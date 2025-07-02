@@ -36,6 +36,7 @@ type ConfigSetBody = {
           triggers?: {
             [key: string]:
               | {
+                  enabled: boolean;
                   type: string;
                   data: string;
                   threshold: number;
@@ -84,6 +85,7 @@ export default function TriggerView({
     return Object.entries(
       config.cameras[selectedCamera].semantic_search.triggers,
     ).map(([name, trigger]) => ({
+      enabled: trigger.enabled,
       name,
       type: trigger.type,
       data: trigger.data,
@@ -99,7 +101,7 @@ export default function TriggerView({
   const saveToConfig = useCallback(
     (trigger: Trigger, isEdit: boolean) => {
       setIsLoading(true);
-      const { name, type, data, threshold, actions } = trigger;
+      const { enabled, name, type, data, threshold, actions } = trigger;
       const embeddingBody: TriggerEmbeddingBody = { type, data, threshold };
       const embeddingUrl = isEdit
         ? `/trigger/embedding/${selectedCamera}/${name}`
@@ -117,6 +119,7 @@ export default function TriggerView({
                     semantic_search: {
                       triggers: {
                         [name]: {
+                          enabled,
                           type,
                           data,
                           threshold,
@@ -172,6 +175,7 @@ export default function TriggerView({
 
   const onCreate = useCallback(
     (
+      enabled: boolean,
       name: string,
       type: TriggerType,
       data: string,
@@ -179,7 +183,7 @@ export default function TriggerView({
       actions: TriggerAction[],
     ) => {
       setUnsavedChanges(true);
-      saveToConfig({ name, type, data, threshold, actions }, false);
+      saveToConfig({ enabled, name, type, data, threshold, actions }, false);
       setShowCreate(false);
     },
     [saveToConfig, setUnsavedChanges],

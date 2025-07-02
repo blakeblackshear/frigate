@@ -224,6 +224,7 @@ export interface CameraConfig {
   semantic_search: {
     triggers: {
       [triggerName: string]: {
+        enabled: boolean;
         type: TriggerType;
         data: string;
         threshold: number;

@@ -34,12 +34,14 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { FrigateConfig } from "@/types/frigateConfig";
 import ImagePicker from "@/components/overlay/ImagePicker";
 import { Trigger, TriggerAction, TriggerType } from "@/types/trigger";
+import { Switch } from "@/components/ui/switch";
 
 type CreateTriggerDialogProps = {
   show: boolean;
   trigger: Trigger | null;
   selectedCamera: string;
   onCreate: (
+    enabled: boolean,
     name: string,
     type: TriggerType,
     data: string,
@@ -74,6 +76,7 @@ export default function CreateTriggerDialog({
   }, [config, selectedCamera]);
 
   const formSchema = z.object({
+    enabled: z.boolean(),
     name: z
       .string()
       .min(2, t("triggers.dialog.form.name.error.minLength"))
@@ -101,6 +104,7 @@ export default function CreateTriggerDialog({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
+      enabled: trigger?.enabled ?? true,
       name: trigger?.name ?? "",
       type: trigger?.type ?? "description",
       data: trigger?.data ?? "",
@@ -115,6 +119,7 @@ export default function CreateTriggerDialog({
       onEdit({ ...values });
     } else {
       onCreate(
+        values.enabled,
         values.name,
         values.type,
         values.data,
@@ -128,6 +133,7 @@ export default function CreateTriggerDialog({
   useEffect(() => {
     if (!show) {
       form.reset({
+        enabled: true,
         name: "",
         type: "description",
         data: "",
@@ -136,6 +142,7 @@ export default function CreateTriggerDialog({
       });
     } else if (trigger) {
       form.reset({
+        enabled: trigger.enabled,
         name: trigger.name,
         type: trigger.type,
         data: trigger.data,
@@ -190,6 +197,29 @@ export default function CreateTriggerDialog({
                     />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="enabled"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      {t("enabled", { ns: "common" })}
+                    </FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      {t("triggers.dialog.form.enabled.description")}
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />

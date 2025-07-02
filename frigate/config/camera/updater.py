@@ -107,6 +107,8 @@ class CameraConfigUpdateSubscriber:
             config.record = updated_config
         elif update_type == CameraConfigUpdateEnum.review:
             config.review = updated_config
+        elif update_type == CameraConfigUpdateEnum.semantic_search:
+            config.semantic_search = updated_config
         elif update_type == CameraConfigUpdateEnum.snapshots:
             config.snapshots = updated_config
         elif update_type == CameraConfigUpdateEnum.zones:

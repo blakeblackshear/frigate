@@ -125,10 +125,11 @@ class SemanticSearchConfig(FrigateBaseModel):
 
 
 class TriggerConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable this trigger")
     type: TriggerType = Field(default=TriggerType.DESCRIPTION, title="Type of trigger")
     data: str = Field(title="Trigger content (text phrase or image ID)")
     threshold: float = Field(
-        title="Confidence score required to run the trigger.",
+        title="Confidence score required to run the trigger",
         default=0.8,
         gt=0.0,
         le=1.0,

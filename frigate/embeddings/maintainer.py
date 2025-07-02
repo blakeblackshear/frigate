@@ -97,7 +97,11 @@ class EmbeddingMaintainer(threading.Thread):
         self.config_updater = CameraConfigUpdateSubscriber(
             self.config,
             self.config.cameras,
-            [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.remove],
+            [
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.remove,
+                CameraConfigUpdateEnum.semantic_search,
+            ],
         )
 
         # Configure Frigate DB

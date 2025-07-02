@@ -80,6 +80,16 @@ class SemanticTriggerProcessor(PostProcessorApi):
         )
 
         for trigger in triggers:
+            if (
+                not self.config.cameras[camera]
+                .semantic_search.triggers[trigger["name"]]
+                .enabled
+            ):
+                logger.debug(
+                    f"Trigger {trigger['name']} is disabled for camera {camera}"
+                )
+                continue
+
             logger.debug(
                 f"Processing {trigger['type']} trigger for {event_id} on {trigger['camera']}: {trigger['name']}"
             )
@@ -171,6 +181,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
                     .actions
                 ):
                     # TODO: handle actions for the trigger
+                    # notifications already handled by webpush
                     pass
 
             if WRITE_DEBUG_IMAGES:

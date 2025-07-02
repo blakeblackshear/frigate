@@ -693,6 +693,9 @@
             "alreadyExists": "A trigger with this name already exists for this camera."
           }
         },
+        "enabled": {
+          "description": "Enable or disable this trigger"
+        },
         "type": {
           "title": "Trigger Type",
           "placeholder": "Select trigger type"
