@@ -136,7 +136,7 @@ class User(Model):  # type: ignore[misc]
     notification_tokens = JSONField()
 
 
-class Trigger(Model):
+class Trigger(Model):  # type: ignore[misc]
     camera = CharField(max_length=20)
     name = CharField()
     type = CharField(max_length=10)
