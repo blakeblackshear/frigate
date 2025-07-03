@@ -8,14 +8,16 @@
     "unknown": "Ismeretlen",
     "person": "Ember",
     "timestamp": "Időbélyeg",
-    "face": "Arc részletek"
+    "face": "Arc részletek",
+    "faceDesc": "A követett tárgy részletei, amely alapján ez az arc létrejött"
   },
   "button": {
     "deleteFace": "Arc törlése",
     "renameFace": "Arc átnevezése",
     "deleteFaceAttempts": "Arcok törlése",
     "addFace": "Arc hozzáadása",
-    "uploadImage": "Kép feltöltése"
+    "uploadImage": "Kép feltöltése",
+    "reprocessFace": "Arc Újrafeldolgozása"
   },
   "collections": "Gyűjtemények",
   "steps": {
@@ -27,10 +29,13 @@
     "nextSteps": "Következő lépések"
   },
   "deleteFaceAttempts": {
-    "title": "Arcok törlése"
+    "title": "Arcok törlése",
+    "desc_one": "Biztos benne, hogy törölni akar {{count}} arcot? Ezt már nem tudja visszavonni.",
+    "desc_other": "Biztos benne, hogy törölni akar {{count}} arcot? Ezt már nem tudja visszavonni."
   },
   "uploadFaceImage": {
-    "title": "Arckép feltöltése"
+    "title": "Arckép feltöltése",
+    "desc": "Töltsön fel egy képet, hogy beolvasson arcokat és beillessze {{pageToggle}}-ba/-be"
   },
   "createFaceLibrary": {
     "title": "Gyűjtemény létrehozása",
@@ -51,7 +56,8 @@
     "validation": {
       "selectImage": "Kérem válasszon egy képet."
     },
-    "maxSize": "Maximális méret: {{size}} MB"
+    "maxSize": "Maximális méret: {{size}} MB",
+    "dropInstructions": "Fogja és húzza a képet ide, vagy kattintson a kiválasztáshoz"
   },
   "trainFaceAs": "Arc tanítása mint:",
   "trainFace": "Arc tanítása",
@@ -60,14 +66,30 @@
       "addFaceLibrary": "{{name}} sikeresen hozzáadva a az Arc Könyvtárhoz!",
       "uploadedImage": "A kép sikeresen feltöltve.",
       "deletedName_one": "{{count}} arc sikeresen törölve.",
-      "deletedName_other": "{{count}} arc sikeresen törölve."
+      "deletedName_other": "{{count}} arc sikeresen törölve.",
+      "renamedFace": "Arc sikeresen átnvezezve {{name}}-ra/-re",
+      "updatedFaceScore": "Arc pontszáma sikeresen frissítve.",
+      "trainedFace": "Arc sikeresen betanítva.",
+      "deletedFace_one": "{{count}} arc sikeresen törölve.",
+      "deletedFace_other": "{{count}} arc sikeresen törölve."
+    },
+    "error": {
+      "addFaceLibraryFailed": "Arc névadás sikertelen: {{errorMessage}}",
+      "deleteFaceFailed": "Törlés sikertelen: {{errorMessage}}",
+      "deleteNameFailed": "Név törlése sikertelen: {{errorMessage}}",
+      "uploadingImageFailed": "Kép feltöltése sikertelen: {{errorMessage}}",
+      "updateFaceScoreFailed": "Arc pontszám frissítése sikertelen: {{errorMessage}}",
+      "renameFaceFailed": "Arc átnevezése sikertelen: {{errorMessage}}",
+      "trainFailed": "Sikertelen tanítás: {{errorMessage}}"
     }
   },
   "readTheDocs": "Olvassa el a dokumentációt",
   "nofaces": "Nincs elérhető arc",
   "documentTitle": "Arc könyvtár - Frigate",
   "train": {
-    "title": "Vonat"
+    "title": "Vonat",
+    "empty": "Nincs friss arcfelismerés",
+    "aria": "Válassza ki a tanítást"
   },
   "pixels": "{{area}}px",
   "selectItem": "KIválasztani {{item}}-et"

@@ -14,8 +14,67 @@
       "label": "Név",
       "placeholder": "Adjon meg egy nevet…",
       "errorMessage": {
-        "mustLeastCharacters": "A kamera csoport nevének legalább 2 karakterből kell állnia."
+        "mustLeastCharacters": "A kamera csoport nevének legalább 2 karakterből kell állnia.",
+        "exists": "Ez a kamera csoport név már létezik.",
+        "nameMustNotPeriod": "A kamera csoport neve nem tartalmazhat idő intervallumot.",
+        "invalid": "Hibás kamera csoport név."
+      }
+    },
+    "cameras": {
+      "label": "Kamerák",
+      "desc": "Válassza ki a kamerákat ehhez a csoporthoz."
+    },
+    "icon": "Ikon",
+    "success": "Kamera csoport {{name}} mentve.",
+    "camera": {
+      "setting": {
+        "audioIsAvailable": "Hang elérhető ehhez az adáshoz",
+        "audioIsUnavailable": "Nem elérhető hang ehhez az adáshoz",
+        "audio": {
+          "tips": {
+            "document": "Olvassa el a leírást ",
+            "title": "A hangnak a kamerából kell jönnie és be kell állítva legyen a go2rtc-ben ehhez az adáshoz."
+          }
+        },
+        "title": "{{cameraName}} Adás Beállításai",
+        "label": "Kamera adás beállítások",
+        "stream": "Adás",
+        "streamMethod": {
+          "method": {
+            "noStreaming": {
+              "label": "Nincs Adás",
+              "desc": "A kameraképek percenként frissülnek és nem lesz élő adás."
+            },
+            "smartStreaming": {
+              "label": "Okos Adás (ajánlott)"
+            },
+            "continuousStreaming": {
+              "label": "Folyamatos Adás"
+            }
+          },
+          "label": "Adási Mód",
+          "placeholder": "Válasszon egy adási módot"
+        },
+        "placeholder": "Válasszon adást",
+        "compatibilityMode": {
+          "label": "Kompatibilitás mód"
+        },
+        "desc": "Változtassa meg az élő adás beállításait ezen kamera csoport kijelzőjén. <em> Ezek a beállítások eszköz/böngésző-specifikusak.</em>"
       }
     }
+  },
+  "debug": {
+    "options": {
+      "label": "Beállítások",
+      "title": "Lehetőségek",
+      "showOptions": "Mutasd a Lehetőségeket",
+      "hideOptions": "Lehetőségek Elrejtése"
+    },
+    "timestamp": "Időbélyeg",
+    "zones": "Zónák",
+    "mask": "Maszk",
+    "motion": "Mozgás",
+    "regions": "Régiók",
+    "boundingBox": "Doboz"
   }
 }

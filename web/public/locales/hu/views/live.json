@@ -13,7 +13,8 @@
   "ptz": {
     "move": {
       "clickMove": {
-        "label": "Kattintson a képre a kamera középre igazításához"
+        "label": "Kattintson a képre a kamera középre igazításához",
+        "enable": "Engedélyezze a kattintást a mozgatáshoz"
       },
       "left": {
         "label": "PTZ kamera balra mozgatása"
@@ -40,7 +41,8 @@
       "center": {
         "label": "Kattinston a képre a PTZ kamera középre igazításához"
       }
-    }
+    },
+    "presets": "PTZ kamera előzetes beállításai"
   },
   "camera": {
     "enable": "Kamera Engedélyezése",
@@ -82,7 +84,14 @@
     "showStats": {
       "label": "Statisztika Mutatása"
     },
-    "debugView": "Hibakeresési Nézet"
+    "debugView": "Hibakeresési Nézet",
+    "title": "Igény Szerinti Felvétel",
+    "start": "Igény szerinti felvétel indítása",
+    "started": "Kézi igény szerinti felvétel elindítva.",
+    "failedToStart": "Kézi igény szerinti felvétel indítása sikertelen.",
+    "end": "Igény szerinti felvétel befejezése",
+    "ended": "Kézi igény szerinti felvétel befejezve.",
+    "failedToEnd": "Kézi igény szerinti felvétel befejezése sikertelen."
   },
   "streamingSettings": "Adás Beállítások",
   "notifications": "Értesítések",
@@ -110,5 +119,12 @@
     "playInBackground": {
       "label": "Lejátszás a háttérben"
     }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Beállítások",
+    "cameraEnabled": "Kamera Engedélyezve",
+    "objectDetection": "Tárgy Észlelés",
+    "recording": "Felvétel",
+    "audioDetection": "Hang Észlelés"
   }
 }
