@@ -1539,9 +1539,19 @@ def create_trigger_embedding(
 
         if body.type == "thumbnail":
             # Save image to the triggers directory
-            context.save_trigger_thumbnail(
-                camera, body.data, (base64.b64encode(thumbnail).decode("ASCII"))
-            )
+            try:
+                os.makedirs(os.path.join(TRIGGER_DIR, camera), exist_ok=True)
+                with open(
+                    os.path.join(TRIGGER_DIR, camera, f"{body.data}.webp"), "wb"
+                ) as f:
+                    f.write(thumbnail)
+                logger.debug(
+                    f"Writing thumbnail for trigger with data {body.data} in {camera}."
+                )
+            except Exception as e:
+                logger.error(
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}: {e}"
+                )
 
         Trigger.create(
             camera=camera,
@@ -1653,7 +1663,15 @@ def update_trigger_embedding(
         if trigger:
             # Update existing trigger
             if trigger.data != body.data:  # Delete old thumbnail only if data changes
-                context.delete_trigger_thumbnail(camera, trigger.data)
+                try:
+                    os.remove(os.path.join(TRIGGER_DIR, camera, f"{trigger.data}.webp"))
+                    logger.debug(
+                        f"Deleted thumbnail for trigger with data {trigger.data} in {camera}."
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}: {e}"
+                    )
 
             Trigger.update(
                 data=body.data,
@@ -1679,9 +1697,19 @@ def update_trigger_embedding(
 
         if body.type == "thumbnail":
             # Save image to the triggers directory
-            context.save_trigger_thumbnail(
-                camera, body.data, (base64.b64encode(thumbnail).decode("ASCII"))
-            )
+            try:
+                os.makedirs(os.path.join(TRIGGER_DIR, camera), exist_ok=True)
+                with open(
+                    os.path.join(TRIGGER_DIR, camera, f"{body.data}.webp"), "wb"
+                ) as f:
+                    f.write(thumbnail)
+                logger.debug(
+                    f"Writing thumbnail for trigger with data {body.data} in {camera}."
+                )
+            except Exception as e:
+                logger.error(
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}: {e}"
+                )
 
         return JSONResponse(
             content={
@@ -1736,8 +1764,15 @@ def delete_trigger_embedding(
                 status_code=401,
             )
 
-        context: EmbeddingsContext = request.app.embeddings
-        context.delete_trigger_thumbnail(camera, trigger.data)
+        try:
+            os.remove(os.path.join(TRIGGER_DIR, camera, f"{trigger.data}.webp"))
+            logger.debug(
+                f"Deleted thumbnail for trigger with data {trigger.data} in {camera}."
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}: {e}"
+            )
 
         return JSONResponse(
             content={
