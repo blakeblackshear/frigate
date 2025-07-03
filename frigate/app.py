@@ -38,6 +38,7 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
     THUMB_DIR,
+    TRIGGER_DIR,
 )
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
@@ -55,6 +56,7 @@ from frigate.models import (
     Regions,
     ReviewSegment,
     Timeline,
+    Trigger,
     User,
 )
 from frigate.object_detection.base import ObjectDetectProcess
@@ -120,6 +122,9 @@ class FrigateApp:
 
         if self.config.face_recognition.enabled:
             dirs.append(FACE_DIR)
+
+        if self.config.semantic_search.enabled:
+            dirs.append(TRIGGER_DIR)
 
         for d in dirs:
             if not os.path.exists(d) and not os.path.islink(d):
@@ -286,6 +291,7 @@ class FrigateApp:
             ReviewSegment,
             Timeline,
             User,
+            Trigger,
         ]
         self.db.bind(models)
 

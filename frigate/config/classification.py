@@ -10,6 +10,7 @@ __all__ = [
     "CameraLicensePlateRecognitionConfig",
     "FaceRecognitionConfig",
     "SemanticSearchConfig",
+    "CameraSemanticSearchConfig",
     "LicensePlateRecognitionConfig",
 ]
 
@@ -22,6 +23,16 @@ class SemanticSearchModelEnum(str, Enum):
 class EnrichmentsDeviceEnum(str, Enum):
     GPU = "GPU"
     CPU = "CPU"
+
+
+class TriggerType(str, Enum):
+    THUMBNAIL = "thumbnail"
+    DESCRIPTION = "description"
+
+
+class TriggerAction(str, Enum):
+    ALERT = "alert"
+    NOTIFICATION = "notification"
 
 
 class AudioTranscriptionConfig(FrigateBaseModel):
@@ -111,6 +122,32 @@ class SemanticSearchConfig(FrigateBaseModel):
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
     )
+
+
+class TriggerConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable this trigger")
+    type: TriggerType = Field(default=TriggerType.DESCRIPTION, title="Type of trigger")
+    data: str = Field(title="Trigger content (text phrase or image ID)")
+    threshold: float = Field(
+        title="Confidence score required to run the trigger",
+        default=0.8,
+        gt=0.0,
+        le=1.0,
+    )
+    actions: Optional[List[TriggerAction]] = Field(
+        default=[], title="Actions to perform when trigger is matched"
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+
+class CameraSemanticSearchConfig(FrigateBaseModel):
+    triggers: Optional[Dict[str, TriggerConfig]] = Field(
+        default=None,
+        title="Text or image triggers to elevate tracked objects to review alerts",
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class FaceRecognitionConfig(FrigateBaseModel):

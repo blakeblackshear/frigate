@@ -23,6 +23,7 @@ class CameraConfigUpdateEnum(str, Enum):
     record = "record"
     remove = "remove"  # for removing a camera
     review = "review"
+    semantic_search = "semantic_search"  # for semantic search triggers
     snapshots = "snapshots"
     zones = "zones"
 
@@ -106,6 +107,8 @@ class CameraConfigUpdateSubscriber:
             config.record = updated_config
         elif update_type == CameraConfigUpdateEnum.review:
             config.review = updated_config
+        elif update_type == CameraConfigUpdateEnum.semantic_search:
+            config.semantic_search = updated_config
         elif update_type == CameraConfigUpdateEnum.snapshots:
             config.snapshots = updated_config
         elif update_type == CameraConfigUpdateEnum.zones:

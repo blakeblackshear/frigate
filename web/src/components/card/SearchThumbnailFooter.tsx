@@ -15,6 +15,7 @@ type SearchThumbnailProps = {
   refreshResults: () => void;
   showObjectLifecycle: () => void;
   showSnapshot: () => void;
+  addTrigger: () => void;
 };
 
 export default function SearchThumbnailFooter({
@@ -24,6 +25,7 @@ export default function SearchThumbnailFooter({
   refreshResults,
   showObjectLifecycle,
   showSnapshot,
+  addTrigger,
 }: SearchThumbnailProps) {
   const { t } = useTranslation(["views/search"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -61,6 +63,7 @@ export default function SearchThumbnailFooter({
           refreshResults={refreshResults}
           showObjectLifecycle={showObjectLifecycle}
           showSnapshot={showSnapshot}
+          addTrigger={addTrigger}
         />
       </div>
     </div>

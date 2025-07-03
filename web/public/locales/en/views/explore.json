@@ -175,6 +175,10 @@
       "label": "Find similar",
       "aria": "Find similar tracked objects"
     },
+    "addTrigger": {
+      "label": "Add trigger",
+      "aria": "Add a trigger for this tracked object"
+    },
     "audioTranscription": {
       "label": "Transcribe",
       "aria": "Request audio transcription"

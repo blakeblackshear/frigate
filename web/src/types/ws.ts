@@ -105,3 +105,11 @@ export type TrackedObjectUpdateReturnType = {
   timestamp?: number;
   text?: string;
 } | null;
+
+export type TriggerStatus = {
+  name: string;
+  camera: string;
+  event_id: string;
+  type: string;
+  score: number;
+};

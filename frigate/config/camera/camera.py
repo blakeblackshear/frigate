@@ -22,6 +22,7 @@ from ..classification import (
     AudioTranscriptionConfig,
     CameraFaceRecognitionConfig,
     CameraLicensePlateRecognitionConfig,
+    CameraSemanticSearchConfig,
 )
 from .audio import AudioConfig
 from .birdseye import BirdseyeCameraConfig
@@ -90,6 +91,10 @@ class CameraConfig(FrigateBaseModel):
     )
     review: ReviewConfig = Field(
         default_factory=ReviewConfig, title="Review configuration."
+    )
+    semantic_search: CameraSemanticSearchConfig = Field(
+        default_factory=CameraSemanticSearchConfig,
+        title="Semantic search configuration.",
     )
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Snapshot configuration."
