@@ -22,6 +22,7 @@ import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { Link } from "react-router-dom";
+import { useTriggers } from "@/api/ws";
 
 type ConfigSetBody = {
   requires_restart: number;
@@ -65,10 +66,16 @@ export default function TriggerView({
   const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
-  const { data: trigger_status } = useSWR(`/triggers/status/${selectedCamera}`);
+  const { data: trigger_status, mutate } = useSWR(
+    `/triggers/status/${selectedCamera}`,
+    {
+      revalidateOnFocus: false,
+    },
+  );
   const [showCreate, setShowCreate] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [selectedTrigger, setSelectedTrigger] = useState<Trigger | null>(null);
+  const [triggeredTrigger, setTriggeredTrigger] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
 
   const triggers = useMemo(() => {
@@ -90,6 +97,38 @@ export default function TriggerView({
       actions: trigger.actions,
     }));
   }, [config, selectedCamera]);
+
+  // watch websocket for updates
+  const { payload: triggers_status_ws } = useTriggers();
+
+  useEffect(() => {
+    if (!triggers_status_ws) return;
+
+    mutate();
+
+    setTriggeredTrigger(triggers_status_ws.name);
+    const target = document.querySelector(
+      `#trigger-${triggers_status_ws.name}`,
+    );
+    if (target) {
+      target.scrollIntoView({
+        block: "center",
+        behavior: "smooth",
+        inline: "nearest",
+      });
+      const ring = target.querySelector(".trigger-ring");
+      if (ring) {
+        ring.classList.add(`outline-selected`);
+        ring.classList.remove("outline-transparent");
+
+        const timeout = setTimeout(() => {
+          ring.classList.remove(`outline-selected`);
+          ring.classList.add("outline-transparent");
+        }, 3000);
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [triggers_status_ws, selectedCamera, mutate]);
 
   useEffect(() => {
     document.title = t("triggers.documentTitle");
@@ -382,8 +421,17 @@ export default function TriggerView({
                   {triggers.map((trigger) => (
                     <div
                       key={trigger.name}
-                      className="flex items-center justify-between rounded-lg border border-border bg-background p-4 transition-opacity"
+                      id={`trigger-${trigger.name}`}
+                      className="relative flex items-center justify-between rounded-lg border border-border bg-background p-4 transition-all"
                     >
+                      <div
+                        className={cn(
+                          "trigger-ring pointer-events-none absolute inset-0 z-10 size-full rounded-md outline outline-[3px] -outline-offset-[2.8px] duration-500",
+                          triggeredTrigger === trigger.name
+                            ? "shadow-selected outline-selected"
+                            : "outline-transparent duration-500",
+                        )}
+                      />
                       <div className="min-w-0 flex-1">
                         <h3
                           className={cn(
@@ -395,7 +443,7 @@ export default function TriggerView({
                         </h3>
                         <div
                           className={cn(
-                            "mt-1 flex flex-col gap-0.5 text-sm text-muted-foreground md:flex-row md:items-center md:gap-3",
+                            "mt-1 flex flex-col gap-1 text-sm text-muted-foreground md:flex-row md:items-center md:gap-3",
                             !trigger.enabled && "opacity-60",
                           )}
                         >
@@ -416,10 +464,6 @@ export default function TriggerView({
                             </Badge>
                           </div>
 
-                          <span>{trigger.threshold.toFixed(2)} threshold</span>
-
-                          <span>{trigger.actions.length} actions</span>
-
                           <Link
                             to={`/explore?event_id=${trigger_status?.triggers[trigger.name]?.triggering_event_id || ""}`}
                             className={cn(
@@ -429,8 +473,8 @@ export default function TriggerView({
                                 "pointer-events-none opacity-60",
                             )}
                           >
-                            <div className="flex flex-row items-center justify-center">
-                              Last:{" "}
+                            <div className="flex flex-row items-center">
+                              {t("triggers.table.lastTriggered")}{" "}
                               {trigger_status &&
                               trigger_status.triggers[trigger.name]
                                 ?.last_triggered

@@ -9,6 +9,7 @@ import {
   ModelState,
   ToggleableSetting,
   TrackedObjectUpdateReturnType,
+  TriggerStatus,
 } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
 import { createContainer } from "react-tracked";
@@ -571,4 +572,14 @@ export function useNotificationTest(): {
     send,
   } = useWs("notification_test", "notification_test");
   return { payload: payload as string, send };
+}
+
+export function useTriggers(): { payload: TriggerStatus } {
+  const {
+    value: { payload },
+  } = useWs("triggers", "");
+  const parsed = payload
+    ? JSON.parse(payload as string)
+    : { name: "", camera: "", event_id: "", type: "", score: 0 };
+  return { payload: useDeepMemo(parsed) };
 }

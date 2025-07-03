@@ -660,7 +660,8 @@
       "actions": "Actions",
       "noTriggers": "No triggers configured for this camera.",
       "edit": "Edit",
-      "deleteTrigger": "Delete Trigger"
+      "deleteTrigger": "Delete Trigger",
+      "lastTriggered": "Last triggered"
     },
     "type": {
       "thumbnail": "Thumbnail",
@@ -685,7 +686,7 @@
       },
       "form": {
         "name": {
-          "title": "Trigger Name",
+          "title": "Name",
           "placeholder": "Enter trigger name",
           "error": {
             "minLength": "Name must be at least 2 characters long.",
@@ -697,7 +698,7 @@
           "description": "Enable or disable this trigger"
         },
         "type": {
-          "title": "Trigger Type",
+          "title": "Type",
           "placeholder": "Select trigger type"
         },
         "content": {
