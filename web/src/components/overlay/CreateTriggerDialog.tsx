@@ -15,6 +15,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,6 +36,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import ImagePicker from "@/components/overlay/ImagePicker";
 import { Trigger, TriggerAction, TriggerType } from "@/types/trigger";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "../ui/textarea";
 
 type CreateTriggerDialogProps = {
   show: boolean;
@@ -268,24 +270,34 @@ export default function CreateTriggerDialog({
                     {t("triggers.dialog.form.content.title")}
                   </FormLabel>
                   {form.watch("type") === "thumbnail" ? (
-                    <FormControl>
-                      <ImagePicker
-                        selectedImageId={field.value}
-                        setSelectedImageId={field.onChange}
-                        camera={selectedCamera}
-                      />
-                    </FormControl>
+                    <>
+                      <FormControl>
+                        <ImagePicker
+                          selectedImageId={field.value}
+                          setSelectedImageId={field.onChange}
+                          camera={selectedCamera}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t("triggers.dialog.form.content.imageDesc")}
+                      </FormDescription>
+                    </>
                   ) : (
-                    <FormControl>
-                      <Input
-                        placeholder={t(
-                          "triggers.dialog.form.content.textPlaceholder",
-                        )}
-                        className="h-10"
-                        {...field}
-                      />
-                    </FormControl>
+                    <>
+                      <FormControl>
+                        <Textarea
+                          placeholder={t(
+                            "triggers.dialog.form.content.textPlaceholder",
+                          )}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t("triggers.dialog.form.content.textDesc")}
+                      </FormDescription>
+                    </>
                   )}
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -328,7 +340,7 @@ export default function CreateTriggerDialog({
                     {t("triggers.dialog.form.actions.title")}
                   </FormLabel>
                   <div className="space-y-2">
-                    {["alert", "notification"].map((action) => (
+                    {["notification"].map((action) => (
                       <div key={action} className="flex items-center space-x-2">
                         <FormControl>
                           <Checkbox
@@ -357,6 +369,9 @@ export default function CreateTriggerDialog({
                       </div>
                     ))}
                   </div>
+                  <FormDescription>
+                    {t("triggers.dialog.form.actions.desc")}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

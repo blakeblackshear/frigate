@@ -705,6 +705,8 @@
           "title": "Content",
           "imagePlaceholder": "Select an image",
           "textPlaceholder": "Enter text content",
+          "imageDesc": "Select an image to trigger this action when a similar image is detected.",
+          "textDesc": "Enter text to trigger this action when a similar tracked object description is detected.",
           "error": {
             "required": "Content is required."
           }
@@ -718,6 +720,7 @@
         },
         "actions": {
           "title": "Actions",
+          "desc": "By default, Frigate fires an MQTT message for all triggers. Choose an additional action to perform when this trigger fires.",
           "error": {
             "min": "At least one action must be selected."
           }
