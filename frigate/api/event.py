@@ -1792,8 +1792,9 @@ def get_triggers_status(
             )
 
         return {"success": True, "triggers": status}
-    except Exception as e:
+    except Exception as ex:
+        logger.exception(ex)
         return JSONResponse(
-            content={"success": False, "message": str(e)},
-            status_code=500,
+            content=({"success": False, "message": "Error fetching trigger status"}),
+            status_code=400,
         )
