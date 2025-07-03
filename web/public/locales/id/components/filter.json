@@ -10,6 +10,9 @@
     "count_other": "{{count}} Label"
   },
   "zones": {
-    "label": "Zona"
+    "label": "Zona",
+    "all": {
+      "title": "Semua Zona"
+    }
   }
 }
