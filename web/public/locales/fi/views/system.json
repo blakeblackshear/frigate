@@ -13,6 +13,13 @@
     },
     "download": {
       "label": "Lataa lokit"
+    },
+    "tips": "Lokeja toistetaan palvelimelta",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Virhe noudettaessa lokeja: {{errorMessage}}",
+        "whileStreamingLogs": "Virhe toistettaessa lokeja: {{errorMessage}}"
+      }
     }
   },
   "documentTitle": {
@@ -49,6 +56,14 @@
           "label": "Sulje GPU:n tiedot"
         }
       }
-    }
+    },
+    "detector": {
+      "memoryUsage": "Ilmaiseman muistinkäyttö",
+      "title": "Ilmaisimet",
+      "inferenceSpeed": "Ilmaisimen päättelynopeus",
+      "cpuUsage": "Ilmaisimen CPU-käyttö",
+      "temperature": "Ilmaisimen lämpötila"
+    },
+    "title": "Yleinen"
   }
 }
