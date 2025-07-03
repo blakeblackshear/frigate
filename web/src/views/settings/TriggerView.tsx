@@ -469,12 +469,11 @@ export default function TriggerView({
                             className={cn(
                               "text-sm",
                               !trigger_status?.triggers[trigger.name]
-                                ?.triggering_event_id &&
-                                "pointer-events-none opacity-60",
+                                ?.triggering_event_id && "pointer-events-none",
                             )}
                           >
                             <div className="flex flex-row items-center">
-                              {t("triggers.table.lastTriggered")}{" "}
+                              {t("triggers.table.lastTriggered")}:{" "}
                               {trigger_status &&
                               trigger_status.triggers[trigger.name]
                                 ?.last_triggered
@@ -502,7 +501,16 @@ export default function TriggerView({
                                     },
                                   )
                                 : "Never"}
-                              <LuSearch className="ml-2 size-3.5" />
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <LuSearch className="ml-2 size-3.5" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {t("details.item.button.viewInExplore", {
+                                    ns: "views/explore",
+                                  })}
+                                </TooltipContent>
+                              </Tooltip>
                             </div>
                           </Link>
                         </div>
