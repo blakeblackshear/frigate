@@ -1,0 +1,42 @@
+{
+  "noRecordingsFoundForThisTime": "Δεν βρέθηκαν εγγραφές για αυτήν την ώρα",
+  "noPreviewFound": "Δεν βρέθηκε προεπισκόπηση",
+  "noPreviewFoundFor": "Δεν βρέθηκε προεπισκόπηση για {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Να υποβληθεί αυτό το καρέ στο Frigate+;",
+    "submit": "Υποβολή"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 ή μεγαλύτερο χρειάζεται για αυτό τον τύπο του live stream.",
+  "streamOffline": {
+    "title": "Η μετάδοση είναι εκτός λειτουργίας",
+    "desc": "Δεν έχουν ληφθεί καρέ στη ροή {{cameraName}} <code>detect</code>, ελέγξτε τα αρχεία καταγραφής σφαλμάτων"
+  },
+  "cameraDisabled": "Η Κάμερα έχει απενεργοποιηθεί",
+  "stats": {
+    "streamType": {
+      "title": "Τύπος μετάδοσης:",
+      "short": "Τύπος"
+    },
+    "bandwidth": {
+      "title": "Ταχύτητα:",
+      "short": "Ταχύτητα"
+    },
+    "latency": {
+      "title": "Καθυστέρηση:",
+      "value": "{{seconds}} δευτερόλεπτα",
+      "short": {
+        "title": "Καθυστέρηση",
+        "value": "{{seconds}} δευτερόλεπτα"
+      }
+    },
+    "totalFrames": "Συνολικός αριθμός Καρέ:",
+    "droppedFrames": {
+      "title": "Απορριφθέντα καρέ:",
+      "short": {
+        "title": "Απορριφθέντα",
+        "value": "{{droppedFrames}} καρέ"
+      }
+    },
+    "decodedFrames": "Αποκωδικοποιημένα Καρέ:"
+  }
+}
