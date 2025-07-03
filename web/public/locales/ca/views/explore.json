@@ -96,7 +96,8 @@
       "toast": {
         "success": {
           "updatedSublabel": "Subetiqueta actualitzada amb èxit.",
-          "updatedLPR": "Matrícula actualitzada amb èxit."
+          "updatedLPR": "Matrícula actualitzada amb èxit.",
+          "regenerate": "El {{provider}} ha sol·licitat una nova descripció. En funció de la velocitat del vostre proveïdor, la nova descripció pot trigar un temps a regenerar-se."
         },
         "error": {
           "regenerate": "No s'ha pogut contactar amb {{provider}} per obtenir una nova descripció: {{errorMessage}}",
@@ -107,12 +108,16 @@
       "title": "Revisar detalls de l'element",
       "desc": "Revisar detalls de l'element",
       "tips": {
-        "hasMissingObjects": "Ajusta la configuració si vols que Frigate guardi els objectes rastrejat de les seguents etiquetes: <em>{{objects}}</em>"
+        "hasMissingObjects": "Ajusta la configuració si vols que Frigate guardi els objectes rastrejat de les seguents etiquetes: <em>{{objects}}</em>",
+        "mismatch_one": "{{count}} objecte no disponible ha estat detectat i inclòs en aquest element de revisió. Aquest objecte tampoc no s'han calificat com una alerta o detecció o ja ha estat netejat mes amunt/eliminat.",
+        "mismatch_many": "{{count}} objectes no disponibles han estat detectats i inclosos en aquest element de revisió. Aquests objectes tampoc no s'han calificat com una alerta o detecció o ja han estat netejats mes amunt/eliminats.",
+        "mismatch_other": "{{count}} objectes no disponibles han estat detectats i inclosos en aquest element de revisió. Aquests objectes tampoc no s'han calificat com una alerta o detecció o ja han estat netejats mes amunt/eliminats."
       }
     },
     "label": "Etiqueta",
     "topScore": {
-      "label": "Puntuació màxima"
+      "label": "Puntuació màxima",
+      "info": "El resultat superior és la mediana més alta per l'objecte seguit, així que pot diferir des del resultat mostrat en thumbnail de la búsqueda de recerca."
     },
     "estimatedSpeed": "Velocitat estimada",
     "button": {
@@ -193,7 +198,8 @@
   "noTrackedObjects": "No s'han trobat objectes rastrejats",
   "dialog": {
     "confirmDelete": {
-      "title": "Confirmar la supressió"
+      "title": "Confirmar la supressió",
+      "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol objecte associat. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
     }
   },
   "fetchingTrackedObjectsFailed": "Error al obtenir objectes rastrejats: {{errorMessage}}",
