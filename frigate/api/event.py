@@ -1755,3 +1755,45 @@ def delete_trigger_embedding(
             },
             status_code=500,
         )
+
+
+@router.get(
+    "/triggers/status/{camera_name}",
+    response_model=dict,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def get_triggers_status(
+    camera_name: str,
+):
+    try:
+        # Fetch all triggers for the specified camera
+        triggers = Trigger.select().where(Trigger.camera == camera_name)
+
+        # Prepare the response with trigger status
+        status = {
+            trigger.name: {
+                "last_triggered": trigger.last_triggered.timestamp()
+                if trigger.last_triggered
+                else None,
+                "triggering_event_id": trigger.triggering_event_id
+                if trigger.triggering_event_id
+                else None,
+            }
+            for trigger in triggers
+        }
+
+        if not status:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"No triggers found for camera {camera_name}",
+                },
+                status_code=404,
+            )
+
+        return {"success": True, "triggers": status}
+    except Exception as e:
+        return JSONResponse(
+            content={"success": False, "message": str(e)},
+            status_code=500,
+        )

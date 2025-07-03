@@ -163,6 +163,13 @@ class SemanticTriggerProcessor(PostProcessorApi):
                     f"Trigger {trigger['name']} activated with similarity {similarity:.4f}"
                 )
 
+                # Update the trigger's last_triggered and triggering_event_id
+                Trigger.update(
+                    last_triggered=datetime.datetime.now(), triggering_event_id=event_id
+                ).where(
+                    Trigger.camera == camera, Trigger.name == trigger["name"]
+                ).execute()
+
                 # Always publish MQTT message
                 self.requestor.send_data(
                     "triggers",

@@ -649,7 +649,7 @@
     "documentTitle": "Triggers",
     "management": {
       "title": "Trigger Management",
-      "desc": "Manage triggers for camera '{{camera}}' to detect specific events."
+      "desc": "Manage triggers for {{camera}}. Use the thumbnail type to trigger on similar thumbnails to your selected tracked object, and the description type to trigger on similar descriptions to text you specify."
     },
     "addTrigger": "Add Trigger",
     "table": {
