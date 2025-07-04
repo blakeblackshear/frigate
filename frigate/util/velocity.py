@@ -59,6 +59,11 @@ def create_ground_plane(zone_points, distances):
         :param y: Y-coordinate in the image
         :return: Real-world distance per pixel at the given (x, y) coordinate
         """
+
+        # Return 0 if divide by zero would occur
+        if (B[0] - A[0]) == 0 or (D[1] - A[1]) == 0:
+            return 0
+
         # Normalize x and y within the zone
         x_norm = (x - A[0]) / (B[0] - A[0])
         y_norm = (y - A[1]) / (D[1] - A[1])
