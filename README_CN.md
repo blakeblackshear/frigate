@@ -39,7 +39,7 @@
 <img width="800" alt="实时监控面板" src="https://github.com/blakeblackshear/frigate/assets/569905/5e713cb9-9db5-41dc-947a-6937c3bc376e">
 </div>
 
-### 简单的审查工作流程
+### 简单的核查工作流程
 <div>
 <img width="800" alt="简单的审查工作流程" src="https://github.com/blakeblackshear/frigate/assets/569905/6fed96e8-3b18-40e5-9ddc-31e6f3c9f2ff">
 </div>
@@ -60,6 +60,11 @@
 
 
 ## 非官方中文讨论社区
-欢迎加入中文讨论QQ群：1043861059
+欢迎加入中文讨论QQ群：[1043861059](https://qm.qq.com/q/7vQKsTmSz)
 
 Bilibili：https://space.bilibili.com/3546894915602564
+
+
+## 中文社区赞助商
+[![EdgeOne](https://edgeone.ai/media/34fe3a45-492d-4ea4-ae5d-ea1087ca7b4b.png)](https://edgeone.ai/zh?from=github)
+本项目 CDN 加速及安全防护由 Tencent EdgeOne 赞助
