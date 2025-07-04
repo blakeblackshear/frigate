@@ -1,0 +1,207 @@
+{
+  "documentTitle": "Utforsk - Frigate",
+  "generativeAI": "Generativ AI",
+  "exploreIsUnavailable": {
+    "title": "Utforsk er utilgjengelig",
+    "embeddingsReindexing": {
+      "startingUp": "Starter opp…",
+      "estimatedTime": "Estimert gjenværende tid:",
+      "context": "Utforsk kan brukes etter at reindekseringen av vektorrepresentasjoner for sporede objekter er fullført.",
+      "finishingShortly": "Avsluttes snart",
+      "step": {
+        "thumbnailsEmbedded": "Miniatyrbilder innebygd: ",
+        "descriptionsEmbedded": "Beskrivelser innebygd: ",
+        "trackedObjectsProcessed": "Sporede objekter behandlet: "
+      }
+    },
+    "downloadingModels": {
+      "setup": {
+        "visionModel": "Visjonsmodell",
+        "visionModelFeatureExtractor": "Funksjonsekstraktor for visjonsmodell",
+        "textModel": "Tekstmodell",
+        "textTokenizer": "Tekst symbolbygger"
+      },
+      "context": "Frigate laster ned de nødvendige vektorrepresentasjonsmodellene for å støtte funksjonen for semantisk søk. Dette kan ta flere minutter, avhengig av hastigheten på nettverksforbindelsen din.",
+      "tips": {
+        "context": "Du bør vurdere å reindeksere vektorrepresentasjoner for de sporede objektene dine når modellene er lastet ned.",
+        "documentation": "Se dokumentasjonen"
+      },
+      "error": "En feil har oppstått. Sjekk Frigate-loggene."
+    }
+  },
+  "objectLifecycle": {
+    "createObjectMask": "Lag objektmaske",
+    "adjustAnnotationSettings": "Juster annoteringsinnstillinger",
+    "scrollViewTips": "Sveip for å se de viktigste hendelsene i dette objektets livssyklus.",
+    "autoTrackingTips": "Posisjoner for omsluttende boks vil være unøyaktige for kameraer med automatisk sporing.",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} oppdaget",
+      "attribute": {
+        "other": "{{label}} gjenkjent som {{attribute}}",
+        "faceOrLicense_plate": "{{attribute}} oppdaget for {{label}}"
+      },
+      "gone": "{{label}} forlot",
+      "heard": "{{label}} hørt",
+      "external": "{{label}} oppdaget",
+      "entered_zone": "{{label}} gikk inn i {{zones}}",
+      "active": "{{label}} ble aktiv",
+      "stationary": "{{label}} ble stasjonær",
+      "header": {
+        "zones": "Soner",
+        "ratio": "Forhold",
+        "area": "Areal"
+      }
+    },
+    "annotationSettings": {
+      "title": "Annoteringsinnstillinger",
+      "showAllZones": {
+        "title": "Vis alle soner",
+        "desc": "Vis alltid soner på bilder der objekter har gått inn i en sone."
+      },
+      "offset": {
+        "documentation": "Se dokumentasjonen ",
+        "label": "Annoteringsforskyvning",
+        "desc": "Disse dataene kommer fra kameraets deteksjonsstrøm, men legges over bilder fra opptaksstrømmen. Det er usannsynlig at de to strømmene er perfekt synkronisert. Som et resultat vil ikke den omsluttende boksen og opptakene stemme perfekt overens. Imidlertid kan feltet <code>annotation_offset</code> brukes til å justere dette.",
+        "millisecondsToOffset": "Millisekunder å forskyve annoteringsdata. <em>Standard: 0</em>",
+        "tips": "TIPS: Tenk deg et hendelsesklipp med en person som går fra venstre til høyre. Hvis den omsluttende boksen i hendelsestidslinjen konsekvent er til venstre for personen, bør verdien reduseres. Tilsvarende, hvis en person går fra venstre til høyre og den omsluttende boksen konsekvent er foran personen, bør verdien økes.",
+        "toast": {
+          "success": "Annoteringsforskyvning for {{camera}} er lagret i konfigurasjonsfilen. Start Frigate på nytt for å bruke endringene dine."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Forrige lysbilde",
+      "next": "Neste lysbilde"
+    },
+    "title": "Objektets livssyklus",
+    "noImageFound": "Ingen bilder funnet for dette tidsstempelet.",
+    "count": "{{first}} av {{second}}",
+    "trackedPoint": "Sporet punkt"
+  },
+  "details": {
+    "item": {
+      "title": "Detaljer for inspeksjonelement",
+      "button": {
+        "share": "Del dette inspeksjonselementet",
+        "viewInExplore": "Vis i Utforsk"
+      },
+      "toast": {
+        "success": {
+          "updatedSublabel": "Under-merkelapp oppdatert med suksess.",
+          "updatedLPR": "Vellykket oppdatering av kjennemerke.",
+          "regenerate": "En ny beskrivelse har blitt anmodet fra {{provider}}. Avhengig av hastigheten til leverandøren din, kan den nye beskrivelsen ta litt tid å regenerere."
+        },
+        "error": {
+          "regenerate": "Feil ved anrop til {{provider}} for en ny beskrivelse: {{errorMessage}}",
+          "updatedLPRFailed": "Oppdatering av kjennemerke feilet: {{errorMessage}}",
+          "updatedSublabelFailed": "Feil ved oppdatering av under-merkelapp: {{errorMessage}}"
+        }
+      },
+      "desc": "Detaljer for inspeksjonselement",
+      "tips": {
+        "mismatch_one": "{{count}} utilgjengelig objekt ble oppdaget og inkludert i dette inspeksjonselementet. Disse objektene kvalifiserte ikke som et varsel eller deteksjon, eller har allerede blitt ryddet opp/slettet.",
+        "mismatch_other": "{{count}} utilgjengelige objekter ble oppdaget og inkludert i dette inspeksjonselementet. Disse objektene kvalifiserte ikke som et varsel eller deteksjon, eller har allerede blitt ryddet opp/slettet.",
+        "hasMissingObjects": "Juster konfigurasjonen hvis du vil at Frigate skal lagre sporede objekter for følgende merkelapper: <em>{{objects}}</em>"
+      }
+    },
+    "topScore": {
+      "info": "Den høyeste poengsummen er den høyeste medianverdi for det sporede objektet, så denne kan avvike fra poengsummen som vises på miniatyrbildet for søkeresultatet.",
+      "label": "Høyeste poengsum"
+    },
+    "estimatedSpeed": "Estimert hastighet",
+    "objects": "Objekter",
+    "button": {
+      "findSimilar": "Finn lignende",
+      "regenerate": {
+        "title": "Regenerer",
+        "label": "Regenerer beskrivelse for sporet objekt"
+      }
+    },
+    "description": {
+      "placeholder": "Beskrivelse av det sporede objektet",
+      "aiTips": "Frigate vil ikke anmode om en beskrivelse fra din generative AI-leverandør før livssyklusen til det sporede objektet er avsluttet.",
+      "label": "Beskrivelse"
+    },
+    "regenerateFromThumbnails": "Regenerer fra miniatyrbilder",
+    "tips": {
+      "descriptionSaved": "Beskrivelse lagret med suksess",
+      "saveDescriptionFailed": "Feil ved lagring av beskrivelse: {{errorMessage}}"
+    },
+    "label": "Merkelapp",
+    "editLPR": {
+      "title": "Rediger kjennemerke",
+      "descNoLabel": "Skriv inn et nytt kjennemerke for dette sporede objekt",
+      "desc": "Skriv inn et nytt kjennemerke for denne {{label}}"
+    },
+    "recognizedLicensePlate": "Gjenkjent kjennemerke",
+    "camera": "Kamera",
+    "zones": "Soner",
+    "timestamp": "Tidsstempel",
+    "expandRegenerationMenu": "Utvid regenereringsmenyen",
+    "regenerateFromSnapshot": "Regenerer fra øyeblikksbilde",
+    "editSubLabel": {
+      "title": "Rediger under-merkelapp",
+      "desc": "Angi en ny under-merkelapp for denne {{label}}",
+      "descNoLabel": "Angi en ny under-merkelapp for dette sporede objektet"
+    },
+    "snapshotScore": {
+      "label": "Øyeblikksbilde poengsum"
+    }
+  },
+  "itemMenu": {
+    "viewInHistory": {
+      "label": "Vis i Historikk",
+      "aria": "Vis i Historikk"
+    },
+    "downloadVideo": {
+      "aria": "Last ned video",
+      "label": "Last ned video"
+    },
+    "downloadSnapshot": {
+      "label": "Last ned øyeblikksbilde",
+      "aria": "Last ned øyeblikksbilde"
+    },
+    "viewObjectLifecycle": {
+      "label": "Vis objektets livssyklus",
+      "aria": "Vis objektets livssyklus"
+    },
+    "findSimilar": {
+      "label": "Finn lignende",
+      "aria": "Finn lignende sporede objekter"
+    },
+    "deleteTrackedObject": {
+      "label": "Slett dette sporede objektet"
+    },
+    "submitToPlus": {
+      "label": "Send til Frigate+",
+      "aria": "Send til Frigate Plus"
+    }
+  },
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "error": "Feil ved sletting av sporet objekt: {{errorMessage}}",
+        "success": "Sporet objekt ble slettet med suksess."
+      }
+    },
+    "tooltip": "Samsvarer {{type}} til {{confidence}}%"
+  },
+  "trackedObjectDetails": "Detaljer om sporet objekt",
+  "type": {
+    "details": "detaljer",
+    "snapshot": "øyeblikksbilde",
+    "video": "video",
+    "object_lifecycle": "objektets livssyklus"
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Bekreft sletting",
+      "desc": "Sletting av dette sporede objektet fjerner øyeblikksbildet, eventuelle lagrede vektorrepresentasjoner og alle tilknyttede livssykloppføringer for objektet. Opptak av dette sporede objektet i Historikk-visningen vil <em>IKKE</em> bli slettet.<br /><br />Er du sikker på at du vil fortsette?"
+    }
+  },
+  "noTrackedObjects": "Fant ingen sporede objekter",
+  "fetchingTrackedObjectsFailed": "Feil ved henting av sporede objekter: {{errorMessage}}",
+  "trackedObjectsCount_one": "{{count}} sporet objekt ",
+  "trackedObjectsCount_other": "{{count}} sporede objekter ",
+  "exploreMore": "Utforsk flere {{label}} objekter"
+}

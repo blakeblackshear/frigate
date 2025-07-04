@@ -1,0 +1,78 @@
+{
+  "group": {
+    "label": "Grupuri de Camere",
+    "add": "Adauga Grup de Camere",
+    "edit": "Editeaza Grupul de Camere",
+    "delete": {
+      "label": "Sterge Grupul de Camere",
+      "confirm": {
+        "title": "Confirma Stergerea",
+        "desc": "Esti sigur ca doresti sa stergi gruoul de camere <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Nume",
+      "placeholder": "Introdu un nume…",
+      "errorMessage": {
+        "mustLeastCharacters": "Numele grupului de cmere trebuie sa sontina minim 2 caractere.",
+        "exists": "Numele grupului de camere exista deja.",
+        "nameMustNotPeriod": "Numele grupului de camere nu trebuia sa contina punct.",
+        "invalid": "Nume invalid pentru grupul de camere."
+      }
+    },
+    "cameras": {
+      "label": "Camere",
+      "desc": "Selecteaza camere pentru acest grup."
+    },
+    "icon": "Pictograma",
+    "success": "Grupul de camere {{name}}) a fost salvat.",
+    "camera": {
+      "setting": {
+        "label": "Setarile de Stream ale Camerei",
+        "title": "{{cameraName}} Setari de Stream",
+        "stream": "Stream",
+        "placeholder": "Alege un stream",
+        "desc": "Schimbă opțiunile de streaming live pentru panoul acestui grup de camere. <em>Aceste setări sunt specifice dispozitivului/browser-ului.</em>",
+        "audioIsUnavailable": "Sunetul nu este disponibil pentru acest stream",
+        "audioIsAvailable": "Sunetul este disponibil pentru acest stream",
+        "audio": {
+          "tips": {
+            "title": "Sunetul trebuie să fie redat de camera ta și configurat în go2rtc pentru acest stream.",
+            "document": "Citește documentația "
+          }
+        },
+        "streamMethod": {
+          "label": "Metoda de streaming",
+          "placeholder": "Alege o metodă de streaming",
+          "method": {
+            "noStreaming": {
+              "label": "Fără streaming",
+              "desc": "Imaginile camerelor se vor actualiza doar o dată pe minut și nu va exista streaming live."
+            },
+            "smartStreaming": {
+              "label": "Streaming Inteligent (recomandat)",
+              "desc": "Streaming-ul inteligent va actualiza imaginea camerei o dată pe minut când nu există activitate detectabilă, pentru a economisi trafic de date și resurse. Când se detectează activitate, imaginea trece la streaming live."
+            },
+            "continuousStreaming": {
+              "label": "Streaming continu",
+              "desc": {
+                "title": "Imaginea camerei va fi întotdeauna un stream live când este vizibilă pe panou, chiar dacă nu se detectează activitate.",
+                "warning": "Streaming-ul continuu poate provoca un consum mare de lățime de bandă și probleme de performanță. Folosește cu prudență."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Mod compatibilitate"
+        }
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Setari",
+      "title": "Optiuni",
+      "showOptions": "Arata Optiuni"
+    }
+  }
+}

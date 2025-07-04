@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Kameragrupper",
+    "add": "Lägg till Kameragrupp",
+    "edit": "Ändra Kameragrupp",
+    "delete": {
+      "label": "Radera kameragrupp",
+      "confirm": {
+        "title": "Bekräfta borttagning",
+        "desc": "Är du säker på att du vill ta bort kameragruppen <em>{{name}}</em>?"
+      }
+    },
+    "success": "Kameragruppen ({{name}}) har sparats.",
+    "name": {
+      "label": "Namn",
+      "placeholder": "Ange ett namn…",
+      "errorMessage": {
+        "mustLeastCharacters": "Gruppnamnet för kameror måste vara minst 2 tecken.",
+        "nameMustNotPeriod": "Kameragruppnamnet får inte innehålla en punkt.",
+        "invalid": "Ogiltligt kameragruppnamn.",
+        "exists": "Kameragruppnamnet finns redan."
+      }
+    },
+    "icon": "Ikon",
+    "camera": {
+      "setting": {
+        "label": "inställningar för kameraströmning",
+        "title": "{{cameraName}} Streaminginställningar",
+        "desc": "Ändra alternativen för livestreaming för den här kameragruppens instrumentpanel. <em>Dessa inställningar är enhets-/webbläsarspecifika.</em>",
+        "audioIsAvailable": "Ljud är tillgängligt för denna kameraström",
+        "audioIsUnavailable": "Ljud är otillgängligt för denna kameraström",
+        "audio": {
+          "tips": {
+            "title": "Ljud måste sändas från din kamera och konfigureras i go2rtc för den här strömmen.",
+            "document": "Läs dokumentationen. "
+          }
+        },
+        "streamMethod": {
+          "label": "Strömningsmetod",
+          "method": {
+            "smartStreaming": {
+              "desc": "Smart streaming uppdaterar kamerabilden en gång per minut när ingen detekterbar aktivitet sker för att spara bandbredd och resurser. När aktivitet detekteras växlar bilden sömlöst till en livestream.",
+              "label": "Smart strömning (rekommenderas)"
+            },
+            "continuousStreaming": {
+              "label": "Kontinuerlig strömning",
+              "desc": {
+                "title": "Kamerabilden kommer alltid att vara en liveström när den är synlig på instrumentpanelen, även om ingen aktivitet detekteras.",
+                "warning": "Kontinuerlig strömning kan orsaka hög bandbreddsanvändning och prestandaproblem. Använd med försiktighet."
+              }
+            },
+            "noStreaming": {
+              "label": "Ingen strömning",
+              "desc": "Kamerabilderna uppdateras bara en gång per minut och ingen livestreaming kommer att ske."
+            }
+          },
+          "placeholder": "Välj en strömningsmetod"
+        },
+        "stream": "Strömma",
+        "placeholder": "Välj en ström",
+        "compatibilityMode": {
+          "label": "Kompatibilitetsläge",
+          "desc": "Aktivera endast det här alternativet om kamerans livestream visar färgartefakter och har en diagonal linje på höger sida av bilden."
+        }
+      }
+    },
+    "cameras": {
+      "desc": "Välj kameror för denna guppen.",
+      "label": "Kameror"
+    }
+  },
+  "debug": {
+    "options": {
+      "showOptions": "Visa alternativ",
+      "label": "Inställningar",
+      "title": "Alternativ",
+      "hideOptions": "Dölj alternativ"
+    },
+    "boundingBox": "Avgränsningsruta",
+    "timestamp": "Tidsstämpel",
+    "zones": "Zoner",
+    "mask": "Maskera",
+    "motion": "Rörelse",
+    "regions": "Regioner"
+  }
+}

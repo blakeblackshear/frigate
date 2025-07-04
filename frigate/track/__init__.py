@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from frigate.config import DetectConfig
 
@@ -10,6 +11,6 @@ class ObjectTracker(ABC):
 
     @abstractmethod
     def match_and_update(
-        self, frame_name: str, frame_time: float, detections: list[dict[str, any]]
+        self, frame_name: str, frame_time: float, detections: list[dict[str, Any]]
     ) -> None:
         pass

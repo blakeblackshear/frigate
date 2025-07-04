@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Unduh Video",
+      "toast": {
+        "success": "Video yang yang anda lihat sudah mulai di unduh."
+      }
+    }
+  }
+}

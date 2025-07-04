@@ -1,11 +1,11 @@
 ---
 id: semantic_search
-title: Using Semantic Search
+title: Semantic Search
 ---
 
 Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one. This feature works by creating _embeddings_ — numerical vector representations — for both the images and text descriptions of your tracked objects. By comparing these embeddings, Frigate assesses their similarities to deliver relevant search results.
 
-Frigate uses [Jina AI's CLIP model](https://huggingface.co/jinaai/jina-clip-v1) to create and save embeddings to Frigate's database. All of this runs locally.
+Frigate uses models from [Jina AI](https://huggingface.co/jinaai) to create and save embeddings to Frigate's database. All of this runs locally.
 
 Semantic Search is accessed via the _Explore_ view in the Frigate UI.
 
@@ -19,7 +19,7 @@ For best performance, 16GB or more of RAM and a dedicated GPU are recommended.
 
 ## Configuration
 
-Semantic Search is disabled by default, and must be enabled in your config file or in the UI's Settings page before it can be used. Semantic Search is a global configuration setting.
+Semantic Search is disabled by default, and must be enabled in your config file or in the UI's Enrichments Settings page before it can be used. Semantic Search is a global configuration setting.
 
 ```yaml
 semantic_search:
@@ -29,28 +29,52 @@ semantic_search:
 
 :::tip
 
-The embeddings database can be re-indexed from the existing tracked objects in your database by adding `reindex: True` to your `semantic_search` configuration or by toggling the switch on the Search Settings page in the UI and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may max out your CPU while indexing. Make sure to turn the UI's switch off or set the config back to `False` before restarting Frigate again.
+The embeddings database can be re-indexed from the existing tracked objects in your database by pressing the "Reindex" button in the Enrichments Settings in the UI or by adding `reindex: True` to your `semantic_search` configuration and restarting Frigate. Depending on the number of tracked objects you have, it can take a long while to complete and may max out your CPU while indexing.
 
-If you are enabling Semantic Search for the first time, be advised that Frigate does not automatically index older tracked objects. You will need to enable the `reindex` feature in order to do that.
+If you are enabling Semantic Search for the first time, be advised that Frigate does not automatically index older tracked objects. You will need to reindex as described above.
 
 :::
 
-### Jina AI CLIP
+### Jina AI CLIP (version 1)
 
-The vision model is able to embed both images and text into the same vector space, which allows `image -> image` and `text -> image` similarity searches. Frigate uses this model on tracked objects to encode the thumbnail image and store it in the database. When searching for tracked objects via text in the search box, Frigate will perform a `text -> image` similarity search against this embedding. When clicking "Find Similar" in the tracked object detail pane, Frigate will perform an `image -> image` similarity search to retrieve the closest matching thumbnails.
+The [V1 model from Jina](https://huggingface.co/jinaai/jina-clip-v1) has a vision model which is able to embed both images and text into the same vector space, which allows `image -> image` and `text -> image` similarity searches. Frigate uses this model on tracked objects to encode the thumbnail image and store it in the database. When searching for tracked objects via text in the search box, Frigate will perform a `text -> image` similarity search against this embedding. When clicking "Find Similar" in the tracked object detail pane, Frigate will perform an `image -> image` similarity search to retrieve the closest matching thumbnails.
 
-The text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Explore page when clicking on thumbnail of a tracked object. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate tracked object descriptions.
+The V1 text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Explore page when clicking on thumbnail of a tracked object. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate tracked object descriptions.
 
-Differently weighted versions of the Jina model are available and can be selected by setting the `model_size` config option as `small` or `large`:
+Differently weighted versions of the Jina models are available and can be selected by setting the `model_size` config option as `small` or `large`:
 
 ```yaml
 semantic_search:
   enabled: True
+  model: "jinav1"
   model_size: small
 ```
 
 - Configuring the `large` model employs the full Jina model and will automatically run on the GPU if applicable.
 - Configuring the `small` model employs a quantized version of the Jina model that uses less RAM and runs on CPU with a very negligible difference in embedding quality.
+
+### Jina AI CLIP (version 2)
+
+Frigate also supports the [V2 model from Jina](https://huggingface.co/jinaai/jina-clip-v2), which introduces multilingual support (89 languages). In contrast, the V1 model only supports English.
+
+V2 offers only a 3% performance improvement over V1 in both text-image and text-text retrieval tasks, an upgrade that is unlikely to yield noticeable real-world benefits. Additionally, V2 has _significantly_ higher RAM and GPU requirements, leading to increased inference time and memory usage. If you plan to use V2, ensure your system has ample RAM and a discrete GPU. CPU inference (with the `small` model) using V2 is not recommended.
+
+To use the V2 model, update the `model` parameter in your config:
+
+```yaml
+semantic_search:
+  enabled: True
+  model: "jinav2"
+  model_size: large
+```
+
+For most users, especially native English speakers, the V1 model remains the recommended choice.
+
+:::note
+
+Switching between V1 and V2 requires reindexing your embeddings. The embeddings from V1 and V2 are incompatible, and failing to reindex will result in incorrect search results.
+
+:::
 
 ### GPU Acceleration
 
@@ -66,19 +90,7 @@ semantic_search:
 
 If the correct build is used for your GPU and the `large` model is configured, then the GPU will be detected and used automatically.
 
-**NOTE:** Object detection and Semantic Search are independent features. If you want to use your GPU with Semantic Search, you must choose the appropriate Frigate Docker image for your GPU.
-
-- **AMD**
-
-  - ROCm will automatically be detected and used for Semantic Search in the `-rocm` Frigate image.
-
-- **Intel**
-
-  - OpenVINO will automatically be detected and used for Semantic Search in the default Frigate image.
-
-- **Nvidia**
-  - Nvidia GPUs will automatically be detected and used for Semantic Search in the `-tensorrt` Frigate image.
-  - Jetson devices will automatically be detected and used for Semantic Search in the `-tensorrt-jp(4/5)` Frigate image.
+See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 
 :::
 

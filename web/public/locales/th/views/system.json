@@ -1,0 +1,59 @@
+{
+  "general": {
+    "title": "ทั่วไป",
+    "hardwareInfo": {
+      "gpuInfo": {
+        "nvidiaSMIOutput": {
+          "driver": "ไดรเวอร์: {{driver}}",
+          "name": "ชื่อ: {{name}}"
+        },
+        "copyInfo": {
+          "label": "คัดลอกข้อมูล GPU"
+        },
+        "closeInfo": {
+          "label": "ปิดข้อมูล GPU"
+        },
+        "toast": {
+          "success": "คัดลอกข้อมูล GPU ไปยังคลิปบอร์ดแล้ว"
+        }
+      },
+      "gpuUsage": "การใช้งาน GPU",
+      "gpuMemory": "หน่วยความจํา GPU",
+      "title": "รายละเอียดของอุปกรณ์",
+      "gpuEncoder": "ใช้ GPU เข้ารหัส",
+      "gpuDecoder": "ใช้ GPU ถอดรหัส"
+    },
+    "detector": {
+      "cpuUsage": "ตัวตรวจจับใช้งานหน่วยประมวลผลกลาง",
+      "title": "ตัวตรวจจับ",
+      "inferenceSpeed": "ความเร็วในการตรวจจับ",
+      "temperature": "อุณภูมิตัวตรวจจับ",
+      "memoryUsage": "ตัวตรวจจับใช้งานหน่วยความจำ"
+    }
+  },
+  "enrichments": {
+    "embeddings": {
+      "face_recognition_speed": "ความเร็วในการจดจำใบหน้า",
+      "plate_recognition_speed": "ความเร็วในการจดจำป้าย",
+      "yolov9_plate_detection_speed": "ความเร็วในการตรวจจับป้าย ของ YOLOv9",
+      "face_recognition": "การจดจำใบหน้า",
+      "text_embedding_speed": "ความเร็วในการอ่านข้อความ",
+      "yolov9_plate_detection": "การตรวจจับป้าย ของ YOLOv9"
+    }
+  },
+  "title": "ระบบ",
+  "storage": {
+    "cameraStorage": {
+      "unused": {
+        "title": "ไม่ได้ใช้"
+      },
+      "storageUsed": "พื้นที่จัดเก็บ",
+      "title": "พื้นที่จัดเก็บกล้อง"
+    },
+    "title": "พื้นที่จัดเก็บ"
+  },
+  "stats": {
+    "cameraIsOffline": "{{camera}} ออฟไลน์",
+    "detectIsVerySlow": "{{detect}} ช้ามาก ({{speed}} มิลลิวินาที)"
+  }
+}

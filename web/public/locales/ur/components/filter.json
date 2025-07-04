@@ -1,0 +1,18 @@
+{
+  "filter": "فلٹر",
+  "labels": {
+    "label": "لیبلز",
+    "all": {
+      "title": "تمام لیبلز",
+      "short": "لیبلز"
+    },
+    "count_one": "{{count}} لیبل",
+    "count_other": "{{count}} لیبلز"
+  },
+  "zones": {
+    "label": "زونز",
+    "all": {
+      "title": "تمام زونز"
+    }
+  }
+}

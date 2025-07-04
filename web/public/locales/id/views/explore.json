@@ -1,0 +1,15 @@
+{
+  "documentTitle": "Jelajahi - Frigate",
+  "generativeAI": "AI Generatif",
+  "exploreIsUnavailable": {
+    "title": "Penelusuran tidak tersedia",
+    "embeddingsReindexing": {
+      "context": "Jelajahi dapat digunakan setelah embedding objek yang dilacak selesai di-reindex.",
+      "startingUp": "Sedang memulai…",
+      "estimatedTime": "Perkiraan waktu tersisa:"
+    }
+  },
+  "details": {
+    "timestamp": "Stempel waktu"
+  }
+}

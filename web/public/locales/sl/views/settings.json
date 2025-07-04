@@ -1,0 +1,70 @@
+{
+  "documentTitle": {
+    "default": "Nastavitve - Frigate",
+    "authentication": "Nastavitve preverjanja pristnosti - Frigate",
+    "camera": "Nastavitve kamere - Frigate",
+    "notifications": "Nastavitve obvestil - Frigate",
+    "masksAndZones": "Urejevalnik mask in območij - Frigate",
+    "object": "Odpravljanje napak - Frigate",
+    "general": "Splošne Nastavitve - Frigate",
+    "frigatePlus": "Frigate+ Nastavitve - Frigate",
+    "enrichments": "Nastavitve Obogatitev - Frigate"
+  },
+  "menu": {
+    "ui": "Uporabniški vmesnik",
+    "enrichments": "Obogatitve",
+    "cameras": "Nastavitve Kamere",
+    "masksAndZones": "Maske / Cone",
+    "debug": "Razhroščevanje",
+    "users": "Uporabniki",
+    "notifications": "Obvestila",
+    "frigateplus": "Frigate+"
+  },
+  "masksAndZones": {
+    "zones": {
+      "point_one": "{{count}} točka",
+      "point_two": "{{count}} točki",
+      "point_few": "{{count}} točke",
+      "point_other": "{{count}} točk"
+    },
+    "objectMasks": {
+      "point_one": "{{count}} točka",
+      "point_two": "{{count}} točki",
+      "point_few": "{{count}} točke",
+      "point_other": "{{count}} točk"
+    },
+    "motionMasks": {
+      "point_one": "{{count}} točka",
+      "point_two": "{{count}} točki",
+      "point_few": "{{count}} točke",
+      "point_other": "{{count}} točk"
+    }
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Imate neshranjene spremembe.",
+      "desc": "Ali želite shraniti spremembe, preden nadaljujete?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Brez Kamere"
+  },
+  "general": {
+    "title": "Splošne Nastavitve",
+    "liveDashboard": {
+      "title": "Nadzorna plošča (v živo)",
+      "automaticLiveView": {
+        "label": "Samodejni pogled v živo",
+        "desc": "Samodejno preklopite na pogled kamere v živo, ko je zaznana aktivnost. Če onemogočite to možnost, se statične slike kamere na nadzorni plošči v živo posodobijo le enkrat na minuto."
+      },
+      "playAlertVideos": {
+        "label": "Predvajajte opozorilne videoposnetke"
+      }
+    },
+    "storedLayouts": {
+      "title": "Sharnjene Postavitve",
+      "desc": "Postaviteve kamer v skupini kamer je mogoče povleči/prilagoditi. Položaji so shranjeni v lokalnem pomnilniku vašega brskalnika."
+    }
+  }
+}

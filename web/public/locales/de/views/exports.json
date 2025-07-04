@@ -1,0 +1,17 @@
+{
+  "deleteExport": "Export löschen",
+  "editExport": {
+    "title": "Export umbenennen",
+    "desc": "Gib einen neuen Namen für diesen Export an.",
+    "saveExport": "Export speichern"
+  },
+  "documentTitle": "Exportieren - Frigate",
+  "deleteExport.desc": "Soll {{exportName}} wirklich gelöscht werden?",
+  "search": "Suche",
+  "noExports": "Keine Exporte gefunden",
+  "toast": {
+    "error": {
+      "renameExportFailed": "Umbenennen des Exports fehlgeschlagen: {{errorMessage}}"
+    }
+  }
+}

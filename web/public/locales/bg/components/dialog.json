@@ -1,0 +1,12 @@
+{
+  "export": {
+    "name": {
+      "placeholder": "Име на експорта"
+    },
+    "time": {
+      "lastHour_one": "Последният час",
+      "lastHour_other": "Последните {{count}} часа"
+    },
+    "select": "Избери"
+  }
+}

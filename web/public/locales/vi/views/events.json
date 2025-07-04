@@ -1,0 +1,38 @@
+{
+  "camera": "Tiếng máy ảnh",
+  "alerts": "Cảnh báo",
+  "detections": "Phát hiện",
+  "motion": {
+    "only": "Chỉ chuyển động",
+    "label": "Chuyển động"
+  },
+  "allCameras": "Tất cả Camera",
+  "detected": "Đã phát hiện",
+  "recordings": {
+    "documentTitle": "Bản ghi - Frigate"
+  },
+  "events": {
+    "aria": "Chọn sự kiện",
+    "label": "Sự kiện",
+    "noFoundForTimePeriod": "Không tìm thấy sự kiện nào trong khoảng thời gian này."
+  },
+  "timeline.aria": "Chọn dòng thời gian",
+  "selected_one": "{{count}} đã chọn",
+  "selected_other": "{{count}} đã chọn",
+  "empty": {
+    "alert": "Không có cảnh báo nào để xem xét",
+    "detection": "Không có phát hiện nào để xem xét",
+    "motion": "Không tìm thấy dữ liệu chuyển động"
+  },
+  "timeline": "Dòng thời gian",
+  "documentTitle": "Xem lại - Frigate",
+  "calendarFilter": {
+    "last24Hours": "24 giờ qua"
+  },
+  "newReviewItems": {
+    "label": "Xem các mục mới cần xem xét",
+    "button": "Các mục mới cần xem xét"
+  },
+  "markAsReviewed": "Đánh dấu là đã xem xét",
+  "markTheseItemsAsReviewed": "Đánh dấu các mục này là đã xem xét"
+}

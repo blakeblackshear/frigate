@@ -1,0 +1,21 @@
+{
+  "person": "Személy",
+  "bicycle": "Bicikli",
+  "car": "Autó",
+  "motorcycle": "Motor",
+  "airplane": "Repülőgép",
+  "bus": "Busz",
+  "train": "Vonat",
+  "boat": "Hajó",
+  "dog": "Kutya",
+  "cat": "Macska",
+  "horse": "Ló",
+  "sheep": "Juh",
+  "bird": "Madár",
+  "mouse": "Egér",
+  "keyboard": "Szintetizátor",
+  "animal": "Állat",
+  "bark": "Ugatás",
+  "goat": "Kecske",
+  "traffic_light": "Jelzőlámpa"
+}

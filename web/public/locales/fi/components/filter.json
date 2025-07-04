@@ -1,0 +1,30 @@
+{
+  "filter": "Suodatin",
+  "dates": {
+    "selectPreset": "Valitse esiasettelu…",
+    "all": {
+      "title": "Kaikki päivämäärät",
+      "short": "Päivämäärät"
+    }
+  },
+  "more": "Lisää suodattimia",
+  "reset": {
+    "label": "Palauta suodattimet oletusarvoihin"
+  },
+  "labels": {
+    "count_one": "{{count}} nimike",
+    "label": "Nimikkeet",
+    "all": {
+      "title": "Kaikki nimikkeet",
+      "short": "Nimikkeet"
+    },
+    "count_other": "{{count}} nimikettä"
+  },
+  "zones": {
+    "label": "Alueet",
+    "all": {
+      "title": "Kaikki alueet",
+      "short": "Alueet"
+    }
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Živě - Frigate",
+  "documentTitle.withCamera": "{{camera}}-Živě-Frigate",
+  "lowBandwidthMode": "Režim nízké šířky pásma",
+  "twoWayTalk": {
+    "enable": "Povolit obousměrný hovor",
+    "disable": "Zakázat obousměrný hovor"
+  },
+  "cameraAudio": {
+    "enable": "Povolit zvuk kamery",
+    "disable": "Zakázat zvuk kamery"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Klikněte do snímku pro vycentrování kamery",
+        "enable": "Povolit pohyb kliknutím",
+        "disable": "Zakázat pohyb kliknutím"
+      },
+      "left": {
+        "label": "Posunot PTZ kameru do leva"
+      },
+      "up": {
+        "label": "Posunot PTZ kameru nahoru"
+      },
+      "down": {
+        "label": "Posunot PTZ kameru dolů"
+      },
+      "right": {
+        "label": "Posunot PTZ kameru do prava"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Přiblížit PTZ kameru"
+      },
+      "out": {
+        "label": "Oddálit PTZ kameru"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Klikněte do snímku pro vycentrování PTZ kamery"
+      }
+    },
+    "presets": "Předvolby PTZ kamery"
+  },
+  "camera": {
+    "enable": "Povolit kameru",
+    "disable": "Zakázat kameru"
+  },
+  "muteCameras": {
+    "enable": "Ztlumit všechny kamery",
+    "disable": "Zrušit ztlumení u všech kamer"
+  },
+  "detect": {
+    "enable": "Povolit detekci",
+    "disable": "Zakázat detekci"
+  },
+  "recording": {
+    "enable": "Povolit nahrávání",
+    "disable": "Zakázat nahrávání"
+  },
+  "snapshots": {
+    "enable": "Povolit vytváření snímků",
+    "disable": "Zakázat vytváření snímků"
+  },
+  "audioDetect": {
+    "enable": "Povolit detekci zvuků",
+    "disable": "Zakázat detekci zvuků"
+  },
+  "autotracking": {
+    "enable": "Povolit automatické sledování",
+    "disable": "Zakázat automatické sledování"
+  },
+  "streamStats": {
+    "disable": "Skrýt statistiky streamu",
+    "enable": "Ukázat statistiky streamu"
+  },
+  "manualRecording": {
+    "title": "Nahrávání na vyžádání",
+    "playInBackground": {
+      "label": "Přehrát na pozadí",
+      "desc": "Povolte tuto volbu pro pokračování streamování i když je přehrávač skrytý."
+    },
+    "showStats": {
+      "label": "Ukázat statistiky",
+      "desc": "Povolte tuto možnost pro zobrazení překryvných statistik v obraze streamu."
+    },
+    "debugView": "Náhled ladění",
+    "start": "Spustit nahrávání na vyžádání",
+    "failedToStart": "Chyba manuálního spuštění nahrávání na požádání.",
+    "end": "Konec nahrávání na vyžádání",
+    "failedToEnd": "Chyba ukončení manuálního nahrávání na vyžádání.",
+    "started": "Manuálně spuštěno nahrávání na požádání.",
+    "ended": "Ukončeno manuální nahrávání na vyžádání.",
+    "recordDisabledTips": "Protože je v konfiguraci této kamery nahrávání zakázáno nebo omezeno, bude uložen pouze snímek.",
+    "tips": "Spustit ruční událost na základě nastavení uchovávání záznamů této kamery."
+  },
+  "streamingSettings": "Nastavení Streamování",
+  "audio": "Zvuk",
+  "suspend": {
+    "forTime": "Pozastavení na: "
+  },
+  "stream": {
+    "title": "Stream",
+    "audio": {
+      "tips": {
+        "title": "Zvuk musí být kamerou vysílán a nakonfigurován v go2rtc pro tento stream.",
+        "documentation": "Přečtěte si dokumentaci "
+      },
+      "available": "Zvuk je dostupný pro tento stream",
+      "unavailable": "Zvuk není dostupný pro tento stream"
+    },
+    "twoWayTalk": {
+      "tips.documentation": "Přečtěte si dokumentaci ",
+      "available": "Obousměrný hovor je dostupný pro tento stream",
+      "unavailable": "Obousměrný hovor není dostupný pro tento stream",
+      "tips": "Vaše zařízení musí tuto funkci podporovat a WebRTC musí být nakonfigurováno pro obousměrnou komunikaci."
+    },
+    "lowBandwidth": {
+      "resetStream": "Resetovat stream",
+      "tips": "Živý náhled je v režimu nízké přenosové rychlosti kvůli vyrovnávací paměti nebo chybám ve streamu."
+    },
+    "playInBackground": {
+      "label": "Přehrát na pozadí",
+      "tips": "Povolte tuto volbu pro pokračování streamování i když je přehrávač skrytý."
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Nastavení",
+    "cameraEnabled": "Kamera Povolena",
+    "objectDetection": "Detekce Objektu",
+    "snapshots": "Snímky",
+    "audioDetection": "Detekce Zvuku",
+    "autotracking": "Automatické sledování",
+    "recording": "Nahrávání"
+  },
+  "history": {
+    "label": "Zobrazit historické záznamy"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Vše",
+      "motion": "Pohyb",
+      "active_objects": "Aktivní Objekty"
+    },
+    "notAllTips": "Vaše nastavení uchovávání záznamů pro zdroj {{source}} je nastaveno na <code>režim: {{effectiveRetainMode}}</code>, takže tento záznam na vyžádání bude uchovávat pouze segmenty s režimem {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "exitEdit": "Ukončit Úpravu",
+    "label": "Upravit Rozložení",
+    "group": {
+      "label": "Upravit Skupinu Kamer"
+    }
+  },
+  "notifications": "Notifikace"
+}

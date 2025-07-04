@@ -1,0 +1,9 @@
+{
+  "restart": {
+    "title": "Frigateを再起動しますか?",
+    "restarting": {
+      "title": "Frigateは再起動中です"
+    },
+    "button": "再起動"
+  }
+}

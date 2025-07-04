@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Geen opnames gevonden voor deze tijd",
+  "stats": {
+    "latency": {
+      "value": "{{seconds}} seconden",
+      "short": {
+        "title": "Latentie",
+        "value": "{{seconds}} s"
+      },
+      "title": "Latentie:"
+    },
+    "totalFrames": "Totaal aantal frames:",
+    "droppedFrames": {
+      "title": "Overgeslagen frames:",
+      "short": {
+        "value": "{{droppedFrames}} frames",
+        "title": "Overgeslagen"
+      }
+    },
+    "droppedFrameRate": "Frequentie van overgeslagen frames:",
+    "bandwidth": {
+      "short": "Bandbreedte",
+      "title": "Bandbreedte:"
+    },
+    "streamType": {
+      "short": "Type",
+      "title": "Stream Type:"
+    },
+    "decodedFrames": "Gedecodeerde frames:"
+  },
+  "submitFrigatePlus": {
+    "title": "Dit frame indienen bij Frigate+?",
+    "submit": "Indienen"
+  },
+  "streamOffline": {
+    "title": "Stream is Offline",
+    "desc": "Er zijn geen frames ontvangen in de <code>detect</code>-stream van {{cameraName}}, controleer de error logs"
+  },
+  "noPreviewFound": "Geen voorbeeld gevonden",
+  "noPreviewFoundFor": "Geen voorbeeld gevonden voor {{cameraName}}",
+  "livePlayerRequiredIOSVersion": "Voor dit type livestream is iOS 17.1 of hoger vereist.",
+  "cameraDisabled": "Camera is uitgeschakeld",
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Frame succesvol ingediend bij Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Het is niet gelukt om een frame naar Frigate+ te sturen"
+    }
+  }
+}

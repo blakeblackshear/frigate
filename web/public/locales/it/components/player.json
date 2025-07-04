@@ -1,0 +1,51 @@
+{
+  "noPreviewFound": "Nessuna anteprima trovata",
+  "noRecordingsFoundForThisTime": "Nessuna registrazione trovata per questo intervallo",
+  "noPreviewFoundFor": "Nessuna anteprima trovata per {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Vuoi inviare questo fotogramma a Frigate+?",
+    "submit": "Invia"
+  },
+  "livePlayerRequiredIOSVersion": "Per questo tipo di trasmissione dal vivo è richiesto iOS 17.1 o versione successiva.",
+  "stats": {
+    "streamType": {
+      "short": "Tipo",
+      "title": "Tipo di trasmissione:"
+    },
+    "bandwidth": {
+      "title": "Larghezza di banda:",
+      "short": "Larghezza di banda"
+    },
+    "latency": {
+      "title": "Latenza:",
+      "value": "{{seconds}} secondi",
+      "short": {
+        "title": "Latenza",
+        "value": "{{seconds}} sec"
+      }
+    },
+    "droppedFrames": {
+      "title": "Fotogrammi persi:",
+      "short": {
+        "title": "Persi",
+        "value": "{{droppedFrames}} fotogrammi"
+      }
+    },
+    "decodedFrames": "Fotogrammi decodificati:",
+    "totalFrames": "Totale fotogrammi:",
+    "droppedFrameRate": "Percentuali fotogrammi persi:"
+  },
+  "streamOffline": {
+    "desc": "Nessun fotogramma ricevuto sul flusso <code>detect</code> di {{cameraName}}, controlla i registri degli errori",
+    "title": "Trasmissione disconnessa"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Fotogramma inviato correttamente a Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Impossibile inviare il fotogramma a Frigate+"
+    }
+  },
+  "cameraDisabled": "La telecamera è disattivata"
+}

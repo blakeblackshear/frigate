@@ -1,0 +1,17 @@
+{
+  "documentTitle": "Izvoz - Frigate",
+  "search": "Iskanje",
+  "noExports": "Izovzi niso najdeni",
+  "deleteExport": "Izbriši izvoz",
+  "deleteExport.desc": "Ali ste prepričani, da želite izbrisati {{exportName}}?",
+  "editExport": {
+    "title": "Preimenuj izvoz",
+    "desc": "Vpišite novo ime za ta izvoz.",
+    "saveExport": "Shrani izvoz"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Napaka pri preimenovanju izvoza: {{errorMessage}}"
+    }
+  }
+}

@@ -3,6 +3,8 @@
 import datetime
 import logging
 import os
+import random
+import string
 from functools import reduce
 from pathlib import Path
 from urllib.parse import unquote
@@ -14,6 +16,7 @@ from fastapi.responses import JSONResponse
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
+from frigate.api.auth import require_role
 from frigate.api.defs.query.events_query_parameters import (
     DEFAULT_TIME_RANGE,
     EventsQueryParams,
@@ -28,6 +31,7 @@ from frigate.api.defs.request.events_body import (
     EventsDeleteBody,
     EventsDescriptionBody,
     EventsEndBody,
+    EventsLPRBody,
     EventsSubLabelBody,
     SubmitPlusBody,
 )
@@ -39,11 +43,11 @@ from frigate.api.defs.response.event_response import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
+from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
-from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, ReviewSegment, Timeline
-from frigate.object_processing import TrackedObject, TrackedObjectProcessor
+from frigate.track.object_processing import TrackedObject
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -92,10 +96,13 @@ def events(params: EventsQueryParams = Depends()):
     favorites = params.favorites
     min_score = params.min_score
     max_score = params.max_score
+    min_speed = params.min_speed
+    max_speed = params.max_speed
     is_submitted = params.is_submitted
     min_length = params.min_length
     max_length = params.max_length
     event_id = params.event_id
+    recognized_license_plate = params.recognized_license_plate
 
     sort = params.sort
 
@@ -152,6 +159,45 @@ def events(params: EventsQueryParams = Depends()):
 
         sub_label_clause = reduce(operator.or_, sub_label_clauses)
         clauses.append((sub_label_clause))
+
+    if recognized_license_plate != "all":
+        # use matching so joined recognized_license_plates are included
+        # for example a recognized license plate 'ABC123' would get events
+        # with recognized license plates 'ABC123' and 'ABC123, XYZ789'
+        recognized_license_plate_clauses = []
+        filtered_recognized_license_plates = recognized_license_plate.split(",")
+
+        if "None" in filtered_recognized_license_plates:
+            filtered_recognized_license_plates.remove("None")
+            recognized_license_plate_clauses.append(
+                (Event.data["recognized_license_plate"].is_null())
+            )
+
+        for recognized_license_plate in filtered_recognized_license_plates:
+            # Exact matching plus list inclusion
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    == recognized_license_plate
+                )
+            )
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    % f"*{recognized_license_plate},*"
+                )
+            )
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    % f"*, {recognized_license_plate}*"
+                )
+            )
+
+        recognized_license_plate_clause = reduce(
+            operator.or_, recognized_license_plate_clauses
+        )
+        clauses.append((recognized_license_plate_clause))
 
     if zones != "all":
         # use matching so events with multiple zones
@@ -226,6 +272,12 @@ def events(params: EventsQueryParams = Depends()):
     if min_score is not None:
         clauses.append((Event.data["score"] >= min_score))
 
+    if max_speed is not None:
+        clauses.append((Event.data["average_estimated_speed"] <= max_speed))
+
+    if min_speed is not None:
+        clauses.append((Event.data["average_estimated_speed"] >= min_speed))
+
     if min_length is not None:
         clauses.append(((Event.end_time - Event.start_time) >= min_length))
 
@@ -249,6 +301,10 @@ def events(params: EventsQueryParams = Depends()):
             order_by = Event.data["score"].asc()
         elif sort == "score_desc":
             order_by = Event.data["score"].desc()
+        elif sort == "speed_asc":
+            order_by = Event.data["average_estimated_speed"].asc()
+        elif sort == "speed_desc":
+            order_by = Event.data["average_estimated_speed"].desc()
         elif sort == "date_asc":
             order_by = Event.start_time.asc()
         elif sort == "date_desc":
@@ -316,7 +372,18 @@ def events_explore(limit: int = 10):
                     k: v
                     for k, v in event.data.items()
                     if k
-                    in ["type", "score", "top_score", "description", "sub_label_score"]
+                    in [
+                        "type",
+                        "score",
+                        "top_score",
+                        "description",
+                        "sub_label_score",
+                        "average_estimated_speed",
+                        "velocity_angle",
+                        "path_data",
+                        "recognized_license_plate",
+                        "recognized_license_plate_score",
+                    ]
                 },
                 "event_count": label_counts[event.label],
             }
@@ -367,10 +434,13 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     before = params.before
     min_score = params.min_score
     max_score = params.max_score
+    min_speed = params.min_speed
+    max_speed = params.max_speed
     time_range = params.time_range
     has_clip = params.has_clip
     has_snapshot = params.has_snapshot
     is_submitted = params.is_submitted
+    recognized_license_plate = params.recognized_license_plate
 
     # for similarity search
     event_id = params.event_id
@@ -440,6 +510,45 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
         event_filters.append((reduce(operator.or_, zone_clauses)))
 
+    if recognized_license_plate != "all":
+        # use matching so joined recognized_license_plates are included
+        # for example an recognized_license_plate 'ABC123' would get events
+        # with recognized_license_plates 'ABC123' and 'ABC123, XYZ789'
+        recognized_license_plate_clauses = []
+        filtered_recognized_license_plates = recognized_license_plate.split(",")
+
+        if "None" in filtered_recognized_license_plates:
+            filtered_recognized_license_plates.remove("None")
+            recognized_license_plate_clauses.append(
+                (Event.data["recognized_license_plate"].is_null())
+            )
+
+        for recognized_license_plate in filtered_recognized_license_plates:
+            # Exact matching plus list inclusion
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    == recognized_license_plate
+                )
+            )
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    % f"*{recognized_license_plate},*"
+                )
+            )
+            recognized_license_plate_clauses.append(
+                (
+                    Event.data["recognized_license_plate"].cast("text")
+                    % f"*, {recognized_license_plate}*"
+                )
+            )
+
+        recognized_license_plate_clause = reduce(
+            operator.or_, recognized_license_plate_clauses
+        )
+        event_filters.append((recognized_license_plate_clause))
+
     if after:
         event_filters.append((Event.start_time > after))
 
@@ -465,6 +574,16 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
             event_filters.append((Event.data["score"] >= min_score))
         if max_score is not None:
             event_filters.append((Event.data["score"] <= max_score))
+
+    if min_speed is not None and max_speed is not None:
+        event_filters.append(
+            (Event.data["average_estimated_speed"].between(min_speed, max_speed))
+        )
+    else:
+        if min_speed is not None:
+            event_filters.append((Event.data["average_estimated_speed"] >= min_speed))
+        if max_speed is not None:
+            event_filters.append((Event.data["average_estimated_speed"] <= max_speed))
 
     if time_range != DEFAULT_TIME_RANGE:
         tz_name = params.timezone
@@ -581,7 +700,20 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         processed_event["data"] = {
             k: v
             for k, v in event["data"].items()
-            if k in ["type", "score", "top_score", "description"]
+            if k
+            in [
+                "attributes",
+                "type",
+                "score",
+                "top_score",
+                "description",
+                "sub_label_score",
+                "average_estimated_speed",
+                "velocity_angle",
+                "path_data",
+                "recognized_license_plate",
+                "recognized_license_plate_score",
+            ]
         }
 
         if event["id"] in search_results:
@@ -593,9 +725,15 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     if (sort is None or sort == "relevance") and search_results:
         processed_events.sort(key=lambda x: x.get("search_distance", float("inf")))
     elif min_score is not None and max_score is not None and sort == "score_asc":
-        processed_events.sort(key=lambda x: x["score"])
+        processed_events.sort(key=lambda x: x["data"]["score"])
     elif min_score is not None and max_score is not None and sort == "score_desc":
-        processed_events.sort(key=lambda x: x["score"], reverse=True)
+        processed_events.sort(key=lambda x: x["data"]["score"], reverse=True)
+    elif min_speed is not None and max_speed is not None and sort == "speed_asc":
+        processed_events.sort(key=lambda x: x["data"]["average_estimated_speed"])
+    elif min_speed is not None and max_speed is not None and sort == "speed_desc":
+        processed_events.sort(
+            key=lambda x: x["data"]["average_estimated_speed"], reverse=True
+        )
     elif sort == "date_asc":
         processed_events.sort(key=lambda x: x["start_time"])
     else:
@@ -631,6 +769,7 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
             Event.camera,
             Event.label,
             Event.sub_label,
+            Event.data,
             fn.strftime(
                 "%Y-%m-%d",
                 fn.datetime(
@@ -645,6 +784,7 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
             Event.camera,
             Event.label,
             Event.sub_label,
+            Event.data,
             (Event.start_time + seconds_offset).cast("int") / (3600 * 24),
             Event.zones,
         )
@@ -661,7 +801,11 @@ def event(event_id: str):
         return JSONResponse(content="Event not found", status_code=404)
 
 
-@router.post("/events/{event_id}/retain", response_model=GenericResponse)
+@router.post(
+    "/events/{event_id}/retain",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def set_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
@@ -881,7 +1025,11 @@ def false_positive(request: Request, event_id: str):
     )
 
 
-@router.delete("/events/{event_id}/retain", response_model=GenericResponse)
+@router.delete(
+    "/events/{event_id}/retain",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def delete_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
@@ -900,7 +1048,11 @@ def delete_retain(event_id: str):
     )
 
 
-@router.post("/events/{event_id}/sub_label", response_model=GenericResponse)
+@router.post(
+    "/events/{event_id}/sub_label",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def set_sub_label(
     request: Request,
     event_id: str,
@@ -909,50 +1061,106 @@ def set_sub_label(
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
+        event = None
+
+    if request.app.detected_frames_processor:
+        tracked_obj: TrackedObject = None
+
+        for state in request.app.detected_frames_processor.camera_states.values():
+            tracked_obj = state.tracked_objects.get(event_id)
+
+            if tracked_obj is not None:
+                break
+    else:
+        tracked_obj = None
+
+    if not event and not tracked_obj:
         return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            content=(
+                {"success": False, "message": "Event " + event_id + " not found."}
+            ),
             status_code=404,
         )
 
     new_sub_label = body.subLabel
     new_score = body.subLabelScore
 
-    if not event.end_time:
-        # update tracked object
-        tracked_obj: TrackedObject = (
-            request.app.detected_frames_processor.camera_states[
-                event.camera
-            ].tracked_objects.get(event.id)
-        )
+    if new_sub_label == "":
+        new_sub_label = None
+        new_score = None
 
-        if tracked_obj:
-            tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
+    request.app.event_metadata_updater.publish(
+        EventMetadataTypeEnum.sub_label, (event_id, new_sub_label, new_score)
+    )
 
-        # update timeline items
-        Timeline.update(
-            data=Timeline.data.update({"sub_label": (new_sub_label, new_score)})
-        ).where(Timeline.source_id == event_id).execute()
-
-    event.sub_label = new_sub_label
-
-    if new_score:
-        data = event.data
-        data["sub_label_score"] = new_score
-        event.data = data
-
-    event.save()
     return JSONResponse(
-        content=(
-            {
-                "success": True,
-                "message": "Event " + event_id + " sub label set to " + new_sub_label,
-            }
-        ),
+        content={
+            "success": True,
+            "message": f"Event {event_id} sub label set to {new_sub_label if new_sub_label is not None else 'None'}",
+        },
         status_code=200,
     )
 
 
-@router.post("/events/{event_id}/description", response_model=GenericResponse)
+@router.post(
+    "/events/{event_id}/recognized_license_plate",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def set_plate(
+    request: Request,
+    event_id: str,
+    body: EventsLPRBody,
+):
+    try:
+        event: Event = Event.get(Event.id == event_id)
+    except DoesNotExist:
+        event = None
+
+    if request.app.detected_frames_processor:
+        tracked_obj: TrackedObject = None
+
+        for state in request.app.detected_frames_processor.camera_states.values():
+            tracked_obj = state.tracked_objects.get(event_id)
+
+            if tracked_obj is not None:
+                break
+    else:
+        tracked_obj = None
+
+    if not event and not tracked_obj:
+        return JSONResponse(
+            content=(
+                {"success": False, "message": "Event " + event_id + " not found."}
+            ),
+            status_code=404,
+        )
+
+    new_plate = body.recognizedLicensePlate
+    new_score = body.recognizedLicensePlateScore
+
+    if new_plate == "":
+        new_plate = None
+        new_score = None
+
+    request.app.event_metadata_updater.publish(
+        EventMetadataTypeEnum.recognized_license_plate, (event_id, new_plate, new_score)
+    )
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": f"Event {event_id} license plate set to {new_plate if new_plate is not None else 'None'}",
+        },
+        status_code=200,
+    )
+
+
+@router.post(
+    "/events/{event_id}/description",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def set_description(
     request: Request,
     event_id: str,
@@ -999,7 +1207,11 @@ def set_description(
     )
 
 
-@router.put("/events/{event_id}/description/regenerate", response_model=GenericResponse)
+@router.put(
+    "/events/{event_id}/description/regenerate",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def regenerate_description(
     request: Request, event_id: str, params: RegenerateQueryParameters = Depends()
 ):
@@ -1013,11 +1225,10 @@ def regenerate_description(
 
     camera_config = request.app.frigate_config.cameras[event.camera]
 
-    if (
-        request.app.frigate_config.semantic_search.enabled
-        and camera_config.genai.enabled
-    ):
-        request.app.event_metadata_updater.publish((event.id, params.source))
+    if camera_config.genai.enabled:
+        request.app.event_metadata_updater.publish(
+            EventMetadataTypeEnum.regenerate_description, (event.id, params.source)
+        )
 
         return JSONResponse(
             content=(
@@ -1070,14 +1281,22 @@ def delete_single_event(event_id: str, request: Request) -> dict:
     return {"success": True, "message": f"Event {event_id} deleted"}
 
 
-@router.delete("/events/{event_id}", response_model=GenericResponse)
+@router.delete(
+    "/events/{event_id}",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def delete_event(request: Request, event_id: str):
     result = delete_single_event(event_id, request)
     status_code = 200 if result["success"] else 404
     return JSONResponse(content=result, status_code=status_code)
 
 
-@router.delete("/events/", response_model=EventMultiDeleteResponse)
+@router.delete(
+    "/events/",
+    response_model=EventMultiDeleteResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def delete_events(request: Request, body: EventsDeleteBody):
     if not body.event_ids:
         return JSONResponse(
@@ -1103,7 +1322,11 @@ def delete_events(request: Request, body: EventsDeleteBody):
     return JSONResponse(content=response, status_code=200)
 
 
-@router.post("/events/{camera_name}/{label}/create", response_model=EventCreateResponse)
+@router.post(
+    "/events/{camera_name}/{label}/create",
+    response_model=EventCreateResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def create_event(
     request: Request,
     camera_name: str,
@@ -1124,28 +1347,25 @@ def create_event(
             status_code=404,
         )
 
-    try:
-        frame_processor: TrackedObjectProcessor = request.app.detected_frames_processor
-        external_processor: ExternalEventProcessor = request.app.external_processor
+    now = datetime.datetime.now().timestamp()
+    rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    event_id = f"{now}-{rand_id}"
 
-        frame = frame_processor.get_current_frame(camera_name)
-        event_id = external_processor.create_manual_event(
+    request.app.event_metadata_updater.publish(
+        EventMetadataTypeEnum.manual_event_create,
+        (
+            now,
             camera_name,
             label,
-            body.source_type,
-            body.sub_label,
-            body.score,
-            body.duration,
+            event_id,
             body.include_recording,
+            body.score,
+            body.sub_label,
+            body.duration,
+            body.source_type,
             body.draw,
-            frame,
-        )
-    except Exception as e:
-        logger.error(e)
-        return JSONResponse(
-            content=({"success": False, "message": "An unknown error occurred"}),
-            status_code=500,
-        )
+        ),
+    )
 
     return JSONResponse(
         content=(
@@ -1159,11 +1379,17 @@ def create_event(
     )
 
 
-@router.put("/events/{event_id}/end", response_model=GenericResponse)
+@router.put(
+    "/events/{event_id}/end",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+)
 def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
         end_time = body.end_time or datetime.datetime.now().timestamp()
-        request.app.external_processor.finish_manual_event(event_id, end_time)
+        request.app.event_metadata_updater.publish(
+            EventMetadataTypeEnum.manual_event_end, (event_id, end_time)
+        )
     except Exception:
         return JSONResponse(
             content=(

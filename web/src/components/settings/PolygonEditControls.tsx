@@ -2,18 +2,26 @@ import { Polygon } from "@/types/canvas";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { MdOutlineRestartAlt, MdUndo } from "react-icons/md";
 import { Button } from "../ui/button";
+import { TbPolygon, TbPolygonOff } from "react-icons/tb";
+import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type PolygonEditControlsProps = {
   polygons: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex: number | undefined;
+  snapPoints: boolean;
+  setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function PolygonEditControls({
   polygons,
   setPolygons,
   activePolygonIndex,
+  snapPoints,
+  setSnapPoints,
 }: PolygonEditControlsProps) {
+  const { t } = useTranslation(["views/settings"]);
   const undo = () => {
     if (activePolygonIndex === undefined || !polygons) {
       return;
@@ -74,28 +82,51 @@ export default function PolygonEditControls({
           <Button
             variant="default"
             className="size-6 rounded-md p-1"
-            aria-label="Remove last point"
+            aria-label={t("masksAndZones.form.polygonDrawing.removeLastPoint")}
             disabled={!polygons[activePolygonIndex].points.length}
             onClick={undo}
           >
             <MdUndo className="text-secondary-foreground" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Remove last point</TooltipContent>
+        <TooltipContent>
+          {t("masksAndZones.form.polygonDrawing.removeLastPoint")}
+        </TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             variant="default"
             className="size-6 rounded-md p-1"
-            aria-label="Clear all points"
+            aria-label={t("masksAndZones.form.polygonDrawing.reset.label")}
             disabled={!polygons[activePolygonIndex].points.length}
             onClick={reset}
           >
             <MdOutlineRestartAlt className="text-secondary-foreground" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Reset</TooltipContent>
+        <TooltipContent>{t("button.reset", { ns: "common" })}</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant={snapPoints ? "select" : "default"}
+            className={cn("size-6 rounded-md p-1")}
+            aria-label={t("masksAndZones.form.polygonDrawing.snapPoints.true")}
+            onClick={() => setSnapPoints((prev) => !prev)}
+          >
+            {snapPoints ? (
+              <TbPolygon className="text-primary" />
+            ) : (
+              <TbPolygonOff className="text-secondary-foreground" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {snapPoints
+            ? t("masksAndZones.form.polygonDrawing.snapPoints.false")
+            : t("masksAndZones.form.polygonDrawing.snapPoints.true")}
+        </TooltipContent>
       </Tooltip>
     </div>
   );

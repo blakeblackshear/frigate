@@ -45,7 +45,7 @@ class PlusApi:
             self.key = (
                 Path(os.path.join("/run/secrets", PLUS_ENV_VAR)).read_text().strip()
             )
-        # check for the addon options file
+        # check for the add-on options file
         elif os.path.isfile("/data/options.json"):
             with open("/data/options.json") as f:
                 raw_options = f.read()
@@ -229,6 +229,14 @@ class PlusApi:
 
     def get_model_info(self, model_id: str) -> Any:
         r = self._get(f"model/{model_id}")
+
+        if not r.ok:
+            raise Exception(r.text)
+
+        return r.json()
+
+    def get_models(self) -> Any:
+        r = self._get("model/list")
 
         if not r.ok:
             raise Exception(r.text)

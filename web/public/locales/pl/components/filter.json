@@ -1,0 +1,126 @@
+{
+  "filter": "Filtr",
+  "labels": {
+    "label": "Etykiety",
+    "all": {
+      "title": "Wszystkie Etykiety",
+      "short": "Etykiety"
+    },
+    "count_one": "{{count}} Etykieta",
+    "count_other": "{{count}} Etykiet"
+  },
+  "zones": {
+    "label": "Strefy",
+    "all": {
+      "title": "Wszystkie Strefy",
+      "short": "Strefy"
+    }
+  },
+  "subLabels": {
+    "all": "Wszystkie Podetykiety",
+    "label": "Podetykiety"
+  },
+  "score": "Wynik",
+  "estimatedSpeed": "Szacowana Prędkość ({{unit}})",
+  "features": {
+    "label": "Funkcje",
+    "hasSnapshot": "Posiada stop klatkę",
+    "hasVideoClip": "Posiada klip wideo",
+    "submittedToFrigatePlus": {
+      "label": "Przesłano do Frigate+",
+      "tips": "Musisz najpierw filtrować obiekty śledzone, które mają stop klatkę.<br /><br />Obiekty śledzone bez stop klatki nie mogą być przesłane do Frigate+."
+    }
+  },
+  "sort": {
+    "dateDesc": "Data (Malejąco)",
+    "scoreAsc": "Wynik Obiektu (Rosnąco)",
+    "scoreDesc": "Wynik Obiektu (Malejąco)",
+    "speedAsc": "Szacowana Prędkość (Rosnąco)",
+    "speedDesc": "Szacowana Prędkość (Malejąco)",
+    "label": "Sortuj",
+    "dateAsc": "Data (Rosnąco)",
+    "relevance": "Trafność"
+  },
+  "explore": {
+    "settings": {
+      "gridColumns": {
+        "desc": "Wybierz liczbę kolumn w widoku siatki.",
+        "title": "Kolumny Siatki"
+      },
+      "searchSource": {
+        "label": "Źródło Wyszukiwania",
+        "desc": "Wybierz, czy przeszukiwać miniatury czy opisy śledzonych obiektów.",
+        "options": {
+          "description": "Opis",
+          "thumbnailImage": "Obraz Miniatury"
+        }
+      },
+      "defaultView": {
+        "title": "Domyślny Widok",
+        "summary": "Podsumowanie",
+        "unfilteredGrid": "Niefiltrowana Siatka",
+        "desc": "Gdy nie wybrano filtrów, wyświetl podsumowanie najnowszych śledzonych obiektów dla każdej etykiety lub wyświetl niefiltrowaną siatkę."
+      },
+      "title": "Ustawienia"
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Wybierz datę do filtrowania"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtruj poziom logów",
+    "filterBySeverity": "Filtruj logi według ważności",
+    "loading": {
+      "title": "Ładowanie",
+      "desc": "Gdy panel logów jest przewinięty do dołu, nowe logi są automatycznie strumieniowane w miarę ich dodawania."
+    },
+    "disableLogStreaming": "Wyłącz strumieniowanie logów",
+    "allLogs": "Wszystkie logi"
+  },
+  "recognizedLicensePlates": {
+    "loading": "Ładowanie rozpoznanych tablic rejestracyjnych…",
+    "placeholder": "Wpisz, aby wyszukać tablice rejestracyjne…",
+    "noLicensePlatesFound": "Nie znaleziono tablic rejestracyjnych.",
+    "title": "Rozpoznane Tablice Rejestracyjne",
+    "loadFailed": "Nie udało się załadować rozpoznanych tablic rejestracyjnych.",
+    "selectPlatesFromList": "Wybierz jedną lub więcej tablic z listy."
+  },
+  "dates": {
+    "all": {
+      "title": "Wszystkie Daty",
+      "short": "Daty"
+    },
+    "selectPreset": "Wybierz ustawienie…"
+  },
+  "more": "Więcej Filtrów",
+  "reset": {
+    "label": "Resetuj filtry do wartości domyślnych"
+  },
+  "timeRange": "Zakres Czasu",
+  "cameras": {
+    "label": "Filtr Kamer",
+    "all": {
+      "title": "Wszystkie Kamery",
+      "short": "Kamery"
+    }
+  },
+  "review": {
+    "showReviewed": "Pokaż Przejrzane"
+  },
+  "motion": {
+    "showMotionOnly": "Pokaż Tylko Ruch"
+  },
+  "trackedObjectDelete": {
+    "toast": {
+      "success": "Śledzone obiekty zostały pomyślnie usunięte.",
+      "error": "Nie udało się usunąć śledzonych obiektów: {{errorMessage}}"
+    },
+    "title": "Potwierdź Usunięcie",
+    "desc": "Usunięcie tych {{objectLength}} śledzonych obiektów usuwa stop klatki, wszelkie zapisane osadzenia i wszystkie powiązane wpisy cyklu życia obiektu. Nagrane materiały tych śledzonych obiektów w widoku Historii <em>NIE</em> zostaną usunięte.<br /><br />Czy na pewno chcesz kontynuować?<br /><br />Przytrzymaj klawisz <em>Shift</em>, aby pominąć to okno dialogowe w przyszłości."
+  },
+  "zoneMask": {
+    "filterBy": "Filtruj według maski strefy"
+  }
+}

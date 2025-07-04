@@ -1,0 +1,250 @@
+{
+  "time": {
+    "today": "วันนี้",
+    "justNow": "ตอนนี้",
+    "yesterday": "เมื่อวาน",
+    "lastWeek": "สัปดาห์ที่แล้ว",
+    "untilForRestart": "จนกว่า Frigate รีสตาร์ท.",
+    "untilRestart": "จนกว่า รีสตาร์ท",
+    "ago": "{{timeAgo}} ที่แล้ว",
+    "last7": "7 วันที่แล้ว",
+    "last14": "14 วันที่แล้ว",
+    "last30": "30 วันที่แล้ว",
+    "thisWeek": "สัปดาห์นี้",
+    "untilForTime": "จนกว่า {{time}}",
+    "thisMonth": "เดือนนี้",
+    "lastMonth": "เดือนที่แล้ว",
+    "5minutes": "5 นาที",
+    "30minutes": "30 นาที",
+    "12hours": "12 ชั่วโมง",
+    "10minutes": "10 นาที",
+    "1hour": "1 ชั่วโมง",
+    "24hours": "24 ชั่วโมง",
+    "pm": "หลังเที่ยง",
+    "year_other": "{{time}} ปี",
+    "month_other": "{{time}} เดือน",
+    "day_other": "{{time}} วัน",
+    "h": "{{time}} ชั่วโมง",
+    "hour_other": "{{time}} ชั่วโมง",
+    "m": "{{time}} นาที",
+    "s": "{{time}} วินาที",
+    "mo": "{{time}} เดือน",
+    "minute_other": "{{time}} นาที",
+    "am": "ก่อนเที่ยง",
+    "formattedTimestamp": {
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "yr": "{{time}} ปี",
+    "d": "{{time}} วัน",
+    "second_other": "{{time}} วินาที",
+    "formattedTimestampMonthDayYear": {
+      "24hour": "MMM d, yyyy",
+      "12hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "24hour": "HH:mm:ss",
+      "12hour": "h:mm:ss aaa"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDay": "MMM d"
+  },
+  "label": {
+    "back": "ย้อนกลับ"
+  },
+  "button": {
+    "apply": "ใช้งาน",
+    "reset": "รีเซ็ต",
+    "done": "เรียบร้อย",
+    "enabled": "เปิดใช้งานแล้ว",
+    "enable": "เปิดใช้งาน",
+    "disable": "ปิดใช้งาน",
+    "disabled": "ปิดใช้งานแล้ว",
+    "save": "บันทึก",
+    "saving": "กำลังบันทึก…",
+    "cancel": "ยกเลิก",
+    "close": "ปิด",
+    "copy": "คัดลอก",
+    "back": "กลับ",
+    "history": "ประวัติ",
+    "fullscreen": "เต็มจอ",
+    "exitFullscreen": "ออกเต็มจอ",
+    "pictureInPicture": "ภาพซ้อนภาพ",
+    "cameraAudio": "เสียงกล้อง",
+    "on": "เปิด",
+    "off": "ปิด",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "yes": "ใช่",
+    "no": "ไม่",
+    "download": "ดาวน์โหลด",
+    "info": "ข้อมูล",
+    "play": "เล่น",
+    "unselect": "ไม่ได้เลือก",
+    "export": "ส่งออก",
+    "deleteNow": "ลบตอนนี้",
+    "next": "ต่อไป",
+    "twoWayTalk": "พูดคุยสองทาง",
+    "copyCoordinates": "คัดลอกพิกัด",
+    "suspended": "ถูกระงับ",
+    "unsuspended": "ยกเลิกถูกระงับ"
+  },
+  "menu": {
+    "restart": "รีสตาร์ท Frigate",
+    "user": {
+      "logout": "ออกจากระบบ",
+      "title": "ผู้ใช้",
+      "account": "บัญชี",
+      "current": "ผู้ใช้ปัจจุบัน: {{user}}",
+      "anonymous": "ไม่ระบุตัวตน",
+      "setPassword": "ตั้งรหัสผ่าน"
+    },
+    "live": {
+      "cameras": {
+        "count_other": "{{count}} กล้อง",
+        "title": "กล้อง"
+      },
+      "title": "สด",
+      "allCameras": "กล้องทั้งหมด"
+    },
+    "configurationEditor": "ตัวแก้ไขการกำหนดค่า",
+    "export": "ส่งออก",
+    "system": "ระบบ",
+    "configuration": "การกำหนดค่า",
+    "systemLogs": "บันทึกระบบ",
+    "settings": "ตั้งค่า",
+    "languages": "ภาษา",
+    "language": {
+      "withSystem": {
+        "label": "ใช้ภาษาของระบบ"
+      },
+      "en": "English (อังกฤษ)",
+      "zhCN": "简体中文 (ภาษาจีนตัวย่อ)",
+      "hi": "हिन्दी (ฮินดี)",
+      "fr": "Français (ฝรั่งเศส)",
+      "ar": "العربية (อาหรับ)",
+      "pt": "Português (โปรตุเกส)",
+      "ru": "Русский (รัสเซีย)",
+      "de": "Deutsch (เยอรมัน)",
+      "ja": "日本語 (ญี่ปุ่น)",
+      "tr": "Türkçe (ตุรกี)",
+      "it": "Italiano (อิตาเลียน)",
+      "nl": "Nederlands (ดัตช์)",
+      "sv": "Svenska (สวีเดน)",
+      "cs": "Čeština (เช็ก)",
+      "nb": "Norsk Bokmål (นอร์เวย์ บ็อกมอล)",
+      "ko": "한국어 (เกาหลี)",
+      "fa": "فارسی (เปอร์เซีย)",
+      "he": "עברית (ฮีบรู)",
+      "el": "Ελληνικά (กรีก)",
+      "ro": "Română (โรมาเนีย)",
+      "hu": "Magyar (ฮังการี)",
+      "fi": "Suomi (ฟินแลนด์)",
+      "da": "Dansk (เดนมาร์ก)",
+      "es": "Español (สเปน)",
+      "sk": "Slovenčina (สโลวัก)",
+      "uk": "Українська (ยูเครน)",
+      "vi": "Tiếng Việt (เวียดนาม)",
+      "yue": "粵語 (กวางตุ้ง)",
+      "pl": "Polski (ขัด)",
+      "th": "ไทย (ไทย)"
+    },
+    "darkMode": {
+      "label": "โหมดมืด",
+      "light": "สว่าง",
+      "dark": "มืด",
+      "withSystem": {
+        "label": "ใช้ของระบบสำหรับโหมดสว่างหรือมืด"
+      }
+    },
+    "withSystem": "ระบบ",
+    "theme": {
+      "label": "ธีม",
+      "blue": "น้ำเงิน",
+      "green": "เขียว",
+      "red": "แดง",
+      "highcontrast": "คอนทราสต์สูง",
+      "default": "เริ่มต้น",
+      "nord": "ฟ้า"
+    },
+    "review": "รีวิว",
+    "explore": "สำรวจ",
+    "uiPlayground": "UI สนามเด็กเล่น",
+    "faceLibrary": "ที่เก็บหน้า",
+    "help": "ช่วยเหลือ",
+    "documentation": {
+      "title": "เอกสาร",
+      "label": "เอกสาร Frigate"
+    },
+    "systemMetrics": "ตัวชี้วัดของระบบ",
+    "appearance": "หน้าตา"
+  },
+  "role": {
+    "viewer": "ผู้ชม",
+    "title": "บทบาท",
+    "admin": "ผู้ดูแล",
+    "desc": "ผู้ดูแลสามารถเข้าถึงระบบได้ทั้งหมดใน UI Frigate. ผู้ชมสามารถทำได้แค่ ดูกล้อง, ดูรีวิว, และ ประวัติคลิปใน UI."
+  },
+  "toast": {
+    "save": {
+      "error": {
+        "noMessage": "มีข้อผิดพลาดในการกำหนดค่า",
+        "title": "ผิดพลาดในการบันทึกการกำหนดค่า: {{errorMessage}}"
+      },
+      "title": "บันทึก"
+    },
+    "copyUrlToClipboard": "คัดลอก URL ใส่ คลิปบอร์ดแล้ว"
+  },
+  "pagination": {
+    "previous": {
+      "title": "ก่อนหน้า",
+      "label": "ไปหน้าที่แล้ว"
+    },
+    "next": {
+      "title": "ต่อไป",
+      "label": "ไปหน้าต่อไป"
+    },
+    "more": "หน้าเพิ่มเติม",
+    "label": "แบ่งหน้า"
+  },
+  "accessDenied": {
+    "documentTitle": "ไม่สามารถเข้าถึงได้ - Frigate",
+    "title": "ไม่สามารถเข้าถึงได้",
+    "desc": "คุณไม่มีสิทธิ์ในการเข้าถึงหน้านี้"
+  },
+  "notFound": {
+    "documentTitle": "ไม่พบ - Frigate",
+    "desc": "ไม่พบหน้านี้",
+    "title": "๔๐๔"
+  },
+  "selectItem": "เลือก {{item}}",
+  "unit": {
+    "speed": {
+      "mph": "ไมล์ต่อชั่วโมง",
+      "kph": "กิโลเมตรต่อชั่วโมง"
+    },
+    "length": {
+      "feet": "ฟุต",
+      "meters": "เมตร"
+    }
+  }
+}

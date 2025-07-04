@@ -1,0 +1,127 @@
+{
+  "filter": "Filtro",
+  "labels": {
+    "all": {
+      "short": "Etiquetas",
+      "title": "Todas las etiquetas"
+    },
+    "count": "{{count}} Etiquetas",
+    "label": "Etiquetas",
+    "count_one": "{{count}} Etiqueta",
+    "count_other": "{{count}} Etiquetas"
+  },
+  "zones": {
+    "all": {
+      "title": "Todas las zonas",
+      "short": "Zonas"
+    },
+    "label": "Zonas"
+  },
+  "dates": {
+    "all": {
+      "title": "Todas las fechas",
+      "short": "Fechas"
+    },
+    "selectPreset": "Selecciona un Preajuste…"
+  },
+  "timeRange": "Rango de tiempo",
+  "subLabels": {
+    "all": "Todas las subetiquetas",
+    "label": "Subetiquetas"
+  },
+  "score": "Puntuación",
+  "estimatedSpeed": "Velocidad estimada ({{unit}})",
+  "features": {
+    "label": "Características",
+    "submittedToFrigatePlus": {
+      "label": "Enviado a Frigate+",
+      "tips": "Primero debes filtrar por objetos rastreados que tengan una captura de pantalla.<br /><br />Los objetos rastreados sin una captura de pantalla no pueden enviarse a Frigate+."
+    },
+    "hasSnapshot": "Tiene una captura instantánea",
+    "hasVideoClip": "Tiene un clip de vídeo"
+  },
+  "sort": {
+    "label": "Ordenar",
+    "dateAsc": "Fecha (Ascendente)",
+    "dateDesc": "Fecha (Descendente)",
+    "scoreAsc": "Puntuación del objeto (Ascendente)",
+    "scoreDesc": "Puntuación del objeto (Descendente)",
+    "speedAsc": "Velocidad estimada (Ascendente)",
+    "speedDesc": "Velocidad estimada (Descendente)",
+    "relevance": "Relevancia"
+  },
+  "cameras": {
+    "label": "Filtro de cámaras",
+    "all": {
+      "title": "Todas las cámaras",
+      "short": "Cámaras"
+    }
+  },
+  "review": {
+    "showReviewed": "Mostrar revisados"
+  },
+  "motion": {
+    "showMotionOnly": "Mostrar solo movimiento"
+  },
+  "explore": {
+    "settings": {
+      "title": "Configuración",
+      "defaultView": {
+        "title": "Vista predeterminada",
+        "summary": "Resumen",
+        "desc": "Cuando no se seleccionen filtros, muestra un resumen de los objetos rastreados más recientes por etiqueta, o muestra una cuadrícula sin filtrar.",
+        "unfilteredGrid": "Cuadrícula sin filtrar"
+      },
+      "searchSource": {
+        "label": "Fuente de búsqueda",
+        "options": {
+          "thumbnailImage": "Miniatura Imagen",
+          "description": "Descripción"
+        },
+        "desc": "Elige si deseas buscar en las miniaturas o en las descripciones de tus objetos rastreados."
+      },
+      "gridColumns": {
+        "title": "Columnas de la cuadrícula",
+        "desc": "Selecciona el número de columnas en la vista de cuadrícula."
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Selecciona una fecha para filtrar"
+      }
+    }
+  },
+  "reset": {
+    "label": "Restablecer filtros a los valores predeterminados"
+  },
+  "more": "Más filtros",
+  "logSettings": {
+    "label": "Filtrar nivel de registro",
+    "loading": {
+      "title": "Cargando",
+      "desc": "Cuando el panel de registros está desplazado hasta el final, los nuevos registros se transmiten automáticamente a medida que se añaden."
+    },
+    "disableLogStreaming": "Deshabilitar transmisión de registros",
+    "filterBySeverity": "Filtrar registros por gravedad",
+    "allLogs": "Todos los registros"
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmar eliminación",
+    "desc": "Eliminar estos {{objectLength}} objetos rastreados elimina la captura de pantalla, cualquier incrustación guardada y cualquier entrada asociada al ciclo de vida del objeto. Las grabaciones de estos objetos rastreados en la vista de Historial <em>NO</em> se eliminarán.<br /><br />¿Estás seguro de que quieres proceder?<br /><br />Mantén presionada la tecla <em>Shift</em> para omitir este diálogo en el futuro.",
+    "toast": {
+      "success": "Objetos rastreados eliminados con éxito.",
+      "error": "No se pudo eliminar los objetos rastreados: {{errorMessage}}"
+    }
+  },
+  "recognizedLicensePlates": {
+    "title": "Matrículas reconocidas",
+    "loadFailed": "No se pudieron cargar las matrículas reconocidas.",
+    "loading": "Cargando matrículas reconocidas…",
+    "placeholder": "Escribe para buscar matrículas…",
+    "noLicensePlatesFound": "No se encontraron matrículas.",
+    "selectPlatesFromList": "Selecciona una o más matrículas de la lista."
+  },
+  "zoneMask": {
+    "filterBy": "Filtrar por máscara de zona"
+  }
+}

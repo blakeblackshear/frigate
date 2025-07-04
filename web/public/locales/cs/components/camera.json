@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Skupiny kamer",
+    "camera": {
+      "setting": {
+        "streamMethod": {
+          "method": {
+            "noStreaming": {
+              "label": "Žádný stream",
+              "desc": "Obrázky z kamery se aktualizují pouze jednou za minutu a neproběhne žádné živé vysílání."
+            },
+            "smartStreaming": {
+              "label": "Smart Streaming (doporučeno)",
+              "desc": "Inteligentní streamování aktualizuje obraz vaší kamery jednou za minutu, když nedochází k žádné detekovatelné aktivitě, aby se šetřila šířka pásma a zdroje. Když je detekována aktivita, obraz se plynule přepne na živý přenos."
+            },
+            "continuousStreaming": {
+              "label": "Kontinuální streamování",
+              "desc": {
+                "title": "Obraz z kamery bude vždy živým přenosem, když je viditelný na dashboardu, i když není detekována žádná aktivita.",
+                "warning": "Nepřetržité streamování může způsobit velké využití šířky pásma a problémy s výkonem. Používejte opatrně."
+              }
+            }
+          },
+          "label": "Metoda streamování",
+          "placeholder": "Vyberte metodu vysílání"
+        },
+        "label": "Nastavení streamování kamery",
+        "audioIsAvailable": "Audio je k dispozici pro tento stream",
+        "audioIsUnavailable": "Audio není k dispozici pro tento stream",
+        "audio": {
+          "tips": {
+            "document": "Přečtěte si dokumentaci ",
+            "title": "Pro tento stream musí být výstup zvuku z vaší kamery a nakonfigurován v go2rtc."
+          }
+        },
+        "compatibilityMode": {
+          "label": "Režim kompatibility",
+          "desc": "Tuto možnost povolte pouze v případě, že živý přenos vaší kamery zobrazuje barevné artefakty a má na pravé straně obrazu diagonální čáru."
+        },
+        "title": "Nastavení streamování {{cameraName}}",
+        "desc": "Změní možnosti živého vysílání pro dashboard této skupiny kamer. <em>Tato nastavení jsou specifická pro zařízení/prohlížeč.</em>",
+        "stream": "Proud",
+        "placeholder": "Vyberte proud"
+      }
+    },
+    "delete": {
+      "confirm": {
+        "title": "Potvrdit odstranění",
+        "desc": "Skutečně si přejete odstranit skupinu kamer <em>{{name}}</em>?"
+      },
+      "label": "Odstranit skupinu kamer"
+    },
+    "add": "Přidat skupinu kamer",
+    "name": {
+      "label": "Jméno",
+      "placeholder": "Zadejte jméno…",
+      "errorMessage": {
+        "exists": "Tento název skupiny kamer již existuje.",
+        "mustLeastCharacters": "Název skupiny kamer musí mít minimálně 2 znaky.",
+        "nameMustNotPeriod": "Název skupiny kamer nesmí obsahovat tečku.",
+        "invalid": "Špatný název skupiny kamer."
+      }
+    },
+    "edit": "Upravit skupinu kamer",
+    "cameras": {
+      "label": "Kamery",
+      "desc": "Vyberte kamery pro tuto skupinu."
+    },
+    "icon": "Ikona",
+    "success": "Skupina kamer {{name}} byla uložena."
+  },
+  "debug": {
+    "options": {
+      "label": "Nastavení",
+      "title": "Možnosti",
+      "showOptions": "Zobrazit možnosti",
+      "hideOptions": "Skrýt možnosti"
+    },
+    "zones": "Zóny",
+    "motion": "Pohyb",
+    "regions": "Kraje",
+    "timestamp": "Časové razítko",
+    "boundingBox": "Ohraničení",
+    "mask": "Maska"
+  }
+}

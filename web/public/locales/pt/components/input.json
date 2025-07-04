@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Descarregar vídeo",
+      "toast": {
+        "success": "O vídeo do seu item de análise começou a ser descarregado."
+      }
+    }
+  }
+}

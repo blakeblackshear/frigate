@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "cameras": "Statistiche telecamere - Frigate",
+    "enrichments": "Statistiche di miglioramento - Frigate",
+    "storage": "Statistiche archiviazione - Frigate",
+    "general": "Statistiche generali - Frigate",
+    "logs": {
+      "frigate": "Registri Frigate - Frigate",
+      "go2rtc": "Registri Go2RTC - Frigate",
+      "nginx": "Registri Nginx - Frigate"
+    }
+  },
+  "logs": {
+    "type": {
+      "timestamp": "Orario",
+      "label": "Tipo",
+      "tag": "Etichetta",
+      "message": "Messaggio"
+    },
+    "tips": "I registri vengono trasmessi dal server",
+    "toast": {
+      "error": {
+        "whileStreamingLogs": "Errore durante la trasmissione dei registri: {{errorMessage}}",
+        "fetchingLogsFailed": "Errore durante il recupero dei registri: {{errorMessage}}"
+      }
+    },
+    "download": {
+      "label": "Scarica registri"
+    },
+    "copy": {
+      "label": "Copia negli appunti",
+      "success": "Registri copiati negli appunti",
+      "error": "Impossibile copiare i registri negli appunti"
+    }
+  },
+  "general": {
+    "hardwareInfo": {
+      "gpuInfo": {
+        "nvidiaSMIOutput": {
+          "cudaComputerCapability": "Capacità di elaborazione CUDA: {{cuda_compute}}",
+          "title": "Risultati Nvidia SMI",
+          "name": "Nome: {{name}}",
+          "driver": "Driver: {{driver}}",
+          "vbios": "Informazioni VBios: {{vbios}}"
+        },
+        "vainfoOutput": {
+          "title": "Risultati Vainfo",
+          "returnCode": "Codice di ritorno: {{code}}",
+          "processOutput": "Risultati del processo:",
+          "processError": "Errore del processo:"
+        },
+        "closeInfo": {
+          "label": "Chiudi informazioni GPU"
+        },
+        "copyInfo": {
+          "label": "Copia informazioni GPU"
+        },
+        "toast": {
+          "success": "Informazioni GPU copiate negli appunti"
+        }
+      },
+      "title": "Informazioni hardware",
+      "gpuDecoder": "Decodificatore GPU",
+      "gpuEncoder": "Codificatore GPU",
+      "gpuUsage": "Utilizzo GPU",
+      "gpuMemory": "Memoria GPU",
+      "npuUsage": "Utilizzo NPU",
+      "npuMemory": "Memoria NPU"
+    },
+    "detector": {
+      "inferenceSpeed": "Velocità inferenza rilevatore",
+      "title": "Rilevatori",
+      "cpuUsage": "Utilizzo CPU rilevatore",
+      "memoryUsage": "Utilizzo memoria rilevatore",
+      "temperature": "Temperatura del rilevatore"
+    },
+    "title": "Generale",
+    "otherProcesses": {
+      "title": "Altri processi",
+      "processCpuUsage": "Utilizzo CPU processo",
+      "processMemoryUsage": "Utilizzo memoria processo"
+    }
+  },
+  "enrichments": {
+    "embeddings": {
+      "face_embedding_speed": "Velocità incorporazione volti",
+      "plate_recognition_speed": "Velocità riconoscimento targhe",
+      "image_embedding_speed": "Velocità incorporazione immagini",
+      "text_embedding_speed": "Velocità incorporazione testo",
+      "face_recognition_speed": "Velocità di riconoscimento facciale",
+      "face_recognition": "Riconoscimento facciale",
+      "plate_recognition": "Riconoscimento delle targhe",
+      "yolov9_plate_detection_speed": "Velocità di rilevamento della targa con YOLOv9",
+      "yolov9_plate_detection": "Rilevamento della targa con YOLOv9",
+      "image_embedding": "Incorporamento di immagini",
+      "text_embedding": "Incorporamento di testo"
+    },
+    "title": "Miglioramenti",
+    "infPerSecond": "Inferenze al secondo"
+  },
+  "cameras": {
+    "info": {
+      "fetching": "Recupero dati della telecamera",
+      "streamDataFromFFPROBE": "I dati del flusso vengono ottenuti con <code>ffprobe</code>.",
+      "cameraProbeInfo": "Informazioni analisi telecamera {{camera}}",
+      "stream": "Flusso {{idx}}",
+      "video": "Video:",
+      "codec": "Codec:",
+      "resolution": "Risoluzione:",
+      "fps": "FPS:",
+      "unknown": "Sconosciuto",
+      "audio": "Audio:",
+      "error": "Errore: {{error}}",
+      "tips": {
+        "title": "Informazioni analisi telecamera"
+      },
+      "aspectRatio": "rapporto d'aspetto"
+    },
+    "title": "Telecamere",
+    "overview": "Sommario",
+    "framesAndDetections": "Fotogrammi / Rilevamenti",
+    "label": {
+      "camera": "telecamera",
+      "detect": "rileva",
+      "skipped": "saltato",
+      "ffmpeg": "FFmpeg",
+      "capture": "cattura",
+      "overallFramesPerSecond": "fotogrammi totali al secondo",
+      "overallDetectionsPerSecond": "rilevamenti totali al secondo",
+      "overallSkippedDetectionsPerSecond": "rilevamenti totali saltati al secondo",
+      "cameraCapture": "{{camName}} cattura",
+      "cameraDetect": "{{camName}} rileva",
+      "cameraFramesPerSecond": "{{camName}} fotogrammi al secondo",
+      "cameraDetectionsPerSecond": "{{camName}} rilevamenti al secondo",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} rilevamenti saltati al secondo",
+      "cameraFfmpeg": "{{camName}} FFmpeg"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Dati di analisi copiati negli appunti."
+      },
+      "error": {
+        "unableToProbeCamera": "Impossibile analizzare la telecamera: {{errorMessage}}"
+      }
+    }
+  },
+  "stats": {
+    "detectHighCpuUsage": "{{camera}} ha un utilizzo elevato della CPU con il rilevamento ({{detectAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} ha un elevato utilizzo della CPU con FFmpeg ({{ffmpegAvg}}%)",
+    "healthy": "Il sistema è integro",
+    "reindexingEmbeddings": "Reindicizzazione degli incorporamenti (completata al {{processed}}%)",
+    "cameraIsOffline": "{{camera}} è disconnessa",
+    "detectIsSlow": "{{detect}} è lento ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} è molto lento ({{speed}} ms)"
+  },
+  "title": "Sistema",
+  "metrics": "Metriche di sistema",
+  "storage": {
+    "title": "Archiviazione",
+    "overview": "Sommario",
+    "recordings": {
+      "title": "Registrazioni",
+      "tips": "Questo valore rappresenta lo spazio di archiviazione totale utilizzato dalle registrazioni nel database di Frigate. Frigate non tiene traccia dell'utilizzo dello spazio di archiviazione per tutti i file presenti sul disco.",
+      "earliestRecording": "Prima registrazione disponibile:"
+    },
+    "cameraStorage": {
+      "title": "Archiviazione della telecamera",
+      "camera": "Telecamera",
+      "unusedStorageInformation": "Informazioni spazio di archiviazione non utilizzato",
+      "storageUsed": "Archiviazione",
+      "percentageOfTotalUsed": "Percentuale del totale",
+      "bandwidth": "Larghezza di banda",
+      "unused": {
+        "title": "Liberi",
+        "tips": "Questo valore potrebbe non rappresentare accuratamente lo spazio libero disponibile per Frigate se nel disco sono archiviati altri file oltre alle registrazioni di Frigate. Frigate non tiene traccia dell'utilizzo dello spazio di archiviazione al di fuori delle sue registrazioni."
+      }
+    }
+  },
+  "lastRefreshed": "Ultimo aggiornamento: "
+}

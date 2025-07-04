@@ -1,0 +1,112 @@
+{
+  "restart": {
+    "title": "Bạn có chắc chắn muốn khởi động lại Frigate không?",
+    "button": "Khởi động lại",
+    "restarting": {
+      "title": "Đang khởi động lại Frigate",
+      "content": "Trang này sẽ tải lại sau {{countdown}} giây.",
+      "button": "Tải lại ngay"
+    }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "question": {
+          "ask_a": "Đối tượng này có phải là một <code>{{label}}</code> không?",
+          "ask_an": "Đối tượng này có phải là một <code>{{label}}</code> không?",
+          "label": "Xác nhận nhãn này cho Frigate Plus",
+          "ask_full": "Đối tượng này có phải là một <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) không?"
+        },
+        "state": {
+          "submitted": "Đã gửi"
+        }
+      },
+      "submitToPlus": {
+        "label": "Gửi lên Frigate+",
+        "desc": "Đối tượng xuất hiện ở các khu vực bạn muốn tránh không được xem là phát hiện sai. Gửi chúng lên dưới dạng phát hiện sai có thể làm mô hình bị nhầm lẫn."
+      }
+    },
+    "video": {
+      "viewInHistory": "Xem lại trong Lịch sử"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Chọn từ Dòng thời gian",
+      "custom": "Tuỳ chọn",
+      "start": {
+        "title": "Thời gian bắt đầu",
+        "label": "Chọn thời gian bắt đầu"
+      },
+      "end": {
+        "title": "Thời gian kết thúc",
+        "label": "Chọn thời gian kết thúc"
+      },
+      "lastHour_other": "{{count}} giờ trước"
+    },
+    "name": {
+      "placeholder": "Đặt tên cho bản xuất"
+    },
+    "select": "Chọn",
+    "export": "Xuất",
+    "selectOrExport": "Chọn hay xuất",
+    "toast": {
+      "error": {
+        "endTimeMustAfterStartTime": "Thời gian kết thúc phải sau thời gian bắt đầu",
+        "noVaildTimeSelected": "Chưa chọn khoảng thời gian hợp lệ",
+        "failed": "Không thể bắt đầu xuất: {{error}}"
+      },
+      "success": "Đã bắt đầu xuất thành công. Xem tệp trong thư mục /exports."
+    },
+    "fromTimeline": {
+      "saveExport": "Lưu bản xuất",
+      "previewExport": "Xem trước bản xuất"
+    }
+  },
+  "streaming": {
+    "debugView": "Chế độ xem Gỡ lỗi",
+    "label": "Luồng",
+    "restreaming": {
+      "disabled": "Tính năng phát lại luồng không được bật cho camera này.",
+      "desc": {
+        "title": "Thiết lập go2rtc để có thêm tùy chọn xem trực tiếp và âm thanh cho camera này.",
+        "readTheDocumentation": "Đọc tài liệu"
+      }
+    },
+    "showStats": {
+      "label": "Hiển thị số liệu thống kê luồng",
+      "desc": "Bật tùy chọn này để hiển thị số liệu thống kê luồng dưới dạng lớp phủ trên nguồn cấp dữ liệu camera."
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Xác nhận xóa",
+      "toast": {
+        "success": "Đoạn video liên quan đến các mục đánh giá đã chọn đã được xóa thành công.",
+        "error": "Không thể xóa: {{error}}"
+      },
+      "desc": {
+        "selected": "Bạn có chắc chắn muốn xóa tất cả video đã ghi liên quan đến mục đánh giá này không?<br /><br />Giữ phím <em>Shift</em> để bỏ qua hộp thoại này trong tương lai."
+      }
+    },
+    "button": {
+      "deleteNow": "Xóa ngay",
+      "export": "Xuất",
+      "markAsReviewed": "Đánh dấu là đã xem xét"
+    }
+  },
+  "search": {
+    "saveSearch": {
+      "success": "Tìm kiếm ({{searchName}}) đã được lưu.",
+      "button": {
+        "save": {
+          "label": "Lưu tìm kiếm này"
+        }
+      },
+      "label": "Lưu tìm kiếm",
+      "desc": "Cung cấp tên cho tìm kiếm đã lưu này.",
+      "placeholder": "Nhập tên cho tìm kiếm của bạn",
+      "overwrite": "{{searchName}} đã tồn tại. Lưu sẽ ghi đè lên giá trị hiện có."
+    }
+  }
+}
