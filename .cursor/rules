@@ -1,0 +1,239 @@
+# Frigate Repository Rules and Guidelines
+
+## Architecture Overview
+
+Frigate is a complete and local NVR (Network Video Recorder) designed for Home Assistant with AI object detection. It consists of:
+
+### Core Technologies Stack
+
+1. **Backend**: Python-based with FastAPI
+
+   - Object detection using TensorFlow/OpenCV
+   - Multiprocessing architecture for real-time performance
+   - SQLite database with Peewee ORM
+   - MQTT communication
+   - Docker containerization
+
+2. **Frontend**: Modern React/TypeScript SPA
+
+   - React 18+ with TypeScript
+   - TailwindCSS for styling
+   - Shadcn/ui components
+   - Vite build system
+   - WebSocket real-time communication
+
+3. **Infrastructure**:
+   - Docker multi-stage builds
+   - Nginx for serving
+   - S6 overlay for process management
+   - Go2RTC for streaming
+   - Hardware acceleration support (Coral TPU, GPU)
+
+## Project Structure Rules
+
+### Python Backend (`frigate/`)
+
+- **Main Application**: `frigate/app.py` - Central FrigateApp class managing all services
+- **API Layer**: `frigate/api/` - FastAPI-based REST API with Pydantic models
+- **Configuration**: `frigate/config/` - Pydantic-based configuration system
+- **Detection**: Object detection processes and AI model integration
+- **Events**: Event processing, cleanup, and management
+- **Video**: Camera capture, motion detection, and video processing
+- **Database**: SQLite with vector extensions for embeddings
+- **Communication**: Inter-process communication via ZMQ, MQTT, WebSockets
+
+### Frontend (`web/`)
+
+- **Components**: React components organized by feature
+- **Pages**: Top-level route components
+- **Hooks**: Custom React hooks for API integration
+- **Types**: TypeScript type definitions
+- **Utils**: Utility functions and helpers
+
+### Docker (`docker/`)
+
+- Multi-architecture support (AMD64, ARM64, etc.)
+- Hardware-specific builds (Coral, NVIDIA, etc.)
+- Development container support
+
+## Development Rules
+
+### Python Development
+
+1. Use Pydantic for all configuration and data models
+2. Leverage multiprocessing for CPU-intensive tasks
+3. Follow async/await patterns for I/O operations
+4. Use structured logging with appropriate log levels
+5. Implement proper error handling and recovery
+6. Use type hints consistently
+
+### Frontend Development
+
+1. Use TypeScript for all new code
+2. Follow React functional component patterns with hooks
+3. Use TailwindCSS classes exclusively for styling
+4. Implement proper error boundaries
+5. Use const assertions for immutable data
+6. Prefer early returns in component logic
+7. Name event handlers with "handle" prefix (handleClick, handleSubmit)
+8. Use descriptive variable and function names
+
+### API Development
+
+1. Use Pydantic models for request/response validation
+2. Implement proper HTTP status codes
+3. Use FastAPI dependency injection
+4. Document all endpoints with OpenAPI schemas
+5. Implement proper authentication/authorization
+
+### Testing Rules
+
+1. Write unit tests for critical business logic
+2. Use pytest for Python testing
+3. Mock external dependencies appropriately
+4. Test configuration validation thoroughly
+
+## Code Style Guidelines
+
+### Python
+
+- Follow PEP 8 style guidelines
+- Use Black for code formatting
+- Use isort for import organization
+- Maximum line length: 88 characters
+- Use f-strings for string formatting
+
+### TypeScript/React
+
+- Use ESLint with strict TypeScript rules
+- Use Prettier for code formatting
+- Prefer interface over type for object definitions
+- Use PascalCase for components, camelCase for functions/variables
+- Implement accessibility features (ARIA labels, keyboard navigation)
+
+### Comments and Documentation
+
+- COMMENTS ARE NOT ALLOWED ANYWHERE - code should be self-documenting
+- Use descriptive names instead of explanatory comments
+- Document complex algorithms in external documentation
+
+## Performance Rules
+
+1. **Real-time First**: Prioritize real-time performance over processing every frame
+2. **Multiprocessing**: Use separate processes for detection, recording, and web serving
+3. **Memory Management**: Use shared memory for frame data between processes
+4. **Resource Optimization**: Monitor CPU, memory, and GPU usage
+5. **Hardware Acceleration**: Leverage Coral TPU, GPU acceleration when available
+
+## Security Guidelines
+
+1. Implement proper authentication for web interface
+2. Validate all user inputs through Pydantic models
+3. Use environment variables for sensitive configuration
+4. Implement proper CORS policies
+5. Sanitize file paths and user uploads
+
+## Database Guidelines
+
+1. Use Peewee ORM for database operations
+2. Implement proper migrations for schema changes
+3. Use vector database for embeddings and similarity search
+4. Optimize queries for real-time performance
+5. Implement proper cleanup for old records
+
+## Container and Deployment
+
+1. Use multi-stage Docker builds for optimization
+2. Support multiple architectures (x86_64, ARM64)
+3. Use S6 overlay for proper process management
+4. Implement health checks for all services
+5. Support hardware passthrough for AI accelerators
+
+## Integration Rules
+
+1. **Home Assistant**: Primary integration target
+2. **MQTT**: Use for real-time communication
+3. **Hardware**: Support Coral TPU, NVIDIA GPU, Intel hardware acceleration
+4. **Cameras**: Support RTSP, HTTP streams with go2rtc
+
+## File Naming Conventions
+
+- Python files: snake_case.py
+- React components: PascalCase.tsx
+- Utility files: camelCase.ts
+- Configuration files: kebab-case.yml
+- Docker files: Dockerfile.{variant}
+
+## Git Workflow
+
+1. Use conventional commit messages
+2. Create feature branches for new functionality
+3. Ensure all tests pass before merging
+4. Use semantic versioning for releases
+5. Tag releases appropriately
+
+## Common Patterns
+
+### Python Multiprocessing
+
+```python
+# Process-based architecture pattern
+class SomeProcess(Process):
+    def __init__(self, config, stop_event):
+        self.config = config
+        self.stop_event = stop_event
+
+    def run(self):
+        # Process main loop
+        pass
+```
+
+### React Component Pattern
+
+```tsx
+interface ComponentProps {
+  // Define props interface
+}
+
+const Component = ({ prop1, prop2 }: ComponentProps) => {
+  // Use hooks
+  const [state, setState] = useState();
+
+  // Event handlers with handle prefix
+  const handleClick = () => {
+    // Early return pattern
+    if (!condition) return;
+
+    // Handle event
+  };
+
+  return <div className="tailwind-classes">{/* JSX */}</div>;
+};
+```
+
+### Configuration Pattern
+
+```python
+class ConfigModel(FrigateBaseModel):
+    field: str = Field(description="Field description")
+
+    @field_validator('field')
+    def validate_field(cls, v):
+        # Validation logic
+        return v
+```
+
+## Build and Package Management
+
+- Python: Use pip with requirements.txt
+- Frontend: Use npm/bun with package.json
+- Container: Multi-stage Docker builds
+- Development: Use devcontainer for consistent environment
+
+## This repository prioritizes:
+
+1. Real-time performance over processing completeness
+2. Local processing over cloud dependencies
+3. Home Assistant integration
+4. Hardware acceleration support
+5. Extensibility and configuration flexibility
