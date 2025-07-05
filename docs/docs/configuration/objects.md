@@ -13,9 +13,14 @@ Please note:
 - `person` is the only tracked object by default. See the [full configuration reference](reference.md) for an example of expanding the list of tracked objects.
 
 <ul>
-  {labels.split("\n").map((label) => (
-    <li>{label.replace(/^\d+\s+/, "")}</li>
-  ))}
+  {labels
+    .split("\n")
+    .sort((a, b) =>
+      a.replace(/^\d+\s+/, "").localeCompare(b.replace(/^\d+\s+/, ""))
+    )
+    .map((label) => (
+      <li>{label.replace(/^\d+\s+/, "")}</li>
+    ))}
 </ul>
 
 ## Custom Models
