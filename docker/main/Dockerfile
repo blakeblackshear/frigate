@@ -176,6 +176,15 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
 
+# Build MemryX SDK wheel
+RUN pip3 wheel --wheel-dir=/wheels/memx/ \
+     --index-url https://download.pytorch.org/whl/cpu \
+     --extra-index-url https://developer.memryx.com/pip \
+     --extra-index-url https://pypi.org/simple \
+    memryx~=1.2.0
+
+RUN rm -f /wheels/memx/PySide6* /wheels/memx/Qt* /wheels/memx/qt_material*
+
 COPY docker/main/requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
 
@@ -240,10 +249,21 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
 
-RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    pip3 install -U /deps/wheels/*.whl
+RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
+    bash -euo pipefail -c '\
+      echo "→ Installing MemryX SDK wheels…"; \
+      pip3 install --no-deps /wheels/memx/*.whl; \
+      echo "→ Installing/overwriting with project wheels…"; \
+      pip3 install --no-deps --upgrade /wheels/*.whl; \
+    '
 
 COPY --from=deps-rootfs / /
+
+# Install memx-accl using a custom function that installs the latest 1.2.x version and holds it.
+RUN curl -fsSL https://developer.memryx.com/deb/memryx.asc | tee /etc/apt/trusted.gpg.d/memryx.asc && \
+    echo "deb https://developer.memryx.com/deb stable main" > /etc/apt/sources.list.d/memryx.list && \
+    apt-get update -qq && \
+    apt-get install -y --no-install-recommends memx-accl=1.2.2-1
 
 RUN ldconfig
 
