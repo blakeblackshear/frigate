@@ -261,7 +261,7 @@
       "clickDrawPolygon": "Fai clic per disegnare un poligono sull'immagine.",
       "edit": "Modifica maschera oggetti",
       "objects": {
-        "desc": "Il tipo di oggetto che si applica a questa maschera di oggetti.",
+        "desc": "Tipo di oggetto applicabile a questa maschera oggetto.",
         "title": "Oggetti",
         "allObjectTypes": "Tutti i tipi di oggetti"
       },

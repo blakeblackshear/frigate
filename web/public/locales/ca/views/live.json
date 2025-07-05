@@ -145,7 +145,8 @@
       "all": "Tot",
       "motion": "Moviment",
       "active_objects": "Objectes actius"
-    }
+    },
+    "notAllTips": "El vostre {{source}} registre de configuració de retenció s'ha posat en el mode <code>: {{effectiveRetainMode}}</code>, així que la gravaciò a demanda només seguirà segments amb {{effectiveRetainModeName}}."
   },
   "editLayout": {
     "label": "Editar el disseny",

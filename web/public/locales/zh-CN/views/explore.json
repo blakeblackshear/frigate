@@ -201,5 +201,5 @@
     },
     "tooltip": "与 {{type}} 匹配度为 {{confidence}}%"
   },
-  "exploreMore": "浏览更多 {{label}} 对象"
+  "exploreMore": "浏览更多的 {{label}}"
 }

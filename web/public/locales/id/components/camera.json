@@ -11,7 +11,8 @@
       }
     },
     "name": {
-      "label": "Nama"
+      "label": "Nama",
+      "placeholder": "Masukkan nama…"
     }
   }
 }

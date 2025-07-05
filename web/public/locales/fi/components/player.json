@@ -22,7 +22,30 @@
       "short": "Kaistanleveys"
     },
     "latency": {
-      "title": "Latenssi:"
+      "title": "Latenssi:",
+      "value": "{{seconds}} sekuntia",
+      "short": {
+        "value": "{{seconds}} sek",
+        "title": "Latenssi"
+      }
+    },
+    "totalFrames": "Kehyksiä yhteensä:",
+    "droppedFrames": {
+      "title": "Pudotettuja kehyksiä:",
+      "short": {
+        "title": "Pudotettu",
+        "value": "{{droppedFrames}} kehystä"
+      }
+    },
+    "decodedFrames": "Dekoodatut kehykset:",
+    "droppedFrameRate": "Pudotettujen kehysten nopeus:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Onnistuneesti lähetetty Frigate+:aan"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Frigate+:aan lähetys epäonnistui"
     }
   }
 }
