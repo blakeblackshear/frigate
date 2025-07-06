@@ -98,7 +98,7 @@ export default function CreateTriggerDialog({
       .number()
       .min(0, t("triggers.dialog.form.threshold.error.min"))
       .max(1, t("triggers.dialog.form.threshold.error.max")),
-    actions: z.array(z.enum(["alert", "notification"])),
+    actions: z.array(z.enum(["notification"])),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -346,13 +346,13 @@ export default function CreateTriggerDialog({
                           <Checkbox
                             checked={form
                               .watch("actions")
-                              .includes(action as "alert" | "notification")}
+                              .includes(action as TriggerAction)}
                             onCheckedChange={(checked) => {
                               const currentActions = form.getValues("actions");
                               if (checked) {
                                 form.setValue("actions", [
                                   ...currentActions,
-                                  action as "alert" | "notification",
+                                  action as TriggerAction,
                                 ]);
                               } else {
                                 form.setValue(
