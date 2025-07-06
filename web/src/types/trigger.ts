@@ -1,5 +1,5 @@
 export type TriggerType = "thumbnail" | "description";
-export type TriggerAction = "alert" | "notification";
+export type TriggerAction = "notification";
 
 export type Trigger = {
   enabled: boolean;

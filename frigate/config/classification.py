@@ -31,7 +31,6 @@ class TriggerType(str, Enum):
 
 
 class TriggerAction(str, Enum):
-    ALERT = "alert"
     NOTIFICATION = "notification"
 
 
@@ -144,7 +143,7 @@ class TriggerConfig(FrigateBaseModel):
 class CameraSemanticSearchConfig(FrigateBaseModel):
     triggers: Optional[Dict[str, TriggerConfig]] = Field(
         default=None,
-        title="Text or image triggers to elevate tracked objects to review alerts",
+        title="Trigger actions on tracked objects that match existing thumbnails or descriptions",
     )
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())

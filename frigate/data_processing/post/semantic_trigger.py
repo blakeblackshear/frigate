@@ -1,4 +1,4 @@
-"""Real time processor to trigger alerts by matching embeddings."""
+"""Post time processor to trigger actions based on similar embeddings."""
 
 import datetime
 import json
