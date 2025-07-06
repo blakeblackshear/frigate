@@ -192,6 +192,20 @@ Message published for each changed review item. The first message is published w
 }
 ```
 
+### `frigate/triggers`
+
+Message published when a trigger defined in a camera's semantic_search configuration fires.
+
+```json
+{
+  "name": "car_trigger",
+  "camera": "driveway",
+  "event_id": "1751565549.853251-b69j73",
+  "type": "thumbnail",
+  "score": 0.85
+}
+```
+
 ### `frigate/stats`
 
 Same data available at `/api/stats` published at a configurable interval.

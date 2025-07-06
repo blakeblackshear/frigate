@@ -102,3 +102,74 @@ See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_
 4. Make your search language and tone closely match exactly what you're looking for. If you are using thumbnail search, **phrase your query as an image caption**. Searching for "red car" may not work as well as "red sedan driving down a residential street on a sunny day".
 5. Semantic search on thumbnails tends to return better results when matching large subjects that take up most of the frame. Small things like "cat" tend to not work well.
 6. Experiment! Find a tracked object you want to test and start typing keywords and phrases to see what works for you.
+
+## Triggers
+
+Triggers in Frigate enable automated actions based on semantic search results for tracked objects. By defining triggers, you can configure Frigate to execute specific actions when a tracked object's image or description matches a predefined image or text, based on a similarity threshold. Triggers are managed per camera and can be configured via the Frigate UI in the Settings page under the Triggers tab.
+
+### Configuration
+
+Triggers are defined within the `semantic_search` configuration for each camera in your Frigate configuration file or through the UI. Each trigger consists of a `type` (either `thumbnail` or `description`), a `data` field (the reference image event ID or text), a `threshold` for similarity matching, and a list of `actions` to perform when the trigger fires.
+
+#### Example Configuration
+
+You can configure triggers directly in your config file, but this is more easily managed through the Frigate UI.
+
+```yaml
+cameras:
+  front_door:
+    semantic_search:
+      triggers:
+        red_car:
+          enabled: true
+          type: thumbnail
+          data: 1751565549.853251-b69j73
+          threshold: 0.7
+          actions:
+            - notification
+        person_at_front_door:
+          enabled: true
+          type: description
+          data: "Person in a red shirt standing at the front door"
+          threshold: 0.8
+          actions:
+            - notification
+```
+
+Fields:
+
+- **enabled**: Boolean to enable or disable the trigger.
+- **type**: Either `thumbnail` (matches based on an image embedding) or `description` (matches based on a text embedding).
+- **data**: The reference data for matching, either an event ID for a thumbnail or a text string for a description.
+- **threshold**: A value between 0 and 1 indicating the minimum similarity score required to fire the trigger (e.g., 0.7 for 70% similarity).
+- **actions**: A list of actions to perform when the trigger fires. Valid actions are `notification` ([native notifications](/configuration/notifications.md) must be enabled). Frigate will always post an update to the `frigate/triggers` topic.
+
+#### Managing Triggers in the UI
+
+1. Navigate to the **Settings** page and select the **Triggers** tab.
+2. Choose a camera from the dropdown menu to view or manage its triggers.
+3. Click **Add Trigger** to create a new trigger or use the pencil icon to edit an existing one.
+4. In the **Create Trigger** dialog:
+   - Enter a **Name** for the trigger (e.g., "red_car_alert").
+   - Select the **Type** (`Thumbnail` or `Description`).
+   - For `Thumbnail`, select an image to trigger this action when a similar thumbnail image is detected, based on the threshold.
+   - For `Description`, enter text to trigger this action when a similar tracked object description is detected.
+   - Set the **Threshold** for similarity matching.
+   - Select **Actions** to perform when the trigger fires.
+5. Save the trigger to update the configuration and store the embedding in the database.
+
+When a trigger fires, the UI highlights the trigger with a blue outline for 3 seconds and scrolls it into view for easy identification.
+
+### Usage and Best Practices
+
+1. **Thumbnail Triggers**: Select a representative image (event ID) from the Explore page that closely matches the object you want to detect. For best results, choose images where the object is prominent and fills most of the frame.
+2. **Description Triggers**: Write concise, specific text descriptions (e.g., "Person in a red jacket") that align with the tracked object’s description. Avoid vague terms to improve matching accuracy.
+3. **Threshold Tuning**: Adjust the threshold to balance sensitivity and specificity. A higher threshold (e.g., 0.8) requires closer matches, reducing false positives but potentially missing similar objects. A lower threshold (e.g., 0.6) is more inclusive but may trigger more often.
+4. **Using Explore**: Use the context menu or right-click / long-press on a tracked object in the Grid View in Explore to quickly add a trigger based on the tracked object's thumbnail.
+5. **Editing triggers**: For the best experience, triggers should be edited via the UI. However, Frigate will ensure triggers edited in the config will be synced with triggers created and edited in the UI.
+
+### Notes
+
+- Triggers rely on the same Jina AI CLIP models (V1 or V2) used for semantic search. Ensure `semantic_search` is enabled and properly configured.
+- Reindexing embeddings (via the UI or `reindex: True`) does not affect trigger configurations but may update the embeddings used for matching.
+- For optimal performance, use a system with sufficient RAM (8GB minimum, 16GB recommended) and a GPU for `large` model configurations, as described in the Semantic Search requirements.
