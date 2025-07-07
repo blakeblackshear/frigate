@@ -87,7 +87,11 @@ export default function FaceLibrary() {
 
   const faces = useMemo<string[]>(
     () =>
-      faceData ? Object.keys(faceData).filter((face) => face != "train") : [],
+      faceData
+        ? Object.keys(faceData)
+            .filter((face) => face != "train")
+            .sort()
+        : [],
     [faceData],
   );
   const faceImages = useMemo<string[]>(
