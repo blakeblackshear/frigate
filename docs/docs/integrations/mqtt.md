@@ -194,7 +194,7 @@ Message published for each changed review item. The first message is published w
 
 ### `frigate/triggers`
 
-Message published when a trigger defined in a camera's semantic_search configuration fires.
+Message published when a trigger defined in a camera's `semantic_search` configuration fires.
 
 ```json
 {

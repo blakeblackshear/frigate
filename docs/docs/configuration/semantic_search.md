@@ -158,7 +158,7 @@ Fields:
    - Select **Actions** to perform when the trigger fires.
 5. Save the trigger to update the configuration and store the embedding in the database.
 
-When a trigger fires, the UI highlights the trigger with a blue outline for 3 seconds and scrolls it into view for easy identification.
+When a trigger fires, the UI highlights the trigger with a blue outline for 3 seconds for easy identification.
 
 ### Usage and Best Practices
 
