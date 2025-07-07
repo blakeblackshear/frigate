@@ -41,6 +41,7 @@ jobs:
           target: frigate
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
+          cache-to: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
   arm64_build:
     runs-on: ubuntu-22.04-arm
     name: ARM Build
@@ -161,8 +162,8 @@ jobs:
           files: docker/tensorrt/trt.hcl
           set: |
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt,mode=max
       - name: AMD/ROCm general build
         env:
           AMDGPU: gfx
@@ -176,7 +177,7 @@ jobs:
           set: |
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-rocm,mode=max
-            *.cache-from=type=gha
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-rocm
   arm64_extra_builds:
     runs-on: ubuntu-22.04-arm
     name: ARM Extra Build
