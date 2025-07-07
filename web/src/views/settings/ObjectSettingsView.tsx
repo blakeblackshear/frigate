@@ -89,6 +89,12 @@ export default function ObjectSettingsView({
       description: t("debug.regions.desc"),
       info: <Trans ns="views/settings">debug.regions.tips</Trans>,
     },
+    {
+      param: "paths",
+      title: t("debug.paths.title"),
+      description: t("debug.paths.desc"),
+      info: <Trans ns="views/settings">debug.paths.tips</Trans>,
+    },
   ];
 
   const [options, setOptions, optionsLoaded] = usePersistence<Options>(
