@@ -44,6 +44,7 @@ if TRT_SUPPORT:
             else:
                 return logging.DEBUG
 
+
 class TensorRTDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
     device: int = Field(default=0, title="GPU Device Index")
@@ -226,7 +227,6 @@ class TensorRtDetector(DetectionApi):
             raise ImportError(
                 "TensorRT detector is no longer supported on amd64 system. Please use ONNX detector instead, see https://docs.frigate.video/configuration/object_detectors#onnx for more information."
             )
-
 
         assert TRT_SUPPORT, (
             f"TensorRT libraries not found, {DETECTOR_KEY} detector not present"
