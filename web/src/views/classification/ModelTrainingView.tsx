@@ -577,9 +577,14 @@ function DatasetGrid({
 }: DatasetGridProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
+  const classData = useMemo(
+    () => images.sort((a, b) => a.localeCompare(b)),
+    [images],
+  );
+
   return (
     <div className="flex flex-wrap gap-2 overflow-y-auto p-2">
-      {images.map((image) => (
+      {classData.map((image) => (
         <div
           className={cn(
             "flex w-60 cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
