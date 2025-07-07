@@ -136,7 +136,23 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 
 ### TensorRT - Nvidia GPU
 
-The TensortRT detector is able to run on x86 hosts that have an Nvidia GPU which supports the 12.x series of CUDA libraries. The minimum driver version on the host system must be `>=525.60.13`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the [TensorRT docs for more info](/configuration/object_detectors#nvidia-tensorrt-detector).
+Frigate is able to utilize an Nvidia GPU which supports the 12.x series of CUDA libraries.
+
+### Minimum Hardware Support
+
+ 12.x series of CUDA libraries are used which have minor version compatibility. The minimum driver version on the host system must be `>=545`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the NVIDIA GPU Compute Capability table linked below.
+
+Make sure your host system has the [nvidia-container-runtime](https://docs.docker.com/config/containers/resource_constraints/#access-an-nvidia-gpu) installed to pass through the GPU to the container and the host system has a compatible driver installed for your GPU.
+
+There are improved capabilities in newer GPU architectures that TensorRT can benefit from, such as INT8 operations and Tensor cores. The features compatible with your hardware will be optimized when the model is converted to a trt file. Currently the script provided for generating the model provides a switch to enable/disable FP16 operations. If you wish to use newer features such as INT8 optimization, more work is required.
+
+#### Compatibility References:
+
+[NVIDIA TensorRT Support Matrix](https://docs.nvidia.com/deeplearning/tensorrt/archives/tensorrt-841/support-matrix/index.html)
+
+[NVIDIA CUDA Compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/index.html)
+
+[NVIDIA GPU Compute Capability](https://developer.nvidia.com/cuda-gpus)
 
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
