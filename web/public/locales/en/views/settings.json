@@ -439,6 +439,11 @@
       "desc": "Show a box of the region of interest sent to the object detector",
       "tips": "<p><strong>Region Boxes</strong></p><br><p>Bright green boxes will be overlaid on areas of interest in the frame that are being sent to the object detector.</p>"
     },
+    "paths": {
+      "title": "Paths",
+      "desc": "Show significant points of the tracked object's path",
+      "tips": "<p><strong>Paths</strong></p><br><p>Lines and circles will indicate significant points the tracked object has moved during its lifecycle.</p>"
+    },
     "objectShapeFilterDrawing": {
       "title": "Object Shape Filter Drawing",
       "desc": "Draw a rectangle on the image to view area and ratio details",

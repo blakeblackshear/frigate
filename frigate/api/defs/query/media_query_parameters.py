@@ -18,6 +18,7 @@ class MediaLatestFrameQueryParams(BaseModel):
     zones: Optional[int] = None
     mask: Optional[int] = None
     motion: Optional[int] = None
+    paths: Optional[int] = None
     regions: Optional[int] = None
     quality: Optional[int] = 70
     height: Optional[int] = None
