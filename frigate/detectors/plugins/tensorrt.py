@@ -1,5 +1,6 @@
 import ctypes
 import logging
+import platform
 
 import numpy as np
 
@@ -42,6 +43,13 @@ if TRT_SUPPORT:
                 return logging.CRITICAL
             else:
                 return logging.DEBUG
+elif platform.machine() == "x86_64":
+    logger.error(
+        "TensorRT detector is no longer supported on amd64 system. Please use ONNX detector instead, see https://docs.frigate.video/configuration/object_detectors#onnx for more information."
+    )
+    raise ImportError(
+        "TensorRT detector is no longer supported on amd64 system. Please use ONNX detector instead, see https://docs.frigate.video/configuration/object_detectors#onnx for more information."
+    )
 
 
 class TensorRTDetectorConfig(BaseDetectorConfig):
