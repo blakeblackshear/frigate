@@ -1,6 +1,8 @@
-from typing import List, Literal, Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
+
+from frigate.config.classification import TriggerType
 
 
 class EventsSubLabelBody(BaseModel):
@@ -48,6 +50,6 @@ class SubmitPlusBody(BaseModel):
 
 
 class TriggerEmbeddingBody(BaseModel):
-    type: Literal["thumbnail", "description"]
+    type: TriggerType
     data: str
     threshold: float = Field(default=0.5, ge=0.0, le=1.0)
