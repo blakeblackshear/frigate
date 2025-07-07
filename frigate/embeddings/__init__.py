@@ -296,3 +296,15 @@ class EmbeddingsContext:
         return self.requestor.send_data(
             EmbeddingsRequestEnum.transcribe_audio.value, {"event": event}
         )
+
+    def generate_description_embedding(self, text: str) -> None:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.embed_description.value,
+            {"id": None, "description": text, "upsert": False},
+        )
+
+    def generate_image_embedding(self, event_id: str, thumbnail: bytes) -> None:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.embed_thumbnail.value,
+            {"id": str(event_id), "thumbnail": str(thumbnail), "upsert": False},
+        )

@@ -428,3 +428,19 @@ def sanitize_float(value):
     if isinstance(value, (int, float)) and not math.isfinite(value):
         return 0.0
     return value
+
+
+def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+    return 1 - cosine_distance(a, b)
+
+
+def cosine_distance(a: np.ndarray, b: np.ndarray) -> float:
+    """Returns cosine distance to match sqlite-vec's calculation."""
+    dot = np.dot(a, b)
+    a_mag = np.dot(a, a)  # ||a||^2
+    b_mag = np.dot(b, b)  # ||b||^2
+
+    if a_mag == 0 or b_mag == 0:
+        return 1.0
+
+    return 1.0 - (dot / (np.sqrt(a_mag) * np.sqrt(b_mag)))

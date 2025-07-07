@@ -840,6 +840,23 @@ cameras:
       # By default the cameras are sorted alphabetically.
       order: 0
 
+    # Optional: Configuration for triggers to automate actions based on semantic search results.
+    triggers:
+      # Required: Unique identifier for the trigger (generated automatically from nickname if not specified).
+      trigger_name:
+        # Required: Enable or disable the trigger. (default: shown below)
+        enabled: true
+        # Type of trigger, either `thumbnail` for image-based matching or `description` for text-based matching. (default: none)
+        type: thumbnail
+        # Reference data for matching, either an event ID for `thumbnail` or a text string for `description`. (default: none)
+        data: 1751565549.853251-b69j73
+        # Similarity threshold for triggering. (default: none)
+        threshold: 0.7
+        # List of actions to perform when the trigger fires. (default: none)
+        # Available options: `notification` (send a webpush notification)
+        actions:
+          - notification
+
     # Optional: Configuration for AI generated tracked object descriptions
     genai:
       # Optional: Enable AI description generation (default: shown below)
