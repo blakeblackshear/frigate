@@ -105,44 +105,11 @@ See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_
 
 ## Triggers
 
-Triggers in Frigate enable automated actions based on semantic search results for tracked objects. By defining triggers, you can configure Frigate to execute specific actions when a tracked object's image or description matches a predefined image or text, based on a similarity threshold. Triggers are managed per camera and can be configured via the Frigate UI in the Settings page under the Triggers tab.
+Triggers utilize semantic search to automate actions when a tracked object matches a specified image or description. Triggers can be configured so that Frigate executes a specific actions when a tracked object's image or description matches a predefined image or text, based on a similarity threshold. Triggers are managed per camera and can be configured via the Frigate UI in the Settings page under the Triggers tab.
 
 ### Configuration
 
 Triggers are defined within the `semantic_search` configuration for each camera in your Frigate configuration file or through the UI. Each trigger consists of a `type` (either `thumbnail` or `description`), a `data` field (the reference image event ID or text), a `threshold` for similarity matching, and a list of `actions` to perform when the trigger fires.
-
-#### Example Configuration
-
-You can configure triggers directly in your config file, but this is more easily managed through the Frigate UI.
-
-```yaml
-cameras:
-  front_door:
-    semantic_search:
-      triggers:
-        red_car:
-          enabled: true
-          type: thumbnail
-          data: 1751565549.853251-b69j73
-          threshold: 0.7
-          actions:
-            - notification
-        person_at_front_door:
-          enabled: true
-          type: description
-          data: "Person in a red shirt standing at the front door"
-          threshold: 0.8
-          actions:
-            - notification
-```
-
-Fields:
-
-- **enabled**: Boolean to enable or disable the trigger.
-- **type**: Either `thumbnail` (matches based on an image embedding) or `description` (matches based on a text embedding).
-- **data**: The reference data for matching, either an event ID for a thumbnail or a text string for a description.
-- **threshold**: A value between 0 and 1 indicating the minimum similarity score required to fire the trigger (e.g., 0.7 for 70% similarity).
-- **actions**: A list of actions to perform when the trigger fires. Valid actions are `notification` ([native notifications](/configuration/notifications.md) must be enabled). Frigate will always post an update to the `frigate/triggers` topic.
 
 #### Managing Triggers in the UI
 
