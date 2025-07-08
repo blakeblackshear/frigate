@@ -42,12 +42,13 @@ export default function StorageMetrics({
     }
 
     const totalStorage = {
-      used: 0,
+      used: stats.service.storage["/media/frigate/recordings"]["used"],
+      camera: 0,
       total: stats.service.storage["/media/frigate/recordings"]["total"],
     };
 
     Object.values(cameraStorage).forEach(
-      (cam) => (totalStorage.used += cam.usage),
+      (cam) => (totalStorage.camera += cam.usage),
     );
     setLastUpdated(Date.now() / 1000);
     return totalStorage;
@@ -118,7 +119,7 @@ export default function StorageMetrics({
           </div>
           <StorageGraph
             graphId="general-recordings"
-            used={totalStorage.used}
+            used={totalStorage.camera}
             total={totalStorage.total}
           />
           {earliestDate && (
