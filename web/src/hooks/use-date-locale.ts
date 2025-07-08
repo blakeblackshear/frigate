@@ -18,7 +18,7 @@ const localeMap: Record<string, () => Promise<Locale>> = {
   nl: () => import("date-fns/locale/nl").then((module) => module.nl),
   sv: () => import("date-fns/locale/sv").then((module) => module.sv),
   cs: () => import("date-fns/locale/cs").then((module) => module.cs),
-  nb: () => import("date-fns/locale/nb").then((module) => module.nb),
+  "nb-NO": () => import("date-fns/locale/nb").then((module) => module.nb),
   ko: () => import("date-fns/locale/ko").then((module) => module.ko),
   vi: () => import("date-fns/locale/vi").then((module) => module.vi),
   fa: () => import("date-fns/locale/fa-IR").then((module) => module.faIR),
