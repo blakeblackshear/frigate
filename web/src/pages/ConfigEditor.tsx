@@ -16,6 +16,7 @@ import { MdOutlineRestartAlt } from "react-icons/md";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useTranslation } from "react-i18next";
 import { useRestart } from "@/api/ws";
+import { useResizeObserver } from "@/hooks/resize-observer";
 
 type SaveOptions = "saveonly" | "restart";
 
@@ -209,6 +210,10 @@ function ConfigEditor() {
     };
   }, [hasChanges, t]);
 
+  // layout change handler
+
+  const [{ width, height }] = useResizeObserver(configRef);
+
   useEffect(() => {
     if (editorRef.current) {
       // Small delay to ensure DOM has updated
@@ -218,7 +223,7 @@ function ConfigEditor() {
 
       return () => clearTimeout(timeoutId);
     }
-  }, [error]);
+  }, [error, width, height]);
 
   if (!config) {
     return <ActivityIndicator />;
