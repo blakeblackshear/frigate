@@ -1,6 +1,6 @@
 import { useTheme } from "@/context/theme-provider";
 import { generateColors } from "@/utils/colorUtil";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import {
   Table,
@@ -30,6 +30,7 @@ type CameraStorage = {
 
 type TotalStorage = {
   used: number;
+  camera: number;
   total: number;
 };
 
@@ -59,6 +60,13 @@ export function CombinedStorageGraph({
   }));
 
   // Add the unused percentage to the series
+  series.push({
+    name: "Other",
+    data: [(totalStorage.used / totalStorage.total) * 100],
+    usage: totalStorage.used,
+    bandwidth: 0,
+    color: (systemTheme || theme) == "dark" ? "#606060" : "#D5D5D5",
+  });
   series.push({
     name: "Unused",
     data: [
@@ -160,12 +168,27 @@ export function CombinedStorageGraph({
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
   }, [graphId, options]);
 
+  // convenience
+
+  const getItemTitle = useCallback(
+    (name: string) => {
+      if (name == "Unused") {
+        return t("storage.cameraStorage.unused.title");
+      } else if (name == "Other") {
+        return t("label.other", { ns: "common" });
+      } else {
+        return name.replaceAll("_", " ");
+      }
+    },
+    [t],
+  );
+
   return (
     <div className="flex w-full flex-col gap-2.5">
       <div className="flex w-full items-center justify-between gap-1">
         <div className="flex items-center gap-1">
           <div className="text-xs text-primary">
-            {getUnitSize(totalStorage.used)}
+            {getUnitSize(totalStorage.camera)}
           </div>
           <div className="text-xs text-primary">/</div>
           <div className="text-xs text-muted-foreground">
@@ -197,10 +220,8 @@ export function CombinedStorageGraph({
                     className="size-3 rounded-md"
                     style={{ backgroundColor: item.color }}
                   ></div>
-                  {item.name === "Unused"
-                    ? t("storage.cameraStorage.unused.title")
-                    : item.name.replaceAll("_", " ")}
-                  {item.name === "Unused" && (
+                  {getItemTitle(item.name)}
+                  {(item.name === "Unused" || item.name == "Other") && (
                     <Popover>
                       <PopoverTrigger asChild>
                         <button
@@ -228,7 +249,7 @@ export function CombinedStorageGraph({
                 <TableCell>{getUnitSize(item.usage ?? 0)}</TableCell>
                 <TableCell>{item.data[0].toFixed(2)}%</TableCell>
                 <TableCell>
-                  {item.name === "Unused"
+                  {item.name === "Unused" || item.name == "Other"
                     ? "—"
                     : `${getUnitSize(item.bandwidth)} / hour`}
                 </TableCell>
