@@ -11,17 +11,32 @@ current_hard_limit=$(ulimit -Hn)
 TARGET_SOFT_LIMIT=65536
 TARGET_HARD_LIMIT=65536
 
-if [ "$current_soft_limit" -lt "$TARGET_SOFT_LIMIT" ]; then
-    # Attempt to set both soft and hard limits to the new value
-    # This requires sufficient privileges (e.g., running as root in the container)
-    if ulimit -Hn "$TARGET_HARD" && ulimit -Sn "$TARGET_SOFT"; then
-        new_soft_limit=$(ulimit -Sn)
-        new_hard_limit=$(ulimit -Hn)
+echo "Current file limits - Soft: $current_soft_limit, Hard: $current_hard_limit"
 
-        if [ "$new_soft_limit" -ne "$TARGET_SOFT_LIMIT" ] || [ "$new_hard_limit" -ne "$TARGET_HARD_LIMIT" ]; then
-            echo "Warning: Nofile limits were set, but not to the exact target values."
+if [ "$current_soft_limit" -lt "$TARGET_SOFT_LIMIT" ]; then
+    if [ "$current_hard_limit" -lt "$TARGET_HARD_LIMIT" ]; then
+        if ! ulimit -Hn "$TARGET_HARD_LIMIT"; then
+            echo "Warning: Failed to set hard limit to $TARGET_HARD_LIMIT"
+            echo "This may require running as root or adjusting system limits"
+            exit 1
         fi
-    else
-        echo "Warning: Failed to set new nofile limits."
     fi
+
+    if ! ulimit -Sn "$TARGET_SOFT_LIMIT"; then
+        echo "Warning: Failed to set soft limit to $TARGET_SOFT_LIMIT"
+        exit 1
+    fi
+
+    # Verify the new limits
+    new_soft_limit=$(ulimit -Sn)
+    new_hard_limit=$(ulimit -Hn)
+    echo "New limits - Soft: $new_soft_limit, Hard: $new_hard_limit"
+
+    if [ "$new_soft_limit" -ne "$TARGET_SOFT_LIMIT" ] || [ "$new_hard_limit" -ne "$TARGET_HARD_LIMIT" ]; then
+        echo "Warning: Nofile limits were set, but not to the exact target values."
+    else
+        echo "Successfully set file limits to target values"
+    fi
+else
+    echo "Soft limit is already sufficient ($current_soft_limit >= $TARGET_SOFT_LIMIT)"
 fi
