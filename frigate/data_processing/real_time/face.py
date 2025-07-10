@@ -303,9 +303,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             self.person_face_history[id]
         )
 
-        if len(self.person_face_history[id]) < self.face_config.min_faces:
-            weighted_sub_label = "unknown"
-
         self.requestor.send_data(
             "tracked_object_update",
             json.dumps(
@@ -458,6 +455,9 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             A tuple containing the prominent name and its weighted average score, or (None, 0.0) if the list is empty.
         """
         if not results_list:
+            return None, 0.0
+
+        if len(results_list) < self.face_config.min_faces:
             return None, 0.0
 
         counts: dict[str, int] = {}
