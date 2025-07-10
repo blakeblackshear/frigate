@@ -561,7 +561,7 @@ face_recognition:
   recognition_threshold: 0.9
   # Optional: Min area of detected face box to consider running face recognition (default: shown below)
   min_area: 500
-  # Optional: Min face attempts for the sub label to be applied to the person object (default: shown below)
+  # Optional: Min face recognitions for the sub label to be applied to the person object (default: shown below)
   min_faces: 1
   # Optional: Number of images of recognized faces to save for training (default: shown below)
   save_attempts: 100

@@ -457,9 +457,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         if not results_list:
             return None, 0.0
 
-        if len(results_list) < self.face_config.min_faces:
-            return None, 0.0
-
         counts: dict[str, int] = {}
         weighted_scores: dict[str, int] = {}
         total_weights: dict[str, int] = {}
@@ -488,6 +485,10 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             return None, 0.0
 
         best_name = max(weighted_scores, key=weighted_scores.get)
+
+        # If the number of faces for this person < min_faces, we are not confident it is a correct result
+        if counts[best_name] < self.face_config.min_faces:
+            return None, 0.0
 
         # If the best name has the same number of results as another name, we are not confident it is a correct result
         for name, count in counts.items():

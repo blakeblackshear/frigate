@@ -84,7 +84,7 @@ class FaceRecognitionConfig(FrigateBaseModel):
         default=1,
         gt=0,
         le=6,
-        title="Min face attempts for the sub label to be applied to the person object.",
+        title="Min face recognitions for the sub label to be applied to the person object.",
     )
     save_attempts: int = Field(
         default=100, ge=0, title="Number of face attempts to save in the train tab."
