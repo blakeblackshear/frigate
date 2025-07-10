@@ -11,7 +11,7 @@ current_hard_limit=$(ulimit -Hn)
 TARGET_SOFT_LIMIT=65536
 TARGET_HARD_LIMIT=65536
 
-if [ "$current_soft_limit" -eq 1024 ]; then
+if [ "$current_soft_limit" -lt "$TARGET_SOFT_LIMIT" ]; then
     # Attempt to set both soft and hard limits to the new value
     # This requires sufficient privileges (e.g., running as root in the container)
     if ulimit -n "$TARGET_SOFT_LIMIT:$TARGET_HARD_LIMIT"; then
