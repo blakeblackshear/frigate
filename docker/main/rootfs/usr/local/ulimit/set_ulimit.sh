@@ -19,7 +19,7 @@ if [ "$current_soft_limit" -lt "$TARGET_SOFT_LIMIT" ]; then
         new_hard_limit=$(ulimit -Hn)
 
         if [ "$new_soft_limit" -ne "$TARGET_SOFT_LIMIT" ] || [ "$new_hard_limit" -ne "$TARGET_HARD_LIMIT" ]; then
-            echo "Warning: Limits were set, but not to the exact target values. Check system constraints."
+            echo "Warning: Nofile limits were set, but not to the exact target values."
         fi
     else
         echo "Warning: Failed to set new nofile limits."
