@@ -50,7 +50,6 @@ function set_libva_version() {
 echo "[INFO] Preparing Frigate..."
 migrate_db_path
 set_libva_version
-/usr/local/ulimit/set_ulimit.sh
 echo "[INFO] Starting Frigate..."
 
 cd /opt/frigate || echo "[ERROR] Failed to change working directory to /opt/frigate"

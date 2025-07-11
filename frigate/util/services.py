@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import re
+import resource
 import signal
 import subprocess as sp
 import traceback
@@ -632,3 +633,19 @@ async def get_video_properties(
         result["fourcc"] = fourcc
 
     return result
+
+
+def set_file_limit() -> None:
+    # Newer versions of containerd 2.X+ impose a very low soft file limit of 1024
+    # This applies to OSs like HA OS (see https://github.com/home-assistant/operating-system/issues/4110)
+    # Attempt to increase this limit
+    soft_limit = int(os.getenv("SOFT_FILE_LIMIT", "65536") or "65536")
+
+    current_soft, current_hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    logger.info(f"Current file limits - Soft: {current_soft}, Hard: {current_hard}")
+
+    new_soft = min(soft_limit, current_hard)
+    resource.setrlimit(resource.RLIMIT_NOFILE, (new_soft, current_hard))
+    logger.info(
+        f"File limit set. New soft limit: {new_soft}, Hard limit remains: {current_hard}"
+    )
