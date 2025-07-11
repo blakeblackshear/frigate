@@ -303,9 +303,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             self.person_face_history[id]
         )
 
-        if len(self.person_face_history[id]) < self.face_config.min_faces:
-            weighted_sub_label = "unknown"
-
         self.requestor.send_data(
             "tracked_object_update",
             json.dumps(
@@ -488,6 +485,10 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             return None, 0.0
 
         best_name = max(weighted_scores, key=weighted_scores.get)
+
+        # If the number of faces for this person < min_faces, we are not confident it is a correct result
+        if counts[best_name] < self.face_config.min_faces:
+            return None, 0.0
 
         # If the best name has the same number of results as another name, we are not confident it is a correct result
         for name, count in counts.items():

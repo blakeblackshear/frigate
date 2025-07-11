@@ -67,7 +67,7 @@ Fine-tune face recognition with these optional parameters at the global level of
   - Default: `0.8`.
 - `recognition_threshold`: Recognition confidence score required to add the face to the object as a sub label.
   - Default: `0.9`.
-- `min_faces`: Min face attempts for the sub label to be applied to the person object.
+- `min_faces`: Min face recognitions for the sub label to be applied to the person object.
   - Default: `1`
 - `save_attempts`: Number of images of recognized faces to save for training.
   - Default: `100`.
