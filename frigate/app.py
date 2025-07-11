@@ -2,6 +2,7 @@ import datetime
 import logging
 import multiprocessing as mp
 import os
+import resource
 import secrets
 import shutil
 from multiprocessing import Queue
@@ -109,6 +110,16 @@ class FrigateApp:
                 os.makedirs(d)
             else:
                 logger.debug(f"Skipping directory: {d}")
+
+    def set_file_limit(self, soft_limit: int) -> None:
+        current_soft, current_hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+        logger.info(f"Current file limits - Soft: {current_soft}, Hard: {current_hard}")
+
+        new_soft = min(soft_limit, current_hard)
+        resource.setrlimit(resource.RLIMIT_NOFILE, (new_soft, current_hard))
+        logger.info(
+            f"File limit set. New soft limit: {new_soft}, Hard limit remains: {current_hard}"
+        )
 
     def init_camera_metrics(self) -> None:
         # create camera_metrics
@@ -586,6 +597,9 @@ class FrigateApp:
 
         # Ensure global state.
         self.ensure_dirs()
+
+        # Set soft file limits.
+        self.set_file_limit(65536)
 
         # Start frigate services.
         self.init_camera_metrics()
