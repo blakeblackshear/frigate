@@ -240,6 +240,25 @@ class CameraWatchdog(threading.Thread):
                 )
                 self.logpipe.dump()
                 self.start_ffmpeg_detect()
+            elif self.camera_fps.value >= (self.config.detect.fps + 10):
+                self.fps_overflow_count += 1
+
+                if self.fps_overflow_count == 3:
+                    self.fps_overflow_count = 0
+                    self.camera_fps.value = 0
+                    self.logger.info(
+                        f"{self.camera_name} exceeded fps limit. Exiting ffmpeg..."
+                    )
+                    self.ffmpeg_detect_process.terminate()
+                    try:
+                        # we don't want to communicate() here because we know that ffmpeg is
+                        # outputting a massive amount of frames
+                        self.logger.info("Waiting for ffmpeg to exit gracefully...")
+                        self.ffmpeg_detect_process.wait(timeout=30)
+                    except sp.TimeoutExpired:
+                        self.logger.info("FFmpeg did not exit. Force killing...")
+                        self.ffmpeg_detect_process.kill()
+                        self.ffmpeg_detect_process.wait()
             elif now - self.capture_thread.current_frame.value > 20:
                 self.camera_fps.value = 0
                 self.logger.info(
@@ -253,23 +272,6 @@ class CameraWatchdog(threading.Thread):
                     self.logger.info("FFmpeg did not exit. Force killing...")
                     self.ffmpeg_detect_process.kill()
                     self.ffmpeg_detect_process.communicate()
-            elif self.camera_fps.value >= (self.config.detect.fps + 10):
-                self.fps_overflow_count += 1
-
-                if self.fps_overflow_count == 3:
-                    self.fps_overflow_count = 0
-                    self.camera_fps.value = 0
-                    self.logger.info(
-                        f"{self.camera_name} exceeded fps limit. Exiting ffmpeg..."
-                    )
-                    self.ffmpeg_detect_process.terminate()
-                    try:
-                        self.logger.info("Waiting for ffmpeg to exit gracefully...")
-                        self.ffmpeg_detect_process.communicate(timeout=30)
-                    except sp.TimeoutExpired:
-                        self.logger.info("FFmpeg did not exit. Force killing...")
-                        self.ffmpeg_detect_process.kill()
-                        self.ffmpeg_detect_process.communicate()
             else:
                 # process is running normally
                 self.fps_overflow_count = 0
