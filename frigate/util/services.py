@@ -636,6 +636,9 @@ async def get_video_properties(
 
 
 def set_file_limit() -> None:
+    # Newer versions of containerd 2.X+ impose a very low soft file limit of 1024
+    # This applies to OSs like HA OS (see https://github.com/home-assistant/operating-system/issues/4110)
+    # Attempt to increase this limit
     soft_limit = int(os.getenv("SOFT_FILE_LIMIT", "65536") or "65536")
 
     current_soft, current_hard = resource.getrlimit(resource.RLIMIT_NOFILE)
