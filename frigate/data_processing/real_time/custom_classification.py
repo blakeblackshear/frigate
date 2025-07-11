@@ -284,8 +284,8 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 
         if sub_label != "none":
             self.sub_label_publisher.publish(
-                EventMetadataTypeEnum.sub_label,
                 (obj_data["id"], sub_label, score),
+                EventMetadataTypeEnum.sub_label.value,
             )
 
     def handle_request(self, topic, request_data):
