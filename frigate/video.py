@@ -208,7 +208,35 @@ class CameraWatchdog(threading.Thread):
 
         return self.config.enabled
 
-    def run(self):
+    def reset_capture_thread(
+        self, terminate: bool = True, drain_output: bool = True
+    ) -> None:
+        if terminate:
+            self.ffmpeg_detect_process.terminate()
+            try:
+                self.logger.info("Waiting for ffmpeg to exit gracefully...")
+
+                if drain_output:
+                    self.ffmpeg_detect_process.communicate(timeout=30)
+                else:
+                    self.ffmpeg_detect_process.wait(timeout=30)
+            except sp.TimeoutExpired:
+                self.logger.info("FFmpeg did not exit. Force killing...")
+                self.ffmpeg_detect_process.kill()
+
+                if drain_output:
+                    self.ffmpeg_detect_process.communicate()
+                else:
+                    self.ffmpeg_detect_process.wait()
+
+        self.logger.error(
+            "The following ffmpeg logs include the last 100 lines prior to exit."
+        )
+        self.logpipe.dump()
+        self.logger.info("Restarting ffmpeg...")
+        self.start_ffmpeg_detect()
+
+    def run(self) -> None:
         if self._update_enabled_state():
             self.start_all_ffmpeg()
 
@@ -235,24 +263,7 @@ class CameraWatchdog(threading.Thread):
                 self.logger.error(
                     f"Ffmpeg process crashed unexpectedly for {self.camera_name}."
                 )
-                self.logger.error(
-                    "The following ffmpeg logs include the last 100 lines prior to exit."
-                )
-                self.logpipe.dump()
-                self.start_ffmpeg_detect()
-            elif now - self.capture_thread.current_frame.value > 20:
-                self.camera_fps.value = 0
-                self.logger.info(
-                    f"No frames received from {self.camera_name} in 20 seconds. Exiting ffmpeg..."
-                )
-                self.ffmpeg_detect_process.terminate()
-                try:
-                    self.logger.info("Waiting for ffmpeg to exit gracefully...")
-                    self.ffmpeg_detect_process.communicate(timeout=30)
-                except sp.TimeoutExpired:
-                    self.logger.info("FFmpeg did not exit. Force killing...")
-                    self.ffmpeg_detect_process.kill()
-                    self.ffmpeg_detect_process.communicate()
+                self.reset_capture_thread(terminate=False)
             elif self.camera_fps.value >= (self.config.detect.fps + 10):
                 self.fps_overflow_count += 1
 
@@ -262,14 +273,13 @@ class CameraWatchdog(threading.Thread):
                     self.logger.info(
                         f"{self.camera_name} exceeded fps limit. Exiting ffmpeg..."
                     )
-                    self.ffmpeg_detect_process.terminate()
-                    try:
-                        self.logger.info("Waiting for ffmpeg to exit gracefully...")
-                        self.ffmpeg_detect_process.communicate(timeout=30)
-                    except sp.TimeoutExpired:
-                        self.logger.info("FFmpeg did not exit. Force killing...")
-                        self.ffmpeg_detect_process.kill()
-                        self.ffmpeg_detect_process.communicate()
+                    self.reset_capture_thread(drain_output=False)
+            elif now - self.capture_thread.current_frame.value > 20:
+                self.camera_fps.value = 0
+                self.logger.info(
+                    f"No frames received from {self.camera_name} in 20 seconds. Exiting ffmpeg..."
+                )
+                self.reset_capture_thread()
             else:
                 # process is running normally
                 self.fps_overflow_count = 0
