@@ -903,7 +903,7 @@ telemetry:
     # Optional: Enable Intel GPU stats (default: shown below)
     intel_gpu_stats: True
     # Optional: Treat GPU as SR-IOV to fix GPU stats (default: shown below)
-    sriov: False
+    intel_gpu_device: None
     # Optional: Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
     # NOTE: The container must either be privileged or have cap_net_admin, cap_net_raw capabilities enabled.
     network_bandwidth: False

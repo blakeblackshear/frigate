@@ -176,15 +176,25 @@ For more information on the various values across different distributions, see h
 
 Depending on your OS and kernel configuration, you may need to change the `/proc/sys/kernel/perf_event_paranoid` kernel tunable. You can test the change by running `sudo sh -c 'echo 2 >/proc/sys/kernel/perf_event_paranoid'` which will persist until a reboot. Make it permanent by running `sudo sh -c 'echo kernel.perf_event_paranoid=2 >> /etc/sysctl.d/local.conf'`
 
-#### Stats for SR-IOV devices
+#### Stats for SR-IOV or other devices
 
-When using virtualized GPUs via SR-IOV, additional args are needed for GPU stats to function. This can be enabled with the following config:
+When using virtualized GPUs via SR-IOV, you need to specify the device path to use to gather stats from `intel_gpu_top`. This example may work for some systems using SR-IOV:
 
 ```yaml
 telemetry:
   stats:
-    sriov: True
+    intel_gpu_device: "sriov"
 ```
+
+For other virtualized GPUs, try specifying the direct path to the device instead:
+
+```yaml
+telemetry:
+  stats:
+    intel_gpu_device: "drm:/dev/dri/card0"
+```
+
+If you are passing in a device path, make sure you've passed the device through to the container.
 
 ## AMD/ATI GPUs (Radeon HD 2000 and newer GPUs) via libva-mesa-driver
 
