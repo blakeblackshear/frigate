@@ -1,0 +1,42 @@
+{
+  "filter": "Filter",
+  "labels": {
+    "label": "Označenia",
+    "all": {
+      "title": "Všetky popisky",
+      "short": "Štítky"
+    },
+    "count_one": "{{count}} Štítok",
+    "count_other": "{{count}} Štítkov"
+  },
+  "zones": {
+    "label": "Zóny",
+    "all": {
+      "title": "Všetky zóny",
+      "short": "Zóny"
+    }
+  },
+  "dates": {
+    "selectPreset": "Vyberte predvoľbu…",
+    "all": {
+      "title": "Všetky dátumy",
+      "short": "Dátumy"
+    }
+  },
+  "more": "Viac filtrov",
+  "reset": {
+    "label": "Obnoviť filtre na predvolené hodnoty"
+  },
+  "timeRange": "Časový rozsah",
+  "subLabels": {
+    "label": "Podštítky",
+    "all": "Všetky vedľajšie štítky"
+  },
+  "score": "Skóre",
+  "estimatedSpeed": "Odhadovaná rýchlosť ({{unit}})",
+  "features": {
+    "label": "Vlastnosti",
+    "hasSnapshot": "Má snímku",
+    "hasVideoClip": "Má videoklip"
+  }
+}

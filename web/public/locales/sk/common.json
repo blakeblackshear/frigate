@@ -1,0 +1,27 @@
+{
+  "time": {
+    "untilForTime": "Do{{time}}",
+    "untilForRestart": "Do reštartu Frigate.",
+    "untilRestart": "Do reštartu",
+    "ago": "{{timeAgo}} pred časom",
+    "justNow": "Práve teraz",
+    "today": "Dnes",
+    "yesterday": "Včera",
+    "last7": "Posledných 7 dní",
+    "last14": "Posledných 14 dní",
+    "last30": "Posledných 30 dní",
+    "thisWeek": "Tento týždeň",
+    "lastWeek": "Minulý týždeň",
+    "thisMonth": "Tento mesiac",
+    "lastMonth": "Minulý mesiac",
+    "5minutes": "5 minút",
+    "10minutes": "10 minút",
+    "30minutes": "30 minút",
+    "1hour": "1 hodina",
+    "12hours": "12 hodín",
+    "24hours": "24 hodín",
+    "am": "ráno",
+    "yr": "{{time}}r"
+  },
+  "selectItem": "Vyberte {{item}}"
+}

@@ -1,0 +1,12 @@
+{
+  "filter": "Filter",
+  "export": "Exportovať",
+  "calendar": "Kalendár",
+  "filters": "Filtre",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Nie je vybratý žiadny platný časový rozsah",
+      "endTimeMustAfterStartTime": "Čas konca musí byť po čase začiatku"
+    }
+  }
+}
