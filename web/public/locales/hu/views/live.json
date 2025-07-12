@@ -13,7 +13,9 @@
   "ptz": {
     "move": {
       "clickMove": {
-        "label": "Kattintson a képre a kamera középre igazításához"
+        "label": "Kattintson a képre a kamera középre igazításához",
+        "enable": "Engedélyezze a kattintást a mozgatáshoz",
+        "disable": "Kattintással húzás kikapcsolása"
       },
       "left": {
         "label": "PTZ kamera balra mozgatása"
@@ -40,7 +42,8 @@
       "center": {
         "label": "Kattinston a képre a PTZ kamera középre igazításához"
       }
-    }
+    },
+    "presets": "PTZ kamera előzetes beállításai"
   },
   "camera": {
     "enable": "Kamera Engedélyezése",
@@ -80,9 +83,19 @@
       "desc": "Engedélyezze ezt a lehetőséget, hogy az adás tovább folyjon amikor a lejátszó rejtve van."
     },
     "showStats": {
-      "label": "Statisztika Mutatása"
+      "label": "Statisztika Mutatása",
+      "desc": "Engedélyezze ezt az opciót, hogy a közvetítés statisztikái átfedésként megjelenjenek a kameraképen."
     },
-    "debugView": "Hibakeresési Nézet"
+    "debugView": "Hibakeresési Nézet",
+    "title": "Igény Szerinti Felvétel",
+    "start": "Igény szerinti felvétel indítása",
+    "started": "Kézi igény szerinti felvétel elindítva.",
+    "failedToStart": "Kézi igény szerinti felvétel indítása sikertelen.",
+    "end": "Igény szerinti felvétel befejezése",
+    "ended": "Kézi igény szerinti felvétel befejezve.",
+    "failedToEnd": "Kézi igény szerinti felvétel befejezése sikertelen.",
+    "tips": "Indítson el egy manuális eseményt a kamera felvételmegőrzési beállításai alapján.",
+    "recordDisabledTips": "Mivel a rögzítés le van tiltva vagy korlátozva van a konfigurációban ennél a kameránál, csak egy pillanatkép kerül mentésre."
   },
   "streamingSettings": "Adás Beállítások",
   "notifications": "Értesítések",
@@ -94,7 +107,8 @@
     "title": "Adás",
     "audio": {
       "tips": {
-        "documentation": "Olvassa el a leírást "
+        "documentation": "Olvassa el a leírást ",
+        "title": "A hangot a kamerának kell kibocsátania, és a go2rtc-ben kell konfigurálni ehhez a streamhez."
       },
       "available": "Ehhez az adáshoz hang elérhető",
       "unavailable": "Nem elérhető hang ehhez az adáshoz"
@@ -102,13 +116,43 @@
     "twoWayTalk": {
       "tips.documentation": "Olvassa el a leírást ",
       "available": "Kétirányú kommunikáció elérhető ehhez az adáshoz",
-      "unavailable": "Nem elérhető a kétirányú kommunikáció ehhez az adáshoz"
+      "unavailable": "Nem elérhető a kétirányú kommunikáció ehhez az adáshoz",
+      "tips": "Az eszközének támogatnia kell ezt a funkciót, és a WebRTC-nek kétirányú beszélgetésre kell lennie konfigurálva."
     },
     "lowBandwidth": {
-      "resetStream": "Adás visszaállítása"
+      "resetStream": "Adás visszaállítása",
+      "tips": "Az élő nézet alacsony sávszélességű módban van a pufferelés vagy stream hibák miatt."
     },
     "playInBackground": {
-      "label": "Lejátszás a háttérben"
+      "label": "Lejátszás a háttérben",
+      "tips": "Engedélyezze ezt az opciót a folyamatos közvetítéshez akkor is, ha a lejátszó rejtve van."
     }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Beállítások",
+    "cameraEnabled": "Kamera Engedélyezve",
+    "objectDetection": "Tárgy Észlelés",
+    "recording": "Felvétel",
+    "audioDetection": "Hang Észlelés",
+    "snapshots": "Pillanatképek",
+    "autotracking": "Automatikus követés"
+  },
+  "history": {
+    "label": "Előzmény felvételek megjelenítése"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Mind",
+      "motion": "Mozgás",
+      "active_objects": "Aktív objektumok"
+    },
+    "notAllTips": "Az Ön {{source}} felvételmegőrzési beállítása akövetkezőre van állítva <code>mode: {{effectiveRetainMode}}</code>, így ez az igény szerinti felvétel csak a {{effectiveRetainModeName}} szegmenseket őrzi meg."
+  },
+  "editLayout": {
+    "label": "Elrendezés szerkesztése",
+    "group": {
+      "label": "Kameracsoport szerkesztése"
+    },
+    "exitEdit": "Szerkesztés bezárása"
   }
 }

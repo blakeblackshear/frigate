@@ -2,12 +2,13 @@
   "documentTitle": {
     "cameras": "Kamera statisztikák - Frigate",
     "storage": "Tárhely statisztikák - Frigate",
-    "general": "Általános statisztikák - Frigate",
+    "general": "Általános Statisztikák - Frigate",
     "logs": {
       "frigate": "Frigate naplók - Frigate",
       "go2rtc": "Go2RTC naplók - Frigate",
       "nginx": "Nginx naplók - Frigate"
-    }
+    },
+    "enrichments": "Kiegészítés statisztikák - Frigate"
   },
   "cameras": {
     "label": {
@@ -22,7 +23,9 @@
       "cameraDetect": "{{camName}} észlelés",
       "cameraFramesPerSecond": "{{camName}} képkocka per másodperc",
       "cameraDetectionsPerSecond": "{{camName}} észlelés per másodperc",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} kihagyott észlelés per másodperc"
+      "cameraSkippedDetectionsPerSecond": "{{camName}} kihagyott észlelés per másodperc",
+      "cameraCapture": "{{camName}} megszerzése",
+      "capture": "megszerez"
     },
     "title": "Kamerák",
     "info": {
@@ -39,13 +42,17 @@
       "audio": "Hang:",
       "tips": {
         "title": "Kamera Szonda Infó"
-      }
+      },
+      "streamDataFromFFPROBE": "Az adás adat begyűjtése <code>ffprobe</code>-bal."
     },
     "overview": "Áttekintés",
     "framesAndDetections": "Képek / Észlelések",
     "toast": {
       "success": {
         "copyToClipboard": "Szonda adat másolva a vágólapra."
+      },
+      "error": {
+        "unableToProbeCamera": "Nem sikerült felderíteni a kamerát: {{errorMessage}}"
       }
     }
   },
@@ -64,12 +71,14 @@
     },
     "toast": {
       "error": {
-        "fetchingLogsFailed": "Hiba a naplók begyűjtése közben: {{errorMessage}}"
+        "fetchingLogsFailed": "Hiba a naplók begyűjtése közben: {{errorMessage}}",
+        "whileStreamingLogs": "Hiba a naplók bekérésekor: {{errorMessage}}"
       }
     },
     "download": {
       "label": "Naplók letöltése"
-    }
+    },
+    "tips": "A naplók a szerverről érkeznek"
   },
   "general": {
     "title": "Általános",
@@ -89,7 +98,8 @@
           "name": "Név: {{name}}",
           "title": "Nvidia SMI Kimenet",
           "vbios": "VBios Infó: {{vbios}}",
-          "driver": "Meghajtó: {{driver}}"
+          "driver": "Meghajtó: {{driver}}",
+          "cudaComputerCapability": "CUDA Számítási Képesség: {{cuda_compute}}"
         },
         "vainfoOutput": {
           "processOutput": "Folyamat Kimenete:",
@@ -134,7 +144,8 @@
       "percentageOfTotalUsed": "Teljes Százaléka",
       "bandwidth": "Sávszélesség",
       "unused": {
-        "title": "Felhasználatlan"
+        "title": "Felhasználatlan",
+        "tips": "Ez az érték nem feltétlenül tükrözi pontosan a Frigate számára elérhető szabad helyet, ha a meghajtón egyéb fájlok is tárolva vannak a Frigate felvételein kívül. A Frigate nem követi a tárhelyhasználatot a saját felvételein kívül."
       }
     }
   },
@@ -152,14 +163,18 @@
       "yolov9_plate_detection_speed": "YOLOv9 Rendszám Felismerés Sebesség",
       "yolov9_plate_detection": "YOLOv9 Rendszám Észlelés"
     },
-    "infPerSecond": "Inferencia Per Másodperc"
+    "infPerSecond": "Inferencia Per Másodperc",
+    "title": "Kiegészítések"
   },
   "metrics": "Rendszer jellemzők",
   "stats": {
     "detectIsVerySlow": "{{detect}} nagyon lassú ({{speed}} ms)",
     "healthy": "A rendszer egészséges",
     "cameraIsOffline": "{{camera}} nem elérhető",
-    "detectIsSlow": "{{detect}} lassú ({{speed}} ms)"
+    "detectIsSlow": "{{detect}} lassú ({{speed}} ms)",
+    "reindexingEmbeddings": "Beágyazások újra indexelése ({{processed}}% kész)",
+    "ffmpegHighCpuUsage": "{{camera}}-nak/-nek magas FFmpeg CPU felhasználása ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "A(z) {{camera}} kameránál magas az észlelési CPU-használat ({{detectAvg}}%)"
   },
   "lastRefreshed": "Utoljára frissítve: "
 }
