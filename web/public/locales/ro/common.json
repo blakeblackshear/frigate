@@ -5,7 +5,7 @@
     "untilRestart": "Pana la repornire",
     "ago": "{{timeAgo}} in urma",
     "justNow": "Acum",
-    "today": "Azi",
+    "today": "Astazi",
     "yesterday": "Ieri",
     "last7": "Ultimele 7 zile",
     "last14": "Ultimele 14 zile",
@@ -135,7 +135,12 @@
       "red": "Roșu"
     },
     "user": {
-      "title": "Utilizator"
+      "title": "Utilizator",
+      "account": "Cont",
+      "current": "Utilizator curent: {{user}}",
+      "logout": "Deconectare",
+      "anonymous": "anonim",
+      "setPassword": "Setează parola"
     },
     "live": {
       "cameras": {
@@ -218,5 +223,43 @@
   "label": {
     "back": "Mergi înapoi"
   },
-  "selectItem": "Selectează {{item}}"
+  "selectItem": "Selectează {{item}}",
+  "pagination": {
+    "label": "paginare",
+    "next": {
+      "label": "Mergi la pagina următoare",
+      "title": "Urmator"
+    },
+    "previous": {
+      "title": "Anterior",
+      "label": "Meri la pagina anterioară"
+    },
+    "more": "Mai multe pagini"
+  },
+  "role": {
+    "viewer": "Vizualizator",
+    "desc": "Administratorii au acces complet la toate funcționalitățile din interfața Frigate. Vizualizatorii sunt limitați la vizualizarea camerelor, a elementelor de revizuire și a înregistrărilor istorice în interfață.",
+    "admin": "Administrator",
+    "title": "Rol"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL-ul a fost copiat în clipboard.",
+    "save": {
+      "title": "Salvează",
+      "error": {
+        "noMessage": "Nu s-au putut salva modificările de configurare",
+        "title": "Salvarea modificărilor de configurare a eșuat: {{errorMessage}}"
+      }
+    }
+  },
+  "accessDenied": {
+    "title": "Acces refuzat",
+    "desc": "Nu ai permisiunea să vizualizezi această pagină.",
+    "documentTitle": "Acces refuzat - Frigate"
+  },
+  "notFound": {
+    "documentTitle": "Nu a fost găsit - Frigate",
+    "title": "404",
+    "desc": "Pagină negăsită"
+  }
 }
