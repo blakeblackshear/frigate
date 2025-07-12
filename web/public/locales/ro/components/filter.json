@@ -59,5 +59,68 @@
       "title": "Toate camerele"
     },
     "label": "Filtru camere"
+  },
+  "review": {
+    "showReviewed": "Afișează revizuitele"
+  },
+  "motion": {
+    "showMotionOnly": "Afișează doar mișcarea"
+  },
+  "explore": {
+    "settings": {
+      "title": "Setări",
+      "defaultView": {
+        "title": "Vizualizare implicită",
+        "unfilteredGrid": "Grilă nefiltrată",
+        "desc": "Când nu sunt selectate filtre, afișează un rezumat al celor mai recente obiecte urmărite pentru fiecare etichetă sau afișează o grilă nefiltrată.",
+        "summary": "Sumar"
+      },
+      "gridColumns": {
+        "title": "Coloane grilă",
+        "desc": "Selectează numărul de coloane în vizualizarea grilă."
+      },
+      "searchSource": {
+        "label": "Sursa căutării",
+        "desc": "Alege dacă dorești să cauți în miniaturi sau în descrierile obiectelor urmărite.",
+        "options": {
+          "thumbnailImage": "Imagine miniatură",
+          "description": "Descriere"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Selectează o dată pentru filtrare"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtrează nivelul jurnalului",
+    "filterBySeverity": "Filtrează jurnalele după severitate",
+    "loading": {
+      "title": "Se încarcă",
+      "desc": "Când panoul de jurnale este derulat până jos, noile jurnale sunt afișate automat pe măsură ce sunt adăugate."
+    },
+    "disableLogStreaming": "Dezactivează streaming-ul jurnalelor",
+    "allLogs": "Toate jurnalele"
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmă ștergerea",
+    "desc": "Ștergerea acestor {{objectLength}} obiecte urmărite elimină snapshot-ul, orice încorporări salvate și orice înregistrări asociate ciclului de viață al obiectului. Filmările înregistrate ale acestor obiecte urmărite în vizualizarea Istoric <em>NU</em> vor fi șterse. <br /><br />Sunteți sigur că doriți să continuați?<br /><br />Țineți apăsată tasta <em>Shift</em> pentru a sări peste acest dialog în viitor.",
+    "toast": {
+      "success": "Obiectele urmărite au fost șterse cu succes.",
+      "error": "Ștergerea obiectelor urmărite a eșuat: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtrează după masca de zonă"
+  },
+  "recognizedLicensePlates": {
+    "title": "Numere de înmatriculare recunoscute",
+    "noLicensePlatesFound": "Nu s-au găsit plăcuțe de înmatriculare.",
+    "selectPlatesFromList": "Selectați una sau mai multe plăcuțe din listă.",
+    "loading": "Se încarcă numerele de înmatriculare recunoscute…",
+    "placeholder": "Căutați plăcuțe de înmatriculare…",
+    "loadFailed": "Nu s-au putut încărca numerele de înmatriculare recunoscute."
   }
 }

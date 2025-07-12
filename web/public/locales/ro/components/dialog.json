@@ -44,7 +44,19 @@
   },
   "recording": {
     "button": {
-      "deleteNow": "Sterge Acum"
+      "deleteNow": "Sterge Acum",
+      "export": "Exportă",
+      "markAsReviewed": "Marchează ca revizuit"
+    },
+    "confirmDelete": {
+      "toast": {
+        "success": "Înregistrările video asociate elementelor de revizuire selectate au fost șterse cu succes.",
+        "error": "Ștergerea a eșuat: {{error}}"
+      },
+      "title": "Confirmă ștergerea",
+      "desc": {
+        "selected": "Ești sigur că vrei să ștergi toate videoclipurile înregistrate asociate acestui element de revizuire?<br /><br />Ține apăsată tasta <em>Shift</em> pentru a sări peste această confirmare pe viitor."
+      }
     }
   },
   "export": {
@@ -92,7 +104,23 @@
       }
     },
     "showStats": {
-      "label": "Afișează statistici streaming"
+      "label": "Afișează statistici streaming",
+      "desc": "Activează această opțiune pentru a afișa statisticile de streaming ca un overlay peste fluxul camerei."
+    },
+    "debugView": "Vizualizator depanare"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Salvează căutarea",
+      "desc": "Alege un nume pentru această căutare salvată.",
+      "placeholder": "Introdu un nume pentru căutarea ta",
+      "overwrite": "{{searchName}} există deja. Salvarea va suprascrie valoarea existentă.",
+      "success": "Căutarea ({{searchName}}) a fost salvată.",
+      "button": {
+        "save": {
+          "label": "Salvează această căutare"
+        }
+      }
     }
   }
 }

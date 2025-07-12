@@ -63,7 +63,8 @@
           }
         },
         "compatibilityMode": {
-          "label": "Mod compatibilitate"
+          "label": "Mod compatibilitate",
+          "desc": "Activează această opțiune doar dacă stream-ul live al camerei afișează artefacte de culoare și are o linie diagonală pe partea dreaptă a imaginii."
         }
       }
     }
@@ -72,7 +73,14 @@
     "options": {
       "label": "Setari",
       "title": "Optiuni",
-      "showOptions": "Arata Optiuni"
-    }
+      "showOptions": "Arata Optiuni",
+      "hideOptions": "Ascunde opțiunile"
+    },
+    "boundingBox": "Casetă de delimitare",
+    "timestamp": "Marcaj temporal",
+    "zones": "Zone",
+    "mask": "Mască",
+    "motion": "Mișcare",
+    "regions": "Regiuni"
   }
 }

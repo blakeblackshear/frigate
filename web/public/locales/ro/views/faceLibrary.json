@@ -55,7 +55,48 @@
   },
   "button": {
     "addFace": "Adaugă față",
-    "deleteFaceAttempts": "Șterge fețele"
+    "deleteFaceAttempts": "Șterge fețele",
+    "renameFace": "Redenumește fața",
+    "uploadImage": "Încarcă imagine",
+    "deleteFace": "Șterge fața",
+    "reprocessFace": "Reprocesează fața"
   },
-  "selectItem": "Selectează {{item}}"
+  "selectItem": "Selectează {{item}}",
+  "toast": {
+    "success": {
+      "deletedName_one": "{{count}} față a fost ștearsă cu succes.",
+      "deletedName_few": "{{count}} fețe au fost șterse cu succes.",
+      "deletedName_other": "{{count}} de fețe au fost șterse cu succes.",
+      "trainedFace": "Față antrenată cu succes.",
+      "renamedFace": "Fața a fost redenumită cu succes ca {{name}}",
+      "updatedFaceScore": "Scorul feței a fost actualizat cu succes.",
+      "deletedFace_one": "{{count}} față a fost ștersă cu succes.",
+      "deletedFace_few": "{{count}} fețe au fost șterse cu succes.",
+      "deletedFace_other": "{{count}} de fețe au fost șterse cu succes.",
+      "uploadedImage": "Imagine încărcată cu succes.",
+      "addFaceLibrary": "{{name}} a fost adăugat(ă) cu succes la biblioteca de fețe!"
+    },
+    "error": {
+      "addFaceLibraryFailed": "Setarea numelui feței a eșuat: {{errorMessage}}",
+      "deleteFaceFailed": "Ștergerea a eșuat: {{errorMessage}}",
+      "deleteNameFailed": "Ștergerea numelui a eșuat: {{errorMessage}}",
+      "renameFaceFailed": "Redenumirea feței a eșuat: {{errorMessage}}",
+      "trainFailed": "Antrenarea a eșuat: {{errorMessage}}",
+      "uploadingImageFailed": "Încărcarea imaginii a eșuat: {{errorMessage}}",
+      "updateFaceScoreFailed": "Nu s-a putut actualiza scorul feței: {{errorMessage}}"
+    }
+  },
+  "imageEntry": {
+    "dropActive": "Trage imaginea aici…",
+    "dropInstructions": "Trage și plasează o imagine aici sau fă clic pentru a selecta",
+    "maxSize": "Dimensiunea maximă: {{size}}MB",
+    "validation": {
+      "selectImage": "Te rog să selectezi un fișier imagine."
+    }
+  },
+  "trainFaceAs": "Antrenează fața ca:",
+  "trainFace": "Antrenează fața",
+  "readTheDocs": "Citește documentația",
+  "nofaces": "Nu sunt fețe disponibile",
+  "pixels": "{{area}}px"
 }
