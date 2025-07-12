@@ -623,7 +623,7 @@
       "title": "Vogel Klassifizierung",
       "desc": "Die Vogelklassifizierung identifiziert bekannte Vögel mithilfe eines quantisierten Tensorflow-Modells. Wenn ein bekannter Vogel erkannt wird, wird sein allgemeiner Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten."
     },
-    "title": "Verbesserugsseinstellungen",
+    "title": "Anreicherungseinstellungen",
     "unsavedChanges": "Ungesicherte geänderte Verbesserungseinstellungen",
     "semanticSearch": {
       "reindexNow": {
