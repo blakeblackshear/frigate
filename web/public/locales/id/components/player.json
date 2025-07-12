@@ -8,6 +8,13 @@
   "noRecordingsFoundForThisTime": "Tidak ada Rekaman pada waktu ini",
   "livePlayerRequiredIOSVersion": "iOS 17.1 atau yang lebih tinggi diperlukan untuk tipe siaran langsung ini.",
   "streamOffline": {
-    "title": "Stream Tidak Aktif"
+    "title": "Stream Tidak Aktif",
+    "desc": "Tidak ada gambar yang diterima dari strim <code>detect</code> {{cameraName}}, mohon lihat log error"
+  },
+  "cameraDisabled": "Kamera dinonaktifkan",
+  "stats": {
+    "streamType": {
+      "title": "Tipe stream:"
+    }
   }
 }

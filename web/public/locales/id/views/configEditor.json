@@ -11,5 +11,6 @@
     "error": {
       "savingError": "Gagal menyimpan konfigurasi"
     }
-  }
+  },
+  "confirm": "Keluar tanpa menyimpan?"
 }

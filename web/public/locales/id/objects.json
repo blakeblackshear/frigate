@@ -5,5 +5,8 @@
   "motorcycle": "Motor",
   "airplane": "Pesawat",
   "bus": "Bis",
-  "train": "Kereta"
+  "train": "Kereta",
+  "boat": "Kapal",
+  "traffic_light": "Lampu Lalu Lintas",
+  "fire_hydrant": "Hidran Kebakaran"
 }

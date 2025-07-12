@@ -11,7 +11,12 @@
       }
     },
     "name": {
-      "label": "Nama"
+      "label": "Nama",
+      "placeholder": "Masukkan nama…",
+      "errorMessage": {
+        "mustLeastCharacters": "Nama grup kamera minimal harus 2 karakter.",
+        "exists": "Nama grup kamera sudah ada."
+      }
     }
   }
 }
