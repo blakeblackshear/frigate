@@ -12,11 +12,13 @@
   "zones": {
     "label": "Zoner",
     "all": {
-      "title": "Alla zoner"
+      "title": "Alla zoner",
+      "short": "Soner"
     }
   },
   "features": {
-    "hasSnapshot": "Har ögonblicksbild"
+    "hasSnapshot": "Har ögonblicksbild",
+    "hasVideoClip": "Har ett video klipp"
   },
   "sort": {
     "dateAsc": "Datum (Stigande)",
@@ -62,11 +64,21 @@
   "score": "Poäng",
   "dates": {
     "all": {
-      "short": "Datum"
+      "short": "Datum",
+      "title": "Alla datum"
     }
   },
   "recognizedLicensePlates": {
     "noLicensePlatesFound": "Inga registreringsplåtar hittade.",
     "selectPlatesFromList": "Välj en eller flera registreringsplåtar från listan."
-  }
+  },
+  "more": "Flera filter",
+  "reset": {
+    "label": "Nollställ filter"
+  },
+  "subLabels": {
+    "label": "Under kategori",
+    "all": "Alla under kategorier"
+  },
+  "estimatedSpeed": "Estimerad hastighet ({{unit}})"
 }
