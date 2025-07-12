@@ -6,7 +6,10 @@
     "enrichments": "Statistik Enrichment - Frigate",
     "logs": {
       "frigate": "Log Frigate - Frigate",
-      "go2rtc": "Log Go2RTC - Frigate"
+      "go2rtc": "Log Go2RTC - Frigate",
+      "nginx": "Log NGINX - Frigate"
     }
-  }
+  },
+  "title": "Sistem",
+  "metrics": "Metrik sistem"
 }

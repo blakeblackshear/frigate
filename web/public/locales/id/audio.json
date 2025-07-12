@@ -26,5 +26,6 @@
   "motorcycle": "Motor",
   "bicycle": "Sepeda",
   "bus": "Bis",
-  "train": "Kereta"
+  "train": "Kereta",
+  "boat": "Kapal"
 }

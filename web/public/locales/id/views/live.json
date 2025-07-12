@@ -7,6 +7,15 @@
     "disable": "Nonaktifkan Komunikasi Dua Arah"
   },
   "cameraAudio": {
-    "enable": "Nyalakan Audio Kamera"
+    "enable": "Nyalakan Audio Kamera",
+    "disable": "Matikan Audio Kamera"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Klik kotak ini untuk menengahkan kamera",
+        "enable": "Aktifkan klik untuk bergerak"
+      }
+    }
   }
 }
