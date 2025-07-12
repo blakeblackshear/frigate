@@ -101,7 +101,7 @@
   "notifications": "通知",
   "audio": "音频",
   "suspend": {
-    "forTime": "暂停时长："
+    "forTime": "暂停时长： "
   },
   "stream": {
     "title": "视频流",
