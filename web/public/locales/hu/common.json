@@ -39,7 +39,40 @@
     "month_one": "{{time}} hónap",
     "month_other": "{{time}} hónapok",
     "day_one": "{{time}} nap",
-    "day_other": "{{time}} napok"
+    "day_other": "{{time}} napok",
+    "formattedTimestamp": {
+      "24hour": "HHH n, ÓÓ:pp:mm",
+      "12hour": "HHH d, ó:pp:mm aaa"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "HHH d, éééé",
+      "24hour": "HHH n, éééé"
+    },
+    "formattedTimestampHourMinute": {
+      "24hour": "ÓÓ:pp",
+      "12hour": "ó:pp aaa"
+    },
+    "formattedTimestamp2": {
+      "24hour": "n HHH ÓÓ:pp:mm",
+      "12hour": "HH/NN ó:pp:mma"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "24hour": "ÓÓ:pp:mm",
+      "12hour": "ó:pp:mm aaa"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "24hour": "HHH n éééé, ÓÓ:pp",
+      "12hour": "HHH n éééé, ó:pp aaa"
+    },
+    "formattedTimestampFilename": {
+      "24hour": "HH-nn-éé-ÓÓ-pp-mm",
+      "12hour": "HH-nn-éé-ó-pp-mm-a"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "24hour": "HHH n, ÓÓ:pp",
+      "12hour": "HHH n, ó:pp aaa"
+    },
+    "formattedTimestampMonthDay": "HHH n"
   },
   "menu": {
     "darkMode": {
@@ -79,7 +112,37 @@
       "ca": "Katalán",
       "withSystem": {
         "label": "Használd a rendszerbeállításoknál megadott nyelvet"
-      }
+      },
+      "sk": "Szlovák",
+      "da": "Dán",
+      "yue": "Kantoni",
+      "hi": "Hindi",
+      "vi": "Vietnámi",
+      "fa": "Perzsa",
+      "pl": "Lengyel",
+      "en": "Angol",
+      "es": "Spanyol",
+      "uk": "Ukrán",
+      "ja": "Japán",
+      "tr": "Török",
+      "it": "Olasz",
+      "nl": "Holland",
+      "sv": "Svéd",
+      "he": "Héber",
+      "el": "Görög",
+      "fr": "Francia",
+      "nb": "Norvég",
+      "cs": "Cseh",
+      "ko": "Koreai",
+      "zhCN": "Egyszerűsített kínai",
+      "ar": "Arab",
+      "pt": "Portugál",
+      "ru": "Orosz",
+      "de": "Német",
+      "ro": "Román",
+      "hu": "Magyar",
+      "fi": "Finn",
+      "th": "Thai"
     },
     "uiPlayground": "UI játszótér",
     "faceLibrary": "Arc Könyvtár",
@@ -94,7 +157,14 @@
       }
     },
     "review": "Áttekintés",
-    "appearance": "Megjelenés"
+    "appearance": "Megjelenés",
+    "languages": "Nyelvek",
+    "configurationEditor": "Konfiguráció Kezelő",
+    "systemMetrics": "Rendszer metrikák",
+    "system": "Rendszer",
+    "configuration": "Konfiguráció",
+    "systemLogs": "Rendszer naplók",
+    "settings": "Beállítások"
   },
   "role": {
     "viewer": "Néző",
@@ -134,5 +204,55 @@
       }
     }
   },
-  "selectItem": "KIválasztani {{item}}-et"
+  "selectItem": "KIválasztani {{item}}-et",
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "láb",
+      "meters": "méter"
+    }
+  },
+  "button": {
+    "save": "Mentés",
+    "saving": "Mentés…",
+    "disable": "Kikapcsol",
+    "close": "Bezár",
+    "copy": "Másolás",
+    "back": "Vissza",
+    "apply": "Alkalmazás",
+    "done": "Kész",
+    "reset": "Visszaállítás",
+    "enabled": "Engedélyezve",
+    "enable": "Engedélyez",
+    "disabled": "Kikapcsolva",
+    "cancel": "Mégsem",
+    "fullscreen": "Teljes képernyő",
+    "history": "Előzmények",
+    "exitFullscreen": "Kilépés a Teljes Képernyőből",
+    "no": "Nem",
+    "download": "Letöltés",
+    "off": "KI",
+    "info": "Infó",
+    "twoWayTalk": "Kétirányú kommunikáció",
+    "pictureInPicture": "Kép a Képben",
+    "cameraAudio": "Kamera Hang",
+    "on": "BE",
+    "edit": "Módosít",
+    "copyCoordinates": "Koordináták másolása",
+    "delete": "Törlés",
+    "yes": "Igen",
+    "unsuspended": "Bekapcsol",
+    "suspended": "Felfüggesztve",
+    "play": "Lejátszás",
+    "unselect": "Kijelölés megszüntetése",
+    "export": "Exportálás",
+    "deleteNow": "Törlés Most",
+    "next": "Következő"
+  },
+  "label": {
+    "back": "Vissza"
+  }
 }
