@@ -7,10 +7,23 @@
       "estimatedTime": "Beräknad återstående tid:",
       "finishingShortly": "Snart klar"
     },
-    "title": "Utforska är inte tillgänglig"
+    "title": "Utforska är inte tillgänglig",
+    "downloadingModels": {
+      "setup": {
+        "textModel": "Text modell"
+      },
+      "tips": {
+        "documentation": "Läs dokumentationen"
+      },
+      "error": "Ett fel har inträffat. Kontrollera Frigate loggarna."
+    }
   },
   "details": {
     "timestamp": "tidsstämpel"
   },
-  "exploreMore": "Utforska fler {{label}} objekt"
+  "exploreMore": "Utforska fler {{label}} objekt",
+  "type": {
+    "details": "detaljer",
+    "video": "video"
+  }
 }

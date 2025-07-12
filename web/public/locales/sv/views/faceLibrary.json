@@ -4,7 +4,8 @@
     "confidence": "Säkerhet",
     "face": "Ansiktsdetaljer",
     "timestamp": "tidsstämpel",
-    "faceDesc": "Detaljer för ansiktet och tillhörande objekt"
+    "faceDesc": "Detaljer för ansiktet och tillhörande objekt",
+    "unknown": "Okänt"
   },
   "description": {
     "placeholder": "Ange ett namn för denna samling",
@@ -30,5 +31,6 @@
     "title": "Ladda upp ansiktsbild",
     "desc": "Ladda upp en bild för att skanna efter ansikte och inkludera {{pageToggle}}"
   },
-  "selectItem": "Välj {{item}}"
+  "selectItem": "Välj {{item}}",
+  "collections": "Samlingar"
 }
