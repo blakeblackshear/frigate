@@ -148,23 +148,27 @@
         "desc": "Habilita l'estimació de velocitat per a objectes dins d'aquesta zona. La zona ha de tenir exactament 4 punts."
       },
       "inertia": {
-        "title": "Inèrcia"
+        "title": "Inèrcia",
+        "desc": "Especifica quants fotogrames ha d’estar un objecte dins d’una zona abans de considerar-se que hi és. <em>Per defecte: 3</em>"
       },
       "point_one": "{{count}} punt",
       "point_many": "{{count}} punts",
       "point_other": "{{count}} punts",
       "name": {
         "inputPlaceHolder": "Introduïu un nom…",
-        "title": "Nom"
+        "title": "Nom",
+        "tips": "El nom ha de tenir almenys 2 caràcters i no pot coincidir amb el nom d'una càmera ni amb el d'una altra zona."
       },
       "label": "Zones",
       "desc": {
-        "documentation": "Documentació"
+        "documentation": "Documentació",
+        "title": "Les zones permeten definir una àrea específica de la imatge per tal de determinar si un objecte es troba dins d'una àrea concreta o no."
       },
       "add": "Afegir Zona",
       "edit": "Editar zona",
       "loiteringTime": {
-        "title": "Temps de merodeig"
+        "title": "Temps de merodeig",
+        "desc": "Estableix el temps mínim, en segons, que l'objecte ha d'estar dins la zona perquè s'activi. <em>Per defecte: 0</em>"
       },
       "allObjects": "Tots els objectes",
       "documentTitle": "Edita zona - Frigate",
@@ -188,10 +192,12 @@
     },
     "motionMasks": {
       "desc": {
-        "documentation": "Documentació"
+        "documentation": "Documentació",
+        "title": "Les màscares de moviment s’utilitzen per evitar que certs tipus de moviment no desitjats activin la detecció. Si s’aplica una màscara excessiva, es dificultarà el seguiment dels objectes."
       },
       "context": {
-        "documentation": "Llegir la documentació"
+        "documentation": "Llegir la documentació",
+        "title": "Les màscares de moviment s’utilitzen per evitar que certs tipus de moviment no desitjats activin la detecció (per exemple: branques d’arbres, marques temporals). Les màscares de moviment s’han d’utilitzar <em>amb molta moderació</em>, un excés de màscares dificultarà el seguiment dels objectes."
       },
       "polygonAreaTooLarge": {
         "documentation": "Llegir la documentació",
@@ -199,7 +205,7 @@
         "title": "La màscara de moviment cobreix el {{polygonArea}}% del camp de visió de la càmera. Les màscares de moviment molt grans no son recomanables."
       },
       "point_one": "{{count}} punt",
-      "point_many": "",
+      "point_many": "{{count}} punts",
       "point_other": "{{count}} punts",
       "label": "Màscara de moviment",
       "add": "Nova màscara de moviment",
@@ -254,11 +260,13 @@
   "notification": {
     "email": {
       "title": "Correu electrònic",
-      "placeholder": "p. ex. exemple@email.com"
+      "placeholder": "p. ex. exemple@email.com",
+      "desc": "Es requereix un correu electrònic vàlid que s’utilitzarà per notificar-te si hi ha algun problema amb el servei de notificacions push."
     },
     "notificationSettings": {
       "documentation": "Llegir la documentació",
-      "title": "Paràmetres de notificació"
+      "title": "Paràmetres de notificació",
+      "desc": "Frigate pot enviar notificacions push directament al teu dispositiu quan s’executa des del navegador o està instal·lat com a PWA (aplicació web progressiva)."
     },
     "deviceSpecific": "Paràmetres específics del dispositiu",
     "registerDevice": "Registrar aquest dispositiu",
@@ -276,7 +284,8 @@
     },
     "toast": {
       "success": {
-        "settingSaved": "Els paràmetres de notificacions s'han desat."
+        "settingSaved": "Els paràmetres de notificacions s'han desat.",
+        "registered": "Registre de notificacions realitzat amb èxit. Cal reiniciar Frigate perquè es puguin enviar notificacions (inclosa una notificació de prova)."
       },
       "error": {
         "registerFailed": "No s'ha pogut desar el registre de notificacions."
@@ -290,7 +299,8 @@
     "title": "Notificacions",
     "notificationUnavailable": {
       "title": "Notificacions no disponibles",
-      "documentation": "Llegir la documentació"
+      "documentation": "Llegir la documentació",
+      "desc": "Les notificacions push web requereixen un context segur (<code>https://…</code>). Aquesta és una limitació del navegador. Accedeix a Frigate de manera segura per utilitzar les notificacions."
     },
     "unsavedChanges": "Canvis de notificació no desats",
     "globalSettings": {
@@ -304,7 +314,8 @@
   },
   "camera": {
     "streams": {
-      "title": "Transmissions"
+      "title": "Transmissions",
+      "desc": "Desactiva temporalment una càmera fins que es reiniciï Frigate. La desactivació d'una càmera atura completament el processament de les transmissions d'aquesta càmera per part de Frigate. La detecció, gravació i depuració no estaran disponibles.<br /><em>Nota: Això no desactiva les retransmissions de go2rtc.</em>"
     },
     "title": "Paràmetres de la càmera",
     "reviewClassification": {
@@ -321,25 +332,32 @@
         "success": "S'ha desat la configuració de la classificació de revisió. Reinicia Frigate per aplicar els canvis."
       },
       "zoneObjectDetectionsTips": {
-        "text": "Tots els objectes {{detectionsLabels}} no classificats a la {{zone}} de {{cameraName}} es mostraràn com a Deteccions."
-      }
+        "text": "Tots els objectes {{detectionsLabels}} no classificats a la {{zone}} de {{cameraName}} es mostraràn com a Deteccions.",
+        "notSelectDetections": "Tots els objectes {{detectionsLabels}} detectats a {{zone}} de la càmera {{cameraName}} que no estiguin categoritzats com a Alertes es mostraran com a Deteccions, independentment de la zona en què es trobin.",
+        "regardlessOfZoneObjectDetectionsTips": "Tots els objectes {{detectionsLabels}} no categoritzats a {{cameraName}} es mostraran com a Deteccions independentment de la zona en què es trobin."
+      },
+      "objectDetectionsTips": "Tots els objectes {{detectionsLabels}} no categoritzats a {{cameraName}} es mostraran com a Deteccions independentment de la zona en què es trobin.",
+      "desc": "Frigate categoritza els elements de revisió com a Alertes i Deteccions. Per defecte, tots els objectes de tipus <em>persona</em> i <em>cotxe</em> es consideren Alertes. Pots afinar la categorització dels teus elements de revisió configurant zones requerides per a aquests."
     },
     "review": {
       "alerts": "Alertes ",
       "detections": "Deteccions ",
-      "title": "Revisar"
+      "title": "Revisar",
+      "desc": "Habilita o deshabilita temporalment les alertes i deteccions per a aquesta càmera fins que es reiniciï Frigate. Quan estigui desactivat, no es generaran nous elements de revisió. "
     }
   },
   "motionDetectionTuner": {
     "Threshold": {
-      "title": "Llindar"
+      "title": "Llindar",
+      "desc": "El valor del llindar determina quanta variació en la luminància d’un píxel cal perquè es consideri moviment. <em>Per defecte: 30</em>"
     },
     "contourArea": {
       "title": "Àrea de contorn",
       "desc": "El valor de l’àrea del contorn s’utilitza per decidir quins grups de píxels canviats es consideren moviment. <em>Valor per defecte: 10</em>"
     },
     "desc": {
-      "documentation": "Llegeix la guia d'ajust de detecció de moviment"
+      "documentation": "Llegeix la guia d'ajust de detecció de moviment",
+      "title": "Frigate utilitza la detecció de moviment com a primer filtre per comprovar si hi ha alguna activitat a la imatge que valgui la pena analitzar amb la detecció d’objectes."
     },
     "improveContrast": {
       "title": "Millorar contrast",
@@ -362,7 +380,8 @@
     },
     "regions": {
       "title": "Regions",
-      "desc": "Mostre un requadre de la regió d'interés enviat al detector d'objectes"
+      "desc": "Mostre un requadre de la regió d'interés enviat al detector d'objectes",
+      "tips": "<p><strong>Requadres de Regió</strong></p><br><p>Requadres verds es sobreposaran a les àrees d’interès de la imatge que s'envien al detector d’objectes.</p>"
     },
     "objectShapeFilterDrawing": {
       "score": "Puntuació",
@@ -370,7 +389,8 @@
       "ratio": "Proporció",
       "area": "Àrea",
       "title": "Dibuix del filtre de forma de l'objecte",
-      "desc": "Dibuixa un rectangle a la imatge per veure detalls d'àrea i proporció"
+      "desc": "Dibuixa un rectangle a la imatge per veure detalls d'àrea i proporció",
+      "tips": "Habilita aquesta opció per dibuixar un rectangle a la imatge de la càmera que mostri la seva àrea i proporció. Aquests valors es poden utilitzar després per configurar els paràmetres del filtre de forma d’objecte a la teva configuració."
     },
     "zones": {
       "title": "Zones",
@@ -383,7 +403,8 @@
     "boundingBoxes": {
       "title": "Caixes delimitadores",
       "colors": {
-        "label": "Colors de la caixa delimitadora de l'objecte"
+        "label": "Colors de la caixa delimitadora de l'objecte",
+        "info": "<li>En iniciar, s'assignarà un color diferent a cada etiqueta d’objecte</li> <li>Una línia fina de color blau fosc indica que l’objecte no està detectat en aquest moment</li> <li>Una línia fina de color gris indica que l’objecte està detectat com a estacionari</li> <li>Una línia gruixuda indica que l’objecte és el subjecte de l’autoseguiment (quan està activat)</li>"
       },
       "desc": "Mostra les caixes delimitadores al voltant dels objectes rastrejats"
     },
@@ -392,7 +413,8 @@
       "desc": "Mostra requadres al voltant de les àrees on s'ha detectat moviment",
       "tips": "<p><strong>Caixes de moviment</strong></p><br><p>Es sobreposaran requadres vermells a les àrees del fotograma on actualment s’estigui detectant moviment.</p>"
     },
-    "detectorDesc": "Frigate fa servir els teus detectors ({{detectors}}) per a detectar objectes a les imatges de la teva càmera."
+    "detectorDesc": "Frigate fa servir els teus detectors ({{detectors}}) per a detectar objectes a les imatges de la teva càmera.",
+    "desc": "La vista de depuració mostra en temps real els objectes rastrejats i les seves estadístiques. La llista d’objectes mostra un resum amb retard temporal dels objectes detectats."
   },
   "users": {
     "table": {
@@ -500,7 +522,8 @@
       },
       "title": "Configuració d'instantànies",
       "documentation": "Llegir la documentació",
-      "desc": "Per a enviar a Frigate+ fa falta que tan la instantània com la instantània <code>clean_copy</code> estiguin habilitades a la configuració."
+      "desc": "Per a enviar a Frigate+ fa falta que tan la instantània com la instantània <code>clean_copy</code> estiguin habilitades a la configuració.",
+      "cleanCopyWarning": "Algunes càmeres tenen les captures d'imatge activades però la còpia neta desactivada. Cal habilitar <code>clean_copy</code> a la configuració de captures per poder enviar imatges d’aquestes càmeres a Frigate+."
     },
     "modelInfo": {
       "baseModel": "Model base",
@@ -516,7 +539,8 @@
       },
       "loadingAvailableModels": "Carregant models disponibles…",
       "loading": "Carregant informació del model…",
-      "error": "No s'ha pogut carregar la informació del model"
+      "error": "No s'ha pogut carregar la informació del model",
+      "modelSelect": "Els models disponibles a Frigate+ es poden seleccionar aquí. Tingues en compte que només es poden triar els models compatibles amb la configuració actual del detector."
     },
     "apiKey": {
       "plusLink": "Llegeix més sobre Frigate+",
@@ -537,7 +561,8 @@
     "semanticSearch": {
       "modelSize": {
         "small": {
-          "title": "petit"
+          "title": "petit",
+          "desc": "L’opció <em>small</em> fa servir una versió quantitzada del model que consumeix menys RAM i s’executa més ràpidament a la CPU, amb una diferència gairebé inapreciable en la qualitat de les incrustacions (embeddings)."
         },
         "label": "Mida del model",
         "large": {
@@ -574,12 +599,14 @@
         "desc": "La mida del model utilitzat per al reconeixement facial."
       },
       "readTheDocumentation": "Llegir la documentació",
-      "title": "Reconeixement de rostres"
+      "title": "Reconeixement de rostres",
+      "desc": "El reconeixement facial permet a les persones assignar noms i quan es reconeix la seva cara Frigate assignarà el nom de la persona com a subetiqueta. Aquesta informació s'inclou en la interfície d'usuari, filtres, així com en les notificacions."
     },
     "unsavedChanges": "Canvis dels paràmetres complementaris sense desar",
     "licensePlateRecognition": {
       "readTheDocumentation": "Llegir la documentació",
-      "title": "Reconeixement de matrícules"
+      "title": "Reconeixement de matrícules",
+      "desc": "Frigate pot reconèixer les plaques de matrícula en vehicles i afegir automàticament els caràcters detectats al camp de la placa reconeguda o un nom conegut com a sub_etiqueta en objectes que són de tipus cotxe. Un cas d'ús comú pot ser llegir les plaques de matrícula dels cotxes que entren en un lloc o els cotxes que passen per un carrer."
     },
     "birdClassification": {
       "title": "Classificació d'ocells",
