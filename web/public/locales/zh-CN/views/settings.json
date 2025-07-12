@@ -160,7 +160,7 @@
     },
     "reviewClassification": {
       "title": "核查分级",
-      "desc": "Frigate 将核查项分为“警报”和“检测”。默认情况下，所有的 <b>人</b>、<b>汽车</b> 对象都将视为警报。你可以通过修改配置文件配置区域来细分。",
+      "desc": "Frigate 将核查项分为“警报”和“检测”。默认情况下，所有的 <strong>人</strong>、<strong>汽车</strong> 对象都将视为警报。你可以通过修改配置文件配置区域来细分。",
       "readTheDocumentation": "阅读文档",
       "noDefinedZones": "该摄像头没有设置区域。",
       "objectAlertsTips": "所有 {{alertsLabels}} 对象在 {{cameraName}} 下都将显示为警报。",
@@ -304,7 +304,7 @@
       "add": "添加运动遮罩",
       "edit": "编辑运动遮罩",
       "context": {
-        "title": "运动遮罩用于防止不需要的运动类型触发检测（例如：树枝、摄像头显示的时间等）。运动遮罩需要<strong>谨慎使用</strong>，过度的遮罩会导致追踪对象变得更加困难。",
+        "title": "运动遮罩用于防止不需要的运动类型触发检测（例如：树枝、摄像头画面显示的时间等）。运动遮罩需要<strong>谨慎使用</strong>，过度的遮罩会导致追踪对象变得更加困难。",
         "documentation": "阅读文档"
       },
       "point_other": "{{count}} 点",
@@ -335,7 +335,7 @@
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
       "objects": {
         "title": "对象",
-        "desc": "将应用于此对象遮罩的对象列表。",
+        "desc": "将应用于此对象遮罩的对象类型。",
         "allObjectTypes": "所有对象类型"
       },
       "toast": {
@@ -638,11 +638,11 @@
         "desc": "用于语义搜索的语言模型大小。",
         "small": {
           "title": "小",
-          "desc": "使用 <strong>小</strong>模型。该模型将使用较少的内存，在CPU上也能较快的运行。质量较好。"
+          "desc": "将使用 <strong>小</strong>模型。该模型将使用少量的内存，在CPU上也能较快的运行，质量较好。"
         },
         "large": {
           "title": "大",
-          "desc": "使用 <strong>大</strong>模型。该模型采用了完整的Jina模型，并在适用的情况下使用GPU。"
+          "desc": "将使用 <strong>大</strong>模型。该选项使用了完整的Jina模型，在合适的时候将自动使用GPU。"
         }
       },
       "title": "分类搜索",
@@ -663,11 +663,11 @@
         "desc": "用于人脸识别的模型大小。",
         "small": {
           "title": "小",
-          "desc": "使用<strong>小</strong>模型将采用FaceNet人脸特征提取模型，可在大多数CPU上高效运行。"
+          "desc": "将使用<strong>小</strong>模型。该选项采用FaceNet人脸特征提取模型，可在大多数CPU上高效运行。"
         },
         "large": {
           "title": "大",
-          "desc": "使用<strong>大</strong>模型将采用ArcFace人脸特征提取模型，若条件允许将自动使用GPU运行。"
+          "desc": "将使用<strong>大</strong>模型。该选项使用ArcFace人脸特征提取模型，在需要的时候自动使用GPU运行。"
         }
       }
     },

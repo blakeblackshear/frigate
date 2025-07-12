@@ -150,7 +150,7 @@
       }
     }
   },
-  "lastRefreshed": "最后刷新时间：",
+  "lastRefreshed": "最后刷新时间： ",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} 的 FFmpeg CPU 使用率较高（{{ffmpegAvg}}%）",
     "detectHighCpuUsage": "{{camera}} 的 检测器 CPU 使用率较高（{{detectAvg}}%）",

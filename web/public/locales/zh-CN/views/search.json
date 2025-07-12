@@ -53,7 +53,7 @@
         "step5": "时间范围过滤器使用 {{exampleTime}} 格式；",
         "step6": "点击过滤器旁的'x'可移除该过滤选项。",
         "exampleLabel": "范例：",
-        "step1": "输入过滤键名后接冒号（例如 \"cameras:\" ）；",
+        "step1": "输入过滤键名后接英文冒号（例如 \"cameras:\" ）；",
         "step4": "日期过滤器（before: 和 after:）使用 {{DateFormat}} 格式；"
       }
     },
