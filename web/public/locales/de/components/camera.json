@@ -1,0 +1,86 @@
+{
+  "group": {
+    "delete": {
+      "label": "Kameragruppe löschen",
+      "confirm": {
+        "title": "Löschen bestätigen",
+        "desc": "Willst Du die Kameragruppe <em>{{name}}</em> wirklich löschen?"
+      }
+    },
+    "name": {
+      "label": "Name",
+      "placeholder": "Gib einen Namen ein…",
+      "errorMessage": {
+        "exists": "Name der Kameragruppe bereits vorhanden.",
+        "nameMustNotPeriod": "Name einer Kameragruppe darf keinen Punkt enthalten.",
+        "mustLeastCharacters": "Name einer Kameragruppe muss mindestens 2 Zeichen haben.",
+        "invalid": "Ungültiger Name für eine Kameragruppe."
+      }
+    },
+    "icon": "Icon",
+    "camera": {
+      "setting": {
+        "label": "Kamera Streaming Einstellungen",
+        "audioIsAvailable": "Audio ist für diesen Stream verfügbar",
+        "audioIsUnavailable": "Audio ist für diesen Stream nicht verfügbar",
+        "streamMethod": {
+          "label": "Streaming-Methode",
+          "method": {
+            "noStreaming": {
+              "label": "Kein Streaming",
+              "desc": "Kamerabilder werden nur einmal pro Minute aktualisiert und es wird kein Live Streaming geben."
+            },
+            "smartStreaming": {
+              "label": "Smart Streaming (empfohlen)",
+              "desc": "Smart Streaming wird Deine Kamera einmal in der Minute aktualisieren, wenn sich keine erkennbare Aktivität ereignet, um Bandbreite und Ressourcen zu schonen. Sobald eine Aktivität erkannt wird, wechselt das Standbild sofort zu einem Live Stream."
+            },
+            "continuousStreaming": {
+              "label": "Kontinuierliches Streaming",
+              "desc": {
+                "title": "Das auf einem Dashboard sichtbare Kamerabild ist immer ein Live Stream, selbst wenn keine Aktivität erkannt wird.",
+                "warning": "Kontinuierliches Streaming kann zu hoher Bandbreitenausnutzung und zu Performanceproblemen führen. Bitte behutsam nutzen."
+              }
+            }
+          },
+          "placeholder": "Wähle eine streaming Methode"
+        },
+        "title": "{{cameraName}} Streaming Einstellungen",
+        "compatibilityMode": {
+          "desc": "Aktiviere diese Option nur, falls der Live Stream Deiner Kamera Farbstörungen zeigt und eine Diagonale Linie auf der rechten Seite des Bildes hat.",
+          "label": "Kompatibilitätsmodus"
+        },
+        "audio": {
+          "tips": {
+            "title": "Audio muss in der Kamera verfügbar und in go2rtc für diesen Stream konfiguriert sein.",
+            "document": "Lies die Dokumentation. "
+          }
+        },
+        "desc": "Ändere die Live Stream Optionen für das Dashboard dieser Kameragruppe. <em>Diese Einstellungen sind geräte-/browserspezifisch.</em>",
+        "stream": "Stream",
+        "placeholder": "Wähle einen Stream"
+      }
+    },
+    "add": "Kameragruppe hinzufügen",
+    "cameras": {
+      "label": "Kameras",
+      "desc": "Wähle Kameras für diese Gruppe aus."
+    },
+    "label": "Kameragruppen",
+    "edit": "Kameragruppe bearbeiten",
+    "success": "Kameragruppe {{name}} wurde gespeichert."
+  },
+  "debug": {
+    "options": {
+      "title": "Optionen",
+      "hideOptions": "Verberge Optionen",
+      "label": "Einstellungen",
+      "showOptions": "Zeige Optionen"
+    },
+    "timestamp": "Zeitstempel",
+    "zones": "Zonen",
+    "mask": "Maske",
+    "motion": "Bewegung",
+    "regions": "Regionen",
+    "boundingBox": "Begrenzungsrechteck"
+  }
+}

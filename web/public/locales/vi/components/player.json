@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Không tìm thấy bản ghi nào cho thời điểm này",
+  "noPreviewFound": "Không tìm thấy bản xem trước",
+  "noPreviewFoundFor": "Không tìm thấy bản xem trước cho {{cameraName}}",
+  "stats": {
+    "droppedFrameRate": "Tỷ lệ khung hình bị rớt:",
+    "droppedFrames": {
+      "short": {
+        "title": "Bị rớt",
+        "value": "{{droppedFrames}} khung hình"
+      },
+      "title": "Khung hình bị rớt:"
+    },
+    "decodedFrames": "Khung hình đã giải mã:",
+    "latency": {
+      "short": {
+        "value": "{{seconds}} giây",
+        "title": "Độ trễ"
+      },
+      "title": "Độ trễ:",
+      "value": "{{seconds}} giây"
+    },
+    "totalFrames": "Tổng số khung hình:",
+    "streamType": {
+      "title": "Loại luồng:",
+      "short": "Loại"
+    },
+    "bandwidth": {
+      "title": "Băng thông:",
+      "short": "Băng thông"
+    }
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Đã gửi thành công khung hình tới Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Không gửi được khung hình tới Frigate+"
+    }
+  },
+  "submitFrigatePlus": {
+    "title": "Gửi khung hình này tới Frigate+?",
+    "submit": "Gửi"
+  },
+  "livePlayerRequiredIOSVersion": "Yêu cầu iOS 17.1 trở lên cho loại luồng trực tiếp này.",
+  "streamOffline": {
+    "title": "Luồng ngoại tuyến",
+    "desc": "Không nhận được khung hình nào trên luồng <code>detect</code> của {{cameraName}}, hãy kiểm tra nhật ký lỗi"
+  },
+  "cameraDisabled": "Camera đã bị tắt"
+}

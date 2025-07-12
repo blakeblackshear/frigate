@@ -1,0 +1,10 @@
+{
+  "person": "Pessoa",
+  "bicycle": "Bicicleta",
+  "car": "Carro",
+  "motorcycle": "Moto",
+  "airplane": "Avião",
+  "bus": "Ônibus",
+  "train": "Trem",
+  "boat": "Barco"
+}

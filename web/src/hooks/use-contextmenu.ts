@@ -33,6 +33,7 @@ export default function useContextMenu(
       };
     } else {
       const context = (e: MouseEvent) => {
+        e.stopPropagation();
         e.preventDefault();
         callback();
       };

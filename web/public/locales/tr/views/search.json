@@ -1,0 +1,74 @@
+{
+  "button": {
+    "save": "Aramayı kaydet",
+    "filterActive": "Fitreler açık",
+    "filterInformation": "Filtrele",
+    "clear": "Aramayı temizle",
+    "delete": "Kayıtlı aramayı sil"
+  },
+  "trackedObjectId": "Takip Edilen Nesne ID",
+  "filter": {
+    "label": {
+      "min_score": "Min. Skor",
+      "recognized_license_plate": "Tanınan Plaka",
+      "search_type": "Arama Türü",
+      "has_snapshot": "Fotoğrafı var",
+      "cameras": "Kameralar",
+      "max_score": "Maks. Skor",
+      "labels": "Etiketler",
+      "time_range": "Zaman Aralığı",
+      "before": "Önce",
+      "zones": "Alanlar",
+      "after": "Sonras",
+      "has_clip": "Klibi var",
+      "min_speed": "Min. Hız",
+      "sub_labels": "Alt Etiketler",
+      "max_speed": "Maks. Hız"
+    },
+    "searchType": {
+      "description": "Açıklama",
+      "thumbnail": "Küçük resim"
+    },
+    "tips": {
+      "title": "Metin filtreleri nasıl kullanılır",
+      "desc": {
+        "text": "Filtreler arama sonuçlarınızı daraltmanıza yardımcı olur. Giriş alanındaki kullanımları şöyledir:",
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"> <li>Bir filtre adı yazın ve iki nokta üst üste (:) ile bitirin (örn. \"kameralar:\").</li> <li>Önerilerden bir değer seçin veya kendiniz yazın.</li> <li>Birden fazla filtreyi aralarına boşluk koyarak art arda ekleyip kullanın.</li> <li>Tarih filtreleri (before: ve after:) <em>{{DateFormat}}</em> biçimini kullanır.</li> <li>Zaman aralığı filtresi <em>{{exampleTime}}</em> biçimini kullanır.</li> <li>Filtreleri kaldırmak için yanlarındaki 'x'e tıklayın.</li></ul>",
+        "example": "Örnek(anahtar kelimeler ingilizce olmalıdır): <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
+        "exampleLabel": "Örnek:",
+        "step1": "Bir filtre anahtarını iki nokta üst üste ile beraber yazın (örn. belli kameraları seçmek için \"cameras:\").",
+        "step2": "Önerilen bir değer seçin veya kendiniz girin.",
+        "step3": "Birden fazla filtreyi aralarında boşluk bırakarak kullanabilirsiniz.",
+        "step4": "Tarih filtreleri (before: ve after:) {{DateFormat}} formatını kullanır.",
+        "step5": "Zaman aralığı filtreleri {{exampleTime}} formatını kullanır.",
+        "step6": "Filtreleri kaldırmak için yanlarındaki çarpıya basın."
+      }
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "'Önce' tarihi 'sonra' tarihinden sonra olmalıdır.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Maksimum skor, minimum skora eşit veya daha fazla olmalıdır.",
+        "minScoreMustBeLessOrEqualMaxScore": "Minimum skor, maksimum skora eşit veya daha az olmalıdır.",
+        "afterDatebeEarlierBefore": "'Sonra' tarihi 'Önce' tarihinden önce olmalıdır.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Maksimum hız, minimum hıza eşit veya daha fazla olmalıdır.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Minimum hız, maksimum hıza eşit veya daha az olmalıdır."
+      }
+    },
+    "header": {
+      "noFilters": "Filtreler",
+      "activeFilters": "Aktif Filtreler",
+      "currentFilterType": "Değerleri Filtrele"
+    }
+  },
+  "placeholder": {
+    "search": "Ara…"
+  },
+  "similaritySearch": {
+    "active": "Benzerlik araması aktif",
+    "title": "Benzerlik Araması",
+    "clear": "Benzerlik aramasını temizle"
+  },
+  "searchFor": "{{inputValue}} için Arat",
+  "search": "Arama",
+  "savedSearches": "Kayıtlı Aramalar"
+}

@@ -1,0 +1,18 @@
+{
+  "filter": "Filtro",
+  "labels": {
+    "label": "Rótulos",
+    "all": {
+      "title": "Todas as Etiquetas",
+      "short": "Etiquetas"
+    },
+    "count_one": "{{count}} Etiqueta",
+    "count_other": "{{count}} Etiquetas"
+  },
+  "zones": {
+    "label": "Zonas",
+    "all": {
+      "title": "Todas as Zonas"
+    }
+  }
+}

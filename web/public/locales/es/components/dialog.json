@@ -1,0 +1,126 @@
+{
+  "restart": {
+    "restarting": {
+      "title": "Frigate se está reiniciando",
+      "button": "Forzar recarga ahora",
+      "content": "Esta página se recargará en {{countdown}} segundos."
+    },
+    "title": "¿Estás seguro de que quieres reiniciar Frigate?",
+    "button": "Reiniciar"
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Enviar a Frigate+",
+        "desc": "Los objetos en ubicaciones que deseas evitar no son falsos positivos. Enviarlos como falsos positivos confundirá al modelo."
+      },
+      "review": {
+        "false": {
+          "label": "No confirmar esta etiqueta para Frigate Plus",
+          "false_one": "Esto no es un {{label}}",
+          "false_many": "Esto no es un {{label}}",
+          "false_other": "Esto no es un {{label}}"
+        },
+        "true": {
+          "true_one": "Esto es un {{label}}",
+          "true_many": "Esto es un {{label}}",
+          "true_other": "Esto es un {{label}}",
+          "label": "Confirmar esta etiqueta para Frigate+"
+        },
+        "state": {
+          "submitted": "Enviado"
+        },
+        "question": {
+          "label": "Confirmar esta etiqueta para Frigate Plus",
+          "ask_a": "¿Es este objeto un <code>{{label}}</code>?",
+          "ask_an": "¿Es este objeto un <code>{{label}}</code>?",
+          "ask_full": "¿Es este objeto un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Ver en el historial"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Seleccionar desde la línea de tiempo",
+      "lastHour_one": "Última hora",
+      "lastHour_many": "Últimas {{count}} horas",
+      "lastHour_other": "Últimas {{count}} horas",
+      "custom": "Personalizado",
+      "start": {
+        "title": "Hora de inicio",
+        "label": "Seleccionar hora de inicio"
+      },
+      "end": {
+        "title": "Hora de finalización",
+        "label": "Seleccionar hora de finalización"
+      }
+    },
+    "name": {
+      "placeholder": "Nombrar la exportación"
+    },
+    "select": "Seleccionar",
+    "export": "Exportar",
+    "toast": {
+      "error": {
+        "failed": "No se pudo iniciar la exportación: {{error}}",
+        "noVaildTimeSelected": "No se seleccionó un rango de tiempo válido.",
+        "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio."
+      },
+      "success": "Exportación iniciada con éxito. Ver el archivo en la carpeta /exports."
+    },
+    "fromTimeline": {
+      "saveExport": "Guardar exportación",
+      "previewExport": "Vista previa de la exportación"
+    },
+    "selectOrExport": "Seleccionar o exportar"
+  },
+  "streaming": {
+    "restreaming": {
+      "disabled": "La retransmisión no está habilitada para esta cámara.",
+      "desc": {
+        "title": "Configura go2rtc para opciones adicionales de vista en vivo y audio para esta cámara.",
+        "readTheDocumentation": "Leer la documentación"
+      }
+    },
+    "debugView": "Vista de depuración",
+    "label": "Transmisión",
+    "showStats": {
+      "label": "Mostrar estadísticas de transmisión",
+      "desc": "Habilita esta opción para mostrar las estadísticas de transmisión como una superposición en la imagen de la cámara."
+    }
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Guardar búsqueda",
+      "desc": "Proporciona un nombre para esta búsqueda guardada.",
+      "overwrite": "{{searchName}} ya existe. Guardar sobrescribirá el valor existente.",
+      "success": "La búsqueda ({{searchName}}) ha sido guardada.",
+      "button": {
+        "save": {
+          "label": "Guardar esta búsqueda"
+        }
+      },
+      "placeholder": "Introduce un nombre para tu búsqueda"
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Confirmar eliminación",
+      "desc": {
+        "selected": "¿Estás seguro de que quieres eliminar todo el video grabado asociado con este elemento de revisión?<br /><br />Mantén presionada la tecla <em>Shift</em> para omitir este diálogo en el futuro."
+      },
+      "toast": {
+        "success": "El metraje de video asociado con los elementos de revisión seleccionados se ha eliminado con éxito.",
+        "error": "No se pudo eliminar: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Exportar",
+      "markAsReviewed": "Marcar como revisado",
+      "deleteNow": "Eliminar ahora"
+    }
+  }
+}

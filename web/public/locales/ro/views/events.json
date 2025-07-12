@@ -1,0 +1,38 @@
+{
+  "alerts": "Alerte",
+  "motion": {
+    "label": "Miscare",
+    "only": "Doar Miscare"
+  },
+  "allCameras": "Toate Camerele",
+  "empty": {
+    "alert": "Nu sunt alerte de revizuit",
+    "detection": "Nu sunt detectii de revizuit",
+    "motion": "Nu au fost gasite date despre miscare"
+  },
+  "timeline": "Cronologie",
+  "timeline.aria": "Selecteaza Cronologie",
+  "events": {
+    "aria": "Selecteaza Evenimente",
+    "noFoundForTimePeriod": "Niciun eveniment gasit pentru acest interval de timp.",
+    "label": "Evenimente"
+  },
+  "documentTitle": "Revizuieste - Frigate",
+  "recordings": {
+    "documentTitle": "Inregistrari - frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Ultimele 24 de ore"
+  },
+  "markAsReviewed": "Marcheaza ca Revizuit",
+  "markTheseItemsAsReviewed": "Marcheaza aceste articole ca revizuite",
+  "newReviewItems": {
+    "label": "Vezi articole noi de revizuit",
+    "button": "Articole Noi de Revizuit"
+  },
+  "camera": "Camera foto",
+  "detections": "Detectii",
+  "detected": "detectat",
+  "selected_one": "{{count}} selectate",
+  "selected_other": "{{count}} selectate"
+}

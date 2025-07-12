@@ -50,11 +50,17 @@ export type SearchResult = {
     score: number;
     sub_label_score?: number;
     region: number[];
+    attributes?: [{ box: number[]; label: string; score: number }];
     box: number[];
     area: number;
     ratio: number;
     type: "object" | "audio" | "manual";
     description?: string;
+    average_estimated_speed: number;
+    velocity_angle: number;
+    path_data: [number[], number][];
+    recognized_license_plate?: string;
+    recognized_license_plate_score?: number;
   };
 };
 
@@ -63,11 +69,14 @@ export type SearchFilter = {
   cameras?: string[];
   labels?: string[];
   sub_labels?: string[];
+  recognized_license_plate?: string[];
   zones?: string[];
   before?: number;
   after?: number;
   min_score?: number;
   max_score?: number;
+  min_speed?: number;
+  max_speed?: number;
   has_snapshot?: number;
   has_clip?: number;
   is_submitted?: number;
@@ -84,11 +93,14 @@ export type SearchQueryParams = {
   cameras?: string[];
   labels?: string[];
   sub_labels?: string[];
+  recognized_license_plate?: string[];
   zones?: string[];
   before?: string;
   after?: string;
   min_score?: number;
   max_score?: number;
+  min_speed?: number;
+  max_speed?: number;
   search_type?: string;
   limit?: number;
   in_progress?: number;

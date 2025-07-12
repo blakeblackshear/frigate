@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from .base import FrigateBaseModel
 from .env import EnvString
@@ -11,6 +11,10 @@ __all__ = ["ProxyConfig", "HeaderMappingConfig"]
 class HeaderMappingConfig(FrigateBaseModel):
     user: str = Field(
         default=None, title="Header name from upstream proxy to identify user."
+    )
+    role: str = Field(
+        default=None,
+        title="Header name from upstream proxy to identify user role.",
     )
 
 
@@ -26,3 +30,17 @@ class ProxyConfig(FrigateBaseModel):
         default=None,
         title="Secret value for proxy authentication.",
     )
+    default_role: Optional[str] = Field(
+        default="viewer", title="Default role for proxy users."
+    )
+    separator: Optional[str] = Field(
+        default=",",
+        title="The character used to separate values in a mapped header.",
+    )
+
+    @field_validator("separator", mode="before")
+    @classmethod
+    def validate_separator_length(cls, v):
+        if v is not None and len(v) != 1:
+            raise ValueError("Separator must be exactly one character")
+        return v

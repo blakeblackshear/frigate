@@ -1,0 +1,13 @@
+{
+  "documentTitle": "Explorar - Frigate",
+  "generativeAI": "IA Generativa",
+  "exploreMore": "Explorar mais objetos {{label}}",
+  "exploreIsUnavailable": {
+    "title": "Explorar não está disponível",
+    "embeddingsReindexing": {
+      "context": "Explorar pode ser usado depois da incorporação do objeto rastreado terminar a reindexação.",
+      "startingUp": "Começando…",
+      "estimatedTime": "Time estimado faltando:"
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Grupy kamer",
+    "add": "Dodaj grupę kamer",
+    "edit": "Edytuj grupę kamer",
+    "delete": {
+      "label": "Usuń grupę kamer",
+      "confirm": {
+        "title": "Potwierdź usuwanie",
+        "desc": "Czy jesteś pewny że chcesz usunąć grupę kamer <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "placeholder": "Wprowadź nazwę…",
+      "label": "Nazwa",
+      "errorMessage": {
+        "mustLeastCharacters": "Nazwa grupy kamer musi mieć co najmniej 2 znaki.",
+        "exists": "Grupa kamer o takiej nazwie już istnieje.",
+        "nameMustNotPeriod": "Nazwa grupy kamer nie może zawierać kropki.",
+        "invalid": "Niepoprawna nazwa grupy kamer."
+      }
+    },
+    "cameras": {
+      "label": "Kamery",
+      "desc": "Wykierz kamery dla tej grupy."
+    },
+    "icon": "Ikona",
+    "success": "Grupa kamer ({{name}}) została zapisana.",
+    "camera": {
+      "setting": {
+        "audio": {
+          "tips": {
+            "document": "Czytaj dokumentację ",
+            "title": "Dźwięk musi być wysyłany z kamery i skonfigurowany w go2rtc dla tego strumienia."
+          }
+        },
+        "label": "Ustawienia Strumieniowania Kamery",
+        "title": "Ustawienia Strumieniowania {{cameraName}}",
+        "desc": "Zmień opcje strumieniowania na żywo dla pulpitu tej grupy kamer. <em>Te ustawienia są specyficzne dla urządzenia/przeglądarki.</em>",
+        "audioIsAvailable": "Dźwięk jest dostępny dla tego strumienia",
+        "audioIsUnavailable": "Dźwięk jest niedostępny dla tego strumienia",
+        "streamMethod": {
+          "label": "Metoda Strumieniowania",
+          "method": {
+            "noStreaming": {
+              "label": "Brak Strumieniowania",
+              "desc": "Obrazy z kamery będą aktualizowane tylko raz na minutę, bez strumieniowania na żywo."
+            },
+            "smartStreaming": {
+              "label": "Inteligentne Strumieniowanie (zalecane)",
+              "desc": "Inteligentne strumieniowanie aktualizuje obraz kamery raz na minutę gdy nie wykryto aktywności, aby oszczędzać przepustowość i zasoby. Gdy aktywność zostanie wykryta, obraz płynnie przełącza się na transmisję na żywo."
+            },
+            "continuousStreaming": {
+              "desc": {
+                "title": "Obraz kamery będzie zawsze strumieniowany na żywo, gdy jest widoczny na pulpicie, nawet jeśli nie wykryto aktywności.",
+                "warning": "Ciągłe strumieniowanie może powodować wysokie zużycie przepustowości i problemy z wydajnością. Używaj ostrożnie."
+              },
+              "label": "Ciągłe Strumieniowanie"
+            }
+          },
+          "placeholder": "Wybierz sposób strumieniowania"
+        },
+        "compatibilityMode": {
+          "label": "Tryb kompatybilności",
+          "desc": "Włącz tę opcję tylko jeśli transmisja na żywo z kamery wyświetla artefakty kolorów i ma ukośną linię po prawej stronie obrazu."
+        },
+        "placeholder": "Wybierz strumień",
+        "stream": "Strumień"
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Ustawienia",
+      "title": "Opcje",
+      "showOptions": "Pokaż Opcje",
+      "hideOptions": "Ukryj Opcje"
+    },
+    "timestamp": "Znacznik czasu",
+    "zones": "Strefy",
+    "mask": "Maski",
+    "regions": "Regiony",
+    "motion": "Ruch",
+    "boundingBox": "Ramka Ograniczająca"
+  }
+}

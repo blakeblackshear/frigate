@@ -1,0 +1,22 @@
+{
+  "documentTitle": "V živo - Frigate",
+  "documentTitle.withCamera": "{{camera}} - v živo - Frigate",
+  "lowBandwidthMode": "Nizkopasovni način",
+  "twoWayTalk": {
+    "enable": "Omogoči dvosmerni pogovor",
+    "disable": "Onemogoči Obojesmerni Pogovor"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "disable": "Onemogoči funkcijo klikni in premakni"
+      },
+      "left": {
+        "label": "Premakni PTZ kamero v levo"
+      },
+      "up": {
+        "label": "Premakni PTZ kamero gor"
+      }
+    }
+  }
+}

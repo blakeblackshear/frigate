@@ -1,0 +1,7 @@
+{
+  "time": {
+    "untilForRestart": "Frigateが再起動するまで.",
+    "untilRestart": "再起動まで",
+    "untilForTime": "{{time}} まで"
+  }
+}

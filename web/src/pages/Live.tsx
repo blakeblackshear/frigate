@@ -9,10 +9,13 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import LiveBirdseyeView from "@/views/live/LiveBirdseyeView";
 import LiveCameraView from "@/views/live/LiveCameraView";
 import LiveDashboardView from "@/views/live/LiveDashboardView";
+import { useTranslation } from "react-i18next";
+
 import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 
 function Live() {
+  const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // selection
@@ -64,13 +67,17 @@ function Live() {
         .split("_")
         .filter((text) => text)
         .map((text) => text[0].toUpperCase() + text.substring(1));
-      document.title = `${capitalized.join(" ")} - Live - Frigate`;
+      document.title = t("documentTitle.withCamera", {
+        camera: capitalized.join(" "),
+      });
     } else if (cameraGroup && cameraGroup != "default") {
-      document.title = `${cameraGroup[0].toUpperCase()}${cameraGroup.substring(1)} - Live - Frigate`;
+      document.title = t("documentTitle.withCamera", {
+        camera: `${cameraGroup[0].toUpperCase()}${cameraGroup.substring(1)}`,
+      });
     } else {
-      document.title = "Live - Frigate";
+      document.title = t("documentTitle", { ns: "views/live" });
     }
-  }, [cameraGroup, selectedCameraName]);
+  }, [cameraGroup, selectedCameraName, t]);
 
   // settings
 
@@ -101,12 +108,14 @@ function Live() {
     ) {
       const group = config.camera_groups[cameraGroup];
       return Object.values(config.cameras)
-        .filter((conf) => conf.enabled && group.cameras.includes(conf.name))
+        .filter(
+          (conf) => conf.enabled_in_config && group.cameras.includes(conf.name),
+        )
         .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config, cameraGroup]);
 

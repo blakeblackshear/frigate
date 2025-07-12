@@ -167,3 +167,7 @@ To maintain object tracking during PTZ moves, Frigate tracks the motion of your 
 ### Calibration seems to have completed, but the camera is not actually moving to track my object. Why?
 
 Some cameras have firmware that reports that FOV RelativeMove, the ONVIF command that Frigate uses for autotracking, is supported. However, if the camera does not pan or tilt when an object comes into the required zone, your camera's firmware does not actually support FOV RelativeMove. One such camera is the Uniview IPC672LR-AX4DUPK. It actually moves its zoom motor instead of panning and tilting and does not follow the ONVIF standard whatsoever.
+
+### Frigate reports an error saying that calibration has failed. Why?
+
+Calibration measures the amount of time it takes for Frigate to make a series of movements with your PTZ. This error message is recorded in the log if these values are too high for Frigate to support calibrated autotracking. This is often the case when your camera's motor or network connection is too slow or your camera's firmware doesn't report the motor status in a timely manner. You can try running without calibration (just remove the `movement_weights` line from your config and restart), but if calibration fails, this often means that autotracking will behave unpredictably.

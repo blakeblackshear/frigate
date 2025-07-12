@@ -1,0 +1,72 @@
+{
+  "search": "Tìm kiếm",
+  "savedSearches": "Tìm kiếm đã lưu",
+  "searchFor": "Tìm kiếm {{inputValue}}",
+  "button": {
+    "clear": "Xóa tìm kiếm",
+    "save": "Lưu tìm kiếm",
+    "delete": "Xóa tìm kiếm đã lưu",
+    "filterInformation": "Thông tin bộ lọc",
+    "filterActive": "Bộ lọc đang hoạt động"
+  },
+  "filter": {
+    "tips": {
+      "desc": {
+        "step2": "Chọn một giá trị từ các gợi ý hoặc tự nhập.",
+        "step1": "Nhập tên khóa bộ lọc theo sau là dấu hai chấm (ví dụ: \"cameras:\").",
+        "step3": "Sử dụng nhiều bộ lọc bằng cách thêm chúng nối tiếp nhau, cách nhau bằng dấu cách.",
+        "step5": "Bộ lọc phạm vi thời gian sử dụng định dạng {{exampleTime}}.",
+        "exampleLabel": "Ví dụ:",
+        "step6": "Xóa bộ lọc bằng cách nhấp vào dấu 'x' bên cạnh chúng..",
+        "step4": "Bộ lọc ngày (before: và after:) sử dụng định dạng {{DateFormat}}.",
+        "text": "Bộ lọc giúp bạn thu hẹp kết quả tìm kiếm. Dưới đây là cách sử dụng chúng trong trường nhập liệu:"
+      },
+      "title": "Cách sử dụng bộ lọc văn bản"
+    },
+    "header": {
+      "activeFilters": "Bộ lọc đang hoạt động",
+      "currentFilterType": "Giá trị bộ lọc",
+      "noFilters": "Bộ lọc"
+    },
+    "label": {
+      "has_clip": "Có clip",
+      "min_score": "Điểm tối thiểu",
+      "has_snapshot": "Có ảnh chụp nhanh",
+      "max_score": "Điểm tối đa",
+      "search_type": "Loại tìm kiếm",
+      "after": "Sau",
+      "cameras": "Camera",
+      "labels": "Nhãn",
+      "zones": "Khu vực",
+      "sub_labels": "Nhãn phụ",
+      "time_range": "Phạm vi thời gian",
+      "before": "Trước",
+      "min_speed": "Tốc độ tối thiểu",
+      "max_speed": "Tốc độ tối đa",
+      "recognized_license_plate": "Biển số xe được nhận dạng"
+    },
+    "toast": {
+      "error": {
+        "afterDatebeEarlierBefore": "Ngày 'Sau' phải trước ngày 'Trước'.",
+        "beforeDateBeLaterAfter": "Ngày 'Trước' phải sau ngày 'Sau'.",
+        "minScoreMustBeLessOrEqualMaxScore": "'Điểm tối thiểu' phải nhỏ hơn hoặc bằng 'Điểm tối đa'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "'Điểm tối đa' phải lớn hơn hoặc bằng 'Điểm tối thiểu.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'Tốc độ tối thiểu' phải nhỏ hơn hoặc bằng 'Tốc độ tối đa'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'Tốc độ tối đa' phải lớn hơn hoặc bằng 'Tốc độ tối thiểu'."
+      }
+    },
+    "searchType": {
+      "thumbnail": "Hình thu nhỏ",
+      "description": "Mô tả"
+    }
+  },
+  "similaritySearch": {
+    "title": "Tìm kiếm tương đồng",
+    "clear": "Xóa tìm kiếm tương đồng",
+    "active": "Tìm kiếm tương đồng đang hoạt động"
+  },
+  "placeholder": {
+    "search": "Tìm kiếm…"
+  },
+  "trackedObjectId": "ID đối tượng được theo dõi"
+}

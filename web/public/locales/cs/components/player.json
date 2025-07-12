@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "V tomto období nebyly nalezeny žádné záznamy",
+  "noPreviewFound": "Náhled nenalezen",
+  "noPreviewFoundFor": "Náhled nenalezen pro {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Odeslat tento snímek do služby Frigate+?",
+    "submit": "Odeslat"
+  },
+  "livePlayerRequiredIOSVersion": "Pro tento typ živého přenosu je vyžadován systém iOS 17.1 nebo novější.",
+  "streamOffline": {
+    "title": "Přenos je offline",
+    "desc": "Žádné snímky nebyly zaznamenány na {{cameraName}} <code>detect</code>přenosu, zkontrolujte logy chyb"
+  },
+  "cameraDisabled": "Kamera je zakázaná",
+  "stats": {
+    "streamType": {
+      "title": "Typ přenosu:",
+      "short": "Typ"
+    },
+    "bandwidth": {
+      "title": "Šířka pásma:",
+      "short": "Šířka pásma"
+    },
+    "latency": {
+      "title": "Latence:",
+      "value": "{{seconds}} sekund",
+      "short": {
+        "title": "Latence",
+        "value": "{{seconds}} sek"
+      }
+    },
+    "totalFrames": "Celkový počet snímků:",
+    "droppedFrames": {
+      "title": "Ztracené snímky:",
+      "short": {
+        "title": "Ztracené",
+        "value": "{{droppedFrames}} snímků"
+      }
+    },
+    "decodedFrames": "Dekódované snímky:",
+    "droppedFrameRate": "Frekvence ztracených snímků:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Snimek byl úspěšně odeslán službě Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Nepodařilo se odeslat snímek službě Frigate+"
+    }
+  }
+}

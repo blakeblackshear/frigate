@@ -12,6 +12,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
   MotionData,
+  RecordingsSummary,
   REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
@@ -54,10 +55,14 @@ import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
 
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import { useTranslation } from "react-i18next";
+
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
   currentReviewItems: ReviewSegment[] | null;
   reviewSummary?: ReviewSummary;
+  recordingsSummary?: RecordingsSummary;
   relevantPreviews?: Preview[];
   timeRange: TimeRange;
   filter?: ReviewFilter;
@@ -76,6 +81,7 @@ export default function EventView({
   reviewItems,
   currentReviewItems,
   reviewSummary,
+  recordingsSummary,
   relevantPreviews,
   timeRange,
   filter,
@@ -90,6 +96,7 @@ export default function EventView({
   pullLatestData,
   updateFilter,
 }: EventViewProps) {
+  const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -194,25 +201,30 @@ export default function EventView({
         .then((response) => {
           if (response.status == 200) {
             toast.success(
-              "Successfully started export. View the file in the /exports folder.",
-              { position: "top-center" },
+              t("export.toast.success", { ns: "components/dialog" }),
+              {
+                position: "top-center",
+              },
             );
           }
         })
         .catch((error) => {
-          if (error.response?.data?.message) {
-            toast.error(
-              `Failed to start export: ${error.response.data.message}`,
-              { position: "top-center" },
-            );
-          } else {
-            toast.error(`Failed to start export: ${error.message}`, {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("export.toast.error.failed", {
+              ns: "components/dialog",
+              message: errorMessage,
+            }),
+            {
               position: "top-center",
-            });
-          }
+            },
+          );
         });
     },
-    [reviewItems],
+    [reviewItems, t],
   );
 
   const [motionOnly, setMotionOnly] = useState(false);
@@ -265,70 +277,62 @@ export default function EventView({
           <ToggleGroupItem
             className={cn(severityToggle != "alert" && "text-muted-foreground")}
             value="alert"
-            aria-label="Select alerts"
+            aria-label={t("alerts")}
           >
-            {isMobileOnly ? (
-              <div
-                className={cn(
-                  "flex size-6 items-center justify-center rounded text-severity_alert",
-                  severityToggle == "alert" ? "font-semibold" : "font-medium",
-                )}
-              >
+            <div
+              className={cn(
+                "flex size-6 items-center justify-center rounded text-severity_alert sm:hidden",
+                severityToggle == "alert" ? "font-semibold" : "font-medium",
+              )}
+            >
+              {reviewCounts.alert > -1 ? (
+                reviewCounts.alert
+              ) : (
+                <ActivityIndicator className="size-4" />
+              )}
+            </div>
+            <div className="hidden items-center sm:flex">
+              <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
+              <div className="hidden md:flex md:flex-row md:items-center">
+                {t("alerts")}
                 {reviewCounts.alert > -1 ? (
-                  reviewCounts.alert
+                  ` ∙ ${reviewCounts.alert}`
                 ) : (
-                  <ActivityIndicator className="size-4" />
+                  <ActivityIndicator className="ml-2 size-4" />
                 )}
               </div>
-            ) : (
-              <>
-                <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
-                <div className="hidden md:flex md:flex-row md:items-center">
-                  Alerts
-                  {reviewCounts.alert > -1 ? (
-                    ` ∙ ${reviewCounts.alert}`
-                  ) : (
-                    <ActivityIndicator className="ml-2 size-4" />
-                  )}
-                </div>
-              </>
-            )}
+            </div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={cn(
               severityToggle != "detection" && "text-muted-foreground",
             )}
             value="detection"
-            aria-label="Select detections"
+            aria-label={t("detections")}
           >
-            {isMobileOnly ? (
-              <div
-                className={cn(
-                  "flex size-6 items-center justify-center rounded text-severity_detection",
-                  severityToggle == "detection"
-                    ? "font-semibold"
-                    : "font-medium",
-                )}
-              >
+            <div
+              className={cn(
+                "flex size-6 items-center justify-center rounded text-severity_detection sm:hidden",
+                severityToggle == "detection" ? "font-semibold" : "font-medium",
+              )}
+            >
+              {reviewCounts.detection > -1 ? (
+                reviewCounts.detection
+              ) : (
+                <ActivityIndicator className="size-4" />
+              )}
+            </div>
+            <div className="hidden items-center sm:flex">
+              <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
+              <div className="hidden md:flex md:flex-row md:items-center">
+                {t("detections")}
                 {reviewCounts.detection > -1 ? (
-                  reviewCounts.detection
+                  ` ∙ ${reviewCounts.detection}`
                 ) : (
-                  <ActivityIndicator className="size-4" />
+                  <ActivityIndicator className="ml-2 size-4" />
                 )}
               </div>
-            ) : (
-              <>
-                <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
-                <div className="hidden md:flex md:flex-row md:items-center">
-                  Detections
-                  {reviewCounts.detection > -1 ? (
-                    ` ∙ ${reviewCounts.detection}`
-                  ) : (
-                    <ActivityIndicator className="ml-2 size-4" />
-                  )}
-                </div>
-              </>
-            )}
+            </div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={cn(
@@ -336,16 +340,13 @@ export default function EventView({
               severityToggle != "significant_motion" && "text-muted-foreground",
             )}
             value="significant_motion"
-            aria-label="Select motion"
+            aria-label={t("motion.label")}
           >
-            {isMobileOnly ? (
-              <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion" />
-            ) : (
-              <>
-                <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
-                <div className="hidden md:block">Motion</div>
-              </>
-            )}
+            <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion sm:hidden" />
+            <div className="hidden items-center sm:flex">
+              <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
+              <div className="hidden md:block">{t("motion.label")}</div>
+            </div>
           </ToggleGroupItem>
         </ToggleGroup>
 
@@ -358,6 +359,7 @@ export default function EventView({
             }
             currentSeverity={severityToggle}
             reviewSummary={reviewSummary}
+            recordingsSummary={recordingsSummary}
             filter={filter}
             motionOnly={motionOnly}
             filterList={reviewFilterList}
@@ -459,9 +461,9 @@ function DetectionReview({
   setSelectedReviews,
   pullLatestData,
 }: DetectionReviewProps) {
-  const reviewTimelineRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation(["views/events"]);
 
-  const segmentDuration = 60;
+  const reviewTimelineRef = useRef<HTMLDivElement>(null);
 
   // detail
 
@@ -492,9 +494,38 @@ function DetectionReview({
     [timeRange],
   );
 
+  const [zoomSettings, setZoomSettings] = useState({
+    segmentDuration: 60,
+    timestampSpread: 15,
+  });
+
+  const possibleZoomLevels = useMemo(
+    () => [
+      { segmentDuration: 60, timestampSpread: 15 },
+      { segmentDuration: 30, timestampSpread: 5 },
+      { segmentDuration: 10, timestampSpread: 1 },
+    ],
+    [],
+  );
+
+  const handleZoomChange = useCallback(
+    (newZoomLevel: number) => {
+      setZoomSettings(possibleZoomLevels[newZoomLevel]);
+    },
+    [possibleZoomLevels],
+  );
+
+  const { isZooming, zoomDirection } = useTimelineZoom({
+    zoomSettings,
+    zoomLevels: possibleZoomLevels,
+    onZoomChange: handleZoomChange,
+    timelineRef: reviewTimelineRef,
+    timelineDuration,
+  });
+
   const { alignStartDateToTimeline, getVisibleTimelineDuration } =
     useTimelineUtils({
-      segmentDuration,
+      segmentDuration: zoomSettings.segmentDuration,
       timelineDuration,
       timelineRef: reviewTimelineRef,
     });
@@ -590,6 +621,16 @@ function DetectionReview({
   // existing review item
 
   useEffect(() => {
+    if (loading || currentItems == null || itemsToReview == undefined) {
+      return;
+    }
+
+    if (currentItems.length == 0 && itemsToReview > 0) {
+      pullLatestData();
+    }
+  }, [loading, currentItems, itemsToReview, pullLatestData]);
+
+  useEffect(() => {
     if (!startTime || !currentItems || currentItems.length == 0) {
       return;
     }
@@ -673,7 +714,7 @@ function DetectionReview({
         {!loading && currentItems?.length === 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderCheck className="size-16" />
-            There are no {severity.replace(/_/g, " ")}s to review
+            {t("empty." + severity.replace(/_/g, " "))}
           </div>
         )}
 
@@ -692,7 +733,7 @@ function DetectionReview({
                     data-start={value.start_time}
                     data-segment-start={
                       alignStartDateToTimeline(value.start_time) -
-                      segmentDuration
+                      zoomSettings.segmentDuration
                     }
                     className="review-item relative rounded-lg"
                   >
@@ -718,7 +759,12 @@ function DetectionReview({
                       />
                     </div>
                     <div
-                      className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
+                      className={cn(
+                        "review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px]",
+                        selected
+                          ? `outline-severity_${value.severity} shadow-severity_${value.severity}`
+                          : "outline-transparent duration-500",
+                      )}
                     />
                   </div>
                 );
@@ -735,27 +781,27 @@ function DetectionReview({
               <div className="col-span-full flex items-center justify-center">
                 <Button
                   className="text-white"
-                  aria-label="Mark these items as reviewed"
+                  aria-label={t("markTheseItemsAsReviewed")}
                   variant="select"
                   onClick={() => {
                     setSelectedReviews([]);
                     markAllItemsAsReviewed(currentItems ?? []);
                   }}
                 >
-                  Mark these items as reviewed
+                  {t("markTheseItemsAsReviewed")}
                 </Button>
               </div>
             )}
         </div>
       </div>
       <div className="flex w-[65px] flex-row md:w-[110px]">
-        <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
+        <div className="no-scrollbar w-[55px] md:w-[100px]">
           {loading ? (
             <Skeleton className="size-full" />
           ) : (
             <EventReviewTimeline
-              segmentDuration={segmentDuration}
-              timestampSpread={15}
+              segmentDuration={zoomSettings.segmentDuration}
+              timestampSpread={zoomSettings.timestampSpread}
               timelineStart={timeRange.before}
               timelineEnd={timeRange.after}
               showMinimap={showMinimap && !previewTime}
@@ -769,6 +815,8 @@ function DetectionReview({
               contentRef={contentRef}
               timelineRef={reviewTimelineRef}
               dense={isMobile}
+              isZooming={isZooming}
+              zoomDirection={zoomDirection}
             />
           )}
         </div>
@@ -780,7 +828,7 @@ function DetectionReview({
               reviewTimelineRef={reviewTimelineRef}
               timelineStart={timeRange.before}
               timelineEnd={timeRange.after}
-              segmentDuration={segmentDuration}
+              segmentDuration={zoomSettings.segmentDuration}
               events={reviewItems?.all ?? []}
               severityType={severity}
             />
@@ -816,6 +864,7 @@ function MotionReview({
   motionOnly = false,
   onOpenRecording,
 }: MotionReviewProps) {
+  const { t } = useTranslation(["views/events"]);
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -1005,7 +1054,7 @@ function MotionReview({
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderX className="size-16" />
-        No motion data found
+        {t("empty.motion")}
       </div>
     );
   }
@@ -1095,7 +1144,6 @@ function MotionReview({
             setHandlebarTime={setCurrentTime}
             events={reviewItems?.all ?? []}
             motion_events={motionData ?? []}
-            severityType="significant_motion"
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => {
               if (playing && scrubbing) {
@@ -1105,6 +1153,8 @@ function MotionReview({
               setScrubbing(scrubbing);
             }}
             dense={isMobileOnly}
+            isZooming={false}
+            zoomDirection={null}
           />
         ) : (
           <Skeleton className="size-full" />

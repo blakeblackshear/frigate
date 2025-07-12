@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "logs": {
+      "frigate": "Frigate Günlükleri - Frigate",
+      "go2rtc": "Go2RTC Günlükleri - Frigate",
+      "nginx": "Nginx Günlükleri - Frigate"
+    },
+    "general": "Genel İstatistikler - Frigate",
+    "storage": "Depolama İstatistikleri - Frigate",
+    "cameras": "Kamera İstatistikleri - Frigate",
+    "enrichments": "Zenginleştirme İstatistikleri - Frigate"
+  },
+  "metrics": "Sistem metrikleri",
+  "general": {
+    "hardwareInfo": {
+      "gpuDecoder": "GPU Kod Çözücü",
+      "gpuInfo": {
+        "nvidiaSMIOutput": {
+          "name": "İsim: {{name}}",
+          "driver": "Sürücü: {{driver}}",
+          "cudaComputerCapability": "CUDA Hesaplama Yeteneği: {{cuda_compute}}",
+          "vbios": "VBios Bilgisi: {{vbios}}",
+          "title": "Nvidia SMI Çıktısı"
+        },
+        "toast": {
+          "success": "GPU bilgisi panoya kopyalandı"
+        },
+        "vainfoOutput": {
+          "processError": "İşlem Hatası:",
+          "returnCode": "Dönüt Kodu: {{code}}",
+          "processOutput": "İşlem Çıktısı:",
+          "title": "Vainfo çıktısı"
+        },
+        "closeInfo": {
+          "label": "GPU bilgisini kapat"
+        },
+        "copyInfo": {
+          "label": "GPU bilgisini kopyala"
+        }
+      },
+      "gpuUsage": "GPU Kullanımı",
+      "gpuMemory": "GPU Belleği",
+      "gpuEncoder": "GPU Kodlayıcı",
+      "title": "Donanım Bilgisi",
+      "npuUsage": "NPU Kullanımı",
+      "npuMemory": "NPU Bellek Kullanımı"
+    },
+    "otherProcesses": {
+      "title": "Diğer İşlemler",
+      "processCpuUsage": "İşlem CPU Kullanımı",
+      "processMemoryUsage": "İşlem Bellek Kullanımı"
+    },
+    "detector": {
+      "title": "Algılayıcılar",
+      "inferenceSpeed": "Algılayıcı Çıkarım Hızı",
+      "memoryUsage": "Algılayıcı Bellek Kullanımı",
+      "cpuUsage": "Algılayıcı İşlemci Kullanımı",
+      "temperature": "Algılayıcı Sıcaklığı"
+    },
+    "title": "Genel"
+  },
+  "storage": {
+    "title": "Depolama",
+    "overview": "Genel",
+    "recordings": {
+      "title": "Kayıtlar",
+      "earliestRecording": "Mevcut en erken kayıt:",
+      "tips": "Burada gösterilen değer, Frigate’in veritabanına göre kayıtların diskinizde kullandığı toplam alanı ifade eder. Frigate, diskinizdeki tüm dosyaların alan kullanımını takip etmez."
+    },
+    "cameraStorage": {
+      "title": "Kamera Depolaması",
+      "camera": "Kamera",
+      "unused": {
+        "tips": "Eğer diskinizde Frigate'in kayıtları dışında dosyalar varsa bu değer diskinizdeki boş alanı doğru olarak göstermeyebilir. Frigate kendi kayıtları dışındaki dosyaların disk kullanımını takip etmez.",
+        "title": "Kullanılmayan"
+      },
+      "percentageOfTotalUsed": "Toplam Yüzde",
+      "storageUsed": "Depolama",
+      "bandwidth": "Saatlik Veri Kullanımı",
+      "unusedStorageInformation": "Kullanılmayan Depolama Bilgisi"
+    }
+  },
+  "cameras": {
+    "info": {
+      "streamDataFromFFPROBE": "Yayın bilgisi <code>ffprobe</code> ile edinilmiştir.",
+      "video": "Video:",
+      "codec": "Kodlama:",
+      "fps": "Kare Hızı:",
+      "resolution": "Çözünürlük:",
+      "unknown": "Bilinmeyen",
+      "stream": "Yayın {{idx}}",
+      "tips": {
+        "title": "Kamera Detayları"
+      },
+      "fetching": "Kamera Bilgileri Alınıyor",
+      "cameraProbeInfo": "{{camera}} Kamera Detayları",
+      "error": "Hata: {{error}}",
+      "audio": "Ses:",
+      "aspectRatio": "en boy oranı"
+    },
+    "framesAndDetections": "Kare / Tespit",
+    "label": {
+      "camera": "kamera",
+      "detect": "tespit",
+      "ffmpeg": "FFmpeg",
+      "capture": "kayıt",
+      "skipped": "atlanan",
+      "overallDetectionsPerSecond": "toplam tespit/sn",
+      "overallFramesPerSecond": "toplam kare/sn",
+      "cameraFramesPerSecond": "{{camName}} kare/sn",
+      "overallSkippedDetectionsPerSecond": "toplam atlanan tespit/sn",
+      "cameraCapture": "{{camName}} kayıt",
+      "cameraDetect": "{{camName}} tespit",
+      "cameraDetectionsPerSecond": "{{camName}} tespit/sn",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} atlanan tespit/sn",
+      "cameraFfmpeg": "{{camName}} FFmpeg"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Detaylar panoya kopyalandı."
+      },
+      "error": {
+        "unableToProbeCamera": "Kamera detayları alınamadı: {{errorMessage}}"
+      }
+    },
+    "title": "Kameralar",
+    "overview": "Genel"
+  },
+  "lastRefreshed": "Son güncelleme: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} FFmpeg'te yüksek miktarda CPU kullanıyor (%{{ffmpegAvg}})",
+    "reindexingEmbeddings": "Gömüler yeniden dizinleniyor (%{{processed}} tamamlandı)",
+    "detectHighCpuUsage": "{{camera}} tespitte yüksek miktarda CPU kullanıyor (%{{detectAvg}})",
+    "healthy": "Sistem sağlıklı",
+    "detectIsVerySlow": "{{detect}} çok yavaş çalışıyor ({{speed}} ms)",
+    "cameraIsOffline": "{{camera}} çevrimdışı",
+    "detectIsSlow": "{{detect}} yavaş çalışıyor ({{speed}} ms)"
+  },
+  "enrichments": {
+    "embeddings": {
+      "image_embedding_speed": "Resim Gömü Hızı",
+      "text_embedding_speed": "Metin Gömü Hızı",
+      "plate_recognition_speed": "Plaka Tanıma Hızı",
+      "face_embedding_speed": "Yüz Gömü Hızı",
+      "image_embedding": "Resim Gömüleme",
+      "text_embedding": "Metin Gömülüeme",
+      "face_recognition": "Yüz Tanıma",
+      "plate_recognition": "Plaka Tanıma",
+      "face_recognition_speed": "Yüz Tanıma Hızı",
+      "yolov9_plate_detection_speed": "YOLOv9 Plaka Tanıma Hızı",
+      "yolov9_plate_detection": "YOLOv9 Plaka Tanıma"
+    },
+    "infPerSecond": "Saniye Başına Çıkarım",
+    "title": "Zenginleştirmeler"
+  },
+  "logs": {
+    "download": {
+      "label": "Günlükleri İndir"
+    },
+    "type": {
+      "message": "Mesaj",
+      "tag": "Etiket",
+      "timestamp": "Zaman Damgası",
+      "label": "Tür"
+    },
+    "copy": {
+      "error": "Günlükler panoya kopyalanamadı",
+      "label": "Panoya Kopyala",
+      "success": "Günlükler panoya kopyalandı"
+    },
+    "tips": "Günlükler sunucudan yansıtılıyor",
+    "toast": {
+      "error": {
+        "whileStreamingLogs": "Günlükler yansıtılırken hata: {{errorMessage}}",
+        "fetchingLogsFailed": "Günlükler alınırken hata: {{errorMessage}}"
+      }
+    }
+  },
+  "title": "Sistem"
+}

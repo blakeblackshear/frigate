@@ -44,23 +44,43 @@ function useValue(): useValueReturn {
       return;
     }
 
-    const cameraActivity: { [key: string]: object } = JSON.parse(activityValue);
+    const cameraActivity: { [key: string]: FrigateCameraState } =
+      JSON.parse(activityValue);
 
-    if (!cameraActivity) {
+    if (Object.keys(cameraActivity).length === 0) {
       return;
     }
 
     const cameraStates: WsState = {};
 
     Object.entries(cameraActivity).forEach(([name, state]) => {
-      const { record, detect, snapshots, audio, autotracking } =
-        // @ts-expect-error we know this is correct
-        state["config"];
+      const {
+        record,
+        detect,
+        enabled,
+        snapshots,
+        audio,
+        notifications,
+        notifications_suspended,
+        autotracking,
+        alerts,
+        detections,
+      } = state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
+      cameraStates[`${name}/enabled/state`] = enabled ? "ON" : "OFF";
       cameraStates[`${name}/detect/state`] = detect ? "ON" : "OFF";
       cameraStates[`${name}/snapshots/state`] = snapshots ? "ON" : "OFF";
       cameraStates[`${name}/audio/state`] = audio ? "ON" : "OFF";
+      cameraStates[`${name}/notifications/state`] = notifications
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/notifications/suspended`] =
+        notifications_suspended || 0;
       cameraStates[`${name}/ptz_autotracker/state`] = autotracking
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/review_alerts/state`] = alerts ? "ON" : "OFF";
+      cameraStates[`${name}/review_detections/state`] = detections
         ? "ON"
         : "OFF";
     });
@@ -145,6 +165,17 @@ export function useWs(watchTopic: string, publishTopic: string) {
   return { value, send };
 }
 
+export function useEnabledState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/enabled/state`, `${camera}/enabled/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
 export function useDetectState(camera: string): {
   payload: ToggleableSetting;
   send: (payload: ToggleableSetting, retain?: boolean) => void;
@@ -197,6 +228,31 @@ export function useAutotrackingState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/ptz_autotracker/state`, `${camera}/ptz_autotracker/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useAlertsState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/review_alerts/state`, `${camera}/review_alerts/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useDetectionsState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/review_detections/state`,
+    `${camera}/review_detections/set`,
+  );
   return { payload: payload as ToggleableSetting, send };
 }
 
@@ -412,4 +468,40 @@ export function useTrackedObjectUpdate(): { payload: string } {
     value: { payload },
   } = useWs("tracked_object_update", "");
   return useDeepMemo(JSON.parse(payload as string));
+}
+
+export function useNotifications(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/notifications/state`, `${camera}/notifications/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useNotificationSuspend(camera: string): {
+  payload: string;
+  send: (payload: number, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/notifications/suspended`,
+    `${camera}/notifications/suspend`,
+  );
+  return { payload: payload as string, send };
+}
+
+export function useNotificationTest(): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs("notification_test", "notification_test");
+  return { payload: payload as string, send };
 }

@@ -1,0 +1,29 @@
+{
+  "generativeAI": "Generativ AI",
+  "documentTitle": "Utforska - Frigate",
+  "exploreIsUnavailable": {
+    "embeddingsReindexing": {
+      "startingUp": "Startar upp…",
+      "estimatedTime": "Beräknad återstående tid:",
+      "finishingShortly": "Snart klar"
+    },
+    "title": "Utforska är inte tillgänglig",
+    "downloadingModels": {
+      "setup": {
+        "textModel": "Text modell"
+      },
+      "tips": {
+        "documentation": "Läs dokumentationen"
+      },
+      "error": "Ett fel har inträffat. Kontrollera Frigate loggarna."
+    }
+  },
+  "details": {
+    "timestamp": "tidsstämpel"
+  },
+  "exploreMore": "Utforska fler {{label}} objekt",
+  "type": {
+    "details": "detaljer",
+    "video": "video"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "searchFor": "{{inputValue}} を検索",
+  "button": {
+    "save": "検索を保存",
+    "delete": "保存した検索を削除",
+    "filterInformation": "フィルタ情報",
+    "clear": "検索をクリア"
+  },
+  "search": "検索",
+  "savedSearches": "保存した検索"
+}

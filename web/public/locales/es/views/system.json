@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "storage": "Estadísticas de almacenamiento - Frigate",
+    "general": "Estadísticas generales - Frigate",
+    "logs": {
+      "frigate": "Registros de Frigate - Frigate",
+      "go2rtc": "Registros de Go2RTC - Frigate",
+      "nginx": "Registros de Nginx - Frigate"
+    },
+    "cameras": "Estadísticas de cámaras - Frigate",
+    "enrichments": "Estadísticas de Enriquecimientos - Frigate"
+  },
+  "logs": {
+    "copy": {
+      "label": "Copiar al portapapeles",
+      "success": "Registros copiados al portapapeles",
+      "error": "No se pudieron copiar los registros al portapapeles"
+    },
+    "type": {
+      "label": "Tipo",
+      "timestamp": "Marca de tiempo",
+      "tag": "Etiqueta",
+      "message": "Mensaje"
+    },
+    "tips": "Los registros se están transmitiendo desde el servidor",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Error al obtener los registros: {{errorMessage}}",
+        "whileStreamingLogs": "Error mientras se transmitían los registros: {{errorMessage}}"
+      }
+    },
+    "download": {
+      "label": "Descargar registros"
+    }
+  },
+  "title": "Sistema",
+  "metrics": "Métricas del sistema",
+  "general": {
+    "title": "General",
+    "detector": {
+      "title": "Detectores",
+      "inferenceSpeed": "Velocidad de inferencia del detector",
+      "cpuUsage": "Uso de CPU del Detector",
+      "memoryUsage": "Uso de Memoria del Detector",
+      "temperature": "Detector de Temperatura"
+    },
+    "hardwareInfo": {
+      "title": "Información de Hardware",
+      "gpuUsage": "Uso de GPU",
+      "gpuEncoder": "Codificador de GPU",
+      "gpuDecoder": "Decodificador de GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Salida de Vainfo",
+          "returnCode": "Código de Retorno: {{code}}",
+          "processOutput": "Salida del Proceso:",
+          "processError": "Error del Proceso:"
+        },
+        "nvidiaSMIOutput": {
+          "cudaComputerCapability": "Capacidad de Cómputo CUDA: {{cuda_compute}}",
+          "title": "Salida de Nvidia SMI",
+          "driver": "Controlador: {{driver}}",
+          "name": "Nombre: {{name}}",
+          "vbios": "Información de VBios: {{vbios}}"
+        },
+        "toast": {
+          "success": "Información de GPU copiada al portapapeles"
+        },
+        "copyInfo": {
+          "label": "Copiar información de GPU"
+        },
+        "closeInfo": {
+          "label": "Cerrar información de GPU"
+        }
+      },
+      "gpuMemory": "Memoria de GPU",
+      "npuMemory": "Memoria de NPU",
+      "npuUsage": "Uso de NPU"
+    },
+    "otherProcesses": {
+      "title": "Otros Procesos",
+      "processCpuUsage": "Uso de CPU del Proceso",
+      "processMemoryUsage": "Uso de Memoria del Proceso"
+    }
+  },
+  "storage": {
+    "recordings": {
+      "title": "Grabaciones",
+      "tips": "Este valor representa el almacenamiento total utilizado por las grabaciones en la base de datos de Frigate. Frigate no realiza un seguimiento del uso de almacenamiento de todos los archivos en tu disco.",
+      "earliestRecording": "Grabación más antigua disponible:"
+    },
+    "overview": "Resumen",
+    "title": "Almacenamiento",
+    "cameraStorage": {
+      "percentageOfTotalUsed": "Porcentaje del Total",
+      "bandwidth": "Ancho de Banda",
+      "camera": "Cámara",
+      "unused": {
+        "title": "No Utilizado",
+        "tips": "Este valor puede no representar con precisión el espacio libre disponible para Frigate si tienes otros archivos almacenados en tu disco además de las grabaciones de Frigate. Frigate no realiza un seguimiento del uso de almacenamiento fuera de sus grabaciones."
+      },
+      "title": "Almacenamiento de la Cámara",
+      "storageUsed": "Almacenamiento",
+      "unusedStorageInformation": "Información de Almacenamiento No Utilizado"
+    }
+  },
+  "cameras": {
+    "title": "Cámaras",
+    "overview": "Resumen",
+    "info": {
+      "cameraProbeInfo": "Información de Sondeo de la Cámara {{camera}}",
+      "streamDataFromFFPROBE": "Los datos del flujo se obtienen con <code>ffprobe</code>.",
+      "codec": "Codec:",
+      "fetching": "Obteniendo Datos de la Cámara",
+      "stream": "Flujo {{idx}}",
+      "video": "Video:",
+      "fps": "FPS:",
+      "resolution": "Resolución:",
+      "error": "Error: {{error}}",
+      "unknown": "Desconocido",
+      "audio": "Audio:",
+      "tips": {
+        "title": "Información de Sondeo de la Cámara"
+      },
+      "aspectRatio": "Relación de aspecto"
+    },
+    "framesAndDetections": "Fotogramas / Detecciones",
+    "label": {
+      "camera": "cámara",
+      "skipped": "omitido",
+      "detect": "detectar",
+      "ffmpeg": "FFmpeg",
+      "capture": "captura",
+      "overallFramesPerSecond": "cuadros por segundo totales",
+      "overallDetectionsPerSecond": "detecciones por segundo totales",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} detecciones omitidas por segundo",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} captura",
+      "cameraDetect": "{{camName}} detectar",
+      "cameraFramesPerSecond": "{{camName}} cuadros por segundo",
+      "cameraDetectionsPerSecond": "{{camName}} detecciones por segundo",
+      "overallSkippedDetectionsPerSecond": "detecciones omitidas por segundo totales"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Datos de sondeo copiados al portapapeles."
+      },
+      "error": {
+        "unableToProbeCamera": "No se pudo sondear la cámara: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Última actualización: ",
+  "enrichments": {
+    "infPerSecond": "Inferencias Por Segundo",
+    "embeddings": {
+      "plate_recognition_speed": "Velocidad de Reconocimiento de Matrículas",
+      "face_embedding_speed": "Velocidad de Incrustación de Rostros",
+      "image_embedding_speed": "Velocidad de Incrustación de Imágenes",
+      "text_embedding_speed": "Velocidad de Incrustación de Texto",
+      "face_recognition_speed": "Velocidad de Reconocimiento Facial",
+      "text_embedding": "Incrustación de Texto",
+      "face_recognition": "Reconocimiento Facial",
+      "plate_recognition": "Reconocimiento de Matrículas",
+      "yolov9_plate_detection": "Detección de Matrículas YOLOv9",
+      "image_embedding": "Incrustación de Imágenes",
+      "yolov9_plate_detection_speed": "Velocidad de Detección de Matrículas YOLOv9"
+    },
+    "title": "Enriquecimientos"
+  },
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} tiene un uso elevado de CPU por FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} tiene un uso elevado de CPU por detección ({{detectAvg}}%)",
+    "healthy": "El sistema está saludable",
+    "reindexingEmbeddings": "Reindexando incrustaciones ({{processed}}% completado)",
+    "detectIsSlow": "{{detect}} es lento ({{speed}} ms)",
+    "cameraIsOffline": "{{camera}} está desconectada",
+    "detectIsVerySlow": "{{detect}} es muy lento ({{speed}} ms)"
+  }
+}

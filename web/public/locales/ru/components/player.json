@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Не найдено ни одной записи",
+  "noPreviewFound": "Предпросмотр не найден",
+  "submitFrigatePlus": {
+    "title": "Отправить этот кадр в Frigate+?",
+    "submit": "Отправить"
+  },
+  "noPreviewFoundFor": "Не найдено предпросмотра для {{cameraName}}",
+  "livePlayerRequiredIOSVersion": "iOS 17.1 или выше требуется для этого типа стрима.",
+  "streamOffline": {
+    "title": "Поток оффлайн",
+    "desc": "С потока <code>detect</code> камеры {{cameraName}} не получено кадров, проверьте логи ошибок"
+  },
+  "cameraDisabled": "Камера отключена",
+  "stats": {
+    "streamType": {
+      "title": "Тип потока:",
+      "short": "Тип"
+    },
+    "bandwidth": {
+      "title": "Пропускная способность:",
+      "short": "Пропускная способность"
+    },
+    "latency": {
+      "title": "Задержка:",
+      "value": "{{seconds}} сек",
+      "short": {
+        "title": "Задержка",
+        "value": "{{seconds}} сек"
+      }
+    },
+    "totalFrames": "Всего кадров:",
+    "droppedFrames": {
+      "title": "Пропущено кадров:",
+      "short": {
+        "title": "Пропущено",
+        "value": "{{droppedFrames}} кадров"
+      }
+    },
+    "decodedFrames": "Декодированные кадры:",
+    "droppedFrameRate": "Частота пропущенных кадров:"
+  },
+  "toast": {
+    "error": {
+      "submitFrigatePlusFailed": "Не удалось отправить кадр в Frigate+"
+    },
+    "success": {
+      "submittedFrigatePlus": "Кадр успешно загружен в Frigate+"
+    }
+  }
+}

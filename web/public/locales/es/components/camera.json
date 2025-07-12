@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Grupos de cámaras",
+    "add": "Agregar grupo de cámaras",
+    "edit": "Editar grupo de cámaras",
+    "delete": {
+      "label": "Eliminar grupo de cámaras",
+      "confirm": {
+        "title": "Confirmar eliminación",
+        "desc": "¿Estás seguro de que quieres eliminar el grupo de cámaras <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Nombre",
+      "placeholder": "Introduce un nombre…",
+      "errorMessage": {
+        "mustLeastCharacters": "El nombre del grupo de cámaras debe tener al menos 2 caracteres.",
+        "nameMustNotPeriod": "El nombre del grupo de cámaras no debe contener un punto.",
+        "invalid": "Nombre de grupo de cámaras no válido.",
+        "exists": "El nombre del grupo de cámaras ya existe."
+      }
+    },
+    "cameras": {
+      "desc": "Selecciona cámaras para este grupo.",
+      "label": "Cámaras"
+    },
+    "icon": "Icono",
+    "success": "El grupo de cámaras ({{name}}) ha sido guardado.",
+    "camera": {
+      "setting": {
+        "title": "Ajustes de transmisión de {{cameraName}}",
+        "audioIsAvailable": "El audio está disponible para esta transmisión",
+        "audioIsUnavailable": "El audio no está disponible para esta transmisión",
+        "audio": {
+          "tips": {
+            "title": "El audio debe provenir de tu cámara y estar configurado en go2rtc para esta transmisión.",
+            "document": "Leer la documentación "
+          }
+        },
+        "streamMethod": {
+          "method": {
+            "noStreaming": {
+              "desc": "Las imágenes de la cámara solo se actualizarán una vez por minuto y no habrá transmisión en vivo.",
+              "label": "Sin transmisión"
+            },
+            "smartStreaming": {
+              "label": "Transmisión inteligente (recomendada)",
+              "desc": "La transmisión inteligente actualizará la imagen de tu cámara una vez por minuto cuando no se detecte actividad para conservar ancho de banda y recursos. Cuando se detecte actividad, la imagen cambiará sin problemas a una transmisión en vivo."
+            },
+            "continuousStreaming": {
+              "label": "Transmisión continua",
+              "desc": {
+                "title": "La imagen de la cámara siempre será una transmisión en vivo cuando esté visible en el panel de control, incluso si no se detecta ninguna actividad.",
+                "warning": "La transmisión continua puede causar un alto uso de ancho de banda y problemas de rendimiento. Usa con precaución."
+              }
+            }
+          },
+          "label": "Método de transmisión",
+          "placeholder": "Elige un método de transmisión"
+        },
+        "compatibilityMode": {
+          "label": "Modo de compatibilidad",
+          "desc": "Habilita esta opción solo si la transmisión en vivo de tu cámara muestra artefactos de color y tiene una línea diagonal en el lado derecho de la imagen."
+        },
+        "label": "Ajustes de transmisión de la cámara",
+        "desc": "Cambia las opciones de transmisión en vivo para el panel de control de este grupo de cámaras. <em>Estos ajustes son específicos del dispositivo/navegador.</em>",
+        "placeholder": "Elige una transmisión",
+        "stream": "Transmitir"
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Ajustes",
+      "title": "Opciones",
+      "showOptions": "Mostrar opciones",
+      "hideOptions": "Ocultar opciones"
+    },
+    "timestamp": "Marca de tiempo",
+    "zones": "Zonas",
+    "motion": "Movimiento",
+    "regions": "Regiones",
+    "boundingBox": "Caja delimitadora",
+    "mask": "Máscara"
+  }
+}

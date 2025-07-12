@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Editor de Configuració - Frigate",
+  "configEditor": "Editor de configuració",
+  "copyConfig": "Copiar configuració",
+  "saveAndRestart": "Desa i reinicia",
+  "saveOnly": "Només desar",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Configuració copiada al porta-retalls."
+    },
+    "error": {
+      "savingError": "Error al desar la configuració"
+    }
+  },
+  "confirm": "Sortir sense desar?"
+}

@@ -1,68 +1,39 @@
-import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
-import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import React, { useMemo } from "react";
-// import useTapUtils from "@/hooks/use-tap-utils";
+import { cn } from "@/lib/utils";
+import { ConsolidatedSegmentData } from "@/types/review";
 
 type SummarySegmentProps = {
-  events: ReviewSegment[];
-  segmentTime: number;
-  segmentDuration: number;
-  segmentHeight: number;
-  severityType: ReviewSeverity;
+  segmentData: ConsolidatedSegmentData;
+  totalDuration: number;
 };
 
 export function SummarySegment({
-  events,
-  segmentTime,
-  segmentDuration,
-  segmentHeight,
-  severityType,
+  segmentData,
+  totalDuration,
 }: SummarySegmentProps) {
-  const { getSeverity, getReviewed, displaySeverityType } =
-    useEventSegmentUtils(segmentDuration, events, severityType);
+  const { startTime, endTime, severity, reviewed } = segmentData;
 
-  const severity = useMemo(
-    () => getSeverity(segmentTime, displaySeverityType),
-    [getSeverity, segmentTime, displaySeverityType],
-  );
-
-  const reviewed = useMemo(
-    () => getReviewed(segmentTime),
-    [getReviewed, segmentTime],
-  );
-
-  const segmentKey = useMemo(() => segmentTime, [segmentTime]);
-
-  const severityColors: { [key: number]: string } = {
-    1: reviewed
+  const severityColors: { [key: string]: string } = {
+    significant_motion: reviewed
       ? "bg-severity_significant_motion/50"
       : "bg-severity_significant_motion",
-    2: reviewed ? "bg-severity_detection/50" : "bg-severity_detection",
-    3: reviewed ? "bg-severity_alert/50" : "bg-severity_alert",
+    detection: reviewed ? "bg-severity_detection/50" : "bg-severity_detection",
+    alert: reviewed ? "bg-severity_alert/50" : "bg-severity_alert",
+    empty: "bg-transparent",
   };
 
+  const height = ((endTime - startTime) / totalDuration) * 100;
+
   return (
-    <div
-      key={segmentKey}
-      className="relative w-full"
-      style={{ height: segmentHeight }}
-    >
-      {severity.map((severityValue: number, index: number) => (
-        <React.Fragment key={index}>
-          {severityValue === displaySeverityType && (
-            <div
-              className="flex cursor-pointer justify-end"
-              style={{ height: segmentHeight }}
-            >
-              <div
-                key={`${segmentKey}_${index}_secondary_data`}
-                style={{ height: segmentHeight }}
-                className={`w-[10px] ${severityColors[severityValue]}`}
-              ></div>
-            </div>
+    <div className="relative w-full" style={{ height: `${height}%` }}>
+      <div className="absolute inset-0 flex h-full cursor-pointer justify-end">
+        <div
+          className={cn(
+            "w-[10px]",
+            severityColors[severity],
+            height < 0.5 && "min-h-[0.5px]",
           )}
-        </React.Fragment>
-      ))}
+        ></div>
+      </div>
     </div>
   );
 }

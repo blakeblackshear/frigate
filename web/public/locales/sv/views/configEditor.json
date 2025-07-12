@@ -1,0 +1,16 @@
+{
+  "copyConfig": "Kopiera konfiguration",
+  "saveAndRestart": "Spara & Starta om",
+  "saveOnly": "Spara",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Konfiguration kopierad till urklipp."
+    },
+    "error": {
+      "savingError": "Problem att spara konfiguration"
+    }
+  },
+  "documentTitle": "Ändra konfiguration - Frigate",
+  "configEditor": "Ändra konfiguration",
+  "confirm": "Avsluta utan att spara?"
+}

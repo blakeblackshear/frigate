@@ -1,0 +1,74 @@
+{
+  "search": "Pesquisar",
+  "savedSearches": "Pesquisas salvas",
+  "searchFor": "Pesquisar por {{inputValue}}",
+  "button": {
+    "save": "Salvar pesquisa",
+    "delete": "Excluir pesquisa salva",
+    "filterInformation": "Informação do filtro",
+    "filterActive": "Filtros ativos",
+    "clear": "Limpar pesquisa"
+  },
+  "trackedObjectId": "ID do objeto rastreado",
+  "filter": {
+    "label": {
+      "sub_labels": "Sub etiquetas",
+      "zones": "Zonas",
+      "cameras": "Câmaras",
+      "labels": "Etiquetas",
+      "search_type": "Tipo de pesquisa",
+      "time_range": "Intervalo de tempo",
+      "before": "Antes",
+      "after": "Depois",
+      "min_score": "Pontuação mínima",
+      "max_score": "Pontuação máxima",
+      "min_speed": "Velocidade mínima",
+      "max_speed": "Velocidade máxima",
+      "recognized_license_plate": "Matrícula reconhecida",
+      "has_clip": "Tem Clipe",
+      "has_snapshot": "Tem Captura de Imagem"
+    },
+    "searchType": {
+      "thumbnail": "Miniatura",
+      "description": "Descrição"
+    },
+    "header": {
+      "noFilters": "Filtros",
+      "activeFilters": "Filtros ativos",
+      "currentFilterType": "Valores de filtro"
+    },
+    "tips": {
+      "desc": {
+        "text": "Os filtros ajudam você a restringir os resultados da sua pesquisa. Veja como usá-los no campo de entrada:",
+        "example": "Exemplo: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"> <li>Digite um nome de filtro seguido de dois pontos (ex: \"cameras:\").</li><li>Selecione um valor entre as sugestões ou digite o seu próprio.</li><li>Use múltiplos filtros adicionando-os um após o outro com um espaço entre eles.</li> <li>Filtros de data (before: e after:) usam o formato <em>{{DateFormat}}</em>.</li><li>O filtro de intervalo de tempo usa o formato <em>{{exampleTime}}</em>.</li><li>Remova filtros clicando no 'x' ao lado deles.</li></ul>",
+        "step1": "Digite um nome para o filtro seguido de dois pontos (exemplo \"camaras:\").",
+        "step2": "Selecione um valor entre as sugestões ou digite o seu próprio.",
+        "step3": "Use vários filtros adicionando-os um após o outro com um espaço entre eles.",
+        "step5": "O filtro de intervalo de tempo usa o formato {{exampleTime}}.",
+        "step6": "Remova os filtros clicando no 'x' ao lado deles.",
+        "step4": "Os filtros de data (antes: e depois:) utilizam o formato {{DateFormat}}.",
+        "exampleLabel": "Exemplo:"
+      },
+      "title": "Como usar filtros de texto"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "A data 'antes' deve ser posterior à data 'depois'.",
+        "minScoreMustBeLessOrEqualMaxScore": "O 'min_score' deve ser inferior ou igual ao 'max_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "O 'min_speed' deve ser inferior ou igual ao 'max_speed'.",
+        "afterDatebeEarlierBefore": "A data \"depois\" deve ser anterior à data \"antes\".",
+        "maxScoreMustBeGreaterOrEqualMinScore": "O 'max_score' deve ser maior ou igual ao 'min_score'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "O 'max_speed' deve ser maior ou igual ao 'min_speed'."
+      }
+    }
+  },
+  "placeholder": {
+    "search": "Pesquisar…"
+  },
+  "similaritySearch": {
+    "title": "Pesquisa de similaridade",
+    "active": "Busca de semelhança ativa",
+    "clear": "Pesquisa de semelhança clara"
+  }
+}

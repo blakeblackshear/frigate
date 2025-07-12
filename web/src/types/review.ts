@@ -50,6 +50,10 @@ export type ReviewSummary = {
   [day: string]: ReviewSummaryDay;
 };
 
+export type RecordingsSummary = {
+  [day: string]: boolean;
+};
+
 export type MotionData = {
   start_time: number;
   motion?: number;
@@ -60,3 +64,12 @@ export type MotionData = {
 export const REVIEW_PADDING = 4;
 
 export type ReviewDetailPaneType = "overview" | "details";
+
+export type ConsolidatedSegmentData = {
+  startTime: number;
+  endTime: number;
+  severity: ReviewSeverity | "empty";
+  reviewed: boolean;
+};
+
+export type TimelineZoomDirection = "in" | "out" | null;

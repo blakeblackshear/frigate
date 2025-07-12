@@ -1,0 +1,126 @@
+{
+  "filter": "Szűrő",
+  "labels": {
+    "label": "Cimkék",
+    "all": {
+      "title": "Minden cimke",
+      "short": "Cimkék"
+    },
+    "count_other": "{{count}} cimke",
+    "count_one": "{{count}} Cimke"
+  },
+  "zones": {
+    "label": "Zónák",
+    "all": {
+      "title": "Minden zóna",
+      "short": "Zónák"
+    }
+  },
+  "more": "Több Szűrő",
+  "timeRange": "Idő intervallum",
+  "reset": {
+    "label": "Szűrők visszaállítása alapállapotba"
+  },
+  "subLabels": {
+    "label": "Alcimkék",
+    "all": "Minden Alcimke"
+  },
+  "logSettings": {
+    "label": "Szűrő napló szint",
+    "loading": {
+      "title": "Töltés",
+      "desc": "Amikor a naplópanel az aljára van görgetve, az új naplóbejegyzések automatikusan megjelennek, ahogy hozzáadódnak."
+    },
+    "allLogs": "Minden napló",
+    "filterBySeverity": "Naplók szűrési fontosság alapján",
+    "disableLogStreaming": "Napló adásának kikapcsolása"
+  },
+  "trackedObjectDelete": {
+    "toast": {
+      "error": "Követett tárgyak törlése sikertelen: {{errorMessage}}",
+      "success": "Követett tárgyak törlése sikeres."
+    },
+    "title": "Törlés Megerősítése",
+    "desc": "A(z) {{objectLength}} követett objektum törlése eltávolítja a pillanatképet, az összes mentett beágyazást és az összes kapcsolódó objektum életciklus-bejegyzést. Ezeknek a követett objektumoknak a rögzített felvételei a Történet nézetben <em>NEM</em> kerülnek törlésre.<br /><br />Biztosan folytatni szeretné?<br /><br />Tartsa lenyomva a <em>Shift</em> billentyűt, hogy a jövőben kihagyja ezt a párbeszédablakot."
+  },
+  "dates": {
+    "all": {
+      "title": "Minden Dátum",
+      "short": "Dátumok"
+    },
+    "selectPreset": "Válasszon sablon beállítást…"
+  },
+  "score": "Pont",
+  "estimatedSpeed": "Becsült Sebesség {{unit}}",
+  "features": {
+    "hasSnapshot": "Van pillanatképe",
+    "submittedToFrigatePlus": {
+      "label": "Elküldve a Frigate+-hoz",
+      "tips": "Először szűrjön azokra a követett objektumokra, amelyek rendelkeznek pillanatképpel.<br /><br />A pillanatkép nélküli követett objektumokat nem lehet beküldeni a Frigate+ rendszerébe."
+    },
+    "label": "Funkciók",
+    "hasVideoClip": "Van videója"
+  },
+  "sort": {
+    "label": "Rendezés",
+    "dateAsc": "Dátum szerint (Növekvő)",
+    "scoreDesc": "Tárgy Pontszám (Csökkenő)",
+    "scoreAsc": "Tárgy Pontszám (Növekvő)",
+    "speedAsc": "Becsült Sebesség (Növekvő)",
+    "dateDesc": "Dátum szerint (Csökkenő)",
+    "speedDesc": "Becsült Sebesség (Csökkenő)",
+    "relevance": "Relevancia"
+  },
+  "cameras": {
+    "all": {
+      "title": "Minden Kamera",
+      "short": "Kamerák"
+    },
+    "label": "Kamera szűrő"
+  },
+  "review": {
+    "showReviewed": "Mutasd az Áttekintetteket"
+  },
+  "motion": {
+    "showMotionOnly": "Mutasd Csak a Mozgást"
+  },
+  "explore": {
+    "settings": {
+      "title": "Beállítások",
+      "defaultView": {
+        "title": "Alap Nézet",
+        "summary": "Összegzés",
+        "unfilteredGrid": "Szűrőmentes Rács",
+        "desc": "Ha nincs kiválasztva szűrő, jelenítse meg az egyes címkékhez tartozó legutóbbi követett objektumok összefoglalóját, vagy jelenítsen meg egy szűretlen rácsot."
+      },
+      "searchSource": {
+        "label": "Keresés Forrás",
+        "options": {
+          "description": "Leírás",
+          "thumbnailImage": "Bélyegkép"
+        },
+        "desc": "Válassza ki, hogy a követett objektumok bélyegképeiben vagy leírásaiban szeretne keresni."
+      },
+      "gridColumns": {
+        "title": "Rács Oszlopok",
+        "desc": "Válassza ki az oszlopok számáta rács nézetben."
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Válassza ki a dátumot a szűréshez"
+      }
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Szűrés zóna maszk alapján"
+  },
+  "recognizedLicensePlates": {
+    "title": "Felismert Rendszámtáblák",
+    "loadFailed": "Felismert rendszámtáblák betöltése sikertelen.",
+    "noLicensePlatesFound": "Rendszámtábla nem található.",
+    "selectPlatesFromList": "Válasszon ki egy vagy több rendszámtáblát a listából.",
+    "loading": "Felismert rendszámtáblák betöltése…",
+    "placeholder": "Kezdjen gépelni a rendszámok közötti kereséshez…"
+  }
+}

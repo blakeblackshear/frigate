@@ -1,0 +1,12 @@
+{
+  "filter": "Filtru",
+  "export": "Exporta",
+  "calendar": "Calendar",
+  "filters": "Filtre",
+  "toast": {
+    "error": {
+      "endTimeMustAfterStartTime": "Timpul de sfarsit trebuie sa fie dupa cel de start",
+      "noValidTimeSelected": "Niciun interval de timp valid nu a fost selectat"
+    }
+  }
+}

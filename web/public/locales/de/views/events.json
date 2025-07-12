@@ -1,0 +1,38 @@
+{
+  "alerts": "Alarme",
+  "detections": "Erkennungen",
+  "motion": {
+    "label": "Bewegung",
+    "only": "nur Bewegung"
+  },
+  "empty": {
+    "alert": "Es gibt keine zu prüfenden Alarme",
+    "detection": "Es gibt keine zu prüfenden Erkennungen",
+    "motion": "Keine Bewegungsdaten gefunden"
+  },
+  "timeline": "Zeitleiste",
+  "timeline.aria": "Zeitleiste auswählen",
+  "events": {
+    "label": "Ereignisse",
+    "noFoundForTimePeriod": "Keine Ereignisse für diesen Zeitraum gefunden.",
+    "aria": "Wähle Ereignisse aus"
+  },
+  "documentTitle": "Überprüfung - Frigate",
+  "recordings": {
+    "documentTitle": "Aufnahmen - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Letzte 24 Stunden"
+  },
+  "newReviewItems": {
+    "label": "Neue zu prüfende Objekte anschauen",
+    "button": "Neue zu prüfende Objekte"
+  },
+  "markTheseItemsAsReviewed": "Diese Objekte als geprüft kennzeichnen",
+  "camera": "Kamera",
+  "allCameras": "Alle Kameras",
+  "markAsReviewed": "Als geprüft kennzeichnen",
+  "selected_one": "{{count}} ausgewählt",
+  "selected_other": "{{count}} ausgewählt",
+  "detected": "erkannt"
+}

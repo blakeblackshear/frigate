@@ -1,0 +1,158 @@
+{
+  "twoWayTalk": {
+    "enable": "Kétirányú kommunikáció engedélyezése",
+    "disable": "Kétirányú kommunikáció tiltása"
+  },
+  "documentTitle": "Élő - Frigate",
+  "lowBandwidthMode": "Alacsony felbontású mód",
+  "documentTitle.withCamera": "{{camera}} - Élő - Frigate",
+  "cameraAudio": {
+    "disable": "Kamera hangjának kikapcsolása",
+    "enable": "Kamera hangjának bekapcsolása"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Kattintson a képre a kamera középre igazításához",
+        "enable": "Engedélyezze a kattintást a mozgatáshoz",
+        "disable": "Kattintással húzás kikapcsolása"
+      },
+      "left": {
+        "label": "PTZ kamera balra mozgatása"
+      },
+      "up": {
+        "label": "PTZ kamera felfele mozgatása"
+      },
+      "down": {
+        "label": "PTZ kamera lefele mozgatása"
+      },
+      "right": {
+        "label": "PTZ kamera jobbra mozgatása"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "PTZ kamera közelítés"
+      },
+      "out": {
+        "label": "PTZ kamera távolodás"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Kattinston a képre a PTZ kamera középre igazításához"
+      }
+    },
+    "presets": "PTZ kamera előzetes beállításai"
+  },
+  "camera": {
+    "enable": "Kamera Engedélyezése",
+    "disable": "Kamera Kikapcsolása"
+  },
+  "muteCameras": {
+    "enable": "Minden Kamera Némítása",
+    "disable": "Minden Kamera Felhangosítása"
+  },
+  "detect": {
+    "enable": "Észlelés Engedélyezése",
+    "disable": "Észlelés Kikapcsolása"
+  },
+  "recording": {
+    "enable": "Felvétel Készítés Engedélyezése",
+    "disable": "Felvétel Készítés Kikapcsolása"
+  },
+  "snapshots": {
+    "enable": "Pillanatfelvétel Engedélyezése",
+    "disable": "Pillanatfelvétel Kikapcsolása"
+  },
+  "audioDetect": {
+    "enable": "Hang Észlelés Engedélyezése",
+    "disable": "Hang Észlelés Kikapcsolása"
+  },
+  "autotracking": {
+    "enable": "Automatikus Követés Engedélyezése",
+    "disable": "Automatikus Követés Kikapcsolása"
+  },
+  "streamStats": {
+    "enable": "Adás Statisztika Mutatása",
+    "disable": "Adás Statisztika Elrejtése"
+  },
+  "manualRecording": {
+    "playInBackground": {
+      "label": "Lejátszás a háttérben",
+      "desc": "Engedélyezze ezt a lehetőséget, hogy az adás tovább folyjon amikor a lejátszó rejtve van."
+    },
+    "showStats": {
+      "label": "Statisztika Mutatása",
+      "desc": "Engedélyezze ezt az opciót, hogy a közvetítés statisztikái átfedésként megjelenjenek a kameraképen."
+    },
+    "debugView": "Hibakeresési Nézet",
+    "title": "Igény Szerinti Felvétel",
+    "start": "Igény szerinti felvétel indítása",
+    "started": "Kézi igény szerinti felvétel elindítva.",
+    "failedToStart": "Kézi igény szerinti felvétel indítása sikertelen.",
+    "end": "Igény szerinti felvétel befejezése",
+    "ended": "Kézi igény szerinti felvétel befejezve.",
+    "failedToEnd": "Kézi igény szerinti felvétel befejezése sikertelen.",
+    "tips": "Indítson el egy manuális eseményt a kamera felvételmegőrzési beállításai alapján.",
+    "recordDisabledTips": "Mivel a rögzítés le van tiltva vagy korlátozva van a konfigurációban ennél a kameránál, csak egy pillanatkép kerül mentésre."
+  },
+  "streamingSettings": "Adás Beállítások",
+  "notifications": "Értesítések",
+  "audio": "Hang",
+  "suspend": {
+    "forTime": "Felfüggesztés: "
+  },
+  "stream": {
+    "title": "Adás",
+    "audio": {
+      "tips": {
+        "documentation": "Olvassa el a leírást ",
+        "title": "A hangot a kamerának kell kibocsátania, és a go2rtc-ben kell konfigurálni ehhez a streamhez."
+      },
+      "available": "Ehhez az adáshoz hang elérhető",
+      "unavailable": "Nem elérhető hang ehhez az adáshoz"
+    },
+    "twoWayTalk": {
+      "tips.documentation": "Olvassa el a leírást ",
+      "available": "Kétirányú kommunikáció elérhető ehhez az adáshoz",
+      "unavailable": "Nem elérhető a kétirányú kommunikáció ehhez az adáshoz",
+      "tips": "Az eszközének támogatnia kell ezt a funkciót, és a WebRTC-nek kétirányú beszélgetésre kell lennie konfigurálva."
+    },
+    "lowBandwidth": {
+      "resetStream": "Adás visszaállítása",
+      "tips": "Az élő nézet alacsony sávszélességű módban van a pufferelés vagy stream hibák miatt."
+    },
+    "playInBackground": {
+      "label": "Lejátszás a háttérben",
+      "tips": "Engedélyezze ezt az opciót a folyamatos közvetítéshez akkor is, ha a lejátszó rejtve van."
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Beállítások",
+    "cameraEnabled": "Kamera Engedélyezve",
+    "objectDetection": "Tárgy Észlelés",
+    "recording": "Felvétel",
+    "audioDetection": "Hang Észlelés",
+    "snapshots": "Pillanatképek",
+    "autotracking": "Automatikus követés"
+  },
+  "history": {
+    "label": "Előzmény felvételek megjelenítése"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Mind",
+      "motion": "Mozgás",
+      "active_objects": "Aktív objektumok"
+    },
+    "notAllTips": "Az Ön {{source}} felvételmegőrzési beállítása akövetkezőre van állítva <code>mode: {{effectiveRetainMode}}</code>, így ez az igény szerinti felvétel csak a {{effectiveRetainModeName}} szegmenseket őrzi meg."
+  },
+  "editLayout": {
+    "label": "Elrendezés szerkesztése",
+    "group": {
+      "label": "Kameracsoport szerkesztése"
+    },
+    "exitEdit": "Szerkesztés bezárása"
+  }
+}

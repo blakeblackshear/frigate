@@ -10,6 +10,12 @@ There are many possible causes for a USB coral not being detected and some are O
 1. When the device is first plugged in and has not initialized it will appear as `1a6e:089a Global Unichip Corp.` when running `lsusb` or checking the hardware page in HA OS.
 2. Once initialized, the device will appear as `18d1:9302 Google Inc.` when running `lsusb` or checking the hardware page in HA OS.
 
+:::tip
+
+Using `lsusb` or checking the hardware page in HA OS will show as `1a6e:089a Global Unichip Corp.` until Frigate runs an inferance using the coral. So don't worry about the identification until after Frigate has attempted to detect the coral.
+
+:::
+
 If the coral does not initialize then Frigate can not interface with it. Some common reasons for the USB based Coral not initializing are:
 
 ### Not Enough Power
@@ -26,7 +32,7 @@ The USB coral can draw up to 900mA and this can be too much for some on-device U
 The USB coral has different IDs when it is uninitialized and initialized.
 
 - When running Frigate in a VM, Proxmox lxc, etc. you must ensure both device IDs are mapped.
-- When running HA OS you may need to run the Full Access version of the Frigate addon with the `Protected Mode` switch disabled so that the coral can be accessed.
+- When running through the Home Assistant OS you may need to run the Full Access variant of the Frigate Add-on with the _Protection mode_ switch disabled so that the coral can be accessed.
 
 ### Synology 716+II running DSM 7.2.1-69057 Update 5
 
@@ -60,10 +66,14 @@ The USB Coral can become stuck and need to be restarted, this can happen for a n
 
 ## PCIe Coral Not Detected
 
-The most common reason for the PCIe Coral not being detected is that the driver has not been installed. This process varies based on what OS and kernel that is being run. 
+The most common reason for the PCIe Coral not being detected is that the driver has not been installed. This process varies based on what OS and kernel that is being run.
 
 - In most cases [the Coral docs](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) show how to install the driver for the PCIe based Coral.
-- For Ubuntu 22.04+ https://github.com/jnicolson/gasket-builder can be used to build and install the latest version of the driver.
+- For some newer Linux distros (for example, Ubuntu 22.04+), https://github.com/jnicolson/gasket-builder can be used to build and install the latest version of the driver.
+
+## Attempting to load TPU as pci & Fatal Python error: Illegal instruction
+
+This is an issue due to outdated gasket driver when being used with new linux kernels. Installing an updated driver from https://github.com/jnicolson/gasket-builder has been reported to fix the issue.
 
 ### Not detected on Raspberry Pi5
 

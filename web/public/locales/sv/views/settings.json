@@ -1,0 +1,88 @@
+{
+  "documentTitle": {
+    "camera": "Kamerainställningar - Frigate",
+    "default": "Inställningar - Frigate",
+    "general": "Allmänna inställningar - Frigate",
+    "authentication": "Autentiseringsinställningar - Frigate",
+    "classification": "Klassificeringsinställningar - Frigate",
+    "masksAndZones": "Maskerings- och zonverktyg - Frigate",
+    "enrichments": "Förbättringsinställningar - Frigate",
+    "frigatePlus": "Frigate+ Inställningar - Frigate",
+    "notifications": "Notifikations Inställningar - Frigate"
+  },
+  "general": {
+    "title": "Allmänna Inställningar",
+    "liveDashboard": {
+      "automaticLiveView": {
+        "desc": "Automatiskt byte till kamera där aktivitet registreras. Inaktivering av denna inställning gör att en statisk bild visas i Live Panelen som uppdateras en gång per minut.",
+        "label": "Automatisk Live Visning"
+      },
+      "playAlertVideos": {
+        "desc": "Som standard visas varningar på Live Panelen som små loopande klipp. Inaktivera denna inställning för att bara visa en statisk bild av nya varningar på denna enhet/webbläsare.",
+        "label": "Spela Varnings Videos"
+      },
+      "title": "Live Panel"
+    },
+    "storedLayouts": {
+      "title": "Sparade Layouter",
+      "desc": "Layouten av kameror i en grupp kan dras för att ändra storlek. Positionerna lagras lokalt i din webbläsare.",
+      "clearAll": "Rensa Alla Layouter"
+    },
+    "cameraGroupStreaming": {
+      "desc": "Streaming inställningar för varje kameragrupp lagras lokalt i din webbläsare.",
+      "clearAll": "Rensa Alla Streaming Inställningar",
+      "title": "Kamera Grupp Streaming Inställningar"
+    },
+    "recordingsViewer": {
+      "title": "Inspelningsvisare",
+      "defaultPlaybackRate": {
+        "desc": "Standard uppspelningshastighet för inspelningar.",
+        "label": "Standard Uppspelningshastighet"
+      }
+    },
+    "calendar": {
+      "firstWeekday": {
+        "sunday": "Söndag",
+        "monday": "Måndag",
+        "label": "Första Veckodag"
+      },
+      "title": "Kalender"
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Rensa lagrad layout för {{cameraName}}",
+        "clearStreamingSettings": "Rensa streaminginställningar för samtliga kameragrupper."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Misslyckades att rensa lagrad layout för: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Misslyckades med att rensa streaminginställningar: {{errorMessage}}"
+      }
+    }
+  },
+  "cameraSetting": {
+    "noCamera": "Ingen Kamera",
+    "camera": "Kamera"
+  },
+  "enrichments": {
+    "unsavedChanges": "Osparade Förbättringsinställningar",
+    "birdClassification": {
+      "title": "Fågel klassificering"
+    },
+    "title": "Förbättringsinställningar"
+  },
+  "menu": {
+    "ui": "UI",
+    "cameras": "Kamera Inställningar",
+    "masksAndZones": "Masker / Områden",
+    "users": "Användare",
+    "notifications": "Notifikationer",
+    "frigateplus": "Frigate+",
+    "enrichments": "Förbättringar"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Du har osparade ändringar.",
+      "desc": "Vill du spara dina ändringar innan du fortsätter?"
+    }
+  }
+}

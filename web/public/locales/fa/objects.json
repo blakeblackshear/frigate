@@ -1,0 +1,20 @@
+{
+  "person": "شخص",
+  "bicycle": "دوچرخه",
+  "car": "ماشین",
+  "airplane": "هواپیما",
+  "bus": "اتوبوس",
+  "train": "قطار",
+  "boat": "قایق",
+  "traffic_light": "چراغ راهنمایی",
+  "motorcycle": "موتور سیکلت",
+  "fire_hydrant": "شیر آتش‌نشانی",
+  "street_sign": "تابلو راهنمایی رانندگی",
+  "stop_sign": "تابلو ایست",
+  "parking_meter": "پارکومتر",
+  "bench": "نیمکت",
+  "bird": "پرنده",
+  "cat": "گربه",
+  "dog": "سگ",
+  "horse": "اسب"
+}

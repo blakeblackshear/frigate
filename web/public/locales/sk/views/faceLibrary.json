@@ -1,0 +1,102 @@
+{
+  "description": {
+    "addFace": "Sprievodca pridáním novej kolekcie do Knižnice tvárí.",
+    "invalidName": "Neplatný názov. Názov može obsahovať iba písmená, čísla, medzery, apostrofy, podtržníky a pomlčky.",
+    "placeholder": "Zadajte názov pre túto kolekciu"
+  },
+  "details": {
+    "person": "Osoba",
+    "subLabelScore": "Skóre podúrovne",
+    "scoreInfo": "Skóre podúrovne je vážené skóre všetkých rozpoznaných dôverností tváre, to ale môže byť odlišné od skóre zobrazeného na snímke.",
+    "face": "Detail tváre",
+    "faceDesc": "Podrobnosti o sledovanom objekte, ktorý vytvoril túto tvár",
+    "timestamp": "Časová pečiatka",
+    "unknown": "Neznáme"
+  },
+  "documentTitle": "Knižnica tvárí",
+  "uploadFaceImage": {
+    "title": "Nahrať obrázok tváre",
+    "desc": "Nahrajte obrázok na skenovanie tvárí a zahrňte ho do {{pageToggle}}"
+  },
+  "collections": "Zbierky",
+  "createFaceLibrary": {
+    "title": "Vytvoriť Zbierku",
+    "desc": "Vytvoriť novú zbierku",
+    "new": "Vytvoriť novú tvár",
+    "nextSteps": "Vybudovanie pevných základov: <li> Pomocou záložky Tréning vyberte a trénujte obrázky pre každú detekovanú osobu.</li><li>Pre dosiahnutie najlepších výsledkov sa zamerajte na snímky s priamym pohľadom; vyhnite sa snímkam, ktoré zachytávajú tváre pod uhlom.</li></ul>"
+  },
+  "steps": {
+    "faceName": "Zadajte Meno tváre",
+    "uploadFace": "Nahrať obrázok tváre",
+    "nextSteps": "Ďalšie kroky",
+    "description": {
+      "uploadFace": "Nahrajte obrázok {{name}}, ktorý zobrazuje tvár osoby z čelného uhla. Obrázok nemusí byť orezaný len na jej tvár."
+    }
+  },
+  "train": {
+    "title": "Trénovať",
+    "aria": "Vybrať tréning",
+    "empty": "Neexistujú žiadne predchádzajúce pokusy o rozpoznávanie tváre"
+  },
+  "selectItem": "Vyberte {{item}}",
+  "selectFace": "Vyberte tvár",
+  "deleteFaceLibrary": {
+    "title": "Odstrániť Meno",
+    "desc": "Ste si istí, že chcete odstrániť kolekciu {{name}}? Tým sa natrvalo odstránia všetky pridružené tváre."
+  },
+  "deleteFaceAttempts": {
+    "title": "Odstrániť tváre",
+    "desc_one": "Ste si istí, že chcete odstrániť {{count}} tvár? Túto akciu nemožno vrátiť späť.",
+    "desc_few": "Ste si istí, že chcete odstrániť {{count}} tvárí? Túto akciu nemožno vrátiť späť.",
+    "desc_other": "Ste si istí, že chcete odstrániť {{count}} tvárí? Túto akciu nemožno vrátiť späť."
+  },
+  "renameFace": {
+    "title": "Premonovať tvár",
+    "desc": "Zadajte nový názov pre {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Odstraniť tváre",
+    "addFace": "Pridať tvár",
+    "renameFace": "Premenovať tvár",
+    "deleteFace": "Zmazať tvár",
+    "uploadImage": "Nahrať obrázok",
+    "reprocessFace": "Nanovo spracovať tvár"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Vyberte súbor s obrázkom."
+    },
+    "dropActive": "Presunte obrázok sem…",
+    "dropInstructions": "Potiahnite sem obrázok alebo ho vyberte kliknutím",
+    "maxSize": "Max velkosť: {{size}} MB"
+  },
+  "nofaces": "Žiadne tváre",
+  "pixels": "{{area}}px",
+  "readTheDocs": "Prečitajte si návod",
+  "trainFaceAs": "Trénovať tvár ako:",
+  "trainFace": "Trénovať tvár",
+  "toast": {
+    "success": {
+      "uploadedImage": "Obrázok bol úspešne nahraný.",
+      "addFaceLibrary": "{{name}} bol(a) úspešne pridaný(á) do knižnice tvárí!",
+      "deletedFace_one": "Úspešne odstránená {{count}} tvár.",
+      "deletedFace_few": "Úspešne odstránené {{count}} tváre.",
+      "deletedFace_other": "Úspešne odstránených {{count}} tvárí.",
+      "deletedName_one": "{{count}} tvár bola úspešne odstránená.",
+      "deletedName_few": "{{count}} tváre boli úspešne odstránené.",
+      "deletedName_other": "{{count}} tvárí bolo úspešne odstránených.",
+      "renamedFace": "Úspešne premenovaná tvár na {{name}}",
+      "trainedFace": "Úspešne natrénovaná tvár.",
+      "updatedFaceScore": "Úspešne aktualizované skóre tváre."
+    },
+    "error": {
+      "uploadingImageFailed": "Nepodarilo sa nahrať obrázok: {{errorMessage}}",
+      "addFaceLibraryFailed": "Nepodarilo sa nastaviť meno tváre: {{errorMessage}}",
+      "deleteFaceFailed": "Nepodarilo sa odstrániť: {{errorMessage}}",
+      "deleteNameFailed": "Nepodarilo sa odstrániť meno: {{errorMessage}}",
+      "renameFaceFailed": "Nepodarilo sa premenovať tvár: {{errorMessage}}",
+      "trainFailed": "Nepodarilo sa trénovať: {{errorMessage}}",
+      "updateFaceScoreFailed": "Nepodarilo sa aktualizovať skóre tváre: {{errorMessage}}"
+    }
+  }
+}

@@ -2,9 +2,9 @@
 
 import json
 import os
-import shutil
 import sys
 from pathlib import Path
+from typing import Any
 
 from ruamel.yaml import YAML
 
@@ -13,8 +13,10 @@ from frigate.const import (
     BIRDSEYE_PIPE,
     DEFAULT_FFMPEG_VERSION,
     INCLUDED_FFMPEG_VERSIONS,
+    LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+from frigate.util.config import find_config_file
 
 sys.path.remove("/opt/frigate")
 
@@ -29,25 +31,20 @@ if os.path.isdir("/run/secrets"):
                 Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
             )
 
-config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-
-# Check if we can use .yaml instead of .yml
-config_file_yaml = config_file.replace(".yml", ".yaml")
-if os.path.isfile(config_file_yaml):
-    config_file = config_file_yaml
+config_file = find_config_file()
 
 try:
     with open(config_file) as f:
         raw_config = f.read()
 
     if config_file.endswith((".yaml", ".yml")):
-        config: dict[str, any] = yaml.load(raw_config)
+        config: dict[str, Any] = yaml.load(raw_config)
     elif config_file.endswith(".json"):
-        config: dict[str, any] = json.loads(raw_config)
+        config: dict[str, Any] = json.loads(raw_config)
 except FileNotFoundError:
-    config: dict[str, any] = {}
+    config: dict[str, Any] = {}
 
-go2rtc_config: dict[str, any] = config.get("go2rtc", {})
+go2rtc_config: dict[str, Any] = config.get("go2rtc", {})
 
 # Need to enable CORS for go2rtc so the frigate integration / card work automatically
 if go2rtc_config.get("api") is None:
@@ -57,7 +54,7 @@ elif go2rtc_config["api"].get("origin") is None:
 
 # Need to set default location for HA config
 if go2rtc_config.get("hass") is None:
-    go2rtc_config["hass"] = {"config": "/config"}
+    go2rtc_config["hass"] = {"config": "/homeassistant"}
 
 # we want to ensure that logs are easy to read
 if go2rtc_config.get("log") is None:
@@ -66,56 +63,34 @@ elif go2rtc_config["log"].get("format") is None:
     go2rtc_config["log"]["format"] = "text"
 
 # ensure there is a default webrtc config
-if not go2rtc_config.get("webrtc"):
+if go2rtc_config.get("webrtc") is None:
     go2rtc_config["webrtc"] = {}
 
-# go2rtc should listen on 8555 tcp & udp by default
-if not go2rtc_config["webrtc"].get("listen"):
-    go2rtc_config["webrtc"]["listen"] = ":8555"
-
-if not go2rtc_config["webrtc"].get("candidates", []):
+if go2rtc_config["webrtc"].get("candidates") is None:
     default_candidates = []
     # use internal candidate if it was discovered when running through the add-on
-    internal_candidate = os.environ.get(
-        "FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL", None
-    )
+    internal_candidate = os.environ.get("FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL")
     if internal_candidate is not None:
         default_candidates.append(internal_candidate)
     # should set default stun server so webrtc can work
     default_candidates.append("stun:8555")
 
-    go2rtc_config["webrtc"] = {"candidates": default_candidates}
-else:
-    print(
-        "[INFO] Not injecting WebRTC candidates into go2rtc config as it has been set manually",
+    go2rtc_config["webrtc"]["candidates"] = default_candidates
+
+if go2rtc_config.get("rtsp", {}).get("username") is not None:
+    go2rtc_config["rtsp"]["username"] = go2rtc_config["rtsp"]["username"].format(
+        **FRIGATE_ENV_VARS
     )
 
-# sets default RTSP response to be equivalent to ?video=h264,h265&audio=aac
-# this means user does not need to specify audio codec when using restream
-# as source for frigate and the integration supports HLS playback
-if go2rtc_config.get("rtsp") is None:
-    go2rtc_config["rtsp"] = {"default_query": "mp4"}
-else:
-    if go2rtc_config["rtsp"].get("default_query") is None:
-        go2rtc_config["rtsp"]["default_query"] = "mp4"
-
-    if go2rtc_config["rtsp"].get("username") is not None:
-        go2rtc_config["rtsp"]["username"] = go2rtc_config["rtsp"]["username"].format(
-            **FRIGATE_ENV_VARS
-        )
-
-    if go2rtc_config["rtsp"].get("password") is not None:
-        go2rtc_config["rtsp"]["password"] = go2rtc_config["rtsp"]["password"].format(
-            **FRIGATE_ENV_VARS
-        )
+if go2rtc_config.get("rtsp", {}).get("password") is not None:
+    go2rtc_config["rtsp"]["password"] = go2rtc_config["rtsp"]["password"].format(
+        **FRIGATE_ENV_VARS
+    )
 
 # ensure ffmpeg path is set correctly
 path = config.get("ffmpeg", {}).get("path", "default")
 if path == "default":
-    if shutil.which("ffmpeg") is None:
-        ffmpeg_path = f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
-    else:
-        ffmpeg_path = "ffmpeg"
+    ffmpeg_path = f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
 elif path in INCLUDED_FFMPEG_VERSIONS:
     ffmpeg_path = f"/usr/lib/ffmpeg/{path}/bin/ffmpeg"
 else:
@@ -127,14 +102,12 @@ elif go2rtc_config["ffmpeg"].get("bin") is None:
     go2rtc_config["ffmpeg"]["bin"] = ffmpeg_path
 
 # need to replace ffmpeg command when using ffmpeg4
-if int(os.environ.get("LIBAVFORMAT_VERSION_MAJOR", "59") or "59") < 59:
-    if go2rtc_config["ffmpeg"].get("rtsp") is None:
-        go2rtc_config["ffmpeg"]["rtsp"] = (
-            "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
-        )
-else:
+if LIBAVFORMAT_VERSION_MAJOR < 59:
+    rtsp_args = "-fflags nobuffer -flags low_delay -stimeout 10000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
     if go2rtc_config.get("ffmpeg") is None:
-        go2rtc_config["ffmpeg"] = {"path": ""}
+        go2rtc_config["ffmpeg"] = {"rtsp": rtsp_args}
+    elif go2rtc_config["ffmpeg"].get("rtsp") is None:
+        go2rtc_config["ffmpeg"]["rtsp"] = rtsp_args
 
 for name in go2rtc_config.get("streams", {}):
     stream = go2rtc_config["streams"][name]
@@ -162,7 +135,7 @@ for name in go2rtc_config.get("streams", {}):
 
 # add birdseye restream stream if enabled
 if config.get("birdseye", {}).get("restream", False):
-    birdseye: dict[str, any] = config.get("birdseye")
+    birdseye: dict[str, Any] = config.get("birdseye")
 
     input = f"-f rawvideo -pix_fmt yuv420p -video_size {birdseye.get('width', 1280)}x{birdseye.get('height', 720)} -r 10 -i {BIRDSEYE_PIPE}"
     ffmpeg_cmd = f"exec:{parse_preset_hardware_acceleration_encode(ffmpeg_path, config.get('ffmpeg', {}).get('hwaccel_args', ''), input, '-rtsp_transport tcp -f rtsp {output}')}"

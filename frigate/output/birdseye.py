@@ -10,13 +10,14 @@ import queue
 import subprocess as sp
 import threading
 import traceback
+from typing import Any, Optional
 
 import cv2
 import numpy as np
 
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import BirdseyeModeEnum, FfmpegConfig, FrigateConfig
-from frigate.const import BASE_DIR, BIRDSEYE_PIPE
+from frigate.const import BASE_DIR, BIRDSEYE_PIPE, INSTALL_DIR
 from frigate.util.image import (
     SharedMemoryFrameManager,
     copy_yuv_to_position,
@@ -258,7 +259,7 @@ class BroadcastThread(threading.Thread):
                             ws.send(buf, binary=True)
                         except ValueError:
                             pass
-                        except (BrokenPipeError, ConnectionResetError) as e:
+                        except (BrokenPipeError, ConnectionResetError, OSError) as e:
                             logger.debug(f"Websocket unexpectedly closed {e}")
             elif self.converter.process.poll() is not None:
                 break
@@ -297,7 +298,9 @@ class BirdsEyeFrameManager:
             birdseye_logo = cv2.imread(custom_logo_files[0], cv2.IMREAD_UNCHANGED)
 
         if birdseye_logo is None:
-            logo_files = glob.glob("/opt/frigate/frigate/images/birdseye.png")
+            logo_files = glob.glob(
+                os.path.join(INSTALL_DIR, "frigate/images/birdseye.png")
+            )
 
             if len(logo_files) > 0:
                 birdseye_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
@@ -378,8 +381,11 @@ class BirdsEyeFrameManager:
         if mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
 
-    def update_frame(self, frame: np.ndarray):
-        """Update to a new frame for birdseye."""
+    def update_frame(self, frame: Optional[np.ndarray] = None) -> bool:
+        """
+        Update birdseye, optionally with a new frame.
+        When no frame is passed, check the layout and update for any disabled cameras.
+        """
 
         # determine how many cameras are tracking objects within the last inactivity_threshold seconds
         active_cameras: set[str] = set(
@@ -387,11 +393,14 @@ class BirdsEyeFrameManager:
                 cam
                 for cam, cam_data in self.cameras.items()
                 if self.config.cameras[cam].birdseye.enabled
+                and self.config.cameras[cam].enabled_in_config
+                and self.config.cameras[cam].enabled
                 and cam_data["last_active_frame"] > 0
                 and cam_data["current_frame_time"] - cam_data["last_active_frame"]
                 < self.inactivity_threshold
             ]
         )
+        logger.debug(f"Active cameras: {active_cameras}")
 
         max_cameras = self.config.birdseye.layout.max_cameras
         max_camera_refresh = False
@@ -409,127 +418,134 @@ class BirdsEyeFrameManager:
                         - self.cameras[active_camera]["last_active_frame"]
                     ),
                 )
-                active_cameras = limited_active_cameras[
-                    : self.config.birdseye.layout.max_cameras
-                ]
+                active_cameras = limited_active_cameras[:max_cameras]
                 max_camera_refresh = True
                 self.last_refresh_time = now
 
-        # if there are no active cameras
+        # Track if the frame changes
+        frame_changed = False
+
+        # If no active cameras and layout is already empty, no update needed
         if len(active_cameras) == 0:
             # if the layout is already cleared
             if len(self.camera_layout) == 0:
                 return False
             # if the layout needs to be cleared
-            else:
-                self.camera_layout = []
-                self.active_cameras = set()
-                self.clear_frame()
-                return True
-
-        # check if we need to reset the layout because there is a different number of cameras
-        if len(self.active_cameras) - len(active_cameras) == 0:
-            if len(self.active_cameras) == 1 and self.active_cameras != active_cameras:
-                reset_layout = True
-            elif max_camera_refresh:
-                reset_layout = True
-            else:
-                reset_layout = False
-        else:
-            reset_layout = True
-
-        # reset the layout if it needs to be different
-        if reset_layout:
-            logger.debug("Added new cameras, resetting layout...")
+            self.camera_layout = []
+            self.active_cameras = set()
             self.clear_frame()
-            self.active_cameras = active_cameras
-
-            # this also converts added_cameras from a set to a list since we need
-            # to pop elements in order
-            active_cameras_to_add = sorted(
-                active_cameras,
-                # sort cameras by order and by name if the order is the same
-                key=lambda active_camera: (
-                    self.config.cameras[active_camera].birdseye.order,
-                    active_camera,
-                ),
-            )
-
-            if len(active_cameras) == 1:
-                # show single camera as fullscreen
-                camera = active_cameras_to_add[0]
-                camera_dims = self.cameras[camera]["dimensions"].copy()
-                scaled_width = int(self.canvas.height * camera_dims[0] / camera_dims[1])
-
-                # center camera view in canvas and ensure that it fits
-                if scaled_width < self.canvas.width:
-                    coefficient = 1
-                    x_offset = int((self.canvas.width - scaled_width) / 2)
+            frame_changed = True
+        else:
+            # Determine if layout needs resetting
+            if len(self.active_cameras) - len(active_cameras) == 0:
+                if (
+                    len(self.active_cameras) == 1
+                    and self.active_cameras != active_cameras
+                ):
+                    reset_layout = True
+                elif max_camera_refresh:
+                    reset_layout = True
                 else:
-                    coefficient = self.canvas.width / scaled_width
-                    x_offset = int(
-                        (self.canvas.width - (scaled_width * coefficient)) / 2
-                    )
-
-                self.camera_layout = [
-                    [
-                        (
-                            camera,
-                            (
-                                x_offset,
-                                0,
-                                int(scaled_width * coefficient),
-                                int(self.canvas.height * coefficient),
-                            ),
-                        )
-                    ]
-                ]
+                    reset_layout = False
             else:
-                # calculate optimal layout
-                coefficient = self.canvas.get_coefficient(len(active_cameras))
-                calculating = True
+                reset_layout = True
 
-                # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
-                while calculating:
-                    if self.stop_event.is_set():
-                        return
+            if reset_layout:
+                logger.debug("Resetting Birdseye layout...")
+                self.clear_frame()
+                self.active_cameras = active_cameras
 
-                    layout_candidate = self.calculate_layout(
-                        active_cameras_to_add,
-                        coefficient,
+                # this also converts added_cameras from a set to a list since we need
+                # to pop elements in order
+                active_cameras_to_add = sorted(
+                    active_cameras,
+                    # sort cameras by order and by name if the order is the same
+                    key=lambda active_camera: (
+                        self.config.cameras[active_camera].birdseye.order,
+                        active_camera,
+                    ),
+                )
+                if len(active_cameras) == 1:
+                    # show single camera as fullscreen
+                    camera = active_cameras_to_add[0]
+                    camera_dims = self.cameras[camera]["dimensions"].copy()
+                    scaled_width = int(
+                        self.canvas.height * camera_dims[0] / camera_dims[1]
                     )
 
-                    if not layout_candidate:
-                        if coefficient < 10:
-                            coefficient += 1
-                            continue
-                        else:
-                            logger.error("Error finding appropriate birdseye layout")
+                    # center camera view in canvas and ensure that it fits
+                    if scaled_width < self.canvas.width:
+                        coefficient = 1
+                        x_offset = int((self.canvas.width - scaled_width) / 2)
+                    else:
+                        coefficient = self.canvas.width / scaled_width
+                        x_offset = int(
+                            (self.canvas.width - (scaled_width * coefficient)) / 2
+                        )
+
+                    self.camera_layout = [
+                        [
+                            (
+                                camera,
+                                (
+                                    x_offset,
+                                    0,
+                                    int(scaled_width * coefficient),
+                                    int(self.canvas.height * coefficient),
+                                ),
+                            )
+                        ]
+                    ]
+                else:
+                    # calculate optimal layout
+                    coefficient = self.canvas.get_coefficient(len(active_cameras))
+                    calculating = True
+
+                    # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
+                    while calculating:
+                        if self.stop_event.is_set():
                             return
 
-                    calculating = False
-                    self.canvas.set_coefficient(len(active_cameras), coefficient)
+                        layout_candidate = self.calculate_layout(
+                            active_cameras_to_add, coefficient
+                        )
 
-                self.camera_layout = layout_candidate
+                        if not layout_candidate:
+                            if coefficient < 10:
+                                coefficient += 1
+                                continue
+                            else:
+                                logger.error(
+                                    "Error finding appropriate birdseye layout"
+                                )
+                                return
+                        calculating = False
+                        self.canvas.set_coefficient(len(active_cameras), coefficient)
 
-        for row in self.camera_layout:
-            for position in row:
-                self.copy_to_position(
-                    position[1],
-                    position[0],
-                    self.cameras[position[0]]["current_frame"],
-                )
+                    self.camera_layout = layout_candidate
+                frame_changed = True
 
-        return True
+            # Draw the layout
+            for row in self.camera_layout:
+                for position in row:
+                    src_frame = self.cameras[position[0]]["current_frame"]
+                    if src_frame is None or src_frame.size == 0:
+                        logger.debug(f"Skipping invalid frame for {position[0]}")
+                        continue
+                    self.copy_to_position(position[1], position[0], src_frame)
+            if frame is not None:  # Frame presence indicates a potential change
+                frame_changed = True
+
+        return frame_changed
 
     def calculate_layout(
         self,
         cameras_to_add: list[str],
         coefficient: float,
-    ) -> tuple[any]:
+    ) -> tuple[Any]:
         """Calculate the optimal layout for 2+ cameras."""
 
-        def map_layout(camera_layout: list[list[any]], row_height: int):
+        def map_layout(camera_layout: list[list[Any]], row_height: int):
             """Map the calculated layout."""
             candidate_layout = []
             starting_x = 0
@@ -572,7 +588,7 @@ class BirdsEyeFrameManager:
             return max_width, y, candidate_layout
 
         canvas_aspect_x, canvas_aspect_y = self.canvas.get_aspect(coefficient)
-        camera_layout: list[list[any]] = []
+        camera_layout: list[list[Any]] = []
         camera_layout.append([])
         starting_x = 0
         x = starting_x
@@ -674,30 +690,29 @@ class BirdsEyeFrameManager:
         frame: np.ndarray,
     ) -> bool:
         # don't process if birdseye is disabled for this camera
-        camera_config = self.config.cameras[camera].birdseye
-
-        if not camera_config.enabled:
-            return False
+        camera_config = self.config.cameras[camera]
+        force_update = False
 
         # disabling birdseye is a little tricky
-        if not camera_config.enabled:
+        if not camera_config.birdseye.enabled or not camera_config.enabled:
             # if we've rendered a frame (we have a value for last_active_frame)
             # then we need to set it to zero
             if self.cameras[camera]["last_active_frame"] > 0:
                 self.cameras[camera]["last_active_frame"] = 0
-
-            return False
+                force_update = True
+            else:
+                return False
 
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame.copy()
         self.cameras[camera]["current_frame_time"] = frame_time
-        if self.camera_active(camera_config.mode, object_count, motion_count):
+        if self.camera_active(camera_config.birdseye.mode, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()
 
         # limit output to 10 fps
-        if (now - self.last_output_time) < 1 / 10:
+        if not force_update and (now - self.last_output_time) < 1 / 10:
             return False
 
         try:
@@ -709,7 +724,7 @@ class BirdsEyeFrameManager:
             print(traceback.format_exc())
 
         # if the frame was updated or the fps is too low, send frame
-        if updated_frame or (now - self.last_output_time) > 1:
+        if force_update or updated_frame or (now - self.last_output_time) > 1:
             self.last_output_time = now
             return True
         return False
@@ -739,8 +754,9 @@ class Birdseye:
             "birdseye", self.converter, websocket_server, stop_event
         )
         self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
-        self.config_subscriber = ConfigSubscriber("config/birdseye/")
+        self.birdseye_subscriber = ConfigSubscriber("config/birdseye/")
         self.frame_manager = SharedMemoryFrameManager()
+        self.stop_event = stop_event
 
         if config.birdseye.restream:
             self.birdseye_buffer = self.frame_manager.create(
@@ -751,10 +767,26 @@ class Birdseye:
         self.converter.start()
         self.broadcaster.start()
 
+    def __send_new_frame(self) -> None:
+        frame_bytes = self.birdseye_manager.frame.tobytes()
+
+        if self.config.birdseye.restream:
+            self.birdseye_buffer[:] = frame_bytes
+
+        try:
+            self.input.put_nowait(frame_bytes)
+        except queue.Full:
+            # drop frames if queue is full
+            pass
+
+    def all_cameras_disabled(self) -> None:
+        self.birdseye_manager.clear_frame()
+        self.__send_new_frame()
+
     def write_data(
         self,
         camera: str,
-        current_tracked_objects: list[dict[str, any]],
+        current_tracked_objects: list[dict[str, Any]],
         motion_boxes: list[list[int]],
         frame_time: float,
         frame: np.ndarray,
@@ -762,15 +794,16 @@ class Birdseye:
         # check if there is an updated config
         while True:
             (
-                updated_topic,
+                updated_birdseye_topic,
                 updated_birdseye_config,
-            ) = self.config_subscriber.check_for_update()
+            ) = self.birdseye_subscriber.check_for_update()
 
-            if not updated_topic:
+            if not updated_birdseye_topic:
                 break
 
-            camera_name = updated_topic.rpartition("/")[-1]
-            self.config.cameras[camera_name].birdseye = updated_birdseye_config
+            if updated_birdseye_config:
+                camera_name = updated_birdseye_topic.rpartition("/")[-1]
+                self.config.cameras[camera_name].birdseye = updated_birdseye_config
 
         if self.birdseye_manager.update(
             camera,
@@ -779,18 +812,9 @@ class Birdseye:
             frame_time,
             frame,
         ):
-            frame_bytes = self.birdseye_manager.frame.tobytes()
-
-            if self.config.birdseye.restream:
-                self.birdseye_buffer[:] = frame_bytes
-
-            try:
-                self.input.put_nowait(frame_bytes)
-            except queue.Full:
-                # drop frames if queue is full
-                pass
+            self.__send_new_frame()
 
     def stop(self) -> None:
-        self.config_subscriber.stop()
+        self.birdseye_subscriber.stop()
         self.converter.join()
         self.broadcaster.join()

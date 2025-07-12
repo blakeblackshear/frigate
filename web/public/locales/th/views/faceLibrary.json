@@ -1,0 +1,56 @@
+{
+  "details": {
+    "person": "คน",
+    "subLabelScore": "คะแนน Sub Label",
+    "unknown": "ไม่รู้"
+  },
+  "steps": {
+    "faceName": "ใส่ชื่อหน้า",
+    "uploadFace": "ใส่รูปหน้า",
+    "nextSteps": "ต่อไป",
+    "description": {
+      "uploadFace": "อัพโหลดภาพ {{name}} ที่แสดงให้เห็นใบหน้าของเขาจากมุมข้างหน้า. รูปภาพไม่จําเป็นต้องตัดให้เห็นเฉพาะใบหน้าของเขา."
+    }
+  },
+  "selectFace": "เลือกหน้า",
+  "deleteFaceLibrary": {
+    "title": "ลบชื่อ",
+    "desc": "คุณแน่ใจหรือไม่ว่าต้องการลบคอลเลกชัน {{name}}? การลบนี้จะเป็นการลบอย่างถาวร."
+  },
+  "deleteFaceAttempts": {
+    "title": "ลบหน้า"
+  },
+  "renameFace": {
+    "title": "เปลี่ยนชื่อหน้า",
+    "desc": "ใส่ชื่อใหม่สำหรับ {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "ลบหน้า",
+    "addFace": "เพิ่มหน้า",
+    "renameFace": "แก้ชื่อหน้า",
+    "deleteFace": "ลบหน้า",
+    "uploadImage": "อัปโหลดรูป",
+    "reprocessFace": "คำนวนหน้าใหม่"
+  },
+  "imageEntry": {
+    "dropActive": "ลากรูปลงที่นี้",
+    "dropInstructions": "ลากและวางภาพที่นี่, หรือคลิกเลือก"
+  },
+  "selectItem": "เลือก {{item}}",
+  "createFaceLibrary": {
+    "new": "สร้างหน้าใหม่",
+    "nextSteps": "สร้างรากฐานที่แข็งแรง:<li>ใช้แท็บฝึกเพื่อเลือกและฝึกบนภาพแต่ละบุคคล.</li><li>เน้นไปที่ภาพหน้าตรงเพื่อผลลัพธ์ที่ดีที่สุด; หลีกเลี่ยงภาพที่จับภาพใบหน้าแบบมุม</li></ul>"
+  },
+  "collections": "คอลเลกชัน",
+  "description": {
+    "addFace": "ทำตามวิธีการเพิ่มคอลเลกชันใหม่ไปยังที่เก็บหน้า.",
+    "placeholder": "ใส่ชื่อสําหรับคอลเลกชันนี้"
+  },
+  "toast": {
+    "success": {
+      "addFaceLibrary": "{{name}} เพิ่มลงที่เก็บหน้าเรียบร้อยแล้ว!",
+      "deletedName_other": "{{count}} หน้าถูกลบไปเรียบร้อยแล้ว."
+    }
+  },
+  "readTheDocs": "อ่านเอกสาร"
+}
