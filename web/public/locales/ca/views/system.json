@@ -97,7 +97,8 @@
       "storageUsed": "Emmagatzematge",
       "title": "Emmagatzematge de càmera",
       "unused": {
-        "title": "Sense utilitzar"
+        "title": "Sense utilitzar",
+        "tips": "Aquest valor pot no de forma exacta representar l'espai lliure disponible a Frigate si tens altres fitxers emmagatzemats en la vostra unitat més enllà dels registres de Frigate. Frigate no rastreja l'ús d'emmagatzematge extern als seus registres."
       },
       "percentageOfTotalUsed": "Percentatge del total"
     },
