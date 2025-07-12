@@ -599,6 +599,18 @@ cameras:
     # If disabled: config is used but no live stream and no capture etc.
     # Events/Recordings are still viewable.
     enabled: True
+    # Optional: list of objects to track at camera level
+    # objects:
+      # - person
+      # Optional: Filters at camera level
+      # filters:
+        # person:
+          # Optional: minimum width*height of the bounding box for the detected object at camera level (default: 0)
+          # min_area: 1000
+          # Optional: maximum width*height of the bounding box for the detected object at camera level (default: 24000000)
+          # max_area: 1000000
+          # Optional: minimum decimal percentage for tracked object's computed score to be considered a true positive at camera level (default: shown below)
+          # threshold: 0.70
     # Required: ffmpeg settings for the camera
     ffmpeg:
       # Required: A list of input streams for the camera. See documentation for more information.
