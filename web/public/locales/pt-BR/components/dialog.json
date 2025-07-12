@@ -1,0 +1,24 @@
+{
+  "restart": {
+    "title": "Você tem certeza que deseja reiniciar o Frigate?",
+    "button": "Reiniciar",
+    "restarting": {
+      "title": "Frigate está Reiniciando",
+      "content": "Essa página vai recarregar em {{countdown}} segundos.",
+      "button": "Forçar Recarregar Agora"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Enviar para Frigate+",
+        "desc": "Objetos nos lugares que você quer evitar não são falsos positivos. Enviá-los como falsos positivos confundirá o modelo."
+      },
+      "review": {
+        "question": {
+          "label": "Confirmar essa etiqueta para Frigate Plus"
+        }
+      }
+    }
+  }
+}

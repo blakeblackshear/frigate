@@ -1,0 +1,11 @@
+{
+  "documentTitle": {
+    "default": "Configurações - Frigate",
+    "authentication": "Configurações de Autenticação - Frigate",
+    "camera": "Configurações de Câmera - Frigate",
+    "enrichments": "Configurações de Enriquecimento - Frigate",
+    "masksAndZones": "Editor de Máscara e Zona - Frigate",
+    "motionTuner": "Virada de Movimento - Frigate",
+    "object": "Debug - Frigate"
+  }
+}
