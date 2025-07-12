@@ -13,13 +13,14 @@
     "faceDesc": "Lisätiedot kohteesta, josta tämä kasvokuva tallennettiin",
     "person": "Henkilö",
     "timestamp": "Aikaleima",
-    "subLabelScore": "",
-    "face": ""
+    "subLabelScore": "Alinimikkeen pisteet",
+    "face": "Kasvojen yksityiskohdat"
   },
   "documentTitle": "Kasvokirjasto - Frigate",
   "deleteFaceAttempts": {
     "desc_one": "Oletko varma, että haluat poistaa {{count}} kasvon? Tätä toimintoa ei voi perua.",
-    "desc_other": "Oletko varma, että haluat poistaa {{count}} kasvoa? Tätä toimintoa ei voi perua."
+    "desc_other": "Oletko varma, että haluat poistaa {{count}} kasvoa? Tätä toimintoa ei voi perua.",
+    "title": "Poista kasvot"
   },
   "toast": {
     "success": {
@@ -27,5 +28,25 @@
       "deletedFace_other": "{{count}} kasvoa poistettu onnistuneesti."
     }
   },
-  "selectItem": "Valitse {{item}}"
+  "selectItem": "Valitse {{item}}",
+  "train": {
+    "empty": "Ei viimeaikaisia kasvojentunnistusyrityksiä",
+    "title": "Koulutus"
+  },
+  "collections": "Kokoelmat",
+  "steps": {
+    "faceName": "Anna nimi kasvoille",
+    "uploadFace": "Lähetä kasvokuva",
+    "nextSteps": "Seuraavat vaiheet"
+  },
+  "createFaceLibrary": {
+    "title": "Luo kokoelma",
+    "desc": "Luo uusi kokoelma",
+    "new": "Luo uusi kasvo"
+  },
+  "selectFace": "Valitse kasvo",
+  "deleteFaceLibrary": {
+    "title": "Poista nimi",
+    "desc": "Haluatko varmasti poistaa kokoelman {{name}}? Tämä poistaa pysyvästi kaikki liitetyt kasvot."
+  }
 }

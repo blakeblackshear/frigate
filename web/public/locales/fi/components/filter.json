@@ -26,5 +26,29 @@
       "title": "Kaikki alueet",
       "short": "Alueet"
     }
+  },
+  "timeRange": "Aikaikkuna",
+  "subLabels": {
+    "label": "Alinimikkeet",
+    "all": "Kaikki alinimikkeet"
+  },
+  "score": "Piste",
+  "estimatedSpeed": "Arvioitu nopeus {{unit}}",
+  "features": {
+    "label": "Piirteet",
+    "hasVideoClip": "Videoleike löytyy",
+    "submittedToFrigatePlus": {
+      "label": "Lähetetty Frigate+:aan"
+    },
+    "hasSnapshot": "Tilannekuva löytyy"
+  },
+  "sort": {
+    "label": "Järjestä",
+    "dateAsc": "Päivämäärä (Nouseva)",
+    "dateDesc": "Päivämäärä (Laskeva)",
+    "scoreAsc": "Kohteen pisteet (Nouseva)",
+    "scoreDesc": "Kohteen pisteet (Laskeva)",
+    "speedAsc": "Arvioitu nopeus (Nouseva)",
+    "speedDesc": "Arvioitu nopeus (Laskeva)"
   }
 }
