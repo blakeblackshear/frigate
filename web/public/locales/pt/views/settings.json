@@ -403,7 +403,7 @@
       "objects": {
         "allObjectTypes": "Todos os tipos de objeto",
         "title": "Objetos",
-        "desc": "O tipo de objeto ao qual essa máscara de objeto se aplica."
+        "desc": "O tipo de objeto que se aplica a esta máscara de objeto."
       },
       "add": "Adicionar filtro para objecto",
       "edit": "Editar filtro de objecto",
