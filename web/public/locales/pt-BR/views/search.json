@@ -1,0 +1,11 @@
+{
+  "search": "Buscar",
+  "savedSearches": "Buscas Salvas",
+  "searchFor": "Procurar por {{inputValue}}",
+  "button": {
+    "clear": "Limpar procurar",
+    "save": "Salvar pesquisa",
+    "delete": "Apagar procura salva",
+    "filterInformation": "Filtrar informação"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "group": {
+    "label": "Grupo de Câmeras",
+    "add": "Adicionar Grupo de Câmeras",
+    "edit": "Edição Grupo de Câmera",
+    "delete": {
+      "label": "Deletar Grupo de Câmera",
+      "confirm": {
+        "title": "Confirmar Apagar",
+        "desc": "Você tem certeza que quer apagar o grupo de câmera <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Nome",
+      "placeholder": "Digite um nome…"
+    }
+  }
+}

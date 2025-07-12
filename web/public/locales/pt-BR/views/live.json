@@ -1,0 +1,13 @@
+{
+  "documentTitle": "Ao Vivo - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Ao vivo - Frigate",
+  "lowBandwidthMode": "Modo de baixa largura de banda",
+  "twoWayTalk": {
+    "enable": "Habilitar Fala em Dois Sentidos",
+    "disable": "Desabilitar Fala em Dois Sentidos"
+  },
+  "cameraAudio": {
+    "enable": "Habilitar Áudio da Câmera",
+    "disable": "Desabilitar Audio da Câmera"
+  }
+}
