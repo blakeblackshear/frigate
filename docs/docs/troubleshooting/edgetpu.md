@@ -46,6 +46,17 @@ Some users have reported that this older device runs an older kernel causing iss
 6. Open the control panel - info scree. The coral TPU will now be recognised as a USB Device - google inc
 7. Start the frigate container. Everything should work now!
 
+### QNAP NAS
+
+QNAP NAS devices, such as the TS-253A, may use connected Coral TPU devices if [QuMagie](https://www.qnap.com/en/software/qumagie) is installed along with its QNAP AI Core extension. If any of the features—`facial recognition`, `object recognition`, or `similar photo recognition`—are enabled, Container Station applications such as `Frigate` or `CodeProject.AI Server` will be unable to initialize the TPU device in use.
+To allow the Coral TPU device to be discovered, the you must either:
+
+1. [Disable the AI recognition features in QuMagie](https://docs.qnap.com/application/qumagie/2.x/en-us/configuring-qnap-ai-core-settings-FB13CE03.html),
+2. Remove the QNAP AI Core extension or
+3. Manually start the QNAP AI Core extension after Frigate has fully started (not recommended).
+
+It is also recommended to restart the NAS once the changes have been made.
+
 ## USB Coral Detection Appears to be Stuck
 
 The USB Coral can become stuck and need to be restarted, this can happen for a number of reasons depending on hardware and software setup. Some common reasons are:
