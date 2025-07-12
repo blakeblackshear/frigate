@@ -1,0 +1,34 @@
+{
+  "documentTitle": {
+    "default": "Nastavenia - Frigate",
+    "authentication": "Nastavenie autentifikácie- Frigate",
+    "camera": "Nastavenia fotoaparátu – Frigate",
+    "enrichments": "Nastavenia obohatenia – Frigate",
+    "masksAndZones": "Editor masky a zón - Frigate",
+    "motionTuner": "Ladič detekcie pohybu - Frigate",
+    "object": "Ladenie - Frigate",
+    "general": "Všeobecné nastavenia – Frigate",
+    "frigatePlus": "Nastavenia Frigate+ – Frigate",
+    "notifications": "Nastavenia upozornení – Frigate"
+  },
+  "menu": {
+    "ui": "Uživaťelské rozohranie",
+    "enrichments": "Obohatenia",
+    "cameras": "Nastavenia kamier",
+    "masksAndZones": "Masky / Zóny",
+    "motionTuner": "Ladič detekcie pohybu",
+    "debug": "Ladenie",
+    "users": "Uživatelia",
+    "notifications": "Notifikacie",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Máte neuložené zmeny.",
+      "desc": "Chcete uložiť zmeny pred pokračovaním?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera"
+  }
+}
