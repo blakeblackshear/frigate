@@ -112,7 +112,7 @@ python3 -c 'import secrets; print(secrets.token_hex(64))'
 
 ### Header mapping
 
-If you have disabled Frigate's authentication and your proxy supports passing a header with authenticated usernames and/or roles, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` and `X-Forwarded-Role` values. Header names are not case sensitive. Multiple values can be included in the role header. Frigate expects that the character separating the roles is a comma, but this can be specified using the `separator` config entry.
+If you have disabled Frigate's authentication and your proxy supports passing a header with authenticated usernames and/or roles, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` and `X-Forwarded-Groups` values. Header names are not case sensitive. Multiple values can be included in the role header. Frigate expects that the character separating the roles is a comma, but this can be specified using the `separator` config entry.
 
 ```yaml
 proxy:
@@ -120,7 +120,7 @@ proxy:
   separator: "|" # This value defaults to a comma, but Authentik uses a pipe, for example.
   header_map:
     user: x-forwarded-user
-    role: x-forwarded-role
+    role: x-forwarded-groups
 ```
 
 Frigate supports both `admin` and `viewer` roles (see below). When using port `8971`, Frigate validates these headers and subsequent requests use the headers `remote-user` and `remote-role` for authorization.
