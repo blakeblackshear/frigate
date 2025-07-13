@@ -339,6 +339,12 @@ class Embeddings:
             batch_thumbs = {}
             batch_descs = {}
             for event in events:
+                totals["processed_objects"] += 1
+
+                if description := event.data.get("description", "").strip():
+                    batch_descs[event.id] = description
+                    totals["descriptions"] += 1
+
                 thumbnail = get_event_thumbnail_bytes(event)
 
                 if thumbnail is None:
@@ -346,12 +352,6 @@ class Embeddings:
 
                 batch_thumbs[event.id] = thumbnail
                 totals["thumbnails"] += 1
-
-                if description := event.data.get("description", "").strip():
-                    batch_descs[event.id] = description
-                    totals["descriptions"] += 1
-
-                totals["processed_objects"] += 1
 
             # run batch embedding
             self.batch_embed_thumbnail(batch_thumbs)
