@@ -71,7 +71,7 @@ def get_remote_addr(request: Request):
             )
             if trusted_proxy.version == 4:
                 ipv4 = ip.ipv4_mapped if ip.version == 6 else ip
-                if ipv4 in trusted_proxy:
+                if ipv4 is not None and ipv4 in trusted_proxy:
                     trusted = True
                     logger.debug(f"Trusted: {str(ip)} by {str(trusted_proxy)}")
                     break
