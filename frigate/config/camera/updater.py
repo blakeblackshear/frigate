@@ -17,6 +17,7 @@ class CameraConfigUpdateEnum(str, Enum):
     birdseye = "birdseye"
     detect = "detect"
     enabled = "enabled"
+    genai = "genai"
     motion = "motion"  # includes motion and motion masks
     notifications = "notifications"
     objects = "objects"
@@ -97,6 +98,8 @@ class CameraConfigUpdateSubscriber:
             config.detect = updated_config
         elif update_type == CameraConfigUpdateEnum.enabled:
             config.enabled = updated_config
+        elif update_type == CameraConfigUpdateEnum.genai:
+            config.genai = updated_config
         elif update_type == CameraConfigUpdateEnum.motion:
             config.motion = updated_config
         elif update_type == CameraConfigUpdateEnum.notifications:

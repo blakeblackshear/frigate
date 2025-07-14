@@ -397,6 +397,14 @@ Topic to turn review detections for a camera on or off. Expected values are `ON`
 
 Topic with current state of review detections for a camera. Published values are `ON` and `OFF`.
 
+### `frigate/<camera_name>/genai/set`
+
+Topic to turn generative AI for a camera on or off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/genai/state`
+
+Topic with current state of generative AI for a camera. Published values are `ON` and `OFF`.
+
 ### `frigate/<camera_name>/birdseye/set`
 
 Topic to turn Birdseye for a camera on and off. Expected values are `ON` and `OFF`. Birdseye mode

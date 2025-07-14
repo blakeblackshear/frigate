@@ -122,6 +122,11 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 "ON" if camera.review.detections.enabled_in_config else "OFF",
                 retain=True,
             )
+            self.publish(
+                f"{camera_name}/genai/state",
+                "ON" if camera.genai.enabled_in_config else "OFF",
+                retain=True,
+            )
 
         if self.config.notifications.enabled_in_config:
             self.publish(
@@ -215,6 +220,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             "birdseye_mode",
             "review_alerts",
             "review_detections",
+            "genai",
         ]
 
         for name in self.config.cameras.keys():

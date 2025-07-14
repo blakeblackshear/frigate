@@ -68,6 +68,7 @@ function useValue(): useValueReturn {
         autotracking,
         alerts,
         detections,
+        genai,
       } = state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
       cameraStates[`${name}/enabled/state`] = enabled ? "ON" : "OFF";
@@ -89,6 +90,7 @@ function useValue(): useValueReturn {
       cameraStates[`${name}/review_detections/state`] = detections
         ? "ON"
         : "OFF";
+      cameraStates[`${name}/genai/state`] = genai ? "ON" : "OFF";
     });
 
     setWsState((prevState) => ({
@@ -273,6 +275,17 @@ export function useDetectionsState(camera: string): {
     `${camera}/review_detections/state`,
     `${camera}/review_detections/set`,
   );
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useGenAIState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/genai/state`, `${camera}/genai/set`);
   return { payload: payload as ToggleableSetting, send };
 }
 

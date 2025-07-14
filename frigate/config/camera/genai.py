@@ -58,6 +58,10 @@ class GenAICameraConfig(BaseModel):
         title="What triggers to use to send frames to generative AI for a tracked object.",
     )
 
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of generative AI."
+    )
+
     @field_validator("required_zones", mode="before")
     @classmethod
     def validate_required_zones(cls, v):

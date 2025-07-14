@@ -29,7 +29,12 @@ import { cn } from "@/lib/utils";
 import { Trans, useTranslation } from "react-i18next";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useAlertsState, useDetectionsState, useEnabledState } from "@/api/ws";
+import {
+  useAlertsState,
+  useDetectionsState,
+  useEnabledState,
+  useGenAIState,
+} from "@/api/ws";
 import CameraEditForm from "@/components/settings/CameraEditForm";
 import { LuPlus } from "react-icons/lu";
 import {
@@ -141,6 +146,9 @@ export default function CameraSettingsView({
     useAlertsState(selectedCamera);
   const { payload: detectionsState, send: sendDetections } =
     useDetectionsState(selectedCamera);
+
+  const { payload: genAIState, send: sendGenAI } =
+    useGenAIState(selectedCamera);
 
   const handleCheckedChange = useCallback(
     (isChecked: boolean) => {
@@ -402,6 +410,36 @@ export default function CameraSettingsView({
                   </div>
                 </div>
               </div>
+              {config?.genai?.enabled && (
+                <>
+                  <Separator className="my-2 flex bg-secondary" />
+
+                  <Heading as="h4" className="my-2">
+                    <Trans ns="views/settings">camera.genai.title</Trans>
+                  </Heading>
+
+                  <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 space-y-3 text-sm text-primary-variant">
+                    <div className="flex flex-row items-center">
+                      <Switch
+                        id="alerts-enabled"
+                        className="mr-3"
+                        checked={genAIState == "ON"}
+                        onCheckedChange={(isChecked) => {
+                          sendGenAI(isChecked ? "ON" : "OFF");
+                        }}
+                      />
+                      <div className="space-y-0.5">
+                        <Label htmlFor="genai-enabled">
+                          <Trans>button.enabled</Trans>
+                        </Label>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-sm text-muted-foreground">
+                      <Trans ns="views/settings">camera.genai.desc</Trans>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <Separator className="my-2 flex bg-secondary" />
 
