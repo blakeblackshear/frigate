@@ -121,17 +121,3 @@ cameras:
         objects:
           - car
 ```
-
-### Loitering Time
-
-Zones support a `loitering_time` configuration which can be used to only consider an object as part of a zone if they loiter in the zone for the specified number of seconds. This can be used, for example, to create alerts for cars that stop on the street but not cars that just drive past your camera.
-
-```yaml
-cameras:
-  name_of_your_camera:
-    zones:
-      front_yard:
-        loitering_time: 5 # unit is in seconds
-        objects:
-          - person
-```
