@@ -1199,6 +1199,101 @@ Explanation of the paramters:
   - **example**: Specifying `output_name = "frigate-{quant}-{input_basename}-{soc}-v{tk_version}"` could result in a model called `frigate-i8-my_model-rk3588-v2.3.0.rknn`.
 - `config`: Configuration passed to `rknn-toolkit2` for model conversion. For an explanation of all available parameters have a look at section "2.2. Model configuration" of [this manual](https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.2/03_Rockchip_RKNPU_API_Reference_RKNN_Toolkit2_V2.3.2_EN.pdf).
 
+## DeGirum
+
+DeGirum is a detector that can use any type of hardware listed on [their website](https://hub.degirum.com). DeGirum can be used with local hardware through a DeGirum AI Server, or through the use of `@local`. You can also connect directly to DeGirum's AI Hub to run inferences. **Please Note:** This detector *cannot* be used for commercial purposes.
+
+### Configuration
+
+#### AI Server Inference
+
+Before starting with the config file for this section, you must first launch an AI server. DeGirum has an AI server ready to use as a docker container. Add this to your `docker-compose.yml` to get started:
+```yaml
+degirum_detector:
+    container_name: degirum
+    image: degirum/aiserver:latest
+    privileged: true
+    ports:
+      - "8778:8778"
+```
+All supported hardware will automatically be found on your AI server host as long as relevant runtimes and drivers are properly installed on your machine. Refer to [DeGirum's docs site](https://docs.degirum.com/pysdk/runtimes-and-drivers) if you have any trouble.
+
+Once completed, changing the `config.yml` file is simple.
+```yaml
+degirum_detector:
+    type: degirum
+    location: degirum # Set to service name (degirum_detector), container_name (degirum), or a host:port (192.168.29.4:8778)
+    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "workspace/zoo_name". degirum/public is available to everyone, so feel free to use it if you don't know where to start. If you aren't pulling a model from the AI Hub, leave this and 'token' blank.
+    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the [AI Hub](https://hub.degirum.com). This can be left blank if you're pulling a model from the public zoo and running inferences on your local hardware using @local or a local DeGirum AI Server
+```
+Setting up a model in the `config.yml` is similar to setting up an AI server.
+You can set it to:
+- A model listed on the [AI Hub](https://hub.degirum.com), given that the correct zoo name is listed in your detector
+    - If this is what you choose to do, the correct model will be downloaded onto your machine before running.
+- A local directory acting as a zoo. See DeGirum's docs site [for more information](https://docs.degirum.com/pysdk/user-guide-pysdk/organizing-models#model-zoo-directory-structure).
+- A path to some model.json.
+```yaml
+model:
+    path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1 # directory to model .json and file
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
+```
+
+
+#### Local Inference
+
+It is also possible to eliminate the need for an AI server and run the hardware directly. The benefit of this approach is that you eliminate any bottlenecks that occur when transferring prediction results from the AI server docker container to the frigate one. However, the method of implementing local inference is different for every device and hardware combination, so it's usually more trouble than it's worth. A general guideline to achieve this would be:
+1. Ensuring that the frigate docker container has the runtime you want to use. So for instance, running `@local` for Hailo means making sure the container you're using has the Hailo runtime installed.
+2. To double check the runtime is detected by the DeGirum detector, make sure the `degirum sys-info` command properly shows whatever runtimes you mean to install.
+3. Create a DeGirum detector in your `config.yml` file.
+
+```yaml
+degirum_detector:
+    type: degirum
+    location: "@local" # For accessing AI Hub devices and models
+    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "workspace/zoo_name". degirum/public is available to everyone, so feel free to use it if you don't know where to start.
+    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the [AI Hub](https://hub.degirum.com). This can be left blank if you're pulling a model from the public zoo and running inferences on your local hardware using @local or a local DeGirum AI Server
+
+```
+
+Once `degirum_detector` is setup, you can choose a model through 'model' section in the `config.yml` file.
+
+```yaml
+model:
+    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
+```
+
+
+#### AI Hub Cloud Inference
+
+If you do not possess whatever hardware you want to run, there's also the option to run cloud inferences. Do note that your detection fps might need to be lowered as network latency does significantly slow down this method of detection. For use with Frigate, we highly recommend using a local AI server as described above. To set up cloud inferences,
+1. Sign up at [DeGirum's AI Hub](https://hub.degirum.com).
+2. Get an access token.
+3. Create a DeGirum detector in your `config.yml` file.
+
+```yaml
+degirum_detector:
+    type: degirum
+    location: "@cloud" # For accessing AI Hub devices and models
+    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "workspace/zoo_name". degirum/public is available to everyone, so feel free to use it if you don't know where to start.
+    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the (AI Hub)[https://hub.degirum.com).
+
+```
+
+Once `degirum_detector` is setup, you can choose a model through 'model' section in the `config.yml` file.
+
+```yaml
+model:
+    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
+    width: 300 # width is in the model name as the first number in the "int"x"int" section
+    height: 300 # height is in the model name as the second number in the "int"x"int" section
+    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
+```
+
 # Models
 
 Some model types are not included in Frigate by default.
@@ -1299,99 +1394,4 @@ FROM scratch
 ARG MODEL_SIZE
 COPY --from=build /yolov9/yolov9-${MODEL_SIZE}.onnx /
 EOF
-```
-
-## DeGirum
-
-DeGirum is a detector that can use any type of hardware listed on [their website](https://hub.degirum.com). DeGirum can be used with local hardware through a DeGirum AI Server, or through the use of `@local`. You can also connect directly to DeGirum's AI Hub to run inferences. **Please Note:** This detector *cannot* be used for commercial purposes.
-
-### Configuration
-
-#### AI Server Inference
-
-Before starting with the config file for this section, you must first launch an AI server. DeGirum has an AI server ready to use as a docker container. Add this to your `docker-compose.yml` to get started:
-```yaml
-degirum_detector:
-    container_name: degirum
-    image: degirum/aiserver:latest
-    privileged: true
-    ports:
-      - "8778:8778"
-```
-All supported hardware will automatically be found on your AI server host as long as relevant runtimes and drivers are properly installed on your machine. Refer to [DeGirum's docs site](https://docs.degirum.com/pysdk/runtimes-and-drivers) if you have any trouble.
-
-Once completed, changing the `config.yml` file is simple.
-```yaml
-degirum_detector:
-    type: degirum
-    location: degirum # Set to service name (degirum_detector), container_name (degirum), or a host:port (192.168.29.4:8778)
-    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "workspace/zoo_name". degirum/public is available to everyone, so feel free to use it if you don't know where to start. If you aren't pulling a model from the AI Hub, leave this and 'token' blank.
-    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the [AI Hub](https://hub.degirum.com). This can be left blank if you're pulling a model from the public zoo and running inferences on your local hardware using @local or a local DeGirum AI Server
-```
-Setting up a model in the `config.yml` is similar to setting up an AI server.
-You can set it to:
-- A model listed on the [AI Hub](https://hub.degirum.com), given that the correct zoo name is listed in your detector
-    - If this is what you choose to do, the correct model will be downloaded onto your machine before running.
-- A local directory acting as a zoo. See DeGirum's docs site [for more information](https://docs.degirum.com/pysdk/user-guide-pysdk/organizing-models#model-zoo-directory-structure).
-- A path to some model.json.
-```yaml
-model:
-    path: ./mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1 # directory to model .json and file
-    width: 300 # width is in the model name as the first number in the "int"x"int" section
-    height: 300 # height is in the model name as the second number in the "int"x"int" section
-    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
-```
-
-
-#### Local Inference
-
-It is also possible to eliminate the need for an AI server and run the hardware directly. The benefit of this approach is that you eliminate any bottlenecks that occur when transferring prediction results from the AI server docker container to the frigate one. However, the method of implementing local inference is different for every device and hardware combination, so it's usually more trouble than it's worth. A general guideline to achieve this would be:
-1. Ensuring that the frigate docker container has the runtime you want to use. So for instance, running `@local` for Hailo means making sure the container you're using has the Hailo runtime installed.
-2. To double check the runtime is detected by the DeGirum detector, make sure the `degirum sys-info` command properly shows whatever runtimes you mean to install.
-3. Create a DeGirum detector in your `config.yml` file.
-
-```yaml
-degirum_detector:
-    type: degirum
-    location: "@local" # For accessing AI Hub devices and models
-    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "workspace/zoo_name". degirum/public is available to everyone, so feel free to use it if you don't know where to start.
-    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the [AI Hub](https://hub.degirum.com). This can be left blank if you're pulling a model from the public zoo and running inferences on your local hardware using @local or a local DeGirum AI Server
-
-```
-
-Once `degirum_detector` is setup, you can choose a model through 'model' section in the `config.yml` file.
-
-```yaml
-model:
-    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
-    width: 300 # width is in the model name as the first number in the "int"x"int" section
-    height: 300 # height is in the model name as the second number in the "int"x"int" section
-    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
-```
-
-
-#### AI Hub Cloud Inference
-
-If you do not possess whatever hardware you want to run, there's also the option to run cloud inferences. Do note that your detection fps might need to be lowered as network latency does significantly slow down this method of detection. For use with Frigate, we highly recommend using a local AI server as described above. To set up cloud inferences,
-1. Sign up at [DeGirum's AI Hub](https://hub.degirum.com).
-2. Get an access token.
-3. Create a DeGirum detector in your `config.yml` file.
-
-```yaml
-degirum_detector:
-    type: degirum
-    location: "@cloud" # For accessing AI Hub devices and models
-    zoo: degirum/public # DeGirum's public model zoo. Zoo name should be in format "workspace/zoo_name". degirum/public is available to everyone, so feel free to use it if you don't know where to start.
-    token: dg_example_token # For authentication with the AI Hub. Get this token through the "tokens" section on the main page of the (AI Hub)[https://hub.degirum.com).
-
-```
-
-Once `degirum_detector` is setup, you can choose a model through 'model' section in the `config.yml` file.
-
-```yaml
-model:
-    path: mobilenet_v2_ssd_coco--300x300_quant_n2x_orca1_1
-    width: 300 # width is in the model name as the first number in the "int"x"int" section
-    height: 300 # height is in the model name as the second number in the "int"x"int" section
-    input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
 ```
