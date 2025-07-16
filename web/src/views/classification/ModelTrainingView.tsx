@@ -50,6 +50,7 @@ import { ModelState } from "@/types/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { MdAutoFixHigh } from "react-icons/md";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
@@ -345,8 +346,12 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
             onClick={trainModel}
             disabled={modelState != "complete"}
           >
-            Train Model
-            {modelState == "training" && <ActivityIndicator size={20} />}
+            {modelState == "training" ? (
+              <ActivityIndicator size={20} />
+            ) : (
+              <MdAutoFixHigh />
+            )}
+            {t("button.trainModel")}
           </Button>
         )}
       </div>
