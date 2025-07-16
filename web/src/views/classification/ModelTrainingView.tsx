@@ -51,6 +51,9 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { MdAutoFixHigh } from "react-icons/md";
+import TrainFilterDialog from "@/components/overlay/dialog/TrainFilterDialog";
+import useApiFilter, { useApiFilterArgs } from "@/hooks/use-api-filter";
+import { TrainFilter } from "@/types/classification";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
@@ -96,6 +99,8 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   const { data: dataset, mutate: refreshDataset } = useSWR<{
     [id: string]: string[];
   }>(`classification/${model.name}/dataset`);
+
+  const [trainFilter, setTrainFilter] = useApiFilter<TrainFilter>();
 
   // image multiselect
 
@@ -341,18 +346,25 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
             </Button>
           </div>
         ) : (
-          <Button
-            className="flex justify-center gap-2"
-            onClick={trainModel}
-            disabled={modelState != "complete"}
-          >
-            {modelState == "training" ? (
-              <ActivityIndicator size={20} />
-            ) : (
-              <MdAutoFixHigh />
-            )}
-            {t("button.trainModel")}
-          </Button>
+          <div className="flex flex-row gap-2">
+            <TrainFilterDialog
+              filter={trainFilter}
+              filterValues={{ classes: Object.keys(dataset || {}) }}
+              onUpdateFilter={setTrainFilter}
+            />
+            <Button
+              className="flex justify-center gap-2"
+              onClick={trainModel}
+              disabled={modelState != "complete"}
+            >
+              {modelState == "training" ? (
+                <ActivityIndicator size={20} />
+              ) : (
+                <MdAutoFixHigh />
+              )}
+              {t("button.trainModel")}
+            </Button>
+          </div>
         )}
       </div>
       {pageToggle == "train" ? (
@@ -360,6 +372,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           model={model}
           classes={Object.keys(dataset || {})}
           trainImages={trainImages || []}
+          trainFilter={trainFilter}
           selectedImages={selectedImages}
           onRefresh={refreshTrain}
           onClickImages={onClickImages}
@@ -647,6 +660,7 @@ type TrainGridProps = {
   model: CustomClassificationModelConfig;
   classes: string[];
   trainImages: string[];
+  trainFilter?: TrainFilter;
   selectedImages: string[];
   onClickImages: (images: string[], ctrl: boolean) => void;
   onRefresh: () => void;
@@ -656,6 +670,7 @@ function TrainGrid({
   model,
   classes,
   trainImages,
+  trainFilter,
   selectedImages,
   onClickImages,
   onRefresh,
@@ -677,8 +692,30 @@ function TrainGrid({
             truePositive: rawScore >= model.threshold,
           };
         })
+        .filter((data) => {
+          if (!trainFilter) {
+            return true;
+          }
+
+          if (
+            trainFilter.classes &&
+            !trainFilter.classes.includes(data.label)
+          ) {
+            return false;
+          }
+
+          if (trainFilter.min_score && trainFilter.min_score > data.score) {
+            return false;
+          }
+
+          if (trainFilter.max_score && trainFilter.max_score < data.score) {
+            return false;
+          }
+
+          return true;
+        })
         .sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
-    [model, trainImages],
+    [model, trainImages, trainFilter],
   );
 
   return (
