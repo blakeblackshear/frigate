@@ -88,9 +88,9 @@ class DGDetector(DetectionApi):
         logger.debug("Prediction generator was called")
         with self.dg_model as model:
             while 1:
-                logger.debug(f"q size before calling get: {self._queue.qsize()}")
+                logger.info(f"q size before calling get: {self._queue.qsize()}")
                 data = self._queue.get(block=True)
-                logger.debug(f"q size after calling get: {self._queue.qsize()}")
+                logger.info(f"q size after calling get: {self._queue.qsize()}")
                 logger.debug(
                     f"Data we're passing into model predict: {data}, shape of data: {data.shape}"
                 )
@@ -113,7 +113,7 @@ class DGDetector(DetectionApi):
         res = next(self.prediction)
 
         # If we have an empty prediction, return immediately
-        if len(res.results[0]) == 0:
+        if len(res.results) == 0 or len(res.results[0]) == 0:
             return detections
 
         i = 0
