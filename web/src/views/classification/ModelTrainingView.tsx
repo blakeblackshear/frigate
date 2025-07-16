@@ -704,11 +704,17 @@ function TrainGrid({
             return false;
           }
 
-          if (trainFilter.min_score && trainFilter.min_score > data.score) {
+          if (
+            trainFilter.min_score &&
+            trainFilter.min_score > data.score / 100.0
+          ) {
             return false;
           }
 
-          if (trainFilter.max_score && trainFilter.max_score < data.score) {
+          if (
+            trainFilter.max_score &&
+            trainFilter.max_score <= data.score / 100.0
+          ) {
             return false;
           }
 
