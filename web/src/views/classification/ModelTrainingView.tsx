@@ -52,7 +52,7 @@ import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { MdAutoFixHigh } from "react-icons/md";
 import TrainFilterDialog from "@/components/overlay/dialog/TrainFilterDialog";
-import useApiFilter, { useApiFilterArgs } from "@/hooks/use-api-filter";
+import useApiFilter from "@/hooks/use-api-filter";
 import { TrainFilter } from "@/types/classification";
 
 type ModelTrainingViewProps = {
