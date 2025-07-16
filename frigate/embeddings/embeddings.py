@@ -334,7 +334,7 @@ class Embeddings:
             .paginate(current_page, batch_size)
         )
 
-        while len(events) > 0:
+        while events:
             event: Event
             batch_thumbs = {}
             batch_descs = {}
@@ -345,16 +345,13 @@ class Embeddings:
                     batch_descs[event.id] = description
                     totals["descriptions"] += 1
 
-                thumbnail = get_event_thumbnail_bytes(event)
-
-                if thumbnail is None:
-                    continue
-
-                batch_thumbs[event.id] = thumbnail
-                totals["thumbnails"] += 1
+                if thumbnail := get_event_thumbnail_bytes(event):
+                    batch_thumbs[event.id] = thumbnail
+                    totals["thumbnails"] += 1
 
             # run batch embedding
-            self.batch_embed_thumbnail(batch_thumbs)
+            if batch_thumbs:
+                self.batch_embed_thumbnail(batch_thumbs)
 
             if batch_descs:
                 self.batch_embed_description(batch_descs)
