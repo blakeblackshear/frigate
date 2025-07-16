@@ -800,7 +800,10 @@ def vod_event(event_id: str):
     )
 
 
-@router.get("/events/{event_id}/snapshot.jpg")
+@router.get(
+    "/events/{event_id}/snapshot.jpg",
+    description="Returns a snapshot image for the specified object id. NOTE: The query params only take affect while the event is in-progress. Once the event has ended the snapshot configuration is used.",
+)
 def event_snapshot(
     request: Request,
     event_id: str,
