@@ -225,6 +225,9 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             self.model_config.name
         ].value = self.classifications_per_second.eps()
 
+        if obj_data["false_positive"]:
+            return
+
         if obj_data["label"] not in self.model_config.object_config.objects:
             return
 
