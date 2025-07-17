@@ -3,7 +3,8 @@
     "deleteClassificationAttempts": "Delete Classification Images",
     "renameCategory": "Rename Class",
     "deleteCategory": "Delete Class",
-    "deleteImages": "Delete Images"
+    "deleteImages": "Delete Images",
+    "trainModel": "Train Model"
   },
   "toast": {
     "success": {
