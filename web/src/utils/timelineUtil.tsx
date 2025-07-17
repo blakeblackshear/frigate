@@ -46,7 +46,7 @@ export function getChunkedTimeRange(
   endOfThisHour.setHours(endOfThisHour.getHours() + 1, 0, 0, 0);
   const data: TimeRange[] = [];
   const startDay = new Date(startTimestamp * 1000);
-  startDay.setMinutes(0, 0, 0);
+  startDay.setUTCMinutes(0, 0, 0);
   let start = startDay.getTime() / 1000;
   let end = 0;
 
