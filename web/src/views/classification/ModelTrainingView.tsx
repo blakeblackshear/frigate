@@ -360,7 +360,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
               {modelState == "training" ? (
                 <ActivityIndicator size={20} />
               ) : (
-                <MdAutoFixHigh />
+                <MdAutoFixHigh className="text-secondary-foreground" />
               )}
               {t("button.trainModel")}
             </Button>
