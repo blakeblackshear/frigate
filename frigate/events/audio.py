@@ -29,6 +29,7 @@ from frigate.const import (
     AUDIO_MAX_BIT_RANGE,
     AUDIO_MIN_CONFIDENCE,
     AUDIO_SAMPLE_RATE,
+    PROCESS_PRIORITY_HIGH,
 )
 from frigate.data_processing.common.audio_transcription.model import (
     AudioTranscriptionModelRunner,
@@ -90,7 +91,9 @@ class AudioProcessor(FrigateProcess):
         camera_metrics: DictProxy,
         stop_event: MpEvent,
     ):
-        super().__init__(stop_event, name="frigate.audio_manager", daemon=True)
+        super().__init__(
+            stop_event, PROCESS_PRIORITY_HIGH, name="frigate.audio_manager", daemon=True
+        )
 
         self.camera_metrics = camera_metrics
         self.cameras = cameras

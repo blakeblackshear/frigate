@@ -1,6 +1,7 @@
 import faulthandler
 import logging
 import multiprocessing as mp
+import os
 import threading
 from logging.handlers import QueueHandler
 from multiprocessing.synchronize import Event as MpEvent
@@ -16,6 +17,7 @@ class BaseProcess(mp.Process):
     def __init__(
         self,
         stop_event: MpEvent,
+        priority: int,
         *,
         name: Optional[str] = None,
         target: Optional[Callable] = None,
@@ -23,6 +25,7 @@ class BaseProcess(mp.Process):
         kwargs: dict = {},
         daemon: Optional[bool] = None,
     ):
+        self.priority = priority
         self.stop_event = stop_event
         super().__init__(
             name=name, target=target, args=args, kwargs=kwargs, daemon=daemon
@@ -47,6 +50,7 @@ class FrigateProcess(BaseProcess):
         self.__log_queue = frigate.log.log_listener.queue
 
     def pre_run_setup(self, logConfig: LoggerConfig | None = None) -> None:
+        os.nice(self.priority)
         setproctitle(self.name)
         threading.current_thread().name = f"process:{self.name}"
         faulthandler.enable()

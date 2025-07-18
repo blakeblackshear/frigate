@@ -23,6 +23,7 @@ from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
     REQUEST_REGION_GRID,
+    PROCESS_PRIORITY_HIGH,
 )
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
@@ -455,7 +456,12 @@ class CameraCapture(FrigateProcess):
         camera_metrics: CameraMetrics,
         stop_event: MpEvent,
     ) -> None:
-        super().__init__(stop_event, name=f"frigate.capture:{config.name}", daemon=True)
+        super().__init__(
+            stop_event,
+            PROCESS_PRIORITY_HIGH,
+            name=f"frigate.capture:{config.name}",
+            daemon=True,
+        )
         self.config = config
         self.shm_frame_count = shm_frame_count
         self.camera_metrics = camera_metrics
@@ -488,7 +494,12 @@ class CameraTracker(FrigateProcess):
         region_grid: list[list[dict[str, Any]]],
         stop_event: MpEvent,
     ) -> None:
-        super().__init__(stop_event, name=f"frigate.process:{config.name}", daemon=True)
+        super().__init__(
+            stop_event,
+            PROCESS_PRIORITY_HIGH,
+            name=f"frigate.process:{config.name}",
+            daemon=True,
+        )
         self.config = config
         self.model_config = model_config
         self.labelmap = labelmap
