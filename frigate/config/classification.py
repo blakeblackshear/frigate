@@ -34,6 +34,11 @@ class TriggerAction(str, Enum):
     NOTIFICATION = "notification"
 
 
+class ObjectClassificationType(str, Enum):
+    sub_label = "sub_label"
+    attribute = "attribute"
+
+
 class AudioTranscriptionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable audio transcription.")
     language: str = Field(
@@ -88,6 +93,10 @@ class CustomClassificationStateConfig(FrigateBaseModel):
 
 class CustomClassificationObjectConfig(FrigateBaseModel):
     objects: list[str] = Field(title="Object types to classify.")
+    classification_type: ObjectClassificationType = Field(
+        default=ObjectClassificationType.sub_label,
+        title="Type of classification that is applied.",
+    )
 
 
 class CustomClassificationConfig(FrigateBaseModel):
