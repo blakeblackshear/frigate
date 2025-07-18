@@ -1545,8 +1545,8 @@ class LicensePlateProcessingMixin:
             ),
         )
         self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.recognized_license_plate,
-            (id, top_plate, avg_confidence),
+            EventMetadataTypeEnum.attribute,
+            (id, "recognized_license_plate", top_plate, avg_confidence),
         )
 
         # save the best snapshot for dedicated lpr cams not using frigate+

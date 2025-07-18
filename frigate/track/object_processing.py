@@ -438,10 +438,14 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def set_recognized_license_plate(
-        self, event_id: str, recognized_license_plate: str | None, score: float | None
+    def set_object_attribute(
+        self,
+        event_id: str,
+        field_name: str,
+        field_value: str | None,
+        score: float | None,
     ) -> None:
-        """Update recognized license plate for given event id."""
+        """Update attribute for given event id."""
         tracked_obj: TrackedObject = None
 
         for state in self.camera_states.values():
@@ -459,18 +463,18 @@ class TrackedObjectProcessor(threading.Thread):
             return
 
         if tracked_obj:
-            tracked_obj.obj_data["recognized_license_plate"] = (
-                recognized_license_plate,
+            tracked_obj.obj_data[field_name] = (
+                field_value,
                 score,
             )
 
         if event:
             data = event.data
-            data["recognized_license_plate"] = recognized_license_plate
-            if recognized_license_plate is None:
-                data["recognized_license_plate_score"] = None
+            data[field_name] = field_value
+            if field_value is None:
+                data[f"{field_name}_score"] = None
             elif score is not None:
-                data["recognized_license_plate_score"] = score
+                data[f"{field_name}_score"] = score
             event.data = data
             event.save()
 
@@ -706,11 +710,9 @@ class TrackedObjectProcessor(threading.Thread):
                 if topic.endswith(EventMetadataTypeEnum.sub_label.value):
                     (event_id, sub_label, score) = payload
                     self.set_sub_label(event_id, sub_label, score)
-                if topic.endswith(EventMetadataTypeEnum.recognized_license_plate.value):
-                    (event_id, recognized_license_plate, score) = payload
-                    self.set_recognized_license_plate(
-                        event_id, recognized_license_plate, score
-                    )
+                if topic.endswith(EventMetadataTypeEnum.attribute.value):
+                    (event_id, field_name, field_value, score) = payload
+                    self.set_object_attribute(event_id, field_name, field_value, score)
                 elif topic.endswith(EventMetadataTypeEnum.lpr_event_create.value):
                     self.create_lpr_event(payload)
                 elif topic.endswith(EventMetadataTypeEnum.save_lpr_snapshot.value):

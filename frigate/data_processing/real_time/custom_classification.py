@@ -15,7 +15,10 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.config.classification import CustomClassificationConfig
+from frigate.config.classification import (
+    CustomClassificationConfig,
+    ObjectClassificationType,
+)
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.log import redirect_output_to_logger
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
@@ -285,10 +288,22 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         sub_label = self.labelmap[best_id]
         self.detected_objects[obj_data["id"]] = score
 
-        if sub_label != "none":
+        if (
+            self.model_config.object_config.classification_type
+            == ObjectClassificationType.sub_label
+        ):
+            if sub_label != "none":
+                self.sub_label_publisher.publish(
+                    EventMetadataTypeEnum.sub_label,
+                    (obj_data["id"], sub_label, score),
+                )
+        elif (
+            self.model_config.object_config.classification_type
+            == ObjectClassificationType.attribute
+        ):
             self.sub_label_publisher.publish(
-                EventMetadataTypeEnum.sub_label,
-                (obj_data["id"], sub_label, score),
+                EventMetadataTypeEnum.attribute,
+                (obj_data["id"], self.model_config.name, sub_label, score),
             )
 
     def handle_request(self, topic, request_data):
