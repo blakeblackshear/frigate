@@ -116,6 +116,12 @@ UPDATE_EMBEDDINGS_REINDEX_PROGRESS = "handle_embeddings_reindex_progress"
 UPDATE_BIRDSEYE_LAYOUT = "update_birdseye_layout"
 NOTIFICATION_TEST = "notification_test"
 
+# IO Nice Values
+
+PROCESS_PRIORITY_HIGH = 0
+PROCESS_PRIORITY_MED = 10
+PROCESS_PRIORITY_LOW = 19
+
 # Stats Values
 
 FREQUENCY_STATS_POINTS = 15
