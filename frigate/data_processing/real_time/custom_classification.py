@@ -18,6 +18,7 @@ from frigate.config import FrigateConfig
 from frigate.config.classification import CustomClassificationConfig
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.log import redirect_output_to_logger
+from frigate.types import ObjectClassificationType
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.object import box_overlaps, calculate_region
 
@@ -285,11 +286,17 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         sub_label = self.labelmap[best_id]
         self.detected_objects[obj_data["id"]] = score
 
-        if sub_label != "none":
-            self.sub_label_publisher.publish(
-                EventMetadataTypeEnum.sub_label,
-                (obj_data["id"], sub_label, score),
-            )
+        if (
+            self.model_config.object_config.classification_type
+            == ObjectClassificationType.sub_label
+        ):
+            if sub_label != "none":
+                self.sub_label_publisher.publish(
+                    EventMetadataTypeEnum.sub_label,
+                    (obj_data["id"], sub_label, score),
+                )
+        elif self.model_config.object_config.classification_type == ObjectClassificationType.attribute:
+            pass
 
     def handle_request(self, topic, request_data):
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
