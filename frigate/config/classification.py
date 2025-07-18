@@ -3,8 +3,6 @@ from typing import Dict, List, Optional
 
 from pydantic import ConfigDict, Field
 
-from frigate.types import ObjectClassificationType
-
 from .base import FrigateBaseModel
 
 __all__ = [
@@ -34,6 +32,11 @@ class TriggerType(str, Enum):
 
 class TriggerAction(str, Enum):
     NOTIFICATION = "notification"
+
+
+class ObjectClassificationType(str, Enum):
+    sub_label = "sub_label"
+    attribute = "attribute"
 
 
 class AudioTranscriptionConfig(FrigateBaseModel):

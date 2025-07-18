@@ -15,10 +15,12 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.config.classification import CustomClassificationConfig
+from frigate.config.classification import (
+    CustomClassificationConfig,
+    ObjectClassificationType,
+)
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.log import redirect_output_to_logger
-from frigate.types import ObjectClassificationType
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.object import box_overlaps, calculate_region
 

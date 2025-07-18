@@ -25,11 +25,6 @@ class ModelStatusTypesEnum(str, Enum):
     complete = "complete"
 
 
-class ObjectClassificationType(str, Enum):
-    sub_label = "sub_label"
-    attribute = "attribute"
-
-
 class TrackedObjectUpdateTypesEnum(str, Enum):
     description = "description"
     face = "face"
