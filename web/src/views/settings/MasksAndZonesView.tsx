@@ -734,7 +734,7 @@ export default function MasksAndZonesView({
                   hoveredPolygonIndex={hoveredPolygonIndex}
                   selectedZoneMask={selectedZoneMask}
                   activeLine={activeLine}
-                  snapPoints={true}
+                  snapPoints={snapPoints}
                 />
               ) : (
                 <Skeleton className="size-full" />
