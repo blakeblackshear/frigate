@@ -142,7 +142,7 @@ class TriggerConfig(FrigateBaseModel):
         gt=0.0,
         le=1.0,
     )
-    actions: Optional[List[TriggerAction]] = Field(
+    actions: List[TriggerAction] = Field(
         default=[], title="Actions to perform when trigger is matched"
     )
 
@@ -150,8 +150,8 @@ class TriggerConfig(FrigateBaseModel):
 
 
 class CameraSemanticSearchConfig(FrigateBaseModel):
-    triggers: Optional[Dict[str, TriggerConfig]] = Field(
-        default=None,
+    triggers: Dict[str, TriggerConfig] = Field(
+        default={},
         title="Trigger actions on tracked objects that match existing thumbnails or descriptions",
     )
 
