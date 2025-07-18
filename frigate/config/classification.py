@@ -3,6 +3,8 @@ from typing import Dict, List, Optional
 
 from pydantic import ConfigDict, Field
 
+from frigate.types import ObjectClassificationType
+
 from .base import FrigateBaseModel
 
 __all__ = [
@@ -88,6 +90,10 @@ class CustomClassificationStateConfig(FrigateBaseModel):
 
 class CustomClassificationObjectConfig(FrigateBaseModel):
     objects: list[str] = Field(title="Object types to classify.")
+    classification_type: ObjectClassificationType = Field(
+        default=ObjectClassificationType.sub_label,
+        title="Type of classification that is applied.",
+    )
 
 
 class CustomClassificationConfig(FrigateBaseModel):
