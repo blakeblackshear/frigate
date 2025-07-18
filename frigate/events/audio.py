@@ -2,17 +2,22 @@
 
 import datetime
 import logging
+import random
+import string
 import threading
 import time
-from typing import Tuple
+from typing import Any, Tuple
 
 import numpy as np
-import requests
 
 import frigate.util as util
 from frigate.camera import CameraMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+    EventMetadataTypeEnum,
+)
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, CameraInput, FfmpegConfig
 from frigate.const import (
@@ -21,11 +26,10 @@ from frigate.const import (
     AUDIO_MAX_BIT_RANGE,
     AUDIO_MIN_CONFIDENCE,
     AUDIO_SAMPLE_RATE,
-    FRIGATE_LOCALHOST,
 )
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
-from frigate.object_detection import load_labels
+from frigate.object_detection.base import load_labels
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
@@ -122,7 +126,7 @@ class AudioEventMaintainer(threading.Thread):
 
         self.config = camera
         self.camera_metrics = camera_metrics
-        self.detections: dict[dict[str, any]] = {}
+        self.detections: dict[dict[str, Any]] = {}
         self.stop_event = stop_event
         self.detector = AudioTfl(stop_event, self.config.audio.num_threads)
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
@@ -135,7 +139,13 @@ class AudioEventMaintainer(threading.Thread):
         # create communication for audio detections
         self.requestor = InterProcessRequestor()
         self.config_subscriber = ConfigSubscriber(f"config/audio/{camera.name}")
+        self.enabled_subscriber = ConfigSubscriber(
+            f"config/enabled/{camera.name}", True
+        )
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio)
+        self.event_metadata_publisher = EventMetadataPublisher()
+
+        self.was_enabled = camera.enabled
 
     def detect_audio(self, audio) -> None:
         if not self.config.audio.enabled or self.stop_event.is_set():
@@ -202,24 +212,33 @@ class AudioEventMaintainer(threading.Thread):
                 datetime.datetime.now().timestamp()
             )
         else:
+            now = datetime.datetime.now().timestamp()
+            rand_id = "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
+            )
+            event_id = f"{now}-{rand_id}"
             self.requestor.send_data(f"{self.config.name}/audio/{label}", "ON")
 
-            resp = requests.post(
-                f"{FRIGATE_LOCALHOST}/api/events/{self.config.name}/{label}/create",
-                json={"duration": None, "score": score, "source_type": "audio"},
+            self.event_metadata_publisher.publish(
+                EventMetadataTypeEnum.manual_event_create,
+                (
+                    now,
+                    self.config.name,
+                    label,
+                    event_id,
+                    True,
+                    score,
+                    None,
+                    None,
+                    "audio",
+                    {},
+                ),
             )
-
-            if resp.status_code == 200:
-                event_id = resp.json()["event_id"]
-                self.detections[label] = {
-                    "id": event_id,
-                    "label": label,
-                    "last_detection": datetime.datetime.now().timestamp(),
-                }
-            else:
-                self.logger.warning(
-                    f"Failed to create audio event with status code {resp.status_code}"
-                )
+            self.detections[label] = {
+                "id": event_id,
+                "label": label,
+                "last_detection": now,
+            }
 
     def expire_detections(self) -> None:
         now = datetime.datetime.now().timestamp()
@@ -236,17 +255,23 @@ class AudioEventMaintainer(threading.Thread):
                     f"{self.config.name}/audio/{detection['label']}", "OFF"
                 )
 
-                resp = requests.put(
-                    f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
-                    json={"end_time": detection["last_detection"]},
+                self.event_metadata_publisher.publish(
+                    EventMetadataTypeEnum.manual_event_end,
+                    (detection["id"], detection["last_detection"]),
                 )
+                self.detections[detection["label"]] = None
 
-                if resp.status_code == 200:
-                    self.detections[detection["label"]] = None
-                else:
-                    self.logger.warning(
-                        f"Failed to end audio event {detection['id']} with status code {resp.status_code}"
-                    )
+    def expire_all_detections(self) -> None:
+        """Immediately end all current detections"""
+        now = datetime.datetime.now().timestamp()
+        for label, detection in list(self.detections.items()):
+            if detection:
+                self.requestor.send_data(f"{self.config.name}/audio/{label}", "OFF")
+                self.event_metadata_publisher.publish(
+                    EventMetadataTypeEnum.manual_event_end,
+                    (detection["id"], now),
+                )
+                self.detections[label] = None
 
     def start_or_restart_ffmpeg(self) -> None:
         self.audio_listener = start_or_restart_ffmpeg(
@@ -283,10 +308,41 @@ class AudioEventMaintainer(threading.Thread):
             self.logger.error(f"Error reading audio data from ffmpeg process: {e}")
             log_and_restart()
 
+    def _update_enabled_state(self) -> bool:
+        """Fetch the latest config and update enabled state."""
+        _, config_data = self.enabled_subscriber.check_for_update()
+        if config_data:
+            self.config.enabled = config_data.enabled
+            return config_data.enabled
+
+        return self.config.enabled
+
     def run(self) -> None:
-        self.start_or_restart_ffmpeg()
+        if self._update_enabled_state():
+            self.start_or_restart_ffmpeg()
 
         while not self.stop_event.is_set():
+            enabled = self._update_enabled_state()
+            if enabled != self.was_enabled:
+                if enabled:
+                    self.logger.debug(
+                        f"Enabling audio detections for {self.config.name}"
+                    )
+                    self.start_or_restart_ffmpeg()
+                else:
+                    self.logger.debug(
+                        f"Disabling audio detections for {self.config.name}, ending events"
+                    )
+                    self.expire_all_detections()
+                    stop_ffmpeg(self.audio_listener, self.logger)
+                    self.audio_listener = None
+                self.was_enabled = enabled
+                continue
+
+            if not enabled:
+                time.sleep(0.1)
+                continue
+
             # check if there is an updated config
             (
                 updated_topic,
@@ -298,10 +354,12 @@ class AudioEventMaintainer(threading.Thread):
 
             self.read_audio()
 
-        stop_ffmpeg(self.audio_listener, self.logger)
+        if self.audio_listener:
+            stop_ffmpeg(self.audio_listener, self.logger)
         self.logpipe.close()
         self.requestor.stop()
         self.config_subscriber.stop()
+        self.enabled_subscriber.stop()
         self.detection_publisher.stop()
 
 

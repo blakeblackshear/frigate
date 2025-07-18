@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import unittest
+from unittest.mock import Mock
 
 from fastapi.testclient import TestClient
 from peewee_migrate import Router
@@ -10,7 +11,9 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.fastapi_app import create_fastapi_app
+from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.config import FrigateConfig
+from frigate.const import BASE_DIR, CACHE_DIR
 from frigate.models import Event, Recordings, Timeline
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
@@ -74,19 +77,19 @@ class TestHttp(unittest.TestCase):
                         "total": 67.1,
                         "used": 16.6,
                     },
-                    "/media/frigate/clips": {
+                    os.path.join(BASE_DIR, "clips"): {
                         "free": 42429.9,
                         "mount_type": "ext4",
                         "total": 244529.7,
                         "used": 189607.0,
                     },
-                    "/media/frigate/recordings": {
+                    os.path.join(BASE_DIR, "recordings"): {
                         "free": 0.2,
                         "mount_type": "ext4",
                         "total": 8.0,
                         "used": 7.8,
                     },
-                    "/tmp/cache": {
+                    CACHE_DIR: {
                         "free": 976.8,
                         "mount_type": "tmpfs",
                         "total": 1000.0,
@@ -119,7 +122,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
         )
         id = "123456.random"
 
@@ -135,7 +137,6 @@ class TestHttp(unittest.TestCase):
         app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
-            None,
             None,
             None,
             None,
@@ -162,7 +163,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
         )
         id = "123456.random"
 
@@ -171,7 +171,7 @@ class TestHttp(unittest.TestCase):
             event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
-            client.delete(f"/events/{id}")
+            client.delete(f"/events/{id}", headers={"remote-role": "admin"})
             event = client.get(f"/events/{id}").json()
             assert event == "Event not found"
 
@@ -185,18 +185,17 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
         )
         id = "123456.random"
 
         with TestClient(app) as client:
             _insert_mock_event(id)
-            client.post(f"/events/{id}/retain")
+            client.post(f"/events/{id}/retain", headers={"remote-role": "admin"})
             event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["retain_indefinitely"] is True
-            client.delete(f"/events/{id}/retain")
+            client.delete(f"/events/{id}/retain", headers={"remote-role": "admin"})
             event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
@@ -206,7 +205,6 @@ class TestHttp(unittest.TestCase):
         app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
-            None,
             None,
             None,
             None,
@@ -242,6 +240,7 @@ class TestHttp(unittest.TestCase):
             assert len(events) == 1
 
     def test_set_delete_sub_label(self):
+        mock_event_updater = Mock(spec=EventMetadataPublisher)
         app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
@@ -250,17 +249,24 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
-            None,
+            mock_event_updater,
         )
         id = "123456.random"
         sub_label = "sub"
+
+        def update_event(topic, payload):
+            event = Event.get(id=id)
+            event.sub_label = payload[1]
+            event.save()
+
+        mock_event_updater.publish.side_effect = update_event
 
         with TestClient(app) as client:
             _insert_mock_event(id)
             new_sub_label_response = client.post(
                 f"/events/{id}/sub_label",
                 json={"subLabel": sub_label},
+                headers={"remote-role": "admin"},
             )
             assert new_sub_label_response.status_code == 200
             event = client.get(f"/events/{id}").json()
@@ -270,14 +276,16 @@ class TestHttp(unittest.TestCase):
             empty_sub_label_response = client.post(
                 f"/events/{id}/sub_label",
                 json={"subLabel": ""},
+                headers={"remote-role": "admin"},
             )
             assert empty_sub_label_response.status_code == 200
             event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
-            assert event["sub_label"] == ""
+            assert event["sub_label"] == None
 
     def test_sub_label_list(self):
+        mock_event_updater = Mock(spec=EventMetadataPublisher)
         app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
@@ -286,17 +294,24 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
-            None,
+            mock_event_updater,
         )
         id = "123456.random"
         sub_label = "sub"
+
+        def update_event(topic, payload):
+            event = Event.get(id=id)
+            event.sub_label = payload[1]
+            event.save()
+
+        mock_event_updater.publish.side_effect = update_event
 
         with TestClient(app) as client:
             _insert_mock_event(id)
             client.post(
                 f"/events/{id}/sub_label",
                 json={"subLabel": sub_label},
+                headers={"remote-role": "admin"},
             )
             sub_labels = client.get("/sub_labels").json()
             assert sub_labels
@@ -306,7 +321,6 @@ class TestHttp(unittest.TestCase):
         app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
-            None,
             None,
             None,
             None,
@@ -324,7 +338,6 @@ class TestHttp(unittest.TestCase):
         app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
-            None,
             None,
             None,
             None,

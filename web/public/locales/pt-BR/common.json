@@ -1,0 +1,13 @@
+{
+  "time": {
+    "untilForTime": "Até {{time}}",
+    "untilForRestart": "Até o Frigate reiniciar.",
+    "untilRestart": "Até reiniciar",
+    "ago": "{{timeAgo}} antes",
+    "justNow": "Agora mesmo",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "last7": "Últimos 7 dias"
+  },
+  "selectItem": "Selecione {{item}}"
+}

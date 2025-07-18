@@ -46,6 +46,11 @@ mqtt:
   tls_insecure: false
   # Optional: interval in seconds for publishing stats (default: shown below)
   stats_interval: 60
+  # Optional: QoS level for subscriptions and publishing (default: shown below)
+  # 0 = at most once
+  # 1 = at least once
+  # 2 = exactly once
+  qos: 0
 
 # Optional: Detectors configuration. Defaults to a single CPU detector
 detectors:
@@ -73,16 +78,21 @@ proxy:
   # Optional: Mapping for headers from upstream proxies. Only used if Frigate's auth
   # is disabled.
   # NOTE: Many authentication proxies pass a header downstream with the authenticated
-  #       user name. Not all values are supported. It must be a whitelisted header.
+  #       user name and role. Not all values are supported. It must be a whitelisted header.
   #       See the docs for more info.
   header_map:
     user: x-forwarded-user
+    role: x-forwarded-role
   # Optional: Url for logging out a user. This sets the location of the logout url in
   # the UI.
   logout_url: /api/logout
   # Optional: Auth secret that is checked against the X-Proxy-Secret header sent from
   # the proxy. If not set, all requests are trusted regardless of origin.
   auth_secret: None
+  # Optional: The default role to use for proxy auth. Must be "admin" or "viewer"
+  default_role: viewer
+  # Optional: The character used to separate multiple values in the proxy headers. (default: shown below)
+  separator: ","
 
 # Optional: Authentication configuration
 auth:
@@ -120,7 +130,7 @@ auth:
 # NOTE: The default values are for the EdgeTPU detector.
 # Other detectors will require the model config to be set.
 model:
-  # Required: path to the model (default: automatic based on detector)
+  # Required: path to the model. Frigate+ models use plus://<model_id> (default: automatic based on detector)
   path: /edgetpu_model.tflite
   # Required: path to the labelmap (default: shown below)
   labelmap_path: /labelmap.txt
@@ -244,10 +254,14 @@ ffmpeg:
   # If set too high, then if a ffmpeg crash or camera stream timeout occurs, you could potentially lose up to a maximum of retry_interval second(s) of footage
   # NOTE: this can be a useful setting for Wireless / Battery cameras to reduce how much footage is potentially lost during a connection timeout.
   retry_interval: 10
+  # Optional: Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players. (default: shown below)
+  apple_compatibility: false
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level
 detect:
+  # Optional: enables detection for the camera (default: shown below)
+  enabled: False
   # Optional: width of the frame for the input with the detect role (default: use native stream resolution)
   width: 1280
   # Optional: height of the frame for the input with the detect role (default: use native stream resolution)
@@ -255,8 +269,6 @@ detect:
   # Optional: desired fps for your camera for the input with the detect role (default: shown below)
   # NOTE: Recommended value of 5. Ideally, try and reduce your FPS on the camera.
   fps: 5
-  # Optional: enables detection for the camera (default: True)
-  enabled: True
   # Optional: Number of consecutive detection hits required for an object to be initialized in the tracker. (default: 1/2 the frame rate)
   min_initialized: 2
   # Optional: Number of frames without a detection before Frigate considers an object to be gone. (default: 5x the frame rate)
@@ -310,9 +322,11 @@ objects:
   # Optional: filters to reduce false positives for specific object types
   filters:
     person:
-      # Optional: minimum width*height of the bounding box for the detected object (default: 0)
+      # Optional: minimum size of the bounding box for the detected object (default: 0).
+      # Can be specified as an integer for width*height in pixels or as a decimal representing the percentage of the frame (0.000001 to 0.99).
       min_area: 5000
-      # Optional: maximum width*height of the bounding box for the detected object (default: 24000000)
+      # Optional: maximum size of the bounding box for the detected object (default: 24000000).
+      # Can be specified as an integer for width*height in pixels or as a decimal representing the percentage of the frame (0.000001 to 0.99).
       max_area: 100000
       # Optional: minimum width/height of the bounding box for the detected object (default: 0)
       min_ratio: 0.5
@@ -331,6 +345,8 @@ objects:
 review:
   # Optional: alerts configuration
   alerts:
+    # Optional: enables alerts for the camera (default: shown below)
+    enabled: True
     # Optional: labels that qualify as an alert (default: shown below)
     labels:
       - car
@@ -343,6 +359,8 @@ review:
       - driveway
   # Optional: detections configuration
   detections:
+    # Optional: enables detections for the camera (default: shown below)
+    enabled: True
     # Optional: labels that qualify as a detection (default: all labels that are tracked / listened to)
     labels:
       - car
@@ -400,12 +418,15 @@ motion:
   mqtt_off_delay: 30
 
 # Optional: Notification Configuration
+# NOTE: Can be overridden at the camera level (except email)
 notifications:
   # Optional: Enable notification service (default: shown below)
   enabled: False
   # Optional: Email for push service to reach out to
   # NOTE: This is required to use notifications
   email: "admin@example.com"
+  # Optional: Cooldown time for notifications in seconds (default: shown below)
+  cooldown: 0
 
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level
@@ -520,12 +541,65 @@ semantic_search:
   enabled: False
   # Optional: Re-index embeddings database from historical tracked objects (default: shown below)
   reindex: False
+  # Optional: Set the model used for embeddings. (default: shown below)
+  model: "jinav1"
   # Optional: Set the model size used for embeddings. (default: shown below)
   # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
 
+# Optional: Configuration for face recognition capability
+# NOTE: enabled, min_area can be overridden at the camera level
+face_recognition:
+  # Optional: Enable face recognition (default: shown below)
+  enabled: False
+  # Optional: Minimum face distance score required to mark as a potential match (default: shown below)
+  unknown_score: 0.8
+  # Optional: Minimum face detection score required to detect a face (default: shown below)
+  # NOTE: This only applies when not running a Frigate+ model
+  detection_threshold: 0.7
+  # Optional: Minimum face distance score required to be considered a match (default: shown below)
+  recognition_threshold: 0.9
+  # Optional: Min area of detected face box to consider running face recognition (default: shown below)
+  min_area: 500
+  # Optional: Min face recognitions for the sub label to be applied to the person object (default: shown below)
+  min_faces: 1
+  # Optional: Number of images of recognized faces to save for training (default: shown below)
+  save_attempts: 100
+  # Optional: Apply a blur quality filter to adjust confidence based on the blur level of the image (default: shown below)
+  blur_confidence_filter: True
+  # Optional: Set the model size used face recognition. (default: shown below)
+  model_size: small
+
+# Optional: Configuration for license plate recognition capability
+# NOTE: enabled, min_area, and enhancement can be overridden at the camera level
+lpr:
+  # Optional: Enable license plate recognition (default: shown below)
+  enabled: False
+  # Optional: The device to run the models on (default: shown below)
+  device: CPU
+  # Optional: Set the model size used for text detection. (default: shown below)
+  model_size: small
+  # Optional: License plate object confidence score required to begin running recognition (default: shown below)
+  detection_threshold: 0.7
+  # Optional: Minimum area of license plate to begin running recognition (default: shown below)
+  min_area: 1000
+  # Optional: Recognition confidence score required to add the plate to the object as a sub label (default: shown below)
+  recognition_threshold: 0.9
+  # Optional: Minimum number of characters a license plate must have to be added to the object as a sub label (default: shown below)
+  min_plate_length: 4
+  # Optional: Regular expression for the expected format of a license plate (default: shown below)
+  format: None
+  # Optional: Allow this number of missing/incorrect characters to still cause a detected plate to match a known plate
+  match_distance: 1
+  # Optional: Known plates to track (strings or regular expressions) (default: shown below)
+  known_plates: {}
+  # Optional: Enhance the detected plate image with contrast adjustment and denoising (default: shown below)
+  # A value between 0 and 10. Higher values are not always better and may perform worse than lower values.
+  enhancement: 0
+  # Optional: Save plate images to /media/frigate/clips/lpr for debugging purposes (default: shown below)
+  debug_save_plates: False
+
 # Optional: Configuration for AI generated tracked object descriptions
-# NOTE: Semantic Search must be enabled for this to do anything.
 # WARNING: Depending on the provider, this will send thumbnails over the internet
 # to Google or OpenAI's LLMs to generate descriptions. It can be overridden at
 # the camera level (enabled: False) to enhance privacy for indoor cameras.
@@ -547,18 +621,20 @@ genai:
     person: "My special person prompt."
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v1.9.2)
+# Uses https://github.com/AlexxIT/go2rtc (v1.9.9)
 # NOTE: The default go2rtc API port (1984) must be used,
-#       changing this port for the integrated go2rtc instance is not supported. 
+#       changing this port for the integrated go2rtc instance is not supported.
 go2rtc:
 
 # Optional: Live stream configuration for WebUI.
 # NOTE: Can be overridden at the camera level
 live:
-  # Optional: Set the name of the stream configured in go2rtc
+  # Optional: Set the streams configured in go2rtc
   # that should be used for live view in frigate WebUI. (default: name of camera)
   # NOTE: In most cases this should be set at the camera level only.
-  stream_name: camera_name
+  streams:
+    main_stream: main_stream_name
+    sub_stream: sub_stream_name
   # Optional: Set the height of the jsmpeg stream. (default: 720)
   # This must be less than or equal to the height of the detect stream. Lower resolutions
   # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
@@ -599,6 +675,9 @@ cameras:
     # If disabled: config is used but no live stream and no capture etc.
     # Events/Recordings are still viewable.
     enabled: True
+    # Optional: camera type used for some Frigate features (default: shown below)
+    # Options are "generic" and "lpr"
+    type: "generic"
     # Required: ffmpeg settings for the camera
     ffmpeg:
       # Required: A list of input streams for the camera. See documentation for more information.
@@ -643,7 +722,10 @@ cameras:
       front_steps:
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
-        coordinates: 0.284,0.997,0.389,0.869,0.410,0.745
+        coordinates: 0.033,0.306,0.324,0.138,0.439,0.185,0.042,0.428
+        # Optional: The real-world distances of a 4-sided zone used for zones with speed estimation enabled (default: none)
+        # List distances in order of the zone points coordinates and use the unit system defined in the ui config
+        distances: 10,15,12,11
         # Optional: Number of consecutive frames required for object to be considered present in the zone (default: shown below).
         inertia: 3
         # Optional: Number of seconds that an object must loiter to be considered in the zone (default: shown below)
@@ -764,6 +846,12 @@ cameras:
         - cat
       # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
       required_zones: []
+      # Optional: What triggers to use to send frames for a tracked object to generative AI (default: shown below)
+      send_triggers:
+        # Once the object is no longer tracked
+        tracked_object_end: True
+        # Optional: After X many significant updates are received (default: shown below)
+        after_significant_updates: None
       # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
       debug_save_thumbnails: False
 
@@ -794,6 +882,9 @@ ui:
   # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
   # possible values are shown above (default: not set)
   strftime_fmt: "%Y/%m/%d %H:%M"
+  # Optional: Set the unit system to either "imperial" or "metric" (default: metric)
+  # Used in the UI and in MQTT topics
+  unit_system: metric
 
 # Optional: Telemetry configuration
 telemetry:
@@ -807,15 +898,17 @@ telemetry:
     - lo
   # Optional: Configure system stats
   stats:
-    # Enable AMD GPU stats (default: shown below)
+    # Optional: Enable AMD GPU stats (default: shown below)
     amd_gpu_stats: True
-    # Enable Intel GPU stats (default: shown below)
+    # Optional: Enable Intel GPU stats (default: shown below)
     intel_gpu_stats: True
-    # Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
+    # Optional: Treat GPU as SR-IOV to fix GPU stats (default: shown below)
+    intel_gpu_device: None
+    # Optional: Enable network bandwidth stats monitoring for camera ffmpeg processes, go2rtc, and object detectors. (default: shown below)
     # NOTE: The container must either be privileged or have cap_net_admin, cap_net_raw capabilities enabled.
     network_bandwidth: False
   # Optional: Enable the latest version outbound check (default: shown below)
-  # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
+  # NOTE: If you use the Home Assistant integration, disabling this will prevent it from reporting new versions
   version_check: True
 
 # Optional: Camera groups (default: no groups are setup)

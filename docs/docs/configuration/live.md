@@ -3,9 +3,9 @@ id: live
 title: Live View
 ---
 
-Frigate intelligently displays your camera streams on the Live view dashboard. Your camera images update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion is detected, cameras seamlessly switch to a live stream.
+Frigate intelligently displays your camera streams on the Live view dashboard. By default, Frigate employs "smart streaming" where camera images update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion or active objects are detected, cameras seamlessly switch to a live stream.
 
-## Live View technologies
+### Live View technologies
 
 Frigate intelligently uses three different streaming technologies to display your camera streams on the dashboard and the single camera view, switching between available modes based on network bandwidth, player errors, or required features like two-way talk. The highest quality and fluency of the Live view requires the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
 
@@ -23,7 +23,7 @@ If you are using go2rtc, you should adjust the following settings in your camera
 
 - Video codec: **H.264** - provides the most compatible video codec with all Live view technologies and browsers. Avoid any kind of "smart codec" or "+" codec like _H.264+_ or _H.265+_. as these non-standard codecs remove keyframes (see below).
 - Audio codec: **AAC** - provides the most compatible audio codec with all Live view technologies and browsers that support audio.
-- I-frame interval (sometimes called the keyframe interval, the interframe space, or the GOP length): match your camera's frame rate, or choose "1x" (for interframe space on Reolink cameras). For example, if your stream outputs 20fps, your i-frame interval should be 20 (or 1x on Reolink). Values higher than the frame rate will cause the stream to take longer to begin playback. See [this page](https://gardinal.net/understanding-the-keyframe-interval/) for more on keyframes. For many users this may not be an issue, but it should be noted that that a 1x i-frame interval will cause more storage utilization if you are using the stream for the `record` role as well.
+- I-frame interval (sometimes called the keyframe interval, the interframe space, or the GOP length): match your camera's frame rate, or choose "1x" (for interframe space on Reolink cameras). For example, if your stream outputs 20fps, your i-frame interval should be 20 (or 1x on Reolink). Values higher than the frame rate will cause the stream to take longer to begin playback. See [this page](https://gardinal.net/understanding-the-keyframe-interval/) for more on keyframes. For many users this may not be an issue, but it should be noted that a 1x i-frame interval will cause more storage utilization if you are using the stream for the `record` role as well.
 
 The default video and audio codec on your camera may not always be compatible with your browser, which is why setting them to H.264 and AAC is recommended. See the [go2rtc docs](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#codecs-madness) for codec support information.
 
@@ -42,6 +42,16 @@ go2rtc:
       - "ffmpeg:http_cam#audio=opus" # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
 ```
 
+If your camera does not support AAC audio or are having problems with Live view, try transcoding to AAC audio directly:
+
+```yaml
+go2rtc:
+  streams:
+    rtsp_cam: # <- for RTSP streams
+      - "ffmpeg:rtsp://192.168.1.5:554/live0#video=copy#audio=aac" # <- copies video stream and transcodes to aac audio
+      - "ffmpeg:rtsp_cam#audio=opus" # <- provides support for WebRTC
+```
+
 If your camera does not have audio and you are having problems with Live view, you should have go2rtc send video only:
 
 ```yaml
@@ -51,19 +61,32 @@ go2rtc:
       - ffmpeg:rtsp://192.168.1.5:554/live0#video=copy
 ```
 
-### Setting Stream For Live UI
+### Setting Streams For Live UI
 
-There may be some cameras that you would prefer to use the sub stream for live view, but the main stream for recording. This can be done via `live -> stream_name`.
+You can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the `live -> streams` list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage.
+
+Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard.
+
+:::note
+
+Frigate's default dashboard ("All Cameras") will always use the first entry you've defined in `streams:` when playing live streams from your cameras.
+
+:::
+
+Configure the `streams` option with a "friendly name" for your stream followed by the go2rtc stream name.
+
+Using Frigate's internal version of go2rtc is required to use this feature. You cannot specify paths in the `streams` configuration, only go2rtc stream names.
 
 ```yaml
 go2rtc:
   streams:
     test_cam:
-      - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio.
+      - rtsp://192.168.1.5:554/live_main # <- stream which supports video & aac audio.
       - "ffmpeg:test_cam#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
     test_cam_sub:
-      - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio.
-      - "ffmpeg:test_cam_sub#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
+      - rtsp://192.168.1.5:554/live_sub # <- stream which supports video & aac audio.
+    test_cam_another_sub:
+      - rtsp://192.168.1.5:554/live_alt # <- stream which supports video & aac audio.
 
 cameras:
   test_cam:
@@ -80,7 +103,10 @@ cameras:
           roles:
             - detect
     live:
-      stream_name: test_cam_sub
+      streams: # <--- Multiple streams for Frigate 0.16 and later
+        Main Stream: test_cam # <--- Specify a "friendly name" followed by the go2rtc stream name
+        Sub Stream: test_cam_sub
+        Special Stream: test_cam_another_sub
 ```
 
 ### WebRTC extra configuration:
@@ -88,9 +114,9 @@ cameras:
 WebRTC works by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
 
 - For external access, over the internet, setup your router to forward port `8555` to port `8555` on the Frigate device, for both TCP and UDP.
-- For internal/local access, unless you are running through the add-on, you will also need to set the WebRTC candidates list in the go2rtc config. For example, if `192.168.1.10` is the local IP of the device running Frigate:
+- For internal/local access, unless you are running through the HA Add-on, you will also need to set the WebRTC candidates list in the go2rtc config. For example, if `192.168.1.10` is the local IP of the device running Frigate:
 
-  ```yaml title="/config/frigate.yaml"
+  ```yaml title="config.yml"
   go2rtc:
     streams:
       test_cam: ...
@@ -101,12 +127,13 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
   ```
 
 - For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.64.0.0/10` CIDR block.
+- Note that WebRTC does not support H.265.
 
 :::tip
 
-This extra configuration may not be required if Frigate has been installed as a Home Assistant add-on, as Frigate uses the Supervisor's API to generate a WebRTC candidate.
+This extra configuration may not be required if Frigate has been installed as a Home Assistant Add-on, as Frigate uses the Supervisor's API to generate a WebRTC candidate.
 
-However, it is recommended if issues occur to define the candidates manually. You should do this if the Frigate add-on fails to generate a valid candidate. If an error occurs you will see some warnings like the below in the add-on logs page during the initialization:
+However, it is recommended if issues occur to define the candidates manually. You should do this if the Frigate Add-on fails to generate a valid candidate. If an error occurs you will see some warnings like the below in the Add-on logs page during the initialization:
 
 ```log
 [WARN] Failed to get IP address from supervisor
@@ -148,3 +175,79 @@ For devices that support two way talk, Frigate can be configured to use the feat
 - For the Home Assistant Frigate card, [follow the docs](http://card.camera/#/usage/2-way-audio) for the correct source.
 
 To use the Reolink Doorbell with two way talk, you should use the [recommended Reolink configuration](/configuration/camera_specific#reolink-doorbell)
+
+### Streaming options on camera group dashboards
+
+Frigate provides a dialog in the Camera Group Edit pane with several options for streaming on a camera group's dashboard. These settings are _per device_ and are saved in your device's local storage.
+
+- Stream selection using the `live -> streams` configuration option (see _Setting Streams For Live UI_ above)
+- Streaming type:
+  - _No streaming_: Camera images will only update once per minute and no live streaming will occur.
+  - _Smart Streaming_ (default, recommended setting): Smart streaming will update your camera image once per minute when no detectable activity is occurring to conserve bandwidth and resources, since a static picture is the same as a streaming image with no motion or objects. When motion or objects are detected, the image seamlessly switches to a live stream.
+  - _Continuous Streaming_: Camera image will always be a live stream when visible on the dashboard, even if no activity is being detected. Continuous streaming may cause high bandwidth usage and performance issues. **Use with caution.**
+- _Compatibility mode_: Enable this option only if your camera's live stream is displaying color artifacts and has a diagonal line on the right side of the image. Before enabling this, try setting your camera's `detect` width and height to a standard aspect ratio (for example: 640x352 becomes 640x360, and 800x443 becomes 800x450, 2688x1520 becomes 2688x1512, etc). Depending on your browser and device, more than a few cameras in compatibility mode may not be supported, so only use this option if changing your config fails to resolve the color artifacts and diagonal line.
+
+:::note
+
+The default dashboard ("All Cameras") will always use:
+
+- Smart Streaming, unless you've disabled the global Automatic Live View in Settings.
+- The first entry set in your `streams` configuration, if defined.
+
+Use a camera group if you want to change any of these settings from the defaults.
+
+:::
+
+### Disabling cameras
+
+Cameras can be temporarily disabled through the Frigate UI and through [MQTT](/integrations/mqtt#frigatecamera_nameenabledset) to conserve system resources. When disabled, Frigate's ffmpeg processes are terminated — recording stops, object detection is paused, and the Live dashboard displays a blank image with a disabled message. Review items, tracked objects, and historical footage for disabled cameras can still be accessed via the UI.
+
+:::note
+
+Disabling a camera via the Frigate UI or MQTT is temporary and does not persist through restarts of Frigate.
+
+:::
+
+For restreamed cameras, go2rtc remains active but does not use system resources for decoding or processing unless there are active external consumers (such as the Advanced Camera Card in Home Assistant using a go2rtc source).
+
+Note that disabling a camera through the config file (`enabled: False`) removes all related UI elements, including historical footage access. To retain access while disabling the camera, keep it enabled in the config and use the UI or MQTT to disable it temporarily.
+
+## Live view FAQ
+
+1. **Why don't I have audio in my Live view?**
+
+   You must use go2rtc to hear audio in your live streams. If you have go2rtc already configured, you need to ensure your camera is sending PCMA/PCMU or AAC audio. If you can't change your camera's audio codec, you need to [transcode the audio](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg) using go2rtc.
+
+   Note that the low bandwidth mode player is a video-only stream. You should not expect to hear audio when in low bandwidth mode, even if you've set up go2rtc.
+
+2. **Frigate shows that my live stream is in "low bandwidth mode". What does this mean?**
+
+   Frigate intelligently selects the live streaming technology based on a number of factors (user-selected modes like two-way talk, camera settings, browser capabilities, available bandwidth) and prioritizes showing an actual up-to-date live view of your camera's stream as quickly as possible.
+
+   When you have go2rtc configured, Live view initially attempts to load and play back your stream with a clearer, fluent stream technology (MSE). An initial timeout, a low bandwidth condition that would cause buffering of the stream, or decoding errors in the stream will cause Frigate to switch to the stream defined by the `detect` role, using the jsmpeg format. This is what the UI labels as "low bandwidth mode". On Live dashboards, the mode will automatically reset when smart streaming is configured and activity stops. Continuous streaming mode does not have an automatic reset mechanism, but you can use the _Reset_ option to force a reload of your stream.
+
+   If you are using continuous streaming or you are loading more than a few high resolution streams at once on the dashboard, your browser may struggle to begin playback of your streams before the timeout. Frigate always prioritizes showing a live stream as quickly as possible, even if it is a lower quality jsmpeg stream. You can use the "Reset" link/button to try loading your high resolution stream again.
+
+   If you are still experiencing Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the [recommendations above](#camera_settings_recommendations).
+
+3. **It doesn't seem like my cameras are streaming on the Live dashboard. Why?**
+
+   On the default Live dashboard ("All Cameras"), your camera images will update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any activity is detected, cameras seamlessly switch to a full-resolution live stream. If you want to customize this behavior, use a camera group.
+
+4. **I see a strange diagonal line on my live view, but my recordings look fine. How can I fix it?**
+
+   This is caused by incorrect dimensions set in your detect width or height (or incorrectly auto-detected), causing the jsmpeg player's rendering engine to display a slightly distorted image. You should enlarge the width and height of your `detect` resolution up to a standard aspect ratio (example: 640x352 becomes 640x360, and 800x443 becomes 800x450, 2688x1520 becomes 2688x1512, etc). If changing the resolution to match a standard (4:3, 16:9, or 32:9, etc) aspect ratio does not solve the issue, you can enable "compatibility mode" in your camera group dashboard's stream settings. Depending on your browser and device, more than a few cameras in compatibility mode may not be supported, so only use this option if changing your `detect` width and height fails to resolve the color artifacts and diagonal line.
+
+5. **How does "smart streaming" work?**
+
+   Because a static image of a scene looks exactly the same as a live stream with no motion or activity, smart streaming updates your camera images once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any activity (motion or object/audio detection) occurs, cameras seamlessly switch to a live stream.
+
+   This static image is pulled from the stream defined in your config with the `detect` role. When activity is detected, images from the `detect` stream immediately begin updating at ~5 frames per second so you can see the activity until the live player is loaded and begins playing. This usually only takes a second or two. If the live player times out, buffers, or has streaming errors, the jsmpeg player is loaded and plays a video-only stream from the `detect` role. When activity ends, the players are destroyed and a static image is displayed until activity is detected again, and the process repeats.
+
+   Smart streaming depends on having your camera's motion `threshold` and `contour_area` config values dialed in. Use the Motion Tuner in Settings in the UI to tune these values in real-time.
+
+   This is Frigate's default and recommended setting because it results in a significant bandwidth savings, especially for high resolution cameras.
+
+6. **I have unmuted some cameras on my dashboard, but I do not hear sound. Why?**
+
+   If your camera is streaming (as indicated by a red dot in the upper right, or if it has been set to continuous streaming mode), your browser may be blocking audio until you interact with the page. This is an intentional browser limitation. See [this article](https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide#autoplay_availability). Many browsers have a whitelist feature to change this behavior.

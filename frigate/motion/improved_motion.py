@@ -1,13 +1,14 @@
 import logging
 
 import cv2
-import imutils
 import numpy as np
 from scipy.ndimage import gaussian_filter
 
+from frigate.camera import PTZMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import MotionConfig
 from frigate.motion import MotionDetector
+from frigate.util.image import grab_cv2_contours
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ class ImprovedMotionDetector(MotionDetector):
         frame_shape,
         config: MotionConfig,
         fps: int,
+        ptz_metrics: PTZMetrics = None,
         name="improved",
         blur_radius=1,
         interpolation=cv2.INTER_NEAREST,
@@ -47,7 +49,9 @@ class ImprovedMotionDetector(MotionDetector):
         self.contrast_values = np.zeros((contrast_frame_history, 2), np.uint8)
         self.contrast_values[:, 1:2] = 255
         self.contrast_values_index = 0
-        self.config_subscriber = ConfigSubscriber(f"config/motion/{name}")
+        self.config_subscriber = ConfigSubscriber(f"config/motion/{name}", True)
+        self.ptz_metrics = ptz_metrics
+        self.last_stop_time = None
 
     def is_calibrating(self):
         return self.calibrating
@@ -63,6 +67,21 @@ class ImprovedMotionDetector(MotionDetector):
 
         if not self.config.enabled:
             return motion_boxes
+
+        # if ptz motor is moving from autotracking, quickly return
+        # a single box that is 80% of the frame
+        if (
+            self.ptz_metrics.autotracker_enabled.value
+            and not self.ptz_metrics.motor_stopped.is_set()
+        ):
+            return [
+                (
+                    int(self.frame_shape[1] * 0.1),
+                    int(self.frame_shape[0] * 0.1),
+                    int(self.frame_shape[1] * 0.9),
+                    int(self.frame_shape[0] * 0.9),
+                )
+            ]
 
         gray = frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]]
 
@@ -128,7 +147,7 @@ class ImprovedMotionDetector(MotionDetector):
         contours = cv2.findContours(
             thresh_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
-        contours = imutils.grab_contours(contours)
+        contours = grab_cv2_contours(contours)
 
         # loop over the contours
         total_contour_area = 0
@@ -150,6 +169,25 @@ class ImprovedMotionDetector(MotionDetector):
         pct_motion = total_contour_area / (
             self.motion_frame_size[0] * self.motion_frame_size[1]
         )
+
+        # check if the motor has just stopped from autotracking
+        # if so, reassign the average to the current frame so we begin with a new baseline
+        if (
+            # ensure we only do this for cameras with autotracking enabled
+            self.ptz_metrics.autotracker_enabled.value
+            and self.ptz_metrics.motor_stopped.is_set()
+            and (
+                self.last_stop_time is None
+                or self.ptz_metrics.stop_time.value != self.last_stop_time
+            )
+            # value is 0 on startup or when motor is moving
+            and self.ptz_metrics.stop_time.value != 0
+        ):
+            self.last_stop_time = self.ptz_metrics.stop_time.value
+
+            self.avg_frame = resized_frame.astype(np.float32)
+            motion_boxes = []
+            pct_motion = 0
 
         # once the motion is less than 5% and the number of contours is < 4, assume its calibrated
         if pct_motion < 0.05 and len(motion_boxes) <= 4:

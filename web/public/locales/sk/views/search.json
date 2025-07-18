@@ -1,0 +1,30 @@
+{
+  "search": "Nájsť",
+  "savedSearches": "Uložené vyhľadávania",
+  "searchFor": "Hľadať pre {{inputValue}}",
+  "button": {
+    "clear": "Prehľadné vyhľadávanie",
+    "save": "Uložiť vyhladávanie",
+    "delete": "Vymazať uložené vyhladávania",
+    "filterInformation": "Filtrovanie informacii",
+    "filterActive": "Aktívne filtre"
+  },
+  "trackedObjectId": "ID sledovaného objektu",
+  "filter": {
+    "label": {
+      "cameras": "Kamery",
+      "labels": "Štítky",
+      "zones": "Zóny",
+      "sub_labels": "Podštítky",
+      "search_type": "Typ vyhľadávania",
+      "time_range": "Časový rozsah",
+      "before": "Predtým",
+      "after": "Po",
+      "min_score": "Min. Skóre",
+      "max_score": "Maximálne skóre",
+      "min_speed": "Min rýchlosť",
+      "max_speed": "Max rýchlosť",
+      "recognized_license_plate": "Uznaná poznávacia značka"
+    }
+  }
+}

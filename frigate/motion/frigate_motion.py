@@ -1,9 +1,9 @@
 import cv2
-import imutils
 import numpy as np
 
 from frigate.config import MotionConfig
 from frigate.motion import MotionDetector
+from frigate.util.image import grab_cv2_contours
 
 
 class FrigateMotionDetector(MotionDetector):
@@ -103,7 +103,7 @@ class FrigateMotionDetector(MotionDetector):
             contours = cv2.findContours(
                 thresh_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
             )
-            contours = imutils.grab_contours(contours)
+            contours = grab_cv2_contours(contours)
 
             # loop over the contours
             for c in contours:

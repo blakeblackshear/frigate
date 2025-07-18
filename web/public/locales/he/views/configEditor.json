@@ -1,0 +1,16 @@
+{
+  "documentTitle": "עורך הגדרות - פריגטה",
+  "configEditor": "עורך תצורה",
+  "copyConfig": "העתקת הגדרות",
+  "saveAndRestart": "שמירה והפעלה מחדש",
+  "saveOnly": "שמירה בלבד",
+  "confirm": "לצאת ללא שמירה?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "התצורה הועתקה ללוח."
+    },
+    "error": {
+      "savingError": "שגיאה בשמירת ההגדרות"
+    }
+  }
+}

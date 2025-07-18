@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Descarca Video",
+      "toast": {
+        "success": "A inceput descarcarea clipului ce contine articolul revizuit."
+      }
+    }
+  }
+}

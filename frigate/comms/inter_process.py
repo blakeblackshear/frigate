@@ -3,11 +3,11 @@
 import multiprocessing as mp
 import threading
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Callable
+from typing import Any, Callable
 
 import zmq
 
-from frigate.comms.dispatcher import Communicator
+from frigate.comms.base_communicator import Communicator
 
 SOCKET_REP_REQ = "ipc:///tmp/cache/comms"
 
@@ -63,7 +63,7 @@ class InterProcessRequestor:
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(SOCKET_REP_REQ)
 
-    def send_data(self, topic: str, data: any) -> any:
+    def send_data(self, topic: str, data: Any) -> Any:
         """Sends data and then waits for reply."""
         try:
             self.socket.send_json((topic, data))

@@ -1,25 +1,83 @@
-# syntax=docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.6
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
-
 ARG BASE_IMAGE
+ARG TRT_BASE=nvcr.io/nvidia/tensorrt:23.12-py3
+
+# Build TensorRT-specific library
+FROM ${TRT_BASE} AS trt-deps
+
+ARG TARGETARCH
+ARG COMPUTE_LEVEL
+
+RUN apt-get update \
+    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvparsers-dev libnvonnxparsers-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=bind,source=docker/tensorrt/detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
+    /tensorrt_libyolo.sh
+
+# COPY required individual CUDA deps
+RUN mkdir -p /usr/local/cuda-deps
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+    cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libcurand.so.* /usr/local/cuda-deps/ && \
+    cp /usr/local/cuda-12.3/targets/x86_64-linux/lib/libnvrtc.so.* /usr/local/cuda-deps/ && \
+    cd /usr/local/cuda-deps/ && \
+    for lib in libnvrtc.so.*; do \
+    if [[ "$lib" =~ libnvrtc.so\.([0-9]+\.[0-9]+\.[0-9]+) ]]; then \
+    version="${BASH_REMATCH[1]}"; \
+    ln -sf "libnvrtc.so.$version" libnvrtc.so; \
+    fi; \
+    done && \
+    for lib in libcurand.so.*; do \
+    if [[ "$lib" =~ libcurand.so\.([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+) ]]; then \
+    version="${BASH_REMATCH[1]}"; \
+    ln -sf "libcurand.so.$version" libcurand.so; \
+    fi; \
+    done; \
+    fi
+
+# Frigate w/ TensorRT Support as separate image
+FROM deps AS tensorrt-base
+
+#Disable S6 Global timeout
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+
+# COPY TensorRT Model Generation Deps
+COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
+COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
+
+# COPY Individual CUDA deps folder
+COPY --from=trt-deps /usr/local/cuda-deps /usr/local/cuda
+
+COPY docker/tensorrt/detector/rootfs/ /
+ENV YOLO_MODELS=""
+
+HEALTHCHECK --start-period=600s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
+    CMD curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1
+
 FROM ${BASE_IMAGE} AS build-wheels
 ARG DEBIAN_FRONTEND
+
+# Add deadsnakes PPA for python3.11
+RUN apt-get -qq update && \
+    apt-get -qq install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends \
-    python3.9 python3.9-dev \
+    python3.11 python3.11-dev \
     wget build-essential cmake git \
     && rm -rf /var/lib/apt/lists/*
 
-# Ensure python3 defaults to python3.9
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+# Ensure python3 defaults to python3.11
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
-
 
 FROM build-wheels AS trt-wheels
 ARG DEBIAN_FRONTEND
@@ -41,11 +99,11 @@ RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,t
     && TENSORRT_VER=$(cat /etc/TENSORRT_VER) /deps/build_python_tensorrt.sh
 
 COPY docker/tensorrt/requirements-arm64.txt /requirements-tensorrt.txt
-ADD https://nvidia.box.com/shared/static/9aemm4grzbbkfaesg5l7fplgjtmswhj8.whl /tmp/onnxruntime_gpu-1.15.1-cp39-cp39-linux_aarch64.whl
 
-RUN pip3 uninstall -y onnxruntime-openvino \
-    && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt \
-    && pip3 install --no-deps /tmp/onnxruntime_gpu-1.15.1-cp39-cp39-linux_aarch64.whl
+RUN pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
+
+# See https://elinux.org/Jetson_Zoo#ONNX_Runtime
+ADD https://nvidia.box.com/shared/static/9yvw05k6u343qfnkhdv2x6xhygze0aq1.whl /trt-wheels/onnxruntime_gpu-1.19.0-cp311-cp311-linux_aarch64.whl
 
 FROM build-wheels AS trt-model-wheels
 ARG DEBIAN_FRONTEND
@@ -67,17 +125,31 @@ RUN --mount=type=bind,source=docker/tensorrt/build_jetson_ffmpeg.sh,target=/deps
 # Frigate w/ TensorRT for NVIDIA Jetson platforms
 FROM tensorrt-base AS frigate-tensorrt
 RUN apt-get update \
-    && apt-get install -y python-is-python3 libprotobuf17  \
+    && apt-get install -y python-is-python3 libprotobuf23  \
     && rm -rf /var/lib/apt/lists/*
 
-RUN rm -rf /usr/lib/btbn-ffmpeg/
 COPY --from=jetson-ffmpeg /rootfs /
+ENV DEFAULT_FFMPEG_VERSION="jetson"
+ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:${INCLUDED_FFMPEG_VERSIONS}"
+
+# ffmpeg runtime dependencies
+RUN apt-get -qq update \
+    && apt-get -qq install -y --no-install-recommends \
+    libx264-163 libx265-199 libegl1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Fixes "Error loading shared libs"
+RUN mkdir -p /etc/ld.so.conf.d && echo /usr/lib/ffmpeg/jetson/lib/ > /etc/ld.so.conf.d/ffmpeg.conf
 
 COPY --from=trt-wheels /etc/TENSORRT_VER /etc/TENSORRT_VER
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     --mount=type=bind,from=trt-model-wheels,source=/trt-model-wheels,target=/deps/trt-model-wheels \
-    pip3 install -U /deps/trt-wheels/*.whl /deps/trt-model-wheels/*.whl \
+    pip3 uninstall -y onnxruntime \
+    && pip3 install -U /deps/trt-wheels/*.whl /deps/trt-model-wheels/*.whl \
     && ldconfig
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+
+# Fixes "Error importing detector runtime: /usr/lib/aarch64-linux-gnu/libstdc++.so.6: cannot allocate memory in static TLS block"
+ENV LD_PRELOAD /usr/lib/aarch64-linux-gnu/libstdc++.so.6

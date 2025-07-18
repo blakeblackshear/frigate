@@ -1,0 +1,21 @@
+{
+  "documentTitle.withCamera": "{{camera}} - Langsung - Frigate",
+  "documentTitle": "Langsung - Frigate",
+  "lowBandwidthMode": "Mode Bandwith-Rendah",
+  "twoWayTalk": {
+    "enable": "Nyalakan Komunikasi dua arah",
+    "disable": "Nonaktifkan Komunikasi Dua Arah"
+  },
+  "cameraAudio": {
+    "enable": "Nyalakan Audio Kamera",
+    "disable": "Matikan Audio Kamera"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Klik kotak ini untuk menengahkan kamera",
+        "enable": "Aktifkan klik untuk bergerak"
+      }
+    }
+  }
+}

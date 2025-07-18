@@ -1,0 +1,17 @@
+{
+  "documentTitle": "Eksport - Frigate",
+  "search": "Søk",
+  "noExports": "Ingen eksporter funnet",
+  "deleteExport": "Slett eksport",
+  "deleteExport.desc": "Er du sikker på at du vil slette {{exportName}}?",
+  "editExport": {
+    "title": "Gi nytt navn til eksport",
+    "desc": "Skriv inn et nytt navn for denne eksporten.",
+    "saveExport": "Lagre eksport"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Kunne ikke gi nytt navn til eksport: {{errorMessage}}"
+    }
+  }
+}

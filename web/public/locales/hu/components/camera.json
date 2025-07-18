@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Kamera Csoport",
+    "delete": {
+      "confirm": {
+        "desc": "Biztosan törölni akarja a következő kamera csoportot <em>{{name}}</em>?",
+        "title": "Törlés megerősítése"
+      },
+      "label": "Kamera csoport törlése"
+    },
+    "add": "Kamera csoport hozzáadása",
+    "edit": "Kamera csoport módosítása",
+    "name": {
+      "label": "Név",
+      "placeholder": "Adjon meg egy nevet…",
+      "errorMessage": {
+        "mustLeastCharacters": "A kamera csoport nevének legalább 2 karakterből kell állnia.",
+        "exists": "Ez a kamera csoport név már létezik.",
+        "nameMustNotPeriod": "A kamera csoport neve nem tartalmazhat idő intervallumot.",
+        "invalid": "Hibás kamera csoport név."
+      }
+    },
+    "cameras": {
+      "label": "Kamerák",
+      "desc": "Válassza ki a kamerákat ehhez a csoporthoz."
+    },
+    "icon": "Ikon",
+    "success": "Kamera csoport {{name}} mentve.",
+    "camera": {
+      "setting": {
+        "audioIsAvailable": "Hang elérhető ehhez az adáshoz",
+        "audioIsUnavailable": "Nem elérhető hang ehhez az adáshoz",
+        "audio": {
+          "tips": {
+            "document": "Olvassa el a leírást ",
+            "title": "A hangnak a kamerából kell jönnie és be kell állítva legyen a go2rtc-ben ehhez az adáshoz."
+          }
+        },
+        "title": "{{cameraName}} Adás Beállításai",
+        "label": "Kamera adás beállítások",
+        "stream": "Adás",
+        "streamMethod": {
+          "method": {
+            "noStreaming": {
+              "label": "Nincs Adás",
+              "desc": "A kameraképek percenként frissülnek és nem lesz élő adás."
+            },
+            "smartStreaming": {
+              "label": "Okos Adás (ajánlott)",
+              "desc": "Az intelligens közvetítés percenként egyszer frissíti a kameraképet, ha nem észlelhető aktivitás, így takarékoskodik a sávszélességgel és az erőforrásokkal. Amikor aktivitást észlel, a kép zökkenőmentesen átvált élő közvetítésre."
+            },
+            "continuousStreaming": {
+              "label": "Folyamatos Adás",
+              "desc": {
+                "title": "A kamerakép mindig élő közvetítés lesz, amikor látható az irányítópulton, még akkor is, ha nincs észlelt aktivitás.",
+                "warning": "A folyamatos közvetítés magas sávszélesség-használatot és teljesítményproblémákat okozhat. Csak óvatosan használja."
+              }
+            }
+          },
+          "label": "Adási Mód",
+          "placeholder": "Válasszon egy adási módot"
+        },
+        "placeholder": "Válasszon adást",
+        "compatibilityMode": {
+          "label": "Kompatibilitás mód",
+          "desc": "Csak akkor engedélyezze ezt az opciót, ha a kamera élő közvetítése képhibás, és a kép jobb oldalán átlós vonal látható."
+        },
+        "desc": "Változtassa meg az élő adás beállításait ezen kamera csoport kijelzőjén. <em> Ezek a beállítások eszköz/böngésző-specifikusak.</em>"
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Beállítások",
+      "title": "Lehetőségek",
+      "showOptions": "Mutasd a Lehetőségeket",
+      "hideOptions": "Lehetőségek Elrejtése"
+    },
+    "timestamp": "Időbélyeg",
+    "zones": "Zónák",
+    "mask": "Maszk",
+    "motion": "Mozgás",
+    "regions": "Régiók",
+    "boundingBox": "Doboz"
+  }
+}

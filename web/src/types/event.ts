@@ -22,5 +22,6 @@ export interface Event {
     area: number;
     ratio: number;
     type: "object" | "audio" | "manual";
+    path_data: [number[], number][];
   };
 }

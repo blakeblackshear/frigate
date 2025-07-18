@@ -26,7 +26,7 @@ class Service(ABC):
             self.__dict__["name"] = name
 
         self.__manager = manager or ServiceManager.current()
-        self.__lock = asyncio.Lock(loop=self.__manager._event_loop)
+        self.__lock = asyncio.Lock(loop=self.__manager._event_loop)  # type: ignore[call-arg]
         self.__manager._register(self)
 
     @property

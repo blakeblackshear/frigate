@@ -11,6 +11,7 @@ import { useCameraActivity } from "@/hooks/use-camera-activity";
 import {
   LivePlayerError,
   LivePlayerMode,
+  PlayerStatsType,
   VideoResolutionType,
 } from "@/types/live";
 import { getIconForLabel } from "@/utils/iconUtil";
@@ -20,20 +21,28 @@ import { cn } from "@/lib/utils";
 import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { baseUrl } from "@/api/baseUrl";
+import { PlayerStats } from "./PlayerStats";
+import { LuVideoOff } from "react-icons/lu";
+import { Trans, useTranslation } from "react-i18next";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
   className?: string;
   cameraConfig: CameraConfig;
+  streamName: string;
   preferredLiveMode: LivePlayerMode;
   showStillWithoutActivity?: boolean;
+  useWebGL: boolean;
   windowVisible?: boolean;
   playAudio?: boolean;
+  volume?: number;
+  playInBackground: boolean;
   micEnabled?: boolean; // only webrtc supports mic
   iOSCompatFullScreen?: boolean;
   pip?: boolean;
   autoLive?: boolean;
+  showStats?: boolean;
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
@@ -45,25 +54,49 @@ export default function LivePlayer({
   containerRef,
   className,
   cameraConfig,
+  streamName,
   preferredLiveMode,
   showStillWithoutActivity = true,
+  useWebGL = false,
   windowVisible = true,
   playAudio = false,
+  volume,
+  playInBackground = false,
   micEnabled = false,
   iOSCompatFullScreen = false,
   pip,
   autoLive = true,
+  showStats = false,
   onClick,
   setFullResolution,
   onError,
   onResetLiveMode,
 }: LivePlayerProps) {
+  const { t } = useTranslation(["components/player"]);
+
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // stats
+
+  const [stats, setStats] = useState<PlayerStatsType>({
+    streamType: "-",
+    bandwidth: 0, // in kbps
+    latency: undefined, // in seconds
+    totalFrames: 0,
+    droppedFrames: undefined,
+    decodedFrames: 0,
+    droppedFrameRate: 0, // percentage
+  });
 
   // camera activity
 
-  const { activeMotion, activeTracking, objects, offline } =
-    useCameraActivity(cameraConfig);
+  const {
+    enabled: cameraEnabled,
+    activeMotion,
+    activeTracking,
+    objects,
+    offline,
+  } = useCameraActivity(cameraConfig);
 
   const cameraActive = useMemo(
     () =>
@@ -144,24 +177,75 @@ export default function LivePlayer({
     setLiveReady(false);
   }, [preferredLiveMode]);
 
+  const [key, setKey] = useState(0);
+
+  const resetPlayer = () => {
+    setLiveReady(false);
+    setKey((prevKey) => prevKey + 1);
+  };
+
+  useEffect(() => {
+    if (streamName) {
+      resetPlayer();
+    }
+  }, [streamName]);
+
+  useEffect(() => {
+    if (showStillWithoutActivity && !autoLive) {
+      setLiveReady(false);
+    }
+  }, [showStillWithoutActivity, autoLive]);
+
   const playerIsPlaying = useCallback(() => {
     setLiveReady(true);
   }, []);
+
+  // enabled states
+
+  const [isReEnabling, setIsReEnabling] = useState(false);
+  const prevCameraEnabledRef = useRef(cameraEnabled ?? true);
+
+  useEffect(() => {
+    if (cameraEnabled == undefined) {
+      return;
+    }
+    if (!prevCameraEnabledRef.current && cameraEnabled) {
+      // Camera enabled
+      setLiveReady(false);
+      setIsReEnabling(true);
+      setKey((prevKey) => prevKey + 1);
+    } else if (prevCameraEnabledRef.current && !cameraEnabled) {
+      // Camera disabled
+      setLiveReady(false);
+      setKey((prevKey) => prevKey + 1);
+    }
+    prevCameraEnabledRef.current = cameraEnabled;
+  }, [cameraEnabled]);
+
+  useEffect(() => {
+    if (liveReady && isReEnabling) {
+      setIsReEnabling(false);
+    }
+  }, [liveReady, isReEnabling]);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
   }
 
   let player;
-  if (!autoLive) {
+  if (!autoLive || !streamName || !cameraEnabled) {
     player = null;
   } else if (preferredLiveMode == "webrtc") {
     player = (
       <WebRtcPlayer
+        key={"webrtc_" + key}
         className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
-        camera={cameraConfig.live.stream_name}
+        camera={streamName}
         playbackEnabled={cameraActive || liveReady}
+        getStats={showStats}
+        setStats={setStats}
         audioEnabled={playAudio}
+        volume={volume}
         microphoneEnabled={micEnabled}
         iOSCompatFullScreen={iOSCompatFullScreen}
         onPlaying={playerIsPlaying}
@@ -173,10 +257,15 @@ export default function LivePlayer({
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
+          key={"mse_" + key}
           className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
-          camera={cameraConfig.live.stream_name}
+          camera={streamName}
           playbackEnabled={cameraActive || liveReady}
           audioEnabled={playAudio}
+          volume={volume}
+          playInBackground={playInBackground}
+          getStats={showStats}
+          setStats={setStats}
           onPlaying={playerIsPlaying}
           pip={pip}
           setFullResolution={setFullResolution}
@@ -186,7 +275,7 @@ export default function LivePlayer({
     } else {
       player = (
         <div className="w-5xl text-center text-sm">
-          iOS 17.1 or greater is required for this live stream type.
+          {t("livePlayerRequiredIOSVersion")}
         </div>
       );
     }
@@ -194,6 +283,7 @@ export default function LivePlayer({
     if (cameraActive || !showStillWithoutActivity || liveReady) {
       player = (
         <JSMpegPlayer
+          key={"jsmpeg_" + key}
           className="flex justify-center overflow-hidden rounded-lg md:rounded-2xl"
           camera={cameraConfig.name}
           width={cameraConfig.detect.width}
@@ -201,6 +291,8 @@ export default function LivePlayer({
           playbackEnabled={
             cameraActive || !showStillWithoutActivity || liveReady
           }
+          useWebGL={useWebGL}
+          setStats={setStats}
           containerRef={containerRef ?? internalContainerRef}
           onPlaying={playerIsPlaying}
         />
@@ -232,16 +324,18 @@ export default function LivePlayer({
         }
       }}
     >
-      {((showStillWithoutActivity && !liveReady) || liveReady) && (
-        <>
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
-        </>
-      )}
+      {cameraEnabled &&
+        ((showStillWithoutActivity && !liveReady) || liveReady) && (
+          <>
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
+          </>
+        )}
       {player}
-      {!offline && !showStillWithoutActivity && !liveReady && (
-        <ActivityIndicator />
-      )}
+      {cameraEnabled &&
+        !offline &&
+        (!showStillWithoutActivity || isReEnabling) &&
+        !liveReady && <ActivityIndicator />}
 
       {((showStillWithoutActivity && !liveReady) || liveReady) &&
         objects.length > 0 && (
@@ -267,11 +361,13 @@ export default function LivePlayer({
                 </TooltipTrigger>
               </div>
               <TooltipPortal>
-                <TooltipContent className="capitalize">
+                <TooltipContent className="smart-capitalize">
                   {[
                     ...new Set([
                       ...(objects || []).map(({ label, sub_label }) =>
-                        label.endsWith("verified") ? sub_label : label,
+                        label.endsWith("verified")
+                          ? sub_label
+                          : label.replaceAll("_", " "),
                       ),
                     ]),
                   ]
@@ -289,27 +385,49 @@ export default function LivePlayer({
       <div
         className={cn(
           "absolute inset-0 w-full",
-          showStillWithoutActivity && !liveReady ? "visible" : "invisible",
+          showStillWithoutActivity &&
+            !liveReady &&
+            !isReEnabling &&
+            cameraEnabled
+            ? "visible"
+            : "invisible",
         )}
       >
         <AutoUpdatingCameraImage
-          className="size-full"
+          className="pointer-events-none size-full"
+          cameraClasses="relative size-full flex justify-center"
           camera={cameraConfig.name}
           showFps={false}
           reloadInterval={stillReloadInterval}
-          cameraClasses="relative size-full flex justify-center"
+          periodicCache
         />
       </div>
 
-      {offline && !showStillWithoutActivity && (
+      {offline && !showStillWithoutActivity && cameraEnabled && (
         <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
           <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
-            <p className="my-5 text-lg">Stream offline</p>
+            <p className="my-5 text-lg">{t("streamOffline.title")}</p>
             <TbExclamationCircle className="mb-3 size-10" />
             <p className="max-w-96 text-center">
-              No frames have been received on the{" "}
-              {capitalizeFirstLetter(cameraConfig.name)} <code>detect</code>{" "}
-              stream, check error logs
+              <Trans
+                ns="components/player"
+                values={{
+                  cameraName: capitalizeFirstLetter(cameraConfig.name),
+                }}
+              >
+                streamOffline.desc
+              </Trans>
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!cameraEnabled && (
+        <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-secondary-foreground bg-background_alt">
+          <div className="flex h-32 flex-col items-center justify-center rounded-lg p-4 md:h-48 md:w-48">
+            <LuVideoOff className="mb-2 size-8 md:size-10" />
+            <p className="max-w-32 text-center text-sm md:max-w-40 md:text-base">
+              {t("cameraDisabled")}
             </p>
           </div>
         </div>
@@ -322,7 +440,7 @@ export default function LivePlayer({
           ((showStillWithoutActivity && !liveReady) || liveReady) && (
             <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
           )}
-        {offline && showStillWithoutActivity && (
+        {((offline && showStillWithoutActivity) || !cameraEnabled) && (
           <Chip
             className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
           >
@@ -330,6 +448,9 @@ export default function LivePlayer({
           </Chip>
         )}
       </div>
+      {showStats && (
+        <PlayerStats stats={stats} minimal={cameraRef !== undefined} />
+      )}
     </div>
   );
 }

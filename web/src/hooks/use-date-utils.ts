@@ -1,33 +1,49 @@
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useMemo } from "react";
+import { useDateLocale } from "@/hooks/use-date-locale";
 
 export function useFormattedTimestamp(
   timestamp: number,
   format: string,
   timezone?: string,
 ) {
+  const locale = useDateLocale();
+
   const formattedTimestamp = useMemo(() => {
     return formatUnixTimestampToDateTime(timestamp, {
       timezone,
-      strftime_fmt: format,
+      date_format: format,
+      locale,
     });
-  }, [format, timestamp, timezone]);
+  }, [format, timestamp, timezone, locale]);
 
   return formattedTimestamp;
 }
 
-export function useFormattedRange(start: number, end: number, format: string) {
+export function useFormattedRange(
+  start: number,
+  end: number,
+  format: string,
+  timezone?: string,
+) {
+  const locale = useDateLocale();
+
   const formattedStart = useMemo(() => {
     return formatUnixTimestampToDateTime(start, {
-      strftime_fmt: format,
+      timezone,
+      date_format: format,
+      locale,
     });
-  }, [format, start]);
+  }, [format, start, timezone, locale]);
+
   const formattedEnd = useMemo(() => {
     return formatUnixTimestampToDateTime(end, {
-      strftime_fmt: format,
+      timezone,
+      date_format: format,
+      locale,
     });
-  }, [format, end]);
+  }, [format, end, timezone, locale]);
 
   return `${formattedStart} - ${formattedEnd}`;
 }
@@ -44,7 +60,7 @@ export function useTimezone(config: FrigateConfig | undefined) {
   }, [config]);
 }
 
-function use24HourTime(config: FrigateConfig | undefined) {
+export function use24HourTime(config: FrigateConfig | undefined) {
   const localeUses24HourTime = useMemo(
     () =>
       new Intl.DateTimeFormat(undefined, {
@@ -60,8 +76,8 @@ function use24HourTime(config: FrigateConfig | undefined) {
       return false;
     }
 
-    if (config.ui.time_format != "browser") {
-      return config.ui.time_format == "24hour";
+    if (config.ui.time_format !== "browser") {
+      return config.ui.time_format === "24hour";
     }
 
     return localeUses24HourTime;

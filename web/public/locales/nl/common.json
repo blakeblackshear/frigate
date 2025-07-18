@@ -1,0 +1,268 @@
+{
+  "time": {
+    "untilForTime": "Totdat {{time}}",
+    "untilForRestart": "Totdat Frigate herstart.",
+    "untilRestart": "Tot herstart",
+    "12hours": "12 uur",
+    "lastWeek": "Vorige week",
+    "last7": "Afgelopen 7 dagen",
+    "last30": "Afgelopen 30 dagen",
+    "yr": "{{time}} jaar",
+    "5minutes": "5 minuten",
+    "10minutes": "10 minuten",
+    "24hours": "24 uur",
+    "30minutes": "30 minuten",
+    "ago": "{{timeAgo}} geleden",
+    "justNow": "Zojuist",
+    "today": "Vandaag",
+    "yesterday": "Gisteren",
+    "last14": "Afgelopen 14 dagen",
+    "thisWeek": "Deze week",
+    "thisMonth": "Deze maand",
+    "lastMonth": "Vorige maand",
+    "1hour": "1 uur",
+    "pm": "pm",
+    "am": "am",
+    "year_one": "{{time}} Jaar",
+    "year_other": "{{time}} Jaren",
+    "mo": "{{time}} maand",
+    "month_one": "{{time}} maand",
+    "month_other": "{{time}} maanden",
+    "formattedTimestamp2": {
+      "12hour": "dd/MM h:mm:ss",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "s": "{{time}}s",
+    "formattedTimestamp": {
+      "12hour": "d MMM, HH:mm:ss",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestampOnlyMonthAndDay": "%-d %b",
+    "d": "{{time}}dag",
+    "day_one": "{{time}} dag",
+    "day_other": "{{time}} dagen",
+    "h": "{{time}}u",
+    "hour_one": "{{time}} uur",
+    "hour_other": "{{time}} uren",
+    "m": "{{time}}min",
+    "formattedTimestampWithYear": {
+      "12hour": "%-d %b %Y, %H:%M",
+      "24hour": "%-d %b %Y, %H:%M"
+    },
+    "formattedTimestampExcludeSeconds": {
+      "24hour": "%-d %b, %H:%M",
+      "12hour": "%-d %b, %H:%M"
+    },
+    "minute_one": "{{time}} minuut",
+    "minute_other": "{{time}} minuten",
+    "second_one": "{{time}} seconde",
+    "second_other": "{{time}} seconden",
+    "formattedTimestampHourMinute": {
+      "24hour": "HH:mm",
+      "12hour": "HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, HH:mm",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-HH-mm-ss",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "HH:mm:ss",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, HH:mm",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM yyyy",
+      "24hour": "d MMM yyyy"
+    }
+  },
+  "button": {
+    "enabled": "Ingeschakeld",
+    "back": "Terug",
+    "apply": "Toepassen",
+    "reset": "Opnieuw instellen",
+    "enable": "Inschakelen",
+    "disabled": "Uitgeschakeld",
+    "cancel": "Annuleren",
+    "close": "Sluiten",
+    "copy": "Kopieer",
+    "done": "Klaar",
+    "saving": "Opslaan…",
+    "disable": "Uitschakelen",
+    "save": "Opslaan",
+    "history": "Geschiedenis",
+    "fullscreen": "Volledig scherm",
+    "pictureInPicture": "Pop-up venster",
+    "twoWayTalk": "Tweerichtingsgesprek",
+    "cameraAudio": "Camera geluid",
+    "on": "aan",
+    "copyCoordinates": "Coördinaten kopiëren",
+    "delete": "Verwijder",
+    "yes": "Ja",
+    "no": "Nee",
+    "suspended": "Opgeschort",
+    "unsuspended": "Heractiveren",
+    "export": "Exporteren",
+    "exitFullscreen": "Verlaat volledig scherm",
+    "play": "Speel",
+    "off": "uit",
+    "info": "Info",
+    "edit": "Bewerken",
+    "download": "Download",
+    "unselect": "Deselecteren",
+    "next": "Volgende",
+    "deleteNow": "Nu verwijderen"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/u"
+    },
+    "length": {
+      "feet": "voet",
+      "meters": "meter"
+    }
+  },
+  "label": {
+    "back": "Ga terug"
+  },
+  "menu": {
+    "system": "Systeem",
+    "systemMetrics": "Systeemstatistieken",
+    "settings": "Instellingen",
+    "configuration": "Configuratie",
+    "systemLogs": "Systeem logboeken",
+    "configurationEditor": "Configuratie bewerker",
+    "languages": "Talen",
+    "language": {
+      "en": "English (Engels)",
+      "zhCN": "简体中文 (Vereenvoudigd Chinees)",
+      "withSystem": {
+        "label": "Gebruik de systeeminstellingen voor de taal"
+      },
+      "ar": "العربية (Arabisch)",
+      "pt": "Português (Portugees)",
+      "ru": "Русский (Russisch)",
+      "de": "Deutsch (Duits)",
+      "tr": "Türkçe (Turks)",
+      "it": "Italiano (Italiaans)",
+      "nl": "Nederlands (Nederlands)",
+      "sv": "Svenska (Zweeds)",
+      "cs": "Čeština (Tsjechisch)",
+      "fa": "فارسی (Perzisch)",
+      "pl": "Polski (Pools)",
+      "he": "עברית (Hebreeuws)",
+      "el": "Ελληνικά (Grieks)",
+      "ro": "Română (Roemeense)",
+      "hu": "Magyar (Hongaars)",
+      "fi": "Suomi (Fins)",
+      "da": "Dansk (Deens)",
+      "sk": "Slovenčina (Slowaaks)",
+      "ko": "한국어 (Koreaans)",
+      "nb": "Norsk Bokmål (Noors Bokmål)",
+      "fr": "Français (Frans)",
+      "uk": "Українська (Oekraïens)",
+      "es": "Español (Spaans)",
+      "vi": "Tiếng Việt (Vietnamees)",
+      "hi": "हिन्दी (Hindi)",
+      "ja": "日本語 (Japans)",
+      "yue": "粵語 (Kantonees)",
+      "th": "ไทย (Thais)",
+      "ca": "Català (Catalaans)"
+    },
+    "darkMode": {
+      "label": "Donkere modus",
+      "light": "Licht",
+      "dark": "Donker",
+      "withSystem": {
+        "label": "Gebruik de systeeminstellingen voor de lichte of donkere modus"
+      }
+    },
+    "appearance": "Opmaak",
+    "theme": {
+      "blue": "Blauw",
+      "contrast": "Hoog contrast",
+      "label": "Thema",
+      "green": "Groen",
+      "nord": "Nord",
+      "red": "Rood",
+      "default": "Standaard",
+      "highcontrast": "Hoog contrast"
+    },
+    "withSystem": "Systeem",
+    "help": "Help",
+    "live": {
+      "title": "Live",
+      "allCameras": "Alle Camera's",
+      "cameras": {
+        "title": "Camera's",
+        "count_one": "{{count}} Camera",
+        "count_other": "{{count}} Camera's"
+      }
+    },
+    "restart": "Herstart Frigate",
+    "documentation": {
+      "title": "Documentatie",
+      "label": "Frigate documentatie"
+    },
+    "review": "Beoordelen",
+    "explore": "Verkennen",
+    "export": "Exporteren",
+    "uiPlayground": "Testgebied voor gebruikersinterface",
+    "faceLibrary": "Gezichtenbibliotheek",
+    "user": {
+      "title": "Gebruik",
+      "current": "Huidige gebruiker: {{user}}",
+      "logout": "Uitloggen",
+      "setPassword": "Wachtwoord instellen",
+      "account": "Account",
+      "anonymous": "anoniem"
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL naar klembord gekopieerd.",
+    "save": {
+      "title": "Opslaan",
+      "error": {
+        "title": "Opslaan van configuratiewijzigingen mislukt: {{errorMessage}}",
+        "noMessage": "Het opslaan van configuratiewijzigingen is mislukt"
+      }
+    }
+  },
+  "role": {
+    "title": "Rol",
+    "admin": "Beheerder",
+    "viewer": "Gebruiker",
+    "desc": "Beheerders hebben volledige toegang tot alle functies in de Frigate-interface. Kijkers kunnen alleen camera’s bekijken, items beoordelen en historische beelden terugkijken."
+  },
+  "pagination": {
+    "previous": {
+      "title": "Vorig",
+      "label": "Ga naar de vorige pagina"
+    },
+    "more": "Meer pagina's",
+    "label": "Paginering",
+    "next": {
+      "title": "Volgende",
+      "label": "Ga naar volgende pagina"
+    }
+  },
+  "accessDenied": {
+    "documentTitle": "Toegang geweigerd - Frigate",
+    "desc": "Je hebt geen toestemming om deze pagina te bekijken.",
+    "title": "Toegang geweigerd"
+  },
+  "notFound": {
+    "desc": "Pagina niet gevonden",
+    "title": "404",
+    "documentTitle": "Niet gevonden - Frigate"
+  },
+  "selectItem": "Selecteer {{item}}"
+}

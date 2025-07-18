@@ -1,8 +1,7 @@
-import shutil
 from enum import Enum
 from typing import Union
 
-from pydantic import Field, PrivateAttr, field_validator
+from pydantic import Field, field_validator
 
 from frigate.const import DEFAULT_FFMPEG_VERSION, INCLUDED_FFMPEG_VERSIONS
 
@@ -22,7 +21,7 @@ __all__ = [
 FFMPEG_GLOBAL_ARGS_DEFAULT = ["-hide_banner", "-loglevel", "warning", "-threads", "2"]
 FFMPEG_INPUT_ARGS_DEFAULT = "preset-rtsp-generic"
 
-RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic"
+RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic-audio-aac"
 DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "-threads",
     "2",
@@ -42,7 +41,6 @@ class FfmpegOutputArgsConfig(FrigateBaseModel):
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Record role FFmpeg output arguments.",
     )
-    _force_record_hvc1: bool = PrivateAttr(default=False)
 
 
 class FfmpegConfig(FrigateBaseModel):
@@ -64,14 +62,15 @@ class FfmpegConfig(FrigateBaseModel):
         default=10.0,
         title="Time in seconds to wait before FFmpeg retries connecting to the camera.",
     )
+    apple_compatibility: bool = Field(
+        default=False,
+        title="Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players.",
+    )
 
     @property
     def ffmpeg_path(self) -> str:
         if self.path == "default":
-            if shutil.which("ffmpeg") is None:
-                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
-            else:
-                return "ffmpeg"
+            return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
         elif self.path in INCLUDED_FFMPEG_VERSIONS:
             return f"/usr/lib/ffmpeg/{self.path}/bin/ffmpeg"
         else:
@@ -80,10 +79,7 @@ class FfmpegConfig(FrigateBaseModel):
     @property
     def ffprobe_path(self) -> str:
         if self.path == "default":
-            if shutil.which("ffprobe") is None:
-                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
-            else:
-                return "ffprobe"
+            return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
         elif self.path in INCLUDED_FFMPEG_VERSIONS:
             return f"/usr/lib/ffmpeg/{self.path}/bin/ffprobe"
         else:

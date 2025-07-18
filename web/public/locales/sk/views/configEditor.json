@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Editor nastavení - Frigate",
+  "configEditor": "Editor nastavení",
+  "copyConfig": "Kopírovať konfiguráciu",
+  "saveAndRestart": "Uložiť a reštartovať",
+  "saveOnly": "Len uložit",
+  "confirm": "Opustiť bez uloženia?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Konfigurácia bola skopírovaná do schránky."
+    },
+    "error": {
+      "savingError": "Chyba ukladaní konfigurácie"
+    }
+  }
+}

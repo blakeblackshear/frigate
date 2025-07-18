@@ -3,14 +3,29 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG BASE_IMAGE=debian:11
-ARG SLIM_BASE=debian:11-slim
+# Globally set pip break-system-packages option to avoid having to specify it every time
+ARG PIP_BREAK_SYSTEM_PACKAGES=1
+
+ARG BASE_IMAGE=debian:12
+ARG SLIM_BASE=debian:12-slim
+
+# A hook that allows us to inject commands right after the base images
+ARG BASE_HOOK=
 
 FROM ${BASE_IMAGE} AS base
+ARG PIP_BREAK_SYSTEM_PACKAGES
+ARG BASE_HOOK
 
-FROM --platform=${BUILDPLATFORM} debian:11 AS base_host
+RUN sh -c "$BASE_HOOK"
+
+FROM --platform=${BUILDPLATFORM} debian:12 AS base_host
+ARG PIP_BREAK_SYSTEM_PACKAGES
 
 FROM ${SLIM_BASE} AS slim-base
+ARG PIP_BREAK_SYSTEM_PACKAGES
+ARG BASE_HOOK
+
+RUN sh -c "$BASE_HOOK"
 
 FROM slim-base AS wget
 ARG DEBIAN_FRONTEND
@@ -24,10 +39,7 @@ ARG DEBIAN_FRONTEND
 ENV CCACHE_DIR /root/.ccache
 ENV CCACHE_MAXSIZE 2G
 
-# bind /var/cache/apt to tmpfs to speed up nginx build
-RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
-    --mount=type=bind,source=docker/main/build_nginx.sh,target=/deps/build_nginx.sh \
-    --mount=type=cache,target=/root/.ccache \
+RUN --mount=type=bind,source=docker/main/build_nginx.sh,target=/deps/build_nginx.sh \
     /deps/build_nginx.sh
 
 FROM wget AS sqlite-vec
@@ -43,7 +55,7 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
 FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.2/go2rtc_linux_${TARGETARCH}" go2rtc
+ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.9/go2rtc_linux_${TARGETARCH}" go2rtc
 
 FROM wget AS tempio
 ARG TARGETARCH
@@ -66,8 +78,9 @@ COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip" \
-    && pip install -r /requirements-ov.txt
+    && pip3 install -r /requirements-ov.txt
 
 # Get OpenVino Model
 RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_model.py \
@@ -139,24 +152,17 @@ ARG TARGETARCH
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y \
-    apt-transport-https \
-    gnupg \
-    wget \
-    # the key fingerprint can be obtained from https://ftp-master.debian.org/keys.html
-    && wget -qO- "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA4285295FC7B1A81600062A9605C66F00D6C9793" | \
-    gpg --dearmor > /usr/share/keyrings/debian-archive-bullseye-stable.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/debian-archive-bullseye-stable.gpg] http://deb.debian.org/debian bullseye main contrib non-free" | \
-    tee /etc/apt/sources.list.d/debian-bullseye-nonfree.list \
+    apt-transport-https wget \
     && apt-get -qq update \
     && apt-get -qq install -y \
-    python3.9 \
-    python3.9-dev \
+    python3.11 \
+    python3.11-dev \
     # opencv dependencies
     build-essential cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
     gfortran openexr libatlas-base-dev libssl-dev\
-    libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
+    libtbbmalloc2 libtbb-dev libdc1394-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
     # sqlite3 dependencies
     tclsh \
@@ -164,10 +170,10 @@ RUN apt-get -qq update \
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Ensure python3 defaults to python3.9
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
@@ -180,6 +186,9 @@ RUN /build_pysqlite3.sh
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
+# Install HailoRT & Wheels
+RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
+    /deps/install_hailort.sh
 
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
@@ -190,6 +199,7 @@ COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
+COPY --from=wheels /rootfs/ /
 COPY docker/main/rootfs/ /
 
 
@@ -214,14 +224,23 @@ ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 # Set OpenCV ffmpeg loglevel to fatal: https://ffmpeg.org/doxygen/trunk/log_8h.html
 ENV OPENCV_FFMPEG_LOGLEVEL=8
 
+# Set HailoRT to disable logging
+ENV HAILORT_LOGGER_PATH=NONE
+
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
 
+ENV DEFAULT_FFMPEG_VERSION="7.0"
+ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:5.0"
+
+RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
+    && python3 get-pip.py "pip"
+
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    python3 -m pip install --upgrade pip && \
     pip3 install -U /deps/wheels/*.whl
 
 COPY --from=deps-rootfs / /
@@ -241,12 +260,12 @@ ENTRYPOINT ["/init"]
 CMD []
 
 HEALTHCHECK --start-period=300s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
-    CMD curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1
+    CMD test -f /dev/shm/.frigate-is-stopping && exit 0; curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1
 
 # Frigate deps with Node.js and NPM for devcontainer
 FROM deps AS devcontainer
 
-# Do not start the actual Frigate service on devcontainer as it will be started by VSCode
+# Do not start the actual Frigate service on devcontainer as it will be started by VS Code
 # But start a fake service for simulating the logs
 COPY docker/main/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
 

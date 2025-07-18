@@ -33,6 +33,7 @@ import {
 } from "../ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { FaCompress, FaExpand } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 type VideoControls = {
   volume?: boolean;
@@ -249,7 +250,9 @@ export default function VideoControls({
         >
           <DropdownMenuTrigger>{`${playbackRate}x`}</DropdownMenuTrigger>
           <DropdownMenuContent
-            portalProps={{ container: controlsContainerRef.current }}
+            portalProps={{
+              container: containerRef?.current ?? controlsContainerRef.current,
+            }}
           >
             <DropdownMenuRadioGroup
               onValueChange={(rate) => onSetPlaybackRate(parseFloat(rate))}
@@ -309,6 +312,8 @@ function FrigatePlusUploadButton({
   onUploadFrame,
   containerRef,
 }: FrigatePlusUploadButtonProps) {
+  const { t } = useTranslation(["components/player"]);
+
   const [videoImg, setVideoImg] = useState<string>();
 
   return (
@@ -346,14 +351,16 @@ function FrigatePlusUploadButton({
         className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl"
       >
         <AlertDialogHeader>
-          <AlertDialogTitle>Submit this frame to Frigate+?</AlertDialogTitle>
+          <AlertDialogTitle>{t("submitFrigatePlus.title")}</AlertDialogTitle>
         </AlertDialogHeader>
         <img className="aspect-video w-full object-contain" src={videoImg} />
         <AlertDialogFooter>
           <AlertDialogAction className="bg-selected" onClick={onUploadFrame}>
-            Submit
+            {t("submitFrigatePlus.submit")}
           </AlertDialogAction>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>
+            {t("button.cancel", { ns: "common" })}
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

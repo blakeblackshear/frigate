@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from multiprocessing import resource_tracker as _mprt
 from multiprocessing import shared_memory as _mpshm
 from string import printable
-from typing import AnyStr, Optional
+from typing import Any, AnyStr, Optional
 
 import cv2
 import numpy as np
@@ -80,7 +80,7 @@ def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
             return False
 
     # check license_plate on car
-    if label == "car":
+    if label in ["car", "motorcycle"]:
         if has_better_attr(current_thumb, new_obj, "license_plate"):
             return True
         # if the current thumb has a license_plate attr, dont update unless it gets better
@@ -263,6 +263,19 @@ def draw_box_with_label(
         color=(0, 0, 0),
         thickness=2,
     )
+
+
+def grab_cv2_contours(cnts):
+    # if the length the contours tuple returned by cv2.findContours
+    # is '2' then we are using either OpenCV v2.4, v4-beta, or
+    # v4-official
+    if len(cnts) == 2:
+        return cnts[0]
+
+    # if the length of the contours tuple is '3' then we are using
+    # either OpenCV v3, v4-pre, or v4-alpha
+    elif len(cnts) == 3:
+        return cnts[1]
 
 
 def is_label_printable(label) -> bool:
@@ -632,6 +645,22 @@ def copy_yuv_to_position(
         )
 
 
+def get_blank_yuv_frame(width: int, height: int) -> np.ndarray:
+    """Creates a black YUV 4:2:0 frame."""
+    yuv_height = height * 3 // 2
+    yuv_frame = np.zeros((yuv_height, width), dtype=np.uint8)
+
+    uv_height = height // 2
+
+    # The U and V planes are stored after the Y plane.
+    u_start = height  # U plane starts right after Y plane
+    v_start = u_start + uv_height // 2  # V plane starts after U plane
+    yuv_frame[u_start : u_start + uv_height, :width] = 128
+    yuv_frame[v_start : v_start + uv_height, :width] = 128
+
+    return yuv_frame
+
+
 def yuv_region_2_yuv(frame, region):
     try:
         # TODO: does this copy the numpy array?
@@ -737,7 +766,7 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def write(self, name: str) -> memoryview:
+    def write(self, name: str) -> Optional[memoryview]:
         pass
 
     @abstractmethod
@@ -818,7 +847,7 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store[name] = shm
         return shm.buf
 
-    def write(self, name: str) -> memoryview:
+    def write(self, name: str) -> Optional[memoryview]:
         try:
             if name in self.shm_store:
                 shm = self.shm_store[name]
@@ -915,7 +944,7 @@ def get_image_from_recording(
     relative_frame_time: float,
     codec: str,
     height: Optional[int] = None,
-) -> Optional[any]:
+) -> Optional[Any]:
     """retrieve a frame from given time in recording file."""
 
     ffmpeg_cmd = [
@@ -949,3 +978,32 @@ def get_image_from_recording(
         return process.stdout
     else:
         return None
+
+
+def get_histogram(image, x_min, y_min, x_max, y_max):
+    image_bgr = cv2.cvtColor(image, cv2.COLOR_YUV2BGR_I420)
+    image_bgr = image_bgr[y_min:y_max, x_min:x_max]
+
+    hist = cv2.calcHist(
+        [image_bgr], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256]
+    )
+    return cv2.normalize(hist, hist).flatten()
+
+
+def ensure_jpeg_bytes(image_data):
+    """Ensure image data is jpeg bytes for genai"""
+    try:
+        img_array = np.frombuffer(image_data, dtype=np.uint8)
+        img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+
+        if img is None:
+            return image_data
+
+        success, encoded_img = cv2.imencode(".jpg", img)
+
+        if success:
+            return encoded_img.tobytes()
+    except Exception as e:
+        logger.warning(f"Error when converting thumbnail to jpeg for genai: {e}")
+
+    return image_data

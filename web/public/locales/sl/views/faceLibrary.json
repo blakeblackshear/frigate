@@ -1,0 +1,34 @@
+{
+  "description": {
+    "addFace": "Sprehodite se skozi dodajanje nove zbirke v knjižnico obrazov.",
+    "placeholder": "Vnesite ime za to zbirko",
+    "invalidName": "Neveljavno ime. Ime lahko vsebuje črke, števila, presledke, narekovaje, podčrtaje in pomišljaje."
+  },
+  "details": {
+    "person": "Oseba",
+    "unknown": "Nenznano",
+    "timestamp": "Časovni žig"
+  },
+  "uploadFaceImage": {
+    "title": "Naloži nov obraz"
+  },
+  "deleteFaceAttempts": {
+    "desc_one": "Ali ste prepričani, da želite izbrisati {{count}} obraz? Tega dejanja ni mogoče razveljaviti.",
+    "desc_two": "Ali ste prepričani, da želite izbrisati {{count}} obraza? Tega dejanja ni mogoče razveljaviti.",
+    "desc_few": "Ali ste prepričani, da želite izbrisati {{count}} obraze? Tega dejanja ni mogoče razveljaviti.",
+    "desc_other": "Ali ste prepričani, da želite izbrisati {{count}} obrazov? Tega dejanja ni mogoče razveljaviti."
+  },
+  "toast": {
+    "success": {
+      "deletedFace_one": "Uspešno izbrisan {{count}} obraz.",
+      "deletedFace_two": "Uspešno izbrisana {{count}} obraza.",
+      "deletedFace_few": "Uspešno izbrisani {{count}} obrazi.",
+      "deletedFace_other": "Uspešno izbrisanih {{count}} obrazov.",
+      "deletedName_one": "{{count}} je bil uspešno izbrisan.",
+      "deletedName_two": "{{count}} obraza sta bila uspešno izbrisana.",
+      "deletedName_few": "{{count}} obrazi so bili uspešno izbrisani.",
+      "deletedName_other": "{{count}} obrazov je bilo uspešno izbrisanih."
+    }
+  },
+  "documentTitle": "Knjižnica obrazov - Frigate"
+}

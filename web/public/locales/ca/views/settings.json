@@ -1,0 +1,622 @@
+{
+  "documentTitle": {
+    "enrichments": "Parmàmetres complementaris - Frigate",
+    "motionTuner": "Ajust de moviment - Frigate",
+    "object": "Depurar - Frigate",
+    "default": "Paràmetres - Frigate",
+    "authentication": "Configuració d'autenticació - Frigate",
+    "camera": "Paràmetres de càmera - Frigate",
+    "masksAndZones": "Editor de màscares i zones - Frigate",
+    "general": "Paràmetres Generals - Frigate",
+    "frigatePlus": "Paràmetres de Frigate+ - Frigate",
+    "notifications": "Paràmetres de notificació - Frigate"
+  },
+  "menu": {
+    "ui": "Interfície d'usuari",
+    "cameras": "Paràmetres de la càmera",
+    "masksAndZones": "Màscares / Zones",
+    "motionTuner": "Ajust de detecció de moviment",
+    "users": "Usuaris",
+    "notifications": "Notificacions",
+    "debug": "Depuració",
+    "frigateplus": "Frigate+",
+    "enrichments": "Enriquiments"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Hi ha canvis no guardats.",
+      "desc": "Desar els canvis abans de continuar?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Càmera",
+    "noCamera": "Cap càmera"
+  },
+  "general": {
+    "title": "Paràmetres generals",
+    "liveDashboard": {
+      "title": "Panell en directe",
+      "automaticLiveView": {
+        "label": "Vista en directe automàtica",
+        "desc": "Canvia automàticament a la vista en directe d’una càmera quan es detecta activitat. Desactivar aquesta opció fa que les imatges estàtiques de la càmera al panell en directe s’actualitzin només un cop per minut."
+      },
+      "playAlertVideos": {
+        "label": "Reproduir vídeos d’alerta",
+        "desc": "Per defecte, les alertes recents al tauler en directe es reprodueixen com a vídeos petits en bucle. Desactiva aquesta opció per mostrar només una imatge estàtica de les alertes recents en aquest dispositiu/navegador."
+      }
+    },
+    "storedLayouts": {
+      "title": "Disposicions desades",
+      "desc": "La disposició de les càmeres en un grup es pot arrossegar i redimensionar. Les posicions es guarden a l’emmagatzematge local del teu navegador.",
+      "clearAll": "Esborra tots les disposicions"
+    },
+    "cameraGroupStreaming": {
+      "desc": "La configuració de la transmissió per a cada grup de càmeres s'emmagatzema de manera local al vostre navegador.",
+      "title": "Parmàmetres de transmissió del grup de càmeres",
+      "clearAll": "Esborra tots els paràmetres de transmissió"
+    },
+    "recordingsViewer": {
+      "title": "Visor d'enregistraments",
+      "defaultPlaybackRate": {
+        "label": "Velocitat de reproducció predeterminada",
+        "desc": "Velocitat de reproducció predeterminada per a la reproducció de gravacions."
+      }
+    },
+    "calendar": {
+      "firstWeekday": {
+        "monday": "Dilluns",
+        "label": "Primer dia de la setmana",
+        "sunday": "Diumenge",
+        "desc": "El dia en que comencen les setmanes del calendari de revisions."
+      },
+      "title": "Calendari"
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Disposició emmagatzemada esborrada per {{cameraName}}",
+        "clearStreamingSettings": "S'han suprimit els paràmetres de la transmissió per tots els grups de càmeres."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Error en suprimir la disposició desada: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Error en esborrar els paràmetres de la transmissió: {{errorMessage}}"
+      }
+    }
+  },
+  "masksAndZones": {
+    "form": {
+      "polygonDrawing": {
+        "snapPoints": {
+          "false": "No ajustar punts",
+          "true": "Punts d'ajust"
+        },
+        "delete": {
+          "success": "{{name}} s'ha suprimit.",
+          "title": "Confirmar la supressió",
+          "desc": "Estas segur que vols suprimir el {{type}} <em>{{name}}</em>?"
+        },
+        "removeLastPoint": "Eliminar l'últim punt",
+        "reset": {
+          "label": "Neteja tots els punts"
+        },
+        "error": {
+          "mustBeFinished": "El dibuix del polígon s'ha d'acabar abans de desar."
+        }
+      },
+      "zoneName": {
+        "error": {
+          "hasIllegalCharacter": "El nom de la zona conté caràcters il·legals.",
+          "mustBeAtLeastTwoCharacters": "El nom de la zona ha de contenir com a mínim 2 caràcters.",
+          "mustNotContainPeriod": "El nom de la zona no pot contenir punts.",
+          "alreadyExists": "Ja existeix una zona amb aquest nom per a aquesta càmera.",
+          "mustNotBeSameWithCamera": "El nom de la zona no pot ser el mateix que el nom de la càmera."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "L'inèrcia ha de ser superior a 0."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "La distància ha de ser major o igual a 0.1.",
+          "mustBeFilled": "Cal omplir tots els camps de distància per poder utilitzar l’estimació de la velocitat."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "El llindar de velocitat ha de ser major o igual a 0.1."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "El temps de merodeig ha de ser mes gran o igual a 0."
+        }
+      }
+    },
+    "zones": {
+      "objects": {
+        "title": "Objectes",
+        "desc": "Llista d'objectes que apliquen per aquesta zona."
+      },
+      "speedEstimation": {
+        "lineDDistance": "Distància de la línia D ({{unit}})",
+        "title": "Estimació de velocitat",
+        "docs": "Llegir la documentació",
+        "lineADistance": "Distància de la línia A ({{unit}})",
+        "lineBDistance": "Distància de la línia B ({{unit}})",
+        "lineCDistance": "Distància de la línia C ({{unit}})",
+        "desc": "Habilita l'estimació de velocitat per a objectes dins d'aquesta zona. La zona ha de tenir exactament 4 punts."
+      },
+      "inertia": {
+        "title": "Inèrcia",
+        "desc": "Especifica quants fotogrames ha d’estar un objecte dins d’una zona abans de considerar-se que hi és. <em>Per defecte: 3</em>"
+      },
+      "point_one": "{{count}} punt",
+      "point_many": "{{count}} punts",
+      "point_other": "{{count}} punts",
+      "name": {
+        "inputPlaceHolder": "Introduïu un nom…",
+        "title": "Nom",
+        "tips": "El nom ha de tenir almenys 2 caràcters i no pot coincidir amb el nom d'una càmera ni amb el d'una altra zona."
+      },
+      "label": "Zones",
+      "desc": {
+        "documentation": "Documentació",
+        "title": "Les zones permeten definir una àrea específica de la imatge per tal de determinar si un objecte es troba dins d'una àrea concreta o no."
+      },
+      "add": "Afegir Zona",
+      "edit": "Editar zona",
+      "loiteringTime": {
+        "title": "Temps de merodeig",
+        "desc": "Estableix el temps mínim, en segons, que l'objecte ha d'estar dins la zona perquè s'activi. <em>Per defecte: 0</em>"
+      },
+      "allObjects": "Tots els objectes",
+      "documentTitle": "Edita zona - Frigate",
+      "speedThreshold": {
+        "title": "Llindar de velocitat ({{unit}})",
+        "toast": {
+          "error": {
+            "loiteringTimeError": "Zones amb temps de merodeig superior a 0 no s'han d'utilitzar per a l'estimació de velocitat.",
+            "pointLengthError": "L'estimació de velocitat s'ha desactivat per a aquesta zona. Les zones amb estimació de velocitat han de tenir exactament 4 points."
+          }
+        },
+        "desc": "Especifica una velocitat mínima dels objectes per ser considerats dins d'aquesta zona."
+      },
+      "clickDrawPolygon": "Fes click per a dibuixar un polígon a la imatge.",
+      "toast": {
+        "success": "La zona {{zoneName}} ha estat desada. Reinicia Frigate per a aplicar els canvis."
+      }
+    },
+    "filter": {
+      "all": "Totes les màscares i zones"
+    },
+    "motionMasks": {
+      "desc": {
+        "documentation": "Documentació",
+        "title": "Les màscares de moviment s’utilitzen per evitar que certs tipus de moviment no desitjats activin la detecció. Si s’aplica una màscara excessiva, es dificultarà el seguiment dels objectes."
+      },
+      "context": {
+        "documentation": "Llegir la documentació",
+        "title": "Les màscares de moviment s’utilitzen per evitar que certs tipus de moviment no desitjats activin la detecció (per exemple: branques d’arbres, marques temporals). Les màscares de moviment s’han d’utilitzar <em>amb molta moderació</em>, un excés de màscares dificultarà el seguiment dels objectes."
+      },
+      "polygonAreaTooLarge": {
+        "documentation": "Llegir la documentació",
+        "tips": "Les màscares de moviment no impedeixen la detecció d'objectes. Hauries de fer servir una zona requerida en el seu lloc.",
+        "title": "La màscara de moviment cobreix el {{polygonArea}}% del camp de visió de la càmera. Les màscares de moviment molt grans no son recomanables."
+      },
+      "point_one": "{{count}} punt",
+      "point_many": "{{count}} punts",
+      "point_other": "{{count}} punts",
+      "label": "Màscara de moviment",
+      "add": "Nova màscara de moviment",
+      "edit": "Edita la màscara de moviment",
+      "documentTitle": "Editar la màscara de moviment - Frigate",
+      "clickDrawPolygon": "Fes click per a dibuixar un polígon a la imatge.",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} s'ha desat. Reinicia Frigate per a aplicar els canvis.",
+          "noName": "La màscara de moviment ha estat desada. Reinicia Frigate per aplicar els canvis."
+        }
+      }
+    },
+    "objectMasks": {
+      "documentTitle": "Editar la màscara d'objecte - Frigate",
+      "label": "Màscares d'objecte",
+      "edit": "Editar la màscara d'objecte",
+      "point_one": "{{count}} punt",
+      "point_many": "{{count}} punts",
+      "point_other": "{{count}} punts",
+      "objects": {
+        "allObjectTypes": "Tots els tipus d’objecte",
+        "title": "Objectes",
+        "desc": "El tipus d'objecte que s'aplica a la màscara d'objectes."
+      },
+      "add": "Afegir màscara d'objecte",
+      "desc": {
+        "documentation": "Documentació",
+        "title": "Les màscares de filtratge d’objectes s’utilitzen per descartar falsos positius d’un tipus d’objecte concret segons la seva ubicació."
+      },
+      "clickDrawPolygon": "Fes click per a dibuixar un polígon a la imatge.",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} s'ha desat. Reinicia Frigate per a aplicar els canvis.",
+          "noName": "La màscara d'objectes ha estat desada. Reincia Frigate per a aplicar els canvis."
+        }
+      },
+      "context": "Les màscares de filtratge d’objectes s’utilitzen per descartar falsos positius d’un tipus d’objecte concret segons la seva ubicació."
+    },
+    "restart_required": "Reinici necessari (canvi de màscares o zones)",
+    "motionMaskLabel": "Màscara de moviment {{number}}",
+    "objectMaskLabel": "Màscara d'objecte {{number}} ({{label}})",
+    "toast": {
+      "success": {
+        "copyCoordinates": "S'han copiat les coordenades per a {{polyName}} al porta-retalls."
+      },
+      "error": {
+        "copyCoordinatesFailed": "No s'han pogut copiar les coordenades al porta-retalls."
+      }
+    }
+  },
+  "notification": {
+    "email": {
+      "title": "Correu electrònic",
+      "placeholder": "p. ex. exemple@email.com",
+      "desc": "Es requereix un correu electrònic vàlid que s’utilitzarà per notificar-te si hi ha algun problema amb el servei de notificacions push."
+    },
+    "notificationSettings": {
+      "documentation": "Llegir la documentació",
+      "title": "Paràmetres de notificació",
+      "desc": "Frigate pot enviar notificacions push directament al teu dispositiu quan s’executa des del navegador o està instal·lat com a PWA (aplicació web progressiva)."
+    },
+    "deviceSpecific": "Paràmetres específics del dispositiu",
+    "registerDevice": "Registrar aquest dispositiu",
+    "unregisterDevice": "Desegistrar aquest dispositiu",
+    "cancelSuspension": "Cancel·la la suspensió",
+    "suspendTime": {
+      "untilRestart": "Suspendre fins al reinici",
+      "30minutes": "Suspèn durant 30 minuts",
+      "1hour": "Suspèn durant 1 hora",
+      "12hours": "Suspèn durant 12 hores",
+      "suspend": "Suspendre",
+      "24hours": "Suspèn durant 24 hores",
+      "10minutes": "Suspèn durant 10 minuts",
+      "5minutes": "Suspèn durant 5 minuts"
+    },
+    "toast": {
+      "success": {
+        "settingSaved": "Els paràmetres de notificacions s'han desat.",
+        "registered": "Registre de notificacions realitzat amb èxit. Cal reiniciar Frigate perquè es puguin enviar notificacions (inclosa una notificació de prova)."
+      },
+      "error": {
+        "registerFailed": "No s'ha pogut desar el registre de notificacions."
+      }
+    },
+    "cameras": {
+      "title": "Càmeres",
+      "noCameras": "Sense càmeres disponibles",
+      "desc": "Selecciona per a quines càmeres s'han d'habilitar les notificacions."
+    },
+    "title": "Notificacions",
+    "notificationUnavailable": {
+      "title": "Notificacions no disponibles",
+      "documentation": "Llegir la documentació",
+      "desc": "Les notificacions push web requereixen un context segur (<code>https://…</code>). Aquesta és una limitació del navegador. Accedeix a Frigate de manera segura per utilitzar les notificacions."
+    },
+    "unsavedChanges": "Canvis de notificació no desats",
+    "globalSettings": {
+      "title": "Paràmetres globals",
+      "desc": "Suspendre temporalment les notificacions per a certes càmeres per tots els dispositius registrats."
+    },
+    "active": "Notificacions actives",
+    "suspended": "Notificacions suspeses {{time}}",
+    "unsavedRegistrations": "Registres de notificació no desats",
+    "sendTestNotification": "Enviar una notificació de prova"
+  },
+  "camera": {
+    "streams": {
+      "title": "Transmissions",
+      "desc": "Desactiva temporalment una càmera fins que es reiniciï Frigate. La desactivació d'una càmera atura completament el processament de les transmissions d'aquesta càmera per part de Frigate. La detecció, gravació i depuració no estaran disponibles.<br /><em>Nota: Això no desactiva les retransmissions de go2rtc.</em>"
+    },
+    "title": "Paràmetres de la càmera",
+    "reviewClassification": {
+      "title": "Revisar la classificació",
+      "readTheDocumentation": "Llegir la documentació",
+      "selectAlertsZones": "Seleccionar zones per alertes",
+      "limitDetections": "Limitar deteccions a zones específiques",
+      "selectDetectionsZones": "Seleccionar zones per deteccions",
+      "unsavedChanges": "Paràmetres de la revisió de classificació no guardats per a {{camera}}",
+      "noDefinedZones": "No s'han definit zones per a aquesta càmera.",
+      "objectAlertsTips": "Tots els objectes {{alertsLabels}} a {{cameraName}} es mostraràn com a Alertes.",
+      "zoneObjectAlertsTips": "Tots els objectes {{alertsLabels}} detectats a la {{zone}} de {{cameraName}} es mostraràn com a Alertes.",
+      "toast": {
+        "success": "S'ha desat la configuració de la classificació de revisió. Reinicia Frigate per aplicar els canvis."
+      },
+      "zoneObjectDetectionsTips": {
+        "text": "Tots els objectes {{detectionsLabels}} no classificats a la {{zone}} de {{cameraName}} es mostraràn com a Deteccions.",
+        "notSelectDetections": "Tots els objectes {{detectionsLabels}} detectats a {{zone}} de la càmera {{cameraName}} que no estiguin categoritzats com a Alertes es mostraran com a Deteccions, independentment de la zona en què es trobin.",
+        "regardlessOfZoneObjectDetectionsTips": "Tots els objectes {{detectionsLabels}} no categoritzats a {{cameraName}} es mostraran com a Deteccions independentment de la zona en què es trobin."
+      },
+      "objectDetectionsTips": "Tots els objectes {{detectionsLabels}} no categoritzats a {{cameraName}} es mostraran com a Deteccions independentment de la zona en què es trobin.",
+      "desc": "Frigate categoritza els elements de revisió com a Alertes i Deteccions. Per defecte, tots els objectes de tipus <em>persona</em> i <em>cotxe</em> es consideren Alertes. Pots afinar la categorització dels teus elements de revisió configurant zones requerides per a aquests."
+    },
+    "review": {
+      "alerts": "Alertes ",
+      "detections": "Deteccions ",
+      "title": "Revisar",
+      "desc": "Habilita o deshabilita temporalment les alertes i deteccions per a aquesta càmera fins que es reiniciï Frigate. Quan estigui desactivat, no es generaran nous elements de revisió. "
+    }
+  },
+  "motionDetectionTuner": {
+    "Threshold": {
+      "title": "Llindar",
+      "desc": "El valor del llindar determina quanta variació en la luminància d’un píxel cal perquè es consideri moviment. <em>Per defecte: 30</em>"
+    },
+    "contourArea": {
+      "title": "Àrea de contorn",
+      "desc": "El valor de l’àrea del contorn s’utilitza per decidir quins grups de píxels canviats es consideren moviment. <em>Valor per defecte: 10</em>"
+    },
+    "desc": {
+      "documentation": "Llegeix la guia d'ajust de detecció de moviment",
+      "title": "Frigate utilitza la detecció de moviment com a primer filtre per comprovar si hi ha alguna activitat a la imatge que valgui la pena analitzar amb la detecció d’objectes."
+    },
+    "improveContrast": {
+      "title": "Millorar contrast",
+      "desc": "Millora el contrast per les escenes fosques. <em>Predeterminat: ACTIVAT</em>"
+    },
+    "title": "Afinador de detecció de moviment",
+    "toast": {
+      "success": "Els ajustos de la detecció de moviment s'han desat."
+    },
+    "unsavedChanges": "Canvis no desats en l'ajust de moviment {{camera}}"
+  },
+  "debug": {
+    "title": "Depuració",
+    "objectList": "Llista d'objectes",
+    "noObjects": "Cap objecte",
+    "debugging": "Depurant",
+    "mask": {
+      "title": "Màscares de moviment",
+      "desc": "Mostra els polígons de la màscara de moviment"
+    },
+    "regions": {
+      "title": "Regions",
+      "desc": "Mostre un requadre de la regió d'interés enviat al detector d'objectes",
+      "tips": "<p><strong>Requadres de Regió</strong></p><br><p>Requadres verds es sobreposaran a les àrees d’interès de la imatge que s'envien al detector d’objectes.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "score": "Puntuació",
+      "document": "Llegir la documentació ",
+      "ratio": "Proporció",
+      "area": "Àrea",
+      "title": "Dibuix del filtre de forma de l'objecte",
+      "desc": "Dibuixa un rectangle a la imatge per veure detalls d'àrea i proporció",
+      "tips": "Habilita aquesta opció per dibuixar un rectangle a la imatge de la càmera que mostri la seva àrea i proporció. Aquests valors es poden utilitzar després per configurar els paràmetres del filtre de forma d’objecte a la teva configuració."
+    },
+    "zones": {
+      "title": "Zones",
+      "desc": "Mostra el contorn per a qualsevol zona definida"
+    },
+    "timestamp": {
+      "title": "Marca temporal",
+      "desc": "Superposa una marca temporal a la imatge"
+    },
+    "boundingBoxes": {
+      "title": "Caixes delimitadores",
+      "colors": {
+        "label": "Colors de la caixa delimitadora de l'objecte",
+        "info": "<li>En iniciar, s'assignarà un color diferent a cada etiqueta d’objecte</li> <li>Una línia fina de color blau fosc indica que l’objecte no està detectat en aquest moment</li> <li>Una línia fina de color gris indica que l’objecte està detectat com a estacionari</li> <li>Una línia gruixuda indica que l’objecte és el subjecte de l’autoseguiment (quan està activat)</li>"
+      },
+      "desc": "Mostra les caixes delimitadores al voltant dels objectes rastrejats"
+    },
+    "motion": {
+      "title": "Caixes de moviment",
+      "desc": "Mostra requadres al voltant de les àrees on s'ha detectat moviment",
+      "tips": "<p><strong>Caixes de moviment</strong></p><br><p>Es sobreposaran requadres vermells a les àrees del fotograma on actualment s’estigui detectant moviment.</p>"
+    },
+    "detectorDesc": "Frigate fa servir els teus detectors ({{detectors}}) per a detectar objectes a les imatges de la teva càmera.",
+    "desc": "La vista de depuració mostra en temps real els objectes rastrejats i les seves estadístiques. La llista d’objectes mostra un resum amb retard temporal dels objectes detectats."
+  },
+  "users": {
+    "table": {
+      "username": "Nom d'usuari",
+      "password": "Contrasenya",
+      "deleteUser": "Suprimir usuari",
+      "noUsers": "No s'han trobat usuaris.",
+      "changeRole": "Canviar la funció d’usuari",
+      "actions": "Accions",
+      "role": "Rol"
+    },
+    "toast": {
+      "error": {
+        "deleteUserFailed": "No s'ha pogut eliminar l'usuari: {{errorMessage}}",
+        "roleUpdateFailed": "No s'ha pogut actualitzar la funció: {{errorMessage}}",
+        "setPasswordFailed": "Error en guardar la contrasenya: {{errorMessage}}",
+        "createUserFailed": "No s'ha pogut crear l'usuari: {{errorMessage}}"
+      },
+      "success": {
+        "deleteUser": "L'usuari {{user}} s'ha suprimit amb èxit",
+        "createUser": "L'Usuari {{user}} s'ha creat amb èxit",
+        "updatePassword": "Contrasenya actualitzada amb èxit.",
+        "roleUpdated": "Funció actualitzada per {{user}}"
+      }
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Nom d'usuari",
+          "placeholder": "Introdueix el nom d'usuari",
+          "desc": "Només es permeten lletres, números, punts i guions baixos."
+        },
+        "password": {
+          "confirm": {
+            "placeholder": "Confirma contrasenya",
+            "title": "Confirma contrasenya"
+          },
+          "strength": {
+            "title": "Seguretat de la contrasenya: ",
+            "weak": "Dèbil",
+            "strong": "Fort",
+            "veryStrong": "Molt forta",
+            "medium": "Mitjana"
+          },
+          "notMatch": "Les contrasenyes no coincideixen",
+          "match": "Les contrasenyes coincideixen",
+          "placeholder": "Introdueix la contrasenya",
+          "title": "Contrasenya"
+        },
+        "newPassword": {
+          "title": "Nova contrasenya",
+          "placeholder": "Introduïu una nova contrasenya",
+          "confirm": {
+            "placeholder": "Re-entrar contrasenya nova"
+          }
+        },
+        "usernameIsRequired": "El nom d'usuari és obligatori",
+        "passwordIsRequired": "La contrasenya és obligatoria"
+      },
+      "passwordSetting": {
+        "updatePassword": "Contrasenya actualitzada per {{username}}",
+        "setPassword": "Estableix Contrasenya",
+        "cannotBeEmpty": "La contrasenya no pot ser buida",
+        "doNotMatch": "Les contrasenyes no coincideixen",
+        "desc": "Crea un nova contrasenya segura per protegir aquest compte."
+      },
+      "deleteUser": {
+        "title": "Suprimir usuari",
+        "warn": "Estàs segur que vols suprimir <strong>{{username}}</strong>?",
+        "desc": "Aquesta acció no es pot desfer. Això eliminarà permanentment el compte d'usuari i suprimirà totes les dades associades."
+      },
+      "changeRole": {
+        "roleInfo": {
+          "viewer": "Visualitzador",
+          "admin": "Administrador",
+          "adminDesc": "Accés complet a totes les funcionalitats.",
+          "intro": "Selecciona el rol adequat per a aquest usuari:",
+          "viewerDesc": "Limitat només a panells en directe, revisió, exporació i exportació."
+        },
+        "title": "Canviar la funció d’usuari",
+        "desc": "Actualitzar permisos per a <strong>{{username}}</strong>",
+        "select": "Seleccioneu un paper"
+      },
+      "createUser": {
+        "title": "Crear un nou usuari",
+        "confirmPassword": "Siusplau, confirma la contrasenya",
+        "usernameOnlyInclude": "El nom d'usuari només pot contenir lletres, números, . o _",
+        "desc": "Afegeix un nou compte d'usuari i especifica un rol per accedir a àrees de la interfície de Frigate."
+      }
+    },
+    "title": "Usuaris",
+    "addUser": "Afegir usuari",
+    "management": {
+      "title": "Gestió d'usuaris",
+      "desc": "Gestioneu els comptes d'usuari d'aquesta instància de Frigate."
+    },
+    "updatePassword": "Actualitzar contrasenya"
+  },
+  "frigatePlus": {
+    "snapshotConfig": {
+      "table": {
+        "camera": "Càmera",
+        "snapshots": "Instantànies",
+        "cleanCopySnapshots": "<code>clean_copy</code> Instantànies"
+      },
+      "title": "Configuració d'instantànies",
+      "documentation": "Llegir la documentació",
+      "desc": "Per a enviar a Frigate+ fa falta que tan la instantània com la instantània <code>clean_copy</code> estiguin habilitades a la configuració.",
+      "cleanCopyWarning": "Algunes càmeres tenen les captures d'imatge activades però la còpia neta desactivada. Cal habilitar <code>clean_copy</code> a la configuració de captures per poder enviar imatges d’aquestes càmeres a Frigate+."
+    },
+    "modelInfo": {
+      "baseModel": "Model base",
+      "modelType": "Tipus de model",
+      "trainDate": "Data d'entrenament",
+      "title": "Informació del model",
+      "supportedDetectors": "Detectors compatibles",
+      "availableModels": "Models disponibles",
+      "cameras": "Càmeres",
+      "plusModelType": {
+        "userModel": "Afinat",
+        "baseModel": "Model base"
+      },
+      "loadingAvailableModels": "Carregant models disponibles…",
+      "loading": "Carregant informació del model…",
+      "error": "No s'ha pogut carregar la informació del model",
+      "modelSelect": "Els models disponibles a Frigate+ es poden seleccionar aquí. Tingues en compte que només es poden triar els models compatibles amb la configuració actual del detector."
+    },
+    "apiKey": {
+      "plusLink": "Llegeix més sobre Frigate+",
+      "title": "Clau API de Frigate+",
+      "validated": "La clau API de Frigate+ ha estat detectada i validada",
+      "notValidated": "La clau API de Frigate+ no ha estat detectada o no ha estat validada",
+      "desc": "La clau API de Frigate+ habilita la integració amb el servei Frigate+."
+    },
+    "unsavedChanges": "Canvis dels paràmetres de Frigate+ sense desar",
+    "title": "Paràmetres de Frigate+",
+    "toast": {
+      "error": "No s'han pogut guardar els canvis de configuració: {{errorMessage}}",
+      "success": "Els paràmetres de Frigate+ han estat desats. Reincia Frigate per aplicar els canvis."
+    },
+    "restart_required": "Es necessari un reinici (El model de Frigate+ ha cambiat)"
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "modelSize": {
+        "small": {
+          "title": "petit",
+          "desc": "L’opció <em>small</em> fa servir una versió quantitzada del model que consumeix menys RAM i s’executa més ràpidament a la CPU, amb una diferència gairebé inapreciable en la qualitat de les incrustacions (embeddings)."
+        },
+        "label": "Mida del model",
+        "large": {
+          "title": "gran",
+          "desc": "L’opció <em>large</em> fa servir el model complet de Jina i s’executarà automàticament a la GPU si està disponible."
+        },
+        "desc": "La mida del model utilitzat per incrustacions de cerca semàntica."
+      },
+      "reindexNow": {
+        "confirmButton": "Reindexar",
+        "success": "La reindexació ha començat amb èxit.",
+        "label": "Reindexar ara",
+        "confirmTitle": "Confirmar la reindexació",
+        "desc": "La reindexació regenerarà les incrustacions (embeddings) de tots els objectes seguits. Aquest procés s’executa en segon pla i pot arribar a saturar la CPU, així com trigar una bona estona depenent del nombre d’objectes seguits que tinguis.",
+        "confirmDesc": "Estàs segur que vols reindexar totes les incrustacions (embeddings) dels objectes seguits? Aquest procés s’executarà en segon pla, però pot arribar a saturar la CPU i trigar bastant temps. Pots seguir-ne el progrés a la pàgina d’Explora.",
+        "alreadyInProgress": "La reindexació ja està en curs.",
+        "error": "Error en iniciar la reindexació: {{errorMessage}}"
+      },
+      "readTheDocumentation": "Llegir la documentació",
+      "title": "Cerca semàntica",
+      "desc": "La cerca semàntica a Frigate permet trobar objectes rastrejats dins dels elements de revisió utilitzant la pròpia imatge, una descripció de text definida per l'usuari o una de generada automàticament."
+    },
+    "faceRecognition": {
+      "modelSize": {
+        "small": {
+          "title": "petit",
+          "desc": "Fer servir la opció <em>petit</em> fa servir un model d'embedding de rostre de FaceNet que d'executa de manera eficient a la majoria de les CPUs."
+        },
+        "large": {
+          "title": "gran",
+          "desc": "L’opció <em>large</em> fa servir el model d'embedding de rostres d'ArcFace i s’executarà automàticament a la GPU si està disponible."
+        },
+        "label": "Mida del model",
+        "desc": "La mida del model utilitzat per al reconeixement facial."
+      },
+      "readTheDocumentation": "Llegir la documentació",
+      "title": "Reconeixement de rostres",
+      "desc": "El reconeixement facial permet a les persones assignar noms i quan es reconeix la seva cara Frigate assignarà el nom de la persona com a subetiqueta. Aquesta informació s'inclou en la interfície d'usuari, filtres, així com en les notificacions."
+    },
+    "unsavedChanges": "Canvis dels paràmetres complementaris sense desar",
+    "licensePlateRecognition": {
+      "readTheDocumentation": "Llegir la documentació",
+      "title": "Reconeixement de matrícules",
+      "desc": "Frigate pot reconèixer les plaques de matrícula en vehicles i afegir automàticament els caràcters detectats al camp de la placa reconeguda o un nom conegut com a sub_etiqueta en objectes que són de tipus cotxe. Un cas d'ús comú pot ser llegir les plaques de matrícula dels cotxes que entren en un lloc o els cotxes que passen per un carrer."
+    },
+    "birdClassification": {
+      "title": "Classificació d'ocells",
+      "desc": "La classificació d’ocells identifica ocells coneguts mitjançant un model TensorFlow quantitzat. Quan es reconeix un ocell conegut, el seu nom comú s’afegeix com a subetiqueta. Aquesta informació es mostra a la interfície d’usuari, als filtres i també a les notificacions."
+    },
+    "title": "Parmàmetres complementaris",
+    "toast": {
+      "error": "No s'han pogut guardar els canvis de configuració: {{errorMessage}}",
+      "success": "Els paràmetres complementaris s'han desat. Reinicia Frigate per aplicar els canvis."
+    },
+    "restart_required": "És necessari reiniciar (Han cambiat paràmetres complementaris)"
+  }
+}

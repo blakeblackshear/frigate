@@ -1,0 +1,126 @@
+{
+  "restart": {
+    "title": "Êtes-vous sûr de vouloir redémarrer Frigate ?",
+    "restarting": {
+      "title": "Frigate redémarre",
+      "content": "Actualisation de la page dans {{countdown}} secondes.",
+      "button": "Forcer l'actualisation maintenant"
+    },
+    "button": "Redémarrer"
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Soumettre à Frigate+",
+        "desc": "Les objets situés dans des zones à ignorer ne doivent pas être signalés comme de faux positifs, car cela nuirait à la précision du modèle."
+      },
+      "review": {
+        "true": {
+          "label": "Confirmez cette étiquette pour Frigate Plus",
+          "true_one": "C'est un {{label}}",
+          "true_many": "Ce sont des {{label}}",
+          "true_other": "Ce sont des {{label}}"
+        },
+        "false": {
+          "false_one": "Ceci n'est pas un {{label}}",
+          "false_many": "Ceux-ci ne sont pas des {{label}}",
+          "false_other": "Ceux-ci ne sont pas des {{label}}",
+          "label": "Ne pas confirmer cette étiquette pour Frigate Plus"
+        },
+        "state": {
+          "submitted": "Soumis"
+        },
+        "question": {
+          "label": "Confirmez ce libellé pour Frigate+",
+          "ask_an": "Est-ce que cet objet est un(e) <code>{{label}}</code> ?",
+          "ask_a": "Est-ce que cet objet est un(e) <code>{{label}}</code> ?",
+          "ask_full": "Est-ce-que cet objet est un(e) <code>{{translatedLabel}}</code>  ?"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Afficher dans la chronologie"
+    }
+  },
+  "export": {
+    "time": {
+      "custom": "Personnalisé",
+      "fromTimeline": "Sélectionner depuis la chronologie",
+      "lastHour_one": "Dernière heure",
+      "lastHour_many": "{{count}} dernières heures",
+      "lastHour_other": "{{count}} dernières heures",
+      "end": {
+        "label": "Sélectionner une heure de fin",
+        "title": "Heure de fin"
+      },
+      "start": {
+        "label": "Sélectionner une heure de début",
+        "title": "Heure de début"
+      }
+    },
+    "selectOrExport": "Sélectionner ou exporter",
+    "toast": {
+      "error": {
+        "failed": "Échec du démarrage de l'export : {{error}}",
+        "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début",
+        "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide"
+      },
+      "success": "Exportation démarrée avec succès. Consultez le fichier dans le dossier /exports."
+    },
+    "select": "Sélectionner",
+    "name": {
+      "placeholder": "Nommer l'export"
+    },
+    "export": "Exporter",
+    "fromTimeline": {
+      "saveExport": "Enregistrer l'export",
+      "previewExport": "Prévisualiser l'export"
+    }
+  },
+  "search": {
+    "saveSearch": {
+      "desc": "Donnez un nom à cette recherche enregistrée.",
+      "label": "Enregistrer la recherche",
+      "success": "La recherche ({{searchName}}) a été enregistrée.",
+      "button": {
+        "save": {
+          "label": "Enregistrer cette recherche"
+        }
+      },
+      "overwrite": "{{searchName}} existe déjà. L'enregistrement écrasera la recherche existante.",
+      "placeholder": "Saisissez un nom pour votre recherche"
+    }
+  },
+  "streaming": {
+    "label": "Flux",
+    "restreaming": {
+      "disabled": "La rediffusion n'est pas activée pour cette caméra.",
+      "desc": {
+        "readTheDocumentation": "Lire la documentation",
+        "title": "Configurez go2rtc pour bénéficier d'options de visualisation en direct supplémentaires et de l'audio pour cette caméra."
+      }
+    },
+    "showStats": {
+      "label": "Afficher les statistiques du flux",
+      "desc": "Activez cette option pour montrer les statistiques de diffusion en incrustation sur le flux vidéo de la caméra."
+    },
+    "debugView": "Affichage de débogage"
+  },
+  "recording": {
+    "confirmDelete": {
+      "desc": {
+        "selected": "Êtes-vous sûr(e) de vouloir supprimer toutes les vidéos enregistrées associées à cet élément de la revue d'événements ? <br /><br />Maintenez la touche <em>Maj</em> enfoncée pour éviter cette boîte de dialogue à l'avenir."
+      },
+      "title": "Confirmer la suppression",
+      "toast": {
+        "success": "Les vidéos associées aux éléments de revue d'événements sélectionnés ont été supprimées.",
+        "error": "Échec de la suppression : {{error}}"
+      }
+    },
+    "button": {
+      "export": "Exporter",
+      "markAsReviewed": "Marquer comme passé en revue",
+      "deleteNow": "Supprimer maintenant"
+    }
+  }
+}

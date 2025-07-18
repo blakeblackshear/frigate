@@ -1,0 +1,8 @@
+{
+  "noRecordingsFoundForThisTime": "لا يوجد تسجيلات في هذا التوقيت",
+  "noPreviewFound": "لا يوجد معاينة",
+  "noPreviewFoundFor": "لا يوجد معاينة لـ{{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "هل ترغب بإرسال هذه الصوره الى Frigate+؟"
+  }
+}

@@ -5,6 +5,7 @@ import queue
 import threading
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
+from typing import Any
 
 from frigate.config import FrigateConfig
 from frigate.events.maintainer import EventStateEnum, EventTypeEnum
@@ -27,7 +28,7 @@ class TimelineProcessor(threading.Thread):
         self.config = config
         self.queue = queue
         self.stop_event = stop_event
-        self.pre_event_cache: dict[str, list[dict[str, any]]] = {}
+        self.pre_event_cache: dict[str, list[dict[str, Any]]] = {}
 
     def run(self) -> None:
         while not self.stop_event.is_set():
@@ -55,9 +56,9 @@ class TimelineProcessor(threading.Thread):
 
     def insert_or_save(
         self,
-        entry: dict[str, any],
-        prev_event_data: dict[any, any],
-        event_data: dict[any, any],
+        entry: dict[str, Any],
+        prev_event_data: dict[Any, Any],
+        event_data: dict[Any, Any],
     ) -> None:
         """Insert into db or cache."""
         id = entry[Timeline.source_id]
@@ -81,8 +82,8 @@ class TimelineProcessor(threading.Thread):
         self,
         camera: str,
         event_type: str,
-        prev_event_data: dict[any, any],
-        event_data: dict[any, any],
+        prev_event_data: dict[Any, Any],
+        event_data: dict[Any, Any],
     ) -> bool:
         """Handle object detection."""
         save = False
@@ -153,7 +154,7 @@ class TimelineProcessor(threading.Thread):
         self,
         camera: str,
         event_type: str,
-        event_data: dict[any, any],
+        event_data: dict[Any, Any],
     ) -> bool:
         if event_type != "new":
             return False

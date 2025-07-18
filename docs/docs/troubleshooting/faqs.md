@@ -34,7 +34,7 @@ Frigate generally [recommends cameras with configurable sub streams](/frigate/ha
 To do this efficiently the following setup is required:
 
 1. A GPU or iGPU must be available to do the scaling.
-2. [ffmpeg presets for hwaccel](/configuration/hardware_acceleration.md) must be used
+2. [ffmpeg presets for hwaccel](/configuration/hardware_acceleration_video.md) must be used
 3. Set the desired detection resolution for `detect -> width` and `detect -> height`.
 
 When this is done correctly, the GPU will do the decoding and scaling which will result in a small increase in CPU usage but with better results.

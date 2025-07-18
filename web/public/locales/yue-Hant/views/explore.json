@@ -1,0 +1,205 @@
+{
+  "documentTitle": "瀏覽 - Frigate",
+  "generativeAI": "生成式人工智能",
+  "exploreIsUnavailable": {
+    "title": "無法使用瀏覽功能",
+    "embeddingsReindexing": {
+      "startingUp": "啟動中…",
+      "estimatedTime": "預計剩餘時間：",
+      "finishingShortly": "即將完成",
+      "step": {
+        "thumbnailsEmbedded": "已嵌入縮圖： ",
+        "descriptionsEmbedded": "已嵌入描述： ",
+        "trackedObjectsProcessed": "已處理的追蹤物件： "
+      },
+      "context": "完成重新索引追蹤物件的嵌入後即可使用瀏覽功能。"
+    },
+    "downloadingModels": {
+      "tips": {
+        "context": "下載完成後，你可能需要重新索引追蹤物件的嵌入。",
+        "documentation": "閱讀文件"
+      },
+      "error": "發生錯誤。請檢查 Frigate 日誌。",
+      "context": "Frigate 正在下載必要的嵌入模型以支援語意搜尋功能。這可能需要幾分鐘，視乎你的網絡速度。",
+      "setup": {
+        "textTokenizer": "文字分詞器",
+        "textModel": "文字模型",
+        "visionModelFeatureExtractor": "視覺模型特徵提取器",
+        "visionModel": "視覺模型"
+      }
+    }
+  },
+  "trackedObjectDetails": "追蹤物件詳情",
+  "type": {
+    "details": "詳情",
+    "snapshot": "快照",
+    "video": "影片",
+    "object_lifecycle": "物件生命周期"
+  },
+  "objectLifecycle": {
+    "title": "物件生命周期",
+    "noImageFound": "此時間點找不到圖像。",
+    "createObjectMask": "建立物件遮罩",
+    "lifecycleItemDesc": {
+      "active": "{{label}} 變為活躍",
+      "stationary": "{{label}} 變為靜止",
+      "attribute": {
+        "faceOrLicense_plate": "偵測到 {{label}} 的 {{attribute}}",
+        "other": "{{label}} 被識別為 {{attribute}}"
+      },
+      "header": {
+        "zones": "區域",
+        "ratio": "比例",
+        "area": "區域範圍"
+      },
+      "heard": "聽到 {{label}}",
+      "entered_zone": "{{label}} 進入了 {{zones}}",
+      "gone": "{{label}} 離開了",
+      "visible": "偵測到 {{label}}",
+      "external": "偵測到 {{label}}"
+    },
+    "annotationSettings": {
+      "title": "註解設定",
+      "showAllZones": {
+        "title": "顯示所有區域",
+        "desc": "在物件進入區域的畫面上總是顯示區域。"
+      },
+      "offset": {
+        "tips": "提示：試想像有一段事件片段，當中有人由左行到右。如果事件時間線上的方框一直偏向人物的左邊，則應該減少數值。相反，如果有人由左行到右，而方框一直走在人物前面，則應該增加數值。",
+        "desc": "此資料來自鏡頭的偵測串流，但覆蓋在錄影串流的畫面上。兩個串流通常無法完全同步。因此邊界框和影片可能無法完全對齊。不過可以使用 <code>annotation_offset</code> 欄位來調整。",
+        "label": "註解偏移量",
+        "documentation": "閱讀文件 ",
+        "millisecondsToOffset": "偵測註解的偏移毫秒數。<em>預設：0</em>",
+        "toast": {
+          "success": "{{camera}} 的註解偏移量已儲存到設定檔。請重新啟動 Frigate 以套用更改。"
+        }
+      }
+    },
+    "carousel": {
+      "previous": "上一張",
+      "next": "下一張"
+    },
+    "adjustAnnotationSettings": "調整註解設定",
+    "scrollViewTips": "滾動以查看此物件生命周期中的重要時刻。",
+    "autoTrackingTips": "自動追蹤鏡頭的邊界框位置可能不準確。",
+    "count": "第 {{first}} 個，共 {{second}} 個",
+    "trackedPoint": "追蹤點"
+  },
+  "details": {
+    "item": {
+      "title": "審查項目詳情",
+      "desc": "審查項目詳情",
+      "button": {
+        "share": "分享此審查項目",
+        "viewInExplore": "在瀏覽中查看"
+      },
+      "tips": {
+        "mismatch_other": "偵測到 {{count}} 個不可用的物件並包含在此審查項目中。這些物件可能未符合警報或偵測標準，或已被清除/刪除。",
+        "hasMissingObjects": "如果你想讓 Frigate 保存下列標籤的追蹤物件，請調整設定：<em>{{objects}}</em>"
+      },
+      "toast": {
+        "success": {
+          "updatedSublabel": "成功更新子標籤。",
+          "updatedLPR": "成功更新車牌號碼。",
+          "regenerate": "已從 {{provider}} 請求新的描述。根據提供者的速度，生成新的描述可能需要一些時間。"
+        },
+        "error": {
+          "regenerate": "呼叫 {{provider}} 以獲取新描述失敗：{{errorMessage}}",
+          "updatedSublabelFailed": "更新子標籤失敗：{{errorMessage}}",
+          "updatedLPRFailed": "更新車牌號碼失敗：{{errorMessage}}"
+        }
+      }
+    },
+    "label": "標籤",
+    "recognizedLicensePlate": "已識別車牌",
+    "estimatedSpeed": "預計速度",
+    "objects": "物件",
+    "camera": "鏡頭",
+    "zones": "區域",
+    "timestamp": "時間戳記",
+    "tips": {
+      "descriptionSaved": "成功保存描述",
+      "saveDescriptionFailed": "更新描述失敗：{{errorMessage}}"
+    },
+    "regenerateFromSnapshot": "從快照重新生成",
+    "button": {
+      "regenerate": {
+        "label": "重新生成追蹤物件描述",
+        "title": "重新生成"
+      },
+      "findSimilar": "尋找相似項目"
+    },
+    "description": {
+      "label": "描述",
+      "placeholder": "追蹤物件的描述",
+      "aiTips": "Frigate 會等到追蹤物件生命周期結束後，才向你的生成式 AI 提供者請求描述。"
+    },
+    "editLPR": {
+      "descNoLabel": "為此追蹤物件輸入新的車牌號碼",
+      "title": "編輯車牌號碼",
+      "desc": "為此 {{label}} 輸入新的車牌號碼"
+    },
+    "topScore": {
+      "label": "最高分數",
+      "info": "最高分數是追蹤物件的最高中位分數，因此可能與搜尋結果縮圖上顯示的分數不同。"
+    },
+    "editSubLabel": {
+      "desc": "為此 {{label}} 輸入新的子標籤",
+      "title": "編輯子標籤",
+      "descNoLabel": "為此追蹤物件輸入新的子標籤"
+    },
+    "snapshotScore": {
+      "label": "快照分數"
+    },
+    "expandRegenerationMenu": "展開重新生成選單",
+    "regenerateFromThumbnails": "從縮圖重新生成"
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "下載影片",
+      "aria": "下載影片"
+    },
+    "downloadSnapshot": {
+      "label": "下載快照",
+      "aria": "下載快照"
+    },
+    "viewObjectLifecycle": {
+      "label": "查看物件生命周期",
+      "aria": "顯示物件生命周期"
+    },
+    "findSimilar": {
+      "label": "尋找相似項目",
+      "aria": "尋找相似追蹤物件"
+    },
+    "submitToPlus": {
+      "label": "提交到 Frigate+",
+      "aria": "提交到 Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "在歷史記錄中查看",
+      "aria": "在歷史記錄中查看"
+    },
+    "deleteTrackedObject": {
+      "label": "刪除此追蹤物件"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "確認刪除",
+      "desc": "刪除此追蹤物件會移除快照、所有已保存的嵌入，以及相關的物件生命周期記錄。歷史記錄中的錄影<em>不會</em>被刪除。<br /><br />你確定要繼續嗎？"
+    }
+  },
+  "noTrackedObjects": "找不到追蹤物件",
+  "fetchingTrackedObjectsFailed": "取得追蹤物件時出錯：{{errorMessage}}",
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "追蹤物件已成功刪除。",
+        "error": "刪除追蹤物件失敗：{{errorMessage}}"
+      }
+    },
+    "tooltip": "已配對{{type}}（{{confidence}}% 信心"
+  },
+  "trackedObjectsCount_other": "{{count}} 個追蹤物件 ",
+  "exploreMore": "瀏覽更多{{label}}物件"
+}

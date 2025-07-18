@@ -4,6 +4,7 @@ import datetime
 import logging
 import math
 from collections import defaultdict
+from typing import Any
 
 import cv2
 import numpy as np
@@ -38,7 +39,7 @@ def get_camera_regions_grid(
     name: str,
     detect: DetectConfig,
     min_region_size: int,
-) -> list[list[dict[str, any]]]:
+) -> list[list[dict[str, Any]]]:
     """Build a grid of expected region sizes for a camera."""
     # get grid from db if available
     try:
@@ -163,10 +164,10 @@ def get_cluster_region_from_grid(frame_shape, min_region, cluster, boxes, region
 
 
 def get_region_from_grid(
-    frame_shape: tuple[int],
+    frame_shape: tuple[int, int],
     cluster: list[int],
     min_region: int,
-    region_grid: list[list[dict[str, any]]],
+    region_grid: list[list[dict[str, Any]]],
 ) -> list[int]:
     """Get a region for a box based on the region grid."""
     box = calculate_region(
@@ -446,9 +447,9 @@ def get_cluster_region(frame_shape, min_region, cluster, boxes):
 
 
 def get_startup_regions(
-    frame_shape: tuple[int],
+    frame_shape: tuple[int, int],
     region_min_size: int,
-    region_grid: list[list[dict[str, any]]],
+    region_grid: list[list[dict[str, Any]]],
 ) -> list[list[int]]:
     """Get a list of regions to run on startup."""
     # return 8 most popular regions for the camera
@@ -480,12 +481,12 @@ def get_startup_regions(
 
 
 def reduce_detections(
-    frame_shape: tuple[int],
-    all_detections: list[tuple[any]],
-) -> list[tuple[any]]:
+    frame_shape: tuple[int, int],
+    all_detections: list[tuple[Any]],
+) -> list[tuple[Any]]:
     """Take a list of detections and reduce overlaps to create a list of confident detections."""
 
-    def reduce_overlapping_detections(detections: list[tuple[any]]) -> list[tuple[any]]:
+    def reduce_overlapping_detections(detections: list[tuple[Any]]) -> list[tuple[Any]]:
         """apply non-maxima suppression to suppress weak, overlapping bounding boxes."""
         detected_object_groups = defaultdict(lambda: [])
         for detection in detections:
@@ -524,7 +525,7 @@ def reduce_detections(
         # set the detections list to only include top objects
         return selected_objects
 
-    def get_consolidated_object_detections(detections: list[tuple[any]]):
+    def get_consolidated_object_detections(detections: list[tuple[Any]]):
         """Drop detections that overlap too much."""
         detected_object_groups = defaultdict(lambda: [])
         for detection in detections:

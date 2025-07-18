@@ -1,0 +1,12 @@
+{
+  "filter": "Filtre",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "No s'ha seleccionat un rang de temps vàlid",
+      "endTimeMustAfterStartTime": "L'hora de finalització ha de ser posterior a l'hora d'inici"
+    }
+  },
+  "export": "Exportar",
+  "calendar": "Calendari",
+  "filters": "Filtres"
+}

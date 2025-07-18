@@ -51,7 +51,7 @@ When configuring the integration, you will be asked for the `URL` of your Frigat
 
 ### Docker Compose Examples
 
-If you are running Home Assistant Core and Frigate with Docker Compose on the same device, here are some examples.
+If you are running Home Assistant and Frigate with Docker Compose on the same device, here are some examples.
 
 #### Home Assistant running with host networking
 
@@ -60,7 +60,6 @@ It is not recommended to run Frigate in host networking mode. In this example, y
 ```yaml
 services:
   homeassistant:
-    container_name: hass
     image: ghcr.io/home-assistant/home-assistant:stable
     network_mode: host
     ...
@@ -80,7 +79,6 @@ In this example, it is recommended to connect to the authenticated port, for exa
 ```yaml
 services:
   homeassistant:
-    container_name: hass
     image: ghcr.io/home-assistant/home-assistant:stable
     # network_mode: host
     ...
@@ -93,17 +91,16 @@ services:
       ...
 ```
 
-### HassOS Addon
+### Home Assistant Add-on
 
-If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using. Note that if you are using the Proxy Addon, you do NOT point the integration at the proxy URL. Just enter the URL used to access Frigate directly from your network.
+If you are using Home Assistant Add-on, the URL should be one of the following depending on which Add-on variant you are using. Note that if you are using the Proxy Add-on, you should NOT point the integration at the proxy URL. Just enter the same URL used to access Frigate directly from your network.
 
-| Addon Version                  | URL                                       |
-| ------------------------------ | ----------------------------------------- |
-| Frigate NVR                    | `http://ccab4aaf-frigate:5000`            |
-| Frigate NVR (Full Access)      | `http://ccab4aaf-frigate-fa:5000`         |
-| Frigate NVR Beta               | `http://ccab4aaf-frigate-beta:5000`       |
-| Frigate NVR Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000`    |
-| Frigate NVR HailoRT Beta       | `http://ccab4aaf-frigate-hailo-beta:5000` |
+| Add-on Variant             | URL                                       |
+| -------------------------- | ----------------------------------------- |
+| Frigate                    | `http://ccab4aaf-frigate:5000`            |
+| Frigate (Full Access)      | `http://ccab4aaf-frigate-fa:5000`         |
+| Frigate Beta               | `http://ccab4aaf-frigate-beta:5000`       |
+| Frigate Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000`    |
 
 ### Frigate running on a separate machine
 

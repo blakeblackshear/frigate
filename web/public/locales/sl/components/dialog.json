@@ -1,0 +1,34 @@
+{
+  "restart": {
+    "title": "Ali ste prepričani, da želite ponovno zagnati Frigate?",
+    "button": "Ponovni zagon",
+    "restarting": {
+      "title": "Frigate se ponovno zaganja",
+      "content": "Ta stran se bo osvežila čez {{countdown}}.",
+      "button": "Osveži zdaj"
+    }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "question": {
+          "ask_full": "Ali je ta objekt <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Oddano"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Poglej zgodovino"
+    }
+  },
+  "export": {
+    "time": {
+      "lastHour_one": "Zadnja ura",
+      "lastHour_two": "Zadnji {{count}} uri",
+      "lastHour_few": "Zadnje {{count}} ure",
+      "lastHour_other": "Zadnjih {{count}} ur"
+    }
+  }
+}

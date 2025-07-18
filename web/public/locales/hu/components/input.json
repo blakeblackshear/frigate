@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Videó Letöltése",
+      "toast": {
+        "success": "Az áttekintendő videó letöltése megkezdődött."
+      }
+    }
+  }
+}

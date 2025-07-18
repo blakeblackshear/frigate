@@ -1,0 +1,209 @@
+{
+  "documentTitle": "גלה - פריגטה",
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "הורדת וידיאו",
+      "aria": "הורדת וידיאו"
+    },
+    "viewObjectLifecycle": {
+      "label": "צפה בשלבים של האובייקט",
+      "aria": "הצג את השלבים של האובייקט"
+    },
+    "downloadSnapshot": {
+      "label": "הורדת לכידת תמונה",
+      "aria": "הורדת לכידת תמונה"
+    },
+    "findSimilar": {
+      "label": "מצא דומה",
+      "aria": "מצא אובייקטים דומים במעקב"
+    },
+    "submitToPlus": {
+      "label": "שלח ל- +Frigate",
+      "aria": "שלח ל +Frigate"
+    },
+    "viewInHistory": {
+      "label": "צפה בהיסטוריה",
+      "aria": "צפה בהיסטוריה"
+    },
+    "deleteTrackedObject": {
+      "label": "מחק את אובייקט המעקב הזה"
+    }
+  },
+  "generativeAI": "Generative - AI",
+  "exploreMore": "סקור אובייקטים נוספים של {{label}}",
+  "exploreIsUnavailable": {
+    "title": "סקירה לא זמינה",
+    "embeddingsReindexing": {
+      "context": "ניתן להשתמש בסקירה לאחר סיום בניית המאגר של האובייקטים שזוהו.",
+      "startingUp": "מתחיל…",
+      "estimatedTime": "זמן משוער שנותר:",
+      "finishingShortly": "מסיים בקרוב",
+      "step": {
+        "thumbnailsEmbedded": "תמונות ממוזערות מוטמעות: ",
+        "descriptionsEmbedded": "תיאורים מוטמעים: ",
+        "trackedObjectsProcessed": "אובייקטים שעובדו לאחר מעקב: "
+      }
+    },
+    "downloadingModels": {
+      "setup": {
+        "visionModel": "מודל חוזי",
+        "visionModelFeatureExtractor": "מחלץ תכונות מודל חוזי",
+        "textModel": "מודל טקסט",
+        "textTokenizer": "מפצל טקסט"
+      },
+      "tips": {
+        "context": "מומלץ לעדכן את המאגר של האובייקטים אחרי שהמודלים ירדו.",
+        "documentation": "קרא את התיעוד"
+      },
+      "error": "אירעה שגיאה. בדוק את הלוגים.",
+      "context": "Frigate מורידה את מודלי ההטמעה הדרושים כדי לתמוך בתכונת החיפוש הסמנטי. פעולה זו עשויה להימשך מספר דקות, בהתאם למהירות חיבור הרשת שלך."
+    }
+  },
+  "trackedObjectDetails": "פרטי אובייקט במעקב",
+  "type": {
+    "details": "פרטים",
+    "snapshot": "לכידת תמונה",
+    "video": "וידיאו",
+    "object_lifecycle": "שלבי זיהוי של האובייקט"
+  },
+  "objectLifecycle": {
+    "title": "שלבי זיהוי של האובייקט",
+    "noImageFound": "לא נמצאה תמונה עבור חותמת זמן זו.",
+    "createObjectMask": "יצירת מיסוך אובייקט",
+    "adjustAnnotationSettings": "שנה את הגדרות הסימון",
+    "scrollViewTips": "גלול כדי לצפות ברגעים המשמעותיים בשלבים של אובייקט זה.",
+    "count": "{{first}} מתוך{{second}}",
+    "trackedPoint": "נקודת מעקב",
+    "lifecycleItemDesc": {
+      "visible": "זוהה {{label}}",
+      "entered_zone": "{{label}} נכנס ל-{{zones}}",
+      "active": "{{label}} הפך לפעיל",
+      "stationary": "{{label}} הפך לנייח",
+      "attribute": {
+        "faceOrLicense_plate": "זוהה {{attribute}} עבור {{label}}",
+        "other": "{{label}} זוהה כ-{{attribute}}"
+      },
+      "gone": "{{label}} שמאל",
+      "heard": "{{label}} נשמעה",
+      "external": "זוהה {{label}}",
+      "header": {
+        "zones": "אזורים",
+        "ratio": "יחס",
+        "area": "אזור"
+      }
+    },
+    "annotationSettings": {
+      "title": "הגדרות סימון",
+      "showAllZones": {
+        "title": "הצג את כל האזורים",
+        "desc": "הצג תמיד אזורים בפריימים שבהם אובייקטים נכנסו לאזור."
+      },
+      "offset": {
+        "label": "היסט ההערה",
+        "documentation": "עיין בתיעוד ",
+        "toast": {
+          "success": "קיזוז עבור {{camera}} נשמר בקובץ התצורה. הפעל מחדש את Frigate כדי להחיל את השינויים שלך."
+        },
+        "tips": "טיפ: דמיינו סרטון אירוע שבו אדם הולך משמאל לימין. אם תיבת הגבול של ציר הזמן של האירוע נמצאת באופן עקבי משמאל לאדם, יש להפחית את הערך. באופן דומה, אם אדם הולך משמאל לימין והתיבה התוחמת נמצאת באופן עקבי לפני האדם, יש להגדיל את הערך.",
+        "millisecondsToOffset": "מספר מילישניות להסטת ההערות שנוצרו מזיהוי <em>ברירת מחדל: 0</em>",
+        "desc": "נתונים אלה מגיעים משידור הזיהוי של המצלמה שלך, אך הם מונחים על גבי תמונות משידור ההקלטה. לא סביר ששני הזרמים יהיו מסונכרנים לחלוטין. כתוצאה מכך, תיבת הגבול והצילומים לא מסונכרנים בצורה מושלמת. עם זאת, ניתן להשתמש בשדה <code>היסט סימון</code> כדי לסנכרן."
+      }
+    },
+    "autoTrackingTips": "מיקומי תיבות הסימון לא יהיו מדויקים עבור מצלמות עם מעקב אוטומטי.",
+    "carousel": {
+      "previous": "שקופית קודמת",
+      "next": "שקופית הבאה"
+    }
+  },
+  "details": {
+    "timestamp": "חותמת זמן",
+    "item": {
+      "tips": {
+        "mismatch_one": "זוהה אובייקט לא זמין ({{count}}) ונכלל בפריט סקירה זה. אובייקטים אלה לא עמדו בקריטריונים של התראה או זיהוי, או שכבר נוקו/נמחקו.",
+        "mismatch_two": "זוהו אובייקטים לא זמינים ({{count}}) ונכלל בפריט סקירה זה. אובייקטים אלה לא עמדו בקריטריונים של התראה או זיהוי, או שכבר נוקו/נמחקו.",
+        "mismatch_other": "זוהו אובייקטים לא זמינים ({{count}}) ונכלל בפריט סקירה זה. אובייקטים אלה לא עמדו בקריטריונים של התראה או זיהוי, או שכבר נוקו/נמחקו.",
+        "hasMissingObjects": "התאם את התצורה שלך אם ברצונך ש-Frigate ישמור אובייקטים שעוקבים אחריהם עבור התוויות הבאות: <em>{{objects}}</em>"
+      },
+      "button": {
+        "viewInExplore": "הצג בסקירה",
+        "share": "שתף פריט זה"
+      },
+      "toast": {
+        "success": {
+          "updatedSublabel": "תווית המשנה עודכנה בהצלחה.",
+          "updatedLPR": "לוחית הרישוי עודכנה בהצלחה.",
+          "regenerate": "תיאור חדש התבקש מ-{{provider}}. בהתאם למהירות הספק שלך, ייתכן שייקח זמן מה ליצירת התיאור החדש."
+        },
+        "error": {
+          "regenerate": "ההתקשרות ל-{{provider}} לקבלת תיאור חדש נכשלה: {{errorMessage}}",
+          "updatedSublabelFailed": "עדכון תווית המשנה נכשל: {{errorMessage}}",
+          "updatedLPRFailed": "עדכון לוחית הרישוי נכשל: {{errorMessage}}"
+        }
+      },
+      "title": "סקירת הפריט",
+      "desc": "סקירת הפריט"
+    },
+    "label": "תווית",
+    "editSubLabel": {
+      "title": "עריכת תווית משנה",
+      "desc": "הזן תווית משנה חדשה עבור {{label}}",
+      "descNoLabel": "הזן תווית משנה חדשה עבור אובייקט המעקב"
+    },
+    "editLPR": {
+      "title": "עריכת לוחית זיהוי",
+      "desc": "הזן ערך לוחית רישוי חדשה עבור {{label}}",
+      "descNoLabel": "הזן ערך לוחית רישוי חדשה עבור האובייקט במעקב"
+    },
+    "snapshotScore": {
+      "label": "ציון לכידת תמונה"
+    },
+    "topScore": {
+      "label": "ציון גבוה",
+      "info": "הציון הגבוה ביותר הוא הציון החציוני הגבוה ביותר עבור האובייקט במעקב, כך שהוא עשוי להיות שונה מהציון המוצג בתמונה הממוזערת של תוצאת החיפוש."
+    },
+    "recognizedLicensePlate": "לוחית רישוי מוכרת",
+    "estimatedSpeed": "מהירות משוערת",
+    "objects": "אובייקט",
+    "camera": "מצלמה",
+    "button": {
+      "findSimilar": "מצא דומה",
+      "regenerate": {
+        "title": "צור מחדש",
+        "label": "צור מחדש את תיאור אובייקט המעקב"
+      }
+    },
+    "description": {
+      "label": "תיאור",
+      "placeholder": "תיאור האובייקט במעקב",
+      "aiTips": "Frigate לא תבקש תיאור מספק הבינה המלאכותית הגנרטיבית שלך עד לסיום כל השלבים של האובייקט במעקב."
+    },
+    "expandRegenerationMenu": "פתח את תפריט היצירה מחדש",
+    "regenerateFromSnapshot": "צור מחדש מלכידת התמונה",
+    "regenerateFromThumbnails": "צור מחדש מתמונות ממוזערות",
+    "tips": {
+      "descriptionSaved": "התיאור נשמר בהצלחה",
+      "saveDescriptionFailed": "עדכון התיאור נכשל: {{errorMessage}}"
+    },
+    "zones": "אזורים"
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "אישור מחיקה",
+      "desc": "מחיקת אובייקט זה במעקב מסירה את תמונת המצב, כל ההטמעות שנשמרו וכל ערכי שלבי האובייקט המשויכים. קטעי וידאו מוקלטים של אובייקט זה במעקב בתצוגת היסטוריה <em>לא</em> יימחקו.<br /><br />האם אתה בטוח שברצונך להמשיך?"
+    }
+  },
+  "searchResult": {
+    "tooltip": "תואם ל-{{type}} ב-{{confidence}}%",
+    "deleteTrackedObject": {
+      "toast": {
+        "error": "מחיקת האובייקט במעקב נכשלה: {{errorMessage}}",
+        "success": "האובייקט המעקב נמחק בהצלחה."
+      }
+    }
+  },
+  "noTrackedObjects": "לא נמצאו אובייקטים במעקב",
+  "fetchingTrackedObjectsFailed": "שגיאה באחזור אובייקטים במעקב: {{errorMessage}}",
+  "trackedObjectsCount_one": "אובייקט במעקב ({{count}}) ",
+  "trackedObjectsCount_two": "אובייקטים במעקב ({{count}}) ",
+  "trackedObjectsCount_other": "אובייקטים במעקב ({{count}}) "
+}

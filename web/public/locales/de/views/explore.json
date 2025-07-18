@@ -1,0 +1,207 @@
+{
+  "details": {
+    "timestamp": "Zeitstempel",
+    "item": {
+      "title": "Item-Details begutachten",
+      "desc": "Item-Details begutachten",
+      "button": {
+        "share": "Diese Aufnahme teilen",
+        "viewInExplore": "Ansicht in Erkunden"
+      },
+      "tips": {
+        "hasMissingObjects": "Passe die Konfiguration an, so dass Frigate verfolgte Objekte für die folgenden Kategorien speichert: <em>{{objects}}</em>",
+        "mismatch_one": "{{count}} nicht verfügbares Objekt wurde entdeckt und in diese Überprüfung einbezogen. Dieses Objekt hat sich entweder nicht für einen Alarm oder eine Erkennung qualifiziert oder wurde bereits bereinigt/gelöscht.",
+        "mismatch_other": "{{count}} nicht verfügbare Objekte wurden entdeckt und in diese Überprüfung einbezogen. Diese Objekte haben sich entweder nicht für einen Alarm oder eine Erkennung qualifiziert oder wurden bereits bereinigt/gelöscht."
+      },
+      "toast": {
+        "success": {
+          "updatedSublabel": "Unterkategorie erfolgreich aktualisiert.",
+          "updatedLPR": "Nummernschild erfolgreich aktualisiert.",
+          "regenerate": "Eine neue Beschreibung wurde von {{provider}} angefordert. Je nach Geschwindigkeit des Anbieters kann es einige Zeit dauern, bis die neue Beschreibung generiert ist."
+        },
+        "error": {
+          "regenerate": "Der Aufruf von {{provider}} für eine neue Beschreibung ist fehlgeschlagen: {{errorMessage}}",
+          "updatedSublabelFailed": "Untekategorie konnte nicht aktualisiert werden: {{errorMessage}}",
+          "updatedLPRFailed": "Aktualisierung des Kennzeichens fehlgeschlagen: {{errorMessage}}"
+        }
+      }
+    },
+    "label": "Label",
+    "zones": "Zonen",
+    "editSubLabel": {
+      "title": "Unterkategorie bearbeiten",
+      "desc": "Geben Sie eine neue Unterkategorie für dieses {{label}} ein",
+      "descNoLabel": "Geben Sie eine neue Unterkategorie für dieses verfolgte Objekt ein"
+    },
+    "editLPR": {
+      "title": "Kennzeichen bearbeiten",
+      "desc": "Gib einen neuen Kennzeichenwert für dieses {{label}} ein",
+      "descNoLabel": "Gib einen neuen Kennzeichenwert für dieses verfolgte Objekt ein"
+    },
+    "topScore": {
+      "label": "Beste Ergebnisse",
+      "info": "Die höchste Punktzahl ist der höchste Medianwert für das verfolgte Objekt und kann daher von der auf der Miniaturansicht des Suchergebnisses angezeigten Punktzahl abweichen."
+    },
+    "recognizedLicensePlate": "Erkanntes Kennzeichen",
+    "estimatedSpeed": "Geschätzte Geschwindigkeit",
+    "objects": "Objekte",
+    "camera": "Kamera",
+    "button": {
+      "findSimilar": "Finde ähnliche",
+      "regenerate": {
+        "title": "Erneuern",
+        "label": "Beschreibung des verfolgten Objekts neu generieren"
+      }
+    },
+    "description": {
+      "label": "Beschreibung",
+      "placeholder": "Beschreibund des verfolgten Objekts",
+      "aiTips": "Frigate wird erst dann eine Beschreibung vom generativen KI-Anbieter anfordern, wenn der Lebenszyklus des verfolgten Objekts beendet ist."
+    },
+    "expandRegenerationMenu": "Erneuerungsmenü erweitern",
+    "regenerateFromSnapshot": "Aus Snapshot neu generieren",
+    "regenerateFromThumbnails": "Aus Vorschaubild neu generieren",
+    "tips": {
+      "descriptionSaved": "Erfolgreich gespeicherte Beschreibung",
+      "saveDescriptionFailed": "Die Aktualisierung der Beschreibung ist fehlgeschlagen: {{errorMessage}}"
+    },
+    "snapshotScore": {
+      "label": "Schnappschuss Bewertung"
+    }
+  },
+  "documentTitle": "Erkunde - Frigate",
+  "generativeAI": "Generative KI",
+  "exploreIsUnavailable": {
+    "title": "Erkunden ist nicht Verfügbar",
+    "embeddingsReindexing": {
+      "context": "Erkunden kann nach der Re-Indexierung der verfolgten Objekte verwendet werden.",
+      "startingUp": "Startet…",
+      "estimatedTime": "Voraussichtlich verbleibende Zeit:",
+      "finishingShortly": "Bald erledigt",
+      "step": {
+        "thumbnailsEmbedded": "Vorschaubilder eingebettet: ",
+        "descriptionsEmbedded": "Beschreibungen eingebettet: ",
+        "trackedObjectsProcessed": "Verfolgte Objekte bearbeitet: "
+      }
+    },
+    "downloadingModels": {
+      "setup": {
+        "visionModel": "Vision Model",
+        "visionModelFeatureExtractor": "Vision Model Feature Extraktor",
+        "textModel": "Text Model",
+        "textTokenizer": "Text Tokenizer"
+      },
+      "tips": {
+        "context": "Sie sollten eine Re-Indexierung der verfolgten Objekte durchführen, sobald die Modelle heruntergeladen sind.",
+        "documentation": "Lesen Sie die Dokumentation"
+      },
+      "error": "Ein Fehler ist aufgetreten. Bitte prüfen Sie die Frigate Logs.",
+      "context": "Frigate lädt derzeit benötigte Modelle für den Support des \"Semantic Search\"-Features. Je nach der Geschwindigkeit der Netzwerkverbindung kann dies einige Minuten in Anspruch nehmen."
+    }
+  },
+  "trackedObjectDetails": "Details zu verfolgtem Objekt",
+  "objectLifecycle": {
+    "noImageFound": "Kein Bild für diesen Zeitstempel gefunden.",
+    "createObjectMask": "Objekt-Maske erstellen",
+    "lifecycleItemDesc": {
+      "entered_zone": "{{label}} hat {{zones}} betreten",
+      "visible": "{{label}} erkannt",
+      "attribute": {
+        "other": "{{label}} erkannt als {{attribute}}",
+        "faceOrLicense_plate": "{{attribute}} erkannt für {{label}}"
+      },
+      "external": "{{label}} erkannt",
+      "active": "{{label}} wurde aktiv",
+      "gone": "{{label}} hat verlassen",
+      "stationary": "{{label}} wurde stationär",
+      "heard": "{{label}} gehört",
+      "header": {
+        "ratio": "Verhältnis",
+        "area": "Bereich",
+        "zones": "Zonen"
+      }
+    },
+    "annotationSettings": {
+      "offset": {
+        "documentation": "Lesen Sie die Dokumentation ",
+        "label": "Anmerkungen Versatz",
+        "desc": "Diese Daten stammen aus dem Erkennungs-Feed der Kamera, werden aber mit Bildern aus dem Aufnahme-Feed überlagert. Es ist unwahrscheinlich, dass die beiden Streams perfekt synchronisiert sind. Daher stimmen die Bounding Box und das Filmmaterial nicht perfekt überein. Das Feld <code>annotation_offset</code> kann jedoch verwendet werden, um dies anzupassen.",
+        "millisecondsToOffset": "Millisekunden, um die Erkennungen verschoben werden soll. <em>Standard: 0</em>",
+        "tips": "TIPP: Stelle dir einen Ereignisclip vor, in dem eine Person von links nach rechts läuft. Wenn die Bounding Box der Ereigniszeitleiste durchgehend links von der Person liegt, sollte der Wert verringert werden. Ähnlich verhält es sich, wenn eine Person von links nach rechts geht und die Bounding Box durchgängig vor der Person liegt, dann sollte der Wert erhöht werden.",
+        "toast": {
+          "success": "Versatz für {{camera}} wurde in der Konfigurationsdatei gespeichert. Starten Sie Frigate neu, um Ihre Änderungen zu übernehmen."
+        }
+      },
+      "showAllZones": {
+        "title": "Zeige alle Zonen",
+        "desc": "Immer Zonen auf Rahmen anzeigen, in die Objekte eingetreten sind."
+      },
+      "title": "Anmerkungseinstellungen"
+    },
+    "adjustAnnotationSettings": "Anmerkungseinstellungen anpassen",
+    "title": "Objekt-Lebenszyklus",
+    "carousel": {
+      "next": "Nächste Anzeige",
+      "previous": "Vorherige Anzeige"
+    },
+    "scrollViewTips": "Scrolle um die wichtigsten Momente dieses Objekts anzuzeigen.",
+    "autoTrackingTips": "Die Positionen der Bounding Box sind bei Kameras mit automatischer Verfolgung ungenau.",
+    "count": "{{first}} von {{second}}",
+    "trackedPoint": "Verfolgter Punkt"
+  },
+  "type": {
+    "details": "Details",
+    "video": "Video",
+    "object_lifecycle": "Objekt-Lebenszyklus",
+    "snapshot": "Snapshot"
+  },
+  "itemMenu": {
+    "downloadSnapshot": {
+      "label": "Schnappschuss herunterladen",
+      "aria": "Schnappschuss herunterladen"
+    },
+    "downloadVideo": {
+      "label": "Video herunterladen",
+      "aria": "Video herunterladen"
+    },
+    "viewObjectLifecycle": {
+      "label": "Lebenszyklus von Objekten anzeigen",
+      "aria": "Den Lebenszyklus des Objekts anzeigen"
+    },
+    "findSimilar": {
+      "label": "Ähnliches finden",
+      "aria": "Ähnliche verfolgte Objekte finden"
+    },
+    "submitToPlus": {
+      "label": "Bei Frigate+ einreichen",
+      "aria": "Bei Frigate+ einreichen"
+    },
+    "viewInHistory": {
+      "label": "Ansicht im Verlauf",
+      "aria": "Ansicht im Verlauf"
+    },
+    "deleteTrackedObject": {
+      "label": "Dieses verfolgte Objekt löschen"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Löschen bestätigen",
+      "desc": "Beim Löschen dieses verfolgten Objekts werden der Schnappschuss, alle gespeicherten Einbettungen und alle zugehörigen Objektlebenszykluseinträge entfernt. Aufgezeichnetes Filmmaterial dieses verfolgten Objekts in der Verlaufsansicht wird <em>NICHT</em> gelöscht. <br /><br />Sind Sie sicher, dass Sie fortfahren möchten?"
+    }
+  },
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Verfolgtes Objekt erfolgreich gelöscht.",
+        "error": "Das verfolgte Objekt konnte nicht gelöscht werden: {{errorMessage}}"
+      }
+    },
+    "tooltip": "Entspricht {{type}} bei {{confidence}}%"
+  },
+  "noTrackedObjects": "Keine verfolgten Objekte gefunden",
+  "fetchingTrackedObjectsFailed": "Fehler beim Abrufen von verfolgten Objekten: {{errorMessage}}",
+  "trackedObjectsCount_one": "{{count}} verfolgtes Objekt ",
+  "trackedObjectsCount_other": "{{count}} verfolgte Objekte ",
+  "exploreMore": "Erkunde mehr {{label}} Objekte"
+}

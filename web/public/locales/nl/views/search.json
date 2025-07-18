@@ -1,0 +1,74 @@
+{
+  "button": {
+    "delete": "Opgeslagen zoekopdracht verwijderen",
+    "save": "Zoekopdracht opslaan",
+    "clear": "Zoekopdracht wissen",
+    "filterInformation": "Filter informatie",
+    "filterActive": "Filters actief"
+  },
+  "search": "Zoek",
+  "savedSearches": "Opgeslagen zoekopdrachten",
+  "searchFor": "Zoeken naar {{inputValue}}",
+  "trackedObjectId": "Getraceerd object-ID",
+  "filter": {
+    "label": {
+      "cameras": "Camera's",
+      "labels": "Labels",
+      "sub_labels": "Sublabels",
+      "time_range": "Tijdsbereik",
+      "before": "Voor",
+      "min_score": "Min Score",
+      "max_score": "Max Score",
+      "min_speed": "Min snelheid",
+      "recognized_license_plate": "Herkend kenteken",
+      "has_snapshot": "Heeft Snapshot",
+      "has_clip": "Heeft Clip",
+      "search_type": "Zoektype",
+      "zones": "Zones",
+      "max_speed": "Max snelheid",
+      "after": "Na"
+    },
+    "toast": {
+      "error": {
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "De ‘max_speed’ moet groter zijn dan of gelijk aan de ‘min_speed’.",
+        "beforeDateBeLaterAfter": "De 'voor' datum moet later zijn dan de 'na' datum.",
+        "afterDatebeEarlierBefore": "De ‘na’ datum moet eerder zijn dan de ‘voor’ datum.",
+        "minScoreMustBeLessOrEqualMaxScore": "De ‘min_score’ moet kleiner zijn dan of gelijk aan de ‘max_score’.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "De ‘max_score’ moet groter zijn dan of gelijk aan de ‘min_score’.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "De ‘min_snelheid’ moet kleiner zijn dan of gelijk aan de ‘max_snelheid’."
+      }
+    },
+    "tips": {
+      "title": "Hoe tekstfilters te gebruiken",
+      "desc": {
+        "example": "Voorbeeld: <code className=\"text-primary\">camera's:voordeur label:persoon vóór:01012024 tijdsbereik:15:00-16:00</code>",
+        "text": "Filters helpen je om je zoekresultaten te beperken. Zo gebruik je ze in het invoerveld:",
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Typ een filternaam gevolgd door een dubbele punt (bijv. \"cameras:\").</li><li>Selecteer een waarde uit de suggesties of typ je eigen waarde.</li><li>Gebruik meerdere filters door ze achter elkaar toe te voegen, gescheiden door een spatie.</li><li>Datumfilters (before: en after:) gebruiken <em>{{DateFormat}}</em> formaat </li><li>Het tijdsfilter gebruikt <em>{{exampleTime}}</em> formaat </li><li>Verwijder filters door op de 'x' ernaast te klikken.</li></ul>",
+        "step3": "Gebruik meerdere filters door ze achter elkaar toe te voegen met een spatie ertussen.",
+        "step4": "Datumfilters (voor: en na:) gebruiken het {{DateFormat}} formaat.",
+        "step5": "Het tijdsfilter gebruikt het {{exampleTime}} als formaat.",
+        "step2": "Selecteer een waarde uit de suggesties of voer je eigen waarde in.",
+        "step1": "Typ een filtersleutelnaam gevolgd door een dubbele punt (bijv. \"camera's:\").",
+        "step6": "Verwijder filters door op de 'x' naast de filteroptie te klikken.",
+        "exampleLabel": "Voorbeeld:"
+      }
+    },
+    "searchType": {
+      "thumbnail": "Thumbnail",
+      "description": "Beschrijving"
+    },
+    "header": {
+      "currentFilterType": "Filterwaarden",
+      "noFilters": "Filters",
+      "activeFilters": "Actieve filters"
+    }
+  },
+  "similaritySearch": {
+    "active": "Gelijkenis zoeken actief",
+    "title": "Gelijkenis zoeken",
+    "clear": "Gelijksoortige zoekopdracht wissen"
+  },
+  "placeholder": {
+    "search": "Zoek…"
+  }
+}
