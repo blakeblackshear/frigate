@@ -96,7 +96,7 @@ class OutputProcess(FrigateProcess):
         websocket_server.initialize_websockets_manager()
         websocket_thread = threading.Thread(target=websocket_server.serve_forever)
 
-        detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
+        detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video.value)
         config_subscriber = CameraConfigUpdateSubscriber(
             self.config,
             self.config.cameras,
