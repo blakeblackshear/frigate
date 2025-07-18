@@ -12,6 +12,7 @@ from frigate.comms.object_detector_signaler import (
     ObjectDetectorSubscriber,
 )
 from frigate.config import FrigateConfig
+from frigate.const import PROCESS_PRIORITY_HIGH
 from frigate.detectors import create_detector
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
@@ -97,7 +98,7 @@ class DetectorRunner(FrigateProcess):
         detector_config: BaseDetectorConfig,
         stop_event: MpEvent,
     ) -> None:
-        super().__init__(stop_event, name=name, daemon=True)
+        super().__init__(stop_event, PROCESS_PRIORITY_HIGH, name=name, daemon=True)
         self.detection_queue = detection_queue
         self.cameras = cameras
         self.avg_speed = avg_speed
