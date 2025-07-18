@@ -13,7 +13,7 @@ from pathvalidate import ValidationError, sanitize_filename
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.config import FrigateConfig
-from frigate.const import CONFIG_DIR, FACE_DIR
+from frigate.const import CONFIG_DIR, FACE_DIR, PROCESS_PRIORITY_HIGH
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
@@ -34,7 +34,12 @@ class EmbeddingProcess(FrigateProcess):
         metrics: DataProcessorMetrics | None,
         stop_event: MpEvent,
     ) -> None:
-        super().__init__(stop_event, name="frigate.embeddings_manager", daemon=True)
+        super().__init__(
+            stop_event,
+            PROCESS_PRIORITY_HIGH,
+            name="frigate.embeddings_manager",
+            daemon=True,
+        )
         self.config = config
         self.metrics = metrics
 

@@ -22,7 +22,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
-from frigate.const import CACHE_DIR, CLIPS_DIR
+from frigate.const import CACHE_DIR, CLIPS_DIR, PROCESS_PRIORITY_MED
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
@@ -74,7 +74,9 @@ def check_disabled_camera_update(
 
 class OutputProcess(FrigateProcess):
     def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
-        super().__init__(stop_event, name="frigate.output", daemon=True)
+        super().__init__(
+            stop_event, PROCESS_PRIORITY_MED, name="frigate.output", daemon=True
+        )
         self.config = config
 
     def run(self) -> None:

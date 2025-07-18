@@ -8,7 +8,12 @@ import numpy as np
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR, UPDATE_MODEL_STATE
+from frigate.const import (
+    CLIPS_DIR,
+    MODEL_CACHE_DIR,
+    UPDATE_MODEL_STATE,
+    PROCESS_PRIORITY_LOW,
+)
 from frigate.log import redirect_output_to_logger
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.process import FrigateProcess
@@ -24,6 +29,7 @@ class ClassificationTrainingProcess(FrigateProcess):
     def __init__(self, model_name: str) -> None:
         super().__init__(
             stop_event=None,
+            priority=PROCESS_PRIORITY_LOW,
             name=f"model_training:{model_name}",
         )
         self.model_name = model_name
