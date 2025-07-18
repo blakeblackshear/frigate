@@ -894,7 +894,6 @@ model: # required
   width: 320
   height: 320
   input_tensor: nhwc
-  input_dtype: float
   labelmap_path: /labelmap/coco-80.txt
 ```
 
