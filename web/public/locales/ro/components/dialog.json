@@ -1,9 +1,9 @@
 {
   "restart": {
-    "title": "Esti sigur ca doresti sa repornesti Frigate?",
-    "button": "Reporneste",
+    "title": "Ești sigur că dorești să repornești Frigate?",
+    "button": "Repornește",
     "restarting": {
-      "title": "Frigate Reporneste",
+      "title": "Frigate repornește",
       "content": "Aceasta pagina se va reincarca in {{countdown}} secunde.",
       "button": "Forteaza Reincarcarea Acum"
     }
@@ -44,7 +44,7 @@
   },
   "recording": {
     "button": {
-      "deleteNow": "Sterge Acum",
+      "deleteNow": "Șterge acum",
       "export": "Exportă",
       "markAsReviewed": "Marchează ca revizuit"
     },
@@ -62,7 +62,7 @@
   "export": {
     "time": {
       "custom": "personalizat",
-      "fromTimeline": "Selectează din Cronologie",
+      "fromTimeline": "Selectează din cronologie",
       "lastHour_one": "Ultima oră",
       "lastHour_few": "Ultimele {{count}} ore",
       "lastHour_other": "Ultimele {{count}} ore",

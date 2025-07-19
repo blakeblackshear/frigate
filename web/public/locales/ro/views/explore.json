@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Exploreaza - Frigate",
+  "documentTitle": "Căutare - Frigate",
   "generativeAI": "AI Generativ",
   "exploreIsUnavailable": {
     "title": "Explorarea este Indisponibila",
@@ -23,7 +23,7 @@
         "textTokenizer": "Tokenizer text"
       },
       "tips": {
-        "context": "S-ar putea să doriți să reindexați încorporările obiectelor urmărite odată ce modelele sunt descărcate.",
+        "context": "S-ar putea să dorești să reindexezi încorporările obiectelor urmărite odată ce modelele sunt descărcate.",
         "documentation": "Citește documentația"
       },
       "error": "A apărut o eroare. Verifică jurnalele Frigate."
@@ -74,7 +74,7 @@
         "millisecondsToOffset": "Millisecondele cu care să compensezi adnotările de detecție. <em>Implicit: 0</em>",
         "tips": "SFAT: Imaginează-ți că există un clip de eveniment cu o persoană care merge de la stânga la dreapta. Dacă caseta de delimitare de pe linia temporală a evenimentului este constant în partea stângă a persoanei, atunci valoarea ar trebui să fie scăzută. În mod similar, dacă persoana merge de la stânga la dreapta și caseta de delimitare este constant înaintea persoanei, atunci valoarea ar trebui să fie crescută.",
         "toast": {
-          "success": "Compensarea adnotării pentru {{camera}} a fost salvată în fișierul de configurare. Reporneste Frigate pentru a aplica modificările."
+          "success": "Compensarea adnotării pentru {{camera}} a fost salvată în fișierul de configurație. Repornește Frigate pentru a aplica modificările."
         }
       },
       "title": "Setări adnotare"
@@ -155,7 +155,7 @@
     "regenerateFromSnapshot": "Regenerează din snapshot",
     "regenerateFromThumbnails": "Regenerează din miniaturi"
   },
-  "exploreMore": "Explorează mai multe obiecte {{label}}",
+  "exploreMore": "Explorează mai multe obiecte cu {{label}}",
   "trackedObjectDetails": "Detalii despre obiectul urmărit",
   "trackedObjectsCount_one": "{{count}} obiect urmărit ",
   "trackedObjectsCount_few": "{{count}} obiecte urmărite ",
