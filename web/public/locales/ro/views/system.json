@@ -37,7 +37,7 @@
           "label": "Copiază informațiile GPU"
         },
         "toast": {
-          "success": "Informațiile GPU au fost copiate în clipboard"
+          "success": "Informațiile GPU au fost copiate"
         },
         "closeInfo": {
           "label": "Închide informațiile GPU"
@@ -47,14 +47,14 @@
     "detector": {
       "temperature": "Temperatura Detectorului",
       "title": "Detectori",
-      "cpuUsage": "Utilizarea procesorului detectorului",
-      "inferenceSpeed": "Viteza inferenței detectorului",
+      "cpuUsage": "Utilizarea procesorului",
+      "inferenceSpeed": "Viteza de inferență",
       "memoryUsage": "Utilizare memorie detector"
     },
     "otherProcesses": {
       "title": "Alte Procese",
-      "processCpuUsage": "Utilizare CPU pentru proces",
-      "processMemoryUsage": "Utilizare memorie proces"
+      "processCpuUsage": "Utilizare CPU",
+      "processMemoryUsage": "Utilizare memorie"
     },
     "title": "General"
   },
@@ -64,12 +64,12 @@
       "earliestRecording": "Prima înregistrare disponibilă:",
       "tips": "Această valoare reprezintă spațiul total de stocare utilizat de înregistrările din baza de date a Frigate. Frigate nu urmărește utilizarea spațiului pentru toate fișierele de pe discul tău."
     },
-    "title": "Stocare",
+    "title": "Spațiu stocare",
     "cameraStorage": {
-      "title": "Stocare cameră",
+      "title": "Spațiu tocare camere",
       "camera": "Camera",
       "unusedStorageInformation": "Informații despre stocarea neutilizată",
-      "storageUsed": "Stocare",
+      "storageUsed": "Spațiu stocare",
       "percentageOfTotalUsed": "Procent din total",
       "unused": {
         "title": "Nefolosit",
@@ -85,9 +85,9 @@
       "label": "Jurnal Descărcări"
     },
     "copy": {
-      "label": "Copiați în Clipboard",
-      "success": "Copiați jurnal în Clipboard",
-      "error": "Nu se poate copia jurnalul în Clipboard"
+      "label": "Copiază",
+      "success": "Copiază jurnalul",
+      "error": "Jurnalul nu s-a putut copia"
     },
     "type": {
       "label": "Tip",
@@ -103,14 +103,14 @@
       }
     }
   },
-  "metrics": "Date Sistem",
+  "metrics": "Metrici de sistem",
   "enrichments": {
     "title": "Îmbogățiri",
     "embeddings": {
-      "image_embedding": "Încorporare imagine",
+      "image_embedding": "Încorporare imagini",
       "text_embedding": "Încorporare text",
       "plate_recognition": "Recunoaștere numere de înmatriculare",
-      "image_embedding_speed": "Viteza încorporării imaginii",
+      "image_embedding_speed": "Viteză încorporarei imaginii",
       "face_recognition": "Recunoaștere facială",
       "face_recognition_speed": "Viteză recunoaștere facială",
       "plate_recognition_speed": "Viteză recunoaștere numere de înmatriculare",
@@ -140,8 +140,8 @@
       "unknown": "Necunoscut"
     },
     "label": {
-      "capture": "captură",
-      "skipped": "sărit",
+      "capture": "capturare",
+      "skipped": "sărite",
       "overallSkippedDetectionsPerSecond": "Detecții totale sărite pe secundă",
       "cameraCapture": "captură {{camName}}",
       "cameraDetect": "detectare {{camName}}",
@@ -150,9 +150,9 @@
       "cameraSkippedDetectionsPerSecond": "detecții sărite pe secundă {{camName}}",
       "overallFramesPerSecond": "Cadre totale pe secundă",
       "overallDetectionsPerSecond": "Detecții totale pe secundă",
-      "detect": "detectează",
+      "detect": "detectare",
       "cameraFfmpeg": "{{camName}} FFmpeg",
-      "camera": "cameră",
+      "camera": "camere",
       "ffmpeg": "FFmpeg"
     },
     "title": "Camere",
@@ -160,7 +160,7 @@
     "framesAndDetections": "Cadre / Detecții",
     "toast": {
       "success": {
-        "copyToClipboard": "Datele sondei au fost copiate în clipboard."
+        "copyToClipboard": "Datele sondei au fost copiate."
       },
       "error": {
         "unableToProbeCamera": "Sondarea camerei nu a fost posibilă: {{errorMessage}}"

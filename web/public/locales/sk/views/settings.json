@@ -29,6 +29,26 @@
     }
   },
   "cameraSetting": {
-    "camera": "Kamera"
+    "camera": "Kamera",
+    "noCamera": "Žiadna Kamera"
+  },
+  "general": {
+    "title": "Hlavné nastavenia",
+    "liveDashboard": {
+      "title": "Živý Dashboard",
+      "automaticLiveView": {
+        "label": "Automatický živý náhľad",
+        "desc": "Pri detekcii aktivity sa automaticky prepne na živý náhľad kamery. Vypnutie tejto možnosti spôsobí, že sa statické snímky z kamery na ovládacom paneli Live aktualizujú iba raz za minútu."
+      },
+      "playAlertVideos": {
+        "label": "Prehrať videá s upozornením",
+        "desc": "Predvolene sa nedávne upozornenia na paneli Živé vysielanie prehrávajú ako krátke cyklické videá. Túto možnosť vypnite, ak chcete zobrazovať iba statický obrázok nedávnych upozornení na tomto zariadení/prehliadači."
+      }
+    },
+    "storedLayouts": {
+      "title": "Uložené rozloženia",
+      "desc": "Rozloženie kamier v skupine kamier je možné presúvať/zmeniť jeho veľkosť. Pozície sú uložené v lokálnom úložisku vášho prehliadača.",
+      "clearAll": "Vymazať všetky rozloženia"
+    }
   }
 }

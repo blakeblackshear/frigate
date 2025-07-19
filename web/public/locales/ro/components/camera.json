@@ -1,35 +1,35 @@
 {
   "group": {
     "label": "Grupuri de Camere",
-    "add": "Adauga Grup de Camere",
-    "edit": "Editeaza Grupul de Camere",
+    "add": "Adaugă un grup de camere",
+    "edit": "Editează grupul de camere",
     "delete": {
-      "label": "Sterge Grupul de Camere",
+      "label": "Șterge grupul de camere",
       "confirm": {
-        "title": "Confirma Stergerea",
-        "desc": "Esti sigur ca doresti sa stergi gruoul de camere <em>{{name}}</em>?"
+        "title": "Confirmă ștergerea",
+        "desc": "Ești sigur că dorești să ștergi grupul de camere <em>{{name}}</em>?"
       }
     },
     "name": {
       "label": "Nume",
       "placeholder": "Introdu un nume…",
       "errorMessage": {
-        "mustLeastCharacters": "Numele grupului de cmere trebuie sa sontina minim 2 caractere.",
-        "exists": "Numele grupului de camere exista deja.",
-        "nameMustNotPeriod": "Numele grupului de camere nu trebuia sa contina punct.",
+        "mustLeastCharacters": "Numele grupului de cmere trebuie să conțină minim 2 caractere.",
+        "exists": "Numele grupului de camere există deja.",
+        "nameMustNotPeriod": "Numele grupului de camere nu trebuie să conțină punct.",
         "invalid": "Nume invalid pentru grupul de camere."
       }
     },
     "cameras": {
       "label": "Camere",
-      "desc": "Selecteaza camere pentru acest grup."
+      "desc": "Selectează camerele pentru acest grup."
     },
     "icon": "Pictograma",
-    "success": "Grupul de camere {{name}}) a fost salvat.",
+    "success": "Grupul de camere ({{name}}) a fost salvat.",
     "camera": {
       "setting": {
-        "label": "Setarile de Stream ale Camerei",
-        "title": "{{cameraName}} Setari de Stream",
+        "label": "Setările de streaming ale camerei",
+        "title": "{{cameraName}} Setări de streaming",
         "stream": "Stream",
         "placeholder": "Alege un stream",
         "desc": "Schimbă opțiunile de streaming live pentru panoul acestui grup de camere. <em>Aceste setări sunt specifice dispozitivului/browser-ului.</em>",
@@ -71,7 +71,7 @@
   },
   "debug": {
     "options": {
-      "label": "Setari",
+      "label": "Setări",
       "title": "Optiuni",
       "showOptions": "Arata Optiuni",
       "hideOptions": "Ascunde opțiunile"

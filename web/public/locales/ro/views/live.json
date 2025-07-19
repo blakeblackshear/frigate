@@ -4,7 +4,7 @@
   "lowBandwidthMode": "Mod Latime de Banda Limitata",
   "twoWayTalk": {
     "enable": "Activare dialog",
-    "disable": "Dezactivați conversația bidirecțională"
+    "disable": "Dezactivează conversația bidirecțională"
   },
   "ptz": {
     "zoom": {
@@ -125,7 +125,7 @@
     },
     "playInBackground": {
       "label": "Redare în fundal",
-      "tips": "Activați această opțiune pentru a continua streaming-ul când player-ul este ascuns."
+      "tips": "Activează această opțiune pentru a continua streaming-ul când player-ul este ascuns."
     }
   },
   "cameraSettings": {

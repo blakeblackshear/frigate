@@ -1,7 +1,7 @@
 {
   "noRecordingsFoundForThisTime": "Nu au fost gasite inregistrari in perioada de timp mentionata",
   "noPreviewFound": "Nu a fost gasita o Previzualizare",
-  "noPreviewFoundFor": "Nu exista Previzualizari pentru {{cameraName}}",
+  "noPreviewFoundFor": "Nu există previzualizari pentru {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Trimiteti acest cadru catre Frigate+?",
     "submit": "Trimite"
