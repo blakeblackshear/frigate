@@ -37,6 +37,15 @@
         "value": "{{droppedFrames}} snimku"
       }
     },
-    "decodedFrames": "Dekódované snímky:"
+    "decodedFrames": "Dekódované snímky:",
+    "droppedFrameRate": "Frekvencia stratených snímok:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Snímok bol úspešne odoslaný službe Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Nepodarilo sa odoslať snímku službe Frigate+"
+    }
   }
 }

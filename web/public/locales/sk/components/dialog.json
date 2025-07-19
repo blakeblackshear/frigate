@@ -47,6 +47,28 @@
       "placeholder": "Pomenujte Export"
     },
     "select": "Vybrat",
-    "export": "Exportovať"
+    "export": "Exportovať",
+    "selectOrExport": "Vybrať pre Export",
+    "toast": {
+      "success": "Export úspešne spustený. Súbor nájdete v adresári /exports.",
+      "error": {
+        "failed": "Chyba spustenia exportu: {{error}}",
+        "endTimeMustAfterStartTime": "Čas konca musí byť po čase začiatku",
+        "noVaildTimeSelected": "Nie je vybrané žiadne platné časové obdobie"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Uložiť Export",
+      "previewExport": "Export ukážky"
+    }
+  },
+  "streaming": {
+    "label": "Stream",
+    "restreaming": {
+      "disabled": "Opätovné streamovanie nie je pre túto kameru povolené.",
+      "desc": {
+        "title": "Pre ďalšie možnosti živého náhľadu a zvuku pre túto kameru nastavte go2rtc."
+      }
+    }
   }
 }
