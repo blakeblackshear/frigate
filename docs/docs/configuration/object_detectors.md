@@ -1032,22 +1032,21 @@ python3 yolo_to_onnx.py -m yolov7-320
 
 #### YOLOv9
 
-YOLOv9 models can be exported using the below code
+YOLOv9 model can be exported as ONNX using the below command:
 
 ```sh
-git clone https://github.com/WongKinYiu/yolov9
-cd yolov9
-
-# setup the virtual environment so installation doesn't affect main system
-# NOTE: Virtual environment must be using Python 3.11 or older.
-python3 -m venv ./
-bin/pip install -r requirements.txt
-bin/pip install onnx onnxruntime onnx-simplifier>=0.4.1
-
-# download the weights
-wget -O yolov9-t.pt "https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-t-converted.pt" # download the weights
-
-# prepare and run export script
-sed -i "s/ckpt = torch.load(attempt_download(w), map_location='cpu')/ckpt = torch.load(attempt_download(w), map_location='cpu', weights_only=False)/g" ./models/experimental.py
-bin/python3 export.py --weights ./yolov9-t.pt --imgsz 320 --simplify --include onnx
+docker build . --output . -f- <<'EOF'
+FROM python:3.11 AS build
+RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+WORKDIR /yolov9
+ADD https://github.com/WongKinYiu/yolov9.git .
+RUN uv pip install --system -r requirements.txt
+RUN uv pip install --system onnx onnxruntime onnx-simplifier>=0.4.1
+ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-t-converted.pt yolov9-t.pt
+RUN sed -i "s/ckpt = torch.load(attempt_download(w), map_location='cpu')/ckpt = torch.load(attempt_download(w), map_location='cpu', weights_only=False)/g" models/experimental.py
+RUN python3 export.py --weights ./yolov9-t.pt --imgsz 320 --simplify --include onnx
+FROM scratch
+COPY --from=build /yolov9/yolov9-t.onnx /
+EOF
 ```
