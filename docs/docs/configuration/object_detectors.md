@@ -1035,7 +1035,7 @@ python3 yolo_to_onnx.py -m yolov7-320
 YOLOv9 model can be exported as ONNX using the below command:
 
 ```sh
-docker build . --output . -f- <<'EOF'
+docker build . --build-arg VARIANT=t --output . -f- <<'EOF'
 FROM python:3.11 AS build
 RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
 COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
@@ -1043,10 +1043,12 @@ WORKDIR /yolov9
 ADD https://github.com/WongKinYiu/yolov9.git .
 RUN uv pip install --system -r requirements.txt
 RUN uv pip install --system onnx onnxruntime onnx-simplifier>=0.4.1
-ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-t-converted.pt yolov9-t.pt
+ARG VARIANT
+ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-${VARIANT}-converted.pt yolov9-${VARIANT}.pt
 RUN sed -i "s/ckpt = torch.load(attempt_download(w), map_location='cpu')/ckpt = torch.load(attempt_download(w), map_location='cpu', weights_only=False)/g" models/experimental.py
-RUN python3 export.py --weights ./yolov9-t.pt --imgsz 320 --simplify --include onnx
+RUN python3 export.py --weights ./yolov9-${VARIANT}.pt --imgsz 320 --simplify --include onnx
 FROM scratch
-COPY --from=build /yolov9/yolov9-t.onnx /
+ARG VARIANT
+COPY --from=build /yolov9/yolov9-${VARIANT}.onnx /
 EOF
 ```
