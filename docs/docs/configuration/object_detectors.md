@@ -1032,7 +1032,7 @@ python3 yolo_to_onnx.py -m yolov7-320
 
 #### YOLOv9
 
-YOLOv9 model can be exported as ONNX using the below command:
+YOLOv9 model can be exported as ONNX using the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=t` in the first line to the [model size](https://github.com/WongKinYiu/yolov9#performance) you would like to convert (available sizes are `t`, `s`, `m`, `c`, and `e`).
 
 ```sh
 docker build . --build-arg MODEL_SIZE=t --output . -f- <<'EOF'
