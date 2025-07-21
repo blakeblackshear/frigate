@@ -62,8 +62,10 @@ export function CombinedStorageGraph({
   // Add the unused percentage to the series
   series.push({
     name: "Other",
-    data: [(totalStorage.used / totalStorage.total) * 100],
-    usage: totalStorage.used,
+    data: [
+      ((totalStorage.used - totalStorage.camera) / totalStorage.total) * 100,
+    ],
+    usage: totalStorage.used - totalStorage.camera,
     bandwidth: 0,
     color: (systemTheme || theme) == "dark" ? "#606060" : "#D5D5D5",
   });
