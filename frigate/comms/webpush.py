@@ -241,6 +241,9 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                         self.expired_subs.setdefault(notification.user, []).append(
                             endpoint
                         )
+                        logger.debug(
+                            f"Notification endpoint expired for {notification.user}, received {resp.status_code}"
+                        )
                     elif resp.status_code != 201:
                         logger.warning(
                             f"Failed to send notification to {notification.user} :: {resp.status_code}"
@@ -256,6 +259,8 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             return
 
         self.check_registrations()
+
+        logger.debug("Sending test notification")
 
         for user in self.web_pushers:
             self.send_push_notification(
