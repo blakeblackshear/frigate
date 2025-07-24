@@ -36,6 +36,18 @@
   "trackedObjectDetails": "Podrobnosti sledovaného objektu",
   "type": {
     "details": "detaily",
-    "snapshot": "snímka"
+    "snapshot": "snímka",
+    "video": "video",
+    "object_lifecycle": "životný cyklus objektu"
+  },
+  "objectLifecycle": {
+    "title": "Životný cyklus Objektu",
+    "noImageFound": "Žiadny obrázok pre túto časovú pečiatku.",
+    "createObjectMask": "Vytvoriť masku objektu",
+    "adjustAnnotationSettings": "Upravte nastavenia anotácií",
+    "scrollViewTips": "Posúvaním zobrazíte významné momenty životného cyklu tohto objektu.",
+    "autoTrackingTips": "Pozície ohraničujúcich rámčekov budú pre kamery s automatickým sledovaním nepresné.",
+    "count": "{{first}} z {{second}}",
+    "trackedPoint": "Sledovaný bod"
   }
 }
