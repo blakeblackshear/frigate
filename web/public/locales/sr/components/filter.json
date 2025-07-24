@@ -1,1 +1,15 @@
-{}
+{
+  "filter": "Filter",
+  "labels": {
+    "label": "Etikete",
+    "all": {
+      "title": "Sve oznake",
+      "short": "Etikete"
+    },
+    "count_one": "{{count}} Etiketa",
+    "count_other": "{{count}} Etikete"
+  },
+  "zones": {
+    "label": "Zone"
+  }
+}
