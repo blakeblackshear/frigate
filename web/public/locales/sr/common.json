@@ -1,1 +1,11 @@
-{}
+{
+  "time": {
+    "untilForTime": "Do {{vreme}}{{time}}",
+    "untilForRestart": "Dok se Frigate ponovo ne pokrene.",
+    "untilRestart": "Do ponovnog pokretanja",
+    "ago": "{{timeAgo}} pre",
+    "justNow": "Upravo sada",
+    "today": "Danas",
+    "yesterday": "Juče"
+  }
+}

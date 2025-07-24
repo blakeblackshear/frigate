@@ -1,1 +1,9 @@
-{}
+{
+  "person": "Osoba",
+  "bicycle": "Bicikla",
+  "car": "Auto",
+  "motorcycle": "Motor",
+  "airplane": "Avion",
+  "bus": "Autobus",
+  "train": "Voz"
+}
