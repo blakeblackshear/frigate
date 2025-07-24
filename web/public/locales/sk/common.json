@@ -21,7 +21,25 @@
     "12hours": "12 hodín",
     "24hours": "24 hodín",
     "am": "ráno",
-    "yr": "{{time}}r"
+    "yr": "{{time}}r",
+    "pm": "popoludní",
+    "year_one": "{{time}}rok",
+    "year_few": "{{time}}rokov",
+    "year_other": "{{time}}rokov",
+    "mo": "{{time}}mes",
+    "month_one": "{{time}}mesiac",
+    "month_few": "{{time}} mesiace",
+    "month_other": "{{time}} mesiaca",
+    "d": "{{time}}d",
+    "day_one": "{{time}}deň",
+    "day_few": "{{time}}dni",
+    "day_other": "{{time}}dni",
+    "h": "{{time}}h",
+    "hour_one": "{{time}}hodina",
+    "hour_few": "{{time}}hodiny",
+    "hour_other": "{{time}}hodin",
+    "m": "{{time}} min",
+    "s": "{{time}}s"
   },
   "selectItem": "Vyberte {{item}}"
 }

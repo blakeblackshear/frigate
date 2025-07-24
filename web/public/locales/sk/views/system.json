@@ -38,7 +38,23 @@
   "general": {
     "title": "Hlavný",
     "detector": {
-      "title": "Detektory"
+      "title": "Detektory",
+      "inferenceSpeed": "Detekčná rýchlosť",
+      "temperature": "Detekčná teplota",
+      "cpuUsage": "Detektor využitia CPU",
+      "memoryUsage": "Detektor využitia pamäte"
+    },
+    "hardwareInfo": {
+      "title": "Informácie o hardvéri",
+      "gpuUsage": "Využitie GPU",
+      "gpuMemory": "Pamäť GPU",
+      "gpuEncoder": "GPU kódovač",
+      "gpuDecoder": "GPU dekodér",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Výstup Vainfo"
+        }
+      }
     }
   }
 }

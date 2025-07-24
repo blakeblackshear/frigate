@@ -37,6 +37,23 @@
   "features": {
     "label": "Vlastnosti",
     "hasSnapshot": "Má snímku",
-    "hasVideoClip": "Má videoklip"
+    "hasVideoClip": "Má videoklip",
+    "submittedToFrigatePlus": {
+      "label": "Odoslané do Frigate+",
+      "tips": "Najprv musíte filtrovať sledované objekty, ktoré majú snímku.<br /><br />Sledované objekty bez snímky nie je možné odoslať do Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Zoradiť",
+    "dateAsc": "Dátum (Vzostupne)",
+    "dateDesc": "Dátum (Zostupne)",
+    "scoreAsc": "Skóre objektu (Vzostupne)",
+    "scoreDesc": "Skóre objektu (zostupne)",
+    "speedAsc": "Odhadovaná rýchlosť (vzostupne)",
+    "speedDesc": "Odhadovaná rýchlosť (zostupne)",
+    "relevance": "Relevantnosť"
+  },
+  "cameras": {
+    "label": "Filter kamier"
   }
 }

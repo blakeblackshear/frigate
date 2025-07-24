@@ -20,5 +20,16 @@
   "sheep": "Ovce",
   "cow": "Krava",
   "elephant": "Slon",
-  "bear": "Medveď"
+  "bear": "Medveď",
+  "zebra": "Zebra",
+  "giraffe": "Žirafa",
+  "hat": "Čiapka",
+  "backpack": "Batoh",
+  "umbrella": "Dáždnik",
+  "shoe": "Topánka",
+  "eye_glasses": "Okuliare",
+  "handbag": "Kabelka",
+  "tie": "Kravata",
+  "suitcase": "Kufor",
+  "frisbee": "Frisbee"
 }
