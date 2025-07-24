@@ -9,5 +9,33 @@
       "go2rtc": "Registros GoRTC - Frigate",
       "nginx": "Registros Nginx - Frigate"
     }
+  },
+  "title": "Sistema",
+  "metrics": "Métricas do sistema",
+  "logs": {
+    "download": {
+      "label": "Baixar registros"
+    },
+    "copy": {
+      "label": "Copiar para a área de transferência",
+      "success": "Registros copiados para a área de transferência",
+      "error": "Não foi possível copiar os registros para a área de transferência"
+    },
+    "type": {
+      "label": "Tipo",
+      "timestamp": "Marca temporal",
+      "tag": "Etiqueta",
+      "message": "Mensagem"
+    },
+    "tips": "Os Registros estão sendo transmitidos do servidor",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Erro ao buscar registros: {{errorMessage}}",
+        "whileStreamingLogs": "Erro ao transmitir registros: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Geral"
   }
 }

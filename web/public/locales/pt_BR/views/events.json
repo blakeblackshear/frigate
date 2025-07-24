@@ -10,5 +10,23 @@
     "alert": "Não existe nenhum alerta para revisar",
     "detection": "Não há nenhuma detecção para revisar",
     "motion": "Nenhum dado de movimento encontrado"
-  }
+  },
+  "timeline": "Linha do tempo",
+  "timeline.aria": "Selecione a linha do tempo",
+  "events": {
+    "label": "Eventos",
+    "aria": "Selecione eventos",
+    "noFoundForTimePeriod": "Nenhum evento encontrado neste período."
+  },
+  "recordings": {
+    "documentTitle": "Gravações - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Últimas 24 horas"
+  },
+  "markTheseItemsAsReviewed": "Marque estes itens como revisados",
+  "newReviewItems": {
+    "button": "Novos Itens para Revisão"
+  },
+  "selected_one": "{{count}} selecionado(s)"
 }

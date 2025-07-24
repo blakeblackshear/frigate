@@ -20,5 +20,12 @@
   "motorcycle": "Moto",
   "bus": "Ônibus",
   "train": "Trem",
-  "boat": "Barco"
+  "boat": "Barco",
+  "bird": "Pássaro",
+  "cat": "Gato",
+  "dog": "Cachorro",
+  "rapping": "Cantando rap",
+  "horse": "Cavalo",
+  "humming": "Cantarolando",
+  "sheep": "Ovelha"
 }

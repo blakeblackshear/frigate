@@ -12,7 +12,27 @@
     },
     "name": {
       "label": "Nome",
-      "placeholder": "Digite um nome…"
+      "placeholder": "Digite um nome…",
+      "errorMessage": {
+        "mustLeastCharacters": "O nome do grupo de câmeras deve ter pelo menos 2 caracteres.",
+        "exists": "O nome do grupo de câmeras já existe.",
+        "nameMustNotPeriod": "O nome do grupo de câmeras não deve conter ponto.",
+        "invalid": "Nome de grupo de câmeras inválido."
+      }
+    },
+    "cameras": {
+      "label": "Câmeras",
+      "desc": "Selecione as câmeras para este grupo."
+    },
+    "icon": "Ícone",
+    "success": "O grupo de câmeras {{name}} foi salvo.",
+    "camera": {
+      "setting": {
+        "label": "Configurações de Streaming da Câmera",
+        "title": "Configurações de streaming da câmera {{cameraName}}",
+        "audioIsAvailable": "Áudio está disponível para esta transmissão",
+        "audioIsUnavailable": "Áudio indisponível para esta transmissão"
+      }
     }
   }
 }
