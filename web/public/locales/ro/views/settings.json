@@ -1,8 +1,8 @@
 {
   "documentTitle": {
-    "authentication": "Setari de Autentificcare - Frigate",
-    "camera": "Setari Camera - Frigate",
-    "default": "Setari - Frigate",
+    "authentication": "Setări de autentificare - Frigate",
+    "camera": "Setări cameră - Frigate",
+    "default": "Setări - Frigate",
     "classification": "Setări de clasificare - Frigate",
     "masksAndZones": "Editor Zonă si Mască - Frigate",
     "notifications": "Setări notificări - Frigate",
@@ -92,7 +92,7 @@
         },
         "desc": "Dimensiunea modelului utilizat pentru recunoașterea facială.",
         "small": {
-          "title": "mică",
+          "title": "mic",
           "desc": "Utilizarea variantei <em>mici</em> folosește un model FaceNet pentru încorporarea fețelor, care rulează eficient pe majoritatea tipurilor de procesoare."
         },
         "label": "Dimensiunea modelului"
@@ -130,7 +130,7 @@
     },
     "licensePlateRecognition": {
       "desc": "Frigate poate recunoaște numerele de înmatriculare ale vehiculelor și poate adăuga automat caracterele detectate în câmpul recognized_license_plate sau un nume cunoscut ca sub_etichetă pentru obiectele de tip mașină. Un caz de utilizare comun poate fi citirea numerelor de înmatriculare ale mașinilor care intră într-o curte sau ale celor care trec pe stradă.",
-      "title": "Recunoașterea numerelor de înmatriculare",
+      "title": "Recunoaștere numere de înmatriculare",
       "readTheDocumentation": "Citește documentația"
     },
     "title": "Setări îmbogățiri",
@@ -141,7 +141,7 @@
     },
     "restart_required": "Este necesară repornirea (setările de îmbogățiri au fost modificate)",
     "toast": {
-      "success": "Setările de îmbogățiri au fost salvate. Reporneste Frigate pentru a aplica modificările.",
+      "success": "Setările de îmbogățiri au fost salvate. Repornește Frigate pentru a aplica modificările.",
       "error": "Nu s-au putut salva modificările configurației: {{errorMessage}}"
     }
   },
@@ -172,7 +172,7 @@
       "zoneObjectAlertsTips": "Toate obiectele {{alertsLabels}} detectate în {{zone}} pe {{cameraName}} vor fi afișate ca alerte.",
       "objectDetectionsTips": "Toate obiectele {{detectionsLabels}} necategorisite pe {{cameraName}} vor fi afișate ca detecții, indiferent de zona în care se află.",
       "toast": {
-        "success": "Configurarea clasificării pentru revizuire a fost salvată. Repornește Frigate pentru a aplica modificările."
+        "success": "Configurația clasificării pentru revizuire a fost salvată. Repornește Frigate pentru a aplica modificările."
       },
       "selectAlertsZones": "Selectează zone pentru alerte",
       "noDefinedZones": "Nu sunt definite zone pentru această cameră.",
@@ -239,13 +239,13 @@
       "point_few": "{{count}} puncte",
       "point_other": "{{count}} de puncte",
       "clickDrawPolygon": "Fă click pentru a desena un poligon pe imagine.",
-      "label": "Mască de mișcare",
+      "label": "Măști de mișcare",
       "documentTitle": "Editează masca de mișcare - Frigate",
       "desc": {
         "documentation": "Documentație",
         "title": "Măștile de mișcare sunt folosite pentru a preveni ca anumite tipuri de mișcare nedorită să declanșeze detecția. Mascare excesivă va îngreuna urmărirea obiectelor."
       },
-      "add": "Mască de mișcare nouă",
+      "add": "Adaugă mască de mișcare",
       "edit": "Editează masca de mișcare",
       "context": {
         "documentation": "Citește documentația",
@@ -292,10 +292,10 @@
     "restart_required": "Repornire necesară (măști/zone modificate)",
     "toast": {
       "success": {
-        "copyCoordinates": "Coordonatele pentru {{polyName}} au fost copiate în clipboard."
+        "copyCoordinates": "Coordonatele pentru {{polyName}} au fost copiate."
       },
       "error": {
-        "copyCoordinatesFailed": "Nu s-au putut copia coordonatele în clipboard."
+        "copyCoordinatesFailed": "Nu s-au putut copia coordonatele."
       }
     },
     "filter": {
@@ -404,7 +404,7 @@
   "users": {
     "dialog": {
       "deleteUser": {
-        "warn": "Ești sigur că vrei să ștergi <strong>{{username}}</strong>?",
+        "warn": "Ești sigur că vrei să ștergi utilizatorul <strong>{{username}}</strong>?",
         "title": "Șterge utilizatorul",
         "desc": "Această acțiune nu poate fi anulată. Aceasta va șterge definitiv contul de utilizator și va elimina toate datele asociate."
       },
@@ -463,7 +463,7 @@
         "cannotBeEmpty": "Parola nu poate fi goală",
         "doNotMatch": "Parolele nu se potrivesc",
         "updatePassword": "Actualizează parola pentru {{username}}",
-        "setPassword": "Setează parola",
+        "setPassword": "Schimbă parola",
         "desc": "Creează o parolă puternică pentru a securiza acest cont."
       }
     },
@@ -520,7 +520,7 @@
     },
     "cameras": {
       "title": "Camere",
-      "desc": "Selectați camerele pentru care doriți să activați notificările.",
+      "desc": "Selectează camerele pentru care dorești să activezi notificările.",
       "noCameras": "Nu există camere disponibile"
     },
     "deviceSpecific": "Setări specifice dispozitivului",
@@ -580,7 +580,7 @@
         "userModel": "Reglat-fin"
       },
       "loadingAvailableModels": "Se încarcă modelele disponibile…",
-      "modelSelect": "Modelele disponibile pe Frigate+ pot fi selectate aici. Rețineți că pot fi selectate doar modelele compatibile cu configurația curentă a detectorului dumneavoastră.",
+      "modelSelect": "Modelele disponibile pe Frigate+ pot fi selectate aici. Rețineți că pot fi selectate doar modelele compatibile cu configurația actuală a detectorului dumneavoastră.",
       "baseModel": "Model de bază",
       "loading": "Se încarcă informațiile modelului…",
       "error": "Încărcarea informațiilor modelului a eșuat",
