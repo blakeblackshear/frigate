@@ -1,11 +1,11 @@
 {
   "time": {
-    "untilForTime": "Pana la {{time}}",
+    "untilForTime": "Până la {{time}}",
     "untilForRestart": "Pana la repornirea Frigate.",
     "untilRestart": "Pana la repornire",
     "ago": "{{timeAgo}} in urma",
     "justNow": "Acum",
-    "today": "Astazi",
+    "today": "Astăzi",
     "yesterday": "Ieri",
     "last7": "Ultimele 7 zile",
     "last14": "Ultimele 14 zile",
@@ -13,7 +13,7 @@
     "thisWeek": "Săptămâna aceasta",
     "lastWeek": "Săptămâna trecută",
     "thisMonth": "Luna aceasta",
-    "lastMonth": "Luna trecuta",
+    "lastMonth": "Luna trecută",
     "5minutes": "5 minute",
     "10minutes": "10 minute",
     "formattedTimestampMonthDayYear": {
@@ -44,7 +44,7 @@
     "30minutes": "30 de minute",
     "1hour": "O oră",
     "12hours": "12 ore",
-    "24hours": "24 ore",
+    "24hours": "24 de ore",
     "pm": "PM",
     "am": "AM",
     "mo": "{{time}}lună",
@@ -85,7 +85,7 @@
       "title": "Documentație",
       "label": "Documentație Frigate"
     },
-    "explore": "Explorează",
+    "explore": "Căutare",
     "uiPlayground": "UI Playground",
     "faceLibrary": "Biblioteca de fețe",
     "export": "Exportă",
@@ -137,10 +137,10 @@
     "user": {
       "title": "Utilizator",
       "account": "Cont",
-      "current": "Utilizator curent: {{user}}",
+      "current": "Utilizator actual: {{user}}",
       "logout": "Deconectare",
       "anonymous": "anonim",
-      "setPassword": "Setează parola"
+      "setPassword": "Schimă parola"
     },
     "live": {
       "cameras": {
@@ -154,22 +154,22 @@
     },
     "help": "Ajutor",
     "system": "Sistem",
-    "systemMetrics": "Metricile sistemului",
+    "systemMetrics": "Metrici de sistem",
     "configuration": "Configurație",
     "systemLogs": "Jurnale de sistem",
     "settings": "Setări",
-    "configurationEditor": "Editor de configurare",
+    "configurationEditor": "Editor de configurație",
     "languages": "Limba",
     "appearance": "Aspect",
     "darkMode": {
-      "label": "Modul întunecat",
-      "light": "Deschis",
+      "label": "Mod luminozitate",
+      "light": "Luminos",
       "dark": "Întunecat",
       "withSystem": {
-        "label": "Utilizează setările de sistem pentru modul deschis sau întunecat"
+        "label": "Utilizează setările de sistem pentru modul luminos sau întunecat"
       }
     },
-    "withSystem": "Sistem",
+    "withSystem": "Modul sistemului",
     "restart": "Repornește Frigate",
     "review": "Revizuire"
   },
@@ -243,12 +243,12 @@
     "title": "Rol"
   },
   "toast": {
-    "copyUrlToClipboard": "URL-ul a fost copiat în clipboard.",
+    "copyUrlToClipboard": "URL-ul a fost copiat.",
     "save": {
       "title": "Salvează",
       "error": {
-        "noMessage": "Nu s-au putut salva modificările de configurare",
-        "title": "Salvarea modificărilor de configurare a eșuat: {{errorMessage}}"
+        "noMessage": "Nu s-au putut salva modificările de configurație",
+        "title": "Salvarea modificărilor de configurație a eșuat: {{errorMessage}}"
       }
     }
   },
