@@ -1,0 +1,12 @@
+{
+  "person": "人",
+  "bicycle": "腳踏車",
+  "car": "車",
+  "boat": "船",
+  "traffic_light": "紅綠燈",
+  "fire_hydrant": "消防栓",
+  "street_sign": "道路標示",
+  "stop_sign": "停止標示",
+  "parking_meter": "停車柱",
+  "bench": "長椅"
+}
