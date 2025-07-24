@@ -332,7 +332,7 @@
       "context": "Nesne filtresi maskeleri, belirli bir nesne türü için konum bazında yanlış pozitifleri filtrelemek için kullanılır.",
       "objects": {
         "allObjectTypes": "Bütün nesne türleri",
-        "desc": "Bu nesne maskesinin geçerli olacağı nesne türü.",
+        "desc": "Bu nesne maskesinin uygulanacağı nesne türü.",
         "title": "Nesneler"
       },
       "add": "Nesne Maskesi Ekle",
