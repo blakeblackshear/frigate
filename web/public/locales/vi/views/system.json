@@ -61,11 +61,11 @@
   "storage": {
     "overview": "Tổng quan",
     "cameraStorage": {
-      "title": "Lưu trữ Máy quay",
+      "title": "Lưu trữ Camera",
       "camera": "Camera",
       "unusedStorageInformation": "Thông tin Lưu trữ Chưa sử dụng",
       "storageUsed": "Lưu trữ",
-      "percentageOfTotalUsed": "Phần trăm Tổng dung lượng Đã sử dụng",
+      "percentageOfTotalUsed": "Phần trăm dung lượng sử dụng",
       "bandwidth": "Băng thông",
       "unused": {
         "title": "Chưa sử dụng",
@@ -89,7 +89,7 @@
       "cameraFramesPerSecond": "{{camName}} khung hình mỗi giây",
       "cameraDetectionsPerSecond": "{{camName}} phát hiện mỗi giây",
       "overallFramesPerSecond": "tổng số khung hình mỗi giây",
-      "camera": "máy quay",
+      "camera": "camera",
       "overallSkippedDetectionsPerSecond": "tổng số phát hiện bị bỏ qua mỗi giây",
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraCapture": "{{camName}} ghi hình",
@@ -101,24 +101,24 @@
         "copyToClipboard": "Đã sao chép dữ liệu thăm dò vào clipboard."
       },
       "error": {
-        "unableToProbeCamera": "Không thể thăm dò máy quay: {{errorMessage}}"
+        "unableToProbeCamera": "Không thể thăm dò camera: {{errorMessage}}"
       }
     },
     "info": {
       "stream": "Luồng {{idx}}",
       "streamDataFromFFPROBE": "Dữ liệu luồng được lấy bằng <code>ffprobe</code>.",
       "video": "Video:",
-      "fetching": "Đang tìm nạp Dữ liệu Máy quay",
+      "fetching": "Đang tìm nạp Dữ liệu Camera",
       "codec": "Codec:",
       "unknown": "Không xác định",
       "audio": "Âm thanh:",
       "error": "Lỗi: {{error}}",
       "tips": {
-        "title": "Thông tin Thăm dò Máy quay"
+        "title": "Thông tin Thăm dò Camera"
       },
       "resolution": "Độ phân giải:",
       "fps": "FPS:",
-      "cameraProbeInfo": "Thông tin Thăm dò Máy quay {{camera}}",
+      "cameraProbeInfo": "Thông tin Thăm dò Camera {{camera}}",
       "aspectRatio": "tỉ lệ khung hình"
     },
     "overview": "Tổng quan",

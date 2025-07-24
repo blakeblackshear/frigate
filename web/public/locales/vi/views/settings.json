@@ -33,9 +33,9 @@
       "title": "Email"
     },
     "cameras": {
-      "noCameras": "Không có máy quay nào",
-      "title": "Máy quay",
-      "desc": "Chọn máy quay nào để bật thông báo."
+      "noCameras": "Không có camera nào",
+      "title": "Camera",
+      "desc": "Chọn camera để bật thông báo."
     },
     "deviceSpecific": "Cài đặt dành riêng cho thiết bị",
     "sendTestNotification": "Gửi một thông báo thử",
@@ -61,7 +61,7 @@
       "documentation": "Đọc tài liệu"
     },
     "globalSettings": {
-      "desc": "Tạm thời đình chỉ thông báo cho các máy quay cụ thể trên tất cả các thiết bị đã đăng ký.",
+      "desc": "Tạm thời đình chỉ thông báo cho các camera cụ thể trên tất cả các thiết bị đã đăng ký.",
       "title": "Cài đặt Chung"
     },
     "title": "Thông báo"
@@ -77,12 +77,12 @@
     },
     "snapshotConfig": {
       "table": {
-        "camera": "Máy quay",
+        "camera": "Camera",
         "cleanCopySnapshots": "Ảnh chụp nhanh <code>clean_copy</code>",
         "snapshots": "Ảnh chụp nhanh"
       },
       "desc": "Việc gửi đến Frigate+ yêu cầu cả ảnh chụp nhanh và ảnh chụp nhanh <code>clean_copy</code> phải được bật trong cấu hình của bạn.",
-      "cleanCopyWarning": "Một số máy quay đã bật ảnh chụp nhanh nhưng đã tắt bản sao sạch. Bạn cần bật <code>clean_copy</code> trong cấu hình ảnh chụp nhanh của mình để có thể gửi hình ảnh từ các máy quay này đến Frigate+.",
+      "cleanCopyWarning": "Một số camera đã bật ảnh chụp nhanh nhưng đã tắt bản sao sạch. Bạn cần bật <code>clean_copy</code> trong cấu hình ảnh chụp nhanh của mình để có thể gửi hình ảnh từ các camera này đến Frigate+.",
       "title": "Cấu hình Ảnh chụp nhanh",
       "documentation": "Đọc tài liệu"
     },
@@ -98,7 +98,7 @@
       "availableModels": "Các mô hình có sẵn",
       "loadingAvailableModels": "Đang tải các mô hình có sẵn…",
       "modelSelect": "Các mô hình có sẵn của bạn trên Frigate+ có thể được chọn ở đây. Lưu ý rằng chỉ những mô hình tương thích với cấu hình bộ phát hiện hiện tại của bạn mới có thể được chọn.",
-      "cameras": "Máy quay",
+      "cameras": "Camera",
       "loading": "Đang tải thông tin mô hình…",
       "modelType": "Loại Mô hình",
       "trainDate": "Ngày Huấn luyện"
@@ -111,12 +111,12 @@
     "restart_required": "Yêu cầu khởi động lại (mô hình Frigate+ đã thay đổi)"
   },
   "camera": {
-    "title": "Cài đặt Máy quay",
+    "title": "Cài đặt Camera",
     "review": {
       "alerts": "Cảnh báo ",
       "detections": "Phát hiện ",
       "title": "Xem lại",
-      "desc": "Tạm thời bật/tắt cảnh báo và phát hiện cho máy quay này cho đến khi Frigate khởi động lại. Khi bị vô hiệu hóa, sẽ không có mục xem lại mới nào được tạo ra. "
+      "desc": "Tạm thời bật/tắt cảnh báo và phát hiện cho camera này cho đến khi Frigate khởi động lại. Khi bị vô hiệu hóa, sẽ không có mục xem lại mới nào được tạo ra. "
     },
     "reviewClassification": {
       "title": "Phân loại mục Xem lại",
@@ -135,23 +135,23 @@
       "limitDetections": "Giới hạn phát hiện trong các vùng cụ thể",
       "selectDetectionsZones": "Chọn vùng cho Phát hiện",
       "zoneObjectAlertsTips": "Tất cả các đối tượng {{alertsLabels}} được phát hiện trong vùng {{zone}} trên {{cameraName}} sẽ được hiển thị dưới dạng Cảnh báo.",
-      "noDefinedZones": "Không có vùng nào được xác định cho máy quay này.",
+      "noDefinedZones": "Không có vùng nào được xác định cho camera này.",
       "objectAlertsTips": "Tất cả các đối tượng {{alertsLabels}} trên {{cameraName}} sẽ được hiển thị dưới dạng Cảnh báo.",
       "selectAlertsZones": "Chọn vùng cho Cảnh báo"
     },
     "streams": {
       "title": "Luồng phát",
-      "desc": "Tạm thời vô hiệu hóa một máy quay cho đến khi Frigate khởi động lại. Vô hiệu hóa một máy quay sẽ dừng hoàn toàn quá trình xử lý các luồng của máy quay này của Frigate. Việc phát hiện, ghi hình và gỡ lỗi sẽ không khả dụng.<br /> <em>Lưu ý: Điều này không vô hiệu hóa các luồng phát lại của go2rtc.</em>"
+      "desc": "Tạm thời vô hiệu hóa một camera cho đến khi Frigate khởi động lại. Vô hiệu hóa một camera sẽ dừng hoàn toàn quá trình xử lý các luồng của camera này của Frigate. Việc phát hiện, ghi hình và gỡ lỗi sẽ không khả dụng.<br /> <em>Lưu ý: Điều này không vô hiệu hóa các luồng phát lại của go2rtc.</em>"
     }
   },
   "masksAndZones": {
     "form": {
       "zoneName": {
         "error": {
-          "mustNotBeSameWithCamera": "Tên vùng không được trùng với tên máy quay.",
+          "mustNotBeSameWithCamera": "Tên vùng không được trùng với tên camera.",
           "mustBeAtLeastTwoCharacters": "Tên vùng phải có ít nhất 2 ký tự.",
           "mustNotContainPeriod": "Tên vùng không được chứa dấu chấm.",
-          "alreadyExists": "Một vùng với tên này đã tồn tại cho máy quay này.",
+          "alreadyExists": "Một vùng với tên này đã tồn tại cho camera này.",
           "hasIllegalCharacter": "Tên vùng chứa các ký tự không hợp lệ."
         }
       },
@@ -260,7 +260,7 @@
       },
       "name": {
         "inputPlaceHolder": "Nhập tên…",
-        "tips": "Tên phải có ít nhất 2 ký tự và không được trùng với tên của máy quay hoặc một vùng khác.",
+        "tips": "Tên phải có ít nhất 2 ký tự và không được trùng với tên của camera hoặc một vùng khác.",
         "title": "Tên"
       },
       "edit": "Chỉnh sửa Vùng",
@@ -281,13 +281,13 @@
       "polygonAreaTooLarge": {
         "documentation": "Đọc tài liệu",
         "tips": "Mặt nạ chuyển động không ngăn chặn việc phát hiện đối tượng. Bạn nên sử dụng một vùng bắt buộc thay thế.",
-        "title": "Mặt nạ chuyển động đang che {{polygonArea}}% khung hình của máy quay. Không khuyến khích sử dụng mặt nạ chuyển động lớn."
+        "title": "Mặt nạ chuyển động đang che {{polygonArea}}% khung hình của camera. Không khuyến khích sử dụng mặt nạ chuyển động lớn."
       },
       "add": "Mặt nạ chuyển động mới",
       "edit": "Chỉnh sửa Mặt nạ chuyển động",
       "context": {
         "documentation": "Đọc tài liệu",
-        "title": "Mặt nạ chuyển động được sử dụng để ngăn chặn các loại chuyển động không mong muốn kích hoạt việc phát hiện (ví dụ: cành cây, dấu thời gian của máy quay). Mặt nạ chuyển động nên được sử dụng <em>rất hạn chế</em>, việc che quá nhiều sẽ làm cho việc theo dõi đối tượng trở nên khó khăn hơn."
+        "title": "Mặt nạ chuyển động được sử dụng để ngăn chặn các loại chuyển động không mong muốn kích hoạt việc phát hiện (ví dụ: cành cây, dấu thời gian của camera). Mặt nạ chuyển động nên được sử dụng <em>rất hạn chế</em>, việc che quá nhiều sẽ làm cho việc theo dõi đối tượng trở nên khó khăn hơn."
       },
       "label": "Mặt nạ chuyển động",
       "clickDrawPolygon": "Nhấp để vẽ một đa giác trên hình ảnh.",
@@ -342,11 +342,11 @@
       "desc": "Vẽ một hình chữ nhật trên hình ảnh để xem chi tiết diện tích và tỷ lệ",
       "document": "Đọc tài liệu ",
       "score": "Điểm",
-      "tips": "Bật tùy chọn này để vẽ một hình chữ nhật trên hình ảnh của máy quay để hiển thị diện tích và tỷ lệ của nó. Các giá trị này sau đó có thể được sử dụng để đặt các tham số bộ lọc hình dạng đối tượng trong cấu hình của bạn.",
+      "tips": "Bật tùy chọn này để vẽ một hình chữ nhật trên hình ảnh của camera để hiển thị diện tích và tỷ lệ của nó. Các giá trị này sau đó có thể được sử dụng để đặt các tham số bộ lọc hình dạng đối tượng trong cấu hình của bạn.",
       "ratio": "Tỷ lệ",
       "area": "Diện tích"
     },
-    "detectorDesc": "Frigate sử dụng các bộ phát hiện của bạn ({{detectors}}) để phát hiện các đối tượng trong luồng video của máy quay.",
+    "detectorDesc": "Frigate sử dụng các bộ phát hiện của bạn ({{detectors}}) để phát hiện các đối tượng trong luồng video của camera.",
     "boundingBoxes": {
       "colors": {
         "label": "Màu sắc Hộp giới hạn Đối tượng",
@@ -491,19 +491,19 @@
       "title": "Lịch"
     },
     "storedLayouts": {
-      "desc": "Bố cục của các máy quay trong một nhóm máy quay có thể được kéo/thay đổi kích thước. Các vị trí được lưu trữ trong bộ nhớ cục bộ của trình duyệt của bạn.",
+      "desc": "Bố cục của các camera trong một nhóm camera có thể được kéo/thay đổi kích thước. Các vị trí được lưu trữ trong bộ nhớ cục bộ của trình duyệt của bạn.",
       "title": "Bố cục đã lưu",
       "clearAll": "Xóa tất cả Bố cục"
     },
     "cameraGroupStreaming": {
-      "title": "Cài đặt Phát luồng Nhóm Máy quay",
-      "desc": "Cài đặt phát luồng cho mỗi nhóm máy quay được lưu trữ trong bộ nhớ cục bộ của trình duyệt của bạn.",
+      "title": "Cài đặt Phát luồng Nhóm Camera",
+      "desc": "Cài đặt phát luồng cho mỗi nhóm camera được lưu trữ trong bộ nhớ cục bộ của trình duyệt của bạn.",
       "clearAll": "Xóa tất cả Cài đặt Phát luồng"
     },
     "toast": {
       "success": {
         "clearStoredLayout": "Đã xóa bố cục đã lưu cho {{cameraName}}",
-        "clearStreamingSettings": "Đã xóa cài đặt phát luồng cho tất cả các nhóm máy quay."
+        "clearStreamingSettings": "Đã xóa cài đặt phát luồng cho tất cả các nhóm camera."
       },
       "error": {
         "clearStoredLayoutFailed": "Không thể xóa bố cục đã lưu: {{errorMessage}}",
@@ -512,7 +512,7 @@
     },
     "liveDashboard": {
       "automaticLiveView": {
-        "desc": "Tự động chuyển sang chế độ xem trực tiếp của máy quay khi phát hiện hoạt động. Việc tắt tùy chọn này sẽ khiến hình ảnh tĩnh của máy quay trên bảng điều khiển Trực tiếp chỉ cập nhật mỗi phút một lần.",
+        "desc": "Tự động chuyển sang chế độ xem trực tiếp của camera khi phát hiện hoạt động. Việc tắt tùy chọn này sẽ khiến hình ảnh tĩnh của camera trên bảng điều khiển Trực tiếp chỉ cập nhật mỗi phút một lần.",
         "label": "Chế độ xem trực tiếp tự động"
       },
       "playAlertVideos": {
