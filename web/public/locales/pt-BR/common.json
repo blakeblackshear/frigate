@@ -7,7 +7,21 @@
     "justNow": "Agora mesmo",
     "today": "Hoje",
     "yesterday": "Ontem",
-    "last7": "Últimos 7 dias"
+    "last7": "Últimos 7 dias",
+    "last14": "Últimos 14 dias",
+    "last30": "Últimos 30 dias",
+    "thisWeek": "Essa semana",
+    "lastWeek": "Semana passada",
+    "thisMonth": "Este mês",
+    "lastMonth": "Mês passado",
+    "5minutes": "5 minutos",
+    "10minutes": "10 minutos",
+    "30minutes": "30 minutos",
+    "1hour": "1 hora",
+    "12hours": "12 horas",
+    "24hours": "24 horas",
+    "pm": "pm",
+    "am": "am"
   },
   "selectItem": "Selecione {{item}}"
 }

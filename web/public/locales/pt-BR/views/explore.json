@@ -7,7 +7,32 @@
     "embeddingsReindexing": {
       "context": "Explorar pode ser usado depois da incorporação do objeto rastreado terminar a reindexação.",
       "startingUp": "Começando…",
-      "estimatedTime": "Time estimado faltando:"
+      "estimatedTime": "Time estimado faltando:",
+      "finishingShortly": "Terminando em breve",
+      "step": {
+        "thumbnailsEmbedded": "Miniaturas incorporadas: ",
+        "descriptionsEmbedded": "Descrições incorporadas: ",
+        "trackedObjectsProcessed": "Objetos rastreados processados: "
+      }
+    },
+    "downloadingModels": {
+      "context": "Frigate está baixando os modelos de embeddings necessários para oferecer suporte ao recurso de Pesquisa Semântica. Isso pode levar vários minutos, dependendo da velocidade da sua conexão de rede.",
+      "setup": {
+        "textModel": "Modelo de texto",
+        "textTokenizer": "Tokenizador de Texto"
+      },
+      "tips": {
+        "context": "Você pode querer reindexar as incorporações de seus objetos rastreados uma vez que os modelos forem baixados.",
+        "documentation": "Leia a documentação"
+      },
+      "error": "Um erro ocorreu. Verifique os registos do Frigate."
     }
+  },
+  "details": {
+    "timestamp": "Carimbo de data e hora"
+  },
+  "trackedObjectDetails": "Detalhes do Objeto Rastreado",
+  "type": {
+    "details": "detalhes"
   }
 }

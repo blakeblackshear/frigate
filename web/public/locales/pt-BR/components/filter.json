@@ -12,7 +12,29 @@
   "zones": {
     "label": "Zonas",
     "all": {
-      "title": "Todas as Zonas"
+      "title": "Todas as Zonas",
+      "short": "Zonas"
     }
+  },
+  "dates": {
+    "selectPreset": "Selecione uma predefinição…",
+    "all": {
+      "title": "Todas as datas",
+      "short": "Datas"
+    }
+  },
+  "more": "Mais filtros",
+  "reset": {
+    "label": "Resetar filtros para valores padrão"
+  },
+  "timeRange": "Intervalo de Tempo",
+  "subLabels": {
+    "label": "Sub-etiquetas",
+    "all": "Todas as Sub-etiquetas"
+  },
+  "score": "Pontuação",
+  "estimatedSpeed": "Velocidade Estimada {{unit}}",
+  "features": {
+    "hasSnapshot": "Tem um snapshot"
   }
 }

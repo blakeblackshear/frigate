@@ -16,8 +16,34 @@
       },
       "review": {
         "question": {
-          "label": "Confirmar essa etiqueta para Frigate Plus"
+          "label": "Confirmar essa etiqueta para Frigate Plus",
+          "ask_a": "Este objeto é um <code>{{label}}</code>?",
+          "ask_an": "Este objeto é um<code>{{label}}</code>?",
+          "ask_full": "Este objeto é um<code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Enviado"
         }
+      }
+    },
+    "video": {
+      "viewInHistory": "Ver no Histórico"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Selecione da Linha do tempo",
+      "lastHour_one": "Última hora",
+      "lastHour_many": "Últimas {{count}} horas",
+      "lastHour_other": "Últimas {{count}} horas",
+      "custom": "Personalizado",
+      "start": {
+        "title": "Hora de Início",
+        "label": "Selecione a Hora de Início"
+      },
+      "end": {
+        "title": "Hora de Término",
+        "label": "Selecione a Hora de Término"
       }
     }
   }

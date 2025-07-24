@@ -3,8 +3,10 @@
     "person": "Pessoa",
     "unknown": "Desconhecido",
     "face": "Detalhes do Rosto",
-    "subLabelScore": "Pontuação da Sub Etiqueta",
-    "scoreInfo": "A pontuação da sub etiqueta é a pontuação ponderada de todas as confidências faciais reconhecidas, então a pontuação pode ser diferente da mostrada na foto instantânea."
+    "subLabelScore": "Pontuação do sub-rótulo",
+    "scoreInfo": "A pontuação da sub etiqueta é a pontuação ponderada de todas as confidências faciais reconhecidas, então a pontuação pode ser diferente da mostrada na foto instantânea.",
+    "faceDesc": "Detalhes do objeto rastreado que gerou este rosto",
+    "timestamp": "Carimbo de data e hora"
   },
   "selectItem": "Selecione {{item}}",
   "imageEntry": {
@@ -24,7 +26,10 @@
     "reprocessFace": "Reprocessar Rosto"
   },
   "createFaceLibrary": {
-    "new": "Criar Novo Rosto"
+    "new": "Criar Novo Rosto",
+    "title": "Criar Coleção",
+    "desc": "Criar uma nova coleção",
+    "nextSteps": "Para construir uma base forte:<li> Use a aba Teinar para selecionar e treinar em imagens para cada pessoa detectada.</li><li> Foque em imagens retas para melhores resultados; evite treinar imagens que capturam rostos em um ângulo.</li></ul>"
   },
   "deleteFaceAttempts": {
     "title": "Apagar Rostos",
@@ -40,11 +45,19 @@
   "pixels": "{{area}}px",
   "readTheDocs": "Leia a documentação",
   "steps": {
-    "nextSteps": "Próximos Passos"
+    "nextSteps": "Próximos Passos",
+    "faceName": "Digite o Nome do Rosto",
+    "uploadFace": "Enviar Imagem de Rosto"
   },
   "description": {
     "placeholder": "Informe um nome para esta coleção",
     "addFace": "Passo a Passo para adicionar uma nova coleção a Biblioteca Facial.",
     "invalidName": "Nome inválido. Nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífenes."
-  }
+  },
+  "documentTitle": "Biblioteca de rostos - Frigate",
+  "uploadFaceImage": {
+    "title": "Carregar imagem facial",
+    "desc": "Envie uma imagem para escanear por faces e incluir em {{pageToggle}}"
+  },
+  "collections": "Coleções"
 }

@@ -9,5 +9,39 @@
   "cameraAudio": {
     "enable": "Habilitar Áudio da Câmera",
     "disable": "Desabilitar Audio da Câmera"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Clique no quadro para centralizar a câmera",
+        "enable": "Ativar clique para mover",
+        "disable": "Desativar clique para mover"
+      },
+      "left": {
+        "label": "Mova a câmera PTZ para a esquerda"
+      },
+      "up": {
+        "label": "Mova a câmera PTZ para cima"
+      },
+      "down": {
+        "label": "Mova a câmera PTZ para baixo"
+      },
+      "right": {
+        "label": "Mova a câmera PTZ para a direita"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Clique no quadro para centralizar a câmera PTZ"
+      }
+    },
+    "presets": "Predefinições de câmera PTZ"
+  },
+  "camera": {
+    "enable": "Ativar Câmera",
+    "disable": "Desabilitar Câmera"
+  },
+  "muteCameras": {
+    "enable": "Silenciar Todas as Câmeras"
   }
 }

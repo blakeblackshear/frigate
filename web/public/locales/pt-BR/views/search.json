@@ -6,6 +6,21 @@
     "clear": "Limpar procurar",
     "save": "Salvar pesquisa",
     "delete": "Apagar procura salva",
-    "filterInformation": "Filtrar informação"
+    "filterInformation": "Filtrar informação",
+    "filterActive": "Filtros ativos"
+  },
+  "trackedObjectId": "ID do objeto rastreado",
+  "filter": {
+    "label": {
+      "cameras": "Câmeras",
+      "labels": "Etiquetas",
+      "zones": "Zonas",
+      "before": "Antes",
+      "after": "Depois",
+      "min_score": "Pontuação Mínima",
+      "max_score": "Pontuação Máxima",
+      "min_speed": "Velocidade Mínima",
+      "max_speed": "Velocidade Máxima"
+    }
   }
 }

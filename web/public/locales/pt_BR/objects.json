@@ -6,5 +6,19 @@
   "airplane": "Avião",
   "bus": "Ônibus",
   "train": "Trem",
-  "boat": "Barco"
+  "boat": "Barco",
+  "traffic_light": "Semáforo",
+  "fire_hydrant": "Hidrante",
+  "street_sign": "Placa de rua",
+  "stop_sign": "Sinal de parada",
+  "parking_meter": "Parquímetro",
+  "bench": "Banco",
+  "bird": "Pássaro",
+  "cat": "Gato",
+  "dog": "Cachorro",
+  "horse": "Cavalo",
+  "sheep": "Ovelha",
+  "cow": "Vaca",
+  "elephant": "Elefante",
+  "bear": "Urso"
 }

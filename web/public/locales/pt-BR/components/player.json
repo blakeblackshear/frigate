@@ -10,5 +10,31 @@
   "streamOffline": {
     "title": "Stream Offiline",
     "desc": "Nenhum quadro foi recebido na stream {{cameraName}}<code>detect</code>, checar registros de erros"
+  },
+  "cameraDisabled": "A câmera está desativada",
+  "stats": {
+    "streamType": {
+      "title": "Tipo de fluxo:",
+      "short": "Tipo"
+    },
+    "bandwidth": {
+      "title": "Largura de banda:"
+    },
+    "latency": {
+      "title": "Latência:",
+      "value": "{{seconds}} segundos",
+      "short": {
+        "title": "Latência",
+        "value": "{{seconds}} segundos"
+      }
+    },
+    "totalFrames": "Total de Quadros:",
+    "droppedFrames": {
+      "title": "Quadros perdidos:",
+      "short": {
+        "title": "Perdidos",
+        "value": "{{droppedFrames}} quadros"
+      }
+    }
   }
 }

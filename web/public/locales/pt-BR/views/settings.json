@@ -6,6 +6,23 @@
     "enrichments": "Configurações de Enriquecimento - Frigate",
     "masksAndZones": "Editor de Máscara e Zona - Frigate",
     "motionTuner": "Virada de Movimento - Frigate",
-    "object": "Debug - Frigate"
+    "object": "Debug - Frigate",
+    "general": "Configurações Gerais - Frigate",
+    "frigatePlus": "Frigate+ Configurações- Frigate",
+    "notifications": "Configurações de notificação - Frigate"
+  },
+  "menu": {
+    "ui": "UI",
+    "cameras": "Configurações da câmera",
+    "masksAndZones": "Máscaras / Zonas",
+    "users": "Usuários",
+    "notifications": "Notificações",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Você tem alterações não salvas.",
+      "desc": "Você deseja salvar as alterações antes de continuar?"
+    }
   }
 }
