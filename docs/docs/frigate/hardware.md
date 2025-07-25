@@ -115,8 +115,17 @@ A single Coral can handle many cameras using the default model and will be suffi
 The OpenVINO detector type is able to run on:
 
 - 6th Gen Intel Platforms and newer that have an iGPU
-- x86 & Arm64 hosts with VPU Hardware (ex: Intel NCS2)
+- x86 hosts with an Intel Arc GPU
 - Most modern AMD CPUs (though this is officially not supported by Intel)
+- x86 & Arm64 hosts via CPU (generally not recommended)
+
+:::note
+
+Intel NPUs are not officially supported, [though users have gotten it working](https://github.com/blakeblackshear/frigate/discussions/13248#discussioncomment-12347357).
+
+During testing, the NPU provides similar or worse performance comared to the integrated GPU.
+
+:::
 
 More information is available [in the detector docs](/configuration/object_detectors#openvino-detector)
 
