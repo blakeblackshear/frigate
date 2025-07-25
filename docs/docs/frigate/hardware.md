@@ -60,13 +60,13 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **AMD**
 
-- [ROCm](#amd-gpus): ROCm can run on AMD Discrete GPUs to provide efficient object detection
+- [ROCm](#rocm---amd-gpu): ROCm can run on AMD Discrete GPUs to provide efficient object detection
   - [Supports limited model architectures](../../configuration/object_detectors#supported-models-1)
   - Runs best on discrete AMD GPUs
 
 **Intel**
 
-- [OpenVino](#openvino): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
+- [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
   - [Supports majority of model architectures](../../configuration/object_detectors#supported-models)
   - Runs best with tiny, small, or medium models
 
@@ -110,13 +110,22 @@ Frigate supports both the USB and M.2 versions of the Google Coral.
 
 A single Coral can handle many cameras using the default model and will be sufficient for the majority of users. You can calculate the maximum performance of your Coral based on the inference speed reported by Frigate. With an inference speed of 10, your Coral will top out at `1000/10=100`, or 100 frames per second. If your detection fps is regularly getting close to that, you should first consider tuning motion masks. If those are already properly configured, a second Coral may be needed.
 
-### OpenVINO
+### OpenVINO - Intel
 
 The OpenVINO detector type is able to run on:
 
 - 6th Gen Intel Platforms and newer that have an iGPU
-- x86 & Arm64 hosts with VPU Hardware (ex: Intel NCS2)
+- x86 hosts with an Intel Arc GPU
 - Most modern AMD CPUs (though this is officially not supported by Intel)
+- x86 & Arm64 hosts via CPU (generally not recommended)
+
+:::note
+
+Intel NPUs have seen [limited success in community deployments](https://github.com/blakeblackshear/frigate/discussions/13248#discussioncomment-12347357), although they remain officially unsupported.
+
+In testing, the NPU delivered performance that was only comparable to — or in some cases worse than — the integrated GPU.
+
+:::
 
 More information is available [in the detector docs](/configuration/object_detectors#openvino-detector)
 
@@ -138,7 +147,7 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 
 Frigate is able to utilize an Nvidia GPU which supports the 12.x series of CUDA libraries.
 
-### Minimum Hardware Support
+#### Minimum Hardware Support
 
  12.x series of CUDA libraries are used which have minor version compatibility. The minimum driver version on the host system must be `>=545`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the NVIDIA GPU Compute Capability table linked below.
 
@@ -168,7 +177,7 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 | Quadro P400 2GB | 20 - 25 ms            |                           |                           |
 | Quadro P2000    | ~ 12 ms               |                           |                           |
 
-### AMD GPUs
+### ROCm - AMD GPU
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
