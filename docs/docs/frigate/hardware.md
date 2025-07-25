@@ -60,7 +60,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **AMD**
 
-- [ROCm](#amd-gpus): ROCm can run on AMD Discrete GPUs to provide efficient object detection
+- [ROCm](#rocm---amd-gpu): ROCm can run on AMD Discrete GPUs to provide efficient object detection
   - [Supports limited model architectures](../../configuration/object_detectors#supported-models-1)
   - Runs best on discrete AMD GPUs
 
@@ -147,7 +147,7 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 
 Frigate is able to utilize an Nvidia GPU which supports the 12.x series of CUDA libraries.
 
-### Minimum Hardware Support
+#### Minimum Hardware Support
 
  12.x series of CUDA libraries are used which have minor version compatibility. The minimum driver version on the host system must be `>=545`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the NVIDIA GPU Compute Capability table linked below.
 
@@ -177,7 +177,7 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 | Quadro P400 2GB | 20 - 25 ms            |                           |                           |
 | Quadro P2000    | ~ 12 ms               |                           |                           |
 
-### AMD GPUs
+### ROCm - AMD GPU
 
 With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
