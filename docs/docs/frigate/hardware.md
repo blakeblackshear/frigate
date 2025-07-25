@@ -121,7 +121,7 @@ The OpenVINO detector type is able to run on:
 
 :::note
 
-Intel NPUs are not officially supported, [though users have gotten it working](https://github.com/blakeblackshear/frigate/discussions/13248#discussioncomment-12347357).
+Intel NPUs have seen [limited success in community deployments](https://github.com/blakeblackshear/frigate/discussions/13248#discussioncomment-12347357), although they remain officially unsupported.
 
 During testing, the NPU provides similar or worse performance comared to the integrated GPU.
 
