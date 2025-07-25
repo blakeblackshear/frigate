@@ -66,7 +66,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Intel**
 
-- [OpenVino](#openvino): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
+- [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
   - [Supports majority of model architectures](../../configuration/object_detectors#supported-models)
   - Runs best with tiny, small, or medium models
 
@@ -110,7 +110,7 @@ Frigate supports both the USB and M.2 versions of the Google Coral.
 
 A single Coral can handle many cameras using the default model and will be sufficient for the majority of users. You can calculate the maximum performance of your Coral based on the inference speed reported by Frigate. With an inference speed of 10, your Coral will top out at `1000/10=100`, or 100 frames per second. If your detection fps is regularly getting close to that, you should first consider tuning motion masks. If those are already properly configured, a second Coral may be needed.
 
-### OpenVINO
+### OpenVINO - Intel
 
 The OpenVINO detector type is able to run on:
 
