@@ -53,9 +53,9 @@ Some users may find that Frigate+ models result in more false positives initiall
 Frigate+ models support a more relevant set of objects for security cameras. The labels for annotation in Frigate+ are configurable by editing the camera in the Cameras section of Frigate+. Currently, the following objects are supported:
 
 - **People**: `person`, `face`
-- **Vehicles**: `car`, `motorcycle`, `bicycle`, `boat`, `license_plate`
-- **Delivery Logos**: `amazon`, `usps`, `ups`, `fedex`, `dhl`, `an_post`, `purolator`, `postnl`, `nzpost`, `postnord`, `gls`, `dpd`
-- **Animals**: `dog`, `cat`, `deer`, `horse`, `bird`, `raccoon`, `fox`, `bear`, `cow`, `squirrel`, `goat`, `rabbit`
+- **Vehicles**: `car`, `motorcycle`, `bicycle`, `boat`, `school_bus`, `license_plate`
+- **Delivery Logos**: `amazon`, `usps`, `ups`, `fedex`, `dhl`, `an_post`, `purolator`, `postnl`, `nzpost`, `postnord`, `gls`, `dpd`, `canada_post`, `royal_mail`
+- **Animals**: `dog`, `cat`, `deer`, `horse`, `bird`, `raccoon`, `fox`, `bear`, `cow`, `squirrel`, `goat`, `rabbit`, `skunk`, `kangaroo`
 - **Other**: `package`, `waste_bin`, `bbq_grill`, `robot_lawnmower`, `umbrella`
 
 Other object types available in the default Frigate model are not available. Additional object types will be added in future releases.
@@ -66,7 +66,7 @@ Candidate labels are also available for annotation. These labels don't have enou
 
 Where possible, these labels are mapped to existing labels during training. For example, any `baby` labels are mapped to `person` until support for new labels is added.
 
-The candidate labels are: `baby`, `royal mail`, `canada post`, `bpost`, `skunk`, `badger`, `possum`, `rodent`, `kangaroo`, `chicken`, `groundhog`, `boar`, `hedgehog`, `school bus`, `tractor`, `golf cart`, `garbage truck`, `bus`, `sports ball`
+The candidate labels are: `baby`, `bpost`, `badger`, `possum`, `rodent`, `chicken`, `groundhog`, `boar`, `hedgehog`, `tractor`, `golf cart`, `garbage truck`, `bus`, `sports ball`
 
 Candidate labels are not available for automatic suggestions.
 
