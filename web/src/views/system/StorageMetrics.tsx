@@ -80,7 +80,7 @@ export default function StorageMetrics({
   const formattedEarliestDate = useFormattedTimestamp(
     earliestDate || 0,
     format,
-    timezone,
+    "UTC", // timezone is already converted from recordings summary endpoint
   );
 
   if (!cameraStorage || !stats || !totalStorage || !config) {
