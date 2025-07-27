@@ -13,6 +13,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useFormattedTimestamp, useTimezone } from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
 import { useTranslation } from "react-i18next";
+import { TZDate } from "react-day-picker";
 
 type CameraStorage = {
   [key: string]: {
@@ -66,9 +67,10 @@ export default function StorageMetrics({
   const earliestDate = useMemo(() => {
     const keys = Object.keys(recordingsSummary || {});
     return keys.length
-      ? new Date(keys[keys.length - 1]).getTime() / 1000
+      ? new TZDate(keys[keys.length - 1] + "T00:00:00", timezone).getTime() /
+          1000
       : null;
-  }, [recordingsSummary]);
+  }, [recordingsSummary, timezone]);
 
   const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
   const format = useMemo(() => {

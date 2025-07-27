@@ -50,7 +50,7 @@ export default function ReviewActivityCalendar({
         }
 
         const parts = date.split("-");
-        const cal = new TZDate(date, timezone);
+        const cal = new TZDate(date + "T00:00:00", timezone);
 
         cal.setFullYear(
           parseInt(parts[0]),
@@ -70,7 +70,7 @@ export default function ReviewActivityCalendar({
         }
 
         const parts = date.split("-");
-        const cal = new TZDate(date, timezone);
+        const cal = new TZDate(date + "T00:00:00", timezone);
 
         cal.setFullYear(
           parseInt(parts[0]),
