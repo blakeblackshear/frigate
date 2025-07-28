@@ -20,9 +20,11 @@ RUN apt update && \
     apt update && \
     apt install -y rocm
 
-RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
+RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib/hipblaslt/library
 RUN cd /opt/rocm-$ROCM/lib && \
     cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocsolver*.so* librocfft*.so* librocprofiler*.so* libroctx*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/ && \
+    mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib/hipblaslt/library && \
+    cp -dpr hipblaslt /opt/rocm-dist/opt/rocm-$ROCM/lib/ && \
     mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib && \
     cp -dpr migraphx/lib/* /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
@@ -57,6 +59,7 @@ COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-drive
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share/miopen/db/
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx908* /opt/rocm-$ROCM/share/miopen/db/
 COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/lib/rocblas/library/
+COPY --from=rocm /opt/rocm-$ROCM/lib/hipblaslt/library/*$AMDGPU* /opt/rocm-$ROCM/lib/hipblaslt/library/
 COPY --from=rocm /opt/rocm-dist/ /
 
 #######################################################################

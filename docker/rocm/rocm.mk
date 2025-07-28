@@ -1,7 +1,7 @@
 BOARDS += rocm
 
 # AMD/ROCm is chunky so we build couple of smaller images for specific chipsets
-ROCM_CHIPSETS:=gfx900:9.0.0 gfx1030:10.3.0 gfx1100:11.0.0
+ROCM_CHIPSETS:=gfx900:9.0.0 gfx1030:10.3.0 gfx1100:11.0.0 gfx1201:11.0.0
 
 local-rocm: version
 	$(foreach chipset,$(ROCM_CHIPSETS), \
