@@ -12,7 +12,7 @@ local-rocm: version
 			--set rocm.tags=frigate:latest-rocm-$(word 1,$(subst :, ,$(chipset))) \
 			--load \
 	&&) true
-	
+
 	unset HSA_OVERRIDE_GFX_VERSION && \
 	HSA_OVERRIDE=0 \
 	AMDGPU=gfx \
