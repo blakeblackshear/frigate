@@ -657,7 +657,7 @@ export function RecordingView({
                 containerRef={mainLayoutRef}
               />
             </div>
-            {isDesktop && (
+            {isDesktop && allCameras.length > 1 && (
               <div
                 ref={previewRowRef}
                 className={cn(
