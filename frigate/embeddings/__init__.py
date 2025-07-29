@@ -7,6 +7,7 @@ import multiprocessing as mp
 import os
 import signal
 import threading
+from json.decoder import JSONDecodeError
 from types import FrameType
 from typing import Any, Optional, Union
 
@@ -78,7 +79,7 @@ class EmbeddingsContext:
                 data = json.loads(f.read())
                 self.thumb_stats.from_dict(data["thumb_stats"])
                 self.desc_stats.from_dict(data["desc_stats"])
-        except FileNotFoundError:
+        except (FileNotFoundError, JSONDecodeError):
             pass
 
     def stop(self):
