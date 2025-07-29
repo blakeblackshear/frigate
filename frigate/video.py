@@ -22,8 +22,8 @@ from frigate.config.camera.updater import (
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
-    REQUEST_REGION_GRID,
     PROCESS_PRIORITY_HIGH,
+    REQUEST_REGION_GRID,
 )
 from frigate.log import LogPipe
 from frigate.motion import MotionDetector
