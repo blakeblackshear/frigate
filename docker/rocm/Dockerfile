@@ -33,7 +33,10 @@ RUN echo /opt/rocm/lib|tee /opt/rocm-dist/etc/ld.so.conf.d/rocm.conf
 #######################################################################
 FROM deps AS deps-prelim
 
-RUN apt-get update && apt-get install -y libnuma1
+COPY docker/rocm/debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
+RUN apt-get update && \
+    apt-get install -y libnuma1 && \
+    apt-get install -qq -y -t bookworm-backports mesa-va-drivers mesa-vulkan-drivers
 
 WORKDIR /opt/frigate
 COPY --from=rootfs / /
