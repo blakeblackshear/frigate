@@ -7,6 +7,7 @@ import multiprocessing as mp
 import os
 import signal
 import threading
+from json.decoder import JSONDecodeError
 from types import FrameType
 from typing import Any, Optional, Union
 
@@ -73,13 +74,21 @@ class EmbeddingsContext:
         self.requestor = EmbeddingsRequestor()
 
         # load stats from disk
+        stats_file = os.path.join(CONFIG_DIR, ".search_stats.json")
         try:
-            with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "r") as f:
+            with open(stats_file, "r") as f:
                 data = json.loads(f.read())
                 self.thumb_stats.from_dict(data["thumb_stats"])
                 self.desc_stats.from_dict(data["desc_stats"])
         except FileNotFoundError:
             pass
+        except JSONDecodeError:
+            logger.warning("Failed to decode semantic search stats, clearing file")
+            try:
+                with open(stats_file, "w") as f:
+                    f.write("")
+            except OSError as e:
+                logger.error(f"Failed to clear corrupted stats file: {e}")
 
     def stop(self):
         """Write the stats to disk as JSON on exit."""
