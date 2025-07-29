@@ -11,8 +11,8 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import (
     CLIPS_DIR,
     MODEL_CACHE_DIR,
-    UPDATE_MODEL_STATE,
     PROCESS_PRIORITY_LOW,
+    UPDATE_MODEL_STATE,
 )
 from frigate.log import redirect_output_to_logger
 from frigate.types import ModelStatusTypesEnum
