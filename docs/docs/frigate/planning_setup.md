@@ -1,6 +1,6 @@
 ---
 id: planning_setup
-title: Planning setup
+title: Planning a New Installation
 ---
 
 Choosing the right hardware for your Frigate NVR setup is important for optimal performance and a smooth experience. This guide will walk you through the key considerations, focusing on the number of cameras and the hardware required for efficient object detection.
