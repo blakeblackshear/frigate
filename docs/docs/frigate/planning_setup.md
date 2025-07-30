@@ -7,7 +7,7 @@ Choosing the right hardware for your Frigate NVR setup is important for optimal 
 
 ## Key Considerations
 
-## Number of Cameras and Simultaneous Activity
+### Number of Cameras and Simultaneous Activity
 
 The most fundamental factor in your hardware decision is the number of cameras you plan to use. However, it's not just about the raw count; it's also about how many of those cameras are likely to see activity and require object detection simultaneously.
 
