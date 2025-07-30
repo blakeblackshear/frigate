@@ -7,6 +7,7 @@ const sidebars: SidebarsConfig = {
     Frigate: [
       'frigate/index',
       'frigate/hardware',
+      'frigate/planning_setup',
       'frigate/installation',
       'frigate/updating',
       'frigate/camera_setup',
