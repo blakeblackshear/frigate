@@ -13,13 +13,20 @@ The most fundamental factor in your hardware decision is the number of cameras y
 
 When motion is detected in a camera's feed, regions of that frame are sent to your chosen object detection hardware (e.g., a Coral TPU).
 
-- **Low Simultaneous Activity (1-6 cameras with occasional motion)**: If you have a few cameras in areas with infrequent activity (e.g., a seldom-used backyard, a quiet interior), the demand on your object detection hardware will be lower. A single, entry-level AI accelerator might suffice.
-- **Moderate Simultaneous Activity (6-12 cameras with some overlapping motion)**: For setups with more cameras, especially in areas like a busy street or a property with multiple access points, it's more likely that several cameras will detect motion at the same time. This significantly increases the load on your object detection hardware, requiring more processing power.
-- **High Simultaneous Activity (12+ cameras or highly active zones)**: Large installations or scenarios where many cameras frequently capture motion (e.g., a commercial property, an active public space) will necessitate robust object detection capabilities. You'll likely need multiple accelerators or a more powerful single unit.
+- **Low Simultaneous Activity (1-6 cameras with occasional motion)**: If you have a few cameras in areas with infrequent activity (e.g., a seldom-used backyard, a quiet interior), the demand on your object detection hardware will be lower. A single, entry-level AI accelerator will suffice.
+- **Moderate Simultaneous Activity (6-12 cameras with some overlapping motion)**: For setups with more cameras, especially in areas like a busy street or a property with multiple access points, it's more likely that several cameras will capture activity at the same time. This increases the load on your object detection hardware, requiring more processing power.
+- **High Simultaneous Activity (12+ cameras or highly active zones)**: Large installations or scenarios where many cameras frequently capture activity (e.g., busy street with overview, identification, dedicated LPR cameras, etc.) will necessitate robust object detection capabilities. You'll likely need multiple entry-level AI accelerators or a more powerful single unit such as a discrete GPU.
+- **Commercial Installations (40+ cameras)**: Commercial installations or scenarios where a substantial number of cameras capture activity (e.g., a commercial property, an active public space) will necessitate robust object detection capabilities. You'll likely need a modern discrete GPU.
 
 ### Video Decoding
 
 Modern CPUs with integrated GPUs (Intel Quick Sync, AMD VCN) or dedicated GPUs can significantly offload video decoding from the main CPU, freeing up resources. This is highly recommended, especially for multiple cameras.
+
+:::tip
+
+For commercial installations it is important to verify the number of supported concurrent streams on your GPU, many consumer GPUs max out at ~20 concurrent camera streams.
+
+:::
 
 ### Object Detection
 
