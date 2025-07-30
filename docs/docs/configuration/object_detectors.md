@@ -777,8 +777,8 @@ model:
   labelmap_path: /labelmap/coco-80.txt
   input_tensor: nchw
   input_pixel_format: rgb
-  width: 320
-  height: 320
+  width: 320 # MUST match the chosen model i.e yolov7-320 -> 320, yolov4-416 -> 416
+  height: 320 # MUST match the chosen model i.e yolov7-320 -> 320 yolov4-416 -> 416
 ```
 
 ## Rockchip platform
