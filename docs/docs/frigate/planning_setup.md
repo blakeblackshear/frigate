@@ -11,7 +11,7 @@ Choosing the right hardware for your Frigate NVR setup is important for optimal 
 
 The most fundamental factor in your hardware decision is the number of cameras you plan to use. However, it's not just about the raw count; it's also about how many of those cameras are likely to see activity and require object detection simultaneously.
 
-When motion is detected in a camera's feed, regions of that frame are sent to your chosen object detection hardware (e.g., a Coral TPU).
+When motion is detected in a camera's feed, regions of that frame are sent to your chosen object detection hardware (e.g., a Hailo Accelerator).
 
 - **Low Simultaneous Activity (1-6 cameras with occasional motion)**: If you have a few cameras in areas with infrequent activity (e.g., a seldom-used backyard, a quiet interior), the demand on your object detection hardware will be lower. A single, entry-level AI accelerator will suffice.
 - **Moderate Simultaneous Activity (6-12 cameras with some overlapping motion)**: For setups with more cameras, especially in areas like a busy street or a property with multiple access points, it's more likely that several cameras will capture activity at the same time. This increases the load on your object detection hardware, requiring more processing power.
