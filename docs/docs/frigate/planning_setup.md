@@ -7,7 +7,7 @@ Choosing the right hardware for your Frigate NVR setup is important for optimal 
 
 ## Key Considerations
 
-### Number of Cameras and Simultaneous Activity
+## Number of Cameras and Simultaneous Activity
 
 The most fundamental factor in your hardware decision is the number of cameras you plan to use. However, it's not just about the raw count; it's also about how many of those cameras are likely to see activity and require object detection simultaneously.
 
@@ -28,9 +28,44 @@ For commercial installations it is important to verify the number of supported c
 
 :::
 
+## Hardware Considerations
+
 ### Object Detection
 
 There are many different hardware options for object detection depending on priorities and available hardware. See [the recommended hardware page](./hardware.md#detectors) for more specifics on what hardware is recommended for object detection.
+
+### Storage
+
+Storage is an important consideration when planning a new installation. To get a more precise estimate of your storage requirements, you can use an IP camera storage calculator. Websites like [IPConfigure Storage Calculator](https://calculator.ipconfigure.com/) can help you determine the necessary disk space based on your camera settings.
+
+
+#### SSDs (Solid State Drives)
+
+SSDs are an excellent choice for Frigate, offering high speed and responsiveness. The older concern that SSDs would quickly "wear out" from constant video recording is largely no longer valid for modern consumer and enterprise-grade SSDs.
+
+- Longevity: Modern SSDs are designed with advanced wear-leveling algorithms and significantly higher "Terabytes Written" (TBW) ratings than earlier models. For typical home NVR use, a good quality SSD will likely outlast the useful life of your NVR hardware itself.
+- Performance: SSDs excel at handling the numerous small write operations that occur during continuous video recording and can significantly improve the responsiveness of the Frigate UI and clip retrieval.
+- Silence and Efficiency: SSDs produce no noise and consume less power than traditional HDDs.
+
+#### HDDs (Hard Disk Drives)
+
+Traditional Hard Disk Drives (HDDs) remain a great and often more cost-effective option for long-term video storage, especially for larger setups where raw capacity is prioritized.
+
+- Cost-Effectiveness: HDDs offer the best cost per gigabyte, making them ideal for storing many days, weeks, or months of continuous footage.
+- Capacity: HDDs are available in much larger capacities than most consumer SSDs, which is beneficial for extensive video archives.
+- NVR-Rated Drives: If choosing an HDD, consider drives specifically designed for surveillance (NVR) use, such as Western Digital Purple or Seagate SkyHawk. These drives are engineered for 24/7 operation and continuous write workloads, offering improved reliability compared to standard desktop drives.
+
+Determining Your Storage Needs
+The amount of storage you need will depend on several factors:
+
+- Number of Cameras: More cameras naturally require more space.
+- Resolution and Framerate: Higher resolution (e.g., 4K) and higher framerate (e.g., 30fps) streams consume significantly more storage.
+- Recording Method: Continuous recording uses the most space. motion-only recording or object-triggered recording can save space, but may miss some footage.
+- Retention Period: How many days, weeks, or months of footage do you want to keep?
+
+#### Network Storage (NFS/SMB)
+
+While supported, using network-attached storage (NAS) for recordings can introduce latency and network dependency considerations. For optimal performance and reliability, it is generally recommended to have local storage for your Frigate recordings. If using a NAS, ensure your network connection to it is robust and fast (Gigabit Ethernet at minimum) and that the NAS itself can handle the continuous write load.
 
 ### RAM (Memory)
 
