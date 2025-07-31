@@ -365,8 +365,8 @@ detectors:
 
 model:
   model_type: rfdetr
-  width: 560
-  height: 560
+  width: 320
+  height: 320
   input_tensor: nchw
   input_dtype: float
   path: /config/model_cache/rfdetr.onnx
@@ -616,8 +616,8 @@ detectors:
 
 model:
   model_type: rfdetr
-  width: 560
-  height: 560
+  width: 320
+  height: 320
   input_tensor: nchw
   input_dtype: float
   path: /config/model_cache/rfdetr.onnx
@@ -983,22 +983,21 @@ Make sure you change the batch size to 1 before exporting.
 
 ### Download RF-DETR Model
 
-To export as ONNX:
+RF-DETR can be exported as ONNX by running the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=Nano` in the first line to `Nano`, `Small`, or `Medium` size.
 
-1. `pip3 install rfdetr`
-2. `python3`
-3. `from rfdetr import RFDETRBase`
-4. `x = RFDETRBase()`
-5. `x.export()`
-
-#### Additional Configuration
-
-The input tensor resolution can be customized:
-
-```python
-from rfdetr import RFDETRBase
-x = RFDETRBase(resolution=560)  # resolution must be a multiple of 56
-x.export()
+```sh
+docker build . --build-arg MODEL_SIZE=Nano --output . -f- <<'EOF'
+FROM python:3.11 AS build
+RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+WORKDIR /rfdetr
+RUN uv pip install --system rfdetr onnx onnxruntime onnxsim onnx-graphsurgeon
+ARG MODEL_SIZE
+RUN python3 -c "from rfdetr import RFDETR${MODEL_SIZE}; x = RFDETR${MODEL_SIZE}(resolution=320); x.export()"
+FROM scratch
+ARG MODEL_SIZE
+COPY --from=build /rfdetr/output/inference_model.onnx /rfdetr-${MODEL_SIZE}.onnx
+EOF
 ```
 
 ### Downloading YOLO-NAS Model
