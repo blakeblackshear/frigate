@@ -166,12 +166,12 @@ There are improved capabilities in newer GPU architectures that TensorRT can ben
 Inference speeds will vary greatly depending on the GPU and the model used.
 `tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-| Name            | YOLOv9 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time    |
-| --------------- | --------------------- | ------------------------- | ------------------------- |
-| RTX 3050        | 320: 15 ms            | 320: ~ 10 ms 640: ~ 16 ms | 336: ~ 16 ms 560: ~ 40 ms |
-| RTX 3070        | 320: 11 ms            | 320: ~ 8 ms 640: ~ 14 ms  | 336: ~ 14 ms 560: ~ 36 ms |
-| RTX A4000       |                       | 320: ~ 15 ms              |                           |
-| Tesla P40       |                       | 320: ~ 105 ms             |                           |
+| Name            | YOLOv9 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time |
+| --------------- | --------------------- | ------------------------- | ---------------------- |
+| RTX 3050        | 320: 15 ms            | 320: ~ 10 ms 640: ~ 16 ms | Nano: ~ 12 ms          |
+| RTX 3070        | 320: 11 ms            | 320: ~ 8 ms 640: ~ 14 ms  | Nano: ~ 9 ms           |
+| RTX A4000       |                       | 320: ~ 15 ms              |                        |
+| Tesla P40       |                       | 320: ~ 105 ms             |                        |
 
 ### ROCm - AMD GPU
 
