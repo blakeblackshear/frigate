@@ -7,7 +7,7 @@ from .zmq_proxy import Publisher, Subscriber
 logger = logging.getLogger(__name__)
 
 
-class ReviewDataPublisher(Publisher[tuple[str, float]]):
+class ReviewDataPublisher(Publisher): # update when typing improvement is added Publisher[tuple[str, float]]
     """Publishes review item data."""
 
     topic_base = "review/"
