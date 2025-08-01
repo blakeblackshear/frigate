@@ -187,7 +187,6 @@ Next, you should configure [hardware object detection](/configuration/object_det
 Running in Docker with compose is the recommended install method.
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     container_name: frigate
