@@ -19,11 +19,6 @@ class SemanticSearchModelEnum(str, Enum):
     jinav2 = "jinav2"
 
 
-class LPRDeviceEnum(str, Enum):
-    GPU = "GPU"
-    CPU = "CPU"
-
-
 class BirdClassificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable bird classification.")
     threshold: float = Field(
@@ -51,6 +46,11 @@ class SemanticSearchConfig(FrigateBaseModel):
     )
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
+    )
+    device: str = Field(
+        default="CPU",
+        title="The device to use for license plate recognition.",
+        description="Use 'cpu' or 'gpu', to target a specific gpu use: '0', '1', etc.",
     )
 
 
@@ -92,6 +92,11 @@ class FaceRecognitionConfig(FrigateBaseModel):
     blur_confidence_filter: bool = Field(
         default=True, title="Apply blur quality filter to face confidence."
     )
+    device: str = Field(
+        default="CPU",
+        title="The device to use for license plate recognition.",
+        description="Use 'cpu' or 'gpu', to target a specific gpu use: '0', '1', etc.",
+    )
 
 
 class CameraFaceRecognitionConfig(FrigateBaseModel):
@@ -105,10 +110,6 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
-    device: Optional[LPRDeviceEnum] = Field(
-        default=LPRDeviceEnum.CPU,
-        title="The device used for license plate recognition.",
-    )
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
     )
@@ -153,6 +154,11 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
     debug_save_plates: bool = Field(
         default=False,
         title="Save plates captured for LPR for debugging purposes.",
+    )
+    device: str = Field(
+        default="CPU",
+        title="The device to use for license plate recognition.",
+        description="Use 'cpu' or 'gpu', to target a specific gpu use: '0', '1', etc.",
     )
 
 
