@@ -612,7 +612,7 @@ face_recognition:
   blur_confidence_filter: True
   # Optional: Set the model size used face recognition. (default: shown below)
   model_size: small
-  # Optional: Target a specific device to run the model (default: None)
+  # Optional: Target a specific device to run the model (default: shown below)
   # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
   device: None
 
