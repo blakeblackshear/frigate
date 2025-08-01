@@ -269,7 +269,7 @@ class ArcFaceRecognizer(FaceRecognizer):
     def __init__(self, config: FrigateConfig):
         super().__init__(config)
         self.mean_embs: dict[int, np.ndarray] = {}
-        self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding()
+        self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding(config)
         self.model_builder_queue: queue.Queue | None = None
 
     def clear(self) -> None:
