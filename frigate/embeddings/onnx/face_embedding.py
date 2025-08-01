@@ -150,7 +150,12 @@ class ArcfaceEmbedding(BaseEmbedding):
 
             self.runner = ONNXModelRunner(
                 os.path.join(self.download_path, self.model_file),
-                device=self.config.face_recognition.device,
+                device=self.config.face_recognition.device
+                or (
+                    "GPU"
+                    if self.config.face_recognition.model_size == "large"
+                    else "CPU"
+                ),
             )
 
     def _preprocess_inputs(self, raw_inputs):
