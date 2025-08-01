@@ -112,9 +112,7 @@ class Embeddings:
             self.embedding = JinaV2Embedding(
                 model_size=self.config.semantic_search.model_size,
                 requestor=self.requestor,
-                device="GPU"
-                if self.config.semantic_search.model_size == "large"
-                else "CPU",
+                device=self.config.semantic_search.device,
             )
             self.text_embedding = lambda input_data: self.embedding(
                 input_data, embedding_type="text"
@@ -131,7 +129,7 @@ class Embeddings:
             self.vision_embedding = JinaV1ImageEmbedding(
                 model_size=config.semantic_search.model_size,
                 requestor=self.requestor,
-                device="GPU" if config.semantic_search.model_size == "large" else "CPU",
+                device=self.config.semantic_search.device,
             )
 
     def update_stats(self) -> None:
