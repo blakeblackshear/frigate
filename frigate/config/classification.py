@@ -132,7 +132,7 @@ class SemanticSearchConfig(FrigateBaseModel):
     )
     device: str = Field(
         default="CPU",
-        title="The device to use for license plate recognition.",
+        title="The device to use for semantic search.",
         description="Use 'cpu' or 'gpu', to target a specific gpu use: '0', '1', etc.",
     )
 
@@ -203,7 +203,7 @@ class FaceRecognitionConfig(FrigateBaseModel):
     )
     device: str = Field(
         default="CPU",
-        title="The device to use for license plate recognition.",
+        title="The device to use for face recognition.",
         description="Use 'cpu' or 'gpu', to target a specific gpu use: '0', '1', etc.",
     )
 
