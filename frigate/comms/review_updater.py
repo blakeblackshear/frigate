@@ -7,7 +7,7 @@ from .zmq_proxy import Publisher, Subscriber
 logger = logging.getLogger(__name__)
 
 
-class RecordingsDataPublisher(Publisher[tuple[str, float]]):
+class ReviewDataPublisher(Publisher[tuple[str, float]]):
     """Publishes review item data."""
 
     topic_base = "review/"
@@ -19,7 +19,7 @@ class RecordingsDataPublisher(Publisher[tuple[str, float]]):
         super().publish(payload, sub_topic)
 
 
-class RecordingsDataSubscriber(Subscriber):
+class ReviewDataSubscriber(Subscriber):
     """Receives review item data."""
 
     topic_base = "review/"
