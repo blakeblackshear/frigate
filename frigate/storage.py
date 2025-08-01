@@ -94,6 +94,22 @@ class StorageMaintainer(threading.Thread):
             [b["bandwidth"] for b in self.camera_storage_stats.values()]
         )
         remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / pow(2, 20), 1)
+        
+        # Check if max_size is configured and total usage exceeds it
+        max_size = self.config.record.retain.max_size
+        if max_size is not None:
+            total_usage = (
+                Recordings.select(fn.SUM(Recordings.segment_size))
+                .where(Recordings.segment_size != 0)
+                .scalar() or 0
+            ) / pow(2, 20)  # Convert to MB
+            
+            if total_usage > max_size:
+                logger.debug(
+                    f"Storage cleanup check: total usage {total_usage} MB exceeds max_size {max_size} MB."
+                )
+                return True
+        
         logger.debug(
             f"Storage cleanup check: {hourly_bandwidth} hourly with remaining storage: {remaining_storage}."
         )

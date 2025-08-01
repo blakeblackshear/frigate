@@ -31,6 +31,7 @@ class RetainModeEnum(str, Enum):
 class RecordRetainConfig(FrigateBaseModel):
     days: float = Field(default=0, title="Default retention period.")
     mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
+    max_size: Optional[int] = Field(default=None, title="Maximum storage size in MB.")
 
 
 class ReviewRetainConfig(FrigateBaseModel):

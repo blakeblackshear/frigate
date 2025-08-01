@@ -452,6 +452,9 @@ record:
     #   active_objects - save all recording segments with active/moving objects
     # NOTE: this mode only applies when the days setting above is greater than 0
     mode: all
+    # Optional: Maximum storage size in MB for recordings (default: no limit)
+    # When total recording storage exceeds this limit, oldest recordings will be deleted
+    max_size: 5000
   # Optional: Recording Export Settings
   export:
     # Optional: Timelapse Output Args (default: shown below).

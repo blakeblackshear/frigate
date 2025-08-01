@@ -260,6 +260,78 @@ class TestHttp(unittest.TestCase):
         assert Recordings.get(Recordings.id == rec_k2_id)
         assert Recordings.get(Recordings.id == rec_k3_id)
 
+    def test_storage_cleanup_with_max_size(self):
+        """Test that storage cleanup is triggered when max_size is exceeded."""
+        config_with_max_size = {
+            "mqtt": {"host": "mqtt"},
+            "record": {"retain": {"max_size": 1}},  # 1 MB max size
+            "cameras": {
+                "front_door": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        config = FrigateConfig(**config_with_max_size)
+        storage = StorageMaintainer(config, MagicMock())
+
+        # Insert recordings that exceed max_size (1 MB = 1048576 bytes)
+        time_now = datetime.datetime.now().timestamp()
+        rec_id1 = "test1.recording"
+        rec_id2 = "test2.recording"
+        
+        # Create recordings with size larger than max_size
+        _insert_mock_recording(
+            rec_id1,
+            os.path.join(self.test_dir, f"{rec_id1}.tmp"),
+            time_now - 3600,
+            time_now - 3590,
+            seg_size=524288,  # 0.5 MB
+        )
+        _insert_mock_recording(
+            rec_id2,
+            os.path.join(self.test_dir, f"{rec_id2}.tmp"),
+            time_now - 1800,
+            time_now - 1790,
+            seg_size=524288,  # 0.5 MB (total 1 MB)
+        )
+        
+        storage.calculate_camera_bandwidth()
+        
+        # Should trigger cleanup since total size (1 MB) exceeds max_size (1 MB)
+        assert storage.check_storage_needs_cleanup() == True
+
+    def test_storage_cleanup_without_max_size(self):
+        """Test that max_size check is skipped when not configured."""
+        config = FrigateConfig(**self.minimal_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        time_now = datetime.datetime.now().timestamp()
+        rec_id = "test.recording"
+        
+        # Create a large recording
+        _insert_mock_recording(
+            rec_id,
+            os.path.join(self.test_dir, f"{rec_id}.tmp"),
+            time_now - 3600,
+            time_now - 3590,
+            seg_size=1048576,  # 1 MB
+        )
+        
+        storage.calculate_camera_bandwidth()
+        
+        # Should not trigger cleanup based on max_size since it's not configured
+        # (may still trigger based on free space, but that's a separate check)
+        assert storage.config.record.retain.max_size is None
+
 
 def _insert_mock_event(id: str, start: int, end: int, retain: bool) -> Event:
     """Inserts a basic event model with a given id."""

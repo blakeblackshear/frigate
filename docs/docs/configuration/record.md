@@ -70,6 +70,8 @@ record:
 
 As of Frigate 0.12 if there is less than an hour left of storage, the oldest 2 hours of recordings will be deleted.
 
+Additionally, you can configure a maximum storage size limit for recordings using the `max_size` option. When the total size of recordings exceeds this limit, Frigate will automatically clean up the oldest recordings to stay within the specified size.
+
 ## Configuring Recording Retention
 
 Frigate supports both continuous and tracked object based recordings with separate retention modes and retention periods.
@@ -92,6 +94,20 @@ record:
 ```
 
 Continuous recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
+
+### Storage Size Limit
+
+You can configure a maximum storage size limit for recordings. When the total size of recordings exceeds this limit, Frigate will automatically clean up the oldest recordings first.
+
+```yaml
+record:
+  enabled: True
+  retain:
+    days: 7
+    max_size: 5000 # <- maximum storage size in MB (5GB in this example)
+```
+
+The `max_size` parameter specifies the maximum total storage size in megabytes (MB) that recordings should consume. This works in addition to the time-based retention settings - recordings will be deleted when either the time limit OR the size limit is exceeded.
 
 ### Object Recording
 

@@ -1531,6 +1531,49 @@ class TestConfig(unittest.TestCase):
 
         self.assertRaises(ValueError, lambda: FrigateConfig(**config))
 
+    def test_record_retain_max_size(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "record": {"retain": {"max_size": 1000}},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert frigate_config.record.retain.max_size == 1000
+
+    def test_record_retain_max_size_default(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+        frigate_config = FrigateConfig(**config)
+        assert frigate_config.record.retain.max_size is None
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
