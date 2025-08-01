@@ -47,10 +47,10 @@ class SemanticSearchConfig(FrigateBaseModel):
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
     )
-    device: str = Field(
-        default="CPU",
-        title="The device to use for semantic search.",
-        description="Use 'cpu' or 'gpu', to target a specific gpu use: '0', '1', etc.",
+    device: Optional[str] = Field(
+        default=None,
+        title="The gpu id to use for semantic search.",
+        description="This is an override, to target a specific gpu use: '0', '1', etc.",
     )
 
 
@@ -92,10 +92,10 @@ class FaceRecognitionConfig(FrigateBaseModel):
     blur_confidence_filter: bool = Field(
         default=True, title="Apply blur quality filter to face confidence."
     )
-    device: str = Field(
-        default="CPU",
-        title="The device to use for face recognition.",
-        description="Use 'cpu' or 'gpu', to target a specific gpu use: '0', '1', etc.",
+    device: Optional[str] = Field(
+        default=None,
+        title="The gpu id to use for face recognition.",
+        description="This is an override, to target a specific gpu use: '0', '1', etc.",
     )
 
 
@@ -155,10 +155,10 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         default=False,
         title="Save plates captured for LPR for debugging purposes.",
     )
-    device: str = Field(
-        default="CPU",
-        title="The device to use for license plate recognition.",
-        description="Use 'cpu' or 'gpu', to target a specific gpu use: '0', '1', etc.",
+    device: Optional[str] = Field(
+        default=None,
+        title="The gpu id to use for license plate recognition.",
+        description="This is an override, to target a specific gpu use: '0', '1', etc.",
     )
 
 
