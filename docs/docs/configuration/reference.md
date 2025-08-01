@@ -588,7 +588,7 @@ semantic_search:
   model_size: "small"
   # Optional: Target a specific device to run the model (default: None)
   # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
-  #device: 
+  device: None
 
 # Optional: Configuration for face recognition capability
 # NOTE: enabled, min_area can be overridden at the camera level
