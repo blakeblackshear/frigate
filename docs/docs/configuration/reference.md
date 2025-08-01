@@ -586,7 +586,7 @@ semantic_search:
   # Optional: Set the model size used for embeddings. (default: shown below)
   # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
-  # Optional: Target a specific device to run the model (default: None)
+  # Optional: Target a specific device to run the model (default: shown below)
   # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
   device: None
 
