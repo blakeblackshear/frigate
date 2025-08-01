@@ -1,6 +1,7 @@
 """Maintain review segments in db."""
 
 import copy
+import datetime
 import json
 import logging
 import os
@@ -64,6 +65,7 @@ class PendingReviewSegment:
         self.zones = zones
         self.audio = audio
         self.last_update = frame_time
+        self.thumb_time: float | None = None
 
         # thumbnail
         self._frame = np.zeros((THUMB_HEIGHT * 3 // 2, THUMB_WIDTH), np.uint8)
@@ -105,6 +107,7 @@ class PendingReviewSegment:
         )
 
         if self._frame is not None:
+            self.thumb_time = datetime.datetime.now().timestamp()
             self.has_frame = True
             cv2.imwrite(
                 self.frame_path, self._frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
@@ -138,6 +141,7 @@ class PendingReviewSegment:
                     "sub_labels": list(self.sub_labels.values()),
                     "zones": self.zones,
                     "audio": list(self.audio),
+                    "thumb_time": self.thumb_time,
                 },
             }
         )

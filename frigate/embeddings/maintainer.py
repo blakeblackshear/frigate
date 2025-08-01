@@ -50,6 +50,7 @@ from frigate.data_processing.post.audio_transcription import (
 from frigate.data_processing.post.license_plate import (
     LicensePlatePostProcessor,
 )
+from frigate.data_processing.post.review_descriptions import ReviewDescriptionProcessor
 from frigate.data_processing.post.semantic_trigger import SemanticTriggerProcessor
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
 from frigate.data_processing.real_time.bird import BirdRealTimeProcessor
@@ -534,7 +535,9 @@ class EmbeddingMaintainer(threading.Thread):
             if review_updates == None:
                 break
 
-            logger.info(f"revieved review update {review_updates}")
+            for processor in self.post_processors:
+                if isinstance(processor, ReviewDescriptionProcessor):
+                    processor.process_data(review_updates, PostProcessDataEnum.review)
 
     def _process_event_metadata(self):
         # Check for regenerate description requests
