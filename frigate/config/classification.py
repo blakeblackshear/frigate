@@ -203,8 +203,8 @@ class FaceRecognitionConfig(FrigateBaseModel):
     )
     device: Optional[str] = Field(
         default=None,
-        title="The gpu id to use for face recognition.",
-        description="This is an override, to target a specific gpu use: '0', '1', etc.",
+        title="The device key to use for semantic search.",
+        description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
     )
 
 
