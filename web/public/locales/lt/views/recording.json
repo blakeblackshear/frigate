@@ -1,0 +1,12 @@
+{
+  "filter": "Filtras",
+  "export": "Eksportuoti",
+  "calendar": "Kalendorius",
+  "filters": "Filtrai",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Pasriniktas laiko periodas netinkamas",
+      "endTimeMustAfterStartTime": "Pabaigos laikas privalo būti vėlesnis nei pradžios laikas"
+    }
+  }
+}

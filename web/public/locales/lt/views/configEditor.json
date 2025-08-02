@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Konfiguracijos redaktorius - Frigate",
+  "configEditor": "Konfiguracijos Redaktorius",
+  "copyConfig": "Kopijuoti Konfiguraciją",
+  "saveAndRestart": "Išsaugoti ir Perkrauti",
+  "saveOnly": "Tik Išsaugoti",
+  "confirm": "Išeiti neišsaugant?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Konfiguracija nukopijuota į atmintį."
+    },
+    "error": {
+      "savingError": "Klaida išsaugant konfiguraciją"
+    }
+  }
+}
