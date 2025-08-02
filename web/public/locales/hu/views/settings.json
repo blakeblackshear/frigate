@@ -42,7 +42,7 @@
         "desc": "Automatikusan váltson át a kamera élő nézetére, amikor aktivitást észlel. Ha ez az opció ki van kapcsolva, akkor az Élő irányítópulton a statikus kameraképek csak percenként egyszer frissülnek."
       },
       "playAlertVideos": {
-        "label": "Riadó Videók Lejátszása",
+        "label": "Riasztási Videók Lejátszása",
         "desc": "Alapértelmezetten az Élő irányítópulton a legutóbbi riasztások kis, ismétlődő videóként jelennek meg. Kapcsolja ki ezt az opciót, ha csak állóképet szeretne megjeleníteni a legutóbbi riasztásokról ezen az eszközön/böngészőben."
       }
     },
