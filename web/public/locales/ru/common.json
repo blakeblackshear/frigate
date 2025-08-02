@@ -56,11 +56,11 @@
     },
     "formattedTimestamp2": {
       "24hour": "d MMM HH:mm:ss",
-      "12hour": "MM/dd h:mm:ssa"
+      "12hour": "dd/MM h:mm:ssa"
     },
     "formattedTimestamp": {
-      "12hour": "MMM d, h:mm:ss aaa",
-      "24hour": "MMM d, HH:mm:ss"
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
     },
     "formattedTimestampOnlyMonthAndDay": "%b %-d",
     "formattedTimestampHourMinuteSecond": {
@@ -68,25 +68,25 @@
       "24hour": "HH:mm:ss"
     },
     "formattedTimestampFilename": {
-      "24hour": "MM-dd-yy-HH-mm-ss",
-      "12hour": "MM-dd-yy-h-mm-ss-a"
+      "24hour": "dd-MM-yy-HH-mm-ss",
+      "12hour": "dd-MM-yy-h-mm-ss-a"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "MMM d, h:mm aaa",
-      "24hour": "MMM d, HH:mm"
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "MMM d yyyy, h:mm aaa",
-      "24hour": "MMM d yyyy, HH:mm"
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
     },
-    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampMonthDay": "d MMM",
     "formattedTimestampHourMinute": {
       "12hour": "h:mm aaa",
       "24hour": "HH:mm"
     },
     "formattedTimestampMonthDayYear": {
-      "12hour": "MMM d, yyyy",
-      "24hour": "MMM d, yyyy"
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
     }
   },
   "selectItem": "Выбор {{item}}",
