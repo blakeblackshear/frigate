@@ -166,15 +166,15 @@
     "embeddings": {
       "image_embedding_speed": "Velocidade de incorporação de imagem",
       "face_embedding_speed": "Velocidade de incorporação facial",
-      "plate_recognition_speed": "Velocidade de reconhecimento de matrículas",
+      "plate_recognition_speed": "Velocidade de reconhecimento de placas",
       "text_embedding_speed": "Velocidade de incorporação de texto",
       "face_recognition_speed": "Velocidade de Reconhecimento Facial",
-      "plate_recognition": "Reconhecimento de Matrículas",
+      "plate_recognition": "Reconhecimento de Placas",
       "image_embedding": "Incorporação de Imagem",
       "text_embedding": "Incorporação de Texto",
       "face_recognition": "Reconhecimento Facial",
-      "yolov9_plate_detection_speed": "Velocidade de Detecção de Matrículas YOLOv9",
-      "yolov9_plate_detection": "Detecção de Matrículas YOLOv9"
+      "yolov9_plate_detection_speed": "Velocidade de Detecção de Placas YOLOv9",
+      "yolov9_plate_detection": "Detecção de Placas YOLOv9"
     }
   }
 }

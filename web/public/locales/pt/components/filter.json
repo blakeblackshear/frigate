@@ -117,11 +117,11 @@
     "desc": "Excluir estes {{objectLength}} objetos rastreados remove a captura de imagem, quaisquer embeddings salvos e todas as entradas associadas ao ciclo de vida do objeto. As gravações desses objetos rastreados na visualização do Histórico <em>NÃO</em> serão excluídas.<br /><br />Tem certeza de que deseja continuar?<br /><br />Mantenha pressionada a tecla <em>Shift</em> para ignorar este diálogo no futuro."
   },
   "recognizedLicensePlates": {
-    "title": "Matrículas Reconhecidas",
+    "title": "Placas Reconhecidas",
     "noLicensePlatesFound": "Nenhuma matrícula encontrada.",
-    "selectPlatesFromList": "Selecione uma ou mais matrículas da lista.",
-    "loadFailed": "Falha ao carregar as matrículas reconhecidas.",
-    "loading": "Carregando matrículas reconhecidas…",
-    "placeholder": "Digite para procurar matrículas…"
+    "selectPlatesFromList": "Selecione uma ou mais placas da lista.",
+    "loadFailed": "Falha ao carregar as placas reconhecidas.",
+    "loading": "Carregando placas reconhecidas…",
+    "placeholder": "Digite para procurar placas…"
   }
 }
