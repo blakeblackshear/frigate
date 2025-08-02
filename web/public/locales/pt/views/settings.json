@@ -570,8 +570,8 @@
       "title": "Busca semântica"
     },
     "licensePlateRecognition": {
-      "desc": "O Frigate pode reconhecer matrículas de veículos e adicionar automaticamente os caracteres detectados ao campo recognized_license_plate ou um nome conhecido como subrótulo para objetos do tipo carro. Um caso de uso comum pode ser a leitura de matrículas de carros entrando numa garagem ou de carros passando por uma rua.",
-      "title": "Reconhecimento de matrículas",
+      "desc": "O Frigate pode reconhecer placas de veículos e adicionar automaticamente os caracteres detectados ao campo recognized_license_plate ou um nome conhecido como subrótulo para objetos do tipo carro. Um caso de uso comum pode ser a leitura de placas de carros entrando numa garagem ou de carros passando por uma rua.",
+      "title": "Reconhecimento de placas",
       "readTheDocumentation": "Leia a documentação"
     },
     "birdClassification": {
