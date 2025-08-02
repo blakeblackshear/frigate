@@ -19,7 +19,9 @@
       "context": "Frigate está baixando os modelos de embeddings necessários para oferecer suporte ao recurso de Pesquisa Semântica. Isso pode levar vários minutos, dependendo da velocidade da sua conexão de rede.",
       "setup": {
         "textModel": "Modelo de texto",
-        "textTokenizer": "Tokenizador de Texto"
+        "textTokenizer": "Tokenizador de Texto",
+        "visionModel": "Modelo de visão",
+        "visionModelFeatureExtractor": "Extrator de características do modelo de visão"
       },
       "tips": {
         "context": "Você pode querer reindexar as incorporações de seus objetos rastreados uma vez que os modelos forem baixados.",
@@ -33,6 +35,41 @@
   },
   "trackedObjectDetails": "Detalhes do Objeto Rastreado",
   "type": {
-    "details": "detalhes"
+    "details": "detalhes",
+    "snapshot": "captura de imagem",
+    "video": "vídeo",
+    "object_lifecycle": "ciclo de vida do obejto"
+  },
+  "objectLifecycle": {
+    "title": "Ciclo de Vida do Objeto",
+    "noImageFound": "Nenhuma imagem encontrada nessa marcação de horário.",
+    "createObjectMask": "Criar Máscara de Objeto",
+    "adjustAnnotationSettings": "Ajustar configurações de anotação",
+    "scrollViewTips": "Role a tela para ver momentos significantes do ciclo de vida desse objeto.",
+    "autoTrackingTips": "As posições da caixa delimitadora será inacurada para cameras com rastreamento automático.",
+    "count": "{{first}} de {{second}}",
+    "trackedPoint": "Ponto Rastreado",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} detectado",
+      "entered_zone": "{{label}} entrou em {{zones}}",
+      "active": "{{label}} se tornou ativo",
+      "stationary": "{{label}} se tornou estacionário",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detectado para {{label}}",
+        "other": "{{label}} reconhecido como {{attribute}}"
+      },
+      "gone": "{{label}} esquerda",
+      "heard": "{{label}} escutado(a)",
+      "header": {
+        "zones": "Zonas",
+        "area": "Área"
+      }
+    },
+    "annotationSettings": {
+      "title": "Configurações de anotação",
+      "showAllZones": {
+        "title": "Mostrar todas as zonas"
+      }
+    }
   }
 }

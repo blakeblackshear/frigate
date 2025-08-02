@@ -18,7 +18,8 @@
       "short": "Tipo"
     },
     "bandwidth": {
-      "title": "Largura de banda:"
+      "title": "Largura de banda:",
+      "short": "Largura de banda"
     },
     "latency": {
       "title": "Latência:",
@@ -35,6 +36,16 @@
         "title": "Perdidos",
         "value": "{{droppedFrames}} quadros"
       }
+    },
+    "decodedFrames": "Quadros Decodificados:",
+    "droppedFrameRate": "Taxa de Quadros Perdidos:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Quadro enviado ao Frigate+ com sucesso"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Falha em submeter quadro ao Frigate+"
     }
   }
 }

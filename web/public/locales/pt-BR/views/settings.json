@@ -17,12 +17,85 @@
     "masksAndZones": "Máscaras / Zonas",
     "users": "Usuários",
     "notifications": "Notificações",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "motionTuner": "Ajuste de Detecção de Movimento",
+    "debug": "Depuração",
+    "enrichments": "Melhorias"
   },
   "dialog": {
     "unsavedChanges": {
       "title": "Você tem alterações não salvas.",
       "desc": "Você deseja salvar as alterações antes de continuar?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Câmera",
+    "noCamera": "Sem Câmera"
+  },
+  "general": {
+    "title": "Opções Gerais",
+    "liveDashboard": {
+      "title": "Painel em Tempo Real",
+      "automaticLiveView": {
+        "label": "Visão em Tempo Real Automática",
+        "desc": "Automaticamente alterar para a visão em tempo real da câmera quando alguma atividade for detectada. Desativar essa opção faz com que as imagens estáticas da câmera no Painel em Tempo Real atualizem apenas uma vez por minuto."
+      },
+      "playAlertVideos": {
+        "label": "Reproduzir Alertas de Video",
+        "desc": "Por padrão, alertas recentes no Painel em Tempo Real sejam reproduzidos como vídeos em loop. Desative essa opção para mostrar apenas a imagens estáticas de alertas recentes nesse dispositivo / navegador."
+      }
+    },
+    "storedLayouts": {
+      "title": "Layouts Salvos",
+      "desc": "O layout das câmeras em um grupo de câmeras pode ser arrastado/redimensionado. As posições são salvas no armazenamento local do seu navegador.",
+      "clearAll": "Apagar Todos os Layouts"
+    },
+    "cameraGroupStreaming": {
+      "title": "Opções de Streaming de Grupo de Câmeras",
+      "desc": "Os ajustes de streaming para cada grupo de câmera são salvos no armazenamento local do seu navegador.",
+      "clearAll": "Apagar Todos os Ajustes de Streaming"
+    },
+    "recordingsViewer": {
+      "title": "Visualizador de Gravações",
+      "defaultPlaybackRate": {
+        "label": "Taxa Padrão de Reprodução",
+        "desc": "Taxa Padrão de Reprodução para Gravações."
+      }
+    },
+    "calendar": {
+      "title": "Calendário",
+      "firstWeekday": {
+        "label": "Primeiro Dia da Semana",
+        "desc": "Dia em que as semanas no calendário de revisão iniciam.",
+        "sunday": "Domingo",
+        "monday": "Segunda-Feira"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Layout deletado para {{cameraName}}",
+        "clearStreamingSettings": "Ajustes de streaming para todos os grupos de câmera limpados."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Não foi possível apagar o layout:{{errorMessage}}",
+        "clearStreamingSettingsFailed": "Não foi possível apagar os ajustes de streaming:{{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "title": "Configurações de Enriquecimento",
+    "unsavedChanges": "Alterações de configurações de Enriquecimento não salvas",
+    "birdClassification": {
+      "title": "Classificação de Pássaros",
+      "desc": "A classificação de pássaros identifica pássaros conhecidos usando o modelo Tensorflow quantizado. Quando um pássaro é reconhecido, o seu nome commum será adicionado como uma subcategoria. Essa informação é incluida na UI, filtros e notificações."
+    },
+    "semanticSearch": {
+      "title": "Busca Semântica",
+      "desc": "A Busca Semântica no Frigate permite você encontrar objetos rastreados dentro dos seus itens revisados, usando ou a imagem em si, uma descrição de texto definida pelo usuário ou uma gerada automaticamente.",
+      "readTheDocumentation": "Leia a Documentação",
+      "reindexNow": {
+        "label": "Reindexar Agora"
+      }
     }
   }
 }

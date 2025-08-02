@@ -45,6 +45,66 @@
         "title": "Hora de Término",
         "label": "Selecione a Hora de Término"
       }
+    },
+    "name": {
+      "placeholder": "Nomeie a Exportação"
+    },
+    "select": "Selecionar",
+    "export": "Exportar",
+    "selectOrExport": "Selecionar ou Exportar",
+    "toast": {
+      "success": "Exportação iniciada com sucesso. Veja o arquivo na pasta /exports.",
+      "error": {
+        "failed": "Falha em iniciar exportação: {{error}}",
+        "endTimeMustAfterStartTime": "Tempo de finalização deve ser após tempo de início",
+        "noVaildTimeSelected": "Nenhuma faixa de tempo válida selecionada"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Salvar Exportação",
+      "previewExport": "Pré-Visualizar Exportação"
+    }
+  },
+  "streaming": {
+    "label": "Transmissão",
+    "restreaming": {
+      "disabled": "A retransmissão não está habilitada para essa câmera.",
+      "desc": {
+        "title": "Configurar o go2rtc para opções de visualização ao vivo e audio adicional para essa câmera.",
+        "readTheDocumentation": "Leia a documentação"
+      }
+    },
+    "showStats": {
+      "label": "Exibir estatísticas da transmissão",
+      "desc": "Habilite essa opção para exibir as estatísticas de transmissão como uma sobreposição na transmissão da câmera."
+    },
+    "debugView": "Visualização do Depurador"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Salvar Busca",
+      "desc": "Indique um nome para essa pesquisa salva.",
+      "placeholder": "Dê um nome para a sua busca",
+      "overwrite": "{{searchName}} já existe. Salvar substituirá o valor existente.",
+      "success": "A pesquisa ({{searchName}}) foi salva.",
+      "button": {
+        "save": {
+          "label": "Salvar esta pesquisa"
+        }
+      }
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "desc": {
+        "selected": "Tem certeza de que deseja excluir todos os vídeos gravados associados a este item de revisão?<br /><br />Segure a tecla <em>Shift</em> para ignorar esta caixa de diálogo no futuro."
+      },
+      "toast": {
+        "success": "As filmagens associadas aos itens de revisão selecionados foram excluídas com sucesso."
+      }
+    },
+    "button": {
+      "markAsReviewed": "Marcar como revisado"
     }
   }
 }

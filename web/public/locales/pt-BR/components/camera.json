@@ -31,8 +31,54 @@
         "label": "Configurações de Streaming da Câmera",
         "title": "Configurações de streaming da câmera {{cameraName}}",
         "audioIsAvailable": "Áudio está disponível para esta transmissão",
-        "audioIsUnavailable": "Áudio indisponível para esta transmissão"
+        "audioIsUnavailable": "Áudio indisponível para esta transmissão",
+        "desc": "Alterar as opções de transmissão ao vivo para o painel desse grupo de câmera. <em>Esses ajustes são específicos para esse dispositivo/navegador.</em>",
+        "audio": {
+          "tips": {
+            "title": "O audio deve ter a sua saída da câmera e configurado em go2rtc para essa transmissão.",
+            "document": "Leia a documentação "
+          }
+        },
+        "stream": "Transmissão",
+        "placeholder": "Selecionar transmissão ao vivo",
+        "streamMethod": {
+          "label": "Método de Transmissão",
+          "placeholder": "Selecione um método de transmissão",
+          "method": {
+            "noStreaming": {
+              "label": "Sem Transmissão",
+              "desc": "Imagens da câmera atualizarão apenas uma vez por minuto e não haverá transmissão ao vivo."
+            },
+            "smartStreaming": {
+              "label": "Transmissão Inteligente (recomendado)",
+              "desc": "O streaming inteligente atualizará a imagem da câmera uma vez por minuto quando não houver atividade detectável para economizar largura de banda e recursos. Quando alguma atividade for detectada, a imagem automáticamente mudará para a transmissão ao vivo."
+            },
+            "continuousStreaming": {
+              "label": "Transmissão Contínua",
+              "desc": {
+                "title": "A imagem da câmera será sempre uma transmissão ao vivo quando visível no painel, mesmo que não haja atividade sendo detectada.",
+                "warning": "A transmissão contínua pode causar alta utilização de banda e problemas de performance. Use com cuidado."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Modo de compatibilidade",
+          "desc": "Habilite essa opção somente se a transmissão ao vivo da sua câmera estiver exibindo artefatos de cor e possui uma linha diagonal no canto esquerdo da imagem."
+        }
       }
     }
+  },
+  "debug": {
+    "options": {
+      "label": "Configurações",
+      "title": "Opções",
+      "showOptions": "Exibir Opções",
+      "hideOptions": "Ocultar Opções"
+    },
+    "zones": "Zonas",
+    "mask": "Máscara",
+    "motion": "Movimento",
+    "regions": "Regiões"
   }
 }

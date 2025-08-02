@@ -36,6 +36,48 @@
     }
   },
   "general": {
-    "title": "Geral"
+    "title": "Geral",
+    "detector": {
+      "title": "Detectores",
+      "inferenceSpeed": "Velocidade de Inferência do Detector",
+      "temperature": "Detector Temperatura",
+      "cpuUsage": "Utilização de CPU de Detecção",
+      "memoryUsage": "Utilização de Memória do Detector"
+    },
+    "hardwareInfo": {
+      "title": "Informações de Hardware",
+      "gpuUsage": "Utilização de GPU",
+      "gpuMemory": "Memória da GPU",
+      "gpuEncoder": "Codificador da GPU",
+      "gpuDecoder": "Decodificador da GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Saída do Vainfo",
+          "returnCode": "Código de Retorno: {{code}}",
+          "processOutput": "Saída do Processo:",
+          "processError": "Erro de Processo:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Saída SMI da Nvidia",
+          "name": "Nome: {{name}}",
+          "driver": "Motorista: {{driver}}",
+          "cudaComputerCapability": "Capacidade de Computação CUDA: {{cuda_compute}}"
+        },
+        "closeInfo": {
+          "label": "Fechar informações da GPU"
+        },
+        "copyInfo": {
+          "label": "Copiar informações da GPU"
+        },
+        "toast": {
+          "success": "Informações da GPU copiadas para a área de transferência"
+        }
+      },
+      "npuUsage": "Uso da NPU",
+      "npuMemory": "Memória da NPU"
+    },
+    "otherProcesses": {
+      "title": "Outros processos"
+    }
   }
 }
