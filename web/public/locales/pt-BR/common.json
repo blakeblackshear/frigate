@@ -21,7 +21,43 @@
     "12hours": "12 horas",
     "24hours": "24 horas",
     "pm": "pm",
-    "am": "am"
+    "am": "am",
+    "yr": "{{time}}ano",
+    "year_one": "{{time}} ano",
+    "year_many": "{{time}} anos",
+    "year_other": "",
+    "mo": "{{time}}mês",
+    "month_one": "{{time}} mês",
+    "month_many": "{{time}} meses",
+    "month_other": "",
+    "d": "{{time}} dia",
+    "day_one": "{{time}} dia",
+    "day_many": "{{time}} dias",
+    "day_other": "",
+    "h": "{{time}}h",
+    "hour_one": "{{time}} hora",
+    "hour_many": "{{time}} horas",
+    "hour_other": "",
+    "m": "{{time}}m",
+    "minute_one": "{{time}} minuto",
+    "minute_many": "{{time}} minutos",
+    "minute_other": "",
+    "s": "{{time}}s",
+    "second_one": "{{time}} segundo",
+    "second_many": "{{time}} segundos",
+    "second_other": "",
+    "formattedTimestamp": {
+      "12hour": "d MMM,h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd/MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    }
   },
   "selectItem": "Selecione {{item}}"
 }

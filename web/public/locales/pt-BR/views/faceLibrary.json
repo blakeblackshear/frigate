@@ -13,17 +13,21 @@
     "validation": {
       "selectImage": "Por favor selecione um arquivo de imagem."
     },
-    "maxSize": "Tamanho máximo: {{size}}MB"
+    "maxSize": "Tamanho máximo: {{size}}MB",
+    "dropActive": "Solte a imagem aqui…",
+    "dropInstructions": "Arraste e solte uma imagem aqui, ou clique para selecionar"
   },
   "deleteFaceLibrary": {
-    "title": "Apagar Nome"
+    "title": "Apagar Nome",
+    "desc": "Tem certeza que quer deletar a coleção {{name}}? Isso deletará permanentemente todos os rostos associados."
   },
   "button": {
     "addFace": "Adicionar Rosto",
     "renameFace": "Renomear Rosto",
     "deleteFace": "Remover Rosto",
     "deleteFaceAttempts": "Remover Rostos",
-    "reprocessFace": "Reprocessar Rosto"
+    "reprocessFace": "Reprocessar Rosto",
+    "uploadImage": "Enviar Imagem"
   },
   "createFaceLibrary": {
     "new": "Criar Novo Rosto",
@@ -47,7 +51,10 @@
   "steps": {
     "nextSteps": "Próximos Passos",
     "faceName": "Digite o Nome do Rosto",
-    "uploadFace": "Enviar Imagem de Rosto"
+    "uploadFace": "Enviar Imagem de Rosto",
+    "description": {
+      "uploadFace": "Faça o upload de uma imagem de {{name}} que mostre mostre seu rosto visto de frente. A imagem não precisa estar recortada apenas com o rosto."
+    }
   },
   "description": {
     "placeholder": "Informe um nome para esta coleção",
@@ -59,5 +66,11 @@
     "title": "Carregar imagem facial",
     "desc": "Envie uma imagem para escanear por faces e incluir em {{pageToggle}}"
   },
-  "collections": "Coleções"
+  "collections": "Coleções",
+  "train": {
+    "title": "Treinar",
+    "aria": "Selecionar treinar",
+    "empty": "Não há tentativas recentes de reconhecimento facial"
+  },
+  "selectFace": "Selecionar Rosto"
 }

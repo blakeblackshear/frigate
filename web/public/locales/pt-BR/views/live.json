@@ -35,13 +35,64 @@
         "label": "Clique no quadro para centralizar a câmera PTZ"
       }
     },
-    "presets": "Predefinições de câmera PTZ"
+    "presets": "Predefinições de câmera PTZ",
+    "zoom": {
+      "in": {
+        "label": "Aumentar Zoom na câmera PTZ"
+      },
+      "out": {
+        "label": "Diminuir Zoom na câmera PTZ"
+      }
+    }
   },
   "camera": {
     "enable": "Ativar Câmera",
     "disable": "Desabilitar Câmera"
   },
   "muteCameras": {
-    "enable": "Silenciar Todas as Câmeras"
+    "enable": "Silenciar Todas as Câmeras",
+    "disable": "Ativar Áudio de Todas as Câmeras"
+  },
+  "detect": {
+    "enable": "Ativar Detecção",
+    "disable": "Desativar Detecção"
+  },
+  "recording": {
+    "enable": "Ativar Gravação",
+    "disable": "Desativar Gravação"
+  },
+  "snapshots": {
+    "enable": "Permitir Capturas de Imagem",
+    "disable": "Desativar Campturas de Imagem"
+  },
+  "audioDetect": {
+    "enable": "Ativar Detecção de Áudio",
+    "disable": "Desabilitar Detecção de Áudio"
+  },
+  "autotracking": {
+    "enable": "Habilitar Rastreamento Automático",
+    "disable": "Desabilitar Rastreamento Automático"
+  },
+  "streamStats": {
+    "enable": "Exibir Estatísticas de Transmissão",
+    "disable": "Ocultar Estatísticas de Transmissão"
+  },
+  "manualRecording": {
+    "title": "Gravação Sob Demanda",
+    "tips": "Inicie um evento manual baseado nas configurações de retenção de gravação dessa câmera.",
+    "playInBackground": {
+      "label": "Reproduzir em segundo plano",
+      "desc": "Habilite essa opção para continuar transmitindo quando o reprodutor estiver oculto."
+    },
+    "showStats": {
+      "label": "Exibir Estatísticas",
+      "desc": "Habilite esta opção para exibir as estatísticas da transmissão como uma sobreposição no feed da câmera."
+    },
+    "start": "Iniciar gravação sob demanda",
+    "started": "Iniciou a gravação manual sob demanda.",
+    "failedToStart": "Falha ao iniciar a gravação manual sob demanda.",
+    "recordDisabledTips": "Como a gravação está desabilitada ou restrita na configuração desta câmera, apenas um instantâneo será salvo.",
+    "end": "Fim da gravação sob demanda",
+    "failedToEnd": "Falha ao finalizar a gravação manual sob demanda."
   }
 }

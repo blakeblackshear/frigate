@@ -35,6 +35,50 @@
   "score": "Pontuação",
   "estimatedSpeed": "Velocidade Estimada {{unit}}",
   "features": {
-    "hasSnapshot": "Tem um snapshot"
+    "hasSnapshot": "Tem um snapshot",
+    "label": "Características",
+    "hasVideoClip": "Possui videoclipe",
+    "submittedToFrigatePlus": {
+      "label": "Enviado ao Frigate+",
+      "tips": "Você deve filtrar primeiro objetos que possuem capturas de imagem.<br /><br />Objetos rastreados sem capturas de imagem não serão enviados ao Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Ordenar",
+    "dateAsc": "Data (Ascendente)",
+    "dateDesc": "Data (Descendente)",
+    "scoreAsc": "Pontuação do Objeto (Ascendente)",
+    "scoreDesc": "Pontuação de Objeto (Descendente)",
+    "speedAsc": "Velocidade Estimada (Ascendente)",
+    "speedDesc": "Velocidade Estimada (Descendente)",
+    "relevance": "Relevância"
+  },
+  "cameras": {
+    "label": "Filtro de Câmeras",
+    "all": {
+      "title": "Todas as Câmeras",
+      "short": "Câmeras"
+    }
+  },
+  "review": {
+    "showReviewed": "Exibir Revisados"
+  },
+  "motion": {
+    "showMotionOnly": "Exibir Movimento Apenas"
+  },
+  "explore": {
+    "settings": {
+      "title": "Configurações",
+      "defaultView": {
+        "title": "Visualização Padrão",
+        "desc": "Quando nenhum filtro é selecionado, exibir um sumário dos objetos mais recentes rastreados por categoria, ou exiba uma grade sem filtro."
+      },
+      "gridColumns": {
+        "desc": "Selecione o número de colunas na visualização em grade."
+      },
+      "searchSource": {
+        "desc": "Escolha se deseja pesquisar nas miniaturas ou descrições dos seus objetos rastreados."
+      }
+    }
   }
 }

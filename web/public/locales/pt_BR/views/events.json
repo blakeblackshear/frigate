@@ -26,7 +26,13 @@
   },
   "markTheseItemsAsReviewed": "Marque estes itens como revisados",
   "newReviewItems": {
-    "button": "Novos Itens para Revisão"
+    "button": "Novos Itens para Revisão",
+    "label": "Ver novos itens para revisão"
   },
-  "selected_one": "{{count}} selecionado(s)"
+  "selected_one": "{{count}} selecionado(s)",
+  "documentTitle": "Revisão - Frigate",
+  "markAsReviewed": "Marcar como Revisado",
+  "selected_other": "{{count}} selecionado(s)",
+  "camera": "Câmera",
+  "detected": "detectado"
 }
