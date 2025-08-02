@@ -1,0 +1,17 @@
+{
+  "search": "Paieška",
+  "documentTitle": "Eksportuoti - Frigate",
+  "noExports": "Eksportuotų įrašų nerasta",
+  "deleteExport": "Ištrinti Eksportuotą Įrašą",
+  "deleteExport.desc": "Esate įsitikine, kad norite ištrinti {{exportName}}?",
+  "editExport": {
+    "title": "Pervadinti Eksportuojamą įrašą",
+    "desc": "Įveskite nauja pavadinimą šiam eksportuojamam įrašui.",
+    "saveExport": "Išsaugoti Eksportuojamą Įrašą"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Nepavyko pervadinti eksportuojamo įrašo: {{errorMessage}}"
+    }
+  }
+}

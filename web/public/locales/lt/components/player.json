@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Šiam laiko tarpui įrašų nerasta",
+  "noPreviewFound": "Peržiūrų nerasta",
+  "noPreviewFoundFor": "Peržiūrų nerasta {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Pateikti šį kadrą į Frigate+?",
+    "submit": "Pateikti"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 ar naujesni yra privalomi šiam tiesioginės transliacijos tipui.",
+  "streamOffline": {
+    "title": "Transliacija nepasiekiama",
+    "desc": "Jokių transliacijos kadrų negauta iš {{cameraName}}<code>detect</code>, patikrinkite klaidų sąrašus"
+  },
+  "cameraDisabled": "Kamera yra išjungta",
+  "stats": {
+    "streamType": {
+      "title": "Transliacijos Tipas:",
+      "short": "Tipas"
+    },
+    "bandwidth": {
+      "title": "Pralaidumas:",
+      "short": "Pralaidumas"
+    },
+    "latency": {
+      "title": "Vėlavimas:",
+      "value": "{{seconds}} sekundžių",
+      "short": {
+        "title": "Vėlavimas",
+        "value": "{{seconds}} sek"
+      }
+    },
+    "totalFrames": "Iš viso Kadrų:",
+    "droppedFrames": {
+      "title": "Pamestų Kadrų:",
+      "short": {
+        "title": "Pamesti",
+        "value": "{{droppedFrames}} kadrai"
+      }
+    },
+    "decodedFrames": "Dekoduoti Kadrai:",
+    "droppedFrameRate": "Pamestų Kadrų Dažnis:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Kadras sėkmingai pateiktas į Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Nepavyko pateikti kadro į Frigate+"
+    }
+  }
+}

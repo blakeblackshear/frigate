@@ -1,0 +1,9 @@
+{
+  "restart": {
+    "title": "Ar įsitikinę kad norite perkrauti Frigate?",
+    "button": "Perkrauti",
+    "restarting": {
+      "title": "Frigate Persikrauna"
+    }
+  }
+}
