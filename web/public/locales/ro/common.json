@@ -3,7 +3,7 @@
     "untilForTime": "Până la {{time}}",
     "untilForRestart": "Pana la repornirea Frigate.",
     "untilRestart": "Pana la repornire",
-    "ago": "{{timeAgo}} in urma",
+    "ago": "{{timeAgo}} în urmă",
     "justNow": "Acum",
     "today": "Astăzi",
     "yesterday": "Ieri",
@@ -228,7 +228,7 @@
     "label": "paginare",
     "next": {
       "label": "Mergi la pagina următoare",
-      "title": "Urmator"
+      "title": "Următor"
     },
     "previous": {
       "title": "Anterior",
