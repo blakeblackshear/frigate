@@ -29,7 +29,7 @@
   "train": {
     "title": "Eğit",
     "aria": "Eğitimi seç",
-    "empty": "Yakın zamanda yüz tanıma konusunda bir girişimde bulunulmadı"
+    "empty": "Yakın zamanda yüz tanıma denemesi olmadı"
   },
   "deleteFaceLibrary": {
     "title": "İsmi Sil",
