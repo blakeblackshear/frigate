@@ -1,7 +1,7 @@
 {
   "button": {
     "downloadVideo": {
-      "label": "Sačuvaj Video",
+      "label": "Sačuvaj video",
       "toast": {
         "success": "Preuzimanje vašeg videa za recenziju je počelo."
       }
