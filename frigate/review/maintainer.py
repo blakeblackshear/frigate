@@ -1,6 +1,7 @@
 """Maintain review segments in db."""
 
 import copy
+import datetime
 import json
 import logging
 import os
@@ -17,6 +18,7 @@ import numpy as np
 
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
+from frigate.comms.review_updater import ReviewDataPublisher
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
@@ -63,6 +65,7 @@ class PendingReviewSegment:
         self.zones = zones
         self.audio = audio
         self.last_update = frame_time
+        self.thumb_time: float | None = None
 
         # thumbnail
         self._frame = np.zeros((THUMB_HEIGHT * 3 // 2, THUMB_WIDTH), np.uint8)
@@ -104,6 +107,7 @@ class PendingReviewSegment:
         )
 
         if self._frame is not None:
+            self.thumb_time = datetime.datetime.now().timestamp()
             self.has_frame = True
             cv2.imwrite(
                 self.frame_path, self._frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
@@ -137,6 +141,7 @@ class PendingReviewSegment:
                     "sub_labels": list(self.sub_labels.values()),
                     "zones": self.zones,
                     "audio": list(self.audio),
+                    "thumb_time": self.thumb_time,
                 },
             }
         )
@@ -165,6 +170,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             ],
         )
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
+        self.review_publisher = ReviewDataPublisher("")
 
         # manual events
         self.indefinite_events: dict[str, dict[str, Any]] = {}
@@ -185,16 +191,16 @@ class ReviewSegmentMaintainer(threading.Thread):
         new_data = segment.get_data(ended=False)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, new_data)
         start_data = {k: v for k, v in new_data.items()}
+        review_update = {
+            "type": "new",
+            "before": start_data,
+            "after": start_data,
+        }
         self.requestor.send_data(
             "reviews",
-            json.dumps(
-                {
-                    "type": "new",
-                    "before": start_data,
-                    "after": start_data,
-                }
-            ),
+            json.dumps(review_update),
         )
+        self.review_publisher.publish(review_update, segment.camera)
         self.requestor.send_data(
             f"{segment.camera}/review_status", segment.severity.value.upper()
         )
@@ -213,16 +219,16 @@ class ReviewSegmentMaintainer(threading.Thread):
 
         new_data = segment.get_data(ended=False)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, new_data)
+        review_update = {
+            "type": "update",
+            "before": {k: v for k, v in prev_data.items()},
+            "after": {k: v for k, v in new_data.items()},
+        }
         self.requestor.send_data(
             "reviews",
-            json.dumps(
-                {
-                    "type": "update",
-                    "before": {k: v for k, v in prev_data.items()},
-                    "after": {k: v for k, v in new_data.items()},
-                }
-            ),
+            json.dumps(review_update),
         )
+        self.review_publisher.publish(review_update, segment.camera)
         self.requestor.send_data(
             f"{segment.camera}/review_status", segment.severity.value.upper()
         )
@@ -235,16 +241,16 @@ class ReviewSegmentMaintainer(threading.Thread):
         """End segment."""
         final_data = segment.get_data(ended=True)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, final_data)
+        review_update = {
+            "type": "end",
+            "before": {k: v for k, v in prev_data.items()},
+            "after": {k: v for k, v in final_data.items()},
+        }
         self.requestor.send_data(
             "reviews",
-            json.dumps(
-                {
-                    "type": "end",
-                    "before": {k: v for k, v in prev_data.items()},
-                    "after": {k: v for k, v in final_data.items()},
-                }
-            ),
+            json.dumps(review_update),
         )
+        self.review_publisher.publish(review_update, segment.camera)
         self.requestor.send_data(f"{segment.camera}/review_status", "NONE")
         self.active_review_segments[segment.camera] = None
 

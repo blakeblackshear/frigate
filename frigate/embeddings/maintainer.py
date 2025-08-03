@@ -29,6 +29,7 @@ from frigate.comms.recordings_updater import (
     RecordingsDataSubscriber,
     RecordingsDataTypeEnum,
 )
+from frigate.comms.review_updater import ReviewDataSubscriber
 from frigate.config import FrigateConfig
 from frigate.config.camera.camera import CameraTypeEnum
 from frigate.config.camera.updater import (
@@ -49,6 +50,7 @@ from frigate.data_processing.post.audio_transcription import (
 from frigate.data_processing.post.license_plate import (
     LicensePlatePostProcessor,
 )
+from frigate.data_processing.post.review_descriptions import ReviewDescriptionProcessor
 from frigate.data_processing.post.semantic_trigger import SemanticTriggerProcessor
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
 from frigate.data_processing.real_time.bird import BirdRealTimeProcessor
@@ -143,6 +145,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.recordings_subscriber = RecordingsDataSubscriber(
             RecordingsDataTypeEnum.recordings_available_through
         )
+        self.review_subscriber = ReviewDataSubscriber("")
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
@@ -249,6 +252,7 @@ class EmbeddingMaintainer(threading.Thread):
             self._process_requests()
             self._process_updates()
             self._process_recordings_updates()
+            self._process_review_updates()
             self._process_frame_updates()
             self._expire_dedicated_lpr()
             self._process_finalized()
@@ -522,6 +526,18 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug(
                 f"{camera} now has recordings available through {recordings_available_through_timestamp}"
             )
+
+    def _process_review_updates(self) -> None:
+        """Process review updates."""
+        while True:
+            review_updates = self.review_subscriber.check_for_update()
+
+            if review_updates == None:
+                break
+
+            for processor in self.post_processors:
+                if isinstance(processor, ReviewDescriptionProcessor):
+                    processor.process_data(review_updates, PostProcessDataEnum.review)
 
     def _process_event_metadata(self):
         # Check for regenerate description requests
