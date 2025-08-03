@@ -688,7 +688,7 @@ class EmbeddingMaintainer(threading.Thread):
         """Embed the description for an event."""
         camera_config = self.config.cameras[event.camera]
 
-        description = self.genai_client.generate_description(
+        description = self.genai_client.generate_object_description(
             camera_config, thumbnails, event
         )
 

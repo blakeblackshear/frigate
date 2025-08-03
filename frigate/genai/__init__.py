@@ -33,7 +33,7 @@ class GenAIClient:
         self.timeout = timeout
         self.provider = self._init_provider()
 
-    def generate_description(
+    def generate_object_description(
         self,
         camera_config: CameraConfig,
         thumbnails: list[bytes],
