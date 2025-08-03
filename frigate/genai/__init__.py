@@ -1,9 +1,10 @@
 """Generative AI module for Frigate."""
 
 import importlib
+import json
 import logging
 import os
-from typing import Optional
+from typing import Any, Optional
 
 from playhouse.shortcuts import model_to_dict
 
@@ -32,6 +33,28 @@ class GenAIClient:
         self.genai_config: GenAIConfig = genai_config
         self.timeout = timeout
         self.provider = self._init_provider()
+
+    def generate_review_description(
+        self, review_data: dict[str, Any], thumbnails: list[bytes]
+    ) -> None:
+        """Generate a description for the review item activity."""
+        context_prompt = f"""
+        Here is additional context about the scene from a security camera:
+        {json.dumps(review_data, indent=2)}
+
+        Please analyze the image(s), which are in chronological order, strictly from the perspective of a security camera.
+        Your task is to provide a **neutral, factual, and objective description** of the scene.
+        **Do not make assumptions about intent, emotions, or potential threats.**
+        Focus solely on observable actions, visible entities, and the environment.
+
+        Describe:
+        - What is happening?
+        - Who or what is visible?
+        - What are the entities doing?
+        - What is the environmental context (e.g., time of day, weather, lighting)?
+    """
+        logger.info(f"processing {review_data}")
+        logger.info(f"Got GenAI review: {self._send(context_prompt, thumbnails)}")
 
     def generate_object_description(
         self,
