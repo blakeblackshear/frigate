@@ -340,21 +340,22 @@ class EventCleanup(threading.Thread):
                 .where(Event.has_clip == False, Event.has_snapshot == False)
                 .iterator()
             )
-            events_to_delete = [e.id for e in events]
+            events_to_delete: list[Event] = [e for e in events]
 
-            for e in events:
+            for e in events_to_delete:
                 delete_event_thumbnail(e)
 
             logger.debug(f"Found {len(events_to_delete)} events that can be expired")
             if len(events_to_delete) > 0:
-                for i in range(0, len(events_to_delete), CHUNK_SIZE):
-                    chunk = events_to_delete[i : i + CHUNK_SIZE]
+                ids_to_delete = [e.id for e in events_to_delete]
+                for i in range(0, len(ids_to_delete), CHUNK_SIZE):
+                    chunk = ids_to_delete[i : i + CHUNK_SIZE]
                     logger.debug(f"Deleting {len(chunk)} events from the database")
                     Event.delete().where(Event.id << chunk).execute()
 
                     if self.config.semantic_search.enabled:
                         self.db.delete_embeddings_description(event_ids=chunk)
                         self.db.delete_embeddings_thumbnail(event_ids=chunk)
-                        logger.debug(f"Deleted {len(events_to_delete)} embeddings")
+                        logger.debug(f"Deleted {len(ids_to_delete)} embeddings")
 
         logger.info("Exiting event cleanup...")
