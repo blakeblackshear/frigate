@@ -5,6 +5,8 @@ import react from "@vitejs/plugin-react-swc";
 import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
 const proxyHost = process.env.PROXY_HOST || "localhost:5000";
+const proxyProtocol = process.env.PROXY_PROTOCOL || "http";
+const proxySecure = process.env.PROXY_SECURE === "false" ? false : undefined;
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,26 +16,32 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: `http://${proxyHost}`,
+        target: `${proxyProtocol}://${proxyHost}`,
         ws: true,
+        secure: proxySecure,
       },
       "/vod": {
-        target: `http://${proxyHost}`,
+        target: `${proxyProtocol}://${proxyHost}`,
+        secure: proxySecure,
       },
       "/clips": {
-        target: `http://${proxyHost}`,
+        target: `${proxyProtocol}://${proxyHost}`,
+        secure: proxySecure,
       },
       "/exports": {
-        target: `http://${proxyHost}`,
+        target: `${proxyProtocol}://${proxyHost}`,
+        secure: proxySecure,
       },
       "/ws": {
-        target: `ws://${proxyHost}`,
+        target: `${proxyProtocol === "http" ? "ws" : "wss"}://${proxyHost}`,
         ws: true,
+        secure: proxySecure,
       },
       "/live": {
-        target: `ws://${proxyHost}`,
+        target: `${proxyProtocol === "http" ? "ws" : "wss"}://${proxyHost}`,
         changeOrigin: true,
         ws: true,
+        secure: proxySecure,
       },
     },
   },
