@@ -37,8 +37,26 @@
         "beforeDateBeLaterAfter": "'Ennen' ajan täytyy olla myöhemmin kun 'jälkeen' aika.",
         "afterDatebeEarlierBefore": "'Jälkeen' ajan täytyy olla aiemmin kun 'ennen' aika.",
         "minScoreMustBeLessOrEqualMaxScore": "Arvon 'min_score' täytyy olla pienempi tai yhtäsuuri kuin 'max_score'.",
-        "maxScoreMustBeGreaterOrEqualMinScore": "Arvon 'max_score' täytyy olla suurempi tai yhtäsuuri kuin 'min_score'."
+        "maxScoreMustBeGreaterOrEqualMinScore": "Arvon 'max_score' täytyy olla suurempi tai yhtäsuuri kuin 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'Minimi nopeus' tulee olla pienempi tai yhtäsuuri kuin 'maksimi nopeus'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'Maksimi nopeus' tulee olla suurempi tai yhtä suuri kuin 'minimi nopeus'."
       }
+    },
+    "tips": {
+      "desc": {
+        "exampleLabel": "Esimerkki:"
+      },
+      "title": "Tekstisuodattimien käyttö"
+    },
+    "header": {
+      "currentFilterType": "Suodata arvoja",
+      "noFilters": "Suodattimet",
+      "activeFilters": "Käytössä olevat suodattimet"
     }
+  },
+  "similaritySearch": {
+    "title": "Samankaltaisten kohteiden haku",
+    "active": "Samankaltaisuushaku aktiivinen",
+    "clear": "Poista samankaltaisuushaku"
   }
 }

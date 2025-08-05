@@ -27,10 +27,12 @@
       "context": "Frigate lataa semanttista hakua varten vaadittavat upotusmallit. Tämä saattaa viedä useamman minuutin, riippuen yhteytesi nopeudesta.",
       "setup": {
         "visionModel": "Vision-malli",
-        "textModel": "Tekstimalli"
+        "textModel": "Tekstimalli",
+        "textTokenizer": "Tekstin osioija"
       },
       "tips": {
-        "documentation": "Lue dokumentaatio"
+        "documentation": "Lue dokumentaatio",
+        "context": "Saatat haluta uudelleenindeksoida seurattavien kohteiden upotukset, kun mallit on ladattu."
       },
       "error": "Tapahtui virhe. Tarkista Frigaten lokit."
     }
@@ -74,7 +76,8 @@
     "noImageFound": "Tältä aikaleimalta ei löytynyt kuvia.",
     "createObjectMask": "Luo kohdemaski",
     "scrollViewTips": "Vieritä katsoaksesi merkittäviä hetkiä kohteen elinkaarelta.",
-    "autoTrackingTips": "Kohteen rajojen sijainti on epätarkka automaattisesti seuraaville kameroille."
+    "autoTrackingTips": "Kohteen rajojen sijainti on epätarkka automaattisesti seuraaville kameroille.",
+    "adjustAnnotationSettings": "Säädä merkintäasetuksia"
   },
   "trackedObjectDetails": "Seurattavien kohteiden tiedot",
   "type": {
