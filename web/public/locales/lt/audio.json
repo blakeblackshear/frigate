@@ -27,5 +27,12 @@
   "vehicle": "Mašina",
   "animal": "Gyvūnas",
   "bark": "Lojimas",
-  "goat": "Ožka"
+  "goat": "Ožka",
+  "bellow": "Apačioje",
+  "whoop": "Rėkavimas",
+  "whispering": "Šnabždėjimas",
+  "laughter": "Juokas",
+  "snicker": "Kikenimas",
+  "crying": "Verkimas",
+  "singing": "Dainavimas"
 }
