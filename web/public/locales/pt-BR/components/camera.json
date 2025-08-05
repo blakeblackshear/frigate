@@ -79,6 +79,8 @@
     "zones": "Zonas",
     "mask": "Máscara",
     "motion": "Movimento",
-    "regions": "Regiões"
+    "regions": "Regiões",
+    "boundingBox": "Caixa Delimitadora",
+    "timestamp": "Timestamp"
   }
 }

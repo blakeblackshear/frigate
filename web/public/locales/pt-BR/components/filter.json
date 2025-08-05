@@ -71,14 +71,56 @@
       "title": "Configurações",
       "defaultView": {
         "title": "Visualização Padrão",
-        "desc": "Quando nenhum filtro é selecionado, exibir um sumário dos objetos mais recentes rastreados por categoria, ou exiba uma grade sem filtro."
+        "desc": "Quando nenhum filtro é selecionado, exibir um sumário dos objetos mais recentes rastreados por categoria, ou exiba uma grade sem filtro.",
+        "summary": "Sumário",
+        "unfilteredGrid": "Grade Sem Filtros"
       },
       "gridColumns": {
-        "desc": "Selecione o número de colunas na visualização em grade."
+        "desc": "Selecione o número de colunas na visualização em grade.",
+        "title": "Colunas de Grade"
       },
       "searchSource": {
-        "desc": "Escolha se deseja pesquisar nas miniaturas ou descrições dos seus objetos rastreados."
+        "desc": "Escolha se deseja pesquisar nas miniaturas ou descrições dos seus objetos rastreados.",
+        "label": "Buscar Fonte",
+        "options": {
+          "thumbnailImage": "Imagem da Miniatura",
+          "description": "Descrição"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Selecione uma data para filtrar"
       }
     }
+  },
+  "logSettings": {
+    "label": "Nível de filtro de log",
+    "filterBySeverity": "Filtrar logs por severidade",
+    "loading": {
+      "title": "Carregando",
+      "desc": "Quando o painel de log é rolado para baixo, novos logs são transmitidos automaticamente conforme são adicionados."
+    },
+    "disableLogStreaming": "Desativar o log de tranmissão",
+    "allLogs": "Todos os logs"
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmar Exclusão",
+    "desc": "Deletar esses {{objectLength}} objetos rastreados remove as capturas de imagem, qualquer embeddings salvos, e quaisquer entradas do ciclo de vida associadas do objeto. Gravações desses objetos rastreados na visualização de Histórico <em>NÃO</em> irão ser deletadas.<br /><br />Tem certeza que quer proceder?<br /><br />Segure a tecla <em>Shift</em> para pular esse diálogo no futuro.",
+    "toast": {
+      "success": "Objetos rastreados deletados com sucesso.",
+      "error": "Falha ao deletar objeto rastreado: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtrar por máscara de zona"
+  },
+  "recognizedLicensePlates": {
+    "title": "Placas de Identificação Reconhecidas",
+    "loadFailed": "Falha ao carregar placas de identificação reconhecidas.",
+    "loading": "Carregando placas de identificação reconhecidas…",
+    "placeholder": "Digite para pesquisar por placas de identificação…",
+    "noLicensePlatesFound": "Nenhuma placa de identificação encontrada.",
+    "selectPlatesFromList": "Seleciona uma ou mais placas da lista."
   }
 }

@@ -72,5 +72,31 @@
     "aria": "Selecionar treinar",
     "empty": "Não há tentativas recentes de reconhecimento facial"
   },
-  "selectFace": "Selecionar Rosto"
+  "selectFace": "Selecionar Rosto",
+  "trainFaceAs": "Treinar Rosto como:",
+  "trainFace": "Treinar Rosto",
+  "toast": {
+    "success": {
+      "uploadedImage": "Imagens enviadas com sucesso.",
+      "addFaceLibrary": "{{name}} foi adicionado com sucesso à Biblioteca de Rostos!",
+      "deletedFace_one": "{{count}} rosto apagado com sucesso.",
+      "deletedFace_many": "{{count}} rostos apagados com sucesso.",
+      "deletedFace_other": "{{count}} rostos apagados com sucesso.",
+      "trainedFace": "Rosto treinado com sucesso.",
+      "updatedFaceScore": "Pontuação de rosto atualizada com sucesso.",
+      "renamedFace": "O rosto foi renomeado com sucesso para {{name}}",
+      "deletedName_one": "{{count}} rosto foi deletado com sucesso.",
+      "deletedName_many": "{{count}} rostos foram deletados com sucesso.",
+      "deletedName_other": ""
+    },
+    "error": {
+      "uploadingImageFailed": "Falha ao enviar a imagem: {{errorMessage}}",
+      "addFaceLibraryFailed": "Falha ao definir o nome do rosto: {{errorMessage}}",
+      "deleteFaceFailed": "Falha em deletar: {{errorMessage}}",
+      "deleteNameFailed": "Falha ao deletar nome: {{errorMessage}}",
+      "renameFaceFailed": "Falha ao renomear rosto: {{errorMessage}}",
+      "trainFailed": "Falha ao treinar: {{errorMessage}}",
+      "updateFaceScoreFailed": "Falha ao atualizar pontuação de rosto: {{errorMessage}}"
+    }
+  }
 }

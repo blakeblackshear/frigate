@@ -57,7 +57,89 @@
     "formattedTimestampHourMinute": {
       "12hour": "h:mm aaa",
       "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-hh-mm-ss",
+      "24hour": "dd-MM-yy-HH-mm-ss"
     }
   },
-  "selectItem": "Selecione {{item}}"
+  "selectItem": "Selecione {{item}}",
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "pés",
+      "meters": "metros"
+    }
+  },
+  "label": {
+    "back": "Voltar"
+  },
+  "button": {
+    "apply": "Aplicar",
+    "reset": "Resetar",
+    "done": "Concluído",
+    "enabled": "Habilitado",
+    "enable": "Habilitar",
+    "disabled": "Desativado",
+    "disable": "Desativar",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "copy": "Copiar",
+    "back": "Voltar",
+    "history": "Histórico",
+    "fullscreen": "Tela Inteira",
+    "exitFullscreen": "Sair da Tela Inteira",
+    "pictureInPicture": "Miniatura Flutuante",
+    "twoWayTalk": "Áudio Bidirecional",
+    "cameraAudio": "Áudio da Câmera",
+    "on": "LIGADO",
+    "off": "DESLIGADO",
+    "edit": "Editar",
+    "copyCoordinates": "Copiar coordenadas",
+    "delete": "Deletar",
+    "yes": "Sim",
+    "no": "Não",
+    "download": "Baixar",
+    "info": "Informação",
+    "suspended": "Suspenso",
+    "unsuspended": "Não Suspenso",
+    "play": "Reproduzir",
+    "unselect": "Deselecionar",
+    "export": "Exportar",
+    "deleteNow": "Deletar Agora",
+    "next": "Próximo"
+  },
+  "menu": {
+    "system": "Sistema",
+    "systemMetrics": "Métricas de sistema",
+    "configuration": "Configuração",
+    "language": {
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (Francês)"
+    },
+    "systemLogs": "Logs de sistema",
+    "settings": "Configurações"
+  }
 }
