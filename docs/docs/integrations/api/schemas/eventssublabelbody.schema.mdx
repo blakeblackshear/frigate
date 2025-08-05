@@ -1,0 +1,33 @@
+---
+id: eventssublabelbody
+title: "EventsSubLabelBody"
+description: ""
+sidebar_label: "EventsSubLabelBody"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"subLabel":"string","subLabelScore":0,"camera":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"EventsSubLabelBody"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"subLabel":{"type":"string","maxLength":100,"title":"Sub label"},"subLabelScore":{"anyOf":[{"type":"number","maximum":1,"exclusiveMinimum":0},{"type":"null"}],"title":"Score for sub label"},"camera":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Camera this object is detected on."}},"type":"object","required":["subLabel"],"title":"EventsSubLabelBody"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

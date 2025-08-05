@@ -50,8 +50,8 @@
     "disable": "Desativar câmara"
   },
   "muteCameras": {
-    "disable": "Ativar áudio de todas as câmaras",
-    "enable": "Silenciar todas as câmaras"
+    "disable": "Ativar áudio de todas as câmeras",
+    "enable": "Silenciar todas as câmeras"
   },
   "detect": {
     "enable": "Habilitar detecção",
@@ -143,7 +143,7 @@
   "editLayout": {
     "label": "Editar layout",
     "group": {
-      "label": "Editar grupo de câmaras"
+      "label": "Editar grupo de câmeras"
     },
     "exitEdit": "Sair da edição"
   },

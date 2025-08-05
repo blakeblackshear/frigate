@@ -1,0 +1,70 @@
+---
+id: set-plate-events-event-id-recognized-license-plate-post
+title: "Set Plate"
+description: "Set Plate"
+sidebar_label: "Set Plate"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVctu2zAQ/BVhTy3ARkrQXnTrI2gDJEjgpr0YhkFLa5kpRTIk5cQV9O/FkpKlxHFa1BcZ5D5nhrsteF45yOdwvkXlHSwYaIOWe6HVRQk5OPRLI7nHJQaLZfwuRblcWix0pcRvLJdSFKgc9qZGOw8MDLe8Ro+WMrSgeI2Qw+APDISCHAz3G2Bg8b4RFkvIvW2QgSs2WHPIW/A7Q37OW6EqYOCFl3QQSk4uSui6RfRH5z/pckdOz8MVWnlUnq64MVIUocX0zmlFZ2M2YwkAL9DFMEOLl7HDG2rwpapq/niJqvIbyE+zbKxyto+Q9CGSGKNjR6J/L7QNKbjaXa8DdH0y1dQrtDGZqJsa8lMG+FjIxoktXgkVD7OOTVykBMJnqCdET9baJmP2pKcvMbGyjg3uenWHhX9Cz/wYKItn1LjLm1mgo+u60KwzWrmI61mW0adEV1hhiAoqrSkKdG7dyGTWG8N/M+disAlVK60lcjVRUJ+QqKjROV69yOxgfdWb/A2eIfMYdILMV1RoRbHvL2Lz/uzsEI6fXIoyNJucW6vt/2NRoudC0j/hsXaHBlIXT24PlNeDMRGWUB4rtNAtRji4tXw3QexSxwIDwK76J3CHYK+8ewIjuaXbv1FBfcXUvd2EiRHeiO7xNr5E+F5KNph8u729OQgYuX2mcfT9+yd5+I2mIbuflzQ9II2TNm2HSdmlxyYtMHBot8OEbayEHDbeG5enaYm1PllbUXGPJ1tRok65EYHD0TBPU6kLLjfa+fxDlp1GmwUDEtVsHKrnj7w2El8biiNVrw62rKPJv9aB4x4/YEBdRIyyk9OTjPggXGoepN0vjyl8T4Ddy8Xjo0+N5CKoLjTa9sjO4+6hl5lPttBRcBcMCBZybNsVd/jDyq6j4/sG7Q7y+YLBllvBV9TEvIVSOPpfQr7m0uFBjfv3C29mvUzfJsBern1QoyItbrlseqB+4W66RsMD3CAv0YYa4vXnmOldeCaj+8HUIDVEj49Fgca/aruYaPbm+vstMFj1+7bWJflY/kCI8odYqg6dx01KZy1IrqomDFqIMen3B3+39QE=
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Set Plate"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/events/{event_id}/recognized_license_plate"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Set Plate
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"path","required":true,"schema":{"type":"string","title":"Event Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"properties":{"recognizedLicensePlate":{"type":"string","maxLength":100,"title":"Recognized License Plate"},"recognizedLicensePlateScore":{"anyOf":[{"type":"number","maximum":1,"exclusiveMinimum":0},{"type":"null"}],"title":"Score for recognized license plate"}},"type":"object","required":["recognizedLicensePlate"],"title":"EventsLPRBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"message":{"type":"string","title":"Message"}},"type":"object","required":["success","message"],"title":"GenericResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

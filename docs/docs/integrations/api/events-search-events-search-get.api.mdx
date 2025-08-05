@@ -1,0 +1,70 @@
+---
+id: events-search-events-search-get
+title: "Events Search"
+description: "Events Search"
+sidebar_label: "Events Search"
+hide_title: true
+hide_table_of_contents: true
+api: eJy9V01v4zYQ/SvCnIVYCXYvum23wTZAim5jt4cGhkBRY4tbitSSVBCvof9ekPqi7CTgVnBOhujHeW+GX2+OYMheQ/oIt08ojIZtDLJGRQyT4q6AFNCNZxqJomU2/9qjgRhqokiFBpWNcwRBKoQUvjeoDhADE96Hwu8NU1hAuiNcYwyallgRSI9AxOGPnQtgDrUNoI1iYg9tPI6IhnNotzEYZrgd+NOFbS2kZ3X6MlZcmNgVK7orZtx9Udycy9AXuCMNN5CCKZsqF4RxmEStHX+0sZN8XUxQ3hSYjXP0EnlMGNyjelvf9aTqrmOPNhO7L46zipmL6/mYTILuHaOvgZIKFVlUlaBFI9xfrs8966waJMdly/M/hNx3pL6OH1Lge8v4x3H6KsjOoFqiQjRV/srWGFg/OQ6fNcedVItOcADtLx2Jz2tYhZkiYn/52yNJ0iSJbz6kSeItwIZVGD04Ab6ukuiMclYvUZVLyZGIN0vyG9HRZ8tzSq4FqXUpF90SoQLWA9fsAtWZbvKKGYOLHpYQEXc6Wo9cp9vDHsuLb47G0JNN4Wh9LRUTmaaXPyW/MxGt6elBqcjz+7CT55fYbe41LtsJobk7nrPc34Pd5n7GrpDKvWA/sMg4oyg0ZjUn5vJ7cv5SPIwyovtORvTVyZi5MakW3RgBLnBtKVo7olDXUmjUNtRNktifAjVVrLZG2mIbSlHrXcOjhx4MMVApDArjBNQ1Z9T57tU3beccJ3lt27YxfLi5OQ/8N+GscNOiW6Wk+omoUCvr9Q3rdBdorKFMj8AMVvocwCWd/RtQs9Gdbdt4GCNKkYPvP2QnENoYKr23kefxvG2JWhP7Pg3BXoe6YoxmeIDJ/BtSM9sKjy6vjrrHeWs8lber7utp/NqV7yWy8YXZbL6eBezWdr6oXTMWdY7eakNTStuNDR2XKSGFVdeNrfQA06iehjasUdy+n8bUOl2tCqzk1U6xPTF49cQKlCtSM7dSEzBdrbikhJdSm/Rjklx3mK09RTvpit0nAjFYok5scnV9ldjC1FKbirg91h/C0zxmWY5rZ/DZrGpOmNsCTs+xz/Gx7z9dci7INgarz/51POZE41+Kt60d7k65zb1gmuTcO+f/4sG7Bp4Ib1wWNv1XsF4jGQKf934hM17sykImDh1TCHbqbIIiD91HCHhoEUKwg5EPwY72OwQ888whEzwzGwr37GfQus7NYmgWvbULgfvuKwjv+aXg+L3HCI7/E/g3XETQUese9gm6tR+KWSykj/ahKZEUqNxV0M35RCnW/qyzd9FGGW/ZL7cbaNv/ANWFbf0=
+sidebar_class_name: "get api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Events Search"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/events/search"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Events Search
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"query","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Query"}},{"name":"event_id","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Event Id"}},{"name":"search_type","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"default":"thumbnail","title":"Search Type"}},{"name":"include_thumbnails","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":1,"title":"Include Thumbnails"}},{"name":"limit","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":50,"title":"Limit"}},{"name":"cameras","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"default":"all","title":"Cameras"}},{"name":"labels","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"default":"all","title":"Labels"}},{"name":"zones","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"default":"all","title":"Zones"}},{"name":"after","in":"query","required":false,"schema":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"After"}},{"name":"before","in":"query","required":false,"schema":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Before"}},{"name":"time_range","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"default":"00:00,24:00","title":"Time Range"}},{"name":"has_clip","in":"query","required":false,"schema":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Has Clip"}},{"name":"has_snapshot","in":"query","required":false,"schema":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Has Snapshot"}},{"name":"is_submitted","in":"query","required":false,"schema":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Is Submitted"}},{"name":"timezone","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"default":"utc","title":"Timezone"}},{"name":"min_score","in":"query","required":false,"schema":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Min Score"}},{"name":"max_score","in":"query","required":false,"schema":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Max Score"}},{"name":"min_speed","in":"query","required":false,"schema":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Min Speed"}},{"name":"max_speed","in":"query","required":false,"schema":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Max Speed"}},{"name":"recognized_license_plate","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"default":"all","title":"Recognized License Plate"}},{"name":"sort","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Sort"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

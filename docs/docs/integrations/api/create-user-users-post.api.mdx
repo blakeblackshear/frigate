@@ -1,0 +1,70 @@
+---
+id: create-user-users-post
+title: "Create User"
+description: "Create User"
+sidebar_label: "Create User"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVMFu2zAM/ZWAZy9Oi+2iW7cV2IANDdp0lyAoGJux1cmWKtFJg8D/PlBK6qRduy4HR6afSPE9Pu2AsQqg5nDRcQ2LDKwjj6xt+70EBYUnZLrrAvn4CHfOBoYMPD10FPizLbegdvFVeypBse8og8K2TC3LJ3TO6CKmzO+DbSUWipoalJXzUpA1BXmTEi02JGveOgIFgb1uK8iANRsJ3B4wfQYOQ9hYX76Fnx4wfQbempgb2+3VCtT8+a4+e4q0nTHQL4Y817I3g5JW2BkGBWtNG/LQ99lhj13eU3FgJ9ExH3o6Ou5R2gvnpjawdBUim30vGT0FZ9uQaDmfTOSvpFB47YRJUHDTFQWFsOrM6HoPhvcTn6p8PD9/mfgXGl3GbaNL763/j6zP5CyJURtZaaYmvAQYW5x8fYcuumWqhPbFwDt6j9sjyX/YdECRvAnVW9Pxk0LAKg5TgrwOjWSMZvL1X5pLX6n0Hnck+EBvYvf1Nr4m+v5W7AD5NptNXyRM2p6K+iUaeSRjJicjrq34e+9mh1yDgjxaHDII5NeyEiU6b0BBzeyCyvOSGjteeV0h03itS7I5Oh0FGoAqz40t0NQ2sPo0mZwlzCIDmZjr4eq4fMTGJUsO1h+YH+w9xJKFh8EA3a5slG1PCWQgZ09tT8Zn40m8KWzgBuO07qucMnLC1tMMMD1y7gzqOEqxwd2erGTsIMpKmxLY7ZYY6NabvpfwQ0d+C2q+yGCNXuNSjjeXsa0JS/KR3d+0lbMkf32IwyVw08WBeO41oTntuCgKcvwmdnGk8/TqZgYZLPfXdWNL2eNxI4ziJtFmY/vRiDG2A4Nt1Yk9FKSc8vsDHmUg6A==
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create User"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/users"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Create User
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"properties":{"username":{"type":"string","title":"Username"},"password":{"type":"string","title":"Password"},"role":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Role","default":"viewer"}},"type":"object","required":["username","password"],"title":"AppPostUsersBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

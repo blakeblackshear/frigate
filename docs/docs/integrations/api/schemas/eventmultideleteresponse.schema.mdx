@@ -1,0 +1,33 @@
+---
+id: eventmultideleteresponse
+title: "EventMultiDeleteResponse"
+description: ""
+sidebar_label: "EventMultiDeleteResponse"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"success":true,"deleted_events":["string"],"not_found_events":["string"]}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"EventMultiDeleteResponse"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"success":{"type":"boolean","title":"Success"},"deleted_events":{"items":{"type":"string"},"type":"array","title":"Deleted Events"},"not_found_events":{"items":{"type":"string"},"type":"array","title":"Not Found Events"}},"type":"object","required":["success","deleted_events","not_found_events"],"title":"EventMultiDeleteResponse"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

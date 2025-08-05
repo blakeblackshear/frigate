@@ -1,0 +1,70 @@
+---
+id: export-recording-export-camera-name-start-start-time-end-end-time-post
+title: "Export Recording"
+description: "Export Recording"
+sidebar_label: "Export Recording"
+hide_title: true
+hide_table_of_contents: true
+api: eJy9Vk2P2zYQ/SvCnFpAXTlGtwfd2mSLBkibxWbbi2EYY3EsM6FIhaS8NgT992BIWR/rjZG2QHywpeFwPt4bProFj6WDfAV3x9pYD+sUTE0WvTT6rYAcKNg3lgpjhdTlpjdsCqzI4kZjRZuN88i2+OMlm0iL+BVfa+M8pFCjxYo8WU7aAu+GHCaxIAWpIYca/R5SsPS5kZYE5N42lIIr9lQh5C34U81bnbdSl5CCl16x4XWIlfzFsbouHXKMtf3bFLqptmQnKT5wqORRPstwbvZ/x7/T4hx9HfeT878ZceJNz8MVRnvSnpewrpUsAnfZR2c028ZstWVmvSQX3hSetlh8CnX0ee97W7LDwhuuSNAOG+UhB0uo+uaeI0+6qXiEpi6yIoW1o83y9gjrLgVnGlvQi9n6pXm2ftzc1XwTp9rSQdJTyBX5uByRCo/vSJd+D/ny9pcR79+tJC3UKQkbuxRkhSVtAn9XJu0teyX37NV1Q5lm+5EKP2UzHJiHodhAZNfxFkuuNtpFRpaLBf8IcoWVNZPIo9YUBTm3a1Ty0DvDt3Mes/y8XF4G/geVFGFbcmdtIPs/TpIgj1Lxk/RUuUsHZYrZKurT+104/nNk+Sj1Fqk9lWShW4/AorV4muD6zsQCmbDKldeY+pOcwzJQG12+7hrASB559SVSx9O3Cn3F1L3fegwzwhvR/XobbyJ81yboj8fH+4uAkds5qXHUkmHWuDzye8NCPggwDzVkUcazdiK9XRY0MmtHqewy0iJrz8rWQQqO7OEs341VkMPe+9rlWSaoMjc7K0v0dHOQgkyGtQy0jo55lilToNob5/PbxeJV9FmnwHP2MGrd3RGrWtFcq6Yac1aUuQ4Mat/zOj3K46CB1DszFSNIgbuKMC5uXt0s2IsxqzBMfx/3BYRnFAyD5enos1qhDPMZ+m978Ff9pQop5PObLwDP5tllRVqwbbhe1ikwehyobbfo6G+ruo7NnxuyJ8hX6xQOaCVuubdVC0I6fhaQ71A5uqh5OPnww0M/4D8mo/LOeznPseYpPqBqevw+0enZVc7Mf8fUE9C+c+aBmqBXe0JBNgAfl1/HTD8FVRm3X4gsVx13/FoUVPurvuvJ2b5//+ERUtj2fxEqI8K5wCdWLHyKpZrQeVDgYGtBoS4b1sUcYkz+fAHZM3Tg
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Export Recording"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/export/{camera_name}/start/{start_time}/end/{end_time}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Export Recording
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"camera_name","in":"path","required":true,"schema":{"type":"string","title":"Camera Name"}},{"name":"start_time","in":"path","required":true,"schema":{"type":"number","title":"Start Time"}},{"name":"end_time","in":"path","required":true,"schema":{"type":"number","title":"End Time"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"properties":{"playback":{"title":"Playback factor","default":"realtime","type":"string","enum":["realtime","timelapse_25x"]},"source":{"title":"Playback source","default":"recordings","type":"string","enum":["recordings","preview"]},"name":{"type":"string","maxLength":256,"title":"Friendly name"},"image_path":{"type":"string","title":"Image Path"}},"type":"object","title":"ExportRecordingsBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

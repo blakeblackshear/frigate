@@ -1,0 +1,33 @@
+---
+id: eventslprbody
+title: "EventsLPRBody"
+description: ""
+sidebar_label: "EventsLPRBody"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"recognizedLicensePlate":"string","recognizedLicensePlateScore":0}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"EventsLPRBody"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"recognizedLicensePlate":{"type":"string","maxLength":100,"title":"Recognized License Plate"},"recognizedLicensePlateScore":{"anyOf":[{"type":"number","maximum":1,"exclusiveMinimum":0},{"type":"null"}],"title":"Score for recognized license plate"}},"type":"object","required":["recognizedLicensePlate"],"title":"EventsLPRBody"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

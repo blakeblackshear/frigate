@@ -1,0 +1,70 @@
+---
+id: set-sub-label-events-event-id-sub-label-post
+title: "Set Sub Label"
+description: "Set Sub Label"
+sidebar_label: "Set Sub Label"
+hide_title: true
+hide_table_of_contents: true
+api: eJylVd9v0zAQ/leiewLJNNkEL3mDMcGkIdA2eKmq6pJcWw/HDrZTVkX539HZaZO1YyDoS6rz/fzu8+cOPK4d5HO43JL2DhYCTEMWvTT6qoIcHPmla4ulwoLUkoLXMn6XslpOzhrjPAho0GJNniyn7UBjTZDDPgAESA05NOg3IMDSj1ZaqiD3tiUBrtxQjZB34HcNxzlvpV6DAC+9YkPoM7mqoO8XMZ6cf2eqHQcdpyuN9qQ9H2HTKFmGudJ7ZzTbxmqN5am9JBfsbXHNIz3VR40P16TXfgP5WZaNfd22RRJwgF4cEtyWxlKornefVwGPIZ9u64JszCfrtob8TAA9lKp1ckufpI7GrBeTEKWAhz6U5OzJytjETYuXWJPFJ6sOUzyX9CJEJ34jXWKKeyp9Il1SkafSU5UYPYO+F/vw6PFokfMRvsXR2tztcBL21fecyJJrjHYR+PMs409FrrSy4V0FZMuSnFu1KrkZnOE/VhuSTTZbGKMINUxXGX16ATU5h2t6jpCfBpc/oxKzjkkn8HwgTVaWh/kiNq/Pz0/h+IZKVmHY5NJaY/8di4o8ykBy6al2pw7KlI9O/4JPUntak4V+McKB1uJugti1iQ0GgN36r8DdJ3tGGBiM5I5P/7QKniuWHvwmmxjhjej+foz3Eb6niu1dPt7dfTlJGHd7xHHyCStIvDdMEb8xLL8HUWXBgTTqb9rt5bRPD/oLAhzZ7V53W6sgh433jcvTtKLazFZWrtHTbCsrMik2MixudMzTVJkS1cY4n7/JsrPosxDATLoZpfbyAetG0WOpHDdypH7ZKEkjYUDqlQnrHKACAdx7hCObnc0y9uLxawwsHh6SY6Qe4Xhgh6cHnzYKZSBZGLEbQJzHt4gvYj55lUYcFwIYAfbsugIdfbWq79n8oyW7g3y+ELBFK7HgzucdVNLx/wryFSpHJ00d7ie8uBlo+DIB8XSze7Zp5toWVTug851203c0XLANYUU29BCPL2KlV+EajOEnqsCLjxFvy5Ia/6zvYsLHL59v70BAMTy4tak4xuJPvmL4M7ZqwuRBMoKtA4V63QYhhZiTf78A48roFA==
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Set Sub Label"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/events/{event_id}/sub_label"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Set Sub Label
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"path","required":true,"schema":{"type":"string","title":"Event Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"properties":{"subLabel":{"type":"string","maxLength":100,"title":"Sub label"},"subLabelScore":{"anyOf":[{"type":"number","maximum":1,"exclusiveMinimum":0},{"type":"null"}],"title":"Score for sub label"},"camera":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Camera this object is detected on."}},"type":"object","required":["subLabel"],"title":"EventsSubLabelBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"message":{"type":"string","title":"Message"}},"type":"object","required":["success","message"],"title":"GenericResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

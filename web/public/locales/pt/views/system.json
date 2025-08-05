@@ -8,7 +8,7 @@
       "go2rtc": "Logs do Go2RTC - Frigate",
       "nginx": "Logs do Nginx - Frigate"
     },
-    "cameras": "Estatísticas das câmaras - Frigate"
+    "cameras": "Estatísticas das câmeras - Frigate"
   },
   "title": "Sistema",
   "metrics": "Métricas do sistema",
@@ -57,7 +57,7 @@
     }
   },
   "cameras": {
-    "title": "Câmaras",
+    "title": "Câmeras",
     "info": {
       "video": "Vídeo:",
       "unknown": "Desconhecido",

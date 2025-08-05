@@ -1,0 +1,70 @@
+---
+id: set-not-reviewed-review-review-id-viewed-delete
+title: "Set Not Reviewed"
+description: "Set Not Reviewed"
+sidebar_label: "Set Not Reviewed"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVE2P0zAQ/SvRnECymu4KLr4hUcFKy4dK4VJFlZtMGy9O7LUnhSryf0d23DSlu4A42bLfzLz3POMeSOwd8DUs8SDxBxQMtEErSOr2rgIODmnTatrYeI9V2mxOq6w2m3RToUJCYGCEFQ0S2pC5h1Y0CBzGAGAgW+BgBNXAwOJjJy1WwMl2yMCVNTYCeA90NCHQkZXtHhiQJBUOBq7ZXQXeFyGBM7p16ELM7XwelgpdaaUJMoDDl64s0bldp7JlAgODUreELQW4MEbJMqrOH1yI6Sc8jA2ekBwquCHZhOBWa4WinTBMBcEzaNA5scc/6fmQIN6zE0ZvH7CkC3fWY+Vz0uKc5B22aGU56vM+pHt1e3ttxzehZBXFZgtrtf1/LyokIVXYScLGXQOULi9uRXv8tItdcWmGZ+OJbAn3aMEXZzuEteI4cexeDwSjwW7/T+aekj0PjWZkq3D7t6cIuobSCTd5ibO9g7vPy3g72PdUsRPk/Wr1+Srh8La/9ThS9lFTtkyDGruEah2GeDKZVAOHfJjFvB9n0udjlEN7OI1uZxVwqImM43leYaNnOyv3gnB2kBXqXBgZ3+4M5HmudClUrR3x1/P5zYApwtDvdLQ/SQMGodBAfz67mc2DVUY7akTsuvRxPKHsQvr4oIQ/KTdKyNgXkVKfJK/T9wMM+PQjShkLBoFvwPX9Vjj8apX34fixQ3sEvi4YHISVYhuor3uopAv7CvhOKIdXlMaBghfL1DcvM2BPUz21Rxua4yBUl+z5jseLjzOORI2iQhtJDPdvyhINTSKvJji4PzbD28X9YrUA738BBhgNAw==
+sidebar_class_name: "delete api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Set Not Reviewed"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/review/{review_id}/viewed"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Set Not Reviewed
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"review_id","in":"path","required":true,"schema":{"type":"string","title":"Review Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"message":{"type":"string","title":"Message"}},"type":"object","required":["success","message"],"title":"GenericResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

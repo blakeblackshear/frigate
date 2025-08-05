@@ -1,0 +1,70 @@
+---
+id: regenerate-description-events-event-id-description-regenerate-put
+title: "Regenerate Description"
+description: "Regenerate Description"
+sidebar_label: "Regenerate Description"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVE1v2zAM/SsBTxtgxGmxXXwb0GIrsGFFl+5SBIFiM7E6WVIlOlhg+L8PlL/kpu2GnRJY5CPfI/kaIHHwkD3A9RE1edgkYCw6QdLomwIycHhAzR9wW6DPnbT8tMUQvu1+t7LYzl6jJFsTJGCFExUSOq7VgBYVQgZDMiQgNWRgBZWQgMOnWjosICNXYwI+L7ESkDVAJ8t5npzUB0iAJCn+EJpf3BTQtsmI7k3tchywn2p0pxn4Xig/Qxf69H0f+nteB3VdsUhU1tVOC6k8JOC1sL40xJoNjdyNxK8mOa45mxvrYXWtFLSbBArci1oRZHPgAexHR6DlUIfeGu3Rc6OXqxX/RIpzdJ3n6P2+Vou7PhgSyI0m1BToWatkHiabPnrOaSLy1vHcSXYVfAcWab4zRqHQcXt9TJtAhd6LA741om99SNsmQ4zZPWJOs5k8jJUn0EjezyyuzEd+bctwHy4vz+X4KZQsAtnFtXPG/b8WBZKQiv9JwsqfByiTz15f26NoBaQmPKCDdjPJIZwTp0ixr6ZrMAjsD/8k7gD2xqmwGIs1v/5tFMyrK93HRZOY5O3UfZ3GVSffS8WGkC/r9e0ZYDfb+VCn81pE9xV2hUrDdjXYDZWQQdq5VNoMRtOmEV46uRRfM7rjYE+1U5BBSWR9lqYFVma5d/IgCJdHWaBJhZVhmlNglqbK5EKVxlP2cbW66GI27D57EwbSk4UEuFBHaLW8WK5YPGs8VSLsYW9fr3KdSTIOmvA3pVYJGfYlNNb0Ojx0Rss3lUWWW8xQIzE2CTANTmyanfB471Tb8ufORFmiQnqxU5GN/sJT7LlHoerAliU4Cic5+uXMZ3zGK4V3d/0yvl9A8jLPYef0Ka45dDOSDWdWoijQhR665095jpaixDNX4ObH1bq9X0Pb/gEOw3rp
+sidebar_class_name: "put api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Regenerate Description"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"put"}
+  path={"/events/{event_id}/description/regenerate"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Regenerate Description
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"path","required":true,"schema":{"type":"string","title":"Event Id"}},{"name":"source","in":"query","required":false,"schema":{"anyOf":[{"type":"string","enum":["thumbnails","snapshot"],"title":"RegenerateDescriptionEnum"},{"type":"null"}],"default":"thumbnails","title":"Source"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"message":{"type":"string","title":"Message"}},"type":"object","required":["success","message"],"title":"GenericResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

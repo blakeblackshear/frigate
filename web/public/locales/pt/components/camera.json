@@ -1,31 +1,31 @@
 {
   "group": {
-    "label": "Grupos de câmaras",
-    "add": "Adicionar grupo de câmaras",
-    "edit": "Editar grupo de câmaras",
+    "label": "Grupos de câmeras",
+    "add": "Adicionar grupo de câmeras",
+    "edit": "Editar grupo de câmeras",
     "delete": {
-      "label": "Excluir grupo de câmaras",
+      "label": "Excluir grupo de câmeras",
       "confirm": {
         "title": "Confirmar exclusão",
-        "desc": "Tem certeza de que deseja excluir o grupo de câmaras <em>{{name}}</em>?"
+        "desc": "Tem certeza de que deseja excluir o grupo de câmeras <em>{{name}}</em>?"
       }
     },
     "name": {
       "label": "Nome",
       "placeholder": "Digita um nome…",
       "errorMessage": {
-        "exists": "O nome do grupo de câmaras já existe.",
-        "nameMustNotPeriod": "O nome do grupo de câmaras não deve conter pontos.",
-        "mustLeastCharacters": "O nome do grupo de câmaras deve ter pelo menos 2 caracteres.",
-        "invalid": "Nome de grupo de câmaras inválido."
+        "exists": "O nome do grupo de câmeras já existe.",
+        "nameMustNotPeriod": "O nome do grupo de câmeras não deve conter pontos.",
+        "mustLeastCharacters": "O nome do grupo de câmeras deve ter pelo menos 2 caracteres.",
+        "invalid": "Nome de grupo de câmeras inválido."
       }
     },
     "cameras": {
-      "desc": "Selecione câmaras para este grupo.",
-      "label": "Câmaras"
+      "desc": "Selecione câmeras para este grupo.",
+      "label": "Câmeras"
     },
     "icon": "Ícone",
-    "success": "O grupo de câmaras ({{name}}) foi guardado.",
+    "success": "O grupo de câmeras ({{name}}) foi guardado.",
     "camera": {
       "setting": {
         "audioIsAvailable": "O áudio está disponível para esta transmissão",
@@ -62,7 +62,7 @@
           "desc": "Habilite esta opção somente se a transmissão ao vivo da sua câmara estiver exibindo artefatos de cor e tiver uma linha diagonal no lado direito da imagem."
         },
         "label": "Configurações de transmissão da câmara",
-        "desc": "Altere as opções de transmissão ao vivo para o painel deste grupo de câmaras. <em>Essas configurações são específicas do dispositivo/navegador.</em>",
+        "desc": "Altere as opções de transmissão ao vivo para o painel deste grupo de câmeras. <em>Essas configurações são específicas do dispositivo/navegador.</em>",
         "title": "{{cameraName}} configurações de transmissão",
         "placeholder": "Escolha uma transmissão",
         "stream": "Transmissão"

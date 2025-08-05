@@ -6,7 +6,7 @@ import {
 } from "@/types/frigateConfig";
 import { isDesktop, isMobile } from "react-device-detect";
 import useSWR from "swr";
-import { MdHome } from "react-icons/md";
+import { LuHouse } from "react-icons/lu";
 import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { Button, buttonVariants } from "../ui/button";
 import { useCallback, useMemo, useState } from "react";
@@ -151,7 +151,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
               <Button
                 className={
                   group == "default"
-                    ? "bg-blue-900 bg-opacity-60 text-selected focus:bg-blue-900 focus:bg-opacity-60"
+                    ? "bg-blue-900 bg-opacity-60 text-text focus:bg-blue-900 focus:bg-opacity-60"
                     : "bg-secondary text-secondary-foreground focus:bg-secondary focus:text-secondary-foreground"
                 }
                 aria-label={t("menu.live.allCameras", { ns: "common" })}
@@ -160,7 +160,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                 onMouseEnter={() => (isDesktop ? showTooltip("default") : null)}
                 onMouseLeave={() => (isDesktop ? showTooltip(undefined) : null)}
               >
-                <MdHome className="size-4" />
+                <LuHouse className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipPortal>
@@ -176,7 +176,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                   <Button
                     className={
                       group == name
-                        ? "bg-blue-900 bg-opacity-60 text-selected focus:bg-blue-900 focus:bg-opacity-60"
+                        ? "bg-blue-900 bg-opacity-60 text-text focus:bg-blue-900 focus:bg-opacity-60"
                         : "bg-secondary text-secondary-foreground"
                     }
                     aria-label={t("group.label")}

@@ -1,0 +1,70 @@
+---
+id: preview-mp-4-camera-name-start-start-ts-end-end-ts-preview-mp-4-get
+title: "Preview Mp4"
+description: "Preview Mp4"
+sidebar_label: "Preview Mp4"
+hide_title: true
+hide_table_of_contents: true
+api: eJy9VNtum0AQ/RU0T62EDInci3iLkqit1LRR6vYlstAYxrApLGR3cWOh/fdqFrAhdiqlrfLiy+7sOTNnZk4LBjMN0S1cUSoQlj5UNSk0opKfUoigVrQR9Csu63kcJ1iSwlhiSXGsDSozfBkdxyTT7oP/jN9lZMCHGhWWZEgxXQsMAhGMIMEHIZkSTQ4+KLpvhKIUIqMa8kEnOZUIUQtmW/NTbZSQGfhghCn44NxheV8Yy1p/xzGk+FwC2ZQrUiOCbwzkLfQEvav4n7EvZfoYucSHOMEkpxiznTr3DanthGGNhT5GIaShzHGkpBMlam4qRHCFD56D9TAjT0hPU1LJVM+8C1pjUxjvnZfiVo+vHIi7hOhtOH8fhvvMGe/c4Z1lBPa/0NklV6jrSmrSXNNpGPLXFPpbkySk9bopvJs+GHxIKmlIGg7Hui5E4qY5uNP8pt3rZK21PsxPTw+Bf2AhUvfMu1SqUs9AhVrxBhnR5Z2SQVHwL2Go1IcBRZVMblFuv67dhkzHnOfiUWPt0vrDGSqF29E4fa66BLkfpc7+tDZXpDV2netCng51YngLvrV77mp1R4mZzOStq6uj7uOWe5i9vJ26T5dx0cl3jGwI+bhYXB8Adr2dNvW6syTvqp5zZmTyih1ucCeTQwRBOzIkGzjnCNrBQGxAMg3abuNt0HvcrHSAmtRmMLdGFRBBbkytoyBIqaxmayUyNDTbiJSqAGvhOroPjIKgqBIs8kqb6E0YnnQxS177deWa0hcMPjBRV1Q4O5mFLGBdaVOim8XePqb1TrTYddjQgwnqAoUbFJdN22txC9HUnJ0K4EM08lOSKZ/sPHAsydIHLoaR2naFmr6rwlo+7jyMhUqFxlUxcrFHae627m9d62idP2l7xF43WDROXxZ9g0pwZs/M8tVNvwKvvafIh0mX2zHnkNRYch6QF6TetfWFefvhcW6WE6aknOjd5VmSUG1Gzw7Ml7u1W+YPlwuw9jeq7gBd
+sidebar_class_name: "get api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Preview Mp4"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Preview Mp4
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"camera_name","in":"path","required":true,"schema":{"type":"string","title":"Camera Name"}},{"name":"start_ts","in":"path","required":true,"schema":{"type":"number","title":"Start Ts"}},{"name":"end_ts","in":"path","required":true,"schema":{"type":"number","title":"End Ts"}},{"name":"max_cache_age","in":"query","required":false,"schema":{"type":"integer","description":"Max cache age in seconds. Default 7 days in seconds.","default":604800,"title":"Max Cache Age"},"description":"Max cache age in seconds. Default 7 days in seconds."}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

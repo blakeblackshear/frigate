@@ -53,10 +53,10 @@
     "relevance": "Relevância"
   },
   "cameras": {
-    "label": "Filtro de câmaras",
+    "label": "Filtro de câmeras",
     "all": {
-      "short": "Câmaras",
-      "title": "Todas as câmaras"
+      "short": "Câmeras",
+      "title": "Todas as câmeras"
     }
   },
   "review": {

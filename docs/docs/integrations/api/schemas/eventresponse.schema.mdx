@@ -1,0 +1,33 @@
+---
+id: eventresponse
+title: "EventResponse"
+description: ""
+sidebar_label: "EventResponse"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"id":"string","label":"string","sub_label":"string","camera":"string","start_time":0,"end_time":0,"false_positive":true,"zones":["string"],"thumbnail":"string","has_clip":true,"has_snapshot":true,"retain_indefinitely":true,"plus_id":"string","model_hash":"string","detector_type":"string","model_type":"string","data":{}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"EventResponse"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"id":{"type":"string","title":"Id"},"label":{"type":"string","title":"Label"},"sub_label":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Sub Label"},"camera":{"type":"string","title":"Camera"},"start_time":{"type":"number","title":"Start Time"},"end_time":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"End Time"},"false_positive":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"False Positive"},"zones":{"items":{"type":"string"},"type":"array","title":"Zones"},"thumbnail":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Thumbnail"},"has_clip":{"type":"boolean","title":"Has Clip"},"has_snapshot":{"type":"boolean","title":"Has Snapshot"},"retain_indefinitely":{"type":"boolean","title":"Retain Indefinitely"},"plus_id":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Plus Id"},"model_hash":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Model Hash"},"detector_type":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Detector Type"},"model_type":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Model Type"},"data":{"type":"object","title":"Data"}},"type":"object","required":["id","label","sub_label","camera","start_time","end_time","false_positive","zones","thumbnail","has_clip","has_snapshot","retain_indefinitely","plus_id","model_hash","detector_type","model_type","data"],"title":"EventResponse"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

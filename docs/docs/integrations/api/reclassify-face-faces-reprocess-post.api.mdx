@@ -1,0 +1,70 @@
+---
+id: reclassify-face-faces-reprocess-post
+title: "Reclassify Face"
+description: "Reclassify Face"
+sidebar_label: "Reclassify Face"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVMtu2zAQ/BVjz6zlBO2Ftz5StECLBInbiyEEa2otM6VEhqScCIL+vVhSkZMmKVofbGI5HO7ODD1AxDqA3MDZgdoYoBRgHXmM2rZfK5DgSRkMQe/66x0qSl/h2pPzVlEI186GCAI83XYU4gdb9SAHULaN1EZeonNGq0RY3ATbci2oPTXIq9g7Agl2e0OKeaKOhguJaBzHkamDs22gwPjT1Yp/KgrKa8ekIOGqU9zLrjOLywkM4p97yLe8PT19TvwTja7SscWZ99b/Bys4z0JGnfuuKKI2vNKRmvAcYKx6sottf74DuZklCtHrtoZRzBXdRqrJw1iO4qGG3mP/SMdvNjcIo4Am1I8kn/iO0O8UAtYEM9nr0CTGYs274/Hu2UQOg/ZUca54rnz1hCuPNEd5s7qvj/Epy/fSZQ+QL+v1xTPC7O1TUy/nRC8+o+KkNBT3lsM+hdlh3IOEImW9mLMOAgL5A/mQfOm8AQn7GF2QRVFRY5c7r2uMtDzoimyBTie7jkBZFMYqNHsbony3Wp1kTCmA83N5fENn99g4HmsYBeh2Z5Mb06QggJvI06yWJ8sVK8e9N5hC2GJDLw76RIjZ3kj3sXAGdUpJ6naYNNhA0iB5+qBCKYD7581h2GKgH96MI5dvO/I9yE0p4IBe45bb3XA694QV+STbL+pBwsf8jN6kDDHcdMn3P58U65dPvFeKXPwrtnxk5cX51RoEbKc/pMZWfMbjHc+Cd1lGm6RI7y3VBjDY1h2/AgmZkz+/AdaQxMI=
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Reclassify Face"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/faces/reprocess"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Reclassify Face
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"type":"object","title":"Body"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

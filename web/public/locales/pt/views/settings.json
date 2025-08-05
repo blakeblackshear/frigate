@@ -40,7 +40,7 @@
       "title": "Painel ao vivo",
       "automaticLiveView": {
         "label": "Visualização ao vivo automática",
-        "desc": "Alternar automaticamente para a visualização ao vivo de uma câmara quando uma atividade for detectada. Desativar esta opção faz com que as imagens estáticas das câmaras no painel Ao Vivo sejam atualizadas apenas uma vez por minuto."
+        "desc": "Alternar automaticamente para a visualização ao vivo de uma câmara quando uma atividade for detectada. Desativar esta opção faz com que as imagens estáticas das câmeras no painel Ao Vivo sejam atualizadas apenas uma vez por minuto."
       },
       "playAlertVideos": {
         "label": "Reproduzir vídeos de alerta",
@@ -58,7 +58,7 @@
     },
     "storedLayouts": {
       "title": "Layouts armazenados",
-      "desc": "O layout das câmaras em um grupo de câmaras pode ser arrastado/redimensionado. As posições são armazenadas no armazenamento local do seu navegador.",
+      "desc": "O layout das câmeras em um grupo de câmeras pode ser arrastado/redimensionado. As posições são armazenadas no armazenamento local do seu navegador.",
       "clearAll": "Limpar todos os layouts"
     },
     "recordingsViewer": {
@@ -69,13 +69,13 @@
       "title": "Visualizador de gravações"
     },
     "cameraGroupStreaming": {
-      "desc": "As configurações de transmissão de cada grupo de câmaras são armazenadas no armazenamento local do seu navegador.",
-      "title": "Configurações de transmissão do grupo de câmaras",
+      "desc": "As configurações de transmissão de cada grupo de câmeras são armazenadas no armazenamento local do seu navegador.",
+      "title": "Configurações de transmissão do grupo de câmeras",
       "clearAll": "Limpar todas as configurações de transmissão"
     },
     "toast": {
       "success": {
-        "clearStreamingSettings": "Configurações de transmissão para todos os grupos de câmaras limpas.",
+        "clearStreamingSettings": "Configurações de transmissão para todos os grupos de câmeras limpas.",
         "clearStoredLayout": "Limpo layout armazenado para {{cameraName}}"
       },
       "error": {
@@ -149,7 +149,7 @@
   "notification": {
     "globalSettings": {
       "title": "Configurações globais",
-      "desc": "Suspenda temporariamente as notificações para câmaras específicas em todos os dispositivos registados."
+      "desc": "Suspenda temporariamente as notificações para câmeras específicas em todos os dispositivos registados."
     },
     "notificationSettings": {
       "documentation": "Leia a documentação",
@@ -162,9 +162,9 @@
       "desc": "As notificações push da Web exigem um contexto seguro (<code>https://…</code>). Esta é uma limitação do navegador. Acesse o Frigate com segurança para usar as notificações."
     },
     "cameras": {
-      "title": "Câmaras",
+      "title": "Câmeras",
       "noCameras": "Nenhuma câmara disponível",
-      "desc": "Selecione para que câmaras as notificações serão ativadas."
+      "desc": "Selecione para que câmeras as notificações serão ativadas."
     },
     "deviceSpecific": "Configurações específicas do dispositivo",
     "registerDevice": "Registe este dispositivo",
@@ -211,7 +211,7 @@
       },
       "title": "Configuração de snapshots",
       "desc": "O envio para o Frigate+ requer que tanto os snapshots quanto os snapshots <code>clean_copy</code> estejam habilitados na sua configuração.",
-      "cleanCopyWarning": "Algumas câmaras têm snapshots habilitados, mas a cópia limpa está desabilitada. É necessário habilitar <code>clean_copy</code> na sua configuração de snapshot para poder enviar imagens dessas câmaras para o Frigate+."
+      "cleanCopyWarning": "Algumas câmeras têm snapshots habilitados, mas a cópia limpa está desabilitada. É necessário habilitar <code>clean_copy</code> na sua configuração de snapshot para poder enviar imagens dessas câmeras para o Frigate+."
     },
     "toast": {
       "success": "As definições do Frigate+ foram guardadas. Reinicie o Frigate para aplicar as alterações.",
@@ -230,7 +230,7 @@
       },
       "supportedDetectors": "Detectores Suportados",
       "loading": "Carregando informações do modelo…",
-      "cameras": "Câmaras",
+      "cameras": "Câmeras",
       "loadingAvailableModels": "Carregando modelos disponíveis…",
       "modelSelect": "Os modelos disponíveis no Frigate+ podem ser selecionados aqui. Observe que apenas modelos compatíveis com a configuração atual do seu detector podem ser selecionados."
     },

@@ -1,0 +1,33 @@
+---
+id: reviewsummaryresponse
+title: "ReviewSummaryResponse"
+description: ""
+sidebar_label: "ReviewSummaryResponse"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"last24Hours":{"reviewed_alert":0,"reviewed_detection":0,"total_alert":0,"total_detection":0},"root":{}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"ReviewSummaryResponse"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"last24Hours":{"properties":{"reviewed_alert":{"type":"integer","title":"Reviewed Alert"},"reviewed_detection":{"type":"integer","title":"Reviewed Detection"},"total_alert":{"type":"integer","title":"Total Alert"},"total_detection":{"type":"integer","title":"Total Detection"}},"type":"object","required":["reviewed_alert","reviewed_detection","total_alert","total_detection"],"title":"Last24HoursReview"},"root":{"additionalProperties":{"properties":{"day":{"type":"string","format":"date-time","title":"Day"},"reviewed_alert":{"type":"integer","title":"Reviewed Alert"},"reviewed_detection":{"type":"integer","title":"Reviewed Detection"},"total_alert":{"type":"integer","title":"Total Alert"},"total_detection":{"type":"integer","title":"Total Detection"}},"type":"object","required":["day","reviewed_alert","reviewed_detection","total_alert","total_detection"],"title":"DayReview"},"type":"object","title":"Root"}},"type":"object","required":["last24Hours","root"],"title":"ReviewSummaryResponse"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

@@ -1,0 +1,70 @@
+---
+id: preview-gif-camera-name-start-start-ts-end-end-ts-preview-gif-get
+title: "Preview Gif"
+description: "Preview Gif"
+sidebar_label: "Preview Gif"
+hide_title: true
+hide_table_of_contents: true
+api: eJy9VE1vm0AQ/StoTq2EDHGbQ7lFSZRWatoodXuJLDSGMWwKC9ld3Fho/3s1C9gQO5XSVrn4Y3f2vZk3M68Fg5mG6A6uKRUISx+qmhQaUclPKURQK9oI+hVnYh3HCZakMJZYUhxrg8oMX0bHMcm0++A/43cZGfChRoUlGVJM1wKDQAQjSPBBSKZEk4MPih4aoSiFyKiGfNBJTiVC1ILZ1vxUGyVkBj4YYQo+OHdY3hfGstbfcQwpvpRANuWK1IjgGwN5Cz1B7yr+Z+xLmT5FLvExTjDJKcZsp85DQ2o7YVhjoY9RCGkocxwp6USJmpsKEVzjo+dgPczIE9LTlFQy1TPvgtbYFMZ7F3opbvX4zqG4W4jmpx/mYRjuc2fEc4d4lhHY/0Nol1ykriupSXNZ8zDkryn2tyZJSOt1U3i3fTD4kFTSkDQcjnVdiMQNdHCv+U27l8paa314P58fAv/AQqTumXepVKVegAq14iUyoss7JYOi4F/CUKkPA4oqmdyi3H5duyWZTjqPxpPe2qX1hzNUCrejifpcdQlyQ0qd/Wlzrklr7FrXhTwf6sTwFnxr99zV6p4SMxnLO1dXR93HLfcwe3k7dZ8v46KT7xjZEPJxsbg5AOx6O23qTedK3pVYc2Zk8opNbjAok0MEQTvyJBs48wjawUNsQDIN2m7pbdDb3CxzgJrUZvC3RhUQQW5MraMgSKmsZmslMjQ024iUqgBr4Tq6D4yCoKgSLPJKm+g0DE+6mCVv/rpyTekLBh+YqCsqnJ3MQhawrrQp0c1i7yDTeida7Dps6NEEdYHCDYrLpu21uINo6s9OBfAhGlkqyZRPdjY4lmTpAxfDSG27Qk3fVWEtH3c2xkKlQuOqGBnZkzR3W/fXxnW00J+0PWKxGywaJzCrvkElOLUXpvnmtt+Bt95z5MOoy+2Yc0hqrDlPyCtS7/r6yrz99Dg7ywlTUk707vIsSag2o2cH7svd2m3z1eUCrP0NgVcB7w==
+sidebar_class_name: "get api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Preview Gif"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Preview Gif
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"camera_name","in":"path","required":true,"schema":{"type":"string","title":"Camera Name"}},{"name":"start_ts","in":"path","required":true,"schema":{"type":"number","title":"Start Ts"}},{"name":"end_ts","in":"path","required":true,"schema":{"type":"number","title":"End Ts"}},{"name":"max_cache_age","in":"query","required":false,"schema":{"type":"integer","description":"Max cache age in seconds. Default 30 days in seconds.","default":2592000,"title":"Max Cache Age"},"description":"Max cache age in seconds. Default 30 days in seconds."}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

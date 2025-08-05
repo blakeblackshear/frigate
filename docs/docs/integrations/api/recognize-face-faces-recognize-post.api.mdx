@@ -1,0 +1,70 @@
+---
+id: recognize-face-faces-recognize-post
+title: "Recognize Face"
+description: "Recognize Face"
+sidebar_label: "Recognize Face"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVE1v2zAM/SsBz2qcFttFt21tsQEbWrTZLkFQMDKdqLMtVaKDZYH/+0Apn02KbRdbH4/U43uU1sA4j6AncLOkliNMFThPAdm69ksJGgIZN2/tb3qq0ORPfNovehcZFAR66SjyR1euQK/T1AYqQXPoSIFxLVPLstV0NVuPgYvKheaiREZZjmZBTRr5IATYUpRZZWuSP688gYbIwbZzUCDByKBhZlsMK1DAlgUKtxLR92ob4mbPZLYcM6lJTjvdBwnxp38pte8ldaDoXRszxavRSH4lRROsF+FAw2NnDMVYdfXgYQOGIx3Q+9qapHPxHCXmQIR8yrurq9PEP7C2ZQob3ITgwn9kfSVtSYy2lpFlauIpoHbmaBfb1V0FevLajV7tVmzLNKcA/XRvAIaAhwZ9dZkg9AqaOD/n7hb6jWLEOcEu2dvQJMZgLLt/M1/qykdvcAeNsJc3q/t2GddZvnOHbSGfx+P7k4TZ22NTH7ZNNrhFI43SEC+cXL/N/fLIC9BQpJ4sdj0JCiKFJYWYbOlCDRoWzD7qoiipccMq2DkyDZe2JFegt8mtPVAXRe0M1gsXWb8fjS4zZqrAtpVLgm+KAQVyUCY8Gl4ORyKO8Gsw9VmLDZ2r5ajUnYFMv7jwNdrUB4nQelPmBFKZybVtoVMFQlE21+sZRvoe6r6X5ZeOwgr0ZKpgicHiTNhOpP8WhCWFpMxPWoGGT/miXKQuEXjdCZVzT5KolIM+GEOeD+And0zU2hl2f/c4BgWzzUvYuFJiJHHKq/ZDIdn3fwBN7+Xu
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Recognize Face"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/faces/recognize"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Recognize Face
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"multipart/form-data":{"schema":{"properties":{"file":{"type":"string","format":"binary","title":"File"}},"type":"object","required":["file"],"title":"Body_recognize_face_faces_recognize_post"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

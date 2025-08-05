@@ -1,0 +1,70 @@
+---
+id: send-to-plus-events-event-id-plus-post
+title: "Send To Plus"
+description: "Send To Plus"
+sidebar_label: "Send To Plus"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVU1v2zAM/SsBTxug1WmxXXzbR4EV2NCizXYJgoCxmESdLKmSnDYw/N8HSknsNmsGNBc7Mkm/9/hItxBxFaCcwuWGTAwwE2AdeYzKmisJJQQych7t3OkmzCkFzfN1ruQ8HzsbIghw6LGmSJ4LtmCwJihhHwsClIESHMY1CPD00ChPEsroGxIQqjXVCGULces4L0SvzAoERBU1HySEoysJXTfL+RTiFyu3nFRZE8lEvkXntKoSg+I+WMNnfXXnmV9UFPifMpVuJM3RGBtTygCBMpFW5AcQrnL46HMfLkDSEhsdoTzvOrHPtYt7quIg9a5Z1Cre6CYkyF3HwZ6CsyZkLBfjMV8khcorl7HAXVNVFMKy0aPbXTCIt7INudiA4sJaTWie4cwxnYDUWyVP9YT55JYcM+87PD28uS86e9HYX05blFzvwDNr9PHi4liW36iVTKRHl95b/3ZNJEVUOnkhUh2OA7Stnj1Fs71eJoM/F6UTR8bpZr0s6D1uB8r9sBkgC12H1SmRf1IIuCI4FDsxIyzGaMJP/9cS5pVfvYsbdKSXN6v7Oo1vWb5Tzv8+mdwcFcy9feF1MnI0sSM2AUOjuLa8gg7rJa6hhCIvoaLdL5aucDkhkN/sl0/jNZSwjtGFsigk1fZs6dUKI51tlCRboFOpZX1gWRTaVqjXNsTy03h8nmNmAthDt/2+uXzC2ml6bX+cd7zpljb1aacBCGBomef47PxsnAbMhlhjsuduWb6Q4Jk+h65HeoqF06iSeRKBdqfONK9bzi0HizcJNBPA1DiobRcY6JfXXcfHDw35LZTTmYANeoULxjxtQarA9xLKJepAR3gOIwfvbnfOej8C8W+cewMZts8GdbPT5Q9th1+JNDNrQkk+YciPv+Y3fUjO7tOPBp07mjM+VxW5eDJ2NvDYzfXdBAQsdp+T2krO8fjIU4OPGapNzNMWSGctaDSrhmezhFyTf38BUumFcA==
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Send To Plus"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/events/{event_id}/plus"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Send To Plus
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"path","required":true,"schema":{"type":"string","title":"Event Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"properties":{"include_annotation":{"type":"integer","title":"Include Annotation","default":1}},"type":"object","title":"SubmitPlusBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"plus_id":{"type":"string","title":"Plus Id"}},"type":"object","required":["success","plus_id"],"title":"EventUploadPlusResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

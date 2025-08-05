@@ -1,0 +1,33 @@
+---
+id: validationerror
+title: "ValidationError"
+description: ""
+sidebar_label: "ValidationError"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"loc":["string",0],"msg":"string","type":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"ValidationError"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

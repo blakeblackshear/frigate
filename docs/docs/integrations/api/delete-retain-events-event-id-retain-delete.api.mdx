@@ -1,0 +1,70 @@
+---
+id: delete-retain-events-event-id-retain-delete
+title: "Delete Retain"
+description: "Delete Retain"
+sidebar_label: "Delete Retain"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVE2L2zAQ/SthTi2IOLu0F90KG9qFLS3btJdggmJPYm1lSSvJocHov5eR7MRpth/0ZCO9mXnvzYx6CGLvga9heUAdPJQMjEUngjT6vgYONSoMuHEYhNQbTKhN/m5kvRkvMgwYWOFEiwEdZe1BixaBw4gHBlIDBytCAwwcPnfSYQ08uA4Z+KrBVgDvIRwtxfngpN4DgyCDooNEc3ZfQ4wlxXtrtEdPIbeLBX1q9JWTlgQAhy9dVaH3u07NHgcwMKiMDqgDwYW1SlZJb/HkKaaf0LCO3AgyV/A52YTf1hiFQk8IDgUhMmjRe7HHP8n5OEBiZCPGbJ+wChfmrE+Vz0nLc5L3qNHJ6qQvRkr35vb22o5vQsk6iZ0tnTPu/72oqe+K/mTA1l8DlKkuboU+ftqlmbg0I7LTidQB9+gglmc7hHPiOHHswWSCyWC//ydzx2R/GCsyY7ai27+1gnTl0gNu0omzvdnd38u4y/a9VGyEfFitPl8lzL29bOpd2r3ZY9rENCKhMefdTUsZGuBQ5PUt+nEdY+HGII/uMC5t5xRwaEKwnhdFja2Z75zci4Dzg6zRFMLK1LczkBeFMpVQjfGBv10sbjKmpH3fmWT9IAsYUKFMfTG/mS/IJmt8aEWauOHJ+FXVheZTJwP+CIVVBIks8+kHuev86tDS8Mn7MyguGRBXgvX9Vnj86lSMdPzcoTsCX5cMDsJJsSXa6x5q6em/Br4TyuMVo9MiwavHYV5ez4C9zHQcC01DcRCqG6z5jsfpc5k2oUFRo0sc8vW7qkIbJoFXi0vGn8bgbvmwXC0hxp+UdAcH
+sidebar_class_name: "delete api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Delete Retain"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/events/{event_id}/retain"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Delete Retain
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"path","required":true,"schema":{"type":"string","title":"Event Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"message":{"type":"string","title":"Message"}},"type":"object","required":["success","message"],"title":"GenericResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

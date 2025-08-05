@@ -1,0 +1,70 @@
+---
+id: export-delete-export-event-id-delete
+title: "Export Delete"
+description: "Export Delete"
+sidebar_label: "Export Delete"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVE2L2zAQ/SthTi2IOBvai26FGLqwpWWb9hJMUKxJrK1saaVx2GD038vYztdmu9CT7fl88+aNOyC1iyBXkL94FwgKAc5jUGRcc69BAvb2tUaLhOvxa417bGht9Hp0gACvgqqRMHC5DhpVI6ePgSDANCDBK6pAQMDn1gTUICm0KCCWFdYKZAd08JwXKZhmBwLIkGVDzoUm9xpSKjg/etdEjJwyn834oTGWwXhGDhJ+tmWJMW5bO3kcg0FA6RrChjhceW9N2Q+aPUXO6c4wUkpJwKf5/Lbwb2WN7tMmeQgu/EdV8IHJJTPg1kjKWH4zhHW8DbCuvPKq5vB927N7zVISJ4tpCHcYIBVJHG0qBHW4oPLBDQAhCajj7j3Wv2GMaodwKvbOgpiMyZK96dzbbZ6wpKuNr/q5htZjXHEuc6Z3YPffYywG+t5qdgz5ulz+uCk47PZ6qYP6J4ujmGukyrH8L+RNFUjIhgvIuqOwEwiIGPZH3bfBgoSKyEeZZRprN90Gs1OE073R6DLlTb+wc6DMMutKZSsXSX6eze6GmIJPZut6zsd5QAA3GjDPpnfTGfPjXaRa9VIbr+71OFfDnlZI+EKZt8r0SujxdOOcq/HuQYA8nXAhgCGyt+s2KuKvYFNi83OL4QByVQjYq2DUhtGuOtAm8rsGuVU24g2Q0+HAh8dRHx8nIN4GeJRBwyLYK9uOjPzBw+WPpld+hUpj6DEM7i9liZ4uEm8Olfk+rX2RP+TLHFL6C+O2wHQ=
+sidebar_class_name: "delete api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Export Delete"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/export/{event_id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Export Delete
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"path","required":true,"schema":{"type":"string","title":"Event Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

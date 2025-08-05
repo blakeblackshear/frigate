@@ -1,0 +1,33 @@
+---
+id: reviewsegmentresponse
+title: "ReviewSegmentResponse"
+description: ""
+sidebar_label: "ReviewSegmentResponse"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"id":"string","camera":"string","start_time":"2024-07-29T15:51:28.071Z","end_time":"2024-07-29T15:51:28.071Z","has_been_reviewed":true,"severity":"alert","thumb_path":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"ReviewSegmentResponse"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"id":{"type":"string","title":"Id"},"camera":{"type":"string","title":"Camera"},"start_time":{"type":"string","format":"date-time","title":"Start Time"},"end_time":{"type":"string","format":"date-time","title":"End Time"},"has_been_reviewed":{"type":"boolean","title":"Has Been Reviewed"},"severity":{"type":"string","enum":["alert","detection"],"title":"SeverityEnum"},"thumb_path":{"type":"string","title":"Thumb Path"},"data":{"title":"Data"}},"type":"object","required":["id","camera","start_time","end_time","has_been_reviewed","severity","thumb_path","data"],"title":"ReviewSegmentResponse"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

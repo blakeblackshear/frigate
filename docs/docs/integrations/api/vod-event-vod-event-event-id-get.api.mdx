@@ -1,0 +1,70 @@
+---
+id: vod-event-vod-event-event-id-get
+title: "Vod Event"
+description: "Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback."
+sidebar_label: "Vod Event"
+hide_title: true
+hide_table_of_contents: true
+api: eJy9VE1rGzEQ/StiTi0Ir5O2UPYWaGgCCS2Jm4sxZrwae5VoV4o0a2IW/fei/bDjugn00tNqpTdfb95MC4ybAPkcbklphIUERaHw2rG2NeRwR9z4OgisxdXNvXAGd0YHFmvrBZckgqNCrzUpYVePVPBEXDhHtRJZhYHJT6pPzVdhvch0reil/03Go7cVFk8TkGAdeUxBrxXksLVqSVuqeXk4DR+tlssNMUhw6LEiJp8KaKHGiiCHEQUSdKrAIZcgwdNzoz0pyNk3JCEUJVUIeQu8c8kusNf1BiSwZpMuLpMjca0gxkWyD87WgUIyOZ9O0+eYqvumKCiEdWPE3QAGCYWtmWpOcHTO6KIrMnsMyaY9pBFjjBI+n5+fOn5Ao1VnJi69t/4fvILziVjWfd6KGLVJJ81UhVOAscXRK9a7H+uO3WOWotzf6JppQx7iIsrxDr3H3Ssqb2yfIEQJVdi8x/othYAbgr2zdxqUyBCz9BoPsXsdHnV83tXVhx5wi4ObA709u2+X8a2n72/BRsjVbPbzxGHf24q4tEnco3q5hByyrVVZp9msHaUbQUIgvx2V3XgDOZTMLuRZpqiyk7XXG2SabLUim6HTXUsOwDzLjC3QlDZw/mU6PesxizQUa9uxOmQMElKgXmrTydlkmhhwNnCFnZiGuXqwSnQjAX/siPagxv+3Lgb+mV44cwZ1J62u/HZgdp6WCMh+H4CEfL8YFhISLQnStisM9MubGNP1c0N+B/l8IWGLXuMqMTRvQemQzgryNZpA7xDw4W5Q3UfxVpajuOokrS2aZujCE+1er69unkpCRb7LoX++KApy/MrwZPxTj/dS+345gxh/A+hkArE=
+sidebar_class_name: "get api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Vod Event"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/vod/event/{event_id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"path","required":true,"schema":{"type":"string","title":"Event Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

@@ -1,0 +1,70 @@
+---
+id: update-role-users-username-role-put
+title: "Update Role"
+description: "Update Role"
+sidebar_label: "Update Role"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVN9v0zAQ/leqewLJNN0EL34bMAkkEFNpeamqyk2ujUcSe/alWxXlf0dnJ027rgPy4ujuu9/3XQOkth7kAm5qymEpwFh0irSpvmYgobaZIlw5U+Cq9uj8KjyVKnEVpbYmEGCVUyUSOvbVAOvZuoOCAF2BBKsoBwEOH2rtMANJrkYBPs2xVCAboL1lO09OV1sQQJoKFsx7R227jPbo6aPJ9mz03F1qKsKKWKWsLXQayknuvalYNkSzjosljT64MRzqcg5T1ret6AFmfY8pnZSziE6Wg9GNtXc1sWnItm3ZgUNvTeVj2OvJhJ8Mfeq05UxBws86TdH7TV2Mph0Y/r2wGOX99fW541+q0FkwG906Z9x/eH3WrgxJ6YL/NGHpzwGFSU+0qtr/2ITtOO1wKw4SXRFu0UG7HNqsnFP7ozF8MzFBaAWUfvvaxL6j92qLcHB2GRqaMZqx9m8j5rpi6A53NO6hvbG7l8v4HNv3UrAe8mU2uztzGGd7OtR5IOkoLKiAEik3zN2emZSDhCSwN2l6SraJi3CPbtfTtnYFSMiJrJdJkmFpxhunt4pwvNMZmkRZHeY1AGWSFCZVRW48yQ+TyVXELAXwAk0Hpt4+qdJGhkWmDfMHXW1MmE5XOQjgnGJ1k/HVeMIoazyVKixld19OCz9pymHUhE+U2ELpsDEh8aZryiIcKA8C5NGl6inMFTGmadbK49wVbcvihxrdHuRiKWCnnFZrznjRQKY9/2cgN6rweJbOgWbwZtpt09sRiJfT7Jem4pXZqaLuuvIb98dnNfAkR5WhCzlE9acY6V3Y5sH8jNw8yGhxk6Zo6VXs8mix7uYzELDuzm9pMjZx6pGbpx5jpiYUHg8ryxooVLWtmY4Sokv+/gDXwzpn
+sidebar_class_name: "put api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Update Role"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"put"}
+  path={"/users/{username}/role"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Update Role
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"username","in":"path","required":true,"schema":{"type":"string","title":"Username"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"properties":{"role":{"type":"string","title":"Role"}},"type":"object","required":["role"],"title":"AppPutRoleBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

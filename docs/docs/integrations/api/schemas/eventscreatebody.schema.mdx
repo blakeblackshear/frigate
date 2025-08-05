@@ -1,0 +1,33 @@
+---
+id: eventscreatebody
+title: "EventsCreateBody"
+description: ""
+sidebar_label: "EventsCreateBody"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"source_type":"string","sub_label":"string","score":0,"duration":0,"include_recording":true,"draw":{}}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"EventsCreateBody"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"source_type":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Source Type","default":"api"},"sub_label":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Sub Label"},"score":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Score","default":0},"duration":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Duration","default":30},"include_recording":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Include Recording","default":true},"draw":{"anyOf":[{"type":"object"},{"type":"null"}],"title":"Draw","default":{}}},"type":"object","title":"EventsCreateBody"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

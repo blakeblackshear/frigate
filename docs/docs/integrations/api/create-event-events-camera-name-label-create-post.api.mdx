@@ -1,0 +1,70 @@
+---
+id: create-event-events-camera-name-label-create-post
+title: "Create Event"
+description: "Create Event"
+sidebar_label: "Create Event"
+hide_title: true
+hide_table_of_contents: true
+api: eJy9Vk2P2zYQ/SvCnFqAXSmb9sJbu1mgC7RNsLvtxTAEShzbTClRISk3hqD/XgxJS/LacRYpUB8MgZx5M/PmiwN4sXXAV3C/x9Y7WDMwHVrhlWkfJHCoLQqPJdJ1/HdlWYsGrShb0WBZllpUqMsySXbGeWDQCSsa9GgJfQASJbRZERioFjh0wu+AgcVPvbIogXvbIwNX77ARwAfwh45Unbeq3QIDr7ymg7uAlf1BWOPIJhvBnf+M/ltAGcd1VEbnfzHyQBq1aT22nj5F12lVB7Lyj860dDZDS9yIXgdBZ3pbY5mMiU4B+WAsAi8YyD4SDvxtQX7XupdYWqyNleRVclpa8Q/wYRwZdJay5BW6M/QBRHt4vwmsnwZHHKWTttcaKLZjuE8BInumazZ7HlwdGbi+imn+Zvy+yhKlU+QXkNq+qdBeRwrKCx+LccngBVDVetx+BfXdEWAB/JaQL2TjgonKGI2ivWriISJljxPSwhZleJxSfG7AVB+x9tdDIN0F5DBSpZzqz9Kx3+9Cz4bKHoO4RdeZ1sW6ui2KWMeutqqL/MJTX9fo3KbX2WMSBvb6pnhRuRFs0YhHJpelE2VGBg06J7Z4rW9/TyIjgzizlLwmHmjIHiRc4mqeGqvJ09mJhYH1C8BI60RPpPbH29tzNv8SWsnAVXZvrbHfTqVEL1ToT+WxcecC2tQnt69o46lz1jM7wlpxWA5KEx0M+XHbV+bmOKu+mBciI46jr2WG4oqmk9wiGzO9kd0vh/Eu0netZX59fv5wBhhze5rUmP4slEIoGL8ztEun1eh3wCGP2zQfFktxzIcwZsc8blNaE2j3xy3aWw0cdt53jue5xMbcbKzaCo83eyXR5HFcLwV5nmtTC70zzvOfiuJNlFkzoIJ6nFfb/WfRdBrPt9WUm8USWBxe2GKvXGKq3ZhQA4lfYECRRg6Lmzc3BeWLSGtEKP204F/Qe8L9VFEeP/u800KFwgx8DIn5VWxc6mV++iDhx7dDYn/NgHgjlWGohMM/rR5HOv7Uoz0AX60Z7IVVoqIIVgNI5ehbAt8I7fDMu6m54bvHVMPfZ8Aue30s1ZYKdS90n1j6Gw8v3lKU8//RdKQpTIUdCok2xB7v7qKZH9JT4qh7NsrI5ajxc11j56/Krhdd9OH90zMwqNJzrDGSdOLyC8VFfpoQdphzaaVq0W77sDwgYtLvX/BGwjM=
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create Event"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/events/{camera_name}/{label}/create"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Create Event
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"camera_name","in":"path","required":true,"schema":{"type":"string","title":"Camera Name"}},{"name":"label","in":"path","required":true,"schema":{"type":"string","title":"Label"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"default":{"source_type":"api","score":0,"duration":30,"include_recording":true,"draw":{}},"properties":{"source_type":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Source Type","default":"api"},"sub_label":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Sub Label"},"score":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Score","default":0},"duration":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Duration","default":30},"include_recording":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Include Recording","default":true},"draw":{"anyOf":[{"type":"object"},{"type":"null"}],"title":"Draw","default":{}}},"type":"object","title":"EventsCreateBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"message":{"type":"string","title":"Message"},"event_id":{"type":"string","title":"Event Id"}},"type":"object","required":["success","message","event_id"],"title":"EventCreateResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

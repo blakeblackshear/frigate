@@ -1,0 +1,70 @@
+---
+id: delete-user-users-username-delete
+title: "Delete User"
+description: "Delete User"
+sidebar_label: "Delete User"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVF2L2zAQ/CthnloQce5oX/R2cIEWrrRcc30JJujsTayrbPmkdWgw+u9Fsp0Pclfoi220s6vZ2Vn3YLXzkGvcdVwhF7AtOcXaNl9LSJRkiGnTeXLp4Tfp1aiaNpshCIFWOVUTk4uVesQoJCYgBHQDiVZxBQFHr512VEKy60jAFxXVCrIHH9qY59npZgcB1mziwdNUKIQ85vvWNp58TLldLOKrJF843UbakPjZFQV5v+3M7HEEQ6CwDVPDEa7a1ugidZm9+JjTn2iEEILAp9vb68K/lNFlSpstnbPuP6qidVFZ1gPvklhpE780U+2vAcYWF1HVHL5vk7qXKgVxPNEN044cQh7EdKacU4czKR/sQBBBoPa7f6n+jbxXO8Kx2PvQJMZsFaPhdLd9fqGCLya+Tn0NV4+4/FTmJO+g7vtt3A/yvXXZBPmyWv24KjjM9nKo98nFs2iyyIy4sifnJ3NzBYks2T/rJ1cHCHhy+8n0nTOQqJhbL7OspNrOt07vFNN8r0uymWp1mtYJKLPM2EKZynqWnxeLmwGTx33Z2iT42AwE4kUD4cX8Zr6I4rTWc62Sz8aVu+zlos/j9Jj+cNYapZMJEpt+bHKddtZDQB6XNxeI/GKw75+VpydnQojHrx25A+Q6F9grp9VzpLruUWofv0vIrTKerngcVwYfHkdnfJxBvM1vMkATx79Xphvl+E2H819M8nxFqiSXOAzhu6Kgls8Sr1Y0in0c+f3yYblaIoS/wsG8Vg==
+sidebar_class_name: "delete api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Delete User"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"delete"}
+  path={"/users/{username}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Delete User
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"username","in":"path","required":true,"schema":{"type":"string","title":"Username"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

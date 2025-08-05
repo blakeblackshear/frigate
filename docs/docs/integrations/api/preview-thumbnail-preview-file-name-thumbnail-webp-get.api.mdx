@@ -1,0 +1,70 @@
+---
+id: preview-thumbnail-preview-file-name-thumbnail-webp-get
+title: "Preview Thumbnail"
+description: "Get a thumbnail from the cached preview frames."
+sidebar_label: "Preview Thumbnail"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVMtu2zAQ/BVhTy1AWE7QXnQr0CQt0LRB6vZiCMZaWklMKZEhV04Ngf9eUC/bcROgPUnYx3B2OMsOGEsHyRpuKZcIqYCcXGalYakbSOCGOMKIq7beNihVVFhdR1xRlGFWUR4ZSztJT1FhsSa3AAHakMXQ/TmHBMb8ZkbYTJFNIRVtGqxpc5R9oq3ZlMQgwGDAZLKBXwehEhKYu0CADAwNcgUCLD220lIOCduWBLisohoh6YD3JjQ6trIpQQBLViFwLRVFXwOS92kAcEY3jlzouVwuw+dUi+9tlpFzRaui+7EYBGS6YWo4lKMxSmb98PGDCz3dgYf33gt4d3l5DvwTlcz7tujKWm3/ARWMDYKzHHjnxChV+JNMtTsvUDo7yWKz/1b0+p7K5MUckQ1TSRZ86sUUQ2txf6TlFz0QBC+gduVrst+Sc1gSzGAvl/ZiRKuQ9Yez9faBMj658nU/13D0WJceYA7yDuq+PMbHQb6/HTaVfFqt7s4Ah7utiSsdTD/5lytIIB4NH3ezdX08G34RDA8CHNnd5PTWKkigYjYuieOcar0orCyRabGTOekYjewv6FCYxLHSGapKO07eL5cXQ00adqTQvcYjfxAQDhqMt1xcLJZBD6Md19hba9yzu3GxVxNTePY0dAeP/scrMcrL9Jtjo1D2zunn6Ubh1tPbAQKS461/pl0qIEwdGrpui45+WOV9CD+2ZPeQrFMBO7QSt0GAdQe5dOE/h6RA5eiVud7cjxZ7G73EeXJSE3y0Q9WOIv+i/clr1W9PRZiT7UkM+Q9ZRoaPOs+WPdzhbKybqxV4/weEcfZK
+sidebar_class_name: "get api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Preview Thumbnail"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/preview/{file_name}/thumbnail.webp"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Get a thumbnail from the cached preview frames.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"file_name","in":"path","required":true,"schema":{"type":"string","title":"File Name"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

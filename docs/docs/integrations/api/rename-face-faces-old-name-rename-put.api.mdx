@@ -1,0 +1,70 @@
+---
+id: rename-face-faces-old-name-rename-put
+title: "Rename Face"
+description: "Rename Face"
+sidebar_label: "Rename Face"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVE1v2zAM/SsBTxugxWmxXXTbR4cN2Noiy3YJjECxmUSdLKmSnDQw/N8HSnacNG23+RA75CP1+EiqgSDWHvgcrraog4ecgbHoRJBGfy2Bg0MtKlysRJF+/GJhVLmIxkXntHUABlY4UWFAR/kaIA9w6MHAQGrgYEXYAAOH97V0WAIPrkYGvthgJYA3EPaW4nxwUq+BQZBBkeFGlaNrStS2eYpHHz6Yck9Bj9MVRgfUgVzCWiWLWFB2540m23CadVRukOjpn8ZdIvsCj2vc9TxYDzLLOyzCSVnzIVk+BE+jYJ9FgZF521ISh94a7ROFy8mEXiX6wklLrIHDj7oo0PtVrUbTDgz/XmQ65e3l5XniX0LJMoaNrpwz7j+yPpKuxCCkoi8ZsPLnAGWKE6/Q+5tVnJRTpVt2sEgdcI0O2nyQWjgn9kft+GYSQWgZVH79Uue+o/dijXBI9jw0ijGakfdvbaa60tEd7qjdg7xJ3efL+JTke+qwHvJlNrs9S5h6e9rUNGQjmjJihmFjaJP7LQ0b4JDFXc6afj3bLO0yMPDotv0S104Bh00I1vMsK7Ey45WTaxFwvJUlmkxYGTs2AHmWKVMItTE+8HeTyUXC5AxohKbD3l49iMoqPN27YQpA6pWJPerqBwbEK9U4GV+MJ4SyxodKxNHsMpyWfyLNoeEBH0JmlZBxbiL5ppNmDlEaYMCP7q5OnZwB1UWoplkKjz+dalsy39fo9sDnOYOtcFIsifO8gVJ6+i6Br4TyeEbosG7watpN1esRsKeJ9sOjaXS2QtWdLr9xf3zVxn3ZoCjRRQ7J/TGd9CZO9RB+tuTUzhTxvijQhhex+dGA3f6cAYNldyVXpqQQJ3Ykn9glpiYWHi+AaGtACb2uaS05pJT0/AFpjUE5
+sidebar_class_name: "put api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Rename Face"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"put"}
+  path={"/faces/{old_name}/rename"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Rename Face
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"old_name","in":"path","required":true,"schema":{"type":"string","title":"Old Name"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"properties":{"new_name":{"type":"string","title":"New Name"}},"type":"object","required":["new_name"],"title":"RenameFaceBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

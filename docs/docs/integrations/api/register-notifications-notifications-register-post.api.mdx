@@ -1,0 +1,70 @@
+---
+id: register-notifications-notifications-register-post
+title: "Register Notifications"
+description: "Register Notifications"
+sidebar_label: "Register Notifications"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVE1v2zAM/SsBz1qcFttFt30U2IBtLdpsl8AYFJtx1MmSKtFtA8P/faDkOkmzFpsvluinJ/Lx0T2QaiLIFXx3pDe6UqSdjVAKcB5D2n2pQULARkfC8Mse4p7tJpB3kUBAwLsOI31w9Q5kD5WzhJZ4qbw347HiNjrLsVhtsVW8op1HkODWt1gxD2kyHEhEwzAMTB29sxEj488XC37VGKugPZOChJuuqjDGTWdm1yMYxD/nkG95e35+SvxTGV2nY7OLEFz4D1bwgWUlnfOukZQ2vNKEbTwFGFcdfVV2d7kBuZokihS0bWAQU0RbwgYDDOUgnmIqBLU70PGrywnCIKCNzYHkI98e+g1jVA3CRPYyNIkxW/LXYX/31EQ2gw5Ys9m4rnz1iCv3NHt5s7ovl/Epy/e3y54gn5fLqxPC3Nvjpl6P1p0dz4GAFmnreAJGT3tFW5BQHDm/eHI+CIgY7jHE1KUuGJCwJfJRFkWNrZtvgm4U4fxe1+gK5XVq3h4oi8K4SpmtiyTfLRZnGVMKYDdd7yfq4lG1novsBwHablzqzVg3COAkcm2L+dl8wTpyCa1KlrSqxdfKPlJn6jnhIxXeKJ2sk5LuR0VWYJ9RTJqUArgaxvT9WkX8EcwwcPiuw7ADuSoF3Kug1ZqTX7Fzt6hqDEnE37gDCR/ziL1J/mK46ZInno8bq5lPvK8q9PQqtjzo79XlzRIErMefVetqPhPUA5eiHrKozufqZJ9jPRhlm44nRELm5OcPNHfaDQ==
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Register Notifications"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/notifications/register"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Register Notifications
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"type":"object","title":"Body"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

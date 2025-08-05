@@ -1,0 +1,70 @@
+---
+id: submit-recording-snapshot-to-plus-camera-name-plus-frame-time-post
+title: "Submit Recording Snapshot To Plus"
+description: "Submit Recording Snapshot To Plus"
+sidebar_label: "Submit Recording Snapshot To Plus"
+hide_title: true
+hide_table_of_contents: true
+api: eJy9VE1v1DAQ/SvRnECyNtsKLr4hCgKJ0qpduKxWkTeZ3bg4sWtPVqwi/3c0Tvar2yIQEqc44zdfb+a5B1LrAHIO11hpBQsB1qFXpG37uQIJoVs2mgqPpfWVbtdFaJULtaWCbOFMF4qiVA16VbSqwWI0rTz/kE4WGwgEOMU2Qs/ZemA0SDjyBQG6BQlOUQ0CPD522mMFknyHAkJZY6NA9kBbx66BvG7XIIA0GTa8T7GyrxwrRrHPcSjmn1N85FDZTKcMC44QnG0DBna6nE75U2EovXbMIEi478oSQ1h1JrsbwSCgtC1hSwxXzhldJsLzh8A+/aGQGGMU8Oby8jzwd2V0ldyyD95b/xdRwXkeMumh7gpJacMnTdiEc4Cx5cmtarc3qzTFU56Y89GiW8I1eoiLKHY25b3aHpH5xQ4FQhTQhPXveL/GENQaYR/sZWgiI5vxbTzktssHLOlk5vPU15B6xC0OYQ70Duy+3MbVQN9zyXaQT7PZ7VnAYbZPt4XVlt3t1Jbdj2rLZja7NV3gepFqy9LcC4tqkJD3R1qKOesw7w+rH0FAQL/Z6a/zBiTURC7IPK+wsZOV12tFONnoCm2unE4DPQBlnhtbKlPbQPLtdHoxYBYsqpVNMxn7BQGcaOhpOrmYTJk/rrdRaRVHZf5JuycE7cdO+JNyZ5RO25Nq7Ecm5iBPXxU3BJJH78BCAHfB4L5fqoDfvImRzY8d+i3I+ULARnmtltzQvIdKBz5XIFfKBDyra689eHU3rtjrDMTz9e42qeU92ijTjaT9wO2TN5En8B9TH1GUlFujqtAnAgbAu7JER0euZw8N78N+RW9v7mcQ4y9SdTHL
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Submit Recording Snapshot To Plus"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/{camera_name}/plus/{frame_time}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Submit Recording Snapshot To Plus
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"camera_name","in":"path","required":true,"schema":{"type":"string","title":"Camera Name"}},{"name":"frame_time","in":"path","required":true,"schema":{"type":"string","title":"Frame Time"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

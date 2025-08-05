@@ -3,11 +3,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { NavData } from "@/types/navigation";
 import { useMemo } from "react";
 import { isDesktop } from "react-device-detect";
-import { FaCompactDisc, FaVideo } from "react-icons/fa";
-import { IoSearch } from "react-icons/io5";
-import { LuConstruction } from "react-icons/lu";
-import { MdVideoLibrary } from "react-icons/md";
-import { TbFaceId } from "react-icons/tb";
+import { LuConstruction, LuVideo, LuChartNoAxesCombined, LuSearch, LuShare, LuScanFace } from "react-icons/lu";
 import useSWR from "swr";
 
 export const ID_LIVE = 1;
@@ -30,28 +26,28 @@ export default function useNavigation(
         {
           id: ID_LIVE,
           variant,
-          icon: FaVideo,
+          icon: LuVideo,
           title: "menu.live.title",
           url: "/",
         },
         {
           id: ID_REVIEW,
           variant,
-          icon: MdVideoLibrary,
+          icon: LuChartNoAxesCombined,
           title: "menu.review",
           url: "/review",
         },
         {
           id: ID_EXPLORE,
           variant,
-          icon: IoSearch,
+          icon: LuSearch,
           title: "menu.explore",
           url: "/explore",
         },
         {
           id: ID_EXPORT,
           variant,
-          icon: FaCompactDisc,
+          icon: LuShare,
           title: "menu.export",
           url: "/export",
         },
@@ -66,7 +62,7 @@ export default function useNavigation(
         {
           id: ID_FACE_LIBRARY,
           variant,
-          icon: TbFaceId,
+          icon: LuScanFace,
           title: "menu.faceLibrary",
           url: "/faces",
           enabled: isDesktop && config?.face_recognition.enabled,

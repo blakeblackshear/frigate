@@ -1,0 +1,70 @@
+---
+id: false-positive-events-event-id-false-positive-put
+title: "False Positive"
+description: "False Positive"
+sidebar_label: "False Positive"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVE2L2zAQ/SthTi2IOLu0F90K3dKFloY220swQbEnsbaypZXGocH4v5eRHMfZbLfQk400H++9macOSO0DyDXcHbChALkA69Ar0ra5L0HCTpmAG2eDJn3ADcawTfpudLnZPAtwLYEAp7yqkdBz7Q4aVSNIOCWBAN2ABKeoAgEen1rtsQRJvkUBoaiwViA7oKPjvEBeN3sQQJoMH0Sws/sS+j7n/OBsEzBwyu1iwZ8SQ+G1Yxog4UdbFBjCrjWz70MwCChsQ9gQhyvnjC4i6+wxcE43geE8a0I6dQip2ATf1lqDqpkAHBpCL8CZNjDnV+gsTRsSG3GKsdtHLOhCnPXY+Vw0f6bJgzNWlVxv5Nn3XPbd7e21LD+V0WUkPbvz3vr/16REUtrwnyasw3WAscXFrWqO33ZxNy5F6cV4ohvCPXro87Msynt1nCj3xSaALHQd9q+J/BVDUHuEsdgr68VizFZ8+6+RMK/UeoibTOQsb1L37zQ+JvleanYK+bxaLa8KptleDvUT+3G2HPzI4JAqy1Y+WZMqkJAlJ2fdyZR9dulkEBDQH04Wbr0BCRWRCzLLSqztfOf1XhHOD7pEmymn4/TOgTLLjC2UqWwg+X6xuEkxObt/Z+MABnIggBslAov5zXwRnWMD1Sru3fCAXHG7oD4OlPA3Zc4oHfciAuoG3uv0CLGH5OQ5ekY9F8CgObzrtirggzd9z8dPLfojyHUu4KC8VlvGv+6g1IH/S5Cx1BWy0Vfw5vuwPm9nIF5GfNqShnfkoEw7aPQLj9NXNBqjQlWijxjS9YeiQEeTxCsf8wTGpVg+rKDv/wDg7BLP
+sidebar_class_name: "put api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"False Positive"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"put"}
+  path={"/events/{event_id}/false_positive"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+False Positive
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"path","required":true,"schema":{"type":"string","title":"Event Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"plus_id":{"type":"string","title":"Plus Id"}},"type":"object","required":["success","plus_id"],"title":"EventUploadPlusResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

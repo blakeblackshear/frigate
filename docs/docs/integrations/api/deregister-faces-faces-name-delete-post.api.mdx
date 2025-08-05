@@ -1,0 +1,70 @@
+---
+id: deregister-faces-faces-name-delete-post
+title: "Deregister Faces"
+description: "Deregister Faces"
+sidebar_label: "Deregister Faces"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVE1v2zAM/SsBTxugxWmxXXTb1g4bsK1Fm+0SGIFiM4462XIlOm1g6L8PlJy4QdpiyyEWKPLx8eOpB1KVB7mAyy025CEXYFt0irRtvpUgoUSHlfaEbrlWBfrhf9moGpfLEg0SLlvrCQS0yqkaCR0j9sAuINNHgG5AQqtoAwIc3nfaYQmSXIcCfLHBWoHsgXYtx3hyuqlAAGkybPjJICHkKRY9fbLljgMK2xA2xEfVtkYXkXp2523DthNku7rDgp4gR6AQQmBo39rGo2f/89mMPyX6wumWQUHCbVcU6P26M5ObwRnEP3NIWd6fn58C/1ZGlzFscumcdf+BCq3jkZFOvEskpQ2fNGHtTx2MLY5uVbO7WseBHTc/iINFN4QVOgh5EHubck7tnvTxu00EIQioffXaMH+g96pCOIC97BqbMZnzbRhzH4Y4LtIi1pVSD375CDO2N3X35TIuUvueS7Z3+TqfX58AptkeD/XioJ3JF1YN00PaWNbVQTK0AQlZVFXWs1ZCllQFAjy67V5NnTMgYUPUepllJdZ2una6UoTTrS7RZqrVcWajo8wyYwtlNtaT/DCbnSWfXAAv0c0opMtHVbdcWx9YqGsbRzKUCwKYRCppNj2bzrh9zL9WcRMHnT9T7VE7DkMmfKSsNUrHXYl0+6ERC1gPoXJ4NoZe5AK4Cvbo+5Xy+MuZENh836HbgVzkArbKabVi0oseSu35XIJcK+PxhMxBXvDmZtiitxMQz5PcL0vDq7JVphsa8wd3+xcuamODqkQX86erzynLu7jBY+iJoHlwKeJjUWBLr/rmT/bo+up2DgJWw3NY25JjnHpgdaiHRNPGqqPao60Ho5qqYw1KSJj8+ws0pxFM
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Deregister Faces"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/faces/{name}/delete"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Deregister Faces
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"name","in":"path","required":true,"schema":{"type":"string","title":"Name"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"content":{"application/json":{"schema":{"type":"object","title":"Body"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

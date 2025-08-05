@@ -1,0 +1,70 @@
+---
+id: login-login-post
+title: "Login"
+description: "Login"
+sidebar_label: "Login"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVE1P3DAQ/StozulmQe3FN1qQWomKFSy9RKvKm8wmpk5sPBNgFeW/V2PvkgUKbXPIx/h5PO+9mQzAuiZQBZz23MAqA+cxaDau+1aBAutq0/1Md++IIYOAdz0Sf3bVFtQQP03AChSHHjMoXcfYsSxp760pY7L8llwnMSobbLW8+SBHsUGSr54wyJO3HkEBcTBdDRmwYSuBG1kfM/Ca6MGF6j3sYo8Zx2wPcutbLPflp3qLdOhBztWU49T7hSO+EOaR6jhKtoDkXUep5pP5XB4VUhmMF5qg4LovSyTa9PboageGf1clnfLx5OR14h/amipuOzoPwYX/yPpC6wpZGytvhrGl1wDrymeruttebkAVLyUfs6eI6RhrsWg1aa5D0NsDXy5cKlB8bKl+z8LvSKRrhKdkb0OjGEdLWf2b38IrHb3DHRg+yZvUfZvGWZLvT4ftIV+Xy8WrhMnb56bG/pKakBsnA7cbMq+5AQW53a0ThnsMFD3ogwUFDbMnlecVtm62CabWjLN7U6HLtTfRmgmo8ty6UtvGEatP8/lxwqwykF65mib6/FG33uI0kZPe0+RN9oPpNi6asyMOGUididx8djybx6F1xK2OPdnpFg94P1PjyWPGR8691Sa2SqQx7CQp0i9JnBMyEhiGtSa8CXYcJXzXY9iCKlYZ3Otg9FoKK6QtG9SVcCoG+IVbUPAlzc+H2DwCt300/OUsiZhpx2lZoud3sasDNxeX10vIYL37V7aukj1BP0hj6ockmIv046DF2ABWd3Uv7a8g5ZTrNw3d8Qk=
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Login"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/login"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Login
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"properties":{"user":{"type":"string","title":"User"},"password":{"type":"string","title":"Password"}},"type":"object","required":["user","password"],"title":"AppPostLoginBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

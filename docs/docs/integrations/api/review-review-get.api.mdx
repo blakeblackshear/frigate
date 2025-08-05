@@ -1,0 +1,70 @@
+---
+id: review-review-get
+title: "Review"
+description: "Review"
+sidebar_label: "Review"
+hide_title: true
+hide_table_of_contents: true
+api: eJy1Vk1v2zgQ/SvGnNXYDbYX3dpt0BbYRYvE7aGBYYykkc0uJarkyLuuof++GFKSqTpJnaY9CSIf5828+SAPwLhxkN7CNe0U/QurBExDFlmZ+l0BKVi/vu4/G2JIoEGLFTFZOXmAGiuCFHKsyKKDBFQNKXxtye4hAUtfW2WpgLRE7SgBl2+pQkgPwPtGDjq2qt5AAgWV2GqGFFBrSIAVawH82VvuumRk05iR/h1kfwXDMdc3U9PvoPrs7cZMQWYqHk+maqYN2ZhtcWS6HuxOJFSV4qcwjZJ5Q7FpRzuyivdPEI3qtpLCRE2WfVhMuZSl1OjAfNPzXAk4diCj0lh6PH3dVtkktlfBUGwbS/aQp5p+6e103UpOu8bUjpzgLxcL+RTkcqsaH3IKN22ek3Nlq2fXPRgSyE3NVLPAsWm0yn3jzr84OXM49QGtRZ8UpspzNVbanVVgVsVdmRj8fVdAl/Rt/hAutKtgHaPlNSuR7RRfGluhdEWBTM88KsqsHJ0tZbGTYih+zsxVXYxGtujWGVG9HrvsaC0zRhPW0cm36GaviOrZsXeSY13/moJNgLdtla0b5O1Dii4FNfsgqC6ROIP+/e5r+e/EWDhusi+U86QmbyW1Y+4miYnEvUuiJO7lyNvejdX3M+aGNhXVPNZoFwPCWq/o8HlDMjvE/z8uL08L/xNqVfiynl1Za+xjqn5a3QUxKu3r/O7y1yaf7GK9f1/6K26aGJkF3w3DbnXUf2iycTya4KBoUbnNQ4n+m5zDTVDNQ+6HejFmS9n9Ue4lrkDd46KsHeUN6t4fxusg311kY88slx9ODIbcTpPavzYSqIi3Rt4Zw8tCGgHmdth3ZHfDO6O1GlLYMjcunc8LqsxFadUGmS52qiAzx0b53ByB6XyuTY56axynLxaL5wGzkuFdmriJIAEhCu4tLp5fLESKxjiu0FdVP/xHzycBjWli+o/njUbls+0dOfRR3fa3u6gv/sjK4ZCho49Wd50sh8tEYi2Uw0xH18k/tJ+8sXaoW++3BHwPenwjnQMeHjnnYKPpcJYf/UPjHGw0bc6Bj/f8OeDh4j5iV/JjlYAhvZUe3hIWZH0OwqGXeU5N7P3JyBErYx2/uVpC1/0PdJLR3A==
+sidebar_class_name: "get api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Review"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/review"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Review
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"cameras","in":"query","required":false,"schema":{"type":"string","default":"all","title":"Cameras"}},{"name":"labels","in":"query","required":false,"schema":{"type":"string","default":"all","title":"Labels"}},{"name":"zones","in":"query","required":false,"schema":{"type":"string","default":"all","title":"Zones"}},{"name":"reviewed","in":"query","required":false,"schema":{"type":"integer","default":0,"title":"Reviewed"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","title":"Limit"}},{"name":"severity","in":"query","required":false,"schema":{"type":"string","enum":["alert","detection"],"title":"SeverityEnum"}},{"name":"before","in":"query","required":false,"schema":{"type":"number","title":"Before"}},{"name":"after","in":"query","required":false,"schema":{"type":"number","title":"After"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"properties":{"id":{"type":"string","title":"Id"},"camera":{"type":"string","title":"Camera"},"start_time":{"type":"string","format":"date-time","title":"Start Time"},"end_time":{"type":"string","format":"date-time","title":"End Time"},"has_been_reviewed":{"type":"boolean","title":"Has Been Reviewed"},"severity":{"type":"string","enum":["alert","detection"],"title":"SeverityEnum"},"thumb_path":{"type":"string","title":"Thumb Path"},"data":{"title":"Data"}},"type":"object","required":["id","camera","start_time","end_time","has_been_reviewed","severity","thumb_path","data"],"title":"ReviewSegmentResponse"},"title":"Response Review Review Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

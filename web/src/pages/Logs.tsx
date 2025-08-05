@@ -575,7 +575,7 @@ function Logs() {
                     <div className="absolute right-1 top-3">
                       <Tooltip>
                         <TooltipTrigger>
-                          <MdCircle className="mr-2 size-2 animate-pulse cursor-default text-selected shadow-selected drop-shadow-md" />
+                          <MdCircle className="mr-2 size-2 animate-pulse cursor-default text-text shadow-selected drop-shadow-md" />
                         </TooltipTrigger>
                         <TooltipContent>{t("logs.tips")}</TooltipContent>
                       </Tooltip>

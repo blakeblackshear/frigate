@@ -1,0 +1,70 @@
+---
+id: reprocess-license-plate-lpr-reprocess-put
+title: "Reprocess License Plate"
+description: "Reprocess License Plate"
+sidebar_label: "Reprocess License Plate"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVE1rGzEQ/SvLnFoQXse0F90KDTSQUpM6vRhj5N2xrVS7UkazpmbRfy+j9UeMk0BOXjRfb9574x7YbCLoOdzusOUICwU+IBm2vr2rQQNhIF9hjEtnK2wjLoMzjEsXaHmOhY5BQTBkGmQk6dhDaxoEDSidl7YGBbYFDc8d0h4UED53lrAGzdShglhtsTGge+B9kMLIZNsNKGDLTh4yxuKuhpQWUh+DbyNGKZmMx/JTY6zIBkEPGn53laBbd654OCSDgsq3jC1LugnB2SovWz5FqenPMFJKScGXyeS68R/jbJ3LilsiTx/oCoGEYLYD7hrZWCdflrGJ1wnOVxdR0+5/rTO9lywldXqxLeMGCdIiqeObITL7F1Te+wEgJAVN3LzH+k+M0WwQTs3eEUjIKGYSTefZfvWEFV8oPs97DaMPeYtzmzO9A7tvr/F9oO+1YceUH7PZ9KrhoO2lqA9HNxf3g9OLqThdUCJvvRzD0ea8BQ2lC1SeTgAURKTd0fsdOdCwZQ5Rl2WNjR+tyW4M42hna/SlCTZrdk7UZel8ZdzWR9Zfx+ObIWchZ7P2mfbDSqBABg2wx6Ob0VgoCj5yY7LbDpf39kYXm5/0ZPzHZXDGZltkZP1h2zm4QFnC474LBYJUQn2/MhEfyaUkz8OBCwu1jWblRPC1cRGv5p6OBj49HLzxuQD1Op6/uL/8N9kZ12U6hKOdISuzQM/F9ls0NVIGMdR9qyoM/KLq6kqly0np6eMMUvoPiDbBQw==
+sidebar_class_name: "put api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Reprocess License Plate"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"put"}
+  path={"/lpr/reprocess"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Reprocess License Plate
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"query","required":true,"schema":{"type":"string","title":"Event Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

@@ -1,0 +1,70 @@
+---
+id: latest-frame-camera-name-latest-extension-get
+title: "Latest Frame"
+description: "Latest Frame"
+sidebar_label: "Latest Frame"
+hide_title: true
+hide_table_of_contents: true
+api: eJy1lV1r2zAUhv9KONcmdsvGwJfbWjZo9tGGXawUo9jHtjJZUqXjrlnQfx+SHUch62AD3+RDOjrPq1ey3z0Qayzk97DCijN4SEBpNIy4kh8ryEEwQktFbViHRVGyDg0rZPgzThX4TCgtV7IoGiRIQDNfTWh84z34asghWgsJcAk5aEYtJGDwsecGK8jJ9JiALVvsGOR7oJ32Sy0ZLhtIgDgJP/Au9Fp88r2cSybGJOW/CSj7ztvxEzfabyUMbvXwiY036CDiaoLFEjYb9XygP/Zodif4mgl7wmdy97kONo1KuCRs0IBvOQ7JXghwEfmtZ8RQ4h1aYp2em7yeQDH+l5Jo50Z/D5AY2zH7Y27qyjNOoIqi+zUbdqDEYIMNV3J2m29HTIx+7JngtJsLXWHNekGQv8mOOr6OzFhHi7xpaW4HPgyUGGxJGZybexcgzg8ZtFpJi9Y3u8wy/1WhLQ3X4V7kcNeXJVpb92JxOxZDAqWShJKCBK0FL8OLPN1av2Z/FOiccwm8urw8b/yNCV6FZYsrY5T5h66gjQ8P4oPuColx4X9xws6eFwhVnsyeuTa+lSPTJh8fXHIYY8awXRQON2oQCC6BzjZ/y5EVWssahKnZy6XBjMXaz7ojW222WNLJZbgP+xrQY110yEd7B3df3sb7wb4/waabul5/OWs4nO3pod6EqF5cmyF8O6RW+XQ/5DW1kEO6jyLapUO8L/dTpjpIwKJ5OuR6b4R/Jom0zdO0wk4ta8MbRrh84hWqlGkezu5YmKepUCUTrbKUv86yi6HmwT9ZtQr2j1uDBDxokJ8tL5YZOPcb1LXyGg==
+sidebar_class_name: "get api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Latest Frame"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/{camera_name}/latest.{extension}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Latest Frame
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"camera_name","in":"path","required":true,"schema":{"type":"string","title":"Camera Name"}},{"name":"extension","in":"path","required":true,"schema":{"type":"string","enum":["webp","png","jpg","jpeg"],"title":"Extension"}},{"name":"bbox","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Bbox"}},{"name":"timestamp","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Timestamp"}},{"name":"zones","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Zones"}},{"name":"mask","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Mask"}},{"name":"motion","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Motion"}},{"name":"regions","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Regions"}},{"name":"quality","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"default":70,"title":"Quality"}},{"name":"height","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Height"}},{"name":"store","in":"query","required":false,"schema":{"anyOf":[{"type":"integer"},{"type":"null"}],"title":"Store"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

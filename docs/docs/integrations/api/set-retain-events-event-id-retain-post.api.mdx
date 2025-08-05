@@ -1,0 +1,70 @@
+---
+id: set-retain-events-event-id-retain-post
+title: "Set Retain"
+description: "Set Retain"
+sidebar_label: "Set Retain"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVMFu2zAM/ZWApw0Q4rTYLroNWLEV2NCizXYJgkCxmVidbKkSHSww9O8DLdtxlq4bdrIhPZLvPZJqgdQ+gFzBzQFrCrAWYB16RdrWtwVICEgbj6R0vcEOsknfjS42w4WzgUCAU15VSOg5YQu1qhAkDGgQoGuQ4BSVIMDjc6M9FiDJNygg5CVWCmQLdHQcF8jreg8CSJPhg47h7LaAGNccH5ytAwYOuV4s+FNgyL12zB0kPDZ5jiHsGjN76MEgILc1YU0MV84ZnXdSs6fAMe2EhvNsBOlUIaRkE35baw2qekKwLwhRQIUhqD2+JudrD4lRDBi7fcKczsxZjZVPSdenJJ+wRq/zUV+MnO7d9fWlHd+V0UUndnbjvfX/70XBXTf8pwmrcAkwNj+7VfXxbtfNxLkZUYwnuibco4e4PtmhvFfHiWNfbCLYGRz2/2TukOyVsWIzZku+/VsrWFcq3eMmnTjZm9z9s4yPyb6Xig2Qz8vl/UXC1NvfZhxp9tAtYTcfVFre2XEfqQQJWdrbrB02MWZ+CAnoD8O+Nt6AhJLIBZllBVZ2vvN6rwjnB12gzZTTXctOQJllxubKlDaQfL9YXCXMmld9ZzvXe0UggAsl1ov51XzBDjHRSnXD1r8WZ4LOtI4dJPxJmTMMiSKRaXutq/Ta8LLIybvTy10LYKIMa9utCvjNmxj5+LlBfwS5Wgs4KK/VljmvWih04P8C5E6ZgBeMxgWCNw/9nLydgXiZ6TAONQ/DQZmm9+UHHqfPZLcBJaoCfcchXX/Ic3Q0CbxYWHZ9nID7u8clxPgLGqQByw==
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Set Retain"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/events/{event_id}/retain"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Set Retain
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"event_id","in":"path","required":true,"schema":{"type":"string","title":"Event Id"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"message":{"type":"string","title":"Message"}},"type":"object","required":["success","message"],"title":"GenericResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

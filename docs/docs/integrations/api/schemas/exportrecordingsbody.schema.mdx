@@ -1,0 +1,33 @@
+---
+id: exportrecordingsbody
+title: "ExportRecordingsBody"
+description: ""
+sidebar_label: "ExportRecordingsBody"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"playback":"realtime","source":"recordings","name":"string","image_path":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"ExportRecordingsBody"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"playback":{"title":"Playback factor","default":"realtime","type":"string","enum":["realtime","timelapse_25x"]},"source":{"title":"Playback source","default":"recordings","type":"string","enum":["recordings","preview"]},"name":{"type":"string","maxLength":256,"title":"Friendly name"},"image_path":{"type":"string","title":"Image Path"}},"type":"object","title":"ExportRecordingsBody"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

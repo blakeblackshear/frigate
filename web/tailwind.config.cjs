@@ -43,6 +43,11 @@ module.exports = {
         tall: "8 / 9",
       },
       colors: {
+        // adicionadas só no tema default
+        login: "hsl(var(--login))",
+        'logo-secondary': "hsl(var(--logo-secondary))",
+        text: "hsl(var(--text))",
+
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

@@ -1,0 +1,33 @@
+---
+id: genericresponse
+title: "GenericResponse"
+description: ""
+sidebar_label: "GenericResponse"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"success":true,"message":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"GenericResponse"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"success":{"type":"boolean","title":"Success"},"message":{"type":"string","title":"Message"}},"type":"object","required":["success","message"],"title":"GenericResponse"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

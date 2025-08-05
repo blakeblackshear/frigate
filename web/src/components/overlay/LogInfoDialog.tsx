@@ -91,7 +91,7 @@ export default function LogInfoDialog({
                 <div className="text-sm text-primary/40">Helpful Links</div>
                 {helpfulLinks.map((tip) => (
                   <Link to={tip.link} target="_blank" rel="noopener noreferrer">
-                    <div className="text-sm text-selected hover:underline">
+                    <div className="text-sm text-text hover:underline">
                       {tip.text}
                     </div>
                   </Link>

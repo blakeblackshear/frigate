@@ -1,0 +1,70 @@
+---
+id: register-face-faces-name-register-post
+title: "Register Face"
+description: "Register Face"
+sidebar_label: "Register Face"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVE1v2zAM/SsBTxug1mmxXXTbR4sN2NaizXYJjICx6USdbbkSHSww/N8HSo6TNO0+LrEi8ZGP5CM7YFx50HO42lDNHlIFtiGHbGz9OQcNjlbGM7lFgRmFH79Y1FjRYjE+NdYzKGjQYUVMThx2IEag40eBqUFDg7wGBY4eW+MoB82uJQU+W1OFoDvgbSMYz87UK1DAhku5+CZO+j6NWPL83uZbATx1ldmaqWZ5qtqSTYOOk8K66ixHDiH2wRonqbIhL/8KI5FOKQgYGTQsTY1ue0DqWhB9r3YQu3ygjI/ym0e36R4kxBf/XNS+F/+OfGNrH3leTqfyyclnzjTSJ9Bw32YZeV+05eRuMIajYmDTlCYLbU0evGAOKhGjvLm8PHX8A0uTB9jkyjnr/sPrk/rmxGhKORmmyp8alDY7esV6e1MEJR23pFfjjamZVuSgT/ddQOfwsEtfbCQIvYLKr/6ksq/kPa4IRmcvm4ZiTGby+jcFSF4x9GB3oIZ9eWN1X07jYyzfc8F2Jp9ms9sTh7G3x029GzQ2ucZMdFIRr60M+zjIvAYNSRBm0okw+2QnTFDgyW12U966EjSsmRuvkySnyp4XzqyQ6XxjcrIJNia0bG+ok6S0GZZr61m/nU4vok0qS6KwoepDRqBAAkXW0/OL86lUSFhWGMQ27JinCR2lOzaR6RcnTYkmaCHw6YZc5xByBQV62FdjuqkCISo2XbdET99d2fdy/diS24Kepwo26AwuhfO8g9x4OeegCyw9ndAZBwhe3Q06eT0B9TzNnRxqEcMGy3aoy0/a7pZrUP+aMCcX4senDzHKWdDoHvrcVpT2RNC7LKOGD8xPJlzaNOrl9uZ+BgqWwzKubC4YcRz8qv1Rz9O+738DvFY1Ew==
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Register Face"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/faces/{name}/register"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Register Face
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"name","in":"path","required":true,"schema":{"type":"string","title":"Name"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"multipart/form-data":{"schema":{"properties":{"file":{"type":"string","format":"binary","title":"File"}},"type":"object","required":["file"],"title":"Body_register_face_faces__name__register_post"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

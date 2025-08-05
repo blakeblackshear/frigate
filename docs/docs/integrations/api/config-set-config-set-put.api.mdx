@@ -1,0 +1,70 @@
+---
+id: config-set-config-set-put
+title: "Config Set"
+description: "Config Set"
+sidebar_label: "Config Set"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVE1v2zAM/SsBz1qcFNtFt24rsAEbVrTpLkFQMDbjqJMtVaLbBoH/+0DJrdOmLbZcIlOPX++R2gNjHUEv4dR7WClwngKyce33CjSUrt2Y+joSXx8cfcegINBtR5E/u2oHep8+TaAKNIeOlLgytSxX6L01ZYpa3ETXii2WW2pQTj5ITjYUD8LE60CRMSR/3nkCDaZlqimAAjZsxXIxgCcXA1hBRRvsLIOe97169HTrGyr5wPHU+y+pn0vKDfS9wANF79qYKzmZzeSvolgG46V40HDZlSXFuOms5Exg+Pdec5aPJyfHgX+jNVVym5yF4MJ/RH3BYEWMxsrJMDXxGGBd+ewW292vDejlE9GRg2lr6NUR9f1qJBVDwN0Bpz9cLhB6BU2sD4Qb4o3QnxQj1gRPwd6GJjImC7l9TdBx6papr5x6wK3GMCO9md232/ia6Xtver4tFudHAbO2z0XNMza5JPFuiLdOliqvj0fegoYi71UREyZSuKMQkxhdsKBhy+yjLoqKGjfdBFMj0/TOVOQK9CZpNAJ1UVhXot26yPrTbDbPmJUCGZqLcWHPHrDxll5fuHmvwLQbl2QZWgYFUlhuazadT2dCoXeRG0zT2GJDLzt+RsaTxEwPXHiLJk1KKn4/sLEcHpzEBIt+0onY9/s1RroKtu/FfNtR2IFerhTcYTC4liKXMpxbwopCIvAP7XJFskUf0ggJ3HZJ9pcbJUxmj9OyJM/vYlcHcp5fLUDBengGG1eJS8B7mU68z9y5REJ+4MS2B4tt3ckOaMgh5fcXk6HowA==
+sidebar_class_name: "put api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Config Set"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"put"}
+  path={"/config/set"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Config Set
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"properties":{"requires_restart":{"type":"integer","title":"Requires Restart","default":1}},"type":"object","title":"AppConfigSetBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

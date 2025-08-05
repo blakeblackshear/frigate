@@ -220,9 +220,9 @@
     "restart": "Reiniciar Frigate",
     "live": {
       "title": "Ao vivo",
-      "allCameras": "Todas as câmaras",
+      "allCameras": "Todas as câmeras",
       "cameras": {
-        "title": "Câmaras",
+        "title": "Câmeras",
         "count_one": "{{count}} Câmera",
         "count_many": "{{count}} Câmeras",
         "count_other": "{{count}} Câmeras"

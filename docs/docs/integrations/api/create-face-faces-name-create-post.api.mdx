@@ -1,0 +1,70 @@
+---
+id: create-face-faces-name-create-post
+title: "Create Face"
+description: "Create Face"
+sidebar_label: "Create Face"
+hide_title: true
+hide_table_of_contents: true
+api: eJyVVMFu2zAM/ZWApw0Q4jTYLroNW4cN2NaizXYJjICVmVidbakSEyww9O8DZSdpkHbALrYhPZKPj4/ugXETQS/hekcdRygVOE8B2bruawUaTCBkWq3RDI+4WnXY0mo1XngXGRR4DNgSU5BkPQgE9PBSYDvQ4JFrUBDoaWsDVaA5bElBNDW1CLoH3nuJiRxstwEFbLmRgx+SJKVSYqN3XaQo8PlsJq+KognWC1/QcL81hmJcb5vJ3QgGBcZ1TB0LHL1vrMntFY9RYvoThZRSUvBuPr9M/AsbW+WwyXUILvxHVvBBJGU78K6I0TbyZZnaeAlonDm7xW5/s86qniuU1PHEdkwbCpDKpA5nGALun8n4zQ0EISlo4+Zfin+nGHFDcEz2OjSLMVnIbTrVdg+PZPhs2svc11B6xJWnNCd5B3Vfb+PTIN9LxQ6QL4vF7UXCYbbnQ/2YLTz5jEZc0hLXTix/tDTXoKHIri968XIqBteDgkhhd3D7NjSgoWb2URdFRa2broPdINN0ZytyBXqbx3UC6qJonMGmdpH1+9nsasCUsixrlxUfuwEFUmhgPJteTWeijnBsMRtt3LXzZs4aPY6P6Q8XvkGbXZDZ9GOfS8h9ggI9bu3YaqlASAqi7x8w0s/QpCTHT1sKe9DLUsEOg8UH4bvsobJRvivQa2wiXZA5Lg68uRv98XYC6mWSBxt0YoIdNttRk9+0P/xgsutrwopCrj9cfTCGPD8LulhSUfs49Nub+wWk9BcOwLg1
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Create Face"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/faces/{name}/create"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Create Face
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"name","in":"path","required":true,"schema":{"type":"string","title":"Name"}}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={undefined}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

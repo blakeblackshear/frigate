@@ -1,0 +1,70 @@
+---
+id: set-multiple-reviewed-reviews-viewed-post
+title: "Set Multiple Reviewed"
+description: "Set Multiple Reviewed"
+sidebar_label: "Set Multiple Reviewed"
+hide_title: true
+hide_table_of_contents: true
+api: eJydVU1v2zAM/SsBz16cFNvFt30UW4EWLdJsF8MIFJtx1MmSKslpjcD/faAkx0k/h+ZiSXwi+R4pZg+O1RayHBa44/gARQJKo2GOK3lRQQYW3appheNa4Mp4EFZxYVdxq5V1kIDB+xat+6aqDrK933KDFWTOtJhAqaRD6cjEtBa89FHSO6skndlyiw2jlTaUg+Noacer8HHY+IXrNFJiznBZQwINl5coa7eFbN4ng5kZw7pgvQg35wk47gQZLyoL/YhV6zssBwIh49yHLcYrQZ8rVfFNdxX18ET7njwZtFpJGzI+m83oU6EtDddEEjK4bcsSrd20YrKIYPiwJjY4O5JjrZRAJmHMOAaEPoEGrWU1vqTegL6KkPdkGSKPTo9E+okSDS8P/II2n8/OnsvxhwleebKTc2OU+bgWFTrGxUmLnAKEKk+sTHbXG8jyp2L0yeGES4c1GuiL5x01kL1UIUEvsK3/S9zB2etQL8ZkSdb3SkG8QuiIO6rEKG9Q93UaP4J8LwUbIL+Wy5tnDkNtn/Q4usnwOCaLOCx8q7itomkSB4Vm9FohjWMkPQAtmh0a64vTGgEZbJ3TNkvTChs13RheM4fTHa9QpUxzX7MRmKWpUCUTW2Vd9mU2mwdMkQA10WIcT+ePrNECD+MlHwpB9eZyo3yJIn1IgJIKFGfT+XRGchKVhvnOlKzBN9ifaHSovMNHl2rBuG8gz2EfhckhCkORg5ciASJFtv1+zSz+NqLv6fi+RdNBlhcJ7JjhbE0558Rji6xC47X8ix1k8D08sE++uwguWt8RTx8biRpufC1L1O5NbHFU3pvr2yUksI5/AI2q6I5hD9S57CFoqbwS/iX6sz0IJuvWzycIPun3DzvwRj0=
+sidebar_class_name: "post api-method"
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Set Multiple Reviewed"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/reviews/viewed"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Set Multiple Reviewed
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={undefined}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"properties":{"ids":{"items":{"type":"string","minLength":1},"type":"array","minItems":1,"title":"Ids"}},"type":"object","required":["ids"],"title":"ReviewModifyMultipleBody"}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"properties":{"success":{"type":"boolean","title":"Success"},"message":{"type":"string","title":"Message"}},"type":"object","required":["success","message"],"title":"GenericResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"properties":{"detail":{"items":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"}}}}}}
+>
+  
+</StatusCodes>
+
+
+      

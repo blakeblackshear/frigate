@@ -1,0 +1,33 @@
+---
+id: apppostusersbody
+title: "AppPostUsersBody"
+description: ""
+sidebar_label: "AppPostUsersBody"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"username":"string","password":"string","role":"string"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"AppPostUsersBody"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"properties":{"username":{"type":"string","title":"Username"},"password":{"type":"string","title":"Password"},"role":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Role","default":"viewer"}},"type":"object","required":["username","password"],"title":"AppPostUsersBody"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            
