@@ -8,5 +8,6 @@
     "delete": "Hapus pencarian yang disimpan",
     "filterInformation": "Saring Informasi",
     "filterActive": "Filter aktif"
-  }
+  },
+  "trackedObjectId": "Tracked Object ID"
 }
