@@ -93,6 +93,66 @@
     "failedToStart": "Falha ao iniciar a gravação manual sob demanda.",
     "recordDisabledTips": "Como a gravação está desabilitada ou restrita na configuração desta câmera, apenas um instantâneo será salvo.",
     "end": "Fim da gravação sob demanda",
-    "failedToEnd": "Falha ao finalizar a gravação manual sob demanda."
+    "failedToEnd": "Falha ao finalizar a gravação manual sob demanda.",
+    "debugView": "Visualização de Depuração",
+    "ended": "Gravação manual sob demanda finalizada."
+  },
+  "streamingSettings": "Configurações de Transmissão",
+  "notifications": "Notificações",
+  "audio": "Áudio",
+  "suspend": {
+    "forTime": "Suspender por: "
+  },
+  "stream": {
+    "title": "Transmissão",
+    "audio": {
+      "tips": {
+        "title": "O áudio deve sair da sua câmera e configurado no go2rtc para essa transmissão.",
+        "documentation": "Leia da documentação. "
+      },
+      "available": "Áudio disponível para essa transmissão",
+      "unavailable": "O áudio não está disponível para essa transmissão"
+    },
+    "twoWayTalk": {
+      "tips": "O seu dispostivio precisa suportar esse recurso e o WebRTC precisa estar configurado para áudio bidirecional.",
+      "tips.documentation": "Leia a documentação. ",
+      "available": "Áudio bidirecional está disponível para essa transmissão",
+      "unavailable": "Áudio bidirecional está indisponível para essa transmissão"
+    },
+    "lowBandwidth": {
+      "tips": "A transmissão ao vivo está em modo de economia de dados devido a erros de buffering ou de transmissão.",
+      "resetStream": "Resetar transmissão"
+    },
+    "playInBackground": {
+      "label": "Reproduzir em segundo plano",
+      "tips": "Habilitar essa opção para continuar a transmissão quando o reprodutor estiver oculto."
+    }
+  },
+  "cameraSettings": {
+    "title": "Configurações de {{camera}}",
+    "cameraEnabled": "Câmera Habilitada",
+    "objectDetection": "Detecção de Objeto",
+    "recording": "Gravação",
+    "snapshots": "Capturas de Imagem",
+    "audioDetection": "Detecção de Áudio",
+    "autotracking": "Auto Rastreamento"
+  },
+  "history": {
+    "label": "Exibir gravação histórica"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Todos",
+      "motion": "Movimento",
+      "active_objects": "Objetos Ativos"
+    },
+    "notAllTips": "A configuração de retenção da sua gravação do(a) {{source}} está definida para o <code>modo: {{effectiveRetainMode}}</code>, então essa gravação sob demanda irá manter somente os segmentos com o {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Editar Layout",
+    "group": {
+      "label": "Editar Grupo de Câmera"
+    },
+    "exitEdit": "Sair da Edição"
   }
 }

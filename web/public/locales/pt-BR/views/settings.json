@@ -94,8 +94,77 @@
       "desc": "A Busca Semântica no Frigate permite você encontrar objetos rastreados dentro dos seus itens revisados, usando ou a imagem em si, uma descrição de texto definida pelo usuário ou uma gerada automaticamente.",
       "readTheDocumentation": "Leia a Documentação",
       "reindexNow": {
-        "label": "Reindexar Agora"
+        "label": "Reindexar Agora",
+        "desc": "A reindexação irá regenerar os embeddings para todos os objetos rastreados. Esse processo roda em segundo plano e pode 100% da CPU e levar um tempo considerável dependendo do número de objetos rastreados que você possui.",
+        "confirmTitle": "Confirmar Reindexação",
+        "confirmDesc": "Tem certeza que quer reindexar todos os embeddings de objetos rastreados? Esse processo rodará em segundo plano porém utilizará 100% da CPU e levará uma quantidade de tempo considerável. Você pode acompanhar o progresso na página Explorar.",
+        "confirmButton": "Reindexar",
+        "success": "A reindexação iniciou com sucesso.",
+        "alreadyInProgress": "A reindexação já está em progresso.",
+        "error": "Falha ao iniciar a reindexação: {{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "Tamanho do Modelo",
+        "desc": "O tamanho do modelo usado para embeddings de pesquisa semântica.",
+        "small": {
+          "title": "pequeno",
+          "desc": "Usando<em>pequeno</em> emprega a versão quantizada do modelo que utiliza menos RAM e roda mais rápido na CPU, com diferenças negligíveis na qualidade dos embeddings."
+        },
+        "large": {
+          "title": "grande",
+          "desc": "Usar <em>grande</em> emprega o modelo Jina completo e roda na GPU automáticamente caso aplicável."
+        }
       }
+    },
+    "faceRecognition": {
+      "title": "Reconhecimento Facial",
+      "desc": "O reconhecimento facial permite que pessoas sejam associadas a nomes e quando seus rostos forem reconhecidos, o Frigate associará o nome da pessoa como uma sub-categoria. Essa informação é inclusa na UI, filtros e notificações.",
+      "readTheDocumentation": "Leia a Documentação",
+      "modelSize": {
+        "label": "Tamanho do Modelo",
+        "desc": "O tamanho do modelo usado para reconhecimento facial.",
+        "small": {
+          "title": "pequeno",
+          "desc": "Usar <em>pequeno</em> emprega o modelo de embedding de rosto FaceNet, que roda de maneira eficiente na maioria das CPUs."
+        },
+        "large": {
+          "title": "grande",
+          "desc": "Usando o <em>grande</em> emprega um modelo de embedding de rosto ArcFace e irá automáticamente roda pela GPU se aplicável."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Reconhecimento de Placa de Identificação",
+      "desc": "O Frigate pode reconhecer placas de identificação em veículos e automáticamente adicionar os caracteres detectados ao campo placas_de_identificação_reconhecidas ou um nome conhecido como uma sub-categoria a objetos que são do tipo carro. Um uso típico é ler a placa de carros entrando em uma garagem ou carros passando pela rua.",
+      "readTheDocumentation": "Leia a Documentação"
+    },
+    "restart_required": "Necessário reiniciar (configurações de enriquecimento foram alteradas)",
+    "toast": {
+      "success": "As regras de enriquecimento foram salvas. Reinicie o Frigate para aplicar as alterações.",
+      "error": "Falha ao salvar alterações de configurações: {{errorMessage}}"
+    }
+  },
+  "camera": {
+    "title": "Configurações de Câmera",
+    "streams": {
+      "title": "Transmissões",
+      "desc": "Temporáriamente desativar a câmera até o Frigate reiniciar. Desatiar a câmera completamente impede o processamento da transmissão dessa câmera pelo Frigate. Detecções, gravações e depuração estarão indisponíveis.<br /><em>Nota: Isso não desativa as retransmissões do go2rtc.</em>"
+    },
+    "review": {
+      "title": "Revisar",
+      "desc": "Temporariamente habilitar/desabilitar alertas e detecções para essa câmera até o Frigate reiniciar. Quando desabilitado, nenhum novo item de revisão será gerado. ",
+      "alerts": "Alertas ",
+      "detections": "Detecções "
+    },
+    "reviewClassification": {
+      "title": "Revisar Classificação",
+      "desc": "O Frigate categoriza itens de revisão como Alertas e Detecções. Por padrão, todas as <em>pessoa</em> e <em>carros</em> são considerados alertas. Você pode refinar a categorização dos seus itens revisados configurando as zonas requeridas para eles.",
+      "readTheDocumentation": "Leia a Documentação",
+      "noDefinedZones": "Nenhuma zona definida para essa câmera.",
+      "selectAlertsZones": "Selecionar as zonas para Alertas",
+      "selectDetectionsZones": "Selecionar as zonas para Detecções",
+      "objectAlertsTips": "Todos os {{alertsLabels}} objetos em {{cameraName}} serão exibidos como Alertas.",
+      "zoneObjectAlertsTips": "Todos os {{alertsLabels}} objetos detectados em {{zone}} em {{cameraName}} serão exibidos como Alertas."
     }
   }
 }

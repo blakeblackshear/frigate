@@ -57,11 +57,14 @@
     },
     "header": {
       "noFilters": "Filtros",
-      "activeFilters": "Filtros ativos"
+      "activeFilters": "Filtros ativos",
+      "currentFilterType": "Valores de Filtros"
     }
   },
   "similaritySearch": {
-    "active": "Pesquisa por similaridade ativa"
+    "active": "Pesquisa por similaridade ativa",
+    "title": "Buscar por Similaridade",
+    "clear": "Limpar buscar por similaridade"
   },
   "placeholder": {
     "search": "Pesquisar…"
