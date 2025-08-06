@@ -105,6 +105,12 @@ genai:
   model: gemini-1.5-flash
 ```
 
+:::note
+
+To use a different Gemini-compatible API endpoint, set the `GEMINI_BASE_URL` environment variable to your provider's API URL.
+
+:::
+
 ## OpenAI
 
 OpenAI does not have a free tier for their API. With the release of gpt-4o, pricing has been reduced and each generation should cost fractions of a cent if you choose to go this route.
