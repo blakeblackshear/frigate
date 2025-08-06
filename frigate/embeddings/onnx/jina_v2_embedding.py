@@ -128,7 +128,6 @@ class JinaV2Embedding(BaseEmbedding):
             self.runner = ONNXModelRunner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
-                self.model_size,
             )
 
     def _preprocess_image(self, image_data: bytes | Image.Image) -> np.ndarray:
