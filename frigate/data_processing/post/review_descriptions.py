@@ -1,6 +1,7 @@
 """Post processor for review items to get descriptions."""
 
 import logging
+import shutil
 
 import cv2
 
@@ -47,6 +48,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     # we have already processed this thumbnail
                     return
 
+                shutil.copy(thumb_path, f"/media/frigate/frames/{thumb_time}.webp")
                 thumb_data = cv2.imread(thumb_path)
                 ret, jpg = cv2.imencode(
                     ".jpg", thumb_data, [int(cv2.IMWRITE_JPEG_QUALITY), 100]

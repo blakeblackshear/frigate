@@ -10,7 +10,7 @@ class ReviewMetadata(BaseModel):
     )
     potential_threat_level: int | None = Field(
         default=None,
-        ge=0,
+        ge=1,
         le=3,
-        description="An integer representing the potential threat level (0-3). 0: No threat. 1: Minor anomaly. 2: Moderate concern. 3: High threat. Only include this field if a clear security concern is observable; otherwise, omit it.",
+        description="An integer representing the potential threat level (1-3). 1: Minor anomaly. 2: Moderate concern. 3: High threat. Only include this field if a clear security concern is observable; otherwise, omit it.",
     )
