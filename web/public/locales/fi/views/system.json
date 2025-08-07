@@ -44,7 +44,8 @@
       "gpuDecoder": "GPU-dekooderi",
       "gpuInfo": {
         "vainfoOutput": {
-          "title": "Vainfon tulostus"
+          "title": "Vainfon tulostus",
+          "returnCode": "Paluuarvo: {{code}}"
         },
         "toast": {
           "success": "Kopioi GPU:n tiedot leikepöydälle"

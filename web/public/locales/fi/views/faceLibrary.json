@@ -56,6 +56,10 @@
     "desc": "Haluatko varmasti poistaa kokoelman {{name}}? Tämä poistaa pysyvästi kaikki liitetyt kasvot."
   },
   "renameFace": {
-    "title": "Uudelleennimeä kasvot"
+    "title": "Uudelleennimeä kasvot",
+    "desc": "Anna uusi nimi tälle {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Poista kasvot"
   }
 }
