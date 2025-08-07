@@ -118,50 +118,6 @@ export default function NotificationView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changedValue]);
 
-  // notification key handling
-
-  const { data: publicKey } = useSWR(
-    config?.notifications?.enabled ? "notifications/pubkey" : null,
-    { revalidateOnFocus: false },
-  );
-
-  const subscribeToNotifications = useCallback(
-    (registration: ServiceWorkerRegistration) => {
-      if (registration) {
-        addMessage(
-          "notification_settings",
-          t("notification.unsavedRegistrations"),
-          undefined,
-          "registration",
-        );
-
-        registration.pushManager
-          .subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: publicKey,
-          })
-          .then((pushSubscription) => {
-            axios
-              .post("notifications/register", {
-                sub: pushSubscription,
-              })
-              .catch(() => {
-                toast.error(t("notification.toast.error.registerFailed"), {
-                  position: "top-center",
-                });
-                pushSubscription.unsubscribe();
-                registration.unregister();
-                setRegistration(null);
-              });
-            toast.success(t("notification.toast.success.registered"), {
-              position: "top-center",
-            });
-          });
-      }
-    },
-    [publicKey, addMessage, t],
-  );
-
   // notification state
 
   const [registration, setRegistration] =
@@ -206,7 +162,55 @@ export default function NotificationView({
     },
   });
 
-  const watchCameras = form.watch("cameras");
+  const watchAllEnabled = form.watch("allEnabled");
+  const watchCameras = useMemo(() => form.watch("cameras") || [], [form]);
+
+  const { data: publicKey } = useSWR(
+    config &&
+      (config.notifications?.enabled ||
+        watchAllEnabled ||
+        (Array.isArray(watchCameras) && watchCameras.length > 0))
+      ? "notifications/pubkey"
+      : null,
+    { revalidateOnFocus: false },
+  );
+
+  const subscribeToNotifications = useCallback(
+    (registration: ServiceWorkerRegistration) => {
+      if (registration) {
+        addMessage(
+          "notification_settings",
+          t("notification.unsavedRegistrations"),
+          undefined,
+          "registration",
+        );
+
+        registration.pushManager
+          .subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: publicKey,
+          })
+          .then((pushSubscription) => {
+            axios
+              .post("notifications/register", {
+                sub: pushSubscription,
+              })
+              .catch(() => {
+                toast.error(t("notification.toast.error.registerFailed"), {
+                  position: "top-center",
+                });
+                pushSubscription.unsubscribe();
+                registration.unregister();
+                setRegistration(null);
+              });
+            toast.success(t("notification.toast.success.registered"), {
+              position: "top-center",
+            });
+          });
+      }
+    },
+    [publicKey, addMessage, t],
+  );
 
   useEffect(() => {
     if (watchCameras.length > 0) {
