@@ -54,6 +54,9 @@
     "relevance": "Olennaisuus"
   },
   "cameras": {
-    "label": "Kameran suodattimet"
+    "label": "Kameran suodattimet",
+    "all": {
+      "title": "Kaikki kamerat"
+    }
   }
 }
