@@ -9,6 +9,7 @@ from typing import Any, Optional
 from playhouse.shortcuts import model_to_dict
 
 from frigate.config import CameraConfig, FrigateConfig, GenAIConfig, GenAIProviderEnum
+from frigate.data_processing.post.types import ReviewMetadata
 from frigate.models import Event
 
 logger = logging.getLogger(__name__)
@@ -40,19 +41,24 @@ class GenAIClient:
         """Generate a description for the review item activity."""
         context_prompt = f"""
         Here is additional context about the scene from a security camera:
-        {json.dumps(review_data, indent=2)}
+        The following objects were detected: {review_data['objects']}
+        The following recognized objects were detected: {review_data['recognized_objects']}
+        The activity happened in the following zones: {review_data['zones']}
 
-        Please analyze the image(s), which are in chronological order, strictly from the perspective of a security camera.
+        Please analyze the image(s), which are in chronological order, strictly from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
         Your task is to provide a **neutral, factual, and objective description** of the scene.
-        **Do not make assumptions about intent, emotions, or potential threats.**
         Focus solely on observable actions, visible entities, and the environment.
 
-        Describe:
-        - What is happening?
-        - Who or what is visible?
-        - What are the entities doing?
-        - What is the environmental context (e.g., time of day, weather, lighting)?
-    """
+        Your response **MUST** be a flat JSON object with the following fields:
+        - `scene` (string): A single, comprehensive description of the entire visual scene.
+        - `action` (string): A single description of any key actions or movements.
+        - `potential_threat_level` (integer, optional): An integer from 0 to 3. Only include if a clear security concern is visible. Omit if no threat.
+
+        **IMPORTANT:** The value for each field (e.g., "scene", "action") must be a plain string or integer, NOT another JSON object or a description of the field itself.
+
+        Provide the response in the exact JSON format specified by this schema:
+        {ReviewMetadata.model_json_schema()}
+        """
         logger.info(f"processing {review_data}")
         logger.info(f"Got GenAI review: {self._send(context_prompt, thumbnails)}")
 

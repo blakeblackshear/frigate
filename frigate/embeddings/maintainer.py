@@ -152,10 +152,6 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.detected_license_plates: dict[str, dict[str, Any]] = {}
 
-        self.post_processors.append(
-            ReviewDescriptionProcessor(self.config, self.metrics)
-        )
-
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
             lpr_model_runner = LicensePlateModelRunner(
@@ -209,6 +205,10 @@ class EmbeddingMaintainer(threading.Thread):
 
         # post processors
         self.post_processors: list[PostProcessorApi] = []
+
+        self.post_processors.append(
+            ReviewDescriptionProcessor(self.config, self.metrics)
+        )
 
         if self.config.lpr.enabled:
             self.post_processors.append(
