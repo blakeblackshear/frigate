@@ -20,7 +20,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         self.tracked_review_items: dict[str, list[tuple[int, bytes]]] = {}
         self.genai_client = OllamaClient(
             GenAIConfig(
-                enabled=True, model="gemma3:4b", base_url="http://192.168.50.107:11434"
+                enabled=True, model="qwen2.5vl:3b", base_url="http://192.168.50.107:11434"
             )
         )
 
@@ -62,7 +62,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             self.genai_client.generate_review_description(
                 {
                     "camera": final_data["camera"],
-                    "objects": final_data["data"]["objects"] + final_data["data"]["sub_labels"],
+                    "objects": final_data["data"]["objects"],
+                    "recognized_objects": final_data["data"]["sub_labels"],
                     "zones": final_data["data"]["zones"],
                 },
                 [r[1] for r in self.tracked_review_items[id]],
