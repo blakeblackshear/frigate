@@ -13,6 +13,7 @@ RUN sed -i "/https:\/\//d" /requirements-wheels.txt
 RUN sed -i "/onnxruntime/d" /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/rk-wheels -r /requirements-wheels-rk.txt
 RUN rm -rf /rk-wheels/opencv_python-*
+RUN rm -rf /rk-wheels/torch-*
 
 FROM deps AS rk-frigate
 ARG TARGETARCH
