@@ -159,14 +159,51 @@
   },
   "itemMenu": {
     "findSimilar": {
-      "aria": "Encontrar objetos rastreados similares"
+      "aria": "Encontrar objetos rastreados similares",
+      "label": "Encontrar similar"
     },
     "submitToPlus": {
-      "label": "Enviar ao Frigate+"
+      "label": "Enviar ao Frigate+",
+      "aria": "Enviar ao Frigate Plus"
     },
     "downloadVideo": {
       "label": "Baixar vídeo",
       "aria": "Baixar vídeo"
+    },
+    "downloadSnapshot": {
+      "label": "Baixar captura de imagem",
+      "aria": "Baixar captura de imagem"
+    },
+    "viewObjectLifecycle": {
+      "label": "Ver ciclo de vida do objeto",
+      "aria": "Exibir o ciclo de vida do objeto"
+    },
+    "viewInHistory": {
+      "label": "Ver no Histórico",
+      "aria": "Ver no Histórico"
+    },
+    "deleteTrackedObject": {
+      "label": "Deletar esse objeto rastreado"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Confirmar Exclusão",
+      "desc": "Deletar esse objeto rastreado remove a captura de imagem, qualquer embedding salvo, e quaisquer entradas de ciclo de vida de objeto associadas. Gravações desse objeto rastreado na visualização de Histórico <em>NÃO</em> serão deletadas.<br /><br />Tem certeza que quer prosseguir?"
+    }
+  },
+  "noTrackedObjects": "Nenhum Objeto Rastreado Encontrado",
+  "fetchingTrackedObjectsFailed": "Erro ao buscar por objetos rastreados: {{errorMessage}}",
+  "trackedObjectsCount_one": "{{count}} objeto rastreado ",
+  "trackedObjectsCount_many": "{{count}} objetos rastreados ",
+  "trackedObjectsCount_other": "",
+  "searchResult": {
+    "tooltip": "Correspondência com {{type}} de {{confidence}}%",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Objeto rastreado deletado com sucesso.",
+        "error": "Falha ao detectar objeto rastreado {{errorMessage}}"
+      }
     }
   }
 }

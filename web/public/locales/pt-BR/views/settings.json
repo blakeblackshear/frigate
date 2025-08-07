@@ -164,7 +164,119 @@
       "selectAlertsZones": "Selecionar as zonas para Alertas",
       "selectDetectionsZones": "Selecionar as zonas para Detecções",
       "objectAlertsTips": "Todos os {{alertsLabels}} objetos em {{cameraName}} serão exibidos como Alertas.",
-      "zoneObjectAlertsTips": "Todos os {{alertsLabels}} objetos detectados em {{zone}} em {{cameraName}} serão exibidos como Alertas."
+      "zoneObjectAlertsTips": "Todos os {{alertsLabels}} objetos detectados em {{zone}} em {{cameraName}} serão exibidos como Alertas.",
+      "objectDetectionsTips": "Todos os objetos {{detectionsLabels}} não categorizados em {{cameraName}} serão exibidos como Detecções independente de qual zona eles estiverem.",
+      "zoneObjectDetectionsTips": {
+        "text": "Todos os objetos de {{detectionsLabels}} não categorizados em {{zone}} em {{cameraName}} serão exibidos como Detecções.",
+        "notSelectDetections": "Todos os objetos {{detectionsLabels}} detectados em {{zone}} em {{cameraName}} não categorizados como Alertas serão exibidos como Detecções independente da zona em que estiverem.",
+        "regardlessOfZoneObjectDetectionsTips": "Todos os objetos {{detectionsLabels}} não categorizados em {{cameraName}} serão exibidos como Detecções independente de quais zonas estiverem."
+      },
+      "unsavedChanges": "Configurações de Classificação de Revisões Não Salvas para {{camera}}",
+      "limitDetections": "Limitar detecções a zonas específicas",
+      "toast": {
+        "success": "A configuração de Revisão de Classificação foi salva. Reinicie o Frigate para aplicar as mudanças."
+      }
+    }
+  },
+  "masksAndZones": {
+    "filter": {
+      "all": "Todas as Máscaras e Zonas"
+    },
+    "restart_required": "Reinicialização requerida (máscaras/zonas foram alteradas)",
+    "toast": {
+      "success": {
+        "copyCoordinates": "Coordenadas copiadas para {{polyName}} para a área de transferência."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Não foi possível copiar as coordenadas para a área de transferência."
+      }
+    },
+    "motionMaskLabel": "Máscara de Movimento {{number}}",
+    "objectMaskLabel": "Máscara de Objeto {{number}} ({{label}})",
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "O nome da zona deve conter ao menos 2 caracteres.",
+          "mustNotBeSameWithCamera": "O nome da zona não pode ser igual ao nome da câmera.",
+          "alreadyExists": "Uma zona com esse noma já existe para essa câmera.",
+          "mustNotContainPeriod": "O nome da zona não pode conter ponto final.",
+          "hasIllegalCharacter": "O nome da zona contém caracteres ilegais."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "A distância deve sair maior ou igual a 0.1.",
+          "mustBeFilled": "Todos os campos de distância devem ser preenchidos para utilizar a estimativa de velocidade."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "A inércia deve ser maior que 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "O tempo de permanência deve ser maior ou igual a zero."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "O limiar de velocidade deve ser maior ou igual a 0.1."
+        }
+      },
+      "polygonDrawing": {
+        "removeLastPoint": "Remover o ultimo ponto",
+        "reset": {
+          "label": "Limpar todos os pontos"
+        },
+        "snapPoints": {
+          "true": "Pontos de encaixe",
+          "false": "Não encaixar os ponts"
+        },
+        "delete": {
+          "title": "Confirmar Deletar",
+          "desc": "Tem certeza que quer deletar o {{type}} <em>{{name}}</em>?",
+          "success": "{{name}} foi deletado."
+        },
+        "error": {
+          "mustBeFinished": "O desenho do polígono deve ser finalizado antes de salvar."
+        }
+      }
+    },
+    "zones": {
+      "label": "Zonas",
+      "documentTitle": "Editar Zona - Frigate",
+      "desc": {
+        "title": "Zonas permitem que você defina uma área específica do quadro para que você possa determinar se um objeto está ou não em uma área em particular.",
+        "documentation": "Documentação"
+      },
+      "add": "Adicionar Zona",
+      "edit": "Editar Zona",
+      "point_one": "{{count}} ponto",
+      "point_many": "{{count}} pontos",
+      "point_other": "",
+      "clickDrawPolygon": "Clique para desenhar um polígono na imagem.",
+      "name": {
+        "title": "Nome",
+        "inputPlaceHolder": "Digite um nome…",
+        "tips": "O nome deve ter no mínimo 2 caracteres e não pode ter o nome de uma câmera ou outra zona."
+      },
+      "inertia": {
+        "title": "Inércia",
+        "desc": "Especifica por quantos quadros um objeto deve permanecer em uma zona para que seja considerado na zona. <em>Padrão: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Tempo de Permanência",
+        "desc": "Define o tempo mínimo em segundos que o objeto deve estar na zona para ser ativado. <em>Padrão: 0</em>"
+      },
+      "objects": {
+        "title": "Objetos",
+        "desc": "Lista de objetos que se aplicam a essa zona."
+      },
+      "allObjects": "Todos os Objetos",
+      "speedEstimation": {
+        "title": "Estimativa de Velocidade"
+      }
     }
   }
 }

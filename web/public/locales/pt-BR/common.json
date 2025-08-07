@@ -137,9 +137,71 @@
     "configuration": "Configuração",
     "language": {
       "hi": "हिन्दी (Hindi)",
-      "fr": "Français (Francês)"
+      "fr": "Français (Francês)",
+      "en": "English (Inglês)",
+      "es": "Español (Espanhol)",
+      "zhCN": "简体中文 (Chinês Simplificado)",
+      "ar": "العربية (Arábico)",
+      "pt": "Português (Português)",
+      "ru": "Русский (Russo)",
+      "de": "Deustch (Alemão)",
+      "ja": "日本語 (Japonês)",
+      "tr": "Türkçe (Turco)",
+      "it": "Italiano (Italiano)",
+      "nl": "Nederlands (Holandês)",
+      "sv": "Svenska (Sueco)",
+      "cs": "Čeština (Checo)",
+      "nb": "Norsk Bokmål (Bokmål Norueguês)",
+      "ko": "한국어 (Coreano)",
+      "vi": "Tiếng Việt (Vietnamita)",
+      "fa": "فارسی (Persa)",
+      "pl": "Polski (Polonês)",
+      "uk": "Українська (Ucraniano)",
+      "he": "עברית (Hebraico)",
+      "el": "Ελληνικά (Grego)",
+      "ro": "Română (Romeno)",
+      "hu": "Magyar (Húngaro)",
+      "fi": "Suomi (Finlandês)",
+      "da": "Dansk (Dinamarquês)",
+      "sk": "Slovenčina (Eslovaco)",
+      "yue": "粵語 (Cantonês)",
+      "th": "ไทย (Tailandês)",
+      "ca": "Català (Catalão)",
+      "withSystem": {
+        "label": "Usar as configurações de sistema para o idioma"
+      }
     },
     "systemLogs": "Logs de sistema",
-    "settings": "Configurações"
+    "settings": "Configurações",
+    "configurationEditor": "Editor de Configuração",
+    "languages": "Idiomas",
+    "appearance": "Aparência",
+    "darkMode": {
+      "label": "Modo Escuro",
+      "light": "Claro",
+      "dark": "Escuro",
+      "withSystem": {
+        "label": "Use as configurações do sistema para modo claro ou escuro"
+      }
+    },
+    "withSystem": "Sistema",
+    "theme": {
+      "label": "Tema",
+      "blue": "Azul",
+      "green": "Verde",
+      "nord": "Nord",
+      "red": "Vermelho",
+      "highcontrast": "Alto Contraste",
+      "default": "Padrão"
+    },
+    "help": "Ajuda",
+    "documentation": {
+      "title": "Documentação",
+      "label": "Documentação do Frigate"
+    },
+    "restart": "Reiniciar o Frigate",
+    "live": {
+      "title": "Ao Vivo"
+    }
   }
 }

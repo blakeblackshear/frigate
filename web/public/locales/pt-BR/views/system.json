@@ -152,11 +152,29 @@
   },
   "lastRefreshed": "Atualizado pela última vez: ",
   "stats": {
-    "detectIsVerySlow": "{{detect}} está lento ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} está muito lento ({{speed}} ms)",
     "ffmpegHighCpuUsage": "{{camera}} possui alta utilização de CPU para FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} possui alta utilização de CPU para detecção ({{detectAvg}}%)"
+    "detectHighCpuUsage": "{{camera}} possui alta utilização de CPU para detecção ({{detectAvg}}%)",
+    "healthy": "O sistema está saudável",
+    "cameraIsOffline": "{{camera}} está offline",
+    "reindexingEmbeddings": "Reindexando embeddings ({{processed}}% completado)",
+    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)"
   },
   "enrichments": {
-    "title": "Enriquecimentos"
+    "title": "Enriquecimentos",
+    "infPerSecond": "Inferências por Segundo",
+    "embeddings": {
+      "face_recognition": "Reconhecimento Facial",
+      "plate_recognition": "Reconhecimento de Placa",
+      "plate_recognition_speed": "Velocidade de Reconhecimento de Placas",
+      "text_embedding_speed": "Velocidade de Incorporação de Textos",
+      "yolov9_plate_detection_speed": "Velocidade de Reconhecimento de Placas do YOLOv9",
+      "yolov9_plate_detection": "Detecção de Placas do YOLOv9",
+      "image_embedding": "Incorporação de Imagem",
+      "text_embedding": "Incorporação de Texto",
+      "image_embedding_speed": "Velocidade de Incorporação de Imagem",
+      "face_embedding_speed": "Velocidade de Incorporação de Rosto",
+      "face_recognition_speed": "Velocidade de Reconhecimento de Rostos"
+    }
   }
 }
