@@ -165,13 +165,27 @@ export default function NotificationView({
   const watchAllEnabled = form.watch("allEnabled");
   const watchCameras = useMemo(() => form.watch("cameras") || [], [form]);
 
-  const { data: publicKey } = useSWR(
+  const anyCameraNotificationsEnabled = useMemo(
+    () =>
+      config &&
+      Object.values(config.cameras).some(
+        (c) =>
+          c.enabled_in_config &&
+          c.notifications &&
+          c.notifications.enabled_in_config,
+      ),
+    [config],
+  );
+
+  const shouldFetchPubKey = Boolean(
     config &&
-      (config.notifications?.enabled ||
-        watchAllEnabled ||
-        (Array.isArray(watchCameras) && watchCameras.length > 0))
-      ? "notifications/pubkey"
-      : null,
+      (config.notifications?.enabled || anyCameraNotificationsEnabled) &&
+      (watchAllEnabled ||
+        (Array.isArray(watchCameras) && watchCameras.length > 0)),
+  );
+
+  const { data: publicKey } = useSWR(
+    shouldFetchPubKey ? "notifications/pubkey" : null,
     { revalidateOnFocus: false },
   );
 
@@ -525,13 +539,7 @@ export default function NotificationView({
                   </Heading>
                   <Button
                     aria-label={t("notification.registerDevice")}
-                    disabled={
-                      (!config?.notifications.enabled &&
-                        notificationCameras.length === 0 &&
-                        !form.watch("allEnabled") &&
-                        form.watch("cameras").length === 0) ||
-                      publicKey == undefined
-                    }
+                    disabled={!shouldFetchPubKey || publicKey == undefined}
                     onClick={() => {
                       if (registration == null) {
                         Notification.requestPermission().then((permission) => {
