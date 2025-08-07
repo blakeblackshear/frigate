@@ -523,7 +523,9 @@ export default function NotificationView({
                     aria-label={t("notification.registerDevice")}
                     disabled={
                       (!config?.notifications.enabled &&
-                        notificationCameras.length === 0) ||
+                        notificationCameras.length === 0 &&
+                        !form.watch("allEnabled") &&
+                        form.watch("cameras").length === 0) ||
                       publicKey == undefined
                     }
                     onClick={() => {
