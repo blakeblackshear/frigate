@@ -118,50 +118,6 @@ export default function NotificationView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changedValue]);
 
-  // notification key handling
-
-  const { data: publicKey } = useSWR(
-    config?.notifications?.enabled ? "notifications/pubkey" : null,
-    { revalidateOnFocus: false },
-  );
-
-  const subscribeToNotifications = useCallback(
-    (registration: ServiceWorkerRegistration) => {
-      if (registration) {
-        addMessage(
-          "notification_settings",
-          t("notification.unsavedRegistrations"),
-          undefined,
-          "registration",
-        );
-
-        registration.pushManager
-          .subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: publicKey,
-          })
-          .then((pushSubscription) => {
-            axios
-              .post("notifications/register", {
-                sub: pushSubscription,
-              })
-              .catch(() => {
-                toast.error(t("notification.toast.error.registerFailed"), {
-                  position: "top-center",
-                });
-                pushSubscription.unsubscribe();
-                registration.unregister();
-                setRegistration(null);
-              });
-            toast.success(t("notification.toast.success.registered"), {
-              position: "top-center",
-            });
-          });
-      }
-    },
-    [publicKey, addMessage, t],
-  );
-
   // notification state
 
   const [registration, setRegistration] =
@@ -206,7 +162,69 @@ export default function NotificationView({
     },
   });
 
-  const watchCameras = form.watch("cameras");
+  const watchAllEnabled = form.watch("allEnabled");
+  const watchCameras = useMemo(() => form.watch("cameras") || [], [form]);
+
+  const anyCameraNotificationsEnabled = useMemo(
+    () =>
+      config &&
+      Object.values(config.cameras).some(
+        (c) =>
+          c.enabled_in_config &&
+          c.notifications &&
+          c.notifications.enabled_in_config,
+      ),
+    [config],
+  );
+
+  const shouldFetchPubKey = Boolean(
+    config &&
+      (config.notifications?.enabled || anyCameraNotificationsEnabled) &&
+      (watchAllEnabled ||
+        (Array.isArray(watchCameras) && watchCameras.length > 0)),
+  );
+
+  const { data: publicKey } = useSWR(
+    shouldFetchPubKey ? "notifications/pubkey" : null,
+    { revalidateOnFocus: false },
+  );
+
+  const subscribeToNotifications = useCallback(
+    (registration: ServiceWorkerRegistration) => {
+      if (registration) {
+        addMessage(
+          "notification_settings",
+          t("notification.unsavedRegistrations"),
+          undefined,
+          "registration",
+        );
+
+        registration.pushManager
+          .subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: publicKey,
+          })
+          .then((pushSubscription) => {
+            axios
+              .post("notifications/register", {
+                sub: pushSubscription,
+              })
+              .catch(() => {
+                toast.error(t("notification.toast.error.registerFailed"), {
+                  position: "top-center",
+                });
+                pushSubscription.unsubscribe();
+                registration.unregister();
+                setRegistration(null);
+              });
+            toast.success(t("notification.toast.success.registered"), {
+              position: "top-center",
+            });
+          });
+      }
+    },
+    [publicKey, addMessage, t],
+  );
 
   useEffect(() => {
     if (watchCameras.length > 0) {
@@ -521,13 +539,7 @@ export default function NotificationView({
                   </Heading>
                   <Button
                     aria-label={t("notification.registerDevice")}
-                    disabled={
-                      (!config?.notifications.enabled &&
-                        notificationCameras.length === 0 &&
-                        !form.watch("allEnabled") &&
-                        form.watch("cameras").length === 0) ||
-                      publicKey == undefined
-                    }
+                    disabled={!shouldFetchPubKey || publicKey == undefined}
                     onClick={() => {
                       if (registration == null) {
                         Notification.requestPermission().then((permission) => {

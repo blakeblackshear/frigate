@@ -21,7 +21,12 @@ router = APIRouter(tags=[Tags.notifications])
 
 @router.get("/notifications/pubkey")
 def get_vapid_pub_key(request: Request):
-    if not request.app.frigate_config.notifications.enabled:
+    config = request.app.frigate_config
+    notifications_enabled = config.notifications.enabled
+    camera_notifications_enabled = [
+        c for c in config.cameras.values() if c.enabled and c.notifications.enabled
+    ]
+    if not (notifications_enabled or camera_notifications_enabled):
         return JSONResponse(
             content=({"success": False, "message": "Notifications are not enabled."}),
             status_code=400,
