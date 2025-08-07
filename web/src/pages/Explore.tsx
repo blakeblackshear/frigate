@@ -58,7 +58,13 @@ export default function Explore() {
   const [search, setSearch] = useState("");
 
   const [searchFilter, setSearchFilter, searchSearchParams] =
-    useApiFilterArgs<SearchFilter>();
+    useApiFilterArgs<SearchFilter>([
+      "cameras",
+      "labels",
+      "sub_labels",
+      "recognized_license_plate",
+      "zones",
+    ]);
 
   const searchTerm = useMemo(
     () => searchSearchParams?.["query"] || "",
