@@ -20,6 +20,12 @@ local: version
 		--tag frigate:latest \
 		--load
 
+debug: version
+	docker buildx build --target=frigate --file docker/main/Dockerfile . \
+	    --build-arg DEBUG=true \
+		--tag frigate:latest \
+		--load
+
 amd64:
 	docker buildx build --target=frigate --file docker/main/Dockerfile . \
 		--tag $(IMAGE_REPO):$(VERSION)-$(COMMIT_HASH) \

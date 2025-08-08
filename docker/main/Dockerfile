@@ -148,6 +148,7 @@ RUN --mount=type=bind,source=docker/main/install_s6_overlay.sh,target=/deps/inst
 FROM base AS wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
+ARG DEBUG=false
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
@@ -177,7 +178,12 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
-RUN pip3 install -r /requirements.txt
+COPY docker/main/requirements-dev.txt /requirements-dev.txt
+
+RUN pip3 install -r /requirements.txt && \
+    if [ "$DEBUG" = "true" ]; then \
+        pip3 install -r /requirements-dev.txt; \
+    fi
 
 # Build pysqlite3 from source
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
