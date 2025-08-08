@@ -413,7 +413,7 @@ export default function CameraSettingsView({
                   </div>
                 </div>
               </div>
-              {config?.genai?.enabled && (
+              {cameraConfig?.objects?.genai?.enabled_in_config && (
                 <>
                   <Separator className="my-2 flex bg-secondary" />
 
