@@ -82,7 +82,7 @@ class TrackedObjectProcessor(threading.Thread):
         )
 
         self.requestor = InterProcessRequestor()
-        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.all)
+        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.all.value)
         self.event_sender = EventUpdatePublisher()
         self.event_end_subscriber = EventEndSubscriber()
         self.sub_label_subscriber = EventMetadataSubscriber(EventMetadataTypeEnum.all)

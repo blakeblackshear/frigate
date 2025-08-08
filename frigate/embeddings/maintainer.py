@@ -146,7 +146,7 @@ class EmbeddingMaintainer(threading.Thread):
             RecordingsDataTypeEnum.recordings_available_through
         )
         self.review_subscriber = ReviewDataSubscriber("")
-        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
+        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video.value)
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
 
@@ -504,8 +504,8 @@ class EmbeddingMaintainer(threading.Thread):
                 to_remove.append(id)
         for id in to_remove:
             self.event_metadata_publisher.publish(
-                EventMetadataTypeEnum.manual_event_end,
                 (id, now),
+                EventMetadataTypeEnum.manual_event_end.value,
             )
             self.detected_license_plates.pop(id)
 
