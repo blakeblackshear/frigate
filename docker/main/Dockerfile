@@ -243,6 +243,12 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     pip3 install -U /deps/wheels/*.whl
 
+# Copy memryx setup script
+COPY ./docker/main/install_memryx.sh /deps/install_memryx.sh
+
+# Install MemryX runtime for Frigate
+RUN chmod +x /deps/install_memryx.sh && /deps/install_memryx.sh
+
 COPY --from=deps-rootfs / /
 
 RUN ldconfig

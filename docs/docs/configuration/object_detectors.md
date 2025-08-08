@@ -13,6 +13,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
+- [MemryX](#memryx-mx3): The MX3 Acceleration module is available in M.2 format, offering broad compatibility across various platforms.
 
 **AMD**
 
@@ -52,7 +53,7 @@ This does not affect using hardware for accelerating other tasks such as [semant
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `memryx`, `onnx`, `openvino`, `rknn`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 
@@ -237,6 +238,155 @@ Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-proc
 
 > **Note:**
 > The config.path parameter can accept either a local file path or a URL ending with .hef. When provided, the detector will first check if the path is a local file path. If the file exists locally, it will use it directly. If the file is not found locally or if a URL was provided, it will attempt to download the model from the specified URL.
+
+---
+
+## MemryX MX3  
+
+This detector is available for use with the MemryX MX3 accelerator M.2 module. Frigate supports the MX3 on compatible hardware platforms, providing efficient and high-performance object detection.  
+
+See the [installation docs](../frigate/installation.md#memryx-mx3) for information on configuring the MemryX hardware.
+
+To configure a MemryX detector, simply set the `type` attribute to `memryx` and follow the configuration guide below.
+
+### Configuration  
+
+To configure the MemryX detector, use the following example configuration:  
+
+#### Single PCIe MemryX MX3  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+```
+
+#### Multiple PCIe MemryX MX3 Modules
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+  memx1:
+    type: memryx
+    device: PCIe:1
+
+  memx2:
+    type: memryx
+    device: PCIe:2
+```
+
+### Supported Models 
+
+MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
+
+#### YOLO-NAS
+
+The [YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) model included in this detector is downloaded from the [Models Section](#downloading-yolo-nas-model) and compiled to DFP with [mx_nc](https://developer.memryx.com/tools/neural_compiler.html#usage).
+
+The input size for **YOLO-NAS** can be set to either **320x320** (default) or **640x640**.
+
+- The default size of **320x320** is optimized for lower CPU usage and faster inference times.
+
+##### Configuration  
+
+Below is the recommended configuration for using the **YOLO-NAS** (small) model with the MemryX detector:  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+model:
+  model_type: yolonas
+  width: 320   # (Can be set to 640 for higher resolution)
+  height: 320  # (Can be set to 640 for higher resolution)
+  input_tensor: nchw
+  input_dtype: float
+  # path: yolo_nas_s.dfp  ##Model is normally fetched through the runtime, so 'path' can be omitted.##
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+#### YOLOX  
+
+The model is sourced from the [OpenCV Model Zoo](https://github.com/opencv/opencv_zoo) and precompiled to DFP.
+
+##### Configuration  
+
+Below is the recommended configuration for using the **YOLOX** (small) model with the MemryX detector:  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+model:
+  model_type: yolox
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_dtype: float_denorm
+  # path: YOLOX_640_640_3_onnx.dfp  ##Model is normally fetched through the runtime, so 'path' can be omitted.##
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+#### YOLOv9  
+
+The YOLOv9s model included in this detector is downloaded from [the original GitHub](https://github.com/WongKinYiu/yolov9) like in the [Models Section](#yolov9-1) and compiled to DFP with [mx_nc](https://developer.memryx.com/tools/neural_compiler.html#usage).
+
+##### Configuration
+
+Below is the recommended configuration for using the **YOLOv9** (small) model with the MemryX detector:  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+model:
+  model_type: yolo-generic   
+  width: 320   # (Can be set to 640 for higher resolution)
+  height: 320  # (Can be set to 640 for higher resolution)
+  input_tensor: nchw
+  input_dtype: float
+  # path: YOLO_v9_small_onnx.dfp  ##Model is normally fetched through the runtime, so 'path' can be omitted.##
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+#### SSDLite MobileNet v2  
+
+The model is sourced from the [OpenMMLab Model Zoo](https://mmdeploy-oss.openmmlab.com/model/mmdet-det/ssdlite-e8679f.onnx) and has been converted to DFP.
+
+##### Configuration  
+
+Below is the recommended configuration for using the **SSDLite MobileNet v2** model with the MemryX detector:  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+model:
+  model_type: ssd
+  width: 320
+  height: 320
+  input_tensor: nchw
+  input_dtype: float
+  # path: SSDlite_MobileNet_v2_320_320_3_onnx.dfp  ##Model is normally fetched during runtime, so 'path' can be omitted.##
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+#### Using a Custom Model  
+To use your own model, bind-mount the compiled `.dfp` file into the container and specify its path using `model.path`. You will also have to update the `labelmap` accordingly.
+
+For detailed instructions on compiling models, refer to the [MemryX Compiler](https://developer.memryx.com/tools/neural_compiler.html#usage) docs and [Tutorials](https://developer.memryx.com/tutorials/tutorials.html).
 
 ---
 

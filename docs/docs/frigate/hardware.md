@@ -58,6 +58,10 @@ Frigate supports multiple different detectors that work on different types of ha
 - [Google Coral EdgeTPU](#google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
   - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#edge-tpu-detector)
 
+- [MemryX](#memryx-mx3): The MX3 M.2 accelerator module is available in m.2 format allowing for a wide range of compatibility with devices.
+  - [Supports many model architectures](../../configuration/object_detectors#memryx-mx3)
+  - Runs best with tiny, small, or medium-size models
+
 **AMD**
 
 - [ROCm](#rocm---amd-gpu): ROCm can run on AMD Discrete GPUs to provide efficient object detection
@@ -183,6 +187,35 @@ With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detec
 | AMD 8700G |                       | 320: ~ 20 ms 640: ~ 40 ms |
 
 ## Community Supported Detectors
+
+### MemryX MX3
+
+Frigate supports the MemryX MX3 M.2 AI Acceleration Module on compatible hardware platforms, including both x86 (Intel/AMD) and ARM-based SBCs such as RPi 5.
+
+A single MemryX MX3 module is capable of handling multiple camera streams using the default models, making it sufficient for most users. For larger deployments with more cameras or bigger models, multiple MX3 modules can be used. Frigate supports multi-detector configurations, allowing you to connect multiple MX3 modules to scale inference capacity seamlessly.
+
+Detailed information is available [in the detector docs](/configuration/object_detectors#memryx-mx3).
+
+Frigate supports the following models resolutions with the MemryX MX3 module:
+
+- **Yolo-NAS**: 320 (default), 640
+- **YOLOv9**: 320 (default), 640
+- **YOLOX**: 640
+- **SSDlite MobileNet v2**: 320
+
+Due to the MX3's architecture, the maximum frames per second supported cannot be calculated as `1/inference time` and is measured separately. When deciding how many camera streams you may support with your configuration, use the **MX3 Total FPS** column to approximate of the detector's limit, not the Inference Time.
+
+
+| Model                | Input Size | MX3 Inference Time | MX3 Total FPS |
+|----------------------|------------|--------------------|---------------|
+| YOLO-NAS-Small       | 320        | ~ 9 ms             | ~ 378         |
+| YOLO-NAS-Small       | 640        | ~ 21 ms            | ~ 138         |
+| YOLOv9s              | 320        | ~ 16 ms            | ~ 382         |
+| YOLOv9s              | 640        | ~ 41 ms            | ~ 110         |
+| YOLOX-Small          | 640        | ~ 16 ms            | ~ 263         |
+| SSDlite MobileNet v2 | 320        | ~ 5 ms             | ~ 1056        |
+    
+Inference speeds may vary depending on the host platform’s CPU performance. The above data was measured on an **Intel 13700 CPU**. Platforms like Raspberry Pi, x86 hosts, Orange Pi, and other ARM-based SBCs have different levels of processing capability, which will increase post-processing time and may result in lower FPS.
 
 ### Nvidia Jetson
 
