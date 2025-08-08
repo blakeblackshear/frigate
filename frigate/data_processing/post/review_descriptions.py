@@ -61,9 +61,18 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 return
 
             final_data = data["after"]
+            camera = final_data["camera"]
+
+            if data["type"] == "alert" and not self.config.cameras[camera].review.genai.alerts:
+                self.tracked_review_items.pop(id)
+                return
+            elif data["type"] == "detection" and not self.config.cameras[camera].review.detections:
+                self.tracked_review_items.pop(id)
+                return
+
             self.genai_client.generate_review_description(
                 {
-                    "camera": final_data["camera"],
+                    "camera": camera,
                     "objects": final_data["data"]["objects"],
                     "recognized_objects": final_data["data"]["sub_labels"],
                     "zones": final_data["data"]["zones"],
