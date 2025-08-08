@@ -99,7 +99,7 @@ class CameraConfigUpdateSubscriber:
         elif update_type == CameraConfigUpdateEnum.enabled:
             config.enabled = updated_config
         elif update_type == CameraConfigUpdateEnum.genai:
-            config.genai = updated_config
+            config.objects.genai = updated_config
         elif update_type == CameraConfigUpdateEnum.motion:
             config.motion = updated_config
         elif update_type == CameraConfigUpdateEnum.notifications:

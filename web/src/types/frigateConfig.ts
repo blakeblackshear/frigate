@@ -94,13 +94,6 @@ export interface CameraConfig {
     cmd: string;
     roles: string[];
   }[];
-  genai: {
-    enabled: string;
-    prompt: string;
-    object_prompts: { [key: string]: string };
-    required_zones: string[];
-    objects: string[];
-  };
   live: {
     height: number;
     quality: number;
@@ -146,6 +139,14 @@ export interface CameraConfig {
     };
     mask: string;
     track: string[];
+    genai: {
+      enabled: boolean;
+      enabled_in_config: boolean;
+      prompt: string;
+      object_prompts: { [key: string]: string };
+      required_zones: string[];
+      objects: string[];
+    };
   };
   onvif: {
     autotracking: {
@@ -406,15 +407,10 @@ export interface FrigateConfig {
   };
 
   genai: {
-    enabled: boolean;
     provider: string;
     base_url?: string;
     api_key?: string;
     model: string;
-    prompt: string;
-    object_prompts: { [key: string]: string };
-    required_zones: string[];
-    objects: string[];
   };
 
   go2rtc: {
