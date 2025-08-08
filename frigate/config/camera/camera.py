@@ -28,7 +28,6 @@ from .audio import AudioConfig
 from .birdseye import BirdseyeCameraConfig
 from .detect import DetectConfig
 from .ffmpeg import CameraFfmpegConfig, CameraInput
-from .genai import GenAICameraConfig
 from .live import CameraLiveConfig
 from .motion import MotionConfig
 from .mqtt import CameraMqttConfig
@@ -71,9 +70,6 @@ class CameraConfig(FrigateBaseModel):
         default_factory=CameraFaceRecognitionConfig, title="Face recognition config."
     )
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
-    genai: GenAICameraConfig = Field(
-        default_factory=GenAICameraConfig, title="Generative AI configuration."
-    )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
     )

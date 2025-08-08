@@ -4,7 +4,7 @@ from pydantic import Field, PrivateAttr, field_serializer, field_validator
 
 from ..base import FrigateBaseModel
 
-__all__ = ["ObjectConfig", "FilterConfig"]
+__all__ = ["ObjectConfig", "GenAIObjectConfig", "FilterConfig"]
 
 
 DEFAULT_TRACKED_OBJECTS = ["person"]

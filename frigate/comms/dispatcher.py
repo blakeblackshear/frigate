@@ -744,10 +744,10 @@ class Dispatcher:
 
     def _on_genai_command(self, camera_name: str, payload: str) -> None:
         """Callback for GenAI topic."""
-        genai_settings = self.config.cameras[camera_name].genai
+        genai_settings = self.config.cameras[camera_name].objects.genai
 
         if payload == "ON":
-            if not self.config.cameras[camera_name].genai.enabled_in_config:
+            if not self.config.cameras[camera_name].objects.genai.enabled_in_config:
                 logger.error(
                     "GenAI must be enabled in the config to be turned on via MQTT."
                 )

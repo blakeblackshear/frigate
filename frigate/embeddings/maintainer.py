@@ -30,7 +30,7 @@ from frigate.comms.recordings_updater import (
     RecordingsDataTypeEnum,
 )
 from frigate.comms.review_updater import ReviewDataSubscriber
-from frigate.config import FrigateConfig
+from frigate.config import CameraConfig, FrigateConfig
 from frigate.config.camera.camera import CameraTypeEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
@@ -329,7 +329,10 @@ class EmbeddingMaintainer(threading.Thread):
         camera_config = self.config.cameras[camera]
 
         # no need to process updated objects if face recognition, lpr, genai are disabled
-        if not camera_config.genai.enabled and len(self.realtime_processors) == 0:
+        if (
+            not camera_config.objects.genai.enabled
+            and len(self.realtime_processors) == 0
+        ):
             return
 
         # Create our own thumbnail based on the bounding box and the frame time
@@ -367,23 +370,23 @@ class EmbeddingMaintainer(threading.Thread):
         # check if we're configured to send an early request after a minimum number of updates received
         if (
             self.genai_client is not None
-            and camera_config.genai.send_triggers.after_significant_updates
+            and camera_config.objects.genai.send_triggers.after_significant_updates
         ):
             if (
                 len(self.tracked_events.get(data["id"], []))
-                >= camera_config.genai.send_triggers.after_significant_updates
+                >= camera_config.objects.genai.send_triggers.after_significant_updates
                 and data["id"] not in self.early_request_sent
             ):
                 if data["has_clip"] and data["has_snapshot"]:
                     event: Event = Event.get(Event.id == data["id"])
 
                     if (
-                        not camera_config.genai.objects
-                        or event.label in camera_config.genai.objects
+                        not camera_config.objects.genai.objects
+                        or event.label in camera_config.objects.genai.objects
                     ) and (
-                        not camera_config.genai.required_zones
+                        not camera_config.objects.genai.required_zones
                         or set(data["entered_zones"])
-                        & set(camera_config.genai.required_zones)
+                        & set(camera_config.objects.genai.required_zones)
                     ):
                         logger.debug(f"{camera} sending early request to GenAI")
 
@@ -436,16 +439,17 @@ class EmbeddingMaintainer(threading.Thread):
 
                 # Run GenAI
                 if (
-                    camera_config.genai.enabled
-                    and camera_config.genai.send_triggers.tracked_object_end
+                    camera_config.objects.genai.enabled
+                    and camera_config.objects.genai.send_triggers.tracked_object_end
                     and self.genai_client is not None
                     and (
-                        not camera_config.genai.objects
-                        or event.label in camera_config.genai.objects
+                        not camera_config.objects.genai.objects
+                        or event.label in camera_config.objects.genai.objects
                     )
                     and (
-                        not camera_config.genai.required_zones
-                        or set(event.zones) & set(camera_config.genai.required_zones)
+                        not camera_config.objects.genai.required_zones
+                        or set(event.zones)
+                        & set(camera_config.objects.genai.required_zones)
                     )
                 ):
                     self._process_genai_description(event, camera_config, thumbnail)
@@ -624,8 +628,10 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.embeddings.embed_thumbnail(event_id, thumbnail)
 
-    def _process_genai_description(self, event, camera_config, thumbnail) -> None:
-        if event.has_snapshot and camera_config.genai.use_snapshot:
+    def _process_genai_description(
+        self, event: Event, camera_config: CameraConfig, thumbnail
+    ) -> None:
+        if event.has_snapshot and camera_config.objects.genai.use_snapshot:
             snapshot_image = self._read_and_crop_snapshot(event, camera_config)
             if not snapshot_image:
                 return
@@ -637,7 +643,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         embed_image = (
             [snapshot_image]
-            if event.has_snapshot and camera_config.genai.use_snapshot
+            if event.has_snapshot and camera_config.objects.genai.use_snapshot
             else (
                 [data["thumbnail"] for data in self.tracked_events[event.id]]
                 if num_thumbnails > 0
@@ -645,7 +651,7 @@ class EmbeddingMaintainer(threading.Thread):
             )
         )
 
-        if camera_config.genai.debug_save_thumbnails and num_thumbnails > 0:
+        if camera_config.objects.genai.debug_save_thumbnails and num_thumbnails > 0:
             logger.debug(f"Saving {num_thumbnails} thumbnails for event {event.id}")
 
             Path(os.path.join(CLIPS_DIR, f"genai-requests/{event.id}")).mkdir(
@@ -775,7 +781,7 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         camera_config = self.config.cameras[event.camera]
-        if not camera_config.genai.enabled and not force:
+        if not camera_config.objects.genai.enabled and not force:
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 
