@@ -352,6 +352,11 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=ModelConfig, title="Detection model configuration."
     )
 
+    # GenAI config
+    genai: GenAIConfig = Field(
+        default_factory=GenAIConfig, title="Generative AI configuration."
+    )
+
     # Camera config
     cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
     audio: AudioConfig = Field(
@@ -365,9 +370,6 @@ class FrigateConfig(FrigateBaseModel):
     )
     ffmpeg: FfmpegConfig = Field(
         default_factory=FfmpegConfig, title="Global FFmpeg configuration."
-    )
-    genai: GenAIConfig = Field(
-        default_factory=GenAIConfig, title="Generative AI configuration."
     )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
@@ -458,7 +460,6 @@ class FrigateConfig(FrigateBaseModel):
                 "live": ...,
                 "objects": ...,
                 "review": ...,
-                "genai": ...,
                 "motion": ...,
                 "notifications": ...,
                 "detect": ...,
@@ -606,7 +607,7 @@ class FrigateConfig(FrigateBaseModel):
             camera_config.review.detections.enabled_in_config = (
                 camera_config.review.detections.enabled
             )
-            camera_config.genai.enabled_in_config = camera_config.genai.enabled
+            camera_config.objects.genai.enabled_in_config = camera_config.objects.genai.enabled
 
             # Add default filters
             object_keys = camera_config.objects.track

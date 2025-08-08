@@ -108,6 +108,10 @@ class ObjectConfig(FrigateBaseModel):
         default_factory=dict, title="Object filters."
     )
     mask: Union[str, list[str]] = Field(default="", title="Object mask.")
+    genai: GenAIObjectConfig = Field(
+        default_factory=GenAIObjectConfig,
+        title="Config for using genai to analyze objects.",
+    )
     _all_objects: list[str] = PrivateAttr()
 
     @property
