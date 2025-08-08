@@ -151,6 +151,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
 
         self.detected_license_plates: dict[str, dict[str, Any]] = {}
+        self.genai_client = get_genai_client(config)
 
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
@@ -206,9 +207,10 @@ class EmbeddingMaintainer(threading.Thread):
         # post processors
         self.post_processors: list[PostProcessorApi] = []
 
-        self.post_processors.append(
-            ReviewDescriptionProcessor(self.config, self.metrics)
-        )
+        if any(c.review.genai.enabled_in_config for c in self.config.cameras.values()):
+            self.post_processors.append(
+                ReviewDescriptionProcessor(self.config, self.metrics, self.genai_client)
+            )
 
         if self.config.lpr.enabled:
             self.post_processors.append(
@@ -244,7 +246,6 @@ class EmbeddingMaintainer(threading.Thread):
         self.stop_event = stop_event
         self.tracked_events: dict[str, list[Any]] = {}
         self.early_request_sent: dict[str, bool] = {}
-        self.genai_client = get_genai_client(config)
 
         # recordings data
         self.recordings_available_through: dict[str, float] = {}

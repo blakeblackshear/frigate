@@ -7,8 +7,7 @@ import cv2
 
 from frigate.config import FrigateConfig
 from frigate.data_processing.types import PostProcessDataEnum
-from frigate.genai import GenAIConfig
-from frigate.genai.ollama import OllamaClient
+from frigate.genai import GenAIClient
 
 from ..post.api import PostProcessorApi
 
@@ -16,14 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
-    def __init__(self, config: FrigateConfig, metrics):
+    def __init__(self, config: FrigateConfig, metrics, client: GenAIClient):
         super().__init__(config, metrics, None)
         self.tracked_review_items: dict[str, list[tuple[int, bytes]]] = {}
-        self.genai_client = OllamaClient(
-            GenAIConfig(
-                enabled=True, model="qwen2.5vl:3b", base_url="http://192.168.50.107:11434"
-            )
-        )
+        self.genai_client = client
 
     def process_data(self, data, data_type):
         if data_type != PostProcessDataEnum.review:
@@ -63,10 +58,16 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             final_data = data["after"]
             camera = final_data["camera"]
 
-            if data["type"] == "alert" and not self.config.cameras[camera].review.genai.alerts:
+            if (
+                data["type"] == "alert"
+                and not self.config.cameras[camera].review.genai.alerts
+            ):
                 self.tracked_review_items.pop(id)
                 return
-            elif data["type"] == "detection" and not self.config.cameras[camera].review.detections:
+            elif (
+                data["type"] == "detection"
+                and not self.config.cameras[camera].review.detections
+            ):
                 self.tracked_review_items.pop(id)
                 return
 

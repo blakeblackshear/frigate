@@ -1,7 +1,6 @@
 """Generative AI module for Frigate."""
 
 import importlib
-import json
 import logging
 import os
 from typing import Any, Optional
