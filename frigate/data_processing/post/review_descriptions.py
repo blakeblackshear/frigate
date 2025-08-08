@@ -1,11 +1,14 @@
 """Post processor for review items to get descriptions."""
 
 import logging
+import os
 import shutil
+from pathlib import Path
 
 import cv2
 
 from frigate.config import FrigateConfig
+from frigate.const import CLIPS_DIR
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
 
@@ -43,7 +46,6 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     # we have already processed this thumbnail
                     return
 
-                shutil.copy(thumb_path, f"/media/frigate/frames/{thumb_time}.webp")
                 thumb_data = cv2.imread(thumb_path)
                 ret, jpg = cv2.imencode(
                     ".jpg", thumb_data, [int(cv2.IMWRITE_JPEG_QUALITY), 100]
@@ -51,6 +53,22 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
                 if ret:
                     self.tracked_review_items[id].append((thumb_time, jpg.tobytes()))
+
+                if self.config.cameras[""].review.genai.debug_save_thumbnails:
+                    id = data["after"]["id"]
+                    Path(os.path.join(CLIPS_DIR, f"genai-requests/{id}")).mkdir(
+                        parents=True, exist_ok=True
+                    )
+
+                    for idx, data in enumerate(self.tracked_review_items[id], 1):
+                        shutil.copy(
+                            thumb_path,
+                            os.path.join(
+                                CLIPS_DIR,
+                                f"genai-requests/{id}/{idx}.webp",
+                            ),
+                        )
+
         else:
             if id not in self.tracked_review_items:
                 return
