@@ -16,11 +16,8 @@ import { MdOutlineRestartAlt } from "react-icons/md";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useTranslation } from "react-i18next";
 import { useRestart } from "@/api/ws";
-<<<<<<< HEAD
 import { useResizeObserver } from "@/hooks/resize-observer";
-=======
 import { FrigateConfig } from "@/types/frigateConfig";
->>>>>>> 5f40e6e2 (Add basic config editor when Frigate can't startup (#18383))
 
 type SaveOptions = "saveonly" | "restart";
 
