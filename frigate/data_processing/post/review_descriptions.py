@@ -27,8 +27,6 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         if data_type != PostProcessDataEnum.review:
             return
 
-        logger.info(f"processing review {data['type']} on {data['after']['camera']}")
-
         id = data["after"]["id"]
 
         if data["type"] == "new" or data["type"] == "update":
@@ -79,13 +77,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             camera = final_data["camera"]
 
             if (
-                data["type"] == "alert"
+                final_data["severity"] == "alert"
                 and not self.config.cameras[camera].review.genai.alerts
             ):
                 self.tracked_review_items.pop(id)
                 return
             elif (
-                data["type"] == "detection"
+                final_data["severity"] == "detection"
                 and not self.config.cameras[camera].review.detections
             ):
                 self.tracked_review_items.pop(id)
