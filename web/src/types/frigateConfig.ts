@@ -140,7 +140,8 @@ export interface CameraConfig {
     mask: string;
     track: string[];
     genai: {
-      enabled: string;
+      enabled: boolean;
+      enabled_in_config: boolean;
       prompt: string;
       object_prompts: { [key: string]: string };
       required_zones: string[];
