@@ -1,0 +1,67 @@
+{
+  "group": {
+    "label": "Skupiny Kamier",
+    "add": "Pridať skupinu kamier",
+    "edit": "Upraviť skupinu kamier",
+    "delete": {
+      "label": "Odstrániť skupinu kamier",
+      "confirm": {
+        "title": "Potvrďte Odstránenie",
+        "desc": "Ste si istý že chcete vymazať skupinu kamier <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Meno",
+      "placeholder": "Zadajte meno…",
+      "errorMessage": {
+        "mustLeastCharacters": "Názov skupiny kamier musí mať aspoň 2 znaky.",
+        "exists": "Názov skupiny kamier už existuje.",
+        "nameMustNotPeriod": "Názov skupiny kamier nesmie obsahovať bodku.",
+        "invalid": "Neplatný názov skupiny kamier."
+      }
+    },
+    "cameras": {
+      "label": "Kamery",
+      "desc": "Vyberte kamery pre túto skupinu."
+    },
+    "icon": "Ikona",
+    "success": "Skupina kamier ({{name}}) bola uložená.",
+    "camera": {
+      "setting": {
+        "label": "Nastavenia streamovania z kamery",
+        "title": "Nastavenia streamovania {{cameraName}}",
+        "desc": "Zmeňte možnosti živého vysielania pre ovládací panel tejto skupiny kamier. <em>Tieto nastavenia sú špecifické pre zariadenie/prehliadač.</em>",
+        "audioIsAvailable": "Pre tento stream je k dispozícii zvuk",
+        "audioIsUnavailable": "Zvuk nie je pre tento stream k dispozícii",
+        "audio": {
+          "tips": {
+            "title": "Zvuk musí byť vyvedený z vašej kamery a nakonfigurovaný v go2rtc pre tento stream.",
+            "document": "Prečítajte si dokumentáciu "
+          }
+        },
+        "stream": "Prúd",
+        "placeholder": "Vyberte prúd",
+        "streamMethod": {
+          "label": "Metóda streamovania",
+          "placeholder": "Vyberte metódu vysielania",
+          "method": {
+            "noStreaming": {
+              "label": "Žiadny stream",
+              "desc": "Snímky z kamery sa budú aktualizovať iba raz za minútu a nebude prebiehať žiadne živé vysielanie."
+            },
+            "smartStreaming": {
+              "label": "Inteligentné streamovanie (odporúčané)",
+              "desc": "Inteligentné streamovanie aktualizuje obraz z kamery raz za minútu, keď sa neprejavuje žiadna detekovateľná aktivita, aby sa šetrila šírka pásma a zdroje. Keď sa zistí aktivita, obraz sa plynule prepne na živý stream."
+            },
+            "continuousStreaming": {
+              "label": "Nepretržité streamovanie",
+              "desc": {
+                "title": "Obraz z kamery bude vždy vysielaný naživo, keď bude viditeľný na palubnej doske, aj keď nebude detekovaná žiadna aktivita."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

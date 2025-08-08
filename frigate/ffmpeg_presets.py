@@ -6,9 +6,12 @@ from enum import Enum
 from typing import Any
 
 from frigate.const import (
+    FFMPEG_HVC1_ARGS,
     FFMPEG_HWACCEL_NVIDIA,
+    FFMPEG_HWACCEL_RKMPP,
     FFMPEG_HWACCEL_VAAPI,
     FFMPEG_HWACCEL_VULKAN,
+    LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.util.services import vainfo_hwaccel
 from frigate.version import VERSION
@@ -50,9 +53,8 @@ class LibvaGpuSelector:
         return ""
 
 
-LIBAV_VERSION = int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59") or "59")
-FPS_VFR_PARAM = "-fps_mode vfr" if LIBAV_VERSION >= 59 else "-vsync 2"
-TIMEOUT_PARAM = "-timeout" if LIBAV_VERSION >= 59 else "-stimeout"
+FPS_VFR_PARAM = "-fps_mode vfr" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-vsync 2"
+TIMEOUT_PARAM = "-timeout" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-stimeout"
 
 _gpu_selector = LibvaGpuSelector()
 _user_agent_args = [
@@ -64,13 +66,12 @@ PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
     "preset-rpi-64-h265": "-c:v:1 hevc_v4l2m2m",
     FFMPEG_HWACCEL_VAAPI: f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
-    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAV_VERSION >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
-    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAV_VERSION >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
+    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
+    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
     FFMPEG_HWACCEL_NVIDIA: "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
-    "preset-rk-h264": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
-    "preset-rk-h265": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
+    f"{FFMPEG_HWACCEL_RKMPP}-no-dump_extra": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
     # experimental presets
     FFMPEG_HWACCEL_VULKAN: "-hwaccel vulkan -init_hw_device vulkan=gpu:0 -filter_hw_device gpu -hwaccel_output_format vulkan",
 }
@@ -84,6 +85,16 @@ PRESETS_HW_ACCEL_DECODE["preset-nvidia-mjpeg"] = PRESETS_HW_ACCEL_DECODE[
     FFMPEG_HWACCEL_NVIDIA
 ]
 
+PRESETS_HW_ACCEL_DECODE[FFMPEG_HWACCEL_RKMPP] = (
+    f"{PRESETS_HW_ACCEL_DECODE[f'{FFMPEG_HWACCEL_RKMPP}-no-dump_extra']}{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}"
+)
+PRESETS_HW_ACCEL_DECODE["preset-rk-h264"] = PRESETS_HW_ACCEL_DECODE[
+    FFMPEG_HWACCEL_RKMPP
+]
+PRESETS_HW_ACCEL_DECODE["preset-rk-h265"] = PRESETS_HW_ACCEL_DECODE[
+    FFMPEG_HWACCEL_RKMPP
+]
+
 PRESETS_HW_ACCEL_SCALE = {
     "preset-rpi-64-h264": "-r {0} -vf fps={0},scale={1}:{2}",
     "preset-rpi-64-h265": "-r {0} -vf fps={0},scale={1}:{2}",
@@ -93,8 +104,7 @@ PRESETS_HW_ACCEL_SCALE = {
     FFMPEG_HWACCEL_NVIDIA: "-r {0} -vf fps={0},scale_cuda=w={1}:h={2},hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5",
     "preset-jetson-h264": "-r {0}",  # scaled in decoder
     "preset-jetson-h265": "-r {0}",  # scaled in decoder
-    "preset-rk-h264": "-r {0} -vf scale_rkrga=w={1}:h={2}:format=yuv420p:force_original_aspect_ratio=0,hwmap=mode=read,format=yuv420p",
-    "preset-rk-h265": "-r {0} -vf scale_rkrga=w={1}:h={2}:format=yuv420p:force_original_aspect_ratio=0,hwmap=mode=read,format=yuv420p",
+    FFMPEG_HWACCEL_RKMPP: "-r {0} -vf scale_rkrga=w={1}:h={2}:format=yuv420p:force_original_aspect_ratio=0,hwmap=mode=read,format=yuv420p",
     "default": "-r {0} -vf fps={0},scale={1}:{2}",
     # experimental presets
     FFMPEG_HWACCEL_VULKAN: "-r {0} -vf fps={0},hwupload,scale_vulkan=w={1}:h={2},hwdownload",
@@ -106,6 +116,12 @@ PRESETS_HW_ACCEL_SCALE["preset-nvidia-h265"] = PRESETS_HW_ACCEL_SCALE[
     FFMPEG_HWACCEL_NVIDIA
 ]
 
+PRESETS_HW_ACCEL_SCALE[f"{FFMPEG_HWACCEL_RKMPP}-no-dump_extra"] = (
+    PRESETS_HW_ACCEL_SCALE[FFMPEG_HWACCEL_RKMPP]
+)
+PRESETS_HW_ACCEL_SCALE["preset-rk-h264"] = PRESETS_HW_ACCEL_SCALE[FFMPEG_HWACCEL_RKMPP]
+PRESETS_HW_ACCEL_SCALE["preset-rk-h265"] = PRESETS_HW_ACCEL_SCALE[FFMPEG_HWACCEL_RKMPP]
+
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-rpi-64-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m {2}",
     "preset-rpi-64-h265": "{0} -hide_banner {1} -c:v hevc_v4l2m2m {2}",
@@ -115,7 +131,7 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     FFMPEG_HWACCEL_NVIDIA: "{0} -hide_banner {1} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {2}",
     "preset-jetson-h264": "{0} -hide_banner {1} -c:v h264_nvmpi -profile high {2}",
     "preset-jetson-h265": "{0} -hide_banner {1} -c:v h264_nvmpi -profile main {2}",
-    "preset-rk-h264": "{0} -hide_banner {1} -c:v h264_rkmpp -profile:v high {2}",
+    FFMPEG_HWACCEL_RKMPP: "{0} -hide_banner {1} -c:v h264_rkmpp -profile:v high {2}",
     "preset-rk-h265": "{0} -hide_banner {1} -c:v hevc_rkmpp -profile:v main {2}",
     "default": "{0} -hide_banner {1} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {2}",
 }
@@ -125,6 +141,13 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-nvidia-h264"] = (
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-nvidia-h265"] = (
     PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
 )
+
+PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[f"{FFMPEG_HWACCEL_RKMPP}-no-dump_extra"] = (
+    PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_RKMPP]
+)
+PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-rk-h264"] = PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[
+    FFMPEG_HWACCEL_RKMPP
+]
 
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rpi-64-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m -pix_fmt yuv420p {2}",
@@ -136,13 +159,20 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-nvidia-h265": "{0} -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {1} -c:v hevc_nvenc {2}",
     "preset-jetson-h264": "{0} -hide_banner {1} -c:v h264_nvmpi -profile high {2}",
     "preset-jetson-h265": "{0} -hide_banner {1} -c:v hevc_nvmpi -profile main {2}",
-    "preset-rk-h264": "{0} -hide_banner {1} -c:v h264_rkmpp -profile:v high {2}",
+    FFMPEG_HWACCEL_RKMPP: "{0} -hide_banner {1} -c:v h264_rkmpp -profile:v high {2}",
     "preset-rk-h265": "{0} -hide_banner {1} -c:v hevc_rkmpp -profile:v main {2}",
     "default": "{0} -hide_banner {1} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {2}",
 }
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE["preset-nvidia-h264"] = (
     PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[FFMPEG_HWACCEL_NVIDIA]
 )
+
+PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[f"{FFMPEG_HWACCEL_RKMPP}-no-dump_extra"] = (
+    PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[FFMPEG_HWACCEL_RKMPP]
+)
+PRESETS_HW_ACCEL_ENCODE_TIMELAPSE["preset-rk-h264"] = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[
+    FFMPEG_HWACCEL_RKMPP
+]
 
 # encoding of previews is only done on CPU due to comparable encode times and better quality from libx264
 PRESETS_HW_ACCEL_ENCODE_PREVIEW = {
@@ -282,7 +312,7 @@ PRESETS_INPUT = {
         "-probesize",
         "1000M",
         "-rw_timeout",
-        "5000000",
+        "10000000",
     ],
     "preset-rtmp-generic": [
         "-avoid_negative_ts",
@@ -296,7 +326,7 @@ PRESETS_INPUT = {
         "-fflags",
         "+genpts+discardcorrupt",
         "-rw_timeout",
-        "5000000",
+        "10000000",
         "-use_wallclock_as_timestamps",
         "1",
         "-f",
@@ -311,7 +341,7 @@ PRESETS_INPUT = {
         "-rtsp_transport",
         "tcp",
         TIMEOUT_PARAM,
-        "5000000",
+        "10000000",
         "-use_wallclock_as_timestamps",
         "1",
     ],
@@ -320,14 +350,14 @@ PRESETS_INPUT = {
         "-rtsp_transport",
         "tcp",
         TIMEOUT_PARAM,
-        "5000000",
+        "10000000",
     ],
     "preset-rtsp-restream-low-latency": _user_agent_args
     + [
         "-rtsp_transport",
         "tcp",
         TIMEOUT_PARAM,
-        "5000000",
+        "10000000",
         "-fflags",
         "nobuffer",
         "-flags",
@@ -342,7 +372,7 @@ PRESETS_INPUT = {
         "-rtsp_transport",
         "udp",
         TIMEOUT_PARAM,
-        "5000000",
+        "10000000",
         "-use_wallclock_as_timestamps",
         "1",
     ],
@@ -361,7 +391,7 @@ PRESETS_INPUT = {
         "-rtsp_transport",
         "tcp",
         TIMEOUT_PARAM,
-        "5000000",
+        "10000000",
         "-use_wallclock_as_timestamps",
         "1",
     ],
@@ -490,6 +520,6 @@ def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str]:
 
     if force_record_hvc1:
         # Apple only supports HEVC if it is hvc1 (vs. hev1)
-        preset += ["-tag:v", "hvc1"]
+        return preset + FFMPEG_HVC1_ARGS
 
     return preset

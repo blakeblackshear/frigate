@@ -1,0 +1,62 @@
+{
+  "filter": "Suodatin",
+  "dates": {
+    "selectPreset": "Valitse esiasettelu…",
+    "all": {
+      "title": "Kaikki päivämäärät",
+      "short": "Päivämäärät"
+    }
+  },
+  "more": "Lisää suodattimia",
+  "reset": {
+    "label": "Palauta suodattimet oletusarvoihin"
+  },
+  "labels": {
+    "count_one": "{{count}} nimike",
+    "label": "Nimikkeet",
+    "all": {
+      "title": "Kaikki nimikkeet",
+      "short": "Nimikkeet"
+    },
+    "count_other": "{{count}} nimikettä"
+  },
+  "zones": {
+    "label": "Alueet",
+    "all": {
+      "title": "Kaikki alueet",
+      "short": "Alueet"
+    }
+  },
+  "timeRange": "Aikaikkuna",
+  "subLabels": {
+    "label": "Alinimikkeet",
+    "all": "Kaikki alinimikkeet"
+  },
+  "score": "Piste",
+  "estimatedSpeed": "Arvioitu nopeus {{unit}}",
+  "features": {
+    "label": "Piirteet",
+    "hasVideoClip": "Videoleike löytyy",
+    "submittedToFrigatePlus": {
+      "label": "Lähetetty Frigate+:aan",
+      "tips": "Sinun on ensin suodatettava seuratut kohteet, joilla on tilannekuva.<br /><br />Kohteita, joilla ei ole tilannekuvaa, ei voida lähettää Frigate+:aan."
+    },
+    "hasSnapshot": "Tilannekuva löytyy"
+  },
+  "sort": {
+    "label": "Järjestä",
+    "dateAsc": "Päivämäärä (Nouseva)",
+    "dateDesc": "Päivämäärä (Laskeva)",
+    "scoreAsc": "Kohteen pisteet (Nouseva)",
+    "scoreDesc": "Kohteen pisteet (Laskeva)",
+    "speedAsc": "Arvioitu nopeus (Nouseva)",
+    "speedDesc": "Arvioitu nopeus (Laskeva)",
+    "relevance": "Olennaisuus"
+  },
+  "cameras": {
+    "label": "Kameran suodattimet",
+    "all": {
+      "title": "Kaikki kamerat"
+    }
+  }
+}

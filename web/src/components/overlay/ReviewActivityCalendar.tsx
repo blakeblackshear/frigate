@@ -1,24 +1,32 @@
-import { ReviewSummary } from "@/types/review";
+import { RecordingsSummary, ReviewSummary } from "@/types/review";
 import { Calendar } from "../ui/calendar";
-import { useMemo } from "react";
+import { ButtonHTMLAttributes, useEffect, useMemo, useRef } from "react";
 import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
-import { type DayContentProps } from "react-day-picker";
+import { type DayButtonProps, TZDate } from "react-day-picker";
 import { LAST_24_HOURS_KEY } from "@/types/filter";
 import { usePersistence } from "@/hooks/use-persistence";
+import { cn } from "@/lib/utils";
+import { FrigateConfig } from "@/types/frigateConfig";
+import useSWR from "swr";
+import { useTimezone } from "@/hooks/use-date-utils";
 
 type WeekStartsOnType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 type ReviewActivityCalendarProps = {
   reviewSummary?: ReviewSummary;
+  recordingsSummary?: RecordingsSummary;
   selectedDay?: Date;
   onSelect: (day?: Date) => void;
 };
 export default function ReviewActivityCalendar({
   reviewSummary,
+  recordingsSummary,
   selectedDay,
   onSelect,
 }: ReviewActivityCalendarProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const timezone = useTimezone(config);
   const [weekStartsOn] = usePersistence("weekStartsOn", 0);
 
   const disabledDates = useMemo(() => {
@@ -30,39 +38,56 @@ export default function ReviewActivityCalendar({
   }, []);
 
   const modifiers = useMemo(() => {
-    if (!reviewSummary) {
-      return { alerts: [], detections: [] };
+    const recordings: Date[] = [];
+    const alerts: Date[] = [];
+    const detections: Date[] = [];
+
+    // Handle recordings
+    if (recordingsSummary) {
+      Object.keys(recordingsSummary).forEach((date) => {
+        if (date === LAST_24_HOURS_KEY) {
+          return;
+        }
+
+        const parts = date.split("-");
+        const cal = new TZDate(date + "T00:00:00", timezone);
+
+        cal.setFullYear(
+          parseInt(parts[0]),
+          parseInt(parts[1]) - 1,
+          parseInt(parts[2]),
+        );
+
+        recordings.push(cal);
+      });
     }
 
-    const unreviewedDetections: Date[] = [];
-    const unreviewedAlerts: Date[] = [];
+    // Handle reviews if present
+    if (reviewSummary) {
+      Object.entries(reviewSummary).forEach(([date, data]) => {
+        if (date === LAST_24_HOURS_KEY) {
+          return;
+        }
 
-    Object.entries(reviewSummary).forEach(([date, data]) => {
-      if (date == LAST_24_HOURS_KEY) {
-        return;
-      }
+        const parts = date.split("-");
+        const cal = new TZDate(date + "T00:00:00", timezone);
 
-      const parts = date.split("-");
-      const cal = new Date(date);
+        cal.setFullYear(
+          parseInt(parts[0]),
+          parseInt(parts[1]) - 1,
+          parseInt(parts[2]),
+        );
 
-      cal.setFullYear(
-        parseInt(parts[0]),
-        parseInt(parts[1]) - 1,
-        parseInt(parts[2]),
-      );
+        if (data.total_alert > data.reviewed_alert) {
+          alerts.push(cal);
+        } else if (data.total_detection > data.reviewed_detection) {
+          detections.push(cal);
+        }
+      });
+    }
 
-      if (data.total_alert > data.reviewed_alert) {
-        unreviewedAlerts.push(cal);
-      } else if (data.total_detection > data.reviewed_detection) {
-        unreviewedDetections.push(cal);
-      }
-    });
-
-    return {
-      alerts: unreviewedAlerts,
-      detections: unreviewedDetections,
-    };
-  }, [reviewSummary]);
+    return { alerts, detections, recordings };
+  }, [reviewSummary, recordingsSummary, timezone]);
 
   return (
     <Calendar
@@ -74,34 +99,70 @@ export default function ReviewActivityCalendar({
       onSelect={onSelect}
       modifiers={modifiers}
       components={{
-        DayContent: ReviewActivityDay,
+        DayButton: ReviewActivityDay,
       }}
       defaultMonth={selectedDay ?? new Date()}
       weekStartsOn={(weekStartsOn ?? 0) as WeekStartsOnType}
+      timeZone={timezone}
     />
   );
 }
 
-function ReviewActivityDay({ date, activeModifiers }: DayContentProps) {
+function ReviewActivityDay({
+  day,
+  modifiers,
+  ...buttonProps
+}: DayButtonProps & ButtonHTMLAttributes<HTMLButtonElement>) {
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (modifiers.focused) ref.current?.focus();
+  }, [modifiers.focused]);
+
   const dayActivity = useMemo(() => {
-    if (activeModifiers["alerts"]) {
+    if (modifiers["alerts"]) {
       return "alert";
-    } else if (activeModifiers["detections"]) {
+    } else if (modifiers["detections"]) {
       return "detection";
     } else {
       return "none";
     }
-  }, [activeModifiers]);
+  }, [modifiers]);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-0.5">
-      {date.getDate()}
-      {dayActivity != "none" && (
-        <FaCircle
-          className={`size-2 ${dayActivity == "alert" ? "fill-severity_alert" : "fill-severity_detection"}`}
+    <button ref={ref} {...buttonProps}>
+      <div className={cn("flex flex-col items-center justify-center gap-0.5")}>
+        <span
+          className={cn(
+            modifiers["recordings"] ? "text-primary" : "text-primary/40",
+          )}
+        >
+          {day.date.getDate()}
+        </span>
+        <div
+          className={cn(
+            "w-4",
+            modifiers["recordings"]
+              ? "border-b border-primary/60 text-primary"
+              : "text-primary/40",
+            modifiers.selected && "border-white text-white",
+          )}
         />
-      )}
-    </div>
+
+        <div className="mt-0.5 flex h-2 flex-row gap-0.5">
+          {dayActivity != "none" && (
+            <FaCircle
+              size={6}
+              className={cn(
+                dayActivity == "alert"
+                  ? "fill-severity_alert"
+                  : "fill-severity_detection",
+              )}
+            />
+          )}
+        </div>
+      </div>
+    </button>
   );
 }
 

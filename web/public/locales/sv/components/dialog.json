@@ -1,0 +1,48 @@
+{
+  "restart": {
+    "button": "Starta om",
+    "restarting": {
+      "title": "Frigate startar om",
+      "content": "Sidan uppdateras om {{countdown}} seconds.",
+      "button": "Tvinga uppdatering nu"
+    },
+    "title": "Är du säker på att du vill starta om Frigate?"
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Skicka till Frigate+"
+      },
+      "review": {
+        "question": {
+          "ask_a": "Är detta objektet <code>{{label}}</code>?",
+          "ask_an": "Är detta objektet en <code>{{label}}</code>?",
+          "ask_full": "Är detta objektet <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Se i Historik"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Välj från tidslinjen",
+      "lastHour_one": "Sista timma",
+      "lastHour_other": "Sista t {{count}} Timmarna",
+      "start": {
+        "title": "Start Tid",
+        "label": "Välj Start Tid"
+      },
+      "end": {
+        "title": "Slut Tid",
+        "label": "Välj Sluttid"
+      }
+    },
+    "name": {
+      "placeholder": "Ge exporten ett namn"
+    },
+    "select": "Välj",
+    "export": "Eksport"
+  }
+}

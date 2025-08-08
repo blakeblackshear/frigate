@@ -1,0 +1,214 @@
+{
+  "time": {
+    "untilForTime": "Iki {{time}}",
+    "untilForRestart": "Iki kol Frigate persikraus.",
+    "untilRestart": "Iki perkrovimo",
+    "ago": "prieš {{timeAgo}}",
+    "justNow": "Ką tik",
+    "today": "Šiandien",
+    "yesterday": "Vakar",
+    "last7": "Paskutinės 7 dienos",
+    "last14": "Paskutinės 14 dienų",
+    "last30": "Paskutinės 30 dienų",
+    "thisWeek": "Šią Savaitę",
+    "lastWeek": "Praeitą Savaitę",
+    "thisMonth": "Šį Mėnesį",
+    "lastMonth": "Praeitą Mėnesį",
+    "5minutes": "5 minutės",
+    "10minutes": "10 minučių",
+    "30minutes": "30 minučių",
+    "1hour": "1 valandą",
+    "12hours": "12 valandų",
+    "24hours": "24 valandos",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}}m",
+    "year_one": "{{time}} metai",
+    "year_few": "{{time}} metai",
+    "year_other": "{{time}} metų",
+    "mo": "{{time}}mėn",
+    "month_one": "{{time}} mėnuo",
+    "month_few": "{{time}} mėnesiai",
+    "month_other": "{{time}} mėnesių",
+    "d": "{{time}}d",
+    "day_one": "{{time}} diena",
+    "day_few": "{{time}} dienos",
+    "day_other": "{{time}} dienų",
+    "h": "{{time}}v",
+    "hour_one": "{{time}} valanda",
+    "hour_few": "{{time}} valandos",
+    "hour_other": "{{time}} valandų",
+    "m": "{{time}}min",
+    "minute_one": "{{time}} minutė",
+    "minute_few": "{{time}} minutės",
+    "minute_other": "{{time}} minučių",
+    "s": "{{time}}s",
+    "second_one": "{{time}} sekundė",
+    "second_few": "{{time}} sekundės",
+    "second_other": "{{time}} sekundžių",
+    "formattedTimestamp": {
+      "12hour": ""
+    }
+  },
+  "unit": {
+    "speed": {
+      "kph": "kmh"
+    },
+    "length": {
+      "feet": "pėdos",
+      "meters": "metrai"
+    }
+  },
+  "label": {
+    "back": "Eiti atgal"
+  },
+  "button": {
+    "apply": "Pritaikyti",
+    "reset": "Atstatyti",
+    "done": "Baigta",
+    "enabled": "Įjungta",
+    "enable": "Įjungti",
+    "disabled": "Išjungta",
+    "disable": "Išjungti",
+    "save": "Išsaugoti",
+    "saving": "Saugoma…",
+    "cancel": "Atšaukti",
+    "close": "Užverti",
+    "copy": "Kopijuoti",
+    "back": "Atgal",
+    "history": "Istorija",
+    "fullscreen": "Pilnas Ekranas",
+    "exitFullscreen": "Išeiti iš Pilno Ekrano",
+    "pictureInPicture": "Paveikslėlis Paveiksle",
+    "twoWayTalk": "Dvikryptis Kalbėjimas",
+    "cameraAudio": "Kameros Garsas",
+    "on": "",
+    "edit": "Redaguoti",
+    "copyCoordinates": "Kopijuoti koordinates",
+    "delete": "Ištrinti",
+    "yes": "Taip",
+    "no": "Ne",
+    "download": "Atsisiųsti",
+    "info": "",
+    "suspended": "Pristatbdytas",
+    "unsuspended": "Atnaujinti",
+    "play": "Groti",
+    "unselect": "Atžymėti",
+    "export": "Eksportuoti",
+    "deleteNow": "Trinti Dabar",
+    "next": "Kitas"
+  },
+  "menu": {
+    "system": "Sistema",
+    "systemMetrics": "Sistemos duomenys",
+    "configuration": "Konfiguracija",
+    "systemLogs": "Sistemos įrašai",
+    "settings": "Nustatymai",
+    "configurationEditor": "Konfiguracijos Redaktorius",
+    "languages": "Kalbos",
+    "language": {
+      "en": "Anglų",
+      "es": "Ispanų",
+      "zhCN": "Kinų (supaprastinta)",
+      "fr": "Prancūzų",
+      "ar": "Arabų",
+      "pt": "Portugalų",
+      "ru": "Rusų",
+      "de": "Vokiečių",
+      "ja": "Japonų",
+      "tr": "Turkų",
+      "it": "Italų",
+      "nl": "Olandų",
+      "sv": "Švedų",
+      "cs": "Čekų",
+      "nb": "Norvegų",
+      "vi": "Vietnamiečių",
+      "fa": "Persų",
+      "pl": "Lenkų",
+      "uk": "Ukrainos",
+      "el": "Graikų",
+      "ro": "Romūnijos",
+      "hu": "Vengrų",
+      "fi": "Suomių",
+      "da": "Danų",
+      "sk": "Slovėnų",
+      "withSystem": {
+        "label": "Kalbai naudoti sistemos nustatymus"
+      }
+    },
+    "appearance": "Išvaizda",
+    "darkMode": {
+      "label": "Tamsusis Rėžimas",
+      "light": "Šviesus",
+      "dark": "Tamsus",
+      "withSystem": {
+        "label": "Šviesiam ar tamsiam rėžimui naudoti sistemos nustatymus"
+      }
+    },
+    "withSystem": "Sistema",
+    "theme": {
+      "label": "Tema",
+      "blue": "Mėlyna",
+      "green": "Žalia",
+      "nord": "Šiaurietiška",
+      "red": "Raudona",
+      "highcontrast": "Didelio Kontrasto",
+      "default": "Numatyta"
+    },
+    "help": "Pagalba",
+    "documentation": {
+      "title": "Dokumentacija",
+      "label": "Frigate dokumentacija"
+    },
+    "restart": "Perkrauti Frigate",
+    "live": {
+      "title": "Tiesiogiai",
+      "allCameras": "Visos Kameros",
+      "cameras": {
+        "title": "Kameros",
+        "count_one": "{{count}} Kamera",
+        "count_few": "{{count}} Kameros",
+        "count_other": "{{count}} Kamerų"
+      }
+    },
+    "review": "Peržiūros",
+    "explore": "Iškoti",
+    "export": "Eksportuoti",
+    "faceLibrary": "Veidų Biblioteka",
+    "user": {
+      "title": "Vartotojas",
+      "account": "Paskyra",
+      "current": "Esamas vartotojas: {{user}}",
+      "anonymous": "neidentifikuotas",
+      "logout": "atsijungti",
+      "setPassword": "Nustatyti Slaptažodi"
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL nukopijuotas į atmintį.",
+    "save": {
+      "title": "Išsaugoti",
+      "error": {
+        "title": "Nepavyko išsaugoti konfiguracijos pakeitimų: {{errorMessage}}",
+        "noMessage": "Nepavyko išsaugoti konfiguracijos pakeitimų"
+      }
+    }
+  },
+  "role": {
+    "title": "Rolė",
+    "admin": "Adminas",
+    "viewer": "Žiūrėtojas",
+    "desc": "Adminai turi pilną prieigą prie visų Frigate vartotojo sąsajos fukncijų. Žiūrėtojai yra apriboti peržiūrėti kameras, peržiūrų įrašus ir istorinius įrašus."
+  },
+  "pagination": {
+    "label": "puslapiavimas",
+    "previous": {
+      "title": "Ankstesnis",
+      "label": "Eiti į ankstesnį puslapį"
+    },
+    "next": {
+      "title": "Sekantis",
+      "label": "Eiti į sekantį puslapį"
+    }
+  }
+}

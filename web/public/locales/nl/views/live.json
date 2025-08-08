@@ -1,0 +1,158 @@
+{
+  "lowBandwidthMode": "Modus voor lage bandbreedte",
+  "twoWayTalk": {
+    "enable": "Tweerichtingsgesprek inschakelen",
+    "disable": "Tweerichtingsgesprek uitschakelen"
+  },
+  "cameraAudio": {
+    "enable": "Camera geluid inschakelen",
+    "disable": "Camera geluid uitschakelen"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Klik in het frame om de camera te centreren",
+        "enable": "Klikken om te bewegen inschakelen",
+        "disable": "Klikken om te bewegen uitschakelen"
+      },
+      "right": {
+        "label": "Beweeg de PTZ-camera naar rechts"
+      },
+      "down": {
+        "label": "Beweeg de PTZ-camera naar beneden"
+      },
+      "up": {
+        "label": "Beweeg de PTZ-camera naar boven"
+      },
+      "left": {
+        "label": "Beweeg de PTZ-camera naar links"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Zoom de PTZ-camera in"
+      },
+      "out": {
+        "label": "Zoom de PTZ-camera uit"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Klik in het frame om de PTZ-camera te centreren"
+      }
+    },
+    "presets": "PTZ-camerapresets"
+  },
+  "camera": {
+    "enable": "Camera inschakelen",
+    "disable": "Camera uitschakelen"
+  },
+  "muteCameras": {
+    "enable": "Alle camera's dempen",
+    "disable": "Dempen van alle camera's opheffen"
+  },
+  "detect": {
+    "disable": "Detectie uitschakelen",
+    "enable": "Detectie inschakelen"
+  },
+  "snapshots": {
+    "enable": "Momentopnamen inschakelen",
+    "disable": "Schakel snapshots uit"
+  },
+  "audioDetect": {
+    "disable": "Audiodetectie uitschakelen",
+    "enable": "Audiodetectie inschakelen"
+  },
+  "streamStats": {
+    "disable": "Verberg streamstatistieken",
+    "enable": "Streamstatistieken weergeven"
+  },
+  "manualRecording": {
+    "showStats": {
+      "label": "Statistieken weergeven",
+      "desc": "Schakel deze optie in om streamstatistieken als overlay op de camerafeed weer te geven."
+    },
+    "started": "Handmatige opname gestart.",
+    "start": "Handmatige opname starten",
+    "debugView": "Debug weergave",
+    "end": "Handmatige opname stoppen",
+    "ended": "Handmatige opname gestopt.",
+    "failedToEnd": "Het beëindigen van de handmatige opname is mislukt.",
+    "playInBackground": {
+      "label": "Speel op de achtergrond",
+      "desc": "Schakel deze optie in om te blijven streamen wanneer de speler verborgen is."
+    },
+    "recordDisabledTips": "Aangezien opnemen is uitgeschakeld of beperkt in de configuratie van deze camera, zal alleen een momentopname worden opgeslagen.",
+    "title": "Opname op aanvraag",
+    "tips": "Start een handmatige gebeurtenis op basis van de opnamebehoudinstellingen van deze camera.",
+    "failedToStart": "Handmatige opname starten mislukt."
+  },
+  "notifications": "Meldingen",
+  "audio": "Geluid",
+  "documentTitle": "Live - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+  "autotracking": {
+    "enable": "Automatisch volgen inschakelen",
+    "disable": "Automatisch volgen uitschakelen"
+  },
+  "recording": {
+    "disable": "Opname uitschakelen",
+    "enable": "Opname inschakelen"
+  },
+  "suspend": {
+    "forTime": "Onderbreken voor: "
+  },
+  "streamingSettings": "Streaming-instellingen",
+  "stream": {
+    "twoWayTalk": {
+      "tips.documentation": "Lees de documenten ",
+      "tips": "Uw apparaat moet deze functie ondersteunen en WebRTC moet geconfigureerd zijn voor tweerichtingsgesprekken.",
+      "unavailable": "Tweerichtingsgesprek is niet beschikbaar voor deze stream",
+      "available": "Voor deze stream is tweerichtingsgesprek beschikbaar"
+    },
+    "lowBandwidth": {
+      "resetStream": "Stream resetten",
+      "tips": "Liveweergave staat in de lagebandbreedtemodus vanwege buffering of streamfouten."
+    },
+    "title": "Stream",
+    "audio": {
+      "tips": {
+        "documentation": "Lees de documentatie ",
+        "title": "Audio moet via je camera komen en in go2rtc geconfigureerd zijn voor deze stream."
+      },
+      "unavailable": "Audio is niet beschikbaar voor deze stroom",
+      "available": "Audio is beschikbaar voor deze stream"
+    },
+    "playInBackground": {
+      "label": "Afspelen op de achtergrond",
+      "tips": "Schakel deze optie in om te blijven streamen wanneer de speler verborgen is."
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Instellingen",
+    "objectDetection": "Objectdetectie",
+    "recording": "Opname",
+    "audioDetection": "Audiodetectie",
+    "autotracking": "Automatisch volgen",
+    "snapshots": "Momentopnames",
+    "cameraEnabled": "Camera ingeschakeld"
+  },
+  "history": {
+    "label": "Historische beelden weergeven"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Alle",
+      "active_objects": "Actieve objecten",
+      "motion": "Beweging"
+    },
+    "notAllTips": "De bewaarbeleid-configuratie voor {{source}} is ingesteld op <code>modus: {{effectiveRetainMode}}</code>, dus deze opname op aanvraag bewaart alleen segmenten met {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Lay-out bewerken",
+    "exitEdit": "Bewerken verlaten",
+    "group": {
+      "label": "Cameragroep bewerken"
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "documentTitle": "Naživo - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Naživo - Frigate",
+  "lowBandwidthMode": "Režim nízkej šírky pásma",
+  "twoWayTalk": {
+    "enable": "Povoliť obojsmernú komunikáciu",
+    "disable": "Zakázať obojsmernú komunikáciu"
+  },
+  "cameraAudio": {
+    "enable": "Povoliť zvuk kamery",
+    "disable": "Zakázať zvuk kamerám"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Kliknite do rámčeka pre vycentrovanie kamery",
+        "enable": "Povoliť pohyb kliknutím",
+        "disable": "Zakázať pohyb kliknutím"
+      },
+      "left": {
+        "label": "Posuňte PTZ kameru doľava"
+      },
+      "up": {
+        "label": "Posuňte PTZ kameru nahor"
+      },
+      "down": {
+        "label": "Posuňte PTZ kameru nadol"
+      },
+      "right": {
+        "label": "Posuňte PTZ kameru doprava"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Priblíženie PTZ kamery"
+      },
+      "out": {
+        "label": "Oddialenie PTZ kamery"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Kliknite do rámčeka pre vycentrovanie PTZ kamery"
+      }
+    },
+    "presets": "Predvoľby PTZ kamery"
+  },
+  "camera": {
+    "enable": "Povoliť fotoaparát",
+    "disable": "Zakázať kameru"
+  },
+  "muteCameras": {
+    "enable": "Stlmiť všetky kamery",
+    "disable": "Zapnúť zvuk všetkých kamier"
+  },
+  "detect": {
+    "enable": "Povoliť detekciu",
+    "disable": "Zakázať detekciu"
+  },
+  "recording": {
+    "enable": "Povoliť nahrávanie",
+    "disable": "Zakázať nahrávanie"
+  },
+  "snapshots": {
+    "enable": "Povoliť vytváranie snímok",
+    "disable": "Zakázať snímky"
+  },
+  "audioDetect": {
+    "enable": "Povoliť detekciu zvuku",
+    "disable": "Zakázať detekciu zvuku"
+  },
+  "autotracking": {
+    "enable": "Povoliť automatické sledovanie",
+    "disable": "Zakázať automatické sledovanie"
+  }
+}

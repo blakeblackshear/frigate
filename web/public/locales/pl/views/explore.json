@@ -1,0 +1,209 @@
+{
+  "generativeAI": "Generatywna SI",
+  "documentTitle": "Eksploruj - Frigate",
+  "details": {
+    "timestamp": "Znacznik czasu",
+    "item": {
+      "desc": "Szczegóły elementu do przeglądu",
+      "title": "Szczegóły Elementu do Przeglądu",
+      "button": {
+        "share": "Udostępnij ten element",
+        "viewInExplore": "Zobacz w Eksploracji"
+      },
+      "tips": {
+        "hasMissingObjects": "Dostosuj swoją konfigurację, jeśli chcesz, aby Frigate zapisywał śledzone obiekty dla następujących etykiet: <em>{{objects}}</em>",
+        "mismatch_one": "{{count}} niedostępny obiekt został wykryty i uwzględniony w tym elemencie przeglądu. Ten obiekt albo nie kwalifikował się jako alert lub detekcja, albo został już wyczyszczont/usunięty.",
+        "mismatch_few": "{{count}} niedostępne obiekty zostały wykryte i uwzględnione w tym elemencie przeglądu. Te obiekty albo nie kwalifikowały się jako alert lub detekcja, albo zostały już wyczyszczone/usunięte.",
+        "mismatch_many": "{{count}} niedostępnych obiektów zostało wykrytych i uwzględnionych w tym elemencie przeglądu. Te obiekty albo nie kwalifikowały się jako alert lub detekcja, albo zostały już wyczyszczone/usunięte."
+      },
+      "toast": {
+        "success": {
+          "regenerate": "Zażądano nowego opisu od {{provider}}. W zależności od szybkości twojego dostawcy, wygenerowanie nowego opisu może zająć trochę czasu.",
+          "updatedSublabel": "Pomyślnie zaktualizowano podetykietę.",
+          "updatedLPR": "Pomyślnie zaktualizowano tablicę rejestracyjną."
+        },
+        "error": {
+          "regenerate": "Nie udało się wezwać {{provider}} dla nowego opisu: {{errorMessage}}",
+          "updatedSublabelFailed": "Nie udało się zaktualizować podetykiety: {{errorMessage}}",
+          "updatedLPRFailed": "Nie udało się zaktualizować tablicy rejestracyjnej: {{errorMessage}}"
+        }
+      }
+    },
+    "topScore": {
+      "info": "Najwyższy wynik to najwyższa mediana wyniku dla śledzonego obiektu, więc może się różnić od wyniku pokazanego na miniaturze wyników wyszukiwania.",
+      "label": "Najwyższy wynik"
+    },
+    "editSubLabel": {
+      "descNoLabel": "Wprowadź nową podetykietę dla tego śledzonego obiektu",
+      "title": "Edytuj podetykietę",
+      "desc": "Wprowadź nową podetykietę dla tego {{label}}"
+    },
+    "estimatedSpeed": "Szacowana prędkość",
+    "label": "Etykieta",
+    "button": {
+      "regenerate": {
+        "title": "Regeneruj",
+        "label": "Regeneruj opis śledzonego obiektu"
+      },
+      "findSimilar": "Znajdź Podobne"
+    },
+    "objects": "Obiekty",
+    "camera": "Kamera",
+    "zones": "Strefy",
+    "expandRegenerationMenu": "Rozwiń menu regeneracji",
+    "description": {
+      "label": "Opis",
+      "placeholder": "Opis śledzonego obiektu",
+      "aiTips": "Frigate nie poprosi o opis od twojego dostawcy AI, dopóki cykl życia śledzonego obiektu nie dobiegnie końca."
+    },
+    "editLPR": {
+      "title": "Edytuj tablicę rejestracyjną",
+      "desc": "Wprowadź nową wartość tablicy rejestracyjnej dla tego {{label}}",
+      "descNoLabel": "Wprowadź nową wartość tablicy rejestracyjnej dla tego śledzonego obiektu"
+    },
+    "tips": {
+      "descriptionSaved": "Pomyślnie zapisano opis",
+      "saveDescriptionFailed": "Nie udało się zaktualizować opisu: {{errorMessage}}"
+    },
+    "recognizedLicensePlate": "Rozpoznana tablica rejestracyjna",
+    "regenerateFromSnapshot": "Regeneruj ze zrzutu ekranu",
+    "regenerateFromThumbnails": "Regeneruj z miniatur",
+    "snapshotScore": {
+      "label": "Wynik zrzutu"
+    }
+  },
+  "objectLifecycle": {
+    "annotationSettings": {
+      "title": "Ustawienia adnotacji",
+      "showAllZones": {
+        "title": "Pokaż wszystkie strefy",
+        "desc": "Zawsze pokazuj strefy na klatkach, w których obiekty weszły do strefy."
+      },
+      "offset": {
+        "desc": "Te dane pochodzą z kanału detekcji kamery, ale są nakładane na obrazy z kanału nagrywania. Mało prawdopodobne, aby oba strumienie były idealnie zsynchronizowane. W rezultacie ramka ograniczająca i nagranie mogą nie być idealnie dopasowane. Jednak pole <code>annotation_offset</code> może być użyte do regulacji tego.",
+        "documentation": "Przeczytaj dokumentację ",
+        "label": "Przesunięcie adnotacji",
+        "millisecondsToOffset": "Milisekundy do przesunięcia adnotacji detekcji. <em>Domyślnie: 0</em>",
+        "tips": "WSKAZÓWKA: Wyobraź sobie, że istnieje klip zdarzenia z osobą idącą od lewej do prawej. Jeśli na osi czasu zdarzenia ramka ograniczająca jest konsekwentnie na lewo od osoby, wartość powinna być zmniejszona. Podobnie, jeśli osoba idzie od lewej do prawej, a ramka ograniczająca jest konsekwentnie przed osobą, wartość powinna być zwiększona.",
+        "toast": {
+          "success": "Przesunięcie adnotacji dla {{camera}} zostało zapisane w pliku konfiguracyjnym. Zrestartuj Frigate, aby zastosować zmiany."
+        }
+      }
+    },
+    "title": "Cykl życia obiektu",
+    "noImageFound": "Nie znaleziono obrazu dla tego znacznika czasu.",
+    "scrollViewTips": "Przewiń, aby zobaczyć kluczowe momenty cyklu życia tego obiektu.",
+    "autoTrackingTips": "Pozycje ramek ograniczających mogą być niedokładne dla kamer z automatycznym śledzeniem.",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} wykryty",
+      "entered_zone": "{{label}} wszedł w strefę {{zones}}",
+      "active": "{{label}} stał się aktywny",
+      "stationary": "{{label}} stał się nieruchomy",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} wykryty dla {{label}}",
+        "other": "{{label}} rozpoznany jako {{attribute}}"
+      },
+      "gone": "{{label}} zniknął",
+      "heard": "{{label}} usłyszany",
+      "external": "{{label}} wykryty",
+      "header": {
+        "ratio": "Współczynnik",
+        "area": "Obszar",
+        "zones": "Strefy"
+      }
+    },
+    "carousel": {
+      "previous": "Poprzedni slajd",
+      "next": "Następny slajd"
+    },
+    "createObjectMask": "Utwórz maskę obiektu",
+    "adjustAnnotationSettings": "Dostosuj ustawienia adnotacji",
+    "trackedPoint": "Punkt Śledzenia",
+    "count": "{{first}} z {{second}}"
+  },
+  "exploreIsUnavailable": {
+    "title": "Eksploracja jest niedostępna",
+    "embeddingsReindexing": {
+      "context": "Eksploracja będzie dostępna po zakończeniu ponownego indeksowania osadzenia śledzonych obiektów.",
+      "startingUp": "Uruchamianie…",
+      "estimatedTime": "Szacowany pozostały czas:",
+      "finishingShortly": "Zaraz się zakończy",
+      "step": {
+        "thumbnailsEmbedded": "Osadzone miniatury: ",
+        "descriptionsEmbedded": "Osadzone opisy: ",
+        "trackedObjectsProcessed": "Przetworzone śledzone obiekty: "
+      }
+    },
+    "downloadingModels": {
+      "context": "Frigate pobiera niezbędne modele osadzenia do obsługi funkcji wyszukiwania semantycznego. Może to potrwać kilka minut, w zależności od prędkości Twojego połączenia sieciowego.",
+      "setup": {
+        "visionModelFeatureExtractor": "Ekstraktor cech modelu wizyjnego",
+        "textModel": "Model tekstowy",
+        "visionModel": "Model wizyjny",
+        "textTokenizer": "Tokenizer tekstu"
+      },
+      "tips": {
+        "context": "Po pobraniu modeli warto ponownie zindeksować osadzenia śledzonych obiektów.",
+        "documentation": "Przeczytaj dokumentację"
+      },
+      "error": "Wystąpił błąd. Sprawdź logi Frigate."
+    }
+  },
+  "trackedObjectDetails": "Szczegóły śledzonego obiektu",
+  "type": {
+    "details": "szczegóły",
+    "snapshot": "zrzut ekranu",
+    "video": "wideo",
+    "object_lifecycle": "cykl życia obiektu"
+  },
+  "itemMenu": {
+    "downloadSnapshot": {
+      "aria": "Pobierz zrzut ekranu",
+      "label": "Pobierz zrzut ekranu"
+    },
+    "viewObjectLifecycle": {
+      "label": "Wyświetl cykl życia obiektu",
+      "aria": "Pokaż cykl życia obiektu"
+    },
+    "downloadVideo": {
+      "label": "Pobierz wideo",
+      "aria": "Pobierz wideo"
+    },
+    "findSimilar": {
+      "label": "Znajdź podobne",
+      "aria": "Znajdź podobne śledzone obiekty"
+    },
+    "submitToPlus": {
+      "label": "Prześlij do Frigate+",
+      "aria": "Prześlij do Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "Wyświetl w Historii",
+      "aria": "Wyświetl w Historii"
+    },
+    "deleteTrackedObject": {
+      "label": "Usuń ten śledzony obiekt"
+    }
+  },
+  "trackedObjectsCount_one": "{{count}} śledzony obiekt ",
+  "trackedObjectsCount_few": "{{count}} śledzone obiekty ",
+  "trackedObjectsCount_many": "{{count}} śledzonych obiektów ",
+  "noTrackedObjects": "Nie znaleziono śledzonych obiektów",
+  "dialog": {
+    "confirmDelete": {
+      "desc": "Usunięcie tego śledzonego obiektu usuwa zrzut ekranu, wszelkie zapisane osadzenia i wszystkie powiązane wpisy cyklu życia obiektu. Nagrany materiał tego śledzonego obiektu w widoku Historii <em>NIE</em> zostanie usunięty.<br /><br />Czy na pewno chcesz kontynuować?",
+      "title": "Potwierdź usunięcie"
+    }
+  },
+  "fetchingTrackedObjectsFailed": "Błąd pobierania śledzonych obiektów: {{errorMessage}}",
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Śledzony obiekt usunięty pomyślnie.",
+        "error": "Nie udało się usunąć śledzonego obiektu: {{errorMessage}}"
+      }
+    },
+    "tooltip": "Pasuje do {{type}} z pewnością {{confidence}}%"
+  },
+  "exploreMore": "Odkryj więcej obiektów typu {{label}}"
+}

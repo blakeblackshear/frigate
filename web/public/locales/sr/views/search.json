@@ -1,0 +1,10 @@
+{
+  "search": "Pretraga",
+  "savedSearches": "Sačuvane pretrage",
+  "searchFor": "Pretraži {{inputValue}}",
+  "button": {
+    "clear": "Obriši pretragu",
+    "save": "Sačuvaj pretragu",
+    "delete": "Izbrišite sačuvanu pretragu"
+  }
+}

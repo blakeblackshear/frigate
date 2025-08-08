@@ -1,0 +1,85 @@
+{
+  "labels": {
+    "all": {
+      "title": "Alla Etiketter",
+      "short": "Etiketter"
+    },
+    "label": "Etiketter",
+    "count": "{{count}} Etiketter",
+    "count_one": "{{count}} Etikett",
+    "count_other": "{{count}} Etiketter"
+  },
+  "filter": "Filter",
+  "zones": {
+    "label": "Zoner",
+    "all": {
+      "title": "Alla zoner",
+      "short": "Soner"
+    }
+  },
+  "features": {
+    "hasSnapshot": "Har ögonblicksbild",
+    "hasVideoClip": "Har ett video klipp"
+  },
+  "sort": {
+    "dateAsc": "Datum (Stigande)",
+    "label": "Sortera",
+    "scoreAsc": "Objektpoäng (Stigande)",
+    "speedDesc": "Uppskattad Hastighet (Fallande)",
+    "relevance": "Relevans",
+    "dateDesc": "Datum (Fallande)",
+    "scoreDesc": "Objektpoäng (Fallande)",
+    "speedAsc": "Uppskattad Hastighet (Stigande)"
+  },
+  "cameras": {
+    "all": {
+      "short": "Kameror",
+      "title": "Alla Kameror"
+    },
+    "label": "Kamerafilter"
+  },
+  "explore": {
+    "settings": {
+      "title": "Inställningar",
+      "defaultView": {
+        "title": "Standard Vy"
+      },
+      "searchSource": {
+        "options": {
+          "description": "Beskrivning"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Välj datum att filtrera efter"
+      }
+    }
+  },
+  "review": {
+    "showReviewed": "Visa Kontrollerade"
+  },
+  "motion": {
+    "showMotionOnly": "Visa Endast Rörelse"
+  },
+  "score": "Poäng",
+  "dates": {
+    "all": {
+      "short": "Datum",
+      "title": "Alla datum"
+    }
+  },
+  "recognizedLicensePlates": {
+    "noLicensePlatesFound": "Inga registreringsplåtar hittade.",
+    "selectPlatesFromList": "Välj en eller flera registreringsplåtar från listan."
+  },
+  "more": "Flera filter",
+  "reset": {
+    "label": "Nollställ filter"
+  },
+  "subLabels": {
+    "label": "Under kategori",
+    "all": "Alla under kategorier"
+  },
+  "estimatedSpeed": "Estimerad hastighet ({{unit}})"
+}

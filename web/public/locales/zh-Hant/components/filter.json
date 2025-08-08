@@ -1,0 +1,126 @@
+{
+  "filter": "過濾",
+  "labels": {
+    "label": "標籤",
+    "all": {
+      "title": "所有標籤",
+      "short": "標籤"
+    },
+    "count_one": "{{count}} 個標籤",
+    "count_other": "{{count}} 個標籤"
+  },
+  "zones": {
+    "all": {
+      "title": "所有區域",
+      "short": "區域"
+    },
+    "label": "區域"
+  },
+  "dates": {
+    "selectPreset": "選擇預設設定…",
+    "all": {
+      "title": "所有日期",
+      "short": "日期"
+    }
+  },
+  "more": "更多過濾條件",
+  "reset": {
+    "label": "重設過濾條件為預設值"
+  },
+  "timeRange": "時間範圍",
+  "subLabels": {
+    "label": "子標籤",
+    "all": "所有子標籤"
+  },
+  "score": "分數",
+  "estimatedSpeed": "估計速度({{unit}})",
+  "features": {
+    "label": "特徵",
+    "hasSnapshot": "包含截圖",
+    "hasVideoClip": "包含影片片段",
+    "submittedToFrigatePlus": {
+      "label": "已提交至 Frigate+",
+      "tips": "你必須先過濾出包含截圖的追蹤物件。<br /><br />無法提交不包含截圖的追蹤物件至 Frigate+。"
+    }
+  },
+  "sort": {
+    "label": "排序",
+    "dateAsc": "日期（由舊到新）",
+    "dateDesc": "日期（由新到舊）",
+    "scoreAsc": "物件分數（由小到大）",
+    "scoreDesc": "物件分數（由大到小）",
+    "speedAsc": "估計速度（由慢到快）",
+    "speedDesc": "估計速度（由快到慢）",
+    "relevance": "相關性"
+  },
+  "cameras": {
+    "label": "鏡頭過濾",
+    "all": {
+      "title": "所有鏡頭",
+      "short": "鏡頭"
+    }
+  },
+  "review": {
+    "showReviewed": "顯示已審核的內容"
+  },
+  "motion": {
+    "showMotionOnly": "僅顯示有移動的內容"
+  },
+  "explore": {
+    "settings": {
+      "title": "設定",
+      "defaultView": {
+        "title": "預設檢視",
+        "desc": "當未選擇過濾條件時，顯示每個標籤最近追蹤物件的摘要，或顯示未過濾的網格。",
+        "summary": "摘要",
+        "unfilteredGrid": "未過濾的網格"
+      },
+      "gridColumns": {
+        "title": "網格欄位數",
+        "desc": "選擇檢視網格的欄位數量。"
+      },
+      "searchSource": {
+        "label": "搜尋來源",
+        "desc": "選擇搜尋追蹤物件的截圖或是說明。",
+        "options": {
+          "thumbnailImage": "截圖",
+          "description": "說明"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "選擇要過濾的日期"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "過濾日誌等級",
+    "filterBySeverity": "依嚴重程度過濾日誌",
+    "loading": {
+      "title": "讀取中",
+      "desc": "當日誌頁面捲動到底部時，新日誌將自動更新顯示。"
+    },
+    "disableLogStreaming": "停用日誌串流",
+    "allLogs": "所有日誌"
+  },
+  "trackedObjectDelete": {
+    "title": "確認刪除",
+    "desc": "刪除這 {{objectLength}} 個追蹤物件將會刪除截圖、儲存的嵌入資料，以及相關的物件生命週期紀錄。歷史記錄中的錄影檔案<em>不會</em>被刪除。<br /><br />你確定要繼續嗎？<br /><br />按住 <em>Shift</em> 可在未來跳過這個確認內容。",
+    "toast": {
+      "success": "成功刪除追蹤物件。",
+      "error": "刪除追蹤物件失敗：{{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "按區域遮罩過濾"
+  },
+  "recognizedLicensePlates": {
+    "title": "已辨識車牌",
+    "loadFailed": "讀取已辨識車牌失敗。",
+    "loading": "讀取已辨識車牌中…",
+    "placeholder": "輸入以搜尋車牌…",
+    "noLicensePlatesFound": "未找到車牌。",
+    "selectPlatesFromList": "從列表中選擇一個或多個車牌。"
+  }
+}

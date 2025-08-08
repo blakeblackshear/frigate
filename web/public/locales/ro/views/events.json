@@ -1,0 +1,38 @@
+{
+  "alerts": "Alerte",
+  "motion": {
+    "label": "Mișcare",
+    "only": "Doar mișcare"
+  },
+  "allCameras": "Toate Camerele",
+  "empty": {
+    "alert": "Nu sunt alerte de revizuit",
+    "detection": "Nu sunt detecții de revizuit",
+    "motion": "Nu au fost găsite date despre mișcare"
+  },
+  "timeline": "Cronologie",
+  "timeline.aria": "Selectează cronologia",
+  "events": {
+    "aria": "Selectează evenimente",
+    "noFoundForTimePeriod": "Niciun eveniment gasit pentru acest interval de timp.",
+    "label": "Evenimente"
+  },
+  "documentTitle": "Revizuieste - Frigate",
+  "recordings": {
+    "documentTitle": "Inregistrari - frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Ultimele 24 de ore"
+  },
+  "markAsReviewed": "Marchează ca revizuit",
+  "markTheseItemsAsReviewed": "Marchează aceste articole ca revizuite",
+  "newReviewItems": {
+    "label": "Vezi articole noi de revizuit",
+    "button": "Articole Noi de Revizuit"
+  },
+  "camera": "Camera foto",
+  "detections": "Detecții",
+  "detected": "detectat",
+  "selected_one": "{{count}} selectate",
+  "selected_other": "{{count}} selectate"
+}

@@ -1,0 +1,60 @@
+{
+  "documentTitle": {
+    "cameras": "Štatistiky kamier - Frigate",
+    "storage": "Štatistiky úložiska - Frigate",
+    "general": "Všeobecné štatistiky - Frigate",
+    "enrichments": "Štatistiky obohatenia - Frigate",
+    "logs": {
+      "frigate": "Protokoly Frigate - Frigate",
+      "go2rtc": "Protokoly Go2RTC - Frigate",
+      "nginx": "Protokoly Ngnix - Frigate"
+    }
+  },
+  "title": "System",
+  "metrics": "Systémové metriky",
+  "logs": {
+    "download": {
+      "label": "Stiahnúť záznamy"
+    },
+    "copy": {
+      "label": "Kopírovať do schránky",
+      "success": "Protokoly boli skopírované do schránky",
+      "error": "Nepodarilo sa skopírovať protokoly do schránky"
+    },
+    "type": {
+      "label": "Typ",
+      "timestamp": "Časová pečiatka",
+      "tag": "Šťitok (Tag)",
+      "message": "Správa"
+    },
+    "tips": "Záznamy sa streamujú zo servera",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Chyba pri načítaní protokolov: {{errorMessage}}",
+        "whileStreamingLogs": "Chyba pri streamovaní protokolov: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Hlavný",
+    "detector": {
+      "title": "Detektory",
+      "inferenceSpeed": "Detekčná rýchlosť",
+      "temperature": "Detekčná teplota",
+      "cpuUsage": "Detektor využitia CPU",
+      "memoryUsage": "Detektor využitia pamäte"
+    },
+    "hardwareInfo": {
+      "title": "Informácie o hardvéri",
+      "gpuUsage": "Využitie GPU",
+      "gpuMemory": "Pamäť GPU",
+      "gpuEncoder": "GPU kódovač",
+      "gpuDecoder": "GPU dekodér",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Výstup Vainfo"
+        }
+      }
+    }
+  }
+}

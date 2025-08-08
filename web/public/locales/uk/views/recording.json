@@ -1,0 +1,12 @@
+{
+  "export": "Експорт",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Вибраний діапазон часу не є коректним",
+      "endTimeMustAfterStartTime": "Час закінчення повинен бути пізніше часу початку"
+    }
+  },
+  "calendar": "Календар",
+  "filter": "Фiльтр",
+  "filters": "Фiльтри"
+}

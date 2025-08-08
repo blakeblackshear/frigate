@@ -1,0 +1,65 @@
+{
+  "description": {
+    "addFace": "Opastus: Uuden kokoelman lisääminen Kasvokirjastoon.",
+    "invalidName": "Virheellinen nimi. Nimi voi sisältää vain merkkejä, numeroita, välejä, heittomerkkejä, alaviivoja ja väliviivoja.",
+    "placeholder": "Anna nimi kokoelmalle"
+  },
+  "uploadFaceImage": {
+    "desc": "Lähetä kuva kasvojen tunnistukseen ja lisää se sivulle {{pageToggle}}",
+    "title": "Lähetä kasvokuva"
+  },
+  "details": {
+    "unknown": "Tuntematon",
+    "faceDesc": "Lisätiedot kohteesta, josta tämä kasvokuva tallennettiin",
+    "person": "Henkilö",
+    "timestamp": "Aikaleima",
+    "subLabelScore": "Alinimikkeen pisteet",
+    "face": "Kasvojen yksityiskohdat",
+    "scoreInfo": "Alatunnisteen pistemäärä on kaikkien tunnistettujen kasvojen varmuustasojen painotettu keskiarvo, joten se voi poiketa tilannekuvassa näkyvästä pistemäärästä."
+  },
+  "documentTitle": "Kasvokirjasto - Frigate",
+  "deleteFaceAttempts": {
+    "desc_one": "Oletko varma, että haluat poistaa {{count}} kasvon? Tätä toimintoa ei voi perua.",
+    "desc_other": "Oletko varma, että haluat poistaa {{count}} kasvoa? Tätä toimintoa ei voi perua.",
+    "title": "Poista kasvot"
+  },
+  "toast": {
+    "success": {
+      "deletedFace_one": "{{count}} kasvo poistettu onnistuneesti.",
+      "deletedFace_other": "{{count}} kasvoa poistettu onnistuneesti."
+    }
+  },
+  "selectItem": "Valitse {{item}}",
+  "train": {
+    "empty": "Ei viimeaikaisia kasvojentunnistusyrityksiä",
+    "title": "Koulutus",
+    "aria": "Valitse kouluta"
+  },
+  "collections": "Kokoelmat",
+  "steps": {
+    "faceName": "Anna nimi kasvoille",
+    "uploadFace": "Lähetä kasvokuva",
+    "nextSteps": "Seuraavat vaiheet",
+    "description": {
+      "uploadFace": "Lataa kuva henkilöstä {{name}}, jossa hänen kasvonsa näkyvät suoraan edestä päin. Kuvaa ei tarvitse rajata pelkkiin kasvoihin."
+    }
+  },
+  "createFaceLibrary": {
+    "title": "Luo kokoelma",
+    "desc": "Luo uusi kokoelma",
+    "new": "Luo uusi kasvo",
+    "nextSteps": "Hyvän perustan luomiseksi huomioitavaa:<li>Käytä koulutus-välilehteä valitaksesi opetukseen kuvia kustakin tunnistetusta henkilöstä</li><li>Panosta mahdollisimman suoraan otettuihin kuviin; vältä kouluttamista kulmassa kuvatuilla kuvilla.</li></ul>"
+  },
+  "selectFace": "Valitse kasvo",
+  "deleteFaceLibrary": {
+    "title": "Poista nimi",
+    "desc": "Haluatko varmasti poistaa kokoelman {{name}}? Tämä poistaa pysyvästi kaikki liitetyt kasvot."
+  },
+  "renameFace": {
+    "title": "Uudelleennimeä kasvot",
+    "desc": "Anna uusi nimi tälle {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Poista kasvot"
+  }
+}

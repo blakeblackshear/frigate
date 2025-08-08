@@ -1,0 +1,114 @@
+{
+  "restart": {
+    "title": "Jste si jistí, že chcete restartovat Frigate?",
+    "button": "Restartovat",
+    "restarting": {
+      "title": "Frigate restartuje",
+      "content": "Tato stránka bude obnovena za {{countdown}} sekund.",
+      "button": "Vynutit opětovné načtení"
+    }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "question": {
+          "label": "Potvrďte tento štítek pro Frigate Plus",
+          "ask_a": "Je tento objekt <code>{{label}}</code>?",
+          "ask_an": "Tento objekt je <code>{{label}}</code>?",
+          "ask_full": "Je tento objekt <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Odesláno"
+        }
+      },
+      "submitToPlus": {
+        "label": "Odeslat do Frigate+",
+        "desc": "Objekty na místech, kterým se chcete vyhnout, nejsou falešné poplachy. Označení takových objektů jako falešných pozitiv může model zmást."
+      }
+    },
+    "video": {
+      "viewInHistory": "Zobrazit historii"
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "toast": {
+        "success": "Videozáznam spojený s vybranými položkami přehledu byl úspěšně smazán.",
+        "error": "Chyba mazání: {{error}}"
+      },
+      "title": "Potvrdit odstranění",
+      "desc": {
+        "selected": "Opravdu chcete smazat všechna nahraná videa spojená s touto položkou přehledu?<br /><br />Chcete-li tento dialog v budoucnu obejít, podržte klávesu <em>Shift</em>."
+      }
+    },
+    "button": {
+      "markAsReviewed": "Označit jako zkontrolované",
+      "deleteNow": "Smazat hned",
+      "export": "Exportovat"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Vybrat z Časové osy",
+      "custom": "Vlastní",
+      "lastHour_one": "Minulou hodinu",
+      "lastHour_few": "Minulé {{count}} hodiny",
+      "lastHour_other": "Minulých {{count}} hodin",
+      "start": {
+        "title": "Čas začátku",
+        "label": "Vybrat čas začátku"
+      },
+      "end": {
+        "title": "Čas konce",
+        "label": "Vybrat čas konce"
+      }
+    },
+    "select": "Vybrat",
+    "export": "Exportovat",
+    "selectOrExport": "Vybrat pro Export",
+    "toast": {
+      "success": "Export úspěšně spuštěn. Soubor najdete v adresáři /exports.",
+      "error": {
+        "failed": "Chyba spuštění exportu: {{error}}",
+        "endTimeMustAfterStartTime": "Čas konce musí být po čase začátku",
+        "noVaildTimeSelected": "Není vybráno žádné platné časové období"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Uložit export",
+      "previewExport": "Prohlížet export"
+    },
+    "name": {
+      "placeholder": "Jméno exportu"
+    }
+  },
+  "streaming": {
+    "label": "Stream",
+    "restreaming": {
+      "disabled": "Restreaming pro tuto kameru není povolen.",
+      "desc": {
+        "title": "Nastavte go2rtc pro rozšiřující živé zobrazení a pro zvuk pro tuto kameru.",
+        "readTheDocumentation": "Přečtěte si dokumentaci"
+      }
+    },
+    "showStats": {
+      "label": "Ukázat statistiky streamu",
+      "desc": "Povolte tuto možnost pro zobrazení překryvných statistik v obraze streamu."
+    },
+    "debugView": "Náhled ladění"
+  },
+  "search": {
+    "saveSearch": {
+      "desc": "Zadejte název tohoto uloženého vyhledávání.",
+      "placeholder": "Zadejte název pro vaše vyhledávání",
+      "success": "Hledání {{searchName}} bylo uloženo.",
+      "button": {
+        "save": {
+          "label": "Uložit toto hledání"
+        }
+      },
+      "label": "Uložit vyhledávání",
+      "overwrite": "{{searchName}} už existuje. Uložení přepíše existující hodnotu."
+    }
+  }
+}

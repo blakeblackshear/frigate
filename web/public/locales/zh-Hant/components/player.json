@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "此時間段內沒有錄影",
+  "noPreviewFound": "找不到預覽",
+  "noPreviewFoundFor": "找不到 {{cameraName}} 的預覽",
+  "submitFrigatePlus": {
+    "title": "提交此畫面至 Frigate+？",
+    "submit": "提交"
+  },
+  "streamOffline": {
+    "desc": "{{cameraName}} 的 <code>detect</code> 串流未接收到任何畫面，請檢查錯誤日誌",
+    "title": "串流離線"
+  },
+  "cameraDisabled": "鏡頭已關閉",
+  "stats": {
+    "streamType": {
+      "title": "串流類型：",
+      "short": "類型"
+    },
+    "bandwidth": {
+      "title": "頻寬：",
+      "short": "頻寬"
+    },
+    "latency": {
+      "title": "延遲：",
+      "value": "{{seconds}} 秒",
+      "short": {
+        "title": "延遲",
+        "value": "{{seconds}} 秒"
+      }
+    },
+    "totalFrames": "總幀數：",
+    "droppedFrames": {
+      "title": "掉幀數：",
+      "short": {
+        "title": "掉幀",
+        "value": "{{droppedFrames}} 幀"
+      }
+    },
+    "decodedFrames": "已解碼幀數：",
+    "droppedFrameRate": "掉幀率："
+  },
+  "livePlayerRequiredIOSVersion": "此串流類型需要 IOS 17.1 或以上版本。",
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "成功提交畫面至 Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "提交畫面至 Frigate+ 失敗"
+    }
+  }
+}

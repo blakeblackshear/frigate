@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import { LivePlayerError } from "@/types/live";
+import { LivePlayerError, PlayerStatsType } from "@/types/live";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type WebRtcPlayerProps = {
@@ -7,9 +7,12 @@ type WebRtcPlayerProps = {
   camera: string;
   playbackEnabled?: boolean;
   audioEnabled?: boolean;
+  volume?: number;
   microphoneEnabled?: boolean;
   iOSCompatFullScreen?: boolean; // ios doesn't support fullscreen divs so we must support the video element
   pip?: boolean;
+  getStats?: boolean;
+  setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
   onError?: (error: LivePlayerError) => void;
 };
@@ -19,9 +22,12 @@ export default function WebRtcPlayer({
   camera,
   playbackEnabled = true,
   audioEnabled = false,
+  volume,
   microphoneEnabled = false,
   iOSCompatFullScreen = false,
   pip = false,
+  getStats = false,
+  setStats,
   onPlaying,
   onError,
 }: WebRtcPlayerProps) {
@@ -194,6 +200,16 @@ export default function WebRtcPlayer({
     videoRef.current.requestPictureInPicture();
   }, [pip, videoRef]);
 
+  // control volume
+
+  useEffect(() => {
+    if (!videoRef.current || volume == undefined) {
+      return;
+    }
+
+    videoRef.current.volume = volume;
+  }, [volume, videoRef]);
+
   useEffect(() => {
     videoLoadTimeoutRef.current = setTimeout(() => {
       onError?.("stalled");
@@ -214,6 +230,75 @@ export default function WebRtcPlayer({
     }
     onPlaying?.();
   };
+
+  // stats
+
+  useEffect(() => {
+    if (!pcRef.current || !getStats) return;
+
+    let lastBytesReceived = 0;
+    let lastTimestamp = 0;
+
+    const interval = setInterval(async () => {
+      if (pcRef.current && videoRef.current && !videoRef.current.paused) {
+        const report = await pcRef.current.getStats();
+        let bytesReceived = 0;
+        let timestamp = 0;
+        let roundTripTime = 0;
+        let framesReceived = 0;
+        let framesDropped = 0;
+        let framesDecoded = 0;
+
+        report.forEach((stat) => {
+          if (stat.type === "inbound-rtp" && stat.kind === "video") {
+            bytesReceived = stat.bytesReceived;
+            timestamp = stat.timestamp;
+            framesReceived = stat.framesReceived;
+            framesDropped = stat.framesDropped;
+            framesDecoded = stat.framesDecoded;
+          }
+          if (stat.type === "candidate-pair" && stat.state === "succeeded") {
+            roundTripTime = stat.currentRoundTripTime;
+          }
+        });
+
+        const timeDiff = (timestamp - lastTimestamp) / 1000; // in seconds
+        const bitrate =
+          timeDiff > 0
+            ? (bytesReceived - lastBytesReceived) / timeDiff / 1000
+            : 0; // in kbps
+
+        setStats?.({
+          streamType: "WebRTC",
+          bandwidth: Math.round(bitrate),
+          latency: roundTripTime,
+          totalFrames: framesReceived,
+          droppedFrames: framesDropped,
+          decodedFrames: framesDecoded,
+          droppedFrameRate:
+            framesReceived > 0 ? (framesDropped / framesReceived) * 100 : 0,
+        });
+
+        lastBytesReceived = bytesReceived;
+        lastTimestamp = timestamp;
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      setStats?.({
+        streamType: "-",
+        bandwidth: 0,
+        latency: undefined,
+        totalFrames: 0,
+        droppedFrames: undefined,
+        decodedFrames: 0,
+        droppedFrameRate: 0,
+      });
+    };
+    // we need to listen on the value of the ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pcRef, pcRef.current, getStats]);
 
   return (
     <video

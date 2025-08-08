@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Na żywo - Frigate",
+  "documentTitle.withCamera": "{{camera}}- Na żywo - Frigate",
+  "lowBandwidthMode": "Tryb niskiej przepustowości",
+  "twoWayTalk": {
+    "enable": "Włącz komunikację dwukierunkową",
+    "disable": "Wyłącz komunikację dwukierunkową"
+  },
+  "cameraAudio": {
+    "enable": "Włącz dźwięk kamery",
+    "disable": "Wyłącz dźwięk kamery"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Kliknij w ramce, aby wyśrodkować kamerę",
+        "enable": "Włącz kliknięcie do przesuwania",
+        "disable": "Wyłącz kliknięcie do przesuwania"
+      },
+      "left": {
+        "label": "Przesuń kamerę PTZ w lewo"
+      },
+      "right": {
+        "label": "Przesuń kamerę PTZ w prawo"
+      },
+      "down": {
+        "label": "Przesuń kamerę PTZ w dół"
+      },
+      "up": {
+        "label": "Przesuń kamerę PTZ w górę"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Przybliż kamerę PTZ"
+      },
+      "out": {
+        "label": "Oddal kamerę PTZ"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Kliknij w ramce, aby wyśrodkować kamerę PTZ"
+      }
+    },
+    "presets": "Presety kamery PTZ"
+  },
+  "recording": {
+    "enable": "Włącz nagrywanie",
+    "disable": "Wyłącz nagrywanie"
+  },
+  "snapshots": {
+    "enable": "Włącz zrzuty ekranu",
+    "disable": "Wyłącz zrzuty ekranu"
+  },
+  "streamStats": {
+    "disable": "Ukryj statystyki strumienia",
+    "enable": "Pokaż statystyki strumienia"
+  },
+  "manualRecording": {
+    "title": "Nagrywanie na żądanie",
+    "tips": "Rozpocznij ręczne zdarzenie w oparciu o ustawienia przechowywania nagrań tej kamery.",
+    "playInBackground": {
+      "label": "Odtwarzaj w tle",
+      "desc": "Włącz tę opcję, aby kontynuować transmisję, gdy odtwarzacz jest ukryty."
+    },
+    "showStats": {
+      "label": "Pokaż statystyki",
+      "desc": "Włącz tę opcję, aby pokazać statystyki strumienia jako nakładkę na podgląd kamery."
+    },
+    "debugView": "Widok debugowania",
+    "start": "Rozpocznij nagrywanie na żądanie",
+    "started": "Rozpoczęto ręczne nagrywanie na żądanie.",
+    "failedToStart": "Nie udało się rozpocząć ręcznego nagrywania na żądanie.",
+    "recordDisabledTips": "Ponieważ nagrywanie jest wyłączone lub ograniczone w konfiguracji tej kamery, zostanie zapisany tylko zrzut ekranu.",
+    "end": "Zakończ nagrywanie na żądanie",
+    "ended": "Zakończono ręczne nagrywanie na żądanie.",
+    "failedToEnd": "Nie udało się zakończyć ręcznego nagrywania na żądanie."
+  },
+  "notifications": "Powiadomienia",
+  "audio": "Dźwięk",
+  "suspend": {
+    "forTime": "Zawieś na: "
+  },
+  "stream": {
+    "title": "Strumień",
+    "audio": {
+      "tips": {
+        "title": "Dźwięk musi być wysyłany z kamery i skonfigurowany w go2rtc dla tego strumienia.",
+        "documentation": "Przeczytaj dokumentację "
+      },
+      "available": "Dźwięk jest dostępny dla tego strumienia",
+      "unavailable": "Dźwięk nie jest dostępny dla tego strumienia"
+    },
+    "twoWayTalk": {
+      "tips.documentation": "Przeczytaj dokumentację ",
+      "tips": "Twoje urządzenie musi obsługiwać tę funkcję, a WebRTC musi być skonfigurowany dla komunikacji dwukierunkowej.",
+      "unavailable": "Komunikacja dwukierunkowa jest niedostępna dla tego strumienia",
+      "available": "Komunikacja dwukierunkowa jest dostępna dla tego strumienia"
+    },
+    "lowBandwidth": {
+      "resetStream": "Zresetuj strumień",
+      "tips": "Podgląd na żywo jest w trybie niskiej przepustowości z powodu buforowania lub błędów strumienia."
+    },
+    "playInBackground": {
+      "tips": "Włącz tę opcję, aby kontynuować transmisję, gdy odtwarzacz jest ukryty.",
+      "label": "Odtwarzaj w tle"
+    }
+  },
+  "cameraSettings": {
+    "title": "Ustawienia {{camera}}",
+    "cameraEnabled": "Kamera włączona",
+    "objectDetection": "Wykrywanie obiektów",
+    "recording": "Nagrywanie",
+    "snapshots": "Zrzuty ekranu",
+    "audioDetection": "Wykrywanie dźwięku",
+    "autotracking": "Automatyczne śledzenie"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Wszystkie",
+      "active_objects": "Aktywne obiekty",
+      "motion": "Ruch"
+    },
+    "notAllTips": "Twoja konfiguracja przechowywania nagrań {{source}} jest ustawiona na <code>tryb: {{effectiveRetainMode}}</code>, więc to nagrywanie na żądanie zachowa tylko segmenty z {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Edytuj układ",
+    "group": {
+      "label": "Edytuj grupę kamer"
+    },
+    "exitEdit": "Zakończ edycję"
+  },
+  "muteCameras": {
+    "enable": "Wycisz wszystkie kamery",
+    "disable": "Wyłącz wyciszenie wszystkich kamer"
+  },
+  "camera": {
+    "disable": "Wyłącz kamerę",
+    "enable": "Włącz kamerę"
+  },
+  "autotracking": {
+    "enable": "Włącz automatyczne śledzenie",
+    "disable": "Wyłącz automatyczne śledzenie"
+  },
+  "detect": {
+    "disable": "Wyłącz wykrywanie",
+    "enable": "Włącz wykrywanie"
+  },
+  "audioDetect": {
+    "enable": "Włącz wykrywanie dźwięku",
+    "disable": "Wyłącz wykrywanie dźwięku"
+  },
+  "streamingSettings": "Ustawienia transmisji",
+  "history": {
+    "label": "Pokaż nagrania archiwalne"
+  }
+}

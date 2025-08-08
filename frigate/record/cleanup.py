@@ -12,7 +12,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
-from frigate.models import Previews, Recordings, ReviewSegment
+from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
 from frigate.record.util import remove_empty_directories, sync_recordings
 from frigate.util.builtin import clear_and_unlink, get_tomorrow_at_time
 
@@ -69,7 +69,7 @@ class RecordingCleanup(threading.Thread):
             now - datetime.timedelta(days=config.record.detections.retain.days)
         ).timestamp()
         expired_reviews: ReviewSegment = (
-            ReviewSegment.select(ReviewSegment.id)
+            ReviewSegment.select(ReviewSegment.id, ReviewSegment.thumb_path)
             .where(ReviewSegment.camera == config.name)
             .where(
                 (
@@ -84,11 +84,19 @@ class RecordingCleanup(threading.Thread):
             .namedtuples()
         )
 
+        thumbs_to_delete = list(map(lambda x: x[1], expired_reviews))
+        for thumb_path in thumbs_to_delete:
+            Path(thumb_path).unlink(missing_ok=True)
+
         max_deletes = 100000
         deleted_reviews_list = list(map(lambda x: x[0], expired_reviews))
         for i in range(0, len(deleted_reviews_list), max_deletes):
             ReviewSegment.delete().where(
                 ReviewSegment.id << deleted_reviews_list[i : i + max_deletes]
+            ).execute()
+            UserReviewStatus.delete().where(
+                UserReviewStatus.review_segment
+                << deleted_reviews_list[i : i + max_deletes]
             ).execute()
 
     def expire_existing_camera_recordings(

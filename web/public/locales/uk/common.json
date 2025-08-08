@@ -1,0 +1,266 @@
+{
+  "time": {
+    "year_one": "{{time}}рік",
+    "year_few": "{{time}}роки",
+    "year_many": "{{time}}років",
+    "month_one": "{{time}}місяць",
+    "month_few": "{{time}}місяця",
+    "month_many": "{{time}} місяців",
+    "justNow": "Зараз",
+    "today": "Сьогодні",
+    "last7": "Останні 7 днів",
+    "last14": "Останній 14 днів",
+    "last30": "Останній 30 днів",
+    "thisWeek": "Цей тиждень",
+    "lastWeek": "Останній тиждень",
+    "thisMonth": "У цьому місяці",
+    "lastMonth": "Останній місяць",
+    "5minutes": "5 хвилин",
+    "10minutes": "10 хвилин",
+    "30minutes": "30 хвилин",
+    "1hour": "1 година",
+    "12hours": "12 годин",
+    "24hours": "24 години",
+    "pm": "вечора",
+    "am": "ранку",
+    "yr": "{{time}} рік",
+    "hour_one": "{{time}} година",
+    "hour_few": "{{time}} години",
+    "hour_many": "{{time}} годин",
+    "minute_one": "{{time}} хвилина",
+    "minute_few": "{{time}} хвилини",
+    "minute_many": "{{time}} хвилин",
+    "day_one": "{{time}} день",
+    "day_few": "{{time}} дні",
+    "day_many": "{{time}} днів",
+    "second_one": "{{time}}секунда",
+    "second_few": "{{time}}секунди",
+    "second_many": "{{time}}секунд",
+    "ago": "{{timeAgo}} тому",
+    "yesterday": "Учора",
+    "mo": "{{time}}місяць",
+    "d": "{{time}}д",
+    "h": "{{time}}г",
+    "m": "{{time}}хв",
+    "s": "{{time}}сек",
+    "untilForTime": "До {{time}}",
+    "untilForRestart": "Доки Frigate не перезавантажиться.",
+    "untilRestart": "До перезавантаження",
+    "formattedTimestamp": {
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd.MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampMonthDayYear": {
+      "24hour": "MMM d, yyyy",
+      "12hour": "MMM d, yyyy"
+    }
+  },
+  "button": {
+    "exitFullscreen": "Вийти з повноекранного режиму",
+    "on": "ВКЛ",
+    "yes": "Так",
+    "copy": "Копіювати",
+    "close": "Закрити",
+    "saving": "Збереження…",
+    "history": "Історія",
+    "cancel": "Відмінити",
+    "fullscreen": "Повноекранний режим",
+    "back": "Назад",
+    "pictureInPicture": "Картинка в картинці",
+    "cameraAudio": "Аудіо камери",
+    "copyCoordinates": "Копіювати координати",
+    "edit": "Редагувати",
+    "no": "Ні",
+    "twoWayTalk": "Двосторонній зв'язок",
+    "off": "ВИКЛ",
+    "delete": "Видалити",
+    "apply": "Застосувати",
+    "reset": "Скинути",
+    "done": "Готово",
+    "enabled": "Увімкнено",
+    "enable": "Увімкнути",
+    "disabled": "Вимкнено",
+    "disable": "Вимкнути",
+    "save": "Зберегти",
+    "download": "Завантажити",
+    "info": "Інфо",
+    "suspended": "Призупинено",
+    "play": "Грати",
+    "unselect": "Прибрати виділення",
+    "export": "Експортувати",
+    "deleteNow": "Видалити негайно",
+    "next": "Наступне",
+    "unsuspended": "Відновити дію"
+  },
+  "menu": {
+    "language": {
+      "da": "Датська",
+      "uk": "Українська",
+      "ro": "Румунська",
+      "es": "Іспанська",
+      "zhCN": "Спрощена китайська",
+      "hi": "Хінді",
+      "fr": "Французька",
+      "ar": "Арабська",
+      "pt": "Португальська",
+      "de": "Німецька",
+      "ja": "Японська",
+      "tr": "Турецька",
+      "ru": "російська",
+      "it": "Італійська",
+      "nl": "Голландська",
+      "sv": "Швецька",
+      "cs": "Чешська",
+      "nb": "Норвежский букмол",
+      "ko": "Корейська",
+      "vi": "В'єтнамська",
+      "fa": "Персидська",
+      "pl": "Польська",
+      "he": "Иврит",
+      "el": "Грецька",
+      "hu": "Венгерська",
+      "fi": "Фінська",
+      "sk": "Словацька",
+      "withSystem": {
+        "label": "Використовувати системну мову"
+      },
+      "en": "Англійська",
+      "yue": "粵語 (Кантонська)",
+      "th": "ไทย (Тайська)",
+      "ca": "Català (Каталанська)"
+    },
+    "system": "Система",
+    "systemMetrics": "Системна метріка",
+    "configuration": "Конфігурація",
+    "systemLogs": "Системні логи",
+    "settings": "Налаштування",
+    "configurationEditor": "Редактор конфігурації",
+    "languages": "Мови",
+    "theme": {
+      "nord": "Північ",
+      "red": "Червоний",
+      "contrast": "Висока контрастність",
+      "default": "Типовий",
+      "label": "Тема",
+      "blue": "Синій",
+      "green": "Зелений",
+      "highcontrast": "Висока контрастність"
+    },
+    "help": "Допомогти",
+    "documentation": {
+      "title": "Документація",
+      "label": "Frigate документація"
+    },
+    "restart": "Перезапустити Frigate",
+    "live": {
+      "title": "Живи",
+      "allCameras": "Всi камери",
+      "cameras": {
+        "title": "Камери",
+        "count_one": "{{count}} Камера",
+        "count_few": "{{count}} Камери",
+        "count_many": "{{count}} Камер"
+      }
+    },
+    "review": "Перегляд",
+    "explore": "Вивчити",
+    "export": "Експорт",
+    "uiPlayground": "UI iгровий майданчик",
+    "faceLibrary": "Бібліотека обличчя",
+    "user": {
+      "title": "Користувач",
+      "account": "Акаунт",
+      "current": "Поточний користувач: {{user}}",
+      "anonymous": "анонімний",
+      "logout": "Вихід",
+      "setPassword": "Встановити пароль"
+    },
+    "darkMode": {
+      "label": "Темний режим",
+      "light": "Світло",
+      "dark": "Темний",
+      "withSystem": {
+        "label": "Використовуйте налаштування системи для світлого або темного режиму"
+      }
+    },
+    "appearance": "Поява",
+    "withSystem": "Система"
+  },
+  "unit": {
+    "speed": {
+      "mph": "миль/г",
+      "kph": "км/г"
+    },
+    "length": {
+      "feet": "ноги",
+      "meters": "метрів"
+    }
+  },
+  "label": {
+    "back": "Повернутись"
+  },
+  "toast": {
+    "save": {
+      "title": "Зберегти",
+      "error": {
+        "title": "Не вдалося зберегти зміни конфігурації: {{errorMessage}}",
+        "noMessage": "Не вдалося зберегти зміни налаштування"
+      }
+    },
+    "copyUrlToClipboard": "Скопійовано URL до буфера обміну."
+  },
+  "role": {
+    "title": "Роль",
+    "desc": "Адміністратори мають повний доступ до всіх функцій інтерфейсу Fregate. Глядачі обмежуються переглядом камер, оглядовими елементами та історичними кадрами в інтерфейсі користувача.",
+    "admin": "Адміністратор",
+    "viewer": "Глядач"
+  },
+  "pagination": {
+    "previous": {
+      "title": "Попередній",
+      "label": "Повернутись до попередньої сторінки"
+    },
+    "next": {
+      "title": "Наступний",
+      "label": "Перехід до наступної сторінки"
+    },
+    "more": "Більше сторінок",
+    "label": "Пагінація"
+  },
+  "accessDenied": {
+    "documentTitle": "Доступ заборонений - Frigate",
+    "title": "Доступ заборонений",
+    "desc": "У вас немає дозволу на перегляд цієї сторінки."
+  },
+  "notFound": {
+    "documentTitle": "Не знайдено - Frigate",
+    "desc": "Сторінка не знайдена",
+    "title": "404"
+  },
+  "selectItem": "Вибрати {{item}}"
+}

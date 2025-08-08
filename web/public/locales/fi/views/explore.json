@@ -1,0 +1,95 @@
+{
+  "documentTitle": "Etsi",
+  "details": {
+    "timestamp": "Aikaleima",
+    "item": {
+      "title": "Tarkastele kohteen tietoja",
+      "desc": "Tarkastele kohteen tietoja",
+      "button": {
+        "share": "Jaa tämä tarkasteltu kohde"
+      }
+    }
+  },
+  "exploreIsUnavailable": {
+    "title": "Selaus on tavoittamattomissa",
+    "embeddingsReindexing": {
+      "startingUp": "Käynnistytään…",
+      "estimatedTime": "Arvioitu aika jäljellä:",
+      "finishingShortly": "Valmista pian",
+      "step": {
+        "trackedObjectsProcessed": "Käsitellyt seuratut objektit: ",
+        "thumbnailsEmbedded": "Kuvakkeet sisällytetty: ",
+        "descriptionsEmbedded": "Kuvaukset sisällytetty: "
+      },
+      "context": "Selausta voidaan käyttää sen jälkeen kun seurattavien kohteiden uudelleenindeksöinti on valmistunut."
+    },
+    "downloadingModels": {
+      "context": "Frigate lataa semanttista hakua varten vaadittavat upotusmallit. Tämä saattaa viedä useamman minuutin, riippuen yhteytesi nopeudesta.",
+      "setup": {
+        "visionModel": "Vision-malli",
+        "textModel": "Tekstimalli",
+        "textTokenizer": "Tekstin osioija"
+      },
+      "tips": {
+        "documentation": "Lue dokumentaatio",
+        "context": "Saatat haluta uudelleenindeksoida seurattavien kohteiden upotukset, kun mallit on ladattu."
+      },
+      "error": "Tapahtui virhe. Tarkista Frigaten lokit."
+    }
+  },
+  "exploreMore": "Selaa lisää {{label}}-tyyppisiä kohteita",
+  "generativeAI": "Generatiivinen AI",
+  "objectLifecycle": {
+    "annotationSettings": {
+      "offset": {
+        "documentation": "Lue dokumentaatio "
+      },
+      "showAllZones": {
+        "title": "Näytä kaikki vyöhykkeet"
+      }
+    },
+    "lifecycleItemDesc": {
+      "header": {
+        "zones": "Vyöhykkeet",
+        "ratio": "Suhde",
+        "area": "Alue"
+      },
+      "active": "{{label}} aktivoitui",
+      "stationary": "{{label}} pysähtyi",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} havaittiin nimikkeelle {{label}}",
+        "other": "{{label}} tunnistettu {{attribute}}:na"
+      },
+      "gone": "{{label}} poistui",
+      "entered_zone": "{{label}} ilmestyi vyöhykkeelle {{zones}}",
+      "visible": "{{label}} havaittu",
+      "heard": "{{label}} kuului",
+      "external": "{{label}} havaittiin"
+    },
+    "trackedPoint": "Seurattu piste",
+    "carousel": {
+      "previous": "Edellinen",
+      "next": "Seuraava"
+    },
+    "count": "{{first}} / {{second}}",
+    "title": "Kohteen elinkaari",
+    "noImageFound": "Tältä aikaleimalta ei löytynyt kuvia.",
+    "createObjectMask": "Luo kohdemaski",
+    "scrollViewTips": "Vieritä katsoaksesi merkittäviä hetkiä kohteen elinkaarelta.",
+    "autoTrackingTips": "Kohteen rajojen sijainti on epätarkka automaattisesti seuraaville kameroille.",
+    "adjustAnnotationSettings": "Säädä merkintäasetuksia"
+  },
+  "trackedObjectDetails": "Seurattavien kohteiden tiedot",
+  "type": {
+    "details": "tiedot",
+    "snapshot": "kuvankaappaus",
+    "video": "video",
+    "object_lifecycle": "kohteen elinkaari"
+  },
+  "itemMenu": {
+    "downloadSnapshot": {
+      "label": "Lataa kuvankaappaus",
+      "aria": "Lataa kuvankaappaus"
+    }
+  }
+}

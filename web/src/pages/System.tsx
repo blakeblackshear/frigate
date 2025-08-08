@@ -1,24 +1,46 @@
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { isDesktop, isMobile } from "react-device-detect";
 import GeneralMetrics from "@/views/system/GeneralMetrics";
 import StorageMetrics from "@/views/system/StorageMetrics";
-import { LuActivity, LuHardDrive } from "react-icons/lu";
+import { LuActivity, LuHardDrive, LuSearchCode } from "react-icons/lu";
 import { FaVideo } from "react-icons/fa";
 import Logo from "@/components/Logo";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import CameraMetrics from "@/views/system/CameraMetrics";
 import { useHashState } from "@/hooks/use-overlay-state";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { Toaster } from "@/components/ui/sonner";
+import { FrigateConfig } from "@/types/frigateConfig";
+import EnrichmentMetrics from "@/views/system/EnrichmentMetrics";
+import { useTranslation } from "react-i18next";
 
-const metrics = ["general", "storage", "cameras"] as const;
-type SystemMetric = (typeof metrics)[number];
+const allMetrics = ["general", "enrichments", "storage", "cameras"] as const;
+type SystemMetric = (typeof allMetrics)[number];
 
 function System() {
+  const { t } = useTranslation(["views/system"]);
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
+  const metrics = useMemo(() => {
+    const metrics = [...allMetrics];
+
+    if (
+      !config?.semantic_search.enabled &&
+      !config?.lpr.enabled &&
+      !config?.face_recognition.enabled
+    ) {
+      const index = metrics.indexOf("enrichments");
+      metrics.splice(index, 1);
+    }
+
+    return metrics;
+  }, [config]);
+
   // stats page
 
   const [page, setPage] = useHashState<SystemMetric>();
@@ -31,9 +53,9 @@ function System() {
 
   useEffect(() => {
     if (pageToggle) {
-      document.title = `${capitalizeFirstLetter(pageToggle)} Stats - Frigate`;
+      document.title = t("documentTitle." + pageToggle);
     }
-  }, [pageToggle]);
+  }, [pageToggle, t]);
 
   // stats collection
 
@@ -67,9 +89,12 @@ function System() {
               aria-label={`Select ${item}`}
             >
               {item == "general" && <LuActivity className="size-4" />}
+              {item == "enrichments" && <LuSearchCode className="size-4" />}
               {item == "storage" && <LuHardDrive className="size-4" />}
               {item == "cameras" && <FaVideo className="size-4" />}
-              {isDesktop && <div className="capitalize">{item}</div>}
+              {isDesktop && (
+                <div className="smart-capitalize">{t(item + ".title")}</div>
+              )}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
@@ -77,13 +102,14 @@ function System() {
         <div className="flex h-full items-center">
           {lastUpdated && (
             <div className="h-full content-center text-sm text-muted-foreground">
-              Last refreshed: <TimeAgo time={lastUpdated * 1000} dense />
+              {t("lastRefreshed")}
+              <TimeAgo time={lastUpdated * 1000} dense />
             </div>
           )}
         </div>
       </div>
       <div className="mt-2 flex items-end gap-2">
-        <div className="h-full content-center font-medium">System</div>
+        <div className="h-full content-center font-medium">{t("title")}</div>
         {statsSnapshot && (
           <div className="h-full content-center text-sm text-muted-foreground">
             {statsSnapshot.service.version}
@@ -92,6 +118,12 @@ function System() {
       </div>
       {page == "general" && (
         <GeneralMetrics
+          lastUpdated={lastUpdated}
+          setLastUpdated={setLastUpdated}
+        />
+      )}
+      {page == "enrichments" && (
+        <EnrichmentMetrics
           lastUpdated={lastUpdated}
           setLastUpdated={setLastUpdated}
         />

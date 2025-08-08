@@ -1,0 +1,207 @@
+{
+  "time": {
+    "untilForTime": "Até {{time}}",
+    "untilForRestart": "Até o Frigate reiniciar.",
+    "untilRestart": "Até reiniciar",
+    "ago": "{{timeAgo}} antes",
+    "justNow": "Agora mesmo",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "last7": "Últimos 7 dias",
+    "last14": "Últimos 14 dias",
+    "last30": "Últimos 30 dias",
+    "thisWeek": "Essa semana",
+    "lastWeek": "Semana passada",
+    "thisMonth": "Este mês",
+    "lastMonth": "Mês passado",
+    "5minutes": "5 minutos",
+    "10minutes": "10 minutos",
+    "30minutes": "30 minutos",
+    "1hour": "1 hora",
+    "12hours": "12 horas",
+    "24hours": "24 horas",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}}ano",
+    "year_one": "{{time}} ano",
+    "year_many": "{{time}} anos",
+    "year_other": "",
+    "mo": "{{time}}mês",
+    "month_one": "{{time}} mês",
+    "month_many": "{{time}} meses",
+    "month_other": "",
+    "d": "{{time}} dia",
+    "day_one": "{{time}} dia",
+    "day_many": "{{time}} dias",
+    "day_other": "",
+    "h": "{{time}}h",
+    "hour_one": "{{time}} hora",
+    "hour_many": "{{time}} horas",
+    "hour_other": "",
+    "m": "{{time}}m",
+    "minute_one": "{{time}} minuto",
+    "minute_many": "{{time}} minutos",
+    "minute_other": "",
+    "s": "{{time}}s",
+    "second_one": "{{time}} segundo",
+    "second_many": "{{time}} segundos",
+    "second_other": "",
+    "formattedTimestamp": {
+      "12hour": "d MMM,h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd/MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-hh-mm-ss",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    }
+  },
+  "selectItem": "Selecione {{item}}",
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "pés",
+      "meters": "metros"
+    }
+  },
+  "label": {
+    "back": "Voltar"
+  },
+  "button": {
+    "apply": "Aplicar",
+    "reset": "Resetar",
+    "done": "Concluído",
+    "enabled": "Habilitado",
+    "enable": "Habilitar",
+    "disabled": "Desativado",
+    "disable": "Desativar",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "copy": "Copiar",
+    "back": "Voltar",
+    "history": "Histórico",
+    "fullscreen": "Tela Inteira",
+    "exitFullscreen": "Sair da Tela Inteira",
+    "pictureInPicture": "Miniatura Flutuante",
+    "twoWayTalk": "Áudio Bidirecional",
+    "cameraAudio": "Áudio da Câmera",
+    "on": "LIGADO",
+    "off": "DESLIGADO",
+    "edit": "Editar",
+    "copyCoordinates": "Copiar coordenadas",
+    "delete": "Deletar",
+    "yes": "Sim",
+    "no": "Não",
+    "download": "Baixar",
+    "info": "Informação",
+    "suspended": "Suspenso",
+    "unsuspended": "Não Suspenso",
+    "play": "Reproduzir",
+    "unselect": "Deselecionar",
+    "export": "Exportar",
+    "deleteNow": "Deletar Agora",
+    "next": "Próximo"
+  },
+  "menu": {
+    "system": "Sistema",
+    "systemMetrics": "Métricas de sistema",
+    "configuration": "Configuração",
+    "language": {
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (Francês)",
+      "en": "English (Inglês)",
+      "es": "Español (Espanhol)",
+      "zhCN": "简体中文 (Chinês Simplificado)",
+      "ar": "العربية (Arábico)",
+      "pt": "Português (Português)",
+      "ru": "Русский (Russo)",
+      "de": "Deustch (Alemão)",
+      "ja": "日本語 (Japonês)",
+      "tr": "Türkçe (Turco)",
+      "it": "Italiano (Italiano)",
+      "nl": "Nederlands (Holandês)",
+      "sv": "Svenska (Sueco)",
+      "cs": "Čeština (Checo)",
+      "nb": "Norsk Bokmål (Bokmål Norueguês)",
+      "ko": "한국어 (Coreano)",
+      "vi": "Tiếng Việt (Vietnamita)",
+      "fa": "فارسی (Persa)",
+      "pl": "Polski (Polonês)",
+      "uk": "Українська (Ucraniano)",
+      "he": "עברית (Hebraico)",
+      "el": "Ελληνικά (Grego)",
+      "ro": "Română (Romeno)",
+      "hu": "Magyar (Húngaro)",
+      "fi": "Suomi (Finlandês)",
+      "da": "Dansk (Dinamarquês)",
+      "sk": "Slovenčina (Eslovaco)",
+      "yue": "粵語 (Cantonês)",
+      "th": "ไทย (Tailandês)",
+      "ca": "Català (Catalão)",
+      "withSystem": {
+        "label": "Usar as configurações de sistema para o idioma"
+      }
+    },
+    "systemLogs": "Logs de sistema",
+    "settings": "Configurações",
+    "configurationEditor": "Editor de Configuração",
+    "languages": "Idiomas",
+    "appearance": "Aparência",
+    "darkMode": {
+      "label": "Modo Escuro",
+      "light": "Claro",
+      "dark": "Escuro",
+      "withSystem": {
+        "label": "Use as configurações do sistema para modo claro ou escuro"
+      }
+    },
+    "withSystem": "Sistema",
+    "theme": {
+      "label": "Tema",
+      "blue": "Azul",
+      "green": "Verde",
+      "nord": "Nord",
+      "red": "Vermelho",
+      "highcontrast": "Alto Contraste",
+      "default": "Padrão"
+    },
+    "help": "Ajuda",
+    "documentation": {
+      "title": "Documentação",
+      "label": "Documentação do Frigate"
+    },
+    "restart": "Reiniciar o Frigate",
+    "live": {
+      "title": "Ao Vivo"
+    }
+  }
+}

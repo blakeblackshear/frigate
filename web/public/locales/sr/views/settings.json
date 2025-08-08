@@ -1,0 +1,10 @@
+{
+  "documentTitle": {
+    "default": "Podešavanja - Frigate",
+    "authentication": "Podešavanja autentifikacije - Fregate",
+    "camera": "Podešavanje kamera - Frigate",
+    "enrichments": "Podešavanja obogaćivanja - Frigate",
+    "masksAndZones": "Uređivač maski i zona - Frigate",
+    "motionTuner": "Tjuner pokreta - Frigate"
+  }
+}

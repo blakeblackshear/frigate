@@ -1,12 +1,16 @@
+import os
 import re
 
+INSTALL_DIR = "/opt/frigate"
 CONFIG_DIR = "/config"
 DEFAULT_DB_PATH = f"{CONFIG_DIR}/frigate.db"
 MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
 BASE_DIR = "/media/frigate"
 CLIPS_DIR = f"{BASE_DIR}/clips"
-RECORD_DIR = f"{BASE_DIR}/recordings"
 EXPORT_DIR = f"{BASE_DIR}/exports"
+FACE_DIR = f"{CLIPS_DIR}/faces"
+THUMB_DIR = f"{CLIPS_DIR}/thumbs"
+RECORD_DIR = f"{BASE_DIR}/recordings"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
 FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
@@ -22,6 +26,7 @@ DEFAULT_ATTRIBUTE_LABEL_MAP = {
     "car": [
         "amazon",
         "an_post",
+        "canada_post",
         "dhl",
         "dpd",
         "fedex",
@@ -31,9 +36,11 @@ DEFAULT_ATTRIBUTE_LABEL_MAP = {
         "postnl",
         "postnord",
         "purolator",
+        "royal_mail",
         "ups",
         "usps",
     ],
+    "motorcycle": ["license_plate"],
 }
 LABEL_CONSOLIDATION_MAP = {
     "car": 0.8,
@@ -59,11 +66,14 @@ MAX_WAL_SIZE = 10  # MB
 
 # Ffmpeg constants
 
-DEFAULT_FFMPEG_VERSION = "7.0"
-INCLUDED_FFMPEG_VERSIONS = ["7.0", "5.0"]
+DEFAULT_FFMPEG_VERSION = os.environ.get("DEFAULT_FFMPEG_VERSION", "")
+INCLUDED_FFMPEG_VERSIONS = os.environ.get("INCLUDED_FFMPEG_VERSIONS", "").split(":")
+LIBAVFORMAT_VERSION_MAJOR = int(os.environ.get("LIBAVFORMAT_VERSION_MAJOR", "59"))
 FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
 FFMPEG_HWACCEL_VULKAN = "preset-vulkan"
+FFMPEG_HWACCEL_RKMPP = "preset-rkmpp"
+FFMPEG_HVC1_ARGS = ["-tag:v", "hvc1"]
 
 # Regex constants
 
@@ -102,6 +112,7 @@ UPDATE_CAMERA_ACTIVITY = "update_camera_activity"
 UPDATE_EVENT_DESCRIPTION = "update_event_description"
 UPDATE_MODEL_STATE = "update_model_state"
 UPDATE_EMBEDDINGS_REINDEX_PROGRESS = "handle_embeddings_reindex_progress"
+NOTIFICATION_TEST = "notification_test"
 
 # Stats Values
 
@@ -121,3 +132,7 @@ AUTOTRACKING_ZOOM_EDGE_THRESHOLD = 0.05
 
 JWT_SECRET_ENV_VAR = "FRIGATE_JWT_SECRET"
 PASSWORD_HASH_ALGORITHM = "pbkdf2_sha256"
+
+# Queues
+
+FAST_QUEUE_TIMEOUT = 0.00001  # seconds

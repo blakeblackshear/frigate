@@ -1,0 +1,8 @@
+{
+  "time": {
+    "untilForTime": "حتى {{time}}",
+    "untilForRestart": "حتى يعاد تشغيل فرايجيت.",
+    "untilRestart": "حتى إعادة التشغيل",
+    "ago": "منذ {{timeAgo}}"
+  }
+}

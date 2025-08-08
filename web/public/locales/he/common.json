@@ -1,0 +1,265 @@
+{
+  "time": {
+    "justNow": "כעת",
+    "untilForRestart": "עד לאתחול של Frigate.",
+    "untilRestart": "עד לאתחול",
+    "ago": "לפני {{timeAgo}}",
+    "today": "היום",
+    "untilForTime": "עד:{{time}}",
+    "last30": "30 ימים אחרונים",
+    "last14": "14 ימים אחרונים",
+    "year_one": "{{time}} שנה",
+    "year_two": "{{time}} שנים",
+    "year_other": "{{time}} שנים",
+    "last7": "7 ימים אחרונים",
+    "lastMonth": "חודש שעבר",
+    "10minutes": "10 דקות",
+    "yesterday": "אתמול",
+    "thisWeek": "השבוע",
+    "lastWeek": "שבוע שעבר",
+    "1hour": "שעה",
+    "12hours": "12 שעות",
+    "24hours": "24 שעות",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}}שנה",
+    "mo": "{{time}}חודש",
+    "d": "{{time}}יום",
+    "month_one": "{{time}} חודש",
+    "month_two": "{{time}} חודשים",
+    "month_other": "{{time}} חודשים",
+    "h": "{{time}}שעה",
+    "day_one": "{{time}} יום",
+    "day_two": "{{time}} ימים",
+    "day_other": "{{time}} ימים",
+    "hour_one": "{{time}} שעה",
+    "hour_two": "{{time}} שעות",
+    "hour_other": "{{time}} שעות",
+    "m": "{{time}}דקות",
+    "minute_one": "{{time}} דקה",
+    "minute_two": "{{time}} דקות",
+    "minute_other": "{{time}} דקות",
+    "s": "{{time}}שניה",
+    "formattedTimestamp": {
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "second_one": "{{time}} שניה",
+    "second_two": "{{time}} שניות",
+    "second_other": "{{time}} שניות",
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "24hour": "HH:mm:ss",
+      "12hour": "h:mm:ss aaa"
+    },
+    "5minutes": "5 דקות",
+    "formattedTimestampMonthDayYear": {
+      "24hour": "MMM d, yyyy",
+      "12hour": "MMM d, yyyy"
+    },
+    "30minutes": "30 דקות",
+    "thisMonth": "החודש"
+  },
+  "unit": {
+    "speed": {
+      "kph": "קמ\"ש",
+      "mph": "מייל לשעה"
+    },
+    "length": {
+      "feet": "רגל",
+      "meters": "מטרים"
+    }
+  },
+  "label": {
+    "back": "אחורה"
+  },
+  "button": {
+    "apply": "החל",
+    "reset": "איפוס",
+    "done": "בוצע",
+    "enabled": "מאופשר",
+    "enable": "אפשר",
+    "disabled": "מבוטל",
+    "disable": "בטל",
+    "save": "שמירה",
+    "saving": "שומר…",
+    "back": "חזרה",
+    "close": "סגירה",
+    "cancel": "ביטול",
+    "copy": "העתקה",
+    "twoWayTalk": "דיבור דו כיווני",
+    "exitFullscreen": "יציאה ממסך מלא",
+    "pictureInPicture": "תמונה בתוך תמונה",
+    "cameraAudio": "קול ממצלמה",
+    "off": "כבוי",
+    "edit": "עריכה",
+    "copyCoordinates": "העתקת קואורדינטות",
+    "delete": "מחיקה",
+    "yes": "כן",
+    "no": "לא",
+    "suspended": "מושהה",
+    "unsuspended": "ביטול השהייה",
+    "play": "ניגון",
+    "unselect": "בטל בחירה",
+    "export": "ייצוא",
+    "deleteNow": "מחיקה כעת",
+    "fullscreen": "מסך מלא",
+    "history": "היסטוריה",
+    "on": "פעיל",
+    "download": "הורדה",
+    "info": "מידע",
+    "next": "הבא"
+  },
+  "menu": {
+    "system": "מערכת",
+    "systemMetrics": "מדדי מערכת",
+    "configuration": "תצורת מערכת",
+    "systemLogs": "לוגים מערכת",
+    "settings": "הגדרות",
+    "configurationEditor": "עריכת תצורה",
+    "languages": "שפות",
+    "language": {
+      "en": "English (English)",
+      "es": "ספרדית",
+      "fr": "צרפתית",
+      "ar": "ערבית",
+      "pt": "פורטוגזית",
+      "it": "איטלקית",
+      "nl": "הולנדית",
+      "sv": "שוודית",
+      "cs": "צ'כית",
+      "nb": "נורווגית",
+      "ko": "קוריאנית",
+      "vi": "ויטנאמית",
+      "fa": "פרסית",
+      "pl": "פולנית",
+      "uk": "אוקראינית",
+      "he": "עברית",
+      "el": "יוונית",
+      "ro": "רומנית",
+      "hu": "הונגרית",
+      "fi": "פינית",
+      "da": "דנית",
+      "withSystem": {
+        "label": "השתמש בהגדרות המערכת עבור השפה"
+      },
+      "sk": "סלובקית",
+      "th": "תאילנדית",
+      "zhCN": "סינית פשוטה",
+      "tr": "טורקית",
+      "hi": "הודית",
+      "ru": "רוסית",
+      "ja": "יפנית",
+      "de": "גרמנית",
+      "yue": "קנטונזית",
+      "ca": "קטלה (קטלאנית)"
+    },
+    "appearance": "מראה.",
+    "darkMode": {
+      "label": "מצב כהה",
+      "light": "בהיר",
+      "dark": "כהה",
+      "withSystem": {
+        "label": "השתמש בהגדרות המערכת עבור מצב בהיר או כהה"
+      }
+    },
+    "withSystem": "מערכת",
+    "theme": {
+      "label": "ערכת נושא",
+      "blue": "כחול",
+      "green": "ירוק",
+      "nord": "נורד",
+      "red": "אדום",
+      "highcontrast": "ניגודיות גבוהה",
+      "default": "ברירת מחדל"
+    },
+    "review": "סקירה",
+    "explore": "עיון",
+    "help": "עזרה",
+    "documentation": {
+      "title": "תיעוד",
+      "label": "תיעוד Frigate"
+    },
+    "restart": "הפעלה מחדש",
+    "live": {
+      "title": "שידור חי",
+      "cameras": {
+        "title": "מצלמות",
+        "count_one": "{{count}} מצלמה",
+        "count_two": "{{count}} מצלמות",
+        "count_other": "{{count}} מצלמות"
+      },
+      "allCameras": "כל המצלמות"
+    },
+    "export": "ייצוא",
+    "uiPlayground": "ממשק משתמש",
+    "faceLibrary": "ספריית זיהוי פנים",
+    "user": {
+      "account": "חשבון",
+      "anonymous": "אנונימי",
+      "logout": "ניתוק",
+      "current": "משתמש מחובר: {{user}}",
+      "setPassword": "קביעת סיסמה",
+      "title": "משתמש"
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "כתובת האתר המועתקת.",
+    "save": {
+      "title": "שמירה",
+      "error": {
+        "noMessage": "שמירת שינויי התצורה נכשלה",
+        "title": "נכשל בניסיון לשמור את ההגדרות: {{errorMessage}}"
+      }
+    }
+  },
+  "role": {
+    "title": "הרשאה",
+    "admin": "מנהל",
+    "viewer": "צופה",
+    "desc": "למנהלי מערכת יש גישה מלאה לכל התכונות בממשק המשתמש של Frigate. הצופים מוגבלים לצפייה במצלמות, סקירת פריטים וצילומים היסטוריים בממשק המשתמש."
+  },
+  "pagination": {
+    "next": {
+      "title": "הבא",
+      "label": "עבור לדף הבא"
+    },
+    "label": "דפדוף",
+    "previous": {
+      "title": "הקודם",
+      "label": "עבור לדף הקודם"
+    },
+    "more": "דפים נוספים"
+  },
+  "accessDenied": {
+    "title": "הגישה נדחתה",
+    "desc": "אין לך הרשאה לצפות בדף הזה.",
+    "documentTitle": "גישה נדחתה - Frigate"
+  },
+  "notFound": {
+    "documentTitle": "לא נמצא - Frigate",
+    "title": "404",
+    "desc": "דף לא נמצא"
+  },
+  "selectItem": "בחירה:{{item}}"
+}

@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Parsisiųsti Video",
+      "toast": {
+        "success": "Jūsų peržiūros elemento parsisiuntimas pradėtas."
+      }
+    }
+  }
+}

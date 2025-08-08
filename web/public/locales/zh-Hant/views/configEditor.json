@@ -1,0 +1,16 @@
+{
+  "documentTitle": "設定編輯器 - Frigate",
+  "configEditor": "設定編輯器",
+  "copyConfig": "複製設定",
+  "saveAndRestart": "保存並重新啟動",
+  "toast": {
+    "error": {
+      "savingError": "保存設定時出錯"
+    },
+    "success": {
+      "copyToClipboard": "已複製設定製剪貼簿。"
+    }
+  },
+  "saveOnly": "僅保存",
+  "confirm": "是否不保存就離開？"
+}

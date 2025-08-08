@@ -1,0 +1,17 @@
+{
+  "group": {
+    "label": "Grupa kamera",
+    "add": "Dodajte grupu kamera",
+    "edit": "Uredite grupu kamera",
+    "delete": {
+      "label": "Izbrišite grupu kamera",
+      "confirm": {
+        "title": "Potvrdi Brisanje",
+        "desc": "Da li ste sigurni da želite da obrišete grupu kamera <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Ime"
+    }
+  }
+}

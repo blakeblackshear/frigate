@@ -1,0 +1,112 @@
+{
+  "restart": {
+    "title": "你確定要重新啟動 Frigate 嗎？",
+    "button": "重新啟動",
+    "restarting": {
+      "title": "Frigate 正在重新啟動",
+      "content": "此頁面將在 {{countdown}} 秒後重新載入。",
+      "button": "立即重新載入"
+    }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "question": {
+          "label": "確認此 Frigate Plus 標籤",
+          "ask_a": "此物件是 <code>{{label}}</code> 嗎？",
+          "ask_an": "此物件是 <code>{{label}}</code> 嗎？",
+          "ask_full": "此物件是 <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) 嗎？"
+        },
+        "state": {
+          "submitted": "已提交"
+        }
+      },
+      "submitToPlus": {
+        "label": "提交到 Frigate+",
+        "desc": "在你欲遮蓋範圍內的物件並不是誤判。將他們標示為誤判並提交會使模型混淆。"
+      }
+    },
+    "video": {
+      "viewInHistory": "在歷史記錄中查看"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "從時間線選擇",
+      "lastHour_other": "過去 {{count}} 個小時",
+      "custom": "自定義",
+      "start": {
+        "title": "開始時間",
+        "label": "選擇開始時間"
+      },
+      "end": {
+        "title": "結束時間",
+        "label": "選擇結束時間"
+      }
+    },
+    "name": {
+      "placeholder": "替匯出資料命名"
+    },
+    "select": "選擇",
+    "export": "匯出",
+    "selectOrExport": "選擇或匯出",
+    "toast": {
+      "success": "成功開始匯出。請至 /exports 資料夾查看匯出資料。",
+      "error": {
+        "failed": "匯出失敗：{{error}}",
+        "endTimeMustAfterStartTime": "結束時間必須要在開始時間之後",
+        "noVaildTimeSelected": "沒有選取有效的時間範圍"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "保存匯出資料",
+      "previewExport": "預覽匯出資料"
+    }
+  },
+  "streaming": {
+    "label": "串流",
+    "restreaming": {
+      "disabled": "此鏡頭並未啟用串流重導向。",
+      "desc": {
+        "title": "設定 go2rtc 以啟用更多此鏡頭的預覽選項及音訊。",
+        "readTheDocumentation": "閱讀文件"
+      }
+    },
+    "showStats": {
+      "label": "顯示串流統計資料",
+      "desc": "啟用此選項以在鏡頭畫面上顯示串流統計資料。"
+    },
+    "debugView": "除錯檢視"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "保存搜尋",
+      "desc": "替此保存的搜尋命名。",
+      "placeholder": "請輸入搜尋的名稱",
+      "overwrite": "{{searchName}} 已存在。保存將會覆蓋現有資料。",
+      "success": "搜尋 {{searchName}} 已保存。",
+      "button": {
+        "save": {
+          "label": "保存此次搜尋"
+        }
+      }
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "確認刪除",
+      "desc": {
+        "selected": "你確定要刪除所有與此查核項目有關的錄影檔案嗎？<br /><br />按住<em>Shift</em>以在未來跳過此確認步驟。"
+      },
+      "toast": {
+        "success": "已成功刪除與選擇的審核物件有關的影片片段。",
+        "error": "刪除失敗：{{error}}"
+      }
+    },
+    "button": {
+      "export": "匯出",
+      "markAsReviewed": "標記為已審核",
+      "deleteNow": "立即刪除"
+    }
+  }
+}

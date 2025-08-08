@@ -1,0 +1,100 @@
+{
+  "selectItem": "{{item}} seçin",
+  "description": {
+    "placeholder": "Bu koleksiyona bir isim verin",
+    "addFace": "Yüz Kütüphanesi’ne yeni bir koleksiyon ekleme adımlarını takip edin.",
+    "invalidName": "Geçersiz isim. İsimlerde yalnızca harf, sayı, boşluk, kesme işareti, tire veya alt çizgi kullanılabilir."
+  },
+  "details": {
+    "person": "İnsan",
+    "faceDesc": "Yüz ve ilişkili nesneye ait detaylar",
+    "confidence": "Kesinlik",
+    "timestamp": "Zaman Damgası",
+    "face": "Yüz Detayları",
+    "scoreInfo": "Alt etiket skoru, tanınan tüm yüzlerin güvenilirlik değerlerinin ağırlıklı ortalamasından elde edilir, dolayısıyla fotoğraf üzerinde gösterilen skordan farklı olabilir.",
+    "subLabelScore": "Alt Etiket Puanı",
+    "unknown": "Bilinmeyen"
+  },
+  "documentTitle": "Yüz Kütüphanesi - Frigate",
+  "uploadFaceImage": {
+    "title": "Yüz Resmi Yükle",
+    "desc": "Yüzleri taramak ve {{pageToggle}} için dahil etmek üzere bir resim yükleyin"
+  },
+  "createFaceLibrary": {
+    "desc": "Yeni bir yüz koleksiyonu oluşturun",
+    "new": "Yeni Yüz Oluştur",
+    "title": "Koleksiyon Oluştur",
+    "nextSteps": "Sağlam bir temel oluşturmak için:<li>Her tespit edilen kişi için 'Eğit' sekmesinden resimler seçip eğitin.</li><li>En iyi sonuçlar için doğrudan karşıdan çekilmiş yüz resimlerine odaklanın; açılı yüz resimlerinden kaçının.</li></ul>"
+  },
+  "train": {
+    "title": "Eğit",
+    "aria": "Eğitimi seç",
+    "empty": "Yakın zamanda yüz tanıma denemesi olmadı"
+  },
+  "deleteFaceLibrary": {
+    "title": "İsmi Sil",
+    "desc": "{{name}} koleksiyonunu silmek istediğinizden emin misiniz? Bu işlem, ilişkili tüm yüzleri kalıcı olarak silecektir."
+  },
+  "button": {
+    "deleteFaceAttempts": "Yüzleri Sil",
+    "addFace": "Yüz Ekle",
+    "reprocessFace": "Yüzü Yeniden İşle",
+    "uploadImage": "Resim Yükle",
+    "renameFace": "Yüzü Yeniden Adlandır",
+    "deleteFace": "Yüzü Sil"
+  },
+  "imageEntry": {
+    "dropActive": "Resmi buraya bırakın…",
+    "maxSize": "Maksimum boyut: {{size}} MB",
+    "validation": {
+      "selectImage": "Lütfen bir resim dosyası seçin."
+    },
+    "dropInstructions": "Bir resmi buraya sürükleyip bırakın ya da tıklayarak seçin"
+  },
+  "trainFaceAs": "Yüzü şu olarak eğit:",
+  "toast": {
+    "success": {
+      "deletedFace_one": "{{count}} yüz başarıyla silindi.",
+      "deletedFace_other": "{{count}} yüz başarıyla silindi.",
+      "deletedName_one": "{{count}} yüz başarıyla silindi.",
+      "deletedName_other": "{{count}} yüz başarıyla silindi.",
+      "addFaceLibrary": "{{name}} başarıyla Yüz Kütüphanesi’ne eklendi!",
+      "trainedFace": "Yüz başarıyla eğitildi.",
+      "uploadedImage": "Resim başarıyla yüklendi.",
+      "updatedFaceScore": "Yüz skoru başarıyla güncellendi.",
+      "renamedFace": "Yüz başarıyla {{name}} olarak adlandırıldı"
+    },
+    "error": {
+      "uploadingImageFailed": "Resim yüklenemedi: {{errorMessage}}",
+      "addFaceLibraryFailed": "Yüz ismi ayarlanamadı: {{errorMessage}}",
+      "updateFaceScoreFailed": "Yüz skoru güncellenemedi: {{errorMessage}}",
+      "trainFailed": "Eğitme işlemi başarısız oldu: {{errorMessage}}",
+      "deleteFaceFailed": "Silme işlemi başarısız: {{errorMessage}}",
+      "deleteNameFailed": "İsim silinemedi: {{errorMessage}}",
+      "renameFaceFailed": "Yüz yeniden adlandırılamadı: {{errorMessage}}"
+    }
+  },
+  "readTheDocs": "Dokümantasyonu oku",
+  "selectFace": "Yüz Seçin",
+  "trainFace": "Yüzü Eğit",
+  "steps": {
+    "faceName": "Yüze İsim Verin",
+    "uploadFace": "Yüz Resmi Yükle",
+    "nextSteps": "Sonraki Adımlar",
+    "description": {
+      "uploadFace": "{{name}}'ın yüzünü direkt karşıdan, ön açıdan gösteren bir fotoğraf yükleyin. Fotoğrafı yalnızca yüzü kalacak şekilde kırpmanıza gerek YOKTUR."
+    }
+  },
+  "renameFace": {
+    "title": "Yüzü Yeniden Adlandır",
+    "desc": "{{name}} için yeni bir isim girin"
+  },
+  "collections": "Koleksiyonlar",
+  "deleteFaceAttempts": {
+    "title": "Yüzleri Sil",
+    "desc_one": "Bir adet yüzü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+    "desc_other": "{{count}} adet yüzü silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+  },
+  "nofaces": "Yüz bulunamadı",
+  "pixels": "{{area}}px"
+}

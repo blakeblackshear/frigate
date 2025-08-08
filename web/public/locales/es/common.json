@@ -1,0 +1,275 @@
+{
+  "time": {
+    "yesterday": "Ayer",
+    "thisMonth": "Este mes",
+    "yr": "{{time}}año",
+    "formattedTimestampWithYear": {
+      "12hour": "%b %-d %Y, %I:%M %p",
+      "24hour": "%b %-d %Y, %H:%M"
+    },
+    "second_one": "{{time}} segundo",
+    "second_many": "{{time}} segundos",
+    "second_other": "{{time}} segundos",
+    "formattedTimestampOnlyMonthAndDay": "%b %-d",
+    "formattedTimestampExcludeSeconds": {
+      "24hour": "%b %-d, %H:%M",
+      "12hour": "%b %-d, %I:%M %p"
+    },
+    "formattedTimestamp": {
+      "24hour": "MMM d, HH:mm:ss",
+      "12hour": "MMM d, h:mm:ss aaa"
+    },
+    "day_one": "{{time}} día",
+    "day_many": "{{time}} días",
+    "day_other": "{{time}} días",
+    "untilForTime": "Hasta {{time}}",
+    "untilForRestart": "Hasta que Frigate se reinicie.",
+    "untilRestart": "Hasta que se reinicie",
+    "ago": "Hace {{timeAgo}}",
+    "justNow": "Ahora mismo",
+    "today": "Hoy",
+    "last7": "Últimos 7 días",
+    "last14": "Últimos 14 días",
+    "last30": "Últimos 30 días",
+    "thisWeek": "Esta semana",
+    "lastWeek": "Semana pasada",
+    "lastMonth": "Mes pasado",
+    "10minutes": "10 minutos",
+    "30minutes": "30 minutos",
+    "1hour": "1 hora",
+    "12hours": "12 horas",
+    "24hours": "24 horas",
+    "pm": "pm",
+    "year_one": "{{time}} año",
+    "year_many": "{{time}} años",
+    "year_other": "{{time}} años",
+    "mo": "{{time}}mes",
+    "month_one": "{{time}} mes",
+    "month_many": "{{time}} meses",
+    "month_other": "{{time}} meses",
+    "h": "{{time}}h",
+    "m": "{{time}}m",
+    "minute_one": "{{time}} minuto",
+    "minute_many": "{{time}} minutos",
+    "minute_other": "{{time}} minutos",
+    "s": "{{time}}s",
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "5minutes": "5 minutos",
+    "am": "am",
+    "d": "{{time}}d",
+    "hour_one": "{{time}} hora",
+    "hour_many": "{{time}} horas",
+    "hour_other": "{{time}} horas",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    }
+  },
+  "menu": {
+    "settings": "Ajustes",
+    "export": "Exportar",
+    "user": {
+      "title": "Usuario",
+      "account": "Cuenta",
+      "anonymous": "Anónimo",
+      "logout": "Cerrar sesión",
+      "setPassword": "Establecer contraseña",
+      "current": "Usuario actual: {{user}}"
+    },
+    "systemMetrics": "Métricas del sistema",
+    "help": "Ayuda",
+    "system": "Sistema",
+    "configuration": "Configuración",
+    "systemLogs": "Registros del sistema",
+    "configurationEditor": "Editor de configuración",
+    "languages": "Idiomas",
+    "language": {
+      "en": "English (Inglés)",
+      "zhCN": "简体中文 (Chino simplificado)",
+      "withSystem": {
+        "label": "Usar los ajustes del sistema para el idioma"
+      },
+      "ru": "Русский (Ruso)",
+      "de": "Deutsch (Alemán)",
+      "ja": "日本語 (Japonés)",
+      "tr": "Türkçe (Turco)",
+      "sv": "Svenska (Sueco)",
+      "nb": "Norsk Bokmål (Noruego Bokmål)",
+      "ko": "한국어 (Coreano)",
+      "vi": "Tiếng Việt (Vietnamita)",
+      "fa": "فارسی (Persa)",
+      "pl": "Polski (Polaco)",
+      "uk": "Українська (Ucraniano)",
+      "he": "עברית (Hebreo)",
+      "el": "Ελληνικά (Griego)",
+      "ro": "Română (Rumano)",
+      "hu": "Magyar (Húngaro)",
+      "fi": "Suomi (Finlandés)",
+      "it": "Italian (Italiano)",
+      "da": "Dansk (Danés)",
+      "sk": "Slovenčina (Eslovaco)",
+      "hi": "हिन्दी (Hindi)",
+      "es": "Español",
+      "ar": "العربية (Árabe)",
+      "pt": "Português (Portugues)",
+      "cs": "Čeština (Checo)",
+      "nl": "Nederlands (Neerlandés)",
+      "fr": "Français (Frances)",
+      "yue": "粵語 (Cantonés)",
+      "th": "ไทย (Tailandés)",
+      "ca": "Català (Catalan)"
+    },
+    "appearance": "Apariencia",
+    "darkMode": {
+      "label": "Modo oscuro",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "withSystem": {
+        "label": "Usar los ajustes del sistema para el modo claro u oscuro"
+      }
+    },
+    "withSystem": "Sistema",
+    "theme": {
+      "label": "Tema",
+      "blue": "Azul",
+      "green": "Verde",
+      "nord": "Nord",
+      "red": "Rojo",
+      "contrast": "Alto contraste",
+      "default": "Predeterminado",
+      "highcontrast": "Alto Contraste"
+    },
+    "documentation": {
+      "title": "Documentación",
+      "label": "Documentación de Frigate"
+    },
+    "restart": "Reiniciar Frigate",
+    "live": {
+      "title": "Directo",
+      "cameras": {
+        "title": "Cámaras",
+        "count_one": "{{count}} Cámara",
+        "count_many": "{{count}} Cámaras",
+        "count_other": "{{count}} Cámaras"
+      },
+      "allCameras": "Todas las cámaras"
+    },
+    "review": "Revisar",
+    "explore": "Explorar",
+    "uiPlayground": "Zona de pruebas de la interfaz de usuario",
+    "faceLibrary": "Biblioteca de rostros"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "kph"
+    },
+    "length": {
+      "meters": "Metros",
+      "feet": "Pies"
+    }
+  },
+  "button": {
+    "off": "APAGADO",
+    "copyCoordinates": "Copiar coordenadas",
+    "fullscreen": "Pantalla completa",
+    "apply": "Aplicar",
+    "reset": "Restablecer",
+    "done": "Hecho",
+    "enable": "Habilitar",
+    "disabled": "Deshabilitado",
+    "disable": "Deshabilitar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "copy": "Copiar",
+    "back": "Atrás",
+    "history": "Historial",
+    "pictureInPicture": "Imagen en imagen",
+    "twoWayTalk": "Conversación bidireccional",
+    "cameraAudio": "Audio de la cámara",
+    "delete": "Eliminar",
+    "yes": "Sí",
+    "no": "No",
+    "download": "Descargar",
+    "info": "Información",
+    "suspended": "Suspendido",
+    "unsuspended": "Reactivar",
+    "play": "Reproducir",
+    "unselect": "Deseleccionar",
+    "export": "Exportar",
+    "deleteNow": "Eliminar ahora",
+    "next": "Siguiente",
+    "edit": "Editar",
+    "enabled": "Habilitado",
+    "saving": "Guardando…",
+    "exitFullscreen": "Salir de pantalla completa",
+    "on": "ENCENDIDO"
+  },
+  "toast": {
+    "save": {
+      "error": {
+        "noMessage": "No se pudieron guardar los cambios de configuración",
+        "title": "No se pudieron guardar los cambios de configuración: {{errorMessage}}"
+      },
+      "title": "Guardar"
+    },
+    "copyUrlToClipboard": "URL copiada al portapapeles."
+  },
+  "label": {
+    "back": "Volver atrás"
+  },
+  "role": {
+    "title": "Rol",
+    "admin": "Administrador",
+    "viewer": "Espectador",
+    "desc": "Los administradores tienen acceso completo a todas las funciones en la interfaz de usuario de Frigate. Los espectadores están limitados a ver cámaras, elementos de revisión y grabaciones históricas en la interfaz de usuario."
+  },
+  "pagination": {
+    "label": "paginación",
+    "previous": {
+      "title": "Anterior",
+      "label": "Ir a la página anterior"
+    },
+    "next": {
+      "title": "Siguiente",
+      "label": "Ir a la página siguiente"
+    },
+    "more": "Más páginas"
+  },
+  "accessDenied": {
+    "documentTitle": "Acceso denegado - Frigate",
+    "desc": "No tienes permiso para ver esta página.",
+    "title": "Acceso denegado"
+  },
+  "notFound": {
+    "documentTitle": "No se ha encontrado - Frigate",
+    "title": "404",
+    "desc": "Página no encontrada"
+  },
+  "selectItem": "Seleccionar {{item}}"
+}

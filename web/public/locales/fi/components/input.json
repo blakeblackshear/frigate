@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Lataa Video",
+      "toast": {
+        "success": "Tarkistettavan kohteen videon lataus on aloitettu."
+      }
+    }
+  }
+}

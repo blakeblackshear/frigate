@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Config Editor - Frigate",
+  "configEditor": "Config Editor",
+  "copyConfig": "Copy Config",
+  "saveAndRestart": "Save & Restart",
+  "saveOnly": "Save Only",
+  "confirm": "Exit without saving?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Config copied to clipboard."
+    },
+    "error": {
+      "savingError": "Error saving config"
+    }
+  }
+}

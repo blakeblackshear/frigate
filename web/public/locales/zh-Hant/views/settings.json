@@ -1,0 +1,45 @@
+{
+  "documentTitle": {
+    "default": "設定 - Frigate",
+    "authentication": "認證設定 - Frigate",
+    "camera": "鏡頭設定 - Frigate",
+    "enrichments": "進階設定 - Frigate",
+    "general": "一般設定 - Frigate",
+    "frigatePlus": "Frigate+ 設定 - Frigate",
+    "notifications": "通知設定 - Frigate",
+    "masksAndZones": "遮罩與區域編輯器 - Frigate",
+    "motionTuner": "移動偵測調教器 - Frigate",
+    "object": "除錯 - Frigate"
+  },
+  "menu": {
+    "ui": "使用者介面",
+    "enrichments": "進階功能",
+    "cameras": "鏡頭設定",
+    "masksAndZones": "遮罩 / 區域",
+    "motionTuner": "移動偵測調教器",
+    "debug": "除錯",
+    "users": "使用者",
+    "notifications": "通知",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "你有未保存的變更。",
+      "desc": "再繼續之前，你想先儲存你的變更嗎？"
+    }
+  },
+  "cameraSetting": {
+    "camera": "鏡頭",
+    "noCamera": "沒有鏡頭"
+  },
+  "general": {
+    "title": "一般設定",
+    "liveDashboard": {
+      "title": "即時監控面板",
+      "automaticLiveView": {
+        "label": "自動即時檢視",
+        "desc": "在偵測到移動時自動切換至即時影像。停用此設定將使得在即時監控面板上的靜態畫面每分鐘更新一次。"
+      }
+    }
+  }
+}

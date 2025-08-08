@@ -1,0 +1,127 @@
+{
+  "filter": "Filter",
+  "labels": {
+    "label": "Merkelapper",
+    "all": {
+      "title": "Alle masker / soner",
+      "short": "Merkelapper"
+    },
+    "count": "{{count}} merkelapper",
+    "count_other": "{{count}} Merkelapper",
+    "count_one": "{{count}} Merkelapp"
+  },
+  "features": {
+    "hasVideoClip": "Har et videoklipp",
+    "submittedToFrigatePlus": {
+      "label": "Sendt til Frigate+",
+      "tips": "Du må først filtrere på sporede objekter som har et øyeblikksbilde.<br /><br />Sporede objekter uten et øyeblikksbilde kan ikke sendes til Frigate+."
+    },
+    "label": "Funksjoner",
+    "hasSnapshot": "Har et øyeblikksbilde"
+  },
+  "sort": {
+    "label": "Sorter",
+    "dateAsc": "Dato (Stigende)",
+    "dateDesc": "Dato (Synkende)",
+    "scoreAsc": "Objektpoengsum (Stigende)",
+    "scoreDesc": "Objektpoengsum (Synkende)",
+    "speedAsc": "Estimert hastighet (Stigende)",
+    "speedDesc": "Estimert hastighet (Synkende)",
+    "relevance": "Relevans"
+  },
+  "explore": {
+    "date": {
+      "selectDateBy": {
+        "label": "Velg en dato å filtrere etter"
+      }
+    },
+    "settings": {
+      "title": "Innstillinger",
+      "defaultView": {
+        "title": "Standard visning",
+        "desc": "Når ingen filtre er valgt, vis et sammendrag av de nyeste sporede objektene per merkelapp, eller vis et ufiltrert rutenett.",
+        "summary": "Sammendrag",
+        "unfilteredGrid": "Ufiltrert rutenett"
+      },
+      "gridColumns": {
+        "title": "Rutenett kolonner",
+        "desc": "Velg antall kolonner i rutenettvisningen."
+      },
+      "searchSource": {
+        "label": "Søkekilde",
+        "desc": "Velg om du vil søke i bildene eller beskrivelsene av de sporede objektene dine.",
+        "options": {
+          "thumbnailImage": "Miniatyrbilde",
+          "description": "Beskrivelse"
+        }
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtrer loggnivå",
+    "filterBySeverity": "Filtrer logger etter alvorlighetsgrad",
+    "loading": {
+      "title": "Laster inn",
+      "desc": "Når loggvinduet rulles til bunnen, strømmes nye logger automatisk etter hvert som de legges til."
+    },
+    "disableLogStreaming": "Deaktiver loggstrømming",
+    "allLogs": "Alle logger"
+  },
+  "trackedObjectDelete": {
+    "title": "Bekreft sletting",
+    "desc": "Sletting av disse {{objectLength}} sporede objektene fjerner øyeblikksbildet, eventuelle lagrede vektorrepresentasjoner og tilhørende objekt livssyklusoppføringer. Opptak av disse sporede objektene i Historikkvisning vil <em>IKKE</em> bli slettet.<br /><br />Er du sikker på at du vil fortsette?<br /><br />Hold <em>Shift</em>-tasten for å unngå denne dialogboksen i fremtiden.",
+    "toast": {
+      "success": "Sporede objekter ble slettet.",
+      "error": "Kunne ikke slette sporede objekter: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtrer etter sonemaske"
+  },
+  "recognizedLicensePlates": {
+    "noLicensePlatesFound": "Ingen kjennemerker funnet.",
+    "selectPlatesFromList": "Velg ett eller flere kjennemerker fra listen.",
+    "title": "Gjenkjente kjennemerker",
+    "loadFailed": "Kunne ikke laste inn gjenkjente kjennemerker.",
+    "loading": "Laster inn gjenkjente kjennemerker…",
+    "placeholder": "Skriv for å søke etter kjennemerker…"
+  },
+  "dates": {
+    "all": {
+      "title": "Alle datoer",
+      "short": "Datoer"
+    },
+    "selectPreset": "Velg en forhåndsinnstilling.…"
+  },
+  "more": "Flere filtre",
+  "reset": {
+    "label": "Nullstill filtre til standardverdier"
+  },
+  "timeRange": "Tidsrom",
+  "subLabels": {
+    "label": "Under-Merkelapper",
+    "all": "Alle under-Merkelapper"
+  },
+  "score": "Poengsum",
+  "estimatedSpeed": "Estimert hastighet ({{unit}})",
+  "cameras": {
+    "all": {
+      "title": "Alle kameraer",
+      "short": "Kameraer"
+    },
+    "label": "Kamerafilter"
+  },
+  "review": {
+    "showReviewed": "Vis inspiserte"
+  },
+  "motion": {
+    "showMotionOnly": "Vis kun bevegelse"
+  },
+  "zones": {
+    "label": "Soner",
+    "all": {
+      "title": "Alle soner",
+      "short": "Soner"
+    }
+  }
+}

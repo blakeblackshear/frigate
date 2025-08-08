@@ -1,0 +1,62 @@
+{
+  "search": "Etsi",
+  "savedSearches": "Tallennetut haut",
+  "searchFor": "Etsi {{inputValue}}",
+  "button": {
+    "clear": "Tyhjennä haku",
+    "save": "Tallenna haku",
+    "delete": "Poista tallennettu haku",
+    "filterInformation": "Suodattimen tiedot",
+    "filterActive": "Suodattimia valittuina"
+  },
+  "trackedObjectId": "Seuratun kohteen ID",
+  "filter": {
+    "label": {
+      "cameras": "Kamerat",
+      "labels": "Nimikkeet",
+      "zones": "Alueet",
+      "sub_labels": "Alinimikkeet",
+      "search_type": "Haun tyyppi",
+      "time_range": "Aikaikkuna",
+      "before": "Ennen",
+      "after": "Jälkeen",
+      "min_score": "Minimi pisteet",
+      "max_score": "Maksimi pisteet",
+      "min_speed": "Minimi nopeus",
+      "max_speed": "Maksimi nopeus",
+      "recognized_license_plate": "Tunnistettu rekisterikilpi",
+      "has_clip": "Leike löytyy",
+      "has_snapshot": "Tilannekuva löytyy"
+    },
+    "searchType": {
+      "thumbnail": "Kuvake",
+      "description": "Kuvaus"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "'Ennen' ajan täytyy olla myöhemmin kun 'jälkeen' aika.",
+        "afterDatebeEarlierBefore": "'Jälkeen' ajan täytyy olla aiemmin kun 'ennen' aika.",
+        "minScoreMustBeLessOrEqualMaxScore": "Arvon 'min_score' täytyy olla pienempi tai yhtäsuuri kuin 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Arvon 'max_score' täytyy olla suurempi tai yhtäsuuri kuin 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'Minimi nopeus' tulee olla pienempi tai yhtäsuuri kuin 'maksimi nopeus'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'Maksimi nopeus' tulee olla suurempi tai yhtä suuri kuin 'minimi nopeus'."
+      }
+    },
+    "tips": {
+      "desc": {
+        "exampleLabel": "Esimerkki:"
+      },
+      "title": "Tekstisuodattimien käyttö"
+    },
+    "header": {
+      "currentFilterType": "Suodata arvoja",
+      "noFilters": "Suodattimet",
+      "activeFilters": "Käytössä olevat suodattimet"
+    }
+  },
+  "similaritySearch": {
+    "title": "Samankaltaisten kohteiden haku",
+    "active": "Samankaltaisuushaku aktiivinen",
+    "clear": "Poista samankaltaisuushaku"
+  }
+}

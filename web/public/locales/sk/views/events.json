@@ -1,0 +1,38 @@
+{
+  "alerts": "Upozornenia",
+  "detections": "Detekcie",
+  "motion": {
+    "label": "Pohyb",
+    "only": "Iba pohyb"
+  },
+  "allCameras": "Všetky Kamery",
+  "empty": {
+    "alert": "Nie sú žiadne upozornenia na kontrolu",
+    "detection": "Nie sú žiadne detekcie na kontrolu",
+    "motion": "Nenašli sa žiadne údaje o pohybe"
+  },
+  "timeline": "Časová os",
+  "timeline.aria": "Vyberte časovú os",
+  "events": {
+    "label": "Udalosti",
+    "aria": "Vyberte udalosti",
+    "noFoundForTimePeriod": "Pre toto časové obdobie sa nenašli žiadne udalosti."
+  },
+  "documentTitle": "Recenzia - Frikgate",
+  "recordings": {
+    "documentTitle": "Nahrávky - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Posledných 24 hodín"
+  },
+  "markAsReviewed": "Označiť ako skontrolované",
+  "markTheseItemsAsReviewed": "Označiť tieto položky ako skontrolované",
+  "newReviewItems": {
+    "label": "Zobraziť nové položky recenzie",
+    "button": "Nové položky na kontrolu"
+  },
+  "selected_one": "{{count}} vybraných",
+  "selected_other": "{{count}} vybraných",
+  "camera": "Kamera",
+  "detected": "Detekované"
+}

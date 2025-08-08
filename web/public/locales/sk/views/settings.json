@@ -1,0 +1,54 @@
+{
+  "documentTitle": {
+    "default": "Nastavenia - Frigate",
+    "authentication": "Nastavenie autentifikácie- Frigate",
+    "camera": "Nastavenia fotoaparátu – Frigate",
+    "enrichments": "Nastavenia obohatenia – Frigate",
+    "masksAndZones": "Editor masky a zón - Frigate",
+    "motionTuner": "Ladič detekcie pohybu - Frigate",
+    "object": "Ladenie - Frigate",
+    "general": "Všeobecné nastavenia – Frigate",
+    "frigatePlus": "Nastavenia Frigate+ – Frigate",
+    "notifications": "Nastavenia upozornení – Frigate"
+  },
+  "menu": {
+    "ui": "Uživaťelské rozohranie",
+    "enrichments": "Obohatenia",
+    "cameras": "Nastavenia kamier",
+    "masksAndZones": "Masky / Zóny",
+    "motionTuner": "Ladič detekcie pohybu",
+    "debug": "Ladenie",
+    "users": "Uživatelia",
+    "notifications": "Notifikacie",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Máte neuložené zmeny.",
+      "desc": "Chcete uložiť zmeny pred pokračovaním?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Žiadna Kamera"
+  },
+  "general": {
+    "title": "Hlavné nastavenia",
+    "liveDashboard": {
+      "title": "Živý Dashboard",
+      "automaticLiveView": {
+        "label": "Automatický živý náhľad",
+        "desc": "Pri detekcii aktivity sa automaticky prepne na živý náhľad kamery. Vypnutie tejto možnosti spôsobí, že sa statické snímky z kamery na ovládacom paneli Live aktualizujú iba raz za minútu."
+      },
+      "playAlertVideos": {
+        "label": "Prehrať videá s upozornením",
+        "desc": "Predvolene sa nedávne upozornenia na paneli Živé vysielanie prehrávajú ako krátke cyklické videá. Túto možnosť vypnite, ak chcete zobrazovať iba statický obrázok nedávnych upozornení na tomto zariadení/prehliadači."
+      }
+    },
+    "storedLayouts": {
+      "title": "Uložené rozloženia",
+      "desc": "Rozloženie kamier v skupine kamier je možné presúvať/zmeniť jeho veľkosť. Pozície sú uložené v lokálnom úložisku vášho prehliadača.",
+      "clearAll": "Vymazať všetky rozloženia"
+    }
+  }
+}

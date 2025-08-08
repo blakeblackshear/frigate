@@ -1,6 +1,6 @@
 from typing import Any, Optional, Union
 
-from pydantic import Field, field_serializer
+from pydantic import Field, PrivateAttr, field_serializer
 
 from ..base import FrigateBaseModel
 
@@ -11,11 +11,13 @@ DEFAULT_TRACKED_OBJECTS = ["person"]
 
 
 class FilterConfig(FrigateBaseModel):
-    min_area: int = Field(
-        default=0, title="Minimum area of bounding box for object to be counted."
+    min_area: Union[int, float] = Field(
+        default=0,
+        title="Minimum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99).",
     )
-    max_area: int = Field(
-        default=24000000, title="Maximum area of bounding box for object to be counted."
+    max_area: Union[int, float] = Field(
+        default=24000000,
+        title="Maximum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99).",
     )
     min_ratio: float = Field(
         default=0,
@@ -53,3 +55,20 @@ class ObjectConfig(FrigateBaseModel):
         default_factory=dict, title="Object filters."
     )
     mask: Union[str, list[str]] = Field(default="", title="Object mask.")
+    _all_objects: list[str] = PrivateAttr()
+
+    @property
+    def all_objects(self) -> list[str]:
+        return self._all_objects
+
+    def parse_all_objects(self, cameras):
+        if "_all_objects" in self:
+            return
+
+        # get list of unique enabled labels for tracking
+        enabled_labels = set(self.track)
+
+        for camera in cameras.values():
+            enabled_labels.update(camera.objects.track)
+
+        self._all_objects = list(enabled_labels)

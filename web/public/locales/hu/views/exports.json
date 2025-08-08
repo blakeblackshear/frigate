@@ -1,0 +1,17 @@
+{
+  "documentTitle": "Exportálás - Frigate",
+  "search": "Keresés",
+  "noExports": "Export nem található",
+  "deleteExport.desc": "Biztos, hogy törölni akarja {{exportName}}-t?",
+  "deleteExport": "Export törlése",
+  "editExport": {
+    "title": "Exportálás átnevezése",
+    "desc": "Adjon meg egy új nevet ennek az exportnak.",
+    "saveExport": "Export mentése"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Sikertelen export átnevezés: {{errorMessage}}"
+    }
+  }
+}

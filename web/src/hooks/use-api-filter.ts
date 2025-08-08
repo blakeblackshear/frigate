@@ -47,9 +47,9 @@ export default function useApiFilter<
   return [filter, setFilter, searchParams];
 }
 
-export function useApiFilterArgs<
-  F extends FilterType,
->(): useApiFilterReturn<F> {
+export function useApiFilterArgs<F extends FilterType>(
+  arrayKeys: string[],
+): useApiFilterReturn<F> {
   const [rawParams, setRawParams] = useSearchParams();
 
   const setFilter = useCallback(
@@ -64,30 +64,37 @@ export function useApiFilterArgs<
 
     const filter: { [key: string]: unknown } = {};
 
-    rawParams.forEach((value, key) => {
-      const isValidNumber = /^-?\d+(\.\d+)?(?!.)/.test(value);
-      const isValidEventID = /^\d+\.\d+-[a-zA-Z0-9]+$/.test(value);
+    // always treat these keys as string[], not as a number or event id
+    const arrayKeySet = new Set(arrayKeys);
 
-      if (
-        value != "true" &&
-        value != "false" &&
-        !isValidNumber &&
-        !isValidEventID
-      ) {
+    rawParams.forEach((value, key) => {
+      if (arrayKeySet.has(key)) {
         filter[key] = value.includes(",") ? value.split(",") : [value];
       } else {
-        if (value != undefined) {
-          try {
-            filter[key] = JSON.parse(value);
-          } catch {
-            filter[key] = `${value}`;
+        const isValidNumber = /^-?\d+(\.\d+)?(?!.)/.test(value);
+        const isValidEventID = /^\d+\.\d+-[a-zA-Z0-9]+$/.test(value);
+
+        if (
+          value != "true" &&
+          value != "false" &&
+          !isValidNumber &&
+          !isValidEventID
+        ) {
+          filter[key] = value.includes(",") ? value.split(",") : [value];
+        } else {
+          if (value != undefined) {
+            try {
+              filter[key] = JSON.parse(value);
+            } catch {
+              filter[key] = `${value}`;
+            }
           }
         }
       }
     });
 
     return filter as F;
-  }, [rawParams]);
+  }, [rawParams, arrayKeys]);
 
   const searchParams = useMemo(() => {
     if (filter == undefined || Object.keys(filter).length == 0) {

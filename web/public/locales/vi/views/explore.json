@@ -1,0 +1,205 @@
+{
+  "objectLifecycle": {
+    "lifecycleItemDesc": {
+      "header": {
+        "zones": "Vùng",
+        "ratio": "Tỷ lệ",
+        "area": "Diện tích"
+      },
+      "gone": "{{label}} đã rời đi",
+      "heard": "{{label}} đã nghe thấy",
+      "external": "{{label}} được phát hiện",
+      "visible": "{{label}} được phát hiện",
+      "entered_zone": "{{label}} đã đi vào {{zones}}",
+      "active": "{{label}} trở nên hoạt động",
+      "stationary": "{{label}} trở nên đứng yên",
+      "attribute": {
+        "faceOrLicense_plate": "Đã phát hiện {{attribute}} cho {{label}}",
+        "other": "{{label}} được nhận dạng là {{attribute}}"
+      }
+    },
+    "carousel": {
+      "previous": "Trang trước",
+      "next": "Trang tiếp theo"
+    },
+    "annotationSettings": {
+      "showAllZones": {
+        "desc": "Luôn hiển thị các vùng trên các khung hình mà đối tượng đã đi vào.",
+        "title": "Hiển thị tất cả các Vùng"
+      },
+      "offset": {
+        "millisecondsToOffset": "Số mili giây để lệch các chú thích phát hiện. <em>Mặc định: 0</em>",
+        "documentation": "Đọc tài liệu ",
+        "desc": "Dữ liệu này đến từ luồng phát hiện của camera nằm ở trên hình ảnh từ luồng ghi hình. Có khả năng hai luồng này không đồng bộ hoàn hảo. Do đó, hộp giới hạn và đoạn ghi hình sẽ không khớp nhau một cách hoàn hảo. Tuy nhiên, trường <code>annotation_offset</code> có thể được sử dụng để điều chỉnh điều này.",
+        "label": "Độ lệch Chú thích",
+        "tips": "MẸO: Hãy tưởng tượng có một clip sự kiện với một người đi từ trái sang phải. Nếu hộp giới hạn trên dòng thời gian sự kiện luôn ở bên trái của người đó thì giá trị nên được giảm xuống. Tương tự, nếu một người đi từ trái sang phải và hộp giới hạn luôn ở phía trước người đó thì giá trị nên được tăng lên.",
+        "toast": {
+          "success": "Độ lệch chú thích cho {{camera}} đã được lưu vào tệp cấu hình. Khởi động lại Frigate để áp dụng các thay đổi của bạn."
+        }
+      },
+      "title": "Cài đặt Chú thích"
+    },
+    "count": "{{first}} trên {{second}}",
+    "title": "Vòng đời Đối tượng",
+    "noImageFound": "Không tìm thấy hình ảnh cho dấu thời gian này.",
+    "createObjectMask": "Tạo Mặt nạ Đối tượng",
+    "adjustAnnotationSettings": "Điều chỉnh cài đặt chú thích",
+    "trackedPoint": "Điểm được theo dõi",
+    "scrollViewTips": "Cuộn để xem những khoảnh khắc quan trọng trong vòng đời của đối tượng này.",
+    "autoTrackingTips": "Vị trí hộp giới hạn sẽ không chính xác đối với camera quay tự động theo dõi."
+  },
+  "details": {
+    "item": {
+      "title": "Chi tiết Mục Xem lại",
+      "desc": "Chi tiết mục xem lại",
+      "button": {
+        "share": "Chia sẻ mục xem lại này",
+        "viewInExplore": "Xem trong Khám phá"
+      },
+      "toast": {
+        "error": {
+          "updatedSublabelFailed": "Không thể cập nhật nhãn phụ: {{errorMessage}}",
+          "updatedLPRFailed": "Không thể cập nhật biển số xe: {{errorMessage}}",
+          "regenerate": "Không thể gọi {{provider}} để lấy mô tả mới: {{errorMessage}}"
+        },
+        "success": {
+          "regenerate": "Một mô tả mới đã được yêu cầu từ {{provider}}. Tùy thuộc vào tốc độ của nhà cung cấp của bạn, mô tả mới có thể mất một chút thời gian để tạo lại.",
+          "updatedLPR": "Cập nhật biển số xe thành công.",
+          "updatedSublabel": "Cập nhật nhãn phụ thành công."
+        }
+      },
+      "tips": {
+        "mismatch_other": "{{count}} đối tượng không khả dụng đã được phát hiện và bao gồm trong mục xem lại này. Những đối tượng đó hoặc không đủ điều kiện là một cảnh báo hoặc phát hiện hoặc đã được dọn dẹp/xóa.",
+        "hasMissingObjects": "Điều chỉnh cấu hình của bạn nếu bạn muốn Frigate lưu các đối tượng được theo dõi cho các nhãn sau: <em>{{objects}}</em>"
+      }
+    },
+    "expandRegenerationMenu": "Mở rộng menu tạo lại",
+    "label": "Nhãn",
+    "editSubLabel": {
+      "title": "Chỉnh sửa nhãn phụ",
+      "desc": "Nhập một nhãn phụ mới cho {{label}} này",
+      "descNoLabel": "Nhập một nhãn phụ mới cho đối tượng được theo dõi này"
+    },
+    "snapshotScore": {
+      "label": "Điểm Ảnh chụp nhanh"
+    },
+    "topScore": {
+      "info": "Điểm cao nhất là điểm trung vị cao nhất cho đối tượng được theo dõi, vì vậy điểm này có thể khác với điểm được hiển thị trên ảnh thu nhỏ của kết quả tìm kiếm.",
+      "label": "Điểm Cao nhất"
+    },
+    "estimatedSpeed": "Tốc độ ước tính",
+    "objects": "Đối tượng",
+    "timestamp": "Dấu thời gian",
+    "button": {
+      "findSimilar": "Tìm đối tượng tương tự",
+      "regenerate": {
+        "title": "Tạo lại",
+        "label": "Tạo lại mô tả đối tượng được theo dõi"
+      }
+    },
+    "description": {
+      "label": "Mô tả",
+      "placeholder": "Mô tả của đối tượng được theo dõi",
+      "aiTips": "Frigate sẽ không yêu cầu mô tả từ nhà cung cấp AI tạo sinh của bạn cho đến khi vòng đời của đối tượng được theo dõi kết thúc."
+    },
+    "tips": {
+      "descriptionSaved": "Lưu mô tả thành công",
+      "saveDescriptionFailed": "Không thể cập nhật mô tả: {{errorMessage}}"
+    },
+    "camera": "Camera",
+    "recognizedLicensePlate": "Biển số xe được nhận dạng",
+    "regenerateFromSnapshot": "Tạo lại từ Ảnh chụp nhanh",
+    "regenerateFromThumbnails": "Tạo lại từ Ảnh thu nhỏ",
+    "zones": "Vùng",
+    "editLPR": {
+      "title": "Chỉnh sửa biển số xe",
+      "desc": "Nhập một giá trị biển số xe mới cho {{label}} này",
+      "descNoLabel": "Nhập một giá trị biển số xe mới cho đối tượng được theo dõi này"
+    }
+  },
+  "itemMenu": {
+    "viewObjectLifecycle": {
+      "label": "Xem vòng đời đối tượng",
+      "aria": "Hiển thị vòng đời đối tượng"
+    },
+    "downloadSnapshot": {
+      "label": "Tải xuống ảnh chụp nhanh",
+      "aria": "Tải xuống ảnh chụp nhanh"
+    },
+    "downloadVideo": {
+      "aria": "Tải xuống video",
+      "label": "Tải xuống video"
+    },
+    "findSimilar": {
+      "label": "Tìm đối tượng tương tự",
+      "aria": "Tìm các đối tượng được theo dõi tương tự"
+    },
+    "submitToPlus": {
+      "aria": "Gửi đến Frigate Plus",
+      "label": "Gửi đến Frigate+"
+    },
+    "viewInHistory": {
+      "label": "Xem trong Lịch sử",
+      "aria": "Xem trong Lịch sử"
+    },
+    "deleteTrackedObject": {
+      "label": "Xóa đối tượng được theo dõi này"
+    }
+  },
+  "exploreIsUnavailable": {
+    "embeddingsReindexing": {
+      "step": {
+        "descriptionsEmbedded": "Mô tả đã được nhúng: ",
+        "trackedObjectsProcessed": "Đối tượng được theo dõi đã xử lý: ",
+        "thumbnailsEmbedded": "Ảnh thu nhỏ đã được nhúng: "
+      },
+      "finishingShortly": "Sẽ hoàn thành trong giây lát",
+      "context": "Tính năng Khám phá có thể được sử dụng sau khi quá trình tái lập chỉ mục dữ liệu nhúng (embeddings) của đối tượng được theo dõi hoàn tất.",
+      "startingUp": "Đang khởi động…",
+      "estimatedTime": "Thời gian ước tính còn lại:"
+    },
+    "downloadingModels": {
+      "context": "Frigate đang tải xuống các mô hình dữ liệu nhúng cần thiết để hỗ trợ tính năng Tìm kiếm theo Ngữ nghĩa. Quá trình này có thể mất vài phút tùy thuộc vào tốc độ kết nối mạng của bạn.",
+      "setup": {
+        "visionModel": "Mô hình thị giác",
+        "visionModelFeatureExtractor": "Trình trích xuất đặc trưng mô hình thị giác",
+        "textModel": "Mô hình văn bản",
+        "textTokenizer": "Trình mã hóa văn bản"
+      },
+      "tips": {
+        "context": "Bạn có thể muốn tái lập chỉ mục dữ liệu nhúng của các đối tượng được theo dõi sau khi các mô hình được tải xuống.",
+        "documentation": "Đọc tài liệu"
+      },
+      "error": "Đã xảy ra lỗi. Vui lòng kiểm tra nhật ký của Frigate."
+    },
+    "title": "Tính năng Khám phá không khả dụng"
+  },
+  "dialog": {
+    "confirmDelete": {
+      "desc": "Việc xóa đối tượng được theo dõi này sẽ xóa ảnh chụp nhanh, mọi dữ liệu nhúng đã lưu và mọi mục nhập vòng đời đối tượng liên quan. Đoạn ghi hình đã ghi của đối tượng được theo dõi này trong chế độ xem Lịch sử sẽ <em>KHÔNG</em> bị xóa.<br /><br />Bạn có chắc chắn muốn tiếp tục không?",
+      "title": "Xác nhận Xóa"
+    }
+  },
+  "noTrackedObjects": "Không tìm thấy Đối tượng được theo dõi nào",
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Đã xóa đối tượng được theo dõi thành công.",
+        "error": "Không thể xóa đối tượng được theo dõi: {{errorMessage}}"
+      }
+    },
+    "tooltip": "Khớp {{type}} ở mức {{confidence}}%"
+  },
+  "exploreMore": "Khám phá thêm các đối tượng {{label}}",
+  "trackedObjectDetails": "Chi tiết Đối tượng được theo dõi",
+  "type": {
+    "details": "chi tiết",
+    "snapshot": "ảnh chụp nhanh",
+    "video": "video",
+    "object_lifecycle": "vòng đời đối tượng"
+  },
+  "fetchingTrackedObjectsFailed": "Lỗi khi tìm nạp các đối tượng được theo dõi: {{errorMessage}}",
+  "documentTitle": "Khám phá - Frigate",
+  "generativeAI": "AI Tạo sinh",
+  "trackedObjectsCount_other": "{{count}} đối tượng được theo dõi "
+}

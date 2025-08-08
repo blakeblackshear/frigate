@@ -1,0 +1,16 @@
+{
+  "alerts": "Peringatan",
+  "detections": "Deteksi",
+  "motion": {
+    "label": "Gerakan",
+    "only": "Hanya Gerakan"
+  },
+  "allCameras": "Semua Kamera",
+  "empty": {
+    "detection": "Tidak ada deteksi untuk ditinjau",
+    "alert": "Tidak ada peringatan untuk ditinjau",
+    "motion": "Data gerakan tidak ditemukan"
+  },
+  "timeline.aria": "Pilih timeline",
+  "timeline": "Linimasa"
+}

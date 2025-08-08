@@ -1,0 +1,15 @@
+{
+  "filter": "Filter",
+  "labels": {
+    "label": "Labele",
+    "all": {
+      "title": "Sve oznake",
+      "short": "Oznake"
+    },
+    "count_one": "{{count}} Oznaka",
+    "count_other": "{{count}} Oznake"
+  },
+  "zones": {
+    "label": "Zone"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "search": "Nájsť",
+  "savedSearches": "Uložené vyhľadávania",
+  "searchFor": "Hľadať pre {{inputValue}}",
+  "button": {
+    "clear": "Prehľadné vyhľadávanie",
+    "save": "Uložiť vyhladávanie",
+    "delete": "Vymazať uložené vyhladávania",
+    "filterInformation": "Filtrovanie informacii",
+    "filterActive": "Aktívne filtre"
+  },
+  "trackedObjectId": "ID sledovaného objektu",
+  "filter": {
+    "label": {
+      "cameras": "Kamery",
+      "labels": "Štítky",
+      "zones": "Zóny",
+      "sub_labels": "Podštítky",
+      "search_type": "Typ vyhľadávania",
+      "time_range": "Časový rozsah",
+      "before": "Predtým",
+      "after": "Po",
+      "min_score": "Min. Skóre",
+      "max_score": "Maximálne skóre",
+      "min_speed": "Min rýchlosť",
+      "max_speed": "Max rýchlosť",
+      "recognized_license_plate": "Uznaná poznávacia značka",
+      "has_clip": "Má Klip",
+      "has_snapshot": "Má Snímok"
+    },
+    "searchType": {
+      "thumbnail": "Náhľad",
+      "description": "Popis"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Dátum 'pred' musí byť neskorší ako dátum 'po'.",
+        "afterDatebeEarlierBefore": "Dátum „po“ musí byť skorší ako dátum „pred“.",
+        "minScoreMustBeLessOrEqualMaxScore": "Hodnota „min_score“ musí byť menšia alebo rovná hodnote „max_score“.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Hodnota „max_score“ musí byť väčšia alebo rovná hodnote „min_score“.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Hodnota „min_speed“ musí byť menšia alebo rovná hodnote „max_speed“.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Hodnota „max_speed“ musí byť väčšia alebo rovná hodnote „min_speed“."
+      }
+    }
+  }
+}

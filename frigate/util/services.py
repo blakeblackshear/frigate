@@ -9,7 +9,8 @@ import resource
 import signal
 import subprocess as sp
 import traceback
-from typing import Optional
+from datetime import datetime
+from typing import Any, List, Optional, Tuple
 
 import cv2
 import psutil
@@ -230,7 +231,7 @@ def is_vaapi_amd_driver() -> bool:
         return any("AMD Radeon Graphics" in line for line in output)
 
 
-def get_amd_gpu_stats() -> dict[str, str]:
+def get_amd_gpu_stats() -> Optional[dict[str, str]]:
     """Get stats using radeontop."""
     radeontop_command = ["radeontop", "-d", "-", "-l", "1"]
 
@@ -256,7 +257,7 @@ def get_amd_gpu_stats() -> dict[str, str]:
         return results
 
 
-def get_intel_gpu_stats() -> dict[str, str]:
+def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, str]]:
     """Get stats using intel_gpu_top."""
 
     def get_stats_manually(output: str) -> dict[str, str]:
@@ -303,11 +304,17 @@ def get_intel_gpu_stats() -> dict[str, str]:
         "1",
     ]
 
-    p = sp.run(
-        intel_gpu_top_command,
-        encoding="ascii",
-        capture_output=True,
-    )
+    if intel_gpu_device:
+        intel_gpu_top_command += ["-d", intel_gpu_device]
+
+    try:
+        p = sp.run(
+            intel_gpu_top_command,
+            encoding="ascii",
+            capture_output=True,
+        )
+    except UnicodeDecodeError:
+        return None
 
     # timeout has a non-zero returncode when timeout is reached
     if p.returncode != 124:
@@ -359,7 +366,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
                     if video_frame is not None:
                         video[key].append(float(video_frame))
 
-        if render["global"]:
+        if render["global"] and video["global"]:
             results["gpu"] = (
                 f"{round(((sum(render['global']) / len(render['global'])) + (sum(video['global']) / len(video['global']))) / 2, 2)}%"
             )
@@ -377,6 +384,50 @@ def get_intel_gpu_stats() -> dict[str, str]:
                 )
 
         return results
+
+
+def get_rockchip_gpu_stats() -> Optional[dict[str, str]]:
+    """Get GPU stats using rk."""
+    try:
+        with open("/sys/kernel/debug/rkrga/load", "r") as f:
+            content = f.read()
+    except FileNotFoundError:
+        return None
+
+    load_values = []
+    for line in content.splitlines():
+        match = re.search(r"load = (\d+)%", line)
+        if match:
+            load_values.append(int(match.group(1)))
+
+    if not load_values:
+        return None
+
+    average_load = f"{round(sum(load_values) / len(load_values), 2)}%"
+    return {"gpu": average_load, "mem": "-"}
+
+
+def get_rockchip_npu_stats() -> Optional[dict[str, float | str]]:
+    """Get NPU stats using rk."""
+    try:
+        with open("/sys/kernel/debug/rknpu/load", "r") as f:
+            npu_output = f.read()
+
+            if "Core0:" in npu_output:
+                # multi core NPU
+                core_loads = re.findall(r"Core\d+:\s*(\d+)%", npu_output)
+            else:
+                # single core NPU
+                core_loads = re.findall(r"NPU load:\s+(\d+)%", npu_output)
+    except FileNotFoundError:
+        core_loads = None
+
+    if not core_loads:
+        return None
+
+    percentages = [int(load) for load in core_loads]
+    mean = round(sum(percentages) / len(percentages), 2)
+    return {"npu": mean, "mem": "-"}
 
 
 def try_get_info(f, h, default="N/A"):
@@ -447,7 +498,7 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
         return results
 
 
-def get_jetson_stats() -> dict[int, dict]:
+def get_jetson_stats() -> Optional[dict[int, dict]]:
     results = {}
 
     try:
@@ -490,7 +541,7 @@ def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-def get_nvidia_driver_info() -> dict[str, any]:
+def get_nvidia_driver_info() -> dict[str, Any]:
     """Get general hardware info for nvidia GPU."""
     results = {}
     try:
@@ -549,8 +600,8 @@ def auto_detect_hwaccel() -> str:
 
 async def get_video_properties(
     ffmpeg, url: str, get_duration: bool = False
-) -> dict[str, any]:
-    async def calculate_duration(video: Optional[any]) -> float:
+) -> dict[str, Any]:
+    async def calculate_duration(video: Optional[Any]) -> float:
         duration = None
 
         if video is not None:
@@ -635,6 +686,74 @@ async def get_video_properties(
     return result
 
 
+def process_logs(
+    contents: str,
+    service: Optional[str] = None,
+    start: Optional[int] = None,
+    end: Optional[int] = None,
+) -> Tuple[int, List[str]]:
+    log_lines = []
+    last_message = None
+    last_timestamp = None
+    repeat_count = 0
+
+    for raw_line in contents.splitlines():
+        clean_line = raw_line.strip()
+
+        if len(clean_line) < 10:
+            continue
+
+        # Handle cases where S6 does not include date in log line
+        if "  " not in clean_line:
+            clean_line = f"{datetime.now()}  {clean_line}"
+
+        try:
+            # Find the position of the first double space to extract timestamp and message
+            date_end = clean_line.index("  ")
+            timestamp = clean_line[:date_end]
+            full_message = clean_line[date_end:].strip()
+
+            # For frigate, remove the date part from message comparison
+            if service == "frigate":
+                # Skip the date at the start of the message if it exists
+                date_parts = full_message.split("]", 1)
+                if len(date_parts) > 1:
+                    message_part = date_parts[1].strip()
+                else:
+                    message_part = full_message
+            else:
+                message_part = full_message
+
+            if message_part == last_message:
+                repeat_count += 1
+                continue
+            else:
+                if repeat_count > 0:
+                    # Insert a deduplication message formatted the same way as logs
+                    dedup_message = f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+                    log_lines.append(dedup_message)
+                    repeat_count = 0
+
+                log_lines.append(clean_line)
+                last_timestamp = timestamp
+
+                last_message = message_part
+
+        except ValueError:
+            # If we can't parse the line properly, just add it as is
+            log_lines.append(clean_line)
+            continue
+
+    # If there were repeated messages at the end, log the count
+    if repeat_count > 0:
+        dedup_message = (
+            f"{last_timestamp}  [LOGGING] Last message repeated {repeat_count} times"
+        )
+        log_lines.append(dedup_message)
+
+    return len(log_lines), log_lines[start:end]
+
+
 def set_file_limit() -> None:
     # Newer versions of containerd 2.X+ impose a very low soft file limit of 1024
     # This applies to OSs like HA OS (see https://github.com/home-assistant/operating-system/issues/4110)
@@ -642,10 +761,10 @@ def set_file_limit() -> None:
     soft_limit = int(os.getenv("SOFT_FILE_LIMIT", "65536") or "65536")
 
     current_soft, current_hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-    logger.info(f"Current file limits - Soft: {current_soft}, Hard: {current_hard}")
+    logger.debug(f"Current file limits - Soft: {current_soft}, Hard: {current_hard}")
 
     new_soft = min(soft_limit, current_hard)
     resource.setrlimit(resource.RLIMIT_NOFILE, (new_soft, current_hard))
-    logger.info(
+    logger.debug(
         f"File limit set. New soft limit: {new_soft}, Hard limit remains: {current_hard}"
     )

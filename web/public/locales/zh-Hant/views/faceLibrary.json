@@ -1,0 +1,96 @@
+{
+  "description": {
+    "addFace": "了解如何新增圖片集合至人臉資料庫。",
+    "placeholder": "輸入此集合的名稱",
+    "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。"
+  },
+  "details": {
+    "person": "人",
+    "timestamp": "時間戳",
+    "unknown": "未知",
+    "subLabelScore": "子標籤分數",
+    "scoreInfo": "子標籤分數是所有已辨識的人臉信心值的加權平均，因此可能與截圖上顯示的分數不同。",
+    "face": "人臉詳細資料",
+    "faceDesc": "組成此人臉的追蹤物件的詳細資料"
+  },
+  "documentTitle": "人臉資料庫 - Frigate",
+  "uploadFaceImage": {
+    "title": "上傳人臉圖片",
+    "desc": "上傳圖片以掃描人臉並將其加入 {{pageToggle}}"
+  },
+  "collections": "集合",
+  "selectItem": "選擇 {{item}}",
+  "createFaceLibrary": {
+    "title": "建立集合",
+    "desc": "建立新集合",
+    "new": "建立新人臉",
+    "nextSteps": "為了建立可靠的模型基底：<li>在訓練分頁中選擇並針對每個偵測到人的圖片進行訓練。</li><li>請優先使用正臉照以獲得最佳效果，請盡量避免使用從側面或有傾斜角度的人臉</li></ul>"
+  },
+  "steps": {
+    "faceName": "輸入人臉名稱",
+    "uploadFace": "上傳人臉圖片",
+    "nextSteps": "下一步",
+    "description": {
+      "uploadFace": "上傳一張 {{name}} 的正臉圖片。圖片不需要裁剪到只剩下臉部。"
+    }
+  },
+  "train": {
+    "title": "訓練",
+    "aria": "選擇訓練",
+    "empty": "最近沒有辨識人臉的操作"
+  },
+  "selectFace": "選擇人臉",
+  "deleteFaceLibrary": {
+    "title": "刪除名稱",
+    "desc": "你確定要刪除 {{name}} 集合嗎？這會刪除所有有關的人臉資料。"
+  },
+  "deleteFaceAttempts": {
+    "title": "刪除人臉",
+    "desc_other": "你確定要刪除 {{count}} 個人臉嗎？這個步驟無法復原。"
+  },
+  "renameFace": {
+    "title": "重新命名人臉",
+    "desc": "輸入 {{name}} 的新名稱"
+  },
+  "button": {
+    "deleteFaceAttempts": "刪除人臉",
+    "addFace": "新增人臉",
+    "renameFace": "重新命名人臉",
+    "uploadImage": "上傳圖片",
+    "reprocessFace": "重新處理人臉",
+    "deleteFace": "刪除人臉"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "請選擇一個圖片檔。"
+    },
+    "dropActive": "將圖片拖到這裡…",
+    "dropInstructions": "將圖片拖放至此處，或點擊以選取",
+    "maxSize": "最大檔案大小：{{size}}MB"
+  },
+  "nofaces": "沒有可用的人臉",
+  "pixels": "{{area}}px",
+  "readTheDocs": "閱讀文件",
+  "trainFaceAs": "將人臉訓練為：",
+  "trainFace": "訓練人臉",
+  "toast": {
+    "success": {
+      "uploadedImage": "成功上傳圖片。",
+      "addFaceLibrary": "已成功將 {{name}} 加入至人臉資料庫！",
+      "deletedFace_other": "成功刪除 {{count}} 個人臉。",
+      "deletedName_other": "{{count}} 個人臉已成功刪除。",
+      "renamedFace": "成功將人臉重新命名為 {{name}}",
+      "trainedFace": "成功訓練人臉。",
+      "updatedFaceScore": "成功更新人臉分數。"
+    },
+    "error": {
+      "uploadingImageFailed": "上傳圖片失敗：{{errorMessage}}",
+      "addFaceLibraryFailed": "設定人臉名稱失敗：{{errorMessage}}",
+      "deleteFaceFailed": "刪除失敗：{{errorMessage}}",
+      "deleteNameFailed": "刪除名稱失敗：{{errorMessage}}",
+      "renameFaceFailed": "重新命名人臉失敗：{{errorMessage}}",
+      "trainFailed": "訓練失敗：{{errorMessage}}",
+      "updateFaceScoreFailed": "更新人臉分數失敗：{{errorMessage}}"
+    }
+  }
+}

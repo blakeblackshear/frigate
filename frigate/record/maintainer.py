@@ -19,10 +19,15 @@ import psutil
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
+from frigate.comms.recordings_updater import (
+    RecordingsDataPublisher,
+    RecordingsDataTypeEnum,
+)
 from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
+    FAST_QUEUE_TIMEOUT,
     INSERT_MANY_RECORDINGS,
     MAX_SEGMENT_DURATION,
     MAX_SEGMENTS_IN_CACHE,
@@ -33,8 +38,6 @@ from frigate.review.types import SeverityEnum
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
-
-QUEUE_READ_TIMEOUT = 0.00001  # seconds
 
 
 class SegmentInfo:
@@ -70,6 +73,9 @@ class RecordingMaintainer(threading.Thread):
         self.requestor = InterProcessRequestor()
         self.config_subscriber = ConfigSubscriber("config/record/")
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
+        self.recordings_publisher = RecordingsDataPublisher(
+            RecordingsDataTypeEnum.recordings_available_through
+        )
 
         self.stop_event = stop_event
         self.object_recordings_info: dict[str, list] = defaultdict(list)
@@ -213,6 +219,16 @@ class RecordingMaintainer(threading.Thread):
                 [self.validate_and_move_segment(camera, reviews, r) for r in recordings]
             )
 
+            # publish most recently available recording time and None if disabled
+            self.recordings_publisher.publish(
+                (
+                    camera,
+                    recordings[0]["start_time"].timestamp()
+                    if self.config.cameras[camera].record.enabled
+                    else None,
+                )
+            )
+
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
 
         # fire and forget recordings entries
@@ -226,7 +242,7 @@ class RecordingMaintainer(threading.Thread):
         self.end_time_cache.pop(cache_path, None)
 
     async def validate_and_move_segment(
-        self, camera: str, reviews: list[ReviewSegment], recording: dict[str, any]
+        self, camera: str, reviews: list[ReviewSegment], recording: dict[str, Any]
     ) -> None:
         cache_path: str = recording["cache_path"]
         start_time: datetime.datetime = recording["start_time"]
@@ -456,7 +472,7 @@ class RecordingMaintainer(threading.Thread):
                     # get the segment size of the cache file
                     # file without faststart is same size
                     segment_size = round(
-                        float(os.path.getsize(cache_path)) / pow(2, 20), 1
+                        float(os.path.getsize(cache_path)) / pow(2, 20), 2
                     )
                 except OSError:
                     segment_size = 0
@@ -519,7 +535,7 @@ class RecordingMaintainer(threading.Thread):
             # empty the object recordings info queue
             while True:
                 (topic, data) = self.detection_subscriber.check_for_update(
-                    timeout=QUEUE_READ_TIMEOUT
+                    timeout=FAST_QUEUE_TIMEOUT
                 )
 
                 if not topic:
@@ -560,7 +576,7 @@ class RecordingMaintainer(threading.Thread):
                                 audio_detections,
                             )
                         )
-                elif topic == DetectionTypeEnum.api:
+                elif topic == DetectionTypeEnum.api or DetectionTypeEnum.lpr:
                     continue
 
                 if frame_time < run_start - stale_frame_count_threshold:
@@ -582,4 +598,5 @@ class RecordingMaintainer(threading.Thread):
         self.requestor.stop()
         self.config_subscriber.stop()
         self.detection_subscriber.stop()
+        self.recordings_publisher.stop()
         logger.info("Exiting recording maintenance...")

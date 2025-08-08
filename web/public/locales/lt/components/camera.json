@@ -1,0 +1,22 @@
+{
+  "group": {
+    "label": "Kamerų Grupės",
+    "add": "Sukurti Kamerų Grupę",
+    "edit": "Modifikuoti Kamerų Grupę",
+    "delete": {
+      "label": "Ištrinti Kamerų Grupę",
+      "confirm": {
+        "title": "Patvirtinti ištrynimą",
+        "desc": "Ar tikrai norite ištrinti šią kamerų grupę <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Pavadinimas",
+      "placeholder": "Įveskite pavadinimą…",
+      "errorMessage": {
+        "mustLeastCharacters": "Kamerų grupės pavadinimas turi būti bent 2 simbolių.",
+        "exists": "Kamerų grupės pavadinimas jau egzistuoja."
+      }
+    }
+  }
+}

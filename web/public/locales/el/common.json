@@ -1,0 +1,8 @@
+{
+  "time": {
+    "untilForTime": "Ως{{time}}",
+    "untilForRestart": "Μέχρι να γίνει επανεκίννηση του Frigate.",
+    "untilRestart": "Μέχρι να γίνει επανεκκίνηση",
+    "justNow": "Μόλις τώρα"
+  }
+}

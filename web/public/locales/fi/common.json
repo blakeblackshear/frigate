@@ -1,0 +1,172 @@
+{
+  "time": {
+    "untilRestart": "Kunnes uudelleenkäynnistyy",
+    "ago": "{{timeAgo}} sitten",
+    "justNow": "Juuri nyt",
+    "today": "Tänään",
+    "yesterday": "Eilen",
+    "last14": "Viimeiset 14 päivää",
+    "untilForTime": "Kunnes {{time}}",
+    "untilForRestart": "Kunnes Frigate uudelleenkäynnistyy.",
+    "thisWeek": "Tämä viikko",
+    "lastWeek": "Viime viikko",
+    "last7": "Viimeiset 7 päivää",
+    "thisMonth": "Tämä kuu",
+    "lastMonth": "Viime kuu",
+    "last30": "Viimeiset 30 päivää",
+    "5minutes": "5 minuuttia",
+    "10minutes": "10 minuuttia",
+    "30minutes": "30 minuuttia",
+    "1hour": "1 tunti",
+    "12hours": "12 tuntia",
+    "24hours": "24 tuntia",
+    "pm": "ip",
+    "am": "ap",
+    "yr": "{{time}}v",
+    "year_one": "{{time}} vuosi",
+    "year_other": "{{time}} vuotta",
+    "mo": "{{time}}kk",
+    "month_one": "{{time}} kuukausi",
+    "month_other": "{{time}} kuukaudet",
+    "d": "{{time}}pv",
+    "day_one": "{{time}} päivä",
+    "day_other": "{{time}} päivät",
+    "h": "{{time}}t",
+    "hour_one": "{{time}} tunti",
+    "hour_other": "{{time}} tuntia",
+    "m": "{{time}}m",
+    "s": "{{time}}s",
+    "minute_one": "{{time}}minuutti",
+    "minute_other": "{{time}}minuuttia",
+    "second_one": "{{time}}sekuntti",
+    "second_other": "{{time}}sekunttia"
+  },
+  "pagination": {
+    "next": {
+      "title": "Seuraava",
+      "label": "Mene seuraavalle sivulle"
+    },
+    "more": "Lisää sivuja",
+    "previous": {
+      "title": "Edellinen",
+      "label": "Mene edelliselle sivulle"
+    },
+    "label": "sivutus"
+  },
+  "accessDenied": {
+    "documentTitle": "Pääsy kielletty - Frigate",
+    "title": "Pääsy kielletty",
+    "desc": "Sinulla ei ole oikeuksia tarkastella tätä sivua."
+  },
+  "role": {
+    "admin": "Järjestelmänvalvoja",
+    "viewer": "Katselija",
+    "desc": "Järjestelmänvalvojalla on täysi käyttöoikeus kaikkiin Frigaten käyttöliittymän toimintoihin. Katselijoiden oikeudet on rajoitettu kameroiden katseluun, kohteiden arviointiin ja historian tarkasteluun.",
+    "title": "Rooli"
+  },
+  "notFound": {
+    "documentTitle": "Ei löytynyt - Frigate",
+    "title": "404",
+    "desc": "Sivua ei löytynyt"
+  },
+  "selectItem": "Valitse {{item}}",
+  "menu": {
+    "live": {
+      "title": "Suora",
+      "cameras": {
+        "title": "Kamerat",
+        "count_one": "{{count}} kamera",
+        "count_other": "{{count}} kameraa"
+      },
+      "allCameras": "Kaikki kamerat"
+    },
+    "explore": "Selaa",
+    "export": "Vienti",
+    "uiPlayground": "UI-leikkikenttä",
+    "user": {
+      "account": "Tili",
+      "current": "Nykyinen käyttäjä: {{user}}",
+      "anonymous": "anonyymi",
+      "title": "Käyttäjä",
+      "logout": "Kirjaudu ulos",
+      "setPassword": "Aseta salasana"
+    },
+    "appearance": "Ulkonäkö",
+    "darkMode": {
+      "label": "Tumma tila",
+      "light": "Valoisa",
+      "dark": "Tumma",
+      "withSystem": {
+        "label": "Käytä järjestelmän asetuksia valoisalle tai tummalle tilalle"
+      }
+    },
+    "faceLibrary": "Kasvokirjasto",
+    "language": {
+      "ca": "Katalaani",
+      "withSystem": {
+        "label": "Käytä järjestelmän asetuksia kielelle"
+      }
+    },
+    "review": "Esikatselu",
+    "theme": {
+      "highcontrast": "Korkea resoluutio",
+      "blue": "Sininen",
+      "green": "Vihreä",
+      "default": "Oletus",
+      "nord": "Pohjoismainen",
+      "red": "Punainen",
+      "label": "Teema"
+    },
+    "withSystem": "Järjestelmä",
+    "help": "Apua",
+    "documentation": {
+      "title": "Dokumentaatio",
+      "label": "Frigaten dokumentaatio"
+    },
+    "restart": "Käynnistä uudelleen",
+    "languages": "Kielet",
+    "system": "Järjestelmä",
+    "settings": "Asetukset",
+    "configuration": "Konfiguraatio"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL kopioitu leikepöydälle.",
+    "save": {
+      "title": "Tallenna",
+      "error": {
+        "title": "Konfiguraatiomuutosten tallennus epäonnistui: {{errorMessage}}",
+        "noMessage": "Konfiguraatiomuutosten tallennus epäonnistui"
+      }
+    }
+  },
+  "button": {
+    "on": "ON",
+    "disabled": "Pois käytöstä",
+    "done": "Valmis",
+    "enabled": "Käytössä",
+    "enable": "Ota käyttöön",
+    "disable": "Poista käytöstä",
+    "save": "Tallenna",
+    "saving": "Tallennetaan…",
+    "cancel": "Peruuta",
+    "reset": "Nollaa",
+    "close": "Sulje",
+    "off": "OFF",
+    "edit": "Muokkaa",
+    "yes": "Kyllä",
+    "copy": "Kopioi",
+    "no": "Ei",
+    "download": "Lataa",
+    "back": "Takaisin",
+    "history": "Historia",
+    "play": "Toista",
+    "next": "Seuraava",
+    "delete": "Poista",
+    "info": "Info"
+  },
+  "unit": {
+    "length": {
+      "feet": "jalka"
+    }
+  }
+}

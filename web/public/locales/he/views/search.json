@@ -1,0 +1,72 @@
+{
+  "search": "חיפוש",
+  "savedSearches": "חיפושים שמורים",
+  "searchFor": "חפש את{{inputValue}}",
+  "button": {
+    "clear": "ניקוי חיפוש",
+    "save": "שמירת החיפוש",
+    "delete": "מחיקת חיפוש שמור",
+    "filterInformation": "סינון מידע",
+    "filterActive": "מסננים פעילים"
+  },
+  "trackedObjectId": "מזהה אובייקט במעקב",
+  "filter": {
+    "label": {
+      "cameras": "מצלמות",
+      "labels": "תוויות",
+      "zones": "אזורים",
+      "sub_labels": "תוויות משנה",
+      "search_type": "סוג חיפוש",
+      "time_range": "טווח זמן",
+      "before": "לפני",
+      "after": "אחרי",
+      "min_score": "ציון מינימום",
+      "max_speed": "מהירות מקסימאלית",
+      "max_score": "ציון מקסימאלי",
+      "min_speed": "מהירות מינמאלית",
+      "recognized_license_plate": "לוחית רישוי מוכרת",
+      "has_clip": "קיים סרטון קליפ",
+      "has_snapshot": "לכידת תמונה קיימת"
+    },
+    "searchType": {
+      "thumbnail": "תמונה ממוזערת",
+      "description": "תיאור"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "תאריך ה\"לפני\" חייב להיות מאוחר מתאריך ה\"אחרי\".",
+        "afterDatebeEarlierBefore": "תאריך ה'אחרי' חייב להיות מוקדם יותר מתאריך ה'לפני'.",
+        "minScoreMustBeLessOrEqualMaxScore": "ה-'min_score' חייב להיות קטן או שווה ל-'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "ה-'max_score' חייב להיות גדול או שווה ל-'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "ה-'min_speed' חייב להיות קטן או שווה ל-'max_speed'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "ה-'max_speed' חייב להיות גדול או שווה ל-'min_speed'."
+      }
+    },
+    "tips": {
+      "title": "כיצד להשתמש במסנני טקסט",
+      "desc": {
+        "text": "מסננים עוזרים לך לצמצם את תוצאות החיפוש שלך. כך תוכל להשתמש בהם בשדה הקלט:",
+        "step1": "הקלד שם של מפתח סינון ואחריו נקודתיים (לדוגמה, \"מצלמות:\").",
+        "step2": "בחר ערך מההצעות או הקלד ערך משלך.",
+        "step3": "השתמשו במספר מסננים על ידי הוספתם אחד אחרי השני עם רווח ביניהם.",
+        "step6": "הסר מסננים על ידי לחיצה על ה-'x' שלידם.",
+        "step4": "מסנני תאריך (לפני: ואחרי:) משתמשים בפורמט {{DateFormat}}.",
+        "step5": "מסנן טווח הזמן משתמש בפורמט {{exampleTime}}.",
+        "exampleLabel": "דוּגמָה:"
+      }
+    },
+    "header": {
+      "currentFilterType": "סנן ערכים",
+      "noFilters": "מסננים",
+      "activeFilters": "מסננים פעילים"
+    }
+  },
+  "similaritySearch": {
+    "title": "חיפוש פריטים דומים",
+    "active": "חיפוש דומה פעיל",
+    "clear": "נקה חיפוש דומה"
+  },
+  "placeholder": {
+    "search": "חיפוש…"
+  }
+}

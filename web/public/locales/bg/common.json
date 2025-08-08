@@ -1,0 +1,110 @@
+{
+  "time": {
+    "today": "Днес",
+    "yesterday": "Вчера",
+    "month_one": "{{time}} месец",
+    "month_other": "{{time}} месеца",
+    "day_one": "{{time}} ден",
+    "day_other": "{{time}} дни",
+    "hour_one": "{{time}} час",
+    "hour_other": "{{time}} часа",
+    "minute_one": "{{time}} минута",
+    "minute_other": "{{time}} минути",
+    "second_one": "{{time}} секунда",
+    "second_other": "{{time}} секунди",
+    "year_one": "{{time}} година",
+    "year_other": "{{time}} години",
+    "justNow": "Сега",
+    "last7": "Изминалите 7 дни",
+    "last14": "Изминалите 14 дни",
+    "last30": "Изминалите 30 дни",
+    "thisWeek": "Тази седмица",
+    "lastWeek": "Предходната седмица",
+    "thisMonth": "Този месец",
+    "lastMonth": "Предходния месец",
+    "5minutes": "5 минути",
+    "10minutes": "10 минути",
+    "30minutes": "30 минути",
+    "1hour": "1 час",
+    "12hours": "12 часа",
+    "24hours": "24 часа",
+    "pm": "pm",
+    "am": "am",
+    "yr": "г",
+    "d": "{{time}}д",
+    "h": "{{time}}ч",
+    "formattedTimestamp": {
+      "12hour": "МММ д, ч:мм:сс ааа",
+      "24hour": "МММ д, ЧЧ:мм:сс"
+    },
+    "formattedTimestamp2": {
+      "12hour": "ММ/дд ч:мм:сса",
+      "24hour": "д МММ ЧЧ:мм:сс"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "ч:мм ааа",
+      "24hour": "ЧЧ:мм"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "ч:мм:сс ааа",
+      "24hour": "ЧЧ:мм:сс"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "МММ д, ч:мм ааа",
+      "24hour": "МММ д, ЧЧ:мм"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "МММ д, гггг",
+      "24hour": "МММ д, гггг"
+    }
+  },
+  "button": {
+    "apply": "Приложи",
+    "reset": "Нулиране",
+    "done": "Готово",
+    "disabled": "Деактивирано",
+    "save": "Запази",
+    "saving": "Запазване…",
+    "cancel": "Отказ",
+    "close": "Затвори",
+    "copy": "Копирай",
+    "edit": "Редактирай",
+    "copyCoordinates": "Копирай координати",
+    "delete": "Изтриване",
+    "yes": "Да",
+    "download": "Изтегляне",
+    "enabled": "Активирано",
+    "history": "История",
+    "back": "Назад",
+    "fullscreen": "Цял екран",
+    "exitFullscreen": "Излез от цял екран",
+    "pictureInPicture": "Картина в картина",
+    "twoWayTalk": "Двупосочни разговори",
+    "cameraAudio": "Аудио на камерата",
+    "on": "Включено",
+    "off": "Изключено",
+    "no": "Не",
+    "info": "Информация",
+    "suspended": "Спряно",
+    "unsuspended": "Възобновяване",
+    "play": "Пускане",
+    "unselect": "Демаркиране",
+    "export": "Експортиране",
+    "deleteNow": "Изтрии сега",
+    "next": "Следващ",
+    "disable": "Деактивирай",
+    "enable": "Активирай"
+  },
+  "menu": {
+    "live": {
+      "title": "Наживо",
+      "cameras": {
+        "count_one": "{{count}} камера",
+        "count_other": "{{count}} камери"
+      }
+    }
+  },
+  "label": {
+    "back": "Върни се"
+  }
+}

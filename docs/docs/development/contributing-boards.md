@@ -72,17 +72,17 @@ COPY --from=rootfs / /
 The images for each board will be built for each Frigate release, this is done in the `.github/workflows/ci.yml` file. The board build workflow will need to be added here.
 
 ```yml
-      - name: Build and push board build
-        uses: docker/bake-action@v3
-        with:
-          push: true
-          targets: board # this is the target in the board.hcl file
-          files: docker/board/board.hcl # this should be updated with the actual board type
-          # the tags should be updated with the actual board types as well
-          # the community board builds should never push to cache, but it can pull from cache
-          set: |
-            board.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-board
-            *.cache-from=type=gha
+- name: Build and push board build
+  uses: docker/bake-action@v3
+  with:
+    push: true
+    targets: board # this is the target in the board.hcl file
+    files: docker/board/board.hcl # this should be updated with the actual board type
+    # the tags should be updated with the actual board types as well
+    # the community board builds should never push to cache, but it can pull from cache
+    set: |
+      board.tags=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-board
+      *.cache-from=type=gha
 ```
 
 ### Code Owner File
@@ -91,4 +91,4 @@ The `CODEOWNERS` file should be updated to include the `docker/board` along with
 
 # Docs
 
-At a minimum the `installation`, `object_detectors`, `hardware_acceleration`, and `ffmpeg-presets` docs should be updated (if applicable) to reflect the configuration of this community board.
+At a minimum the `installation`, `object_detectors`, `hardware_acceleration_video`, and `ffmpeg-presets` docs should be updated (if applicable) to reflect the configuration of this community board.

@@ -1,0 +1,19 @@
+{
+  "documentTitle": {
+    "cameras": "Kamerų Statistika - Frigate",
+    "storage": "Saugyklos Statistika - Frigate",
+    "logs": {
+      "frigate": "Frigate Žurnalas - Frigate",
+      "go2rtc": "Go2RTC Žurnalas - Frigate",
+      "nginx": "Nginx Žurnalas - Frigate"
+    },
+    "general": "Bendroji Statistika - Frigate"
+  },
+  "title": "Sistema",
+  "metrics": "Sistemos metrikos",
+  "logs": {
+    "download": {
+      "label": "Parsisiųsti Žurnalą"
+    }
+  }
+}

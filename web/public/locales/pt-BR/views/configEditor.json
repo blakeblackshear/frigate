@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Editor de Configuração - Frigate",
+  "configEditor": "Editor de configuração",
+  "copyConfig": "Copiar Configuração",
+  "saveAndRestart": "Salvar & Reiniciar",
+  "saveOnly": "Salvar apenas",
+  "confirm": "Sair sem salvar?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Configuração copiada para a área de transferência."
+    },
+    "error": {
+      "savingError": "Erro ao salvar configuração"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "search": "搜尋",
+  "savedSearches": "已儲存的搜尋",
+  "searchFor": "搜尋 {{inputValue}}",
+  "button": {
+    "clear": "清除搜尋",
+    "save": "儲存搜尋",
+    "delete": "刪除已儲存的搜尋",
+    "filterInformation": "篩選資料",
+    "filterActive": "篩選中"
+  },
+  "trackedObjectId": "追蹤物件編號",
+  "filter": {
+    "label": {
+      "labels": "標籤",
+      "zones": "區域",
+      "search_type": "搜尋類型",
+      "time_range": "時間範圍",
+      "after": "之後",
+      "recognized_license_plate": "已辨識車牌",
+      "has_clip": "有片段",
+      "has_snapshot": "有快照",
+      "min_score": "最低分數",
+      "before": "之前",
+      "max_score": "最高分數",
+      "max_speed": "最高速度",
+      "min_speed": "最低速度",
+      "cameras": "鏡頭",
+      "sub_labels": "子標籤"
+    },
+    "searchType": {
+      "thumbnail": "縮圖",
+      "description": "描述"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "「結束」日期必須遲於「開始」日期。",
+        "afterDatebeEarlierBefore": "「開始」日期必須早於「結束」日期。",
+        "minScoreMustBeLessOrEqualMaxScore": "「最低分數」必須少於或等於「最高分數」。",
+        "maxScoreMustBeGreaterOrEqualMinScore": "「最高分數」必須多於或等於「最低分數」。",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "「最高速度」必須多於或等於「最低速度」。",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "「最低速度」必須少於或等於「最高速度」。"
+      }
+    },
+    "tips": {
+      "title": "如何使用文字篩選",
+      "desc": {
+        "step1": "輸入篩選鍵名後加上冒號（例如：\"cameras:\"）。",
+        "step2": "從建議中選擇一個值，或者自行輸入。",
+        "step3": "可以用空格隔開，連續使用多個篩選條件。",
+        "step4": "日期篩選（before: 同 after:）要用 {{DateFormat}} 格式。",
+        "step5": "時間範圍篩選要用 {{exampleTime}} 格式。",
+        "step6": "點擊旁邊的「x」就可以移除篩選條件。",
+        "text": "篩選可以幫你縮窄搜尋結果。以下係使用方法：",
+        "exampleLabel": "例子："
+      }
+    },
+    "header": {
+      "activeFilters": "啟用中的篩選條件",
+      "noFilters": "篩選條件",
+      "currentFilterType": "篩選數值"
+    }
+  },
+  "similaritySearch": {
+    "title": "相似搜尋",
+    "active": "正在進行相似搜尋",
+    "clear": "清除相似搜尋"
+  },
+  "placeholder": {
+    "search": "搜尋…"
+  }
+}

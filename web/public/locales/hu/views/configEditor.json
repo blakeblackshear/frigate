@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Konfiguráció Szerkesztő - Frigate",
+  "configEditor": "Konfiguráció szerkesztő",
+  "copyConfig": "Konfiguráció másolása",
+  "saveAndRestart": "Mentés és Újraindítás",
+  "saveOnly": "Csak mentés",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Konfiguráció átmásolva a vágólapra."
+    },
+    "error": {
+      "savingError": "Hiba a konfiguráció mentésekor"
+    }
+  },
+  "confirm": "Kilép mentés nélkül?"
+}

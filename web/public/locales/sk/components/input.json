@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Stiahnuť Video",
+      "toast": {
+        "success": "Video pre náhľad sa začalo sťahovanie."
+      }
+    }
+  }
+}

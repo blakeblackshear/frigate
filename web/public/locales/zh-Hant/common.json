@@ -1,0 +1,251 @@
+{
+  "time": {
+    "untilForTime": "直到 {{time}}",
+    "untilForRestart": "直到 Frigate 重新啟動。",
+    "untilRestart": "直到重新啟動",
+    "ago": "{{timeAgo}} 前",
+    "last14": "過去 14 天",
+    "last30": "過去 30 天",
+    "thisWeek": "這週",
+    "lastWeek": "上週",
+    "thisMonth": "這個月",
+    "lastMonth": "上個月",
+    "justNow": "剛剛",
+    "today": "今天",
+    "yesterday": "昨天",
+    "last7": "過去 7 天",
+    "5minutes": "5 分鐘",
+    "10minutes": "10 分鐘",
+    "30minutes": "30 分鐘",
+    "1hour": "1 小時",
+    "12hours": "12 小時",
+    "24hours": "24 小時",
+    "pm": "下午",
+    "am": "上午",
+    "yr": "{{time}} 年",
+    "year_other": "{{time}} 年",
+    "mo": "{{time}} 月",
+    "month_other": "{{time}} 月",
+    "d": "{{time}} 日",
+    "day_other": "{{time}}天",
+    "h": "{{time}}時",
+    "hour_other": "{{time}}小時",
+    "m": "{{time}}分",
+    "minute_other": "{{time}}分鐘",
+    "s": "{{time}}秒",
+    "second_other": "{{time}}秒鐘",
+    "formattedTimestamp": {
+      "12hour": "M 月 d 日 ah:mm:ss",
+      "24hour": "M 月 d 日 HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM 月 dd 日 ah:mm:ss",
+      "24hour": "MM 月 dd 日 HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "a h:mm",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "a h:mm:ss",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "M 月 d 日 ah:mm",
+      "24hour": "M 月 d 日 HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "yy 年 MM 月 dd 日",
+      "24hour": "yy 年 MM 月 dd 日"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "yyyy 年 M 月 d 日 ah:mm",
+      "24hour": "yyyy 年 M 月 d 日 HH:mm"
+    },
+    "formattedTimestampMonthDay": "M 月 d 日",
+    "formattedTimestampFilename": {
+      "12hour": "yy年MM月dd日 ah時mm分ss秒",
+      "24hour": "yy年MM月dd日 HH時mm分ss秒"
+    }
+  },
+  "unit": {
+    "speed": {
+      "mph": "英里/小時",
+      "kph": "公里/小時"
+    },
+    "length": {
+      "feet": "英尺",
+      "meters": "公尺"
+    }
+  },
+  "label": {
+    "back": "返回"
+  },
+  "button": {
+    "apply": "套用",
+    "reset": "重置",
+    "done": "完成",
+    "enabled": "已啟用",
+    "enable": "啟用",
+    "disabled": "已停用",
+    "disable": "停用",
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "取消",
+    "close": "關閉",
+    "copy": "複製",
+    "back": "返回",
+    "history": "歷史紀錄",
+    "fullscreen": "全螢幕",
+    "exitFullscreen": "退出全螢幕",
+    "pictureInPicture": "子母畫面",
+    "twoWayTalk": "雙向通話",
+    "cameraAudio": "鏡頭音訊",
+    "on": "開",
+    "off": "關",
+    "edit": "編輯",
+    "copyCoordinates": "複製座標",
+    "delete": "刪除",
+    "yes": "是",
+    "no": "否",
+    "download": "下載",
+    "info": "資訊",
+    "suspended": "已暫停",
+    "unsuspended": "取消暫停",
+    "play": "播放",
+    "unselect": "取消選取",
+    "export": "匯出",
+    "deleteNow": "立即刪除",
+    "next": "繼續"
+  },
+  "menu": {
+    "system": "系統",
+    "systemMetrics": "系統訊息",
+    "configuration": "設定",
+    "systemLogs": "系統日誌",
+    "settings": "設定",
+    "configurationEditor": "設定編輯器",
+    "languages": "語言",
+    "language": {
+      "en": "English (英文)",
+      "es": "Español (西班牙文)",
+      "zhCN": "简体中文 (簡體中文)",
+      "hi": "हिन्दी (印地文)",
+      "fr": "Français (法文)",
+      "ar": "العربية (阿拉伯文)",
+      "pt": "Português (葡萄牙文)",
+      "ru": "Русский (俄文)",
+      "de": "Deutsch (德文)",
+      "ja": "日本語 (日文)",
+      "tr": "Türkçe (土耳其文)",
+      "it": "Italiano (義大利文)",
+      "nl": "Nederlands (荷蘭文)",
+      "sv": "Svenska (瑞典文)",
+      "cs": "Čeština (捷克文)",
+      "nb": "Norsk Bokmål (挪威文)",
+      "ko": "한국어 (韓文)",
+      "vi": "Tiếng Việt (越南文)",
+      "fa": "فارسی (波斯文)",
+      "pl": "Polski (波蘭文)",
+      "uk": "Українська (烏克蘭文)",
+      "he": "עברית (希伯來文)",
+      "el": "Ελληνικά (希臘文)",
+      "ro": "Română (羅馬尼亞文)",
+      "hu": "Magyar (匈牙利文)",
+      "fi": "Suomi (芬蘭文)",
+      "da": "Dansk (丹麥文)",
+      "sk": "Slovenčina (斯洛伐克文)",
+      "yue": "粵語 (粵語)",
+      "th": "ไทย (泰文)",
+      "ca": "Català (加泰隆尼亞文)",
+      "withSystem": {
+        "label": "使用系統語言設定"
+      }
+    },
+    "appearance": "外觀",
+    "darkMode": {
+      "label": "深色模式",
+      "light": "淺色",
+      "dark": "深色",
+      "withSystem": {
+        "label": "使用系統外觀模式設定"
+      }
+    },
+    "withSystem": "系統",
+    "theme": {
+      "label": "主題",
+      "blue": "藍色",
+      "green": "綠色",
+      "nord": "北歐風",
+      "red": "紅色",
+      "highcontrast": "高對比",
+      "default": "預設"
+    },
+    "help": "幫助",
+    "documentation": {
+      "title": "文件",
+      "label": "Frigate 文件"
+    },
+    "restart": "重新啟動 Frigate",
+    "live": {
+      "title": "即時影像",
+      "allCameras": "所有鏡頭",
+      "cameras": {
+        "title": "鏡頭",
+        "count_other": "{{count}} 個鏡頭"
+      }
+    },
+    "review": "審核",
+    "explore": "瀏覽",
+    "export": "匯出",
+    "uiPlayground": "UI 測試區",
+    "faceLibrary": "人臉資料庫",
+    "user": {
+      "title": "使用者",
+      "account": "帳號",
+      "current": "當前使用者：{{user}}",
+      "anonymous": "匿名",
+      "logout": "登出",
+      "setPassword": "設定密碼"
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "已複製連結至剪貼簿。",
+    "save": {
+      "title": "保存",
+      "error": {
+        "title": "保存設定變更失敗：{{errorMessage}}",
+        "noMessage": "保存設定變更失敗"
+      }
+    }
+  },
+  "role": {
+    "title": "角色",
+    "admin": "管理員",
+    "viewer": "檢視者",
+    "desc": "管理員可以存取 Frigate UI 的全部功能。檢視者僅能查看鏡頭影像、審核物件及歷史紀錄。"
+  },
+  "pagination": {
+    "label": "分頁",
+    "previous": {
+      "title": "上一頁",
+      "label": "前往上一頁"
+    },
+    "next": {
+      "title": "下一頁",
+      "label": "前往下一頁"
+    },
+    "more": "更多頁面"
+  },
+  "accessDenied": {
+    "documentTitle": "拒絕存取 - Frigate",
+    "title": "拒絕存取",
+    "desc": "你沒有瀏覽此頁面的權限。"
+  },
+  "notFound": {
+    "documentTitle": "找不到頁面 - Frigate",
+    "title": "404",
+    "desc": "找不到頁面"
+  },
+  "selectItem": "選擇 {{item}}"
+}

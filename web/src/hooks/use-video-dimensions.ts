@@ -17,7 +17,7 @@ export function useVideoDimensions(
   });
 
   const videoAspectRatio = useMemo(() => {
-    return videoResolution.width / videoResolution.height || 16 / 9;
+    return videoResolution.width / videoResolution.height;
   }, [videoResolution]);
 
   const containerAspectRatio = useMemo(() => {
@@ -25,7 +25,7 @@ export function useVideoDimensions(
   }, [containerWidth, containerHeight]);
 
   const videoDimensions = useMemo(() => {
-    if (!containerWidth || !containerHeight)
+    if (!containerWidth || !containerHeight || !videoAspectRatio)
       return { width: "100%", height: "100%" };
     if (containerAspectRatio > videoAspectRatio) {
       const height = containerHeight;

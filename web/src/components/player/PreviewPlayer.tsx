@@ -20,8 +20,10 @@ import {
   getPreviewForTimeRange,
   usePreviewForTimeRange,
 } from "@/hooks/use-camera-previews";
+import { useTranslation } from "react-i18next";
 
 type PreviewPlayerProps = {
+  previewRef?: (ref: HTMLDivElement | null) => void;
   className?: string;
   camera: string;
   timeRange: TimeRange;
@@ -29,19 +31,23 @@ type PreviewPlayerProps = {
   startTime?: number;
   isScrubbing: boolean;
   forceAspect?: number;
+  isVisible?: boolean;
   onControllerReady: (controller: PreviewController) => void;
   onClick?: () => void;
 };
 export default function PreviewPlayer({
+  previewRef,
   className,
   camera,
   timeRange,
   cameraPreviews,
   startTime,
   isScrubbing,
+  isVisible = true,
   onControllerReady,
   onClick,
 }: PreviewPlayerProps) {
+  const { t } = useTranslation(["components/player"]);
   const [currentHourFrame, setCurrentHourFrame] = useState<string>();
   const currentPreview = usePreviewForTimeRange(
     cameraPreviews,
@@ -52,6 +58,7 @@ export default function PreviewPlayer({
   if (currentPreview) {
     return (
       <PreviewVideoPlayer
+        visibilityRef={previewRef}
         className={className}
         camera={camera}
         timeRange={timeRange}
@@ -59,6 +66,7 @@ export default function PreviewPlayer({
         initialPreview={currentPreview}
         startTime={startTime}
         isScrubbing={isScrubbing}
+        isVisible={isVisible}
         currentHourFrame={currentHourFrame}
         onControllerReady={onControllerReady}
         onClick={onClick}
@@ -88,7 +96,7 @@ export default function PreviewPlayer({
         className,
       )}
     >
-      No Preview Found
+      {t("noPreviewFound")}
     </div>
   );
 }
@@ -108,6 +116,7 @@ export abstract class PreviewController {
 }
 
 type PreviewVideoPlayerProps = {
+  visibilityRef?: (ref: HTMLDivElement | null) => void;
   className?: string;
   camera: string;
   timeRange: TimeRange;
@@ -115,12 +124,14 @@ type PreviewVideoPlayerProps = {
   initialPreview?: Preview;
   startTime?: number;
   isScrubbing: boolean;
+  isVisible: boolean;
   currentHourFrame?: string;
   onControllerReady: (controller: PreviewVideoController) => void;
   onClick?: () => void;
   setCurrentHourFrame: (src: string | undefined) => void;
 };
 function PreviewVideoPlayer({
+  visibilityRef,
   className,
   camera,
   timeRange,
@@ -128,11 +139,13 @@ function PreviewVideoPlayer({
   initialPreview,
   startTime,
   isScrubbing,
+  isVisible,
   currentHourFrame,
   onControllerReady,
   onClick,
   setCurrentHourFrame,
 }: PreviewVideoPlayerProps) {
+  const { t } = useTranslation(["components/player"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // controlling playback
@@ -264,11 +277,13 @@ function PreviewVideoPlayer({
 
   return (
     <div
+      ref={visibilityRef}
       className={cn(
         "relative flex w-full justify-center overflow-hidden rounded-lg bg-black md:rounded-2xl",
         onClick && "cursor-pointer",
         className,
       )}
+      data-camera={camera}
       onClick={onClick}
     >
       <img
@@ -283,48 +298,51 @@ function PreviewVideoPlayer({
           previewRef.current?.load();
         }}
       />
-      <video
-        ref={previewRef}
-        className={`absolute size-full ${currentHourFrame ? "invisible" : "visible"}`}
-        preload="auto"
-        autoPlay
-        playsInline
-        muted
-        disableRemotePlayback
-        onSeeked={onPreviewSeeked}
-        onLoadedData={() => {
-          if (firstLoad) {
-            setFirstLoad(false);
-          }
-
-          if (controller) {
-            controller.previewReady();
-          } else {
-            previewRef.current?.pause();
-          }
-
-          if (previewRef.current) {
-            setVideoSize([
-              previewRef.current.videoWidth,
-              previewRef.current.videoHeight,
-            ]);
-
-            if (startTime && currentPreview) {
-              previewRef.current.currentTime = startTime - currentPreview.start;
+      {isVisible && (
+        <video
+          ref={previewRef}
+          className={`absolute size-full ${currentHourFrame ? "invisible" : "visible"}`}
+          preload="auto"
+          autoPlay
+          playsInline
+          muted
+          disableRemotePlayback
+          onSeeked={onPreviewSeeked}
+          onLoadedData={() => {
+            if (firstLoad) {
+              setFirstLoad(false);
             }
-          }
-        }}
-      >
-        {currentPreview != undefined && (
-          <source
-            src={`${baseUrl}${currentPreview.src.substring(1)}`}
-            type={currentPreview.type}
-          />
-        )}
-      </video>
+
+            if (controller) {
+              controller.previewReady();
+            } else {
+              previewRef.current?.pause();
+            }
+
+            if (previewRef.current) {
+              setVideoSize([
+                previewRef.current.videoWidth,
+                previewRef.current.videoHeight,
+              ]);
+
+              if (startTime && currentPreview) {
+                previewRef.current.currentTime =
+                  startTime - currentPreview.start;
+              }
+            }
+          }}
+        >
+          {currentPreview != undefined && (
+            <source
+              src={`${baseUrl}${currentPreview.src.substring(1)}`}
+              type={currentPreview.type}
+            />
+          )}
+        </video>
+      )}
       {cameraPreviews && !currentPreview && (
         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background_alt text-primary dark:bg-black md:rounded-2xl">
-          No Preview Found for {camera.replaceAll("_", " ")}
+          {t("noPreviewFoundFor", { camera: camera.replaceAll("_", " ") })}
         </div>
       )}
       {firstLoad && <Skeleton className="absolute aspect-video size-full" />}
@@ -444,6 +462,8 @@ function PreviewFramesPlayer({
   onControllerReady,
   onClick,
 }: PreviewFramesPlayerProps) {
+  const { t } = useTranslation(["components/player"]);
+
   // frames data
 
   const { data: previewFrames } = useSWR<string[]>(
@@ -544,7 +564,7 @@ function PreviewFramesPlayer({
       />
       {previewFrames?.length === 0 && (
         <div className="-y-translate-1/2 align-center absolute inset-x-0 top-1/2 rounded-lg bg-background_alt text-center text-primary dark:bg-black md:rounded-2xl">
-          No Preview Found for {camera.replaceAll("_", " ")}
+          {t("noPreviewFoundFor", { cameraName: camera.replaceAll("_", " ") })}
         </div>
       )}
       {firstLoad && <Skeleton className="absolute aspect-video size-full" />}

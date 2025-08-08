@@ -1,0 +1,38 @@
+{
+  "motion": {
+    "label": "Judesys",
+    "only": "Tik judesys"
+  },
+  "allCameras": "Visos kameros",
+  "timeline": "Laiko juosta",
+  "timeline.aria": "Pasirink laiko juostą",
+  "events": {
+    "label": "Įvykiai",
+    "aria": "Pasirinkti įvykius",
+    "noFoundForTimePeriod": "Šiam laiko periodui įvykių nėrasta."
+  },
+  "calendarFilter": {
+    "last24Hours": "Paskutinė para"
+  },
+  "selected_one": "{{count}} pasirinktas",
+  "selected_other": "{{count}} pasirinkta",
+  "camera": "Kamera",
+  "alerts": "Įspėjimai",
+  "detections": "Aptikimai",
+  "empty": {
+    "alert": "Nėra pranešimų peržiūrai",
+    "detection": "Nėra aptikimų peržiūrai",
+    "motion": "Duomenų apie judesius nėra"
+  },
+  "documentTitle": "Peržiūros - Frigate",
+  "recordings": {
+    "documentTitle": "Įrašai - Frigate"
+  },
+  "markAsReviewed": "Pažymėti kaip peržiūrėtą",
+  "markTheseItemsAsReviewed": "Pažymėti šiuos įrašus kaip peržiūrėtus",
+  "newReviewItems": {
+    "label": "Pamatyti naujus peržiūros įrašus",
+    "button": "Nauji Įrašai Peržiūrėjimui"
+  },
+  "detected": "aptikta"
+}

@@ -1,0 +1,59 @@
+{
+  "filter": "Filter",
+  "labels": {
+    "label": "Označenia",
+    "all": {
+      "title": "Všetky popisky",
+      "short": "Štítky"
+    },
+    "count_one": "{{count}} Štítok",
+    "count_other": "{{count}} Štítkov"
+  },
+  "zones": {
+    "label": "Zóny",
+    "all": {
+      "title": "Všetky zóny",
+      "short": "Zóny"
+    }
+  },
+  "dates": {
+    "selectPreset": "Vyberte predvoľbu…",
+    "all": {
+      "title": "Všetky dátumy",
+      "short": "Dátumy"
+    }
+  },
+  "more": "Viac filtrov",
+  "reset": {
+    "label": "Obnoviť filtre na predvolené hodnoty"
+  },
+  "timeRange": "Časový rozsah",
+  "subLabels": {
+    "label": "Podštítky",
+    "all": "Všetky vedľajšie štítky"
+  },
+  "score": "Skóre",
+  "estimatedSpeed": "Odhadovaná rýchlosť ({{unit}})",
+  "features": {
+    "label": "Vlastnosti",
+    "hasSnapshot": "Má snímku",
+    "hasVideoClip": "Má videoklip",
+    "submittedToFrigatePlus": {
+      "label": "Odoslané do Frigate+",
+      "tips": "Najprv musíte filtrovať sledované objekty, ktoré majú snímku.<br /><br />Sledované objekty bez snímky nie je možné odoslať do Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Zoradiť",
+    "dateAsc": "Dátum (Vzostupne)",
+    "dateDesc": "Dátum (Zostupne)",
+    "scoreAsc": "Skóre objektu (Vzostupne)",
+    "scoreDesc": "Skóre objektu (zostupne)",
+    "speedAsc": "Odhadovaná rýchlosť (vzostupne)",
+    "speedDesc": "Odhadovaná rýchlosť (zostupne)",
+    "relevance": "Relevantnosť"
+  },
+  "cameras": {
+    "label": "Filter kamier"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "documentTitle": "Izvoz - Frigate",
+  "search": "Pretraga",
+  "noExports": "Nije pronađen nijedan izvoz",
+  "deleteExport": "Izbriši izvoz",
+  "deleteExport.desc": "Da li zaista želite obrisati {{exportName}}?",
+  "editExport": {
+    "title": "Preimenuj izvoz",
+    "desc": "Unesite novo ime za ovaj izvoz."
+  }
+}
