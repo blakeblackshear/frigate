@@ -163,7 +163,7 @@ export default function NotificationView({
   });
 
   const watchAllEnabled = form.watch("allEnabled");
-  const watchCameras = useMemo(() => form.watch("cameras") || [], [form]);
+  const watchCameras = form.watch("cameras");
 
   const anyCameraNotificationsEnabled = useMemo(
     () =>
