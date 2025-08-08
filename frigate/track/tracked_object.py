@@ -32,6 +32,14 @@ from frigate.util.velocity import calculate_real_world_speed
 logger = logging.getLogger(__name__)
 
 
+# In most cases objects that loiter in a loitering zone should alert,
+# but can still be expected to stay stationary for extended periods of time
+# (ex: car loitering on the street vs when a known person parks on the street)
+# person is the main object that should keep alerts going as long as they loiter
+# even if they are stationary.
+EXTENDED_LOITERING_OBJECTS = ["person"]
+
+
 class TrackedObject:
     def __init__(
         self,
@@ -247,8 +255,12 @@ class TrackedObject:
                         if zone.distances and not in_speed_zone:
                             continue  # Skip zone entry for speed zones until speed threshold met
 
-                        # if the zone has loitering time, update loitering status
-                        if zone.loitering_time > 0:
+                        # if the zone has loitering time, and the object is an extended loiter object
+                        # always mark it as loitering actively
+                        if (
+                            self.obj_data["label"] in EXTENDED_LOITERING_OBJECTS
+                            and zone.loitering_time > 0
+                        ):
                             in_loitering_zone = True
 
                         loitering_score = self.zone_loitering.get(name, 0) + 1
@@ -264,6 +276,10 @@ class TrackedObject:
                                 self.entered_zones.append(name)
                         else:
                             self.zone_loitering[name] = loitering_score
+
+                            # this object is pending loitering but has not entered the zone yet
+                            if zone.loitering_time > 0:
+                                in_loitering_zone = True
                     else:
                         self.zone_presence[name] = zone_score
             else:
