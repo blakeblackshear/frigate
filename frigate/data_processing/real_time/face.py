@@ -319,8 +319,8 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         if weighted_score >= self.face_config.recognition_threshold:
             self.sub_label_publisher.publish(
-                EventMetadataTypeEnum.sub_label,
                 (id, weighted_sub_label, weighted_score),
+                EventMetadataTypeEnum.sub_label.value,
             )
 
         self.__update_metrics(datetime.datetime.now().timestamp() - start)
