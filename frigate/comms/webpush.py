@@ -70,7 +70,7 @@ class WebPushClient(Communicator):
         # Pull keys from PEM or generate if they do not exist
         self.vapid = Vapid01.from_file(os.path.join(CONFIG_DIR, "notifications.pem"))
 
-        users: list[User] = (
+        users: list[dict[str, Any]] = (
             User.select(User.username, User.notification_tokens).dicts().iterator()
         )
         for user in users:
