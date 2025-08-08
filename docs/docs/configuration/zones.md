@@ -88,7 +88,9 @@ Sometimes objects are expected to be passing through a zone, but an object loite
 
 :::note
 
-When using loitering zones, a review item will remain active until the object leaves. Loitering zones are only meant to be used in areas where loitering is not expected behavior.
+When using loitering zones, a review item will remain behave in the following way:
+- When a person is in a loitering zone, the review item will remain active until the person leaves the loitering zone, regardless of if they are stationary.
+- When any other object is in a loitering zone, the review item will remain active until the loitering time is met. Then if the object is stationary the review item will end.
 
 :::
 
