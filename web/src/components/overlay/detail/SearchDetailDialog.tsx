@@ -936,14 +936,17 @@ function ObjectDetailsTab({
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        {config?.cameras[search.camera].genai.enabled &&
+        {config?.cameras[search.camera].objects.genai.enabled &&
         !search.end_time &&
-        (config.cameras[search.camera].genai.required_zones.length === 0 ||
+        (config.cameras[search.camera].objects.genai.required_zones.length ===
+          0 ||
           search.zones.some((zone) =>
-            config.cameras[search.camera].genai.required_zones.includes(zone),
+            config.cameras[search.camera].objects.genai.required_zones.includes(
+              zone,
+            ),
           )) &&
-        (config.cameras[search.camera].genai.objects.length === 0 ||
-          config.cameras[search.camera].genai.objects.includes(
+        (config.cameras[search.camera].objects.genai.objects.length === 0 ||
+          config.cameras[search.camera].objects.genai.objects.includes(
             search.label,
           )) ? (
           <>
@@ -972,47 +975,49 @@ function ObjectDetailsTab({
         )}
 
         <div className="flex w-full flex-row justify-end gap-2">
-          {config?.cameras[search.camera].genai.enabled && search.end_time && (
-            <div className="flex items-start">
-              <Button
-                className="rounded-r-none border-r-0"
-                aria-label={t("details.button.regenerate.label")}
-                onClick={() => regenerateDescription("thumbnails")}
-              >
-                {t("details.button.regenerate.title")}
-              </Button>
-              {search.has_snapshot && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className="rounded-l-none border-l-0 px-2"
-                      aria-label={t("details.expandRegenerationMenu")}
-                    >
-                      <FaChevronDown className="size-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      aria-label={t("details.regenerateFromSnapshot")}
-                      onClick={() => regenerateDescription("snapshot")}
-                    >
-                      {t("details.regenerateFromSnapshot")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      aria-label={t("details.regenerateFromThumbnails")}
-                      onClick={() => regenerateDescription("thumbnails")}
-                    >
-                      {t("details.regenerateFromThumbnails")}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          )}
-          {((config?.cameras[search.camera].genai.enabled && search.end_time) ||
-            !config?.cameras[search.camera].genai.enabled) && (
+          {config?.cameras[search.camera].objects.genai.enabled &&
+            search.end_time && (
+              <div className="flex items-start">
+                <Button
+                  className="rounded-r-none border-r-0"
+                  aria-label={t("details.button.regenerate.label")}
+                  onClick={() => regenerateDescription("thumbnails")}
+                >
+                  {t("details.button.regenerate.title")}
+                </Button>
+                {search.has_snapshot && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        className="rounded-l-none border-l-0 px-2"
+                        aria-label={t("details.expandRegenerationMenu")}
+                      >
+                        <FaChevronDown className="size-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        aria-label={t("details.regenerateFromSnapshot")}
+                        onClick={() => regenerateDescription("snapshot")}
+                      >
+                        {t("details.regenerateFromSnapshot")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        aria-label={t("details.regenerateFromThumbnails")}
+                        onClick={() => regenerateDescription("thumbnails")}
+                      >
+                        {t("details.regenerateFromThumbnails")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            )}
+          {((config?.cameras[search.camera].objects.genai.enabled &&
+            search.end_time) ||
+            !config?.cameras[search.camera].objects.genai.enabled) && (
             <Button
               variant="select"
               aria-label={t("button.save", { ns: "common" })}

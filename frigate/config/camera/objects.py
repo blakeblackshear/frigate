@@ -61,7 +61,7 @@ class GenAIObjectTriggerConfig(FrigateBaseModel):
 
 
 class GenAIObjectConfig(FrigateBaseModel):
-    enabled: bool = Field(default=False, title="Enable GenAI for camera.")
+    enabled: bool = Field(default=True, title="Enable GenAI for camera.")
     use_snapshot: bool = Field(
         default=False, title="Use snapshots for generating descriptions."
     )

@@ -40,9 +40,9 @@ class GenAIClient:
         event: Event,
     ) -> Optional[str]:
         """Generate a description for the frame."""
-        prompt = camera_config.genai.object_prompts.get(
+        prompt = camera_config.objects.genai.object_prompts.get(
             event.label,
-            camera_config.genai.prompt,
+            camera_config.objects.genai.prompt,
         ).format(**model_to_dict(event))
         logger.debug(f"Sending images to genai provider with prompt: {prompt}")
         return self._send(prompt, thumbnails)
@@ -58,16 +58,10 @@ class GenAIClient:
 
 def get_genai_client(config: FrigateConfig) -> Optional[GenAIClient]:
     """Get the GenAI client."""
-    genai_config = config.genai
-    genai_cameras = [
-        c for c in config.cameras.values() if c.enabled and c.genai.enabled
-    ]
-
-    if genai_cameras or genai_config.enabled:
-        load_providers()
-        provider = PROVIDERS.get(genai_config.provider)
-        if provider:
-            return provider(genai_config)
+    load_providers()
+    provider = PROVIDERS.get(config.genai.provider)
+    if provider:
+        return provider(config.genai)
 
     return None
 

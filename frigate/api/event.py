@@ -1230,7 +1230,7 @@ def regenerate_description(
 
     camera_config = request.app.frigate_config.cameras[event.camera]
 
-    if camera_config.genai.enabled or params.force:
+    if camera_config.objects.genai.enabled or params.force:
         request.app.event_metadata_updater.publish(
             (event.id, params.source, params.force),
             EventMetadataTypeEnum.regenerate_description.value,
