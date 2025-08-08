@@ -339,6 +339,33 @@ objects:
       # Optional: mask to prevent this object type from being detected in certain areas (default: no mask)
       # Checks based on the bottom center of the bounding box of the object
       mask: 0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278
+  # Optional: Configuration for AI generated tracked object descriptions
+  genai:
+    # Optional: Enable AI object description generation (default: shown below)
+    enabled: False
+    # Optional: Use the object snapshot instead of thumbnails for description generation (default: shown below)
+    use_snapshot: False
+    # Optional: The default prompt for generating descriptions. Can use replacement
+    # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
+    prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
+    # Optional: Object specific prompts to customize description results
+    # Format: {label}: {prompt}
+    object_prompts:
+      person: "My special person prompt."
+    # Optional: objects to generate descriptions for (default: all objects that are tracked)
+    objects:
+      - person
+      - cat
+    # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
+    required_zones: []
+    # Optional: What triggers to use to send frames for a tracked object to generative AI (default: shown below)
+    send_triggers:
+      # Once the object is no longer tracked
+      tracked_object_end: True
+      # Optional: After X many significant updates are received (default: shown below)
+      after_significant_updates: None
+    # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
+    debug_save_thumbnails: False
 
 # Optional: Review configuration
 # NOTE: Can be overridden at the camera level
@@ -612,13 +639,6 @@ genai:
   base_url: http://localhost::11434
   # Required if gemini or openai
   api_key: "{FRIGATE_GENAI_API_KEY}"
-  # Optional: The default prompt for generating descriptions. Can use replacement
-  # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
-  prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
-  # Optional: Object specific prompts to customize description results
-  # Format: {label}: {prompt}
-  object_prompts:
-    person: "My special person prompt."
 
 # Optional: Configuration for audio transcription
 # NOTE: only the enabled option can be overridden at the camera level
@@ -856,34 +876,6 @@ cameras:
         # Available options: `notification` (send a webpush notification)
         actions:
           - notification
-
-    # Optional: Configuration for AI generated tracked object descriptions
-    genai:
-      # Optional: Enable AI description generation (default: shown below)
-      enabled: False
-      # Optional: Use the object snapshot instead of thumbnails for description generation (default: shown below)
-      use_snapshot: False
-      # Optional: The default prompt for generating descriptions. Can use replacement
-      # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
-      prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
-      # Optional: Object specific prompts to customize description results
-      # Format: {label}: {prompt}
-      object_prompts:
-        person: "My special person prompt."
-      # Optional: objects to generate descriptions for (default: all objects that are tracked)
-      objects:
-        - person
-        - cat
-      # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
-      required_zones: []
-      # Optional: What triggers to use to send frames for a tracked object to generative AI (default: shown below)
-      send_triggers:
-        # Once the object is no longer tracked
-        tracked_object_end: True
-        # Optional: After X many significant updates are received (default: shown below)
-        after_significant_updates: None
-      # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
-      debug_save_thumbnails: False
 
 # Optional
 ui:

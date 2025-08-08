@@ -124,7 +124,7 @@ class MqttClient(Communicator):
             )
             self.publish(
                 f"{camera_name}/genai/state",
-                "ON" if camera.genai.enabled_in_config else "OFF",
+                "ON" if camera.objects.genai.enabled_in_config else "OFF",
                 retain=True,
             )
 

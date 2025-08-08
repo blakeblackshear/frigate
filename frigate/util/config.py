@@ -371,6 +371,22 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
         del new_config["record"]["retain"]
 
+    # migrate global genai to new objects config
+    global_genai = config.get("genai", {})
+
+    if global_genai:
+        new_genai_config = {}
+        new_object_config = config.get("objects", {})
+        new_object_config["genai"] = {}
+
+        for key in global_genai.keys():
+            if key not in ["provider", "base_url", "api_key"]:
+                new_object_config["genai"][key] = global_genai[key]
+            else:
+                new_genai_config[key] = global_genai[key]
+
+        config["genai"] = new_genai_config
+
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, Any]] = camera.copy()
         camera_record_retain = camera_config.get("record", {}).get("retain")
@@ -391,6 +407,13 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
                 camera_config["record"]["motion"] = motion
 
             del camera_config["record"]["retain"]
+
+        camera_genai = camera_config.get("genai", {})
+
+        if camera_genai:
+            new_object_config = config.get("objects", {})
+            new_object_config["genai"] = camera_genai
+            del camera_config["genai"]
 
         new_config["cameras"][name] = camera_config
 
