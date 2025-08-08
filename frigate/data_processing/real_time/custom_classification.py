@@ -303,7 +303,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         ):
             self.sub_label_publisher.publish(
                 (obj_data["id"], self.model_config.name, sub_label, score),
-                EventMetadataTypeEnum.attribute,
+                EventMetadataTypeEnum.attribute.value,
             )
 
     def handle_request(self, topic, request_data):

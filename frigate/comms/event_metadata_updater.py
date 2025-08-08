@@ -46,5 +46,4 @@ class EventMetadataSubscriber(Subscriber):
         if payload is None:
             return (None, None)
 
-        topic = EventMetadataTypeEnum[topic[len(self.topic_base) :]]
         return (topic, payload)

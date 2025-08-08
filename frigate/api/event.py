@@ -1149,7 +1149,7 @@ def set_plate(
 
     request.app.event_metadata_updater.publish(
         (event_id, "recognized_license_plate", new_plate, new_score),
-        EventMetadataTypeEnum.attribute,
+        EventMetadataTypeEnum.attribute.value,
     )
 
     return JSONResponse(
