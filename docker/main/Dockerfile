@@ -148,6 +148,7 @@ RUN --mount=type=bind,source=docker/main/install_s6_overlay.sh,target=/deps/inst
 FROM base AS wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
+ARG DEBUG=false
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
@@ -177,6 +178,8 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
+COPY docker/main/requirements-dev.txt /requirements-dev.txt
+
 RUN pip3 install -r /requirements.txt
 
 # Build pysqlite3 from source
@@ -184,7 +187,10 @@ COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
 RUN /build_pysqlite3.sh
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
-RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
+RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
+    if [ "$DEBUG" = "true" ]; then \
+        pip3 wheel --wheel-dir=/wheels -r /requirements-dev.txt; \
+    fi
 
 # Install HailoRT & Wheels
 RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \

@@ -3,7 +3,7 @@
 import datetime
 import json
 import logging
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, cast
 
 from frigate.camera import PTZMetrics
 from frigate.camera.activity_manager import CameraActivityManager
@@ -135,7 +135,7 @@ class Dispatcher:
 
         def handle_update_event_description() -> None:
             event: Event = Event.get(Event.id == payload["id"])
-            event.data["description"] = payload["description"]
+            cast(dict, event.data)["description"] = payload["description"]
             event.save()
             self.publish(
                 "tracked_object_update",
