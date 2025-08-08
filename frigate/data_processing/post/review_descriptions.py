@@ -95,6 +95,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     "objects": final_data["data"]["objects"],
                     "recognized_objects": final_data["data"]["sub_labels"],
                     "zones": final_data["data"]["zones"],
+                    "timestamp": final_data["end_time"],
                 },
                 [r[1] for r in self.tracked_review_items[id]],
             )

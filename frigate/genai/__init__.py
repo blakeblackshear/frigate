@@ -39,14 +39,15 @@ class GenAIClient:
     ) -> None:
         """Generate a description for the review item activity."""
         context_prompt = f"""
-        Here is additional context about the scene from a security camera:
-        The following objects were detected: {review_data['objects']}
-        The following recognized objects were detected: {review_data['recognized_objects']}
-        The activity happened in the following zones: {review_data['zones']}
-
         Please analyze the image(s), which are in chronological order, strictly from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
-        Your task is to provide a **neutral, factual, and objective description** of the scene.
+        Your task is to provide a **neutral, factual, and objective description** of the scene and the objects interacting with it.
         Focus solely on observable actions, visible entities, and the environment.
+
+        Here is some information we already know:
+        - the following activity occurred at {review_data['timestamp'].strftime('%I:%M %p')}
+        - the following objects were detected: {review_data['objects']}
+        - the following recognized objects were detected: {review_data['recognized_objects']}
+        - the activity happened in the following zones: {review_data['zones']}
 
         Your response **MUST** be a flat JSON object with the following fields:
         - `scene` (string): A single, comprehensive description of the entire visual scene.
