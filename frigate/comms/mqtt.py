@@ -11,7 +11,7 @@ from frigate.config import FrigateConfig
 logger = logging.getLogger(__name__)
 
 
-class MqttClient(Communicator):  # type: ignore[misc]
+class MqttClient(Communicator):
     """Frigate wrapper for mqtt client."""
 
     def __init__(self, config: FrigateConfig) -> None:
@@ -75,7 +75,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             )
             self.publish(
                 f"{camera_name}/improve_contrast/state",
-                "ON" if camera.motion.improve_contrast else "OFF",  # type: ignore[union-attr]
+                "ON" if camera.motion.improve_contrast else "OFF",
                 retain=True,
             )
             self.publish(
@@ -85,12 +85,12 @@ class MqttClient(Communicator):  # type: ignore[misc]
             )
             self.publish(
                 f"{camera_name}/motion_threshold/state",
-                camera.motion.threshold,  # type: ignore[union-attr]
+                camera.motion.threshold,
                 retain=True,
             )
             self.publish(
                 f"{camera_name}/motion_contour_area/state",
-                camera.motion.contour_area,  # type: ignore[union-attr]
+                camera.motion.contour_area,
                 retain=True,
             )
             self.publish(
@@ -150,7 +150,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
         client: mqtt.Client,
         userdata: Any,
         flags: Any,
-        reason_code: mqtt.ReasonCode,
+        reason_code: mqtt.ReasonCode,  # type: ignore[name-defined]
         properties: Any,
     ) -> None:
         """Mqtt connection callback."""
@@ -182,7 +182,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
         client: mqtt.Client,
         userdata: Any,
         flags: Any,
-        reason_code: mqtt.ReasonCode,
+        reason_code: mqtt.ReasonCode,  # type: ignore[name-defined]
         properties: Any,
     ) -> None:
         """Mqtt disconnection callback."""
