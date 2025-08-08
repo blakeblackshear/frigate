@@ -54,7 +54,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 if ret:
                     self.tracked_review_items[id].append((thumb_time, jpg.tobytes()))
 
-                if self.config.cameras[""].review.genai.debug_save_thumbnails:
+                if self.config.cameras[
+                    data["after"]["camera"]
+                ].review.genai.debug_save_thumbnails:
                     id = data["after"]["id"]
                     Path(os.path.join(CLIPS_DIR, f"genai-requests/{id}")).mkdir(
                         parents=True, exist_ok=True
