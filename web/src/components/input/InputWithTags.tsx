@@ -424,7 +424,7 @@ export default function InputWithTags({
     } else if (filterType === "search_type") {
       return t("filter.searchType." + (filterValues as string));
     } else {
-      return (filterValues as string).replaceAll("_", " ");
+      return String(filterValues).replaceAll("_", " ") as string;
     }
   }
 
