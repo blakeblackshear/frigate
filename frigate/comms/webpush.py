@@ -378,7 +378,7 @@ class WebPushClient(Communicator):
             message = f"Detected on {titlecase(camera.replace('_', ' '))}"
 
         if ended:
-            print(f"sending a message with message {message}")
+            logger.debug(f"Sending a notification with state {state} and message {message}")
 
         # if event is ongoing open to live view otherwise open to recordings view
         direct_url = f"/review?id={reviewId}" if ended else f"/#{camera}"
