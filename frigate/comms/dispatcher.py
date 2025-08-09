@@ -156,7 +156,7 @@ class Dispatcher:
                 conflict_target=[ReviewSegment.id],
                 update=final_data,
             ).execute()
-            self.publish("reviews", payload)
+            self.publish("reviews", json.dumps(payload))
 
         def handle_update_model_state() -> None:
             if payload:
