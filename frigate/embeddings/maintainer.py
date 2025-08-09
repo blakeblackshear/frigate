@@ -209,7 +209,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         if any(c.review.genai.enabled_in_config for c in self.config.cameras.values()):
             self.post_processors.append(
-                ReviewDescriptionProcessor(self.config, self.metrics, self.genai_client)
+                ReviewDescriptionProcessor(
+                    self.config, self.requestor, self.metrics, self.genai_client
+                )
             )
 
         if self.config.lpr.enabled:
