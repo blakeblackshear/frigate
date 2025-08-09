@@ -10,19 +10,29 @@ from pathlib import Path
 
 import cv2
 
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
 
 from ..post.api import PostProcessorApi
+from ..types import DataProcessorMetrics
 
 logger = logging.getLogger(__name__)
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
-    def __init__(self, config: FrigateConfig, metrics, client: GenAIClient):
+    def __init__(
+        self,
+        config: FrigateConfig,
+        requestor: InterProcessRequestor,
+        metrics: DataProcessorMetrics,
+        client: GenAIClient,
+    ):
         super().__init__(config, metrics, None)
+        self.requestor = requestor
+        self.metrics = metrics
         self.tracked_review_items: dict[str, list[tuple[int, bytes]]] = {}
         self.genai_client = client
 
@@ -108,6 +118,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
 @staticmethod
 def run_analysis(
+    requestor: InterProcessRequestor,
     genai_client: GenAIClient,
     camera: str,
     final_data: dict[str, str],
@@ -126,3 +137,14 @@ def run_analysis(
 
     if not metadata:
         return None
+
+    prev_data = copy.deepcopy(final_data)
+    final_data["data"]["metadata"] = metadata.model_dump_json()
+    requestor.send_data(
+        UPDATE_REVIEW_DESCRIPTION,
+        {
+            "type": "end",
+            "before": {k: v for k, v in prev_data.items()},
+            "after": {k: v for k, v in final_data.items()},
+        },
+    )
