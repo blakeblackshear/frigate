@@ -79,8 +79,9 @@ class GenAIClient:
 
             try:
                 return ReviewMetadata.model_validate_json(clean_json)
-            except Exception:
+            except Exception as e:
                 # rarely LLMs can fail to follow directions on output format
+                logger.warning(f"Failed to parse review description as the response did not match expected format. {e}")
                 return None
         else:
             return None
