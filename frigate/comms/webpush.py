@@ -369,12 +369,17 @@ class WebPushClient(Communicator):
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
 
         title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"
-        message = f"Detected on {titlecase(camera.replace('_', ' '))}"
         image = f"{payload['after']['thumb_path'].replace('/media/frigate', '')}"
+        ended = state == "end" or state == "genai"
+
+        if state == "genai" and payload["after"]["data"]["metadata"]:
+            message = payload["after"]["data"]["metadata"]["description"]
+        else:
+            message = f"Detected on {titlecase(camera.replace('_', ' '))}"
 
         # if event is ongoing open to live view otherwise open to recordings view
-        direct_url = f"/review?id={reviewId}" if state == "end" else f"/#{camera}"
-        ttl = 3600 if state == "end" else 0
+        direct_url = f"/review?id={reviewId}" if ended else f"/#{camera}"
+        ttl = 3600 if ended else 0
 
         logger.debug(f"Sending push notification for {camera}, review ID {reviewId}")
 
