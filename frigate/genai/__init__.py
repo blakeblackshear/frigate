@@ -39,7 +39,7 @@ class GenAIClient:
     ) -> None:
         """Generate a description for the review item activity."""
         context_prompt = f"""
-        Please analyze the image(s), which are in chronological order, strictly from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
+        Please analyze the image(s), which are in chronological order, strictly from the perspective of the {review_data['camera'].replace('_', ' ')} security camera.
         Your task is to provide a **neutral, factual, and objective description** of the scene and the objects interacting with it.
         Focus solely on observable actions, visible entities, and the environment.
 
@@ -57,7 +57,7 @@ class GenAIClient:
         **IMPORTANT:** The value for each field (e.g., "scene", "action") must be a plain string or integer, NOT another JSON object or a description of the field itself.
 
         Provide the response in the exact JSON format specified by this schema:
-        {ReviewMetadata.model_json_schema()}
+        {ReviewMetadata.model_json_schema()['properties']}
         """
         logger.info(f"processing {review_data}")
         logger.info(f"Got GenAI review: {self._send(context_prompt, thumbnails)}")
