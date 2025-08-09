@@ -1,9 +1,11 @@
 """Post processor for review items to get descriptions."""
 
+import copy
 import datetime
 import logging
 import os
 import shutil
+import threading
 from pathlib import Path
 
 import cv2
@@ -60,15 +62,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     Path(os.path.join(CLIPS_DIR, f"genai-requests/{id}")).mkdir(
                         parents=True, exist_ok=True
                     )
-
-                    for idx, data in enumerate(self.tracked_review_items[id], 1):
-                        shutil.copy(
-                            thumb_path,
-                            os.path.join(
-                                CLIPS_DIR,
-                                f"genai-requests/{id}/{idx}.webp",
-                            ),
-                        )
+                    shutil.copy(
+                        thumb_path,
+                        os.path.join(
+                            CLIPS_DIR,
+                            f"genai-requests/{id}/{thumb_time}.webp",
+                        ),
+                    )
 
         else:
             if id not in self.tracked_review_items:
@@ -90,19 +90,35 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 self.tracked_review_items.pop(id)
                 return
 
-            self.genai_client.generate_review_description(
-                {
-                    "camera": camera,
-                    "objects": final_data["data"]["objects"],
-                    "recognized_objects": final_data["data"]["sub_labels"],
-                    "zones": final_data["data"]["zones"],
-                    "timestamp": datetime.datetime.fromtimestamp(
-                        final_data["end_time"]
-                    ),
-                },
-                [r[1] for r in self.tracked_review_items[id]],
-            )
+            # kickoff analysis
+            threading.Thread(
+                target=self.run_analysis,
+                args=(
+                    self.genai_client,
+                    camera,
+                    final_data,
+                    copy.copy([r[1] for r in self.tracked_review_items[id]]),
+                ),
+            ).start()
             self.tracked_review_items.pop(id)
+
+    def run_analysis(
+        self,
+        genai_client: GenAIClient,
+        camera: str,
+        final_data: dict[str, str],
+        thumbs: list[bytes],
+    ) -> None:
+        genai_client.generate_review_description(
+            {
+                "camera": camera,
+                "objects": final_data["data"]["objects"],
+                "recognized_objects": final_data["data"]["sub_labels"],
+                "zones": final_data["data"]["zones"],
+                "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
+            },
+            thumbs,
+        )
 
     def handle_request(self, request_data):
         pass
