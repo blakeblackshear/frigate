@@ -3,6 +3,7 @@
 import importlib
 import logging
 import os
+import re
 from typing import Any, Optional
 
 from playhouse.shortcuts import model_to_dict
@@ -36,7 +37,7 @@ class GenAIClient:
 
     def generate_review_description(
         self, review_data: dict[str, Any], thumbnails: list[bytes]
-    ) -> None:
+    ) -> ReviewMetadata | None:
         """Generate a description for the review item activity."""
         context_prompt = f"""
         Please analyze the image(s), which are in chronological order, strictly from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
@@ -68,8 +69,20 @@ class GenAIClient:
         - The JSON must strictly match this structure:
         {ReviewMetadata.model_json_schema()["properties"]}
         """
-        logger.info(f"processing {review_data}")
-        logger.info(f"Got GenAI review: {self._send(context_prompt, thumbnails)}")
+        response = self._send(context_prompt, thumbnails)
+
+        if response:
+            clean_json = re.sub(
+                r"\n?```$", "", re.sub(r"^```[a-zA-Z0-9]*\n?", "", response)
+            )
+
+            try:
+                return ReviewMetadata.model_validate_json(clean_json)
+            except Exception:
+                # rarely LLMs can fail to follow directions on output format
+                return None
+        else:
+            return None
 
     def generate_object_description(
         self,

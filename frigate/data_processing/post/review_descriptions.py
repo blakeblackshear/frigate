@@ -92,7 +92,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
             # kickoff analysis
             threading.Thread(
-                target=self.run_analysis,
+                target=run_analysis,
                 args=(
                     self.genai_client,
                     camera,
@@ -102,23 +102,27 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             ).start()
             self.tracked_review_items.pop(id)
 
-    def run_analysis(
-        self,
-        genai_client: GenAIClient,
-        camera: str,
-        final_data: dict[str, str],
-        thumbs: list[bytes],
-    ) -> None:
-        genai_client.generate_review_description(
-            {
-                "camera": camera,
-                "objects": final_data["data"]["objects"],
-                "recognized_objects": final_data["data"]["sub_labels"],
-                "zones": final_data["data"]["zones"],
-                "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
-            },
-            thumbs,
-        )
-
     def handle_request(self, request_data):
         pass
+
+
+@staticmethod
+def run_analysis(
+    genai_client: GenAIClient,
+    camera: str,
+    final_data: dict[str, str],
+    thumbs: list[bytes],
+) -> None:
+    metadata = genai_client.generate_review_description(
+        {
+            "camera": camera,
+            "objects": final_data["data"]["objects"],
+            "recognized_objects": final_data["data"]["sub_labels"],
+            "zones": final_data["data"]["zones"],
+            "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
+        },
+        thumbs,
+    )
+
+    if not metadata:
+        return None
