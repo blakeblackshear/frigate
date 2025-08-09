@@ -3,10 +3,10 @@ from pydantic import BaseModel, Field
 
 class ReviewMetadata(BaseModel):
     scene: str = Field(
-        description="A concise summary of the overall scene. This should be a single string of text."
+        description="A comprehensive description of the setting and entities, including relevant context and plausible inferences if supported by visual evidence."
     )
-    action: str = Field(
-        description="A concise description of the primary action or event happening in the scene. This should be a single string of text."
+    confidence: float = Field(
+        description="A float between 0 and 1 representing your overall confidence in this analysis."
     )
     potential_threat_level: int | None = Field(
         default=None,

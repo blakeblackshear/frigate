@@ -56,9 +56,8 @@ class GenAIClient:
 
         Your response **MUST** be a flat JSON object with the following fields:
         - `scene` (string): A comprehensive description of the setting and entities, including relevant context and plausible inferences if supported by visual evidence.
-        - `action` (string): A concise description of the main action(s) or movement(s) taking place.
-        - `potential_threat_level` (integer, optional): 0–3 scale. Only include if a clear security concern is visible:
-        - 0 = No concern
+        - `confidence` (float): A float between 0 and 1 representing your overall confidence in this analysis.
+        - `potential_threat_level` (integer, optional): 1–3 scale. Only include if a clear security concern is visible:
         - 1 = Unusual but not overtly threatening
         - 2 = Suspicious or potentially harmful
         - 3 = Clear and immediate threat
