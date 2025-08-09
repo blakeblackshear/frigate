@@ -140,7 +140,7 @@ def run_analysis(
         return None
 
     prev_data = copy.deepcopy(final_data)
-    final_data["data"]["metadata"] = metadata.model_dump_json()
+    final_data["data"]["metadata"] = metadata.model_dump()
     requestor.send_data(
         UPDATE_REVIEW_DESCRIPTION,
         {
