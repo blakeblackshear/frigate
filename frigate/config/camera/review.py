@@ -62,6 +62,18 @@ class DetectionsConfig(FrigateBaseModel):
         return v
 
 
+class GenAIReviewConfig(FrigateBaseModel):
+    alerts: bool = Field(default=False, title="Enable GenAI for alerts.")
+    detections: bool = Field(default=False, title="Enable GenAI for detections.")
+    debug_save_thumbnails: bool = Field(
+        default=False,
+        title="Save thumbnails sent to generative AI for debugging purposes.",
+    )
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of generative AI."
+    )
+
+
 class ReviewConfig(FrigateBaseModel):
     """Configure reviews"""
 
@@ -70,4 +82,7 @@ class ReviewConfig(FrigateBaseModel):
     )
     detections: DetectionsConfig = Field(
         default_factory=DetectionsConfig, title="Review detections config."
+    )
+    genai: GenAIReviewConfig = Field(
+        default_factory=GenAIReviewConfig, title="Review description genai config."
     )

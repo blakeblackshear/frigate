@@ -610,6 +610,10 @@ class FrigateConfig(FrigateBaseModel):
             camera_config.objects.genai.enabled_in_config = (
                 camera_config.objects.genai.enabled
             )
+            camera_config.review.genai.enabled_in_config = (
+                camera_config.review.genai.alerts
+                or camera_config.review.genai.detections
+            )
 
             # Add default filters
             object_keys = camera_config.objects.track

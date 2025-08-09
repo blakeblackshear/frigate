@@ -142,6 +142,7 @@ class PendingReviewSegment:
                     "zones": self.zones,
                     "audio": list(self.audio),
                     "thumb_time": self.thumb_time,
+                    "metadata": None,
                 },
             }
         )
