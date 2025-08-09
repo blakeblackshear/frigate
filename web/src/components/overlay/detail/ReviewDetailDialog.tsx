@@ -69,6 +69,8 @@ export default function ReviewDetailDialog({
     review ? ["event_ids", { ids: review.data.detections.join(",") }] : null,
   );
 
+  const aiAnalysis = useMemo(() => review?.data?.metadata, [review]);
+
   const hasMismatch = useMemo(() => {
     if (!review || !events) {
       return false;
@@ -232,6 +234,15 @@ export default function ReviewDetailDialog({
           )}
           {pane == "overview" && (
             <div className="flex flex-col gap-5 md:mt-3">
+              {aiAnalysis != undefined && (
+                <div className="m-2 flex h-full w-[90%] flex-col gap-2 rounded-md bg-card p-2">
+                  AI Analysis
+                  <div className="text-sm text-primary/40">Description</div>
+                  <div className="text-sm smart-capitalize">
+                    {aiAnalysis.scene}
+                  </div>
+                </div>
+              )}
               <div className="flex w-full flex-row">
                 <div className="flex w-full flex-col gap-3">
                   <div className="flex flex-col gap-1.5">
