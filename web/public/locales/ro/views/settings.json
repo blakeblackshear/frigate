@@ -67,7 +67,7 @@
       "title": "Calendar",
       "firstWeekday": {
         "label": "Prima zi a săptămânii",
-        "desc": "Ziua în care încep săptămânile calendarului de revizuire.",
+        "desc": "Ziua cu care încep săptămânile calendarului de revizuire.",
         "sunday": "Duminică",
         "monday": "Luni"
       }
