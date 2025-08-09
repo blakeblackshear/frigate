@@ -144,7 +144,7 @@ def run_analysis(
     requestor.send_data(
         UPDATE_REVIEW_DESCRIPTION,
         {
-            "type": "end",
+            "type": "genai",
             "before": {k: v for k, v in prev_data.items()},
             "after": {k: v for k, v in final_data.items()},
         },

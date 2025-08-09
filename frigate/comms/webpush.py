@@ -373,9 +373,13 @@ class WebPushClient(Communicator):
         ended = state == "end" or state == "genai"
 
         if state == "genai" and payload["after"]["data"]["metadata"]:
+            print(f"has metadata")
             message = payload["after"]["data"]["metadata"]["scene"]
         else:
             message = f"Detected on {titlecase(camera.replace('_', ' '))}"
+
+        if ended:
+            print(f"sending a message with message {message}")
 
         # if event is ongoing open to live view otherwise open to recordings view
         direct_url = f"/review?id={reviewId}" if ended else f"/#{camera}"
