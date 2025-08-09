@@ -1,0 +1,14 @@
+{
+  "noRecordingsFoundForThisTime": "Non se atoparon grabacións para ese período",
+  "noPreviewFound": "Non se atopou previsualización",
+  "submitFrigatePlus": {
+    "submit": "Enviar",
+    "title": "Enviar este frame a Frigate+?"
+  },
+  "stats": {
+    "streamType": {
+      "title": "Tipo de emisión:"
+    }
+  },
+  "noPreviewFoundFor": "Vista Previa non atopada para {{cameraName}}"
+}

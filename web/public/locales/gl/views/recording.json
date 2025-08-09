@@ -1,0 +1,11 @@
+{
+  "filter": "Filtrar",
+  "export": "Exportar",
+  "calendar": "Calendario",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Rango de tempo inválido"
+    }
+  },
+  "filters": "Filtros"
+}
