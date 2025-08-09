@@ -85,7 +85,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 return
             elif (
                 final_data["severity"] == "detection"
-                and not self.config.cameras[camera].review.detections
+                and not self.config.cameras[camera].review.genai.detections
             ):
                 self.tracked_review_items.pop(id)
                 return
