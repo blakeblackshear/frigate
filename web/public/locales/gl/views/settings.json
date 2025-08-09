@@ -1,0 +1,11 @@
+{
+  "documentTitle": {
+    "default": "Preferencias - Frigate",
+    "authentication": "Configuracións de Autenticación - Frigate",
+    "camera": "Configuracións da Cámara - Frigate",
+    "general": "Configuracións xerais - Frigate",
+    "notifications": "Configuración de Notificacións - Frigate",
+    "enrichments": "Configuración complementarias - Frigate",
+    "masksAndZones": "Editor de máscaras e zonas - Frigate"
+  }
+}

@@ -4,8 +4,8 @@
     "button": "Repornește",
     "restarting": {
       "title": "Frigate repornește",
-      "content": "Această pagină se va reâncărca în {{countdown}} secunde.",
-      "button": "Forteaza Reincarcarea Acum"
+      "content": "Această pagină se va reâncărca automat în {{countdown}} secunde.",
+      "button": "Forțează acum reîncărcarea"
     }
   },
   "explore": {

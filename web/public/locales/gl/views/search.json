@@ -1,0 +1,15 @@
+{
+  "search": "Pesquisar",
+  "savedSearches": "Pesquisas gardadas",
+  "button": {
+    "save": "Gardar pesquisa",
+    "filterActive": "Filtros activos",
+    "clear": "Borrar pesquisa"
+  },
+  "filter": {
+    "label": {
+      "cameras": "Cámaras"
+    }
+  },
+  "searchFor": "Procurar por {{inputValue}}"
+}

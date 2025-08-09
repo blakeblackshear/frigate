@@ -1,0 +1,20 @@
+{
+  "group": {
+    "label": "Grupos de cámaras",
+    "add": "Engadir Grupo de cámaras",
+    "delete": {
+      "confirm": {
+        "title": "Confirma o borrado",
+        "desc": "Seguro/a que queres borrar o Grupo de cámaras <em>{{name}}</em>?"
+      },
+      "label": "Borrar o Grupo de Cámaras"
+    },
+    "name": {
+      "placeholder": "Introduce un nome…",
+      "errorMessage": {
+        "nameMustNotPeriod": "Grupo de Cámaras non debe conter un punto."
+      }
+    },
+    "edit": "Editar o Grupo de Cámaras"
+  }
+}

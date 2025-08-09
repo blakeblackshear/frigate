@@ -37,7 +37,7 @@
   },
   "objectLifecycle": {
     "lifecycleItemDesc": {
-      "visible": "{{label}} detectata",
+      "visible": "S-a detectat {{label}}",
       "active": "{{label}} a devenit activ",
       "entered_zone": "{{label}} a intrat în {{zones}}",
       "stationary": "{{label}} a devenit staționar",
@@ -50,7 +50,7 @@
         "ratio": "Raport",
         "area": "Suprafață"
       },
-      "gone": "{{label}} a ieșit",
+      "gone": "{{label}} a părasit cadrul",
       "heard": "{{label}} auzit(ă)",
       "external": "{{label}} detectat(ă)"
     },

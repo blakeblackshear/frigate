@@ -1,0 +1,10 @@
+{
+  "alerts": "Alertas",
+  "detections": "Deteccións",
+  "allCameras": "Tódalas cámaras",
+  "timeline.aria": "Selecciona liña de tempo",
+  "motion": {
+    "only": "Só movemento",
+    "label": "Movemento"
+  }
+}

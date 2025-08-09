@@ -1,0 +1,11 @@
+{
+  "description": {
+    "addFace": "Navegar para engadir unha nova colección á Libraría de Caras.",
+    "placeholder": "Introduce un nome para esta colección",
+    "invalidName": "Nome non válido. Os nomes só poden incluír letras, números, espazos, apóstrofes, guións baixos e guións."
+  },
+  "details": {
+    "unknown": "Descoñecido",
+    "person": "Persoa"
+  }
+}

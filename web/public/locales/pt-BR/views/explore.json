@@ -41,8 +41,8 @@
       },
       "tips": {
         "mismatch_one": "{{count}} objeto indisponível foi detectado e incluido nesse item de revisão. Esse objeto ou não se qualifica para um alerta ou detecção, ou já foi limpo/deletado.",
-        "mismatch_many": "{{count}} objetos indisponíveis foram detectados e incluídos nesse item de revisão. Esses objetos ou não se qualificam para um alerta ou detecção, ou já foi limpo/deletado.",
-        "mismatch_other": "",
+        "mismatch_many": "{{count}} objetos indisponíveis foram detectados e incluídos nesse item de revisão. Esses objetos ou não se qualificam para um alerta ou detecção, ou já foram limpos/deletados.",
+        "mismatch_other": "{{count}} objetos indisponíveis foram detectados e incluídos nesse item de revisão. Esses objetos ou não se qualificam para um alerta ou detecção, ou já foram limpos/deletados.",
         "hasMissingObjects": "Ajustar a sua configuração se quiser que o Frigate salve objetos rastreados com as seguintes categorias: <em>{{objects}}</em>"
       },
       "toast": {
@@ -196,7 +196,7 @@
   "fetchingTrackedObjectsFailed": "Erro ao buscar por objetos rastreados: {{errorMessage}}",
   "trackedObjectsCount_one": "{{count}} objeto rastreado ",
   "trackedObjectsCount_many": "{{count}} objetos rastreados ",
-  "trackedObjectsCount_other": "",
+  "trackedObjectsCount_other": "{{count}} objetos rastreados ",
   "searchResult": {
     "tooltip": "Correspondência com {{type}} de {{confidence}}%",
     "deleteTrackedObject": {
