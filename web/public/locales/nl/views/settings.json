@@ -644,7 +644,7 @@
         }
       },
       "title": "Semantisch zoeken",
-      "desc": "Semantische zoektocht in Frigate laat je opsporingsberichten vinden binnen je beoordelingsvoorwerpen met het beeld zelf, een gebruiker-definieerde tekstbeschrijving, of een automatisch gegen.",
+      "desc": "Semantisch zoeken in Frigate stelt je in staat om getraceerde objecten binnen je review-items te vinden, met behulp van de afbeelding zelf, een door de gebruiker gedefinieerde tekstbeschrijving of een automatisch gegenereerde beschrijving.",
       "readTheDocumentation": "Lees de documentatie"
     },
     "faceRecognition": {
