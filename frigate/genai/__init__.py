@@ -65,9 +65,7 @@ class GenAIClient:
         Omit this field entirely if there is no observable security concern.
 
         **IMPORTANT:**
-        - Values for each field must be plain strings or integers — no nested objects or explanatory text.
-        - The JSON must strictly match this structure:
-        {ReviewMetadata.model_json_schema()["properties"]}
+        Values for each field must be plain strings or integers — no nested objects or explanatory text.
         """
         response = self._send(context_prompt, thumbnails)
 

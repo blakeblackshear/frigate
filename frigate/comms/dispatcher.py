@@ -151,7 +151,12 @@ class Dispatcher:
             )
 
         def handle_update_review_description() -> None:
-            logger.info(f"received review genai data {payload}")
+            final_data = payload["after"]
+            ReviewSegment.insert(final_data).on_conflict(
+                conflict_target=[ReviewSegment.id],
+                update=final_data,
+            ).execute()
+            self.publish("reviews", payload)
 
         def handle_update_model_state() -> None:
             if payload:

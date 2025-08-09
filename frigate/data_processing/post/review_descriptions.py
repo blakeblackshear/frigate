@@ -104,6 +104,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             threading.Thread(
                 target=run_analysis,
                 args=(
+                    self.requestor,
                     self.genai_client,
                     camera,
                     final_data,
