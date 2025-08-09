@@ -18,7 +18,7 @@ export type ReviewData = {
   sub_labels?: string[];
   significant_motion_areas: number[];
   zones: string[];
-  metadata: {
+  metadata?: {
     scene: string;
   };
 };
