@@ -268,10 +268,13 @@ def stats_snapshot(
     camera_metrics = stats_tracking["camera_metrics"]
     stats: dict[str, Any] = {}
 
-    total_detection_fps = 0
+    total_camera_fps = total_process_fps = total_skipped_fps = total_detection_fps = 0
 
     stats["cameras"] = {}
     for name, camera_stats in camera_metrics.items():
+        total_camera_fps += camera_stats.camera_fps.value
+        total_process_fps += camera_stats.process_fps.value
+        total_skipped_fps += camera_stats.skipped_fps.value
         total_detection_fps += camera_stats.detection_fps.value
         pid = camera_stats.process_pid.value if camera_stats.process_pid.value else None
         ffmpeg_pid = camera_stats.ffmpeg_pid.value if camera_stats.ffmpeg_pid else None
@@ -305,6 +308,9 @@ def stats_snapshot(
             # from mypy 0.981 onwards
             "pid": pid,
         }
+    stats["camera_fps"] = round(total_camera_fps, 2)
+    stats["process_fps"] = round(total_process_fps, 2)
+    stats["skipped_fps"] = round(total_skipped_fps, 2)
     stats["detection_fps"] = round(total_detection_fps, 2)
 
     stats["embeddings"] = {}
