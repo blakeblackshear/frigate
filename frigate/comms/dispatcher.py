@@ -26,6 +26,7 @@ from frigate.const import (
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_EVENT_DESCRIPTION,
     UPDATE_MODEL_STATE,
+    UPDATE_REVIEW_DESCRIPTION,
     UPSERT_REVIEW_SEGMENT,
 )
 from frigate.models import Event, Previews, Recordings, ReviewSegment
@@ -149,6 +150,14 @@ class Dispatcher:
                 ),
             )
 
+        def handle_update_review_description() -> None:
+            final_data = payload["after"]
+            ReviewSegment.insert(final_data).on_conflict(
+                conflict_target=[ReviewSegment.id],
+                update=final_data,
+            ).execute()
+            self.publish("reviews", json.dumps(payload))
+
         def handle_update_model_state() -> None:
             if payload:
                 model = payload["model"]
@@ -232,6 +241,7 @@ class Dispatcher:
             CLEAR_ONGOING_REVIEW_SEGMENTS: handle_clear_ongoing_review_segments,
             UPDATE_CAMERA_ACTIVITY: handle_update_camera_activity,
             UPDATE_EVENT_DESCRIPTION: handle_update_event_description,
+            UPDATE_REVIEW_DESCRIPTION: handle_update_review_description,
             UPDATE_MODEL_STATE: handle_update_model_state,
             UPDATE_EMBEDDINGS_REINDEX_PROGRESS: handle_update_embeddings_reindex_progress,
             UPDATE_BIRDSEYE_LAYOUT: handle_update_birdseye_layout,

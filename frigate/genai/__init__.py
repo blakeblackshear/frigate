@@ -3,11 +3,13 @@
 import importlib
 import logging
 import os
-from typing import Optional
+import re
+from typing import Any, Optional
 
 from playhouse.shortcuts import model_to_dict
 
 from frigate.config import CameraConfig, FrigateConfig, GenAIConfig, GenAIProviderEnum
+from frigate.data_processing.post.types import ReviewMetadata
 from frigate.models import Event
 
 logger = logging.getLogger(__name__)
@@ -33,7 +35,60 @@ class GenAIClient:
         self.timeout = timeout
         self.provider = self._init_provider()
 
-    def generate_description(
+    def generate_review_description(
+        self, review_data: dict[str, Any], thumbnails: list[bytes]
+    ) -> ReviewMetadata | None:
+        """Generate a description for the review item activity."""
+        context_prompt = f"""
+        Please analyze the image(s), which are in chronological order, strictly from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
+
+        Your task is to provide a **neutral, factual, and objective description** of the scene, while also:
+        - Clearly stating **what is happening** based on observable actions and movements.
+        - Including **reasonable, evidence-based inferences** about the likely activity or context, but only if directly supported by visible details.
+
+        When forming your description:
+        - **Facts first**: Describe the physical setting, people, and objects exactly as seen.
+        - **Then context**: Briefly note plausible purposes or activities (e.g., “appears to be delivering a package” if carrying a box to a door).
+        - Clearly separate certain facts (“A person is holding a ladder”) from reasonable inferences (“likely performing maintenance”).
+        - Do not speculate beyond what is visible, and do not imply hostility, criminal intent, or other strong judgments unless there is unambiguous visual evidence.
+
+        Here is information already known:
+        - Activity occurred at {review_data["timestamp"].strftime("%I:%M %p")}
+        - Detected objects: {review_data["objects"]}
+        - Recognized objects: {review_data["recognized_objects"]}
+        - Zones involved: {review_data["zones"]}
+
+        Your response **MUST** be a flat JSON object with:
+        - `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
+        - `confidence` (float): A number 0–1 for overall confidence in the analysis.
+        - `potential_threat_level` (integer, optional): Include only if there is a clear, observable security concern:
+            - 1 = Unusual but not overtly threatening
+            - 2 = Suspicious or potentially harmful
+            - 3 = Clear and immediate threat
+            Omit this field if no concern is evident.
+
+        **IMPORTANT:**
+        - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
+        """
+        response = self._send(context_prompt, thumbnails)
+
+        if response:
+            clean_json = re.sub(
+                r"\n?```$", "", re.sub(r"^```[a-zA-Z0-9]*\n?", "", response)
+            )
+
+            try:
+                return ReviewMetadata.model_validate_json(clean_json)
+            except Exception as e:
+                # rarely LLMs can fail to follow directions on output format
+                logger.warning(
+                    f"Failed to parse review description as the response did not match expected format. {e}"
+                )
+                return None
+        else:
+            return None
+
+    def generate_object_description(
         self,
         camera_config: CameraConfig,
         thumbnails: list[bytes],

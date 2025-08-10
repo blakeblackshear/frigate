@@ -11,7 +11,11 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
-import { ReviewDetailPaneType, ReviewSegment } from "@/types/review";
+import {
+  ReviewDetailPaneType,
+  ReviewSegment,
+  ThreatLevel,
+} from "@/types/review";
 import { Event } from "@/types/event";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -68,6 +72,25 @@ export default function ReviewDetailDialog({
   const { data: events } = useSWR<Event[]>(
     review ? ["event_ids", { ids: review.data.detections.join(",") }] : null,
   );
+
+  const aiAnalysis = useMemo(() => review?.data?.metadata, [review]);
+
+  const aiThreatLevel = useMemo(() => {
+    if (!aiAnalysis?.potential_threat_level) {
+      return "None";
+    }
+
+    switch (aiAnalysis.potential_threat_level) {
+      case ThreatLevel.UNUSUAL:
+        return "Unusual Activity";
+      case ThreatLevel.SUSPICIOUS:
+        return "Suspicious Activity";
+      case ThreatLevel.DANGER:
+        return "Danger";
+    }
+
+    return "Unknown";
+  }, [aiAnalysis]);
 
   const hasMismatch = useMemo(() => {
     if (!review || !events) {
@@ -232,6 +255,22 @@ export default function ReviewDetailDialog({
           )}
           {pane == "overview" && (
             <div className="flex flex-col gap-5 md:mt-3">
+              {aiAnalysis != undefined && (
+                <div
+                  className={cn(
+                    "m-2 flex h-full w-full flex-col gap-2 rounded-md bg-card p-2",
+                    isDesktop && "w-[90%]",
+                  )}
+                >
+                  AI Analysis
+                  <div className="text-sm text-primary/40">Description</div>
+                  <div className="text-sm">{aiAnalysis.scene}</div>
+                  <div className="text-sm text-primary/40">Score</div>
+                  <div className="text-sm">{aiAnalysis.confidence * 100}%</div>
+                  <div className="text-sm text-primary/40">Threat Level</div>
+                  <div className="text-sm">{aiThreatLevel}</div>
+                </div>
+              )}
               <div className="flex w-full flex-row">
                 <div className="flex w-full flex-col gap-3">
                   <div className="flex flex-col gap-1.5">

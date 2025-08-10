@@ -20,6 +20,8 @@ class DataProcessorMetrics:
     alpr_pps: Synchronized
     yolov9_lpr_speed: Synchronized
     yolov9_lpr_pps: Synchronized
+    review_desc_speed: Synchronized
+    review_desc_dps: Synchronized
     classification_speeds: dict[str, Synchronized]
     classification_cps: dict[str, Synchronized]
 
@@ -34,6 +36,8 @@ class DataProcessorMetrics:
         self.alpr_pps = manager.Value("d", 0.0)
         self.yolov9_lpr_speed = manager.Value("d", 0.0)
         self.yolov9_lpr_pps = manager.Value("d", 0.0)
+        self.review_desc_speed = manager.Value("d", 0.0)
+        self.review_desc_dps = manager.Value("d", 0.0)
         self.classification_speeds = manager.dict()
         self.classification_cps = manager.dict()
 
