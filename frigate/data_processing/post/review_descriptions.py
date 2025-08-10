@@ -12,7 +12,7 @@ import cv2
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
+from frigate.const import CACHE_DIR, CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
@@ -34,7 +34,6 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         super().__init__(config, metrics, None)
         self.requestor = requestor
         self.metrics = metrics
-        self.tracked_review_items: dict[str, list[tuple[int, bytes]]] = {}
         self.genai_client = client
         self.review_desc_speed = InferenceSpeed(self.metrics.review_desc_speed)
         self.review_descs_dps = EventsPerSecond()
@@ -54,27 +53,38 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         id = data["after"]["id"]
 
         if data["type"] == "new" or data["type"] == "update":
-            if id not in self.tracked_review_items:
-                self.tracked_review_items[id] = []
+            return
+        else:
+            final_data = data["after"]
 
-            thumb_time = data["after"]["data"]["thumb_time"]
-            thumb_path = data["after"]["thumb_path"]
+            if (
+                final_data["severity"] == "alert"
+                and not self.config.cameras[camera].review.genai.alerts
+            ):
+                return
+            elif (
+                final_data["severity"] == "detection"
+                and not self.config.cameras[camera].review.genai.detections
+            ):
+                return
 
-            if thumb_time and thumb_path:
-                if (
-                    len(self.tracked_review_items[id]) > 0
-                    and self.tracked_review_items[id][0] == thumb_time
-                ):
-                    # we have already processed this thumbnail
-                    return
+            frames = self.get_cache_frames(
+                camera, final_data["start_time"], final_data["end_time"]
+            )
 
+            if not frames:
+                frames = [final_data["thumb_path"]]
+
+            thumbs = []
+
+            for idx, thumb_path in enumerate(frames):
                 thumb_data = cv2.imread(thumb_path)
                 ret, jpg = cv2.imencode(
                     ".jpg", thumb_data, [int(cv2.IMWRITE_JPEG_QUALITY), 100]
                 )
 
                 if ret:
-                    self.tracked_review_items[id].append((thumb_time, jpg.tobytes()))
+                    thumbs.append(jpg.tobytes())
 
                 if self.config.cameras[
                     data["after"]["camera"]
@@ -87,28 +97,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                         thumb_path,
                         os.path.join(
                             CLIPS_DIR,
-                            f"genai-requests/{id}/{thumb_time}.webp",
+                            f"genai-requests/{id}/{idx}.webp",
                         ),
                     )
-
-        else:
-            if id not in self.tracked_review_items:
-                return
-
-            final_data = data["after"]
-
-            if (
-                final_data["severity"] == "alert"
-                and not self.config.cameras[camera].review.genai.alerts
-            ):
-                self.tracked_review_items.pop(id)
-                return
-            elif (
-                final_data["severity"] == "detection"
-                and not self.config.cameras[camera].review.genai.detections
-            ):
-                self.tracked_review_items.pop(id)
-                return
 
             # kickoff analysis
             self.review_descs_dps.update()
@@ -127,6 +118,40 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
     def handle_request(self, request_data):
         pass
+
+    def get_cache_frames(
+        self, camera: str, start_time: float, end_time: float
+    ) -> list[str]:
+        preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+        file_start = f"preview_{camera}"
+        start_file = f"{file_start}-{start_time}.webp"
+        end_file = f"{file_start}-{end_time}.webp"
+        all_frames = []
+
+        for file in sorted(os.listdir(preview_dir)):
+            if not file.startswith(file_start):
+                continue
+
+            if file < start_file:
+                continue
+
+            if file > end_file:
+                break
+
+            all_frames.append(os.path.join(preview_dir, file))
+
+        frame_count = len(all_frames)
+        if frame_count <= 10:
+            return all_frames
+
+        selected_frames = []
+        step_size = (frame_count - 1) / 9
+
+        for i in range(10):
+            index = round(i * step_size)
+            selected_frames.append(all_frames[index])
+
+        return selected_frames
 
 
 @staticmethod
