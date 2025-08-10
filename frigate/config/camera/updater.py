@@ -17,13 +17,14 @@ class CameraConfigUpdateEnum(str, Enum):
     birdseye = "birdseye"
     detect = "detect"
     enabled = "enabled"
-    genai = "genai"
     motion = "motion"  # includes motion and motion masks
     notifications = "notifications"
     objects = "objects"
+    object_genai = "object_genai"
     record = "record"
     remove = "remove"  # for removing a camera
     review = "review"
+    review_genai = "review_genai"
     semantic_search = "semantic_search"  # for semantic search triggers
     snapshots = "snapshots"
     zones = "zones"
@@ -98,7 +99,7 @@ class CameraConfigUpdateSubscriber:
             config.detect = updated_config
         elif update_type == CameraConfigUpdateEnum.enabled:
             config.enabled = updated_config
-        elif update_type == CameraConfigUpdateEnum.genai:
+        elif update_type == CameraConfigUpdateEnum.object_genai:
             config.objects.genai = updated_config
         elif update_type == CameraConfigUpdateEnum.motion:
             config.motion = updated_config
@@ -110,6 +111,8 @@ class CameraConfigUpdateSubscriber:
             config.record = updated_config
         elif update_type == CameraConfigUpdateEnum.review:
             config.review = updated_config
+        elif update_type == CameraConfigUpdateEnum.review_genai:
+            config.review.genai = updated_config
         elif update_type == CameraConfigUpdateEnum.semantic_search:
             config.semantic_search = updated_config
         elif update_type == CameraConfigUpdateEnum.snapshots:

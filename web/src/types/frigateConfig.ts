@@ -218,6 +218,12 @@ export interface CameraConfig {
         mode: string;
       };
     };
+    genai?: {
+      enabled: boolean;
+      enabled_in_config: boolean;
+      alerts: boolean;
+      detections: boolean;
+    };
   };
   rtmp: {
     enabled: boolean;

@@ -68,7 +68,8 @@ function useValue(): useValueReturn {
         autotracking,
         alerts,
         detections,
-        genai,
+        object_descriptions,
+        review_descriptions,
       } = state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
       cameraStates[`${name}/enabled/state`] = enabled ? "ON" : "OFF";
@@ -90,7 +91,12 @@ function useValue(): useValueReturn {
       cameraStates[`${name}/review_detections/state`] = detections
         ? "ON"
         : "OFF";
-      cameraStates[`${name}/genai/state`] = genai ? "ON" : "OFF";
+      cameraStates[`${name}/object_descriptions/state`] = object_descriptions
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/review_descriptions/state`] = review_descriptions
+        ? "ON"
+        : "OFF";
     });
 
     setWsState((prevState) => ({
@@ -278,14 +284,31 @@ export function useDetectionsState(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
-export function useGenAIState(camera: string): {
+export function useObjectDescriptionState(camera: string): {
   payload: ToggleableSetting;
   send: (payload: ToggleableSetting, retain?: boolean) => void;
 } {
   const {
     value: { payload },
     send,
-  } = useWs(`${camera}/genai/state`, `${camera}/genai/set`);
+  } = useWs(
+    `${camera}/object_descriptions/state`,
+    `${camera}/object_descriptions/set`,
+  );
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useReviewDescriptionState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/review_descriptions/state`,
+    `${camera}/review_descriptions/set`,
+  );
   return { payload: payload as ToggleableSetting, send };
 }
 

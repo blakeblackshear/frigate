@@ -8,9 +8,8 @@ class ReviewMetadata(BaseModel):
     confidence: float = Field(
         description="A float between 0 and 1 representing your overall confidence in this analysis."
     )
-    potential_threat_level: int | None = Field(
-        default=None,
-        ge=1,
+    potential_threat_level: int = Field(
+        ge=0,
         le=3,
         description="An integer representing the potential threat level (1-3). 1: Minor anomaly. 2: Moderate concern. 3: High threat. Only include this field if a clear security concern is observable; otherwise, omit it.",
     )
