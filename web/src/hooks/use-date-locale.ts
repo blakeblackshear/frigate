@@ -10,6 +10,7 @@ const localeMap: Record<string, () => Promise<Locale>> = {
   fr: () => import("date-fns/locale/fr").then((module) => module.fr),
   ar: () => import("date-fns/locale/ar").then((module) => module.ar),
   pt: () => import("date-fns/locale/pt").then((module) => module.pt),
+  "pt-BR": () => import("date-fns/locale/pt").then((module) => module.pt),
   ru: () => import("date-fns/locale/ru").then((module) => module.ru),
   de: () => import("date-fns/locale/de").then((module) => module.de),
   ja: () => import("date-fns/locale/ja").then((module) => module.ja),
