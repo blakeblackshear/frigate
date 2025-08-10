@@ -773,7 +773,7 @@ class Dispatcher:
                 genai_settings.enabled = False
 
         self.config_updater.publish_update(
-            CameraConfigUpdateTopic(CameraConfigUpdateEnum.genai, camera_name),
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.object_genai, camera_name),
             genai_settings,
         )
         self.publish(f"{camera_name}/object_descriptions/state", payload, retain=True)
@@ -798,7 +798,7 @@ class Dispatcher:
                 genai_settings.enabled = False
 
         self.config_updater.publish_update(
-            CameraConfigUpdateTopic(CameraConfigUpdateEnum.genai, camera_name),
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.review_genai, camera_name),
             genai_settings,
         )
         self.publish(f"{camera_name}/review_descriptions/state", payload, retain=True)
