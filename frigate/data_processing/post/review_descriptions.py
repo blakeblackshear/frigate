@@ -15,6 +15,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
+from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 
 from ..post.api import PostProcessorApi
 from ..types import DataProcessorMetrics
@@ -35,8 +36,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         self.metrics = metrics
         self.tracked_review_items: dict[str, list[tuple[int, bytes]]] = {}
         self.genai_client = client
+        self.review_desc_speed = InferenceSpeed(self.metrics.review_desc_speed)
+        self.review_descs_dps = EventsPerSecond()
+        self.review_descs_dps.start()
 
     def process_data(self, data, data_type):
+        self.metrics.review_desc_dps.value = self.review_descs_dps.eps()
+
         if data_type != PostProcessDataEnum.review:
             return
 
@@ -101,11 +107,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 return
 
             # kickoff analysis
+            self.review_descs_dps.update()
             threading.Thread(
                 target=run_analysis,
                 args=(
                     self.requestor,
                     self.genai_client,
+                    self.review_desc_speed,
                     camera,
                     final_data,
                     copy.copy([r[1] for r in self.tracked_review_items[id]]),
@@ -121,10 +129,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 def run_analysis(
     requestor: InterProcessRequestor,
     genai_client: GenAIClient,
+    review_inference_speed: InferenceSpeed,
     camera: str,
     final_data: dict[str, str],
     thumbs: list[bytes],
 ) -> None:
+    start = datetime.datetime.now().timestamp()
     metadata = genai_client.generate_review_description(
         {
             "camera": camera,
@@ -135,6 +145,7 @@ def run_analysis(
         },
         thumbs,
     )
+    review_inference_speed.update(datetime.datetime.now().timestamp() - start)
 
     if not metadata:
         return None
