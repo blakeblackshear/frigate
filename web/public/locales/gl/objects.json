@@ -1,0 +1,18 @@
+{
+  "person": "Persoa",
+  "bicycle": "Bicicleta",
+  "airplane": "Avión",
+  "motorcycle": "Motocicleta",
+  "bus": "Bus",
+  "train": "Tren",
+  "boat": "Bote",
+  "traffic_light": "Luces de tráfico",
+  "fire_hydrant": "Boca de incendio",
+  "street_sign": "Sinal de tráfico",
+  "stop_sign": "Sinal de Stop",
+  "parking_meter": "Parquímetro",
+  "bench": "Banco",
+  "bird": "Paxaro",
+  "cat": "Gato",
+  "car": "Coche"
+}
