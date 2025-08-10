@@ -35,7 +35,8 @@ import {
   useAlertsState,
   useDetectionsState,
   useEnabledState,
-  useGenAIState,
+  useObjectDescriptionState,
+  useReviewDescriptionState,
 } from "@/api/ws";
 import CameraEditForm from "@/components/settings/CameraEditForm";
 import { LuPlus } from "react-icons/lu";
@@ -150,8 +151,10 @@ export default function CameraSettingsView({
   const { payload: detectionsState, send: sendDetections } =
     useDetectionsState(selectedCamera);
 
-  const { payload: genAIState, send: sendGenAI } =
-    useGenAIState(selectedCamera);
+  const { payload: objDescState, send: sendObjDesc } =
+    useObjectDescriptionState(selectedCamera);
+  const { payload: revDescState, send: sendRevDesc } =
+    useReviewDescriptionState(selectedCamera);
 
   const handleCheckedChange = useCallback(
     (isChecked: boolean) => {
@@ -418,7 +421,9 @@ export default function CameraSettingsView({
                   <Separator className="my-2 flex bg-secondary" />
 
                   <Heading as="h4" className="my-2">
-                    <Trans ns="views/settings">camera.genai.title</Trans>
+                    <Trans ns="views/settings">
+                      camera.object_descriptions.title
+                    </Trans>
                   </Heading>
 
                   <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 space-y-3 text-sm text-primary-variant">
@@ -426,9 +431,9 @@ export default function CameraSettingsView({
                       <Switch
                         id="alerts-enabled"
                         className="mr-3"
-                        checked={genAIState == "ON"}
+                        checked={objDescState == "ON"}
                         onCheckedChange={(isChecked) => {
-                          sendGenAI(isChecked ? "ON" : "OFF");
+                          sendObjDesc(isChecked ? "ON" : "OFF");
                         }}
                       />
                       <div className="space-y-0.5">
@@ -438,7 +443,44 @@ export default function CameraSettingsView({
                       </div>
                     </div>
                     <div className="mt-3 text-sm text-muted-foreground">
-                      <Trans ns="views/settings">camera.genai.desc</Trans>
+                      <Trans ns="views/settings">
+                        camera.object_descriptions.desc
+                      </Trans>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {cameraConfig?.review?.genai?.enabled_in_config && (
+                <>
+                  <Separator className="my-2 flex bg-secondary" />
+
+                  <Heading as="h4" className="my-2">
+                    <Trans ns="views/settings">
+                      camera.review_descriptions.title
+                    </Trans>
+                  </Heading>
+
+                  <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 space-y-3 text-sm text-primary-variant">
+                    <div className="flex flex-row items-center">
+                      <Switch
+                        id="alerts-enabled"
+                        className="mr-3"
+                        checked={revDescState == "ON"}
+                        onCheckedChange={(isChecked) => {
+                          sendRevDesc(isChecked ? "ON" : "OFF");
+                        }}
+                      />
+                      <div className="space-y-0.5">
+                        <Label htmlFor="genai-enabled">
+                          <Trans>button.enabled</Trans>
+                        </Label>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-sm text-muted-foreground">
+                      <Trans ns="views/settings">
+                        camera.review_descriptions.desc
+                      </Trans>
                     </div>
                   </div>
                 </>

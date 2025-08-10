@@ -75,7 +75,8 @@ class Dispatcher:
             "birdseye_mode": self._on_birdseye_mode_command,
             "review_alerts": self._on_alerts_command,
             "review_detections": self._on_detections_command,
-            "genai": self._on_genai_command,
+            "object_descriptions": self._on_object_description_command,
+            "review_descriptions": self._on_review_description_command,
         }
         self._global_settings_handlers: dict[str, Callable] = {
             "notifications": self._on_global_notification_command,
@@ -218,7 +219,12 @@ class Dispatcher:
                     ].onvif.autotracking.enabled,
                     "alerts": self.config.cameras[camera].review.alerts.enabled,
                     "detections": self.config.cameras[camera].review.detections.enabled,
-                    "genai": self.config.cameras[camera].objects.genai.enabled,
+                    "object_descriptions": self.config.cameras[
+                        camera
+                    ].objects.genai.enabled,
+                    "review_descriptions": self.config.cameras[
+                        camera
+                    ].review.genai.enabled,
                 }
 
             self.publish("camera_activity", json.dumps(camera_status))
@@ -752,8 +758,8 @@ class Dispatcher:
         )
         self.publish(f"{camera_name}/review_detections/state", payload, retain=True)
 
-    def _on_genai_command(self, camera_name: str, payload: str) -> None:
-        """Callback for GenAI topic."""
+    def _on_object_description_command(self, camera_name: str, payload: str) -> None:
+        """Callback for object description topic."""
         genai_settings = self.config.cameras[camera_name].objects.genai
 
         if payload == "ON":
@@ -764,15 +770,40 @@ class Dispatcher:
                 return
 
             if not genai_settings.enabled:
-                logger.info(f"Turning on GenAI for {camera_name}")
+                logger.info(f"Turning on object descriptions for {camera_name}")
                 genai_settings.enabled = True
         elif payload == "OFF":
             if genai_settings.enabled:
-                logger.info(f"Turning off GenAI for {camera_name}")
+                logger.info(f"Turning off object descriptions for {camera_name}")
                 genai_settings.enabled = False
 
         self.config_updater.publish_update(
-            CameraConfigUpdateTopic(CameraConfigUpdateEnum.genai, camera_name),
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.object_genai, camera_name),
             genai_settings,
         )
-        self.publish(f"{camera_name}/genai/state", payload, retain=True)
+        self.publish(f"{camera_name}/object_descriptions/state", payload, retain=True)
+
+    def _on_review_description_command(self, camera_name: str, payload: str) -> None:
+        """Callback for review description topic."""
+        genai_settings = self.config.cameras[camera_name].review.genai
+
+        if payload == "ON":
+            if not self.config.cameras[camera_name].review.genai.enabled_in_config:
+                logger.error(
+                    "GenAI Alerts or Detections must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
+            if not genai_settings.enabled:
+                logger.info(f"Turning on review descriptions for {camera_name}")
+                genai_settings.enabled = True
+        elif payload == "OFF":
+            if genai_settings.enabled:
+                logger.info(f"Turning off review descriptions for {camera_name}")
+                genai_settings.enabled = False
+
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.review_genai, camera_name),
+            genai_settings,
+        )
+        self.publish(f"{camera_name}/review_descriptions/state", payload, retain=True)
