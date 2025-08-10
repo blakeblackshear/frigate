@@ -70,7 +70,7 @@ class GenAIClient:
         **IMPORTANT:**
         - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
         """
-        logger.info(
+        logger.debug(
             f"Sending {len(thumbnails)} images to create review description on {review_data['camera']}"
         )
         response = self._send(context_prompt, thumbnails)

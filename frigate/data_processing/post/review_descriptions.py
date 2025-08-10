@@ -111,10 +111,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     self.review_desc_speed,
                     camera,
                     final_data,
-                    copy.copy([r[1] for r in self.tracked_review_items[id]]),
+                    thumbs,
                 ),
             ).start()
-            self.tracked_review_items.pop(id)
 
     def handle_request(self, request_data):
         pass
