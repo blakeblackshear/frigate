@@ -356,7 +356,7 @@ def stats_snapshot(
                     embeddings_metrics.yolov9_lpr_pps.value, 2
                 )
 
-        if embeddings_metrics.review_desc_dps.value > 0.0:
+        if embeddings_metrics.review_desc_speed.value > 0.0:
             stats["embeddings"]["review_description_speed"] = round(
                 embeddings_metrics.review_desc_speed.value * 1000, 2
             )
