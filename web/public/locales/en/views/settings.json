@@ -150,9 +150,13 @@
       "title": "Streams",
       "desc": "Temporarily disable a camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>"
     },
-    "genai": {
-      "title": "Generative AI",
-      "desc": "Temporarily enable/disable Generative AI for this camera. When disabled, AI generated descriptions will not be requested for tracked objects on this camera."
+    "object_descriptions": {
+      "title": "Generative AI Object Descriptions",
+      "desc": "Temporarily enable/disable Generative AI object descriptions for this camera. When disabled, AI generated descriptions will not be requested for tracked objects on this camera."
+    },
+    "review_descriptions": {
+      "title": "Generative AI Review Descriptions",
+      "desc": "Temporarily enable/disable Generative AI review descriptions for this camera. When disabled, AI generated descriptions will not be requested for review items on this camera."
     },
     "review": {
       "title": "Review",

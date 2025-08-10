@@ -62,10 +62,10 @@ class GenAIClient:
         - `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
         - `confidence` (float): A number 0–1 for overall confidence in the analysis.
         - `potential_threat_level` (integer, optional): Include only if there is a clear, observable security concern:
+            - 0 = Normal activity is occurring
             - 1 = Unusual but not overtly threatening
             - 2 = Suspicious or potentially harmful
             - 3 = Clear and immediate threat
-            Omit this field if no concern is evident.
 
         **IMPORTANT:**
         - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.

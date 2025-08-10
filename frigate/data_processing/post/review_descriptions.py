@@ -46,6 +46,11 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         if data_type != PostProcessDataEnum.review:
             return
 
+        camera = data["after"]["camera"]
+
+        if not self.config.cameras[camera].review.genai.enabled:
+            return
+
         id = data["after"]["id"]
 
         if data["type"] == "new" or data["type"] == "update":
@@ -91,7 +96,6 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 return
 
             final_data = data["after"]
-            camera = final_data["camera"]
 
             if (
                 final_data["severity"] == "alert"

@@ -64,7 +64,8 @@ export interface FrigateCameraState {
     autotracking: boolean;
     alerts: boolean;
     detections: boolean;
-    genai: boolean;
+    object_descriptions: boolean;
+    review_descriptions: boolean;
   };
   motion: boolean;
   objects: ObjectType[];
