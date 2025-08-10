@@ -24,7 +24,7 @@
     "type": {
       "label": "Tipo",
       "timestamp": "Marca temporal",
-      "tag": "Etiqueta",
+      "tag": "Marcador",
       "message": "Mensagem"
     },
     "tips": "Os Registros estão sendo transmitidos do servidor",
@@ -157,7 +157,7 @@
     "detectHighCpuUsage": "{{camera}} possui alta utilização de CPU para detecção ({{detectAvg}}%)",
     "healthy": "O sistema está saudável",
     "cameraIsOffline": "{{camera}} está offline",
-    "reindexingEmbeddings": "Reindexando embeddings ({{processed}}% completado)",
+    "reindexingEmbeddings": "Reindexando os vetores de característica de imagens ({{processed}}% completado)",
     "detectIsSlow": "{{detect}} está lento ({{speed}} ms)"
   },
   "enrichments": {
@@ -167,13 +167,13 @@
       "face_recognition": "Reconhecimento Facial",
       "plate_recognition": "Reconhecimento de Placa",
       "plate_recognition_speed": "Velocidade de Reconhecimento de Placas",
-      "text_embedding_speed": "Velocidade de Incorporação de Textos",
+      "text_embedding_speed": "Velocidade de Geração de Vetores de Texto",
       "yolov9_plate_detection_speed": "Velocidade de Reconhecimento de Placas do YOLOv9",
       "yolov9_plate_detection": "Detecção de Placas do YOLOv9",
-      "image_embedding": "Incorporação de Imagem",
-      "text_embedding": "Incorporação de Texto",
-      "image_embedding_speed": "Velocidade de Incorporação de Imagem",
-      "face_embedding_speed": "Velocidade de Incorporação de Rosto",
+      "image_embedding": "Vetores de Características de Imagens",
+      "text_embedding": "Vetor de Característica de Texto",
+      "image_embedding_speed": "Velocidade de Geração de Vetores de Imagem",
+      "face_embedding_speed": "Velocidade de Geração de Vetores de Rostos",
       "face_recognition_speed": "Velocidade de Reconhecimento de Rostos"
     }
   }

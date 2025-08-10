@@ -3,11 +3,11 @@
   "labels": {
     "label": "Rótulos",
     "all": {
-      "title": "Todas as Etiquetas",
-      "short": "Etiquetas"
+      "title": "Todos os Rótulos",
+      "short": "Rótulos"
     },
-    "count_one": "{{count}} Etiqueta",
-    "count_other": "{{count}} Etiquetas"
+    "count_one": "{{count}} Rótulo",
+    "count_other": "{{count}} Rótulos"
   },
   "zones": {
     "label": "Zonas",
@@ -29,8 +29,8 @@
   },
   "timeRange": "Intervalo de Tempo",
   "subLabels": {
-    "label": "Sub-etiquetas",
-    "all": "Todas as Sub-etiquetas"
+    "label": "Sub-Rótulos",
+    "all": "Todos os Sub-Rótulos"
   },
   "score": "Pontuação",
   "estimatedSpeed": "Velocidade Estimada {{unit}}",

@@ -3,8 +3,8 @@
     "person": "Pessoa",
     "unknown": "Desconhecido",
     "face": "Detalhes do Rosto",
-    "subLabelScore": "Pontuação do sub-rótulo",
-    "scoreInfo": "A pontuação da sub etiqueta é a pontuação ponderada de todas as confidências faciais reconhecidas, então a pontuação pode ser diferente da mostrada na foto instantânea.",
+    "subLabelScore": "Pontuação do Sub-Rótulo",
+    "scoreInfo": "A pontuação do sub-rótulo é a pontuação ponderada de todas as confidências faciais reconhecidas, então a pontuação pode ser diferente da mostrada na foto instantânea.",
     "faceDesc": "Detalhes do objeto rastreado que gerou este rosto",
     "timestamp": "Carimbo de data e hora"
   },
@@ -53,7 +53,7 @@
     "faceName": "Digite o Nome do Rosto",
     "uploadFace": "Enviar Imagem de Rosto",
     "description": {
-      "uploadFace": "Faça o upload de uma imagem de {{name}} que mostre mostre seu rosto visto de frente. A imagem não precisa estar recortada apenas com o rosto."
+      "uploadFace": "Faça o upload de uma imagem de {{name}} que mostre seu rosto visto de frente. A imagem não precisa estar recortada apenas com o rosto."
     }
   },
   "description": {
@@ -87,7 +87,7 @@
       "renamedFace": "O rosto foi renomeado com sucesso para {{name}}",
       "deletedName_one": "{{count}} rosto foi deletado com sucesso.",
       "deletedName_many": "{{count}} rostos foram deletados com sucesso.",
-      "deletedName_other": ""
+      "deletedName_other": "{{count}} rostos foram deletados com sucesso."
     },
     "error": {
       "uploadingImageFailed": "Falha ao enviar a imagem: {{errorMessage}}",
