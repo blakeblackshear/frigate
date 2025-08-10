@@ -356,6 +356,14 @@ def stats_snapshot(
                     embeddings_metrics.yolov9_lpr_pps.value, 2
                 )
 
+        if embeddings_metrics.review_desc_dps.value > 0.0:
+            stats["embeddings"]["review_description_speed"] = round(
+                embeddings_metrics.review_desc_speed.value * 1000, 2
+            )
+            stats["embeddings"]["review_descriptions"] = round(
+                embeddings_metrics.review_desc_dps.value, 2
+            )
+
         for key in embeddings_metrics.classification_speeds.keys():
             stats["embeddings"][f"{key}_classification_speed"] = round(
                 embeddings_metrics.classification_speeds[key].value * 1000, 2
