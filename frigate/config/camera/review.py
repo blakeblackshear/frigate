@@ -63,11 +63,11 @@ class DetectionsConfig(FrigateBaseModel):
 
 
 class GenAIReviewConfig(FrigateBaseModel):
-    enabled: bool | None = Field(
-        default=None,
-        title="Internal field to represent if the review descriptions feature is enabled.",
+    enabled: bool = Field(
+        default=False,
+        title="Enable GenAI descriptions for review items.",
     )
-    alerts: bool = Field(default=False, title="Enable GenAI for alerts.")
+    alerts: bool = Field(default=True, title="Enable GenAI for alerts.")
     detections: bool = Field(default=False, title="Enable GenAI for detections.")
     debug_save_thumbnails: bool = Field(
         default=False,
