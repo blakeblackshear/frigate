@@ -69,12 +69,20 @@ class GenAIReviewConfig(FrigateBaseModel):
     )
     alerts: bool = Field(default=True, title="Enable GenAI for alerts.")
     detections: bool = Field(default=False, title="Enable GenAI for detections.")
+    additional_concerns: list[str] = Field(
+        default=[],
+        title="Additional concerns that GenAI should make note of on this camera.",
+    )
     debug_save_thumbnails: bool = Field(
         default=False,
         title="Save thumbnails sent to generative AI for debugging purposes.",
     )
     enabled_in_config: Optional[bool] = Field(
         default=None, title="Keep track of original state of generative AI."
+    )
+    preferred_language: str | None = Field(
+        title="Preferred language for GenAI Response",
+        default=None,
     )
 
 
