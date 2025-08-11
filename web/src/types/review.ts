@@ -22,6 +22,7 @@ export type ReviewData = {
     scene: string;
     confidence: number;
     potential_threat_level?: number;
+    other_concerns?: string[];
   };
 };
 
