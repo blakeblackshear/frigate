@@ -1,10 +1,9 @@
 import logging
 import os
-import socket
 import threading
 import time
 from pathlib import Path
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Tuple
 from urllib.parse import urlparse
 
 import requests
@@ -24,8 +23,6 @@ MIRROR_MAPPING = {
 
 # Global flag to force using official sources only
 FORCE_OFFICIAL_SOURCE = False
-
-
 
 
 def set_force_official_source(force: bool = True) -> None:
