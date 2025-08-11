@@ -1,5 +1,6 @@
 """Generative AI module for Frigate."""
 
+import datetime
 import importlib
 import logging
 import os
@@ -47,9 +48,9 @@ class GenAIClient:
         - Including **reasonable, evidence-based inferences** about the likely activity or context, but only if directly supported by visible details.
 
         When forming your description:
-        - **Facts first**: Describe the physical setting, people, and objects exactly as seen.
+        - **Facts first**: Describe the time, physical setting, people, and objects exactly as seen.
         - **Then context**: Briefly note plausible purposes or activities (e.g., “appears to be delivering a package” if carrying a box to a door).
-        - Clearly separate certain facts (“A person is holding a ladder”) from reasonable inferences (“likely performing maintenance”).
+        - Clearly separate certain facts (“A person is holding an object with horizontal rungs”) from reasonable inferences (“likely a ladder”).
         - Do not speculate beyond what is visible, and do not imply hostility, criminal intent, or other strong judgments unless there is unambiguous visual evidence.
 
         Here is information already known:
@@ -116,6 +117,9 @@ class GenAIClient:
 
 def get_genai_client(config: FrigateConfig) -> Optional[GenAIClient]:
     """Get the GenAI client."""
+    if not config.genai.provider:
+        return None
+
     load_providers()
     provider = PROVIDERS.get(config.genai.provider)
     if provider:
