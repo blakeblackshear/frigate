@@ -41,17 +41,23 @@ class GenAIClient:
         review_data: dict[str, Any],
         thumbnails: list[bytes],
         concerns: list[str],
+        preferred_language: str | None,
     ) -> ReviewMetadata | None:
         """Generate a description for the review item activity."""
         if concerns:
             concern_list = "\n    - ".join(concerns)
-            other_concerns = f"""
+            concern_prompt = f"""
 - `other_concerns` (list of strings): Include a list of any of the following concerns that are occurring:
     - {concern_list}
 """
 
         else:
-            other_concerns = None
+            concern_prompt = ""
+
+        if preferred_language:
+            language_prompt = f"Provide your answer in {preferred_language}"
+        else:
+            language_prompt = ""
 
         context_prompt = f"""
 Please analyze the image(s), which are in chronological order, strictly from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
@@ -80,10 +86,11 @@ Your response **MUST** be a flat JSON object with:
     - 1 = Unusual but not overtly threatening
     - 2 = Suspicious or potentially harmful
     - 3 = Clear and immediate threat
-{other_concerns}
+{concern_prompt}
 
 **IMPORTANT:**
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
+{language_prompt}
         """
         logger.debug(
             f"Sending {len(thumbnails)} images to create review description on {review_data['camera']}"

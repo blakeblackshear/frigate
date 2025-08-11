@@ -80,6 +80,10 @@ class GenAIReviewConfig(FrigateBaseModel):
     enabled_in_config: Optional[bool] = Field(
         default=None, title="Keep track of original state of generative AI."
     )
+    preferred_language: str | None = Field(
+        title="Preferred language for GenAI Response",
+        default=None,
+    )
 
 
 class ReviewConfig(FrigateBaseModel):

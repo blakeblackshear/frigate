@@ -112,6 +112,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     final_data,
                     thumbs,
                     camera_config.review.genai.additional_concerns,
+                    camera_config.review.genai.preferred_language,
                 ),
             ).start()
 
@@ -162,6 +163,7 @@ def run_analysis(
     final_data: dict[str, str],
     thumbs: list[bytes],
     concerns: list[str],
+    preferred_language: str | None,
 ) -> None:
     start = datetime.datetime.now().timestamp()
     metadata = genai_client.generate_review_description(
@@ -174,6 +176,7 @@ def run_analysis(
         },
         thumbs,
         concerns,
+        preferred_language,
     )
     review_inference_speed.update(datetime.datetime.now().timestamp() - start)
 

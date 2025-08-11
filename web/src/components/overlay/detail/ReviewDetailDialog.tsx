@@ -76,10 +76,6 @@ export default function ReviewDetailDialog({
   const aiAnalysis = useMemo(() => review?.data?.metadata, [review]);
 
   const aiThreatLevel = useMemo(() => {
-    console.log(
-      `${aiAnalysis?.potential_threat_level} || ${aiAnalysis?.other_concerns}`,
-    );
-
     if (
       !aiAnalysis ||
       (!aiAnalysis.potential_threat_level && !aiAnalysis.other_concerns)
