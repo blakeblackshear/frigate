@@ -258,8 +258,8 @@ export default function ReviewDetailDialog({
               {aiAnalysis != undefined && (
                 <div
                   className={cn(
-                    "m-2 flex h-full w-full flex-col gap-2 rounded-md bg-card p-2",
-                    isDesktop && "w-[90%]",
+                    "flex h-full w-full flex-col gap-2 rounded-md bg-card p-2",
+                    isDesktop && "m-2 w-[90%]",
                   )}
                 >
                   AI Analysis
