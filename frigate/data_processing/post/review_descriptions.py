@@ -7,6 +7,7 @@ import os
 import shutil
 import threading
 from pathlib import Path
+from typing import Any
 
 import cv2
 
@@ -122,7 +123,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         if topic == EmbeddingsRequestEnum.summarize_review.value:
             start_ts = request_data["start_ts"]
             end_ts = request_data["end_ts"]
-            items = [
+            items: list[dict[str, Any]] = [
                 r["data"]["metadata"]
                 for r in (
                     ReviewSegment.select(ReviewSegment.data)
@@ -141,7 +142,18 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 logger.debug("No review items with metadata found during time period")
                 return None
 
-            return self.genai_client.generate_review_summary(start_ts, end_ts, items)
+            important_items = filter(
+                lambda item: item.get("potential_threat_level", 0) > 0
+                or item.get("other_concerns"),
+                items,
+            )
+
+            if not important_items:
+                return "No concerns were found during this time period."
+
+            return self.genai_client.generate_review_summary(
+                start_ts, end_ts, important_items
+            )
         else:
             return None
 
