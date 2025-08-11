@@ -26,18 +26,6 @@ MIRROR_MAPPING = {
 FORCE_OFFICIAL_SOURCE = False
 
 
-def measure_latency(host: str, port: int = 80, timeout: float = 2.0) -> Optional[float]:
-    """
-    Measure the latency to a host using a TCP connection.
-    Returns the latency in milliseconds or None if the connection failed.
-    """
-    try:
-        start_time = time.time()
-        with socket.create_connection((host, port), timeout=timeout):
-            end_time = time.time()
-        return (end_time - start_time) * 1000  # Convert to milliseconds
-    except (socket.timeout, socket.error):
-        return None
 
 
 def set_force_official_source(force: bool = True) -> None:
@@ -52,7 +40,7 @@ def set_force_official_source(force: bool = True) -> None:
 
 def get_best_mirror(url: str, latency_threshold: int = 20) -> Tuple[str, bool]:
     """
-    Determine the best URL to use based on latency measurements.
+    Determine whether to use mirror based on environment variable USE_MIRROR_SOURCE.
     Returns a tuple of (url_to_use, is_mirror).
     """
     if FORCE_OFFICIAL_SOURCE:
@@ -66,27 +54,8 @@ def get_best_mirror(url: str, latency_threshold: int = 20) -> Tuple[str, bool]:
     if not mirror_host:
         return url, False
 
-    # Measure latency to both hosts
-    official_latency = measure_latency(host)
-    mirror_latency = measure_latency(mirror_host)
-
-    # Log latency information
-    if official_latency is not None and mirror_latency is not None:
-        logger.info(
-            f"Latency - Official: {official_latency:.2f}ms, Mirror: {mirror_latency:.2f}ms"
-        )
-
-    # Determine which URL to use
-    use_mirror = False
-    if official_latency is None:
-        # Official site unreachable, try mirror
-        use_mirror = mirror_latency is not None
-    elif mirror_latency is None:
-        # Mirror unreachable, use official
-        use_mirror = False
-    else:
-        # Both reachable, compare latency
-        use_mirror = mirror_latency < (official_latency - latency_threshold)
+    # Check environment variable to determine if mirror should be used
+    use_mirror = os.environ.get("USE_MIRROR_SOURCE", "").lower() == "true"
 
     if use_mirror:
         mirror_url = url.replace(host, mirror_host)
