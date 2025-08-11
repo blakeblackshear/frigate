@@ -69,7 +69,6 @@ Your task is to provide a **neutral, factual, and objective description** of the
 When forming your description:
 - **Facts first**: Describe the time, physical setting, people, and objects exactly as seen.
 - **Then context**: Briefly note plausible purposes or activities (e.g., “appears to be delivering a package” if carrying a box to a door).
-- Clearly separate certain facts (“A person is holding an object with horizontal rungs”) from reasonable inferences (“likely a ladder”).
 - Do not speculate beyond what is visible, and do not imply hostility, criminal intent, or other strong judgments unless there is unambiguous visual evidence.
 
 Here is information already known:

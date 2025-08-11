@@ -142,10 +142,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 logger.debug("No review items with metadata found during time period")
                 return None
 
-            important_items = filter(
-                lambda item: item.get("potential_threat_level", 0) > 0
-                or item.get("other_concerns"),
-                items,
+            important_items = list(
+                filter(
+                    lambda item: item.get("potential_threat_level", 0) > 0
+                    or item.get("other_concerns"),
+                    items,
+                )
             )
 
             if not important_items:
