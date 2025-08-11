@@ -46,8 +46,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             return
 
         camera = data["after"]["camera"]
+        camera_config = self.config.cameras[camera]
 
-        if not self.config.cameras[camera].review.genai.enabled:
+        if not camera_config.review.genai.enabled:
             return
 
         id = data["after"]["id"]
@@ -59,12 +60,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
             if (
                 final_data["severity"] == "alert"
-                and not self.config.cameras[camera].review.genai.alerts
+                and not camera_config.review.genai.alerts
             ):
                 return
             elif (
                 final_data["severity"] == "detection"
-                and not self.config.cameras[camera].review.genai.detections
+                and not camera_config.review.genai.detections
             ):
                 return
 
@@ -86,9 +87,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 if ret:
                     thumbs.append(jpg.tobytes())
 
-                if self.config.cameras[
-                    data["after"]["camera"]
-                ].review.genai.debug_save_thumbnails:
+                if camera_config.review.genai.debug_save_thumbnails:
                     id = data["after"]["id"]
                     Path(os.path.join(CLIPS_DIR, f"genai-requests/{id}")).mkdir(
                         parents=True, exist_ok=True
@@ -112,6 +111,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     camera,
                     final_data,
                     thumbs,
+                    camera_config.review.genai.additional_concerns,
                 ),
             ).start()
 
@@ -161,6 +161,7 @@ def run_analysis(
     camera: str,
     final_data: dict[str, str],
     thumbs: list[bytes],
+    concerns: list[str],
 ) -> None:
     start = datetime.datetime.now().timestamp()
     metadata = genai_client.generate_review_description(
@@ -172,6 +173,7 @@ def run_analysis(
             "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
         },
         thumbs,
+        concerns,
     )
     review_inference_speed.update(datetime.datetime.now().timestamp() - start)
 

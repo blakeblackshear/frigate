@@ -13,3 +13,7 @@ class ReviewMetadata(BaseModel):
         le=3,
         description="An integer representing the potential threat level (1-3). 1: Minor anomaly. 2: Moderate concern. 3: High threat. Only include this field if a clear security concern is observable; otherwise, omit it.",
     )
+    other_concerns: list[str] | None = Field(
+        default=None,
+        description="Other concerns highlighted by the user that are observed.",
+    )

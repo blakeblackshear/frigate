@@ -76,20 +76,35 @@ export default function ReviewDetailDialog({
   const aiAnalysis = useMemo(() => review?.data?.metadata, [review]);
 
   const aiThreatLevel = useMemo(() => {
-    if (!aiAnalysis?.potential_threat_level) {
+    console.log(
+      `${aiAnalysis?.potential_threat_level} || ${aiAnalysis?.other_concerns}`,
+    );
+
+    if (
+      !aiAnalysis ||
+      (!aiAnalysis.potential_threat_level && !aiAnalysis.other_concerns)
+    ) {
       return "None";
     }
 
+    let concerns = "";
     switch (aiAnalysis.potential_threat_level) {
       case ThreatLevel.UNUSUAL:
-        return "Unusual Activity";
+        concerns = "• Unusual Activity\n";
+        break;
       case ThreatLevel.SUSPICIOUS:
-        return "Suspicious Activity";
+        concerns = "• Suspicious Activity\n";
+        break;
       case ThreatLevel.DANGER:
-        return "Danger";
+        concerns = "• Danger\n";
+        break;
     }
 
-    return "Unknown";
+    (aiAnalysis.other_concerns ?? []).forEach((c) => {
+      concerns += `• ${c}\n`;
+    });
+
+    return concerns || "None";
   }, [aiAnalysis]);
 
   const hasMismatch = useMemo(() => {
@@ -267,7 +282,7 @@ export default function ReviewDetailDialog({
                   <div className="text-sm">{aiAnalysis.scene}</div>
                   <div className="text-sm text-primary/40">Score</div>
                   <div className="text-sm">{aiAnalysis.confidence * 100}%</div>
-                  <div className="text-sm text-primary/40">Threat Level</div>
+                  <div className="text-sm text-primary/40">Concerns</div>
                   <div className="text-sm">{aiThreatLevel}</div>
                 </div>
               )}
