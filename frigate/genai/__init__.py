@@ -1,5 +1,6 @@
 """Generative AI module for Frigate."""
 
+import datetime
 import importlib
 import logging
 import os
@@ -111,6 +112,47 @@ Your response **MUST** be a flat JSON object with:
                 return None
         else:
             return None
+
+    def generate_review_summary(
+        self, start_ts: float, end_ts: float, segments: list[dict[str, Any]]
+    ) -> str | None:
+        """Generate a summary of review item descriptions over a period of time."""
+        time_range = f"{datetime.datetime.fromtimestamp(start_ts).strftime('%I:%M %p')} to {datetime.datetime.fromtimestamp(end_ts).strftime('%I:%M %p')}"
+        timeline_summary_prompt = f"""
+Analyze security camera metadata for {time_range} and write a professional security report.
+
+INPUT FORMAT: JSON objects with "scene", "confidence", and "potential_threat_level" (0-3).
+
+OUTPUT FORMAT:
+Security Summary - {time_range}
+[One sentence overview of general activity]
+
+[Chronological timeline with timestamps when available]
+
+[Final threat assessment statement]
+
+REPORT REQUIREMENTS:
+- Write chronologically using timestamps
+- Highlight any potential_threat_level ≥ 2 incidents with times
+- Note unusual events even if not threats
+- State "only normal activity observed" if no threats detected
+- Use factual, professional security language
+
+STRICT RULES:
+- Output ONLY the security report
+- NO introductory phrases like "Here's a breakdown"
+- NO recommendations, suggestions, or system commentary
+- NO follow-up questions
+- Write as a human security officer would
+        """
+
+        for item in segments:
+            timeline_summary_prompt += f"\n        {item}"
+
+        with open("/config/prompt.txt", "w") as f:
+            f.write(timeline_summary_prompt)
+
+        return self._send(timeline_summary_prompt, [])
 
     def generate_object_description(
         self,

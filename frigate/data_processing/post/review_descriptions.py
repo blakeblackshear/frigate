@@ -10,11 +10,13 @@ from pathlib import Path
 
 import cv2
 
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
+from frigate.models import ReviewSegment
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 
 from ..post.api import PostProcessorApi
@@ -116,8 +118,32 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 ),
             ).start()
 
-    def handle_request(self, request_data):
-        pass
+    def handle_request(self, topic, request_data):
+        if topic == EmbeddingsRequestEnum.summarize_review.value:
+            start_ts = request_data["start_ts"]
+            end_ts = request_data["end_ts"]
+            items = [
+                r["data"]["metadata"]
+                for r in (
+                    ReviewSegment.select(ReviewSegment.data)
+                    .where(
+                        (ReviewSegment.data["metadata"].is_null(False))
+                        & (ReviewSegment.start_time < end_ts)
+                        & (ReviewSegment.end_time > start_ts)
+                    )
+                    .order_by(ReviewSegment.start_time.asc())
+                    .dicts()
+                    .iterator()
+                )
+            ]
+
+            if len(items) == 0:
+                logger.debug("No review items with metadata found during time period")
+                return None
+
+            return self.genai_client.generate_review_summary(start_ts, end_ts, items)
+        else:
+            return None
 
     def get_cache_frames(
         self, camera: str, start_time: float, end_time: float
