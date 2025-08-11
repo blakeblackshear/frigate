@@ -166,6 +166,7 @@ X-authentik-groups
 X-authentik-email
 X-authentik-name
 X-authentik-uid
+Cf-Access-Authenticated-User-Email
 ```
 
 If you would like to add more options, you can overwrite the default file with a docker bind mount at `/usr/local/nginx/conf/proxy_trusted_headers.conf`. Reference the source code for the default file formatting.
