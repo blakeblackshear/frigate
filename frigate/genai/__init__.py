@@ -10,6 +10,7 @@ from typing import Any, Optional
 from playhouse.shortcuts import model_to_dict
 
 from frigate.config import CameraConfig, FrigateConfig, GenAIConfig, GenAIProviderEnum
+from frigate.const import CLIPS_DIR
 from frigate.data_processing.post.types import ReviewMetadata
 from frigate.models import Event
 
@@ -42,6 +43,7 @@ class GenAIClient:
         thumbnails: list[bytes],
         concerns: list[str],
         preferred_language: str | None,
+        debug_save: bool,
     ) -> ReviewMetadata | None:
         """Generate a description for the review item activity."""
         if concerns:
@@ -60,7 +62,7 @@ class GenAIClient:
             language_prompt = ""
 
         context_prompt = f"""
-Please analyze the image(s), which are in chronological order, strictly from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
+Please analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
 
 Your task is to provide a clear, security-focused description of the scene that:
 1. States exactly what is happening based on observable actions and movements.
@@ -77,7 +79,7 @@ When forming your description:
 
 Your response MUST be a flat JSON object with:
 - `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
-- `confidence` (float): 0–1 confidence in the analysis.
+- `confidence` (float): 0-1 confidence in the analysis.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below.
 {concern_prompt}
 
@@ -86,7 +88,8 @@ Threat-level definitions:
 - 1 — Unusual or suspicious activity: At least one security-relevant behavior is present **and not explainable by a normal residential activity**.
 - 2 — Active or immediate threat: Breaking in, vandalism, aggression, weapon display.
 
-Here is information already known:
+Sequence details:
+- Frame 1 = earliest, Frame 10 = latest
 - Activity occurred at {review_data["timestamp"].strftime("%I:%M %p")}
 - Detected objects: {list(set(review_data["objects"]))}
 - Recognized objects: {list(set(review_data["recognized_objects"])) or "None"}
@@ -99,6 +102,14 @@ Here is information already known:
         logger.debug(
             f"Sending {len(thumbnails)} images to create review description on {review_data['camera']}"
         )
+
+        if debug_save:
+            with open(
+                os.path.join(CLIPS_DIR, "genai-requests", review_data["id"], "prompt.txt"),
+                "w",
+            ) as f:
+                f.write(context_prompt)
+
         response = self._send(context_prompt, thumbnails)
 
         if response:

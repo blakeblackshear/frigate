@@ -14,6 +14,7 @@ import cv2
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.config.camera.review import GenAIReviewConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
@@ -114,8 +115,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     camera,
                     final_data,
                     thumbs,
-                    camera_config.review.genai.additional_concerns,
-                    camera_config.review.genai.preferred_language,
+                    camera_config.review.genai,
                 ),
             ).start()
 
@@ -202,12 +202,12 @@ def run_analysis(
     camera: str,
     final_data: dict[str, str],
     thumbs: list[bytes],
-    concerns: list[str],
-    preferred_language: str | None,
+    genai_config: GenAIReviewConfig,
 ) -> None:
     start = datetime.datetime.now().timestamp()
     metadata = genai_client.generate_review_description(
         {
+            "id": final_data["id"],
             "camera": camera,
             "objects": final_data["data"]["objects"],
             "recognized_objects": final_data["data"]["sub_labels"],
@@ -215,8 +215,9 @@ def run_analysis(
             "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
         },
         thumbs,
-        concerns,
-        preferred_language,
+        genai_config.additional_concerns,
+        genai_config.preferred_language,
+        genai_config.debug_save_thumbnails,
     )
     review_inference_speed.update(datetime.datetime.now().timestamp() - start)
 
