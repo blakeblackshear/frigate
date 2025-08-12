@@ -7,6 +7,9 @@ export interface FrigateStats {
   npu_usages?: { [npuKey: string]: NpuStats };
   processes: { [processKey: string]: ExtraProcessStats };
   service: ServiceStats;
+  camera_fps: number;
+  process_fps: number;
+  skipped_fps: number;
   detection_fps: number;
 }
 
