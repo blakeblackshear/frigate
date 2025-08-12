@@ -7,14 +7,18 @@ import os
 import shutil
 import threading
 from pathlib import Path
+from typing import Any
 
 import cv2
 
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.config.camera.review import GenAIReviewConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
+from frigate.models import ReviewSegment
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 
 from ..post.api import PostProcessorApi
@@ -111,13 +115,49 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     camera,
                     final_data,
                     thumbs,
-                    camera_config.review.genai.additional_concerns,
-                    camera_config.review.genai.preferred_language,
+                    camera_config.review.genai,
                 ),
             ).start()
 
-    def handle_request(self, request_data):
-        pass
+    def handle_request(self, topic, request_data):
+        if topic == EmbeddingsRequestEnum.summarize_review.value:
+            start_ts = request_data["start_ts"]
+            end_ts = request_data["end_ts"]
+            items: list[dict[str, Any]] = [
+                r["data"]["metadata"]
+                for r in (
+                    ReviewSegment.select(ReviewSegment.data)
+                    .where(
+                        (ReviewSegment.data["metadata"].is_null(False))
+                        & (ReviewSegment.start_time < end_ts)
+                        & (ReviewSegment.end_time > start_ts)
+                    )
+                    .order_by(ReviewSegment.start_time.asc())
+                    .dicts()
+                    .iterator()
+                )
+            ]
+
+            if len(items) == 0:
+                logger.debug("No review items with metadata found during time period")
+                return None
+
+            important_items = list(
+                filter(
+                    lambda item: item.get("potential_threat_level", 0) > 0
+                    or item.get("other_concerns"),
+                    items,
+                )
+            )
+
+            if not important_items:
+                return "No concerns were found during this time period."
+
+            return self.genai_client.generate_review_summary(
+                start_ts, end_ts, important_items
+            )
+        else:
+            return None
 
     def get_cache_frames(
         self, camera: str, start_time: float, end_time: float
@@ -162,12 +202,12 @@ def run_analysis(
     camera: str,
     final_data: dict[str, str],
     thumbs: list[bytes],
-    concerns: list[str],
-    preferred_language: str | None,
+    genai_config: GenAIReviewConfig,
 ) -> None:
     start = datetime.datetime.now().timestamp()
     metadata = genai_client.generate_review_description(
         {
+            "id": final_data["id"],
             "camera": camera,
             "objects": final_data["data"]["objects"],
             "recognized_objects": final_data["data"]["sub_labels"],
@@ -175,8 +215,9 @@ def run_analysis(
             "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
         },
         thumbs,
-        concerns,
-        preferred_language,
+        genai_config.additional_concerns,
+        genai_config.preferred_language,
+        genai_config.debug_save_thumbnails,
     )
     review_inference_speed.update(datetime.datetime.now().timestamp() - start)
 
