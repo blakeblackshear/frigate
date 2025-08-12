@@ -123,38 +123,27 @@ Here is information already known:
         """Generate a summary of review item descriptions over a period of time."""
         time_range = f"{datetime.datetime.fromtimestamp(start_ts).strftime('%I:%M %p')} to {datetime.datetime.fromtimestamp(end_ts).strftime('%I:%M %p')}"
         timeline_summary_prompt = f"""
-Analyze security camera metadata for {time_range} and write a professional security report.
+You are a security officer. Time range: {time_range}.
+Input: JSON list with "scene", "confidence", "potential_threat_level" (1-2), "other_concerns".
+Write a report:
 
-INPUT FORMAT: JSON objects with "scene", "confidence", and "potential_threat_level" (0-3).
-
-OUTPUT FORMAT:
 Security Summary - {time_range}
-[One sentence overview of general activity]
+[One-sentence overview of activity]
+[Chronological bullet list of events with timestamps if in scene]
+[Final threat assessment]
 
-[Chronological timeline with timestamps when available]
-
-[Final threat assessment statement]
-
-REPORT REQUIREMENTS:
-- Write chronologically using timestamps
-- Highlight any potential_threat_level ≥ 2 incidents with times
-- Note unusual events even if not threats
-- State "only normal activity observed" if no threats detected
-- Use factual, professional security language
-
-STRICT RULES:
-- Output ONLY the security report
-- NO introductory phrases like "Here's a breakdown"
-- NO recommendations, suggestions, or system commentary
-- NO follow-up questions
-- Write as a human security officer would
+Rules:
+- List events in order.
+- Highlight potential_threat_level ≥ 1 with exact times.
+- Note any of the additional concerns which are present.
+- Note unusual activity even if not threats.
+- If no threats: "Final assessment: Only normal activity observed during this period."
+- No commentary, questions, or recommendations.
+- Output only the report.
         """
 
         for item in segments:
-            timeline_summary_prompt += f"\n        {item}"
-
-        with open("/config/prompt.txt", "w") as f:
-            f.write(timeline_summary_prompt)
+            timeline_summary_prompt += f"\n{item}"
 
         return self._send(timeline_summary_prompt, [])
 
