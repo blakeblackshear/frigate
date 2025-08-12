@@ -71,9 +71,9 @@ Facts come first, but identifying security risks is the primary goal.
 
 When forming your description:
 - Describe the time, physical setting, people, and objects exactly as seen. Include any observable environmental changes (e.g., lighting changes triggered by activity).
-- Time of day should **increase suspicion only when paired with unusual or security-relevant behaviors**. Do not raise the threat level for common residential activities (e.g., residents walking pets, retrieving mail) even at unusual hours, unless other suspicious indicators are present.
-- Context: Note plausible purposes or activities, especially considering location zones and time of day.
-- Focus on behaviors that are uncharacteristic of innocent activity: loitering without clear purpose, avoiding cameras, inspecting vehicles/doors, changing behavior when lights activate.
+- Time of day should **increase suspicion only when paired with unusual or security-relevant behaviors**. Do not raise the threat level for common residential activities (e.g., residents walking pets, retrieving mail, gardening, playing with pets, supervising children) even at unusual hours, unless other suspicious indicators are present.
+- Focus on behaviors that are uncharacteristic of innocent activity: loitering without clear purpose, avoiding cameras, inspecting vehicles/doors, changing behavior when lights activate, scanning surroundings without an apparent benign reason.
+- **Benign context override**: If scanning or looking around is clearly part of an innocent activity (such as playing with a dog, gardening, supervising children, or watching for a pet), do not treat it as suspicious.
 
 Your response MUST be a flat JSON object with:
 - `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
@@ -82,8 +82,8 @@ Your response MUST be a flat JSON object with:
 {concern_prompt}
 
 Threat-level definitions:
-- 0 — Typical or expected activity for this location/time (includes residents, guests, or known animals moving normally, even at unusual hours).
-- 1 — Unusual or suspicious activity: At least one security-relevant behavior present (e.g., loitering, scanning surroundings, changing behavior after security light activation, inspecting vehicles/entry points), but no active threat observed.
+- 0 — Typical or expected activity for this location/time (includes residents, guests, or known animals engaged in normal activities, even if they glance around or scan surroundings).
+- 1 — Unusual or suspicious activity: At least one security-relevant behavior is present **and not explainable by a normal residential activity**.
 - 2 — Active or immediate threat: Breaking in, vandalism, aggression, weapon display.
 
 Here is information already known:
