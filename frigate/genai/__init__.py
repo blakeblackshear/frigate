@@ -72,7 +72,7 @@ Your task is to provide a clear, security-focused description of the scene that:
 Facts come first, but identifying security risks is the primary goal.
 
 When forming your description:
-- Describe the time, physical setting, people, and objects exactly as seen. Include any observable environmental changes (e.g., lighting changes triggered by activity).
+- Describe the time, people, and objects exactly as seen. Include any observable environmental changes (e.g., lighting changes triggered by activity).
 - Time of day should **increase suspicion only when paired with unusual or security-relevant behaviors**. Do not raise the threat level for common residential activities (e.g., residents walking pets, retrieving mail, gardening, playing with pets, supervising children) even at unusual hours, unless other suspicious indicators are present.
 - Focus on behaviors that are uncharacteristic of innocent activity: loitering without clear purpose, avoiding cameras, inspecting vehicles/doors, changing behavior when lights activate, scanning surroundings without an apparent benign reason.
 - **Benign context override**: If scanning or looking around is clearly part of an innocent activity (such as playing with a dog, gardening, supervising children, or watching for a pet), do not treat it as suspicious.
@@ -105,7 +105,9 @@ Sequence details:
 
         if debug_save:
             with open(
-                os.path.join(CLIPS_DIR, "genai-requests", review_data["id"], "prompt.txt"),
+                os.path.join(
+                    CLIPS_DIR, "genai-requests", review_data["id"], "prompt.txt"
+                ),
                 "w",
             ) as f:
                 f.write(context_prompt)
