@@ -49,6 +49,9 @@ class TestHttp(unittest.TestCase):
             },
         }
         self.test_stats = {
+            "camera_fps": 5.0,
+            "process_fps": 5.0,
+            "skipped_fps": 0.0,
             "detection_fps": 13.7,
             "detectors": {
                 "cpu1": {
