@@ -9,13 +9,13 @@ arch=$(uname -m)
 
 # Purge existing packages and repo
 echo "Removing old MemryX installations..."
-sudo apt purge -y memx-* || true
+sudo apt purge -y memx-* mxa-manager || true
 sudo rm -f /etc/apt/sources.list.d/memryx.list /etc/apt/trusted.gpg.d/memryx.asc
 
 # Install kernel headers
 echo "Installing kernel headers for: $(uname -r)"
 sudo apt update
-sudo apt install -y linux-headers-$(uname -r)
+sudo apt install -y dkms linux-headers-$(uname -r)
 
 # Add MemryX key and repo
 echo "Adding MemryX GPG key and repository..."

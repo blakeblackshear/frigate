@@ -190,21 +190,17 @@ With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detec
 
 ### MemryX MX3
 
-Frigate supports the MemryX MX3 M.2 AI Acceleration Module on compatible hardware platforms, including both x86 (Intel/AMD) and ARM-based SBCs such as RPi 5.
+Frigate supports the MemryX MX3 M.2 AI Acceleration Module on compatible hardware platforms, including both x86 (Intel/AMD) and ARM-based SBCs such as Raspberry Pi 5.
 
-A single MemryX MX3 module is capable of handling multiple camera streams using the default models, making it sufficient for most users. For larger deployments with more cameras or bigger models, multiple MX3 modules can be used. Frigate supports multi-detector configurations, allowing you to connect multiple MX3 modules to scale inference capacity seamlessly.
+A single MemryX MX3 module is capable of handling multiple camera streams using the default models, making it sufficient for most users. For larger deployments with more cameras or bigger models, multiple MX3 modules can be used. Frigate supports multi-detector configurations, allowing you to connect multiple MX3 modules to scale inference capacity.
 
 Detailed information is available [in the detector docs](/configuration/object_detectors#memryx-mx3).
 
-Frigate supports the following models resolutions with the MemryX MX3 module:
+**Default Model Configuration:**
 
-- **Yolo-NAS**: 320 (default), 640
-- **YOLOv9**: 320 (default), 640
-- **YOLOX**: 640
-- **SSDlite MobileNet v2**: 320
+- Default model is **YOLO-NAS-Small**.
 
-Due to the MX3's architecture, the maximum frames per second supported cannot be calculated as `1/inference time` and is measured separately. When deciding how many camera streams you may support with your configuration, use the **MX3 Total FPS** column to approximate of the detector's limit, not the Inference Time.
-
+The MX3 is a pipelined architecture, where the maximum frames per second supported (and thus supported number of cameras) cannot be calculated as `1/latency` (1/"Inference Time") and is measured separately. When estimating how many camera streams you may support with your configuration, use the **MX3 Total FPS** column to approximate of the detector's limit, not the Inference Time.
 
 | Model                | Input Size | MX3 Inference Time | MX3 Total FPS |
 |----------------------|------------|--------------------|---------------|
@@ -215,7 +211,7 @@ Due to the MX3's architecture, the maximum frames per second supported cannot be
 | YOLOX-Small          | 640        | ~ 16 ms            | ~ 263         |
 | SSDlite MobileNet v2 | 320        | ~ 5 ms             | ~ 1056        |
     
-Inference speeds may vary depending on the host platform’s CPU performance. The above data was measured on an **Intel 13700 CPU**. Platforms like Raspberry Pi, x86 hosts, Orange Pi, and other ARM-based SBCs have different levels of processing capability, which will increase post-processing time and may result in lower FPS.
+Inference speeds may vary depending on the host platform. The above data was measured on an **Intel 13700 CPU**. Platforms like Raspberry Pi, Orange Pi, and other ARM-based SBCs have different levels of processing capability, which may limit total FPS.
 
 ### Nvidia Jetson
 

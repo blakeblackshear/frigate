@@ -13,7 +13,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
-- [MemryX](#memryx-mx3): The MX3 Acceleration module is available in M.2 format, offering broad compatibility across various platforms.
+- [MemryX](#memryx-mx3): The MX3 Acceleration module is available in m.2 format, offering broad compatibility across various platforms.
 
 **AMD**
 
@@ -384,7 +384,8 @@ model:
 ```
 
 #### Using a Custom Model  
-To use your own model, bind-mount the compiled `.dfp` file into the container and specify its path using `model.path`. You will also have to update the `labelmap` accordingly.
+
+To use your own model, bind-mount the path to your compiled `.dfp` file into the container and specify its path using `model.path`. You will also have to update the `labelmap` accordingly.
 
 For detailed instructions on compiling models, refer to the [MemryX Compiler](https://developer.memryx.com/tools/neural_compiler.html#usage) docs and [Tutorials](https://developer.memryx.com/tutorials/tutorials.html).
 
