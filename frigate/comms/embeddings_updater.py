@@ -29,6 +29,8 @@ class EmbeddingsRequestEnum(Enum):
     reindex = "reindex"
     # LPR
     reprocess_plate = "reprocess_plate"
+    # Review Descriptions
+    summarize_review = "summarize_review"
 
 
 class EmbeddingsResponder:

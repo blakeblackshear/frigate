@@ -66,7 +66,7 @@ from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataE
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import get_genai_client
-from frigate.models import Event, Recordings, Trigger
+from frigate.models import Event, Recordings, ReviewSegment, Trigger
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import (
@@ -121,7 +121,7 @@ class EmbeddingMaintainer(threading.Thread):
             ),
             load_vec_extension=True,
         )
-        models = [Event, Recordings, Trigger]
+        models = [Event, Recordings, ReviewSegment, Trigger]
         db.bind(models)
 
         if config.semantic_search.enabled:
