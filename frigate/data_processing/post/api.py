@@ -39,7 +39,9 @@ class PostProcessorApi(ABC):
         pass
 
     @abstractmethod
-    def handle_request(self, request_data: dict[str, Any]) -> dict[str, Any] | None:
+    def handle_request(
+        self, topic: str, request_data: dict[str, Any]
+    ) -> dict[str, Any] | None:
         """Handle metadata requests.
         Args:
             request_data (dict): containing data about requested change to process.

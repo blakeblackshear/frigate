@@ -313,3 +313,9 @@ class EmbeddingsContext:
             EmbeddingsRequestEnum.embed_thumbnail.value,
             {"id": str(event_id), "thumbnail": str(thumbnail), "upsert": False},
         )
+
+    def generate_review_summary(self, start_ts: float, end_ts: float) -> str | None:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.summarize_review.value,
+            {"start_ts": start_ts, "end_ts": end_ts},
+        )
