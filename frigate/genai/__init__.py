@@ -62,30 +62,35 @@ class GenAIClient:
         context_prompt = f"""
 Please analyze the image(s), which are in chronological order, strictly from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
 
-Your task is to provide a **neutral, factual, and objective description** of the scene, while also:
-- Clearly stating **what is happening** based on observable actions and movements.
-- Including **reasonable, evidence-based inferences** about the likely activity or context, but only if directly supported by visible details.
+Your task is to provide a clear, security-focused description of the scene that:
+1. States exactly what is happening based on observable actions and movements.
+2. Identifies and emphasizes behaviors that match patterns of suspicious activity.
+3. Assigns a potential_threat_level based on the definitions below, applying them consistently.
+
+Facts come first, but identifying security risks is the primary goal.
 
 When forming your description:
-- **Facts first**: Describe the time, physical setting, people, and objects exactly as seen.
-- **Then context**: Briefly note plausible purposes or activities (e.g., “appears to be delivering a package” if carrying a box to a door).
-- Do not speculate beyond what is visible, and do not imply hostility, criminal intent, or other strong judgments unless there is unambiguous visual evidence.
+- Describe the time, physical setting, people, and objects exactly as seen. Include any observable environmental changes (e.g., lighting changes triggered by activity).
+- Time of day should **increase suspicion only when paired with unusual or security-relevant behaviors**. Do not raise the threat level for common residential activities (e.g., residents walking pets, retrieving mail) even at unusual hours, unless other suspicious indicators are present.
+- Context: Note plausible purposes or activities, especially considering location zones and time of day.
+- Focus on behaviors that are uncharacteristic of innocent activity: loitering without clear purpose, avoiding cameras, inspecting vehicles/doors, changing behavior when lights activate.
+
+Your response MUST be a flat JSON object with:
+- `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
+- `confidence` (float): 0–1 confidence in the analysis.
+- `potential_threat_level` (integer): 0, 1, or 2 as defined below.
+{concern_prompt}
+
+Threat-level definitions:
+- 0 — Typical or expected activity for this location/time (includes residents, guests, or known animals moving normally, even at unusual hours).
+- 1 — Unusual or suspicious activity: At least one security-relevant behavior present (e.g., loitering, scanning surroundings, changing behavior after security light activation, inspecting vehicles/entry points), but no active threat observed.
+- 2 — Active or immediate threat: Breaking in, vandalism, aggression, weapon display.
 
 Here is information already known:
 - Activity occurred at {review_data["timestamp"].strftime("%I:%M %p")}
-- Detected objects: {review_data["objects"]}
-- Recognized objects: {review_data["recognized_objects"]}
+- Detected objects: {list(set(review_data["objects"]))}
+- Recognized objects: {list(set(review_data["recognized_objects"])) or "None"}
 - Zones involved: {review_data["zones"]}
-
-Your response **MUST** be a flat JSON object with:
-- `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
-- `confidence` (float): A number 0-1 for overall confidence in the analysis.
-- `potential_threat_level` (integer, optional): Include only if there is a clear, observable security concern:
-    - 0 = Normal activity is occurring
-    - 1 = Unusual but not overtly threatening
-    - 2 = Suspicious or potentially harmful
-    - 3 = Clear and immediate threat
-{concern_prompt}
 
 **IMPORTANT:**
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.

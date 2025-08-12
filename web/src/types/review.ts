@@ -81,7 +81,6 @@ export type ConsolidatedSegmentData = {
 export type TimelineZoomDirection = "in" | "out" | null;
 
 export enum ThreatLevel {
-  UNUSUAL = 1,
-  SUSPICIOUS = 2,
-  DANGER = 3,
+  SUSPICIOUS = 1,
+  DANGER = 2,
 }
