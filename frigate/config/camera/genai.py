@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import Field
 
@@ -23,3 +23,5 @@ class GenAIConfig(FrigateBaseModel):
     base_url: Optional[str] = Field(default=None, title="Provider base url.")
     model: str = Field(default="gpt-4o", title="GenAI model.")
     provider: GenAIProviderEnum | None = Field(default=None, title="GenAI provider.")
+    keep_alive: int | str | None = Field(default="1h", title="Ollama keep_alive.")
+    extra_options: dict[str, Any] = Field(default={}, title="Ollama extra options.")

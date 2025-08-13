@@ -48,7 +48,8 @@ class OllamaClient(GenAIClient):
                 self.genai_config.model,
                 prompt,
                 images=images if images else None,
-                keep_alive="1h",
+                keep_alive=self.genai_config.keep_alive,
+                options=self.genai_config.extra_options,
             )
             return result["response"].strip()
         except (TimeoutException, ResponseError) as e:
