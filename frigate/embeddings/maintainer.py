@@ -125,14 +125,23 @@ class EmbeddingMaintainer(threading.Thread):
         db.bind(models)
 
         if config.semantic_search.enabled:
-            self.embeddings = Embeddings(config, db, metrics)
+            try:
+                self.embeddings = Embeddings(config, db, metrics)
 
-            # Check if we need to re-index events
-            if config.semantic_search.reindex:
-                self.embeddings.reindex()
+                # Check if we need to re-index events
+                if config.semantic_search.reindex:
+                    self.embeddings.reindex()
 
-            # Sync semantic search triggers in db with config
-            self.embeddings.sync_triggers()
+                # Sync semantic search triggers in db with config
+                self.embeddings.sync_triggers()
+            except Exception as e:
+                logger.error(
+                    f"Failed to initialize semantic search embeddings: {e}. "
+                    "Continuing without semantic search. Face recognition and LPR will still work."
+                )
+                self.embeddings = None
+                # Disable semantic search in runtime to prevent further attempts
+                config.semantic_search.enabled = False
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
@@ -283,7 +292,7 @@ class EmbeddingMaintainer(threading.Thread):
         def _handle_request(topic: str, data: dict[str, Any]) -> str:
             try:
                 # First handle the embedding-specific topics when semantic search is enabled
-                if self.config.semantic_search.enabled:
+                if self.config.semantic_search.enabled and self.embeddings is not None:
                     if topic == EmbeddingsRequestEnum.embed_description.value:
                         return serialize(
                             self.embeddings.embed_description(
@@ -331,7 +340,7 @@ class EmbeddingMaintainer(threading.Thread):
         if not camera or source_type != EventTypeEnum.tracked_object:
             return
 
-        if self.config.semantic_search.enabled:
+        if self.config.semantic_search.enabled and self.embeddings is not None:
             self.embeddings.update_stats()
 
         camera_config = self.config.cameras[camera]
@@ -634,7 +643,10 @@ class EmbeddingMaintainer(threading.Thread):
         if not self.config.semantic_search.enabled:
             return
 
-        self.embeddings.embed_thumbnail(event_id, thumbnail)
+        if self.embeddings is not None:
+            self.embeddings.embed_thumbnail(event_id, thumbnail)
+        else:
+            logger.debug(f"Skipping thumbnail embedding for {event_id} - semantic search not available")
 
     def _process_genai_description(
         self, event: Event, camera_config: CameraConfig, thumbnail
@@ -716,7 +728,7 @@ class EmbeddingMaintainer(threading.Thread):
         )
 
         # Embed the description
-        if self.config.semantic_search.enabled:
+        if self.config.semantic_search.enabled and self.embeddings is not None:
             self.embeddings.embed_description(event.id, description)
 
         # Check semantic trigger for this description

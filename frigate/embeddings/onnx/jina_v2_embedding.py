@@ -6,6 +6,18 @@ import os
 
 import numpy as np
 from PIL import Image
+
+# Check CPU compatibility before importing transformers
+from frigate.util.cpu_compatibility import ensure_cpu_compatibility
+
+# Setup logger early for compatibility warnings
+logger = logging.getLogger(__name__)
+
+# Log any CPU compatibility warnings
+compatibility_warning = ensure_cpu_compatibility()
+if compatibility_warning:
+    logger.warning(compatibility_warning)
+
 from transformers import AutoTokenizer
 from transformers.utils.logging import disable_progress_bar, set_verbosity_error
 

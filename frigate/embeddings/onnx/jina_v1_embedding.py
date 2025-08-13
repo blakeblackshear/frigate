@@ -4,6 +4,17 @@ import logging
 import os
 import warnings
 
+# Check CPU compatibility before importing transformers
+from frigate.util.cpu_compatibility import ensure_cpu_compatibility
+
+# Setup logger early for compatibility warnings
+logger = logging.getLogger(__name__)
+
+# Log any CPU compatibility warnings
+compatibility_warning = ensure_cpu_compatibility()
+if compatibility_warning:
+    logger.warning(compatibility_warning)
+
 # importing this without pytorch or others causes a warning
 # https://github.com/huggingface/transformers/issues/27214
 # suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
