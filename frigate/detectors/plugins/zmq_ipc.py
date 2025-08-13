@@ -53,7 +53,7 @@ class ZmqIpcDetector(DetectionApi):
     def __init__(self, detector_config: ZmqDetectorConfig):
         super().__init__(detector_config)
 
-        self._context = zmq.Context.instance()
+        self._context = zmq.Context()
         self._endpoint = detector_config.endpoint
         self._request_timeout_ms = detector_config.request_timeout_ms
         self._linger_ms = detector_config.linger_ms
@@ -73,7 +73,7 @@ class ZmqIpcDetector(DetectionApi):
         # Apply timeouts and linger so calls don't block indefinitely
         self._socket.setsockopt(zmq.RCVTIMEO, self._request_timeout_ms)
         self._socket.setsockopt(zmq.SNDTIMEO, self._request_timeout_ms)
-        self._socket.setsockopt(zmq.LINGER, self._linger_ms)
+        #self._socket.setsockopt(zmq.LINGER, self._linger_ms)
         logger.info(f"ZMQ detector connecting to {self._endpoint}")
         self._socket.connect(self._endpoint)
 
@@ -114,9 +114,12 @@ class ZmqIpcDetector(DetectionApi):
             payload_bytes = memoryview(tensor_input.tobytes(order="C"))
 
             # Send request
+            print("sending multipart")
             self._socket.send_multipart([header_bytes, payload_bytes])
+            print("sent multipart")
 
             # Receive reply
+            print("looking for response")
             reply_frames = self._socket.recv_multipart()
             detections = self._decode_response(reply_frames)
 
