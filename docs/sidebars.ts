@@ -46,6 +46,7 @@ const sidebars: SidebarsConfig = {
           },
           items: [
             "configuration/genai/genai_config",
+            "configuration/genai/genai_review",
             "configuration/genai/genai_objects",
           ],
         },

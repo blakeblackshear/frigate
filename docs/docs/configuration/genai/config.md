@@ -25,7 +25,16 @@ Parallel requests also come with some caveats. You will need to set `OLLAMA_NUM_
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/library). At the time of writing, this includes `llava`, `llava-llama3`, `llava-phi3`, and `moondream`. Note that Frigate will not automatically download the model you specify in your config, you must download the model to your local instance of Ollama first i.e. by running `ollama pull llava:7b` on your Ollama server/Docker container. Note that the model specified in Frigate's config must match the downloaded model tag.
+You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/library). Note that Frigate will not automatically download the model you specify in your config, Ollama will try to download the model but it may take longer than the timeout, it is recommended to pull the model beforehand by running `ollama pull your_model` on your Ollama server/Docker container. Note that the model specified in Frigate's config must match the downloaded model tag.
+
+The following models are recommended:
+
+| Model             | Size   | Recommended Features |
+| ----------------- | ------ | -------------------- |
+| `minicpm-v:8b`    | 5.5 GB | Review Summary       |
+| `qwen2.5vl:3b`    | 3.2 GB | Review Summary       |
+| `gemma3:4b`       | 3.3 GB | All Features         |
+| `llava-phi3:3.8b` | 2.9 GB | All Features         |
 
 :::note
 
@@ -39,7 +48,9 @@ You should have at least 8 GB of RAM available (or VRAM if running on GPU) to ru
 genai:
   provider: ollama
   base_url: http://localhost:11434
-  model: llava:7b
+  model: minicpm-v:8b
+  provider_options:  # other Ollama client options can be defined
+    keep_alive: -1
 ```
 
 ## Google Gemini
