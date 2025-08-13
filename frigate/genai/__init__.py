@@ -46,20 +46,21 @@ class GenAIClient:
         debug_save: bool,
     ) -> ReviewMetadata | None:
         """Generate a description for the review item activity."""
-        if concerns:
-            concern_list = "\n    - ".join(concerns)
-            concern_prompt = f"""
+
+        def get_concern_prompt() -> str:
+            if concerns:
+                concern_list = "\n    - ".join(concerns)
+                return f"""
 - `other_concerns` (list of strings): Include a list of any of the following concerns that are occurring:
-    - {concern_list}
-"""
+    - {concern_list}"""
+            else:
+                return ""
 
-        else:
-            concern_prompt = ""
-
-        if preferred_language:
-            language_prompt = f"Provide your answer in {preferred_language}"
-        else:
-            language_prompt = ""
+        def get_language_prompt() -> str:
+            if preferred_language:
+                return f"Provide your answer in {preferred_language}"
+            else:
+                return ""
 
         context_prompt = f"""
 Please analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
@@ -81,7 +82,7 @@ Your response MUST be a flat JSON object with:
 - `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
 - `confidence` (float): 0-1 confidence in the analysis.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below.
-{concern_prompt}
+{get_concern_prompt()}
 
 Threat-level definitions:
 - 0 — Typical or expected activity for this location/time (includes residents, guests, or known animals engaged in normal activities, even if they glance around or scan surroundings).
@@ -97,7 +98,7 @@ Sequence details:
 
 **IMPORTANT:**
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
-{language_prompt}
+{get_language_prompt()}
         """
         logger.debug(
             f"Sending {len(thumbnails)} images to create review description on {review_data['camera']}"

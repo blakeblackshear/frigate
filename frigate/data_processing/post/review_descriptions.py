@@ -209,7 +209,9 @@ def run_analysis(
         {
             "id": final_data["id"],
             "camera": camera,
-            "objects": final_data["data"]["objects"],
+            "objects": list(
+                filter(lambda o: "-verified" not in o, final_data["data"]["objects"])
+            ),
             "recognized_objects": final_data["data"]["sub_labels"],
             "zones": final_data["data"]["zones"],
             "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
