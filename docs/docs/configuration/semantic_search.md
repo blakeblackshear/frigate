@@ -39,7 +39,7 @@ If you are enabling Semantic Search for the first time, be advised that Frigate 
 
 The [V1 model from Jina](https://huggingface.co/jinaai/jina-clip-v1) has a vision model which is able to embed both images and text into the same vector space, which allows `image -> image` and `text -> image` similarity searches. Frigate uses this model on tracked objects to encode the thumbnail image and store it in the database. When searching for tracked objects via text in the search box, Frigate will perform a `text -> image` similarity search against this embedding. When clicking "Find Similar" in the tracked object detail pane, Frigate will perform an `image -> image` similarity search to retrieve the closest matching thumbnails.
 
-The V1 text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Explore page when clicking on thumbnail of a tracked object. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate tracked object descriptions.
+The V1 text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Explore page when clicking on thumbnail of a tracked object. See [the object description docs](/configuration/genai/objects.md) for more information on how to automatically generate tracked object descriptions.
 
 Differently weighted versions of the Jina models are available and can be selected by setting the `model_size` config option as `small` or `large`:
 
