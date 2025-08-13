@@ -73,8 +73,9 @@ class ZmqIpcDetector(DetectionApi):
         # Apply timeouts and linger so calls don't block indefinitely
         self._socket.setsockopt(zmq.RCVTIMEO, self._request_timeout_ms)
         self._socket.setsockopt(zmq.SNDTIMEO, self._request_timeout_ms)
-        #self._socket.setsockopt(zmq.LINGER, self._linger_ms)
-        logger.info(f"ZMQ detector connecting to {self._endpoint}")
+        self._socket.setsockopt(zmq.LINGER, self._linger_ms)
+
+        logger.debug(f"ZMQ detector connecting to {self._endpoint}")
         self._socket.connect(self._endpoint)
 
     def _build_header(self, tensor_input: np.ndarray) -> bytes:
@@ -114,25 +115,15 @@ class ZmqIpcDetector(DetectionApi):
             payload_bytes = memoryview(tensor_input.tobytes(order="C"))
 
             # Send request
-            print("sending multipart")
             self._socket.send_multipart([header_bytes, payload_bytes])
-            print("sent multipart")
 
             # Receive reply
-            print("looking for response")
             reply_frames = self._socket.recv_multipart()
             detections = self._decode_response(reply_frames)
+            print(f"got response of first item {detections[0]}")
 
             # Ensure output shape and dtype are exactly as expected
-            if detections.shape != (20, 6) or detections.dtype != np.float32:
-                try:
-                    detections = np.asarray(detections, dtype=np.float32)
-                    detections = detections.reshape((20, 6))
-                except Exception:  # noqa: BLE001
-                    logger.warning(
-                        f"ZMQ detector coerced unexpected response shape {detections.shape}"
-                    )
-                    detections = self._zero_result
+
 
             return detections
         except zmq.Again:
