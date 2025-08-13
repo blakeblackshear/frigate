@@ -37,7 +37,6 @@ warnings.filterwarnings(
 
 # disables the progress bar for downloading tokenizers and feature extractors
 disable_progress_bar()
-logger = logging.getLogger(__name__)
 
 
 class JinaV1TextEmbedding(BaseEmbedding):

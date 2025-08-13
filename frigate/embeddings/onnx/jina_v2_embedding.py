@@ -32,7 +32,6 @@ from .runner import ONNXModelRunner
 # disables the progress bar and download logging for downloading tokenizers and image processors
 disable_progress_bar()
 set_verbosity_error()
-logger = logging.getLogger(__name__)
 
 
 class JinaV2Embedding(BaseEmbedding):
