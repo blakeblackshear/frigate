@@ -64,6 +64,9 @@ export default function SearchFilterDialog({
   const { t } = useTranslation(["components/filter"]);
   const [currentFilter, setCurrentFilter] = useState(filter ?? {});
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
+  const { data: allRecognizedLicensePlates } = useSWR<string[]>(
+    "recognized_license_plates",
+  );
 
   useEffect(() => {
     if (filter) {
@@ -130,6 +133,7 @@ export default function SearchFilterDialog({
         }
       />
       <RecognizedLicensePlatesFilterContent
+        allRecognizedLicensePlates={allRecognizedLicensePlates}
         recognizedLicensePlates={currentFilter.recognized_license_plate}
         setRecognizedLicensePlates={(plate) =>
           setCurrentFilter({
@@ -875,6 +879,7 @@ export function SnapshotClipFilterContent({
 }
 
 type RecognizedLicensePlatesFilterContentProps = {
+  allRecognizedLicensePlates: string[] | undefined;
   recognizedLicensePlates: string[] | undefined;
   setRecognizedLicensePlates: (
     recognizedLicensePlates: string[] | undefined,
@@ -882,17 +887,11 @@ type RecognizedLicensePlatesFilterContentProps = {
 };
 
 export function RecognizedLicensePlatesFilterContent({
+  allRecognizedLicensePlates,
   recognizedLicensePlates,
   setRecognizedLicensePlates,
 }: RecognizedLicensePlatesFilterContentProps) {
   const { t } = useTranslation(["components/filter"]);
-
-  const { data: allRecognizedLicensePlates, error } = useSWR<string[]>(
-    "recognized_license_plates",
-    {
-      revalidateOnFocus: false,
-    },
-  );
 
   const [selectedRecognizedLicensePlates, setSelectedRecognizedLicensePlates] =
     useState<string[]>(recognizedLicensePlates || []);
@@ -923,7 +922,7 @@ export function RecognizedLicensePlatesFilterContent({
     }
   };
 
-  if (!allRecognizedLicensePlates || allRecognizedLicensePlates.length === 0) {
+  if (allRecognizedLicensePlates && allRecognizedLicensePlates.length === 0) {
     return null;
   }
 
@@ -947,15 +946,11 @@ export function RecognizedLicensePlatesFilterContent({
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">{t("recognizedLicensePlates.title")}</div>
-      {error ? (
-        <p className="text-sm text-red-500">
-          {t("recognizedLicensePlates.loadFailed")}
-        </p>
-      ) : !allRecognizedLicensePlates ? (
+      {allRecognizedLicensePlates == undefined ? (
         <p className="text-sm text-muted-foreground">
           {t("recognizedLicensePlates.loading")}
         </p>
-      ) : (
+      ) : allRecognizedLicensePlates.length === 0 ? null : (
         <>
           <Command
             className="border border-input bg-background"
