@@ -1,11 +1,12 @@
 import logging
-import numpy as np
-import cv2
 import os
+import time
 import urllib.request
 import zipfile
 from queue import Queue
-import time
+
+import cv2
+import numpy as np
 
 try:
     # from memryx import AsyncAccl  # Import MemryX SDK
@@ -17,11 +18,11 @@ except ModuleNotFoundError:
 
 from pydantic import BaseModel, Field
 from typing_extensions import Literal
+
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     ModelTypeEnum,
-    InputTensorEnum,
 )
 from frigate.util.model import post_process_yolo
 

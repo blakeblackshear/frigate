@@ -1,11 +1,11 @@
 import datetime
-import time
 import logging
 import multiprocessing as mp
 import os
 import queue
 import signal
 import threading
+import time
 from abc import ABC, abstractmethod
 from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
