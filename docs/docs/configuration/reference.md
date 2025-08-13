@@ -398,6 +398,19 @@ review:
     #       should be configured at the camera level.
     required_zones:
       - driveway
+  # Optional: GenAI Review Summary Configuration
+  genai:
+    # Optional: Enable the GenAI review summary feature (default: shown below)
+    enabled: False
+    # Optional: Enable GenAI review summaries for alerts (default: shown below)
+    alerts: True
+    # Optional: Enable GenAI review summaries for detections (default: shown below)
+    detections: False
+    # Optional: Additional concerns that the GenAI should make note of (default: None)
+    additional_concerns:
+      - Animals in the garden
+    # Optional: Preferred response language (default: English)
+    preferred_language: English
 
 # Optional: Motion configuration
 # NOTE: Can be overridden at the camera level
@@ -639,6 +652,9 @@ genai:
   base_url: http://localhost::11434
   # Required if gemini or openai
   api_key: "{FRIGATE_GENAI_API_KEY}"
+  # Optional additional args to pass to the GenAI Provider (default: None)
+  provider_options:
+    keep_alive: -1
 
 # Optional: Configuration for audio transcription
 # NOTE: only the enabled option can be overridden at the camera level
