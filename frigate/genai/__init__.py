@@ -52,22 +52,9 @@ class GenAIClient:
                 concern_list = "\n    - ".join(concerns)
                 return f"""
 - `other_concerns` (list of strings): Include a list of any of the following concerns that are occurring:
-    - {concern_list}
-"""
+    - {concern_list}"""
             else:
                 return ""
-
-        def get_recognized_objects_prompt() -> str:
-            if not review_data["recognized_objects"]:
-                return ""
-
-            return f"""
-Recognized Objects:
-- These are people, vehicles, or other entities that the system has positively identified.
-- Always use these names or labels directly in the scene description instead of generic terms.
-
-Recognized objects: {list(set(review_data["recognized_objects"]))}
-"""
 
         def get_language_prompt() -> str:
             if preferred_language:
@@ -91,8 +78,6 @@ When forming your description:
 - Focus on behaviors that are uncharacteristic of innocent activity: loitering without clear purpose, avoiding cameras, inspecting vehicles/doors, changing behavior when lights activate, scanning surroundings without an apparent benign reason.
 - **Benign context override**: If scanning or looking around is clearly part of an innocent activity (such as playing with a dog, gardening, supervising children, or watching for a pet), do not treat it as suspicious.
 
-{get_recognized_objects_prompt()}
-
 Your response MUST be a flat JSON object with:
 - `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
 - `confidence` (float): 0-1 confidence in the analysis.
@@ -108,6 +93,7 @@ Sequence details:
 - Frame 1 = earliest, Frame 10 = latest
 - Activity occurred at {review_data["timestamp"].strftime("%I:%M %p")}
 - Detected objects: {list(set(review_data["objects"]))}
+- Recognized objects: {list(set(review_data["recognized_objects"])) or "None"}
 - Zones involved: {review_data["zones"]}
 
 **IMPORTANT:**
