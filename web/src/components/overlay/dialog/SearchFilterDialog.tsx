@@ -42,6 +42,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { LuCheck } from "react-icons/lu";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -947,7 +948,8 @@ export function RecognizedLicensePlatesFilterContent({
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">{t("recognizedLicensePlates.title")}</div>
       {allRecognizedLicensePlates == undefined ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="flex items-center text-sm text-muted-foreground">
+          <ActivityIndicator className="mr-2 size-5" />
           {t("recognizedLicensePlates.loading")}
         </p>
       ) : allRecognizedLicensePlates.length === 0 ? null : (
