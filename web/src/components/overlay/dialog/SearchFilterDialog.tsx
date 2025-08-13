@@ -948,11 +948,11 @@ export function RecognizedLicensePlatesFilterContent({
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">{t("recognizedLicensePlates.title")}</div>
       {allRecognizedLicensePlates == undefined ? (
-        <p className="flex items-center text-sm text-muted-foreground">
-          <ActivityIndicator className="mr-2 size-5" />
-          {t("recognizedLicensePlates.loading")}
-        </p>
-      ) : allRecognizedLicensePlates.length === 0 ? null : (
+        <div className="flex flex-col items-center justify-center text-sm text-muted-foreground">
+          <ActivityIndicator className="mb-3 mr-2 size-5" />
+          <p>{t("recognizedLicensePlates.loading")}</p>
+        </div>
+      ) : allRecognizedLicensePlates.length == 0 ? null : (
         <>
           <Command
             className="border border-input bg-background"
@@ -1007,11 +1007,11 @@ export function RecognizedLicensePlatesFilterContent({
               ))}
             </div>
           )}
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("recognizedLicensePlates.selectPlatesFromList")}
+          </p>
         </>
       )}
-      <p className="mt-1 text-sm text-muted-foreground">
-        {t("recognizedLicensePlates.selectPlatesFromList")}
-      </p>
     </div>
   );
 }
