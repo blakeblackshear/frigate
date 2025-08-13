@@ -97,10 +97,10 @@ class AsyncLocalObjectDetector(BaseLocalDetector):
     def async_send_input(self, tensor_input: np.ndarray, connection_id):
         tensor_input = self._transform_input(tensor_input)
         return self.detect_api.send_input(connection_id, tensor_input)
-    
+
     def async_receive_output(self):
         return self.detect_api.receive_output()
-    
+
 
 def prepare_detector(name, out_events):
     threading.current_thread().name = f"detector:{name}"
@@ -136,10 +136,7 @@ def run_detector(
     start: Value,
     detector_config: BaseDetectorConfig,
 ):
-    
-    stop_event, frame_manager, outputs, logger = prepare_detector(
-        name, out_events
-    )
+    stop_event, frame_manager, outputs, logger = prepare_detector(name, out_events)
 
     object_detector = LocalObjectDetector(detector_config=detector_config)
 
@@ -179,10 +176,7 @@ def async_run_detector(
     start: Value,
     detector_config: BaseDetectorConfig,
 ):
-
-    stop_event, frame_manager, outputs, logger = prepare_detector(
-        name, out_events
-    )
+    stop_event, frame_manager, outputs, logger = prepare_detector(name, out_events)
 
     object_detector = AsyncLocalObjectDetector(detector_config=detector_config)
 
