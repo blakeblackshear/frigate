@@ -18,7 +18,7 @@ def check_cpu_has_avx() -> bool:
         bool: True if CPU has AVX support, False otherwise
     """
     try:
-        # Try Linux method first (most common for Frigate)
+        # Try Linux method first
         if sys.platform.startswith("linux"):
             with open("/proc/cpuinfo", "r") as f:
                 cpuinfo = f.read().lower()
