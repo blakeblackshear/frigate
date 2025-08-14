@@ -185,9 +185,16 @@ export default function DynamicVideoPlayer({
       playerRef.current.autoplay = !isScrubbing;
     }
 
+    const inpointOffset = calculateInpointOffset(
+      recordingParams.after,
+      (recordings || [])[0],
+    );
+
     setSource({
       playlist: `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`,
-      startPosition: startTimestamp ? startTimestamp - timeRange.after : 0,
+      startPosition: startTimestamp
+        ? Math.max(0, startTimestamp - timeRange.after - inpointOffset)
+        : 0,
     });
 
     setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
