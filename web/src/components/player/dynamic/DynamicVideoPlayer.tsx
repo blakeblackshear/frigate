@@ -189,11 +189,6 @@ export default function DynamicVideoPlayer({
       playlist: `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`,
       startPosition: startTimestamp ? startTimestamp - timeRange.after : 0,
     });
-    if (startTimestamp) {
-      console.log(
-        `start timestamp is ${startTimestamp} which is ${startTimestamp - recordingParams.after} seconds from start of playlist`,
-      );
-    }
 
     setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
 
