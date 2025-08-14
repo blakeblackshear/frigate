@@ -77,7 +77,6 @@ When forming your description:
 - Time of day should **increase suspicion only when paired with unusual or security-relevant behaviors**. Do not raise the threat level for common residential activities (e.g., residents walking pets, retrieving mail, gardening, playing with pets, supervising children) even at unusual hours, unless other suspicious indicators are present.
 - Focus on behaviors that are uncharacteristic of innocent activity: loitering without clear purpose, avoiding cameras, inspecting vehicles/doors, changing behavior when lights activate, scanning surroundings without an apparent benign reason.
 - **Benign context override**: If scanning or looking around is clearly part of an innocent activity (such as playing with a dog, gardening, supervising children, or watching for a pet), do not treat it as suspicious.
-- If any verified recognized object is a known trusted person (e.g., family member, employee, authorized visitor), assume the activity is normal **unless** there is clear evidence of immediate threat (threat level 2). In such cases, default to threat level 0.
 
 Your response MUST be a flat JSON object with:
 - `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
@@ -92,7 +91,7 @@ Threat-level definitions:
 
 Sequence details:
 - Frame 1 = earliest, Frame {len(thumbnails)} = latest
-- Activity occurred at {review_data["timestamp"].strftime("%A, %I:%M %p")}
+- Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
 - Detected objects: {", ".join(review_data["objects"])}
 - Verified recognized objects: {", ".join(review_data["recognized_objects"]) or "None"}
 - Zones involved: {", ".join(z.replace("_", " ").title() for z in review_data["zones"]) or "None"}
@@ -122,7 +121,12 @@ Sequence details:
             )
 
             try:
-                return ReviewMetadata.model_validate_json(clean_json)
+                metadata = ReviewMetadata.model_validate_json(clean_json)
+
+                if review_data["recognized_objects"]:
+                    metadata.potential_threat_level = 0
+
+                return metadata
             except Exception as e:
                 # rarely LLMs can fail to follow directions on output format
                 logger.warning(

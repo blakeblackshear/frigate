@@ -217,7 +217,8 @@ def run_analysis(
         "id": final_data["id"],
         "camera": camera,
         "zones": final_data["data"]["zones"],
-        "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
+        "start": datetime.datetime.fromtimestamp(final_data["start_time"]),
+        "duration": final_data["end_time"] - final_data["start_time"],
     }
 
     objects = []
