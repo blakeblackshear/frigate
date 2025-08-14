@@ -43,7 +43,7 @@ type HlsVideoPlayerProps = {
   fullscreen: boolean;
   frigateControls?: boolean;
   inpointOffset?: number;
-  onClipEnded?: () => void;
+  onClipEnded?: (currentTime: number) => void;
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
@@ -387,7 +387,11 @@ export default function HlsVideoPlayer({
               }
             }
           }}
-          onEnded={onClipEnded}
+          onEnded={() => {
+            if (onClipEnded) {
+              onClipEnded(getVideoTime() ?? 0);
+            }
+          }}
           onError={(e) => {
             if (
               !hlsRef.current &&

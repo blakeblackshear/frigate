@@ -14,6 +14,7 @@ import axios from "axios";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { calculateInpointOffset } from "@/utils/videoUtil";
+import { isFirefox } from "react-device-detect";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -223,6 +224,33 @@ export default function DynamicVideoPlayer({
     [recordingParams, recordings],
   );
 
+  const onValidateClipEnd = useCallback(
+    (currentTime: number) => {
+      if (!onClipEnded || !controller || !recordings) {
+        return;
+      }
+
+      if (!isFirefox) {
+        onClipEnded();
+      }
+
+      // Firefox has a bug where clipEnded can be called prematurely due to buffering
+      // we need to validate if the current play-point is truly at the end of available recordings
+
+      const lastRecordingTime = recordings.at(-1)?.start_time;
+
+      if (
+        !lastRecordingTime ||
+        controller.getProgress(currentTime) < lastRecordingTime
+      ) {
+        return;
+      }
+
+      onClipEnded();
+    },
+    [onClipEnded, controller, recordings],
+  );
+
   return (
     <>
       <HlsVideoPlayer
@@ -236,7 +264,7 @@ export default function DynamicVideoPlayer({
         inpointOffset={inpointOffset}
         onTimeUpdate={onTimeUpdate}
         onPlayerLoaded={onPlayerLoaded}
-        onClipEnded={onClipEnded}
+        onClipEnded={onValidateClipEnd}
         onPlaying={() => {
           if (isScrubbing) {
             playerRef.current?.pause();
