@@ -116,6 +116,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     final_data,
                     thumbs,
                     camera_config.review.genai,
+                    list(self.config.model.merged_labelmap.values()),
                 ),
             ).start()
 
@@ -160,12 +161,18 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             return None
 
     def get_cache_frames(
-        self, camera: str, start_time: float, end_time: float
+        self,
+        camera: str,
+        start_time: float,
+        end_time: float,
+        desired_frame_count: int = 12,
     ) -> list[str]:
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
         file_start = f"preview_{camera}"
-        start_file = f"{file_start}-{start_time}.webp"
-        end_file = f"{file_start}-{end_time}.webp"
+
+        # 30 seconds padding to ensure that a frame before & after the activity is considered
+        start_file = f"{file_start}-{start_time - 30}.webp"
+        end_file = f"{file_start}-{end_time + 30}.webp"
         all_frames = []
 
         for file in sorted(os.listdir(preview_dir)):
@@ -181,13 +188,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             all_frames.append(os.path.join(preview_dir, file))
 
         frame_count = len(all_frames)
-        if frame_count <= 10:
+        if frame_count <= desired_frame_count:
             return all_frames
 
         selected_frames = []
-        step_size = (frame_count - 1) / 9
+        step_size = (frame_count - 1) / (desired_frame_count - 1)
 
-        for i in range(10):
+        for i in range(desired_frame_count):
             index = round(i * step_size)
             selected_frames.append(all_frames[index])
 
@@ -203,19 +210,33 @@ def run_analysis(
     final_data: dict[str, str],
     thumbs: list[bytes],
     genai_config: GenAIReviewConfig,
+    labelmap_objects: list[str],
 ) -> None:
     start = datetime.datetime.now().timestamp()
+    analytics_data = {
+        "id": final_data["id"],
+        "camera": camera,
+        "zones": final_data["data"]["zones"],
+        "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
+    }
+
+    objects = []
+    verified_objects = []
+
+    for label in set(final_data["data"]["objects"] + final_data["data"]["sub_labels"]):
+        if "-verified" in label:
+            continue
+
+        if label in labelmap_objects:
+            objects.append(label.replace("_", " ").title())
+        else:
+            verified_objects.append(label.replace("_", " ").title())
+
+    analytics_data["objects"] = objects
+    analytics_data["recognized_objects"] = verified_objects
+
     metadata = genai_client.generate_review_description(
-        {
-            "id": final_data["id"],
-            "camera": camera,
-            "objects": list(
-                filter(lambda o: "-verified" not in o, final_data["data"]["objects"])
-            ),
-            "recognized_objects": final_data["data"]["sub_labels"],
-            "zones": final_data["data"]["zones"],
-            "timestamp": datetime.datetime.fromtimestamp(final_data["end_time"]),
-        },
+        analytics_data,
         thumbs,
         genai_config.additional_concerns,
         genai_config.preferred_language,
