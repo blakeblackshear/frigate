@@ -1,0 +1,37 @@
+name: Auto-rebase Dev + v17 into dev-v17-release
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # daglig kl 03:00 UTC
+  workflow_dispatch:       # kan kjøre manuelt
+
+jobs:
+  rebase:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout merge branch
+      uses: actions/checkout@v3
+      with:
+        ref: dev-v17-release
+        fetch-depth: 0
+
+    - name: Add v17 remote
+      run: |
+        git remote add v17 https://github.com/blablabla/frigate-v17.git
+        git fetch v17
+
+    - name: Rebase on Dev
+      run: |
+        git fetch origin
+        git rebase origin/main
+
+    - name: Rebase on v17 (favor v17)
+      run: |
+        git rebase -X theirs v17/main
+
+    - name: Push updated merge branch
+      env:
+        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      run: |
+        git push -f https://${PAT_TOKEN}@github.com/torsteinelv/frigate-dev.git dev-v17-release
