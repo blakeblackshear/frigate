@@ -30,7 +30,7 @@ const unsupportedErrorCodes = [
 
 export interface HlsSource {
   playlist: string;
-  startPosition: number;
+  startPosition?: number;
 }
 
 type HlsVideoPlayerProps = {

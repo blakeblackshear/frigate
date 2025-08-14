@@ -109,7 +109,6 @@ export function GenericVideoPlayer({
                 videoRef={videoRef}
                 currentSource={{
                   playlist: source,
-                  startPosition: 0,
                 }}
                 hotKeys
                 visible
