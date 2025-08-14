@@ -1,0 +1,31 @@
+name: Auto-sync v17 into dev-v17-merge
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # Kjører daglig kl 03:00 UTC
+  workflow_dispatch:       # Kan trigges manuelt
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout merge branch
+      uses: actions/checkout@v3
+      with:
+        ref: dev-v17-merge
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: Add v17 remote
+      run: |
+        git remote add v17 https://github.com/blablabla/frigate-v17.git
+        git fetch v17
+
+    - name: Merge v17/main (favor v17 on conflicts)
+      run: |
+        git merge -X theirs v17/main -m "Auto-merge v17 into dev-v17-merge (favor v17)"
+
+    - name: Push updated branch
+      run: |
+        git push origin dev-v17-merge
