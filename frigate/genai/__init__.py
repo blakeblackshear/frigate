@@ -91,10 +91,10 @@ Threat-level definitions:
 
 Sequence details:
 - Frame 1 = earliest, Frame 10 = latest
-- Activity occurred at {review_data["timestamp"].strftime("%I:%M %p")}
-- Detected objects: {list(set(review_data["objects"]))}
-- Recognized objects: {list(set(review_data["recognized_objects"])) or "None"}
-- Zones involved: {review_data["zones"]}
+- Activity occurred at {review_data["timestamp"].strftime("%A, %I:%M %p")}
+- Detected objects: {", ".join(obj.replace("_", " ").title() for obj in list(set(review_data["objects"])))}
+- Verified Recognized objects: {list(set(review_data["recognized_objects"])) or "None"}
+- Zones involved: {", ".join(z.replace("_", " ").title() for z in review_data["zones"]) or "None"}
 
 **IMPORTANT:**
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
