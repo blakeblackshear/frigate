@@ -60,11 +60,49 @@ class ClassificationTrainingProcess(FrigateProcess):
     def __train_classification_model(self) -> bool:
         """Train a classification model."""
 
+        # Check CPU compatibility before attempting to import TensorFlow
+        from frigate.util.cpu_compatibility import check_cpu_has_avx
+        
+        if not check_cpu_has_avx():
+            logger.error(
+                f"Cannot train classification model '{self.model_name}': "
+                "CPU does not support AVX instructions required by TensorFlow 2.19+. "
+                "Live model training is not available on this hardware."
+            )
+            # Notify that training failed due to hardware incompatibility
+            requestor = InterProcessRequestor()
+            requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": self.model_name,
+                    "state": ModelStatusTypesEnum.error,
+                    "message": "CPU incompatible with TensorFlow - AVX instruction set required",
+                },
+            )
+            requestor.stop()
+            return False
+
         # import in the function so that tensorflow is not initialized multiple times
-        import tensorflow as tf
-        from tensorflow.keras import layers, models, optimizers
-        from tensorflow.keras.applications import MobileNetV2
-        from tensorflow.keras.preprocessing.image import ImageDataGenerator
+        try:
+            import tensorflow as tf
+            from tensorflow.keras import layers, models, optimizers
+            from tensorflow.keras.applications import MobileNetV2
+            from tensorflow.keras.preprocessing.image import ImageDataGenerator
+        except (ImportError, Exception) as e:
+            logger.error(
+                f"Failed to import TensorFlow for model training '{self.model_name}': {e}"
+            )
+            requestor = InterProcessRequestor()
+            requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": self.model_name,
+                    "state": ModelStatusTypesEnum.error,
+                    "message": f"TensorFlow import failed: {str(e)}",
+                },
+            )
+            requestor.stop()
+            return False
 
         logger.info(f"Kicking off classification training for {self.model_name}.")
         dataset_dir = os.path.join(CLIPS_DIR, self.model_name, "dataset")
