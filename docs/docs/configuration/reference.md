@@ -614,6 +614,8 @@ genai:
   api_key: "{FRIGATE_GENAI_API_KEY}"
   # Optional: The default prompt for generating descriptions. Can use replacement
   # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
+  model: gemini-1.5-flash
+  # Required if enabled: The model to use with the provider.
   prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
   # Optional: Object specific prompts to customize description results
   # Format: {label}: {prompt}
