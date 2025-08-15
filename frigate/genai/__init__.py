@@ -115,6 +115,15 @@ Sequence details:
 
         response = self._send(context_prompt, thumbnails)
 
+        if debug_save:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, "genai-requests", review_data["id"], "response.txt"
+                ),
+                "w",
+            ) as f:
+                f.write(response)
+
         if response:
             clean_json = re.sub(
                 r"\n?```$", "", re.sub(r"^```[a-zA-Z0-9]*\n?", "", response)
