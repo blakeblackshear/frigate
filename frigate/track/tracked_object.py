@@ -12,6 +12,7 @@ import numpy as np
 
 from frigate.config import (
     CameraConfig,
+    FilterConfig,
     SnapshotsConfig,
     UIConfig,
 )
@@ -455,9 +456,9 @@ class TrackedObject:
     def get_img_bytes(
         self,
         ext: str,
-        timestamp=False,
-        bounding_box=False,
-        crop=False,
+        timestamp: bool = False,
+        bounding_box: bool = False,
+        crop: bool = False,
         height: int | None = None,
         quality: int | None = None,
     ) -> bytes | None:
@@ -598,6 +599,9 @@ class TrackedObject:
                     p.write(png_bytes)
 
     def write_thumbnail_to_disk(self) -> None:
+        if not self.camera_config.name:
+            return
+
         directory = os.path.join(THUMB_DIR, self.camera_config.name)
 
         if not os.path.exists(directory):
@@ -605,11 +609,14 @@ class TrackedObject:
 
         thumb_bytes = self.get_thumbnail("webp")
 
-        with open(os.path.join(directory, f"{self.obj_data['id']}.webp"), "wb") as f:
-            f.write(thumb_bytes)
+        if thumb_bytes:
+            with open(
+                os.path.join(directory, f"{self.obj_data['id']}.webp"), "wb"
+            ) as f:
+                f.write(thumb_bytes)
 
 
-def zone_filtered(obj: TrackedObject, object_config):
+def zone_filtered(obj: TrackedObject, object_config: dict[str, FilterConfig]) -> bool:
     object_name = obj.obj_data["label"]
 
     if object_name in object_config:
@@ -659,9 +666,9 @@ class TrackedObjectAttribute:
 
     def find_best_object(self, objects: list[dict[str, Any]]) -> Optional[str]:
         """Find the best attribute for each object and return its ID."""
-        best_object_area = None
-        best_object_id = None
-        best_object_label = None
+        best_object_area: float | None = None
+        best_object_id: str | None = None
+        best_object_label: str | None = None
 
         for obj in objects:
             if not box_inside(obj["box"], self.box):
