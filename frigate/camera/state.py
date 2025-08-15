@@ -272,7 +272,7 @@ class CameraState:
     def finished(self, obj_id):
         del self.tracked_objects[obj_id]
 
-    def on(self, event_type: str, callback: Callable[[str, TrackedObject, str], None]):
+    def on(self, event_type: str, callback: Callable):
         self.callbacks[event_type].append(callback)
 
     def update(
