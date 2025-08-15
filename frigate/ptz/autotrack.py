@@ -60,10 +60,10 @@ class PtzMotionEstimator:
 
     def motion_estimator(
         self,
-        detections: list[dict[str, Any]],
+        detections: list[tuple[Any, Any, Any, Any, Any, Any]],
         frame_name: str,
         frame_time: float,
-        camera: str,
+        camera: str | None,
     ):
         # If we've just started up or returned to our preset, reset motion estimator for new tracking session
         if self.ptz_metrics.reset.is_set():

@@ -8,7 +8,7 @@ from .zmq_proxy import Publisher, Subscriber
 
 
 class EventUpdatePublisher(
-    Publisher[tuple[EventTypeEnum, EventStateEnum, str, str, dict[str, Any]]]
+    Publisher[tuple[EventTypeEnum, EventStateEnum, str | None, str, dict[str, Any]]]
 ):
     """Publishes events (objects, audio, manual)."""
 
@@ -19,7 +19,7 @@ class EventUpdatePublisher(
 
     def publish(
         self,
-        payload: tuple[EventTypeEnum, EventStateEnum, str, str, dict[str, Any]],
+        payload: tuple[EventTypeEnum, EventStateEnum, str | None, str, dict[str, Any]],
         sub_topic: str = "",
     ) -> None:
         super().publish(payload, sub_topic)
