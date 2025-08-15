@@ -13,7 +13,7 @@ from frigate.util.image import intersection_over_union
 
 class CentroidTracker(ObjectTracker):
     def __init__(self, config: DetectConfig):
-        self.tracked_objects: dict[str, Any] = {}
+        self.tracked_objects: dict[str, dict[str, Any]] = {}
         self.untracked_object_boxes: list[tuple[int, int, int, int]] = []
         self.disappeared: dict[str, Any] = {}
         self.positions: dict[str, Any] = {}
@@ -138,19 +138,19 @@ class CentroidTracker(ObjectTracker):
                 self.deregister(id)
 
     def match_and_update(
-        self, frame_name: str, frame_time: float, detections: list[dict[Any, Any]]
+        self, frame_name: str, frame_time: float, detections: list[tuple[Any, Any, Any, Any, Any, Any]]
     ) -> None:
         # group by name
         detection_groups = defaultdict(lambda: [])
-        for obj in detections:
-            detection_groups[obj[0]].append(
+        for det in detections:
+            detection_groups[det[0]].append(
                 {
-                    "label": obj[0],
-                    "score": obj[1],
-                    "box": obj[2],
-                    "area": obj[3],
-                    "ratio": obj[4],
-                    "region": obj[5],
+                    "label": det[0],
+                    "score": det[1],
+                    "box": det[2],
+                    "area": det[3],
+                    "ratio": det[4],
+                    "region": det[5],
                     "frame_time": frame_time,
                 }
             )

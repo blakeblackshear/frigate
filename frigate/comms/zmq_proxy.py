@@ -70,7 +70,7 @@ class Publisher(Generic[T]):
         self.context.destroy()
 
 
-class Subscriber:
+class Subscriber(Generic[T]):
     """Receives messages."""
 
     topic_base: str = ""
@@ -82,9 +82,7 @@ class Subscriber:
         self.socket.setsockopt_string(zmq.SUBSCRIBE, self.topic)
         self.socket.connect(SOCKET_SUB)
 
-    def check_for_update(
-        self, timeout: float | None = FAST_QUEUE_TIMEOUT
-    ) -> tuple[str, Any] | tuple[None, None] | None:
+    def check_for_update(self, timeout: float | None = FAST_QUEUE_TIMEOUT) -> T | None:
         """Returns message or None if no update."""
         try:
             has_update, _, _ = zmq.select([self.socket], [], [], timeout)
@@ -101,7 +99,5 @@ class Subscriber:
         self.socket.close()
         self.context.destroy()
 
-    def _return_object(
-        self, topic: str, payload: Optional[tuple[str, Any]]
-    ) -> tuple[str, Any] | tuple[None, None] | None:
+    def _return_object(self, topic: str, payload: T | None) -> T | None:
         return payload
