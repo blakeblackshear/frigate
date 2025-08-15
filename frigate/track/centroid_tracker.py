@@ -138,7 +138,10 @@ class CentroidTracker(ObjectTracker):
                 self.deregister(id)
 
     def match_and_update(
-        self, frame_name: str, frame_time: float, detections: list[tuple[Any, Any, Any, Any, Any, Any]]
+        self,
+        frame_name: str,
+        frame_time: float,
+        detections: list[tuple[Any, Any, Any, Any, Any, Any]],
     ) -> None:
         # group by name
         detection_groups = defaultdict(lambda: [])

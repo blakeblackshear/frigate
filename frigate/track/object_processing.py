@@ -706,9 +706,7 @@ class TrackedObjectProcessor(threading.Thread):
 
             # check for sub label updates
             while True:
-                update = self.sub_label_subscriber.check_for_update(
-                    timeout=0
-                )
+                update = self.sub_label_subscriber.check_for_update(timeout=0)
 
                 if not update:
                     break
