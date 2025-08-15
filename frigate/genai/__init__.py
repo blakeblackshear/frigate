@@ -90,11 +90,11 @@ Threat-level definitions:
 - 2 — Active or immediate threat: Breaking in, vandalism, aggression, weapon display.
 
 Sequence details:
-- Frame 1 = earliest, Frame 10 = latest
-- Activity occurred at {review_data["timestamp"].strftime("%I:%M %p")}
-- Detected objects: {list(set(review_data["objects"]))}
-- Recognized objects: {list(set(review_data["recognized_objects"])) or "None"}
-- Zones involved: {review_data["zones"]}
+- Frame 1 = earliest, Frame {len(thumbnails)} = latest
+- Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
+- Detected objects: {", ".join(review_data["objects"])}
+- Verified recognized objects: {", ".join(review_data["recognized_objects"]) or "None"}
+- Zones involved: {", ".join(z.replace("_", " ").title() for z in review_data["zones"]) or "None"}
 
 **IMPORTANT:**
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
@@ -115,13 +115,27 @@ Sequence details:
 
         response = self._send(context_prompt, thumbnails)
 
+        if debug_save:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, "genai-requests", review_data["id"], "response.txt"
+                ),
+                "w",
+            ) as f:
+                f.write(response)
+
         if response:
             clean_json = re.sub(
                 r"\n?```$", "", re.sub(r"^```[a-zA-Z0-9]*\n?", "", response)
             )
 
             try:
-                return ReviewMetadata.model_validate_json(clean_json)
+                metadata = ReviewMetadata.model_validate_json(clean_json)
+
+                if review_data["recognized_objects"]:
+                    metadata.potential_threat_level = 0
+
+                return metadata
             except Exception as e:
                 # rarely LLMs can fail to follow directions on output format
                 logger.warning(

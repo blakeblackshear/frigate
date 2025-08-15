@@ -29,12 +29,11 @@ You must use a vision capable model with Frigate. Current model variants can be 
 
 The following models are recommended:
 
-| Model             | Size   | Recommended Features |
-| ----------------- | ------ | -------------------- |
-| `minicpm-v:8b`    | 5.5 GB | Review Summary       |
-| `qwen2.5vl:3b`    | 3.2 GB | Review Summary       |
-| `gemma3:4b`       | 3.3 GB | All Features         |
-| `llava-phi3:3.8b` | 2.9 GB | All Features         |
+| Model             | Size   | Notes                                                       |
+| ----------------- | ------ | ----------------------------------------------------------- |
+| `gemma3:4b`       | 3.3 GB | Strong frame-to-frame understanding, slower inference times |
+| `qwen2.5vl:3b`    | 3.2 GB | Fast but capable model with good vision comprehension       |
+| `llava-phi3:3.8b` | 2.9 GB | Lightweight and fast model with vision comprehension        |
 
 :::note
 

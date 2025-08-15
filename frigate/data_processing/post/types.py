@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ReviewMetadata(BaseModel):
+    model_config = ConfigDict(extra="ignore", protected_namespaces=())
+
     scene: str = Field(
         description="A comprehensive description of the setting and entities, including relevant context and plausible inferences if supported by visual evidence."
     )
