@@ -2,7 +2,7 @@
 
 import json
 import threading
-from typing import Any, Generic, Optional, TypeVar
+from typing import Generic, TypeVar
 
 import zmq
 
