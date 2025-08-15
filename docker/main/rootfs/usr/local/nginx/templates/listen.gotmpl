@@ -1,12 +1,16 @@
 # intended for internal traffic, not protected by auth
 listen 5000;
+listen [::]:5000;
 
 {{ if not .enabled }}
 # intended for external traffic, protected by auth
 listen 8971;
+listen [::]:8971;
+
 {{ else }}
 # intended for external traffic, protected by auth
 listen 8971 ssl;
+listen [::]:8971 ssl;
 
 ssl_certificate /etc/letsencrypt/live/frigate/fullchain.pem;
 ssl_certificate_key /etc/letsencrypt/live/frigate/privkey.pem;
