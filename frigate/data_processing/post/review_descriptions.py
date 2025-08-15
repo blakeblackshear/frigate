@@ -169,10 +169,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
     ) -> list[str]:
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
         file_start = f"preview_{camera}"
-
-        # 30 seconds padding to ensure that a frame before & after the activity is considered
-        start_file = f"{file_start}-{start_time - 30}.webp"
-        end_file = f"{file_start}-{end_time + 30}.webp"
+        start_file = f"{file_start}-{start_time}.webp"
+        end_file = f"{file_start}-{end_time}.webp"
         all_frames = []
 
         for file in sorted(os.listdir(preview_dir)):
@@ -180,9 +178,15 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 continue
 
             if file < start_file:
+                if len(all_frames):
+                    all_frames[0] = os.path.join(preview_dir, file)
+                else:
+                    all_frames.append(os.path.join(preview_dir, file))
+
                 continue
 
             if file > end_file:
+                all_frames.append(os.path.join(preview_dir, file))
                 break
 
             all_frames.append(os.path.join(preview_dir, file))
@@ -217,7 +221,9 @@ def run_analysis(
         "id": final_data["id"],
         "camera": camera,
         "zones": final_data["data"]["zones"],
-        "start": datetime.datetime.fromtimestamp(final_data["start_time"]).strftime("%A, %I:%M %p"),
+        "start": datetime.datetime.fromtimestamp(final_data["start_time"]).strftime(
+            "%A, %I:%M %p"
+        ),
         "duration": final_data["end_time"] - final_data["start_time"],
     }
 
