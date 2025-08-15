@@ -383,9 +383,9 @@ class TrackedObjectProcessor(threading.Thread):
             event.sub_label = sub_label  # type: ignore[assignment]
             data = event.data
             if sub_label is None:
-                data["sub_label_score"] = None
+                data["sub_label_score"] = None  # type: ignore[index]
             elif score is not None:
-                data["sub_label_score"] = score
+                data["sub_label_score"] = score  # type: ignore[index]
             event.data = data
             event.save()
 
@@ -480,11 +480,11 @@ class TrackedObjectProcessor(threading.Thread):
 
         if event:
             data = event.data
-            data[field_name] = field_value
+            data[field_name] = field_value  # type: ignore[index]
             if field_value is None:
-                data[f"{field_name}_score"] = None
+                data[f"{field_name}_score"] = None  # type: ignore[index]
             elif score is not None:
-                data[f"{field_name}_score"] = score
+                data[f"{field_name}_score"] = score  # type: ignore[index]
             event.data = data
             event.save()
 
