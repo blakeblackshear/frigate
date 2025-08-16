@@ -197,9 +197,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             payload="offline",
             qos=1,
             retain=True,
-        )
-
-        # register callbacks
+        )  # register callbacks
         callback_types = [
             "enabled",
             "recordings",
@@ -215,6 +213,8 @@ class MqttClient(Communicator):  # type: ignore[misc]
             "birdseye_mode",
             "review_alerts",
             "review_detections",
+            "object_detection_enable",
+            "object_detection_disable",
         ]
 
         for name in self.config.cameras.keys():

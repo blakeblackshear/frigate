@@ -17,7 +17,7 @@ from setproctitle import setproctitle
 from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import CameraConfig, DetectConfig, ModelConfig
+from frigate.config import CameraConfig, DetectConfig, ModelConfig, ObjectConfig
 from frigate.config.camera.camera import CameraTypeEnum
 from frigate.const import (
     CACHE_DIR,
@@ -508,8 +508,6 @@ def track_camera(
     frame_queue = camera_metrics.frame_queue
 
     frame_shape = config.frame_shape
-    objects_to_track = config.objects.track
-    object_filters = config.objects.filters
 
     motion_detector = ImprovedMotionDetector(
         frame_shape,
@@ -543,8 +541,7 @@ def track_camera(
         object_tracker,
         detected_objects_queue,
         camera_metrics,
-        objects_to_track,
-        object_filters,
+        config.objects,
         stop_event,
         ptz_metrics,
         region_grid,
@@ -610,8 +607,7 @@ def process_frames(
     object_tracker: ObjectTracker,
     detected_objects_queue: Queue,
     camera_metrics: CameraMetrics,
-    objects_to_track: list[str],
-    object_filters,
+    objects_config: ObjectConfig,
     stop_event: MpEvent,
     ptz_metrics: PTZMetrics,
     region_grid: list[list[dict[str, Any]]],
@@ -619,6 +615,7 @@ def process_frames(
 ):
     next_region_update = get_tomorrow_at_time(2)
     detect_config_subscriber = ConfigSubscriber(f"config/detect/{camera_name}", True)
+    objects_config_subscriber = ConfigSubscriber(f"config/objects/{camera_name}", True)
     enabled_config_subscriber = ConfigSubscriber(f"config/enabled/{camera_name}", True)
 
     fps_tracker = EventsPerSecond()
@@ -691,6 +688,12 @@ def process_frames(
 
         if updated_detect_config:
             detect_config = updated_detect_config
+
+        # check for updated objects config
+        _, updated_objects_config = objects_config_subscriber.check_for_update()
+
+        if updated_objects_config:
+            objects_config = updated_objects_config
 
         if (
             datetime.datetime.now().astimezone(datetime.timezone.utc)
@@ -836,8 +839,8 @@ def process_frames(
                         frame,
                         model_config,
                         region,
-                        objects_to_track,
-                        object_filters,
+                        objects_config.track,
+                        objects_config.filters,
                     )
                 )
 

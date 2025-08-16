@@ -68,6 +68,8 @@ class Dispatcher:
             "birdseye_mode": self._on_birdseye_mode_command,
             "review_alerts": self._on_alerts_command,
             "review_detections": self._on_detections_command,
+            "object_detection_enable": self._on_object_detection_enable_command,
+            "object_detection_disable": self._on_object_detection_disable_command,
         }
         self._global_settings_handlers: dict[str, Callable] = {
             "notifications": self._on_global_notification_command,
@@ -641,3 +643,27 @@ class Dispatcher:
 
         self.config_updater.publish(f"config/review/{camera_name}", review_settings)
         self.publish(f"{camera_name}/review_detections/state", payload, retain=True)
+
+    def _on_object_detection_enable_command(
+        self, camera_name: str, object_name: str
+    ) -> None:
+        """Callback for object detect topic."""
+        objects_settings = self.config.cameras[camera_name].objects
+
+        if object_name not in objects_settings.track:
+            logger.info(f"Turning on detection for {object_name} on {camera_name}")
+            objects_settings.track.append(object_name)
+
+        self.config_updater.publish(f"config/objects/{camera_name}", objects_settings)
+
+    def _on_object_detection_disable_command(
+        self, camera_name: str, object_name: str
+    ) -> None:
+        """Callback for object detect topic."""
+        objects_settings = self.config.cameras[camera_name].objects
+
+        if object_name in objects_settings.track:
+            logger.info(f"Turning off detection for {object_name} on {camera_name}")
+            objects_settings.track.remove(object_name)
+
+        self.config_updater.publish(f"config/objects/{camera_name}", objects_settings)
