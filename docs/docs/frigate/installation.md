@@ -132,6 +132,77 @@ If you are using `docker run`, add this option to your command `--device /dev/ha
 
 Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8l) to complete the setup.
 
+### MemryX MX3  
+
+The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVMe SSD), and supports a variety of configurations:
+- x86 (Intel/AMD) PCs
+- Raspberry Pi 5
+- Orange Pi 5 Plus/Max
+- Multi-M.2 PCIe carrier cards
+
+#### Configuration  
+
+
+#### Installation  
+
+To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/get_started/hardware_setup.html).
+
+Then follow these steps for installing the correct driver/runtime configuration:
+
+1. Copy or download [this script](https://github.com/blakeblackshear/frigate/blob/dev/docker/memryx/user_installation.sh).
+2. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
+3. Run the script with `./user_installation.sh`
+4. **Restart your computer** to complete driver installation.
+
+#### Setup  
+
+To set up Frigate, follow the default installation instructions, for example:   `ghcr.io/blakeblackshear/frigate:stable`
+
+Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
+
+```yaml
+devices:
+  - /dev/memx0
+```
+
+During configuration, you must run Docker in privileged mode and ensure the container can access the max-manager.
+
+In your `docker-compose.yml`, also add:
+
+```yaml
+privileged: true
+
+volumes:
+    /run/mxa_manager:/run/mxa_manager
+```
+
+If you can't use Docker Compose, you can run the container with something similar to this:
+
+```bash
+  docker run -d \
+    --name frigate-memx \
+    --restart=unless-stopped \
+    --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
+    --shm-size=256m \
+    -v /path/to/your/storage:/media/frigate \
+    -v /path/to/your/config:/config \
+    -v /etc/localtime:/etc/localtime:ro \
+    -v /run/mxa_manager:/run/mxa_manager \
+    -e FRIGATE_RTSP_PASSWORD='password' \
+    --privileged=true \
+    -p 8971:8971 \
+    -p 8554:8554 \
+    -p 5000:5000 \
+    -p 8555:8555/tcp \
+    -p 8555:8555/udp \
+    --device /dev/memx0 \
+    ghcr.io/blakeblackshear/frigate:stable
+```
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#memryx-mx3) to complete the setup.
+
 ### Rockchip platform
 
 Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and necessary drivers (especially rkvdec2 and rknpu). To check, enter the following commands:
