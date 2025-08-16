@@ -20,7 +20,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from markupsafe import escape
-from peewee import operator
+from peewee import SQL, operator
 from pydantic import ValidationError
 
 from frigate.api.auth import require_role
@@ -685,7 +685,14 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
 @router.get("/recognized_license_plates")
 def get_recognized_license_plates(split_joined: Optional[int] = None):
     try:
-        events = Event.select(Event.data).distinct()
+        query = (
+            Event.select(
+                SQL("json_extract(data, '$.recognized_license_plate') AS plate")
+            )
+            .where(SQL("json_extract(data, '$.recognized_license_plate') IS NOT NULL"))
+            .distinct()
+        )
+        recognized_license_plates = [row[0] for row in query.tuples()]
     except Exception:
         return JSONResponse(
             content=(
@@ -693,14 +700,6 @@ def get_recognized_license_plates(split_joined: Optional[int] = None):
             ),
             status_code=404,
         )
-
-    recognized_license_plates = []
-    for e in events:
-        if e.data is not None and "recognized_license_plate" in e.data:
-            recognized_license_plates.append(e.data["recognized_license_plate"])
-
-    while None in recognized_license_plates:
-        recognized_license_plates.remove(None)
 
     if split_joined:
         original_recognized_license_plates = recognized_license_plates.copy()
