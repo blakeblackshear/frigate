@@ -7,13 +7,104 @@
       "go2rtc": "Go2RTC Žurnalas - Frigate",
       "nginx": "Nginx Žurnalas - Frigate"
     },
-    "general": "Bendroji Statistika - Frigate"
+    "general": "Bendroji Statistika - Frigate",
+    "enrichments": "Pagerinimų Statistika - Frigate"
   },
   "title": "Sistema",
   "metrics": "Sistemos metrikos",
   "logs": {
     "download": {
       "label": "Parsisiųsti Žurnalą"
+    },
+    "copy": {
+      "label": "Kopijuoti į iškarpinę",
+      "success": "Nukopijuoti įrašai į iškarpinę",
+      "error": "Nepavyko nukopijuoti įrašų į iškarpinę"
+    },
+    "type": {
+      "label": "Tipas",
+      "timestamp": "Laiko žymė",
+      "tag": "Žyma",
+      "message": "Žinutė"
+    },
+    "tips": "Įrašai yra transliuojami iš serverio",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Klaida nuskaitant įrašus: {{errorMessage}}",
+        "whileStreamingLogs": "Klaidai transliuojant įrašus: {{errorMessage}}"
+      }
     }
+  },
+  "general": {
+    "title": "Bendrinis",
+    "detector": {
+      "title": "Detektoriai",
+      "inferenceSpeed": "Detektorių darbo greitis",
+      "temperature": "Detektorių Temperatūra",
+      "cpuUsage": "Detektorių CPU Naudojimas",
+      "memoryUsage": "Detektorių Atminties Naudojimas"
+    },
+    "hardwareInfo": {
+      "title": "Techninės įrangos Info",
+      "gpuUsage": "GPU Naudojimas",
+      "gpuMemory": "GPU Atmintis",
+      "gpuEncoder": "GPU Kodavimas",
+      "gpuDecoder": "GPU Dekodavimas",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo Išvestis",
+          "returnCode": "Grįžtamas Kodas: {{code}}",
+          "processOutput": "Proceso Išvestis:",
+          "processError": "Proceso Klaida:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI išvestis:",
+          "name": "Pavadinimas: {{name}}",
+          "driver": "Driver: {{driver}}",
+          "cudaComputerCapability": "CUDA Compute Galimybės: {{cuda_compute}}",
+          "vbios": "VBios Info: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Užverti GPU info"
+        },
+        "copyInfo": {
+          "label": "Kopijuoti GPU Info"
+        },
+        "toast": {
+          "success": "Nukopijuota GPU info į iškarpinę"
+        }
+      },
+      "npuUsage": "NPU Naudojimas",
+      "npuMemory": "NPU Atmintis"
+    },
+    "otherProcesses": {
+      "title": "Kiti Procesai",
+      "processCpuUsage": "Procesų CPU Naudojimas",
+      "processMemoryUsage": "Procesu Atminties Naudojimas"
+    }
+  },
+  "storage": {
+    "title": "Saugykla",
+    "overview": "Apžvalga",
+    "recordings": {
+      "title": "Įrašai",
+      "tips": "Ši reikšmė nurodo kiek iš viso Frigate duombazėje esantys įrašai užima vietos saugykloje. Frigate neseka kiek vietos užima visi kiti failai esantys laikmenoje.",
+      "earliestRecording": "Anksčiausias esantis įrašas:"
+    },
+    "cameraStorage": {
+      "title": "Kameros Saugykla",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Neišnaudotos Saugyklos Informacija",
+      "storageUsed": "Saugykla",
+      "percentageOfTotalUsed": "Procentas nuo Viso",
+      "bandwidth": "Pralaidumas",
+      "unused": {
+        "title": "Nepanaudota",
+        "tips": "Jei saugykloje turite daugiau failų apart Frigate įrašų, ši reikšmė neatspindės tikslios likusios laisvos vietos Frigate panaudojimui. Frigate neseka saugyklos panaudojimo už savo įrašų ribų."
+      }
+    }
+  },
+  "cameras": {
+    "title": "Kameros"
   }
 }
