@@ -7,7 +7,7 @@ PYSQLITE3_VERSION="0.5.3"
 
 # Fetch the source code for the latest release of Sqlite.
 if [[ ! -d "sqlite" ]]; then
-  wget wget https://github.com/sqlite/sqlite/archive/refs/tags/version-${SQLITE3_VERSION}.tar.gz -O sqlite.tar.gz
+  wget https://github.com/sqlite/sqlite/archive/refs/tags/version-${SQLITE3_VERSION}.tar.gz -O sqlite.tar.gz
   tar xzf sqlite.tar.gz
   cd sqlite/
   LIBS="-lm" ./configure --disable-tcl --enable-tempstore=always
