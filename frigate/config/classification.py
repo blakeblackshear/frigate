@@ -19,11 +19,6 @@ class SemanticSearchModelEnum(str, Enum):
     jinav2 = "jinav2"
 
 
-class LPRDeviceEnum(str, Enum):
-    GPU = "GPU"
-    CPU = "CPU"
-
-
 class BirdClassificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable bird classification.")
     threshold: float = Field(
@@ -51,6 +46,11 @@ class SemanticSearchConfig(FrigateBaseModel):
     )
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
+    )
+    device: Optional[str] = Field(
+        default=None,
+        title="The device key to use for semantic search.",
+        description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
     )
 
 
@@ -92,6 +92,11 @@ class FaceRecognitionConfig(FrigateBaseModel):
     blur_confidence_filter: bool = Field(
         default=True, title="Apply blur quality filter to face confidence."
     )
+    device: Optional[str] = Field(
+        default=None,
+        title="The device key to use for semantic search.",
+        description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
+    )
 
 
 class CameraFaceRecognitionConfig(FrigateBaseModel):
@@ -105,10 +110,6 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
-    device: Optional[LPRDeviceEnum] = Field(
-        default=LPRDeviceEnum.CPU,
-        title="The device used for license plate recognition.",
-    )
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
     )
@@ -153,6 +154,11 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
     debug_save_plates: bool = Field(
         default=False,
         title="Save plates captured for LPR for debugging purposes.",
+    )
+    device: Optional[str] = Field(
+        default=None,
+        title="The device key to use for semantic search.",
+        description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
     )
 
 
