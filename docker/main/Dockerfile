@@ -152,7 +152,7 @@ ARG TARGETARCH
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y \
-    apt-transport-https wget \
+    apt-transport-https wget unzip \
     && apt-get -qq update \
     && apt-get -qq install -y \
     python3.11 \
