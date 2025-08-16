@@ -21,5 +21,10 @@
         "label": "Pateiktį į Frigate+"
       }
     }
+  },
+  "streaming": {
+    "restreaming": {
+      "disabled": "Šiai kamerai pertransliavimas nėra įjungtas"
+    }
   }
 }

@@ -175,7 +175,15 @@
       "ja": "日本語 (Japans)",
       "yue": "粵語 (Kantonees)",
       "th": "ไทย (Thais)",
-      "ca": "Català (Catalaans)"
+      "ca": "Català (Catalaans)",
+      "ptBR": "Português brasileiro (Braziliaans Portugees)",
+      "sr": "Српски (Servisch)",
+      "sl": "Slovenščina (Sloveens)",
+      "lt": "Lietuvių (Litouws)",
+      "bg": "Български (Bulgaars)",
+      "gl": "Galego (Galicisch)",
+      "id": "Bahasa Indonesia (Indonesisch)",
+      "ur": "اردو (Urdu)"
     },
     "darkMode": {
       "label": "Donkere modus",

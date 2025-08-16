@@ -5,13 +5,13 @@
   "exploreIsUnavailable": {
     "title": "Explorar não está disponível",
     "embeddingsReindexing": {
-      "context": "Explorar pode ser usado depois da incorporação do objeto rastreado terminar a reindexação.",
-      "startingUp": "Começando…",
-      "estimatedTime": "Time estimado faltando:",
-      "finishingShortly": "Terminando em breve",
+      "context": "O menu explorar pode ser usado após os embeddings do objeto rastreado terem terminado de reindexar.",
+      "startingUp": "Iniciando…",
+      "estimatedTime": "Tempo estimado restante:",
+      "finishingShortly": "Finalizando em breve",
       "step": {
-        "thumbnailsEmbedded": "Miniaturas incorporadas: ",
-        "descriptionsEmbedded": "Descrições incorporadas: ",
+        "thumbnailsEmbedded": "Miniaturas embedded: ",
+        "descriptionsEmbedded": "Descrições embedded: ",
         "trackedObjectsProcessed": "Objetos rastreados processados: "
       }
     },
@@ -24,7 +24,7 @@
         "visionModelFeatureExtractor": "Extrator de características do modelo de visão"
       },
       "tips": {
-        "context": "Você pode querer reindexar as incorporações de seus objetos rastreados uma vez que os modelos forem baixados.",
+        "context": "Você pode querer reindexar os embeddings de seus objetos rastreados uma vez que os modelos forem baixados.",
         "documentation": "Leia a documentação"
       },
       "error": "Um erro ocorreu. Verifique os registos do Frigate."
@@ -189,7 +189,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar Exclusão",
-      "desc": "Deletar esse objeto rastreado remove a captura de imagem, qualquer embedding salvo, e quaisquer entradas de ciclo de vida de objeto associadas. Gravações desse objeto rastreado na visualização de Histórico <em>NÃO</em> serão deletadas.<br /><br />Tem certeza que quer prosseguir?"
+      "desc": "Deletar esse objeto rastreado remove a captura de imagem, quaisquer embeddings salvos, e quaisquer entradas de ciclo de vida de objeto associadas. Gravações desse objeto rastreado na visualização de Histórico <em>NÃO</em> serão deletadas.<br /><br />Tem certeza que quer prosseguir?"
     }
   },
   "noTrackedObjects": "Nenhum Objeto Rastreado Encontrado",

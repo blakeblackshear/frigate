@@ -8,7 +8,7 @@
     "general": "Allgemeine Einstellungen – Frigate",
     "frigatePlus": "Frigate+ Einstellungen – Frigate",
     "classification": "Klassifizierungseinstellungen – Frigate",
-    "motionTuner": "Bewegungstuner – Frigate",
+    "motionTuner": "Bewegungserkennungs-Optimierer – Frigate",
     "notifications": "Benachrichtigungs-Einstellungen",
     "enrichments": "Erweiterte Statistiken - Frigate"
   },
@@ -17,12 +17,12 @@
     "cameras": "Kameraeinstellungen",
     "classification": "Klassifizierung",
     "masksAndZones": "Maskierungen / Zonen",
-    "motionTuner": "Bewegungstuner",
+    "motionTuner": "Bewegungserkennungs-Optimierer",
     "debug": "Debug",
     "frigateplus": "Frigate+",
     "users": "Benutzer",
     "notifications": "Benachrichtigungen",
-    "enrichments": "Verbesserungen"
+    "enrichments": "Erkennungsfunktionen"
   },
   "dialog": {
     "unsavedChanges": {
@@ -178,7 +178,7 @@
       "detections": "Erkennungen ",
       "desc": "Aktiviere/deaktiviere Benachrichtigungen und Erkennungen für diese Kamera vorübergehend, bis Frigate neu gestartet wird. Wenn deaktiviert, werden keine neuen Überprüfungseinträge erstellt. "
     },
-    "title": "Kamera-Einstellungen"
+    "title": "Kameraeinstellungen"
   },
   "masksAndZones": {
     "form": {
@@ -420,7 +420,7 @@
       "desc": "Der Wert für die Konturfläche wird verwendet, um zu bestimmen, welche Gruppen von veränderten Pixeln als Bewegung gelten. <em>Standard: 10</em>"
     },
     "title": "Bewegungserkennungs-Optimierer",
-    "unsavedChanges": "Nicht gespeicherte Änderungen am Bewegungstuner ({{camera}})"
+    "unsavedChanges": "Nicht gespeicherte Änderungen im Bewegungserkennungs-Optimierer ({{camera}})"
   },
   "users": {
     "addUser": "Benutzer hinzufügen",
@@ -623,7 +623,7 @@
       "title": "Vogel Klassifizierung",
       "desc": "Die Vogelklassifizierung identifiziert bekannte Vögel mithilfe eines quantisierten Tensorflow-Modells. Wenn ein bekannter Vogel erkannt wird, wird sein allgemeiner Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten."
     },
-    "title": "Anreicherungseinstellungen",
+    "title": "Erweiterte Erkennungsfunktionen",
     "unsavedChanges": "Ungesicherte geänderte Verbesserungseinstellungen",
     "semanticSearch": {
       "reindexNow": {

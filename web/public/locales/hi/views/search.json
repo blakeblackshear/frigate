@@ -1,4 +1,5 @@
 {
   "search": "खोजें",
-  "savedSearches": "सहेजी गई खोजें"
+  "savedSearches": "सहेजी गई खोजें",
+  "searchFor": "{{inputValue}} खोजें"
 }

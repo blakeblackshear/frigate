@@ -9,5 +9,6 @@
     "face": "Veido detelės",
     "timestamp": "Laiko žyma",
     "unknown": "Nežinoma"
-  }
+  },
+  "selectItem": "Pasirinkti {{item}}"
 }
