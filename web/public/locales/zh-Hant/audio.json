@@ -35,5 +35,9 @@
   "vehicle": "車輛",
   "animal": "動物",
   "bark": "樹皮",
-  "goat": "山羊"
+  "goat": "山羊",
+  "whoop": "大叫",
+  "whispering": "講話",
+  "laughter": "笑聲",
+  "snicker": "竊笑"
 }
