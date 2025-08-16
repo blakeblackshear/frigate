@@ -542,7 +542,7 @@ def delete_classification_dataset_images(
     )
 
     for id in list_of_ids:
-        file_path = os.path.join(folder, id)
+        file_path = os.path.join(folder, sanitize_filename(id))
 
         if os.path.isfile(file_path):
             os.unlink(file_path)
@@ -574,7 +574,9 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
     json: dict[str, Any] = body or {}
     category = sanitize_filename(json.get("category", ""))
     training_file_name = sanitize_filename(json.get("training_file", ""))
-    training_file = os.path.join(CLIPS_DIR, name, "train", training_file_name)
+    training_file = os.path.join(
+        CLIPS_DIR, sanitize_filename(name), "train", training_file_name
+    )
 
     if training_file_name and not os.path.isfile(training_file):
         return JSONResponse(
@@ -588,7 +590,9 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
         )
 
     new_name = f"{category}-{datetime.datetime.now().timestamp()}.png"
-    new_file_folder = os.path.join(CLIPS_DIR, name, "dataset", category)
+    new_file_folder = os.path.join(
+        CLIPS_DIR, sanitize_filename(name), "dataset", category
+    )
 
     if not os.path.exists(new_file_folder):
         os.mkdir(new_file_folder)
@@ -627,7 +631,7 @@ def delete_classification_train_images(request: Request, name: str, body: dict =
     folder = os.path.join(CLIPS_DIR, sanitize_filename(name), "train")
 
     for id in list_of_ids:
-        file_path = os.path.join(folder, id)
+        file_path = os.path.join(folder, sanitize_filename(id))
 
         if os.path.isfile(file_path):
             os.unlink(file_path)
