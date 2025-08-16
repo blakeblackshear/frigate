@@ -7,6 +7,14 @@
     "disable": "Onemogućite dvosmerni razgovor"
   },
   "cameraAudio": {
-    "enable": "Omogući zvuk kamere"
+    "enable": "Omogući zvuk kamere",
+    "disable": "Onemogući zvuk kamere"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Kliknite na sliku da bi centrirali kameru"
+      }
+    }
   }
 }

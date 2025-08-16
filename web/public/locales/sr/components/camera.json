@@ -11,7 +11,11 @@
       }
     },
     "name": {
-      "label": "Ime"
+      "label": "Ime",
+      "placeholder": "Unesite ime…",
+      "errorMessage": {
+        "mustLeastCharacters": "Naziv grupe kamera mora imati bar 2 karaktera."
+      }
     }
   }
 }
