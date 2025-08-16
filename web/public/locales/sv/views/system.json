@@ -4,9 +4,11 @@
     "general": "Allmän statistik - Frigate",
     "cameras": "Kamerastatistik - Frigate",
     "logs": {
-      "frigate": "Frigate loggar - Frigate",
-      "go2rtc": "Go2RTC Loggar - Frigate"
-    }
+      "frigate": "Frigate-loggar - Frigate",
+      "go2rtc": "Go2RTC-loggar - Frigate",
+      "nginx": "Nginx-loggar"
+    },
+    "enrichments": "Förbättringsstatistik - Frigate"
   },
   "logs": {
     "copy": {
@@ -32,7 +34,7 @@
     }
   },
   "title": "System",
-  "metrics": "System detaljer",
+  "metrics": "Systemdetaljer",
   "general": {
     "title": "Generellt",
     "detector": {
