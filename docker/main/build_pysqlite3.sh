@@ -5,15 +5,22 @@ set -euxo pipefail
 SQLITE3_VERSION="3.46.1"
 PYSQLITE3_VERSION="0.5.3"
 
-# Fetch the source code for the latest release of Sqlite.
+# Fetch the pre-built sqlite amalgamation instead of building from source
 if [[ ! -d "sqlite" ]]; then
-  wget https://github.com/sqlite/sqlite/archive/refs/tags/version-${SQLITE3_VERSION}.tar.gz -O sqlite.tar.gz
-  tar xzf sqlite.tar.gz
-  cd sqlite-version-${SQLITE3_VERSION}/
-  LIBS="-lm" ./configure --disable-tcl --enable-tempstore=always
-  make sqlite3.c
+  mkdir sqlite
+  cd sqlite
+  
+  # Download the pre-built amalgamation from sqlite.org
+  # For SQLite 3.46.1, the amalgamation version is 3460100
+  SQLITE_AMALGAMATION_VERSION="3460100"
+  
+  wget https://www.sqlite.org/2024/sqlite-amalgamation-${SQLITE_AMALGAMATION_VERSION}.zip -O sqlite-amalgamation.zip
+  unzip sqlite-amalgamation.zip
+  mv sqlite-amalgamation-${SQLITE_AMALGAMATION_VERSION}/* .
+  rmdir sqlite-amalgamation-${SQLITE_AMALGAMATION_VERSION}
+  rm sqlite-amalgamation.zip
+  
   cd ../
-  rm sqlite.tar.gz
 fi
 
 # Grab the pysqlite3 source code.
