@@ -1,0 +1,123 @@
+{
+  "restart": {
+    "title": "Sind Sie sicher, dass Sie Frigate neustarten wollen?",
+    "restarting": {
+      "title": "Frigate startet neu",
+      "content": "Diese Seite wird in {{countdown}} Sekunde(n) aktualisiert.",
+      "button": "Neuladen erzwingen"
+    },
+    "button": "Neustarten"
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "true": {
+          "label": "Bestätigen Sie das Label für Frigate Plus",
+          "true_one": "Das ist ein/eine {{label}}",
+          "true_other": "Dies sind {{label}}"
+        },
+        "state": {
+          "submitted": "Übermittelt"
+        },
+        "false": {
+          "false_one": "Das ist kein(e) {{label}}",
+          "false_other": "Das sind kein(e) {{label}}",
+          "label": "Bestätige dieses Label nicht für Frigate Plus"
+        },
+        "question": {
+          "label": "Bestätige diese Beschriftung für Frigate Plus",
+          "ask_a": "Ist dieses Objekt ein <code>{{label}}</code>?",
+          "ask_an": "Ist dieses Objekt ein <code>{{label}}</code>?",
+          "ask_full": "Ist dieses Objekt ein <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        }
+      },
+      "submitToPlus": {
+        "label": "An Frigate+ übermitteln",
+        "desc": "Objekte an Orten die du vermeiden möchtest, sind keine Fehlalarme. Wenn du sie als Fehlalarme meldest, verwirrst du das Modell."
+      }
+    },
+    "video": {
+      "viewInHistory": "Im Verlauf ansehen"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Aus der Zeitleiste auswählen",
+      "start": {
+        "title": "Startzeit",
+        "label": "Startzeit auswählen"
+      },
+      "end": {
+        "label": "Endzeit auswählen",
+        "title": "Endzeit"
+      },
+      "lastHour_one": "Letzte Stunde",
+      "lastHour_other": "Letzte {{count}} Stunden",
+      "custom": "Benutzerdefiniert"
+    },
+    "name": {
+      "placeholder": "Export benennen"
+    },
+    "select": "Auswählen",
+    "selectOrExport": "Auswählen oder Exportieren",
+    "toast": {
+      "error": {
+        "endTimeMustAfterStartTime": "Die Endzeit darf nicht vor der Startzeit liegen",
+        "failed": "Fehler beim Starten des Exports: {{error}}",
+        "noVaildTimeSelected": "Kein gültiger Zeitraum ausgewählt"
+      },
+      "success": "Export erfolgreich gestartet. Die Datei befindet sich im Ordner /exports."
+    },
+    "fromTimeline": {
+      "saveExport": "Export speichern",
+      "previewExport": "Exportvorschau"
+    },
+    "export": "Exportieren"
+  },
+  "streaming": {
+    "restreaming": {
+      "disabled": "Für diese Kamera ist das Restreaming nicht aktiviert.",
+      "desc": {
+        "readTheDocumentation": "Weitere Informationen in der Dokumentation",
+        "title": "Konfiguriere go2rtc, um erweiterte Live-Ansichtsoptionen und Audio für diese Kamera zu nutzen."
+      }
+    },
+    "showStats": {
+      "label": "Stream-Statistiken anzeigen",
+      "desc": "Stream-Statistiken werden bei aktivierter Option als Overlay im Kamera-Feed eingeblendet."
+    },
+    "debugView": "Debug-Ansicht",
+    "label": "Stream"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Suche speichern",
+      "desc": "Gib einen Namen für diese gespeicherte Suche an.",
+      "placeholder": "Gib einen Namen für die Suche ein",
+      "overwrite": "{{searchName}} existiert bereits. Beim Speichern wird der vorhandene Wert überschrieben.",
+      "button": {
+        "save": {
+          "label": "Diese Suche speichern"
+        }
+      },
+      "success": "Die Suche {{searchName}} wurde gespeichert."
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Bestätige Löschung",
+      "desc": {
+        "selected": "Bist du sicher, dass du alle aufgezeichneten Videos, die mit diesem Beitrag verbunden sind, löschen möchtest?<br /><br />Halte <em>Shift</em>-Taste gedrückt, um diesen Dialog in Zukunft zu umgehen."
+      },
+      "toast": {
+        "success": "Das Videomaterial des gewählten Eintrags wurde erfolgreich gelöscht.",
+        "error": "Löschen is fehlgeschlagen: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Exportieren",
+      "markAsReviewed": "Als geprüft markieren",
+      "deleteNow": "Jetzt löschen"
+    }
+  }
+}

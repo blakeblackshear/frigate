@@ -11,7 +11,10 @@ import useDeepMemo from "./use-deep-memo";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { useFrigateStats } from "@/api/ws";
 
+import { useTranslation } from "react-i18next";
+
 export default function useStats(stats: FrigateStats | undefined) {
+  const { t } = useTranslation(["views/system"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const memoizedStats = useDeepMemo(stats);
@@ -33,13 +36,19 @@ export default function useStats(stats: FrigateStats | undefined) {
     Object.entries(memoizedStats["detectors"]).forEach(([key, det]) => {
       if (det["inference_speed"] > InferenceThreshold.error) {
         problems.push({
-          text: `${capitalizeFirstLetter(key)} is very slow (${det["inference_speed"]} ms)`,
+          text: t("stats.detectIsVerySlow", {
+            detect: capitalizeFirstLetter(key),
+            speed: det["inference_speed"],
+          }),
           color: "text-danger",
           relevantLink: "/system#general",
         });
       } else if (det["inference_speed"] > InferenceThreshold.warning) {
         problems.push({
-          text: `${capitalizeFirstLetter(key)} is slow (${det["inference_speed"]} ms)`,
+          text: t("stats.detectIsSlow", {
+            detect: capitalizeFirstLetter(key),
+            speed: det["inference_speed"],
+          }),
           color: "text-orange-400",
           relevantLink: "/system#general",
         });
@@ -54,7 +63,9 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       if (config.cameras[name].enabled && cam["camera_fps"] == 0) {
         problems.push({
-          text: `${capitalizeFirstLetter(name.replaceAll("_", " "))} is offline`,
+          text: t("stats.cameraIsOffline", {
+            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+          }),
           color: "text-danger",
           relevantLink: "logs",
         });
@@ -72,7 +83,10 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push({
-          text: `${capitalizeFirstLetter(name.replaceAll("_", " "))} has high FFMPEG CPU usage (${ffmpegAvg}%)`,
+          text: t("stats.ffmpegHighCpuUsage", {
+            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+            ffmpegAvg,
+          }),
           color: "text-danger",
           relevantLink: "/system#cameras",
         });
@@ -80,7 +94,10 @@ export default function useStats(stats: FrigateStats | undefined) {
 
       if (!isNaN(detectAvg) && detectAvg >= CameraDetectThreshold.error) {
         problems.push({
-          text: `${capitalizeFirstLetter(name.replaceAll("_", " "))} has high detect CPU usage (${detectAvg}%)`,
+          text: t("stats.detectHighCpuUsage", {
+            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+            detectAvg,
+          }),
           color: "text-danger",
           relevantLink: "/system#cameras",
         });
@@ -88,7 +105,7 @@ export default function useStats(stats: FrigateStats | undefined) {
     });
 
     return problems;
-  }, [config, memoizedStats]);
+  }, [config, memoizedStats, t]);
 
   return { potentialProblems };
 }

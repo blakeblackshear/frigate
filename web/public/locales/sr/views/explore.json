@@ -1,0 +1,13 @@
+{
+  "documentTitle": "Istraži - Frigate",
+  "generativeAI": "Generativni AI",
+  "exploreMore": "Istražite više {{label}} objekata",
+  "exploreIsUnavailable": {
+    "title": "Istraživanje je nedostupno",
+    "embeddingsReindexing": {
+      "context": "Istraživanje se može koristiti nakon što se završi reindeksiranje ugrađivanja praćenih objekata.",
+      "startingUp": "Pokretanje…",
+      "estimatedTime": "Procenjeno preostalo vreme:"
+    }
+  }
+}

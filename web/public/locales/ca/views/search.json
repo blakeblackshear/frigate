@@ -1,0 +1,72 @@
+{
+  "filter": {
+    "label": {
+      "time_range": "Rang de temps",
+      "cameras": "Càmeres",
+      "search_type": "Tipus de cerca",
+      "labels": "Etiquetes",
+      "zones": "Zones",
+      "sub_labels": "Subetiquetes",
+      "before": "Abans",
+      "after": "Després",
+      "min_score": "Puntuació mínima",
+      "max_score": "Puntuació màxima",
+      "min_speed": "Velocitat mínima",
+      "max_speed": "Velocitat màxima",
+      "recognized_license_plate": "Matrícula reconeguda",
+      "has_clip": "Té Clip",
+      "has_snapshot": "Té instantània"
+    },
+    "searchType": {
+      "thumbnail": "Miniatura",
+      "description": "Descripció"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "La data 'abans' ha de ser posterior a la data 'després'.",
+        "afterDatebeEarlierBefore": "La data 'després' ha de ser anterior a la data 'abans'.",
+        "minScoreMustBeLessOrEqualMaxScore": "La \"puntuació mínima\" ha de ser menor o igual que la \"puntuació màxima\".",
+        "maxScoreMustBeGreaterOrEqualMinScore": "La \"puntuació màxima\" ha de ser major o igual que la \"puntuació mínima\".",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "La \"velocitat mínima\" ha de ser menor o igual que la \"velocitat màxima\".",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "La \"velocitat màxima\" ha de ser major o igual que la \"velocitat mínima\"."
+      }
+    },
+    "tips": {
+      "title": "Com utilitzar filtres de text",
+      "desc": {
+        "step2": "Selecciona un valor de les suggerències o escriu-ne un de propi.",
+        "step3": "Utilitza múltiples filtres afegint-los un rere l'altre amb un espai entremig.",
+        "exampleLabel": "Exemple:",
+        "step1": "Escriviu un nom de clau de filtre seguit de dos punts (p. ex., \"càmeres:\").",
+        "text": "Els filtres t'ajuden a acotar els resultats de cerca. Aquí tens com utilitzar-los al camp d’entrada:",
+        "step4": "Els filtres de data {abans: i després:) fan servir el format {{DateFormat}}.",
+        "step5": "El filtre de rang de temps fa servir el format {{exampleTime}}.",
+        "step6": "Suprimeix els filtres fent clic a la 'x' que tenen al costat."
+      }
+    },
+    "header": {
+      "noFilters": "Filtres",
+      "currentFilterType": "Valors del filtre",
+      "activeFilters": "Filtres actius"
+    }
+  },
+  "search": "Buscar",
+  "savedSearches": "Cerques desades",
+  "searchFor": "Buscar {{inputValue}}",
+  "button": {
+    "clear": "Netejar cerca",
+    "save": "Desar la cerca",
+    "delete": "Suprimeix la recerca desada",
+    "filterInformation": "Informació de filtre",
+    "filterActive": "Filtres actius"
+  },
+  "trackedObjectId": "ID d'objecte rastrejat",
+  "placeholder": {
+    "search": "Cercar…"
+  },
+  "similaritySearch": {
+    "title": "Cerca per similitud",
+    "active": "Cerca per similitud habilitada",
+    "clear": "Netejar cerca per similitud"
+  }
+}

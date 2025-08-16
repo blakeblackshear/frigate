@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Editor configurație - Frigate",
+  "configEditor": "Editor de configurație",
+  "copyConfig": "Copiază setările",
+  "saveAndRestart": "Salvează și repornește",
+  "saveOnly": "Salvează",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Setări copiate."
+    },
+    "error": {
+      "savingError": "Eroare la salvarea setărilor"
+    }
+  },
+  "confirm": "Ieși fără să salvezi?"
+}

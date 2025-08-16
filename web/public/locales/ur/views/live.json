@@ -1,0 +1,13 @@
+{
+  "documentTitle": "لائیو - فریگیٹ",
+  "documentTitle.withCamera": "{{camera}} -براہِ راست - فریگیٹ",
+  "lowBandwidthMode": "کم بینڈوتھ موڈ",
+  "twoWayTalk": {
+    "enable": "دو طرفہ گفتگو کو فعال کریں",
+    "disable": "دو طرفہ گفتگو کو غیر فعال کریں"
+  },
+  "cameraAudio": {
+    "enable": "کیمرہ آڈیو فعال کریں",
+    "disable": "کیمرہ آڈیو کو غیر فعال کریں"
+  }
+}

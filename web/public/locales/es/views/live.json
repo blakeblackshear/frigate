@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Directo - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Directo - Frigate",
+  "twoWayTalk": {
+    "enable": "Habilitar conversación bidireccional",
+    "disable": "Deshabilitar conversación bidireccional"
+  },
+  "cameraAudio": {
+    "enable": "Habilitar audio de la cámara",
+    "disable": "Deshabilitar audio de la cámara"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Haz clic en el marco para centrar la cámara",
+        "enable": "Habilitar clic para mover",
+        "disable": "Deshabilitar clic para mover"
+      },
+      "up": {
+        "label": "Mover la cámara PTZ hacia arriba"
+      },
+      "down": {
+        "label": "Mover la cámara PTZ hacia abajo"
+      },
+      "right": {
+        "label": "Mover la cámara PTZ hacia la derecha"
+      },
+      "left": {
+        "label": "Mover la cámara PTZ hacia la izquierda"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Acercar la cámara PTZ"
+      },
+      "out": {
+        "label": "Alejar la cámara PTZ"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Haz clic en el marco para centrar la cámara PTZ"
+      }
+    },
+    "presets": "Preajustes de cámara PTZ"
+  },
+  "camera": {
+    "enable": "Habilitar cámara",
+    "disable": "Deshabilitar cámara"
+  },
+  "muteCameras": {
+    "enable": "Silenciar todas las cámaras",
+    "disable": "Activar sonido de todas las cámaras"
+  },
+  "detect": {
+    "enable": "Habilitar detección",
+    "disable": "Deshabilitar detección"
+  },
+  "recording": {
+    "enable": "Habilitar grabación",
+    "disable": "Deshabilitar grabación"
+  },
+  "snapshots": {
+    "enable": "Habilitar capturas de pantalla",
+    "disable": "Desactivar instantáneas"
+  },
+  "audioDetect": {
+    "enable": "Activar detección de audio",
+    "disable": "Desactivar detección de audio"
+  },
+  "autotracking": {
+    "enable": "Activar seguimiento automático",
+    "disable": "Desactivar seguimiento automático"
+  },
+  "streamStats": {
+    "enable": "Mostrar estadísticas de transmisión",
+    "disable": "Ocultar estadísticas de transmisión"
+  },
+  "manualRecording": {
+    "title": "Grabación bajo demanda",
+    "tips": "Iniciar un evento manual basado en la configuración de retención de grabaciones de esta cámara.",
+    "playInBackground": {
+      "label": "Reproducir en segundo plano",
+      "desc": "Habilitar esta opción para continuar transmitiendo cuando el reproductor esté oculto."
+    },
+    "showStats": {
+      "label": "Mostrar estadísticas",
+      "desc": "Habilitar esta opción para mostrar estadísticas de transmisión como una superposición en la transmisión de la cámara."
+    },
+    "debugView": "Vista de depuración",
+    "started": "Grabación manual bajo demanda iniciada.",
+    "failedToStart": "No se pudo iniciar la grabación manual bajo demanda.",
+    "start": "Iniciar grabación bajo demanda",
+    "recordDisabledTips": "Dado que la grabación está deshabilitada o restringida en la configuración de esta cámara, solo se guardará una captura de pantalla.",
+    "end": "Finalizar grabación bajo demanda",
+    "ended": "Finalizó la grabación manual bajo demanda.",
+    "failedToEnd": "No se pudo finalizar la grabación manual bajo demanda."
+  },
+  "lowBandwidthMode": "Modo de bajo ancho de banda",
+  "streamingSettings": "Ajustes de transmisión",
+  "notifications": "Notificaciones",
+  "audio": "Audio",
+  "suspend": {
+    "forTime": "Suspender por: "
+  },
+  "stream": {
+    "title": "Transmisión",
+    "audio": {
+      "tips": {
+        "documentation": "Leer la documentación ",
+        "title": "El audio debe provenir de tu cámara y estar configurado en go2rtc para esta transmisión."
+      },
+      "available": "El audio está disponible para esta transmisión",
+      "unavailable": "El audio no está disponible para esta transmisión"
+    },
+    "twoWayTalk": {
+      "tips.documentation": "Leer la documentación ",
+      "available": "La conversación bidireccional está disponible para esta transmisión",
+      "unavailable": "La conversación bidireccional está disponible para esta transmisión",
+      "tips": "Tu dispositivo debe soportar la función y WebRTC debe estar configurado para la conversación bidireccional."
+    },
+    "lowBandwidth": {
+      "tips": "La vista en vivo está en modo de bajo ancho de banda debido a problemas de almacenamiento en búfer o errores de transmisión.",
+      "resetStream": "Restablecer transmisión"
+    },
+    "playInBackground": {
+      "label": "Reproducir en segundo plano",
+      "tips": "Habilita esta opción para continuar la transmisión cuando el reproductor esté oculto."
+    }
+  },
+  "cameraSettings": {
+    "title": "Ajustes de {{camera}}",
+    "objectDetection": "Detección de objetos",
+    "audioDetection": "Detección de audio",
+    "recording": "Grabación",
+    "snapshots": "Capturas de pantalla",
+    "autotracking": "Seguimiento automático",
+    "cameraEnabled": "Cámara habilitada"
+  },
+  "history": {
+    "label": "Mostrar grabaciones históricas"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "motion": "Movimiento",
+      "active_objects": "Objetos activos",
+      "all": "Todo"
+    },
+    "notAllTips": "Tu configuración de retención de grabación de {{source}} está establecida en <code>modo: {{effectiveRetainMode}}</code>, por lo que esta grabación bajo demanda solo mantendrá segmentos con {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Editar diseño",
+    "group": {
+      "label": "Editar grupo de cámaras"
+    },
+    "exitEdit": "Salir de la edición"
+  }
+}

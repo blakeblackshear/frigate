@@ -1,28 +1,28 @@
 {
   "name": "Frigate",
   "short_name": "Frigate",
-  "start_url": "/",
+  "start_url": "/BASE_PATH/",
   "icons": [
     {
-      "src": "/images/android-chrome-512x512.png",
+      "src": "/BASE_PATH/images/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/android-chrome-192x192.png",
+      "src": "/BASE_PATH/images/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/maskable-icon.png",
+      "src": "/BASE_PATH/images/maskable-icon.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/images/maskable-badge.png",
+      "src": "/BASE_PATH/images/maskable-badge.png",
       "sizes": "96x96",
       "type": "image/png",
       "purpose": "maskable"

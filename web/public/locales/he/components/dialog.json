@@ -1,0 +1,114 @@
+{
+  "restart": {
+    "title": "האם אתה בטוח שברצונך להפעיל מחדש את Frigate?",
+    "button": "הפעלה מחדש - Frigate",
+    "restarting": {
+      "title": "Frigate מופעל מחדש כעת",
+      "content": "דף זה ייטען מחדש בעוד {{countdown}} שניות.",
+      "button": "אילוץ טעינה מחדש"
+    }
+  },
+  "export": {
+    "toast": {
+      "error": {
+        "endTimeMustAfterStartTime": "שעת הסיום חייבת להיות אחרי שעת ההתחלה",
+        "failed": "נכשל בהתחלת הייצוא: {{error}}",
+        "noVaildTimeSelected": "לא נבחר טווח זמן תקף"
+      },
+      "success": "הייצוא הוחל בהצלחה. הצג את הקובץ בתיקייה /ייצוא."
+    },
+    "time": {
+      "end": {
+        "label": "בחירת זמן סיום",
+        "title": "זמן סיום"
+      },
+      "fromTimeline": "בחירה מציר זמן",
+      "lastHour_one": "שעה אחרונה",
+      "lastHour_two": "שעות אחרונות {{count}}",
+      "lastHour_other": "שעות אחרונות {{count}}",
+      "custom": "מותאם אישית",
+      "start": {
+        "title": "זמן התחלה",
+        "label": "בחירת זמן התחלה"
+      }
+    },
+    "selectOrExport": "בחירה או ייצוא",
+    "name": {
+      "placeholder": "תן שם לייצוא"
+    },
+    "select": "בחירה",
+    "export": "ייצוא",
+    "fromTimeline": {
+      "saveExport": "שמירת ייצוא",
+      "previewExport": "תצוגה מקדימה של ייצוא"
+    }
+  },
+  "streaming": {
+    "restreaming": {
+      "desc": {
+        "title": "הגדר את go2rtc לקבלת אפשרויות נוספות של תצוגה חיה ושמע עבור מצלמה זו.",
+        "readTheDocumentation": "קרא את התיעוד"
+      },
+      "disabled": "הזרמה מחדש אינה פעילה עבור מצלמה זו."
+    },
+    "label": "זרם",
+    "showStats": {
+      "label": "הצג סטטיסטיקות שידור",
+      "desc": "הפעל אפשרות זו כדי להציג סטטיסטיקות שידור כשכבת-על על פיד המצלמה."
+    },
+    "debugView": "תצוגת ניפוי שגיאות"
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "העלה ל- +Frigate",
+        "desc": "אובייקטים במיקומים שברצונך להימנע מהם אינם תוצאות חיוביות שגויות. הגשתם כתוצאות חיוביות שגויות תבלבל את המודל."
+      },
+      "review": {
+        "question": {
+          "label": "אשר תווית זו עבור +Frigate",
+          "ask_a": "האם אובייקט זה הוא <code>{{label}}</code>?",
+          "ask_an": "האם אובייקט זה הוא - <code>{{label}}</code>?",
+          "ask_full": "האם אובייקט זה הוא <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "נשלח"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "צפה בהיסטוריה"
+    }
+  },
+  "search": {
+    "saveSearch": {
+      "label": "שמירת חיפוש",
+      "desc": "ספק שם לחיפוש שמור זה.",
+      "placeholder": "הזן שם לחיפוש שלך",
+      "success": "החיפוש ({{searchName}}) נשמר.",
+      "button": {
+        "save": {
+          "label": "שמירת החיפוש הזה"
+        }
+      },
+      "overwrite": "{{searchName}} כבר קיים. שמירה תדרוס את הערך הקיים."
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "אישור מחיקה",
+      "desc": {
+        "selected": "האם אתה בטוח שברצונך למחוק את כל הסרטונים המוקלטים המשויכים לפריט סקירה זה?<br /><br />החזק את מקש <em>Shift</em> לחוץ כדי לעקוף תיבת דו-שיח זו בעתיד."
+      },
+      "toast": {
+        "success": "קטעי וידאו המשויכים לפריטי הסקירה שנבחרו נמחקו בהצלחה.",
+        "error": "המחיקה נכשלה: {{error}}"
+      }
+    },
+    "button": {
+      "export": "ייצוא",
+      "markAsReviewed": "סמן כסוקר",
+      "deleteNow": "מחיקה כעת"
+    }
+  }
+}

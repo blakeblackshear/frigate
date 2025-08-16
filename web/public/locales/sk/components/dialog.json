@@ -1,0 +1,74 @@
+{
+  "restart": {
+    "title": "Ste si istý, že chcete reštartovať Frigate ?",
+    "button": "Reštart",
+    "restarting": {
+      "title": "Frigate sa reštartuje",
+      "content": "Táto stránka bude obnovená o {{countdown}} sekúnd.",
+      "button": "Vynútiť opätovné načítanie teraz"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Odoslať do Frigate+",
+        "desc": "Objekty na miestach, ktorým sa chcete vyhnúť, nie sú falošne pozitívne. Ich odoslanie ako falošne pozitívnych výsledkov spôsobí zmätok v modeli."
+      },
+      "review": {
+        "question": {
+          "label": "Potvrďte tento štítok pre Frigate Plus",
+          "ask_a": "Je tento objekt typom <code>{{label}}</code>?",
+          "ask_an": "Tento objekt je <code>{{label}}</code>?",
+          "ask_full": "Je tento objekt typom <code>{{untranslatedLabel}}</code>{{translatedLabel}}?"
+        },
+        "state": {
+          "submitted": "Predložené"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Zobraziť v histórii"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Vyberte z časovej osi",
+      "custom": "Vlastné",
+      "start": {
+        "title": "Čas začiatku",
+        "label": "Vyberte Čas začiatku"
+      },
+      "end": {
+        "title": "Čas ukončenia",
+        "label": "Vybrat čas ukončenia"
+      }
+    },
+    "name": {
+      "placeholder": "Pomenujte Export"
+    },
+    "select": "Vybrat",
+    "export": "Exportovať",
+    "selectOrExport": "Vybrať pre Export",
+    "toast": {
+      "success": "Export úspešne spustený. Súbor nájdete v adresári /exports.",
+      "error": {
+        "failed": "Chyba spustenia exportu: {{error}}",
+        "endTimeMustAfterStartTime": "Čas konca musí byť po čase začiatku",
+        "noVaildTimeSelected": "Nie je vybrané žiadne platné časové obdobie"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Uložiť Export",
+      "previewExport": "Export ukážky"
+    }
+  },
+  "streaming": {
+    "label": "Stream",
+    "restreaming": {
+      "disabled": "Opätovné streamovanie nie je pre túto kameru povolené.",
+      "desc": {
+        "title": "Pre ďalšie možnosti živého náhľadu a zvuku pre túto kameru nastavte go2rtc."
+      }
+    }
+  }
+}

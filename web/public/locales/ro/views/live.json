@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Frigate - Live",
+  "documentTitle.withCamera": "{{camera}} - Frigate - Live",
+  "lowBandwidthMode": "Mod Latime de Banda Limitata",
+  "twoWayTalk": {
+    "enable": "Activare dialog",
+    "disable": "Dezactivează conversația bidirecțională"
+  },
+  "ptz": {
+    "zoom": {
+      "out": {
+        "label": "Îndepărtează camera PTZ"
+      },
+      "in": {
+        "label": "Apropie camera PTZ"
+      }
+    },
+    "move": {
+      "clickMove": {
+        "label": "Fă click în cadrul imaginii pentru a centra camera",
+        "enable": "Activează clic pentru a muta",
+        "disable": "Dezactivează clic pentru a muta"
+      },
+      "left": {
+        "label": "Mișcă camera PTZ spre stânga"
+      },
+      "up": {
+        "label": "Mișcă camera PTZ în sus"
+      },
+      "down": {
+        "label": "Mișcă camera PTZ în jos"
+      },
+      "right": {
+        "label": "Mișcă camera PTZ spre dreapta"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Fă clic în cadru pentru a centra camera PTZ"
+      }
+    },
+    "presets": "Presetări cameră PTZ"
+  },
+  "cameraAudio": {
+    "enable": "Activează sunetul camerei",
+    "disable": "Dezactivează sunetul camerei"
+  },
+  "camera": {
+    "enable": "Activează camera",
+    "disable": "Dezactivează camera"
+  },
+  "muteCameras": {
+    "enable": "Dezactivează sunetul pentru toate camerele",
+    "disable": "Activează sunetul pentru toate camerele"
+  },
+  "detect": {
+    "enable": "Activează detectarea",
+    "disable": "Dezactivează detectarea"
+  },
+  "recording": {
+    "enable": "Activează înregistrarea",
+    "disable": "Dezactivează înregistrarea"
+  },
+  "snapshots": {
+    "disable": "Dezactivează snapshoturile",
+    "enable": "Activează snapshoturile"
+  },
+  "audioDetect": {
+    "enable": "Activează detectarea audio",
+    "disable": "Dezactivează detectarea audio"
+  },
+  "autotracking": {
+    "enable": "Activează urmărirea automată",
+    "disable": "Dezactivează urmărirea automată"
+  },
+  "streamStats": {
+    "enable": "Afișează statistici streaming",
+    "disable": "Ascunde statisticile de streaming"
+  },
+  "manualRecording": {
+    "title": "Înregistrare la cerere",
+    "tips": "Pornește un eveniment manual bazat pe setările de păstrare a înregistrărilor pentru această cameră.",
+    "playInBackground": {
+      "label": "Redă în fundal",
+      "desc": "Activează această opțiune pentru a continua redarea streaming-ului chiar și atunci când playerul este ascuns."
+    },
+    "showStats": {
+      "label": "Afișează statistici",
+      "desc": "Activează această opțiune pentru a afișa statisticile de streaming suprapus peste imaginea camerei."
+    },
+    "debugView": "Vizualizator depanare",
+    "start": "Pornește înregistrarea la cerere",
+    "started": "Înregistrare la cerere pornită manual.",
+    "failedToStart": "Nu s-a putut porni înregistrarea manuală la cerere.",
+    "recordDisabledTips": "Deoarece înregistrarea este dezactivată sau restricționată în configurația pentru această cameră, va fi salvată doar o captură de ecran.",
+    "end": "Oprește înregistrarea la cerere",
+    "ended": "Înregistrarea manuală la cerere s-a încheiat.",
+    "failedToEnd": "Nu s-a reușit încheierea înregistrării manuale la cerere."
+  },
+  "streamingSettings": "Setări streaming",
+  "notifications": "Notificări",
+  "audio": "Audio",
+  "suspend": {
+    "forTime": "Suspendă pentru: "
+  },
+  "stream": {
+    "title": "Stream",
+    "audio": {
+      "tips": {
+        "title": "Sunetul trebuie să fie redat de camera dvs. și configurat în go2rtc pentru acest stream.",
+        "documentation": "Citește documentația "
+      },
+      "available": "Sunetul este disponibil pentru acest stream",
+      "unavailable": "Sunetul nu este disponibil pentru acest stream"
+    },
+    "twoWayTalk": {
+      "tips": "Dispozitivul dvs. trebuie să suporte această funcție, iar WebRTC trebuie configurat pentru comunicare bidirecțională.",
+      "tips.documentation": "Citește documentația ",
+      "available": "Comunicarea bidirecțională este disponibilă pentru acest stream",
+      "unavailable": "Comunicarea bidirecțională nu este disponibilă pentru acest stream"
+    },
+    "lowBandwidth": {
+      "tips": "Vizualizarea live este în modul de lățime de bandă redusă din cauza întârzierilor sau a erorilor de streaming.",
+      "resetStream": "Resetează stream-ul"
+    },
+    "playInBackground": {
+      "label": "Redare în fundal",
+      "tips": "Activează această opțiune pentru a continua streaming-ul când player-ul este ascuns."
+    }
+  },
+  "cameraSettings": {
+    "title": "Setări pentru {{camera}}",
+    "cameraEnabled": "Cameră activată",
+    "objectDetection": "Detectare obiecte",
+    "recording": "Înregistrare",
+    "snapshots": "Snapshot-uri",
+    "audioDetection": "Detectare sunet",
+    "autotracking": "Urmărire automată"
+  },
+  "history": {
+    "label": "Afișează înregistrările istorice"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Toate",
+      "motion": "Mișcare",
+      "active_objects": "Obiecte active"
+    },
+    "notAllTips": "Configurația ta de retenție pentru înregistrările {{source}} este setată la <code>mode: {{effectiveRetainMode}}</code>, astfel că această înregistrare la cerere va păstra doar segmentele cu {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Editează aspectul",
+    "group": {
+      "label": "Editează grupul de camere"
+    },
+    "exitEdit": "Ieși din modul de editare"
+  }
+}

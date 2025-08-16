@@ -1,0 +1,158 @@
+{
+  "ptz": {
+    "zoom": {
+      "in": {
+        "label": "Apropar la càmera PTZ"
+      },
+      "out": {
+        "label": "Allunyar la càmera PTZ"
+      }
+    },
+    "move": {
+      "clickMove": {
+        "label": "Fes clic a la imatge per centrar la càmera",
+        "enable": "Habilita clic per moure",
+        "disable": "Deshabilita clic per moure"
+      },
+      "left": {
+        "label": "Moure la càmera PTZ a l'esquerra"
+      },
+      "up": {
+        "label": "Moure la càmera PTZ cap amunt"
+      },
+      "down": {
+        "label": "Moure la càmera PTZ cap avall"
+      },
+      "right": {
+        "label": "Moure la càmera PTZ a la dreta"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Fer clic a la imatge per centrar la càmera PTZ"
+      }
+    },
+    "presets": "Predefinits de la càmera PTZ"
+  },
+  "documentTitle": "Directe - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Directe - Frigate",
+  "lowBandwidthMode": "Mode de baix ample de banda",
+  "twoWayTalk": {
+    "enable": "Activa la comunicació bidireccional",
+    "disable": "Desactiva la comunicació bidireccional"
+  },
+  "cameraAudio": {
+    "enable": "Habilitar l'àudio de la càmera",
+    "disable": "Deshabilita l'àudio de la càmera"
+  },
+  "camera": {
+    "enable": "Habilitar la càmera",
+    "disable": "Deshabilita la càmera"
+  },
+  "muteCameras": {
+    "enable": "Silencia totes les càmeres",
+    "disable": "Activar el so de totes les càmeres"
+  },
+  "detect": {
+    "enable": "Habilita la detecció",
+    "disable": "Deshabilitar detecció"
+  },
+  "recording": {
+    "enable": "Habilitar gravació",
+    "disable": "Deshabilita l'enregistrament"
+  },
+  "snapshots": {
+    "enable": "Habilita captura d'instantània",
+    "disable": "Deshabilitar instantànies"
+  },
+  "audioDetect": {
+    "enable": "Habilita la detecció d'àudio",
+    "disable": "Deshabilitar la detecció d'àudio"
+  },
+  "autotracking": {
+    "enable": "Habilitar seguiment automàtic",
+    "disable": "Deshabilitar seguiment automàtic"
+  },
+  "streamStats": {
+    "enable": "Mostrar les estadístiques de la transmissió",
+    "disable": "Amaga estadístiques de la transmissió"
+  },
+  "manualRecording": {
+    "title": "Gravació sota demanda",
+    "tips": "Iniciar un event manual basat en els paràmetres de retenció de gravació per aquesta càmera.",
+    "playInBackground": {
+      "label": "Reproduir en segon pla",
+      "desc": "Habilita aquesta opció per a continuar la transmissió quan el reproductor està amagat."
+    },
+    "showStats": {
+      "label": "Mostrar les estadístiques",
+      "desc": "Habilita aquesta opció per mostrar les estadístiques de transmissió com una superposició de la transmissió de la càmera."
+    },
+    "start": "Iniciar enregistrament sota demanda",
+    "started": "Gravació sota demanda manual inciada.",
+    "ended": "Gravació sota demanda manual finalitzada.",
+    "debugView": "Vista de depuració",
+    "end": "Finalitzar gravació sota demanda",
+    "failedToStart": "No s'ha pogut iniciar la gravació manual sota demanda.",
+    "recordDisabledTips": "Com que la gravació està deshabilitada o restringida a la configuració d'aquesta càmera, només es guardarà una instantània.",
+    "failedToEnd": "No s'ha pogut acabar la gravació manual sota demanda."
+  },
+  "notifications": "Notificacions",
+  "audio": "Àudio",
+  "stream": {
+    "title": "Transmissió",
+    "audio": {
+      "tips": {
+        "documentation": "Llegir la documentació ",
+        "title": "L'àudio ha de provenir de la càmera i estar configurat amb go2rtc per a aquesta transmissió."
+      },
+      "available": "L'àudio està disponible per a aquesta transmissió",
+      "unavailable": "L'audio no està disponible per a aquesta transmissió"
+    },
+    "twoWayTalk": {
+      "tips.documentation": "Llegir la documentació ",
+      "tips": "El teu dispositiu ha de suportar la funció i WebRTC ha d'estar configurat per a conversa bidireccional.",
+      "available": "La conversa bidireccional està disponible per a aquesta transmissió",
+      "unavailable": "La conversa bidireccional no està disponible per a aquesta transmissió"
+    },
+    "lowBandwidth": {
+      "resetStream": "Restablir transmissió",
+      "tips": "La vista en directe està en mode de baix ample de banda a causa d'errors de transmissió o de buffering."
+    },
+    "playInBackground": {
+      "label": "Reproduir en segon pla",
+      "tips": "Habilita aquesta opció per a contiuar la transmissió tot i que el reproductor estigui ocult."
+    }
+  },
+  "streamingSettings": "Paràmetres de transmissió",
+  "suspend": {
+    "forTime": "Suspèn per: "
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Paràmetres",
+    "cameraEnabled": "Càmera habilitada",
+    "recording": "Gravació",
+    "snapshots": "Instantànies",
+    "autotracking": "Seguiment automàtic",
+    "objectDetection": "Detecció d'objectes",
+    "audioDetection": "Detecció d'àudio"
+  },
+  "history": {
+    "label": "Mostrar gravacions històriques"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Tot",
+      "motion": "Moviment",
+      "active_objects": "Objectes actius"
+    },
+    "notAllTips": "El vostre {{source}} registre de configuració de retenció s'ha posat en el mode <code>: {{effectiveRetainMode}}</code>, així que la gravaciò a demanda només seguirà segments amb {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Editar el disseny",
+    "group": {
+      "label": "Editar grup de càmeres"
+    },
+    "exitEdit": "Sortir de l'edició"
+  }
+}

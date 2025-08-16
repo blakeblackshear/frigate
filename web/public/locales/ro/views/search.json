@@ -1,0 +1,72 @@
+{
+  "search": "Caută",
+  "savedSearches": "Căutări salvate",
+  "searchFor": "Caută {{inputValue}}",
+  "button": {
+    "clear": "Șterge căutarea",
+    "save": "Salvează căutarea",
+    "filterInformation": "Filtrează informațiile",
+    "delete": "Șterge căutarea salvată",
+    "filterActive": "Filtre active"
+  },
+  "trackedObjectId": "ID-ul obiectului urmărit",
+  "filter": {
+    "label": {
+      "cameras": "Camere",
+      "labels": "Etichete",
+      "zones": "Zone",
+      "sub_labels": "Sub-etichete",
+      "search_type": "Tip căutare",
+      "time_range": "Interval de timp",
+      "max_score": "Scor maxim",
+      "before": "Înainte",
+      "after": "După",
+      "min_score": "Scor minim",
+      "min_speed": "Viteza minimă",
+      "max_speed": "Viteza maximă",
+      "recognized_license_plate": "Număr de înmatriculare recunoscut",
+      "has_clip": "Are videoclip",
+      "has_snapshot": "Are snapshot"
+    },
+    "tips": {
+      "desc": {
+        "step1": "Tastează un nume de filtru urmat de două puncte (ex. „camere:” ).",
+        "step3": "Folosește mai multe filtre adăugându-le unul după altul, separate prin spațiu.",
+        "step4": "Filtrele de dată (înainte: și după:) folosesc formatul {{DateFormat}}.",
+        "step6": "Elimină filtrele făcând clic pe „X”-ul de lângă ele.",
+        "exampleLabel": "Exemplu:",
+        "step5": "Filtrul pentru intervalul de timp folosește formatul {{exampleTime}}.",
+        "step2": "Selectează o valoare din sugestii sau tastează propria valoare.",
+        "text": "Filtrele te ajută să restrângi rezultatele căutării. Iată cum să le folosești în câmpul de introducere:"
+      },
+      "title": "Cum să folosești filtrele de text"
+    },
+    "header": {
+      "noFilters": "Filtre",
+      "currentFilterType": "Valori filtru",
+      "activeFilters": "Filtre active"
+    },
+    "searchType": {
+      "thumbnail": "Miniatură",
+      "description": "Descriere"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Data „înainte” trebuie să fie ulterioară datei „după”.",
+        "afterDatebeEarlierBefore": "Data „după” trebuie să fie mai recentă decât data „înainte”.",
+        "minScoreMustBeLessOrEqualMaxScore": "Valoarea „min_score” trebuie să fie mai mică sau egală cu „max_score”.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Valoarea „max_score” trebuie să fie mai mare sau egală cu „min_score”.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Valoarea „min_speed” trebuie să fie mai mică sau egală cu „max_speed”.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Valoarea „max_speed” trebuie să fie mai mare sau egală cu „min_speed”."
+      }
+    }
+  },
+  "similaritySearch": {
+    "title": "Căutare după similaritate",
+    "active": "Căutarea după similaritate este activată",
+    "clear": "Șterge căutarea după similaritate"
+  },
+  "placeholder": {
+    "search": "Căutare…"
+  }
+}

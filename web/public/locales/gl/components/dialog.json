@@ -1,0 +1,21 @@
+{
+  "restart": {
+    "title": "Estás seguro/a que queres reiniciar Frigate?",
+    "button": "Reiniciar",
+    "restarting": {
+      "button": "Forzar reinicio",
+      "content": "Esta páxina recargarase en {{countdown}} segundos.",
+      "title": "Frigate está Reiniciando"
+    }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "question": {
+          "label": "Confirma esta etiqueta para Frigate Plus",
+          "ask_an": "E isto un obxecto <code>{{label}}</code>?"
+        }
+      }
+    }
+  }
+}

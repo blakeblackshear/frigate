@@ -1,5 +1,6 @@
 """Main api runner."""
 
+import asyncio
 import copy
 import json
 import logging
@@ -7,21 +8,28 @@ import os
 import traceback
 from datetime import datetime, timedelta
 from functools import reduce
+from io import StringIO
+from pathlib import Path as FilePath
 from typing import Any, Optional
 
+import aiofiles
 import requests
+import ruamel.yaml
 from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from markupsafe import escape
 from peewee import operator
+from pydantic import ValidationError
 
+from frigate.api.auth import require_role
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.models import Event, Timeline
+from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
     clean_camera_user_pass,
     get_tz_modifiers,
@@ -31,6 +39,7 @@ from frigate.util.config import find_config_file
 from frigate.util.services import (
     ffprobe_stream,
     get_nvidia_driver_info,
+    process_logs,
     restart_frigate,
     vainfo_hwaccel,
 )
@@ -65,18 +74,22 @@ def go2rtc_streams():
         )
     stream_data = r.json()
     for data in stream_data.values():
-        for producer in data.get("producers", []):
+        for producer in data.get("producers") or []:
             producer["url"] = clean_camera_user_pass(producer.get("url", ""))
     return JSONResponse(content=stream_data)
 
 
 @router.get("/go2rtc/streams/{camera_name}")
-def go2rtc_camera_stream(camera_name: str):
+def go2rtc_camera_stream(request: Request, camera_name: str):
     r = requests.get(
         f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
     )
     if not r.ok:
-        logger.error("Failed to fetch streams from go2rtc")
+        camera_config = request.app.frigate_config.cameras.get(camera_name)
+
+        if camera_config and camera_config.enabled:
+            logger.error("Failed to fetch streams from go2rtc")
+
         return JSONResponse(
             content=({"success": False, "message": "Error fetching stream data"}),
             status_code=500,
@@ -105,10 +118,20 @@ def stats_history(request: Request, keys: str = None):
     return JSONResponse(content=request.app.stats_emitter.get_stats_history(keys))
 
 
+@router.get("/metrics")
+def metrics(request: Request):
+    """Expose Prometheus metrics endpoint and update metrics with latest stats"""
+    # Retrieve the latest statistics and update the Prometheus metrics
+    stats = request.app.stats_emitter.get_latest_stats()
+    update_metrics(stats)
+    content, content_type = get_metrics()
+    return Response(content=content, media_type=content_type)
+
+
 @router.get("/config")
 def config(request: Request):
     config_obj: FrigateConfig = request.app.frigate_config
-    config: dict[str, dict[str, any]] = config_obj.model_dump(
+    config: dict[str, dict[str, Any]] = config_obj.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
 
@@ -135,7 +158,7 @@ def config(request: Request):
             camera_dict["zones"][zone_name]["color"] = zone.color
 
     # remove go2rtc stream passwords
-    go2rtc: dict[str, any] = config_obj.go2rtc.model_dump(
+    go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
     for stream_name, stream in go2rtc.get("streams", {}).items():
@@ -154,6 +177,23 @@ def config(request: Request):
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
     config["model"]["colormap"] = config_obj.model.colormap
     config["model"]["all_attributes"] = config_obj.model.all_attributes
+    config["model"]["non_logo_attributes"] = config_obj.model.non_logo_attributes
+
+    # Add model plus data if plus is enabled
+    if config["plus"]["enabled"]:
+        model_path = config.get("model", {}).get("path")
+        if model_path:
+            model_json_path = FilePath(model_path).with_suffix(".json")
+            try:
+                with open(model_json_path, "r") as f:
+                    model_plus_data = json.load(f)
+                config["model"]["plus"] = model_plus_data
+            except FileNotFoundError:
+                config["model"]["plus"] = None
+            except json.JSONDecodeError:
+                config["model"]["plus"] = None
+        else:
+            config["model"]["plus"] = None
 
     # use merged labelamp
     for detector_config in config["detectors"].values():
@@ -183,10 +223,9 @@ def config_raw():
         )
 
 
-@router.post("/config/save")
+@router.post("/config/save", dependencies=[Depends(require_role(["admin"]))])
 def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
     new_config = body.decode()
-
     if not new_config:
         return JSONResponse(
             content=(
@@ -197,13 +236,64 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
 
     # Validate the config schema
     try:
+        # Use ruamel to parse and preserve line numbers
+        yaml_config = ruamel.yaml.YAML()
+        yaml_config.preserve_quotes = True
+        full_config = yaml_config.load(StringIO(new_config))
+
         FrigateConfig.parse_yaml(new_config)
+
+    except ValidationError as e:
+        error_message = []
+
+        for error in e.errors():
+            error_path = error["loc"]
+            current = full_config
+            line_number = "Unknown"
+            last_line_number = "Unknown"
+
+            try:
+                for i, part in enumerate(error_path):
+                    key = int(part) if part.isdigit() else part
+
+                    if isinstance(current, ruamel.yaml.comments.CommentedMap):
+                        current = current[key]
+                    elif isinstance(current, list):
+                        current = current[key]
+
+                    if hasattr(current, "lc"):
+                        last_line_number = current.lc.line
+
+                    if i == len(error_path) - 1:
+                        if hasattr(current, "lc"):
+                            line_number = current.lc.line
+                        else:
+                            line_number = last_line_number
+
+            except Exception:
+                line_number = "Unable to determine"
+
+            error_message.append(
+                f"Line {line_number}: {' -> '.join(map(str, error_path))} - {error.get('msg', error.get('type', 'Unknown'))}"
+            )
+
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "Your configuration is invalid.\nSee the official documentation at docs.frigate.video.\n\n"
+                    + "\n".join(error_message),
+                }
+            ),
+            status_code=400,
+        )
+
     except Exception:
         return JSONResponse(
             content=(
                 {
                     "success": False,
-                    "message": f"\nConfig Error:\n\n{escape(str(traceback.format_exc()))}",
+                    "message": f"\nYour configuration is invalid.\nSee the official documentation at docs.frigate.video.\n\n{escape(str(traceback.format_exc()))}",
                 }
             ),
             status_code=400,
@@ -258,7 +348,7 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
-@router.put("/config/set")
+@router.put("/config/set", dependencies=[Depends(require_role(["admin"]))])
 def config_set(request: Request, body: AppConfigSetBody):
     config_file = find_config_file()
 
@@ -394,9 +484,10 @@ def nvinfo():
 
 
 @router.get("/logs/{service}", tags=[Tags.logs])
-def logs(
+async def logs(
     service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
     download: Optional[str] = None,
+    stream: Optional[bool] = False,
     start: Optional[int] = 0,
     end: Optional[int] = None,
 ):
@@ -415,6 +506,27 @@ def logs(
                 status_code=500,
             )
 
+    async def stream_logs(file_path: str):
+        """Asynchronously stream log lines."""
+        buffer = ""
+        try:
+            async with aiofiles.open(file_path, "r") as file:
+                await file.seek(0, 2)
+                while True:
+                    line = await file.readline()
+                    if line:
+                        buffer += line
+                        # Process logs only when there are enough lines in the buffer
+                        if "\n" in buffer:
+                            _, processed_lines = process_logs(buffer, service)
+                            buffer = ""
+                            for processed_line in processed_lines:
+                                yield f"{processed_line}\n"
+                    else:
+                        await asyncio.sleep(0.1)
+        except FileNotFoundError:
+            yield "Log file not found.\n"
+
     log_locations = {
         "frigate": "/dev/shm/logs/frigate/current",
         "go2rtc": "/dev/shm/logs/go2rtc/current",
@@ -431,48 +543,17 @@ def logs(
     if download:
         return download_logs(service_location)
 
+    if stream:
+        return StreamingResponse(stream_logs(service_location), media_type="text/plain")
+
+    # For full logs initially
     try:
-        file = open(service_location, "r")
-        contents = file.read()
-        file.close()
+        async with aiofiles.open(service_location, "r") as file:
+            contents = await file.read()
 
-        # use the start timestamp to group logs together``
-        logLines = []
-        keyLength = 0
-        dateEnd = 0
-        currentKey = ""
-        currentLine = ""
-
-        for rawLine in contents.splitlines():
-            cleanLine = rawLine.strip()
-
-            if len(cleanLine) < 10:
-                continue
-
-            # handle cases where S6 does not include date in log line
-            if "  " not in cleanLine:
-                cleanLine = f"{datetime.now()}  {cleanLine}"
-
-            if dateEnd == 0:
-                dateEnd = cleanLine.index("  ")
-                keyLength = dateEnd - (6 if service_location == "frigate" else 0)
-
-            newKey = cleanLine[0:keyLength]
-
-            if newKey == currentKey:
-                currentLine += f"\n{cleanLine[dateEnd:].strip()}"
-                continue
-            else:
-                if len(currentLine) > 0:
-                    logLines.append(currentLine)
-
-                currentKey = newKey
-                currentLine = cleanLine
-
-        logLines.append(currentLine)
-
+        total_lines, log_lines = process_logs(contents, service, start, end)
         return JSONResponse(
-            content={"totalLines": len(logLines), "lines": logLines[start:end]},
+            content={"totalLines": total_lines, "lines": log_lines},
             status_code=200,
         )
     except FileNotFoundError as e:
@@ -483,7 +564,7 @@ def logs(
         )
 
 
-@router.post("/restart")
+@router.post("/restart", dependencies=[Depends(require_role(["admin"]))])
 def restart():
     try:
         restart_frigate()
@@ -557,6 +638,83 @@ def get_sub_labels(split_joined: Optional[int] = None):
 
     sub_labels.sort()
     return JSONResponse(content=sub_labels)
+
+
+@router.get("/plus/models")
+def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
+    if not request.app.frigate_config.plus_api.is_active():
+        return JSONResponse(
+            content=({"success": False, "message": "Frigate+ is not enabled"}),
+            status_code=400,
+        )
+
+    models: dict[Any, Any] = request.app.frigate_config.plus_api.get_models()
+
+    if not models["list"]:
+        return JSONResponse(
+            content=({"success": False, "message": "No models found"}),
+            status_code=400,
+        )
+
+    modelList = models["list"]
+
+    # current model type
+    modelType = request.app.frigate_config.model.model_type
+
+    # current detectorType for comparing to supportedDetectors
+    detectorType = list(request.app.frigate_config.detectors.values())[0].type
+
+    validModels = []
+
+    for model in sorted(
+        filter(
+            lambda m: (
+                not filterByCurrentModelDetector
+                or (detectorType in m["supportedDetectors"] and modelType in m["type"])
+            ),
+            modelList,
+        ),
+        key=(lambda m: m["trainDate"]),
+        reverse=True,
+    ):
+        validModels.append(model)
+
+    return JSONResponse(content=validModels)
+
+
+@router.get("/recognized_license_plates")
+def get_recognized_license_plates(split_joined: Optional[int] = None):
+    try:
+        events = Event.select(Event.data).distinct()
+    except Exception:
+        return JSONResponse(
+            content=(
+                {"success": False, "message": "Failed to get recognized license plates"}
+            ),
+            status_code=404,
+        )
+
+    recognized_license_plates = []
+    for e in events:
+        if e.data is not None and "recognized_license_plate" in e.data:
+            recognized_license_plates.append(e.data["recognized_license_plate"])
+
+    while None in recognized_license_plates:
+        recognized_license_plates.remove(None)
+
+    if split_joined:
+        original_recognized_license_plates = recognized_license_plates.copy()
+        for recognized_license_plate in original_recognized_license_plates:
+            if recognized_license_plate and "," in recognized_license_plate:
+                recognized_license_plates.remove(recognized_license_plate)
+                parts = recognized_license_plate.split(",")
+                for part in parts:
+                    if part.strip() not in recognized_license_plates:
+                        recognized_license_plates.append(part.strip())
+
+    recognized_license_plates = list(set(recognized_license_plates))
+    recognized_license_plates.sort()
+    return JSONResponse(content=recognized_license_plates)
 
 
 @router.get("/timeline")
@@ -643,7 +801,7 @@ def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
     count = 0
     start = 0
     end = 0
-    hours: dict[str, list[dict[str, any]]] = {}
+    hours: dict[str, list[dict[str, Any]]] = {}
 
     for t in timeline:
         if count == 0:

@@ -17,7 +17,15 @@ export function useResizeObserver(...refs: RefType[]) {
     () =>
       new ResizeObserver((entries) => {
         window.requestAnimationFrame(() => {
-          setDimensions(entries.map((entry) => entry.contentRect));
+          setDimensions((prevDimensions) => {
+            const newDimensions = entries.map((entry) => entry.contentRect);
+            if (
+              JSON.stringify(prevDimensions) !== JSON.stringify(newDimensions)
+            ) {
+              return newDimensions;
+            }
+            return prevDimensions;
+          });
         });
       }),
     [],

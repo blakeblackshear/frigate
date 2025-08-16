@@ -1,0 +1,100 @@
+{
+  "description": {
+    "addFace": "Walk through adding a new collection to the Face Library.",
+    "placeholder": "Enter a name for this collection",
+    "invalidName": "Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens."
+  },
+  "details": {
+    "person": "Person",
+    "subLabelScore": "Sub Label Score",
+    "scoreInfo": "The sub label score is the weighted score for all of the recognized face confidences, so this may differ from the score shown on the snapshot.",
+    "face": "Face Details",
+    "faceDesc": "Details of the tracked object that generated this face",
+    "timestamp": "Timestamp",
+    "unknown": "Unknown"
+  },
+  "documentTitle": "Face Library - Frigate",
+  "uploadFaceImage": {
+    "title": "Upload Face Image",
+    "desc": "Upload an image to scan for faces and include for {{pageToggle}}"
+  },
+  "collections": "Collections",
+  "createFaceLibrary": {
+    "title": "Create Collection",
+    "desc": "Create a new collection",
+    "new": "Create New Face",
+    "nextSteps": "To build a strong foundation:<li>Use the Train tab to select and train on images for each detected person.</li><li>Focus on straight-on images for best results; avoid training images that capture faces at an angle.</li></ul>"
+  },
+  "steps": {
+    "faceName": "Enter Face Name",
+    "uploadFace": "Upload Face Image",
+    "nextSteps": "Next Steps",
+    "description": {
+      "uploadFace": "Upload an image of {{name}} that shows their face from a front-facing angle. The image does not need to be cropped to just their face."
+    }
+  },
+  "train": {
+    "title": "Train",
+    "aria": "Select train",
+    "empty": "There are no recent face recognition attempts"
+  },
+  "selectItem": "Select {{item}}",
+  "selectFace": "Select Face",
+  "deleteFaceLibrary": {
+    "title": "Delete Name",
+    "desc": "Are you sure you want to delete the collection {{name}}? This will permanently delete all associated faces."
+  },
+  "deleteFaceAttempts": {
+    "title": "Delete Faces",
+    "desc_one": "Are you sure you want to delete {{count}} face? This action cannot be undone.",
+    "desc_other": "Are you sure you want to delete {{count}} faces? This action cannot be undone."
+  },
+  "renameFace": {
+    "title": "Rename Face",
+    "desc": "Enter a new name for {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Delete Faces",
+    "addFace": "Add Face",
+    "renameFace": "Rename Face",
+    "deleteFace": "Delete Face",
+    "uploadImage": "Upload Image",
+    "reprocessFace": "Reprocess Face"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Please select an image file."
+    },
+    "dropActive": "Drop the image here…",
+    "dropInstructions": "Drag and drop an image here, or click to select",
+    "maxSize": "Max size: {{size}}MB"
+  },
+  "nofaces": "No faces available",
+  "pixels": "{{area}}px",
+  "readTheDocs": "Read the documentation",
+  "trainFaceAs": "Train Face as:",
+  "trainFace": "Train Face",
+  "toast": {
+    "success": {
+      "uploadedImage": "Successfully uploaded image.",
+      "addFaceLibrary": "{{name}} has successfully been added to the Face Library!",
+      "deletedFace_one": "Successfully deleted {{count}} face.",
+      "deletedFace_other": "Successfully deleted {{count}} faces.",
+      "deletedName_zero": "Empty collection deleted successfully.",
+      "deletedName_one": "{{count}} face has been successfully deleted.",
+      "deletedName_other": "{{count}} faces have been successfully deleted.",
+      "renamedFace": "Successfully renamed face to {{name}}",
+      "trainedFace": "Successfully trained face.",
+      "updatedFaceScore": "Successfully updated face score."
+    },
+    "error": {
+      "uploadingImageFailed": "Failed to upload image: {{errorMessage}}",
+      "addFaceLibraryFailed": "Failed to set face name: {{errorMessage}}",
+      "deleteFaceFailed": "Failed to delete: {{errorMessage}}",
+      "deleteNameFailed": "Failed to delete name: {{errorMessage}}",
+      "renameFaceFailed": "Failed to rename face: {{errorMessage}}",
+      "trainFailed": "Failed to train: {{errorMessage}}",
+      "updateFaceScoreFailed": "Failed to update face score: {{errorMessage}}"
+    }
+  }
+}

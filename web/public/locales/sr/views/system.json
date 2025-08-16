@@ -1,0 +1,12 @@
+{
+  "documentTitle": {
+    "cameras": "Statusi kamera - Frigate",
+    "storage": "Statistika skladištenja - Frigate",
+    "general": "Opšta statistika - Frigate",
+    "enrichments": "Statistika obogaćivanja - Frigate",
+    "logs": {
+      "frigate": "Frigate logovi - Frigate",
+      "go2rtc": "Go2RTC dnevnici - Frigate"
+    }
+  }
+}

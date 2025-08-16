@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from typing import Optional
 
 from pydantic import Field, PrivateAttr
@@ -17,6 +18,10 @@ from frigate.util.builtin import (
 )
 
 from ..base import FrigateBaseModel
+from ..classification import (
+    CameraFaceRecognitionConfig,
+    CameraLicensePlateRecognitionConfig,
+)
 from .audio import AudioConfig
 from .birdseye import BirdseyeCameraConfig
 from .detect import DetectConfig
@@ -25,6 +30,7 @@ from .genai import GenAICameraConfig
 from .live import CameraLiveConfig
 from .motion import MotionConfig
 from .mqtt import CameraMqttConfig
+from .notification import NotificationConfig
 from .objects import ObjectConfig
 from .onvif import OnvifConfig
 from .record import RecordConfig
@@ -35,6 +41,11 @@ from .ui import CameraUiConfig
 from .zone import ZoneConfig
 
 __all__ = ["CameraConfig"]
+
+
+class CameraTypeEnum(str, Enum):
+    generic = "generic"
+    lpr = "lpr"
 
 
 class CameraConfig(FrigateBaseModel):
@@ -51,12 +62,18 @@ class CameraConfig(FrigateBaseModel):
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
     )
+    face_recognition: CameraFaceRecognitionConfig = Field(
+        default_factory=CameraFaceRecognitionConfig, title="Face recognition config."
+    )
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
     genai: GenAICameraConfig = Field(
         default_factory=GenAICameraConfig, title="Generative AI configuration."
     )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
+    )
+    lpr: CameraLicensePlateRecognitionConfig = Field(
+        default_factory=CameraLicensePlateRecognitionConfig, title="LPR config."
     )
     motion: Optional[MotionConfig] = Field(
         None, title="Motion detection configuration."
@@ -85,9 +102,13 @@ class CameraConfig(FrigateBaseModel):
     mqtt: CameraMqttConfig = Field(
         default_factory=CameraMqttConfig, title="MQTT configuration."
     )
+    notifications: NotificationConfig = Field(
+        default_factory=NotificationConfig, title="Notifications configuration."
+    )
     onvif: OnvifConfig = Field(
         default_factory=OnvifConfig, title="Camera Onvif Configuration."
     )
+    type: CameraTypeEnum = Field(default=CameraTypeEnum.generic, title="Camera Type")
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig, title="Camera UI Modifications."
     )
@@ -97,6 +118,9 @@ class CameraConfig(FrigateBaseModel):
     )
     zones: dict[str, ZoneConfig] = Field(
         default_factory=dict, title="Zone configuration."
+    )
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of camera."
     )
 
     _ffmpeg_cmds: list[dict[str, list[str]]] = PrivateAttr()
@@ -167,7 +191,7 @@ class CameraConfig(FrigateBaseModel):
             record_args = get_ffmpeg_arg_list(
                 parse_preset_output_record(
                     self.ffmpeg.output_args.record,
-                    self.ffmpeg.output_args._force_record_hvc1,
+                    self.ffmpeg.apple_compatibility,
                 )
                 or self.ffmpeg.output_args.record
             )

@@ -1,0 +1,209 @@
+{
+  "generativeAI": "Generativní AI",
+  "documentTitle": "Prozkoumat – Frigate",
+  "details": {
+    "timestamp": "Časové razítko",
+    "snapshotScore": {
+      "label": "Skóre snímku"
+    },
+    "item": {
+      "title": "Zkontrolovat detaily položky",
+      "desc": "Zkontrolovat detaily položky",
+      "button": {
+        "share": "Sdílet tuto položku kontroly",
+        "viewInExplore": "Zobrazit v Průzkumu"
+      },
+      "tips": {
+        "hasMissingObjects": "Upravte svou konfiguraci, pokud chcete, aby Frigate ukládal sledované objekty pro následující štítky: <em>{{objects}}</em>",
+        "mismatch_one": "{{count}} nedostupný objekt byl detekován a vložen do této položky kontroly. Tento objekt se buď nekvalifikoval jako výstraha nebo detekce, nebo již byl vyčištěn/smazán.",
+        "mismatch_few": "{{count}} nedostupné objekty byly detekovány a vloženy do této položky kontroly. Tyto objekty se buď nekvalifikovaly jako výstraha nebo detekce, nebo již byly vyčištěny/smazány.",
+        "mismatch_other": "{{count}} nedostupných objektů bylo detekováno a vloženo do této položky kontroly. Tyto objekty se buď nekvalifikovaly jako výstraha nebo detekce, nebo již byly vyčištěny/smazány."
+      },
+      "toast": {
+        "success": {
+          "regenerate": "Od {{provider}} byl vyžádán nový popis. V závislosti na rychlosti vašeho poskytovatele může obnovení nového popisu nějakou dobu trvat.",
+          "updatedSublabel": "Úspěšně aktualizovaný podružný štítek.",
+          "updatedLPR": "Úspěšně aktualizovaná SPZ."
+        },
+        "error": {
+          "regenerate": "Chyba volání {{provider}} pro nový popis: {{errorMessage}}",
+          "updatedSublabelFailed": "Chyba obnovení podružného štítku: {{errorMessage}}",
+          "updatedLPRFailed": "Chyba obnovení SPZ: {{errorMessage}}"
+        }
+      }
+    },
+    "editSubLabel": {
+      "descNoLabel": "Vložit nový podružný štítek pro tento sledovaný objekt",
+      "desc": "Vložit nový podružný štítek pro tento {{label}}",
+      "title": "Upravit podružný štítek"
+    },
+    "editLPR": {
+      "title": "Upravit SPZ",
+      "descNoLabel": "Vložit novou SPZ pro tento sledovaný objekt",
+      "desc": "Vložit novou SPZ pro tento {{label}}"
+    },
+    "estimatedSpeed": "Odhadovaná rychlost",
+    "objects": "Objekty",
+    "camera": "Kamera",
+    "zones": "Zóny",
+    "button": {
+      "regenerate": {
+        "label": "Regenerovat popis sledovaného objektu",
+        "title": "Regenerovat"
+      },
+      "findSimilar": "Najít podobné"
+    },
+    "description": {
+      "label": "Popis",
+      "placeholder": "Popis sledovaného objektu",
+      "aiTips": "Frigate nebude vyžadovat popis od vašeho poskytovatele generativní AI, dokud neskončí životní cyklus sledovaného objektu."
+    },
+    "expandRegenerationMenu": "Rozbalte nabídku regenerace",
+    "regenerateFromSnapshot": "Regenerovat ze snímku",
+    "regenerateFromThumbnails": "Regenerovat z náhledu",
+    "tips": {
+      "descriptionSaved": "Popis úspěšně uložen",
+      "saveDescriptionFailed": "Aktualizace popisu se nezdařila: {{errorMessage}}"
+    },
+    "topScore": {
+      "info": "Nejvyšší skóre je nejvyšší střední skóre pro sledovaný objekt, takže se může lišit od skóre zobrazeného na miniatuře výsledku vyhledávání.",
+      "label": "Nejvyšší skóre"
+    },
+    "label": "Štítek",
+    "recognizedLicensePlate": "Rozpoznaná SPZ"
+  },
+  "exploreIsUnavailable": {
+    "title": "Prozkoumat je nedostupné",
+    "embeddingsReindexing": {
+      "context": "Prozkoumat může být použito až vložené sledované objekty dokončí přeindexování.",
+      "startingUp": "Spouštění…",
+      "estimatedTime": "Odhadovaný zbývající čas:",
+      "finishingShortly": "Brzy bude dokončeno",
+      "step": {
+        "thumbnailsEmbedded": "Vložené náhledy: ",
+        "descriptionsEmbedded": "Vložené popisy: ",
+        "trackedObjectsProcessed": "Zpracované sledované objekty: "
+      }
+    },
+    "downloadingModels": {
+      "context": "Frigate stahuje potřebné modely vložení pro podporu funkce sémantického vyhledávání. To může trvat několik minut v závislosti na rychlosti vašeho síťového připojení.",
+      "setup": {
+        "visionModelFeatureExtractor": "Extraktor funkcí Vision modelu",
+        "visionModel": "Vision model",
+        "textModel": "Textový model",
+        "textTokenizer": "Textový tokenizér"
+      },
+      "tips": {
+        "documentation": "Přečtěte si dokumentaci",
+        "context": "Můžete reindexovat vložení vašich sledovaných oběktů hned jak budou modely staženy."
+      },
+      "error": "Nastala chyba. Zkontrolujte protokoly Frigate."
+    }
+  },
+  "trackedObjectsCount_one": "{{count}} sledovaný objekt ",
+  "trackedObjectsCount_few": "{{count}} sledované objekty ",
+  "trackedObjectsCount_other": "{{count}} sledovaných objektů ",
+  "searchResult": {
+    "tooltip": "Shoda s {{type}} na {{confidence}} %",
+    "deleteTrackedObject": {
+      "toast": {
+        "error": "Sledovaný objekt se nepodařilo smazat: {{errorMessage}}",
+        "success": "Sledovaný objekt úspěšně smazán."
+      }
+    }
+  },
+  "objectLifecycle": {
+    "count": "{{first}} z {{second}}",
+    "trackedPoint": "Sledovaný bod",
+    "lifecycleItemDesc": {
+      "external": "{{label}} detekován",
+      "header": {
+        "zones": "Zóny",
+        "ratio": "Poměr",
+        "area": "Oblast"
+      },
+      "entered_zone": "{{label}} vstoupil do {{zones}}",
+      "active": "{{label}} začal být aktivní",
+      "stationary": "{{label}} se stal statickým",
+      "visible": "{{label}} detekován",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detekován pro {{label}}",
+        "other": "{{label}} rozpoznán jako {{attribute}}"
+      },
+      "heard": "{{label}} slyšen",
+      "gone": "{{label}} opuštěn"
+    },
+    "annotationSettings": {
+      "showAllZones": {
+        "title": "Zobrazit všechny zóny",
+        "desc": "Vždy zobrazit zóny na snímcích, kde objekty vstoupily do zóny."
+      },
+      "offset": {
+        "label": "Odsazení popisku",
+        "documentation": "Přečtěte si dokumentaci ",
+        "millisecondsToOffset": "Milisekundy pro posun zobrazení popisku detekce. <em>Výchozí: 0</em>",
+        "desc": "Tato data pocházejí z detekčního zdroje vaší kamery, ale jsou překryta na snímcích ze záznamu. Je nepravděpodobné, že by tyto dva proudy byly dokonale synchronizované. Výsledkem je, že ohraničující rámeček a stopáž nebudou dokonale zarovnány. K nastavení však lze použít pole <code>annotation_offset</code>.",
+        "tips": "TIP: Představte si, že existuje klip události s osobou, která jde zleva doprava. Pokud je ohraničovací rámeček na časové ose události konzistentně vlevo od osoby, měla by být hodnota snížena. Podobně, pokud osoba chodí zleva doprava a ohraničující rámeček je trvale před osobou, měla by být hodnota zvýšena.",
+        "toast": {
+          "success": "Posun anotace pro {{camera}} byl uložen do konfiguračního souboru. Restartujte Frigate, aby se změny projevily."
+        }
+      },
+      "title": "Nastavení popisků"
+    },
+    "carousel": {
+      "previous": "Předchozí snímek",
+      "next": "Následující snímek"
+    },
+    "title": "Životní cyklus Objektu",
+    "noImageFound": "Žádný obrázek pro toto časové razítko.",
+    "createObjectMask": "Vytvořit masku objektu",
+    "adjustAnnotationSettings": "Upravit nastavení poznámek",
+    "scrollViewTips": "Posouváním zobrazíte významné okamžiky životního cyklu tohoto objektu.",
+    "autoTrackingTips": "Pozice ohraničení bude nepřesná pro kamery s automatickým sledováním."
+  },
+  "itemMenu": {
+    "downloadSnapshot": {
+      "label": "Stáhnout snímek",
+      "aria": "Stáhnout snímek"
+    },
+    "viewInHistory": {
+      "aria": "Zobrazit v historii",
+      "label": "Zobrazit historii"
+    },
+    "deleteTrackedObject": {
+      "label": "Smazat tento sledovaný objekt"
+    },
+    "downloadVideo": {
+      "label": "Stáhnout video",
+      "aria": "Stáhnout video"
+    },
+    "findSimilar": {
+      "aria": "Najít podobný sledovaný objekt",
+      "label": "Najít podobné"
+    },
+    "submitToPlus": {
+      "aria": "Odeslat do Frigate Plus",
+      "label": "Odeslat do Frigate+"
+    },
+    "viewObjectLifecycle": {
+      "label": "Zobrazit životní cyklus objektu",
+      "aria": "Ukázat životní cyklus objektu"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Potvrdit smazání",
+      "desc": "Odstraněním tohoto sledovaného objektu se odstraní snímek, všechna uložená vložení a všechny související položky životního cyklu objektu. Zaznamenaný záznam tohoto sledovaného objektu v zobrazení Historie <em>NEBUDE</em> smazán.<br /><br />Opravdu chcete pokračovat?"
+    }
+  },
+  "trackedObjectDetails": "Detaily sledovaných objektů",
+  "type": {
+    "details": "detaily",
+    "snapshot": "snímek",
+    "video": "video",
+    "object_lifecycle": "životní cyklus objektu"
+  },
+  "noTrackedObjects": "Žádné sledované objekty nebyly nalezeny",
+  "fetchingTrackedObjectsFailed": "Chyba při načítání sledovaných objektů: {{errorMessage}}",
+  "exploreMore": "Prozkoumat více {{label}} objektů"
+}

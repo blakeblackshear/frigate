@@ -1,0 +1,258 @@
+{
+  "time": {
+    "untilForTime": "{{time}} ideig",
+    "s": "{{time}} másodperc",
+    "untilForRestart": "Amíg a Frigate újraindul.",
+    "untilRestart": "Amíg újraindul",
+    "justNow": "Most",
+    "ago": "Ennyi ideje: {{timeAgo}}",
+    "today": "Ma",
+    "yesterday": "Tegnap",
+    "last7": "Elmúlt 7 nap",
+    "last14": "Elmúlt 14 nap",
+    "last30": "Elmúlt 30 nap",
+    "thisWeek": "Ezen a héten",
+    "lastWeek": "Előző héten",
+    "thisMonth": "Ebben a hónapban",
+    "lastMonth": "Előző hónapban",
+    "5minutes": "5 perc",
+    "10minutes": "10 perc",
+    "30minutes": "30 perc",
+    "1hour": "1 óra",
+    "12hours": "12 óra",
+    "24hours": "24 óra",
+    "pm": "du",
+    "am": "de",
+    "yr": "{{time}} év",
+    "mo": "{{time}} hónap",
+    "d": "{{time}} nap",
+    "m": "{{time}} perc",
+    "hour_one": "{{time}} óra",
+    "hour_other": "{{time}} órák",
+    "h": "{{time}} óra",
+    "minute_one": "{{time}} perc",
+    "minute_other": "{{time}} percek",
+    "second_one": "{{time}} másodperc",
+    "second_other": "{{time}} másodpercek",
+    "year_one": "{{time}} év",
+    "year_other": "{{time}} évek",
+    "month_one": "{{time}} hónap",
+    "month_other": "{{time}} hónapok",
+    "day_one": "{{time}} nap",
+    "day_other": "{{time}} napok",
+    "formattedTimestamp": {
+      "24hour": "MMM d, HH:mm:ss",
+      "12hour": "MMM d, h:mm:ss aaa"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampHourMinute": {
+      "24hour": "HH:mm",
+      "12hour": "h:mm aaa"
+    },
+    "formattedTimestamp2": {
+      "24hour": "d MMM HH:mm:ss",
+      "12hour": "MM/dd h:mm:ssa"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "24hour": "HH:mm:ss",
+      "12hour": "h:mm:ss aaa"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "24hour": "MMM d yyyy, HH:mm",
+      "12hour": "MMM d yyyy, h:mm aaa"
+    },
+    "formattedTimestampFilename": {
+      "24hour": "yy-MM-dd-HH-mm-ss",
+      "12hour": "yy-MM-dd-h-mm-ss-a"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "24hour": "MMM d, HH:mm",
+      "12hour": "MMM d, h:mm aaa"
+    },
+    "formattedTimestampMonthDay": "MMM d"
+  },
+  "menu": {
+    "darkMode": {
+      "label": "Sötét Mód",
+      "withSystem": {
+        "label": "Használd a rendszerbeállításokat a világos vagy sötét mód megheghatározásához"
+      },
+      "dark": "Sötét",
+      "light": "Világos"
+    },
+    "withSystem": "Rendszer",
+    "theme": {
+      "default": "Alap",
+      "nord": "Nord",
+      "red": "Piros",
+      "highcontrast": "Nagy Kontrasztarány",
+      "label": "Téma",
+      "blue": "Kék",
+      "green": "Zöld"
+    },
+    "documentation": {
+      "title": "Dokumentáció",
+      "label": "Frigate dokumentáció"
+    },
+    "help": "Segítség",
+    "explore": "Felfedezés",
+    "user": {
+      "logout": "Kijelentkezés",
+      "title": "Felhasználó",
+      "account": "Fiók",
+      "current": "Jelenlegi Felhazsnáló: {{user}}",
+      "anonymous": "anoním",
+      "setPassword": "Jelszó Beállítása"
+    },
+    "export": "Exportálás",
+    "language": {
+      "ca": "Katalán",
+      "withSystem": {
+        "label": "Használd a rendszerbeállításoknál megadott nyelvet"
+      },
+      "sk": "Szlovák",
+      "da": "Dán",
+      "yue": "Kantoni",
+      "hi": "Hindi",
+      "vi": "Vietnámi",
+      "fa": "Perzsa",
+      "pl": "Lengyel",
+      "en": "Angol",
+      "es": "Spanyol",
+      "uk": "Ukrán",
+      "ja": "Japán",
+      "tr": "Török",
+      "it": "Olasz",
+      "nl": "Holland",
+      "sv": "Svéd",
+      "he": "Héber",
+      "el": "Görög",
+      "fr": "Francia",
+      "nb": "Norvég",
+      "cs": "Cseh",
+      "ko": "Koreai",
+      "zhCN": "Egyszerűsített kínai",
+      "ar": "Arab",
+      "pt": "Portugál",
+      "ru": "Orosz",
+      "de": "Német",
+      "ro": "Román",
+      "hu": "Magyar",
+      "fi": "Finn",
+      "th": "Thai"
+    },
+    "uiPlayground": "UI játszótér",
+    "faceLibrary": "Arc Könyvtár",
+    "restart": "Frigate Újraindítása",
+    "live": {
+      "title": "Élő",
+      "allCameras": "Minden Kamera",
+      "cameras": {
+        "title": "Kamerák",
+        "count_one": "{{count}} Kamera",
+        "count_other": "{{count}} Kamerák"
+      }
+    },
+    "review": "Áttekintés",
+    "appearance": "Megjelenés",
+    "languages": "Nyelvek",
+    "configurationEditor": "Konfiguráció Kezelő",
+    "systemMetrics": "Rendszer metrikák",
+    "system": "Rendszer",
+    "configuration": "Konfiguráció",
+    "systemLogs": "Rendszer naplók",
+    "settings": "Beállítások"
+  },
+  "role": {
+    "viewer": "Néző",
+    "title": "Szerep",
+    "admin": "Adminisztrátor",
+    "desc": "Az adminisztrátoroknak teljes hozzáférése van az összes feature-höz. A nézők csak a kamerákat láthatják, áttekinthetik az elemeket és az előzményeket a UI-on."
+  },
+  "pagination": {
+    "next": {
+      "label": "Következő oldal",
+      "title": "Következő"
+    },
+    "more": "Több oldal",
+    "previous": {
+      "label": "Vissza az előző oldalra",
+      "title": "Előző"
+    },
+    "label": "lapozás"
+  },
+  "accessDenied": {
+    "documentTitle": "Belépés Megtagadva - Frigate",
+    "title": "Belépés Megtagadva",
+    "desc": "Nincs jogolultsága ehhez az oldalhoz."
+  },
+  "notFound": {
+    "title": "404",
+    "desc": "Oldal nem található",
+    "documentTitle": "Nem található - Frigate"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL kimásolva a vágólapra.",
+    "save": {
+      "title": "Mentés",
+      "error": {
+        "title": "Sikertelen konfiguráció mentés: {{errorMessage}}",
+        "noMessage": "Konfigurációs változtatások mentése sikertelen"
+      }
+    }
+  },
+  "selectItem": "KIválasztani {{item}}-et",
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "láb",
+      "meters": "méter"
+    }
+  },
+  "button": {
+    "save": "Mentés",
+    "saving": "Mentés…",
+    "disable": "Kikapcsol",
+    "close": "Bezár",
+    "copy": "Másolás",
+    "back": "Vissza",
+    "apply": "Alkalmazás",
+    "done": "Kész",
+    "reset": "Visszaállítás",
+    "enabled": "Engedélyezve",
+    "enable": "Engedélyez",
+    "disabled": "Kikapcsolva",
+    "cancel": "Mégsem",
+    "fullscreen": "Teljes képernyő",
+    "history": "Előzmények",
+    "exitFullscreen": "Kilépés a Teljes Képernyőből",
+    "no": "Nem",
+    "download": "Letöltés",
+    "off": "KI",
+    "info": "Infó",
+    "twoWayTalk": "Kétirányú kommunikáció",
+    "pictureInPicture": "Kép a Képben",
+    "cameraAudio": "Kamera Hang",
+    "on": "BE",
+    "edit": "Módosít",
+    "copyCoordinates": "Koordináták másolása",
+    "delete": "Törlés",
+    "yes": "Igen",
+    "unsuspended": "Bekapcsol",
+    "suspended": "Felfüggesztve",
+    "play": "Lejátszás",
+    "unselect": "Kijelölés megszüntetése",
+    "export": "Exportálás",
+    "deleteNow": "Törlés Most",
+    "next": "Következő"
+  },
+  "label": {
+    "back": "Vissza"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "documentTitle": {
+    "default": "Nustatymai - Frigate",
+    "authentication": "Autentifikavimo Nustatymai - Frigate",
+    "camera": "Kameros Nustatymai - Frigate",
+    "object": "Derinti - Frigate",
+    "general": "Bendrieji Nustatymai - Frigate",
+    "frigatePlus": "Frigate+ Nustatymai - Frigate",
+    "notifications": "Pranešimų Nustatymai - Frigate",
+    "motionTuner": "Judesio Derinimas - Frigate"
+  }
+}

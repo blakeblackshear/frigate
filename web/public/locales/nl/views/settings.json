@@ -1,0 +1,684 @@
+{
+  "documentTitle": {
+    "default": "Instellingen - Frigate",
+    "camera": "Camera-instellingen - Frigate",
+    "authentication": "Authenticatie-instellingen - Frigate",
+    "motionTuner": "Motion Tuner - Frigate",
+    "classification": "Classificatie-instellingen - Frigate",
+    "masksAndZones": "Masker- en zone-editor - Frigate",
+    "object": "Foutopsporing Frigate",
+    "general": "Algemene instellingen - Frigate",
+    "frigatePlus": "Frigate+ Instellingen - Frigate",
+    "notifications": "Meldingsinstellingen - Frigate",
+    "enrichments": "Verrijkingsinstellingen - Frigate"
+  },
+  "menu": {
+    "ui": "Gebruikersinterface",
+    "classification": "Classificatie",
+    "masksAndZones": "Maskers / Zones",
+    "motionTuner": "Bewegingsdetectie-afstellen",
+    "debug": "foutopsporing",
+    "users": "Gebruikers",
+    "notifications": "Meldingen",
+    "cameras": "Camera-instellingen",
+    "frigateplus": "Frigate+",
+    "enrichments": "Verrijkingen"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Je hebt niet-opgeslagen wijzigingen.",
+      "desc": "Wilt je jouw wijzigingen opslaan voordat u verdergaat?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Camera",
+    "noCamera": "Geen camera"
+  },
+  "general": {
+    "liveDashboard": {
+      "title": "Live-dashboard",
+      "automaticLiveView": {
+        "label": "Automatische liveweergave",
+        "desc": "Schakel automatisch over naar de liveweergave van een camera wanneer er activiteit wordt gedetecteerd. Als u deze optie uitschakelt, worden de statische camerabeelden op het live dashboard slechts eenmaal per minuut bijgewerkt."
+      },
+      "playAlertVideos": {
+        "label": "Meldingen afspelen",
+        "desc": "Standaard worden recente meldingen op het Live dashboard afgespeeld als kleine lusvideo's. Schakel deze optie uit om alleen een statische afbeelding van recente meldingen weer te geven op dit apparaat/browser."
+      }
+    },
+    "title": "Algemene instellingen",
+    "storedLayouts": {
+      "title": "Opgeslagen indelingen",
+      "clearAll": "Alle indelingen wissen",
+      "desc": "De indeling van camera's in een cameragroep kan worden versleept en in formaat worden aangepast. De posities en afmetingen worden opgeslagen in de lokale opslag van je browser."
+    },
+    "cameraGroupStreaming": {
+      "title": "Streaminginstellingen voor cameragroep",
+      "desc": "De streaminginstellingen voor elke cameragroep worden opgeslagen in de lokale opslag van uw browser.",
+      "clearAll": "Alle streaminginstellingen wissen"
+    },
+    "recordingsViewer": {
+      "title": "Opnamebekijker",
+      "defaultPlaybackRate": {
+        "label": "Standaard afspeelsnelheid",
+        "desc": "Standaard afspeelsnelheid voor het afspelen van opnames."
+      }
+    },
+    "calendar": {
+      "firstWeekday": {
+        "label": "Eerste weekdag",
+        "sunday": "Zondag",
+        "monday": "Maandag",
+        "desc": "De eerste dag van de week die in de kalender in de interface wordt weergegeven."
+      },
+      "title": "Kalender"
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Verwijderde opgeslagen indeling voor {{cameraName}}",
+        "clearStreamingSettings": "Verwijderde streaming-instellingen voor alle cameragroepen."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Het wissen van de opgeslagen indelingen is mislukt: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Het wissen van de streaminginstellingen is mislukt: {{errorMessage}}"
+      }
+    }
+  },
+  "classification": {
+    "semanticSearch": {
+      "title": "Semantisch zoeken",
+      "reindexNow": {
+        "label": "Nu opnieuw indexeren",
+        "confirmTitle": "Bevestig herindexering",
+        "confirmButton": "Opnieuw indexeren",
+        "alreadyInProgress": "Het herindexeren is al bezig.",
+        "success": "Het herindexeren is succesvol gestart.",
+        "error": "Het opnieuw indexeren is mislukt: {{errorMessage}}",
+        "desc": "Opnieuw indexeren zal embeddings regenereren voor alle gevolgde objecten. Dit proces wordt op de achtergrond uitgevoerd en kan je CPU zwaar belasten en een behoorlijke hoeveelheid tijd in beslag nemen, afhankelijk van het aantal gevolgde objecten dat je hebt.",
+        "confirmDesc": "Weet u zeker dat u alle gevolgde object-embeddings opnieuw wilt indexeren? Dit proces wordt op de achtergrond uitgevoerd, maar kan uw CPU zwaar belasten en enige tijd in beslag nemen. U kunt de voortgang bekijken op de pagina Verkennen."
+      },
+      "modelSize": {
+        "label": "Modelgrootte",
+        "desc": "De grootte van het model dat wordt gebruikt voor semantische zoekopdrachten.",
+        "small": {
+          "title": "klein",
+          "desc": "Het gebruik van <em>small</em> maakt gebruik van een gequantiseerde versie van het model die minder RAM verbruikt en sneller draait op de CPU, met een verwaarloosbaar verschil in embeddingkwaliteit."
+        },
+        "large": {
+          "title": "groot",
+          "desc": "Het gebruik van <em>large</em> maakt gebruik van het volledige Jina-model en wordt automatisch op de GPU uitgevoerd als die beschikbaar is."
+        }
+      },
+      "readTheDocumentation": "Lees de documentatie",
+      "desc": "Met semantisch zoeken in Frigate kun je getraceerde objecten in je overzichtsitems vinden aan de hand van de afbeelding zelf, een door de gebruiker gedefinieerde tekstbeschrijving of een automatisch gegenereerde beschrijving."
+    },
+    "faceRecognition": {
+      "title": "Gezichtsherkenning",
+      "modelSize": {
+        "label": "Modelgrootte",
+        "desc": "De grootte van het model dat gebruikt wordt voor gezichtsherkenning.",
+        "small": {
+          "title": "klein",
+          "desc": "Met <em>small</em> wordt een FaceNet-model voor gezichtsinbedding gebruikt dat efficiënt werkt op de meeste CPU's."
+        },
+        "large": {
+          "desc": "Het gebruik van <em>groot</em> maakt gebruik van een ArcFace-gezichtsembeddingmodel en wordt automatisch op de GPU uitgevoerd als die beschikbaar is.",
+          "title": "groot"
+        }
+      },
+      "desc": "Gezichtsherkenning maakt het mogelijk om namen aan mensen toe te wijzen. Wanneer hun gezicht wordt herkend, wijst Frigate de naam van de persoon toe als sublabel. Deze informatie is opgenomen in de gebruikersinterface, filters en meldingen.",
+      "readTheDocumentation": "Lees de documentatie"
+    },
+    "title": "Classificatie-instellingen",
+    "licensePlateRecognition": {
+      "title": "Kentekenherkenning",
+      "readTheDocumentation": "Lees de documentatie",
+      "desc": "Frigate kan kentekenplaten op voertuigen herkennen en automatisch de gedetecteerde tekens toevoegen aan het veld recognized_license_plate of een bekende naam als sublabel toekennen aan objecten van het type auto. Een veelvoorkomende toepassing is het uitlezen van kentekens van auto's die een oprit oprijden of voorbijrijden op straat."
+    },
+    "toast": {
+      "success": "Classificatie-instellingen zijn opgeslagen. Start Frigate opnieuw op om de wijzigingen toe te passen.",
+      "error": "Configuratiewijzigingen konden niet worden opgeslagen: {{errorMessage}}"
+    },
+    "birdClassification": {
+      "title": "Vogelclassificatie",
+      "desc": "Vogelclassificatie herkent bekende vogels met behulp van een gequantiseerd TensorFlow-model. Wanneer een bekende vogel wordt herkend, wordt de algemene naam toegevoegd als sublabel. Deze informatie wordt weergegeven in de interface, is beschikbaar in filters en wordt ook opgenomen in meldingen."
+    },
+    "restart_required": "Opnieuw opstarten vereist (Classificatie-instellingen gewijzigd)",
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in de classificatie-instellingen"
+  },
+  "camera": {
+    "review": {
+      "title": "Beoordeel",
+      "alerts": "Meldingen ",
+      "detections": "Detecties ",
+      "desc": "Schakel waarschuwingen en detecties voor deze camera tijdelijk in of uit totdat Frigate opnieuw wordt gestart. Wanneer uitgeschakeld, worden er geen nieuwe beoordelingsitems gegenereerd. "
+    },
+    "reviewClassification": {
+      "objectAlertsTips": "Alle {{alertsLabels}}-objecten op {{cameraName}} worden weergegeven als meldingen.",
+      "zoneObjectAlertsTips": "Alle {{alertsLabels}}-objecten die zijn gedetecteerd in {{zone}} op {{cameraName}} worden weergegeven als meldingen.",
+      "zoneObjectDetectionsTips": {
+        "text": "Alle {{detectionsLabels}}-objecten die in {{zone}} op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties.",
+        "notSelectDetections": "Alle {{detectionsLabels}}-objecten die in {{zone}} op {{cameraName}} worden gedetecteerd en niet als waarschuwing zijn gecategoriseerd, worden weergegeven als detecties – ongeacht in welke zone ze zich bevinden.",
+        "regardlessOfZoneObjectDetectionsTips": "Alle {{detectionsLabels}}-objecten die op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties – ongeacht in welke zone ze zich bevinden."
+      },
+      "selectAlertsZones": "Zones selecteren voor meldingen",
+      "selectDetectionsZones": "Selecteer zones voor detecties",
+      "limitDetections": "Beperk detecties tot specifieke zones",
+      "toast": {
+        "success": "Configuratie voor beoordelingsclassificatie is opgeslagen. Herstart Frigate om de wijzigingen toe te passen."
+      },
+      "readTheDocumentation": "Lees de documentatie",
+      "noDefinedZones": "Voor deze camera zijn nog geen zones ingesteld.",
+      "desc": "Frigate categoriseert beoordelingsitems als waarschuwingen en detecties.Standaard worden alle <em>person</em>- en <em>car</em>-objecten als waarschuwingen beschouwd. Je kunt de categorisatie verfijnen door zones te configureren waarin uitsluitend deze objecten gedetecteerd moeten worden.",
+      "title": "Beoordelingsclassificatie",
+      "objectDetectionsTips": "Alle {{detectionsLabels}}-objecten die op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties, ongeacht in welke zone ze zich bevinden.",
+      "unsavedChanges": "Niet-opgeslagen classificatie-instellingen voor {{camera}}"
+    },
+    "streams": {
+      "desc": "Schakel een camera tijdelijk uit totdat Frigate opnieuw wordt gestart. Het uitschakelen van een camera stopt de verwerking van de streams van deze camera volledig door Frigate. Detectie, opname en foutopsporing zijn dan niet beschikbaar.<br /> <em>Let op: dit schakelt go2rtc-restreams niet uit.</em>",
+      "title": "Streams"
+    },
+    "title": "Camera-instellingen"
+  },
+  "masksAndZones": {
+    "filter": {
+      "all": "Alle maskers en zones"
+    },
+    "toast": {
+      "success": {
+        "copyCoordinates": "Coördinaten voor {{polyName}} gekopieerd naar klembord."
+      },
+      "error": {
+        "copyCoordinatesFailed": "De coördinaten konden niet naar het klembord worden gekopieerd."
+      }
+    },
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "De zonenaam moet minimaal 2 tekens lang zijn.",
+          "mustNotContainPeriod": "De zonenaam mag geen punten bevatten.",
+          "hasIllegalCharacter": "De zonenaam bevat ongeldige tekens.",
+          "mustNotBeSameWithCamera": "De zonenaam mag niet gelijk zijn aan de cameranaam.",
+          "alreadyExists": "Er bestaat al een zone met deze naam voor deze camera."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Afstand moet groter dan of gelijk zijn aan 0,1.",
+          "mustBeFilled": "Alle afstandsvelden moeten worden ingevuld om de snelheid te kunnen schatten."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "De minimale snelheid moet meer zijn dan 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "De verblijftijd moet groter dan of gelijk aan 0 zijn."
+        }
+      },
+      "polygonDrawing": {
+        "removeLastPoint": "Laatste punt verwijderen",
+        "snapPoints": {
+          "true": "Verbind punten",
+          "false": "Punten niet verbinden"
+        },
+        "delete": {
+          "title": "Bevestig Verwijderen",
+          "desc": "Weet je zeker dat je de {{type}} <em>{{name}}</em> wilt verwijderen?",
+          "success": "{{name}} is verwijderd."
+        },
+        "error": {
+          "mustBeFinished": "De polygoontekening moet voltooid zijn voordat u deze kunt opslaan."
+        },
+        "reset": {
+          "label": "Alle punten wissen"
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "De snelheidsdrempel moet groter dan of gelijk zijn aan 0,1."
+        }
+      }
+    },
+    "zones": {
+      "documentTitle": "Bewerkingszone - Frigate",
+      "desc": {
+        "title": "Zones stellen je in staat om een specifiek gedeelte van het beeld te definiëren, zodat je kunt bepalen of een object zich binnen dat gebied bevindt of niet.",
+        "documentation": "Documentatie"
+      },
+      "edit": "Bewerk zone",
+      "clickDrawPolygon": "Klik om een polygoon op de afbeelding te tekenen.",
+      "name": {
+        "title": "Naam",
+        "inputPlaceHolder": "Voer een naam in…",
+        "tips": "De naam moet minimaal 2 tekens lang zijn en mag niet gelijk zijn aan de naam van een camera of een andere zone."
+      },
+      "inertia": {
+        "title": "Traagheid",
+        "desc": "Geeft aan hoeveel frames een object in een zone moet zijn voordat het als 'in de zone' wordt beschouwd. <em>Standaard: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Stationaire tijd",
+        "desc": "Stelt de minimale tijd in (in seconden) die een object in de zone moet blijven voordat deze wordt geactiveerd. <em>Standaard: 0</em>"
+      },
+      "objects": {
+        "title": "Objecten",
+        "desc": "Lijst met objecten die van toepassing zijn op deze zone."
+      },
+      "speedEstimation": {
+        "desc": "Snelheidsschatting inschakelen voor objecten in deze zone. De zone moet precies 4 punten hebben.",
+        "title": "Snelheidsschatting",
+        "docs": "Lees de documentatie",
+        "lineADistance": "Afstand van lijn A ({{unit}})",
+        "lineBDistance": "Afstand van lijn B ({{unit}})",
+        "lineCDistance": "Afstand van lijn C ({{unit}})",
+        "lineDDistance": "Afstand van lijn D ({{unit}})"
+      },
+      "speedThreshold": {
+        "desc": "Geeft een minimumsnelheid op voor objecten die in deze zone moeten worden beschouwd.",
+        "toast": {
+          "error": {
+            "pointLengthError": "De snelheidsschatting is uitgeschakeld voor deze zone. Zones met snelheidsschatting moeten precies 4 punten hebben.",
+            "loiteringTimeError": "Zones met een stationaire tijd groter dan 0 mogen niet worden gebruikt in combinatie met snelheidsschatting."
+          }
+        },
+        "title": "Snelheidsdrempel ({{unit}})"
+      },
+      "point_one": "{{count}} punt",
+      "point_other": "{{count}} punten",
+      "label": "Zones",
+      "add": "Zone toevoegen",
+      "allObjects": "Alle objecten",
+      "toast": {
+        "success": "Zone ({{zoneName}}) is opgeslagen. Start Frigate opnieuw om de wijzigingen toe te passen."
+      }
+    },
+    "motionMasks": {
+      "label": "Bewegingsmasker",
+      "documentTitle": "Bewerken Bewegingsmasker - Frigate",
+      "desc": {
+        "documentation": "Documentatie",
+        "title": "Bewegingsmaskers worden gebruikt om te voorkomen dat ongewenste vormen van beweging een detectie activeren. Te veel maskeren maakt het moeilijker om objecten te volgen."
+      },
+      "edit": "Bewerk bewegingsmasker",
+      "context": {
+        "documentation": "Lees de documentatie",
+        "title": "Bewegingsmaskers worden gebruikt om te voorkomen dat ongewenste soorten beweging een detectie activeren (bijvoorbeeld: bewegende boomtakken of tijdstempels in het camerabeeld). Bewegingsmaskers moeten <em>zeer spaarzaam</em> worden gebruikt – te veel maskeren maakt het moeilijker om objecten te volgen."
+      },
+      "clickDrawPolygon": "Klik om een polygoon op de afbeelding te tekenen.",
+      "polygonAreaTooLarge": {
+        "documentation": "Lees de documentatie",
+        "title": "Het bewegingsmasker bedekt {{polygonArea}}% van het camerabeeld. Grote bewegingsmaskers worden niet aanbevolen.",
+        "tips": "Bewegingsmaskers voorkomen niet dat objecten worden gedetecteerd. Gebruik in plaats daarvan een objectmasker."
+      },
+      "point_one": "{{count}} punt",
+      "point_other": "{{count}} punten",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} is opgeslagen. Herstart Frigate om de wijzigingen toe te passen.",
+          "noName": "Bewegingsmasker is opgeslagen. Herstart Frigate om de wijzigingen toe te passen."
+        }
+      },
+      "add": "Nieuw bewegingsmasker"
+    },
+    "objectMasks": {
+      "label": "Objectmaskers",
+      "documentTitle": "Objectmasker bewerken - Frigate",
+      "desc": {
+        "title": "Objectfiltermaskers worden gebruikt om valse positieven uit te filteren voor een bepaald objecttype op basis van locatie.",
+        "documentation": "Documentatie"
+      },
+      "add": "Objectmasker toevoegen",
+      "objects": {
+        "desc": "Het objecttype dat van toepassing is op dit objectmasker.",
+        "allObjectTypes": "Alle objecttypen",
+        "title": "Objecten"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} is opgeslagen. Herstart Frigate om de wijzigingen toe te passen.",
+          "noName": "Objectmasker is opgeslagen. Herstart Frigate om de wijzigingen toe te passen."
+        }
+      },
+      "point_one": "{{count}} punt",
+      "point_other": "{{count}} punten",
+      "clickDrawPolygon": "Klik om een polygoon op de afbeelding te tekenen.",
+      "context": "Objectfiltermaskers worden gebruikt om valse positieven uit te filteren voor een bepaald objecttype op basis van locatie.",
+      "edit": "Objectmasker bewerken"
+    },
+    "restart_required": "Herstart vereist (maskers/zones gewijzigd)",
+    "motionMaskLabel": "Bewegingsmasker {{number}}",
+    "objectMaskLabel": "Objectmasker {{number}} ({{label}})"
+  },
+  "motionDetectionTuner": {
+    "title": "Bewegingsdetectie-afsteller",
+    "desc": {
+      "title": "Frigate gebruikt bewegingsdetectie als eerste controle om te zien of er iets gebeurt in het frame dat de moeite waard is om te controleren met objectdetectie.",
+      "documentation": "Lees de handleiding voor bewegingsafstelling"
+    },
+    "Threshold": {
+      "title": "Drempelwaarde",
+      "desc": "De drempelwaarde bepaalt hoeveel verandering in de luminantie van een pixel nodig is om als beweging te worden beschouwd. <em>Standaard: 30</em>"
+    },
+    "contourArea": {
+      "title": "Contourgebied",
+      "desc": "De waarde voor het contourgebied wordt gebruikt om te bepalen welke groepen gewijzigde pixels in aanmerking komen als beweging. <em>Standaard: 10</em>"
+    },
+    "improveContrast": {
+      "title": "Contrast verbeteren",
+      "desc": "Verbeter het contrast bij weinig licht. <em>Standaard: AAN</em>"
+    },
+    "toast": {
+      "success": "De bewegingsinstellingen zijn opgeslagen."
+    },
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in Bewegingsdetectie-afsteller ({{camera}})"
+  },
+  "debug": {
+    "title": "Foutopsporing",
+    "desc": "De debugweergave toont een realtime overzicht van gevolgde objecten en hun statistieken. De objectlijst toont een samenvatting van gedetecteerde objecten met een tijdsvertraging.",
+    "debugging": "Foutopsporing",
+    "objectList": "Objectenlijst",
+    "noObjects": "Geen objecten",
+    "boundingBoxes": {
+      "title": "Objectkaders",
+      "desc": "Toon objectkaders rond gevolgde objecten",
+      "colors": {
+        "label": "Kleuren van objectkaders",
+        "info": "<li>Bij het opstarten wordt er een andere kleur toegewezen aan elk objectlabel.</li> <li>Een dunne donkerblauwe lijn geeft aan dat het object op dit moment niet wordt gedetecteerd.</li> <li>Een dunne grijze lijn geeft aan dat het object als stilstaand wordt herkend.</li> <li>Een dikke lijn geeft aan dat het object het doelwit is van automatische tracking (indien ingeschakeld).</li>"
+      }
+    },
+    "timestamp": {
+      "title": "Tijdstempel",
+      "desc": "Toon een tijdstempel als overlay op het beeld"
+    },
+    "zones": {
+      "desc": "Toon een overzicht van alle gedefinieerde zones",
+      "title": "Zones"
+    },
+    "mask": {
+      "title": "Bewegingsmaskers",
+      "desc": "Toon bewegingsmasker-polygonen"
+    },
+    "motion": {
+      "title": "Bewegingskaders",
+      "desc": "Toon kaders rondom gebieden waar beweging wordt gedetecteerd",
+      "tips": "<p><strong>Bewegingskaders</strong></p><br><p>Rode kaders worden over het beeld geplaatst op de plekken waar momenteel beweging wordt gedetecteerd.</p>"
+    },
+    "regions": {
+      "title": "Regio's",
+      "desc": "Toon een kader rond het interessegebied dat naar de objectdetector wordt gestuurd",
+      "tips": "<p><strong>Interessekaders</strong></p><br><p>Heldergroene kaders worden over het beeld geplaatst op de interessegebieden die naar de objectdetector worden gestuurd.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Objectvormfilter tekenen",
+      "desc": "Teken een rechthoek op het beeld om details over oppervlakte en verhouding te bekijken",
+      "document": "Lees de documentatie ",
+      "area": "Gebied",
+      "tips": "Schakel deze optie in om een rechthoek op het camerabeeld te tekenen die de oppervlakte en verhouding weergeeft. Deze waarden kunnen vervolgens worden gebruikt om parameters voor het objectvormfilter in je configuratie in te stellen.",
+      "score": "Score",
+      "ratio": "Verhouding"
+    },
+    "detectorDesc": "Frigate gebruikt je detectoren ({{detectors}}) om objecten in de videostream van je camera te detecteren."
+  },
+  "users": {
+    "title": "Gebruikers",
+    "management": {
+      "desc": "Beheer de gebruikersaccounts van deze Frigate-installatie.",
+      "title": "Gebruikersbeheer"
+    },
+    "addUser": "Gebruiker toevoegen",
+    "updatePassword": "Wachtwoord bijwerken",
+    "toast": {
+      "success": {
+        "createUser": "Gebruiker {{user}} succesvol aangemaakt",
+        "deleteUser": "Gebruiker {{user}} succesvol verwijderd",
+        "updatePassword": "Wachtwoord succesvol bijgewerkt.",
+        "roleUpdated": "De rol bijgewerkt voor {{user}}"
+      },
+      "error": {
+        "setPasswordFailed": "Het wachtwoord kon niet worden opgeslagen: {{errorMessage}}",
+        "createUserFailed": "Gebruiker aanmaken mislukt: {{errorMessage}}",
+        "deleteUserFailed": "Gebruiker verwijderen mislukt: {{errorMessage}}",
+        "roleUpdateFailed": "Rol bijwerken mislukt: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "actions": "Acties",
+      "role": "Rol",
+      "noUsers": "Geen gebruikers gevonden.",
+      "changeRole": "Gebruikersrol wijzigen",
+      "password": "Wachtwoord",
+      "deleteUser": "Verwijder gebruiker",
+      "username": "Gebruikersnaam"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "desc": "Alleen letters, cijfers, punten en onderstrepingstekens zijn toegestaan.",
+          "title": "Gebruikersnaam",
+          "placeholder": "Gebruikersnaam invoeren"
+        },
+        "password": {
+          "title": "Wachtwoord",
+          "strength": {
+            "medium": "Matig",
+            "strong": "Sterk",
+            "veryStrong": "Zeer sterk",
+            "title": "Wachtwoordsterkte: ",
+            "weak": "Zwak"
+          },
+          "match": "Wachtwoorden komen overeen",
+          "confirm": {
+            "title": "Wachtwoord bevestigen",
+            "placeholder": "Wachtwoord bevestigen"
+          },
+          "placeholder": "Wachtwoord invoeren",
+          "notMatch": "Wachtwoorden komen niet overeen"
+        },
+        "newPassword": {
+          "title": "Nieuw wachtwoord",
+          "placeholder": "Voer een nieuw wachtwoord in",
+          "confirm": {
+            "placeholder": "Voer het nieuwe wachtwoord opnieuw in"
+          }
+        },
+        "usernameIsRequired": "Gebruikersnaam is vereist",
+        "passwordIsRequired": "Wachtwoord is vereist"
+      },
+      "createUser": {
+        "title": "Nieuwe gebruiker aanmaken",
+        "desc": "Voeg een nieuw gebruikersaccount toe en geef een rol op voor toegang tot onderdelen van de Frigate-interface.",
+        "usernameOnlyInclude": "Gebruikersnaam mag alleen letters, cijfers, . of _ bevatten",
+        "confirmPassword": "Bevestig uw wachtwoord"
+      },
+      "deleteUser": {
+        "title": "Verwijder gebruiker",
+        "warn": "Weet je zeker dat je <strong>{{username}}</strong> wilt verwijderen?",
+        "desc": "Deze actie kan niet ongedaan worden gemaakt. Het gebruikersaccount wordt permanent verwijderd, samen met alle bijbehorende gegevens."
+      },
+      "changeRole": {
+        "desc": "Machtigingen bijwerken voor <strong>{{username}}</strong>",
+        "title": "Gebruikersrol wijzigen",
+        "roleInfo": {
+          "intro": "Selecteer een gepaste rol voor deze gebruiker:",
+          "admin": "Beheerder",
+          "adminDesc": "Volledige toegang tot alle functies.",
+          "viewer": "Gebruiker",
+          "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports."
+        },
+        "select": "Selecteer een rol"
+      },
+      "passwordSetting": {
+        "setPassword": "Wachtwoord instellen",
+        "updatePassword": "Wachtwoord bijwerken voor {{username}}",
+        "desc": "Maak een sterk wachtwoord aan om dit account te beveiligen.",
+        "cannotBeEmpty": "Het wachtwoord kan niet leeg zijn",
+        "doNotMatch": "Wachtwoorden komen niet overeen"
+      }
+    }
+  },
+  "notification": {
+    "notificationSettings": {
+      "title": "Meldingen instellen",
+      "desc": "Frigate kan rechtstreeks pushmeldingen naar uw apparaat verzenden als het in de browser actief is of als een PWA geïnstalleerd is.",
+      "documentation": "Lees de documentatie"
+    },
+    "notificationUnavailable": {
+      "title": "Meldingen niet beschikbaar",
+      "documentation": "Lees de documentatie",
+      "desc": "Webpushmeldingen vereisen een veilige omgeving (<code>https://…</code>). Dit is een beperking van de browser. Open Frigate via een beveiligde verbinding om meldingen te kunnen ontvangen."
+    },
+    "globalSettings": {
+      "title": "Globale instellingen",
+      "desc": "Meldingen voor specifieke camera's op alle geregistreerde apparaten tijdelijk uitschakelen."
+    },
+    "email": {
+      "title": "E-mail",
+      "placeholder": "bijv. voorbeeld@email.com",
+      "desc": "Een geldig e-mailadres is verplicht en wordt gebruikt om je te waarschuwen als er problemen zijn met de pushmeldingsdienst."
+    },
+    "cameras": {
+      "noCameras": "Geen camera's beschikbaar",
+      "desc": "Selecteer voor welke camera's je meldingen wilt inschakelen.",
+      "title": "Camera's"
+    },
+    "deviceSpecific": "Apparaatspecifieke instellingen",
+    "active": "Meldingen actief",
+    "suspendTime": {
+      "5minutes": "Onderbreek voor 5 minuten",
+      "30minutes": "Onderbreek voor 30 minuten",
+      "1hour": "Onderbreek voor 1 uur",
+      "12hours": "Onderbreek voor 12 uur",
+      "24hours": "Onderbreek voor 24 uur",
+      "untilRestart": "Opschorten tot herstart",
+      "10minutes": "Onderbreek voor 10 minuten",
+      "suspend": "Pauzeren"
+    },
+    "cancelSuspension": "Onderbreking annuleren",
+    "toast": {
+      "success": {
+        "settingSaved": "De instellingen voor meldingen zijn opgeslagen.",
+        "registered": "Succesvol geregistreerd voor meldingen. Het opnieuw starten van Frigate is vereist voordat meldingen kunnen worden verzonden (inclusief een testmelding)."
+      },
+      "error": {
+        "registerFailed": "Het opslaan van de meldingsregistratie is mislukt."
+      }
+    },
+    "title": "Meldingen",
+    "sendTestNotification": "Stuur een testmelding",
+    "registerDevice": "Registreer dit apparaat",
+    "unregisterDevice": "Dit apparaat afmelden",
+    "suspended": "Meldingen onderbroken {{time}}",
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in meldingen",
+    "unsavedRegistrations": "Niet-opgeslagen notificatieregistraties"
+  },
+  "frigatePlus": {
+    "title": "Frigate+ Instellingen",
+    "apiKey": {
+      "title": "Frigate+ API-sleutel",
+      "plusLink": "Lees meer over Frigate+",
+      "validated": "Frigate+ API-sleutel is gedetecteerd en gevalideerd",
+      "desc": "Met de Frigate+ API-sleutel is integratie met de Frigate+ service mogelijk.",
+      "notValidated": "Frigate+ API-sleutel wordt niet gedetecteerd of niet gevalideerd"
+    },
+    "snapshotConfig": {
+      "title": "Snapshot-configuratie",
+      "desc": "Om te verzenden naar Frigate+ moeten zowel snapshots als <code>clean_copy</code>-snapshots ingeschakeld zijn in je configuratie.",
+      "documentation": "Lees de documentatie",
+      "table": {
+        "camera": "Camera",
+        "snapshots": "Snapshots",
+        "cleanCopySnapshots": "<code>clean_copy</code> Snapshots"
+      },
+      "cleanCopyWarning": "Bij sommige camera's zijn snapshots ingeschakeld, maar ontbreekt de 'clean_copy'. Om afbeeldingen van deze camera's naar Frigate+ te kunnen verzenden, moet <code>clean_copy</code> zijn ingeschakeld in de snapshotconfiguratie."
+    },
+    "modelInfo": {
+      "title": "Modelinformatie",
+      "modelType": "Type model",
+      "trainDate": "Trainingsdatum",
+      "baseModel": "Basismodel",
+      "cameras": "Camera's",
+      "error": "Het laden van modelinformatie is mislukt",
+      "loadingAvailableModels": "Beschikbare modellen laden…",
+      "modelSelect": "Je beschikbare modellen op Frigate+ kunnen hier worden geselecteerd. Houd er rekening mee dat alleen modellen die compatibel zijn met je huidige detectorconfiguratie geselecteerd kunnen worden.",
+      "dimensions": "Afmetingen",
+      "supportedDetectors": "Ondersteunde detectoren",
+      "availableModels": "Beschikbare modellen",
+      "loading": "Modelinformatie laden…",
+      "plusModelType": {
+        "baseModel": "Basismodel",
+        "userModel": "Verfijnd"
+      }
+    },
+    "toast": {
+      "success": "Frigate+ instellingen zijn opgeslagen. Herstart Frigate om de wijzigingen toe te passen.",
+      "error": "Configuratiewijzigingen konden niet worden opgeslagen: {{errorMessage}}"
+    },
+    "restart_required": "Herstart vereist (Frigate+ model gewijzigd)",
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in Frigate+ instellingen"
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "reindexNow": {
+        "confirmDesc": "Weet u zeker dat u alle gevolgde object-embeddings opnieuw wilt indexeren? Dit proces wordt op de achtergrond uitgevoerd, maar kan uw CPU zwaar belasten en enige tijd in beslag nemen. U kunt de voortgang bekijken op de pagina Verkenner.",
+        "label": "Nu opnieuw indexeren",
+        "desc": "Opnieuw indexeren zal embeddings regenereren voor alle gevolgde objecten. Dit proces wordt op de achtergrond uitgevoerd en kan je CPU zwaar belasten en een behoorlijke hoeveelheid tijd in beslag nemen, afhankelijk van het aantal gevolgde objecten dat je hebt.",
+        "confirmButton": "Opnieuw indexeren",
+        "success": "Het herindexeren is succesvol gestart.",
+        "alreadyInProgress": "Het herindexeren is al bezig.",
+        "error": "Het opnieuw indexeren is mislukt: {{errorMessage}}",
+        "confirmTitle": "Bevestig herindexering"
+      },
+      "modelSize": {
+        "large": {
+          "title": "groot",
+          "desc": "Het gebruik van <em>large</em> maakt gebruik van het volledige Jina-model en wordt automatisch op de GPU uitgevoerd als die beschikbaar is."
+        },
+        "label": "Modelgrootte",
+        "desc": "De grootte van het model dat wordt gebruikt voor semantische zoekopdrachten.",
+        "small": {
+          "title": "klein",
+          "desc": "Het gebruik van <em>small</em> maakt gebruik van een gequantiseerde versie van het model die minder RAM verbruikt en sneller draait op de CPU, met een verwaarloosbaar verschil in embeddingkwaliteit."
+        }
+      },
+      "title": "Semantisch zoeken",
+      "desc": "Semantisch zoeken in Frigate stelt je in staat om getraceerde objecten binnen je review-items te vinden, met behulp van de afbeelding zelf, een door de gebruiker gedefinieerde tekstbeschrijving of een automatisch gegenereerde beschrijving.",
+      "readTheDocumentation": "Lees de documentatie"
+    },
+    "faceRecognition": {
+      "modelSize": {
+        "small": {
+          "desc": "Met <em>small</em> wordt een FaceNet-model voor gezichtsinbedding gebruikt dat efficiënt werkt op de meeste CPU's.",
+          "title": "klein"
+        },
+        "desc": "De grootte van het model dat gebruikt wordt voor gezichtsherkenning.",
+        "label": "Modelgrootte",
+        "large": {
+          "title": "groot",
+          "desc": "Het gebruik van <em>groot</em> maakt gebruik van een ArcFace-gezichtsembeddingmodel en wordt automatisch op de GPU uitgevoerd als die beschikbaar is."
+        }
+      },
+      "desc": "Gezichtsherkenning maakt het mogelijk om namen aan mensen toe te wijzen. Wanneer hun gezicht wordt herkend, wijst Frigate de naam van de persoon toe als sublabel. Deze informatie is opgenomen in de gebruikersinterface, filters en meldingen.",
+      "title": "Gezichtsherkenning",
+      "readTheDocumentation": "Lees de documentatie"
+    },
+    "licensePlateRecognition": {
+      "desc": "Frigate kan kentekenplaten op voertuigen herkennen en automatisch de gedetecteerde tekens toevoegen aan het veld recognized_license_plate of een bekende naam als sublabel toekennen aan objecten van het type auto. Een veelvoorkomende toepassing is het uitlezen van kentekens van auto's die een oprit oprijden of voorbijrijden op straat.",
+      "title": "Kentekenherkenning",
+      "readTheDocumentation": "Lees de documentatie"
+    },
+    "birdClassification": {
+      "desc": "Vogelclassificatie herkent bekende vogels met behulp van een gequantiseerd TensorFlow-model. Wanneer een bekende vogel wordt herkend, wordt de algemene naam toegevoegd als sublabel. Deze informatie wordt weergegeven in de interface, is beschikbaar in filters en wordt ook opgenomen in meldingen.",
+      "title": "Vogelclassificatie"
+    },
+    "title": "Verrijkingsinstellingen",
+    "unsavedChanges": "Niet-opgeslagen wijzigingen in verrijkingsinstellingen",
+    "restart_required": "Opnieuw opstarten vereist (verrijkingsinstellingen gewijzigd)",
+    "toast": {
+      "success": "Verrijkingsinstellingen zijn opgeslagen. Start Frigate opnieuw op om je wijzigingen toe te passen.",
+      "error": "Configuratiewijzigingen konden niet worden opgeslagen: {{errorMessage}}"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "filter": "Filter",
+  "export": "Izvoz",
+  "calendar": "Koledar",
+  "filters": "Filtri",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Izbrano časovno obdobje ni veljavno",
+      "endTimeMustAfterStartTime": "Končen čas mora biti po začetnem času"
+    }
+  }
+}

@@ -1,0 +1,275 @@
+{
+  "time": {
+    "untilForTime": "До {{time}}",
+    "untilForRestart": "До перезапуска Frigate.",
+    "untilRestart": "До перезапуска",
+    "ago": "{{timeAgo}} назад",
+    "justNow": "Только что",
+    "today": "Сегодня",
+    "yesterday": "Вчера",
+    "thisWeek": "На этой неделе",
+    "last14": "Последние 14 дней",
+    "last30": "Последние 30 дней",
+    "last7": "Последние 7 дней",
+    "thisMonth": "В этом месяце",
+    "5minutes": "5 минут",
+    "30minutes": "30 минут",
+    "1hour": "1 час",
+    "12hours": "12 часов",
+    "24hours": "24 часа",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}} л",
+    "year_one": "{{time}} год",
+    "year_few": "{{time}} года",
+    "year_many": "{{time}} лет",
+    "mo": "{{time}} мес",
+    "month_one": "{{time}} месяц",
+    "month_few": "{{time}} месяца",
+    "month_many": "{{time}} месяцев",
+    "d": "{{time}} д",
+    "h": "{{time}} ч",
+    "hour_one": "{{time}} час",
+    "hour_few": "{{time}} часа",
+    "hour_many": "{{time}} часов",
+    "m": "{{time}} мин",
+    "minute_one": "{{time}} минута",
+    "minute_few": "{{time}} минуты",
+    "minute_many": "{{time}} минут",
+    "day_one": "{{time}} день",
+    "day_few": "{{time}} дня",
+    "day_many": "{{time}} дней",
+    "lastWeek": "На прошлой неделе",
+    "lastMonth": "В прошлом месяце",
+    "10minutes": "10 минут",
+    "s": "{{time}} с",
+    "second_one": "{{time}} секунда",
+    "second_few": "{{time}} секунды",
+    "second_many": "{{time}} секунд",
+    "formattedTimestampExcludeSeconds": {
+      "24hour": "%b %-d, %H:%M",
+      "12hour": "%b %-d, %I:%M %p"
+    },
+    "formattedTimestampWithYear": {
+      "24hour": "%b %-d %Y, %H:%M",
+      "12hour": "%b %-d %Y, %I:%M %p"
+    },
+    "formattedTimestamp2": {
+      "24hour": "d MMM HH:mm:ss",
+      "12hour": "dd/MM h:mm:ssa"
+    },
+    "formattedTimestamp": {
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestampOnlyMonthAndDay": "%b %-d",
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampFilename": {
+      "24hour": "dd-MM-yy-HH-mm-ss",
+      "12hour": "dd-MM-yy-h-mm-ss-a"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
+    }
+  },
+  "selectItem": "Выбор {{item}}",
+  "button": {
+    "apply": "Применить",
+    "done": "Готово",
+    "enabled": "Включено",
+    "enable": "Включить",
+    "save": "Сохранить",
+    "saving": "Сохранение…",
+    "fullscreen": "Полноэкранный режим",
+    "pictureInPicture": "Картинка в картинке",
+    "twoWayTalk": "Двусторонняя связь",
+    "cameraAudio": "Аудио с камеры",
+    "on": "Вкл",
+    "edit": "Редактировать",
+    "copyCoordinates": "Скопировать координаты",
+    "delete": "Удалить",
+    "yes": "Да",
+    "no": "Нет",
+    "download": "Загрузить",
+    "info": "Информация",
+    "suspended": "Приостановлено",
+    "cancel": "Отменить",
+    "disable": "Отключить",
+    "reset": "Сбросить",
+    "disabled": "Отключено",
+    "close": "Закрыть",
+    "copy": "Скопировать",
+    "back": "Назад",
+    "history": "История",
+    "off": "Выкл",
+    "exitFullscreen": "Выйти из полноэкранного режима",
+    "unsuspended": "Возобновить",
+    "play": "Воспроизвести",
+    "unselect": "Снять выбор",
+    "export": "Экспортировать",
+    "deleteNow": "Удалить сейчас",
+    "next": "Следующий"
+  },
+  "label": {
+    "back": "Вернуться"
+  },
+  "unit": {
+    "speed": {
+      "kph": "км/ч",
+      "mph": "миль/ч"
+    },
+    "length": {
+      "meters": "метры",
+      "feet": "футы"
+    }
+  },
+  "menu": {
+    "configuration": "Конфигурация",
+    "systemLogs": "Логи системы",
+    "settings": "Настройки",
+    "configurationEditor": "Редактор конфигурации",
+    "system": "Система",
+    "systemMetrics": "Метрики системы",
+    "languages": "Языки",
+    "language": {
+      "en": "English (Английский)",
+      "zhCN": "简体中文 (Упрощённый китайский)",
+      "es": "Español (Испанский)",
+      "hi": "हिन्दी (Хинди)",
+      "fr": "Français (Французский)",
+      "ar": "العربية (Арабский)",
+      "pt": "Português (Португальский)",
+      "ru": "Русский",
+      "tr": "Türkçe (Турецкий)",
+      "nl": "Nederlands (Нидерландский)",
+      "cs": "Čeština (Чешский)",
+      "nb": "Norsk Bokmål (Норвежский (букмол))",
+      "vi": "Tiếng Việt (Вьетнамский)",
+      "fa": "فارسی (Фарси)",
+      "pl": "Polski (Польский)",
+      "uk": "Українська (Украинский)",
+      "el": "Ελληνικά (Греческий)",
+      "da": "Dansk (Датский)",
+      "sk": "Slovenčina (Словацкий)",
+      "sv": "Svenska (Шведский)",
+      "hu": "Magyar (Венгерский)",
+      "fi": "Suomi (Финский)",
+      "ro": "Română (Румынский)",
+      "ja": "日本語 (Японский)",
+      "it": "Italiano (Итальянский)",
+      "de": "Deutsch (Немецкий)",
+      "ko": "한국어 (Корейский)",
+      "he": "עברית (Иврит)",
+      "withSystem": {
+        "label": "Использовать системные настройки языка"
+      },
+      "yue": "粵語 (Кантонский)",
+      "th": "ไทย (Тайский)",
+      "ca": "Català (Каталонский)"
+    },
+    "darkMode": {
+      "withSystem": {
+        "label": "Использовать системные настройки светлой/тёмной темы"
+      },
+      "label": "Тёмный режим",
+      "light": "Светлый",
+      "dark": "Тёмный"
+    },
+    "withSystem": "Системный",
+    "theme": {
+      "label": "Тема",
+      "blue": "Синяя",
+      "default": "По умолчанию",
+      "green": "Зелёная",
+      "nord": "Северная",
+      "red": "Красная",
+      "contrast": "Высокий контраст",
+      "highcontrast": "Контрастная"
+    },
+    "help": "Помощь",
+    "documentation": {
+      "title": "Документация",
+      "label": "Документация по Frigate"
+    },
+    "explore": "Поиск событий",
+    "restart": "Перезапуск Frigate",
+    "live": {
+      "title": "Прямой эфир",
+      "allCameras": "Все камеры",
+      "cameras": {
+        "count_one": "{{count}} камера",
+        "count_few": "{{count}} камеры",
+        "count_many": "{{count}} камер",
+        "title": "Камеры"
+      }
+    },
+    "review": "Обзор событий",
+    "export": "Экспортировать",
+    "uiPlayground": "Среда тестирования интерфейсов",
+    "faceLibrary": "Библиотека лиц",
+    "user": {
+      "title": "Пользователь",
+      "account": "Аккаунт",
+      "current": "Текущий пользователь: {{user}}",
+      "anonymous": "anonymous",
+      "logout": "Выход",
+      "setPassword": "Установить пароль"
+    },
+    "appearance": "Внешний вид"
+  },
+  "pagination": {
+    "label": "пагинация",
+    "previous": {
+      "title": "Предыдущая",
+      "label": "Переход на предыдущую страницу"
+    },
+    "next": {
+      "title": "Следующая",
+      "label": "Переход на следующую страницу"
+    },
+    "more": "Больше страниц"
+  },
+  "accessDenied": {
+    "desc": "У вас нет разрешения на просмотр этой страницы.",
+    "documentTitle": "Доступ запрещён - Frigate",
+    "title": "Доступ запрещён"
+  },
+  "notFound": {
+    "desc": "Страница не найдена",
+    "documentTitle": "Не найдена - Frigate",
+    "title": "404"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL скопирован в буфер обмена.",
+    "save": {
+      "error": {
+        "noMessage": "Не удалось сохранить изменения конфигурации",
+        "title": "Не удалось сохранить изменения конфигурации: {{errorMessage}}"
+      },
+      "title": "Сохранить"
+    }
+  },
+  "role": {
+    "title": "Роль",
+    "admin": "Администратор",
+    "viewer": "Наблюдатель",
+    "desc": "Администраторы имеют полный доступ ко всем функциям в интерфейсе Frigate. Наблюдатели ограничены просмотром камер, элементов просмотра и архивных записей."
+  }
+}

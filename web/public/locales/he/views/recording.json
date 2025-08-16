@@ -1,0 +1,12 @@
+{
+  "filter": "לסנן",
+  "export": "ייצוא",
+  "calendar": "לוח שנה",
+  "filters": "מסננים",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "לא נבחר טווח זמן תקף",
+      "endTimeMustAfterStartTime": "שעת הסיום חייבת להיות אחרי שעת ההתחלה"
+    }
+  }
+}

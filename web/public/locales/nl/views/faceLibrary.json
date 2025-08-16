@@ -1,0 +1,100 @@
+{
+  "selectItem": "Selecteer {{item}}",
+  "details": {
+    "timestamp": "Tijdstempel",
+    "person": "Persoon",
+    "confidence": "Vertrouwen",
+    "face": "Gezicht Details",
+    "faceDesc": "Details van het gevolgde object dat dit gezicht heeft gegenereerd",
+    "scoreInfo": "De sublabelscore is het gewogen gemiddelde van hoe zeker de gezichtsherkenningen zijn. Deze score kan anders zijn dan die op de snapshot.",
+    "subLabelScore": "Score voor sublabel",
+    "unknown": "Onbekend"
+  },
+  "documentTitle": "Gezichtsbibliotheek - Frigate",
+  "description": {
+    "placeholder": "Voer een naam in voor deze verzameling",
+    "addFace": "Doorloop het toevoegen van een nieuwe collectie aan de gezichtenbibliotheek.",
+    "invalidName": "Ongeldige naam. Namen mogen alleen letters, cijfers, spaties, apostroffen, underscores en koppeltekens bevatten."
+  },
+  "train": {
+    "title": "Train",
+    "aria": "Selecteer trainen",
+    "empty": "Er zijn geen recente pogingen tot gezichtsherkenning"
+  },
+  "selectFace": "Selecteer gezicht",
+  "toast": {
+    "error": {
+      "addFaceLibraryFailed": "Het is niet gelukt om de gezichtsnaam in te stellen: {{errorMessage}}",
+      "deleteFaceFailed": "Verwijderen mislukt: {{errorMessage}}",
+      "deleteNameFailed": "Naam verwijderen is niet gelukt: {{errorMessage}}",
+      "updateFaceScoreFailed": "Niet gelukt om gezichtsscore bij te werken: {{errorMessage}}",
+      "uploadingImageFailed": "Afbeelding uploaden mislukt: {{errorMessage}}",
+      "trainFailed": "Trainen mislukt: {{errorMessage}}",
+      "renameFaceFailed": "Het is niet gelukt om het gezicht te hernoemen: {{errorMessage}}"
+    },
+    "success": {
+      "deletedFace_one": "{{count}} gezicht is succesvol verwijderd.",
+      "deletedFace_other": "{{count}} gezichten zijn succesvol verwijderd.",
+      "trainedFace": "Met succes getraind gezicht.",
+      "updatedFaceScore": "De gezichtsscore is succesvol bijgewerkt.",
+      "deletedName_one": "{{count}} gezicht is succesvol verwijderd.",
+      "deletedName_other": "{{count}} gezichten zijn succesvol verwijderd.",
+      "uploadedImage": "Afbeelding succesvol geüpload.",
+      "addFaceLibrary": "{{name}} is succesvol toegevoegd aan de Gezichtenbibliotheek!",
+      "renamedFace": "Gezicht succesvol hernoemd naar {{name}}"
+    }
+  },
+  "imageEntry": {
+    "dropActive": "Zet de afbeelding hier neer…",
+    "dropInstructions": "Sleep een afbeelding hierheen of klik om te selecteren",
+    "maxSize": "Maximale grootte: {{size}}MB",
+    "validation": {
+      "selectImage": "Selecteer een afbeeldingbestand."
+    }
+  },
+  "createFaceLibrary": {
+    "title": "Collectie maken",
+    "desc": "Een nieuwe collectie maken",
+    "new": "Creëer een nieuw gezicht",
+    "nextSteps": "Om een sterke basis op te bouwen:<li>Gebruik het tabblad Trainen om per gedetecteerd persoon afbeeldingen te selecteren en te trainen.</li> <li>Richt je op frontale afbeeldingen voor het beste resultaat; vermijd trainingsbeelden waarop gezichten vanuit een hoek te zien zijn.</li>"
+  },
+  "button": {
+    "addFace": "Gezicht toevoegen",
+    "uploadImage": "Afbeelding uploaden",
+    "deleteFaceAttempts": "Verwijder gezicht",
+    "reprocessFace": "Herverwerk gezicht",
+    "renameFace": "Gezicht hernoemen",
+    "deleteFace": "Gezicht verwijderen"
+  },
+  "uploadFaceImage": {
+    "desc": "Upload een afbeelding om te scannen op gezichten en op te nemen voor {{pageToggle}}",
+    "title": "Upload een afbeelding van het gezicht"
+  },
+  "deleteFaceLibrary": {
+    "title": "Verwijder Naam",
+    "desc": "Weet je zeker dat je de collectie {{name}} wilt verwijderen? Dit zal permanent alle geassocieerde gezichten verwijderen."
+  },
+  "trainFaceAs": "Gezicht trainen als:",
+  "trainFace": "Gezicht trainen",
+  "readTheDocs": "Lees de documentatie",
+  "steps": {
+    "nextSteps": "Volgende stappen",
+    "faceName": "Voer een naam in",
+    "uploadFace": "Upload een afbeelding van het gezicht",
+    "description": {
+      "uploadFace": "Upload een afbeelding van {{name}} waarop het gezicht van voren te zien is. De afbeelding hoeft niet bijgesneden te zijn tot alleen het gezicht."
+    }
+  },
+  "renameFace": {
+    "title": "Gezicht hernoemen",
+    "desc": "Voer een nieuwe naam in voor {{name}}"
+  },
+  "deleteFaceAttempts": {
+    "title": "Verwijder gezicht",
+    "desc_one": "Weet je zeker dat je {{count}} gezicht wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "desc_other": "Weet je zeker dat je {{count}} gezichten wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+  },
+  "collections": "Collecties",
+  "nofaces": "Geen gezichten beschikbaar",
+  "pixels": "{{area}}px"
+}

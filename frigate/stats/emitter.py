@@ -6,11 +6,12 @@ import logging
 import threading
 import time
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Optional
+from typing import Any, Optional
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import FREQUENCY_STATS_POINTS
+from frigate.stats.prometheus import update_metrics
 from frigate.stats.util import stats_snapshot
 from frigate.types import StatsTrackingTypes
 
@@ -32,12 +33,12 @@ class StatsEmitter(threading.Thread):
         self.stats_tracking = stats_tracking
         self.stop_event = stop_event
         self.hwaccel_errors: list[str] = []
-        self.stats_history: list[dict[str, any]] = []
+        self.stats_history: list[dict[str, Any]] = []
 
         # create communication for stats
         self.requestor = InterProcessRequestor()
 
-    def get_latest_stats(self) -> dict[str, any]:
+    def get_latest_stats(self) -> dict[str, Any]:
         """Get latest stats."""
         if len(self.stats_history) > 0:
             return self.stats_history[-1]
@@ -50,12 +51,12 @@ class StatsEmitter(threading.Thread):
 
     def get_stats_history(
         self, keys: Optional[list[str]] = None
-    ) -> list[dict[str, any]]:
+    ) -> list[dict[str, Any]]:
         """Get stats history."""
         if not keys:
             return self.stats_history
 
-        selected_stats: list[dict[str, any]] = []
+        selected_stats: list[dict[str, Any]] = []
 
         for s in self.stats_history:
             selected = {}
@@ -66,6 +67,16 @@ class StatsEmitter(threading.Thread):
             selected_stats.append(selected)
 
         return selected_stats
+
+    def stats_init(config, camera_metrics, detectors, processes):
+        stats = {
+            "cameras": camera_metrics,
+            "detectors": detectors,
+            "processes": processes,
+        }
+        # Update Prometheus metrics with initial stats
+        update_metrics(stats)
+        return stats
 
     def run(self) -> None:
         time.sleep(10)

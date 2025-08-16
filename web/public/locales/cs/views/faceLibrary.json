@@ -1,0 +1,102 @@
+{
+  "imageEntry": {
+    "dropInstructions": "Přetáhněte obrázek zde, nebo klikněte na výběr",
+    "maxSize": "Maximální velikost: {{size}}MB",
+    "dropActive": "Přetáhněte obrázek zde…",
+    "validation": {
+      "selectImage": "Prosím vyberte soubor obrázků."
+    }
+  },
+  "createFaceLibrary": {
+    "new": "Vytvořit nový obličej",
+    "desc": "Vytvořit novou kolekci",
+    "nextSteps": "Chcete-li vybudovat pevný základ:<li>Použijte kartu Trénování k výběru a trénování na snímcích pro každou detekovanou osobu.</li><li>Pro nejlepší výsledky se zaměřte na přímé snímky; vyhněte se trénování snímků, které zachycují obličeje pod úhlem.</li></ul>",
+    "title": "Vytvořit kolekci"
+  },
+  "details": {
+    "unknown": "Neznámý",
+    "person": "Osoba",
+    "face": "Detaily tváře",
+    "subLabelScore": "Skóre dílčího popisku",
+    "scoreInfo": "Skóre dílčího popisku je vážené skóre všech jistot rozpoznání obličejů, ale to může být odlišné od skóre zobrazeného na snímku.",
+    "faceDesc": "Podrobnosti o sledovaném objektu, který vygeneroval tuto tvář",
+    "timestamp": "Časové razítko"
+  },
+  "selectFace": "Vyberte tvář",
+  "deleteFaceAttempts": {
+    "title": "Odstranit obličeje",
+    "desc_one": "Skutečně chcete vymazat {{count}} obličej? Tato akce je nevratná.",
+    "desc_few": "Skutečně chcete vymazat {{count}} obličeje? Tato akce je nevratná.",
+    "desc_other": "Skutečně chcete vymazat {{count}} obličejů? Tato akce je nevratná."
+  },
+  "nofaces": "Žádné tváře",
+  "pixels": "{{area}}px",
+  "deleteFaceLibrary": {
+    "title": "Odstranit jméno",
+    "desc": "Skutečně chcete vymazat kolekci {{name}}? Toto trvale vymaže všechny přiřazené obličeje."
+  },
+  "train": {
+    "title": "Trénovat",
+    "empty": "Nejsou zde žádné předchozí pokusy o rozpoznání obličeje",
+    "aria": "Vybrat trénink"
+  },
+  "description": {
+    "addFace": "Prúvodce přidání nové kolekce do Knižnice obličejů.",
+    "placeholder": "Zadejte název pro tuto kolekci",
+    "invalidName": "Neplatný název. Názvy mohou obsahovat pouze písmena, čísla, mezery, apostrofy, podtržítka a pomlčky."
+  },
+  "documentTitle": "Knihovna obličejů - Frigate",
+  "uploadFaceImage": {
+    "title": "Nahrát obrázek obličeje",
+    "desc": "Nahrajte obrázek pro skenování tváří a zahrňte jej pro {{pageToggle}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Odstranění obličeje",
+    "addFace": "Přidat obličej",
+    "renameFace": "Přejmenovat obličej",
+    "deleteFace": "Odstranit obličej",
+    "uploadImage": "Nahrát obrázek",
+    "reprocessFace": "Přepracovat Obličej"
+  },
+  "trainFace": "Trénovat obličej",
+  "selectItem": "Vyberte {{item}}",
+  "renameFace": {
+    "title": "Přejmenovat obličej",
+    "desc": "Zadejte nový název pro {{name}}"
+  },
+  "readTheDocs": "Přečtěte si dokumentaci",
+  "toast": {
+    "success": {
+      "renamedFace": "Úspěšně přejmenovaný obličej na {{name}}",
+      "trainedFace": "Úspěšně vytrénovaný obličej.",
+      "uploadedImage": "Úspěšně nahraný obrázek.",
+      "deletedFace_one": "Úspěšně odstraněna {{count}} tvář.",
+      "deletedFace_few": "Úspěšně odstraněny {{count}} tváře.",
+      "deletedFace_other": "Úspěšně odstraněny {{count}} tváře.",
+      "deletedName_one": "{{count}} obličej byl úspěšně odstraněn.",
+      "deletedName_few": "{{count}} tváře byly úspěšně odstraněny.",
+      "deletedName_other": "{{count}} tváře byly úspěšně odstraněny.",
+      "updatedFaceScore": "Úspěšně aktualizováno skóre obličeje.",
+      "addFaceLibrary": "{{name}} byl(a) úspěšně přidán(a) do Knihovny obličejů!"
+    },
+    "error": {
+      "renameFaceFailed": "Chyba při přejmenování obličeje: {{errorMessage}}",
+      "trainFailed": "Chyba trénování: {{errorMessage}}",
+      "updateFaceScoreFailed": "Chyba aktualizace skóre obličeje: {{errorMessage}}",
+      "deleteFaceFailed": "Chyba při mazání: {{errorMessage}}",
+      "uploadingImageFailed": "Chyba při nahrávání obrázku: {{errorMessage}}",
+      "addFaceLibraryFailed": "Nepodařilo se nastavit jméno obličeje: {{errorMessage}}",
+      "deleteNameFailed": "Chyba při mazání jména: {{errorMessage}}"
+    }
+  },
+  "steps": {
+    "nextSteps": "Další kroky",
+    "faceName": "Zadejte název obličeje",
+    "uploadFace": "Nahrát obrázek obličeje",
+    "description": {
+      "uploadFace": "Pro {{name}} nahrajte obrázek, který zobrazuje jeho obličej zepředu. Obrázek nemusí být oříznut pouze na jeho obličej."
+    }
+  },
+  "collections": "Kolekce",
+  "trainFaceAs": "Trénovat Obličej jako:"
+}

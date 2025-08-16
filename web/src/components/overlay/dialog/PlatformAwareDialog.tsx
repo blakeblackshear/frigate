@@ -91,7 +91,7 @@ export function PlatformAwareSheet({
               className="mx-2"
               onClose={() => onOpenChange(false)}
             >
-              <MobilePageTitle>More Filters</MobilePageTitle>
+              <MobilePageTitle>{title}</MobilePageTitle>
             </MobilePageHeader>
             <div className={contentClassName}>{content}</div>
           </MobilePageContent>

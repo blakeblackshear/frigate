@@ -1,0 +1,17 @@
+{
+  "search": "Sök",
+  "documentTitle": "Export - Frigate",
+  "noExports": "Inga exporter hittade",
+  "deleteExport": "Radera export",
+  "deleteExport.desc": "Är du säker att du vill radera {{exportName}}?",
+  "editExport": {
+    "desc": "Ange ett nytt namn för denna export.",
+    "title": "Byt namn på Export",
+    "saveExport": "Spara Export"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Misslyckades att byta namn på export: {{errorMessage}}"
+    }
+  }
+}

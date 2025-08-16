@@ -1,16 +1,10 @@
-import {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import scrollIntoView from "scroll-into-view-if-needed";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTimelineUtils } from "./use-timeline-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { useDateLocale } from "./use-date-locale";
+import { useTranslation } from "react-i18next";
 
 type DraggableElementProps = {
   contentRef: React.RefObject<HTMLElement>;
@@ -33,7 +27,8 @@ type DraggableElementProps = {
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
   setDraggableElementPosition?: React.Dispatch<React.SetStateAction<number>>;
   dense: boolean;
-  timelineSegments: ReactNode[];
+  segments: number[];
+  scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
 };
 
 function useDraggableElement({
@@ -57,7 +52,8 @@ function useDraggableElement({
   setIsDragging,
   setDraggableElementPosition,
   dense,
-  timelineSegments,
+  segments,
+  scrollToSegment,
 }: DraggableElementProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -66,7 +62,6 @@ function useDraggableElement({
   const [elementScrollIntoView, setElementScrollIntoView] = useState(true);
   const [scrollEdgeSize, setScrollEdgeSize] = useState<number>();
   const [fullTimelineHeight, setFullTimelineHeight] = useState<number>();
-  const [segments, setSegments] = useState<HTMLDivElement[]>([]);
   const { alignStartDateToTimeline, getCumulativeScrollTop, segmentHeight } =
     useTimelineUtils({
       segmentDuration: segmentDuration,
@@ -169,17 +164,28 @@ function useDraggableElement({
     [segmentDuration, timelineStartAligned, segmentHeight],
   );
 
+  const { t } = useTranslation(["common"]);
+  const locale = useDateLocale();
+
+  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const format = useMemo(() => {
+    const formatKey = `time.${
+      segmentDuration < 60 && !dense
+        ? "formattedTimestampHourMinuteSecond"
+        : "formattedTimestampHourMinute"
+    }.${timeFormat}`;
+    return t(formatKey);
+  }, [t, timeFormat, segmentDuration, dense]);
+
   const getFormattedTimestamp = useCallback(
     (segmentStartTime: number) => {
       return formatUnixTimestampToDateTime(segmentStartTime, {
         timezone: config?.ui.timezone,
-        strftime_fmt:
-          config?.ui.time_format == "24hour"
-            ? `%H:%M${segmentDuration < 60 && !dense ? ":%S" : ""}`
-            : `%I:%M${segmentDuration < 60 && !dense ? ":%S" : ""} %p`,
+        date_format: format,
+        locale,
       });
     },
-    [config, dense, segmentDuration],
+    [config?.ui.timezone, format, locale],
   );
 
   const updateDraggableElementPosition = useCallback(
@@ -201,11 +207,7 @@ function useDraggableElement({
             draggableElementTimeRef.current.textContent =
               getFormattedTimestamp(segmentStartTime);
             if (scrollTimeline && !userInteracting) {
-              scrollIntoView(thumb, {
-                block: "center",
-                behavior: "smooth",
-                scrollMode: "if-needed",
-              });
+              scrollToSegment(segmentStartTime);
             }
           }
         });
@@ -222,6 +224,7 @@ function useDraggableElement({
       setDraggableElementPosition,
       getFormattedTimestamp,
       userInteracting,
+      scrollToSegment,
     ],
   );
 
@@ -242,12 +245,6 @@ function useDraggableElement({
   );
 
   useEffect(() => {
-    if (timelineRef.current && timelineSegments.length) {
-      setSegments(Array.from(timelineRef.current.querySelectorAll(".segment")));
-    }
-  }, [timelineRef, timelineCollapsed, timelineSegments]);
-
-  useEffect(() => {
     let animationFrameId: number | null = null;
 
     const handleScroll = () => {
@@ -256,7 +253,7 @@ function useDraggableElement({
         showDraggableElement &&
         isDragging &&
         clientYPosition &&
-        segments &&
+        segments.length > 0 &&
         fullTimelineHeight
       ) {
         const { scrollTop: scrolled } = timelineRef.current;
@@ -295,31 +292,18 @@ function useDraggableElement({
           return;
         }
 
-        let targetSegmentId = 0;
-        let offset = 0;
+        const start = Math.max(0, Math.floor(scrolled / segmentHeight));
 
-        segments.forEach((segmentElement: HTMLDivElement) => {
-          const rect = segmentElement.getBoundingClientRect();
-          const segmentTop =
-            rect.top + scrolled - timelineTopAbsolute - segmentHeight;
-          const segmentBottom =
-            rect.bottom + scrolled - timelineTopAbsolute - segmentHeight;
+        const relativePosition = newElementPosition - scrolled;
+        const segmentIndex =
+          Math.floor(relativePosition / segmentHeight) + start + 1;
 
-          // Check if handlebar position falls within the segment bounds
-          if (
-            newElementPosition >= segmentTop &&
-            newElementPosition <= segmentBottom
-          ) {
-            targetSegmentId = parseFloat(
-              segmentElement.getAttribute("data-segment-id") || "0",
-            );
-            offset = Math.min(
-              segmentBottom - newElementPosition,
-              segmentHeight,
-            );
-            return;
-          }
-        });
+        const targetSegmentTime = segments[segmentIndex];
+        if (targetSegmentTime === undefined) return;
+
+        const segmentStart = segmentIndex * segmentHeight - scrolled;
+
+        const offset = Math.min(segmentStart - relativePosition, segmentHeight);
 
         if ((draggingAtTopEdge || draggingAtBottomEdge) && scrollEdgeSize) {
           if (draggingAtTopEdge) {
@@ -349,8 +333,8 @@ function useDraggableElement({
         }
 
         const setTime = alignSetTimeToSegment
-          ? targetSegmentId
-          : targetSegmentId + segmentDuration * (offset / segmentHeight);
+          ? targetSegmentTime
+          : targetSegmentTime + segmentDuration * (offset / segmentHeight);
 
         updateDraggableElementPosition(
           newElementPosition,
@@ -361,7 +345,7 @@ function useDraggableElement({
 
         if (setDraggableElementTime) {
           setDraggableElementTime(
-            targetSegmentId + segmentDuration * (offset / segmentHeight),
+            targetSegmentTime + segmentDuration * (offset / segmentHeight),
           );
         }
 
@@ -397,6 +381,7 @@ function useDraggableElement({
     draggingAtTopEdge,
     draggingAtBottomEdge,
     showDraggableElement,
+    segments,
   ]);
 
   useEffect(() => {
@@ -408,24 +393,23 @@ function useDraggableElement({
       !isDragging &&
       segments.length > 0
     ) {
-      const { scrollTop: scrolled } = timelineRef.current;
-
       const alignedSegmentTime = alignStartDateToTimeline(draggableElementTime);
+      if (!userInteracting) {
+        scrollToSegment(alignedSegmentTime);
+      }
 
-      const segmentElement = timelineRef.current.querySelector(
-        `[data-segment-id="${alignedSegmentTime}"]`,
+      const segmentIndex = segments.findIndex(
+        (time) => time === alignedSegmentTime,
       );
 
-      if (segmentElement) {
-        const timelineRect = timelineRef.current.getBoundingClientRect();
-        const timelineTopAbsolute = timelineRect.top;
-        const rect = segmentElement.getBoundingClientRect();
-        const segmentTop = rect.top + scrolled - timelineTopAbsolute;
+      if (segmentIndex >= 0) {
+        const segmentStart = segmentIndex * segmentHeight;
+
         const offset =
           ((draggableElementTime - alignedSegmentTime) / segmentDuration) *
           segmentHeight;
         // subtract half the height of the handlebar cross bar (4px) for pixel perfection
-        const newElementPosition = segmentTop - offset - 2;
+        const newElementPosition = segmentStart - offset - 2;
 
         updateDraggableElementPosition(
           newElementPosition,
@@ -454,14 +438,27 @@ function useDraggableElement({
     segments,
   ]);
 
+  const findNextAvailableSegment = useCallback(
+    (startTime: number) => {
+      let searchTime = startTime;
+      while (searchTime < timelineStartAligned + timelineDuration) {
+        if (segments.includes(searchTime)) {
+          return searchTime;
+        }
+        searchTime += segmentDuration;
+      }
+      return null;
+    },
+    [segments, timelineStartAligned, timelineDuration, segmentDuration],
+  );
+
   useEffect(() => {
     if (
       timelineRef.current &&
       segmentsRef.current &&
       draggableElementTime &&
       timelineCollapsed &&
-      timelineSegments &&
-      segments
+      segments.length > 0
     ) {
       setFullTimelineHeight(
         Math.min(
@@ -469,47 +466,27 @@ function useDraggableElement({
           segmentsRef.current.scrollHeight,
         ),
       );
+
       const alignedSegmentTime = alignStartDateToTimeline(draggableElementTime);
 
-      let segmentElement = timelineRef.current.querySelector(
-        `[data-segment-id="${alignedSegmentTime}"]`,
-      );
-
-      if (!segmentElement) {
+      if (segments.includes(alignedSegmentTime)) {
+        scrollToSegment(alignedSegmentTime);
+      } else {
         // segment not found, maybe we collapsed over a collapsible segment
-        let searchTime = alignedSegmentTime;
+        const nextAvailableSegment =
+          findNextAvailableSegment(alignedSegmentTime);
 
-        while (
-          searchTime < timelineStartAligned &&
-          searchTime < timelineStartAligned + timelineDuration
-        ) {
-          searchTime += segmentDuration;
-          segmentElement = timelineRef.current.querySelector(
-            `[data-segment-id="${searchTime}"]`,
-          );
-
-          if (segmentElement) {
-            // found, set time
-            if (setDraggableElementTime) {
-              setDraggableElementTime(searchTime);
-            }
-            return;
-          }
-        }
-      }
-      if (!segmentElement) {
-        // segment still not found, just start at the beginning of the timeline or at now()
-        if (segments?.length) {
-          const searchTime = parseInt(
-            segments[0].getAttribute("data-segment-id") || "0",
-            10,
-          );
+        if (nextAvailableSegment !== null) {
+          scrollToSegment(nextAvailableSegment);
           if (setDraggableElementTime) {
-            setDraggableElementTime(searchTime);
+            setDraggableElementTime(nextAvailableSegment);
           }
         } else {
+          // segment still not found, just start at the beginning of the timeline or at now()
+          const firstAvailableSegment = segments[0] || timelineStartAligned;
+          scrollToSegment(firstAvailableSegment);
           if (setDraggableElementTime) {
-            setDraggableElementTime(timelineStartAligned);
+            setDraggableElementTime(firstAvailableSegment);
           }
         }
       }

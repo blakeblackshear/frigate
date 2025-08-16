@@ -12,7 +12,7 @@ class EventResponse(BaseModel):
     end_time: Optional[float]
     false_positive: Optional[bool]
     zones: list[str]
-    thumbnail: str
+    thumbnail: Optional[str]
     has_clip: bool
     has_snapshot: bool
     retain_indefinitely: bool

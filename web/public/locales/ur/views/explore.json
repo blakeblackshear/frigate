@@ -1,0 +1,13 @@
+{
+  "documentTitle": "جائزہ لیں - فریگیٹ",
+  "generativeAI": "جنریٹو اے آئی",
+  "exploreIsUnavailable": {
+    "title": "جائزہ لینا دستیاب نہیں ہے",
+    "embeddingsReindexing": {
+      "context": "جب ٹریک کیے گئے آبجیکٹ ایمبیڈنگز کی دوبارہ انڈیکسنگ مکمل ہو جائےتو \"جائزہ لیں\" استعمال کیا جا سکتا ہے۔",
+      "startingUp": "شروع ہو رہا ہے…",
+      "estimatedTime": "متوقع باقی وقت:"
+    }
+  },
+  "exploreMore": "مزید {{label}} اشیاء کو دریافت کریں"
+}

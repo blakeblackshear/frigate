@@ -1,0 +1,102 @@
+{
+  "description": {
+    "addFace": "Parcurge adăugarea unei colecții noi la biblioteca de fețe.",
+    "placeholder": "Introduceti un nume pentru aceasta colectie",
+    "invalidName": "Nume invalid. Numele poate conține doar litere, cifre, spații, apostrofuri, liniuțe de subliniere și cratime."
+  },
+  "details": {
+    "person": "Persoană",
+    "subLabelScore": "Scor subetichetă",
+    "unknown": "Necunoscut",
+    "scoreInfo": "Scorul sub-etichetă este scorul ponderat pentru toate fețele recunoscute, așa că acesta poate diferi de scorul afișat în snapshot.",
+    "face": "Detalii față",
+    "faceDesc": "Detalii despre obiectul urmărit care a generat această față",
+    "timestamp": "Marcaj timp"
+  },
+  "uploadFaceImage": {
+    "desc": "Încarcă o imagine pentru a scana fețele și a include pentru {{pageToggle}}",
+    "title": "Încarcă imaginea feței"
+  },
+  "createFaceLibrary": {
+    "desc": "Creează o colecție nouă",
+    "title": "Creează colecție",
+    "nextSteps": "Pentru a construi o bază solidă:<li>Folosește fila „antrenare” pentru a selecta și antrena pe imagini pentru fiecare persoană detectată.</li><li>Concentrează-te pe imagini frontale pentru cele mai bune rezultate; evită imaginile de antrenament care surprind fețe din unghiuri laterale.</li></ul>",
+    "new": "Crează o față nouă"
+  },
+  "collections": "Colecții",
+  "documentTitle": "Bibliotecă fețe - Frigate",
+  "train": {
+    "empty": "Nu există încercări recente de recunoaștere facială",
+    "title": "Antrenează",
+    "aria": "Selectează antrenarea"
+  },
+  "steps": {
+    "description": {
+      "uploadFace": "Încarcă o imagine cu {{name}} care să arate fața dintr-un unghi frontal. Imaginea nu trebuie să fie decupată doar la nivelul feței."
+    },
+    "faceName": "Introdu numele feței",
+    "uploadFace": "Încarcă imaginea feței",
+    "nextSteps": "Pașii următori"
+  },
+  "selectFace": "Selectează fața",
+  "deleteFaceLibrary": {
+    "title": "Șterge numele",
+    "desc": "Ești sigur că vrei să ștergi colecția {{name}}? Aceasta va șterge definitiv toate fețele asociate."
+  },
+  "renameFace": {
+    "title": "Redenumește fața",
+    "desc": "Introdu un nume nou pentru {{name}}"
+  },
+  "deleteFaceAttempts": {
+    "title": "Șterge fețele",
+    "desc_one": "Ești sigur că vrei să ștergi {{count}} față? Această acțiune nu poate fi anulată.",
+    "desc_few": "Ești sigur că vrei să ștergi {{count}} fețe? Această acțiune nu poate fi anulată.",
+    "desc_other": "Ești sigur că vrei să ștergi {{count}} de fețe? Această acțiune nu poate fi anulată."
+  },
+  "button": {
+    "addFace": "Adaugă față",
+    "deleteFaceAttempts": "Șterge fețele",
+    "renameFace": "Redenumește fața",
+    "uploadImage": "Încarcă imagine",
+    "deleteFace": "Șterge fața",
+    "reprocessFace": "Reprocesează fața"
+  },
+  "selectItem": "Selectează {{item}}",
+  "toast": {
+    "success": {
+      "deletedName_one": "{{count}} față a fost ștearsă cu succes.",
+      "deletedName_few": "{{count}} fețe au fost șterse cu succes.",
+      "deletedName_other": "{{count}} de fețe au fost șterse cu succes.",
+      "trainedFace": "Față antrenată cu succes.",
+      "renamedFace": "Fața a fost redenumită cu succes ca {{name}}",
+      "updatedFaceScore": "Scorul feței a fost actualizat cu succes.",
+      "deletedFace_one": "{{count}} față a fost ștersă cu succes.",
+      "deletedFace_few": "{{count}} fețe au fost șterse cu succes.",
+      "deletedFace_other": "{{count}} de fețe au fost șterse cu succes.",
+      "uploadedImage": "Imagine încărcată cu succes.",
+      "addFaceLibrary": "{{name}} a fost adăugat(ă) cu succes la biblioteca de fețe!"
+    },
+    "error": {
+      "addFaceLibraryFailed": "Setarea numelui feței a eșuat: {{errorMessage}}",
+      "deleteFaceFailed": "Ștergerea a eșuat: {{errorMessage}}",
+      "deleteNameFailed": "Ștergerea numelui a eșuat: {{errorMessage}}",
+      "renameFaceFailed": "Redenumirea feței a eșuat: {{errorMessage}}",
+      "trainFailed": "Antrenarea a eșuat: {{errorMessage}}",
+      "uploadingImageFailed": "Încărcarea imaginii a eșuat: {{errorMessage}}",
+      "updateFaceScoreFailed": "Nu s-a putut actualiza scorul feței: {{errorMessage}}"
+    }
+  },
+  "imageEntry": {
+    "dropActive": "Trage imaginea aici…",
+    "dropInstructions": "Trage și plasează o imagine aici sau fă clic pentru a selecta",
+    "maxSize": "Dimensiunea maximă: {{size}}MB",
+    "validation": {
+      "selectImage": "Te rog să selectezi un fișier imagine."
+    }
+  },
+  "trainFaceAs": "Antrenează fața ca:",
+  "trainFace": "Antrenează fața",
+  "readTheDocs": "Citește documentația",
+  "nofaces": "Nu sunt fețe disponibile",
+  "pixels": "{{area}}px"
+}

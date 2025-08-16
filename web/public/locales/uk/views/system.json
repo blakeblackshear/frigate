@@ -1,0 +1,180 @@
+{
+  "cameras": {
+    "label": {
+      "ffmpeg": "FFmpeg'",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} пропущених виявлень на секунду",
+      "cameraDetect": "{{camName}} виявлення",
+      "cameraFfmpeg": "{{camName}} FFmpeg'",
+      "overallDetectionsPerSecond": "загальна кiлькiсть виявлень за секунду",
+      "cameraDetectionsPerSecond": "{{camName}} виявлень на секунду",
+      "overallFramesPerSecond": "загальна кiлкiсть кадрiв на секунду",
+      "overallSkippedDetectionsPerSecond": "загальна кiлкiсть пропущених виявлень за секунду",
+      "cameraCapture": "{{camName}} захоплення",
+      "cameraFramesPerSecond": "{{camName}} кадрiв на секунду",
+      "skipped": "пропущено",
+      "capture": "захоплення",
+      "camera": "камера",
+      "detect": "виявити"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Тестові дані копіюються в буфер обміну."
+      },
+      "error": {
+        "unableToProbeCamera": "Не вдалося дослідити камеру: {{errorMessage}}"
+      }
+    },
+    "title": "Камери",
+    "info": {
+      "fetching": "Отримання даних з камери",
+      "cameraProbeInfo": "{{camera}} Інформація про зонд камери",
+      "streamDataFromFFPROBE": "Дані потоку отримуються за допомогою <code>ffprobe</code>.",
+      "stream": "Потік {{idx}}",
+      "video": "Відео:",
+      "codec": "Кодек:",
+      "resolution": "Роздільна здатність:",
+      "fps": "FPS:",
+      "unknown": "Невідомо",
+      "audio": "Аудіо:",
+      "error": "Помилка: {{error}}",
+      "tips": {
+        "title": "Інформація про зонд камери"
+      },
+      "aspectRatio": "співвідношення сторін"
+    },
+    "overview": "Огляд",
+    "framesAndDetections": "Кадри / Виявлення"
+  },
+  "enrichments": {
+    "embeddings": {
+      "plate_recognition": "Розпiзнавання номерiв",
+      "image_embedding_speed": "Швидкість вбудовування зображень",
+      "face_embedding_speed": "Швидкість вбудовування облич",
+      "face_recognition_speed": "Швидкість розпізнавання обличчя",
+      "plate_recognition_speed": "Швидкість розпізнавання номерних знаків",
+      "text_embedding_speed": "Швидкість вбудовування тексту",
+      "image_embedding": "Вбудовування зображень",
+      "text_embedding": "Вбудовування тексту",
+      "face_recognition": "Розпізнавання обличчя",
+      "yolov9_plate_detection_speed": "Швидкість виявлення номерних знаків YOLOv9",
+      "yolov9_plate_detection": "Виявлення пластин YOLOv9"
+    },
+    "title": "Збагаченням",
+    "infPerSecond": "Висновки за секунду"
+  },
+  "general": {
+    "title": "Загальна",
+    "hardwareInfo": {
+      "npuUsage": "Використання нейронного процесора",
+      "npuMemory": "Пам'ять NPU",
+      "title": "Інформація про обладнання",
+      "gpuUsage": "Використання графічного процесора",
+      "gpuMemory": "Пам'ять графічного процесора",
+      "gpuEncoder": "GPU-кодер",
+      "gpuDecoder": "Декодер графічного процесора",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Вихід Vainfo",
+          "returnCode": "Код повернення: {{code}}",
+          "processOutput": "Вихід процесу:",
+          "processError": "Помилка процесу:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Вихід Nvidia SMI",
+          "name": "Ім'я: {{name}}",
+          "driver": "Водій: {{driver}}",
+          "cudaComputerCapability": "Можливості обчислень CUDA: {{cuda_compute}}",
+          "vbios": "Інформація про VBios: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Закрити інформацію про графічний процесор"
+        },
+        "copyInfo": {
+          "label": "Копіювати інформацію про графічний процесор"
+        },
+        "toast": {
+          "success": "Інформацію про графічний процесор скопійовано в буфер обміну"
+        }
+      }
+    },
+    "otherProcesses": {
+      "processMemoryUsage": "Використання пам'яті процесу",
+      "processCpuUsage": "Використання процесора процесу",
+      "title": "Інші процеси"
+    },
+    "detector": {
+      "temperature": "Температура детектора",
+      "title": "Детектори",
+      "inferenceSpeed": "Швидкість виведення детектора",
+      "cpuUsage": "Використання процесора детектора",
+      "memoryUsage": "Використання пам'яті детектора"
+    }
+  },
+  "storage": {
+    "cameraStorage": {
+      "unused": {
+        "tips": "Це значення може неточно відображати обсяг вільного простору, доступного для Frigate, якщо на вашому диску зберігаються інші файли, окрім записів Frigate. Frigate не відстежує використання пам’яті поза ним.",
+        "title": "Невикористаний"
+      },
+      "title": "Зберігання камери",
+      "storageUsed": "Зберігання",
+      "camera": "Камера",
+      "unusedStorageInformation": "Інформація про невикористане сховище",
+      "percentageOfTotalUsed": "Відсоток від загальної кількості",
+      "bandwidth": "Пропускна здатність"
+    },
+    "overview": "Огляд",
+    "recordings": {
+      "title": "Записи",
+      "tips": "Це значення відображає загальний обсяг пам’яті, що використовується записами в базі даних Frigate. Frigate не відстежує використання пам’яті для всіх файлів на вашому диску.",
+      "earliestRecording": "Найдавніший доступний запис:"
+    },
+    "title": "Зберігання"
+  },
+  "lastRefreshed": "Останнє оновлення: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} має високе використання процесора FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} має високе використання процесора для виявлення ({{detectAvg}}%)",
+    "healthy": "Система справна",
+    "reindexingEmbeddings": "Переіндексація вбудовування (виконано {{processed}}%)",
+    "cameraIsOffline": "{{camera}} не в мережі",
+    "detectIsSlow": "{{detect}} повільний ({{speed}} мс)",
+    "detectIsVerySlow": "{{detect}} дуже повільний ({{speed}} мс)"
+  },
+  "documentTitle": {
+    "cameras": "Статистика камер - Фрегат",
+    "storage": "Статистика сховища - Фрегат",
+    "general": "Загальна статистика - Frigate",
+    "enrichments": "Статистика збагачені - Фрегат",
+    "logs": {
+      "frigate": "Фрегатні журнали - Фрегат",
+      "go2rtc": "Журнали Go2RTC - Фрегат",
+      "nginx": "Журнали Nginx - Фрегат"
+    }
+  },
+  "title": "Система",
+  "metrics": "Системні показники",
+  "logs": {
+    "download": {
+      "label": "Завантажити журнали"
+    },
+    "copy": {
+      "label": "Копіювати в буфер обміну",
+      "success": "Скопійовано журнали в буфер обміну",
+      "error": "Не вдалося скопіювати журнали в буфер обміну"
+    },
+    "type": {
+      "label": "Тип",
+      "timestamp": "Позначка часу",
+      "tag": "Тег",
+      "message": "Повідомлення"
+    },
+    "tips": "Журнали передаються потоком із сервера",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Помилка отримання журналів: {{errorMessage}}",
+        "whileStreamingLogs": "Помилка під час потокової передачі журналів: {{errorMessage}}"
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "search": "Buscar",
+  "savedSearches": "Buscas Salvas",
+  "searchFor": "Procurar por {{inputValue}}",
+  "button": {
+    "clear": "Limpar procurar",
+    "save": "Salvar pesquisa",
+    "delete": "Apagar procura salva",
+    "filterInformation": "Filtrar informação",
+    "filterActive": "Filtros ativos"
+  },
+  "trackedObjectId": "ID do objeto rastreado",
+  "filter": {
+    "label": {
+      "cameras": "Câmeras",
+      "labels": "Rótulos",
+      "zones": "Zonas",
+      "before": "Antes",
+      "after": "Depois",
+      "min_score": "Pontuação Mínima",
+      "max_score": "Pontuação Máxima",
+      "min_speed": "Velocidade Mínima",
+      "max_speed": "Velocidade Máxima",
+      "sub_labels": "Sub-Rótulos",
+      "search_type": "Tipo de Busca",
+      "time_range": "Intervalo de Tempo",
+      "recognized_license_plate": "Placa de Carro Reconhecida",
+      "has_clip": "Possui Clipe",
+      "has_snapshot": "Possui Captura de Imagem"
+    },
+    "searchType": {
+      "thumbnail": "Miniatura",
+      "description": "Descrição"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "A data 'antes' deve ser depois da data 'após'.",
+        "afterDatebeEarlierBefore": "A data 'após' deve ser antes da data 'antes'.",
+        "minScoreMustBeLessOrEqualMaxScore": "A 'pontuação_min' deve ser menor ou igual a 'pontuação_max'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "A 'pontuação_max' deve ser maior ou igual a 'pontuação_min'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "A 'velocidad_min' deve ser menor ou igual a 'velocidad_max'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "A 'velocidad_max' deve ser maior ou igual a 'velocidade_min'."
+      }
+    },
+    "tips": {
+      "title": "Como utilizar filtros de texto",
+      "desc": {
+        "text": "Filtros ajudam a refinar os resultados da busca. Veja como utilizá-los na campo de pesquisa:",
+        "step1": "Digite um nome de chave de filtro seguido por \":\" (ex., \"câmeras:\").",
+        "step2": "Selecione um valor a partir das sugestões ou digite a sua própria.",
+        "step3": "Usar filtros múltiplos adicionando um após o outro com um espaço entre eles.",
+        "step4": "Filtros de data (antes: e após:) usam o formato {{DateFormat}}.",
+        "step5": "Filtros de tempo usam o formato {{exampleTime}}.",
+        "step6": "Remova os filtros clicando no \"x\" ao lado deles.",
+        "exampleLabel": "Exemplo:"
+      }
+    },
+    "header": {
+      "noFilters": "Filtros",
+      "activeFilters": "Filtros ativos",
+      "currentFilterType": "Valores de Filtros"
+    }
+  },
+  "similaritySearch": {
+    "active": "Pesquisa por similaridade ativa",
+    "title": "Buscar por Similaridade",
+    "clear": "Limpar buscar por similaridade"
+  },
+  "placeholder": {
+    "search": "Pesquisar…"
+  }
+}

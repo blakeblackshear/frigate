@@ -1,0 +1,102 @@
+{
+  "description": {
+    "addFace": "עיין בהוספת אוסף חדש לספריית הפנים.",
+    "placeholder": "הזנת שם לאוסף זה",
+    "invalidName": "שם לא חוקי. שמות יכולים לכלול רק אותיות, מספרים, רווחים, גרשים, קווים תחתונים ומקפים."
+  },
+  "createFaceLibrary": {
+    "nextSteps": "כדי לבנות בסיס חזק:<li>השתמשו בכרטיסייה 'אימון' כדי לבחור ולאמן תמונות עבור כל אדם שזוהה.</li><li>התמקדו בתמונות ישירות לקבלת התוצאות הטובות ביותר; הימנעו מאימון תמונות שלוכדות פנים בזווית.</li></ul>",
+    "title": "יצירת אוסף",
+    "desc": "יצירת אוסף חדש",
+    "new": "יצירת פנים חדשות"
+  },
+  "toast": {
+    "success": {
+      "deletedName_one": "פנים עבור {{count}} נמחקו בהצלחה.",
+      "deletedName_two": "פנים של {{count}} נמחקו בהצלחה.",
+      "deletedName_other": "פנים של {{count}} נמחקו בהצלחה.",
+      "deletedFace_one": "נמחק בהצלחה {{count}} פנים.",
+      "deletedFace_two": "נמחקו בהצלחה {{count}} פנים.",
+      "deletedFace_other": "נמחקו בהצלחה {{count}} פנים.",
+      "uploadedImage": "התמונה הועלתה בהצלחה.",
+      "addFaceLibrary": "{{name}} נוסף בהצלחה לספריית הפנים!",
+      "renamedFace": "שם הפנים שונה בהצלחה ל-{{name}}",
+      "trainedFace": "פנים אומנו בהצלחה.",
+      "updatedFaceScore": "ציון הפנים עודכן בהצלחה."
+    },
+    "error": {
+      "deleteFaceFailed": "המחיקה נכשלה: {{errorMessage}}",
+      "deleteNameFailed": "מחיקת השם: {{errorMessage}} נכשלה",
+      "renameFaceFailed": "שינוי שם הפנים נכשל: {{errorMessage}}",
+      "trainFailed": "אימון הפנים נכשל: {{errorMessage}}",
+      "updateFaceScoreFailed": "עדכון ציון הפנים נכשל: {{errorMessage}}",
+      "uploadingImageFailed": "העלאת התמונה נכשלה: {{errorMessage}}",
+      "addFaceLibraryFailed": "הגדרת שם הפנים נכשלה: {{errorMessage}}"
+    }
+  },
+  "details": {
+    "person": "אדם",
+    "subLabelScore": "ציון תווית משנה",
+    "face": "פרטי פנים",
+    "faceDesc": "פרטי האובייקט שגרם לזיהוי הפנים הזה",
+    "timestamp": "חותמת זמן",
+    "unknown": "לא ידוע",
+    "scoreInfo": "ציון תווית המשנה הוא הציון המשוקלל עבור כל זיהוי הפנים המזוהים, כך שהוא עשוי להיות שונה מהציון המוצג בתמונה."
+  },
+  "documentTitle": "ספריית זיהו פנים - Frigate",
+  "uploadFaceImage": {
+    "title": "העלאת תמונת פנים",
+    "desc": "העלה תמונה לסריקה לאיתור פנים והכללה {{pageToggle}}"
+  },
+  "collections": "אוספים",
+  "steps": {
+    "faceName": "קביעת שם לפנים",
+    "uploadFace": "העלאת תמונת פנים",
+    "nextSteps": "צעדים הבאים",
+    "description": {
+      "uploadFace": "העלה תמונה של {{name}} המציגה את פניו מזווית חזית. אין צורך לחתוך את התמונה רק לפנים שלו."
+    }
+  },
+  "train": {
+    "title": "רכבת",
+    "aria": "בחירת אימון",
+    "empty": "אין ניסיונות זיהוי פנים אחרונים"
+  },
+  "selectItem": "בחירה:{{item}}",
+  "selectFace": "בחירת פנים",
+  "deleteFaceLibrary": {
+    "title": "מחיקת שם",
+    "desc": "האם אתה בטוח שברצונך למחוק את האוסף {{name}}? פעולה זו תמחק לצמיתות את כל הפרצופים המשויכים."
+  },
+  "deleteFaceAttempts": {
+    "title": "מחיקת פנים",
+    "desc_one": "האם אתה בטוח שברצונך למחוק את הפנים עבור {{count}}? פעולה זו אינה ניתנת לביטול.",
+    "desc_two": "האם אתה בטוח שברצונך למחוק את הפנים של {{count}}? פעולה זו אינה ניתנת לביטול.",
+    "desc_other": "האם אתה בטוח שברצונך למחוק את הפנים של {{count}}? פעולה זו אינה ניתנת לביטול."
+  },
+  "renameFace": {
+    "title": "שינוי שם של פנים",
+    "desc": "הזנת שם חדש עבור {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "מחיקת פנים",
+    "addFace": "הוסף פנים",
+    "renameFace": "שנה שם פנים",
+    "deleteFace": "מחיקת פנים",
+    "uploadImage": "העלאת תמונה",
+    "reprocessFace": "עיבוד מחדש של הפנים"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "בחירת קובץ תמונה."
+    },
+    "dropActive": "שחרר/י את התמונה כאן…",
+    "dropInstructions": "גרור ושחרר תמונה כאן, או לחץ כדי לבחור",
+    "maxSize": "גודל מקסימאלי: {{size}}MB"
+  },
+  "nofaces": "אין פנים זמינים",
+  "pixels": "{{area}}פיקסלים",
+  "readTheDocs": "עיין בתיעוד",
+  "trainFaceAs": "אימון פנים כ:",
+  "trainFace": "אימון פנים"
+}

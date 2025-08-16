@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Ao vivo - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Ao vivo - Frigate",
+  "twoWayTalk": {
+    "disable": "Desativar conversa bidirecional",
+    "enable": "Habilitar conversa bidirecional"
+  },
+  "cameraAudio": {
+    "enable": "Habilitar áudio da câmara",
+    "disable": "Desativar áudio da câmara"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Clique no quadro para centralizar a câmara",
+        "enable": "Habilitar clique para mover",
+        "disable": "Desativar clique para mover"
+      },
+      "down": {
+        "label": "Mover a câmara PTZ para baixo"
+      },
+      "up": {
+        "label": "Mover a câmara PTZ para cima"
+      },
+      "left": {
+        "label": "Mover a câmara PTZ para a esquerda"
+      },
+      "right": {
+        "label": "Mover a câmara PTZ para a direita"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Aumentar zoom da câmara PTZ"
+      },
+      "out": {
+        "label": "Diminuir zoom da câmara PTZ"
+      }
+    },
+    "presets": "Predefinições de câmara PTZ",
+    "frame": {
+      "center": {
+        "label": "Clique no quadro para centralizar a câmara PTZ"
+      }
+    }
+  },
+  "lowBandwidthMode": "Modo de baixa largura de banda",
+  "camera": {
+    "enable": "Habilitar câmara",
+    "disable": "Desativar câmara"
+  },
+  "muteCameras": {
+    "disable": "Ativar áudio de todas as câmaras",
+    "enable": "Silenciar todas as câmaras"
+  },
+  "detect": {
+    "enable": "Habilitar detecção",
+    "disable": "Desativar detecção"
+  },
+  "snapshots": {
+    "enable": "Habilitar snapshots",
+    "disable": "Desativar snapshots"
+  },
+  "audioDetect": {
+    "enable": "Habilitar detecção de áudio",
+    "disable": "Desativar detecção de áudio"
+  },
+  "autotracking": {
+    "enable": "Habilitar rastreamento automático",
+    "disable": "Desativar rastreamento automático"
+  },
+  "streamStats": {
+    "enable": "Mostrar estatísticas de transmissão",
+    "disable": "Ocultar estatísticas de transmissão"
+  },
+  "manualRecording": {
+    "tips": "Inicie um evento manual com base nas configurações de retenção de gravação desta câmara.",
+    "playInBackground": {
+      "label": "Reproduzir em segundo plano",
+      "desc": "Habilite esta opção para continuar a transmissão quando o player estiver oculto."
+    },
+    "showStats": {
+      "label": "Mostrar estatísticas",
+      "desc": "Habilite esta opção para mostrar estatísticas de transmissão como uma sobreposição no feed da câmara."
+    },
+    "start": "Iniciar gravação on-demand",
+    "recordDisabledTips": "Como a gravação está desabilitada ou restrita na configuração desta câmara, apenas um snapshot será salvo.",
+    "end": "Encerrar gravação on-demand",
+    "ended": "Fim da gravação manual on-demand.",
+    "failedToEnd": "Falha ao finalizar a gravação manual on-demand.",
+    "failedToStart": "Falha ao iniciar a gravação manual on-demand.",
+    "title": "Gravação on-demand",
+    "started": "Iniciou a gravação manual on-demand.",
+    "debugView": "Exibição de depuração"
+  },
+  "streamingSettings": "Configurações de transmissão",
+  "notifications": "Notificações",
+  "suspend": {
+    "forTime": "Suspender por: "
+  },
+  "stream": {
+    "title": "Transmissão",
+    "audio": {
+      "tips": {
+        "title": "O áudio deve ser emitido pela sua câmara e configurado no go2rtc para esta transmissão.",
+        "documentation": "Leia a documentação "
+      },
+      "available": "O áudio está disponível para esta transmissão",
+      "unavailable": "O áudio não está disponível para esta transmissão"
+    },
+    "twoWayTalk": {
+      "tips.documentation": "Leia a documentação ",
+      "unavailable": "Conversa bidirecional não está disponível para esta transmissão",
+      "tips": "Seu dispositivo deve suportar o recurso e o WebRTC deve ser configurado para conversa bidirecional.",
+      "available": "Conversa bidirecional está disponível para esta transmissão"
+    },
+    "lowBandwidth": {
+      "tips": "A visualização ao vivo está em modo de baixa largura de banda devido a erros de buffer ou transmissão.",
+      "resetStream": "Reiniciar transmissão"
+    },
+    "playInBackground": {
+      "label": "Reproduzir em segundo plano",
+      "tips": "Habilite esta opção para continuar a transmissão quando o player estiver oculto."
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} configurações",
+    "cameraEnabled": "Câmara habilitada",
+    "objectDetection": "Detecção de objeto",
+    "recording": "Gravando",
+    "audioDetection": "Detecção de áudio",
+    "autotracking": "Rastreamento automático",
+    "snapshots": "Snapshots"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "active_objects": "Objetos ativos",
+      "motion": "Movimento",
+      "all": "Todos"
+    },
+    "notAllTips": "Sua configuração de retenção de gravação {{source}} está definida como <code>modo: {{effectiveRetainMode}}</code>, portanto, esta gravação on-demand manterá apenas segmentos com {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Editar layout",
+    "group": {
+      "label": "Editar grupo de câmaras"
+    },
+    "exitEdit": "Sair da edição"
+  },
+  "audio": "Áudio",
+  "recording": {
+    "enable": "Habilitar gravação",
+    "disable": "Desativar gravação"
+  },
+  "history": {
+    "label": "Mostrar filmagens históricas"
+  }
+}

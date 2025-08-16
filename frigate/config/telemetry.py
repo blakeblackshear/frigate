@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import Field
 
 from .base import FrigateBaseModel
@@ -10,6 +12,9 @@ class StatsConfig(FrigateBaseModel):
     intel_gpu_stats: bool = Field(default=True, title="Enable Intel GPU stats.")
     network_bandwidth: bool = Field(
         default=False, title="Enable network bandwidth for ffmpeg processes."
+    )
+    intel_gpu_device: Optional[str] = Field(
+        default=None, title="Define the device to use when gathering SR-IOV stats."
     )
 
 

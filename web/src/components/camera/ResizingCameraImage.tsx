@@ -108,9 +108,7 @@ export default function CameraImage({
           width={scaledWidth}
         />
       ) : (
-        <div className="pt-6 text-center">
-          Camera is disabled in config, no stream or snapshot available!
-        </div>
+        <div className="pt-6 text-center">Camera is disabled.</div>
       )}
       {!hasLoaded && enabled ? (
         <div

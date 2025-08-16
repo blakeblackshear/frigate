@@ -1,0 +1,38 @@
+{
+  "alerts": "Výstrahy",
+  "detections": "Detekce",
+  "motion": {
+    "label": "Pohyb",
+    "only": "Jen pohyb"
+  },
+  "allCameras": "Všechny kamery",
+  "empty": {
+    "alert": "Nejsou žádné výstrahy na kontrolu",
+    "detection": "Nejsou žádné detekce na kontrolu",
+    "motion": "Nenalezena žádná data o pohybu"
+  },
+  "timeline": "Časová osa",
+  "timeline.aria": "Zvolit časovou osu",
+  "events": {
+    "label": "Události",
+    "aria": "Zvolit události",
+    "noFoundForTimePeriod": "Pro toto období nebyly nalezeny žádné události."
+  },
+  "documentTitle": "Revize - Frigate",
+  "camera": "Kamera",
+  "calendarFilter": {
+    "last24Hours": "Posledních 24 hodin"
+  },
+  "markAsReviewed": "Označit jako zkontrolované",
+  "markTheseItemsAsReviewed": "Označit tyto položky jako zkontrolované",
+  "newReviewItems": {
+    "label": "Zobrazit nové položky na kontrolu",
+    "button": "Nové položky na kontrolu"
+  },
+  "recordings": {
+    "documentTitle": "Záznamy - Frigate"
+  },
+  "detected": "Detekováno",
+  "selected_one": "{{count}} vybráno",
+  "selected_other": "{{count}} vybráno"
+}

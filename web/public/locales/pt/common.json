@@ -1,0 +1,275 @@
+{
+  "time": {
+    "last30": "Últimos 30 dias",
+    "12hours": "12 horas",
+    "justNow": "Agora",
+    "yesterday": "Ontem",
+    "today": "Hoje",
+    "last7": "Últimos 7 dias",
+    "last14": "Últimos 14 dias",
+    "thisWeek": "Essa semana",
+    "lastWeek": "Semana passada",
+    "5minutes": "5 minutos",
+    "10minutes": "10 minutos",
+    "30minutes": "30 minutos",
+    "24hours": "24 horas",
+    "pm": "pm",
+    "am": "am",
+    "year_one": "{{time}} ano",
+    "year_many": "{{time}} de anos",
+    "year_other": "{{time}} anos",
+    "month_one": "{{time}} mes",
+    "month_many": "{{time}} meses",
+    "month_other": "",
+    "day_one": "{{time}} dia",
+    "day_many": "{{time}} dias",
+    "day_other": "{{time}} dias",
+    "thisMonth": "Esse mês",
+    "lastMonth": "Mês passado",
+    "1hour": "1 hora",
+    "hour_one": "{{time}} hora",
+    "hour_many": "{{time}} horas",
+    "hour_other": "{{time}} horas",
+    "minute_one": "{{time}} minuto",
+    "minute_many": "{{time}} minutos",
+    "minute_other": "{{time}} minutos",
+    "second_one": "{{time}} segundo",
+    "second_many": "{{time}} segundos",
+    "second_other": "{{time}} segundos",
+    "untilForTime": "Até {{time}}",
+    "untilForRestart": "Até que o Frigate reinicie.",
+    "untilRestart": "Até reiniciar",
+    "ago": "{{timeAgo}} atrás",
+    "d": "{{time}}d",
+    "h": "{{time}}h",
+    "m": "{{time}}m",
+    "s": "{{time}}s",
+    "yr": "{{time}}ano",
+    "mo": "{{time}}mês",
+    "formattedTimestamp": {
+      "12hour": "%b %-d, %I:%M:%S %p",
+      "24hour": "%b %-d, %H:%M:%S"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd/MM h:mm:ss a",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampExcludeSeconds": {
+      "12hour": "%b %-d, %I:%M %p",
+      "24hour": "%b %-d, %H:%M"
+    },
+    "formattedTimestampWithYear": {
+      "12hour": "%b %-d %Y, %I:%M %p",
+      "24hour": "%b %-d %Y, %H:%M"
+    },
+    "formattedTimestampOnlyMonthAndDay": "%b %-d",
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
+    }
+  },
+  "unit": {
+    "speed": {
+      "kph": "kph",
+      "mph": "mph"
+    },
+    "length": {
+      "feet": "pé",
+      "meters": "metros"
+    }
+  },
+  "button": {
+    "enabled": "Habilitado",
+    "enable": "Habilitar",
+    "done": "Feito",
+    "reset": "Reiniciar",
+    "disabled": "Desabilitado",
+    "saving": "Salvando…",
+    "apply": "Aplicar",
+    "disable": "Desabilitar",
+    "save": "Salvar",
+    "copy": "Cópia",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "history": "Histórico",
+    "back": "Voltar",
+    "fullscreen": "Ecrã Completo",
+    "exitFullscreen": "Sair do Ecrã Completo",
+    "twoWayTalk": "Conversa bidirecional",
+    "cameraAudio": "Áudio da câmera",
+    "edit": "Editar",
+    "off": "DESLIGADO",
+    "copyCoordinates": "Copiar coordenadas",
+    "on": "LIGADO",
+    "delete": "Excluir",
+    "download": "Download",
+    "info": "Informações",
+    "no": "Não",
+    "suspended": "Suspenso",
+    "yes": "Sim",
+    "unselect": "Desmarcar",
+    "unsuspended": "Dessuspender",
+    "deleteNow": "Excluir agora",
+    "export": "Exportar",
+    "next": "Próximo",
+    "play": "Tocar",
+    "pictureInPicture": "Sobrepor Imagem"
+  },
+  "label": {
+    "back": "Voltar"
+  },
+  "menu": {
+    "user": {
+      "logout": "Sair",
+      "account": "Conta",
+      "current": "Utilizador atual: {{user}}",
+      "setPassword": "Definir senha",
+      "title": "Utilizador",
+      "anonymous": "anônimo"
+    },
+    "faceLibrary": "Biblioteca de rostos",
+    "withSystem": "Sistema",
+    "theme": {
+      "label": "Tema",
+      "blue": "Azul",
+      "green": "Verde",
+      "red": "Vermelho",
+      "contrast": "Alto contraste",
+      "default": "Padrão",
+      "highcontrast": "Alto Contraste",
+      "nord": "Nord"
+    },
+    "system": "Sistema",
+    "systemMetrics": "Métricas do sistema",
+    "configuration": "Configuração",
+    "systemLogs": "Logs do sistema",
+    "settings": "Configurações",
+    "configurationEditor": "Editor de configuração",
+    "languages": "Idiomas",
+    "language": {
+      "en": "Inglês (English)",
+      "zhCN": "Chinês simplificado",
+      "withSystem": {
+        "label": "Use as configurações do sistema para idioma"
+      },
+      "fr": "Français (Francês)",
+      "es": "Español (Espanhol)",
+      "ru": "Русский (Russo)",
+      "de": "Deutsch (Alemão)",
+      "ja": "日本語 (Japonês)",
+      "yue": "Cantonês (粵語)",
+      "ar": "العربية (Arabic)",
+      "uk": "Ucraniano (Українська)",
+      "el": "Grego (Ελληνικά)",
+      "hi": "हिन्दी (Hindi)",
+      "pt": "Português (Portuguese)",
+      "tr": "Türkçe (Turkish)",
+      "it": "Italiano (Italian)",
+      "nb": "Norueguês Bokmål (Norsk Bokmål)",
+      "ko": "Coreano (한국어)",
+      "vi": "Vietnamita (Tiếng Việt)",
+      "nl": "Nederlands (Dutch)",
+      "sv": "Svenska (Swedish)",
+      "cs": "Tcheco (Čeština)",
+      "fa": "Persa (فارسی)",
+      "pl": "Polonês (Polski)",
+      "he": "Hebraico (עברית)",
+      "fi": "Finlandês (Suomi)",
+      "da": "Dinamarquês (Dansk)",
+      "ro": "Romeno (Română)",
+      "hu": "Húngaro (Magyar)",
+      "sk": "Eslovaco (Slovenčina)",
+      "th": "Tailandês",
+      "ca": "Català (Catalão)"
+    },
+    "appearance": "Aparência",
+    "darkMode": {
+      "label": "Modo escuro",
+      "withSystem": {
+        "label": "Use as configurações do sistema para o modo claro ou escuro"
+      },
+      "light": "Claro",
+      "dark": "Escuro"
+    },
+    "help": "Ajuda",
+    "documentation": {
+      "title": "Documentação",
+      "label": "Documentação do Frigate"
+    },
+    "restart": "Reiniciar Frigate",
+    "live": {
+      "title": "Ao vivo",
+      "allCameras": "Todas as câmaras",
+      "cameras": {
+        "title": "Câmaras",
+        "count_one": "{{count}} Câmera",
+        "count_many": "{{count}} Câmeras",
+        "count_other": "{{count}} Câmeras"
+      }
+    },
+    "export": "Exportar",
+    "explore": "Explorar",
+    "review": "Análise",
+    "uiPlayground": "Área de Testes da Interface"
+  },
+  "pagination": {
+    "previous": {
+      "label": "Ir para a página anterior",
+      "title": "Anterior"
+    },
+    "label": "paginação",
+    "next": {
+      "title": "Próximo",
+      "label": "Ir para a próxima página"
+    },
+    "more": "Mais páginas"
+  },
+  "role": {
+    "admin": "Administrador",
+    "viewer": "Visualizador",
+    "title": "Regra",
+    "desc": "Administradores têm acesso total a todos os recursos da interface do Frigate. Visualizadores estão limitados a visualizar câmeras, revisar itens e assistir o histórico de gravaçoes na interface."
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL copiada para a área de transferência.",
+    "save": {
+      "title": "Salvar",
+      "error": {
+        "noMessage": "Falha ao salvar as alterações de configuração",
+        "title": "Falha ao salvar as alterações de configuração: {{errorMessage}}"
+      }
+    }
+  },
+  "accessDenied": {
+    "documentTitle": "Acesso negado - Frigate",
+    "title": "Acesso negado",
+    "desc": "Você não tem permissão para visualizar esta página."
+  },
+  "notFound": {
+    "documentTitle": "Não encontrado - Frigate",
+    "desc": "Página não encontrada",
+    "title": "404"
+  },
+  "selectItem": "Selecionar {{item}}"
+}

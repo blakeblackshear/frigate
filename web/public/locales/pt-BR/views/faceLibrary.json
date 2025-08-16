@@ -1,0 +1,102 @@
+{
+  "details": {
+    "person": "Pessoa",
+    "unknown": "Desconhecido",
+    "face": "Detalhes do Rosto",
+    "subLabelScore": "Pontuação do Sub-Rótulo",
+    "scoreInfo": "A pontuação do sub-rótulo é a pontuação ponderada de todas as confidências faciais reconhecidas, então a pontuação pode ser diferente da mostrada na foto instantânea.",
+    "faceDesc": "Detalhes do objeto rastreado que gerou este rosto",
+    "timestamp": "Carimbo de data e hora"
+  },
+  "selectItem": "Selecione {{item}}",
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Por favor selecione um arquivo de imagem."
+    },
+    "maxSize": "Tamanho máximo: {{size}}MB",
+    "dropActive": "Solte a imagem aqui…",
+    "dropInstructions": "Arraste e solte uma imagem aqui, ou clique para selecionar"
+  },
+  "deleteFaceLibrary": {
+    "title": "Apagar Nome",
+    "desc": "Tem certeza que quer deletar a coleção {{name}}? Isso deletará permanentemente todos os rostos associados."
+  },
+  "button": {
+    "addFace": "Adicionar Rosto",
+    "renameFace": "Renomear Rosto",
+    "deleteFace": "Remover Rosto",
+    "deleteFaceAttempts": "Remover Rostos",
+    "reprocessFace": "Reprocessar Rosto",
+    "uploadImage": "Enviar Imagem"
+  },
+  "createFaceLibrary": {
+    "new": "Criar Novo Rosto",
+    "title": "Criar Coleção",
+    "desc": "Criar uma nova coleção",
+    "nextSteps": "Para construir uma base forte:<li> Use a aba Teinar para selecionar e treinar em imagens para cada pessoa detectada.</li><li> Foque em imagens retas para melhores resultados; evite treinar imagens que capturam rostos em um ângulo.</li></ul>"
+  },
+  "deleteFaceAttempts": {
+    "title": "Apagar Rostos",
+    "desc_one": "Você tem certeza que quer deletar {{count}} rosto? Essa ação não pode ser desfeita.",
+    "desc_many": "Você tem certeza que quer deletar {{count}} rostos? Essa ação não pode ser desfeita.",
+    "desc_other": ""
+  },
+  "renameFace": {
+    "title": "Renomear Rosto",
+    "desc": "Entre com o novo nome para {{name}}"
+  },
+  "nofaces": "Sem rostos disponíveis",
+  "pixels": "{{area}}px",
+  "readTheDocs": "Leia a documentação",
+  "steps": {
+    "nextSteps": "Próximos Passos",
+    "faceName": "Digite o Nome do Rosto",
+    "uploadFace": "Enviar Imagem de Rosto",
+    "description": {
+      "uploadFace": "Faça o upload de uma imagem de {{name}} que mostre seu rosto visto de frente. A imagem não precisa estar recortada apenas com o rosto."
+    }
+  },
+  "description": {
+    "placeholder": "Informe um nome para esta coleção",
+    "addFace": "Passo a Passo para adicionar uma nova coleção a Biblioteca Facial.",
+    "invalidName": "Nome inválido. Nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífenes."
+  },
+  "documentTitle": "Biblioteca de rostos - Frigate",
+  "uploadFaceImage": {
+    "title": "Carregar imagem facial",
+    "desc": "Envie uma imagem para escanear por faces e incluir em {{pageToggle}}"
+  },
+  "collections": "Coleções",
+  "train": {
+    "title": "Treinar",
+    "aria": "Selecionar treinar",
+    "empty": "Não há tentativas recentes de reconhecimento facial"
+  },
+  "selectFace": "Selecionar Rosto",
+  "trainFaceAs": "Treinar Rosto como:",
+  "trainFace": "Treinar Rosto",
+  "toast": {
+    "success": {
+      "uploadedImage": "Imagens enviadas com sucesso.",
+      "addFaceLibrary": "{{name}} foi adicionado com sucesso à Biblioteca de Rostos!",
+      "deletedFace_one": "{{count}} rosto apagado com sucesso.",
+      "deletedFace_many": "{{count}} rostos apagados com sucesso.",
+      "deletedFace_other": "{{count}} rostos apagados com sucesso.",
+      "trainedFace": "Rosto treinado com sucesso.",
+      "updatedFaceScore": "Pontuação de rosto atualizada com sucesso.",
+      "renamedFace": "O rosto foi renomeado com sucesso para {{name}}",
+      "deletedName_one": "{{count}} rosto foi deletado com sucesso.",
+      "deletedName_many": "{{count}} rostos foram deletados com sucesso.",
+      "deletedName_other": "{{count}} rostos foram deletados com sucesso."
+    },
+    "error": {
+      "uploadingImageFailed": "Falha ao enviar a imagem: {{errorMessage}}",
+      "addFaceLibraryFailed": "Falha ao definir o nome do rosto: {{errorMessage}}",
+      "deleteFaceFailed": "Falha em deletar: {{errorMessage}}",
+      "deleteNameFailed": "Falha ao deletar nome: {{errorMessage}}",
+      "renameFaceFailed": "Falha ao renomear rosto: {{errorMessage}}",
+      "trainFailed": "Falha ao treinar: {{errorMessage}}",
+      "updateFaceScoreFailed": "Falha ao atualizar pontuação de rosto: {{errorMessage}}"
+    }
+  }
+}

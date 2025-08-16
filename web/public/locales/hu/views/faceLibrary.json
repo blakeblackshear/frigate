@@ -1,0 +1,99 @@
+{
+  "renameFace": {
+    "title": "Arc átnevezése",
+    "desc": "Adjon meg egy új nevet {{name}}-nak/-nek"
+  },
+  "details": {
+    "subLabelScore": "Alcimke érték",
+    "unknown": "Ismeretlen",
+    "person": "Ember",
+    "timestamp": "Időbélyeg",
+    "face": "Arc részletek",
+    "faceDesc": "A követett tárgy részletei, amely alapján ez az arc létrejött",
+    "scoreInfo": "Az alcímke pontszáma az összes felismert arc pontozásának súlyozott átlaga, ezért ez eltérhet a pillanatképen megjelenített pontszámtól."
+  },
+  "button": {
+    "deleteFace": "Arc törlése",
+    "renameFace": "Arc átnevezése",
+    "deleteFaceAttempts": "Arcok törlése",
+    "addFace": "Arc hozzáadása",
+    "uploadImage": "Kép feltöltése",
+    "reprocessFace": "Arc Újrafeldolgozása"
+  },
+  "collections": "Gyűjtemények",
+  "steps": {
+    "description": {
+      "uploadFace": "Töltsön fel egy képet {{name}}-ről amin szemből látható. A képen nem szükséges, hogy csak az arc legyen látható."
+    },
+    "faceName": "Adjon meg egy arcnevet",
+    "uploadFace": "Arckép feltöltése",
+    "nextSteps": "Következő lépések"
+  },
+  "deleteFaceAttempts": {
+    "title": "Arcok törlése",
+    "desc_one": "Biztos benne, hogy törölni akar {{count}} arcot? Ezt már nem tudja visszavonni.",
+    "desc_other": "Biztos benne, hogy törölni akar {{count}} arcot? Ezt már nem tudja visszavonni."
+  },
+  "uploadFaceImage": {
+    "title": "Arckép feltöltése",
+    "desc": "Töltsön fel egy képet, hogy beolvasson arcokat és beillessze {{pageToggle}}-ba/-be"
+  },
+  "createFaceLibrary": {
+    "title": "Gyűjtemény létrehozása",
+    "desc": "Új gyűjtemény létrehozása",
+    "new": "Új arc létrhozása",
+    "nextSteps": "A jó alap készítéséhez:<li>Használja a Tanítás fület az egyes észlelt személyekhez tartozó képek kiválasztására és betanítására.</li>A legjobb eredmény érdekében válassza az egyenesen előre néző arcokat ábrázoló képeket és kerülje a ferde szögből készült arcképeket a tanításhoz.</li></ul>"
+  },
+  "description": {
+    "placeholder": "Adj nevet ennek a gyűjteménynek",
+    "invalidName": "Nem megfelelő név. A nevek csak betűket, számokat, szóközöket, aposztrófokat, alulhúzásokat és kötőjeleket tartalmazhatnak.",
+    "addFace": "Segédlet új gyűjtemény hozzáadásához az arckép könyvtárban."
+  },
+  "selectFace": "Arc kiválasztása",
+  "deleteFaceLibrary": {
+    "title": "Név törlése",
+    "desc": "Biztosan törölni akarja a {{name}} gyűjteményt? Ezzel véglegesen törli a párosított arcokat."
+  },
+  "imageEntry": {
+    "dropActive": "Húzza a képet ide…",
+    "validation": {
+      "selectImage": "Kérem válasszon egy képet."
+    },
+    "maxSize": "Maximális méret: {{size}} MB",
+    "dropInstructions": "Fogja és húzza a képet ide, vagy kattintson a kiválasztáshoz"
+  },
+  "trainFaceAs": "Arc tanítása mint:",
+  "trainFace": "Arc tanítása",
+  "toast": {
+    "success": {
+      "addFaceLibrary": "{{name}} sikeresen hozzáadva a az Arc Könyvtárhoz!",
+      "uploadedImage": "A kép sikeresen feltöltve.",
+      "deletedName_one": "{{count}} arc sikeresen törölve.",
+      "deletedName_other": "{{count}} arc sikeresen törölve.",
+      "renamedFace": "Arc sikeresen átnvezezve {{name}}-ra/-re",
+      "updatedFaceScore": "Arc pontszáma sikeresen frissítve.",
+      "trainedFace": "Arc sikeresen betanítva.",
+      "deletedFace_one": "{{count}} arc sikeresen törölve.",
+      "deletedFace_other": "{{count}} arc sikeresen törölve."
+    },
+    "error": {
+      "addFaceLibraryFailed": "Arc névadás sikertelen: {{errorMessage}}",
+      "deleteFaceFailed": "Törlés sikertelen: {{errorMessage}}",
+      "deleteNameFailed": "Név törlése sikertelen: {{errorMessage}}",
+      "uploadingImageFailed": "Kép feltöltése sikertelen: {{errorMessage}}",
+      "updateFaceScoreFailed": "Arc pontszám frissítése sikertelen: {{errorMessage}}",
+      "renameFaceFailed": "Arc átnevezése sikertelen: {{errorMessage}}",
+      "trainFailed": "Sikertelen tanítás: {{errorMessage}}"
+    }
+  },
+  "readTheDocs": "Olvassa el a dokumentációt",
+  "nofaces": "Nincs elérhető arc",
+  "documentTitle": "Arc könyvtár - Frigate",
+  "train": {
+    "title": "Vonat",
+    "empty": "Nincs friss arcfelismerés",
+    "aria": "Válassza ki a tanítást"
+  },
+  "pixels": "{{area}}px",
+  "selectItem": "KIválasztani {{item}}-et"
+}

@@ -105,7 +105,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/users/{username}":
+  /users/{username}:
     delete:
       tags:
         - Auth
@@ -130,7 +130,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/users/{username}/password":
+  /users/{username}/password:
     put:
       tags:
         - Auth
@@ -161,6 +161,284 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /users/{username}/role:
+    put:
+      tags:
+        - Auth
+      summary: Update Role
+      operationId: update_role_users__username__role_put
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppPutRoleBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /faces:
+    get:
+      tags:
+        - Events
+      summary: Get Faces
+      operationId: get_faces_faces_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /faces/reprocess:
+    post:
+      tags:
+        - Events
+      summary: Reclassify Face
+      operationId: reclassify_face_faces_reprocess_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Body
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /faces/train/{name}/classify:
+    post:
+      tags:
+        - Events
+      summary: Train Face
+      operationId: train_face_faces_train__name__classify_post
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Body
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /faces/{name}/create:
+    post:
+      tags:
+        - Events
+      summary: Create Face
+      operationId: create_face_faces__name__create_post
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Name
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /faces/{name}/register:
+    post:
+      tags:
+        - Events
+      summary: Register Face
+      operationId: register_face_faces__name__register_post
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Name
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: >-
+                #/components/schemas/Body_register_face_faces__name__register_post
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /faces/recognize:
+    post:
+      tags:
+        - Events
+      summary: Recognize Face
+      operationId: recognize_face_faces_recognize_post
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Body_recognize_face_faces_recognize_post"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /faces/{name}/delete:
+    post:
+      tags:
+        - Events
+      summary: Deregister Faces
+      operationId: deregister_faces_faces__name__delete_post
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Body
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /faces/{old_name}/rename:
+    put:
+      tags:
+        - Events
+      summary: Rename Face
+      operationId: rename_face_faces__old_name__rename_put
+      parameters:
+        - name: old_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Old Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenameFaceBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /lpr/reprocess:
+    put:
+      tags:
+        - Events
+      summary: Reprocess License Plate
+      operationId: reprocess_license_plate_lpr_reprocess_put
+      parameters:
+        - name: event_id
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /reindex:
+    put:
+      tags:
+        - Events
+      summary: Reindex Embeddings
+      operationId: reindex_embeddings_reindex_put
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
   /review:
     get:
       tags:
@@ -206,9 +484,7 @@ paths:
           in: query
           required: false
           schema:
-            allOf:
-              - $ref: "#/components/schemas/SeverityEnum"
-            title: Severity
+            $ref: "#/components/schemas/SeverityEnum"
         - name: before
           in: query
           required: false
@@ -231,6 +507,35 @@ paths:
                 items:
                   $ref: "#/components/schemas/ReviewSegmentResponse"
                 title: Response Review Review Get
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /review_ids:
+    get:
+      tags:
+        - Review
+      summary: Review Ids
+      operationId: review_ids_review_ids_get
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Ids
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReviewSegmentResponse"
+                title: Response Review Ids Review Ids Get
         "422":
           description: Validation Error
           content:
@@ -385,7 +690,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/review/event/{event_id}":
+  /review/event/{event_id}:
     get:
       tags:
         - Review
@@ -411,7 +716,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/review/{review_id}":
+  /review/{review_id}:
     get:
       tags:
         - Review
@@ -437,7 +742,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/review/{review_id}/viewed":
+  /review/{review_id}/viewed:
     delete:
       tags:
         - Review
@@ -500,7 +805,7 @@ paths:
           content:
             application/json:
               schema: {}
-  "/go2rtc/streams/{camera_name}":
+  /go2rtc/streams/{camera_name}:
     get:
       tags:
         - App
@@ -575,6 +880,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+  /metrics:
+    get:
+      tags:
+        - App
+      summary: Metrics
+      description: Expose Prometheus metrics endpoint and update metrics with latest stats
+      operationId: metrics_metrics_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
   /config:
     get:
       tags:
@@ -704,7 +1022,7 @@ paths:
           content:
             application/json:
               schema: {}
-  "/logs/{service}":
+  /logs/{service}:
     get:
       tags:
         - App
@@ -731,6 +1049,15 @@ paths:
               - type: string
               - type: "null"
             title: Download
+        - name: stream
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: "null"
+            default: false
+            title: Stream
         - name: start
           in: query
           required: false
@@ -804,6 +1131,59 @@ paths:
         - App
       summary: Get Sub Labels
       operationId: get_sub_labels_sub_labels_get
+      parameters:
+        - name: split_joined
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: "null"
+            title: Split Joined
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /plus/models:
+    get:
+      tags:
+        - App
+      summary: Plusmodels
+      operationId: plusModels_plus_models_get
+      parameters:
+        - name: filterByCurrentModelDetector
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Filterbycurrentmodeldetector
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /recognized_license_plates:
+    get:
+      tags:
+        - App
+      summary: Get Recognized License Plates
+      operationId: get_recognized_license_plates_recognized_license_plates_get
       parameters:
         - name: split_joined
           in: query
@@ -938,7 +1318,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/preview/{camera_name}/start/{start_ts}/end/{end_ts}":
+  /preview/{camera_name}/start/{start_ts}/end/{end_ts}:
     get:
       tags:
         - Preview
@@ -976,7 +1356,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/preview/{year_month}/{day}/{hour}/{camera_name}/{tz_name}":
+  /preview/{year_month}/{day}/{hour}/{camera_name}/{tz_name}:
     get:
       tags:
         - Preview
@@ -1027,7 +1407,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/preview/{camera_name}/start/{start_ts}/end/{end_ts}/frames":
+  /preview/{camera_name}/start/{start_ts}/end/{end_ts}/frames:
     get:
       tags:
         - Preview
@@ -1114,7 +1494,7 @@ paths:
           content:
             application/json:
               schema: {}
-  "/export/{camera_name}/start/{start_time}/end/{end_time}":
+  /export/{camera_name}/start/{start_time}/end/{end_time}:
     post:
       tags:
         - Export
@@ -1158,12 +1538,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/export/{event_id}/{new_name}":
+  /export/{event_id}/rename:
     patch:
       tags:
         - Export
       summary: Export Rename
-      operationId: export_rename_export__event_id___new_name__patch
+      operationId: export_rename_export__event_id__rename_patch
       parameters:
         - name: event_id
           in: path
@@ -1171,12 +1551,12 @@ paths:
           schema:
             type: string
             title: Event Id
-        - name: new_name
-          in: path
-          required: true
-          schema:
-            type: string
-            title: New Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportRenameBody"
       responses:
         "200":
           description: Successful Response
@@ -1189,7 +1569,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/export/{event_id}":
+  /export/{event_id}:
     delete:
       tags:
         - Export
@@ -1214,7 +1594,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/exports/{export_id}":
+  /exports/{export_id}:
     get:
       tags:
         - Export
@@ -1350,7 +1730,7 @@ paths:
             anyOf:
               - type: string
               - type: "null"
-            default: "00:00,24:00"
+            default: 00:00,24:00
             title: Time Range
         - name: has_clip
           in: query
@@ -1409,6 +1789,31 @@ paths:
               - type: number
               - type: "null"
             title: Max Score
+        - name: min_speed
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: "null"
+            title: Min Speed
+        - name: max_speed
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: "null"
+            title: Max Speed
+        - name: recognized_license_plate
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            default: all
+            title: Recognized License Plate
         - name: is_submitted
           in: query
           required: false
@@ -1633,7 +2038,7 @@ paths:
             anyOf:
               - type: string
               - type: "null"
-            default: "00:00,24:00"
+            default: 00:00,24:00
             title: Time Range
         - name: has_clip
           in: query
@@ -1684,6 +2089,31 @@ paths:
               - type: number
               - type: "null"
             title: Max Score
+        - name: min_speed
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: "null"
+            title: Min Speed
+        - name: max_speed
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: "null"
+            title: Max Speed
+        - name: recognized_license_plate
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            default: all
+            title: Recognized License Plate
         - name: sort
           in: query
           required: false
@@ -1748,7 +2178,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}":
+  /events/{event_id}:
     get:
       tags:
         - Events
@@ -1799,7 +2229,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/retain":
+  /events/{event_id}/retain:
     post:
       tags:
         - Events
@@ -1850,7 +2280,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/plus":
+  /events/{event_id}/plus:
     post:
       tags:
         - Events
@@ -1867,9 +2297,7 @@ paths:
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: "#/components/schemas/SubmitPlusBody"
-              title: Body
+              $ref: "#/components/schemas/SubmitPlusBody"
       responses:
         "200":
           description: Successful Response
@@ -1883,7 +2311,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/false_positive":
+  /events/{event_id}/false_positive:
     put:
       tags:
         - Events
@@ -1909,7 +2337,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/sub_label":
+  /events/{event_id}/sub_label:
     post:
       tags:
         - Events
@@ -1941,7 +2369,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/description":
+  /events/{event_id}/recognized_license_plate:
+    post:
+      tags:
+        - Events
+      summary: Set Plate
+      operationId: set_plate_events__event_id__recognized_license_plate_post
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventsLPRBody"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericResponse"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /events/{event_id}/description:
     post:
       tags:
         - Events
@@ -1973,7 +2433,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/description/regenerate":
+  /events/{event_id}/description/regenerate:
     put:
       tags:
         - Events
@@ -2033,7 +2493,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{camera_name}/{label}/create":
+  /events/{camera_name}/{label}/create:
     post:
       tags:
         - Events
@@ -2056,15 +2516,13 @@ paths:
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: "#/components/schemas/EventsCreateBody"
+              $ref: "#/components/schemas/EventsCreateBody"
               default:
                 source_type: api
                 score: 0
                 duration: 30
                 include_recording: true
                 draw: {}
-              title: Body
       responses:
         "200":
           description: Successful Response
@@ -2078,7 +2536,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/end":
+  /events/{event_id}/end:
     put:
       tags:
         - Events
@@ -2110,7 +2568,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}":
+  /{camera_name}:
     get:
       tags:
         - Media
@@ -2197,7 +2655,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/ptz/info":
+  /{camera_name}/ptz/info:
     get:
       tags:
         - Media
@@ -2222,7 +2680,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/latest.{extension}":
+  /{camera_name}/latest.{extension}:
     get:
       tags:
         - Media
@@ -2305,6 +2763,14 @@ paths:
               - type: integer
               - type: "null"
             title: Height
+        - name: store
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: "null"
+            title: Store
       responses:
         "200":
           description: Successful Response
@@ -2317,7 +2783,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/recordings/{frame_time}/snapshot.{format}":
+  /{camera_name}/recordings/{frame_time}/snapshot.{format}:
     get:
       tags:
         - Media
@@ -2364,7 +2830,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/plus/{frame_time}":
+  /{camera_name}/plus/{frame_time}:
     post:
       tags:
         - Media
@@ -2407,7 +2873,43 @@ paths:
           content:
             application/json:
               schema: {}
-  "/{camera_name}/recordings/summary":
+  /recordings/summary:
+    get:
+      tags:
+        - Media
+      summary: All Recordings Summary
+      description: Returns true/false by day indicating if recordings exist
+      operationId: all_recordings_summary_recordings_summary_get
+      parameters:
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            type: string
+            default: utc
+            title: Timezone
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: "null"
+            default: all
+            title: Cameras
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /{camera_name}/recordings/summary:
     get:
       tags:
         - Media
@@ -2440,13 +2942,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/recordings":
+  /{camera_name}/recordings:
     get:
       tags:
         - Media
       summary: Recordings
       description: >-
-        Return specific camera recordings between the given 'after'/'end' times.
+        Return specific camera recordings between the given "after"/"end" times.
         If not provided the last hour will be used
       operationId: recordings__camera_name__recordings_get
       parameters:
@@ -2461,14 +2963,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1733228876.15567
+            default: 1752611870.43948
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1733232476.15567
+            default: 1752615470.43949
             title: Before
       responses:
         "200":
@@ -2482,11 +2984,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4":
+  /{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4:
     get:
       tags:
         - Media
       summary: Recording Clip
+      description: >-
+        For iOS devices, use the master.m3u8 HLS link instead of clip.mp4.
+        Safari does not reliably process progressive mp4 files.
       operationId: recording_clip__camera_name__start__start_ts__end__end_ts__clip_mp4_get
       parameters:
         - name: camera_name
@@ -2519,11 +3024,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/vod/{camera_name}/start/{start_ts}/end/{end_ts}":
+  /vod/{camera_name}/start/{start_ts}/end/{end_ts}:
     get:
       tags:
         - Media
       summary: Vod Ts
+      description: >-
+        Returns an HLS playlist for the specified timestamp-range on the
+        specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.
       operationId: vod_ts_vod__camera_name__start__start_ts__end__end_ts__get
       parameters:
         - name: camera_name
@@ -2556,12 +3064,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/vod/{year_month}/{day}/{hour}/{camera_name}":
+  /vod/{year_month}/{day}/{hour}/{camera_name}:
     get:
       tags:
         - Media
       summary: Vod Hour No Timezone
-      description: VOD for specific hour. Uses the default timezone (UTC).
+      description: >-
+        Returns an HLS playlist for the specified date-time on the specified
+        camera. Append /master.m3u8 or /index.m3u8 for HLS playback.
       operationId: vod_hour_no_timezone_vod__year_month___day___hour___camera_name__get
       parameters:
         - name: year_month
@@ -2600,11 +3110,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}":
+  /vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}:
     get:
       tags:
         - Media
       summary: Vod Hour
+      description: >-
+        Returns an HLS playlist for the specified date-time (with timezone) on
+        the specified camera. Append /master.m3u8 or /index.m3u8 for HLS
+        playback.
       operationId: vod_hour_vod__year_month___day___hour___camera_name___tz_name__get
       parameters:
         - name: year_month
@@ -2649,11 +3163,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/vod/event/{event_id}":
+  /vod/event/{event_id}:
     get:
       tags:
         - Media
       summary: Vod Event
+      description: >-
+        Returns an HLS playlist for the specified object. Append /master.m3u8 or
+        /index.m3u8 for HLS playback.
       operationId: vod_event_vod_event__event_id__get
       parameters:
         - name: event_id
@@ -2674,11 +3191,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/snapshot.jpg":
+  /events/{event_id}/snapshot.jpg:
     get:
       tags:
         - Media
       summary: Event Snapshot
+      description: >-
+        Returns a snapshot image for the specified object id. NOTE: The query
+        params only take affect while the event is in-progress. Once the event
+        has ended the snapshot configuration is used.
       operationId: event_snapshot_events__event_id__snapshot_jpg_get
       parameters:
         - name: event_id
@@ -2749,12 +3270,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/thumbnail.jpg":
+  /events/{event_id}/thumbnail.{extension}:
     get:
       tags:
         - Media
       summary: Event Thumbnail
-      operationId: event_thumbnail_events__event_id__thumbnail_jpg_get
+      operationId: event_thumbnail_events__event_id__thumbnail__extension__get
       parameters:
         - name: event_id
           in: path
@@ -2762,6 +3283,12 @@ paths:
           schema:
             type: string
             title: Event Id
+        - name: extension
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Extension
         - name: max_cache_age
           in: query
           required: false
@@ -2793,7 +3320,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/grid.jpg":
+  /{camera_name}/grid.jpg:
     get:
       tags:
         - Media
@@ -2832,7 +3359,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/snapshot-clean.png":
+  /events/{event_id}/snapshot-clean.png:
     get:
       tags:
         - Media
@@ -2864,7 +3391,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/clip.mp4":
+  /events/{event_id}/clip.mp4:
     get:
       tags:
         - Media
@@ -2889,7 +3416,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/events/{event_id}/preview.gif":
+  /events/{event_id}/preview.gif:
     get:
       tags:
         - Media
@@ -2914,7 +3441,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif":
+  /{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif:
     get:
       tags:
         - Media
@@ -2960,7 +3487,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4":
+  /{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4:
     get:
       tags:
         - Media
@@ -3006,7 +3533,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/review/{event_id}/preview":
+  /review/{event_id}/preview:
     get:
       tags:
         - Media
@@ -3041,7 +3568,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/preview/{file_name}/thumbnail.webp":
+  /preview/{file_name}/thumbnail.webp:
     get:
       tags:
         - Media
@@ -3067,7 +3594,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/preview/{file_name}/thumbnail.jpg":
+  /preview/{file_name}/thumbnail.jpg:
     get:
       tags:
         - Media
@@ -3093,7 +3620,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/{label}/thumbnail.jpg":
+  /{camera_name}/{label}/thumbnail.jpg:
     get:
       tags:
         - Media
@@ -3124,7 +3651,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/{label}/best.jpg":
+  /{camera_name}/{label}/best.jpg:
     get:
       tags:
         - Media
@@ -3155,7 +3682,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/{label}/clip.mp4":
+  /{camera_name}/{label}/clip.mp4:
     get:
       tags:
         - Media
@@ -3186,7 +3713,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-  "/{camera_name}/{label}/snapshot.jpg":
+  /{camera_name}/{label}/snapshot.jpg:
     get:
       tags:
         - Media
@@ -3251,6 +3778,12 @@ components:
         password:
           type: string
           title: Password
+        role:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Role
+          default: viewer
       type: object
       required:
         - username
@@ -3265,6 +3798,35 @@ components:
       required:
         - password
       title: AppPutPasswordBody
+    AppPutRoleBody:
+      properties:
+        role:
+          type: string
+          title: Role
+      type: object
+      required:
+        - role
+      title: AppPutRoleBody
+    Body_recognize_face_faces_recognize_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+        - file
+      title: Body_recognize_face_faces_recognize_post
+    Body_register_face_faces__name__register_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+        - file
+      title: Body_register_face_faces__name__register_post
     DayReview:
       properties:
         day:
@@ -3354,7 +3916,9 @@ components:
             - type: "null"
           title: End Time
         false_positive:
-          type: boolean
+          anyOf:
+            - type: boolean
+            - type: "null"
           title: False Positive
         zones:
           items:
@@ -3362,7 +3926,9 @@ components:
           type: array
           title: Zones
         thumbnail:
-          type: string
+          anyOf:
+            - type: string
+            - type: "null"
           title: Thumbnail
         has_clip:
           type: boolean
@@ -3394,6 +3960,7 @@ components:
             - type: "null"
           title: Model Type
         data:
+          type: object
           title: Data
       type: object
       required:
@@ -3498,6 +4065,23 @@ components:
           title: End Time
       type: object
       title: EventsEndBody
+    EventsLPRBody:
+      properties:
+        recognizedLicensePlate:
+          type: string
+          maxLength: 100
+          title: Recognized License Plate
+        recognizedLicensePlateScore:
+          anyOf:
+            - type: number
+              maximum: 1
+              exclusiveMinimum: 0
+            - type: "null"
+          title: Score for recognized license plate
+      type: object
+      required:
+        - recognizedLicensePlate
+      title: EventsLPRBody
     EventsSubLabelBody:
       properties:
         subLabel:
@@ -3511,6 +4095,11 @@ components:
               exclusiveMinimum: 0
             - type: "null"
           title: Score for sub label
+        camera:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Camera this object is detected on.
       type: object
       required:
         - subLabel
@@ -3518,13 +4107,11 @@ components:
     ExportRecordingsBody:
       properties:
         playback:
-          allOf:
-            - $ref: "#/components/schemas/PlaybackFactorEnum"
+          $ref: "#/components/schemas/PlaybackFactorEnum"
           title: Playback factor
           default: realtime
         source:
-          allOf:
-            - $ref: "#/components/schemas/PlaybackSourceEnum"
+          $ref: "#/components/schemas/PlaybackSourceEnum"
           title: Playback source
           default: recordings
         name:
@@ -3536,6 +4123,16 @@ components:
           title: Image Path
       type: object
       title: ExportRecordingsBody
+    ExportRenameBody:
+      properties:
+        name:
+          type: string
+          maxLength: 256
+          title: Friendly name
+      type: object
+      required:
+        - name
+      title: ExportRenameBody
     Extension:
       type: string
       enum:
@@ -3605,6 +4202,15 @@ components:
         - thumbnails
         - snapshot
       title: RegenerateDescriptionEnum
+    RenameFaceBody:
+      properties:
+        new_name:
+          type: string
+          title: New Name
+      type: object
+      required:
+        - new_name
+      title: RenameFaceBody
     ReviewActivityMotionResponse:
       properties:
         start_time:

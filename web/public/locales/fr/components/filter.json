@@ -1,0 +1,127 @@
+{
+  "labels": {
+    "label": "Libellés",
+    "all": {
+      "title": "Tous les libellés",
+      "short": "Libellés"
+    },
+    "count": "{{count}} Étiquettes",
+    "count_one": "{{count}} libellé",
+    "count_other": "{{count}} libellés"
+  },
+  "filter": "Filtre",
+  "zones": {
+    "label": "Zones",
+    "all": {
+      "title": "Toutes les zones",
+      "short": "Zones"
+    }
+  },
+  "dates": {
+    "all": {
+      "title": "Toutes les dates",
+      "short": "Dates"
+    },
+    "selectPreset": "Sélectionnez un préréglage…"
+  },
+  "more": "Plus de filtres",
+  "reset": {
+    "label": "Réinitialiser les filtres aux valeurs par défaut"
+  },
+  "timeRange": "Plage de temps",
+  "subLabels": {
+    "label": "Sous-libellés",
+    "all": "Tous les sous-libellés"
+  },
+  "score": "Score",
+  "estimatedSpeed": "Vitesse estimée ({{unit}})",
+  "sort": {
+    "label": "Tri",
+    "dateDesc": "Date (ordre chronologique inverse)",
+    "dateAsc": "Date (ordre chronologique)",
+    "scoreDesc": "Score d'objet (décroissant)",
+    "scoreAsc": "Score d'objet (croissant)",
+    "speedAsc": "Vitesse estimée (croissant)",
+    "speedDesc": "Vitesse estimée (décroissant)",
+    "relevance": "Pertinence"
+  },
+  "features": {
+    "submittedToFrigatePlus": {
+      "tips": "Vous devez d'abord filtrer les objets suivis qui ont un instantané.<br /><br />Les objets suivis sans instantané ne peuvent pas être soumis à Frigate+.",
+      "label": "Soumis à Frigate+"
+    },
+    "hasVideoClip": "A un clip vidéo",
+    "hasSnapshot": "A un instantané",
+    "label": "Fonctionnalités"
+  },
+  "explore": {
+    "settings": {
+      "title": "Paramètres",
+      "defaultView": {
+        "title": "Vue par défaut",
+        "summary": "Résumé",
+        "unfilteredGrid": "Grille non filtrée",
+        "desc": "Lorsqu'aucun filtre n'est sélectionné, affiche un résumé des objets suivis les plus récents par libellé, ou affiche une grille non filtrée."
+      },
+      "gridColumns": {
+        "desc": "Sélectionner le nombre de colonnes dans la vue grille.",
+        "title": "Colonnes de la grille"
+      },
+      "searchSource": {
+        "label": "Source de recherche",
+        "options": {
+          "thumbnailImage": "Image de miniature",
+          "description": "Description"
+        },
+        "desc": "Choisissez si vous souhaitez rechercher les miniatures ou les descriptions de vos objets suivis."
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Sélectionner une date pour filtrer"
+      }
+    }
+  },
+  "review": {
+    "showReviewed": "Montrer les éléments passés en revue"
+  },
+  "cameras": {
+    "label": "Filtre des caméras",
+    "all": {
+      "short": "Caméras",
+      "title": "Toutes les caméras"
+    }
+  },
+  "motion": {
+    "showMotionOnly": "Afficher uniquement le mouvement"
+  },
+  "logSettings": {
+    "filterBySeverity": "Filtrer les journaux par gravité",
+    "loading": {
+      "title": "Chargement",
+      "desc": "Lorsque le volet de journalisation est défilé jusqu'en bas, les nouveaux enregistrements s'affichent automatiquement au fur et à mesure qu'ils sont ajoutés."
+    },
+    "label": "Niveau de journalisation du filtre",
+    "disableLogStreaming": "Désactiver la diffusion des journaux",
+    "allLogs": "Tous les journaux"
+  },
+  "recognizedLicensePlates": {
+    "placeholder": "Tapez pour rechercher des plaques d'immatriculation…",
+    "noLicensePlatesFound": "Aucune plaque d'immatriculation trouvée.",
+    "loading": "Chargement des plaques d'immatriculation reconnues…",
+    "title": "Plaques d'immatriculation reconnues",
+    "loadFailed": "Échec du chargement des plaques d'immatriculation reconnues.",
+    "selectPlatesFromList": "Sélectionner une ou plusieurs plaques d'immatriculation dans la liste."
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmer la suppression",
+    "toast": {
+      "success": "Les objets suivis ont été supprimés avec succès.",
+      "error": "Échec de la suppression des objets suivis : {{errorMessage}}"
+    },
+    "desc": "Supprimer ces objets suivis {{objectLength}} retirera l'instantané, les représentations numériques enregistrées et les entrées du cycle de vie de l'objet associées. Les séquences enregistrées de ces objets suivis dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Voulez-vous vraiment continuer ?<br /><br />Maintenez la touche <em>Maj</em> enfoncée pour ignorer cette boîte de dialogue à l'avenir."
+  },
+  "zoneMask": {
+    "filterBy": "Filtrer par masque de zone"
+  }
+}

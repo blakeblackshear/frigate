@@ -1,0 +1,266 @@
+{
+  "time": {
+    "untilForTime": "Until {{time}}",
+    "untilForRestart": "Until Frigate restarts.",
+    "untilRestart": "Until restart",
+    "ago": "{{timeAgo}} ago",
+    "justNow": "Just now",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last7": "Last 7 days",
+    "last14": "Last 14 days",
+    "last30": "Last 30 days",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "5minutes": "5 minutes",
+    "10minutes": "10 minutes",
+    "30minutes": "30 minutes",
+    "1hour": "1 hour",
+    "12hours": "12 hours",
+    "24hours": "24 hours",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}}yr",
+    "year_one": "{{time}} year",
+    "year_other": "{{time}} years",
+    "mo": "{{time}}mo",
+    "month_one": "{{time}} month",
+    "month_other": "{{time}} months",
+    "d": "{{time}}d",
+    "day_one": "{{time}} day",
+    "day_other": "{{time}} days",
+    "h": "{{time}}h",
+    "hour_one": "{{time}} hour",
+    "hour_other": "{{time}} hours",
+    "m": "{{time}}m",
+    "minute_one": "{{time}} minute",
+    "minute_other": "{{time}} minutes",
+    "s": "{{time}}s",
+    "second_one": "{{time}} second",
+    "second_other": "{{time}} seconds",
+    "formattedTimestamp": {
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    }
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "kph"
+    },
+    "length": {
+      "feet": "feet",
+      "meters": "meters"
+    }
+  },
+  "label": {
+    "back": "Go back"
+  },
+  "button": {
+    "apply": "Apply",
+    "reset": "Reset",
+    "done": "Done",
+    "enabled": "Enabled",
+    "enable": "Enable",
+    "disabled": "Disabled",
+    "disable": "Disable",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "close": "Close",
+    "copy": "Copy",
+    "back": "Back",
+    "history": "History",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "pictureInPicture": "Picture in Picture",
+    "twoWayTalk": "Two Way Talk",
+    "cameraAudio": "Camera Audio",
+    "on": "ON",
+    "off": "OFF",
+    "edit": "Edit",
+    "copyCoordinates": "Copy coordinates",
+    "delete": "Delete",
+    "yes": "Yes",
+    "no": "No",
+    "download": "Download",
+    "info": "Info",
+    "suspended": "Suspended",
+    "unsuspended": "Unsuspend",
+    "play": "Play",
+    "unselect": "Unselect",
+    "export": "Export",
+    "deleteNow": "Delete Now",
+    "next": "Next"
+  },
+  "menu": {
+    "system": "System",
+    "systemMetrics": "System metrics",
+    "configuration": "Configuration",
+    "systemLogs": "System logs",
+    "settings": "Settings",
+    "configurationEditor": "Configuration Editor",
+    "languages": "Languages",
+    "language": {
+      "en": "English (English)",
+      "es": "Español (Spanish)",
+      "zhCN": "简体中文 (Simplified Chinese)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (French)",
+      "ar": "العربية (Arabic)",
+      "pt": "Português (Portuguese)",
+      "ptBR": "Português brasileiro (Brazilian Portuguese)",
+      "ru": "Русский (Russian)",
+      "de": "Deutsch (German)",
+      "ja": "日本語 (Japanese)",
+      "tr": "Türkçe (Turkish)",
+      "it": "Italiano (Italian)",
+      "nl": "Nederlands (Dutch)",
+      "sv": "Svenska (Swedish)",
+      "cs": "Čeština (Czech)",
+      "nb": "Norsk Bokmål (Norwegian Bokmål)",
+      "ko": "한국어 (Korean)",
+      "vi": "Tiếng Việt (Vietnamese)",
+      "fa": "فارسی (Persian)",
+      "pl": "Polski (Polish)",
+      "uk": "Українська (Ukrainian)",
+      "he": "עברית (Hebrew)",
+      "el": "Ελληνικά (Greek)",
+      "ro": "Română (Romanian)",
+      "hu": "Magyar (Hungarian)",
+      "fi": "Suomi (Finnish)",
+      "da": "Dansk (Danish)",
+      "sk": "Slovenčina (Slovak)",
+      "yue": "粵語 (Cantonese)",
+      "th": "ไทย (Thai)",
+      "ca": "Català (Catalan)",
+      "sr": "Српски (Serbian)",
+      "sl": "Slovenščina (Slovenian)",
+      "lt": "Lietuvių (Lithuanian)",
+      "bg": "Български (Bulgarian)",
+      "gl": "Galego (Galician)",
+      "id": "Bahasa Indonesia (Indonesian)",
+      "ur": "اردو (Urdu)",
+      "withSystem": {
+        "label": "Use the system settings for language"
+      }
+    },
+    "appearance": "Appearance",
+    "darkMode": {
+      "label": "Dark Mode",
+      "light": "Light",
+      "dark": "Dark",
+      "withSystem": {
+        "label": "Use the system settings for light or dark mode"
+      }
+    },
+    "withSystem": "System",
+    "theme": {
+      "label": "Theme",
+      "blue": "Blue",
+      "green": "Green",
+      "nord": "Nord",
+      "red": "Red",
+      "highcontrast": "High Contrast",
+      "default": "Default"
+    },
+    "help": "Help",
+    "documentation": {
+      "title": "Documentation",
+      "label": "Frigate documentation"
+    },
+    "restart": "Restart Frigate",
+    "live": {
+      "title": "Live",
+      "allCameras": "All Cameras",
+      "cameras": {
+        "title": "Cameras",
+        "count_one": "{{count}} Camera",
+        "count_other": "{{count}} Cameras"
+      }
+    },
+    "review": "Review",
+    "explore": "Explore",
+    "export": "Export",
+    "uiPlayground": "UI Playground",
+    "faceLibrary": "Face Library",
+    "user": {
+      "title": "User",
+      "account": "Account",
+      "current": "Current User: {{user}}",
+      "anonymous": "anonymous",
+      "logout": "Logout",
+      "setPassword": "Set Password"
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "Copied URL to clipboard.",
+    "save": {
+      "title": "Save",
+      "error": {
+        "title": "Failed to save config changes: {{errorMessage}}",
+        "noMessage": "Failed to save config changes"
+      }
+    }
+  },
+  "role": {
+    "title": "Role",
+    "admin": "Admin",
+    "viewer": "Viewer",
+    "desc": "Admins have full access to all features in the Frigate UI. Viewers are limited to viewing cameras, review items, and historical footage in the UI."
+  },
+  "pagination": {
+    "label": "pagination",
+    "previous": {
+      "title": "Previous",
+      "label": "Go to previous page"
+    },
+    "next": {
+      "title": "Next",
+      "label": "Go to next page"
+    },
+    "more": "More pages"
+  },
+  "accessDenied": {
+    "documentTitle": "Access Denied - Frigate",
+    "title": "Access Denied",
+    "desc": "You don't have permission to view this page."
+  },
+  "notFound": {
+    "documentTitle": "Not Found - Frigate",
+    "title": "404",
+    "desc": "Page not found"
+  },
+  "selectItem": "Select {{item}}"
+}

@@ -1,0 +1,126 @@
+{
+  "filter": "Filter",
+  "labels": {
+    "all": {
+      "short": "Labels",
+      "title": "Alle Labels"
+    },
+    "label": "Labels",
+    "count_one": "{{count}} Label",
+    "count_other": "{{count}} Labels"
+  },
+  "zones": {
+    "all": {
+      "title": "Alle Zonen",
+      "short": "Zonen"
+    },
+    "label": "Zonen"
+  },
+  "dates": {
+    "all": {
+      "title": "Alle Zeiträume",
+      "short": "Daten"
+    },
+    "selectPreset": "Wähle eine Voreinstellung aus…"
+  },
+  "reset": {
+    "label": "Filter auf Standardwerte zurücksetzen"
+  },
+  "more": "Mehr Filter",
+  "timeRange": "Zeitraum",
+  "subLabels": {
+    "all": "Alle Unterkategorien",
+    "label": "Unterkategorie"
+  },
+  "features": {
+    "label": "Eigenschaften",
+    "hasSnapshot": "Hat einen Schnappschuss",
+    "hasVideoClip": "Hat einen Video-Clip",
+    "submittedToFrigatePlus": {
+      "label": "Eingereicht bei Frigate+",
+      "tips": "Du musst zuerst nach deine erkannten Objekten, die einen Schnappschuss haben, filtern. <br /><br /> Erkante Objekte ohne Schnappschuss können nicht zu Frigate+ übermittelt werden."
+    }
+  },
+  "score": "Ergebnis",
+  "estimatedSpeed": "Geschätzte Geschwindigkeit ({{unit}})",
+  "sort": {
+    "label": "Sortieren",
+    "dateAsc": "Datum (Aufsteigend)",
+    "dateDesc": "Datum (Absteigend)",
+    "scoreAsc": "Objekt Wertung (Aufsteigend)",
+    "scoreDesc": "Objekt Wertung (Absteigend)",
+    "speedAsc": "Geschätzte Geschwindigkeit (Aufsteigend)",
+    "relevance": "Relevanz",
+    "speedDesc": "Geschätzte Geschwindigkeit (absteigend)"
+  },
+  "cameras": {
+    "all": {
+      "title": "Alle Kameras",
+      "short": "Kameras"
+    },
+    "label": "Kamera Filter"
+  },
+  "motion": {
+    "showMotionOnly": "Zeige nur Bewegung"
+  },
+  "review": {
+    "showReviewed": "Geprüfte anzeigen"
+  },
+  "explore": {
+    "settings": {
+      "defaultView": {
+        "title": "Standardansicht",
+        "desc": "Wenn keine Filter ausgewählt sind, wird eine Zusammenfassung der zuletzt verfolgten Objekte pro Kategorie oder ein ungefiltertes Raster angezeigt.",
+        "summary": "Zusammenfassung",
+        "unfilteredGrid": "Ungefiltertes Raster"
+      },
+      "title": "Einstellungen",
+      "gridColumns": {
+        "title": "Rasterspalten",
+        "desc": "Wähle die Anzahl der Spalten in der Rasteransicht."
+      },
+      "searchSource": {
+        "options": {
+          "description": "Beschreibung",
+          "thumbnailImage": "Vorschaubild"
+        },
+        "label": "Quelle der Suche",
+        "desc": "Wähle, ob die Miniaturansichten oder die Beschreibungen der erkannten Objekte durchsucht werden sollen."
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Wähle ein Datum zum Filtern"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Log-Ebene filtern",
+    "filterBySeverity": "Protokolle nach Schweregrad filtern",
+    "loading": {
+      "title": "Lade",
+      "desc": "Wenn das Protokollfenster nach unten gescrollt wird, werden neue Protokolle automatisch geladen, sobald sie hinzugefügt werden."
+    },
+    "disableLogStreaming": "Log des Streams deaktvieren",
+    "allLogs": "Alle Logs"
+  },
+  "trackedObjectDelete": {
+    "title": "Bestätige Löschung",
+    "toast": {
+      "success": "Erkannte Objekte erfolgreich gelöscht.",
+      "error": "Das Löschen von verfolgten Objekten ist fehlgeschlagen: {{errorMessage}}"
+    },
+    "desc": "Beim Löschen dieser {{objectLength}} verfolgten Objekte werden der Schnappschuss, alle gespeicherten Einbettungen und alle zugehörigen Objektlebenszykluseinträge entfernt. Aufgezeichnetes Filmmaterial dieser verfolgten Objekte in der Verlaufsansicht wird <em>NICHT</em> gelöscht. <br /><br />Bist du sicher, dass du fortfahren möchtest?<br /><br />Halte die <em>Shift-Taste</em> gedrückt, um diesen Dialog in Zukunft zu umgehen."
+  },
+  "zoneMask": {
+    "filterBy": "Nach Zonenmaskierung filtern"
+  },
+  "recognizedLicensePlates": {
+    "noLicensePlatesFound": "Keine Kennzeichen gefunden.",
+    "title": "Bekannte Kennzeichen",
+    "loadFailed": "Bekannte Nummernschilder konnten nicht geladen werden.",
+    "loading": "Lade bekannte Nummernschilder…",
+    "placeholder": "Tippe, um Kennzeichen zu suchen…",
+    "selectPlatesFromList": "Wählen eine oder mehrere Kennzeichen aus der Liste aus."
+  }
+}

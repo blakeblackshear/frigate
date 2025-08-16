@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "storage": "Thống kê lưu trữ - Frigate",
+    "general": "Thống kê Chung - Frigate",
+    "enrichments": "Thống kê Làm giàu Dữ liệu - Frigate",
+    "logs": {
+      "frigate": "Nhật ký Frigate - Frigate",
+      "go2rtc": "Nhật ký Go2RTC - Frigate",
+      "nginx": "Nhật ký Nginx - Frigate"
+    },
+    "cameras": "Thống kê Camera - Frigate"
+  },
+  "general": {
+    "hardwareInfo": {
+      "npuUsage": "Mức sử dụng NPU",
+      "npuMemory": "Bộ nhớ NPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Đầu ra Vainfo",
+          "returnCode": "Mã trả về: {{code}}",
+          "processOutput": "Đầu ra Tiến trình:",
+          "processError": "Lỗi Tiến trình:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Đầu ra Nvidia SMI",
+          "name": "Tên: {{name}}",
+          "driver": "Trình điều khiển: {{driver}}",
+          "cudaComputerCapability": "Khả năng Tính toán CUDA: {{cuda_compute}}",
+          "vbios": "Thông tin VBios: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Đóng thông tin GPU"
+        },
+        "copyInfo": {
+          "label": "Sao chép thông tin GPU"
+        },
+        "toast": {
+          "success": "Đã sao chép thông tin GPU vào clipboard"
+        }
+      },
+      "title": "Thông tin Phần cứng",
+      "gpuUsage": "Mức sử dụng GPU",
+      "gpuMemory": "Bộ nhớ GPU",
+      "gpuEncoder": "Bộ mã hóa GPU",
+      "gpuDecoder": "Bộ giải mã GPU"
+    },
+    "otherProcesses": {
+      "processCpuUsage": "Mức sử dụng CPU của Tiến trình",
+      "processMemoryUsage": "Mức sử dụng Bộ nhớ của Tiến trình",
+      "title": "Các Tiến trình Khác"
+    },
+    "detector": {
+      "temperature": "Nhiệt độ Bộ phát hiện",
+      "memoryUsage": "Mức sử dụng Bộ nhớ của Bộ phát hiện",
+      "title": "Bộ phát hiện",
+      "inferenceSpeed": "Tốc độ Suy luận của Bộ phát hiện",
+      "cpuUsage": "Mức sử dụng CPU của Bộ phát hiện"
+    },
+    "title": "Chung"
+  },
+  "storage": {
+    "overview": "Tổng quan",
+    "cameraStorage": {
+      "title": "Lưu trữ Camera",
+      "camera": "Camera",
+      "unusedStorageInformation": "Thông tin Lưu trữ Chưa sử dụng",
+      "storageUsed": "Lưu trữ",
+      "percentageOfTotalUsed": "Tổng phần trăm",
+      "bandwidth": "Băng thông",
+      "unused": {
+        "title": "Chưa sử dụng",
+        "tips": "Giá trị này có thể không phản ánh chính xác dung lượng trống có sẵn cho Frigate nếu bạn có các tệp khác được lưu trữ trên ổ đĩa ngoài các bản ghi của Frigate. Frigate không theo dõi việc sử dụng dung lượng lưu trữ bên ngoài các bản ghi của nó."
+      }
+    },
+    "title": "Lưu trữ",
+    "recordings": {
+      "title": "Bản ghi",
+      "tips": "Giá trị này thể hiện tổng dung lượng lưu trữ được sử dụng bởi các bản ghi trong cơ sở dữ liệu của Frigate. Frigate không theo dõi việc sử dụng dung lượng lưu trữ cho tất cả các tệp trên đĩa của bạn.",
+      "earliestRecording": "Bản ghi sớm nhất hiện có:"
+    }
+  },
+  "cameras": {
+    "label": {
+      "detect": "phát hiện",
+      "skipped": "bỏ qua",
+      "ffmpeg": "FFmpeg",
+      "capture": "ghi hình",
+      "overallDetectionsPerSecond": "tổng số phát hiện mỗi giây",
+      "cameraFramesPerSecond": "{{camName}} khung hình mỗi giây",
+      "cameraDetectionsPerSecond": "{{camName}} phát hiện mỗi giây",
+      "overallFramesPerSecond": "tổng số khung hình mỗi giây",
+      "camera": "camera",
+      "overallSkippedDetectionsPerSecond": "tổng số phát hiện bị bỏ qua mỗi giây",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} ghi hình",
+      "cameraDetect": "{{camName}} phát hiện",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} phát hiện bị bỏ qua mỗi giây"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Đã sao chép dữ liệu thăm dò vào clipboard."
+      },
+      "error": {
+        "unableToProbeCamera": "Không thể thăm dò camera: {{errorMessage}}"
+      }
+    },
+    "info": {
+      "stream": "Luồng {{idx}}",
+      "streamDataFromFFPROBE": "Dữ liệu luồng được lấy bằng <code>ffprobe</code>.",
+      "video": "Video:",
+      "fetching": "Đang tìm nạp Dữ liệu Camera",
+      "codec": "Codec:",
+      "unknown": "Không xác định",
+      "audio": "Âm thanh:",
+      "error": "Lỗi: {{error}}",
+      "tips": {
+        "title": "Thông tin Thăm dò Camera"
+      },
+      "resolution": "Độ phân giải:",
+      "fps": "FPS:",
+      "cameraProbeInfo": "Thông tin Thăm dò Camera {{camera}}",
+      "aspectRatio": "tỉ lệ khung hình"
+    },
+    "overview": "Tổng quan",
+    "framesAndDetections": "Khung hình / Phát hiện",
+    "title": "Camera"
+  },
+  "lastRefreshed": "Làm mới lần cuối: ",
+  "stats": {
+    "detectIsSlow": "{{detect}} đang chậm ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} đang rất chậm ({{speed}} ms)",
+    "cameraIsOffline": "{{camera}} đang ngoại tuyến",
+    "ffmpegHighCpuUsage": "{{camera}} có mức sử dụng CPU FFmpeg cao ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} có mức sử dụng CPU phát hiện cao ({{detectAvg}}%)",
+    "healthy": "Hệ thống đang hoạt động tốt",
+    "reindexingEmbeddings": "Đang lập chỉ mục lại các embedding (hoàn thành {{processed}}%)"
+  },
+  "enrichments": {
+    "embeddings": {
+      "image_embedding": "Embedding Hình ảnh",
+      "text_embedding_speed": "Tốc độ Embedding Văn bản",
+      "face_embedding_speed": "Tốc độ Embedding Khuôn mặt",
+      "text_embedding": "Embedding Văn bản",
+      "face_recognition": "Nhận dạng Khuôn mặt",
+      "plate_recognition": "Nhận dạng Biển số",
+      "image_embedding_speed": "Tốc độ Embedding Hình ảnh",
+      "face_recognition_speed": "Tốc độ Nhận dạng Khuôn mặt",
+      "plate_recognition_speed": "Tốc độ Nhận dạng Biển số",
+      "yolov9_plate_detection_speed": "Tốc độ Phát hiện Biển số YOLOv9",
+      "yolov9_plate_detection": "Phát hiện Biển số YOLOv9"
+    },
+    "title": "Làm giàu Dữ liệu",
+    "infPerSecond": "Suy luận Mỗi Giây"
+  },
+  "title": "Hệ thống",
+  "metrics": "Số liệu hệ thống",
+  "logs": {
+    "download": {
+      "label": "Tải xuống Nhật ký"
+    },
+    "copy": {
+      "label": "Sao chép vào Clipboard",
+      "success": "Đã sao chép nhật ký vào clipboard",
+      "error": "Không thể sao chép nhật ký vào clipboard"
+    },
+    "type": {
+      "label": "Loại",
+      "timestamp": "Dấu thời gian",
+      "tag": "Thẻ",
+      "message": "Thông báo"
+    },
+    "tips": "Nhật ký đang được truyền trực tiếp từ máy chủ",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Lỗi khi tìm nạp nhật ký: {{errorMessage}}",
+        "whileStreamingLogs": "Lỗi trong khi truyền trực tiếp nhật ký: {{errorMessage}}"
+      }
+    }
+  }
+}

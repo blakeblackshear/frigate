@@ -12,6 +12,8 @@ import Heading from "../ui/heading";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 
+import { useTranslation } from "react-i18next";
+
 export type IconName = keyof typeof LuIcons;
 
 export type IconElement = {
@@ -30,6 +32,7 @@ export default function IconPicker({
   selectedIcon,
   setSelectedIcon,
 }: IconPickerProps) {
+  const { t } = useTranslation(["components/icons"]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,9 +71,9 @@ export default function IconPicker({
           {!selectedIcon?.name || !selectedIcon?.Icon ? (
             <Button
               className="mt-2 w-full text-muted-foreground"
-              aria-label="Select an icon"
+              aria-label={t("iconPicker.selectIcon")}
             >
-              Select an icon
+              {t("iconPicker.selectIcon")}
             </Button>
           ) : (
             <div className="hover:cursor-pointer">
@@ -101,7 +104,7 @@ export default function IconPicker({
           className="flex max-h-[50dvh] flex-col overflow-y-hidden md:max-h-[30dvh]"
         >
           <div className="mb-3 flex flex-row items-center justify-between">
-            <Heading as="h4">Select an icon</Heading>
+            <Heading as="h4">{t("iconPicker.selectIcon")}</Heading>
             <span tabIndex={0} className="sr-only" />
             <IoClose
               size={15}
@@ -113,7 +116,9 @@ export default function IconPicker({
           </div>
           <Input
             type="text"
-            placeholder="Search for an icon..."
+            placeholder={t("iconPicker.search.placeholder", {
+              ns: "components/icons",
+            })}
             className="text-md mb-3 md:text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

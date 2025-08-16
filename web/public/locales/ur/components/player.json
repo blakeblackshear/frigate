@@ -1,0 +1,13 @@
+{
+  "noRecordingsFoundForThisTime": "اس وقت کے لیے کوئی ریکارڈنگ نہیں ملی",
+  "noPreviewFound": "کوئی پیش نظارہ نہیں ملا",
+  "noPreviewFoundFor": "{{cameraName}} کے لیے کوئی پیش نظارہ نہیں ملا",
+  "submitFrigatePlus": {
+    "title": "اس فریم کو فریگیٹ+ میں جمع کرائیں؟",
+    "submit": "جمع کروائیں"
+  },
+  "livePlayerRequiredIOSVersion": "اس لائیو اسٹریم کی قسم کے لیے iOS 17.1 یا اس سے جدید ورژن درکار ہے۔",
+  "streamOffline": {
+    "title": "آف لائن اسٹریم"
+  }
+}

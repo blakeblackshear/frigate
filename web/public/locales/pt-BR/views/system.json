@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "cameras": "Estatísticas das Câmeras - Frigate",
+    "storage": "Status de Armazenamento - Frigate",
+    "general": "Estatísticas Gerais - Frigate",
+    "enrichments": "Estatísticas de Enriquecimento - Frigate",
+    "logs": {
+      "frigate": "Registros Frigate - Frigate",
+      "go2rtc": "Registros GoRTC - Frigate",
+      "nginx": "Registros Nginx - Frigate"
+    }
+  },
+  "title": "Sistema",
+  "metrics": "Métricas do sistema",
+  "logs": {
+    "download": {
+      "label": "Baixar registros"
+    },
+    "copy": {
+      "label": "Copiar para a área de transferência",
+      "success": "Registros copiados para a área de transferência",
+      "error": "Não foi possível copiar os registros para a área de transferência"
+    },
+    "type": {
+      "label": "Tipo",
+      "timestamp": "Marca temporal",
+      "tag": "Marcador",
+      "message": "Mensagem"
+    },
+    "tips": "Os Registros estão sendo transmitidos do servidor",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Erro ao buscar registros: {{errorMessage}}",
+        "whileStreamingLogs": "Erro ao transmitir registros: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Geral",
+    "detector": {
+      "title": "Detectores",
+      "inferenceSpeed": "Velocidade de Inferência do Detector",
+      "temperature": "Detector Temperatura",
+      "cpuUsage": "Utilização de CPU de Detecção",
+      "memoryUsage": "Utilização de Memória do Detector"
+    },
+    "hardwareInfo": {
+      "title": "Informações de Hardware",
+      "gpuUsage": "Utilização de GPU",
+      "gpuMemory": "Memória da GPU",
+      "gpuEncoder": "Codificador da GPU",
+      "gpuDecoder": "Decodificador da GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Saída do Vainfo",
+          "returnCode": "Código de Retorno: {{code}}",
+          "processOutput": "Saída do Processo:",
+          "processError": "Erro de Processo:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Saída SMI da Nvidia",
+          "name": "Nome: {{name}}",
+          "driver": "Motorista: {{driver}}",
+          "cudaComputerCapability": "Capacidade de Computação CUDA: {{cuda_compute}}",
+          "vbios": "Informação de VBios: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Fechar informações da GPU"
+        },
+        "copyInfo": {
+          "label": "Copiar informações da GPU"
+        },
+        "toast": {
+          "success": "Informações da GPU copiadas para a área de transferência"
+        }
+      },
+      "npuUsage": "Uso da NPU",
+      "npuMemory": "Memória da NPU"
+    },
+    "otherProcesses": {
+      "title": "Outros processos",
+      "processCpuUsage": "Uso de Processamento da CPU",
+      "processMemoryUsage": "Uso de Memória de Processos"
+    }
+  },
+  "storage": {
+    "title": "Armazenamento",
+    "overview": "Visão Geral",
+    "recordings": {
+      "title": "Gravações",
+      "earliestRecording": "Gravação mais recente disponível:",
+      "tips": "Esse valor representa o armazenamento total usado pelas gravações no banco de dados do Frigate. O Frigate não rastreia o uso de armazenamento para todos os arquivos do seu disco."
+    },
+    "cameraStorage": {
+      "title": "Armazenamento da Câmera",
+      "camera": "Câmera",
+      "unusedStorageInformation": "Informação de Armazenamento Não Utilizado",
+      "storageUsed": "Armazenamento",
+      "percentageOfTotalUsed": "Porcentagem do Total",
+      "bandwidth": "Largura de Banda",
+      "unused": {
+        "title": "Não Utilizado",
+        "tips": "Esse valor por não representar com precisão o espaço livre disponí®el para o Frigate se você possui outros arquivos armazenados no seu drive além das gravações do Frigate. O Frigate não rastreia a utilização do armazenamento além de suas próprias gravações."
+      }
+    }
+  },
+  "cameras": {
+    "title": "Câmeras",
+    "overview": "Visão Geral",
+    "info": {
+      "aspectRatio": "proporção",
+      "cameraProbeInfo": "{{camera}} Informação de Probe da Câmera",
+      "streamDataFromFFPROBE": "Os dados da tranmissão são obtidos com o <code>ffprobe</code>.",
+      "fetching": "Buscando Dados da Câmera",
+      "stream": "Transmissão {{idx}}",
+      "video": "Vídeo:",
+      "codec": "Codec:",
+      "resolution": "Resolução:",
+      "fps": "FPS:",
+      "unknown": "Desconhecido",
+      "audio": "Áudio:",
+      "error": "Erro: {{error}}",
+      "tips": {
+        "title": "Informação de Probe de Câmera"
+      }
+    },
+    "framesAndDetections": "Quadros / Detecções",
+    "label": {
+      "camera": "câmera",
+      "detect": "detectar",
+      "skipped": "ignoradas",
+      "ffmpeg": "FFmpeg",
+      "capture": "captura",
+      "overallFramesPerSecond": "quadros por segundo em geral",
+      "overallDetectionsPerSecond": "detecções por segundo em geral",
+      "overallSkippedDetectionsPerSecond": "detecções puladas por segundo em geral",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} captura",
+      "cameraDetect": "{{camName}} detectar",
+      "cameraFramesPerSecond": "{{camName}} quadros por segundo",
+      "cameraDetectionsPerSecond": "{{camName}} detecções por segundo",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} detecções puladas por segundo"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Dados do probe copiados para a área de transferência."
+      },
+      "error": {
+        "unableToProbeCamera": "Não foi possível fazer o probe da câmera: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Atualizado pela última vez: ",
+  "stats": {
+    "detectIsVerySlow": "{{detect}} está muito lento ({{speed}} ms)",
+    "ffmpegHighCpuUsage": "{{camera}} possui alta utilização de CPU para FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} possui alta utilização de CPU para detecção ({{detectAvg}}%)",
+    "healthy": "O sistema está saudável",
+    "cameraIsOffline": "{{camera}} está offline",
+    "reindexingEmbeddings": "Reindexando os vetores de característica de imagens ({{processed}}% completado)",
+    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)"
+  },
+  "enrichments": {
+    "title": "Enriquecimentos",
+    "infPerSecond": "Inferências por Segundo",
+    "embeddings": {
+      "face_recognition": "Reconhecimento Facial",
+      "plate_recognition": "Reconhecimento de Placa",
+      "plate_recognition_speed": "Velocidade de Reconhecimento de Placas",
+      "text_embedding_speed": "Velocidade de Geração de Vetores de Texto",
+      "yolov9_plate_detection_speed": "Velocidade de Reconhecimento de Placas do YOLOv9",
+      "yolov9_plate_detection": "Detecção de Placas do YOLOv9",
+      "image_embedding": "Vetores de Características de Imagens",
+      "text_embedding": "Vetor de Característica de Texto",
+      "image_embedding_speed": "Velocidade de Geração de Vetores de Imagem",
+      "face_embedding_speed": "Velocidade de Geração de Vetores de Rostos",
+      "face_recognition_speed": "Velocidade de Reconhecimento de Rostos"
+    }
+  }
+}

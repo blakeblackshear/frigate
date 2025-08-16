@@ -1,0 +1,683 @@
+{
+  "documentTitle": {
+    "default": "Einstellungen - Frigate",
+    "authentication": "Authentifizierungseinstellungen – Frigate",
+    "camera": "Kameraeinstellungen - Frigate",
+    "masksAndZones": "Masken- und Zonen-Editor – Frigate",
+    "object": "Debug - Frigate",
+    "general": "Allgemeine Einstellungen – Frigate",
+    "frigatePlus": "Frigate+ Einstellungen – Frigate",
+    "classification": "Klassifizierungseinstellungen – Frigate",
+    "motionTuner": "Bewegungstuner – Frigate",
+    "notifications": "Benachrichtigungs-Einstellungen",
+    "enrichments": "Erweiterte Statistiken - Frigate"
+  },
+  "menu": {
+    "ui": "Benutzeroberfläche",
+    "cameras": "Kameraeinstellungen",
+    "classification": "Klassifizierung",
+    "masksAndZones": "Maskierungen / Zonen",
+    "motionTuner": "Bewegungstuner",
+    "debug": "Debug",
+    "frigateplus": "Frigate+",
+    "users": "Benutzer",
+    "notifications": "Benachrichtigungen",
+    "enrichments": "Verbesserungen"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Du hast nicht gespeicherte Änderungen.",
+      "desc": "Möchtest Du deine Änderungen speichern, bevor du fortfährst?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Keine Kamera"
+  },
+  "general": {
+    "title": "Allgemeine Einstellungen",
+    "liveDashboard": {
+      "title": "Live Übersicht",
+      "playAlertVideos": {
+        "label": "Spiele Videos mit Alarmierung",
+        "desc": "Standardmäßig werden die letzten Warnmeldungen auf dem Live-Dashboard als kurze Videoschleifen abgespielt. Deaktiviere diese Option, um nur ein statisches Bild der letzten Warnungen auf diesem Gerät/Browser anzuzeigen."
+      },
+      "automaticLiveView": {
+        "desc": "Wechsle automatisch zur Live Ansicht der Kamera, wenn einen Aktivität erkannt wurde. Wenn du diese Option deaktivierst, werden die statischen Kamerabilder auf der Liveübersicht nur einmal pro Minute aktualisiert.",
+        "label": "Automatische Live Ansicht"
+      }
+    },
+    "storedLayouts": {
+      "title": "Gespeicherte Ansichten",
+      "clearAll": "Lösche alle Ansichten",
+      "desc": "Das Layout der Kameras in einer Kameragruppe kann verschoben/geändert werden. Die Positionen werden im lokalen Cache des Browsers gespeichert."
+    },
+    "cameraGroupStreaming": {
+      "title": "Einstellungen für Kamera-Gruppen-Streaming",
+      "clearAll": "Alle Streamingeinstellungen löschen",
+      "desc": "Die Streaming-Einstellungen für jede Kameragruppe werden im lokalen Cache des Browsers gespeichert."
+    },
+    "recordingsViewer": {
+      "title": "Aufzeichnungsbetrachter",
+      "defaultPlaybackRate": {
+        "desc": "Standard-Wiedergabegeschwindigkeit für die Wiedergabe von Aufnahmen.",
+        "label": "Standard-Wiedergabegeschwindigkeit"
+      }
+    },
+    "calendar": {
+      "title": "Kalender",
+      "firstWeekday": {
+        "label": "Erster Wochentag",
+        "desc": "Der Tag, an dem die Wochen des Review Kalenders beginnen.",
+        "sunday": "Sonntag",
+        "monday": "Montag"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Gespeichertes Layout für {{cameraName}} gelöscht",
+        "clearStreamingSettings": "Streaming Einstellungen aller Kameragruppen bereinigt."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Das gespeicherte Layout konnte nicht gelöscht werden: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Die Streaming-Einstellungen konnten nicht gelöscht werden: {{errorMessage}}"
+      }
+    }
+  },
+  "classification": {
+    "title": "Klassifizierungseinstellungen",
+    "semanticSearch": {
+      "title": "Semantische Suche",
+      "desc": "Die semantische Suche in Frigate ermöglicht es, verfolgte Objekte innerhalb der Überprüfungselemente zu finden, indem entweder das Bild selbst, eine benutzerdefinierte Textbeschreibung oder eine automatisch generierte Beschreibung verwendet wird.",
+      "readTheDocumentation": "Lesen Sie die Dokumentation",
+      "reindexNow": {
+        "alreadyInProgress": "Neu-Indizierung läufts bereits.",
+        "label": "Neuindizieren",
+        "confirmTitle": "Bestätige Neu-Indizierung",
+        "confirmButton": "Neu-Indizieren",
+        "success": "Neuindizierung erfolgreich gestartet.",
+        "error": "Starten der Neuindizierung fehlgeschlagen: {{errorMessage}}",
+        "desc": "Durch die Neuindizierung werden die Einbettungen für alle verfolgten Objekte neu generiert. Dieser Prozess läuft im Hintergrund und kann Ihre CPU überlasten. Je nach Anzahl der verfolgten Objekte kann er einige Zeit in Anspruch nehmen.",
+        "confirmDesc": "Möchten Sie alle verfolgten Objekteinbettungen wirklich neu indizieren? Dieser Vorgang läuft im Hintergrund, kann aber Ihre CPU überlasten und einige Zeit in Anspruch nehmen. Sie können den Fortschritt auf der Explore-Seite verfolgen."
+      },
+      "modelSize": {
+        "large": {
+          "title": "groß",
+          "desc": "Bei Verwendung von <em> large </em> wird das vollständige Jina-Modell verwendet und ggf. automatisch auf der GPU ausgeführt."
+        },
+        "label": "Model Größe",
+        "small": {
+          "title": "klein",
+          "desc": "Durch die Verwendung von <em> small </em> wird eine quantisierte Version des Modells eingesetzt, die weniger RAM verwendet und schneller auf der CPU läuft, wobei der Unterschied in der Einbettungsqualität sehr gering ist."
+        },
+        "desc": "Die Größe des Modells, das für semantische Sucheinbettungen verwendet wird."
+      }
+    },
+    "birdClassification": {
+      "desc": "Die Vogelklassifizierung identifiziert bekannte Vögel mithilfe eines quantisierten Tensorflow-Modells. Wenn ein bekannter Vogel erkannt wird, wird sein allgemeiner Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten.",
+      "title": "Vogel-Klassifizierung"
+    },
+    "licensePlateRecognition": {
+      "readTheDocumentation": "Lies die Dokumentation",
+      "title": "Nummernschilderkennung",
+      "desc": "Frigate kann Nummernschilder an Fahrzeugen erkennen und die erkannten Zeichen automatisch dem Feld „recognized_license_plate“ oder einem bekannten Namen als Unterbezeichnung für Objekte vom Typ „Auto“ hinzufügen. Ein häufiger Anwendungsfall ist das Lesen der Nummernschilder von Autos, die in eine Einfahrt einfahren oder auf einer Straße vorbeifahren."
+    },
+    "faceRecognition": {
+      "readTheDocumentation": "Lies die Dokumentation",
+      "modelSize": {
+        "small": {
+          "title": "klein",
+          "desc": "ei der Verwendung von <em> small </em> wird ein FaceNet-Gesichtseinbettungsmodell eingesetzt, das auf den meisten CPUs effizient läuft."
+        },
+        "label": "Model Größe",
+        "large": {
+          "title": "groß",
+          "desc": "Bei der Verwendung von <em> large </em> wird ein ArcFace-Gesichtseinbettungsmodell verwendet und ggf. automatisch auf der GPU ausgeführt."
+        },
+        "desc": "Die Größe des für die Gesichtserkennung verwendeten Modells."
+      },
+      "title": "Gesichtserkennung",
+      "desc": "Mithilfe der Gesichtserkennung können Personen Namen zugewiesen werden. Sobald das Gesicht erkannt wird, weist Frigate den Namen der Person als Unterbezeichnung zu. Diese Informationen werden in die Benutzeroberfläche, Filter und Benachrichtigungen integriert."
+    },
+    "toast": {
+      "error": "Sichern der Konfigurationsänderungen fehlgeschlagen: {{errorMessage}}",
+      "success": "Die Klassifizierungseinstellungen wurden gespeichert. Starten Sie Frigate neu, um die Änderungen zu übernehmen."
+    },
+    "restart_required": "Neustart erforderlich (Klassifizierungseinstellungen geändert)",
+    "unsavedChanges": "Nicht gespeicherte Änderungen der Klassifizierungseinstellungen"
+  },
+  "camera": {
+    "reviewClassification": {
+      "toast": {
+        "success": "Die Konfiguration der Klassifizierung wurde gespeichert. Starte Frigate neu, um die Änderungen zu übernehmen."
+      },
+      "title": "Überprüfung der Klassifikation",
+      "selectAlertsZones": "Zonen für Warnungen auswählen",
+      "limitDetections": "Begrenzung der Erkennungen auf bestimmte Zonen",
+      "readTheDocumentation": "Lies die Dokumentation",
+      "noDefinedZones": "Für diese Kamera sind keine Zonen definiert.",
+      "selectDetectionsZones": "Zonen für Erkennungen auswählen",
+      "objectAlertsTips": "Alle {{alertsLabels}} -Objekte auf {{cameraName}} werden als Warnungen angezeigt.",
+      "desc": "Frigate kategorisiert Überprüfungselemente als Warnungen und Erkennungen. Standardmäßig werden alle Objekte vom Typ <em> Person </em> und <em> Auto </em> als Warnungen betrachtet. Sie können die Kategorisierung Ihrer Überprüfungselemente verfeinern, indem Sie die erforderlichen Zonen dafür konfigurieren.",
+      "zoneObjectAlertsTips": "Alle {{alertsLabels}} Objekte, die in {{zone}} auf {{cameraName}} erkannt werden , werden als Warnungen angezeigt.",
+      "objectDetectionsTips": "Alle {{detectionsLabels}} Objekte, die auf {{cameraName}} nicht kategorisiert sind, werden unabhängig von der Zone, in der sie sich befinden, als Erkennungen angezeigt.",
+      "zoneObjectDetectionsTips": {
+        "text": "Alle {{detectionsLabels}} Objekte, die in {{zone}} auf {{cameraName}} nicht kategorisiert sind, werden als Erkennungen angezeigt.",
+        "regardlessOfZoneObjectDetectionsTips": "Alle {{detectionsLabels}} Objekte, die auf {{cameraName}} nicht kategorisiert sind, werden unabhängig von der Zone, in der sie sich befinden, als Erkennungen angezeigt.",
+        "notSelectDetections": "Alle {{detectionsLabels}} Objekte, die in {{zone}} auf {{cameraName}} erkannt wurden und nicht als Warnungen kategorisiert sind, werden unabhängig von der Zone, in der sie sich befinden, als Erkennungen angezeigt."
+      },
+      "unsavedChanges": "Nicht gespeicherte Überprüfung der Klassifizierungseinstellungen für {{camera}}"
+    },
+    "streams": {
+      "title": "Streams",
+      "desc": "Deaktiviere eine Kamera vorübergehend, bis Frigate neu gestartet wird. Das Deaktivieren einer Kamera stoppt die Verarbeitung der Streams dieser Kamera durch Frigate vollständig. Erkennung, Aufzeichnung und Debugging sind dann nicht mehr möglich.<br /> <em>Hinweis: Go2RTC-Restreams werden dadurch nicht deaktiviert.</em>"
+    },
+    "review": {
+      "title": "Überprüfung",
+      "alerts": "Warnungen ",
+      "detections": "Erkennungen ",
+      "desc": "Aktiviere/deaktiviere Benachrichtigungen und Erkennungen für diese Kamera vorübergehend, bis Frigate neu gestartet wird. Wenn deaktiviert, werden keine neuen Überprüfungseinträge erstellt. "
+    },
+    "title": "Kamera-Einstellungen"
+  },
+  "masksAndZones": {
+    "form": {
+      "zoneName": {
+        "error": {
+          "hasIllegalCharacter": "Zonenname enthält unzulässige Zeichen.",
+          "alreadyExists": "Für diese Kamera existiert bereits eine Zone mit diesem Namen.",
+          "mustBeAtLeastTwoCharacters": "Der Zonenname muss aus mindestens 2 Zeichen bestehen.",
+          "mustNotBeSameWithCamera": "Der Zonenname darf nicht mit dem Kameranamen identisch sein.",
+          "mustNotContainPeriod": "Der Zonenname darf keine Punkte enthalten."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Die Verweildauer muss größer oder gleich 0 sein."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Der Abstand muss größer als oder gleich 0.1 sein.",
+          "mustBeFilled": "Alle Entfernungsfelder müssen ausgefüllt werden, um die Geschwindigkeitsschätzung zu verwenden."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Die Trägheit muss über 0 liegen."
+        }
+      },
+      "polygonDrawing": {
+        "removeLastPoint": "Letzten Punkt entfernen",
+        "reset": {
+          "label": "Alle Punkte löschen"
+        },
+        "snapPoints": {
+          "true": "Fangpunkte",
+          "false": "Punkte nicht einrasten"
+        },
+        "delete": {
+          "title": "Löschen bestätigen",
+          "success": "{{name}} wurde gelöscht.",
+          "desc": "Bist du sicher, dass du die {{type}} <em>{{name}}</em> löschen möchtest?"
+        },
+        "error": {
+          "mustBeFinished": "Polygonzeichnung muss vor dem Speichern abgeschlossen sein."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Der Geschwindigkeitsschwellwert muss größer oder gleich 0,1 sein."
+        }
+      }
+    },
+    "toast": {
+      "error": {
+        "copyCoordinatesFailed": "Die Koordinaten konnten nicht in die Zwischenablage kopiert werden."
+      },
+      "success": {
+        "copyCoordinates": "Koordinaten von {{polyName}} wurden in die Zwischenablage kopiert."
+      }
+    },
+    "filter": {
+      "all": "Alle Maskierungen und Zonen"
+    },
+    "zones": {
+      "edit": "Zone bearbeiten",
+      "toast": {
+        "success": "Die Zone ({{zoneName}}) wurde gespeichert. Starten Sie Frigate neu, um die Änderungen zu übernehmen."
+      },
+      "desc": {
+        "documentation": "Dokumentation",
+        "title": "Zonen ermöglichen es dir, einen bestimmten Bereich des Bildes festzulegen, damit du bestimmen kannst, ob sich ein Objekt in einem bestimmten Bereich befindet oder nicht."
+      },
+      "allObjects": "Alle Objekte",
+      "speedEstimation": {
+        "title": "Geschwindigkeitsschätzung",
+        "desc": "Aktiviere die Geschwindigkeitsabschätzung für Objekte in diesem Bereich. Der Bereich muss genau 4 Punkte haben.",
+        "docs": "Bitte lies die Dokumentation",
+        "lineADistance": "Spur A Distanz ({{unit}})",
+        "lineDDistance": "Spur D Distanz ({{unit}})",
+        "lineBDistance": "Spur B Distanz ({{unit}})",
+        "lineCDistance": "Spur C Distanz ({{unit}})"
+      },
+      "label": "Zonen",
+      "documentTitle": "Zone bearbeiten - Frigate",
+      "add": "Zone hinzufügen",
+      "name": {
+        "title": "Name",
+        "inputPlaceHolder": "Geben Sie einen Namen ein…",
+        "tips": "Der Name muss aus mindestens 2 Zeichen bestehen und sollte nicht den Namen einer Kamera oder anderen Zone entsprechen."
+      },
+      "objects": {
+        "title": "Objekte",
+        "desc": "Liste der Objekte, die zu diesem Bereich gehören."
+      },
+      "speedThreshold": {
+        "title": "Geschwindigkeitsschwelle ({{unit}})",
+        "desc": "Legt eine Mindestgeschwindigkeit für Objekte fest, damit sie als \"in diesem Bereich\" betrachtet werden können.",
+        "toast": {
+          "error": {
+            "loiteringTimeError": "Zonen mit einer Verweilzeit größer als 0 sollten nicht für die Geschwindigkeitsmessung verwendet werden.",
+            "pointLengthError": "Die Geschwindigkeitsabschätzung wurde für diesen Bereich deaktiviert. Bereiche mit Geschwindigkeitsabschätzung müssen genau 4 Punkte haben."
+          }
+        }
+      },
+      "point_one": "{{count}} Punkt",
+      "point_other": "{{count}} Punkte",
+      "clickDrawPolygon": "Klicke, um ein Polygon auf dem Bild zu zeichnen.",
+      "inertia": {
+        "desc": "Legt fest, wie viele Bilder ein Objekt in einem Bereich sein muss, bevor es \"als in dem Bereich befindlich\" betrachtet wird. <em>Standard: 3</em>",
+        "title": "Trägheit"
+      },
+      "loiteringTime": {
+        "desc": "Legt eine Mindestzeit in Sekunden fest, die das Objekt in dem Bereich sein muss, damit es aktiviert wird. <em>Standard: 0</em>",
+        "title": "Verweilzeit"
+      }
+    },
+    "motionMasks": {
+      "desc": {
+        "documentation": "Dokumentation",
+        "title": "Bewegungsmasken werden verwendet, um zu verhindern, dass unerwünschte Bewegungsarten eine Erkennung auslösen. Zu starkes Maskieren erschwert das Nachverfolgen von Objekten."
+      },
+      "documentTitle": "Bewegungsmaske bearbeiten – Frigate",
+      "context": {
+        "documentation": "Lies die Dokumentation",
+        "title": "Bewegungsmasken werden verwendet, um unerwünschte Bewegungen (z. B. Baumäste, Kamerazeitstempel) daran zu hindern, eine Erkennung auszulösen. Bewegungsmasken sollten <em>sehr sparsam</em> eingesetzt werden – zu starkes Maskieren erschwert das Nachverfolgen von Objekten."
+      },
+      "clickDrawPolygon": "Klicke, um ein Polygon auf dem Bild zu zeichnen.",
+      "toast": {
+        "success": {
+          "noName": "Bewegungsmaske wurde gespeichert. Starte Frigate neu, um die Änderungen zu übernehmen.",
+          "title": "{{polygonName}} wurde gespeichert. Starte Frigate neu, um die Änderungen zu übernehmen."
+        }
+      },
+      "add": "Neue Bewegungsmaske",
+      "edit": "Bewegungsmaske bearbeiten",
+      "polygonAreaTooLarge": {
+        "title": "Die Bewegungsmaske deckt {{polygonArea}} % des Kamerabildes ab. Große Bewegungsmasken werden nicht empfohlen.",
+        "tips": "Bewegungsmasken verhindern nicht, dass Objekte erkannt werden. Du solltest stattdessen eine erforderliche Zone verwenden.",
+        "documentation": "Lies die Dokumentation"
+      },
+      "point_one": "{{count}} Punkt",
+      "point_other": "{{count}} Punkte",
+      "label": "Bewegungsmaske"
+    },
+    "restart_required": "Neustart erforderlich (Maske/Zone hat sich geändert)",
+    "objectMasks": {
+      "label": "Objektmasken",
+      "documentTitle": "Objektmaske bearbeiten – Frigate",
+      "toast": {
+        "success": {
+          "noName": "Objektmaske wurde gespeichert. Starte Frigate neu, um die Änderungen zu übernehmen.",
+          "title": "{{polygonName}} wurde gespeichert. Starte Frigate neu, um die Änderungen zu übernehmen."
+        }
+      },
+      "desc": {
+        "title": "Objekt-Filtermasken werden verwendet, um Fehlalarme für einen bestimmten Objekttyp basierend auf dem Standort herauszufiltern.",
+        "documentation": "Dokumentation"
+      },
+      "add": "Objektmaske hinzufügen",
+      "clickDrawPolygon": "Klicken Sie, um ein Polygon auf dem Bild zu zeichnen.",
+      "edit": "Objektmaske bearbeiten",
+      "context": "Objekt-Filtermasken werden verwendet, um Fehlalarme für einen bestimmten Objekttyp anhand des Standorts herauszufiltern.",
+      "point_one": "{{count}} Punkt",
+      "point_other": "{{count}} Punkte",
+      "objects": {
+        "title": "Objekte",
+        "desc": "Der Objekttyp, für den diese Objektmaske gilt.",
+        "allObjectTypes": "Alle Objekttypen"
+      }
+    },
+    "motionMaskLabel": "Bewegungsmaske {{number}}",
+    "objectMaskLabel": "Objektmaske {{number}} ({{label}})"
+  },
+  "debug": {
+    "objectShapeFilterDrawing": {
+      "score": "Bewertung",
+      "document": "Lies die Dokumentation. ",
+      "tips": "Aktiviere diese Option, um ein Rechteck auf dem Kamerabild zu zeichnen, das dessen Bereich und Seitenverhältnis anzeigt. Diese Werte können anschließend verwendet werden, um Parameter für den Objektform-Filter in deiner Konfiguration festzulegen.",
+      "area": "Bereich",
+      "ratio": "Verhältnis",
+      "title": "Objektform-Filter-Zeichnung",
+      "desc": "Zeichne ein Rechteck auf das Bild, um Flächen- und Verhältnisdetails anzuzeigen"
+    },
+    "motion": {
+      "tips": "<p><strong>Bewegungsrahmen</strong></p><br><p>Rote Rahmen werden über die Bereiche des Bildes gelegt, in denen aktuell Bewegung erkannt wird.</p>",
+      "title": "Bewegungsrahmen",
+      "desc": "Rahmen um Bereiche anzeigen, in denen Bewegung erkannt wird"
+    },
+    "boundingBoxes": {
+      "title": "Begrenzungsrahmen",
+      "desc": "Begrenzungsrahmen um verfolgte Objekte anzeigen",
+      "colors": {
+        "info": "<li>Beim Start werden jedem Objektlabel unterschiedliche Farben zugewiesen.</li><li>Eine dünne dunkelblaue Linie zeigt an, dass das Objekt zum aktuellen Zeitpunkt nicht erkannt wird.</li><li>Eine dünne graue Linie zeigt an, dass das Objekt als stationär erkannt wurde.</li><li>Eine dicke Linie zeigt an, dass das Objekt aktuell vom Autotracking verfolgt wird (wenn aktiviert).</li>",
+        "label": "Farben der Objekt-Begrenzungsrahmen"
+      }
+    },
+    "zones": {
+      "title": "Zonen",
+      "desc": "Umrisse aller definierten Zonen anzeigen"
+    },
+    "timestamp": {
+      "desc": "Einen Zeitstempel auf dem Bild einblenden",
+      "title": "Zeitstempel"
+    },
+    "mask": {
+      "desc": "Bewegungsmasken-Polygone anzeigen",
+      "title": "Bewegungsmasken"
+    },
+    "detectorDesc": "Frigate verwendet deine Detektoren ({{detectors}}), um Objekte im Videostream deiner Kamera zu erkennen.",
+    "debugging": "Fehlersuche",
+    "objectList": "Objektliste",
+    "noObjects": "Keine Objekte",
+    "regions": {
+      "title": "Regionen",
+      "tips": "<p><strong>Regionsrahmen</strong></p><br><p>Leuchtend grüne Rahmen werden über die Interessensbereiche im Bild gelegt, die an den Objektdetektor übermittelt werden.</p>",
+      "desc": "Einen Rahmen für den an den Objektdetektor übermittelten Interessensbereich anzeigen"
+    },
+    "title": "Debug",
+    "desc": "Die Debug-Ansicht zeigt eine Echtzeitansicht der verfolgten Objekte und ihrer Statistiken. Die Objektliste zeigt eine zeitverzögerte Zusammenfassung der erkannten Objekte."
+  },
+  "motionDetectionTuner": {
+    "Threshold": {
+      "title": "Schwellenwert",
+      "desc": "Der Schwellenwert legt fest, wie stark sich die Helligkeit eines Pixels ändern muss, damit dies als Bewegung erkannt wird. <em>Standard: 30</em>"
+    },
+    "improveContrast": {
+      "title": "Kontrast verbessern",
+      "desc": "Den Kontrast für dunklere Szenen verbessern. <em>Standard: EIN</em>"
+    },
+    "toast": {
+      "success": "Bewegungseinstellungen wurden gespeichert."
+    },
+    "desc": {
+      "documentation": "Lies die Anleitung zur Bewegungsoptimierung",
+      "title": "Frigate verwendet die Bewegungserkennung als erste Überprüfung, um festzustellen, ob im Bildausschnitt etwas passiert, das eine Objekterkennung rechtfertigt."
+    },
+    "contourArea": {
+      "title": "Konturfläche",
+      "desc": "Der Wert für die Konturfläche wird verwendet, um zu bestimmen, welche Gruppen von veränderten Pixeln als Bewegung gelten. <em>Standard: 10</em>"
+    },
+    "title": "Bewegungserkennungs-Optimierer",
+    "unsavedChanges": "Nicht gespeicherte Änderungen am Bewegungstuner ({{camera}})"
+  },
+  "users": {
+    "addUser": "Benutzer hinzufügen",
+    "updatePassword": "Passwort aktualisieren",
+    "toast": {
+      "success": {
+        "deleteUser": "Benutzer {{user}} wurde erfolgreich gelöscht",
+        "createUser": "Benutzer {{user}} wurde erfolgreich erstellt",
+        "updatePassword": "Passwort erfolgreich aktualisiert.",
+        "roleUpdated": "Rolle für {{user}} aktualisiert"
+      },
+      "error": {
+        "setPasswordFailed": "Speichern des Passworts fehlgeschlagen: {{errorMessage}}",
+        "createUserFailed": "Benutzer konnte nicht erstellt werden: {{errorMessage}}",
+        "deleteUserFailed": "Benutzer konnte nicht gelöscht werden: {{errorMessage}}",
+        "roleUpdateFailed": "Aktualisierung der Rolle fehlgeschlagen: {{errorMessage}}"
+      }
+    },
+    "title": "Benutzer",
+    "management": {
+      "title": "Benutzerverwaltung",
+      "desc": "Verwalte die Benutzerkonten dieser Frigate-Instanz."
+    },
+    "table": {
+      "changeRole": "Benutzerrolle ändern",
+      "deleteUser": "Benutzer löschen",
+      "noUsers": "Keine Benutzer gefunden.",
+      "password": "Passwort",
+      "username": "Benutzername",
+      "actions": "Aktionen",
+      "role": "Rolle"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Benutzername",
+          "desc": "Nur Buchstaben, Zahlen, Punkte und Unterstriche sind erlaubt.",
+          "placeholder": "Benutzernamen eingeben"
+        },
+        "password": {
+          "notMatch": "Passwörter stimmen nicht überein",
+          "strength": {
+            "weak": "Schwach",
+            "title": "Passwortstärke: ",
+            "medium": "Mittel",
+            "strong": "Stark",
+            "veryStrong": "Sehr stark"
+          },
+          "confirm": {
+            "placeholder": "Bestätige Passwort",
+            "title": "Bestätige Passwort"
+          },
+          "match": "Passwörter stimmen überein",
+          "title": "Passwort",
+          "placeholder": "Passwort eingeben"
+        },
+        "newPassword": {
+          "title": "Neues Passwort",
+          "placeholder": "Neues Passwort eingeben",
+          "confirm": {
+            "placeholder": "Neues Passwort erneut eingeben"
+          }
+        },
+        "usernameIsRequired": "Benutzername ist erforderlich",
+        "passwordIsRequired": "Passwort benötigt"
+      },
+      "changeRole": {
+        "desc": "Berechtigungen für <strong>{{username}}</strong> aktualisieren",
+        "roleInfo": {
+          "intro": "Wähle die entsprechende Rolle für diesen Benutzer:",
+          "admin": "Admin",
+          "adminDesc": "Voller Zugang zu allen Funktionen.",
+          "viewer": "Betrachter",
+          "viewerDesc": "Nur auf Live-Dashboards, Überprüfung, Erkundung und Exporte beschränkt."
+        },
+        "title": "Benutzerrolle ändern",
+        "select": "Wähle eine Rolle"
+      },
+      "deleteUser": {
+        "desc": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Benutzerkonto dauerhaft gelöscht und alle zugehörigen Daten werden entfernt.",
+        "warn": "Bist du sicher, dass du <strong>{{username}}</strong> löschen willst?",
+        "title": "Benutzer löschen"
+      },
+      "createUser": {
+        "title": "Neuen Benutzer anlegen",
+        "desc": "Füge ein neues Benutzerkonto hinzu und lege eine Rolle für den Zugriff auf Bereiche der Frigate-Benutzeroberfläche fest.",
+        "usernameOnlyInclude": "Der Benutzername darf nur Buchstaben, Zahlen, . oder _ enthalten",
+        "confirmPassword": "Bitte bestätige dein Passwort"
+      },
+      "passwordSetting": {
+        "updatePassword": "Passwort für {{username}} aktualisieren",
+        "setPassword": "Passwort festlegen",
+        "desc": "Erstelle ein sicheres Passwort, um dieses Konto zu schützen.",
+        "cannotBeEmpty": "Das Passwort darf nicht leer sein",
+        "doNotMatch": "Die Passwörter sind nicht identisch"
+      }
+    }
+  },
+  "notification": {
+    "email": {
+      "desc": "Eine gültige E-Mail-Adresse ist erforderlich und wird verwendet, um Sie zu benachrichtigen, falls es Probleme mit dem Push-Dienst gibt.",
+      "placeholder": "z. B. example@email.com",
+      "title": "Email"
+    },
+    "notificationSettings": {
+      "title": "Einstellungen für Benachrichtigungen",
+      "desc": "Frigate kann von Haus aus Push-Benachrichtigungen an ein Gerät senden, wenn es im Browser läuft oder als PWA installiert ist.",
+      "documentation": "Lese die Dokumentation"
+    },
+    "title": "Benachrichtigungen",
+    "notificationUnavailable": {
+      "title": "Benachrichtigungen nicht verfügbar",
+      "desc": "Web Push Benachrichtigungen erfordern einen sicheren Kontext (<code>https://…</code>). Das ist eine Vorgabe des Browsers. Greife auf Frigate gesichert zu um Benachrichtigungen zu nutzen.",
+      "documentation": "Dokumentation lesen"
+    },
+    "cameras": {
+      "desc": "Wähle aus für welche Kameras Benachrichtigungen aktiviert werden sollen.",
+      "noCameras": "Keine Kameras verfügbar",
+      "title": "Kameras"
+    },
+    "sendTestNotification": "Test Benachrichtigung senden",
+    "globalSettings": {
+      "desc": "Benachrichtigungen für bestimmte Kameras auf allen registrierten Geräten vorübergehend aussetzen.",
+      "title": "Globale Einstellungen"
+    },
+    "deviceSpecific": "Geräte spezifische Einstellungen",
+    "active": "Benachrichtigungen aktiv",
+    "registerDevice": "Dieses Gerät registrieren",
+    "unregisterDevice": "Dieses Gerät abmelden",
+    "toast": {
+      "error": {
+        "registerFailed": "Speichern der Benachrichtigungsregistrierung fehlgeschlagen."
+      },
+      "success": {
+        "registered": "Erfolgreich für Benachrichtigungen registriert. Starte Frigate neu bevor Benachrichtigungen (inklusive Testbenachrichtigung) gesendet werden können.",
+        "settingSaved": "Benachrichtigungseinstellungen wurden gespeichert."
+      }
+    },
+    "suspendTime": {
+      "30minutes": "für 30 Minuten pausieren",
+      "1hour": "für 1 Stunde pausieren",
+      "12hours": "für 12 Stunden pausieren",
+      "untilRestart": "bis Neustart pausieren",
+      "24hours": "für 24 Stunden pausieren",
+      "5minutes": "Für 5 Minuten pausieren",
+      "10minutes": "Für 10 Minuten pausieren",
+      "suspend": "Pausieren"
+    },
+    "cancelSuspension": "Pausieren abbrechen",
+    "suspended": "Benachrichtigungen für {{time}} pausiert",
+    "unsavedChanges": "Nicht gespeicherte Änderungen an den Benachrichtigungen",
+    "unsavedRegistrations": "Nicht gespeicherte Benachrichtigungsanmeldungen"
+  },
+  "frigatePlus": {
+    "title": "Frigate+ Einstellungen",
+    "apiKey": {
+      "title": "Frigate+ API Key",
+      "desc": "Der Frigate+ API Key aktiviert die Integration des Frigate+ Dienstes.",
+      "validated": "Frigate+ API Key erkannt und validiert",
+      "notValidated": "Frigate+ API Key nicht erkannt und validiert",
+      "plusLink": "Lese mehr zu Frigate+"
+    },
+    "snapshotConfig": {
+      "desc": "Für die Übermittlung an Frigate+ muss in der Konfiguration sowohl Snapshots als auch <code>clean_copy</code>-Snapshots aktiviert sein.",
+      "cleanCopyWarning": "Einige Kameras haben Snapshots aktiviert aber clean copy deaktiviert. Aktiviere <code>clean_copy</code> in der Snapshot Konfiguration um Bilder an Frigate+ zu senden.",
+      "documentation": "die Dokumentation lesen",
+      "table": {
+        "camera": "Kamera",
+        "snapshots": "Snapshots",
+        "cleanCopySnapshots": "<code>clean_copy</code> Snapshots"
+      },
+      "title": "Snapshot Einstellungen"
+    },
+    "modelInfo": {
+      "modelType": "Model Typ",
+      "trainDate": "Trainings Datum",
+      "supportedDetectors": "Unterstützte Detektoren",
+      "modelSelect": "Die verfügbaren Modelle auf Frigate+ können hier ausgewählt werden. Beachte, dass nur Modelle kompatibel mit deiner aktuellen Detektorkonfiguration zur Auswahl stehen.",
+      "plusModelType": {
+        "baseModel": "Basis Model",
+        "userModel": "Feinabgestimmt"
+      },
+      "cameras": "Kameras",
+      "loading": "Lade Model Informationen…",
+      "error": "Model Informationen laden fehlgeschlagen",
+      "availableModels": "Verfügbare Modelle",
+      "loadingAvailableModels": "Lade verfügbare Modelle…",
+      "baseModel": "Basis Model",
+      "title": "Model Informationen"
+    },
+    "toast": {
+      "error": "Speichern der Konfigurationsänderungen fehlgeschlagen: {{errorMessage}}",
+      "success": "Frigate+ Einstellungen wurden gespeichert. Starte Frigate neu um Änderungen anzuwenden."
+    },
+    "restart_required": "Neustart erforderlich (Frigate+ Model geändert)",
+    "unsavedChanges": "Nicht gespeicherte Änderungen an den Frigate+-Einstellungen"
+  },
+  "enrichments": {
+    "birdClassification": {
+      "title": "Vogel Klassifizierung",
+      "desc": "Die Vogelklassifizierung identifiziert bekannte Vögel mithilfe eines quantisierten Tensorflow-Modells. Wenn ein bekannter Vogel erkannt wird, wird sein allgemeiner Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten."
+    },
+    "title": "Anreicherungseinstellungen",
+    "unsavedChanges": "Ungesicherte geänderte Verbesserungseinstellungen",
+    "semanticSearch": {
+      "reindexNow": {
+        "confirmDesc": "Sind Sie sicher, dass Sie alle verfolgten Objekteinbettungen neu indizieren wollen? Dieser Prozess läuft im Hintergrund, kann aber Ihre CPU auslasten und eine gewisse Zeit in Anspruch nehmen. Sie können den Fortschritt auf der Seite Explore verfolgen.",
+        "label": "Jetzt neu indizien",
+        "desc": "Bei der Neuindizierung werden die Einbettungen für alle verfolgten Objekte neu generiert. Dieser Prozess läuft im Hintergrund und kann je nach Anzahl der verfolgten Objekte Ihre CPU auslasten und eine gewisse Zeit in Anspruch nehmen.",
+        "confirmTitle": "Neuinszenierung bestätigen",
+        "confirmButton": "Neuindizierung",
+        "success": "Die Neuindizierung wurde erfolgreich gestartet.",
+        "alreadyInProgress": "Die Neuindizierung ist bereits im Gange.",
+        "error": "Neuindizierung konnte nicht gestartet werden: {{errorMessage}}"
+      },
+      "modelSize": {
+        "small": {
+          "desc": "Bei der Verwendung von <em>klein</em> wird eine quantisierte Version des Modells verwendet, die weniger Arbeitsspeicher verbraucht und schneller auf der CPU läuft, wobei der Unterschied in der Einbettungsqualität sehr gering ist.",
+          "title": "klein"
+        },
+        "label": "Modell Größe",
+        "desc": "Die Größe des für die Einbettung der semantischen Suche verwendeten Modells.",
+        "large": {
+          "title": "groß",
+          "desc": "Bei der Verwendung von <em>groß</em> wird das gesamte Jina-Modell verwendet und automatisch auf der GPU ausgeführt, falls zutreffend."
+        }
+      },
+      "title": "Semantische Suche",
+      "desc": "Die semantische Suche in Frigate ermöglicht es Ihnen, verfolgte Objekte innerhalb Ihrer Überprüfungselemente zu finden, indem Sie entweder das Bild selbst, eine benutzerdefinierte Textbeschreibung oder eine automatisch generierte Beschreibung verwenden.",
+      "readTheDocumentation": "Lies die Dokumentation"
+    },
+    "faceRecognition": {
+      "title": "Gesichtserkennung",
+      "desc": "Die Gesichtserkennung ermöglicht es, Personen Namen zuzuweisen, und wenn ihr Gesicht erkannt wird, ordnet Frigate den Namen der Person als Untertitel zu. Diese Informationen sind in der Benutzeroberfläche, den Filtern und in den Benachrichtigungen enthalten.",
+      "readTheDocumentation": "Lies die Dokumentation",
+      "modelSize": {
+        "label": "Modell Größe",
+        "desc": "Die Größe des für die Gesichtserkennung verwendeten Modells.",
+        "small": {
+          "title": "klein",
+          "desc": "Mit <em>klein</em> wird ein FaceNet-Gesichtseinbettungsmodell verwendet, das auf den meisten CPUs effizient läuft."
+        },
+        "large": {
+          "title": "groß",
+          "desc": "Die Verwendung von <em>groß</em> verwendet ein ArcFace-Gesichtseinbettungsmodell und läuft automatisch auf der GPU, falls zutreffend."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Kennzeichenerkennung",
+      "desc": "Frigate kann Kennzeichen an Fahrzeugen erkennen und die erkannten Zeichen automatisch in das Feld recognized_license_plate oder einen bekannten Namen als sub_label zu Objekten vom Typ car hinzufügen. Ein häufiger Anwendungsfall ist das Lesen der Kennzeichen von Autos, die in eine Einfahrt einfahren oder auf einer Straße vorbeifahren.",
+      "readTheDocumentation": "Lies die Dokumentation"
+    },
+    "restart_required": "Neustart erforderlich (Verbesserungseinstellungen geändert)",
+    "toast": {
+      "success": "Die Einstellungen für die Verbesserungen wurden gespeichert. Starten Sie Frigate neu, um Ihre Änderungen zu übernehmen.",
+      "error": "Konfigurationsänderungen konnten nicht gespeichert werden: {{errorMessage}}"
+    }
+  }
+}

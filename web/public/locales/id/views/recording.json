@@ -1,0 +1,12 @@
+{
+  "filter": "Saring",
+  "export": "Expor",
+  "calendar": "Kalender",
+  "filters": "Penyaring",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Rentan Waktu yang dipilih tidak valid",
+      "endTimeMustAfterStartTime": "Waktu akhir harus setelah waktu mulai"
+    }
+  }
+}

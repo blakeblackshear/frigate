@@ -1,0 +1,248 @@
+{
+  "dialog": {
+    "unsavedChanges": {
+      "title": "คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก.",
+      "desc": "คุณต้องการบันทึกการเปลี่ยนแปลงของคุณก่อนดำเนินการต่อหรือไม่?"
+    }
+  },
+  "users": {
+    "dialog": {
+      "form": {
+        "newPassword": {
+          "title": "รหัสผ่านใหม่",
+          "confirm": {
+            "placeholder": "ใส่รหัสผ่านใหม่อีกครั้ง"
+          },
+          "placeholder": "ใส่รหัสผ่านใหม่"
+        },
+        "password": {
+          "notMatch": "รหัสไม่ตรงกัน",
+          "title": "รหัสผ่าน",
+          "confirm": {
+            "title": "ยืนยันรหัสผ่าน",
+            "placeholder": "ยืนยันรหัสผ่าน"
+          },
+          "strength": {
+            "title": "ความแข็งแรงของรหัส: ",
+            "weak": "แย่",
+            "strong": "ใช้ได้",
+            "veryStrong": "แข็งแรง",
+            "medium": "กลาง"
+          },
+          "match": "รหัสตรงกัน",
+          "placeholder": "ใส่รหัสผ่าน"
+        },
+        "user": {
+          "placeholder": "ใส่ชื่อผู้ใช้",
+          "title": "ผู้ใช้"
+        },
+        "passwordIsRequired": "ต้องการรหัสผ่าน",
+        "usernameIsRequired": "ต้องการชื่อผู้ใช้"
+      },
+      "changeRole": {
+        "roleInfo": {
+          "admin": "ผู้ดูแล"
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "updatePassword": "อัปเดตรหัสผ่านเรียบร้อย",
+        "deleteUser": "ลบผู้ใช้ {{user}} เรียบร้อย",
+        "createUser": "สร้างผู้ใช้ {{user}} เรียบร้อย"
+      },
+      "error": {
+        "setPasswordFailed": "ผิดพลาดในการบันทึกรหัสผ่าน: {{errorMessage}}",
+        "deleteUserFailed": "ผิดพลาดในการลบผู้ใช้: {{errorMessage}}",
+        "createUserFailed": "ผิดพลาดในการสร้างผู้ใช้: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "ชื่อผู้ใช้",
+      "noUsers": "ไม่เจอผู้ใช้",
+      "password": "รหัสผ่าน",
+      "deleteUser": "ลบผู้ใช้",
+      "actions": "การดำเนินการ"
+    },
+    "management": {
+      "title": "จัดการผู้ใช้",
+      "desc": "จัดการบัญชีของ Frigate นี้."
+    },
+    "addUser": "แก้ไขผู้ใช้",
+    "title": "ผู้ใช้",
+    "updatePassword": "อัปเดตรหัสผ่าน"
+  },
+  "notification": {
+    "suspendTime": {
+      "12hours": "ระงับ 12 ชั่วโมง",
+      "5minutes": "ระงับ 5 นาที",
+      "10minutes": "ระงับ 10 นาที",
+      "1hour": "ระงับ 1 ชั่วโมง",
+      "untilRestart": "ระงับจนกว่ารีสตาร์ท",
+      "suspend": "ระงับ",
+      "24hours": "ระงับ 24 ชั่วโมง",
+      "30minutes": "ระงับ 30 นาที"
+    },
+    "cameras": {
+      "title": "กล้อง",
+      "noCameras": "ไม่มีกล้องให้ใช้งาน"
+    },
+    "email": {
+      "title": "อีเมล"
+    },
+    "notificationSettings": {
+      "documentation": "อ่านเอกสาร"
+    },
+    "notificationUnavailable": {
+      "documentation": "อ่านเอกสาร"
+    }
+  },
+  "documentTitle": {
+    "default": "ตั้งค่า - Frigate",
+    "authentication": "การตั้งค่าการตรวจสอบสิทธิ์ - Frigate",
+    "camera": "การตั้งค่ากล้อง - Frigate",
+    "classification": "การตั้งค่าการจำแนกประเภท - Frigate",
+    "masksAndZones": "ตัวแก้ไขแมสและโซน - Frigate",
+    "general": "การตั้งค่าทั่วไป - Frigate",
+    "frigatePlus": "การตั้งค่า Frigate+ - Frigate",
+    "notifications": "การตั้งค่าการแจ้งเตือน - Frigate"
+  },
+  "menu": {
+    "notifications": "การแจ้งเตือน",
+    "frigateplus": "Frigate+",
+    "cameras": "ตั้งค่ากล้อง",
+    "users": "ผู้ใช้",
+    "classification": "การจําแนกประเภท",
+    "masksAndZones": "แมส / โซน",
+    "ui": "UI"
+  },
+  "cameraSetting": {
+    "camera": "กล้อง",
+    "noCamera": "ไม่มีกล้อง"
+  },
+  "general": {
+    "liveDashboard": {
+      "title": "แดชบอร์ดสด",
+      "automaticLiveView": {
+        "label": "การดูสดอัตโนมัติ",
+        "desc": "สลับไปที่มุมมองสดของกล้องโดยอัตโนมัติเมื่อตรวจพบกิจกรรม. การปิดใช้งานตัวเลือกนี้จะทำให้ภาพคงที่จากกล้องบนแดชบอร์ดสดอัปเดตเพียงครั้งเดียวต่อนาที."
+      },
+      "playAlertVideos": {
+        "label": "เล่นวิดีโอการแจ้งเตือน.",
+        "desc": "ตามค่าเริ่มต้น, แจ้งเตือนล่าสุดบนแดชบอร์ดสด จะเล่นเป็นวิดีโอวนซ้ำขนาดเล็ก. ปิดใช้งานตัวเลือกนี้เพื่อแสดงเฉพาะภาพนิ่งของการแจ้งเตือนล่าสุดบนอุปกรณ์/เบราว์เซอร์นี้เท่านั้น."
+      }
+    },
+    "storedLayouts": {
+      "title": "เลย์เอาท์ที่จัดเก็บไว้",
+      "desc": "คุณสามารถลากหรือปรับขนาดเลย์เอาท์ของกล้องในกลุ่มกล้องได้. ตำแหน่งต่างๆ จะถูกเก็บไว้ในหน่วยความจำภายในของเบราว์เซอร์ของคุณ.",
+      "clearAll": "ล้างเลย์เอาต์ทั้งหมด"
+    },
+    "calendar": {
+      "title": "ปฎิทิน",
+      "firstWeekday": {
+        "label": "วันธรรมดาวันแรก",
+        "sunday": "วันอาทิตย์",
+        "monday": "วันจันทร์",
+        "desc": "วันที่เริ่มต้นสัปดาห์ของปฏิทินการรีวิว."
+      }
+    },
+    "title": "การตั้งค่าทั่วไป",
+    "cameraGroupStreaming": {
+      "title": "การตั้งค่าสตรีมกล้องแบบกลุ่ม",
+      "desc": "การตั้งค่าสตรีมมิ่งสําหรับกล้องแต่ละกลุ่มเก็บไว้ในเบราว์เซอร์ของคุณ.",
+      "clearAll": "ล้างการตั้งค่าสตรีมทั้งหมด"
+    }
+  },
+  "classification": {
+    "faceRecognition": {
+      "title": "การจดจำใบหน้า",
+      "modelSize": {
+        "small": {
+          "title": "เล็ก"
+        },
+        "large": {
+          "title": "ใหญ่"
+        }
+      }
+    },
+    "toast": {
+      "error": "ผิดพลาดในการบันทึกการกำหนดค่า: {{errorMessage}}"
+    },
+    "semanticSearch": {
+      "modelSize": {
+        "small": {
+          "title": "เล็ก"
+        },
+        "large": {
+          "title": "ใหญ่"
+        }
+      }
+    },
+    "restart_required": "จำเป็นต้องรีสตาร์ท (การตั้งค่าการจำแนกมีการเปลี่ยนแปลง)"
+  },
+  "camera": {
+    "review": {
+      "title": "รีวิว",
+      "alerts": "การแจ้งเตือน ",
+      "detections": "การเคลื่อนไหว "
+    },
+    "reviewClassification": {
+      "readTheDocumentation": "อ่านเอกสาร"
+    }
+  },
+  "masksAndZones": {
+    "zones": {
+      "name": {
+        "tips": "ชื่อต้องมีความยาวอย่างน้อย 2 อักขระ และต้องไม่ใช่ชื่อกล้องหรือโซนอื่น",
+        "title": "ชื่อ",
+        "inputPlaceHolder": "ใส่ชื่อ…"
+      },
+      "add": "เพิ่มโซน",
+      "edit": "แก้โซน",
+      "point_other": "{{count}} จุด",
+      "speedEstimation": {
+        "docs": "อ่านเอกสาร"
+      }
+    },
+    "motionMasks": {
+      "point_other": "{{count}} จุด",
+      "context": {
+        "documentation": "อ่านเอกสาร"
+      },
+      "polygonAreaTooLarge": {
+        "documentation": "อ่านเอกสาร"
+      }
+    },
+    "objectMasks": {
+      "point_other": "{{count}} จุด"
+    }
+  },
+  "frigatePlus": {
+    "title": "การตั้งค่า Frigate+",
+    "modelInfo": {
+      "cameras": "กล้อง"
+    },
+    "toast": {
+      "error": "ผิดพลาดในการบันทึกการกำหนดค่า: {{errorMessage}}"
+    },
+    "snapshotConfig": {
+      "documentation": "อ่านเอกสาร"
+    }
+  },
+  "debug": {
+    "objectShapeFilterDrawing": {
+      "document": "อ่านเอกสาร "
+    }
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "readTheDocumentation": "อ่านเอกสาร"
+    },
+    "faceRecognition": {
+      "readTheDocumentation": "อ่านเอกสาร"
+    },
+    "licensePlateRecognition": {
+      "readTheDocumentation": "อ่านเอกสาร"
+    }
+  }
+}

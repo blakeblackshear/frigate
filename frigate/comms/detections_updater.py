@@ -1,7 +1,7 @@
 """Facilitates communication between processes."""
 
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from .zmq_proxy import Publisher, Subscriber
 
@@ -11,6 +11,7 @@ class DetectionTypeEnum(str, Enum):
     api = "api"
     video = "video"
     audio = "audio"
+    lpr = "lpr"
 
 
 class DetectionPublisher(Publisher):
@@ -34,10 +35,10 @@ class DetectionSubscriber(Subscriber):
 
     def check_for_update(
         self, timeout: float = None
-    ) -> Optional[tuple[DetectionTypeEnum, any]]:
+    ) -> Optional[tuple[DetectionTypeEnum, Any]]:
         return super().check_for_update(timeout)
 
-    def _return_object(self, topic: str, payload: any) -> any:
+    def _return_object(self, topic: str, payload: Any) -> Any:
         if payload is None:
             return (None, None)
         return (DetectionTypeEnum[topic[len(self.topic_base) :]], payload)

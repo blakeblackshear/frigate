@@ -1,0 +1,126 @@
+{
+  "reset": {
+    "label": "重設篩選條件為預設值"
+  },
+  "subLabels": {
+    "all": "所有子標籤",
+    "label": "子標籤"
+  },
+  "score": "分數",
+  "features": {
+    "label": "特徵",
+    "hasSnapshot": "有快照",
+    "hasVideoClip": "有影片片段",
+    "submittedToFrigatePlus": {
+      "label": "已提交到 Frigate+",
+      "tips": "你必須先篩選出有快照的追蹤物件。<br /><br />沒有快照的追蹤物件無法提交到 Frigate+。"
+    }
+  },
+  "sort": {
+    "label": "排序",
+    "dateAsc": "日期（由舊到新）",
+    "dateDesc": "日期（由新到舊）",
+    "scoreAsc": "物件分數（由細到大）",
+    "scoreDesc": "物件分數（由大到細）",
+    "speedAsc": "預計速度（由慢到快）",
+    "speedDesc": "預計速度（由快到慢）",
+    "relevance": "相關性"
+  },
+  "cameras": {
+    "label": "鏡頭篩選",
+    "all": {
+      "title": "所有鏡頭",
+      "short": "鏡頭"
+    }
+  },
+  "review": {
+    "showReviewed": "顯示已審查"
+  },
+  "motion": {
+    "showMotionOnly": "只顯示有移動"
+  },
+  "explore": {
+    "settings": {
+      "title": "設定",
+      "defaultView": {
+        "summary": "摘要",
+        "unfilteredGrid": "未篩選網格",
+        "desc": "當未選取篩選條件時，顯示每個標籤最近追蹤物件的摘要，或顯示未篩選的網格。",
+        "title": "預設檢視"
+      },
+      "gridColumns": {
+        "title": "網格欄數",
+        "desc": "選擇網格檢視中的欄數。"
+      },
+      "searchSource": {
+        "label": "搜尋來源",
+        "desc": "選擇搜尋追蹤物件的縮圖還是描述。",
+        "options": {
+          "thumbnailImage": "縮圖",
+          "description": "描述"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "選擇日期進行篩選"
+      }
+    }
+  },
+  "logSettings": {
+    "filterBySeverity": "依嚴重程度篩選日誌",
+    "loading": {
+      "desc": "當日誌窗格捲動到底部時，新日誌將自動串流顯示。",
+      "title": "載入中"
+    },
+    "label": "篩選日誌等級",
+    "allLogs": "所有日誌",
+    "disableLogStreaming": "停用日誌串流"
+  },
+  "trackedObjectDelete": {
+    "title": "確認刪除",
+    "toast": {
+      "success": "成功刪除追蹤物件。",
+      "error": "刪除追蹤物件失敗：{{errorMessage}}"
+    },
+    "desc": "刪除這 {{objectLength}} 個追蹤物件將會移除快照、儲存的嵌入資料，以及相關的物件生命週期記錄。歷史檢視中的錄影檔案<em>不會</em>被刪除。<br /><br />你確定要繼續嗎？<br /><br />按住 <em>Shift</em> 鍵可略過未來此對話框。"
+  },
+  "recognizedLicensePlates": {
+    "loading": "載入已識別車牌中…",
+    "noLicensePlatesFound": "找不到車牌。",
+    "selectPlatesFromList": "從列表中選取一個或多個車牌。",
+    "placeholder": "輸入以搜尋車牌…",
+    "title": "已識別車牌",
+    "loadFailed": "載入已識別車牌失敗。"
+  },
+  "estimatedSpeed": "預計速度（{{unit}}）",
+  "labels": {
+    "label": "標籤",
+    "count_one": "{{count}} 個標籤",
+    "all": {
+      "title": "所有標籤",
+      "short": "標籤"
+    },
+    "count_other": "{{count}} 個標籤"
+  },
+  "zoneMask": {
+    "filterBy": "按區域遮罩篩選"
+  },
+  "zones": {
+    "label": "區域",
+    "all": {
+      "short": "區域",
+      "title": "所有區域"
+    }
+  },
+  "filter": "篩選",
+  "dates": {
+    "all": {
+      "title": "所有日期",
+      "short": "日期"
+    },
+    "selectPreset": "選擇預設設定…"
+  },
+  "more": "更多篩選條件",
+  "timeRange": "時間範圍"
+}

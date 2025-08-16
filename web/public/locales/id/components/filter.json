@@ -1,0 +1,19 @@
+{
+  "filter": "Saring",
+  "labels": {
+    "label": "Label",
+    "all": {
+      "title": "Semua Label",
+      "short": "Label"
+    },
+    "count_one": "{{count}} Label",
+    "count_other": "{{count}} Label"
+  },
+  "zones": {
+    "label": "Zona",
+    "all": {
+      "title": "Semua Zona",
+      "short": "Zona"
+    }
+  }
+}

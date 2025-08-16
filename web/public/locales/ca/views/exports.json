@@ -1,0 +1,17 @@
+{
+  "documentTitle": "Exportar - Frigate",
+  "search": "Buscar",
+  "noExports": "No s'han trobat exportacions",
+  "deleteExport": "Suprimeix l'exportació",
+  "deleteExport.desc": "Estàs segur que vols eliminar {{exportName}}?",
+  "editExport": {
+    "title": "Renombrar exportació",
+    "desc": "Introdueix un nou nom per a aquesta exportació.",
+    "saveExport": "Desar exportació"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Error al canviar el nom de l’exportació: {{errorMessage}}"
+    }
+  }
+}

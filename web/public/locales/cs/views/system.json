@@ -1,0 +1,180 @@
+{
+  "cameras": {
+    "info": {
+      "stream": "Stream {{idx}}",
+      "resolution": "Rozlišení:",
+      "error": "Chyba: {{error}}",
+      "unknown": "Neznámý",
+      "fps": "FPS:",
+      "audio": "Audio:",
+      "video": "Video:",
+      "fetching": "Získávám data o kameře",
+      "codec": "Kodek:",
+      "tips": {
+        "title": "Informace o sondování kamery"
+      },
+      "streamDataFromFFPROBE": "Data ze streamu jsou získávána pomocí <code>ffprobe</code>.",
+      "cameraProbeInfo": "{{camera}} Informace o sondování kamery",
+      "aspectRatio": "zachovat poměr stran"
+    },
+    "label": {
+      "camera": "kamera",
+      "ffmpeg": "FFmpeg",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "detect": "detekováno",
+      "skipped": "přeskočeno",
+      "capture": "zachyceno",
+      "overallFramesPerSecond": "celkový počet snímků za sekundu",
+      "overallDetectionsPerSecond": "celkový počet detekcí za sekundu",
+      "overallSkippedDetectionsPerSecond": "celkový počet přeskočených detekcí za sekundu",
+      "cameraCapture": "záznam {{camName}}",
+      "cameraDetect": "detekce {{camName}}",
+      "cameraFramesPerSecond": "{{camName}} snímků za sekundu",
+      "cameraDetectionsPerSecond": "{{camName}} detekcí za sekundu",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} přeskočených detekcí za sekundu"
+    },
+    "title": "Kamery",
+    "overview": "Přehled",
+    "framesAndDetections": "Snímky / Detekce",
+    "toast": {
+      "success": {
+        "copyToClipboard": "Sondovaná data uložena do schránky."
+      },
+      "error": {
+        "unableToProbeCamera": "Nemohu sondovat kameru: {{errorMessage}}"
+      }
+    }
+  },
+  "stats": {
+    "cameraIsOffline": "{{camera}} je offline",
+    "healthy": "Systém je zdravý",
+    "reindexingEmbeddings": "Přeindexování vektorů ({{processed}} % dokončeno)",
+    "detectIsSlow": "{{detect}} je pomalé ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} je velmi pomalé ({{speed}} ms)",
+    "detectHighCpuUsage": "{{camera}} má vysoké využití CPU detekcemi ({{detectAvg}} %)",
+    "ffmpegHighCpuUsage": "{{camera}} má vyské využití CPU FFmpegem ({{ffmpegAvg}}%)"
+  },
+  "enrichments": {
+    "embeddings": {
+      "face_recognition_speed": "Rychlost rozpoznávání obličeje",
+      "plate_recognition_speed": "Rychlost rozpoznávání SPZ",
+      "plate_recognition": "Rozpoznávání SPZ",
+      "face_recognition": "Rozpoznávání obličeje",
+      "image_embedding_speed": "Rychlost vkládání obrázku",
+      "text_embedding_speed": "Rychlost vkládání textu",
+      "text_embedding": "Vkládání textu",
+      "image_embedding": "Vkládání obrázku",
+      "face_embedding_speed": "Rychlost vkládání obličeje",
+      "yolov9_plate_detection_speed": "YOLOv9 rychlost detekce SPZ",
+      "yolov9_plate_detection": "YOLOv9 Detekce SPZ"
+    },
+    "infPerSecond": "Inferencí za sekundu",
+    "title": "Obohacení"
+  },
+  "general": {
+    "detector": {
+      "temperature": "Detekční teplota",
+      "title": "Detektory",
+      "inferenceSpeed": "Detekční rychlost",
+      "memoryUsage": "Detektor využití paměti",
+      "cpuUsage": "Detektor využití CPU"
+    },
+    "hardwareInfo": {
+      "title": "Informace o hardware",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "processError": "Chyba procesu:",
+          "returnCode": "Návratový kód: {{code}}",
+          "processOutput": "Výstup procesu:",
+          "title": "Výstup Vainfo"
+        },
+        "nvidiaSMIOutput": {
+          "name": "Jméno: {{name}}",
+          "title": "Výstup Nvidia SMI",
+          "driver": "Ovladač: {{driver}}",
+          "cudaComputerCapability": "Výpočetní schopnost CUDA: {{cuda_compute}}",
+          "vbios": "Informace o VBios: {{vbios}}"
+        },
+        "copyInfo": {
+          "label": "Kopírovat informace o GPU"
+        },
+        "toast": {
+          "success": "Informace o GPU zkopírovány do schránky"
+        },
+        "closeInfo": {
+          "label": "Zavřít informace o GPU"
+        }
+      },
+      "npuUsage": "Využití NPU",
+      "npuMemory": "Paměť NPU",
+      "gpuUsage": "Využití CPU",
+      "gpuMemory": "Paměť GPU",
+      "gpuEncoder": "GPU kodér",
+      "gpuDecoder": "GPU Dekodér"
+    },
+    "otherProcesses": {
+      "title": "Ostatní procesy",
+      "processCpuUsage": "Využití CPU procesy",
+      "processMemoryUsage": "Využití paměti procesy"
+    },
+    "title": "Hlavní"
+  },
+  "storage": {
+    "cameraStorage": {
+      "storageUsed": "Úložiště",
+      "camera": "Kamera",
+      "title": "Úložiště kamery",
+      "unused": {
+        "title": "Nepoužité",
+        "tips": "Tato hodnota nemusí přesně reprezentovat volné místo dostupné pro Frigate, pokud máte na disku uloženy další soubory kromě nahrávek Frigate. Frigate nesleduje využití úložiště mimo své nahrávky."
+      },
+      "bandwidth": "Šířka pásma",
+      "unusedStorageInformation": "Informace o nepoužitém úložišti",
+      "percentageOfTotalUsed": "Procento celkem"
+    },
+    "recordings": {
+      "title": "Záznamy",
+      "earliestRecording": "Nejstarší dostupná nahrávka:",
+      "tips": "Tato hodnota uvádí celkové využití disku záznamy uloženými v databázi Frigate. Frigate nesleduje využití disku ostatními soubory na vašem disku."
+    },
+    "title": "Úložiště",
+    "overview": "Přehled"
+  },
+  "lastRefreshed": "Poslední aktualizace: ",
+  "documentTitle": {
+    "cameras": "Statistiky kamer – Frigate",
+    "storage": "Statistiky uložiště - Frigate",
+    "general": "Obecné statistiky - Frigate",
+    "enrichments": "Statistiky obohacení - Frigate",
+    "logs": {
+      "frigate": "Protokoly Frigate - Frigate",
+      "go2rtc": "Protokoly Go2RTC - Frigate",
+      "nginx": "Protokoly Nginx - Frigate"
+    }
+  },
+  "title": "Systém",
+  "logs": {
+    "copy": {
+      "label": "Kopírovat do schránky",
+      "success": "Protokoly zkopírovány do schránky",
+      "error": "Protokoly se nepodařilo zkopírovat do schránky"
+    },
+    "type": {
+      "label": "Typ",
+      "message": "Zpráva",
+      "timestamp": "Časové razítko",
+      "tag": "Štítek (Tag)"
+    },
+    "download": {
+      "label": "Stáhnout záznamy"
+    },
+    "tips": "Protokoly jsou streamovány ze serveru",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Chyba při načítání protokolů: {{errorMessage}}",
+        "whileStreamingLogs": "Chyba při streamování protokolů: {{errorMessage}}"
+      }
+    }
+  },
+  "metrics": "Systémové metriky"
+}

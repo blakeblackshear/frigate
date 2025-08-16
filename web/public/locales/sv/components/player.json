@@ -1,0 +1,51 @@
+{
+  "noPreviewFound": "Ingen Förhandsvisning Hittad",
+  "noRecordingsFoundForThisTime": "Inga inspelningar hittade för denna tid",
+  "noPreviewFoundFor": "Ingen förhandsvisning hittad för {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Skicka denna bild till Frigate+?",
+    "submit": "Skicka"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 eller senare krävs för den här typen av livestream.",
+  "streamOffline": {
+    "title": "Ström ej tillgänglig",
+    "desc": "Inga bildrutor har tagits emot från {{cameraName}}-strömmen <code>detect</code>, kontrollera felloggarna"
+  },
+  "stats": {
+    "streamType": {
+      "short": "Typ",
+      "title": "Strömtyp:"
+    },
+    "bandwidth": {
+      "title": "Bandbredd:",
+      "short": "Bandbredd"
+    },
+    "latency": {
+      "title": "Latens:",
+      "short": {
+        "title": "Latens",
+        "value": "{{seconds}} sek"
+      },
+      "value": "{{seconds}} sekunder"
+    },
+    "totalFrames": "Totala Bildrutor:",
+    "droppedFrames": {
+      "title": "Bortfallna bildrutor:",
+      "short": {
+        "title": "Bortfallen",
+        "value": "{{droppedFrames}} Bildrutor"
+      }
+    },
+    "decodedFrames": "Avkodade bildrutor:",
+    "droppedFrameRate": "Frekvens för bortfallna bildrutor:"
+  },
+  "cameraDisabled": "Kameran är disablead",
+  "toast": {
+    "error": {
+      "submitFrigatePlusFailed": "Bildruta har skickats till Frigate+ med misslyckat resultat"
+    },
+    "success": {
+      "submittedFrigatePlus": "Bildruta har skickats till Frigate+ med lyckat resultat"
+    }
+  }
+}

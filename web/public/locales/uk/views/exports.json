@@ -1,0 +1,17 @@
+{
+  "documentTitle": "Експорта - Frigate",
+  "search": "Пошук",
+  "noExports": "Не знайдено експортованих файлів",
+  "deleteExport": "Видалити експортування",
+  "deleteExport.desc": "Ви справді бажаєте вилучити {{exportName}}?",
+  "editExport": {
+    "title": "Перейменувати експорт",
+    "desc": "Введіть нову назву для цього експорту.",
+    "saveExport": "Зберегти експорт"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Не вдалося перейменувати експорт: {{errorMessage}}"
+    }
+  }
+}

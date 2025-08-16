@@ -32,19 +32,19 @@ Examples of available modules are:
 
 #### Go2RTC Logging
 
-See [the go2rtc docs](for logging configuration)
+See [the go2rtc docs](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#module-log) for logging configuration
 
 ```yaml
 go2rtc:
   streams:
-    ...
+    # ...
   log:
     exec: trace
 ```
 
 ### `environment_vars`
 
-This section can be used to set environment variables for those unable to modify the environment of the container (ie. within HassOS)
+This section can be used to set environment variables for those unable to modify the environment of the container, like within Home Assistant OS.
 
 Example:
 
@@ -172,27 +172,57 @@ listen [::]:8971 ipv6only=off ssl;
 listen [::]:5000 ipv6only=off;
 ```
 
+## Base path
+
+By default, Frigate runs at the root path (`/`). However some setups require to run Frigate under a custom path prefix (e.g. `/frigate`), especially when Frigate is located behind a reverse proxy that requires path-based routing.
+
+### Set Base Path via HTTP Header
+The preferred way to configure the base path is through the `X-Ingress-Path` HTTP header, which needs to be set to the desired base path in an upstream reverse proxy.
+
+For example, in Nginx:
+```
+location /frigate {
+    proxy_set_header X-Ingress-Path /frigate;
+    proxy_pass http://frigate_backend;
+}
+```
+
+### Set Base Path via Environment Variable
+When it is not feasible to set the base path via a HTTP header, it can also be set via the `FRIGATE_BASE_PATH` environment variable in the Docker Compose file.
+
+For example:
+```
+services:
+  frigate:
+    image: blakeblackshear/frigate:latest
+    environment:
+      - FRIGATE_BASE_PATH=/frigate
+```
+
+This can be used for example to access Frigate via a Tailscale agent (https), by simply forwarding all requests to the base path (http):
+```
+tailscale serve --https=443 --bg --set-path /frigate http://localhost:5000/frigate
+```
+
 ## Custom Dependencies
 
 ### Custom ffmpeg build
 
-Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, statically built ffmpeg binary can be downloaded to /config and used.
+Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, statically built `ffmpeg` and `ffprobe` binaries can be placed in `/config/custom-ffmpeg/bin` for Frigate to use.
 
 To do this:
 
-1. Download your ffmpeg build and uncompress to the Frigate config folder.
-2. Update your docker-compose or docker CLI to include `'/home/appdata/frigate/custom-ffmpeg':'/usr/lib/btbn-ffmpeg':'ro'` in the volume mappings.
-3. Restart Frigate and the custom version will be used if the mapping was done correctly.
-
-NOTE: The folder that is set for the config needs to be the folder that contains `/bin`. So if the full structure is `/home/appdata/frigate/custom-ffmpeg/bin/ffmpeg` then the `ffmpeg -> path` field should be `/config/custom-ffmpeg/bin`.
+1. Download your ffmpeg build and uncompress it to the `/config/custom-ffmpeg` folder. Verify that both the `ffmpeg` and `ffprobe` binaries are located in `/config/custom-ffmpeg/bin`.
+2. Update the `ffmpeg.path` in your Frigate config to `/config/custom-ffmpeg`.
+3. Restart Frigate and the custom version will be used if the steps above were done correctly.
 
 ### Custom go2rtc version
 
-Frigate currently includes go2rtc v1.9.2, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.9, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 
-1. Download the go2rtc build to the /config folder.
+1. Download the go2rtc build to the `/config` folder.
 2. Rename the build to `go2rtc`.
 3. Give `go2rtc` execute permission.
 4. Restart Frigate and the custom version will be used, you can verify by checking go2rtc logs.

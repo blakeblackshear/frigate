@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Nu au fost gasite inregistrari in perioada de timp mentionata",
+  "noPreviewFound": "Nu a fost gasita o Previzualizare",
+  "noPreviewFoundFor": "Nu există previzualizari pentru {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Trimiteti acest cadru catre Frigate+?",
+    "submit": "Trimite"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 sau mai recent este necesar pentru acest tip de stream live.",
+  "streamOffline": {
+    "title": "Stream Offline",
+    "desc": "Nici un cadru nu a fost receptionat de la streamul {{cameraName}} <code>detect</code>, verifica logurile de eroare"
+  },
+  "cameraDisabled": "Camera este dezactivata",
+  "stats": {
+    "streamType": {
+      "title": "Tip Stream:",
+      "short": "Tip"
+    },
+    "bandwidth": {
+      "title": "Latime de Banda:",
+      "short": "Latime de Banda"
+    },
+    "latency": {
+      "title": "Latenta:",
+      "value": "{{seconds}} secunde",
+      "short": {
+        "title": "Latenta",
+        "value": "{{seconds}} sec"
+      }
+    },
+    "totalFrames": "Total Cadre:",
+    "droppedFrames": {
+      "title": "Cadre Pierdute:",
+      "short": {
+        "title": "Pierdut",
+        "value": "{{droppedFrames}} cadre"
+      }
+    },
+    "decodedFrames": "Cadre Decodate:",
+    "droppedFrameRate": "Rata de Cadre Pierdute:"
+  },
+  "toast": {
+    "error": {
+      "submitFrigatePlusFailed": "Eraoare trimitere Cadru catre Frigate+"
+    },
+    "success": {
+      "submittedFrigatePlus": "Cadru trimis cu Succes catre Frigate+"
+    }
+  }
+}

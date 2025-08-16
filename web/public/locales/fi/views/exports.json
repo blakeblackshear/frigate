@@ -1,0 +1,17 @@
+{
+  "search": "Etsi",
+  "documentTitle": "Vie",
+  "deleteExport.desc": "Oletko varma että haluat poistaa kohteen {{exportName}}?",
+  "toast": {
+    "error": {
+      "renameExportFailed": "Viedyn kohteen uudelleennimeäminen epäonnistui: {{errorMessage}}"
+    }
+  },
+  "noExports": "Ei vietyjä kohteita",
+  "deleteExport": "Poista viety kohde",
+  "editExport": {
+    "title": "Nimeä uudelleen",
+    "desc": "Anna uusi nimi viedylle kohteelle.",
+    "saveExport": "Tallenna vienti"
+  }
+}

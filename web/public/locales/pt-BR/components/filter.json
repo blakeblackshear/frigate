@@ -1,0 +1,126 @@
+{
+  "filter": "Filtro",
+  "labels": {
+    "label": "Rótulos",
+    "all": {
+      "title": "Todos os Rótulos",
+      "short": "Rótulos"
+    },
+    "count_one": "{{count}} Rótulo",
+    "count_other": "{{count}} Rótulos"
+  },
+  "zones": {
+    "label": "Zonas",
+    "all": {
+      "title": "Todas as Zonas",
+      "short": "Zonas"
+    }
+  },
+  "dates": {
+    "selectPreset": "Selecione uma predefinição…",
+    "all": {
+      "title": "Todas as datas",
+      "short": "Datas"
+    }
+  },
+  "more": "Mais filtros",
+  "reset": {
+    "label": "Resetar filtros para valores padrão"
+  },
+  "timeRange": "Intervalo de Tempo",
+  "subLabels": {
+    "label": "Sub-Rótulos",
+    "all": "Todos os Sub-Rótulos"
+  },
+  "score": "Pontuação",
+  "estimatedSpeed": "Velocidade Estimada {{unit}}",
+  "features": {
+    "hasSnapshot": "Tem um snapshot",
+    "label": "Características",
+    "hasVideoClip": "Possui videoclipe",
+    "submittedToFrigatePlus": {
+      "label": "Enviado ao Frigate+",
+      "tips": "Você deve filtrar primeiro objetos que possuem capturas de imagem.<br /><br />Objetos rastreados sem capturas de imagem não serão enviados ao Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Ordenar",
+    "dateAsc": "Data (Ascendente)",
+    "dateDesc": "Data (Descendente)",
+    "scoreAsc": "Pontuação do Objeto (Ascendente)",
+    "scoreDesc": "Pontuação de Objeto (Descendente)",
+    "speedAsc": "Velocidade Estimada (Ascendente)",
+    "speedDesc": "Velocidade Estimada (Descendente)",
+    "relevance": "Relevância"
+  },
+  "cameras": {
+    "label": "Filtro de Câmeras",
+    "all": {
+      "title": "Todas as Câmeras",
+      "short": "Câmeras"
+    }
+  },
+  "review": {
+    "showReviewed": "Exibir Revisados"
+  },
+  "motion": {
+    "showMotionOnly": "Exibir Movimento Apenas"
+  },
+  "explore": {
+    "settings": {
+      "title": "Configurações",
+      "defaultView": {
+        "title": "Visualização Padrão",
+        "desc": "Quando nenhum filtro é selecionado, exibir um sumário dos objetos mais recentes rastreados por categoria, ou exiba uma grade sem filtro.",
+        "summary": "Sumário",
+        "unfilteredGrid": "Grade Sem Filtros"
+      },
+      "gridColumns": {
+        "desc": "Selecione o número de colunas na visualização em grade.",
+        "title": "Colunas de Grade"
+      },
+      "searchSource": {
+        "desc": "Escolha se deseja pesquisar nas miniaturas ou descrições dos seus objetos rastreados.",
+        "label": "Buscar Fonte",
+        "options": {
+          "thumbnailImage": "Imagem da Miniatura",
+          "description": "Descrição"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Selecione uma data para filtrar"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Nível de filtro de log",
+    "filterBySeverity": "Filtrar logs por severidade",
+    "loading": {
+      "title": "Carregando",
+      "desc": "Quando o painel de log é rolado para baixo, novos logs são transmitidos automaticamente conforme são adicionados."
+    },
+    "disableLogStreaming": "Desativar o log de tranmissão",
+    "allLogs": "Todos os logs"
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmar Exclusão",
+    "desc": "Deletar esses {{objectLength}} objetos rastreados remove as capturas de imagem, qualquer embeddings salvos, e quaisquer entradas do ciclo de vida associadas do objeto. Gravações desses objetos rastreados na visualização de Histórico <em>NÃO</em> irão ser deletadas.<br /><br />Tem certeza que quer proceder?<br /><br />Segure a tecla <em>Shift</em> para pular esse diálogo no futuro.",
+    "toast": {
+      "success": "Objetos rastreados deletados com sucesso.",
+      "error": "Falha ao deletar objeto rastreado: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtrar por máscara de zona"
+  },
+  "recognizedLicensePlates": {
+    "title": "Placas de Identificação Reconhecidas",
+    "loadFailed": "Falha ao carregar placas de identificação reconhecidas.",
+    "loading": "Carregando placas de identificação reconhecidas…",
+    "placeholder": "Digite para pesquisar por placas de identificação…",
+    "noLicensePlatesFound": "Nenhuma placa de identificação encontrada.",
+    "selectPlatesFromList": "Seleciona uma ou mais placas da lista."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "copyConfig": "Sao chép cấu hình",
+  "saveAndRestart": "Lưu & Khởi động lại",
+  "saveOnly": "Chỉ lưu",
+  "confirm": "Thoát mà không lưu?",
+  "toast": {
+    "error": {
+      "savingError": "Lỗi khi lưu cấu hình"
+    },
+    "success": {
+      "copyToClipboard": "Đã sao chép cấu hình vào bộ nhớ tạm."
+    }
+  },
+  "configEditor": "Trình chỉnh sửa cấu hình",
+  "documentTitle": "Trình chỉnh sửa - Frigate"
+}

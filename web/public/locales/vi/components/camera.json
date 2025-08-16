@@ -1,0 +1,86 @@
+{
+  "group": {
+    "delete": {
+      "label": "Xóa nhóm Camera",
+      "confirm": {
+        "title": "Xác nhận xóa",
+        "desc": "Bạn có chắc chắn muốn xóa nhóm camera <em>{{name}}</em> không?"
+      }
+    },
+    "label": "Các nhóm Camera",
+    "add": "Thêm nhóm Camera",
+    "camera": {
+      "setting": {
+        "stream": "Trực tiếp",
+        "audio": {
+          "tips": {
+            "title": "Âm thanh phải được xuất từ camera của bạn và được định cấu hình trong go2rtc cho luồng này.",
+            "document": "Đọc tài liệu "
+          }
+        },
+        "desc": "Thay đổi các tùy chọn truyền phát trực tiếp cho bảng điều khiển của nhóm camera này.<em>Các cài đặt này dành riêng cho thiết bị/trình duyệt..</em>",
+        "streamMethod": {
+          "method": {
+            "noStreaming": {
+              "desc": "Hình ảnh camera sẽ chỉ cập nhật mỗi phút một lần và không có truyền phát nào xảy ra.",
+              "label": "Không truyền phát"
+            },
+            "continuousStreaming": {
+              "desc": {
+                "title": "Hình ảnh camera sẽ luôn là luồng trực tiếp khi hiển thị trên bảng điều khiển, ngay cả khi không có hoạt động nào được phát hiện.",
+                "warning": "Truyền phát liên tục có thể gây ra sử dụng băng thông cao và các vấn đề về hiệu suất. Sử dụng một cách thận trọng."
+              },
+              "label": "Truyền phát liên tục"
+            },
+            "smartStreaming": {
+              "label": "Truyền phát Thông minh (khuyến nghị)",
+              "desc": "Truyền phát thông minh sẽ cập nhật hình ảnh camera của bạn mỗi phút một lần khi không có hoạt động nào được phát hiện để tiết kiệm băng thông và tài nguyên. Khi phát hiện hoạt động, hình ảnh sẽ chuyển đổi liền mạch sang luồng trực tiếp."
+            }
+          },
+          "placeholder": "Chọn phương thức truyền phát",
+          "label": "Phương thức truyền phát"
+        },
+        "placeholder": "Chọn phát trực tiếp",
+        "compatibilityMode": {
+          "label": "Chế độ tương thích",
+          "desc": "Chỉ bật tùy chọn này nếu luồng trực tiếp của camera của bạn hiển thị các hiện vật màu và có một đường chéo ở phía bên phải của hình ảnh."
+        },
+        "title": "Cài đặt trực tiếp {{cameraName}}",
+        "audioIsAvailable": "Âm thanh có sẵn cho luồng này",
+        "audioIsUnavailable": "Âm thanh không có sẵn cho luồng này",
+        "label": "Cài đặt trực tiếp Camera"
+      }
+    },
+    "name": {
+      "label": "Tên",
+      "errorMessage": {
+        "mustLeastCharacters": "Tên nhóm Camera phải có ít nhất 2 ký tự.",
+        "nameMustNotPeriod": "Tên nhóm camera không được chứa dấu chấm.",
+        "exists": "Tên nhóm Camera đã tồn tại.",
+        "invalid": "Tên nhóm camera không hợp lệ."
+      },
+      "placeholder": "Nhập tên…"
+    },
+    "icon": "Biểu tượng",
+    "success": "Nhóm camera ({{name}}) đã được lưu.",
+    "cameras": {
+      "desc": "Chọn camera cho nhóm này.",
+      "label": "Camera"
+    },
+    "edit": "Sửa nhóm Camera"
+  },
+  "debug": {
+    "boundingBox": "Hộp giới hạn",
+    "options": {
+      "hideOptions": "Ẩn tùy chọn",
+      "label": "Cài đặt",
+      "title": "Tùy chọn",
+      "showOptions": "Hiện thị tùy chọn"
+    },
+    "timestamp": "Dấu thời gian",
+    "zones": "Khu vực",
+    "mask": "Mặt nạ",
+    "motion": "Chuyển động",
+    "regions": "Vùng"
+  }
+}

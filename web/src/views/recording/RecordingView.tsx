@@ -15,6 +15,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
   MotionData,
+  RecordingsSummary,
   REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
@@ -46,8 +47,14 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-
-const SEGMENT_DURATION = 30;
+import { useTimezone } from "@/hooks/use-date-utils";
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import { useTranslation } from "react-i18next";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -71,9 +78,22 @@ export function RecordingView({
   filter,
   updateFilter,
 }: RecordingViewProps) {
+  const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement | null>(null);
+
+  // recordings summary
+
+  const timezone = useTimezone(config);
+
+  const { data: recordingsSummary } = useSWR<RecordingsSummary>([
+    "recordings/summary",
+    {
+      timezone: timezone,
+      cameras: allCameras.join(",") ?? null,
+    },
+  ]);
 
   // controller state
 
@@ -370,6 +390,55 @@ export function RecordingView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewRowRef.current?.scrollWidth, previewRowRef.current?.scrollHeight]);
 
+  // visibility listener for lazy loading
+
+  const [visiblePreviews, setVisiblePreviews] = useState<string[]>([]);
+  const visiblePreviewObserver = useRef<IntersectionObserver | null>(null);
+  useEffect(() => {
+    const visibleCameras = new Set<string>();
+    visiblePreviewObserver.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const camera = (entry.target as HTMLElement).dataset.camera;
+
+          if (!camera) {
+            return;
+          }
+
+          if (entry.isIntersecting) {
+            visibleCameras.add(camera);
+          } else {
+            visibleCameras.delete(camera);
+          }
+
+          setVisiblePreviews([...visibleCameras]);
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    return () => {
+      visiblePreviewObserver.current?.disconnect();
+    };
+  }, []);
+
+  const previewRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (!visiblePreviewObserver.current) {
+        return;
+      }
+
+      try {
+        if (node) visiblePreviewObserver.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    // we need to listen on the value of the ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [visiblePreviewObserver.current],
+  );
+
   return (
     <div ref={contentRef} className="flex size-full flex-col pt-2">
       <Toaster closeButton={true} />
@@ -380,12 +449,16 @@ export function RecordingView({
         <div className={cn("flex items-center gap-2")}>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
-            aria-label="Go back"
+            aria-label={t("label.back", { ns: "common" })}
             size="sm"
             onClick={() => navigate(-1)}
           >
             <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-            {isDesktop && <div className="text-primary">Back</div>}
+            {isDesktop && (
+              <div className="text-primary">
+                {t("button.back", { ns: "common" })}
+              </div>
+            )}
           </Button>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
@@ -396,7 +469,11 @@ export function RecordingView({
             }}
           >
             <FaVideo className="size-5 text-secondary-foreground" />
-            {isDesktop && <div className="text-primary">Live</div>}
+            {isDesktop && (
+              <div className="text-primary">
+                {t("menu.live.title", { ns: "common" })}
+              </div>
+            )}
           </Button>
         </div>
         <div className="flex items-center justify-end gap-2">
@@ -429,14 +506,30 @@ export function RecordingView({
           )}
           {isDesktop && (
             <ReviewFilterGroup
-              filters={["date", "general"]}
+              filters={["cameras", "date", "general"]}
               reviewSummary={reviewSummary}
+              recordingsSummary={recordingsSummary}
               filter={filter}
               motionOnly={false}
               filterList={reviewFilterList}
               showReviewed
               setShowReviewed={() => {}}
-              onUpdateFilter={updateFilter}
+              mainCamera={mainCamera}
+              onUpdateFilter={(newFilter: ReviewFilter) => {
+                const updatedCameras =
+                  newFilter.cameras === undefined
+                    ? undefined // Respect undefined as "all cameras"
+                    : newFilter.cameras
+                      ? Array.from(
+                          new Set([mainCamera, ...(newFilter.cameras || [])]),
+                        ) // Include mainCamera if specific cameras are selected
+                      : [mainCamera];
+                const adjustedFilter: ReviewFilter = {
+                  ...newFilter,
+                  cameras: updatedCameras,
+                };
+                updateFilter(adjustedFilter);
+              }}
               setMotionOnly={() => {}}
             />
           )}
@@ -453,16 +546,16 @@ export function RecordingView({
               <ToggleGroupItem
                 className={`${timelineType == "timeline" ? "" : "text-muted-foreground"}`}
                 value="timeline"
-                aria-label="Select timeline"
+                aria-label={t("timeline.aria")}
               >
-                <div className="">Timeline</div>
+                <div className="">{t("timeline")}</div>
               </ToggleGroupItem>
               <ToggleGroupItem
                 className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}
                 value="events"
-                aria-label="Select events"
+                aria-label={t("events.aria")}
               >
-                <div className="">Events</div>
+                <div className="">{t("events.label")}</div>
               </ToggleGroupItem>
             </ToggleGroup>
           ) : (
@@ -476,6 +569,7 @@ export function RecordingView({
             filter={filter}
             currentTime={currentTime}
             latestTime={timeRange.before}
+            recordingsSummary={recordingsSummary}
             mode={exportMode}
             range={exportRange}
             showExportPreview={showExportPreview}
@@ -563,7 +657,7 @@ export function RecordingView({
                 containerRef={mainLayoutRef}
               />
             </div>
-            {isDesktop && (
+            {isDesktop && allCameras.length > 1 && (
               <div
                 ref={previewRowRef}
                 className={cn(
@@ -581,29 +675,37 @@ export function RecordingView({
                   }
 
                   return (
-                    <div
-                      key={cam}
-                      className={
-                        mainCameraAspect == "tall" ? "w-full" : "h-full"
-                      }
-                      style={{
-                        aspectRatio: getCameraAspect(cam),
-                      }}
-                    >
-                      <PreviewPlayer
-                        className="size-full"
-                        camera={cam}
-                        timeRange={currentTimeRange}
-                        cameraPreviews={allPreviews ?? []}
-                        startTime={startTime}
-                        isScrubbing={scrubbing}
-                        onControllerReady={(controller) => {
-                          previewRefs.current[cam] = controller;
-                          controller.scrubToTimestamp(startTime);
-                        }}
-                        onClick={() => onSelectCamera(cam)}
-                      />
-                    </div>
+                    <Tooltip key={cam}>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={
+                            mainCameraAspect == "tall" ? "w-full" : "h-full"
+                          }
+                          style={{
+                            aspectRatio: getCameraAspect(cam),
+                          }}
+                        >
+                          <PreviewPlayer
+                            previewRef={previewRef}
+                            className="size-full"
+                            camera={cam}
+                            timeRange={currentTimeRange}
+                            cameraPreviews={allPreviews ?? []}
+                            startTime={startTime}
+                            isScrubbing={scrubbing}
+                            isVisible={visiblePreviews.includes(cam)}
+                            onControllerReady={(controller) => {
+                              previewRefs.current[cam] = controller;
+                              controller.scrubToTimestamp(startTime);
+                            }}
+                            onClick={() => onSelectCamera(cam)}
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="smart-capitalize">
+                        {cam.replaceAll("_", " ")}
+                      </TooltipContent>
+                    </Tooltip>
                   );
                 })}
                 <div className="w-2" />
@@ -633,6 +735,7 @@ export function RecordingView({
 
 type TimelineProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
+  timelineRef?: MutableRefObject<HTMLDivElement | null>;
   mainCamera: string;
   timelineType: TimelineType;
   timeRange: TimeRange;
@@ -646,6 +749,7 @@ type TimelineProps = {
 };
 function Timeline({
   contentRef,
+  timelineRef,
   mainCamera,
   timelineType,
   timeRange,
@@ -657,12 +761,49 @@ function Timeline({
   setScrubbing,
   setExportRange,
 }: TimelineProps) {
-  const { data: motionData } = useSWR<MotionData[]>([
+  const { t } = useTranslation(["views/events"]);
+  const internalTimelineRef = useRef<HTMLDivElement>(null);
+  const selectedTimelineRef = timelineRef || internalTimelineRef;
+
+  // timeline interaction
+
+  const [zoomSettings, setZoomSettings] = useState({
+    segmentDuration: 30,
+    timestampSpread: 15,
+  });
+
+  const possibleZoomLevels = useMemo(
+    () => [
+      { segmentDuration: 30, timestampSpread: 15 },
+      { segmentDuration: 15, timestampSpread: 5 },
+      { segmentDuration: 5, timestampSpread: 1 },
+    ],
+    [],
+  );
+
+  const handleZoomChange = useCallback(
+    (newZoomLevel: number) => {
+      setZoomSettings(possibleZoomLevels[newZoomLevel]);
+    },
+    [possibleZoomLevels],
+  );
+
+  const { isZooming, zoomDirection } = useTimelineZoom({
+    zoomSettings,
+    zoomLevels: possibleZoomLevels,
+    onZoomChange: handleZoomChange,
+    timelineRef: selectedTimelineRef,
+    timelineDuration: timeRange.after - timeRange.before,
+  });
+
+  // motion data
+
+  const { data: motionData, isLoading } = useSWR<MotionData[]>([
     "review/activity/motion",
     {
       before: timeRange.before,
       after: timeRange.after,
-      scale: SEGMENT_DURATION / 2,
+      scale: Math.round(zoomSettings.segmentDuration / 2),
       cameras: mainCamera,
     },
   ]);
@@ -689,16 +830,17 @@ function Timeline({
       className={`${
         isDesktop
           ? `${timelineType == "timeline" ? "w-[100px]" : "w-60"} no-scrollbar overflow-y-auto`
-          : "overflow-hidden portrait:flex-grow landscape:w-[20%]"
+          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : "landscape:w-[175px]"} `
       } relative`}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
       {timelineType == "timeline" ? (
-        motionData ? (
+        !isLoading ? (
           <MotionReviewTimeline
-            segmentDuration={30}
-            timestampSpread={15}
+            timelineRef={selectedTimelineRef}
+            segmentDuration={zoomSettings.segmentDuration}
+            timestampSpread={zoomSettings.timestampSpread}
             timelineStart={timeRange.before}
             timelineEnd={timeRange.after}
             showHandlebar={exportRange == undefined}
@@ -711,9 +853,10 @@ function Timeline({
             setHandlebarTime={setCurrentTime}
             events={mainCameraReviewItems}
             motion_events={motionData ?? []}
-            severityType="significant_motion"
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+            isZooming={isZooming}
+            zoomDirection={zoomDirection}
           />
         ) : (
           <Skeleton className="size-full" />
@@ -723,12 +866,12 @@ function Timeline({
           <div
             className={cn(
               "scrollbar-container grid h-auto grid-cols-1 gap-4 overflow-auto p-4",
-              isMobile && "sm:grid-cols-2",
+              isMobile && "sm:portrait:grid-cols-2",
             )}
           >
             {mainCameraReviewItems.length === 0 ? (
               <div className="mt-5 text-center text-primary">
-                No events found for this time period.
+                {t("events.noFoundForTimePeriod")}
               </div>
             ) : (
               mainCameraReviewItems.map((review) => {

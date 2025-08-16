@@ -1,0 +1,616 @@
+{
+  "documentTitle": {
+    "default": "Cài đặt - Frigate",
+    "authentication": "Cài đặt Xác thực - Frigate",
+    "camera": "Cài đặt Camera - Frigate",
+    "enrichments": "Cài đặt Làm giàu Dữ liệu - Frigate",
+    "notifications": "Cài đặt Thông báo - Frigate",
+    "masksAndZones": "Trình chỉnh sửa Mặt nạ và Vùng - Frigate",
+    "object": "Gỡ lỗi - Frigate",
+    "general": "Cài đặt Chung - Frigate",
+    "frigatePlus": "Cài đặt Frigate+ - Frigate",
+    "motionTuner": "Bộ tinh chỉnh Chuyển động - Frigate"
+  },
+  "notification": {
+    "toast": {
+      "error": {
+        "registerFailed": "Không thể lưu đăng ký thông báo."
+      },
+      "success": {
+        "settingSaved": "Cài đặt thông báo đã được lưu.",
+        "registered": "Đã đăng ký nhận thông báo thành công. Cần khởi động lại Frigate trước khi có thể gửi bất kỳ thông báo nào (kể cả thông báo thử)."
+      }
+    },
+    "unsavedChanges": "Các thay đổi Thông báo chưa được lưu",
+    "registerDevice": "Đăng ký Thiết bị này",
+    "unregisterDevice": "Hủy đăng ký Thiết bị này",
+    "unsavedRegistrations": "Các đăng ký Thông báo chưa được lưu",
+    "suspended": "Thông báo bị đình chỉ {{time}}",
+    "cancelSuspension": "Hủy tạm dừng",
+    "email": {
+      "desc": "Một email hợp lệ là bắt buộc và sẽ được sử dụng để thông báo cho bạn nếu có bất kỳ vấn đề nào với dịch vụ đẩy.",
+      "placeholder": "ví dụ: example@email.com",
+      "title": "Email"
+    },
+    "cameras": {
+      "noCameras": "Không có camera nào",
+      "title": "Camera",
+      "desc": "Chọn camera để bật thông báo."
+    },
+    "deviceSpecific": "Cài đặt dành riêng cho thiết bị",
+    "sendTestNotification": "Gửi một thông báo thử",
+    "active": "Thông báo đang hoạt động",
+    "suspendTime": {
+      "24hours": "Tạm dừng trong 24 giờ",
+      "untilRestart": "Tạm dừng cho đến khi khởi động lại",
+      "30minutes": "Tạm dừng trong 30 phút",
+      "1hour": "Tạm dừng trong 1 giờ",
+      "suspend": "Tạm dừng",
+      "12hours": "Tạm dừng trong 12 giờ",
+      "5minutes": "Tạm dừng trong 5 phút",
+      "10minutes": "Tạm dừng trong 10 phút"
+    },
+    "notificationSettings": {
+      "desc": "Frigate có thể gửi thông báo đẩy tự nhiên đến thiết bị của bạn khi nó đang chạy trong trình duyệt hoặc được cài đặt dưới dạng PWA.",
+      "title": "Cài đặt Thông báo",
+      "documentation": "Đọc tài liệu"
+    },
+    "notificationUnavailable": {
+      "desc": "Thông báo đẩy web yêu cầu một ngữ cảnh an toàn (<code>https://…</code>). Đây là một hạn chế của trình duyệt. Truy cập Frigate một cách an toàn để sử dụng thông báo.",
+      "title": "Thông báo không khả dụng",
+      "documentation": "Đọc tài liệu"
+    },
+    "globalSettings": {
+      "desc": "Tạm thời đình chỉ thông báo cho các camera cụ thể trên tất cả các thiết bị đã đăng ký.",
+      "title": "Cài đặt Chung"
+    },
+    "title": "Thông báo"
+  },
+  "frigatePlus": {
+    "title": "Cài đặt Frigate+",
+    "apiKey": {
+      "title": "Khóa API Frigate+",
+      "validated": "Khóa API Frigate+ đã được phát hiện và xác thực",
+      "notValidated": "Khóa API Frigate+ không được phát hiện hoặc chưa được xác thực",
+      "desc": "Khóa API Frigate+ cho phép tích hợp với dịch vụ Frigate+.",
+      "plusLink": "Đọc thêm về Frigate+"
+    },
+    "snapshotConfig": {
+      "table": {
+        "camera": "Camera",
+        "cleanCopySnapshots": "Ảnh chụp nhanh <code>clean_copy</code>",
+        "snapshots": "Ảnh chụp nhanh"
+      },
+      "desc": "Việc gửi đến Frigate+ yêu cầu cả ảnh chụp nhanh và ảnh chụp nhanh <code>clean_copy</code> phải được bật trong cấu hình của bạn.",
+      "cleanCopyWarning": "Một số camera đã bật ảnh chụp nhanh nhưng đã tắt bản sao sạch. Bạn cần bật <code>clean_copy</code> trong cấu hình ảnh chụp nhanh của mình để có thể gửi hình ảnh từ các camera này đến Frigate+.",
+      "title": "Cấu hình Ảnh chụp nhanh",
+      "documentation": "Đọc tài liệu"
+    },
+    "modelInfo": {
+      "error": "Không thể tải thông tin mô hình",
+      "plusModelType": {
+        "userModel": "Đã tinh chỉnh",
+        "baseModel": "Mô hình Cơ sở"
+      },
+      "supportedDetectors": "Các bộ phát hiện được hỗ trợ",
+      "title": "Thông tin Mô hình",
+      "baseModel": "Mô hình Cơ sở",
+      "availableModels": "Các mô hình có sẵn",
+      "loadingAvailableModels": "Đang tải các mô hình có sẵn…",
+      "modelSelect": "Các mô hình có sẵn của bạn trên Frigate+ có thể được chọn ở đây. Lưu ý rằng chỉ những mô hình tương thích với cấu hình bộ phát hiện hiện tại của bạn mới có thể được chọn.",
+      "cameras": "Camera",
+      "loading": "Đang tải thông tin mô hình…",
+      "modelType": "Loại Mô hình",
+      "trainDate": "Ngày Huấn luyện"
+    },
+    "unsavedChanges": "Các thay đổi cài đặt Frigate+ chưa được lưu",
+    "toast": {
+      "success": "Cài đặt Frigate+ đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi.",
+      "error": "Không thể lưu các thay đổi cấu hình: {{errorMessage}}"
+    },
+    "restart_required": "Yêu cầu khởi động lại (mô hình Frigate+ đã thay đổi)"
+  },
+  "camera": {
+    "title": "Cài đặt Camera",
+    "review": {
+      "alerts": "Cảnh báo ",
+      "detections": "Phát hiện ",
+      "title": "Xem lại",
+      "desc": "Tạm thời bật/tắt cảnh báo và phát hiện cho camera này cho đến khi Frigate khởi động lại. Khi bị vô hiệu hóa, sẽ không có mục xem lại mới nào được tạo ra. "
+    },
+    "reviewClassification": {
+      "title": "Phân loại mục Xem lại",
+      "unsavedChanges": "Các thay đổi cài đặt Phân loại mục Xem lại chưa được lưu cho {{camera}}",
+      "readTheDocumentation": "Đọc tài liệu",
+      "objectDetectionsTips": "Tất cả các đối tượng {{detectionsLabels}} không được phân loại trên {{cameraName}} sẽ được hiển thị dưới dạng Phát hiện bất kể chúng ở trong vùng nào.",
+      "desc": "Frigate phân loại các mục xem lại thành Cảnh báo và Phát hiện. Theo mặc định, tất cả các đối tượng <em>người</em> và <em>ô tô</em> được coi là Cảnh báo. Bạn có thể tinh chỉnh việc phân loại các mục xem lại của mình bằng cách định cấu hình các vùng bắt buộc cho chúng.",
+      "zoneObjectDetectionsTips": {
+        "text": "Tất cả các đối tượng {{detectionsLabels}} không được phân loại trong vùng {{zone}} trên {{cameraName}} sẽ được hiển thị dưới dạng Phát hiện.",
+        "notSelectDetections": "Tất cả các đối tượng {{detectionsLabels}} được phát hiện trong vùng {{zone}} trên {{cameraName}} không được phân loại là Cảnh báo sẽ được hiển thị dưới dạng Phát hiện bất kể chúng ở trong vùng nào.",
+        "regardlessOfZoneObjectDetectionsTips": "Tất cả các đối tượng {{detectionsLabels}} không được phân loại trên {{cameraName}} sẽ được hiển thị dưới dạng Phát hiện bất kể chúng ở trong vùng nào."
+      },
+      "toast": {
+        "success": "Cấu hình Phân loại mục Xem lại đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi."
+      },
+      "limitDetections": "Giới hạn phát hiện trong các vùng cụ thể",
+      "selectDetectionsZones": "Chọn vùng cho Phát hiện",
+      "zoneObjectAlertsTips": "Tất cả các đối tượng {{alertsLabels}} được phát hiện trong vùng {{zone}} trên {{cameraName}} sẽ được hiển thị dưới dạng Cảnh báo.",
+      "noDefinedZones": "Không có vùng nào được xác định cho camera này.",
+      "objectAlertsTips": "Tất cả các đối tượng {{alertsLabels}} trên {{cameraName}} sẽ được hiển thị dưới dạng Cảnh báo.",
+      "selectAlertsZones": "Chọn vùng cho Cảnh báo"
+    },
+    "streams": {
+      "title": "Luồng phát",
+      "desc": "Tạm thời vô hiệu hóa một camera cho đến khi Frigate khởi động lại. Vô hiệu hóa một camera sẽ dừng hoàn toàn quá trình xử lý các luồng của camera này của Frigate. Việc phát hiện, ghi hình và gỡ lỗi sẽ không khả dụng.<br /> <em>Lưu ý: Điều này không vô hiệu hóa các luồng phát lại của go2rtc.</em>"
+    }
+  },
+  "masksAndZones": {
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustNotBeSameWithCamera": "Tên vùng không được trùng với tên camera.",
+          "mustBeAtLeastTwoCharacters": "Tên vùng phải có ít nhất 2 ký tự.",
+          "mustNotContainPeriod": "Tên vùng không được chứa dấu chấm.",
+          "alreadyExists": "Một vùng với tên này đã tồn tại cho camera này.",
+          "hasIllegalCharacter": "Tên vùng chứa các ký tự không hợp lệ."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Quán tính phải lớn hơn 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Thời gian lảng vảng phải lớn hơn hoặc bằng 0."
+        }
+      },
+      "polygonDrawing": {
+        "delete": {
+          "desc": "Bạn có chắc muốn xóa {{type}} <em>{{name}}</em> không?",
+          "title": "Xác nhận Xóa",
+          "success": "{{name}} đã được xóa."
+        },
+        "removeLastPoint": "Xóa điểm cuối",
+        "snapPoints": {
+          "true": "Bắt dính điểm",
+          "false": "Không bắt dính điểm"
+        },
+        "reset": {
+          "label": "Xóa tất cả các điểm"
+        },
+        "error": {
+          "mustBeFinished": "Việc vẽ đa giác phải được hoàn thành trước khi lưu."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Ngưỡng tốc độ phải lớn hơn hoặc bằng 0.1."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Khoảng cách phải lớn hơn hoặc bằng 0.1.",
+          "mustBeFilled": "Tất cả các trường khoảng cách phải được điền để sử dụng ước tính tốc độ."
+        }
+      }
+    },
+    "objectMasks": {
+      "add": "Thêm Mặt nạ đối tượng",
+      "edit": "Chỉnh sửa Mặt nạ đối tượng",
+      "context": "Mặt nạ lọc đối tượng được sử dụng để lọc ra các kết quả dương tính giả cho một loại đối tượng nhất định dựa trên vị trí.",
+      "objects": {
+        "allObjectTypes": "Tất cả các loại đối tượng",
+        "title": "Đối tượng",
+        "desc": "Loại đối tượng áp dụng cho mặt nạ đối tượng này."
+      },
+      "documentTitle": "Chỉnh sửa Mặt nạ đối tượng - Frigate",
+      "desc": {
+        "title": "Mặt nạ lọc đối tượng được sử dụng để lọc ra các kết quả dương tính giả cho một loại đối tượng nhất định dựa trên vị trí.",
+        "documentation": "Tài liệu"
+      },
+      "point_other": "{{count}} điểm",
+      "toast": {
+        "success": {
+          "noName": "Mặt nạ đối tượng đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi.",
+          "title": "{{polygonName}} đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi."
+        }
+      },
+      "label": "Mặt nạ đối tượng",
+      "clickDrawPolygon": "Nhấp để vẽ một đa giác trên hình ảnh."
+    },
+    "zones": {
+      "speedEstimation": {
+        "docs": "Đọc tài liệu",
+        "desc": "Bật ước tính tốc độ cho các đối tượng trong vùng này. Vùng phải có chính xác 4 điểm.",
+        "title": "Ước tính Tốc độ",
+        "lineADistance": "Khoảng cách đường A ({{unit}})",
+        "lineBDistance": "Khoảng cách đường B ({{unit}})",
+        "lineCDistance": "Khoảng cách đường C ({{unit}})",
+        "lineDDistance": "Khoảng cách đường D ({{unit}})"
+      },
+      "desc": {
+        "documentation": "Tài liệu",
+        "title": "Các vùng cho phép bạn xác định một khu vực cụ thể của khung hình để bạn có thể xác định xem một đối tượng có ở trong một khu vực cụ thể hay không."
+      },
+      "add": "Thêm Vùng",
+      "allObjects": "Tất cả Đối tượng",
+      "speedThreshold": {
+        "toast": {
+          "error": {
+            "loiteringTimeError": "Các vùng có thời gian lảng vảng lớn hơn 0 không nên được sử dụng với ước tính tốc độ.",
+            "pointLengthError": "Ước tính tốc độ đã bị vô hiệu hóa cho vùng này. Các vùng có ước tính tốc độ phải có chính xác 4 điểm."
+          }
+        },
+        "desc": "Chỉ định tốc độ tối thiểu để các đối tượng được coi là ở trong vùng này.",
+        "title": "Ngưỡng Tốc độ ({{unit}})"
+      },
+      "loiteringTime": {
+        "title": "Thời gian lảng vảng",
+        "desc": "Đặt một khoảng thời gian tối thiểu tính bằng giây mà đối tượng phải ở trong vùng để kích hoạt nó. <em>Mặc định: 0</em>"
+      },
+      "point_other": "{{count}} điểm",
+      "clickDrawPolygon": "Nhấp để vẽ một đa giác trên hình ảnh.",
+      "objects": {
+        "title": "Đối tượng",
+        "desc": "Danh sách các đối tượng áp dụng cho vùng này."
+      },
+      "toast": {
+        "success": "Vùng ({{zoneName}}) đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi."
+      },
+      "name": {
+        "inputPlaceHolder": "Nhập tên…",
+        "tips": "Tên phải có ít nhất 2 ký tự và không được trùng với tên của camera hoặc một vùng khác.",
+        "title": "Tên"
+      },
+      "edit": "Chỉnh sửa Vùng",
+      "label": "Vùng",
+      "documentTitle": "Chỉnh sửa Vùng - Frigate",
+      "inertia": {
+        "title": "Quán tính",
+        "desc": "Chỉ định số khung hình mà một đối tượng phải ở trong một vùng trước khi được coi là ở trong vùng. <em>Mặc định: 3</em>"
+      }
+    },
+    "motionMasks": {
+      "documentTitle": "Chỉnh sửa Mặt nạ chuyển động - Frigate",
+      "desc": {
+        "documentation": "Tài liệu",
+        "title": "Mặt nạ chuyển động được sử dụng để ngăn các loại chuyển động không mong muốn kích hoạt phát hiện. Việc che quá nhiều sẽ khiến việc theo dõi đối tượng trở nên khó khăn hơn."
+      },
+      "point_other": "{{count}} điểm",
+      "polygonAreaTooLarge": {
+        "documentation": "Đọc tài liệu",
+        "tips": "Mặt nạ chuyển động không ngăn chặn việc phát hiện đối tượng. Bạn nên sử dụng một vùng bắt buộc thay thế.",
+        "title": "Mặt nạ chuyển động đang che {{polygonArea}}% khung hình của camera. Không khuyến khích sử dụng mặt nạ chuyển động lớn."
+      },
+      "add": "Mặt nạ chuyển động mới",
+      "edit": "Chỉnh sửa Mặt nạ chuyển động",
+      "context": {
+        "documentation": "Đọc tài liệu",
+        "title": "Mặt nạ chuyển động được sử dụng để ngăn chặn các loại chuyển động không mong muốn kích hoạt việc phát hiện (ví dụ: cành cây, dấu thời gian của camera). Mặt nạ chuyển động nên được sử dụng <em>rất hạn chế</em>, việc che quá nhiều sẽ làm cho việc theo dõi đối tượng trở nên khó khăn hơn."
+      },
+      "label": "Mặt nạ chuyển động",
+      "clickDrawPolygon": "Nhấp để vẽ một đa giác trên hình ảnh.",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi.",
+          "noName": "Mặt nạ chuyển động đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi."
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "copyCoordinates": "Đã sao chép tọa độ của {{polyName}} vào clipboard."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Không thể sao chép tọa độ vào clipboard."
+      }
+    },
+    "restart_required": "Yêu cầu khởi động lại (mặt nạ/vùng đã thay đổi)",
+    "motionMaskLabel": "Mặt nạ chuyển động {{number}}",
+    "objectMaskLabel": "Mặt nạ đối tượng {{number}} ({{label}})",
+    "filter": {
+      "all": "Tất cả Mặt nạ và Vùng"
+    }
+  },
+  "motionDetectionTuner": {
+    "unsavedChanges": "Các thay đổi Tinh chỉnh Chuyển động chưa được lưu ({{camera}})",
+    "Threshold": {
+      "title": "Ngưỡng",
+      "desc": "Giá trị ngưỡng quy định mức độ thay đổi độ sáng của một pixel cần thiết để được coi là chuyển động. <em>Mặc định: 30</em>"
+    },
+    "contourArea": {
+      "title": "Diện tích đường viền",
+      "desc": "Giá trị diện tích đường viền được sử dụng để quyết định nhóm pixel nào đã thay đổi đủ điều kiện là chuyển động. <em>Mặc định: 10</em>"
+    },
+    "title": "Bộ tinh chỉnh Phát hiện Chuyển động",
+    "desc": {
+      "title": "Frigate sử dụng phát hiện chuyển động như một bước kiểm tra đầu tiên để xem có điều gì đang xảy ra trong khung hình đáng để kiểm tra bằng phát hiện đối tượng hay không.",
+      "documentation": "Đọc Hướng dẫn Tinh chỉnh Chuyển động"
+    },
+    "improveContrast": {
+      "desc": "Cải thiện độ tương phản cho các cảnh tối hơn. <em>Mặc định: BẬT</em>",
+      "title": "Cải thiện độ tương phản"
+    },
+    "toast": {
+      "success": "Cài đặt chuyển động đã được lưu."
+    }
+  },
+  "debug": {
+    "objectShapeFilterDrawing": {
+      "title": "Vẽ bộ lọc hình dạng đối tượng",
+      "desc": "Vẽ một hình chữ nhật trên hình ảnh để xem chi tiết diện tích và tỷ lệ",
+      "document": "Đọc tài liệu ",
+      "score": "Điểm",
+      "tips": "Bật tùy chọn này để vẽ một hình chữ nhật trên hình ảnh của camera để hiển thị diện tích và tỷ lệ của nó. Các giá trị này sau đó có thể được sử dụng để đặt các tham số bộ lọc hình dạng đối tượng trong cấu hình của bạn.",
+      "ratio": "Tỷ lệ",
+      "area": "Diện tích"
+    },
+    "detectorDesc": "Frigate sử dụng các bộ phát hiện của bạn ({{detectors}}) để phát hiện các đối tượng trong luồng video của camera.",
+    "boundingBoxes": {
+      "colors": {
+        "label": "Màu sắc Hộp giới hạn Đối tượng",
+        "info": "<li>Khi khởi động, các màu khác nhau sẽ được gán cho mỗi nhãn đối tượng</li><li>Một đường mỏng màu xanh đậm cho biết đối tượng không được phát hiện tại thời điểm hiện tại</li><li>Một đường mỏng màu xám cho biết đối tượng được phát hiện là đang đứng yên</li><li>Một đường dày cho biết đối tượng là chủ thể của việc theo dõi tự động (khi được bật)</li>"
+      },
+      "desc": "Hiển thị các hộp giới hạn xung quanh các đối tượng được theo dõi",
+      "title": "Hộp giới hạn"
+    },
+    "desc": "Chế độ xem gỡ lỗi hiển thị chế độ xem thời gian thực của các đối tượng được theo dõi và các thống kê của chúng. Danh sách đối tượng hiển thị một bản tóm tắt có độ trễ về các đối tượng được phát hiện.",
+    "debugging": "Gỡ lỗi",
+    "timestamp": {
+      "desc": "Chồng một dấu thời gian lên hình ảnh",
+      "title": "Dấu thời gian"
+    },
+    "regions": {
+      "title": "Khu vực",
+      "tips": "<p><strong>Hộp khu vực</strong></p><br><p>Các hộp màu xanh lá cây sáng sẽ được chồng lên các khu vực quan tâm trong khung hình đang được gửi đến bộ phát hiện đối tượng.</p>",
+      "desc": "Hiển thị một hộp của khu vực quan tâm được gửi đến bộ phát hiện đối tượng"
+    },
+    "zones": {
+      "title": "Vùng",
+      "desc": "Hiển thị đường viền của bất kỳ vùng nào đã được xác định"
+    },
+    "mask": {
+      "title": "Mặt nạ chuyển động",
+      "desc": "Hiển thị các đa giác mặt nạ chuyển động"
+    },
+    "title": "Gỡ lỗi",
+    "objectList": "Danh sách đối tượng",
+    "noObjects": "Không có đối tượng",
+    "motion": {
+      "desc": "Hiển thị các hộp xung quanh các khu vực phát hiện có chuyển động",
+      "tips": "<p><strong>Hộp chuyển động</strong></p><br><p>Các hộp màu đỏ sẽ được chồng lên các khu vực của khung hình nơi chuyển động đang được phát hiện</p>",
+      "title": "Hộp chuyển động"
+    }
+  },
+  "users": {
+    "title": "Người dùng",
+    "management": {
+      "title": "Quản lý Người dùng",
+      "desc": "Quản lý các tài khoản người dùng của phiên bản Frigate này."
+    },
+    "table": {
+      "noUsers": "Không tìm thấy người dùng nào.",
+      "username": "Tên người dùng",
+      "actions": "Hành động",
+      "role": "Vai trò",
+      "changeRole": "Thay đổi vai trò người dùng",
+      "password": "Mật khẩu",
+      "deleteUser": "Xóa người dùng"
+    },
+    "dialog": {
+      "form": {
+        "password": {
+          "strength": {
+            "strong": "Mạnh",
+            "title": "Độ mạnh mật khẩu: ",
+            "medium": "Trung bình",
+            "veryStrong": "Rất mạnh",
+            "weak": "Yếu"
+          },
+          "title": "Mật khẩu",
+          "placeholder": "Nhập mật khẩu",
+          "confirm": {
+            "title": "Xác nhận Mật khẩu",
+            "placeholder": "Xác nhận Mật khẩu"
+          },
+          "notMatch": "Mật khẩu không trùng khớp",
+          "match": "Mật khẩu trùng khớp"
+        },
+        "newPassword": {
+          "placeholder": "Nhập mật khẩu mới",
+          "confirm": {
+            "placeholder": "Nhập lại mật khẩu mới"
+          },
+          "title": "Mật khẩu mới"
+        },
+        "usernameIsRequired": "Tên người dùng là bắt buộc",
+        "user": {
+          "title": "Tên người dùng",
+          "desc": "Chỉ cho phép chữ cái, số, dấu chấm và dấu gạch dưới.",
+          "placeholder": "Nhập tên người dùng"
+        },
+        "passwordIsRequired": "Mật khẩu là bắt buộc"
+      },
+      "createUser": {
+        "desc": "Thêm một tài khoản người dùng mới và chỉ định một vai trò để truy cập vào các khu vực của giao diện người dùng Frigate.",
+        "usernameOnlyInclude": "Tên người dùng chỉ có thể bao gồm chữ cái, số, . hoặc _",
+        "title": "Tạo Người dùng Mới",
+        "confirmPassword": "Vui lòng xác nhận mật khẩu của bạn"
+      },
+      "deleteUser": {
+        "desc": "Hành động này không thể được hoàn tác. Điều này sẽ xóa vĩnh viễn tài khoản người dùng và xóa tất cả dữ liệu liên quan.",
+        "warn": "Bạn có chắc muốn xóa <strong>{{username}}</strong> không?",
+        "title": "Xóa Người dùng"
+      },
+      "passwordSetting": {
+        "setPassword": "Đặt Mật khẩu",
+        "updatePassword": "Cập nhật Mật khẩu cho {{username}}",
+        "cannotBeEmpty": "Mật khẩu không được để trống",
+        "desc": "Tạo một mật khẩu mạnh để bảo mật tài khoản này.",
+        "doNotMatch": "Mật khẩu không khớp"
+      },
+      "changeRole": {
+        "title": "Thay đổi Vai trò Người dùng",
+        "roleInfo": {
+          "intro": "Chọn vai trò thích hợp cho người dùng này:",
+          "admin": "Quản trị viên",
+          "adminDesc": "Toàn quyền truy cập vào tất cả các tính năng.",
+          "viewer": "Người xem",
+          "viewerDesc": "Chỉ giới hạn ở các bảng điều khiển Trực tiếp, Xem lại, Khám phá và Xuất file."
+        },
+        "select": "Chọn một vai trò",
+        "desc": "Cập nhật quyền cho <strong>{{username}}</strong>"
+      }
+    },
+    "addUser": "Thêm Người dùng",
+    "updatePassword": "Cập nhật Mật khẩu",
+    "toast": {
+      "error": {
+        "setPasswordFailed": "Không thể lưu mật khẩu: {{errorMessage}}",
+        "createUserFailed": "Không thể tạo người dùng: {{errorMessage}}",
+        "deleteUserFailed": "Không thể xóa người dùng: {{errorMessage}}",
+        "roleUpdateFailed": "Không thể cập nhật vai trò: {{errorMessage}}"
+      },
+      "success": {
+        "roleUpdated": "Vai trò đã được cập nhật cho {{user}}",
+        "createUser": "Người dùng {{user}} đã được tạo thành công",
+        "deleteUser": "Người dùng {{user}} đã được xóa thành công",
+        "updatePassword": "Mật khẩu đã được cập nhật thành công."
+      }
+    }
+  },
+  "general": {
+    "calendar": {
+      "firstWeekday": {
+        "sunday": "Chủ nhật",
+        "monday": "Thứ hai",
+        "label": "Ngày đầu tuần",
+        "desc": "Ngày bắt đầu của các tuần trong lịch xem lại."
+      },
+      "title": "Lịch"
+    },
+    "storedLayouts": {
+      "desc": "Bố cục của các camera trong một nhóm camera có thể được kéo/thay đổi kích thước. Các vị trí được lưu trữ trong bộ nhớ cục bộ của trình duyệt của bạn.",
+      "title": "Bố cục đã lưu",
+      "clearAll": "Xóa tất cả Bố cục"
+    },
+    "cameraGroupStreaming": {
+      "title": "Cài đặt Phát luồng Nhóm Camera",
+      "desc": "Cài đặt phát luồng cho mỗi nhóm camera được lưu trữ trong bộ nhớ cục bộ của trình duyệt của bạn.",
+      "clearAll": "Xóa tất cả Cài đặt Phát luồng"
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Đã xóa bố cục đã lưu cho {{cameraName}}",
+        "clearStreamingSettings": "Đã xóa cài đặt phát luồng cho tất cả các nhóm camera."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Không thể xóa bố cục đã lưu: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Không thể xóa cài đặt phát luồng: {{errorMessage}}"
+      }
+    },
+    "liveDashboard": {
+      "automaticLiveView": {
+        "desc": "Tự động chuyển sang chế độ xem trực tiếp của camera khi phát hiện hoạt động. Việc tắt tùy chọn này sẽ khiến hình ảnh tĩnh của camera trên bảng điều khiển Trực tiếp chỉ cập nhật mỗi phút một lần.",
+        "label": "Chế độ xem trực tiếp tự động"
+      },
+      "playAlertVideos": {
+        "desc": "Theo mặc định, các cảnh báo gần đây trên bảng điều khiển Trực tiếp sẽ phát dưới dạng các video lặp lại nhỏ. Tắt tùy chọn này để chỉ hiển thị hình ảnh tĩnh của các cảnh báo gần đây trên thiết bị/trình duyệt này.",
+        "label": "Phát video cảnh báo"
+      },
+      "title": "Bảng điều khiển trực tiếp"
+    },
+    "recordingsViewer": {
+      "defaultPlaybackRate": {
+        "label": "Tốc độ phát mặc định",
+        "desc": "Tốc độ phát mặc định cho việc xem lại các bản ghi."
+      },
+      "title": "Trình xem Bản ghi"
+    },
+    "title": "Cài đặt Chung"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "desc": "Bạn có muốn lưu các thay đổi trước khi tiếp tục không?",
+      "title": "Bạn có các thay đổi chưa được lưu."
+    }
+  },
+  "enrichments": {
+    "title": "Cài đặt Làm giàu Dữ liệu",
+    "unsavedChanges": "Các thay đổi cài đặt Làm giàu Dữ liệu chưa được lưu",
+    "birdClassification": {
+      "title": "Phân loại Chim",
+      "desc": "Phân loại chim xác định các loài chim đã biết bằng mô hình Tensorflow lượng tử hóa. Khi một loài chim đã biết được nhận dạng, tên thông thường của nó sẽ được thêm vào dưới dạng nhãn phụ (sub_label). Thông tin này được bao gồm trong giao diện người dùng, bộ lọc, cũng như trong các thông báo."
+    },
+    "semanticSearch": {
+      "title": "Tìm kiếm theo Ngữ nghĩa",
+      "desc": "Tìm kiếm theo Ngữ nghĩa trong Frigate cho phép bạn tìm các đối tượng được theo dõi trong các mục xem lại của mình bằng cách sử dụng chính hình ảnh, mô tả văn bản do người dùng xác định hoặc mô tả được tạo tự động.",
+      "reindexNow": {
+        "desc": "Việc tái lập chỉ mục sẽ tạo lại các nhúng (embeddings) cho tất cả các đối tượng được theo dõi. Quá trình này chạy ở chế độ nền và có thể làm CPU của bạn hoạt động tối đa và mất một khoảng thời gian đáng kể tùy thuộc vào số lượng đối tượng bạn đã theo dõi.",
+        "confirmTitle": "Xác nhận Tái lập chỉ mục",
+        "confirmDesc": "Bạn có chắc muốn tái lập chỉ mục cho tất cả các nhúng của đối tượng được theo dõi không? Quá trình này sẽ chạy ở chế độ nền nhưng có thể làm CPU của bạn hoạt động tối đa và mất một khoảng thời gian đáng kể. Bạn có thể theo dõi tiến trình trên trang Khám phá.",
+        "success": "Đã bắt đầu tái lập chỉ mục thành công.",
+        "alreadyInProgress": "Quá trình tái lập chỉ mục đang được tiến hành.",
+        "error": "Không thể bắt đầu tái lập chỉ mục: {{errorMessage}}",
+        "label": "Tái lập chỉ mục ngay",
+        "confirmButton": "Tái lập chỉ mục"
+      },
+      "modelSize": {
+        "label": "Kích thước Mô hình",
+        "desc": "Kích thước của mô hình được sử dụng cho các nhúng tìm kiếm theo ngữ nghĩa.",
+        "small": {
+          "title": "nhỏ",
+          "desc": "Sử dụng mô hình <em>nhỏ</em> sẽ dùng phiên bản lượng tử hóa của mô hình, tiêu thụ ít RAM hơn và chạy nhanh hơn trên CPU với sự khác biệt không đáng kể về chất lượng nhúng."
+        },
+        "large": {
+          "title": "lớn",
+          "desc": "Sử dụng mô hình <em>lớn</em> sẽ dùng mô hình Jina đầy đủ và sẽ tự động chạy trên GPU nếu có."
+        }
+      },
+      "readTheDocumentation": "Đọc tài liệu"
+    },
+    "faceRecognition": {
+      "title": "Nhận dạng Khuôn mặt",
+      "desc": "Nhận dạng khuôn mặt cho phép gán tên cho người và khi khuôn mặt của họ được nhận dạng, Frigate sẽ gán tên của người đó làm nhãn phụ. Thông tin này được bao gồm trong giao diện người dùng, bộ lọc, cũng như trong các thông báo.",
+      "readTheDocumentation": "Đọc tài liệu",
+      "modelSize": {
+        "label": "Kích thước Mô hình",
+        "desc": "Kích thước của mô hình được sử dụng để nhận dạng khuôn mặt.",
+        "small": {
+          "title": "nhỏ",
+          "desc": "Sử dụng mô hình <em>nhỏ</em> sẽ dùng mô hình nhúng khuôn mặt FaceNet, chạy hiệu quả trên hầu hết các CPU."
+        },
+        "large": {
+          "title": "lớn",
+          "desc": "Sử dụng mô hình <em>lớn</em> sẽ dùng mô hình nhúng khuôn mặt ArcFace và sẽ tự động chạy trên GPU nếu có."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Nhận dạng Biển số xe",
+      "desc": "Frigate có thể nhận dạng biển số xe trên các phương tiện và tự động thêm các ký tự được phát hiện vào trường recognized_license_plate hoặc một tên đã biết làm nhãn phụ cho các đối tượng thuộc loại ô tô. Một trường hợp sử dụng phổ biến có thể là đọc biển số xe ô tô đi vào đường lái xe hoặc ô tô đi ngang qua trên đường phố.",
+      "readTheDocumentation": "Đọc tài liệu"
+    },
+    "restart_required": "Yêu cầu khởi động lại (cài đặt Làm giàu Dữ liệu đã thay đổi)",
+    "toast": {
+      "success": "Cài đặt Làm giàu Dữ liệu đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi của bạn.",
+      "error": "Không thể lưu các thay đổi cấu hình: {{errorMessage}}"
+    }
+  },
+  "menu": {
+    "frigateplus": "Frigate+",
+    "ui": "Giao diện người dùng",
+    "masksAndZones": "Mặt nạ / Vùng",
+    "debug": "Gỡ lỗi",
+    "users": "Người dùng",
+    "notifications": "Thông báo",
+    "motionTuner": "Tinh chỉnh Chuyển động",
+    "cameras": "Cài đặt Camera",
+    "enrichments": "Làm giàu Dữ liệu"
+  },
+  "cameraSetting": {
+    "camera": "Camera",
+    "noCamera": "Không có Camera"
+  }
+}

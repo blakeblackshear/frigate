@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Configuratie-bewerken - Frigate",
+  "copyConfig": "Configuratie kopiëren",
+  "saveAndRestart": "Opslaan en opnieuw opstarten",
+  "toast": {
+    "error": {
+      "savingError": "Fout bij het opslaan van de configuratie"
+    },
+    "success": {
+      "copyToClipboard": "Configuratie gekopieerd naar klembord."
+    }
+  },
+  "configEditor": "Configuratie Bewerken",
+  "saveOnly": "Alleen opslaan",
+  "confirm": "Afsluiten zonder op te slaan?"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "onnxruntime-gpu",
+  "version": "0.0.1",
+  "name": "ONNX Runtime GPU (Nvidia)",
+  "description": "Installs ONNX Runtime for Nvidia GPUs.",
+  "documentationURL": "",
+  "options": {
+    "version": {
+      "type": "string",
+      "proposals": [
+        "latest",
+        "1.20.1",
+        "1.20.0"
+      ],
+      "default": "latest",
+      "description": "Version of ONNX Runtime to install"
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/nvidia-cuda"
+  ]
+}

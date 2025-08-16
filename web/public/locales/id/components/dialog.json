@@ -1,0 +1,25 @@
+{
+  "restart": {
+    "title": "Apakah kamu yakin ingin memulai ulang Frigate?",
+    "button": "Mulai ulang",
+    "restarting": {
+      "title": "Sedang Merestart Frigate",
+      "content": "Halaman ini akan memulai ulang dalam {{countdown}} detik.",
+      "button": "Muat Ulang Sekarang"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Kirim ke Frigate+",
+        "desc": "Objek di lokasi yang ingin Anda hindari bukanlah deteksi palsu. Mengirimnya sebagai deteksi palsu akan membingungkan model."
+      },
+      "review": {
+        "question": {
+          "label": "Konfirmasi label ini untuk Frigate Plus",
+          "ask_a": "Apakah objek ini adalah sebuah<code>{{label}}</code>?"
+        }
+      }
+    }
+  }
+}

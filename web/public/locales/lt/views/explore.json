@@ -1,0 +1,14 @@
+{
+  "documentTitle": "Tyrinėti - Frigate",
+  "generativeAI": "Generatyvinis DI",
+  "exploreMore": "Apžvelgti daugiau {{label}} objektų",
+  "exploreIsUnavailable": {
+    "embeddingsReindexing": {
+      "startingUp": "Paleidžiama…",
+      "estimatedTime": "Apytikris likęs laikas:"
+    }
+  },
+  "details": {
+    "timestamp": "Laiko žyma"
+  }
+}

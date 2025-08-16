@@ -4,6 +4,7 @@ import ast
 import copy
 import datetime
 import logging
+import math
 import multiprocessing as mp
 import queue
 import re
@@ -11,6 +12,7 @@ import shlex
 import struct
 import urllib.parse
 from collections.abc import Mapping
+from multiprocessing.sharedctypes import Synchronized
 from pathlib import Path
 from typing import Any, Optional, Tuple, Union
 from zoneinfo import ZoneInfoNotFoundError
@@ -26,16 +28,16 @@ logger = logging.getLogger(__name__)
 
 
 class EventsPerSecond:
-    def __init__(self, max_events=1000, last_n_seconds=10):
+    def __init__(self, max_events=1000, last_n_seconds=10) -> None:
         self._start = None
         self._max_events = max_events
         self._last_n_seconds = last_n_seconds
         self._timestamps = []
 
-    def start(self):
+    def start(self) -> None:
         self._start = datetime.datetime.now().timestamp()
 
-    def update(self):
+    def update(self) -> None:
         now = datetime.datetime.now().timestamp()
         if self._start is None:
             self._start = now
@@ -45,7 +47,7 @@ class EventsPerSecond:
             self._timestamps = self._timestamps[(1 - self._max_events) :]
         self.expire_timestamps(now)
 
-    def eps(self):
+    def eps(self) -> float:
         now = datetime.datetime.now().timestamp()
         if self._start is None:
             self._start = now
@@ -58,10 +60,27 @@ class EventsPerSecond:
         return len(self._timestamps) / seconds
 
     # remove aged out timestamps
-    def expire_timestamps(self, now):
+    def expire_timestamps(self, now: float) -> None:
         threshold = now - self._last_n_seconds
         while self._timestamps and self._timestamps[0] < threshold:
             del self._timestamps[0]
+
+
+class InferenceSpeed:
+    def __init__(self, metric: Synchronized) -> None:
+        self.__metric = metric
+        self.__initialized = False
+
+    def update(self, inference_time: float) -> None:
+        if not self.__initialized:
+            self.__metric.value = inference_time
+            self.__initialized = True
+            return
+
+        self.__metric.value = (self.__metric.value * 9 + inference_time) / 10
+
+    def current(self) -> float:
+        return self.__metric.value
 
 
 def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dict:
@@ -138,7 +157,7 @@ def load_labels(path: Optional[str], encoding="utf-8", prefill=91):
         return labels
 
 
-def get_tz_modifiers(tz_name: str) -> Tuple[str, str, int]:
+def get_tz_modifiers(tz_name: str) -> Tuple[str, str, float]:
     seconds_offset = (
         datetime.datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
     )
@@ -151,7 +170,7 @@ def get_tz_modifiers(tz_name: str) -> Tuple[str, str, int]:
 
 def to_relative_box(
     width: int, height: int, box: Tuple[int, int, int, int]
-) -> Tuple[int, int, int, int]:
+) -> Tuple[int | float, int | float, int | float, int | float]:
     return (
         box[0] / width,  # x
         box[1] / height,  # y
@@ -168,6 +187,9 @@ def create_mask(frame_shape, mask):
 def update_yaml_from_url(file_path, url):
     parsed_url = urllib.parse.urlparse(url)
     query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
+
+    # Filter out empty keys but keep blank values for non-empty keys
+    query_string = {k: v for k, v in query_string.items() if k}
 
     for key_path_str, new_value_list in query_string.items():
         key_path = key_path_str.split(".")
@@ -378,3 +400,10 @@ def serialize(
 def deserialize(bytes_data: bytes) -> list[float]:
     """Deserializes a compact "raw bytes" format into a list of floats"""
     return list(struct.unpack("%sf" % (len(bytes_data) // 4), bytes_data))
+
+
+def sanitize_float(value):
+    """Replace NaN or inf with 0.0."""
+    if isinstance(value, (int, float)) and not math.isfinite(value):
+        return 0.0
+    return value

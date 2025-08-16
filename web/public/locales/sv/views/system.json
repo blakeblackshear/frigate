@@ -1,0 +1,71 @@
+{
+  "documentTitle": {
+    "storage": "Lagringsstatistik - Frigate",
+    "general": "Allmän statistik - Frigate",
+    "cameras": "Kamerastatistik - Frigate",
+    "logs": {
+      "frigate": "Frigate loggar - Frigate",
+      "go2rtc": "Go2RTC Loggar - Frigate"
+    }
+  },
+  "logs": {
+    "copy": {
+      "label": "Kopiera till urklipp",
+      "success": "Kopierat loggarna till utklippstavlan",
+      "error": "Kunde inte kopiera loggarna till utklippstavlan"
+    },
+    "download": {
+      "label": "Ladda ned logg"
+    },
+    "type": {
+      "label": "Typ",
+      "timestamp": "Tidsstämpel",
+      "message": "Meddelande",
+      "tag": "Tagg"
+    },
+    "tips": "Loggarna strömmas från Server",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Fel vid hämtning av loggar: {{errorMessage}}",
+        "whileStreamingLogs": "Fel vid uppspelning av loggar: {{errorMessage}}"
+      }
+    }
+  },
+  "title": "System",
+  "metrics": "System detaljer",
+  "general": {
+    "title": "Generellt",
+    "detector": {
+      "title": "Detektorer"
+    },
+    "hardwareInfo": {
+      "title": "Hårdvaruinformation",
+      "gpuUsage": "GPU-användning",
+      "gpuMemory": "GPU-minne"
+    },
+    "otherProcesses": {
+      "title": "Övriga processer"
+    }
+  },
+  "storage": {
+    "cameraStorage": {
+      "storageUsed": "Lagring",
+      "percentageOfTotalUsed": "Procentandel av totalt",
+      "bandwidth": "Bandbredd",
+      "unused": {
+        "title": "Oanvänt",
+        "tips": "Det här värdet kanske inte korrekt representerar det lediga utrymmet tillgängligt för Frigate om du har andra filer lagrade på din hårddisk utöver Frigates inspelningar. Frigate spårar inte lagringsanvändning utanför sina egna inspelningar."
+      }
+    }
+  },
+  "cameras": {
+    "title": "Kameror",
+    "overview": "Översikt",
+    "info": {
+      "aspectRatio": "bildförhållande"
+    },
+    "label": {
+      "detect": "detektera"
+    }
+  }
+}

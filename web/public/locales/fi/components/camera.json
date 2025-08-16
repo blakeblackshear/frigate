@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Kameraryhmä",
+    "add": "Lisää kameraryhmä",
+    "edit": "Muokkaa kameraryhmää",
+    "delete": {
+      "label": "Poista kameraryhmä",
+      "confirm": {
+        "title": "Varmista poisto",
+        "desc": "Oletko varma että haluat poistaa kameraryhmän <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Nimi",
+      "placeholder": "Anna nimi…",
+      "errorMessage": {
+        "mustLeastCharacters": "Kameraryhmän nimi täytyy olla vähintään 2 kirjainta.",
+        "exists": "Kameraryhmän nimi on jo olemassa.",
+        "nameMustNotPeriod": "Kameraryhmän nimi ei voi sisältää pistettä.",
+        "invalid": "Virheellinen kameraryhmän nimi."
+      }
+    },
+    "cameras": {
+      "label": "Kamerat",
+      "desc": "Valitse ryhmän kamera."
+    },
+    "icon": "Ikoni",
+    "success": "Kameraryhmä ({{name}}) on tallennettu.",
+    "camera": {
+      "setting": {
+        "label": "Kameran suoratoistoasetukset",
+        "title": "{{cameraName}} suoratoistoasetukset",
+        "desc": "Muuta tämän kameraryhmän kojelaudan live-suoratoistoasetuksia.<em>Nämä asetukset ovat laite/selainkohtaisia.</em>",
+        "audioIsAvailable": "Ääni on saatavilla tähän suoratoistoon",
+        "audioIsUnavailable": "Ääni ei ole saatavilla tähän suoratoistoon",
+        "audio": {
+          "tips": {
+            "title": "Äänen on oltava kytkettynä kameraan ja määritettynä go2rtc:ssä tätä suoratoistoa varten.",
+            "document": "Lue dokumentaatio "
+          }
+        },
+        "streamMethod": {
+          "label": "Suoratoistomenetelmä",
+          "method": {
+            "noStreaming": {
+              "label": "Ei suoratoistoa",
+              "desc": "Kamerakuvat päivittyvät vain kerran minuutissa, eikä suoratoistoa tapahdu."
+            },
+            "smartStreaming": {
+              "label": "Älykäs suoratoisto (suositus)",
+              "desc": "Älykäs suoratoisto päivittää kamerakuvan kerran minuutissa kun havaittavaa toimintaa ei tapahdu, säästääkseen kaistanleveyttä ja resursseja. Kun toimintaa havaitaan, kuva vaihtuu saumattomasti reaaliaikaiseksi suoratoistoksi."
+            },
+            "continuousStreaming": {
+              "label": "Jatkuva suoratoisto",
+              "desc": {
+                "title": "Kamerakuva näkyy aina reaaliaikaisena suoratoistona kojelaudassa, vaikka mitään liikettä ei havaitaisi.",
+                "warning": "Jatkuva suoratoisto voi lisätä kaistanleveyden käyttöä ja suorituskykyongelmia. Käytä varoen."
+              }
+            }
+          },
+          "placeholder": "Valitse toiston tyyppi"
+        },
+        "compatibilityMode": {
+          "label": "Yhteensopivuustila",
+          "desc": "Ota tämä vaihtoehto käyttöön vain, jos kamerasi live-suoratoistossa näkyy väriartefakteja ja kuvan oikealla puolella on vinoviiva."
+        },
+        "stream": "Kuvavirta",
+        "placeholder": "Valitse kuvavirta"
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Asetukset",
+      "title": "Vaihtoehdot",
+      "showOptions": "Näytä vaihtoehdot",
+      "hideOptions": "Piilota vaihtoehdot"
+    },
+    "boundingBox": "Rajauslaatikko",
+    "timestamp": "Aikaleima",
+    "zones": "Vyöhykkeet",
+    "mask": "Peite",
+    "motion": "Liike",
+    "regions": "Alueet"
+  }
+}

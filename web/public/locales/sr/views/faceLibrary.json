@@ -1,0 +1,12 @@
+{
+  "description": {
+    "addFace": "Prođite kroz dodavanje nove kolekcije u biblioteku lica.",
+    "placeholder": "Unesite ime za ovu kolekciju",
+    "invalidName": "Nevažeće ime. Imena mogu da sadrže samo slova, brojeve, razmake, apostrofe, donje crte i crtice."
+  },
+  "details": {
+    "person": "Osoba",
+    "subLabelScore": "Sub Label Skor",
+    "scoreInfo": "Rezultat podoznake je otežan rezultat za sve prepoznate pouzdanosti lica, tako da se može razlikovati od rezultata prikazanog na snimku."
+  }
+}

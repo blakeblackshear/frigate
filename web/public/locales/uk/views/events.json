@@ -1,0 +1,38 @@
+{
+  "camera": "Камера",
+  "selected_one": "{{count}} відібраний",
+  "selected_other": "{{count}} відібраний",
+  "alerts": "Оповіщення",
+  "detections": "Виявлень",
+  "motion": {
+    "label": "Рух",
+    "only": "Тiльки рух"
+  },
+  "allCameras": "Всi камери",
+  "empty": {
+    "alert": "Немає попереджень для перегляду",
+    "detection": "Немає ніяких ознак",
+    "motion": "Даних про рух не знайдено"
+  },
+  "timeline": "Хронологія",
+  "timeline.aria": "Вибрати хронiку",
+  "events": {
+    "label": "Події",
+    "aria": "Выбрати події",
+    "noFoundForTimePeriod": "За цей період подій не знайдено."
+  },
+  "documentTitle": "Перегляд подiя - Frigate",
+  "recordings": {
+    "documentTitle": "Записи - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Останні 24 години"
+  },
+  "markAsReviewed": "Прибрати позначку про необхідність огляду",
+  "markTheseItemsAsReviewed": "Позначити ці елементи як переглянуті",
+  "newReviewItems": {
+    "label": "Переглянути нові елементи огляду",
+    "button": "Нові матеріали для перегляду"
+  },
+  "detected": "виявлено"
+}

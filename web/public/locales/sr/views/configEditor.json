@@ -1,0 +1,13 @@
+{
+  "documentTitle": "Editor Konfiguracije - Frigate",
+  "configEditor": "Editor konfiguracije",
+  "copyConfig": "Kopiraj konfiguraciju",
+  "saveAndRestart": "Sačuvaj & Ponovo pokreni",
+  "saveOnly": "Samo sačuvaj",
+  "confirm": "Izađi bez čuvanja?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Konfiguracija je kopirana u clipboard."
+    }
+  }
+}

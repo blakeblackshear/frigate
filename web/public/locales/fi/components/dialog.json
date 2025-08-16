@@ -1,0 +1,77 @@
+{
+  "restart": {
+    "title": "Haluatko varmasti käynnistää Frigaten uudelleen?",
+    "button": "Uudelleenkäynnistys",
+    "restarting": {
+      "title": "Fregatti käynnistyy uudelleen",
+      "content": "Tämä sivu latautuu uudelleen {{countdown}} sekunnin kuluttua.",
+      "button": "Pakota uudelleenlataus nyt"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Lähetä Frigate+:lle",
+        "desc": "Välttämissäsi paikoissa olevat kohteet eivät ole vääriä positiivisia. Niiden lähettäminen väärinä positiivisina sekoittaa mallia."
+      },
+      "review": {
+        "question": {
+          "label": "Vahvista tämä nimike Frigate Plussalle",
+          "ask_a": "Onko kohde <code>{{label}}</code>?",
+          "ask_an": "Onko tämä kohde <code>{{label}}</code>?",
+          "ask_full": "Onko tämä kohde <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Lähetetty"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Katso historiaa"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Valitse aikajanalta",
+      "lastHour_one": "Viimeinen tunti",
+      "lastHour_other": "Viimeiset {{count}} tuntia",
+      "start": {
+        "title": "Aloitusaika",
+        "label": "Valitse aloitusaika"
+      },
+      "end": {
+        "title": "Lopetusaika",
+        "label": "Valitse lopetusaika"
+      },
+      "custom": "Mukautettu"
+    },
+    "name": {
+      "placeholder": "Nimeä vienti"
+    },
+    "select": "Valitse",
+    "export": "Vie",
+    "selectOrExport": "Valitse tai Vie",
+    "toast": {
+      "error": {
+        "failed": "Viennin aloitus epäonnistui: {{error}}",
+        "endTimeMustAfterStartTime": "Lopetusajan pitää olla aloitusajan jälkeen",
+        "noVaildTimeSelected": "Sopivaa aikaikkunaa ei valittuna"
+      },
+      "success": "Vienti käynnistettiin onnistuneesti. Katso tiedosto /export kansiossa."
+    },
+    "fromTimeline": {
+      "saveExport": "Tallenna vienti",
+      "previewExport": "Esikatsele vientiä"
+    }
+  },
+  "streaming": {
+    "label": "Kuvavirta",
+    "restreaming": {
+      "disabled": "Uudelleentoisto ei ole käytettävissä tällä kameralla.",
+      "desc": {
+        "title": "Määritä go2rtc saadaksesi lisäreaaliaikanäkymän vaihtoehtoja ja ääntä tälle kameralle.",
+        "readTheDocumentation": "Lue dokumentaatio"
+      }
+    }
+  }
+}

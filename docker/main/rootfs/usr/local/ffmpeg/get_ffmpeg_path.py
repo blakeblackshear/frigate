@@ -1,7 +1,6 @@
 import json
-import os
-import shutil
 import sys
+from typing import Any
 
 from ruamel.yaml import YAML
 
@@ -10,35 +9,28 @@ from frigate.const import (
     DEFAULT_FFMPEG_VERSION,
     INCLUDED_FFMPEG_VERSIONS,
 )
+from frigate.util.config import find_config_file
 
 sys.path.remove("/opt/frigate")
 
 yaml = YAML()
 
-config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-
-# Check if we can use .yaml instead of .yml
-config_file_yaml = config_file.replace(".yml", ".yaml")
-if os.path.isfile(config_file_yaml):
-    config_file = config_file_yaml
+config_file = find_config_file()
 
 try:
     with open(config_file) as f:
         raw_config = f.read()
 
     if config_file.endswith((".yaml", ".yml")):
-        config: dict[str, any] = yaml.load(raw_config)
+        config: dict[str, Any] = yaml.load(raw_config)
     elif config_file.endswith(".json"):
-        config: dict[str, any] = json.loads(raw_config)
+        config: dict[str, Any] = json.loads(raw_config)
 except FileNotFoundError:
-    config: dict[str, any] = {}
+    config: dict[str, Any] = {}
 
 path = config.get("ffmpeg", {}).get("path", "default")
 if path == "default":
-    if shutil.which("ffmpeg") is None:
-        print(f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg")
-    else:
-        print("ffmpeg")
+    print(f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg")
 elif path in INCLUDED_FFMPEG_VERSIONS:
     print(f"/usr/lib/ffmpeg/{path}/bin/ffmpeg")
 else:

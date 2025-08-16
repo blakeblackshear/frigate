@@ -1,0 +1,19 @@
+{
+  "restart": {
+    "title": "Da li želite da restartujete Frigate?",
+    "button": "Ponovo pokreni",
+    "restarting": {
+      "title": "Frigate se ponovo pokreće",
+      "content": "Ova stranica će se ponovo učitati za {{countdown}} sekundi.",
+      "button": "Prisilno ponovno učitavanje"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Pošalji na Frigate+",
+        "desc": "Objekti na lokacijama koje želite da izbegnete nisu lažno pozitivni. Slanje lažno pozitivnih rezultata će zbuniti model."
+      }
+    }
+  }
+}

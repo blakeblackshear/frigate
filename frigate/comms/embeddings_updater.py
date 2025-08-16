@@ -1,7 +1,7 @@
 """Facilitates communication between processes."""
 
 from enum import Enum
-from typing import Callable
+from typing import Any, Callable
 
 import zmq
 
@@ -9,9 +9,15 @@ SOCKET_REP_REQ = "ipc:///tmp/cache/embeddings"
 
 
 class EmbeddingsRequestEnum(Enum):
+    clear_face_classifier = "clear_face_classifier"
     embed_description = "embed_description"
     embed_thumbnail = "embed_thumbnail"
     generate_search = "generate_search"
+    recognize_face = "recognize_face"
+    register_face = "register_face"
+    reprocess_face = "reprocess_face"
+    reprocess_plate = "reprocess_plate"
+    reindex = "reindex"
 
 
 class EmbeddingsResponder:
@@ -22,7 +28,7 @@ class EmbeddingsResponder:
 
     def check_for_request(self, process: Callable) -> None:
         while True:  # load all messages that are queued
-            has_message, _, _ = zmq.select([self.socket], [], [], 0.1)
+            has_message, _, _ = zmq.select([self.socket], [], [], 0.01)
 
             if not has_message:
                 break
@@ -52,7 +58,7 @@ class EmbeddingsRequestor:
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(SOCKET_REP_REQ)
 
-    def send_data(self, topic: str, data: any) -> str:
+    def send_data(self, topic: str, data: Any) -> str:
         """Sends data and then waits for reply."""
         try:
             self.socket.send_json((topic, data))

@@ -1,0 +1,86 @@
+{
+  "group": {
+    "label": "Kameragrupper",
+    "name": {
+      "placeholder": "Skriv inn et navn…",
+      "errorMessage": {
+        "mustLeastCharacters": "Navnet på kameragruppen må være minst 2 tegn.",
+        "exists": "Navnet på kameragruppen finnes allerede.",
+        "nameMustNotPeriod": "Navnet på kameragruppen kan ikke inneholde punktum.",
+        "invalid": "Ugyldig navn på kameragruppe."
+      },
+      "label": "Navn"
+    },
+    "camera": {
+      "setting": {
+        "streamMethod": {
+          "method": {
+            "continuousStreaming": {
+              "label": "Kontinuerlig strømming",
+              "desc": {
+                "title": "Kamerabildet vil alltid være en direktestrøm når det vises på dashbordet, selv om ingen aktivitet oppdages.",
+                "warning": "Kontinuerlig strømming kan føre til høy båndbreddebruk og ytelsesproblemer. Bruk med forsiktighet."
+              }
+            },
+            "noStreaming": {
+              "label": "Ingen strømming",
+              "desc": "Kamerabilder vil bare oppdateres én gang i minuttet, og ingen direktestrømming vil finne sted."
+            },
+            "smartStreaming": {
+              "label": "Smart strømming (anbefalt)",
+              "desc": "Smart strømming oppdaterer kamerabilder én gang i minuttet når ingen aktivitet oppdages, for å spare båndbredde og ressurser. Når aktivitet oppdages, byttes bildet sømløst til direktestrøm."
+            }
+          },
+          "label": "Strømmemetode",
+          "placeholder": "Velg en strømmemetode"
+        },
+        "compatibilityMode": {
+          "label": "Kompatibilitetsmodus",
+          "desc": "Aktiver dette alternativet kun hvis kameraets direktestrøm viser fargeforstyrrelser og har en diagonal linje på høyre side av bildet."
+        },
+        "label": "Innstillinger for kamerastrømming",
+        "title": "{{cameraName}} strømmeinnstillinger",
+        "desc": "Endre direktestrømmingsalternativene for denne kameragruppens dashbord. <em>Disse innstillingene er spesifikke for enhet/nettleser.</em>",
+        "audioIsAvailable": "Lyd er tilgjengelig for denne strømmen",
+        "audioIsUnavailable": "Lyd er ikke tilgjengelig for denne strømmen",
+        "audio": {
+          "tips": {
+            "title": "Lyd må komme fra kameraet ditt og konfigureres i go2rtc for denne strømmen.",
+            "document": "Se dokumentasjonen "
+          }
+        },
+        "stream": "Strøm",
+        "placeholder": "Velg en strøm"
+      }
+    },
+    "add": "Legg til kameragruppe",
+    "edit": "Rediger kameragruppe",
+    "delete": {
+      "label": "Slett kameragruppe",
+      "confirm": {
+        "title": "Bekreft sletting",
+        "desc": "Er du sikker på at du vil slette kameragruppen <em>{{name}}</em>?"
+      }
+    },
+    "cameras": {
+      "label": "Kameraer",
+      "desc": "Velg kameraer for denne gruppen."
+    },
+    "icon": "Ikon",
+    "success": "Kameragruppen ({{name}}) er lagret."
+  },
+  "debug": {
+    "options": {
+      "label": "Innstillinger",
+      "title": "Alternativer",
+      "showOptions": "Vis alternativer",
+      "hideOptions": "Skjul alternativer"
+    },
+    "boundingBox": "Omsluttende boks",
+    "timestamp": "Tidsstempel",
+    "zones": "Soner",
+    "mask": "Maske",
+    "motion": "Bevegelse",
+    "regions": "Regioner"
+  }
+}

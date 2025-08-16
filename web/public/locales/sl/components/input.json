@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Prenesi video",
+      "toast": {
+        "success": "Izbrani posnetek se je začel prenašati."
+      }
+    }
+  }
+}

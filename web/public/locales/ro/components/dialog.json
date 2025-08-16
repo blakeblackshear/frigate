@@ -1,0 +1,126 @@
+{
+  "restart": {
+    "title": "Ești sigur că dorești să repornești Frigate?",
+    "button": "Repornește",
+    "restarting": {
+      "title": "Frigate repornește",
+      "content": "Această pagină se va reâncărca automat în {{countdown}} secunde.",
+      "button": "Forțează acum reîncărcarea"
+    }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "true": {
+          "label": "Confirma aceasta eticheta pentru Frigate Plus",
+          "true_one": "Asta e o {{label}}",
+          "true_few": "Astea sunt {{label}}",
+          "true_other": "Astea sunt {{label}}"
+        },
+        "false": {
+          "label": "Nu confirma aceasta eticheta pentru Frigate Plus",
+          "false_one": "Asta nu este  {{label}}",
+          "false_few": "Astea nu sunt {{label}}",
+          "false_other": "Astea nu sunt {{label}}"
+        },
+        "state": {
+          "submitted": "Trimis"
+        },
+        "question": {
+          "label": "Confirmă această etichetă pentru Frigate Plus",
+          "ask_a": "Este acest obiect un <code>{{label}}</code>?",
+          "ask_an": "Este acest obiect un <code>{{label}}</code>?",
+          "ask_full": "Este acest obiect un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        }
+      },
+      "submitToPlus": {
+        "label": "Trimite catre Frigate+",
+        "desc": "Obiectele din locațiile pe care dorești să le eviți nu sunt false-pozitive. Marcarea lor ca false-pozitive va induce confuzie modelul."
+      }
+    },
+    "video": {
+      "viewInHistory": "Vezi în istoric"
+    }
+  },
+  "recording": {
+    "button": {
+      "deleteNow": "Șterge acum",
+      "export": "Exportă",
+      "markAsReviewed": "Marchează ca revizuit"
+    },
+    "confirmDelete": {
+      "toast": {
+        "success": "Înregistrările video asociate elementelor de revizuire selectate au fost șterse cu succes.",
+        "error": "Ștergerea a eșuat: {{error}}"
+      },
+      "title": "Confirmă ștergerea",
+      "desc": {
+        "selected": "Ești sigur că vrei să ștergi toate videoclipurile înregistrate asociate acestui element de revizuire?<br /><br />Ține apăsată tasta <em>Shift</em> pentru a sări peste această confirmare pe viitor."
+      }
+    }
+  },
+  "export": {
+    "time": {
+      "custom": "personalizat",
+      "fromTimeline": "Selectează din cronologie",
+      "lastHour_one": "Ultima oră",
+      "lastHour_few": "Ultimele {{count}} ore",
+      "lastHour_other": "Ultimele {{count}} ore",
+      "start": {
+        "title": "Ora de început",
+        "label": "Selectează ora de început"
+      },
+      "end": {
+        "title": "Oră terminare",
+        "label": "Selectează ora de terminare"
+      }
+    },
+    "name": {
+      "placeholder": "Denumește exportul"
+    },
+    "select": "Selectează",
+    "export": "Exportă",
+    "selectOrExport": "Selectează sau exportă",
+    "toast": {
+      "success": "Exportul a început cu succes. Vizualizați fișierul în dosarul /exports.",
+      "error": {
+        "failed": "Eroare la pornirea exportului: {{error}}",
+        "endTimeMustAfterStartTime": "Ora de sfârșit trebuie să fie după ora de început",
+        "noVaildTimeSelected": "Nu a fost selectat un interval de timp valid"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Salvează exportul",
+      "previewExport": "Previzualizează exportul"
+    }
+  },
+  "streaming": {
+    "label": "Stream",
+    "restreaming": {
+      "disabled": "Restreaming-ul nu este activat pentru această cameră.",
+      "desc": {
+        "title": "Configurează go2rtc pentru opțiuni suplimentare de vizualizare live și audio pentru această cameră.",
+        "readTheDocumentation": "Citește documentația"
+      }
+    },
+    "showStats": {
+      "label": "Afișează statistici streaming",
+      "desc": "Activează această opțiune pentru a afișa statisticile de streaming ca un overlay peste fluxul camerei."
+    },
+    "debugView": "Vizualizator depanare"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Salvează căutarea",
+      "desc": "Alege un nume pentru această căutare salvată.",
+      "placeholder": "Introdu un nume pentru căutarea ta",
+      "overwrite": "{{searchName}} există deja. Salvarea va suprascrie valoarea existentă.",
+      "success": "Căutarea ({{searchName}}) a fost salvată.",
+      "button": {
+        "save": {
+          "label": "Salvează această căutare"
+        }
+      }
+    }
+  }
+}

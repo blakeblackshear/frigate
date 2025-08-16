@@ -1,0 +1,86 @@
+{
+  "group": {
+    "camera": {
+      "setting": {
+        "audio": {
+          "tips": {
+            "title": "此串流必須從你的鏡頭輸出音訊並在 go2rtc 中設定。",
+            "document": "閱讀文件 "
+          }
+        },
+        "streamMethod": {
+          "method": {
+            "continuousStreaming": {
+              "desc": {
+                "warning": "持續串流可能導致高頻寬使用及效能問題，請小心使用。",
+                "title": "即使沒有偵測到活動，只要在控制台上可見，鏡頭影像也會一直保持即時串流。"
+              },
+              "label": "持續串流"
+            },
+            "smartStreaming": {
+              "label": "智能串流（建議）",
+              "desc": "當沒有偵測到活動時，智能串流會每分鐘更新一次鏡頭影像以節省頻寬和資源。當偵測到活動時，影像會無縫切換到即時串流。"
+            },
+            "noStreaming": {
+              "label": "不串流",
+              "desc": "鏡頭影像每分鐘只會更新一次，不會進行即時串流。"
+            }
+          },
+          "label": "串流方式",
+          "placeholder": "選擇串流方式"
+        },
+        "compatibilityMode": {
+          "label": "相容模式",
+          "desc": "只有當你的鏡頭串流出現色彩異常及右側有斜線時，才啟用此選項。"
+        },
+        "label": "鏡頭串流設定",
+        "title": "{{cameraName}} 串流設定",
+        "desc": "更改此鏡頭群組控制台的即時串流選項。<em>這些設定是裝置/瀏覽器專屬的。</em>",
+        "audioIsAvailable": "此串流有提供音訊",
+        "audioIsUnavailable": "此串流沒有音訊",
+        "placeholder": "選擇串流來源",
+        "stream": "串流"
+      }
+    },
+    "delete": {
+      "confirm": {
+        "title": "確認刪除",
+        "desc": "你確定要刪除鏡頭群組 <em>{{name}}</em> 嗎？"
+      },
+      "label": "刪除鏡頭群組"
+    },
+    "name": {
+      "errorMessage": {
+        "exists": "鏡頭群組名稱已存在。",
+        "invalid": "鏡頭群組名稱無效。",
+        "mustLeastCharacters": "鏡頭群組名稱必須至少包含兩個字元。",
+        "nameMustNotPeriod": "鏡頭群組名稱不能包含句號。"
+      },
+      "placeholder": "請輸入名稱…",
+      "label": "名稱"
+    },
+    "icon": "圖標",
+    "cameras": {
+      "desc": "為此群組選擇鏡頭。",
+      "label": "鏡頭"
+    },
+    "label": "鏡頭群組",
+    "add": "新增鏡頭群組",
+    "edit": "編輯鏡頭群組",
+    "success": "鏡頭群組（{{name}}）已儲存。"
+  },
+  "debug": {
+    "options": {
+      "label": "設定",
+      "title": "選項",
+      "showOptions": "顯示選項",
+      "hideOptions": "隱藏選項"
+    },
+    "mask": "遮罩",
+    "boundingBox": "框選區",
+    "motion": "移動",
+    "regions": "大區域",
+    "timestamp": "時間戳記",
+    "zones": "區域"
+  }
+}

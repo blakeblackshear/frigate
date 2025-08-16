@@ -1,0 +1,38 @@
+{
+  "camera": "鏡頭",
+  "alerts": "警報",
+  "empty": {
+    "alert": "沒有警報需要審查",
+    "detection": "沒有偵測到的項目需要審查",
+    "motion": "找不到移動數據"
+  },
+  "timeline": "時間線",
+  "events": {
+    "label": "事件",
+    "noFoundForTimePeriod": "此時段內沒有找到事件。",
+    "aria": "選擇事件"
+  },
+  "recordings": {
+    "documentTitle": "錄影 - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "過去24小時"
+  },
+  "markAsReviewed": "標記為已審查",
+  "markTheseItemsAsReviewed": "將這些項目標記為已審查",
+  "newReviewItems": {
+    "label": "查看新的審查項目",
+    "button": "有新的審查項目"
+  },
+  "selected_one": "已選擇 {{count}} 項",
+  "selected_other": "已選擇 {{count}} 項",
+  "allCameras": "所有鏡頭",
+  "documentTitle": "審查 - Frigate",
+  "motion": {
+    "only": "只顯示移動",
+    "label": "移動"
+  },
+  "detections": "偵測",
+  "timeline.aria": "選擇時間線",
+  "detected": "已偵測"
+}

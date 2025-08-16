@@ -1,0 +1,18 @@
+{
+  "search": "Paieška",
+  "savedSearches": "Išsaugotos Paieškos",
+  "searchFor": "Ieškoti {{inputValue}}",
+  "button": {
+    "clear": "Išvalyti paiešką",
+    "save": "Išsaugoti paiešką",
+    "delete": "Ištrinti išsaugotą paiešką",
+    "filterInformation": "Filtruoti informaciją",
+    "filterActive": "Aktyvūs filtrai"
+  },
+  "trackedObjectId": "Sekamo Objekto ID",
+  "filter": {
+    "label": {
+      "cameras": "Kameros"
+    }
+  }
+}

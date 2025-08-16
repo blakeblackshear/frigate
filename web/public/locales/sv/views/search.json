@@ -1,0 +1,72 @@
+{
+  "savedSearches": "Sparade Sökningar",
+  "searchFor": "Sök efter {{inputValue}}",
+  "search": "Sök",
+  "button": {
+    "clear": "Radera sökning",
+    "save": "Spara sökning",
+    "filterActive": "Aktiva filter",
+    "delete": "Ta bort sparad sökning",
+    "filterInformation": "Filterinformation"
+  },
+  "filter": {
+    "tips": {
+      "desc": {
+        "step1": "Skriv ett filtreringsnyckelnamn följt av ett kolon (t.ex. \"kameror:\").",
+        "step2": "Välj ett värde utifrån alternativen eller skriv in ditt egna.",
+        "step3": "Använd flera filter genom att addera dom en efter en med ett mellanslag emellan dom.",
+        "step4": "Datumfilter (före: och efter:) använd {{DateFormat}} format.",
+        "step5": "Tidsintervaller använder {{exampleTime}} format.",
+        "exampleLabel": "Exempel:",
+        "step6": "Ta bort filter genom att klicka på 'x\" bredvid dom.",
+        "text": "Filter hjälper dig att begränsa dina sökresultat. Så här använder du dem i inmatningsfältet:"
+      },
+      "title": "Hur du använder filter"
+    },
+    "header": {
+      "noFilters": "Filter",
+      "activeFilters": "Aktiva Filter",
+      "currentFilterType": "Filtervärden"
+    },
+    "label": {
+      "after": "Efter",
+      "min_speed": "Minsta Hastighet",
+      "zones": "Zoner",
+      "min_score": "Minsta Poäng",
+      "cameras": "Kameror",
+      "sub_labels": "Underetiketter",
+      "search_type": "Söktyp",
+      "time_range": "Tidsintervall",
+      "before": "Före",
+      "max_speed": "Högsta Hastighet",
+      "recognized_license_plate": "Identifierad registreringsskylt",
+      "has_clip": "Har klipp",
+      "has_snapshot": "Har Ögonblicksbild",
+      "labels": "Etiketter",
+      "max_score": "Högsta Poäng"
+    },
+    "searchType": {
+      "thumbnail": "Miniatyrbild",
+      "description": "Beskrivning"
+    },
+    "toast": {
+      "error": {
+        "afterDatebeEarlierBefore": "Datumet \"efter\" måste vara tidigare än datumet \"före\".",
+        "minScoreMustBeLessOrEqualMaxScore": "\"min_score\" måste vara mindre än eller lika med \"max_score\".",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "\"max_speed\" måste vara större än eller lika med \"min_speed\".",
+        "beforeDateBeLaterAfter": "Datumet \"före\" måste vara senare än datumet \"efter\".",
+        "maxScoreMustBeGreaterOrEqualMinScore": "\"max_score\" måste vara större än eller lika med \"min_score\".",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "\"min_speed\" måste vara mindre än eller lika med \"max_speed\"."
+      }
+    }
+  },
+  "similaritySearch": {
+    "title": "Likhetssökning",
+    "active": "Likhetsökning aktiv",
+    "clear": "Rensa likhetsökning"
+  },
+  "placeholder": {
+    "search": "Sök…"
+  },
+  "trackedObjectId": "Spårad Objekts ID"
+}

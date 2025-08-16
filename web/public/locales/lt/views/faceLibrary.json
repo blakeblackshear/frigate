@@ -1,0 +1,13 @@
+{
+  "description": {
+    "addFace": "Apžiūrėkite naujų kolekcijų pridėjimą prie Veidų Bibliotekos.",
+    "placeholder": "Įveskite pavadinimą šiai kolekcijai",
+    "invalidName": "Netinkamas vardas. Vardai gali turėti tik raides, numerius, tarpus, apostrofus, pabraukimus ir brukšnelius."
+  },
+  "details": {
+    "person": "Žmogus",
+    "face": "Veido detelės",
+    "timestamp": "Laiko žyma",
+    "unknown": "Nežinoma"
+  }
+}

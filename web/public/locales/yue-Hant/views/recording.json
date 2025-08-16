@@ -1,0 +1,12 @@
+{
+  "filter": "篩選",
+  "export": "匯出",
+  "calendar": "日曆",
+  "filters": "篩選條件",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "未選擇有效的時間範圍",
+      "endTimeMustAfterStartTime": "結束時間必須在開始時間之後"
+    }
+  }
+}

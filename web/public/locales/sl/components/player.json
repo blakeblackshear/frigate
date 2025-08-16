@@ -1,0 +1,51 @@
+{
+  "noRecordingsFoundForThisTime": "Posnetki niso bili najdeni",
+  "noPreviewFound": "Predogled ni bil najden",
+  "noPreviewFoundFor": "Predogled za {{cameraName}} ni na voljo",
+  "submitFrigatePlus": {
+    "title": "Želite poslati ta okvir na Frigate+?",
+    "submit": "Pošlji"
+  },
+  "stats": {
+    "streamType": {
+      "title": "Tip pretoka:",
+      "short": "Tip"
+    },
+    "bandwidth": {
+      "title": "Pasovna širina:",
+      "short": "Pasovna širina"
+    },
+    "latency": {
+      "value": "{{seconds}} sekund",
+      "title": "Zakasnitev:",
+      "short": {
+        "value": "{{seconds}} s",
+        "title": "Zakasnitev"
+      }
+    },
+    "totalFrames": "Skupno število sličic:",
+    "droppedFrames": {
+      "title": "Izpuščene sličice:",
+      "short": {
+        "title": "Izpuščeno",
+        "value": "{{droppedFrames}} sličic"
+      }
+    },
+    "decodedFrames": "Dekodirane sličice:",
+    "droppedFrameRate": "Stopnja izpuščenih sličic:"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 je zahteven za ta tip pretoka.",
+  "streamOffline": {
+    "title": "Pretok ni na voljo",
+    "desc": "Na toku <code>detect</code> kamere {{cameraName}} ni bilo prejetih nobenih sličic, preverite dnevnik napak"
+  },
+  "cameraDisabled": "Kamera je onemogočena",
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Sličica je bila uspešno poslana v Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Pošiljanje sličice v Frigate+ ni uspelo"
+    }
+  }
+}

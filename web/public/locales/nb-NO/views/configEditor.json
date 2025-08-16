@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Konfigurasjonsredigering - Frigate",
+  "toast": {
+    "error": {
+      "savingError": "Feil ved lagring av konfigurasjon"
+    },
+    "success": {
+      "copyToClipboard": "Konfigurasjonen ble kopiert til utklippstavlen."
+    }
+  },
+  "configEditor": "Konfigurasjonsredigering",
+  "copyConfig": "Kopier konfigurasjonen",
+  "saveAndRestart": "Lagre og omstart",
+  "saveOnly": "Kun lagre",
+  "confirm": "Avslutt uten å lagre?"
+}

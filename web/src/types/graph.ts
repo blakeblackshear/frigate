@@ -18,6 +18,11 @@ export const InferenceThreshold = {
   error: 100,
 } as Threshold;
 
+export const EmbeddingThreshold = {
+  warning: 500,
+  error: 1000,
+} as Threshold;
+
 export const DetectorTempThreshold = {
   warning: 72,
   error: 80,

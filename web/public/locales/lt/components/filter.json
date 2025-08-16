@@ -1,0 +1,19 @@
+{
+  "filter": "Filtras",
+  "labels": {
+    "label": "Etiketės",
+    "all": {
+      "title": "Visos Etiketės",
+      "short": "Etiketės"
+    },
+    "count_one": "{{count}} Etiketė",
+    "count_other": "{{count}} Etiketės"
+  },
+  "zones": {
+    "label": "Zonos",
+    "all": {
+      "title": "Visos Zonos",
+      "short": "Zonos"
+    }
+  }
+}

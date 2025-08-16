@@ -16,7 +16,7 @@ export default function FilterSwitch({
   return (
     <div className="flex items-center justify-between gap-1">
       <Label
-        className={`mx-2 w-full cursor-pointer capitalize text-primary ${disabled ? "text-secondary-foreground" : ""}`}
+        className={`mx-2 w-full cursor-pointer text-primary smart-capitalize ${disabled ? "text-secondary-foreground" : ""}`}
         htmlFor={label}
       >
         {label}

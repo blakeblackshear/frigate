@@ -1,0 +1,16 @@
+{
+  "documentTitle": "Editor Konfigurasi - Frigate",
+  "configEditor": "Editor Konfigurasi",
+  "copyConfig": "Salin Konfigurasi",
+  "saveAndRestart": "Simpan dan Mulai ulang",
+  "saveOnly": "Hanya simpan",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Konfigurasi disalin ke papan klip."
+    },
+    "error": {
+      "savingError": "Gagal menyimpan konfigurasi"
+    }
+  },
+  "confirm": "Keluar tanpa menyimpan?"
+}

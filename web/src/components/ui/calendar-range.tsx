@@ -12,6 +12,8 @@ import {
 import { Switch } from "./switch";
 import { cn } from "@/lib/utils";
 import { LuCheck } from "react-icons/lu";
+import { TZDate } from "react-day-picker";
+import { t } from "i18next";
 
 export interface DateRangePickerProps {
   /** Click handler for applying the updates from DateRangePicker. */
@@ -31,19 +33,24 @@ export interface DateRangePickerProps {
   locale?: string;
   /** Option for showing compare feature */
   showCompare?: boolean;
+  /** timezone */
+  timezone?: string;
 }
 
-const getDateAdjustedForTimezone = (dateInput: Date | string): Date => {
+const getDateAdjustedForTimezone = (
+  dateInput: Date | string,
+  timezone?: string,
+): Date => {
   if (typeof dateInput === "string") {
     // Split the date string to get year, month, and day parts
     const parts = dateInput.split("-").map((part) => parseInt(part, 10));
     // Create a new Date object using the local timezone
     // Note: Month is 0-indexed, so subtract 1 from the month part
-    const date = new Date(parts[0], parts[1] - 1, parts[2]);
+    const date = new TZDate(parts[0], parts[1] - 1, parts[2], timezone);
     return date;
   } else {
     // If dateInput is already a Date object, return it directly
-    return dateInput;
+    return new TZDate(dateInput, timezone);
   }
 };
 
@@ -59,20 +66,25 @@ interface Preset {
 
 // Define presets
 const PRESETS: Preset[] = [
-  { name: "today", label: "Today" },
-  { name: "yesterday", label: "Yesterday" },
-  { name: "last7", label: "Last 7 days" },
-  { name: "last14", label: "Last 14 days" },
-  { name: "last30", label: "Last 30 days" },
-  { name: "thisWeek", label: "This Week" },
-  { name: "lastWeek", label: "Last Week" },
-  { name: "thisMonth", label: "This Month" },
-  { name: "lastMonth", label: "Last Month" },
+  { name: "today", label: t("time.today", { ns: "common" }) },
+  { name: "yesterday", label: t("time.yesterday", { ns: "common" }) },
+  { name: "last7", label: t("time.last7", { ns: "common" }) },
+  { name: "last14", label: t("time.last14", { ns: "common" }) },
+  { name: "last30", label: t("time.last30", { ns: "common" }) },
+  { name: "thisWeek", label: t("time.thisWeek", { ns: "common" }) },
+  { name: "lastWeek", label: t("time.lastWeek", { ns: "common" }) },
+  { name: "thisMonth", label: t("time.thisMonth", { ns: "common" }) },
+  { name: "lastMonth", label: t("time.lastMonth", { ns: "common" }) },
 ];
 
 /** The DateRangePicker component allows a user to select a range of dates */
 export function DateRangePicker({
-  initialDateFrom = new Date(new Date().setHours(0, 0, 0, 0)),
+  timezone,
+  initialDateFrom = (() => {
+    const date = new TZDate(new Date(), timezone);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  })(),
   initialDateTo,
   initialCompareFrom,
   initialCompareTo,
@@ -83,18 +95,27 @@ export function DateRangePicker({
   const [isOpen, setIsOpen] = useState(false);
 
   const [range, setRange] = useState<DateRange>({
-    from: getDateAdjustedForTimezone(initialDateFrom),
+    from: getDateAdjustedForTimezone(initialDateFrom, timezone),
     to: initialDateTo
-      ? getDateAdjustedForTimezone(initialDateTo)
-      : getDateAdjustedForTimezone(initialDateFrom),
+      ? getDateAdjustedForTimezone(initialDateTo, timezone)
+      : getDateAdjustedForTimezone(initialDateFrom, timezone),
   });
   const [rangeCompare, setRangeCompare] = useState<DateRange | undefined>(
     initialCompareFrom
       ? {
-          from: new Date(new Date(initialCompareFrom).setHours(0, 0, 0, 0)),
+          from: new TZDate(
+            new Date(initialCompareFrom).setHours(0, 0, 0, 0),
+            timezone,
+          ),
           to: initialCompareTo
-            ? new Date(new Date(initialCompareTo).setHours(0, 0, 0, 0))
-            : new Date(new Date(initialCompareFrom).setHours(0, 0, 0, 0)),
+            ? new TZDate(
+                new Date(initialCompareTo).setHours(0, 0, 0, 0),
+                timezone,
+              )
+            : new TZDate(
+                new Date(initialCompareFrom).setHours(0, 0, 0, 0),
+                timezone,
+              ),
         }
       : undefined,
   );
@@ -127,8 +148,8 @@ export function DateRangePicker({
   const getPresetRange = (presetName: string): DateRange => {
     const preset = PRESETS.find(({ name }) => name === presetName);
     if (!preset) throw new Error(`Unknown date range preset: ${presetName}`);
-    const from = new Date();
-    const to = new Date();
+    const from = new TZDate(new Date(), timezone);
+    const to = new TZDate(new Date(), timezone);
     const first = from.getDate() - from.getDay();
 
     switch (preset.name) {
@@ -190,16 +211,18 @@ export function DateRangePicker({
     setRange(range);
     if (rangeCompare) {
       const rangeCompare = {
-        from: new Date(
+        from: new TZDate(
           range.from.getFullYear() - 1,
           range.from.getMonth(),
           range.from.getDate(),
+          timezone,
         ),
         to: range.to
-          ? new Date(
+          ? new TZDate(
               range.to.getFullYear() - 1,
               range.to.getMonth(),
               range.to.getDate(),
+              timezone,
             )
           : undefined,
       };
@@ -211,16 +234,18 @@ export function DateRangePicker({
     for (const preset of PRESETS) {
       const presetRange = getPresetRange(preset.name);
 
-      const normalizedRangeFrom = new Date(range.from);
+      const normalizedRangeFrom = new TZDate(range.from, timezone);
       normalizedRangeFrom.setHours(0, 0, 0, 0);
-      const normalizedPresetFrom = new Date(
+      const normalizedPresetFrom = new TZDate(
         presetRange.from.setHours(0, 0, 0, 0),
+        timezone,
       );
 
-      const normalizedRangeTo = new Date(range.to ?? 0);
+      const normalizedRangeTo = new TZDate(range.to ?? new Date(0), timezone);
       normalizedRangeTo.setHours(0, 0, 0, 0);
-      const normalizedPresetTo = new Date(
+      const normalizedPresetTo = new TZDate(
         presetRange.to?.setHours(0, 0, 0, 0) ?? 0,
+        timezone,
       );
 
       if (
@@ -368,7 +393,11 @@ export function DateRangePicker({
                 }}
               >
                 <SelectTrigger className="mx-auto mb-2 w-[180px]">
-                  <SelectValue placeholder="Select..." />
+                  <SelectValue
+                    placeholder={t("dates.selectPreset", {
+                      ns: "components/filter",
+                    })}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {PRESETS.map((preset) => (
@@ -396,6 +425,7 @@ export function DateRangePicker({
                     ),
                   )
                 }
+                timeZone={timezone}
               />
             </div>
           </div>
@@ -418,7 +448,7 @@ export function DateRangePicker({
       <div className="mx-auto flex w-64 items-center justify-evenly gap-2 py-2">
         <Button
           variant="select"
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           onClick={() => {
             setIsOpen(false);
             if (
@@ -429,7 +459,7 @@ export function DateRangePicker({
             }
           }}
         >
-          Apply
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
           onClick={() => {
@@ -438,9 +468,9 @@ export function DateRangePicker({
             onReset?.();
           }}
           variant="ghost"
-          aria-label="Reset"
+          aria-label={t("button.reset", { ns: "common" })}
         >
-          Reset
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </div>

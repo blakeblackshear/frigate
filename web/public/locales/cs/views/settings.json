@@ -1,0 +1,686 @@
+{
+  "documentTitle": {
+    "default": "Nastavení - Frigate",
+    "authentication": "Nastavení ověřování - Frigate",
+    "camera": "Nastavení kamery - Frigate",
+    "classification": "Nastavení klasifikace - Frigate",
+    "notifications": "Nastavení notifikací - Frigate",
+    "masksAndZones": "Editor masky a zón - Frigate",
+    "motionTuner": "Ladič detekce pohybu - Frigate",
+    "object": "Ladění - Frigate",
+    "general": "Obecné nastavení - Frigate",
+    "frigatePlus": "Frigate+ nastavení - Frigate",
+    "enrichments": "Nastavení obohacení - Frigate"
+  },
+  "frigatePlus": {
+    "toast": {
+      "error": "Chyba při ukládání změn konfigurace: {{errorMessage}}",
+      "success": "Nastavení Frigate+ byla uložena. Restartujte Frigate+ pro aplikování změn."
+    },
+    "modelInfo": {
+      "cameras": "Kamery",
+      "modelSelect": "Zde můžete vybrat dostupné modely ze služby Frigate+. Upozorňujeme, že lze zvolit pouze modely kompatibilní s aktuální konfigurací detektoru.",
+      "loadingAvailableModels": "Načítám dostupné modely…",
+      "plusModelType": {
+        "baseModel": "Základní Model",
+        "userModel": "Doladěno"
+      },
+      "loading": "Načítám informace o modelu…",
+      "error": "Chyba načítání informací o modelu",
+      "availableModels": "Dostupné Moduly",
+      "supportedDetectors": "Podporované Detektory",
+      "title": "Informace o Modelu",
+      "modelType": "Typ Modelu",
+      "trainDate": "Datum Tréninku",
+      "baseModel": "Základní Model"
+    },
+    "snapshotConfig": {
+      "documentation": "Přečtěte si dokumentaci",
+      "desc": "Odesílání do Frigate+ vyžaduje, aby byly ve vaší konfiguraci povoleny jak běžné snímky, tak snímky typu <code>clean_copy</code>.",
+      "title": "Nastavení Snímku",
+      "table": {
+        "cleanCopySnapshots": "<code>clean_copy</code> Snímky",
+        "snapshots": "Snímky",
+        "camera": "Kamera"
+      },
+      "cleanCopyWarning": "Některé kamery mají povolené snímky, ale volba <code>clean_copy</code> je zakázaná. Pro možnost odesílání snímků z těchto kamer do služby Frigate+ je nutné tuto volbu povolit v konfiguraci snímků."
+    },
+    "apiKey": {
+      "notValidated": "API klíč Frigate+ nebyl rozpoznán nebo nebyl ověřen",
+      "plusLink": "Přečtěte si více o Frigate+",
+      "validated": "API klíč Frigate+ byl rozpoznán a ověřen",
+      "desc": "API klíč Frigate+ umožňuje integraci se službou Frigate+.",
+      "title": "Frigate+ API Klíč"
+    },
+    "unsavedChanges": "Neuložené změny nastavení Frigate+",
+    "title": "Nastavení Frigate+",
+    "restart_required": "Vyžadován restart (model Frigate+ změněn)"
+  },
+  "classification": {
+    "unsavedChanges": "Neuložené změny nastavení klasifikací",
+    "semanticSearch": {
+      "readTheDocumentation": "Přečtěte si dokumentaci",
+      "reindexNow": {
+        "alreadyInProgress": "Reindexování je už spuštěno.",
+        "label": "Reindexovat Teď",
+        "confirmTitle": "Potvrdit Reindexaci",
+        "error": "Chyba spouštění reindexování: {{errorMessage}}",
+        "desc": "Přeindexování znovu vygeneruje vektorové reprezentace (embeddingy) pro všechny sledované objekty. Tento proces probíhá na pozadí, může plně zatížit váš procesor a v závislosti na počtu sledovaných objektů může trvat delší dobu.",
+        "confirmDesc": "Opravdu chcete přeindexovat embeddingy všech sledovaných objektů? Tento proces poběží na pozadí, ale může plně vytížit procesor a trvat delší dobu. Průběh můžete sledovat na stránce Prozkoumat.",
+        "confirmButton": "Reindexovat",
+        "success": "Reindexování úspěšně spuštěno."
+      },
+      "title": "Sémantické Hledání",
+      "desc": "Sémantické vyhledávání ve Frigate umožňuje najít sledované objekty ve vašich záznamech pomocí samotného obrázku, uživatelem zadaného textového popisu nebo automaticky generovaného popisu.",
+      "modelSize": {
+        "small": {
+          "title": "malý",
+          "desc": "Použití <em>malý</em> znamená využití kvantizované verze modelu, která spotřebovává méně paměti RAM a běží rychleji na procesoru, přičemž rozdíl v kvalitě embeddingů je zanedbatelný."
+        },
+        "large": {
+          "title": "velký",
+          "desc": "Volba <em>velký</em> využívá plný model Jina a automaticky se provádí na GPU, pokud je k dispozici."
+        },
+        "label": "Velikost Modelu",
+        "desc": "Velikost modelu pro sémantické vyhledávání pomocí embeddingů."
+      }
+    },
+    "title": "Nastavení Klasifikací",
+    "birdClassification": {
+      "title": "Klasifikace Ptáka",
+      "desc": "Klasifikace ptáků rozpoznává známé druhy pomocí kvantizovaného modelu TensorFlow. Když je rozpoznán známý pták, jeho běžný název bude přidán jako podružný štítek (sub_label). Tato informace se zobrazí v uživatelském rozhraní, je dostupná ve filtrech a zahrnuta i v notifikacích."
+    },
+    "toast": {
+      "error": "Chyba při ukládání změn konfigurace: {{errorMessage}}",
+      "success": "Nastavení klasifikací uloženo. Restartujte Frigate pro aplikování změn."
+    },
+    "restart_required": "Vyžadován restart (Nastavení klasifikací se změnilo)",
+    "licensePlateRecognition": {
+      "title": "Rozpoznávání SPZ",
+      "desc": "Frigate dokáže rozpoznávat SPZ na vozidlech a automaticky přidávat rozpoznané znaky do pole recognized_license_plate nebo známý název jako podružný štítek k objektům typu auto. Běžným případem použití je čtení SPZ aut vjíždějících na příjezdovou cestu nebo projíždějících kolem na ulici.",
+      "readTheDocumentation": "Přečtěte si dokumentaci"
+    },
+    "faceRecognition": {
+      "title": "Rozpoznávání obličeje",
+      "readTheDocumentation": "Přečtěte si dokumentaci",
+      "desc": "Rozpoznávání obličeje umožňuje přiřadit lidem jména, a když je jejich obličej rozpoznán, Frigate přiřadí dané jméno jako podružný štítek (sub_label). Tato informace se zobrazuje v uživatelském rozhraní, je dostupná ve filtrech a je také součástí notifikací.",
+      "modelSize": {
+        "label": "Velikost Modelu",
+        "desc": "Velikost modelu použitého pro rozpoznávání obličeje.",
+        "small": {
+          "title": "malý",
+          "desc": "Použití <em>malý</em> znamená využití FaceNet modelu pro embedding obličejů, který běží efektivně na většině procesorů (CPU)."
+        },
+        "large": {
+          "title": "velký",
+          "desc": "Použití <em>velký</em> znamená využití modelu ArcFace pro embedding obličejů, který se v případě dostupnosti automaticky spustí na GPU."
+        }
+      }
+    }
+  },
+  "masksAndZones": {
+    "zones": {
+      "speedEstimation": {
+        "docs": "Přečtěte si dokumentaci",
+        "title": "Odhad rychlosti",
+        "desc": "Povolit odhad rychlosti pro objekty v této zóně. Zóna musí mít přesně 4 body.",
+        "lineADistance": "Vzdálenost linky A ({{unit}})",
+        "lineBDistance": "Vzdálenost linky B ({{unit}})",
+        "lineCDistance": "Vzdálenost linky C ({{unit}})",
+        "lineDDistance": "Vzdálenost linky D ({{unit}})"
+      },
+      "name": {
+        "inputPlaceHolder": "Zadejte jméno…",
+        "title": "Jméno",
+        "tips": "Název musí mít alespoň 2 znaky a nesmí být shodný s názvem kamery nebo jiné zóny."
+      },
+      "inertia": {
+        "title": "Setrvačnost",
+        "desc": "Určuje, po kolika snímcích strávených v zóně je objekt považován za přítomný v této zóně.<em>Výchozí hodnota: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Doba setrvání",
+        "desc": "Nastavuje minimální dobu v sekundách, po kterou musí být objekt v zóně, aby došlo k aktivaci.<em>Výchozí hodnota: 0</em>"
+      },
+      "objects": {
+        "title": "Objekty",
+        "desc": "Seznam objektů, na které se tato zóna vztahuje."
+      },
+      "allObjects": "Všechny Objekty",
+      "speedThreshold": {
+        "title": "Práh rychlosti ({{unit}})",
+        "desc": "Určuje minimální rychlost, při které jsou objekty v této zóně zohledněny.",
+        "toast": {
+          "error": {
+            "pointLengthError": "Odhad rychlosti byl pro tuto zónu deaktivován. Zóny s odhadem rychlosti musí mít přesně 4 body.",
+            "loiteringTimeError": "Pokud má zóna nastavenou dobu setrvání větší než 0, nedoporučuje se používat odhad rychlosti."
+          }
+        }
+      },
+      "toast": {
+        "success": "Zóna {{zoneName}} byla uložena. Restartujte Frigate pro aplikování změn."
+      },
+      "label": "Zóny",
+      "desc": {
+        "title": "Zóny umožňují definovat konkrétní oblast v záběru, díky čemuž lze určit, zda se objekt nachází v dané oblasti či nikoliv.",
+        "documentation": "Dokumentace"
+      },
+      "add": "Přidat Zónu",
+      "edit": "Upravit Zónu",
+      "documentTitle": "Upravit Zónu - Frigate",
+      "clickDrawPolygon": "Klikněte pro kreslení polygonu na obrázku.",
+      "point_one": "{{count}} bod",
+      "point_few": "{{count}} body",
+      "point_other": "{{count}} bodů"
+    },
+    "motionMasks": {
+      "context": {
+        "documentation": "Přečtěte si dokumentaci",
+        "title": "Masky detekce pohybu slouží k zabránění tomu, aby nežádoucí typy pohybu spouštěly detekci (například větve stromů nebo časové značky kamery). Masky detekce pohybu by se měly používat <em>velmi střídmě</em> – příliš rozsáhlé maskování může ztížit sledování objektů."
+      },
+      "polygonAreaTooLarge": {
+        "documentation": "Přečtěte si dokumentaci",
+        "title": "Maska detekce pohybu pokrývá {{polygonArea}}% záběru kamery. Příliš velké masky detekce pohybu nejsou doporučovány.",
+        "tips": "Masky detekce pohybu nebrání detekci objektů. Místo toho byste měli použít požadovanou zónu."
+      },
+      "documentTitle": "Editovat Masku Detekce pohybu - Frigate",
+      "desc": {
+        "title": "Masky detekce pohybu slouží k zabránění nežádoucím typům pohybu ve spuštění detekce. Příliš rozsáhlé maskování však může ztížit sledování objektů.",
+        "documentation": "Dokumentace"
+      },
+      "label": "Maska Detekce pohybu",
+      "add": "Nová Maska Detekce pohybu",
+      "edit": "Upravit Masku Detekce pohybu",
+      "point_one": "{{count}} bod",
+      "point_few": "{{count}} body",
+      "point_other": "{{count}} bodů",
+      "clickDrawPolygon": "Kliknutím nakreslíte polygon do obrázku.",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} byl uložen. Restartujte Frigate pro aplikování změn.",
+          "noName": "Maska Detekce pohybu byla uložena. Restartujte Frigate pro aplikování změn."
+        }
+      }
+    },
+    "filter": {
+      "all": "Všechny Masky a Zóny"
+    },
+    "restart_required": "Vyžadován restart (masky/zóny byly změněny)",
+    "toast": {
+      "error": {
+        "copyCoordinatesFailed": "Nemohu zkopírovat souřadnice do schránky."
+      },
+      "success": {
+        "copyCoordinates": "Souřadnice pro {{polyName}} zkopírovány do schránky."
+      }
+    },
+    "form": {
+      "zoneName": {
+        "error": {
+          "hasIllegalCharacter": "Název zóny obsahuje zakázané znaky.",
+          "mustNotBeSameWithCamera": "Název Zóny nesmí být stejný jako název kamery.",
+          "mustNotContainPeriod": "Název zóny nesmí obsahovat tečky.",
+          "alreadyExists": "Zóna se stejným názvem u této kamery již existuje.",
+          "mustBeAtLeastTwoCharacters": "Název Zóny musí mít minimálně 2 znaky."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Setrvačnost musí být větší než 0."
+        }
+      },
+      "polygonDrawing": {
+        "snapPoints": {
+          "true": "Přichytávat body",
+          "false": "Nepřichytávat body"
+        },
+        "delete": {
+          "title": "Potvrdit Smazání",
+          "desc": "Opravdu chcete smazat {{type}}<em>{{name}}</em>?",
+          "success": "{{name}} bylo smazáno."
+        },
+        "error": {
+          "mustBeFinished": "Kreslení polygonu musí být před uložením dokončeno."
+        },
+        "reset": {
+          "label": "Vymazat všechny body"
+        },
+        "removeLastPoint": "Odebrat poslední bod"
+      },
+      "distance": {
+        "error": {
+          "mustBeFilled": "Pro použití odhadu rychlosti musí být vyplněna všechna pole pro vzdálenost.",
+          "text": "Vzdálenost musí být větší nebo rovna 0.1."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Doba setrvání musí být větší nebo rovna nule."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Prahová hodnota rychlosti musí být větší nebo rovna 0,1."
+        }
+      }
+    },
+    "objectMasks": {
+      "label": "Masky Objektu",
+      "documentTitle": "Upravit Masku Objektu - Frigate",
+      "desc": {
+        "documentation": "Dokumentace",
+        "title": "Masky filtrování objektů slouží k odfiltrování falešných detekcí daného typu objektu na základě jeho umístění."
+      },
+      "add": "Přidat Masku Objektu",
+      "edit": "Upravit Masku Objektu",
+      "objects": {
+        "title": "Objekty",
+        "allObjectTypes": "Všechny typy objektů",
+        "desc": "Typ objektu, na který se tato maska objektu vztahuje."
+      },
+      "context": "Masky filtrování objektů slouží k odfiltrování falešných poplachů konkrétního typu objektu na základě jeho umístění.",
+      "clickDrawPolygon": "Kliknutím nakreslete polygon do obrázku.",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} byl uložen. Restartujte Frigate pro aplikování změn.",
+          "noName": "Maska Objektu byla uložena. Restartujte Frigate pro aplikování změn."
+        }
+      },
+      "point_one": "{{count}} bod",
+      "point_few": "{{count}} body",
+      "point_other": "{{count}} bodů"
+    },
+    "motionMaskLabel": "Maska Detekce pohybu {{number}}",
+    "objectMaskLabel": "Maska Objektu {{number}} {{label}}"
+  },
+  "menu": {
+    "ui": "Uživatelské rozhraní",
+    "classification": "Klasifikace",
+    "cameras": "Nastavení kamery",
+    "masksAndZones": "Masky / Zóny",
+    "motionTuner": "Ladič detekce pohybu",
+    "debug": "Ladění",
+    "users": "Uživatelé",
+    "notifications": "Notifikace",
+    "frigateplus": "Frigate +",
+    "enrichments": "Obohacení"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Máte neuložené změny.",
+      "desc": "Přejete si uložit změny před pokračováním?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Žádná Kamera"
+  },
+  "general": {
+    "title": "Hlavní nastavení",
+    "liveDashboard": {
+      "title": "Živý Dashboard",
+      "automaticLiveView": {
+        "desc": "Při detekci aktivity se automaticky přepne na živý náhled kamery. Vypnutí této možnosti způsobí, že se statické snímky z kamery na ovládacím panelu Live aktualizují pouze jednou za minutu.",
+        "label": "Automatický živý náhled"
+      },
+      "playAlertVideos": {
+        "label": "Přehrát videa s výstrahou",
+        "desc": "Ve výchozím nastavení se nedávná upozornění na ovládacím panelu Živě přehrávají jako malá opakující se videa. Vypněte tuto možnost, chcete-li na tomto zařízení/prohlížeči zobrazovat pouze statický obrázek nedávných výstrah."
+      }
+    },
+    "storedLayouts": {
+      "title": "Uložené rozložení",
+      "desc": "Rozložení kamer ve skupině kamer lze přetáhnout nebo jim změnit velikost. Pozice jsou uloženy v místním úložišti vašeho prohlížeče.",
+      "clearAll": "Smazat všechna rozložení"
+    },
+    "cameraGroupStreaming": {
+      "title": "Nastavení streamování skupiny kamer",
+      "desc": "Nastavení streamování pro každou kameru je uloženo v místním uložišti vašeho prohlížeče.",
+      "clearAll": "Vymazat všechna nastavení streamování"
+    },
+    "recordingsViewer": {
+      "title": "Prohlížeč Nahrávek",
+      "defaultPlaybackRate": {
+        "label": "Výchozí Rychlost Přehrávání",
+        "desc": "Výchozí rychlost přehrávání pro nahrávky."
+      }
+    },
+    "calendar": {
+      "title": "Kalendář",
+      "firstWeekday": {
+        "label": "První den týdne",
+        "desc": "Den, kterým bude začínat týden v kalendáři kontrol.",
+        "sunday": "Neděle",
+        "monday": "Pondělí"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Vymazáno uložené rozvržení pro kameru {{cameraName}}",
+        "clearStreamingSettings": "Vymazány nastavení streamování pro všechny skupiny kamer."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Chyba mazání uloženého rozvržení: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Chyba mazání nastavení streamování: {{errorMessage}}"
+      }
+    }
+  },
+  "debug": {
+    "timestamp": {
+      "title": "Časové razítko",
+      "desc": "Překrýt obrázek časovým razítkem"
+    },
+    "regions": {
+      "title": "Regiony",
+      "desc": "Zobrazit rámeček oblasti zájmu odesílané detektoru objektů",
+      "tips": "<p><strong>Boxy oblastí zájmu</strong></p><br><p>Jasně zelené boxy budou překryty na oblastech zájmu ve snímku, které jsou odesílány detektoru objektů.</p>"
+    },
+    "title": "Ladit",
+    "detectorDesc": "Frigate používá vaše detektory {{detectors}} k detekci objektů ve streamu vašich kamer.",
+    "objectList": "Seznam Objektů",
+    "boundingBoxes": {
+      "title": "Ohraničující rámečky",
+      "desc": "Zobrazit ohraničující rámečky okolo sledovaných objektů",
+      "colors": {
+        "label": "Barvy Ohraničujících Rámečků Objektů",
+        "info": "<li>Při spuštění bude každému objektovému štítku přiřazena jiná barva.</li><li>Tenká tmavě modrá čára označuje, že objekt není v daném okamžiku detekován.</li><li>Tenká šedá čára znamená, že objekt je detekován jako nehybný.</li><li>Silná čára označuje, že objekt je aktuálně sledován pomocí automatického sledování (pokud je aktivováno).</li>"
+      }
+    },
+    "zones": {
+      "title": "Zóny",
+      "desc": "Zobrazit obrys všech definovaných zón"
+    },
+    "mask": {
+      "title": "Masky detekce pohybu",
+      "desc": "Zobrazit polygony masek detekce pohybu"
+    },
+    "debugging": "Ledění",
+    "desc": "Ladicí zobrazení ukazuje sledované objekty a jejich statistiky v reálném čase. Seznam objektů zobrazuje časově zpožděný přehled detekovaných objektů.",
+    "motion": {
+      "title": "Rámečky detekce pohybu",
+      "desc": "Zobrazit rámečky okolo oblastí, kde byl detekován pohyb",
+      "tips": "<p><strong>Boxy pohybu</strong></p><br><p>Červené boxy budou překryty na místech snímku, kde je právě detekován pohyb.</p>"
+    },
+    "noObjects": "Žádné objekty",
+    "objectShapeFilterDrawing": {
+      "title": "Kreslení Filtru Tvaru Objektu",
+      "desc": "Nakreslete na obrázek obdélník pro zobrazení informací o ploše a poměru stran",
+      "tips": "Povolte tuto možnost pro nakreslení obdélníku na obraz kamery, který zobrazí jeho plochu a poměr stran. Tyto hodnoty pak můžete použít pro nastavení parametrů tvarového filtru objektu ve vaší konfiguraci.",
+      "document": "Přečtěte si dokumentaci ",
+      "score": "Skóre",
+      "ratio": "Poměr",
+      "area": "Oblast"
+    }
+  },
+  "camera": {
+    "streams": {
+      "title": "Streamy",
+      "desc": "Dočasně zakáže kameru dokud Frigate nerestartuje. Deaktivace kamery zcela zastaví zpracování jejích streamů ve Frigate. Detekce, nahrávání ani ladění nebudou dostupné.<br/><em>Poznámka: Tímto nedojde k deaktivaci restreamů v go2rtc.</em>"
+    },
+    "review": {
+      "desc": "Dočasně povolte nebo zakažte upozornění a detekce pro tuto kameru dokud Frigate nerestartuje. Pokud jsou vypnuté, nebudou se vytvářet žádné nové položky k přezkoumání. ",
+      "detections": "Detekce ",
+      "title": "Revize",
+      "alerts": "Výstrahy "
+    },
+    "reviewClassification": {
+      "readTheDocumentation": "Přečtěte si dokumentaci",
+      "desc": "Frigate rozděluje položky k přezkoumání na Upozornění a Detekce. Ve výchozím nastavení jsou všechny objekty typu <em>osoba</em> a <em>auto</em> považovány za Upozornění. Kategorizaci těchto položek můžete upřesnit nastavením požadovaných zón.",
+      "title": "Přehled klasifikace",
+      "objectAlertsTips": "Všechny {{alertsLabels}} objekty na {{cameraName}} budou zobrazeny ve Výstrahách.",
+      "objectDetectionsTips": "Všechny objekty typu {{detectionsLabels}}, které nejsou na kameře {{cameraName}} zařazeny do kategorie, budou zobrazeny jako Detekce bez ohledu na to, ve které zóně se nacházejí.",
+      "zoneObjectDetectionsTips": {
+        "notSelectDetections": "Všechny objekty typu {{detectionsLabels}} detekované v zóně {{zone}} na kameře {{cameraName}}, které nejsou zařazeny jako Upozornění, budou zobrazeny jako Detekce – bez ohledu na to, ve které zóně se nacházejí.",
+        "text": "Všechny objekty typu {{detectionsLabels}}, které nejsou v zóně {{zone}} na kameře {{cameraName}} zařazeny do kategorie, budou zobrazeny jako Detekce.",
+        "regardlessOfZoneObjectDetectionsTips": "Všechny objekty {{detectionsLabels}}, které nejsou na kameře {{cameraName}} zařazeny do žádné kategorie, budou zobrazeny jako Detekce – bez ohledu na zónu, ve které se nacházejí."
+      },
+      "noDefinedZones": "Nejsou nastaveny žádné zóny pro tuto kameru.",
+      "zoneObjectAlertsTips": "Všechny {{alertsLabels}} objekty detekované v {{zone}} na {{cameraName}} budou zobrazeny ve Výstrahách.",
+      "unsavedChanges": "Neuložené nastavení revize klasifikace pro {{camera}}",
+      "selectAlertsZones": "Vybrat zóny pro Výstrahy",
+      "selectDetectionsZones": "Vybrat zóny pro Detekce",
+      "toast": {
+        "success": "Konfigurace Revizí Klasifikací byla uložena. Restartujte Frigate pro aplikování změn."
+      },
+      "limitDetections": "Omezit detekce pro specifické zóny"
+    },
+    "title": "Nastavení Kamery"
+  },
+  "notification": {
+    "notificationSettings": {
+      "documentation": "Přečtěte si dokumentaci",
+      "title": "Nastavení notifikací",
+      "desc": "Frigate může nativně odesílat push notifikace do vašeho zařízení, pokud běží v prohlížeči nebo je nainstalován jako PWA (progresivní webová aplikace)."
+    },
+    "notificationUnavailable": {
+      "documentation": "Přečtěte si dokumentaci",
+      "title": "Notifikace Nedostupné",
+      "desc": "Webové push notifikace vyžadují zabezpečený kontext (<code>https://…</code>). Jedná se o omezení prohlížeče. Pro použití notifikací přistupujte k Frigate přes zabezpečené připojení."
+    },
+    "cameras": {
+      "title": "Kamery",
+      "desc": "Vyberte kamery, pro které chcete povolit notifikace.",
+      "noCameras": "Žádné dostupné kamery"
+    },
+    "title": "Notifikace",
+    "email": {
+      "placeholder": "např. example@email.com",
+      "title": "Email",
+      "desc": "Je vyžadována platná e-mailová adresa, která bude použita k upozornění v případě problémů se službou push notifikací."
+    },
+    "registerDevice": "Registrovat Toto Zařízení",
+    "deviceSpecific": "Nastavení Specifická pro Zařízení",
+    "unregisterDevice": "Odregistrovat Toto Zařízení",
+    "sendTestNotification": "Poslat testovací notifikaci",
+    "unsavedRegistrations": "Neuložené přihlášky k Notifikacím",
+    "unsavedChanges": "Neuložené změny Notifikací",
+    "globalSettings": {
+      "desc": "Dočasně pozastavit notifikace pro vybrané kamery na všech registrovaných zařízeních.",
+      "title": "Globální nastavení"
+    },
+    "active": "Notifikace Aktivní",
+    "suspendTime": {
+      "suspend": "Pozastavit",
+      "12hours": "Pozastavit na 12 hodin",
+      "24hours": "Pozastavit na 24 hodin",
+      "untilRestart": "Pozastavit do restartu",
+      "5minutes": "Pozastavit na 5 minut",
+      "10minutes": "Pozastavit na 10 minut",
+      "30minutes": "Pozastavit na 30 minut",
+      "1hour": "Pozastavit na 1 hodinu"
+    },
+    "toast": {
+      "error": {
+        "registerFailed": "Nepodařilo se uložit registraci notifikací."
+      },
+      "success": {
+        "registered": "Notifikace byly úspěšně zaregistrovány. Pro odesílání notifikací (včetně testovací) je nutné Frigate restartovat.",
+        "settingSaved": "Nastavení notifikací bylo uloženo."
+      }
+    },
+    "cancelSuspension": "Zrušit Pozastavení",
+    "suspended": "Notifikace pozastaveny {{time}}"
+  },
+  "users": {
+    "dialog": {
+      "form": {
+        "password": {
+          "strength": {
+            "weak": "Slabé",
+            "medium": "Střední",
+            "strong": "Silné",
+            "veryStrong": "Velmi Silné",
+            "title": "Síla hesla: "
+          },
+          "match": "Hesla souhlasí",
+          "notMatch": "Hesla nesouhlasí",
+          "title": "Heslo",
+          "placeholder": "Vložit heslo",
+          "confirm": {
+            "title": "Potvrdit heslo",
+            "placeholder": "Potvrdit heslo"
+          }
+        },
+        "newPassword": {
+          "placeholder": "Vložte nové heslo",
+          "title": "Nové Heslo",
+          "confirm": {
+            "placeholder": "Zopakujte nové heslo"
+          }
+        },
+        "usernameIsRequired": "Uživatelské jméno je nutné",
+        "user": {
+          "title": "Uživatelské jméno",
+          "desc": "Povolena jsou pouze písmena, čísla, tečky a podtržítka.",
+          "placeholder": "Vložte uživatelské jméno"
+        },
+        "passwordIsRequired": "Je vyžadováno heslo"
+      },
+      "createUser": {
+        "title": "Vytvořit nového uživatele",
+        "desc": "Přidejte nový uživatelský účet a zadejte roli pro určení přístupu k jednotlivým částem uživatelského rozhraní Frigate.",
+        "usernameOnlyInclude": "Uživatelské jméno smí obsahovat pouze písmena, čísla, . nebo _",
+        "confirmPassword": "Potvrďte prosím heslo"
+      },
+      "deleteUser": {
+        "title": "Smazat Uživatele",
+        "desc": "Tuto akci nelze vrátit zpět. Uživatelský účet bude trvale smazán a veškerá s ním spojená data budou odstraněna.",
+        "warn": "Opravdu chcete smazat <strong>{{username}}</strong>?"
+      },
+      "changeRole": {
+        "roleInfo": {
+          "intro": "Vyberte odpovídající roli pro tohoto uživatele:",
+          "admin": "Správce",
+          "adminDesc": "Plný přístup ke všem funkcím.",
+          "viewer": "Divák",
+          "viewerDesc": "Omezení pouze na Živé dashboardy, Revize, Průzkumníka a Exporty."
+        },
+        "title": "Změnit Roli Uživatele",
+        "desc": "Aktualizovat oprávnění pro <strong>{{username}}</strong>",
+        "select": "Vyberte roli"
+      },
+      "passwordSetting": {
+        "updatePassword": "Aktualizovat heslo pro uživatele {{username}}",
+        "setPassword": "Nastavit Heslo",
+        "desc": "Vytvořte silné heslo pro zabezpečení tohoto účtu.",
+        "cannotBeEmpty": "Heslo nemůže být prázdné",
+        "doNotMatch": "Hesla nesouhlasí"
+      }
+    },
+    "table": {
+      "username": "Uživatelské jméno",
+      "actions": "Akce",
+      "noUsers": "Žádní uživatelé nebyli nalezeni.",
+      "changeRole": "Změnit roli uživatele",
+      "password": "Heslo",
+      "deleteUser": "Smazat uživatele",
+      "role": "Role"
+    },
+    "updatePassword": "Aktualizovat heslo",
+    "toast": {
+      "success": {
+        "createUser": "Uživatel {{user}} úspěšně vytvořen",
+        "deleteUser": "Uživatel {{user}} úspěšně odebrán",
+        "updatePassword": "Heslo úspěšně aktualizováno.",
+        "roleUpdated": "Role pro {{user}} aktualizována"
+      },
+      "error": {
+        "setPasswordFailed": "Chyba uložení hesla: {{errorMessage}}",
+        "createUserFailed": "Chyba vytvoření uživatele: {{errorMessage}}",
+        "deleteUserFailed": "Chyba při mazání uživatele: {{errorMessage}}",
+        "roleUpdateFailed": "Chyba při aktualizaci role: {{errorMessage}}"
+      }
+    },
+    "management": {
+      "desc": "Spravujte uživatelské účty této instance Frigate.",
+      "title": "Správa Uživatelů"
+    },
+    "addUser": "Přidat uživatele",
+    "title": "Uživatelé"
+  },
+  "motionDetectionTuner": {
+    "unsavedChanges": "Neuložené změny Ladiče Detekce Pohybu {{camera}}",
+    "improveContrast": {
+      "title": "Zlepšit Kontrast",
+      "desc": "Zlepšit kontrast pro tmavé scény <em>Výchozí: ON</em>"
+    },
+    "toast": {
+      "success": "Nastavení detekce pohybu bylo uloženo."
+    },
+    "title": "Ladič Detekce Pohybu",
+    "desc": {
+      "documentation": "Přečtěte si příručku Ladiče Detekce Pohybu",
+      "title": "Frigate používá detekci pohybu jako první kontrolu k ověření, zda se ve snímku děje něco, co stojí za další analýzu pomocí detekce objektů."
+    },
+    "Threshold": {
+      "title": "Práh",
+      "desc": "Prahová hodnota určuje, jak velká změna jasu pixelu je nutná, aby byl považován za pohyb. <em>Výchozí: 30</em>"
+    },
+    "contourArea": {
+      "title": "Obrysová Oblast",
+      "desc": "Hodnota plochy obrysu se používá k rozhodnutí, které skupiny změněných pixelů se kvalifikují jako pohyb. <em>Výchozí: 10</em>"
+    }
+  },
+  "enrichments": {
+    "title": "Nastavení obohacení",
+    "faceRecognition": {
+      "title": "Rozpoznání Obličeje",
+      "desc": "Rozpoznávání obličeje umožňuje přiřadit lidem jména a po rozpoznání jejich obličeje. Frigate přiřadí jméno osoby jako podštítek. Tyto informace jsou zahrnuty v uživatelském rozhraní, filtrech a také v oznámeních.",
+      "readTheDocumentation": "Přečtěte si Dokumentaci",
+      "modelSize": {
+        "label": "Velikost Modelu",
+        "desc": "Velikost modelu použitého pro rozpoznání obličeje.",
+        "small": {
+          "title": "malý",
+          "desc": "Použití metody <em>malý</em> využívá model vkládání obličejů FaceNet, který efektivně běží na většině procesorů."
+        },
+        "large": {
+          "title": "velký",
+          "desc": "Použití metody <em>velký</em> využívá model vkládání obličejů ArcFace a v případě potřeby se automaticky spustí na GPU."
+        }
+      }
+    },
+    "semanticSearch": {
+      "reindexNow": {
+        "confirmDesc": "Jste si jisti, že chcete znovu indexovat všechny vložené sledované objekty? Tento proces poběží na pozadí, ale může maximálně zatížit váš procesor a trvat poměrně dlouho. Průběh můžete sledovat na stránce Prozkoumat.",
+        "confirmTitle": "Potvrdit Reindexování",
+        "label": "Přeindexovat nyní",
+        "desc": "Reindexování regeneruje vložení pro všechny sledované objekty. Tento proces běží na pozadí a může maximálně zatížit váš procesor a trvat poměrně dlouho v závislosti na počtu sledovaných objektů.",
+        "confirmButton": "Přeindexovat",
+        "success": "Přeindexování úspěšně spuštěno.",
+        "alreadyInProgress": "Přeindexování je již spuštěno.",
+        "error": "Chyba spuštění přeindexování: {{errorMessage}}"
+      },
+      "title": "Sémantické Vyhledávání",
+      "desc": "Sémantické vyhledávání ve Frigate umožňuje najít sledované objekty v rámci vašich zkontrolovaných položek pomocí samotného obrázku, uživatelem definovaného textového popisu nebo automaticky generovaného popisu.",
+      "readTheDocumentation": "Přečtěte si Dokumentaci",
+      "modelSize": {
+        "label": "Velikost Modelu",
+        "desc": "Velikost modelu použitého pro vkládání sémantického vyhledávání.",
+        "small": {
+          "title": "malý",
+          "desc": "Použitím <em>malého</em> modelu se využívá kvantizovaná verze modelu, která spotřebovává méně RAM a běží rychleji na CPU s velmi zanedbatelným rozdílem v kvalitě vkládání."
+        },
+        "large": {
+          "title": "velký",
+          "desc": "Použití parametru <em>velký</em> využívá celý model Jina a v případě potřeby se automaticky spustí na GPU."
+        }
+      }
+    },
+    "birdClassification": {
+      "desc": "Klasifikace ptáků identifikuje známé ptáky pomocí kvantovaného modelu Tensorflow. Po rozpoznání známého ptáka se jeho běžný název přidá jako sub_label. Tato informace je zahrnuta v uživatelském rozhraní, filtrech a také v oznámeních.",
+      "title": "Klasifikace Ptáků"
+    },
+    "unsavedChanges": "Neuložené změny nastavení Obohacení",
+    "licensePlateRecognition": {
+      "title": "Rozpoznání SPZ",
+      "desc": "Frigate dokáže rozpoznávat SPZ vozidel a automaticky přidávat detekované znaky do pole recognized_license_plate nebo název známé SPZ jako sub_label k objektům typu auto. Běžným případem použití může být čtení SPZ aut vjíždějících na příjezdovou cestu nebo aut projíždějících po ulici.",
+      "readTheDocumentation": "Přečtěte si Dokumentaci"
+    },
+    "restart_required": "Nutný restart (nastavení Obohacení změněno)",
+    "toast": {
+      "success": "Nastavení Obohacení uloženo. Restartujte Frigate aby se změny aplikovaly.",
+      "error": "Chyba ukládání změn konfigurace: {{errorMessage}}"
+    }
+  }
+}

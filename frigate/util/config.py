@@ -4,7 +4,7 @@ import asyncio
 import logging
 import os
 import shutil
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from ruamel.yaml import YAML
 
@@ -13,8 +13,8 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = "0.15-1"
-DEFAULT_CONFIG_FILE = "/config/config.yml"
+CURRENT_CONFIG_VERSION = "0.16-0"
+DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
 
 
 def find_config_file() -> str:
@@ -37,7 +37,7 @@ def migrate_frigate_config(config_file: str):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
     with open(config_file, "r") as f:
-        config: dict[str, dict[str, any]] = yaml.load(f)
+        config: dict[str, dict[str, Any]] = yaml.load(f)
 
     if config is None:
         logger.error(f"Failed to load config at {config_file}")
@@ -84,10 +84,17 @@ def migrate_frigate_config(config_file: str):
             yaml.dump(new_config, f)
         previous_version = "0.15-1"
 
+    if previous_version < "0.16-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.16-0...")
+        new_config = migrate_016_0(config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
+        previous_version = "0.16-0"
+
     logger.info("Finished frigate config migration...")
 
 
-def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+def migrate_014(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.14"""
     # migrate record.events.required_zones to review.alerts.required_zones
     new_config = config.copy()
@@ -135,7 +142,7 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         del new_config["rtmp"]
 
     for name, camera in config.get("cameras", {}).items():
-        camera_config: dict[str, dict[str, any]] = camera.copy()
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
         required_zones = (
             camera_config.get("record", {}).get("events", {}).get("required_zones", [])
         )
@@ -174,7 +181,7 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
     return new_config
 
 
-def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+def migrate_015_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.15-0"""
     new_config = config.copy()
 
@@ -225,9 +232,9 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
         del new_config["record"]["events"]
 
     for name, camera in config.get("cameras", {}).items():
-        camera_config: dict[str, dict[str, any]] = camera.copy()
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
 
-        record_events: dict[str, any] = camera_config.get("record", {}).get("events")
+        record_events: dict[str, Any] = camera_config.get("record", {}).get("events")
 
         if record_events:
             alerts_retention = {"retain": {}}
@@ -274,7 +281,7 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
     return new_config
 
 
-def migrate_015_1(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+def migrate_015_1(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.15-1"""
     new_config = config.copy()
 
@@ -286,6 +293,50 @@ def migrate_015_1(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
             del new_config["detectors"][detector]["model"]
 
     new_config["version"] = "0.15-1"
+    return new_config
+
+
+def migrate_016_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Handle migrating frigate config to 0.16-0"""
+    new_config = config.copy()
+
+    # migrate config that does not have detect -> enabled explicitly set to have it enabled
+    if new_config.get("detect", {}).get("enabled") is None:
+        detect_config = new_config.get("detect", {})
+        detect_config["enabled"] = True
+        new_config["detect"] = detect_config
+
+    for name, camera in config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
+
+        live_config = camera_config.get("live", {})
+        if "stream_name" in live_config:
+            # Migrate from live -> stream_name to live -> streams -> dict
+            stream_name = live_config["stream_name"]
+            live_config["streams"] = {stream_name: stream_name}
+
+            del live_config["stream_name"]
+
+            camera_config["live"] = live_config
+
+        # add another value to movement_weights for autotracking cams
+        onvif_config = camera_config.get("onvif", {})
+        if "autotracking" in onvif_config:
+            movement_weights = (
+                camera_config.get("onvif", {})
+                .get("autotracking")
+                .get("movement_weights", {})
+            )
+
+            if movement_weights and len(movement_weights.split(",")) == 5:
+                onvif_config["autotracking"]["movement_weights"] = (
+                    movement_weights + ", 0"
+                )
+            camera_config["onvif"] = onvif_config
+
+        new_config["cameras"][name] = camera_config
+
+    new_config["version"] = "0.16-0"
     return new_config
 
 
@@ -345,6 +396,36 @@ def get_relative_coordinates(
         return mask
 
     return mask
+
+
+def convert_area_to_pixels(
+    area_value: Union[int, float], frame_shape: tuple[int, int]
+) -> int:
+    """
+    Convert area specification to pixels.
+
+    Args:
+        area_value: Area value (pixels or percentage)
+        frame_shape: Tuple of (height, width) for the frame
+
+    Returns:
+        Area in pixels
+    """
+    # If already an integer, assume it's in pixels
+    if isinstance(area_value, int):
+        return area_value
+
+    # Check if it's a percentage
+    if isinstance(area_value, float):
+        if 0.000001 <= area_value <= 0.99:
+            frame_area = frame_shape[0] * frame_shape[1]
+            return max(1, int(frame_area * area_value))
+        else:
+            raise ValueError(
+                f"Percentage must be between 0.000001 and 0.99, got {area_value}"
+            )
+
+    raise TypeError(f"Unexpected type for area: {type(area_value)}")
 
 
 class StreamInfoRetriever:

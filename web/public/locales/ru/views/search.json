@@ -1,0 +1,74 @@
+{
+  "savedSearches": "Сохраненные поиски",
+  "button": {
+    "clear": "Очистить поиск",
+    "save": "Сохранить поиск",
+    "delete": "Удалить сохранённый поиск",
+    "filterActive": "Активные фильтры",
+    "filterInformation": "Информация о фильтре"
+  },
+  "search": "Поиск",
+  "searchFor": "Поиск {{inputValue}}",
+  "trackedObjectId": "ID отслеживаемого объекта",
+  "filter": {
+    "label": {
+      "cameras": "Камеры",
+      "zones": "Зоны",
+      "sub_labels": "Дополнительные метки",
+      "search_type": "Тип поиска",
+      "time_range": "Временной диапазон",
+      "before": "До",
+      "after": "После",
+      "min_score": "Мин. оценка",
+      "max_score": "Макс. оценка",
+      "min_speed": "Мин. скорость",
+      "recognized_license_plate": "Распознанный номерной знак",
+      "max_speed": "Макс. скорость",
+      "has_clip": "Есть клип",
+      "has_snapshot": "Есть снимок",
+      "labels": "Метки"
+    },
+    "searchType": {
+      "thumbnail": "Миниатюра",
+      "description": "Описание"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Дата 'до' должна быть позже, чем дата 'после'.",
+        "afterDatebeEarlierBefore": "Дата 'после' должна быть раньше, чем дата 'до'.",
+        "minScoreMustBeLessOrEqualMaxScore": "Значение 'min_score' должно быть меньше или равно значению 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Значение 'max_score' должно быть больше или равно значению 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Значение 'min_speed' должно быть меньше или равно значению 'max_speed'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Значение 'max_speed' должно быть больше или равно значению 'min_speed'."
+      }
+    },
+    "tips": {
+      "title": "Как использовать текстовые фильтры",
+      "desc": {
+        "text": "Фильтры помогают уточнить результаты поиска. Вот как их использовать в поле ввода:",
+        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Введите название фильтра, затем двоеточие (например, \"камеры:\").</li><li>Выберите значение из подсказок или введите своё.</li><li>Используйте несколько фильтров, добавляя их через пробел.</li><li>Фильтры даты (before:/after:) используют формат <em>{{DateFormat}}</em>.</li><li>Временной диапазон — в формате <em>{{exampleTime}}</em>.</li><li>Удаляйте фильтры нажатием на «×» рядом с ними.</li></ul>",
+        "example": "Пример: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
+        "step1": "Введите имя ключа фильтра с двоеточием (например, \"камеры:\").",
+        "step5": "Фильтр временного диапазона использует формат {{exampleTime}}.",
+        "exampleLabel": "Пример:",
+        "step2": "Выберите значение из предложенных или введите свое собственное.",
+        "step3": "Вы можете применять несколько фильтров, указывая их подряд через пробел.",
+        "step6": "Удаляйте фильтры, нажав на значок \"x\" рядом с ними.",
+        "step4": "Фильтры по дате (до: и после:) используют формат {{DateFormat}}."
+      }
+    },
+    "header": {
+      "currentFilterType": "Значения фильтров",
+      "noFilters": "Фильтры",
+      "activeFilters": "Активные фильтры"
+    }
+  },
+  "similaritySearch": {
+    "title": "Поиск похожего",
+    "active": "Активен поиск похожего",
+    "clear": "Очистить поиск похожего"
+  },
+  "placeholder": {
+    "search": "Поиск…"
+  }
+}

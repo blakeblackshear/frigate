@@ -1,0 +1,126 @@
+{
+  "labels": {
+    "all": {
+      "short": "Etiquetes",
+      "title": "Totes les etiquetes"
+    },
+    "label": "Etiquetes",
+    "count_one": "{{count}} Etiqueta",
+    "count_other": "{{count}} Etiquetes"
+  },
+  "filter": "Filtre",
+  "zones": {
+    "label": "Zones",
+    "all": {
+      "title": "Totes les zones",
+      "short": "Zones"
+    }
+  },
+  "dates": {
+    "all": {
+      "title": "Totes les dates",
+      "short": "Dates"
+    },
+    "selectPreset": "Selecciona un preajust…"
+  },
+  "more": "Més filtres",
+  "reset": {
+    "label": "Restablir filtres als valors predeterminats"
+  },
+  "timeRange": "Rang de temps",
+  "subLabels": {
+    "label": "Subetiquetes",
+    "all": "Totes les subetiquetes"
+  },
+  "score": "Puntuació",
+  "estimatedSpeed": "Velocitat estimada ({{unit}})",
+  "features": {
+    "label": "Característiques",
+    "hasSnapshot": "Té una instantània",
+    "hasVideoClip": "Té un clip de vídeo",
+    "submittedToFrigatePlus": {
+      "label": "Enviat a Frigate+",
+      "tips": "Primer heu de filtrar els objectes de seguiment que tenen una instantània.<br /><br />Els objectes de seguiment sense una instantània no es poden enviar a Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Ordenar",
+    "dateAsc": "Data (Ascendent)",
+    "dateDesc": "Data (Descendent)",
+    "scoreAsc": "Puntuació de l'objecte (Ascendent)",
+    "scoreDesc": "Puntuació de l'objecte (Descendent)",
+    "speedAsc": "Velocitat estimada (Ascendent)",
+    "speedDesc": "Velocitat estimada (descendent)",
+    "relevance": "Rellevància"
+  },
+  "explore": {
+    "settings": {
+      "defaultView": {
+        "summary": "Resum",
+        "unfilteredGrid": "Quadrícula sense filtrar",
+        "title": "Vista per defecte",
+        "desc": "Quan no s'ha seleccionat cap filtre, mostreu un resum dels objectes de seguiment més recents per etiqueta, o visualitzeu una quadrícula sense filtrar."
+      },
+      "gridColumns": {
+        "title": "Columnes de la quadrícula",
+        "desc": "Seleccionar el nombre de columnes a la vista de quadrícula."
+      },
+      "searchSource": {
+        "label": "Font de cerca",
+        "options": {
+          "description": "Descripció",
+          "thumbnailImage": "Imatge en miniatura"
+        },
+        "desc": "Trieu si voleu cercar les miniatures o les descripcions dels objectes de seguiment."
+      },
+      "title": "Configuració"
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Seleccionr a una data per filtrar"
+      }
+    }
+  },
+  "logSettings": {
+    "disableLogStreaming": "Deshabilitar la transmissió de registres",
+    "allLogs": "Tots els registres",
+    "loading": {
+      "desc": "Quan el panell de registre es desplaça cap a la part inferior, els registres nous apareixen automàticament a mesura que s'afegeixen.",
+      "title": "Carregant"
+    },
+    "label": "Filtrar nivell de registre",
+    "filterBySeverity": "Filtrar registre per gravetat"
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmar la supressió",
+    "desc": "En suprimir aquests {{objectLength}} objectes de seguiment, s'elimina la instatània, les incrustacions desades, i els registres de temps de vida. Les imatges gravades d'aquests objectes <em>NO</em> es suprimiran de l'historial. <br/><br/>Està segur que vol continuar?<br/><br/>Manteniu la tecla <em>Shift</em> per ometre aquest diàleg en el futur.",
+    "toast": {
+      "success": "Els objectes amb seguiment s'han suprimit correctament.",
+      "error": "No s'han pogut suprimir els objectes de seguiment: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtrar per màscara de zona"
+  },
+  "recognizedLicensePlates": {
+    "title": "Matrícules reconegudes",
+    "loadFailed": "No s'han pogut carregar les matrícules reconegudes.",
+    "loading": "Carregant les matrícules reconegudes…",
+    "placeholder": "Escriu per a buscar matrícules…",
+    "noLicensePlatesFound": "No s'han trobat matrícules.",
+    "selectPlatesFromList": "Seleccioni una o més matrícules de la llista."
+  },
+  "cameras": {
+    "label": "Filtre de càmeres",
+    "all": {
+      "title": "Totes les càmeres",
+      "short": "Càmeres"
+    }
+  },
+  "review": {
+    "showReviewed": "Mostrar els revisats"
+  },
+  "motion": {
+    "showMotionOnly": "Mostar només el moviment"
+  }
+}

@@ -1,9 +1,21 @@
-import { useEffect, useCallback, useMemo, useRef, RefObject } from "react";
-import EventSegment from "./EventSegment";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  RefObject,
+  useCallback,
+} from "react";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
-import { ReviewSegment, ReviewSeverity } from "@/types/review";
+import {
+  ReviewSegment,
+  ReviewSeverity,
+  TimelineZoomDirection,
+} from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
-import scrollIntoView from "scroll-into-view-if-needed";
+import {
+  VirtualizedEventSegments,
+  VirtualizedEventSegmentsRef,
+} from "./VirtualizedEventSegments";
 
 export type EventReviewTimelineProps = {
   segmentDuration: number;
@@ -27,6 +39,8 @@ export type EventReviewTimelineProps = {
   timelineRef?: RefObject<HTMLDivElement>;
   contentRef: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
+  isZooming: boolean;
+  zoomDirection: TimelineZoomDirection;
   dense?: boolean;
 };
 
@@ -52,10 +66,13 @@ export function EventReviewTimeline({
   timelineRef,
   contentRef,
   onHandlebarDraggingChange,
+  isZooming,
+  zoomDirection,
   dense = false,
 }: EventReviewTimelineProps) {
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
+  const virtualizedSegmentsRef = useRef<VirtualizedEventSegmentsRef>(null);
 
   const timelineDuration = useMemo(
     () => timelineStart - timelineEnd,
@@ -73,79 +90,27 @@ export function EventReviewTimeline({
     [timelineStart, alignStartDateToTimeline],
   );
 
-  // Generate segments for the timeline
-  const generateSegments = useCallback(() => {
+  // Generate segment times for the timeline
+  const segmentTimes = useMemo(() => {
     const segmentCount = Math.ceil(timelineDuration / segmentDuration);
-
-    return Array.from({ length: segmentCount }, (_, index) => {
-      const segmentTime = timelineStartAligned - index * segmentDuration;
-
-      return (
-        <EventSegment
-          key={segmentTime + severityType}
-          events={events}
-          segmentDuration={segmentDuration}
-          segmentTime={segmentTime}
-          timestampSpread={timestampSpread}
-          showMinimap={showMinimap}
-          minimapStartTime={minimapStartTime}
-          minimapEndTime={minimapEndTime}
-          severityType={severityType}
-          contentRef={contentRef}
-          setHandlebarTime={setHandlebarTime}
-          dense={dense}
-        />
-      );
-    });
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    segmentDuration,
-    timestampSpread,
-    timelineStart,
-    timelineDuration,
-    showMinimap,
-    minimapStartTime,
-    minimapEndTime,
-    events,
-  ]);
-
-  const segments = useMemo(
-    () => generateSegments(),
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      segmentDuration,
-      timestampSpread,
-      timelineStart,
-      timelineDuration,
-      showMinimap,
-      minimapStartTime,
-      minimapEndTime,
-      events,
-    ],
-  );
+    return Array.from(
+      { length: segmentCount },
+      (_, index) => timelineStartAligned - index * segmentDuration,
+    );
+  }, [timelineDuration, segmentDuration, timelineStartAligned]);
 
   useEffect(() => {
     if (
-      selectedTimelineRef.current &&
-      segments &&
       visibleTimestamps &&
-      visibleTimestamps?.length > 0 &&
-      !showMinimap
+      visibleTimestamps.length > 0 &&
+      !showMinimap &&
+      virtualizedSegmentsRef.current
     ) {
       const alignedVisibleTimestamps = visibleTimestamps.map(
         alignStartDateToTimeline,
       );
-      const element = selectedTimelineRef.current?.querySelector(
-        `[data-segment-id="${Math.max(...alignedVisibleTimestamps)}"]`,
-      );
-      if (element) {
-        scrollIntoView(element, {
-          scrollMode: "if-needed",
-          behavior: "smooth",
-        });
-      }
+
+      scrollToSegment(Math.max(...alignedVisibleTimestamps), true);
     }
     // don't scroll when segments update from unreviewed -> reviewed
     // we know that these deps are correct
@@ -155,7 +120,21 @@ export function EventReviewTimeline({
     showMinimap,
     alignStartDateToTimeline,
     visibleTimestamps,
+    segmentDuration,
   ]);
+
+  const scrollToSegment = useCallback(
+    (segmentTime: number, ifNeeded?: boolean, behavior?: ScrollBehavior) => {
+      if (virtualizedSegmentsRef.current) {
+        virtualizedSegmentsRef.current.scrollToSegment(
+          segmentTime,
+          ifNeeded,
+          behavior,
+        );
+      }
+    },
+    [],
+  );
 
   return (
     <ReviewTimeline
@@ -174,8 +153,27 @@ export function EventReviewTimeline({
       setExportStartTime={setExportStartTime}
       setExportEndTime={setExportEndTime}
       dense={dense}
+      segments={segmentTimes}
+      scrollToSegment={scrollToSegment}
+      isZooming={isZooming}
+      zoomDirection={zoomDirection}
     >
-      {segments}
+      <VirtualizedEventSegments
+        ref={virtualizedSegmentsRef}
+        timelineRef={selectedTimelineRef}
+        segments={segmentTimes}
+        events={events}
+        segmentDuration={segmentDuration}
+        timestampSpread={timestampSpread}
+        showMinimap={showMinimap}
+        minimapStartTime={minimapStartTime}
+        minimapEndTime={minimapEndTime}
+        severityType={severityType}
+        contentRef={contentRef}
+        setHandlebarTime={setHandlebarTime}
+        dense={dense}
+        alignStartDateToTimeline={alignStartDateToTimeline}
+      />
     </ReviewTimeline>
   );
 }

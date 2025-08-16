@@ -1,0 +1,13 @@
+{
+  "timeline.aria": "Избери хронология",
+  "timeline": "Хронология",
+  "calendarFilter": {
+    "last24Hours": "Последните 24 часа"
+  },
+  "events": {
+    "label": "Събития",
+    "aria": "Избери събития",
+    "noFoundForTimePeriod": "Няма намерени събития за този времеви период."
+  },
+  "allCameras": "Всички камери"
+}

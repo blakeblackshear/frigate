@@ -1,0 +1,114 @@
+{
+  "restart": {
+    "title": "Estàs segur que vols reiniciar Frigate?",
+    "button": "Reiniciar",
+    "restarting": {
+      "title": "Frigate s'està reiniciant",
+      "content": "Aquesta pàgina es tornarà a carregar d'aquí a {{countdown}} segons.",
+      "button": "Forçar la recàrrega ara"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Enviar a Frigate+",
+        "desc": "Els objectes a les ubicacions que voleu evitar no són falsos positius. Enviar-los com a falsos positius confondrà el model."
+      },
+      "review": {
+        "question": {
+          "label": "Confirmar aquesta etiqueta per a Frigate Plus",
+          "ask_a": "Aquest objecte és un <code>{{label}}</code>?",
+          "ask_an": "Aquest objecte és un <code>{{label}}</code>?",
+          "ask_full": "Aquest objecte és un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Enviat"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Veure a l'historial"
+    }
+  },
+  "export": {
+    "time": {
+      "custom": "Personalitzat",
+      "fromTimeline": "Seleccionar a la línia de temps",
+      "lastHour_one": "L'última hora",
+      "lastHour_many": "Les últimes {{count}} hores",
+      "lastHour_other": "Les últimes {{count}} hores",
+      "start": {
+        "title": "Hora d'inci",
+        "label": "Seleccionar una hora d'inici"
+      },
+      "end": {
+        "title": "Hora de finalització",
+        "label": "Seleccionar una hora de finalització"
+      }
+    },
+    "name": {
+      "placeholder": "Nom de l'exportació"
+    },
+    "select": "Seleccionar",
+    "export": "Exportar",
+    "selectOrExport": "Seleccionar o exportar",
+    "toast": {
+      "success": "Exportació inciada amb èxit. Pots veure l'arxiu a la carpeta /exports.",
+      "error": {
+        "endTimeMustAfterStartTime": "L'hora de finalització ha de ser posterior a l'hora d'inici",
+        "noVaildTimeSelected": "No s'ha seleccionat un rang de temps vàlid",
+        "failed": "No s'ha pogut inciar l'exportació: {{error}}"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Guardar exportació",
+      "previewExport": "Previsualitzar exportació"
+    }
+  },
+  "streaming": {
+    "label": "Transmissió",
+    "restreaming": {
+      "disabled": "La retransmissió no està habilitada per a aquesta càmera.",
+      "desc": {
+        "title": "Configurar go2rtc per a àudio i opcions addicionals de visualització en directe per a aquesta càmera.",
+        "readTheDocumentation": "Llegir la documentació"
+      }
+    },
+    "showStats": {
+      "label": "Mostrar les estadístiques de la transmissió",
+      "desc": "Activa aquesta opció per a mostrar les estadístiques de la transmissió superposades a la imatge de la càmera."
+    },
+    "debugView": "Vista de depuració"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Desar la cerca",
+      "desc": "Propocioneu un nom per a aquesta cerca desada.",
+      "placeholder": "Introduïu un nom per a la vostra cerca",
+      "success": "La cerca {{searchName}} ha sigut desada.",
+      "overwrite": "{{searchName}} ja existeix. Si deseu, es sobreescriurà el valor existent.",
+      "button": {
+        "save": {
+          "label": "Desar aquesta cerca"
+        }
+      }
+    }
+  },
+  "recording": {
+    "button": {
+      "deleteNow": "Suprimir ara",
+      "export": "Exportar",
+      "markAsReviewed": "Marcar com a revisat"
+    },
+    "confirmDelete": {
+      "title": "Confirmar la supressió",
+      "desc": {
+        "selected": "Esteu segurs que voleu suprimir tots els vídeos enregistrats associats a aquest element de revisió?<br /><br />Manteniu premuda la tecla <em>Maj</em> per ometre aquest diàleg en el futur."
+      },
+      "toast": {
+        "success": "Els enregistraments de vídeo associats als elements de revisió seleccionats s’han suprimit correctament.",
+        "error": "No s'ha pogut suprimir: {{error}}"
+      }
+    }
+  }
+}

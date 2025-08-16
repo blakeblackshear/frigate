@@ -1,0 +1,13 @@
+{
+  "noRecordingsFoundForThisTime": "Nije pronađen nijedan snimak za ovo vreme",
+  "noPreviewFound": "Pregled nije pronađen",
+  "noPreviewFoundFor": "Nije pronađen pregled za {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Pošaljite ovaj frejm na Frigate+?",
+    "submit": "Pošalji"
+  },
+  "livePlayerRequiredIOSVersion": "Za ovaj tip prenosa uživo potreban je iOS 17.1 ili noviji.",
+  "streamOffline": {
+    "title": "Strim je oflajn"
+  }
+}

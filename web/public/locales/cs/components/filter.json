@@ -1,0 +1,126 @@
+{
+  "filter": "Filtrovat",
+  "labels": {
+    "label": "Štítky",
+    "all": {
+      "title": "Všechny popisky",
+      "short": "Popisky"
+    },
+    "count_one": "{{count}} Štítek",
+    "count_other": "{{count}} Štítků"
+  },
+  "dates": {
+    "selectPreset": "Vyberte předvolbu…",
+    "all": {
+      "title": "Všechny datumy",
+      "short": "Datumy"
+    }
+  },
+  "more": "Víc filtrů",
+  "reset": {
+    "label": "Resetovat filtry do výchozích hodnot"
+  },
+  "timeRange": "Časový rozsah",
+  "score": "Skóre",
+  "subLabels": {
+    "all": "Všechny podružné štítky",
+    "label": "Podružné Štítky"
+  },
+  "features": {
+    "label": "Funkce",
+    "hasSnapshot": "Má snímek",
+    "hasVideoClip": "Má videoklip",
+    "submittedToFrigatePlus": {
+      "label": "Odesláno do Frigate+",
+      "tips": "Nejprve musíte filtrovat sledované objekty, které mají snímek.<br /><br />Sledované objekty bez snímku nelze odeslat do Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Seřadit",
+    "relevance": "Závažnost",
+    "dateAsc": "Datum (Vzestupně)",
+    "dateDesc": "Datum (Sestupně)",
+    "scoreAsc": "Skóre objektu (Vzestupně)",
+    "scoreDesc": "Skóre objektu (Sestupně)",
+    "speedAsc": "Odhadovaná rychlost (Vzestupně)",
+    "speedDesc": "Odhadovaná rychlost (Sestupně)"
+  },
+  "motion": {
+    "showMotionOnly": "Pouze zpomalené záběry"
+  },
+  "explore": {
+    "settings": {
+      "title": "Nastavení",
+      "searchSource": {
+        "label": "Hledat zdroj",
+        "options": {
+          "thumbnailImage": "Obrázek náhledu",
+          "description": "Popis"
+        },
+        "desc": "Zvolte, zda chcete prohledávat miniatury nebo popisy sledovaných objektů."
+      },
+      "gridColumns": {
+        "desc": "Zvolte počet sloupců mřížky náhledu.",
+        "title": "Sloupce mřížky"
+      },
+      "defaultView": {
+        "title": "Základní pohled",
+        "desc": "Pokud nejsou vybrány žádné filtry, zobrazí se přehled nejnovějších sledovaných objektů podle štítků, nebo se zobrazí nefiltrovaná mřížka.",
+        "summary": "Souhrn",
+        "unfilteredGrid": "Nefiltrovaná mřížka"
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Vyberte datum k filtrování"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtrovat úroveň protokolu",
+    "filterBySeverity": "Filtrovat logy podle závažnosti",
+    "loading": {
+      "title": "Načítání",
+      "desc": "Když se podokno protokolu posune dolů, nové protokoly se automaticky zobrazují, jakmile jsou přidány."
+    },
+    "disableLogStreaming": "Zakázat živé zobrazování logu",
+    "allLogs": "Všechny protokoly"
+  },
+  "recognizedLicensePlates": {
+    "title": "Rozeznané SPZ",
+    "loadFailed": "Chyba načítání rozeznaných SPZ.",
+    "loading": "Načítám rozeznané SPZ…",
+    "placeholder": "Zadejte text pro hledání SPZ…",
+    "selectPlatesFromList": "Vyberte jednu, nebo více SPZ ze seznamu.",
+    "noLicensePlatesFound": "Žádné SPZ nebyly nalezeny."
+  },
+  "zones": {
+    "all": {
+      "title": "Všechny zóny",
+      "short": "Zóny"
+    },
+    "label": "Zóny"
+  },
+  "trackedObjectDelete": {
+    "toast": {
+      "success": "Sledované objekty úspěšně vymazány.",
+      "error": "Chyba při mazání sledovaných objektů: {{errorMessage}}"
+    },
+    "title": "Potvrdit odstranění",
+    "desc": "Smazáním těchto {{objectLength}} sledovaných objektů dojde k odstranění snímku, všech uložených vektorových reprezentací (embeddingů) a souvisejících záznamů o životním cyklu objektu. Záznamy z kamery v náhledu historie <em>NEBUDOU</em> smazány.<br/><br/>Přejete si to skutečně udělat?<br/><br/>Podržte <em>Shift</em> pro přeskočení tohoto dialogu v budoucnosti."
+  },
+  "zoneMask": {
+    "filterBy": "Filtrovat podle masky zóny"
+  },
+  "estimatedSpeed": "Odhadovaná rychlost ({{unit}})",
+  "cameras": {
+    "label": "Filtr kamer",
+    "all": {
+      "title": "Všechny kamery",
+      "short": "Kamery"
+    }
+  },
+  "review": {
+    "showReviewed": "Zobrazit zkontrolované"
+  }
+}

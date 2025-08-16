@@ -1,0 +1,623 @@
+{
+  "documentTitle": {
+    "authentication": "Setări de autentificare - Frigate",
+    "camera": "Setări cameră - Frigate",
+    "default": "Setări - Frigate",
+    "classification": "Setări de clasificare - Frigate",
+    "masksAndZones": "Editor Zonă si Mască - Frigate",
+    "notifications": "Setări notificări - Frigate",
+    "motionTuner": "Ajustare mișcare - Frigate",
+    "object": "Depanare - Frigate",
+    "general": "Setări generale - Frigate",
+    "frigatePlus": "Setări Frigate+ - Frigate",
+    "enrichments": "Setări de Îmbogățiri - Frigate"
+  },
+  "menu": {
+    "ui": "Interfață utilizator",
+    "cameras": "Setări cameră",
+    "masksAndZones": "Măști / Zone",
+    "motionTuner": "Reglaj mișcare",
+    "enrichments": "Îmbogățiri",
+    "debug": "Depanare",
+    "users": "Utilizatori",
+    "notifications": "Notificări",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Ai modificări nesalvate.",
+      "desc": "Vrei să salvezi modificările înainte de a continua?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Cameră",
+    "noCamera": "Nicio cameră"
+  },
+  "general": {
+    "title": "Setări generale",
+    "liveDashboard": {
+      "title": "Tabloul de bord live",
+      "automaticLiveView": {
+        "desc": "Comută automat la vizualizarea live a unei camere când este detectată activitate. Dezactivarea acestei opțiuni face ca imaginile statice ale camerelor din panoul Live să se actualizeze doar o dată pe minut.",
+        "label": "Vizualizare Live Automată"
+      },
+      "playAlertVideos": {
+        "label": "Redă videoclipurile de alertă",
+        "desc": "În mod implicit, alertele recente din panoul Live se redau ca videoclipuri mici, ce ruleaza repetat. Dezactivează această opțiune pentru a afișa doar o imagine statică a alertelor recente pe acest dispozitiv/browser."
+      }
+    },
+    "storedLayouts": {
+      "title": "Layout-uri salvate",
+      "desc": "Aranjamentul camerelor într-un grup de camere poate fi tras și redimensionat. Pozițiile sunt salvate în stocarea locală a browserului tău.",
+      "clearAll": "Șterge toate layout-urile"
+    },
+    "cameraGroupStreaming": {
+      "title": "Setări de streaming pentru grupul de camere",
+      "desc": "Setările de streaming pentru fiecare grup de camere sunt stocate în memoria locală a browserului tău.",
+      "clearAll": "Șterge toate setările de streaming"
+    },
+    "recordingsViewer": {
+      "title": "Vizualizator înregistrări",
+      "defaultPlaybackRate": {
+        "desc": "Viteza implicită de redare pentru înregistrări.",
+        "label": "Viteza implicită de redare"
+      }
+    },
+    "calendar": {
+      "title": "Calendar",
+      "firstWeekday": {
+        "label": "Prima zi a săptămânii",
+        "desc": "Ziua cu care încep săptămânile calendarului de revizuire.",
+        "sunday": "Duminică",
+        "monday": "Luni"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Aspectul salvat pentru {{cameraName}} a fost șters",
+        "clearStreamingSettings": "Setările de streaming pentru toate grupurile de camere au fost resetate."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Eroare la ștergerea layout-ului salvat: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Nu s-au putut șterge setările de streaming: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "faceRecognition": {
+      "modelSize": {
+        "large": {
+          "desc": "Utilizarea variantei <em>mari</em> folosește un model ArcFace pentru încorporarea fețelor și va rula automat pe GPU, dacă este disponibil.",
+          "title": "mare"
+        },
+        "desc": "Dimensiunea modelului utilizat pentru recunoașterea facială.",
+        "small": {
+          "title": "mic",
+          "desc": "Utilizarea variantei <em>mici</em> folosește un model FaceNet pentru încorporarea fețelor, care rulează eficient pe majoritatea tipurilor de procesoare."
+        },
+        "label": "Dimensiunea modelului"
+      },
+      "title": "Recunoaștere facială",
+      "desc": "Recunoașterea facială permite atribuirea de nume persoanelor, iar când fața lor este recunoscută, Frigate va atribui numele persoanei ca sub-etichetă. Această informație este inclusă în interfața utilizatorului, filtre și în notificări.",
+      "readTheDocumentation": "Citește documentația"
+    },
+    "semanticSearch": {
+      "reindexNow": {
+        "confirmDesc": "Ești sigur că vrei să reindexezi încorporările pentru toate obiectele urmărite? Acest proces va rula în fundal, dar poate folosi la maxim procesorul și poate dura ceva timp. Poți urmări progresul pe pagina de explorare.",
+        "label": "Reindexează acum",
+        "desc": "Reindexarea va regenera încorporările pentru toate obiectele urmărite. Acest proces rulează în fundal și poate utiliza la maxim procesorul, durând o perioadă considerabilă în funcție de numărul de obiecte urmărite pe care le ai.",
+        "confirmTitle": "Confirmă reindexarea",
+        "confirmButton": "Reindexează",
+        "success": "Reindexarea a început cu succes.",
+        "alreadyInProgress": "Reindexarea este deja în curs de desfășurare.",
+        "error": "Eroare la pornirea reindexării: {{errorMessage}}"
+      },
+      "title": "Căutare semantică",
+      "desc": "Căutarea semantică în Frigate îți permite să găsești obiecte urmărite în elementele tale de revizuire folosind fie imaginea în sine, o descriere text definită de utilizator, sau una generată automat.",
+      "readTheDocumentation": "Citește documentația",
+      "modelSize": {
+        "label": "Dimensiunea modelului",
+        "desc": "Dimensiunea modelului utilizat pentru încorporările de căutare semantică.",
+        "small": {
+          "title": "mic",
+          "desc": "Utilizarea variantei <em>mici</em> folosește o versiune cuantificată a modelului care consumă mai puțină memorie RAM și rulează mai rapid pe CPU, cu o diferență foarte mică în calitatea încorporărilor."
+        },
+        "large": {
+          "title": "mare",
+          "desc": "Utilizarea variantei <em>mari</em> folosește modelul complet Jina și va rula automat pe GPU, dacă este disponibil."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "desc": "Frigate poate recunoaște numerele de înmatriculare ale vehiculelor și poate adăuga automat caracterele detectate în câmpul recognized_license_plate sau un nume cunoscut ca sub_etichetă pentru obiectele de tip mașină. Un caz de utilizare comun poate fi citirea numerelor de înmatriculare ale mașinilor care intră într-o curte sau ale celor care trec pe stradă.",
+      "title": "Recunoaștere numere de înmatriculare",
+      "readTheDocumentation": "Citește documentația"
+    },
+    "title": "Setări îmbogățiri",
+    "unsavedChanges": "Modificările nesalvate ale setărilor de îmbogățiri",
+    "birdClassification": {
+      "title": "Clasificarea păsărilor",
+      "desc": "Clasificarea păsărilor identifică păsările cunoscute folosind un model TensorFlow cuantificat. Când o pasăre recunoscută este identificată, numele său comun va fi adăugat ca sub_etichetă. Această informație este inclusă în interfața utilizator, filtre și în notificări."
+    },
+    "restart_required": "Este necesară repornirea (setările de îmbogățiri au fost modificate)",
+    "toast": {
+      "success": "Setările de îmbogățiri au fost salvate. Repornește Frigate pentru a aplica modificările.",
+      "error": "Nu s-au putut salva modificările configurației: {{errorMessage}}"
+    }
+  },
+  "camera": {
+    "title": "Setări cameră",
+    "streams": {
+      "title": "Stream-uri",
+      "desc": "Dezactivează temporar o cameră până la repornirea Frigate. Dezactivarea completă a unei camere oprește procesarea streamului acesteia de către Frigate. Detecția, înregistrarea și depanarea nu vor fi disponibile.<br /> <em>Notă: Aceasta nu dezactivează restream-urile go2rtc.</em>"
+    },
+    "review": {
+      "title": "Revizuire",
+      "desc": "Activează/dezactivează temporar alertele și detecțiile pentru această cameră până la repornirea Frigate. Când este dezactivată, nu vor fi generate noi elemente pentru revizuire. ",
+      "alerts": "Alerte. ",
+      "detections": "Detecții. "
+    },
+    "reviewClassification": {
+      "title": "Clasificare revizuiri",
+      "desc": "Frigate clasifică elementele de revizuire în \"alerte\" și \"detecții\". În mod implicit, toate obiectele de tip <em>persoană</em> și <em>mașină</em> sunt considerate alerte. Poți rafina clasificarea elementelor de revizuire configurând zonele necesare pentru acestea.",
+      "readTheDocumentation": "Citește documentația",
+      "unsavedChanges": "Setări de clasificare a revizuirilor nesalvate pentru {{camera}}",
+      "limitDetections": "Limitează detecțiile la zone specifice",
+      "zoneObjectDetectionsTips": {
+        "notSelectDetections": "Toate obiectele {{detectionsLabels}} detectate în {{zone}} pe {{cameraName}} care nu sunt categorisite ca alerte vor fi afișate ca detecții, indiferent de zona în care se află.",
+        "regardlessOfZoneObjectDetectionsTips": "Toate obiectele {{detectionsLabels}} necategorisite pe {{cameraName}} vor fi afișate ca detecții, indiferent de zona în care se află.",
+        "text": "Toate obiectele {{detectionsLabels}} care nu sunt categorisite în {{zone}} pe {{cameraName}} vor fi afișate ca detecții."
+      },
+      "selectDetectionsZones": "Selectează zone pentru detecții",
+      "zoneObjectAlertsTips": "Toate obiectele {{alertsLabels}} detectate în {{zone}} pe {{cameraName}} vor fi afișate ca alerte.",
+      "objectDetectionsTips": "Toate obiectele {{detectionsLabels}} necategorisite pe {{cameraName}} vor fi afișate ca detecții, indiferent de zona în care se află.",
+      "toast": {
+        "success": "Configurația clasificării pentru revizuire a fost salvată. Repornește Frigate pentru a aplica modificările."
+      },
+      "selectAlertsZones": "Selectează zone pentru alerte",
+      "noDefinedZones": "Nu sunt definite zone pentru această cameră.",
+      "objectAlertsTips": "Toate obiectele {{alertsLabels}} de pe {{cameraName}} vor fi afișate ca alerte."
+    }
+  },
+  "masksAndZones": {
+    "zones": {
+      "point_one": "{{count}} punct",
+      "point_few": "{{count}} puncte",
+      "point_other": "{{count}} de puncte",
+      "loiteringTime": {
+        "title": "Timp de ședere",
+        "desc": "Setează o durată minimă în secunde în care obiectul trebuie să fie în zonă pentru ca aceasta să se activeze. <em>Implicit: 0</em>"
+      },
+      "speedEstimation": {
+        "desc": "Activează estimarea vitezei pentru obiectele din această zonă. Atenție: Pentru ca estimarea vitezei să funcționeze corect, zona trebuie să aibă exact 4 puncte.",
+        "title": "Estimare viteză",
+        "docs": "Citește documentația",
+        "lineADistance": "Distanța liniei A ({{unit}})",
+        "lineBDistance": "Distanța liniei B ({{unit}})",
+        "lineCDistance": "Distanța liniei C ({{unit}})",
+        "lineDDistance": "Distanța liniei D ({{unit}})"
+      },
+      "add": "Adaugă zonă",
+      "desc": {
+        "title": "Zonele îți permit să definești o anumită zonă din cadrul vizual al camerei. Astfel, poți determina dacă un obiect se află sau nu într-o anumită arie de interes.",
+        "documentation": "Documentație"
+      },
+      "edit": "Editează zona",
+      "name": {
+        "inputPlaceHolder": "Introdu un nume…",
+        "title": "Nume",
+        "tips": "Numele trebuie să aibă cel puțin 2 caractere și nu trebuie să fie identic cu numele unei camere sau al unei alte zone existente."
+      },
+      "inertia": {
+        "title": "Inerție",
+        "desc": "Specifică câte cadre trebuie să fie un obiect într-o zonă înainte de a fi considerat prezent în zonă. <em>Implicit: 3</em>"
+      },
+      "speedThreshold": {
+        "toast": {
+          "error": {
+            "pointLengthError": "Estimarea vitezei a fost dezactivată pentru această zonă. Zonele cu estimare a vitezei trebuie să aibă exact 4 puncte.",
+            "loiteringTimeError": "Zonele cu un timp de staționare mai mare de 0 nu ar trebui utilizate împreună cu estimarea vitezei."
+          }
+        },
+        "title": "Prag de viteză ({{unit}})",
+        "desc": "Specifică o viteză minimă pe care trebuie să o aibă obiectele pentru a fi considerate în această zonă."
+      },
+      "documentTitle": "Editează zone - Frigate",
+      "clickDrawPolygon": "Click pentru a desena un poligon pe imagine.",
+      "toast": {
+        "success": "Zona ({{zoneName}}) a fost salvată. Repornește Frigate pentru a aplica modificările."
+      },
+      "label": "Zone",
+      "objects": {
+        "title": "Obiecte",
+        "desc": "Lista de obiecte care se aplică acestei zone."
+      },
+      "allObjects": "Toate obiectele"
+    },
+    "motionMasks": {
+      "point_one": "{{count}} punct",
+      "point_few": "{{count}} puncte",
+      "point_other": "{{count}} de puncte",
+      "clickDrawPolygon": "Fă click pentru a desena un poligon pe imagine.",
+      "label": "Măști de mișcare",
+      "documentTitle": "Editează masca de mișcare - Frigate",
+      "desc": {
+        "documentation": "Documentație",
+        "title": "Măștile de mișcare sunt folosite pentru a preveni ca anumite tipuri de mișcare nedorită să declanșeze detecția. Mascare excesivă va îngreuna urmărirea obiectelor."
+      },
+      "add": "Adaugă mască de mișcare",
+      "edit": "Editează masca de mișcare",
+      "context": {
+        "documentation": "Citește documentația",
+        "title": "Măștile de mișcare sunt folosite pentru a preveni declanșarea detecțiilor din cauza tipurilor nedorite de mișcare (de exemplu: ramuri de copaci, timestamp-uri ale camerei). Măștile de mișcare ar trebui folosite <em>cu mare prudență</em>, deoarece supramascarea va îngreuna urmărirea obiectelor."
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} a fost salvat. Repornește Frigate pentru a aplica modificările.",
+          "noName": "Masca de mișcare a fost salvată.Repornește Frigate pentru a aplica modificările."
+        }
+      },
+      "polygonAreaTooLarge": {
+        "tips": "Măștile de mișcare nu împiedică detectarea obiectelor. Ele doar previn ca mișcarea nedorită să declanșeze o detecție.",
+        "title": "Masca de mișcare acoperă {{polygonArea}}% din cadrul camerei. Măștile mari de mișcare nu sunt recomandate.",
+        "documentation": "Citește documentația"
+      }
+    },
+    "objectMasks": {
+      "point_one": "{{count}} punct",
+      "point_few": "{{count}} puncte",
+      "point_other": "{{count}} de puncte",
+      "documentTitle": "Editează masca de obiecte - Frigate",
+      "add": "Adaugă mască de obiecte",
+      "edit": "Editează masca de obiecte",
+      "desc": {
+        "documentation": "Documentație",
+        "title": "Măștile de filtrare a obiectelor sunt folosite pentru a filtra falsele pozitive pentru un anumit tip de obiect, în funcție de locație."
+      },
+      "label": "Măști obiecte",
+      "objects": {
+        "desc": "Tipul de obiect căruia i se aplică această mască de obiecte.",
+        "allObjectTypes": "Toate tipurile de obiecte",
+        "title": "Obiecte"
+      },
+      "toast": {
+        "success": {
+          "noName": "Masca de obiecte a fost salvată. Repornește Frigate pentru a aplica modificările.",
+          "title": "{{polygonName}} a fost salvat. Repornește Frigate pentru a aplica modificările."
+        }
+      },
+      "clickDrawPolygon": "Fă click pentru a desena un poligon pe imagine.",
+      "context": "Măștile de filtrare a obiectelor sunt folosite pentru a elimina falsele pozitive pentru un anumit tip de obiect, în funcție de locația acestuia."
+    },
+    "restart_required": "Repornire necesară (măști/zone modificate)",
+    "toast": {
+      "success": {
+        "copyCoordinates": "Coordonatele pentru {{polyName}} au fost copiate."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Nu s-au putut copia coordonatele."
+      }
+    },
+    "filter": {
+      "all": "Toate măștile și zonele"
+    },
+    "motionMaskLabel": "Masca de mișcare {{number}}",
+    "objectMaskLabel": "Mască obiect {{number}} ({{label}})",
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "Numele zonei trebuie să aibă cel puțin 2 caractere.",
+          "mustNotContainPeriod": "Numele zonei nu trebuie să conțină puncte.",
+          "hasIllegalCharacter": "Numele zonei conține caractere nepermise.",
+          "mustNotBeSameWithCamera": "Numele zonei nu trebuie să fie identic cu numele camerei.",
+          "alreadyExists": "O zonă cu acest nume există deja pentru această cameră."
+        }
+      },
+      "polygonDrawing": {
+        "delete": {
+          "desc": "Ești sigur că vrei să ștergi {{type}} <em>{{name}}</em>?",
+          "success": "{{name}} a fost șters.",
+          "title": "Confirmă ștergerea"
+        },
+        "removeLastPoint": "Elimină ultimul punct",
+        "reset": {
+          "label": "Șterge toate punctele"
+        },
+        "snapPoints": {
+          "false": "Nu fixa punctele",
+          "true": "Fixează punctele"
+        },
+        "error": {
+          "mustBeFinished": "Desenul poligonului trebuie finalizat înainte de salvare."
+        }
+      },
+      "distance": {
+        "error": {
+          "mustBeFilled": "Toate câmpurile de distanță trebuie completate pentru a putea folosi estimarea vitezei.",
+          "text": "Distanța trebuie să fie mai mare sau egală cu 0.1."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Inerția trebuie să fie mai mare de 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Timpul de staționare trebuie să fie mai mare sau egal cu 0."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Pragul de viteză trebuie să fie mai mare sau egal cu 0.1."
+        }
+      }
+    }
+  },
+  "debug": {
+    "motion": {
+      "tips": "<p><strong>Casete de mișcare</strong></p><br><p>Casetele roșii vor fi suprapuse pe zonele din cadru unde este detectată în prezent mișcare</p>",
+      "title": "Casete de mișcare",
+      "desc": "Arată chenarele în jurul zonelor unde este detectată mișcare"
+    },
+    "regions": {
+      "tips": "<p><strong>Casete de regiune</strong></p><br><p>Casetele verde deschis vor fi suprapuse pe zonele de interes din cadru care sunt trimise către detectorul de obiecte.</p>",
+      "title": "Regiuni",
+      "desc": "Arată o casetă a regiunii de interes trimise detectorului de obiecte"
+    },
+    "desc": "Vizualizarea de depanare îți arată o vizualizare în timp real a obiectelor urmărite și a statisticilor acestora. Lista de obiecte afișează un rezumat întârziat al obiectelor detectate.",
+    "objectShapeFilterDrawing": {
+      "document": "Citește documentația ",
+      "area": "Suprafață",
+      "title": "Desenare filtru formă obiect",
+      "desc": "Desenează un dreptunghi pe imagine pentru a vizualiza detaliile zonei și ale raportului",
+      "tips": "Activează această opțiune pentru a desena un dreptunghi pe imaginea camerei, pentru a-i arăta zona și raportul. Aceste valori pot fi apoi utilizate pentru a seta parametrii de filtrare a formei obiectelor în configurația ta.",
+      "score": "Scor",
+      "ratio": "Raport"
+    },
+    "noObjects": "Nici un obiect",
+    "boundingBoxes": {
+      "title": "Casete de delimitare",
+      "desc": "Afișează casete de delimitare în jurul obiectelor urmărite",
+      "colors": {
+        "label": "Culori pentru casetele de delimitare ale obiectelor",
+        "info": "<li>La pornire, fiecărei etichete de obiect i se vor atribui culori diferite</li><li>O linie subțire albastru închis indică faptul că obiectul nu este detectat în acest moment</li><li>O linie subțire gri indică faptul că obiectul este detectat ca fiind staționar</li><li>O linie groasă indică faptul că obiectul este subiectul urmării automate (când este activată)</li>"
+      }
+    },
+    "title": "Depanare",
+    "debugging": "Depanare",
+    "objectList": "Listă obiecte",
+    "mask": {
+      "desc": "Afișează poligoanele măștilor de mișcare",
+      "title": "Măști de mișcare"
+    },
+    "detectorDesc": "Frigate folosește detectorii ({{detectors}}) pentru a detecta obiecte în stream-ul video al camerei tale.",
+    "timestamp": {
+      "title": "Marcaj temporal",
+      "desc": "Suprapune un marcaj temporal pe imagine"
+    },
+    "zones": {
+      "title": "Zone",
+      "desc": "Afișează conturul oricăror zone definite"
+    }
+  },
+  "users": {
+    "dialog": {
+      "deleteUser": {
+        "warn": "Ești sigur că vrei să ștergi utilizatorul <strong>{{username}}</strong>?",
+        "title": "Șterge utilizatorul",
+        "desc": "Această acțiune nu poate fi anulată. Aceasta va șterge definitiv contul de utilizator și va elimina toate datele asociate."
+      },
+      "changeRole": {
+        "desc": "Actualizează permisiunile pentru <strong>{{username}}</strong>",
+        "roleInfo": {
+          "intro": "Selectează rolul potrivit pentru acest utilizator:",
+          "admin": "Administrator",
+          "adminDesc": "Acces complet la toate funcțiile.",
+          "viewer": "Vizualizator",
+          "viewerDesc": "Limitat doar la tablourile de bord Live, Revizuire, Explorare și Exporturi."
+        },
+        "select": "Selectează un rol",
+        "title": "Schimbă rolul utilizatorului"
+      },
+      "form": {
+        "password": {
+          "strength": {
+            "weak": "Slabă",
+            "title": "Putere parolă: ",
+            "veryStrong": "Foarte puternică",
+            "medium": "Medie",
+            "strong": "Puternică"
+          },
+          "placeholder": "Introdu parola",
+          "confirm": {
+            "title": "Confirmă parola",
+            "placeholder": "Confirmă parola"
+          },
+          "title": "Parolă",
+          "match": "Parolele se potrivesc",
+          "notMatch": "Parolele nu se potrivesc"
+        },
+        "passwordIsRequired": "Este nevoie de parolă",
+        "user": {
+          "placeholder": "Introdu nume utilizator",
+          "title": "Nume utilizator",
+          "desc": "Sunt permise doar litere, cifre, puncte și subliniere."
+        },
+        "newPassword": {
+          "title": "Parolă nouă",
+          "placeholder": "Introdu parola nouă",
+          "confirm": {
+            "placeholder": "Re-introdu parola nouă"
+          }
+        },
+        "usernameIsRequired": "Este nevoie de numele de utilizator"
+      },
+      "createUser": {
+        "confirmPassword": "Te rog să confirmi parola",
+        "title": "Crează un utilizator nou",
+        "desc": "Adaugă un cont de utilizator nou și specifică un rol pentru accesul la anumite zone ale interfeței Frigate.",
+        "usernameOnlyInclude": "Numele de utilizator poate conține doar litere, cifre, . sau _"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Parola nu poate fi goală",
+        "doNotMatch": "Parolele nu se potrivesc",
+        "updatePassword": "Actualizează parola pentru {{username}}",
+        "setPassword": "Schimbă parola",
+        "desc": "Creează o parolă puternică pentru a securiza acest cont."
+      }
+    },
+    "addUser": "Adaugă utilizator",
+    "management": {
+      "desc": "Gestionează conturile de utilizator ale acestei instanțe Frigate.",
+      "title": "Gestionare utilizatori"
+    },
+    "toast": {
+      "success": {
+        "roleUpdated": "Rolul a fost actualizat pentru {{user}}",
+        "updatePassword": "Parola a fost actualizată cu succes.",
+        "createUser": "Utilizatorul {{user}} a fost creat cu succes",
+        "deleteUser": "Utilizatorul {{user}} a fost șters cu succes"
+      },
+      "error": {
+        "setPasswordFailed": "Salvarea parolei a eșuat: {{errorMessage}}",
+        "createUserFailed": "Crearea utilizatorului a eșuat: {{errorMessage}}",
+        "roleUpdateFailed": "Actualizarea rolului a eșuat: {{errorMessage}}",
+        "deleteUserFailed": "Ștergerea utilizatorului a eșuat: {{errorMessage}}"
+      }
+    },
+    "updatePassword": "Actualizează parola",
+    "title": "Utilizatori",
+    "table": {
+      "username": "Nume utilizator",
+      "actions": "Acțiuni",
+      "role": "Rol",
+      "noUsers": "Nu a fost găsit niciun utilizator.",
+      "changeRole": "Schimbă rolul utilizatorului",
+      "deleteUser": "Șterge utilizatorul",
+      "password": "Parolă"
+    }
+  },
+  "notification": {
+    "notificationSettings": {
+      "title": "Setări pentru notificări",
+      "desc": "Frigate poate trimite nativ notificări push către dispozitivul tău atunci când rulează în browser sau este instalat ca PWA.",
+      "documentation": "Citește documentația"
+    },
+    "globalSettings": {
+      "desc": "Suspendă temporar notificările pentru camerele specifice pe toate dispozitivele înregistrate.",
+      "title": "Setări globale"
+    },
+    "email": {
+      "placeholder": "ex. exemplu@email.com",
+      "desc": "Este necesar un email valid, care va fi folosit pentru a te notifica în cazul în care apar probleme cu serviciul de push.",
+      "title": "Email"
+    },
+    "notificationUnavailable": {
+      "documentation": "Citește documentația",
+      "desc": "Notificările push web necesită un context securizat (<code>https://…</code>). Aceasta este o limitare a browserului. Accesează Frigate în mod securizat pentru a putea folosi notificările.",
+      "title": "Notificările nu sunt disponibile"
+    },
+    "cameras": {
+      "title": "Camere",
+      "desc": "Selectează camerele pentru care dorești să activezi notificările.",
+      "noCameras": "Nu există camere disponibile"
+    },
+    "deviceSpecific": "Setări specifice dispozitivului",
+    "registerDevice": "Înregistrează acest dispozitiv",
+    "unregisterDevice": "Deregistrează acest dispozitiv",
+    "sendTestNotification": "Trimite o notificare de test",
+    "suspendTime": {
+      "12hours": "Suspendă pentru 12 ore",
+      "suspend": "Suspendă",
+      "5minutes": "Suspendă pentru 5 minute",
+      "10minutes": "Suspendă pentru 10 minute",
+      "24hours": "Suspendă pentru 24 de ore",
+      "untilRestart": "Suspendă până la restart",
+      "1hour": "Suspendă pentru 1 oră",
+      "30minutes": "Suspendă pentru 30 minute"
+    },
+    "toast": {
+      "success": {
+        "registered": "Înregistrarea pentru notificări a fost realizată cu succes. Este necesară repornirea Frigate înainte ca orice notificare (inclusiv o notificare de test) să poată fi trimisă.",
+        "settingSaved": "Setările notificărilor au fost salvate."
+      },
+      "error": {
+        "registerFailed": "Eroare la salvarea înregistrării notificării."
+      }
+    },
+    "suspended": "Notificări suspendate {{time}}",
+    "active": "Notificări active",
+    "unsavedRegistrations": "Înregistrări notificări nesalvate",
+    "unsavedChanges": "Modificări ale notificărilor nesalvate",
+    "title": "Notificări",
+    "cancelSuspension": "Anulează suspendarea"
+  },
+  "frigatePlus": {
+    "apiKey": {
+      "plusLink": "Citește mai mult despre Frigate+",
+      "desc": "Cheia API Frigate+ permite integrarea cu serviciul Frigate+.",
+      "validated": "Frigate+ API key a fost detectată și validată",
+      "title": "Frigate+ API Key",
+      "notValidated": "Frigate+ API key nu a fost detectată sau nu a fost validată"
+    },
+    "snapshotConfig": {
+      "title": "Configurație snapshot-uri",
+      "table": {
+        "snapshots": "Snapshot-uri",
+        "cleanCopySnapshots": "Snapshot-uri <code>clean_copy</code>",
+        "camera": "Cameră"
+      },
+      "documentation": "Citește documentația",
+      "cleanCopyWarning": "Unele camere au snapshot-uri activate, dar copia curată (clean_copy) este dezactivată. Trebuie să activați <code>clean_copy</code> în configurația instantaneelor pentru a putea trimite imagini de la aceste camere către Frigate+.",
+      "desc": "Trimiterea către Frigate+ necesită ca atât snapshot-urile, cât și snapshot-urile <code>clean_copy</code> să fie activate în configurația ta."
+    },
+    "modelInfo": {
+      "title": "Informații model",
+      "supportedDetectors": "Detectoare suportate",
+      "plusModelType": {
+        "baseModel": "Model de bază",
+        "userModel": "Reglat-fin"
+      },
+      "loadingAvailableModels": "Se încarcă modelele disponibile…",
+      "modelSelect": "Modelele disponibile pe Frigate+ pot fi selectate aici. Rețineți că pot fi selectate doar modelele compatibile cu configurația actuală a detectorului dumneavoastră.",
+      "baseModel": "Model de bază",
+      "loading": "Se încarcă informațiile modelului…",
+      "error": "Încărcarea informațiilor modelului a eșuat",
+      "availableModels": "Modele disponibile",
+      "modelType": "Tip model",
+      "trainDate": "Dată antrenare",
+      "cameras": "Camere"
+    },
+    "toast": {
+      "error": "Nu s-au putut salva modificările configurației: {{errorMessage}}",
+      "success": "Setările Frigate+ au fost salvate. Reporniti Frigate pentru a aplica modificările."
+    },
+    "restart_required": "Repornire necesară (model Frigate+ schimbat)",
+    "unsavedChanges": "Modificări nesalvate ale setărilor Frigate+",
+    "title": "Setări Frigate+"
+  },
+  "motionDetectionTuner": {
+    "unsavedChanges": "Modificări nesalvate la reglajul de mișcare pentru {{camera}}",
+    "Threshold": {
+      "title": "Prag",
+      "desc": "Valoarea pragului determină cât de mare trebuie să fie schimbarea luminozității unui pixel pentru a fi considerată mișcare. <em>Implicit: 30</em>"
+    },
+    "contourArea": {
+      "desc": "Valoarea suprafeței conturului este folosită pentru a decide care grupuri de pixeli modificați se califică ca mișcare. <em>Implicit: 10</em>",
+      "title": "Suprafața conturului"
+    },
+    "improveContrast": {
+      "title": "Îmbunătățire contrast",
+      "desc": "Îmbunătățește contrastul pentru scene întunecate. <em>Implicit: ACTIVAT</em>"
+    },
+    "desc": {
+      "title": "Frigate utilizează detecția mișcării ca o primă verificare, pentru a vedea dacă există ceva semnificativ în cadru care merită verificat cu detecția de obiecte.",
+      "documentation": "Citește ghidul pentru reglajul mișcării"
+    },
+    "toast": {
+      "success": "Setările de mișcare au fost salvate."
+    },
+    "title": "Reglaj detecție mișcare"
+  }
+}

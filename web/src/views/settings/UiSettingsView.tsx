@@ -18,13 +18,14 @@ import {
   SelectItem,
   SelectTrigger,
 } from "../../components/ui/select";
+import { useTranslation } from "react-i18next";
 
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
 
 export default function UiSettingsView() {
   const { data: config } = useSWR<FrigateConfig>("config");
-
+  const { t } = useTranslation("views/settings");
   const clearStoredLayouts = useCallback(() => {
     if (!config) {
       return [];
@@ -33,22 +34,60 @@ export default function UiSettingsView() {
     Object.entries(config.camera_groups).forEach(async (value) => {
       await delData(`${value[0]}-draggable-layout`)
         .then(() => {
-          toast.success(`Cleared stored layout for ${value[0]}`, {
-            position: "top-center",
-          });
+          toast.success(
+            t("general.toast.success.clearStoredLayout", {
+              cameraName: value[0],
+            }),
+            {
+              position: "top-center",
+            },
+          );
         })
         .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
           toast.error(
-            `Failed to clear stored layout: ${error.response.data.message}`,
-            { position: "top-center" },
+            t("general.toast.error.clearStoredLayoutFailed", { errorMessage }),
+            {
+              position: "top-center",
+            },
           );
         });
     });
-  }, [config]);
+  }, [config, t]);
+
+  const clearStreamingSettings = useCallback(async () => {
+    if (!config) {
+      return [];
+    }
+
+    await delData(`streaming-settings`)
+      .then(() => {
+        toast.success(t("general.toast.success.clearStreamingSettings"), {
+          position: "top-center",
+        });
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(
+          t("general.toast.error.clearStreamingSettingsFailed", {
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
+      });
+  }, [config, t]);
 
   useEffect(() => {
-    document.title = "General Settings - Frigate";
-  }, []);
+    document.title = t("documentTitle.general");
+  }, [t]);
 
   // settings
 
@@ -63,13 +102,13 @@ export default function UiSettingsView() {
         <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
           <Heading as="h3" className="my-2">
-            General Settings
+            {t("general.title")}
           </Heading>
 
           <Separator className="my-2 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            Live Dashboard
+            {t("general.liveDashboard.title")}
           </Heading>
 
           <div className="mt-2 space-y-6">
@@ -81,15 +120,11 @@ export default function UiSettingsView() {
                   onCheckedChange={setAutoLive}
                 />
                 <Label className="cursor-pointer" htmlFor="auto-live">
-                  Automatic Live View
+                  {t("general.liveDashboard.automaticLiveView.label")}
                 </Label>
               </div>
-              <div className="my-2 text-sm text-muted-foreground">
-                <p>
-                  Automatically switch to a camera's live view when activity is
-                  detected. Disabling this option causes static camera images on
-                  the Live dashboard to only update once per minute.
-                </p>
+              <div className="my-2 max-w-5xl text-sm text-muted-foreground">
+                <p>{t("general.liveDashboard.automaticLiveView.desc")}</p>
               </div>
             </div>
             <div className="space-y-3">
@@ -100,50 +135,65 @@ export default function UiSettingsView() {
                   onCheckedChange={setAlertVideos}
                 />
                 <Label className="cursor-pointer" htmlFor="images-only">
-                  Play Alert Videos
+                  {t("general.liveDashboard.playAlertVideos.label")}
                 </Label>
               </div>
-              <div className="my-2 text-sm text-muted-foreground">
-                <p>
-                  By default, recent alerts on the Live dashboard play as small
-                  looping videos. Disable this option to only show a static
-                  image of recent alerts on this device/browser.
-                </p>
+              <div className="my-2 max-w-5xl text-sm text-muted-foreground">
+                <p>{t("general.liveDashboard.playAlertVideos.desc")}</p>
               </div>
             </div>
           </div>
 
           <div className="my-3 flex w-full flex-col space-y-6">
-            <div className="mt-2 space-y-6">
+            <div className="mt-2 space-y-3">
               <div className="space-y-0.5">
-                <div className="text-md">Stored Layouts</div>
+                <div className="text-md">
+                  {t("general.storedLayouts.title")}
+                </div>
                 <div className="my-2 text-sm text-muted-foreground">
-                  <p>
-                    The layout of cameras in a camera group can be
-                    dragged/resized. The positions are stored in your browser's
-                    local storage.
-                  </p>
+                  <p>{t("general.storedLayouts.desc")}</p>
                 </div>
               </div>
               <Button
-                aria-label="Clear all saved layouts"
+                aria-label={t("general.storedLayouts.clearAll")}
                 onClick={clearStoredLayouts}
               >
-                Clear All Layouts
+                {t("general.storedLayouts.clearAll")}
+              </Button>
+            </div>
+
+            <div className="mt-2 space-y-3">
+              <div className="space-y-0.5">
+                <div className="text-md">
+                  {t("general.cameraGroupStreaming.title")}
+                </div>
+                <div className="my-2 max-w-5xl text-sm text-muted-foreground">
+                  <p>{t("general.cameraGroupStreaming.desc")}</p>
+                </div>
+              </div>
+              <Button
+                aria-label={t("general.cameraGroupStreaming.clearAll")}
+                onClick={clearStreamingSettings}
+              >
+                {t("general.cameraGroupStreaming.clearAll")}
               </Button>
             </div>
 
             <Separator className="my-2 flex bg-secondary" />
 
             <Heading as="h4" className="my-2">
-              Recordings Viewer
+              {t("general.recordingsViewer.title")}
             </Heading>
 
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
-                <div className="text-md">Default Playback Rate</div>
+                <div className="text-md">
+                  {t("general.recordingsViewer.defaultPlaybackRate.label")}
+                </div>
                 <div className="my-2 text-sm text-muted-foreground">
-                  <p>Default playback rate for recordings playback.</p>
+                  <p>
+                    {t("general.recordingsViewer.defaultPlaybackRate.desc")}
+                  </p>
                 </div>
               </div>
             </div>
@@ -171,14 +221,16 @@ export default function UiSettingsView() {
             <Separator className="my-2 flex bg-secondary" />
 
             <Heading as="h4" className="my-2">
-              Calendar
+              {t("general.calendar.title")}
             </Heading>
 
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
-                <div className="text-md">First Weekday</div>
+                <div className="text-md">
+                  {t("general.calendar.firstWeekday.label")}
+                </div>
                 <div className="my-2 text-sm text-muted-foreground">
-                  <p>The day that the weeks of the review calendar begin on.</p>
+                  <p>{t("general.calendar.firstWeekday.desc")}</p>
                 </div>
               </div>
             </div>
@@ -187,7 +239,10 @@ export default function UiSettingsView() {
               onValueChange={(value) => setWeekStartsOn(parseInt(value))}
             >
               <SelectTrigger className="w-32">
-                {WEEK_STARTS_ON[weekStartsOn ?? 0]}
+                {t(
+                  "general.calendar.firstWeekday." +
+                    WEEK_STARTS_ON[weekStartsOn ?? 0].toLowerCase(),
+                )}
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -197,7 +252,7 @@ export default function UiSettingsView() {
                       className="cursor-pointer"
                       value={index.toString()}
                     >
-                      {day}
+                      {t("general.calendar.firstWeekday." + day.toLowerCase())}
                     </SelectItem>
                   ))}
                 </SelectGroup>

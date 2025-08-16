@@ -6,11 +6,13 @@ import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
+from typing import Any
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event, Timeline
+from frigate.util.path import delete_event_snapshot, delete_event_thumbnail
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +30,7 @@ class EventCleanup(threading.Thread):
         self.db = db
         self.camera_keys = list(self.config.cameras.keys())
         self.removed_camera_labels: list[str] = None
-        self.camera_labels: dict[str, dict[str, any]] = {}
+        self.camera_labels: dict[str, dict[str, Any]] = {}
 
     def get_removed_camera_labels(self) -> list[Event]:
         """Get a list of distinct labels for removed cameras."""
@@ -64,7 +66,6 @@ class EventCleanup(threading.Thread):
     def expire_snapshots(self) -> list[str]:
         ## Expire events from unlisted cameras based on the global config
         retain_config = self.config.snapshots.retain
-        file_extension = "jpg"
         update_params = {"has_snapshot": False}
 
         distinct_labels = self.get_removed_camera_labels()
@@ -83,6 +84,7 @@ class EventCleanup(threading.Thread):
                 Event.select(
                     Event.id,
                     Event.camera,
+                    Event.thumbnail,
                 )
                 .where(
                     Event.camera.not_in(self.camera_keys),
@@ -94,22 +96,15 @@ class EventCleanup(threading.Thread):
                 .iterator()
             )
             logger.debug(f"{len(list(expired_events))} events can be expired")
+
             # delete the media from disk
             for expired in expired_events:
-                media_name = f"{expired.camera}-{expired.id}"
-                media_path = Path(
-                    f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
-                )
+                deleted = delete_event_snapshot(expired)
 
-                try:
-                    media_path.unlink(missing_ok=True)
-                    if file_extension == "jpg":
-                        media_path = Path(
-                            f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
-                        )
-                        media_path.unlink(missing_ok=True)
-                except OSError as e:
-                    logger.warning(f"Unable to delete event images: {e}")
+                if not deleted:
+                    logger.warning(
+                        f"Unable to delete event images for {expired.camera}: {expired.id}"
+                    )
 
             # update the clips attribute for the db entry
             query = Event.select(Event.id).where(
@@ -165,6 +160,7 @@ class EventCleanup(threading.Thread):
                     Event.select(
                         Event.id,
                         Event.camera,
+                        Event.thumbnail,
                     )
                     .where(
                         Event.camera == name,
@@ -181,19 +177,12 @@ class EventCleanup(threading.Thread):
                 # so no need to delete mp4 files
                 for event in expired_events:
                     events_to_update.append(event.id)
+                    deleted = delete_event_snapshot(event)
 
-                    try:
-                        media_name = f"{event.camera}-{event.id}"
-                        media_path = Path(
-                            f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
+                    if not deleted:
+                        logger.warning(
+                            f"Unable to delete event images for {event.camera}: {event.id}"
                         )
-                        media_path.unlink(missing_ok=True)
-                        media_path = Path(
-                            f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
-                        )
-                        media_path.unlink(missing_ok=True)
-                    except OSError as e:
-                        logger.warning(f"Unable to delete event images: {e}")
 
         # update the clips attribute for the db entry
         for i in range(0, len(events_to_update), CHUNK_SIZE):
@@ -351,17 +340,22 @@ class EventCleanup(threading.Thread):
                 .where(Event.has_clip == False, Event.has_snapshot == False)
                 .iterator()
             )
-            events_to_delete = [e.id for e in events]
+            events_to_delete: list[Event] = [e for e in events]
+
+            for e in events_to_delete:
+                delete_event_thumbnail(e)
+
             logger.debug(f"Found {len(events_to_delete)} events that can be expired")
             if len(events_to_delete) > 0:
-                for i in range(0, len(events_to_delete), CHUNK_SIZE):
-                    chunk = events_to_delete[i : i + CHUNK_SIZE]
+                ids_to_delete = [e.id for e in events_to_delete]
+                for i in range(0, len(ids_to_delete), CHUNK_SIZE):
+                    chunk = ids_to_delete[i : i + CHUNK_SIZE]
                     logger.debug(f"Deleting {len(chunk)} events from the database")
                     Event.delete().where(Event.id << chunk).execute()
 
                     if self.config.semantic_search.enabled:
                         self.db.delete_embeddings_description(event_ids=chunk)
                         self.db.delete_embeddings_thumbnail(event_ids=chunk)
-                        logger.debug(f"Deleted {len(events_to_delete)} embeddings")
+                        logger.debug(f"Deleted {len(ids_to_delete)} embeddings")
 
         logger.info("Exiting event cleanup...")

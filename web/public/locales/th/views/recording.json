@@ -1,0 +1,12 @@
+{
+  "export": "ส่งออก",
+  "calendar": "ปฎิทิน",
+  "filter": "กรอง",
+  "filters": "ตัวกรอง",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "ไม่ได้เลือกช่วงเวลาที่ถูกต้อง",
+      "endTimeMustAfterStartTime": "เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น"
+    }
+  }
+}

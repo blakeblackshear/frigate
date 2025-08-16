@@ -1,5 +1,6 @@
-import strftime from "strftime";
 import { fromUnixTime, intervalToDuration, formatDuration } from "date-fns";
+import { Locale } from "date-fns/locale";
+import { formatInTimeZone } from "date-fns-tz";
 export const longToDate = (long: number): Date => new Date(long * 1000);
 export const epochToLong = (date: number): number => date / 1000;
 export const dateToLong = (date: Date): number => epochToLong(date.getTime());
@@ -27,9 +28,6 @@ export const getNowYesterdayInLong = (): number => {
  * The `timezone` option allows you to specify a specific timezone for the output, otherwise the user's browser timezone will be used.
  * The `use12hour` option allows you to display time in a 12-hour format if true, and 24-hour format if false.
  * The `dateStyle` and `timeStyle` options allow you to specify pre-defined formats for displaying the date and time.
- * The `strftime_fmt` option allows you to specify a custom format using the strftime syntax.
- *
- * If both `strftime_fmt` and `dateStyle`/`timeStyle` are provided, `strftime_fmt` takes precedence.
  *
  * @param unixTimestamp The Unix timestamp to format
  * @param config An object containing the configuration options for date/time display
@@ -108,11 +106,19 @@ const getResolvedTimeZone = () => {
   }
 };
 
+type DateTimeStyle = {
+  timezone?: string;
+  time_format?: "browser" | "12hour" | "24hour";
+  date_style?: "full" | "long" | "medium" | "short";
+  time_style?: "full" | "long" | "medium" | "short";
+  date_format?: string;
+  locale?: string | Locale;
+};
 /**
  * Formats a Unix timestamp into a human-readable date/time string.
  *
  * The format of the output string is determined by a configuration object passed as an argument, which
- * may specify a time zone, 12- or 24-hour time, and various stylistic options for the date and time.
+ * may specify a time zone, 12- or 24-hour time, various stylistic options for the date and time, and a locale.
  * If these options are not specified, the function will use system defaults or sensible fallbacks.
  *
  * The function is robust to environments where the Intl API is not fully supported, and includes a
@@ -126,53 +132,71 @@ const getResolvedTimeZone = () => {
  */
 export const formatUnixTimestampToDateTime = (
   unixTimestamp: number,
-  config: {
-    timezone?: string;
-    time_format?: "browser" | "12hour" | "24hour";
-    date_style?: "full" | "long" | "medium" | "short";
-    time_style?: "full" | "long" | "medium" | "short";
-    strftime_fmt?: string;
-  },
+  config: DateTimeStyle = {},
 ): string => {
-  const { timezone, time_format, date_style, time_style, strftime_fmt } =
+  const { timezone, time_format, date_style, time_style, date_format, locale } =
     config;
-  const locale = window.navigator?.language || "en-US";
+
+  // Determine the locale to use
+  let localeCode: string;
+  let dateFnsLocale: Locale | undefined;
+  if (typeof locale === "string") {
+    localeCode = locale;
+  } else if (locale && "code" in locale) {
+    localeCode = (locale as Locale).code || "en-US";
+    dateFnsLocale = locale as Locale;
+  } else {
+    localeCode = window.navigator?.language || "en-US";
+  }
+
   if (isNaN(unixTimestamp)) {
     return "Invalid time";
   }
 
   try {
     const date = new Date(unixTimestamp * 1000);
-    const resolvedTimeZone = getResolvedTimeZone();
 
-    // use strftime_fmt if defined in config
-    if (strftime_fmt) {
-      const offset = getUTCOffset(date, timezone || resolvedTimeZone);
-      const strftime_locale = strftime.timezone(offset);
-      return strftime_locale(strftime_fmt, date);
+    if (date_format) {
+      const resolvedTimeZone = timezone || getResolvedTimeZone();
+      let formatted = formatInTimeZone(date, resolvedTimeZone, date_format, {
+        locale: dateFnsLocale,
+      });
+      // Uppercase AM/PM for 12-hour formats
+      if (date_format.includes("a") || date_format.includes("aaa")) {
+        formatted = formatted.replace(/am|pm/gi, (match) =>
+          match.toUpperCase(),
+        );
+      }
+      return formatted;
     }
 
     // DateTime format options
     const options: Intl.DateTimeFormatOptions = {
       dateStyle: date_style,
       timeStyle: time_style,
-      hour12: time_format !== "browser" ? time_format == "12hour" : undefined,
+      hour12: time_format !== "browser" ? time_format === "12hour" : undefined,
     };
 
     // Only set timeZone option when resolvedTimeZone does not match UTC±HH:MM format, or when timezone is set in config
+    const resolvedTimeZone = getResolvedTimeZone();
     const isUTCOffsetFormat = /^UTC[+-]\d{2}:\d{2}$/.test(resolvedTimeZone);
     if (timezone || !isUTCOffsetFormat) {
       options.timeZone = timezone || resolvedTimeZone;
     }
 
-    const formatter = new Intl.DateTimeFormat(locale, options);
-    const formattedDateTime = formatter.format(date);
+    const formatter = new Intl.DateTimeFormat(localeCode, options);
+    let formattedDateTime = formatter.format(date);
 
-    // Regex to check for existence of time. This is needed because dateStyle/timeStyle is not always supported.
+    if (options.hour12) {
+      formattedDateTime = formattedDateTime.replace(/am|pm/gi, (match) =>
+        match.toUpperCase(),
+      );
+    }
+
+    // Regex to check for existence of time
     const containsTime = /\d{1,2}:\d{1,2}/.test(formattedDateTime);
 
-    // fallback if the browser does not support dateStyle/timeStyle in Intl.DateTimeFormat
-    // This works even tough the timezone is undefined, it will use the runtime's default time zone
+    // fallback if the browser does not support dateStyle/timeStyle
     if (!containsTime) {
       const dateOptions = {
         ...formatMap[date_style ?? ""]?.date,
@@ -185,10 +209,17 @@ export const formatUnixTimestampToDateTime = (
         hour12: options.hour12,
       };
 
-      return `${date.toLocaleDateString(
-        locale,
+      let fallbackFormatted = `${date.toLocaleDateString(
+        localeCode,
         dateOptions,
-      )} ${date.toLocaleTimeString(locale, timeOptions)}`;
+      )} ${date.toLocaleTimeString(localeCode, timeOptions)}`;
+      // Uppercase AM/PM in fallback
+      if (options.hour12) {
+        fallbackFormatted = fallbackFormatted.replace(/am|pm/gi, (match) =>
+          match.toUpperCase(),
+        );
+      }
+      return fallbackFormatted;
     }
 
     return formattedDateTime;

@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "cameras": "Estadístiques de càmera - Frigate",
+    "storage": "Estadístiques d'emmagatzematge - Frigate",
+    "general": "Estadístiques generals - Frigate",
+    "logs": {
+      "frigate": "Registres de Frigate - Frigate",
+      "go2rtc": "Registres de Go2RTC - Frigate",
+      "nginx": "Registres de Nginix - Frigate"
+    },
+    "enrichments": "Estadístiques complementàries - Frigate"
+  },
+  "title": "Sistema",
+  "metrics": "Mètriques del sistema",
+  "logs": {
+    "download": {
+      "label": "Descarregar registres"
+    },
+    "copy": {
+      "label": "Copiar al porta-retalls",
+      "success": "Registres copiats al porta-retalls",
+      "error": "No s'han pogut copiar els registres al porta-retalls"
+    },
+    "type": {
+      "label": "Tipus",
+      "timestamp": "Marca temporal",
+      "tag": "Etiqueta",
+      "message": "Missatge"
+    },
+    "tips": "Els registres s'estàn transmetent des del servidor",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Error al obtenir els registres: {{errorMessage}}",
+        "whileStreamingLogs": "Error en la transmissió dels registres: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "detector": {
+      "memoryUsage": "Ús de memòria del detector",
+      "title": "Detectors",
+      "inferenceSpeed": "Velocitat d'inferència del detector",
+      "cpuUsage": "Ús de CPU del detector",
+      "temperature": "Temperatura del detector"
+    },
+    "title": "General",
+    "hardwareInfo": {
+      "title": "Informació de maquinari",
+      "gpuUsage": "Ús de la GPU",
+      "gpuMemory": "Memòria de GPU",
+      "gpuDecoder": "Decodificador de GPU",
+      "gpuEncoder": "Codificador de GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Sortida de Vainfo",
+          "processOutput": "Sortida del procés:",
+          "processError": "Error de procés:",
+          "returnCode": "Codi de retorn: {{code}}"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Sortida de Nvidia SMI",
+          "vbios": "Informació de VBios: {{vbios}}",
+          "cudaComputerCapability": "Capacitat de càlcul CUDA: {{cuda_compute}}",
+          "name": "Nom: {{name}}",
+          "driver": "Controlador: {{driver}}"
+        },
+        "closeInfo": {
+          "label": "Tancar informació de GPU"
+        },
+        "copyInfo": {
+          "label": "Copiar informació de GPU"
+        },
+        "toast": {
+          "success": "Informació de GPU copiada al porta-retalls"
+        }
+      },
+      "npuUsage": "Ús de NPU",
+      "npuMemory": "Memòria de NPU"
+    },
+    "otherProcesses": {
+      "title": "Altres processos",
+      "processMemoryUsage": "Ús de memòria de procés",
+      "processCpuUsage": "Ús de la CPU del procés"
+    }
+  },
+  "storage": {
+    "title": "Emmagatzematge",
+    "recordings": {
+      "title": "Gravacions",
+      "earliestRecording": "Gravació més antiga disponible:",
+      "tips": "Aquest valor representa l'emmagatzematge total utilitzat per les gravacions a la base de dades de Frigate. Frigate no registre l'ús de tots els arxius del disc."
+    },
+    "cameraStorage": {
+      "camera": "Càmera",
+      "unusedStorageInformation": "Informació d'emmagatzematge no utilitzat",
+      "bandwidth": "Ample de banda",
+      "storageUsed": "Emmagatzematge",
+      "title": "Emmagatzematge de càmera",
+      "unused": {
+        "title": "Sense utilitzar",
+        "tips": "Aquest valor pot no de forma exacta representar l'espai lliure disponible a Frigate si tens altres fitxers emmagatzemats en la vostra unitat més enllà dels registres de Frigate. Frigate no rastreja l'ús d'emmagatzematge extern als seus registres."
+      },
+      "percentageOfTotalUsed": "Percentatge del total"
+    },
+    "overview": "Visió general"
+  },
+  "cameras": {
+    "framesAndDetections": "Fotogrames / Deteccions",
+    "label": {
+      "capture": "captura",
+      "cameraDetect": "{{camName}} detectar",
+      "cameraCapture": "{{camName}} captura",
+      "camera": "càmera",
+      "skipped": "omès",
+      "ffmpeg": "FFmpeg",
+      "detect": "detectar",
+      "overallFramesPerSecond": "Fotogrames per segon globals",
+      "overallDetectionsPerSecond": "Deteccions per segon globals",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraFramesPerSecond": "{{camName}} fotogrames per segon",
+      "cameraDetectionsPerSecond": "{{camName}} deteccions per segon",
+      "overallSkippedDetectionsPerSecond": "Nombre total de deteccions descartades per segon",
+      "cameraSkippedDetectionsPerSecond": "Nombre de deteccions descartades per segon a {{camName}}"
+    },
+    "info": {
+      "codec": "Còdec:",
+      "fps": "FPS:",
+      "resolution": "Resolució:",
+      "video": "Vídeo:",
+      "unknown": "Desconegut",
+      "stream": "Transmissió {{idx}}",
+      "error": "Error: {{error}}",
+      "fetching": "Obtenint dades de càmera",
+      "aspectRatio": "relació d'aspecte",
+      "tips": {
+        "title": "Informació del sondeig de la càmera"
+      },
+      "audio": "Àudio:",
+      "cameraProbeInfo": "Informació del sondeig de la càmera {{camera}}",
+      "streamDataFromFFPROBE": "Les dades de la transmissió són obtingudes mitjançant <code>ffprobe</code>."
+    },
+    "title": "Càmeres",
+    "overview": "Visió general",
+    "toast": {
+      "success": {
+        "copyToClipboard": "S'han copiat les dades de sondeig al porta-retalls."
+      },
+      "error": {
+        "unableToProbeCamera": "No s'ha pogut sondejar la càmera: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Darrera actualització: ",
+  "stats": {
+    "reindexingEmbeddings": "Reindexant incrustacions ({{processed}}% completat)",
+    "healthy": "El sistema és saludable",
+    "cameraIsOffline": "{{camera}} està fora de línia",
+    "ffmpegHighCpuUsage": "{{camera}} te un ús elevat de CPU per FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} te un ús elevat de CPU per la detecció ({{detectAvg}}%)",
+    "detectIsVerySlow": "{{detect}} és molt lent ({{speed}} ms)",
+    "detectIsSlow": "{{detect}} és lent ({{speed}} ms)"
+  },
+  "enrichments": {
+    "title": "Enriquiments",
+    "embeddings": {
+      "face_recognition_speed": "Velocitat de reconeixement facial",
+      "image_embedding": "Incrustació d'imatges",
+      "text_embedding": "Incrustació de text",
+      "face_recognition": "Reconeixement de rostres",
+      "plate_recognition": "Reconeixemnt de matrícules",
+      "image_embedding_speed": "Velocitat d'ncrustació d'imatges",
+      "face_embedding_speed": "Velocitat d'incrustació de rostres",
+      "plate_recognition_speed": "Velocitat de reconeixement de matrícules",
+      "text_embedding_speed": "Velocitat d'incrustació de text",
+      "yolov9_plate_detection": "Detecció de matrícules YOLOv9",
+      "yolov9_plate_detection_speed": "Velocitat de detecció de matrícules YOLOv9"
+    },
+    "infPerSecond": "Inferències per segon"
+  }
+}

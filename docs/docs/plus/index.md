@@ -22,11 +22,11 @@ Not all model types are supported by all detectors, so it's important to choose 
 
 ## Supported detector types
 
-Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVino (`openvino`), ONNX (`onnx`), and ROCm (`rocm`) detectors.
+Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVino (`openvino`), and ONNX (`onnx`) detectors.
 
 :::warning
 
-Using Frigate+ models with `onnx` and `rocm` is only available with Frigate 0.15 and later.
+Using Frigate+ models with `onnx` is only available with Frigate 0.15 and later.
 
 :::
 

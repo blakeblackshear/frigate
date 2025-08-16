@@ -9,7 +9,7 @@ title: Getting started
 
 If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
 
-If you already have Frigate installed in Docker or as a Home Assistant addon, you can continue to [Configuring Frigate](#configuring-frigate) below.
+If you already have Frigate installed through Docker or through a Home Assistant Add-on, you can continue to [Configuring Frigate](#configuring-frigate) below.
 
 :::
 
@@ -81,7 +81,7 @@ Now you have a minimal Debian server that requires very little maintenance.
 
 ## Installing Frigate
 
-This section shows how to create a minimal directory structure for a Docker installation on Debian. If you have installed Frigate as a Home Assistant addon or another way, you can continue to [Configuring Frigate](#configuring-frigate).
+This section shows how to create a minimal directory structure for a Docker installation on Debian. If you have installed Frigate as a Home Assistant Add-on or another way, you can continue to [Configuring Frigate](#configuring-frigate).
 
 ### Setup directories
 
@@ -110,7 +110,6 @@ This `docker-compose.yml` file is just a starter for amd64 devices. You will nee
 `docker-compose.yml`
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     container_name: frigate
@@ -151,8 +150,6 @@ cameras:
         - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
           roles:
             - detect
-    detect:
-      enabled: False # <---- disable detection until you have a working camera feed
 ```
 
 ### Step 2: Start Frigate
@@ -165,19 +162,18 @@ FFmpeg arguments for other types of cameras can be found [here](../configuration
 
 ### Step 3: Configure hardware acceleration (recommended)
 
-Now that you have a working camera configuration, you want to setup hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](../configuration/hardware_acceleration.md) config reference for examples applicable to your hardware.
+Now that you have a working camera configuration, you want to setup hardware acceleration to minimize the CPU required to decode your video streams. See the [hardware acceleration](../configuration/hardware_acceleration_video.md) config reference for examples applicable to your hardware.
 
 Here is an example configuration with hardware acceleration configured to work with most Intel processors with an integrated GPU using the [preset](../configuration/ffmpeg_presets.md):
 
 `docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     ...
     devices:
-      - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
+      - /dev/dri/renderD128:/dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
     ...
 ```
 
@@ -201,7 +197,6 @@ By default, Frigate will use a single CPU detector. If you have a USB Coral, you
 `docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     ...
@@ -307,7 +302,8 @@ By default, Frigate will retain video of all tracked objects for 10 days. The fu
 
 ### Step 7: Complete config
 
-At this point you have a complete config with basic functionality. 
+At this point you have a complete config with basic functionality.
+
 - View [common configuration examples](../configuration/index.md#common-configuration-examples) for a list of common configuration examples.
 - View [full config reference](../configuration/reference.md) for a complete list of configuration options.
 

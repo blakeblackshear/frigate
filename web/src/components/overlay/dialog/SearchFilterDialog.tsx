@@ -33,6 +33,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Trans, useTranslation } from "react-i18next";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { LuCheck } from "react-icons/lu";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -52,7 +61,7 @@ export default function SearchFilterDialog({
   onUpdateFilter,
 }: SearchFilterDialogProps) {
   // data
-
+  const { t } = useTranslation(["components/filter"]);
   const [currentFilter, setCurrentFilter] = useState(filter ?? {});
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
 
@@ -71,18 +80,21 @@ export default function SearchFilterDialog({
       currentFilter &&
       (currentFilter.time_range ||
         (currentFilter.min_score ?? 0) > 0.5 ||
+        (currentFilter.min_speed ?? 1) > 1 ||
         (currentFilter.has_snapshot ?? 0) === 1 ||
         (currentFilter.has_clip ?? 0) === 1 ||
         (currentFilter.max_score ?? 1) < 1 ||
+        (currentFilter.max_speed ?? 150) < 150 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
-        (currentFilter.sub_labels?.length ?? 0) > 0),
+        (currentFilter.sub_labels?.length ?? 0) > 0 ||
+        (currentFilter.recognized_license_plate?.length ?? 0) > 0),
     [currentFilter],
   );
 
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      aria-label="More Filters"
+      aria-label={t("more")}
       size="sm"
       variant={moreFiltersSelected ? "select" : "default"}
     >
@@ -91,7 +103,7 @@ export default function SearchFilterDialog({
           moreFiltersSelected ? "text-white" : "text-secondary-foreground",
         )}
       />
-      More Filters
+      {t("more")}
     </Button>
   );
   const content = (
@@ -117,11 +129,28 @@ export default function SearchFilterDialog({
           setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
         }
       />
+      <RecognizedLicensePlatesFilterContent
+        recognizedLicensePlates={currentFilter.recognized_license_plate}
+        setRecognizedLicensePlates={(plate) =>
+          setCurrentFilter({
+            ...currentFilter,
+            recognized_license_plate: plate,
+          })
+        }
+      />
       <ScoreFilterContent
         minScore={currentFilter.min_score}
         maxScore={currentFilter.max_score}
         setScoreRange={(min, max) =>
           setCurrentFilter({ ...currentFilter, min_score: min, max_score: max })
+        }
+      />
+      <SpeedFilterContent
+        config={config}
+        minSpeed={currentFilter.min_speed}
+        maxSpeed={currentFilter.max_speed}
+        setSpeedRange={(min, max) =>
+          setCurrentFilter({ ...currentFilter, min_speed: min, max_speed: max })
         }
       />
       <SnapshotClipFilterContent
@@ -156,7 +185,7 @@ export default function SearchFilterDialog({
       <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
-          aria-label="Apply"
+          aria-label={t("button.apply", { ns: "common" })}
           onClick={() => {
             if (currentFilter != filter) {
               onUpdateFilter(currentFilter);
@@ -165,10 +194,10 @@ export default function SearchFilterDialog({
             setOpen(false);
           }}
         >
-          Apply
+          {t("button.apply", { ns: "common" })}
         </Button>
         <Button
-          aria-label="Reset filters to default values"
+          aria-label={t("reset.label")}
           onClick={() => {
             setCurrentFilter((prevFilter) => ({
               ...prevFilter,
@@ -178,12 +207,15 @@ export default function SearchFilterDialog({
               search_type: undefined,
               min_score: undefined,
               max_score: undefined,
+              min_speed: undefined,
+              max_speed: undefined,
               has_snapshot: undefined,
               has_clip: undefined,
+              recognized_license_plate: undefined,
             }));
           }}
         >
-          Reset
+          {t("button.reset", { ns: "common" })}
         </Button>
       </div>
     </div>
@@ -192,6 +224,7 @@ export default function SearchFilterDialog({
   return (
     <PlatformAwareSheet
       trigger={trigger}
+      title={t("more")}
       content={content}
       contentClassName={cn(
         "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",
@@ -219,15 +252,18 @@ function TimeRangeFilterContent({
   timeRange,
   updateTimeRange,
 }: TimeRangeFilterContentProps) {
+  const { t } = useTranslation(["components/filter", "components/dialog"]);
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
 
   const [afterHour, beforeHour] = useMemo(() => {
-    if (!timeRange || !timeRange.includes(",")) {
-      return [DEFAULT_TIME_RANGE_AFTER, DEFAULT_TIME_RANGE_BEFORE];
+    if (Array.isArray(timeRange) && timeRange.length === 2) {
+      return timeRange;
     }
-
-    return timeRange.split(",");
+    if (typeof timeRange === "string" && timeRange.includes(",")) {
+      return timeRange.split(",");
+    }
+    return [DEFAULT_TIME_RANGE_AFTER, DEFAULT_TIME_RANGE_BEFORE];
   }, [timeRange]);
 
   const [selectedAfterHour, setSelectedAfterHour] = useState(afterHour);
@@ -260,7 +296,7 @@ function TimeRangeFilterContent({
 
   return (
     <div className="overflow-x-hidden">
-      <div className="text-lg">Time Range</div>
+      <div className="text-lg">{t("timeRange")}</div>
       <div className="mt-3 flex flex-row items-center justify-center gap-2">
         <Popover
           open={startOpen}
@@ -273,7 +309,9 @@ function TimeRangeFilterContent({
           <PopoverTrigger asChild>
             <Button
               className={`text-primary ${isDesktop ? "" : "text-xs"} `}
-              aria-label="Select Start Time"
+              aria-label={t("export.time.start.label", {
+                ns: "components/dialog",
+              })}
               variant={startOpen ? "select" : "default"}
               size="sm"
               onClick={() => {
@@ -311,7 +349,9 @@ function TimeRangeFilterContent({
           <PopoverTrigger asChild>
             <Button
               className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-              aria-label="Select End Time"
+              aria-label={t("export.time.end.label", {
+                ns: "components/dialog",
+              })}
               variant={endOpen ? "select" : "default"}
               size="sm"
               onClick={() => {
@@ -354,11 +394,12 @@ export function ZoneFilterContent({
   zones,
   updateZones,
 }: ZoneFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <>
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
-        <div className="text-lg">Zones</div>
+        <div className="text-lg">{t("zones.label")}</div>
         {allZones && (
           <>
             <div className="mb-5 mt-2.5 flex items-center justify-between">
@@ -366,7 +407,7 @@ export function ZoneFilterContent({
                 className="mx-2 cursor-pointer text-primary"
                 htmlFor="allZones"
               >
-                All Zones
+                {t("zones.all.title")}
               </Label>
               <Switch
                 className="ml-1"
@@ -421,13 +462,21 @@ export function SubFilterContent({
   subLabels,
   setSubLabels,
 }: SubFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
+  const sortedSubLabels = useMemo(
+    () =>
+      [...allSubLabels].sort((a, b) =>
+        a.toLowerCase().localeCompare(b.toLowerCase()),
+      ),
+    [allSubLabels],
+  );
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="text-lg">Sub Labels</div>
+      <div className="text-lg">{t("subLabels.label")}</div>
       <div className="mb-5 mt-2.5 flex items-center justify-between">
         <Label className="mx-2 cursor-pointer text-primary" htmlFor="allLabels">
-          All Sub Labels
+          {t("subLabels.all")}
         </Label>
         <Switch
           className="ml-1"
@@ -441,7 +490,7 @@ export function SubFilterContent({
         />
       </div>
       <div className="mt-2.5 flex flex-col gap-2.5">
-        {allSubLabels.map((item) => (
+        {sortedSubLabels.map((item) => (
           <FilterSwitch
             key={item}
             label={item.replaceAll("_", " ")}
@@ -479,10 +528,11 @@ export function ScoreFilterContent({
   maxScore,
   setScoreRange,
 }: ScoreFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Score</div>
+      <div className="mb-3 text-lg">{t("score")}</div>
       <div className="flex items-center gap-1">
         <Input
           className="w-14 text-center"
@@ -521,6 +571,69 @@ export function ScoreFilterContent({
   );
 }
 
+type SpeedFilterContentProps = {
+  config?: FrigateConfig;
+  minSpeed: number | undefined;
+  maxSpeed: number | undefined;
+  setSpeedRange: (min: number | undefined, max: number | undefined) => void;
+};
+export function SpeedFilterContent({
+  config,
+  minSpeed,
+  maxSpeed,
+  setSpeedRange,
+}: SpeedFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
+  return (
+    <div className="overflow-x-hidden">
+      <DropdownMenuSeparator className="mb-3" />
+      <div className="mb-3 text-lg">
+        {t("estimatedSpeed", {
+          ns: "components/filter",
+          unit:
+            config?.ui.unit_system == "metric"
+              ? t("unit.speed.kph", { ns: "common" })
+              : t("unit.speed.mph", { ns: "common" }),
+        })}
+      </div>
+      <div className="flex items-center gap-1">
+        <Input
+          className="w-14 text-center"
+          inputMode="numeric"
+          value={minSpeed ?? 1}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            if (value) {
+              setSpeedRange(parseInt(value), maxSpeed ?? 1.0);
+            }
+          }}
+        />
+        <DualThumbSlider
+          className="mx-2 w-full"
+          min={1}
+          max={150}
+          step={1}
+          value={[minSpeed ?? 1, maxSpeed ?? 150]}
+          onValueChange={([min, max]) => setSpeedRange(min, max)}
+        />
+        <Input
+          className="w-14 text-center"
+          inputMode="numeric"
+          value={maxSpeed ?? 150}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            if (value) {
+              setSpeedRange(minSpeed ?? 1, parseInt(value));
+            }
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 type SnapshotClipContentProps = {
   config?: FrigateConfig;
   hasSnapshot: boolean | undefined;
@@ -540,6 +653,7 @@ export function SnapshotClipFilterContent({
   submittedToFrigatePlus,
   setSnapshotClip,
 }: SnapshotClipContentProps) {
+  const { t } = useTranslation(["components/filter"]);
   const [isSnapshotFilterActive, setIsSnapshotFilterActive] = useState(
     hasSnapshot !== undefined,
   );
@@ -568,7 +682,7 @@ export function SnapshotClipFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <div className="mb-3 text-lg">Features</div>
+      <div className="mb-3 text-lg">{t("features.label")}</div>
 
       <div className="my-2.5 space-y-1">
         <div className="flex items-center justify-between">
@@ -590,7 +704,7 @@ export function SnapshotClipFilterContent({
               htmlFor="snapshot-filter"
               className="cursor-pointer text-sm font-medium leading-none"
             >
-              Has a snapshot
+              {t("features.hasSnapshot")}
             </Label>
           </div>
           <ToggleGroup
@@ -608,17 +722,17 @@ export function SnapshotClipFilterContent({
           >
             <ToggleGroupItem
               value="yes"
-              aria-label="Yes"
+              aria-label={t("button.yes", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              Yes
+              {t("button.yes", { ns: "common" })}
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
-              aria-label="No"
+              aria-label={t("button.no", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              No
+              {t("button.no", { ns: "common" })}
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -652,12 +766,9 @@ export function SnapshotClipFilterContent({
                       side="left"
                       sideOffset={5}
                     >
-                      You must first filter on tracked objects that have a
-                      snapshot.
-                      <br />
-                      <br />
-                      Tracked objects without a snapshot cannot be submitted to
-                      Frigate+.
+                      <Trans ns="components/filter">
+                        features.submittedToFrigatePlus.tips
+                      </Trans>
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -666,7 +777,7 @@ export function SnapshotClipFilterContent({
                 htmlFor="plus-filter"
                 className="cursor-pointer text-sm font-medium leading-none"
               >
-                Submitted to Frigate+
+                {t("features.submittedToFrigatePlus.label")}
               </Label>
             </div>
             <ToggleGroup
@@ -689,17 +800,17 @@ export function SnapshotClipFilterContent({
             >
               <ToggleGroupItem
                 value="yes"
-                aria-label="Yes"
+                aria-label={t("button.yes", { ns: "common" })}
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                Yes
+                {t("button.yes", { ns: "common" })}
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="no"
-                aria-label="No"
+                aria-label={t("button.no", { ns: "common" })}
                 className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
               >
-                No
+                {t("button.no", { ns: "common" })}
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -728,7 +839,7 @@ export function SnapshotClipFilterContent({
               htmlFor="clip-filter"
               className="cursor-pointer text-sm font-medium leading-none"
             >
-              Has a video clip
+              {t("features.hasVideoClip")}
             </Label>
           </div>
           <ToggleGroup
@@ -744,21 +855,166 @@ export function SnapshotClipFilterContent({
           >
             <ToggleGroupItem
               value="yes"
-              aria-label="Yes"
+              aria-label={t("button.yes", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              Yes
+              {t("button.yes", { ns: "common" })}
             </ToggleGroupItem>
             <ToggleGroupItem
               value="no"
-              aria-label="No"
+              aria-label={t("button.no", { ns: "common" })}
               className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
-              No
+              {t("button.no", { ns: "common" })}
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
       </div>
+    </div>
+  );
+}
+
+type RecognizedLicensePlatesFilterContentProps = {
+  recognizedLicensePlates: string[] | undefined;
+  setRecognizedLicensePlates: (
+    recognizedLicensePlates: string[] | undefined,
+  ) => void;
+};
+
+export function RecognizedLicensePlatesFilterContent({
+  recognizedLicensePlates,
+  setRecognizedLicensePlates,
+}: RecognizedLicensePlatesFilterContentProps) {
+  const { t } = useTranslation(["components/filter"]);
+
+  const { data: allRecognizedLicensePlates, error } = useSWR<string[]>(
+    "recognized_license_plates",
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  const [selectedRecognizedLicensePlates, setSelectedRecognizedLicensePlates] =
+    useState<string[]>(recognizedLicensePlates || []);
+  const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    if (recognizedLicensePlates) {
+      setSelectedRecognizedLicensePlates(recognizedLicensePlates);
+    } else {
+      setSelectedRecognizedLicensePlates([]);
+    }
+  }, [recognizedLicensePlates]);
+
+  const handleSelect = (recognizedLicensePlate: string) => {
+    const newSelected = selectedRecognizedLicensePlates.includes(
+      recognizedLicensePlate,
+    )
+      ? selectedRecognizedLicensePlates.filter(
+          (id) => id !== recognizedLicensePlate,
+        ) // Deselect
+      : [...selectedRecognizedLicensePlates, recognizedLicensePlate]; // Select
+
+    setSelectedRecognizedLicensePlates(newSelected);
+    if (newSelected.length === 0) {
+      setRecognizedLicensePlates(undefined); // Clear filter if no plates selected
+    } else {
+      setRecognizedLicensePlates(newSelected);
+    }
+  };
+
+  if (!allRecognizedLicensePlates || allRecognizedLicensePlates.length === 0) {
+    return null;
+  }
+
+  const filterItems = (value: string, search: string) => {
+    if (!search) return 1; // Show all items if no search input
+
+    if (search.includes("*") || search.includes("?")) {
+      const escapedSearch = search
+        .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+        .replace(/\*/g, ".*") // * matches any characters
+        .replace(/\?/g, "."); // ? matches any single character
+      const regex = new RegExp(`^${escapedSearch}$`, "i");
+      return regex.test(value) ? 1 : -1; // 1 for match, -1 for no match
+    }
+
+    // fallback to substring matching if no wildcards
+    return value.toLowerCase().includes(search.toLowerCase()) ? 1 : -1;
+  };
+
+  return (
+    <div className="overflow-x-hidden">
+      <DropdownMenuSeparator className="mb-3" />
+      <div className="mb-3 text-lg">{t("recognizedLicensePlates.title")}</div>
+      {error ? (
+        <p className="text-sm text-red-500">
+          {t("recognizedLicensePlates.loadFailed")}
+        </p>
+      ) : !allRecognizedLicensePlates ? (
+        <p className="text-sm text-muted-foreground">
+          {t("recognizedLicensePlates.loading")}
+        </p>
+      ) : (
+        <>
+          <Command
+            className="border border-input bg-background"
+            filter={filterItems}
+          >
+            <CommandInput
+              placeholder={t("recognizedLicensePlates.placeholder")}
+              value={inputValue}
+              onValueChange={setInputValue}
+            />
+            <CommandList className="max-h-[200px] overflow-auto">
+              {allRecognizedLicensePlates.length > 0 && inputValue && (
+                <CommandEmpty>
+                  {t("recognizedLicensePlates.noLicensePlatesFound")}
+                </CommandEmpty>
+              )}
+              {allRecognizedLicensePlates.map((plate) => (
+                <CommandItem
+                  key={plate}
+                  value={plate}
+                  onSelect={() => handleSelect(plate)}
+                  className="cursor-pointer"
+                >
+                  <LuCheck
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedRecognizedLicensePlates.includes(plate)
+                        ? "opacity-100"
+                        : "opacity-0",
+                    )}
+                  />
+                  {plate}
+                </CommandItem>
+              ))}
+            </CommandList>
+          </Command>
+          {selectedRecognizedLicensePlates.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {selectedRecognizedLicensePlates.map((id) => (
+                <span
+                  key={id}
+                  className="inline-flex items-center rounded bg-selected px-2 py-1 text-sm text-white"
+                >
+                  {id}
+                  <button
+                    onClick={() => handleSelect(id)}
+                    className="ml-1 text-white hover:text-gray-200"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+      <p className="mt-1 text-sm text-muted-foreground">
+        {t("recognizedLicensePlates.selectPlatesFromList")}
+      </p>
     </div>
   );
 }

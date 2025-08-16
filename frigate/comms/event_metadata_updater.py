@@ -2,9 +2,7 @@
 
 import logging
 from enum import Enum
-from typing import Optional
-
-from frigate.events.types import RegenerateDescriptionEnum
+from typing import Any
 
 from .zmq_proxy import Publisher, Subscriber
 
@@ -13,7 +11,13 @@ logger = logging.getLogger(__name__)
 
 class EventMetadataTypeEnum(str, Enum):
     all = ""
+    manual_event_create = "manual_event_create"
+    manual_event_end = "manual_event_end"
     regenerate_description = "regenerate_description"
+    sub_label = "sub_label"
+    recognized_license_plate = "recognized_license_plate"
+    lpr_event_create = "lpr_event_create"
+    save_lpr_snapshot = "save_lpr_snapshot"
 
 
 class EventMetadataPublisher(Publisher):
@@ -21,12 +25,11 @@ class EventMetadataPublisher(Publisher):
 
     topic_base = "event_metadata/"
 
-    def __init__(self, topic: EventMetadataTypeEnum) -> None:
-        topic = topic.value
-        super().__init__(topic)
+    def __init__(self) -> None:
+        super().__init__()
 
-    def publish(self, payload: tuple[str, RegenerateDescriptionEnum]) -> None:
-        super().publish(payload)
+    def publish(self, topic: EventMetadataTypeEnum, payload: Any) -> None:
+        super().publish(payload, topic.value)
 
 
 class EventMetadataSubscriber(Subscriber):
@@ -35,17 +38,11 @@ class EventMetadataSubscriber(Subscriber):
     topic_base = "event_metadata/"
 
     def __init__(self, topic: EventMetadataTypeEnum) -> None:
-        topic = topic.value
-        super().__init__(topic)
+        super().__init__(topic.value)
 
-    def check_for_update(
-        self, timeout: float = 1
-    ) -> Optional[tuple[EventMetadataTypeEnum, str, RegenerateDescriptionEnum]]:
-        return super().check_for_update(timeout)
-
-    def _return_object(self, topic: str, payload: any) -> any:
+    def _return_object(self, topic: str, payload: tuple) -> tuple:
         if payload is None:
-            return (None, None, None)
+            return (None, None)
+
         topic = EventMetadataTypeEnum[topic[len(self.topic_base) :]]
-        event_id, source = payload
-        return (topic, event_id, RegenerateDescriptionEnum(source))
+        return (topic, payload)

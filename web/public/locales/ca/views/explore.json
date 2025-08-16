@@ -1,0 +1,209 @@
+{
+  "exploreIsUnavailable": {
+    "downloadingModels": {
+      "tips": {
+        "context": "Potser voldreu reindexar les incrustacions dels objectes seguits un cop s'hagin descarregat els models.",
+        "documentation": "Llegir la documentació"
+      },
+      "context": "Frigate està descarregant els models d'embeddings necessaris per a donar suport a la funció de cerca semàntica. Això pot trigar diversos minuts, depenent de la velocitat de la teva connexió de xarxa.",
+      "setup": {
+        "visionModel": "Model de visió",
+        "visionModelFeatureExtractor": "Extractor de característiques del model de visió",
+        "textModel": "Model de text",
+        "textTokenizer": "Tokenitzador de text"
+      },
+      "error": "S'ha produït un error. Comproveu els registres de Frigate."
+    },
+    "embeddingsReindexing": {
+      "context": "Explorar pot ser utilitzat després d’haver completat la reindexació d’objectes rastrejats.",
+      "startingUp": "Iniciant…",
+      "finishingShortly": "Finalitzant en breus",
+      "step": {
+        "thumbnailsEmbedded": "Miniatures integrades: ",
+        "descriptionsEmbedded": "Descripcions integrades: ",
+        "trackedObjectsProcessed": "Objectes processats: "
+      },
+      "estimatedTime": "Temps restant estimat:"
+    },
+    "title": "Explorar no està disponible"
+  },
+  "documentTitle": "Explora - Frigate",
+  "generativeAI": "IA Generativa",
+  "objectLifecycle": {
+    "createObjectMask": "Crear màscara per a l'objecte",
+    "title": "Cicle de vida de l'objecte",
+    "noImageFound": "No s'ha trobat cap imatge per a aquesta marca temporal.",
+    "adjustAnnotationSettings": "Ajustar els paràmetres de les anotacions",
+    "scrollViewTips": "Desplaça't per veure els moments significatius del cicle de vida d'aquest objecte.",
+    "lifecycleItemDesc": {
+      "entered_zone": "{{label}} ha entrat a {{zones}}",
+      "active": "{{label}} s'ha activat",
+      "stationary": "{{label}} ha esdevingut estacionari",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detectat per a {{label}}",
+        "other": "{{label}} reconegut com a {{attribute}}"
+      },
+      "header": {
+        "zones": "Zones",
+        "ratio": "Proporció",
+        "area": "Àrea"
+      },
+      "heard": "{{label}} escoltat",
+      "external": "{{label}} detectat",
+      "gone": "{{label}} ha marxat",
+      "visible": "{{label}} detectat"
+    },
+    "annotationSettings": {
+      "offset": {
+        "documentation": "Llegir la documentació ",
+        "label": "Desplaçament de l'anotació",
+        "desc": "Aquestes dades provenen de la detecció d'objectes, però se superposen a les imatges d’enregistrament. És poc probable que les dues transmissions estiguin perfectament sincronitzades. Per aquest motiu, la capsa delimitadora i les imatges poden no coincidir exactament. Tanmateix, es pot utilitzar el camp <code>annotation_offset</code> per ajustar-ho.",
+        "tips": "CONSELL: Imagina que hi ha la captura d'un esdeveniment on una persona camina d'esquerra a dreta. Si la caixa delimitadora de l'objecte està constantment a l'esquerra de la persona, llavors el valor s'hauria de disminuir. Si, per contra, la caixa delimitadora està constantment per davant de la persona (a la seva dreta en aquest exemple), llavors el valor s'hauria d'augmentar.",
+        "toast": {
+          "success": "El desplaçament d'anotació per {{camera}} s'ha guardat al fitxer de configuració. Reinicia Frigate per aplicar els canvis."
+        },
+        "millisecondsToOffset": "Mil·lisegons a desplaçar les anotacions de detecció: <em>Per Defecte: 0</em>"
+      },
+      "title": "Paràmetres de les anotacions",
+      "showAllZones": {
+        "title": "Mostra totes les zones",
+        "desc": "Mostra sempre les zones en fotogrames on hi hagin aparegut objectes."
+      }
+    },
+    "carousel": {
+      "next": "Diapositiva següent",
+      "previous": "Diapositiva anterior"
+    },
+    "autoTrackingTips": "Les posicions dels recuadres delimitadors seràn inexactes per a càmeres amb seguiment automàtic.",
+    "count": "{{first}} de {{second}}",
+    "trackedPoint": "Punt seguit"
+  },
+  "exploreMore": "Explora més {{label}} objectes",
+  "trackedObjectDetails": "Detalls de l'objecte rastrejat",
+  "type": {
+    "details": "detalls",
+    "snapshot": "instantània",
+    "video": "vídeo",
+    "object_lifecycle": "cicle de vida de l'objecte"
+  },
+  "details": {
+    "timestamp": "Marca temporal",
+    "item": {
+      "button": {
+        "viewInExplore": "Veure a Explorar",
+        "share": "Comparteix aquest element de revisió"
+      },
+      "toast": {
+        "success": {
+          "updatedSublabel": "Subetiqueta actualitzada amb èxit.",
+          "updatedLPR": "Matrícula actualitzada amb èxit.",
+          "regenerate": "El {{provider}} ha sol·licitat una nova descripció. En funció de la velocitat del vostre proveïdor, la nova descripció pot trigar un temps a regenerar-se."
+        },
+        "error": {
+          "regenerate": "No s'ha pogut contactar amb {{provider}} per obtenir una nova descripció: {{errorMessage}}",
+          "updatedSublabelFailed": "No s'ha pogut actualitzar la subetiqueta: {{errorMessage}}",
+          "updatedLPRFailed": "No s'ha pogut actualitzar la matrícula: {{errorMessage}}"
+        }
+      },
+      "title": "Revisar detalls de l'element",
+      "desc": "Revisar detalls de l'element",
+      "tips": {
+        "hasMissingObjects": "Ajusta la configuració si vols que Frigate guardi els objectes rastrejat de les seguents etiquetes: <em>{{objects}}</em>",
+        "mismatch_one": "{{count}} objecte no disponible ha estat detectat i inclòs en aquest element de revisió. Aquest objecte tampoc no s'han calificat com una alerta o detecció o ja ha estat netejat mes amunt/eliminat.",
+        "mismatch_many": "{{count}} objectes no disponibles han estat detectats i inclosos en aquest element de revisió. Aquests objectes tampoc no s'han calificat com una alerta o detecció o ja han estat netejats mes amunt/eliminats.",
+        "mismatch_other": "{{count}} objectes no disponibles han estat detectats i inclosos en aquest element de revisió. Aquests objectes tampoc no s'han calificat com una alerta o detecció o ja han estat netejats mes amunt/eliminats."
+      }
+    },
+    "label": "Etiqueta",
+    "topScore": {
+      "label": "Puntuació màxima",
+      "info": "El resultat superior és la mediana més alta per l'objecte seguit, així que pot diferir des del resultat mostrat en thumbnail de la búsqueda de recerca."
+    },
+    "estimatedSpeed": "Velocitat estimada",
+    "button": {
+      "regenerate": {
+        "title": "Regenerar",
+        "label": "Regenerar descripció d'objecte rastrejat"
+      },
+      "findSimilar": "Cercar similars"
+    },
+    "expandRegenerationMenu": "Amplia el menú de regeneració",
+    "regenerateFromSnapshot": "Regenerar desde instantània",
+    "regenerateFromThumbnails": "Regenerar desde miniatures",
+    "tips": {
+      "descriptionSaved": "Descripció desada amb èxit",
+      "saveDescriptionFailed": "No s'ha pogut actualitzar la descripció: {{errorMessage}}"
+    },
+    "description": {
+      "placeholder": "Descripció de l'objecte rastrejat",
+      "label": "Descripció",
+      "aiTips": "Frigate no sol·licitarà una descripció al teu proveïdor d'intel·ligència artificial generativa fins que el cicle de vida de l'objecte rastrejat hagi acabat."
+    },
+    "objects": "Objectes",
+    "camera": "Càmera",
+    "editSubLabel": {
+      "title": "Editar subetiqueta",
+      "descNoLabel": "Introdueix una nova subetiqueta per a aquest objecte rastrejat",
+      "desc": "Introdueix una nova subetiqueta per a aquesta {{label}}"
+    },
+    "zones": "Zones",
+    "recognizedLicensePlate": "Matrícula reconeguda",
+    "snapshotScore": {
+      "label": "Puntuació d'instantània"
+    },
+    "editLPR": {
+      "title": "Editar matrícula",
+      "descNoLabel": "Introdueix un nou valor de matrícula per a aquest objecte rastrejat",
+      "desc": "Introdueix un nou valor per a la matrícula per aquesta {{label}}"
+    }
+  },
+  "searchResult": {
+    "tooltip": "S'ha identificat {{type}} amb una confiança del {{confidence}}%",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "L'objectes amb seguiment s'ha suprimit correctament.",
+        "error": "No s'ha pogut suprimir l'objecte rastrejat: {{errorMessage}}"
+      }
+    }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "aria": "Descarregar vídeo",
+      "label": "Descarregar vídeo"
+    },
+    "submitToPlus": {
+      "aria": "Enviar a Frigate Plus",
+      "label": "Enviar a Frigate+"
+    },
+    "downloadSnapshot": {
+      "label": "Descarregar instantània",
+      "aria": "Descarregar instantània"
+    },
+    "findSimilar": {
+      "label": "Cercar similars",
+      "aria": "Trobar objectes de seguiment similars"
+    },
+    "viewObjectLifecycle": {
+      "label": "Veure el cicle de vida de l'objecte",
+      "aria": "Mostrar el cicle de vida de l'objecte"
+    },
+    "viewInHistory": {
+      "label": "Veure a l'historial",
+      "aria": "Veure a l'historial"
+    },
+    "deleteTrackedObject": {
+      "label": "Suprimeix aquest objecte rastrejat"
+    }
+  },
+  "noTrackedObjects": "No s'han trobat objectes rastrejats",
+  "dialog": {
+    "confirmDelete": {
+      "title": "Confirmar la supressió",
+      "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol objecte associat. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
+    }
+  },
+  "fetchingTrackedObjectsFailed": "Error al obtenir objectes rastrejats: {{errorMessage}}",
+  "trackedObjectsCount_one": "{{count}} objecte rastrejat ",
+  "trackedObjectsCount_many": "{{count}} objectes rastrejats ",
+  "trackedObjectsCount_other": "{{count}} objectes rastrejats "
+}

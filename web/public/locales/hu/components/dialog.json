@@ -1,0 +1,113 @@
+{
+  "restart": {
+    "title": "Biztosan újra szeretnéd indítani a Frigate-ot?",
+    "button": "Újraindítás",
+    "restarting": {
+      "title": "A Frigate újraindul",
+      "content": "Az oldal újrtölt {{countdown}} másodperc múlva.",
+      "button": "Erőltetett újraindítás azonnal"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Küldés a Frigate+-nak",
+        "desc": "Objektumok, amelyek olyan helyeken vannak, ahol nem akarod, hogy felismerésre kerüljenek, nem számítanak téves egyezésnek. Ha téves egyezésként küldöd be őket, az összezavarja a modellt."
+      },
+      "review": {
+        "state": {
+          "submitted": "Elküldve"
+        },
+        "question": {
+          "ask_a": "Ez a tárgy egy <code>{{label}}</code>?",
+          "label": "Erősítse meg ezt a cimkét a Frigate plus felé",
+          "ask_an": "Ez a tárgy egy <code>{{label}}</code>?",
+          "ask_full": "Ez a tárgy egy <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Megtekintés az Előzmények között"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Kiválasztás az Idővonalból",
+      "start": {
+        "title": "Kezdő időpont",
+        "label": "Kezdeti Időpont Kiválasztása"
+      },
+      "end": {
+        "title": "Végső időpont",
+        "label": "Végső Időpont Kiválasztása"
+      },
+      "lastHour_one": "Előző óra",
+      "lastHour_other": "Utolsó {{count}} óra",
+      "custom": "Egyéb"
+    },
+    "name": {
+      "placeholder": "Export Elnevezése"
+    },
+    "select": "Kiválaszt",
+    "export": "Exportálás",
+    "selectOrExport": "Kiválasztás vagy Exportálás",
+    "toast": {
+      "success": "Exportálás sikeresen megkezdődött. Tekintse meg a fájl-t a /exports mappában.",
+      "error": {
+        "failed": "Nem sikerült elkezdeni az exportálást: {{error}}",
+        "endTimeMustAfterStartTime": "A végső időpontnak a kezdeti időpont után kell következnie",
+        "noVaildTimeSelected": "Nincs érvényes idő intervallum kiválasztva"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Exportálás mentése",
+      "previewExport": "Exportálás Előnézet"
+    }
+  },
+  "streaming": {
+    "label": "Adás",
+    "restreaming": {
+      "desc": {
+        "readTheDocumentation": "Olvassa el a dokumentációt",
+        "title": "Állítsa be a go2rtc-t további élő nézeti lehetőségek és hang támogatása érdekében ennél a kameránál."
+      },
+      "disabled": "Az újraadás nem engedélyezett ennél a kameránál."
+    },
+    "showStats": {
+      "label": "Mutasd az adás statisztikákat",
+      "desc": "Engedélyezze ezt az opciót, hogy a közvetítés statisztikái átfedésként megjelenjenek a kameraképen."
+    },
+    "debugView": "Debug Nézet"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Keresés Mentése",
+      "placeholder": "Adjon nevet a keresésnek",
+      "success": "Keresés {{searchName}} mentve.",
+      "button": {
+        "save": {
+          "label": "Keresés mentése"
+        }
+      },
+      "desc": "Adjon meg egy nevet ehhez a mentett kereséshez.",
+      "overwrite": "{{searchName}} már létezik. Ha elmenti az felül fogja írni a meglévőt."
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Törlés Megerősítése",
+      "toast": {
+        "error": "Törlés sikertelen: {{error}}",
+        "success": "A kijelölt ellenőrzési elemekhez tartozó videofelvételek sikeresen törölve lettek."
+      },
+      "desc": {
+        "selected": "Biztosan törölni szeretné az összes rögzített videót, amely ehhez az ellenőrzési elemhez tartozik?<br /><br />Tartsa lenyomva a <em>Shift</em> billentyűt, hogy a jövőben kihagyja ezt a párbeszédablakot."
+      }
+    },
+    "button": {
+      "markAsReviewed": "Megjelölés áttekintettként",
+      "deleteNow": "Törlés Most",
+      "export": "Exportálás"
+    }
+  }
+}

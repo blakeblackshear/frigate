@@ -5,7 +5,7 @@ import numpy as np
 from pydantic import parse_obj_as
 
 import frigate.detectors as detectors
-import frigate.object_detection
+import frigate.object_detection.base
 from frigate.config import DetectorConfig, ModelConfig
 from frigate.detectors import DetectorTypeEnum
 from frigate.detectors.detector_config import InputTensorEnum
@@ -23,7 +23,7 @@ class TestLocalObjectDetector(unittest.TestCase):
                         DetectorConfig, ({"type": det_type, "model": {}})
                     )
                     test_cfg.model.path = "/test/modelpath"
-                    test_obj = frigate.object_detection.LocalObjectDetector(
+                    test_obj = frigate.object_detection.base.LocalObjectDetector(
                         detector_config=test_cfg
                     )
 
@@ -43,7 +43,7 @@ class TestLocalObjectDetector(unittest.TestCase):
 
         TEST_DATA = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         TEST_DETECT_RESULT = np.ndarray([1, 2, 4, 8, 16, 32])
-        test_obj_detect = frigate.object_detection.LocalObjectDetector(
+        test_obj_detect = frigate.object_detection.base.LocalObjectDetector(
             detector_config=parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
         )
 
@@ -70,7 +70,7 @@ class TestLocalObjectDetector(unittest.TestCase):
         test_cfg = parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
         test_cfg.model.input_tensor = InputTensorEnum.nchw
 
-        test_obj_detect = frigate.object_detection.LocalObjectDetector(
+        test_obj_detect = frigate.object_detection.base.LocalObjectDetector(
             detector_config=test_cfg
         )
 
@@ -91,7 +91,7 @@ class TestLocalObjectDetector(unittest.TestCase):
         "frigate.detectors.api_types",
         {det_type: Mock() for det_type in DetectorTypeEnum},
     )
-    @patch("frigate.object_detection.load_labels")
+    @patch("frigate.object_detection.base.load_labels")
     def test_detect_given_tensor_input_should_return_lfiltered_detections(
         self, mock_load_labels
     ):
@@ -118,7 +118,7 @@ class TestLocalObjectDetector(unittest.TestCase):
 
         test_cfg = parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
         test_cfg.model = ModelConfig()
-        test_obj_detect = frigate.object_detection.LocalObjectDetector(
+        test_obj_detect = frigate.object_detection.base.LocalObjectDetector(
             detector_config=test_cfg,
             labels=TEST_LABEL_FILE,
         )

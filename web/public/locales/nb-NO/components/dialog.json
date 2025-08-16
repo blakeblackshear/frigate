@@ -1,0 +1,123 @@
+{
+  "restart": {
+    "title": "Er du sikker på at du vil starte Frigate på nytt?",
+    "button": "Start på nytt",
+    "restarting": {
+      "title": "Frigate starter på nytt",
+      "button": "Tving omlasting nå",
+      "content": "Denne siden vil lastes inn på nytt om {{countdown}} sekunder."
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Send til Frigate+",
+        "desc": "Objekter på steder du vil unngå er ikke falske positiver. Å sende dem som falske positiver vil forvirre modellen."
+      },
+      "review": {
+        "true": {
+          "label": "Bekreft denne merkelappen for Frigate Plus",
+          "true_one": "Dette er en {{label}}",
+          "true_other": "Dette er en {{label}}"
+        },
+        "state": {
+          "submitted": "Sendt inn"
+        },
+        "false": {
+          "label": "Ikke bekreft denne merkelappen for Frigate Plus",
+          "false_one": "Dette er ikke en {{label}}",
+          "false_other": "Dette er ikke en {{label}}"
+        },
+        "question": {
+          "label": "Bekreft denne merkelappen for Frigate Plus",
+          "ask_an": "Er dette objekt en <code>{{label}}</code>?",
+          "ask_a": "Er dette objektet en <code>{{label}}</code>?",
+          "ask_full": "Er dette objekt en <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Vis i historikk"
+    }
+  },
+  "export": {
+    "time": {
+      "lastHour_one": "Siste time",
+      "lastHour_other": "Siste {{count}} timer",
+      "custom": "Tilpasset",
+      "start": {
+        "title": "Starttid",
+        "label": "Velg starttid"
+      },
+      "fromTimeline": "Velg fra tidslinje",
+      "end": {
+        "title": "Sluttid",
+        "label": "Velg sluttid"
+      }
+    },
+    "toast": {
+      "success": "Eksporten startet. Se filen i /exports-mappen.",
+      "error": {
+        "failed": "Klarte ikke å starte eksport: {{error}}",
+        "noVaildTimeSelected": "Ingen gyldig tidsperiode valgt",
+        "endTimeMustAfterStartTime": "Sluttid må være etter starttid"
+      }
+    },
+    "fromTimeline": {
+      "previewExport": "Forhåndsvis eksport",
+      "saveExport": "Lagre eksport"
+    },
+    "name": {
+      "placeholder": "Gi eksporten et navn"
+    },
+    "select": "Velg",
+    "export": "Eksporter",
+    "selectOrExport": "Velg eller eksporter"
+  },
+  "streaming": {
+    "label": "Strøm",
+    "restreaming": {
+      "disabled": "Restrømming er ikke aktivert for dette kameraet.",
+      "desc": {
+        "readTheDocumentation": "Se dokumentasjonen",
+        "title": "Konfigurer go2rtc for flere direktestrømmingsalternativer og lyd for dette kameraet."
+      }
+    },
+    "showStats": {
+      "label": "Vis strømmestatistikk",
+      "desc": "Aktiver dette alternativet for å vise strømmestatistikk som et overlegg på kamerabildet."
+    },
+    "debugView": "Feilsøkingsvisning"
+  },
+  "search": {
+    "saveSearch": {
+      "button": {
+        "save": {
+          "label": "Lagre dette søket"
+        }
+      },
+      "label": "Lagre søk",
+      "desc": "Skriv inn et navn for dette lagrede søket.",
+      "placeholder": "Skriv inn et navn for søket",
+      "overwrite": "{{searchName}} finnes allerede. Lagring vil overskrive eksisterende verdi.",
+      "success": "Søk ({{searchName}}) er lagret."
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Bekreft sletting",
+      "desc": {
+        "selected": "Er du sikker på at du vil slette alle opptak knyttet til dette inspeksjonselementet?<br /><br />Hold inne <em>Shift</em>-tasten for å hoppe over denne dialogen i fremtiden."
+      },
+      "toast": {
+        "success": "Videomaterialet knyttet til de valgte inspeksjonselementene har blitt slettet.",
+        "error": "Kunne ikke slette: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Eksportér",
+      "markAsReviewed": "Merk som inspisert",
+      "deleteNow": "Slett nå"
+    }
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "restart": {
+    "title": "Czy na pewno chcesz ponownie uruchomić Frigate?",
+    "button": "Uruchom ponownie",
+    "restarting": {
+      "title": "Frigate uruchamia się ponownie",
+      "content": "Strona odświeży się za {{countdown}} sekund.",
+      "button": "Wymuś odświeżenie"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Wyślij do Frigate+",
+        "desc": "Obiekty w miejscach, których chcesz unikać, nie są fałszywymi alarmami. Zgłaszanie ich jako fałszywe alarmy zdezorientuje model."
+      },
+      "review": {
+        "true": {
+          "label": "Potwierdź tę etykietę dla Frigate Plus",
+          "true_one": "To jest {{label}}",
+          "true_few": "To są {{label}}",
+          "true_many": "To są {{label}}"
+        },
+        "false": {
+          "label": "Nie potwierdzaj tej etykiety dla Frigate Plus",
+          "false_one": "To nie jest {{label}}",
+          "false_few": "To nie są {{label}}",
+          "false_many": "To nie są {{label}}"
+        },
+        "state": {
+          "submitted": "Przesłano"
+        },
+        "question": {
+          "ask_a": "Czy ten obiekt to <code>{{label}}</code>?",
+          "ask_an": "Czy ten obiekt to <code>{{label}}</code>?",
+          "ask_full": "Czy ten obiekt to <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
+          "label": "Potwierdź tę etykietę dla Frigate Plus"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Zobacz w Historii"
+    }
+  },
+  "export": {
+    "time": {
+      "lastHour_one": "Ostatnia godzina",
+      "lastHour_few": "Ostatnie {{count}} godziny",
+      "lastHour_many": "Ostatnie {{count}} godzin",
+      "fromTimeline": "Wybierz z Osi Czasu",
+      "custom": "Niestandardowy",
+      "start": {
+        "title": "Czas Rozpoczęcia",
+        "label": "Wybierz Czas Rozpoczęcia"
+      },
+      "end": {
+        "title": "Czas Zakończenia",
+        "label": "Wybierz Czas Zakończenia"
+      }
+    },
+    "name": {
+      "placeholder": "Nazwij Eksport"
+    },
+    "select": "Wybierz",
+    "export": "Eksportuj",
+    "selectOrExport": "Wybierz lub Eksportuj",
+    "toast": {
+      "success": "Pomyślnie rozpoczęto eksport. Zobacz plik w folderze /exports.",
+      "error": {
+        "failed": "Nie udało się rozpocząć eksportu: {{error}}",
+        "endTimeMustAfterStartTime": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia",
+        "noVaildTimeSelected": "Nie wybrano prawidłowego zakresu czasu"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Zapisz Eksport",
+      "previewExport": "Podgląd Eksportu"
+    }
+  },
+  "recording": {
+    "button": {
+      "markAsReviewed": "Oznacz jako sprawdzone",
+      "deleteNow": "Usuń teraz",
+      "export": "Eksportuj"
+    },
+    "confirmDelete": {
+      "title": "Potwierdź Usunięcie",
+      "desc": {
+        "selected": "Czy na pewno chcesz usunąć wszystkie nagrane wideo powiązane z tym elementem recenzji?<br /><br />Przytrzymaj klawisz <em>Shift</em>, aby pominąć to okno dialogowe w przyszłości."
+      },
+      "toast": {
+        "success": "Nagrania wideo powiązane z wybranymi elementami przeglądu zostały pomyślnie usunięte.",
+        "error": "Nie udało się usunąć: {{error}}"
+      }
+    }
+  },
+  "streaming": {
+    "label": "Strumień",
+    "restreaming": {
+      "disabled": "Restreaming nie jest włączony dla tej kamery.",
+      "desc": {
+        "title": "Skonfiguruj go2rtc dla dodatkowych opcji podglądu na żywo i dźwięku dla tej kamery.",
+        "readTheDocumentation": "Przeczytaj dokumentację"
+      }
+    },
+    "showStats": {
+      "label": "Pokaż statystyki strumienia",
+      "desc": "Włącz tę opcję, aby wyświetlać statystyki strumienia jako nakładkę na obrazie z kamery."
+    },
+    "debugView": "Widok Debugowania"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Zapisz Wyszukiwanie",
+      "desc": "Podaj nazwę dla tego zapisanego wyszukiwania.",
+      "placeholder": "Wprowadź nazwę dla swojego wyszukiwania",
+      "overwrite": "{{searchName}} już istnieje. Zapisanie nadpisze istniejącą wartość.",
+      "success": "Wyszukiwanie ({{searchName}}) zostało zapisane.",
+      "button": {
+        "save": {
+          "label": "Zapisz to wyszukiwanie"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "documentTitle": {
+    "cameras": "Statistika kamer - Frigate",
+    "storage": "Statistika prostora - Frigate",
+    "general": "Statistika - Frigate",
+    "logs": {
+      "frigate": "Frigate dnevniki - Frigate",
+      "go2rtc": "Go2RTC dnevniki - Frigate",
+      "nginx": "Nginx dnevniki - Frigate"
+    }
+  },
+  "logs": {
+    "download": {
+      "label": "Prenesi dnevnike"
+    },
+    "copy": {
+      "label": "Kopiraj v odložišče",
+      "success": "Dnevniki kopirani v odložišče",
+      "error": "Dnevnika ni bilo mogoče kopirati v odložišče"
+    },
+    "type": {
+      "label": "Tip",
+      "timestamp": "Časovni žig",
+      "message": "Sporočilo",
+      "tag": "Oznaka"
+    }
+  },
+  "storage": {
+    "recordings": {
+      "title": "Posnetki",
+      "tips": "Ta vrednost predstavlja velikost podatkovne zbirke posnetkov Frigate. Frigate ne spremlja velikost drugih datotek na disku.",
+      "earliestRecording": "Najstarejši posnetki:"
+    },
+    "title": "Hramba",
+    "overview": "Pregled",
+    "cameraStorage": {
+      "title": "Hramba kamer",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Informacija neporabljenega prostora",
+      "storageUsed": "Hramba",
+      "percentageOfTotalUsed": "Procent celote",
+      "bandwidth": "Pasovna širina",
+      "unused": {
+        "title": "Neporabljeno",
+        "tips": "Ta vrednost ne predstavlja dejanske proste kapacitete za Frigate posnetke, če na disku shranjujete še druge datoteke. Frigate ne spremlja velikost drugih datotek na disku."
+      }
+    }
+  },
+  "general": {
+    "hardwareInfo": {
+      "npuMemory": "Pomnilnik NPE",
+      "title": "Podatki strojne opreme",
+      "gpuUsage": "Poraba GPE",
+      "gpuMemory": "Pomnilnik GPE",
+      "gpuEncoder": "GPE kodirnik",
+      "gpuDecoder": "GPE dekoder",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo izpis",
+          "returnCode": "Povratna koda: {{code}}",
+          "processOutput": "Izpis procesa:",
+          "processError": "Napaka procesa:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI izpis",
+          "name": "Ime: {{name}}",
+          "driver": "Gonilnik: {{driver}}",
+          "cudaComputerCapability": "Zmožnost računanja CUDA: {{cuda_compute}}",
+          "vbios": "VBios info: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Zapri GPU info"
+        },
+        "copyInfo": {
+          "label": "Kopiraj GPU info"
+        },
+        "toast": {
+          "success": "GPU informacije kopirane v odložišče"
+        }
+      },
+      "npuUsage": "Poraba NPE"
+    },
+    "title": "Splošno",
+    "detector": {
+      "title": "Detektorji",
+      "inferenceSpeed": "Hitrost sklepanja detektorja",
+      "temperature": "Temperatura detektorja",
+      "cpuUsage": "Poraba CPE detektorja",
+      "memoryUsage": "Poraba pomnilnika detektorja"
+    },
+    "otherProcesses": {
+      "title": "Ostali procesi",
+      "processMemoryUsage": "Poraba pomnilnika",
+      "processCpuUsage": "Poraba CPE"
+    }
+  },
+  "title": "Sistem",
+  "metrics": "Sistemske meritve",
+  "cameras": {
+    "title": "Kamere",
+    "overview": "Pregled",
+    "info": {
+      "aspectRatio": "razmerje stranic"
+    }
+  }
+}

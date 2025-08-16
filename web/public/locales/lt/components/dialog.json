@@ -1,0 +1,25 @@
+{
+  "restart": {
+    "title": "Ar įsitikinę kad norite perkrauti Frigate?",
+    "button": "Perkrauti",
+    "restarting": {
+      "title": "Frigate Persikrauna",
+      "content": "Šis puslapis persikraus už {{countdown}} sekundžių.",
+      "button": "Priverstinai Perkrauti Dabar"
+    }
+  },
+  "explore": {
+    "plus": {
+      "review": {
+        "question": {
+          "ask_a": "Ar šis objektas yra <code>{{label}}</code>?",
+          "ask_an": "Ar šis objektas yra <code>{{label}}</code>?",
+          "label": "Patvirtinti šią etiketę į Frigate Plus"
+        }
+      },
+      "submitToPlus": {
+        "label": "Pateiktį į Frigate+"
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "search": "Cerca",
+  "savedSearches": "Ricerche salvate",
+  "searchFor": "Cerca {{inputValue}}",
+  "button": {
+    "clear": "Cancella ricerca",
+    "save": "Salva ricerca",
+    "delete": "Elimina la ricerca salvata",
+    "filterInformation": "Informazioni sul filtro",
+    "filterActive": "Filtri attivi"
+  },
+  "filter": {
+    "label": {
+      "has_snapshot": "Contiene istantanea",
+      "cameras": "Telecamere",
+      "search_type": "Tipo di ricerca",
+      "has_clip": "Contiene video",
+      "before": "Prima",
+      "labels": "Etichette",
+      "min_score": "Punteggio minimo",
+      "zones": "Zone",
+      "max_score": "Punteggio massimo",
+      "min_speed": "Velocità minima",
+      "time_range": "Intervallo di tempo",
+      "after": "Dopo",
+      "max_speed": "Velocità massima",
+      "recognized_license_plate": "Targa riconosciuta",
+      "sub_labels": "Sottoetichette"
+    },
+    "tips": {
+      "desc": {
+        "step3": "Puoi utilizzare più filtri aggiungendoli uno dopo l'altro, lasciando uno spazio in mezzo.",
+        "step5": "Il filtro intervallo di tempo utilizza il formato {{exampleTime}}.",
+        "exampleLabel": "Esempio:",
+        "step1": "Digita un nome chiave di filtro seguito da due punti (ad esempio, \"telecamere:\").",
+        "step2": "Seleziona un valore dai suggerimenti oppure digita il tuo valore.",
+        "step4": "I filtri data (prima: e dopo:) utilizzano il formato {{DateFormat}}.",
+        "step6": "Rimuovi i filtri cliccando sulla \"x\" accanto ad essi.",
+        "text": "I filtri ti aiutano a restringere i risultati della ricerca. Ecco come usarli nel campo di inserimento:"
+      },
+      "title": "Come utilizzare i filtri di testo"
+    },
+    "toast": {
+      "error": {
+        "minScoreMustBeLessOrEqualMaxScore": "Il 'punteggio minimo' deve essere minore o uguale del 'punteggio massimo'.",
+        "beforeDateBeLaterAfter": "La data 'prima' deve essere successiva alla data 'dopo'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "La 'velocità minima' deve essere minore o uguale della 'velocità massima'.",
+        "afterDatebeEarlierBefore": "La data 'dopo' deve essere precedente alla data 'prima'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Il 'punteggio massimo' deve essere maggiore o uguale del 'punteggio minimo'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "La 'velocità massima' deve essere maggiore o uguale della 'velocità minima'."
+      }
+    },
+    "searchType": {
+      "thumbnail": "Miniatura",
+      "description": "Descrizione"
+    },
+    "header": {
+      "noFilters": "Filtri",
+      "activeFilters": "Filtri attivi",
+      "currentFilterType": "Valori del filtro"
+    }
+  },
+  "similaritySearch": {
+    "clear": "Cancella ricerca di somiglianza",
+    "title": "Ricerca di somiglianza",
+    "active": "Ricerca di somiglianza attiva"
+  },
+  "placeholder": {
+    "search": "Ricerca…"
+  },
+  "trackedObjectId": "ID oggetto tracciato"
+}

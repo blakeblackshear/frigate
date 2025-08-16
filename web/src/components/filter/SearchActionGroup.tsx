@@ -15,6 +15,7 @@ import {
 } from "../ui/alert-dialog";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { toast } from "sonner";
+import { Trans, useTranslation } from "react-i18next";
 
 type SearchActionGroupProps = {
   selectedObjects: string[];
@@ -26,6 +27,7 @@ export default function SearchActionGroup({
   setSelectedObjects,
   pullLatestData,
 }: SearchActionGroupProps) {
+  const { t } = useTranslation(["components/filter"]);
   const onClearSelected = useCallback(() => {
     setSelectedObjects([]);
   }, [setSelectedObjects]);
@@ -37,19 +39,23 @@ export default function SearchActionGroup({
       })
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success("Tracked objects deleted successfully.", {
+          toast.success(t("trackedObjectDelete.toast.success"), {
             position: "top-center",
           });
           setSelectedObjects([]);
           pullLatestData();
         }
       })
-      .catch(() => {
-        toast.error("Failed to delete tracked objects.", {
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(t("trackedObjectDelete.toast.error", { errorMessage }), {
           position: "top-center",
         });
       });
-  }, [selectedObjects, setSelectedObjects, pullLatestData]);
+  }, [selectedObjects, setSelectedObjects, pullLatestData, t]);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bypassDialog, setBypassDialog] = useState(false);
@@ -74,27 +80,27 @@ export default function SearchActionGroup({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("trackedObjectDelete.title")}
+            </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            Deleting these {selectedObjects.length} tracked objects removes the
-            snapshot, any saved embeddings, and any associated object lifecycle
-            entries. Recorded footage of these tracked objects in History view
-            will <em>NOT</em> be deleted.
-            <br />
-            <br />
-            Are you sure you want to proceed?
-            <br />
-            <br />
-            Hold the <em>Shift</em> key to bypass this dialog in the future.
+            <Trans
+              ns="components/filter"
+              values={{ objectLength: selectedObjects.length }}
+            >
+              trackedObjectDelete.desc
+            </Trans>
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
             <AlertDialogAction
               className={buttonVariants({ variant: "destructive" })}
               onClick={onDelete}
             >
-              Delete
+              {t("button.delete", { ns: "common" })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -102,26 +108,33 @@ export default function SearchActionGroup({
 
       <div className="absolute inset-x-2 inset-y-0 flex items-center justify-between gap-2 bg-background py-2 md:left-auto">
         <div className="mx-1 flex items-center justify-center text-sm text-muted-foreground">
-          <div className="p-1">{`${selectedObjects.length} selected`}</div>
+          <div className="p-1">
+            {t("selected", {
+              ns: "views/events",
+              count: selectedObjects.length,
+            })}
+          </div>
           <div className="p-1">{"|"}</div>
           <div
             className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
             onClick={onClearSelected}
           >
-            Unselect
+            {t("button.unselect", { ns: "common" })}
           </div>
         </div>
         <div className="flex items-center gap-1 md:gap-2">
           <Button
             className="flex items-center gap-2 p-2"
-            aria-label="Delete"
+            aria-label={t("button.delete", { ns: "common" })}
             size="sm"
             onClick={handleDelete}
           >
             <HiTrash className="text-secondary-foreground" />
             {isDesktop && (
               <div className="text-primary">
-                {bypassDialog ? "Delete Now" : "Delete"}
+                {bypassDialog
+                  ? t("button.deleteNow", { ns: "common" })
+                  : t("button.delete", { ns: "common" })}
               </div>
             )}
           </Button>

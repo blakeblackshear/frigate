@@ -20,6 +20,7 @@ class MediaLatestFrameQueryParams(BaseModel):
     regions: Optional[int] = None
     quality: Optional[int] = 70
     height: Optional[int] = None
+    store: Optional[int] = None
 
 
 class MediaEventsSnapshotQueryParams(BaseModel):
@@ -40,3 +41,8 @@ class MediaMjpegFeedQueryParams(BaseModel):
     mask: Optional[int] = None
     motion: Optional[int] = None
     regions: Optional[int] = None
+
+
+class MediaRecordingsSummaryQueryParams(BaseModel):
+    timezone: str = "utc"
+    cameras: Optional[str] = "all"

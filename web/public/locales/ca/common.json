@@ -1,0 +1,265 @@
+{
+  "role": {
+    "title": "Rol",
+    "viewer": "Visualitzador",
+    "admin": "Administrador",
+    "desc": "Els administradors tenen accés complet a totes les característiques de la interfície d'usuari de Frigate. Els visualitzadors es limiten a visualitzar càmeres, articles de revisió i imatges històriques a la interfície d'usuari."
+  },
+  "menu": {
+    "language": {
+      "yue": "粵語 (Cantonès)",
+      "zhCN": "简体中文 (Xinès simplificat)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (Francès)",
+      "ar": "العربية (Àrab)",
+      "de": "Deutsch (Alemany)",
+      "sv": "Svenska (Suec)",
+      "cs": "Čeština (Txec)",
+      "nb": "Norsk Bokmål (Noruec Bokmål)",
+      "ko": "한국어 (Coreà)",
+      "vi": "Tiếng Việt (Vietnamita)",
+      "fa": "فارسی (Persa)",
+      "hu": "Magyar (Hongarès)",
+      "fi": "Suomi (Finlandès)",
+      "en": "English (Anglès)",
+      "pt": "Português (Portuguès)",
+      "ja": "日本語 (Japonès)",
+      "es": "Español (Espanyol)",
+      "withSystem": {
+        "label": "Utilitzeu la configuració del sistema per a l'idioma"
+      },
+      "tr": "Türkçe (Turc)",
+      "it": "Italiano (Italià)",
+      "he": "עברית (Hebreu)",
+      "el": "Ελληνικά (Grec)",
+      "ro": "Română (Romanès)",
+      "nl": "Nederlands (Holandès)",
+      "pl": "Polski (Polonès)",
+      "uk": "Українська (Ucraïnès)",
+      "da": "Dansk (Danès)",
+      "sk": "Slovenčina (Eslovac)",
+      "ru": "Русский (Rus)",
+      "th": "ไทย (Tailandès)",
+      "ca": "Català (Catalan)"
+    },
+    "system": "Sistema",
+    "systemMetrics": "Mètriques del sistema",
+    "configuration": "Configuració",
+    "systemLogs": "Registres del sistema",
+    "configurationEditor": "Editor de configuració",
+    "languages": "Idiomes",
+    "settings": "Opcions",
+    "darkMode": {
+      "light": "Clar",
+      "dark": "Fosc",
+      "withSystem": {
+        "label": "Utilitzeu la configuració del sistema per al mode clar o fosc"
+      },
+      "label": "Mode fosc"
+    },
+    "withSystem": "Sistema",
+    "appearance": "Aspecte",
+    "theme": {
+      "blue": "Blau",
+      "green": "Verd",
+      "nord": "Nord",
+      "red": "Vermell",
+      "default": "Per defecte",
+      "highcontrast": "Contrast Alt",
+      "label": "Tema"
+    },
+    "help": "Ajuda",
+    "documentation": {
+      "title": "Documentació",
+      "label": "Documentació de Frigate"
+    },
+    "restart": "Reinicia Frigate",
+    "live": {
+      "title": "Directe",
+      "allCameras": "Totes les càmeres",
+      "cameras": {
+        "title": "Càmeres",
+        "count_one": "{{count}} Càmera",
+        "count_many": "{{count}} Càmeres",
+        "count_other": "{{count}} Càmeres"
+      }
+    },
+    "review": "Revisió",
+    "explore": "Explora",
+    "export": "Exportar",
+    "uiPlayground": "Zona de proves de la interfície d'usuari",
+    "faceLibrary": "Biblioteca de cares",
+    "user": {
+      "title": "Usuari",
+      "setPassword": "Estableix Contrasenya",
+      "account": "Compte",
+      "anonymous": "Anònim",
+      "logout": "Tanca la sessió",
+      "current": "Usuari actual: {{user}}"
+    }
+  },
+  "pagination": {
+    "previous": {
+      "label": "Ves a pàgina anterior",
+      "title": "Anterior"
+    },
+    "next": {
+      "label": "Ves a pàgina següent",
+      "title": "Següent"
+    },
+    "more": "Més pàgines",
+    "label": "paginació"
+  },
+  "time": {
+    "untilForTime": "Fins les {{time}}",
+    "untilForRestart": "Fins que Frigate es reiniciï.",
+    "untilRestart": "Fins que es reiniciï",
+    "ago": "Fa {{timeAgo}}",
+    "justNow": "Ara mateix",
+    "today": "Avui",
+    "yesterday": "Ahir",
+    "last7": "Últims 7 dies",
+    "last14": "Últims 14 dies",
+    "last30": "Últims 30 dies",
+    "thisWeek": "Aquesta setmana",
+    "lastWeek": "La setmana passada",
+    "thisMonth": "Aquest mes",
+    "lastMonth": "El mes passat",
+    "5minutes": "5 minuts",
+    "10minutes": "10 minuts",
+    "30minutes": "30 minuts",
+    "1hour": "1 hora",
+    "12hours": "12 hores",
+    "24hours": "24 hores",
+    "pm": "pm",
+    "am": "am",
+    "yr": "{{time}}any",
+    "year_one": "{{time}} any",
+    "year_many": "{{time}} anys",
+    "year_other": "{{time}} anys",
+    "mo": "{{time}}mes",
+    "month_one": "{{time}} mes",
+    "month_many": "{{time}} mesos",
+    "month_other": "{{time}} mesos",
+    "h": "{{time}}h",
+    "d": "{{time}}d",
+    "day_one": "{{time}} dia",
+    "day_many": "{{time}} dies",
+    "day_other": "{{time}} dies",
+    "hour_one": "{{time}} hora",
+    "hour_many": "{{time}} hores",
+    "hour_other": "{{time}} hores",
+    "m": "{{time}} m",
+    "minute_one": "{{time}} minut",
+    "minute_many": "{{time}} minuts",
+    "minute_other": "{{time}} minuts",
+    "s": "{{time}}s",
+    "second_one": "{{time}} segon",
+    "second_many": "{{time}} segons",
+    "second_other": "{{time}} segons",
+    "formattedTimestamp": {
+      "12hour": "MMM d, h::mm::ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestampMonthDayYear": {
+      "24hour": "MMM d, yyyy",
+      "12hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "24hour": "HH:mm:ss",
+      "12hour": "h:mm:ss aaa"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    }
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "peus",
+      "meters": "metres"
+    }
+  },
+  "label": {
+    "back": "Torna enrere"
+  },
+  "button": {
+    "apply": "Aplicar",
+    "reset": "Restablir",
+    "done": "Fet",
+    "disabled": "Deshabilitat",
+    "disable": "Deshabilitar",
+    "save": "Guardar",
+    "copy": "Copiar",
+    "back": "Enrere",
+    "pictureInPicture": "Imatge en Imatge",
+    "twoWayTalk": "Xerrada bidireccional",
+    "cameraAudio": "Àudio de la càmera",
+    "no": "No",
+    "yes": "Sí",
+    "download": "Descarregar",
+    "info": "Informació",
+    "suspended": "Suspès",
+    "export": "Exportar",
+    "deleteNow": "Eliminar ara",
+    "next": "Següent",
+    "saving": "Guardant…",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "copyCoordinates": "Copiar coordenades",
+    "delete": "Elimina",
+    "unsuspended": "Reactivar",
+    "play": "Reproduir",
+    "close": "Tancar",
+    "history": "Historial",
+    "fullscreen": "Pantalla completa",
+    "exitFullscreen": "Sortir de pantalla completa",
+    "on": "ENCÈS",
+    "off": "APAGAT",
+    "unselect": "Desseleccionar",
+    "enable": "Habilitar",
+    "enabled": "Habilitat"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL copiada al porta-retalls.",
+    "save": {
+      "title": "Guardar",
+      "error": {
+        "title": "No s'han pogut guardar els canvis de configuració: {{errorMessage}}",
+        "noMessage": "No s'han pogut guardar els canvis de configuració"
+      }
+    }
+  },
+  "accessDenied": {
+    "desc": "No teniu permís per veure aquesta pàgina.",
+    "documentTitle": "Accés Denegat - Frigate",
+    "title": "Accés Denegat"
+  },
+  "notFound": {
+    "documentTitle": "No s'ha trobat - Frigate",
+    "title": "404",
+    "desc": "Pàgina no trobada"
+  },
+  "selectItem": "Selecciona {{item}}"
+}

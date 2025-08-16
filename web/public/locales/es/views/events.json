@@ -1,0 +1,39 @@
+{
+  "alerts": "Alertas",
+  "detections": "Detecciones",
+  "motion": {
+    "label": "Movimiento",
+    "only": "Solo movimiento"
+  },
+  "allCameras": "Todas las cámaras",
+  "empty": {
+    "alert": "No hay alertas para revisar",
+    "detection": "No hay detecciones para revisar",
+    "motion": "No se encontraron datos de movimiento"
+  },
+  "timeline": "Línea de tiempo",
+  "timeline.aria": "Seleccionar línea de tiempo",
+  "events": {
+    "label": "Eventos",
+    "aria": "Seleccionar eventos",
+    "noFoundForTimePeriod": "No se encontraron eventos para este período de tiempo."
+  },
+  "documentTitle": "Revisión - Frigate",
+  "markAsReviewed": "Marcar como revisado",
+  "newReviewItems": {
+    "label": "Ver nuevos elementos de revisión",
+    "button": "Nuevos elementos para revisar"
+  },
+  "camera": "Cámara",
+  "recordings": {
+    "documentTitle": "Grabaciones - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Últimas 24 horas"
+  },
+  "markTheseItemsAsReviewed": "Marcar estos elementos como revisados",
+  "selected": "{{count}} seleccionados",
+  "selected_one": "{{count}} seleccionados",
+  "selected_other": "{{count}} seleccionados",
+  "detected": "detectado"
+}

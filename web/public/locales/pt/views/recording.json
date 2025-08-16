@@ -1,0 +1,12 @@
+{
+  "export": "Exportar",
+  "calendar": "Calendário",
+  "filter": "Filtro",
+  "filters": "Filtros",
+  "toast": {
+    "error": {
+      "endTimeMustAfterStartTime": "O horário de término deve ser posterior ao horário de início",
+      "noValidTimeSelected": "Nenhum intervalo de tempo válido selecionado"
+    }
+  }
+}

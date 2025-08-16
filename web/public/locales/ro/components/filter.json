@@ -1,0 +1,126 @@
+{
+  "filter": "Filtru",
+  "labels": {
+    "label": "Etichete",
+    "all": {
+      "title": "Toate etichetele",
+      "short": "Etichete"
+    },
+    "count_one": "Etichetă {{count}}",
+    "count_other": "{{count}} etichete"
+  },
+  "dates": {
+    "selectPreset": "Selectează o presetare…",
+    "all": {
+      "title": "Toate datele",
+      "short": "Date"
+    }
+  },
+  "zones": {
+    "label": "Zone",
+    "all": {
+      "title": "Toate zonele",
+      "short": "Zone"
+    }
+  },
+  "reset": {
+    "label": "Resetează filtrele la valorile implicite"
+  },
+  "timeRange": "Interval de timp",
+  "subLabels": {
+    "label": "Sub-etichete",
+    "all": "Toate sub-etichetele"
+  },
+  "more": "Mai multe filtre",
+  "score": "Scor",
+  "estimatedSpeed": "Viteza estimată ({{unit}})",
+  "features": {
+    "label": "Caracteristici",
+    "hasSnapshot": "Are snapshot",
+    "hasVideoClip": "Are un videoclip",
+    "submittedToFrigatePlus": {
+      "label": "Trimis către Frigate+",
+      "tips": "Trebuie mai întâi să filtrezi obiectele urmărite care au un snapshot.<br /><br />Obiectele urmărite fără snapshot nu pot fi trimise către Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Sortează",
+    "dateAsc": "Dată (crescător)",
+    "dateDesc": "Dată (descrescător)",
+    "scoreAsc": "Scor obiect (crescător)",
+    "scoreDesc": "Scor obiect (descrescător)",
+    "speedAsc": "Viteză estimată (crescător)",
+    "speedDesc": "Viteză estimată (descrescător)",
+    "relevance": "Relevanță"
+  },
+  "cameras": {
+    "all": {
+      "short": "Camere",
+      "title": "Toate camerele"
+    },
+    "label": "Filtru camere"
+  },
+  "review": {
+    "showReviewed": "Afișează cele revizuite"
+  },
+  "motion": {
+    "showMotionOnly": "Afișează doar mișcarea"
+  },
+  "explore": {
+    "settings": {
+      "title": "Setări",
+      "defaultView": {
+        "title": "Vizualizare implicită",
+        "unfilteredGrid": "Grilă nefiltrată",
+        "desc": "Când nu sunt selectate filtre, afișează un rezumat al celor mai recente obiecte urmărite pentru fiecare etichetă sau afișează o grilă nefiltrată.",
+        "summary": "Sumar"
+      },
+      "gridColumns": {
+        "title": "Coloane grilă",
+        "desc": "Selectează numărul de coloane în vizualizarea grilă."
+      },
+      "searchSource": {
+        "label": "Sursa căutării",
+        "desc": "Alege dacă dorești să cauți în miniaturi sau în descrierile obiectelor urmărite.",
+        "options": {
+          "thumbnailImage": "Imagine miniatură",
+          "description": "Descriere"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Selectează o dată pentru filtrare"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtrează nivelul jurnalului",
+    "filterBySeverity": "Filtrează jurnalele după severitate",
+    "loading": {
+      "title": "Încărcare continuă",
+      "desc": "Când panoul de jurnale este derulat până jos, noile jurnale sunt afișate automat pe măsură ce sunt adăugate."
+    },
+    "disableLogStreaming": "Dezactivează încărcarea continuă",
+    "allLogs": "Toate jurnalele"
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmă ștergerea",
+    "desc": "Ștergerea acestor {{objectLength}} obiecte urmărite elimină snapshot-ul, orice încorporări salvate și orice înregistrări asociate ciclului de viață al obiectului. Filmările înregistrate ale acestor obiecte urmărite în vizualizarea Istoric <em>NU</em> vor fi șterse. <br /><br />Ești sigur că dorești să continui?<br /><br />Țineți apăsată tasta <em>Shift</em> pentru a sări peste acest dialog în viitor.",
+    "toast": {
+      "success": "Obiectele urmărite au fost șterse cu succes.",
+      "error": "Ștergerea obiectelor urmărite a eșuat: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtrează după masca de zonă"
+  },
+  "recognizedLicensePlates": {
+    "title": "Numere de înmatriculare recunoscute",
+    "noLicensePlatesFound": "Nu s-au găsit plăcuțe de înmatriculare.",
+    "selectPlatesFromList": "Selectează una sau mai multe plăcuțe din listă.",
+    "loading": "Se încarcă numerele de înmatriculare recunoscute…",
+    "placeholder": "Caută plăcuțe de înmatriculare…",
+    "loadFailed": "Nu s-au putut încărca numerele de înmatriculare recunoscute."
+  }
+}

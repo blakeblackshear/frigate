@@ -1,0 +1,17 @@
+{
+  "search": "Caută",
+  "documentTitle": "Export - Frigate",
+  "noExports": "Nu au fost gasite exporturi",
+  "deleteExport": "Șterge exportul",
+  "deleteExport.desc": "Ești sigur că vrei să ștergi {{exportName}}?",
+  "editExport": {
+    "title": "Redenumeste Exportul",
+    "saveExport": "Salveaza Export",
+    "desc": "Introdu un nume nou pentru acest Export."
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Eroare redenumire export: {{errorMessage}}"
+    }
+  }
+}

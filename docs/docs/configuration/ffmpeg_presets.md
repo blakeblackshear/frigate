@@ -9,7 +9,7 @@ Some presets of FFmpeg args are provided by default to make the configuration ea
 
 It is highly recommended to use hwaccel presets in the config. These presets not only replace the longer args, but they also give Frigate hints of what hardware is available and allows Frigate to make other optimizations using the GPU such as when encoding the birdseye restream or when scaling a stream that has a size different than the native stream size.
 
-See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on how to setup hwaccel for your GPU / iGPU.
+See [the hwaccel docs](/configuration/hardware_acceleration_video.md) for more info on how to setup hwaccel for your GPU / iGPU.
 
 | Preset                | Usage                          | Other Notes                                           |
 | --------------------- | ------------------------------ | ----------------------------------------------------- |
@@ -71,11 +71,11 @@ cameras:
 
 Output args presets help make the config more readable and handle use cases for different types of streams to ensure consistent recordings.
 
-| Preset                           | Usage                             | Other Notes                                                                                                                          |
-| -------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| preset-record-generic            | Record WITHOUT audio              | This is the default when nothing is specified                                                                                        |
-| preset-record-generic-audio-copy | Record WITH original audio        | Use this to enable audio in recordings                                                                                               |
-| preset-record-generic-audio-aac  | Record WITH transcoded aac audio  | Use this to transcode to aac audio. If your source is already aac, use preset-record-generic-audio-copy instead to avoid re-encoding |
-| preset-record-mjpeg              | Record an mjpeg stream            | Recommend restreaming mjpeg stream instead                                                                                           |
-| preset-record-jpeg               | Record live jpeg                  | Recommend restreaming live jpeg instead                                                                                              |
-| preset-record-ubiquiti           | Record ubiquiti stream with audio | Recordings with ubiquiti non-standard audio                                                                                          |
+| Preset                           | Usage                             | Other Notes                                                                                                                                                                                              |
+| -------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| preset-record-generic            | Record WITHOUT audio              | If your camera doesn’t have audio, or if you don’t want to record audio, use this option                                                                                                                 |
+| preset-record-generic-audio-copy | Record WITH original audio        | Use this to enable audio in recordings                                                                                                                                                                   |
+| preset-record-generic-audio-aac  | Record WITH transcoded aac audio  | This is the default when no option is specified. Use it to transcode audio to AAC. If the source is already in AAC format, use preset-record-generic-audio-copy instead to avoid unnecessary re-encoding |
+| preset-record-mjpeg              | Record an mjpeg stream            | Recommend restreaming mjpeg stream instead                                                                                                                                                               |
+| preset-record-jpeg               | Record live jpeg                  | Recommend restreaming live jpeg instead                                                                                                                                                                  |
+| preset-record-ubiquiti           | Record ubiquiti stream with audio | Recordings with ubiquiti non-standard audio                                                                                                                                                              |

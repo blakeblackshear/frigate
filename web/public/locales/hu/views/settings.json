@@ -1,0 +1,621 @@
+{
+  "documentTitle": {
+    "default": "Beállítások - Frigate",
+    "authentication": "Hitelesítési beállítások - Frigate",
+    "camera": "Kamera beállítások - Frigate",
+    "classification": "Osztályozási beállítások - Frigate",
+    "masksAndZones": "Maszk és zónaszerkesztő - Frigate",
+    "object": "Hibakeresés - Frigate",
+    "general": "Áltlános Beállítások - Frigate",
+    "frigatePlus": "Frigate+ beállítások - Frigate",
+    "notifications": "Értesítések beállítása - Frigate",
+    "motionTuner": "Mozgás Hangoló - Frigate",
+    "enrichments": "Kiegészítés Beállítások - Frigate"
+  },
+  "menu": {
+    "ui": "UI",
+    "classification": "Osztályozás",
+    "cameras": "Kamera beállítások",
+    "masksAndZones": "Maszkok / Zónák",
+    "motionTuner": "Mozgás finomhangolása",
+    "debug": "Hibakeresés",
+    "users": "Felhasználók",
+    "notifications": "Értesítések",
+    "frigateplus": "Frigate+",
+    "enrichments": "Gazdagítások"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Vannak nem mentett módosítások.",
+      "desc": "Szeretné elmenteni a módosításokat a folytatás előtt?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Nincs kamera"
+  },
+  "general": {
+    "liveDashboard": {
+      "title": "Live irányítópult",
+      "automaticLiveView": {
+        "label": "Automata élőkép",
+        "desc": "Automatikusan váltson át a kamera élő nézetére, amikor aktivitást észlel. Ha ez az opció ki van kapcsolva, akkor az Élő irányítópulton a statikus kameraképek csak percenként egyszer frissülnek."
+      },
+      "playAlertVideos": {
+        "label": "Riasztási Videók Lejátszása",
+        "desc": "Alapértelmezetten az Élő irányítópulton a legutóbbi riasztások kis, ismétlődő videóként jelennek meg. Kapcsolja ki ezt az opciót, ha csak állóképet szeretne megjeleníteni a legutóbbi riasztásokról ezen az eszközön/böngészőben."
+      }
+    },
+    "title": "Alapbeállítások",
+    "cameraGroupStreaming": {
+      "title": "Kamera Csoport Adás Beállítások",
+      "clearAll": "Minden Adás Beállítás Törlése",
+      "desc": "Az egyes kameracsoportok közvetítési beállításai a böngésző helyi tárolójában kerülnek mentésre."
+    },
+    "recordingsViewer": {
+      "title": "Felvétel Néző",
+      "defaultPlaybackRate": {
+        "label": "Alap Lejátszási Sebesség",
+        "desc": "Alapértelmezett lejátszási sebesség a felvételek visszajátszásához."
+      }
+    },
+    "calendar": {
+      "title": "Naptár",
+      "firstWeekday": {
+        "label": "Első Hétköznap",
+        "sunday": "Vasárnap",
+        "monday": "Hétfő",
+        "desc": "A nap, amivel az áttekintési naptár hete kezdődik."
+      }
+    },
+    "toast": {
+      "error": {
+        "clearStreamingSettingsFailed": "Adásbeállítások törlése sikertelen: {{errorMessage}}",
+        "clearStoredLayoutFailed": "Nem sikerült törölni a mentett elrendezést: {{errorMessage}}"
+      },
+      "success": {
+        "clearStoredLayout": "Mentett elrendezés törölve ehhez: {{cameraName}}",
+        "clearStreamingSettings": "Az összes kameracsoport közvetítési beállítása törölve."
+      }
+    },
+    "storedLayouts": {
+      "title": "Tárolt Elrendezések",
+      "desc": "A kameracsoporton belüli kamerák elrendezése áthúzható és átméretezhető. A pozíciók a böngésző helyi tárolójában kerülnek mentésre.",
+      "clearAll": "Összes elrendezés törlése"
+    }
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "readTheDocumentation": "Olvassa el a Dokumentációt",
+      "reindexNow": {
+        "error": "Újraindexálás megkezdése sikertelen: {{errorMessage}}",
+        "label": "Újraindexálás Most",
+        "confirmTitle": "Újraindexálás Megerősítése",
+        "confirmButton": "Újraindexálás",
+        "success": "Újraindexálás sikeresen megkezdődött.",
+        "alreadyInProgress": "Újraindexálás már folyamatban.",
+        "desc": "Az újraindexelés újragenerálja az összes követett objektum beágyazásait. Ez a folyamat a háttérben fut, és a követett objektumok számától függően maximálisan kihasználhatja a CPU-t, valamint jelentős időt vehet igénybe.",
+        "confirmDesc": "Biztosan újra szeretné indexelni az összes követett objektum beágyazását? Ez a folyamat a háttérben fut, de maximálisan kihasználhatja a CPU-t, és jelentős időt vehet igénybe. A folyamat állapotát az Áttekintés oldalon követheti nyomon."
+      },
+      "modelSize": {
+        "label": "Modell méret",
+        "small": {
+          "title": "kicsi",
+          "desc": "A <em>small</em> használata egy kvantált modellverziót alkalmaz, amely kevesebb memóriát használ és gyorsabban fut a CPU-n, miközben a beágyazás minősége alig észrevehető mértékben változik."
+        },
+        "large": {
+          "title": "nagy",
+          "desc": "A <em>large</em> használata a teljes Jina modellt alkalmazza, és automatikusan a GPU-n futtatja, ha ez elérhető."
+        },
+        "desc": "A szemantikus keresés beágyazásaihoz használt modell mérete."
+      },
+      "title": "Szemantikus keresés",
+      "desc": "A Frigate szemantikus keresés funkciója lehetővé teszi, hogy a felülvizsgálati elemekben szereplő követett objektumokat megtalálja akár magával a képpel, egy felhasználó által megadott szöveges leírással, vagy egy automatikusan generált leírással."
+    },
+    "birdClassification": {
+      "title": "Madár Osztályozás",
+      "desc": "A madárfelismerés egy kvantált Tensorflow modell segítségével azonosít ismert madarakat. Ha egy ismert madarat felismer, annak közismert neve sub_label jelölésként kerül hozzáadásra. Ez az információ megjelenik a felhasználói felületen, a szűrőkben, valamint az értesítésekben is."
+    },
+    "faceRecognition": {
+      "title": "Arcfelismerés",
+      "readTheDocumentation": "Olvassa el a Dokumentációt",
+      "modelSize": {
+        "label": "Modell Mérete",
+        "desc": "Az arcfelismeréshez használt modell mérete.",
+        "small": {
+          "title": "kis",
+          "desc": "A <em>small</em> használata egy FaceNet arcbeágyazási modellt alkalmaz, amely a legtöbb CPU-n hatékonyan fut."
+        },
+        "large": {
+          "title": "nagy",
+          "desc": "A <em>large</em> használata egy ArcFace arcbeágyazási modellt alkalmaz, és automatikusan a GPU-n fut, ha az elérhető."
+        }
+      },
+      "desc": "Az arcfelismerés lehetővé teszi, hogy személyekhez neveket rendeljenek, és amikor az arcukat felismeri a Frigate, akkor a személy nevét alcímkeként rendeli hozzá. Ez az információ megjelenik a felhasználói felületen, a szűrőkben és az értesítésekben is."
+    },
+    "licensePlateRecognition": {
+      "title": "Rendszámtábla Felismerés",
+      "readTheDocumentation": "Olvassa el a Dokumentációt",
+      "desc": "A Frigate képes felismerni a járművek rendszámtábláit, és automatikusan hozzáadja a felismert karaktereket a recognized_license_plate mezőhöz, vagy egy ismert nevet al_címkeként rendel az autótípusú objektumokhoz. Egy gyakori felhasználási eset lehet a bejáróra behajtó vagy az utcán elhaladó autók rendszámtáblájának olvasása."
+    },
+    "toast": {
+      "error": "Konfigurációs változtatások mentése sikertelen: {{errorMessage}}",
+      "success": "A kiegészítő beállítások elmentésre kerültek. A módosítások alkalmazásához indítsa újra a Frigate-et."
+    },
+    "unsavedChanges": "Mentetlen gazdagítási beállítás változtatások",
+    "title": "Kiegészítők Beállítása",
+    "restart_required": "Újraindítás szükséges (a kiegészítő beállítások megváltoztak)"
+  },
+  "notification": {
+    "title": "Értesítések",
+    "notificationSettings": {
+      "documentation": "Olvassa el a Dokumentációt",
+      "title": "Értesítési Beállítások",
+      "desc": "A Frigate natívan képes push értesítéseket küldeni az eszközére, ha böngészőben fut vagy PWA-ként van telepítve."
+    },
+    "globalSettings": {
+      "title": "Globális Beállítások",
+      "desc": "Ideiglenesen függessze fel az értesítéseket meghatározott kamerákhoz az összes regisztrált eszközön."
+    },
+    "email": {
+      "title": "E-mail",
+      "placeholder": "Példa example@email.com",
+      "desc": "Érvényes e-mail cím szükséges, amelyre értesítést küldünk, ha problémák adódnak a push szolgáltatással."
+    },
+    "suspended": "Értesítések felfüggesztve {{time}}",
+    "active": "Értesítések Bekapcsolva",
+    "suspendTime": {
+      "5minutes": "Felfüggesztés 5 percre",
+      "24hours": "Felfüggesztés 24 órára",
+      "suspend": "Felfüggeszt",
+      "12hours": "Felfüggesztés 12 órára",
+      "10minutes": "Felfüggesztés 10 percre",
+      "1hour": "Felfüggesztés 1 órára",
+      "30minutes": "Felfüggesztés 30 percre",
+      "untilRestart": "Felfüggesztés újraindításig"
+    },
+    "toast": {
+      "success": {
+        "settingSaved": "Értesítési beállítások elmentve.",
+        "registered": "Sikeresen regisztrált az értesítések fogadására. Az értesítések (beleértve a tesztértesítést is) küldése előtt újra kell indítani a Frigate-et."
+      },
+      "error": {
+        "registerFailed": "Nem sikerült elmenteni az értesítési regisztrációt."
+      }
+    },
+    "notificationUnavailable": {
+      "title": "Értesítés elérhetetlen",
+      "documentation": "Olvassa el a Dokumentációt",
+      "desc": "A webes push értesítésekhez biztonságos környezet (<code>https://…</code>) szükséges. Ez egy böngészői korlátozás. A értesítések használatához férjen hozzá biztonságosan a Frigate-hez."
+    },
+    "sendTestNotification": "Teszt értesítés küldése",
+    "deviceSpecific": "Eszköz Specifikus Beállítások",
+    "cameras": {
+      "desc": "Válassza ki mely kamerákhoz engedélyezi az értesítéseket.",
+      "noCameras": "Nincs elérhető kamera",
+      "title": "Kamerák"
+    },
+    "unsavedChanges": "Mentetlen Értesítés változtatások",
+    "cancelSuspension": "Felfüggesztés megszüntetése",
+    "registerDevice": "Regisztráld ezt az eszközt",
+    "unregisterDevice": "Eszköz regisztrációjának törlése",
+    "unsavedRegistrations": "Nem mentett értesítési regisztrációk"
+  },
+  "frigatePlus": {
+    "modelInfo": {
+      "error": "Modell információ betöltése sikertelen",
+      "plusModelType": {
+        "baseModel": "Alap modell",
+        "userModel": "Finomhangolt"
+      },
+      "supportedDetectors": "Támogatott Érzékelők",
+      "baseModel": "Alap modell",
+      "loadingAvailableModels": "Elérhető modellek betöltése…",
+      "loading": "Modell információ betöltése…",
+      "availableModels": "Elérhető modellek",
+      "modelType": "Modell típus",
+      "title": "Modell Információ",
+      "cameras": "Kamerák",
+      "trainDate": "Tanítás dátum",
+      "modelSelect": "A Frigate+-on elérhető modelljeit itt választhatja ki. Figyelem: csak az aktuális érzékelő konfigurációval kompatibilis modellek választhatók."
+    },
+    "apiKey": {
+      "plusLink": "Tudjon meg többet a Frigate+-ról",
+      "title": "Frigate+ API kulcs",
+      "validated": "Frigate+ API kulcs észlelve és ellenőrizve",
+      "notValidated": "Frigate+ API kulcs nem található vagy nem ellenőrzött",
+      "desc": "A Frigate+ API kulcs lehetővé teszi az integrációt a Frigate+ szolgáltatással."
+    },
+    "snapshotConfig": {
+      "title": "Pillanatkép Konfiguráció",
+      "table": {
+        "snapshots": "Pillanatképek",
+        "camera": "Kamera",
+        "cleanCopySnapshots": "<code>clean_copy</code> pillanatképek"
+      },
+      "documentation": "Olvassa el a dokumentációt",
+      "desc": "A Frigate+ szolgáltatásba történő beküldéshez a konfigurációban engedélyezni kell a pillanatképeket és a <code>clean_copy</code> pillanatképeket is.",
+      "cleanCopyWarning": "Néhány kamerán engedélyezve vannak a pillanatképek, de a tiszta másolat ki van kapcsolva. Ahhoz, hogy ezekről a kamerákról képeket tudjon beküldeni a Frigate+ szolgáltatásba, engedélyeznie kell a <code>clean_copy</code> beállítást a pillanatkép konfigurációban."
+    },
+    "restart_required": "Újraindítás szükséges ( Frigate+ modell megváltozott)",
+    "toast": {
+      "success": "Frigate+ beállítások elmentve. Indítsa újra a Frigate-et a változtatások érvényrejutásához.",
+      "error": "Konfigurációs módosítások mentése sikertelen: {{errorMessage}}"
+    },
+    "title": "Frigate+ Beállítások",
+    "unsavedChanges": "Mentetlen Frigate+ beállítás változtatások"
+  },
+  "users": {
+    "dialog": {
+      "changeRole": {
+        "roleInfo": {
+          "viewer": "Néző",
+          "admin": "Adminisztrátor",
+          "intro": "Válassza ki a megfelelő szerepkört ehhez a felhasználóhoz:",
+          "adminDesc": "Teljes hozzáférés az összes funkcióhoz.",
+          "viewerDesc": "Csak az Élő irányítópultokhoz, Ellenőrzéshez, Felfedezéshez és Exportokhoz korlátozva."
+        },
+        "title": "Felhasználói szerepkör módosítása",
+        "select": "Válasszon szerepkört",
+        "desc": "Engedélyek frissítése <strong>{{username}}</strong> számára"
+      },
+      "form": {
+        "user": {
+          "desc": "Csak betűk, számok, pontok és alulhúzások engedélyezettek.",
+          "title": "Felhasználói név",
+          "placeholder": "Adja meg a felhasználói nevet"
+        },
+        "password": {
+          "match": "A jelszavak egyeznek",
+          "strength": {
+            "weak": "Gyenge",
+            "veryStrong": "Nagyon Erős",
+            "strong": "Erős",
+            "medium": "Közepes",
+            "title": "Jelszó erőssége: "
+          },
+          "placeholder": "Adja meg a jelszót",
+          "title": "Jelszó",
+          "confirm": {
+            "placeholder": "Erősítse meg Jelszavát",
+            "title": "Erősítse meg Jelszavát"
+          },
+          "notMatch": "A jelszavak nem egyeznek"
+        },
+        "newPassword": {
+          "title": "Új Jelszó",
+          "placeholder": "Adjon meg egy új jelszót",
+          "confirm": {
+            "placeholder": "Adja meg ismét az új jelszót"
+          }
+        },
+        "usernameIsRequired": "Felhasználói név szükséges",
+        "passwordIsRequired": "Jelszó szükséges"
+      },
+      "createUser": {
+        "usernameOnlyInclude": "A felhasználói név csak betűket, számokat, .-t vagy _-t tartalmazhat",
+        "title": "Új Felhasználó Létrehozása",
+        "confirmPassword": "Erősítse meg a jelszavát",
+        "desc": "Új felhasználói fiók hozzáadása, és egy szerepkör megadása a Frigate felhasználói felületének területeihez való hozzáféréshez."
+      },
+      "deleteUser": {
+        "title": "Felhasználó Törlése",
+        "warn": "Biztosan törölni akarja <strong>{{username}}</strong>-t?",
+        "desc": "Ez a művelet nem vonható vissza. Ez véglegesen törli a felhasználói fiókot és minden kapcsolódó adatot."
+      },
+      "passwordSetting": {
+        "setPassword": "Jelszó Megadása",
+        "doNotMatch": "Jelszavak nem egyeznek",
+        "cannotBeEmpty": "A jelszó nem lehet üres",
+        "updatePassword": "{{username}} Jelszavának Módosítása",
+        "desc": "Hozzon létre erős jelszót a fiók védelméhez."
+      }
+    },
+    "table": {
+      "noUsers": "Felhasználók nem találhatóak.",
+      "username": "Felhasználói név",
+      "password": "Jelszó",
+      "deleteUser": "Felhasználó törlése",
+      "actions": "Műveletek",
+      "role": "Szerepkör",
+      "changeRole": "felhasználói szerepkör módosítása"
+    },
+    "toast": {
+      "error": {
+        "setPasswordFailed": "Jelszó mentése sikertelen: {{errorMessage}}",
+        "deleteUserFailed": "Felhasználó törlése sikertelen: {{errorMessage}}",
+        "createUserFailed": "Felhasználó létrehozása sikertelen: {{errorMessage}}",
+        "roleUpdateFailed": "Nem sikerült frissíteni a szerepkört: {{errorMessage}}"
+      },
+      "success": {
+        "updatePassword": "Jelszó sikeresen módosítva.",
+        "deleteUser": "{{user}} felhasználó sikeresen törölve",
+        "createUser": "{{user}} felhasználó sikeresen létrehozva",
+        "roleUpdated": "A szerepkör frissítve lett a(z) {{user}} számára"
+      }
+    },
+    "addUser": "Felhasználó hozzáadása",
+    "updatePassword": "Jelszó Módosítása",
+    "management": {
+      "desc": "Ezen Frigate példány felhasználóinak kezelése.",
+      "title": "Felhasználó kezelés"
+    },
+    "title": "Felhasználók"
+  },
+  "masksAndZones": {
+    "zones": {
+      "desc": {
+        "documentation": "Dokumentáció",
+        "title": "A zónák lehetővé teszik, hogy meghatározzon egy adott területet a képkockán belül, így eldöntheti, hogy egy objektum egy adott területen belül van-e vagy sem."
+      },
+      "edit": "Zóne Módosítása",
+      "label": "Zónák",
+      "documentTitle": "Zóna Módosítása - Frigate",
+      "name": {
+        "title": "Név",
+        "tips": "A névnek legalább 2 karakterből kell állnia és nem a kamera neve vagy egy másik zónáé.",
+        "inputPlaceHolder": "Adjon meg egy nevet…"
+      },
+      "objects": {
+        "title": "Tárgyak",
+        "desc": "Adott zónára vonatkozó tárgyak listája."
+      },
+      "add": "Zóna Hozzáadása",
+      "allObjects": "Minden Tárgy",
+      "speedEstimation": {
+        "title": "Sebesség Becslés",
+        "docs": "Olvassa el a dokumentációt",
+        "lineADistance": "A vonal távsolság {{unit}}",
+        "lineBDistance": "B vonal távolsága {{unit}}",
+        "lineCDistance": "C vonal távolsága {{unit}}",
+        "lineDDistance": "D vonal távolsága {{unit}}",
+        "desc": "Engedélyezze a sebességbecslést a zónában lévő objektumokra. A zónának pontosan 4 pontból kell állnia."
+      },
+      "speedThreshold": {
+        "title": "Sebesség Határérték {{unit}}",
+        "desc": "Megadja a minimális sebességet, amely felett az objektumokat ebben a zónában figyelembe kell venni.",
+        "toast": {
+          "error": {
+            "pointLengthError": "A sebességbecslés le lett tiltva ennél a zónánál. A sebességbecslést tartalmazó zónáknak pontosan 4 pontból kell állniuk.",
+            "loiteringTimeError": "Az olyan zónák, amelyeknél a tartózkodási idő nagyobb, mint 0, nem használhatók sebességbecsléssel együtt."
+          }
+        }
+      },
+      "point_one": "{{count}} pont",
+      "point_other": "{{count}} pont",
+      "clickDrawPolygon": "Kattintson a sokszög rajzoláshoz a képen.",
+      "inertia": {
+        "title": "Inercia",
+        "desc": "Megadja, hogy hány képkockán keresztül kell egy objektumnak a zónában lennie, mielőtt azt a zónán belülinek tekintenénk. <em>Alapértelmezett: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Lebzselési idő",
+        "desc": "Beállítja a zónában tartózkodás minimális idejét másodpercben, amelynek teljesülnie kell az aktiváláshoz. <em>Alapértelmezett: 0</em>"
+      },
+      "toast": {
+        "success": "A(z) {{zoneName}} zóna elmentésre került. A módosítások alkalmazásához indítsa újra a Frigate-et."
+      }
+    },
+    "objectMasks": {
+      "point_one": "{{count}} pont",
+      "point_other": "{{count}} pont",
+      "label": "Tárgymaszkok",
+      "desc": {
+        "documentation": "Dokumentáció",
+        "title": "Az objektumszűrő maszkokat arra használják, hogy hely alapján kiszűrjék a téves egyezéseket adott objektumtípus esetén."
+      },
+      "documentTitle": "Tárgymaszk módosítása - Frigate",
+      "objects": {
+        "title": "Tárgyak",
+        "allObjectTypes": "Minden tárgytípus",
+        "desc": "Az objektumtípus, amelyre ez az objektummaszk vonatkozik."
+      },
+      "edit": "Tárgymaszk módosítása",
+      "add": "Tárgymaszk hozzáadása",
+      "context": "Az objektumszűrő maszkokat arra használják, hogy hely alapján kiszűrjék az adott objektumtípus téves egyezéseit.",
+      "clickDrawPolygon": "Kattintson a képre, hogy poligont rajzoljon.",
+      "toast": {
+        "success": {
+          "title": "A(z) {{polygonName}} elmentve. A módosítások alkalmazásához indítsa újra a Frigate-et.",
+          "noName": "Az objektummaszk elmentésre került. A módosítások alkalmazásához indítsa újra a Frigate-et."
+        }
+      }
+    },
+    "form": {
+      "polygonDrawing": {
+        "delete": {
+          "title": "Törlés Megerősítése",
+          "desc": "Biztosan törölni akarja {{type}}<em>{{name}}</em>-t?",
+          "success": "{{name}} törölve."
+        },
+        "error": {
+          "mustBeFinished": "A sokszög rajzolásnak be kell fejeződnie mentés előtt."
+        },
+        "removeLastPoint": "Utolsó pont törlése",
+        "reset": {
+          "label": "Minden pont törlése"
+        },
+        "snapPoints": {
+          "true": "Képkivágási pontok",
+          "false": "Ne rögzítse a pontokat"
+        }
+      },
+      "zoneName": {
+        "error": {
+          "hasIllegalCharacter": "A zóna neve olyan karaktert tartalmaz, ami nem megengedett.",
+          "mustBeAtLeastTwoCharacters": "A zóna neve legalább 2 karakterből kell, hogy álljon.",
+          "mustNotBeSameWithCamera": "A zóna neve nem egyezhet meg a kamera nevével.",
+          "alreadyExists": "Egy zóna ezen a néven már létezik ennél a kameránál.",
+          "mustNotContainPeriod": "A zóna neve nem tartalmazhat pontot."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "A távolságnak nagyobb vagy egyenlőnek kell lennie, mint 0.1.",
+          "mustBeFilled": "A sebességbecslés használatához minden távolságmezőt ki kell tölteni."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "A tehetetlenségnek nagyobbnak kell lennie 0-nál."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "A tartózkodási időnek nagyobbnak vagy egyenlőnek kell lennie 0-hoz képest."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "A sebességküszöbnek nagyobbnak vagy egyenlőnek kell lennie 0.1-hez képest."
+        }
+      }
+    },
+    "motionMasks": {
+      "desc": {
+        "documentation": "Dokumentáció",
+        "title": "A mozgásmaszkokat arra használják, hogy megakadályozzák a nem kívánt mozgástípusok észlelését. A túlzott maszkolás megnehezíti az objektumok követését."
+      },
+      "context": {
+        "documentation": "Olvassa el a dokumentációt",
+        "title": "A mozgásmaszkokat arra használják, hogy megakadályozzák a nem kívánt mozgástípusok észlelését (például faágak, kamera időbélyegek). A mozgásmaszkokat <em>nagyon megfontoltan</em> kell alkalmazni, mert a túlzott maszkolás megnehezíti az objektumok követését."
+      },
+      "edit": "Mozgási Maszk Módosítása",
+      "polygonAreaTooLarge": {
+        "documentation": "Olvassa el a dokumentációt",
+        "title": "A mozgásmaszk a kamera képkockájának {{polygonArea}}%-át fedi le. Nagy mozgásmaszkok használata nem ajánlott.",
+        "tips": "A mozgásmaszkok nem akadályozzák meg az objektumok észlelését. Ehelyett ajánlott kötelező zónát használni."
+      },
+      "documentTitle": "Mozgási Maszk Módosítása - Frigate",
+      "add": "Új Mozgási Maszk",
+      "point_one": "{{count}} pont",
+      "point_other": "{{count}} pont",
+      "label": "Mozgási maszk",
+      "clickDrawPolygon": "Kattintson a sokszög rajzoláshoz a képre.",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} neve mentve. Indítsa újra a Frigate-et a módosítások érvényesítéséhez.",
+          "noName": "A mozgásmaszk elmentésre került. A módosítások alkalmazásához indítsa újra a Frigate-et."
+        }
+      }
+    },
+    "restart_required": "Újraindítás szükséges (maszkok/zónák módosultak)",
+    "filter": {
+      "all": "Mindem Maszk és Zóna"
+    },
+    "motionMaskLabel": "Mozgási Maszk {{number}}",
+    "objectMaskLabel": "Tárgy Maszk {{number}} {{label}}",
+    "toast": {
+      "success": {
+        "copyCoordinates": "A {{polyName}} koordinátái vágólapra másolva."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Nem sikerült a koordinátákat a vágólapra másolni."
+      }
+    }
+  },
+  "debug": {
+    "objectList": "Tárgy lista",
+    "debugging": "Hibakeresés",
+    "motion": {
+      "desc": "Mutasd a dobozokat azon területek körül, ahol mozgás észlelés történt",
+      "title": "Mozgáskeretek",
+      "tips": "<p><strong>Mozgáskeretek</strong></p><br><p>Piros keretek jelennek meg a képkocka azon területein, ahol jelenleg mozgást észlelhető.</p>"
+    },
+    "zones": {
+      "title": "Zónák",
+      "desc": "Mutassa a meghatározott zónák körvonalát"
+    },
+    "objectShapeFilterDrawing": {
+      "score": "Pontszám",
+      "document": "Olvassa el a dokumentációt ",
+      "area": "Terület",
+      "title": "Objektum alak szűrő rajzolás",
+      "desc": "Rajzoljon egy téglalapot a képre a terület- és arányadatok megtekintéséhez",
+      "tips": "Engedélyezze ezt az opciót, hogy téglalapot rajzoljon a kameraképen, amely megmutatja a területét és az arányát. Ezek az értékek ezután felhasználhatók az objektumalak szűrő paramétereinek beállításához a konfigurációban.",
+      "ratio": "Arány"
+    },
+    "timestamp": {
+      "title": "Időbélyeg",
+      "desc": "Időbélyeg megjelenítése a képen"
+    },
+    "title": "Hibakeresés",
+    "noObjects": "Nincs tárgy",
+    "detectorDesc": "A Frigate a(z) {{detectors}} érzékelőit használja az objektumok észlelésére a kamera videófolyamában.",
+    "desc": "A hibakereső nézet valós idejű képet mutat a követett objektumokról és azok statisztikáiról. Az objektumlista késleltetett összefoglalót ad az észlelt objektumokról.",
+    "boundingBoxes": {
+      "title": "Határoló keretek",
+      "desc": "Mutassa a határoló kereteket a követett objektumok körül",
+      "colors": {
+        "label": "Határolókeret színek",
+        "info": "<li>Indításkor minden objektumcímkéhez más-más szín kerül hozzárendelésre</li><li>A sötétkék vékony vonal azt jelzi, hogy az objektum ebben a pillanatban nincs észlelve</li><li>A szürke vékony vonal azt jelzi, hogy az objektum állónak van észlelve</li><li>A vastag vonal azt jelzi, hogy az objektum az automatikus követés tárgya (ha engedélyezve van)</li>"
+      }
+    },
+    "mask": {
+      "title": "Mozgásmaszkok",
+      "desc": "Mozgásmaszk poligonok megjelenítése"
+    },
+    "regions": {
+      "title": "Régiók",
+      "desc": "Mutassa a célterület keretét, amelyet az objektumérzékelőhöz küldenek",
+      "tips": "<p><strong>Célterület keretek</strong></p><br><p>Világoszöld keretek jelennek meg a képkocka azon területein, amelyek az objektumérzékelőnek elküldésre kerülnek.</p>"
+    }
+  },
+  "motionDetectionTuner": {
+    "toast": {
+      "success": "Mozgási beállítások mentve."
+    },
+    "improveContrast": {
+      "desc": "Növelje a kontrasztot a sötétebb jeleneteknél. <em>Alapbeállítás: BE</em>",
+      "title": "Kontraszt Növelése"
+    },
+    "Threshold": {
+      "title": "Határérték",
+      "desc": "A küszöbérték határozza meg, hogy egy pixel fényességének mekkora változása szükséges ahhoz, hogy mozgásnak minősüljön. <em>Alapértelmezett: 30</em>"
+    },
+    "title": "Mozgásérzékelő hangoló",
+    "unsavedChanges": "Nem mentett mozgásérzékelő hangolási módosítások ({{camera}})",
+    "desc": {
+      "title": "A Frigate a mozgásérzékelést elsődleges ellenőrzésként használja, hogy megállapítsa, van-e a képkockában olyan esemény, amely érdemes az objektumfelismeréssel való vizsgálatra.",
+      "documentation": "Olvassa el a mozgásérzékelő hangolási útmutatót"
+    },
+    "contourArea": {
+      "title": "Kontúrterület",
+      "desc": "A kontúrterület értékét arra használják, hogy eldöntsék, melyik megváltozott pixelekből álló csoport minősül mozgásnak. <em>Alapértelmezett: 10</em>"
+    }
+  },
+  "camera": {
+    "streams": {
+      "title": "Adások",
+      "desc": "Ideiglenesen tiltsa le a kamerát a Frigate újraindításáig. A kamera teljes letiltása megállítja a Frigate feldolgozását az adott kamera közvetítésénél. Az észlelés, rögzítés és hibakeresés nem lesz elérhető.<br /> <em>Megjegyzés: Ez nem tiltja le a go2rtc újraközvetítéseket.</em>"
+    },
+    "review": {
+      "title": "Áttekintés",
+      "alerts": "Riasztások ",
+      "detections": "Érzékelések ",
+      "desc": "Ideiglenesen engedélyezze/tiltsa le a riasztásokat és észleléseket ennél a kameránál a Frigate újraindításáig. Letiltás esetén nem keletkeznek új ellenőrzési elemek. "
+    },
+    "reviewClassification": {
+      "readTheDocumentation": "Olvassa el a Dokumentációt",
+      "title": "Attekintés Osztályozás",
+      "noDefinedZones": "Nincs zóna meghatározva ehhez a kamerához.",
+      "objectAlertsTips": "Minden {{alertsLabels}} tárgy a {{cameraName}} -n Riasztásként fog megjelenni.",
+      "selectDetectionsZones": "Válassza ki a zónákat az Észleléshez",
+      "limitDetections": "Korlátozza az észleléseket adott zónákra",
+      "selectAlertsZones": "Válassza ki a zónákat a Riasztásokhoz",
+      "zoneObjectAlertsTips": "Minden {{alertsLabels}}tárgy észlelés {{zone}}-ban/-ben a {{cameraName}}-n Riasztásként lesz megjelenítve.",
+      "objectDetectionsTips": "Minden {{detectionsLabels}} tárgy, ami nincs bekategorizálva a {{cameraName}}-n Észleléskén lesz megjelenítve függetlenül attól, hogy melyik zónában vannak.",
+      "desc": "A Frigate az ellenőrzési elemeket Riasztásokra és Észlelésekre osztja. Alapértelmezés szerint az összes <em>személy</em> és <em>autó</em> objektum Riasztásnak számít. Az ellenőrzési elemek kategorizálását finomíthatja azzal, hogy megadja az észleléshez szükséges zónákat.",
+      "zoneObjectDetectionsTips": {
+        "text": "Az összes {{detectionsLabels}} objektum, amely nincs kategorizálva a(z) {{zone}} zónában a(z) {{cameraName}} kamerán, Észlelésként lesz megjelenítve.",
+        "notSelectDetections": "Az összes {{detectionsLabels}} objektum, amelyet a(z) {{zone}} zónában észleltek a(z) {{cameraName}} kamerán, és amely nem lett Riasztásként kategorizálva, Észlelésként lesz megjelenítve, függetlenül attól, hogy melyik zónában vannak.",
+        "regardlessOfZoneObjectDetectionsTips": "Az összes {{detectionsLabels}} objektum, amely nincs kategorizálva a(z) {{cameraName}} kamerán, Észlelésként lesz megjelenítve zónától függetlenül."
+      },
+      "unsavedChanges": "Nem mentett Ellenőrzési Kategorizálási beállítások a(z) {{camera}} kamerához",
+      "toast": {
+        "success": "Az Ellenőrzési Kategorizálás beállításai elmentésre kerültek. A módosítások alkalmazásához indítsa újra a Frigate-et."
+      }
+    },
+    "title": "Kamera Beállítások"
+  }
+}

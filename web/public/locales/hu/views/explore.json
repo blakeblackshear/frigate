@@ -1,0 +1,207 @@
+{
+  "documentTitle": "Tallózás - Frigate",
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Video letöltése",
+      "aria": "Video letöltése"
+    },
+    "submitToPlus": {
+      "aria": "Küldés a Frigate Plus-nak",
+      "label": "Küldés a Frigate+-nak"
+    },
+    "deleteTrackedObject": {
+      "label": "Követett tárgy törlése"
+    },
+    "viewObjectLifecycle": {
+      "label": "Tárgy életciklusának megtekintése",
+      "aria": "Mutasd a tárgy életciklusát"
+    },
+    "findSimilar": {
+      "label": "Keress hasonlót",
+      "aria": "Keress hasonló követett tárgyat"
+    },
+    "viewInHistory": {
+      "label": "Megtekintés az Előzményekben",
+      "aria": "Megtekintés az Előzményekben"
+    },
+    "downloadSnapshot": {
+      "aria": "Pillanatfelvétel letöltése",
+      "label": "Pillanatfelvétel letöltése"
+    }
+  },
+  "details": {
+    "editLPR": {
+      "title": "Rendszám módosítása",
+      "desc": "Új rendszám hozzáadása ehhez {{label}}",
+      "descNoLabel": "Adjon hozzá egy új rendszámot ehhez a követett tárgyhoz"
+    },
+    "label": "Cimke",
+    "editSubLabel": {
+      "desc": "Új alcimke létrehozása ehhez a cimkéhez {{label}}",
+      "title": "Alcimke módosítása",
+      "descNoLabel": "Adjon hozzá egy új alcimkét ehhez a követett tárgyhoz"
+    },
+    "camera": "Kamera",
+    "zones": "Zónák",
+    "description": {
+      "placeholder": "Követett tárgy leírása",
+      "label": "Leírás",
+      "aiTips": "A Frigate nem fog igényelni leírást a Generatív MI szolgáltatójától, amíg a követett tárgy életciklusa be nem fejeződött."
+    },
+    "timestamp": "Időbélyeg",
+    "estimatedSpeed": "Becsült Sebesség",
+    "objects": "Tárgyak",
+    "topScore": {
+      "label": "Legnagyobb Pontszám",
+      "info": "A legmagasabb pontszám a követett objektum legmagasabb medián pontszáma, ezért eltérhet a keresési eredmény bélyegképén megjelenő pontszámtól."
+    },
+    "recognizedLicensePlate": "Felismert Rendszám",
+    "tips": {
+      "descriptionSaved": "Leírás sikeresen mentve",
+      "saveDescriptionFailed": "Leírás frissítése sikertelen: {{errorMessage}}"
+    },
+    "item": {
+      "toast": {
+        "error": {
+          "updatedLPRFailed": "Rendszám frissítése sikertelen: {{errorMessage}}",
+          "updatedSublabelFailed": "Alcimke frissítése sikertelen: {{errorMessage}}",
+          "regenerate": "Nem sikerült meghívni a(z) {{provider}} szolgáltatót az új leírásért: {{errorMessage}}"
+        },
+        "success": {
+          "updatedSublabel": "Az alcimke sikeresen frissítve.",
+          "updatedLPR": "Rendszám sikeresen frissítve.",
+          "regenerate": "Új leírást kértünk a(z) {{provider}} szolgáltatótól. A szolgáltató sebességétől függően az új leírás előállítása eltarthat egy ideig."
+        }
+      },
+      "button": {
+        "viewInExplore": "Mutasd a Felfedezésben",
+        "share": "Áttekintési elem megosztása"
+      },
+      "desc": "Áttekintendő elem részletei",
+      "title": "Áttekintendő Elem Részletei",
+      "tips": {
+        "mismatch_one": "{{count}} nem elérhető objektum lett észlelve és belefogalve ebbe az ellenőrzési elembe. Ez az objektum vagy nem felelt meg a riasztás vagy észlelés feltételeinek, vagy már törlésre/eltávolításra került.",
+        "mismatch_other": "{{count}} nem elérhető objektumok lettek észlelve és belefogalve ebbe az ellenőrzési elembe. Ezek az objektumok vagy nem feleltek meg a riasztás vagy észlelés feltételeinek, vagy már törlésre/eltávolításra kerültek.",
+        "hasMissingObjects": "Állítsa be a konfigurációját, ha azt szeretné, hogy a Frigate mentse a követett objektumokat a következő címkékhez: <em>{{objects}}</em>"
+      }
+    },
+    "snapshotScore": {
+      "label": "Pillanatfelvétel Pontszáma"
+    },
+    "regenerateFromThumbnails": "Újragenerálás kisképből",
+    "regenerateFromSnapshot": "Újragenerálás pillanatfelvételből",
+    "button": {
+      "regenerate": {
+        "label": "Követett tárgy leírásának újragenerálása",
+        "title": "Újragenerálás"
+      },
+      "findSimilar": "Keress Hasonlót"
+    },
+    "expandRegenerationMenu": "Újragenerálási menü kiterjesztése"
+  },
+  "searchResult": {
+    "deleteTrackedObject": {
+      "toast": {
+        "error": "Hiba a követett tárgy törlése közben: {{errorMessage}}",
+        "success": "Követett tárgy sikeresen törölve."
+      }
+    },
+    "tooltip": "{{type}} egyezés {{confidence}}%-os megbízhatósággal"
+  },
+  "generativeAI": "Generatív MI",
+  "exploreIsUnavailable": {
+    "title": "Felfedezés nem elérhető",
+    "embeddingsReindexing": {
+      "startingUp": "Indulás…",
+      "estimatedTime": "Becsült hátralevő idő:",
+      "finishingShortly": "Hamarosan végez",
+      "step": {
+        "thumbnailsEmbedded": "Beágyazott ikonok: ",
+        "descriptionsEmbedded": "Beágyazott leírások: ",
+        "trackedObjectsProcessed": "Feldolgozott követett tárgyak: "
+      },
+      "context": "A felfedezés azután használható, hogy a követett tárgy beágyazások újraindexálása befejeződött."
+    },
+    "downloadingModels": {
+      "tips": {
+        "documentation": "Olvassa el a leírást",
+        "context": "Érdemes lehet újraindexelni a követett objektumok beágyazásait, miután a modellek letöltődtek."
+      },
+      "setup": {
+        "textModel": "Szöveg modell",
+        "textTokenizer": "Szöveg tokenizáló",
+        "visionModel": "Látvány modell",
+        "visionModelFeatureExtractor": "Látvány modell képesség kinyerő"
+      },
+      "error": "Hiba történt. Ellenőrizze a Frigate naplókat.",
+      "context": "A Frigate letölti a szemantikus keresés funkcióhoz szükséges beágyazási modelleket. Ez a hálózati kapcsolat sebességétől függően néhány percet is igénybe vehet."
+    }
+  },
+  "noTrackedObjects": "Nincs követett tárgy",
+  "trackedObjectsCount_one": "{{count}} követett tárgy. ",
+  "trackedObjectsCount_other": "{{count}} követett tárgy. ",
+  "dialog": {
+    "confirmDelete": {
+      "title": "Törlés megerősítése",
+      "desc": "Ennek a követett objektumnak a törlése eltávolítja a pillanatképet, az összes mentett beágyazást és az összes kapcsolódó objektum életciklus-bejegyzést. A Történet nézetben lévő rögzített felvételek <em>NEM</em> kerülnek törlésre.<br /><br />Biztosan folytatni szeretné?"
+    }
+  },
+  "fetchingTrackedObjectsFailed": "Hiba a követett tárgyak betöltése közben: {{errorMessage}}",
+  "objectLifecycle": {
+    "title": "Tárgy Életciklus",
+    "noImageFound": "Ehhez az időbélyeghez nem található kép.",
+    "createObjectMask": "Tárgy Maszk Létrehozása",
+    "scrollViewTips": "Görgessen, hogy megnézze ezen tárgy életciklusának jelentős pillanatait.",
+    "lifecycleItemDesc": {
+      "heard": "{{label}} meghallva",
+      "external": "{{label}} észlelve",
+      "header": {
+        "zones": "Zónák",
+        "ratio": "Arány",
+        "area": "Körzet"
+      },
+      "active": "{{label}} aktiválódott",
+      "attribute": {
+        "other": "{{label}} felismerve mint {{attribute}}",
+        "faceOrLicense_plate": "{{attribute}} észlelve {{label}}-hoz/-hez/-höz"
+      },
+      "entered_zone": "{{label}} belépett {{zones}}-ba/-be",
+      "visible": "{{label}} észlelve",
+      "gone": "{{label}} elment",
+      "stationary": "{{label}} mozdulatlanná vált"
+    },
+    "annotationSettings": {
+      "offset": {
+        "documentation": "Olvassa el a leírást ",
+        "label": "Jelölés eltolás",
+        "desc": "Ez az információ a kamera észlelési csatornájából származik, de a felvételi csatorna képeire van ráhelyezve. Nem valószínű, hogy a két közvetítés tökéletesen szinkronban van. Ennek eredményeként a kijelölő keret és a felvétel nem lesz teljesen pontosan összehangolva. Azonban az <code>annotation_offset</code> mező segítségével ez korrigálható.",
+        "millisecondsToOffset": "Ezredmásodpercben megadott érték, amellyel az észlelési jelölések eltolhatók. <em>Alapértelmezett: 0</em>",
+        "tips": "TIPP: Képzelje el, hogy van egy eseményklip, amelyben egy személy balról jobbra sétál. Ha az esemény idővonalán a kijelölő keret következetesen a személy bal oldalán jelenik meg, akkor az értéket csökkenteni kell. Hasonlóképpen, ha a kijelölő keret folyamatosan a személy előtt van, akkor az értéket növelni kell.",
+        "toast": {
+          "success": "A(z) {{camera}} jelöléseltolása el lett mentve a konfigurációs fájlba. Indítsa újra a Frigate-et a módosítások alkalmazásához."
+        }
+      },
+      "showAllZones": {
+        "desc": "Mindig mutasd a képen a zónákat, ahol a tárgy belépett a zónába.",
+        "title": "Mutasd az Összes Zónát"
+      },
+      "title": "Jelölés beállításai"
+    },
+    "carousel": {
+      "next": "Következő dia",
+      "previous": "Előző dia"
+    },
+    "trackedPoint": "Követett Pont",
+    "count": "{{first}}-nek a {{second}}",
+    "autoTrackingTips": "A doboz helyzete pontatlan lesz az automatikusan követő kamerákhoz.",
+    "adjustAnnotationSettings": "Címkézés beállításainak módosítása"
+  },
+  "type": {
+    "video": "videó",
+    "object_lifecycle": "tárgy életciklus",
+    "details": "részletek",
+    "snapshot": "pillanatfelvétel"
+  },
+  "trackedObjectDetails": "Követett Tárgy Részletei",
+  "exploreMore": "Fedezzen fel több {{label}} tárgyat"
+}

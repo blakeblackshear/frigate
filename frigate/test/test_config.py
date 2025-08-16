@@ -39,7 +39,7 @@ class TestConfig(unittest.TestCase):
             "description": "Fine tuned model",
             "trainDate": "2023-04-28T23:22:01.262Z",
             "type": "ssd",
-            "supportedDetectors": ["edgetpu"],
+            "supportedDetectors": ["cpu", "edgetpu"],
             "width": 320,
             "height": 320,
             "inputShape": "nhwc",
@@ -854,9 +854,9 @@ class TestConfig(unittest.TestCase):
         assert frigate_config.model.merged_labelmap[0] == "person"
 
     def test_plus_labelmap(self):
-        with open("/config/model_cache/test", "w") as f:
+        with open(os.path.join(MODEL_CACHE_DIR, "test"), "w") as f:
             json.dump(self.plus_model_info, f)
-        with open("/config/model_cache/test.json", "w") as f:
+        with open(os.path.join(MODEL_CACHE_DIR, "test.json"), "w") as f:
             json.dump(self.plus_model_info, f)
 
         config = {
@@ -1491,7 +1491,9 @@ class TestConfig(unittest.TestCase):
                         "fps": 5,
                     },
                     "onvif": {
-                        "autotracking": {"movement_weights": "0, 1, 1.23, 2.34, 0.50"}
+                        "autotracking": {
+                            "movement_weights": "0, 1, 1.23, 2.34, 0.50, 1"
+                        }
                     },
                 }
             },
@@ -1504,6 +1506,7 @@ class TestConfig(unittest.TestCase):
             "1.23",
             "2.34",
             "0.5",
+            "1.0",
         ]
 
     def test_fails_invalid_movement_weights(self):

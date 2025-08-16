@@ -1,17 +1,20 @@
-import {
-  RefObject,
-  useCallback,
-  useEffect,
-  useMemo,
+import React, {
   useRef,
   useState,
+  useMemo,
+  useCallback,
+  useEffect,
 } from "react";
 import { SummarySegment } from "./SummarySegment";
+import {
+  ConsolidatedSegmentData,
+  ReviewSegment,
+  ReviewSeverity,
+} from "@/types/review";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
-import { ReviewSegment, ReviewSeverity } from "@/types/review";
 
 export type SummaryTimelineProps = {
-  reviewTimelineRef: RefObject<HTMLDivElement>;
+  reviewTimelineRef: React.RefObject<HTMLDivElement>;
   timelineStart: number;
   timelineEnd: number;
   segmentDuration: number;
@@ -29,7 +32,6 @@ export function SummaryTimeline({
 }: SummaryTimelineProps) {
   const summaryTimelineRef = useRef<HTMLDivElement>(null);
   const visibleSectionRef = useRef<HTMLDivElement>(null);
-  const [segmentHeight, setSegmentHeight] = useState(0);
 
   const [isDragging, setIsDragging] = useState(false);
   const [scrollStartPosition, setScrollStartPosition] = useState<number>(0);
@@ -43,61 +45,89 @@ export function SummaryTimeline({
     [timelineEnd, timelineStart, segmentDuration],
   );
 
-  const { alignStartDateToTimeline } = useTimelineUtils({
-    segmentDuration,
-    timelineDuration: reviewTimelineDuration,
-    timelineRef: reviewTimelineRef,
-  });
-
-  const timelineStartAligned = useMemo(
-    () => alignStartDateToTimeline(timelineStart) + 2 * segmentDuration,
-    [timelineStart, alignStartDateToTimeline, segmentDuration],
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    {
+      segmentDuration,
+      timelineDuration: reviewTimelineDuration,
+      timelineRef: reviewTimelineRef,
+    },
   );
 
-  // Generate segments for the timeline
-  const generateSegments = useCallback(() => {
-    const segmentCount = Math.ceil(reviewTimelineDuration / segmentDuration);
+  const consolidatedSegments = useMemo(() => {
+    const filteredEvents = events.filter(
+      (event) => event.severity === severityType,
+    );
 
-    if (segmentHeight) {
-      return Array.from({ length: segmentCount }, (_, index) => {
-        const segmentTime = timelineStartAligned - index * segmentDuration;
+    const sortedEvents = filteredEvents.sort(
+      (a, b) => a.start_time - b.start_time,
+    );
 
-        return (
-          <SummarySegment
-            key={segmentTime}
-            events={events}
-            segmentDuration={segmentDuration}
-            segmentTime={segmentTime}
-            segmentHeight={segmentHeight}
-            severityType={severityType}
-          />
-        );
+    const consolidated: ConsolidatedSegmentData[] = [];
+
+    let currentTime = alignEndDateToTimeline(timelineEnd);
+    const timelineStartAligned = alignStartDateToTimeline(timelineStart);
+
+    sortedEvents.forEach((event) => {
+      const alignedStartTime = Math.max(
+        alignStartDateToTimeline(event.start_time),
+        currentTime,
+      );
+      const alignedEndTime = Math.min(
+        event.end_time
+          ? alignEndDateToTimeline(event.end_time)
+          : alignedStartTime + segmentDuration,
+        timelineStartAligned,
+      );
+
+      if (alignedStartTime < alignedEndTime) {
+        if (alignedStartTime > currentTime) {
+          consolidated.push({
+            startTime: currentTime,
+            endTime: alignedStartTime,
+            severity: "empty",
+            reviewed: false,
+          });
+        }
+
+        consolidated.push({
+          startTime: alignedStartTime,
+          endTime: alignedEndTime,
+          severity: event.severity,
+          reviewed: event.has_been_reviewed,
+        });
+
+        currentTime = alignedEndTime;
+      }
+    });
+
+    if (currentTime < timelineStartAligned) {
+      consolidated.push({
+        startTime: currentTime,
+        endTime: timelineStartAligned,
+        severity: "empty",
+        reviewed: false,
       });
     }
-  }, [
-    segmentDuration,
-    timelineStartAligned,
-    events,
-    reviewTimelineDuration,
-    segmentHeight,
-    severityType,
-  ]);
 
-  const segments = useMemo(
-    () => generateSegments(),
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      segmentDuration,
-      segmentHeight,
-      timelineStartAligned,
-      events,
-      reviewTimelineDuration,
-      segmentHeight,
-      generateSegments,
-      severityType,
-    ],
-  );
+    return consolidated.length > 0
+      ? consolidated
+      : [
+          {
+            startTime: alignEndDateToTimeline(timelineEnd),
+            endTime: timelineStartAligned,
+            severity: "empty" as const,
+            reviewed: false,
+          },
+        ];
+  }, [
+    events,
+    severityType,
+    timelineStart,
+    timelineEnd,
+    alignStartDateToTimeline,
+    alignEndDateToTimeline,
+    segmentDuration,
+  ]);
 
   const setVisibleSectionStyles = useCallback(() => {
     if (
@@ -137,15 +167,6 @@ export function SummaryTimeline({
 
       observer.current = new ResizeObserver(() => {
         setVisibleSectionStyles();
-        if (summaryTimelineRef.current) {
-          const { clientHeight: summaryTimelineVisibleHeight } =
-            summaryTimelineRef.current;
-
-          setSegmentHeight(
-            summaryTimelineVisibleHeight /
-              (reviewTimelineDuration / segmentDuration),
-          );
-        }
       });
       observer.current.observe(content);
 
@@ -162,18 +183,6 @@ export function SummaryTimeline({
     reviewTimelineDuration,
     segmentDuration,
   ]);
-
-  useEffect(() => {
-    if (summaryTimelineRef.current) {
-      const { clientHeight: summaryTimelineVisibleHeight } =
-        summaryTimelineRef.current;
-
-      setSegmentHeight(
-        summaryTimelineVisibleHeight /
-          (reviewTimelineDuration / segmentDuration),
-      );
-    }
-  }, [reviewTimelineDuration, summaryTimelineRef, segmentDuration]);
 
   const timelineClick = useCallback(
     (
@@ -344,11 +353,17 @@ export function SummaryTimeline({
     >
       <div
         ref={summaryTimelineRef}
-        className="relative z-10 flex h-full flex-col"
+        className="relative z-10 flex h-full flex-col-reverse"
         onClick={timelineClick}
         onTouchEnd={timelineClick}
       >
-        {segments}
+        {consolidatedSegments.map((segment, index) => (
+          <SummarySegment
+            key={`${segment.startTime}-${segment.endTime}+${index}`}
+            segmentData={segment}
+            totalDuration={timelineStart - timelineEnd}
+          />
+        ))}
       </div>
       <div
         ref={visibleSectionRef}

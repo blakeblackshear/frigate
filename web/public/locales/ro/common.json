@@ -1,0 +1,265 @@
+{
+  "time": {
+    "untilForTime": "Până la {{time}}",
+    "untilForRestart": "Pana la repornirea Frigate.",
+    "untilRestart": "Pana la repornire",
+    "ago": "{{timeAgo}} în urmă",
+    "justNow": "Acum",
+    "today": "Astăzi",
+    "yesterday": "Ieri",
+    "last7": "Ultimele 7 zile",
+    "last14": "Ultimele 14 zile",
+    "last30": "Ultimele 30 de zile",
+    "thisWeek": "Săptămâna aceasta",
+    "lastWeek": "Săptămâna trecută",
+    "thisMonth": "Luna aceasta",
+    "lastMonth": "Luna trecută",
+    "5minutes": "5 minute",
+    "10minutes": "10 minute",
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyy"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "30minutes": "30 de minute",
+    "1hour": "O oră",
+    "12hours": "12 ore",
+    "24hours": "24 de ore",
+    "pm": "PM",
+    "am": "AM",
+    "mo": "{{time}}lună",
+    "yr": "{{time}}an",
+    "year_one": "{{time}} an",
+    "year_few": "{{time}} ani",
+    "year_other": "{{time}} de ani",
+    "d": "{{time}}z",
+    "h": "{{time}}o",
+    "m": "{{time}}m",
+    "s": "{{time}}s",
+    "formattedTimestamp": {
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd/MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "month_one": "{{time}} lună",
+    "month_few": "{{time}} luni",
+    "month_other": "{{time}} de luni",
+    "day_one": "{{time}} zi",
+    "day_few": "{{time}} zile",
+    "day_other": "{{time}} de zile",
+    "hour_one": "{{time}} oră",
+    "hour_few": "{{time}} ore",
+    "hour_other": "{{time}} de ore",
+    "minute_one": "{{time}} minut",
+    "minute_few": "{{time}} minute",
+    "minute_other": "{{time}} de minute",
+    "second_one": "{{time}} secundă",
+    "second_few": "{{time}} secunde",
+    "second_other": "{{time}} de secunde"
+  },
+  "menu": {
+    "documentation": {
+      "title": "Documentație",
+      "label": "Documentație Frigate"
+    },
+    "explore": "Căutare",
+    "uiPlayground": "UI Playground",
+    "faceLibrary": "Biblioteca de fețe",
+    "export": "Exportă",
+    "language": {
+      "ca": "Català (Catalană)",
+      "withSystem": {
+        "label": "Utilizează setările de limbă ale sistemului"
+      },
+      "ja": "日本語 (Japoneză)",
+      "fa": "فارسی (Persiană)",
+      "pl": "Polski (Poloneză)",
+      "uk": "Українська (Ucrainiană)",
+      "he": "עברית (Ebraică)",
+      "yue": "粵語 (Cantoneză)",
+      "en": "English (Engleză)",
+      "de": "Deutsch (Germană)",
+      "es": "Español (Spaniolă)",
+      "zhCN": "简体中文 (Chineză simplificată)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (Franceză)",
+      "ar": "العربية (Arabă)",
+      "pt": "Português (Portugheză)",
+      "ru": "Русский (Rusă)",
+      "tr": "Türkçe (Turcă)",
+      "it": "Italiano (Italiană)",
+      "nl": "Nederlands (Olandeză)",
+      "sv": "Svenska (Suedeză)",
+      "cs": "Čeština (Cehă)",
+      "nb": "Norsk Bokmål (Norvegiană Bokmål)",
+      "ko": "한국어 (Coreană)",
+      "vi": "Tiếng Việt (Vietnameză)",
+      "da": "Dansk (Daneză)",
+      "sk": "Slovenčina (Slovacă)",
+      "el": "Ελληνικά (Greacă)",
+      "ro": "Română (Română)",
+      "hu": "Magyar (Maghiară)",
+      "fi": "Suomi (Finlandeză)",
+      "th": "ไทย (Thailandeză)"
+    },
+    "theme": {
+      "default": "Implicit",
+      "highcontrast": "Contrast ridicat",
+      "label": "Temă",
+      "blue": "Albastru",
+      "green": "Verde",
+      "nord": "Nord",
+      "red": "Roșu"
+    },
+    "user": {
+      "title": "Utilizator",
+      "account": "Cont",
+      "current": "Utilizator actual: {{user}}",
+      "logout": "Deconectare",
+      "anonymous": "anonim",
+      "setPassword": "Schimă parola"
+    },
+    "live": {
+      "cameras": {
+        "count_one": "{{count}} cameră",
+        "count_few": "{{count}} camere",
+        "count_other": "{{count}} de camere",
+        "title": "Camere"
+      },
+      "title": "Live",
+      "allCameras": "Toate camerele"
+    },
+    "help": "Ajutor",
+    "system": "Sistem",
+    "systemMetrics": "Metrici de sistem",
+    "configuration": "Configurație",
+    "systemLogs": "Jurnale de sistem",
+    "settings": "Setări",
+    "configurationEditor": "Editor de configurație",
+    "languages": "Limba",
+    "appearance": "Aspect",
+    "darkMode": {
+      "label": "Mod luminozitate",
+      "light": "Luminos",
+      "dark": "Întunecat",
+      "withSystem": {
+        "label": "Utilizează setările de sistem pentru modul luminos sau întunecat"
+      }
+    },
+    "withSystem": "Modul sistemului",
+    "restart": "Repornește Frigate",
+    "review": "Revizuire"
+  },
+  "button": {
+    "cameraAudio": "Sunet cameră",
+    "apply": "Aplică",
+    "reset": "Resetare",
+    "done": "Gata",
+    "enabled": "Activat",
+    "copyCoordinates": "Copiază coordonate",
+    "on": "PORNIT",
+    "off": "OPRIT",
+    "edit": "Editează",
+    "delete": "Șterge",
+    "yes": "Da",
+    "no": "Nu",
+    "download": "Descarcă",
+    "info": "Informații",
+    "enable": "Activează",
+    "twoWayTalk": "Conversație bidirecțională",
+    "disabled": "Dezactivat",
+    "disable": "Dezactivează",
+    "save": "Salvează",
+    "saving": "Se salvează…",
+    "cancel": "Renunță",
+    "close": "Închide",
+    "copy": "Copiază",
+    "back": "Înapoi",
+    "history": "Istorie",
+    "fullscreen": "Ecran complet",
+    "exitFullscreen": "ieși din ecran complet",
+    "pictureInPicture": "Imagine în imagine",
+    "suspended": "Suspendat",
+    "unsuspended": "Nesuspendat",
+    "play": "Redă",
+    "unselect": "Deselectează",
+    "export": "Exportă",
+    "deleteNow": "Șterge acum",
+    "next": "Următorul"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mile/h",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "picioare",
+      "meters": "metri"
+    }
+  },
+  "label": {
+    "back": "Mergi înapoi"
+  },
+  "selectItem": "Selectează {{item}}",
+  "pagination": {
+    "label": "paginare",
+    "next": {
+      "label": "Mergi la pagina următoare",
+      "title": "Următor"
+    },
+    "previous": {
+      "title": "Anterior",
+      "label": "Meri la pagina anterioară"
+    },
+    "more": "Mai multe pagini"
+  },
+  "role": {
+    "viewer": "Vizualizator",
+    "desc": "Administratorii au acces complet la toate funcționalitățile din interfața Frigate. Vizualizatorii sunt limitați la vizualizarea camerelor, a elementelor de revizuire și a înregistrărilor istorice în interfață.",
+    "admin": "Administrator",
+    "title": "Rol"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL-ul a fost copiat.",
+    "save": {
+      "title": "Salvează",
+      "error": {
+        "noMessage": "Nu s-au putut salva modificările de configurație",
+        "title": "Salvarea modificărilor de configurație a eșuat: {{errorMessage}}"
+      }
+    }
+  },
+  "accessDenied": {
+    "title": "Acces refuzat",
+    "desc": "Nu ai permisiunea să vizualizezi această pagină.",
+    "documentTitle": "Acces refuzat - Frigate"
+  },
+  "notFound": {
+    "documentTitle": "Nu a fost găsit - Frigate",
+    "title": "404",
+    "desc": "Pagină negăsită"
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "documentTitle": "Live - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+  "twoWayTalk": {
+    "enable": "Aktivera Two Way Talk",
+    "disable": "Avaktivera Two Way Talk"
+  },
+  "cameraAudio": {
+    "disable": "Inaktivera kameraljud",
+    "enable": "Aktivera kameraljud"
+  },
+  "ptz": {
+    "zoom": {
+      "in": {
+        "label": "Zooma in PTZ kamera"
+      },
+      "out": {
+        "label": "Zooma ut PTZ kamera"
+      }
+    },
+    "move": {
+      "up": {
+        "label": "Flytta PTZ kamera uppåt"
+      },
+      "right": {
+        "label": "Flytta PTZ kamera åt höger"
+      },
+      "clickMove": {
+        "disable": "Inaktivera klick för att flytta",
+        "label": "Klicka i bilden för att centrera kameran",
+        "enable": "Aktivera klick för att flytta"
+      },
+      "left": {
+        "label": "Flytta PTZ kamera till vänster"
+      },
+      "down": {
+        "label": "Flytta PTZ kamera nedåt"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Klicka i bilden för att centrera PTZ kamera"
+      }
+    },
+    "presets": "PTZ kamera förinställningar"
+  },
+  "streamStats": {
+    "enable": "Visa videostatistik",
+    "disable": "Dölj videostatistik"
+  },
+  "detect": {
+    "enable": "Aktivera detektering",
+    "disable": "Avaktivera detektering"
+  },
+  "recording": {
+    "enable": "Aktivera inspelning",
+    "disable": "Avaktivera inspelning"
+  },
+  "snapshots": {
+    "enable": "Aktivera ögonblicksbilder",
+    "disable": "Avaktivera ögonblicksbilder"
+  },
+  "audioDetect": {
+    "enable": "Aktivera ljudaktivering",
+    "disable": "Avaktivera ljudaktivering"
+  },
+  "autotracking": {
+    "enable": "Aktivera automatisk panorering",
+    "disable": "Avaktivera automatisk panorering"
+  },
+  "notifications": "Notifikationer",
+  "audio": "Ljud",
+  "lowBandwidthMode": "Läge för låg bandbredd",
+  "manualRecording": {
+    "failedToEnd": "Misslyckades med att avsluta manuell vid behov-inspelning.",
+    "started": "Starta manuell inspelning vid behov.",
+    "title": "Aktivera inspelning vid behov",
+    "tips": "Starta en manuell händelse enligt denna kameras inställningar för inspelningslagring.",
+    "playInBackground": {
+      "label": "Spela upp i bakgrunden",
+      "desc": "Strömma vidare när spelaren inte visas."
+    },
+    "showStats": {
+      "label": "Visa Statistik",
+      "desc": "Visa statistik ovanpå kamerabilden."
+    },
+    "debugView": "Felsökningsvy",
+    "start": "Starta inspelning vid behov",
+    "failedToStart": "Misslyckades med att starta manuell inspelning vid behov.",
+    "recordDisabledTips": "Eftersom inspelning är inaktiverad eller begränsad i konfigurationen för den här kameran kommer endast en ögonblicksbild att sparas.",
+    "end": "Avsluta vid behov-inspelning",
+    "ended": "Avslutade manuell vid behov-inspelning."
+  },
+  "cameraSettings": {
+    "audioDetection": "Ljuddetektering",
+    "title": "{{kamera}} inställningar",
+    "cameraEnabled": "Kamera Aktiverad",
+    "objectDetection": "Objektsdetektering",
+    "recording": "Inspelning",
+    "snapshots": "Ögonblicksbilder",
+    "autotracking": "Autospårning"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "active_objects": "Aktiva Objekt",
+      "all": "Allt",
+      "motion": "Rörelse"
+    },
+    "notAllTips": "Din lagringskonfiguration för {{source}}-inspelning är inställd på <code>läge: {{effectiveRetainMode}}</code>, så den här inspelningen vid behov kommer endast att behålla segment av {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Redigera Layout",
+    "group": {
+      "label": "Redigera Kameragrupp"
+    },
+    "exitEdit": "Lämna Redigering"
+  },
+  "camera": {
+    "enable": "Aktivera Kamera",
+    "disable": "Inaktivera Kamera"
+  },
+  "muteCameras": {
+    "enable": "Slå av ljudet på alla kameror",
+    "disable": "Slå på ljudet på alla kameror"
+  },
+  "streamingSettings": "Inställningar för Streaming",
+  "suspend": {
+    "forTime": "Pausa för: "
+  },
+  "stream": {
+    "title": "Ström (Swedish also use the word Stream)",
+    "audio": {
+      "tips": {
+        "title": "Ljud måste skickas ut från din kamera och konfigureras i go2rtc för den här strömmen.",
+        "documentation": "Läs dokumentationen: "
+      },
+      "available": "Ljud är tillgängligt för den här strömmen",
+      "unavailable": "Ljud är inte tillgängligt för den här strömmen"
+    },
+    "twoWayTalk": {
+      "tips": "Din enhet måste stödja funktionen och WebRTC måste vara konfigurerat för tvåvägskommunikation.",
+      "tips.documentation": "Läs dokumentationen: ",
+      "available": "tvåvägskommunikation är tillgängligt för den här strömmen",
+      "unavailable": "Tvåvägskommunikation är inte tillgängligt för den här strömmen"
+    },
+    "lowBandwidth": {
+      "tips": "Livevisningen är i lägebandbreddsläge på grund av buffring eller strömningsfel.",
+      "resetStream": "Återställ ström"
+    },
+    "playInBackground": {
+      "label": "Spela i bakgrunden",
+      "tips": "Aktivera det här alternativet för att fortsätta strömma när spelaren är dold."
+    }
+  },
+  "history": {
+    "label": "Visa historiskt videomaterial"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "logs": {
+    "type": {
+      "timestamp": "Aikaleima",
+      "tag": "Tagi",
+      "message": "Viesti",
+      "label": "Tyyppi"
+    },
+    "copy": {
+      "label": "Kopioi leikepöydälle",
+      "success": "Lokit kopioitu leikepöydälle",
+      "error": "Lokeja ei voitu kopioida leikepöydälle"
+    },
+    "download": {
+      "label": "Lataa lokit"
+    },
+    "tips": "Lokeja toistetaan palvelimelta",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Virhe noudettaessa lokeja: {{errorMessage}}",
+        "whileStreamingLogs": "Virhe toistettaessa lokeja: {{errorMessage}}"
+      }
+    }
+  },
+  "documentTitle": {
+    "cameras": "Kameroiden tilastot - Frigate",
+    "storage": "Tallenteiden tilastot - Fgirage",
+    "general": "Yleiset tilastot - Frigate",
+    "enrichments": "Rikastetut tilastot - Frigate",
+    "logs": {
+      "frigate": "Frigaten lokit - Frigate",
+      "go2rtc": "Go2RTC lokit - Frigate",
+      "nginx": "Nginx lokit - Frigate"
+    }
+  },
+  "title": "Järjestelmä",
+  "metrics": "Järjestelmämittarit",
+  "general": {
+    "hardwareInfo": {
+      "title": "Laitteiston tiedot",
+      "gpuUsage": "GPU:n käyttö",
+      "gpuMemory": "GPU:n muisti",
+      "gpuEncoder": "GPU-enkooderi",
+      "gpuDecoder": "GPU-dekooderi",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfon tulostus",
+          "returnCode": "Paluuarvo: {{code}}"
+        },
+        "toast": {
+          "success": "Kopioi GPU:n tiedot leikepöydälle"
+        },
+        "copyInfo": {
+          "label": "Kopioi GPU:n tiedot"
+        },
+        "closeInfo": {
+          "label": "Sulje GPU:n tiedot"
+        }
+      }
+    },
+    "detector": {
+      "memoryUsage": "Ilmaiseman muistinkäyttö",
+      "title": "Ilmaisimet",
+      "inferenceSpeed": "Ilmaisimen päättelynopeus",
+      "cpuUsage": "Ilmaisimen CPU-käyttö",
+      "temperature": "Ilmaisimen lämpötila"
+    },
+    "title": "Yleinen"
+  }
+}

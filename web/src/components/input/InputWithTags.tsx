@@ -51,6 +51,8 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { MdImageSearch } from "react-icons/md";
+import { useTranslation } from "react-i18next";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type InputWithTagsProps = {
   inputFocused: boolean;
@@ -73,6 +75,7 @@ export default function InputWithTags({
   setSearch,
   allSuggestions,
 }: InputWithTagsProps) {
+  const { t, i18n } = useTranslation(["views/search"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -216,11 +219,14 @@ export default function InputWithTags({
         type == "after" ||
         type == "time_range" ||
         type == "min_score" ||
-        type == "max_score"
+        type == "max_score" ||
+        type == "min_speed" ||
+        type == "max_speed"
       ) {
         const newFilters = { ...filters };
         let timestamp = 0;
         let score = 0;
+        let speed = 0;
 
         switch (type) {
           case "before":
@@ -233,12 +239,9 @@ export default function InputWithTags({
                 filters.after &&
                 timestamp <= filters.after * 1000
               ) {
-                toast.error(
-                  "The 'before' date must be later than the 'after' date.",
-                  {
-                    position: "top-center",
-                  },
-                );
+                toast.error(t("filter.toast.error.beforeDateBeLaterAfter"), {
+                  position: "top-center",
+                });
                 return;
               }
               if (
@@ -246,12 +249,9 @@ export default function InputWithTags({
                 filters.before &&
                 timestamp >= filters.before * 1000
               ) {
-                toast.error(
-                  "The 'after' date must be earlier than the 'before' date.",
-                  {
-                    position: "top-center",
-                  },
-                );
+                toast.error(t("filter.toast.error.afterDatebeEarlierBefore"), {
+                  position: "top-center",
+                });
                 return;
               }
               if (type === "before") {
@@ -271,7 +271,7 @@ export default function InputWithTags({
                 score > filters.max_score * 100
               ) {
                 toast.error(
-                  "The 'min_score' must be less than or equal to the 'max_score'.",
+                  t("filter.toast.error.minScoreMustBeLessOrEqualMaxScore"),
                   {
                     position: "top-center",
                   },
@@ -284,7 +284,7 @@ export default function InputWithTags({
                 score < filters.min_score * 100
               ) {
                 toast.error(
-                  "The 'max_score' must be greater than or equal to the 'min_score'.",
+                  t("filter.toast.error.maxScoreMustBeGreaterOrEqualMinScore"),
                   {
                     position: "top-center",
                   },
@@ -292,6 +292,40 @@ export default function InputWithTags({
                 return;
               }
               newFilters[type] = score / 100;
+            }
+            break;
+          case "min_speed":
+          case "max_speed":
+            speed = parseFloat(value);
+            if (score >= 0) {
+              // Check for conflicts between min_speed and max_speed
+              if (
+                type === "min_speed" &&
+                filters.max_speed !== undefined &&
+                speed > filters.max_speed
+              ) {
+                toast.error(
+                  t("filter.toast.error.minSpeedMustBeLessOrEqualMaxSpeed"),
+                  {
+                    position: "top-center",
+                  },
+                );
+                return;
+              }
+              if (
+                type === "max_speed" &&
+                filters.min_speed !== undefined &&
+                speed < filters.min_speed
+              ) {
+                toast.error(
+                  t("filter.toast.error.maxSpeedMustBeGreaterOrEqualMinSpeed"),
+                  {
+                    position: "top-center",
+                  },
+                );
+                return;
+              }
+              newFilters[type] = speed;
             }
             break;
           case "time_range":
@@ -343,7 +377,7 @@ export default function InputWithTags({
         setCurrentFilterType(null);
       }
     },
-    [filters, setFilters, allSuggestions],
+    [filters, setFilters, allSuggestions, t],
   );
 
   function formatFilterValues(
@@ -369,14 +403,28 @@ export default function InputWithTags({
       }`;
     } else if (filterType === "min_score" || filterType === "max_score") {
       return Math.round(Number(filterValues) * 100).toString() + "%";
+    } else if (filterType === "min_speed" || filterType === "max_speed") {
+      return (
+        filterValues +
+        " " +
+        (config?.ui.unit_system == "metric"
+          ? t("unit.speed.kph", { ns: "common" })
+          : t("unit.speed.mph", { ns: "common" }))
+      );
     } else if (
       filterType === "has_clip" ||
       filterType === "has_snapshot" ||
       filterType === "is_submitted"
     ) {
-      return filterValues ? "Yes" : "No";
+      return filterValues
+        ? t("button.yes", { ns: "common" })
+        : t("button.no", { ns: "common" });
+    } else if (filterType === "labels") {
+      return getTranslatedLabel(String(filterValues));
+    } else if (filterType === "search_type") {
+      return t("filter.searchType." + String(filterValues));
     } else {
-      return filterValues as string;
+      return String(filterValues).replaceAll("_", " ");
     }
   }
 
@@ -397,7 +445,11 @@ export default function InputWithTags({
         ((filterType === "min_score" || filterType === "max_score") &&
           !isNaN(Number(trimmedValue)) &&
           Number(trimmedValue) >= 50 &&
-          Number(trimmedValue) <= 100)
+          Number(trimmedValue) <= 100) ||
+        ((filterType === "min_speed" || filterType === "max_speed") &&
+          !isNaN(Number(trimmedValue)) &&
+          Number(trimmedValue) >= 1 &&
+          Number(trimmedValue) <= 150)
       ) {
         createFilter(
           filterType,
@@ -608,7 +660,7 @@ export default function InputWithTags({
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
             className="text-md h-9 pr-32"
-            placeholder="Search..."
+            placeholder={t("placeholder.search")}
           />
           <div className="absolute right-3 top-0 flex h-full flex-row items-center justify-center gap-5">
             {(search || Object.keys(filters).length > 0) && (
@@ -620,7 +672,7 @@ export default function InputWithTags({
                   />
                 </TooltipTrigger>
                 <TooltipPortal>
-                  <TooltipContent>Clear search</TooltipContent>
+                  <TooltipContent>{t("button.clear")}</TooltipContent>
                 </TooltipPortal>
               </Tooltip>
             )}
@@ -634,7 +686,7 @@ export default function InputWithTags({
                   />
                 </TooltipTrigger>
                 <TooltipPortal>
-                  <TooltipContent>Save search</TooltipContent>
+                  <TooltipContent>{t("button.save")}</TooltipContent>
                 </TooltipPortal>
               </Tooltip>
             )}
@@ -643,12 +695,14 @@ export default function InputWithTags({
               <Tooltip>
                 <TooltipTrigger className="cursor-default">
                   <MdImageSearch
-                    aria-label="Similarity search active"
+                    aria-label={t("similaritySearch.active")}
                     className="size-4 text-selected"
                   />
                 </TooltipTrigger>
                 <TooltipPortal>
-                  <TooltipContent>Similarity search active</TooltipContent>
+                  <TooltipContent>
+                    {t("similaritySearch.active")}
+                  </TooltipContent>
                 </TooltipPortal>
               </Tooltip>
             )}
@@ -657,10 +711,10 @@ export default function InputWithTags({
               <PopoverTrigger asChild>
                 <button
                   className="focus:outline-none"
-                  aria-label="Filter information"
+                  aria-label={t("button.filterInformation")}
                 >
                   <LuFilter
-                    aria-label="Filters active"
+                    aria-label={t("button.filterActive")}
                     className={cn(
                       "size-4",
                       Object.keys(filters).length > 0
@@ -672,39 +726,31 @@ export default function InputWithTags({
               </PopoverTrigger>
               <PopoverContent className="w-80">
                 <div className="space-y-2">
-                  <h3 className="font-medium">How to use text filters</h3>
+                  <h3 className="font-medium">{t("filter.tips.title")}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Filters help you narrow down your search results. Here's how
-                    to use them in the input field:
+                    {t("filter.tips.desc.text")}
                   </p>
                   <ul className="list-disc pl-5 text-sm text-primary-variant">
+                    <li>{t("filter.tips.desc.step1")}</li>
+                    <li>{t("filter.tips.desc.step2")}</li>
+                    <li>{t("filter.tips.desc.step3")}</li>
                     <li>
-                      Type a filter name followed by a colon (e.g., "cameras:").
+                      {t("filter.tips.desc.step4", {
+                        DateFormat: getIntlDateFormat(),
+                      })}
                     </li>
                     <li>
-                      Select a value from the suggestions or type your own.
+                      {t("filter.tips.desc.step5", {
+                        exampleTime:
+                          config?.ui.time_format == "24hour"
+                            ? "15:00-16:00"
+                            : "3:00PM-4:00PM",
+                      })}
                     </li>
-                    <li>
-                      Use multiple filters by adding them one after another with
-                      a space in between.
-                    </li>
-                    <li>
-                      Date filters (before: and after:) use{" "}
-                      <em>{getIntlDateFormat()}</em> format.
-                    </li>
-                    <li>
-                      Time range filter uses{" "}
-                      <em>
-                        {config?.ui.time_format == "24hour"
-                          ? "15:00-16:00"
-                          : "3:00PM-4:00PM"}{" "}
-                      </em>
-                      format.
-                    </li>
-                    <li>Remove filters by clicking the 'x' next to them.</li>
+                    <li>{t("filter.tips.desc.step6")}</li>
                   </ul>
                   <p className="text-sm text-muted-foreground">
-                    Example:{" "}
+                    {t("filter.tips.desc.exampleLabel")}{" "}
                     <code className="text-primary">
                       cameras:front_door label:person before:01012024
                       time_range:3:00PM-4:00PM
@@ -716,12 +762,18 @@ export default function InputWithTags({
 
             {inputFocused ? (
               <LuChevronUp
-                onClick={() => setInputFocused(false)}
+                onClick={() => {
+                  setInputFocused(false);
+                  inputRef.current?.blur();
+                }}
                 className="size-4 cursor-pointer text-secondary-foreground"
               />
             ) : (
               <LuChevronDown
-                onClick={() => setInputFocused(true)}
+                onClick={() => {
+                  setInputFocused(true);
+                  inputRef.current?.focus();
+                }}
                 className="size-4 cursor-pointer text-secondary-foreground"
               />
             )}
@@ -731,31 +783,33 @@ export default function InputWithTags({
         <CommandList
           className={cn(
             "scrollbar-container border-t duration-200 animate-in fade-in",
-            inputFocused ? "visible" : "hidden",
+            inputFocused && inputRef.current?.matches(":focus")
+              ? "visible"
+              : "hidden",
           )}
         >
           {!currentFilterType && inputValue && (
-            <CommandGroup heading="Search">
+            <CommandGroup heading={t("search")}>
               <CommandItem
                 className="cursor-pointer"
                 onSelect={() => handleSearch(inputValue)}
               >
                 <LuSearch className="mr-2 h-4 w-4" />
-                Search for "{inputValue}"
+                {t("searchFor", { inputValue })}
               </CommandItem>
             </CommandGroup>
           )}
           {(Object.keys(filters).filter((key) => key !== "query").length > 0 ||
             isSimilaritySearch) && (
-            <CommandGroup heading="Active Filters">
+            <CommandGroup heading={t("filter.header.activeFilters")}>
               <div className="my-2 flex flex-wrap gap-2 px-2">
                 {isSimilaritySearch && (
                   <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
-                    Similarity Search
+                    {t("similaritySearch.title")}
                     <button
                       onClick={handleClearSimilarity}
                       className="ml-1 focus:outline-none"
-                      aria-label="Clear similarity search"
+                      aria-label={t("similaritySearch.clear")}
                     >
                       <LuX className="h-3 w-3" />
                     </button>
@@ -769,10 +823,12 @@ export default function InputWithTags({
                         .map((value, index) => (
                           <span
                             key={`${filterType}-${index}`}
-                            className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
+                            className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800 smart-capitalize"
                           >
-                            {filterType.replaceAll("_", " ")}:{" "}
-                            {value.replaceAll("_", " ")}
+                            {t("filter.label." + filterType)}:{" "}
+                            {filterType === "labels"
+                              ? getTranslatedLabel(value)
+                              : value.replaceAll("_", " ")}
                             <button
                               onClick={() =>
                                 removeFilter(filterType as FilterType, value)
@@ -787,13 +843,15 @@ export default function InputWithTags({
                     : !(filterType == "event_id" && isSimilaritySearch) && (
                         <span
                           key={filterType}
-                          className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
+                          className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800 smart-capitalize"
                         >
                           {filterType === "event_id"
-                            ? "Tracked Object ID"
+                            ? t("trackedObjectId")
                             : filterType === "is_submitted"
-                              ? "Submitted to Frigate+"
-                              : filterType.replaceAll("_", " ")}
+                              ? t("features.submittedToFrigatePlus.label", {
+                                  ns: "components/filter",
+                                })
+                              : t("filter.label." + filterType)}
                           : {formatFilterValues(filterType, filterValues)}
                           <button
                             onClick={() =>
@@ -818,7 +876,7 @@ export default function InputWithTags({
             !inputValue &&
             searchHistoryLoaded &&
             (searchHistory?.length ?? 0) > 0 && (
-              <CommandGroup heading="Saved Searches">
+              <CommandGroup heading={t("savedSearches")}>
                 {searchHistory?.map((suggestion, index) => (
                   <CommandItem
                     key={index}
@@ -839,7 +897,7 @@ export default function InputWithTags({
                         </button>
                       </TooltipTrigger>
                       <TooltipPortal>
-                        <TooltipContent>Delete saved search</TooltipContent>
+                        <TooltipContent>{t("button.delete")}</TooltipContent>
                       </TooltipPortal>
                     </Tooltip>
                   </CommandItem>
@@ -847,7 +905,11 @@ export default function InputWithTags({
               </CommandGroup>
             )}
           <CommandGroup
-            heading={currentFilterType ? "Filter Values" : "Filters"}
+            heading={
+              currentFilterType
+                ? t("filter.header.currentFilterType")
+                : t("filter.header.noFilters")
+            }
           >
             {filterSuggestions(suggestions)
               .filter(
@@ -860,7 +922,17 @@ export default function InputWithTags({
                   className="cursor-pointer"
                   onSelect={() => handleSuggestionClick(suggestion)}
                 >
-                  {suggestion}
+                  {i18n.language === "en" ? (
+                    suggestion
+                  ) : (
+                    <>
+                      {suggestion} {" ("}
+                      {currentFilterType
+                        ? formatFilterValues(currentFilterType, suggestion)
+                        : t("filter.label." + suggestion)}
+                      {")"}
+                    </>
+                  )}
                 </CommandItem>
               ))}
           </CommandGroup>

@@ -1,0 +1,12 @@
+{
+  "filter": "Szűrő",
+  "calendar": "Naptár",
+  "export": "Exportálás",
+  "filters": "Szűrők",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Nem megfelelő idősáv kiválasztva",
+      "endTimeMustAfterStartTime": "A végpontnak később kell lennie, mint a kezdőpontnak"
+    }
+  }
+}

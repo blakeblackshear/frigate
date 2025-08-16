@@ -14,9 +14,9 @@ sys.path.append("/workspace/frigate")
 
 from frigate.config import FrigateConfig  # noqa: E402
 from frigate.motion import MotionDetector  # noqa: E402
-from frigate.object_detection import LocalObjectDetector  # noqa: E402
-from frigate.object_processing import CameraState  # noqa: E402
+from frigate.object_detection.base import LocalObjectDetector  # noqa: E402
 from frigate.track.centroid_tracker import CentroidTracker  # noqa: E402
+from frigate.track.object_processing import CameraState  # noqa: E402
 from frigate.util import (  # noqa: E402
     EventsPerSecond,
     SharedMemoryFrameManager,

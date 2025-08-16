@@ -1,0 +1,127 @@
+{
+  "labels": {
+    "label": "Etiquetas",
+    "all": {
+      "short": "Etiquetas",
+      "title": "Todas as etiquetas"
+    },
+    "count": "{{count}} etiquetas",
+    "count_one": "{{count}} Etiqueta",
+    "count_other": "{{count}} Etiquetas"
+  },
+  "filter": "Filtro",
+  "zones": {
+    "label": "Zonas",
+    "all": {
+      "title": "Todas as zonas",
+      "short": "Zonas"
+    }
+  },
+  "dates": {
+    "all": {
+      "title": "Todas as datas",
+      "short": "Datas"
+    },
+    "selectPreset": "Escolhe uma predefinição…"
+  },
+  "more": "Mais filtros",
+  "reset": {
+    "label": "Redefinir filtros para valores padrão"
+  },
+  "subLabels": {
+    "label": "Sub etiquetas",
+    "all": "Todas sub etiquetas"
+  },
+  "score": "Pontuação",
+  "features": {
+    "label": "Funcionalidades",
+    "hasSnapshot": "Tem um snapshot",
+    "hasVideoClip": "Tem um videoclipe",
+    "submittedToFrigatePlus": {
+      "label": "Enviado para Frigate+",
+      "tips": "Primeiro, você deve filtrar os objetos rastreados que têm um snapshot.<br /><br />Objetos rastreados sem um snapshot não podem ser enviados ao Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Organizar",
+    "dateAsc": "Data (Ascendente)",
+    "scoreAsc": "Pontuação do objeto (Crescente)",
+    "scoreDesc": "Pontuação do objeto (Decrescente)",
+    "speedDesc": "Velocidade estimada (Decrescente)",
+    "speedAsc": "Velocidade estimada (Crescente)",
+    "dateDesc": "Data (Decrescente)",
+    "relevance": "Relevância"
+  },
+  "cameras": {
+    "label": "Filtro de câmaras",
+    "all": {
+      "short": "Câmaras",
+      "title": "Todas as câmaras"
+    }
+  },
+  "review": {
+    "showReviewed": "Mostrar analisados"
+  },
+  "motion": {
+    "showMotionOnly": "Mostrar apenas movimento"
+  },
+  "explore": {
+    "settings": {
+      "title": "Configurações",
+      "defaultView": {
+        "title": "Exibição padrão",
+        "summary": "Sumário",
+        "unfilteredGrid": "Grade não filtrada",
+        "desc": "Quando nenhum filtro for selecionado, exiba um resumo dos objetos rastreados mais recentemente por etiqueta ou exiba uma grade não filtrada."
+      },
+      "gridColumns": {
+        "title": "Colunas da grade",
+        "desc": "Selecione o número de colunas na visualização em grade."
+      },
+      "searchSource": {
+        "label": "Pesquisar fonte",
+        "desc": "Escolha se deseja pesquisar nas miniaturas ou descrições dos seus objetos rastreados.",
+        "options": {
+          "thumbnailImage": "Imagem em miniatura",
+          "description": "Descrição"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Selecione uma data para filtrar"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Nível de log do filtro",
+    "loading": {
+      "title": "Carregando",
+      "desc": "Ao fazer scroll até ao fundo no painel de logs, novos registos são automaticamente apresentados à medida que são adicionados."
+    },
+    "filterBySeverity": "Filtrar logs por gravidade",
+    "disableLogStreaming": "Desativar transmissão de logs",
+    "allLogs": "Todos os logs"
+  },
+  "estimatedSpeed": "Velocidade estimada ({{unit}})",
+  "timeRange": "Intervalo de tempo",
+  "zoneMask": {
+    "filterBy": "Filtrar por máscara de zona"
+  },
+  "trackedObjectDelete": {
+    "title": "Confirmar exclusão",
+    "toast": {
+      "success": "Objetos rastreados excluídos com sucesso.",
+      "error": "Falha ao excluir os objetos rastreados: {{errorMessage}}"
+    },
+    "desc": "Excluir estes {{objectLength}} objetos rastreados remove a captura de imagem, quaisquer embeddings salvos e todas as entradas associadas ao ciclo de vida do objeto. As gravações desses objetos rastreados na visualização do Histórico <em>NÃO</em> serão excluídas.<br /><br />Tem certeza de que deseja continuar?<br /><br />Mantenha pressionada a tecla <em>Shift</em> para ignorar este diálogo no futuro."
+  },
+  "recognizedLicensePlates": {
+    "title": "Placas Reconhecidas",
+    "noLicensePlatesFound": "Nenhuma matrícula encontrada.",
+    "selectPlatesFromList": "Selecione uma ou mais placas da lista.",
+    "loadFailed": "Falha ao carregar as placas reconhecidas.",
+    "loading": "Carregando placas reconhecidas…",
+    "placeholder": "Digite para procurar placas…"
+  }
+}

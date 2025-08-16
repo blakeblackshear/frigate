@@ -1,0 +1,38 @@
+{
+  "alerts": "Riasztások",
+  "empty": {
+    "detection": "Nincs megnézendő észlelés",
+    "alert": "Nincs megnézendő riasztás",
+    "motion": "Nem található mozgás"
+  },
+  "detections": "Észlelések",
+  "motion": {
+    "label": "Mozgás",
+    "only": "Csak mozgások"
+  },
+  "allCameras": "Összes kamera",
+  "timeline": "Idővonal",
+  "detected": "észlelve",
+  "events": {
+    "label": "Események",
+    "aria": "Válassza ki az eseményeket",
+    "noFoundForTimePeriod": "Nem található esemény ebben az idő intervallumban."
+  },
+  "calendarFilter": {
+    "last24Hours": "Elmúlt 24 Óra"
+  },
+  "newReviewItems": {
+    "label": "Új áttekintendő elemek megnézése",
+    "button": "Áttekintendő Új Elemek"
+  },
+  "camera": "Kamera",
+  "timeline.aria": "Válassza ki az idővonalat",
+  "documentTitle": "Áttekintés - Frigate",
+  "recordings": {
+    "documentTitle": "Felvételek - Frigate"
+  },
+  "markTheseItemsAsReviewed": "Ezen elemek megjelölése áttekintettként",
+  "markAsReviewed": "Megjelölés Áttekintettként",
+  "selected_one": "{{count}} kiválasztva",
+  "selected_other": "{{count}} kiválasztva"
+}

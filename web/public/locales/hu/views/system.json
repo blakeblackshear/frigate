@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "cameras": "Kamera statisztikák - Frigate",
+    "storage": "Tárhely statisztikák - Frigate",
+    "general": "Általános Statisztikák - Frigate",
+    "logs": {
+      "frigate": "Frigate naplók - Frigate",
+      "go2rtc": "Go2RTC naplók - Frigate",
+      "nginx": "Nginx naplók - Frigate"
+    },
+    "enrichments": "Kiegészítés statisztikák - Frigate"
+  },
+  "cameras": {
+    "label": {
+      "ffmpeg": "FFmpeg",
+      "overallSkippedDetectionsPerSecond": "összes kihagyott észlelés per másodperc",
+      "camera": "kamera",
+      "detect": "észlel",
+      "skipped": "kihagyott",
+      "overallFramesPerSecond": "összes képkocka per másodperc",
+      "overallDetectionsPerSecond": "összes észlelés per másodperc",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraDetect": "{{camName}} észlelés",
+      "cameraFramesPerSecond": "{{camName}} képkocka per másodperc",
+      "cameraDetectionsPerSecond": "{{camName}} észlelés per másodperc",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} kihagyott észlelés per másodperc",
+      "cameraCapture": "{{camName}} megszerzése",
+      "capture": "megszerez"
+    },
+    "title": "Kamerák",
+    "info": {
+      "video": "Videó:",
+      "resolution": "Felbontás:",
+      "codec": "Codec:",
+      "error": "Hiba: {{error}}",
+      "cameraProbeInfo": "{{camera}} Kamera Szonda Infó",
+      "fetching": "Kamera Adat Begyűjtése",
+      "aspectRatio": "képarány",
+      "stream": "Folyam: {{idx}}",
+      "fps": "FPS:",
+      "unknown": "Ismeretlen",
+      "audio": "Hang:",
+      "tips": {
+        "title": "Kamera Szonda Infó"
+      },
+      "streamDataFromFFPROBE": "Az adás adat begyűjtése <code>ffprobe</code>-bal."
+    },
+    "overview": "Áttekintés",
+    "framesAndDetections": "Képek / Észlelések",
+    "toast": {
+      "success": {
+        "copyToClipboard": "Szonda adat másolva a vágólapra."
+      },
+      "error": {
+        "unableToProbeCamera": "Nem sikerült felderíteni a kamerát: {{errorMessage}}"
+      }
+    }
+  },
+  "title": "Rendszer",
+  "logs": {
+    "copy": {
+      "label": "Másolás a Vágólapra",
+      "error": "Nem sikerült a naplók vágólapra másolása",
+      "success": "Naplók a vágólapra másolva"
+    },
+    "type": {
+      "label": "Típus",
+      "timestamp": "Időbélyeg",
+      "tag": "Cédula",
+      "message": "Üzenet"
+    },
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Hiba a naplók begyűjtése közben: {{errorMessage}}",
+        "whileStreamingLogs": "Hiba a naplók bekérésekor: {{errorMessage}}"
+      }
+    },
+    "download": {
+      "label": "Naplók letöltése"
+    },
+    "tips": "A naplók a szerverről érkeznek"
+  },
+  "general": {
+    "title": "Általános",
+    "detector": {
+      "title": "Érzékelők",
+      "inferenceSpeed": "Érzékelők Inferencia Sebessége",
+      "cpuUsage": "Érzékelő CPU Kihasználtság",
+      "memoryUsage": "Érzékelő Memória Kihasználtság",
+      "temperature": "Érzékelő Hőmérséklete"
+    },
+    "hardwareInfo": {
+      "title": "Hardver Infó",
+      "gpuUsage": "GPU Kihasználtság",
+      "gpuMemory": "GPU Memória",
+      "gpuInfo": {
+        "nvidiaSMIOutput": {
+          "name": "Név: {{name}}",
+          "title": "Nvidia SMI Kimenet",
+          "vbios": "VBios Infó: {{vbios}}",
+          "driver": "Meghajtó: {{driver}}",
+          "cudaComputerCapability": "CUDA Számítási Képesség: {{cuda_compute}}"
+        },
+        "vainfoOutput": {
+          "processOutput": "Folyamat Kimenete:",
+          "processError": "Folyamat Hiba:",
+          "title": "Vainfo Kimenet",
+          "returnCode": "Visszatérési Érték: {{code}}"
+        },
+        "copyInfo": {
+          "label": "GPU infó másolása"
+        },
+        "closeInfo": {
+          "label": "GPU info bezárása"
+        },
+        "toast": {
+          "success": "GPU infó a vágólapra másolva"
+        }
+      },
+      "gpuEncoder": "GPU Enkóder",
+      "gpuDecoder": "GPU Dekóder",
+      "npuUsage": "NPU Kihasználtság",
+      "npuMemory": "NPU Memória"
+    },
+    "otherProcesses": {
+      "processMemoryUsage": "Folyamat Memória Kihasználtság",
+      "title": "Egyéb Folyamatok",
+      "processCpuUsage": "Folyamat CPU Kihasználtság"
+    }
+  },
+  "storage": {
+    "recordings": {
+      "title": "Felvételek",
+      "tips": "Ez az érték mutatja a Frigate adatbázisában található felvételek teljes tárhely felhasználását. A Frigate nem követi az összes fájl által foglalt tárhelyet.",
+      "earliestRecording": "Legkorábbi elérhető felvétel:"
+    },
+    "title": "Tárhely",
+    "overview": "Áttekintés",
+    "cameraStorage": {
+      "unusedStorageInformation": "Felhasználatlan Tárhely Információ",
+      "title": "Kamera Tárhely",
+      "camera": "Kamera",
+      "storageUsed": "Tárhely",
+      "percentageOfTotalUsed": "Teljes Százaléka",
+      "bandwidth": "Sávszélesség",
+      "unused": {
+        "title": "Felhasználatlan",
+        "tips": "Ez az érték nem feltétlenül tükrözi pontosan a Frigate számára elérhető szabad helyet, ha a meghajtón egyéb fájlok is tárolva vannak a Frigate felvételein kívül. A Frigate nem követi a tárhelyhasználatot a saját felvételein kívül."
+      }
+    }
+  },
+  "enrichments": {
+    "embeddings": {
+      "image_embedding_speed": "Kép Beágyazás Sebesség",
+      "face_embedding_speed": "Arc Beágyazás Sebesség",
+      "face_recognition_speed": "Arcfelismerés Sebesség",
+      "plate_recognition_speed": "Rendszám Felismerés Sebesség",
+      "text_embedding_speed": "Szöveg Beágyazás Sebesség",
+      "image_embedding": "Kép Beágyazása",
+      "text_embedding": "Szöveg Beágyazása",
+      "face_recognition": "Arcfelismerés",
+      "plate_recognition": "Rendszám Felismerés",
+      "yolov9_plate_detection_speed": "YOLOv9 Rendszám Felismerés Sebesség",
+      "yolov9_plate_detection": "YOLOv9 Rendszám Észlelés"
+    },
+    "infPerSecond": "Inferencia Per Másodperc",
+    "title": "Kiegészítések"
+  },
+  "metrics": "Rendszer jellemzők",
+  "stats": {
+    "detectIsVerySlow": "{{detect}} nagyon lassú ({{speed}} ms)",
+    "healthy": "A rendszer egészséges",
+    "cameraIsOffline": "{{camera}} nem elérhető",
+    "detectIsSlow": "{{detect}} lassú ({{speed}} ms)",
+    "reindexingEmbeddings": "Beágyazások újra indexelése ({{processed}}% kész)",
+    "ffmpegHighCpuUsage": "{{camera}}-nak/-nek magas FFmpeg CPU felhasználása ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "A(z) {{camera}} kameránál magas az észlelési CPU-használat ({{detectAvg}}%)"
+  },
+  "lastRefreshed": "Utoljára frissítve: "
+}

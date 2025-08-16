@@ -1,0 +1,180 @@
+{
+  "documentTitle": {
+    "general": "Algemene Statistieken - Frigate",
+    "logs": {
+      "nginx": "Nginx Logboeken - Frigate",
+      "go2rtc": "Go2RTC Logboeken - Frigate",
+      "frigate": "Frigate Logboek - Frigate"
+    },
+    "storage": "Opslag Statistieken - Frigate",
+    "cameras": "Camera Statistieken - Frigate",
+    "enrichments": "Verrijkings Statistieken - Frigate"
+  },
+  "title": "Systeem",
+  "metrics": "Systeem statistieken",
+  "logs": {
+    "download": {
+      "label": "Logs Downloaden"
+    },
+    "copy": {
+      "label": "Kopieeren naar klembord",
+      "success": "Logs zijn gekopieerd naar klembord",
+      "error": "Logs kopieeren naar klembord mislukt"
+    },
+    "type": {
+      "timestamp": "Tijdsvermelding",
+      "message": "Bericht",
+      "tag": "Tag",
+      "label": "Type"
+    },
+    "toast": {
+      "error": {
+        "whileStreamingLogs": "Fout bij streamen van logs: {{errorMessage}}",
+        "fetchingLogsFailed": "Fout bij ophalen van logs: {{errorMessage}}"
+      }
+    },
+    "tips": "Logs worden gestreamd vanaf de server"
+  },
+  "general": {
+    "detector": {
+      "title": "Detectoren",
+      "cpuUsage": "Detector CPU-verbruik",
+      "memoryUsage": "Detector Geheugen Gebruik",
+      "inferenceSpeed": "Detector Interferentie Snelheid",
+      "temperature": "Detectortemperatuur"
+    },
+    "hardwareInfo": {
+      "title": "Systeem Gegevens",
+      "gpuUsage": "GPU-verbruik",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo Resultaat",
+          "returnCode": "Terugvoer Code: {{code}}",
+          "processError": "Process Fout:",
+          "processOutput": "Process Resultaat:"
+        },
+        "nvidiaSMIOutput": {
+          "name": "Naam: {{name}}",
+          "vbios": "VBios Informatie: {{vbios}}",
+          "cudaComputerCapability": "CUDA Verwerking Capaciteit: {{cuda_compute}}",
+          "driver": "Stuurprogramma: {{driver}}",
+          "title": "Nvidia SMI Uitvoer"
+        },
+        "closeInfo": {
+          "label": "Sluit GPU info"
+        },
+        "copyInfo": {
+          "label": "Kopieer GPU Info"
+        },
+        "toast": {
+          "success": "GPU info gekopieerd naar klembord"
+        }
+      },
+      "gpuDecoder": "GPU Decodeerder",
+      "gpuEncoder": "GPU Encodeerder",
+      "gpuMemory": "GPU-geheugen",
+      "npuUsage": "NPU-gebruik",
+      "npuMemory": "NPU-geheugen"
+    },
+    "otherProcesses": {
+      "processMemoryUsage": "Process Geheugen Gebruik",
+      "processCpuUsage": "Process CPU-verbruik",
+      "title": "Verdere Processen"
+    },
+    "title": "Algemeen"
+  },
+  "storage": {
+    "overview": "Overzicht",
+    "recordings": {
+      "title": "Opnames",
+      "earliestRecording": "Oudste beschikbare opname:",
+      "tips": "Deze waarde laat het totale opslag ruimte gebruik voor opnames zien in de database van Frigate. Frigate houdt geen opslag gebruiks gegevens bij van alle bestanden op uw schijf."
+    },
+    "cameraStorage": {
+      "title": "Camera Opslag",
+      "unusedStorageInformation": "Ongebruikte opslagruimte informatie",
+      "storageUsed": "Opslag",
+      "percentageOfTotalUsed": "Percentage van Totaal",
+      "unused": {
+        "title": "Ongebruikt",
+        "tips": "Deze waarde kan de beschikbare opslag ruimte voor Frigate niet goed weergeven indien er ook andere bestanden op de schijf staan. Frigate houdt geen opslag gegevens bij van bestanden buiten haar eigen opnames."
+      },
+      "camera": "Camera",
+      "bandwidth": "Bandbreedte"
+    },
+    "title": "Opslag"
+  },
+  "cameras": {
+    "title": "Cameras",
+    "overview": "Overzicht",
+    "info": {
+      "cameraProbeInfo": "{{camera}} Informatie opgehaald uit de camerastream",
+      "streamDataFromFFPROBE": "Streamgegevens zijn ontvangen via <code>ffprobe</code>.",
+      "stream": "Stream {{idx}}",
+      "resolution": "Resolutie:",
+      "unknown": "Onbekend",
+      "error": "Fout: {{error}}",
+      "tips": {
+        "title": "Informatie ophalen uit de camerastream"
+      },
+      "fps": "FPS:",
+      "codec": "Codec:",
+      "video": "Video:",
+      "fetching": "Camera Gegevens Opvragen",
+      "audio": "Audio:",
+      "aspectRatio": "beeldverhouding"
+    },
+    "framesAndDetections": "Frames / Detecties",
+    "label": {
+      "camera": "camera",
+      "detect": "detectie",
+      "skipped": "overgeslagen",
+      "ffmpeg": "FFmpeg",
+      "capture": "registratie",
+      "overallSkippedDetectionsPerSecond": "totaal aantal overgeslagen detecties per seconde",
+      "overallFramesPerSecond": "totale aantal frames per seconde",
+      "overallDetectionsPerSecond": "totale aantal detecties per seconde",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraFramesPerSecond": "{{camName}} frames per seconde",
+      "cameraDetectionsPerSecond": "{{camName}} detecties per seconde",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} overgeslagen detecties per seconde",
+      "cameraCapture": "{{camName}} opname",
+      "cameraDetect": "{{camName}} detecteren"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Uitvraag gegevens naar klembord gekopieerd."
+      },
+      "error": {
+        "unableToProbeCamera": "Kan camera niet uitvragen: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Voor het laatst vernieuwd: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} zorgt voor hoge FFmpeg CPU belasting ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} zorgt voor hoge detectie CPU belasting ({{detectAvg}}%)",
+    "healthy": "Systeem is gezond",
+    "reindexingEmbeddings": "Herindexering van inbeddingen ({{processed}}% compleet)",
+    "detectIsSlow": "{{detect}} is traag ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} is erg traag ({{speed}} ms)",
+    "cameraIsOffline": "{{camera}} is offline"
+  },
+  "enrichments": {
+    "title": "Verrijkingen",
+    "infPerSecond": "Interferenties Per Seconde",
+    "embeddings": {
+      "image_embedding_speed": "Afbeelding Inplaatsings Snelheid",
+      "face_embedding_speed": "Gezicht Inplaatsings Snelheid",
+      "text_embedding_speed": "Text Inplaatsing Snelheid",
+      "plate_recognition_speed": "Kentekenplaat Herkenning Snelheid",
+      "face_recognition_speed": "Snelheid van gezichtsherkenning",
+      "image_embedding": "Afbeelding Inbedden",
+      "text_embedding": "Tekstinbedden",
+      "face_recognition": "Gezichtsherkenning",
+      "yolov9_plate_detection_speed": "YOLOv9 Kentekenplaat Detectiesnelheid",
+      "yolov9_plate_detection": "YOLOv9 Kentekenplaatdetectie",
+      "plate_recognition": "Kentekenherkenning"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "documentTitle": {
+    "default": "Pengaturan - Frigate",
+    "camera": "Pengaturan Kamera - Frigate",
+    "classification": "Pengaturan Klasifikasi - Frigate",
+    "authentication": "Pengaturan Autentikasi - Frigate",
+    "masksAndZones": "Editor Mask dan Zona - Frigate",
+    "motionTuner": "Penyetel Gerakan - Frigate",
+    "general": "Frigate - Pengaturan Umum",
+    "object": "Debug - Frigate",
+    "enrichments": "Frigate - Pengaturan Pengayaan"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "camera": "kamera",
+  "alerts": "Alarmlar",
+  "detections": "Tespitler",
+  "empty": {
+    "detection": "İncelenecek tespit öğesi yok",
+    "alert": "İncelenecek alarm öğesi yok",
+    "motion": "Hareket verisi bulunamadı"
+  },
+  "timeline": "Zaman şeridi",
+  "events": {
+    "aria": "Olayları seçin",
+    "noFoundForTimePeriod": "Seçili zaman aralığında olay bulunamadı.",
+    "label": "Olaylar"
+  },
+  "recordings": {
+    "documentTitle": "Kayıtlar - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "Son 24 Saat"
+  },
+  "markAsReviewed": "İncelendi Olarak İşaretle",
+  "newReviewItems": {
+    "button": "Yeni İncelenecek Öğeler Var",
+    "label": "Yeni inceleme öğelerini göster"
+  },
+  "documentTitle": "İncele - Frigate",
+  "motion": {
+    "label": "Hareket",
+    "only": "Yalnızca hareket"
+  },
+  "timeline.aria": "Zaman şeridi seçin",
+  "markTheseItemsAsReviewed": "Bunları incelendi olarak işaretle",
+  "allCameras": "Tüm Kameralar",
+  "selected_one": "{{count}} seçildi",
+  "selected_other": "{{count}} seçildi",
+  "detected": "algılandı"
+}

@@ -1,0 +1,114 @@
+{
+  "restart": {
+    "title": "Você tem certeza que deseja reiniciar o Frigate?",
+    "button": "Reiniciar",
+    "restarting": {
+      "title": "Frigate está Reiniciando",
+      "content": "Essa página vai recarregar em {{countdown}} segundos.",
+      "button": "Forçar Recarregar Agora"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Enviar para Frigate+",
+        "desc": "Objetos nos lugares que você quer evitar não são falsos positivos. Enviá-los como falsos positivos confundirá o modelo."
+      },
+      "review": {
+        "question": {
+          "label": "Confirmar esse rótulo para Frigate Plus",
+          "ask_a": "Este objeto é um <code>{{label}}</code>?",
+          "ask_an": "Este objeto é um<code>{{label}}</code>?",
+          "ask_full": "Este objeto é um<code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Enviado"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "Ver no Histórico"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "Selecione da Linha do tempo",
+      "lastHour_one": "Última hora",
+      "lastHour_many": "Últimas {{count}} horas",
+      "lastHour_other": "Últimas {{count}} horas",
+      "custom": "Personalizado",
+      "start": {
+        "title": "Hora de Início",
+        "label": "Selecione a Hora de Início"
+      },
+      "end": {
+        "title": "Hora de Término",
+        "label": "Selecione a Hora de Término"
+      }
+    },
+    "name": {
+      "placeholder": "Nomeie a Exportação"
+    },
+    "select": "Selecionar",
+    "export": "Exportar",
+    "selectOrExport": "Selecionar ou Exportar",
+    "toast": {
+      "success": "Exportação iniciada com sucesso. Veja o arquivo na pasta /exports.",
+      "error": {
+        "failed": "Falha em iniciar exportação: {{error}}",
+        "endTimeMustAfterStartTime": "Tempo de finalização deve ser após tempo de início",
+        "noVaildTimeSelected": "Nenhuma faixa de tempo válida selecionada"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Salvar Exportação",
+      "previewExport": "Pré-Visualizar Exportação"
+    }
+  },
+  "streaming": {
+    "label": "Transmissão",
+    "restreaming": {
+      "disabled": "A retransmissão não está habilitada para essa câmera.",
+      "desc": {
+        "title": "Configurar o go2rtc para opções de visualização ao vivo e audio adicional para essa câmera.",
+        "readTheDocumentation": "Leia a documentação"
+      }
+    },
+    "showStats": {
+      "label": "Exibir estatísticas da transmissão",
+      "desc": "Habilite essa opção para exibir as estatísticas de transmissão como uma sobreposição na transmissão da câmera."
+    },
+    "debugView": "Visualização do Depurador"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Salvar Busca",
+      "desc": "Indique um nome para essa pesquisa salva.",
+      "placeholder": "Dê um nome para a sua busca",
+      "overwrite": "{{searchName}} já existe. Salvar substituirá o valor existente.",
+      "success": "A pesquisa ({{searchName}}) foi salva.",
+      "button": {
+        "save": {
+          "label": "Salvar esta pesquisa"
+        }
+      }
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "desc": {
+        "selected": "Tem certeza de que deseja excluir todos os vídeos gravados associados a este item de revisão?<br /><br />Segure a tecla <em>Shift</em> para ignorar esta caixa de diálogo no futuro."
+      },
+      "toast": {
+        "success": "As filmagens associadas aos itens de revisão selecionados foram excluídas com sucesso.",
+        "error": "Falha ao deletar: {{error}}"
+      },
+      "title": "Confirmar Exclusão"
+    },
+    "button": {
+      "markAsReviewed": "Marcar como revisado",
+      "export": "Exportar",
+      "deleteNow": "Deletar Agora"
+    }
+  }
+}

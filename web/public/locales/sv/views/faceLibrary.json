@@ -1,0 +1,36 @@
+{
+  "details": {
+    "person": "Person",
+    "confidence": "Säkerhet",
+    "face": "Ansiktsdetaljer",
+    "timestamp": "tidsstämpel",
+    "faceDesc": "Detaljer för ansiktet och tillhörande objekt",
+    "unknown": "Okänt"
+  },
+  "description": {
+    "placeholder": "Ange ett namn för denna samling",
+    "addFace": "Gå genom för att lägga till nya ansikte till biblioteket.",
+    "invalidName": "Felaktigt namn. Namn kan endast innehålla bokstäver, siffror, mellanslag, apostrofer, understreck och bindestreck."
+  },
+  "documentTitle": "Ansiktsbibliotek - Frigate",
+  "steps": {
+    "faceName": "Ange namn",
+    "uploadFace": "Ladda upp bild på ansikte",
+    "nextSteps": "Nästa steg"
+  },
+  "createFaceLibrary": {
+    "title": "Skapa samling",
+    "desc": "Skapa ny samling",
+    "nextSteps": "För att bygga en stark grund:<li>Använd fliken Träna för att välja och träna på bilder för varje upptäckt person.</li><li>Fokusera på raka bilder för bästa resultat; undvik träningsbilder som fångar ansikten i vinkel.</li></ul>",
+    "new": "Skapa nytt ansikte"
+  },
+  "train": {
+    "title": "Träna"
+  },
+  "uploadFaceImage": {
+    "title": "Ladda upp ansiktsbild",
+    "desc": "Ladda upp en bild för att skanna efter ansikte och inkludera {{pageToggle}}"
+  },
+  "selectItem": "Välj {{item}}",
+  "collections": "Samlingar"
+}

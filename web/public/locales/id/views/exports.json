@@ -1,0 +1,17 @@
+{
+  "documentTitle": "Expor - Frigate",
+  "search": "Cari",
+  "noExports": "Tidak bisa mengekspor",
+  "deleteExport": "Hapus Ekspor",
+  "deleteExport.desc": "Apakah Anda yakin ingin menghapus {{exportName}}?",
+  "editExport": {
+    "title": "Ganti Nama saat Ekspor",
+    "desc": "Masukkan nama baru untuk mengekspor.",
+    "saveExport": "Simpan Ekspor"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Gagal mengganti nama export: {{errorMessage}}"
+    }
+  }
+}

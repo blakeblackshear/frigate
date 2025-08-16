@@ -1,26 +1,33 @@
 """SQLite-vec embeddings database."""
 
-import base64
+import datetime
+import io
 import logging
 import os
+import threading
 import time
 
 from numpy import ndarray
+from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config.semantic_search import SemanticSearchConfig
+from frigate.config import FrigateConfig
+from frigate.config.classification import SemanticSearchModelEnum
 from frigate.const import (
     CONFIG_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
-from frigate.util.builtin import serialize
+from frigate.util.builtin import EventsPerSecond, InferenceSpeed, serialize
+from frigate.util.path import get_event_thumbnail_bytes
 
-from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
+from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
+from .onnx.jina_v2_embedding import JinaV2Embedding
 
 logger = logging.getLogger(__name__)
 
@@ -60,23 +67,31 @@ class Embeddings:
     """SQLite-vec embeddings database."""
 
     def __init__(
-        self, config: SemanticSearchConfig, db: SqliteVecQueueDatabase
+        self,
+        config: FrigateConfig,
+        db: SqliteVecQueueDatabase,
+        metrics: DataProcessorMetrics,
     ) -> None:
         self.config = config
         self.db = db
+        self.metrics = metrics
         self.requestor = InterProcessRequestor()
+
+        self.image_inference_speed = InferenceSpeed(self.metrics.image_embeddings_speed)
+        self.image_eps = EventsPerSecond()
+        self.image_eps.start()
+        self.text_inference_speed = InferenceSpeed(self.metrics.text_embeddings_speed)
+        self.text_eps = EventsPerSecond()
+        self.text_eps.start()
+
+        self.reindex_lock = threading.Lock()
+        self.reindex_thread = None
+        self.reindex_running = False
 
         # Create tables if they don't exist
         self.db.create_embeddings_tables()
 
-        models = [
-            "jinaai/jina-clip-v1-text_model_fp16.onnx",
-            "jinaai/jina-clip-v1-tokenizer",
-            "jinaai/jina-clip-v1-vision_model_fp16.onnx"
-            if config.model_size == "large"
-            else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
-            "jinaai/jina-clip-v1-preprocessor_config.json",
-        ]
+        models = self.get_model_definitions()
 
         for model in models:
             self.requestor.send_data(
@@ -87,39 +102,68 @@ class Embeddings:
                 },
             )
 
-        self.text_embedding = GenericONNXEmbedding(
-            model_name="jinaai/jina-clip-v1",
-            model_file="text_model_fp16.onnx",
-            tokenizer_file="tokenizer",
-            download_urls={
-                "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
-            },
-            model_size=config.model_size,
-            model_type=ModelTypeEnum.text,
-            requestor=self.requestor,
-            device="CPU",
+        if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2:
+            # Single JinaV2Embedding instance for both text and vision
+            self.embedding = JinaV2Embedding(
+                model_size=self.config.semantic_search.model_size,
+                requestor=self.requestor,
+                device="GPU"
+                if self.config.semantic_search.model_size == "large"
+                else "CPU",
+            )
+            self.text_embedding = lambda input_data: self.embedding(
+                input_data, embedding_type="text"
+            )
+            self.vision_embedding = lambda input_data: self.embedding(
+                input_data, embedding_type="vision"
+            )
+        else:  # Default to jinav1
+            self.text_embedding = JinaV1TextEmbedding(
+                model_size=config.semantic_search.model_size,
+                requestor=self.requestor,
+                device="CPU",
+            )
+            self.vision_embedding = JinaV1ImageEmbedding(
+                model_size=config.semantic_search.model_size,
+                requestor=self.requestor,
+                device="GPU" if config.semantic_search.model_size == "large" else "CPU",
+            )
+
+    def update_stats(self) -> None:
+        self.metrics.image_embeddings_eps.value = self.image_eps.eps()
+        self.metrics.text_embeddings_eps.value = self.text_eps.eps()
+
+    def get_model_definitions(self):
+        # Version-specific models
+        if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2:
+            models = [
+                "jinaai/jina-clip-v2-tokenizer",
+                "jinaai/jina-clip-v2-model_fp16.onnx"
+                if self.config.semantic_search.model_size == "large"
+                else "jinaai/jina-clip-v2-model_quantized.onnx",
+                "jinaai/jina-clip-v2-preprocessor_config.json",
+            ]
+        else:  # Default to jinav1
+            models = [
+                "jinaai/jina-clip-v1-text_model_fp16.onnx",
+                "jinaai/jina-clip-v1-tokenizer",
+                "jinaai/jina-clip-v1-vision_model_fp16.onnx"
+                if self.config.semantic_search.model_size == "large"
+                else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
+                "jinaai/jina-clip-v1-preprocessor_config.json",
+            ]
+
+        # Add common models
+        models.extend(
+            [
+                "facenet-facenet.onnx",
+                "paddleocr-onnx-detection.onnx",
+                "paddleocr-onnx-classification.onnx",
+                "paddleocr-onnx-recognition.onnx",
+            ]
         )
 
-        model_file = (
-            "vision_model_fp16.onnx"
-            if self.config.model_size == "large"
-            else "vision_model_quantized.onnx"
-        )
-
-        download_urls = {
-            model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{model_file}",
-            "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
-        }
-
-        self.vision_embedding = GenericONNXEmbedding(
-            model_name="jinaai/jina-clip-v1",
-            model_file=model_file,
-            download_urls=download_urls,
-            model_size=config.model_size,
-            model_type=ModelTypeEnum.vision,
-            requestor=self.requestor,
-            device="GPU" if config.model_size == "large" else "CPU",
-        )
+        return models
 
     def embed_thumbnail(
         self, event_id: str, thumbnail: bytes, upsert: bool = True
@@ -130,6 +174,7 @@ class Embeddings:
         @param: thumbnail bytes in jpg format
         @param: upsert If embedding should be upserted into vec DB
         """
+        start = datetime.datetime.now().timestamp()
         # Convert thumbnail bytes to PIL Image
         embedding = self.vision_embedding([thumbnail])[0]
 
@@ -142,6 +187,9 @@ class Embeddings:
                 (event_id, serialize(embedding)),
             )
 
+        self.image_inference_speed.update(datetime.datetime.now().timestamp() - start)
+        self.image_eps.update()
+
         return embedding
 
     def batch_embed_thumbnail(
@@ -152,29 +200,52 @@ class Embeddings:
         @param: event_thumbs Map of Event IDs in DB to thumbnail bytes in jpg format
         @param: upsert If embedding should be upserted into vec DB
         """
-        ids = list(event_thumbs.keys())
-        embeddings = self.vision_embedding(list(event_thumbs.values()))
+        start = datetime.datetime.now().timestamp()
+        valid_ids = []
+        valid_thumbs = []
+        for eid, thumb in event_thumbs.items():
+            try:
+                img = Image.open(io.BytesIO(thumb))
+                img.verify()  # Will raise if corrupt
+                valid_ids.append(eid)
+                valid_thumbs.append(thumb)
+            except Exception as e:
+                logger.warning(
+                    f"Embeddings reindexing: Skipping corrupt thumbnail for event {eid}: {e}"
+                )
+
+        if not valid_thumbs:
+            logger.warning(
+                "Embeddings reindexing: No valid thumbnails to embed in this batch."
+            )
+            return []
+
+        embeddings = self.vision_embedding(valid_thumbs)
 
         if upsert:
             items = []
-
-            for i in range(len(ids)):
-                items.append(ids[i])
+            for i in range(len(valid_ids)):
+                items.append(valid_ids[i])
                 items.append(serialize(embeddings[i]))
+                self.image_eps.update()
 
             self.db.execute_sql(
                 """
                 INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
                 VALUES {}
-                """.format(", ".join(["(?, ?)"] * len(ids))),
+                """.format(", ".join(["(?, ?)"] * len(valid_ids))),
                 items,
             )
+
+        duration = datetime.datetime.now().timestamp() - start
+        self.text_inference_speed.update(duration / len(valid_ids))
 
         return embeddings
 
     def embed_description(
         self, event_id: str, description: str, upsert: bool = True
     ) -> ndarray:
+        start = datetime.datetime.now().timestamp()
         embedding = self.text_embedding([description])[0]
 
         if upsert:
@@ -186,11 +257,15 @@ class Embeddings:
                 (event_id, serialize(embedding)),
             )
 
+        self.text_inference_speed.update(datetime.datetime.now().timestamp() - start)
+        self.text_eps.update()
+
         return embedding
 
     def batch_embed_description(
         self, event_descriptions: dict[str, str], upsert: bool = True
     ) -> ndarray:
+        start = datetime.datetime.now().timestamp()
         # upsert embeddings one by one to avoid token limit
         embeddings = []
 
@@ -204,6 +279,7 @@ class Embeddings:
             for i in range(len(ids)):
                 items.append(ids[i])
                 items.append(serialize(embeddings[i]))
+                self.text_eps.update()
 
             self.db.execute_sql(
                 """
@@ -212,6 +288,8 @@ class Embeddings:
                 """.format(", ".join(["(?, ?)"] * len(ids))),
                 items,
             )
+
+        self.text_inference_speed.update(datetime.datetime.now().timestamp() - start)
 
         return embeddings
 
@@ -230,16 +308,13 @@ class Embeddings:
         st = time.time()
 
         # Get total count of events to process
-        total_events = (
-            Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
-            .count()
-        )
+        total_events = Event.select().count()
 
-        batch_size = 32
+        batch_size = (
+            4
+            if self.config.semantic_search.model == SemanticSearchModelEnum.jinav2
+            else 32
+        )
         current_page = 1
 
         totals = {
@@ -255,30 +330,28 @@ class Embeddings:
 
         events = (
             Event.select()
-            .where(
-                (Event.has_clip == True | Event.has_snapshot == True)
-                & Event.thumbnail.is_null(False)
-            )
             .order_by(Event.start_time.desc())
             .paginate(current_page, batch_size)
         )
 
-        while len(events) > 0:
+        while events:
             event: Event
             batch_thumbs = {}
             batch_descs = {}
             for event in events:
-                batch_thumbs[event.id] = base64.b64decode(event.thumbnail)
-                totals["thumbnails"] += 1
+                totals["processed_objects"] += 1
 
                 if description := event.data.get("description", "").strip():
                     batch_descs[event.id] = description
                     totals["descriptions"] += 1
 
-                totals["processed_objects"] += 1
+                if thumbnail := get_event_thumbnail_bytes(event):
+                    batch_thumbs[event.id] = thumbnail
+                    totals["thumbnails"] += 1
 
             # run batch embedding
-            self.batch_embed_thumbnail(batch_thumbs)
+            if batch_thumbs:
+                self.batch_embed_thumbnail(batch_thumbs)
 
             if batch_descs:
                 self.batch_embed_description(batch_descs)
@@ -307,10 +380,6 @@ class Embeddings:
             current_page += 1
             events = (
                 Event.select()
-                .where(
-                    (Event.has_clip == True | Event.has_snapshot == True)
-                    & Event.thumbnail.is_null(False)
-                )
                 .order_by(Event.start_time.desc())
                 .paginate(current_page, batch_size)
             )
@@ -324,3 +393,27 @@ class Embeddings:
         totals["status"] = "completed"
 
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+
+    def start_reindex(self) -> bool:
+        """Start reindexing in a separate thread if not already running."""
+        with self.reindex_lock:
+            if self.reindex_running:
+                logger.warning("Reindex embeddings is already running.")
+                return False
+
+            # Mark as running and start the thread
+            self.reindex_running = True
+            self.reindex_thread = threading.Thread(
+                target=self._reindex_wrapper, daemon=True
+            )
+            self.reindex_thread.start()
+            return True
+
+    def _reindex_wrapper(self) -> None:
+        """Wrapper to run reindex and reset running flag when done."""
+        try:
+            self.reindex()
+        finally:
+            with self.reindex_lock:
+                self.reindex_running = False
+                self.reindex_thread = None

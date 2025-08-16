@@ -1,0 +1,17 @@
+{
+  "documentTitle": "匯出 - Frigate",
+  "search": "搜尋",
+  "noExports": "未找到匯出項目",
+  "deleteExport": "刪除匯出",
+  "editExport": {
+    "title": "重新命名匯出",
+    "desc": "請輸入新的匯出名稱。",
+    "saveExport": "儲存匯出"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "重新命名匯出失敗：{{errorMessage}}"
+    }
+  },
+  "deleteExport.desc": "你確定要刪除 {{exportName}} 嗎？"
+}

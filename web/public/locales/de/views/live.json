@@ -1,0 +1,158 @@
+{
+  "lowBandwidthMode": "Modus für geringe Bandbreite",
+  "twoWayTalk": {
+    "enable": "Gegensprechfunktion aktivieren",
+    "disable": "Gegensprechfunktion ausschalten"
+  },
+  "cameraAudio": {
+    "enable": "Kamera-Audio aktivieren",
+    "disable": "Kamera-Audio deaktivieren"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "disable": "Bewegen per Klick deaktivieren",
+        "enable": "Bewegen per Klick aktivieren",
+        "label": "Zum Zentrieren der Kamera ins Bild klicken"
+      },
+      "up": {
+        "label": "PTZ-Kamera nach oben bewegen"
+      },
+      "left": {
+        "label": "PTZ-Kamera nach links bewegen"
+      },
+      "down": {
+        "label": "PTZ-Kamera nach unten bewegen"
+      },
+      "right": {
+        "label": "PTZ-Kamera nach rechts bewegen"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "PTZ-Kamera vergrößern"
+      },
+      "out": {
+        "label": "PTZ-Kamera herauszoomen"
+      }
+    },
+    "presets": "PTZ-Kameravoreinstellungen",
+    "frame": {
+      "center": {
+        "label": "Klicken Sie in den Rahmen, um die PTZ-Kamera zu zentrieren"
+      }
+    }
+  },
+  "documentTitle": "Live - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+  "muteCameras": {
+    "disable": "Stumm aller Kameras aufheben",
+    "enable": "Alle Kameras auf stumm"
+  },
+  "recording": {
+    "disable": "Aufzeichnung deaktivieren",
+    "enable": "Aufzeichnung aktivieren"
+  },
+  "snapshots": {
+    "enable": "Snapshots aktivieren",
+    "disable": "Snapshots deaktivieren"
+  },
+  "autotracking": {
+    "disable": "Autotracking deaktivieren",
+    "enable": "Autotracking aktivieren"
+  },
+  "streamStats": {
+    "enable": "Stream Statistiken anzeigen",
+    "disable": "Stream-Statistiken ausblenden"
+  },
+  "manualRecording": {
+    "title": "On-Demand Aufzeichnung",
+    "showStats": {
+      "label": "Statistiken anzeigen",
+      "desc": "Aktivieren Sie diese Option, um Stream-Statistiken als Overlay über dem Kamera-Feed anzuzeigen."
+    },
+    "started": "Manuelle On-Demand Aufzeichnung gestartet.",
+    "failedToStart": "Manuelle On-Demand Aufzeichnung konnte nicht gestartet werden.",
+    "recordDisabledTips": "Da die Aufzeichnung in der Konfiguration für diese Kamera deaktiviert oder eingeschränkt ist, wird nur ein Schnappschuss gespeichert.",
+    "end": "On-Demand Aufzeichnung beenden",
+    "ended": "Manuelle On-Demand Aufzeichnung beendet.",
+    "playInBackground": {
+      "desc": "Aktivieren Sie diese Option, um das Streaming fortzusetzen, wenn der Player ausgeblendet ist.",
+      "label": "Im Hintergrund abspielen"
+    },
+    "tips": "Starten Sie ein manuelles Ereignis basierend auf den Aufzeichnung Aufbewahrungseinstellungen dieser Kamera.",
+    "debugView": "Debug-Ansicht",
+    "start": "On-Demand Aufzeichnung starten",
+    "failedToEnd": "Die manuelle On-Demand Aufzeichnung konnte nicht beendet werden."
+  },
+  "streamingSettings": "Streaming Einstellungen",
+  "notifications": "Benachrichtigungen",
+  "stream": {
+    "audio": {
+      "available": "Audio ist für diesen Stream verfügbar",
+      "tips": {
+        "title": "Audio muss von deiner Kamera ausgegeben und für diesen Stream in go2rtc konfiguriert werden.",
+        "documentation": "Dokumentation lesen "
+      },
+      "unavailable": "Für diesen Stream ist kein Audio verfügbar"
+    },
+    "twoWayTalk": {
+      "tips": "Ihr Gerät muss die Funktion unterstützen und WebRTC muss für die bidirektionale Kommunikation konfiguriert sein.",
+      "tips.documentation": "Dokumentation lesen ",
+      "available": "Für diesen Stream ist eine Zwei-Wege-Sprechfunktion verfügbar",
+      "unavailable": "Für diesen Stream ist keine Zwei-Wege-Kommunikation möglich."
+    },
+    "lowBandwidth": {
+      "tips": "Die Live-Ansicht befindet sich aufgrund von Puffer- oder Stream-Fehlern im Modus mit geringer Bandbreite.",
+      "resetStream": "Stream zurücksetzen"
+    },
+    "title": "Stream",
+    "playInBackground": {
+      "tips": "Aktivieren Sie diese Option, um das Streaming fortzusetzen, wenn der Player ausgeblendet ist.",
+      "label": "Im Hintergrund abspielen"
+    }
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "motion": "Bewegung",
+      "active_objects": "Aktive Objekte",
+      "all": "Alle"
+    },
+    "notAllTips": "Dein Konfiguration zur Aufzeichnungsaufbewahrung von {{source}} ist eingestellt auf<code> -Modus:{{effectiveRetainMode}}</code> , daher werden in dieser On-Demand Aufzeichnung nur Segmente gespeichert mit{{effectiveRetainModeName}} ."
+  },
+  "editLayout": {
+    "group": {
+      "label": "Kameragruppe bearbeiten"
+    },
+    "exitEdit": "Bearbeitung beenden",
+    "label": "Layout bearbeiten"
+  },
+  "camera": {
+    "enable": "Kamera aktivieren",
+    "disable": "Kamera deaktivieren"
+  },
+  "audioDetect": {
+    "enable": "Audioerkennung aktivieren",
+    "disable": "Audioerkennung deaktivieren"
+  },
+  "detect": {
+    "enable": "Erkennung aktivieren",
+    "disable": "Erkennung deaktivieren"
+  },
+  "cameraSettings": {
+    "objectDetection": "Objekterkennung",
+    "recording": "Aufnahme",
+    "snapshots": "Schnappschüsse",
+    "cameraEnabled": "Kamera aktiviert",
+    "autotracking": "Autotracking",
+    "audioDetection": "Audioerkennung",
+    "title": "{{camera}} Einstellungen"
+  },
+  "history": {
+    "label": "Historisches Filmmaterial zeigen"
+  },
+  "audio": "Audio",
+  "suspend": {
+    "forTime": "Aussetzen für: "
+  }
+}
