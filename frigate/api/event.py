@@ -15,6 +15,7 @@ import numpy as np
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
+from pathvalidate import sanitize_filename
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
@@ -1550,17 +1551,25 @@ def create_trigger_embedding(
         if body.type == "thumbnail":
             # Save image to the triggers directory
             try:
-                os.makedirs(os.path.join(TRIGGER_DIR, camera), exist_ok=True)
+                os.makedirs(
+                    os.path.join(TRIGGER_DIR, sanitize_filename(camera)), exist_ok=True
+                )
                 with open(
-                    os.path.join(TRIGGER_DIR, camera, f"{body.data}.webp"), "wb"
+                    os.path.join(
+                        TRIGGER_DIR,
+                        sanitize_filename(camera),
+                        f"{sanitize_filename(body.data)}.webp",
+                    ),
+                    "wb",
                 ) as f:
                     f.write(thumbnail)
                 logger.debug(
                     f"Writing thumbnail for trigger with data {body.data} in {camera}."
                 )
             except Exception as e:
+                logger.error(e.with_traceback())
                 logger.error(
-                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}: {e}"
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}"
                 )
 
         Trigger.create(
@@ -1584,10 +1593,11 @@ def create_trigger_embedding(
         )
 
     except Exception as e:
+        logger.error(e.with_traceback())
         return JSONResponse(
             content={
                 "success": False,
-                "message": f"Error creating trigger embedding: {str(e)}",
+                "message": "Error creating trigger embedding",
             },
             status_code=500,
         )
@@ -1620,8 +1630,8 @@ def update_trigger_embedding(
         if body.type == "description":
             embedding = context.generate_description_embedding(body.data)
         elif body.type == "thumbnail":
-            webp_file = body.data + ".webp"
-            webp_path = os.path.join(TRIGGER_DIR, camera, webp_file)
+            webp_file = sanitize_filename(body.data) + ".webp"
+            webp_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera), webp_file)
 
             try:
                 event: Event = Event.get(Event.id == body.data)
@@ -1674,13 +1684,20 @@ def update_trigger_embedding(
             # Update existing trigger
             if trigger.data != body.data:  # Delete old thumbnail only if data changes
                 try:
-                    os.remove(os.path.join(TRIGGER_DIR, camera, f"{trigger.data}.webp"))
+                    os.remove(
+                        os.path.join(
+                            TRIGGER_DIR,
+                            sanitize_filename(camera),
+                            f"{trigger.data}.webp",
+                        )
+                    )
                     logger.debug(
                         f"Deleted thumbnail for trigger with data {trigger.data} in {camera}."
                     )
                 except Exception as e:
+                    logger.error(e.with_traceback())
                     logger.error(
-                        f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}: {e}"
+                        f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}"
                     )
 
             Trigger.update(
@@ -1708,17 +1725,20 @@ def update_trigger_embedding(
         if body.type == "thumbnail":
             # Save image to the triggers directory
             try:
-                os.makedirs(os.path.join(TRIGGER_DIR, camera), exist_ok=True)
+                camera_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera))
+                os.makedirs(camera_path, exist_ok=True)
                 with open(
-                    os.path.join(TRIGGER_DIR, camera, f"{body.data}.webp"), "wb"
+                    os.path.join(camera_path, f"{sanitize_filename(body.data)}.webp"),
+                    "wb",
                 ) as f:
                     f.write(thumbnail)
                 logger.debug(
                     f"Writing thumbnail for trigger with data {body.data} in {camera}."
                 )
             except Exception as e:
+                logger.error(e.with_traceback())
                 logger.error(
-                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}: {e}"
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}"
                 )
 
         return JSONResponse(
@@ -1730,10 +1750,11 @@ def update_trigger_embedding(
         )
 
     except Exception as e:
+        logger.error(e.with_traceback())
         return JSONResponse(
             content={
                 "success": False,
-                "message": f"Error updating trigger embedding: {str(e)}",
+                "message": "Error updating trigger embedding",
             },
             status_code=500,
         )
@@ -1775,13 +1796,18 @@ def delete_trigger_embedding(
             )
 
         try:
-            os.remove(os.path.join(TRIGGER_DIR, camera, f"{trigger.data}.webp"))
+            os.remove(
+                os.path.join(
+                    TRIGGER_DIR, sanitize_filename(camera), f"{trigger.data}.webp"
+                )
+            )
             logger.debug(
                 f"Deleted thumbnail for trigger with data {trigger.data} in {camera}."
             )
         except Exception as e:
+            logger.error(e.with_traceback())
             logger.error(
-                f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}: {e}"
+                f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}"
             )
 
         return JSONResponse(
@@ -1793,10 +1819,11 @@ def delete_trigger_embedding(
         )
 
     except Exception as e:
+        logger.error(e.with_traceback())
         return JSONResponse(
             content={
                 "success": False,
-                "message": f"Error deleting trigger embedding: {str(e)}",
+                "message": "Error deleting trigger embedding",
             },
             status_code=500,
         )
