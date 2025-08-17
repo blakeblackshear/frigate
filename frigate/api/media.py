@@ -142,15 +142,13 @@ def latest_frame(
         "regions": params.regions,
     }
     quality = params.quality
-    mime_type = extension
 
-    if extension == "png":
+    if extension == Extension.png:
         quality_params = None
-    elif extension == "webp":
+    elif extension == Extension.webp:
         quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-    else:
+    else:  # jpg or jpeg
         quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
-        mime_type = "jpeg"
 
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
@@ -193,12 +191,11 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        _, img = cv2.imencode(f".{extension}", frame, quality_params)
+        _, img = cv2.imencode(f".{extension.value}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{mime_type}",
+            media_type=f"image/{extension.value}",
             headers={
-                "Content-Type": f"image/{mime_type}",
                 "Cache-Control": "no-store"
                 if not params.store
                 else "private, max-age=60",
@@ -215,12 +212,11 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        _, img = cv2.imencode(f".{extension}", frame, quality_params)
+        _, img = cv2.imencode(f".{extension.value}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{mime_type}",
+            media_type=f"image/{extension.value}",
             headers={
-                "Content-Type": f"image/{mime_type}",
                 "Cache-Control": "no-store"
                 if not params.store
                 else "private, max-age=60",
