@@ -57,9 +57,13 @@ fi
 
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
-    # use debian bookworm for amd / intel-i965 driver packages, non-free required for video encoding using i965 driver
-    echo 'deb https://deb.debian.org/debian bookworm main contrib non-free' >/etc/apt/sources.list.d/debian-bookworm.list
-    apt-get -qq update
+# Install non-free version of i965 driver
+CODENAME=$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) \
+    && echo "deb http://deb.debian.org/debian $CODENAME main contrib non-free" > /etc/apt/sources.list.d/va-driver.list \
+    && apt update \
+    && apt install -y i965-va-driver-shaders \
+    && rm /etc/apt/sources.list.d/va-driver.list \
+    && apt update
     # install amd / intel-i965 driver packages
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         i965-va-driver-shaders intel-gpu-tools onevpl-tools \
