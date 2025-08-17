@@ -59,11 +59,12 @@ fi
 if [[ "${TARGETARCH}" == "amd64" ]]; then
   # Install non-free version of i965 driver
   CODENAME=$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) \
-      && echo "deb http://deb.debian.org/debian $CODENAME main contrib non-free" > /etc/apt/sources.list.d/va-driver.list \
-      && apt update \
-      && apt install -y i965-va-driver-shaders \
+      && echo "deb http://deb.debian.org/debian $CODENAME main contrib non-free non-free-firmware" > /etc/apt/sources.list.d/va-driver.list \
+      && apt-get -qq update \
+      && apt-get install -y i965-va-driver-shaders \
       && rm /etc/apt/sources.list.d/va-driver.list \
-      && apt update
+      && apt-get update
+
     # install amd / intel-i965 driver packages
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         intel-gpu-tools onevpl-tools \
