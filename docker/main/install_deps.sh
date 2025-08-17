@@ -66,7 +66,7 @@ CODENAME=$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) \
     && apt update
     # install amd / intel-i965 driver packages
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        i965-va-driver-shaders intel-gpu-tools onevpl-tools \
+        intel-gpu-tools onevpl-tools \
         libva-drm2 \
         mesa-va-drivers radeontop
 
