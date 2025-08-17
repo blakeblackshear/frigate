@@ -217,7 +217,6 @@ def latest_frame(
             content=img.tobytes(),
             media_type=f"image/{extension.value}",
             headers={
-                "Content-Type": f"image/{extension.value}",
                 "Cache-Control": "no-store"
                 if not params.store
                 else "private, max-age=60",
