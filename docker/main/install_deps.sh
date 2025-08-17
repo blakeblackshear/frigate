@@ -57,9 +57,12 @@ fi
 
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
+    # use debian bookworm for amd / intel-i965 driver packages, non-free required for video encoding using i965 driver
+    echo 'deb https://deb.debian.org/debian bookworm main contrib non-free' >/etc/apt/sources.list.d/debian-bookworm.list
+    apt-get -qq update
     # install amd / intel-i965 driver packages
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        i965-va-driver intel-gpu-tools onevpl-tools \
+        i965-va-driver-shaders intel-gpu-tools onevpl-tools \
         libva-drm2 \
         mesa-va-drivers radeontop
 
