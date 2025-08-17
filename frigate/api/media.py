@@ -201,7 +201,11 @@ def latest_frame(
                 else "private, max-age=60",
             },
         )
-    elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
+    elif (
+        camera_name == "birdseye"
+        and request.app.frigate_config.birdseye.enabled
+        and request.app.frigate_config.birdseye.restream
+    ):
         frame = cv2.cvtColor(
             frame_processor.get_current_frame(camera_name),
             cv2.COLOR_YUV2BGR_I420,
