@@ -123,7 +123,6 @@ class ZmqIpcDetector(DetectionApi):
 
             # Ensure output shape and dtype are exactly as expected
 
-
             return detections
         except zmq.Again:
             # Timeout
@@ -150,4 +149,3 @@ class ZmqIpcDetector(DetectionApi):
                 self._socket.close(linger=self.detector_config.linger_ms)
         except Exception:
             pass
-
