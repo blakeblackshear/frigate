@@ -214,7 +214,7 @@ async def register_face(request: Request, name: str, file: UploadFile):
         )
 
     context: EmbeddingsContext = request.app.embeddings
-    result = context.register_face(name, await file.read())
+    result = None if context is None else context.register_face(name, await file.read())
 
     if not isinstance(result, dict):
         return JSONResponse(
