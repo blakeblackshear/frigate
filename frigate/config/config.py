@@ -62,7 +62,7 @@ from .classification import (
 )
 from .database import DatabaseConfig
 from .env import EnvVars
-from .network import IPv6Config
+from .network import NetworkingConfig
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .proxy import ProxyConfig
