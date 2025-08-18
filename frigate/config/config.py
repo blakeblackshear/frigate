@@ -62,9 +62,9 @@ from .classification import (
 )
 from .database import DatabaseConfig
 from .env import EnvVars
-from .network import NetworkingConfig
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
+from .network import NetworkingConfig
 from .proxy import ProxyConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
