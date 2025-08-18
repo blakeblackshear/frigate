@@ -58,7 +58,7 @@ fi
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
   # Install non-free version of i965 driver
-  CODENAME=$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) \ 
+  CODENAME=$(grep VERSION_CODENAME= /etc/os-release | cut -d= -f2) \
       && sed -i -E "s/^(deb http:\/\/deb\.debian\.org\/debian ${CODENAME} main)(.*)$/\1 contrib non-free non-free-firmware\2/" /etc/apt/sources.list \
       && apt-get -qq update \
       && apt-get install --no-install-recommends --no-install-suggests -y i965-va-driver-shaders \
