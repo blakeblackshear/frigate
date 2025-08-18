@@ -73,9 +73,9 @@ tls:
   # Optional: Enable TLS for port 8971 (default: shown below)
   enabled: True
 
-# Optiona: IPv6 configuration
+# Optional: IPv6 configuration
 Networking:
-  # Optional: Enable IPv6 on 5000 and 8971 if tls is configured (default: shown below)
+  # Optional: Enable IPv6 on 5000, and 8971 if tls is configured (default: shown below)
   IPv6:
     eanbled: False
 
