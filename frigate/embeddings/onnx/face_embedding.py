@@ -9,9 +9,9 @@ from frigate.const import MODEL_CACHE_DIR
 from frigate.log import redirect_output_to_logger
 from frigate.util.downloader import ModelDownloader
 
+from ...config import FaceRecognitionConfig
 from .base_embedding import BaseEmbedding
 from .runner import ONNXModelRunner
-from ...config import FaceRecognitionConfig
 
 try:
     from tflite_runtime.interpreter import Interpreter
