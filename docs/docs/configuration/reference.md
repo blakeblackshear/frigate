@@ -76,7 +76,7 @@ tls:
 # Optional: IPv6 configuration
 networking:
   # Optional: Enable IPv6 on 5000, and 8971 if tls is configured (default: shown below)
-  IPv6:
+  ipv6:
     eanbled: False
 
 # Optional: Proxy configuration
