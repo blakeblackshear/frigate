@@ -250,6 +250,7 @@ class FrigateApp:
             and not genai_cameras
             and not self.config.lpr.enabled
             and not self.config.face_recognition.enabled
+            and not self.config.classification.bird.enabled
         ):
             return
 
