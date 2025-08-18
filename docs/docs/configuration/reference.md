@@ -73,6 +73,12 @@ tls:
   # Optional: Enable TLS for port 8971 (default: shown below)
   enabled: True
 
+# Optional: IPv6 configuration
+networking:
+  # Optional: Enable IPv6 on 5000, and 8971 if tls is configured (default: shown below)
+  ipv6:
+    enabled: False
+
 # Optional: Proxy configuration
 proxy:
   # Optional: Mapping for headers from upstream proxies. Only used if Frigate's auth

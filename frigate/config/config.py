@@ -64,6 +64,7 @@ from .database import DatabaseConfig
 from .env import EnvVars
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
+from .network import NetworkingConfig
 from .proxy import ProxyConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
@@ -333,6 +334,9 @@ class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT configuration.")
     notifications: NotificationConfig = Field(
         default_factory=NotificationConfig, title="Global notification configuration."
+    )
+    networking: NetworkingConfig = Field(
+        default_factory=NetworkingConfig, title="Networking configuration"
     )
     proxy: ProxyConfig = Field(
         default_factory=ProxyConfig, title="Proxy configuration."
