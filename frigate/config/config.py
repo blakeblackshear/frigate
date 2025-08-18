@@ -331,9 +331,6 @@ class FrigateConfig(FrigateBaseModel):
     go2rtc: RestreamConfig = Field(
         default_factory=RestreamConfig, title="Global restream configuration."
     )
-    ipv6: IPv6Config = Field(
-        default_factory=IPv6Config, title="IPv6 configuration."
-    )  
     mqtt: MqttConfig = Field(title="MQTT configuration.")
     notifications: NotificationConfig = Field(
         default_factory=NotificationConfig, title="Global notification configuration."
