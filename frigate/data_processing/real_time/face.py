@@ -171,7 +171,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         # don't run for non person objects
         if obj_data.get("label") != "person":
-            logger.debug("Not a processing face for non person object.")
+            logger.debug("Not processing face for a non person object.")
             return
 
         # don't overwrite sub label for objects that have a sub label

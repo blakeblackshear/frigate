@@ -592,6 +592,9 @@ semantic_search:
   # Optional: Set the model size used for embeddings. (default: shown below)
   # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
+  # Optional: Target a specific device to run the model (default: shown below)
+  # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
+  device: None
 
 # Optional: Configuration for face recognition capability
 # NOTE: enabled, min_area can be overridden at the camera level
@@ -615,6 +618,9 @@ face_recognition:
   blur_confidence_filter: True
   # Optional: Set the model size used face recognition. (default: shown below)
   model_size: small
+  # Optional: Target a specific device to run the model (default: shown below)
+  # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
+  device: None
 
 # Optional: Configuration for license plate recognition capability
 # NOTE: enabled, min_area, and enhancement can be overridden at the camera level
@@ -622,6 +628,7 @@ lpr:
   # Optional: Enable license plate recognition (default: shown below)
   enabled: False
   # Optional: The device to run the models on (default: shown below)
+  # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
   device: CPU
   # Optional: Set the model size used for text detection. (default: shown below)
   model_size: small

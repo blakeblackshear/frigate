@@ -73,6 +73,9 @@ Fine-tune face recognition with these optional parameters at the global level of
   - Default: `100`.
 - `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
   - Default: `True`.
+- `device`: Target a specific device to run the face recognition model on (multi-GPU installation).
+  - Default: `None`.
+  - Note: This setting is only applicable when using the `large` model. See [onnxruntime's provider options](https://onnxruntime.ai/docs/execution-providers/)
 
 ## Usage
 
