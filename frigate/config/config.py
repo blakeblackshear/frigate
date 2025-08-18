@@ -61,7 +61,7 @@ from .classification import (
 )
 from .database import DatabaseConfig
 from .env import EnvVars
-from .ipv6 import IPv6Config
+from .network import IPv6Config
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .proxy import ProxyConfig
@@ -360,6 +360,9 @@ class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT configuration.")
     notifications: NotificationConfig = Field(
         default_factory=NotificationConfig, title="Global notification configuration."
+    )
+    networking: NetworkingConfig = Field(
+        default_factory=NetworkingConfig, title="Networking configuration"
     )
     proxy: ProxyConfig = Field(
         default_factory=ProxyConfig, title="Proxy configuration."

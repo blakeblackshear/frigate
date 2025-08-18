@@ -27,7 +27,8 @@ except FileNotFoundError:
     config: dict[str, Any] = {}
 
 tls_config: dict[str, any] = config.get("tls", {"enabled": True})
-ipv6_config: dict[str, any] = config.get("ipv6", {"enabled": False})
+networking_config = config.get("networking", {})
+ipv6_config = networking_config.get("ipv6", {"enabled": False})
 
 output = {
     "tls": tls_config,
