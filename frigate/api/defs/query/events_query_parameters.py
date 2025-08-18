@@ -47,7 +47,14 @@ class EventsSearchQueryParams(BaseModel):
     query: Optional[str] = None
     event_id: Optional[str] = None
     search_type: Optional[str] = "thumbnail"
-    include_thumbnails: Optional[int] = 1
+    include_thumbnails: Optional[int] = Field(
+        1,
+        description=(
+            "Deprecated. Thumbnail data is no longer included in the response. "
+            "Use the /api/events/:event_id/thumbnail.:extension endpoint instead."
+        ),
+        deprecated=True,
+    )
     limit: Optional[int] = 50
     cameras: Optional[str] = "all"
     labels: Optional[str] = "all"
