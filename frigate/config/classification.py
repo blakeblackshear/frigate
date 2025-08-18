@@ -203,7 +203,7 @@ class FaceRecognitionConfig(FrigateBaseModel):
     )
     device: Optional[str] = Field(
         default=None,
-        title="The device key to use for semantic search.",
+        title="The device key to use for face recognition.",
         description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
     )
 
@@ -266,7 +266,7 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
     )
     device: Optional[str] = Field(
         default=None,
-        title="The device key to use for semantic search.",
+        title="The device key to use for LPR.",
         description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
     )
 
