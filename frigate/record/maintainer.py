@@ -16,7 +16,6 @@ from typing import Any, Optional, Tuple
 import numpy as np
 import psutil
 
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.comms.recordings_updater import (
@@ -24,6 +23,10 @@ from frigate.comms.recordings_updater import (
     RecordingsDataTypeEnum,
 )
 from frigate.config import FrigateConfig, RetainModeEnum
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
@@ -71,8 +74,12 @@ class RecordingMaintainer(threading.Thread):
 
         # create communication for retained recordings
         self.requestor = InterProcessRequestor()
-        self.config_subscriber = ConfigSubscriber("config/record/")
-        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.record],
+        )
+        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all.value)
         self.recordings_publisher = RecordingsDataPublisher(
             RecordingsDataTypeEnum.recordings_available_through
         )
@@ -280,12 +287,16 @@ class RecordingMaintainer(threading.Thread):
                 Path(cache_path).unlink(missing_ok=True)
                 return
 
-        # if cached file's start_time is earlier than the retain days for the camera
-        # meaning continuous recording is not enabled
-        if start_time <= (
-            datetime.datetime.now().astimezone(datetime.timezone.utc)
-            - datetime.timedelta(days=self.config.cameras[camera].record.retain.days)
-        ):
+        record_config = self.config.cameras[camera].record
+        highest = None
+
+        if record_config.continuous.days > 0:
+            highest = "continuous"
+        elif record_config.motion.days > 0:
+            highest = "motion"
+
+        # continuous / motion recording is not enabled
+        if highest is None:
             # if the cached segment overlaps with the review items:
             overlaps = False
             for review in reviews:
@@ -339,8 +350,7 @@ class RecordingMaintainer(threading.Thread):
                 ).astimezone(datetime.timezone.utc)
                 if end_time < retain_cutoff:
                     self.drop_segment(cache_path)
-        # else retain days includes this segment
-        # meaning continuous recording is enabled
+        # continuous / motion is enabled
         else:
             # assume that empty means the relevant recording info has not been received yet
             camera_info = self.object_recordings_info[camera]
@@ -355,7 +365,11 @@ class RecordingMaintainer(threading.Thread):
                 ).astimezone(datetime.timezone.utc)
                 >= end_time
             ):
-                record_mode = self.config.cameras[camera].record.retain.mode
+                record_mode = (
+                    RetainModeEnum.all
+                    if highest == "continuous"
+                    else RetainModeEnum.motion
+                )
                 return await self.move_segment(
                     camera, start_time, end_time, duration, cache_path, record_mode
                 )
@@ -518,17 +532,7 @@ class RecordingMaintainer(threading.Thread):
             run_start = datetime.datetime.now().timestamp()
 
             # check if there is an updated config
-            while True:
-                (
-                    updated_topic,
-                    updated_record_config,
-                ) = self.config_subscriber.check_for_update()
-
-                if not updated_topic:
-                    break
-
-                camera_name = updated_topic.rpartition("/")[-1]
-                self.config.cameras[camera_name].record = updated_record_config
+            self.config_subscriber.check_for_updates()
 
             stale_frame_count = 0
             stale_frame_count_threshold = 10
@@ -541,7 +545,7 @@ class RecordingMaintainer(threading.Thread):
                 if not topic:
                     break
 
-                if topic == DetectionTypeEnum.video:
+                if topic == DetectionTypeEnum.video.value:
                     (
                         camera,
                         _,
@@ -560,7 +564,7 @@ class RecordingMaintainer(threading.Thread):
                                 regions,
                             )
                         )
-                elif topic == DetectionTypeEnum.audio:
+                elif topic == DetectionTypeEnum.audio.value:
                     (
                         camera,
                         frame_time,
@@ -576,7 +580,9 @@ class RecordingMaintainer(threading.Thread):
                                 audio_detections,
                             )
                         )
-                elif topic == DetectionTypeEnum.api or DetectionTypeEnum.lpr:
+                elif (
+                    topic == DetectionTypeEnum.api.value or DetectionTypeEnum.lpr.value
+                ):
                     continue
 
                 if frame_time < run_start - stale_frame_count_threshold:

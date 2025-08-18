@@ -42,6 +42,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { LuCheck } from "react-icons/lu";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -64,6 +65,9 @@ export default function SearchFilterDialog({
   const { t } = useTranslation(["components/filter"]);
   const [currentFilter, setCurrentFilter] = useState(filter ?? {});
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
+  const { data: allRecognizedLicensePlates } = useSWR<string[]>(
+    "recognized_license_plates",
+  );
 
   useEffect(() => {
     if (filter) {
@@ -130,6 +134,7 @@ export default function SearchFilterDialog({
         }
       />
       <RecognizedLicensePlatesFilterContent
+        allRecognizedLicensePlates={allRecognizedLicensePlates}
         recognizedLicensePlates={currentFilter.recognized_license_plate}
         setRecognizedLicensePlates={(plate) =>
           setCurrentFilter({
@@ -875,6 +880,7 @@ export function SnapshotClipFilterContent({
 }
 
 type RecognizedLicensePlatesFilterContentProps = {
+  allRecognizedLicensePlates: string[] | undefined;
   recognizedLicensePlates: string[] | undefined;
   setRecognizedLicensePlates: (
     recognizedLicensePlates: string[] | undefined,
@@ -882,17 +888,11 @@ type RecognizedLicensePlatesFilterContentProps = {
 };
 
 export function RecognizedLicensePlatesFilterContent({
+  allRecognizedLicensePlates,
   recognizedLicensePlates,
   setRecognizedLicensePlates,
 }: RecognizedLicensePlatesFilterContentProps) {
   const { t } = useTranslation(["components/filter"]);
-
-  const { data: allRecognizedLicensePlates, error } = useSWR<string[]>(
-    "recognized_license_plates",
-    {
-      revalidateOnFocus: false,
-    },
-  );
 
   const [selectedRecognizedLicensePlates, setSelectedRecognizedLicensePlates] =
     useState<string[]>(recognizedLicensePlates || []);
@@ -923,7 +923,7 @@ export function RecognizedLicensePlatesFilterContent({
     }
   };
 
-  if (!allRecognizedLicensePlates || allRecognizedLicensePlates.length === 0) {
+  if (allRecognizedLicensePlates && allRecognizedLicensePlates.length === 0) {
     return null;
   }
 
@@ -947,15 +947,12 @@ export function RecognizedLicensePlatesFilterContent({
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">{t("recognizedLicensePlates.title")}</div>
-      {error ? (
-        <p className="text-sm text-red-500">
-          {t("recognizedLicensePlates.loadFailed")}
-        </p>
-      ) : !allRecognizedLicensePlates ? (
-        <p className="text-sm text-muted-foreground">
-          {t("recognizedLicensePlates.loading")}
-        </p>
-      ) : (
+      {allRecognizedLicensePlates == undefined ? (
+        <div className="flex flex-col items-center justify-center text-sm text-muted-foreground">
+          <ActivityIndicator className="mb-3 mr-2 size-5" />
+          <p>{t("recognizedLicensePlates.loading")}</p>
+        </div>
+      ) : allRecognizedLicensePlates.length == 0 ? null : (
         <>
           <Command
             className="border border-input bg-background"
@@ -1010,11 +1007,11 @@ export function RecognizedLicensePlatesFilterContent({
               ))}
             </div>
           )}
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("recognizedLicensePlates.selectPlatesFromList")}
+          </p>
         </>
       )}
-      <p className="mt-1 text-sm text-muted-foreground">
-        {t("recognizedLicensePlates.selectPlatesFromList")}
-      </p>
     </div>
   );
 }

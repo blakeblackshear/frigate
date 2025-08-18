@@ -5,13 +5,13 @@ import os
 import shutil
 import time
 from json import JSONDecodeError
+from multiprocessing.managers import DictProxy
 from typing import Any, Optional
 
 import psutil
 import requests
 from requests.exceptions import RequestException
 
-from frigate.camera import CameraMetrics
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.data_processing.types import DataProcessorMetrics
@@ -53,7 +53,7 @@ def get_latest_version(config: FrigateConfig) -> str:
 
 def stats_init(
     config: FrigateConfig,
-    camera_metrics: dict[str, CameraMetrics],
+    camera_metrics: DictProxy,
     embeddings_metrics: DataProcessorMetrics | None,
     detectors: dict[str, ObjectDetectProcess],
     processes: dict[str, int],
@@ -268,15 +268,20 @@ def stats_snapshot(
     camera_metrics = stats_tracking["camera_metrics"]
     stats: dict[str, Any] = {}
 
-    total_detection_fps = 0
+    total_camera_fps = total_process_fps = total_skipped_fps = total_detection_fps = 0
 
     stats["cameras"] = {}
     for name, camera_stats in camera_metrics.items():
+        total_camera_fps += camera_stats.camera_fps.value
+        total_process_fps += camera_stats.process_fps.value
+        total_skipped_fps += camera_stats.skipped_fps.value
         total_detection_fps += camera_stats.detection_fps.value
-        pid = camera_stats.process.pid if camera_stats.process else None
+        pid = camera_stats.process_pid.value if camera_stats.process_pid.value else None
         ffmpeg_pid = camera_stats.ffmpeg_pid.value if camera_stats.ffmpeg_pid else None
         capture_pid = (
-            camera_stats.capture_process.pid if camera_stats.capture_process else None
+            camera_stats.capture_process_pid.value
+            if camera_stats.capture_process_pid.value
+            else None
         )
         stats["cameras"][name] = {
             "camera_fps": round(camera_stats.camera_fps.value, 2),
@@ -303,6 +308,9 @@ def stats_snapshot(
             # from mypy 0.981 onwards
             "pid": pid,
         }
+    stats["camera_fps"] = round(total_camera_fps, 2)
+    stats["process_fps"] = round(total_process_fps, 2)
+    stats["skipped_fps"] = round(total_skipped_fps, 2)
     stats["detection_fps"] = round(total_detection_fps, 2)
 
     stats["embeddings"] = {}
@@ -353,6 +361,22 @@ def stats_snapshot(
                 stats["embeddings"]["yolov9_plate_detection"] = round(
                     embeddings_metrics.yolov9_lpr_pps.value, 2
                 )
+
+        if embeddings_metrics.review_desc_speed.value > 0.0:
+            stats["embeddings"]["review_description_speed"] = round(
+                embeddings_metrics.review_desc_speed.value * 1000, 2
+            )
+            stats["embeddings"]["review_descriptions"] = round(
+                embeddings_metrics.review_desc_dps.value, 2
+            )
+
+        for key in embeddings_metrics.classification_speeds.keys():
+            stats["embeddings"][f"{key}_classification_speed"] = round(
+                embeddings_metrics.classification_speeds[key].value * 1000, 2
+            )
+            stats["embeddings"][f"{key}_classification"] = round(
+                embeddings_metrics.classification_cps[key].value, 2
+            )
 
     get_processing_stats(config, stats, hwaccel_errors)
 

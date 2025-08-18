@@ -3,7 +3,7 @@
 from collections import Counter
 from typing import Any, Callable
 
-from frigate.config.config import FrigateConfig
+from frigate.config import CameraConfig, FrigateConfig
 
 
 class CameraActivityManager:
@@ -23,26 +23,33 @@ class CameraActivityManager:
             if not camera_config.enabled_in_config:
                 continue
 
-            self.last_camera_activity[camera_config.name] = {}
-            self.camera_all_object_counts[camera_config.name] = Counter()
-            self.camera_active_object_counts[camera_config.name] = Counter()
+            self.__init_camera(camera_config)
 
-            for zone, zone_config in camera_config.zones.items():
-                if zone not in self.all_zone_labels:
-                    self.zone_all_object_counts[zone] = Counter()
-                    self.zone_active_object_counts[zone] = Counter()
-                    self.all_zone_labels[zone] = set()
+    def __init_camera(self, camera_config: CameraConfig) -> None:
+        self.last_camera_activity[camera_config.name] = {}
+        self.camera_all_object_counts[camera_config.name] = Counter()
+        self.camera_active_object_counts[camera_config.name] = Counter()
 
-                self.all_zone_labels[zone].update(
-                    zone_config.objects
-                    if zone_config.objects
-                    else camera_config.objects.track
-                )
+        for zone, zone_config in camera_config.zones.items():
+            if zone not in self.all_zone_labels:
+                self.zone_all_object_counts[zone] = Counter()
+                self.zone_active_object_counts[zone] = Counter()
+                self.all_zone_labels[zone] = set()
+
+            self.all_zone_labels[zone].update(
+                zone_config.objects
+                if zone_config.objects
+                else camera_config.objects.track
+            )
 
     def update_activity(self, new_activity: dict[str, dict[str, Any]]) -> None:
         all_objects: list[dict[str, Any]] = []
 
         for camera in new_activity.keys():
+            # handle cameras that were added dynamically
+            if camera not in self.camera_all_object_counts:
+                self.__init_camera(self.config.cameras[camera])
+
             new_objects = new_activity[camera].get("objects", [])
             all_objects.extend(new_objects)
 

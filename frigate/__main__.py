@@ -1,5 +1,6 @@
 import argparse
 import faulthandler
+import multiprocessing as mp
 import signal
 import sys
 import threading
@@ -15,12 +16,17 @@ from frigate.util.config import find_config_file
 
 
 def main() -> None:
+    manager = mp.Manager()
     faulthandler.enable()
 
     # Setup the logging thread
-    setup_logging()
+    setup_logging(manager)
 
     threading.current_thread().name = "frigate"
+    stop_event = mp.Event()
+
+    # send stop event on SIGINT
+    signal.signal(signal.SIGINT, lambda sig, frame: stop_event.set())
 
     # Make sure we exit cleanly on SIGTERM.
     signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())
@@ -93,7 +99,14 @@ def main() -> None:
         print("*************************************************************")
         print("***    End Config Validation Errors                       ***")
         print("*************************************************************")
-        sys.exit(1)
+
+        # attempt to start Frigate in recovery mode
+        try:
+            config = FrigateConfig.load(install=True, safe_load=True)
+            print("Starting Frigate in safe mode.")
+        except ValidationError:
+            print("Unable to start Frigate in safe mode.")
+            sys.exit(1)
     if args.validate_config:
         print("*************************************************************")
         print("*** Your config file is valid.                            ***")
@@ -101,8 +114,23 @@ def main() -> None:
         sys.exit(0)
 
     # Run the main application.
-    FrigateApp(config).start()
+    FrigateApp(config, manager, stop_event).start()
 
 
 if __name__ == "__main__":
+    mp.set_forkserver_preload(
+        [
+            # Standard library and core dependencies
+            "sqlite3",
+            # Third-party libraries commonly used in Frigate
+            "numpy",
+            "cv2",
+            "peewee",
+            "zmq",
+            "ruamel.yaml",
+            # Frigate core modules
+            "frigate.camera.maintainer",
+        ]
+    )
+    mp.set_start_method("forkserver", force=True)
     main()

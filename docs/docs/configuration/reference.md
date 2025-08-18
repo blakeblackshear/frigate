@@ -339,6 +339,33 @@ objects:
       # Optional: mask to prevent this object type from being detected in certain areas (default: no mask)
       # Checks based on the bottom center of the bounding box of the object
       mask: 0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278
+  # Optional: Configuration for AI generated tracked object descriptions
+  genai:
+    # Optional: Enable AI object description generation (default: shown below)
+    enabled: False
+    # Optional: Use the object snapshot instead of thumbnails for description generation (default: shown below)
+    use_snapshot: False
+    # Optional: The default prompt for generating descriptions. Can use replacement
+    # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
+    prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
+    # Optional: Object specific prompts to customize description results
+    # Format: {label}: {prompt}
+    object_prompts:
+      person: "My special person prompt."
+    # Optional: objects to generate descriptions for (default: all objects that are tracked)
+    objects:
+      - person
+      - cat
+    # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
+    required_zones: []
+    # Optional: What triggers to use to send frames for a tracked object to generative AI (default: shown below)
+    send_triggers:
+      # Once the object is no longer tracked
+      tracked_object_end: True
+      # Optional: After X many significant updates are received (default: shown below)
+      after_significant_updates: None
+    # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
+    debug_save_thumbnails: False
 
 # Optional: Review configuration
 # NOTE: Can be overridden at the camera level
@@ -371,6 +398,19 @@ review:
     #       should be configured at the camera level.
     required_zones:
       - driveway
+  # Optional: GenAI Review Summary Configuration
+  genai:
+    # Optional: Enable the GenAI review summary feature (default: shown below)
+    enabled: False
+    # Optional: Enable GenAI review summaries for alerts (default: shown below)
+    alerts: True
+    # Optional: Enable GenAI review summaries for detections (default: shown below)
+    detections: False
+    # Optional: Additional concerns that the GenAI should make note of (default: None)
+    additional_concerns:
+      - Animals in the garden
+    # Optional: Preferred response language (default: English)
+    preferred_language: English
 
 # Optional: Motion configuration
 # NOTE: Can be overridden at the camera level
@@ -438,20 +478,20 @@ record:
   # Optional: Number of minutes to wait between cleanup runs (default: shown below)
   # This can be used to reduce the frequency of deleting recording segments from disk if you want to minimize i/o
   expire_interval: 60
-  # Optional: Sync recordings with disk on startup and once a day (default: shown below).
+  # Optional: Two-way sync recordings database with disk on startup and once a day (default: shown below).
   sync_recordings: False
-  # Optional: Retention settings for recording
-  retain:
+  # Optional: Continuous retention settings
+  continuous:
+    # Optional: Number of days to retain recordings regardless of tracked objects or motion (default: shown below)
+    # NOTE: This should be set to 0 and retention should be defined in alerts and detections section below
+    #       if you only want to retain recordings of alerts and detections.
+    days: 0
+  # Optional: Motion retention settings
+  motion:
     # Optional: Number of days to retain recordings regardless of tracked objects (default: shown below)
     # NOTE: This should be set to 0 and retention should be defined in alerts and detections section below
     #       if you only want to retain recordings of alerts and detections.
     days: 0
-    # Optional: Mode for retention. Available options are: all, motion, and active_objects
-    #   all - save all recording segments regardless of activity
-    #   motion - save all recordings segments with any detected motion
-    #   active_objects - save all recording segments with active/moving objects
-    # NOTE: this mode only applies when the days setting above is greater than 0
-    mode: all
   # Optional: Recording Export Settings
   export:
     # Optional: Timelapse Output Args (default: shown below).
@@ -612,13 +652,22 @@ genai:
   base_url: http://localhost::11434
   # Required if gemini or openai
   api_key: "{FRIGATE_GENAI_API_KEY}"
-  # Optional: The default prompt for generating descriptions. Can use replacement
-  # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
-  prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
-  # Optional: Object specific prompts to customize description results
-  # Format: {label}: {prompt}
-  object_prompts:
-    person: "My special person prompt."
+  # Optional additional args to pass to the GenAI Provider (default: None)
+  provider_options:
+    keep_alive: -1
+
+# Optional: Configuration for audio transcription
+# NOTE: only the enabled option can be overridden at the camera level
+audio_transcription:
+  # Optional: Enable license plate recognition (default: shown below)
+  enabled: False
+  # Optional: The device to run the models on (default: shown below)
+  device: CPU
+  # Optional: Set the model size used for transcription. (default: shown below)
+  model_size: small
+  # Optional: Set the language used for transcription translation. (default: shown below)
+  # List of language codes: https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10
+  language: en
 
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.9.9)
@@ -827,33 +876,22 @@ cameras:
       # By default the cameras are sorted alphabetically.
       order: 0
 
-    # Optional: Configuration for AI generated tracked object descriptions
-    genai:
-      # Optional: Enable AI description generation (default: shown below)
-      enabled: False
-      # Optional: Use the object snapshot instead of thumbnails for description generation (default: shown below)
-      use_snapshot: False
-      # Optional: The default prompt for generating descriptions. Can use replacement
-      # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
-      prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
-      # Optional: Object specific prompts to customize description results
-      # Format: {label}: {prompt}
-      object_prompts:
-        person: "My special person prompt."
-      # Optional: objects to generate descriptions for (default: all objects that are tracked)
-      objects:
-        - person
-        - cat
-      # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
-      required_zones: []
-      # Optional: What triggers to use to send frames for a tracked object to generative AI (default: shown below)
-      send_triggers:
-        # Once the object is no longer tracked
-        tracked_object_end: True
-        # Optional: After X many significant updates are received (default: shown below)
-        after_significant_updates: None
-      # Optional: Save thumbnails sent to generative AI for review/debugging purposes (default: shown below)
-      debug_save_thumbnails: False
+    # Optional: Configuration for triggers to automate actions based on semantic search results.
+    triggers:
+      # Required: Unique identifier for the trigger (generated automatically from nickname if not specified).
+      trigger_name:
+        # Required: Enable or disable the trigger. (default: shown below)
+        enabled: true
+        # Type of trigger, either `thumbnail` for image-based matching or `description` for text-based matching. (default: none)
+        type: thumbnail
+        # Reference data for matching, either an event ID for `thumbnail` or a text string for `description`. (default: none)
+        data: 1751565549.853251-b69j73
+        # Similarity threshold for triggering. (default: none)
+        threshold: 0.7
+        # List of actions to perform when the trigger fires. (default: none)
+        # Available options: `notification` (send a webpush notification)
+        actions:
+          - notification
 
 # Optional
 ui:

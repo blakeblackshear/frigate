@@ -19,6 +19,10 @@ Frigate supports multiple different detectors that work on different types of ha
 - [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
 - [ONNX](#onnx): ROCm will automatically be detected and used as a detector in the `-rocm` Frigate image when a supported ONNX model is configured.
 
+**Apple Silicon**
+
+- [Apple Silicon](#apple-silicon-detector): Apple Silicon can run on M1 and newer Apple Silicon devices.
+
 **Intel**
 
 - [OpenVino](#openvino-detector): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
@@ -264,7 +268,7 @@ detectors:
 
 :::
 
-### Supported Models
+### OpenVINO Supported Models
 
 #### SSDLite MobileNet v2
 
@@ -402,6 +406,59 @@ model:
 
 Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
+## Apple Silicon detector
+
+The NPU in Apple Silicon can't be accessed from within a container, so the [Apple Silicon detector client](https://github.com/frigate-nvr/apple-silicon-detector) must first be setup. It is recommended to use the Frigate docker image with `-standard-arm64` suffix, for example  `ghcr.io/blakeblackshear/frigate:stable-arm64-standard`.
+
+### Setup
+
+1. Setup the [Apple Silicon detector client](https://github.com/frigate-nvr/apple-silicon-detector) and run the client
+2. Configure the detector in Frigate and startup Frigate
+
+### Configuration
+
+Using the detector config below will connect to the client:
+
+```yaml
+detectors:
+  apple-silicon:
+    type: zmq
+    endpoint: tcp://host.docker.internal:5555
+```
+
+### Apple Silicon Supported Models
+
+There is no default model provided, the following formats are supported:
+
+#### YOLO (v3, v4, v7, v9)
+
+YOLOv3, YOLOv4, YOLOv7, and [YOLOv9](https://github.com/WongKinYiu/yolov9) models are supported, but not included by default.
+
+:::tip
+
+The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well. See [the models section](#downloading-yolo-models) for more information on downloading YOLO models for use in Frigate.
+
+:::
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: yolo-generic
+  width: 320 # <--- should match the imgsize set during model export
+  height: 320 # <--- should match the imgsize set during model export
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/yolo.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
 ## AMD/ROCm GPU detector
 
 ### Setup
@@ -483,7 +540,7 @@ We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent an existing override from mes
 $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/rocm/bin/rocminfo |grep gfx)'
 ```
 
-### Supported Models
+### ROCm Supported Models
 
 See [ONNX supported models](#supported-models) for supported models, there are some caveats:
 
@@ -526,7 +583,7 @@ detectors:
 
 :::
 
-### Supported Models
+### ONNX Supported Models
 
 There is no default model provided, the following formats are supported:
 
@@ -824,7 +881,7 @@ $ cat /sys/kernel/debug/rknpu/load
 
 :::
 
-### Supported Models
+### RockChip Supported Models
 
 This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for two). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
 

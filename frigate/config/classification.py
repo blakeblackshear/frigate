@@ -10,6 +10,7 @@ __all__ = [
     "CameraLicensePlateRecognitionConfig",
     "FaceRecognitionConfig",
     "SemanticSearchConfig",
+    "CameraSemanticSearchConfig",
     "LicensePlateRecognitionConfig",
 ]
 
@@ -19,9 +20,44 @@ class SemanticSearchModelEnum(str, Enum):
     jinav2 = "jinav2"
 
 
-class LPRDeviceEnum(str, Enum):
+class EnrichmentsDeviceEnum(str, Enum):
     GPU = "GPU"
     CPU = "CPU"
+
+
+class TriggerType(str, Enum):
+    THUMBNAIL = "thumbnail"
+    DESCRIPTION = "description"
+
+
+class TriggerAction(str, Enum):
+    NOTIFICATION = "notification"
+
+
+class ObjectClassificationType(str, Enum):
+    sub_label = "sub_label"
+    attribute = "attribute"
+
+
+class AudioTranscriptionConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable audio transcription.")
+    language: str = Field(
+        default="en",
+        title="Language abbreviation to use for audio event transcription/translation.",
+    )
+    device: Optional[EnrichmentsDeviceEnum] = Field(
+        default=EnrichmentsDeviceEnum.CPU,
+        title="The device used for license plate recognition.",
+    )
+    model_size: str = Field(
+        default="small", title="The size of the embeddings model used."
+    )
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of camera."
+    )
+    live_enabled: Optional[bool] = Field(
+        default=False, title="Enable live transcriptions."
+    )
 
 
 class BirdClassificationConfig(FrigateBaseModel):
@@ -34,9 +70,51 @@ class BirdClassificationConfig(FrigateBaseModel):
     )
 
 
+class CustomClassificationStateCameraConfig(FrigateBaseModel):
+    crop: list[int, int, int, int] = Field(
+        title="Crop of image frame on this camera to run classification on."
+    )
+
+
+class CustomClassificationStateConfig(FrigateBaseModel):
+    cameras: Dict[str, CustomClassificationStateCameraConfig] = Field(
+        title="Cameras to run classification on."
+    )
+    motion: bool = Field(
+        default=False,
+        title="If classification should be run when motion is detected in the crop.",
+    )
+    interval: int | None = Field(
+        default=None,
+        title="Interval to run classification on in seconds.",
+        gt=0,
+    )
+
+
+class CustomClassificationObjectConfig(FrigateBaseModel):
+    objects: list[str] = Field(title="Object types to classify.")
+    classification_type: ObjectClassificationType = Field(
+        default=ObjectClassificationType.sub_label,
+        title="Type of classification that is applied.",
+    )
+
+
+class CustomClassificationConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable running the model.")
+    name: str | None = Field(default=None, title="Name of classification model.")
+    threshold: float = Field(
+        default=0.8, title="Classification score threshold to change the state."
+    )
+    object_config: CustomClassificationObjectConfig | None = Field(default=None)
+    state_config: CustomClassificationStateConfig | None = Field(default=None)
+
+
 class ClassificationConfig(FrigateBaseModel):
     bird: BirdClassificationConfig = Field(
         default_factory=BirdClassificationConfig, title="Bird classification config."
+    )
+    custom: Dict[str, CustomClassificationConfig] = Field(
+        default={}, title="Custom Classification Model Configs."
     )
 
 
@@ -52,6 +130,32 @@ class SemanticSearchConfig(FrigateBaseModel):
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
     )
+
+
+class TriggerConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable this trigger")
+    type: TriggerType = Field(default=TriggerType.DESCRIPTION, title="Type of trigger")
+    data: str = Field(title="Trigger content (text phrase or image ID)")
+    threshold: float = Field(
+        title="Confidence score required to run the trigger",
+        default=0.8,
+        gt=0.0,
+        le=1.0,
+    )
+    actions: List[TriggerAction] = Field(
+        default=[], title="Actions to perform when trigger is matched"
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+
+class CameraSemanticSearchConfig(FrigateBaseModel):
+    triggers: Dict[str, TriggerConfig] = Field(
+        default={},
+        title="Trigger actions on tracked objects that match existing thumbnails or descriptions",
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class FaceRecognitionConfig(FrigateBaseModel):
@@ -105,8 +209,8 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
 
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
-    device: Optional[LPRDeviceEnum] = Field(
-        default=LPRDeviceEnum.CPU,
+    device: Optional[EnrichmentsDeviceEnum] = Field(
+        default=EnrichmentsDeviceEnum.CPU,
         title="The device used for license plate recognition.",
     )
     model_size: str = Field(

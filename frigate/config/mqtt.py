@@ -30,7 +30,7 @@ class MqttConfig(FrigateBaseModel):
     )
     tls_client_key: Optional[str] = Field(default=None, title="MQTT TLS Client Key")
     tls_insecure: Optional[bool] = Field(default=None, title="MQTT TLS Insecure")
-    qos: Optional[int] = Field(default=0, title="MQTT QoS")
+    qos: int = Field(default=0, title="MQTT QoS")
 
     @model_validator(mode="after")
     def user_requires_pass(self, info: ValidationInfo) -> Self:

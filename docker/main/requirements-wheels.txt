@@ -11,6 +11,9 @@ joserfc == 1.0.*
 pathvalidate == 3.2.*
 markupsafe == 3.0.*
 python-multipart == 0.0.12
+# Classification Model Training
+tensorflow == 2.19.* ; platform_machine == 'aarch64'
+tensorflow-cpu == 2.19.* ; platform_machine == 'x86_64'
 # General
 mypy == 1.6.1
 onvif-zeep-async == 3.1.*
@@ -38,14 +41,14 @@ opencv-python-headless == 4.11.0.*
 opencv-contrib-python == 4.11.0.*
 scipy == 1.14.*
 # OpenVino & ONNX
-openvino == 2024.4.*
-onnxruntime-openvino == 1.20.* ; platform_machine == 'x86_64'
-onnxruntime == 1.20.* ; platform_machine == 'aarch64'
+openvino == 2025.1.*
+onnxruntime-openvino == 1.22.* ; platform_machine == 'x86_64'
+onnxruntime == 1.22.* ; platform_machine == 'aarch64'
 # Embeddings
 transformers == 4.45.*
 # Generative AI
 google-generativeai == 0.8.*
-ollama == 0.3.*
+ollama == 0.5.*
 openai == 1.65.*
 # push notifications
 py-vapid == 1.9.*
@@ -71,3 +74,8 @@ prometheus-client == 0.21.*
 # TFLite
 tflite_runtime @ https://github.com/frigate-nvr/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_x86_64.whl; platform_machine == 'x86_64'
 tflite_runtime @ https://github.com/feranick/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_aarch64.whl; platform_machine == 'aarch64'
+# audio transcription
+sherpa-onnx==1.12.*
+faster-whisper==1.1.*
+librosa==0.11.*
+soundfile==0.13.*

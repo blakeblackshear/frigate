@@ -11,6 +11,7 @@ EXPORT_DIR = f"{BASE_DIR}/exports"
 FACE_DIR = f"{CLIPS_DIR}/faces"
 THUMB_DIR = f"{CLIPS_DIR}/thumbs"
 RECORD_DIR = f"{BASE_DIR}/recordings"
+TRIGGER_DIR = f"{CLIPS_DIR}/triggers"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
 FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
@@ -110,9 +111,17 @@ UPSERT_REVIEW_SEGMENT = "upsert_review_segment"
 CLEAR_ONGOING_REVIEW_SEGMENTS = "clear_ongoing_review_segments"
 UPDATE_CAMERA_ACTIVITY = "update_camera_activity"
 UPDATE_EVENT_DESCRIPTION = "update_event_description"
+UPDATE_REVIEW_DESCRIPTION = "update_review_description"
 UPDATE_MODEL_STATE = "update_model_state"
 UPDATE_EMBEDDINGS_REINDEX_PROGRESS = "handle_embeddings_reindex_progress"
+UPDATE_BIRDSEYE_LAYOUT = "update_birdseye_layout"
 NOTIFICATION_TEST = "notification_test"
+
+# IO Nice Values
+
+PROCESS_PRIORITY_HIGH = 0
+PROCESS_PRIORITY_MED = 10
+PROCESS_PRIORITY_LOW = 19
 
 # Stats Values
 

@@ -103,12 +103,14 @@
         "success": {
           "regenerate": "A new description has been requested from {{provider}}. Depending on the speed of your provider, the new description may take some time to regenerate.",
           "updatedSublabel": "Successfully updated sub label.",
-          "updatedLPR": "Successfully updated license plate."
+          "updatedLPR": "Successfully updated license plate.",
+          "audioTranscription": "Successfully requested audio transcription."
         },
         "error": {
           "regenerate": "Failed to call {{provider}} for a new description: {{errorMessage}}",
           "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}",
-          "updatedLPRFailed": "Failed to update license plate: {{errorMessage}}"
+          "updatedLPRFailed": "Failed to update license plate: {{errorMessage}}",
+          "audioTranscription": "Failed to request audio transcription: {{errorMessage}}"
         }
       }
     },
@@ -172,6 +174,14 @@
     "findSimilar": {
       "label": "Find similar",
       "aria": "Find similar tracked objects"
+    },
+    "addTrigger": {
+      "label": "Add trigger",
+      "aria": "Add a trigger for this tracked object"
+    },
+    "audioTranscription": {
+      "label": "Transcribe",
+      "aria": "Request audio transcription"
     },
     "submitToPlus": {
       "label": "Submit to Frigate+",

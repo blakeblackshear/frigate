@@ -38,6 +38,14 @@
         "label": "Zoom PTZ camera out"
       }
     },
+    "focus": {
+      "in": {
+        "label": "Focus PTZ camera in"
+      },
+      "out": {
+        "label": "Focus PTZ camera out"
+      }
+    },
     "frame": {
       "center": {
         "label": "Click in the frame to center the PTZ camera"
@@ -68,6 +76,10 @@
   "audioDetect": {
     "enable": "Enable Audio Detect",
     "disable": "Disable Audio Detect"
+  },
+  "transcription": {
+    "enable": "Enable Live Audio Transcription",
+    "disable": "Disable Live Audio Transcription"
   },
   "autotracking": {
     "enable": "Enable Autotracking",
@@ -135,6 +147,7 @@
     "recording": "Recording",
     "snapshots": "Snapshots",
     "audioDetection": "Audio Detection",
+    "transcription": "Audio Transcription",
     "autotracking": "Autotracking"
   },
   "history": {
