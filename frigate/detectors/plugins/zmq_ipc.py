@@ -120,7 +120,6 @@ class ZmqIpcDetector(DetectionApi):
             # Receive reply
             reply_frames = self._socket.recv_multipart()
             detections = self._decode_response(reply_frames)
-            print(f"got response of first item {detections[0]}")
 
             # Ensure output shape and dtype are exactly as expected
 
