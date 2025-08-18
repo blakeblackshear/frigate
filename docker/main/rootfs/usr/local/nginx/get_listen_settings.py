@@ -30,9 +30,6 @@ tls_config: dict[str, any] = config.get("tls", {"enabled": True})
 networking_config = config.get("networking", {})
 ipv6_config = networking_config.get("ipv6", {"enabled": False})
 
-output = {
-    "tls": tls_config,
-    "ipv6": ipv6_config
-}
+output = {"tls": tls_config, "ipv6": ipv6_config}
 
 print(json.dumps(output))
