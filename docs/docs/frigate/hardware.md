@@ -61,19 +61,26 @@ Frigate supports multiple different detectors that work on different types of ha
 **AMD**
 
 - [ROCm](#rocm---amd-gpu): ROCm can run on AMD Discrete GPUs to provide efficient object detection
-  - [Supports limited model architectures](../../configuration/object_detectors#supported-models-1)
+  - [Supports limited model architectures](../../configuration/object_detectors#rocm-supported-models)
   - Runs best on discrete AMD GPUs
+
+**Apple Silicon**
+
+- [Apple Silicon](#apple-silicon): Apple Silicon is usable on all M1 and newer Apple Silicon devices to provide efficient and fast object detection
+  - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#apple-silicon-supported-models)
+  - Runs well with any size models including large
+  - Runs via ZMQ proxy which adds some latency, only recommended for local connection
 
 **Intel**
 
 - [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
-  - [Supports majority of model architectures](../../configuration/object_detectors#supported-models)
+  - [Supports majority of model architectures](../../configuration/object_detectors#openvino-supported-models)
   - Runs best with tiny, small, or medium models
 
 **Nvidia**
 
 - [TensortRT](#tensorrt---nvidia-gpu): TensorRT can run on Nvidia GPUs and Jetson devices.
-  - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#supported-models-2)
+  - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#onnx-supported-models)
   - Runs well with any size models including large
 
 **Rockchip**
@@ -173,14 +180,28 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 | RTX A4000       |                       | 320: ~ 15 ms              |                        |
 | Tesla P40       |                       | 320: ~ 105 ms             |                        |
 
+### Apple Silicon
+
+With the [Apple Silicon](../configuration/object_detectors.md#apple-silicon-detector) detector Frigate can take advantage of the NPU in M1 and newer Apple Silicon.
+
+:::warning
+
+Apple Silicon can not run within a container, so a ZMQ proxy is utilized to communicate with [the Apple Silicon Frigate detector](https://github.com/frigate-nvr/apple-silicon-detector) which runs on the host. This should add minimal latency when run on the same device.
+
+:::
+
+| Name      | YOLOv9 Inference Time  |
+| --------- | ---------------------- |
+| M3 Pro    | t-320: 6 ms s-320: 8ms |
+| M1        | s-320: 9ms             |
+
 ### ROCm - AMD GPU
 
-With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
+With the [ROCm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
 | Name      | YOLOv9 Inference Time | YOLO-NAS Inference Time   |
 | --------- | --------------------- | ------------------------- |
 | AMD 780M  | ~ 14 ms               | 320: ~ 25 ms 640: ~ 50 ms |
-| AMD 8700G |                       | 320: ~ 20 ms 640: ~ 40 ms |
 
 ## Community Supported Detectors
 
