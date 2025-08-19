@@ -380,7 +380,7 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
         new_object_config["genai"] = {}
 
         for key in global_genai.keys():
-            if key not in ["provider", "base_url", "api_key"]:
+            if key not in ["enabled", "model", "provider", "base_url", "api_key"]:
                 new_object_config["genai"][key] = global_genai[key]
             else:
                 new_genai_config[key] = global_genai[key]
