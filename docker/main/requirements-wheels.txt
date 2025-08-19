@@ -8,6 +8,7 @@ fastapi[standard-no-fastapi-cloud-cli] == 0.116.*
 uvicorn == 0.35.*
 slowapi == 0.1.*
 joserfc == 1.2.*
+cryptography == 44.0.*
 pathvalidate == 3.3.*
 markupsafe == 3.0.*
 python-multipart == 0.0.20
@@ -16,7 +17,7 @@ tensorflow == 2.19.* ; platform_machine == 'aarch64'
 tensorflow-cpu == 2.19.* ; platform_machine == 'x86_64'
 # General
 mypy == 1.6.1
-onvif-zeep-async == 3.1.*
+onvif-zeep-async == 4.0.*
 paho-mqtt == 2.1.*
 pandas == 2.2.*
 peewee == 3.17.*
@@ -30,7 +31,7 @@ ruamel.yaml == 0.18.*
 tzlocal == 5.2
 requests == 2.32.*
 types-requests == 2.32.*
-norfair == 2.2.*
+norfair == 2.3.*
 setproctitle == 1.3.*
 ws4py == 0.5.*
 unidecode == 1.3.*
