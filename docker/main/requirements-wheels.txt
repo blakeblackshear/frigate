@@ -21,7 +21,7 @@ paho-mqtt == 2.1.*
 pandas == 2.2.*
 peewee == 3.17.*
 peewee_migrate == 1.13.*
-psutil == 6.1.*
+psutil == 7.0.*
 pydantic == 2.10.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 pytz == 2025.*
