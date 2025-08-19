@@ -4,6 +4,7 @@ from typing import Optional
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from joserfc.jwk import OctKey
 from playhouse.sqliteq import SqliteQueueDatabase
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -32,7 +33,6 @@ from frigate.embeddings import EmbeddingsContext
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
 from frigate.storage import StorageMaintainer
-from joserfc.jwk import OctKey
 
 logger = logging.getLogger(__name__)
 
