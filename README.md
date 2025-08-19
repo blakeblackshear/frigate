@@ -24,7 +24,8 @@ Use of a GPU or AI accelerator such as a [Google Coral](https://coral.ai/product
 - 24/7 recording
 - Re-streaming via RTSP to reduce the number of connections to your camera
 - WebRTC & MSE support for low-latency live view
-
+- This is a test change made on my practice branch.
+- Please took a look at it now.
 ## Documentation
 
 View the documentation at https://docs.frigate.video
