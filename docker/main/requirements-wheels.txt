@@ -7,7 +7,7 @@ starlette-context == 0.4.*
 fastapi[standard-no-fastapi-cloud-cli] == 0.116.*
 uvicorn == 0.35.*
 slowapi == 0.1.*
-joserfc == 1.2.*
+joserfc == 1.0.*
 cryptography == 44.0.*
 pathvalidate == 3.3.*
 markupsafe == 3.0.*
