@@ -1329,7 +1329,11 @@ class PtzAutoTracker:
 
         if camera_config.onvif.autotracking.enabled:
             if not self.autotracker_init[camera]:
-                self._autotracker_setup(camera_config, camera)
+                future = asyncio.run_coroutine_threadsafe(
+                    self._autotracker_setup(camera_config, camera), self.onvif.loop
+                )
+                # Wait for the coroutine to complete
+                future.result()
 
             if self.calibrating[camera]:
                 logger.debug(f"{camera}: Calibrating camera")
