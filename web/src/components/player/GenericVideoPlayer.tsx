@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import { useVideoDimensions } from "@/hooks/use-video-dimensions";
 import HlsVideoPlayer from "./HlsVideoPlayer";
 import ActivityIndicator from "../indicators/activity-indicator";
@@ -89,6 +95,12 @@ export function GenericVideoPlayer({
     },
   );
 
+  const hlsSource = useMemo(() => {
+    return {
+      playlist: source,
+    };
+  }, [source]);
+
   return (
     <div ref={containerRef} className="relative flex h-full w-full flex-col">
       <div className="relative flex flex-grow items-center justify-center">
@@ -107,9 +119,7 @@ export function GenericVideoPlayer({
             >
               <HlsVideoPlayer
                 videoRef={videoRef}
-                currentSource={{
-                  playlist: source,
-                }}
+                currentSource={hlsSource}
                 hotKeys
                 visible
                 frigateControls={false}
