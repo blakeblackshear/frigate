@@ -66,3 +66,6 @@ We use [Weblate](https://hosted.weblate.org/projects/frigate-nvr/) to support la
 <a href="https://hosted.weblate.org/engage/frigate-nvr/">
 <img src="https://hosted.weblate.org/widget/frigate-nvr/multi-auto.svg" alt="Translation status" />
 </a>
+
+## End
+Thank you
