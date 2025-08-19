@@ -5,15 +5,10 @@ from typing import Any, Sequence
 
 import cv2
 import numpy as np
-from norfair import (
-    Detection,
-    Drawable,
-    OptimizedKalmanFilterFactory,
-    Tracker,
-    draw_boxes,
-)
-from norfair.drawing.drawer import Drawer
-from norfair.tracker import TrackedObject
+from norfair.drawing.draw_boxes import draw_boxes
+from norfair.drawing.drawer import Drawable, Drawer
+from norfair.filter import OptimizedKalmanFilterFactory
+from norfair.tracker import Detection, TrackedObject, Tracker
 from rich import print
 from rich.console import Console
 from rich.table import Table
@@ -198,19 +193,21 @@ class NorfairTracker(ObjectTracker):
         self.default_tracker = {
             "static": Tracker(
                 distance_function=frigate_distance,
-                distance_threshold=self.default_tracker_config["distance_threshold"],
+                distance_threshold=self.default_tracker_config[  # type: ignore[arg-type]
+                    "distance_threshold"
+                ],
                 initialization_delay=self.detect_config.min_initialized,
-                hit_counter_max=self.detect_config.max_disappeared,
-                filter_factory=self.default_tracker_config["filter_factory"],
+                hit_counter_max=self.detect_config.max_disappeared,  # type: ignore[arg-type]
+                filter_factory=self.default_tracker_config["filter_factory"],  # type: ignore[arg-type]
             ),
             "ptz": Tracker(
                 distance_function=frigate_distance,
                 distance_threshold=self.default_ptz_tracker_config[
                     "distance_threshold"
-                ],
+                ],  # type: ignore[arg-type]
                 initialization_delay=self.detect_config.min_initialized,
-                hit_counter_max=self.detect_config.max_disappeared,
-                filter_factory=self.default_ptz_tracker_config["filter_factory"],
+                hit_counter_max=self.detect_config.max_disappeared,  # type: ignore[arg-type]
+                filter_factory=self.default_ptz_tracker_config["filter_factory"],  # type: ignore[arg-type]
             ),
         }
 
@@ -273,7 +270,7 @@ class NorfairTracker(ObjectTracker):
         # Get the correct tracker for this object's label
         tracker = self.get_tracker(obj["label"])
         obj_match = next(
-            (o for o in tracker.tracked_objects if o.global_id == track_id), None
+            (o for o in tracker.tracked_objects if str(o.global_id) == track_id), None
         )
         # if we don't have a match, we have a new object
         obj["score_history"] = (
@@ -317,7 +314,7 @@ class NorfairTracker(ObjectTracker):
             tracker.tracked_objects = [
                 o
                 for o in tracker.tracked_objects
-                if o.global_id != track_id and o.hit_counter < 0
+                if str(o.global_id) != track_id and o.hit_counter < 0
             ]
 
         del self.track_id_map[track_id]
@@ -565,12 +562,12 @@ class NorfairTracker(ObjectTracker):
                 "estimate": estimate,
                 "estimate_velocity": t.estimate_velocity,
             }
-            active_ids.append(t.global_id)
-            if t.global_id not in self.track_id_map:
-                self.register(t.global_id, new_obj)
+            active_ids.append(str(t.global_id))
+            if str(t.global_id) not in self.track_id_map:
+                self.register(str(t.global_id), new_obj)
             # if there wasn't a detection in this frame, increment disappeared
             elif t.last_detection.data["frame_time"] != frame_time:
-                id = self.track_id_map[t.global_id]
+                id = self.track_id_map[str(t.global_id)]
                 self.disappeared[id] += 1
                 # sometimes the estimate gets way off
                 # only update if the upper left corner is actually upper left
@@ -578,7 +575,7 @@ class NorfairTracker(ObjectTracker):
                     self.tracked_objects[id]["estimate"] = new_obj["estimate"]
             # else update it
             else:
-                self.update(t.global_id, new_obj)
+                self.update(str(t.global_id), new_obj)
 
         # clear expired tracks
         expired_ids = [k for k in self.track_id_map.keys() if k not in active_ids]
@@ -613,7 +610,7 @@ class NorfairTracker(ObjectTracker):
 
     def debug_draw(self, frame: np.ndarray, frame_time: float) -> None:
         # Collect all tracked objects from each tracker
-        all_tracked_objects = []
+        all_tracked_objects: list[TrackedObject] = []
 
         # print a table to the console with norfair tracked object info
         if False:
@@ -644,9 +641,9 @@ class NorfairTracker(ObjectTracker):
         # draw the estimated bounding box
         draw_boxes(frame, all_tracked_objects, color="green", draw_ids=True)
         # draw the detections that were detected in the current frame
-        draw_boxes(frame, active_detections, color="blue", draw_ids=True)
+        draw_boxes(frame, active_detections, color="blue", draw_ids=True)  # type: ignore[arg-type]
         # draw the detections that are missing in the current frame
-        draw_boxes(frame, missing_detections, color="red", draw_ids=True)
+        draw_boxes(frame, missing_detections, color="red", draw_ids=True)  # type: ignore[arg-type]
 
         # draw the distance calculation for the last detection
         # estimate vs detection
@@ -654,8 +651,8 @@ class NorfairTracker(ObjectTracker):
             ld = obj.last_detection
             # bottom right
             text_anchor = (
-                ld.points[1, 0],
-                ld.points[1, 1],
+                ld.points[1, 0],  # type: ignore[index]
+                ld.points[1, 1],  # type: ignore[index]
             )
             frame = Drawer.text(
                 frame,
