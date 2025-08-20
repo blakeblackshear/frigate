@@ -38,6 +38,7 @@ MODEL_TYPE_CONFIGS = {
     },
 }
 
+
 def get_rknn_model_type(model_path: str) -> str | None:
     if all(keyword in model_path for keyword in ["jina-clip-v1", "vision"]):
         return "jina-clip-v1-vision"
@@ -48,6 +49,7 @@ def get_rknn_model_type(model_path: str) -> str | None:
         return model_name
 
     return None
+
 
 def is_rknn_compatible(model_path: str, model_type: str | None = None) -> bool:
     """
@@ -111,6 +113,7 @@ def ensure_rknn_toolkit() -> bool:
     """Ensure RKNN toolkit is available."""
     try:
         from rknn.api import RKNN  # type: ignore # noqa: F401
+
         logger.debug("RKNN toolkit is already available")
         return True
     except ImportError as e:
@@ -438,7 +441,7 @@ def auto_convert_model(
 
             if not model_type:
                 model_type = get_rknn_model_type(base_path)
-            
+
             if wait_for_conversion_completion(model_type, rknn_path, lock_file_path):
                 return str(rknn_path)
             else:

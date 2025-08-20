@@ -181,7 +181,7 @@ class RKNNModelRunner:
         """Get input names for the model."""
         # For CLIP models, we need to determine the model type from the path
         model_name = os.path.basename(self.model_path).lower()
-        
+
         if "vision" in model_name:
             return ["pixel_values"]
         else:
@@ -189,7 +189,7 @@ class RKNNModelRunner:
             if self.model_type and "jina-clip" in self.model_type:
                 if "vision" in self.model_type:
                     return ["pixel_values"]
-            
+
             # Generic fallback
             return ["input"]
 
@@ -209,7 +209,7 @@ class RKNNModelRunner:
         try:
             input_names = self.get_input_names()
             rknn_inputs = []
-            
+
             for name in input_names:
                 if name in inputs:
                     if name == "pixel_values":
@@ -224,21 +224,23 @@ class RKNNModelRunner:
                         rknn_inputs.append(inputs[name])
                 else:
                     logger.warning(f"Input '{name}' not found in inputs, using default")
-                    
+
                     if name == "pixel_values":
                         batch_size = 1
                         if inputs:
                             for val in inputs.values():
-                                if hasattr(val, 'shape') and len(val.shape) > 0:
+                                if hasattr(val, "shape") and len(val.shape) > 0:
                                     batch_size = val.shape[0]
                                     break
                         # Create default in NHWC format as expected by RKNN
-                        rknn_inputs.append(np.zeros((batch_size, 224, 224, 3), dtype=np.float32))
+                        rknn_inputs.append(
+                            np.zeros((batch_size, 224, 224, 3), dtype=np.float32)
+                        )
                     else:
                         batch_size = 1
                         if inputs:
                             for val in inputs.values():
-                                if hasattr(val, 'shape') and len(val.shape) > 0:
+                                if hasattr(val, "shape") and len(val.shape) > 0:
                                     batch_size = val.shape[0]
                                     break
                         rknn_inputs.append(np.zeros((batch_size, 1), dtype=np.float32))
