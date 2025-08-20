@@ -55,7 +55,7 @@ def ensure_torch_dependencies() -> bool:
                 stderr=subprocess.DEVNULL,
             )
 
-            import torch
+            import torch  # type: ignore # noqa: F401
 
             logger.info("PyTorch installed successfully")
             return True
@@ -132,7 +132,7 @@ def convert_onnx_to_rknn(
     config["target_platform"] = soc
 
     try:
-        from rknn.api import RKNN
+        from rknn.api import RKNN  # type: ignore
 
         logger.info(f"Converting {onnx_path} to RKNN format for {soc}")
         rknn = RKNN(verbose=True)
@@ -299,7 +299,7 @@ def wait_for_conversion_completion(
 
         # Check if lock is stale
         if is_lock_stale(lock_file_path):
-            logger.warning(f"Lock file is stale, attempting to clean up and retry...")
+            logger.warning("Lock file is stale, attempting to clean up and retry...")
             cleanup_stale_lock(lock_file_path)
             # Try to acquire lock again
             if acquire_conversion_lock(lock_file_path, timeout=60):
