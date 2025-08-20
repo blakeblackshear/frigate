@@ -14,19 +14,16 @@ MODEL_TYPE_CONFIGS = {
     "yolo-generic": {
         "mean_values": [[0, 0, 0]],
         "std_values": [[255, 255, 255]],
-        "quant_img_RGB2BGR": False,
         "target_platform": None,  # Will be set dynamically
     },
     "yolonas": {
         "mean_values": [[0, 0, 0]],
         "std_values": [[255, 255, 255]],
-        "quant_img_RGB2BGR": True,
         "target_platform": None,  # Will be set dynamically
     },
     "yolox": {
         "mean_values": [[0, 0, 0]],
         "std_values": [[255, 255, 255]],
-        "quant_img_RGB2BGR": True,
         "target_platform": None,  # Will be set dynamically
     },
 }
