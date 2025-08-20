@@ -67,4 +67,9 @@ We use [Weblate](https://hosted.weblate.org/projects/frigate-nvr/) to support la
 <img src="https://hosted.weblate.org/widget/frigate-nvr/multi-auto.svg" alt="Translation status" />
 </a>
 
+
 Conflict while merging for sure!
+
+
+Adding this line just to create a conflict with testbranch_Shuba
+
