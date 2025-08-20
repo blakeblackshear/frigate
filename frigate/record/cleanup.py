@@ -310,7 +310,9 @@ class RecordingCleanup(threading.Thread):
             motion_expire_date = (
                 now
                 - datetime.timedelta(
-                    days=max(config.record.motion.days, config.record.continuous.days)  # can't keep motion for less than continuous
+                    days=max(
+                        config.record.motion.days, config.record.continuous.days
+                    )  # can't keep motion for less than continuous
                 )
             ).timestamp()
 
