@@ -30,7 +30,7 @@ class ONNXModelRunner:
         self.type = "ort"
 
         try:
-            if is_rknn_compatible(model_path):
+            if device != "CPU" and is_rknn_compatible(model_path):
                 # Try to auto-convert to RKNN format
                 rknn_path = auto_convert_model(model_path)
                 if rknn_path:
