@@ -245,7 +245,7 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
 
 # Install MemryX runtime (requires libgomp (OpenMP) in the final docker image)
 RUN --mount=type=bind,source=docker/main/install_memryx.sh,target=/deps/install_memryx.sh \
-    bash -c "apt update && apt install libgomp1 && bash /deps/install_memryx.sh && rm -rf /var/lib/apt/lists/*"
+    bash -c "bash /deps/install_memryx.sh"
 
 COPY --from=deps-rootfs / /
 

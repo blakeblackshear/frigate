@@ -19,6 +19,7 @@ apt-get -qq install --no-install-recommends -y \
     nethogs \
     libgl1 \
     libglib2.0-0 \
+    libgomp1 \
     libusb-1.0.0
 
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
