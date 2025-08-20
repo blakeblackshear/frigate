@@ -86,10 +86,10 @@ export default function ReviewDetailDialog({
     let concerns = "";
     switch (aiAnalysis.potential_threat_level) {
       case ThreatLevel.SUSPICIOUS:
-        concerns = "• Suspicious Activity\n";
+        concerns = `• ${t("suspiciousActivity", { ns: "views/events" })}\n`;
         break;
       case ThreatLevel.DANGER:
-        concerns = "• Danger\n";
+        concerns = `• ${t("threateningActivity", { ns: "views/events" })}\n`;
         break;
     }
 
@@ -98,7 +98,7 @@ export default function ReviewDetailDialog({
     });
 
     return concerns || "None";
-  }, [aiAnalysis]);
+  }, [aiAnalysis, t]);
 
   const hasMismatch = useMemo(() => {
     if (!review || !events) {
@@ -270,12 +270,18 @@ export default function ReviewDetailDialog({
                     isDesktop && "m-2 w-[90%]",
                   )}
                 >
-                  AI Analysis
-                  <div className="text-sm text-primary/40">Description</div>
+                  {t("aiAnalysis.title")}
+                  <div className="text-sm text-primary/40">
+                    {t("description.label")}
+                  </div>
                   <div className="text-sm">{aiAnalysis.scene}</div>
-                  <div className="text-sm text-primary/40">Score</div>
+                  <div className="text-sm text-primary/40">
+                    {t("score.label")}
+                  </div>
                   <div className="text-sm">{aiAnalysis.confidence * 100}%</div>
-                  <div className="text-sm text-primary/40">Concerns</div>
+                  <div className="text-sm text-primary/40">
+                    {t("concerns.label")}
+                  </div>
                   <div className="text-sm">{aiThreatLevel}</div>
                 </div>
               )}

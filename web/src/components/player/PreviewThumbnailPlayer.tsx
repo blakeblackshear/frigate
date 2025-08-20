@@ -317,20 +317,11 @@ export default function PreviewThumbnailPlayer({
                 </TooltipTrigger>
               </div>
               <TooltipContent className="smart-capitalize">
-                {[
-                  ...new Set([
-                    ...(review.data.objects || []),
-                    ...(review.data.sub_labels || []),
-                    ...(review.data.audio || []),
-                  ]),
-                ]
-                  .filter(
-                    (item) => item !== undefined && !item.includes("-verified"),
-                  )
-                  .map((text) => capitalizeFirstLetter(text))
-                  .sort()
-                  .join(", ")
-                  .replaceAll("-verified", "")}
+                {review.data.metadata.potential_threat_level == 1 ? (
+                  <>{t("suspiciousActivity", { ns: "views/events" })}</>
+                ) : (
+                  <>{t("threateningActivity", { ns: "views/events" })}</>
+                )}
               </TooltipContent>
             </Tooltip>
           )}
