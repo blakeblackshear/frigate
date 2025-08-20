@@ -6,7 +6,7 @@ body:
       value: |
         Use this form to submit a reproducible bug in Frigate or Frigate's UI.
 
-        Before submitting your bug report, please [search the discussions][discussions], look at recent open and closed [pull requests][prs], read the [official Frigate documentation][docs], and read the [Frigate FAQ][faq] pinned at the Discussion page to see if your bug has already been fixed by the developers or reported by the community.
+        Before submitting your bug report, please ask the AI with the "Ask AI" button on the [official documentation site][ai] about your issue, [search the discussions][discussions], look at recent open and closed [pull requests][prs], read the [official Frigate documentation][docs], and read the [Frigate FAQ][faq] pinned at the Discussion page to see if your bug has already been fixed by the developers or reported by the community.
 
         **If you are unsure if your issue is actually a bug or not, please submit a support request first.**
 
@@ -14,6 +14,7 @@ body:
         [prs]: https://www.github.com/blakeblackshear/frigate/pulls
         [docs]: https://docs.frigate.video
         [faq]: https://github.com/blakeblackshear/frigate/discussions/12724
+        [ai]: https://docs.frigate.video
   - type: checkboxes
     attributes:
       label: Checklist
@@ -26,6 +27,8 @@ body:
         - label: I have tried a different browser to see if it is related to my browser.
           required: true
         - label: I have tried reproducing the issue in [incognito mode](https://www.computerworld.com/article/1719851/how-to-go-incognito-in-chrome-firefox-safari-and-edge.html) to rule out problems with any third party extensions or plugins I have installed.
+        - label: I have asked the AI at https://docs.frigate.video about my issue.
+          required: true
   - type: textarea
     id: description
     attributes:
@@ -144,3 +147,10 @@ body:
     id: other
     attributes:
       label: Any other information that may be helpful
+  - type: textarea
+    id: ai
+    attributes:
+      label: What AI-suggested solutions have you already tried?
+      description: Visit https://docs.frigate.video and ask the AI about your issue. List the specific suggestions you tried that didn't resolve the problem.
+    validations:
+      required: true
