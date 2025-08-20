@@ -73,7 +73,11 @@ export default function Settings() {
 
   const isAdmin = useIsAdmin();
 
-  const allowedViewsForViewer: SettingsType[] = ["ui", "debug"];
+  const allowedViewsForViewer: SettingsType[] = [
+    "ui",
+    "debug",
+    "notifications",
+  ];
   const visibleSettingsViews = !isAdmin
     ? allowedViewsForViewer
     : allSettingsViews;
@@ -164,7 +168,7 @@ export default function Settings() {
   useSearchEffect("page", (page: string) => {
     if (allSettingsViews.includes(page as SettingsType)) {
       // Restrict viewer to UI settings
-      if (!isAdmin && !["ui", "debug"].includes(page)) {
+      if (!isAdmin && !allowedViewsForViewer.includes(page as SettingsType)) {
         setPage("ui");
       } else {
         setPage(page as SettingsType);
@@ -200,7 +204,7 @@ export default function Settings() {
               onValueChange={(value: SettingsType) => {
                 if (value) {
                   // Restrict viewer navigation
-                  if (!isAdmin && !["ui", "debug"].includes(value)) {
+                  if (!isAdmin && !allowedViewsForViewer.includes(value)) {
                     setPageToggle("ui");
                   } else {
                     setPageToggle(value);
