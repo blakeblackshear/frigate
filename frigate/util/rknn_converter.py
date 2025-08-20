@@ -27,7 +27,48 @@ MODEL_TYPE_CONFIGS = {
         "std_values": [[255, 255, 255]],
         "target_platform": None,  # Will be set dynamically
     },
+    "jina-clip-v1-vision": {
+        "mean_values": [
+            [0.48145466, 0.4578275, 0.40821073]
+        ],  # CLIP standard normalization
+        "std_values": [
+            [0.26862954, 0.26130258, 0.27577711]
+        ],  # CLIP standard normalization
+        "target_platform": None,  # Will be set dynamically
+    },
 }
+
+
+def is_rknn_compatible(model_path: str, model_type: str | None = None) -> bool:
+    """
+    Check if a model is compatible with RKNN conversion.
+
+    Args:
+        model_path: Path to the model file
+        model_type: Type of the model (if known)
+
+    Returns:
+        True if the model is RKNN-compatible, False otherwise
+    """
+    if not ensure_rknn_toolkit():
+        return False
+
+    soc = get_soc_type()
+    if soc is None:
+        return False
+
+    if model_type and model_type in MODEL_TYPE_CONFIGS:
+        return True
+
+    model_name = os.path.basename(model_path).lower()
+
+    if any(keyword in model_name for keyword in ["jina", "clip", "vision"]):
+        return True
+
+    if any(keyword in model_name for keyword in ["yolo", "yolox", "yolonas"]):
+        return True
+
+    return False
 
 
 def ensure_torch_dependencies() -> bool:
@@ -109,11 +150,11 @@ def convert_onnx_to_rknn(
         True if conversion successful, False otherwise
     """
     if not ensure_torch_dependencies():
-        logger.error("PyTorch dependencies not available")
+        logger.debug("PyTorch dependencies not available")
         return False
 
     if not ensure_rknn_toolkit():
-        logger.error("RKNN toolkit not available")
+        logger.debug("RKNN toolkit not available")
         return False
 
     # Get SoC type if not provided
@@ -125,7 +166,7 @@ def convert_onnx_to_rknn(
 
     # Get model config for the specified type
     if model_type not in MODEL_TYPE_CONFIGS:
-        logger.error(f"Unsupported model type: {model_type}")
+        logger.debug(f"Unsupported model type: {model_type}")
         return False
 
     config = MODEL_TYPE_CONFIGS[model_type].copy()
@@ -265,7 +306,7 @@ def is_lock_stale(lock_file_path: Path, max_age: int = 600) -> bool:
 
 
 def wait_for_conversion_completion(
-    rknn_path: Path, lock_file_path: Path, timeout: int = 300
+    model_type: str, rknn_path: Path, lock_file_path: Path, timeout: int = 300
 ) -> bool:
     """
     Wait for another process to complete the conversion.
@@ -320,7 +361,7 @@ def wait_for_conversion_completion(
 
                     if onnx_path.exists():
                         if convert_onnx_to_rknn(
-                            str(onnx_path), str(rknn_path), "yolo-generic", False
+                            str(onnx_path), str(rknn_path), model_type, False
                         ):
                             return str(rknn_path)
 
@@ -392,7 +433,7 @@ def auto_convert_model(
                 f"Another process is converting {model_path}, waiting for completion..."
             )
 
-            if wait_for_conversion_completion(rknn_path, lock_file_path):
+            if wait_for_conversion_completion(model_type, rknn_path, lock_file_path):
                 return str(rknn_path)
             else:
                 logger.error(f"Timeout waiting for conversion of {model_path}")
