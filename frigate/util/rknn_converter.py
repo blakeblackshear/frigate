@@ -60,9 +60,6 @@ def is_rknn_compatible(model_path: str, model_type: str | None = None) -> bool:
     Returns:
         True if the model is RKNN-compatible, False otherwise
     """
-    if not ensure_rknn_toolkit():
-        return False
-
     soc = get_soc_type()
     if soc is None:
         return False
@@ -116,8 +113,8 @@ def ensure_rknn_toolkit() -> bool:
         from rknn.api import RKNN  # type: ignore # noqa: F401
         logger.debug("RKNN toolkit is already available")
         return True
-    except ImportError:
-        logger.error("RKNN toolkit not found. Please ensure it's installed.")
+    except ImportError as e:
+        logger.error(f"RKNN toolkit not found. Please ensure it's installed. {e}")
         return False
 
 
@@ -351,7 +348,7 @@ def wait_for_conversion_completion(
                     # Check if RKNN file appeared while waiting
                     if rknn_path.exists():
                         logger.info(f"RKNN model appeared while waiting: {rknn_path}")
-                        return str(rknn_path)
+                        return True
 
                     # Convert ONNX to RKNN
                     logger.info(
@@ -366,10 +363,10 @@ def wait_for_conversion_completion(
                         if convert_onnx_to_rknn(
                             str(onnx_path), str(rknn_path), model_type, False
                         ):
-                            return str(rknn_path)
+                            return True
 
                     logger.error("Failed to convert model after stale lock cleanup")
-                    return None
+                    return False
 
                 finally:
                     release_conversion_lock(lock_file_path)
@@ -439,6 +436,9 @@ def auto_convert_model(
                 f"Another process is converting {model_path}, waiting for completion..."
             )
 
+            if not model_type:
+                model_type = get_rknn_model_type(base_path)
+            
             if wait_for_conversion_completion(model_type, rknn_path, lock_file_path):
                 return str(rknn_path)
             else:
