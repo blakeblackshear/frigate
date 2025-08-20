@@ -95,24 +95,28 @@ class Rknn(DetectionApi):
         # user provided models should be a path and contain a "/"
         if "/" in model_path:
             model_props["preset"] = False
-            
+
             # Check if this is an ONNX model or model without extension that needs conversion
-            if model_path.endswith('.onnx') or not os.path.splitext(model_path)[1]:
+            if model_path.endswith(".onnx") or not os.path.splitext(model_path)[1]:
                 # Try to auto-convert to RKNN format
-                logger.info(f"Attempting to auto-convert {model_path} to RKNN format...")
-                
+                logger.info(
+                    f"Attempting to auto-convert {model_path} to RKNN format..."
+                )
+
                 # Determine model type from config
                 model_type = self.detector_config.model.model_type
-                
+
                 # Auto-convert the model
                 converted_path = auto_convert_model(model_path, model_type.value)
-                
+
                 if converted_path:
                     model_props["path"] = converted_path
                     logger.info(f"Successfully converted model to: {converted_path}")
                 else:
                     # Fall back to original path if conversion fails
-                    logger.warning(f"Failed to convert {model_path} to RKNN format, using original path")
+                    logger.warning(
+                        f"Failed to convert {model_path} to RKNN format, using original path"
+                    )
                     model_props["path"] = model_path
             else:
                 model_props["path"] = model_path
