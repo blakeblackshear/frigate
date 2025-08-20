@@ -272,11 +272,11 @@ export default function ReviewDetailDialog({
                 >
                   {t("aiAnalysis.title")}
                   <div className="text-sm text-primary/40">
-                    {t("description.label")}
+                    {t("details.description.label")}
                   </div>
                   <div className="text-sm">{aiAnalysis.scene}</div>
                   <div className="text-sm text-primary/40">
-                    {t("score.label")}
+                    {t("details.score.label")}
                   </div>
                   <div className="text-sm">{aiAnalysis.confidence * 100}%</div>
                   <div className="text-sm text-primary/40">
