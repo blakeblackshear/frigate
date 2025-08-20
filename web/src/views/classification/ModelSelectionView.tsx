@@ -79,7 +79,9 @@ function ModelCard({ config, onClick }: ModelCardProps) {
       )}
       onClick={() => onClick()}
     >
-      <div className="grid size-48 grid-cols-2 gap-2">
+      <div
+        className={cn("grid size-48 grid-cols-2 gap-2", isMobile && "w-full")}
+      >
         {Object.entries(coverImages).map(([key, image]) => (
           <img
             key={key}

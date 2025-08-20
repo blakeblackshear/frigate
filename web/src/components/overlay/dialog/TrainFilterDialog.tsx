@@ -60,7 +60,7 @@ export default function TrainFilterDialog({
           moreFiltersSelected ? "text-white" : "text-secondary-foreground",
         )}
       />
-      {t("more")}
+      {isDesktop && t("more")}
     </Button>
   );
   const content = (
