@@ -147,10 +147,3 @@ body:
     id: other
     attributes:
       label: Any other information that may be helpful
-  - type: textarea
-    id: ai
-    attributes:
-      label: What AI-suggested solutions have you already tried?
-      description: Visit https://docs.frigate.video and ask the AI about your issue. List the specific suggestions you tried that didn't resolve the problem.
-    validations:
-      required: true
