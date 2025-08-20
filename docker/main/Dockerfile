@@ -243,11 +243,9 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     pip3 install -U /deps/wheels/*.whl
 
-# Copy memryx setup script
-COPY ./docker/main/install_memryx.sh /deps/install_memryx.sh
-
-# Install MemryX runtime for Frigate
-RUN chmod +x /deps/install_memryx.sh && /deps/install_memryx.sh
+# Install MemryX runtime (requires libgomp (OpenMP) in the final docker image)
+RUN --mount=type=bind,source=docker/main/install_memryx.sh,target=/deps/install_memryx.sh \
+    bash -c "apt update && apt install libgomp1 && bash /deps/install_memryx.sh && rm -rf /var/lib/apt/lists/*"
 
 COPY --from=deps-rootfs / /
 

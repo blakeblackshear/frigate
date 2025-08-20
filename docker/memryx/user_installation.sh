@@ -9,6 +9,8 @@ arch=$(uname -m)
 
 # Purge existing packages and repo
 echo "Removing old MemryX installations..."
+# Remove any holds on MemryX packages (if they exist)
+sudo apt-mark unhold memx-* mxa-manager || true
 sudo apt purge -y memx-* mxa-manager || true
 sudo rm -f /etc/apt/sources.list.d/memryx.list /etc/apt/trusted.gpg.d/memryx.asc
 

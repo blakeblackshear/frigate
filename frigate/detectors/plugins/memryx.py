@@ -1,5 +1,7 @@
+import glob
 import logging
 import os
+import shutil
 import time
 import urllib.request
 import zipfile
@@ -184,10 +186,72 @@ class MemryXDetector(DetectionApi):
         self.const_C = np.load(f"{base}/_model_22_Constant_12_output_0.npy")
 
     def check_and_prepare_model(self):
-        """Check if models exist; if not, download and extract them."""
         if not os.path.exists(self.cache_dir):
-            os.makedirs(self.cache_dir)
+            os.makedirs(self.cache_dir, exist_ok=True)
 
+        # ---------- CASE 1: user provided a custom model path ----------
+        if self.memx_model_path:
+            if not self.memx_model_path.endswith(".zip"):
+                raise ValueError(
+                    f"Invalid model path: {self.memx_model_path}. "
+                    "Only .zip files are supported. Please provide a .zip model archive."
+                )
+            if not os.path.exists(self.memx_model_path):
+                raise FileNotFoundError(
+                    f"Custom model zip not found: {self.memx_model_path}"
+                )
+
+            logger.info(f"User provided zip model: {self.memx_model_path}")
+
+            # Extract custom zip into a separate area so it never clashes with MemryX cache
+            custom_dir = os.path.join(
+                self.cache_dir, "custom_models", self.model_folder
+            )
+            if os.path.isdir(custom_dir):
+                shutil.rmtree(custom_dir)
+            os.makedirs(custom_dir, exist_ok=True)
+
+            with zipfile.ZipFile(self.memx_model_path, "r") as zip_ref:
+                zip_ref.extractall(custom_dir)
+            logger.info(f"Custom model extracted to {custom_dir}.")
+
+            # Find .dfp and optional *_post.onnx recursively
+            dfp_candidates = glob.glob(
+                os.path.join(custom_dir, "**", "*.dfp"), recursive=True
+            )
+            post_candidates = glob.glob(
+                os.path.join(custom_dir, "**", "*_post.onnx"), recursive=True
+            )
+
+            if not dfp_candidates:
+                raise FileNotFoundError(
+                    "No .dfp file found in custom model zip after extraction."
+                )
+
+            self.memx_model_path = dfp_candidates[0]
+
+            # Handle post model requirements by model type
+            if self.memx_model_type in [
+                ModelTypeEnum.yologeneric,
+                ModelTypeEnum.yolonas,
+                ModelTypeEnum.ssd,
+            ]:
+                if not post_candidates:
+                    raise FileNotFoundError(
+                        f"No *_post.onnx file found in custom model zip for {self.memx_model_type.name}."
+                    )
+                self.memx_post_model = post_candidates[0]
+            elif self.memx_model_type == ModelTypeEnum.yolox:
+                # Explicitly ignore any post model even if present
+                self.memx_post_model = None
+            else:
+                # Future model types can optionally use post if present
+                self.memx_post_model = post_candidates[0] if post_candidates else None
+
+            logger.info(f"Using custom model: {self.memx_model_path}")
+            return
+
+        # ---------- CASE 2: no custom model path -> use MemryX cached models ----------
         model_subdir = os.path.join(self.cache_dir, self.model_folder)
         dfp_path = os.path.join(model_subdir, self.expected_dfp_model)
         post_path = (
@@ -207,7 +271,10 @@ class MemryXDetector(DetectionApi):
                 self.load_yolo_constants()
             return
 
-        logger.info(f"Model files not found. Downloading from {self.model_url}...")
+        # ---------- CASE 3: download MemryX model (no cache) ----------
+        logger.info(
+            f"Model files not found locally. Downloading from {self.model_url}..."
+        )
         zip_path = os.path.join(self.cache_dir, f"{self.model_folder}.zip")
 
         try:
@@ -231,14 +298,13 @@ class MemryXDetector(DetectionApi):
             if self.memx_model_type == ModelTypeEnum.yologeneric:
                 self.load_yolo_constants()
 
-        except Exception as e:
-            logger.error(f"Failed to prepare model: {e}")
-            raise
-
         finally:
             if os.path.exists(zip_path):
-                os.remove(zip_path)
-                logger.info("Cleaned up ZIP file after extraction.")
+                try:
+                    os.remove(zip_path)
+                    logger.info("Cleaned up ZIP file after extraction.")
+                except Exception as e:
+                    logger.warning(f"Failed to remove downloaded zip {zip_path}: {e}")
 
     def send_input(self, connection_id, tensor_input: np.ndarray):
         """Pre-process (if needed) and send frame to MemryX input queue"""
@@ -545,91 +611,102 @@ class MemryXDetector(DetectionApi):
     def process_output(self, *outputs):
         """Output callback function -- receives frames from the MX3 and triggers post-processing"""
         if self.memx_model_type == ModelTypeEnum.yologeneric:
-            conv_out1 = outputs[0]
-            conv_out2 = outputs[1]
-            conv_out3 = outputs[2]
-            conv_out4 = outputs[3]
-            conv_out5 = outputs[4]
-            conv_out6 = outputs[5]
+            if not self.memx_post_model:
+                conv_out1 = outputs[0]
+                conv_out2 = outputs[1]
+                conv_out3 = outputs[2]
+                conv_out4 = outputs[3]
+                conv_out5 = outputs[4]
+                conv_out6 = outputs[5]
 
-            concat_1 = self.onnx_concat([conv_out1, conv_out2], axis=1)
-            concat_2 = self.onnx_concat([conv_out3, conv_out4], axis=1)
-            concat_3 = self.onnx_concat([conv_out5, conv_out6], axis=1)
+                concat_1 = self.onnx_concat([conv_out1, conv_out2], axis=1)
+                concat_2 = self.onnx_concat([conv_out3, conv_out4], axis=1)
+                concat_3 = self.onnx_concat([conv_out5, conv_out6], axis=1)
 
-            shape = np.array([1, 144, -1], dtype=np.int64)
+                shape = np.array([1, 144, -1], dtype=np.int64)
 
-            reshaped_1 = self.onnx_reshape_with_allowzero(concat_1, shape, allowzero=0)
-            reshaped_2 = self.onnx_reshape_with_allowzero(concat_2, shape, allowzero=0)
-            reshaped_3 = self.onnx_reshape_with_allowzero(concat_3, shape, allowzero=0)
+                reshaped_1 = self.onnx_reshape_with_allowzero(
+                    concat_1, shape, allowzero=0
+                )
+                reshaped_2 = self.onnx_reshape_with_allowzero(
+                    concat_2, shape, allowzero=0
+                )
+                reshaped_3 = self.onnx_reshape_with_allowzero(
+                    concat_3, shape, allowzero=0
+                )
 
-            concat_4 = self.onnx_concat([reshaped_1, reshaped_2, reshaped_3], 2)
+                concat_4 = self.onnx_concat([reshaped_1, reshaped_2, reshaped_3], 2)
 
-            axis = 1
-            split_sizes = [64, 80]
+                axis = 1
+                split_sizes = [64, 80]
 
-            # Calculate indices at which to split
-            indices = np.cumsum(split_sizes)[
-                :-1
-            ]  # [64] — split before the second chunk
+                # Calculate indices at which to split
+                indices = np.cumsum(split_sizes)[
+                    :-1
+                ]  # [64] — split before the second chunk
 
-            # Perform split along axis 1
-            split_0, split_1 = np.split(concat_4, indices, axis=axis)
+                # Perform split along axis 1
+                split_0, split_1 = np.split(concat_4, indices, axis=axis)
 
-            num_boxes = 2100 if self.memx_model_height == 320 else 8400
-            shape1 = np.array([1, 4, 16, num_boxes])
-            reshape_4 = self.onnx_reshape_with_allowzero(split_0, shape1, allowzero=0)
+                num_boxes = 2100 if self.memx_model_height == 320 else 8400
+                shape1 = np.array([1, 4, 16, num_boxes])
+                reshape_4 = self.onnx_reshape_with_allowzero(
+                    split_0, shape1, allowzero=0
+                )
 
-            transpose_1 = reshape_4.transpose(0, 2, 1, 3)
+                transpose_1 = reshape_4.transpose(0, 2, 1, 3)
 
-            axis = 1  # As per ONNX softmax node
+                axis = 1  # As per ONNX softmax node
 
-            # Subtract max for numerical stability
-            x_max = np.max(transpose_1, axis=axis, keepdims=True)
-            x_exp = np.exp(transpose_1 - x_max)
-            x_sum = np.sum(x_exp, axis=axis, keepdims=True)
-            softmax_output = x_exp / x_sum
+                # Subtract max for numerical stability
+                x_max = np.max(transpose_1, axis=axis, keepdims=True)
+                x_exp = np.exp(transpose_1 - x_max)
+                x_sum = np.sum(x_exp, axis=axis, keepdims=True)
+                softmax_output = x_exp / x_sum
 
-            # Weight W from the ONNX initializer (1, 16, 1, 1) with values 0 to 15
-            W = np.arange(16, dtype=np.float32).reshape(1, 16, 1, 1)  # (1, 16, 1, 1)
+                # Weight W from the ONNX initializer (1, 16, 1, 1) with values 0 to 15
+                W = np.arange(16, dtype=np.float32).reshape(
+                    1, 16, 1, 1
+                )  # (1, 16, 1, 1)
 
-            # Apply 1x1 convolution: this is a weighted sum over channels
-            conv_output = np.sum(
-                softmax_output * W, axis=1, keepdims=True
-            )  # shape: (1, 1, 4, 8400)
+                # Apply 1x1 convolution: this is a weighted sum over channels
+                conv_output = np.sum(
+                    softmax_output * W, axis=1, keepdims=True
+                )  # shape: (1, 1, 4, 8400)
 
-            shape2 = np.array([1, 4, num_boxes])
-            reshape_5 = self.onnx_reshape_with_allowzero(
-                conv_output, shape2, allowzero=0
-            )
+                shape2 = np.array([1, 4, num_boxes])
+                reshape_5 = self.onnx_reshape_with_allowzero(
+                    conv_output, shape2, allowzero=0
+                )
 
-            # ONNX Slice — get first 2 channels: [0:2] along axis 1
-            slice_output1 = reshape_5[:, 0:2, :]  # Result: (1, 2, 8400)
+                # ONNX Slice — get first 2 channels: [0:2] along axis 1
+                slice_output1 = reshape_5[:, 0:2, :]  # Result: (1, 2, 8400)
 
-            # Slice channels 2 to 4 → axis = 1
-            slice_output2 = reshape_5[:, 2:4, :]
+                # Slice channels 2 to 4 → axis = 1
+                slice_output2 = reshape_5[:, 2:4, :]
 
-            # Perform Subtraction
-            sub_output = self.const_A - slice_output1  # Equivalent to ONNX Sub
+                # Perform Subtraction
+                sub_output = self.const_A - slice_output1  # Equivalent to ONNX Sub
 
-            # Perform the ONNX-style Add
-            add_output = self.const_B + slice_output2
+                # Perform the ONNX-style Add
+                add_output = self.const_B + slice_output2
 
-            sub1 = add_output - sub_output
+                sub1 = add_output - sub_output
 
-            add1 = sub_output + add_output
+                add1 = sub_output + add_output
 
-            div_output = add1 / 2.0
+                div_output = add1 / 2.0
 
-            concat_5 = self.onnx_concat([div_output, sub1], axis=1)
+                concat_5 = self.onnx_concat([div_output, sub1], axis=1)
 
-            # Expand B to (1, 1, 8400) so it can broadcast across axis=1 (4 channels)
-            const_C_expanded = self.const_C[:, np.newaxis, :]  # Shape: (1, 1, 8400)
+                # Expand B to (1, 1, 8400) so it can broadcast across axis=1 (4 channels)
+                const_C_expanded = self.const_C[:, np.newaxis, :]  # Shape: (1, 1, 8400)
 
-            # Perform ONNX-style element-wise multiplication
-            mul_output = concat_5 * const_C_expanded  # Result: (1, 4, 8400)
+                # Perform ONNX-style element-wise multiplication
+                mul_output = concat_5 * const_C_expanded  # Result: (1, 4, 8400)
 
-            sigmoid_output = self.sigmoid(split_1)
-            outputs = self.onnx_concat([mul_output, sigmoid_output], axis=1)
+                sigmoid_output = self.sigmoid(split_1)
+                outputs = self.onnx_concat([mul_output, sigmoid_output], axis=1)
 
             final_detections = post_process_yolo(
                 outputs, self.memx_model_width, self.memx_model_height

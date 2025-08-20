@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-# Update and install required system packages
-apt-get update && apt-get install -y git libgomp1
-
-# Clone the MemryX runtime repo
-git clone https://github.com/memryx/mx_accl_frigate.git /opt/mx_accl_frigate
+# Download the MxAccl for Frigate github release
+wget https://github.com/memryx/mx_accl_frigate/archive/refs/heads/main.zip -O /tmp/mxaccl.zip
+unzip /tmp/mxaccl.zip -d /tmp
+mv /tmp/mx_accl_frigate-main /opt/mx_accl_frigate
+rm /tmp/mxaccl.zip
 
 # Install Python dependencies
 pip3 install -r /opt/mx_accl_frigate/freeze
