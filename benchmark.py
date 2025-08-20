@@ -1,3 +1,4 @@
+#Importing the required libraries
 import datetime
 import multiprocessing as mp
 from statistics import mean
@@ -74,9 +75,7 @@ def start(id, num_detections, detection_queue, event):
 # start(1, 1000, edgetpu_process.detection_queue, event)
 # print(f"Average raw inference speed: {edgetpu_process.avg_inference_speed.value*1000:.2f}ms")
 
-####
 # Multiple camera processes
-####
 camera_processes = []
 
 events = {}
