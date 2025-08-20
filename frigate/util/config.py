@@ -363,6 +363,10 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
         if days:
             if mode == "all":
                 continuous["days"] = days
+
+                # if a user was keeping all for number of days
+                # we need to keep motion and all for that number of days
+                motion["days"] = days
             else:
                 motion["days"] = days
 

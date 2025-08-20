@@ -308,7 +308,12 @@ class RecordingCleanup(threading.Thread):
                 now - datetime.timedelta(days=config.record.continuous.days)
             ).timestamp()
             motion_expire_date = (
-                now - datetime.timedelta(days=config.record.motion.days)
+                now
+                - datetime.timedelta(
+                    days=max(
+                        config.record.motion.days, config.record.continuous.days
+                    )  # can't keep motion for less than continuous
+                )
             ).timestamp()
 
             # Get all the reviews to check against
