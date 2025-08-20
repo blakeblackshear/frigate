@@ -77,7 +77,8 @@ class StorageMaintainer(threading.Thread):
                 .scalar()
             )
 
-            usages[camera] = {
+            camera_key = getattr(self.config.cameras[camera], "nickname", camera)
+            usages[camera_key] = {
                 "usage": camera_storage,
                 "bandwidth": self.camera_storage_stats.get(camera, {}).get(
                     "bandwidth", 0

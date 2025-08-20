@@ -23,6 +23,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 type FrigatePlusModel = {
   id: string;
@@ -488,7 +489,9 @@ export default function FrigatePlusSettingsView({
                               key={name}
                               className="border-b border-secondary"
                             >
-                              <td className="px-4 py-2">{name}</td>
+                              <td className="px-4 py-2">
+                                <CameraNameLabel camera={name} />
+                              </td>
                               <td className="px-4 py-2 text-center">
                                 {camera.snapshots.enabled ? (
                                   <CheckCircle2 className="mx-auto size-5 text-green-500" />

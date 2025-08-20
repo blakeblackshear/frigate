@@ -464,7 +464,8 @@ export default function NotificationView({
                               {allCameras?.map((camera) => (
                                 <FilterSwitch
                                   key={camera.name}
-                                  label={camera.name.replaceAll("_", " ")}
+                                  label={camera.name}
+                                  isCameraName={true}
                                   isChecked={field.value?.includes(camera.name)}
                                   onCheckedChange={(checked) => {
                                     setChangedValue(true);

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/tooltip";
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 type CameraMetricsProps = {
   lastUpdated: number;
@@ -271,7 +272,7 @@ export default function CameraMetrics({
                   <div className="flex w-full flex-col gap-3">
                     <div className="flex flex-row items-center justify-between">
                       <div className="text-sm font-medium text-muted-foreground smart-capitalize">
-                        {camera.name.replaceAll("_", " ")}
+                        <CameraNameLabel camera={camera} />
                       </div>
                       <Tooltip>
                         <TooltipTrigger>

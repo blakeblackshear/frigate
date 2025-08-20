@@ -49,6 +49,8 @@ import {
 } from "@/components/ui/select";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { isDesktop } from "react-device-detect";
+import { useCameraNickname } from "@/hooks/use-camera-nickname";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 type CameraSettingsViewProps = {
   selectedCamera: string;
@@ -95,6 +97,8 @@ export default function CameraSettingsView({
     }
     return [];
   }, [config]);
+
+  const selectCameraName = useCameraNickname(selectedCamera);
 
   // zones and labels
 
@@ -337,11 +341,13 @@ export default function CameraSettingsView({
                         <SelectValue placeholder={t("camera.selectCamera")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {cameras.map((camera) => (
-                          <SelectItem key={camera} value={camera}>
-                            {capitalizeFirstLetter(camera.replaceAll("_", " "))}
-                          </SelectItem>
-                        ))}
+                        {cameras.map((camera) => {
+                          return (
+                            <SelectItem key={camera} value={camera}>
+                              <CameraNameLabel camera={camera} />
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
@@ -614,18 +620,14 @@ export default function CameraSettingsView({
                                         ),
                                       )
                                       .join(", "),
-                                    cameraName: capitalizeFirstLetter(
-                                      cameraConfig?.name ?? "",
-                                    ).replaceAll("_", " "),
+                                    cameraName: selectCameraName,
                                   },
                                 )
                               : t(
                                   "camera.reviewClassification.objectAlertsTips",
                                   {
                                     alertsLabels,
-                                    cameraName: capitalizeFirstLetter(
-                                      cameraConfig?.name ?? "",
-                                    ).replaceAll("_", " "),
+                                    cameraName: selectCameraName,
                                   },
                                 )}
                           </div>
@@ -737,9 +739,7 @@ export default function CameraSettingsView({
                                         ),
                                       )
                                       .join(", "),
-                                    cameraName: capitalizeFirstLetter(
-                                      cameraConfig?.name ?? "",
-                                    ).replaceAll("_", " "),
+                                    cameraName: selectCameraName,
                                   }}
                                   ns="views/settings"
                                 />
@@ -756,9 +756,7 @@ export default function CameraSettingsView({
                                         ),
                                       )
                                       .join(", "),
-                                    cameraName: capitalizeFirstLetter(
-                                      cameraConfig?.name ?? "",
-                                    ).replaceAll("_", " "),
+                                    cameraName: selectCameraName,
                                   }}
                                   ns="views/settings"
                                 />
@@ -768,9 +766,7 @@ export default function CameraSettingsView({
                                 i18nKey="camera.reviewClassification.objectDetectionsTips"
                                 values={{
                                   detectionsLabels,
-                                  cameraName: capitalizeFirstLetter(
-                                    cameraConfig?.name ?? "",
-                                  ).replaceAll("_", " "),
+                                  cameraName: selectCameraName,
                                 }}
                                 ns="views/settings"
                               />

@@ -71,12 +71,12 @@ import {
   MobilePageTitle,
 } from "../mobile/MobilePage";
 
-import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { CameraStreamingDialog } from "../settings/CameraStreamingDialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { Trans, useTranslation } from "react-i18next";
+import { CameraNameLabel } from "../camera/CameraNameLabel";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -846,12 +846,11 @@ export function CameraGroupEdit({
                 ].map((camera) => (
                   <FormControl key={camera}>
                     <div className="flex items-center justify-between gap-1">
-                      <Label
+                      <CameraNameLabel
                         className="mx-2 w-full cursor-pointer text-primary smart-capitalize"
                         htmlFor={camera.replaceAll("_", " ")}
-                      >
-                        {camera.replaceAll("_", " ")}
-                      </Label>
+                        camera={camera}
+                      />
 
                       <div className="flex items-center gap-x-2">
                         {camera !== "birdseye" && (

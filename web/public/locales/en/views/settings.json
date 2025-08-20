@@ -17,6 +17,7 @@
     "cameras": "Camera Settings",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion Tuner",
+    "triggers": "Triggers",
     "debug": "Debug",
     "users": "Users",
     "notifications": "Notifications",
@@ -195,7 +196,7 @@
       "description": "Configure camera settings including stream inputs and roles.",
       "name": "Camera Name",
       "nameRequired": "Camera name is required",
-      "nameInvalid": "Camera name must contain only letters, numbers, underscores, or hyphens",
+      "nameLength": "Camera name must be less than 24 characters.",
       "namePlaceholder": "e.g., front_door",
       "enabled": "Enabled",
       "ffmpeg": {

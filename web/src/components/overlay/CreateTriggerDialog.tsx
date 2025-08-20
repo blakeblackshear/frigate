@@ -37,6 +37,7 @@ import ImagePicker from "@/components/overlay/ImagePicker";
 import { Trigger, TriggerAction, TriggerType } from "@/types/trigger";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "../ui/textarea";
+import { useCameraNickname } from "@/hooks/use-camera-nickname";
 
 type CreateTriggerDialogProps = {
   show: boolean;
@@ -161,6 +162,8 @@ export default function CreateTriggerDialog({
     onCancel();
   };
 
+  const cameraName = useCameraNickname(selectedCamera);
+
   return (
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-[425px]">
@@ -177,7 +180,9 @@ export default function CreateTriggerDialog({
               trigger
                 ? "triggers.dialog.editTrigger.desc"
                 : "triggers.dialog.createTrigger.desc",
-              { camera: selectedCamera },
+              {
+                camera: cameraName,
+              },
             )}
           </DialogDescription>
         </DialogHeader>
