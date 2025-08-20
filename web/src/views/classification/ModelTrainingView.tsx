@@ -362,7 +362,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
               ) : (
                 <MdAutoFixHigh className="text-secondary-foreground" />
               )}
-              {t("button.trainModel")}
+              {isDesktop && t("button.trainModel")}
             </Button>
           </div>
         )}
@@ -713,7 +713,7 @@ function TrainGrid({
 
           if (
             trainFilter.max_score &&
-            trainFilter.max_score <= data.score / 100.0
+            trainFilter.max_score < data.score / 100.0
           ) {
             return false;
           }
@@ -725,7 +725,12 @@ function TrainGrid({
   );
 
   return (
-    <div className="flex flex-wrap gap-2 overflow-y-auto p-2">
+    <div
+      className={cn(
+        "flex flex-wrap gap-2 overflow-y-auto p-2",
+        isMobile && "justify-center",
+      )}
+    >
       {trainData?.map((data) => (
         <div
           key={data.timestamp}
@@ -734,6 +739,7 @@ function TrainGrid({
             selectedImages.includes(data.raw)
               ? "shadow-selected outline-selected"
               : "outline-transparent duration-500",
+            isMobile && "w-[48%]",
           )}
           onClick={(e) => {
             e.stopPropagation();

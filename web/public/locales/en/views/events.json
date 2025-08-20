@@ -34,5 +34,7 @@
   "selected_one": "{{count}} selected",
   "selected_other": "{{count}} selected",
   "camera": "Camera",
-  "detected": "detected"
+  "detected": "detected",
+  "suspiciousActivity": "Suspicious Activity",
+  "threateningActivity": "Threatening Activity"
 }

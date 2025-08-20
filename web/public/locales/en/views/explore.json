@@ -132,6 +132,9 @@
       "label": "Top Score",
       "info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail."
     },
+    "score": {
+      "label": "Score"
+    },
     "recognizedLicensePlate": "Recognized License Plate",
     "estimatedSpeed": "Estimated Speed",
     "objects": "Objects",
@@ -213,5 +216,11 @@
         "error": "Failed to delete tracked object: {{errorMessage}}"
       }
     }
+  },
+  "aiAnalysis": {
+    "title": "AI Analysis"
+  },
+  "concerns": {
+    "label": "Concerns"
   }
 }
