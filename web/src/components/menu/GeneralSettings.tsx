@@ -316,7 +316,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   </Link>
                 </>
               )}
-              {isAdmin && isMobile && config?.face_recognition.enabled && (
+              {isAdmin && isMobile && (
                 <>
                   <Link to="/classification">
                     <MenuItem
