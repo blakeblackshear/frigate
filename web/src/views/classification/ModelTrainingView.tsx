@@ -713,7 +713,7 @@ function TrainGrid({
 
           if (
             trainFilter.max_score &&
-            trainFilter.max_score <= data.score / 100.0
+            trainFilter.max_score < data.score / 100.0
           ) {
             return false;
           }
