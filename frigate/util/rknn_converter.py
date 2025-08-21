@@ -132,7 +132,7 @@ def get_soc_type() -> Optional[str]:
             soc = file.read().split(",")[-1].strip("\x00")
             return soc
     except FileNotFoundError:
-        logger.warning("Could not determine SoC type from device tree")
+        logger.debug("Could not determine SoC type from device tree")
         return None
 
 
@@ -168,7 +168,7 @@ def convert_onnx_to_rknn(
     if soc is None:
         soc = get_soc_type()
         if soc is None:
-            logger.error("Could not determine SoC type")
+            logger.debug("Could not determine SoC type")
             return False
 
     # Get model config for the specified type
