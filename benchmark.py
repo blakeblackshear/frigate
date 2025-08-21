@@ -1,4 +1,4 @@
-#Importing the required libraries
+#Importing necessary libraries
 import datetime
 import multiprocessing as mp
 from statistics import mean
@@ -16,9 +16,8 @@ from frigate.util.process import FrigateProcess
 my_frame = np.expand_dims(np.full((300, 300, 3), 1, np.uint8), axis=0)
 labels = load_labels("/labelmap.txt")
 
-######
 # Minimal same process runner
-######
+
 # object_detector = LocalObjectDetector()
 # tensor_input = np.expand_dims(np.full((300,300,3), 0, np.uint8), axis=0)
 
@@ -65,9 +64,9 @@ def start(id, num_detections, detection_queue, event):
     print(f"{id} - Average frame processing time: {mean(frame_times) * 1000:.2f}ms")
 
 
-######
+
 # Separate process runner
-######
+
 # event = mp.Event()
 # detection_queue = mp.Queue()
 # edgetpu_process = EdgeTPUProcess(detection_queue, {'1': event}, 'usb:0')
