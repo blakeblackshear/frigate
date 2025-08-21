@@ -122,5 +122,13 @@
   },
   "motion": {
     "showMotionOnly": "Mostar només el moviment"
+  },
+  "classes": {
+    "label": "Classes",
+    "all": {
+      "title": "Totes les classes"
+    },
+    "count_one": "{{count}} Classe",
+    "count_other": "{{count}} Classes"
   }
 }

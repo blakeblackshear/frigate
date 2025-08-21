@@ -97,7 +97,8 @@
         "success": {
           "updatedSublabel": "Subetiqueta actualitzada amb èxit.",
           "updatedLPR": "Matrícula actualitzada amb èxit.",
-          "regenerate": "El {{provider}} ha sol·licitat una nova descripció. En funció de la velocitat del vostre proveïdor, la nova descripció pot trigar un temps a regenerar-se."
+          "regenerate": "El {{provider}} ha sol·licitat una nova descripció. En funció de la velocitat del vostre proveïdor, la nova descripció pot trigar un temps a regenerar-se.",
+          "audioTranscription": "Transcripció d'àudio sol·licitada amb èxit."
         },
         "error": {
           "regenerate": "No s'ha pogut contactar amb {{provider}} per obtenir una nova descripció: {{errorMessage}}",
