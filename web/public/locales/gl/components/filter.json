@@ -6,7 +6,8 @@
     "all": {
       "short": "Etiquetas",
       "title": "Todas as Etiquetas"
-    }
+    },
+    "count_other": "{{count}} Etiquetas"
   },
   "zones": {
     "all": {
