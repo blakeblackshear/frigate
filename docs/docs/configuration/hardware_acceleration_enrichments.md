@@ -24,7 +24,7 @@ Object detection and enrichments (like Semantic Search, Face Recognition, and Li
   - Jetson devices will automatically be detected and used for enrichments in the `-tensorrt-jp6` Frigate image.
 
 - **RockChip**
-  - RockChip NPU will automatically be detected and used for semantic search in the `-rk` Frigate image.
+  - RockChip NPU will automatically be detected and used for semantic search (v1 only) in the `-rk` Frigate image.
 
 Utilizing a GPU for enrichments does not require you to use the same GPU for object detection. For example, you can run the `tensorrt` Docker image for enrichments and still use other dedicated hardware like a Coral or Hailo for object detection. However, one combination that is not supported is TensorRT for object detection and OpenVINO for enrichments.
 
