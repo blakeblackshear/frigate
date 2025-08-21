@@ -110,5 +110,12 @@
       "export": "Exportar",
       "deleteNow": "Deletar Agora"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Selecionar a miniatura de um objeto rastreado",
+    "search": {
+      "placeholder": "Pesquisar por rótulo ou sub-rótulo…"
+    },
+    "noImages": "Nenhuma miniatura encontrada para essa câmera"
   }
 }

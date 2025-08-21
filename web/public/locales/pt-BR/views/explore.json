@@ -3,15 +3,15 @@
   "generativeAI": "IA Generativa",
   "exploreMore": "Explorar mais objetos {{label}}",
   "exploreIsUnavailable": {
-    "title": "Explorar não está disponível",
+    "title": "A seção Explorar está indisponível",
     "embeddingsReindexing": {
-      "context": "Explorar pode ser usado depois da incorporação do objeto rastreado terminar a reindexação.",
-      "startingUp": "Começando…",
-      "estimatedTime": "Time estimado faltando:",
-      "finishingShortly": "Terminando em breve",
+      "context": "O menu explorar pode ser usado após os embeddings de objetos rastreados terem terminado de reindexar.",
+      "startingUp": "Iniciando…",
+      "estimatedTime": "Tempo estimado restante:",
+      "finishingShortly": "Finalizando em breve",
       "step": {
-        "thumbnailsEmbedded": "Miniaturas incorporadas: ",
-        "descriptionsEmbedded": "Descrições incorporadas: ",
+        "thumbnailsEmbedded": "Miniaturas embedded: ",
+        "descriptionsEmbedded": "Descrições embedded: ",
         "trackedObjectsProcessed": "Objetos rastreados processados: "
       }
     },
@@ -24,7 +24,7 @@
         "visionModelFeatureExtractor": "Extrator de características do modelo de visão"
       },
       "tips": {
-        "context": "Você pode querer reindexar as incorporações de seus objetos rastreados uma vez que os modelos forem baixados.",
+        "context": "Você pode querer reindexar os embeddings de seus objetos rastreados uma vez que os modelos forem baixados.",
         "documentation": "Leia a documentação"
       },
       "error": "Um erro ocorreu. Verifique os registos do Frigate."
@@ -49,12 +49,14 @@
         "success": {
           "regenerate": "Uma nova descrição foi solicitada do {{provider}}. Dependendo da velocidade do seu fornecedor, a nova descrição pode levar algum tempo para regenerar.",
           "updatedSublabel": "Sub-categoria atualizada com sucesso.",
-          "updatedLPR": "Placa de identificação atualizada com sucesso."
+          "updatedLPR": "Placa de identificação atualizada com sucesso.",
+          "audioTranscription": "Transcrição de áudio requisitada com sucesso."
         },
         "error": {
           "regenerate": "Falha ao ligar para {{provider}} para uma descrição nova: {{errorMessage}}",
           "updatedSublabelFailed": "Falha ao atualizar sub-categoria: {{errorMessage}}",
-          "updatedLPRFailed": "Falha ao atualizar placa de identificação: {{errorMessage}}"
+          "updatedLPRFailed": "Falha ao atualizar placa de identificação: {{errorMessage}}",
+          "audioTranscription": "Falha ao requisitar transcrição de áudio: {{errorMessage}}"
         }
       }
     },
@@ -99,6 +101,9 @@
     "tips": {
       "descriptionSaved": "Descrição salva com sucesso",
       "saveDescriptionFailed": "Falha ao atualizar a descrição: {{errorMessage}}"
+    },
+    "score": {
+      "label": "Pontuação"
     }
   },
   "trackedObjectDetails": "Detalhes do Objeto Rastreado",
@@ -184,12 +189,20 @@
     },
     "deleteTrackedObject": {
       "label": "Deletar esse objeto rastreado"
+    },
+    "addTrigger": {
+      "label": "Adicionar gatilho",
+      "aria": "Adicionar um gatilho para esse objeto rastreado"
+    },
+    "audioTranscription": {
+      "label": "Transcrever",
+      "aria": "Solicitar transcrição de áudio"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar Exclusão",
-      "desc": "Deletar esse objeto rastreado remove a captura de imagem, qualquer embedding salvo, e quaisquer entradas de ciclo de vida de objeto associadas. Gravações desse objeto rastreado na visualização de Histórico <em>NÃO</em> serão deletadas.<br /><br />Tem certeza que quer prosseguir?"
+      "desc": "Deletar esse objeto rastreado remove a captura de imagem, quaisquer embeddings salvos, e quaisquer entradas de ciclo de vida de objeto associadas. Gravações desse objeto rastreado na visualização de Histórico <em>NÃO</em> serão deletadas.<br /><br />Tem certeza que quer prosseguir?"
     }
   },
   "noTrackedObjects": "Nenhum Objeto Rastreado Encontrado",
@@ -205,5 +218,11 @@
         "error": "Falha ao detectar objeto rastreado {{errorMessage}}"
       }
     }
+  },
+  "aiAnalysis": {
+    "title": "Análise de IA"
+  },
+  "concerns": {
+    "label": "Preocupações"
   }
 }
