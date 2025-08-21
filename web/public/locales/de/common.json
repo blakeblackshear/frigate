@@ -38,7 +38,7 @@
     "1hour": "1 Stunde",
     "lastWeek": "Letzte Woche",
     "h": "{{time}} Stunde",
-    "ago": "{{timeAgo}} her",
+    "ago": "vor {{timeAgo}}",
     "untilRestart": "Bis zum Neustart",
     "justNow": "Gerade",
     "pm": "nachmittags",
@@ -160,7 +160,15 @@
       "sk": "Slowakisch",
       "yue": "粵語 (Kantonesisch)",
       "th": "ไทย (Thailändisch)",
-      "ca": "Català (Katalanisch)"
+      "ca": "Català (Katalanisch)",
+      "ur": "اردو (Urdu)",
+      "ptBR": "Portugiesisch (Brasilianisch)",
+      "sr": "Српски (Serbisch)",
+      "sl": "Slovenščina (Slowenisch)",
+      "lt": "Lietuvių (Litauisch)",
+      "bg": "Български (bulgarisch)",
+      "gl": "Galego (Galicisch)",
+      "id": "Bahasa Indonesia (Indonesisch)"
     },
     "appearance": "Erscheinung",
     "theme": {
@@ -168,7 +176,7 @@
       "blue": "Blau",
       "green": "Grün",
       "default": "Standard",
-      "nord": "Norden",
+      "nord": "Nord",
       "red": "Rot",
       "contrast": "Hoher Kontrast",
       "highcontrast": "Hoher Kontrast"

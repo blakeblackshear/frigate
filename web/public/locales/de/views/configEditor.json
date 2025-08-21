@@ -12,5 +12,7 @@
     }
   },
   "documentTitle": "Konfigurationseditor – Frigate",
-  "confirm": "Verlassen ohne zu Speichern?"
+  "confirm": "Verlassen ohne zu Speichern?",
+  "safeConfigEditor": "Konfiguration Editor (abgesicherter Modus)",
+  "safeModeDescription": "Frigate ist aufgrund eines Konfigurationsvalidierungsfehlers im abgesicherten Modus."
 }
