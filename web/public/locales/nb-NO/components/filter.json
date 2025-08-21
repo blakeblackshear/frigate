@@ -123,5 +123,13 @@
       "title": "Alle soner",
       "short": "Soner"
     }
+  },
+  "classes": {
+    "label": "Klasser",
+    "all": {
+      "title": "Alle klasser"
+    },
+    "count_one": "{{count}} Klasse",
+    "count_other": "{{count}} Klasser"
   }
 }
