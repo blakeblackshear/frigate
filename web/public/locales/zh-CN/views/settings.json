@@ -178,6 +178,43 @@
         "success": "核查分级配置已保存。请重启 Frigate 以应用更改。"
       },
       "unsavedChanges": "{{camera}} 的核查分类设置未保存"
+    },
+    "object_descriptions": {
+      "title": "生成式AI对象描述",
+      "desc": "临时启用/禁用此摄像头的生成式AI对象描述功能。禁用后，系统将不再请求该摄像头追踪对象的AI生成描述。"
+    },
+    "review_descriptions": {
+      "title": "生成式AI核查描述",
+      "desc": "临时启用/禁用本摄像头的生成式AI核查描述功能。禁用后，系统将不再为该摄像头的核查项目请求AI生成的描述内容。"
+    },
+    "addCamera": "添加新摄像头",
+    "editCamera": "编辑摄像头：",
+    "selectCamera": "选择摄像头",
+    "backToSettings": "返回摄像头设置",
+    "cameraConfig": {
+      "add": "添加摄像头",
+      "edit": "编辑摄像头",
+      "description": "配置摄像头设置，包括视频流输入和视频流功能选择。",
+      "name": "摄像头名称",
+      "nameRequired": "摄像头名称为必填项",
+      "nameInvalid": "摄像头名称只能包含字母、数字、下划线或连字符",
+      "namePlaceholder": "比如：front_door",
+      "enabled": "开启",
+      "ffmpeg": {
+        "inputs": "视频流输入",
+        "path": "视频流路径",
+        "pathRequired": "视频流路径为必填项",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "功能",
+        "rolesRequired": "至少需要指定一个功能",
+        "rolesUnique": "每个功能（音频、检测、录制）只能用于一个视频流，不能够重复分配到多个视频流",
+        "addInput": "添加视频流输入",
+        "removeInput": "移除视频流输入",
+        "inputsRequired": "至少需要一个视频流"
+      },
+      "toast": {
+        "success": "摄像头 {{cameraName}} 保存已保存"
+      }
     }
   },
   "masksAndZones": {
@@ -417,6 +454,11 @@
       "score": "分数",
       "ratio": "比例",
       "area": "区域"
+    },
+    "paths": {
+      "title": "运动轨迹",
+      "desc": "显示被追踪对象运动轨迹的关键点",
+      "tips": "<p><strong>运动轨迹</strong></p><p>将使用线条和圆圈标示被追踪对象在其活动周期内移动的关键位置点。</p>"
     }
   },
   "users": {
@@ -677,5 +719,100 @@
     },
     "unsavedChanges": "增强功能设置未保存",
     "restart_required": "需要重启（增强功能设置已保存）"
+  },
+  "triggers": {
+    "documentTitle": "触发器",
+    "management": {
+      "title": "触发器管理",
+      "desc": "管理 {{camera}} 的触发器。您可以使用“缩略图”类型，基于与所选追踪对象相似的缩略图来触发；也可以使用“描述”类型，基于与您指定的文本相似的描述来触发。"
+    },
+    "addTrigger": "添加触发器",
+    "table": {
+      "name": "名称",
+      "type": "类型",
+      "content": "触发内容",
+      "threshold": "阈值",
+      "actions": "动作",
+      "noTriggers": "此摄像头未配置任何触发器。",
+      "edit": "编辑",
+      "deleteTrigger": "删除触发器",
+      "lastTriggered": "最后一个触发项"
+    },
+    "type": {
+      "thumbnail": "缩略图",
+      "description": "描述"
+    },
+    "actions": {
+      "alert": "标记为警报",
+      "notification": "发送通知"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "创建触发器",
+        "desc": "为摄像头 {{camera}} 创建触发器"
+      },
+      "editTrigger": {
+        "title": "编辑触发器",
+        "desc": "编辑摄像头 {{camera}} 的触发器设置"
+      },
+      "deleteTrigger": {
+        "title": "删除触发器",
+        "desc": "你确定要删除触发器 <strong>{{triggerName}}</strong> 吗？此操作不可撤销。"
+      },
+      "form": {
+        "name": {
+          "title": "名称",
+          "placeholder": "输入触发器名称",
+          "error": {
+            "minLength": "名称至少要两个字符。",
+            "invalidCharacters": "名称只能包含字母、数字、下划线和连字符。",
+            "alreadyExists": "此摄像头已存在同名触发器。"
+          }
+        },
+        "enabled": {
+          "description": "开启/关闭此触发器"
+        },
+        "type": {
+          "title": "类型",
+          "placeholder": "选择触发类型"
+        },
+        "content": {
+          "title": "内容",
+          "imagePlaceholder": "选择图片",
+          "textPlaceholder": "输入文字内容",
+          "imageDesc": "选择一张图片，当检测到相似图片时触发此操作。",
+          "textDesc": "输入文本，当检测到相似的追踪对象描述时触发此操作。",
+          "error": {
+            "required": "内容为必填项。"
+          }
+        },
+        "threshold": {
+          "title": "阈值",
+          "error": {
+            "min": "阈值必须大于 0",
+            "max": "阈值必须小于 1"
+          }
+        },
+        "actions": {
+          "title": "动作",
+          "desc": "默认情况下，Frigate 会为所有触发器发送 MQTT 消息。请选择此触发器触发时需要执行的附加操作。",
+          "error": {
+            "min": "必须至少选择一项动作。"
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "触发器 {{name}} 创建成功。",
+        "updateTrigger": "触发器 {{name}} 更新成功。",
+        "deleteTrigger": "触发器 {{name}} 已删除。"
+      },
+      "error": {
+        "createTriggerFailed": "创建触发器失败：{{errorMessage}}",
+        "updateTriggerFailed": "更新触发器失败：{{errorMessage}}",
+        "deleteTriggerFailed": "删除触发器失败：{{errorMessage}}"
+      }
+    }
   }
 }
