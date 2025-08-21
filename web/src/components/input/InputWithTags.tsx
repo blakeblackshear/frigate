@@ -928,7 +928,15 @@ export default function InputWithTags({
                   onSelect={() => handleSuggestionClick(suggestion)}
                 >
                   {i18n.language === "en" ? (
-                    suggestion
+                    currentFilterType && currentFilterType === "cameras" ? (
+                      <>
+                        {suggestion} {" ("}{" "}
+                        <CameraNameLabel camera={suggestion} />
+                        {")"}
+                      </>
+                    ) : (
+                      suggestion
+                    )
                   ) : (
                     <>
                       {suggestion} {" ("}
