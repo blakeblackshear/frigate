@@ -132,7 +132,7 @@ def get_soc_type() -> Optional[str]:
             soc = file.read().split(",")[-1].strip("\x00")
             return soc
     except FileNotFoundError:
-        logger.warning("Could not determine SoC type from device tree")
+        logger.debug("Could not determine SoC type from device tree")
         return None
 
 
