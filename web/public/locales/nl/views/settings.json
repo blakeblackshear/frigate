@@ -178,7 +178,44 @@
       "desc": "Schakel een camera tijdelijk uit totdat Frigate opnieuw wordt gestart. Het uitschakelen van een camera stopt de verwerking van de streams van deze camera volledig door Frigate. Detectie, opname en foutopsporing zijn dan niet beschikbaar.<br /> <em>Let op: dit schakelt go2rtc-restreams niet uit.</em>",
       "title": "Streams"
     },
-    "title": "Camera-instellingen"
+    "title": "Camera-instellingen",
+    "object_descriptions": {
+      "title": "AI-gegenereerde objectomschrijvingen",
+      "desc": "AI-gegenereerde objectomschrijvingen tijdelijk uitschakelen voor deze camera. Wanneer uitgeschakeld, zullen omschrijvingen van gevolgde objecten op deze camera niet aangevraagd worden."
+    },
+    "review_descriptions": {
+      "title": "Generatieve-AI Beoordelingsbeschrijvingen",
+      "desc": "Tijdelijk generatieve-AI-beoordelingsbeschrijvingen voor deze camera in- of uitschakelen. Wanneer dit is uitgeschakeld, worden er geen door AI gegenereerde beschrijvingen opgevraagd voor beoordelingsitems van deze camera."
+    },
+    "addCamera": "Nieuwe camera toevoegen",
+    "editCamera": "Camera bewerken:",
+    "selectCamera": "Selecteer een camera",
+    "backToSettings": "Terug naar camera-instellingen",
+    "cameraConfig": {
+      "add": "Camera toevoegen",
+      "edit": "Camera bewerken",
+      "description": "Configureer de camera-instellingen, inclusief streaming-inputs en functies.",
+      "name": "Cameranaam",
+      "nameRequired": "Cameranaam is vereist",
+      "nameInvalid": "De cameranaam mag alleen letters, cijfers, onderstrepingstekens of koppeltekens bevatten",
+      "namePlaceholder": "bijv. voor_deur",
+      "enabled": "Ingeschakeld",
+      "ffmpeg": {
+        "inputs": "Streams-Input",
+        "path": "Stroompad",
+        "pathRequired": "Streampad is vereist",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Functie",
+        "rolesRequired": "Er is ten minste één functie vereist",
+        "rolesUnique": "Elke functie (audio, detecteren, opnemen) kan slechts aan één stream worden toegewezen",
+        "addInput": "Inputstream toevoegen",
+        "removeInput": "Inputstream verwijderen",
+        "inputsRequired": "Er is ten minste één stream-input vereist"
+      },
+      "toast": {
+        "success": "Camera {{cameraName}} is succesvol opgeslagen"
+      }
+    }
   },
   "masksAndZones": {
     "filter": {
@@ -420,7 +457,12 @@
       "score": "Score",
       "ratio": "Verhouding"
     },
-    "detectorDesc": "Frigate gebruikt je detectoren ({{detectors}}) om objecten in de videostream van je camera te detecteren."
+    "detectorDesc": "Frigate gebruikt je detectoren ({{detectors}}) om objecten in de videostream van je camera te detecteren.",
+    "paths": {
+      "title": "Paden",
+      "desc": "Toon belangrijke punten van het pad van het gevolgde object",
+      "tips": "<p><strong>Paden</strong></p><br><p>Lijnen en cirkels geven belangrijke punten aan waar het gevolgde object zich tijdens zijn levensduur heeft verplaatst.</p>"
+    }
   },
   "users": {
     "title": "Gebruikers",
@@ -644,7 +686,7 @@
         }
       },
       "title": "Semantisch zoeken",
-      "desc": "Semantische zoektocht in Frigate laat je opsporingsberichten vinden binnen je beoordelingsvoorwerpen met het beeld zelf, een gebruiker-definieerde tekstbeschrijving, of een automatisch gegen.",
+      "desc": "Semantisch zoeken in Frigate stelt je in staat om getraceerde objecten binnen je review-items te vinden, met behulp van de afbeelding zelf, een door de gebruiker gedefinieerde tekstbeschrijving of een automatisch gegenereerde beschrijving.",
       "readTheDocumentation": "Lees de documentatie"
     },
     "faceRecognition": {
@@ -679,6 +721,101 @@
     "toast": {
       "success": "Verrijkingsinstellingen zijn opgeslagen. Start Frigate opnieuw op om je wijzigingen toe te passen.",
       "error": "Configuratiewijzigingen konden niet worden opgeslagen: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Triggers",
+    "management": {
+      "title": "Triggerbeheer",
+      "desc": "Beheer triggers voor {{camera}}. Gebruik het thumbnail om triggers te activeren op basis van thumbnail die lijken op het door u geselecteerde gevolgde object, en het beschrijvingstype om triggers te activeren op basis van beschrijvingen die lijken op de door u opgegeven tekst."
+    },
+    "addTrigger": "Trigger toevoegen",
+    "table": {
+      "name": "Naam",
+      "type": "Type",
+      "content": "Inhoud",
+      "threshold": "Drempel",
+      "actions": "Acties",
+      "noTriggers": "Er zijn geen triggers geconfigureerd voor deze camera.",
+      "edit": "Bewerken",
+      "deleteTrigger": "Trigger verwijderen",
+      "lastTriggered": "Laatst geactiveerd"
+    },
+    "type": {
+      "thumbnail": "Thumbnail",
+      "description": "Beschrijving"
+    },
+    "actions": {
+      "alert": "Markeren als waarschuwing",
+      "notification": "Melding verzenden"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Trigger aanmaken",
+        "desc": "Maak een trigger voor camera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Trigger bewerken",
+        "desc": "Wijzig de instellingen voor de trigger op camera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Trigger verwijderen",
+        "desc": "Weet u zeker dat u de trigger <strong>{{triggerName}}</strong> wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+      },
+      "form": {
+        "name": {
+          "title": "Naam",
+          "placeholder": "Voer de naam van de trigger in",
+          "error": {
+            "minLength": "De naam moet minimaal 2 tekens lang zijn.",
+            "invalidCharacters": "De naam mag alleen letters, cijfers, onderstrepingstekens en koppeltekens bevatten.",
+            "alreadyExists": "Er bestaat al een trigger met deze naam voor deze camera."
+          }
+        },
+        "enabled": {
+          "description": "Deze trigger in- of uitschakelen"
+        },
+        "type": {
+          "title": "Type",
+          "placeholder": "Selecteer het type trigger"
+        },
+        "content": {
+          "title": "Inhoud",
+          "imagePlaceholder": "Selecteer een afbeelding",
+          "textPlaceholder": "Tekst invoeren",
+          "imageDesc": "Selecteer een afbeelding om deze actie te activeren wanneer een vergelijkbare afbeelding wordt gedetecteerd.",
+          "textDesc": "Voer tekst in om deze actie te activeren wanneer een vergelijkbare beschrijving van een gevolgd object wordt gedetecteerd.",
+          "error": {
+            "required": "Inhoud is vereist."
+          }
+        },
+        "threshold": {
+          "title": "Drempel",
+          "error": {
+            "min": "De drempelwaarde moet minimaal 0 zijn",
+            "max": "De drempelwaarde mag maximaal 1 zijn"
+          }
+        },
+        "actions": {
+          "title": "Acties",
+          "desc": "Standaard verstuurt Frigate een MQTT-bericht voor alle triggers. Kies een extra actie die moet worden uitgevoerd wanneer deze trigger wordt geactiveerd.",
+          "error": {
+            "min": "Er moet ten minste één actie worden geselecteerd."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Trigger {{name}} is succesvol aangemaakt.",
+        "updateTrigger": "Trigger {{name}} is succesvol bijgewerkt.",
+        "deleteTrigger": "Trigger {{name}} succesvol verwijderd."
+      },
+      "error": {
+        "createTriggerFailed": "Trigger kan niet worden gemaakt: {{errorMessage}}",
+        "updateTriggerFailed": "Trigger kan niet worden bijgewerkt: {{errorMessage}}",
+        "deleteTriggerFailed": "Trigger kan niet worden verwijderd: {{errorMessage}}"
+      }
     }
   }
 }

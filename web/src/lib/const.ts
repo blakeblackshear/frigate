@@ -2,6 +2,7 @@ export const supportedLanguageKeys = [
   "en",
   "es",
   "pt",
+  "pt-BR",
   "fr",
   "de",
   "it",

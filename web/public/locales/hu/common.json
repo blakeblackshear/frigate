@@ -5,7 +5,7 @@
     "untilForRestart": "Amíg a Frigate újraindul.",
     "untilRestart": "Amíg újraindul",
     "justNow": "Most",
-    "ago": "{{timeAgo}} ezelőtt",
+    "ago": "Ennyi ideje: {{timeAgo}}",
     "today": "Ma",
     "yesterday": "Tegnap",
     "last7": "Elmúlt 7 nap",
@@ -14,15 +14,15 @@
     "thisWeek": "Ezen a héten",
     "lastWeek": "Előző héten",
     "thisMonth": "Ebben a hónapban",
-    "lastMonth": "Előző hónap",
+    "lastMonth": "Előző hónapban",
     "5minutes": "5 perc",
     "10minutes": "10 perc",
     "30minutes": "30 perc",
     "1hour": "1 óra",
     "12hours": "12 óra",
     "24hours": "24 óra",
-    "pm": "PM",
-    "am": "AM",
+    "pm": "du",
+    "am": "de",
     "yr": "{{time}} év",
     "mo": "{{time}} hónap",
     "d": "{{time}} nap",
@@ -41,38 +41,38 @@
     "day_one": "{{time}} nap",
     "day_other": "{{time}} napok",
     "formattedTimestamp": {
-      "24hour": "HHH n, ÓÓ:pp:mm",
-      "12hour": "HHH d, ó:pp:mm aaa"
+      "24hour": "MMM d, HH:mm:ss",
+      "12hour": "MMM d, h:mm:ss aaa"
     },
     "formattedTimestampMonthDayYear": {
-      "12hour": "HHH d, éééé",
-      "24hour": "HHH n, éééé"
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
     },
     "formattedTimestampHourMinute": {
-      "24hour": "ÓÓ:pp",
-      "12hour": "ó:pp aaa"
+      "24hour": "HH:mm",
+      "12hour": "h:mm aaa"
     },
     "formattedTimestamp2": {
-      "24hour": "n HHH ÓÓ:pp:mm",
-      "12hour": "HH/NN ó:pp:mma"
+      "24hour": "d MMM HH:mm:ss",
+      "12hour": "MM/dd h:mm:ssa"
     },
     "formattedTimestampHourMinuteSecond": {
-      "24hour": "ÓÓ:pp:mm",
-      "12hour": "ó:pp:mm aaa"
+      "24hour": "HH:mm:ss",
+      "12hour": "h:mm:ss aaa"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "24hour": "HHH n éééé, ÓÓ:pp",
-      "12hour": "HHH n éééé, ó:pp aaa"
+      "24hour": "MMM d yyyy, HH:mm",
+      "12hour": "MMM d yyyy, h:mm aaa"
     },
     "formattedTimestampFilename": {
-      "24hour": "HH-nn-éé-ÓÓ-pp-mm",
-      "12hour": "HH-nn-éé-ó-pp-mm-a"
+      "24hour": "yy-MM-dd-HH-mm-ss",
+      "12hour": "yy-MM-dd-h-mm-ss-a"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "24hour": "HHH n, ÓÓ:pp",
-      "12hour": "HHH n, ó:pp aaa"
+      "24hour": "MMM d, HH:mm",
+      "12hour": "MMM d, h:mm aaa"
     },
-    "formattedTimestampMonthDay": "HHH n"
+    "formattedTimestampMonthDay": "MMM d"
   },
   "menu": {
     "darkMode": {
@@ -142,7 +142,15 @@
       "ro": "Román",
       "hu": "Magyar",
       "fi": "Finn",
-      "th": "Thai"
+      "th": "Thai",
+      "ptBR": "Português brasileiro (Brazil portugál)",
+      "sr": "Српски (Szerb)",
+      "sl": "Slovenščina (Szlovén)",
+      "lt": "Lietuvių (Litván)",
+      "bg": "Български (Bolgár)",
+      "gl": "Galego (Galíciai)",
+      "id": "Bahasa Indonesia (Indonéz)",
+      "ur": "اردو (Urdu)"
     },
     "uiPlayground": "UI játszótér",
     "faceLibrary": "Arc Könyvtár",

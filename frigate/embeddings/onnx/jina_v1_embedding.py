@@ -128,7 +128,6 @@ class JinaV1TextEmbedding(BaseEmbedding):
             self.runner = ONNXModelRunner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
-                self.model_size,
             )
 
     def _preprocess_inputs(self, raw_inputs):
@@ -207,7 +206,6 @@ class JinaV1ImageEmbedding(BaseEmbedding):
             self.runner = ONNXModelRunner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
-                self.model_size,
             )
 
     def _preprocess_inputs(self, raw_inputs):

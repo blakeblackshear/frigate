@@ -1,14 +1,7 @@
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PolygonCanvas } from "@/components/settings/PolygonCanvas";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { interpolatePoints, parseCoordinates } from "@/utils/canvasUtil";
@@ -36,7 +29,6 @@ import ObjectMaskEditPane from "@/components/settings/ObjectMaskEditPane";
 import PolygonItem from "@/components/settings/PolygonItem";
 import { Link } from "react-router-dom";
 import { isDesktop } from "react-device-detect";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useTranslation } from "react-i18next";
@@ -71,8 +63,6 @@ export default function MasksAndZonesView({
   const [editPane, setEditPane] = useState<PolygonType | undefined>(undefined);
   const [activeLine, setActiveLine] = useState<number | undefined>();
   const [snapPoints, setSnapPoints] = useState(false);
-
-  const { addMessage } = useContext(StatusBarMessagesContext)!;
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
@@ -196,13 +186,7 @@ export default function MasksAndZonesView({
     setAllPolygons([...(editingPolygons ?? [])]);
     setHoveredPolygonIndex(null);
     setUnsavedChanges(false);
-    addMessage(
-      "masks_zones",
-      t("masksAndZones.restart_required"),
-      undefined,
-      "masks_zones",
-    );
-  }, [t, editingPolygons, setUnsavedChanges, addMessage]);
+  }, [editingPolygons, setUnsavedChanges]);
 
   useEffect(() => {
     if (isLoading) {

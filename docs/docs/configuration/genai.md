@@ -9,34 +9,37 @@ Requests for a description are sent off automatically to your AI provider at the
 
 ## Configuration
 
-Generative AI can be enabled for all cameras or only for specific cameras. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
+Generative AI can be enabled for all cameras or only for specific cameras. If GenAI is disabled for a camera, you can still manually generate descriptions for events using the HTTP API. There are currently 3 native providers available to integrate with Frigate. Other providers that support the OpenAI standard API can also be used. See the OpenAI section below.
 
 To use Generative AI, you must define a single provider at the global level of your Frigate configuration. If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
 ```yaml
 genai:
-  enabled: True
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
   model: gemini-1.5-flash
 
 cameras:
-  front_camera: 
+  front_camera:
+    objects:
     genai:
-      enabled: True # <- enable GenAI for your front camera
-      use_snapshot: True
-      objects:
-        - person
-      required_zones:
-        - steps
+        enabled: True # <- enable GenAI for your front camera
+        use_snapshot: True
+        objects:
+          - person
+        required_zones:
+          - steps
   indoor_camera:
-    genai: 
-      enabled: False # <- disable GenAI for your indoor camera
+    objects:
+      genai:
+        enabled: False # <- disable GenAI for your indoor camera
 ```
 
 By default, descriptions will be generated for all tracked objects and all zones. But you can also optionally specify `objects` and `required_zones` to only generate descriptions for certain tracked objects or zones.
 
 Optionally, you can generate the description using a snapshot (if enabled) by setting `use_snapshot` to `True`. By default, this is set to `False`, which sends the uncompressed images from the `detect` stream collected over the object's lifetime to the model. Once the object lifecycle ends, only a single compressed and cropped thumbnail is saved with the tracked object. Using a snapshot might be useful when you want to _regenerate_ a tracked object's description as it will provide the AI with a higher-quality image (typically downscaled by the AI itself) than the cropped/compressed thumbnail. Using a snapshot otherwise has a trade-off in that only a single image is sent to your provider, which will limit the model's ability to determine object movement or direction.
+
+Generative AI can also be toggled dynamically for a camera via MQTT with the topic `frigate/<camera_name>/object_descriptions/set`. See the [MQTT documentation](/integrations/mqtt/#frigatecamera_nameobjectdescriptionsset).
 
 ## Ollama
 
@@ -66,7 +69,6 @@ You should have at least 8 GB of RAM available (or VRAM if running on GPU) to ru
 
 ```yaml
 genai:
-  enabled: True
   provider: ollama
   base_url: http://localhost:11434
   model: llava:7b
@@ -93,11 +95,16 @@ To start using Gemini, you must first get an API key from [Google AI Studio](htt
 
 ```yaml
 genai:
-  enabled: True
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
   model: gemini-1.5-flash
 ```
+
+:::note
+
+To use a different Gemini-compatible API endpoint, set the `GEMINI_BASE_URL` environment variable to your provider's API URL.
+
+:::
 
 ## OpenAI
 
@@ -115,7 +122,6 @@ To start using OpenAI, you must first [create an API key](https://platform.opena
 
 ```yaml
 genai:
-  enabled: True
   provider: openai
   api_key: "{FRIGATE_OPENAI_API_KEY}"
   model: gpt-4o
@@ -143,7 +149,6 @@ To start using Azure OpenAI, you must first [create a resource](https://learn.mi
 
 ```yaml
 genai:
-  enabled: True
   provider: azure_openai
   base_url: https://example-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview
   api_key: "{FRIGATE_OPENAI_API_KEY}"
@@ -186,32 +191,35 @@ You are also able to define custom prompts in your configuration.
 
 ```yaml
 genai:
-  enabled: True
   provider: ollama
   base_url: http://localhost:11434
   model: llava
-  prompt: "Analyze the {label} in these images from the {camera} security camera. Focus on the actions, behavior, and potential intent of the {label}, rather than just describing its appearance."
-  object_prompts:
-    person: "Examine the main person in these images. What are they doing and what might their actions suggest about their intent (e.g., approaching a door, leaving an area, standing still)? Do not describe the surroundings or static details."
-    car: "Observe the primary vehicle in these images. Focus on its movement, direction, or purpose (e.g., parking, approaching, circling). If it's a delivery vehicle, mention the company."
+
+objects:
+    prompt: "Analyze the {label} in these images from the {camera} security camera. Focus on the actions, behavior, and potential intent of the {label}, rather than just describing its appearance."
+    object_prompts:
+      person: "Examine the main person in these images. What are they doing and what might their actions suggest about their intent (e.g., approaching a door, leaving an area, standing still)? Do not describe the surroundings or static details."
+      car: "Observe the primary vehicle in these images. Focus on its movement, direction, or purpose (e.g., parking, approaching, circling). If it's a delivery vehicle, mention the company."
 ```
 
-Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire. 
+Prompts can also be overridden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire.
 
 ```yaml
 cameras:
   front_door:
-    genai:
-      use_snapshot: True
-      prompt: "Analyze the {label} in these images from the {camera} security camera at the front door. Focus on the actions and potential intent of the {label}."
-      object_prompts:
-        person: "Examine the person in these images. What are they doing, and how might their actions suggest their purpose (e.g., delivering something, approaching, leaving)? If they are carrying or interacting with a package, include details about its source or destination."
-        cat: "Observe the cat in these images. Focus on its movement and intent (e.g., wandering, hunting, interacting with objects). If the cat is near the flower pots or engaging in any specific actions, mention it."
-      objects:
-        - person
-        - cat
-      required_zones:
-        - steps
+    objects:
+      genai:
+        enabled: True
+        use_snapshot: True
+        prompt: "Analyze the {label} in these images from the {camera} security camera at the front door. Focus on the actions and potential intent of the {label}."
+        object_prompts:
+          person: "Examine the person in these images. What are they doing, and how might their actions suggest their purpose (e.g., delivering something, approaching, leaving)? If they are carrying or interacting with a package, include details about its source or destination."
+          cat: "Observe the cat in these images. Focus on its movement and intent (e.g., wandering, hunting, interacting with objects). If the cat is near the flower pots or engaging in any specific actions, mention it."
+        objects:
+          - person
+          - cat
+        required_zones:
+          - steps
 ```
 
 ### Experiment with prompts

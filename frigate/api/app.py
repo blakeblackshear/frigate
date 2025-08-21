@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import traceback
+import urllib
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
@@ -20,7 +21,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from markupsafe import escape
-from peewee import operator
+from peewee import SQL, operator
 from pydantic import ValidationError
 
 from frigate.api.auth import require_role
@@ -28,12 +29,18 @@ from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryPa
 from frigate.api.defs.request.app_body import AppConfigSetBody
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateTopic,
+)
 from frigate.models import Event, Timeline
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
     clean_camera_user_pass,
+    flatten_config_data,
     get_tz_modifiers,
-    update_yaml_from_url,
+    process_config_query_string,
+    update_yaml_file_bulk,
 )
 from frigate.util.config import find_config_file
 from frigate.util.services import (
@@ -354,14 +361,37 @@ def config_set(request: Request, body: AppConfigSetBody):
 
     with open(config_file, "r") as f:
         old_raw_config = f.read()
-        f.close()
 
     try:
-        update_yaml_from_url(config_file, str(request.url))
+        updates = {}
+
+        # process query string parameters (takes precedence over body.config_data)
+        parsed_url = urllib.parse.urlparse(str(request.url))
+        query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
+
+        # Filter out empty keys but keep blank values for non-empty keys
+        query_string = {k: v for k, v in query_string.items() if k}
+
+        if query_string:
+            updates = process_config_query_string(query_string)
+        elif body.config_data:
+            updates = flatten_config_data(body.config_data)
+
+        if not updates:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No configuration data provided"}
+                ),
+                status_code=400,
+            )
+
+        # apply all updates in a single operation
+        update_yaml_file_bulk(config_file, updates)
+
+        # validate the updated config
         with open(config_file, "r") as f:
             new_raw_config = f.read()
-            f.close()
-        # Validate the config schema
+
         try:
             config = FrigateConfig.parse(new_raw_config)
         except Exception:
@@ -385,8 +415,25 @@ def config_set(request: Request, body: AppConfigSetBody):
             status_code=500,
         )
 
-    if body.requires_restart == 0:
+    if body.requires_restart == 0 or body.update_topic:
+        old_config: FrigateConfig = request.app.frigate_config
         request.app.frigate_config = config
+
+        if body.update_topic and body.update_topic.startswith("config/cameras/"):
+            _, _, camera, field = body.update_topic.split("/")
+
+            if field == "add":
+                settings = config.cameras[camera]
+            elif field == "remove":
+                settings = old_config.cameras[camera]
+            else:
+                settings = config.get_nested_object(body.update_topic)
+
+            request.app.config_publisher.publish_update(
+                CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
+                settings,
+            )
+
     return JSONResponse(
         content=(
             {
@@ -685,7 +732,14 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
 @router.get("/recognized_license_plates")
 def get_recognized_license_plates(split_joined: Optional[int] = None):
     try:
-        events = Event.select(Event.data).distinct()
+        query = (
+            Event.select(
+                SQL("json_extract(data, '$.recognized_license_plate') AS plate")
+            )
+            .where(SQL("json_extract(data, '$.recognized_license_plate') IS NOT NULL"))
+            .distinct()
+        )
+        recognized_license_plates = [row[0] for row in query.tuples()]
     except Exception:
         return JSONResponse(
             content=(
@@ -693,14 +747,6 @@ def get_recognized_license_plates(split_joined: Optional[int] = None):
             ),
             status_code=404,
         )
-
-    recognized_license_plates = []
-    for e in events:
-        if e.data is not None and "recognized_license_plate" in e.data:
-            recognized_license_plates.append(e.data["recognized_license_plate"])
-
-    while None in recognized_license_plates:
-        recognized_license_plates.remove(None)
 
     if split_joined:
         original_recognized_license_plates = recognized_license_plates.copy()

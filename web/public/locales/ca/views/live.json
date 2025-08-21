@@ -32,7 +32,15 @@
         "label": "Fer clic a la imatge per centrar la càmera PTZ"
       }
     },
-    "presets": "Predefinits de la càmera PTZ"
+    "presets": "Predefinits de la càmera PTZ",
+    "focus": {
+      "in": {
+        "label": "Enfoca la càmera PTZ aprop"
+      },
+      "out": {
+        "label": "Enfoca la càmera PTZ lluny"
+      }
+    }
   },
   "documentTitle": "Directe - Frigate",
   "documentTitle.withCamera": "{{camera}} - Directe - Frigate",
@@ -154,5 +162,9 @@
       "label": "Editar grup de càmeres"
     },
     "exitEdit": "Sortir de l'edició"
+  },
+  "transcription": {
+    "enable": "Habilita la transcripció d'àudio en temps real",
+    "disable": "Deshabilita la transcripció d'àudio en temps real"
   }
 }

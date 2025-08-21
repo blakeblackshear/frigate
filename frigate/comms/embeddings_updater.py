@@ -1,23 +1,36 @@
 """Facilitates communication between processes."""
 
+import logging
 from enum import Enum
 from typing import Any, Callable
 
 import zmq
 
+logger = logging.getLogger(__name__)
+
+
 SOCKET_REP_REQ = "ipc:///tmp/cache/embeddings"
 
 
 class EmbeddingsRequestEnum(Enum):
+    # audio
+    transcribe_audio = "transcribe_audio"
+    # custom classification
+    reload_classification_model = "reload_classification_model"
+    # face
     clear_face_classifier = "clear_face_classifier"
-    embed_description = "embed_description"
-    embed_thumbnail = "embed_thumbnail"
-    generate_search = "generate_search"
     recognize_face = "recognize_face"
     register_face = "register_face"
     reprocess_face = "reprocess_face"
-    reprocess_plate = "reprocess_plate"
+    # semantic search
+    embed_description = "embed_description"
+    embed_thumbnail = "embed_thumbnail"
+    generate_search = "generate_search"
     reindex = "reindex"
+    # LPR
+    reprocess_plate = "reprocess_plate"
+    # Review Descriptions
+    summarize_review = "summarize_review"
 
 
 class EmbeddingsResponder:
@@ -34,9 +47,16 @@ class EmbeddingsResponder:
                 break
 
             try:
-                (topic, value) = self.socket.recv_json(flags=zmq.NOBLOCK)
+                raw = self.socket.recv_json(flags=zmq.NOBLOCK)
 
-                response = process(topic, value)
+                if isinstance(raw, list):
+                    (topic, value) = raw
+                    response = process(topic, value)
+                else:
+                    logging.warning(
+                        f"Received unexpected data type in ZMQ recv_json: {type(raw)}"
+                    )
+                    response = None
 
                 if response is not None:
                     self.socket.send_json(response)
@@ -58,7 +78,7 @@ class EmbeddingsRequestor:
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(SOCKET_REP_REQ)
 
-    def send_data(self, topic: str, data: Any) -> str:
+    def send_data(self, topic: str, data: Any) -> Any:
         """Sends data and then waits for reply."""
         try:
             self.socket.send_json((topic, data))

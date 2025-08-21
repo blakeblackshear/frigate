@@ -25,27 +25,27 @@
     "yr": "{{time}}ano",
     "year_one": "{{time}} ano",
     "year_many": "{{time}} anos",
-    "year_other": "",
+    "year_other": "{{time}} anos",
     "mo": "{{time}}mês",
     "month_one": "{{time}} mês",
     "month_many": "{{time}} meses",
-    "month_other": "",
+    "month_other": "{{time}} meses",
     "d": "{{time}} dia",
     "day_one": "{{time}} dia",
     "day_many": "{{time}} dias",
-    "day_other": "",
+    "day_other": "{{time}} dias",
     "h": "{{time}}h",
     "hour_one": "{{time}} hora",
     "hour_many": "{{time}} horas",
-    "hour_other": "",
+    "hour_other": "{{time}} horas",
     "m": "{{time}}m",
     "minute_one": "{{time}} minuto",
     "minute_many": "{{time}} minutos",
-    "minute_other": "",
+    "minute_other": "{{time}} minutos",
     "s": "{{time}}s",
     "second_one": "{{time}} segundo",
     "second_many": "{{time}} segundos",
-    "second_other": "",
+    "second_other": "{{time}} segundos",
     "formattedTimestamp": {
       "12hour": "d MMM,h:mm:ss aaa",
       "24hour": "d MMM, HH:mm:ss"
@@ -83,7 +83,7 @@
   "selectItem": "Selecione {{item}}",
   "unit": {
     "speed": {
-      "mph": "mph",
+      "mph": "mi/h",
       "kph": "km/h"
     },
     "length": {
@@ -169,7 +169,15 @@
       "ca": "Català (Catalão)",
       "withSystem": {
         "label": "Usar as configurações de sistema para o idioma"
-      }
+      },
+      "ptBR": "Português Brasileiro (Português Brasileiro)",
+      "sr": "Српски (Sérvio)",
+      "sl": "Slovenščina (Esloveno)",
+      "lt": "Lietuvių (Lituano)",
+      "bg": "Български (Búlgaro)",
+      "gl": "Galego (Galego)",
+      "id": "Bahasa Indonesia (Indonésio)",
+      "ur": "اردو (Urdu)"
     },
     "systemLogs": "Logs de sistema",
     "settings": "Configurações",
@@ -201,7 +209,65 @@
     },
     "restart": "Reiniciar o Frigate",
     "live": {
-      "title": "Ao Vivo"
+      "title": "Ao Vivo",
+      "allCameras": "Todas as câmeras",
+      "cameras": {
+        "title": "Câmeras",
+        "count_one": "{{count}} Câmera",
+        "count_many": "{{count}} Câmeras",
+        "count_other": "{{count}} Câmeras"
+      }
+    },
+    "review": "Revisar",
+    "explore": "Explorar",
+    "export": "Exportar",
+    "uiPlayground": "Playground da UI",
+    "faceLibrary": "Biblioteca de Rostos",
+    "user": {
+      "title": "Usuário",
+      "account": "Conta",
+      "current": "Usuário Atual: {{user}}",
+      "anonymous": "anônimo",
+      "logout": "Sair",
+      "setPassword": "Definir Senha"
     }
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL copiada para a área de transferência.",
+    "save": {
+      "title": "Salvar",
+      "error": {
+        "title": "Falha ao salvar as alterações de configuração: {{errorMessage}}",
+        "noMessage": "Falha ao salvar as alterações de configuração"
+      }
+    }
+  },
+  "role": {
+    "title": "Papel",
+    "admin": "Administrador",
+    "viewer": "Espectador",
+    "desc": "Administradores possuem acesso total a todos os recursos da interface do Frigate. Espectadores são limitados a ver as câmeras, revisar itens, e filmagens históricas na interface."
+  },
+  "pagination": {
+    "label": "paginação",
+    "previous": {
+      "title": "Anterior",
+      "label": "Ir para a página anterior"
+    },
+    "next": {
+      "title": "Próximo",
+      "label": "Ir para a próxima página"
+    },
+    "more": "Mais páginas"
+  },
+  "accessDenied": {
+    "documentTitle": "Acesso Negado - Frigate",
+    "title": "Acesso Negado",
+    "desc": "Você não possui permissão para visualizar essa página."
+  },
+  "notFound": {
+    "documentTitle": "Não Encontrado - Frigate",
+    "title": "404",
+    "desc": "Página não encontrada"
   }
 }

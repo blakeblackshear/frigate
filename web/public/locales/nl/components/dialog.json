@@ -119,5 +119,12 @@
         "success": "De videobeelden die aan de geselecteerde beoordelingsitems zijn gekoppeld, zijn succesvol verwijderd."
       }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Kies thumbnail van gevolgd object",
+    "noImages": "Geen thumbnails gevonden voor deze camera",
+    "search": {
+      "placeholder": "Zoeken op label of sub label..."
+    }
   }
 }

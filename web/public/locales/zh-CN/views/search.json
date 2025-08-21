@@ -12,7 +12,7 @@
   "trackedObjectId": "跟踪对象 ID",
   "filter": {
     "label": {
-      "cameras": "摄像机",
+      "cameras": "摄像头",
       "labels": "标签",
       "zones": "区域",
       "sub_labels": "子标签",

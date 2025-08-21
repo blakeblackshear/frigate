@@ -8,6 +8,7 @@
   "allCameras": "Sve Kamere",
   "empty": {
     "alert": "Nema upozorenja za pregled",
-    "detection": "Nema detekcija za pregled"
+    "detection": "Nema detekcija za pregled",
+    "motion": "Nema podataka o pokretu"
   }
 }

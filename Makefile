@@ -1,7 +1,7 @@
 default_target: local
 
 COMMIT_HASH := $(shell git log -1 --pretty=format:"%h"|tail -1)
-VERSION = 0.16.0
+VERSION = 0.17.0
 IMAGE_REPO ?= ghcr.io/blakeblackshear/frigate
 GITHUB_REF_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 BOARDS= #Initialized empty
@@ -17,6 +17,12 @@ version:
 
 local: version
 	docker buildx build --target=frigate --file docker/main/Dockerfile . \
+		--tag frigate:latest \
+		--load
+
+debug: version
+	docker buildx build --target=frigate --file docker/main/Dockerfile . \
+	    --build-arg DEBUG=true \
 		--tag frigate:latest \
 		--load
 

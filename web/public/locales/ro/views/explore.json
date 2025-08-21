@@ -37,7 +37,7 @@
   },
   "objectLifecycle": {
     "lifecycleItemDesc": {
-      "visible": "{{label}} detectata",
+      "visible": "S-a detectat {{label}}",
       "active": "{{label}} a devenit activ",
       "entered_zone": "{{label}} a intrat în {{zones}}",
       "stationary": "{{label}} a devenit staționar",
@@ -50,7 +50,7 @@
         "ratio": "Raport",
         "area": "Suprafață"
       },
-      "gone": "{{label}} a ieșit",
+      "gone": "{{label}} a părasit cadrul",
       "heard": "{{label}} auzit(ă)",
       "external": "{{label}} detectat(ă)"
     },
@@ -103,12 +103,14 @@
         "success": {
           "regenerate": "O nouă descriere a fost solicitată de la {{provider}}. În funcție de viteza furnizorului tău, regenerarea noii descrieri poate dura ceva timp.",
           "updatedSublabel": "Subeticheta a fost actualizată cu succes.",
-          "updatedLPR": "Plăcuța de înmatriculare a fost actualizată cu succes."
+          "updatedLPR": "Plăcuța de înmatriculare a fost actualizată cu succes.",
+          "audioTranscription": "Transcrierea audio a fost solicitată cu succes."
         },
         "error": {
           "updatedSublabelFailed": "Nu s-a putut actualiza sub-etichetarea: {{errorMessage}}",
           "updatedLPRFailed": "Plăcuța de înmatriculare nu a putut fi actualizată: {{errorMessage}}",
-          "regenerate": "Eroare la apelarea {{provider}} pentru o nouă descriere: {{errorMessage}}"
+          "regenerate": "Eroare la apelarea {{provider}} pentru o nouă descriere: {{errorMessage}}",
+          "audioTranscription": "Solicitarea transcrierii audio a eșuat: {{errorMessage}}"
         }
       }
     },
@@ -153,7 +155,10 @@
     },
     "expandRegenerationMenu": "Extinde meniul de regenerare",
     "regenerateFromSnapshot": "Regenerează din snapshot",
-    "regenerateFromThumbnails": "Regenerează din miniaturi"
+    "regenerateFromThumbnails": "Regenerează din miniaturi",
+    "score": {
+      "label": "Scor"
+    }
   },
   "exploreMore": "Explorează mai multe obiecte cu {{label}}",
   "trackedObjectDetails": "Detalii despre obiectul urmărit",
@@ -187,6 +192,14 @@
     "submitToPlus": {
       "label": "Trimite către Frigate+",
       "aria": "Trimite către Frigate Plus"
+    },
+    "addTrigger": {
+      "label": "Adaugă declanșator",
+      "aria": "Adaugă un declanșator pentru acest obiect urmărit"
+    },
+    "audioTranscription": {
+      "label": "Transcrie",
+      "aria": "Solicită transcrierea audio"
     }
   },
   "dialog": {
@@ -205,5 +218,11 @@
       }
     },
     "tooltip": "Potrivire {{type}} cu {{confidence}}%"
+  },
+  "aiAnalysis": {
+    "title": "Analiză AI"
+  },
+  "concerns": {
+    "label": "Îngrijorări"
   }
 }

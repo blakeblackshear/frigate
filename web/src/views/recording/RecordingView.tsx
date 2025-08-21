@@ -30,7 +30,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import {
+  isDesktop,
+  isMobile,
+  isMobileOnly,
+  isTablet,
+} from "react-device-detect";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
@@ -43,7 +48,11 @@ import Logo from "@/components/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaVideo } from "react-icons/fa";
 import { VideoResolutionType } from "@/types/live";
-import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
+import {
+  ASPECT_VERTICAL_LAYOUT,
+  ASPECT_WIDE_LAYOUT,
+  RecordingSegment,
+} from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
@@ -617,9 +626,16 @@ export function RecordingView({
                     )
                   : cn(
                       "pt-2 portrait:w-full",
-                      mainCameraAspect == "wide"
-                        ? "aspect-wide landscape:w-full"
-                        : "aspect-video landscape:h-[94%] landscape:xl:h-[65%]",
+                      isMobileOnly &&
+                        (mainCameraAspect == "wide"
+                          ? "aspect-wide landscape:w-full"
+                          : "aspect-video landscape:h-[94%] landscape:xl:h-[65%]"),
+                      isTablet &&
+                        (mainCameraAspect == "wide"
+                          ? "aspect-wide landscape:w-full"
+                          : mainCameraAspect == "normal"
+                            ? "landscape:w-full"
+                            : "aspect-video landscape:h-[100%]"),
                     ),
               )}
               style={{
@@ -808,6 +824,16 @@ function Timeline({
     },
   ]);
 
+  const { data: noRecordings } = useSWR<RecordingSegment[]>([
+    "recordings/unavailable",
+    {
+      before: timeRange.before,
+      after: timeRange.after,
+      scale: Math.round(zoomSettings.segmentDuration / 2),
+      cameras: mainCamera,
+    },
+  ]);
+
   const [exportStart, setExportStartTime] = useState<number>(0);
   const [exportEnd, setExportEndTime] = useState<number>(0);
 
@@ -853,6 +879,7 @@ function Timeline({
             setHandlebarTime={setCurrentTime}
             events={mainCameraReviewItems}
             motion_events={motionData ?? []}
+            noRecordingRanges={noRecordings ?? []}
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
             isZooming={isZooming}

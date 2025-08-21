@@ -1,0 +1,13 @@
+{
+  "time": {
+    "untilForTime": "Até {{time}}",
+    "untilForRestart": "Até que se reinicie Frigate.",
+    "justNow": "Xusto agora",
+    "last7": "Últimos 7 días",
+    "last14": "Últimos 14 días",
+    "thisWeek": "Esta semana",
+    "today": "Hoxe",
+    "untilRestart": "Ata o reinicio",
+    "ago": "Fai {{timeAgo}}"
+  }
+}

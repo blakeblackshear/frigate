@@ -52,9 +52,42 @@
       "gpuDecoder": "GPU dekodér",
       "gpuInfo": {
         "vainfoOutput": {
-          "title": "Výstup Vainfo"
+          "title": "Výstup Vainfo",
+          "returnCode": "Návratový kód: {{code}}",
+          "processOutput": "Výstup procesu:",
+          "processError": "Chyba procesu:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Výstup Nvidia SMI",
+          "name": "Meno: {{name}}",
+          "driver": "Vodič: {{driver}}",
+          "cudaComputerCapability": "Výpočtové možnosti CUDA: {{cuda_compute}}",
+          "vbios": "Informácie o VBiose: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Zatvorte informácie o GPU"
+        },
+        "copyInfo": {
+          "label": "Kopírovať informácie o GPU"
+        },
+        "toast": {
+          "success": "Informácie o grafickej karte boli skopírované do schránky"
         }
-      }
+      },
+      "npuUsage": "Použitie NPU",
+      "npuMemory": "Pamäť NPU"
+    },
+    "otherProcesses": {
+      "title": "Iné procesy",
+      "processCpuUsage": "Proces využitia CPU",
+      "processMemoryUsage": "Procesné využitie pamäte"
+    }
+  },
+  "storage": {
+    "title": "Skladovanie",
+    "overview": "Prehľad",
+    "recordings": {
+      "title": "Nahrávky"
     }
   }
 }

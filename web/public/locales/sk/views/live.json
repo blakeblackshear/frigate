@@ -43,7 +43,15 @@
         "label": "Kliknite do rámčeka pre vycentrovanie PTZ kamery"
       }
     },
-    "presets": "Predvoľby PTZ kamery"
+    "presets": "Predvoľby PTZ kamery",
+    "focus": {
+      "in": {
+        "label": "Zaostrenie PTZ kamery v"
+      },
+      "out": {
+        "label": "Výstup zaostrenia PTZ kamery"
+      }
+    }
   },
   "camera": {
     "enable": "Povoliť fotoaparát",
@@ -72,5 +80,32 @@
   "autotracking": {
     "enable": "Povoliť automatické sledovanie",
     "disable": "Zakázať automatické sledovanie"
+  },
+  "transcription": {
+    "enable": "Povoliť živý prepis zvuku",
+    "disable": "Zakázať živý prepis zvuku"
+  },
+  "streamStats": {
+    "enable": "Zobraziť štatistiky streamu",
+    "disable": "Skryť štatistiky streamu"
+  },
+  "manualRecording": {
+    "title": "Nahrávanie na požiadanie",
+    "tips": "Spustiť manuálnu udalosť na základe nastavení uchovávania záznamu tejto kamery.",
+    "playInBackground": {
+      "label": "Hrať na pozadí",
+      "desc": "Povoľte túto možnosť, ak chcete pokračovať v streamovaní, aj keď je prehrávač skrytý."
+    },
+    "showStats": {
+      "label": "Zobraziť štatistiky",
+      "desc": "Povoľte túto možnosť, ak chcete zobraziť štatistiky streamu ako prekrytie na obraze z kamery."
+    },
+    "debugView": "Zobrazenie ladenia",
+    "start": "Spustiť nahrávanie na požiadanie",
+    "started": "Spustené manuálne nahrávanie na požiadanie.",
+    "failedToStart": "Nepodarilo sa spustiť manuálne nahrávanie na požiadanie.",
+    "recordDisabledTips": "Keďže nahrávanie je v konfigurácii tejto kamery zakázané alebo obmedzené, uloží sa iba snímka.",
+    "end": "Ukončiť nahrávanie na požiadanie",
+    "ended": "Manuálne nahrávanie na požiadanie bolo ukončené."
   }
 }

@@ -18,6 +18,12 @@ export type ReviewData = {
   sub_labels?: string[];
   significant_motion_areas: number[];
   zones: string[];
+  metadata?: {
+    scene: string;
+    confidence: number;
+    potential_threat_level?: number;
+    other_concerns?: string[];
+  };
 };
 
 export type SegmentedReviewData =
@@ -73,3 +79,8 @@ export type ConsolidatedSegmentData = {
 };
 
 export type TimelineZoomDirection = "in" | "out" | null;
+
+export enum ThreatLevel {
+  SUSPICIOUS = 1,
+  DANGER = 2,
+}

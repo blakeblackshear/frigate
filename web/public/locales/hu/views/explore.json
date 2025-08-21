@@ -27,6 +27,10 @@
     "downloadSnapshot": {
       "aria": "Pillanatfelvétel letöltése",
       "label": "Pillanatfelvétel letöltése"
+    },
+    "addTrigger": {
+      "label": "Indító hozzáadása",
+      "aria": "Indító hozzáadása ehhez a követett tárgyhoz"
     }
   },
   "details": {

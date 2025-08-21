@@ -123,5 +123,13 @@
   },
   "zoneMask": {
     "filterBy": "Filtrer par masque de zone"
+  },
+  "classes": {
+    "label": "Classes",
+    "all": {
+      "title": "Toutes les classes"
+    },
+    "count_one": "{{count}} classe",
+    "count_other": "{{count}} classes"
   }
 }

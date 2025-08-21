@@ -1,0 +1,17 @@
+{
+  "filter": "Filtrar",
+  "labels": {
+    "label": "Etiquetas",
+    "count_one": "{{count}} Etiqueta",
+    "all": {
+      "short": "Etiquetas",
+      "title": "Todas as Etiquetas"
+    },
+    "count_other": "{{count}} Etiquetas"
+  },
+  "zones": {
+    "all": {
+      "title": "Tódalas zonas"
+    }
+  }
+}

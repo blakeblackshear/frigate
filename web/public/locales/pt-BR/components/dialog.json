@@ -16,7 +16,7 @@
       },
       "review": {
         "question": {
-          "label": "Confirmar essa etiqueta para Frigate Plus",
+          "label": "Confirmar esse rótulo para Frigate Plus",
           "ask_a": "Este objeto é um <code>{{label}}</code>?",
           "ask_an": "Este objeto é um<code>{{label}}</code>?",
           "ask_full": "Este objeto é um<code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
@@ -110,5 +110,12 @@
       "export": "Exportar",
       "deleteNow": "Deletar Agora"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Selecionar a miniatura de um objeto rastreado",
+    "search": {
+      "placeholder": "Pesquisar por rótulo ou sub-rótulo…"
+    },
+    "noImages": "Nenhuma miniatura encontrada para essa câmera"
   }
 }

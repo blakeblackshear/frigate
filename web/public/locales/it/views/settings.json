@@ -101,6 +101,11 @@
     "zones": {
       "title": "Zone",
       "desc": "Mostra un contorno di tutte le zone definite"
+    },
+    "paths": {
+      "title": "Percorsi",
+      "desc": "Mostra i punti significativi del percorso dell'oggetto tracciato",
+      "tips": "<p><strong>Percorsi</strong></p><br><p>Linee e cerchi indicheranno i punti significativi in cui l'oggetto tracciato si è spostato durante il suo ciclo di vita.</p>"
     }
   },
   "masksAndZones": {
@@ -314,6 +319,43 @@
       "desc": "Abilita/disabilita temporaneamente avvisi e rilevamenti per questa telecamera fino al riavvio di Frigate. Se disabilitati, non verranno generati nuovi elementi di revisione. ",
       "alerts": "Avvisi ",
       "detections": "Rilevamenti "
+    },
+    "object_descriptions": {
+      "title": "Descrizioni di oggetti di IA generativa",
+      "desc": "Abilita/disabilita temporaneamente le descrizioni degli oggetti generate dall'IA per questa telecamera. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli oggetti tracciati su questa telecamera."
+    },
+    "review_descriptions": {
+      "title": "Descrizioni delle revisioni dell'IA generativa",
+      "desc": "Abilita/disabilita temporaneamente le descrizioni delle revisioni dell'IA generativa per questa telecamera. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli elementi da recensire su questa telecamera."
+    },
+    "addCamera": "Aggiungi nuova telecamera",
+    "editCamera": "Modifica telecamera:",
+    "selectCamera": "Seleziona una telecamera",
+    "backToSettings": "Torna alle impostazioni della telecamera",
+    "cameraConfig": {
+      "add": "Aggiungi telecamera",
+      "edit": "Modifica telecamera",
+      "description": "Configura le impostazioni della telecamera, inclusi gli ingressi ed i ruoli della trasmissione.",
+      "name": "Nome della telecamera",
+      "nameRequired": "Il nome della telecamera è obbligatorio",
+      "nameInvalid": "Il nome della telecamera deve contenere solo lettere, numeri, caratteri di sottolineatura o trattini",
+      "namePlaceholder": "ad esempio: porta_principale",
+      "enabled": "Abilitata",
+      "ffmpeg": {
+        "inputs": "Flussi di ingresso",
+        "path": "Percorso del flusso",
+        "pathRequired": "Il percorso del flusso è obbligatorio",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Ruoli",
+        "rolesRequired": "È richiesto almeno un ruolo",
+        "rolesUnique": "Ogni ruolo (audio, rilevamento, registrazione) può essere assegnato solo ad un flusso",
+        "addInput": "Aggiungi flusso di ingresso",
+        "removeInput": "Rimuovi flusso di ingresso",
+        "inputsRequired": "È richiesto almeno un flusso di ingresso"
+      },
+      "toast": {
+        "success": "La telecamera {{cameraName}} è stata salvata correttamente"
+      }
     }
   },
   "menu": {
@@ -682,5 +724,100 @@
     },
     "unsavedChanges": "Modifiche alle impostazioni di miglioramento non salvate",
     "restart_required": "Riavvio richiesto (impostazioni di miglioramento modificate)"
+  },
+  "triggers": {
+    "documentTitle": "Inneschi",
+    "management": {
+      "title": "Gestione inneschi",
+      "desc": "Gestisci gli inneschi per {{camera}}. Utilizza il tipo miniatura per attivare miniature simili all'oggetto tracciato selezionato e il tipo descrizione per attivare descrizioni simili al testo specificato."
+    },
+    "addTrigger": "Aggiungi innesco",
+    "table": {
+      "name": "Nome",
+      "type": "Tipo",
+      "content": "Contenuto",
+      "threshold": "Soglia",
+      "actions": "Azioni",
+      "noTriggers": "Nessun innesco configurato per questa telecamera.",
+      "edit": "Modifica",
+      "deleteTrigger": "Elimina innesco",
+      "lastTriggered": "Ultimo innesco"
+    },
+    "type": {
+      "thumbnail": "Miniatura",
+      "description": "Descrizione"
+    },
+    "actions": {
+      "alert": "Contrassegna come avviso",
+      "notification": "Invia notifica"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Crea innesco",
+        "desc": "Crea un innesco per la telecamera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Modifica innesco",
+        "desc": "Modifica le impostazioni per l'innesco della telecamera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Elimina innesco",
+        "desc": "Vuoi davvero eliminare l'innesco <strong>{{triggerName}}</strong>? Questa azione non può essere annullata."
+      },
+      "form": {
+        "name": {
+          "title": "Nome",
+          "placeholder": "Inserisci il nome dell'innesco",
+          "error": {
+            "minLength": "Il nome deve essere lungo almeno 2 caratteri.",
+            "invalidCharacters": "Il nome può contenere solo lettere, numeri, caratteri di sottolineatura e trattini.",
+            "alreadyExists": "Per questa telecamera esiste già un innesco con questo nome."
+          }
+        },
+        "enabled": {
+          "description": "Abilita o disabilita questo innesco"
+        },
+        "type": {
+          "title": "Tipo",
+          "placeholder": "Seleziona il tipo di innesco"
+        },
+        "content": {
+          "title": "Contenuto",
+          "imagePlaceholder": "Seleziona un'immagine",
+          "textPlaceholder": "Inserisci il contenuto del testo",
+          "imageDesc": "Seleziona un'immagine per attivare questa azione quando viene rilevata un'immagine simile.",
+          "textDesc": "Inserisci il testo per attivare questa azione quando viene rilevata una descrizione simile dell'oggetto tracciato.",
+          "error": {
+            "required": "Il contenuto è obbligatorio."
+          }
+        },
+        "threshold": {
+          "title": "Soglia",
+          "error": {
+            "min": "La soglia deve essere almeno 0",
+            "max": "La soglia deve essere al massimo 1"
+          }
+        },
+        "actions": {
+          "title": "Azioni",
+          "desc": "Per impostazione predefinita, Frigate invia un messaggio MQTT per tutti gli inneschi. Scegli un'azione aggiuntiva da eseguire quando questo innesco si attiva.",
+          "error": {
+            "min": "È necessario selezionare almeno un'azione."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "L'innesco {{name}} è stato creato correttamente.",
+        "updateTrigger": "L'innesco {{name}} è stato aggiornato correttamente.",
+        "deleteTrigger": "L'innesco {{name}} è stato eliminato correttamente."
+      },
+      "error": {
+        "createTriggerFailed": "Impossibile creare l'innesco: {{errorMessage}}",
+        "updateTriggerFailed": "Impossibile aggiornare l'innesco: {{errorMessage}}",
+        "deleteTriggerFailed": "Impossibile eliminare l'innesco: {{errorMessage}}"
+      }
+    }
   }
 }

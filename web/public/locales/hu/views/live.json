@@ -135,7 +135,8 @@
     "recording": "Felvétel",
     "audioDetection": "Hang Észlelés",
     "snapshots": "Pillanatképek",
-    "autotracking": "Automatikus követés"
+    "autotracking": "Automatikus követés",
+    "transcription": "Hang Feliratozás"
   },
   "history": {
     "label": "Előzmény felvételek megjelenítése"
@@ -154,5 +155,9 @@
       "label": "Kameracsoport szerkesztése"
     },
     "exitEdit": "Szerkesztés bezárása"
+  },
+  "transcription": {
+    "enable": "Élő Audio Feliratozás Engedélyezése",
+    "disable": "Élő Audio Feliratozás Kikapcsolása"
   }
 }

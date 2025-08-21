@@ -1,0 +1,17 @@
+{
+  "documentTitle": {
+    "cameras": "Estatísticas de cámaras - Frigate",
+    "storage": "Estatísticas de Almacenamento - Frigate",
+    "general": "Estatísticas Xerais - Frigate",
+    "enrichments": "Estatísticas complementarias - Frigate",
+    "logs": {
+      "frigate": "Rexistros de Frigate - Frigate"
+    }
+  },
+  "title": "Sistema",
+  "logs": {
+    "download": {
+      "label": "Descargar logs"
+    }
+  }
+}

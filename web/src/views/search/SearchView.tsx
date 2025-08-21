@@ -32,6 +32,7 @@ import Chip from "@/components/indicators/Chip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import SearchActionGroup from "@/components/filter/SearchActionGroup";
 import { Trans, useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 type SearchViewProps = {
   search: string;
@@ -76,6 +77,7 @@ export default function SearchView({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const navigate = useNavigate();
 
   // grid
 
@@ -648,6 +650,16 @@ export default function SearchView({
                         showSnapshot={() =>
                           onSelectSearch(value, false, "snapshot")
                         }
+                        addTrigger={() => {
+                          if (
+                            config?.semantic_search.enabled &&
+                            value.data.type == "object"
+                          ) {
+                            navigate(
+                              `/settings?page=triggers&camera=${value.camera}&event_id=${value.id}`,
+                            );
+                          }
+                        }}
                       />
                     </div>
                   </div>

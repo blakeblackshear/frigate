@@ -190,7 +190,15 @@
       "uk": "Українська (Ukrainsk)",
       "yue": "粵語 (Kantonesisk)",
       "th": "ไทย (Thai)",
-      "ca": "Català (Katalansk)"
+      "ca": "Català (Katalansk)",
+      "ptBR": "Português brasileiro (Brasiliansk portugisisk)",
+      "sr": "Српски (Serbisk)",
+      "sl": "Slovenščina (Slovensk)",
+      "lt": "Lietuvių (Litauisk)",
+      "bg": "Български (Bulgarsk)",
+      "gl": "Galego (Galisisk)",
+      "id": "Bahasa Indonesia (Indonesisk)",
+      "ur": "اردو (Urdu)"
     },
     "appearance": "Utseende",
     "darkMode": {

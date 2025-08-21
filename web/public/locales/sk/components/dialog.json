@@ -41,7 +41,10 @@
       "end": {
         "title": "Čas ukončenia",
         "label": "Vybrat čas ukončenia"
-      }
+      },
+      "lastHour_one": "Minulu hodinu",
+      "lastHour_few": "Minule{{count}}hodiny",
+      "lastHour_other": "Minulych{{count}}hodin"
     },
     "name": {
       "placeholder": "Pomenujte Export"
@@ -67,8 +70,48 @@
     "restreaming": {
       "disabled": "Opätovné streamovanie nie je pre túto kameru povolené.",
       "desc": {
-        "title": "Pre ďalšie možnosti živého náhľadu a zvuku pre túto kameru nastavte go2rtc."
+        "title": "Pre ďalšie možnosti živého náhľadu a zvuku pre túto kameru nastavte go2rtc.",
+        "readTheDocumentation": "Prečítajte si dokumentáciu"
+      }
+    },
+    "showStats": {
+      "label": "Zobraziť štatistiky streamu",
+      "desc": "Povoľte túto možnosť, ak chcete zobraziť štatistiky streamu ako prekrytie na obraze z kamery."
+    },
+    "debugView": "Zobrazenie ladenia"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Uložiť vyhľadávanie",
+      "desc": "Zadajte názov pre toto uložené vyhľadávanie.",
+      "placeholder": "Zadajte názov pre vyhľadávanie",
+      "overwrite": "{{searchName}} už existuje. Uložením sa prepíše existujúca hodnota.",
+      "success": "Hľadanie ({{searchName}}) bolo uložené.",
+      "button": {
+        "save": {
+          "label": "Uložte toto vyhľadávanie"
+        }
       }
     }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Potvrďte Odstrániť",
+      "desc": {
+        "selected": "Naozaj chcete odstrániť všetky nahrané videá spojené s touto položkou recenzie?<br /><br />Podržte kláves <em>Shift</em>, aby ste v budúcnosti toto dialógové okno obišli."
+      },
+      "toast": {
+        "success": "Videozáznam spojený s vybranými položkami recenzie bol úspešne odstránený.",
+        "error": "Nepodarilo sa odstrániť: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Exportovať",
+      "markAsReviewed": "Označiť ako skontrolované",
+      "deleteNow": "Odstrániť teraz"
+    }
+  },
+  "imagePicker": {
+    "selectImage": "Výber miniatúry sledovaného objektu"
   }
 }

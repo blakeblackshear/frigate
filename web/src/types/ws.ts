@@ -58,11 +58,14 @@ export interface FrigateCameraState {
     snapshots: boolean;
     record: boolean;
     audio: boolean;
+    audio_transcription: boolean;
     notifications: boolean;
     notifications_suspended: number;
     autotracking: boolean;
     alerts: boolean;
     detections: boolean;
+    object_descriptions: boolean;
+    review_descriptions: boolean;
   };
   motion: boolean;
   objects: ObjectType[];
@@ -72,7 +75,9 @@ export type ModelState =
   | "not_downloaded"
   | "downloading"
   | "downloaded"
-  | "error";
+  | "error"
+  | "training"
+  | "complete";
 
 export type EmbeddingsReindexProgressType = {
   thumbnails: number;
@@ -84,3 +89,29 @@ export type EmbeddingsReindexProgressType = {
 };
 
 export type ToggleableSetting = "ON" | "OFF";
+
+export type TrackedObjectUpdateType =
+  | "description"
+  | "lpr"
+  | "transcription"
+  | "face";
+
+export type TrackedObjectUpdateReturnType = {
+  type: TrackedObjectUpdateType;
+  id: string;
+  camera: string;
+  description?: string;
+  name?: string;
+  plate?: string;
+  score?: number;
+  timestamp?: number;
+  text?: string;
+} | null;
+
+export type TriggerStatus = {
+  name: string;
+  camera: string;
+  event_id: string;
+  type: string;
+  score: number;
+};
