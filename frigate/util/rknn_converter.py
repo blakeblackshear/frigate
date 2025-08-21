@@ -40,10 +40,10 @@ MODEL_TYPE_CONFIGS = {
 
 
 def get_rknn_model_type(model_path: str) -> str | None:
-    if all(keyword in model_path for keyword in ["jina-clip-v1", "vision"]):
+    if all(keyword in str(model_path) for keyword in ["jina-clip-v1", "vision"]):
         return "jina-clip-v1-vision"
 
-    model_name = os.path.basename(model_path).lower()
+    model_name = os.path.basename(str(model_path)).lower()
 
     if any(keyword in model_name for keyword in ["yolo", "yolox", "yolonas"]):
         return model_name
