@@ -3,15 +3,28 @@
     "title": "Funkcija razišči ni na voljo",
     "downloadingModels": {
       "setup": {
-        "visionModel": "Model vida"
+        "visionModel": "Model vida",
+        "visionModelFeatureExtractor": "Pridobivanje lastnosti modela vida",
+        "textModel": "Besedilni model",
+        "textTokenizer": "Tokenizator besedila"
       },
-      "context": "Frigate prenaša potrebne modele vdelave za podporo funkcije semantičnega iskanja. To lahko traja nekaj minut, odvisno od hitrosti vaše omrežne povezave."
+      "context": "Frigate prenaša potrebne modele vdelave za podporo funkcije semantičnega iskanja. To lahko traja nekaj minut, odvisno od hitrosti vaše omrežne povezave.",
+      "tips": {
+        "context": "Morda boste želeli ponovno indeksirati vdelave (embeddings) svojih sledenih objektov, ko bodo modeli preneseni.",
+        "documentation": "Preberi dokumentacijo"
+      },
+      "error": "Prišlo je do napake. Preverite dnevnike Frigate."
     },
     "embeddingsReindexing": {
       "step": {
         "descriptionsEmbedded": "Vdelani opisi: ",
-        "trackedObjectsProcessed": "Obdelani sledeni predmeti: "
-      }
+        "trackedObjectsProcessed": "Obdelani sledeni predmeti: ",
+        "thumbnailsEmbedded": "Vdelane sličice: "
+      },
+      "context": "Funkcija Explore se lahko uporablja, ko je ponovno indeksiranje vgraditev(embeddings) sledenih objektov končano.",
+      "startingUp": "Zagon…",
+      "estimatedTime": "Ocenjeni preostali čas:",
+      "finishingShortly": "Kmalu končano"
     }
   },
   "documentTitle": "Razišči - Frigate",
@@ -29,12 +42,61 @@
     "estimatedSpeed": "Ocenjena hitrost",
     "description": {
       "placeholder": "Opis sledenega predmeta",
-      "label": "Opis"
+      "label": "Opis",
+      "aiTips": "Frigate od vašega ponudnika generativne UI ne bo zahteval opisa, dokler se življenjski cikel sledenega objekta ne konča."
     },
     "recognizedLicensePlate": "Prepoznana registrska tablica",
     "objects": "Predmeti",
     "zones": "Območja",
-    "timestamp": "Časovni žig"
+    "timestamp": "Časovni žig",
+    "item": {
+      "button": {
+        "share": "Deli ta element mnenja",
+        "viewInExplore": "Poglej v Razišči Pogledu"
+      },
+      "tips": {
+        "hasMissingObjects": "Prilagodite konfiguracijo, če želite, da Frigate shranjuje sledene objekte za naslednje oznake: <em>{{objects}}</em>"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "Od ponudnika {{provider}} je bil zahtevan nov opis. Glede na hitrost vašega ponudnika lahko regeneracija novega opisa traja nekaj časa.",
+          "updatedSublabel": "Podoznaka je bila uspešno posodobljena.",
+          "updatedLPR": "Registrska tablica je bila uspešno posodobljena.",
+          "audioTranscription": "Zahteva za zvočni prepis je bila uspešno izvedena."
+        },
+        "error": {
+          "regenerate": "Klic ponudniku {{provider}} za nov opis ni uspel: {{errorMessage}}",
+          "updatedSublabelFailed": "Posodobitev podoznake ni uspela: {{errorMessage}}",
+          "updatedLPRFailed": "Posodobitev registrske tablice ni uspela: {{errorMessage}}",
+          "audioTranscription": "Zahteva za prepis zvoka ni uspela: {{errorMessage}}"
+        }
+      },
+      "title": "Preglej Podrobnosti Elementa",
+      "desc": "Preglej podrobnosti elementa"
+    },
+    "label": "Oznaka",
+    "editSubLabel": {
+      "title": "Uredi podoznako",
+      "desc": "Vnesite novo podoznako za {{label}}",
+      "descNoLabel": "Vnesite novo podoznako za ta sledeni objekt"
+    },
+    "editLPR": {
+      "title": "Uredi registrsko tablico",
+      "desc": "Vnesite novo vrednost registrske tablice za {{label}}",
+      "descNoLabel": "Vnesite novo vrednost registrske tablice za ta sledeni objekt"
+    },
+    "snapshotScore": {
+      "label": "Ocena Slike"
+    },
+    "topScore": {
+      "label": "Najboljša Ocena",
+      "info": "Najboljša ocena je najvišji mediani rezultat za sledeni objekt, zato se lahko razlikuje od rezultata, prikazanega na sličici rezultata iskanja."
+    },
+    "expandRegenerationMenu": "Razširi meni regeneracije",
+    "tips": {
+      "descriptionSaved": "Opis uspešno shranjen",
+      "saveDescriptionFailed": "Opisa ni bilo mogoče posodobiti: {{errorMessage}}"
+    }
   },
   "itemMenu": {
     "findSimilar": {
@@ -63,11 +125,85 @@
     "downloadSnapshot": {
       "label": "Prenesi posnetek",
       "aria": "Prenesi posnetek"
+    },
+    "addTrigger": {
+      "label": "Dodaj sprožilec",
+      "aria": "Dodaj sprožilec za ta sledeni objekt"
+    },
+    "audioTranscription": {
+      "label": "Prepis",
+      "aria": "Zahtevajte prepis zvoka"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Potrdi brisanje"
+    }
+  },
+  "trackedObjectDetails": "Podrobnosti Sledenega Objekta",
+  "type": {
+    "details": "podrobnosti",
+    "snapshot": "posnetek",
+    "video": "video",
+    "object_lifecycle": "življenjski cikel objekta"
+  },
+  "objectLifecycle": {
+    "title": "Življenjski Cikel Objekta",
+    "noImageFound": "Za ta čas ni bila najdena nobena slika.",
+    "createObjectMask": "Ustvarite Masko Objekta",
+    "adjustAnnotationSettings": "Prilagodi nastavitve opomb",
+    "scrollViewTips": "Pomaknite se, da si ogledate pomembne trenutke življenjskega cikla tega predmeta.",
+    "count": "{{first}} od {{second}}",
+    "trackedPoint": "Sledena točka",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} zaznan",
+      "entered_zone": "{{label}} je vstopil/a v {{zones}}",
+      "active": "{{label}} je postal aktiven",
+      "stationary": "{{label}} je postal nepremičen",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} je bil zaznan za {{label}}",
+        "other": "{{label}} zaznan kot {{attribute}}"
+      },
+      "gone": "{{label}} levo",
+      "heard": "{{label}} slišano",
+      "external": "{{label}} zaznan",
+      "header": {
+        "zones": "Cone",
+        "ratio": "Razmerje",
+        "area": "Območje"
+      }
+    },
+    "annotationSettings": {
+      "title": "Nastavitve Anotacij",
+      "showAllZones": {
+        "title": "Prikaži Vse Cone",
+        "desc": "Vedno prikaži območja na okvirjih, kjer so predmeti vstopili v območje."
+      },
+      "offset": {
+        "label": "Anotacijski Odmik",
+        "documentation": "Preberi dokumentacijo ",
+        "millisecondsToOffset": "Odmik zaznanih anotacij v milisekundah. <em>Privzeto: 0</em>",
+        "tips": "NASVET: Predstavljajte si posnetek dogodka, v katerem oseba hodi od leve proti desni. Če je okvir dogodka na časovnici preveč levo od osebe, je treba vrednost zmanjšati. Podobno je treba vrednost povečati, če oseba hodi od leve proti desni in je okvir preveč pred njo.",
+        "toast": {
+          "success": "Odmik anotacij za {{camera}} je bil shranjen v konfiguracijsko datoteko. Znova zaženite Frigate, da uveljavite spremembe."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Prejšnji diapozitiv",
+      "next": "Naslednji diapozitiv"
+    },
+    "autoTrackingTips": "Položaji okvirjev bodo za kamere s samodejnim sledenjem netočni."
+  },
+  "noTrackedObjects": "Ni Najdenih Sledenih Objektov",
+  "fetchingTrackedObjectsFailed": "Napaka pri pridobivanju sledenih objektov: {{errorMessage}}",
+  "searchResult": {
+    "tooltip": "Ujemanje {{type}} pri {{confidence}}%",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Sledeni objekt je bil uspešno izbrisan.",
+        "error": "Brisanje sledenega predmeta ni uspelo: {{errorMessage}}"
+      }
     }
   }
 }
