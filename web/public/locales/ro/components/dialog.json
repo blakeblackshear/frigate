@@ -122,5 +122,12 @@
         }
       }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Selectează miniatura unui obiect urmărit",
+    "search": {
+      "placeholder": "Caută după etichetă sau subetichetă..."
+    },
+    "noImages": "Nu s-au găsit miniaturi pentru această cameră"
   }
 }
