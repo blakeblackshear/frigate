@@ -33,10 +33,10 @@ MODEL_TYPE_CONFIGS = {
         "target_platform": None,  # Will be set dynamically
     },
     "arcface-r100": {
-        "mean_values": [[127.5,127.5,127.5]],
-        "std_values": [[127.5,127.5,127.5]],
+        "mean_values": [[127.5, 127.5, 127.5]],
+        "std_values": [[127.5, 127.5, 127.5]],
         "target_platform": None,  # Will be set dynamically
-    }
+    },
 }
 
 
