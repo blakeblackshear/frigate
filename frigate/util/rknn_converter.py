@@ -28,12 +28,8 @@ MODEL_TYPE_CONFIGS = {
         "target_platform": None,  # Will be set dynamically
     },
     "jina-clip-v1-vision": {
-        "mean_values": [
-            [0.48145466, 0.4578275, 0.40821073]
-        ],  # CLIP standard normalization
-        "std_values": [
-            [0.26862954, 0.26130258, 0.27577711]
-        ],  # CLIP standard normalization
+        "mean_values": [[0.48145466 * 255, 0.4578275 * 255, 0.40821073 * 255]],
+        "std_values": [[0.26862954 * 255, 0.26130258 * 255, 0.27577711 * 255]],
         "target_platform": None,  # Will be set dynamically
     },
 }
@@ -42,6 +38,9 @@ MODEL_TYPE_CONFIGS = {
 def get_rknn_model_type(model_path: str) -> str | None:
     if all(keyword in str(model_path) for keyword in ["jina-clip-v1", "vision"]):
         return "jina-clip-v1-vision"
+
+    if all(keyword in str(model_path) for keyword in ["jina-clip-v2", "vision"]):
+        return "jina-clip-v2-vision"
 
     model_name = os.path.basename(str(model_path)).lower()
 
