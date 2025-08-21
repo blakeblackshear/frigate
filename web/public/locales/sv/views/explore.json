@@ -5,17 +5,28 @@
     "embeddingsReindexing": {
       "startingUp": "Startar upp…",
       "estimatedTime": "Beräknad återstående tid:",
-      "finishingShortly": "Snart klar"
+      "finishingShortly": "Snart klar",
+      "context": "Utforska kan användas efter att spårade objektinbäddningar har slutförts omindexering.",
+      "step": {
+        "thumbnailsEmbedded": "Miniatyrbilder inbäddad: ",
+        "descriptionsEmbedded": "Beskrivningar inbäddade: ",
+        "trackedObjectsProcessed": "Spårade objekt bearbetad: "
+      }
     },
     "title": "Utforska är inte tillgänglig",
     "downloadingModels": {
       "setup": {
-        "textModel": "Text modell"
+        "textModel": "Text modell",
+        "visionModel": "Visionsmodell",
+        "visionModelFeatureExtractor": "Funktionsutdragare för visionsmodell",
+        "textTokenizer": "Texttokeniserare"
       },
       "tips": {
-        "documentation": "Läs dokumentationen"
+        "documentation": "Läs dokumentationen",
+        "context": "Du kanske vill omindexera inbäddningarna av dina spårade objekt när modellerna har laddats ner."
       },
-      "error": "Ett fel har inträffat. Kontrollera Frigate loggarna."
+      "error": "Ett fel har inträffat. Kontrollera Frigate loggarna.",
+      "context": "Frigate laddar ner de nödvändiga inbäddningsmodellerna för att stödja den semantiska sökfunktionen. Detta kan ta flera minuter beroende på hastigheten på din nätverksanslutning."
     }
   },
   "details": {
@@ -24,6 +35,39 @@
   "exploreMore": "Utforska fler {{label}} objekt",
   "type": {
     "details": "detaljer",
-    "video": "video"
+    "video": "video",
+    "snapshot": "ögonblicksbild",
+    "object_lifecycle": "objektets livscykel"
+  },
+  "trackedObjectDetails": "Detaljer om spårade objekt",
+  "objectLifecycle": {
+    "title": "Objektets livscykel",
+    "noImageFound": "Ingen bild hittades för denna tidsstämpel.",
+    "createObjectMask": "Skapa objektmask",
+    "adjustAnnotationSettings": "Justera annoteringsinställningar",
+    "scrollViewTips": "Scrolla för att se de viktiga ögonblicken i detta objekts livscykel.",
+    "autoTrackingTips": "Begränsningsrutornas positioner kommer att vara felaktiga för autospårningskameror.",
+    "count": "{{first}} av {{second}}",
+    "lifecycleItemDesc": {
+      "external": "{{label}} upptäckt",
+      "header": {
+        "zones": "Zoner",
+        "ratio": "Proportion",
+        "area": "Område"
+      }
+    },
+    "annotationSettings": {
+      "title": "Annoteringsinställningar",
+      "showAllZones": {
+        "title": "Visa alla zoner",
+        "desc": "Visa alltid zoner på ramar där objekt har kommit in i en zon."
+      },
+      "offset": {
+        "label": "Annoteringsförskjutning",
+        "desc": "Denna data kommer från din kameras detekteringsflöde men läggs ovanpå bilder från inspelningsflödet. Det är osannolikt att de två strömmarna är helt synkroniserade. Som ett resultat kommer avgränsningsramen och filmmaterialet inte att radas upp perfekt. Fältet <code>annotation_offset</code> kan dock användas för att justera detta.",
+        "documentation": "Läs dokumentationen ",
+        "millisecondsToOffset": "Millisekunder för att förskjuta detektera annoteringar med. <em>Standard: 0</em>"
+      }
+    }
   }
 }
