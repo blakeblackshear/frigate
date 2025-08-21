@@ -123,5 +123,13 @@
   },
   "motion": {
     "showMotionOnly": "Показывать только движение"
+  },
+  "classes": {
+    "label": "Классы",
+    "all": {
+      "title": "Все классы"
+    },
+    "count_one": "{{count}} класс",
+    "count_other": "{{count}} классы"
   }
 }
