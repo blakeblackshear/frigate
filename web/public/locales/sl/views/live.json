@@ -9,14 +9,163 @@
   "ptz": {
     "move": {
       "clickMove": {
-        "disable": "Onemogoči funkcijo klikni in premakni"
+        "disable": "Onemogoči funkcijo klikni in premakni",
+        "label": "Kliknite v okvir, da postavite kamero na sredino",
+        "enable": "Omogoči premik s klikom"
       },
       "left": {
         "label": "Premakni PTZ kamero v levo"
       },
       "up": {
         "label": "Premakni PTZ kamero gor"
+      },
+      "down": {
+        "label": "Premakni PTZ kamero navzdol"
+      },
+      "right": {
+        "label": "Premakni PTZ kamero desno"
       }
+    },
+    "zoom": {
+      "in": {
+        "label": "Povečaj PTZ kamero"
+      },
+      "out": {
+        "label": "Pomanjšaj PTZ kamero"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "Izostri PTZ kamero"
+      },
+      "out": {
+        "label": "Razostri PTZ kamero"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Kliknite v okvir, da postavite PTZ kamero na sredino"
+      }
+    },
+    "presets": "Prednastavitve PTZ kamere"
+  },
+  "cameraAudio": {
+    "enable": "Omogoči Zvok Kamere",
+    "disable": "Onemogoči Zvok Kamere"
+  },
+  "camera": {
+    "enable": "Omogoči Kamero",
+    "disable": "Onemogoči Kamero"
+  },
+  "muteCameras": {
+    "enable": "Utišaj vse kamere",
+    "disable": "Vklopi Zvok Vsem Kameram"
+  },
+  "detect": {
+    "enable": "Omogoči Detekcijo",
+    "disable": "Onemogoči Detekcijo"
+  },
+  "recording": {
+    "enable": "Omogoči Snemanje",
+    "disable": "Onemogoči Snemanje"
+  },
+  "snapshots": {
+    "enable": "Omogoči Slike",
+    "disable": "Onemogoči Slike"
+  },
+  "audioDetect": {
+    "enable": "Omogoči Zvočno Detekcijo",
+    "disable": "Onemogoči Zvočno Detekcijo"
+  },
+  "transcription": {
+    "enable": "Omogoči Prepisovanje Zvoka v Živo",
+    "disable": "Onemogoči Prepisovanje Zvoka v Živo"
+  },
+  "autotracking": {
+    "enable": "Omogoči Samodejno Sledenje",
+    "disable": "Onemogoči Samodejno Sledenje"
+  },
+  "streamStats": {
+    "enable": "Prikaži Statistiko Pretočnega Predvajanja",
+    "disable": "Skrij Statistiko Pretočnega Predvajanja"
+  },
+  "manualRecording": {
+    "title": "Snemanje na Zahtevo",
+    "tips": "Začni ročni dogodek na podlagi nastavitev hranjenja posnetkov te kamere.",
+    "playInBackground": {
+      "label": "Predvajaj v ozadju",
+      "desc": "Omogočite to možnost, če želite nadaljevati s pretakanjem, ko je predvajalnik skrit."
+    },
+    "showStats": {
+      "label": "Prikaži Statistiko",
+      "desc": "Omogočite to možnost, če želite statistiko pretoka prikazati kot prekrivni sloj na viru kamere."
+    },
+    "debugView": "Pogled za Odpravljanje Napak",
+    "start": "Začni snemanje na zahtevo",
+    "started": "Začelo se je ročno snemanje na zahtevo.",
+    "failedToStart": "Ročnega snemanja na zahtevo ni bilo mogoče začeti.",
+    "recordDisabledTips": "Ker je snemanje v nastavitvah te kamere onemogočeno ali omejeno, bo shranjena samo slika.",
+    "end": "Končaj snemanje na zahtevo",
+    "ended": "Ročno snemanje na zahtevo je končano.",
+    "failedToEnd": "Ročnega snemanja na zahtevo ni bilo mogoče končati."
+  },
+  "streamingSettings": "Nastavitve Pretakanja",
+  "notifications": "Obvestila",
+  "audio": "Zvok",
+  "suspend": {
+    "forTime": "Začasno ustavi za: "
+  },
+  "stream": {
+    "title": "Pretok",
+    "audio": {
+      "tips": {
+        "title": "Zvok mora biti predvajan iz vaše kamere in konfiguriran v go2rtc za ta pretok.",
+        "documentation": "Preberi Dokumentacijo "
+      },
+      "available": "Za ta pretok je na voljo zvok",
+      "unavailable": "Zvok za ta pretok ni na voljo"
+    },
+    "twoWayTalk": {
+      "tips": "Vaša naprava mora podpirati to funkcijo, WebRTC pa mora biti konfiguriran za dvosmerni pogovor.",
+      "tips.documentation": "Preberi dokumentacijo ",
+      "available": "Za ta tok je na voljo dvosmerni pogovor",
+      "unavailable": "Dvosmerni pogovor ni na voljo za ta pretok"
+    },
+    "lowBandwidth": {
+      "tips": "Pogled v živo je v načinu nizke pasovne širine zaradi napak v nalaganju ali pretoku.",
+      "resetStream": "Ponastavi pretok"
+    },
+    "playInBackground": {
+      "label": "Predvajaj v ozadju",
+      "tips": "Omogočite to možnost, če želite nadaljevati s pretakanjem, ko je predvajalnik skrit."
     }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Nastavitve",
+    "cameraEnabled": "Kamera Omogočena",
+    "objectDetection": "Zaznavanje Objektov",
+    "recording": "Snemanje",
+    "snapshots": "Slike",
+    "audioDetection": "Zvočna Detekcija",
+    "transcription": "Zvočni Prepis",
+    "autotracking": "Samodejno Sledenje"
+  },
+  "history": {
+    "label": "Prikaži stare posnetke"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Vse",
+      "motion": "Gibanje",
+      "active_objects": "Aktivni Objekti"
+    },
+    "notAllTips": "Vaša konfiguracija hranjenja posnetkov {{source}} je nastavljena na način <code>: {{effectiveRetainMode}}</code>, zato bo ta posnetek na zahtevo hranil samo segmente z {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Uredi Postavitev",
+    "group": {
+      "label": "Uredi Skupino Kamere"
+    },
+    "exitEdit": "Izhod iz Urejanja"
   }
 }
