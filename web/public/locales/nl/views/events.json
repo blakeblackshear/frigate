@@ -34,5 +34,7 @@
   "markTheseItemsAsReviewed": "Markeer deze items als beoordeeld",
   "selected_other": "{{count}} geselecteerd",
   "selected_one": "{{count}} geselecteerd",
-  "detected": "gedetecteerd"
+  "detected": "gedetecteerd",
+  "suspiciousActivity": "Verdachte activiteit",
+  "threateningActivity": "Bedreigende activiteit"
 }
