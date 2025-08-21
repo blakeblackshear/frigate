@@ -37,7 +37,8 @@
     "cameraEnabled": "Telecamera abilitata",
     "objectDetection": "Rilevamento di oggetti",
     "recording": "Registrazione",
-    "audioDetection": "Rilevamento audio"
+    "audioDetection": "Rilevamento audio",
+    "transcription": "Trascrizione audio"
   },
   "history": {
     "label": "Mostra filmati storici"
@@ -82,7 +83,15 @@
         "label": "Fai clic nella cornice per centrare la telecamera PTZ"
       }
     },
-    "presets": "Preimpostazioni della telecamera PTZ"
+    "presets": "Preimpostazioni della telecamera PTZ",
+    "focus": {
+      "in": {
+        "label": "Aumenta fuoco della telecamera PTZ"
+      },
+      "out": {
+        "label": "Diminuisci fuoco della telecamera PTZ"
+      }
+    }
   },
   "camera": {
     "enable": "Abilita telecamera",
@@ -154,5 +163,9 @@
       "label": "Modifica gruppo telecamere"
     },
     "exitEdit": "Esci dalla modifica"
+  },
+  "transcription": {
+    "enable": "Abilita la trascrizione audio in tempo reale",
+    "disable": "Disabilita la trascrizione audio in tempo reale"
   }
 }
