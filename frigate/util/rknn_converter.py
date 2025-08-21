@@ -182,7 +182,16 @@ def convert_onnx_to_rknn(
         rknn = RKNN(verbose=True)
         rknn.config(**config)
 
-        if rknn.load_onnx(model=onnx_path) != 0:
+        if model_type == "jina-clip-v1-vision":
+            load_output = rknn.load_onnx(
+                model=onnx_path,
+                inputs=["pixel_values"],
+                input_size_list=[[1, 3, 224, 224]],
+            )
+        else:
+            load_output = rknn.load_onnx(model=onnx_path)
+
+        if load_output != 0:
             logger.error("Failed to load ONNX model")
             return False
 
