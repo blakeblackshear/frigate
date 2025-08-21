@@ -12,5 +12,7 @@
       "savingError": "Hiba a konfiguráció mentésekor"
     }
   },
-  "confirm": "Kilép mentés nélkül?"
+  "confirm": "Kilép mentés nélkül?",
+  "safeConfigEditor": "Konfiguráció szerkesztő (Biztosnági Mód)",
+  "safeModeDescription": "Frigate biztonsági módban van konfigurációs hiba miatt."
 }
