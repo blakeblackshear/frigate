@@ -123,5 +123,13 @@
     "placeholder": "输入以搜索车牌…",
     "noLicensePlatesFound": "未找到车牌。",
     "selectPlatesFromList": "从列表中选择一个或多个车牌。"
+  },
+  "classes": {
+    "label": "分类",
+    "all": {
+      "title": "所有分类"
+    },
+    "count_one": "{{count}} 个分类",
+    "count_other": "{{count}} 个分类"
   }
 }
