@@ -43,12 +43,14 @@
         "success": {
           "regenerate": "Uma nova descrição foi solicitada pelo {{provider}}. Dependendo da velocidade do seu fornecedor, a nova descrição pode levar algum tempo para ser regenerada.",
           "updatedSublabel": "Sub-rotulo atualizado com sucesso.",
-          "updatedLPR": "Matrícula atualizada com sucesso."
+          "updatedLPR": "Matrícula atualizada com sucesso.",
+          "audioTranscription": "Transcrição de áudio solicitada com sucesso."
         },
         "error": {
           "regenerate": "Falha ao chamar {{provider}} para uma nova descrição: {{errorMessage}}",
           "updatedSublabelFailed": "Falha ao atualizar o sub-rotulo: {{errorMessage}}",
-          "updatedLPRFailed": "Falha ao atualizar a matrícula: {{errorMessage}}"
+          "updatedLPRFailed": "Falha ao atualizar a matrícula: {{errorMessage}}",
+          "audioTranscription": "Falha ao solicitar transcrição de áudio: {{errorMessage}}"
         }
       },
       "button": {
@@ -97,6 +99,9 @@
     "tips": {
       "descriptionSaved": "Descrição salva com sucesso",
       "saveDescriptionFailed": "Falha ao atualizar a descrição: {{errorMessage}}"
+    },
+    "score": {
+      "label": "Classificação"
     }
   },
   "documentTitle": "Explorar - Frigate",
@@ -183,6 +188,14 @@
     },
     "deleteTrackedObject": {
       "label": "Excluir este objeto rastreado"
+    },
+    "addTrigger": {
+      "label": "Adicionar gatilho",
+      "aria": "Adicione um gatilho para este objeto rastreado"
+    },
+    "audioTranscription": {
+      "label": "Transcrever",
+      "aria": "Solicitar transcrição de áudio"
     }
   },
   "searchResult": {
@@ -205,5 +218,8 @@
   "trackedObjectsCount_one": "{{count}} objeto rastreado ",
   "trackedObjectsCount_many": "{{count}} objetos rastreados ",
   "trackedObjectsCount_other": "",
-  "exploreMore": "Explora mais objetos {{label}}"
+  "exploreMore": "Explora mais objetos {{label}}",
+  "aiAnalysis": {
+    "title": "Análise IA"
+  }
 }
