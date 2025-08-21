@@ -184,6 +184,8 @@ class RKNNModelRunner:
 
         if "vision" in model_name:
             return ["pixel_values"]
+        elif "arcface" in model_name:
+            return ["data"]
         else:
             # Default fallback - try to infer from model type
             if self.model_type and "jina-clip" in self.model_type:
@@ -199,6 +201,8 @@ class RKNNModelRunner:
         model_name = os.path.basename(self.model_path).lower()
         if "vision" in model_name:
             return 224  # CLIP V1 uses 224x224
+        elif "arcface" in model_name:
+            return 112
         return -1
 
     def run(self, inputs: dict[str, Any]) -> Any:
@@ -222,28 +226,6 @@ class RKNNModelRunner:
                         rknn_inputs.append(pixel_data)
                     else:
                         rknn_inputs.append(inputs[name])
-                else:
-                    logger.warning(f"Input '{name}' not found in inputs, using default")
-
-                    if name == "pixel_values":
-                        batch_size = 1
-                        if inputs:
-                            for val in inputs.values():
-                                if hasattr(val, "shape") and len(val.shape) > 0:
-                                    batch_size = val.shape[0]
-                                    break
-                        # Create default in NHWC format as expected by RKNN
-                        rknn_inputs.append(
-                            np.zeros((batch_size, 224, 224, 3), dtype=np.float32)
-                        )
-                    else:
-                        batch_size = 1
-                        if inputs:
-                            for val in inputs.values():
-                                if hasattr(val, "shape") and len(val.shape) > 0:
-                                    batch_size = val.shape[0]
-                                    break
-                        rknn_inputs.append(np.zeros((batch_size, 1), dtype=np.float32))
 
             outputs = self.rknn.inference(inputs=rknn_inputs)
             return outputs

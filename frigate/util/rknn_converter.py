@@ -32,6 +32,11 @@ MODEL_TYPE_CONFIGS = {
         "std_values": [[0.26862954 * 255, 0.26130258 * 255, 0.27577711 * 255]],
         "target_platform": None,  # Will be set dynamically
     },
+    "arcface-r100": {
+        "mean_values": [[127.5, 127.5, 127.5]],
+        "std_values": [[127.5, 127.5, 127.5]],
+        "target_platform": None,  # Will be set dynamically
+    },
 }
 
 
@@ -40,6 +45,9 @@ def get_rknn_model_type(model_path: str) -> str | None:
         return "jina-clip-v1-vision"
 
     model_name = os.path.basename(str(model_path)).lower()
+
+    if "arcface" in model_name:
+        return "arcface-r100"
 
     if any(keyword in model_name for keyword in ["yolo", "yolox", "yolonas"]):
         return model_name
@@ -183,6 +191,12 @@ def convert_onnx_to_rknn(
                 model=onnx_path,
                 inputs=["pixel_values"],
                 input_size_list=[[1, 3, 224, 224]],
+            )
+        elif model_type == "arcface-r100":
+            load_output = rknn.load_onnx(
+                model=onnx_path,
+                inputs=["data"],
+                input_size_list=[[1, 3, 112, 112]],
             )
         else:
             load_output = rknn.load_onnx(model=onnx_path)
