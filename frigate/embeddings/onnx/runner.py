@@ -9,7 +9,7 @@ import onnxruntime as ort
 
 from frigate.const import MODEL_CACHE_DIR
 from frigate.util.model import get_ort_providers
-from frigate.util.rknn_converter import is_rknn_compatible, auto_convert_model
+from frigate.util.rknn_converter import auto_convert_model, is_rknn_compatible
 
 try:
     import openvino as ov
@@ -257,5 +257,5 @@ class RKNNModelRunner:
         if self.rknn:
             try:
                 self.rknn.release()
-            except:
+            except Exception:
                 pass
