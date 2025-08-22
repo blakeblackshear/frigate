@@ -5,6 +5,5 @@
     "untilRestart": "Μέχρι να γίνει επανεκκίνηση",
     "justNow": "Μόλις τώρα",
     "ago": "{{timeAgo}} Πριν"
-  },
-  "readTheDocumentation": "Διαβάστε την τεκμηρίωση"
+  }
 }
