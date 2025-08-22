@@ -18,7 +18,7 @@
       "table": {
         "snapshots": "Istantanee",
         "camera": "Telecamera",
-        "cleanCopySnapshots": "<code>clean_copy</code> Istantanee"
+        "cleanCopySnapshots": "Istantanee <code>clean_copy</code>"
       },
       "desc": "Per inviare a Frigate+ è necessario che nella configurazione siano abilitate sia le istantanee che le istantanee <code>clean_copy</code>.",
       "documentation": "Leggi la documentazione",
@@ -297,7 +297,7 @@
         "regardlessOfZoneObjectDetectionsTips": "Tutti gli oggetti {{detectionsLabels}} non categorizzati su {{cameraName}} verranno mostrati come Rilevamenti, indipendentemente dalla zona in cui si trovano."
       },
       "title": "Classificazione della revisione",
-      "desc": "Frigate categorizza gli elementi di revisione come Avvisi e Rilevamenti. Per impostazione predefinita, tutti gli oggetti <em>persona</em> e <em>auto</em> sono considerati Avvisi. Puoi perfezionare la categorizzazione degli elementi di revisione configurando le zone desiderate.",
+      "desc": "Frigate categorizza gli elementi di revisione come Avvisi e Rilevamenti. Per impostazione predefinita, tutti gli oggetti <em>persona</em> e <em>automobile</em> sono considerati Avvisi. Puoi perfezionare la categorizzazione degli elementi di revisione configurando le zone desiderate.",
       "objectAlertsTips": "Tutti gli oggetti {{alertsLabels}} su {{cameraName}} verranno mostrati come Avvisi.",
       "toast": {
         "success": "La configurazione della classificazione di revisione è stata salvata. Riavvia Frigate per applicare le modifiche."
@@ -310,7 +310,7 @@
       "unsavedChanges": "Impostazioni di classificazione delle revisioni non salvate per {{camera}}"
     },
     "streams": {
-      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi da parte di Frigate. Rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disabilita le ritrasmissioni di go2rtc.</em>",
+      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi da parte di Frigate. Rilevamenti, registrazioni e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disabilita le ritrasmissioni di go2rtc.</em>",
       "title": "Flussi"
     },
     "title": "Impostazioni telecamera",
@@ -470,7 +470,7 @@
   "general": {
     "liveDashboard": {
       "automaticLiveView": {
-        "desc": "Passa automaticamente alla visualizzazione dal vivodi una telecamera quando viene rilevata attività. Disattivando questa opzione, le immagini statiche della telecamera nella schermata dal vivo verranno aggiornate solo una volta al minuto.",
+        "desc": "Passa automaticamente alla visualizzazione dal vivo di una telecamera quando viene rilevata attività. Disattivando questa opzione, le immagini statiche della telecamera nella schermata dal vivo verranno aggiornate solo una volta al minuto.",
         "label": "Visualizzazione automatica dal vivo"
       },
       "playAlertVideos": {
@@ -718,7 +718,7 @@
       "title": "Classificazione degli uccelli"
     },
     "licensePlateRecognition": {
-      "desc": "Frigate può riconoscere le targhe dei veicoli e aggiungere automaticamente i caratteri rilevati al campo recognized_license_plate o un nome noto come sub_label agli oggetti di tipo \"car\". Un caso d'uso comune potrebbe essere la lettura delle targhe delle auto che entrano in un vialetto o che transitano lungo una strada.",
+      "desc": "Frigate può riconoscere le targhe dei veicoli e aggiungere automaticamente i caratteri rilevati al campo recognized_license_plate o un nome noto come sub_label agli oggetti di tipo automobile (car). Un caso d'uso comune potrebbe essere la lettura delle targhe delle auto che entrano in un vialetto o che transitano lungo una strada.",
       "title": "Riconoscimento della targa",
       "readTheDocumentation": "Leggi la documentazione"
     },
