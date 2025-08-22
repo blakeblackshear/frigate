@@ -16,4 +16,4 @@ nvidia-nvjitlink-cu12==12.9.86
 tensorflow==2.20.*
 onnx==1.16.*
 onnxruntime-gpu==1.22.*
-protobuf==3.20.3
+protobuf==5.28.0
