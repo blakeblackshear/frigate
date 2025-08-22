@@ -174,6 +174,11 @@
         "title": "Liberi",
         "tips": "Questo valore potrebbe non rappresentare accuratamente lo spazio libero disponibile per Frigate se nel disco sono archiviati altri file oltre alle registrazioni di Frigate. Frigate non tiene traccia dell'utilizzo dello spazio di archiviazione al di fuori delle sue registrazioni."
       }
+    },
+    "shm": {
+      "title": "Allocazione SHM (memoria condivisa)",
+      "warning": "La dimensione SHM attuale di {{total}} MB è troppo piccola. Aumentarla ad almeno {{min_shm}} MB.",
+      "readTheDocumentation": "Leggi la documentazione"
     }
   },
   "lastRefreshed": "Ultimo aggiornamento: "
