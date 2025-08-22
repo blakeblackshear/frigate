@@ -665,6 +665,8 @@ genai:
   base_url: http://localhost::11434
   # Required if gemini or openai
   api_key: "{FRIGATE_GENAI_API_KEY}"
+  # Required if enabled: The model to use with the provider.
+  model: gemini-1.5-flash
   # Optional additional args to pass to the GenAI Provider (default: None)
   provider_options:
     keep_alive: -1
