@@ -77,7 +77,12 @@
       },
       "bandwidth": "Lățime de bandă"
     },
-    "overview": "Prezentare generală"
+    "overview": "Prezentare generală",
+    "shm": {
+      "title": "Alocare SHM (memorie partajată)",
+      "warning": "Dimensiunea curentă a SHM de {{total}}MB este prea mică. Măriți-o la cel puțin {{min_shm}}MB.",
+      "readTheDocumentation": "Citește documentația"
+    }
   },
   "title": "Sistem",
   "logs": {
