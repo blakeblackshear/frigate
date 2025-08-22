@@ -83,10 +83,10 @@
   },
   "enrichments": {
     "embeddings": {
-      "face_embedding_speed": "Velocità incorporazione volti",
+      "face_embedding_speed": "Velocità incorporamento volti",
       "plate_recognition_speed": "Velocità riconoscimento targhe",
-      "image_embedding_speed": "Velocità incorporazione immagini",
-      "text_embedding_speed": "Velocità incorporazione testo",
+      "image_embedding_speed": "Velocità incorporamento immagini",
+      "text_embedding_speed": "Velocità incorporamento testo",
       "face_recognition_speed": "Velocità di riconoscimento facciale",
       "face_recognition": "Riconoscimento facciale",
       "plate_recognition": "Riconoscimento delle targhe",
@@ -102,7 +102,7 @@
     "info": {
       "fetching": "Recupero dati della telecamera",
       "streamDataFromFFPROBE": "I dati del flusso vengono ottenuti con <code>ffprobe</code>.",
-      "cameraProbeInfo": "Informazioni analisi telecamera {{camera}}",
+      "cameraProbeInfo": "Informazioni flussi telecamera {{camera}}",
       "stream": "Flusso {{idx}}",
       "video": "Video:",
       "codec": "Codec:",
@@ -112,7 +112,7 @@
       "audio": "Audio:",
       "error": "Errore: {{error}}",
       "tips": {
-        "title": "Informazioni analisi telecamera"
+        "title": "Informazioni flussi telecamera"
       },
       "aspectRatio": "rapporto d'aspetto"
     },
@@ -121,15 +121,15 @@
     "framesAndDetections": "Fotogrammi / Rilevamenti",
     "label": {
       "camera": "telecamera",
-      "detect": "rileva",
-      "skipped": "saltato",
+      "detect": "rilevamento",
+      "skipped": "saltati",
       "ffmpeg": "FFmpeg",
       "capture": "cattura",
       "overallFramesPerSecond": "fotogrammi totali al secondo",
       "overallDetectionsPerSecond": "rilevamenti totali al secondo",
       "overallSkippedDetectionsPerSecond": "rilevamenti totali saltati al secondo",
       "cameraCapture": "{{camName}} cattura",
-      "cameraDetect": "{{camName}} rileva",
+      "cameraDetect": "{{camName}} rilevamento",
       "cameraFramesPerSecond": "{{camName}} fotogrammi al secondo",
       "cameraDetectionsPerSecond": "{{camName}} rilevamenti al secondo",
       "cameraSkippedDetectionsPerSecond": "{{camName}} rilevamenti saltati al secondo",
