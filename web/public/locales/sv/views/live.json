@@ -106,7 +106,8 @@
     "objectDetection": "Objektsdetektering",
     "recording": "Inspelning",
     "snapshots": "Ögonblicksbilder",
-    "autotracking": "Autospårning"
+    "autotracking": "Autospårning",
+    "transcription": "Ljudtranskription"
   },
   "effectiveRetainMode": {
     "modes": {
@@ -162,5 +163,9 @@
   },
   "history": {
     "label": "Visa historiskt videomaterial"
+  },
+  "transcription": {
+    "enable": "Aktivera live-ljudtranskription",
+    "disable": "Inaktivera live-ljudtranskription"
   }
 }
