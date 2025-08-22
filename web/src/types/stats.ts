@@ -79,6 +79,7 @@ export type StorageStats = {
   total: number;
   used: number;
   mount_type: string;
+  min_shm?: number;
 };
 
 export type PotentialProblem = {

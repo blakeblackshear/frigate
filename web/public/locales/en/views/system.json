@@ -91,6 +91,11 @@
       "tips": "This value represents the total storage used by the recordings in Frigate's database. Frigate does not track storage usage for all files on your disk.",
       "earliestRecording": "Earliest recording available:"
     },
+    "shm": {
+      "title": "SHM (shared memory) allocation",
+      "warning": "The current SHM size of {{total}}MB is too small, recommend increasing to {{min_shm}}MB.",
+      "readTheDocumentation": "Read the documentation"
+    },
     "cameraStorage": {
       "title": "Camera Storage",
       "camera": "Camera",
