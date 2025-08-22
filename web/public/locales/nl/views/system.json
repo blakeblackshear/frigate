@@ -102,7 +102,12 @@
       "camera": "Camera",
       "bandwidth": "Bandbreedte"
     },
-    "title": "Opslag"
+    "title": "Opslag",
+    "shm": {
+      "title": "SHM (gedeeld geheugen) toewijzing",
+      "warning": "De huidige SHM-grootte van {{total}} MB is te klein. Vergroot deze tot minimaal {{min_shm}} MB.",
+      "readTheDocumentation": "Lees de documentatie"
+    }
   },
   "cameras": {
     "title": "Cameras",
