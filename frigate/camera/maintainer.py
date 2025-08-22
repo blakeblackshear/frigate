@@ -2,8 +2,6 @@
 
 import logging
 import multiprocessing as mp
-import os
-import shutil
 import threading
 from multiprocessing import Queue
 from multiprocessing.managers import DictProxy, SyncManager
@@ -16,11 +14,11 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
-from frigate.const import SHM_FRAMES_VAR
 from frigate.models import Regions
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.object import get_camera_regions_grid
+from frigate.util.services import calculate_shm_requirements
 from frigate.video import CameraCapture, CameraTracker
 
 logger = logging.getLogger(__name__)
@@ -74,53 +72,25 @@ class CameraMaintainer(threading.Thread):
             )
 
     def __calculate_shm_frame_count(self) -> int:
-        total_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
+        shm_stats = calculate_shm_requirements(self.config)
 
-        # required for log files + nginx cache
-        min_req_shm = 40 + 10
-
-        if self.config.birdseye.restream:
-            min_req_shm += 8
-
-        available_shm = total_shm - min_req_shm
-        cam_total_frame_size = 0.0
-
-        for camera in self.config.cameras.values():
-            if (
-                camera.enabled_in_config
-                and camera.detect.width
-                and camera.detect.height
-            ):
-                cam_total_frame_size += round(
-                    (camera.detect.width * camera.detect.height * 1.5 + 270480)
-                    / 1048576,
-                    1,
-                )
-
-        # leave room for 2 cameras that are added dynamically, if a user wants to add more cameras they may need to increase the SHM size and restart after adding them.
-        cam_total_frame_size += 2 * round(
-            (1280 * 720 * 1.5 + 270480) / 1048576,
-            1,
-        )
-
-        if cam_total_frame_size == 0.0:
+        if not shm_stats:
+            # /dev/shm not available
             return 0
 
-        shm_frame_count = min(
-            int(os.environ.get(SHM_FRAMES_VAR, "50")),
-            int(available_shm / (cam_total_frame_size)),
-        )
-
         logger.debug(
-            f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {shm_frame_count} frames for each camera in SHM"
+            f"Calculated total camera size {shm_stats['available']} / "
+            f"{shm_stats['camera_frame_size']} :: {shm_stats['shm_frame_count']} "
+            f"frames for each camera in SHM"
         )
 
-        if shm_frame_count < 20:
+        if shm_stats["min_shm"]:
             logger.warning(
-                f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + cam_total_frame_size * 20)}MB."
+                f"The current SHM size of {shm_stats['total']}MB is too small, "
+                f"recommend increasing it to at least {shm_stats['min_shm']}MB."
             )
 
-        return shm_frame_count
+        return shm_stats["shm_frame_count"]
 
     def __start_camera_processor(
         self, name: str, config: CameraConfig, runtime: bool = False
