@@ -32,7 +32,12 @@ export default function CameraMetrics({
   // stats
 
   const { data: initialStats } = useSWR<FrigateStats[]>(
-    ["stats/history", { keys: "cpu_usages,cameras,detection_fps,service" }],
+    [
+      "stats/history",
+      {
+        keys: "cpu_usages,cameras,camera_fps,detection_fps,skipped_fps,service",
+      },
+    ],
     {
       revalidateOnFocus: false,
     },

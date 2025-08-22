@@ -238,6 +238,14 @@ Topic with current state of notifications. Published values are `ON` and `OFF`.
 
 ## Frigate Camera Topics
 
+### `frigate/<camera_name>/<role>/status`
+
+Publishes the current health status of each role that is enabled (`audio`, `detect`, `record`). Possible values are:
+
+- `online`: Stream is running and being processed
+- `offline`: Stream is offline and is being restarted
+- `disabled`: Camera is currently disabled
+
 ### `frigate/<camera_name>/<object_name>`
 
 Publishes the count of objects for the camera for use as a sensor in Home Assistant.
