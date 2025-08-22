@@ -257,7 +257,7 @@ export default function MotionMaskEditPane({
             rel="noopener noreferrer"
             className="inline"
           >
-            {t("masksAndZones.motionMasks.context.documentation")}{" "}
+            {t("readTheDocumentation", { ns: "common" })}
             <LuExternalLink className="ml-2 inline-flex size-3" />
           </Link>
         </div>
@@ -303,7 +303,7 @@ export default function MotionMaskEditPane({
               rel="noopener noreferrer"
               className="my-3 block"
             >
-              {t("masksAndZones.motionMasks.polygonAreaTooLarge.documentation")}{" "}
+              {t("readTheDocumentation", { ns: "common" })}{" "}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>

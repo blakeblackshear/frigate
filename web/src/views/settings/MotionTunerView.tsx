@@ -205,7 +205,7 @@ export default function MotionTunerView({
               rel="noopener noreferrer"
               className="inline"
             >
-              {t("motionDetectionTuner.desc.documentation")}{" "}
+              {t("readTheDocumentation", { ns: "common" })}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>

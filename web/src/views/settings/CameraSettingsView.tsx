@@ -508,9 +508,7 @@ export default function CameraSettingsView({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      <Trans ns="views/settings">
-                        camera.reviewClassification.readTheDocumentation
-                      </Trans>{" "}
+                      {t("readTheDocumentation", { ns: "common" })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>
