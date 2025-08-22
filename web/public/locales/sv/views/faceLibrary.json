@@ -53,7 +53,10 @@
   "imageEntry": {
     "dropActive": "Släpp bilden här…",
     "dropInstructions": "Dra och släpp en bild här, eller klicka för att välja",
-    "maxSize": "Maxstorlek: {{size}}MB"
+    "maxSize": "Maxstorlek: {{size}}MB",
+    "validation": {
+      "selectImage": "Välj en bildfil."
+    }
   },
   "nofaces": "Inga ansikten tillgängliga",
   "pixels": "{{area}}px",
@@ -65,7 +68,33 @@
       "uploadedImage": "Bilden har laddats upp.",
       "addFaceLibrary": "{{name}} har lagts till i ansiktsbiblioteket!",
       "deletedFace_one": "{{count}} ansikte har raderats.",
-      "deletedFace_other": "{{count}} ansikten har raderats."
+      "deletedFace_other": "{{count}} ansikten har raderats.",
+      "deletedName_one": "{{count}} ansikte har raderats.",
+      "deletedName_other": "{{count}} ansikten har raderats.",
+      "renamedFace": "Ansiktet har bytt namn till {{name}}",
+      "trainedFace": "Ansikte är tränant.",
+      "updatedFaceScore": "Ansikts poängen har uppdaterats."
+    },
+    "error": {
+      "uploadingImageFailed": "Misslyckades med att ladda upp bilden: {{errorMessage}}",
+      "addFaceLibraryFailed": "Misslyckades med att ange ansiktsnamn: {{errorMessage}}",
+      "deleteFaceFailed": "Misslyckades med att ta bort: {{errorMessage}}",
+      "deleteNameFailed": "Misslyckades med att ta bort namnet: {{errorMessage}}",
+      "renameFaceFailed": "Misslyckades med att byta namn på ansikte: {{errorMessage}}",
+      "trainFailed": "Misslyckades med att träna: {{errorMessage}}",
+      "updateFaceScoreFailed": "Misslyckades med att uppdatera ansiktspoäng: {{errorMessage}}"
     }
+  },
+  "renameFace": {
+    "title": "Byt namn på ansikte",
+    "desc": "Ange ett nytt namn för {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Ta bort ansikten",
+    "addFace": "Lägg till ansikte",
+    "renameFace": "Byt namn på ansikte",
+    "deleteFace": "Ta bort ansikte",
+    "uploadImage": "Ladda upp bild",
+    "reprocessFace": "Återbearbeta ansiktet"
   }
 }

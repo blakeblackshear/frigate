@@ -52,7 +52,11 @@
       "gpuDecoder": "GPU-avkodare",
       "gpuInfo": {
         "nvidiaSMIOutput": {
-          "vbios": "VBios-information: {{vbios}}"
+          "vbios": "VBios-information: {{vbios}}",
+          "title": "Nvidia SMI utdata",
+          "name": "Namn: {{name}}",
+          "driver": "Drivrutin: {{driver}}",
+          "cudaComputerCapability": "CUDA beräknings kapacitet: {{cuda_compute}}"
         },
         "closeInfo": {
           "label": "Stäng GPU-info"
@@ -62,6 +66,12 @@
         },
         "toast": {
           "success": "Kopierade GPU-info till urklipp"
+        },
+        "vainfoOutput": {
+          "title": "Vainfo resultat",
+          "returnCode": "Returkod: {{code}}",
+          "processOutput": "Bearbeta utdata:",
+          "processError": "Processfel:"
         }
       },
       "npuUsage": "NPU-användning",
@@ -81,22 +91,46 @@
       "unused": {
         "title": "Oanvänt",
         "tips": "Det här värdet kanske inte korrekt representerar det lediga utrymmet tillgängligt för Frigate om du har andra filer lagrade på din hårddisk utöver Frigates inspelningar. Frigate spårar inte lagringsanvändning utanför sina egna inspelningar."
-      }
+      },
+      "title": "Kamera lagring",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Information om oanvänd lagring"
     },
     "title": "Lagring",
     "overview": "Översikt",
     "recordings": {
-      "title": "Inspelningar"
+      "title": "Inspelningar",
+      "tips": "Detta värde representerar den totala lagringsmängden som används av inspelningarna i Frigates databas. Frigate spårar inte lagringsanvändningen för alla filer på din disk.",
+      "earliestRecording": "Tidigast tillgängliga inspelning:"
     }
   },
   "cameras": {
     "title": "Kameror",
     "overview": "Översikt",
     "info": {
-      "aspectRatio": "bildförhållande"
+      "aspectRatio": "bildförhållande",
+      "cameraProbeInfo": "{{camera}} Kamerasondinformation",
+      "streamDataFromFFPROBE": "Strömdata erhålls med <code>ffprobe</code>.",
+      "codec": "Codec:",
+      "resolution": "Upplösning:",
+      "fps": "FPS:",
+      "unknown": "Okänd",
+      "audio": "Audio:",
+      "error": "Fel: {{error}}",
+      "tips": {
+        "title": "Kamera sond information"
+      },
+      "fetching": "Hämtar kamera data",
+      "stream": "Ström {{idx}}",
+      "video": "Video:"
     },
     "label": {
-      "detect": "detektera"
-    }
+      "detect": "detektera",
+      "camera": "kamera",
+      "skipped": "hoppade över",
+      "ffmpeg": "FFmpeg",
+      "capture": "spela in"
+    },
+    "framesAndDetections": "Ramar / Detektioner"
   }
 }
