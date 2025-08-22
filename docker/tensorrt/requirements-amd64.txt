@@ -1,19 +1,19 @@
 # NVidia TensorRT Support (amd64 only)
 --extra-index-url 'https://pypi.nvidia.com'
-cython==3.0.*; platform_machine == 'x86_64'
-nvidia_cuda_cupti_cu12==12.5.82; platform_machine == 'x86_64'
-nvidia-cublas-cu12==12.5.3.*; platform_machine == 'x86_64'
-nvidia-cudnn-cu12==9.3.0.*; platform_machine == 'x86_64'
-nvidia-cufft-cu12==11.2.3.*; platform_machine == 'x86_64'
-nvidia-curand-cu12==10.3.6.*; platform_machine == 'x86_64'
-nvidia_cuda_nvcc_cu12==12.5.82; platform_machine == 'x86_64'
-nvidia-cuda-nvrtc-cu12==12.5.82; platform_machine == 'x86_64'
-nvidia_cuda_runtime_cu12==12.5.82; platform_machine == 'x86_64'
-nvidia_cusolver_cu12==11.6.3.*; platform_machine == 'x86_64'
-nvidia_cusparse_cu12==12.5.1.*; platform_machine == 'x86_64'
-nvidia_nccl_cu12==2.23.4; platform_machine == 'x86_64'
-nvidia_nvjitlink_cu12==12.5.82; platform_machine == 'x86_64'
-tensorflow==2.19.*; platform_machine == 'x86_64'
-onnx==1.16.*; platform_machine == 'x86_64'
-onnxruntime-gpu==1.22.*; platform_machine == 'x86_64'
-protobuf==3.20.3; platform_machine == 'x86_64'
+cython==3.1.*
+nvidia-cublas-cu12==12.9.1.4
+nvidia-cuda-cupti-cu12==12.9.79
+nvidia-cuda-nvcc-cu12==12.9.86
+nvidia-cuda-nvrtc-cu12==12.9.86
+nvidia-cuda-runtime-cu12==12.9.79
+nvidia-cudnn-cu12==9.12.0.46
+nvidia-cufft-cu12==11.4.1.4
+nvidia-curand-cu12==10.3.10.19
+nvidia-cusolver-cu12==11.7.5.82
+nvidia-cusparse-cu12==12.5.10.65
+nvidia-nccl-cu12==2.27.7
+nvidia-nvjitlink-cu12==12.9.86
+tensorflow==2.20.*
+onnx==1.16.*
+onnxruntime-gpu==1.22.*
+protobuf==3.20.3
