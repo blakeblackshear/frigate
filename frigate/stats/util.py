@@ -380,7 +380,7 @@ def stats_snapshot(
         "last_updated": int(time.time()),
     }
 
-    for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
+    for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
         try:
             storage_stats = shutil.disk_usage(path)
         except (FileNotFoundError, OSError):
