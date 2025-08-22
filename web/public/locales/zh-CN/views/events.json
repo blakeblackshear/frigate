@@ -35,5 +35,7 @@
   "selected": "已选择 {{count}} 个",
   "selected_one": "已选择 {{count}} 个",
   "selected_other": "已选择 {{count}} 个",
-  "detected": "已检测"
+  "detected": "已检测",
+  "suspiciousActivity": "可疑活动",
+  "threateningActivity": "威胁性活动"
 }
