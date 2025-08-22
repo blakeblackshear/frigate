@@ -1,5 +1,7 @@
 {
   "documentTitle": {
-    "cameras": "Στατιστικά Καμερών - Frigate"
+    "cameras": "Στατιστικά Καμερών - Frigate",
+    "storage": "Στατιστικά αποθήκευσης - Frigate",
+    "general": "Γενικά στατιστικά στοιχεία - Frigate"
   }
 }
