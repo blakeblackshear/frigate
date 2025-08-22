@@ -3,5 +3,6 @@
   "savedSearches": "Αποθηκευμένες Αναζητήσεις",
   "button": {
     "clear": "Εκαθάρηση αναζήτησης"
-  }
+  },
+  "searchFor": "Αναζήτηση {{inputValue}}"
 }
