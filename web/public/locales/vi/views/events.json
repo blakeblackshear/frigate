@@ -34,5 +34,7 @@
     "button": "Các mục mới cần xem xét"
   },
   "markAsReviewed": "Đánh dấu là đã xem xét",
-  "markTheseItemsAsReviewed": "Đánh dấu các mục này là đã xem xét"
+  "markTheseItemsAsReviewed": "Đánh dấu các mục này là đã xem xét",
+  "suspiciousActivity": "Hoạt động đáng ngờ",
+  "threateningActivity": "Hoạt động đe dọa"
 }

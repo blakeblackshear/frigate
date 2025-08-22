@@ -60,12 +60,14 @@
         "error": {
           "updatedSublabelFailed": "Không thể cập nhật nhãn phụ: {{errorMessage}}",
           "updatedLPRFailed": "Không thể cập nhật biển số xe: {{errorMessage}}",
-          "regenerate": "Không thể gọi {{provider}} để lấy mô tả mới: {{errorMessage}}"
+          "regenerate": "Không thể gọi {{provider}} để lấy mô tả mới: {{errorMessage}}",
+          "audioTranscription": "Không thể yêu cầu phiên âm: {{errorMessage}}"
         },
         "success": {
           "regenerate": "Một mô tả mới đã được yêu cầu từ {{provider}}. Tùy thuộc vào tốc độ của nhà cung cấp của bạn, mô tả mới có thể mất một chút thời gian để tạo lại.",
           "updatedLPR": "Cập nhật biển số xe thành công.",
-          "updatedSublabel": "Cập nhật nhãn phụ thành công."
+          "updatedSublabel": "Cập nhật nhãn phụ thành công.",
+          "audioTranscription": "Đã yêu cầu phiên âm thành công."
         }
       },
       "tips": {
@@ -115,6 +117,9 @@
       "title": "Chỉnh sửa biển số xe",
       "desc": "Nhập một giá trị biển số xe mới cho {{label}} này",
       "descNoLabel": "Nhập một giá trị biển số xe mới cho đối tượng được theo dõi này"
+    },
+    "score": {
+      "label": "Điểm tin cậy"
     }
   },
   "itemMenu": {
@@ -144,6 +149,14 @@
     },
     "deleteTrackedObject": {
       "label": "Xóa đối tượng được theo dõi này"
+    },
+    "addTrigger": {
+      "label": "Thêm sự kiện kích hoạt",
+      "aria": "Thêm sự kiện kích hoạt cho đối tượng này."
+    },
+    "audioTranscription": {
+      "label": "Phiên âm",
+      "aria": "Yêu cầu phiên âm"
     }
   },
   "exploreIsUnavailable": {
@@ -201,5 +214,11 @@
   "fetchingTrackedObjectsFailed": "Lỗi khi tìm nạp các đối tượng được theo dõi: {{errorMessage}}",
   "documentTitle": "Khám phá - Frigate",
   "generativeAI": "AI Tạo sinh",
-  "trackedObjectsCount_other": "{{count}} đối tượng được theo dõi "
+  "trackedObjectsCount_other": "{{count}} đối tượng được theo dõi ",
+  "aiAnalysis": {
+    "title": "Phân tích bằng AI"
+  },
+  "concerns": {
+    "label": "Mối lo ngại"
+  }
 }
