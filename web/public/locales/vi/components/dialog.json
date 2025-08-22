@@ -108,5 +108,12 @@
       "placeholder": "Nhập tên cho tìm kiếm của bạn",
       "overwrite": "{{searchName}} đã tồn tại. Lưu sẽ ghi đè lên giá trị hiện có."
     }
+  },
+  "imagePicker": {
+    "selectImage": "Chọn hình thu nhỏ của đối tượng cần theo dõi",
+    "search": {
+      "placeholder": "Tìm theo nhãn hoặc nhãn phụ..."
+    },
+    "noImages": "Không tìm thấy hình thu nhỏ cho camera này"
   }
 }

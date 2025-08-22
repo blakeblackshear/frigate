@@ -142,6 +142,43 @@
     "streams": {
       "title": "Luồng phát",
       "desc": "Tạm thời vô hiệu hóa một camera cho đến khi Frigate khởi động lại. Vô hiệu hóa một camera sẽ dừng hoàn toàn quá trình xử lý các luồng của camera này của Frigate. Việc phát hiện, ghi hình và gỡ lỗi sẽ không khả dụng.<br /> <em>Lưu ý: Điều này không vô hiệu hóa các luồng phát lại của go2rtc.</em>"
+    },
+    "object_descriptions": {
+      "title": "Mô tả đối tượng bằng AI tạo sinh",
+      "desc": "Tạm thời bật/tắt mô tả đối tượng bằng AI tạo sinh cho camera này. Khi tắt, mô tả do AI tạo sinh sẽ không được yêu cầu cho các đối tượng được theo dõi trên camera này."
+    },
+    "review_descriptions": {
+      "title": "Mô tả đánh giá bằng AI tạo sinh",
+      "desc": "Tạm thời bật/tắt mô tả xem lại bằng AI tạo sinh cho camera này. Khi tắt, mô tả do AI tạo sinh sẽ không được yêu cầu cho các mục xem lại trên camera này."
+    },
+    "addCamera": "Thêm Camera mới",
+    "editCamera": "Chỉnh sửa Camera:",
+    "selectCamera": "Chọn Camera",
+    "backToSettings": "Quay lại cài đặt Camera",
+    "cameraConfig": {
+      "add": "Thêm Camera",
+      "edit": "Chỉnh sửa Camera",
+      "description": "Cấu hình Camera, bao gồm luồng đầu vào và vai trò.",
+      "name": "Tên Camera",
+      "nameRequired": "Yêu cầu nhập tên Camera",
+      "nameInvalid": "Tên Camera chỉ được chứa chữ cái, số, dấu gạch dưới hoặc dấu gạch ngang",
+      "namePlaceholder": "Ví dụ: front_door",
+      "enabled": "Bật",
+      "ffmpeg": {
+        "inputs": "Luồng đầu vào",
+        "path": "Đường dẫn luồng",
+        "pathRequired": "Yêu cầu nhập đường dẫn luồng",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Vai trò",
+        "rolesRequired": "Cần ít nhất một vai trò",
+        "rolesUnique": "Mỗi vai trò (âm thanh, phát hiện, ghi hình) chỉ có thể được gán cho một luồng duy nhất",
+        "addInput": "Thêm luồng đầu vào",
+        "removeInput": "Xóa luồng đầu vào",
+        "inputsRequired": "Cần ít nhất một luồng đầu vào"
+      },
+      "toast": {
+        "success": "Camera {{cameraName}} đã được lưu thành công"
+      }
     }
   },
   "masksAndZones": {
@@ -381,6 +418,11 @@
       "desc": "Hiển thị các hộp xung quanh các khu vực phát hiện có chuyển động",
       "tips": "<p><strong>Hộp chuyển động</strong></p><br><p>Các hộp màu đỏ sẽ được chồng lên các khu vực của khung hình nơi chuyển động đang được phát hiện</p>",
       "title": "Hộp chuyển động"
+    },
+    "paths": {
+      "title": "Đường dẫn",
+      "desc": "Hiển thị các điểm quan trọng trên đường đi của đối tượng được theo dõi",
+      "tips": "<p><strong>Đường đi</strong></p><br><p>Đường thẳng và vòng tròn sẽ hiển thị các điểm quan trọng mà đối tượng được theo dõi đã di chuyển trong suốt quá trình theo dõi.</p>"
     }
   },
   "users": {
@@ -612,5 +654,11 @@
   "cameraSetting": {
     "camera": "Camera",
     "noCamera": "Không có Camera"
+  },
+  "triggers": {
+    "documentTitle": "Sự kiện kích hoạt",
+    "management": {
+      "title": "Quản lý sự kiện kích hoạt"
+    }
   }
 }
