@@ -49,6 +49,45 @@
       "title": "Uložené rozloženia",
       "desc": "Rozloženie kamier v skupine kamier je možné presúvať/zmeniť jeho veľkosť. Pozície sú uložené v lokálnom úložisku vášho prehliadača.",
       "clearAll": "Vymazať všetky rozloženia"
+    },
+    "cameraGroupStreaming": {
+      "title": "Nastavenia streamovania skupiny kamier",
+      "desc": "Nastavenia streamovania pre každú skupinu kamier sú uložené v lokálnom úložisku vášho prehliadača.",
+      "clearAll": "Vymazať všetky nastavenia streamovania"
+    },
+    "recordingsViewer": {
+      "title": "Prehliadač nahrávok",
+      "defaultPlaybackRate": {
+        "label": "Predvolená rýchlosť prehrávania",
+        "desc": "Predvolená rýchlosť prehrávania nahrávok."
+      }
+    },
+    "calendar": {
+      "title": "Kalendár",
+      "firstWeekday": {
+        "label": "Prvý pracovný deň",
+        "desc": "Deň, kedy začínajú týždne v kalendári kontroly.",
+        "sunday": "Nedeľa",
+        "monday": "Pondelok"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Uložené rozloženie pre {{cameraName}} bolo vymazané",
+        "clearStreamingSettings": "Nastavenia streamovania pre všetky skupiny kamier boli vymazané."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Nepodarilo sa vymazať uložené rozloženie: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Nepodarilo sa vymazať nastavenia streamovania: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "title": "Nastavenia obohatení",
+    "unsavedChanges": "Zmeny nastavení neuložených obohatení",
+    "birdClassification": {
+      "title": "Klasifikácia vtákov",
+      "desc": "Klasifikácia vtákov identifikuje známe vtáky pomocou kvantizovaného modelu Tensorflow. Keď je známy vták rozpoznaný, jeho bežný názov sa pridá ako podoznačenie (sub_label). Tieto informácie sú zahrnuté v používateľskom rozhraní, filtroch, ako aj v oznámeniach."
     }
   }
 }

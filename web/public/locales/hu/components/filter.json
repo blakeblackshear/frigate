@@ -122,5 +122,13 @@
     "selectPlatesFromList": "Válasszon ki egy vagy több rendszámtáblát a listából.",
     "loading": "Felismert rendszámtáblák betöltése…",
     "placeholder": "Kezdjen gépelni a rendszámok közötti kereséshez…"
+  },
+  "classes": {
+    "label": "Osztályok",
+    "all": {
+      "title": "Minden Osztály"
+    },
+    "count_one": "{{count}} Osztály",
+    "count_other": "{{count}} Osztályok"
   }
 }

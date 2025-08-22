@@ -4,8 +4,11 @@
     "general": "Allmän statistik - Frigate",
     "cameras": "Kamerastatistik - Frigate",
     "logs": {
-      "frigate": "Frigate loggar - Frigate"
-    }
+      "frigate": "Frigate-loggar - Frigate",
+      "go2rtc": "Go2RTC-loggar - Frigate",
+      "nginx": "Nginx-loggar - Frigate"
+    },
+    "enrichments": "Förbättringsstatistik - Frigate"
   },
   "logs": {
     "copy": {
@@ -19,18 +22,81 @@
     "type": {
       "label": "Typ",
       "timestamp": "Tidsstämpel",
-      "message": "Meddelande"
+      "message": "Meddelande",
+      "tag": "Tagg"
     },
     "tips": "Loggarna strömmas från Server",
     "toast": {
       "error": {
-        "fetchingLogsFailed": "Fel vid hämtning av loggar: {{errorMessage}}"
+        "fetchingLogsFailed": "Fel vid hämtning av loggar: {{errorMessage}}",
+        "whileStreamingLogs": "Fel vid uppspelning av loggar: {{errorMessage}}"
       }
     }
   },
   "title": "System",
-  "metrics": "System detaljer",
+  "metrics": "Systemdetaljer",
   "general": {
-    "title": "Generellt"
+    "title": "Generellt",
+    "detector": {
+      "title": "Detektorer",
+      "inferenceSpeed": "Detektorns inferenshastighet",
+      "temperature": "Detektor temperatur",
+      "cpuUsage": "Detektorns CPU-användning",
+      "memoryUsage": "Detektor minnes användning"
+    },
+    "hardwareInfo": {
+      "title": "Hårdvaruinformation",
+      "gpuUsage": "GPU-användning",
+      "gpuMemory": "GPU-minne",
+      "gpuEncoder": "GPU-kodare",
+      "gpuDecoder": "GPU-avkodare",
+      "gpuInfo": {
+        "nvidiaSMIOutput": {
+          "vbios": "VBios-information: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Stäng GPU-info"
+        },
+        "copyInfo": {
+          "label": "Kopiera GPU-info"
+        },
+        "toast": {
+          "success": "Kopierade GPU-info till urklipp"
+        }
+      },
+      "npuUsage": "NPU-användning",
+      "npuMemory": "NPU-minne"
+    },
+    "otherProcesses": {
+      "title": "Övriga processer",
+      "processCpuUsage": "Process CPU-användning",
+      "processMemoryUsage": "Processminnesanvändning"
+    }
+  },
+  "storage": {
+    "cameraStorage": {
+      "storageUsed": "Lagring",
+      "percentageOfTotalUsed": "Procentandel av totalt",
+      "bandwidth": "Bandbredd",
+      "unused": {
+        "title": "Oanvänt",
+        "tips": "Det här värdet kanske inte korrekt representerar det lediga utrymmet tillgängligt för Frigate om du har andra filer lagrade på din hårddisk utöver Frigates inspelningar. Frigate spårar inte lagringsanvändning utanför sina egna inspelningar."
+      }
+    },
+    "title": "Lagring",
+    "overview": "Översikt",
+    "recordings": {
+      "title": "Inspelningar"
+    }
+  },
+  "cameras": {
+    "title": "Kameror",
+    "overview": "Översikt",
+    "info": {
+      "aspectRatio": "bildförhållande"
+    },
+    "label": {
+      "detect": "detektera"
+    }
   }
 }

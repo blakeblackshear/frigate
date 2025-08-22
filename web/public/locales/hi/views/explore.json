@@ -1,4 +1,8 @@
 {
   "documentTitle": "अन्वेषण करें - फ्रिगेट",
-  "generativeAI": "जनरेटिव ए आई"
+  "generativeAI": "जनरेटिव ए आई",
+  "exploreMore": "और अधिक {{label}} वस्तुओं का अन्वेषण करें",
+  "exploreIsUnavailable": {
+    "title": "अन्वेषण अनुपलब्ध है"
+  }
 }

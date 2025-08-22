@@ -6,6 +6,7 @@ import queue
 import threading
 from collections import defaultdict
 from enum import Enum
+from multiprocessing import Queue as MpQueue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
@@ -14,7 +15,6 @@ import numpy as np
 from peewee import SQL, DoesNotExist
 
 from frigate.camera.state import CameraState
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import (
@@ -29,6 +29,10 @@ from frigate.config import (
     RecordConfig,
     SnapshotsConfig,
 )
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     FAST_QUEUE_TIMEOUT,
     UPDATE_CAMERA_ACTIVITY,
@@ -36,6 +40,7 @@ from frigate.const import (
 )
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event, ReviewSegment, Timeline
+from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import SharedMemoryFrameManager
 
@@ -53,10 +58,10 @@ class TrackedObjectProcessor(threading.Thread):
         self,
         config: FrigateConfig,
         dispatcher: Dispatcher,
-        tracked_objects_queue,
-        ptz_autotracker_thread,
-        stop_event,
-    ):
+        tracked_objects_queue: MpQueue,
+        ptz_autotracker_thread: PtzAutoTrackerThread,
+        stop_event: MpEvent,
+    ) -> None:
         super().__init__(name="detected_frames_processor")
         self.config = config
         self.dispatcher = dispatcher
@@ -67,10 +72,19 @@ class TrackedObjectProcessor(threading.Thread):
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
-        self.config_enabled_subscriber = ConfigSubscriber("config/enabled/")
+        self.camera_config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.enabled,
+                CameraConfigUpdateEnum.remove,
+                CameraConfigUpdateEnum.zones,
+            ],
+        )
 
         self.requestor = InterProcessRequestor()
-        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.all)
+        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.all.value)
         self.event_sender = EventUpdatePublisher()
         self.event_end_subscriber = EventEndSubscriber()
         self.sub_label_subscriber = EventMetadataSubscriber(EventMetadataTypeEnum.all)
@@ -86,10 +100,20 @@ class TrackedObjectProcessor(threading.Thread):
         #       }
         #   }
         # }
-        self.zone_data = defaultdict(lambda: defaultdict(dict))
-        self.active_zone_data = defaultdict(lambda: defaultdict(dict))
+        self.zone_data: dict[str, dict[str, Any]] = defaultdict(
+            lambda: defaultdict(dict)
+        )
+        self.active_zone_data: dict[str, dict[str, Any]] = defaultdict(
+            lambda: defaultdict(dict)
+        )
 
-        def start(camera: str, obj: TrackedObject, frame_name: str):
+        for camera in self.config.cameras.keys():
+            self.create_camera_state(camera)
+
+    def create_camera_state(self, camera: str) -> None:
+        """Creates a new camera state."""
+
+        def start(camera: str, obj: TrackedObject, frame_name: str) -> None:
             self.event_sender.publish(
                 (
                     EventTypeEnum.tracked_object,
@@ -100,7 +124,7 @@ class TrackedObjectProcessor(threading.Thread):
                 )
             )
 
-        def update(camera: str, obj: TrackedObject, frame_name: str):
+        def update(camera: str, obj: TrackedObject, frame_name: str) -> None:
             obj.has_snapshot = self.should_save_snapshot(camera, obj)
             obj.has_clip = self.should_retain_recording(camera, obj)
             after = obj.to_dict()
@@ -121,10 +145,10 @@ class TrackedObjectProcessor(threading.Thread):
                 )
             )
 
-        def autotrack(camera: str, obj: TrackedObject, frame_name: str):
+        def autotrack(camera: str, obj: TrackedObject, frame_name: str) -> None:
             self.ptz_autotracker_thread.ptz_autotracker.autotrack_object(camera, obj)
 
-        def end(camera: str, obj: TrackedObject, frame_name: str):
+        def end(camera: str, obj: TrackedObject, frame_name: str) -> None:
             # populate has_snapshot
             obj.has_snapshot = self.should_save_snapshot(camera, obj)
             obj.has_clip = self.should_retain_recording(camera, obj)
@@ -193,26 +217,25 @@ class TrackedObjectProcessor(threading.Thread):
 
             return False
 
-        def camera_activity(camera, activity):
+        def camera_activity(camera: str, activity: dict[str, Any]) -> None:
             last_activity = self.camera_activity.get(camera)
 
             if not last_activity or activity != last_activity:
                 self.camera_activity[camera] = activity
                 self.requestor.send_data(UPDATE_CAMERA_ACTIVITY, self.camera_activity)
 
-        for camera in self.config.cameras.keys():
-            camera_state = CameraState(
-                camera, self.config, self.frame_manager, self.ptz_autotracker_thread
-            )
-            camera_state.on("start", start)
-            camera_state.on("autotrack", autotrack)
-            camera_state.on("update", update)
-            camera_state.on("end", end)
-            camera_state.on("snapshot", snapshot)
-            camera_state.on("camera_activity", camera_activity)
-            self.camera_states[camera] = camera_state
+        camera_state = CameraState(
+            camera, self.config, self.frame_manager, self.ptz_autotracker_thread
+        )
+        camera_state.on("start", start)
+        camera_state.on("autotrack", autotrack)
+        camera_state.on("update", update)
+        camera_state.on("end", end)
+        camera_state.on("snapshot", snapshot)
+        camera_state.on("camera_activity", camera_activity)
+        self.camera_states[camera] = camera_state
 
-    def should_save_snapshot(self, camera, obj: TrackedObject):
+    def should_save_snapshot(self, camera: str, obj: TrackedObject) -> bool:
         if obj.false_positive:
             return False
 
@@ -235,7 +258,7 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def should_retain_recording(self, camera: str, obj: TrackedObject):
+    def should_retain_recording(self, camera: str, obj: TrackedObject) -> bool:
         if obj.false_positive:
             return False
 
@@ -255,7 +278,7 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def should_mqtt_snapshot(self, camera, obj: TrackedObject):
+    def should_mqtt_snapshot(self, camera: str, obj: TrackedObject) -> bool:
         # object never changed position
         if obj.is_stationary():
             return False
@@ -270,7 +293,9 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def update_mqtt_motion(self, camera, frame_time, motion_boxes):
+    def update_mqtt_motion(
+        self, camera: str, frame_time: float, motion_boxes: list
+    ) -> None:
         # publish if motion is currently being detected
         if motion_boxes:
             # only send ON if motion isn't already active
@@ -296,11 +321,15 @@ class TrackedObjectProcessor(threading.Thread):
                 # reset the last_motion so redundant `off` commands aren't sent
                 self.last_motion_detected[camera] = 0
 
-    def get_best(self, camera, label):
+    def get_best(self, camera: str, label: str) -> dict[str, Any]:
         # TODO: need a lock here
         camera_state = self.camera_states[camera]
         if label in camera_state.best_objects:
             best_obj = camera_state.best_objects[label]
+
+            if not best_obj.thumbnail_data:
+                return {}
+
             best = best_obj.thumbnail_data.copy()
             best["frame"] = camera_state.frame_cache.get(
                 best_obj.thumbnail_data["frame_time"]
@@ -323,7 +352,7 @@ class TrackedObjectProcessor(threading.Thread):
 
         return self.camera_states[camera].get_current_frame(draw_options)
 
-    def get_current_frame_time(self, camera) -> int:
+    def get_current_frame_time(self, camera: str) -> float:
         """Returns the latest frame time for a given camera."""
         return self.camera_states[camera].current_frame_time
 
@@ -331,7 +360,7 @@ class TrackedObjectProcessor(threading.Thread):
         self, event_id: str, sub_label: str | None, score: float | None
     ) -> None:
         """Update sub label for given event id."""
-        tracked_obj: TrackedObject = None
+        tracked_obj: TrackedObject | None = None
 
         for state in self.camera_states.values():
             tracked_obj = state.tracked_objects.get(event_id)
@@ -340,7 +369,7 @@ class TrackedObjectProcessor(threading.Thread):
                 break
 
         try:
-            event: Event = Event.get(Event.id == event_id)
+            event: Event | None = Event.get(Event.id == event_id)
         except DoesNotExist:
             event = None
 
@@ -351,12 +380,12 @@ class TrackedObjectProcessor(threading.Thread):
             tracked_obj.obj_data["sub_label"] = (sub_label, score)
 
         if event:
-            event.sub_label = sub_label
+            event.sub_label = sub_label  # type: ignore[assignment]
             data = event.data
             if sub_label is None:
-                data["sub_label_score"] = None
+                data["sub_label_score"] = None  # type: ignore[index]
             elif score is not None:
-                data["sub_label_score"] = score
+                data["sub_label_score"] = score  # type: ignore[index]
             event.data = data
             event.save()
 
@@ -385,7 +414,7 @@ class TrackedObjectProcessor(threading.Thread):
                 objects_list = []
                 sub_labels = set()
                 events = Event.select(Event.id, Event.label, Event.sub_label).where(
-                    Event.id.in_(detection_ids)
+                    Event.id.in_(detection_ids)  # type: ignore[call-arg, misc]
                 )
                 for det_event in events:
                     if det_event.sub_label:
@@ -414,18 +443,20 @@ class TrackedObjectProcessor(threading.Thread):
                     f"Updated sub_label for event {event_id} in review segment {review_segment.id}"
                 )
 
-            except ReviewSegment.DoesNotExist:
+            except DoesNotExist:
                 logger.debug(
                     f"No review segment found with event ID {event_id} when updating sub_label"
                 )
 
-        return True
-
-    def set_recognized_license_plate(
-        self, event_id: str, recognized_license_plate: str | None, score: float | None
+    def set_object_attribute(
+        self,
+        event_id: str,
+        field_name: str,
+        field_value: str | None,
+        score: float | None,
     ) -> None:
-        """Update recognized license plate for given event id."""
-        tracked_obj: TrackedObject = None
+        """Update attribute for given event id."""
+        tracked_obj: TrackedObject | None = None
 
         for state in self.camera_states.values():
             tracked_obj = state.tracked_objects.get(event_id)
@@ -434,7 +465,7 @@ class TrackedObjectProcessor(threading.Thread):
                 break
 
         try:
-            event: Event = Event.get(Event.id == event_id)
+            event: Event | None = Event.get(Event.id == event_id)
         except DoesNotExist:
             event = None
 
@@ -442,22 +473,20 @@ class TrackedObjectProcessor(threading.Thread):
             return
 
         if tracked_obj:
-            tracked_obj.obj_data["recognized_license_plate"] = (
-                recognized_license_plate,
+            tracked_obj.obj_data[field_name] = (
+                field_value,
                 score,
             )
 
         if event:
             data = event.data
-            data["recognized_license_plate"] = recognized_license_plate
-            if recognized_license_plate is None:
-                data["recognized_license_plate_score"] = None
+            data[field_name] = field_value  # type: ignore[index]
+            if field_value is None:
+                data[f"{field_name}_score"] = None  # type: ignore[index]
             elif score is not None:
-                data["recognized_license_plate_score"] = score
+                data[f"{field_name}_score"] = score  # type: ignore[index]
             event.data = data
             event.save()
-
-        return True
 
     def save_lpr_snapshot(self, payload: tuple) -> None:
         # save the snapshot image
@@ -617,7 +646,7 @@ class TrackedObjectProcessor(threading.Thread):
             )
             self.ongoing_manual_events.pop(event_id)
 
-    def force_end_all_events(self, camera: str, camera_state: CameraState):
+    def force_end_all_events(self, camera: str, camera_state: CameraState) -> None:
         """Ends all active events on camera when disabling."""
         last_frame_name = camera_state.previous_frame_id
         for obj_id, obj in list(camera_state.tracked_objects.items()):
@@ -635,27 +664,28 @@ class TrackedObjectProcessor(threading.Thread):
                         {"enabled": False, "motion": 0, "objects": []},
                     )
 
-    def run(self):
+    def run(self) -> None:
         while not self.stop_event.is_set():
             # check for config updates
-            while True:
-                (
-                    updated_enabled_topic,
-                    updated_enabled_config,
-                ) = self.config_enabled_subscriber.check_for_update()
+            updated_topics = self.camera_config_subscriber.check_for_updates()
 
-                if not updated_enabled_topic:
-                    break
-
-                camera_name = updated_enabled_topic.rpartition("/")[-1]
-                self.config.cameras[
-                    camera_name
-                ].enabled = updated_enabled_config.enabled
-
-                if self.camera_states[camera_name].prev_enabled is None:
-                    self.camera_states[
-                        camera_name
-                    ].prev_enabled = updated_enabled_config.enabled
+            if "enabled" in updated_topics:
+                for camera in updated_topics["enabled"]:
+                    if self.camera_states[camera].prev_enabled is None:
+                        self.camera_states[camera].prev_enabled = self.config.cameras[
+                            camera
+                        ].enabled
+            elif "add" in updated_topics:
+                for camera in updated_topics["add"]:
+                    self.config.cameras[camera] = (
+                        self.camera_config_subscriber.camera_configs[camera]
+                    )
+                    self.create_camera_state(camera)
+            elif "remove" in updated_topics:
+                for camera in updated_topics["remove"]:
+                    camera_state = self.camera_states[camera]
+                    camera_state.shutdown()
+                    self.camera_states.pop(camera)
 
             # manage camera disabled state
             for camera, config in self.config.cameras.items():
@@ -676,11 +706,14 @@ class TrackedObjectProcessor(threading.Thread):
 
             # check for sub label updates
             while True:
-                (raw_topic, payload) = self.sub_label_subscriber.check_for_update(
-                    timeout=0
-                )
+                update = self.sub_label_subscriber.check_for_update(timeout=0)
 
-                if not raw_topic:
+                if not update:
+                    break
+
+                (raw_topic, payload) = update
+
+                if not raw_topic or not payload:
                     break
 
                 topic = str(raw_topic)
@@ -688,11 +721,9 @@ class TrackedObjectProcessor(threading.Thread):
                 if topic.endswith(EventMetadataTypeEnum.sub_label.value):
                     (event_id, sub_label, score) = payload
                     self.set_sub_label(event_id, sub_label, score)
-                if topic.endswith(EventMetadataTypeEnum.recognized_license_plate.value):
-                    (event_id, recognized_license_plate, score) = payload
-                    self.set_recognized_license_plate(
-                        event_id, recognized_license_plate, score
-                    )
+                if topic.endswith(EventMetadataTypeEnum.attribute.value):
+                    (event_id, field_name, field_value, score) = payload
+                    self.set_object_attribute(event_id, field_name, field_value, score)
                 elif topic.endswith(EventMetadataTypeEnum.lpr_event_create.value):
                     self.create_lpr_event(payload)
                 elif topic.endswith(EventMetadataTypeEnum.save_lpr_snapshot.value):
@@ -764,6 +795,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_sender.stop()
         self.event_end_subscriber.stop()
         self.sub_label_subscriber.stop()
-        self.config_enabled_subscriber.stop()
+        self.camera_config_subscriber.stop()
 
         logger.info("Exiting object processor...")

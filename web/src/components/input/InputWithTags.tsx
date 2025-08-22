@@ -420,11 +420,11 @@ export default function InputWithTags({
         ? t("button.yes", { ns: "common" })
         : t("button.no", { ns: "common" });
     } else if (filterType === "labels") {
-      return getTranslatedLabel(filterValues as string);
+      return getTranslatedLabel(String(filterValues));
     } else if (filterType === "search_type") {
-      return t("filter.searchType." + (filterValues as string));
+      return t("filter.searchType." + String(filterValues));
     } else {
-      return (filterValues as string).replaceAll("_", " ");
+      return String(filterValues).replaceAll("_", " ");
     }
   }
 

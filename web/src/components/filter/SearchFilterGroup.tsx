@@ -131,10 +131,7 @@ export default function SearchFilterGroup({
   );
 
   const availableSortTypes = useMemo(() => {
-    const sortTypes = ["date_asc", "date_desc"];
-    if (filter?.min_score || filter?.max_score) {
-      sortTypes.push("score_desc", "score_asc");
-    }
+    const sortTypes = ["date_asc", "date_desc", "score_desc", "score_asc"];
     if (filter?.min_speed || filter?.max_speed) {
       sortTypes.push("speed_desc", "speed_asc");
     }

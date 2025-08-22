@@ -106,7 +106,7 @@
       "nb": "Norsk Bokmål (Tiếng Na Uy)",
       "ko": "한국어 (Tiếng Hàn)",
       "pl": "Polski (Tiếng Ba Lan)",
-      "vi": "Tiếng Việt",
+      "vi": "Tiếng Việt (Tiếng Việt)",
       "fa": "فارسی (Tiếng Ba Tư)",
       "uk": "Українська (Tiếng Ukraina)",
       "he": "עברית (Tiếng Do Thái)",
@@ -121,7 +121,7 @@
       },
       "yue": "粵語 (Tiếng Quảng Đông)",
       "ca": "Català (Tiếng Catalan)",
-      "th": "ไทย (Tiếng Thái Lan)"
+      "th": "ไทย (Tiếng Thái)"
     },
     "system": "Hệ thống",
     "systemMetrics": "Thông số hệ thống",

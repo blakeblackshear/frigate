@@ -107,7 +107,9 @@ export function GenericVideoPlayer({
             >
               <HlsVideoPlayer
                 videoRef={videoRef}
-                currentSource={source}
+                currentSource={{
+                  playlist: source,
+                }}
                 hotKeys
                 visible
                 frigateControls={false}

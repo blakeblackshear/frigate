@@ -1,5 +1,11 @@
 {
   "filter": "Filter",
+  "classes": {
+    "label": "Classes",
+    "all": { "title": "All Classes" },
+    "count_one": "{{count}} Class",
+    "count_other": "{{count}} Classes"
+  },
   "labels": {
     "label": "Labels",
     "all": {

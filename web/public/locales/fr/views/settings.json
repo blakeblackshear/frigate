@@ -278,6 +278,43 @@
     "streams": {
       "title": "Flux",
       "desc": "Désactive temporairement une caméra jusqu'au redémarrage de Frigate. La désactivation complète d'une caméra interrompt le traitement des flux de cette caméra par Frigate. La détection, l'enregistrement et le débogage seront indisponibles.<br /> <em>Remarque : cela ne désactive pas les rediffusions go2rtc.</em>"
+    },
+    "object_descriptions": {
+      "title": "Description d'objets par IA générative",
+      "desc": "Activer / désactiver temporairement les descriptions d'objets par IA générative pour cette caméra. Lorsqu'elles sont désactivées, les descriptions générées par IA ne seront pas demandées pour les objets suivis par cette caméra."
+    },
+    "review_descriptions": {
+      "title": "Revue de descriptions par IA générative",
+      "desc": "Activer / désactiver temporairement la revue de descriptions d'objets par IA générative pour cette caméra. Lorsqu'elles sont désactivées, les descriptions générées par IA ne seront plus demandées pour la revue d'éléments de cette caméra."
+    },
+    "addCamera": "Ajouter une nouvelle caméra",
+    "editCamera": "Éditer la caméra :",
+    "selectCamera": "Sélectionner une caméra",
+    "backToSettings": "Retour aux paramètres de la caméra",
+    "cameraConfig": {
+      "add": "Ajouter une caméra",
+      "edit": "Éditer la caméra",
+      "description": "Configurer les paramètres de la caméra y compris les flux et les rôles.",
+      "name": "Nom de la caméra",
+      "nameRequired": "Un nom de caméra est nécessaire",
+      "nameInvalid": "Les noms de caméra peuvent contenir uniquement des lettres, des chiffres, des tirets bas, ou des tirets",
+      "namePlaceholder": "par exemple, porte_entree",
+      "enabled": "Activé",
+      "ffmpeg": {
+        "inputs": "Flux entrants",
+        "path": "Chemin d'accès du flux",
+        "pathRequired": "Un chemin d'accès de flux est nécessaire",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Rôles",
+        "rolesRequired": "Au moins un rôle est nécessaire",
+        "rolesUnique": "Chaque rôle (audio, détection, enregistrement) ne peut être assigné qu'à un seul flux",
+        "addInput": "Ajouter un flux entrant",
+        "removeInput": "Supprimer le flux entrant",
+        "inputsRequired": "Au moins un flux entrant est nécessaire"
+      },
+      "toast": {
+        "success": "Caméra {{cameraName}} enregistrée avec succès"
+      }
     }
   },
   "masksAndZones": {
@@ -523,7 +560,12 @@
     "noObjects": "Aucun objet",
     "title": "Débogage",
     "detectorDesc": "Frigate utilise vos détecteurs ({{detectors}}) pour détecter les objets dans le flux vidéo de votre caméra.",
-    "desc": "La vue de débogage affiche en temps réel les objets suivis et leurs statistiques. La liste des objets affiche un résumé différé des objets détectés."
+    "desc": "La vue de débogage affiche en temps réel les objets suivis et leurs statistiques. La liste des objets affiche un résumé différé des objets détectés.",
+    "paths": {
+      "title": "Chemins",
+      "desc": "Montrer les points notables du chemin de l'objet suivi",
+      "tips": "<p><strong>Chemins</strong></p><br><p>Les lignes et les cercles indiqueront les points notables des déplacements de l'objet suivi pendant son cycle de vie.</p>"
+    }
   },
   "users": {
     "title": "Utilisateurs",
@@ -683,5 +725,100 @@
       "success": "Les paramètres de données augmentées ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
     },
     "restart_required": "Redémarrage nécessaire (paramètres des données augmentées modifiés)"
+  },
+  "triggers": {
+    "documentTitle": "Déclencheurs",
+    "management": {
+      "title": "Gestion des déclencheurs",
+      "desc": "Gérer les déclencheurs pour {{camera}}. Utilisez le type vignette pour déclencher à partir de vignettes similaires à l'objet suivi sélectionné. Utilisez le type description pour déclencher à partir de textes de description similaires que vous avez spécifiés."
+    },
+    "addTrigger": "Ajouter un déclencheur",
+    "table": {
+      "name": "Nom",
+      "type": "Type",
+      "content": "Contenu",
+      "threshold": "Seuil",
+      "actions": "Actions",
+      "noTriggers": "Aucun déclencheur configuré pour cette caméra.",
+      "edit": "Éditer",
+      "deleteTrigger": "Supprimer le déclencheur",
+      "lastTriggered": "Dernier déclencheur"
+    },
+    "type": {
+      "thumbnail": "Vignette",
+      "description": "Description"
+    },
+    "actions": {
+      "alert": "Marquer comme alerte",
+      "notification": "Envoyer une notification"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Créer un déclencheur",
+        "desc": "Créer un déclencheur pour la caméra {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Éditer le déclencheur",
+        "desc": "Éditer les paramètres du déclencheur de la caméra {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Supprimer le déclencheur",
+        "desc": "Êtes-vous sûr de vouloir supprimer le déclencheur <strong>{{triggerName}}</strong> ? Cette action est irréversible."
+      },
+      "form": {
+        "name": {
+          "title": "Nom",
+          "placeholder": "Entrez le nom du déclencheur",
+          "error": {
+            "minLength": "Le nom soit comporter au moins deux caractères.",
+            "invalidCharacters": "Le nom peut contenir uniquement des lettres, des nombres, des tirets bas, et des tirets.",
+            "alreadyExists": "Un déclencheur avec le même nom existe déjà pour cette caméra."
+          }
+        },
+        "enabled": {
+          "description": "Activer ou désactiver ce déclencheur"
+        },
+        "type": {
+          "title": "Type",
+          "placeholder": "Sélectionner un type de déclencheur"
+        },
+        "content": {
+          "title": "Contenu",
+          "imagePlaceholder": "Sélectionner une image",
+          "textPlaceholder": "Saisir le contenu du texte",
+          "imageDesc": "Sélectionnez une image pour déclencher cette action lorsqu'une image similaire est détectée.",
+          "textDesc": "Entrez un texte pour déclencher cette action lorsqu'une description similaire d'objet suivi est détectée.",
+          "error": {
+            "required": "Le contenu est requis."
+          }
+        },
+        "threshold": {
+          "title": "Seuil",
+          "error": {
+            "min": "Le seuil doit être au moins 0",
+            "max": "Le seuil peut être au plus 1"
+          }
+        },
+        "actions": {
+          "title": "Actions",
+          "desc": "Par défaut, Frigate publie un message MQTT à chaque déclenchement. Sélectionnez une action complémentaire à exécuter lors de ce déclenchement.",
+          "error": {
+            "min": "Au moins une action doit être sélectionnée."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Le déclencheur {{name}} a été créé avec succès.",
+        "updateTrigger": "Le déclencheur {{name}} a été mis à jour avec succès.",
+        "deleteTrigger": "Le déclencheur {{name}} a été supprimé avec succès."
+      },
+      "error": {
+        "createTriggerFailed": "Échec de la création du déclencheur : {{errorMessage}}",
+        "updateTriggerFailed": "Échec de la mise à jour du déclencheur : {{errorMessage}}",
+        "deleteTriggerFailed": "Échec de la suppression du déclencheur : {{errorMessage}}"
+      }
+    }
   }
 }

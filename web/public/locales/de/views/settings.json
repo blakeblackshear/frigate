@@ -8,7 +8,7 @@
     "general": "Allgemeine Einstellungen – Frigate",
     "frigatePlus": "Frigate+ Einstellungen – Frigate",
     "classification": "Klassifizierungseinstellungen – Frigate",
-    "motionTuner": "Bewegungstuner – Frigate",
+    "motionTuner": "Bewegungserkennungs-Optimierer – Frigate",
     "notifications": "Benachrichtigungs-Einstellungen",
     "enrichments": "Erweiterte Statistiken - Frigate"
   },
@@ -17,12 +17,12 @@
     "cameras": "Kameraeinstellungen",
     "classification": "Klassifizierung",
     "masksAndZones": "Maskierungen / Zonen",
-    "motionTuner": "Bewegungstuner",
+    "motionTuner": "Bewegungserkennungs-Optimierer",
     "debug": "Debug",
     "frigateplus": "Frigate+",
     "users": "Benutzer",
     "notifications": "Benachrichtigungen",
-    "enrichments": "Verbesserungen"
+    "enrichments": "Erkennungsfunktionen"
   },
   "dialog": {
     "unsavedChanges": {
@@ -178,7 +178,44 @@
       "detections": "Erkennungen ",
       "desc": "Aktiviere/deaktiviere Benachrichtigungen und Erkennungen für diese Kamera vorübergehend, bis Frigate neu gestartet wird. Wenn deaktiviert, werden keine neuen Überprüfungseinträge erstellt. "
     },
-    "title": "Kamera-Einstellungen"
+    "title": "Kameraeinstellungen",
+    "object_descriptions": {
+      "title": "Generative KI-Objektbeschreibungen",
+      "desc": "Generativen KI-Objektbeschreibungen für diese Kamera vorübergehend aktivieren/deaktivieren. Wenn diese Funktion deaktiviert ist, werden keine KI-generierten Beschreibungen für verfolgte Objekte auf dieser Kamera angefordert."
+    },
+    "cameraConfig": {
+      "ffmpeg": {
+        "roles": "Rollen",
+        "pathRequired": "Stream-Pfad ist erforderlich",
+        "path": "Stream-Pfad",
+        "inputs": "Eingabe Streams",
+        "pathPlaceholder": "rtsp://...",
+        "rolesRequired": "Mindestens eine Rolle ist erforderlich",
+        "rolesUnique": "Jede Rolle (Audio, Erkennung, Aufzeichnung) kann nur einem Stream zugewiesen werden",
+        "addInput": "Eingabe-Stream hinzufügen",
+        "removeInput": "Eingabe-Stream entfernen",
+        "inputsRequired": "Mindestens ein Eingabe-Stream ist erforderlich"
+      },
+      "enabled": "Aktiviert",
+      "namePlaceholder": "z. B., Vorder_Türe",
+      "nameInvalid": "Der Name der Kamera darf nur Buchstaben, Zahlen, Unterstriche oder Bindestriche enthalten",
+      "name": "Kamera Name",
+      "edit": "Kamera bearbeiten",
+      "add": "Kamera hinzufügen",
+      "description": "Kameraeinstellungen einschließlich Stream-Eingänge und Rollen konfigurieren.",
+      "nameRequired": "Kameraname ist erforderlich",
+      "toast": {
+        "success": "Kamera {{cameraName}} erfolgreich gespeichert"
+      }
+    },
+    "backToSettings": "Zurück zu den Kamera Einstellungen",
+    "selectCamera": "Kamera wählen",
+    "editCamera": "Kamera bearbeiten:",
+    "addCamera": "Neue Kamera hinzufügen",
+    "review_descriptions": {
+      "desc": "Generativen KI-Objektbeschreibungen für diese Kamera vorübergehend aktivieren/deaktivieren. Wenn diese Funktion deaktiviert ist, werden keine KI-generierten Beschreibungen für Überprüfungselemente auf dieser Kamera angefordert.",
+      "title": "Beschreibungen zur generativen KI-Überprüfung"
+    }
   },
   "masksAndZones": {
     "form": {
@@ -397,7 +434,12 @@
       "desc": "Einen Rahmen für den an den Objektdetektor übermittelten Interessensbereich anzeigen"
     },
     "title": "Debug",
-    "desc": "Die Debug-Ansicht zeigt eine Echtzeitansicht der verfolgten Objekte und ihrer Statistiken. Die Objektliste zeigt eine zeitverzögerte Zusammenfassung der erkannten Objekte."
+    "desc": "Die Debug-Ansicht zeigt eine Echtzeitansicht der verfolgten Objekte und ihrer Statistiken. Die Objektliste zeigt eine zeitverzögerte Zusammenfassung der erkannten Objekte.",
+    "paths": {
+      "title": "Pfade",
+      "desc": "Wichtige Punkte des Pfads des verfolgten Objekts anzeigen",
+      "tips": "<p><strong>Pfade</strong></p><br><p>Linien und Kreise zeigen wichtige Punkte an, an denen sich das verfolgte Objekt während seines Lebenszyklus bewegt hat.</p>"
+    }
   },
   "motionDetectionTuner": {
     "Threshold": {
@@ -420,7 +462,7 @@
       "desc": "Der Wert für die Konturfläche wird verwendet, um zu bestimmen, welche Gruppen von veränderten Pixeln als Bewegung gelten. <em>Standard: 10</em>"
     },
     "title": "Bewegungserkennungs-Optimierer",
-    "unsavedChanges": "Nicht gespeicherte Änderungen am Bewegungstuner ({{camera}})"
+    "unsavedChanges": "Nicht gespeicherte Änderungen im Bewegungserkennungs-Optimierer ({{camera}})"
   },
   "users": {
     "addUser": "Benutzer hinzufügen",
@@ -678,6 +720,101 @@
     "toast": {
       "success": "Die Einstellungen für die Verbesserungen wurden gespeichert. Starten Sie Frigate neu, um Ihre Änderungen zu übernehmen.",
       "error": "Konfigurationsänderungen konnten nicht gespeichert werden: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Auslöser",
+    "management": {
+      "title": "Auslöser Verwaltung",
+      "desc": "Auslöser für {{camera}} verwalten. Verwenden Sie den Vorschaubild Typ, um ähnliche Vorschaubilder wie das ausgewählte verfolgte Objekt auszulösen, und den Beschreibungstyp, um ähnliche Beschreibungen wie den von Ihnen angegebenen Text auszulösen."
+    },
+    "addTrigger": "Auslöser hinzufügen",
+    "table": {
+      "name": "Name",
+      "type": "Typ",
+      "content": "Inhalt",
+      "threshold": "Schwellenwert",
+      "actions": "Aktionen",
+      "noTriggers": "Für diese Kamera sind keine Auslöser konfiguriert.",
+      "edit": "Bearbeiten",
+      "deleteTrigger": "Auslöser löschen",
+      "lastTriggered": "Zuletzt ausgelöst"
+    },
+    "type": {
+      "thumbnail": "Vorschaubild",
+      "description": "Beschreibung"
+    },
+    "actions": {
+      "alert": "Als Alarm markieren",
+      "notification": "Benachrichtigung senden"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Auslöser erstellen",
+        "desc": "Auslöser für Kamera {{camera}} erstellen"
+      },
+      "editTrigger": {
+        "title": "Auslöser bearbeiten",
+        "desc": "Einstellungen für Kamera {{camera}} bearbeiten"
+      },
+      "deleteTrigger": {
+        "title": "Auslöser löschen",
+        "desc": "Sind Sie sicher, dass Sie den Auslöser <strong>{{triggerName}}</strong> löschen wollen? Dies kann nicht Rückgängig gemacht werden."
+      },
+      "form": {
+        "name": {
+          "title": "Name",
+          "placeholder": "Auslöser Name eingeben",
+          "error": {
+            "minLength": "Der Name muss mindestens 2 Zeichen lang sein.",
+            "invalidCharacters": "Der Name darf nur Buchstaben, Zahlen, Unterstriche und Bindestriche enthalten.",
+            "alreadyExists": "Ein Auslöser mit diesem Namen existiert bereits für diese Kamera."
+          }
+        },
+        "enabled": {
+          "description": "Diesen Auslöser aktivieren oder deaktivieren"
+        },
+        "type": {
+          "title": "Typ",
+          "placeholder": "Auslöser Typ wählen"
+        },
+        "content": {
+          "title": "Inhalt",
+          "imagePlaceholder": "Ein Bild auswählen",
+          "textPlaceholder": "Inhaltstext eingeben",
+          "imageDesc": "Ein Bild auswählen, um diese Aktion auszulösen, wenn ein ähnliches Bild erkannt wird.",
+          "textDesc": "Einen Text eingeben, um diese Aktion auszulösen, wenn eine ähnliche Beschreibung eines verfolgten Objekts erkannt wird.",
+          "error": {
+            "required": "Inhalt ist erforderlich."
+          }
+        },
+        "threshold": {
+          "title": "Schwellenwert",
+          "error": {
+            "min": "Schwellenwert muss mindestens 0 sein",
+            "max": "Schwellenwert darf höchstens 1 sein"
+          }
+        },
+        "actions": {
+          "title": "Aktionen",
+          "desc": "Standardmäßig sendet Frigate eine MQTT-Nachricht für alle Trigger. Wähle eine zusätzliche Aktion aus, die ausgeführt werden soll, wenn dieser Trigger ausgelöst wird.",
+          "error": {
+            "min": "Mindesten eine Aktion muss ausgewählt sein."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Auslöser {{name}} erfolgreich erstellt.",
+        "updateTrigger": "Auslöser {{name}} erfolgreich aktualisiert.",
+        "deleteTrigger": "Auslöser {{name}} erfolgreich gelöscht."
+      },
+      "error": {
+        "createTriggerFailed": "Auslöser konnte nicht erstellt werden: {{errorMessage}}",
+        "updateTriggerFailed": "Auslöser könnte nicht aktualisiert werden: {{errorMessage}}",
+        "deleteTriggerFailed": "Auslöser konnte nicht gelöscht werden: {{errorMessage}}"
+      }
     }
   }
 }

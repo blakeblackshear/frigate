@@ -67,7 +67,7 @@
       "title": "Calendar",
       "firstWeekday": {
         "label": "Prima zi a săptămânii",
-        "desc": "Ziua în care încep săptămânile calendarului de revizuire.",
+        "desc": "Ziua cu care încep săptămânile calendarului de revizuire.",
         "sunday": "Duminică",
         "monday": "Luni"
       }
@@ -177,6 +177,43 @@
       "selectAlertsZones": "Selectează zone pentru alerte",
       "noDefinedZones": "Nu sunt definite zone pentru această cameră.",
       "objectAlertsTips": "Toate obiectele {{alertsLabels}} de pe {{cameraName}} vor fi afișate ca alerte."
+    },
+    "object_descriptions": {
+      "title": "Descrieri de obiecte generate de AI",
+      "desc": "Activează/dezactivează temporar descrierile de obiecte generate de AI pentru această cameră. Când această funcție este dezactivată, descrierile generate de AI nu vor fi solicitate pentru obiectele urmărite pe această cameră."
+    },
+    "review_descriptions": {
+      "title": "Descrieri de revizuiri generate de AI",
+      "desc": "Activează/dezactivează temporar descrierile recenziilor generate de AI pentru această cameră. Când această funcție este dezactivată, descrierile generate de AI nu vor fi solicitate pentru elementele de recenzie de pe această cameră."
+    },
+    "addCamera": "Adaugă cameră nouă",
+    "editCamera": "Editează camera:",
+    "selectCamera": "Selectează camera",
+    "backToSettings": "Înapoi la setările camerei",
+    "cameraConfig": {
+      "add": "Adaugă cameră",
+      "edit": "Editează camera",
+      "description": "Configurează setările camerei, inclusiv intrările de flux și rolurile.",
+      "name": "Numele camerei",
+      "nameRequired": "Numele camerei este obligatoriu",
+      "nameInvalid": "Numele camerei trebuie să conțină doar litere, cifre, underscore-uri sau cratime",
+      "namePlaceholder": "de ex.: usa_principala",
+      "enabled": "Activat",
+      "ffmpeg": {
+        "inputs": "Stream-uri de intrare",
+        "path": "Cale stream",
+        "pathRequired": "Calea stream-ului este obligatorie",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roluri",
+        "rolesRequired": "Este necesar cel puțin un rol",
+        "rolesUnique": "Fiecare rol (audio, detectare, înregistrare) poate fi atribuit doar unui singur stream",
+        "addInput": "Adaugă stream de intrare",
+        "removeInput": "Elimină stream-ul de intrare",
+        "inputsRequired": "Este necesar cel puțin un stream de intrare"
+      },
+      "toast": {
+        "success": "Camera {{cameraName}} a fost salvată cu succes"
+      }
     }
   },
   "masksAndZones": {
@@ -399,6 +436,11 @@
     "zones": {
       "title": "Zone",
       "desc": "Afișează conturul oricăror zone definite"
+    },
+    "paths": {
+      "title": "Căi",
+      "desc": "Afișează punctele semnificative ale traseului obiectului urmărit",
+      "tips": "<p><strong>Căi</strong></p><br><p>Liniile și cercurile vor indica punctele semnificative prin care obiectul urmărit s-a deplasat pe parcursul ciclului său de viață.</p>"
     }
   },
   "users": {
@@ -619,5 +661,100 @@
       "success": "Setările de mișcare au fost salvate."
     },
     "title": "Reglaj detecție mișcare"
+  },
+  "triggers": {
+    "documentTitle": "Declanșatoare",
+    "management": {
+      "title": "Gestionarea declanșatoarelor",
+      "desc": "Gestionează declanșatoarele pentru {{camera}}. Folosește tipul miniatură pentru a declanșa pe miniaturi similare cu obiectul urmărit selectat și tipul descriere pentru a declanșa pe descrieri similare textului pe care îl specifici."
+    },
+    "addTrigger": "Adaugă declanșator",
+    "table": {
+      "name": "Nume",
+      "type": "Tip",
+      "content": "Conținut",
+      "threshold": "Prag",
+      "actions": "Acțiuni",
+      "noTriggers": "Nu sunt configurate declanșatoare pentru această cameră.",
+      "edit": "Editează",
+      "deleteTrigger": "Elimină declanșatorul",
+      "lastTriggered": "Ultima declanșare"
+    },
+    "type": {
+      "thumbnail": "Miniatură",
+      "description": "Descriere"
+    },
+    "actions": {
+      "alert": "Marchează ca alertă",
+      "notification": "Trimite notificare"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Crează declanșator",
+        "desc": "Creează un declanșator pentru camera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Editează declanșatorul",
+        "desc": "Editează setările pentru declanșatorul de pe camera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Elimină declanșatorul",
+        "desc": "Ești sigur că vrei să ștergi declanșatorul <strong>{{triggerName}}</strong>? Această acțiune nu poate fi anulată."
+      },
+      "form": {
+        "name": {
+          "title": "Nume",
+          "placeholder": "Introdu numele declanșatorului",
+          "error": {
+            "minLength": "Numele trebuie să aibă cel puțin 2 caractere.",
+            "invalidCharacters": "Numele poate conține doar litere, cifre, underscore-uri și cratime.",
+            "alreadyExists": "Un declanșator cu acest nume există deja pentru această cameră."
+          }
+        },
+        "enabled": {
+          "description": "Activează sau dezactivează acest declanșator"
+        },
+        "type": {
+          "title": "Tip",
+          "placeholder": "Selectează tipul de declanșator"
+        },
+        "content": {
+          "title": "Conținut",
+          "imagePlaceholder": "Selectează o imagine",
+          "textPlaceholder": "Introdu conținutul textului",
+          "imageDesc": "Selectează o imagine pentru a declanșa această acțiune atunci când o imagine similară este detectată.",
+          "textDesc": "Introduceți textul pentru a declanșa această acțiune atunci când este detectată o descriere de obiect urmărit similară.",
+          "error": {
+            "required": "Conținutul este obligatoriu."
+          }
+        },
+        "threshold": {
+          "title": "Prag",
+          "error": {
+            "min": "Pragul trebuie să fie cel puțin 0",
+            "max": "Pragul trebuie să fie cel mult 1"
+          }
+        },
+        "actions": {
+          "title": "Acțiuni",
+          "desc": "Implicit, Frigate trimite un mesaj MQTT pentru toate declanșatoarele. Alegeți o acțiune suplimentară de efectuat atunci când acest declanșator se activează.",
+          "error": {
+            "min": "Trebuie selectată cel puțin o acțiune."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Declanșatorul {{name}} a fost creat cu succes.",
+        "updateTrigger": "Declanșatorul {{name}} a fost actualizat cu succes.",
+        "deleteTrigger": "Declanșatorul {{name}} a fost eliminat cu succes."
+      },
+      "error": {
+        "createTriggerFailed": "Crearea declanșatorului a eșuat: {{errorMessage}}",
+        "updateTriggerFailed": "Actualizarea declanșatorului a eșuat: {{errorMessage}}",
+        "deleteTriggerFailed": "Eliminarea declanșatorului a eșuat: {{errorMessage}}"
+      }
+    }
   }
 }

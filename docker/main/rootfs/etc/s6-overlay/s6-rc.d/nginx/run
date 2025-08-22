@@ -85,7 +85,7 @@ python3 /usr/local/nginx/get_base_path.py | \
        -out /usr/local/nginx/conf/base_path.conf
 
 # build templates for optional TLS support
-python3 /usr/local/nginx/get_tls_settings.py | \
+python3 /usr/local/nginx/get_listen_settings.py | \
     tempio  -template /usr/local/nginx/templates/listen.gotmpl \
             -out /usr/local/nginx/conf/listen.conf
 

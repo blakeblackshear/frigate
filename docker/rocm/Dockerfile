@@ -2,7 +2,7 @@
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
-ARG ROCM=6.3.3
+ARG ROCM=1
 ARG AMDGPU=gfx900
 ARG HSA_OVERRIDE_GFX_VERSION
 ARG HSA_OVERRIDE
@@ -13,12 +13,12 @@ FROM wget AS rocm
 ARG ROCM
 ARG AMDGPU
 
-RUN apt update && \
+RUN apt update -qq && \
     apt install -y wget gpg && \
-    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/$ROCM/ubuntu/jammy/amdgpu-install_6.3.60303-1_all.deb && \
+    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/6.4.1/ubuntu/jammy/amdgpu-install_6.4.60401-1_all.deb && \
     apt install -y ./rocm.deb && \
     apt update && \
-    apt install -y rocm
+    apt install -qq -y rocm
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
 RUN cd /opt/rocm-$ROCM/lib && \
@@ -33,7 +33,10 @@ RUN echo /opt/rocm/lib|tee /opt/rocm-dist/etc/ld.so.conf.d/rocm.conf
 #######################################################################
 FROM deps AS deps-prelim
 
-RUN apt-get update && apt-get install -y libnuma1
+COPY docker/rocm/debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
+RUN apt-get update && \
+    apt-get install -y libnuma1 && \
+    apt-get install -qq -y -t bookworm-backports mesa-va-drivers mesa-vulkan-drivers
 
 WORKDIR /opt/frigate
 COPY --from=rootfs / /
@@ -62,7 +65,6 @@ COPY --from=rocm /opt/rocm-dist/ /
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
 ENV HSA_ENABLE_SDMA=0
-ENV MIGRAPHX_ENABLE_NHWC=1
 ENV TF_ROCM_USE_IMMEDIATE_MODE=1
 
 COPY --from=rocm-dist / /

@@ -13,7 +13,7 @@
   "filter": {
     "label": {
       "cameras": "Câmeras",
-      "labels": "Etiquetas",
+      "labels": "Rótulos",
       "zones": "Zonas",
       "before": "Antes",
       "after": "Depois",
@@ -21,7 +21,7 @@
       "max_score": "Pontuação Máxima",
       "min_speed": "Velocidade Mínima",
       "max_speed": "Velocidade Máxima",
-      "sub_labels": "Sub-etiquetas",
+      "sub_labels": "Sub-Rótulos",
       "search_type": "Tipo de Busca",
       "time_range": "Intervalo de Tempo",
       "recognized_license_plate": "Placa de Carro Reconhecida",
@@ -57,11 +57,14 @@
     },
     "header": {
       "noFilters": "Filtros",
-      "activeFilters": "Filtros ativos"
+      "activeFilters": "Filtros ativos",
+      "currentFilterType": "Valores de Filtros"
     }
   },
   "similaritySearch": {
-    "active": "Pesquisa por similaridade ativa"
+    "active": "Pesquisa por similaridade ativa",
+    "title": "Buscar por Similaridade",
+    "clear": "Limpar buscar por similaridade"
   },
   "placeholder": {
     "search": "Pesquisar…"

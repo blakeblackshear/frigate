@@ -3,24 +3,30 @@
 import datetime
 import json
 import logging
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, cast
 
 from frigate.camera import PTZMetrics
 from frigate.camera.activity_manager import CameraActivityManager
 from frigate.comms.base_communicator import Communicator
-from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.webpush import WebPushClient
 from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdatePublisher,
+    CameraConfigUpdateTopic,
+)
 from frigate.const import (
     CLEAR_ONGOING_REVIEW_SEGMENTS,
     INSERT_MANY_RECORDINGS,
     INSERT_PREVIEW,
     NOTIFICATION_TEST,
     REQUEST_REGION_GRID,
+    UPDATE_BIRDSEYE_LAYOUT,
     UPDATE_CAMERA_ACTIVITY,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_EVENT_DESCRIPTION,
     UPDATE_MODEL_STATE,
+    UPDATE_REVIEW_DESCRIPTION,
     UPSERT_REVIEW_SEGMENT,
 )
 from frigate.models import Event, Previews, Recordings, ReviewSegment
@@ -38,7 +44,7 @@ class Dispatcher:
     def __init__(
         self,
         config: FrigateConfig,
-        config_updater: ConfigPublisher,
+        config_updater: CameraConfigUpdatePublisher,
         onvif: OnvifController,
         ptz_metrics: dict[str, PTZMetrics],
         communicators: list[Communicator],
@@ -49,11 +55,12 @@ class Dispatcher:
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
         self.camera_activity = CameraActivityManager(config, self.publish)
-        self.model_state = {}
-        self.embeddings_reindex = {}
-
+        self.model_state: dict[str, ModelStatusTypesEnum] = {}
+        self.embeddings_reindex: dict[str, Any] = {}
+        self.birdseye_layout: dict[str, Any] = {}
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
+            "audio_transcription": self._on_audio_transcription_command,
             "detect": self._on_detect_command,
             "enabled": self._on_enabled_command,
             "improve_contrast": self._on_motion_improve_contrast_command,
@@ -68,6 +75,8 @@ class Dispatcher:
             "birdseye_mode": self._on_birdseye_mode_command,
             "review_alerts": self._on_alerts_command,
             "review_detections": self._on_detections_command,
+            "object_descriptions": self._on_object_description_command,
+            "review_descriptions": self._on_review_description_command,
         }
         self._global_settings_handlers: dict[str, Callable] = {
             "notifications": self._on_global_notification_command,
@@ -80,10 +89,12 @@ class Dispatcher:
             (comm for comm in communicators if isinstance(comm, WebPushClient)), None
         )
 
-    def _receive(self, topic: str, payload: str) -> Optional[Any]:
+    def _receive(self, topic: str, payload: Any) -> Optional[Any]:
         """Handle receiving of payload from communicators."""
 
-        def handle_camera_command(command_type, camera_name, command, payload):
+        def handle_camera_command(
+            command_type: str, camera_name: str, command: str, payload: str
+        ) -> None:
             try:
                 if command_type == "set":
                     self._camera_settings_handlers[command](camera_name, payload)
@@ -92,13 +103,13 @@ class Dispatcher:
             except KeyError:
                 logger.error(f"Invalid command type or handler: {command_type}")
 
-        def handle_restart():
+        def handle_restart() -> None:
             restart_frigate()
 
-        def handle_insert_many_recordings():
+        def handle_insert_many_recordings() -> None:
             Recordings.insert_many(payload).execute()
 
-        def handle_request_region_grid():
+        def handle_request_region_grid() -> Any:
             camera = payload
             grid = get_camera_regions_grid(
                 camera,
@@ -107,26 +118,26 @@ class Dispatcher:
             )
             return grid
 
-        def handle_insert_preview():
+        def handle_insert_preview() -> None:
             Previews.insert(payload).execute()
 
-        def handle_upsert_review_segment():
+        def handle_upsert_review_segment() -> None:
             ReviewSegment.insert(payload).on_conflict(
                 conflict_target=[ReviewSegment.id],
                 update=payload,
             ).execute()
 
-        def handle_clear_ongoing_review_segments():
+        def handle_clear_ongoing_review_segments() -> None:
             ReviewSegment.update(end_time=datetime.datetime.now().timestamp()).where(
                 ReviewSegment.end_time.is_null(True)
             ).execute()
 
-        def handle_update_camera_activity():
+        def handle_update_camera_activity() -> None:
             self.camera_activity.update_activity(payload)
 
-        def handle_update_event_description():
+        def handle_update_event_description() -> None:
             event: Event = Event.get(Event.id == payload["id"])
-            event.data["description"] = payload["description"]
+            cast(dict, event.data)["description"] = payload["description"]
             event.save()
             self.publish(
                 "tracked_object_update",
@@ -140,30 +151,46 @@ class Dispatcher:
                 ),
             )
 
-        def handle_update_model_state():
+        def handle_update_review_description() -> None:
+            final_data = payload["after"]
+            ReviewSegment.insert(final_data).on_conflict(
+                conflict_target=[ReviewSegment.id],
+                update=final_data,
+            ).execute()
+            self.publish("reviews", json.dumps(payload))
+
+        def handle_update_model_state() -> None:
             if payload:
                 model = payload["model"]
                 state = payload["state"]
                 self.model_state[model] = ModelStatusTypesEnum[state]
                 self.publish("model_state", json.dumps(self.model_state))
 
-        def handle_model_state():
+        def handle_model_state() -> None:
             self.publish("model_state", json.dumps(self.model_state.copy()))
 
-        def handle_update_embeddings_reindex_progress():
+        def handle_update_embeddings_reindex_progress() -> None:
             self.embeddings_reindex = payload
             self.publish(
                 "embeddings_reindex_progress",
                 json.dumps(payload),
             )
 
-        def handle_embeddings_reindex_progress():
+        def handle_embeddings_reindex_progress() -> None:
             self.publish(
                 "embeddings_reindex_progress",
                 json.dumps(self.embeddings_reindex.copy()),
             )
 
-        def handle_on_connect():
+        def handle_update_birdseye_layout() -> None:
+            if payload:
+                self.birdseye_layout = payload
+                self.publish("birdseye_layout", json.dumps(self.birdseye_layout))
+
+        def handle_birdseye_layout() -> None:
+            self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
+
+        def handle_on_connect() -> None:
             camera_status = self.camera_activity.last_camera_activity.copy()
             cameras_with_status = camera_status.keys()
 
@@ -177,6 +204,9 @@ class Dispatcher:
                     "snapshots": self.config.cameras[camera].snapshots.enabled,
                     "record": self.config.cameras[camera].record.enabled,
                     "audio": self.config.cameras[camera].audio.enabled,
+                    "audio_transcription": self.config.cameras[
+                        camera
+                    ].audio_transcription.live_enabled,
                     "notifications": self.config.cameras[camera].notifications.enabled,
                     "notifications_suspended": int(
                         self.web_push_client.suspended_cameras.get(camera, 0)
@@ -189,6 +219,12 @@ class Dispatcher:
                     ].onvif.autotracking.enabled,
                     "alerts": self.config.cameras[camera].review.alerts.enabled,
                     "detections": self.config.cameras[camera].review.detections.enabled,
+                    "object_descriptions": self.config.cameras[
+                        camera
+                    ].objects.genai.enabled,
+                    "review_descriptions": self.config.cameras[
+                        camera
+                    ].review.genai.enabled,
                 }
 
             self.publish("camera_activity", json.dumps(camera_status))
@@ -197,8 +233,9 @@ class Dispatcher:
                 "embeddings_reindex_progress",
                 json.dumps(self.embeddings_reindex.copy()),
             )
+            self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
 
-        def handle_notification_test():
+        def handle_notification_test() -> None:
             self.publish("notification_test", "Test notification")
 
         # Dictionary mapping topic to handlers
@@ -210,12 +247,15 @@ class Dispatcher:
             CLEAR_ONGOING_REVIEW_SEGMENTS: handle_clear_ongoing_review_segments,
             UPDATE_CAMERA_ACTIVITY: handle_update_camera_activity,
             UPDATE_EVENT_DESCRIPTION: handle_update_event_description,
+            UPDATE_REVIEW_DESCRIPTION: handle_update_review_description,
             UPDATE_MODEL_STATE: handle_update_model_state,
             UPDATE_EMBEDDINGS_REINDEX_PROGRESS: handle_update_embeddings_reindex_progress,
+            UPDATE_BIRDSEYE_LAYOUT: handle_update_birdseye_layout,
             NOTIFICATION_TEST: handle_notification_test,
             "restart": handle_restart,
             "embeddingsReindexProgress": handle_embeddings_reindex_progress,
             "modelState": handle_model_state,
+            "birdseyeLayout": handle_birdseye_layout,
             "onConnect": handle_on_connect,
         }
 
@@ -243,11 +283,12 @@ class Dispatcher:
                 logger.error(
                     f"Received invalid {topic.split('/')[-1]} command: {topic}"
                 )
-                return
+            return None
         elif topic in topic_handlers:
             return topic_handlers[topic]()
         else:
             self.publish(topic, payload, retain=False)
+            return None
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Handle publishing to communicators."""
@@ -273,8 +314,11 @@ class Dispatcher:
                         f"Turning on motion for {camera_name} due to detection being enabled."
                     )
                     motion_settings.enabled = True
-                    self.config_updater.publish(
-                        f"config/motion/{camera_name}", motion_settings
+                    self.config_updater.publish_update(
+                        CameraConfigUpdateTopic(
+                            CameraConfigUpdateEnum.motion, camera_name
+                        ),
+                        motion_settings,
                     )
                     self.publish(f"{camera_name}/motion/state", payload, retain=True)
         elif payload == "OFF":
@@ -282,7 +326,10 @@ class Dispatcher:
                 logger.info(f"Turning off detection for {camera_name}")
                 detect_settings.enabled = False
 
-        self.config_updater.publish(f"config/detect/{camera_name}", detect_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.detect, camera_name),
+            detect_settings,
+        )
         self.publish(f"{camera_name}/detect/state", payload, retain=True)
 
     def _on_enabled_command(self, camera_name: str, payload: str) -> None:
@@ -303,7 +350,10 @@ class Dispatcher:
                 logger.info(f"Turning off camera {camera_name}")
                 camera_settings.enabled = False
 
-        self.config_updater.publish(f"config/enabled/{camera_name}", camera_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.enabled, camera_name),
+            camera_settings.enabled,
+        )
         self.publish(f"{camera_name}/enabled/state", payload, retain=True)
 
     def _on_motion_command(self, camera_name: str, payload: str) -> None:
@@ -326,7 +376,10 @@ class Dispatcher:
                 logger.info(f"Turning off motion for {camera_name}")
                 motion_settings.enabled = False
 
-        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.motion, camera_name),
+            motion_settings,
+        )
         self.publish(f"{camera_name}/motion/state", payload, retain=True)
 
     def _on_motion_improve_contrast_command(
@@ -338,13 +391,16 @@ class Dispatcher:
         if payload == "ON":
             if not motion_settings.improve_contrast:
                 logger.info(f"Turning on improve contrast for {camera_name}")
-                motion_settings.improve_contrast = True  # type: ignore[union-attr]
+                motion_settings.improve_contrast = True
         elif payload == "OFF":
             if motion_settings.improve_contrast:
                 logger.info(f"Turning off improve contrast for {camera_name}")
-                motion_settings.improve_contrast = False  # type: ignore[union-attr]
+                motion_settings.improve_contrast = False
 
-        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.motion, camera_name),
+            motion_settings,
+        )
         self.publish(f"{camera_name}/improve_contrast/state", payload, retain=True)
 
     def _on_ptz_autotracker_command(self, camera_name: str, payload: str) -> None:
@@ -383,8 +439,11 @@ class Dispatcher:
 
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion contour area for {camera_name}: {payload}")
-        motion_settings.contour_area = payload  # type: ignore[union-attr]
-        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
+        motion_settings.contour_area = payload
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.motion, camera_name),
+            motion_settings,
+        )
         self.publish(f"{camera_name}/motion_contour_area/state", payload, retain=True)
 
     def _on_motion_threshold_command(self, camera_name: str, payload: int) -> None:
@@ -397,8 +456,11 @@ class Dispatcher:
 
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion threshold for {camera_name}: {payload}")
-        motion_settings.threshold = payload  # type: ignore[union-attr]
-        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
+        motion_settings.threshold = payload
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.motion, camera_name),
+            motion_settings,
+        )
         self.publish(f"{camera_name}/motion_threshold/state", payload, retain=True)
 
     def _on_global_notification_command(self, payload: str) -> None:
@@ -409,9 +471,9 @@ class Dispatcher:
 
         notification_settings = self.config.notifications
         logger.info(f"Setting all notifications: {payload}")
-        notification_settings.enabled = payload == "ON"  # type: ignore[union-attr]
-        self.config_updater.publish(
-            "config/notifications", {"_global_notifications": notification_settings}
+        notification_settings.enabled = payload == "ON"
+        self.config_updater.publisher.publish(
+            "config/notifications", notification_settings
         )
         self.publish("notifications/state", payload, retain=True)
 
@@ -434,8 +496,42 @@ class Dispatcher:
                 logger.info(f"Turning off audio detection for {camera_name}")
                 audio_settings.enabled = False
 
-        self.config_updater.publish(f"config/audio/{camera_name}", audio_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.audio, camera_name),
+            audio_settings,
+        )
         self.publish(f"{camera_name}/audio/state", payload, retain=True)
+
+    def _on_audio_transcription_command(self, camera_name: str, payload: str) -> None:
+        """Callback for live audio transcription topic."""
+        audio_transcription_settings = self.config.cameras[
+            camera_name
+        ].audio_transcription
+
+        if payload == "ON":
+            if not self.config.cameras[
+                camera_name
+            ].audio_transcription.enabled_in_config:
+                logger.error(
+                    "Audio transcription must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
+            if not audio_transcription_settings.live_enabled:
+                logger.info(f"Turning on live audio transcription for {camera_name}")
+                audio_transcription_settings.live_enabled = True
+        elif payload == "OFF":
+            if audio_transcription_settings.live_enabled:
+                logger.info(f"Turning off live audio transcription for {camera_name}")
+                audio_transcription_settings.live_enabled = False
+
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(
+                CameraConfigUpdateEnum.audio_transcription, camera_name
+            ),
+            audio_transcription_settings,
+        )
+        self.publish(f"{camera_name}/audio_transcription/state", payload, retain=True)
 
     def _on_recordings_command(self, camera_name: str, payload: str) -> None:
         """Callback for recordings topic."""
@@ -456,7 +552,10 @@ class Dispatcher:
                 logger.info(f"Turning off recordings for {camera_name}")
                 record_settings.enabled = False
 
-        self.config_updater.publish(f"config/record/{camera_name}", record_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.record, camera_name),
+            record_settings,
+        )
         self.publish(f"{camera_name}/recordings/state", payload, retain=True)
 
     def _on_snapshots_command(self, camera_name: str, payload: str) -> None:
@@ -472,6 +571,10 @@ class Dispatcher:
                 logger.info(f"Turning off snapshots for {camera_name}")
                 snapshots_settings.enabled = False
 
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.snapshots, camera_name),
+            snapshots_settings,
+        )
         self.publish(f"{camera_name}/snapshots/state", payload, retain=True)
 
     def _on_ptz_command(self, camera_name: str, payload: str) -> None:
@@ -506,7 +609,10 @@ class Dispatcher:
                 logger.info(f"Turning off birdseye for {camera_name}")
                 birdseye_settings.enabled = False
 
-        self.config_updater.publish(f"config/birdseye/{camera_name}", birdseye_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.birdseye, camera_name),
+            birdseye_settings,
+        )
         self.publish(f"{camera_name}/birdseye/state", payload, retain=True)
 
     def _on_birdseye_mode_command(self, camera_name: str, payload: str) -> None:
@@ -527,7 +633,10 @@ class Dispatcher:
             f"Setting birdseye mode for {camera_name} to {birdseye_settings.mode}"
         )
 
-        self.config_updater.publish(f"config/birdseye/{camera_name}", birdseye_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.birdseye, camera_name),
+            birdseye_settings,
+        )
         self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)
 
     def _on_camera_notification_command(self, camera_name: str, payload: str) -> None:
@@ -559,8 +668,9 @@ class Dispatcher:
             ):
                 self.web_push_client.suspended_cameras[camera_name] = 0
 
-        self.config_updater.publish(
-            "config/notifications", {camera_name: notification_settings}
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.notifications, camera_name),
+            notification_settings,
         )
         self.publish(f"{camera_name}/notifications/state", payload, retain=True)
         self.publish(f"{camera_name}/notifications/suspended", "0", retain=True)
@@ -617,7 +727,10 @@ class Dispatcher:
                 logger.info(f"Turning off alerts for {camera_name}")
                 review_settings.alerts.enabled = False
 
-        self.config_updater.publish(f"config/review/{camera_name}", review_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.review, camera_name),
+            review_settings,
+        )
         self.publish(f"{camera_name}/review_alerts/state", payload, retain=True)
 
     def _on_detections_command(self, camera_name: str, payload: str) -> None:
@@ -639,5 +752,58 @@ class Dispatcher:
                 logger.info(f"Turning off detections for {camera_name}")
                 review_settings.detections.enabled = False
 
-        self.config_updater.publish(f"config/review/{camera_name}", review_settings)
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.review, camera_name),
+            review_settings,
+        )
         self.publish(f"{camera_name}/review_detections/state", payload, retain=True)
+
+    def _on_object_description_command(self, camera_name: str, payload: str) -> None:
+        """Callback for object description topic."""
+        genai_settings = self.config.cameras[camera_name].objects.genai
+
+        if payload == "ON":
+            if not self.config.cameras[camera_name].objects.genai.enabled_in_config:
+                logger.error(
+                    "GenAI must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
+            if not genai_settings.enabled:
+                logger.info(f"Turning on object descriptions for {camera_name}")
+                genai_settings.enabled = True
+        elif payload == "OFF":
+            if genai_settings.enabled:
+                logger.info(f"Turning off object descriptions for {camera_name}")
+                genai_settings.enabled = False
+
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.object_genai, camera_name),
+            genai_settings,
+        )
+        self.publish(f"{camera_name}/object_descriptions/state", payload, retain=True)
+
+    def _on_review_description_command(self, camera_name: str, payload: str) -> None:
+        """Callback for review description topic."""
+        genai_settings = self.config.cameras[camera_name].review.genai
+
+        if payload == "ON":
+            if not self.config.cameras[camera_name].review.genai.enabled_in_config:
+                logger.error(
+                    "GenAI Alerts or Detections must be enabled in the config to be turned on via MQTT."
+                )
+                return
+
+            if not genai_settings.enabled:
+                logger.info(f"Turning on review descriptions for {camera_name}")
+                genai_settings.enabled = True
+        elif payload == "OFF":
+            if genai_settings.enabled:
+                logger.info(f"Turning off review descriptions for {camera_name}")
+                genai_settings.enabled = False
+
+        self.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.review_genai, camera_name),
+            genai_settings,
+        )
+        self.publish(f"{camera_name}/review_descriptions/state", payload, retain=True)

@@ -15,7 +15,8 @@
       "placeholder": "Masukkan nama…",
       "errorMessage": {
         "mustLeastCharacters": "Nama grup kamera minimal harus 2 karakter.",
-        "exists": "Nama grup kamera sudah ada."
+        "exists": "Nama grup kamera sudah ada.",
+        "nameMustNotPeriod": "Nama grup kamera tidak boleh ada titik."
       }
     }
   }

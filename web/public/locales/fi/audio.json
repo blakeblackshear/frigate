@@ -54,5 +54,9 @@
   "pant": "Huohottaa",
   "snort": "Haukkua",
   "cough": "Yskä",
-  "sneeze": "Niistää"
+  "sneeze": "Niistää",
+  "throat_clearing": "Kurkun selvittäminen",
+  "sniff": "Poimi",
+  "run": "Käynnistä",
+  "shuffle": "Sekoitus"
 }

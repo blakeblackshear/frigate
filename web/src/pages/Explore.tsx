@@ -26,6 +26,15 @@ import { useDocDomain } from "@/hooks/use-doc-domain";
 
 const API_LIMIT = 25;
 
+// always parse these as string arrays
+const SEARCH_FILTER_ARRAY_KEYS = [
+  "cameras",
+  "labels",
+  "sub_labels",
+  "recognized_license_plate",
+  "zones",
+];
+
 export default function Explore() {
   // search field handler
 
@@ -58,7 +67,7 @@ export default function Explore() {
   const [search, setSearch] = useState("");
 
   const [searchFilter, setSearchFilter, searchSearchParams] =
-    useApiFilterArgs<SearchFilter>();
+    useApiFilterArgs<SearchFilter>(SEARCH_FILTER_ARRAY_KEYS);
 
   const searchTerm = useMemo(
     () => searchSearchParams?.["query"] || "",
@@ -248,15 +257,13 @@ export default function Explore() {
 
   // mutation and revalidation
 
-  const trackedObjectUpdate = useTrackedObjectUpdate();
+  const { payload: wsUpdate } = useTrackedObjectUpdate();
 
   useEffect(() => {
-    if (trackedObjectUpdate) {
+    if (wsUpdate && wsUpdate.type == "description") {
       mutate();
     }
-    // mutate / revalidate when event description updates come in
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackedObjectUpdate]);
+  }, [wsUpdate, mutate]);
 
   // embeddings reindex progress
 

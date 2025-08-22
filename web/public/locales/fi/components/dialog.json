@@ -65,6 +65,13 @@
     }
   },
   "streaming": {
-    "label": "Kuvavirta"
+    "label": "Kuvavirta",
+    "restreaming": {
+      "disabled": "Uudelleentoisto ei ole käytettävissä tällä kameralla.",
+      "desc": {
+        "title": "Määritä go2rtc saadaksesi lisäreaaliaikanäkymän vaihtoehtoja ja ääntä tälle kameralle.",
+        "readTheDocumentation": "Lue dokumentaatio"
+      }
+    }
   }
 }

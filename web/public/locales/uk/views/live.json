@@ -85,6 +85,14 @@
       "center": {
         "label": "Клацніть у кадрі, щоб відцентрувати камеру PTZ"
       }
+    },
+    "focus": {
+      "in": {
+        "label": "Фокус PTZ-камери"
+      },
+      "out": {
+        "label": "Вихід PTZ-камери для фокусування"
+      }
     }
   },
   "editLayout": {
@@ -94,7 +102,7 @@
       "label": "Редагувати групу камер"
     }
   },
-  "documentTitle": "Прямий трансляція - Frigate",
+  "documentTitle": "Пряма трансляція - Frigate",
   "documentTitle.withCamera": "{{camera}} - Пряма трансляція - Frigate",
   "lowBandwidthMode": "Економічний режим",
   "twoWayTalk": {
@@ -142,7 +150,8 @@
     "recording": "Записування",
     "snapshots": "Знімки",
     "audioDetection": "Виявлення звуку",
-    "autotracking": "Автотрекiнг"
+    "autotracking": "Автотрекiнг",
+    "transcription": "Аудіотранскрипція"
   },
   "history": {
     "label": "Показати історичні кадри"
@@ -154,5 +163,9 @@
       "active_objects": "Активні об'єкти"
     },
     "notAllTips": "Ваш {{source}} конфігурацію збереження записів встановлено на <code>режим: {{effectiveRetainMode}}</code>, тому цей запис на вимогу збереже лише сегменти з {{effectiveRetainModeName}}."
+  },
+  "transcription": {
+    "enable": "Увімкнути транскрипцію аудіо в реальному часі",
+    "disable": "Вимкнути транскрипцію аудіо в реальному часі"
   }
 }

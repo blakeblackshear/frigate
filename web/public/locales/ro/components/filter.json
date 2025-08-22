@@ -61,7 +61,7 @@
     "label": "Filtru camere"
   },
   "review": {
-    "showReviewed": "Afișează revizuitele"
+    "showReviewed": "Afișează cele revizuite"
   },
   "motion": {
     "showMotionOnly": "Afișează doar mișcarea"
@@ -98,10 +98,10 @@
     "label": "Filtrează nivelul jurnalului",
     "filterBySeverity": "Filtrează jurnalele după severitate",
     "loading": {
-      "title": "Se încarcă",
+      "title": "Încărcare continuă",
       "desc": "Când panoul de jurnale este derulat până jos, noile jurnale sunt afișate automat pe măsură ce sunt adăugate."
     },
-    "disableLogStreaming": "Dezactivează fluxul jurnalelor",
+    "disableLogStreaming": "Dezactivează încărcarea continuă",
     "allLogs": "Toate jurnalele"
   },
   "trackedObjectDelete": {
@@ -122,5 +122,13 @@
     "loading": "Se încarcă numerele de înmatriculare recunoscute…",
     "placeholder": "Caută plăcuțe de înmatriculare…",
     "loadFailed": "Nu s-au putut încărca numerele de înmatriculare recunoscute."
+  },
+  "classes": {
+    "label": "Clase",
+    "all": {
+      "title": "Toate clasele"
+    },
+    "count_one": "{{count}} Clasă",
+    "count_other": "{{count}} Clase"
   }
 }

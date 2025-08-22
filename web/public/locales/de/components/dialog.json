@@ -119,5 +119,12 @@
       "markAsReviewed": "Als geprüft markieren",
       "deleteNow": "Jetzt löschen"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Vorschaubild eines verfolgten Objekts selektieren",
+    "search": {
+      "placeholder": "Nach Label oder Unterlabel suchen..."
+    },
+    "noImages": "Kein Vorschaubild für diese Kamera gefunden"
   }
 }

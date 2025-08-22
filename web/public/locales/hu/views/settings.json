@@ -6,7 +6,7 @@
     "classification": "Osztályozási beállítások - Frigate",
     "masksAndZones": "Maszk és zónaszerkesztő - Frigate",
     "object": "Hibakeresés - Frigate",
-    "general": "Áltlános beállítások - Frigate",
+    "general": "Áltlános Beállítások - Frigate",
     "frigatePlus": "Frigate+ beállítások - Frigate",
     "notifications": "Értesítések beállítása - Frigate",
     "motionTuner": "Mozgás Hangoló - Frigate",
@@ -143,7 +143,7 @@
       "success": "A kiegészítő beállítások elmentésre kerültek. A módosítások alkalmazásához indítsa újra a Frigate-et."
     },
     "unsavedChanges": "Mentetlen gazdagítási beállítás változtatások",
-    "title": "Kiegészítés Beállítások",
+    "title": "Kiegészítők Beállítása",
     "restart_required": "Újraindítás szükséges (a kiegészítő beállítások megváltoztak)"
   },
   "notification": {
@@ -616,6 +616,19 @@
         "success": "Az Ellenőrzési Kategorizálás beállításai elmentésre kerültek. A módosítások alkalmazásához indítsa újra a Frigate-et."
       }
     },
-    "title": "Kamera Beállítások"
+    "title": "Kamera Beállítások",
+    "object_descriptions": {
+      "title": "Generatív AI Tárgy Leírások"
+    },
+    "addCamera": "Új Kamera Hozzáadása",
+    "editCamera": "Kamera Szerkesztése:",
+    "selectCamera": "Válasszon ki egy Kamerát",
+    "backToSettings": "Vissza a Kamera Beállításokhoz",
+    "cameraConfig": {
+      "add": "Kamera Hozzáadása",
+      "edit": "Kamera Szerkesztése",
+      "name": "Kamera Neve",
+      "nameRequired": "Kamera nevének megadása szükséges"
+    }
   }
 }

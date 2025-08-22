@@ -1,0 +1,19 @@
+{
+  "documentTitle": "Directo - Frigate",
+  "documentTitle.withCamera": "{{camera}} - Directo - Frigate",
+  "twoWayTalk": {
+    "disable": "Deshabilita a Conversa de dous sentidos",
+    "enable": "Habilitar a Conversa de dous sentidos"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Pincha no frame para centrar a cámara"
+      }
+    }
+  },
+  "cameraAudio": {
+    "enable": "Habilitar Audio de cámara"
+  },
+  "lowBandwidthMode": "Modo de Baixa Banda Ancha"
+}

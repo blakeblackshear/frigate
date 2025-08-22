@@ -7,7 +7,36 @@
       "desc": "Tarkastele kohteen tietoja",
       "button": {
         "share": "Jaa tämä tarkasteltu kohde"
+      },
+      "toast": {
+        "error": {
+          "updatedSublabelFailed": "Alatunnisteen päivitys epäonnistui",
+          "updatedLPRFailed": "Rekisterikilven päivitys epäonnistui"
+        }
       }
+    },
+    "recognizedLicensePlate": "Tunnistettu rekisterikilpi",
+    "estimatedSpeed": "Arvioitu nopeus",
+    "objects": "Objektit",
+    "camera": "Kamera",
+    "zones": "Alueet",
+    "label": "Tunniste",
+    "editSubLabel": {
+      "title": "Editoi alitunnistetta",
+      "desc": "Syötä uusi alitunniste tähän",
+      "descNoLabel": "Lisää uusi alatunniste tähän seurattuun kohteeseen"
+    },
+    "editLPR": {
+      "title": "Muokkaa rekisterikilpeä",
+      "desc": "Syötä uusi rekisterikilven arvo tähän",
+      "descNoLabel": "Syötä uusi rekisterikilven arvo tähän seurattuun objektiin"
+    },
+    "snapshotScore": {
+      "label": "Tilannekuvan arvosana"
+    },
+    "topScore": {
+      "label": "Huippuarvosana",
+      "info": "Ylin pistemäärä on seurattavan kohteen korkein mediaani, joten tämä voi erota hakutuloksen esikatselukuvassa näkyvästä pistemäärästä."
     }
   },
   "exploreIsUnavailable": {
@@ -27,10 +56,13 @@
       "context": "Frigate lataa semanttista hakua varten vaadittavat upotusmallit. Tämä saattaa viedä useamman minuutin, riippuen yhteytesi nopeudesta.",
       "setup": {
         "visionModel": "Vision-malli",
-        "textModel": "Tekstimalli"
+        "textModel": "Tekstimalli",
+        "textTokenizer": "Tekstin osioija",
+        "visionModelFeatureExtractor": "Näkömallin piirreluokkain"
       },
       "tips": {
-        "documentation": "Lue dokumentaatio"
+        "documentation": "Lue dokumentaatio",
+        "context": "Saatat haluta uudelleenindeksoida seurattavien kohteiden upotukset, kun mallit on ladattu."
       },
       "error": "Tapahtui virhe. Tarkista Frigaten lokit."
     }
@@ -74,7 +106,8 @@
     "noImageFound": "Tältä aikaleimalta ei löytynyt kuvia.",
     "createObjectMask": "Luo kohdemaski",
     "scrollViewTips": "Vieritä katsoaksesi merkittäviä hetkiä kohteen elinkaarelta.",
-    "autoTrackingTips": "Kohteen rajojen sijainti on epätarkka automaattisesti seuraaville kameroille."
+    "autoTrackingTips": "Kohteen rajojen sijainti on epätarkka automaattisesti seuraaville kameroille.",
+    "adjustAnnotationSettings": "Säädä merkintäasetuksia"
   },
   "trackedObjectDetails": "Seurattavien kohteiden tiedot",
   "type": {

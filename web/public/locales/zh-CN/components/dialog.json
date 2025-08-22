@@ -116,5 +116,12 @@
       "markAsReviewed": "标记为已核查",
       "deleteNow": "立即删除"
     }
+  },
+  "imagePicker": {
+    "selectImage": "选择追踪对象的缩略图",
+    "search": {
+      "placeholder": "通过标签或子标签搜索……"
+    },
+    "noImages": "未在此摄像头找到缩略图"
   }
 }

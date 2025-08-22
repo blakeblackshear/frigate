@@ -4,8 +4,8 @@
     "button": "Repornește",
     "restarting": {
       "title": "Frigate repornește",
-      "content": "Această pagină se va reâncărca în {{countdown}} secunde.",
-      "button": "Forteaza Reincarcarea Acum"
+      "content": "Această pagină se va reâncărca automat în {{countdown}} secunde.",
+      "button": "Forțează acum reîncărcarea"
     }
   },
   "explore": {
@@ -122,5 +122,12 @@
         }
       }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Selectează miniatura unui obiect urmărit",
+    "search": {
+      "placeholder": "Caută după etichetă sau subetichetă..."
+    },
+    "noImages": "Nu s-au găsit miniaturi pentru această cameră"
   }
 }

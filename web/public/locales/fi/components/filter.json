@@ -38,7 +38,8 @@
     "label": "Piirteet",
     "hasVideoClip": "Videoleike löytyy",
     "submittedToFrigatePlus": {
-      "label": "Lähetetty Frigate+:aan"
+      "label": "Lähetetty Frigate+:aan",
+      "tips": "Sinun on ensin suodatettava seuratut kohteet, joilla on tilannekuva.<br /><br />Kohteita, joilla ei ole tilannekuvaa, ei voida lähettää Frigate+:aan."
     },
     "hasSnapshot": "Tilannekuva löytyy"
   },
@@ -49,6 +50,13 @@
     "scoreAsc": "Kohteen pisteet (Nouseva)",
     "scoreDesc": "Kohteen pisteet (Laskeva)",
     "speedAsc": "Arvioitu nopeus (Nouseva)",
-    "speedDesc": "Arvioitu nopeus (Laskeva)"
+    "speedDesc": "Arvioitu nopeus (Laskeva)",
+    "relevance": "Olennaisuus"
+  },
+  "cameras": {
+    "label": "Kameran suodattimet",
+    "all": {
+      "title": "Kaikki kamerat"
+    }
   }
 }

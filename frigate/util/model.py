@@ -284,7 +284,7 @@ def post_process_yolox(
 
 
 def get_ort_providers(
-    force_cpu: bool = False, device: str = "AUTO", requires_fp16: bool = False
+    force_cpu: bool = False, device: str | None = "AUTO", requires_fp16: bool = False
 ) -> tuple[list[str], list[dict[str, Any]]]:
     if force_cpu:
         return (
@@ -301,7 +301,7 @@ def get_ort_providers(
 
     for provider in ort.get_available_providers():
         if provider == "CUDAExecutionProvider":
-            device_id = 0 if not device.isdigit() else int(device)
+            device_id = 0 if (not device or not device.isdigit()) else int(device)
             providers.append(provider)
             options.append(
                 {

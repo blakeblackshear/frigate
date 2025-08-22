@@ -51,7 +51,40 @@
     "h": "{{time}}h",
     "m": "{{time}}m",
     "s": "{{time}}s",
-    "yr": "le"
+    "yr": "le",
+    "formattedTimestamp": {
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd/MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    }
   },
   "menu": {
     "live": {
@@ -67,9 +100,86 @@
     },
     "explore": "Brskanje",
     "theme": {
-      "nord": "Nord"
+      "nord": "Nord",
+      "label": "Teme",
+      "blue": "Modra",
+      "green": "Zelena",
+      "red": "Rdeča",
+      "highcontrast": "Visok Kontrast",
+      "default": "Privzeto"
     },
-    "review": "Pregled"
+    "review": "Pregled",
+    "system": "Sistem",
+    "systemMetrics": "Sistemske metrike",
+    "configuration": "Konfiguracija",
+    "systemLogs": "Sistemski dnevniki",
+    "settings": "Nastavitve",
+    "configurationEditor": "Urejevalnik Konfiguracije",
+    "languages": "Jeziki",
+    "language": {
+      "en": "English (angleščina)",
+      "es": "Español (španščina)",
+      "zhCN": "简体中文 (poenostavljena kitajščina)",
+      "hi": "हिन्दी (hindijščina)",
+      "fr": "Français (francoščina)",
+      "ar": "العربية (arabščina)",
+      "pt": "Português (portugalščina)",
+      "ru": "Русский (ruščina)",
+      "de": "Deutsch (nemščina)",
+      "ja": "日本語 (japonščina)",
+      "tr": "Türkçe (turščina)",
+      "it": "Italiano (italijanščina)",
+      "nl": "Nederlands (nizozemščina)",
+      "sv": "Svenska (švedščina)",
+      "cs": "Čeština (češčina)",
+      "nb": "Norsk Bokmål (norveščina, bokmal)",
+      "ko": "한국어 (korejščina)",
+      "vi": "Tiếng Việt (vietnamščina)",
+      "fa": "فارسی (perzijščina)",
+      "pl": "Polski (poljščina)",
+      "uk": "Українська (ukrajinščina)",
+      "he": "עברית (hebrejščina)",
+      "el": "Ελληνικά (grščina)",
+      "ro": "Română (romunščina)",
+      "hu": "Magyar (madžarščina)",
+      "fi": "Suomi (finščina)",
+      "da": "Dansk (danščina)",
+      "sk": "Slovenčina (slovaščina)",
+      "yue": "粵語 (kantonščina)",
+      "th": "ไทย (tajščina)",
+      "sr": "Српски (srbščina)",
+      "sl": "Slovenščina (Slovenščina )",
+      "bg": "Български (bulgarščina)",
+      "withSystem": {
+        "label": "Uporabi sistemske nastavitve za jezik"
+      }
+    },
+    "appearance": "Izgled",
+    "darkMode": {
+      "label": "Temni Način",
+      "light": "Svetlo",
+      "dark": "Temno",
+      "withSystem": {
+        "label": "Uporabi sistemske nastavitve za svetel ali temen način"
+      }
+    },
+    "withSystem": "Sistem",
+    "help": "Pomoč",
+    "documentation": {
+      "title": "Dokumentacija",
+      "label": "Frigate dokumentacija"
+    },
+    "restart": "Znova Zaženi Frigate",
+    "export": "Izvoz",
+    "faceLibrary": "Zbirka Obrazov",
+    "user": {
+      "title": "Uporabnik",
+      "account": "Račun",
+      "current": "Trenutni Uporabnik: {{user}}",
+      "anonymous": "anonimen",
+      "logout": "Odjava",
+      "setPassword": "Nastavi Geslo"
+    }
   },
   "button": {
     "apply": "Uporabi",
@@ -80,7 +190,7 @@
     "back": "Nazaj",
     "pictureInPicture": "Slika v Sliki",
     "history": "Zgodovina",
-    "disabled": "Izklopljeno",
+    "disabled": "Onemogočeno",
     "copy": "Kopiraj",
     "exitFullscreen": "Izhod iz Celozaslonskega načina",
     "enabled": "Omogočen",
@@ -88,7 +198,25 @@
     "save": "Shrani",
     "saving": "Shranjevanje …",
     "cancel": "Prekliči",
-    "fullscreen": "Celozaslonski način"
+    "fullscreen": "Celozaslonski način",
+    "twoWayTalk": "Dvosmerni Pogovor",
+    "cameraAudio": "Zvok Kamere",
+    "on": "Vključen",
+    "off": "Izključen",
+    "edit": "Uredi",
+    "copyCoordinates": "Kopiraj koordinate",
+    "delete": "Izbriši",
+    "yes": "Da",
+    "no": "Ne",
+    "download": "Prenesi",
+    "info": "Info",
+    "suspended": "Začasno ustavljeno",
+    "unsuspended": "Obnovi",
+    "play": "Predvajaj",
+    "unselect": "Odznači",
+    "export": "Izvoz",
+    "deleteNow": "Izbriši Zdaj",
+    "next": "Naprej"
   },
   "unit": {
     "speed": {
@@ -105,7 +233,41 @@
   },
   "pagination": {
     "next": {
-      "label": "Pojdi na naslednjo stran"
+      "label": "Pojdi na naslednjo stran",
+      "title": "Naprej"
+    },
+    "label": "paginacija",
+    "previous": {
+      "title": "Prejšnji",
+      "label": "Pojdi na prejšnjo stran"
+    },
+    "more": "Več strani"
+  },
+  "selectItem": "Izberi {{item}}",
+  "toast": {
+    "copyUrlToClipboard": "Povezava kopirana v odložišče.",
+    "save": {
+      "title": "Shrani",
+      "error": {
+        "title": "Napaka pri shranjevanju sprememb: {{errorMessage}}",
+        "noMessage": "Napaka pri shranjevanju sprememb konfiguracije"
+      }
     }
+  },
+  "role": {
+    "title": "Vloga",
+    "admin": "Administrator",
+    "viewer": "Gledalec",
+    "desc": "Administratorji imajo poln dostop do vseh funkcij Frigate uporabniškega vmesnika. Gledalci so omejeni na gledanje kamer, zgodovine posnetkov in pregledovanje dogodkov."
+  },
+  "accessDenied": {
+    "documentTitle": "Dostop zavrnjen - Frigate",
+    "title": "Dostop Zavrnjen",
+    "desc": "Nimate pravic za ogled te strani."
+  },
+  "notFound": {
+    "documentTitle": "Ni Najdeno - Frigate",
+    "title": "404",
+    "desc": "Stran ni najdena"
   }
 }

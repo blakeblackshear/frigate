@@ -75,13 +75,13 @@ export default function ExploreView({
     }, {});
   }, [events]);
 
-  const trackedObjectUpdate = useTrackedObjectUpdate();
+  const { payload: wsUpdate } = useTrackedObjectUpdate();
 
   useEffect(() => {
-    mutate();
-    // mutate / revalidate when event description updates come in
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackedObjectUpdate]);
+    if (wsUpdate && wsUpdate.type == "description") {
+      mutate();
+    }
+  }, [wsUpdate, mutate]);
 
   // update search detail when results change
 
@@ -219,6 +219,7 @@ function ExploreThumbnailImage({
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+  const navigate = useNavigate();
 
   const handleFindSimilar = () => {
     if (config?.semantic_search.enabled) {
@@ -234,6 +235,12 @@ function ExploreThumbnailImage({
     onSelectSearch(event, false, "snapshot");
   };
 
+  const handleAddTrigger = () => {
+    navigate(
+      `/settings?page=triggers&camera=${event.camera}&event_id=${event.id}`,
+    );
+  };
+
   return (
     <SearchResultActions
       searchResult={event}
@@ -241,6 +248,7 @@ function ExploreThumbnailImage({
       refreshResults={mutate}
       showObjectLifecycle={handleShowObjectLifecycle}
       showSnapshot={handleShowSnapshot}
+      addTrigger={handleAddTrigger}
       isContextMenu={true}
     >
       <div className="relative size-full">

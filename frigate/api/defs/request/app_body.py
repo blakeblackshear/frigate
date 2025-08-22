@@ -1,10 +1,12 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
 
 
 class AppConfigSetBody(BaseModel):
     requires_restart: int = 1
+    update_topic: str | None = None
+    config_data: Optional[Dict[str, Any]] = None
 
 
 class AppPutPasswordBody(BaseModel):

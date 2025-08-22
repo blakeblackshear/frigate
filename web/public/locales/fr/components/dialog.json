@@ -122,5 +122,12 @@
       "markAsReviewed": "Marquer comme passé en revue",
       "deleteNow": "Supprimer maintenant"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Sélectionnez une vignette d'objet suivi",
+    "search": {
+      "placeholder": "Chercher par libellé ou sous-libellé..."
+    },
+    "noImages": "Aucune vignette trouvée pour cette caméra"
   }
 }
