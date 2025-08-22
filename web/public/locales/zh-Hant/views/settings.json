@@ -39,7 +39,51 @@
       "automaticLiveView": {
         "label": "自動即時檢視",
         "desc": "在偵測到移動時自動切換至即時影像。停用此設定將使得在即時監控面板上的靜態畫面每分鐘更新一次。"
+      },
+      "playAlertVideos": {
+        "label": "播放警報影片",
+        "desc": "最近的警報影片預設會在即時監控面板中連續循環播放。取消這個選項，可以只顯示靜態的最近警報擷圖（僅套用於該裝置/瀏覽器）。"
+      }
+    },
+    "storedLayouts": {
+      "title": "儲存的排版",
+      "desc": "在鏡頭群組內的鏡頭排版可以拖拉或縮放調整。這個排版設定儲存於目前瀏覽器的本機儲存空間。",
+      "clearAll": "清除所有排版"
+    },
+    "cameraGroupStreaming": {
+      "title": "鏡頭群組串流播放設定",
+      "desc": "每個鏡頭群組的串流播放設定都儲存在目前瀏覽器的本機儲存空間。",
+      "clearAll": "清除所有串流播放設定"
+    },
+    "recordingsViewer": {
+      "title": "錄影檢視器",
+      "defaultPlaybackRate": {
+        "label": "預設播放速度",
+        "desc": "錄影回放的預設播放速度。"
+      }
+    },
+    "calendar": {
+      "title": "月曆",
+      "firstWeekday": {
+        "label": "第一個工作天",
+        "desc": "在檢視月曆中，每個禮拜從禮拜幾開始。",
+        "sunday": "禮拜天",
+        "monday": "禮拜一"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "清除 {{cameraName}} 儲存的排版",
+        "clearStreamingSettings": "清除所有鏡頭群組的串流播放設定。"
+      },
+      "error": {
+        "clearStoredLayoutFailed": "清除儲存的排版設定失敗: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "清除串流播放設定失敗: {{errorMessage}}"
       }
     }
+  },
+  "enrichments": {
+    "title": "強化設定",
+    "unsavedChanges": "尚未儲存的強化設定變更"
   }
 }
