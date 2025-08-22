@@ -34,5 +34,7 @@
   "markAsReviewed": "Als geprüft kennzeichnen",
   "selected_one": "{{count}} ausgewählt",
   "selected_other": "{{count}} ausgewählt",
-  "detected": "erkannt"
+  "detected": "erkannt",
+  "suspiciousActivity": "Verdächtige Aktivität",
+  "threateningActivity": "Bedrohliche Aktivität"
 }

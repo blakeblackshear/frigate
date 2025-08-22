@@ -69,6 +69,9 @@
     },
     "snapshotScore": {
       "label": "Schnappschuss Bewertung"
+    },
+    "score": {
+      "label": "Ergebnis"
     }
   },
   "documentTitle": "Erkunde - Frigate",
@@ -213,5 +216,11 @@
   "fetchingTrackedObjectsFailed": "Fehler beim Abrufen von verfolgten Objekten: {{errorMessage}}",
   "trackedObjectsCount_one": "{{count}} verfolgtes Objekt ",
   "trackedObjectsCount_other": "{{count}} verfolgte Objekte ",
-  "exploreMore": "Erkunde mehr {{label}} Objekte"
+  "exploreMore": "Erkunde mehr {{label}} Objekte",
+  "aiAnalysis": {
+    "title": "KI-Analyse"
+  },
+  "concerns": {
+    "label": "Bedenken"
+  }
 }
