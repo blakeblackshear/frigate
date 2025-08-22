@@ -247,5 +247,6 @@
     "title": "404",
     "desc": "找不到頁面"
   },
-  "selectItem": "選擇 {{item}}"
+  "selectItem": "選擇 {{item}}",
+  "readTheDocumentation": "閱讀文件"
 }

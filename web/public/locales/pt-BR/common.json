@@ -269,5 +269,7 @@
     "documentTitle": "Não Encontrado - Frigate",
     "title": "404",
     "desc": "Página não encontrada"
-  }
+  },
+  "selectItem": "Selecionar {{item}}",
+  "readTheDocumentation": "Leia a documentação"
 }

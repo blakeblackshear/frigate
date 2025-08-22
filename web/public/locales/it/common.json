@@ -279,5 +279,6 @@
       "title": "Salva"
     }
   },
-  "selectItem": "Seleziona {{item}}"
+  "selectItem": "Seleziona {{item}}",
+  "readTheDocumentation": "Leggi la documentazione"
 }

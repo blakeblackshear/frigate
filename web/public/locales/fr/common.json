@@ -262,6 +262,7 @@
     "desc": "Page non trouvée"
   },
   "selectItem": "Sélectionner {{item}}",
+  "readTheDocumentation": "Lire la documentation",
   "accessDenied": {
     "title": "Accès refusé",
     "documentTitle": "Accès refusé - Frigate",

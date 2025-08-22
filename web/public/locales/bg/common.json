@@ -106,5 +106,7 @@
   },
   "label": {
     "back": "Върни се"
-  }
+  },
+  "selectItem": "Избери {{item}}",
+  "readTheDocumentation": "Прочетете документацията"
 }

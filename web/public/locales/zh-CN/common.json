@@ -265,5 +265,6 @@
     "title": "404",
     "desc": "页面未找到"
   },
-  "selectItem": "选择 {{item}}"
+  "selectItem": "选择 {{item}}",
+  "readTheDocumentation": "阅读文档"
 }
