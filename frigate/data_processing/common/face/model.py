@@ -11,6 +11,7 @@ from scipy import stats
 from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.embeddings.onnx.face_embedding import ArcfaceEmbedding, FaceNetEmbedding
+from frigate.log import redirect_output_to_logger
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ class FaceRecognizer(ABC):
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         pass
 
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def init_landmark_detector(self) -> None:
         landmark_model = os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
 
@@ -267,7 +269,7 @@ class ArcFaceRecognizer(FaceRecognizer):
     def __init__(self, config: FrigateConfig):
         super().__init__(config)
         self.mean_embs: dict[int, np.ndarray] = {}
-        self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding()
+        self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding(config.face_recognition)
         self.model_builder_queue: queue.Queue | None = None
 
     def clear(self) -> None:

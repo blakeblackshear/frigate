@@ -19,7 +19,8 @@ apt-get -qq install --no-install-recommends -y \
     nethogs \
     libgl1 \
     libglib2.0-0 \
-    libusb-1.0.0
+    libusb-1.0.0 \
+    libgomp1  # memryx detector
 
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
@@ -30,6 +31,18 @@ wget -q -O /tmp/libedgetpu1-max.deb "https://github.com/feranick/libedgetpu/rele
 unset DEBIAN_FRONTEND
 yes | dpkg -i /tmp/libedgetpu1-max.deb && export DEBIAN_FRONTEND=noninteractive
 rm /tmp/libedgetpu1-max.deb
+
+# install mesa-teflon-delegate from bookworm-backports
+# Only available for arm64 at the moment
+if [[ "${TARGETARCH}" == "arm64" ]]; then
+    if [[ "${BASE_IMAGE}" == *"nvcr.io/nvidia/tensorrt"* ]]; then
+        echo "Info: Skipping apt-get commands because BASE_IMAGE includes 'nvcr.io/nvidia/tensorrt' for arm64."
+    else
+        echo "deb http://deb.debian.org/debian bookworm-backports main" | tee /etc/apt/sources.list.d/bookworm-backbacks.list
+        apt-get -qq update
+        apt-get -qq install --no-install-recommends --no-install-suggests -y mesa-teflon-delegate/bookworm-backports
+    fi
+fi
 
 # ffmpeg -> amd64
 if [[ "${TARGETARCH}" == "amd64" ]]; then
@@ -71,11 +84,33 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/gpu/ubuntu jammy client" | tee /etc/apt/sources.list.d/intel-gpu-jammy.list
     apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        intel-opencl-icd=24.35.30872.31-996~22.04 intel-level-zero-gpu=1.3.29735.27-914~22.04 intel-media-va-driver-non-free=24.3.3-996~22.04 \
-        libmfx1=23.2.2-880~22.04 libmfxgen1=24.2.4-914~22.04 libvpl2=1:2.13.0.0-996~22.04
+        intel-media-va-driver-non-free libmfx1 libmfxgen1 libvpl2
+
+    apt-get -qq install -y ocl-icd-libopencl1
 
     rm -f /usr/share/keyrings/intel-graphics.gpg
     rm -f /etc/apt/sources.list.d/intel-gpu-jammy.list
+
+    # install legacy and standard intel icd and level-zero-gpu
+    # see https://github.com/intel/compute-runtime/blob/master/LEGACY_PLATFORMS.md for more info
+    # needed core package
+    wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/libigdgmm12_22.5.5_amd64.deb
+    dpkg -i libigdgmm12_22.5.5_amd64.deb
+    rm libigdgmm12_22.5.5_amd64.deb
+
+    # legacy packages
+    wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.22/intel-opencl-icd-legacy1_24.35.30872.22_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/24.35.30872.22/intel-level-zero-gpu-legacy1_1.3.30872.22_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.20/intel-igc-opencl_1.0.17537.20_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.20/intel-igc-core_1.0.17537.20_amd64.deb
+    # standard packages
+    wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/intel-opencl-icd_24.52.32224.5_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/intel-level-zero-gpu_1.6.32224.5_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-opencl-2_2.5.6+18417_amd64.deb
+    wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-core-2_2.5.6+18417_amd64.deb
+
+    dpkg -i *.deb
+    rm *.deb
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then

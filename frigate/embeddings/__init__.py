@@ -3,26 +3,24 @@
 import base64
 import json
 import logging
-import multiprocessing as mp
 import os
-import signal
 import threading
 from json.decoder import JSONDecodeError
-from types import FrameType
-from typing import Any, Optional, Union
+from multiprocessing.synchronize import Event as MpEvent
+from typing import Any, Union
 
 import regex
 from pathvalidate import ValidationError, sanitize_filename
-from setproctitle import setproctitle
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.config import FrigateConfig
-from frigate.const import CONFIG_DIR, FACE_DIR
+from frigate.const import CONFIG_DIR, FACE_DIR, PROCESS_PRIORITY_HIGH
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.models import Event, Recordings
+from frigate.models import Event
 from frigate.util.builtin import serialize
-from frigate.util.services import listen
+from frigate.util.classification import kickoff_model_training
+from frigate.util.process import FrigateProcess
 
 from .maintainer import EmbeddingMaintainer
 from .util import ZScoreNormalization
@@ -30,40 +28,30 @@ from .util import ZScoreNormalization
 logger = logging.getLogger(__name__)
 
 
-def manage_embeddings(config: FrigateConfig, metrics: DataProcessorMetrics) -> None:
-    stop_event = mp.Event()
+class EmbeddingProcess(FrigateProcess):
+    def __init__(
+        self,
+        config: FrigateConfig,
+        metrics: DataProcessorMetrics | None,
+        stop_event: MpEvent,
+    ) -> None:
+        super().__init__(
+            stop_event,
+            PROCESS_PRIORITY_HIGH,
+            name="frigate.embeddings_manager",
+            daemon=True,
+        )
+        self.config = config
+        self.metrics = metrics
 
-    def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-        stop_event.set()
-
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
-
-    threading.current_thread().name = "process:embeddings_manager"
-    setproctitle("frigate.embeddings_manager")
-    listen()
-
-    # Configure Frigate DB
-    db = SqliteVecQueueDatabase(
-        config.database.path,
-        pragmas={
-            "auto_vacuum": "FULL",  # Does not defragment database
-            "cache_size": -512 * 1000,  # 512MB of cache
-            "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
-        },
-        timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
-        load_vec_extension=True,
-    )
-    models = [Event, Recordings]
-    db.bind(models)
-
-    maintainer = EmbeddingMaintainer(
-        db,
-        config,
-        metrics,
-        stop_event,
-    )
-    maintainer.start()
+    def run(self) -> None:
+        self.pre_run_setup(self.config.logger)
+        maintainer = EmbeddingMaintainer(
+            self.config,
+            self.metrics,
+            self.stop_event,
+        )
+        maintainer.start()
 
 
 class EmbeddingsContext:
@@ -300,3 +288,34 @@ class EmbeddingsContext:
 
     def reindex_embeddings(self) -> dict[str, Any]:
         return self.requestor.send_data(EmbeddingsRequestEnum.reindex.value, {})
+
+    def start_classification_training(self, model_name: str) -> dict[str, Any]:
+        threading.Thread(
+            target=kickoff_model_training,
+            args=(self.requestor, model_name),
+            daemon=True,
+        ).start()
+        return {"success": True, "message": f"Began training {model_name} model."}
+
+    def transcribe_audio(self, event: dict[str, any]) -> dict[str, any]:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.transcribe_audio.value, {"event": event}
+        )
+
+    def generate_description_embedding(self, text: str) -> None:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.embed_description.value,
+            {"id": None, "description": text, "upsert": False},
+        )
+
+    def generate_image_embedding(self, event_id: str, thumbnail: bytes) -> None:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.embed_thumbnail.value,
+            {"id": str(event_id), "thumbnail": str(thumbnail), "upsert": False},
+        )
+
+    def generate_review_summary(self, start_ts: float, end_ts: float) -> str | None:
+        return self.requestor.send_data(
+            EmbeddingsRequestEnum.summarize_review.value,
+            {"start_ts": start_ts, "end_ts": end_ts},
+        )

@@ -142,7 +142,15 @@
       "ro": "Román",
       "hu": "Magyar",
       "fi": "Finn",
-      "th": "Thai"
+      "th": "Thai",
+      "ptBR": "Português brasileiro (Brazil portugál)",
+      "sr": "Српски (Szerb)",
+      "sl": "Slovenščina (Szlovén)",
+      "lt": "Lietuvių (Litván)",
+      "bg": "Български (Bolgár)",
+      "gl": "Galego (Galíciai)",
+      "id": "Bahasa Indonesia (Indonéz)",
+      "ur": "اردو (Urdu)"
     },
     "uiPlayground": "UI játszótér",
     "faceLibrary": "Arc Könyvtár",

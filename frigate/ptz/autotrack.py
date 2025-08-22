@@ -31,7 +31,7 @@ from frigate.const import (
 )
 from frigate.ptz.onvif import OnvifController
 from frigate.track.tracked_object import TrackedObject
-from frigate.util.builtin import update_yaml_file
+from frigate.util.builtin import update_yaml_file_bulk
 from frigate.util.config import find_config_file
 from frigate.util.image import SharedMemoryFrameManager, intersection_over_union
 
@@ -60,10 +60,10 @@ class PtzMotionEstimator:
 
     def motion_estimator(
         self,
-        detections: list[dict[str, Any]],
+        detections: list[tuple[Any, Any, Any, Any, Any, Any]],
         frame_name: str,
         frame_time: float,
-        camera: str,
+        camera: str | None,
     ):
         # If we've just started up or returned to our preset, reset motion estimator for new tracking session
         if self.ptz_metrics.reset.is_set():
@@ -348,10 +348,13 @@ class PtzAutoTracker:
             f"{camera}: Writing new config with autotracker motion coefficients: {self.config.cameras[camera].onvif.autotracking.movement_weights}"
         )
 
-        update_yaml_file(
+        update_yaml_file_bulk(
             config_file,
-            ["cameras", camera, "onvif", "autotracking", "movement_weights"],
-            self.config.cameras[camera].onvif.autotracking.movement_weights,
+            {
+                f"cameras.{camera}.onvif.autotracking.movement_weights": self.config.cameras[
+                    camera
+                ].onvif.autotracking.movement_weights
+            },
         )
 
     async def _calibrate_camera(self, camera):

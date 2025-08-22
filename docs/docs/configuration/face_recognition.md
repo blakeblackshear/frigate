@@ -24,7 +24,7 @@ Frigate needs to first detect a `person` before it can detect and recognize a fa
 Frigate has support for two face recognition model types:
 
 - **small**: Frigate will run a FaceNet embedding model to recognize faces, which runs locally on the CPU. This model is optimized for efficiency and is not as accurate.
-- **large**: Frigate will run a large ArcFace embedding model that is optimized for accuracy. It is only recommended to be run when an integrated or dedicated GPU is available.
+- **large**: Frigate will run a large ArcFace embedding model that is optimized for accuracy. It is only recommended to be run when an integrated or dedicated GPU / NPU is available.
 
 In both cases, a lightweight face landmark detection model is also used to align faces before running recognition.
 
@@ -34,7 +34,7 @@ All of these features run locally on your system.
 
 The `small` model is optimized for efficiency and runs on the CPU, most CPUs should run the model efficiently.
 
-The `large` model is optimized for accuracy, an integrated or discrete GPU is required. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
+The `large` model is optimized for accuracy, an integrated or discrete GPU / NPU is required. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 
 ## Configuration
 
@@ -73,6 +73,9 @@ Fine-tune face recognition with these optional parameters at the global level of
   - Default: `100`.
 - `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
   - Default: `True`.
+- `device`: Target a specific device to run the face recognition model on (multi-GPU installation).
+  - Default: `None`.
+  - Note: This setting is only applicable when using the `large` model. See [onnxruntime's provider options](https://onnxruntime.ai/docs/execution-providers/)
 
 ## Usage
 

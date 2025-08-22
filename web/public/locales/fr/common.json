@@ -162,7 +162,15 @@
       "vi": "Tiếng Việt (Vietnamien)",
       "yue": "粵語 (Cantonais)",
       "th": "ไทย (Thai)",
-      "ca": "Català (Catalan)"
+      "ca": "Català (Catalan)",
+      "ptBR": "Português brasileiro (portugais brésilien)",
+      "sr": "Српски (Serbe)",
+      "sl": "Slovenščina (slovène)",
+      "lt": "Lietuvių (lithuanien)",
+      "bg": "Български (bulgare)",
+      "gl": "Galego (galicien)",
+      "id": "Bahasa Indonesia (indonésien)",
+      "ur": "اردو (ourdou)"
     },
     "appearance": "Apparence",
     "darkMode": {

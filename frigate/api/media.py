@@ -8,6 +8,7 @@ import os
 import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
+from functools import reduce
 from pathlib import Path as FilePath
 from typing import Any
 from urllib.parse import unquote
@@ -19,7 +20,7 @@ from fastapi import APIRouter, Path, Query, Request, Response
 from fastapi.params import Depends
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pathvalidate import sanitize_filename
-from peewee import DoesNotExist, fn
+from peewee import DoesNotExist, fn, operator
 from tzlocal import get_localzone_name
 
 from frigate.api.defs.query.media_query_parameters import (
@@ -27,6 +28,7 @@ from frigate.api.defs.query.media_query_parameters import (
     MediaEventsSnapshotQueryParams,
     MediaLatestFrameQueryParams,
     MediaMjpegFeedQueryParams,
+    MediaRecordingsAvailabilityQueryParams,
     MediaRecordingsSummaryQueryParams,
 )
 from frigate.api.defs.tags import Tags
@@ -139,6 +141,7 @@ def latest_frame(
         "zones": params.zones,
         "mask": params.mask,
         "motion_boxes": params.motion,
+        "paths": params.paths,
         "regions": params.regions,
     }
     quality = params.quality
@@ -540,6 +543,66 @@ def recordings(
     )
 
     return JSONResponse(content=list(recordings))
+
+
+@router.get("/recordings/unavailable", response_model=list[dict])
+def no_recordings(params: MediaRecordingsAvailabilityQueryParams = Depends()):
+    """Get time ranges with no recordings."""
+    cameras = params.cameras
+    before = params.before or datetime.datetime.now().timestamp()
+    after = (
+        params.after
+        or (datetime.datetime.now() - datetime.timedelta(hours=1)).timestamp()
+    )
+    scale = params.scale
+
+    clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((Recordings.camera << camera_list))
+
+    # Get recording start times
+    data: list[Recordings] = (
+        Recordings.select(Recordings.start_time, Recordings.end_time)
+        .where(reduce(operator.and_, clauses))
+        .order_by(Recordings.start_time.asc())
+        .dicts()
+        .iterator()
+    )
+
+    # Convert recordings to list of (start, end) tuples
+    recordings = [(r["start_time"], r["end_time"]) for r in data]
+
+    # Generate all time segments
+    current = after
+    no_recording_segments = []
+    current_start = None
+
+    while current < before:
+        segment_end = current + scale
+        # Check if segment overlaps with any recording
+        has_recording = any(
+            start <= segment_end and end >= current for start, end in recordings
+        )
+        if not has_recording:
+            if current_start is None:
+                current_start = current  # Start a new gap
+        else:
+            if current_start is not None:
+                # End the current gap and append it
+                no_recording_segments.append(
+                    {"start_time": int(current_start), "end_time": int(current)}
+                )
+                current_start = None
+        current = segment_end
+
+    # Append the last gap if it exists
+    if current_start is not None:
+        no_recording_segments.append(
+            {"start_time": int(current_start), "end_time": int(before)}
+        )
+
+    return JSONResponse(content=no_recording_segments)
 
 
 @router.get(

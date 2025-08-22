@@ -34,5 +34,6 @@
   "camera": "Câmara",
   "detected": "detectado",
   "selected_one": "{{count}} selecionado",
-  "selected_other": "{{count}} selecionados"
+  "selected_other": "{{count}} selecionados",
+  "suspiciousActivity": "Atividade Suspeita"
 }

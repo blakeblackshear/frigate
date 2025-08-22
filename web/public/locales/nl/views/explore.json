@@ -102,12 +102,14 @@
         "success": {
           "regenerate": "Er is een nieuwe beschrijving aangevraagd bij {{provider}}. Afhankelijk van de snelheid van je provider kan het regenereren van de nieuwe beschrijving enige tijd duren.",
           "updatedSublabel": "Sublabel succesvol bijgewerkt.",
-          "updatedLPR": "Kenteken succesvol bijgewerkt."
+          "updatedLPR": "Kenteken succesvol bijgewerkt.",
+          "audioTranscription": "Audiotranscriptie succesvol aangevraagd."
         },
         "error": {
           "updatedSublabelFailed": "Het is niet gelukt om het sublabel bij te werken: {{errorMessage}}",
           "regenerate": "Het is niet gelukt om {{provider}} aan te roepen voor een nieuwe beschrijving: {{errorMessage}}",
-          "updatedLPRFailed": "Kentekenplaat bijwerken mislukt: {{errorMessage}}"
+          "updatedLPRFailed": "Kentekenplaat bijwerken mislukt: {{errorMessage}}",
+          "audioTranscription": "Audiotranscriptie aanvragen mislukt: {{errorMessage}}"
         }
       }
     },
@@ -153,6 +155,9 @@
     "recognizedLicensePlate": "Erkende kentekenplaat",
     "snapshotScore": {
       "label": "Snapshot scoren"
+    },
+    "score": {
+      "label": "Score"
     }
   },
   "itemMenu": {
@@ -182,6 +187,14 @@
     "downloadSnapshot": {
       "label": "Download snapshot",
       "aria": "Download snapshot"
+    },
+    "addTrigger": {
+      "label": "Trigger toevoegen",
+      "aria": "Voeg een trigger toe voor dit gevolgde object"
+    },
+    "audioTranscription": {
+      "label": "Transcriberen",
+      "aria": "Audiotranscriptie aanvragen"
     }
   },
   "noTrackedObjects": "Geen gevolgde objecten gevonden",
@@ -203,5 +216,11 @@
     }
   },
   "fetchingTrackedObjectsFailed": "Fout bij het ophalen van gevolgde objecten: {{errorMessage}}",
-  "exploreMore": "Verken meer {{label}} objecten"
+  "exploreMore": "Verken meer {{label}} objecten",
+  "aiAnalysis": {
+    "title": "AI-analyse"
+  },
+  "concerns": {
+    "label": "Zorgen"
+  }
 }

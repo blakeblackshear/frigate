@@ -34,5 +34,7 @@
   "markTheseItemsAsReviewed": "Merk disse elementene som inspiserte",
   "selected_one": "{{count}} valgt",
   "selected_other": "{{count}} valgt",
-  "detected": "detektert"
+  "detected": "detektert",
+  "suspiciousActivity": "Mistenkelig aktivitet",
+  "threateningActivity": "Truende aktivitet"
 }

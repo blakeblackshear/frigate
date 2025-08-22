@@ -148,11 +148,12 @@ RUN --mount=type=bind,source=docker/main/install_s6_overlay.sh,target=/deps/inst
 FROM base AS wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
+ARG DEBUG=false
 
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y \
-    apt-transport-https wget \
+    apt-transport-https wget unzip \
     && apt-get -qq update \
     && apt-get -qq install -y \
     python3.11 \
@@ -177,6 +178,8 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
 COPY docker/main/requirements.txt /requirements.txt
+COPY docker/main/requirements-dev.txt /requirements-dev.txt
+
 RUN pip3 install -r /requirements.txt
 
 # Build pysqlite3 from source
@@ -184,7 +187,10 @@ COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
 RUN /build_pysqlite3.sh
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
-RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
+RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
+    if [ "$DEBUG" = "true" ]; then \
+        pip3 wheel --wheel-dir=/wheels -r /requirements-dev.txt; \
+    fi
 
 # Install HailoRT & Wheels
 RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
@@ -206,6 +212,7 @@ COPY docker/main/rootfs/ /
 # Frigate deps (ffmpeg, python, nginx, go2rtc, s6-overlay, etc)
 FROM slim-base AS deps
 ARG TARGETARCH
+ARG BASE_IMAGE
 
 ARG DEBIAN_FRONTEND
 # http://stackoverflow.com/questions/48162574/ddg#49462622
@@ -224,8 +231,14 @@ ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 # Set OpenCV ffmpeg loglevel to fatal: https://ffmpeg.org/doxygen/trunk/log_8h.html
 ENV OPENCV_FFMPEG_LOGLEVEL=8
 
+# Set NumPy to ignore getlimits warning
+ENV PYTHONWARNINGS="ignore:::numpy.core.getlimits"
+
 # Set HailoRT to disable logging
 ENV HAILORT_LOGGER_PATH=NONE
+
+# TensorFlow error only
+ENV TF_CPP_MIN_LOG_LEVEL=3
 
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
@@ -242,6 +255,10 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     pip3 install -U /deps/wheels/*.whl
+
+# Install MemryX runtime (requires libgomp (OpenMP) in the final docker image)
+RUN --mount=type=bind,source=docker/main/install_memryx.sh,target=/deps/install_memryx.sh \
+    bash -c "bash /deps/install_memryx.sh"
 
 COPY --from=deps-rootfs / /
 

@@ -12,11 +12,18 @@
     "plus": {
       "review": {
         "question": {
-          "ask_full": "Ali je ta objekt <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+          "ask_full": "Ali je ta objekt <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
+          "label": "Potrdi to oznako za Frigate Plus",
+          "ask_a": "Ali je ta objekt <code>{{label}}</code>?",
+          "ask_an": "Ali je ta objekt <code>{{label}}</code>?"
         },
         "state": {
           "submitted": "Oddano"
         }
+      },
+      "submitToPlus": {
+        "label": "Pošlji v Frigate+",
+        "desc": "Predmeti na lokacijah, ki se jim želite izogniti, niso lažni alarmi. Če jih označite kot lažne alarme, boste zmedli model."
       }
     },
     "video": {
@@ -28,7 +35,88 @@
       "lastHour_one": "Zadnja ura",
       "lastHour_two": "Zadnji {{count}} uri",
       "lastHour_few": "Zadnje {{count}} ure",
-      "lastHour_other": "Zadnjih {{count}} ur"
+      "lastHour_other": "Zadnjih {{count}} ur",
+      "fromTimeline": "Izberi s Časovnice",
+      "custom": "Po meri",
+      "start": {
+        "title": "Začetni čas",
+        "label": "Izberi Začetni Čas"
+      },
+      "end": {
+        "title": "Končni Čas",
+        "label": "Izberi Končni Čas"
+      }
+    },
+    "name": {
+      "placeholder": "Poimenujte Izvoz"
+    },
+    "select": "Izberi",
+    "export": "Izvoz",
+    "selectOrExport": "Izberi ali Izvozi",
+    "toast": {
+      "success": "Izvoz se je uspešno začel. Datoteko si oglejte v mapi /exports.",
+      "error": {
+        "failed": "Npaka pri začetku izvoza: {{error}}",
+        "endTimeMustAfterStartTime": "Končni čas mora biti po začetnem čase",
+        "noVaildTimeSelected": "Ni izbranega veljavnega časovnega obdobja"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Shrani Izvoz",
+      "previewExport": "Predogled Izvoza"
     }
+  },
+  "streaming": {
+    "label": "Pretakanje",
+    "restreaming": {
+      "disabled": "Ponovno pretakanje za to kamero ni omogočeno.",
+      "desc": {
+        "title": "Za dodatne možnosti ogleda v živo in zvoka za to kamero nastavite go2rtc.",
+        "readTheDocumentation": "Preberi dokumentacijo"
+      }
+    },
+    "showStats": {
+      "label": "Prikaži statistiko pretoka",
+      "desc": "Omogočite to možnost, če želite prikazati statistiko pretoka videa kamere."
+    },
+    "debugView": "Pogled za Odpravljanje Napak"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Varno Iskanje",
+      "desc": "Vnesite ime za to shranjeno iskanje.",
+      "placeholder": "Vnesite ime za iskanje",
+      "overwrite": "{{searchName}} že obstaja. Shranjevanje bo prepisalo obstoječo vrednost.",
+      "success": "Iskanje ({{searchName}}) je bilo shranjeno.",
+      "button": {
+        "save": {
+          "label": "Shrani to iskanje"
+        }
+      }
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Potrdi Brisanje",
+      "desc": {
+        "selected": "Ali ste prepričani, da želite izbrisati vse posnete videoposnetke, povezane s tem elementom pregleda?<br /><br />Držite tipko <em>Shift</em>, da se v prihodnje izognete temu pogovornemu oknu."
+      },
+      "toast": {
+        "success": "Videoposnetek, povezan z izbranimi elementi pregleda, je bil uspešno izbrisan.",
+        "error": "Brisanje ni uspelo: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Izvoz",
+      "markAsReviewed": "Označi kot pregledano",
+      "deleteNow": "Izbriši Zdaj"
+    }
+  },
+  "imagePicker": {
+    "selectImage": "Izberite sličico sledenega predmeta",
+    "search": {
+      "placeholder": "Iskanje po oznaki ali podoznaki..."
+    },
+    "noImages": "Za to kamero ni bilo najdenih sličic"
   }
 }

@@ -12,5 +12,7 @@
   },
   "configEditor": "Configuratie Bewerken",
   "saveOnly": "Alleen opslaan",
-  "confirm": "Afsluiten zonder op te slaan?"
+  "confirm": "Afsluiten zonder op te slaan?",
+  "safeConfigEditor": "Configuratie-editor (veilige modus)",
+  "safeModeDescription": "Frigate is in veilige modus vanwege een configuratievalidatiefout."
 }

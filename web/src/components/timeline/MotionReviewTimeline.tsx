@@ -17,6 +17,7 @@ import {
   VirtualizedMotionSegments,
   VirtualizedMotionSegmentsRef,
 } from "./VirtualizedMotionSegments";
+import { RecordingSegment } from "@/types/record";
 
 export type MotionReviewTimelineProps = {
   segmentDuration: number;
@@ -38,6 +39,7 @@ export type MotionReviewTimelineProps = {
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
   events: ReviewSegment[];
   motion_events: MotionData[];
+  noRecordingRanges?: RecordingSegment[];
   contentRef: RefObject<HTMLDivElement>;
   timelineRef?: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
@@ -66,6 +68,7 @@ export function MotionReviewTimeline({
   setExportEndTime,
   events,
   motion_events,
+  noRecordingRanges,
   contentRef,
   timelineRef,
   onHandlebarDraggingChange,
@@ -95,6 +98,17 @@ export function MotionReviewTimeline({
   const { getMotionSegmentValue } = useMotionSegmentUtils(
     segmentDuration,
     motion_events,
+  );
+
+  const getRecordingAvailability = useCallback(
+    (time: number): boolean | undefined => {
+      if (!noRecordingRanges?.length) return undefined;
+
+      return !noRecordingRanges.some(
+        (range) => time >= range.start_time && time < range.end_time,
+      );
+    },
+    [noRecordingRanges],
   );
 
   const segmentTimes = useMemo(() => {
@@ -206,6 +220,7 @@ export function MotionReviewTimeline({
         dense={dense}
         motionOnly={motionOnly}
         getMotionSegmentValue={getMotionSegmentValue}
+        getRecordingAvailability={getRecordingAvailability}
       />
     </ReviewTimeline>
   );

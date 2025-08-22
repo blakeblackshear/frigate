@@ -41,6 +41,7 @@ import {
 import useSWR from "swr";
 
 import { Trans, useTranslation } from "react-i18next";
+import { BsFillLightningFill } from "react-icons/bs";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
@@ -48,6 +49,7 @@ type SearchResultActionsProps = {
   refreshResults: () => void;
   showObjectLifecycle: () => void;
   showSnapshot: () => void;
+  addTrigger: () => void;
   isContextMenu?: boolean;
   children?: ReactNode;
 };
@@ -58,6 +60,7 @@ export default function SearchResultActions({
   refreshResults,
   showObjectLifecycle,
   showSnapshot,
+  addTrigger,
   isContextMenu = false,
   children,
 }: SearchResultActionsProps) {
@@ -138,6 +141,16 @@ export default function SearchResultActions({
           <span>{t("itemMenu.findSimilar.label")}</span>
         </MenuItem>
       )}
+      {config?.semantic_search?.enabled &&
+        searchResult.data.type == "object" && (
+          <MenuItem
+            aria-label={t("itemMenu.addTrigger.aria")}
+            onClick={addTrigger}
+          >
+            <BsFillLightningFill className="mr-2 size-4" />
+            <span>{t("itemMenu.addTrigger.label")}</span>
+          </MenuItem>
+        )}
       {isMobileOnly &&
         config?.plus?.enabled &&
         searchResult.has_snapshot &&

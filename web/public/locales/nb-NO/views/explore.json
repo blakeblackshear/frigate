@@ -89,12 +89,14 @@
         "success": {
           "updatedSublabel": "Under-merkelapp oppdatert med suksess.",
           "updatedLPR": "Vellykket oppdatering av kjennemerke.",
-          "regenerate": "En ny beskrivelse har blitt anmodet fra {{provider}}. Avhengig av hastigheten til leverandøren din, kan den nye beskrivelsen ta litt tid å regenerere."
+          "regenerate": "En ny beskrivelse har blitt anmodet fra {{provider}}. Avhengig av hastigheten til leverandøren din, kan den nye beskrivelsen ta litt tid å regenerere.",
+          "audioTranscription": "Lydtranskripsjon ble forespurt."
         },
         "error": {
           "regenerate": "Feil ved anrop til {{provider}} for en ny beskrivelse: {{errorMessage}}",
           "updatedLPRFailed": "Oppdatering av kjennemerke feilet: {{errorMessage}}",
-          "updatedSublabelFailed": "Feil ved oppdatering av under-merkelapp: {{errorMessage}}"
+          "updatedSublabelFailed": "Feil ved oppdatering av under-merkelapp: {{errorMessage}}",
+          "audioTranscription": "Forespørsel om lydtranskripsjon feilet: {{errorMessage}}"
         }
       },
       "desc": "Detaljer for inspeksjonselement",
@@ -146,6 +148,9 @@
     },
     "snapshotScore": {
       "label": "Øyeblikksbilde poengsum"
+    },
+    "score": {
+      "label": "Poengsum"
     }
   },
   "itemMenu": {
@@ -175,6 +180,14 @@
     "submitToPlus": {
       "label": "Send til Frigate+",
       "aria": "Send til Frigate Plus"
+    },
+    "addTrigger": {
+      "label": "Legg til utløser",
+      "aria": "Legg til en utløser for dette sporede objektet"
+    },
+    "audioTranscription": {
+      "label": "Transkriber",
+      "aria": "Forespør lydtranskripsjon"
     }
   },
   "searchResult": {
@@ -203,5 +216,8 @@
   "fetchingTrackedObjectsFailed": "Feil ved henting av sporede objekter: {{errorMessage}}",
   "trackedObjectsCount_one": "{{count}} sporet objekt ",
   "trackedObjectsCount_other": "{{count}} sporede objekter ",
-  "exploreMore": "Utforsk flere {{label}} objekter"
+  "exploreMore": "Utforsk flere {{label}} objekter",
+  "aiAnalysis": {
+    "title": "AI-Analyse"
+  }
 }

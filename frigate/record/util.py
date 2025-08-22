@@ -66,7 +66,7 @@ def sync_recordings(limited: bool) -> None:
 
         if float(len(recordings_to_delete)) / max(1, recordings.count()) > 0.5:
             logger.warning(
-                f"Deleting {(float(len(recordings_to_delete)) / recordings.count()):2f}% of recordings DB entries, could be due to configuration error. Aborting..."
+                f"Deleting {(len(recordings_to_delete) / max(1, recordings.count()) * 100):.2f}% of recordings DB entries, could be due to configuration error. Aborting..."
             )
             return False
 
@@ -106,7 +106,7 @@ def sync_recordings(limited: bool) -> None:
 
         if float(len(files_to_delete)) / max(1, len(files_on_disk)) > 0.5:
             logger.debug(
-                f"Deleting {(float(len(files_to_delete)) / len(files_on_disk)):2f}% of recordings DB entries, could be due to configuration error. Aborting..."
+                f"Deleting {(len(files_to_delete) / max(1, len(files_on_disk)) * 100):.2f}% of recordings DB entries, could be due to configuration error. Aborting..."
             )
             return False
 

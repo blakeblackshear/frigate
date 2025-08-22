@@ -7,6 +7,8 @@
   "details": {
     "person": "Osoba",
     "subLabelScore": "Sub Label Skor",
-    "scoreInfo": "Rezultat podoznake je otežan rezultat za sve prepoznate pouzdanosti lica, tako da se može razlikovati od rezultata prikazanog na snimku."
+    "scoreInfo": "Rezultat podoznake je otežan rezultat za sve prepoznate pouzdanosti lica, tako da se može razlikovati od rezultata prikazanog na snimku.",
+    "face": "Detalji lica",
+    "faceDesc": "Detalji praćenog objekta koji je generisao ovo lice"
   }
 }

@@ -7,7 +7,36 @@
       "desc": "Tarkastele kohteen tietoja",
       "button": {
         "share": "Jaa tämä tarkasteltu kohde"
+      },
+      "toast": {
+        "error": {
+          "updatedSublabelFailed": "Alatunnisteen päivitys epäonnistui",
+          "updatedLPRFailed": "Rekisterikilven päivitys epäonnistui"
+        }
       }
+    },
+    "recognizedLicensePlate": "Tunnistettu rekisterikilpi",
+    "estimatedSpeed": "Arvioitu nopeus",
+    "objects": "Objektit",
+    "camera": "Kamera",
+    "zones": "Alueet",
+    "label": "Tunniste",
+    "editSubLabel": {
+      "title": "Editoi alitunnistetta",
+      "desc": "Syötä uusi alitunniste tähän",
+      "descNoLabel": "Lisää uusi alatunniste tähän seurattuun kohteeseen"
+    },
+    "editLPR": {
+      "title": "Muokkaa rekisterikilpeä",
+      "desc": "Syötä uusi rekisterikilven arvo tähän",
+      "descNoLabel": "Syötä uusi rekisterikilven arvo tähän seurattuun objektiin"
+    },
+    "snapshotScore": {
+      "label": "Tilannekuvan arvosana"
+    },
+    "topScore": {
+      "label": "Huippuarvosana",
+      "info": "Ylin pistemäärä on seurattavan kohteen korkein mediaani, joten tämä voi erota hakutuloksen esikatselukuvassa näkyvästä pistemäärästä."
     }
   },
   "exploreIsUnavailable": {
@@ -28,7 +57,8 @@
       "setup": {
         "visionModel": "Vision-malli",
         "textModel": "Tekstimalli",
-        "textTokenizer": "Tekstin osioija"
+        "textTokenizer": "Tekstin osioija",
+        "visionModelFeatureExtractor": "Näkömallin piirreluokkain"
       },
       "tips": {
         "documentation": "Lue dokumentaatio",

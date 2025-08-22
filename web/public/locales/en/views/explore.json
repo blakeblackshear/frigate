@@ -103,12 +103,14 @@
         "success": {
           "regenerate": "A new description has been requested from {{provider}}. Depending on the speed of your provider, the new description may take some time to regenerate.",
           "updatedSublabel": "Successfully updated sub label.",
-          "updatedLPR": "Successfully updated license plate."
+          "updatedLPR": "Successfully updated license plate.",
+          "audioTranscription": "Successfully requested audio transcription."
         },
         "error": {
           "regenerate": "Failed to call {{provider}} for a new description: {{errorMessage}}",
           "updatedSublabelFailed": "Failed to update sub label: {{errorMessage}}",
-          "updatedLPRFailed": "Failed to update license plate: {{errorMessage}}"
+          "updatedLPRFailed": "Failed to update license plate: {{errorMessage}}",
+          "audioTranscription": "Failed to request audio transcription: {{errorMessage}}"
         }
       }
     },
@@ -129,6 +131,9 @@
     "topScore": {
       "label": "Top Score",
       "info": "The top score is the highest median score for the tracked object, so this may differ from the score shown on the search result thumbnail."
+    },
+    "score": {
+      "label": "Score"
     },
     "recognizedLicensePlate": "Recognized License Plate",
     "estimatedSpeed": "Estimated Speed",
@@ -173,6 +178,14 @@
       "label": "Find similar",
       "aria": "Find similar tracked objects"
     },
+    "addTrigger": {
+      "label": "Add trigger",
+      "aria": "Add a trigger for this tracked object"
+    },
+    "audioTranscription": {
+      "label": "Transcribe",
+      "aria": "Request audio transcription"
+    },
     "submitToPlus": {
       "label": "Submit to Frigate+",
       "aria": "Submit to Frigate Plus"
@@ -203,5 +216,11 @@
         "error": "Failed to delete tracked object: {{errorMessage}}"
       }
     }
+  },
+  "aiAnalysis": {
+    "title": "AI Analysis"
+  },
+  "concerns": {
+    "label": "Concerns"
   }
 }

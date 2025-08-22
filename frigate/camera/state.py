@@ -54,7 +54,7 @@ class CameraState:
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
 
-    def get_current_frame(self, draw_options: dict[str, Any] = {}):
+    def get_current_frame(self, draw_options: dict[str, Any] = {}) -> np.ndarray:
         with self.current_frame_lock:
             frame_copy = np.copy(self._current_frame)
             frame_time = self.current_frame_time
@@ -228,12 +228,51 @@ class CameraState:
                 position=self.camera_config.timestamp_style.position,
             )
 
+        if draw_options.get("paths"):
+            for obj in tracked_objects.values():
+                if obj["frame_time"] == frame_time and obj["path_data"]:
+                    color = self.config.model.colormap.get(
+                        obj["label"], (255, 255, 255)
+                    )
+
+                    path_points = [
+                        (
+                            int(point[0][0] * self.camera_config.detect.width),
+                            int(point[0][1] * self.camera_config.detect.height),
+                        )
+                        for point in obj["path_data"]
+                    ]
+
+                    for point in path_points:
+                        cv2.circle(frame_copy, point, 5, color, -1)
+
+                    for i in range(1, len(path_points)):
+                        cv2.line(
+                            frame_copy,
+                            path_points[i - 1],
+                            path_points[i],
+                            color,
+                            2,
+                        )
+
+                    bottom_center = (
+                        int((obj["box"][0] + obj["box"][2]) / 2),
+                        int(obj["box"][3]),
+                    )
+                    cv2.line(
+                        frame_copy,
+                        path_points[-1],
+                        bottom_center,
+                        color,
+                        2,
+                    )
+
         return frame_copy
 
     def finished(self, obj_id):
         del self.tracked_objects[obj_id]
 
-    def on(self, event_type: str, callback: Callable[[dict], None]):
+    def on(self, event_type: str, callback: Callable):
         self.callbacks[event_type].append(callback)
 
     def update(

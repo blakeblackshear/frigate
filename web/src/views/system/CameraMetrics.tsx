@@ -32,7 +32,12 @@ export default function CameraMetrics({
   // stats
 
   const { data: initialStats } = useSWR<FrigateStats[]>(
-    ["stats/history", { keys: "cpu_usages,cameras,detection_fps,service" }],
+    [
+      "stats/history",
+      {
+        keys: "cpu_usages,cameras,camera_fps,detection_fps,skipped_fps,service",
+      },
+    ],
     {
       revalidateOnFocus: false,
     },
@@ -97,14 +102,9 @@ export default function CameraMetrics({
         return;
       }
 
-      let frames = 0;
-      Object.values(stats.cameras).forEach(
-        (camStat) => (frames += camStat.camera_fps),
-      );
-
       series["overall_fps"].data.push({
         x: statsIdx,
-        y: Math.round(frames),
+        y: stats.camera_fps,
       });
 
       series["overall_dps"].data.push({
@@ -112,14 +112,9 @@ export default function CameraMetrics({
         y: stats.detection_fps,
       });
 
-      let skipped = 0;
-      Object.values(stats.cameras).forEach(
-        (camStat) => (skipped += camStat.skipped_fps),
-      );
-
       series["overall_skipped_dps"].data.push({
         x: statsIdx,
-        y: skipped,
+        y: stats.skipped_fps,
       });
     });
     return Object.values(series);
@@ -173,7 +168,7 @@ export default function CameraMetrics({
         });
         series[key]["detect"].data.push({
           x: statsIdx,
-          y: stats.cpu_usages[camStats.pid.toString()].cpu,
+          y: stats.cpu_usages[camStats.pid?.toString()]?.cpu,
         });
       });
     });

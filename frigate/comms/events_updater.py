@@ -7,7 +7,9 @@ from frigate.events.types import EventStateEnum, EventTypeEnum
 from .zmq_proxy import Publisher, Subscriber
 
 
-class EventUpdatePublisher(Publisher):
+class EventUpdatePublisher(
+    Publisher[tuple[EventTypeEnum, EventStateEnum, str | None, str, dict[str, Any]]]
+):
     """Publishes events (objects, audio, manual)."""
 
     topic_base = "event/"
@@ -16,9 +18,11 @@ class EventUpdatePublisher(Publisher):
         super().__init__("update")
 
     def publish(
-        self, payload: tuple[EventTypeEnum, EventStateEnum, str, str, dict[str, Any]]
+        self,
+        payload: tuple[EventTypeEnum, EventStateEnum, str | None, str, dict[str, Any]],
+        sub_topic: str = "",
     ) -> None:
-        super().publish(payload)
+        super().publish(payload, sub_topic)
 
 
 class EventUpdateSubscriber(Subscriber):
@@ -30,7 +34,9 @@ class EventUpdateSubscriber(Subscriber):
         super().__init__("update")
 
 
-class EventEndPublisher(Publisher):
+class EventEndPublisher(
+    Publisher[tuple[EventTypeEnum, EventStateEnum, str, dict[str, Any]]]
+):
     """Publishes events that have ended."""
 
     topic_base = "event/"
@@ -39,9 +45,11 @@ class EventEndPublisher(Publisher):
         super().__init__("finalized")
 
     def publish(
-        self, payload: tuple[EventTypeEnum, EventStateEnum, str, dict[str, Any]]
+        self,
+        payload: tuple[EventTypeEnum, EventStateEnum, str, dict[str, Any]],
+        sub_topic: str = "",
     ) -> None:
-        super().publish(payload)
+        super().publish(payload, sub_topic)
 
 
 class EventEndSubscriber(Subscriber):

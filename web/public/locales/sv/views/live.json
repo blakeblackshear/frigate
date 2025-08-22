@@ -2,8 +2,8 @@
   "documentTitle": "Live - Frigate",
   "documentTitle.withCamera": "{{camera}} - Live - Frigate",
   "twoWayTalk": {
-    "enable": "Aktivera Two Way Talk",
-    "disable": "Avaktivera Two Way Talk"
+    "enable": "Aktivera tvåvägssamtal",
+    "disable": "Avaktivera tvåvägssamtal"
   },
   "cameraAudio": {
     "disable": "Inaktivera kameraljud",
@@ -42,7 +42,15 @@
         "label": "Klicka i bilden för att centrera PTZ kamera"
       }
     },
-    "presets": "PTZ kamera förinställningar"
+    "presets": "PTZ kamera förinställningar",
+    "focus": {
+      "in": {
+        "label": "Fokusera PTZ-kameran in"
+      },
+      "out": {
+        "label": "Fokusera PTZ-kameran ut"
+      }
+    }
   },
   "streamStats": {
     "enable": "Visa videostatistik",

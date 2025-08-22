@@ -6,6 +6,7 @@
   "deleteExport.desc": "Da li zaista želite obrisati {{exportName}}?",
   "editExport": {
     "title": "Preimenuj izvoz",
-    "desc": "Unesite novo ime za ovaj izvoz."
+    "desc": "Unesite novo ime za ovaj izvoz.",
+    "saveExport": "Sačuvaj izvoz"
   }
 }

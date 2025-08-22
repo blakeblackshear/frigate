@@ -1,6 +1,6 @@
 {
   "group": {
-    "label": "Kamera Csoport",
+    "label": "Kamera Csoportok",
     "delete": {
       "confirm": {
         "desc": "Biztosan törölni akarja a következő kamera csoportot <em>{{name}}</em>?",

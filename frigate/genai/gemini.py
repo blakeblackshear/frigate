@@ -21,7 +21,9 @@ class GeminiClient(GenAIClient):
     def _init_provider(self):
         """Initialize the client."""
         genai.configure(api_key=self.genai_config.api_key)
-        return genai.GenerativeModel(self.genai_config.model)
+        return genai.GenerativeModel(
+            self.genai_config.model, **self.genai_config.provider_options
+        )
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to Gemini."""
