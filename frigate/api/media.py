@@ -194,7 +194,7 @@ def latest_frame(
         _, img = cv2.imencode(f".{extension.value}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{extension.value}",
+            media_type=extension.get_mime_type(),
             headers={
                 "Cache-Control": "no-store"
                 if not params.store
@@ -219,7 +219,7 @@ def latest_frame(
         _, img = cv2.imencode(f".{extension.value}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{extension.value}",
+            media_type=extension.get_mime_type(),
             headers={
                 "Cache-Control": "no-store"
                 if not params.store
@@ -878,7 +878,7 @@ def event_snapshot(
 def event_thumbnail(
     request: Request,
     event_id: str,
-    extension: str,
+    extension: Extension,
     max_cache_age: int = Query(
         2592000, description="Max cache age in seconds. Default 30 days in seconds."
     ),
@@ -903,7 +903,7 @@ def event_thumbnail(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
-                        thumbnail_bytes = tracked_obj.get_thumbnail(extension)
+                        thumbnail_bytes = tracked_obj.get_thumbnail(extension.value)
         except Exception:
             return JSONResponse(
                 content={"success": False, "message": "Event not found"},
@@ -931,23 +931,21 @@ def event_thumbnail(
         )
 
         quality_params = None
-
-        if extension == "jpg" or extension == "jpeg":
+        if extension in (Extension.jpg, Extension.jpeg):
             quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
-        elif extension == "webp":
+        elif extension == Extension.webp:
             quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
 
-        _, img = cv2.imencode(f".{extension}", thumbnail, quality_params)
+        _, img = cv2.imencode(f".{extension.value}", thumbnail, quality_params)
         thumbnail_bytes = img.tobytes()
 
     return Response(
         thumbnail_bytes,
-        media_type=f"image/{extension}",
+        media_type=extension.get_mime_type(),
         headers={
             "Cache-Control": f"private, max-age={max_cache_age}"
             if event_complete
             else "no-store",
-            "Content-Type": f"image/{extension}",
         },
     )
 
