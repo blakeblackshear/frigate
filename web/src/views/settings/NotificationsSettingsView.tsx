@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/form";
 import Heading from "@/components/ui/heading";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/sonner";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
@@ -46,6 +45,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Trans, useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -698,12 +698,11 @@ export function CameraNotificationSwitch({
             <LuX className="size-6 text-danger" />
           )}
           <div className="flex flex-col">
-            <Label
+            <CameraNameLabel
               className="text-md cursor-pointer text-primary smart-capitalize"
               htmlFor="camera"
-            >
-              {camera.replaceAll("_", " ")}
-            </Label>
+              camera={camera}
+            />
 
             {!isSuspended ? (
               <div className="flex flex-row items-center gap-2 text-sm text-success">
