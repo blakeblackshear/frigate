@@ -372,7 +372,9 @@ class AudioEventMaintainer(threading.Thread):
 
             if not chunk:
                 if self.audio_listener.poll() is not None:
-                    self.requestor.send_data(f"{self.camera_config.name}/status/audio", "offline")
+                    self.requestor.send_data(
+                        f"{self.camera_config.name}/status/audio", "offline"
+                    )
                     self.logger.error("ffmpeg process is not running, restarting...")
                     log_and_restart()
                     return
@@ -398,7 +400,9 @@ class AudioEventMaintainer(threading.Thread):
                     )
                     self.start_or_restart_ffmpeg()
                 else:
-                    self.requestor.send_data(f"{self.camera_config.name}/status/audio", "disabled")
+                    self.requestor.send_data(
+                        f"{self.camera_config.name}/status/audio", "disabled"
+                    )
                     self.logger.debug(
                         f"Disabling audio detections for {self.camera_config.name}, ending events"
                     )

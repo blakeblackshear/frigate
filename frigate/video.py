@@ -334,7 +334,9 @@ class CameraWatchdog(threading.Thread):
                     continue
 
                 for role in p["roles"]:
-                    self.requestor.send_data(f"{self.config.name}/status/{role}", "offline")
+                    self.requestor.send_data(
+                        f"{self.config.name}/status/{role}", "offline"
+                    )
 
                 p["logpipe"].dump()
                 p["process"] = start_or_restart_ffmpeg(
