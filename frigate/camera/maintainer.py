@@ -84,7 +84,7 @@ class CameraMaintainer(threading.Thread):
             f"frames for each camera in SHM"
         )
 
-        if shm_stats["min_shm"]:
+        if shm_stats["shm_frame_count"] < 20:
             logger.warning(
                 f"The current SHM size of {shm_stats['total']}MB is too small, "
                 f"recommend increasing it to at least {shm_stats['min_shm']}MB."
