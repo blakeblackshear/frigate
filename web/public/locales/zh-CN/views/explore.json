@@ -154,6 +154,9 @@
     "recognizedLicensePlate": "识别的车牌",
     "snapshotScore": {
       "label": "快照得分"
+    },
+    "score": {
+      "label": "分值"
     }
   },
   "itemMenu": {
@@ -211,5 +214,8 @@
     },
     "tooltip": "与 {{type}} 匹配度为 {{confidence}}%"
   },
-  "exploreMore": "浏览更多的 {{label}}"
+  "exploreMore": "浏览更多的 {{label}}",
+  "aiAnalysis": {
+    "title": "AI分析"
+  }
 }
