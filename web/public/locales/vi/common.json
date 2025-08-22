@@ -257,5 +257,6 @@
     "title": "Không tìm thấy",
     "desc": "Trang bạn đang tìm không tồn tại"
   },
-  "selectItem": "Chọn mục {{item}}"
+  "selectItem": "Chọn mục {{item}}",
+  "readTheDocumentation": "Đọc tài liệu"
 }

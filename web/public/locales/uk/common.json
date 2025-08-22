@@ -270,5 +270,6 @@
     "desc": "Сторінка не знайдена",
     "title": "404"
   },
-  "selectItem": "Вибрати {{item}}"
+  "selectItem": "Вибрати {{item}}",
+  "readTheDocumentation": "Прочитати документацію"
 }

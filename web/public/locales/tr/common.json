@@ -272,5 +272,6 @@
     "viewer": "Görüntüleyici",
     "admin": "Yönetici",
     "desc": "Yöneticiler Frigate arayüzündeki bütün özelliklere tam erişim sahibidir. Görüntüleyiciler ise yalnızca kameraları, eski görüntüleri ve inceleme öğelerini görüntülemekle sınırlıdır."
-  }
+  },
+  "readTheDocumentation": "Dökümantasyonu oku"
 }

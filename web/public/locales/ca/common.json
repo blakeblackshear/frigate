@@ -261,5 +261,6 @@
     "title": "404",
     "desc": "Pàgina no trobada"
   },
-  "selectItem": "Selecciona {{item}}"
+  "selectItem": "Selecciona {{item}}",
+  "readTheDocumentation": "Llegir la documentació"
 }

@@ -269,5 +269,6 @@
     "title": "404",
     "desc": "Puslapis nerastas"
   },
-  "selectItem": "Pasirinkti {{item}}"
+  "selectItem": "Pasirinkti {{item}}",
+  "readTheDocumentation": "Skaityti dokumentaciją"
 }

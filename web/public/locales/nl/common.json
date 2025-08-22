@@ -272,5 +272,6 @@
     "title": "404",
     "documentTitle": "Niet gevonden - Frigate"
   },
-  "selectItem": "Selecteer {{item}}"
+  "selectItem": "Selecteer {{item}}",
+  "readTheDocumentation": "Lees de documentatie"
 }

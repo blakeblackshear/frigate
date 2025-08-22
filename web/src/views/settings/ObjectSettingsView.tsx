@@ -275,7 +275,7 @@ export default function ObjectSettingsView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  {t("debug.objectShapeFilterDrawing.document")}
+                                  {t("readTheDocumentation", { ns: "common" })}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>

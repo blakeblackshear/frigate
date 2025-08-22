@@ -93,8 +93,7 @@
     },
     "shm": {
       "title": "SHM (shared memory) allocation",
-      "warning": "The current SHM size of {{total}}MB is too small. Increase it to at least {{min_shm}}MB.",
-      "readTheDocumentation": "Read the documentation"
+      "warning": "The current SHM size of {{total}}MB is too small. Increase it to at least {{min_shm}}MB."
     },
     "cameraStorage": {
       "title": "Camera Storage",

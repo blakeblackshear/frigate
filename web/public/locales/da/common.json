@@ -254,5 +254,6 @@
     "title": "404",
     "desc": "Side ikke fundet"
   },
-  "selectItem": "Vælg {{item}}"
+  "selectItem": "Vælg {{item}}",
+  "readTheDocumentation": "Læs dokumentationen"
 }
