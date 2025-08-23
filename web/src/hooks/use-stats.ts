@@ -8,7 +8,7 @@ import { FrigateStats, PotentialProblem } from "@/types/stats";
 import { useMemo } from "react";
 import useSWR from "swr";
 import useDeepMemo from "./use-deep-memo";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { capitalizeAll, capitalizeFirstLetter } from "@/utils/stringUtil";
 import { useFrigateStats } from "@/api/ws";
 
 import { useTranslation } from "react-i18next";
@@ -65,7 +65,7 @@ export default function useStats(stats: FrigateStats | undefined) {
       if (config.cameras[name].enabled && cam["camera_fps"] == 0) {
         problems.push({
           text: t("stats.cameraIsOffline", {
-            camera: capitalizeFirstLetter(cameraName),
+            camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
           }),
           color: "text-danger",
           relevantLink: "logs",
@@ -86,7 +86,7 @@ export default function useStats(stats: FrigateStats | undefined) {
       if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push({
           text: t("stats.ffmpegHighCpuUsage", {
-            camera: capitalizeFirstLetter(cameraName),
+            camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
             ffmpegAvg,
           }),
           color: "text-danger",
@@ -97,7 +97,7 @@ export default function useStats(stats: FrigateStats | undefined) {
       if (!isNaN(detectAvg) && detectAvg >= CameraDetectThreshold.error) {
         problems.push({
           text: t("stats.detectHighCpuUsage", {
-            camera: capitalizeFirstLetter(cameraName),
+            camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
             detectAvg,
           }),
           color: "text-danger",
