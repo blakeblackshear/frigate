@@ -415,6 +415,7 @@
     "title": "Debug",
     "detectorDesc": "Frigate uses your detectors ({{detectors}}) to detect objects in your camera's video stream.",
     "desc": "Debugging view shows a real-time view of tracked objects and their statistics. The object list shows a time-delayed summary of detected objects.",
+    "openCameraWebUI": "Open {{camera}}'s Web UI",
     "debugging": "Debugging",
     "objectList": "Object List",
     "noObjects": "No objects",
