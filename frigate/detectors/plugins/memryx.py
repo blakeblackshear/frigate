@@ -9,15 +9,6 @@ from queue import Queue
 
 import cv2
 import numpy as np
-
-try:
-    # from memryx import AsyncAccl  # Import MemryX SDK
-    from memryx import AsyncAccl
-except ModuleNotFoundError:
-    raise ImportError(
-        "MemryX SDK is not installed. Install it and set up MIX environment."
-    )
-
 from pydantic import BaseModel, Field
 from typing_extensions import Literal
 
@@ -55,6 +46,14 @@ class MemryXDetector(DetectionApi):
 
     def __init__(self, detector_config):
         """Initialize MemryX detector with the provided configuration."""
+        try:
+            # Import MemryX SDK
+            from memryx import AsyncAccl
+        except ModuleNotFoundError:
+            raise ImportError(
+                "MemryX SDK is not installed. Install it and set up MIX environment."
+            )
+            return
 
         model_cfg = getattr(detector_config, "model", None)
 
