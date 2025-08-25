@@ -15,7 +15,7 @@
     "d": "{{time}} Tag",
     "day_one": "{{time}} Tag",
     "day_other": "{{time}} Tage",
-    "m": "{{time}} Minute",
+    "m": "{{time}} Min",
     "minute_one": "{{time}} Minute",
     "minute_other": "{{time}} Minuten",
     "s": "{{time}} Sekunde",
