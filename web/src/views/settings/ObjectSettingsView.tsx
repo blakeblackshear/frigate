@@ -493,7 +493,7 @@ function AudioList({ cameraConfig, audioDetections }: AudioListProps) {
                 <div className="text-md mr-2 w-1/3">
                   <div className="flex flex-col items-end justify-end">
                     <p className="mb-1.5 text-sm text-primary-variant">
-                      {t("debug.objectShapeFilterDrawing.score")}
+                      {t("debug.audio.score")}
                     </p>
                     {obj.score ? (obj.score * 100).toFixed(1).toString() : "-"}%
                   </div>
