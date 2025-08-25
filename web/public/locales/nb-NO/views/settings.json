@@ -178,6 +178,12 @@
       "desc": "Aktiver/deaktiver varsler og deteksjoner midlertidig for dette kameraet til Frigate startes på nytt. Når deaktivert, vil det ikke genereres nye inspeksjonselementer. ",
       "alerts": "Varsler ",
       "detections": "Deteksjoner "
+    },
+    "object_descriptions": {
+      "desc": "Midlertidig aktiver/deaktiver generative KI-objektbeskrivelser for dette kameraet. Når deaktivert, vil KI-genererte beskrivelser ikke bli forespurt for sporede objekter på dette kameraet."
+    },
+    "cameraConfig": {
+      "nameInvalid": "Kameranavnet kan bare inneholde bokstaver, tall, understreker eller bindestreker"
     }
   },
   "masksAndZones": {

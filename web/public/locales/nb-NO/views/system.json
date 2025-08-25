@@ -100,7 +100,11 @@
         "tips": "Denne verdien representerer kanskje ikke nøyaktig den ledige plassen Frigate har tilgang til, dersom det finnes andre filer lagret på disken. Frigate sporer kun lagring brukt av egne opptak."
       }
     },
-    "title": "Lagring"
+    "title": "Lagring",
+    "shm": {
+      "title": "SHM (delt minne) allokering",
+      "warning": "Den nåværende SHM-størrelsen på {{total}} MB er for liten. Øk den til minst {{min_shm}} MB."
+    }
   },
   "cameras": {
     "info": {
