@@ -59,6 +59,7 @@ The default session length for user authentication in Frigate is 24 hours. This 
 While the default provides a balance of security and convenience, you can customize this duration to suit your specific security requirements and user experience preferences. The session length is configured in seconds.
 
 The default value of `86400` will expire the authentication session after 24 hours. Some other examples:
+
 - `0`: Setting the session length to 0 will require a user to log in every time they access the application or after a very short, immediate timeout.
 - `604800`: Setting the session length to 604800 will require a user to log in if the token is not refreshed for 7 days.
 
@@ -132,6 +133,31 @@ proxy:
   ...
   default_role: viewer
 ```
+
+## Role mapping
+
+In some environments, upstream identity providers (OIDC, SAML, LDAP, etc.) do not pass a Frigate-compatible role directly, but instead pass one or more group claims. To handle this, Frigate supports a `role_map` that translates upstream group names into Frigate’s internal roles (`admin` or `viewer`).
+
+```yaml
+proxy:
+  ...
+  header_map:
+    user: x-forwarded-user
+    role: x-forwarded-groups
+    role_map:
+      admin:
+        - sysadmins
+        - access-level-security
+      viewer:
+        - camera-viewer
+```
+
+In this example:
+
+- If the proxy passes a role header containing `sysadmins` or `access-level-security`, the user is assigned the `admin` role.
+- If the proxy passes a role header containing `camera-viewer`, the user is assigned the `viewer` role.
+- If no mapping matches, Frigate falls back to `default_role` if configured.
+- If `role_map` is not defined, Frigate assumes the role header directly contains `admin` or `viewer`.
 
 #### Port Considerations
 
