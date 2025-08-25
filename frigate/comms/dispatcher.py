@@ -244,7 +244,7 @@ class Dispatcher:
                 json.dumps(self.embeddings_reindex.copy()),
             )
             self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
-            self.publish("audio_detections", json.dumps(audio_detections[camera]))
+            self.publish("audio_detections", json.dumps(audio_detections))
 
         def handle_notification_test() -> None:
             self.publish("notification_test", "Test notification")
