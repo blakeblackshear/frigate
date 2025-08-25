@@ -1156,7 +1156,11 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
 
 @router.get("/events/{event_id}/clip.mp4")
-def event_clip(request: Request, event_id: str):
+def event_clip(
+    request: Request,
+    event_id: str,
+    padding: int = Query(0, description="Padding to apply to clip."),
+):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
@@ -1169,8 +1173,12 @@ def event_clip(request: Request, event_id: str):
             content={"success": False, "message": "Clip not available"}, status_code=404
         )
 
-    end_ts = datetime.now().timestamp() if event.end_time is None else event.end_time
-    return recording_clip(request, event.camera, event.start_time, end_ts)
+    end_ts = (
+        datetime.now().timestamp()
+        if event.end_time is None
+        else event.end_time + padding
+    )
+    return recording_clip(request, event.camera, event.start_time - padding, end_ts)
 
 
 @router.get("/events/{event_id}/preview.gif")

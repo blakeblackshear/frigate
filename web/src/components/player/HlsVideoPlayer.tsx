@@ -123,13 +123,6 @@ export default function HlsVideoPlayer({
       return;
     }
 
-    // we must destroy the hlsRef every time the source changes
-    // so that we can create a new HLS instance with startPosition
-    // set at the optimal point in time
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-    }
-
     hlsRef.current = new Hls({
       maxBufferLength: 10,
       maxBufferSize: 20 * 1000 * 1000,
@@ -138,6 +131,15 @@ export default function HlsVideoPlayer({
     hlsRef.current.attachMedia(videoRef.current);
     hlsRef.current.loadSource(currentSource.playlist);
     videoRef.current.playbackRate = currentPlaybackRate;
+
+    return () => {
+      // we must destroy the hlsRef every time the source changes
+      // so that we can create a new HLS instance with startPosition
+      // set at the optimal point in time
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
+    }
   }, [videoRef, hlsRef, useHlsCompat, currentSource]);
 
   // state handling
