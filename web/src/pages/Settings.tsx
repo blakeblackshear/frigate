@@ -46,6 +46,7 @@ import { isPWA } from "@/utils/isPWA";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
 import TriggerView from "@/views/settings/TriggerView";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 const allSettingsViews = [
   "ui",
@@ -351,9 +352,11 @@ function CameraSelectButton({
     >
       <FaVideo className="text-background dark:text-primary" />
       <div className="hidden text-background dark:text-primary md:block">
-        {selectedCamera == undefined
-          ? t("cameraSetting.noCamera")
-          : selectedCamera.replaceAll("_", " ")}
+        {selectedCamera == undefined ? (
+          t("cameraSetting.noCamera")
+        ) : (
+          <CameraNameLabel camera={selectedCamera} />
+        )}
       </div>
     </Button>
   );
@@ -376,7 +379,8 @@ function CameraSelectButton({
               <FilterSwitch
                 key={item.name}
                 isChecked={item.name === selectedCamera}
-                label={item.name.replaceAll("_", " ")}
+                label={item.name}
+                isCameraName={true}
                 onCheckedChange={(isChecked) => {
                   if (isChecked && (isEnabled || isCameraSettingsPage)) {
                     setSelectedCamera(item.name);

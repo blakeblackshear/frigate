@@ -30,6 +30,7 @@ import { isDesktop } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { useCameraNickname } from "@/hooks/use-camera-nickname";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -126,6 +127,8 @@ export default function ObjectSettingsView({
     }
   }, [config, selectedCamera]);
 
+  const cameraName = useCameraNickname(cameraConfig);
+
   const { objects } = useCameraActivity(cameraConfig ?? ({} as CameraConfig));
 
   const memoizedObjects = useDeepMemo(objects);
@@ -181,7 +184,9 @@ export default function ObjectSettingsView({
                 rel="noopener noreferrer"
                 className="inline"
               >
-                Open {capitalizeFirstLetter(cameraConfig.name)}'s Web UI
+                {t("debug.openCameraWebUI", {
+                  camera: cameraName,
+                })}
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
             </div>

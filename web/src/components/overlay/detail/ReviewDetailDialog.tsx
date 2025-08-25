@@ -47,6 +47,7 @@ import { LuSearch } from "react-icons/lu";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Trans, useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -292,7 +293,7 @@ export default function ReviewDetailDialog({
                       {t("details.camera")}
                     </div>
                     <div className="text-sm smart-capitalize">
-                      {review.camera.replaceAll("_", " ")}
+                      <CameraNameLabel camera={review.camera} />
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5">

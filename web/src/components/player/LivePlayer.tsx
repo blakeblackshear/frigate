@@ -24,6 +24,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { PlayerStats } from "./PlayerStats";
 import { LuVideoOff } from "react-icons/lu";
 import { Trans, useTranslation } from "react-i18next";
+import { useCameraNickname } from "@/hooks/use-camera-nickname";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -76,6 +77,7 @@ export default function LivePlayer({
 
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
 
+  const cameraName = useCameraNickname(cameraConfig);
   // stats
 
   const [stats, setStats] = useState<PlayerStatsType>({
@@ -412,7 +414,7 @@ export default function LivePlayer({
               <Trans
                 ns="components/player"
                 values={{
-                  cameraName: capitalizeFirstLetter(cameraConfig.name),
+                  cameraName: cameraName,
                 }}
               >
                 streamOffline.desc
@@ -444,7 +446,7 @@ export default function LivePlayer({
           <Chip
             className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
           >
-            {cameraConfig.name.replaceAll("_", " ")}
+            {cameraName}
           </Chip>
         )}
       </div>

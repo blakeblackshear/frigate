@@ -27,6 +27,7 @@
     "icon": "Icon",
     "success": "Camera group ({{name}}) has been saved.",
     "camera": {
+      "birdseye": "Birdseye",
       "setting": {
         "label": "Camera Streaming Settings",
         "title": "{{cameraName}} Streaming Settings",
