@@ -133,12 +133,13 @@ export default function CameraMetrics({
       }
 
       Object.entries(stats.cameras).forEach(([key, camStats]) => {
-        if (!config?.cameras[key].enabled) {
+        const camera = config?.cameras?.[key];
+        if (!camera || !camera?.enabled) {
           return;
         }
 
         if (!(key in series)) {
-          const camName = key.replaceAll("_", " ");
+          const camName = camera?.nickname || key.replaceAll("_", " ");
           series[key] = {};
           series[key]["ffmpeg"] = {
             name: t("cameras.label.cameraFfmpeg", { camName: camName }),
@@ -189,7 +190,8 @@ export default function CameraMetrics({
 
       Object.entries(stats.cameras).forEach(([key, camStats]) => {
         if (!(key in series)) {
-          const camName = key.replaceAll("_", " ");
+          const camName =
+            config?.cameras?.[key]?.nickname || key.replaceAll("_", " ");
           series[key] = {};
           series[key]["fps"] = {
             name: t("cameras.label.cameraFramesPerSecond", {
@@ -226,7 +228,7 @@ export default function CameraMetrics({
       });
     });
     return series;
-  }, [statsHistory, t]);
+  }, [config, statsHistory, t]);
 
   useEffect(() => {
     if (!showCameraInfoDialog) {
