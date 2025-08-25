@@ -7,5 +7,16 @@
   "person": "شخص",
   "bicycle": "دراجة هوائية",
   "car": "سيارة",
-  "motorcycle": "دراجة نارية"
+  "motorcycle": "دراجة نارية",
+  "airplane": "طائرة",
+  "bus": "حافلة",
+  "traffic_light": "إشارة المرور",
+  "fire_hydrant": "حنفية إطفاء الحريق",
+  "street_sign": "لافتة شارع",
+  "stop_sign": "إشارة توقف",
+  "parking_meter": "عداد موقف سيارات",
+  "train": "قطار",
+  "boat": "زورق",
+  "bench": "مقعدة",
+  "bird": "طائر"
 }
