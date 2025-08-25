@@ -6,7 +6,7 @@ import logging
 from typing import Any, Callable, Optional, cast
 
 from frigate.camera import PTZMetrics
-from frigate.camera.activity_manager import CameraActivityManager
+from frigate.camera.activity_manager import AudioActivityManager, CameraActivityManager
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.webpush import WebPushClient
 from frigate.config import BirdseyeModeEnum, FrigateConfig
@@ -17,10 +17,12 @@ from frigate.config.camera.updater import (
 )
 from frigate.const import (
     CLEAR_ONGOING_REVIEW_SEGMENTS,
+    EXPIRE_AUDIO_ACTIVITY,
     INSERT_MANY_RECORDINGS,
     INSERT_PREVIEW,
     NOTIFICATION_TEST,
     REQUEST_REGION_GRID,
+    UPDATE_AUDIO_ACTIVITY,
     UPDATE_BIRDSEYE_LAYOUT,
     UPDATE_CAMERA_ACTIVITY,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
@@ -55,6 +57,7 @@ class Dispatcher:
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
         self.camera_activity = CameraActivityManager(config, self.publish)
+        self.audio_activity = AudioActivityManager(config, self.publish)
         self.model_state: dict[str, ModelStatusTypesEnum] = {}
         self.embeddings_reindex: dict[str, Any] = {}
         self.birdseye_layout: dict[str, Any] = {}
@@ -135,6 +138,12 @@ class Dispatcher:
         def handle_update_camera_activity() -> None:
             self.camera_activity.update_activity(payload)
 
+        def handle_update_audio_activity() -> None:
+            self.audio_activity.update_activity(payload)
+
+        def handle_expire_audio_activity() -> None:
+            self.audio_activity.expire_all(payload)
+
         def handle_update_event_description() -> None:
             event: Event = Event.get(Event.id == payload["id"])
             cast(dict, event.data)["description"] = payload["description"]
@@ -192,6 +201,7 @@ class Dispatcher:
 
         def handle_on_connect() -> None:
             camera_status = self.camera_activity.last_camera_activity.copy()
+            audio_detections = self.audio_activity.current_audio_detections.copy()
             cameras_with_status = camera_status.keys()
 
             for camera in self.config.cameras.keys():
@@ -234,6 +244,7 @@ class Dispatcher:
                 json.dumps(self.embeddings_reindex.copy()),
             )
             self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
+            self.publish("audio_detections", json.dumps(audio_detections[camera]))
 
         def handle_notification_test() -> None:
             self.publish("notification_test", "Test notification")
@@ -246,6 +257,8 @@ class Dispatcher:
             UPSERT_REVIEW_SEGMENT: handle_upsert_review_segment,
             CLEAR_ONGOING_REVIEW_SEGMENTS: handle_clear_ongoing_review_segments,
             UPDATE_CAMERA_ACTIVITY: handle_update_camera_activity,
+            UPDATE_AUDIO_ACTIVITY: handle_update_audio_activity,
+            EXPIRE_AUDIO_ACTIVITY: handle_expire_audio_activity,
             UPDATE_EVENT_DESCRIPTION: handle_update_event_description,
             UPDATE_REVIEW_DESCRIPTION: handle_update_review_description,
             UPDATE_MODEL_STATE: handle_update_model_state,
