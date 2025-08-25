@@ -727,7 +727,7 @@
     "documentTitle": "Triggers",
     "management": {
       "title": "Triggerbeheer",
-      "desc": "Beheer triggers voor {{camera}}. Gebruik het thumbnail om triggers te activeren op basis van thumbnail die lijken op het door u geselecteerde gevolgde object, en het beschrijvingstype om triggers te activeren op basis van beschrijvingen die lijken op de door u opgegeven tekst."
+      "desc": "Beheer triggers voor {{camera}}. Gebruik een thumbnail om te triggeren op vergelijkbare thumbnails van het door jou gevolgde object, of gebruik een objectbeschrijving om te triggeren op vergelijkbare beschrijvingen van de door jou opgegeven tekst."
     },
     "addTrigger": "Trigger toevoegen",
     "table": {

@@ -145,7 +145,8 @@
       "withSystem": {
         "label": "Använd systeminställningarna för språk"
       },
-      "en": "Engelska"
+      "en": "Engelska",
+      "ptBR": "Português brasileiro (brasiliansk portugisiska)"
     },
     "darkMode": {
       "withSystem": {

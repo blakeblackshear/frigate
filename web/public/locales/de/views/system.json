@@ -102,7 +102,11 @@
       "bandwidth": "Bandbreite"
     },
     "title": "Speicher",
-    "overview": "Übersicht"
+    "overview": "Übersicht",
+    "shm": {
+      "title": "SHM (Shared Memory) Zuweisung",
+      "warning": "Die aktuelle SHM-Größe von {{total}} MB ist zu klein. Erhöhe sie auf mindestens {{min_shm}} MB."
+    }
   },
   "cameras": {
     "info": {

@@ -102,6 +102,10 @@
         "title": "Não Utilizado",
         "tips": "Esse valor por não representar com precisão o espaço livre disponí®el para o Frigate se você possui outros arquivos armazenados no seu drive além das gravações do Frigate. O Frigate não rastreia a utilização do armazenamento além de suas próprias gravações."
       }
+    },
+    "shm": {
+      "title": "Alocação de memória compartilhada (SHM)",
+      "warning": "O tamanho de {{total}}MB de memória compartilhada (SHM) é insuficiente. Aumente para ao menos {{min_shm}}MB."
     }
   },
   "cameras": {

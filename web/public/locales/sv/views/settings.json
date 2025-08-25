@@ -124,7 +124,8 @@
     },
     "restart_required": "Omstart krävs (berikningsinställningar har ändrats)",
     "toast": {
-      "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar."
+      "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar.",
+      "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
     }
   },
   "menu": {
@@ -142,6 +143,59 @@
     "unsavedChanges": {
       "title": "Du har osparade ändringar.",
       "desc": "Vill du spara dina ändringar innan du fortsätter?"
+    }
+  },
+  "camera": {
+    "title": "Kamera inställningar",
+    "streams": {
+      "title": "Videoströmmar",
+      "desc": "Inaktivera tillfälligt en kamera tills Frigate startar om. Om du inaktiverar en kamera helt stoppas Frigates bearbetning av kamerans strömmar. Detektering, inspelning och felsökning kommer inte att vara tillgängliga.<br /> <em>Obs! Detta inaktiverar inte go2rtc-återströmmar.</em>"
+    },
+    "object_descriptions": {
+      "title": "Generativa AI-objektbeskrivningar",
+      "desc": "Aktivera/inaktivera tillfälligt generativa AI-objektbeskrivningar för den här kameran. När den är inaktiverad kommer AI-genererade beskrivningar inte att begäras för spårade objekt på den här kameran."
+    },
+    "review_descriptions": {
+      "title": "Beskrivningar av generativa AI-granskningar",
+      "desc": "Aktivera/inaktivera tillfälligt genererade AI-granskningsbeskrivningar för den här kameran. När det är inaktiverat kommer AI-genererade beskrivningar inte att begäras för granskningsobjekt på den här kameran."
+    },
+    "review": {
+      "title": "Recensera",
+      "desc": "Tillfälligt Aktivera/avaktivera varningar och detekteringar för den här kameran tills Frigate startar om. När den är avaktiverad genereras inga nya granskningsobjekt. ",
+      "alerts": "Aviseringar ",
+      "detections": "Detektioner "
+    },
+    "reviewClassification": {
+      "title": "Granska klassificering",
+      "desc": "Frigate kategoriserar granskningsobjekt som varningar och detekteringar. Som standard betraktas alla <em>person</em>- och <em>bil</em>-objekt som varningar. Du kan förfina kategoriseringen av dina granskningsobjekt genom att konfigurera obligatoriska zoner för dem.",
+      "noDefinedZones": "Inga zoner är definierade för den här kameran.",
+      "objectAlertsTips": "Alla {{alertsLabels}}-objekt på {{cameraName}} kommer att visas som varningar.",
+      "zoneObjectAlertsTips": "Alla {{alertsLabels}} objekt som upptäcks i {{zone}} på {{cameraName}} kommer att visas som varningar.",
+      "objectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} kommer att visas som detektioner oavsett vilken zon de befinner sig i.",
+      "zoneObjectDetectionsTips": {
+        "text": "Alla {{detectionsLabels}}-objekt som inte kategoriseras i {{zone}} på {{cameraName}} kommer att visas som detektioner.",
+        "notSelectDetections": "Alla {{detectionsLabels}} objekt som upptäckts i {{zone}} på {{cameraName}} och som inte kategoriserats som varningar kommer att visas som detekteringar oavsett vilken zon de befinner sig i.",
+        "regardlessOfZoneObjectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} kommer att visas som detektioner oavsett vilken zon de befinner sig i."
+      },
+      "unsavedChanges": "Osparade inställningar för granskningsklassificering för {{camera}}",
+      "selectAlertsZones": "Välj zoner för aviseringar",
+      "selectDetectionsZones": "Välj zoner för detektioner",
+      "limitDetections": "Begränsa detektioner till specifika zoner",
+      "toast": {
+        "success": "Konfigurationen för granskning av klassificering har sparats. Starta om Frigate för att tillämpa ändringarna."
+      }
+    },
+    "addCamera": "Lägg till ny kamera",
+    "editCamera": "Redigera kamera:",
+    "selectCamera": "Välj en kamera",
+    "backToSettings": "Tillbaka till kamera inställningar",
+    "cameraConfig": {
+      "add": "Lägg till kamera",
+      "edit": "Redigera kamera",
+      "description": "Konfigurera kamerainställningar inklusive strömingångar och roller.",
+      "name": "Kamera namn",
+      "nameRequired": "Kamera namn krävs",
+      "nameInvalid": "Kamera namnet får endast innehålla bokstäver, siffror, understreck, eller bindestreck"
     }
   }
 }

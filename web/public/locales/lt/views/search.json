@@ -46,13 +46,13 @@
       "title": "Kaip naudoti tekstinius filtrus",
       "desc": {
         "text": "Filtrai leidžia susiaurinti paieškos rezultatus. Štai kaip juos naudoti įvesties laukelyje:",
-        "step1": "Type a filter key name followed by a colon (e.g., \"cameras:\").",
+        "step1": "Įveskite filtravimo raktą po kurio seks dvitaškis (pvz., \"cameras:\").",
         "step2": "Pasirinkite reikšmę iš siūlomų arba įveskite savo sugalvotą.",
         "step3": "Naudokite kelis filtrus įvesdami juos vieną paskui kitą su tarpu tarp jų.",
         "step5": "Laiko rėžio filtro naudojamas {{exampleTime}} formatas.",
         "step6": "Pašalinti filtrus spaudžiant 'x' šalia jų.",
         "exampleLabel": "Pavyzdys:",
-        "step4": "Date filters (before: and after:) use {{DateFormat}} format."
+        "step4": "Datų filtrai (before: and after:) naudoti {{DateFormat}} formatą."
       }
     },
     "header": {
