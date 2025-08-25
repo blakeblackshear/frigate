@@ -411,6 +411,13 @@
     "debugging": "Debugging",
     "objectList": "Object List",
     "noObjects": "No objects",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "No audio detections",
+      "score": "score",
+      "currentRMS": "Current RMS",
+      "currentdbFS": "Current dbFS"
+    },
     "boundingBoxes": {
       "title": "Bounding boxes",
       "desc": "Show bounding boxes around tracked objects",

@@ -10,6 +10,7 @@ import {
   ToggleableSetting,
   TrackedObjectUpdateReturnType,
   TriggerStatus,
+  FrigateAudioDetections,
 } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
 import { createContainer } from "react-tracked";
@@ -338,6 +339,13 @@ export function useFrigateEvents(): { payload: FrigateEvent } {
   const {
     value: { payload },
   } = useWs("events", "");
+  return { payload: JSON.parse(payload as string) };
+}
+
+export function useAudioDetections(): { payload: FrigateAudioDetections } {
+  const {
+    value: { payload },
+  } = useWs("audio_detections", "");
   return { payload: JSON.parse(payload as string) };
 }
 
