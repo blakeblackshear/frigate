@@ -31,6 +31,10 @@
     "addTrigger": {
       "label": "Indító hozzáadása",
       "aria": "Indító hozzáadása ehhez a követett tárgyhoz"
+    },
+    "audioTranscription": {
+      "label": "Átírás",
+      "aria": "Hangátirat kérése"
     }
   },
   "details": {
@@ -69,12 +73,14 @@
         "error": {
           "updatedLPRFailed": "Rendszám frissítése sikertelen: {{errorMessage}}",
           "updatedSublabelFailed": "Alcimke frissítése sikertelen: {{errorMessage}}",
-          "regenerate": "Nem sikerült meghívni a(z) {{provider}} szolgáltatót az új leírásért: {{errorMessage}}"
+          "regenerate": "Nem sikerült meghívni a(z) {{provider}} szolgáltatót az új leírásért: {{errorMessage}}",
+          "audioTranscription": "Nem sikerült hangátiratot kérni: {{errorMessage}}"
         },
         "success": {
           "updatedSublabel": "Az alcimke sikeresen frissítve.",
           "updatedLPR": "Rendszám sikeresen frissítve.",
-          "regenerate": "Új leírást kértünk a(z) {{provider}} szolgáltatótól. A szolgáltató sebességétől függően az új leírás előállítása eltarthat egy ideig."
+          "regenerate": "Új leírást kértünk a(z) {{provider}} szolgáltatótól. A szolgáltató sebességétől függően az új leírás előállítása eltarthat egy ideig.",
+          "audioTranscription": "Sikeresen kérte a hangátírást."
         }
       },
       "button": {
@@ -101,7 +107,10 @@
       },
       "findSimilar": "Keress Hasonlót"
     },
-    "expandRegenerationMenu": "Újragenerálási menü kiterjesztése"
+    "expandRegenerationMenu": "Újragenerálási menü kiterjesztése",
+    "score": {
+      "label": "Pontszám"
+    }
   },
   "searchResult": {
     "deleteTrackedObject": {
@@ -207,5 +216,11 @@
     "snapshot": "pillanatfelvétel"
   },
   "trackedObjectDetails": "Követett Tárgy Részletei",
-  "exploreMore": "Fedezzen fel több {{label}} tárgyat"
+  "exploreMore": "Fedezzen fel több {{label}} tárgyat",
+  "aiAnalysis": {
+    "title": "MI-elemzés"
+  },
+  "concerns": {
+    "label": "Aggodalmak"
+  }
 }

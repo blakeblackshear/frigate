@@ -114,6 +114,7 @@
     "selectImage": "Válassza ki egy követett tárgy képét",
     "search": {
       "placeholder": "Keresés cimke vagy alcimke alapján..."
-    }
+    },
+    "noImages": "Nem találhatók bélyegképek ehhez a kamerához"
   }
 }
