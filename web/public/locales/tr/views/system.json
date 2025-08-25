@@ -78,6 +78,10 @@
       "storageUsed": "Depolama",
       "bandwidth": "Saatlik Veri Kullanımı",
       "unusedStorageInformation": "Kullanılmayan Depolama Bilgisi"
+    },
+    "shm": {
+      "warning": "Şu anki {{total}}MB'lik SHM boyutu yetersiz. Bu boyutu en az {{min_shm}}MB'a çıkartın.",
+      "title": "Ayrılan SHM (paylaşımlı bellek)"
     }
   },
   "cameras": {
