@@ -102,7 +102,11 @@
       "camera": "Caméra",
       "unusedStorageInformation": "Information sur le stockage non utilisé"
     },
-    "overview": "Vue d'ensemble"
+    "overview": "Vue d'ensemble",
+    "shm": {
+      "title": "Allocation de mémoire partagée SHM",
+      "warning": "La taille actuelle de la SHM de {{total}} MB est trop petite. Augmentez la au moins à {{min_shm}} MB."
+    }
   },
   "cameras": {
     "title": "Caméras",
