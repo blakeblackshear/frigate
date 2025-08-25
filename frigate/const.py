@@ -74,6 +74,7 @@ FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
 FFMPEG_HWACCEL_VULKAN = "preset-vulkan"
 FFMPEG_HWACCEL_RKMPP = "preset-rkmpp"
+FFMPEG_HWACCEL_AMF = "preset-amd-amf"
 FFMPEG_HVC1_ARGS = ["-tag:v", "hvc1"]
 
 # Regex constants
