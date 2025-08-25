@@ -51,6 +51,12 @@ export type ObjectType = {
   sub_label: string;
 };
 
+export type AudioDetection = {
+  id: string;
+  label: string;
+  score: number;
+};
+
 export interface FrigateCameraState {
   config: {
     enabled: boolean;
@@ -69,6 +75,10 @@ export interface FrigateCameraState {
   };
   motion: boolean;
   objects: ObjectType[];
+  audio_detections: AudioDetection[];
+}
+export interface FrigateAudioDetections {
+  [camera: string]: AudioDetection[];
 }
 
 export type ModelState =
