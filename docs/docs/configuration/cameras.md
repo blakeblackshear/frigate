@@ -89,7 +89,7 @@ An ONVIF-capable camera that supports relative movement within the field of view
 
 ## ONVIF PTZ camera recommendations
 
-This list of working and non-working PTZ cameras is based on user feedback.
+This list of working and non-working PTZ cameras is based on user feedback. Generally, for a camera to support autotracking, if a on the [ONVIF Conformant Products Database](https://www.onvif.org/conformant-products/) under the FeatureList for the camera `PTZRelative`, `PTZRelativePanTilt` and / or `PTZRelativeZoom`, as well as `PTZAuxiliary` are listed, the camera is likely to work and it is guaranteed not to work if these are not mentioned. There are still cameras that do not work, even if this feature is present (notable example is the Dahua DH-P5AE-PV). If no such document for the camera is present, it is recommended *not* to buy the camera, except it is explicitly mentioned as working below.
 
 | Brand or specific camera     | PTZ Controls | Autotracking | Notes                                                                                                                                           |
 | ---------------------------- | :----------: | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -99,11 +99,13 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Amcrest IP5M-1190EW          |      ✅      |      ❌      | ONVIF Port: 80. FOV relative movement not supported.                                                                                            |
 | Annke CZ504                  |      ✅      |      ✅      | Annke support provide specific firmware ([V5.7.1 build 250227](https://github.com/pierrepinon/annke_cz504/raw/refs/heads/main/digicap_V5-7-1_build_250227.dav)) to fix issue with ONVIF "TranslationSpaceFov" |
 | Ctronics PTZ                 |      ✅      |      ❌      |                                                                                                                                                 |
-| Dahua                        |      ✅      |      ✅      | Some low-end Dahuas (lite series, among others) have been reported to not support autotracking                                                  |
+| Dahua                        |      ✅      |      ✅      | Some low-end Dahuas (lite series, picoo series (commonly), among others) have been reported to not support autotracking. These models usually don't have a four digit model number with chassis prefix and options postfix (e.g. DH-P5AE-PV vs DH-SD49825GB-HNR).          |
 | Dahua DH-SD2A500HB           |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua DH-SD49825GB-HNR       |      ✅      |      ✅      |                                                                                                                                                 |
 | Dahua DH-P5AE-PV             |      ❌      |      ❌      |                                                                                                                                                 |
+| Foscam                       |      ✅      |      ❌      | In general support PTZ, but not relative move. There are no official ONVIF certifications and tests available on the ONVIF website  |                                                                                                                                  |
 | Foscam R5                    |      ✅      |      ❌      |                                                                                                                                                 |
+| Foscam SD4                   |      ✅      |      ❌      |                                                                                                                                                 |
 | Hanwha XNP-6550RH            |      ✅      |      ❌      |                                                                                                                                                 |
 | Hikvision                    |      ✅      |      ❌      | Incomplete ONVIF support (MoveStatus won't update even on latest firmware) - reported with HWP-N4215IH-DE and DS-2DE3304W-DE, but likely others |
 | Hikvision DS-2DE3A404IWG-E/W |      ✅      |      ✅      |                                                                                                                                                 |
@@ -137,3 +139,6 @@ camera_groups:
     icon: LuCar
     order: 0
 ```
+
+## Two-Way Audio
+Two way audio is supported through `go2rtc`. See [here](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#two-way-audio) for documentation on requirements. As a rule of thumb, a camera supporting ONVIF Profile T is likely to work, but you can check explicitly by verifying that in the [ONVIF Conformant Products Database](https://www.onvif.org/conformant-products/), under FeatureList for the specific camera, it lists `AudioOutput`. If the camera is supported, you can use the Frigate WebUI or the Home-Assistant integration to talk through the camera's speaker.
