@@ -7,11 +7,11 @@ from typing import Any
 
 from frigate.const import (
     FFMPEG_HVC1_ARGS,
+    FFMPEG_HWACCEL_AMF,
     FFMPEG_HWACCEL_NVIDIA,
     FFMPEG_HWACCEL_RKMPP,
     FFMPEG_HWACCEL_VAAPI,
     FFMPEG_HWACCEL_VULKAN,
-    FFMPEG_HWACCEL_AMF,
     LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.util.services import vainfo_hwaccel
