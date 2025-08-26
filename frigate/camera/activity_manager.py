@@ -181,6 +181,7 @@ class AudioActivityManager:
             new_detections = new_activity[camera].get("detections", [])
             if self.compare_audio_activity(camera, new_detections, now):
                 logger.debug(f"Audio detections for {camera}: {new_activity}")
+                self.publish(f"{camera}/audio/all", "ON" if len(self.current_audio_detections[camera]) > 0 else "OFF")
                 self.publish(
                     "audio_detections",
                     json.dumps(self.current_audio_detections),
