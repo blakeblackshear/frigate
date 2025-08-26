@@ -279,6 +279,8 @@ The height and crop of snapshots can be configured in the config.
 
 Publishes "ON" when a type of audio is detected and "OFF" when it is not for the camera for use as a sensor in Home Assistant.
 
+`all` can be used as the audio_type for the status of all audio types.
+
 ### `frigate/<camera_name>/audio/dBFS`
 
 Publishes the dBFS value for audio detected on this camera.
