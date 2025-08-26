@@ -15,6 +15,9 @@
           "label": "Confirma esta etiqueta para Frigate Plus",
           "ask_an": "E isto un obxecto <code>{{label}}</code>?"
         }
+      },
+      "submitToPlus": {
+        "label": "Enviar a Frigate+"
       }
     }
   }

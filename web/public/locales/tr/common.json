@@ -166,7 +166,15 @@
       "ru": "Русский (Rusça)",
       "yue": "粵語 (Kantonca)",
       "th": "ไทย (Tayca)",
-      "ca": "Català (Katalanca)"
+      "ca": "Català (Katalanca)",
+      "ptBR": "Português brasileiro (Brezilya Portekizcesi)",
+      "sr": "Српски (Sırpça)",
+      "sl": "Slovenščina (Slovence)",
+      "lt": "Lietuvių (Litvanyaca)",
+      "bg": "Български (Bulgarca)",
+      "gl": "Galego (Galiçyaca)",
+      "id": "Bahasa Indonesia (Endonezce)",
+      "ur": "اردو (Urduca)"
     },
     "withSystem": "Sistem",
     "theme": {
@@ -264,5 +272,6 @@
     "viewer": "Görüntüleyici",
     "admin": "Yönetici",
     "desc": "Yöneticiler Frigate arayüzündeki bütün özelliklere tam erişim sahibidir. Görüntüleyiciler ise yalnızca kameraları, eski görüntüleri ve inceleme öğelerini görüntülemekle sınırlıdır."
-  }
+  },
+  "readTheDocumentation": "Dökümantasyonu oku"
 }

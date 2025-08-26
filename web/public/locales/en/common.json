@@ -262,5 +262,6 @@
     "title": "404",
     "desc": "Page not found"
   },
-  "selectItem": "Select {{item}}"
+  "selectItem": "Select {{item}}",
+  "readTheDocumentation": "Read the documentation"
 }

@@ -261,5 +261,6 @@
     "title": "404",
     "desc": "דף לא נמצא"
   },
-  "selectItem": "בחירה:{{item}}"
+  "selectItem": "בחירה:{{item}}",
+  "readTheDocumentation": "קרא את התיעוד"
 }

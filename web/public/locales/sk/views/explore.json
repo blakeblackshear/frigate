@@ -48,6 +48,37 @@
     "scrollViewTips": "Posúvaním zobrazíte významné momenty životného cyklu tohto objektu.",
     "autoTrackingTips": "Pozície ohraničujúcich rámčekov budú pre kamery s automatickým sledovaním nepresné.",
     "count": "{{first}} z {{second}}",
-    "trackedPoint": "Sledovaný bod"
+    "trackedPoint": "Sledovaný bod",
+    "lifecycleItemDesc": {
+      "visible": "Zistený {{label}}",
+      "entered_zone": "{{label}} vstúpil do {{zones}}",
+      "active": "{{label}} sa stal aktívnym",
+      "stationary": "{{label}} sa zastavil",
+      "attribute": {
+        "faceOrLicense_plate": "Pre {{label}} bol zistený {{attribute}}",
+        "other": "{{label}} rozpoznané ako {{attribute}}"
+      },
+      "gone": "{{label}} zostalo",
+      "heard": "{{label}} počul",
+      "external": "Zistený {{label}}",
+      "header": {
+        "zones": "Zóny",
+        "ratio": "Pomer",
+        "area": "Oblasť"
+      }
+    },
+    "annotationSettings": {
+      "title": "Nastavenia anotácií",
+      "showAllZones": {
+        "title": "Zobraziť všetky zóny",
+        "desc": "Vždy zobrazovať zóny na rámoch, do ktorých objekty vstúpili."
+      },
+      "offset": {
+        "label": "Odsadenie anotácie",
+        "desc": "Tieto údaje pochádzajú z detekčného kanála vašej kamery, ale prekrývajú sa s obrázkami zo záznamového kanála. Je nepravdepodobné, že tieto dva streamy sú dokonale synchronizované. V dôsledku toho sa ohraničujúci rámček a zábery nebudú dokonale zarovnané. Na úpravu tohto posunu je však možné použiť pole <code>annotation_offset</code>.",
+        "documentation": "Prečítajte si dokumentáciu ",
+        "millisecondsToOffset": "Milisekundy na posunutie detekcie anotácií. <em>Predvolené: 0</em>"
+      }
+    }
   }
 }

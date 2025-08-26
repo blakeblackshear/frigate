@@ -5,25 +5,141 @@
     "embeddingsReindexing": {
       "startingUp": "Startar upp…",
       "estimatedTime": "Beräknad återstående tid:",
-      "finishingShortly": "Snart klar"
+      "finishingShortly": "Snart klar",
+      "context": "Utforska kan användas efter att spårade objektinbäddningar har slutförts omindexering.",
+      "step": {
+        "thumbnailsEmbedded": "Miniatyrbilder inbäddad: ",
+        "descriptionsEmbedded": "Beskrivningar inbäddade: ",
+        "trackedObjectsProcessed": "Spårade objekt bearbetad: "
+      }
     },
     "title": "Utforska är inte tillgänglig",
     "downloadingModels": {
       "setup": {
-        "textModel": "Text modell"
+        "textModel": "Text modell",
+        "visionModel": "Visionsmodell",
+        "visionModelFeatureExtractor": "Funktionsutdragare för visionsmodell",
+        "textTokenizer": "Texttokeniserare"
       },
       "tips": {
-        "documentation": "Läs dokumentationen"
+        "documentation": "Läs dokumentationen",
+        "context": "Du kanske vill omindexera inbäddningarna av dina spårade objekt när modellerna har laddats ner."
       },
-      "error": "Ett fel har inträffat. Kontrollera Frigate loggarna."
+      "error": "Ett fel har inträffat. Kontrollera Frigate loggarna.",
+      "context": "Frigate laddar ner de nödvändiga inbäddningsmodellerna för att stödja den semantiska sökfunktionen. Detta kan ta flera minuter beroende på hastigheten på din nätverksanslutning."
     }
   },
   "details": {
-    "timestamp": "tidsstämpel"
+    "timestamp": "tidsstämpel",
+    "item": {
+      "title": "Granska objektinformation",
+      "desc": "Granska objektinformation",
+      "button": {
+        "share": "Dela den här recensionen",
+        "viewInExplore": "Visa i Utforska"
+      },
+      "tips": {
+        "mismatch_one": "{{count}} otillgängligt objekt upptäcktes och inkluderades i detta granskningsobjekt. Dessa objekt kvalificerade sig antingen inte som en varning eller detektering, eller så har de redan rensats/raderats.",
+        "mismatch_other": "{{count}} otillgängliga objekt upptäcktes och inkluderades i detta granskningsobjekt. Dessa objekt kvalificerade sig antingen inte som en varning eller upptäckt, eller så har de redan rensats/raderats.",
+        "hasMissingObjects": "Justera din konfiguration om du vill att Frigate ska spara spårade objekt för följande etiketter: <em>{{objects}}</em>"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "En ny beskrivning har begärts från {{provider}}. Beroende på din leverantörs hastighet kan det ta lite tid att generera den nya beskrivningen.",
+          "updatedSublabel": "Underetiketten har uppdaterats.",
+          "updatedLPR": "Nummerplåt har uppdaterats.",
+          "audioTranscription": "Ljudtranskription har begärts."
+        },
+        "error": {
+          "regenerate": "Kunde inte ringa {{provider}} för en ny beskrivning: {{errorMessage}}",
+          "updatedSublabelFailed": "Misslyckades med att uppdatera underetiketten: {{errorMessage}}",
+          "audioTranscription": "Misslyckades med att begära ljudtranskription: {{errorMessage}}",
+          "updatedLPRFailed": "Misslyckades med att uppdatera nummerplåten: {{errorMessage}}"
+        }
+      }
+    },
+    "label": "Märka",
+    "editSubLabel": {
+      "title": "Redigera underetikett",
+      "desc": "Ange en ny underetikett för denna {{label}}",
+      "descNoLabel": "Ange en ny underetikett för det här spårade objektet"
+    },
+    "editLPR": {
+      "title": "Redigera nummerplåt",
+      "desc": "Ange ett nytt nummerplåt för denna {{label}}",
+      "descNoLabel": "Ange ett nytt nummerplåt för detta spårade objekt"
+    },
+    "snapshotScore": {
+      "label": "Ögonblicksbildspoäng"
+    },
+    "topScore": {
+      "label": "Högsta poäng",
+      "info": "Topppoängen är den högsta medianpoängen för det spårade objektet, så denna kan skilja sig från poängen som visas på miniatyrbilden av sökresultatet."
+    },
+    "score": {
+      "label": "Poäng"
+    },
+    "recognizedLicensePlate": "Erkänd nummerplåt",
+    "estimatedSpeed": "Uppskattad hastighet",
+    "objects": "Objekt",
+    "camera": "Kamera",
+    "zones": "Zoner"
   },
   "exploreMore": "Utforska fler {{label}} objekt",
   "type": {
     "details": "detaljer",
-    "video": "video"
+    "video": "video",
+    "snapshot": "ögonblicksbild",
+    "object_lifecycle": "objektets livscykel"
+  },
+  "trackedObjectDetails": "Detaljer om spårade objekt",
+  "objectLifecycle": {
+    "title": "Objektets livscykel",
+    "noImageFound": "Ingen bild hittades för denna tidsstämpel.",
+    "createObjectMask": "Skapa objektmask",
+    "adjustAnnotationSettings": "Justera annoteringsinställningar",
+    "scrollViewTips": "Scrolla för att se de viktiga ögonblicken i detta objekts livscykel.",
+    "autoTrackingTips": "Begränsningsrutornas positioner kommer att vara felaktiga för autospårningskameror.",
+    "count": "{{first}} av {{second}}",
+    "lifecycleItemDesc": {
+      "external": "{{label}} upptäckt",
+      "header": {
+        "zones": "Zoner",
+        "ratio": "Proportion",
+        "area": "Område"
+      },
+      "visible": "{{label}} upptäckt",
+      "entered_zone": "{{label}} gick in i {{zones}}",
+      "active": "{{label}} blev aktiv",
+      "stationary": "{{label}} blev stationär",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} upptäckt för {{label}}",
+        "other": "{{label}} igenkänd som {{attribute}}"
+      },
+      "gone": "{{label}} vänster",
+      "heard": "{{label}} hört"
+    },
+    "annotationSettings": {
+      "title": "Annoteringsinställningar",
+      "showAllZones": {
+        "title": "Visa alla zoner",
+        "desc": "Visa alltid zoner på ramar där objekt har kommit in i en zon."
+      },
+      "offset": {
+        "label": "Annoteringsförskjutning",
+        "desc": "Denna data kommer från din kameras detekteringsflöde men läggs ovanpå bilder från inspelningsflödet. Det är osannolikt att de två strömmarna är helt synkroniserade. Som ett resultat kommer avgränsningsramen och filmmaterialet inte att radas upp perfekt. Fältet <code>annotation_offset</code> kan dock användas för att justera detta.",
+        "documentation": "Läs dokumentationen ",
+        "millisecondsToOffset": "Millisekunder för att förskjuta detektera annoteringar med. <em>Standard: 0</em>",
+        "tips": "TIPS: Föreställ dig ett händelseklipp med en person som går från vänster till höger. Om tidslinjens avgränsningsram konsekvent är till vänster om personen bör värdet minskas. På samma sätt, om en person går från vänster till höger och avgränsningsramen konsekvent är framför personen bör värdet ökas.",
+        "toast": {
+          "success": "Annoterings förskjutningen för {{camera}} har sparats i konfigurationsfilen. Starta om Frigate för att tillämpa dina ändringar."
+        }
+      }
+    },
+    "trackedPoint": "Spårad punkt",
+    "carousel": {
+      "previous": "Föregående bild",
+      "next": "Nästa bild"
+    }
   }
 }

@@ -122,5 +122,13 @@
     "loading": "Se încarcă numerele de înmatriculare recunoscute…",
     "placeholder": "Caută plăcuțe de înmatriculare…",
     "loadFailed": "Nu s-au putut încărca numerele de înmatriculare recunoscute."
+  },
+  "classes": {
+    "label": "Clase",
+    "all": {
+      "title": "Toate clasele"
+    },
+    "count_one": "{{count}} Clasă",
+    "count_other": "{{count}} Clase"
   }
 }

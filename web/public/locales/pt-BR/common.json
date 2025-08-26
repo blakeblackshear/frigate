@@ -169,7 +169,15 @@
       "ca": "Català (Catalão)",
       "withSystem": {
         "label": "Usar as configurações de sistema para o idioma"
-      }
+      },
+      "ptBR": "Português Brasileiro (Português Brasileiro)",
+      "sr": "Српски (Sérvio)",
+      "sl": "Slovenščina (Esloveno)",
+      "lt": "Lietuvių (Lituano)",
+      "bg": "Български (Búlgaro)",
+      "gl": "Galego (Galego)",
+      "id": "Bahasa Indonesia (Indonésio)",
+      "ur": "اردو (Urdu)"
     },
     "systemLogs": "Logs de sistema",
     "settings": "Configurações",
@@ -210,7 +218,7 @@
         "count_other": "{{count}} Câmeras"
       }
     },
-    "review": "Revisão",
+    "review": "Revisar",
     "explore": "Explorar",
     "export": "Exportar",
     "uiPlayground": "Playground da UI",
@@ -261,5 +269,7 @@
     "documentTitle": "Não Encontrado - Frigate",
     "title": "404",
     "desc": "Página não encontrada"
-  }
+  },
+  "selectItem": "Selecionar {{item}}",
+  "readTheDocumentation": "Leia a documentação"
 }

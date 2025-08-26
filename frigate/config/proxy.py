@@ -16,6 +16,10 @@ class HeaderMappingConfig(FrigateBaseModel):
         default=None,
         title="Header name from upstream proxy to identify user role.",
     )
+    role_map: Optional[dict[str, list[str]]] = Field(
+        default_factory=dict,
+        title=("Mapping of Frigate roles to upstream group values. "),
+    )
 
 
 class ProxyConfig(FrigateBaseModel):

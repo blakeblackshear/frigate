@@ -47,12 +47,43 @@
     "second_few": "{{time}} sekundės",
     "second_other": "{{time}} sekundžių",
     "formattedTimestamp": {
-      "12hour": ""
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
     }
   },
   "unit": {
     "speed": {
-      "kph": "kmh"
+      "kph": "kmh",
+      "mph": "mph"
     },
     "length": {
       "feet": "pėdos",
@@ -82,21 +113,22 @@
     "pictureInPicture": "Paveikslėlis Paveiksle",
     "twoWayTalk": "Dvikryptis Kalbėjimas",
     "cameraAudio": "Kameros Garsas",
-    "on": "",
+    "on": "ON",
     "edit": "Redaguoti",
     "copyCoordinates": "Kopijuoti koordinates",
     "delete": "Ištrinti",
     "yes": "Taip",
     "no": "Ne",
     "download": "Atsisiųsti",
-    "info": "",
+    "info": "Info",
     "suspended": "Pristatbdytas",
     "unsuspended": "Atnaujinti",
     "play": "Groti",
     "unselect": "Atžymėti",
     "export": "Eksportuoti",
     "deleteNow": "Trinti Dabar",
-    "next": "Kitas"
+    "next": "Kitas",
+    "off": "OFF"
   },
   "menu": {
     "system": "Sistema",
@@ -131,10 +163,24 @@
       "hu": "Vengrų",
       "fi": "Suomių",
       "da": "Danų",
-      "sk": "Slovėnų",
+      "sk": "Slovakų",
       "withSystem": {
         "label": "Kalbai naudoti sistemos nustatymus"
-      }
+      },
+      "hi": "Hindi",
+      "ptBR": "Brazilietiška Portugalų",
+      "ko": "Korėjiečių",
+      "he": "Hebrajų",
+      "yue": "Kantoniečių",
+      "th": "Tailandiečių",
+      "ca": "Kataloniečių",
+      "sr": "Serbų",
+      "sl": "Slovėnų",
+      "lt": "Lietuvių",
+      "bg": "Bulgarų",
+      "gl": "Galician",
+      "id": "Indonesian",
+      "ur": "Urdu"
     },
     "appearance": "Išvaizda",
     "darkMode": {
@@ -182,7 +228,8 @@
       "anonymous": "neidentifikuotas",
       "logout": "atsijungti",
       "setPassword": "Nustatyti Slaptažodi"
-    }
+    },
+    "uiPlayground": "UI Playground"
   },
   "toast": {
     "copyUrlToClipboard": "URL nukopijuotas į atmintį.",
@@ -209,6 +256,19 @@
     "next": {
       "title": "Sekantis",
       "label": "Eiti į sekantį puslapį"
-    }
-  }
+    },
+    "more": "Daugiau puslapių"
+  },
+  "accessDenied": {
+    "documentTitle": "Priegai Nesuteikta - Frigate",
+    "title": "Prieiga Nesuteikta",
+    "desc": "Jūs neturite leidimo žiūrėti šį puslapį."
+  },
+  "notFound": {
+    "documentTitle": "Nerasta - Frigate",
+    "title": "404",
+    "desc": "Puslapis nerastas"
+  },
+  "selectItem": "Pasirinkti {{item}}",
+  "readTheDocumentation": "Skaityti dokumentaciją"
 }

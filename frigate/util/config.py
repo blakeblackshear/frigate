@@ -363,6 +363,10 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
         if days:
             if mode == "all":
                 continuous["days"] = days
+
+                # if a user was keeping all for number of days
+                # we need to keep motion and all for that number of days
+                motion["days"] = days
             else:
                 motion["days"] = days
 
@@ -380,7 +384,7 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
         new_object_config["genai"] = {}
 
         for key in global_genai.keys():
-            if key not in ["provider", "base_url", "api_key"]:
+            if key not in ["enabled", "model", "provider", "base_url", "api_key"]:
                 new_object_config["genai"][key] = global_genai[key]
             else:
                 new_genai_config[key] = global_genai[key]

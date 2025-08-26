@@ -181,7 +181,15 @@
       "it": "Italiano (Italiano)",
       "yue": "粵語 (Cantonese)",
       "th": "ไทย (Tailandese)",
-      "ca": "Català (Catalano)"
+      "ca": "Català (Catalano)",
+      "ptBR": "Português brasileiro (Portoghese brasiliano)",
+      "sr": "Српски (Serbo)",
+      "sl": "Slovenščina (Sloveno)",
+      "lt": "Lietuvių (Lituano)",
+      "bg": "Български (Bulgaro)",
+      "gl": "Galego (Galiziano)",
+      "id": "Bahasa Indonesia (Indonesiano)",
+      "ur": "اردو (Urdu)"
     },
     "darkMode": {
       "label": "Modalità scura",
@@ -271,5 +279,6 @@
       "title": "Salva"
     }
   },
-  "selectItem": "Seleziona {{item}}"
+  "selectItem": "Seleziona {{item}}",
+  "readTheDocumentation": "Leggi la documentazione"
 }

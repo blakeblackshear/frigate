@@ -34,5 +34,7 @@
   "selected_one": "已選擇 {{count}} 個",
   "selected_other": "已選擇 {{count}} 個",
   "camera": "鏡頭",
-  "detected": "已偵測"
+  "detected": "已偵測",
+  "suspiciousActivity": "可疑的活動",
+  "threateningActivity": "有威脅性的活動"
 }

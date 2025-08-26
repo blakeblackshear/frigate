@@ -69,8 +69,7 @@
     "restreaming": {
       "disabled": "Restreaming is not enabled for this camera.",
       "desc": {
-        "title": "Set up go2rtc for additional live view options and audio for this camera.",
-        "readTheDocumentation": "Read the documentation"
+        "title": "Set up go2rtc for additional live view options and audio for this camera."
       }
     },
     "showStats": {

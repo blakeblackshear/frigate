@@ -459,7 +459,7 @@ export default function FrigatePlusSettingsView({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      {t("frigatePlus.snapshotConfig.documentation")}
+                      {t("readTheDocumentation", { ns: "common" })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>

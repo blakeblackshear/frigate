@@ -54,7 +54,7 @@ class CameraState:
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.prev_enabled = self.camera_config.enabled
 
-    def get_current_frame(self, draw_options: dict[str, Any] = {}):
+    def get_current_frame(self, draw_options: dict[str, Any] = {}) -> np.ndarray:
         with self.current_frame_lock:
             frame_copy = np.copy(self._current_frame)
             frame_time = self.current_frame_time
@@ -272,7 +272,7 @@ class CameraState:
     def finished(self, obj_id):
         del self.tracked_objects[obj_id]
 
-    def on(self, event_type: str, callback: Callable[[dict], None]):
+    def on(self, event_type: str, callback: Callable):
         self.callbacks[event_type].append(callback)
 
     def update(

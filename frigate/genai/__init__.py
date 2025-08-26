@@ -115,7 +115,7 @@ Sequence details:
 
         response = self._send(context_prompt, thumbnails)
 
-        if debug_save:
+        if debug_save and response:
             with open(
                 os.path.join(
                     CLIPS_DIR, "genai-requests", review_data["id"], "response.txt"

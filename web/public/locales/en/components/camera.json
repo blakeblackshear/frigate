@@ -36,8 +36,7 @@
         "audioIsUnavailable": "Audio is unavailable for this stream",
         "audio": {
           "tips": {
-            "title": "Audio must be output from your camera and configured in go2rtc for this stream.",
-            "document": "Read the documentation "
+            "title": "Audio must be output from your camera and configured in go2rtc for this stream."
           }
         },
         "stream": "Stream",

@@ -122,5 +122,12 @@
         "error": "Impossibile eliminare: {{error}}"
       }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Seleziona la miniatura di un oggetto tracciato",
+    "search": {
+      "placeholder": "Cerca per etichetta o sottoetichetta..."
+    },
+    "noImages": "Nessuna miniatura trovata per questa fotocamera"
   }
 }

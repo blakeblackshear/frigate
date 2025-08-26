@@ -78,17 +78,21 @@ Switching between V1 and V2 requires reindexing your embeddings. The embeddings 
 
 ### GPU Acceleration
 
-The CLIP models are downloaded in ONNX format, and the `large` model can be accelerated using GPU hardware, when available. This depends on the Docker build that is used.
+The CLIP models are downloaded in ONNX format, and the `large` model can be accelerated using GPU / NPU hardware, when available. This depends on the Docker build that is used. You can also target a specific device in a multi-GPU installation.
 
 ```yaml
 semantic_search:
   enabled: True
   model_size: large
+  # Optional, if using the 'large' model in a multi-GPU installation
+  device: 0 
 ```
 
 :::info
 
-If the correct build is used for your GPU and the `large` model is configured, then the GPU will be detected and used automatically.
+If the correct build is used for your GPU / NPU and the `large` model is configured, then the GPU / NPU will be detected and used automatically. 
+Specify the `device` option to target a specific GPU in a multi-GPU system (see [onnxruntime's provider options](https://onnxruntime.ai/docs/execution-providers/)). 
+If you do not specify a device, the first available GPU will be used.
 
 See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
 

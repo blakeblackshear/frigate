@@ -231,9 +231,7 @@ export function CameraStreamingDialog({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      {t("streaming.restreaming.desc.readTheDocumentation", {
-                        ns: "components/dialog",
-                      })}
+                      {t("readTheDocumentation", { ns: "common" })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>
@@ -292,7 +290,7 @@ export function CameraStreamingDialog({
                               rel="noopener noreferrer"
                               className="inline"
                             >
-                              {t("group.camera.setting.audio.tips.document")}
+                              {t("readTheDocumentation", { ns: "common" })}
                               <LuExternalLink className="ml-2 inline-flex size-3" />
                             </Link>
                           </div>

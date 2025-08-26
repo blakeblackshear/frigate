@@ -110,5 +110,12 @@
         "error": "No s'ha pogut suprimir: {{error}}"
       }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Selecciona la miniatura d'un objecte rastrejat",
+    "search": {
+      "placeholder": "Cerca per etiqueta o subetiqueta..."
+    },
+    "noImages": "No s'han trobat miniatures per a aquesta càmera"
   }
 }

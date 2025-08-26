@@ -42,7 +42,7 @@
       "24hour": "dd-MM-yy-HH-mm-ss"
     },
     "30minutes": "30 de minute",
-    "1hour": "O oră",
+    "1hour": "1 oră",
     "12hours": "12 ore",
     "24hours": "24 de ore",
     "pm": "PM",
@@ -123,7 +123,15 @@
       "ro": "Română (Română)",
       "hu": "Magyar (Maghiară)",
       "fi": "Suomi (Finlandeză)",
-      "th": "ไทย (Thailandeză)"
+      "th": "ไทย (Thailandeză)",
+      "ptBR": "Português brasileiro (Portugheză braziliană)",
+      "sr": "Српски (Sârbă)",
+      "sl": "Slovenščina (Slovenă)",
+      "lt": "Lietuvių (Lituaniană)",
+      "bg": "Български (Bulgară)",
+      "gl": "Galego (Galiciană)",
+      "id": "Bahasa Indonesia (Indoneziană)",
+      "ur": "اردو (Urdu)"
     },
     "theme": {
       "default": "Implicit",
@@ -261,5 +269,6 @@
     "documentTitle": "Nu a fost găsit - Frigate",
     "title": "404",
     "desc": "Pagină negăsită"
-  }
+  },
+  "readTheDocumentation": "Citește documentația"
 }

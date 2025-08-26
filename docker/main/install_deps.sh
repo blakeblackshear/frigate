@@ -19,7 +19,8 @@ apt-get -qq install --no-install-recommends -y \
     nethogs \
     libgl1 \
     libglib2.0-0 \
-    libusb-1.0.0
+    libusb-1.0.0 \
+    libgomp1  # memryx detector
 
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
@@ -34,9 +35,13 @@ rm /tmp/libedgetpu1-max.deb
 # install mesa-teflon-delegate from bookworm-backports
 # Only available for arm64 at the moment
 if [[ "${TARGETARCH}" == "arm64" ]]; then
-    echo "deb http://deb.debian.org/debian bookworm-backports main" | tee /etc/apt/sources.list.d/bookworm-backports.list
-    apt-get -qq update
-    apt-get -qq install --no-install-recommends --no-install-suggests -y mesa-teflon-delegate/bookworm-backports
+    if [[ "${BASE_IMAGE}" == *"nvcr.io/nvidia/tensorrt"* ]]; then
+        echo "Info: Skipping apt-get commands because BASE_IMAGE includes 'nvcr.io/nvidia/tensorrt' for arm64."
+    else
+        echo "deb http://deb.debian.org/debian bookworm-backports main" | tee /etc/apt/sources.list.d/bookworm-backbacks.list
+        apt-get -qq update
+        apt-get -qq install --no-install-recommends --no-install-suggests -y mesa-teflon-delegate/bookworm-backports
+    fi
 fi
 
 # ffmpeg -> amd64

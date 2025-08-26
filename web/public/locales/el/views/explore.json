@@ -1,3 +1,8 @@
 {
-  "documentTitle": "Εξερευνήστε - Frigate"
+  "documentTitle": "Εξερευνήστε - Frigate",
+  "generativeAI": "Παραγωγική τεχνητή νοημοσύνη",
+  "exploreMore": "Εξερευνήστε περισσότερα αντικείμενα {{label}}",
+  "exploreIsUnavailable": {
+    "title": "Η εξερεύνηση δεν είναι διαθέσιμη"
+  }
 }

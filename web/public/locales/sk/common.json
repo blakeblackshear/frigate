@@ -39,7 +39,52 @@
     "hour_few": "{{time}}hodiny",
     "hour_other": "{{time}}hodin",
     "m": "{{time}} min",
-    "s": "{{time}}s"
+    "s": "{{time}}s",
+    "minute_one": "{{time}}minuta",
+    "minute_few": "{{time}}minuty",
+    "minute_other": "{{time}}minut",
+    "second_one": "{{time}}sekunda",
+    "second_few": "{{time}}sekundy",
+    "second_other": "{{time}}sekund",
+    "formattedTimestamp": {
+      "12hour": "Deň MMM, h:mm:ss aaa",
+      "24hour": "Deň MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    }
   },
-  "selectItem": "Vyberte {{item}}"
+  "selectItem": "Vyberte {{item}}",
+  "unit": {
+    "speed": {
+      "mph": "mph"
+    }
+  },
+  "readTheDocumentation": "Prečítajte si dokumentáciu"
 }

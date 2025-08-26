@@ -20,7 +20,7 @@
     "frigateplus": "Frigate+",
     "motionTuner": "Ajuste de Movimento",
     "debug": "Depurar",
-    "enrichments": "Melhorias"
+    "enrichments": "Enriquecimentos"
   },
   "dialog": {
     "unsavedChanges": {
@@ -37,12 +37,12 @@
     "liveDashboard": {
       "title": "Painel em Tempo Real",
       "automaticLiveView": {
-        "label": "Visão em Tempo Real Automática",
-        "desc": "Automaticamente alterar para a visão em tempo real da câmera quando alguma atividade for detectada. Desativar essa opção faz com que as imagens estáticas da câmera no Painel em Tempo Real atualizem apenas uma vez por minuto."
+        "label": "Visualização em Tempo Real Automática",
+        "desc": "Automaticamente alterar para a visualização em tempo real da câmera quando alguma atividade for detectada. Desativar essa opção faz com que as imagens estáticas da câmera no Painel em Tempo Real atualizem apenas uma vez por minuto."
       },
       "playAlertVideos": {
         "label": "Reproduzir Alertas de Video",
-        "desc": "Por padrão, alertas recentes no Painel em Tempo Real sejam reproduzidos como vídeos em loop. Desative essa opção para mostrar apenas a imagens estáticas de alertas recentes nesse dispositivo / navegador."
+        "desc": "Por padrão, alertas recentes no Painel em Tempo Real são reproduzidos como vídeos em loop. Desative essa opção para mostrar apenas a imagens estáticas de alertas recentes nesse dispositivo / navegador."
       }
     },
     "storedLayouts": {
@@ -58,8 +58,8 @@
     "recordingsViewer": {
       "title": "Visualizador de Gravações",
       "defaultPlaybackRate": {
-        "label": "Taxa Padrão de Reprodução",
-        "desc": "Taxa Padrão de Reprodução para Gravações."
+        "label": "Velocidade Padrão de Reprodução",
+        "desc": "Velocidade padrão de reprodução para gravações."
       }
     },
     "calendar": {
@@ -87,7 +87,7 @@
     "unsavedChanges": "Alterações de configurações de Enriquecimento não salvas",
     "birdClassification": {
       "title": "Classificação de Pássaros",
-      "desc": "A classificação de pássaros identifica pássaros conhecidos usando o modelo Tensorflow quantizado. Quando um pássaro é reconhecido, o seu nome commum será adicionado como uma subcategoria. Essa informação é incluida na UI, filtros e notificações."
+      "desc": "A classificação de pássaros identifica pássaros conhecidos usando o modelo Tensorflow quantizado. Quando um pássaro é reconhecido, o seu nome comum será adicionado como um sub-rótulo. Essa informação é incluida na UI, filtros e notificações."
     },
     "semanticSearch": {
       "title": "Busca Semântica",
@@ -95,7 +95,7 @@
       "readTheDocumentation": "Leia a Documentação",
       "reindexNow": {
         "label": "Reindexar Agora",
-        "desc": "A reindexação irá regenerar os embeddings para todos os objetos rastreados. Esse processo roda em segundo plano e pode 100% da CPU e levar um tempo considerável dependendo do número de objetos rastreados que você possui.",
+        "desc": "A reindexação irá regenerar os embeddings para todos os objetos rastreados. Esse processo roda em segundo plano e pode demandar 100% da CPU e levar um tempo considerável dependendo do número de objetos rastreados que você possui.",
         "confirmTitle": "Confirmar Reindexação",
         "confirmDesc": "Tem certeza que quer reindexar todos os embeddings de objetos rastreados? Esse processo rodará em segundo plano porém utilizará 100% da CPU e levará uma quantidade de tempo considerável. Você pode acompanhar o progresso na página Explorar.",
         "confirmButton": "Reindexar",
@@ -108,7 +108,7 @@
         "desc": "O tamanho do modelo usado para embeddings de pesquisa semântica.",
         "small": {
           "title": "pequeno",
-          "desc": "Usando<em>pequeno</em> emprega a versão quantizada do modelo que utiliza menos RAM e roda mais rápido na CPU, com diferenças negligíveis na qualidade dos embeddings."
+          "desc": "Usando <em>pequeno</em> emprega a versão quantizada do modelo que utiliza menos RAM e roda mais rápido na CPU, com diferenças negligíveis na qualidade dos embeddings."
         },
         "large": {
           "title": "grande",
@@ -118,24 +118,24 @@
     },
     "faceRecognition": {
       "title": "Reconhecimento Facial",
-      "desc": "O reconhecimento facial permite que pessoas sejam associadas a nomes e quando seus rostos forem reconhecidos, o Frigate associará o nome da pessoa como uma sub-categoria. Essa informação é inclusa na UI, filtros e notificações.",
+      "desc": "O reconhecimento facial permite que pessoas sejam associadas a nomes e quando seus rostos forem reconhecidos, o Frigate associará o nome da pessoa como um sub-rótulo. Essa informação é inclusa na UI, filtros e notificações.",
       "readTheDocumentation": "Leia a Documentação",
       "modelSize": {
         "label": "Tamanho do Modelo",
         "desc": "O tamanho do modelo usado para reconhecimento facial.",
         "small": {
           "title": "pequeno",
-          "desc": "Usar <em>pequeno</em> emprega o modelo de embedding de rosto FaceNet, que roda de maneira eficiente na maioria das CPUs."
+          "desc": "Usar o <em>pequeno</em> emprega o modelo de embedding de rosto FaceNet, que roda de maneira eficiente na maioria das CPUs."
         },
         "large": {
           "title": "grande",
-          "desc": "Usando o <em>grande</em> emprega um modelo de embedding de rosto ArcFace e irá automáticamente roda pela GPU se aplicável."
+          "desc": "Usar o <em>grande</em> emprega um modelo de embedding de rosto ArcFace e irá automáticamente rodar pela GPU se aplicável."
         }
       }
     },
     "licensePlateRecognition": {
       "title": "Reconhecimento de Placa de Identificação",
-      "desc": "O Frigate pode reconhecer placas de identificação em veículos e automáticamente adicionar os caracteres detectados ao campo placas_de_identificação_reconhecidas ou um nome conhecido como uma sub-categoria a objetos que são do tipo carro. Um uso típico é ler a placa de carros entrando em uma garagem ou carros passando pela rua.",
+      "desc": "O Frigate pode reconhecer placas de identificação em veículos e automáticamente adicionar os caracteres detectados ao campo placas_de_identificação_reconhecidas ou um nome conhecido como um sub-rótulo a objetos que são do tipo carro. Um uso típico é ler a placa de carros entrando em uma garagem ou carros passando pela rua.",
       "readTheDocumentation": "Leia a Documentação"
     },
     "restart_required": "Necessário reiniciar (configurações de enriquecimento foram alteradas)",
@@ -148,22 +148,22 @@
     "title": "Configurações de Câmera",
     "streams": {
       "title": "Transmissões",
-      "desc": "Temporáriamente desativar a câmera até o Frigate reiniciar. Desatiar a câmera completamente impede o processamento da transmissão dessa câmera pelo Frigate. Detecções, gravações e depuração estarão indisponíveis.<br /><em>Nota: Isso não desativa as retransmissões do go2rtc.</em>"
+      "desc": "Temporáriamente desativa a câmera até o Frigate reiniciar. Desativar a câmera completamente impede o processamento da transmissão dessa câmera pelo Frigate. Detecções, gravações e depuração estarão indisponíveis.<br /><em>Nota: Isso não desativa as retransmissões do go2rtc.</em>"
     },
     "review": {
       "title": "Revisar",
-      "desc": "Temporariamente habilitar/desabilitar alertas e detecções para essa câmera até o Frigate reiniciar. Quando desabilitado, nenhum novo item de revisão será gerado. ",
+      "desc": "Temporariamente habilita/desabilita alertas e detecções para essa câmera até o Frigate reiniciar. Quando desabilitado, nenhum novo item de revisão será gerado. ",
       "alerts": "Alertas ",
       "detections": "Detecções "
     },
     "reviewClassification": {
-      "title": "Revisar Classificação",
-      "desc": "O Frigate categoriza itens de revisão como Alertas e Detecções. Por padrão, todas as <em>pessoa</em> e <em>carros</em> são considerados alertas. Você pode refinar a categorização dos seus itens revisados configurando as zonas requeridas para eles.",
+      "title": "Classificação de Revisões",
+      "desc": "O Frigate categoriza itens de revisão como Alertas e Detecções. Por padrão, todas as <em>pessoas</em> e <em>carros</em> são considerados alertas. Você pode refinar a categorização dos seus itens revisados configurando as zonas requeridas para eles.",
       "readTheDocumentation": "Leia a Documentação",
       "noDefinedZones": "Nenhuma zona definida para essa câmera.",
       "selectAlertsZones": "Selecionar as zonas para Alertas",
       "selectDetectionsZones": "Selecionar as zonas para Detecções",
-      "objectAlertsTips": "Todos os {{alertsLabels}} objetos em {{cameraName}} serão exibidos como Alertas.",
+      "objectAlertsTips": "Todos os objetos {{alertsLabels}} em {{cameraName}} serão exibidos como Alertas.",
       "zoneObjectAlertsTips": "Todos os {{alertsLabels}} objetos detectados em {{zone}} em {{cameraName}} serão exibidos como Alertas.",
       "objectDetectionsTips": "Todos os objetos {{detectionsLabels}} não categorizados em {{cameraName}} serão exibidos como Detecções independente de qual zona eles estiverem.",
       "zoneObjectDetectionsTips": {
@@ -175,6 +175,43 @@
       "limitDetections": "Limitar detecções a zonas específicas",
       "toast": {
         "success": "A configuração de Revisão de Classificação foi salva. Reinicie o Frigate para aplicar as mudanças."
+      }
+    },
+    "object_descriptions": {
+      "title": "Descrições de Objeto por IA Generativa",
+      "desc": "Habilitar descrições por IA Generativa temporariamente para essa câmera. Quando desativada, as descrições geradas por IA não serão requisitadas para objetos rastreados para essa câmera."
+    },
+    "review_descriptions": {
+      "title": "Revisar Descrições de IA Generativa",
+      "desc": "Habilitar/desabilitar temporariamente descrições de revisão de IA Generativa para essa câmera. Quando desativada, as descrições de IA Generativa não serão solicitadas para revisão para essa câmera."
+    },
+    "addCamera": "Adicionar Câmera Nova",
+    "editCamera": "Editar Câmera:",
+    "selectCamera": "Selecione uma Câmera",
+    "backToSettings": "Voltar para as Configurções de Câmera",
+    "cameraConfig": {
+      "add": "Adicionar Câmera",
+      "edit": "Editar Câmera",
+      "description": "Configure as opções da câmera incluindo as de transmissão e papéis.",
+      "name": "Nome da Câmera",
+      "nameRequired": "Nome para a câmera é requerido",
+      "nameInvalid": "O nome da câmera deve contar apenas letras, números, sublinhado ou hífens",
+      "namePlaceholder": "ex: porta_da_frente",
+      "enabled": "Habilitado",
+      "ffmpeg": {
+        "inputs": "Transmissões de Entrada",
+        "path": "Caminho da Transmissão",
+        "pathRequired": "Um caminho para a transmissão é requerido",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Regras",
+        "rolesRequired": "Ao menos um papel é requerido",
+        "rolesUnique": "Cada papel (áudio, detecção, gravação) pode ser atribuído a uma única transmissão",
+        "addInput": "Adicionar Transmissão de Entrada",
+        "removeInput": "Remover Transmissão de Entrada",
+        "inputsRequired": "Ao menos uma transmissão de entrada é requerida"
+      },
+      "toast": {
+        "success": "Câmera {{cameraName}} salva com sucesso"
       }
     }
   },
@@ -421,6 +458,11 @@
     "timestamp": {
       "title": "Timestamp",
       "desc": "Sobreponha um timestamp na imagem"
+    },
+    "paths": {
+      "title": "Caminho",
+      "desc": "Mostrar pontos significantes do caminho do objeto rastreado",
+      "tips": "<p><strong>Caminhos</strong></p><br><p>Linhas e círculos indicarão pontos significantes por onde o objeto rastreado se moveu durante o seu ciclo de vida.</p>"
     }
   },
   "users": {
@@ -617,6 +659,101 @@
     "toast": {
       "success": "As configurações do Frigate+ foram salvas. Reinicie o Frigate para aplicar as alterações.",
       "error": "Falha ao salvar as alterações de configuração: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Gatilhos",
+    "management": {
+      "title": "Gerenciamento de Gatilhos",
+      "desc": "Gerenciar gatilhos para {{camera}}. Use o tipo de miniatura para acionar miniaturas semelhantes para os seus objetos rastreados selecionados, e o tipo de descrição para acionar descrições semelhantes para textos que você especifica."
+    },
+    "addTrigger": "Adicionar Gatilho",
+    "table": {
+      "name": "Nome",
+      "type": "Tipo",
+      "content": "Conteúdo",
+      "threshold": "Limiar",
+      "actions": "Ações",
+      "noTriggers": "Nenhum gatilho configurado para essa câmera.",
+      "edit": "Editar",
+      "deleteTrigger": "Apagar Gatilho",
+      "lastTriggered": "Acionado pela última vez"
+    },
+    "type": {
+      "thumbnail": "Miniatura",
+      "description": "Descrição"
+    },
+    "actions": {
+      "alert": "Marcar como Alerta",
+      "notification": "Enviar Notificação"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Criar Gatilho",
+        "desc": "Criar gatilho para a câmera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Editar Gatilho",
+        "desc": "Editar as configurações de gatilho na câmera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Apagar Gatilho",
+        "desc": "Tem certeza que quer deletar o gatilho <strong>{{triggerName}}</strong>? Essa ação não pode ser desfeita."
+      },
+      "form": {
+        "name": {
+          "title": "Nome",
+          "placeholder": "Digite o nome do gatilho",
+          "error": {
+            "minLength": "O nome precisa ter no mínimo 2 caracteres.",
+            "invalidCharacters": "O nome pode contar apenas letras, números, sublinhados, e hífens.",
+            "alreadyExists": "Um gatilho com esse nome já existe para essa câmera."
+          }
+        },
+        "enabled": {
+          "description": "Habilitar ou desabilitar esse gatilho"
+        },
+        "type": {
+          "title": "Tipo",
+          "placeholder": "Selecionar o tipo de gatilho"
+        },
+        "content": {
+          "title": "Conteúdo",
+          "imagePlaceholder": "Selecionar uma imagem",
+          "textPlaceholder": "Digitar conteúdo do texto",
+          "imageDesc": "Selecionar uma imagem para acionar essa ação quando uma imagem semelhante for detectada.",
+          "textDesc": "Digite o texto para ativar essa ação quando uma descrição semelhante de objeto rastreado for detectada.",
+          "error": {
+            "required": "Um conteúdo é requerido."
+          }
+        },
+        "threshold": {
+          "title": "Limiar",
+          "error": {
+            "min": "O limitar deve ser no mínimo 0",
+            "max": "O limiar deve ser no mínimo 1"
+          }
+        },
+        "actions": {
+          "title": "Ações",
+          "desc": "Por padrão, o Frigate dispara uma mensagem MQTT para todos os gatilhos. Escolha uma ação adicional para realizar quando uma ação for disparada.",
+          "error": {
+            "min": "Ao menos uma ação deve ser selecionada."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Gatilho {{name}} criado com sucesso.",
+        "updateTrigger": "Gatilho {{name}} atualizado com sucesso.",
+        "deleteTrigger": "Gatilho {{name}} apagado com sucesso."
+      },
+      "error": {
+        "createTriggerFailed": "Falha ao criar gatilho: {{errorMessage}}",
+        "updateTriggerFailed": "Falha ao atualizar gatilho: {{errorMessage}}",
+        "deleteTriggerFailed": "Falha ao apagar gatilho: {{errorMessage}}"
+      }
     }
   }
 }

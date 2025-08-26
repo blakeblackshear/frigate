@@ -253,5 +253,6 @@
       "meters": "meter"
     }
   },
-  "selectItem": "Välj {{item}}"
+  "selectItem": "Välj {{item}}",
+  "readTheDocumentation": "Läs dokumentationen"
 }

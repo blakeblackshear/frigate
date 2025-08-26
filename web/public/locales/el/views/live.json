@@ -2,5 +2,6 @@
   "documentTitle": "Ζωντανά - Frigate",
   "twoWayTalk": {
     "enable": "Ενεργοποίηση αμφίδρομης επικοινωνίας"
-  }
+  },
+  "documentTitle.withCamera": "{{camera}} - Live - Frigate"
 }

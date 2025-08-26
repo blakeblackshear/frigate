@@ -122,5 +122,13 @@
       "title": "Tất cả Khu vực",
       "short": "Khu vực"
     }
+  },
+  "classes": {
+    "label": "Các nhãn nhận diện",
+    "all": {
+      "title": "Tất cả nhãn nhận diện"
+    },
+    "count_one": "{{count}} Nhãn nhận diện",
+    "count_other": "{{count}} Các nhãn nhận diện"
   }
 }

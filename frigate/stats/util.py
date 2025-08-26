@@ -8,7 +8,6 @@ from json import JSONDecodeError
 from multiprocessing.managers import DictProxy
 from typing import Any, Optional
 
-import psutil
 import requests
 from requests.exceptions import RequestException
 
@@ -18,9 +17,11 @@ from frigate.data_processing.types import DataProcessorMetrics
 from frigate.object_detection.base import ObjectDetectProcess
 from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
+    calculate_shm_requirements,
     get_amd_gpu_stats,
     get_bandwidth_stats,
     get_cpu_stats,
+    get_fs_type,
     get_intel_gpu_stats,
     get_jetson_stats,
     get_nvidia_gpu_stats,
@@ -68,16 +69,6 @@ def stats_init(
         "processes": processes,
     }
     return stats_tracking
-
-
-def get_fs_type(path: str) -> str:
-    bestMatch = ""
-    fsType = ""
-    for part in psutil.disk_partitions(all=True):
-        if path.startswith(part.mountpoint) and len(bestMatch) < len(part.mountpoint):
-            fsType = part.fstype
-            bestMatch = part.mountpoint
-    return fsType
 
 
 def read_temperature(path: str) -> Optional[float]:
@@ -389,7 +380,7 @@ def stats_snapshot(
         "last_updated": int(time.time()),
     }
 
-    for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
+    for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR]:
         try:
             storage_stats = shutil.disk_usage(path)
         except (FileNotFoundError, OSError):
@@ -402,6 +393,8 @@ def stats_snapshot(
             "free": round(storage_stats.free / pow(2, 20), 1),
             "mount_type": get_fs_type(path),
         }
+
+    stats["service"]["storage"]["/dev/shm"] = calculate_shm_requirements(config)
 
     stats["processes"] = {}
     for name, pid in stats_tracking["processes"].items():

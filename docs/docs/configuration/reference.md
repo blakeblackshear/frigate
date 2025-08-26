@@ -73,6 +73,12 @@ tls:
   # Optional: Enable TLS for port 8971 (default: shown below)
   enabled: True
 
+# Optional: IPv6 configuration
+networking:
+  # Optional: Enable IPv6 on 5000, and 8971 if tls is configured (default: shown below)
+  ipv6:
+    enabled: False
+
 # Optional: Proxy configuration
 proxy:
   # Optional: Mapping for headers from upstream proxies. Only used if Frigate's auth
@@ -82,7 +88,13 @@ proxy:
   #       See the docs for more info.
   header_map:
     user: x-forwarded-user
-    role: x-forwarded-role
+    role: x-forwarded-groups
+    role_map:
+      admin:
+        - sysadmins
+        - access-level-security
+      viewer:
+        - camera-viewer
   # Optional: Url for logging out a user. This sets the location of the logout url in
   # the UI.
   logout_url: /api/logout
@@ -586,6 +598,9 @@ semantic_search:
   # Optional: Set the model size used for embeddings. (default: shown below)
   # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
+  # Optional: Target a specific device to run the model (default: shown below)
+  # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
+  device: None
 
 # Optional: Configuration for face recognition capability
 # NOTE: enabled, min_area can be overridden at the camera level
@@ -609,6 +624,9 @@ face_recognition:
   blur_confidence_filter: True
   # Optional: Set the model size used face recognition. (default: shown below)
   model_size: small
+  # Optional: Target a specific device to run the model (default: shown below)
+  # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
+  device: None
 
 # Optional: Configuration for license plate recognition capability
 # NOTE: enabled, min_area, and enhancement can be overridden at the camera level
@@ -616,6 +634,7 @@ lpr:
   # Optional: Enable license plate recognition (default: shown below)
   enabled: False
   # Optional: The device to run the models on (default: shown below)
+  # NOTE: See https://onnxruntime.ai/docs/execution-providers/ for more information
   device: CPU
   # Optional: Set the model size used for text detection. (default: shown below)
   model_size: small
@@ -652,6 +671,8 @@ genai:
   base_url: http://localhost::11434
   # Required if gemini or openai
   api_key: "{FRIGATE_GENAI_API_KEY}"
+  # Required if enabled: The model to use with the provider.
+  model: gemini-1.5-flash
   # Optional additional args to pass to the GenAI Provider (default: None)
   provider_options:
     keep_alive: -1

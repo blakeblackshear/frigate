@@ -12,5 +12,7 @@
     }
   },
   "documentTitle": "Editor de configuração - Frigate",
-  "confirm": "Sair sem salvar?"
+  "confirm": "Sair sem salvar?",
+  "safeConfigEditor": "Editor de Configurações (Modo de Segurança)",
+  "safeModeDescription": "O Frigate está em modo de segurança devido a um erro de validação de configuração."
 }

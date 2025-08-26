@@ -18,7 +18,8 @@
     "debug": "Razhroščevanje",
     "users": "Uporabniki",
     "notifications": "Obvestila",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "motionTuner": "Nastavitev Gibanja"
   },
   "masksAndZones": {
     "zones": {
@@ -59,12 +60,146 @@
         "desc": "Samodejno preklopite na pogled kamere v živo, ko je zaznana aktivnost. Če onemogočite to možnost, se statične slike kamere na nadzorni plošči v živo posodobijo le enkrat na minuto."
       },
       "playAlertVideos": {
-        "label": "Predvajajte opozorilne videoposnetke"
+        "label": "Predvajajte opozorilne videoposnetke",
+        "desc": "Privzeto se nedavna opozorila na nadzorni plošči predvajajo kot kratki ponavljajoči videoposnetki . To možnost onemogočite, če želite, da se v tej napravi/brskalniku prikaže samo statična slika nedavnih opozoril."
       }
     },
     "storedLayouts": {
       "title": "Sharnjene Postavitve",
-      "desc": "Postaviteve kamer v skupini kamer je mogoče povleči/prilagoditi. Položaji so shranjeni v lokalnem pomnilniku vašega brskalnika."
+      "desc": "Postaviteve kamer v skupini kamer je mogoče povleči/prilagoditi. Položaji so shranjeni v lokalnem pomnilniku vašega brskalnika.",
+      "clearAll": "Počisti Vse Postavitve"
+    },
+    "cameraGroupStreaming": {
+      "title": "Nastavitve Pretakanja Skupine Kamer",
+      "desc": "Nastavitve pretakanja za vsako skupino kamer so shranjene v lokalnem pomnilniku vašega brskalnika.",
+      "clearAll": "Počisti Vse Nastavitve Pretakanja"
+    },
+    "recordingsViewer": {
+      "title": "Pregledovalnik Posnetkov",
+      "defaultPlaybackRate": {
+        "label": "Privzeta Hitrost Predvajanja",
+        "desc": "Privzeta Hitrost Predvajanja za Shranjene Posnetke."
+      }
+    },
+    "calendar": {
+      "title": "Koledar",
+      "firstWeekday": {
+        "label": "Prvi Delovni Dan",
+        "desc": "Dan, na katerega se začnejo tedni v koledarju za preglede.",
+        "sunday": "Nedelja",
+        "monday": "Ponedeljek"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Shranjena postavitev za {{cameraName}} je bila izbrisana",
+        "clearStreamingSettings": "Nastavitve pretakanja za vse skupine kamer so bile izbrisane."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Shranjene postavitve ni bilo mogoče izbrisati: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Nastavitev pretakanja ni bilo mogoče izbrisati: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "title": "Nastavitve Obogatitev",
+    "unsavedChanges": "Neshranjene Spremembe Nastavitev Obogatitev",
+    "birdClassification": {
+      "title": "Klasifikacija ptic",
+      "desc": "Klasifikacija ptic identificira znane ptice z uporabo kvantiziranega Tensorflow modela. Ko je znana ptica prepoznana, se njeno splošno ime doda kot podoznaka. Te informacije so vključene v uporabniški vmesnik, filtre in obvestila."
+    },
+    "semanticSearch": {
+      "title": "Semantično Iskanje",
+      "desc": "Semantično iskanje v Frigate vam omogoča iskanje sledenih objektov znotraj vaših pregledov, pri čemer lahko uporabite izvorno sliko, uporabniško določen besedilni opis ali samodejno ustvarjen opis.",
+      "readTheDocumentation": "Preberi Dokumentacijo",
+      "reindexNow": {
+        "label": "Ponovno Indeksiraj Zdaj",
+        "desc": "Ponovno indeksiranje bo regeneriralo vdelave (embeddings) za vse sledene objekte. Ta postopek se izvaja v ozadju in lahko zelo obremeni vaš procesor ter traja precej časa, odvisno od števila sledenih objektov, ki jih imate.",
+        "confirmTitle": "Potrdi Ponovno Indeksiranje",
+        "confirmDesc": "Ali ste prepričani, da želite ponovno indeksirati vse vdelave (embeddings) sledenih objektov? Ta postopek se bo izvajal v ozadju, vendar lahko zelo obremeni vaš procesor in traja kar nekaj časa. Napredek si lahko ogledate na strani Razišči.",
+        "confirmButton": "Ponovno Indeksiranje",
+        "success": "Ponovno indeksiranje se je uspešno začelo.",
+        "alreadyInProgress": "Ponovno indeksiranje je že v teku.",
+        "error": "Ponovnega indeksiranja ni bilo mogoče začeti: {{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "Velikost Modela",
+        "desc": "Velikost modela, uporabljenega za vdelave (embeddings) semantičnih iskanj.",
+        "small": {
+          "title": "majhen",
+          "desc": "Uporaba načina <em>small</em> uporablja kvantizirano različico modela, ki porabi manj RAM-a in deluje hitreje na procesorju z zelo zanemarljivo razliko v kakovosti vdelave (embedding)."
+        },
+        "large": {
+          "title": "velik",
+          "desc": "Uporaba možnosti <em>large</em> uporablja celoten model Jina in se bo, če je mogoče, samodejno izvajal na grafičnem procesorju."
+        }
+      }
+    },
+    "faceRecognition": {
+      "title": "Prepoznavanje Obrazov",
+      "desc": "Prepoznavanje obrazov omogoča, da se ljudem dodelijo imena, in ko Frigate prepozna njihov obraz, se detekciji dodeli ime kot podoznako. Te informacije so vključene v uporabniški vmesnik, filtre in obvestila.",
+      "readTheDocumentation": "Preberi Dokumentacijo",
+      "modelSize": {
+        "label": "Velikost Modela",
+        "desc": "Velikost modela, uporabljenega za prepoznavanje obrazov.",
+        "small": {
+          "title": "majhen",
+          "desc": "Uporaba <em>small</em> uporablja model vdelave (embedding) obrazov FaceNet, ki učinkovito deluje na večini procesorjev."
+        },
+        "large": {
+          "title": "velik",
+          "desc": "Uporaba <em>large</em> uporablja model vdelave (embedding) obrazov ArcFace in se bo samodejno zagnala na grafičnem procesorju, če bo to mogoče."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Prepoznavanje Registrskih Tablic",
+      "desc": "Frigate lahko prepozna registrske tablice na vozilih in samodejno doda zaznane znake v polje recognized_license_plate ali znano ime kot podoznako objektom tipa car. Pogost primer uporabe je lahko branje registrskih tablic avtomobilov, ki se ustavijo na dovozu, ali avtomobilov, ki se peljejo mimo po ulici.",
+      "readTheDocumentation": "Preberi Dokumentacijo"
+    },
+    "restart_required": "Potreben je ponovni zagon (Nastavitve Obogatitve so bile spremenjene)",
+    "toast": {
+      "success": "Nastavitve Obogatitev so shranjene. Znova zaženite Frigate, da uveljavite spremembe.",
+      "error": "Shranjevanje sprememb konfiguracije ni uspelo: {{errorMessage}}"
+    }
+  },
+  "camera": {
+    "title": "Nastavitve Kamere",
+    "streams": {
+      "title": "Pretoki"
+    },
+    "object_descriptions": {
+      "title": "Opisi objektov z uporabo generativne UI",
+      "desc": "Začasno omogoči/onemogoči opise objektov z uporabo generativne UI za to kamero. Ko so onemogočeni, opisi, ki jih ustvari UI, ne bodo zahtevani za sledene objekte na tej kameri."
+    },
+    "review": {
+      "title": "Pregled",
+      "desc": "Začasno omogoči/onemogoči opozorila in zaznavanja za to kamero, dokler se Frigate ne zažene znova. Ko je onemogočeno, ne bodo ustvarjeni novi elementi pregleda. ",
+      "alerts": "Opozorila ",
+      "detections": "Detekcije "
+    },
+    "reviewClassification": {
+      "title": "Pregled Klasifikacij",
+      "readTheDocumentation": "Preberi Dokumentacijo",
+      "noDefinedZones": "Za to kamero ni določenih nobenih con.",
+      "objectAlertsTips": "Vsi objekti {{alertsLabels}} na {{cameraName}} bodo prikazani kot Opozorila.",
+      "unsavedChanges": "Neshranjene nastavitve Pregleda Klasifikacije za {{camera}}",
+      "selectAlertsZones": "Izberite cone za Opozorila",
+      "selectDetectionsZones": "Izberite cone za Zaznavanje",
+      "limitDetections": "Omejite zaznavanje na določene cone"
+    },
+    "addCamera": "Dodaj Novo Kamero",
+    "editCamera": "Uredi Kamero:",
+    "selectCamera": "Izberi Kamero",
+    "backToSettings": "Nazaj na Nastavitve Kamere",
+    "cameraConfig": {
+      "add": "Dodaj Kamero",
+      "edit": "Uredi Kamero",
+      "description": "Konfigurirajte nastavitve kamere, vključno z pretočnimi vhodi in vlogami.",
+      "name": "Ime Kamere",
+      "nameRequired": "Ime kamere je obvezno",
+      "nameInvalid": "Ime kamere mora vsebovati samo črke, številke, podčrtaje ali vezaje",
+      "namePlaceholder": "npr. vhodna_vrata"
     }
   }
 }

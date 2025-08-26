@@ -101,12 +101,14 @@
         "success": {
           "regenerate": "已向 {{provider}} 请求新的描述。根据提供商的速度，生成新描述可能需要一些时间。",
           "updatedSublabel": "成功更新子标签。",
-          "updatedLPR": "成功更新车牌。"
+          "updatedLPR": "成功更新车牌。",
+          "audioTranscription": "成功请求音频转录。"
         },
         "error": {
           "regenerate": "调用 {{provider}} 生成新描述失败：{{errorMessage}}",
           "updatedSublabelFailed": "更新子标签失败：{{errorMessage}}",
-          "updatedLPRFailed": "更新车牌失败：{{errorMessage}}"
+          "updatedLPRFailed": "更新车牌失败：{{errorMessage}}",
+          "audioTranscription": "请求音频转录失败：{{errorMessage}}"
         }
       }
     },
@@ -152,6 +154,9 @@
     "recognizedLicensePlate": "识别的车牌",
     "snapshotScore": {
       "label": "快照得分"
+    },
+    "score": {
+      "label": "分值"
     }
   },
   "itemMenu": {
@@ -181,6 +186,14 @@
     },
     "deleteTrackedObject": {
       "label": "删除此跟踪对象"
+    },
+    "addTrigger": {
+      "label": "添加触发器",
+      "aria": "为该追踪对象添加触发器"
+    },
+    "audioTranscription": {
+      "label": "转录",
+      "aria": "请求音频转录"
     }
   },
   "dialog": {
@@ -201,5 +214,8 @@
     },
     "tooltip": "与 {{type}} 匹配度为 {{confidence}}%"
   },
-  "exploreMore": "浏览更多的 {{label}}"
+  "exploreMore": "浏览更多的 {{label}}",
+  "aiAnalysis": {
+    "title": "AI分析"
+  }
 }

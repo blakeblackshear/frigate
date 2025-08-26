@@ -12,5 +12,7 @@
     "error": {
       "savingError": "Erro ao salvar configuração"
     }
-  }
+  },
+  "safeConfigEditor": "Editor de Configuração (Modo Seguro)",
+  "safeModeDescription": "O Frigate está no modo seguro devido a um erro de validação de configuração."
 }

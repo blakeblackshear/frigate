@@ -43,7 +43,15 @@
         "label": "点击将PTZ摄像头画面居中"
       }
     },
-    "presets": "PTZ摄像头预设"
+    "presets": "PTZ摄像头预设",
+    "focus": {
+      "in": {
+        "label": "PTZ摄像头聚焦"
+      },
+      "out": {
+        "label": "PTZ摄像头拉远"
+      }
+    }
   },
   "camera": {
     "enable": "开启摄像头",
@@ -135,7 +143,8 @@
     "recording": "录制",
     "snapshots": "快照",
     "audioDetection": "音频检测",
-    "autotracking": "自动跟踪"
+    "autotracking": "自动跟踪",
+    "transcription": "音频转录"
   },
   "history": {
     "label": "显示历史录像"
@@ -151,8 +160,12 @@
   "editLayout": {
     "label": "编辑布局",
     "group": {
-      "label": "编辑摄像机分组"
+      "label": "编辑摄像头分组"
     },
     "exitEdit": "退出编辑"
+  },
+  "transcription": {
+    "enable": "启用实时音频转录",
+    "disable": "关闭实时音频转录"
   }
 }

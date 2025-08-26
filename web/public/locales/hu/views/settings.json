@@ -616,6 +616,19 @@
         "success": "Az Ellenőrzési Kategorizálás beállításai elmentésre kerültek. A módosítások alkalmazásához indítsa újra a Frigate-et."
       }
     },
-    "title": "Kamera Beállítások"
+    "title": "Kamera Beállítások",
+    "object_descriptions": {
+      "title": "Generatív AI Tárgy Leírások"
+    },
+    "addCamera": "Új Kamera Hozzáadása",
+    "editCamera": "Kamera Szerkesztése:",
+    "selectCamera": "Válasszon ki egy Kamerát",
+    "backToSettings": "Vissza a Kamera Beállításokhoz",
+    "cameraConfig": {
+      "add": "Kamera Hozzáadása",
+      "edit": "Kamera Szerkesztése",
+      "name": "Kamera Neve",
+      "nameRequired": "Kamera nevének megadása szükséges"
+    }
   }
 }

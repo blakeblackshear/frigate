@@ -13,11 +13,16 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
+- [MemryX](#memryx-mx3): The MX3 Acceleration module is available in m.2 format, offering broad compatibility across various platforms.
 
 **AMD**
 
 - [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
 - [ONNX](#onnx): ROCm will automatically be detected and used as a detector in the `-rocm` Frigate image when a supported ONNX model is configured.
+
+**Apple Silicon**
+
+- [Apple Silicon](#apple-silicon-detector): Apple Silicon can run on M1 and newer Apple Silicon devices.
 
 **Intel**
 
@@ -52,7 +57,7 @@ This does not affect using hardware for accelerating other tasks such as [semant
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `memryx`, `onnx`, `openvino`, `rknn`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 
@@ -240,6 +245,8 @@ Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-proc
 
 ---
 
+
+
 ## OpenVINO Detector
 
 The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel VPU hardware. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
@@ -264,7 +271,7 @@ detectors:
 
 :::
 
-### Supported Models
+### OpenVINO Supported Models
 
 #### SSDLite MobileNet v2
 
@@ -402,6 +409,59 @@ model:
 
 Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
+## Apple Silicon detector
+
+The NPU in Apple Silicon can't be accessed from within a container, so the [Apple Silicon detector client](https://github.com/frigate-nvr/apple-silicon-detector) must first be setup. It is recommended to use the Frigate docker image with `-standard-arm64` suffix, for example  `ghcr.io/blakeblackshear/frigate:stable-arm64-standard`.
+
+### Setup
+
+1. Setup the [Apple Silicon detector client](https://github.com/frigate-nvr/apple-silicon-detector) and run the client
+2. Configure the detector in Frigate and startup Frigate
+
+### Configuration
+
+Using the detector config below will connect to the client:
+
+```yaml
+detectors:
+  apple-silicon:
+    type: zmq
+    endpoint: tcp://host.docker.internal:5555
+```
+
+### Apple Silicon Supported Models
+
+There is no default model provided, the following formats are supported:
+
+#### YOLO (v3, v4, v7, v9)
+
+YOLOv3, YOLOv4, YOLOv7, and [YOLOv9](https://github.com/WongKinYiu/yolov9) models are supported, but not included by default.
+
+:::tip
+
+The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well. See [the models section](#downloading-yolo-models) for more information on downloading YOLO models for use in Frigate.
+
+:::
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: yolo-generic
+  width: 320 # <--- should match the imgsize set during model export
+  height: 320 # <--- should match the imgsize set during model export
+  input_tensor: nchw
+  input_dtype: float
+  path: /config/model_cache/yolo.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
 ## AMD/ROCm GPU detector
 
 ### Setup
@@ -483,7 +543,7 @@ We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent an existing override from mes
 $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/rocm/bin/rocminfo |grep gfx)'
 ```
 
-### Supported Models
+### ROCm Supported Models
 
 See [ONNX supported models](#supported-models) for supported models, there are some caveats:
 
@@ -526,7 +586,7 @@ detectors:
 
 :::
 
-### Supported Models
+### ONNX Supported Models
 
 There is no default model provided, the following formats are supported:
 
@@ -699,6 +759,196 @@ To verify that the integration is working correctly, start Frigate and observe t
 
 # Community Supported Detectors
 
+## MemryX MX3  
+
+This detector is available for use with the MemryX MX3 accelerator M.2 module. Frigate supports the MX3 on compatible hardware platforms, providing efficient and high-performance object detection.  
+
+See the [installation docs](../frigate/installation.md#memryx-mx3) for information on configuring the MemryX hardware.
+
+To configure a MemryX detector, simply set the `type` attribute to `memryx` and follow the configuration guide below.
+
+### Configuration  
+
+To configure the MemryX detector, use the following example configuration:  
+
+#### Single PCIe MemryX MX3  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+```
+
+#### Multiple PCIe MemryX MX3 Modules
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+  memx1:
+    type: memryx
+    device: PCIe:1
+
+  memx2:
+    type: memryx
+    device: PCIe:2
+```
+
+### Supported Models 
+
+MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
+
+#### YOLO-NAS
+
+The [YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) model included in this detector is downloaded from the [Models Section](#downloading-yolo-nas-model) and compiled to DFP with [mx_nc](https://developer.memryx.com/tools/neural_compiler.html#usage).
+
+**Note:** The default model for the MemryX detector is YOLO-NAS 320x320.
+
+The input size for **YOLO-NAS** can be set to either **320x320** (default) or **640x640**.
+
+- The default size of **320x320** is optimized for lower CPU usage and faster inference times.
+
+##### Configuration  
+
+Below is the recommended configuration for using the **YOLO-NAS** (small) model with the MemryX detector:  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+model:
+  model_type: yolonas
+  width: 320   # (Can be set to 640 for higher resolution)
+  height: 320  # (Can be set to 640 for higher resolution)
+  input_tensor: nchw
+  input_dtype: float
+  labelmap_path: /labelmap/coco-80.txt
+  # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+  # path: /config/yolonas.zip
+          # The .zip file must contain:
+          # ├── yolonas.dfp          (a file ending with .dfp)
+          # └── yolonas_post.onnx    (optional; only if the model includes a cropped post-processing network)
+```
+
+#### YOLOv9  
+
+The YOLOv9s model included in this detector is downloaded from [the original GitHub](https://github.com/WongKinYiu/yolov9) like in the [Models Section](#yolov9-1) and compiled to DFP with [mx_nc](https://developer.memryx.com/tools/neural_compiler.html#usage).
+
+##### Configuration
+
+Below is the recommended configuration for using the **YOLOv9** (small) model with the MemryX detector:  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+model:
+  model_type: yolo-generic   
+  width: 320   # (Can be set to 640 for higher resolution)
+  height: 320  # (Can be set to 640 for higher resolution)
+  input_tensor: nchw
+  input_dtype: float
+  labelmap_path: /labelmap/coco-80.txt
+  # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+  # path: /config/yolov9.zip
+          # The .zip file must contain:
+          # ├── yolov9.dfp          (a file ending with .dfp)
+          # └── yolov9_post.onnx    (optional; only if the model includes a cropped post-processing network)
+```
+
+#### YOLOX  
+
+The model is sourced from the [OpenCV Model Zoo](https://github.com/opencv/opencv_zoo) and precompiled to DFP.
+
+##### Configuration  
+
+Below is the recommended configuration for using the **YOLOX** (small) model with the MemryX detector:  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+model:
+  model_type: yolox
+  width: 640
+  height: 640
+  input_tensor: nchw
+  input_dtype: float_denorm
+  labelmap_path: /labelmap/coco-80.txt
+  # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+  # path: /config/yolox.zip
+          # The .zip file must contain:
+          # ├── yolox.dfp          (a file ending with .dfp)
+```
+
+#### SSDLite MobileNet v2  
+
+The model is sourced from the [OpenMMLab Model Zoo](https://mmdeploy-oss.openmmlab.com/model/mmdet-det/ssdlite-e8679f.onnx) and has been converted to DFP.
+
+##### Configuration  
+
+Below is the recommended configuration for using the **SSDLite MobileNet v2** model with the MemryX detector:  
+
+```yaml
+detectors:
+  memx0:
+    type: memryx
+    device: PCIe:0
+
+model:
+  model_type: ssd
+  width: 320
+  height: 320
+  input_tensor: nchw
+  input_dtype: float
+  labelmap_path: /labelmap/coco-80.txt
+  # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
+  # path: /config/ssdlite_mobilenet.zip
+          # The .zip file must contain:
+          # ├── ssdlite_mobilenet.dfp          (a file ending with .dfp)
+          # └── ssdlite_mobilenet_post.onnx    (optional; only if the model includes a cropped post-processing network)
+```
+
+#### Using a Custom Model
+
+To use your own model:
+
+1.  Package your compiled model into a `.zip` file.
+
+2.  The `.zip` must contain the compiled `.dfp` file.
+
+3.  Depending on the model, the compiler may also generate a cropped post-processing network. If present, it will be named with the suffix `_post.onnx`.
+
+4.  Bind-mount the `.zip` file into the container and specify its path using `model.path` in your config.
+
+5.  Update the `labelmap_path` to match your custom model's labels.
+
+For detailed instructions on compiling models, refer to the [MemryX Compiler](https://developer.memryx.com/tools/neural_compiler.html#usage) docs and [Tutorials](https://developer.memryx.com/tutorials/tutorials.html).
+
+```yaml
+  # The detector automatically selects the default model if nothing is provided in the config.
+  #
+  # Optionally, you can specify a local model path as a .zip file to override the default.
+  # If a local path is provided and the file exists, it will be used instead of downloading.
+  #
+  # Example:
+  # path: /config/yolonas.zip
+  #
+  # The .zip file must contain:
+  # ├── yolonas.dfp          (a file ending with .dfp)
+  # └── yolonas_post.onnx    (optional; only if the model includes a cropped post-processing network)
+```
+---
+
 ## NVidia TensorRT Detector
 
 Nvidia Jetson devices may be used for object detection using the TensorRT libraries. Due to the size of the additional libraries, this detector is only provided in images with the `-tensorrt-jp6` tag suffix, e.g. `ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp6`. This detector is designed to work with Yolo models for object detection.
@@ -824,7 +1074,7 @@ $ cat /sys/kernel/debug/rknpu/load
 
 :::
 
-### Supported Models
+### RockChip Supported Models
 
 This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for two). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
 

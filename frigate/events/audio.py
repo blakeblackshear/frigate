@@ -2,21 +2,15 @@
 
 import datetime
 import logging
-import random
-import string
 import threading
 import time
 from multiprocessing.managers import DictProxy
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Tuple
+from typing import Tuple
 
 import numpy as np
 
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
-from frigate.comms.event_metadata_updater import (
-    EventMetadataPublisher,
-    EventMetadataTypeEnum,
-)
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, CameraInput, FfmpegConfig, FrigateConfig
 from frigate.config.camera.updater import (
@@ -29,7 +23,9 @@ from frigate.const import (
     AUDIO_MAX_BIT_RANGE,
     AUDIO_MIN_CONFIDENCE,
     AUDIO_SAMPLE_RATE,
+    EXPIRE_AUDIO_ACTIVITY,
     PROCESS_PRIORITY_HIGH,
+    UPDATE_AUDIO_ACTIVITY,
 )
 from frigate.data_processing.common.audio_transcription.model import (
     AudioTranscriptionModelRunner,
@@ -159,7 +155,6 @@ class AudioEventMaintainer(threading.Thread):
         self.config = config
         self.camera_config = camera
         self.camera_metrics = camera_metrics
-        self.detections: dict[dict[str, Any]] = {}
         self.stop_event = stop_event
         self.detector = AudioTfl(stop_event, self.camera_config.audio.num_threads)
         self.shape = (int(round(AUDIO_DURATION * AUDIO_SAMPLE_RATE)),)
@@ -184,7 +179,6 @@ class AudioEventMaintainer(threading.Thread):
             ],
         )
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio.value)
-        self.event_metadata_publisher = EventMetadataPublisher()
 
         if self.camera_config.audio_transcription.enabled_in_config:
             # init the transcription processor for this camera
@@ -216,12 +210,13 @@ class AudioEventMaintainer(threading.Thread):
         self.camera_metrics[self.camera_config.name].audio_rms.value = rms
         self.camera_metrics[self.camera_config.name].audio_dBFS.value = dBFS
 
+        audio_detections: list[Tuple[str, float]] = []
+
         # only run audio detection when volume is above min_volume
         if rms >= self.camera_config.audio.min_volume:
             # create waveform relative to max range and look for detections
             waveform = (audio / AUDIO_MAX_BIT_RANGE).astype(np.float32)
             model_detections = self.detector.detect(waveform)
-            audio_detections = []
 
             for label, score, _ in model_detections:
                 self.logger.debug(
@@ -234,8 +229,7 @@ class AudioEventMaintainer(threading.Thread):
                 if score > dict(
                     (self.camera_config.audio.filters or {}).get(label, {})
                 ).get("threshold", 0.8):
-                    self.handle_detection(label, score)
-                    audio_detections.append(label)
+                    audio_detections.append((label, score))
 
             # send audio detection data
             self.detection_publisher.publish(
@@ -243,9 +237,15 @@ class AudioEventMaintainer(threading.Thread):
                     self.camera_config.name,
                     datetime.datetime.now().timestamp(),
                     dBFS,
-                    audio_detections,
+                    [label for label, _ in audio_detections],
                 )
             )
+
+        # send audio activity update
+        self.requestor.send_data(
+            UPDATE_AUDIO_ACTIVITY,
+            {self.camera_config.name: {"detections": audio_detections}},
+        )
 
         # run audio transcription
         if self.transcription_processor is not None:
@@ -260,8 +260,6 @@ class AudioEventMaintainer(threading.Thread):
                 )
             else:
                 self.transcription_processor.check_unload_model()
-
-        self.expire_detections()
 
     def calculate_audio_levels(self, audio_as_float: np.float32) -> Tuple[float, float]:
         # Calculate RMS (Root-Mean-Square) which represents the average signal amplitude
@@ -279,75 +277,6 @@ class AudioEventMaintainer(threading.Thread):
 
         return float(rms), float(dBFS)
 
-    def handle_detection(self, label: str, score: float) -> None:
-        if self.detections.get(label):
-            self.detections[label]["last_detection"] = (
-                datetime.datetime.now().timestamp()
-            )
-        else:
-            now = datetime.datetime.now().timestamp()
-            rand_id = "".join(
-                random.choices(string.ascii_lowercase + string.digits, k=6)
-            )
-            event_id = f"{now}-{rand_id}"
-            self.requestor.send_data(f"{self.camera_config.name}/audio/{label}", "ON")
-
-            self.event_metadata_publisher.publish(
-                (
-                    now,
-                    self.camera_config.name,
-                    label,
-                    event_id,
-                    True,
-                    score,
-                    None,
-                    None,
-                    "audio",
-                    {},
-                ),
-                EventMetadataTypeEnum.manual_event_create.value,
-            )
-            self.detections[label] = {
-                "id": event_id,
-                "label": label,
-                "last_detection": now,
-            }
-
-    def expire_detections(self) -> None:
-        now = datetime.datetime.now().timestamp()
-
-        for detection in self.detections.values():
-            if not detection:
-                continue
-
-            if (
-                now - detection.get("last_detection", now)
-                > self.camera_config.audio.max_not_heard
-            ):
-                self.requestor.send_data(
-                    f"{self.camera_config.name}/audio/{detection['label']}", "OFF"
-                )
-
-                self.event_metadata_publisher.publish(
-                    (detection["id"], detection["last_detection"]),
-                    EventMetadataTypeEnum.manual_event_end.value,
-                )
-                self.detections[detection["label"]] = None
-
-    def expire_all_detections(self) -> None:
-        """Immediately end all current detections"""
-        now = datetime.datetime.now().timestamp()
-        for label, detection in list(self.detections.items()):
-            if detection:
-                self.requestor.send_data(
-                    f"{self.camera_config.name}/audio/{label}", "OFF"
-                )
-                self.event_metadata_publisher.publish(
-                    (detection["id"], now),
-                    EventMetadataTypeEnum.manual_event_end.value,
-                )
-                self.detections[label] = None
-
     def start_or_restart_ffmpeg(self) -> None:
         self.audio_listener = start_or_restart_ffmpeg(
             self.ffmpeg_cmd,
@@ -356,6 +285,7 @@ class AudioEventMaintainer(threading.Thread):
             self.chunk_size,
             self.audio_listener,
         )
+        self.requestor.send_data(f"{self.camera_config.name}/status/audio", "online")
 
     def read_audio(self) -> None:
         def log_and_restart() -> None:
@@ -371,6 +301,9 @@ class AudioEventMaintainer(threading.Thread):
 
             if not chunk:
                 if self.audio_listener.poll() is not None:
+                    self.requestor.send_data(
+                        f"{self.camera_config.name}/status/audio", "offline"
+                    )
                     self.logger.error("ffmpeg process is not running, restarting...")
                     log_and_restart()
                     return
@@ -396,10 +329,15 @@ class AudioEventMaintainer(threading.Thread):
                     )
                     self.start_or_restart_ffmpeg()
                 else:
+                    self.requestor.send_data(
+                        f"{self.camera_config.name}/status/audio", "disabled"
+                    )
                     self.logger.debug(
                         f"Disabling audio detections for {self.camera_config.name}, ending events"
                     )
-                    self.expire_all_detections()
+                    self.requestor.send_data(
+                        EXPIRE_AUDIO_ACTIVITY, self.camera_config.name
+                    )
                     stop_ffmpeg(self.audio_listener, self.logger)
                     self.audio_listener = None
                 self.was_enabled = enabled

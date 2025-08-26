@@ -1,7 +1,10 @@
 import datetime
 import logging
 import queue
+import threading
+import time
 from abc import ABC, abstractmethod
+from collections import deque
 from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
 
@@ -34,7 +37,7 @@ class ObjectDetector(ABC):
         pass
 
 
-class LocalObjectDetector(ObjectDetector):
+class BaseLocalDetector(ObjectDetector):
     def __init__(
         self,
         detector_config: BaseDetectorConfig = None,
@@ -56,6 +59,18 @@ class LocalObjectDetector(ObjectDetector):
 
         self.detect_api = create_detector(detector_config)
 
+    def _transform_input(self, tensor_input: np.ndarray) -> np.ndarray:
+        if self.input_transform:
+            tensor_input = np.transpose(tensor_input, self.input_transform)
+
+        if self.dtype == InputDTypeEnum.float:
+            tensor_input = tensor_input.astype(np.float32)
+            tensor_input /= 255
+        elif self.dtype == InputDTypeEnum.float_denorm:
+            tensor_input = tensor_input.astype(np.float32)
+
+        return tensor_input
+
     def detect(self, tensor_input: np.ndarray, threshold=0.4):
         detections = []
 
@@ -73,17 +88,20 @@ class LocalObjectDetector(ObjectDetector):
         self.fps.update()
         return detections
 
+
+class LocalObjectDetector(BaseLocalDetector):
     def detect_raw(self, tensor_input: np.ndarray):
-        if self.input_transform:
-            tensor_input = np.transpose(tensor_input, self.input_transform)
-
-        if self.dtype == InputDTypeEnum.float:
-            tensor_input = tensor_input.astype(np.float32)
-            tensor_input /= 255
-        elif self.dtype == InputDTypeEnum.float_denorm:
-            tensor_input = tensor_input.astype(np.float32)
-
+        tensor_input = self._transform_input(tensor_input)
         return self.detect_api.detect_raw(tensor_input=tensor_input)
+
+
+class AsyncLocalObjectDetector(BaseLocalDetector):
+    def async_send_input(self, tensor_input: np.ndarray, connection_id: str):
+        tensor_input = self._transform_input(tensor_input)
+        return self.detect_api.send_input(connection_id, tensor_input)
+
+    def async_receive_output(self):
+        return self.detect_api.receive_output()
 
 
 class DetectorRunner(FrigateProcess):
@@ -160,6 +178,110 @@ class DetectorRunner(FrigateProcess):
         logger.info("Exited detection process...")
 
 
+class AsyncDetectorRunner(FrigateProcess):
+    def __init__(
+        self,
+        name,
+        detection_queue: Queue,
+        cameras: list[str],
+        avg_speed: Value,
+        start_time: Value,
+        config: FrigateConfig,
+        detector_config: BaseDetectorConfig,
+        stop_event: MpEvent,
+    ) -> None:
+        super().__init__(stop_event, PROCESS_PRIORITY_HIGH, name=name, daemon=True)
+        self.detection_queue = detection_queue
+        self.cameras = cameras
+        self.avg_speed = avg_speed
+        self.start_time = start_time
+        self.config = config
+        self.detector_config = detector_config
+        self.outputs: dict = {}
+        self._frame_manager: SharedMemoryFrameManager | None = None
+        self._publisher: ObjectDetectorPublisher | None = None
+        self._detector: AsyncLocalObjectDetector | None = None
+        self.send_times = deque()
+
+    def create_output_shm(self, name: str):
+        out_shm = UntrackedSharedMemory(name=f"out-{name}", create=False)
+        out_np = np.ndarray((20, 6), dtype=np.float32, buffer=out_shm.buf)
+        self.outputs[name] = {"shm": out_shm, "np": out_np}
+
+    def _detect_worker(self) -> None:
+        logger.info("Starting Detect Worker Thread")
+        while not self.stop_event.is_set():
+            try:
+                connection_id = self.detection_queue.get(timeout=1)
+            except queue.Empty:
+                continue
+
+            input_frame = self._frame_manager.get(
+                connection_id,
+                (
+                    1,
+                    self.detector_config.model.height,
+                    self.detector_config.model.width,
+                    3,
+                ),
+            )
+
+            if input_frame is None:
+                logger.warning(f"Failed to get frame {connection_id} from SHM")
+                continue
+
+            # mark start time and send to accelerator
+            self.send_times.append(time.perf_counter())
+            self._detector.async_send_input(input_frame, connection_id)
+
+    def _result_worker(self) -> None:
+        logger.info("Starting Result Worker Thread")
+        while not self.stop_event.is_set():
+            connection_id, detections = self._detector.async_receive_output()
+
+            if not self.send_times:
+                # guard; shouldn't happen if send/recv are balanced
+                continue
+            ts = self.send_times.popleft()
+            duration = time.perf_counter() - ts
+
+            # release input buffer
+            self._frame_manager.close(connection_id)
+
+            if connection_id not in self.outputs:
+                self.create_output_shm(connection_id)
+
+            # write results and publish
+            if detections is not None:
+                self.outputs[connection_id]["np"][:] = detections[:]
+            self._publisher.publish(connection_id)
+
+            # update timers
+            self.avg_speed.value = (self.avg_speed.value * 9 + duration) / 10
+            self.start_time.value = 0.0
+
+    def run(self) -> None:
+        self.pre_run_setup(self.config.logger)
+
+        self._frame_manager = SharedMemoryFrameManager()
+        self._publisher = ObjectDetectorPublisher()
+        self._detector = AsyncLocalObjectDetector(detector_config=self.detector_config)
+
+        for name in self.cameras:
+            self.create_output_shm(name)
+
+        t_detect = threading.Thread(target=self._detect_worker, daemon=True)
+        t_result = threading.Thread(target=self._result_worker, daemon=True)
+        t_detect.start()
+        t_result.start()
+
+        while not self.stop_event.is_set():
+            time.sleep(0.5)
+
+        self._publisher.stop()
+        logger.info("Exited async detection process...")
+
+
 class ObjectDetectProcess:
     def __init__(
         self,
@@ -198,16 +320,30 @@ class ObjectDetectProcess:
         self.detection_start.value = 0.0
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
-        self.detect_process = DetectorRunner(
-            f"frigate.detector:{self.name}",
-            self.detection_queue,
-            self.cameras,
-            self.avg_inference_speed,
-            self.detection_start,
-            self.config,
-            self.detector_config,
-            self.stop_event,
-        )
+
+        # Async path for MemryX
+        if self.detector_config.type == "memryx":
+            self.detect_process = AsyncDetectorRunner(
+                f"frigate.detector:{self.name}",
+                self.detection_queue,
+                self.cameras,
+                self.avg_inference_speed,
+                self.detection_start,
+                self.config,
+                self.detector_config,
+                self.stop_event,
+            )
+        else:
+            self.detect_process = DetectorRunner(
+                f"frigate.detector:{self.name}",
+                self.detection_queue,
+                self.cameras,
+                self.avg_inference_speed,
+                self.detection_start,
+                self.config,
+                self.detector_config,
+                self.stop_event,
+            )
         self.detect_process.start()
 
 

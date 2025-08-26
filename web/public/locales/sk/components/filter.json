@@ -54,6 +54,46 @@
     "relevance": "Relevantnosť"
   },
   "cameras": {
-    "label": "Filter kamier"
+    "label": "Filter kamier",
+    "all": {
+      "title": "Všetky kamery",
+      "short": "Kamery"
+    }
+  },
+  "classes": {
+    "label": "Triedy",
+    "all": {
+      "title": "Všetky triedy"
+    },
+    "count_one": "Trieda {{count}}",
+    "count_other": "Triedy {{count}}"
+  },
+  "review": {
+    "showReviewed": "Zobraziť skontrolované"
+  },
+  "motion": {
+    "showMotionOnly": "Zobraziť len pohyb"
+  },
+  "explore": {
+    "settings": {
+      "title": "Nastavenia",
+      "defaultView": {
+        "title": "Predvolené zobrazenie",
+        "desc": "Ak nie sú vybraté žiadne filtre, zobrazte súhrn naposledy sledovaných objektov pre každý štítok alebo zobrazte nefiltrovanú mriežku.",
+        "summary": "Zhrnutie",
+        "unfilteredGrid": "Nefiltrovaná mriežka"
+      },
+      "gridColumns": {
+        "title": "Stĺpce mriežky",
+        "desc": "Vyberte počet stĺpcov v mriežkovom zobrazení."
+      },
+      "searchSource": {
+        "label": "Vyhľadať zdroj",
+        "desc": "Vyberte, či chcete vyhľadávať v miniatúrach alebo v popisoch sledovaných objektov.",
+        "options": {
+          "thumbnailImage": "Obrázok miniatúry"
+        }
+      }
+    }
   }
 }

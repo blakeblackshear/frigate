@@ -35,6 +35,14 @@
       "center": {
         "label": "Klikk i rammen for å sentrere PTZ-kameraet"
       }
+    },
+    "focus": {
+      "in": {
+        "label": "Fokuser inn på PTZ kamera"
+      },
+      "out": {
+        "label": "Fokuser ut på PTZ kamera"
+      }
     }
   },
   "camera": {
@@ -153,6 +161,11 @@
     "recording": "Opptak",
     "snapshots": "Øyeblikksbilder",
     "audioDetection": "Lydregistrering",
-    "autotracking": "Automatisk sporing"
+    "autotracking": "Automatisk sporing",
+    "transcription": "Lydtranskripsjon"
+  },
+  "transcription": {
+    "enable": "Aktiver direkte lydtranskripsjon",
+    "disable": "Deaktiver direkte lydtranskripsjon"
   }
 }

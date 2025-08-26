@@ -74,6 +74,7 @@ FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
 FFMPEG_HWACCEL_VULKAN = "preset-vulkan"
 FFMPEG_HWACCEL_RKMPP = "preset-rkmpp"
+FFMPEG_HWACCEL_AMF = "preset-amd-amf"
 FFMPEG_HVC1_ARGS = ["-tag:v", "hvc1"]
 
 # Regex constants
@@ -110,6 +111,8 @@ REQUEST_REGION_GRID = "request_region_grid"
 UPSERT_REVIEW_SEGMENT = "upsert_review_segment"
 CLEAR_ONGOING_REVIEW_SEGMENTS = "clear_ongoing_review_segments"
 UPDATE_CAMERA_ACTIVITY = "update_camera_activity"
+UPDATE_AUDIO_ACTIVITY = "update_audio_activity"
+EXPIRE_AUDIO_ACTIVITY = "expire_audio_activity"
 UPDATE_EVENT_DESCRIPTION = "update_event_description"
 UPDATE_REVIEW_DESCRIPTION = "update_review_description"
 UPDATE_MODEL_STATE = "update_model_state"

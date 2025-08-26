@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import resource
+import shutil
 import signal
 import subprocess as sp
 import traceback
@@ -22,6 +23,7 @@ from frigate.const import (
     DRIVER_ENV_VAR,
     FFMPEG_HWACCEL_NVIDIA,
     FFMPEG_HWACCEL_VAAPI,
+    SHM_FRAMES_VAR,
 )
 from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
 
@@ -768,3 +770,65 @@ def set_file_limit() -> None:
     logger.debug(
         f"File limit set. New soft limit: {new_soft}, Hard limit remains: {current_hard}"
     )
+
+
+def get_fs_type(path: str) -> str:
+    bestMatch = ""
+    fsType = ""
+    for part in psutil.disk_partitions(all=True):
+        if path.startswith(part.mountpoint) and len(bestMatch) < len(part.mountpoint):
+            fsType = part.fstype
+            bestMatch = part.mountpoint
+    return fsType
+
+
+def calculate_shm_requirements(config) -> dict:
+    try:
+        storage_stats = shutil.disk_usage("/dev/shm")
+    except (FileNotFoundError, OSError):
+        return {}
+
+    total_mb = round(storage_stats.total / pow(2, 20), 1)
+    used_mb = round(storage_stats.used / pow(2, 20), 1)
+    free_mb = round(storage_stats.free / pow(2, 20), 1)
+
+    # required for log files + nginx cache
+    min_req_shm = 40 + 10
+
+    if config.birdseye.restream:
+        min_req_shm += 8
+
+    available_shm = total_mb - min_req_shm
+    cam_total_frame_size = 0.0
+
+    for camera in config.cameras.values():
+        if camera.enabled_in_config and camera.detect.width and camera.detect.height:
+            cam_total_frame_size += round(
+                (camera.detect.width * camera.detect.height * 1.5 + 270480) / 1048576,
+                1,
+            )
+
+    # leave room for 2 cameras that are added dynamically, if a user wants to add more cameras they may need to increase the SHM size and restart after adding them.
+    cam_total_frame_size += 2 * round(
+        (1280 * 720 * 1.5 + 270480) / 1048576,
+        1,
+    )
+
+    shm_frame_count = min(
+        int(os.environ.get(SHM_FRAMES_VAR, "50")),
+        int(available_shm / cam_total_frame_size),
+    )
+
+    # minimum required shm recommendation
+    min_shm = round(min_req_shm + cam_total_frame_size * 20)
+
+    return {
+        "total": total_mb,
+        "used": used_mb,
+        "free": free_mb,
+        "mount_type": get_fs_type("/dev/shm"),
+        "available": round(available_shm, 1),
+        "camera_frame_size": cam_total_frame_size,
+        "shm_frame_count": shm_frame_count,
+        "min_shm": min_shm,
+    }

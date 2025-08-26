@@ -8,7 +8,9 @@
     "masksAndZones": "Maskerings- och zonverktyg - Frigate",
     "enrichments": "Förbättringsinställningar - Frigate",
     "frigatePlus": "Frigate+ Inställningar - Frigate",
-    "notifications": "Notifikations Inställningar - Frigate"
+    "notifications": "Notifikations Inställningar - Frigate",
+    "motionTuner": "Rörelsetuner - Frigate",
+    "object": "Felsöka - Frigate"
   },
   "general": {
     "title": "Allmänna Inställningar",
@@ -44,7 +46,8 @@
       "firstWeekday": {
         "sunday": "Söndag",
         "monday": "Måndag",
-        "label": "Första Veckodag"
+        "label": "Första Veckodag",
+        "desc": "Den dag då veckorna i översynskalendern börjar."
       },
       "title": "Kalender"
     },
@@ -66,18 +69,74 @@
   "enrichments": {
     "unsavedChanges": "Osparade Förbättringsinställningar",
     "birdClassification": {
-      "title": "Fågel klassificering"
+      "title": "Fågel klassificering",
+      "desc": "Fågelklassificering identifierar kända fåglar med hjälp av en kvantiserad Tensorflow-modell. När en känd fågel känns igen läggs dess vanliga namn till som en underetikett. Denna information inkluderas i användargränssnittet, filter och i aviseringar."
     },
-    "title": "Förbättringsinställningar"
+    "title": "Förbättringsinställningar",
+    "semanticSearch": {
+      "title": "Semantisk sökning",
+      "desc": "Semantisk sökning i Frigate låter dig hitta spårade objekt i dina granskningsobjekt med hjälp av antingen själva bilden, en användardefinierad textbeskrivning eller en automatiskt genererad.",
+      "readTheDocumentation": "Läs dokumentationen",
+      "reindexNow": {
+        "label": "Omindexera nu",
+        "desc": "Omindexering kommer att generera inbäddningar för alla spårade objekt. Den här processen körs i bakgrunden och kan maximera din CPU och ta en hel del tid beroende på antalet spårade objekt du har.",
+        "confirmTitle": "Bekräfta omindexering",
+        "confirmDesc": "Är du säker på att du vill omindexera alla spårade objektinbäddningar? Den här processen körs i bakgrunden men den kan maximera din processor och ta en hel del tid. Du kan se förloppet på Utforska-sidan.",
+        "confirmButton": "Omindexera",
+        "success": "Omindexeringen har startat.",
+        "alreadyInProgress": "Omindexering pågår redan.",
+        "error": "Misslyckades med att starta omindexering: {{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "Modellstorlek",
+        "desc": "Storleken på modellen som används för semantiska sökinbäddningar.",
+        "small": {
+          "title": "små",
+          "desc": "Att använda <em>small</em> använder en kvantiserad version av modellen som använder mindre RAM och körs snabbare på CPU med en mycket försumbar skillnad i inbäddningskvalitet."
+        },
+        "large": {
+          "title": "stor",
+          "desc": "Att använda <em>large</em> använder hela Jina-modellen och körs automatiskt på GPU:n om tillämpligt."
+        }
+      }
+    },
+    "faceRecognition": {
+      "desc": "Ansiktsigenkänning gör att personer kan tilldelas namn och när deras ansikte känns igen kommer Frigate att tilldela personens namn som en underetikett. Denna information finns i användargränssnittet, filter och i aviseringar.",
+      "readTheDocumentation": "Läs dokumentationen",
+      "modelSize": {
+        "label": "Modellstorlek",
+        "desc": "Storleken på modellen som används för ansiktsigenkänning.",
+        "small": {
+          "title": "små",
+          "desc": "Att använda <em>small</em> använder en FaceNet-modell för ansiktsinbäddning som körs effektivt på de flesta processorer."
+        },
+        "large": {
+          "title": "stor",
+          "desc": "Att använda <em>large</em> använder en ArcFace-modell för ansiktsinbäddning och körs automatiskt på GPU:n om tillämpligt."
+        }
+      },
+      "title": "Ansikts igenkänning"
+    },
+    "licensePlateRecognition": {
+      "title": "Nummerplåt Erkännande",
+      "desc": "Frigate kan känna igen nummerplåt på fordon och automatiskt lägga till de upptäckta tecknen i fältet recognized_license_plate eller ett känt namn som en underetikett till objekt av typen bil. Ett vanligt användningsfall kan vara att läsa nummerplåtor på bilar som kör in på en uppfart eller bilar som passerar på en gata.",
+      "readTheDocumentation": "Läs dokumentationen"
+    },
+    "restart_required": "Omstart krävs (berikningsinställningar har ändrats)",
+    "toast": {
+      "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar."
+    }
   },
   "menu": {
-    "ui": "UI",
+    "ui": "Användargränssnitt",
     "cameras": "Kamera Inställningar",
     "masksAndZones": "Masker / Områden",
     "users": "Användare",
     "notifications": "Notifikationer",
     "frigateplus": "Frigate+",
-    "enrichments": "Förbättringar"
+    "enrichments": "Förbättringar",
+    "motionTuner": "Rörelsemottagare",
+    "debug": "Felsök"
   },
   "dialog": {
     "unsavedChanges": {
