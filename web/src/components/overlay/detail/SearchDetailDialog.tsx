@@ -79,6 +79,7 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 import FaceSelectionDialog from "../FaceSelectionDialog";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { CgTranscript } from "react-icons/cg";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 const SEARCH_TABS = [
   "details",
@@ -864,7 +865,7 @@ function ObjectDetailsTab({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.camera")}</div>
             <div className="text-sm smart-capitalize">
-              {search.camera.replaceAll("_", " ")}
+              <CameraNameLabel camera={search.camera} />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">

@@ -21,6 +21,7 @@ import {
   usePreviewForTimeRange,
 } from "@/hooks/use-camera-previews";
 import { useTranslation } from "react-i18next";
+import { useCameraNickname } from "@/hooks/use-camera-nickname";
 
 type PreviewPlayerProps = {
   previewRef?: (ref: HTMLDivElement | null) => void;
@@ -148,6 +149,7 @@ function PreviewVideoPlayer({
   const { t } = useTranslation(["components/player"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
+  const cameraName = useCameraNickname(camera);
   // controlling playback
 
   const previewRef = useRef<HTMLVideoElement | null>(null);
@@ -342,7 +344,7 @@ function PreviewVideoPlayer({
       )}
       {cameraPreviews && !currentPreview && (
         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-background_alt text-primary dark:bg-black md:rounded-2xl">
-          {t("noPreviewFoundFor", { camera: camera.replaceAll("_", " ") })}
+          {t("noPreviewFoundFor", { camera: cameraName })}
         </div>
       )}
       {firstLoad && <Skeleton className="absolute aspect-video size-full" />}
@@ -464,6 +466,7 @@ function PreviewFramesPlayer({
 }: PreviewFramesPlayerProps) {
   const { t } = useTranslation(["components/player"]);
 
+  const cameraName = useCameraNickname(camera);
   // frames data
 
   const { data: previewFrames } = useSWR<string[]>(
@@ -564,7 +567,7 @@ function PreviewFramesPlayer({
       />
       {previewFrames?.length === 0 && (
         <div className="-y-translate-1/2 align-center absolute inset-x-0 top-1/2 rounded-lg bg-background_alt text-center text-primary dark:bg-black md:rounded-2xl">
-          {t("noPreviewFoundFor", { cameraName: camera.replaceAll("_", " ") })}
+          {t("noPreviewFoundFor", { cameraName: cameraName })}
         </div>
       )}
       {firstLoad && <Skeleton className="absolute aspect-video size-full" />}

@@ -334,6 +334,9 @@ class WebPushClient(Communicator):
             return
 
         camera: str = payload["after"]["camera"]
+        camera_name: str = getattr(
+            self.config.cameras[camera], "nickname", None
+        ) or titlecase(camera.replace("_", " "))
         current_time = datetime.datetime.now().timestamp()
 
         if self._within_cooldown(camera):
@@ -375,7 +378,7 @@ class WebPushClient(Communicator):
         if state == "genai" and payload["after"]["data"]["metadata"]:
             message = payload["after"]["data"]["metadata"]["scene"]
         else:
-            message = f"Detected on {titlecase(camera.replace('_', ' '))}"
+            message = f"Detected on {camera_name}"
 
         if ended:
             logger.debug(
@@ -406,6 +409,9 @@ class WebPushClient(Communicator):
             return
 
         camera: str = payload["camera"]
+        camera_name: str = getattr(
+            self.config.cameras[camera], "nickname", None
+        ) or titlecase(camera.replace("_", " "))
         current_time = datetime.datetime.now().timestamp()
 
         if self._within_cooldown(camera):
@@ -421,14 +427,16 @@ class WebPushClient(Communicator):
         name = payload["name"]
         score = payload["score"]
 
-        title = f"{name.replace('_', ' ')} triggered on {titlecase(camera.replace('_', ' '))}"
-        message = f"{titlecase(trigger_type)} trigger fired for {titlecase(camera.replace('_', ' '))} with score {score:.2f}"
+        title = f"{name.replace('_', ' ')} triggered on {camera_name}"
+        message = f"{titlecase(trigger_type)} trigger fired for {camera_name} with score {score:.2f}"
         image = f"clips/triggers/{camera}/{event_id}.webp"
 
         direct_url = f"/explore?event_id={event_id}"
         ttl = 0
 
-        logger.debug(f"Sending push notification for {camera}, trigger name {name}")
+        logger.debug(
+            f"Sending push notification for {camera_name}, trigger name {name}"
+        )
 
         for user in self.web_pushers:
             self.send_push_notification(

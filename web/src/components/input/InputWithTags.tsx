@@ -53,6 +53,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { MdImageSearch } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { CameraNameLabel } from "../camera/CameraNameLabel";
 
 type InputWithTagsProps = {
   inputFocused: boolean;
@@ -826,9 +827,13 @@ export default function InputWithTags({
                             className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800 smart-capitalize"
                           >
                             {t("filter.label." + filterType)}:{" "}
-                            {filterType === "labels"
-                              ? getTranslatedLabel(value)
-                              : value.replaceAll("_", " ")}
+                            {filterType === "labels" ? (
+                              getTranslatedLabel(value)
+                            ) : filterType === "cameras" ? (
+                              <CameraNameLabel camera={value} />
+                            ) : (
+                              value.replaceAll("_", " ")
+                            )}
                             <button
                               onClick={() =>
                                 removeFilter(filterType as FilterType, value)
@@ -923,13 +928,27 @@ export default function InputWithTags({
                   onSelect={() => handleSuggestionClick(suggestion)}
                 >
                   {i18n.language === "en" ? (
-                    suggestion
+                    currentFilterType && currentFilterType === "cameras" ? (
+                      <>
+                        {suggestion} {" ("}{" "}
+                        <CameraNameLabel camera={suggestion} />
+                        {")"}
+                      </>
+                    ) : (
+                      suggestion
+                    )
                   ) : (
                     <>
                       {suggestion} {" ("}
-                      {currentFilterType
-                        ? formatFilterValues(currentFilterType, suggestion)
-                        : t("filter.label." + suggestion)}
+                      {currentFilterType ? (
+                        currentFilterType === "cameras" ? (
+                          <CameraNameLabel camera={suggestion} />
+                        ) : (
+                          formatFilterValues(currentFilterType, suggestion)
+                        )
+                      ) : (
+                        t("filter.label." + suggestion)
+                      )}
                       {")"}
                     </>
                   )}

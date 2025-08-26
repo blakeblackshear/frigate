@@ -30,6 +30,12 @@ type ConfigSetBody = {
   config_data: any;
   update_topic?: string;
 };
+const generateFixedHash = (name: string): string => {
+  const encoded = encodeURIComponent(name);
+  const base64 = btoa(encoded);
+  const cleanHash = base64.replace(/[^a-zA-Z0-9]/g, "").substring(0, 8);
+  return `cam_${cleanHash.toLowerCase()}`;
+};
 
 const RoleEnum = z.enum(["audio", "detect", "record"]);
 type Role = z.infer<typeof RoleEnum>;
@@ -54,10 +60,7 @@ export default function CameraEditForm({
       z.object({
         cameraName: z
           .string()
-          .min(1, { message: t("camera.cameraConfig.nameRequired") })
-          .regex(/^[a-zA-Z0-9_-]+$/, {
-            message: t("camera.cameraConfig.nameInvalid"),
-          }),
+          .min(1, { message: t("camera.cameraConfig.nameRequired") }),
         enabled: z.boolean(),
         ffmpeg: z.object({
           inputs: z
@@ -101,26 +104,37 @@ export default function CameraEditForm({
 
   type FormValues = z.infer<typeof formSchema>;
 
-  // Determine available roles for default values
-  const usedRoles = useMemo(() => {
-    const roles = new Set<Role>();
-    if (cameraName && config?.cameras[cameraName]) {
-      const camera = config.cameras[cameraName];
-      camera.ffmpeg?.inputs?.forEach((input) => {
-        input.roles.forEach((role) => roles.add(role as Role));
-      });
+  const cameraInfo = useMemo(() => {
+    if (!cameraName || !config?.cameras[cameraName]) {
+      return {
+        nickname: undefined,
+        name: cameraName || "",
+        roles: new Set<Role>(),
+      };
     }
-    return roles;
+
+    const camera = config.cameras[cameraName];
+    const roles = new Set<Role>();
+
+    camera.ffmpeg?.inputs?.forEach((input) => {
+      input.roles.forEach((role) => roles.add(role as Role));
+    });
+
+    return {
+      nickname: camera?.nickname || cameraName,
+      name: cameraName,
+      roles,
+    };
   }, [cameraName, config]);
 
   const defaultValues: FormValues = {
-    cameraName: cameraName || "",
+    cameraName: cameraInfo?.nickname || cameraName || "",
     enabled: true,
     ffmpeg: {
       inputs: [
         {
           path: "",
-          roles: usedRoles.has("detect") ? [] : ["detect"],
+          roles: cameraInfo.roles.has("detect") ? [] : ["detect"],
         },
       ],
     },
@@ -154,10 +168,19 @@ export default function CameraEditForm({
 
   const saveCameraConfig = (values: FormValues) => {
     setIsLoading(true);
+    let finalCameraName = values.cameraName;
+    let nickname: string | undefined = undefined;
+    const isValidName = /^[a-zA-Z0-9_-]+$/.test(values.cameraName);
+    if (!isValidName) {
+      finalCameraName = generateFixedHash(finalCameraName);
+      nickname = values.cameraName;
+    }
+
     const configData: ConfigSetBody["config_data"] = {
       cameras: {
-        [values.cameraName]: {
+        [finalCameraName]: {
           enabled: values.enabled,
+          ...(nickname && { nickname }),
           ffmpeg: {
             inputs: values.ffmpeg.inputs.map((input) => ({
               path: input.path,
@@ -175,7 +198,7 @@ export default function CameraEditForm({
 
     // Add update_topic for new cameras
     if (!cameraName) {
-      requestBody.update_topic = `config/cameras/${values.cameraName}/add`;
+      requestBody.update_topic = `config/cameras/${finalCameraName}/add`;
     }
 
     axios
@@ -209,7 +232,11 @@ export default function CameraEditForm({
   };
 
   const onSubmit = (values: FormValues) => {
-    if (cameraName && values.cameraName !== cameraName) {
+    if (
+      cameraName &&
+      values.cameraName !== cameraName &&
+      values.cameraName !== cameraInfo?.nickname
+    ) {
       // If camera name changed, delete old camera config
       const deleteRequestBody: ConfigSetBody = {
         requires_restart: 1,

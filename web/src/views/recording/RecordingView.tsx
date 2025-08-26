@@ -64,6 +64,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -719,7 +720,7 @@ export function RecordingView({
                         </div>
                       </TooltipTrigger>
                       <TooltipContent className="smart-capitalize">
-                        {cam.replaceAll("_", " ")}
+                        <CameraNameLabel camera={cam} />
                       </TooltipContent>
                     </Tooltip>
                   );
