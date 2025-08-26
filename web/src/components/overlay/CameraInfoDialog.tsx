@@ -16,7 +16,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { Trans, useTranslation } from "react-i18next";
-import { useCameraNickname } from "@/hooks/use-camera-nickname";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 
 type CameraInfoDialogProps = {
   camera: CameraConfig;
@@ -75,7 +75,7 @@ export default function CameraInfoDialog({
     return b === 0 ? a : gcd(b, a % b);
   }
 
-  const cameraName = useCameraNickname(camera);
+  const cameraName = useCameraFriendlyName(camera);
 
   return (
     <>

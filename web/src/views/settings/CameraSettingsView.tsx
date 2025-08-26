@@ -49,7 +49,7 @@ import {
 } from "@/components/ui/select";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { isDesktop } from "react-device-detect";
-import { useCameraNickname } from "@/hooks/use-camera-nickname";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 type CameraSettingsViewProps = {
@@ -98,7 +98,7 @@ export default function CameraSettingsView({
     return [];
   }, [config]);
 
-  const selectCameraName = useCameraNickname(selectedCamera);
+  const selectCameraName = useCameraFriendlyName(selectedCamera);
 
   // zones and labels
 

@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as LabelPrimitive from "@radix-ui/react-label";
-import { useCameraNickname } from "@/hooks/use-camera-nickname";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { CameraConfig } from "@/types/frigateConfig";
 
 interface CameraNameLabelProps
@@ -12,7 +12,7 @@ const CameraNameLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   CameraNameLabelProps
 >(({ className, camera, ...props }, ref) => {
-  const displayName = useCameraNickname(camera);
+  const displayName = useCameraFriendlyName(camera);
   return (
     <LabelPrimitive.Root ref={ref} className={className} {...props}>
       {displayName}

@@ -24,7 +24,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { PlayerStats } from "./PlayerStats";
 import { LuVideoOff } from "react-icons/lu";
 import { Trans, useTranslation } from "react-i18next";
-import { useCameraNickname } from "@/hooks/use-camera-nickname";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -77,7 +77,7 @@ export default function LivePlayer({
 
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const cameraName = useCameraNickname(cameraConfig);
+  const cameraName = useCameraFriendlyName(cameraConfig);
   // stats
 
   const [stats, setStats] = useState<PlayerStatsType>({

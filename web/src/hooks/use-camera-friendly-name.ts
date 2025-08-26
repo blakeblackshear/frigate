@@ -8,14 +8,14 @@ export function resolveCameraName(
 ) {
   if (typeof cameraId === "object" && cameraId !== null) {
     const camera = cameraId as CameraConfig;
-    return camera?.nickname || camera?.name.replaceAll("_", " ");
+    return camera?.friendly_name || camera?.name.replaceAll("_", " ");
   } else {
     const camera = config?.cameras?.[String(cameraId)];
-    return camera?.nickname || String(cameraId).replaceAll("_", " ");
+    return camera?.friendly_name || String(cameraId).replaceAll("_", " ");
   }
 }
 
-export function useCameraNickname(
+export function useCameraFriendlyName(
   cameraId: string | CameraConfig | undefined,
 ): string {
   const { data: config } = useSWR<FrigateConfig>("config");

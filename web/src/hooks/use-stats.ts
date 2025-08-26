@@ -61,7 +61,7 @@ export default function useStats(stats: FrigateStats | undefined) {
         return;
       }
 
-      const cameraName = config.cameras?.[name]?.nickname ?? name;
+      const cameraName = config.cameras?.[name]?.friendly_name ?? name;
       if (config.cameras[name].enabled && cam["camera_fps"] == 0) {
         problems.push({
           text: t("stats.cameraIsOffline", {
@@ -82,7 +82,7 @@ export default function useStats(stats: FrigateStats | undefined) {
         memoizedStats["cpu_usages"][cam["pid"]]?.cpu_average,
       );
 
-      const cameraName = config?.cameras?.[name]?.nickname ?? name;
+      const cameraName = config?.cameras?.[name]?.friendly_name ?? name;
       if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push({
           text: t("stats.ffmpegHighCpuUsage", {
