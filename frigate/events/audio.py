@@ -198,6 +198,24 @@ class AudioEventMaintainer(threading.Thread):
             )
             self.transcription_thread.start()
 
+        if self.camera_config.audio_transcription.enabled_in_config:
+            # init the transcription processor for this camera
+            self.transcription_processor = AudioTranscriptionRealTimeProcessor(
+                config=self.config,
+                camera_config=self.camera_config,
+                requestor=self.requestor,
+                model_runner=self.audio_transcription_model_runner,
+                metrics=self.camera_metrics[self.camera_config.name],
+                stop_event=self.stop_event,
+            )
+
+            self.transcription_thread = threading.Thread(
+                target=self.transcription_processor.run,
+                name=f"{self.camera_config.name}_transcription_processor",
+                daemon=True,
+            )
+            self.transcription_thread.start()
+
         self.was_enabled = camera.enabled
 
     def detect_audio(self, audio) -> None:

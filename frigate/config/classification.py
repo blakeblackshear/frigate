@@ -163,6 +163,32 @@ class CameraSemanticSearchConfig(FrigateBaseModel):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
+class TriggerConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable this trigger")
+    type: TriggerType = Field(default=TriggerType.DESCRIPTION, title="Type of trigger")
+    data: str = Field(title="Trigger content (text phrase or image ID)")
+    threshold: float = Field(
+        title="Confidence score required to run the trigger",
+        default=0.8,
+        gt=0.0,
+        le=1.0,
+    )
+    actions: List[TriggerAction] = Field(
+        default=[], title="Actions to perform when trigger is matched"
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+
+class CameraSemanticSearchConfig(FrigateBaseModel):
+    triggers: Dict[str, TriggerConfig] = Field(
+        default={},
+        title="Trigger actions on tracked objects that match existing thumbnails or descriptions",
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+
 class FaceRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable face recognition.")
     model_size: str = Field(
