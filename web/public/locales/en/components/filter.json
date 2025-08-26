@@ -127,6 +127,8 @@
     "loading": "Loading recognized license plates…",
     "placeholder": "Type to search license plates…",
     "noLicensePlatesFound": "No license plates found.",
-    "selectPlatesFromList": "Select one or more plates from the list."
+    "selectPlatesFromList": "Select one or more plates from the list.",
+    "selectAll": "Select all",
+    "clearAll": "Clear all"
   }
 }
