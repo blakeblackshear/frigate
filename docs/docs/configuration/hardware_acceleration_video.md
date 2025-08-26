@@ -9,7 +9,6 @@ It is highly recommended to use a GPU for hardware acceleration video decoding i
 
 Depending on your system, these parameters may not be compatible. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
 
-# Object Detection
 
 ## Raspberry Pi 3/4
 
