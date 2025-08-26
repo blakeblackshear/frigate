@@ -229,7 +229,7 @@ Additional configuration is needed for the Docker container to be able to access
 services:
   frigate:
     ...
-    image: ghcr.io/blakeblackshear/frigate:stable
+    image: ghcr.io/blakeblackshear/frigate:stable-tensorrt
     deploy:    # <------------- Add this section
       resources:
         reservations:
@@ -247,7 +247,7 @@ docker run -d \
   --name frigate \
   ...
   --gpus=all \
-  ghcr.io/blakeblackshear/frigate:stable
+  ghcr.io/blakeblackshear/frigate:stable-tensorrt
 ```
 
 ### Setup Decoder
