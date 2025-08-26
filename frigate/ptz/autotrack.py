@@ -369,12 +369,13 @@ class PtzAutoTracker:
         logger.info(f"Camera calibration for {camera} in progress")
 
         # zoom levels test
+        self.zoom_time[camera] = 0
+
         if (
             self.config.cameras[camera].onvif.autotracking.zooming
             != ZoomingModeEnum.disabled
         ):
             logger.info(f"Calibration for {camera} in progress: 0% complete")
-            self.zoom_time[camera] = 0
 
             for i in range(2):
                 # absolute move to 0 - fully zoomed out
