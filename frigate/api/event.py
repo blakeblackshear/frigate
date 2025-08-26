@@ -166,43 +166,32 @@ def events(params: EventsQueryParams = Depends()):
         clauses.append((sub_label_clause))
 
     if recognized_license_plate != "all":
-        # use matching so joined recognized_license_plates are included
-        # for example a recognized license plate 'ABC123' would get events
-        # with recognized license plates 'ABC123' and 'ABC123, XYZ789'
-        recognized_license_plate_clauses = []
         filtered_recognized_license_plates = recognized_license_plate.split(",")
+
+        clauses_for_plates = []
 
         if "None" in filtered_recognized_license_plates:
             filtered_recognized_license_plates.remove("None")
-            recognized_license_plate_clauses.append(
-                (Event.data["recognized_license_plate"].is_null())
+            clauses_for_plates.append(Event.data["recognized_license_plate"].is_null())
+
+        # regex vs exact matching
+        normal_plates = []
+        for plate in filtered_recognized_license_plates:
+            if plate.startswith("^") or any(ch in plate for ch in ".[]?+*"):
+                clauses_for_plates.append(
+                    Event.data["recognized_license_plate"].cast("text").regexp(plate)
+                )
+            else:
+                normal_plates.append(plate)
+
+        # if there are any plain string plates, match them with IN
+        if normal_plates:
+            clauses_for_plates.append(
+                Event.data["recognized_license_plate"].cast("text").in_(normal_plates)
             )
 
-        for recognized_license_plate in filtered_recognized_license_plates:
-            # Exact matching plus list inclusion
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    == recognized_license_plate
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*{recognized_license_plate},*"
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*, {recognized_license_plate}*"
-                )
-            )
-
-        recognized_license_plate_clause = reduce(
-            operator.or_, recognized_license_plate_clauses
-        )
-        clauses.append((recognized_license_plate_clause))
+        recognized_license_plate_clause = reduce(operator.or_, clauses_for_plates)
+        clauses.append(recognized_license_plate_clause)
 
     if zones != "all":
         # use matching so events with multiple zones
@@ -516,42 +505,31 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         event_filters.append((reduce(operator.or_, zone_clauses)))
 
     if recognized_license_plate != "all":
-        # use matching so joined recognized_license_plates are included
-        # for example an recognized_license_plate 'ABC123' would get events
-        # with recognized_license_plates 'ABC123' and 'ABC123, XYZ789'
-        recognized_license_plate_clauses = []
         filtered_recognized_license_plates = recognized_license_plate.split(",")
+
+        clauses_for_plates = []
 
         if "None" in filtered_recognized_license_plates:
             filtered_recognized_license_plates.remove("None")
-            recognized_license_plate_clauses.append(
-                (Event.data["recognized_license_plate"].is_null())
+            clauses_for_plates.append(Event.data["recognized_license_plate"].is_null())
+
+        # regex vs exact matching
+        normal_plates = []
+        for plate in filtered_recognized_license_plates:
+            if plate.startswith("^") or any(ch in plate for ch in ".[]?+*"):
+                clauses_for_plates.append(
+                    Event.data["recognized_license_plate"].cast("text").regexp(plate)
+                )
+            else:
+                normal_plates.append(plate)
+
+        # if there are any plain string plates, match them with IN
+        if normal_plates:
+            clauses_for_plates.append(
+                Event.data["recognized_license_plate"].cast("text").in_(normal_plates)
             )
 
-        for recognized_license_plate in filtered_recognized_license_plates:
-            # Exact matching plus list inclusion
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    == recognized_license_plate
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*{recognized_license_plate},*"
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*, {recognized_license_plate}*"
-                )
-            )
-
-        recognized_license_plate_clause = reduce(
-            operator.or_, recognized_license_plate_clauses
-        )
+        recognized_license_plate_clause = reduce(operator.or_, clauses_for_plates)
         event_filters.append((recognized_license_plate_clause))
 
     if after:
