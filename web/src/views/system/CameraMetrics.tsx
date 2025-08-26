@@ -14,7 +14,7 @@ import {
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
-import { resolveCameraName } from "@/hooks/use-camera-nickname";
+import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 
 type CameraMetricsProps = {
   lastUpdated: number;

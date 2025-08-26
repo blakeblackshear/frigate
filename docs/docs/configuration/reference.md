@@ -899,7 +899,7 @@ cameras:
 
     # Optional: Configuration for triggers to automate actions based on semantic search results.
     triggers:
-      # Required: Unique identifier for the trigger (generated automatically from nickname if not specified).
+      # Required: Unique identifier for the trigger (generated automatically from friendly_name if not specified).
       trigger_name:
         # Required: Enable or disable the trigger. (default: shown below)
         enabled: true

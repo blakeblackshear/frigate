@@ -52,12 +52,14 @@ class CameraTypeEnum(str, Enum):
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(None, title="Camera name.", pattern=REGEX_CAMERA_NAME)
 
-    nickname: Optional[str] = Field(None, title="Camera nickname. Only for display.")
+    friendly_name: Optional[str] = Field(
+        None, title="Camera friendly name used in the Frigate UI."
+    )
 
     @model_validator(mode="before")
     @classmethod
-    def handle_nickname(cls, values):
-        if isinstance(values, dict) and "nickname" in values:
+    def handle_friendly_name(cls, values):
+        if isinstance(values, dict) and "friendly_name" in values:
             pass
         return values
 

@@ -335,7 +335,7 @@ class WebPushClient(Communicator):
 
         camera: str = payload["after"]["camera"]
         camera_name: str = getattr(
-            self.config.cameras[camera], "nickname", None
+            self.config.cameras[camera], "friendly_name", None
         ) or titlecase(camera.replace("_", " "))
         current_time = datetime.datetime.now().timestamp()
 
@@ -410,7 +410,7 @@ class WebPushClient(Communicator):
 
         camera: str = payload["camera"]
         camera_name: str = getattr(
-            self.config.cameras[camera], "nickname", None
+            self.config.cameras[camera], "friendly_name", None
         ) or titlecase(camera.replace("_", " "))
         current_time = datetime.datetime.now().timestamp()
 

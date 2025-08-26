@@ -107,7 +107,7 @@ export default function CameraEditForm({
   const cameraInfo = useMemo(() => {
     if (!cameraName || !config?.cameras[cameraName]) {
       return {
-        nickname: undefined,
+        friendly_name: undefined,
         name: cameraName || "",
         roles: new Set<Role>(),
       };
@@ -121,14 +121,14 @@ export default function CameraEditForm({
     });
 
     return {
-      nickname: camera?.nickname || cameraName,
+      friendly_name: camera?.friendly_name || cameraName,
       name: cameraName,
       roles,
     };
   }, [cameraName, config]);
 
   const defaultValues: FormValues = {
-    cameraName: cameraInfo?.nickname || cameraName || "",
+    cameraName: cameraInfo?.friendly_name || cameraName || "",
     enabled: true,
     ffmpeg: {
       inputs: [
@@ -169,18 +169,18 @@ export default function CameraEditForm({
   const saveCameraConfig = (values: FormValues) => {
     setIsLoading(true);
     let finalCameraName = values.cameraName;
-    let nickname: string | undefined = undefined;
+    let friendly_name: string | undefined = undefined;
     const isValidName = /^[a-zA-Z0-9_-]+$/.test(values.cameraName);
     if (!isValidName) {
       finalCameraName = generateFixedHash(finalCameraName);
-      nickname = values.cameraName;
+      friendly_name = values.cameraName;
     }
 
     const configData: ConfigSetBody["config_data"] = {
       cameras: {
         [finalCameraName]: {
           enabled: values.enabled,
-          ...(nickname && { nickname }),
+          ...(friendly_name && { friendly_name }),
           ffmpeg: {
             inputs: values.ffmpeg.inputs.map((input) => ({
               path: input.path,
@@ -235,7 +235,7 @@ export default function CameraEditForm({
     if (
       cameraName &&
       values.cameraName !== cameraName &&
-      values.cameraName !== cameraInfo?.nickname
+      values.cameraName !== cameraInfo?.friendly_name
     ) {
       // If camera name changed, delete old camera config
       const deleteRequestBody: ConfigSetBody = {

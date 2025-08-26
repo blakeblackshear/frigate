@@ -33,7 +33,7 @@ import { Link } from "react-router-dom";
 import { LiveStreamMetadata } from "@/types/live";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-import { useCameraNickname } from "@/hooks/use-camera-nickname";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -57,7 +57,7 @@ export function CameraStreamingDialog({
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const cameraName = useCameraNickname(camera);
+  const cameraName = useCameraFriendlyName(camera);
 
   const [isLoading, setIsLoading] = useState(false);
 

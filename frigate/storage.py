@@ -78,7 +78,7 @@ class StorageMaintainer(threading.Thread):
             )
 
             camera_key = (
-                getattr(self.config.cameras[camera], "nickname", None) or camera
+                getattr(self.config.cameras[camera], "friendly_name", None) or camera
             )
             usages[camera_key] = {
                 "usage": camera_storage,

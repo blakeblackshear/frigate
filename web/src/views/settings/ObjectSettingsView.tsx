@@ -30,7 +30,7 @@ import { isDesktop } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { getTranslatedLabel } from "@/utils/i18n";
-import { useCameraNickname } from "@/hooks/use-camera-nickname";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { AudioLevelGraph } from "@/components/audio/AudioLevelGraph";
 import { useWs } from "@/api/ws";
 
@@ -129,7 +129,7 @@ export default function ObjectSettingsView({
     }
   }, [config, selectedCamera]);
 
-  const cameraName = useCameraNickname(cameraConfig);
+  const cameraName = useCameraFriendlyName(cameraConfig);
 
   const { objects, audio_detections } = useCameraActivity(
     cameraConfig ?? ({} as CameraConfig),

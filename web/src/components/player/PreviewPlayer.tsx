@@ -21,7 +21,7 @@ import {
   usePreviewForTimeRange,
 } from "@/hooks/use-camera-previews";
 import { useTranslation } from "react-i18next";
-import { useCameraNickname } from "@/hooks/use-camera-nickname";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 
 type PreviewPlayerProps = {
   previewRef?: (ref: HTMLDivElement | null) => void;
@@ -149,7 +149,7 @@ function PreviewVideoPlayer({
   const { t } = useTranslation(["components/player"]);
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const cameraName = useCameraNickname(camera);
+  const cameraName = useCameraFriendlyName(camera);
   // controlling playback
 
   const previewRef = useRef<HTMLVideoElement | null>(null);
@@ -466,7 +466,7 @@ function PreviewFramesPlayer({
 }: PreviewFramesPlayerProps) {
   const { t } = useTranslation(["components/player"]);
 
-  const cameraName = useCameraNickname(camera);
+  const cameraName = useCameraFriendlyName(camera);
   // frames data
 
   const { data: previewFrames } = useSWR<string[]>(

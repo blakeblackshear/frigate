@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { Link } from "react-router-dom";
 import { useTriggers } from "@/api/ws";
-import { useCameraNickname } from "@/hooks/use-camera-nickname";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 
 type ConfigSetBody = {
   requires_restart: number;
@@ -79,7 +79,7 @@ export default function TriggerView({
   const [triggeredTrigger, setTriggeredTrigger] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const cameraName = useCameraNickname(selectedCamera);
+  const cameraName = useCameraFriendlyName(selectedCamera);
   const triggers = useMemo(() => {
     if (
       !config ||
