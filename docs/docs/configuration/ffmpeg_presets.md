@@ -21,8 +21,7 @@ See [the hwaccel docs](/configuration/hardware_acceleration_video.md) for more i
 | preset-nvidia         | Nvidia GPU                     |                                                       |
 | preset-jetson-h264    | Nvidia Jetson with h264 stream |                                                       |
 | preset-jetson-h265    | Nvidia Jetson with h265 stream |                                                       |
-| preset-rk-h264        | Rockchip MPP with h264 stream  | Use image with \*-rk suffix and privileged mode       |
-| preset-rk-h265        | Rockchip MPP with h265 stream  | Use image with \*-rk suffix and privileged mode       |
+| preset-rkmpp        | Rockchip MPP  | Use image with \*-rk suffix and privileged mode       |
 
 ### Input Args Presets
 
