@@ -1,7 +1,6 @@
 import logging
 import queue
 
-import degirum as dg
 import numpy as np
 from pydantic import Field
 from typing_extensions import Literal
@@ -26,6 +25,11 @@ class DGDetector(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: DGDetectorConfig):
+        try:
+            import degirum as dg
+        except ModuleNotFoundError:
+            raise ImportError("Unable to import DeGirum detector.")
+
         self._queue = queue.Queue()
         self._zoo = dg.connect(
             detector_config.location, detector_config.zoo, detector_config.token
