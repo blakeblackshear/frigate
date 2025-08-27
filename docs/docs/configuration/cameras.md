@@ -89,7 +89,9 @@ An ONVIF-capable camera that supports relative movement within the field of view
 
 ## ONVIF PTZ camera recommendations
 
-This list of working and non-working PTZ cameras is based on user feedback. Generally, if on the FeatureList for the camera found on the [ONVIF Conformant Products Database](https://www.onvif.org/conformant-products/), `PTZRelative`, `PTZRelativePanTilt` and / or `PTZRelativeZoom`, as well as `PTZAuxiliary` are listed, the camera is likely to work and it is guaranteed not to work if the features are not present. There are still cameras that do not work even if this feature is present (a notable example being the Dahua DH-P5AE-PV). If no such document for the camera is present, it is recommended *not* to buy the camera, except it is explicitly mentioned as working below.
+This list of working and non-working PTZ cameras is based on user feedback. 
+
+The FeatureList on the [ONVIF Conformant Products Database](https://www.onvif.org/conformant-products/) can provide a starting point to determine a camera's compatibility with Frigate's Autotracking. If it includes `PTZRelative` and `PTZAuxiliary` along with `PTZRelativePanTilt` and / or `PTZRelativeZoom`, the camera may support the functionality required for Autotracking and PTZ Control. However, due to inconsistent support from the manufacturer, it is possible that even though the FeatureList lists these features, the camera still does not respond to commands. If the feature List does not include these features, it is guaranteed that Autotracking will not work. However, if only some of them are present, normal PTZ control via the Frigate's WebUI may still work. If there is no entry for the camer exists in the database, it is recommended *not* to buy the camera, or to consult with the manufacturer's customer support, unless it is explicitly listed as working below.
 
 | Brand or specific camera     | PTZ Controls | Autotracking | Notes                                                                                                                                           |
 | ---------------------------- | :----------: | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -103,7 +105,7 @@ This list of working and non-working PTZ cameras is based on user feedback. Gene
 | Dahua DH-SD2A500HB           |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua DH-SD49825GB-HNR       |      ✅      |      ✅      |                                                                                                                                                 |
 | Dahua DH-P5AE-PV             |      ❌      |      ❌      |                                                                                                                                                 |
-| Foscam                       |      ✅      |      ❌      | In general support PTZ, but not relative move. There are no official ONVIF certifications and tests available on the ONVIF website  |                                                                                                                                  |
+| Foscam                       |      ✅      |      ❌      | In general support PTZ, but not relative move. There are no official ONVIF certifications and tests available on the ONVIF Conformant Products Database  |                                                                                                                                  |
 | Foscam R5                    |      ✅      |      ❌      |                                                                                                                                                 |
 | Foscam SD4                   |      ✅      |      ❌      |                                                                                                                                                 |
 | Hanwha XNP-6550RH            |      ✅      |      ❌      |                                                                                                                                                 |
@@ -141,4 +143,4 @@ camera_groups:
 ```
 
 ## Two-Way Audio
-Two way audio is supported through `go2rtc`. See [here](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#two-way-audio) for documentation on requirements. As a rule of thumb, a camera supporting ONVIF Profile T is likely to work, but you can check explicitly by verifying that in the [ONVIF Conformant Products Database](https://www.onvif.org/conformant-products/), under FeatureList for the specific camera, it lists `AudioOutput`. If the camera is supported, you can use the Frigate WebUI or the Home-Assistant integration to talk through the camera's speaker.
+See the [here](/configuration/live/#two-way-talk) for a guide on how to set up Two way audio / Two way talk and some starting points to determine if your camera supports the required features.
