@@ -143,4 +143,4 @@ camera_groups:
 ```
 
 ## Two-Way Audio
-See the [here](/configuration/live/#two-way-talk) for a guide on how to set up Two way audio / Two way talk and some starting points to determine if your camera supports the required features.
+See the guide [here](/configuration/live/#two-way-talk)
