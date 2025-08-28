@@ -749,7 +749,10 @@ def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: st
     "/vod/event/{event_id}",
     description="Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
-def vod_event(event_id: str):
+def vod_event(
+    event_id: str,
+    padding: int = Query(0, description="Padding to apply to the vod."),
+):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
@@ -772,32 +775,23 @@ def vod_event(event_id: str):
             status_code=404,
         )
 
-    clip_path = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.mp4")
-
-    if not os.path.isfile(clip_path):
-        end_ts = (
-            datetime.now().timestamp() if event.end_time is None else event.end_time
-        )
-        vod_response = vod_ts(event.camera, event.start_time, end_ts)
-        # If the recordings are not found and the event started more than 5 minutes ago, set has_clip to false
-        if (
-            event.start_time < datetime.now().timestamp() - 300
-            and type(vod_response) is tuple
-            and len(vod_response) == 2
-            and vod_response[1] == 404
-        ):
-            Event.update(has_clip=False).where(Event.id == event_id).execute()
-        return vod_response
-
-    duration = int((event.end_time - event.start_time) * 1000)
-    return JSONResponse(
-        content={
-            "cache": True,
-            "discontinuity": False,
-            "durations": [duration],
-            "sequences": [{"clips": [{"type": "source", "path": clip_path}]}],
-        }
+    end_ts = (
+        datetime.now().timestamp()
+        if event.end_time is None
+        else (event.end_time + padding)
     )
+    vod_response = vod_ts(event.camera, event.start_time - padding, end_ts)
+
+    # If the recordings are not found and the event started more than 5 minutes ago, set has_clip to false
+    if (
+        event.start_time < datetime.now().timestamp() - 300
+        and type(vod_response) is tuple
+        and len(vod_response) == 2
+        and vod_response[1] == 404
+    ):
+        Event.update(has_clip=False).where(Event.id == event_id).execute()
+
+    return vod_response
 
 
 @router.get(
