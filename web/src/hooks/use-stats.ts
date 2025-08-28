@@ -41,7 +41,7 @@ export default function useStats(stats: FrigateStats | undefined) {
           min: shm.min_shm,
         }),
         color: "text-danger",
-        relevantLink: "/system#general",
+        relevantLink: "/system#storage",
       });
     }
 
