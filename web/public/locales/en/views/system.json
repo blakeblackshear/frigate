@@ -42,6 +42,7 @@
       "inferenceSpeed": "Detector Inference Speed",
       "temperature": "Detector Temperature",
       "cpuUsage": "Detector CPU Usage",
+      "cpuUsageInformation": "CPU used in preparing input and output data to/from detection models. This value does not measure inference usage, even if using a GPU or accelerator.",
       "memoryUsage": "Detector Memory Usage"
     },
     "hardwareInfo": {
