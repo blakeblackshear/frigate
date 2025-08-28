@@ -162,7 +162,8 @@
     "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)",
     "cameraIsOffline": "{{camera}} is offline",
     "detectIsSlow": "{{detect}} is slow ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)",
+    "shmTooLow": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB."
   },
   "enrichments": {
     "title": "Enrichments",

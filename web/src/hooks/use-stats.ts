@@ -32,6 +32,19 @@ export default function useStats(stats: FrigateStats | undefined) {
       return problems;
     }
 
+    // check shm level
+    const shm = memoizedStats.service.storage["/dev/shm"];
+    if (shm?.total && shm?.min_shm && shm.total < shm.min_shm) {
+      problems.push({
+        text: t("stats.shmTooLow", {
+          total: shm.total,
+          min: shm.min_shm,
+        }),
+        color: "text-danger",
+        relevantLink: "/system#storage",
+      });
+    }
+
     // check detectors for high inference speeds
     Object.entries(memoizedStats["detectors"]).forEach(([key, det]) => {
       if (det["inference_speed"] > InferenceThreshold.error) {
