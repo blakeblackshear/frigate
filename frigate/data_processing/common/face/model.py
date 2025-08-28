@@ -9,7 +9,7 @@ import numpy as np
 from scipy import stats
 
 from frigate.config import FrigateConfig
-from frigate.const import MODEL_CACHE_DIR
+from frigate.const import FACE_DIR, MODEL_CACHE_DIR
 from frigate.embeddings.onnx.face_embedding import ArcfaceEmbedding, FaceNetEmbedding
 from frigate.log import redirect_output_to_logger
 
@@ -172,7 +172,7 @@ class FaceNetRecognizer(FaceRecognizer):
             face_embeddings_map: dict[str, list[np.ndarray]] = {}
             idx = 0
 
-            dir = "/media/frigate/clips/faces"
+            dir = FACE_DIR
             for name in os.listdir(dir):
                 if name == "train":
                     continue
@@ -282,7 +282,7 @@ class ArcFaceRecognizer(FaceRecognizer):
             face_embeddings_map: dict[str, list[np.ndarray]] = {}
             idx = 0
 
-            dir = "/media/frigate/clips/faces"
+            dir = FACE_DIR
             for name in os.listdir(dir):
                 if name == "train":
                     continue
