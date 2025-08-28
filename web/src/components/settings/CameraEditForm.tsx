@@ -7,7 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input, MultiSelectInput } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
@@ -22,6 +22,14 @@ import { LuTrash2, LuPlus } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
+import i18n from "@/utils/i18n";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type ConfigSetBody = {
   requires_restart: number;
@@ -55,6 +63,100 @@ export default function CameraEditForm({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [isLoading, setIsLoading] = useState(false);
 
+  const go2rtc_ffmpegOptions = [
+    {
+      id: "codec",
+      name: t("camera.cameraConfig.ffmpeg.go2rtc.compatibility.codec.title"),
+      description: t(
+        "camera.cameraConfig.ffmpeg.go2rtc.compatibility.codec.description",
+      ),
+      options: [
+        {
+          value: "#video=h264",
+          label: t(
+            "camera.cameraConfig.ffmpeg.go2rtc.compatibility.codec.h264",
+          ),
+        },
+        {
+          value: "#video=h265",
+          label: t(
+            "camera.cameraConfig.ffmpeg.go2rtc.compatibility.codec.h265",
+          ),
+        },
+        {
+          value: "#video=copy",
+          label: t(
+            "camera.cameraConfig.ffmpeg.go2rtc.compatibility.codec.copy",
+          ),
+        },
+      ],
+    },
+    {
+      id: "audio",
+      name: t("camera.cameraConfig.ffmpeg.go2rtc.compatibility.audio.title"),
+      description: t(
+        "camera.cameraConfig.ffmpeg.go2rtc.compatibility.audio.description",
+      ),
+      options: [
+        {
+          value: "#audio=aac",
+          label: t("camera.cameraConfig.ffmpeg.go2rtc.compatibility.audio.aac"),
+        },
+        {
+          value: "#audio=opus",
+          label: t(
+            "camera.cameraConfig.ffmpeg.go2rtc.compatibility.audio.opus",
+          ),
+        },
+        {
+          value: "#audio=copy",
+          label: t(
+            "camera.cameraConfig.ffmpeg.go2rtc.compatibility.audio.copy",
+          ),
+        },
+      ],
+    },
+    {
+      id: "rotate",
+      name: t("camera.cameraConfig.ffmpeg.go2rtc.compatibility.rotate.title"),
+      description: t(
+        "camera.cameraConfig.ffmpeg.go2rtc.compatibility.rotate.description",
+      ),
+      options: [
+        {
+          value: "#rotate=90",
+          label: t("camera.cameraConfig.ffmpeg.go2rtc.compatibility.rotate.90"),
+        },
+        {
+          value: "#rotate=180",
+          label: t(
+            "camera.cameraConfig.ffmpeg.go2rtc.compatibility.rotate.180",
+          ),
+        },
+        {
+          value: "#rotate=270",
+          label: t(
+            "camera.cameraConfig.ffmpeg.go2rtc.compatibility.rotate.270",
+          ),
+        },
+      ],
+    },
+    {
+      id: "hardware",
+      name: t("camera.cameraConfig.ffmpeg.go2rtc.compatibility.hardware.title"),
+      description: t(
+        "camera.cameraConfig.ffmpeg.go2rtc.compatibility.hardware.description",
+      ),
+      options: [
+        {
+          value: "#hardware",
+          label: t(
+            "camera.cameraConfig.ffmpeg.go2rtc.compatibility.hardware.useHardware",
+          ),
+        },
+      ],
+    },
+  ];
   const formSchema = useMemo(
     () =>
       z.object({
@@ -72,6 +174,8 @@ export default function CameraEditForm({
                 roles: z.array(RoleEnum).min(1, {
                   message: t("camera.cameraConfig.ffmpeg.rolesRequired"),
                 }),
+                go2rtc: z.boolean(),
+                go2rtc_ffmpeg: z.string().optional(),
               }),
             )
             .min(1, {
@@ -133,6 +237,8 @@ export default function CameraEditForm({
     ffmpeg: {
       inputs: [
         {
+          go2rtc: false,
+          go2rtc_ffmpeg: "",
           path: "",
           roles: cameraInfo.roles.has("detect") ? [] : ["detect"],
         },
@@ -145,10 +251,51 @@ export default function CameraEditForm({
     const camera = config.cameras[cameraName];
     defaultValues.enabled = camera.enabled ?? true;
     defaultValues.ffmpeg.inputs = camera.ffmpeg?.inputs?.length
-      ? camera.ffmpeg.inputs.map((input) => ({
-          path: input.path,
-          roles: input.roles as Role[],
-        }))
+      ? camera.ffmpeg.inputs.map((input) => {
+          const isGo2rtcPath = input.path.match(
+            /^rtsp:\/\/127\.0\.0\.1:8554\/(.+)$/,
+          );
+          const go2rtcStreamName = isGo2rtcPath ? isGo2rtcPath[1] : null;
+
+          let originalPath = input.path;
+          let ffmpegParams = "";
+
+          if (go2rtcStreamName && config.go2rtc?.streams) {
+            Object.entries(config.go2rtc.streams).forEach(
+              ([streamKey, streamConfig]) => {
+                if (
+                  streamKey === go2rtcStreamName ||
+                  streamKey.startsWith(`${cameraName}_`)
+                ) {
+                  if (Array.isArray(streamConfig) && streamConfig.length >= 1) {
+                    originalPath = streamConfig[0] || "";
+                    ffmpegParams = streamConfig[1] || "";
+                  }
+                }
+              },
+            );
+
+            if (
+              originalPath === input.path &&
+              config.go2rtc.streams[go2rtcStreamName]
+            ) {
+              const streamConfig = config.go2rtc.streams[go2rtcStreamName];
+              if (Array.isArray(streamConfig) && streamConfig.length >= 1) {
+                originalPath = streamConfig[0] || "";
+                ffmpegParams = streamConfig[1] || "";
+              }
+            }
+          }
+
+          return {
+            path: isGo2rtcPath ? originalPath : input.path,
+            roles: input.roles as Role[],
+            go2rtc: !!isGo2rtcPath,
+            go2rtc_ffmpeg: isGo2rtcPath
+              ? ffmpegParams
+              : config.go2rtc?.streams?.[cameraName]?.[1] || "",
+          };
+        })
       : defaultValues.ffmpeg.inputs;
   }
 
@@ -183,13 +330,33 @@ export default function CameraEditForm({
           ...(friendly_name && { friendly_name }),
           ffmpeg: {
             inputs: values.ffmpeg.inputs.map((input) => ({
-              path: input.path,
+              path: input.go2rtc
+                ? `rtsp://127.0.0.1:8554/${finalCameraName}_${input.roles.join("_")}`
+                : input.path,
               roles: input.roles,
             })),
           },
         },
       },
     };
+
+    const hasGo2rtcEnabled = values.ffmpeg.inputs.some((input) => input.go2rtc);
+
+    if (hasGo2rtcEnabled) {
+      const go2rtcStreams: Record<string, string[]> = {};
+
+      values.ffmpeg.inputs.forEach((input) => {
+        if (input.go2rtc) {
+          const streamName = `${finalCameraName}_${input.roles.join("_")}`;
+
+          go2rtcStreams[streamName] = [input.path, input.go2rtc_ffmpeg || ""];
+        }
+      });
+
+      configData.go2rtc = {
+        streams: go2rtcStreams,
+      };
+    }
 
     const requestBody: ConfigSetBody = {
       requires_restart: 1,
@@ -232,11 +399,7 @@ export default function CameraEditForm({
   };
 
   const onSubmit = (values: FormValues) => {
-    if (
-      cameraName &&
-      values.cameraName !== cameraName &&
-      values.cameraName !== cameraInfo?.friendly_name
-    ) {
+    if (cameraName && values.cameraName !== cameraName) {
       // If camera name changed, delete old camera config
       const deleteRequestBody: ConfigSetBody = {
         requires_restart: 1,
@@ -247,6 +410,20 @@ export default function CameraEditForm({
         },
         update_topic: `config/cameras/${cameraName}/remove`,
       };
+      const camera = config?.cameras[cameraName];
+      if (values.ffmpeg.inputs.some((input) => input.go2rtc)) {
+        camera?.ffmpeg.inputs.map((input) => {
+          const isGo2rtcPath = input.path.match(
+            /^rtsp:\/\/127\.0\.0\.1:8554\/(.+)$/,
+          );
+          const go2rtcStreamName = isGo2rtcPath ? isGo2rtcPath[1] : "";
+          deleteRequestBody.config_data.go2rtc = {
+            streams: {
+              [go2rtcStreamName]: "",
+            },
+          };
+        });
+      }
 
       axios
         .put("config/set", deleteRequestBody)
@@ -372,32 +549,56 @@ export default function CameraEditForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        {t("camera.cameraConfig.ffmpeg.roles")}
+                        {t("camera.cameraConfig.ffmpeg.roles.title")}
                       </FormLabel>
                       <FormControl>
                         <div className="flex flex-wrap gap-2">
                           {(["audio", "detect", "record"] as const).map(
                             (role) => (
-                              <label
-                                key={role}
-                                className="flex items-center space-x-2"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={field.value.includes(role)}
-                                  onChange={(e) => {
-                                    const updatedRoles = e.target.checked
-                                      ? [...field.value, role]
-                                      : field.value.filter((r) => r !== role);
-                                    field.onChange(updatedRoles);
-                                  }}
-                                  disabled={
-                                    !field.value.includes(role) &&
-                                    getUsedRolesExcludingIndex(index).has(role)
-                                  }
-                                />
-                                <span>{role}</span>
-                              </label>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <label
+                                    key={role}
+                                    className="flex items-center space-x-2"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={field.value.includes(role)}
+                                      onChange={(e) => {
+                                        const updatedRoles = e.target.checked
+                                          ? [...field.value, role]
+                                          : field.value.filter(
+                                              (r) => r !== role,
+                                            );
+                                        field.onChange(updatedRoles);
+                                      }}
+                                      disabled={
+                                        !field.value.includes(role) &&
+                                        getUsedRolesExcludingIndex(index).has(
+                                          role,
+                                        )
+                                      }
+                                    />
+                                    <span>
+                                      {i18n.language === "en"
+                                        ? role
+                                        : t(
+                                            `camera.cameraConfig.ffmpeg.roles.${role}.label`,
+                                          ) +
+                                          "(" +
+                                          role +
+                                          ")"}
+                                    </span>
+                                  </label>
+                                </TooltipTrigger>
+                                <TooltipPortal>
+                                  <TooltipContent>
+                                    {t(
+                                      `camera.cameraConfig.ffmpeg.roles.${role}.info`,
+                                    )}
+                                  </TooltipContent>
+                                </TooltipPortal>
+                              </Tooltip>
                             ),
                           )}
                         </div>
@@ -406,7 +607,73 @@ export default function CameraEditForm({
                     </FormItem>
                   )}
                 />
-
+                <FormField
+                  control={form.control}
+                  name={`ffmpeg.inputs.${index}.go2rtc`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {t("camera.cameraConfig.ffmpeg.go2rtc.title")}
+                        <div className="my-3 text-sm text-muted-foreground">
+                          {t("camera.cameraConfig.ffmpeg.go2rtc.description")}
+                        </div>
+                      </FormLabel>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                          <FormLabel>
+                            {t("camera.cameraConfig.enabled")}
+                          </FormLabel>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`ffmpeg.inputs.${index}.go2rtc_ffmpeg`}
+                  render={({ field }) => (
+                    <FormItem>
+                      {form.watch(`ffmpeg.inputs.${index}.go2rtc`) ? (
+                        <>
+                          <FormLabel>
+                            {t(
+                              "camera.cameraConfig.ffmpeg.go2rtc.compatibility.title",
+                            )}
+                          </FormLabel>
+                          <div className="my-3 text-sm text-muted-foreground">
+                            {t(
+                              "camera.cameraConfig.ffmpeg.go2rtc.compatibility.description",
+                            )}
+                          </div>
+                          <FormControl>
+                            <MultiSelectInput
+                              parameterGroups={go2rtc_ffmpegOptions}
+                              onParameterChange={(params) => {
+                                const combinedValue =
+                                  Object.values(params).join("");
+                                field.onChange(combinedValue);
+                              }}
+                              parameterPlaceholder={t(
+                                "camera.cameraConfig.ffmpeg.go2rtc.compatibility.select",
+                              )}
+                              inputPlaceholder={t(
+                                "camera.cameraConfig.ffmpeg.go2rtc.compatibility.custom",
+                              )}
+                              {...field}
+                              disabled={!!cameraName} // Prevent editing name for existing cameras
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </>
+                      ) : null}
+                    </FormItem>
+                  )}
+                />
                 <Button
                   variant="destructive"
                   size="sm"
@@ -426,7 +693,9 @@ export default function CameraEditForm({
               variant="outline"
               size="sm"
               className="mt-2"
-              onClick={() => append({ path: "", roles: getAvailableRoles() })}
+              onClick={() =>
+                append({ path: "", roles: getAvailableRoles(), go2rtc: false })
+              }
             >
               <LuPlus className="mr-2 h-4 w-4" />
               {t("camera.cameraConfig.ffmpeg.addInput")}

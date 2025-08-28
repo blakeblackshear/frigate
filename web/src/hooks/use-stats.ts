@@ -62,7 +62,7 @@ export default function useStats(stats: FrigateStats | undefined) {
       }
 
       const cameraName = config.cameras?.[name]?.friendly_name ?? name;
-      if (config.cameras[name].enabled && cam["camera_fps"] == 0) {
+      if (config.cameras?.[name]?.enabled && cam["camera_fps"] == 0) {
         problems.push({
           text: t("stats.cameraIsOffline", {
             camera: capitalizeFirstLetter(capitalizeAll(cameraName)),

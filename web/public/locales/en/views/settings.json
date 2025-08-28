@@ -198,10 +198,59 @@
       "enabled": "Enabled",
       "ffmpeg": {
         "inputs": "Input Streams",
+        "go2rtc": {
+          "title": "Use go2rtc stream",
+          "description": "will use go2rtc",
+          "compatibility": {
+            "title": "Video codec compatibility (Advanced)",
+            "description": "Here you can configure common go2rtc FFmpeg encoding parameters. Some of these parameters may help resolve certain video or audio issues.",
+            "codec": {
+              "title": "Video Codec",
+              "description": "You can use go2rtc to convert the stream to a specified encoding. Note that converting video from one format to another is a resource-intensive task, so additional conversion is not recommended if the original setup works properly.",
+              "h264": "H.264",
+              "h265": "H.265",
+              "copy": "Copy (default)"
+            },
+            "audio": {
+              "title": "Audio Codec",
+              "description": "If your camera does not support AAC audio, you can use this parameter to convert the audio to AAC. If you can see the video but hear no sound, try adding this parameter.",
+              "copy": "Copy (default)",
+              "aac": "AAC",
+              "opus": "Opus"
+            },
+            "rotate": {
+              "title": "Rotation",
+              "description": "Some cameras may not set the correct rotation flag in the video stream. If your camera's video appears rotated incorrectly, you can use this parameter to manually set the rotation.",
+              "90": "90°",
+              "180": "180°",
+              "270": "270°"
+            },
+            "hardware": {
+              "title": "Hardware",
+              "description": "If you are using a hardware encoder, you can use this parameter to specify the hardware encoder to use.",
+              "useHardware": "Force use hardware"
+            }
+          }
+        },
+
         "path": "Stream Path",
         "pathRequired": "Stream path is required",
         "pathPlaceholder": "rtsp://...",
-        "roles": "Roles",
+        "roles": {
+          "title": "Roles",
+          "record": {
+            "label": "Record",
+            "info": "5555"
+          },
+          "audio": {
+            "label": "Audio",
+            "info": "6666"
+          },
+          "detect": {
+            "label": "Detect",
+            "info": "77777"
+          }
+        },
         "rolesRequired": "At least one role is required",
         "rolesUnique": "Each role (audio, detect, record) can only be assigned to one stream",
         "addInput": "Add Input Stream",

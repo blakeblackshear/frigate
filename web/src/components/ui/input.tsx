@@ -22,4 +22,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 )
 Input.displayName = "Input"
 
-export { Input }
+import { SelectInput } from "./select-input"
+import { MultiSelectInput } from "./multi-select-input"
+
+export { Input, SelectInput, MultiSelectInput }

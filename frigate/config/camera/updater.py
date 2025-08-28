@@ -80,6 +80,31 @@ class CameraConfigUpdateSubscriber:
             self.camera_configs[camera] = updated_config
             return
         elif update_type == CameraConfigUpdateEnum.remove:
+            """Remove go2rtc streams with camera"""
+            camera_config = self.camera_configs.get(camera)
+            if (
+                camera_config
+                and hasattr(self.config, "go2rtc")
+                and hasattr(camera_config, "ffmpeg")
+                and hasattr(camera_config.ffmpeg, "inputs")
+            ):
+                for input_item in camera_config.ffmpeg.inputs:
+                    if hasattr(input_item, "path") and isinstance(input_item.path, str):
+                        if (
+                            "rtsp://" in input_item.path
+                            and "127.0.0.1:8554/" in input_item.path
+                        ):
+                            stream_name = (
+                                input_item.path.split("127.0.0.1:8554/")[-1]
+                                .split("&")[0]
+                                .split("?")[0]
+                            )
+                            if (
+                                hasattr(self.config.go2rtc, "streams")
+                                and stream_name in self.config.go2rtc.streams
+                            ):
+                                self.config.go2rtc.streams.pop(stream_name)
+
             self.config.cameras.pop(camera)
             self.camera_configs.pop(camera)
             return
