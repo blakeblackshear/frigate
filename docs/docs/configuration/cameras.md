@@ -89,7 +89,7 @@ An ONVIF-capable camera that supports relative movement within the field of view
 
 ## ONVIF PTZ camera recommendations
 
-This list of working and non-working PTZ cameras is based on user feedback. It is thus important that you [report camera compatibility](https://github.com/blakeblackshear/frigate/issues) if you manage or do not manage to get a camera not listed here working.
+This list of working and non-working PTZ cameras is based on user feedback. It is thus important that you report your camera working or not working by opening an issue or by creating a pull request. 
 
 The FeatureList on the [ONVIF Conformant Products Database](https://www.onvif.org/conformant-products/) can provide a starting point to determine a camera's compatibility with Frigate's autotracking. Look to see if a camera lists `PTZRelative`, `PTZRelativePanTilt` and/or `PTZRelativeZoom`, plus `PTZAuxiliary`. These features are required for autotracking, but some cameras still fail to respond even if they claim support. If they are missing, autotracking will not work (though basic PTZ in the WebUI might). Avoid cameras with no database entry unless they are confirmed as working below.
 
