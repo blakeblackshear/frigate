@@ -250,7 +250,7 @@ export default function CameraEditForm({
   if (cameraName && config?.cameras[cameraName]) {
     const camera = config.cameras[cameraName];
     defaultValues.enabled = camera.enabled ?? true;
-    defaultValues.ffmpeg.inputs = camera.ffmpeg?.inputs?.length
+    defaultValues.ffmpeg.inputs = camera.ffmpeg?.inputs
       ? camera.ffmpeg.inputs.map((input) => {
           const isGo2rtcPath = input.path.match(
             /^rtsp:\/\/127\.0\.0\.1:8554\/(.+)$/,
@@ -263,10 +263,7 @@ export default function CameraEditForm({
           if (go2rtcStreamName && config.go2rtc?.streams) {
             Object.entries(config.go2rtc.streams).forEach(
               ([streamKey, streamConfig]) => {
-                if (
-                  streamKey === go2rtcStreamName ||
-                  streamKey.startsWith(`${cameraName}_`)
-                ) {
+                if (streamKey === go2rtcStreamName) {
                   if (Array.isArray(streamConfig) && streamConfig.length >= 1) {
                     originalPath = streamConfig[0] || "";
                     ffmpegParams = streamConfig[1] || "";
@@ -319,7 +316,9 @@ export default function CameraEditForm({
     let friendly_name: string | undefined = undefined;
     const isValidName = /^[a-zA-Z0-9_-]+$/.test(values.cameraName);
     if (!isValidName) {
-      finalCameraName = generateFixedHash(finalCameraName);
+      finalCameraName = cameraName
+        ? cameraName
+        : generateFixedHash(finalCameraName);
       friendly_name = values.cameraName;
     }
 
@@ -366,6 +365,8 @@ export default function CameraEditForm({
     // Add update_topic for new cameras
     if (!cameraName) {
       requestBody.update_topic = `config/cameras/${finalCameraName}/add`;
+    } else {
+      requestBody.update_topic = `config/cameras/${finalCameraName}/edit`;
     }
 
     axios
@@ -399,51 +400,7 @@ export default function CameraEditForm({
   };
 
   const onSubmit = (values: FormValues) => {
-    if (cameraName && values.cameraName !== cameraName) {
-      // If camera name changed, delete old camera config
-      const deleteRequestBody: ConfigSetBody = {
-        requires_restart: 1,
-        config_data: {
-          cameras: {
-            [cameraName]: "",
-          },
-        },
-        update_topic: `config/cameras/${cameraName}/remove`,
-      };
-      const camera = config?.cameras[cameraName];
-      if (values.ffmpeg.inputs.some((input) => input.go2rtc)) {
-        camera?.ffmpeg.inputs.map((input) => {
-          const isGo2rtcPath = input.path.match(
-            /^rtsp:\/\/127\.0\.0\.1:8554\/(.+)$/,
-          );
-          const go2rtcStreamName = isGo2rtcPath ? isGo2rtcPath[1] : "";
-          deleteRequestBody.config_data.go2rtc = {
-            streams: {
-              [go2rtcStreamName]: "",
-            },
-          };
-        });
-      }
-
-      axios
-        .put("config/set", deleteRequestBody)
-        .then(() => saveCameraConfig(values))
-        .catch((error) => {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.detail ||
-            "Unknown error";
-          toast.error(
-            t("toast.save.error.title", { errorMessage, ns: "common" }),
-            { position: "top-center" },
-          );
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    } else {
-      saveCameraConfig(values);
-    }
+    saveCameraConfig(values);
   };
 
   // Determine available roles for new streams
@@ -486,11 +443,19 @@ export default function CameraEditForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("camera.cameraConfig.name")}</FormLabel>
+                {cameraName ? (
+                  <>
+                    <div className="my-3 text-sm text-muted-foreground">
+                      {t("camera.cameraConfig.nameOnlyChangeToFriendlyName")}
+                    </div>
+                  </>
+                ) : (
+                  ""
+                )}
                 <FormControl>
                   <Input
                     placeholder={t("camera.cameraConfig.namePlaceholder")}
                     {...field}
-                    disabled={!!cameraName} // Prevent editing name for existing cameras
                   />
                 </FormControl>
                 <FormMessage />

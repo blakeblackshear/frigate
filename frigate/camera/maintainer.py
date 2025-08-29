@@ -50,6 +50,7 @@ class CameraMaintainer(threading.Thread):
             [
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.remove,
+                CameraConfigUpdateEnum.edit,
             ],
         )
         self.shm_count = self.__calculate_shm_frame_count()
@@ -204,9 +205,25 @@ class CameraMaintainer(threading.Thread):
                             self.update_subscriber.camera_configs[camera],
                             runtime=True,
                         )
+                elif update_type == CameraConfigUpdateEnum.edit.name:
+                    for camera in updated_cameras:
+                        self.__stop_camera_capture_process(camera)
+                        self.__stop_camera_process(camera)
+
+                        self.__start_camera_processor(
+                            camera,
+                            self.update_subscriber.camera_configs[camera],
+                            runtime=True,
+                        )
+                        self.__start_camera_capture(
+                            camera,
+                            self.update_subscriber.camera_configs[camera],
+                            runtime=True,
+                        )
                 elif update_type == CameraConfigUpdateEnum.remove.name:
-                    self.__stop_camera_capture_process(camera)
-                    self.__stop_camera_process(camera)
+                    for camera in updated_cameras:
+                        self.__stop_camera_capture_process(camera)
+                        self.__stop_camera_process(camera)
 
         # ensure the capture processes are done
         for camera in self.camera_processes.keys():

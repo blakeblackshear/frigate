@@ -32,6 +32,7 @@ from frigate.config import FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
+    reload_go2rtc,
 )
 from frigate.models import Event, Timeline
 from frigate.stats.prometheus import get_metrics, update_metrics
@@ -424,15 +425,38 @@ def config_set(request: Request, body: AppConfigSetBody):
 
             if field == "add":
                 settings = config.cameras[camera]
+                if camera in old_config.cameras:
+                    request.app.config_publisher.publish_update(
+                        CameraConfigUpdateTopic(CameraConfigUpdateEnum.edit, camera),
+                        settings,
+                    )
+                    continue_publish = False
+                else:
+                    continue_publish = True
+            elif field == "edit":
+                settings = config.cameras[camera]
+                if camera in old_config.cameras:
+                    logger.info(f"Publishing edit event for camera {camera}")
+                    continue_publish = True
+                else:
+                    request.app.config_publisher.publish_update(
+                        CameraConfigUpdateTopic(CameraConfigUpdateEnum.add, camera),
+                        settings,
+                    )
+                    continue_publish = False
             elif field == "remove":
                 settings = old_config.cameras[camera]
+                continue_publish = True
             else:
                 settings = config.get_nested_object(body.update_topic)
+                continue_publish = True
 
-            request.app.config_publisher.publish_update(
-                CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
-                settings,
-            )
+            if continue_publish:
+                logger.info(f"Publishing {field} event for camera {camera}")
+                request.app.config_publisher.publish_update(
+                    CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
+                    settings,
+                )
 
     return JSONResponse(
         content=(
@@ -528,6 +552,23 @@ def vainfo():
 @router.get("/nvinfo")
 def nvinfo():
     return JSONResponse(content=get_nvidia_driver_info())
+
+
+@router.post("/go2rtc/reload", dependencies=[Depends(require_role(["admin"]))])
+def reload_go2rtc_endpoint():
+    """reload go2rtc service"""
+    try:
+        reload_go2rtc()
+        return JSONResponse(
+            content={"success": True, "message": "go2rtc reloaded"},
+            status_code=200,
+        )
+    except Exception as e:
+        logger.error(f"reload go2rtc failed: {e}")
+        return JSONResponse(
+            content={"success": False, "message": f"{str(e)}"},
+            status_code=500,
+        )
 
 
 @router.get("/logs/{service}", tags=[Tags.logs])

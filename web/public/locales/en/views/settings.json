@@ -192,6 +192,7 @@
       "edit": "Edit Camera",
       "description": "Configure camera settings including stream inputs and roles.",
       "name": "Camera Name",
+      "nameOnlyChangeToFriendlyName": "This will only change the Friendly Name.",
       "nameRequired": "Camera name is required",
       "nameLength": "Camera name must be less than 24 characters.",
       "namePlaceholder": "e.g., front_door",
@@ -200,7 +201,7 @@
         "inputs": "Input Streams",
         "go2rtc": {
           "title": "Use go2rtc stream",
-          "description": "will use go2rtc",
+          "description": "It will utilize go2rtc, enabling a smoother live viewing experience and allowing you to hear the camera audio.",
           "compatibility": {
             "title": "Video codec compatibility (Advanced)",
             "description": "Here you can configure common go2rtc FFmpeg encoding parameters. Some of these parameters may help resolve certain video or audio issues.",
