@@ -83,8 +83,44 @@
   "selectItem": "Vyberte {{item}}",
   "unit": {
     "speed": {
-      "mph": "mph"
+      "mph": "mph",
+      "kph": "Km/h"
+    },
+    "length": {
+      "feet": "nohy",
+      "meters": "metrov"
     }
   },
-  "readTheDocumentation": "Prečítajte si dokumentáciu"
+  "readTheDocumentation": "Prečítajte si dokumentáciu",
+  "label": {
+    "back": "Choď späť"
+  },
+  "button": {
+    "apply": "Použiť",
+    "reset": "Resetovať",
+    "done": "Hotovo",
+    "enabled": "Povolené",
+    "enable": "Povoliť",
+    "disabled": "Zakázané",
+    "disable": "Zakázať",
+    "save": "Uložiť",
+    "saving": "Ukladá sa…",
+    "cancel": "Zrušiť",
+    "close": "Zavrieť",
+    "copy": "Kopírovať",
+    "back": "Späť",
+    "history": "História",
+    "fullscreen": "Celá obrazovka",
+    "exitFullscreen": "Opustiť režim celú obrazovku",
+    "pictureInPicture": "Obraz v obraze",
+    "twoWayTalk": "Obojsmerná komunikácia",
+    "cameraAudio": "Zvuk kamery",
+    "on": "ON",
+    "off": "OFF",
+    "edit": "Upraviť",
+    "copyCoordinates": "Kopírovať súradnice",
+    "delete": "Odstrániť",
+    "yes": "Ano",
+    "no": "Nie"
+  }
 }
