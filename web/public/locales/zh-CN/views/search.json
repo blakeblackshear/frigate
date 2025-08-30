@@ -9,7 +9,7 @@
     "filterInformation": "筛选信息",
     "filterActive": "筛选器已激活"
   },
-  "trackedObjectId": "跟踪对象 ID",
+  "trackedObjectId": "追踪目标 ID",
   "filter": {
     "label": {
       "cameras": "摄像头",

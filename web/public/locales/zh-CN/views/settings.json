@@ -164,12 +164,12 @@
       "readTheDocumentation": "阅读文档",
       "noDefinedZones": "该摄像头没有设置区域。",
       "objectAlertsTips": "所有 {{alertsLabels}} 对象在 {{cameraName}} 下都将显示为警报。",
-      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 对象在 {{cameraName}} 下的 {{zone}} 区内都将显示为警报。",
-      "objectDetectionsTips": "所有未在 {{cameraName}} 归类的 {{detectionsLabels}} 对象，无论它位于哪个区，都将显示为检测。",
+      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 类的目标或物体在 {{cameraName}} 下的 {{zone}} 区内都将显示为警报。",
+      "objectDetectionsTips": "所有未在 {{cameraName}} 归类的 {{detectionsLabels}} 目标或物体，无论它位于哪个区，都将显示为检测。",
       "zoneObjectDetectionsTips": {
-        "text": "所有未在 {{cameraName}} 上归类为 {{detectionsLabels}} 的对象在 {{zone}} 区都将显示为检测。",
-        "notSelectDetections": "所有在 {{cameraName}} 下的 {{zone}} 区内检测到的 {{detectionsLabels}} 对象，如果它未归类为警报，无论它位于哪个区，都将显示为检测。",
-        "regardlessOfZoneObjectDetectionsTips": "所有未在 {{cameraName}} 归类的 {{detectionsLabels}} 对象，无论它位于哪个区域，都将显示为检测。"
+        "text": "所有未在 {{cameraName}} 上归类为 {{detectionsLabels}} 的目标或物体在 {{zone}} 区内都将显示为检测。",
+        "notSelectDetections": "所有在 {{cameraName}} 下的 {{zone}} 区内检测到的 {{detectionsLabels}} 目标或物体，如果它未归类为警报，无论它位于哪个区，都将显示为检测。",
+        "regardlessOfZoneObjectDetectionsTips": "所有未在 {{cameraName}} 归类的 {{detectionsLabels}} 目标或物体，无论它位于哪个区域，都将显示为检测。"
       },
       "selectAlertsZones": "选择警报区",
       "selectDetectionsZones": "选择检测区域",
@@ -283,7 +283,7 @@
       "label": "区域",
       "documentTitle": "编辑区域 - Frigate",
       "desc": {
-        "title": "该功能允许你定义特定区域，以便你可以确定特定对象是否在该区域内。",
+        "title": "该功能允许你定义特定区域，以便你可以确定特定目标或物体是否在该区域内。",
         "documentation": "文档"
       },
       "add": "添加区域",
@@ -297,17 +297,17 @@
       },
       "inertia": {
         "title": "惯性",
-        "desc": "识别指定对象前该对象必须在这个区域内出现了多少帧。<em>默认值：3</em>"
+        "desc": "识别指定目标前该目标必须在这个区域内出现了多少帧。<em>默认值：3</em>"
       },
       "loiteringTime": {
         "title": "停留时间",
-        "desc": "设置对象必须在区域中活动的最小时间（单位为秒）。<em>默认值：0</em>"
+        "desc": "设置目标必须在区域中至少要活动多少时间（单位为秒）。<em>默认值：0</em>"
       },
       "objects": {
-        "title": "对象",
-        "desc": "将在此区域应用的对象列表。"
+        "title": "目标/物体",
+        "desc": "将在此区域应用的目标/物体类别列表。"
       },
-      "allObjects": "所有对象",
+      "allObjects": "所有目标/物体",
       "speedEstimation": {
         "title": "速度估算",
         "desc": "启用此区域内物体的速度估算。该区域必须恰好包含 4 个点。",
@@ -335,7 +335,7 @@
       "label": "运动遮罩",
       "documentTitle": "编辑运动遮罩 - Frigate",
       "desc": {
-        "title": "运动遮罩用于防止触发不必要的运动类型。过度的设置遮罩将使对象更加难以被追踪。",
+        "title": "画面变动遮罩用于防止触发不必要的画面变动检测。过度的设置遮罩将使目标更加难以被追踪。",
         "documentation": "文档"
       },
       "add": "添加运动遮罩",
@@ -348,7 +348,7 @@
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
       "polygonAreaTooLarge": {
         "title": "运动遮罩的大小达到了摄像头画面的{{polygonArea}}%。不建议设置太大的运动遮罩。",
-        "tips": "运动遮罩不会阻止检测到对象，你应该使用区域来限制检测对象。",
+        "tips": "画面变动遮罩并不会使该区域无法检测到指定目标/物体，如有需要，你应该使用 区域 来限制检测的目标/物体类型。",
         "documentation": "阅读文档"
       },
       "toast": {
@@ -359,37 +359,37 @@
       }
     },
     "objectMasks": {
-      "label": "对象遮罩",
-      "documentTitle": "编辑对象遮罩 - Frigate",
+      "label": "目标遮罩",
+      "documentTitle": "编辑目标遮罩 - Frigate",
       "desc": {
-        "title": "对象过滤器用于防止特定位置的指定对象被误报。",
+        "title": "目标过滤器用于防止特定位置出现对某个目标/物体的误报。",
         "documentation": "文档"
       },
-      "add": "添加对象遮罩",
-      "edit": "编辑对象遮罩",
-      "context": "对象过滤器用于防止特定位置的指定对象被误报。",
+      "add": "添加目标遮罩",
+      "edit": "编辑目标遮罩",
+      "context": "目标过滤器用于防止特定位置的指定目标会误报。",
       "point_other": "{{count}} 点",
       "clickDrawPolygon": "在图像上点击添加点绘制多边形区域。",
       "objects": {
-        "title": "对象",
-        "desc": "将应用于此对象遮罩的对象类型。",
-        "allObjectTypes": "所有对象类型"
+        "title": "目标/物体",
+        "desc": "将应用于此目标遮罩的目标或物体类型。",
+        "allObjectTypes": "所有目标或物体类型"
       },
       "toast": {
         "success": {
           "title": "{{polygonName}} 已保存。请重启 Frigate 以应用更改。",
-          "noName": "对象遮罩已保存。请重启 Frigate 以应用更改。"
+          "noName": "目标遮罩已保存。请重启 Frigate 以应用更改。"
         }
       }
     },
     "restart_required": "需要重启（遮罩与区域已修改）",
     "motionMaskLabel": "运动遮罩 {{number}}",
-    "objectMaskLabel": "对象遮罩 {{number}}（{{label}}）"
+    "objectMaskLabel": "目标/物体遮罩 {{number}}（{{label}}）"
   },
   "motionDetectionTuner": {
     "title": "运动检测调整器",
     "desc": {
-      "title": "Frigate 将使用运动检测作为首个步骤，以确认一帧画面中是否有对象需要使用对象检测。",
+      "title": "Frigate 将使用画面变化检测作为首个步骤，以确认一帧画面中是否有目标或物体需要使用目标检测。",
       "documentation": "阅读有关运动检测的文档"
     },
     "Threshold": {
@@ -411,17 +411,17 @@
   },
   "debug": {
     "title": "调试",
-    "detectorDesc": "Frigate 将使用检测器（{{detectors}}）来检测摄像头视频流中的对象。",
-    "desc": "调试界面将实时显示被追踪的对象以及统计信息，对象列表将显示检测到的对象和延迟显示的概览。",
+    "detectorDesc": "Frigate 将使用检测器（{{detectors}}）来检测摄像头视频流中的目标或物体。",
+    "desc": "调试界面将实时显示被追踪的目标以及统计信息，目标列表将显示检测到的目标和延迟显示的概览。",
     "debugging": "调试选项",
-    "objectList": "对象列表",
-    "noObjects": "没有对象",
+    "objectList": "目标列表",
+    "noObjects": "没有目标",
     "boundingBoxes": {
       "title": "边界框",
-      "desc": "将在被追踪的对象周围显示边界框",
+      "desc": "将在被追踪的目标周围显示边界框",
       "colors": {
-        "label": "对象边界框颜色定义",
-        "info": "<li>启用后，将会为每个对象标签分配不同的颜色</li><li>深蓝色细线代表该对象在当前时间点未被检测到</li><li>灰色细线代表检测到的物体静止不动</li><li>粗线表示该对象为自动跟踪的主体（在启动时）</li>"
+        "label": "目标边界框颜色定义",
+        "info": "<li>启用后，将会为每个目标的标签分配不同的颜色</li><li>深蓝色细线代表该目标或物体在当前时间点未被检测到</li><li>灰色细线代表检测到的目标或物体静止不动</li><li>粗线表示该目标或物体为自动跟踪的主体（在启动时）</li>"
       }
     },
     "timestamp": {
@@ -457,8 +457,15 @@
     },
     "paths": {
       "title": "运动轨迹",
-      "desc": "显示被追踪对象运动轨迹的关键点",
-      "tips": "<p><strong>运动轨迹</strong></p><p>将使用线条和圆圈标示被追踪对象在其活动周期内移动的关键位置点。</p>"
+      "desc": "显示被追踪目标的运动轨迹关键点",
+      "tips": "<p><strong>运动轨迹</strong></p><p>将使用线条和圆圈标示被追踪目标在其活动周期内移动的关键位置点。</p>"
+    },
+    "audio": {
+      "title": "音频",
+      "noAudioDetections": "未检测到音频事件",
+      "score": "分值",
+      "currentRMS": "当前均方根值（RMS）",
+      "currentdbFS": "当前满量程相对分贝值（dbFS）"
     }
   },
   "users": {
@@ -666,10 +673,10 @@
     },
     "semanticSearch": {
       "reindexNow": {
-        "desc": "重建索引将为所有跟踪对象重新生成特征向量。该过程将在后台运行，可能会使CPU满载，所需时间取决于跟踪对象的数量。",
+        "desc": "重建索引将为所有追踪目标重新生成特征向量信息。该过程将在后台进行，可能会使CPU满载，所需时间取决于追踪目标的数量。",
         "label": "立即重建索引",
         "confirmTitle": "确认重建索引",
-        "confirmDesc": "确定要为所有跟踪对象重建特征向量索引吗？此过程将在后台运行，但可能会导致CPU满载并耗费较长时间。您可以在 浏览 页面查看进度。",
+        "confirmDesc": "确定要为所有追踪目标重建特征向量索引信息吗？此过程将在后台进行，但可能会导致CPU满载并耗费较长时间。您可以在 浏览 页面查看进度。",
         "confirmButton": "重建索引",
         "success": "重建索引已成功启动。",
         "alreadyInProgress": "重建索引已在执行中。",
@@ -688,11 +695,11 @@
         }
       },
       "title": "分类搜索",
-      "desc": "Frigate中的语义搜索功能允许您通过使用图像本身、用户自定义的文本描述，或自动生成的文本描述等方式在核查项目中查找被追踪对象。",
+      "desc": "Frigate中的语义搜索功能允许您通过图片、用户自定义的文本描述，或自动生成的文本描述等方式在核查项目中查找目标/物体。",
       "readTheDocumentation": "阅读文档"
     },
     "licensePlateRecognition": {
-      "desc": "Frigate 可以识别车辆的车牌，并自动将检测到的字符添加到 recognized_license_plate 字段中，或将已知名称作为子标签添加到汽车类型的对象中。常见的使用场景可能是读取驶入车道的汽车车牌或经过街道的汽车车牌。",
+      "desc": "Frigate 可以识别车辆的车牌，并自动将检测到的字符添加到 recognized_license_plate 字段中，或将已知车牌对应的名称作为子标签添加到该车辆目标中。一般常用于读取驶入车道的车辆车牌或经过街道的车辆车牌。",
       "title": "车牌识别",
       "readTheDocumentation": "阅读文档"
     },

@@ -41,15 +41,15 @@
     "hasVideoClip": "包含视频片段",
     "submittedToFrigatePlus": {
       "label": "提交至 Frigate+",
-      "tips": "你必须要先筛选具有快照的检测对象。<br /><br />没有快照的跟踪对象无法提交至 Frigate+."
+      "tips": "你必须要先筛选有快照的追踪目标。<br /><br />没有快照的追踪目标无法提交至 Frigate+。"
     }
   },
   "sort": {
     "label": "排序",
     "dateAsc": "日期 (正序)",
     "dateDesc": "日期 (倒序)",
-    "scoreAsc": "对象分值 (正序)",
-    "scoreDesc": "对象分值 (倒序)",
+    "scoreAsc": "目标分值 (正序)",
+    "scoreDesc": "目标分值 (倒序)",
     "speedAsc": "预计速度 (正序)",
     "speedDesc": "预计速度 (倒序)",
     "relevance": "关联性"
@@ -72,7 +72,7 @@
       "title": "设置",
       "defaultView": {
         "title": "默认视图",
-        "desc": "当未选择任何过滤器时，显示每个标签最近跟踪对象的摘要，或显示未过滤的网格。",
+        "desc": "当未选择任何筛选条件时，将显示每个标签下最近追踪目标的汇总信息，或者显示未筛选的网格视图。",
         "summary": "摘要",
         "unfilteredGrid": "未过滤网格"
       },
@@ -82,7 +82,7 @@
       },
       "searchSource": {
         "label": "搜索源",
-        "desc": "选择是搜索缩略图还是跟踪对象的描述。",
+        "desc": "选择是搜索缩略图还是追踪目标的描述。",
         "options": {
           "thumbnailImage": "缩略图",
           "description": "描述"
@@ -107,10 +107,10 @@
   },
   "trackedObjectDelete": {
     "title": "确认删除",
-    "desc": "删除这 {{objectLength}} 个跟踪对象将移除快照、任何已保存的嵌入和任何相关的对象生命周期条目。历史视图中这些跟踪对象的录制片段将<em>不会</em>被删除。<br /><br />您确定要继续吗？<br /><br />按住 <em>Shift</em> 键可在将来跳过此对话框。",
+    "desc": "删除这 {{objectLength}} 个已追踪目标将移除它们的快照、所有已保存的嵌入向量数据以及任何相关的目标全周期条目，但在 历史 页面中这些追踪目标的录制视频片段将<em>不会</em>被删除。<br /><br />您确定要继续吗？<br /><br />以后按住 <em>Shift</em> 键进行删除可跳过此提醒。",
     "toast": {
-      "success": "跟踪对象删除成功。",
-      "error": "删除跟踪对象失败：{{errorMessage}}"
+      "success": "删除追踪目标成功。",
+      "error": "删除追踪目标失败：{{errorMessage}}"
     }
   },
   "zoneMask": {
