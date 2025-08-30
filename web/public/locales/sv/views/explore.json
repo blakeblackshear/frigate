@@ -83,7 +83,26 @@
     "estimatedSpeed": "Uppskattad hastighet",
     "objects": "Objekt",
     "camera": "Kamera",
-    "zones": "Zoner"
+    "zones": "Zoner",
+    "button": {
+      "findSimilar": "Hitta liknande",
+      "regenerate": {
+        "title": "Regenerera",
+        "label": "Återskapa beskrivningen av spårat objekt"
+      }
+    },
+    "description": {
+      "label": "Beskrivning",
+      "placeholder": "Beskrivning av det spårade objektet",
+      "aiTips": "Frigate kommer inte att begära en beskrivning från din generativa AI-leverantör förrän det spårade objektets livscykel har avslutats."
+    },
+    "expandRegenerationMenu": "Expandera regenereringsmenyn",
+    "regenerateFromSnapshot": "Återskapa från ögonblicksbild",
+    "regenerateFromThumbnails": "Återskapa från miniatyrbilder",
+    "tips": {
+      "descriptionSaved": "Beskrivningen har sparats",
+      "saveDescriptionFailed": "Misslyckades med att uppdatera beskrivningen: {{errorMessage}}"
+    }
   },
   "exploreMore": "Utforska fler {{label}} objekt",
   "type": {
@@ -141,5 +160,67 @@
       "previous": "Föregående bild",
       "next": "Nästa bild"
     }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Ladda ner video",
+      "aria": "Ladda ner video"
+    },
+    "downloadSnapshot": {
+      "label": "Ladda ner ögonblicksbild",
+      "aria": "Ladda ner ögonblicksbild"
+    },
+    "viewObjectLifecycle": {
+      "label": "Visa objektets livscykel",
+      "aria": "Visa objektets livscykel"
+    },
+    "findSimilar": {
+      "label": "Hitta liknande",
+      "aria": "Hitta liknande spårade objekt"
+    },
+    "addTrigger": {
+      "label": "Lägg till utlösare",
+      "aria": "Lägg till en utlösare för det här spårade objektet"
+    },
+    "audioTranscription": {
+      "label": "Transkribera",
+      "aria": "Begär ljudtranskribering"
+    },
+    "submitToPlus": {
+      "label": "Skicka till Frigate+",
+      "aria": "Skicka till Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "Visa i historik",
+      "aria": "Visa i historik"
+    },
+    "deleteTrackedObject": {
+      "label": "Ta bort det här spårade objektet"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Bekräfta radering",
+      "desc": "Om du tar bort det här spårade objektet tas bort ögonblicksbilden, alla sparade inbäddningar och alla tillhörande objektlivscykelposter bort. Inspelade bilder av det här spårade objektet i historikvyn kommer <em>INTE</em> att raderas.<br /><br />Är du säker på att du vill fortsätta?"
+    }
+  },
+  "noTrackedObjects": "Inga spårade objekt hittades",
+  "fetchingTrackedObjectsFailed": "Fel vid hämtning av spårade objekt: {{errorMessage}}",
+  "trackedObjectsCount_one": "{{count}} spårat objekt ",
+  "trackedObjectsCount_other": "{{count}} spårade objekt ",
+  "searchResult": {
+    "tooltip": "Matchade {{type}} vid {{confidence}}%",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Spårat objekt har raderats.",
+        "error": "Misslyckades med att ta bort spårat objekt: {{errorMessage}}"
+      }
+    }
+  },
+  "aiAnalysis": {
+    "title": "AI-analys"
+  },
+  "concerns": {
+    "label": "Oro"
   }
 }
