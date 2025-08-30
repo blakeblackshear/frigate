@@ -103,7 +103,8 @@
         "error": {
           "regenerate": "No s'ha pogut contactar amb {{provider}} per obtenir una nova descripció: {{errorMessage}}",
           "updatedSublabelFailed": "No s'ha pogut actualitzar la subetiqueta: {{errorMessage}}",
-          "updatedLPRFailed": "No s'ha pogut actualitzar la matrícula: {{errorMessage}}"
+          "updatedLPRFailed": "No s'ha pogut actualitzar la matrícula: {{errorMessage}}",
+          "audioTranscription": "Error en demanar la transcripció d'audio {{errorMessage}}"
         }
       },
       "title": "Revisar detalls de l'element",
@@ -156,6 +157,9 @@
       "title": "Editar matrícula",
       "descNoLabel": "Introdueix un nou valor de matrícula per a aquest objecte rastrejat",
       "desc": "Introdueix un nou valor per a la matrícula per aquesta {{label}}"
+    },
+    "score": {
+      "label": "Puntuació"
     }
   },
   "searchResult": {
@@ -194,6 +198,14 @@
     },
     "deleteTrackedObject": {
       "label": "Suprimeix aquest objecte rastrejat"
+    },
+    "addTrigger": {
+      "label": "Afegir disparador",
+      "aria": "Afegir disparador per aquest objecte"
+    },
+    "audioTranscription": {
+      "label": "Transcriu",
+      "aria": "Demanar una transcripció d'audio"
     }
   },
   "noTrackedObjects": "No s'han trobat objectes rastrejats",
@@ -206,5 +218,11 @@
   "fetchingTrackedObjectsFailed": "Error al obtenir objectes rastrejats: {{errorMessage}}",
   "trackedObjectsCount_one": "{{count}} objecte rastrejat ",
   "trackedObjectsCount_many": "{{count}} objectes rastrejats ",
-  "trackedObjectsCount_other": "{{count}} objectes rastrejats "
+  "trackedObjectsCount_other": "{{count}} objectes rastrejats ",
+  "aiAnalysis": {
+    "title": "Anàlisi d'IA"
+  },
+  "concerns": {
+    "label": "Preocupacions"
+  }
 }
