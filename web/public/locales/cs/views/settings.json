@@ -303,7 +303,8 @@
     "users": "Uživatelé",
     "notifications": "Notifikace",
     "frigateplus": "Frigate +",
-    "enrichments": "Obohacení"
+    "enrichments": "Obohacení",
+    "triggers": "Spouštěče"
   },
   "dialog": {
     "unsavedChanges": {
@@ -444,7 +445,10 @@
       },
       "limitDetections": "Omezit detekce pro specifické zóny"
     },
-    "title": "Nastavení Kamery"
+    "title": "Nastavení Kamery",
+    "object_descriptions": {
+      "title": "AI generované popisy objektů"
+    }
   },
   "notification": {
     "notificationSettings": {
