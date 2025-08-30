@@ -26,7 +26,8 @@
   "toast": {
     "success": {
       "deletedFace_one": "{{count}} kasvo poistettu onnistuneesti.",
-      "deletedFace_other": "{{count}} kasvoa poistettu onnistuneesti."
+      "deletedFace_other": "{{count}} kasvoa poistettu onnistuneesti.",
+      "uploadedImage": "Kuva ladattu onnistuneesti."
     }
   },
   "selectItem": "Valitse {{item}}",
@@ -60,6 +61,22 @@
     "desc": "Anna uusi nimi tälle {{name}}"
   },
   "button": {
-    "deleteFaceAttempts": "Poista kasvot"
-  }
+    "deleteFaceAttempts": "Poista kasvot",
+    "addFace": "Lisää kasvot",
+    "renameFace": "Uudelleennimeä kasvot",
+    "deleteFace": "Poista kasvot",
+    "uploadImage": "Lataa kuva",
+    "reprocessFace": "Uudelleenprosessointi Kasvot"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Valitse kuvatiedosto."
+    },
+    "dropActive": "Pudota kuva tähän…",
+    "dropInstructions": "Vedä ja pudota kuva tähän tai valitse se napsauttamalla",
+    "maxSize": "Maksimikoko: {{size}}MB"
+  },
+  "nofaces": "Kasvoja ei ole saatavilla",
+  "pixels": "{{area}}px",
+  "trainFace": "Kouluta kasvot"
 }

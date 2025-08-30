@@ -12,5 +12,7 @@
   },
   "configEditor": "Konfiguraatioeditori",
   "copyConfig": "Kopioi konfiguraatio",
-  "saveAndRestart": "Tallenna & uudelleenkäynnistä"
+  "saveAndRestart": "Tallenna & uudelleenkäynnistä",
+  "safeConfigEditor": "Konfiguraatioeditori (vikasietotila)",
+  "safeModeDescription": "Frigate on vikasietotilassa konfiguraation vahvistusvirheen vuoksi."
 }

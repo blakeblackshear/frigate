@@ -91,9 +91,44 @@
         "label": "Vyhľadať zdroj",
         "desc": "Vyberte, či chcete vyhľadávať v miniatúrach alebo v popisoch sledovaných objektov.",
         "options": {
-          "thumbnailImage": "Obrázok miniatúry"
+          "thumbnailImage": "Obrázok miniatúry",
+          "description": "Popis"
         }
       }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Vyberte dátum, podľa ktorého chcete filtrovať"
+      }
     }
+  },
+  "logSettings": {
+    "label": "Úroveň denníka filtra",
+    "filterBySeverity": "Filtrujte protokoly podľa závažnosti",
+    "loading": {
+      "title": "Načítava sa",
+      "desc": "Keď sa panel protokolov posunie nadol, nové protokoly sa automaticky streamujú hneď po ich pridaní."
+    },
+    "disableLogStreaming": "Zakázať streamovanie denníka",
+    "allLogs": "Všetky denníky"
+  },
+  "trackedObjectDelete": {
+    "title": "Potvrďte Odstrániť",
+    "desc": "Odstránením týchto sledovaných objektov ({{objectLength}}) sa odstráni snímka, všetky uložené vnorenia a všetky súvisiace položky životného cyklu objektu. Zaznamenané zábery týchto sledovaných objektov v zobrazení História <em>NEBUDÚ</em> odstránené.<br /><br />Naozaj chcete pokračovať?<br /><br />Podržte kláves <em>Shift</em>, aby ste v budúcnosti toto dialógové okno obišli.",
+    "toast": {
+      "success": "Sledované objekty boli úspešne odstránené.",
+      "error": "Nepodarilo sa odstrániť sledované objekty: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtrujte podľa masky zóny"
+  },
+  "recognizedLicensePlates": {
+    "title": "Rozpoznané evidenčné čísla vozidiel",
+    "loadFailed": "Nepodarilo sa načítať rozpoznané evidenčné čísla vozidiel.",
+    "loading": "Načítavajú sa rozpoznané evidenčné čísla…",
+    "placeholder": "Zadajte text pre vyhľadávanie evidenčných čísel…",
+    "noLicensePlatesFound": "Neboli nájdené SPZ.",
+    "selectPlatesFromList": "Vyberte jeden alebo viacero tanierov zo zoznamu."
   }
 }

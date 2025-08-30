@@ -24,7 +24,14 @@
   },
   "streaming": {
     "restreaming": {
-      "disabled": "Šiai kamerai pertransliavimas nėra įjungtas"
+      "disabled": "Šiai kamerai pertransliavimas nėra įjungtas."
+    }
+  },
+  "export": {
+    "time": {
+      "lastHour_one": "Paskutinė {{count}} Valanda",
+      "lastHour_few": "Paskutinės {{count}} Valandos",
+      "lastHour_other": "Paskutinės {{count}} Valandų"
     }
   }
 }

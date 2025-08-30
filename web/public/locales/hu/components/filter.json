@@ -97,7 +97,7 @@
         "label": "Keresés Forrás",
         "options": {
           "description": "Leírás",
-          "thumbnailImage": "Bélyegkép"
+          "thumbnailImage": "Indexkép"
         },
         "desc": "Válassza ki, hogy a követett objektumok bélyegképeiben vagy leírásaiban szeretne keresni."
       },

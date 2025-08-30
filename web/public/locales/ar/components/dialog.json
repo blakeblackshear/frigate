@@ -3,7 +3,36 @@
     "title": "هل أنت متأكد أنك تريد إعادة تشغيل فرايجيت؟",
     "button": "إعادة التشغيل",
     "restarting": {
-      "title": "يتم إعادة تشغيل فرايجيت"
+      "title": "يتم إعادة تشغيل فرايجيت",
+      "content": "العد التنازلي",
+      "button": "فرض إعادة التحميل الآن"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "التقديم إلى Frigate+",
+        "desc": "الكائنات الموجودة في الأماكن التي تريد تجنبها ليست ضمن النتائج الإيجابية الخاطئة. إرسالها كنتائج إيجابية خاطئة سيؤدي إلى إرباك النموذج."
+      },
+      "review": {
+        "state": {
+          "submitted": "تم تقديمه"
+        },
+        "question": {
+          "label": "تأكد من صحة هذه التسمية لـ Frigate Plus",
+          "ask_a": "هل هذا الكائن هو <code>{{label}}</code>؟",
+          "ask_an": "هل هذا الكائن هو <code>{{label}}</code>؟",
+          "ask_full": "هل هذا الكائن هو <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "عرض في التاريخ"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "اختر من التسلسل الزمني"
     }
   }
 }

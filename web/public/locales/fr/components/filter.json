@@ -111,7 +111,9 @@
     "loading": "Chargement des plaques d'immatriculation reconnues…",
     "title": "Plaques d'immatriculation reconnues",
     "loadFailed": "Échec du chargement des plaques d'immatriculation reconnues.",
-    "selectPlatesFromList": "Sélectionner une ou plusieurs plaques d'immatriculation dans la liste."
+    "selectPlatesFromList": "Sélectionner une ou plusieurs plaques d'immatriculation dans la liste.",
+    "selectAll": "Tout sélectionner",
+    "clearAll": "Tout effacer"
   },
   "trackedObjectDelete": {
     "title": "Confirmer la suppression",

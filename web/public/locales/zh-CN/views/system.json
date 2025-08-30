@@ -102,6 +102,10 @@
         "title": "未使用",
         "tips": "如果您的驱动器上存储了除 Frigate 录制内容之外的其他文件，该值可能无法准确反映 Frigate 可用的剩余空间。Frigate 不会追踪录制内容以外的存储使用情况。"
       }
+    },
+    "shm": {
+      "title": "共享内存（SHM）分配",
+      "warning": "当前共享内存（SHM）容量过小（ {{total}}MB），请将其至少增加到 {{min_shm}}MB。"
     }
   },
   "cameras": {

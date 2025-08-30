@@ -37,6 +37,15 @@
     "topScore": {
       "label": "Huippuarvosana",
       "info": "Ylin pistemäärä on seurattavan kohteen korkein mediaani, joten tämä voi erota hakutuloksen esikatselukuvassa näkyvästä pistemäärästä."
+    },
+    "button": {
+      "findSimilar": "Etsi samankaltaisia"
+    },
+    "description": {
+      "label": "Kuvaus"
+    },
+    "score": {
+      "label": "Pisteet"
     }
   },
   "exploreIsUnavailable": {
@@ -120,6 +129,27 @@
     "downloadSnapshot": {
       "label": "Lataa kuvankaappaus",
       "aria": "Lataa kuvankaappaus"
+    },
+    "addTrigger": {
+      "label": "Lisää laukaisin",
+      "aria": "Lisää laukaisin tälle seurattavalle kohteelle"
+    },
+    "submitToPlus": {
+      "label": "Lähetä Frigate+:lle"
+    },
+    "downloadVideo": {
+      "label": "Lataa video",
+      "aria": "Lataa video"
+    },
+    "viewObjectLifecycle": {
+      "label": "Tarkastele objektin elinkaarta",
+      "aria": "Näytä objektin elinkaari"
+    },
+    "findSimilar": {
+      "label": "Etsi samankaltaisia"
     }
+  },
+  "aiAnalysis": {
+    "title": "AI-analyysi"
   }
 }

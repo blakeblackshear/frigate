@@ -91,7 +91,9 @@
     "title": "Igenkända Registreringsskyltar",
     "loadFailed": "Misslyckades med att ladda igenkända registreringsskyltar.",
     "placeholder": "Skriv för att söka registreringsskyltar…",
-    "loading": "Laddar igenkända registreringsskyltar…"
+    "loading": "Laddar igenkända registreringsskyltar…",
+    "selectAll": "Välj alla",
+    "clearAll": "Rensa alla"
   },
   "more": "Flera filter",
   "reset": {

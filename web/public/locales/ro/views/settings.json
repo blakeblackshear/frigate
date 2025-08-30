@@ -21,7 +21,8 @@
     "debug": "Depanare",
     "users": "Utilizatori",
     "notifications": "Notificări",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "triggers": "Declanșatoare"
   },
   "dialog": {
     "unsavedChanges": {
@@ -213,7 +214,8 @@
       },
       "toast": {
         "success": "Camera {{cameraName}} a fost salvată cu succes"
-      }
+      },
+      "nameLength": "Numele camerei trebuie să aibă mai puțin de 24 de caractere."
     }
   },
   "masksAndZones": {
@@ -441,7 +443,15 @@
       "title": "Căi",
       "desc": "Afișează punctele semnificative ale traseului obiectului urmărit",
       "tips": "<p><strong>Căi</strong></p><br><p>Liniile și cercurile vor indica punctele semnificative prin care obiectul urmărit s-a deplasat pe parcursul ciclului său de viață.</p>"
-    }
+    },
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Nicio detecție audio",
+      "score": "scor",
+      "currentRMS": "RMS curent",
+      "currentdbFS": "dbFS curent"
+    },
+    "openCameraWebUI": "Deschide interfața web pentru {{camera}}"
   },
   "users": {
     "dialog": {

@@ -48,5 +48,18 @@
   "acoustic_guitar": "Ακουστική Κιθάρα",
   "classical_music": "Κλασική Μουσική",
   "opera": "Όπερα",
-  "electronic_music": "Ηλεκτρονική Μουσική"
+  "electronic_music": "Ηλεκτρονική Μουσική",
+  "bus": "Λεωφορείο",
+  "train": "Εκπαίδευση",
+  "boat": "Βάρκα",
+  "sigh": "Αναστεναγμός",
+  "singing": "Τραγούδι",
+  "choir": "Χορωδία",
+  "whistling": "Σφύριγμα",
+  "camera": "Κάμερα",
+  "wheeze": "Ξεφύσημα",
+  "yodeling": "Λαρυγγισμός",
+  "chant": "Ύμνος",
+  "mantra": "Μάντρα",
+  "synthetic_singing": "Συνθετικό Τραγούδι"
 }

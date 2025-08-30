@@ -98,7 +98,9 @@
     "loadFailed": "Impossibile caricare le targhe riconosciute.",
     "loading": "Caricamento targhe riconosciute…",
     "placeholder": "Digita per cercare le targhe…",
-    "noLicensePlatesFound": "Nessuna targa trovata."
+    "noLicensePlatesFound": "Nessuna targa trovata.",
+    "selectAll": "Seleziona tutto",
+    "clearAll": "Cancella tutto"
   },
   "timeRange": "Intervallo di tempo",
   "subLabels": {

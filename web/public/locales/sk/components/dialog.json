@@ -112,6 +112,10 @@
     }
   },
   "imagePicker": {
-    "selectImage": "Výber miniatúry sledovaného objektu"
+    "selectImage": "Výber miniatúry sledovaného objektu",
+    "search": {
+      "placeholder": "Hľadať podľa štítku alebo podštítku..."
+    },
+    "noImages": "Pre tuto kameru sa nenašli žiadne miniatúry"
   }
 }
