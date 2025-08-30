@@ -58,9 +58,9 @@
           "processError": "Proceso Klaida:"
         },
         "nvidiaSMIOutput": {
-          "title": "Nvidia SMI išvestis:",
+          "title": "Nvidia SMI Išvestis",
           "name": "Pavadinimas: {{name}}",
-          "driver": "Driver: {{driver}}",
+          "driver": "Tvarkyklė: {{driver}}",
           "cudaComputerCapability": "CUDA Compute Galimybės: {{cuda_compute}}",
           "vbios": "VBios Info: {{vbios}}"
         },
@@ -102,9 +102,83 @@
         "title": "Nepanaudota",
         "tips": "Jei saugykloje turite daugiau failų apart Frigate įrašų, ši reikšmė neatspindės tikslios likusios laisvos vietos Frigate panaudojimui. Frigate neseka saugyklos panaudojimo už savo įrašų ribų."
       }
+    },
+    "shm": {
+      "title": "SHM (bendrinama atmintis) priskyrimas",
+      "warning": "Esamas SHM dydis {{total}}MB yra per mažas. Pridėkite bent jau {{min_shm}}MB."
     }
   },
   "cameras": {
-    "title": "Kameros"
+    "title": "Kameros",
+    "overview": "Apžvalga",
+    "info": {
+      "aspectRatio": "formato santykis",
+      "cameraProbeInfo": "{{camera}} Kameros srauto informacija",
+      "streamDataFromFFPROBE": "Transliacijos duomenys yra surenkami su <code>ffprobe</code>.",
+      "fetching": "Gaunamai Kameros Duomenys",
+      "stream": "Transliacija {{idx}}",
+      "video": "Vaizdas:",
+      "codec": "Kodekas:",
+      "resolution": "Raiška:",
+      "fps": "FPS:",
+      "unknown": "Nežinoma",
+      "audio": "Garsas:",
+      "error": "Klaida:{{error}}",
+      "tips": {
+        "title": "Kameros Srauto Informacija"
+      }
+    },
+    "framesAndDetections": "Kadrai / Aptikimai",
+    "label": {
+      "camera": "kamera",
+      "detect": "susekta",
+      "skipped": "praleista",
+      "ffmpeg": "FFmpeg",
+      "capture": "užfiksuota",
+      "overallFramesPerSecond": "viso kadrų per sekundę",
+      "overallDetectionsPerSecond": "viso susekta per sekundę",
+      "overallSkippedDetectionsPerSecond": "viso praleista susekimų per sekundę",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} ufiksuota",
+      "cameraDetect": "{{camName}} susekta",
+      "cameraFramesPerSecond": "{{camName}} kadrai per sekundę",
+      "cameraDetectionsPerSecond": "{{camName}} susekimai per sekundę",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} praleista susekimų per sekundę"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Srauto informacija nukopijuotą į iškarpinę."
+      },
+      "error": {
+        "unableToProbeCamera": "Negalima gauti kameros mėginio: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Paskutinį kartą atnaujinta: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} turi aukštą CPU suvartojimą FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} turi auktšą CPU vartojimą susiekimui ({{detectAvg}}%)",
+    "healthy": "Sistemos būklė sveika",
+    "reindexingEmbeddings": "Įterpinių reideksavimas ({{processed}}% baigtas)",
+    "cameraIsOffline": "{{camera}} yra nepasiekiama",
+    "detectIsSlow": "{{detect}} yra lėtas ({{speed}}ms)",
+    "detectIsVerySlow": "{{detect}} yra labai lėtas ({{speed}}ms)"
+  },
+  "enrichments": {
+    "title": "Patobulinimai",
+    "embeddings": {
+      "yolov9_plate_detection": "YOLOv9 Numerių Susekimai",
+      "yolov9_plate_detection_speed": "YOLOv9 Numeriu Susekimų Greitis",
+      "text_embedding_speed": "Teksto Įterpimų Greitis",
+      "plate_recognition_speed": "Numerių Atpažinimo Greitis",
+      "face_recognition_speed": "Veidų Atpažinimo Greitis",
+      "face_embedding_speed": "Veidų Įterpimų Greitis",
+      "image_embedding_speed": "Vaizdo Įterpimo Greitis",
+      "plate_recognition": "Numerių Atpažinimas",
+      "face_recognition": "Veido Atpažinimas",
+      "text_embedding": "Teksto Įterpimas",
+      "image_embedding": "Vaizdo Įterpimas"
+    },
+    "infPerSecond": "Išvadų Per Sekundę"
   }
 }
