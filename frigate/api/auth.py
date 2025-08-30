@@ -12,6 +12,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import List
+from urllib.parse import unquote
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -397,7 +398,7 @@ def profile(request: Request):
     username = request.headers.get("remote-user", "anonymous")
     role = request.headers.get("remote-role", "viewer")
 
-    return JSONResponse(content={"username": username, "role": role})
+    return JSONResponse(content={"username": unquote(username), "role": role})
 
 
 @router.get("/logout")
