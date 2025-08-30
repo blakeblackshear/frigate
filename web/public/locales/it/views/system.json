@@ -72,7 +72,8 @@
       "title": "Rilevatori",
       "cpuUsage": "Utilizzo CPU rilevatore",
       "memoryUsage": "Utilizzo memoria rilevatore",
-      "temperature": "Temperatura del rilevatore"
+      "temperature": "Temperatura del rilevatore",
+      "cpuUsageInformation": "CPU utilizzata nella preparazione dei dati di ingresso e uscita da/verso i modelli di rilevamento. Questo valore non misura l'utilizzo dell'inferenza, anche se si utilizza una GPU o un acceleratore."
     },
     "title": "Generale",
     "otherProcesses": {
@@ -151,7 +152,8 @@
     "reindexingEmbeddings": "Reindicizzazione degli incorporamenti (completata al {{processed}}%)",
     "cameraIsOffline": "{{camera}} è disconnessa",
     "detectIsSlow": "{{detect}} è lento ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} è molto lento ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} è molto lento ({{speed}} ms)",
+    "shmTooLow": "L'allocazione /dev/shm ({{total}} MB) dovrebbe essere aumentata almeno a {{min}} MB."
   },
   "title": "Sistema",
   "metrics": "Metriche di sistema",

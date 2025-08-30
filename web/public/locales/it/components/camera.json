@@ -60,7 +60,8 @@
         "desc": "Modifica le opzioni di trasmissione dal vivo per la schermata di questo gruppo di telecamere. <em>Queste impostazioni sono specifiche del dispositivo/browser.</em>",
         "stream": "Flusso",
         "placeholder": "Scegli un flusso"
-      }
+      },
+      "birdseye": "Birdseye"
     },
     "cameras": {
       "desc": "Seleziona le telecamere per questo gruppo.",
