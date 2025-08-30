@@ -22,7 +22,8 @@
     "frigateplus": "Frigate+",
     "users": "Benutzer",
     "notifications": "Benachrichtigungen",
-    "enrichments": "Erkennungsfunktionen"
+    "enrichments": "Erkennungsfunktionen",
+    "triggers": "Auslöser"
   },
   "dialog": {
     "unsavedChanges": {
