@@ -147,6 +147,10 @@
         "title": "Felhasználatlan",
         "tips": "Ez az érték nem feltétlenül tükrözi pontosan a Frigate számára elérhető szabad helyet, ha a meghajtón egyéb fájlok is tárolva vannak a Frigate felvételein kívül. A Frigate nem követi a tárhelyhasználatot a saját felvételein kívül."
       }
+    },
+    "shm": {
+      "title": "SHM (megosztott memória) kiosztás",
+      "warning": "A jelenlegi SHM mérete ({{total}}MB) túl kicsi. Növeld meg minimum ennyivel: {{min_shm}}MB."
     }
   },
   "enrichments": {
