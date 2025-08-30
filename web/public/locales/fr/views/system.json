@@ -42,7 +42,8 @@
       "inferenceSpeed": "Vitesse d'inférence du détecteur",
       "cpuUsage": "Utilisation processeur du détecteur",
       "memoryUsage": "Utilisation mémoire du détecteur",
-      "temperature": "Température du détecteur"
+      "temperature": "Température du détecteur",
+      "cpuUsageInformation": "Utilisation du processeur pour préparer les données avant et après leur passage dans les modèles de détection. Cette valeur ne mesure pas les calculs d'inférence, même si un GPU ou un autre accélérateur est utilisé."
     },
     "hardwareInfo": {
       "title": "Info matériel",
@@ -102,7 +103,11 @@
       "camera": "Caméra",
       "unusedStorageInformation": "Information sur le stockage non utilisé"
     },
-    "overview": "Vue d'ensemble"
+    "overview": "Vue d'ensemble",
+    "shm": {
+      "title": "Allocation de mémoire partagée SHM",
+      "warning": "La taille actuelle de la SHM de {{total}} Mo est trop faible. Augmentez la au moins à {{min_shm}} Mo."
+    }
   },
   "cameras": {
     "title": "Caméras",
@@ -158,7 +163,8 @@
     "reindexingEmbeddings": "Réindexation des représentations numériques ({{processed}}% complété)",
     "cameraIsOffline": "{{camera}} est hors ligne",
     "detectIsSlow": "{{detect}} est lent ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} est très lent ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} est très lent ({{speed}} ms)",
+    "shmTooLow": "L'allocation /dev/shm ({{total}} Mo) devrait être augmentée à au moins {{min}} Mo."
   },
   "enrichments": {
     "title": "Données augmentées",

@@ -66,7 +66,8 @@
         },
         "stream": "Flux",
         "placeholder": "Choisissez un flux"
-      }
+      },
+      "birdseye": "Birdseye"
     }
   },
   "debug": {
