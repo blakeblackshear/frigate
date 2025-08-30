@@ -48,7 +48,7 @@
     "embla-carousel-react": "^8.2.0",
     "framer-motion": "^11.5.4",
     "hls.js": "^1.5.20",
-    "i18next": "^24.2.0",
+    "i18next": "^25.4.2",
     "i18next-http-backend": "^3.0.1",
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",
