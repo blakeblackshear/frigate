@@ -130,12 +130,6 @@ class PendingReviewSegment:
                 self.frame_path, self._frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
             )
 
-    def update_time(self, frame_time: float, update_severity: SeverityEnum) -> None:
-        if update_severity == SeverityEnum.alert:
-            self.last_alert_time = frame_time
-        elif update_severity == SeverityEnum.detection:
-            self.last_detection_time = frame_time
-
     def get_data(self, ended: bool) -> dict:
         end_time = None
 
@@ -396,18 +390,19 @@ class ReviewSegmentMaintainer(threading.Thread):
             should_update_image = False
             should_update_state = False
 
-            # if segment is not alert category but current activity is
-            if (
-                segment.severity != SeverityEnum.alert
-                and activity.has_activity_category(SeverityEnum.alert)
-            ):
-                segment.update_time(frame_time, SeverityEnum.alert)
-                segment.severity = SeverityEnum.alert
-                should_update_state = True
-                should_update_image = True
+            if activity.has_activity_category(SeverityEnum.alert):
+                # update current time for last alert activity
+                segment.last_alert_time = frame_time
+
+                if segment.severity != SeverityEnum.alert:
+                    # if segment is not alert category but current activity is
+                    # update this segment to be an alert
+                    segment.severity = SeverityEnum.alert
+                    should_update_state = True
+                    should_update_image = True
 
             if activity.has_activity_category(SeverityEnum.detection):
-                segment.update_time(frame_time, SeverityEnum.detection)
+                segment.last_detection_time = frame_time
 
             for object in activity.get_all_objects():
                 if not object["sub_label"]:
@@ -499,7 +494,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             frame_time,
                             SeverityEnum.detection,
                             new_detections,
-                            sub_labels=[],
+                            sub_labels={},
                             audio=set(),
                             zones=list(new_zones),
                         )
@@ -527,7 +522,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             detections: dict[str, str] = {}
             sub_labels: dict[str, str] = {}
             zones: list[str] = []
-            severity = None
+            severity: SeverityEnum | None = None
 
             # if activity is alert category mark this review as alert
             if severity != SeverityEnum.alert and activity.has_activity_category(
