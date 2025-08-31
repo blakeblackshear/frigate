@@ -40,9 +40,6 @@ logger = logging.getLogger(__name__)
 THUMB_HEIGHT = 180
 THUMB_WIDTH = 320
 
-THRESHOLD_ALERT_ACTIVITY = 40
-THRESHOLD_DETECTION_ACTIVITY = 30
-
 
 class PendingReviewSegment:
     def __init__(
@@ -472,11 +469,14 @@ class ReviewSegmentMaintainer(threading.Thread):
                     return
 
             if segment.severity == SeverityEnum.alert and frame_time > (
-                segment.last_alert_time + THRESHOLD_ALERT_ACTIVITY
+                segment.last_alert_time + camera_config.review.alerts.cutoff_time
             ):
                 needs_new_detection = (
                     segment.last_detection_time > segment.last_alert_time
-                    and (segment.last_detection_time + THRESHOLD_DETECTION_ACTIVITY)
+                    and (
+                        segment.last_detection_time
+                        + camera_config.review.detections.cutoff_time
+                    )
                     > frame_time
                 )
                 last_detection_time = segment.last_detection_time
@@ -510,7 +510,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                             activity.camera_config.name
                         ].last_detection_time = last_detection_time
             elif segment.severity == SeverityEnum.detection and frame_time > (
-                segment.last_detection_time + THRESHOLD_DETECTION_ACTIVITY
+                segment.last_detection_time
+                + camera_config.review.detections.cutoff_time
             ):
                 self._publish_segment_end(segment, prev_data)
 
