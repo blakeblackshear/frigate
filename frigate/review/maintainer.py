@@ -659,15 +659,13 @@ class ReviewSegmentMaintainer(threading.Thread):
                         ):
                             current_segment.audio.add(audio)
                             current_segment.severity = SeverityEnum.alert
-                            current_segment.update_time(frame_time, SeverityEnum.alert)
+                            current_segment.last_alert_time = frame_time
                         elif (
                             camera_config.review.detections.labels is None
                             or audio in camera_config.review.detections.labels
                         ) and camera_config.review.detections.enabled:
                             current_segment.audio.add(audio)
-                            current_segment.update_time(
-                                frame_time, SeverityEnum.detection
-                            )
+                            current_segment.last_detection_time = frame_time
                 elif topic == DetectionTypeEnum.api or topic == DetectionTypeEnum.lpr:
                     if manual_info["state"] == ManualEventState.complete:
                         current_segment.detections[manual_info["event_id"]] = (
