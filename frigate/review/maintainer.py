@@ -346,9 +346,10 @@ class ReviewSegmentMaintainer(threading.Thread):
         self,
         segment: PendingReviewSegment,
         prev_data: dict[str, Any],
-    ) -> None:
+    ) -> float:
         """End segment."""
         final_data = segment.get_data(ended=True)
+        end_time = final_data[ReviewSegment.end_time.name]
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, final_data)
         review_update = {
             "type": "end",
@@ -362,13 +363,14 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.review_publisher.publish(review_update, segment.camera)
         self.requestor.send_data(f"{segment.camera}/review_status", "NONE")
         self.active_review_segments[segment.camera] = None
+        return end_time
 
-    def end_segment(self, camera: str) -> None:
-        """End the pending segment for a camera."""
+    def forcibly_end_segment(self, camera: str) -> float:
+        """Forcibly end the pending segment for a camera."""
         segment = self.active_review_segments.get(camera)
         if segment:
             prev_data = segment.get_data(False)
-            self._publish_segment_end(segment, prev_data)
+            return self._publish_segment_end(segment, prev_data)
 
     def update_existing_segment(
         self,
@@ -478,7 +480,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     > frame_time
                 )
 
-                self._publish_segment_end(segment, prev_data)
+                end_time = self._publish_segment_end(segment, prev_data)
 
                 if needs_new_detection:
                     new_detections = {}
@@ -491,7 +493,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     self.active_review_segments[activity.camera_config.name] = (
                         PendingReviewSegment(
                             activity.camera_config.name,
-                            frame_time,
+                            end_time,
                             SeverityEnum.detection,
                             new_detections,
                             sub_labels={},
@@ -583,11 +585,11 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if "record" in updated_topics:
                 for camera in updated_topics["record"]:
-                    self.end_segment(camera)
+                    self.forcibly_end_segment(camera)
 
             if "enabled" in updated_topics:
                 for camera in updated_topics["enabled"]:
-                    self.end_segment(camera)
+                    self.forcibly_end_segment(camera)
 
             (topic, data) = self.detection_subscriber.check_for_update(timeout=1)
 
@@ -637,7 +639,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     current_segment.severity == SeverityEnum.detection
                     and not self.config.cameras[camera].review.detections.enabled
                 ):
-                    self.end_segment(camera)
+                    self.forcibly_end_segment(camera)
                     continue
 
             # If we reach here, the segment can be processed (if it exists)
