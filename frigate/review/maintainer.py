@@ -479,31 +479,36 @@ class ReviewSegmentMaintainer(threading.Thread):
                     and (segment.last_detection_time + THRESHOLD_DETECTION_ACTIVITY)
                     > frame_time
                 )
+                last_detection_time = segment.last_detection_time
 
                 end_time = self._publish_segment_end(segment, prev_data)
 
                 if needs_new_detection:
-                    new_detections = {}
+                    new_detections: dict[str, str] = {}
                     new_zones = set()
 
                     for o in activity.categorized_objects["detections"]:
                         new_detections[o["id"]] = o["label"]
                         new_zones.update(o["current_zones"])
 
-                    self.active_review_segments[activity.camera_config.name] = (
-                        PendingReviewSegment(
-                            activity.camera_config.name,
-                            end_time,
-                            SeverityEnum.detection,
-                            new_detections,
-                            sub_labels={},
-                            audio=set(),
-                            zones=list(new_zones),
+                    if new_detections:
+                        self.active_review_segments[activity.camera_config.name] = (
+                            PendingReviewSegment(
+                                activity.camera_config.name,
+                                end_time,
+                                SeverityEnum.detection,
+                                new_detections,
+                                sub_labels={},
+                                audio=set(),
+                                zones=list(new_zones),
+                            )
                         )
-                    )
-                    self._publish_segment_start(
-                        self.active_review_segments[activity.camera_config.name]
-                    )
+                        self._publish_segment_start(
+                            self.active_review_segments[activity.camera_config.name]
+                        )
+                        self.active_review_segments[
+                            activity.camera_config.name
+                        ].last_detection_time = last_detection_time
             elif segment.severity == SeverityEnum.detection and frame_time > (
                 segment.last_detection_time + THRESHOLD_DETECTION_ACTIVITY
             ):
