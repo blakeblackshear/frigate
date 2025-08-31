@@ -390,6 +390,8 @@ review:
     labels:
       - car
       - person
+    # Time to cutoff alerts after no alert-causing activity has occurred (default: shown below)
+    cutoff_time: 40
     # Optional: required zones for an object to be marked as an alert (default: none)
     # NOTE: when settings required zones globally, this zone must exist on all cameras
     #       or the config will be considered invalid. In that case the required_zones
@@ -404,6 +406,8 @@ review:
     labels:
       - car
       - person
+    # Time to cutoff detections after no detection-causing activity has occurred (default: shown below)
+    cutoff_time: 30
     # Optional: required zones for an object to be marked as a detection (default: none)
     # NOTE: when settings required zones globally, this zone must exist on all cameras
     #       or the config will be considered invalid. In that case the required_zones

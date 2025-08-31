@@ -26,6 +26,10 @@ class AlertsConfig(FrigateBaseModel):
     enabled_in_config: Optional[bool] = Field(
         default=None, title="Keep track of original state of alerts."
     )
+    cutoff_time: int = Field(
+        default=40,
+        title="Time to cutoff alerts after no alert-causing activity has occurred.",
+    )
 
     @field_validator("required_zones", mode="before")
     @classmethod
@@ -47,6 +51,10 @@ class DetectionsConfig(FrigateBaseModel):
     required_zones: Union[str, list[str]] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to save the event as a detection.",
+    )
+    cutoff_time: int = Field(
+        default=30,
+        title="Time to cutoff detection after no detection-causing activity has occurred.",
     )
 
     enabled_in_config: Optional[bool] = Field(
