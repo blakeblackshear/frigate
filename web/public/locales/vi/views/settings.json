@@ -178,7 +178,8 @@
       },
       "toast": {
         "success": "Camera {{cameraName}} đã được lưu thành công"
-      }
+      },
+      "nameLength": "Tên của camera phải dưới 24 ký tự."
     }
   },
   "masksAndZones": {
@@ -423,6 +424,14 @@
       "title": "Đường dẫn",
       "desc": "Hiển thị các điểm quan trọng trên đường đi của đối tượng được theo dõi",
       "tips": "<p><strong>Đường đi</strong></p><br><p>Đường thẳng và vòng tròn sẽ hiển thị các điểm quan trọng mà đối tượng được theo dõi đã di chuyển trong suốt quá trình theo dõi.</p>"
+    },
+    "openCameraWebUI": "Đang mở giao diện Web của {{camera}}",
+    "audio": {
+      "title": "Âm thanh",
+      "noAudioDetections": "Không phát hiện âm thanh",
+      "score": "điểm",
+      "currentRMS": "RMS hiện tại",
+      "currentdbFS": "dbFS hiện tại"
     }
   },
   "users": {
@@ -649,7 +658,8 @@
     "notifications": "Thông báo",
     "motionTuner": "Tinh chỉnh Chuyển động",
     "cameras": "Cài đặt Camera",
-    "enrichments": "Làm giàu Dữ liệu"
+    "enrichments": "Làm giàu Dữ liệu",
+    "triggers": "Sự kiện kích hoạt"
   },
   "cameraSetting": {
     "camera": "Camera",
