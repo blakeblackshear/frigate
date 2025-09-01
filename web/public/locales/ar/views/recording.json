@@ -1,5 +1,12 @@
 {
   "filter": "ترشيح",
   "export": "إرسال",
-  "calendar": "التقويم"
+  "calendar": "التقويم",
+  "filters": "المنقيات",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "لم يتم تحديد نطاق زمني صحيح",
+      "endTimeMustAfterStartTime": "يجب أن يكون وقت الانتهاء بعد وقت بدء التشغيل"
+    }
+  }
 }

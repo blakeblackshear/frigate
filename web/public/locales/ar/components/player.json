@@ -3,6 +3,27 @@
   "noPreviewFound": "لا يوجد معاينة",
   "noPreviewFoundFor": "لا يوجد معاينة لـ{{cameraName}}",
   "submitFrigatePlus": {
-    "title": "هل ترغب بإرسال هذه الصوره الى Frigate+؟"
+    "title": "هل ترغب بإرسال هذه الصوره الى Frigate+؟",
+    "submit": "تقديم"
+  },
+  "livePlayerRequiredIOSVersion": "مطلوب نظام iOS 17.1 أو أكبر لهذا النوع من البث المباشر.",
+  "cameraDisabled": "الكاميرا معطلة",
+  "stats": {
+    "streamType": {
+      "title": "نوع الدفق:",
+      "short": "النوع"
+    },
+    "bandwidth": {
+      "title": "العرض الترددي:",
+      "short": "العرض الترددي"
+    },
+    "latency": {
+      "title": "التأخير:",
+      "value": "{{seconds}} ثانية"
+    }
+  },
+  "streamOffline": {
+    "title": "البث دون اتصال بالإنترنت",
+    "desc": "لم يتم استلام أي إطارات على دفق {{cameraName}} <code>detect</code>، تحقق من سجلات الأخطاء"
   }
 }
