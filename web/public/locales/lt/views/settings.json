@@ -7,6 +7,162 @@
     "general": "Bendrieji Nustatymai - Frigate",
     "frigatePlus": "Frigate+ Nustatymai - Frigate",
     "notifications": "Pranešimų Nustatymai - Frigate",
-    "motionTuner": "Judesio Derinimas - Frigate"
+    "motionTuner": "Judesio Derinimas - Frigate",
+    "enrichments": "Patobulinimų Nustatymai - Frigate",
+    "masksAndZones": "Maskavimo ir Zonų redaktorius - Frigate"
+  },
+  "menu": {
+    "ui": "UI",
+    "enrichments": "Patobulinimai",
+    "cameras": "Kameros Nustatymai",
+    "masksAndZones": "Maskavimai / Zonos",
+    "motionTuner": "Judesio Derintojas",
+    "debug": "Derinimas",
+    "users": "Vartotojai",
+    "notifications": "Pranešimai",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Yra neišsaugotų pakeitimų.",
+      "desc": "Ar norite išsaugoti savo pakeitimus prieš tęsdami?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Kamera",
+    "noCamera": "Nėra Kameros"
+  },
+  "general": {
+    "title": "Bendri Nustatymai",
+    "liveDashboard": {
+      "title": "Tiesioginės Transliacijos Skydelis",
+      "automaticLiveView": {
+        "label": "Automatinis Tiesioginis Vaizdas",
+        "desc": "Automatiškai perjungti į kameros tiesioginš vaizdą kai aptinkama veikla. Išjungus šią funkciją tiesioginės transliacijos skydelyje kamerų vaizdai atsinaujis tik kartą per minutę."
+      },
+      "playAlertVideos": {
+        "label": "Leist Įspejimų Vaizdus",
+        "desc": "Pagal nutylėjimą, paskutinieji įspėjimai rodomį kaip maži cikliški vaizdo įrašai. Šią funkciją išjunkite jei norite matyti statinius įspėjimų paveiksliukus šiame įrenginyje/naršyklėje."
+      }
+    },
+    "storedLayouts": {
+      "title": "Išsaugoti Išdėstymai",
+      "desc": "Kamerų išdėstymai kamerų grupėje gali būti perkeliami/keičiami dydžiai. Pozicijos išsaugomos jūsų naršyklės vietinėje atmintyje.",
+      "clearAll": "Išvalyti Visus Išdėstymus"
+    },
+    "cameraGroupStreaming": {
+      "title": "Kamerų Grupės Transliacijos Nustatymai",
+      "desc": "Transliacijos nustatymai kiekvienai kamerų grupei yra saugomi jūsų naršyklės vietinėje atmintyje.",
+      "clearAll": "Išvalyti Visus Transliavimo Nustatymus"
+    },
+    "recordingsViewer": {
+      "title": "Įrašų Naršyklė",
+      "defaultPlaybackRate": {
+        "label": "Numatytasis Atkūrimo Dažnis",
+        "desc": "Numatytas atkūrimo dažnis įrašų atkūrimui."
+      }
+    },
+    "calendar": {
+      "title": "Kalendorius",
+      "firstWeekday": {
+        "label": "Pirma Savaitės Diena",
+        "desc": "Diena kuria prasideda savaitės peržiūrų kalendoriuje.",
+        "sunday": "Sekmadienis",
+        "monday": "Pirmadienis"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Saugoti išdėstimai kamerai{{cameraName}} išvalyti",
+        "clearStreamingSettings": "Visų kamerų grupių transliavimo nustatymai išvalyti."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Nepavyko išvalyti išsaugotų pozicijų išdėstymų: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Nepavyko išvalyti transliavimo nustatymų: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "title": "Pagerinimų Nustatymai",
+    "unsavedChanges": "Neišsaugoti Pagerinimų nustatymų pakeitimai",
+    "birdClassification": {
+      "title": "Paukščių Klasifikatorius",
+      "desc": "Paukščių klasifikatorius identifikuoja žinomus paukščius naudojant kvantinizuotą Tensorflow modelį. Kai žinomas paukštis atpažįstamas, jo bendrinis pavadinimas bus pridėtas prie sub_etikečių. Ši informacija yra pridedama vartotojo sąsajoje, filtruose, taip pat ir pranešimuose."
+    },
+    "semanticSearch": {
+      "title": "Prasmingų Reikšmių Paieška",
+      "desc": "Frigate Prasmingų Reikšmių Paieška leidžia jums atrasti sekamus objektus tarp peržiūrų, naudojant arba pačius paveiksliuks, vartotojo pateiktus tekstinius aprašymus arba automatiškai sugeneruotas reikšmes.",
+      "reindexNow": {
+        "label": "Perindeksuoti Dabar",
+        "desc": "Perindeksavimas sugeneruos įterpinius visiems sekamiems objektams. Šis procesas veiks fone ir priklausomai nuo jūsų turimo sekamų objektų kiekio gali maksimaliai apkrauti jūsų CPU bei užtrukti nemažai laiko.",
+        "confirmTitle": "Patvirtinti Reindeksavimą",
+        "confirmDesc": "Ar esate įsitikinę, kad norite reindeksuoti visų sekamų objektų įterpius? Šis processas veiks fone ir gali maksimaliai apkrauti jūsų CPU bei užtrukti nemažai laiko. Progresą jūs galėsite stebėti Tyrinėjimo puslapyje.",
+        "confirmButton": "Reindeksuoti",
+        "success": "Reindeksavimas pradėtas sėkmingai.",
+        "alreadyInProgress": "Redindeksavimas jau vykdomas.",
+        "error": "Nepavyko pradėti reindeksavimo: {{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "Modelio Dydis",
+        "desc": "Modelio dydis naudojamas prasmingų reikšmių paieškos įterpiuose.",
+        "small": {
+          "title": "mažas",
+          "desc": "Naudojant <em>mažą</em> pasitelkiama kvantizuota modelio versija kuri reikalauja mažiau RAM, naudojant CPU veikia greičiau su nežįmiu skirtumu įterpių kokybei."
+        },
+        "large": {
+          "title": "didelis",
+          "desc": "Naudojant <em>didelį</em> pasitelkiamas pilnas Jina modelis ir automatiškai naudos GPU jei yra galimas."
+        }
+      }
+    },
+    "faceRecognition": {
+      "title": "Veidų Atpažinimas",
+      "desc": "Veidų atpažinimas leidžia priskirti vardus žmonėms ir kai jų veidai atpažįstami Frigate priskirs žmogaus vardą kaip sub etiketę. Ši informacija prieinama vartotojo sąsajoje, filtruose, taip ir pranešimuose.",
+      "modelSize": {
+        "label": "Modelio Dydis",
+        "desc": "Modelio dydis naudojamas veidų atpažinimui.",
+        "small": {
+          "title": "mažas",
+          "desc": "Naudojant <em>mažą</em> pasitelkiamas FaceNet veidų įterpių modelis kuris efektyviai veikia su daugeliu CPU."
+        },
+        "large": {
+          "title": "didelis",
+          "desc": "Naudojant <em>didelį</em> pasitelkiamas ArcFace face embedding modelis ir jei yra galimybė automatiškai naudos GPU."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Registracijos Numerių Atpažinimas",
+      "desc": "Frigate gali atpažinti automobilių registracijos numerius ir automatiškai pridėti susektus simbolius į \"recognized_license_plate\" laukelį arba žinoma pavadinima kaip sub_etiketę \"mašina\" tipo objektams. Dažnas panaudojimas būtų nuskaityti numerius mašinų įvažiuojančių į įvažiavimą arba mašinų pravažiuojančių gatve."
+    },
+    "restart_required": "Privaloma perkrauti (Patobulinimų nustatymai pakeisti)",
+    "toast": {
+      "success": "Patobulinimų nustaty buvo pakeisti. Kad pkyčiai būtų pritaikyti perkraukite Frigate.",
+      "error": "Nepavyko išsaugoti konfiguracijos pakeitimų: {{errorMessage}}"
+    }
+  },
+  "camera": {
+    "title": "Kamerų Nustatymai",
+    "streams": {
+      "title": "Transliacijos",
+      "desc": "Laikinai išjunkite kamerą kol Frigate bus perkrautas. Išjungiant kamerą visiškai sustabdo Frigate veiklą šiai kamerai. Nebus susekimų, įrašų ar derinimų.<br /><em>Pastaba: Tai neišjungs go2rtc sratų.</em>"
+    }
+  },
+  "masksAndZones": {
+    "zones": {
+      "point_one": "{{count}} taškas",
+      "point_few": "{{count}} taškai",
+      "point_other": "{{count}} taškų"
+    },
+    "motionMasks": {
+      "point_one": "{{count}} taškas",
+      "point_few": "{{count}} taškai",
+      "point_other": "{{count}} taškų"
+    },
+    "objectMasks": {
+      "point_one": "{{count}} taškas",
+      "point_few": "{{count}} taškai",
+      "point_other": "{{count}} taškų"
+    }
   }
 }

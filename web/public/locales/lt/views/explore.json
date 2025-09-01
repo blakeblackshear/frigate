@@ -9,6 +9,16 @@
     }
   },
   "details": {
-    "timestamp": "Laiko žyma"
-  }
+    "timestamp": "Laiko žyma",
+    "item": {
+      "tips": {
+        "mismatch_one": "{{count}} neesamas objektas susektas ir pridėtas į šį peržiuros įrašą. Tie objektai arba neatitinką įspėjimų ar susekimų sąlygų arba jau buvo išvalyti/ištrinti.",
+        "mismatch_few": "{{count}} neesami objektai susekti ir pridėti į šį peržiuros įrašą. Tie objektai arba neatitinką įspėjimų ar susekimų sąlygų arba jau buvo išvalyti/ištrinti.",
+        "mismatch_other": "{{count}} neesamų objektų susektų ir pridėtų į šį peržiuros įrašą. Tie objektai arba neatitinką įspėjimų ar susekimų sąlygų arba jau buvo išvalyti/ištrinti."
+      }
+    }
+  },
+  "trackedObjectsCount_one": "{{count}} sekamas objektas ",
+  "trackedObjectsCount_few": "{{count}} sekami objektai ",
+  "trackedObjectsCount_other": "{{count}} sekamų objektų "
 }
