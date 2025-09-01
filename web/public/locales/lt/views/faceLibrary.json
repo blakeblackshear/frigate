@@ -25,5 +25,8 @@
       "deletedName_few": "{{count}} veidai buvo sėkmingai ištrinti.",
       "deletedName_other": "{{count}} veidų buvo sėkmingai ištrinta."
     }
+  },
+  "createFaceLibrary": {
+    "nextSteps": "Kad sukurtumėte stiprų pagrindą:<li>Naudokite Apmokymų skirtuką pasirinkti ir paveikslėliais apmokyti kiekvieną aptiktą asmenį.</li><li>Norint pasiekti geriausią režultatą, susitelkite prie nuotraukų iš priekio; Venkite naudoti veidų nuotraukas kampu pasuktu veidu.</li></ul>"
   }
 }

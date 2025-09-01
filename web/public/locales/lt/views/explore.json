@@ -12,13 +12,28 @@
     "timestamp": "Laiko žyma",
     "item": {
       "tips": {
-        "mismatch_one": "{{count}} neesamas objektas susektas ir pridėtas į šį peržiuros įrašą. Tie objektai arba neatitinką įspėjimų ar susekimų sąlygų arba jau buvo išvalyti/ištrinti.",
-        "mismatch_few": "{{count}} neesami objektai susekti ir pridėti į šį peržiuros įrašą. Tie objektai arba neatitinką įspėjimų ar susekimų sąlygų arba jau buvo išvalyti/ištrinti.",
-        "mismatch_other": "{{count}} neesamų objektų susektų ir pridėtų į šį peržiuros įrašą. Tie objektai arba neatitinką įspėjimų ar susekimų sąlygų arba jau buvo išvalyti/ištrinti."
+        "mismatch_one": "{{count}} neesamas objektas aptiktas ir pridėtas į šį peržiuros įrašą. Tie objektai arba neatitinką įspėjimų ar aptikimų sąlygų arba jau buvo išvalyti/ištrinti.",
+        "mismatch_few": "{{count}} neesami objektai aptikti ir pridėti į šį peržiuros įrašą. Tie objektai arba neatitinką įspėjimų ar aptikimų sąlygų arba jau buvo išvalyti/ištrinti.",
+        "mismatch_other": "{{count}} neesamų objektų aptiktų ir pridėtų į šį peržiuros įrašą. Tie objektai arba neatitinką įspėjimų ar aptikimų sąlygų arba jau buvo išvalyti/ištrinti."
       }
     }
   },
   "trackedObjectsCount_one": "{{count}} sekamas objektas ",
   "trackedObjectsCount_few": "{{count}} sekami objektai ",
-  "trackedObjectsCount_other": "{{count}} sekamų objektų "
+  "trackedObjectsCount_other": "{{count}} sekamų objektų ",
+  "objectLifecycle": {
+    "lifecycleItemDesc": {
+      "visible": "{{label}} aptikta",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} aptiktas etiketei {{label}}"
+      },
+      "external": "{{label}} aptiktas"
+    },
+    "annotationSettings": {
+      "offset": {
+        "desc": "Šie duomenys gaunami iš jūsų kameros aptikimo srauto bet yra užkeliami ant vaizdo gaunamo iš įrašymo srauto. Mažai tikėtina kad abeji srautais bus tobulai sinchronizuoti. Rezultate, apibrėžimo dėžutė ir įrašas nesilygiuos tobulai. Tačiau, <code>annotation_offset</code> reikšmė gali būti naudojama tai koreguoti.",
+        "millisecondsToOffset": "Praslinkti aptikimų anotacijas per mili-sekundes. <em>Default: 0</em>"
+      }
+    }
+  }
 }
