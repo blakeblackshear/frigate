@@ -41,7 +41,8 @@
       "cpuUsage": "Detector CPU-verbruik",
       "memoryUsage": "Detector Geheugen Gebruik",
       "inferenceSpeed": "Detector Interferentie Snelheid",
-      "temperature": "Detectortemperatuur"
+      "temperature": "Detectortemperatuur",
+      "cpuUsageInformation": "CPU-gebruik bij het voorbereiden van in en uitvoer van gegevens voor detectiemodellen. Deze waarde geeft geen inferentie gebruik weer, ook niet wanneer een GPU of accelerator wordt gebruikt."
     },
     "hardwareInfo": {
       "title": "Systeemgegevens",
@@ -163,7 +164,8 @@
     "reindexingEmbeddings": "Herindexering van inbeddingen ({{processed}}% compleet)",
     "detectIsSlow": "{{detect}} is traag ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} is erg traag ({{speed}} ms)",
-    "cameraIsOffline": "{{camera}} is offline"
+    "cameraIsOffline": "{{camera}} is offline",
+    "shmTooLow": "Vergroot de /dev/shm toewijzing van {{total}} MB naar minimaal {{min}} MB."
   },
   "enrichments": {
     "title": "Verrijkingen",
