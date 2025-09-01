@@ -55,6 +55,13 @@
         },
         "closeInfo": {
           "label": "Sulje GPU:n tiedot"
+        },
+        "nvidiaSMIOutput": {
+          "driver": "Ajuri: {{driver}}",
+          "title": "Nvidia SMI tuloste",
+          "name": "Nimi: {{name}}",
+          "cudaComputerCapability": "CUDA laskentakapasiteetti: {{cuda_compute}}",
+          "vbios": "VBios-tiedot: {{vbios}}"
         }
       }
     },

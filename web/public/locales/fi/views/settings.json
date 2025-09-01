@@ -22,7 +22,8 @@
     "debug": "Debuggaus",
     "motionTuner": "Liikesäädin",
     "notifications": "Ilmoitukset",
-    "enrichments": "Rikasteet"
+    "enrichments": "Rikasteet",
+    "triggers": "Laukaisimet"
   },
   "dialog": {
     "unsavedChanges": {
@@ -176,7 +177,14 @@
       "toast": {
         "success": "Luokittelumäärityksen tarkistus on tallennettu. Käynnistä Frigate uudelleen muutosten käyttöönottamiseksi."
       }
-    }
+    },
+    "cameraConfig": {
+      "add": "Lisää kamera",
+      "ffmpeg": {
+        "addInput": "Lisää tulovirta"
+      }
+    },
+    "addCamera": "Lisää uusi kamera"
   },
   "masksAndZones": {
     "filter": {
@@ -415,6 +423,11 @@
           "placeholder": "Syötä käyttäjätunnus",
           "title": "Käyttäjätunnus"
         }
+      },
+      "changeRole": {
+        "roleInfo": {
+          "admin": "Ylläpitäjä"
+        }
       }
     }
   },
@@ -426,6 +439,141 @@
     },
     "Threshold": {
       "title": "Kynnys"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Laukaisimet",
+    "management": {
+      "title": "Laukaisimen hallinta"
+    },
+    "addTrigger": "Lisää laukaisin",
+    "table": {
+      "name": "Nimi",
+      "type": "Tyyppi",
+      "content": "Sisältö",
+      "threshold": "Kynnys",
+      "actions": "Toiminnot",
+      "noTriggers": "Tälle kameralle ei ole määritetty laukaisimia.",
+      "edit": "Muokkaa",
+      "deleteTrigger": "Poista laukaisin",
+      "lastTriggered": "Viimeksi laukaistu"
+    },
+    "type": {
+      "thumbnail": "Kuvake",
+      "description": "Kuvaus"
+    },
+    "actions": {
+      "notification": "Lähetä ilmoitus",
+      "alert": "Merkitse hälytykseksi"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Luo laukaisin",
+        "desc": "Luo laukaisin kameralle {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Muokkaa laukaisinta",
+        "desc": "Muokkaa laukaisimen asetuksia kamerasta {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Poista laukaisin",
+        "desc": "Haluatko varmasti poistaa laukaisimen <strong>{{triggerName}}</strong>? Tätä toimintoa ei voi peruuttaa."
+      },
+      "form": {
+        "name": {
+          "title": "Nimi",
+          "placeholder": "Syötä laukaisimen nimi",
+          "error": {
+            "minLength": "Nimen on oltava vähintään 2 merkkiä pitkä.",
+            "invalidCharacters": "Nimi voi sisältää vain kirjaimia, numeroita, alaviivoja ja väliviivoja.",
+            "alreadyExists": "Tällä nimellä oleva laukaisin on jo olemassa tälle kameralle."
+          }
+        },
+        "enabled": {
+          "description": "Ota tämä laukaisin käyttöön tai pois käytöstä"
+        },
+        "type": {
+          "title": "Tyyppi",
+          "placeholder": "Valitse laukaisintyyppi"
+        },
+        "content": {
+          "title": "Sisältö",
+          "imagePlaceholder": "Valitse kuva",
+          "textPlaceholder": "Kirjoita tekstisisältö",
+          "imageDesc": "Valitse kuva, joka laukaisee tämän toiminnon, kun samankaltainen kuva havaitaan.",
+          "textDesc": "Syötä teksti, joka laukaisee tämän toiminnon, kun vastaava seurattavan kohteen kuvaus havaitaan.",
+          "error": {
+            "required": "Sisältö on pakollinen."
+          }
+        },
+        "threshold": {
+          "title": "Kynnys",
+          "error": {
+            "min": "Kynnys on oltava vähintään 0",
+            "max": "Kynnys on oltava enintään 1"
+          }
+        },
+        "actions": {
+          "title": "Toiminnot",
+          "desc": "Oletuksena Frigate lähettää MQTT-viestin kaikille laukaisimille. Valitse lisätoiminto, joka suoritetaan, kun tämä laukaisija laukeaa.",
+          "error": {
+            "min": "Vähintään yksi toiminto on valittava."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Laukaisin {{name}} luotu onnistuneesti.",
+        "updateTrigger": "Laukaisin {{name}} päivitetty onnistuneesti.",
+        "deleteTrigger": "Laukaisin {{name}} poistettu onnistuneesti."
+      },
+      "error": {
+        "createTriggerFailed": "Laukaisimen luominen epäonnistui: {{errorMessage}}",
+        "updateTriggerFailed": "Laukaisimen päivitys epäonnistui: {{errorMessage}}",
+        "deleteTriggerFailed": "Laukaisimen poistaminen epäonnistui: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "semanticSearch": {
+      "modelSize": {
+        "small": {
+          "title": "pieni",
+          "desc": "<em>pieni</em> käyttää kvantisoitua versiota mallista, joka käyttää vähemmän RAM-muistia ja toimii nopeammin CPU:lla, mutta ero upotuksen laadussa on hyvin vähäinen."
+        },
+        "large": {
+          "title": "suuri",
+          "desc": "<em>suuri</em> käyttää koko Jina-mallia ja toimii automaattisesti GPU:lla, jos se on mahdollista."
+        },
+        "desc": "Semanttisen haun upotuksiin käytetyn mallin koko."
+      },
+      "title": "Semanttinen haku",
+      "desc": "Semanttisen haun avulla Frigatessa voit etsiä seurattavia kohteita tarkistettavista kohteista joko kuvan, käyttäjän määrittämän tekstikuvauksen tai automaattisesti luodun kuvauksen avulla.",
+      "reindexNow": {
+        "label": "Uudelleenindeksoi nyt",
+        "desc": "Uudelleindeksointi luo uudelleen upotukset kaikille seuratuille objekteille. Tämä prosessi suoritetaan taustalla ja voi kuormittaa prosessorin maksimiin ja viedä melko paljon aikaa riippuen seurattujen objektien määrästä.",
+        "confirmTitle": "Vahvista uudelleenindeksointi"
+      }
+    },
+    "faceRecognition": {
+      "title": "Kasvojentunnistus",
+      "desc": "Kasvojentunnistuksen avulla ihmisille voidaan antaa nimiä, ja kun heidän kasvonsa tunnistetaan, Frigate lisää henkilön nimen alaluokaksi. Nämä tiedot näkyvät käyttöliittymässä, suodattimissa ja ilmoituksissa.",
+      "modelSize": {
+        "label": "Mallin koko",
+        "desc": "Kasvojentunnistuksessa käytettävän mallin koko.",
+        "small": {
+          "title": "pieni",
+          "desc": "<em>pieni</em> käyttää FaceNet-kasvojen upotusmallia, joka toimii tehokkaasti useimmilla suorittimilla."
+        },
+        "large": {
+          "title": "suuri",
+          "desc": "<em>suuri</em> käyttää ArcFace-kasvojen upotusmallia ja toimii automaattisesti GPU:lla, jos se on mahdollista."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Rekisterikilven tunnistaminen"
     }
   }
 }
