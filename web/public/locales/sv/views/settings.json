@@ -126,8 +126,6 @@
     "toast": {
       "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar.",
       "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
-      "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar.",
-      "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
     }
   },
   "menu": {
@@ -139,8 +137,6 @@
     "frigateplus": "Frigate+",
     "enrichments": "Förbättringar",
     "motionTuner": "Rörelsemottagare",
-    "debug": "Felsök",
-    "triggers": "Utlösare"
     "debug": "Felsök",
     "triggers": "Utlösare"
   },

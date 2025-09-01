@@ -317,8 +317,6 @@
         "success": "Caméra {{cameraName}} enregistrée avec succès"
       },
       "nameLength": "Le nom de la caméra doit comporter au plus 24 caractères."
-      },
-      "nameLength": "Le nom de la caméra doit comporter au plus 24 caractères."
     }
   },
   "masksAndZones": {
@@ -569,15 +567,6 @@
       "title": "Chemins",
       "desc": "Montrer les points notables du chemin de l'objet suivi",
       "tips": "<p><strong>Chemins</strong></p><br><p>Les lignes et les cercles indiqueront les points notables des déplacements de l'objet suivi pendant son cycle de vie.</p>"
-    },
-    "audio": {
-      "title": "Audio",
-      "noAudioDetections": "Aucune détection audio",
-      "score": "score",
-      "currentRMS": "RMS actuel",
-      "currentdbFS": "dbFS actuel"
-    },
-    "openCameraWebUI": "Ouvre l'interface Web de {{camera}}"
     },
     "audio": {
       "title": "Audio",
