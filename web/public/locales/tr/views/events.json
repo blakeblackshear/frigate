@@ -34,5 +34,7 @@
   "allCameras": "Tüm Kameralar",
   "selected_one": "{{count}} seçildi",
   "selected_other": "{{count}} seçildi",
-  "detected": "algılandı"
+  "detected": "algılandı",
+  "suspiciousActivity": "Şüpheli Etkinlik",
+  "threateningActivity": "Tehlikeli Etkinlik"
 }

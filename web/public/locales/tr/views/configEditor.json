@@ -12,5 +12,7 @@
   "configEditor": "Yapılandırma Düzenleyicisi",
   "documentTitle": "Yapılandırma Düzenleyicisi - Frigate",
   "saveAndRestart": "Kaydet & Yeniden Başlat",
-  "confirm": "Kaydetmeden çıkılsın mı?"
+  "confirm": "Kaydetmeden çıkılsın mı?",
+  "safeConfigEditor": "Yapılandırma Düzenleyicisi (Güvenli Mod)",
+  "safeModeDescription": "Frigate, yapılandırmanızdaki bir hata nedeniyle güvenli moda geçti."
 }
