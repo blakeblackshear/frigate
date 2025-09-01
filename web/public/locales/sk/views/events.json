@@ -34,5 +34,7 @@
   "selected_one": "{{count}} vybraných",
   "selected_other": "{{count}} vybraných",
   "camera": "Kamera",
-  "detected": "Detekované"
+  "detected": "Detekované",
+  "suspiciousActivity": "Podozrivá aktivita",
+  "threateningActivity": "Ohrozujúca činnosť"
 }
