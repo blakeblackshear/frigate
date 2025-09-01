@@ -102,7 +102,11 @@
       },
       "percentageOfTotalUsed": "Percentatge del total"
     },
-    "overview": "Visió general"
+    "overview": "Visió general",
+    "shm": {
+      "title": "Ubicació de SHM (memória compartida)",
+      "warning": "El tamany de la SHM oh {{total}}MB es massa petita. Augmenta almenys fins a {{min_shm}}MB."
+    }
   },
   "cameras": {
     "framesAndDetections": "Fotogrames / Deteccions",

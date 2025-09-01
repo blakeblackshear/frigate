@@ -40,7 +40,15 @@
       "sk": "Slovenčina (Eslovac)",
       "ru": "Русский (Rus)",
       "th": "ไทย (Tailandès)",
-      "ca": "Català (Catalan)"
+      "ca": "Català (Catalan)",
+      "ptBR": "Português brasileiro (Portuguès Brasiler)",
+      "sr": "Српски (Serbi)",
+      "sl": "Slovenščina (Sloveni)",
+      "lt": "Lietuvių (Lituà)",
+      "bg": "Български (Búlgar)",
+      "gl": "Galego (Gallec)",
+      "id": "Bahasa Indonesia (Indonesi)",
+      "ur": "اردو (Urdú)"
     },
     "system": "Sistema",
     "systemMetrics": "Mètriques del sistema",
