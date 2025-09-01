@@ -163,7 +163,8 @@
     "reindexingEmbeddings": "Переиндексация эмбеддингов (выполнено {{processed}} %)",
     "cameraIsOffline": "{{camera}} отключена",
     "detectIsVerySlow": "{{detect}} идёт очень медленно ({{speed}} мс)",
-    "detectIsSlow": "{{detect}} идёт медленно ({{speed}} мс)"
+    "detectIsSlow": "{{detect}} идёт медленно ({{speed}} мс)",
+    "shmTooLow": "Объем выделенной памяти /dev/shm ({{total}} МБ) должен быть увеличен как минимум до {{min}} МБ."
   },
   "enrichments": {
     "title": "Обогащение данных",
