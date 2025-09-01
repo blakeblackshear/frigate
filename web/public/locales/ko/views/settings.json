@@ -1,1 +1,24 @@
-{}
+{
+  "triggers": {
+    "dialog": {
+      "form": {
+        "threshold": {
+          "title": "임계치"
+        },
+        "name": {
+          "title": "이름"
+        },
+        "type": {
+          "title": "종류",
+          "placeholder": "트리거 종류 선택"
+        }
+      },
+      "createTrigger": {
+        "title": "트리거 생성"
+      }
+    },
+    "actions": {
+      "notification": "통지 전송"
+    }
+  }
+}
