@@ -3,7 +3,7 @@
     "untilForTime": "Até {{time}}",
     "untilForRestart": "Até o Frigate reiniciar.",
     "untilRestart": "Até reiniciar",
-    "ago": "{{timeAgo}} antes",
+    "ago": "{{timeAgo}} atrás",
     "justNow": "Agora mesmo",
     "today": "Hoje",
     "yesterday": "Ontem",
@@ -80,7 +80,7 @@
       "24hour": "dd-MM-yy-HH-mm-ss"
     }
   },
-  "selectItem": "Selecione {{item}}",
+  "selectItem": "Selecionar {{item}}",
   "unit": {
     "speed": {
       "mph": "mi/h",
@@ -270,6 +270,5 @@
     "title": "404",
     "desc": "Página não encontrada"
   },
-  "selectItem": "Selecionar {{item}}",
   "readTheDocumentation": "Leia a documentação"
 }

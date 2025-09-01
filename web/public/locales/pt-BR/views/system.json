@@ -42,7 +42,8 @@
       "inferenceSpeed": "Velocidade de Inferência do Detector",
       "temperature": "Detector Temperatura",
       "cpuUsage": "Utilização de CPU de Detecção",
-      "memoryUsage": "Utilização de Memória do Detector"
+      "memoryUsage": "Utilização de Memória do Detector",
+      "cpuUsageInformation": "CPU utilizado para preparar os dados de entrada e saída de/para os modelos de detecção. Esse valor não mede a utilização da inferência, mesmo se estiver usando um GPU ou acelerador."
     },
     "hardwareInfo": {
       "title": "Informações de Hardware",
@@ -102,6 +103,10 @@
         "title": "Não Utilizado",
         "tips": "Esse valor por não representar com precisão o espaço livre disponí®el para o Frigate se você possui outros arquivos armazenados no seu drive além das gravações do Frigate. O Frigate não rastreia a utilização do armazenamento além de suas próprias gravações."
       }
+    },
+    "shm": {
+      "title": "Alocação de memória compartilhada (SHM)",
+      "warning": "O tamanho de {{total}}MB de memória compartilhada (SHM) é insuficiente. Aumente para ao menos {{min_shm}}MB."
     }
   },
   "cameras": {
@@ -158,7 +163,8 @@
     "healthy": "O sistema está saudável",
     "cameraIsOffline": "{{camera}} está offline",
     "reindexingEmbeddings": "Reindexando os embeddings ({{processed}}% completado)",
-    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)"
+    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)",
+    "shmTooLow": "A alocação ({{total}} MB) para a pasta /dev/shm deve ser aumentada para ao menos {{min}} MB."
   },
   "enrichments": {
     "title": "Enriquecimentos",

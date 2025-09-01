@@ -43,28 +43,28 @@
         "mismatch_one": "{{count}} objeto indisponível foi detectado e incluido nesse item de revisão. Esse objeto ou não se qualifica para um alerta ou detecção, ou já foi limpo/deletado.",
         "mismatch_many": "{{count}} objetos indisponíveis foram detectados e incluídos nesse item de revisão. Esses objetos ou não se qualificam para um alerta ou detecção, ou já foram limpos/deletados.",
         "mismatch_other": "{{count}} objetos indisponíveis foram detectados e incluídos nesse item de revisão. Esses objetos ou não se qualificam para um alerta ou detecção, ou já foram limpos/deletados.",
-        "hasMissingObjects": "Ajustar a sua configuração se quiser que o Frigate salve objetos rastreados com as seguintes categorias: <em>{{objects}}</em>"
+        "hasMissingObjects": "Ajustar a sua configuração se quiser que o Frigate salve objetos rastreados com os seguintes rótulos: <em>{{objects}}</em>"
       },
       "toast": {
         "success": {
           "regenerate": "Uma nova descrição foi solicitada do {{provider}}. Dependendo da velocidade do seu fornecedor, a nova descrição pode levar algum tempo para regenerar.",
-          "updatedSublabel": "Sub-categoria atualizada com sucesso.",
+          "updatedSublabel": "Sub-rótulo atualizado com sucesso.",
           "updatedLPR": "Placa de identificação atualizada com sucesso.",
           "audioTranscription": "Transcrição de áudio requisitada com sucesso."
         },
         "error": {
           "regenerate": "Falha ao ligar para {{provider}} para uma descrição nova: {{errorMessage}}",
-          "updatedSublabelFailed": "Falha ao atualizar sub-categoria: {{errorMessage}}",
+          "updatedSublabelFailed": "Falha ao atualizar sub-rótulo: {{errorMessage}}",
           "updatedLPRFailed": "Falha ao atualizar placa de identificação: {{errorMessage}}",
           "audioTranscription": "Falha ao requisitar transcrição de áudio: {{errorMessage}}"
         }
       }
     },
-    "label": "Categoria",
+    "label": "Rótulo",
     "editSubLabel": {
-      "title": "Editar sub-categoria",
-      "desc": "Nomeie uma nova sub categoria para esse(a) {{label}}",
-      "descNoLabel": "Nomeie uma nova sub-categoria para esse objeto rastreado"
+      "title": "Editar sub-rótulo",
+      "desc": "Nomeie um novo sub-rótulo para esse(a) {{label}}",
+      "descNoLabel": "Nomeie um sub-rótulo para esse objeto rastreado"
     },
     "editLPR": {
       "title": "Editar placa de identificação",
@@ -111,7 +111,7 @@
     "details": "detalhes",
     "snapshot": "captura de imagem",
     "video": "vídeo",
-    "object_lifecycle": "ciclo de vida do obejto"
+    "object_lifecycle": "ciclo de vida do objeto"
   },
   "objectLifecycle": {
     "title": "Ciclo de Vida do Objeto",
