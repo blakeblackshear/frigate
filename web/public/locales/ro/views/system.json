@@ -49,7 +49,8 @@
       "title": "Detectori",
       "cpuUsage": "Utilizarea procesorului",
       "inferenceSpeed": "Viteza de inferență",
-      "memoryUsage": "Utilizare memorie detector"
+      "memoryUsage": "Utilizare memorie detector",
+      "cpuUsageInformation": "Procesorul utilizat pentru pregătirea datelor de intrare și ieșire către/dinspre modelele de detecție. Această valoare nu măsoară utilizarea în timpul inferenței, chiar dacă este folosit un GPU sau un accelerator."
     },
     "otherProcesses": {
       "title": "Alte Procese",
@@ -179,7 +180,8 @@
     "detectHighCpuUsage": "Camera {{camera}} are o utilizare ridicată a procesorului pentru detecție ({{detectAvg}}%)",
     "ffmpegHighCpuUsage": "Camera {{camera}} are o utilizare ridicată a procesorului FFmpeg ({{ffmpegAvg}}%)",
     "cameraIsOffline": "{{camera}} este offline",
-    "healthy": "Sistemul funcționează normal"
+    "healthy": "Sistemul funcționează normal",
+    "shmTooLow": "Alocarea /dev/shm ({{total}} MB) ar trebui mărită la cel puțin {{min}} MB."
   },
   "lastRefreshed": "Ultima reîmprospătare: "
 }

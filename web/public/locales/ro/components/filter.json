@@ -121,7 +121,9 @@
     "selectPlatesFromList": "Selectează una sau mai multe plăcuțe din listă.",
     "loading": "Se încarcă numerele de înmatriculare recunoscute…",
     "placeholder": "Caută plăcuțe de înmatriculare…",
-    "loadFailed": "Nu s-au putut încărca numerele de înmatriculare recunoscute."
+    "loadFailed": "Nu s-au putut încărca numerele de înmatriculare recunoscute.",
+    "selectAll": "Selectează tot",
+    "clearAll": "Elimină tot"
   },
   "classes": {
     "label": "Clase",
