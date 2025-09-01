@@ -164,7 +164,7 @@ export default function JSMpegPlayer({
         statsIntervalRef.current = setInterval(() => {
           const currentTimestamp = Date.now();
           const timeDiff = (currentTimestamp - lastTimestampRef.current) / 1000; // in seconds
-          const bitrate = (bytesReceivedRef.current * 8) / timeDiff / 1000; // in kbps
+          const bitrate = bytesReceivedRef.current / timeDiff / 1000; // in kBps
 
           setStats?.({
             streamType: "jsmpeg",

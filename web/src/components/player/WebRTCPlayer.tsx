@@ -266,7 +266,7 @@ export default function WebRtcPlayer({
         const bitrate =
           timeDiff > 0
             ? (bytesReceived - lastBytesReceived) / timeDiff / 1000
-            : 0; // in kbps
+            : 0; // in kBps
 
         setStats?.({
           streamType: "WebRTC",

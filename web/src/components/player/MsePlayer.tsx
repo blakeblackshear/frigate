@@ -592,7 +592,7 @@ function MSEPlayer({
         const now = Date.now();
         const bytesLoaded = totalBytesLoaded.current;
         const timeElapsed = (now - lastTimestamp) / 1000; // seconds
-        const bandwidth = (bytesLoaded - lastLoadedBytes) / timeElapsed / 1024; // kbps
+        const bandwidth = (bytesLoaded - lastLoadedBytes) / timeElapsed / 1000; // kBps
 
         lastLoadedBytes = bytesLoaded;
         lastTimestamp = now;
