@@ -162,7 +162,9 @@ class MqttClient(Communicator):
     def _reason_info(reason_code: object) -> str:
         """Return human_readable_name for a Paho reason code."""
         # Name string
-        if hasattr(reason_code, "getName") and callable(getattr(reason_code, "getName")):
+        if hasattr(reason_code, "getName") and callable(
+            getattr(reason_code, "getName")
+        ):
             try:
                 name = str(getattr(reason_code, "getName")())
             except Exception:
@@ -195,13 +197,19 @@ class MqttClient(Communicator):
         # Check for connection failure by comparing reason name
         if reason_name != "Success":
             if reason_name == "Server unavailable":
-                logger.error("Unable to connect to MQTT server: MQTT Server unavailable")
+                logger.error(
+                    "Unable to connect to MQTT server: MQTT Server unavailable"
+                )
             elif reason_name == "Bad user name or password":
-                logger.error("Unable to connect to MQTT server: MQTT Bad username or password")
+                logger.error(
+                    "Unable to connect to MQTT server: MQTT Bad username or password"
+                )
             elif reason_name == "Not authorized":
                 logger.error("Unable to connect to MQTT server: MQTT Not authorized")
             else:
-                logger.error(f"Unable to connect to MQTT server: Connection refused. Error: {reason_name}")
+                logger.error(
+                    f"Unable to connect to MQTT server: Connection refused. Error: {reason_name}"
+                )
             # Don't set connected = True on connection failure
             return
 
@@ -341,7 +349,7 @@ class MqttClient(Communicator):
         """Handle MQTT reconnection using fresh client creation, retrying every 10 seconds indefinitely."""
         logger.error("MQTT reconnection loop started")
         attempt = 0
-        
+
         while not self._stop_reconnect and not self.connected:
             attempt += 1
 
