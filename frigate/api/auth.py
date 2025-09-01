@@ -357,7 +357,7 @@ def auth(request: Request):
             else "anonymous"
         )
 
-        # parse header and
+        # parse header and resolve a valid role
         role = resolve_role(request.headers, proxy_config)
 
         success_response.headers["remote-role"] = role
