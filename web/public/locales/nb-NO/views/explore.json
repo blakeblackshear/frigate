@@ -65,7 +65,7 @@
         "millisecondsToOffset": "Millisekunder å forskyve annoteringsdata. <em>Standard: 0</em>",
         "tips": "TIPS: Tenk deg et hendelsesklipp med en person som går fra venstre til høyre. Hvis den omsluttende boksen i hendelsestidslinjen konsekvent er til venstre for personen, bør verdien reduseres. Tilsvarende, hvis en person går fra venstre til høyre og den omsluttende boksen konsekvent er foran personen, bør verdien økes.",
         "toast": {
-          "success": "Annoteringsforskyvning for {{camera}} er lagret i konfigurasjonsfilen. Start Frigate på nytt for å bruke endringene dine."
+          "success": "Annoteringsforskyvning for {{camera}} er lagret i konfigurasjonsfilen. Start Frigate på nytt for å aktivere endringene dine."
         }
       }
     },
@@ -219,5 +219,8 @@
   "exploreMore": "Utforsk flere {{label}} objekter",
   "aiAnalysis": {
     "title": "AI-Analyse"
+  },
+  "concerns": {
+    "label": "Bekymringer"
   }
 }
