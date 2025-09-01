@@ -200,5 +200,16 @@
   "chime": "Klämta",
   "wind_chime": "Vindspel",
   "harmonica": "Munspel",
-  "accordion": "Dragspel"
+  "accordion": "Dragspel",
+  "bagpipes": "Säckpipor",
+  "didgeridoo": "Didgeridoo",
+  "theremin": "Theremin",
+  "singing_bowl": "Sjungande skål",
+  "scratching": "Repa",
+  "pop_music": "Popmusik",
+  "hip_hop_music": "Hiphopmusik",
+  "beatboxing": "Beatboxning",
+  "rock_music": "Rockmusik",
+  "heavy_metal": "Heavy Metal musik",
+  "punk_rock": "Punkrock"
 }

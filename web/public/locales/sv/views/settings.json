@@ -126,6 +126,8 @@
     "toast": {
       "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar.",
       "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
+      "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar.",
+      "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
     }
   },
   "menu": {
@@ -137,6 +139,8 @@
     "frigateplus": "Frigate+",
     "enrichments": "Förbättringar",
     "motionTuner": "Rörelsemottagare",
+    "debug": "Felsök",
+    "triggers": "Utlösare"
     "debug": "Felsök",
     "triggers": "Utlösare"
   },
@@ -338,8 +342,31 @@
       "label": "Rörelsemask",
       "documentTitle": "Redigera rörelsemask - Frigate",
       "desc": {
-        "title": "Rörelsemasker används för att förhindra att oönskade typer av rörelser utlöser detektering. Övermaskering gör det svårare att spåra objekt."
+        "title": "Rörelsemasker används för att förhindra att oönskade typer av rörelser utlöser detektering. Övermaskering gör det svårare att spåra objekt.",
+        "documentation": "Dokumentation"
+      },
+      "add": "Ny rörelsemask",
+      "edit": "Redigera rörelsemask",
+      "context": {
+        "title": "Rörelsemasker används för att förhindra att oönskade typer av rörelser utlöser detektering (till exempel: trädgrenar, kameratidsstämplar). Rörelsemasker bör användas <em>mycket sparsamt</em>, övermaskering gör det svårare att spåra objekt."
+      },
+      "point_one": "{{count}} poäng",
+      "point_other": "{{count}} poäng",
+      "clickDrawPolygon": "Klicka för att rita en polygon på bilden.",
+      "polygonAreaTooLarge": {
+        "title": "Rörelsemasken täcker {{polygonArea}}% av kamerabilden. Stora rörelsemasker rekommenderas inte.",
+        "tips": "Rörelsemasker förhindrar inte att objekt upptäcks. Du bör använda en obligatorisk zon istället."
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} har sparats. Starta om Frigate för att tillämpa ändringarna.",
+          "noName": "Rörelsemasken har sparats. Starta om Frigate för att tillämpa ändringarna."
+        }
       }
+    },
+    "objectMasks": {
+      "label": "Objektmasker",
+      "documentTitle": "Redigera objektmask - Frigate"
     }
   }
 }
