@@ -37,6 +37,15 @@
         "value": "{{droppedFrames}} καρέ"
       }
     },
-    "decodedFrames": "Αποκωδικοποιημένα Καρέ:"
+    "decodedFrames": "Αποκωδικοποιημένα Καρέ:",
+    "droppedFrameRate": "Ρυθμός Απορριφθέντων Καρέ:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Επιτυχής αποστολή εικόνας στο Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Αποτυχία αποστολής εικόνας στο Frigate+"
+    }
   }
 }

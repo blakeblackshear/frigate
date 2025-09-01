@@ -4,6 +4,41 @@
     "untilForRestart": "Μέχρι να γίνει επανεκίννηση του Frigate.",
     "untilRestart": "Μέχρι να γίνει επανεκκίνηση",
     "justNow": "Μόλις τώρα",
-    "ago": "{{timeAgo}} Πριν"
+    "ago": "{{timeAgo}} Πριν",
+    "today": "Σήμερα",
+    "yesterday": "Εχθές",
+    "last7": "Τελευταίες 7 ημέρες",
+    "year_one": "{{time}} χρόνος",
+    "year_other": "{{time}} χρόνια",
+    "month_one": "{{time}} μήνας",
+    "month_other": "{{time}} μήνες",
+    "day_one": "{{time}} ημέρα",
+    "day_other": "{{time}} ημέρες",
+    "hour_one": "{{time}} ώρα",
+    "hour_other": "{{time}} ώρες",
+    "minute_one": "{{time}} λεπτό",
+    "minute_other": "{{time}} λεπτά",
+    "second_one": "{{time}} δευτερόλεπτο",
+    "second_other": "{{time}} δευτερόλεπτα",
+    "last14": "Τελευταίες 14 ημέρες",
+    "last30": "Τελευταίες 30 ημέρες",
+    "thisWeek": "Αυτή την εβδομάδα",
+    "lastWeek": "Προηγούμενη Εβδομάδα",
+    "am": "π.μ.",
+    "yr": "{{time}}χρ",
+    "mo": "{{time}}μη",
+    "thisMonth": "Αυτό τον Μήνα",
+    "lastMonth": "Τελευταίος Μήνας",
+    "5minutes": "5 λεπτά",
+    "10minutes": "10 λεπτά",
+    "30minutes": "30 λεπτά"
+  },
+  "menu": {
+    "live": {
+      "cameras": {
+        "count_one": "{{count}} Κάμερα",
+        "count_other": "{{count}} Κάμερες"
+      }
+    }
   }
 }
