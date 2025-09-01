@@ -28,9 +28,9 @@
         },
         "question": {
           "label": "为 Frigate Plus 确认此标签",
-          "ask_a": "这个对象是 <code>{{label}}</code> 吗？",
-          "ask_an": "这个对象是 <code>{{label}}</code> 吗？",
-          "ask_full": "这个对象是 <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) 吗？"
+          "ask_a": "这个目标/物体是 <code>{{label}}</code> 吗？",
+          "ask_an": "这个目标/物体是 <code>{{label}}</code> 吗？",
+          "ask_full": "这个目标/物体是 <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) 吗？"
         }
       }
     },
@@ -118,7 +118,7 @@
     }
   },
   "imagePicker": {
-    "selectImage": "选择追踪对象的缩略图",
+    "selectImage": "选择追踪目标的缩略图",
     "search": {
       "placeholder": "通过标签或子标签搜索……"
     },
