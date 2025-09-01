@@ -108,7 +108,7 @@
       "error": "Takip edilen nesneler silinemedi: {{errorMessage}}"
     },
     "title": "Silmeyi onayla",
-    "desc": "Bu {{objectLength}} adet izlenen nesneyi sildiğinizde ilgili tüm fotoğraflar, kaydedilmiş tüm gömüler ve ilişkili tüm Nesne Geçmişi kayıtları kaldırılır. Bu izlenen nesnelere ait Geçmiş görünümündeki kayıtlı görüntüler <em>SİLİNMEYECEKTİR.</em><br /><br />Devam etmek istediğinize emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklayın."
+    "desc": "Bu {{objectLength}} adet izlenen nesneyi sildiğinizde ilgili tüm fotoğraflar, kaydedilmiş tüm gömüler ve ilişkili tüm nesne yaşam döngüsü kayıtları kaldırılır. Bu izlenen nesnelere ait Geçmiş görünümündeki kayıtlı görüntüler <em>SİLİNMEYECEKTİR.</em><br /><br />Devam etmek istediğinize emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklayın."
   },
   "recognizedLicensePlates": {
     "selectPlatesFromList": "Listeden bir veya birden fazla plaka seçin.",
@@ -116,12 +116,22 @@
     "loading": "Tanınan plakalar yükleniyor…",
     "title": "Tanınan Plakalar",
     "noLicensePlatesFound": "Plaka bulunamadı.",
-    "loadFailed": "Tanınan plakalar yüklenemedi."
+    "loadFailed": "Tanınan plakalar yüklenemedi.",
+    "selectAll": "Tümünü seç",
+    "clearAll": "Tümünü temizle"
   },
   "motion": {
     "showMotionOnly": "Yalnızca Hareket Olanları Göster"
   },
   "zoneMask": {
     "filterBy": "Alana göre filtrele"
+  },
+  "classes": {
+    "count_one": "{{count}} Sınıf",
+    "count_other": "{{count}} Sınıf",
+    "label": "Sınıflar",
+    "all": {
+      "title": "Tüm Sınıflar"
+    }
   }
 }
