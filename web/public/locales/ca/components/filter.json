@@ -108,7 +108,9 @@
     "loading": "Carregant les matrícules reconegudes…",
     "placeholder": "Escriu per a buscar matrícules…",
     "noLicensePlatesFound": "No s'han trobat matrícules.",
-    "selectPlatesFromList": "Seleccioni una o més matrícules de la llista."
+    "selectPlatesFromList": "Seleccioni una o més matrícules de la llista.",
+    "selectAll": "Seleccionar tots",
+    "clearAll": "Netejar tot"
   },
   "cameras": {
     "label": "Filtre de càmeres",

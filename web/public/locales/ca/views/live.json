@@ -143,7 +143,8 @@
     "snapshots": "Instantànies",
     "autotracking": "Seguiment automàtic",
     "objectDetection": "Detecció d'objectes",
-    "audioDetection": "Detecció d'àudio"
+    "audioDetection": "Detecció d'àudio",
+    "transcription": "Transcripció d'audio"
   },
   "history": {
     "label": "Mostrar gravacions històriques"

@@ -20,7 +20,8 @@
     "notifications": "Notificacions",
     "debug": "Depuració",
     "frigateplus": "Frigate+",
-    "enrichments": "Enriquiments"
+    "enrichments": "Enriquiments",
+    "triggers": "Disparadors"
   },
   "dialog": {
     "unsavedChanges": {
@@ -344,6 +345,43 @@
       "detections": "Deteccions ",
       "title": "Revisar",
       "desc": "Habilita o deshabilita temporalment les alertes i deteccions per a aquesta càmera fins que es reiniciï Frigate. Quan estigui desactivat, no es generaran nous elements de revisió. "
+    },
+    "object_descriptions": {
+      "title": "Descripció d'objectes per IA generativa",
+      "desc": "Activar/desactivar temporalment la IA generativa de descripcions per aquesta càmera. Quan està desactivat, les descripcions d'IA generativa no seran requerides per als objectes seguits per aquesta càmera."
+    },
+    "review_descriptions": {
+      "title": "Revisar las descripcions d'IA generativa",
+      "desc": "Activar/desactivals temporalment les descripcions d'IA generativa per aquesta càmera. Quan estan desactivades, les descripcions d'IA generativa no serán requerides per revisar els items en aquesta càmera."
+    },
+    "addCamera": "Afegir Nova Càmera",
+    "editCamera": "Editar Càmera:",
+    "selectCamera": "Seleccionar Càmera",
+    "backToSettings": "Tornar a la Configuració de Càmera",
+    "cameraConfig": {
+      "add": "Afegir Càmera",
+      "edit": "Editar Càmera",
+      "description": "Configurar la càmera incloent les entrades y rols.",
+      "name": "Nom de Càmera",
+      "nameRequired": "El nom de càmera es necesari",
+      "nameLength": "El nom de la càmera ha de ser com a mínim de 24 caràcters.",
+      "namePlaceholder": "e.x., porta_entrada",
+      "enabled": "Activat",
+      "ffmpeg": {
+        "inputs": "Entrades",
+        "path": "Direcció d'entrada",
+        "pathRequired": "Direcció d'entrada necesaria",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Rols",
+        "rolesRequired": "Com a mínin un rol es necesari",
+        "rolesUnique": "Cada rol (audio, detecció, gravació) pot ser assiganda a una entrada",
+        "addInput": "Afegir una entrada",
+        "removeInput": "Esborrar una entrada",
+        "inputsRequired": "Com a mínim una entrada es necesaria"
+      },
+      "toast": {
+        "success": "La càmera {{cameraName}} s'ha guardat correctament"
+      }
     }
   },
   "motionDetectionTuner": {
@@ -414,11 +452,24 @@
       "tips": "<p><strong>Caixes de moviment</strong></p><br><p>Es sobreposaran requadres vermells a les àrees del fotograma on actualment s’estigui detectant moviment.</p>"
     },
     "detectorDesc": "Frigate fa servir els teus detectors ({{detectors}}) per a detectar objectes a les imatges de la teva càmera.",
-    "desc": "La vista de depuració mostra en temps real els objectes rastrejats i les seves estadístiques. La llista d’objectes mostra un resum amb retard temporal dels objectes detectats."
+    "desc": "La vista de depuració mostra en temps real els objectes rastrejats i les seves estadístiques. La llista d’objectes mostra un resum amb retard temporal dels objectes detectats.",
+    "openCameraWebUI": "Obrir la interficie d'usuari de {{camera}}",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "No hi ha deteccions d'audio",
+      "score": "puntuació",
+      "currentRMS": "RMS Actual",
+      "currentdbFS": "dbFS Actual"
+    },
+    "paths": {
+      "title": "Rutes",
+      "desc": "Mostrar els punts significatius de la ruta dels objectes seguits",
+      "tips": "<p><strong>Rutes</strong></p><br><p>Les línies i cercles indicarán els punts significatius dels objectes seguits durant el seu cicle de vida.</p>"
+    }
   },
   "users": {
     "table": {
-      "username": "Nom d'usuari",
+      "username": "Usuari",
       "password": "Contrasenya",
       "deleteUser": "Suprimir usuari",
       "noUsers": "No s'han trobat usuaris.",
@@ -618,5 +669,100 @@
       "success": "Els paràmetres complementaris s'han desat. Reinicia Frigate per aplicar els canvis."
     },
     "restart_required": "És necessari reiniciar (Han cambiat paràmetres complementaris)"
+  },
+  "triggers": {
+    "table": {
+      "actions": "Accions",
+      "noTriggers": "No hi ha disparadors configurats en aquesta càmera.",
+      "edit": "Editar",
+      "deleteTrigger": "Esborrar Disparador",
+      "lastTriggered": "Últim Disparo",
+      "name": "Nom",
+      "type": "Tipus",
+      "content": "Contingut",
+      "threshold": "Llindar"
+    },
+    "type": {
+      "thumbnail": "Miniatura",
+      "description": "Descripció"
+    },
+    "actions": {
+      "alert": "Marcar com Alerta",
+      "notification": "Enviar Notificació"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Crear Disparador",
+        "desc": "Crear disparador per una càmera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Editar Disparador",
+        "desc": "Editar la configuració per al disparador de càmera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Esborrar Disparador",
+        "desc": "Estas segur que vols esborrar el disparador <strong>{{triggerName}}</strong>? Aquesta acció no es pot desfer."
+      },
+      "form": {
+        "name": {
+          "title": "Nom",
+          "placeholder": "Entrar el nom del disparador",
+          "error": {
+            "minLength": "El nom ha de tenir almenys 2 caràcters de llargada.",
+            "invalidCharacters": "El nom només pot contenir lletres, números, guions i guinons baixos.",
+            "alreadyExists": "El disparador amb aquest nom ja existeix per aquesta càmera."
+          }
+        },
+        "enabled": {
+          "description": "Activar o desactivar aquest disparador"
+        },
+        "type": {
+          "title": "Tipus",
+          "placeholder": "Selecciona un tipus de disparador"
+        },
+        "content": {
+          "title": "Contingut",
+          "imagePlaceholder": "Selecciona una imatge",
+          "textPlaceholder": "Entra el contingut de text",
+          "imageDesc": "Selecciona una imatge per disparar aquesta acció quan una imatge similar sigui detectada.",
+          "textDesc": "Entra el text per disparar aquesta acció quan es detecti una descripció d'objecte a rastrejar similar.",
+          "error": {
+            "required": "Contigunt requerit."
+          }
+        },
+        "threshold": {
+          "title": "Llindar",
+          "error": {
+            "min": "El llindar ha de ser mínim 0",
+            "max": "El llindar ha de ser máxim 1"
+          }
+        },
+        "actions": {
+          "title": "Accions",
+          "desc": "Per defecte, Frigate dispara un missatge MQTT per tots els disparadors. Tria una acció adicional per realitzar quan aquest disparador dispari.",
+          "error": {
+            "min": "S'ha de seleccionar una acció com a mínim."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "El disparador {{name}} s'ha creat existosament.",
+        "updateTrigger": "El disparador {{name}} s'ha actualitzat correctament.",
+        "deleteTrigger": "El disparador {{name}} s'ha borrat correctament."
+      },
+      "error": {
+        "createTriggerFailed": "Error al crear el disparador: {{errorMessage}}",
+        "updateTriggerFailed": "Error a l'actualitzar el disparador: {{errorMessage}}",
+        "deleteTriggerFailed": "Error a l'esborrar el disparador: {{errorMessage}}"
+      }
+    },
+    "documentTitle": "Disparadors",
+    "management": {
+      "title": "Gestió de disparadors",
+      "desc": "Gestionar els disparadors de {{camera}}. Usa les tipus de miniatures per disparar miniatures similars a l'objecte a seguir seleccionat, i el tipus de descripció per disparar en cas de descripcions similars a l'especificada."
+    },
+    "addTrigger": "Afegir disaprador"
   }
 }

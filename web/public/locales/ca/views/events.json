@@ -34,5 +34,7 @@
   },
   "camera": "Càmera",
   "selected_one": "{{count}} seleccionats",
-  "selected_other": "{{count}} seleccionats"
+  "selected_other": "{{count}} seleccionats",
+  "suspiciousActivity": "Activitat sospitosa",
+  "threateningActivity": "Activitat amenaçadora"
 }
