@@ -8,7 +8,7 @@
     "person": "人",
     "confidence": "置信度",
     "face": "人脸详情",
-    "faceDesc": "生成此人脸特征的跟踪对象详细信息",
+    "faceDesc": "生成此人脸特征的追踪目标详细信息",
     "timestamp": "时间戳",
     "subLabelScore": "子标签得分",
     "scoreInfo": "子标签分数是基于所有识别到的人脸置信度的加权评分，因此可能与快照中显示的分数有所不同。",
