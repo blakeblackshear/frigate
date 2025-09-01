@@ -106,7 +106,15 @@
       "title": "Percorsi",
       "desc": "Mostra i punti significativi del percorso dell'oggetto tracciato",
       "tips": "<p><strong>Percorsi</strong></p><br><p>Linee e cerchi indicheranno i punti significativi in cui l'oggetto tracciato si è spostato durante il suo ciclo di vita.</p>"
-    }
+    },
+    "audio": {
+      "title": "Audio",
+      "currentdbFS": "dbFS correnti",
+      "noAudioDetections": "Nessun rilevamento audio",
+      "score": "punteggio",
+      "currentRMS": "RMS attuale"
+    },
+    "openCameraWebUI": "Apri l'interfaccia utente Web di {{camera}}"
   },
   "masksAndZones": {
     "motionMasks": {
@@ -355,7 +363,8 @@
       },
       "toast": {
         "success": "La telecamera {{cameraName}} è stata salvata correttamente"
-      }
+      },
+      "nameLength": "Il nome della telecamera deve contenere meno di 24 caratteri."
     }
   },
   "menu": {
@@ -368,7 +377,8 @@
     "debug": "Correzioni",
     "users": "Utenti",
     "frigateplus": "Frigate+",
-    "enrichments": "Miglioramenti"
+    "enrichments": "Miglioramenti",
+    "triggers": "Inneschi"
   },
   "users": {
     "dialog": {
