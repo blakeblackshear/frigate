@@ -622,7 +622,11 @@
     },
     "openCameraWebUI": "Открыть веб-интерфейс {{camera}}",
     "audio": {
-      "title": "Аудио"
+      "title": "Аудио",
+      "noAudioDetections": "Аудиообнаружений нет",
+      "score": "оценка",
+      "currentRMS": "Текущий RMS",
+      "currentdbFS": "Текущий dbFS"
     }
   },
   "frigatePlus": {
