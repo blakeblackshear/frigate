@@ -138,7 +138,13 @@ export default function HlsVideoPlayer({
     hlsRef.current.attachMedia(videoRef.current);
     hlsRef.current.loadSource(currentSource.playlist);
     videoRef.current.playbackRate = currentPlaybackRate;
-  }, [videoRef, hlsRef, useHlsCompat, currentSource]);
+  }, [
+    videoRef,
+    hlsRef,
+    useHlsCompat,
+    currentSource.playlist,
+    currentSource.startPosition,
+  ]);
 
   // state handling
 
