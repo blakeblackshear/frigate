@@ -282,28 +282,45 @@ def auth(request: Request):
         if role_header:
             raw_value = request.headers.get(role_header, "")
             if proxy_config.header_map.role_map and raw_value:
-                # treat as group claim
+                # treat as group claim split by the configured separator
                 groups = [
                     g.strip()
-                    for g in raw_value.replace(" ", ",").split(",")
+                    for g in raw_value.split(proxy_config.separator)
                     if g.strip()
                 ]
-                for (
-                    candidate_role,
-                    required_groups,
-                ) in proxy_config.header_map.role_map.items():
-                    if any(group in groups for group in required_groups):
-                        role = candidate_role
-                        break
-            elif raw_value:
-                normalized_role = raw_value.strip().lower()
-                if normalized_role in VALID_ROLES:
-                    role = normalized_role
-                else:
-                    logger.warning(
-                        f"Provided proxy role header contains invalid value '{raw_value}'. Using default role '{proxy_config.default_role}'."
+
+                # collect all roles whose mapped groups intersect the provided groups
+                matched_roles = {
+                    role_name
+                    for role_name, required_groups in proxy_config.header_map.role_map.items()
+                    if any(group in groups for group in required_groups)
+                }
+
+                if matched_roles:
+                    # choose by VALID_ROLES priority (eg, 'admin' before 'viewer')
+                    role = next(
+                        (r for r in VALID_ROLES if r in matched_roles),
+                        proxy_config.default_role,
                     )
-                    role = proxy_config.default_role
+                else:
+                    logger.info(
+                        f"No role_map match for groups '{raw_value}'. Using default role '{proxy_config.default_role}'."
+                    )
+            elif raw_value:
+                # no role map specified, so header may contain role name(s) directly
+                roles_from_header = [
+                    r.strip().lower()
+                    for r in raw_value.split(proxy_config.separator)
+                    if r.strip()
+                ]
+                role = next(
+                    (r for r in VALID_ROLES if r in roles_from_header),
+                    proxy_config.default_role,
+                )
+                if role == proxy_config.default_role and roles_from_header:
+                    logger.warning(
+                        f"Provided proxy role header values '{raw_value}' did not contain a valid role. Using default role '{proxy_config.default_role}'."
+                    )
 
         success_response.headers["remote-role"] = role
         return success_response
