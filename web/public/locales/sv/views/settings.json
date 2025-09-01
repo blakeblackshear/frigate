@@ -124,7 +124,8 @@
     },
     "restart_required": "Omstart krävs (berikningsinställningar har ändrats)",
     "toast": {
-      "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar."
+      "success": "Inställningarna för berikning har sparats. Starta om Frigate för att tillämpa dina ändringar.",
+      "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
     }
   },
   "menu": {
@@ -136,12 +137,209 @@
     "frigateplus": "Frigate+",
     "enrichments": "Förbättringar",
     "motionTuner": "Rörelsemottagare",
-    "debug": "Felsök"
+    "debug": "Felsök",
+    "triggers": "Utlösare"
   },
   "dialog": {
     "unsavedChanges": {
       "title": "Du har osparade ändringar.",
       "desc": "Vill du spara dina ändringar innan du fortsätter?"
+    }
+  },
+  "camera": {
+    "title": "Kamera inställningar",
+    "streams": {
+      "title": "Videoströmmar",
+      "desc": "Inaktivera tillfälligt en kamera tills Frigate startar om. Om du inaktiverar en kamera helt stoppas Frigates bearbetning av kamerans strömmar. Detektering, inspelning och felsökning kommer inte att vara tillgängliga.<br /> <em>Obs! Detta inaktiverar inte go2rtc-återströmmar.</em>"
+    },
+    "object_descriptions": {
+      "title": "Generativa AI-objektbeskrivningar",
+      "desc": "Aktivera/inaktivera tillfälligt generativa AI-objektbeskrivningar för den här kameran. När den är inaktiverad kommer AI-genererade beskrivningar inte att begäras för spårade objekt på den här kameran."
+    },
+    "review_descriptions": {
+      "title": "Beskrivningar av generativa AI-granskningar",
+      "desc": "Aktivera/inaktivera tillfälligt genererade AI-granskningsbeskrivningar för den här kameran. När det är inaktiverat kommer AI-genererade beskrivningar inte att begäras för granskningsobjekt på den här kameran."
+    },
+    "review": {
+      "title": "Recensera",
+      "desc": "Tillfälligt Aktivera/avaktivera varningar och detekteringar för den här kameran tills Frigate startar om. När den är avaktiverad genereras inga nya granskningsobjekt. ",
+      "alerts": "Aviseringar ",
+      "detections": "Detektioner "
+    },
+    "reviewClassification": {
+      "title": "Granska klassificering",
+      "desc": "Frigate kategoriserar granskningsobjekt som varningar och detekteringar. Som standard betraktas alla <em>person</em>- och <em>bil</em>-objekt som varningar. Du kan förfina kategoriseringen av dina granskningsobjekt genom att konfigurera obligatoriska zoner för dem.",
+      "noDefinedZones": "Inga zoner är definierade för den här kameran.",
+      "objectAlertsTips": "Alla {{alertsLabels}}-objekt på {{cameraName}} kommer att visas som varningar.",
+      "zoneObjectAlertsTips": "Alla {{alertsLabels}} objekt som upptäcks i {{zone}} på {{cameraName}} kommer att visas som varningar.",
+      "objectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} kommer att visas som detektioner oavsett vilken zon de befinner sig i.",
+      "zoneObjectDetectionsTips": {
+        "text": "Alla {{detectionsLabels}}-objekt som inte kategoriseras i {{zone}} på {{cameraName}} kommer att visas som detektioner.",
+        "notSelectDetections": "Alla {{detectionsLabels}} objekt som upptäckts i {{zone}} på {{cameraName}} och som inte kategoriserats som varningar kommer att visas som detekteringar oavsett vilken zon de befinner sig i.",
+        "regardlessOfZoneObjectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} kommer att visas som detektioner oavsett vilken zon de befinner sig i."
+      },
+      "unsavedChanges": "Osparade inställningar för granskningsklassificering för {{camera}}",
+      "selectAlertsZones": "Välj zoner för aviseringar",
+      "selectDetectionsZones": "Välj zoner för detektioner",
+      "limitDetections": "Begränsa detektioner till specifika zoner",
+      "toast": {
+        "success": "Konfigurationen för granskning av klassificering har sparats. Starta om Frigate för att tillämpa ändringarna."
+      }
+    },
+    "addCamera": "Lägg till ny kamera",
+    "editCamera": "Redigera kamera:",
+    "selectCamera": "Välj en kamera",
+    "backToSettings": "Tillbaka till kamera inställningar",
+    "cameraConfig": {
+      "add": "Lägg till kamera",
+      "edit": "Redigera kamera",
+      "description": "Konfigurera kamerainställningar inklusive strömingångar och roller.",
+      "name": "Kamera namn",
+      "nameRequired": "Kamera namn krävs",
+      "nameInvalid": "Kamera namnet får endast innehålla bokstäver, siffror, understreck, eller bindestreck",
+      "namePlaceholder": "t.ex. fram_dörr",
+      "enabled": "Aktiverad",
+      "ffmpeg": {
+        "inputs": "Ingångsströmmar",
+        "path": "Strömväg",
+        "pathRequired": "Strömningsväg krävs",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roller",
+        "rolesRequired": "Minst en roll krävs",
+        "rolesUnique": "Varje roll (ljud, detektering, inspelning) kan bara tilldelas en ström",
+        "addInput": "Lägg till inmatningsström",
+        "removeInput": "Ta bort inmatningsström",
+        "inputsRequired": "Minst en indataström krävs"
+      },
+      "toast": {
+        "success": "Kamera {{cameraName}} sparades"
+      },
+      "nameLength": "Namnet på kameran måste vara kortare än 24 tecken."
+    }
+  },
+  "masksAndZones": {
+    "filter": {
+      "all": "Alla masker och zoner"
+    },
+    "restart_required": "Omstart krävs (masker/zoner har ändrats)",
+    "toast": {
+      "success": {
+        "copyCoordinates": "Kopierade koordinaterna för {{polyName}} till urklipp."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Kunde inte kopiera koordinaterna till urklipp."
+      }
+    },
+    "motionMaskLabel": "Rörelsemask {{number}}",
+    "objectMaskLabel": "Objektmask {{number}} ({{label}})",
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "Zonnamnet måste vara minst 2 tecken långt.",
+          "mustNotBeSameWithCamera": "Zonnamnet får inte vara detsamma som kameranamnet.",
+          "alreadyExists": "En zon med detta namn finns redan för den här kameran.",
+          "mustNotContainPeriod": "Zonnamnet får inte innehålla punkter.",
+          "hasIllegalCharacter": "Zonnamnet innehåller ogiltiga tecken."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Avståndet måste vara större än eller lika med 0,1.",
+          "mustBeFilled": "Alla avståndsfält måste fyllas i för att hastighetsuppskattning ska kunna användas."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Trögheten måste vara över 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Uppehållstiden måste vara större än eller lika med 0."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Gränsvärdet för hastigheten måste vara större eller lika med 0.1."
+        }
+      },
+      "polygonDrawing": {
+        "removeLastPoint": "Ta bort senaste punkten",
+        "reset": {
+          "label": "Rensa alla punkter"
+        },
+        "snapPoints": {
+          "true": "Fäst punkter",
+          "false": "Fäst inte punkter"
+        },
+        "delete": {
+          "title": "Bekräfta borttagning",
+          "desc": "Är du säker på att du vill ta bort {{type}} <em>{{name}}</em>?",
+          "success": "{{name}} har raderats."
+        },
+        "error": {
+          "mustBeFinished": "Polygonritningen måste vara klar innan du sparar."
+        }
+      }
+    },
+    "zones": {
+      "label": "Zoner",
+      "documentTitle": "Redigera zon - Frigate",
+      "desc": {
+        "documentation": "Dokumentation",
+        "title": "Zoner låter dig definiera ett specifikt område av bilden så att du kan avgöra om ett objekt befinner sig inom ett visst område eller inte."
+      },
+      "add": "Lägg till zon",
+      "edit": "Redigera zon",
+      "name": {
+        "title": "Namn",
+        "inputPlaceHolder": "Ange ett namn…",
+        "tips": "Namnet måste vara minst 2 tecken långt och får inte vara namnet på en kamera eller en annan zon."
+      },
+      "inertia": {
+        "title": "Momentum",
+        "desc": "Anger hur många bildrutor ett objekt måste finnas i en zon innan de räknas som en del av zonen. <em>Standard: 3</em>"
+      },
+      "objects": {
+        "title": "Objekt",
+        "desc": "Lista över objekt som gäller för den här zonen."
+      },
+      "allObjects": "Alla objekt",
+      "point_one": "{{count}} poäng",
+      "point_other": "{{count}} poäng",
+      "clickDrawPolygon": "Klicka för att rita en polygon på bilden.",
+      "loiteringTime": {
+        "title": "Tid någon hänger omkring",
+        "desc": "Ställer in en minsta tid i sekunder som objektet måste vara i zonen för att det ska aktiveras. <em>Standard: 0</em>"
+      },
+      "speedEstimation": {
+        "title": "Hastighetsuppskattning",
+        "desc": "Aktivera hastighetsuppskattning för objekt i den här zonen. Zonen måste ha exakt fyra punkter.",
+        "lineADistance": "Avstånd till linje A ({{unit}})",
+        "lineBDistance": "Avstånd till linje B ({{unit}})",
+        "lineCDistance": "Avstånd till linje C ({{unit}})",
+        "lineDDistance": "Avstånd till linje D ({{unit}})"
+      },
+      "speedThreshold": {
+        "title": "Hastighetsgräns ({{unit}})",
+        "desc": "Anger en lägsta hastighet för objekt som ska beaktas i denna zon.",
+        "toast": {
+          "error": {
+            "pointLengthError": "Hastighetsuppskattning har inaktiverats för den här zonen. Zoner med hastighetsuppskattning måste ha exakt 4 punkter.",
+            "loiteringTimeError": "Zoner med uppehållstider större än 0 bör inte användas vid hastighetsuppskattning."
+          }
+        }
+      },
+      "toast": {
+        "success": "Zon ({{zoneName}}) har sparats. Starta om Frigate för att tillämpa ändringarna."
+      }
+    },
+    "motionMasks": {
+      "label": "Rörelsemask",
+      "documentTitle": "Redigera rörelsemask - Frigate",
+      "desc": {
+        "title": "Rörelsemasker används för att förhindra att oönskade typer av rörelser utlöser detektering. Övermaskering gör det svårare att spåra objekt."
+      }
     }
   }
 }
