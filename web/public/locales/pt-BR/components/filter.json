@@ -23,7 +23,7 @@
       "short": "Datas"
     }
   },
-  "more": "Mais filtros",
+  "more": "Mais Filtros",
   "reset": {
     "label": "Resetar filtros para valores padrão"
   },
@@ -71,7 +71,7 @@
       "title": "Configurações",
       "defaultView": {
         "title": "Visualização Padrão",
-        "desc": "Quando nenhum filtro é selecionado, exibir um sumário dos objetos mais recentes rastreados por categoria, ou exiba uma grade sem filtro.",
+        "desc": "Quando nenhum filtro é selecionado, exibe um sumário dos objetos mais recentes rastreados por rótulo, ou exibe uma grade sem filtro.",
         "summary": "Sumário",
         "unfilteredGrid": "Grade Sem Filtros"
       },
@@ -121,7 +121,9 @@
     "loading": "Carregando placas de identificação reconhecidas…",
     "placeholder": "Digite para pesquisar por placas de identificação…",
     "noLicensePlatesFound": "Nenhuma placa de identificação encontrada.",
-    "selectPlatesFromList": "Seleciona uma ou mais placas da lista."
+    "selectPlatesFromList": "Seleciona uma ou mais placas da lista.",
+    "selectAll": "Selecionar todos",
+    "clearAll": "Limpar todos"
   },
   "classes": {
     "label": "Classes",

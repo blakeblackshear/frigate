@@ -20,7 +20,8 @@
     "frigateplus": "Frigate+",
     "motionTuner": "Ajuste de Movimento",
     "debug": "Depurar",
-    "enrichments": "Enriquecimentos"
+    "enrichments": "Enriquecimentos",
+    "triggers": "Gatilhos"
   },
   "dialog": {
     "unsavedChanges": {
@@ -212,7 +213,8 @@
       },
       "toast": {
         "success": "Câmera {{cameraName}} salva com sucesso"
-      }
+      },
+      "nameLength": "O nome da câmera deve ter ao menos 24 caracteres."
     }
   },
   "masksAndZones": {
@@ -396,16 +398,16 @@
       "documentation": "Leia o Guia de Ajuste de Movimento"
     },
     "Threshold": {
-      "title": "Limite",
+      "title": "Limiar",
       "desc": "O valor do limiar dita o quanto de mudança na luminância de um pixel é requerida para ser considerada movimento. <em>Padrão: 30</em>"
     },
     "contourArea": {
       "title": "Área de contorno",
-      "desc": "O valor do contorno da área é usado para decidir quais grupos de mudança de pixel se qualificam como movimento. <em>Padrão: 10</em>"
+      "desc": "O valor da área de contorno é usado para decidir quais grupos de mudança de pixel se qualificam como movimento. <em>Padrão: 10</em>"
     },
     "improveContrast": {
       "title": "Melhorar o contraste",
-      "desc": "Melhorar contraste para cenas escuras. <em>Padrão: ON</em>"
+      "desc": "Melhorar contraste para cenas escuras. <em>Padrão: Ativado</em>"
     },
     "toast": {
       "success": "As configurações de movimento foram salvas."
@@ -457,19 +459,27 @@
     "noObjects": "Nenhum Objeto",
     "timestamp": {
       "title": "Timestamp",
-      "desc": "Sobreponha um timestamp na imagem"
+      "desc": "Sobrepor um timestamp na imagem"
     },
     "paths": {
       "title": "Caminho",
       "desc": "Mostrar pontos significantes do caminho do objeto rastreado",
       "tips": "<p><strong>Caminhos</strong></p><br><p>Linhas e círculos indicarão pontos significantes por onde o objeto rastreado se moveu durante o seu ciclo de vida.</p>"
-    }
+    },
+    "audio": {
+      "title": "Áudio",
+      "noAudioDetections": "Nenhuma detecção de áudio",
+      "score": "pontuanção",
+      "currentRMS": "RMS Atual",
+      "currentdbFS": "dbFS Atual"
+    },
+    "openCameraWebUI": "Abrir a Interface Web de {{camera}}"
   },
   "users": {
     "title": "Usuários",
     "management": {
       "title": "Gerenciamento de Usuário",
-      "desc": "Gerencias as contas de usuário dessa instância do Frigate."
+      "desc": "Gerenciar as contas de usuário dessa instância do Frigate."
     },
     "addUser": "Adicionar Usuário",
     "updatePassword": "Atualizar Senha",
@@ -622,7 +632,7 @@
     "apiKey": {
       "title": "Chave de API do Frigate+",
       "validated": "A chave de API do Frigate+ detectada e validada",
-      "notValidated": "A chave de API do Frigate+ não detectada ou não validada",
+      "notValidated": "Chave de API do Frigate+ não detectada ou não validada",
       "desc": "A chave de API do Frigate+ habilita a integração com o serviço do Frigate+.",
       "plusLink": "Leia mais sobre o Frigate+"
     },
@@ -645,7 +655,7 @@
     },
     "snapshotConfig": {
       "title": "Configuração de Captura de Imagem",
-      "desc": "Enviar ao Frigate+ requer tanto a captura de imagem quanto a captura de imagem <code>clean_copy</code> estarem habilitadas na sua configuração.",
+      "desc": "Envios ao Frigate+ requerem tanto a captura de imagem normais quanto a captura de imagem <code>clean_copy</code> estarem habilitadas na sua configuração.",
       "documentation": "Leia a documentação",
       "cleanCopyWarning": "Algumas câmeras possuem captura de imagem habilitada porém têm a cópia limpa desabilitada. Você precisa habilitar a <code>clean_copy</code> nas suas configurações de captura de imagem para poder submeter imagems dessa câmera ao Frigate+.",
       "table": {
