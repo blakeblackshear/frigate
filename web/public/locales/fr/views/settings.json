@@ -10,7 +10,7 @@
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
     "notifications": "Paramètres de notification - Frigate",
-    "enrichments": "Paramètres de données augmentées - Frigate"
+    "enrichments": "Paramètres d'enrichissement - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -22,7 +22,7 @@
     "users": "Utilisateurs",
     "notifications": "Notifications",
     "frigateplus": "Frigate+",
-    "enrichments": "Données augmentées",
+    "enrichments": "Enrichissements",
     "triggers": "Déclencheurs"
   },
   "dialog": {
@@ -317,6 +317,8 @@
         "success": "Caméra {{cameraName}} enregistrée avec succès"
       },
       "nameLength": "Le nom de la caméra doit comporter au plus 24 caractères."
+      },
+      "nameLength": "Le nom de la caméra doit comporter au plus 24 caractères."
     }
   },
   "masksAndZones": {
@@ -576,6 +578,15 @@
       "currentdbFS": "dbFS actuel"
     },
     "openCameraWebUI": "Ouvre l'interface Web de {{camera}}"
+    },
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Aucune détection audio",
+      "score": "score",
+      "currentRMS": "RMS actuel",
+      "currentdbFS": "dbFS actuel"
+    },
+    "openCameraWebUI": "Ouvre l'interface Web de {{camera}}"
   },
   "users": {
     "title": "Utilisateurs",
@@ -675,7 +686,7 @@
     }
   },
   "enrichments": {
-    "title": "Paramètres des données augmentées",
+    "title": "Paramètres d'enrichissement",
     "birdClassification": {
       "title": "Identification des oiseaux",
       "desc": "L'identification des oiseaux est réalisée à l'aide d'un modèle TensorFlow quantifié. Lorsqu'un oiseau est reconnu, son nom commun est automatiquement ajouté comme sous-libellé. Cette information est intégréesà l'interface utilisateur, aux filtres de recherche et aux notifications."
@@ -707,7 +718,7 @@
       },
       "desc": "La recherche sémantique de Frigate vous permet de retrouver les objets suivis dans votre revue d'évènements en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement."
     },
-    "unsavedChanges": "Modifications non enregistrées des paramètres des données augmentées",
+    "unsavedChanges": "Modifications non enregistrées des paramètres d'enrichissement",
     "faceRecognition": {
       "title": "Reconnaissance faciale",
       "readTheDocumentation": "Lire la documentation",
@@ -732,9 +743,9 @@
     },
     "toast": {
       "error": "Échec de l'enregistrement des modifications de configuration : {{errorMessage}}",
-      "success": "Les paramètres de données augmentées ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
+      "success": "Les paramètres d'enrichissement ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
     },
-    "restart_required": "Redémarrage nécessaire (paramètres des données augmentées modifiés)"
+    "restart_required": "Redémarrage nécessaire (paramètres d'enrichissement modifiés)"
   },
   "triggers": {
     "documentTitle": "Déclencheurs",
