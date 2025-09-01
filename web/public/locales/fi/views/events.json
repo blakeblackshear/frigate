@@ -34,5 +34,7 @@
     "label": "Näytä uudet katselmoitavat kohteet",
     "button": "Uudet katselmoitavat kohteet"
   },
-  "camera": "Kamera"
+  "camera": "Kamera",
+  "suspiciousActivity": "Epäilyttävä toiminta",
+  "threateningActivity": "Uhkaava toiminta"
 }
