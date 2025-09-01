@@ -22,7 +22,8 @@
     "notifications": "Meldingen",
     "cameras": "Camera-instellingen",
     "frigateplus": "Frigate+",
-    "enrichments": "Verrijkingen"
+    "enrichments": "Verrijkingen",
+    "triggers": "Triggers"
   },
   "dialog": {
     "unsavedChanges": {
@@ -214,7 +215,8 @@
       },
       "toast": {
         "success": "Camera {{cameraName}} is succesvol opgeslagen"
-      }
+      },
+      "nameLength": "Cameranaam mag niet langer zijn dan 24 tekens."
     }
   },
   "masksAndZones": {
@@ -462,6 +464,14 @@
       "title": "Paden",
       "desc": "Toon belangrijke punten van het pad van het gevolgde object",
       "tips": "<p><strong>Paden</strong></p><br><p>Lijnen en cirkels geven belangrijke punten aan waar het gevolgde object zich tijdens zijn levensduur heeft verplaatst.</p>"
+    },
+    "openCameraWebUI": "Open de webinterface van {{camera}}",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Geen audiodetecties",
+      "score": "score",
+      "currentRMS": "Huidige RMS",
+      "currentdbFS": "Huidige dbFS"
     }
   },
   "users": {
@@ -727,7 +737,7 @@
     "documentTitle": "Triggers",
     "management": {
       "title": "Triggerbeheer",
-      "desc": "Beheer triggers voor {{camera}}. Gebruik het thumbnail om triggers te activeren op basis van thumbnail die lijken op het door u geselecteerde gevolgde object, en het beschrijvingstype om triggers te activeren op basis van beschrijvingen die lijken op de door u opgegeven tekst."
+      "desc": "Beheer triggers voor {{camera}}. Gebruik een thumbnail om te triggeren op vergelijkbare thumbnails van het door jou gevolgde object, of gebruik een objectbeschrijving om te triggeren op vergelijkbare beschrijvingen van de door jou opgegeven tekst."
     },
     "addTrigger": "Trigger toevoegen",
     "table": {
