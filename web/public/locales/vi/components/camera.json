@@ -49,7 +49,8 @@
         "audioIsAvailable": "Âm thanh có sẵn cho luồng này",
         "audioIsUnavailable": "Âm thanh không có sẵn cho luồng này",
         "label": "Cài đặt trực tiếp Camera"
-      }
+      },
+      "birdseye": "Toàn cảnh"
     },
     "name": {
       "label": "Tên",
