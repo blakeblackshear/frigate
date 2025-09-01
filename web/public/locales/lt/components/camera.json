@@ -66,7 +66,8 @@
           "desc": "Šį nustatymą naudoti tik jei jūsų kameros tiesioginėje transliacijoje matomi spalvų neatitikimai arba matoma įstriža linija dešinėje vaizdo pusėje.",
           "label": "Suderinamumo rėžimas"
         }
-      }
+      },
+      "birdseye": "Birdseye"
     }
   },
   "debug": {

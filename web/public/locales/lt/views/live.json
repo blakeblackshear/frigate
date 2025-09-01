@@ -9,5 +9,17 @@
   "twoWayTalk": {
     "enable": "Įgalinti Dvipusį Pokalbį",
     "disable": "Išjungti Dvipusį Pokalbį"
+  },
+  "detect": {
+    "enable": "Įjungti Aptikimą",
+    "disable": "Išjungti Aptikimą"
+  },
+  "audioDetect": {
+    "enable": "Įjungti Garso Aptikimą",
+    "disable": "Išjungti Garso Aptikimą"
+  },
+  "cameraSettings": {
+    "objectDetection": "Objektų Aptikimai",
+    "audioDetection": "Garso Aptikimai"
   }
 }

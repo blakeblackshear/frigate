@@ -42,7 +42,8 @@
       "inferenceSpeed": "Detektorių darbo greitis",
       "temperature": "Detektorių Temperatūra",
       "cpuUsage": "Detektorių CPU Naudojimas",
-      "memoryUsage": "Detektorių Atminties Naudojimas"
+      "memoryUsage": "Detektorių Atminties Naudojimas",
+      "cpuUsageInformation": "CPU vartojimas ruošiant duomenis detektorių modeliams. Ši reikšmė nevertina inference vartojimo, net jei yra naudojamas GPU akseleratorius."
     },
     "hardwareInfo": {
       "title": "Techninės įrangos Info",
@@ -59,7 +60,9 @@
         },
         "nvidiaSMIOutput": {
           "title": "Nvidia SMI Išvestis",
+          "title": "Nvidia SMI Išvestis",
           "name": "Pavadinimas: {{name}}",
+          "driver": "Tvarkyklė: {{driver}}",
           "driver": "Tvarkyklė: {{driver}}",
           "cudaComputerCapability": "CUDA Compute Galimybės: {{cuda_compute}}",
           "vbios": "VBios Info: {{vbios}}"
@@ -106,6 +109,10 @@
     "shm": {
       "title": "SHM (bendrinama atmintis) priskyrimas",
       "warning": "Esamas SHM dydis {{total}}MB yra per mažas. Pridėkite bent jau {{min_shm}}MB."
+    },
+    "shm": {
+      "title": "SHM (bendrinama atmintis) priskyrimas",
+      "warning": "Esamas SHM dydis {{total}}MB yra per mažas. Pridėkite bent jau {{min_shm}}MB."
     }
   },
   "cameras": {
@@ -131,19 +138,19 @@
     "framesAndDetections": "Kadrai / Aptikimai",
     "label": {
       "camera": "kamera",
-      "detect": "susekta",
+      "detect": "aptikti",
       "skipped": "praleista",
       "ffmpeg": "FFmpeg",
       "capture": "užfiksuota",
       "overallFramesPerSecond": "viso kadrų per sekundę",
-      "overallDetectionsPerSecond": "viso susekta per sekundę",
-      "overallSkippedDetectionsPerSecond": "viso praleista susekimų per sekundę",
+      "overallDetectionsPerSecond": "viso aptikimų per sekundę",
+      "overallSkippedDetectionsPerSecond": "viso praleista aptikimų per sekundę",
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraCapture": "{{camName}} ufiksuota",
       "cameraDetect": "{{camName}} susekta",
       "cameraFramesPerSecond": "{{camName}} kadrai per sekundę",
-      "cameraDetectionsPerSecond": "{{camName}} susekimai per sekundę",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} praleista susekimų per sekundę"
+      "cameraDetectionsPerSecond": "{{camName}} aptikimai per sekundę",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} praleista aptikimų per sekundę"
     },
     "toast": {
       "success": {
@@ -157,18 +164,19 @@
   "lastRefreshed": "Paskutinį kartą atnaujinta: ",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} turi aukštą CPU suvartojimą FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} turi auktšą CPU vartojimą susiekimui ({{detectAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} turi auktšą CPU vartojimą aptikimams ({{detectAvg}}%)",
     "healthy": "Sistemos būklė sveika",
     "reindexingEmbeddings": "Įterpinių reideksavimas ({{processed}}% baigtas)",
     "cameraIsOffline": "{{camera}} yra nepasiekiama",
     "detectIsSlow": "{{detect}} yra lėtas ({{speed}}ms)",
-    "detectIsVerySlow": "{{detect}} yra labai lėtas ({{speed}}ms)"
+    "detectIsVerySlow": "{{detect}} yra labai lėtas ({{speed}}ms)",
+    "shmTooLow": "/dev/shm priskirta ({{total}} MB) turi būti padidinta bent jau iki {{min}} MB."
   },
   "enrichments": {
     "title": "Patobulinimai",
     "embeddings": {
-      "yolov9_plate_detection": "YOLOv9 Numerių Susekimai",
-      "yolov9_plate_detection_speed": "YOLOv9 Numeriu Susekimų Greitis",
+      "yolov9_plate_detection": "YOLOv9 Numerių Aptikimai",
+      "yolov9_plate_detection_speed": "YOLOv9 Numerių Aptikimų Greitis",
       "text_embedding_speed": "Teksto Įterpimų Greitis",
       "plate_recognition_speed": "Numerių Atpažinimo Greitis",
       "face_recognition_speed": "Veidų Atpažinimo Greitis",

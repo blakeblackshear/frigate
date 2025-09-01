@@ -38,7 +38,7 @@
       "title": "Tiesioginės Transliacijos Skydelis",
       "automaticLiveView": {
         "label": "Automatinis Tiesioginis Vaizdas",
-        "desc": "Automatiškai perjungti į kameros tiesioginš vaizdą kai aptinkama veikla. Išjungus šią funkciją tiesioginės transliacijos skydelyje kamerų vaizdai atsinaujis tik kartą per minutę."
+        "desc": "Automatiškai perjungti į kameros tiesioginį vaizdą kai aptinkama veikla. Išjungus šią funkciją tiesioginės transliacijos skydelyje kamerų vaizdai atsinaujis tik kartą per minutę."
       },
       "playAlertVideos": {
         "label": "Leist Įspejimų Vaizdus",
@@ -133,7 +133,7 @@
     },
     "licensePlateRecognition": {
       "title": "Registracijos Numerių Atpažinimas",
-      "desc": "Frigate gali atpažinti automobilių registracijos numerius ir automatiškai pridėti susektus simbolius į \"recognized_license_plate\" laukelį arba žinoma pavadinima kaip sub_etiketę \"mašina\" tipo objektams. Dažnas panaudojimas būtų nuskaityti numerius mašinų įvažiuojančių į įvažiavimą arba mašinų pravažiuojančių gatve."
+      "desc": "Frigate gali atpažinti automobilių registracijos numerius ir automatiškai pridėti aptikitus simbolius į \"recognized_license_plate\" laukelį arba žinoma pavadinima kaip sub_etiketę \"mašina\" tipo objektams. Dažnas panaudojimas būtų nuskaityti numerius mašinų įvažiuojančių į įvažiavimą arba mašinų pravažiuojančių gatve."
     },
     "restart_required": "Privaloma perkrauti (Patobulinimų nustatymai pakeisti)",
     "toast": {
@@ -145,7 +145,28 @@
     "title": "Kamerų Nustatymai",
     "streams": {
       "title": "Transliacijos",
-      "desc": "Laikinai išjunkite kamerą kol Frigate bus perkrautas. Išjungiant kamerą visiškai sustabdo Frigate veiklą šiai kamerai. Nebus susekimų, įrašų ar derinimų.<br /><em>Pastaba: Tai neišjungs go2rtc sratų.</em>"
+      "desc": "Laikinai išjunkite kamerą kol Frigate bus perkrautas. Išjungiant kamerą visiškai sustabdo Frigate veiklą šiai kamerai. Nebus aptikimų, įrašų ar derinimų.<br /><em>Pastaba: Tai neišjungs go2rtc sratų.</em>"
+    },
+    "review": {
+      "desc": "Trumpam įjungti/išjungti įspėjimus ir aptikimus šiai kamerai iki kol Frigate bus perkrautas. Kai išjungta, naujos peržiūros nebus kuriamos. ",
+      "detections": "Aptikimai "
+    },
+    "reviewClassification": {
+      "desc": "Frigate kategorizuoja peržiūras į Įspėjimus ir Aptikimus. Pagal nutylėjimą, visi <em>person</em> ir <em>car</em> objektai yra vertinami kaip įspėjimai. Jūs galite detalizuoti peržiūrų kategorizavimą priskiriant objektas privalomas zonas.",
+      "zoneObjectAlertsTips": "Visi {{alertsLabels}} objektai aptikti {{zone}} ir {{cameraName}} bus rodomi kaip Įspėjimai.",
+      "objectDetectionsTips": "Visi {{detectionsLabels}} objektai nekategorizuoti {{cameraName}} bus rodomi kaip Aptikimai nepriklausomai kurioje zonoje ji yra.",
+      "zoneObjectDetectionsTips": {
+        "text": "Visi {{detectionsLabels}} objektai nekategorizuoti {{zone}} ir {{cameraName}} bus rodomi kaip Aptikimai.",
+        "notSelectDetections": "Visi {{detectionsLabels}} objektai aptikti {{zone}} ir {{cameraName}} nekategorizuojami kaip Įspėjimai bus rodomi kaip Aptikimai nepriklausomai kurioje zonoje ji yra.",
+        "regardlessOfZoneObjectDetectionsTips": "Visi {{detectionsLabels}} objektai nekategorizuoti {{cameraName}} bus rodomi kaip Aptikimai nepriklausomai kurioje zonoje ji yra."
+      },
+      "selectDetectionsZones": "Pasirinkti zonas Aptikimams",
+      "limitDetections": "Apriboti aptikimus specifinėms zonoms"
+    },
+    "cameraConfig": {
+      "ffmpeg": {
+        "rolesUnique": "Kiekviena role (garso, aptikimo, įrašymo) gali buti priskirta tik vienam srautui"
+      }
     }
   },
   "masksAndZones": {
@@ -157,12 +178,50 @@
     "motionMasks": {
       "point_one": "{{count}} taškas",
       "point_few": "{{count}} taškai",
-      "point_other": "{{count}} taškų"
+      "point_other": "{{count}} taškų",
+      "desc": {
+        "title": "Judesių maskavimai yra naudojami sumažinti aptikimų užklausoms dėl nepageidajamų judesių. Objektų sekimas taps kėblesnis jei maskuosite per daug."
+      },
+      "context": {
+        "title": "Judesių maskavimai yra naudojami sumažinti aptikimų užklausoms dėl nepageidajamų judesių (pvz: medžių šakos, kameros laiko užrašas). Judesių maskavimas turi būti naudojamas <em>labai saikingai</em>, bjektų sekimas taps kėblesnis jei maskuosite per daug."
+      },
+      "polygonAreaTooLarge": {
+        "tips": "Judesių maskavimas netrukdo objektų aptikimui. Vietoj to turėtumėte naudoti privalomas zonas."
+      }
     },
     "objectMasks": {
       "point_one": "{{count}} taškas",
       "point_few": "{{count}} taškai",
       "point_other": "{{count}} taškų"
+    }
+  },
+  "motionDetectionTuner": {
+    "title": "Judesių Aptikimų Derinimas",
+    "unsavedChanges": "Neišsaugoti Judesių Derinimo pokyčiai ({{camera}})",
+    "desc": {
+      "title": "Frigate naudoja judesių aptikimą kaip pirmos eilės patikrinimą įvertinti ar yra kadre kažkas, kam verta būtų atlikti objektų atpažinimą.",
+      "documentation": "Skaityti Judesių Derinimo Gidą"
+    },
+    "Threshold": {
+      "title": "Riba",
+      "desc": "Ribos reikšmė diktuoja kiek pokyčio pikselio apšvietime turi būti, kad būtų traktuojama kaip judesys. <em>Pagal nutylėjimą: 30</em>"
+    },
+    "contourArea": {
+      "title": "Kontūro Plotas",
+      "desc": "Kontūro ploto reikšmė yra naudojama įvertinti kurios grupės pasikeitusių pikselių bus vertinami kaip judesys. <em>Pagal nutylėjimą: 10</em>"
+    },
+    "improveContrast": {
+      "title": "Pagerinti Kontrastą",
+      "desc": "Pagerinti kontrastą tamsiose scenose. <em>Pagal nutylėjima: Įjungta</em>"
+    },
+    "toast": {
+      "success": "Judesių nustatymai buvo išsaugoti."
+    }
+  },
+  "debug": {
+    "detectorDesc": "Frigate naudoja jūsų detektorius ({{detectors}}) objektų aptikimui jūsų kameros transliacijoje.",
+    "audio": {
+      "noAudioDetections": "Nėra Garso aptikimų"
     }
   }
 }
