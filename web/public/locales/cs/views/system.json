@@ -138,7 +138,11 @@
       "tips": "Tato hodnota uvádí celkové využití disku záznamy uloženými v databázi Frigate. Frigate nesleduje využití disku ostatními soubory na vašem disku."
     },
     "title": "Úložiště",
-    "overview": "Přehled"
+    "overview": "Přehled",
+    "shm": {
+      "title": "přiřazení SHM (sdílené paměti)",
+      "warning": "Nynější velikost SHM činící {{total}}MB je příliš malá. Zvyšte ji alespoň na {{min_shm}}MB."
+    }
   },
   "lastRefreshed": "Poslední aktualizace: ",
   "documentTitle": {

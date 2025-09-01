@@ -110,5 +110,12 @@
       "label": "Uložit vyhledávání",
       "overwrite": "{{searchName}} už existuje. Uložení přepíše existující hodnotu."
     }
+  },
+  "imagePicker": {
+    "selectImage": "Vyber náhled sledovaného objektu",
+    "search": {
+      "placeholder": "Hledej pomocí štítku nebo podštítku..."
+    },
+    "noImages": "Nebyly nalezeny žádné náhledy pro tuto kameru"
   }
 }
