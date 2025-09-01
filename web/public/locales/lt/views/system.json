@@ -60,9 +60,7 @@
         },
         "nvidiaSMIOutput": {
           "title": "Nvidia SMI Išvestis",
-          "title": "Nvidia SMI Išvestis",
           "name": "Pavadinimas: {{name}}",
-          "driver": "Tvarkyklė: {{driver}}",
           "driver": "Tvarkyklė: {{driver}}",
           "cudaComputerCapability": "CUDA Compute Galimybės: {{cuda_compute}}",
           "vbios": "VBios Info: {{vbios}}"
@@ -105,10 +103,6 @@
         "title": "Nepanaudota",
         "tips": "Jei saugykloje turite daugiau failų apart Frigate įrašų, ši reikšmė neatspindės tikslios likusios laisvos vietos Frigate panaudojimui. Frigate neseka saugyklos panaudojimo už savo įrašų ribų."
       }
-    },
-    "shm": {
-      "title": "SHM (bendrinama atmintis) priskyrimas",
-      "warning": "Esamas SHM dydis {{total}}MB yra per mažas. Pridėkite bent jau {{min_shm}}MB."
     },
     "shm": {
       "title": "SHM (bendrinama atmintis) priskyrimas",
