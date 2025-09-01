@@ -88,6 +88,63 @@
     "birdClassification": {
       "title": "Klasifikácia vtákov",
       "desc": "Klasifikácia vtákov identifikuje známe vtáky pomocou kvantizovaného modelu Tensorflow. Keď je známy vták rozpoznaný, jeho bežný názov sa pridá ako podoznačenie (sub_label). Tieto informácie sú zahrnuté v používateľskom rozhraní, filtroch, ako aj v oznámeniach."
+    },
+    "semanticSearch": {
+      "title": "Sémantické vyhľadávanie",
+      "desc": "Sémantické vyhľadávanie vo Frigate vám umožňuje nájsť sledované objekty v rámci vašich recenzovaných položiek pomocou samotného obrázka, textového popisu definovaného používateľom alebo automaticky vygenerovaného popisu.",
+      "reindexNow": {
+        "label": "Preindexovať teraz",
+        "desc": "Reindexovanie obnoví vložené súbory pre všetky sledované objekty. Tento proces beží na pozadí a môže maximálne zaťažiť váš procesor a trvať pomerne dlho v závislosti od počtu sledovaných objektov, ktoré máte.",
+        "confirmTitle": "Potvrďte opätovné indexovanie",
+        "confirmDesc": "Naozaj chcete preindexovať všetky sledované vložené objekty? Tento proces bude bežať na pozadí, ale môže maximálne zaťažiť váš procesor a trvať pomerne dlho. Priebeh si môžete pozrieť na stránke Preskúmať.",
+        "confirmButton": "Preindexovať",
+        "success": "Reindexovanie sa úspešne spustilo.",
+        "alreadyInProgress": "Reindexovanie už prebieha.",
+        "error": "Nepodarilo sa spustiť reindexáciu: {{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "Veľkosť modelu",
+        "desc": "Veľkosť modelu použitého pre vkladanie sémantického vyhľadávania.",
+        "small": {
+          "title": "malý",
+          "desc": "Použitie funkcie <em>small</em> využíva kvantizovanú verziu modelu, ktorá spotrebuje menej pamäte RAM a beží rýchlejšie na CPU s veľmi zanedbateľným rozdielom v kvalite vkladania."
+        },
+        "large": {
+          "title": "veľký",
+          "desc": "Použitie parametra <em>large</em> využíva celý model Jina a v prípade potreby sa automaticky spustí na GPU."
+        }
+      }
+    },
+    "faceRecognition": {
+      "title": "Rozpoznávanie tváre",
+      "desc": "Rozpoznávanie tváre umožňuje priradiť ľuďom mená a po rozpoznaní ich tváre Frigate priradí meno osoby ako podštítok. Tieto informácie sú zahrnuté v používateľskom rozhraní, filtroch, ako aj v upozorneniach.",
+      "modelSize": {
+        "label": "Veľkosť modelu",
+        "desc": "Veľkosť modelu použitého na rozpoznávanie tváre.",
+        "small": {
+          "title": "malý",
+          "desc": "Použitie funkcie <em>small</em> využíva model vkladania tvárí FaceNet, ktorý efektívne beží na väčšine procesorov."
+        },
+        "large": {
+          "title": "veľký",
+          "desc": "Použitie funkcie <em>large</em> využíva model vkladania tvárí ArcFace a v prípade potreby sa automaticky spustí na grafickom procesore."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Rozpoznávanie ŠPZ",
+      "desc": "Frigate dokáže rozpoznávať evidenčné čísla vozidiel a automaticky pridávať detekované znaky do poľa recognized_license_plate alebo známy názov ako podradený štítok k objektom typu car. Bežným prípadom použitia môže byť čítanie evidenčných čísel áut vchádzajúcich na príjazdovú cestu alebo áut prechádzajúcich po ulici."
+    },
+    "restart_required": "Vyžaduje sa reštart (zmenené nastavenia obohatenia)",
+    "toast": {
+      "success": "Nastavenia obohatenia boli uložené. Reštartujte Frigate, aby sa zmeny prejavili.",
+      "error": "Nepodarilo sa uložiť zmeny konfigurácie: {{errorMessage}}"
+    }
+  },
+  "camera": {
+    "title": "Nastavenie kamier",
+    "streams": {
+      "title": "Streamy"
     }
   }
 }

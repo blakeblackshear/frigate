@@ -106,6 +106,63 @@
     "failedToStart": "Nepodarilo sa spustiť manuálne nahrávanie na požiadanie.",
     "recordDisabledTips": "Keďže nahrávanie je v konfigurácii tejto kamery zakázané alebo obmedzené, uloží sa iba snímka.",
     "end": "Ukončiť nahrávanie na požiadanie",
-    "ended": "Manuálne nahrávanie na požiadanie bolo ukončené."
+    "ended": "Manuálne nahrávanie na požiadanie bolo ukončené.",
+    "failedToEnd": "Nepodarilo sa ukončiť manuálne nahrávanie na požiadanie."
+  },
+  "streamingSettings": "Nastavenia streamovania",
+  "notifications": "Notifikacie",
+  "audio": "Zvuk",
+  "suspend": {
+    "forTime": "Pozastaviť na: "
+  },
+  "stream": {
+    "title": "Stream",
+    "audio": {
+      "tips": {
+        "title": "Zvuk musí byť vyvedený z vašej kamery a nakonfigurovaný v go2rtc pre tento stream."
+      },
+      "available": "Pre tento stream je k dispozícii zvuk",
+      "unavailable": "Zvuk nie je pre tento stream k dispozícii"
+    },
+    "twoWayTalk": {
+      "tips": "Vaše zariadenie musí túto funkciu podporovať a WebRTC musí byť nakonfigurované na obojsmernú komunikáciu.",
+      "available": "Pre tento stream je k dispozícii obojsmerná komunikácia",
+      "unavailable": "Obojsmerná komunikácia nie je pre tento stream k dispozícii"
+    },
+    "lowBandwidth": {
+      "tips": "Živý náhľad je v režime nízkej šírky pásma z dôvodu chýb načítavania do vyrovnávacej pamäte alebo streamu.",
+      "resetStream": "Obnoviť stream"
+    },
+    "playInBackground": {
+      "label": "Hrať na pozadí",
+      "tips": "Povoľte túto možnosť, ak chcete pokračovať v streamovaní, aj keď je prehrávač skrytý."
+    }
+  },
+  "cameraSettings": {
+    "title": "Nastavenia {{camera}}",
+    "cameraEnabled": "Kamera povolená",
+    "objectDetection": "Detekcia objektov",
+    "recording": "Nahrávanie",
+    "snapshots": "Snímky",
+    "audioDetection": "Detekcia zvuku",
+    "transcription": "Zvukový prepis",
+    "autotracking": "Automatické sledovanie"
+  },
+  "history": {
+    "label": "Zobraziť historické zábery"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Všetko",
+      "motion": "Pohyb",
+      "active_objects": "Aktívne objekty"
+    },
+    "notAllTips": "Vaša konfigurácia uchovávania nahrávok {{source}} je nastavená na režim <code>: {{effectiveRetainMode}}<code>, takže táto nahrávka na požiadanie uchová iba segmenty s nastavením {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Upraviť rozloženie",
+    "group": {
+      "label": "Upraviť skupinu kamier"
+    }
   }
 }
