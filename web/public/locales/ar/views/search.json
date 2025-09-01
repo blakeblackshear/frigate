@@ -1,5 +1,23 @@
 {
   "search": "بحث",
   "savedSearches": "عمليات البحث المحفوظة",
-  "searchFor": "البحث عن {{inputValue}}"
+  "searchFor": "البحث عن {{inputValue}}",
+  "button": {
+    "clear": "محو البحث",
+    "save": "احفظ البحث",
+    "delete": "حذف البحث المحفوظ",
+    "filterInformation": "تصفية المعلومات",
+    "filterActive": "الفلتر النشط"
+  },
+  "trackedObjectId": "مُعرف الكائن المتعقّب",
+  "filter": {
+    "label": {
+      "cameras": "الكاميرات",
+      "labels": "الملصقات",
+      "zones": "مناطق",
+      "search_type": "نوع البحث",
+      "sub_labels": "العلامات الفرعية",
+      "time_range": "النطاق الزمني"
+    }
+  }
 }

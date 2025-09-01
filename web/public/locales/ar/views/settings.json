@@ -2,6 +2,34 @@
   "documentTitle": {
     "camera": "إعدادات الكاميرا - فرايجيت",
     "default": "الإعدادات - فرايجيت",
-    "authentication": "إعدادات المصادقة - فرايجيت"
+    "authentication": "إعدادات المصادقة - فرايجيت",
+    "enrichments": "إحصاء الاعدادات",
+    "masksAndZones": "القناع ومحرر المنطقة - Frigate",
+    "motionTuner": "مضبط الحركة - Firgate",
+    "object": "تصحيح الأخطاء - Frigate",
+    "general": "الإعدادات العامة - Frigate",
+    "notifications": "إعدادات الإشعارات - Frigate"
+  },
+  "menu": {
+    "ui": "واجهة المستخدم",
+    "enrichments": "التحسينات",
+    "cameras": "إعدادات الكاميرا",
+    "masksAndZones": "أقنعة / مناطق",
+    "motionTuner": "مضبط الحركة",
+    "debug": "تصحيح",
+    "users": "المستخدمون",
+    "notifications": "إشعارات"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "لديك تغييرات غير محفوظة.",
+      "desc": "هل تريد حفظ تغييراتك قبل المتابعة؟"
+    }
+  },
+  "cameraSetting": {
+    "camera": "كاميرا"
+  },
+  "general": {
+    "title": "الإعدادات العامة"
   }
 }
