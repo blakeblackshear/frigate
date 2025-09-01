@@ -202,11 +202,21 @@ class MqttClient(Communicator):
     ) -> None:
         """Mqtt disconnection callback."""
         self.connected = False
-        logger.error(f"MQTT disconnected (reason: {reason_code.getName()})")
+        # Debug reason code thoroughly
+        reason_name = reason_code.getName() if hasattr(reason_code, 'getName') else str(reason_code)
+        reason_value = getattr(reason_code, 'value', reason_code)
+        logger.error(f"MQTT disconnected - reason: '{reason_name}', code: {reason_value}, type: {type(reason_code)}")
         
         # Don't attempt reconnection if we're stopping or if it was a clean disconnect
-        if self._stop_reconnect or reason_code == 0:
+        if self._stop_reconnect:
+            logger.error("MQTT not reconnecting - stop flag set")
             return
+            
+        if reason_code == 0:
+            logger.error("MQTT not reconnecting - clean disconnect (code 0)")
+            return
+            
+        logger.error("MQTT will attempt reconnection...")
             
         # Start reconnection in a separate thread to avoid blocking
         if not self._reconnect_thread or not self._reconnect_thread.is_alive():
@@ -306,26 +316,50 @@ class MqttClient(Communicator):
             return
 
     def _reconnect_loop(self) -> None:
-        """Handle MQTT reconnection, retrying every 10 seconds indefinitely."""
+        """Handle MQTT reconnection using fresh client creation, retrying every 10 seconds indefinitely."""
+        logger.error("MQTT reconnection loop started")
         attempt = 0
         while not self._stop_reconnect and not self.connected:
             attempt += 1
             
-            logger.debug(f"Will attempt MQTT reconnection in {self._reconnect_delay} seconds (attempt {attempt})")
+            logger.error(f"Will attempt MQTT reconnection in {self._reconnect_delay} seconds (attempt {attempt})")
             
             # Wait with ability to exit early if stopping
             for _ in range(self._reconnect_delay):
                 if self._stop_reconnect:
+                    logger.error("MQTT reconnection stopped during delay")
                     return
                 time.sleep(1)
                 
             if self._stop_reconnect:
+                logger.error("MQTT reconnection stopped after delay")
                 break
                 
             try:
-                logger.debug(f"Attempting MQTT reconnection (attempt {attempt})...")
-                self.client.reconnect()
-                break  # Let the on_connect callback handle success
-            except Exception as e:
-                logger.error(f"MQTT reconnection attempt {attempt} failed: {e}")
+                logger.error(f"Creating fresh MQTT client for reconnection attempt {attempt}...")
+                
+                # Clean up old client if it exists
+                if hasattr(self, 'client'):
+                    try:
+                        self.client.disconnect()
+                        self.client.loop_stop()
+                    except Exception:
+                        pass  # Ignore cleanup errors
+                
+                # Create completely fresh client and attempt connection
+                self._start()
+                
+                # Give the connection attempt some time to complete
+                for _ in range(5):  # Wait up to 5 seconds for connection
+                    if self.connected:
+                        logger.error(f"MQTT fresh connection successful on attempt {attempt}!")
+                        return
+                    time.sleep(1)
+                    
+                logger.error(f"MQTT fresh connection attempt {attempt} timed out, will retry")
                 # Continue the loop to retry
+            except Exception as e:
+                logger.error(f"MQTT fresh connection attempt {attempt} failed: {e}")
+                # Continue the loop to retry
+                
+        logger.error("MQTT reconnection loop finished")
