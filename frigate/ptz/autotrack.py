@@ -1462,7 +1462,7 @@ class PtzAutoTracker:
         if not self.autotracker_init[camera]:
             self._autotracker_setup(self.config.cameras[camera], camera)
         # regularly update camera status
-        if not self.ptz_metrics[camera].motor_stopped.is_set():
+        while not self.ptz_metrics[camera].motor_stopped.is_set():
             await self.onvif.get_camera_status(camera)
 
         # return to preset if tracking is over
@@ -1491,7 +1491,7 @@ class PtzAutoTracker:
             )
 
             # update stored zoom level from preset
-            if not self.ptz_metrics[camera].motor_stopped.is_set():
+            while not self.ptz_metrics[camera].motor_stopped.is_set():
                 await self.onvif.get_camera_status(camera)
 
             self.ptz_metrics[camera].tracking_active.clear()
