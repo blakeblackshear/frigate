@@ -43,7 +43,15 @@
         "label": "Kattinston a képre a PTZ kamera középre igazításához"
       }
     },
-    "presets": "PTZ kamera előzetes beállításai"
+    "presets": "PTZ kamera előzetes beállításai",
+    "focus": {
+      "in": {
+        "label": "PTZ kamera fókuszálás BE"
+      },
+      "out": {
+        "label": "PTZ kamera fókuszálás KI"
+      }
+    }
   },
   "camera": {
     "enable": "Kamera Engedélyezése",

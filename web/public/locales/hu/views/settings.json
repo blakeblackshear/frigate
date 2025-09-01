@@ -559,6 +559,11 @@
       "title": "Régiók",
       "desc": "Mutassa a célterület keretét, amelyet az objektumérzékelőhöz küldenek",
       "tips": "<p><strong>Célterület keretek</strong></p><br><p>Világoszöld keretek jelennek meg a képkocka azon területein, amelyek az objektumérzékelőnek elküldésre kerülnek.</p>"
+    },
+    "paths": {
+      "title": "Útvonalak",
+      "desc": "A követett objektum útvonalához tartozó jelentősebb pontok megjelenítése",
+      "tips": "<p><strong>Útvonalak</strong></p><br><p>A vonalak és körök jelzik a követett objektum életciklusa során érintett jelentősebb pontokat.</p>"
     }
   },
   "motionDetectionTuner": {
@@ -618,7 +623,8 @@
     },
     "title": "Kamera Beállítások",
     "object_descriptions": {
-      "title": "Generatív AI Tárgy Leírások"
+      "title": "Generatív AI Tárgy Leírások",
+      "desc": "Ideiglenesen engedélyezze/tiltsa le a generatív AI objektumleírásokat ehhez a kamerához. Letiltás esetén a rendszer nem kéri le a mesterséges intelligencia által generált leírásokat a kamerán követett objektumokhoz."
     },
     "addCamera": "Új Kamera Hozzáadása",
     "editCamera": "Kamera Szerkesztése:",
@@ -628,7 +634,125 @@
       "add": "Kamera Hozzáadása",
       "edit": "Kamera Szerkesztése",
       "name": "Kamera Neve",
-      "nameRequired": "Kamera nevének megadása szükséges"
+      "nameRequired": "Kamera nevének megadása szükséges",
+      "description": "Konfigurálja a kamera beállításait, beleértve a stream bemeneteket és szerepeket.",
+      "nameInvalid": "A kamera neve csak betűket, számokat, aláhúzásjeleket vagy kötőjeleket tartalmazhat",
+      "namePlaceholder": "pl: bejarati_ajto",
+      "enabled": "Engedélyezve",
+      "ffmpeg": {
+        "inputs": "Bemeneti Adatfolyamok",
+        "path": "Adatfolyam útvonal",
+        "pathRequired": "Adatfolyam útvonal szükséges",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Szerepkörök",
+        "rolesRequired": "Legalább egy szerepkör megadása kötelező",
+        "rolesUnique": "Minden szerepkör (hang, érzékelés, rögzítés) csak egy adatfolyamhoz rendelhető hozzá",
+        "addInput": "Bejövő Adatfolyam Hozzáadása",
+        "removeInput": "Bejövő Adatfolyam Eltávolítása",
+        "inputsRequired": "Legalább egy bemeneti adatfolyam szükséges"
+      },
+      "toast": {
+        "success": "A következő kamera sikeresen mentve: {{cameraName}}"
+      }
+    },
+    "review_descriptions": {
+      "title": "Generatív MI Áttekintési Leírások",
+      "desc": "Ideiglenesen engedélyezze/tiltsa le a generatív mesterséges intelligencia által generált leírásokat ehhez a kamerához. Letiltás esetén a mesterséges intelligencia által generált leírások nem lesznek lekérve a kamerán található elemhez."
+    }
+  },
+  "triggers": {
+    "documentTitle": "Trigger-ek",
+    "management": {
+      "title": "Triggerek kezelése",
+      "desc": "A(z) {{camera}} nevű kamera triggereinek kezelése. A bélyegkép típussal a kiválasztott követett objektumhoz hasonló bélyegképekre, a leírás típussal pedig a megadott szöveghez hasonló leírásokra aktiválhatja a funkciót."
+    },
+    "addTrigger": "Trigger hozzáadása",
+    "table": {
+      "name": "Név",
+      "type": "Típus",
+      "content": "Tartalom",
+      "threshold": "Határérték",
+      "actions": "Akciók",
+      "noTriggers": "Nincsenek konfigurált triggerek ehhez a kamerához.",
+      "edit": "Szerkesztés",
+      "deleteTrigger": "Trigger törlése",
+      "lastTriggered": "Utoljára triggerelve"
+    },
+    "type": {
+      "thumbnail": "Bélyegkép",
+      "description": "Leírás"
+    },
+    "actions": {
+      "alert": "Megjelölés Riasztásként",
+      "notification": "Értesítés küldése"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Trigger létrehozása",
+        "desc": "Hozz létre egy triggert a(z) {{camera}} kamerához"
+      },
+      "editTrigger": {
+        "title": "Trigger Szerkesztése",
+        "desc": "Trigger beállítások szerkesztése a következő kamerán: {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Trigger Törlése",
+        "desc": "Biztosan törölni szeretné a(z)<strong>{{triggerName}}</strong> triggert? Ez a művelet nem vonható vissza."
+      },
+      "form": {
+        "name": {
+          "title": "Név",
+          "placeholder": "Add meg a trigger nevét",
+          "error": {
+            "minLength": "A névnek minimum 2 karakter hosszúnak kell lennie.",
+            "invalidCharacters": "A név csak betűket, számokat, aláhúzásjeleket és kötőjeleket tartalmazhat.",
+            "alreadyExists": "Már létezik egy ilyen nevű trigger ehhez a kamerához."
+          }
+        },
+        "enabled": {
+          "description": "Engedélyezze vagy tiltsa le ezt a triggert"
+        },
+        "type": {
+          "title": "Típus",
+          "placeholder": "Válaszd ki a trigger típusát"
+        },
+        "content": {
+          "title": "Tartalom",
+          "imagePlaceholder": "Válassz egy képet",
+          "textPlaceholder": "Írja be a szöveges tartalmat",
+          "imageDesc": "Válasszon ki egy képet, amely aktiválja ezt a műveletet, amikor a rendszer hasonló képet észlel.",
+          "textDesc": "Írjon be egy szöveget, amely aktiválja ezt a műveletet, amikor a rendszer hasonló követett objektumleírást észlel.",
+          "error": {
+            "required": "Tartalom megadása kötelező."
+          }
+        },
+        "threshold": {
+          "title": "Határérték",
+          "error": {
+            "min": "A határértéknek 0-nál nagyobbnak kell lennie",
+            "max": "A határérték legfeljebb 1 lehet"
+          }
+        },
+        "actions": {
+          "title": "Akciók",
+          "desc": "Alapértelmezés szerint a Frigate minden trigger esetén MQTT üzenetet küld. Válasszon ki egy további műveletet, amelyet a trigger aktiválásakor végre kell hajtani.",
+          "error": {
+            "min": "Legalább egy műveletet ki kell választani."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "A trigger sikeresen létrehozva: {{name}}.",
+        "updateTrigger": "A trigger sikeresen módosítva: {{name}}.",
+        "deleteTrigger": "A trigger sikeresen törölve: {{name}}."
+      },
+      "error": {
+        "createTriggerFailed": "A trigger létrehozása sikertelen: {{errorMessage}}",
+        "updateTriggerFailed": "A trigger módosítása sikertelen: {{errorMessage}}",
+        "deleteTriggerFailed": "A trigger törlése sikertelen: {{errorMessage}}"
+      }
     }
   }
 }
