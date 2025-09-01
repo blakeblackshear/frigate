@@ -338,7 +338,7 @@ function MSEPlayer({
           // console.debug("VideoRTC.buffer", b.byteLength, bufLen);
         } else {
           try {
-            sb?.appendBuffer(data);
+            sb?.appendBuffer(data as ArrayBuffer);
           } catch (e) {
             // no-op
           }
@@ -592,7 +592,7 @@ function MSEPlayer({
         const now = Date.now();
         const bytesLoaded = totalBytesLoaded.current;
         const timeElapsed = (now - lastTimestamp) / 1000; // seconds
-        const bandwidth = (bytesLoaded - lastLoadedBytes) / timeElapsed / 1000; // kBps
+        const bandwidth = (bytesLoaded - lastLoadedBytes) / timeElapsed / 1024; // kbps
 
         lastLoadedBytes = bytesLoaded;
         lastTimestamp = now;
