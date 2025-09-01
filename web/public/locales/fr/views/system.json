@@ -3,7 +3,7 @@
     "storage": "Statistiques de stockage - Frigate",
     "cameras": "Statistiques des caméras - Frigate",
     "general": "Statistiques générales - Frigate",
-    "enrichments": "Statistiques de données augmentées - Frigate",
+    "enrichments": "Statistiques d'enrichissements - Frigate",
     "logs": {
       "frigate": "Journaux de Frigate - Frigate",
       "nginx": "Journaux Nginx - Frigate",
@@ -167,7 +167,7 @@
     "shmTooLow": "L'allocation /dev/shm ({{total}} Mo) devrait être augmentée à au moins {{min}} Mo."
   },
   "enrichments": {
-    "title": "Données augmentées",
+    "title": "Enrichissements",
     "infPerSecond": "Inférences par seconde",
     "embeddings": {
       "face_embedding_speed": "Vitesse de capture des données complémentaires de visage",
