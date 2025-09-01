@@ -10,5 +10,20 @@
     "timestamp": "Laiko žyma",
     "unknown": "Nežinoma"
   },
-  "selectItem": "Pasirinkti {{item}}"
+  "selectItem": "Pasirinkti {{item}}",
+  "deleteFaceAttempts": {
+    "desc_one": "Ar tikrai norite ištrinti {{count}} veidą? Šio veiksmo sugrąžinimas negalimas.",
+    "desc_few": "Ar tikrai norite ištrinti {{count}} veidus? Šio veiksmo sugrąžinimas negalimas.",
+    "desc_other": "Ar tikrai norite ištrinti {{count}} veidų? Šio veiksmo sugrąžinimas negalimas."
+  },
+  "toast": {
+    "success": {
+      "deletedFace_one": "Sėkmingai ištrintas{{count}} veidas.",
+      "deletedFace_few": "Sėkmingai ištrinti {{count}} veidai.",
+      "deletedFace_other": "Sėkmingai ištrinta {{count}} veidų.",
+      "deletedName_one": "{{count}} veidas buvo sėkmingai ištrintas.",
+      "deletedName_few": "{{count}} veidai buvo sėkmingai ištrinti.",
+      "deletedName_other": "{{count}} veidų buvo sėkmingai ištrinta."
+    }
+  }
 }
