@@ -107,10 +107,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Hanwha XNP-6550RH            |      ✅      |      ❌      |                                                                                                                                                 |
 | Hikvision                    |      ✅      |      ❌      | Incomplete ONVIF support (MoveStatus won't update even on latest firmware) - reported with HWP-N4215IH-DE and DS-2DE3304W-DE, but likely others |
 | Hikvision DS-2DE3A404IWG-E/W |      ✅      |      ✅      |                                                                                                                                                 |
-| Reolink 511WA                |      ✅      |      ❌      | Zoom only                                                                                                                                       |
-| Reolink E1 Pro               |      ✅      |      ❌      |                                                                                                                                                 |
-| Reolink E1 Zoom              |      ✅      |      ❌      |                                                                                                                                                 |
-| Reolink RLC-823A 16x         |      ✅      |      ❌      |                                                                                                                                                 |
+| Reolink                      |      ✅      |      ❌      |      only                                                                                                                                       |
 | Speco O8P32X                 |      ✅      |      ❌      |                                                                                                                                                 |
 | Sunba 405-D20X               |      ✅      |      ❌      | Incomplete ONVIF support reported on original, and 4k models. All models are suspected incompatable.                                            |
 | Tapo                         |      ✅      |      ❌      | Many models supported, ONVIF Service Port: 2020                                                                                                 |
