@@ -17,7 +17,7 @@ export function PlayerStats({ stats, minimal }: PlayerStatsProps) {
       </p>
       <p>
         <span className="text-white/70">{t("stats.bandwidth.title")}</span>{" "}
-        <span className="text-white">{stats.bandwidth.toFixed(2)} kbps</span>
+        <span className="text-white">{stats.bandwidth.toFixed(2)} kBps</span>
       </p>
       {stats.latency != undefined && (
         <p>
@@ -66,7 +66,7 @@ export function PlayerStats({ stats, minimal }: PlayerStatsProps) {
       </div>
       <div className="flex flex-col items-center gap-1">
         <span className="text-white/70">{t("stats.bandwidth.short")}</span>{" "}
-        <span className="text-white">{stats.bandwidth.toFixed(2)} kbps</span>
+        <span className="text-white">{stats.bandwidth.toFixed(2)} kBps</span>
       </div>
       {stats.latency != undefined && (
         <div className="hidden flex-col items-center gap-1 md:flex">

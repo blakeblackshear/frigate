@@ -80,7 +80,7 @@ export default function LivePlayer({
 
   const [stats, setStats] = useState<PlayerStatsType>({
     streamType: "-",
-    bandwidth: 0, // in kbps
+    bandwidth: 0, // in kBps
     latency: undefined, // in seconds
     totalFrames: 0,
     droppedFrames: undefined,
