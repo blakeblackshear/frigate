@@ -146,10 +146,10 @@ WEB Digest Algorithm  - MD5
 
 Reolink has many different camera models with inconsistently supported features and behavior. The below table shows a summary of various features and recommendations.
 
-| Camera Resolution | Camera Generation         | Recommended Stream Type | Additional Notes                                                        |
-| 5MP or lower      | All                       | http-flv                | Stream is h264                                                          |
-| 6MP or higher     | Latest (ex: Duo3, CX-8##) | http-flv                | This uses the new http-flv-enhanced over H265 which requires ffmpeg 8.0 |
-| 6MP or higher     | Older (ex: RLC-8##)       | rtsp                    |                                                                         |
+| Camera Resolution | Camera Generation         | Recommended Stream Type           | Additional Notes                                                        |
+| 5MP or lower      | All                       | http-flv                          | Stream is h264                                                          |
+| 6MP or higher     | Latest (ex: Duo3, CX-8##) | http-flv with ffmpeg 8.0, or rtsp | This uses the new http-flv-enhanced over H265 which requires ffmpeg 8.0 |
+| 6MP or higher     | Older (ex: RLC-8##)       | rtsp                              |                                                                         |
 
 Frigate works much better with newer reolink cameras that are setup with the below options:
 
