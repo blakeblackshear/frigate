@@ -48,6 +48,8 @@ class OnvifController:
         self.config = config
         self.ptz_metrics = ptz_metrics
 
+        self.status_locks: dict[str, asyncio.Lock] = {}
+
         # Create a dedicated event loop and run it in a separate thread
         self.loop = asyncio.new_event_loop()
         self.loop_thread = threading.Thread(target=self._run_event_loop, daemon=True)
@@ -59,6 +61,7 @@ class OnvifController:
                 continue
             if cam.onvif.host:
                 self.camera_configs[cam_name] = cam
+                self.status_locks[cam_name] = asyncio.Lock()
 
         asyncio.run_coroutine_threadsafe(self._init_cameras(), self.loop)
 
@@ -764,104 +767,109 @@ class OnvifController:
             return False
 
     async def get_camera_status(self, camera_name: str) -> None:
-        if camera_name not in self.cams.keys():
-            logger.error(f"ONVIF is not configured for {camera_name}")
-            return
-
-        if not self.cams[camera_name]["init"]:
-            if not await self._init_onvif(camera_name):
+        async with self.status_locks[camera_name]:
+            if camera_name not in self.cams.keys():
+                logger.error(f"ONVIF is not configured for {camera_name}")
                 return
 
-        status_request = self.cams[camera_name]["status_request"]
-        try:
-            status = await self.cams[camera_name]["ptz"].GetStatus(status_request)
-        except Exception:
-            pass  # We're unsupported, that'll be reported in the next check.
+            if not self.cams[camera_name]["init"]:
+                if not await self._init_onvif(camera_name):
+                    return
 
-        try:
-            pan_tilt_status = getattr(status.MoveStatus, "PanTilt", None)
-            zoom_status = getattr(status.MoveStatus, "Zoom", None)
+            status_request = self.cams[camera_name]["status_request"]
+            try:
+                status = await self.cams[camera_name]["ptz"].GetStatus(status_request)
+            except Exception:
+                pass  # We're unsupported, that'll be reported in the next check.
 
-            # if it's not an attribute, see if MoveStatus even exists in the status result
-            if pan_tilt_status is None:
-                pan_tilt_status = getattr(status, "MoveStatus", None)
+            try:
+                pan_tilt_status = getattr(status.MoveStatus, "PanTilt", None)
+                zoom_status = getattr(status.MoveStatus, "Zoom", None)
 
-                # we're unsupported
-                if pan_tilt_status is None or pan_tilt_status not in [
-                    "IDLE",
-                    "MOVING",
-                ]:
-                    raise Exception
-        except Exception:
-            logger.warning(
-                f"Camera {camera_name} does not support the ONVIF GetStatus method. Autotracking will not function correctly and must be disabled in your config."
+                # if it's not an attribute, see if MoveStatus even exists in the status result
+                if pan_tilt_status is None:
+                    pan_tilt_status = getattr(status, "MoveStatus", None)
+
+                    # we're unsupported
+                    if pan_tilt_status is None or pan_tilt_status not in [
+                        "IDLE",
+                        "MOVING",
+                    ]:
+                        raise Exception
+            except Exception:
+                logger.warning(
+                    f"Camera {camera_name} does not support the ONVIF GetStatus method. Autotracking will not function correctly and must be disabled in your config."
+                )
+                return
+
+            logger.debug(
+                f"{camera_name}: Pan/tilt status: {pan_tilt_status}, Zoom status: {zoom_status}"
             )
-            return
 
-        logger.debug(
-            f"{camera_name}: Pan/tilt status: {pan_tilt_status}, Zoom status: {zoom_status}"
-        )
+            if pan_tilt_status == "IDLE" and (
+                zoom_status is None or zoom_status == "IDLE"
+            ):
+                self.cams[camera_name]["active"] = False
+                if not self.ptz_metrics[camera_name].motor_stopped.is_set():
+                    self.ptz_metrics[camera_name].motor_stopped.set()
 
-        if pan_tilt_status == "IDLE" and (zoom_status is None or zoom_status == "IDLE"):
-            self.cams[camera_name]["active"] = False
-            if not self.ptz_metrics[camera_name].motor_stopped.is_set():
-                self.ptz_metrics[camera_name].motor_stopped.set()
+                    logger.debug(
+                        f"{camera_name}: PTZ stop time: {self.ptz_metrics[camera_name].frame_time.value}"
+                    )
 
+                    self.ptz_metrics[camera_name].stop_time.value = self.ptz_metrics[
+                        camera_name
+                    ].frame_time.value
+            else:
+                self.cams[camera_name]["active"] = True
+                if self.ptz_metrics[camera_name].motor_stopped.is_set():
+                    self.ptz_metrics[camera_name].motor_stopped.clear()
+
+                    logger.debug(
+                        f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name].frame_time.value}"
+                    )
+
+                    self.ptz_metrics[camera_name].start_time.value = self.ptz_metrics[
+                        camera_name
+                    ].frame_time.value
+                    self.ptz_metrics[camera_name].stop_time.value = 0
+
+            if (
+                self.config.cameras[camera_name].onvif.autotracking.zooming
+                != ZoomingModeEnum.disabled
+            ):
+                # store absolute zoom level as 0 to 1 interpolated from the values of the camera
+                self.ptz_metrics[camera_name].zoom_level.value = numpy.interp(
+                    round(status.Position.Zoom.x, 2),
+                    [
+                        self.cams[camera_name]["absolute_zoom_range"]["XRange"]["Min"],
+                        self.cams[camera_name]["absolute_zoom_range"]["XRange"]["Max"],
+                    ],
+                    [0, 1],
+                )
                 logger.debug(
-                    f"{camera_name}: PTZ stop time: {self.ptz_metrics[camera_name].frame_time.value}"
+                    f"{camera_name}: Camera zoom level: {self.ptz_metrics[camera_name].zoom_level.value}"
                 )
 
+            # some hikvision cams won't update MoveStatus, so warn if it hasn't changed
+            if (
+                not self.ptz_metrics[camera_name].motor_stopped.is_set()
+                and not self.ptz_metrics[camera_name].reset.is_set()
+                and self.ptz_metrics[camera_name].start_time.value != 0
+                and self.ptz_metrics[camera_name].frame_time.value
+                > (self.ptz_metrics[camera_name].start_time.value + 10)
+                and self.ptz_metrics[camera_name].stop_time.value == 0
+            ):
+                logger.debug(
+                    f"Start time: {self.ptz_metrics[camera_name].start_time.value}, Stop time: {self.ptz_metrics[camera_name].stop_time.value}, Frame time: {self.ptz_metrics[camera_name].frame_time.value}"
+                )
+                # set the stop time so we don't come back into this again and spam the logs
                 self.ptz_metrics[camera_name].stop_time.value = self.ptz_metrics[
                     camera_name
                 ].frame_time.value
-        else:
-            self.cams[camera_name]["active"] = True
-            if self.ptz_metrics[camera_name].motor_stopped.is_set():
-                self.ptz_metrics[camera_name].motor_stopped.clear()
-
-                logger.debug(
-                    f"{camera_name}: PTZ start time: {self.ptz_metrics[camera_name].frame_time.value}"
+                logger.warning(
+                    f"Camera {camera_name} is still in ONVIF 'MOVING' status."
                 )
-
-                self.ptz_metrics[camera_name].start_time.value = self.ptz_metrics[
-                    camera_name
-                ].frame_time.value
-                self.ptz_metrics[camera_name].stop_time.value = 0
-
-        if (
-            self.config.cameras[camera_name].onvif.autotracking.zooming
-            != ZoomingModeEnum.disabled
-        ):
-            # store absolute zoom level as 0 to 1 interpolated from the values of the camera
-            self.ptz_metrics[camera_name].zoom_level.value = numpy.interp(
-                round(status.Position.Zoom.x, 2),
-                [
-                    self.cams[camera_name]["absolute_zoom_range"]["XRange"]["Min"],
-                    self.cams[camera_name]["absolute_zoom_range"]["XRange"]["Max"],
-                ],
-                [0, 1],
-            )
-            logger.debug(
-                f"{camera_name}: Camera zoom level: {self.ptz_metrics[camera_name].zoom_level.value}"
-            )
-
-        # some hikvision cams won't update MoveStatus, so warn if it hasn't changed
-        if (
-            not self.ptz_metrics[camera_name].motor_stopped.is_set()
-            and not self.ptz_metrics[camera_name].reset.is_set()
-            and self.ptz_metrics[camera_name].start_time.value != 0
-            and self.ptz_metrics[camera_name].frame_time.value
-            > (self.ptz_metrics[camera_name].start_time.value + 10)
-            and self.ptz_metrics[camera_name].stop_time.value == 0
-        ):
-            logger.debug(
-                f"Start time: {self.ptz_metrics[camera_name].start_time.value}, Stop time: {self.ptz_metrics[camera_name].stop_time.value}, Frame time: {self.ptz_metrics[camera_name].frame_time.value}"
-            )
-            # set the stop time so we don't come back into this again and spam the logs
-            self.ptz_metrics[camera_name].stop_time.value = self.ptz_metrics[
-                camera_name
-            ].frame_time.value
-            logger.warning(f"Camera {camera_name} is still in ONVIF 'MOVING' status.")
 
     def close(self) -> None:
         """Gracefully shut down the ONVIF controller."""
