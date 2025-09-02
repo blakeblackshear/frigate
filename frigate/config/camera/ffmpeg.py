@@ -61,6 +61,7 @@ class FfmpegConfig(FrigateBaseModel):
     retry_interval: float = Field(
         default=10.0,
         title="Time in seconds to wait before FFmpeg retries connecting to the camera.",
+        gt=0.0,
     )
     apple_compatibility: bool = Field(
         default=False,
