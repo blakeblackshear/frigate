@@ -144,7 +144,13 @@ WEB Digest Algorithm  - MD5
 
 ### Reolink Cameras
 
-Reolink has older cameras (ex: 410 & 520) as well as newer camera (ex: 520a & 511wa) which support different subsets of options. In both cases using the http stream is recommended.
+Reolink has many different camera models with inconsistently supported features and behavior. The below table shows a summary of various features and recommendations.
+
+| Camera Resolution | Camera Generation         | Recommended Stream Type           | Additional Notes                                                        |
+| 5MP or lower      | All                       | http-flv                          | Stream is h264                                                          |
+| 6MP or higher     | Latest (ex: Duo3, CX-8##) | http-flv with ffmpeg 8.0, or rtsp | This uses the new http-flv-enhanced over H265 which requires ffmpeg 8.0 |
+| 6MP or higher     | Older (ex: RLC-8##)       | rtsp                              |                                                                         |
+
 Frigate works much better with newer reolink cameras that are setup with the below options:
 
 If available, recommended settings are:
@@ -156,12 +162,6 @@ According to [this discussion](https://github.com/blakeblackshear/frigate/issues
 
 Cameras connected via a Reolink NVR can be connected with the http stream, use `channel[0..15]` in the stream url for the additional channels.
 The setup of main stream can be also done via RTSP, but isn't always reliable on all hardware versions. The example configuration is working with the oldest HW version RLN16-410 device with multiple types of cameras.
-
-:::warning
-
-The below configuration only works for reolink cameras with stream resolution of 5MP or lower, 8MP+ cameras need to use RTSP as http-flv is not supported in this case.
-
-:::
 
 ```yaml
 go2rtc:
@@ -259,7 +259,7 @@ To use a USB camera (webcam) with Frigate, the recommendation is to use go2rtc's
 go2rtc:
   streams:
     usb_camera:
-      - "ffmpeg:device?video=0&video_size=1024x576#video=h264" 
+      - "ffmpeg:device?video=0&video_size=1024x576#video=h264"
 
 cameras:
   usb_camera:
