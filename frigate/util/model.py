@@ -306,6 +306,7 @@ def get_ort_providers(
             options.append(
                 {
                     "arena_extend_strategy": "kSameAsRequested",
+                    "use_ep_level_unified_stream": True,
                     "device_id": device_id,
                 }
             )
