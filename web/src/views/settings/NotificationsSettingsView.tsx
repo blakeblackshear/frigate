@@ -46,6 +46,8 @@ import { Trans, useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { useIsAdmin } from "@/hooks/use-is-admin";
+import { cn } from "@/lib/utils";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
@@ -63,6 +65,10 @@ export default function NotificationView({
 }: NotificationsSettingsViewProps) {
   const { t } = useTranslation(["views/settings"]);
   const { getLocaleDocUrl } = useDocDomain();
+
+  // roles
+
+  const isAdmin = useIsAdmin();
 
   const { data: config, mutate: updateConfig } = useSWR<FrigateConfig>(
     "config",
@@ -380,7 +386,11 @@ export default function NotificationView({
       <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
-          <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+          <div
+            className={cn(
+              isAdmin && "grid w-full grid-cols-1 gap-4 md:grid-cols-2",
+            )}
+          >
             <div className="col-span-1">
               <Heading as="h3" className="my-2">
                 {t("notification.notificationSettings.title")}
@@ -403,139 +413,152 @@ export default function NotificationView({
                 </div>
               </div>
 
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="mt-2 space-y-6"
-                >
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("notification.email.title")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
-                            placeholder={t("notification.email.placeholder")}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          {t("notification.email.desc")}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {isAdmin && (
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="mt-2 space-y-6"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("notification.email.title")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
+                              placeholder={t("notification.email.placeholder")}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            {t("notification.email.desc")}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="cameras"
-                    render={({ field }) => (
-                      <FormItem>
-                        {allCameras && allCameras?.length > 0 ? (
-                          <>
-                            <div className="mb-2">
-                              <FormLabel className="flex flex-row items-center text-base">
-                                {t("notification.cameras.title")}
-                              </FormLabel>
-                            </div>
-                            <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
-                              <FormField
-                                control={form.control}
-                                name="allEnabled"
-                                render={({ field }) => (
+                    <FormField
+                      control={form.control}
+                      name="cameras"
+                      render={({ field }) => (
+                        <FormItem>
+                          {allCameras && allCameras?.length > 0 ? (
+                            <>
+                              <div className="mb-2">
+                                <FormLabel className="flex flex-row items-center text-base">
+                                  {t("notification.cameras.title")}
+                                </FormLabel>
+                              </div>
+                              <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
+                                <FormField
+                                  control={form.control}
+                                  name="allEnabled"
+                                  render={({ field }) => (
+                                    <FilterSwitch
+                                      label={t("cameras.all.title", {
+                                        ns: "components/filter",
+                                      })}
+                                      isChecked={field.value}
+                                      onCheckedChange={(checked) => {
+                                        setChangedValue(true);
+                                        if (checked) {
+                                          form.setValue("cameras", []);
+                                        }
+                                        field.onChange(checked);
+                                      }}
+                                    />
+                                  )}
+                                />
+                                {allCameras?.map((camera) => (
                                   <FilterSwitch
-                                    label={t("cameras.all.title", {
-                                      ns: "components/filter",
-                                    })}
-                                    isChecked={field.value}
+                                    key={camera.name}
+                                    label={camera.name}
+                                    isCameraName={true}
+                                    isChecked={field.value?.includes(
+                                      camera.name,
+                                    )}
                                     onCheckedChange={(checked) => {
                                       setChangedValue(true);
+                                      let newCameras;
                                       if (checked) {
-                                        form.setValue("cameras", []);
+                                        newCameras = [
+                                          ...field.value,
+                                          camera.name,
+                                        ];
+                                      } else {
+                                        newCameras = field.value?.filter(
+                                          (value) => value !== camera.name,
+                                        );
                                       }
-                                      field.onChange(checked);
+                                      field.onChange(newCameras);
+                                      form.setValue("allEnabled", false);
                                     }}
                                   />
-                                )}
-                              />
-                              {allCameras?.map((camera) => (
-                                <FilterSwitch
-                                  key={camera.name}
-                                  label={camera.name}
-                                  isCameraName={true}
-                                  isChecked={field.value?.includes(camera.name)}
-                                  onCheckedChange={(checked) => {
-                                    setChangedValue(true);
-                                    let newCameras;
-                                    if (checked) {
-                                      newCameras = [
-                                        ...field.value,
-                                        camera.name,
-                                      ];
-                                    } else {
-                                      newCameras = field.value?.filter(
-                                        (value) => value !== camera.name,
-                                      );
-                                    }
-                                    field.onChange(newCameras);
-                                    form.setValue("allEnabled", false);
-                                  }}
-                                />
-                              ))}
+                                ))}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="font-normal text-destructive">
+                              {t("notification.cameras.noCameras")}
                             </div>
-                          </>
-                        ) : (
-                          <div className="font-normal text-destructive">
-                            {t("notification.cameras.noCameras")}
-                          </div>
-                        )}
+                          )}
 
-                        <FormMessage />
-                        <FormDescription>
-                          {t("notification.cameras.desc")}
-                        </FormDescription>
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[50%]">
-                    <Button
-                      className="flex flex-1"
-                      aria-label={t("button.cancel", { ns: "common" })}
-                      onClick={onCancel}
-                      type="button"
-                    >
-                      {t("button.cancel", { ns: "common" })}
-                    </Button>
-                    <Button
-                      variant="select"
-                      disabled={isLoading}
-                      className="flex flex-1"
-                      aria-label={t("button.save", { ns: "common" })}
-                      type="submit"
-                    >
-                      {isLoading ? (
-                        <div className="flex flex-row items-center gap-2">
-                          <ActivityIndicator />
-                          <span>{t("button.saving", { ns: "common" })}</span>
-                        </div>
-                      ) : (
-                        t("button.save", { ns: "common" })
+                          <FormMessage />
+                          <FormDescription>
+                            {t("notification.cameras.desc")}
+                          </FormDescription>
+                        </FormItem>
                       )}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
+                    />
+
+                    <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[50%]">
+                      <Button
+                        className="flex flex-1"
+                        aria-label={t("button.cancel", { ns: "common" })}
+                        onClick={onCancel}
+                        type="button"
+                      >
+                        {t("button.cancel", { ns: "common" })}
+                      </Button>
+                      <Button
+                        variant="select"
+                        disabled={isLoading}
+                        className="flex flex-1"
+                        aria-label={t("button.save", { ns: "common" })}
+                        type="submit"
+                      >
+                        {isLoading ? (
+                          <div className="flex flex-row items-center gap-2">
+                            <ActivityIndicator />
+                            <span>{t("button.saving", { ns: "common" })}</span>
+                          </div>
+                        ) : (
+                          t("button.save", { ns: "common" })
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              )}
             </div>
 
             <div className="col-span-1">
               <div className="mt-4 gap-2 space-y-6">
-                <div className="flex flex-col gap-2 md:max-w-[50%]">
-                  <Separator className="my-2 flex bg-secondary md:hidden" />
-                  <Heading as="h4" className="my-2">
+                <div
+                  className={cn(
+                    isAdmin && "flex flex-col gap-2 md:max-w-[50%]",
+                  )}
+                >
+                  <Separator
+                    className={cn(
+                      "my-2 flex bg-secondary",
+                      isAdmin && "md:hidden",
+                    )}
+                  />
+                  <Heading as="h4" className={cn(isAdmin ? "my-2" : "my-4")}>
                     {t("notification.deviceSpecific")}
                   </Heading>
                   <Button
@@ -581,7 +604,7 @@ export default function NotificationView({
                       ? t("notification.unregisterDevice")
                       : t("notification.registerDevice")}
                   </Button>
-                  {registration != null && registration.active && (
+                  {isAdmin && registration != null && registration.active && (
                     <Button
                       aria-label={t("notification.sendTestNotification")}
                       onClick={() => sendTestNotification("notification_test")}
@@ -591,7 +614,7 @@ export default function NotificationView({
                   )}
                 </div>
               </div>
-              {notificationCameras.length > 0 && (
+              {isAdmin && notificationCameras.length > 0 && (
                 <div className="mt-4 gap-2 space-y-6">
                   <div className="space-y-3">
                     <Separator className="my-2 flex bg-secondary" />

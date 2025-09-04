@@ -70,9 +70,16 @@ fi
 
 # arch specific packages
 if [[ "${TARGETARCH}" == "amd64" ]]; then
+  # Install non-free version of i965 driver
+  sed -i -E "/^Components: main$/s/main/main contrib non-free non-free-firmware/" "/etc/apt/sources.list.d/debian.sources" \
+      && apt-get -qq update \
+      && apt-get install --no-install-recommends --no-install-suggests -y i965-va-driver-shaders \
+      && sed -i -E "/^Components: main contrib non-free non-free-firmware$/s/main contrib non-free non-free-firmware/main/" "/etc/apt/sources.list.d/debian.sources" \
+      && apt-get update
+
     # install amd / intel-i965 driver packages
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        i965-va-driver intel-gpu-tools onevpl-tools \
+        intel-gpu-tools onevpl-tools \
         libva-drm2 \
         mesa-va-drivers radeontop
 

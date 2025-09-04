@@ -145,15 +145,13 @@ def latest_frame(
         "regions": params.regions,
     }
     quality = params.quality
-    mime_type = extension
 
-    if extension == "png":
+    if extension == Extension.png:
         quality_params = None
-    elif extension == "webp":
+    elif extension == Extension.webp:
         quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality]
-    else:
+    else:  # jpg or jpeg
         quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
-        mime_type = "jpeg"
 
     if camera_name in request.app.frigate_config.cameras:
         frame = frame_processor.get_current_frame(camera_name, draw_options)
@@ -196,18 +194,21 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        _, img = cv2.imencode(f".{extension}", frame, quality_params)
+        _, img = cv2.imencode(f".{extension.value}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{mime_type}",
+            media_type=extension.get_mime_type(),
             headers={
-                "Content-Type": f"image/{mime_type}",
                 "Cache-Control": "no-store"
                 if not params.store
                 else "private, max-age=60",
             },
         )
-    elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
+    elif (
+        camera_name == "birdseye"
+        and request.app.frigate_config.birdseye.enabled
+        and request.app.frigate_config.birdseye.restream
+    ):
         frame = cv2.cvtColor(
             frame_processor.get_current_frame(camera_name),
             cv2.COLOR_YUV2BGR_I420,
@@ -218,12 +219,11 @@ def latest_frame(
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        _, img = cv2.imencode(f".{extension}", frame, quality_params)
+        _, img = cv2.imencode(f".{extension.value}", frame, quality_params)
         return Response(
             content=img.tobytes(),
-            media_type=f"image/{mime_type}",
+            media_type=extension.get_mime_type(),
             headers={
-                "Content-Type": f"image/{mime_type}",
                 "Cache-Control": "no-store"
                 if not params.store
                 else "private, max-age=60",
@@ -812,7 +812,10 @@ def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: st
     "/vod/event/{event_id}",
     description="Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
-def vod_event(event_id: str):
+def vod_event(
+    event_id: str,
+    padding: int = Query(0, description="Padding to apply to the vod."),
+):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
@@ -835,32 +838,23 @@ def vod_event(event_id: str):
             status_code=404,
         )
 
-    clip_path = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.mp4")
-
-    if not os.path.isfile(clip_path):
-        end_ts = (
-            datetime.now().timestamp() if event.end_time is None else event.end_time
-        )
-        vod_response = vod_ts(event.camera, event.start_time, end_ts)
-        # If the recordings are not found and the event started more than 5 minutes ago, set has_clip to false
-        if (
-            event.start_time < datetime.now().timestamp() - 300
-            and type(vod_response) is tuple
-            and len(vod_response) == 2
-            and vod_response[1] == 404
-        ):
-            Event.update(has_clip=False).where(Event.id == event_id).execute()
-        return vod_response
-
-    duration = int((event.end_time - event.start_time) * 1000)
-    return JSONResponse(
-        content={
-            "cache": True,
-            "discontinuity": False,
-            "durations": [duration],
-            "sequences": [{"clips": [{"type": "source", "path": clip_path}]}],
-        }
+    end_ts = (
+        datetime.now().timestamp()
+        if event.end_time is None
+        else (event.end_time + padding)
     )
+    vod_response = vod_ts(event.camera, event.start_time - padding, end_ts)
+
+    # If the recordings are not found and the event started more than 5 minutes ago, set has_clip to false
+    if (
+        event.start_time < datetime.now().timestamp() - 300
+        and type(vod_response) is tuple
+        and len(vod_response) == 2
+        and vod_response[1] == 404
+    ):
+        Event.update(has_clip=False).where(Event.id == event_id).execute()
+
+    return vod_response
 
 
 @router.get(
@@ -941,7 +935,7 @@ def event_snapshot(
 def event_thumbnail(
     request: Request,
     event_id: str,
-    extension: str,
+    extension: Extension,
     max_cache_age: int = Query(
         2592000, description="Max cache age in seconds. Default 30 days in seconds."
     ),
@@ -966,7 +960,7 @@ def event_thumbnail(
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
-                        thumbnail_bytes = tracked_obj.get_thumbnail(extension)
+                        thumbnail_bytes = tracked_obj.get_thumbnail(extension.value)
         except Exception:
             return JSONResponse(
                 content={"success": False, "message": "Event not found"},
@@ -994,23 +988,21 @@ def event_thumbnail(
         )
 
         quality_params = None
-
-        if extension == "jpg" or extension == "jpeg":
+        if extension in (Extension.jpg, Extension.jpeg):
             quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), 70]
-        elif extension == "webp":
+        elif extension == Extension.webp:
             quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), 60]
 
-        _, img = cv2.imencode(f".{extension}", thumbnail, quality_params)
+        _, img = cv2.imencode(f".{extension.value}", thumbnail, quality_params)
         thumbnail_bytes = img.tobytes()
 
     return Response(
         thumbnail_bytes,
-        media_type=f"image/{extension}",
+        media_type=extension.get_mime_type(),
         headers={
             "Cache-Control": f"private, max-age={max_cache_age}"
             if event_complete
             else "no-store",
-            "Content-Type": f"image/{extension}",
         },
     )
 
@@ -1221,7 +1213,11 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
 
 @router.get("/events/{event_id}/clip.mp4")
-def event_clip(request: Request, event_id: str):
+def event_clip(
+    request: Request,
+    event_id: str,
+    padding: int = Query(0, description="Padding to apply to clip."),
+):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
@@ -1234,8 +1230,12 @@ def event_clip(request: Request, event_id: str):
             content={"success": False, "message": "Clip not available"}, status_code=404
         )
 
-    end_ts = datetime.now().timestamp() if event.end_time is None else event.end_time
-    return recording_clip(request, event.camera, event.start_time, end_ts)
+    end_ts = (
+        datetime.now().timestamp()
+        if event.end_time is None
+        else event.end_time + padding
+    )
+    return recording_clip(request, event.camera, event.start_time - padding, end_ts)
 
 
 @router.get("/events/{event_id}/preview.gif")

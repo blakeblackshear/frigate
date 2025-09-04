@@ -11,6 +11,11 @@ class Extension(str, Enum):
     jpg = "jpg"
     jpeg = "jpeg"
 
+    def get_mime_type(self) -> str:
+        if self in (Extension.jpg, Extension.jpeg):
+            return "image/jpeg"
+        return f"image/{self.value}"
+
 
 class MediaLatestFrameQueryParams(BaseModel):
     bbox: Optional[int] = None

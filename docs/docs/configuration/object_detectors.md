@@ -499,14 +499,13 @@ Also AMD/ROCm does not "officially" support integrated GPUs. It still does work 
 
 For the rocm frigate build there is some automatic detection:
 
-- gfx90c -> 9.0.0
 - gfx1031 -> 10.3.0
 - gfx1103 -> 11.0.0
 
-If you have something else you might need to override the `HSA_OVERRIDE_GFX_VERSION` at Docker launch. Suppose the version you want is `9.0.0`, then you should configure it from command line as:
+If you have something else you might need to override the `HSA_OVERRIDE_GFX_VERSION` at Docker launch. Suppose the version you want is `10.0.0`, then you should configure it from command line as:
 
 ```bash
-$ docker run -e HSA_OVERRIDE_GFX_VERSION=9.0.0 \
+$ docker run -e HSA_OVERRIDE_GFX_VERSION=10.0.0 \
     ...
 ```
 
@@ -517,7 +516,7 @@ services:
   frigate:
 
 environment:
-  HSA_OVERRIDE_GFX_VERSION: "9.0.0"
+  HSA_OVERRIDE_GFX_VERSION: "10.0.0"
 ```
 
 Figuring out what version you need can be complicated as you can't tell the chipset name and driver from the AMD brand name.

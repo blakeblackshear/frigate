@@ -433,137 +433,139 @@ function CustomTimeSelector({
       className={`mt-3 flex items-center rounded-lg bg-secondary text-secondary-foreground ${isDesktop ? "mx-8 gap-2 px-2" : "pl-2"}`}
     >
       <FaCalendarAlt />
-      <Popover
-        open={startOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setStartOpen(false);
-          }
-        }}
-      >
-        <PopoverTrigger asChild>
-          <Button
-            className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-            aria-label={t("export.time.start.title")}
-            variant={startOpen ? "select" : "default"}
-            size="sm"
-            onClick={() => {
-              setStartOpen(true);
-              setEndOpen(false);
-            }}
-          >
-            {formattedStart}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="flex flex-col items-center">
-          <TimezoneAwareCalendar
-            timezone={config?.ui.timezone}
-            selectedDay={new Date(startTime * 1000)}
-            onSelect={(day) => {
-              if (!day) {
-                return;
-              }
-
-              setRange({
-                before: endTime,
-                after: day.getTime() / 1000 + 1,
-              });
-            }}
-          />
-          <SelectSeparator className="bg-secondary" />
-          <input
-            className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-            id="startTime"
-            type="time"
-            value={startClock}
-            step={isIOS ? "60" : "1"}
-            onChange={(e) => {
-              const clock = e.target.value;
-              const [hour, minute, second] = isIOS
-                ? [...clock.split(":"), "00"]
-                : clock.split(":");
-
-              const start = new Date(startTime * 1000);
-              start.setHours(
-                parseInt(hour),
-                parseInt(minute),
-                parseInt(second ?? 0),
-                0,
-              );
-              setRange({
-                before: endTime,
-                after: start.getTime() / 1000,
-              });
-            }}
-          />
-        </PopoverContent>
-      </Popover>
-      <FaArrowRight className="size-4 text-primary" />
-      <Popover
-        open={endOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setEndOpen(false);
-          }
-        }}
-      >
-        <PopoverTrigger asChild>
-          <Button
-            className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-            aria-label={t("export.time.end.title")}
-            variant={endOpen ? "select" : "default"}
-            size="sm"
-            onClick={() => {
-              setEndOpen(true);
+      <div className="flex flex-wrap items-center">
+        <Popover
+          open={startOpen}
+          onOpenChange={(open) => {
+            if (!open) {
               setStartOpen(false);
-            }}
-          >
-            {formattedEnd}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="flex flex-col items-center">
-          <TimezoneAwareCalendar
-            timezone={config?.ui.timezone}
-            selectedDay={new Date(endTime * 1000)}
-            onSelect={(day) => {
-              if (!day) {
-                return;
-              }
+            }
+          }}
+        >
+          <PopoverTrigger asChild>
+            <Button
+              className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+              aria-label={t("export.time.start.title")}
+              variant={startOpen ? "select" : "default"}
+              size="sm"
+              onClick={() => {
+                setStartOpen(true);
+                setEndOpen(false);
+              }}
+            >
+              {formattedStart}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="flex flex-col items-center">
+            <TimezoneAwareCalendar
+              timezone={config?.ui.timezone}
+              selectedDay={new Date(startTime * 1000)}
+              onSelect={(day) => {
+                if (!day) {
+                  return;
+                }
 
-              setRange({
-                after: startTime,
-                before: day.getTime() / 1000,
-              });
-            }}
-          />
-          <SelectSeparator className="bg-secondary" />
-          <input
-            className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-            id="startTime"
-            type="time"
-            value={endClock}
-            step={isIOS ? "60" : "1"}
-            onChange={(e) => {
-              const clock = e.target.value;
-              const [hour, minute, second] = isIOS
-                ? [...clock.split(":"), "00"]
-                : clock.split(":");
+                setRange({
+                  before: endTime,
+                  after: day.getTime() / 1000 + 1,
+                });
+              }}
+            />
+            <SelectSeparator className="bg-secondary" />
+            <input
+              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+              id="startTime"
+              type="time"
+              value={startClock}
+              step={isIOS ? "60" : "1"}
+              onChange={(e) => {
+                const clock = e.target.value;
+                const [hour, minute, second] = isIOS
+                  ? [...clock.split(":"), "00"]
+                  : clock.split(":");
 
-              const end = new Date(endTime * 1000);
-              end.setHours(
-                parseInt(hour),
-                parseInt(minute),
-                parseInt(second ?? 0),
-                0,
-              );
-              setRange({
-                before: end.getTime() / 1000,
-                after: startTime,
-              });
-            }}
-          />
-        </PopoverContent>
-      </Popover>
+                const start = new Date(startTime * 1000);
+                start.setHours(
+                  parseInt(hour),
+                  parseInt(minute),
+                  parseInt(second ?? 0),
+                  0,
+                );
+                setRange({
+                  before: endTime,
+                  after: start.getTime() / 1000,
+                });
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+        <FaArrowRight className="size-4 text-primary" />
+        <Popover
+          open={endOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEndOpen(false);
+            }
+          }}
+        >
+          <PopoverTrigger asChild>
+            <Button
+              className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+              aria-label={t("export.time.end.title")}
+              variant={endOpen ? "select" : "default"}
+              size="sm"
+              onClick={() => {
+                setEndOpen(true);
+                setStartOpen(false);
+              }}
+            >
+              {formattedEnd}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="flex flex-col items-center">
+            <TimezoneAwareCalendar
+              timezone={config?.ui.timezone}
+              selectedDay={new Date(endTime * 1000)}
+              onSelect={(day) => {
+                if (!day) {
+                  return;
+                }
+
+                setRange({
+                  after: startTime,
+                  before: day.getTime() / 1000,
+                });
+              }}
+            />
+            <SelectSeparator className="bg-secondary" />
+            <input
+              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+              id="startTime"
+              type="time"
+              value={endClock}
+              step={isIOS ? "60" : "1"}
+              onChange={(e) => {
+                const clock = e.target.value;
+                const [hour, minute, second] = isIOS
+                  ? [...clock.split(":"), "00"]
+                  : clock.split(":");
+
+                const end = new Date(endTime * 1000);
+                end.setHours(
+                  parseInt(hour),
+                  parseInt(minute),
+                  parseInt(second ?? 0),
+                  0,
+                );
+                setRange({
+                  before: end.getTime() / 1000,
+                  after: startTime,
+                });
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }

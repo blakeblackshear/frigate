@@ -182,10 +182,15 @@ Rules:
         event: Event,
     ) -> Optional[str]:
         """Generate a description for the frame."""
-        prompt = camera_config.objects.genai.object_prompts.get(
-            event.label,
-            camera_config.objects.genai.prompt,
-        ).format(**model_to_dict(event))
+        try:
+            prompt = camera_config.genai.object_prompts.get(
+                event.label,
+                camera_config.genai.prompt,
+            ).format(**model_to_dict(event))
+        except KeyError as e:
+            logger.error(f"Invalid key in GenAI prompt: {e}")
+            return None
+
         logger.debug(f"Sending images to genai provider with prompt: {prompt}")
         return self._send(prompt, thumbnails)
 

@@ -346,7 +346,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               <Portal>
                 <SubItemContent
                   className={
-                    isDesktop ? "" : "w-[92%] rounded-lg md:rounded-2xl"
+                    isDesktop
+                      ? ""
+                      : "scrollbar-container max-h-[75dvh] w-[92%] overflow-y-scroll rounded-lg md:rounded-2xl"
                   }
                 >
                   <span tabIndex={0} className="sr-only" />

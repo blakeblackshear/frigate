@@ -17,7 +17,7 @@ export function useVideoDimensions(
   });
 
   const videoAspectRatio = useMemo(() => {
-    return videoResolution.width / videoResolution.height;
+    return videoResolution.width / videoResolution.height || 16 / 9;
   }, [videoResolution]);
 
   const containerAspectRatio = useMemo(() => {
@@ -25,8 +25,8 @@ export function useVideoDimensions(
   }, [containerWidth, containerHeight]);
 
   const videoDimensions = useMemo(() => {
-    if (!containerWidth || !containerHeight || !videoAspectRatio)
-      return { width: "100%", height: "100%" };
+    if (!containerWidth || !containerHeight)
+      return { aspectRatio: "16 / 9", width: "100%" };
     if (containerAspectRatio > videoAspectRatio) {
       const height = containerHeight;
       const width = height * videoAspectRatio;

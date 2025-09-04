@@ -372,12 +372,13 @@ class PtzAutoTracker:
         logger.info(f"Camera calibration for {camera} in progress")
 
         # zoom levels test
+        self.zoom_time[camera] = 0
+
         if (
             self.config.cameras[camera].onvif.autotracking.zooming
             != ZoomingModeEnum.disabled
         ):
             logger.info(f"Calibration for {camera} in progress: 0% complete")
-            self.zoom_time[camera] = 0
 
             for i in range(2):
                 # absolute move to 0 - fully zoomed out
@@ -1332,7 +1333,11 @@ class PtzAutoTracker:
 
         if camera_config.onvif.autotracking.enabled:
             if not self.autotracker_init[camera]:
-                self._autotracker_setup(camera_config, camera)
+                future = asyncio.run_coroutine_threadsafe(
+                    self._autotracker_setup(camera_config, camera), self.onvif.loop
+                )
+                # Wait for the coroutine to complete
+                future.result()
 
             if self.calibrating[camera]:
                 logger.debug(f"{camera}: Calibrating camera")
@@ -1479,7 +1484,8 @@ class PtzAutoTracker:
             self.tracked_object[camera] = None
             self.tracked_object_history[camera].clear()
 
-            self.ptz_metrics[camera].motor_stopped.wait()
+            while not self.ptz_metrics[camera].motor_stopped.is_set():
+                await self.onvif.get_camera_status(camera)
             logger.debug(
                 f"{camera}: Time is {self.ptz_metrics[camera].frame_time.value}, returning to preset: {autotracker_config.return_preset}"
             )
@@ -1489,7 +1495,7 @@ class PtzAutoTracker:
             )
 
             # update stored zoom level from preset
-            if not self.ptz_metrics[camera].motor_stopped.is_set():
+            while not self.ptz_metrics[camera].motor_stopped.is_set():
                 await self.onvif.get_camera_status(camera)
 
             self.ptz_metrics[camera].tracking_active.clear()

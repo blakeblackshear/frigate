@@ -114,7 +114,7 @@ section.
 ## Next steps
 
 1. If the stream you added to go2rtc is also used by Frigate for the `record` or `detect` role, you can migrate your config to pull from the RTSP restream to reduce the number of connections to your camera as shown [here](/configuration/restream#reduce-connections-to-camera).
-2. You may also prefer to [setup WebRTC](/configuration/live#webrtc-extra-configuration) for slightly lower latency than MSE. Note that WebRTC only supports h264 and specific audio formats and may require opening ports on your router.
+2. You can [set up WebRTC](/configuration/live#webrtc-extra-configuration) if your camera supports two-way talk. Note that WebRTC only supports specific audio formats and may require opening ports on your router.
 
 ## Important considerations
 

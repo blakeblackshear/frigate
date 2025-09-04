@@ -1759,6 +1759,10 @@ paths:
         - name: include_thumbnails
           in: query
           required: false
+          description: >
+            Deprecated. Thumbnail data is no longer included in the response.
+            Use the /api/events/:event_id/thumbnail.:extension endpoint instead.
+          deprecated: true
           schema:
             anyOf:
               - type: integer
@@ -1973,6 +1977,10 @@ paths:
         - name: include_thumbnails
           in: query
           required: false
+          description: >
+            Deprecated. Thumbnail data is no longer included in the response.
+            Use the /api/events/:event_id/thumbnail.:extension endpoint instead.
+          deprecated: true
           schema:
             anyOf:
               - type: integer
