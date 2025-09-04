@@ -251,3 +251,7 @@ Note that disabling a camera through the config file (`enabled: False`) removes 
 6. **I have unmuted some cameras on my dashboard, but I do not hear sound. Why?**
 
    If your camera is streaming (as indicated by a red dot in the upper right, or if it has been set to continuous streaming mode), your browser may be blocking audio until you interact with the page. This is an intentional browser limitation. See [this article](https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide#autoplay_availability). Many browsers have a whitelist feature to change this behavior.
+
+7. **My camera streams have lots of visual artifacts / distortion.**
+
+   Some cameras don't include the hardware to support multiple connections to the high resolution stream, and this can cause unexpected behavior. In this case it is recommended to [restream](./restream.md) the high resolution stream so that it can be used for live view and recordings.
