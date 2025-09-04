@@ -254,4 +254,4 @@ Note that disabling a camera through the config file (`enabled: False`) removes 
 
 7. **My camera streams have lots of visual artifacts / distortion.**
 
-   Some cameras don't include the hardware to support multiple connections to the high resolution stream, and this can cause unexpected behavior. In this case it is recommended to [restream](../restream.md) the high resolution stream so that it can be used for live view and recordings.
+   Some cameras don't include the hardware to support multiple connections to the high resolution stream, and this can cause unexpected behavior. In this case it is recommended to [restream](./restream.md) the high resolution stream so that it can be used for live view and recordings.
