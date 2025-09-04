@@ -5,7 +5,7 @@ title: Updating
 
 # Updating Frigate
 
-The current stable version of Frigate is **0.16.0**. The release notes and any breaking changes for this version can be found on the [Frigate GitHub releases page](https://github.com/blakeblackshear/frigate/releases/tag/v0.16.0).
+The current stable version of Frigate is **0.16.1**. The release notes and any breaking changes for this version can be found on the [Frigate GitHub releases page](https://github.com/blakeblackshear/frigate/releases/tag/v0.16.1).
 
 Keeping Frigate up to date ensures you benefit from the latest features, performance improvements, and bug fixes. The update process varies slightly depending on your installation method (Docker, Home Assistant Addon, etc.). Below are instructions for the most common setups.
 
@@ -33,21 +33,21 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
 2. **Update and Pull the Latest Image**:
 
    - If using Docker Compose:
-     - Edit your `docker-compose.yml` file to specify the desired version tag (e.g., `0.16.0` instead of `0.15.2`). For example:
+     - Edit your `docker-compose.yml` file to specify the desired version tag (e.g., `0.16.1` instead of `0.15.2`). For example:
        ```yaml
        services:
          frigate:
-           image: ghcr.io/blakeblackshear/frigate:0.16.0
+           image: ghcr.io/blakeblackshear/frigate:0.16.1
        ```
      - Then pull the image:
        ```bash
-       docker pull ghcr.io/blakeblackshear/frigate:0.16.0
+       docker pull ghcr.io/blakeblackshear/frigate:0.16.1
        ```
      - **Note for `stable` Tag Users**: If your `docker-compose.yml` uses the `stable` tag (e.g., `ghcr.io/blakeblackshear/frigate:stable`), you don’t need to update the tag manually. The `stable` tag always points to the latest stable release after pulling.
    - If using `docker run`:
-     - Pull the image with the appropriate tag (e.g., `0.16.0`, `0.16.0-tensorrt`, or `stable`):
+     - Pull the image with the appropriate tag (e.g., `0.16.1`, `0.16.1-tensorrt`, or `stable`):
        ```bash
-       docker pull ghcr.io/blakeblackshear/frigate:0.16.0
+       docker pull ghcr.io/blakeblackshear/frigate:0.16.1
        ```
 
 3. **Start the Container**:
