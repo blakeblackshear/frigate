@@ -5,7 +5,9 @@ inputs:
     required: true
 outputs:
   image-name:
-    value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ steps.create-short-sha.outputs.SHORT_SHA }}
+    value: ${{ steps.meta.outputs.tags }}
+  image-labels:
+    value: ${{ steps.meta.outputs.labels }}
   cache-name:
     value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:cache
 runs:
@@ -48,3 +50,10 @@ runs:
     - id: create-short-sha
       run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
       shell: bash
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        # list of Docker images to use as base name for tags
+        images: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}
+        tags: type=raw,value=${{ steps.create-short-sha.outputs.SHORT_SHA }}

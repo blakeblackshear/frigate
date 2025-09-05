@@ -39,6 +39,7 @@ jobs:
           push: true
           platforms: linux/amd64
           target: frigate
+          labels: ${{ steps.setup.outputs.image-labels }}
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
           cache-to: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
@@ -63,8 +64,8 @@ jobs:
           push: true
           platforms: linux/arm64
           target: frigate
-          tags: |
-            ${{ steps.setup.outputs.image-name }}-standard-arm64
+          labels: ${{ steps.setup.outputs.image-labels }}
+          tags: ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
       - name: Build and push RPi build
         uses: docker/bake-action@v6
@@ -194,9 +195,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - uses: docker/metadata-action@v5
+        id: metadata
+        with:
+          images: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}
+          tags: type=raw,value=${{ env.SHORT_SHA }}
       - uses: int128/docker-manifest-create-action@v2
         with:
-          tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}
+          index-annotations: ${{ steps.metadata.outputs.labels }}
+          tags: ${{ steps.metadata.outputs.tags }}
           sources: |
             ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}-amd64
             ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}-rpi
