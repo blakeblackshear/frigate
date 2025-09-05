@@ -42,6 +42,7 @@
       "inferenceSpeed": "Detector Inference Speed",
       "temperature": "Detector Temperature",
       "cpuUsage": "Detector CPU Usage",
+      "cpuUsageInformation": "CPU used in preparing input and output data to/from detection models. This value does not measure inference usage, even if using a GPU or accelerator.",
       "memoryUsage": "Detector Memory Usage"
     },
     "hardwareInfo": {
@@ -90,6 +91,10 @@
       "title": "Recordings",
       "tips": "This value represents the total storage used by the recordings in Frigate's database. Frigate does not track storage usage for all files on your disk.",
       "earliestRecording": "Earliest recording available:"
+    },
+    "shm": {
+      "title": "SHM (shared memory) allocation",
+      "warning": "The current SHM size of {{total}}MB is too small. Increase it to at least {{min_shm}}MB."
     },
     "cameraStorage": {
       "title": "Camera Storage",
@@ -158,7 +163,8 @@
     "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)",
     "cameraIsOffline": "{{camera}} is offline",
     "detectIsSlow": "{{detect}} is slow ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)",
+    "shmTooLow": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB."
   },
   "enrichments": {
     "title": "Enrichments",

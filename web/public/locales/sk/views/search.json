@@ -41,6 +41,32 @@
         "minSpeedMustBeLessOrEqualMaxSpeed": "Hodnota „min_speed“ musí byť menšia alebo rovná hodnote „max_speed“.",
         "maxSpeedMustBeGreaterOrEqualMinSpeed": "Hodnota „max_speed“ musí byť väčšia alebo rovná hodnote „min_speed“."
       }
+    },
+    "tips": {
+      "title": "Ako používať textové filtre",
+      "desc": {
+        "text": "Filtre vám pomôžu zúžiť výsledky vyhľadávania. Tu je postup, ako ich použiť vo vstupnom poli:",
+        "step1": "Zadajte názov kľúča filtra, za ktorým nasleduje dvojbodka (napr. „kamery:“).",
+        "step2": "Vyberte hodnotu z návrhov alebo zadajte vlastnú.",
+        "step3": "Použite viacero filtrov tak, že ich pridáte jeden po druhom s medzerou medzi nimi.",
+        "step4": "Filtre dátumu (pred: a po:) používajú formát {{DateFormat}}.",
+        "step5": "Filter časového rozsahu používa formát {{exampleTime}}.",
+        "step6": "Filtre odstránite kliknutím na „x“ vedľa nich.",
+        "exampleLabel": "Príklad:"
+      }
+    },
+    "header": {
+      "currentFilterType": "Hodnoty filtra",
+      "noFilters": "Filtre",
+      "activeFilters": "Aktívne filtre"
     }
+  },
+  "similaritySearch": {
+    "title": "Vyhľadávanie podobností",
+    "active": "Vyhľadávanie podobnosti je aktívne",
+    "clear": "Jasné vyhľadávanie podobnosti"
+  },
+  "placeholder": {
+    "search": "Hľadať…"
   }
 }

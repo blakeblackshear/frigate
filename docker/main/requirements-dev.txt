@@ -1,1 +1,4 @@
 ruff
+
+# types
+types-peewee == 3.17.*

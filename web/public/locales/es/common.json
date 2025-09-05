@@ -141,7 +141,14 @@
       "fr": "Français (Frances)",
       "yue": "粵語 (Cantonés)",
       "th": "ไทย (Tailandés)",
-      "ca": "Català (Catalan)"
+      "ca": "Català (Catalan)",
+      "ptBR": "Português brasileiro (Portugués brasileño)",
+      "sr": "Српски (Serbio)",
+      "sl": "Slovenščina (Esloveno)",
+      "lt": "Lietuvių (Lituano)",
+      "bg": "Български (Búlgaro)",
+      "gl": "Galego (Gallego)",
+      "id": "Bahasa Indonesia (Indonesio)"
     },
     "appearance": "Apariencia",
     "darkMode": {
@@ -271,5 +278,6 @@
     "title": "404",
     "desc": "Página no encontrada"
   },
-  "selectItem": "Seleccionar {{item}}"
+  "selectItem": "Seleccionar {{item}}",
+  "readTheDocumentation": "Leer la documentación"
 }

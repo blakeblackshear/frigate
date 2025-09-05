@@ -34,5 +34,7 @@
   },
   "detected": "Detekováno",
   "selected_one": "{{count}} vybráno",
-  "selected_other": "{{count}} vybráno"
+  "selected_other": "{{count}} vybráno",
+  "suspiciousActivity": "Podezřelá aktivita",
+  "threateningActivity": "Ohrožující činnost"
 }

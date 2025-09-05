@@ -123,5 +123,13 @@
     "loadFailed": "Falha ao carregar as placas reconhecidas.",
     "loading": "Carregando placas reconhecidas…",
     "placeholder": "Digite para procurar placas…"
+  },
+  "classes": {
+    "label": "Classes",
+    "all": {
+      "title": "Todas as Classes"
+    },
+    "count_one": "{{count}} Classe",
+    "count_other": "{{count}} Classes"
   }
 }

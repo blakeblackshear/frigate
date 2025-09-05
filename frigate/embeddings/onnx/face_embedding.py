@@ -6,8 +6,10 @@ import os
 import numpy as np
 
 from frigate.const import MODEL_CACHE_DIR
+from frigate.log import redirect_output_to_logger
 from frigate.util.downloader import ModelDownloader
 
+from ...config import FaceRecognitionConfig
 from .base_embedding import BaseEmbedding
 from .runner import ONNXModelRunner
 
@@ -53,6 +55,7 @@ class FaceNetEmbedding(BaseEmbedding):
             self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
 
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def _load_model_and_utils(self):
         if self.runner is None:
             if self.downloader:
@@ -109,7 +112,7 @@ class FaceNetEmbedding(BaseEmbedding):
 
 
 class ArcfaceEmbedding(BaseEmbedding):
-    def __init__(self):
+    def __init__(self, config: FaceRecognitionConfig):
         super().__init__(
             model_name="facedet",
             model_file="arcface.onnx",
@@ -117,6 +120,7 @@ class ArcfaceEmbedding(BaseEmbedding):
                 "arcface.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/arcface.onnx",
             },
         )
+        self.config = config
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
         self.tokenizer = None
         self.feature_extractor = None
@@ -146,7 +150,7 @@ class ArcfaceEmbedding(BaseEmbedding):
 
             self.runner = ONNXModelRunner(
                 os.path.join(self.download_path, self.model_file),
-                "GPU",
+                device=self.config.device or "GPU",
             )
 
     def _preprocess_inputs(self, raw_inputs):

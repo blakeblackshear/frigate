@@ -41,6 +41,14 @@
       "center": {
         "label": "Klicken Sie in den Rahmen, um die PTZ-Kamera zu zentrieren"
       }
+    },
+    "focus": {
+      "in": {
+        "label": "PTZ Kamera hinein fokussieren"
+      },
+      "out": {
+        "label": "PTZ Kamera hinaus fokussieren"
+      }
     }
   },
   "documentTitle": "Live - Frigate",
@@ -100,7 +108,7 @@
       "tips": "Ihr Gerät muss die Funktion unterstützen und WebRTC muss für die bidirektionale Kommunikation konfiguriert sein.",
       "tips.documentation": "Dokumentation lesen ",
       "available": "Für diesen Stream ist eine Zwei-Wege-Sprechfunktion verfügbar",
-      "unavailable": "Für diesen Stream ist keine Zwei-Wege-Kommunikation möglich."
+      "unavailable": "Zwei-Wege-Kommunikation für diesen Stream nicht verfügbar"
     },
     "lowBandwidth": {
       "tips": "Die Live-Ansicht befindet sich aufgrund von Puffer- oder Stream-Fehlern im Modus mit geringer Bandbreite.",
@@ -146,7 +154,8 @@
     "cameraEnabled": "Kamera aktiviert",
     "autotracking": "Autotracking",
     "audioDetection": "Audioerkennung",
-    "title": "{{camera}} Einstellungen"
+    "title": "{{camera}} Einstellungen",
+    "transcription": "Audio Transkription"
   },
   "history": {
     "label": "Historisches Filmmaterial zeigen"
@@ -154,5 +163,9 @@
   "audio": "Audio",
   "suspend": {
     "forTime": "Aussetzen für: "
+  },
+  "transcription": {
+    "enable": "Live Audio Transkription einschalten",
+    "disable": "Live Audio Transkription ausschalten"
   }
 }

@@ -43,6 +43,14 @@
       "out": {
         "label": "Diminuir Zoom na câmera PTZ"
       }
+    },
+    "focus": {
+      "in": {
+        "label": "Aumentar foco da câmera PTZ"
+      },
+      "out": {
+        "label": "Tirar foco da câmera PTZ"
+      }
     }
   },
   "camera": {
@@ -135,7 +143,8 @@
     "recording": "Gravação",
     "snapshots": "Capturas de Imagem",
     "audioDetection": "Detecção de Áudio",
-    "autotracking": "Auto Rastreamento"
+    "autotracking": "Auto Rastreamento",
+    "transcription": "Transcrição de Áudio"
   },
   "history": {
     "label": "Exibir gravação histórica"
@@ -154,5 +163,9 @@
       "label": "Editar Grupo de Câmera"
     },
     "exitEdit": "Sair da Edição"
+  },
+  "transcription": {
+    "enable": "Habilitar Transcrição de Áudio em Tempo Real",
+    "disable": "Desabilitar Transcrição de Áudio em Tempo Real"
   }
 }

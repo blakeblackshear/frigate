@@ -1,5 +1,6 @@
 """Event apis."""
 
+import base64
 import datetime
 import logging
 import os
@@ -10,9 +11,11 @@ from pathlib import Path
 from urllib.parse import unquote
 
 import cv2
+import numpy as np
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
+from pathvalidate import sanitize_filename
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
@@ -34,6 +37,7 @@ from frigate.api.defs.request.events_body import (
     EventsLPRBody,
     EventsSubLabelBody,
     SubmitPlusBody,
+    TriggerEmbeddingBody,
 )
 from frigate.api.defs.response.event_response import (
     EventCreateResponse,
@@ -44,11 +48,12 @@ from frigate.api.defs.response.event_response import (
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, TRIGGER_DIR
 from frigate.embeddings import EmbeddingsContext
-from frigate.models import Event, ReviewSegment, Timeline
+from frigate.models import Event, ReviewSegment, Timeline, Trigger
 from frigate.track.object_processing import TrackedObject
 from frigate.util.builtin import get_tz_modifiers
+from frigate.util.path import get_event_thumbnail_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -161,43 +166,32 @@ def events(params: EventsQueryParams = Depends()):
         clauses.append((sub_label_clause))
 
     if recognized_license_plate != "all":
-        # use matching so joined recognized_license_plates are included
-        # for example a recognized license plate 'ABC123' would get events
-        # with recognized license plates 'ABC123' and 'ABC123, XYZ789'
-        recognized_license_plate_clauses = []
         filtered_recognized_license_plates = recognized_license_plate.split(",")
+
+        clauses_for_plates = []
 
         if "None" in filtered_recognized_license_plates:
             filtered_recognized_license_plates.remove("None")
-            recognized_license_plate_clauses.append(
-                (Event.data["recognized_license_plate"].is_null())
+            clauses_for_plates.append(Event.data["recognized_license_plate"].is_null())
+
+        # regex vs exact matching
+        normal_plates = []
+        for plate in filtered_recognized_license_plates:
+            if plate.startswith("^") or any(ch in plate for ch in ".[]?+*"):
+                clauses_for_plates.append(
+                    Event.data["recognized_license_plate"].cast("text").regexp(plate)
+                )
+            else:
+                normal_plates.append(plate)
+
+        # if there are any plain string plates, match them with IN
+        if normal_plates:
+            clauses_for_plates.append(
+                Event.data["recognized_license_plate"].cast("text").in_(normal_plates)
             )
 
-        for recognized_license_plate in filtered_recognized_license_plates:
-            # Exact matching plus list inclusion
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    == recognized_license_plate
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*{recognized_license_plate},*"
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*, {recognized_license_plate}*"
-                )
-            )
-
-        recognized_license_plate_clause = reduce(
-            operator.or_, recognized_license_plate_clauses
-        )
-        clauses.append((recognized_license_plate_clause))
+        recognized_license_plate_clause = reduce(operator.or_, clauses_for_plates)
+        clauses.append(recognized_license_plate_clause)
 
     if zones != "all":
         # use matching so events with multiple zones
@@ -511,42 +505,31 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         event_filters.append((reduce(operator.or_, zone_clauses)))
 
     if recognized_license_plate != "all":
-        # use matching so joined recognized_license_plates are included
-        # for example an recognized_license_plate 'ABC123' would get events
-        # with recognized_license_plates 'ABC123' and 'ABC123, XYZ789'
-        recognized_license_plate_clauses = []
         filtered_recognized_license_plates = recognized_license_plate.split(",")
+
+        clauses_for_plates = []
 
         if "None" in filtered_recognized_license_plates:
             filtered_recognized_license_plates.remove("None")
-            recognized_license_plate_clauses.append(
-                (Event.data["recognized_license_plate"].is_null())
+            clauses_for_plates.append(Event.data["recognized_license_plate"].is_null())
+
+        # regex vs exact matching
+        normal_plates = []
+        for plate in filtered_recognized_license_plates:
+            if plate.startswith("^") or any(ch in plate for ch in ".[]?+*"):
+                clauses_for_plates.append(
+                    Event.data["recognized_license_plate"].cast("text").regexp(plate)
+                )
+            else:
+                normal_plates.append(plate)
+
+        # if there are any plain string plates, match them with IN
+        if normal_plates:
+            clauses_for_plates.append(
+                Event.data["recognized_license_plate"].cast("text").in_(normal_plates)
             )
 
-        for recognized_license_plate in filtered_recognized_license_plates:
-            # Exact matching plus list inclusion
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    == recognized_license_plate
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*{recognized_license_plate},*"
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*, {recognized_license_plate}*"
-                )
-            )
-
-        recognized_license_plate_clause = reduce(
-            operator.or_, recognized_license_plate_clauses
-        )
+        recognized_license_plate_clause = reduce(operator.or_, clauses_for_plates)
         event_filters.append((recognized_license_plate_clause))
 
     if after:
@@ -1099,7 +1082,7 @@ def set_sub_label(
         new_score = None
 
     request.app.event_metadata_updater.publish(
-        EventMetadataTypeEnum.sub_label, (event_id, new_sub_label, new_score)
+        (event_id, new_sub_label, new_score), EventMetadataTypeEnum.sub_label.value
     )
 
     return JSONResponse(
@@ -1153,7 +1136,8 @@ def set_plate(
         new_score = None
 
     request.app.event_metadata_updater.publish(
-        EventMetadataTypeEnum.recognized_license_plate, (event_id, new_plate, new_score)
+        (event_id, "recognized_license_plate", new_plate, new_score),
+        EventMetadataTypeEnum.attribute.value,
     )
 
     return JSONResponse(
@@ -1234,9 +1218,10 @@ def regenerate_description(
 
     camera_config = request.app.frigate_config.cameras[event.camera]
 
-    if camera_config.genai.enabled:
+    if camera_config.objects.genai.enabled or params.force:
         request.app.event_metadata_updater.publish(
-            EventMetadataTypeEnum.regenerate_description, (event.id, params.source)
+            (event.id, params.source, params.force),
+            EventMetadataTypeEnum.regenerate_description.value,
         )
 
         return JSONResponse(
@@ -1260,6 +1245,38 @@ def regenerate_description(
             }
         ),
         status_code=400,
+    )
+
+
+@router.post(
+    "/description/generate",
+    response_model=GenericResponse,
+    # dependencies=[Depends(require_role(["admin"]))],
+)
+def generate_description_embedding(
+    request: Request,
+    body: EventsDescriptionBody,
+):
+    new_description = body.description
+
+    # If semantic search is enabled, update the index
+    if request.app.frigate_config.semantic_search.enabled:
+        context: EmbeddingsContext = request.app.embeddings
+        if len(new_description) > 0:
+            result = context.generate_description_embedding(
+                new_description,
+            )
+
+    return JSONResponse(
+        content=(
+            {
+                "success": True,
+                "message": f"Embedding for description is {result}"
+                if result
+                else "Failed to generate embedding",
+            }
+        ),
+        status_code=200,
     )
 
 
@@ -1361,7 +1378,6 @@ def create_event(
     event_id = f"{now}-{rand_id}"
 
     request.app.event_metadata_updater.publish(
-        EventMetadataTypeEnum.manual_event_create,
         (
             now,
             camera_name,
@@ -1374,6 +1390,7 @@ def create_event(
             body.source_type,
             body.draw,
         ),
+        EventMetadataTypeEnum.manual_event_create.value,
     )
 
     return JSONResponse(
@@ -1397,7 +1414,7 @@ def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
         end_time = body.end_time or datetime.datetime.now().timestamp()
         request.app.event_metadata_updater.publish(
-            EventMetadataTypeEnum.manual_event_end, (event_id, end_time)
+            (event_id, end_time), EventMetadataTypeEnum.manual_event_end.value
         )
     except Exception:
         return JSONResponse(
@@ -1411,3 +1428,423 @@ def end_event(request: Request, event_id: str, body: EventsEndBody):
         content=({"success": True, "message": "Event successfully ended."}),
         status_code=200,
     )
+
+
+@router.post(
+    "/trigger/embedding",
+    response_model=dict,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def create_trigger_embedding(
+    request: Request,
+    body: TriggerEmbeddingBody,
+    camera: str,
+    name: str,
+):
+    try:
+        if not request.app.frigate_config.semantic_search.enabled:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Semantic search is not enabled",
+                },
+                status_code=400,
+            )
+
+        # Check if trigger already exists
+        if (
+            Trigger.select()
+            .where(Trigger.camera == camera, Trigger.name == name)
+            .exists()
+        ):
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Trigger {camera}:{name} already exists",
+                },
+                status_code=400,
+            )
+
+        context: EmbeddingsContext = request.app.embeddings
+        # Generate embedding based on type
+        embedding = None
+        if body.type == "description":
+            embedding = context.generate_description_embedding(body.data)
+        elif body.type == "thumbnail":
+            try:
+                event: Event = Event.get(Event.id == body.data)
+            except DoesNotExist:
+                # TODO: check triggers directory for image
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Failed to fetch event for {body.type} trigger",
+                    },
+                    status_code=400,
+                )
+
+            # Skip the event if not an object
+            if event.data.get("type") != "object":
+                return
+
+            if thumbnail := get_event_thumbnail_bytes(event):
+                cursor = context.db.execute_sql(
+                    """
+                    SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
+                    """,
+                    [body.data],
+                )
+
+                row = cursor.fetchone() if cursor else None
+
+                if row:
+                    query_embedding = row[0]
+                    embedding = np.frombuffer(query_embedding, dtype=np.float32)
+            else:
+                # Extract valid thumbnail
+                thumbnail = get_event_thumbnail_bytes(event)
+
+                if thumbnail is None:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": f"Failed to get thumbnail for {body.data} for {body.type} trigger",
+                        },
+                        status_code=400,
+                    )
+
+                embedding = context.generate_image_embedding(
+                    body.data, (base64.b64encode(thumbnail).decode("ASCII"))
+                )
+
+        if embedding is None:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Failed to generate embedding for {body.type} trigger",
+                },
+                status_code=400,
+            )
+
+        if body.type == "thumbnail":
+            # Save image to the triggers directory
+            try:
+                os.makedirs(
+                    os.path.join(TRIGGER_DIR, sanitize_filename(camera)), exist_ok=True
+                )
+                with open(
+                    os.path.join(
+                        TRIGGER_DIR,
+                        sanitize_filename(camera),
+                        f"{sanitize_filename(body.data)}.webp",
+                    ),
+                    "wb",
+                ) as f:
+                    f.write(thumbnail)
+                logger.debug(
+                    f"Writing thumbnail for trigger with data {body.data} in {camera}."
+                )
+            except Exception as e:
+                logger.error(e.with_traceback())
+                logger.error(
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}"
+                )
+
+        Trigger.create(
+            camera=camera,
+            name=name,
+            type=body.type,
+            data=body.data,
+            threshold=body.threshold,
+            model=request.app.frigate_config.semantic_search.model,
+            embedding=np.array(embedding, dtype=np.float32).tobytes(),
+            triggering_event_id="",
+            last_triggered=None,
+        )
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "message": f"Trigger created successfully for {camera}:{name}",
+            },
+            status_code=200,
+        )
+
+    except Exception as e:
+        logger.error(e.with_traceback())
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Error creating trigger embedding",
+            },
+            status_code=500,
+        )
+
+
+@router.put(
+    "/trigger/embedding/{camera}/{name}",
+    response_model=dict,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def update_trigger_embedding(
+    request: Request,
+    camera: str,
+    name: str,
+    body: TriggerEmbeddingBody,
+):
+    try:
+        if not request.app.frigate_config.semantic_search.enabled:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Semantic search is not enabled",
+                },
+                status_code=400,
+            )
+
+        context: EmbeddingsContext = request.app.embeddings
+        # Generate embedding based on type
+        embedding = None
+        if body.type == "description":
+            embedding = context.generate_description_embedding(body.data)
+        elif body.type == "thumbnail":
+            webp_file = sanitize_filename(body.data) + ".webp"
+            webp_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera), webp_file)
+
+            try:
+                event: Event = Event.get(Event.id == body.data)
+                # Skip the event if not an object
+                if event.data.get("type") != "object":
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": f"Event {body.data} is not a tracked object for {body.type} trigger",
+                        },
+                        status_code=400,
+                    )
+                # Extract valid thumbnail
+                thumbnail = get_event_thumbnail_bytes(event)
+
+                with open(webp_path, "wb") as f:
+                    f.write(thumbnail)
+            except DoesNotExist:
+                # check triggers directory for image
+                if not os.path.exists(webp_path):
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": f"Failed to fetch event for {body.type} trigger",
+                        },
+                        status_code=400,
+                    )
+                else:
+                    # Load the image from the triggers directory
+                    with open(webp_path, "rb") as f:
+                        thumbnail = f.read()
+
+            embedding = context.generate_image_embedding(
+                body.data, (base64.b64encode(thumbnail).decode("ASCII"))
+            )
+
+        if embedding is None:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Failed to generate embedding for {body.type} trigger",
+                },
+                status_code=400,
+            )
+
+        # Check if trigger exists for upsert
+        trigger = Trigger.get_or_none(Trigger.camera == camera, Trigger.name == name)
+
+        if trigger:
+            # Update existing trigger
+            if trigger.data != body.data:  # Delete old thumbnail only if data changes
+                try:
+                    os.remove(
+                        os.path.join(
+                            TRIGGER_DIR,
+                            sanitize_filename(camera),
+                            f"{trigger.data}.webp",
+                        )
+                    )
+                    logger.debug(
+                        f"Deleted thumbnail for trigger with data {trigger.data} in {camera}."
+                    )
+                except Exception as e:
+                    logger.error(e.with_traceback())
+                    logger.error(
+                        f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}"
+                    )
+
+            Trigger.update(
+                data=body.data,
+                model=request.app.frigate_config.semantic_search.model,
+                embedding=np.array(embedding, dtype=np.float32).tobytes(),
+                threshold=body.threshold,
+                triggering_event_id="",
+                last_triggered=None,
+            ).where(Trigger.camera == camera, Trigger.name == name).execute()
+        else:
+            # Create new trigger (for rename case)
+            Trigger.create(
+                camera=camera,
+                name=name,
+                type=body.type,
+                data=body.data,
+                threshold=body.threshold,
+                model=request.app.frigate_config.semantic_search.model,
+                embedding=np.array(embedding, dtype=np.float32).tobytes(),
+                triggering_event_id="",
+                last_triggered=None,
+            )
+
+        if body.type == "thumbnail":
+            # Save image to the triggers directory
+            try:
+                camera_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera))
+                os.makedirs(camera_path, exist_ok=True)
+                with open(
+                    os.path.join(camera_path, f"{sanitize_filename(body.data)}.webp"),
+                    "wb",
+                ) as f:
+                    f.write(thumbnail)
+                logger.debug(
+                    f"Writing thumbnail for trigger with data {body.data} in {camera}."
+                )
+            except Exception as e:
+                logger.error(e.with_traceback())
+                logger.error(
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}"
+                )
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "message": f"Trigger updated successfully for {camera}:{name}",
+            },
+            status_code=200,
+        )
+
+    except Exception as e:
+        logger.error(e.with_traceback())
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Error updating trigger embedding",
+            },
+            status_code=500,
+        )
+
+
+@router.delete(
+    "/trigger/embedding/{camera}/{name}",
+    response_model=dict,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def delete_trigger_embedding(
+    request: Request,
+    camera: str,
+    name: str,
+):
+    try:
+        trigger = Trigger.get_or_none(Trigger.camera == camera, Trigger.name == name)
+        if trigger is None:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Trigger {camera}:{name} not found",
+                },
+                status_code=500,
+            )
+
+        deleted = (
+            Trigger.delete()
+            .where(Trigger.camera == camera, Trigger.name == name)
+            .execute()
+        )
+        if deleted == 0:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Error deleting trigger {camera}:{name}",
+                },
+                status_code=401,
+            )
+
+        try:
+            os.remove(
+                os.path.join(
+                    TRIGGER_DIR, sanitize_filename(camera), f"{trigger.data}.webp"
+                )
+            )
+            logger.debug(
+                f"Deleted thumbnail for trigger with data {trigger.data} in {camera}."
+            )
+        except Exception as e:
+            logger.error(e.with_traceback())
+            logger.error(
+                f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}"
+            )
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "message": f"Trigger deleted successfully for {camera}:{name}",
+            },
+            status_code=200,
+        )
+
+    except Exception as e:
+        logger.error(e.with_traceback())
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Error deleting trigger embedding",
+            },
+            status_code=500,
+        )
+
+
+@router.get(
+    "/triggers/status/{camera_name}",
+    response_model=dict,
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def get_triggers_status(
+    camera_name: str,
+):
+    try:
+        # Fetch all triggers for the specified camera
+        triggers = Trigger.select().where(Trigger.camera == camera_name)
+
+        # Prepare the response with trigger status
+        status = {
+            trigger.name: {
+                "last_triggered": trigger.last_triggered.timestamp()
+                if trigger.last_triggered
+                else None,
+                "triggering_event_id": trigger.triggering_event_id
+                if trigger.triggering_event_id
+                else None,
+            }
+            for trigger in triggers
+        }
+
+        if not status:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"No triggers found for camera {camera_name}",
+                },
+                status_code=404,
+            )
+
+        return {"success": True, "triggers": status}
+    except Exception as ex:
+        logger.exception(ex)
+        return JSONResponse(
+            content=({"success": False, "message": "Error fetching trigger status"}),
+            status_code=400,
+        )

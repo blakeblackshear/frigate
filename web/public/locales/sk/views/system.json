@@ -52,9 +52,87 @@
       "gpuDecoder": "GPU dekodér",
       "gpuInfo": {
         "vainfoOutput": {
-          "title": "Výstup Vainfo"
+          "title": "Výstup Vainfo",
+          "returnCode": "Návratový kód: {{code}}",
+          "processOutput": "Výstup procesu:",
+          "processError": "Chyba procesu:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Výstup Nvidia SMI",
+          "name": "Meno: {{name}}",
+          "driver": "Vodič: {{driver}}",
+          "cudaComputerCapability": "Výpočtové možnosti CUDA: {{cuda_compute}}",
+          "vbios": "Informácie o VBiose: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Zatvorte informácie o GPU"
+        },
+        "copyInfo": {
+          "label": "Kopírovať informácie o GPU"
+        },
+        "toast": {
+          "success": "Informácie o grafickej karte boli skopírované do schránky"
         }
+      },
+      "npuUsage": "Použitie NPU",
+      "npuMemory": "Pamäť NPU"
+    },
+    "otherProcesses": {
+      "title": "Iné procesy",
+      "processCpuUsage": "Proces využitia CPU",
+      "processMemoryUsage": "Procesné využitie pamäte"
+    }
+  },
+  "storage": {
+    "title": "Skladovanie",
+    "overview": "Prehľad",
+    "recordings": {
+      "title": "Nahrávky",
+      "tips": "Táto hodnota predstavuje celkové úložisko, ktoré používajú nahrávky v databáze Frigate. Frigate nesleduje využitie úložiska pre všetky súbory na vašom disku.",
+      "earliestRecording": "Najstaršia dostupná nahrávka:"
+    },
+    "shm": {
+      "title": "Alokácia SHM (zdieľanej pamäte)",
+      "warning": "Aktuálna veľkosť SHM {{total}}MB je príliš malá. Zvýšte ju aspoň na {{min_shm}}MB."
+    },
+    "cameraStorage": {
+      "title": "Úložisko kamery",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Nepoužité informácie o úložisku",
+      "storageUsed": "Skladovanie",
+      "percentageOfTotalUsed": "Percento z celkového počtu",
+      "bandwidth": "Šírka pásma",
+      "unused": {
+        "title": "Nepoužité",
+        "tips": "Táto hodnota nemusí presne zodpovedať voľnému miestu dostupnému pre Frigate, ak máte na disku uložené aj iné súbory okrem nahrávok Frigate. Frigate nesleduje využitie úložiska mimo svojich nahrávok."
       }
+    }
+  },
+  "cameras": {
+    "title": "Kamery",
+    "overview": "Prehľad",
+    "info": {
+      "aspectRatio": "pomer strán",
+      "cameraProbeInfo": "{{camera}} Informácie o sonde kamery",
+      "streamDataFromFFPROBE": "Údaje zo streamu sa získavajú pomocou príkazu <code>ffprobe</code>.",
+      "fetching": "Načítavajú sa údaje z kamery",
+      "stream": "Stream {{idx}}",
+      "video": "Video:",
+      "codec": "Kodek:",
+      "resolution": "Rozlíšenie:",
+      "fps": "FPS:",
+      "unknown": "Neznámy",
+      "audio": "Zvuk:",
+      "error": "Chyba: {{error}}",
+      "tips": {
+        "title": "Informácie o kamerovej sonde"
+      }
+    },
+    "framesAndDetections": "Rámy / Detekcie",
+    "label": {
+      "camera": "kamera",
+      "detect": "odhaliť",
+      "skipped": "preskočené"
     }
   }
 }

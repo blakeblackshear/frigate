@@ -122,5 +122,13 @@
     "loading": "Lade bekannte Nummernschilder…",
     "placeholder": "Tippe, um Kennzeichen zu suchen…",
     "selectPlatesFromList": "Wählen eine oder mehrere Kennzeichen aus der Liste aus."
+  },
+  "classes": {
+    "label": "Klassen",
+    "all": {
+      "title": "Alle Klassen"
+    },
+    "count_one": "{{count}} Klasse",
+    "count_other": "{{count}} Klassen"
   }
 }

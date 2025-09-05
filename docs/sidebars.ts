@@ -37,10 +37,23 @@ const sidebars: SidebarsConfig = {
       ],
       Enrichments: [
         "configuration/semantic_search",
-        "configuration/genai",
         "configuration/face_recognition",
         "configuration/license_plate_recognition",
         "configuration/bird_classification",
+        {
+          type: "category",
+          label: "Generative AI",
+          link: {
+            type: "generated-index",
+            title: "Generative AI",
+            description: "Generative AI Features",
+          },
+          items: [
+            "configuration/genai/genai_config",
+            "configuration/genai/genai_review",
+            "configuration/genai/genai_objects",
+          ],
+        },
       ],
       Cameras: [
         "configuration/cameras",

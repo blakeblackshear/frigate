@@ -6,7 +6,7 @@ from functools import reduce
 from pathlib import Path
 
 import pandas as pd
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, IntegrityError, fn, operator
@@ -26,6 +26,8 @@ from frigate.api.defs.response.review_response import (
     ReviewSummaryResponse,
 )
 from frigate.api.defs.tags import Tags
+from frigate.config import FrigateConfig
+from frigate.embeddings import EmbeddingsContext
 from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
 from frigate.util.builtin import get_tz_modifiers
@@ -606,3 +608,35 @@ async def set_not_reviewed(
         content=({"success": True, "message": f"Set Review {review_id} as not viewed"}),
         status_code=200,
     )
+
+
+@router.post(
+    "/review/summarize/start/{start_ts}/end/{end_ts}",
+    description="Use GenAI to summarize review items over a period of time.",
+)
+def generate_review_summary(request: Request, start_ts: float, end_ts: float):
+    config: FrigateConfig = request.app.frigate_config
+
+    if not config.genai.provider:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "GenAI must be configured to use this feature.",
+                }
+            ),
+            status_code=400,
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    summary = context.generate_review_summary(start_ts, end_ts)
+
+    if summary:
+        return JSONResponse(
+            content=({"success": True, "summary": summary}), status_code=200
+        )
+    else:
+        return JSONResponse(
+            content=({"success": False, "message": "Failed to create summary."}),
+            status_code=500,
+        )

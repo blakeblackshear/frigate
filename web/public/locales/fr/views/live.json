@@ -43,7 +43,15 @@
         "label": "Cliquez dans le cadre pour centrer la caméra PTZ"
       }
     },
-    "presets": "Paramètres prédéfinis pour les caméras PTZ"
+    "presets": "Paramètres prédéfinis pour les caméras PTZ",
+    "focus": {
+      "in": {
+        "label": "Mise au point rapprochée de la caméra PTZ"
+      },
+      "out": {
+        "label": "Mise au point éloignée de la caméra PTZ"
+      }
+    }
   },
   "camera": {
     "enable": "Activer la caméra",
@@ -126,7 +134,8 @@
     "audioDetection": "Détection audio",
     "autotracking": "Suivi automatique",
     "cameraEnabled": "Caméra activée",
-    "title": "Paramètres de {{camera}}"
+    "title": "Paramètres de {{camera}}",
+    "transcription": "Transcription audio"
   },
   "history": {
     "label": "Afficher l'historique de capture"
@@ -154,5 +163,9 @@
       "label": "Modifier le groupe de caméras"
     },
     "exitEdit": "Quitter l'édition"
+  },
+  "transcription": {
+    "enable": "Activer la transcription audio en direct",
+    "disable": "Désactiver la transcription audio en direct"
   }
 }

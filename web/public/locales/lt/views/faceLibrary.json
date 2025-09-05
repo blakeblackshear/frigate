@@ -9,5 +9,24 @@
     "face": "Veido detelės",
     "timestamp": "Laiko žyma",
     "unknown": "Nežinoma"
+  },
+  "selectItem": "Pasirinkti {{item}}",
+  "deleteFaceAttempts": {
+    "desc_one": "Ar tikrai norite ištrinti {{count}} veidą? Šio veiksmo sugrąžinimas negalimas.",
+    "desc_few": "Ar tikrai norite ištrinti {{count}} veidus? Šio veiksmo sugrąžinimas negalimas.",
+    "desc_other": "Ar tikrai norite ištrinti {{count}} veidų? Šio veiksmo sugrąžinimas negalimas."
+  },
+  "toast": {
+    "success": {
+      "deletedFace_one": "Sėkmingai ištrintas{{count}} veidas.",
+      "deletedFace_few": "Sėkmingai ištrinti {{count}} veidai.",
+      "deletedFace_other": "Sėkmingai ištrinta {{count}} veidų.",
+      "deletedName_one": "{{count}} veidas buvo sėkmingai ištrintas.",
+      "deletedName_few": "{{count}} veidai buvo sėkmingai ištrinti.",
+      "deletedName_other": "{{count}} veidų buvo sėkmingai ištrinta."
+    }
+  },
+  "createFaceLibrary": {
+    "nextSteps": "Kad sukurtumėte stiprų pagrindą:<li>Naudokite Apmokymų skirtuką pasirinkti ir paveikslėliais apmokyti kiekvieną aptiktą asmenį.</li><li>Norint pasiekti geriausią režultatą, susitelkite prie nuotraukų iš priekio; Venkite naudoti veidų nuotraukas kampu pasuktu veidu.</li></ul>"
   }
 }

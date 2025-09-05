@@ -34,5 +34,7 @@
   "markTheseItemsAsReviewed": "Markera dessa objekt som granskade",
   "detected": "upptäckt",
   "selected_one": "{{count}} valda",
-  "selected_other": "{{count}} valda"
+  "selected_other": "{{count}} valda",
+  "suspiciousActivity": "Misstänkt aktivitet",
+  "threateningActivity": "Hotande aktivitet"
 }

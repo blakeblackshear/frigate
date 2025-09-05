@@ -1,6 +1,41 @@
 {
   "filter": "Φίλτρο",
   "labels": {
-    "label": "Ετικέτες"
-  }
+    "label": "Ετικέτες",
+    "all": {
+      "title": "Όλες οι ετικέτες",
+      "short": "Ετικέτες"
+    },
+    "count_one": "{{count}} Ετικέτα",
+    "count_other": "{{count}} Ετικέτες"
+  },
+  "classes": {
+    "all": {
+      "title": "Όλες οι κλάσεις"
+    },
+    "count_one": "{{count}} Κλάση",
+    "count_other": "{{count}} Κλάσεις",
+    "label": "Κλάσεις"
+  },
+  "zones": {
+    "label": "Ζώνες",
+    "all": {
+      "title": "Όλες οι ζώνες",
+      "short": "Ζώνες"
+    }
+  },
+  "score": "Σκορ",
+  "estimatedSpeed": "Εκτιμώμενη Ταχύτητα {{unit}}",
+  "features": {
+    "label": "Χαρακτηριστικά",
+    "hasSnapshot": "Έχει ένα στιγμιότυπο"
+  },
+  "dates": {
+    "selectPreset": "Διαλέξτε μια Προεπιλογή…",
+    "all": {
+      "title": "Όλες οι Ημερομηνίες",
+      "short": "Ημερομηνίες"
+    }
+  },
+  "more": "Επιπλέον Φίλτρα"
 }

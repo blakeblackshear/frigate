@@ -12,5 +12,7 @@
       "savingError": "Chyba ukládání konfigurace"
     }
   },
-  "confirm": "Opustit bez uložení?"
+  "confirm": "Opustit bez uložení?",
+  "safeConfigEditor": "Editor konfigurace (Nouzový režim)",
+  "safeModeDescription": "Frigate je v nouzovém režimu kvůli chybě při ověřování konfigurace."
 }

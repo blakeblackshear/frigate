@@ -2,6 +2,7 @@
   "time": {
     "untilForTime": "{{time}} तक",
     "untilForRestart": "जब तक फ्रिगेट पुनः रीस्टार्ट नहीं हो जाता।",
-    "untilRestart": "रीस्टार्ट होने में"
+    "untilRestart": "रीस्टार्ट होने में",
+    "ago": "{{timeAgo}} पहले"
   }
 }

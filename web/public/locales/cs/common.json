@@ -261,5 +261,7 @@
     "admin": "Správce",
     "viewer": "Divák",
     "desc": "Správci mají plný přístup ke všem funkcím v uživatelském rozhraní Frigate. Diváci jsou omezeni na sledování kamer, položek přehledu a historických záznamů v UI."
-  }
+  },
+  "selectItem": "Vybrat {{item}}",
+  "readTheDocumentation": "Přečtěte si dokumentaci"
 }

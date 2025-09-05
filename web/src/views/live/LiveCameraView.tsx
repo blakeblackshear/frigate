@@ -1,5 +1,7 @@
 import {
+  useAudioLiveTranscription,
   useAudioState,
+  useAudioTranscriptionState,
   useAutotrackingState,
   useDetectState,
   useEnabledState,
@@ -90,6 +92,10 @@ import {
   LuX,
 } from "react-icons/lu";
 import {
+  MdCenterFocusStrong,
+  MdCenterFocusWeak,
+  MdClosedCaption,
+  MdClosedCaptionDisabled,
   MdNoPhotography,
   MdOutlineRestartAlt,
   MdPersonOff,
@@ -196,6 +202,29 @@ export default function LiveCameraView({
   // camera enabled state
   const { payload: enabledState } = useEnabledState(camera.name);
   const cameraEnabled = enabledState === "ON";
+
+  // for audio transcriptions
+
+  const { payload: audioTranscriptionState, send: sendTranscription } =
+    useAudioTranscriptionState(camera.name);
+  const { payload: transcription } = useAudioLiveTranscription(camera.name);
+  const transcriptionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (transcription) {
+      if (transcriptionRef.current) {
+        transcriptionRef.current.scrollTop =
+          transcriptionRef.current.scrollHeight;
+      }
+    }
+  }, [transcription]);
+
+  useEffect(() => {
+    return () => {
+      // disable transcriptions when unmounting
+      if (audioTranscriptionState == "ON") sendTranscription("OFF");
+    };
+  }, [audioTranscriptionState, sendTranscription]);
 
   // click overlay for ptzs
 
@@ -567,6 +596,9 @@ export default function LiveCameraView({
                 autotrackingEnabled={
                   camera.onvif.autotracking.enabled_in_config
                 }
+                transcriptionEnabled={
+                  camera.audio_transcription.enabled_in_config
+                }
                 fullscreen={fullscreen}
                 streamName={streamName ?? ""}
                 setStreamName={setStreamName}
@@ -626,6 +658,16 @@ export default function LiveCameraView({
               />
             </div>
           </TransformComponent>
+          {camera?.audio?.enabled_in_config &&
+            audioTranscriptionState == "ON" &&
+            transcription != null && (
+              <div
+                ref={transcriptionRef}
+                className="text-md scrollbar-container absolute bottom-4 left-1/2 max-h-[15vh] w-[75%] -translate-x-1/2 overflow-y-auto rounded-lg bg-black/70 p-2 text-white md:w-[50%]"
+              >
+                {transcription}
+              </div>
+            )}
         </div>
       </div>
       {camera.onvif.host != "" && (
@@ -769,10 +811,10 @@ function PtzControlPanel({
           sendPtz("MOVE_DOWN");
           break;
         case "+":
-          sendPtz("ZOOM_IN");
+          sendPtz(modifiers.shift ? "FOCUS_IN" : "ZOOM_IN");
           break;
         case "-":
-          sendPtz("ZOOM_OUT");
+          sendPtz(modifiers.shift ? "FOCUS_OUT" : "ZOOM_OUT");
           break;
       }
     },
@@ -883,6 +925,40 @@ function PtzControlPanel({
           </TooltipButton>
         </>
       )}
+      {ptz?.features?.includes("focus") && (
+        <>
+          <TooltipButton
+            label={t("ptz.focus.in.label")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              sendPtz("FOCUS_IN");
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              sendPtz("FOCUS_IN");
+            }}
+            onMouseUp={onStop}
+            onTouchEnd={onStop}
+          >
+            <MdCenterFocusStrong />
+          </TooltipButton>
+          <TooltipButton
+            label={t("ptz.focus.out.label")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              sendPtz("FOCUS_OUT");
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              sendPtz("FOCUS_OUT");
+            }}
+            onMouseUp={onStop}
+            onTouchEnd={onStop}
+          >
+            <MdCenterFocusWeak />
+          </TooltipButton>
+        </>
+      )}
 
       {ptz?.features?.includes("pt-r-fov") && (
         <TooltipProvider>
@@ -984,6 +1060,7 @@ type FrigateCameraFeaturesProps = {
   recordingEnabled: boolean;
   audioDetectEnabled: boolean;
   autotrackingEnabled: boolean;
+  transcriptionEnabled: boolean;
   fullscreen: boolean;
   streamName: string;
   setStreamName?: (value: string | undefined) => void;
@@ -1003,6 +1080,7 @@ function FrigateCameraFeatures({
   recordingEnabled,
   audioDetectEnabled,
   autotrackingEnabled,
+  transcriptionEnabled,
   fullscreen,
   streamName,
   setStreamName,
@@ -1035,6 +1113,8 @@ function FrigateCameraFeatures({
   const { payload: audioState, send: sendAudio } = useAudioState(camera.name);
   const { payload: autotrackingState, send: sendAutotracking } =
     useAutotrackingState(camera.name);
+  const { payload: transcriptionState, send: sendTranscription } =
+    useAudioTranscriptionState(camera.name);
 
   // roles
 
@@ -1198,6 +1278,27 @@ function FrigateCameraFeatures({
                 disabled={!cameraEnabled}
               />
             )}
+            {audioDetectEnabled && transcriptionEnabled && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={
+                  transcriptionState == "ON"
+                    ? MdClosedCaption
+                    : MdClosedCaptionDisabled
+                }
+                isActive={transcriptionState == "ON"}
+                title={
+                  transcriptionState == "ON"
+                    ? t("transcription.disable")
+                    : t("transcription.enable")
+                }
+                onClick={() =>
+                  sendTranscription(transcriptionState == "ON" ? "OFF" : "ON")
+                }
+                disabled={!cameraEnabled || audioState == "OFF"}
+              />
+            )}
             {autotrackingEnabled && (
               <CameraFeatureToggle
                 className="p-2 md:p-0"
@@ -1278,12 +1379,7 @@ function FrigateCameraFeatures({
                             rel="noopener noreferrer"
                             className="inline"
                           >
-                            {t(
-                              "streaming.restreaming.desc.readTheDocumentation",
-                              {
-                                ns: "components/dialog",
-                              },
-                            )}
+                            {t("readTheDocumentation", { ns: "common" })}
                             <LuExternalLink className="ml-2 inline-flex size-3" />
                           </Link>
                         </div>
@@ -1356,7 +1452,9 @@ function FrigateCameraFeatures({
                                     rel="noopener noreferrer"
                                     className="inline"
                                   >
-                                    {t("stream.audio.tips.documentation")}
+                                    {t("readTheDocumentation", {
+                                      ns: "common",
+                                    })}
                                     <LuExternalLink className="ml-2 inline-flex size-3" />
                                   </Link>
                                 </div>
@@ -1399,9 +1497,9 @@ function FrigateCameraFeatures({
                                       rel="noopener noreferrer"
                                       className="inline"
                                     >
-                                      {t(
-                                        "stream.twoWayTalk.tips.documentation",
-                                      )}
+                                      {t("readTheDocumentation", {
+                                        ns: "common",
+                                      })}
                                       <LuExternalLink className="ml-2 inline-flex size-3" />
                                     </Link>
                                   </div>
@@ -1562,6 +1660,16 @@ function FrigateCameraFeatures({
                   }
                 />
               )}
+              {audioDetectEnabled && transcriptionEnabled && (
+                <FilterSwitch
+                  label={t("cameraSettings.transcription")}
+                  disabled={audioState == "OFF"}
+                  isChecked={transcriptionState == "ON"}
+                  onCheckedChange={() =>
+                    sendTranscription(transcriptionState == "ON" ? "OFF" : "ON")
+                  }
+                />
+              )}
               {autotrackingEnabled && (
                 <FilterSwitch
                   label={t("cameraSettings.autotracking")}
@@ -1606,9 +1714,7 @@ function FrigateCameraFeatures({
                         rel="noopener noreferrer"
                         className="inline"
                       >
-                        {t("streaming.restreaming.desc.readTheDocumentation", {
-                          ns: "components/dialog",
-                        })}
+                        {t("readTheDocumentation", { ns: "common" })}
                         <LuExternalLink className="ml-2 inline-flex size-3" />
                       </Link>
                     </div>
@@ -1677,7 +1783,7 @@ function FrigateCameraFeatures({
                               rel="noopener noreferrer"
                               className="inline"
                             >
-                              {t("stream.audio.tips.documentation")}
+                              {t("readTheDocumentation", { ns: "common" })}
                               <LuExternalLink className="ml-2 inline-flex size-3" />
                             </Link>
                           </div>
@@ -1720,7 +1826,7 @@ function FrigateCameraFeatures({
                                 rel="noopener noreferrer"
                                 className="inline"
                               >
-                                {t("stream.twoWayTalk.tips.documentation")}
+                                {t("readTheDocumentation", { ns: "common" })}
                                 <LuExternalLink className="ml-2 inline-flex size-3" />
                               </Link>
                             </div>

@@ -1,0 +1,53 @@
+{
+  "button": {
+    "deleteClassificationAttempts": "Delete Classification Images",
+    "renameCategory": "Rename Class",
+    "deleteCategory": "Delete Class",
+    "deleteImages": "Delete Images",
+    "trainModel": "Train Model"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Deleted Class",
+      "deletedImage": "Deleted Images",
+      "categorizedImage": "Successfully Classified Image",
+      "trainedModel": "Successfully trained model.",
+      "trainingModel": "Successfully started model training."
+    },
+    "error": {
+      "deleteImageFailed": "Failed to delete: {{errorMessage}}",
+      "deleteCategoryFailed": "Failed to delete class: {{errorMessage}}",
+      "categorizeFailed": "Failed to categorize image: {{errorMessage}}",
+      "trainingFailed": "Failed to start model training: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Delete Class",
+    "desc": "Are you sure you want to delete the class {{name}}? This will permanently delete all associated images and require re-training the model."
+  },
+  "deleteDatasetImages": {
+    "title": "Delete Dataset Images",
+    "desc": "Are you sure you want to delete {{count}} images from {{dataset}}? This action cannot be undone and will require re-training the model."
+  },
+  "deleteTrainImages": {
+    "title": "Delete Train Images",
+    "desc": "Are you sure you want to delete {{count}} images? This action cannot be undone."
+  },
+  "renameCategory": {
+    "title": "Rename Class",
+    "desc": "Enter a new name for {{name}}. You will be required to retrain the model for the name change to take affect."
+  },
+  "description": {
+    "invalidName": "Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens."
+  },
+  "train": {
+    "title": "Train",
+    "aria": "Select Train"
+  },
+  "categories": "Classes",
+  "createCategory": {
+    "new": "Create New Class"
+  },
+  "categorizeImageAs": "Classify Image As:",
+  "categorizeImage": "Classify Image"
+}

@@ -149,7 +149,10 @@ function Exports() {
         }}
       >
         <DialogContent
-          className={cn("max-w-[80%]", isMobile && "landscape:max-w-[60%]")}
+          className={cn(
+            "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
+            isMobile && "landscape:max-w-[60%]",
+          )}
         >
           <DialogTitle className="smart-capitalize">
             {selected?.name?.replaceAll("_", " ")}

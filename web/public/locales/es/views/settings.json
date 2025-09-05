@@ -178,6 +178,43 @@
     "streams": {
       "title": "Transmisiones",
       "desc": "Desactivar temporalmente una cámara hasta que Frigate se reinicie. Desactivar una cámara detiene por completo el procesamiento de las transmisiones de esta cámara por parte de Frigate. La detección, grabación y depuración no estarán disponibles.<br /> <em>Nota: Esto no desactiva las retransmisiones de go2rtc.</em>"
+    },
+    "object_descriptions": {
+      "title": "Descripciones de objetos de IA generativa",
+      "desc": "Habilitar/deshabilitar temporalmente las descripciones de objetos de IA generativa para esta cámara. Cuando está deshabilitado, no se solicitarán descripciones generadas por IA para los objetos rastreados en esta cámara."
+    },
+    "review_descriptions": {
+      "title": "Descripciones de revisión de IA generativa",
+      "desc": "Habilitar/deshabilitar temporalmente las descripciones de revisión de IA generativa para esta cámara. Cuando está deshabilitado, no se solicitarán descripciones generadas por IA para los elementos de revisión en esta cámara."
+    },
+    "addCamera": "Añadir nueva cámara",
+    "editCamera": "Editar cámara:",
+    "selectCamera": "Seleccionar una cámara",
+    "backToSettings": "Volver a la configuración de la cámara",
+    "cameraConfig": {
+      "add": "Añadir cámara",
+      "edit": "Editar cámara",
+      "description": "Configurar los ajustes de la cámara, incluyendo las entradas de flujo y los roles.",
+      "name": "Nombre de la cámara",
+      "nameRequired": "El nombre de la cámara es obligatorio",
+      "nameInvalid": "El nombre de la cámara debe contener solo letras, números, guiones bajos o guiones",
+      "namePlaceholder": "p. ej., puerta_principal",
+      "enabled": "Habilitado",
+      "ffmpeg": {
+        "inputs": "Flujos de entrada",
+        "path": "Ruta del flujo",
+        "pathRequired": "La ruta del flujo es obligatoria",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roles",
+        "rolesRequired": "Se requiere al menos un rol",
+        "rolesUnique": "Cada rol (audio, detección, grabación) solo puede asignarse a un flujo",
+        "addInput": "Añadir flujo de entrada",
+        "removeInput": "Eliminar flujo de entrada",
+        "inputsRequired": "Se requiere al menos un flujo de entrada"
+      },
+      "toast": {
+        "success": "Cámara {{cameraName}} guardada con éxito"
+      }
     }
   },
   "masksAndZones": {
@@ -423,6 +460,11 @@
       "score": "Puntuación",
       "ratio": "Proporción",
       "area": "Área"
+    },
+    "paths": {
+      "title": "Rutas",
+      "desc": "Mostrar puntos significativos de la ruta del objeto rastreado",
+      "tips": "<p><strong>Rutas</strong></p><br><p>Líneas y círculos indicarán los puntos significativos por los que se ha movido el objeto rastreado durante su ciclo de vida.</p>"
     }
   },
   "users": {
@@ -682,6 +724,13 @@
     "toast": {
       "success": "Los ajustes de enriquecimientos se han guardado. Reinicia Frigate para aplicar los cambios.",
       "error": "No se pudieron guardar los cambios en la configuración: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Disparadores",
+    "management": {
+      "title": "Gestión de disparadores",
+      "desc": "Gestionar disparadores para {{camera}}. Usa el tipo de miniatura para activar en miniaturas similares al objeto rastreado seleccionado, y el tipo de descripción para activar en descripciones similares al texto que especifiques."
     }
   }
 }

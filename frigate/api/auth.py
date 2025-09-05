@@ -217,17 +217,108 @@ def require_role(required_roles: List[str]):
         if not roles:
             raise HTTPException(status_code=403, detail="Role not provided")
 
-        # Check if any role matches required_roles
-        if not any(role in required_roles for role in roles):
+        # enforce VALID_ROLES
+        valid_roles = [r for r in roles if r in VALID_ROLES]
+        if not valid_roles:
             raise HTTPException(
                 status_code=403,
-                detail=f"Role {', '.join(roles)} not authorized. Required: {', '.join(required_roles)}",
+                detail=f"No valid roles found in {roles}. Required: {', '.join(required_roles)}",
             )
 
-        # Return the first matching role
-        return next((role for role in roles if role in required_roles), roles[0])
+        if not any(role in required_roles for role in valid_roles):
+            raise HTTPException(
+                status_code=403,
+                detail=f"Role {', '.join(valid_roles)} not authorized. Required: {', '.join(required_roles)}",
+            )
+
+        return next(
+            (role for role in valid_roles if role in required_roles), valid_roles[0]
+        )
 
     return role_checker
+
+
+def resolve_role(headers: dict, proxy_config: ProxyConfig) -> str:
+    """
+    Determine the effective role for a request based on proxy headers and configuration.
+
+    Order of resolution:
+      1. If a role header is defined in proxy_config.header_map.role:
+         - If a role_map is configured, treat the header as group claims
+           (split by proxy_config.separator) and map to roles.
+         - If no role_map is configured, treat the header as role names directly.
+      2. If no valid role is found, return proxy_config.default_role.
+
+    Args:
+        headers (dict): Incoming request headers (case-insensitive).
+        proxy_config (ProxyConfig): Proxy configuration.
+
+    Returns:
+        str: Resolved role (always one of VALID_ROLES).
+    """
+    role = proxy_config.default_role
+    role_header = proxy_config.header_map.role
+
+    if not role_header:
+        logger.debug(
+            "No role header configured in proxy_config.header_map. Returning default role '%s'.",
+            role,
+        )
+        return role
+
+    raw_value = headers.get(role_header, "")
+    logger.debug("Raw role header value from '%s': %r", role_header, raw_value)
+
+    if not raw_value:
+        logger.debug("Role header missing or empty. Returning default role '%s'.", role)
+        return role
+
+    # role_map configured, treat header as group claims
+    if proxy_config.header_map.role_map:
+        groups = [
+            g.strip() for g in raw_value.split(proxy_config.separator) if g.strip()
+        ]
+        logger.debug("Parsed groups from role header: %s", groups)
+
+        matched_roles = {
+            role_name
+            for role_name, required_groups in proxy_config.header_map.role_map.items()
+            if any(group in groups for group in required_groups)
+        }
+        logger.debug("Matched roles from role_map: %s", matched_roles)
+
+        if matched_roles:
+            resolved = next((r for r in VALID_ROLES if r in matched_roles), role)
+            logger.debug("Resolved role (with role_map) to '%s'.", resolved)
+            return resolved
+
+        logger.debug(
+            "No role_map match for groups '%s'. Using default role '%s'.",
+            raw_value,
+            proxy_config.default_role,
+        )
+        return role
+
+    # no role_map, treat as role names directly
+    roles_from_header = [
+        r.strip().lower() for r in raw_value.split(proxy_config.separator) if r.strip()
+    ]
+    logger.debug("Parsed roles directly from header: %s", roles_from_header)
+
+    resolved = next(
+        (r for r in VALID_ROLES if r in roles_from_header),
+        proxy_config.default_role,
+    )
+    if resolved == proxy_config.default_role and roles_from_header:
+        logger.debug(
+            "Provided proxy role header values '%s' did not contain a valid role. Using default role '%s'.",
+            raw_value,
+            proxy_config.default_role,
+        )
+    else:
+        logger.debug("Resolved role (direct header) to '%s'.", resolved)
+
+    return resolved
 
 
 # Endpoints
@@ -266,22 +357,10 @@ def auth(request: Request):
             else "anonymous"
         )
 
-        role_header = proxy_config.header_map.role
-        role = (
-            request.headers.get(role_header, default=proxy_config.default_role)
-            if role_header
-            else proxy_config.default_role
-        )
+        # parse header and resolve a valid role
+        role = resolve_role(request.headers, proxy_config)
 
-        # if comma-separated with "admin", use "admin",
-        # if comma-separated with "viewer", use "viewer",
-        # else use default role
-
-        roles = [r.strip() for r in role.split(proxy_config.separator)] if role else []
-        success_response.headers["remote-role"] = next(
-            (r for r in VALID_ROLES if r in roles), proxy_config.default_role
-        )
-
+        success_response.headers["remote-role"] = role
         return success_response
 
     # now apply authentication

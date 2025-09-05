@@ -1,1 +1,22 @@
-{}
+{
+  "submitFrigatePlus": {
+    "submit": "제출"
+  },
+  "stats": {
+    "bandwidth": {
+      "short": "대역폭",
+      "title": "대역폭:"
+    },
+    "latency": {
+      "short": {
+        "title": "지연"
+      },
+      "title": "지연:"
+    },
+    "streamType": {
+      "short": "종류",
+      "title": "스트림 종류:"
+    },
+    "totalFrames": "총 프레임:"
+  }
+}

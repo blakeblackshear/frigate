@@ -11,7 +11,7 @@
     "enrichments": "Verrijkings Statistieken - Frigate"
   },
   "title": "Systeem",
-  "metrics": "Systeem statistieken",
+  "metrics": "Systeemstatistieken",
   "logs": {
     "download": {
       "label": "Logs Downloaden"
@@ -41,10 +41,11 @@
       "cpuUsage": "Detector CPU-verbruik",
       "memoryUsage": "Detector Geheugen Gebruik",
       "inferenceSpeed": "Detector Interferentie Snelheid",
-      "temperature": "Detectortemperatuur"
+      "temperature": "Detectortemperatuur",
+      "cpuUsageInformation": "CPU-gebruik bij het voorbereiden van in en uitvoer van gegevens voor detectiemodellen. Deze waarde geeft geen inferentie gebruik weer, ook niet wanneer een GPU of accelerator wordt gebruikt."
     },
     "hardwareInfo": {
-      "title": "Systeem Gegevens",
+      "title": "Systeemgegevens",
       "gpuUsage": "GPU-verbruik",
       "gpuInfo": {
         "vainfoOutput": {
@@ -102,7 +103,12 @@
       "camera": "Camera",
       "bandwidth": "Bandbreedte"
     },
-    "title": "Opslag"
+    "title": "Opslag",
+    "shm": {
+      "title": "SHM (gedeeld geheugen) toewijzing",
+      "warning": "De huidige SHM-grootte van {{total}} MB is te klein. Vergroot deze tot minimaal {{min_shm}} MB.",
+      "readTheDocumentation": "Lees de documentatie"
+    }
   },
   "cameras": {
     "title": "Cameras",
@@ -154,11 +160,12 @@
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} zorgt voor hoge FFmpeg CPU belasting ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} zorgt voor hoge detectie CPU belasting ({{detectAvg}}%)",
-    "healthy": "Systeem is gezond",
+    "healthy": "Geen problemen",
     "reindexingEmbeddings": "Herindexering van inbeddingen ({{processed}}% compleet)",
     "detectIsSlow": "{{detect}} is traag ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} is erg traag ({{speed}} ms)",
-    "cameraIsOffline": "{{camera}} is offline"
+    "cameraIsOffline": "{{camera}} is offline",
+    "shmTooLow": "Vergroot de /dev/shm toewijzing van {{total}} MB naar minimaal {{min}} MB."
   },
   "enrichments": {
     "title": "Verrijkingen",

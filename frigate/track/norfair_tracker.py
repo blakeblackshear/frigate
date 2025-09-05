@@ -5,14 +5,10 @@ from typing import Any, Sequence
 
 import cv2
 import numpy as np
-from norfair import (
-    Detection,
-    Drawable,
-    OptimizedKalmanFilterFactory,
-    Tracker,
-    draw_boxes,
-)
-from norfair.drawing.drawer import Drawer
+from norfair.drawing.draw_boxes import draw_boxes
+from norfair.drawing.drawer import Drawable, Drawer
+from norfair.filter import OptimizedKalmanFilterFactory
+from norfair.tracker import Detection, TrackedObject, Tracker
 from rich import print
 from rich.console import Console
 from rich.table import Table
@@ -43,7 +39,7 @@ MAX_STATIONARY_HISTORY = 10
 # - could be variable based on time since last_detection
 # - include estimated velocity in the distance (car driving by of a parked car)
 # - include some visual similarity factor in the distance for occlusions
-def distance(detection: np.array, estimate: np.array) -> float:
+def distance(detection: np.ndarray, estimate: np.ndarray) -> float:
     # ultimately, this should try and estimate distance in 3-dimensional space
     # consider change in location, width, and height
 
@@ -73,14 +69,16 @@ def distance(detection: np.array, estimate: np.array) -> float:
     change = np.append(distance, np.array([width_ratio, height_ratio]))
 
     # calculate euclidean distance of the change vector
-    return np.linalg.norm(change)
+    return float(np.linalg.norm(change))
 
 
-def frigate_distance(detection: Detection, tracked_object) -> float:
+def frigate_distance(detection: Detection, tracked_object: TrackedObject) -> float:
     return distance(detection.points, tracked_object.estimate)
 
 
-def histogram_distance(matched_not_init_trackers, unmatched_trackers):
+def histogram_distance(
+    matched_not_init_trackers: TrackedObject, unmatched_trackers: TrackedObject
+) -> float:
     snd_embedding = unmatched_trackers.last_detection.embedding
 
     if snd_embedding is None:
@@ -110,17 +108,17 @@ class NorfairTracker(ObjectTracker):
         ptz_metrics: PTZMetrics,
     ):
         self.frame_manager = SharedMemoryFrameManager()
-        self.tracked_objects = {}
+        self.tracked_objects: dict[str, dict[str, Any]] = {}
         self.untracked_object_boxes: list[list[int]] = []
-        self.disappeared = {}
-        self.positions = {}
-        self.stationary_box_history: dict[str, list[list[int, int, int, int]]] = {}
+        self.disappeared: dict[str, int] = {}
+        self.positions: dict[str, dict[str, Any]] = {}
+        self.stationary_box_history: dict[str, list[list[int]]] = {}
         self.camera_config = config
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
-        self.ptz_motion_estimator = {}
+        self.ptz_motion_estimator: PtzMotionEstimator | None = None
         self.camera_name = config.name
-        self.track_id_map = {}
+        self.track_id_map: dict[str, str] = {}
 
         # Define tracker configurations for static camera
         self.object_type_configs = {
@@ -169,7 +167,7 @@ class NorfairTracker(ObjectTracker):
             "distance_threshold": 3,
         }
 
-        self.trackers = {}
+        self.trackers: dict[str, dict[str, Tracker]] = {}
         # Handle static trackers
         for obj_type, tracker_config in self.object_type_configs.items():
             if obj_type in self.camera_config.objects.track:
@@ -195,19 +193,21 @@ class NorfairTracker(ObjectTracker):
         self.default_tracker = {
             "static": Tracker(
                 distance_function=frigate_distance,
-                distance_threshold=self.default_tracker_config["distance_threshold"],
+                distance_threshold=self.default_tracker_config[  # type: ignore[arg-type]
+                    "distance_threshold"
+                ],
                 initialization_delay=self.detect_config.min_initialized,
-                hit_counter_max=self.detect_config.max_disappeared,
-                filter_factory=self.default_tracker_config["filter_factory"],
+                hit_counter_max=self.detect_config.max_disappeared,  # type: ignore[arg-type]
+                filter_factory=self.default_tracker_config["filter_factory"],  # type: ignore[arg-type]
             ),
             "ptz": Tracker(
                 distance_function=frigate_distance,
                 distance_threshold=self.default_ptz_tracker_config[
                     "distance_threshold"
-                ],
+                ],  # type: ignore[arg-type]
                 initialization_delay=self.detect_config.min_initialized,
-                hit_counter_max=self.detect_config.max_disappeared,
-                filter_factory=self.default_ptz_tracker_config["filter_factory"],
+                hit_counter_max=self.detect_config.max_disappeared,  # type: ignore[arg-type]
+                filter_factory=self.default_ptz_tracker_config["filter_factory"],  # type: ignore[arg-type]
             ),
         }
 
@@ -216,7 +216,7 @@ class NorfairTracker(ObjectTracker):
                 self.camera_config, self.ptz_metrics
             )
 
-    def _create_tracker(self, obj_type, tracker_config):
+    def _create_tracker(self, obj_type: str, tracker_config: dict[str, Any]) -> Tracker:
         """Helper function to create a tracker with given configuration."""
         tracker_params = {
             "distance_function": tracker_config["distance_function"],
@@ -258,7 +258,7 @@ class NorfairTracker(ObjectTracker):
             return self.trackers[object_type][mode]
         return self.default_tracker[mode]
 
-    def register(self, track_id, obj):
+    def register(self, track_id: str, obj: dict[str, Any]) -> None:
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         id = f"{obj['frame_time']}-{rand_id}"
         self.track_id_map[track_id] = id
@@ -270,7 +270,7 @@ class NorfairTracker(ObjectTracker):
         # Get the correct tracker for this object's label
         tracker = self.get_tracker(obj["label"])
         obj_match = next(
-            (o for o in tracker.tracked_objects if o.global_id == track_id), None
+            (o for o in tracker.tracked_objects if str(o.global_id) == track_id), None
         )
         # if we don't have a match, we have a new object
         obj["score_history"] = (
@@ -297,7 +297,7 @@ class NorfairTracker(ObjectTracker):
         }
         self.stationary_box_history[id] = boxes
 
-    def deregister(self, id, track_id):
+    def deregister(self, id: str, track_id: str) -> None:
         obj = self.tracked_objects[id]
 
         del self.tracked_objects[id]
@@ -314,14 +314,14 @@ class NorfairTracker(ObjectTracker):
             tracker.tracked_objects = [
                 o
                 for o in tracker.tracked_objects
-                if o.global_id != track_id and o.hit_counter < 0
+                if str(o.global_id) != track_id and o.hit_counter < 0
             ]
 
         del self.track_id_map[track_id]
 
     # tracks the current position of the object based on the last N bounding boxes
     # returns False if the object has moved outside its previous position
-    def update_position(self, id: str, box: list[int, int, int, int], stationary: bool):
+    def update_position(self, id: str, box: list[int], stationary: bool) -> bool:
         xmin, ymin, xmax, ymax = box
         position = self.positions[id]
         self.stationary_box_history[id].append(box)
@@ -396,7 +396,7 @@ class NorfairTracker(ObjectTracker):
 
         return True
 
-    def is_expired(self, id):
+    def is_expired(self, id: str) -> bool:
         obj = self.tracked_objects[id]
         # get the max frames for this label type or the default
         max_frames = self.detect_config.stationary.max_frames.objects.get(
@@ -416,7 +416,7 @@ class NorfairTracker(ObjectTracker):
 
         return False
 
-    def update(self, track_id, obj):
+    def update(self, track_id: str, obj: dict[str, Any]) -> None:
         id = self.track_id_map[track_id]
         self.disappeared[id] = 0
         stationary = (
@@ -443,7 +443,7 @@ class NorfairTracker(ObjectTracker):
 
         self.tracked_objects[id].update(obj)
 
-    def update_frame_times(self, frame_name: str, frame_time: float):
+    def update_frame_times(self, frame_name: str, frame_time: float) -> None:
         # if the object was there in the last frame, assume it's still there
         detections = [
             (
@@ -460,10 +460,13 @@ class NorfairTracker(ObjectTracker):
         self.match_and_update(frame_name, frame_time, detections=detections)
 
     def match_and_update(
-        self, frame_name: str, frame_time: float, detections: list[dict[str, Any]]
-    ):
+        self,
+        frame_name: str,
+        frame_time: float,
+        detections: list[tuple[Any, Any, Any, Any, Any, Any]],
+    ) -> None:
         # Group detections by object type
-        detections_by_type = {}
+        detections_by_type: dict[str, list[Detection]] = {}
         for obj in detections:
             label = obj[0]
             if label not in detections_by_type:
@@ -551,28 +554,28 @@ class NorfairTracker(ObjectTracker):
             estimate = (
                 max(0, estimate[0]),
                 max(0, estimate[1]),
-                min(self.detect_config.width - 1, estimate[2]),
-                min(self.detect_config.height - 1, estimate[3]),
+                min(self.detect_config.width - 1, estimate[2]),  # type: ignore[operator]
+                min(self.detect_config.height - 1, estimate[3]),  # type: ignore[operator]
             )
-            obj = {
+            new_obj = {
                 **t.last_detection.data,
                 "estimate": estimate,
                 "estimate_velocity": t.estimate_velocity,
             }
-            active_ids.append(t.global_id)
-            if t.global_id not in self.track_id_map:
-                self.register(t.global_id, obj)
+            active_ids.append(str(t.global_id))
+            if str(t.global_id) not in self.track_id_map:
+                self.register(str(t.global_id), new_obj)
             # if there wasn't a detection in this frame, increment disappeared
             elif t.last_detection.data["frame_time"] != frame_time:
-                id = self.track_id_map[t.global_id]
+                id = self.track_id_map[str(t.global_id)]
                 self.disappeared[id] += 1
                 # sometimes the estimate gets way off
                 # only update if the upper left corner is actually upper left
                 if estimate[0] < estimate[2] and estimate[1] < estimate[3]:
-                    self.tracked_objects[id]["estimate"] = obj["estimate"]
+                    self.tracked_objects[id]["estimate"] = new_obj["estimate"]
             # else update it
             else:
-                self.update(t.global_id, obj)
+                self.update(str(t.global_id), new_obj)
 
         # clear expired tracks
         expired_ids = [k for k in self.track_id_map.keys() if k not in active_ids]
@@ -585,7 +588,7 @@ class NorfairTracker(ObjectTracker):
             o[2] for o in detections if o[2] not in tracked_object_boxes
         ]
 
-    def print_objects_as_table(self, tracked_objects: Sequence):
+    def print_objects_as_table(self, tracked_objects: Sequence) -> None:
         """Used for helping in debugging"""
         print()
         console = Console()
@@ -605,13 +608,13 @@ class NorfairTracker(ObjectTracker):
             )
         console.print(table)
 
-    def debug_draw(self, frame, frame_time):
+    def debug_draw(self, frame: np.ndarray, frame_time: float) -> None:
         # Collect all tracked objects from each tracker
-        all_tracked_objects = []
+        all_tracked_objects: list[TrackedObject] = []
 
         # print a table to the console with norfair tracked object info
         if False:
-            if len(self.trackers["license_plate"]["static"].tracked_objects) > 0:
+            if len(self.trackers["license_plate"]["static"].tracked_objects) > 0:  # type: ignore[unreachable]
                 self.print_objects_as_table(
                     self.trackers["license_plate"]["static"].tracked_objects
                 )
@@ -638,9 +641,9 @@ class NorfairTracker(ObjectTracker):
         # draw the estimated bounding box
         draw_boxes(frame, all_tracked_objects, color="green", draw_ids=True)
         # draw the detections that were detected in the current frame
-        draw_boxes(frame, active_detections, color="blue", draw_ids=True)
+        draw_boxes(frame, active_detections, color="blue", draw_ids=True)  # type: ignore[arg-type]
         # draw the detections that are missing in the current frame
-        draw_boxes(frame, missing_detections, color="red", draw_ids=True)
+        draw_boxes(frame, missing_detections, color="red", draw_ids=True)  # type: ignore[arg-type]
 
         # draw the distance calculation for the last detection
         # estimate vs detection
@@ -648,8 +651,8 @@ class NorfairTracker(ObjectTracker):
             ld = obj.last_detection
             # bottom right
             text_anchor = (
-                ld.points[1, 0],
-                ld.points[1, 1],
+                ld.points[1, 0],  # type: ignore[index]
+                ld.points[1, 1],  # type: ignore[index]
             )
             frame = Drawer.text(
                 frame,
@@ -662,7 +665,7 @@ class NorfairTracker(ObjectTracker):
 
         if False:
             # draw the current formatted time on the frame
-            from datetime import datetime
+            from datetime import datetime  # type: ignore[unreachable]
 
             formatted_time = datetime.fromtimestamp(frame_time).strftime(
                 "%m/%d/%Y %I:%M:%S %p"

@@ -4,8 +4,10 @@
     "confidence": "Säkerhet",
     "face": "Ansiktsdetaljer",
     "timestamp": "tidsstämpel",
-    "faceDesc": "Detaljer för ansiktet och tillhörande objekt",
-    "unknown": "Okänt"
+    "faceDesc": "Detaljer om det spårade objektet som genererade detta ansikte",
+    "unknown": "Okänt",
+    "subLabelScore": "Underetikett Poäng",
+    "scoreInfo": "Underetikettpoängen är den viktade poängen för alla igenkända ansiktskonfidenser, så detta kan skilja sig från poängen som visas på ögonblicksbilden."
   },
   "description": {
     "placeholder": "Ange ett namn för denna samling",
@@ -16,7 +18,10 @@
   "steps": {
     "faceName": "Ange namn",
     "uploadFace": "Ladda upp bild på ansikte",
-    "nextSteps": "Nästa steg"
+    "nextSteps": "Nästa steg",
+    "description": {
+      "uploadFace": "Ladda upp en bild på {{name}} som visar deras ansikte framifrån. Bilden behöver inte beskäras till bara deras ansikte."
+    }
   },
   "createFaceLibrary": {
     "title": "Skapa samling",
@@ -25,12 +30,71 @@
     "new": "Skapa nytt ansikte"
   },
   "train": {
-    "title": "Träna"
+    "title": "Träna",
+    "aria": "Välj träna",
+    "empty": "Det finns inga ny försök till ansiktsigenkänning"
   },
   "uploadFaceImage": {
     "title": "Ladda upp ansiktsbild",
     "desc": "Ladda upp en bild för att skanna efter ansikte och inkludera {{pageToggle}}"
   },
   "selectItem": "Välj {{item}}",
-  "collections": "Samlingar"
+  "collections": "Samlingar",
+  "selectFace": "Välj ansikte",
+  "deleteFaceLibrary": {
+    "title": "Ta bort namn",
+    "desc": "Är du säker på att du vill ta bort samlingen {{name}}? Detta kommer att ta bort alla associerade ansikten permanent."
+  },
+  "deleteFaceAttempts": {
+    "title": "Ta bort ansikten",
+    "desc_one": "Är du säker på att du vill ta bort {{count}} ansikte? Den här åtgärden kan inte ångras.",
+    "desc_other": "Är du säker på att du vill ta bort {{count}} ansikten? Den här åtgärden kan inte ångras."
+  },
+  "imageEntry": {
+    "dropActive": "Släpp bilden här…",
+    "dropInstructions": "Dra och släpp en bild här, eller klicka för att välja",
+    "maxSize": "Maxstorlek: {{size}}MB",
+    "validation": {
+      "selectImage": "Välj en bildfil."
+    }
+  },
+  "nofaces": "Inga ansikten tillgängliga",
+  "pixels": "{{area}}px",
+  "readTheDocs": "Läs dokumentationen",
+  "trainFaceAs": "Träna ansikte som:",
+  "trainFace": "Träna ansikte",
+  "toast": {
+    "success": {
+      "uploadedImage": "Bilden har laddats upp.",
+      "addFaceLibrary": "{{name}} har lagts till i ansiktsbiblioteket!",
+      "deletedFace_one": "{{count}} ansikte har raderats.",
+      "deletedFace_other": "{{count}} ansikten har raderats.",
+      "deletedName_one": "{{count}} ansikte har raderats.",
+      "deletedName_other": "{{count}} ansikten har raderats.",
+      "renamedFace": "Ansiktet har bytt namn till {{name}}",
+      "trainedFace": "Ansikte är tränant.",
+      "updatedFaceScore": "Ansikts poängen har uppdaterats."
+    },
+    "error": {
+      "uploadingImageFailed": "Misslyckades med att ladda upp bilden: {{errorMessage}}",
+      "addFaceLibraryFailed": "Misslyckades med att ange ansiktsnamn: {{errorMessage}}",
+      "deleteFaceFailed": "Misslyckades med att ta bort: {{errorMessage}}",
+      "deleteNameFailed": "Misslyckades med att ta bort namnet: {{errorMessage}}",
+      "renameFaceFailed": "Misslyckades med att byta namn på ansikte: {{errorMessage}}",
+      "trainFailed": "Misslyckades med att träna: {{errorMessage}}",
+      "updateFaceScoreFailed": "Misslyckades med att uppdatera ansiktspoäng: {{errorMessage}}"
+    }
+  },
+  "renameFace": {
+    "title": "Byt namn på ansikte",
+    "desc": "Ange ett nytt namn för {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Ta bort ansikten",
+    "addFace": "Lägg till ansikte",
+    "renameFace": "Byt namn på ansikte",
+    "deleteFace": "Ta bort ansikte",
+    "uploadImage": "Ladda upp bild",
+    "reprocessFace": "Återbearbeta ansiktet"
+  }
 }

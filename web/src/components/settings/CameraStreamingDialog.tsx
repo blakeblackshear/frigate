@@ -33,6 +33,7 @@ import { Link } from "react-router-dom";
 import { LiveStreamMetadata } from "@/types/live";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -55,6 +56,8 @@ export function CameraStreamingDialog({
 
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  const cameraName = useCameraFriendlyName(camera);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -190,7 +193,7 @@ export function CameraStreamingDialog({
       <DialogHeader className="mb-4">
         <DialogTitle className="smart-capitalize">
           {t("group.camera.setting.title", {
-            cameraName: camera.replaceAll("_", " "),
+            cameraName: cameraName,
           })}
         </DialogTitle>
         <DialogDescription>
@@ -228,9 +231,7 @@ export function CameraStreamingDialog({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      {t("streaming.restreaming.desc.readTheDocumentation", {
-                        ns: "components/dialog",
-                      })}
+                      {t("readTheDocumentation", { ns: "common" })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>
@@ -289,7 +290,7 @@ export function CameraStreamingDialog({
                               rel="noopener noreferrer"
                               className="inline"
                             >
-                              {t("group.camera.setting.audio.tips.document")}
+                              {t("readTheDocumentation", { ns: "common" })}
                               <LuExternalLink className="ml-2 inline-flex size-3" />
                             </Link>
                           </div>

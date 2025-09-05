@@ -23,7 +23,7 @@ jobs:
     name: AMD64 Build
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx
@@ -47,7 +47,7 @@ jobs:
     name: ARM Build
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx
@@ -77,42 +77,12 @@ jobs:
             rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
-  jetson_jp5_build:
-    if: false
-    runs-on: ubuntu-22.04
-    name: Jetson Jetpack 5
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Set up QEMU and Buildx
-        id: setup
-        uses: ./.github/actions/setup
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push TensorRT (Jetson, Jetpack 5)
-        env:
-          ARCH: arm64
-          BASE_IMAGE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
-          SLIM_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
-          TRT_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
-        uses: docker/bake-action@v6
-        with:
-          source: .
-          push: true
-          targets: tensorrt
-          files: docker/tensorrt/trt.hcl
-          set: |
-            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp5
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
   jetson_jp6_build:
     runs-on: ubuntu-22.04-arm
     name: Jetson Jetpack 6
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx
@@ -143,7 +113,7 @@ jobs:
       - amd64_build
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx
@@ -185,7 +155,7 @@ jobs:
       - arm64_build
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Set up QEMU and Buildx

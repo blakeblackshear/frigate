@@ -12,10 +12,12 @@ from typing import Any, Optional
 import cv2
 import numpy as np
 from peewee import DoesNotExist
-from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
-from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsResponder
+from frigate.comms.embeddings_updater import (
+    EmbeddingsRequestEnum,
+    EmbeddingsResponder,
+)
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataSubscriber,
@@ -27,8 +29,13 @@ from frigate.comms.recordings_updater import (
     RecordingsDataSubscriber,
     RecordingsDataTypeEnum,
 )
-from frigate.config import FrigateConfig
+from frigate.comms.review_updater import ReviewDataSubscriber
+from frigate.config import CameraConfig, FrigateConfig
 from frigate.config.camera.camera import CameraTypeEnum
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     CLIPS_DIR,
     UPDATE_EVENT_DESCRIPTION,
@@ -37,19 +44,29 @@ from frigate.data_processing.common.license_plate.model import (
     LicensePlateModelRunner,
 )
 from frigate.data_processing.post.api import PostProcessorApi
+from frigate.data_processing.post.audio_transcription import (
+    AudioTranscriptionPostProcessor,
+)
 from frigate.data_processing.post.license_plate import (
     LicensePlatePostProcessor,
 )
+from frigate.data_processing.post.review_descriptions import ReviewDescriptionProcessor
+from frigate.data_processing.post.semantic_trigger import SemanticTriggerProcessor
 from frigate.data_processing.real_time.api import RealTimeProcessorApi
 from frigate.data_processing.real_time.bird import BirdRealTimeProcessor
+from frigate.data_processing.real_time.custom_classification import (
+    CustomObjectClassificationProcessor,
+    CustomStateClassificationProcessor,
+)
 from frigate.data_processing.real_time.face import FaceRealTimeProcessor
 from frigate.data_processing.real_time.license_plate import (
     LicensePlateRealTimeProcessor,
 )
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
+from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import get_genai_client
-from frigate.models import Event
+from frigate.models import Event, Recordings, ReviewSegment, Trigger
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import serialize
 from frigate.util.image import (
@@ -71,15 +88,41 @@ class EmbeddingMaintainer(threading.Thread):
 
     def __init__(
         self,
-        db: SqliteQueueDatabase,
         config: FrigateConfig,
-        metrics: DataProcessorMetrics,
+        metrics: DataProcessorMetrics | None,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="embeddings_maintainer")
         self.config = config
         self.metrics = metrics
         self.embeddings = None
+        self.config_updater = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.remove,
+                CameraConfigUpdateEnum.object_genai,
+                CameraConfigUpdateEnum.review_genai,
+                CameraConfigUpdateEnum.semantic_search,
+            ],
+        )
+
+        # Configure Frigate DB
+        db = SqliteVecQueueDatabase(
+            config.database.path,
+            pragmas={
+                "auto_vacuum": "FULL",  # Does not defragment database
+                "cache_size": -512 * 1000,  # 512MB of cache
+                "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
+            },
+            timeout=max(
+                60, 10 * len([c for c in config.cameras.values() if c.enabled])
+            ),
+            load_vec_extension=True,
+        )
+        models = [Event, Recordings, ReviewSegment, Trigger]
+        db.bind(models)
 
         if config.semantic_search.enabled:
             self.embeddings = Embeddings(config, db, metrics)
@@ -87,6 +130,9 @@ class EmbeddingMaintainer(threading.Thread):
             # Check if we need to re-index events
             if config.semantic_search.reindex:
                 self.embeddings.reindex()
+
+            # Sync semantic search triggers in db with config
+            self.embeddings.sync_triggers()
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
@@ -100,11 +146,13 @@ class EmbeddingMaintainer(threading.Thread):
         self.recordings_subscriber = RecordingsDataSubscriber(
             RecordingsDataTypeEnum.recordings_available_through
         )
-        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
+        self.review_subscriber = ReviewDataSubscriber("")
+        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video.value)
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
 
         self.detected_license_plates: dict[str, dict[str, Any]] = {}
+        self.genai_client = get_genai_client(config)
 
         # model runners to share between realtime and post processors
         if self.config.lpr.enabled:
@@ -143,8 +191,29 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
+        for model_config in self.config.classification.custom.values():
+            self.realtime_processors.append(
+                CustomStateClassificationProcessor(
+                    self.config, model_config, self.requestor, self.metrics
+                )
+                if model_config.state_config != None
+                else CustomObjectClassificationProcessor(
+                    self.config,
+                    model_config,
+                    self.event_metadata_publisher,
+                    self.metrics,
+                )
+            )
+
         # post processors
         self.post_processors: list[PostProcessorApi] = []
+
+        if any(c.review.genai.enabled_in_config for c in self.config.cameras.values()):
+            self.post_processors.append(
+                ReviewDescriptionProcessor(
+                    self.config, self.requestor, self.metrics, self.genai_client
+                )
+            )
 
         if self.config.lpr.enabled:
             self.post_processors.append(
@@ -158,10 +227,28 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
+        if any(
+            c.enabled_in_config and c.audio_transcription.enabled
+            for c in self.config.cameras.values()
+        ):
+            self.post_processors.append(
+                AudioTranscriptionPostProcessor(self.config, self.requestor, metrics)
+            )
+
+        if self.config.semantic_search.enabled:
+            self.post_processors.append(
+                SemanticTriggerProcessor(
+                    db,
+                    self.config,
+                    self.requestor,
+                    metrics,
+                    self.embeddings,
+                )
+            )
+
         self.stop_event = stop_event
         self.tracked_events: dict[str, list[Any]] = {}
         self.early_request_sent: dict[str, bool] = {}
-        self.genai_client = get_genai_client(config)
 
         # recordings data
         self.recordings_available_through: dict[str, float] = {}
@@ -169,14 +256,17 @@ class EmbeddingMaintainer(threading.Thread):
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
+            self.config_updater.check_for_updates()
             self._process_requests()
             self._process_updates()
             self._process_recordings_updates()
-            self._process_dedicated_lpr()
+            self._process_review_updates()
+            self._process_frame_updates()
             self._expire_dedicated_lpr()
             self._process_finalized()
             self._process_event_metadata()
 
+        self.config_updater.stop()
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()
@@ -247,7 +337,10 @@ class EmbeddingMaintainer(threading.Thread):
         camera_config = self.config.cameras[camera]
 
         # no need to process updated objects if face recognition, lpr, genai are disabled
-        if not camera_config.genai.enabled and len(self.realtime_processors) == 0:
+        if (
+            not camera_config.objects.genai.enabled
+            and len(self.realtime_processors) == 0
+        ):
             return
 
         # Create our own thumbnail based on the bounding box and the frame time
@@ -285,23 +378,23 @@ class EmbeddingMaintainer(threading.Thread):
         # check if we're configured to send an early request after a minimum number of updates received
         if (
             self.genai_client is not None
-            and camera_config.genai.send_triggers.after_significant_updates
+            and camera_config.objects.genai.send_triggers.after_significant_updates
         ):
             if (
                 len(self.tracked_events.get(data["id"], []))
-                >= camera_config.genai.send_triggers.after_significant_updates
+                >= camera_config.objects.genai.send_triggers.after_significant_updates
                 and data["id"] not in self.early_request_sent
             ):
                 if data["has_clip"] and data["has_snapshot"]:
                     event: Event = Event.get(Event.id == data["id"])
 
                     if (
-                        not camera_config.genai.objects
-                        or event.label in camera_config.genai.objects
+                        not camera_config.objects.genai.objects
+                        or event.label in camera_config.objects.genai.objects
                     ) and (
-                        not camera_config.genai.required_zones
+                        not camera_config.objects.genai.required_zones
                         or set(data["entered_zones"])
-                        & set(camera_config.genai.required_zones)
+                        & set(camera_config.objects.genai.required_zones)
                     ):
                         logger.debug(f"{camera} sending early request to GenAI")
 
@@ -332,31 +425,6 @@ class EmbeddingMaintainer(threading.Thread):
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
 
-            # call any defined post processors
-            for processor in self.post_processors:
-                if isinstance(processor, LicensePlatePostProcessor):
-                    recordings_available = self.recordings_available_through.get(camera)
-                    if (
-                        recordings_available is not None
-                        and event_id in self.detected_license_plates
-                        and self.config.cameras[camera].type != "lpr"
-                    ):
-                        processor.process_data(
-                            {
-                                "event_id": event_id,
-                                "camera": camera,
-                                "recordings_available": self.recordings_available_through[
-                                    camera
-                                ],
-                                "obj_data": self.detected_license_plates[event_id][
-                                    "obj_data"
-                                ],
-                            },
-                            PostProcessDataEnum.recording,
-                        )
-                else:
-                    processor.process_data(event_id, PostProcessDataEnum.event_id)
-
             # expire in realtime processors
             for processor in self.realtime_processors:
                 processor.expire_object(event_id, camera)
@@ -379,19 +447,55 @@ class EmbeddingMaintainer(threading.Thread):
 
                 # Run GenAI
                 if (
-                    camera_config.genai.enabled
-                    and camera_config.genai.send_triggers.tracked_object_end
+                    camera_config.objects.genai.enabled
+                    and camera_config.objects.genai.send_triggers.tracked_object_end
                     and self.genai_client is not None
                     and (
-                        not camera_config.genai.objects
-                        or event.label in camera_config.genai.objects
+                        not camera_config.objects.genai.objects
+                        or event.label in camera_config.objects.genai.objects
                     )
                     and (
-                        not camera_config.genai.required_zones
-                        or set(event.zones) & set(camera_config.genai.required_zones)
+                        not camera_config.objects.genai.required_zones
+                        or set(event.zones)
+                        & set(camera_config.objects.genai.required_zones)
                     )
                 ):
                     self._process_genai_description(event, camera_config, thumbnail)
+
+            # call any defined post processors
+            for processor in self.post_processors:
+                if isinstance(processor, LicensePlatePostProcessor):
+                    recordings_available = self.recordings_available_through.get(camera)
+                    if (
+                        recordings_available is not None
+                        and event_id in self.detected_license_plates
+                        and self.config.cameras[camera].type != "lpr"
+                    ):
+                        processor.process_data(
+                            {
+                                "event_id": event_id,
+                                "camera": camera,
+                                "recordings_available": self.recordings_available_through[
+                                    camera
+                                ],
+                                "obj_data": self.detected_license_plates[event_id][
+                                    "obj_data"
+                                ],
+                            },
+                            PostProcessDataEnum.recording,
+                        )
+                elif isinstance(processor, AudioTranscriptionPostProcessor):
+                    continue
+                elif isinstance(processor, SemanticTriggerProcessor):
+                    processor.process_data(
+                        {"event_id": event_id, "camera": camera, "type": "image"},
+                        PostProcessDataEnum.tracked_object,
+                    )
+                else:
+                    processor.process_data(
+                        {"event_id": event_id, "camera": camera},
+                        PostProcessDataEnum.tracked_object,
+                    )
 
             # Delete tracked events based on the event_id
             if event_id in self.tracked_events:
@@ -412,8 +516,8 @@ class EmbeddingMaintainer(threading.Thread):
                 to_remove.append(id)
         for id in to_remove:
             self.event_metadata_publisher.publish(
-                EventMetadataTypeEnum.manual_event_end,
                 (id, now),
+                EventMetadataTypeEnum.manual_event_end.value,
             )
             self.detected_license_plates.pop(id)
 
@@ -435,6 +539,18 @@ class EmbeddingMaintainer(threading.Thread):
                 f"{camera} now has recordings available through {recordings_available_through_timestamp}"
             )
 
+    def _process_review_updates(self) -> None:
+        """Process review updates."""
+        while True:
+            review_updates = self.review_subscriber.check_for_update()
+
+            if review_updates == None:
+                break
+
+            for processor in self.post_processors:
+                if isinstance(processor, ReviewDescriptionProcessor):
+                    processor.process_data(review_updates, PostProcessDataEnum.review)
+
     def _process_event_metadata(self):
         # Check for regenerate description requests
         (topic, payload) = self.event_metadata_subscriber.check_for_update()
@@ -442,14 +558,14 @@ class EmbeddingMaintainer(threading.Thread):
         if topic is None:
             return
 
-        event_id, source = payload
+        event_id, source, force = payload
 
         if event_id:
             self.handle_regenerate_description(
-                event_id, RegenerateDescriptionEnum(source)
+                event_id, RegenerateDescriptionEnum(source), force
             )
 
-    def _process_dedicated_lpr(self) -> None:
+    def _process_frame_updates(self) -> None:
         """Process event updates"""
         (topic, data) = self.detection_subscriber.check_for_update()
 
@@ -458,16 +574,17 @@ class EmbeddingMaintainer(threading.Thread):
 
         camera, frame_name, _, _, motion_boxes, _ = data
 
-        if not camera or not self.config.lpr.enabled or len(motion_boxes) == 0:
+        if not camera or len(motion_boxes) == 0:
             return
 
         camera_config = self.config.cameras[camera]
+        dedicated_lpr_enabled = (
+            camera_config.type == CameraTypeEnum.lpr
+            and "license_plate" not in camera_config.objects.track
+        )
 
-        if (
-            camera_config.type != CameraTypeEnum.lpr
-            or "license_plate" in camera_config.objects.track
-        ):
-            # we're not a dedicated lpr camera or we are one but we're using frigate+
+        if not dedicated_lpr_enabled and len(self.config.classification.custom) == 0:
+            # no active features that use this data
             return
 
         try:
@@ -484,8 +601,15 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         for processor in self.realtime_processors:
-            if isinstance(processor, LicensePlateRealTimeProcessor):
+            if dedicated_lpr_enabled and isinstance(
+                processor, LicensePlateRealTimeProcessor
+            ):
                 processor.process_frame(camera, yuv_frame, True)
+
+            if isinstance(processor, CustomStateClassificationProcessor):
+                processor.process_frame(
+                    {"camera": camera, "motion": motion_boxes}, yuv_frame
+                )
 
         self.frame_manager.close(frame_name)
 
@@ -512,8 +636,10 @@ class EmbeddingMaintainer(threading.Thread):
 
         self.embeddings.embed_thumbnail(event_id, thumbnail)
 
-    def _process_genai_description(self, event, camera_config, thumbnail) -> None:
-        if event.has_snapshot and camera_config.genai.use_snapshot:
+    def _process_genai_description(
+        self, event: Event, camera_config: CameraConfig, thumbnail
+    ) -> None:
+        if event.has_snapshot and camera_config.objects.genai.use_snapshot:
             snapshot_image = self._read_and_crop_snapshot(event, camera_config)
             if not snapshot_image:
                 return
@@ -525,7 +651,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         embed_image = (
             [snapshot_image]
-            if event.has_snapshot and camera_config.genai.use_snapshot
+            if event.has_snapshot and camera_config.objects.genai.use_snapshot
             else (
                 [data["thumbnail"] for data in self.tracked_events[event.id]]
                 if num_thumbnails > 0
@@ -533,7 +659,7 @@ class EmbeddingMaintainer(threading.Thread):
             )
         )
 
-        if camera_config.genai.debug_save_thumbnails and num_thumbnails > 0:
+        if camera_config.objects.genai.debug_save_thumbnails and num_thumbnails > 0:
             logger.debug(f"Saving {num_thumbnails} thumbnails for event {event.id}")
 
             Path(os.path.join(CLIPS_DIR, f"genai-requests/{event.id}")).mkdir(
@@ -570,7 +696,7 @@ class EmbeddingMaintainer(threading.Thread):
         """Embed the description for an event."""
         camera_config = self.config.cameras[event.camera]
 
-        description = self.genai_client.generate_description(
+        description = self.genai_client.generate_object_description(
             camera_config, thumbnails, event
         )
 
@@ -592,6 +718,16 @@ class EmbeddingMaintainer(threading.Thread):
         # Embed the description
         if self.config.semantic_search.enabled:
             self.embeddings.embed_description(event.id, description)
+
+        # Check semantic trigger for this description
+        for processor in self.post_processors:
+            if isinstance(processor, SemanticTriggerProcessor):
+                processor.process_data(
+                    {"event_id": event.id, "camera": event.camera, "type": "text"},
+                    PostProcessDataEnum.tracked_object,
+                )
+            else:
+                continue
 
         logger.debug(
             "Generated description for %s (%d images): %s",
@@ -639,15 +775,21 @@ class EmbeddingMaintainer(threading.Thread):
         except Exception:
             return None
 
-    def handle_regenerate_description(self, event_id: str, source: str) -> None:
+    def handle_regenerate_description(
+        self, event_id: str, source: str, force: bool
+    ) -> None:
         try:
             event: Event = Event.get(Event.id == event_id)
         except DoesNotExist:
             logger.error(f"Event {event_id} not found for description regeneration")
             return
 
+        if self.genai_client is None:
+            logger.error("GenAI not enabled")
+            return
+
         camera_config = self.config.cameras[event.camera]
-        if not camera_config.genai.enabled or self.genai_client is None:
+        if not camera_config.objects.genai.enabled and not force:
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 

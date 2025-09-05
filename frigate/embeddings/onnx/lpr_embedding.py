@@ -32,13 +32,15 @@ class PaddleOCRDetection(BaseEmbedding):
         device: str = "AUTO",
     ):
         model_file = (
-            "detection-large.onnx" if model_size == "large" else "detection-small.onnx"
+            "detection_v5-large.onnx"
+            if model_size == "large"
+            else "detection_v5-small.onnx"
         )
         super().__init__(
             model_name="paddleocr-onnx",
             model_file=model_file,
             download_urls={
-                model_file: f"https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/{model_file}"
+                model_file: f"https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/v5/{model_file}"
             },
         )
         self.requestor = requestor
@@ -156,9 +158,10 @@ class PaddleOCRRecognition(BaseEmbedding):
     ):
         super().__init__(
             model_name="paddleocr-onnx",
-            model_file="recognition.onnx",
+            model_file="recognition_v4.onnx",
             download_urls={
-                "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
+                "recognition_v4.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/v4/recognition_v4.onnx",
+                "ppocr_keys_v1.txt": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/v4/ppocr_keys_v1.txt",
             },
         )
         self.requestor = requestor

@@ -8,5 +8,13 @@
   "train": "Kereta",
   "boat": "Kapal",
   "traffic_light": "Lampu Lalu Lintas",
-  "fire_hydrant": "Hidran Kebakaran"
+  "fire_hydrant": "Hidran Kebakaran",
+  "animal": "Binatang",
+  "dog": "Anjing",
+  "bark": "Gonggongan",
+  "cat": "Kucing",
+  "horse": "Kuda",
+  "goat": "Kambing",
+  "sheep": "Domba",
+  "bird": "Burung"
 }

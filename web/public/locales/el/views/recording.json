@@ -2,5 +2,11 @@
   "filter": "Φίλτρο",
   "export": "Εξαγωγή",
   "calendar": "Ημερολόγιο",
-  "filters": "Φίλτρα"
+  "filters": "Φίλτρα",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Μη επιλογή έγκυρης περιόδου",
+      "endTimeMustAfterStartTime": "Το επιλεγμένο τέλος περιόδου πρέπει να είναι μετά την επιλεγμένη αρχή περιόδου"
+    }
+  }
 }

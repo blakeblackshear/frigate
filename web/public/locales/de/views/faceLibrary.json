@@ -46,7 +46,7 @@
   "train": {
     "title": "Trainiere",
     "aria": "Wähle Training",
-    "empty": "Es gibt keine aktuellen Versuche zurGesichtserkennung"
+    "empty": "Es gibt keine aktuellen Versuche zur Gesichtserkennung"
   },
   "deleteFaceLibrary": {
     "title": "Lösche Name",

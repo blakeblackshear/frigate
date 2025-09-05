@@ -1,9 +1,9 @@
 {
   "alerts": "Avvisi",
-  "detections": "Rilevamento",
+  "detections": "Rilevamenti",
   "motion": {
-    "label": "Movimento",
-    "only": "Solo movimento"
+    "label": "Movimenti",
+    "only": "Solo movimenti"
   },
   "empty": {
     "alert": "Non ci sono avvisi da rivedere",
@@ -35,5 +35,7 @@
   "selected": "{{count}} selezionati",
   "selected_one": "{{count}} selezionati",
   "selected_other": "{{count}} selezionati",
-  "detected": "rilevato"
+  "detected": "rilevato",
+  "suspiciousActivity": "Attività sospetta",
+  "threateningActivity": "Attività minacciosa"
 }

@@ -17,12 +17,14 @@
         "success": {
           "updatedSublabel": "Unterkategorie erfolgreich aktualisiert.",
           "updatedLPR": "Nummernschild erfolgreich aktualisiert.",
-          "regenerate": "Eine neue Beschreibung wurde von {{provider}} angefordert. Je nach Geschwindigkeit des Anbieters kann es einige Zeit dauern, bis die neue Beschreibung generiert ist."
+          "regenerate": "Eine neue Beschreibung wurde von {{provider}} angefordert. Je nach Geschwindigkeit des Anbieters kann es einige Zeit dauern, bis die neue Beschreibung generiert ist.",
+          "audioTranscription": "Audio Transkription erfolgreich angefordert."
         },
         "error": {
           "regenerate": "Der Aufruf von {{provider}} für eine neue Beschreibung ist fehlgeschlagen: {{errorMessage}}",
           "updatedSublabelFailed": "Untekategorie konnte nicht aktualisiert werden: {{errorMessage}}",
-          "updatedLPRFailed": "Aktualisierung des Kennzeichens fehlgeschlagen: {{errorMessage}}"
+          "updatedLPRFailed": "Aktualisierung des Kennzeichens fehlgeschlagen: {{errorMessage}}",
+          "audioTranscription": "Die Anforderung der Audio Transkription ist fehlgeschlagen: {{errorMessage}}"
         }
       }
     },
@@ -67,6 +69,9 @@
     },
     "snapshotScore": {
       "label": "Schnappschuss Bewertung"
+    },
+    "score": {
+      "label": "Ergebnis"
     }
   },
   "documentTitle": "Erkunde - Frigate",
@@ -182,6 +187,14 @@
     },
     "deleteTrackedObject": {
       "label": "Dieses verfolgte Objekt löschen"
+    },
+    "audioTranscription": {
+      "aria": "Audio Transkription anfordern",
+      "label": "Transkribieren"
+    },
+    "addTrigger": {
+      "aria": "Einen Trigger für dieses verfolgte Objekt hinzufügen",
+      "label": "Trigger hinzufügen"
     }
   },
   "dialog": {
@@ -203,5 +216,11 @@
   "fetchingTrackedObjectsFailed": "Fehler beim Abrufen von verfolgten Objekten: {{errorMessage}}",
   "trackedObjectsCount_one": "{{count}} verfolgtes Objekt ",
   "trackedObjectsCount_other": "{{count}} verfolgte Objekte ",
-  "exploreMore": "Erkunde mehr {{label}} Objekte"
+  "exploreMore": "Erkunde mehr {{label}} Objekte",
+  "aiAnalysis": {
+    "title": "KI-Analyse"
+  },
+  "concerns": {
+    "label": "Bedenken"
+  }
 }

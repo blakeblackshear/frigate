@@ -22,7 +22,8 @@
     "frigateplus": "Frigate+",
     "ui": "Brukergrensesnitt",
     "notifications": "Meldingsvarsler",
-    "enrichments": "Utvidelser"
+    "enrichments": "Utvidelser",
+    "triggers": "Utløsere"
   },
   "dialog": {
     "unsavedChanges": {
@@ -178,7 +179,45 @@
       "desc": "Aktiver/deaktiver varsler og deteksjoner midlertidig for dette kameraet til Frigate startes på nytt. Når deaktivert, vil det ikke genereres nye inspeksjonselementer. ",
       "alerts": "Varsler ",
       "detections": "Deteksjoner "
-    }
+    },
+    "object_descriptions": {
+      "desc": "Midlertidig aktiver/deaktiver generative KI-objektbeskrivelser for dette kameraet. Når deaktivert, vil KI-genererte beskrivelser ikke bli forespurt for sporede objekter på dette kameraet.",
+      "title": "Generative KI-objektbeskrivelser"
+    },
+    "cameraConfig": {
+      "nameInvalid": "Kameranavnet kan bare inneholde bokstaver, tall, understreker eller bindestreker",
+      "add": "Legg til kamera",
+      "edit": "Rediger kamera",
+      "description": "Konfigurer kamerainnstillinger, inkludert strømmeinnganger og roller.",
+      "name": "Kamera navn",
+      "nameRequired": "Kamera navn er påkrevd",
+      "nameLength": "Kamera navn må være mindre enn 24 tegn.",
+      "namePlaceholder": "f.eks front_dør",
+      "enabled": "Aktivert",
+      "ffmpeg": {
+        "inputs": "Inngangsstrømmer",
+        "path": "Lenke til strøm",
+        "pathRequired": "Lenke til strøm er påkrevd",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roller",
+        "rolesRequired": "Minst én rolle er påkrevd",
+        "rolesUnique": "Hver rolle (lyd, gjenkjenning, opptak) kan bare tildeles én strøm",
+        "addInput": "Legg til inngangsstrøm",
+        "removeInput": "Fjern inngangsstrøm",
+        "inputsRequired": "Minst én inngangsstrøm er påkrevd"
+      },
+      "toast": {
+        "success": "Kamera {{cameraName}} ble lagret"
+      }
+    },
+    "review_descriptions": {
+      "title": "Generative KI beskrivelser for inspeksjon",
+      "desc": "Midlertidig aktiver/deaktiver inspeksjonsbeskrivelser med generativ KI for dette kameraet. Når deaktivert, vil det ikke bli bedt om KI-genererte beskrivelser for inspeksjonselementer på dette kameraet."
+    },
+    "addCamera": "Legg til nytt kamera",
+    "editCamera": "Rediger kamera:",
+    "selectCamera": "Velg et kamera",
+    "backToSettings": "Tilbake til kamerainnstillinger"
   },
   "masksAndZones": {
     "filter": {
@@ -318,8 +357,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} er lagret. Start Frigate på nytt for å bruke endringene.",
-          "noName": "Bevegelsesmasken er lagret. Start Frigate på nytt for å bruke endringene."
+          "title": "{{polygonName}} er lagret. Start Frigate på nytt for å aktivere endringene.",
+          "noName": "Bevegelsesmasken er lagret. Start Frigate på nytt for å aktivere endringene."
         }
       }
     },
@@ -343,8 +382,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} er lagret. Start Frigate på nytt for å bruke endringene.",
-          "noName": "Objektmasken er lagret. Start Frigate på nytt for å bruke endringene."
+          "title": "{{polygonName}} er lagret. Start Frigate på nytt for å aktivere endringene.",
+          "noName": "Objektmasken er lagret. Start Frigate på nytt for å aktivere endringene."
         }
       }
     },
@@ -420,6 +459,19 @@
     "mask": {
       "title": "Bevegelsesmasker",
       "desc": "Vis polygoner for bevegelsesmasker"
+    },
+    "openCameraWebUI": "Åpne {{camera}} sitt nettgrensesnitt",
+    "audio": {
+      "title": "Lyd",
+      "noAudioDetections": "Ingen lyddeteksjoner",
+      "score": "poengsum",
+      "currentRMS": "Nåværende RMS",
+      "currentdbFS": "Nåværende dbFS"
+    },
+    "paths": {
+      "title": "Stier",
+      "desc": "Vis betydningsfulle punkter på det sporede objektets sti",
+      "tips": "<p><strong>Stier</strong></p><br><p>Linjer og sirkler vil indikere viktige punkter som det sporede objektet har beveget seg gjennom i løpet av sin livssyklus.</p>"
     }
   },
   "users": {
@@ -613,7 +665,7 @@
       "cleanCopyWarning": "Noen kameraer har øyeblikksbilder aktivert, men ren kopi er deaktivert. Du må aktivere <code>clean_copy</code> i øyeblikksbilde-konfigurasjonen for å kunne sende bilder fra disse kameraene til Frigate+."
     },
     "toast": {
-      "success": "Frigate+ innstillingene er lagret. Start Frigate på nytt for å bruke endringene.",
+      "success": "Frigate+ innstillingene er lagret. Start Frigate på nytt for å aktivere endringene.",
       "error": "Kunne ikke lagre konfigurasjonsendringer: {{errorMessage}}"
     },
     "restart_required": "Omstart påkrevd (Frigate+ modell endret)",
@@ -677,8 +729,103 @@
     "unsavedChanges": "Ulagrede endringer i innstillinger for utvidelser",
     "restart_required": "Omstart påkrevd (Innstillinger for utvidelser er endret)",
     "toast": {
-      "success": "Innstillinger for utvidelser har blitt lagret. Start Frigate på nytt for å bruke endringene.",
+      "success": "Innstillinger for utvidelser har blitt lagret. Start Frigate på nytt for å aktivere endringene.",
       "error": "Kunne ikke lagre konfigurasjonsendringer: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Utløsere",
+    "management": {
+      "title": "Utløserhåndtering",
+      "desc": "Administrer utløsere for {{camera}}. Bruk miniatyrbilde-type for å utløse på lignende miniatyrbilder som det sporede objektet du har valgt, og beskrivelsestype for å utløse på lignende beskrivelser basert på teksten du spesifiserer."
+    },
+    "addTrigger": "Legg til utløs­er",
+    "table": {
+      "name": "Navn",
+      "type": "Type",
+      "content": "Innhold",
+      "threshold": "Terskel",
+      "actions": "Handlinger",
+      "noTriggers": "Ingen utløsere er konfigurert for dette kameraet.",
+      "edit": "Rediger",
+      "deleteTrigger": "Slett utløser",
+      "lastTriggered": "Sist utløst"
+    },
+    "type": {
+      "thumbnail": "Miniatyrbilde",
+      "description": "Beskrivelse"
+    },
+    "actions": {
+      "alert": "Marker som varsel",
+      "notification": "Send meldingsvarsel"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Opprett utløser",
+        "desc": "Opprett en utløser for kamera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Rediger utløser",
+        "desc": "Rediger innstillingene for utløser på kamera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Slett utløser",
+        "desc": "Er du sikker på at du vil slette utløseren <strong>{{triggerName}}</strong>? Denne handlingen kan ikke angres."
+      },
+      "form": {
+        "name": {
+          "title": "Navn",
+          "placeholder": "Skriv inn navn på utløser",
+          "error": {
+            "minLength": "Navnet må være minst 2 tegn langt.",
+            "invalidCharacters": "Navnet kan bare inneholde bokstaver, tall, understreker og bindestreker.",
+            "alreadyExists": "En utløser med dette navnet finnes allerede for dette kameraet."
+          }
+        },
+        "enabled": {
+          "description": "Aktiver eller deaktiver denne utløseren"
+        },
+        "type": {
+          "title": "Type",
+          "placeholder": "Velg utløsertype"
+        },
+        "content": {
+          "title": "Innhold",
+          "imagePlaceholder": "Velg et bilde",
+          "textPlaceholder": "Skriv inn tekstinnhold",
+          "imageDesc": "Velg et bilde for å utløse denne handlingen når et lignende bilde oppdages.",
+          "textDesc": "Skriv inn tekst for å utløse denne handlingen når en lignende beskrivelse av et sporet objekt oppdages.",
+          "error": {
+            "required": "Innhold er påkrevd."
+          }
+        },
+        "threshold": {
+          "title": "Terskel",
+          "error": {
+            "min": "Terskelverdien må minst være 0",
+            "max": "Terskelverdien kan maksimum være 1"
+          }
+        },
+        "actions": {
+          "title": "Handlinger",
+          "desc": "Som standard sender Frigate en MQTT-melding for alle utløsere. Velg en ekstra handling som skal utføres når denne utløseren aktiveres.",
+          "error": {
+            "min": "Minst én handling må velges."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Utløseren {{name}} ble opprettet.",
+        "updateTrigger": "Utløseren {{name}} ble oppdatert.",
+        "deleteTrigger": "Utløseren {{name}} ble slettet."
+      },
+      "error": {
+        "createTriggerFailed": "Kunne ikke opprette utløser: {{errorMessage}}",
+        "updateTriggerFailed": "Kunne ikke oppdatere utløser: {{errorMessage}}",
+        "deleteTriggerFailed": "Kunne ikke slette utløser: {{errorMessage}}"
+      }
     }
   }
 }
