@@ -29,6 +29,8 @@ fi
 EOT
 }
 
+target "docker-metadata-action" {}
+
 target "_build_args" {
   args = {
     BASE_IMAGE = BASE_IMAGE,
@@ -81,6 +83,7 @@ target "trt-deps" {
 
 target "tensorrt" {
   dockerfile = "docker/tensorrt/Dockerfile.${ARCH}"
+  inherits = ["docker-metadata-action", "_build_args"]
   context = "."
   contexts = {
     wget = "target:wget",
@@ -89,7 +92,6 @@ target "tensorrt" {
     rootfs = "target:rootfs"
   }
   target = "frigate-tensorrt"
-  inherits = ["_build_args"]
 }
 
 target "devcontainer-trt" {

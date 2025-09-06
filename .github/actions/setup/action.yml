@@ -8,6 +8,8 @@ outputs:
     value: ${{ steps.meta.outputs.tags }}
   image-labels:
     value: ${{ steps.meta.outputs.labels }}
+  bake-file:
+    value: ${{ steps.meta.outputs.bake-file }}
   cache-name:
     value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:cache
 runs:
@@ -54,6 +56,7 @@ runs:
       id: meta
       uses: docker/metadata-action@v5
       with:
+        bake-target: docker-metadata-action
         # list of Docker images to use as base name for tags
         images: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}
         tags: type=raw,value=${{ steps.create-short-sha.outputs.SHORT_SHA }}
