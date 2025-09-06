@@ -10,7 +10,7 @@
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
     "notifications": "Paramètres de notification - Frigate",
-    "enrichments": "Paramètres d'enrichissement - Frigate"
+    "enrichments": "Paramètres d'enrichissements - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -675,7 +675,7 @@
     }
   },
   "enrichments": {
-    "title": "Paramètres d'enrichissement",
+    "title": "Paramètres d'enrichissements",
     "birdClassification": {
       "title": "Identification des oiseaux",
       "desc": "L'identification des oiseaux est réalisée à l'aide d'un modèle TensorFlow quantifié. Lorsqu'un oiseau est reconnu, son nom commun est automatiquement ajouté comme sous-libellé. Cette information est intégréesà l'interface utilisateur, aux filtres de recherche et aux notifications."
@@ -707,7 +707,7 @@
       },
       "desc": "La recherche sémantique de Frigate vous permet de retrouver les objets suivis dans votre revue d'évènements en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement."
     },
-    "unsavedChanges": "Modifications non enregistrées des paramètres d'enrichissement",
+    "unsavedChanges": "Modifications non enregistrées des paramètres d'enrichissements",
     "faceRecognition": {
       "title": "Reconnaissance faciale",
       "readTheDocumentation": "Lire la documentation",
@@ -732,9 +732,9 @@
     },
     "toast": {
       "error": "Échec de l'enregistrement des modifications de configuration : {{errorMessage}}",
-      "success": "Les paramètres d'enrichissement ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
+      "success": "Les paramètres d'enrichissements ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
     },
-    "restart_required": "Redémarrage nécessaire (paramètres d'enrichissement modifiés)"
+    "restart_required": "Redémarrage nécessaire (paramètres d'enrichissements modifiés)"
   },
   "triggers": {
     "documentTitle": "Déclencheurs",

@@ -18,7 +18,7 @@
     "m": "{{time}} Min",
     "minute_one": "{{time}} Minute",
     "minute_other": "{{time}} Minuten",
-    "s": "{{time}} Sekunde",
+    "s": "{{time}}s",
     "second_one": "{{time}} Sekunde",
     "second_other": "{{time}} Sekunden",
     "formattedTimestamp2": {
