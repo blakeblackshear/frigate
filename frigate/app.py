@@ -75,7 +75,7 @@ from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import UntrackedSharedMemory
-from frigate.util.services import set_file_limit
+from frigate.util.services import set_file_limit, get_ffmpeg_version
 from frigate.version import VERSION
 from frigate.watchdog import FrigateWatchdog
 
@@ -551,6 +551,10 @@ class FrigateApp:
         self.start_event_cleanup()
         self.start_record_cleanup()
         self.start_watchdog()
+
+        # Log ffmpeg version
+        ffmpeg_version = get_ffmpeg_version(self.config.ffmpeg.ffmpeg_path)
+        logger.info(f"Using ffmpeg: {ffmpeg_version}")
 
         self.init_auth()
 

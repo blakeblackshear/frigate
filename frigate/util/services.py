@@ -782,6 +782,29 @@ def get_fs_type(path: str) -> str:
     return fsType
 
 
+def get_ffmpeg_version(ffmpeg_path: str) -> str:
+    """Get ffmpeg version."""
+    try:
+        result = sp.run(
+            [ffmpeg_path, "-version"], 
+            capture_output=True, 
+            text=True, 
+            timeout=5
+        )
+        if result.returncode == 0:
+            # Extract version from output (first line contains version info)
+            first_line = result.stdout.split('\n')[0]
+            return first_line.strip()
+        else:
+            return f"Unknown (ffmpeg returned code {result.returncode})"
+    except FileNotFoundError:
+        return f"Not found at path: {ffmpeg_path}"
+    except sp.TimeoutExpired:
+        return "Timeout getting version"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+
 def calculate_shm_requirements(config) -> dict:
     try:
         storage_stats = shutil.disk_usage("/dev/shm")
