@@ -23,13 +23,19 @@ Not all model types are supported by all detectors, so it's important to choose 
 
 _\* Support coming in 0.17_
 
-### YOLOv9
+### YOLOv9 Details
 
 YOLOv9 models are available in `s` and `t` sizes. When requesting a `yolov9` model, you will be prompted to choose a size. If you are unsure what size to choose, you should perform some tests with the base models to find the performance level that suits you. The `s` size is most similar to the current `yolonas` models in terms of inference times and accuracy, and a good place to start is the `320x320` resolution model for `yolov9s`.
 
+:::info
+
+When switching to YOLOv9, you may need to adjust your thresholds for some objects.
+
+:::
+
 #### Hailo Support
 
-If you have a Hailo device, you will need to specify the hardware device you have when submitting a model request because they are not cross compatible. Please test using the available base models before submitting your model request.
+If you have a Hailo device, you will need to specify the hardware you have when submitting a model request because they are not cross compatible. Please test using the available base models before submitting your model request.
 
 #### Rockchip (RKNN) Support
 
