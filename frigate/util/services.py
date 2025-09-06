@@ -786,14 +786,11 @@ def get_ffmpeg_version(ffmpeg_path: str) -> str:
     """Get ffmpeg version."""
     try:
         result = sp.run(
-            [ffmpeg_path, "-version"], 
-            capture_output=True, 
-            text=True, 
-            timeout=5
+            [ffmpeg_path, "-version"], capture_output=True, text=True, timeout=5
         )
         if result.returncode == 0:
             # Extract version from output (first line contains version info)
-            first_line = result.stdout.split('\n')[0]
+            first_line = result.stdout.split("\n")[0]
             return first_line.strip()
         else:
             return f"Unknown (ffmpeg returned code {result.returncode})"

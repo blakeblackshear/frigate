@@ -75,7 +75,7 @@ from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import UntrackedSharedMemory
-from frigate.util.services import set_file_limit, get_ffmpeg_version
+from frigate.util.services import get_ffmpeg_version, set_file_limit
 from frigate.version import VERSION
 from frigate.watchdog import FrigateWatchdog
 
