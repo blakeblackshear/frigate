@@ -140,6 +140,8 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Intel UHD 730  | ~ 10 ms                    |                                         | 320: ~ 19 ms 640: ~ 54 ms |                        |                                    |
 | Intel UHD 770  | ~ 15 ms                    | t-320: 24 ms s-320: 30 ms s-640: 45 ms  | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
 | Intel N100     | ~ 15 ms                    | s-320: 30 ms                            | 320: ~ 25 ms              |                        | Can only run one detector instance |
+| Intel N150     | ~ 15 ms                    | s-320: 24 ms                            |                           |                        |                                       |
+
 | Intel Iris XE  | ~ 10 ms                    |                                         | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
 | Intel Arc A380 | ~ 6 ms                     |                                         | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
 | Intel Arc A750 | ~ 4 ms                     |                                         | 320: ~ 8 ms               |                        |                                    |
