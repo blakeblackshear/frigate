@@ -51,7 +51,7 @@ Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVi
 | [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector) | `edgetpu`                 | `mobiledet`            |
 | [Intel](/configuration/object_detectors.md#openvino-detector)                    | `openvino`                | `yolov9`               |
 | [NVidia GPU](/configuration/object_detectors#onnx)                               | `onnx`                    | `yolov9`               |
-| [AMD ROCm GPU](/configuration/object_detectors#amdrocm-gpu-detector)             | `rocm`                    | `yolov9`               |
+| [AMD ROCm GPU](/configuration/object_detectors#amdrocm-gpu-detector)             | `onnx`                    | `yolov9`               |
 | [Hailo8/Hailo8L/Hailo8R](/configuration/object_detectors#hailo-8)                | `hailo8l`                 | `yolov9`               |
 | [Rockchip NPU](/configuration/object_detectors#rockchip-platform)\*              | `rknn`                    | `yolov9`               |
 
