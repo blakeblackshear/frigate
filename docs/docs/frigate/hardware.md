@@ -99,6 +99,7 @@ In real-world deployments, even with multiple cameras running concurrently, Frig
 | Name             | Hailo‑8 Inference Time | Hailo‑8L Inference Time |
 | ---------------- | ---------------------- | ----------------------- |
 | ssd mobilenet v1 | ~ 6 ms                 | ~ 10 ms                 |
+| yolov9-tiny      |                        | 320: 18ms               |
 | yolov6n          | ~ 7 ms                 | ~ 11 ms                 |
 
 ### Google Coral TPU
@@ -131,17 +132,17 @@ More information is available [in the detector docs](/configuration/object_detec
 
 Inference speeds vary greatly depending on the CPU or GPU used, some known examples of GPU inference times are below:
 
-| Name           | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time | Notes                              |
-| -------------- | -------------------------- | ------------------------- | ---------------------- | ---------------------------------- |
-| Intel HD 530   | 15 - 35 ms                 |                           |                        | Can only run one detector instance |
-| Intel HD 620   | 15 - 25 ms                 | 320: ~ 35 ms              |                        |                                    |
-| Intel HD 630   | ~ 15 ms                    | 320: ~ 30 ms              |                        |                                    |
-| Intel UHD 730  | ~ 10 ms                    | 320: ~ 19 ms 640: ~ 54 ms |                        |                                    |
-| Intel UHD 770  | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
-| Intel N100     | ~ 15 ms                    | 320: ~ 25 ms              |                        | Can only run one detector instance |
-| Intel Iris XE  | ~ 10 ms                    | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
-| Intel Arc A380 | ~ 6 ms                     | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
-| Intel Arc A750 | ~ 4 ms                     | 320: ~ 8 ms               |                        |                                    |
+| Name           | MobileNetV2 Inference Time | YOLOv9                     | YOLO-NAS Inference Time   | RF-DETR Inference Time | Notes                              |
+| -------------- | -------------------------- | -------------------------- | ------------------------- | ---------------------- | ---------------------------------- |
+| Intel HD 530   | 15 - 35 ms                 |                            |                           |                        | Can only run one detector instance |
+| Intel HD 620   | 15 - 25 ms                 |                            | 320: ~ 35 ms              |                        |                                    |
+| Intel HD 630   | ~ 15 ms                    |                            | 320: ~ 30 ms              |                        |                                    |
+| Intel UHD 730  | ~ 10 ms                    |                            | 320: ~ 19 ms 640: ~ 54 ms |                        |                                    |
+| Intel UHD 770  | ~ 15 ms                    | t-320: 24: ms s-320: 30 ms | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
+| Intel N100     | ~ 15 ms                    | s-320: 30ms                | 320: ~ 25 ms              |                        | Can only run one detector instance |
+| Intel Iris XE  | ~ 10 ms                    |                            | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
+| Intel Arc A380 | ~ 6 ms                     |                            | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
+| Intel Arc A750 | ~ 4 ms                     |                            | 320: ~ 8 ms               |                        |                                    |
 
 ### TensorRT - Nvidia GPU
 
@@ -179,7 +180,7 @@ With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detec
 
 | Name      | YOLOv9 Inference Time | YOLO-NAS Inference Time   |
 | --------- | --------------------- | ------------------------- |
-| AMD 780M  | ~ 14 ms               | 320: ~ 25 ms 640: ~ 50 ms |
+| AMD 780M  | 320: ~ 14 ms          | 320: ~ 25 ms 640: ~ 50 ms |
 | AMD 8700G |                       | 320: ~ 20 ms 640: ~ 40 ms |
 
 ## Community Supported Detectors
