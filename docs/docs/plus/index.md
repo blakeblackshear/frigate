@@ -15,11 +15,11 @@ There are three model types offered in Frigate+, `mobiledet`, `yolonas`, and `yo
 
 Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types). You can test model types for compatibility and speed on your hardware by using the base models.
 
-| Model Type  | Description                                                                                                                                                                                                       |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mobiledet` | Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                                                                                                 |
-| `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs.                                                                      |
-| `yolov9`    | A leading SOTA (state of the art) object detection model with similar performance to yolonas, but on a wider range of hardware options. Runs on Intel, NVidia GPUs, AMD GPUs, Hailo, MemryX\*, and Rockchip NPUs. |
+| Model Type  | Description                                                                                                                                                                                                                        |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mobiledet` | Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                                                                                                                  |
+| `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs.                                                                                       |
+| `yolov9`    | A leading SOTA (state of the art) object detection model with similar performance to yolonas, but on a wider range of hardware options. Runs on Intel, NVidia GPUs, AMD GPUs, Hailo, MemryX\*, Apple Silicon\*, and Rockchip NPUs. |
 
 _\* Support coming in 0.17_
 
