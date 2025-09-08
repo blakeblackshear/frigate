@@ -139,7 +139,7 @@ export default function HlsVideoPlayer({
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
-    }
+    };
   }, [videoRef, hlsRef, useHlsCompat, currentSource]);
 
   // state handling
