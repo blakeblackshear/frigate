@@ -185,6 +185,26 @@ For clips to be castable to media devices, audio is required and may need to be 
 
 <a name="api"></a>
 
+## Camera API
+
+To disable a camera dynamically
+
+```
+action: camera.turn_off
+data: {}
+target:
+  entity_id: camera.back_deck_cam  # your Frigate camera entity ID
+```
+
+To enable a camera that has been disabled dynamically
+
+```
+action: camera.turn_on
+data: {}
+target:
+  entity_id: camera.back_deck_cam  # your Frigate camera entity ID
+```
+
 ## Notification API
 
 Many people do not want to expose Frigate to the web, so the integration creates some public API endpoints that can be used for notifications.
