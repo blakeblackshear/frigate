@@ -697,9 +697,8 @@ Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and p
 To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.
 
 # Community Supported Detectors
-## NVidia TensorRT Detector
-laviddichterman marked this conversation as resolved.
 
+## NVidia TensorRT Detector
 Nvidia Jetson devices may be used for object detection using the TensorRT libraries. Due to the size of the additional libraries, this detector is only provided in images with the `-tensorrt-jp6` tag suffix, e.g. `ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp6`. This detector is designed to work with Yolo models for object detection.
 
 ### Generate Models
@@ -717,6 +716,7 @@ If your GPU does not support FP16 operations, you can pass the environment varia
 Specific models can be selected by passing an environment variable to the `docker run` command or in your `docker-compose.yml` file. Use the form `-e YOLO_MODELS=yolov4-416,yolov4-tiny-416` to select one or more model names. The models available are shown below.
 
 <details>
+
 <summary>Available Models</summary>
 ```
 yolov3-288
@@ -747,7 +747,9 @@ yolov7x-640
 yolov7x-320
 ```
 </details>
+
 An example `docker-compose.yml` fragment that converts the `yolov4-608` and `yolov7x-640` models would look something like this:
+
 ```yml
 frigate:
   environment:
@@ -777,6 +779,7 @@ model:
   width: 320 # MUST match the chosen model i.e yolov7-320 -> 320, yolov4-416 -> 416
   height: 320 # MUST match the chosen model i.e yolov7-320 -> 320 yolov4-416 -> 416
 ```
+
 ## Rockchip platform
 
 Hardware accelerated object detection is supported on the following SoCs:
