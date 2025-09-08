@@ -1324,7 +1324,7 @@ Make sure you change the batch size to 1 before exporting.
 
 :::
 
-### Download RF-DETR Model
+### Downloading RF-DETR Model
 
 RF-DETR can be exported as ONNX by running the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=Nano` in the first line to `Nano`, `Small`, or `Medium` size.
 
