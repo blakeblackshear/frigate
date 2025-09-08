@@ -29,6 +29,7 @@ Frigate supports multiple different detectors that work on different types of ha
 - [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX model is configured.
 
 **Nvidia Jetson**
+
 - [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Jetson devices, using one of many default models.
 - [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt-jp6` Frigate image when a supported ONNX model is configured.
 
@@ -325,6 +326,12 @@ The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv
 
 :::
 
+:::warning
+
+If you are using a Frigate+ YOLOv9 model, you should not define any of the below `model` parameters in your config except for `path`. See [the Frigate+ model docs](/plus/first_model#step-3-set-your-model-id-in-the-config) for more information on setting up your model.
+
+:::
+
 After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
 ```yaml
@@ -533,6 +540,12 @@ There is no default model provided, the following formats are supported:
 
 [YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. See [the models section](#downloading-yolo-nas-model) for more information on downloading the YOLO-NAS model for use in Frigate.
 
+:::warning
+
+If you are using a Frigate+ YOLO-NAS model, you should not define any of the below `model` parameters in your config except for `path`. See [the Frigate+ model docs](/plus/first_model#step-3-set-your-model-id-in-the-config) for more information on setting up your model.
+
+:::
+
 After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
 ```yaml
@@ -557,6 +570,12 @@ YOLOv3, YOLOv4, YOLOv7, and [YOLOv9](https://github.com/WongKinYiu/yolov9) model
 :::tip
 
 The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv9 models, but may support other YOLO model architectures as well. See [the models section](#downloading-yolo-models) for more information on downloading YOLO models for use in Frigate.
+
+:::
+
+:::warning
+
+If you are using a Frigate+ YOLOv9 model, you should not define any of the below `model` parameters in your config except for `path`. See [the Frigate+ model docs](/plus/first_model#step-3-set-your-model-id-in-the-config) for more information on setting up your model.
 
 :::
 
