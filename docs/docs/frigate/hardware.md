@@ -140,9 +140,8 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Intel UHD 730  | ~ 10 ms                    |                                         | 320: ~ 19 ms 640: ~ 54 ms |                        |                                    |
 | Intel UHD 770  | ~ 15 ms                    | t-320: 24 ms s-320: 30 ms s-640: 45 ms  | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
 | Intel N100     | ~ 15 ms                    | s-320: 30 ms                            | 320: ~ 25 ms              |                        | Can only run one detector instance |
-| Intel N150     | ~ 15 ms                    | s-320: 24 ms                            |                           |                        |                                    |
-
-| Intel Iris XE  | ~ 10 ms                    |                                         | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
+| Intel N150     | ~ 15 ms                    | t-320: 16ms s-320: 24 ms                |                           |                        |                                    |
+| Intel Iris XE  | ~ 10 ms                    | s-320: 12 ms s-640: 30 ms               | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
 | Intel Arc A310 |                            | s-320: 9 ms                             |                           |                        |                                    |
 | Intel Arc A380 | ~ 6 ms                     |                                         | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
 | Intel Arc A750 | ~ 4 ms                     |                                         | 320: ~ 8 ms               |                        |                                    |
@@ -172,6 +171,7 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 
 | Name            | YOLOv9 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time |
 | --------------- | --------------------- | ------------------------- | ---------------------- |
+| GTX 1070        | s-320: 16 ms          | 320: 14 ms                |                        |
 | RTX 3050        | t-320: 15 ms          | 320: ~ 10 ms 640: ~ 16 ms | Nano-320: ~ 12 ms      |
 | RTX 3070        | t-320: 11 ms          | 320: ~ 8 ms 640: ~ 14 ms  | Nano-320: ~ 9 ms       |
 | RTX A4000       |                       | 320: ~ 15 ms              |                        |
