@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from .base import FrigateBaseModel
 
@@ -48,9 +48,12 @@ class AuthConfig(FrigateBaseModel):
                 raise ValueError(
                     f"Invalid role name '{role}'. Must be alphanumeric with underscores."
                 )
-        # Default admin and viewer to empty lists if not present
-        if "admin" not in v:
-            v["admin"] = []
-        if "viewer" not in v:
-            v["viewer"] = []
         return v
+
+    @model_validator(mode="after")
+    def ensure_default_roles(self):
+        # Ensure admin and viewer are never overridden
+        self.roles["admin"] = []
+        self.roles["viewer"] = []
+
+        return self
