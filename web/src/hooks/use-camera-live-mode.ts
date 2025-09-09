@@ -33,29 +33,43 @@ export default function useCameraLiveMode(
 
   const streamsFetcher = useCallback(async (key: string) => {
     const streamNames = key.split(",");
-    const metadata: { [key: string]: LiveStreamMetadata } = {};
 
-    await Promise.all(
-      streamNames.map(async (streamName) => {
-        try {
-          const response = await fetch(`/api/go2rtc/streams/${streamName}`);
-          if (response.ok) {
-            const data = await response.json();
-            metadata[streamName] = data;
-          }
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(`Failed to fetch metadata for ${streamName}:`, error);
+    const metadataPromises = streamNames.map(async (streamName) => {
+      try {
+        const response = await fetch(`/api/go2rtc/streams/${streamName}`, {
+          priority: "low",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return { streamName, data };
         }
-      }),
-    );
+        return { streamName, data: null };
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to fetch metadata for ${streamName}:`, error);
+        return { streamName, data: null };
+      }
+    });
+
+    const results = await Promise.allSettled(metadataPromises);
+
+    const metadata: { [key: string]: LiveStreamMetadata } = {};
+    results.forEach((result) => {
+      if (result.status === "fulfilled" && result.value.data) {
+        metadata[result.value.streamName] = result.value.data;
+      }
+    });
 
     return metadata;
   }, []);
 
   const { data: allStreamMetadata = {} } = useSWR<{
     [key: string]: LiveStreamMetadata;
-  }>(restreamedStreamsKey, streamsFetcher, { revalidateOnFocus: false });
+  }>(restreamedStreamsKey, streamsFetcher, {
+    revalidateOnFocus: false,
+    dedupingInterval: 10000,
+  });
 
   const [preferredLiveModes, setPreferredLiveModes] = useState<{
     [key: string]: LivePlayerMode;
