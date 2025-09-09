@@ -699,6 +699,7 @@ To verify that the integration is working correctly, start Frigate and observe t
 # Community Supported Detectors
 
 ## NVidia TensorRT Detector
+
 Nvidia Jetson devices may be used for object detection using the TensorRT libraries. Due to the size of the additional libraries, this detector is only provided in images with the `-tensorrt-jp6` tag suffix, e.g. `ghcr.io/blakeblackshear/frigate:stable-tensorrt-jp6`. This detector is designed to work with Yolo models for object detection.
 
 ### Generate Models
@@ -716,7 +717,6 @@ If your GPU does not support FP16 operations, you can pass the environment varia
 Specific models can be selected by passing an environment variable to the `docker run` command or in your `docker-compose.yml` file. Use the form `-e YOLO_MODELS=yolov4-416,yolov4-tiny-416` to select one or more model names. The models available are shown below.
 
 <details>
-
 <summary>Available Models</summary>
 ```
 yolov3-288
@@ -1030,10 +1030,10 @@ python3 yolo_to_onnx.py -m yolov7-320
 
 #### YOLOv9
 
-YOLOv9 model can be exported as ONNX using the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=t` in the first line to the [model size](https://github.com/WongKinYiu/yolov9#performance) you would like to convert (available sizes are `t`, `s`, `m`, `c`, and `e`).
+YOLOv9 model can be exported as ONNX using the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=t` and `IMG_SIZE=320` in the first line to the [model size](https://github.com/WongKinYiu/yolov9#performance) you would like to convert (available model sizes are `t`, `s`, `m`, `c`, and `e`, common image sizes are `320` and `640`).
 
 ```sh
-docker build . --build-arg MODEL_SIZE=t --build-arg IMG_SIZE=640 --output . -f- <<'EOF'
+docker build . --build-arg MODEL_SIZE=t --build-arg IMG_SIZE=320 --output . -f- <<'EOF'
 FROM python:3.11 AS build
 RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
 COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
