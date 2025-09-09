@@ -672,7 +672,6 @@ async def set_not_reviewed(
 @router.post(
     "/review/summarize/start/{start_ts}/end/{end_ts}",
     description="Use GenAI to summarize review items over a period of time.",
-    dependencies=[Depends(require_camera_access)],
 )
 def generate_review_summary(request: Request, start_ts: float, end_ts: float):
     config: FrigateConfig = request.app.frigate_config
