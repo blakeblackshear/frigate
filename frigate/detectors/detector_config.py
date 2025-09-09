@@ -161,6 +161,10 @@ class ModelConfig(BaseModel):
         if model_info.get("inputDataType"):
             self.input_dtype = model_info["inputDataType"]
 
+        # RKNN always uses NHWC
+        if detector == "rknn":
+            self.input_tensor = InputTensorEnum.nhwc
+
         # generate list of attribute labels
         self.attributes_map = {
             **model_info.get("attributes", DEFAULT_ATTRIBUTE_LABEL_MAP),
