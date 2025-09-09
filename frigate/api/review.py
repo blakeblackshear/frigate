@@ -4,6 +4,7 @@ import datetime
 import logging
 from functools import reduce
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 from fastapi import APIRouter, Request
@@ -12,7 +13,12 @@ from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, IntegrityError, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.auth import get_current_user, require_role
+from frigate.api.auth import (
+    get_allowed_cameras_for_filter,
+    get_current_user,
+    require_camera_access,
+    require_role,
+)
 from frigate.api.defs.query.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
@@ -41,6 +47,7 @@ router = APIRouter(tags=[Tags.review])
 async def review(
     params: ReviewQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
     if isinstance(current_user, JSONResponse):
         return current_user
@@ -65,8 +72,14 @@ async def review(
     ]
 
     if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((ReviewSegment.camera << camera_list))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content=[])
+        camera_list = list(filtered)
+    else:
+        camera_list = allowed_cameras
+    clauses.append((ReviewSegment.camera << camera_list))
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -149,6 +162,18 @@ def review_ids(ids: str):
             status_code=400,
         )
 
+    for review_id in ids:
+        try:
+            review = ReviewSegment.get(ReviewSegment.id == review_id)
+            require_camera_access(review.camera)
+        except DoesNotExist:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": f"Review {review_id} not found"}
+                ),
+                status_code=404,
+            )
+
     try:
         reviews = (
             ReviewSegment.select().where(ReviewSegment.id << ids).dicts().iterator()
@@ -165,6 +190,7 @@ def review_ids(ids: str):
 async def review_summary(
     params: ReviewSummaryQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
     if isinstance(current_user, JSONResponse):
         return current_user
@@ -181,8 +207,14 @@ async def review_summary(
     clauses = [(ReviewSegment.start_time > day_ago)]
 
     if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((ReviewSegment.camera << camera_list))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content={})
+        camera_list = list(filtered)
+    else:
+        camera_list = allowed_cameras
+    clauses.append((ReviewSegment.camera << camera_list))
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -276,8 +308,14 @@ async def review_summary(
     clauses = []
 
     if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((ReviewSegment.camera << camera_list))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content={})
+        camera_list = list(filtered)
+    else:
+        camera_list = allowed_cameras
+    clauses.append((ReviewSegment.camera << camera_list))
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -390,6 +428,8 @@ async def set_multiple_reviewed(
 
     for review_id in body.ids:
         try:
+            review = ReviewSegment.get(ReviewSegment.id == review_id)
+            require_camera_access(review.camera)
             review_status = UserReviewStatus.get(
                 UserReviewStatus.user_id == user_id,
                 UserReviewStatus.review_segment == review_id,
@@ -420,6 +460,18 @@ async def set_multiple_reviewed(
     dependencies=[Depends(require_role(["admin"]))],
 )
 def delete_reviews(body: ReviewModifyMultipleBody):
+    list_of_ids = body.ids
+    for review_id in list_of_ids:
+        try:
+            review = ReviewSegment.get(ReviewSegment.id == review_id)
+            require_camera_access(review.camera)
+        except DoesNotExist:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": f"Review {review_id} not found"}
+                ),
+                status_code=404,
+            )
     list_of_ids = body.ids
     reviews = (
         ReviewSegment.select(
@@ -471,7 +523,10 @@ def delete_reviews(body: ReviewModifyMultipleBody):
 @router.get(
     "/review/activity/motion", response_model=list[ReviewActivityMotionResponse]
 )
-def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
+def motion_activity(
+    params: ReviewActivityMotionQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     """Get motion and audio activity."""
     cameras = params.cameras
     before = params.before or datetime.datetime.now().timestamp()
@@ -486,8 +541,14 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     clauses.append((Recordings.motion > 0))
 
     if cameras != "all":
-        camera_list = cameras.split(",")
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content=[])
+        camera_list = list(filtered)
         clauses.append((Recordings.camera << camera_list))
+    else:
+        clauses.append((Recordings.camera << allowed_cameras))
 
     data: list[Recordings] = (
         Recordings.select(
@@ -547,13 +608,11 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
 @router.get("/review/event/{event_id}", response_model=ReviewSegmentResponse)
 def get_review_from_event(event_id: str):
     try:
-        return JSONResponse(
-            model_to_dict(
-                ReviewSegment.get(
-                    ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
-                )
-            )
+        review = ReviewSegment.get(
+            ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
         )
+        require_camera_access(review.camera)
+        return JSONResponse(model_to_dict(review))
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Review item not found"},
@@ -564,9 +623,9 @@ def get_review_from_event(event_id: str):
 @router.get("/review/{review_id}", response_model=ReviewSegmentResponse)
 def get_review(review_id: str):
     try:
-        return JSONResponse(
-            content=model_to_dict(ReviewSegment.get(ReviewSegment.id == review_id))
-        )
+        review = ReviewSegment.get(ReviewSegment.id == review_id)
+        require_camera_access(review.camera)
+        return JSONResponse(content=model_to_dict(review))
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Review item not found"},
@@ -613,6 +672,7 @@ async def set_not_reviewed(
 @router.post(
     "/review/summarize/start/{start_ts}/end/{end_ts}",
     description="Use GenAI to summarize review items over a period of time.",
+    dependencies=[Depends(require_camera_access)],
 )
 def generate_review_summary(request: Request, start_ts: float, end_ts: float):
     config: FrigateConfig = request.app.frigate_config
