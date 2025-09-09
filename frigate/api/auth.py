@@ -626,11 +626,11 @@ async def update_role(
 
 
 async def require_camera_access(
-    camera: Optional[str] = None,
+    camera_name: Optional[str] = None,
     request: Request = None,
 ):
     """Dependency to enforce camera access based on user role."""
-    if camera is None:
+    if camera_name is None:
         return  # For lists, filter later
 
     current_user = await get_current_user(request)
@@ -646,10 +646,10 @@ async def require_camera_access(
     if role == "admin" or not roles_dict.get(role):
         return
 
-    if camera not in allowed_cameras:
+    if camera_name not in allowed_cameras:
         raise HTTPException(
             status_code=403,
-            detail=f"Access denied to camera '{camera}'. Allowed: {allowed_cameras}",
+            detail=f"Access denied to camera '{camera_name}'. Allowed: {allowed_cameras}",
         )
 
 
