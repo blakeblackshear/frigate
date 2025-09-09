@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Dict, List, Optional
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from .base import FrigateBaseModel
 
@@ -34,3 +34,23 @@ class AuthConfig(FrigateBaseModel):
     )
     # As of Feb 2023, OWASP recommends 600000 iterations for PBKDF2-SHA256
     hash_iterations: int = Field(default=600000, title="Password hash iterations")
+    roles: Dict[str, List[str]] = Field(
+        default_factory=dict,
+        title="Role to camera mappings. Empty list grants access to all cameras.",
+    )
+
+    @field_validator("roles")
+    @classmethod
+    def validate_roles(cls, v: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        # Ensure role names are valid (alphanumeric with underscores)
+        for role in v.keys():
+            if not role.replace("_", "").isalnum():
+                raise ValueError(
+                    f"Invalid role name '{role}'. Must be alphanumeric with underscores."
+                )
+        # Default admin and viewer to empty lists if not present
+        if "admin" not in v:
+            v["admin"] = []
+        if "viewer" not in v:
+            v["viewer"] = []
+        return v

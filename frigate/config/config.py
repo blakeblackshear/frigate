@@ -730,6 +730,27 @@ class FrigateConfig(FrigateBaseModel):
                 raise ValueError("Zones cannot share names with cameras")
         return v
 
+    @field_validator("auth")
+    @classmethod
+    def validate_auth_roles(cls, v: AuthConfig, info: ValidationInfo) -> AuthConfig:
+        # Access cameras from the validated model
+        frigate_config = info.data.get("cameras", {})
+        camera_names = (
+            set(frigate_config.keys()) if isinstance(frigate_config, dict) else set()
+        )
+
+        for role, allowed_cameras in v.roles.items():
+            invalid_cameras = [
+                cam for cam in allowed_cameras if cam not in camera_names
+            ]
+            if invalid_cameras:
+                logger.warning(
+                    f"Role '{role}' references non-existent cameras: {invalid_cameras}. "
+                    f"These will grant no access until cameras are added."
+                )
+
+        return v
+
     @classmethod
     def load(cls, **kwargs):
         """Loads the Frigate config file, runs migrations, and creates the config object."""
