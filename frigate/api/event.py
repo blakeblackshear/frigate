@@ -8,6 +8,7 @@ import random
 import string
 from functools import reduce
 from pathlib import Path
+from typing import List
 from urllib.parse import unquote
 
 import cv2
@@ -19,7 +20,11 @@ from pathvalidate import sanitize_filename
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.auth import require_role
+from frigate.api.auth import (
+    get_allowed_cameras_for_filter,
+    require_camera_access,
+    require_role,
+)
 from frigate.api.defs.query.events_query_parameters import (
     DEFAULT_TIME_RANGE,
     EventsQueryParams,
@@ -61,7 +66,10 @@ router = APIRouter(tags=[Tags.events])
 
 
 @router.get("/events", response_model=list[EventResponse])
-def events(params: EventsQueryParams = Depends()):
+def events(
+    params: EventsQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     camera = params.camera
     cameras = params.cameras
 
@@ -135,8 +143,14 @@ def events(params: EventsQueryParams = Depends()):
         clauses.append((Event.camera == camera))
 
     if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((Event.camera << camera_list))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content=[])
+        camera_list = list(filtered)
+    else:
+        camera_list = allowed_cameras
+    clauses.append((Event.camera << camera_list))
 
     if labels != "all":
         label_list = labels.split(",")
@@ -321,9 +335,17 @@ def events(params: EventsQueryParams = Depends()):
 
 
 @router.get("/events/explore", response_model=list[EventResponse])
-def events_explore(limit: int = 10):
+def events_explore(
+    limit: int = 10,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     # get distinct labels for all events
-    distinct_labels = Event.select(Event.label).distinct().order_by(Event.label)
+    distinct_labels = (
+        Event.select(Event.label)
+        .where(Event.camera << allowed_cameras)
+        .distinct()
+        .order_by(Event.label)
+    )
 
     label_counts = {}
 
@@ -334,14 +356,18 @@ def events_explore(limit: int = 10):
             # get most recent events for this label
             label_events = (
                 Event.select()
-                .where(Event.label == label)
+                .where((Event.label == label) & (Event.camera << allowed_cameras))
                 .order_by(Event.start_time.desc())
                 .limit(limit)
                 .iterator()
             )
 
             # count total events for this label
-            label_counts[label] = Event.select().where(Event.label == label).count()
+            label_counts[label] = (
+                Event.select()
+                .where((Event.label == label) & (Event.camera << allowed_cameras))
+                .count()
+            )
 
             yield from label_events
 
@@ -403,6 +429,16 @@ def event_ids(ids: str):
             status_code=400,
         )
 
+    for event_id in ids:
+        try:
+            event = Event.get(Event.id == event_id)
+            require_camera_access(event.camera)
+        except DoesNotExist:
+            return JSONResponse(
+                content=({"success": False, "message": f"Event {event_id} not found"}),
+                status_code=404,
+            )
+
     try:
         events = Event.select().where(Event.id << ids).dicts().iterator()
         return JSONResponse(list(events))
@@ -413,7 +449,11 @@ def event_ids(ids: str):
 
 
 @router.get("/events/search")
-def events_search(request: Request, params: EventsSearchQueryParams = Depends()):
+def events_search(
+    request: Request,
+    params: EventsSearchQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     query = params.query
     search_type = params.search_type
     include_thumbnails = params.include_thumbnails
@@ -486,7 +526,13 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     event_filters = []
 
     if cameras != "all":
-        event_filters.append((Event.camera << cameras.split(",")))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content=[])
+        event_filters.append((Event.camera << list(filtered)))
+    else:
+        event_filters.append((Event.camera << allowed_cameras))
 
     if labels != "all":
         event_filters.append((Event.label << labels.split(",")))
@@ -739,7 +785,10 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
 
 @router.get("/events/summary")
-def events_summary(params: EventsSummaryQueryParams = Depends()):
+def events_summary(
+    params: EventsSummaryQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     tz_name = params.timezone
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
     has_clip = params.has_clip
@@ -771,7 +820,7 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
             Event.zones,
             fn.COUNT(Event.id).alias("count"),
         )
-        .where(reduce(operator.and_, clauses))
+        .where(reduce(operator.and_, clauses) & (Event.camera << allowed_cameras))
         .group_by(
             Event.camera,
             Event.label,
@@ -788,7 +837,9 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
 @router.get("/events/{event_id}", response_model=EventResponse)
 def event(event_id: str):
     try:
-        return model_to_dict(Event.get(Event.id == event_id))
+        event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
+        return model_to_dict(event)
     except DoesNotExist:
         return JSONResponse(content="Event not found", status_code=404)
 
@@ -801,6 +852,7 @@ def event(event_id: str):
 def set_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -835,6 +887,7 @@ def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
 
     try:
         event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
     except DoesNotExist:
         message = f"Event {event_id} not found"
         logger.error(message)
@@ -945,6 +998,7 @@ def false_positive(request: Request, event_id: str):
 
     try:
         event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
     except DoesNotExist:
         message = f"Event {event_id} not found"
         logger.error(message)
@@ -1025,6 +1079,7 @@ def false_positive(request: Request, event_id: str):
 def delete_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -1052,6 +1107,7 @@ def set_sub_label(
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
     except DoesNotExist:
         event = None
 
@@ -1106,6 +1162,7 @@ def set_plate(
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
     except DoesNotExist:
         event = None
 
@@ -1161,6 +1218,7 @@ def set_description(
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -1210,6 +1268,7 @@ def regenerate_description(
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -1283,6 +1342,7 @@ def generate_description_embedding(
 def delete_single_event(event_id: str, request: Request) -> dict:
     try:
         event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
     except DoesNotExist:
         return {"success": False, "message": f"Event {event_id} not found"}
 
@@ -1351,7 +1411,10 @@ def delete_events(request: Request, body: EventsDeleteBody):
 @router.post(
     "/events/{camera_name}/{label}/create",
     response_model=EventCreateResponse,
-    dependencies=[Depends(require_role(["admin"]))],
+    dependencies=[
+        Depends(lambda: require_role(["admin"])),
+        Depends(require_camera_access),
+    ],
 )
 def create_event(
     request: Request,
@@ -1412,6 +1475,8 @@ def create_event(
 )
 def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
+        event: Event = Event.get(Event.id == event_id)
+        require_camera_access(event.camera)
         end_time = body.end_time or datetime.datetime.now().timestamp()
         request.app.event_metadata_updater.publish(
             (event_id, end_time), EventMetadataTypeEnum.manual_event_end.value
@@ -1433,12 +1498,15 @@ def end_event(request: Request, event_id: str, body: EventsEndBody):
 @router.post(
     "/trigger/embedding",
     response_model=dict,
-    dependencies=[Depends(require_role(["admin"]))],
+    dependencies=[
+        Depends(lambda: require_role(["admin"])),
+        Depends(require_camera_access),
+    ],
 )
 def create_trigger_embedding(
     request: Request,
     body: TriggerEmbeddingBody,
-    camera: str,
+    camera_name: str,
     name: str,
 ):
     try:
@@ -1454,13 +1522,13 @@ def create_trigger_embedding(
         # Check if trigger already exists
         if (
             Trigger.select()
-            .where(Trigger.camera == camera, Trigger.name == name)
+            .where(Trigger.camera == camera_name, Trigger.name == name)
             .exists()
         ):
             return JSONResponse(
                 content={
                     "success": False,
-                    "message": f"Trigger {camera}:{name} already exists",
+                    "message": f"Trigger {camera_name}:{name} already exists",
                 },
                 status_code=400,
             )
@@ -1530,28 +1598,29 @@ def create_trigger_embedding(
             # Save image to the triggers directory
             try:
                 os.makedirs(
-                    os.path.join(TRIGGER_DIR, sanitize_filename(camera)), exist_ok=True
+                    os.path.join(TRIGGER_DIR, sanitize_filename(camera_name)),
+                    exist_ok=True,
                 )
                 with open(
                     os.path.join(
                         TRIGGER_DIR,
-                        sanitize_filename(camera),
+                        sanitize_filename(camera_name),
                         f"{sanitize_filename(body.data)}.webp",
                     ),
                     "wb",
                 ) as f:
                     f.write(thumbnail)
                 logger.debug(
-                    f"Writing thumbnail for trigger with data {body.data} in {camera}."
+                    f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
                 )
             except Exception as e:
                 logger.error(e.with_traceback())
                 logger.error(
-                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}"
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera_name}"
                 )
 
         Trigger.create(
-            camera=camera,
+            camera=camera_name,
             name=name,
             type=body.type,
             data=body.data,
@@ -1565,7 +1634,7 @@ def create_trigger_embedding(
         return JSONResponse(
             content={
                 "success": True,
-                "message": f"Trigger created successfully for {camera}:{name}",
+                "message": f"Trigger created successfully for {camera_name}:{name}",
             },
             status_code=200,
         )
@@ -1584,11 +1653,14 @@ def create_trigger_embedding(
 @router.put(
     "/trigger/embedding/{camera}/{name}",
     response_model=dict,
-    dependencies=[Depends(require_role(["admin"]))],
+    dependencies=[
+        Depends(lambda: require_role(["admin"])),
+        Depends(require_camera_access),
+    ],
 )
 def update_trigger_embedding(
     request: Request,
-    camera: str,
+    camera_name: str,
     name: str,
     body: TriggerEmbeddingBody,
 ):
@@ -1609,7 +1681,9 @@ def update_trigger_embedding(
             embedding = context.generate_description_embedding(body.data)
         elif body.type == "thumbnail":
             webp_file = sanitize_filename(body.data) + ".webp"
-            webp_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera), webp_file)
+            webp_path = os.path.join(
+                TRIGGER_DIR, sanitize_filename(camera_name), webp_file
+            )
 
             try:
                 event: Event = Event.get(Event.id == body.data)
@@ -1656,7 +1730,9 @@ def update_trigger_embedding(
             )
 
         # Check if trigger exists for upsert
-        trigger = Trigger.get_or_none(Trigger.camera == camera, Trigger.name == name)
+        trigger = Trigger.get_or_none(
+            Trigger.camera == camera_name, Trigger.name == name
+        )
 
         if trigger:
             # Update existing trigger
@@ -1665,17 +1741,17 @@ def update_trigger_embedding(
                     os.remove(
                         os.path.join(
                             TRIGGER_DIR,
-                            sanitize_filename(camera),
+                            sanitize_filename(camera_name),
                             f"{trigger.data}.webp",
                         )
                     )
                     logger.debug(
-                        f"Deleted thumbnail for trigger with data {trigger.data} in {camera}."
+                        f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
                     )
                 except Exception as e:
                     logger.error(e.with_traceback())
                     logger.error(
-                        f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}"
+                        f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera_name}"
                     )
 
             Trigger.update(
@@ -1685,11 +1761,11 @@ def update_trigger_embedding(
                 threshold=body.threshold,
                 triggering_event_id="",
                 last_triggered=None,
-            ).where(Trigger.camera == camera, Trigger.name == name).execute()
+            ).where(Trigger.camera == camera_name, Trigger.name == name).execute()
         else:
             # Create new trigger (for rename case)
             Trigger.create(
-                camera=camera,
+                camera=camera_name,
                 name=name,
                 type=body.type,
                 data=body.data,
@@ -1703,7 +1779,7 @@ def update_trigger_embedding(
         if body.type == "thumbnail":
             # Save image to the triggers directory
             try:
-                camera_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera))
+                camera_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera_name))
                 os.makedirs(camera_path, exist_ok=True)
                 with open(
                     os.path.join(camera_path, f"{sanitize_filename(body.data)}.webp"),
@@ -1711,18 +1787,18 @@ def update_trigger_embedding(
                 ) as f:
                     f.write(thumbnail)
                 logger.debug(
-                    f"Writing thumbnail for trigger with data {body.data} in {camera}."
+                    f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
                 )
             except Exception as e:
                 logger.error(e.with_traceback())
                 logger.error(
-                    f"Failed to write thumbnail for trigger with data {body.data} in {camera}"
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera_name}"
                 )
 
         return JSONResponse(
             content={
                 "success": True,
-                "message": f"Trigger updated successfully for {camera}:{name}",
+                "message": f"Trigger updated successfully for {camera_name}:{name}",
             },
             status_code=200,
         )
@@ -1741,34 +1817,39 @@ def update_trigger_embedding(
 @router.delete(
     "/trigger/embedding/{camera}/{name}",
     response_model=dict,
-    dependencies=[Depends(require_role(["admin"]))],
+    dependencies=[
+        Depends(lambda: require_role(["admin"])),
+        Depends(require_camera_access),
+    ],
 )
 def delete_trigger_embedding(
     request: Request,
-    camera: str,
+    camera_name: str,
     name: str,
 ):
     try:
-        trigger = Trigger.get_or_none(Trigger.camera == camera, Trigger.name == name)
+        trigger = Trigger.get_or_none(
+            Trigger.camera == camera_name, Trigger.name == name
+        )
         if trigger is None:
             return JSONResponse(
                 content={
                     "success": False,
-                    "message": f"Trigger {camera}:{name} not found",
+                    "message": f"Trigger {camera_name}:{name} not found",
                 },
                 status_code=500,
             )
 
         deleted = (
             Trigger.delete()
-            .where(Trigger.camera == camera, Trigger.name == name)
+            .where(Trigger.camera == camera_name, Trigger.name == name)
             .execute()
         )
         if deleted == 0:
             return JSONResponse(
                 content={
                     "success": False,
-                    "message": f"Error deleting trigger {camera}:{name}",
+                    "message": f"Error deleting trigger {camera_name}:{name}",
                 },
                 status_code=401,
             )
@@ -1776,22 +1857,22 @@ def delete_trigger_embedding(
         try:
             os.remove(
                 os.path.join(
-                    TRIGGER_DIR, sanitize_filename(camera), f"{trigger.data}.webp"
+                    TRIGGER_DIR, sanitize_filename(camera_name), f"{trigger.data}.webp"
                 )
             )
             logger.debug(
-                f"Deleted thumbnail for trigger with data {trigger.data} in {camera}."
+                f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
             )
         except Exception as e:
             logger.error(e.with_traceback())
             logger.error(
-                f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera}"
+                f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera_name}"
             )
 
         return JSONResponse(
             content={
                 "success": True,
-                "message": f"Trigger deleted successfully for {camera}:{name}",
+                "message": f"Trigger deleted successfully for {camera_name}:{name}",
             },
             status_code=200,
         )
@@ -1810,7 +1891,10 @@ def delete_trigger_embedding(
 @router.get(
     "/triggers/status/{camera_name}",
     response_model=dict,
-    dependencies=[Depends(require_role(["admin"]))],
+    dependencies=[
+        Depends(lambda: require_role(["admin"])),
+        Depends(require_camera_access),
+    ],
 )
 def get_triggers_status(
     camera_name: str,
