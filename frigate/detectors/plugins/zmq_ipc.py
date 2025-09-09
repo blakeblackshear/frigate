@@ -82,6 +82,7 @@ class ZmqIpcDetector(DetectionApi):
         header: dict[str, Any] = {
             "shape": list(tensor_input.shape),
             "dtype": str(tensor_input.dtype.name),
+            "model_type": str(self.detector_config.model.model_type.name)
         }
         return json.dumps(header).encode("utf-8")
 
