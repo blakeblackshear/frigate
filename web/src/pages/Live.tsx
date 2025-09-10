@@ -11,12 +11,15 @@ import LiveCameraView from "@/views/live/LiveCameraView";
 import LiveDashboardView from "@/views/live/LiveDashboardView";
 import { useTranslation } from "react-i18next";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useContext, useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
+import { AuthContext } from "@/context/auth-context";
 
 function Live() {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { auth } = useContext(AuthContext);
 
   // selection
 
@@ -81,19 +84,25 @@ function Live() {
 
   // settings
 
+  const allowedCameras = useAllowedCameras();
+
   const includesBirdseye = useMemo(() => {
     if (
       config &&
       Object.keys(config.camera_groups).length &&
       cameraGroup &&
       config.camera_groups[cameraGroup] &&
-      cameraGroup != "default"
+      cameraGroup != "default" &&
+      (auth.user?.role === "admin" ||
+        auth.user?.role == "viewer" ||
+        !auth.isAuthenticated ||
+        "birdseye" in allowedCameras)
     ) {
       return config.camera_groups[cameraGroup].cameras.includes("birdseye");
     } else {
       return false;
     }
-  }, [config, cameraGroup]);
+  }, [config, cameraGroup, allowedCameras, auth]);
 
   const cameras = useMemo(() => {
     if (!config) {
@@ -111,13 +120,15 @@ function Live() {
         .filter(
           (conf) => conf.enabled_in_config && group.cameras.includes(conf.name),
         )
+        .filter((cam) => allowedCameras.includes(cam.name))
         .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
     }
 
     return Object.values(config.cameras)
       .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
+      .filter((cam) => allowedCameras.includes(cam.name))
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-  }, [config, cameraGroup]);
+  }, [config, cameraGroup, allowedCameras]);
 
   const selectedCamera = useMemo(
     () => cameras.find((cam) => cam.name == selectedCameraName),
