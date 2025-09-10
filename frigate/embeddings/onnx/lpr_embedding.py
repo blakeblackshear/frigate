@@ -34,11 +34,12 @@ class PaddleOCRDetection(BaseEmbedding):
         model_file = (
             "detection-large.onnx" if model_size == "large" else "detection-small.onnx"
         )
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
         super().__init__(
             model_name="paddleocr-onnx",
             model_file=model_file,
             download_urls={
-                model_file: f"https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/{model_file}"
+                model_file: f"{GITHUB_ENDPOINT}/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/{model_file}"
             },
         )
         self.requestor = requestor
@@ -94,11 +95,12 @@ class PaddleOCRClassification(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
         super().__init__(
             model_name="paddleocr-onnx",
             model_file="classification.onnx",
             download_urls={
-                "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
+                "classification.onnx": f"{GITHUB_ENDPOINT}/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
             },
         )
         self.requestor = requestor
@@ -154,11 +156,12 @@ class PaddleOCRRecognition(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
         super().__init__(
             model_name="paddleocr-onnx",
             model_file="recognition.onnx",
             download_urls={
-                "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
+                "recognition.onnx": f"{GITHUB_ENDPOINT}/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
             },
         )
         self.requestor = requestor
@@ -214,11 +217,12 @@ class LicensePlateDetector(BaseEmbedding):
         requestor: InterProcessRequestor,
         device: str = "AUTO",
     ):
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
         super().__init__(
             model_name="yolov9_license_plate",
             model_file="yolov9-256-license-plates.onnx",
             download_urls={
-                "yolov9-256-license-plates.onnx": "https://github.com/hawkeye217/yolov9-license-plates/raw/refs/heads/master/models/yolov9-256-license-plates.onnx"
+                "yolov9-256-license-plates.onnx": f"{GITHUB_ENDPOINT}/hawkeye217/yolov9-license-plates/raw/refs/heads/master/models/yolov9-256-license-plates.onnx"
             },
         )
 

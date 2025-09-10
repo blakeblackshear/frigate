@@ -24,11 +24,12 @@ FACENET_INPUT_SIZE = 160
 
 class FaceNetEmbedding(BaseEmbedding):
     def __init__(self):
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
         super().__init__(
             model_name="facedet",
             model_file="facenet.tflite",
             download_urls={
-                "facenet.tflite": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facenet.tflite",
+                "facenet.tflite": f"{GITHUB_ENDPOINT}/NickM-27/facenet-onnx/releases/download/v1.0/facenet.tflite",
             },
         )
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
@@ -109,12 +110,14 @@ class FaceNetEmbedding(BaseEmbedding):
 
 
 class ArcfaceEmbedding(BaseEmbedding):
+    GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
+
     def __init__(self):
         super().__init__(
             model_name="facedet",
             model_file="arcface.onnx",
             download_urls={
-                "arcface.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/arcface.onnx",
+                "arcface.onnx": f"{GITHUB_ENDPOINT}/NickM-27/facenet-onnx/releases/download/v1.0/arcface.onnx",
             },
         )
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
