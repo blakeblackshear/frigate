@@ -9,6 +9,7 @@ import { LuConstruction } from "react-icons/lu";
 import { MdCategory, MdVideoLibrary } from "react-icons/md";
 import { TbFaceId } from "react-icons/tb";
 import useSWR from "swr";
+import { useIsAdmin } from "./use-is-admin";
 
 export const ID_LIVE = 1;
 export const ID_REVIEW = 2;
@@ -24,6 +25,7 @@ export default function useNavigation(
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const isAdmin = useIsAdmin();
 
   return useMemo(
     () =>
@@ -70,7 +72,7 @@ export default function useNavigation(
           icon: TbFaceId,
           title: "menu.faceLibrary",
           url: "/faces",
-          enabled: isDesktop && config?.face_recognition.enabled,
+          enabled: isDesktop && config?.face_recognition.enabled && isAdmin,
         },
         {
           id: ID_CLASSIFICATION,
@@ -78,9 +80,9 @@ export default function useNavigation(
           icon: MdCategory,
           title: "menu.classification",
           url: "/classification",
-          enabled: isDesktop,
+          enabled: isDesktop && isAdmin,
         },
       ] as NavData[],
-    [config?.face_recognition?.enabled, variant],
+    [config?.face_recognition?.enabled, variant, isAdmin],
   );
 }
