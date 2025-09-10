@@ -342,6 +342,10 @@ export interface FrigateConfig {
     enabled: boolean;
   };
 
+  auth: {
+    roles: string[];
+  };
+
   birdseye: BirdseyeConfig;
 
   cameras: {
