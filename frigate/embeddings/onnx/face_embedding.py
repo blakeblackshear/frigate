@@ -110,9 +110,8 @@ class FaceNetEmbedding(BaseEmbedding):
 
 
 class ArcfaceEmbedding(BaseEmbedding):
-    GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
-
     def __init__(self):
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
         super().__init__(
             model_name="facedet",
             model_file="arcface.onnx",
