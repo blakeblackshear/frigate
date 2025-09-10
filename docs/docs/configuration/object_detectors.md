@@ -978,26 +978,29 @@ Here are some tips for getting different model types
 
 ### Downloading D-FINE Model
 
-To export as ONNX:
+D-FINE can be exported as ONNX by running the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=s` in the first line to `s`, `m`, or `l` size.
 
-1. Clone: https://github.com/Peterande/D-FINE and install all dependencies.
-2. Select and download a checkpoint from the [readme](https://github.com/Peterande/D-FINE).
-3. Modify line 58 of `tools/deployment/export_onnx.py` and change batch size to 1: `data = torch.rand(1, 3, 640, 640)`
-4. Run the export, making sure you select the right config, for your checkpoint.
-
-Example:
-
+```sh
+docker build . --build-arg MODEL_SIZE=s --output . -f- <<'EOF'
+FROM python:3.11 AS build
+RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
+WORKDIR /dfine
+RUN git clone https://github.com/Peterande/D-FINE.git .
+RUN uv pip install --system -r requirements.txt
+RUN uv pip install --system onnx onnxruntime onnxsim
+# Create output directory and download checkpoint
+RUN mkdir -p output
+ARG MODEL_SIZE
+RUN wget https://github.com/Peterande/storage/releases/download/dfinev1.0/dfine_${MODEL_SIZE}_obj2coco.pth -O output/dfine_${MODEL_SIZE}_obj2coco.pth
+# Modify line 58 of export_onnx.py to change batch size to 1
+RUN sed -i '58s/data = torch.rand(.*)/data = torch.rand(1, 3, 640, 640)/' tools/deployment/export_onnx.py
+RUN python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hgnetv2_${MODEL_SIZE}_obj2coco.yml -r output/dfine_${MODEL_SIZE}_obj2coco.pth
+FROM scratch
+ARG MODEL_SIZE
+COPY --from=build /dfine/output/dfine_${MODEL_SIZE}_obj2coco.onnx /dfine-${MODEL_SIZE}.onnx
+EOF
 ```
-python3 tools/deployment/export_onnx.py -c configs/dfine/objects365/dfine_hgnetv2_m_obj2coco.yml -r output/dfine_m_obj2coco.pth
-```
-
-:::tip
-
-Model export has only been tested on Linux (or WSL2). Not all dependencies are in `requirements.txt`. Some live in the deployment folder, and some are still missing entirely and must be installed manually.
-
-Make sure you change the batch size to 1 before exporting.
-
-:::
 
 ### Download RF-DETR Model
 
