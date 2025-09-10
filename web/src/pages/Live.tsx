@@ -11,15 +11,15 @@ import LiveCameraView from "@/views/live/LiveCameraView";
 import LiveDashboardView from "@/views/live/LiveDashboardView";
 import { useTranslation } from "react-i18next";
 
-import { useContext, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
-import { AuthContext } from "@/context/auth-context";
+import { useIsCustomRole } from "@/hooks/use-is-custom-role";
 
 function Live() {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { auth } = useContext(AuthContext);
+  const isCustomRole = useIsCustomRole();
 
   // selection
 
@@ -93,16 +93,13 @@ function Live() {
       cameraGroup &&
       config.camera_groups[cameraGroup] &&
       cameraGroup != "default" &&
-      (auth.user?.role === "admin" ||
-        auth.user?.role == "viewer" ||
-        !auth.isAuthenticated ||
-        "birdseye" in allowedCameras)
+      (!isCustomRole || "birdseye" in allowedCameras)
     ) {
       return config.camera_groups[cameraGroup].cameras.includes("birdseye");
     } else {
       return false;
     }
-  }, [config, cameraGroup, allowedCameras, auth]);
+  }, [config, cameraGroup, allowedCameras, isCustomRole]);
 
   const cameras = useMemo(() => {
     if (!config) {
