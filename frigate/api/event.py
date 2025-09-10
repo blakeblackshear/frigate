@@ -1371,8 +1371,8 @@ async def delete_single_event(event_id: str, request: Request) -> dict:
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
 )
-def delete_event(request: Request, event_id: str):
-    result = delete_single_event(event_id, request)
+async def delete_event(request: Request, event_id: str):
+    result = await delete_single_event(event_id, request)
     status_code = 200 if result["success"] else 404
     return JSONResponse(content=result, status_code=status_code)
 
@@ -1382,7 +1382,7 @@ def delete_event(request: Request, event_id: str):
     response_model=EventMultiDeleteResponse,
     dependencies=[Depends(require_role(["admin"]))],
 )
-def delete_events(request: Request, body: EventsDeleteBody):
+async def delete_events(request: Request, body: EventsDeleteBody):
     if not body.event_ids:
         return JSONResponse(
             content=({"success": False, "message": "No event IDs provided."}),
@@ -1393,7 +1393,7 @@ def delete_events(request: Request, body: EventsDeleteBody):
     not_found_events = []
 
     for event_id in body.event_ids:
-        result = delete_single_event(event_id, request)
+        result = await delete_single_event(event_id, request)
         if result["success"]:
             deleted_events.append(event_id)
         else:
