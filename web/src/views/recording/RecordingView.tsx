@@ -65,6 +65,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -97,11 +98,17 @@ export function RecordingView({
 
   const timezone = useTimezone(config);
 
+  const allowedCameras = useAllowedCameras();
+  const effectiveCameras = useMemo(
+    () => allCameras.filter((camera) => allowedCameras.includes(camera)),
+    [allCameras, allowedCameras],
+  );
+
   const { data: recordingsSummary } = useSWR<RecordingsSummary>([
     "recordings/summary",
     {
       timezone: timezone,
-      cameras: allCameras.join(",") ?? null,
+      cameras: effectiveCameras.join(",") ?? null,
     },
   ]);
 
@@ -276,14 +283,16 @@ export function RecordingView({
 
   const onSelectCamera = useCallback(
     (newCam: string) => {
-      setMainCamera(newCam);
-      setFullResolution({
-        width: 0,
-        height: 0,
-      });
-      setPlaybackStart(currentTime);
+      if (allowedCameras.includes(newCam)) {
+        setMainCamera(newCam);
+        setFullResolution({
+          width: 0,
+          height: 0,
+        });
+        setPlaybackStart(currentTime);
+      }
     },
-    [currentTime],
+    [currentTime, allowedCameras],
   );
 
   // fullscreen
@@ -488,12 +497,9 @@ export function RecordingView({
         </div>
         <div className="flex items-center justify-end gap-2">
           <MobileCameraDrawer
-            allCameras={allCameras}
+            allCameras={effectiveCameras}
             selected={mainCamera}
-            onSelectCamera={(cam) => {
-              setPlaybackStart(currentTime);
-              setMainCamera(cam);
-            }}
+            onSelectCamera={onSelectCamera}
           />
           {isDesktop && (
             <ExportDialog
@@ -674,7 +680,7 @@ export function RecordingView({
                 containerRef={mainLayoutRef}
               />
             </div>
-            {isDesktop && allCameras.length > 1 && (
+            {isDesktop && effectiveCameras.length > 1 && (
               <div
                 ref={previewRowRef}
                 className={cn(
@@ -686,7 +692,7 @@ export function RecordingView({
                 )}
               >
                 <div className="w-2" />
-                {allCameras.map((cam) => {
+                {effectiveCameras.map((cam) => {
                   if (cam == mainCamera || cam == "birdseye") {
                     return;
                   }
