@@ -852,6 +852,7 @@ def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: st
     description="Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 async def vod_event(
+    request: Request,
     event_id: str,
     padding: int = Query(0, description="Padding to apply to the vod."),
 ):
@@ -867,9 +868,7 @@ async def vod_event(
             status_code=404,
         )
 
-    require_camera_access(
-        event.camera
-    )  # Manual call (sync for non-async route, but since async, await if needed)
+    await require_camera_access(event.camera, request=request)
 
     end_ts = (
         datetime.now().timestamp()
@@ -904,7 +903,7 @@ async def event_snapshot(
     try:
         event = Event.get(Event.id == event_id, Event.end_time != None)
         event_complete = True
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
         if not event.has_snapshot:
             return JSONResponse(
                 content={"success": False, "message": "Snapshot not available"},
@@ -933,7 +932,7 @@ async def event_snapshot(
                             height=params.height,
                             quality=params.quality,
                         )
-                        require_camera_access(camera_state.name)
+                        await require_camera_access(camera_state.name, request=request)
         except Exception:
             return JSONResponse(
                 content={"success": False, "message": "Ongoing event not found"},
@@ -980,7 +979,7 @@ async def event_thumbnail(
     event_complete = False
     try:
         event: Event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
         if event.end_time is not None:
             event_complete = True
 

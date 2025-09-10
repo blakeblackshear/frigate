@@ -420,7 +420,7 @@ def events_explore(
 
 
 @router.get("/event_ids", response_model=list[EventResponse])
-def event_ids(ids: str):
+async def event_ids(ids: str, request: Request):
     ids = ids.split(",")
 
     if not ids:
@@ -432,7 +432,7 @@ def event_ids(ids: str):
     for event_id in ids:
         try:
             event = Event.get(Event.id == event_id)
-            require_camera_access(event.camera)
+            await require_camera_access(event.camera, request=request)
         except DoesNotExist:
             return JSONResponse(
                 content=({"success": False, "message": f"Event {event_id} not found"}),
@@ -835,10 +835,10 @@ def events_summary(
 
 
 @router.get("/events/{event_id}", response_model=EventResponse)
-def event(event_id: str):
+async def event(event_id: str, request: Request):
     try:
         event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
         return model_to_dict(event)
     except DoesNotExist:
         return JSONResponse(content="Event not found", status_code=404)
@@ -852,7 +852,6 @@ def event(event_id: str):
 def set_retain(event_id: str):
     try:
         event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -869,7 +868,7 @@ def set_retain(event_id: str):
 
 
 @router.post("/events/{event_id}/plus", response_model=EventUploadPlusResponse)
-def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
+async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
     if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
         logger.error(message)
@@ -887,7 +886,7 @@ def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
 
     try:
         event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         message = f"Event {event_id} not found"
         logger.error(message)
@@ -982,7 +981,7 @@ def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
 
 
 @router.put("/events/{event_id}/false_positive", response_model=EventUploadPlusResponse)
-def false_positive(request: Request, event_id: str):
+async def false_positive(request: Request, event_id: str):
     if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
         logger.error(message)
@@ -998,7 +997,7 @@ def false_positive(request: Request, event_id: str):
 
     try:
         event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         message = f"Event {event_id} not found"
         logger.error(message)
@@ -1076,10 +1075,10 @@ def false_positive(request: Request, event_id: str):
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
 )
-def delete_retain(event_id: str):
+async def delete_retain(event_id: str, request: Request):
     try:
         event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -1100,14 +1099,14 @@ def delete_retain(event_id: str):
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
 )
-def set_sub_label(
+async def set_sub_label(
     request: Request,
     event_id: str,
     body: EventsSubLabelBody,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         event = None
 
@@ -1155,14 +1154,14 @@ def set_sub_label(
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
 )
-def set_plate(
+async def set_plate(
     request: Request,
     event_id: str,
     body: EventsLPRBody,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         event = None
 
@@ -1211,14 +1210,14 @@ def set_plate(
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
 )
-def set_description(
+async def set_description(
     request: Request,
     event_id: str,
     body: EventsDescriptionBody,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -1263,12 +1262,12 @@ def set_description(
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
 )
-def regenerate_description(
+async def regenerate_description(
     request: Request, event_id: str, params: RegenerateQueryParameters = Depends()
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -1339,10 +1338,10 @@ def generate_description_embedding(
     )
 
 
-def delete_single_event(event_id: str, request: Request) -> dict:
+async def delete_single_event(event_id: str, request: Request) -> dict:
     try:
         event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         return {"success": False, "message": f"Event {event_id} not found"}
 
@@ -1473,10 +1472,10 @@ def create_event(
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
 )
-def end_event(request: Request, event_id: str, body: EventsEndBody):
+async def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
         event: Event = Event.get(Event.id == event_id)
-        require_camera_access(event.camera)
+        await require_camera_access(event.camera, request=request)
         end_time = body.end_time or datetime.datetime.now().timestamp()
         request.app.event_metadata_updater.publish(
             (event_id, end_time), EventMetadataTypeEnum.manual_event_end.value

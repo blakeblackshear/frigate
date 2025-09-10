@@ -153,7 +153,7 @@ async def review(
 
 
 @router.get("/review_ids", response_model=list[ReviewSegmentResponse])
-def review_ids(ids: str):
+async def review_ids(request: Request, ids: str):
     ids = ids.split(",")
 
     if not ids:
@@ -165,7 +165,7 @@ def review_ids(ids: str):
     for review_id in ids:
         try:
             review = ReviewSegment.get(ReviewSegment.id == review_id)
-            require_camera_access(review.camera)
+            await require_camera_access(review.camera, request=request)
         except DoesNotExist:
             return JSONResponse(
                 content=(
@@ -418,6 +418,7 @@ async def review_summary(
 
 @router.post("/reviews/viewed", response_model=GenericResponse)
 async def set_multiple_reviewed(
+    request: Request,
     body: ReviewModifyMultipleBody,
     current_user: dict = Depends(get_current_user),
 ):
@@ -429,7 +430,7 @@ async def set_multiple_reviewed(
     for review_id in body.ids:
         try:
             review = ReviewSegment.get(ReviewSegment.id == review_id)
-            require_camera_access(review.camera)
+            await require_camera_access(review.camera, request=request)
             review_status = UserReviewStatus.get(
                 UserReviewStatus.user_id == user_id,
                 UserReviewStatus.review_segment == review_id,
@@ -594,12 +595,12 @@ def motion_activity(
 
 
 @router.get("/review/event/{event_id}", response_model=ReviewSegmentResponse)
-def get_review_from_event(event_id: str):
+async def get_review_from_event(request: Request, event_id: str):
     try:
         review = ReviewSegment.get(
             ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
         )
-        require_camera_access(review.camera)
+        await require_camera_access(review.camera, request=request)
         return JSONResponse(model_to_dict(review))
     except DoesNotExist:
         return JSONResponse(
@@ -609,10 +610,10 @@ def get_review_from_event(event_id: str):
 
 
 @router.get("/review/{review_id}", response_model=ReviewSegmentResponse)
-def get_review(review_id: str):
+async def get_review(request: Request, review_id: str):
     try:
         review = ReviewSegment.get(ReviewSegment.id == review_id)
-        require_camera_access(review.camera)
+        await require_camera_access(review.camera, request=request)
         return JSONResponse(content=model_to_dict(review))
     except DoesNotExist:
         return JSONResponse(

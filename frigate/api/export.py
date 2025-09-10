@@ -150,10 +150,10 @@ def export_recording(
 @router.patch(
     "/export/{event_id}/rename", dependencies=[Depends(require_role(["admin"]))]
 )
-def export_rename(event_id: str, body: ExportRenameBody):
+async def export_rename(event_id: str, body: ExportRenameBody, request: Request):
     try:
         export: Export = Export.get(Export.id == event_id)
-        require_camera_access(export.camera)
+        await require_camera_access(export.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=(
@@ -179,10 +179,10 @@ def export_rename(event_id: str, body: ExportRenameBody):
 
 
 @router.delete("/export/{event_id}", dependencies=[Depends(require_role(["admin"]))])
-def export_delete(event_id: str):
+async def export_delete(event_id: str, request: Request):
     try:
         export: Export = Export.get(Export.id == event_id)
-        require_camera_access(export.camera)
+        await require_camera_access(export.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=(
@@ -233,10 +233,10 @@ def export_delete(event_id: str):
 
 
 @router.get("/exports/{export_id}")
-def get_export(export_id: str):
+async def get_export(export_id: str, request: Request):
     try:
         export = Export.get(Export.id == export_id)
-        require_camera_access(export.camera)
+        await require_camera_access(export.camera, request=request)
         return JSONResponse(content=model_to_dict(export))
     except DoesNotExist:
         return JSONResponse(
