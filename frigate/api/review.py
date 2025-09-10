@@ -461,18 +461,6 @@ async def set_multiple_reviewed(
 )
 def delete_reviews(body: ReviewModifyMultipleBody):
     list_of_ids = body.ids
-    for review_id in list_of_ids:
-        try:
-            review = ReviewSegment.get(ReviewSegment.id == review_id)
-            require_camera_access(review.camera)
-        except DoesNotExist:
-            return JSONResponse(
-                content=(
-                    {"success": False, "message": f"Review {review_id} not found"}
-                ),
-                status_code=404,
-            )
-    list_of_ids = body.ids
     reviews = (
         ReviewSegment.select(
             ReviewSegment.camera,
