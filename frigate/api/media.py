@@ -463,7 +463,7 @@ def all_recordings_summary(
     )
 
     if cameras != "all":
-        query = query.where(Recordings.camera << cameras.split(","))
+        query = query.where(Recordings.camera << cameras)
 
     recording_days = query.namedtuples()
     days = {day.day: True for day in recording_days}
