@@ -50,7 +50,7 @@ export default function CreateRoleDialog({
   const formSchema = z.object({
     role: z
       .string()
-      .min(1, t("roles.dialog.form.roleIsRequired"))
+      .min(1, t("roles.dialog.form.role.roleIsRequired"))
       .regex(/^[A-Za-z0-9._]+$/, {
         message: t("roles.dialog.form.role.roleOnlyInclude"),
       })
