@@ -1410,10 +1410,7 @@ async def delete_events(request: Request, body: EventsDeleteBody):
 @router.post(
     "/events/{camera_name}/{label}/create",
     response_model=EventCreateResponse,
-    dependencies=[
-        Depends(lambda: require_role(["admin"])),
-        Depends(require_camera_access),
-    ],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 def create_event(
     request: Request,
@@ -1497,10 +1494,7 @@ async def end_event(request: Request, event_id: str, body: EventsEndBody):
 @router.post(
     "/trigger/embedding",
     response_model=dict,
-    dependencies=[
-        Depends(lambda: require_role(["admin"])),
-        Depends(require_camera_access),
-    ],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 def create_trigger_embedding(
     request: Request,
@@ -1650,12 +1644,9 @@ def create_trigger_embedding(
 
 
 @router.put(
-    "/trigger/embedding/{camera}/{name}",
+    "/trigger/embedding/{camera_name}/{name}",
     response_model=dict,
-    dependencies=[
-        Depends(lambda: require_role(["admin"])),
-        Depends(require_camera_access),
-    ],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 def update_trigger_embedding(
     request: Request,
@@ -1814,12 +1805,9 @@ def update_trigger_embedding(
 
 
 @router.delete(
-    "/trigger/embedding/{camera}/{name}",
+    "/trigger/embedding/{camera_name}/{name}",
     response_model=dict,
-    dependencies=[
-        Depends(lambda: require_role(["admin"])),
-        Depends(require_camera_access),
-    ],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 def delete_trigger_embedding(
     request: Request,
@@ -1890,10 +1878,7 @@ def delete_trigger_embedding(
 @router.get(
     "/triggers/status/{camera_name}",
     response_model=dict,
-    dependencies=[
-        Depends(lambda: require_role(["admin"])),
-        Depends(require_camera_access),
-    ],
+    dependencies=[Depends(require_role(["admin"]))],
 )
 def get_triggers_status(
     camera_name: str,
