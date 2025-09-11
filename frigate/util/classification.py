@@ -40,6 +40,8 @@ class ClassificationTrainingProcess(FrigateProcess):
 
     def __generate_representative_dataset_factory(self, dataset_dir: str):
         def generate_representative_dataset():
+            from tensorflow.keras.applications.mobilenet_v3 import preprocess_input
+            
             image_paths = []
             for root, dirs, files in os.walk(dataset_dir):
                 for file in files:
@@ -50,7 +52,8 @@ class ClassificationTrainingProcess(FrigateProcess):
                 img = cv2.imread(path)
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 img = cv2.resize(img, (224, 224))
-                img_array = (np.array(img, dtype=np.float32) / 255.0) * 2.0 - 1.0
+                img_array = np.array(img, dtype=np.float32)
+                img_array = preprocess_input(img_array)
                 img_array = img_array[None, ...]
                 yield [img_array]
 
@@ -64,6 +67,7 @@ class ClassificationTrainingProcess(FrigateProcess):
         import tensorflow as tf
         from tensorflow.keras import layers, models, optimizers
         from tensorflow.keras.applications import MobileNetV3Small
+        from tensorflow.keras.applications.mobilenet_v3 import preprocess_input
         from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
         logger.info(f"Kicking off classification training for {self.model_name}.")
@@ -103,9 +107,6 @@ class ClassificationTrainingProcess(FrigateProcess):
         )
 
         # create training set
-        def preprocess_input(x):
-            return (x / 255.0) * 2.0 - 1.0
-        
         datagen = ImageDataGenerator(
             preprocessing_function=preprocess_input,
             validation_split=0.2
