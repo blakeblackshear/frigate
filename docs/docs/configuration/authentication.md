@@ -247,7 +247,7 @@ If you want to provide access to all cameras to a specific user, just use the **
 
 ### Managing User Roles
 
-1. Log in as an **admin** user via port `8971`.
+1. Log in as an **admin** user via port `8971` (preferred), or unauthenticated via port `5000`.
 2. Navigate to **Settings > Users**.
 3. In the **Users** section, edit a user’s role by selecting from available roles (admin, viewer, or custom).
 4. In the **Roles** section, add/edit/delete custom roles (select cameras via switches). Deleting a role auto-reassigns users to "viewer".
