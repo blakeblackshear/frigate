@@ -36,6 +36,7 @@ import EditRoleCamerasDialog from "@/components/overlay/EditRoleCamerasDialog";
 import { useTranslation } from "react-i18next";
 import DeleteRoleDialog from "@/components/overlay/DeleteRoleDialog";
 import { Separator } from "@/components/ui/separator";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 export default function AuthenticationView() {
   const { t } = useTranslation("views/settings");
@@ -607,12 +608,22 @@ export default function AuthenticationView() {
                           {roleData.name}
                         </TableCell>
                         <TableCell>
-                          {roleData.cameras.length > 0 ? (
-                            roleData.cameras.join(", ")
+                          {roleData.cameras.length > 5 ? (
+                            <Badge variant="outline" className="text-xs">
+                              {roleData.cameras.length} cameras
+                            </Badge>
                           ) : (
-                            <span className="text-muted-foreground">
-                              {t("menu.live.allCameras", { ns: "common" })}
-                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              {roleData.cameras.map((camera) => (
+                                <Badge variant="outline" className="text-xs">
+                                  <CameraNameLabel
+                                    key={camera}
+                                    camera={camera}
+                                    className="text-xs smart-capitalize"
+                                  />
+                                </Badge>
+                              ))}
+                            </div>
                           )}
                         </TableCell>
                         <TableCell className="text-right">
