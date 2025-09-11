@@ -103,8 +103,11 @@ class ClassificationTrainingProcess(FrigateProcess):
         )
 
         # create training set
+        def preprocess_input(x):
+            return (x / 255.0) * 2.0 - 1.0
+        
         datagen = ImageDataGenerator(
-            rescale=lambda x: (x / 255.0) * 2.0 - 1.0, 
+            preprocessing_function=preprocess_input,
             validation_split=0.2
         )
         train_gen = datagen.flow_from_directory(
