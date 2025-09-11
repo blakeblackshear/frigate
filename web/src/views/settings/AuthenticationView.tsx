@@ -14,7 +14,7 @@ import DeleteUserDialog from "@/components/overlay/DeleteUserDialog";
 import { HiTrash } from "react-icons/hi";
 import { FaUserEdit } from "react-icons/fa";
 
-import { LuPlus, LuShield, LuUserCog } from "react-icons/lu";
+import { LuPencil, LuPlus, LuShield, LuUserCog } from "react-icons/lu";
 import {
   Table,
   TableBody,
@@ -693,7 +693,7 @@ export default function AuthenticationView({
                                         }}
                                         disabled={roleData.name === "admin"}
                                       >
-                                        <FaUserEdit className="size-3.5" />
+                                        <LuPencil className="size-3.5" />
                                         <span className="ml-1.5 hidden sm:inline-block">
                                           {t("roles.table.editCameras")}
                                         </span>
