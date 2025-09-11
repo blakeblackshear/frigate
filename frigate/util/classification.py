@@ -82,7 +82,7 @@ class ClassificationTrainingProcess(FrigateProcess):
             input_shape=(224, 224, 3),
             include_top=False,
             weights="imagenet",
-            alpha=0.35,
+            alpha=0.75,
         )
         base_model.trainable = False  # Freeze pre-trained layers
 
