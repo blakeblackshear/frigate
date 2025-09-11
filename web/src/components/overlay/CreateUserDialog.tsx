@@ -36,7 +36,7 @@ import { useTranslation } from "react-i18next";
 
 type CreateUserOverlayProps = {
   show: boolean;
-  onCreate: (user: string, password: string, role: "admin" | "viewer") => void;
+  onCreate: (user: string, password: string, role: string) => void;
   onCancel: () => void;
 };
 
