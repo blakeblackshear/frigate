@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Toaster } from "@/components/ui/sonner";
@@ -31,22 +31,32 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import RoleChangeDialog from "@/components/overlay/RoleChangeDialog";
+import CreateRoleDialog from "@/components/overlay/CreateRoleDialog";
+import EditRoleCamerasDialog from "@/components/overlay/EditRoleCamerasDialog";
 import { useTranslation } from "react-i18next";
+import DeleteRoleDialog from "@/components/overlay/DeleteRoleDialog";
+import { Separator } from "@/components/ui/separator";
 
 export default function AuthenticationView() {
   const { t } = useTranslation("views/settings");
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config, mutate: updateConfig } =
+    useSWR<FrigateConfig>("config");
   const { data: users, mutate: mutateUsers } = useSWR<User[]>("users");
 
   const [showSetPassword, setShowSetPassword] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [showRoleChange, setShowRoleChange] = useState(false);
+  const [showCreateRole, setShowCreateRole] = useState(false);
+  const [showEditRole, setShowEditRole] = useState(false);
+  const [showDeleteRole, setShowDeleteRole] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState<string>();
-  const [selectedUserRole, setSelectedUserRole] = useState<
-    "admin" | "viewer"
-  >();
+  const [selectedUserRole, setSelectedUserRole] = useState<string>();
+
+  const [selectedRole, setSelectedRole] = useState<string>();
+  const [currentRoleCameras, setCurrentRoleCameras] = useState<string[]>([]);
+  const [selectedRoleForDelete, setSelectedRoleForDelete] = useState<string>();
 
   useEffect(() => {
     document.title = t("documentTitle.authentication");
@@ -82,11 +92,7 @@ export default function AuthenticationView() {
     [t],
   );
 
-  const onCreate = (
-    user: string,
-    password: string,
-    role: "admin" | "viewer",
-  ) => {
+  const onCreate = (user: string, password: string, role: string) => {
     axios
       .post("users", { username: user, password, role })
       .then((response) => {
@@ -148,8 +154,8 @@ export default function AuthenticationView() {
       });
   };
 
-  const onChangeRole = (user: string, newRole: "admin" | "viewer") => {
-    if (user === "admin") return; // Prevent role change for 'admin'
+  const onChangeRole = (user: string, newRole: string) => {
+    if (user === "admin") return;
 
     axios
       .put(`users/${user}/role`, { role: newRole })
@@ -184,6 +190,203 @@ export default function AuthenticationView() {
       });
   };
 
+  type ConfigSetBody = {
+    requires_restart: number;
+    config_data: {
+      auth: {
+        roles: {
+          [key: string]: string[] | string;
+        };
+      };
+    };
+    update_topic?: string;
+  };
+
+  const onCreateRole = useCallback(
+    async (role: string, cameras: string[]) => {
+      const configBody: ConfigSetBody = {
+        requires_restart: 0,
+        config_data: {
+          auth: {
+            roles: {
+              [role]: cameras,
+            },
+          },
+        },
+        update_topic: "config/auth",
+      };
+      return axios
+        .put("config/set", configBody)
+        .then((response) => {
+          if (response.status === 200) {
+            setShowCreateRole(false);
+            updateConfig();
+            toast.success(t("roles.toast.success.createRole", { role }), {
+              position: "top-center",
+            });
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("roles.toast.error.createRoleFailed", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
+          throw error;
+        });
+    },
+    [t, updateConfig],
+  );
+
+  const onEditRoleCameras = useCallback(
+    async (cameras: string[]) => {
+      if (!selectedRole) return;
+      const configBody: ConfigSetBody = {
+        requires_restart: 0,
+        config_data: {
+          auth: {
+            roles: {
+              [selectedRole]: cameras,
+            },
+          },
+        },
+        update_topic: "config/auth",
+      };
+      return axios
+        .put("config/set", configBody)
+        .then((response) => {
+          if (response.status === 200) {
+            setShowEditRole(false);
+            setSelectedRole(undefined);
+            setCurrentRoleCameras([]);
+            updateConfig();
+            toast.success(
+              t("roles.toast.success.updateCameras", { role: selectedRole }),
+              {
+                position: "top-center",
+              },
+            );
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("roles.toast.error.updateCamerasFailed", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
+          throw error;
+        });
+    },
+    [t, selectedRole, updateConfig],
+  );
+
+  const onDeleteRole = useCallback(
+    async (role: string) => {
+      // Update users assigned to this role to 'viewer'
+      const usersToUpdate = users?.filter((user) => user.role === role) || [];
+      if (usersToUpdate.length > 0) {
+        Promise.all(
+          usersToUpdate.map((user) =>
+            axios.put(`users/${user.username}/role`, { role: "viewer" }),
+          ),
+        )
+          .then(() => {
+            mutateUsers(
+              (users) =>
+                users?.map((u) =>
+                  u.role === role ? { ...u, role: "viewer" } : u,
+                ),
+              false,
+            );
+            toast.success(
+              t("roles.toast.success.userRolesUpdated", {
+                count: usersToUpdate.length,
+              }),
+              { position: "top-center" },
+            );
+          })
+          .catch((error) => {
+            const errorMessage =
+              error.response?.data?.message ||
+              error.response?.data?.detail ||
+              "Unknown error";
+            toast.error(
+              t("roles.toast.error.userUpdateFailed", { errorMessage }),
+              { position: "top-center" },
+            );
+          });
+      }
+
+      // Now delete the role from config
+      const configBody: ConfigSetBody = {
+        requires_restart: 0,
+        config_data: {
+          auth: {
+            roles: {
+              [role]: "",
+            },
+          },
+        },
+        update_topic: "config/auth",
+      };
+      return axios
+        .put("config/set", configBody)
+        .then((response) => {
+          if (response.status === 200) {
+            setShowDeleteRole(false);
+            setSelectedRoleForDelete("");
+            updateConfig();
+            toast.success(t("roles.toast.success.deleteRole", { role }), {
+              position: "top-center",
+            });
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("roles.toast.error.deleteRoleFailed", {
+              errorMessage,
+            }),
+            {
+              position: "top-center",
+            },
+          );
+          throw error;
+        });
+    },
+    [t, updateConfig, users, mutateUsers],
+  );
+
+  const roles = useMemo(() => {
+    return config?.auth?.roles
+      ? Object.entries(config.auth.roles).map(([name, data]) => ({
+          name,
+          cameras: Array.isArray(data) ? data : [],
+        }))
+      : [];
+  }, [config]);
+
+  const availableRoles = useMemo(() => {
+    return config ? [...Object.keys(config.auth?.roles || {})] : [];
+  }, [config]);
+
   if (!config || !users) {
     return (
       <div className="flex h-full w-full items-center justify-center">
@@ -193,7 +396,7 @@ export default function AuthenticationView() {
   }
 
   return (
-    <div className="flex size-full flex-col md:flex-row">
+    <div className="flex size-full flex-col">
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
         <div className="mb-5 flex flex-row items-center justify-between gap-2">
@@ -269,33 +472,33 @@ export default function AuthenticationView() {
                         <TableCell className="text-right">
                           <TooltipProvider>
                             <div className="flex items-center justify-end gap-2">
-                              {user.username !== "admin" && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="h-8 px-2"
-                                      onClick={() => {
-                                        setSelectedUser(user.username);
-                                        setSelectedUserRole(
-                                          (user.role as "admin" | "viewer") ||
-                                            "viewer",
-                                        );
-                                        setShowRoleChange(true);
-                                      }}
-                                    >
-                                      <LuUserCog className="size-3.5" />
-                                      <span className="ml-1.5 hidden sm:inline-block">
-                                        {t("role.title", { ns: "common" })}
-                                      </span>
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{t("users.table.changeRole")}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
+                              {user.username !== "admin" &&
+                                user.username !== "viewer" && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-8 px-2"
+                                        onClick={() => {
+                                          setSelectedUser(user.username);
+                                          setSelectedUserRole(
+                                            user.role || "viewer",
+                                          );
+                                          setShowRoleChange(true);
+                                        }}
+                                      >
+                                        <LuUserCog className="size-3.5" />
+                                        <span className="ml-1.5 hidden sm:inline-block">
+                                          {t("role.title", { ns: "common" })}
+                                        </span>
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{t("users.table.changeRole")}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
 
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -353,6 +556,136 @@ export default function AuthenticationView() {
             </div>
           </div>
         </div>
+
+        <Separator className="my-6 flex bg-secondary" />
+
+        <div className="mb-5 flex flex-row items-center justify-between gap-2">
+          <div className="flex flex-col items-start">
+            <Heading as="h3" className="my-2">
+              {t("roles.management.title")}
+            </Heading>
+            <p className="text-sm text-muted-foreground">
+              {t("roles.management.desc")}
+            </p>
+          </div>
+          <Button
+            className="flex items-center gap-2 self-start sm:self-auto"
+            aria-label={t("roles.addRole")}
+            variant="default"
+            onClick={() => setShowCreateRole(true)}
+          >
+            <LuPlus className="size-4" />
+            {t("roles.addRole")}
+          </Button>
+        </div>
+        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt">
+            <div className="h-full overflow-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-muted/50">
+                  <TableRow>
+                    <TableHead className="w-[250px]">
+                      {t("roles.table.role")}
+                    </TableHead>
+                    <TableHead>{t("roles.table.cameras")}</TableHead>
+                    <TableHead className="text-right">
+                      {t("roles.table.actions")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {roles.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="h-24 text-center">
+                        {t("roles.table.noRoles")}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    roles.map((roleData) => (
+                      <TableRow key={roleData.name} className="group">
+                        <TableCell className="font-medium">
+                          {roleData.name}
+                        </TableCell>
+                        <TableCell>
+                          {roleData.cameras.length > 0 ? (
+                            roleData.cameras.join(", ")
+                          ) : (
+                            <span className="text-muted-foreground">
+                              {t("menu.live.allCameras", { ns: "common" })}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <TooltipProvider>
+                            <div className="flex items-center justify-end gap-2">
+                              {roleData.name !== "admin" &&
+                                roleData.name !== "viewer" && (
+                                  <>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="h-8 px-2"
+                                          onClick={() => {
+                                            setSelectedRole(roleData.name);
+                                            setCurrentRoleCameras(
+                                              roleData.cameras,
+                                            );
+                                            setShowEditRole(true);
+                                          }}
+                                          disabled={roleData.name === "admin"}
+                                        >
+                                          <FaUserEdit className="size-3.5" />
+                                          <span className="ml-1.5 hidden sm:inline-block">
+                                            {t("roles.table.editCameras")}
+                                          </span>
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{t("roles.table.editCameras")}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          size="sm"
+                                          variant="destructive"
+                                          className="h-8 px-2"
+                                          onClick={() => {
+                                            setSelectedRoleForDelete(
+                                              roleData.name,
+                                            );
+                                            setShowDeleteRole(true);
+                                          }}
+                                          disabled={roleData.name === "admin"}
+                                        >
+                                          <HiTrash className="size-3.5" />
+                                          <span className="ml-1.5 hidden sm:inline-block">
+                                            {t("button.delete", {
+                                              ns: "common",
+                                            })}
+                                          </span>
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{t("roles.table.deleteRole")}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </>
+                                )}
+                            </div>
+                          </TooltipProvider>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </div>
       </div>
 
       <SetPasswordDialog
@@ -376,10 +709,48 @@ export default function AuthenticationView() {
           show={showRoleChange}
           username={selectedUser}
           currentRole={selectedUserRole}
-          onSave={(role) => onChangeRole(selectedUser, role)}
+          availableRoles={availableRoles}
+          onSave={(role) => onChangeRole(selectedUser!, role)}
           onCancel={() => setShowRoleChange(false)}
         />
       )}
+      <CreateRoleDialog
+        show={showCreateRole}
+        config={config}
+        onCreate={onCreateRole}
+        onCancel={() => setShowCreateRole(false)}
+      />
+      {selectedRole && (
+        <EditRoleCamerasDialog
+          show={showEditRole}
+          config={config}
+          role={selectedRole}
+          currentCameras={currentRoleCameras}
+          onSave={onEditRoleCameras}
+          onCancel={() => {
+            setShowEditRole(false);
+            setSelectedRole(undefined);
+            setCurrentRoleCameras([]);
+          }}
+        />
+      )}
+      <DeleteRoleDialog
+        show={showDeleteRole}
+        role={selectedRoleForDelete || ""}
+        onCancel={() => {
+          setShowDeleteRole(false);
+          setSelectedRoleForDelete("");
+        }}
+        onDelete={async () => {
+          if (selectedRoleForDelete) {
+            try {
+              await onDeleteRole(selectedRoleForDelete);
+            } catch (error) {
+              // Error handling is already done in onDeleteRole
+            }
+          }
+        }}
+      />
     </div>
   );
 }
