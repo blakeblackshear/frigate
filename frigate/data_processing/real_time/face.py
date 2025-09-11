@@ -60,10 +60,12 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.faces_per_second = EventsPerSecond()
         self.inference_speed = InferenceSpeed(self.metrics.face_rec_speed)
 
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
+
         download_path = os.path.join(MODEL_CACHE_DIR, "facedet")
         self.model_files = {
-            "facedet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facedet.onnx",
-            "landmarkdet.yaml": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/landmarkdet.yaml",
+            "facedet.onnx": f"{GITHUB_ENDPOINT}/NickM-27/facenet-onnx/releases/download/v1.0/facedet.onnx",
+            "landmarkdet.yaml": f"{GITHUB_ENDPOINT}/NickM-27/facenet-onnx/releases/download/v1.0/landmarkdet.yaml",
         }
 
         if not all(
