@@ -42,7 +42,7 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         self.labelmap: dict[int, str] = {}
 
         GITHUB_RAW_ENDPOINT = os.environ.get(
-            "GITHUB_RAW_ENDPOINT", "raw.githubusercontent.com"
+            "GITHUB_RAW_ENDPOINT", "https://raw.githubusercontent.com"
         )
         download_path = os.path.join(MODEL_CACHE_DIR, "bird")
         self.model_files = {
