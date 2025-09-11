@@ -63,7 +63,7 @@ class ClassificationTrainingProcess(FrigateProcess):
         # import in the function so that tensorflow is not initialized multiple times
         import tensorflow as tf
         from tensorflow.keras import layers, models, optimizers
-        from tensorflow.keras.applications import MobileNetV2
+        from tensorflow.keras.applications import MobileNetV3Small
         from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
         logger.info(f"Kicking off classification training for {self.model_name}.")
@@ -77,8 +77,8 @@ class ClassificationTrainingProcess(FrigateProcess):
             ]
         )
 
-        # Start with imagenet base model with 35% of channels in each layer
-        base_model = MobileNetV2(
+        # Start with imagenet base model
+        base_model = MobileNetV3Small(
             input_shape=(224, 224, 3),
             include_top=False,
             weights="imagenet",
