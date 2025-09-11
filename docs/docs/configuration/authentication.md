@@ -170,7 +170,7 @@ In this example:
 - The `remote-role` header determines the user’s privileges:
   - **admin** → Full access (user management, configuration changes).
   - **viewer** → Read-only access.
-  - **Custom roles** → Access limited to the cameras defined in `auth.roles[role]`.
+  - **Custom roles** → Read-only access limited to the cameras defined in `auth.roles[role]`.
 - Ensure your **proxy sends both user and role headers** for proper role enforcement.
 
 **Unauthenticated Port (5000)**
@@ -220,7 +220,7 @@ Frigate supports user roles to control access to certain features in the UI and 
 
 ### Custom Roles and Camera Access
 
-Custom roles allow fine-grained control over camera access. Each role specifies an array of allowed camera names. If a user is assigned a role, they are like the **viewer** role - they can only view Live, Review/History, Explore, and Export for those cameras. Backend API endpoints enforce this server-side (e.g., returning 403 for unauthorized cameras), and the frontend UI filters content accordingly (e.g., camera dropdowns show only permitted options).
+The viewer role provides read-only access to all cameras in the UI and API. Custom roles allow admins to limit read-only access to specific cameras. Each role specifies an array of allowed camera names. If a user is assigned a custom role, their account is like the **viewer** role - they can only view Live, Review/History, Explore, and Export for the designated cameras. Backend API endpoints enforce this server-side (e.g., returning 403 for unauthorized cameras), and the frontend UI filters content accordingly (e.g., camera dropdowns show only permitted options).
 
 ### Role Configuration Example
 
