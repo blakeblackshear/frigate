@@ -215,7 +215,6 @@ class MemryXDetector(DetectionApi):
         self._acquire_file_lock(lock_path)
 
         try:
-
             # ---------- CASE 1: user provided a custom model path ----------
             if self.memx_model_path:
                 if not self.memx_model_path.endswith(".zip"):
@@ -273,7 +272,9 @@ class MemryXDetector(DetectionApi):
                     self.memx_post_model = None
                 else:
                     # Future model types can optionally use post if present
-                    self.memx_post_model = post_candidates[0] if post_candidates else None
+                    self.memx_post_model = (
+                        post_candidates[0] if post_candidates else None
+                    )
 
                 logger.info(f"Using custom model: {self.memx_model_path}")
                 return
@@ -315,7 +316,9 @@ class MemryXDetector(DetectionApi):
                     logger.info(f"Model extracted to {self.cache_dir}.")
 
                 # Re-assign model paths after extraction
-                self.memx_model_path = os.path.join(model_subdir, self.expected_dfp_model)
+                self.memx_model_path = os.path.join(
+                    model_subdir, self.expected_dfp_model
+                )
                 self.memx_post_model = (
                     os.path.join(model_subdir, self.expected_post_model)
                     if self.expected_post_model
@@ -331,7 +334,9 @@ class MemryXDetector(DetectionApi):
                         os.remove(zip_path)
                         logger.info("Cleaned up ZIP file after extraction.")
                     except Exception as e:
-                        logger.warning(f"Failed to remove downloaded zip {zip_path}: {e}")
+                        logger.warning(
+                            f"Failed to remove downloaded zip {zip_path}: {e}"
+                        )
 
         finally:
             self._release_file_lock(lock_path)
