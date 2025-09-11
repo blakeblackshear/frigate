@@ -564,15 +564,15 @@
   },
   "roles": {
     "management": {
-      "title": "Role Management",
-      "desc": "Manage roles and their camera access permissions for this Frigate instance."
+      "title": "Viewer Role Management",
+      "desc": "Manage custom viewer roles and their camera access permissions for this Frigate instance."
     },
     "addRole": "Add Role",
     "table": {
       "role": "Role",
       "cameras": "Cameras",
       "actions": "Actions",
-      "noRoles": "No roles found.",
+      "noRoles": "No custom roles found.",
       "editCameras": "Edit Cameras",
       "deleteRole": "Delete Role"
     },
@@ -581,7 +581,7 @@
         "createRole": "Role {{role}} created successfully",
         "updateCameras": "Cameras updated for role {{role}}",
         "deleteRole": "Role {{role}} deleted successfully",
-        "userRolesUpdated": "{{count}} user(s) assigned to this role have been updated to 'viewer'."
+        "userRolesUpdated": "{{count}} user(s) assigned to this role have been updated to 'viewer', which has access to all cameras."
       },
       "error": {
         "createRoleFailed": "Failed to create role: {{errorMessage}}",
@@ -601,7 +601,7 @@
       },
       "deleteRole": {
         "title": "Delete Role",
-        "desc": "This action cannot be undone. This will permanently delete the role and assign any users with this role to the 'viewer' role.",
+        "desc": "This action cannot be undone. This will permanently delete the role and assign any users with this role to the 'viewer' role, which will give viewer access to all cameras.",
         "warn": "Are you sure you want to delete <strong>{{role}}</strong>?",
         "deleting": "Deleting..."
       },

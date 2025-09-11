@@ -38,7 +38,13 @@ import DeleteRoleDialog from "@/components/overlay/DeleteRoleDialog";
 import { Separator } from "@/components/ui/separator";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
-export default function AuthenticationView() {
+type AuthenticationViewProps = {
+  section?: "users" | "roles";
+};
+
+export default function AuthenticationView({
+  section,
+}: AuthenticationViewProps) {
   const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
@@ -377,10 +383,12 @@ export default function AuthenticationView() {
 
   const roles = useMemo(() => {
     return config?.auth?.roles
-      ? Object.entries(config.auth.roles).map(([name, data]) => ({
-          name,
-          cameras: Array.isArray(data) ? data : [],
-        }))
+      ? Object.entries(config.auth.roles)
+          .filter(([name]) => name !== "admin")
+          .map(([name, data]) => ({
+            name,
+            cameras: Array.isArray(data) ? data : [],
+          }))
       : [];
   }, [config]);
 
@@ -396,319 +404,166 @@ export default function AuthenticationView() {
     );
   }
 
-  return (
-    <div className="flex size-full flex-col">
-      <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
-        <div className="mb-5 flex flex-row items-center justify-between gap-2">
-          <div className="flex flex-col items-start">
-            <Heading as="h3" className="my-2">
-              {t("users.management.title")}
-            </Heading>
-            <p className="text-sm text-muted-foreground">
-              {t("users.management.desc")}
-            </p>
-          </div>
-          <Button
-            className="flex items-center gap-2 self-start sm:self-auto"
-            aria-label={t("users.addUser")}
-            variant="default"
-            onClick={() => setShowCreate(true)}
-          >
-            <LuPlus className="size-4" />
-            {t("users.addUser")}
-          </Button>
+  // Users section
+  const UsersSection = (
+    <>
+      <div className="mb-5 flex flex-row items-center justify-between gap-2">
+        <div className="flex flex-col items-start">
+          <Heading as="h3" className="my-2">
+            {t("users.management.title")}
+          </Heading>
+          <p className="text-sm text-muted-foreground">
+            {t("users.management.desc")}
+          </p>
         </div>
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt">
-            <div className="h-full overflow-auto">
-              <Table>
-                <TableHeader className="sticky top-0 bg-muted/50">
+        <Button
+          className="flex items-center gap-2 self-start sm:self-auto"
+          aria-label={t("users.addUser")}
+          variant="default"
+          onClick={() => setShowCreate(true)}
+        >
+          <LuPlus className="size-4" />
+          {t("users.addUser")}
+        </Button>
+      </div>
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt">
+          <div className="h-full overflow-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-muted/50">
+                <TableRow>
+                  <TableHead className="w-[250px]">
+                    {t("users.table.username")}
+                  </TableHead>
+                  <TableHead>{t("users.table.role")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("users.table.actions")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.length === 0 ? (
                   <TableRow>
-                    <TableHead className="w-[250px]">
-                      {t("users.table.username")}
-                    </TableHead>
-                    <TableHead>{t("users.table.role")}</TableHead>
-                    <TableHead className="text-right">
-                      {t("users.table.actions")}
-                    </TableHead>
+                    <TableCell colSpan={3} className="h-24 text-center">
+                      {t("users.table.noUsers")}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="h-24 text-center">
-                        {t("users.table.noUsers")}
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user.username} className="group">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {user.username === "admin" ? (
+                            <LuShield className="size-4 text-primary" />
+                          ) : (
+                            <LuUserCog className="size-4 text-primary-variant" />
+                          )}
+                          {user.username}
+                        </div>
                       </TableCell>
-                    </TableRow>
-                  ) : (
-                    users.map((user) => (
-                      <TableRow key={user.username} className="group">
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            {user.username === "admin" ? (
-                              <LuShield className="size-4 text-primary" />
-                            ) : (
-                              <LuUserCog className="size-4 text-primary-variant" />
-                            )}
-                            {user.username}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              user.role === "admin" ? "default" : "outline"
-                            }
-                            className={
-                              user.role === "admin"
-                                ? "bg-primary/20 text-primary hover:bg-primary/30"
-                                : ""
-                            }
-                          >
-                            {t("role." + (user.role || "viewer"), {
-                              ns: "common",
-                            })}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <TooltipProvider>
-                            <div className="flex items-center justify-end gap-2">
-                              {user.username !== "admin" &&
-                                user.username !== "viewer" && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-8 px-2"
-                                        onClick={() => {
-                                          setSelectedUser(user.username);
-                                          setSelectedUserRole(
-                                            user.role || "viewer",
-                                          );
-                                          setShowRoleChange(true);
-                                        }}
-                                      >
-                                        <LuUserCog className="size-3.5" />
-                                        <span className="ml-1.5 hidden sm:inline-block">
-                                          {t("role.title", { ns: "common" })}
-                                        </span>
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{t("users.table.changeRole")}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-8 px-2"
-                                    onClick={() => {
-                                      setShowSetPassword(true);
-                                      setSelectedUser(user.username);
-                                    }}
-                                  >
-                                    <FaUserEdit className="size-3.5" />
-                                    <span className="ml-1.5 hidden sm:inline-block">
-                                      {t("users.table.password")}
-                                    </span>
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{t("users.updatePassword")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              {user.username !== "admin" && (
+                      <TableCell>
+                        <Badge
+                          variant={
+                            user.role === "admin" ? "default" : "outline"
+                          }
+                          className={
+                            user.role === "admin"
+                              ? "bg-primary/20 text-primary hover:bg-primary/30"
+                              : ""
+                          }
+                        >
+                          {t("role." + (user.role || "viewer"), {
+                            ns: "common",
+                          })}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <TooltipProvider>
+                          <div className="flex items-center justify-end gap-2">
+                            {user.username !== "admin" &&
+                              user.username !== "viewer" && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
                                       size="sm"
-                                      variant="destructive"
+                                      variant="outline"
                                       className="h-8 px-2"
                                       onClick={() => {
-                                        setShowDelete(true);
                                         setSelectedUser(user.username);
+                                        setSelectedUserRole(
+                                          user.role || "viewer",
+                                        );
+                                        setShowRoleChange(true);
                                       }}
                                     >
-                                      <HiTrash className="size-3.5" />
+                                      <LuUserCog className="size-3.5" />
                                       <span className="ml-1.5 hidden sm:inline-block">
-                                        {t("button.delete", { ns: "common" })}
+                                        {t("role.title", { ns: "common" })}
                                       </span>
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>{t("users.table.deleteUser")}</p>
+                                    <p>{t("users.table.changeRole")}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}
-                            </div>
-                          </TooltipProvider>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </div>
 
-        <Separator className="my-6 flex bg-secondary" />
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 px-2"
+                                  onClick={() => {
+                                    setShowSetPassword(true);
+                                    setSelectedUser(user.username);
+                                  }}
+                                >
+                                  <FaUserEdit className="size-3.5" />
+                                  <span className="ml-1.5 hidden sm:inline-block">
+                                    {t("users.table.password")}
+                                  </span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{t("users.updatePassword")}</p>
+                              </TooltipContent>
+                            </Tooltip>
 
-        <div className="mb-5 flex flex-row items-center justify-between gap-2">
-          <div className="flex flex-col items-start">
-            <Heading as="h3" className="my-2">
-              {t("roles.management.title")}
-            </Heading>
-            <p className="text-sm text-muted-foreground">
-              {t("roles.management.desc")}
-            </p>
-          </div>
-          <Button
-            className="flex items-center gap-2 self-start sm:self-auto"
-            aria-label={t("roles.addRole")}
-            variant="default"
-            onClick={() => setShowCreateRole(true)}
-          >
-            <LuPlus className="size-4" />
-            {t("roles.addRole")}
-          </Button>
-        </div>
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt">
-            <div className="h-full overflow-auto">
-              <Table>
-                <TableHeader className="sticky top-0 bg-muted/50">
-                  <TableRow>
-                    <TableHead className="w-[250px]">
-                      {t("roles.table.role")}
-                    </TableHead>
-                    <TableHead>{t("roles.table.cameras")}</TableHead>
-                    <TableHead className="text-right">
-                      {t("roles.table.actions")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {roles.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="h-24 text-center">
-                        {t("roles.table.noRoles")}
+                            {user.username !== "admin" && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    className="h-8 px-2"
+                                    onClick={() => {
+                                      setShowDelete(true);
+                                      setSelectedUser(user.username);
+                                    }}
+                                  >
+                                    <HiTrash className="size-3.5" />
+                                    <span className="ml-1.5 hidden sm:inline-block">
+                                      {t("button.delete", { ns: "common" })}
+                                    </span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{t("users.table.deleteUser")}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
+                        </TooltipProvider>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    roles.map((roleData) => (
-                      <TableRow key={roleData.name} className="group">
-                        <TableCell className="font-medium">
-                          {roleData.name}
-                        </TableCell>
-                        <TableCell>
-                          {roleData.cameras.length === 0 ? (
-                            <Badge
-                              variant="default"
-                              className="bg-primary/20 text-xs text-primary hover:bg-primary/30"
-                            >
-                              {t("menu.live.allCameras", { ns: "common" })}
-                            </Badge>
-                          ) : roleData.cameras.length > 5 ? (
-                            <Badge variant="outline" className="text-xs">
-                              {roleData.cameras.length} cameras
-                            </Badge>
-                          ) : (
-                            <div className="flex flex-wrap gap-1">
-                              {roleData.cameras.map((camera) => (
-                                <Badge
-                                  key={camera}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  <CameraNameLabel
-                                    camera={camera}
-                                    className="text-xs smart-capitalize"
-                                  />
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <TooltipProvider>
-                            <div className="flex items-center justify-end gap-2">
-                              {roleData.name !== "admin" &&
-                                roleData.name !== "viewer" && (
-                                  <>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          className="h-8 px-2"
-                                          onClick={() => {
-                                            setSelectedRole(roleData.name);
-                                            setCurrentRoleCameras(
-                                              roleData.cameras,
-                                            );
-                                            setShowEditRole(true);
-                                          }}
-                                          disabled={roleData.name === "admin"}
-                                        >
-                                          <FaUserEdit className="size-3.5" />
-                                          <span className="ml-1.5 hidden sm:inline-block">
-                                            {t("roles.table.editCameras")}
-                                          </span>
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>{t("roles.table.editCameras")}</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          size="sm"
-                                          variant="destructive"
-                                          className="h-8 px-2"
-                                          onClick={() => {
-                                            setSelectedRoleForDelete(
-                                              roleData.name,
-                                            );
-                                            setShowDeleteRole(true);
-                                          }}
-                                          disabled={roleData.name === "admin"}
-                                        >
-                                          <HiTrash className="size-3.5" />
-                                          <span className="ml-1.5 hidden sm:inline-block">
-                                            {t("button.delete", {
-                                              ns: "common",
-                                            })}
-                                          </span>
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>{t("roles.table.deleteRole")}</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </>
-                                )}
-                            </div>
-                          </TooltipProvider>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
         </div>
       </div>
-
       <SetPasswordDialog
         show={showSetPassword}
         onCancel={() => setShowSetPassword(false)}
@@ -735,6 +590,159 @@ export default function AuthenticationView() {
           onCancel={() => setShowRoleChange(false)}
         />
       )}
+    </>
+  );
+
+  // Roles section
+  const RolesSection = (
+    <>
+      <div className="mb-5 flex flex-row items-center justify-between gap-2">
+        <div className="flex flex-col items-start">
+          <Heading as="h3" className="my-2">
+            {t("roles.management.title")}
+          </Heading>
+          <p className="text-sm text-muted-foreground">
+            {t("roles.management.desc")}
+          </p>
+        </div>
+        <Button
+          className="flex items-center gap-2 self-start sm:self-auto"
+          aria-label={t("roles.addRole")}
+          variant="default"
+          onClick={() => setShowCreateRole(true)}
+        >
+          <LuPlus className="size-4" />
+          {t("roles.addRole")}
+        </Button>
+      </div>
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt">
+          <div className="h-full overflow-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-muted/50">
+                <TableRow>
+                  <TableHead className="w-[250px]">
+                    {t("roles.table.role")}
+                  </TableHead>
+                  <TableHead>{t("roles.table.cameras")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("roles.table.actions")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {roles.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="h-24 text-center">
+                      {t("roles.table.noRoles")}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  roles.map((roleData) => (
+                    <TableRow key={roleData.name} className="group">
+                      <TableCell className="font-medium">
+                        {roleData.name}
+                      </TableCell>
+                      <TableCell>
+                        {roleData.cameras.length === 0 ? (
+                          <Badge
+                            variant="default"
+                            className="bg-primary/20 text-xs text-primary hover:bg-primary/30"
+                          >
+                            {t("menu.live.allCameras", { ns: "common" })}
+                          </Badge>
+                        ) : roleData.cameras.length > 5 ? (
+                          <Badge variant="outline" className="text-xs">
+                            {roleData.cameras.length} cameras
+                          </Badge>
+                        ) : (
+                          <div className="flex flex-wrap gap-1">
+                            {roleData.cameras.map((camera) => (
+                              <Badge
+                                key={camera}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                <CameraNameLabel
+                                  camera={camera}
+                                  className="text-xs smart-capitalize"
+                                />
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <TooltipProvider>
+                          <div className="flex items-center justify-end gap-2">
+                            {roleData.name !== "admin" &&
+                              roleData.name !== "viewer" && (
+                                <>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-8 px-2"
+                                        onClick={() => {
+                                          setSelectedRole(roleData.name);
+                                          setCurrentRoleCameras(
+                                            roleData.cameras,
+                                          );
+                                          setShowEditRole(true);
+                                        }}
+                                        disabled={roleData.name === "admin"}
+                                      >
+                                        <FaUserEdit className="size-3.5" />
+                                        <span className="ml-1.5 hidden sm:inline-block">
+                                          {t("roles.table.editCameras")}
+                                        </span>
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{t("roles.table.editCameras")}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        className="h-8 px-2"
+                                        onClick={() => {
+                                          setSelectedRoleForDelete(
+                                            roleData.name,
+                                          );
+                                          setShowDeleteRole(true);
+                                        }}
+                                        disabled={roleData.name === "admin"}
+                                      >
+                                        <HiTrash className="size-3.5" />
+                                        <span className="ml-1.5 hidden sm:inline-block">
+                                          {t("button.delete", {
+                                            ns: "common",
+                                          })}
+                                        </span>
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{t("roles.table.deleteRole")}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </>
+                              )}
+                          </div>
+                        </TooltipProvider>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </div>
       <CreateRoleDialog
         show={showCreateRole}
         config={config}
@@ -772,6 +780,23 @@ export default function AuthenticationView() {
           }
         }}
       />
+    </>
+  );
+
+  return (
+    <div className="flex size-full flex-col">
+      <Toaster position="top-center" closeButton={true} />
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
+        {section === "users" && UsersSection}
+        {section === "roles" && RolesSection}
+        {!section && (
+          <>
+            {UsersSection}
+            <Separator className="my-6 flex bg-secondary" />
+            {RolesSection}
+          </>
+        )}
+      </div>
     </div>
   );
 }

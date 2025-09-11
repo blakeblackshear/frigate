@@ -33,7 +33,8 @@ import CameraSettingsView from "@/views/settings/CameraSettingsView";
 import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
-import AuthenticationView from "@/views/settings/AuthenticationView";
+import UsersView from "@/views/settings/UsersView";
+import RolesView from "@/views/settings/RolesView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 import EnrichmentsSettingsView from "@/views/settings/EnrichmentsSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
@@ -57,6 +58,7 @@ const allSettingsViews = [
   "triggers",
   "debug",
   "users",
+  "roles",
   "notifications",
   "frigateplus",
 ] as const;
@@ -288,7 +290,8 @@ export default function Settings() {
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
-        {page == "users" && <AuthenticationView />}
+        {page == "users" && <UsersView />}
+        {page == "roles" && <RolesView />}
         {page == "notifications" && (
           <NotificationView setUnsavedChanges={setUnsavedChanges} />
         )}
