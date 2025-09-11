@@ -48,6 +48,21 @@ class AuthConfig(FrigateBaseModel):
                 raise ValueError(
                     f"Invalid role name '{role}'. Must be alphanumeric with underscores."
                 )
+
+        # Ensure 'admin' and 'viewer' are not used as custom role names
+        reserved_roles = {"admin", "viewer"}
+        if v.keys() & reserved_roles:
+            raise ValueError(
+                f"Reserved roles {reserved_roles} cannot be used as custom roles."
+            )
+
+        # Ensure no role has an empty camera list
+        for role, allowed_cameras in v.items():
+            if not allowed_cameras:
+                raise ValueError(
+                    f"Role '{role}' has no cameras assigned. Custom roles must have at least one camera."
+                )
+
         return v
 
     @model_validator(mode="after")
