@@ -608,16 +608,26 @@ export default function AuthenticationView() {
                           {roleData.name}
                         </TableCell>
                         <TableCell>
-                          {roleData.cameras.length > 5 ? (
+                          {roleData.cameras.length === 0 ? (
+                            <Badge
+                              variant="default"
+                              className="bg-primary/20 text-xs text-primary hover:bg-primary/30"
+                            >
+                              {t("menu.live.allCameras", { ns: "common" })}
+                            </Badge>
+                          ) : roleData.cameras.length > 5 ? (
                             <Badge variant="outline" className="text-xs">
                               {roleData.cameras.length} cameras
                             </Badge>
                           ) : (
                             <div className="flex flex-wrap gap-1">
                               {roleData.cameras.map((camera) => (
-                                <Badge variant="outline" className="text-xs">
+                                <Badge
+                                  key={camera}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
                                   <CameraNameLabel
-                                    key={camera}
                                     camera={camera}
                                     className="text-xs smart-capitalize"
                                   />
