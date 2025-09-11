@@ -50,7 +50,7 @@ class ClassificationTrainingProcess(FrigateProcess):
                 img = cv2.imread(path)
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 img = cv2.resize(img, (224, 224))
-                img_array = np.array(img, dtype=np.float32) / 255.0
+                img_array = (np.array(img, dtype=np.float32) / 255.0) * 2.0 - 1.0
                 img_array = img_array[None, ...]
                 yield [img_array]
 
@@ -103,7 +103,10 @@ class ClassificationTrainingProcess(FrigateProcess):
         )
 
         # create training set
-        datagen = ImageDataGenerator(rescale=1.0 / 255, validation_split=0.2)
+        datagen = ImageDataGenerator(
+            rescale=lambda x: (x / 255.0) * 2.0 - 1.0, 
+            validation_split=0.2
+        )
         train_gen = datagen.flow_from_directory(
             dataset_dir,
             target_size=(224, 224),
