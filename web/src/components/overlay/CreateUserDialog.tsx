@@ -123,7 +123,7 @@ export default function CreateUserDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-5 py-4"
+            className="space-y-5 pt-4"
           >
             <FormField
               name="user"
