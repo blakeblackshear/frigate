@@ -381,16 +381,14 @@ export default function AuthenticationView({
     [t, updateConfig, users, mutateUsers],
   );
 
-  const roles = useMemo(() => {
-    return config?.auth?.roles
-      ? Object.entries(config.auth.roles)
-          .filter(([name]) => name !== "admin")
-          .map(([name, data]) => ({
-            name,
-            cameras: Array.isArray(data) ? data : [],
-          }))
-      : [];
-  }, [config]);
+  const roles = config?.auth?.roles
+    ? Object.entries(config.auth.roles)
+        .filter(([name]) => name !== "admin")
+        .map(([name, data]) => ({
+          name,
+          cameras: Array.isArray(data) ? data : [],
+        }))
+    : [];
 
   const availableRoles = useMemo(() => {
     return config ? [...Object.keys(config.auth?.roles || {})] : [];
