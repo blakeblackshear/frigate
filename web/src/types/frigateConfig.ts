@@ -343,7 +343,9 @@ export interface FrigateConfig {
   };
 
   auth: {
-    roles: string[];
+    roles: {
+      [roleName: string]: string[];
+    };
   };
 
   birdseye: BirdseyeConfig;
