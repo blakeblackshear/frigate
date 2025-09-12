@@ -5,8 +5,8 @@
     "cameras": "Kamerastatistik - Frigate",
     "logs": {
       "frigate": "Frigate-loggar - Frigate",
-      "go2rtc": "Go2RTC-loggar - Frigate",
-      "nginx": "Nginx-loggar - Frigate"
+      "go2rtc": "Go2RTC loggar - Frigate",
+      "nginx": "Nginx loggar - Frigate"
     },
     "enrichments": "Förbättringsstatistik - Frigate"
   },

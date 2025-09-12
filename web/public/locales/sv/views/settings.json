@@ -9,7 +9,7 @@
     "enrichments": "Förbättringsinställningar - Frigate",
     "frigatePlus": "Frigate+ Inställningar - Frigate",
     "notifications": "Notifikations Inställningar - Frigate",
-    "motionTuner": "Rörelsetuner - Frigate",
+    "motionTuner": "Rörelse inställning - Frigate",
     "object": "Felsöka - Frigate"
   },
   "general": {
@@ -362,7 +362,213 @@
     },
     "objectMasks": {
       "label": "Objektmasker",
-      "documentTitle": "Redigera objektmask - Frigate"
+      "documentTitle": "Redigera objektmask - Frigate",
+      "point_one": "{{count}} poäng",
+      "point_other": "{{count}} poäng",
+      "desc": {
+        "title": "Objektfiltermasker används för att filtrera bort falska positiva resultat för en given objekttyp baserat på plats.",
+        "documentation": "Dokumentation"
+      },
+      "add": "Lägg till objektmask",
+      "edit": "Redigera objektmask",
+      "context": "Objektfiltermasker används för att filtrera bort falska positiva resultat för en given objekttyp baserat på plats.",
+      "clickDrawPolygon": "Klicka för att rita en polygon på bilden.",
+      "objects": {
+        "title": "Objekt",
+        "desc": "Objekttypen som gäller för den här objektmasken.",
+        "allObjectTypes": "Alla objekttyper"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} har sparats. Starta om Frigate för att tillämpa ändringarna.",
+          "noName": "Objektmasken har sparats. Starta om Frigate för att tillämpa ändringarna."
+        }
+      }
+    }
+  },
+  "motionDetectionTuner": {
+    "title": "Rörelsedetekteringstuner",
+    "unsavedChanges": "Osparade ändringar i Motion Tuner ({{camera}})",
+    "desc": {
+      "title": "Frigate använder rörelsedetektering som en första kontroll för att se om det händer något i bilden som är värt att kontrollera med objektdetektering.",
+      "documentation": "Läs guiden för rörelsejustering"
+    },
+    "Threshold": {
+      "title": "Tröskel",
+      "desc": "Tröskelvärdet anger hur mycket förändring i en pixels luminans som krävs för att betraktas som rörelse. <em>Standard: 30</em>"
+    },
+    "contourArea": {
+      "title": "Konturområde",
+      "desc": "Konturareans värde används för att avgöra vilka grupper av ändrade pixlar som kvalificeras som rörelse. <em>Standard: 10</em>"
+    },
+    "improveContrast": {
+      "title": "Förbättra kontrasten",
+      "desc": "Förbättra kontrasten för mörkare scener. <em>Standard: PÅ</em>"
+    },
+    "toast": {
+      "success": "Rörelseinställningarna har sparats."
+    }
+  },
+  "debug": {
+    "title": "Felsök",
+    "detectorDesc": "Fregate använder dina detektorer ({{detectors}}) för att upptäcka objekt i din kameras videoström.",
+    "desc": "Felsökningsvyn visar en realtidsvy av spårade objekt och deras statistik. Objektlistan visar en tidsfördröjd sammanfattning av upptäckta objekt.",
+    "openCameraWebUI": "Öppna {{camera}}s webbgränssnitt",
+    "debugging": "Felsökning",
+    "objectList": "Objektlista",
+    "noObjects": "Inga föremål",
+    "audio": {
+      "title": "Ljud",
+      "noAudioDetections": "Inga ljuddetekteringar",
+      "score": "betyg",
+      "currentRMS": "Nuvarande RMS",
+      "currentdbFS": "Nuvarande dbFS"
+    },
+    "boundingBoxes": {
+      "title": "Avgränsande rutor",
+      "desc": "Visa avgränsningsrutor runt spårade objekt",
+      "colors": {
+        "label": "Färger för objektgränser",
+        "info": "<li>Vid uppstart tilldelas olika färger till varje objektetikett</li><li>En mörkblå tunn linje indikerar att objektet inte detekteras vid denna aktuella tidpunkt</li><li>En grå tunn linje indikerar att objektet detekteras som stillastående</li><li>En tjock linje indikerar att objektet är föremål för automatisk spårning (när det är aktiverat)</li>"
+      }
+    },
+    "timestamp": {
+      "title": "Tidsstämpel",
+      "desc": "Lägg en tidsstämpel över bilden"
+    },
+    "zones": {
+      "title": "Zoner",
+      "desc": "Visa en översikt över alla definierade zoner"
+    },
+    "mask": {
+      "title": "Rörelsemasker",
+      "desc": "Visa rörelsemaskpolygoner"
+    },
+    "motion": {
+      "title": "Rörelseboxar",
+      "desc": "Visa rutor runt områden där rörelse detekteras",
+      "tips": "<p><strong>Rörelserutor</strong></p><br><p>Röda rutor kommer att läggas över områden i bilden där rörelse för närvarande detekteras</p>"
+    },
+    "regions": {
+      "title": "Regioner",
+      "desc": "Visa en ruta med det intresseområde som skickats till objektdetektorn",
+      "tips": "<p><strong>Regionsrutor</strong></p><br><p>Ljusgröna rutor kommer att läggas över intressanta områden i bilden som skickas till objektdetektorn.</p>"
+    },
+    "paths": {
+      "title": "Vägar",
+      "desc": "Visa viktiga punkter i det spårade objektets bana",
+      "tips": "<p><strong>Vägar</strong></p><br><p>Linjer och cirklar indikerar viktiga punkter som det spårade objektet har flyttat under sin livscykel.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Ritning av objektformfilter",
+      "desc": "Rita en rektangel på bilden för att visa detaljer om area och förhållande",
+      "tips": "Aktivera det här alternativet för att rita en rektangel på kamerabilden för att visa dess area och förhållande. Dessa värden kan sedan användas för att ställa in parametrar för objektformsfilter i din konfiguration.",
+      "score": "Betyg",
+      "ratio": "Förhållandet",
+      "area": "Område"
+    }
+  },
+  "users": {
+    "title": "Användare",
+    "management": {
+      "title": "Användarhantering",
+      "desc": "Hantera användarkonton för denna Frigate-instans."
+    },
+    "addUser": "Lägg till användare",
+    "updatePassword": "Uppdatera lösenord",
+    "toast": {
+      "success": {
+        "createUser": "Användaren {{user}} har skapats",
+        "deleteUser": "Användaren {{user}} har raderats",
+        "updatePassword": "Lösenordet har uppdaterats.",
+        "roleUpdated": "Rollen uppdaterades för {{user}}"
+      },
+      "error": {
+        "setPasswordFailed": "Misslyckades med att spara lösenordet: {{errorMessage}}",
+        "createUserFailed": "Misslyckades med att skapa användare: {{errorMessage}}",
+        "deleteUserFailed": "Misslyckades med att ta bort användaren: {{errorMessage}}",
+        "roleUpdateFailed": "Misslyckades med att uppdatera rollen: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Användarnamn",
+      "actions": "Åtgärder",
+      "role": "Roll",
+      "noUsers": "Inga användare hittades.",
+      "changeRole": "Ändra användarroll",
+      "password": "Lösenord",
+      "deleteUser": "Ta bort användare"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Användarnamn",
+          "desc": "Endast bokstäver, siffror, punkter och understreck är tillåtna.",
+          "placeholder": "Ange användarnamn"
+        },
+        "password": {
+          "title": "Lösenord",
+          "strength": {
+            "title": "Lösenordsstyrka: ",
+            "weak": "Svag",
+            "medium": "Mellanstark",
+            "strong": "Stark",
+            "veryStrong": "Mycket stark"
+          },
+          "match": "Lösenorden matchar",
+          "notMatch": "Lösenorden matchar inte",
+          "placeholder": "Ange lösenord",
+          "confirm": {
+            "title": "Bekräfta lösenord",
+            "placeholder": "Bekräfta lösenord"
+          }
+        },
+        "newPassword": {
+          "title": "Nytt lösenord",
+          "placeholder": "Ange nytt lösenord",
+          "confirm": {
+            "placeholder": "Ange nytt lösenord igen"
+          }
+        },
+        "usernameIsRequired": "Användarnamn krävs",
+        "passwordIsRequired": "Lösenord krävs"
+      },
+      "createUser": {
+        "title": "Skapa ny användare",
+        "desc": "Lägg till ett nytt användarkonto och ange en roll för åtkomst till områden i Frigate gränssnittet.",
+        "usernameOnlyInclude": "Användarnamnet får endast innehålla bokstäver, siffror, . eller _",
+        "confirmPassword": "Vänligen bekräfta ditt lösenord"
+      },
+      "deleteUser": {
+        "title": "Ta bort användare",
+        "desc": "Den här åtgärden kan inte ångras. Detta kommer att permanent radera användarkontot och all tillhörande data.",
+        "warn": "Är du säker på att du vill ta bort <strong>{{username}}</strong>?"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Lösenordet får inte vara tomt",
+        "doNotMatch": "Lösenorden matchar inte",
+        "updatePassword": "Uppdatera lösenord för {{username}}",
+        "setPassword": "Ange lösenord",
+        "desc": "Skapa ett starkt lösenord för att säkra det här kontot."
+      },
+      "changeRole": {
+        "title": "Ändra användarroll",
+        "select": "Välj en roll",
+        "desc": "Uppdatera behörigheter för <strong>{{username}}</strong>",
+        "roleInfo": {
+          "intro": "Välj lämplig roll för den här användaren:",
+          "admin": "Administratör",
+          "adminDesc": "Full åtkomst till alla funktioner.",
+          "viewer": "Åskådare",
+          "viewerDesc": "Begränsat till Live-dashboards, Review, Explore, och Exports bara."
+        }
+      }
+    }
+  },
+  "notification": {
+    "title": "Aviseringar",
+    "notificationSettings": {
+      "title": "Aviseringsinställningar"
     }
   }
 }
