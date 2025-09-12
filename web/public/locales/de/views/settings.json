@@ -207,7 +207,8 @@
       "nameRequired": "Kameraname ist erforderlich",
       "toast": {
         "success": "Kamera {{cameraName}} erfolgreich gespeichert"
-      }
+      },
+      "nameLength": "Der Name der Kamera darf maximal 24 Zeichen lang sein."
     },
     "backToSettings": "Zurück zu den Kamera Einstellungen",
     "selectCamera": "Kamera wählen",
@@ -440,6 +441,14 @@
       "title": "Pfade",
       "desc": "Wichtige Punkte des Pfads des verfolgten Objekts anzeigen",
       "tips": "<p><strong>Pfade</strong></p><br><p>Linien und Kreise zeigen wichtige Punkte an, an denen sich das verfolgte Objekt während seines Lebenszyklus bewegt hat.</p>"
+    },
+    "openCameraWebUI": "Web-Benutzeroberfläche von {{camera}} öffnen",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Keine Audioerkennungen",
+      "score": "Punktzahl",
+      "currentRMS": "Aktueller Effektivwert",
+      "currentdbFS": "Aktuelle dbFS"
     }
   },
   "motionDetectionTuner": {
