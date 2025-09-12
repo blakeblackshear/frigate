@@ -1,0 +1,34 @@
+# syntax=docker/dockerfile:1.4
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+FROM --platform=linux/amd64 debian:12-slim AS poky-toolchain
+ARG DEBIAN_FRONTEND
+RUN apt-get update \
+    && apt-get install -y wget xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /tmp
+
+RUN wget -O /tmp/toolchain.sh.000 https://github.com/synaptics-astra/sdk/releases/download/v1.5.0/sl1680_oobe-poky-glibc-x86_64-astra-media-oobe-cortexa73-sl1680-toolchain-4.0.17.sh.000 \
+ && wget -O /tmp/toolchain.sh.001 https://github.com/synaptics-astra/sdk/releases/download/v1.5.0/sl1680_oobe-poky-glibc-x86_64-astra-media-oobe-cortexa73-sl1680-toolchain-4.0.17.sh.001 \
+ && cat /tmp/toolchain.sh.* > /tmp/toolchain.sh \
+ && chmod +x /tmp/toolchain.sh \
+ && /tmp/toolchain.sh -y -d /opt/poky/4.0.17
+
+FROM deps AS synap1680-deps
+ARG TARGETARCH
+
+# Install dependencies
+RUN --mount=type=bind,source=docker/synap1680/install_deps.sh,target=/deps/install_deps.sh \
+    /deps/install_deps.sh
+
+WORKDIR /opt/frigate/
+COPY --from=rootfs / /
+COPY --from=poky-toolchain /opt/poky/4.0.17/sysroots/cortexa73-poky-linux/usr/lib/libtim-vx.so /rootfs/usr/lib/
+COPY --from=poky-toolchain /opt/poky/4.0.17/sysroots/cortexa73-poky-linux/usr/lib/libtensorflow-lite.so /rootfs/usr/lib/
+COPY --from=poky-toolchain /opt/poky/4.0.17/sysroots/cortexa73-poky-linux/usr/lib/libvx_delegate.so /rootfs/usr/lib/
+COPY --from=poky-toolchain /opt/poky/4.0.17/sysroots/cortexa73-poky-linux/usr/lib/libsynapnb.so /rootfs/usr/lib/
+COPY --from=poky-toolchain /opt/poky/4.0.17/sysroots/cortexa73-poky-linux/usr/lib/libebg_utils.so /rootfs/usr/lib/
+COPY --from=poky-toolchain /opt/poky/4.0.17/sysroots/cortexa73-poky-linux/usr/lib/libovxlib.so /rootfs/usr/lib/
+ADD https://github.com/synaptics-astra/synap-release/blob/v1.5.0/models/dolphin/object_detection/coco/model/mobilenet224_full80/model.synap /model.synap
