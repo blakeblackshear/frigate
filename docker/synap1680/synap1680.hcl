@@ -1,3 +1,9 @@
+target wheels {
+  dockerfile = "docker/main/Dockerfile"
+  platforms = ["linux/arm64"]
+  target = "wheels"
+}
+
 target deps {
   dockerfile = "docker/main/Dockerfile"
   platforms = ["linux/arm64"]
@@ -13,6 +19,7 @@ target rootfs {
 target synap1680 {
   dockerfile = "docker/synap1680/Dockerfile"
   contexts = {
+    wheels = "target:wheels",
     deps = "target:deps",
     rootfs = "target:rootfs"
   }
