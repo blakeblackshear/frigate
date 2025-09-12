@@ -42,7 +42,15 @@
         "label": "Haz clic en el marco para centrar la cámara PTZ"
       }
     },
-    "presets": "Preajustes de cámara PTZ"
+    "presets": "Preajustes de cámara PTZ",
+    "focus": {
+      "in": {
+        "label": "Enfocar camara PTZ"
+      },
+      "out": {
+        "label": "Desenfocar camara PTZ"
+      }
+    }
   },
   "camera": {
     "enable": "Habilitar cámara",
@@ -154,5 +162,8 @@
       "label": "Editar grupo de cámaras"
     },
     "exitEdit": "Salir de la edición"
+  },
+  "transcription": {
+    "enable": "Habilitar transcipcion de audio en tiempo real"
   }
 }
