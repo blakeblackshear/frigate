@@ -1,1 +1,5 @@
-{}
+{
+  "search": "جستجو",
+  "savedSearches": "جستجوهای ذخیره شده",
+  "searchFor": "جستجو برای  {{inputValue}}"
+}

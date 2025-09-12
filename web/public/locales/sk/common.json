@@ -121,6 +121,15 @@
     "copyCoordinates": "Kopírovať súradnice",
     "delete": "Odstrániť",
     "yes": "Ano",
-    "no": "Nie"
+    "no": "Nie",
+    "download": "Stiahnuť",
+    "info": "Informacie",
+    "suspended": "Pozastavené",
+    "export": "Exportovať",
+    "deleteNow": "Odstrániť teraz",
+    "next": "Ďalej"
+  },
+  "menu": {
+    "system": "Systém"
   }
 }

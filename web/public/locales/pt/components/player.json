@@ -1,12 +1,12 @@
 {
-  "noPreviewFound": "Nenhuma visualização encontrada",
-  "noPreviewFoundFor": "Nenhuma visualização encontrada para {{cameraName}}",
+  "noPreviewFound": "Nenhuma pré-visualização encontrada",
+  "noPreviewFoundFor": "Nenhuma pré-visualização encontrada para {{cameraName}}",
   "submitFrigatePlus": {
-    "title": "Enviar este quadro para o Frigate+?",
-    "submit": "Enviar"
+    "title": "Submeter esta imagem para Frigate+?",
+    "submit": "Submeter"
   },
   "streamOffline": {
-    "title": "Transmissão offline",
+    "title": "Transmissão Off-line",
     "desc": "Nenhum quadro foi recebido na transmissão de <code>detecção</code> {{cameraName}}, verifique os logs de erro"
   },
   "cameraDisabled": "A câmara está desativada",
@@ -29,23 +29,23 @@
     },
     "totalFrames": "Total de quadros:",
     "droppedFrames": {
-      "title": "Quadros perdidos:",
+      "title": "Imagens perdidas:",
       "short": {
-        "title": "Perdido",
-        "value": "{{droppedFrames}} quadros"
+        "title": "Perdida",
+        "value": "{{droppedFrames}} imagens"
       }
     },
     "decodedFrames": "Quadros decodificados:",
-    "droppedFrameRate": "Taxa de Quadros Perdidos:"
+    "droppedFrameRate": "Taxa de imagem perdida:"
   },
   "noRecordingsFoundForThisTime": "Nenhuma gravação encontrada para este momento",
-  "livePlayerRequiredIOSVersion": "iOS 17.1 ou superior é necessário para este tipo de transmissão ao vivo.",
+  "livePlayerRequiredIOSVersion": "É necessário o iOS 17.1 ou superior para este tipo de transmissão ao vivo.",
   "toast": {
     "success": {
-      "submittedFrigatePlus": "Quadro enviado com sucesso para o Frigate+"
+      "submittedFrigatePlus": "Imagem submetida com sucesso para Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Falha ao enviar o quadro para o Frigate+"
+      "submitFrigatePlusFailed": "Não foi possível submeter a imagem para Frigate+"
     }
   }
 }

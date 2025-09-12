@@ -1,6 +1,13 @@
 {
   "crying": "울음",
-  "snoring": "코골기",
+  "snoring": "코골이",
   "singing": "노래하기",
-  "yell": "비명"
+  "yell": "비명",
+  "speech": "발표",
+  "babbling": "옹알이",
+  "bicycle": "자전거",
+  "a_capella": "아카펠라",
+  "accelerating": "가속",
+  "accordion": "아코디언",
+  "acoustic_guitar": "어쿠스틱 기타"
 }

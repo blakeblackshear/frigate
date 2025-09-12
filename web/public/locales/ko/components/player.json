@@ -18,5 +18,7 @@
       "title": "스트림 종류:"
     },
     "totalFrames": "총 프레임:"
-  }
+  },
+  "noRecordingsFoundForThisTime": "이 시간에는 녹화본이 없습니다",
+  "noPreviewFound": "미리 보기가 없습니다"
 }

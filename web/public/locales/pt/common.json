@@ -2,13 +2,13 @@
   "time": {
     "last30": "Últimos 30 dias",
     "12hours": "12 horas",
-    "justNow": "Agora",
+    "justNow": "Agora mesmo",
     "yesterday": "Ontem",
     "today": "Hoje",
     "last7": "Últimos 7 dias",
     "last14": "Últimos 14 dias",
-    "thisWeek": "Essa semana",
-    "lastWeek": "Semana passada",
+    "thisWeek": "Esta Semana",
+    "lastWeek": "Semana Passada",
     "5minutes": "5 minutos",
     "10minutes": "10 minutos",
     "30minutes": "30 minutos",
@@ -24,8 +24,8 @@
     "day_one": "{{time}} dia",
     "day_many": "{{time}} dias",
     "day_other": "{{time}} dias",
-    "thisMonth": "Esse mês",
-    "lastMonth": "Mês passado",
+    "thisMonth": "Este Mês",
+    "lastMonth": "Mês Passado",
     "1hour": "1 hora",
     "hour_one": "{{time}} hora",
     "hour_many": "{{time}} horas",
@@ -39,7 +39,7 @@
     "untilForTime": "Até {{time}}",
     "untilForRestart": "Até que o Frigate reinicie.",
     "untilRestart": "Até reiniciar",
-    "ago": "{{timeAgo}} atrás",
+    "ago": "há {{timeAgo}}",
     "d": "{{time}}d",
     "h": "{{time}}h",
     "m": "{{time}}m",
@@ -91,64 +91,64 @@
   },
   "unit": {
     "speed": {
-      "kph": "kph",
+      "kph": "km/h",
       "mph": "mph"
     },
     "length": {
-      "feet": "pé",
+      "feet": "pés",
       "meters": "metros"
     }
   },
   "button": {
-    "enabled": "Habilitado",
-    "enable": "Habilitar",
+    "enabled": "Ativado",
+    "enable": "Ativar",
     "done": "Feito",
     "reset": "Reiniciar",
-    "disabled": "Desabilitado",
-    "saving": "Salvando…",
+    "disabled": "Desativado",
+    "saving": "A guardar…",
     "apply": "Aplicar",
-    "disable": "Desabilitar",
-    "save": "Salvar",
-    "copy": "Cópia",
+    "disable": "Desativar",
+    "save": "Guardar",
+    "copy": "Copiar",
     "cancel": "Cancelar",
     "close": "Fechar",
     "history": "Histórico",
     "back": "Voltar",
     "fullscreen": "Ecrã Completo",
     "exitFullscreen": "Sair do Ecrã Completo",
-    "twoWayTalk": "Conversa bidirecional",
-    "cameraAudio": "Áudio da câmera",
+    "twoWayTalk": "Conversa Bidirecional",
+    "cameraAudio": "Áudio da Câmera",
     "edit": "Editar",
     "off": "DESLIGADO",
     "copyCoordinates": "Copiar coordenadas",
     "on": "LIGADO",
-    "delete": "Excluir",
-    "download": "Download",
-    "info": "Informações",
+    "delete": "Eliminar",
+    "download": "Transferir",
+    "info": "Informação",
     "no": "Não",
     "suspended": "Suspenso",
     "yes": "Sim",
-    "unselect": "Desmarcar",
+    "unselect": "Desselecionar",
     "unsuspended": "Dessuspender",
-    "deleteNow": "Excluir agora",
+    "deleteNow": "Eliminar Agora",
     "export": "Exportar",
-    "next": "Próximo",
+    "next": "Seguinte",
     "play": "Tocar",
-    "pictureInPicture": "Sobrepor Imagem"
+    "pictureInPicture": "Imagem sobre Imagem"
   },
   "label": {
     "back": "Voltar"
   },
   "menu": {
     "user": {
-      "logout": "Sair",
+      "logout": "Terminar sessão",
       "account": "Conta",
       "current": "Utilizador atual: {{user}}",
-      "setPassword": "Definir senha",
+      "setPassword": "Definir Palavra-passe",
       "title": "Utilizador",
-      "anonymous": "anônimo"
+      "anonymous": "anónimo"
     },
-    "faceLibrary": "Biblioteca de rostos",
+    "faceLibrary": "Biblioteca de Rostos",
     "withSystem": "Sistema",
     "theme": {
       "label": "Tema",
@@ -156,66 +156,66 @@
       "green": "Verde",
       "red": "Vermelho",
       "contrast": "Alto contraste",
-      "default": "Padrão",
+      "default": "Predefinição",
       "highcontrast": "Alto Contraste",
       "nord": "Nord"
     },
     "system": "Sistema",
     "systemMetrics": "Métricas do sistema",
     "configuration": "Configuração",
-    "systemLogs": "Logs do sistema",
-    "settings": "Configurações",
-    "configurationEditor": "Editor de configuração",
+    "systemLogs": "Registos do sistema",
+    "settings": "Definições",
+    "configurationEditor": "Editor de Configuração",
     "languages": "Idiomas",
     "language": {
-      "en": "Inglês (English)",
-      "zhCN": "Chinês simplificado",
+      "en": "Inglês (EUA)",
+      "zhCN": "Chinês (Chinês Simplificado)",
       "withSystem": {
-        "label": "Use as configurações do sistema para idioma"
+        "label": "Utilizar as definições do sistema para o idioma"
       },
-      "fr": "Français (Francês)",
-      "es": "Español (Espanhol)",
-      "ru": "Русский (Russo)",
-      "de": "Deutsch (Alemão)",
-      "ja": "日本語 (Japonês)",
-      "yue": "Cantonês (粵語)",
-      "ar": "العربية (Arabic)",
-      "uk": "Ucraniano (Українська)",
-      "el": "Grego (Ελληνικά)",
-      "hi": "हिन्दी (Hindi)",
-      "pt": "Português (Portuguese)",
-      "tr": "Türkçe (Turkish)",
-      "it": "Italiano (Italian)",
-      "nb": "Norueguês Bokmål (Norsk Bokmål)",
-      "ko": "Coreano (한국어)",
-      "vi": "Vietnamita (Tiếng Việt)",
-      "nl": "Nederlands (Dutch)",
-      "sv": "Svenska (Swedish)",
-      "cs": "Tcheco (Čeština)",
-      "fa": "Persa (فارسی)",
-      "pl": "Polonês (Polski)",
-      "he": "Hebraico (עברית)",
-      "fi": "Finlandês (Suomi)",
-      "da": "Dinamarquês (Dansk)",
-      "ro": "Romeno (Română)",
-      "hu": "Húngaro (Magyar)",
-      "sk": "Eslovaco (Slovenčina)",
+      "fr": "Francês (França)",
+      "es": "Espanhol (Espanha)",
+      "ru": "Russo",
+      "de": "Alemão (Alemanha)",
+      "ja": "Japonês",
+      "yue": "Cantonês",
+      "ar": "Árabe",
+      "uk": "Ucraniano",
+      "el": "Grego",
+      "hi": "Híndi (Índia)",
+      "pt": "Português (Portugal)",
+      "tr": "Turco (Turquia)",
+      "it": "Italiano (Itália)",
+      "nb": "Norueguês Bokmål",
+      "ko": "Coreano",
+      "vi": "Vietnamita",
+      "nl": "Holandês (Holanda)",
+      "sv": "Sueco",
+      "cs": "Checo",
+      "fa": "Persa",
+      "pl": "Polaco",
+      "he": "Hebraico",
+      "fi": "Finlandês",
+      "da": "Dinamarquês",
+      "ro": "Romeno",
+      "hu": "Húngaro",
+      "sk": "Eslovaco",
       "th": "Tailandês",
-      "ca": "Català (Catalão)",
-      "ptBR": "Português brasileiro",
-      "sr": "Српски (Sérvio)",
-      "sl": "Slovenščina (Esloveno)",
-      "lt": "Lietuvių (Lituano)",
-      "bg": "Български (Búlgaro)",
+      "ca": "Catalão",
+      "ptBR": "Português (Brazil)",
+      "sr": "Sérvio",
+      "sl": "Esloveno",
+      "lt": "Lituano",
+      "bg": "Búlgaro",
       "gl": "Galego",
-      "id": "Bahasa Indonesia (Indonésio)",
-      "ur": "اردو (Urdu)"
+      "id": "Indonésio Bahasa",
+      "ur": "Urdu"
     },
     "appearance": "Aparência",
     "darkMode": {
-      "label": "Modo escuro",
+      "label": "Modo Escuro",
       "withSystem": {
-        "label": "Use as configurações do sistema para o modo claro ou escuro"
+        "label": "Utilizar as definições do sistema para o modo claro ou escuro"
       },
       "light": "Claro",
       "dark": "Escuro"
@@ -228,7 +228,7 @@
     "restart": "Reiniciar Frigate",
     "live": {
       "title": "Ao vivo",
-      "allCameras": "Todas as câmaras",
+      "allCameras": "Todas as Câmaras",
       "cameras": {
         "title": "Câmaras",
         "count_one": "{{count}} Câmera",
@@ -238,8 +238,8 @@
     },
     "export": "Exportar",
     "explore": "Explorar",
-    "review": "Análise",
-    "uiPlayground": "Área de Testes da Interface"
+    "review": "Rever",
+    "uiPlayground": "Área de Testes da IU"
   },
   "pagination": {
     "previous": {
@@ -248,34 +248,34 @@
     },
     "label": "paginação",
     "next": {
-      "title": "Próximo",
-      "label": "Ir para a próxima página"
+      "title": "Seguinte",
+      "label": "Ir para a página seguinte"
     },
     "more": "Mais páginas"
   },
   "role": {
     "admin": "Administrador",
     "viewer": "Visualizador",
-    "title": "Regra",
-    "desc": "Administradores têm acesso total a todos os recursos da interface do Frigate. Visualizadores estão limitados a visualizar câmeras, revisar itens e assistir o histórico de gravaçoes na interface."
+    "title": "Função",
+    "desc": "Os administradores têm acesso completo a todas as funcionalidades da IU do Frigate. Os visualizadores estão limitados a visualizar as câmeras, rever itens, e o histórico de gravaçoes na IU."
   },
   "toast": {
-    "copyUrlToClipboard": "URL copiada para a área de transferência.",
+    "copyUrlToClipboard": "URL copiado para a área de transferência.",
     "save": {
-      "title": "Salvar",
+      "title": "Guardar",
       "error": {
-        "noMessage": "Falha ao salvar as alterações de configuração",
-        "title": "Falha ao salvar as alterações de configuração: {{errorMessage}}"
+        "noMessage": "Não foi possível guardar as alterações da configuração",
+        "title": "Não foi possível guardar as alterações da configuração: {{errorMessage}}"
       }
     }
   },
   "accessDenied": {
-    "documentTitle": "Acesso negado - Frigate",
-    "title": "Acesso negado",
-    "desc": "Você não tem permissão para visualizar esta página."
+    "documentTitle": "Frigate - Acesso Negado",
+    "title": "Acesso Negado",
+    "desc": "Não tem permissão para ver esta página."
   },
   "notFound": {
-    "documentTitle": "Não encontrado - Frigate",
+    "documentTitle": "Frigate - Não Encontrado",
     "desc": "Página não encontrada",
     "title": "404"
   },

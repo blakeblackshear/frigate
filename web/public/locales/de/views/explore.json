@@ -57,7 +57,7 @@
     },
     "description": {
       "label": "Beschreibung",
-      "placeholder": "Beschreibund des verfolgten Objekts",
+      "placeholder": "Beschreibung des verfolgten Objekts",
       "aiTips": "Frigate wird erst dann eine Beschreibung vom generativen KI-Anbieter anfordern, wenn der Lebenszyklus des verfolgten Objekts beendet ist."
     },
     "expandRegenerationMenu": "Erneuerungsmenü erweitern",

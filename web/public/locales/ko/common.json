@@ -1,3 +1,25 @@
 {
-  "readTheDocumentation": "문서 읽기"
+  "readTheDocumentation": "문서 읽기",
+  "time": {
+    "untilForTime": "{{time}}까지",
+    "untilForRestart": "Frigate가 재시작될 때 까지.",
+    "10minutes": "10분",
+    "12hours": "12시간",
+    "1hour": "1시간",
+    "24hours": "24시간",
+    "30minutes": "30분",
+    "5minutes": "5분"
+  },
+  "notFound": {
+    "title": "404"
+  },
+  "accessDenied": {
+    "title": "접근 거부",
+    "documentTitle": "접근 거부 - Frigate"
+  },
+  "menu": {
+    "user": {
+      "account": "계정"
+    }
+  }
 }
