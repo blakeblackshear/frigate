@@ -195,6 +195,9 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
 # Install HailoRT & Wheels
 RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
     /deps/install_hailort.sh
+#Install Synaptics SL1680 runtime library and wheels
+RUN --mount=type=bind,source=docker/main/install_synap1680.sh,target=/deps/install_synap1680.sh \
+    /deps/install_synap1680.sh
 
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
