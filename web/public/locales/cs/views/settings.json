@@ -6,7 +6,7 @@
     "classification": "Nastavení klasifikace - Frigate",
     "notifications": "Nastavení notifikací - Frigate",
     "masksAndZones": "Editor masky a zón - Frigate",
-    "motionTuner": "Ladič detekce pohybu - Frigate",
+    "motionTuner": "Ladění detekce pohybu - Frigate",
     "object": "Ladění - Frigate",
     "general": "Obecné nastavení - Frigate",
     "frigatePlus": "Frigate+ nastavení - Frigate",
@@ -298,11 +298,11 @@
     "classification": "Klasifikace",
     "cameras": "Nastavení kamery",
     "masksAndZones": "Masky / Zóny",
-    "motionTuner": "Ladič detekce pohybu",
+    "motionTuner": "Ladění detekce pohybu",
     "debug": "Ladění",
     "users": "Uživatelé",
     "notifications": "Notifikace",
-    "frigateplus": "Frigate +",
+    "frigateplus": "Frigate+",
     "enrichments": "Obohacení",
     "triggers": "Spouštěče"
   },
@@ -319,7 +319,7 @@
   "general": {
     "title": "Hlavní nastavení",
     "liveDashboard": {
-      "title": "Živý Dashboard",
+      "title": "Živý dashboard",
       "automaticLiveView": {
         "desc": "Při detekci aktivity se automaticky přepne na živý náhled kamery. Vypnutí této možnosti způsobí, že se statické snímky z kamery na ovládacím panelu Live aktualizují pouze jednou za minutu.",
         "label": "Automatický živý náhled"
@@ -340,9 +340,9 @@
       "clearAll": "Vymazat všechna nastavení streamování"
     },
     "recordingsViewer": {
-      "title": "Prohlížeč Nahrávek",
+      "title": "Prohlížeč nahrávek",
       "defaultPlaybackRate": {
-        "label": "Výchozí Rychlost Přehrávání",
+        "label": "Výchozí rychlost přehrávání",
         "desc": "Výchozí rychlost přehrávání pro nahrávky."
       }
     },
@@ -376,9 +376,9 @@
       "desc": "Zobrazit rámeček oblasti zájmu odesílané detektoru objektů",
       "tips": "<p><strong>Boxy oblastí zájmu</strong></p><br><p>Jasně zelené boxy budou překryty na oblastech zájmu ve snímku, které jsou odesílány detektoru objektů.</p>"
     },
-    "title": "Ladit",
+    "title": "Ladění",
     "detectorDesc": "Frigate používá vaše detektory {{detectors}} k detekci objektů ve streamu vašich kamer.",
-    "objectList": "Seznam Objektů",
+    "objectList": "Seznam objektů",
     "boundingBoxes": {
       "title": "Ohraničující rámečky",
       "desc": "Zobrazit ohraničující rámečky okolo sledovaných objektů",
@@ -395,7 +395,7 @@
       "title": "Masky detekce pohybu",
       "desc": "Zobrazit polygony masek detekce pohybu"
     },
-    "debugging": "Ledění",
+    "debugging": "Ladění",
     "desc": "Ladicí zobrazení ukazuje sledované objekty a jejich statistiky v reálném čase. Seznam objektů zobrazuje časově zpožděný přehled detekovaných objektů.",
     "motion": {
       "title": "Rámečky detekce pohybu",
@@ -404,13 +404,26 @@
     },
     "noObjects": "Žádné objekty",
     "objectShapeFilterDrawing": {
-      "title": "Kreslení Filtru Tvaru Objektu",
+      "title": "Vykreslení filtru tvaru objektu",
       "desc": "Nakreslete na obrázek obdélník pro zobrazení informací o ploše a poměru stran",
       "tips": "Povolte tuto možnost pro nakreslení obdélníku na obraz kamery, který zobrazí jeho plochu a poměr stran. Tyto hodnoty pak můžete použít pro nastavení parametrů tvarového filtru objektu ve vaší konfiguraci.",
       "document": "Přečtěte si dokumentaci ",
       "score": "Skóre",
       "ratio": "Poměr",
       "area": "Oblast"
+    },
+    "openCameraWebUI": "Otevřít webové rozhraní {{camera}}",
+    "audio": {
+      "title": "Zvuk",
+      "noAudioDetections": "Žádné detekce zvuku",
+      "score": "skóre",
+      "currentRMS": "Aktuální RMS",
+      "currentdbFS": "Aktuální dbFS"
+    },
+    "paths": {
+      "title": "Cesty",
+      "desc": "Zobrazit významné body trasy sledovaného objektu",
+      "tips": "<p><strong>Cesty</strong></p><br><p>Čáry a kruhy označují významné body, kterými se sledovaný objekt během svého životního cyklu pohyboval."
     }
   },
   "camera": {
@@ -447,7 +460,41 @@
     },
     "title": "Nastavení Kamery",
     "object_descriptions": {
-      "title": "AI generované popisy objektů"
+      "title": "AI generované popisy objektů",
+      "desc": "Dočasně povolit/zakázat generativní popisy objektů AI pro tuto kameru. Pokud je tato funkce zakázána, nebudou pro sledované objekty na této kameře vyžadovány popisy generované AI."
+    },
+    "review_descriptions": {
+      "title": "Popisy generativní AI",
+      "desc": "Dočasně povolit/zakázat generativní AI recenze popisů pro tuto kameru. Pokud je tato funkce zakázána, nebudou pro položky recenzí na této kameře vyžadovány popisy generované AI."
+    },
+    "addCamera": "Přidat novou kameru",
+    "editCamera": "Upravit kameru:",
+    "selectCamera": "Vybrat kameru",
+    "backToSettings": "Zpět k nastavení kamery",
+    "cameraConfig": {
+      "add": "Přidat kameru",
+      "edit": "Upravit kameru",
+      "description": "Konfigurovat nastavení kamery, včetně vstupů streamu a rolí.",
+      "name": "Název kamery",
+      "nameRequired": "Název kamery je povinný",
+      "nameLength": "Název kamery musí mít méně než 24 znaků.",
+      "namePlaceholder": "např. přední dveře",
+      "enabled": "Povolit",
+      "ffmpeg": {
+        "inputs": "Vstupní streamy",
+        "path": "Cesta streamu",
+        "pathRequired": "Cesta ke streamu je povinná",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Role",
+        "rolesRequired": "Je vyžadována alespoň jedna role",
+        "rolesUnique": "Každá role (audio, detekce, záznam) může být přiřazena pouze k jednomu streamu",
+        "addInput": "Přidat vstupní stream",
+        "removeInput": "Odebrat vstupní stream",
+        "inputsRequired": "Je vyžadován alespoň jeden vstupní stream"
+      },
+      "toast": {
+        "success": "Kamera {{cameraName}} byla úspěšně uložena"
+      }
     }
   },
   "notification": {
@@ -473,7 +520,7 @@
       "desc": "Je vyžadována platná e-mailová adresa, která bude použita k upozornění v případě problémů se službou push notifikací."
     },
     "registerDevice": "Registrovat Toto Zařízení",
-    "deviceSpecific": "Nastavení Specifická pro Zařízení",
+    "deviceSpecific": "Nastavení specifická pro zařízení",
     "unregisterDevice": "Odregistrovat Toto Zařízení",
     "sendTestNotification": "Poslat testovací notifikaci",
     "unsavedRegistrations": "Neuložené přihlášky k Notifikacím",
@@ -597,13 +644,13 @@
     },
     "management": {
       "desc": "Spravujte uživatelské účty této instance Frigate.",
-      "title": "Správa Uživatelů"
+      "title": "Správa uživatelů"
     },
     "addUser": "Přidat uživatele",
     "title": "Uživatelé"
   },
   "motionDetectionTuner": {
-    "unsavedChanges": "Neuložené změny Ladiče Detekce Pohybu {{camera}}",
+    "unsavedChanges": "Neuložené změny ladění detekce pohybu {{camera}}",
     "improveContrast": {
       "title": "Zlepšit Kontrast",
       "desc": "Zlepšit kontrast pro tmavé scény <em>Výchozí: ON</em>"
@@ -611,9 +658,9 @@
     "toast": {
       "success": "Nastavení detekce pohybu bylo uloženo."
     },
-    "title": "Ladič Detekce Pohybu",
+    "title": "Ladění detekce pohybu",
     "desc": {
-      "documentation": "Přečtěte si příručku Ladiče Detekce Pohybu",
+      "documentation": "Přečtěte si příručku Ladění detekce pohybu",
       "title": "Frigate používá detekci pohybu jako první kontrolu k ověření, zda se ve snímku děje něco, co stojí za další analýzu pomocí detekce objektů."
     },
     "Threshold": {
@@ -628,7 +675,7 @@
   "enrichments": {
     "title": "Nastavení obohacení",
     "faceRecognition": {
-      "title": "Rozpoznání Obličeje",
+      "title": "Rozpoznání obličeje",
       "desc": "Rozpoznávání obličeje umožňuje přiřadit lidem jména a po rozpoznání jejich obličeje. Frigate přiřadí jméno osoby jako podštítek. Tyto informace jsou zahrnuty v uživatelském rozhraní, filtrech a také v oznámeních.",
       "readTheDocumentation": "Přečtěte si Dokumentaci",
       "modelSize": {
@@ -655,11 +702,11 @@
         "alreadyInProgress": "Přeindexování je již spuštěno.",
         "error": "Chyba spuštění přeindexování: {{errorMessage}}"
       },
-      "title": "Sémantické Vyhledávání",
+      "title": "Sémantické vyhledávání",
       "desc": "Sémantické vyhledávání ve Frigate umožňuje najít sledované objekty v rámci vašich zkontrolovaných položek pomocí samotného obrázku, uživatelem definovaného textového popisu nebo automaticky generovaného popisu.",
       "readTheDocumentation": "Přečtěte si Dokumentaci",
       "modelSize": {
-        "label": "Velikost Modelu",
+        "label": "Velikost modelu",
         "desc": "Velikost modelu použitého pro vkládání sémantického vyhledávání.",
         "small": {
           "title": "malý",
@@ -673,7 +720,7 @@
     },
     "birdClassification": {
       "desc": "Klasifikace ptáků identifikuje známé ptáky pomocí kvantovaného modelu Tensorflow. Po rozpoznání známého ptáka se jeho běžný název přidá jako sub_label. Tato informace je zahrnuta v uživatelském rozhraní, filtrech a také v oznámeních.",
-      "title": "Klasifikace Ptáků"
+      "title": "Klasifikace ptáků"
     },
     "unsavedChanges": "Neuložené změny nastavení Obohacení",
     "licensePlateRecognition": {
@@ -685,6 +732,71 @@
     "toast": {
       "success": "Nastavení Obohacení uloženo. Restartujte Frigate aby se změny aplikovaly.",
       "error": "Chyba ukládání změn konfigurace: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Spouštěče",
+    "management": {
+      "title": "Správa spouštěčů",
+      "desc": "Spravovat spouštěče pro {{camera}}. Použít typ miniatury ke spuštění u miniatur podobných vybranému sledovanému objektu a typ popisu ke spuštění u popisů podobných zadanému textu."
+    },
+    "addTrigger": "Přidat spouštěč",
+    "table": {
+      "name": "Jméno",
+      "type": "Typ",
+      "content": "Obsah",
+      "threshold": "Prahová hodnota",
+      "actions": "Akce",
+      "noTriggers": "Pro tuto kameru nejsou nakonfigurovány žádné spouštěče.",
+      "edit": "Upravit",
+      "deleteTrigger": "Smazat spouštěč",
+      "lastTriggered": "Naposledy spuštěno"
+    },
+    "type": {
+      "thumbnail": "Miniatura",
+      "description": "Popis"
+    },
+    "actions": {
+      "alert": "Označit jako upozornění",
+      "notification": "Odeslat oznámení"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Vytvořit spouštěč",
+        "desc": "Vytvořit spouštěč pro kameru {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Upravit spouštěč",
+        "desc": "Upravit nastavení spouštěče na kameře {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Odstranit spouštěč",
+        "desc": "Opravdu chcete odstranit spouštěč <strong>{{triggerName}}</strong>? Tuto akci nelze vrátit zpět."
+      },
+      "form": {
+        "name": {
+          "title": "Název",
+          "placeholder": "Zadejte název spouštěče",
+          "error": {
+            "minLength": "Název musí mít alespoň 2 znaky.",
+            "invalidCharacters": "Jméno může obsahovat pouze písmena, číslice, podtržítka a pomlčky.",
+            "alreadyExists": "Spouštěč s tímto názvem již pro tuto kameru existuje."
+          }
+        },
+        "enabled": {
+          "description": "Povolit nebo zakázat tento spouštěč"
+        },
+        "type": {
+          "title": "Typ",
+          "placeholder": "Vybrat typ spouštěče"
+        },
+        "content": {
+          "title": "Obsah",
+          "imagePlaceholder": "Vybrat obrázek",
+          "textPlaceholder": "Zadat textový obsah",
+          "imageDesc": "Vybrat obrázek, který spustí tuto akci, když bude detekován podobný obrázek."
+        }
+      }
     }
   }
 }
