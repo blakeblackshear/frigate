@@ -143,9 +143,10 @@ class ONNXDetector(DetectionApi):
             try:
                 # Run using CUDA graphs if available
                 tensor_output = self._cg_runner.run(model_input_name, tensor_input)
-            except Exception:
-                logger.warning("CUDA Graphs failed, falling back to regular run")
+            except Exception as e:
+                logger.warning(f"CUDA Graphs failed, falling back to regular run: {e}")
                 self._cg_runner = None
+                tensor_output = self.model.run(None, {model_input_name: tensor_input})
         else:
             # Use regular run if CUDA graphs are not available
             tensor_output = self.model.run(None, {model_input_name: tensor_input})
