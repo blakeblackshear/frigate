@@ -122,5 +122,11 @@
   },
   "zoneMask": {
     "filterBy": "Filtruj według maski strefy"
+  },
+  "classes": {
+    "label": "Klasy",
+    "all": {
+      "title": "Wszystkie Klasy"
+    }
   }
 }

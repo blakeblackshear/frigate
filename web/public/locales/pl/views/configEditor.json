@@ -12,5 +12,7 @@
   },
   "saveOnly": "Tylko zapisz",
   "saveAndRestart": "Zapisz i uruchom ponownie",
-  "confirm": "Zamknąć bez zapisu?"
+  "confirm": "Zamknąć bez zapisywania?",
+  "safeConfigEditor": "Edytor Konfiguracji (tryb bezpieczny)",
+  "safeModeDescription": "Frigate jest w trybie bezpiecznym przez błąd walidacji konfiguracji."
 }
