@@ -462,8 +462,8 @@ def all_recordings_summary(
         .order_by(Recordings.start_time.desc())
     )
 
-    if cameras != "all":
-        query = query.where(Recordings.camera << cameras)
+    if params.cameras != "all":
+        query = query.where(Recordings.camera << cameras.split(","))
 
     recording_days = query.namedtuples()
     days = {day.day: True for day in recording_days}
