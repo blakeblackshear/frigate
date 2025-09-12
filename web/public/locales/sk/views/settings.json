@@ -2,7 +2,7 @@
   "documentTitle": {
     "default": "Nastavenia - Frigate",
     "authentication": "Nastavenie autentifikácie- Frigate",
-    "camera": "Nastavenia fotoaparátu – Frigate",
+    "camera": "Nastavenia Kamier– Frigate",
     "enrichments": "Nastavenia obohatenia – Frigate",
     "masksAndZones": "Editor masky a zón - Frigate",
     "motionTuner": "Ladič detekcie pohybu - Frigate",
@@ -20,7 +20,8 @@
     "debug": "Ladenie",
     "users": "Uživatelia",
     "notifications": "Notifikacie",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "triggers": "Spúšťače"
   },
   "dialog": {
     "unsavedChanges": {
@@ -144,7 +145,13 @@
   "camera": {
     "title": "Nastavenie kamier",
     "streams": {
-      "title": "Streamy"
+      "title": "Streamy",
+      "desc": "Dočasne deaktivujte kameru, kým sa Frigate nereštartuje. Deaktivácia kamery úplne zastaví spracovanie streamov z tejto kamery aplikáciou Frigate. Detekcia, nahrávanie a ladenie nebudú k dispozícii.<br /> <em>Poznámka: Toto nezakáže restreamy go2rtc.</em>"
+    },
+    "review": {
+      "title": "Recenzia",
+      "desc": "Dočasne povoliť/zakázať upozornenia a detekcie pre túto kameru, kým sa Frigate nereštartuje. Po zakázaní sa nebudú generovať žiadne nové položky kontroly. ",
+      "alerts": "Upozornenia "
     }
   }
 }

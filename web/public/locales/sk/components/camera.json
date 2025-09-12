@@ -66,7 +66,8 @@
           "label": "Režim kompatibility",
           "desc": "Túto možnosť povoľte iba v prípade, že živý prenos z vašej kamery zobrazuje farebné artefakty a na pravej strane obrazu sa nachádza diagonálna čiara."
         }
-      }
+      },
+      "birdseye": "Vtáčie oko"
     }
   },
   "debug": {
