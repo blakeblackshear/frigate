@@ -60,5 +60,10 @@
   "run": "跑步聲",
   "shuffle": "拖著腳走路聲",
   "footsteps": "腳步聲",
-  "chewing": "咀嚼聲"
+  "chewing": "咀嚼聲",
+  "biting": "咬",
+  "gargling": "漱口",
+  "stomach_rumble": "腸胃蠕動",
+  "burping": "打嗝",
+  "hiccup": "打噎"
 }
