@@ -556,7 +556,68 @@
           "admin": "Admin",
           "adminDesc": "Full access to all features.",
           "viewer": "Viewer",
-          "viewerDesc": "Limited to Live dashboards, Review, Explore, and Exports only."
+          "viewerDesc": "Limited to Live dashboards, Review, Explore, and Exports only.",
+          "customDesc": "Custom role with specific camera access."
+        }
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Viewer Role Management",
+      "desc": "Manage custom viewer roles and their camera access permissions for this Frigate instance."
+    },
+    "addRole": "Add Role",
+    "table": {
+      "role": "Role",
+      "cameras": "Cameras",
+      "actions": "Actions",
+      "noRoles": "No custom roles found.",
+      "editCameras": "Edit Cameras",
+      "deleteRole": "Delete Role"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Role {{role}} created successfully",
+        "updateCameras": "Cameras updated for role {{role}}",
+        "deleteRole": "Role {{role}} deleted successfully",
+        "userRolesUpdated": "{{count}} user(s) assigned to this role have been updated to 'viewer', which has access to all cameras."
+      },
+      "error": {
+        "createRoleFailed": "Failed to create role: {{errorMessage}}",
+        "updateCamerasFailed": "Failed to update cameras: {{errorMessage}}",
+        "deleteRoleFailed": "Failed to delete role: {{errorMessage}}",
+        "userUpdateFailed": "Failed to update user roles: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Create New Role",
+        "desc": "Add a new role and specify camera access permissions."
+      },
+      "editCameras": {
+        "title": "Edit Role Cameras",
+        "desc": "Update camera access for the role <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Delete Role",
+        "desc": "This action cannot be undone. This will permanently delete the role and assign any users with this role to the 'viewer' role, which will give viewer access to all cameras.",
+        "warn": "Are you sure you want to delete <strong>{{role}}</strong>?",
+        "deleting": "Deleting..."
+      },
+      "form": {
+        "role": {
+          "title": "Role Name",
+          "placeholder": "Enter role name",
+          "desc": "Only letters, numbers, periods and underscores allowed.",
+          "roleIsRequired": "Role name is required",
+          "roleOnlyInclude": "Role name may only include letters, numbers, . or _",
+          "roleExists": "A role with this name already exists."
+        },
+        "cameras": {
+          "title": "Cameras",
+          "desc": "Select cameras this role has access to. At least one camera is required.",
+          "required": "At least one camera must be selected."
         }
       }
     }

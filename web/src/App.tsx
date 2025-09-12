@@ -47,6 +47,9 @@ function App() {
 }
 
 function DefaultAppView() {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
   return (
     <div className="size-full overflow-hidden">
       {isDesktop && <Sidebar />}
@@ -64,7 +67,15 @@ function DefaultAppView() {
         <Suspense>
           <Routes>
             <Route
-              element={<ProtectedRoute requiredRoles={["viewer", "admin"]} />}
+              element={
+                <ProtectedRoute
+                  requiredRoles={
+                    config?.auth.roles
+                      ? Object.keys(config.auth.roles)
+                      : ["admin", "viewer"]
+                  }
+                />
+              }
             >
               <Route index element={<Live />} />
               <Route path="/review" element={<Events />} />

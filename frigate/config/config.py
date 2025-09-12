@@ -719,6 +719,18 @@ class FrigateConfig(FrigateBaseModel):
                 "Frigate+ is configured but clean snapshots are not enabled, submissions to Frigate+ will not be possible./"
             )
 
+        # Validate auth roles against cameras
+        camera_names = set(self.cameras.keys())
+
+        for role, allowed_cameras in self.auth.roles.items():
+            invalid_cameras = [
+                cam for cam in allowed_cameras if cam not in camera_names
+            ]
+            if invalid_cameras:
+                logger.warning(
+                    f"Role '{role}' references non-existent cameras: {invalid_cameras}. "
+                )
+
         return self
 
     @field_validator("cameras")

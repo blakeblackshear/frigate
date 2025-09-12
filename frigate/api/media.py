@@ -10,19 +10,19 @@ import time
 from datetime import datetime, timedelta, timezone
 from functools import reduce
 from pathlib import Path as FilePath
-from typing import Any
+from typing import Any, List
 from urllib.parse import unquote
 
 import cv2
 import numpy as np
 import pytz
-from fastapi import APIRouter, Path, Query, Request, Response
-from fastapi.params import Depends
+from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pathvalidate import sanitize_filename
 from peewee import DoesNotExist, fn, operator
 from tzlocal import get_localzone_name
 
+from frigate.api.auth import get_allowed_cameras_for_filter, require_camera_access
 from frigate.api.defs.query.media_query_parameters import (
     Extension,
     MediaEventsSnapshotQueryParams,
@@ -50,12 +50,11 @@ from frigate.util.path import get_event_thumbnail_bytes
 
 logger = logging.getLogger(__name__)
 
-
 router = APIRouter(tags=[Tags.media])
 
 
-@router.get("/{camera_name}")
-def mjpeg_feed(
+@router.get("/{camera_name}", dependencies=[Depends(require_camera_access)])
+async def mjpeg_feed(
     request: Request,
     camera_name: str,
     params: MediaMjpegFeedQueryParams = Depends(),
@@ -111,7 +110,7 @@ def imagestream(
         )
 
 
-@router.get("/{camera_name}/ptz/info")
+@router.get("/{camera_name}/ptz/info", dependencies=[Depends(require_camera_access)])
 async def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
         # Schedule get_camera_info in the OnvifController's event loop
@@ -127,8 +126,10 @@ async def camera_ptz_info(request: Request, camera_name: str):
         )
 
 
-@router.get("/{camera_name}/latest.{extension}")
-def latest_frame(
+@router.get(
+    "/{camera_name}/latest.{extension}", dependencies=[Depends(require_camera_access)]
+)
+async def latest_frame(
     request: Request,
     camera_name: str,
     extension: Extension,
@@ -236,8 +237,11 @@ def latest_frame(
         )
 
 
-@router.get("/{camera_name}/recordings/{frame_time}/snapshot.{format}")
-def get_snapshot_from_recording(
+@router.get(
+    "/{camera_name}/recordings/{frame_time}/snapshot.{format}",
+    dependencies=[Depends(require_camera_access)],
+)
+async def get_snapshot_from_recording(
     request: Request,
     camera_name: str,
     frame_time: float,
@@ -323,8 +327,10 @@ def get_snapshot_from_recording(
         )
 
 
-@router.post("/{camera_name}/plus/{frame_time}")
-def submit_recording_snapshot_to_plus(
+@router.post(
+    "/{camera_name}/plus/{frame_time}", dependencies=[Depends(require_camera_access)]
+)
+async def submit_recording_snapshot_to_plus(
     request: Request, camera_name: str, frame_time: str
 ):
     if camera_name not in request.app.frigate_config.cameras:
@@ -412,11 +418,23 @@ def get_recordings_storage_usage(request: Request):
 
 
 @router.get("/recordings/summary")
-def all_recordings_summary(params: MediaRecordingsSummaryQueryParams = Depends()):
+def all_recordings_summary(
+    request: Request,
+    params: MediaRecordingsSummaryQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     """Returns true/false by day indicating if recordings exist"""
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
 
     cameras = params.cameras
+    if cameras != "all":
+        requested = set(unquote(cameras).split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content={})
+        cameras = ",".join(filtered)
+    else:
+        cameras = allowed_cameras
 
     query = (
         Recordings.select(
@@ -445,7 +463,7 @@ def all_recordings_summary(params: MediaRecordingsSummaryQueryParams = Depends()
     )
 
     if cameras != "all":
-        query = query.where(Recordings.camera << cameras.split(","))
+        query = query.where(Recordings.camera << cameras)
 
     recording_days = query.namedtuples()
     days = {day.day: True for day in recording_days}
@@ -453,8 +471,10 @@ def all_recordings_summary(params: MediaRecordingsSummaryQueryParams = Depends()
     return JSONResponse(content=days)
 
 
-@router.get("/{camera_name}/recordings/summary")
-def recordings_summary(camera_name: str, timezone: str = "utc"):
+@router.get(
+    "/{camera_name}/recordings/summary", dependencies=[Depends(require_camera_access)]
+)
+async def recordings_summary(camera_name: str, timezone: str = "utc"):
     """Returns hourly summary for recordings of given camera"""
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(timezone)
     recording_groups = (
@@ -515,8 +535,8 @@ def recordings_summary(camera_name: str, timezone: str = "utc"):
     return JSONResponse(content=list(days.values()))
 
 
-@router.get("/{camera_name}/recordings")
-def recordings(
+@router.get("/{camera_name}/recordings", dependencies=[Depends(require_camera_access)])
+async def recordings(
     camera_name: str,
     after: float = (datetime.now() - timedelta(hours=1)).timestamp(),
     before: float = datetime.now().timestamp(),
@@ -546,9 +566,22 @@ def recordings(
 
 
 @router.get("/recordings/unavailable", response_model=list[dict])
-def no_recordings(params: MediaRecordingsAvailabilityQueryParams = Depends()):
+async def no_recordings(
+    request: Request,
+    params: MediaRecordingsAvailabilityQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     """Get time ranges with no recordings."""
     cameras = params.cameras
+    if cameras != "all":
+        requested = set(unquote(cameras).split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content=[])
+        cameras = ",".join(filtered)
+    else:
+        cameras = allowed_cameras
+
     before = params.before or datetime.datetime.now().timestamp()
     after = (
         params.after
@@ -560,6 +593,8 @@ def no_recordings(params: MediaRecordingsAvailabilityQueryParams = Depends()):
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((Recordings.camera << camera_list))
+    else:
+        camera_list = allowed_cameras
 
     # Get recording start times
     data: list[Recordings] = (
@@ -607,9 +642,10 @@ def no_recordings(params: MediaRecordingsAvailabilityQueryParams = Depends()):
 
 @router.get(
     "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4",
+    dependencies=[Depends(require_camera_access)],
     description="For iOS devices, use the master.m3u8 HLS link instead of clip.mp4. Safari does not reliably process progressive mp4 files.",
 )
-def recording_clip(
+async def recording_clip(
     request: Request,
     camera_name: str,
     start_ts: float,
@@ -705,9 +741,10 @@ def recording_clip(
 
 @router.get(
     "/vod/{camera_name}/start/{start_ts}/end/{end_ts}",
+    dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
-def vod_ts(camera_name: str, start_ts: float, end_ts: float):
+async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     recordings = (
         Recordings.select(
             Recordings.path,
@@ -782,6 +819,7 @@ def vod_ts(camera_name: str, start_ts: float, end_ts: float):
 
 @router.get(
     "/vod/{year_month}/{day}/{hour}/{camera_name}",
+    dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified date-time on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str):
@@ -793,6 +831,7 @@ def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str)
 
 @router.get(
     "/vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}",
+    dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified date-time (with timezone) on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: str):
@@ -812,7 +851,8 @@ def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: st
     "/vod/event/{event_id}",
     description="Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
-def vod_event(
+async def vod_event(
+    request: Request,
     event_id: str,
     padding: int = Query(0, description="Padding to apply to the vod."),
 ):
@@ -828,15 +868,7 @@ def vod_event(
             status_code=404,
         )
 
-    if not event.has_clip:
-        logger.error(f"Event does not have recordings: {event_id}")
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": "Recordings not available.",
-            },
-            status_code=404,
-        )
+    await require_camera_access(event.camera, request=request)
 
     end_ts = (
         datetime.now().timestamp()
@@ -861,7 +893,7 @@ def vod_event(
     "/events/{event_id}/snapshot.jpg",
     description="Returns a snapshot image for the specified object id. NOTE: The query params only take affect while the event is in-progress. Once the event has ended the snapshot configuration is used.",
 )
-def event_snapshot(
+async def event_snapshot(
     request: Request,
     event_id: str,
     params: MediaEventsSnapshotQueryParams = Depends(),
@@ -871,6 +903,7 @@ def event_snapshot(
     try:
         event = Event.get(Event.id == event_id, Event.end_time != None)
         event_complete = True
+        await require_camera_access(event.camera, request=request)
         if not event.has_snapshot:
             return JSONResponse(
                 content={"success": False, "message": "Snapshot not available"},
@@ -899,6 +932,7 @@ def event_snapshot(
                             height=params.height,
                             quality=params.quality,
                         )
+                        await require_camera_access(camera_state.name, request=request)
         except Exception:
             return JSONResponse(
                 content={"success": False, "message": "Ongoing event not found"},
@@ -932,7 +966,7 @@ def event_snapshot(
 
 
 @router.get("/events/{event_id}/thumbnail.{extension}")
-def event_thumbnail(
+async def event_thumbnail(
     request: Request,
     event_id: str,
     extension: Extension,
@@ -945,6 +979,7 @@ def event_thumbnail(
     event_complete = False
     try:
         event: Event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
         if event.end_time is not None:
             event_complete = True
 
@@ -1007,7 +1042,7 @@ def event_thumbnail(
     )
 
 
-@router.get("/{camera_name}/grid.jpg")
+@router.get("/{camera_name}/grid.jpg", dependencies=[Depends(require_camera_access)])
 def grid_snapshot(
     request: Request, camera_name: str, color: str = "green", font_scale: float = 0.5
 ):
@@ -1254,7 +1289,10 @@ def event_preview(request: Request, event_id: str):
     return preview_gif(request, event.camera, start_ts, end_ts)
 
 
-@router.get("/{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif")
+@router.get(
+    "/{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif",
+    dependencies=[Depends(require_camera_access)],
+)
 def preview_gif(
     request: Request,
     camera_name: str,
@@ -1410,7 +1448,10 @@ def preview_gif(
     )
 
 
-@router.get("/{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4")
+@router.get(
+    "/{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4",
+    dependencies=[Depends(require_camera_access)],
+)
 def preview_mp4(
     request: Request,
     camera_name: str,
@@ -1650,8 +1691,13 @@ def preview_thumbnail(file_name: str):
 ####################### dynamic routes ###########################
 
 
-@router.get("/{camera_name}/{label}/best.jpg")
-@router.get("/{camera_name}/{label}/thumbnail.jpg")
+@router.get(
+    "/{camera_name}/{label}/best.jpg", dependencies=[Depends(require_camera_access)]
+)
+@router.get(
+    "/{camera_name}/{label}/thumbnail.jpg",
+    dependencies=[Depends(require_camera_access)],
+)
 def label_thumbnail(request: Request, camera_name: str, label: str):
     label = unquote(label)
     event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name)
@@ -1673,7 +1719,9 @@ def label_thumbnail(request: Request, camera_name: str, label: str):
         )
 
 
-@router.get("/{camera_name}/{label}/clip.mp4")
+@router.get(
+    "/{camera_name}/{label}/clip.mp4", dependencies=[Depends(require_camera_access)]
+)
 def label_clip(request: Request, camera_name: str, label: str):
     label = unquote(label)
     event_query = Event.select(fn.MAX(Event.id)).where(
@@ -1692,7 +1740,9 @@ def label_clip(request: Request, camera_name: str, label: str):
         )
 
 
-@router.get("/{camera_name}/{label}/snapshot.jpg")
+@router.get(
+    "/{camera_name}/{label}/snapshot.jpg", dependencies=[Depends(require_camera_access)]
+)
 def label_snapshot(request: Request, camera_name: str, label: str):
     """Returns the snapshot image from the latest event for the given camera and label combo"""
     label = unquote(label)

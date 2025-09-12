@@ -33,6 +33,7 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import SearchActionGroup from "@/components/filter/SearchActionGroup";
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 
 type SearchViewProps = {
   search: string;
@@ -96,6 +97,7 @@ export default function SearchView({
   );
 
   // suggestions values
+  const allowedCameras = useAllowedCameras();
 
   const allLabels = useMemo<string[]>(() => {
     if (!config) {
@@ -103,7 +105,9 @@ export default function SearchView({
     }
 
     const labels = new Set<string>();
-    const cameras = searchFilter?.cameras || Object.keys(config.cameras);
+    const cameras = (searchFilter?.cameras || allowedCameras).filter((camera) =>
+      allowedCameras.includes(camera),
+    );
 
     cameras.forEach((camera) => {
       if (camera == "birdseye") {
@@ -128,7 +132,7 @@ export default function SearchView({
     });
 
     return [...labels].sort();
-  }, [config, searchFilter]);
+  }, [config, searchFilter, allowedCameras]);
 
   const { data: allSubLabels } = useSWR("sub_labels");
   const { data: allRecognizedLicensePlates } = useSWR(
@@ -141,7 +145,9 @@ export default function SearchView({
     }
 
     const zones = new Set<string>();
-    const cameras = searchFilter?.cameras || Object.keys(config.cameras);
+    const cameras = (searchFilter?.cameras || allowedCameras).filter((camera) =>
+      allowedCameras.includes(camera),
+    );
 
     cameras.forEach((camera) => {
       if (camera == "birdseye") {
@@ -160,11 +166,11 @@ export default function SearchView({
     });
 
     return [...zones].sort();
-  }, [config, searchFilter]);
+  }, [config, searchFilter, allowedCameras]);
 
   const suggestionsValues = useMemo(
     () => ({
-      cameras: Object.keys(config?.cameras || {}),
+      cameras: allowedCameras,
       labels: Object.values(allLabels || {}),
       zones: Object.values(allZones || {}),
       sub_labels: allSubLabels,
@@ -192,6 +198,7 @@ export default function SearchView({
       allSubLabels,
       allRecognizedLicensePlates,
       searchFilter,
+      allowedCameras,
     ],
   );
 

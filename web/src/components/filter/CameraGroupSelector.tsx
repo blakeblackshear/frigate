@@ -77,6 +77,8 @@ import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { Trans, useTranslation } from "react-i18next";
 import { CameraNameLabel } from "../camera/CameraNameLabel";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
+import { useIsCustomRole } from "@/hooks/use-is-custom-role";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -650,6 +652,9 @@ export function CameraGroupEdit({
       allGroupsStreamingSettings[editingGroup?.[0] ?? ""],
     );
 
+  const allowedCameras = useAllowedCameras();
+  const isCustomRole = useIsCustomRole();
+
   const [openCamera, setOpenCamera] = useState<string | null>();
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
@@ -837,12 +842,17 @@ export function CameraGroupEdit({
                 <FormDescription>{t("group.cameras.desc")}</FormDescription>
                 <FormMessage />
                 {[
-                  ...(birdseyeConfig?.enabled ? ["birdseye"] : []),
-                  ...Object.keys(config?.cameras ?? {}).sort(
-                    (a, b) =>
-                      (config?.cameras[a]?.ui?.order ?? 0) -
-                      (config?.cameras[b]?.ui?.order ?? 0),
-                  ),
+                  ...(birdseyeConfig?.enabled &&
+                  (!isCustomRole || "birdseye" in allowedCameras)
+                    ? ["birdseye"]
+                    : []),
+                  ...Object.keys(config?.cameras ?? {})
+                    .filter((camera) => allowedCameras.includes(camera))
+                    .sort(
+                      (a, b) =>
+                        (config?.cameras[a]?.ui?.order ?? 0) -
+                        (config?.cameras[b]?.ui?.order ?? 0),
+                    ),
                 ].map((camera) => (
                   <FormControl key={camera}>
                     <div className="flex items-center justify-between gap-1">

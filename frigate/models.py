@@ -135,6 +135,18 @@ class User(Model):
     password_hash = CharField(null=False, max_length=120)
     notification_tokens = JSONField()
 
+    @classmethod
+    def get_allowed_cameras(
+        cls, role: str, roles_dict: dict[str, list[str]], all_camera_names: set[str]
+    ) -> list[str]:
+        if role not in roles_dict:
+            return []  # Invalid role grants no access
+        allowed = roles_dict[role]
+        if not allowed:  # Empty list means all cameras
+            return list(all_camera_names)
+
+        return [cam for cam in allowed if cam in all_camera_names]
+
 
 class Trigger(Model):
     camera = CharField(max_length=20)

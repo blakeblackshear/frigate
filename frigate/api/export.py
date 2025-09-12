@@ -4,6 +4,7 @@ import logging
 import random
 import string
 from pathlib import Path
+from typing import List
 
 import psutil
 from fastapi import APIRouter, Depends, Request
@@ -11,7 +12,11 @@ from fastapi.responses import JSONResponse
 from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.auth import require_role
+from frigate.api.auth import (
+    get_allowed_cameras_for_filter,
+    require_camera_access,
+    require_role,
+)
 from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
 from frigate.api.defs.request.export_rename_body import ExportRenameBody
 from frigate.api.defs.tags import Tags
@@ -30,12 +35,23 @@ router = APIRouter(tags=[Tags.export])
 
 
 @router.get("/exports")
-def get_exports():
-    exports = Export.select().order_by(Export.date.desc()).dicts().iterator()
+def get_exports(
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
+    exports = (
+        Export.select()
+        .where(Export.camera << allowed_cameras)
+        .order_by(Export.date.desc())
+        .dicts()
+        .iterator()
+    )
     return JSONResponse(content=[e for e in exports])
 
 
-@router.post("/export/{camera_name}/start/{start_time}/end/{end_time}")
+@router.post(
+    "/export/{camera_name}/start/{start_time}/end/{end_time}",
+    dependencies=[Depends(require_camera_access)],
+)
 def export_recording(
     request: Request,
     camera_name: str,
@@ -134,9 +150,10 @@ def export_recording(
 @router.patch(
     "/export/{event_id}/rename", dependencies=[Depends(require_role(["admin"]))]
 )
-def export_rename(event_id: str, body: ExportRenameBody):
+async def export_rename(event_id: str, body: ExportRenameBody, request: Request):
     try:
         export: Export = Export.get(Export.id == event_id)
+        await require_camera_access(export.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=(
@@ -162,9 +179,10 @@ def export_rename(event_id: str, body: ExportRenameBody):
 
 
 @router.delete("/export/{event_id}", dependencies=[Depends(require_role(["admin"]))])
-def export_delete(event_id: str):
+async def export_delete(event_id: str, request: Request):
     try:
         export: Export = Export.get(Export.id == event_id)
+        await require_camera_access(export.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=(
@@ -215,9 +233,11 @@ def export_delete(event_id: str):
 
 
 @router.get("/exports/{export_id}")
-def get_export(export_id: str):
+async def get_export(export_id: str, request: Request):
     try:
-        return JSONResponse(content=model_to_dict(Export.get(Export.id == export_id)))
+        export = Export.get(Export.id == export_id)
+        await require_camera_access(export.camera, request=request)
+        return JSONResponse(content=model_to_dict(export))
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Export not found"},
