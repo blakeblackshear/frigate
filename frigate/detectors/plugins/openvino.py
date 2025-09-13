@@ -51,8 +51,17 @@ class OvDetector(DetectionApi):
             model=detector_config.model.path, device_name=detector_config.device
         )
 
-        # Create a single reusable inference request for optimal performance
+        # Create a single reusable resources for optimal performance
         self.infer_request = self.interpreter.create_infer_request()
+        input_shape = self.interpreter.inputs[0].get_shape()
+        self.input_tensor = ov.Tensor(ov.Type.f32, input_shape)
+        
+        # For dfine models, also pre-allocate target sizes tensor
+        if self.ov_model_type == ModelTypeEnum.dfine:
+            self.target_sizes_tensor = ov.Tensor(
+                np.array([[self.h, self.w]], dtype=np.int64)
+            )
+        
         self.model_invalid = False
 
         if self.ov_model_type not in self.supported_models:
@@ -131,15 +140,12 @@ class OvDetector(DetectionApi):
         ]
 
     def detect_raw(self, tensor_input):
-        # TODO: see if we can use shared_memory=True
-        input_tensor = ov.Tensor(array=tensor_input)
+        # Copy input data to pre-allocated tensor to avoid allocation overhead
+        np.copyto(self.input_tensor.data, tensor_input)
 
         if self.ov_model_type == ModelTypeEnum.dfine:
-            self.infer_request.set_tensor("images", input_tensor)
-            target_sizes_tensor = ov.Tensor(
-                np.array([[self.h, self.w]], dtype=np.int64)
-            )
-            self.infer_request.set_tensor("orig_target_sizes", target_sizes_tensor)
+            self.infer_request.set_tensor("images", self.input_tensor)
+            self.infer_request.set_tensor("orig_target_sizes", self.target_sizes_tensor)
             self.infer_request.infer()
             tensor_output = (
                 self.infer_request.get_output_tensor(0).data,
@@ -148,7 +154,7 @@ class OvDetector(DetectionApi):
             )
             return post_process_dfine(tensor_output, self.w, self.h)
 
-        self.infer_request.infer(input_tensor)
+        self.infer_request.infer(self.input_tensor)
 
         detections = np.zeros((20, 6), np.float32)
 
