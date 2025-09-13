@@ -51,6 +51,8 @@ class OvDetector(DetectionApi):
             model=detector_config.model.path, device_name=detector_config.device
         )
 
+        # Create a single reusable inference request for optimal performance
+        self.infer_request = self.interpreter.create_infer_request()
         self.model_invalid = False
 
         if self.ov_model_type not in self.supported_models:
@@ -129,25 +131,24 @@ class OvDetector(DetectionApi):
         ]
 
     def detect_raw(self, tensor_input):
-        infer_request = self.interpreter.create_infer_request()
         # TODO: see if we can use shared_memory=True
         input_tensor = ov.Tensor(array=tensor_input)
 
         if self.ov_model_type == ModelTypeEnum.dfine:
-            infer_request.set_tensor("images", input_tensor)
+            self.infer_request.set_tensor("images", input_tensor)
             target_sizes_tensor = ov.Tensor(
                 np.array([[self.h, self.w]], dtype=np.int64)
             )
-            infer_request.set_tensor("orig_target_sizes", target_sizes_tensor)
-            infer_request.infer()
+            self.infer_request.set_tensor("orig_target_sizes", target_sizes_tensor)
+            self.infer_request.infer()
             tensor_output = (
-                infer_request.get_output_tensor(0).data,
-                infer_request.get_output_tensor(1).data,
-                infer_request.get_output_tensor(2).data,
+                self.infer_request.get_output_tensor(0).data,
+                self.infer_request.get_output_tensor(1).data,
+                self.infer_request.get_output_tensor(2).data,
             )
             return post_process_dfine(tensor_output, self.w, self.h)
 
-        infer_request.infer(input_tensor)
+        self.infer_request.infer(input_tensor)
 
         detections = np.zeros((20, 6), np.float32)
 
@@ -156,12 +157,12 @@ class OvDetector(DetectionApi):
         elif self.ov_model_type == ModelTypeEnum.rfdetr:
             return post_process_rfdetr(
                 [
-                    infer_request.get_output_tensor(0).data,
-                    infer_request.get_output_tensor(1).data,
+                    self.infer_request.get_output_tensor(0).data,
+                    self.infer_request.get_output_tensor(1).data,
                 ]
             )
         elif self.ov_model_type == ModelTypeEnum.ssd:
-            results = infer_request.get_output_tensor(0).data[0][0]
+            results = self.infer_request.get_output_tensor(0).data[0][0]
 
             for i, (_, class_id, score, xmin, ymin, xmax, ymax) in enumerate(results):
                 if i == 20:
@@ -176,7 +177,7 @@ class OvDetector(DetectionApi):
                 ]
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolonas:
-            predictions = infer_request.get_output_tensor(0).data
+            predictions = self.infer_request.get_output_tensor(0).data
 
             for i, prediction in enumerate(predictions):
                 if i == 20:
@@ -197,12 +198,12 @@ class OvDetector(DetectionApi):
         elif self.ov_model_type == ModelTypeEnum.yologeneric:
             out_tensor = []
 
-            for item in infer_request.output_tensors:
+            for item in self.infer_request.output_tensors:
                 out_tensor.append(item.data)
 
             return post_process_yolo(out_tensor, self.w, self.h)
         elif self.ov_model_type == ModelTypeEnum.yolox:
-            out_tensor = infer_request.get_output_tensor()
+            out_tensor = self.infer_request.get_output_tensor()
             # [x, y, h, w, box_score, class_no_1, ..., class_no_80],
             results = out_tensor.data
             results[..., :2] = (results[..., :2] + self.grids) * self.expanded_strides
