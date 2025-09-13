@@ -47,6 +47,8 @@ class OvDetector(DetectionApi):
             logger.error(f"OpenVino model file {detector_config.model.path} not found.")
             raise FileNotFoundError
 
+        # Disable performance counters to reduce overhead
+        self.ov_core.set_property(detector_config.device, {"PERF_COUNT": "NO"})
         self.interpreter = self.ov_core.compile_model(
             model=detector_config.model.path, device_name=detector_config.device
         )
