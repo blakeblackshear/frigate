@@ -24,6 +24,7 @@ class MqttClient(Communicator):
         self._reconnect_thread: Optional[threading.Thread] = None
         self._reconnect_delay = 10  # Retry every 10 seconds
         self._stop_reconnect: bool = False
+        self._cleanup_in_progress: bool = False
 
     def subscribe(self, receiver: Callable[[str, str], None]) -> None:
         """Wrapper for allowing dispatcher to subscribe."""
@@ -239,9 +240,13 @@ class MqttClient(Communicator):
             f"MQTT disconnected - reason: '{reason_name}', code: {reason_value}, type: {type(reason_code)}"
         )
 
-        # Don't attempt reconnection if we're stopping or if it was a clean disconnect
+        # Don't attempt reconnection if we're stopping, cleaning up, or if it was a clean disconnect
         if self._stop_reconnect:
             logger.error("MQTT not reconnecting - stop flag set")
+            return
+
+        if self._cleanup_in_progress:
+            logger.error("MQTT not reconnecting - cleanup in progress")
             return
 
         if reason_code == 0:
@@ -379,9 +384,12 @@ class MqttClient(Communicator):
                 # Clean up old client if it exists
                 if self.client is not None:
                     try:
+                        self._cleanup_in_progress = True
                         self.client.disconnect()
                         self.client.loop_stop()
+                        self._cleanup_in_progress = False
                     except Exception:
+                        self._cleanup_in_progress = False
                         pass  # Ignore cleanup errors
 
                 # Create completely fresh client and attempt connection
