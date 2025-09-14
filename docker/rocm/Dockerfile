@@ -47,7 +47,7 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 RUN python3 -m pip config set global.break-system-packages true
 
 COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
-RUN pip3 uninstall -y onnxruntime-openvino \
+RUN pip3 uninstall -y onnxruntime \
     && pip3 install -r /requirements.txt
 
 #######################################################################
