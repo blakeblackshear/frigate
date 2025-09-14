@@ -10,6 +10,7 @@ from pydantic import Field
 
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detection_runners import RKNNModelRunner
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import post_process_yolo
 from frigate.util.rknn_converter import auto_convert_model
@@ -61,18 +62,18 @@ class Rknn(DetectionApi):
                     "For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html"
                 )
 
-        from rknnlite.api import RKNNLite
-
-        self.rknn = RKNNLite(verbose=False)
-        if self.rknn.load_rknn(model_props["path"]) != 0:
-            logger.error("Error initializing rknn model.")
-        if self.rknn.init_runtime(core_mask=core_mask) != 0:
-            logger.error(
-                "Error initializing rknn runtime. Do you run docker in privileged mode?"
-            )
+        self.runner = RKNNModelRunner(
+            model_path=model_props["path"],
+            model_type=config.model.model_type.value
+            if config.model.model_type
+            else None,
+            core_mask=core_mask,
+        )
 
     def __del__(self):
-        self.rknn.release()
+        if hasattr(self, "runner") and self.runner:
+            # The runner's __del__ method will handle cleanup
+            pass
 
     def get_soc(self):
         try:
@@ -305,9 +306,7 @@ class Rknn(DetectionApi):
             )
 
     def detect_raw(self, tensor_input):
-        output = self.rknn.inference(
-            [
-                tensor_input,
-            ]
-        )
+        # Prepare input for the runner
+        inputs = {"input": tensor_input}
+        output = self.runner.run(inputs)
         return self.post_process(output)

@@ -11,11 +11,11 @@ from transformers.utils.logging import disable_progress_bar, set_verbosity_error
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
+from frigate.detectors.detection_runners import get_optimized_runner
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 
 from .base_embedding import BaseEmbedding
-from .runner import ONNXModelRunner
 
 # disables the progress bar and download logging for downloading tokenizers and image processors
 disable_progress_bar()
@@ -125,7 +125,7 @@ class JinaV2Embedding(BaseEmbedding):
                 clean_up_tokenization_spaces=True,
             )
 
-            self.runner = ONNXModelRunner(
+            self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
             )
