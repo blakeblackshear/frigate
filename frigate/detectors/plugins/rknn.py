@@ -9,6 +9,7 @@ import numpy as np
 from pydantic import Field
 
 from frigate.const import MODEL_CACHE_DIR
+from frigate.detectors.base_runner import BaseModelRunner
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import post_process_yolo
@@ -34,12 +35,11 @@ class RknnDetectorConfig(BaseDetectorConfig):
     num_cores: int = Field(default=0, ge=0, le=3, title="Number of NPU cores to use.")
 
 
-class RKNNModelRunner:
+class RKNNModelRunner(BaseModelRunner):
     """Run RKNN models for embeddings."""
 
-    def __init__(self, model_path: str, device: str = "AUTO", model_type: str = None):
+    def __init__(self, model_path: str, model_type: str = None):
         self.model_path = model_path
-        self.device = device
         self.model_type = model_type
         self.rknn = None
         self._load_model()
@@ -70,6 +70,7 @@ class RKNNModelRunner:
 
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""
+        # For detection models, we typically use "input" as the default input name
         # For CLIP models, we need to determine the model type from the path
         model_name = os.path.basename(self.model_path).lower()
 
@@ -94,6 +95,8 @@ class RKNNModelRunner:
             return 224  # CLIP V1 uses 224x224
         elif "arcface" in model_name:
             return 112
+        # For detection models, we can't easily determine this from the RKNN model
+        # The calling code should provide this information
         return -1
 
     def run(self, inputs: dict[str, Any]) -> Any:
@@ -161,18 +164,18 @@ class Rknn(DetectionApi):
                     "For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html"
                 )
 
-        from rknnlite.api import RKNNLite
-
-        self.rknn = RKNNLite(verbose=False)
-        if self.rknn.load_rknn(model_props["path"]) != 0:
-            logger.error("Error initializing rknn model.")
-        if self.rknn.init_runtime(core_mask=core_mask) != 0:
-            logger.error(
-                "Error initializing rknn runtime. Do you run docker in privileged mode?"
-            )
+        # Initialize the RKNN model runner
+        self.runner = RKNNModelRunner(
+            model_path=model_props["path"],
+            model_type=config.model.model_type.value
+            if config.model.model_type
+            else None,
+        )
 
     def __del__(self):
-        self.rknn.release()
+        if hasattr(self, "runner") and self.runner:
+            # The runner's __del__ method will handle cleanup
+            pass
 
     def get_soc(self):
         try:
@@ -405,9 +408,7 @@ class Rknn(DetectionApi):
             )
 
     def detect_raw(self, tensor_input):
-        output = self.rknn.inference(
-            [
-                tensor_input,
-            ]
-        )
+        # Prepare input for the runner
+        inputs = {"input": tensor_input}
+        output = self.runner.run(inputs)
         return self.post_process(output)

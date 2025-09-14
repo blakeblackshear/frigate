@@ -6,8 +6,7 @@ from typing import Any
 import onnxruntime as ort
 
 from frigate.detectors.plugins.openvino import OpenVINOModelRunner
-from frigate.detectors.plugins.onnx import CudaGraphRunner
-from frigate.embeddings.onnx.runner import RKNNModelRunner
+from frigate.detectors.plugins.rknn import RKNNModelRunner
 from frigate.util.model import get_ort_providers
 from frigate.util.rknn_converter import auto_convert_model, is_rknn_compatible
 
@@ -61,7 +60,7 @@ def get_optimized_runner(model_path: str, device: str, **kwargs) -> BaseModelRun
         rknn_path = auto_convert_model(model_path)
 
         if rknn_path:
-            return RKNNModelRunner(rknn_path, device)
+            return RKNNModelRunner(rknn_path)
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
 
@@ -73,10 +72,5 @@ def get_optimized_runner(model_path: str, device: str, **kwargs) -> BaseModelRun
         providers=providers,
         provider_options=options,
     )
-
-    cuda_idx = providers.index("CUDAExecutionProvider")
-
-    if cuda_idx == 0:
-        return CudaGraphRunner(ort, options[cuda_idx].get("device_id", 0))
 
     return ONNXModelRunner(model_path, device, **kwargs)
