@@ -401,7 +401,7 @@ export default function LiveCameraView({
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const screenOrientation = screen.orientation as any;
-    if (!screenOrientation.lock || !screenOrientation.unlock) {
+    if (!screenOrientation?.lock || !screenOrientation?.unlock) {
       // Browser does not support ScreenOrientation APIs that we need
       return;
     }
