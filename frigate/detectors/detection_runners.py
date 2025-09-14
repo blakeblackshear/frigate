@@ -87,7 +87,10 @@ class CudaGraphRunner(BaseModelRunner):
         """Get the input width of the model."""
         return self._session.get_inputs()[0].shape[3]
 
-    def run(self, input_name: str, tensor_input: np.ndarray):
+    def run(self, input: dict[str, Any]):
+        # Extract the single tensor input (assuming one input)
+        input_name = list(input.keys())[0]
+        tensor_input = input[input_name]
         tensor_input = np.ascontiguousarray(tensor_input)
 
         if not self._captured:
