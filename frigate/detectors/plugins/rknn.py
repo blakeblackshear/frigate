@@ -139,8 +139,9 @@ class Rknn(DetectionApi):
         if not os.path.isdir(model_cache_dir):
             os.mkdir(model_cache_dir)
 
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
         urllib.request.urlretrieve(
-            f"https://github.com/MarcA711/rknn-models/releases/download/v2.3.2-2/{filename}",
+            f"{GITHUB_ENDPOINT}/MarcA711/rknn-models/releases/download/v2.3.2-2/{filename}",
             model_cache_dir + filename,
         )
 
