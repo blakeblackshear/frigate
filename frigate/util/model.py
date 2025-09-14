@@ -338,9 +338,11 @@ def get_ort_providers(
             else:
                 continue
         elif provider == "OpenVINOExecutionProvider":
-            # OpenVINO is used directly 
+            # OpenVINO is used directly
             if device == "OpenVINO":
-                os.makedirs(os.path.join(MODEL_CACHE_DIR, "openvino/ort"), exist_ok=True)
+                os.makedirs(
+                    os.path.join(MODEL_CACHE_DIR, "openvino/ort"), exist_ok=True
+                )
                 providers.append(provider)
                 options.append(
                     {
