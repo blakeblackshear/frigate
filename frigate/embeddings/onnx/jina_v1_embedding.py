@@ -7,6 +7,7 @@ import warnings
 # importing this without pytorch or others causes a warning
 # https://github.com/huggingface/transformers/issues/27214
 # suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
+from frigate.detectors.base_runner import BaseModelRunner, get_optimized_runner
 from transformers import AutoFeatureExtractor, AutoTokenizer
 from transformers.utils.logging import disable_progress_bar
 
@@ -16,7 +17,6 @@ from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 
 from .base_embedding import BaseEmbedding
-from .runner import ONNXModelRunner
 
 warnings.filterwarnings(
     "ignore",
@@ -125,7 +125,7 @@ class JinaV1TextEmbedding(BaseEmbedding):
                 clean_up_tokenization_spaces=True,
             )
 
-            self.runner = ONNXModelRunner(
+            self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
             )
@@ -170,7 +170,7 @@ class JinaV1ImageEmbedding(BaseEmbedding):
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
         self.feature_extractor = None
-        self.runner: ONNXModelRunner | None = None
+        self.runner: BaseModelRunner | None = None
         files_names = list(self.download_urls.keys())
         if not all(
             os.path.exists(os.path.join(self.download_path, n)) for n in files_names
@@ -203,7 +203,7 @@ class JinaV1ImageEmbedding(BaseEmbedding):
                 f"{MODEL_CACHE_DIR}/{self.model_name}",
             )
 
-            self.runner = ONNXModelRunner(
+            self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
             )
