@@ -186,15 +186,15 @@ class OpenVINOModelRunner(BaseModelRunner):
                     if port.get_any_name() == input_name:
                         input_port = port
                         break
-                
+
                 if input_port is None:
                     raise ValueError(f"Input '{input_name}' not found in model")
-                
+
                 # Create tensor with the correct element type
                 input_element_type = input_port.get_element_type()
                 input_tensor = ov.Tensor(input_element_type, input_data.shape)
                 np.copyto(input_tensor.data, input_data)
-                
+
                 # Set the input tensor
                 self.infer_request.set_input_tensor(input_tensor)
 
