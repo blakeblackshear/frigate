@@ -48,7 +48,7 @@ def is_openvino_gpu_npu_available() -> bool:
     """
     available_devices = get_openvino_available_devices()
     # Check for GPU, NPU, or other acceleration devices (excluding CPU)
-    acceleration_devices = ['GPU', 'MYRIAD', 'NPU', 'GNA', 'HDDL']
+    acceleration_devices = ["GPU", "MYRIAD", "NPU", "GNA", "HDDL"]
     return any(device in available_devices for device in acceleration_devices)
 
 
@@ -354,20 +354,10 @@ def get_optimized_runner(
         if rknn_path:
             return RKNNModelRunner(rknn_path)
 
-    providers, options = get_ort_providers(device == "CPU", device, **kwargs)
-
-    if device == "CPU":
-        return ONNXModelRunner(
-            ort.InferenceSession(
-                model_path,
-                providers=providers,
-                provider_options=options,
-            )
-        )
-
     if is_openvino_gpu_npu_available():
         return OpenVINOModelRunner(model_path, device, **kwargs)
 
+    providers, options = get_ort_providers(device == "CPU", device, **kwargs)
     ortSession = ort.InferenceSession(
         model_path,
         providers=providers,

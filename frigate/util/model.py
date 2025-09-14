@@ -338,14 +338,16 @@ def get_ort_providers(
             else:
                 continue
         elif provider == "OpenVINOExecutionProvider":
-            os.makedirs(os.path.join(MODEL_CACHE_DIR, "openvino/ort"), exist_ok=True)
-            providers.append(provider)
-            options.append(
-                {
-                    "cache_dir": os.path.join(MODEL_CACHE_DIR, "openvino/ort"),
-                    "device_type": device,
-                }
-            )
+            # OpenVINO is used directly 
+            if device == "OpenVINO":
+                os.makedirs(os.path.join(MODEL_CACHE_DIR, "openvino/ort"), exist_ok=True)
+                providers.append(provider)
+                options.append(
+                    {
+                        "cache_dir": os.path.join(MODEL_CACHE_DIR, "openvino/ort"),
+                        "device_type": device,
+                    }
+                )
         elif provider == "MIGraphXExecutionProvider":
             # MIGraphX uses more CPU than ROCM, while also being the same speed
             if device == "MIGraphX":
