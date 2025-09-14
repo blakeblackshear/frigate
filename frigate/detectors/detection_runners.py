@@ -20,6 +20,38 @@ except ImportError:
     ov = None
 
 
+def get_openvino_available_devices() -> list[str]:
+    """Get available OpenVINO devices without using ONNX Runtime.
+
+    Returns:
+        List of available OpenVINO device names (e.g., ['CPU', 'GPU', 'MYRIAD'])
+    """
+    if ov is None:
+        logger.debug("OpenVINO is not available")
+        return []
+
+    try:
+        core = ov.Core()
+        available_devices = core.available_devices
+        logger.info(f"OpenVINO available devices: {available_devices}")
+        return available_devices
+    except Exception as e:
+        logger.warning(f"Failed to get OpenVINO available devices: {e}")
+        return []
+
+
+def is_openvino_gpu_npu_available() -> bool:
+    """Check if OpenVINO GPU or NPU devices are available.
+
+    Returns:
+        True if GPU or NPU devices are available, False otherwise
+    """
+    available_devices = get_openvino_available_devices()
+    # Check for GPU, NPU, or other acceleration devices (excluding CPU)
+    acceleration_devices = ['GPU', 'MYRIAD', 'NPU', 'GNA', 'HDDL']
+    return any(device in available_devices for device in acceleration_devices)
+
+
 class BaseModelRunner(ABC):
     """Abstract base class for model runners."""
 
@@ -333,7 +365,7 @@ def get_optimized_runner(
             )
         )
 
-    if "OpenVINOExecutionProvider" in providers:
+    if is_openvino_gpu_npu_available():
         return OpenVINOModelRunner(model_path, device, **kwargs)
 
     ortSession = ort.InferenceSession(
