@@ -149,7 +149,8 @@ class OpenVINOModelRunner(BaseModelRunner):
         # Create reusable inference request
         self.infer_request = self.compiled_model.create_infer_request()
         input_shape = self.compiled_model.inputs[0].get_shape()
-        self.input_tensor = ov.Tensor(ov.Type.f32, input_shape)
+        input_element_type = self.compiled_model.inputs[0].get_element_type()
+        self.input_tensor = ov.Tensor(input_element_type, input_shape)
 
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""
@@ -161,20 +162,44 @@ class OpenVINOModelRunner(BaseModelRunner):
         # Assuming NCHW format, width is the last dimension
         return int(input_shape[-1])
 
-    def run(self, input_data: np.ndarray) -> list[np.ndarray]:
+    def run(self, inputs: dict[str, Any]) -> list[np.ndarray]:
         """Run inference with the model.
 
         Args:
-            input_data: Input tensor data
+            inputs: Dictionary mapping input names to input data
 
         Returns:
             List of output tensors
         """
-        # Copy input data to pre-allocated tensor
-        np.copyto(self.input_tensor.data, input_data)
+        # Handle single input case for backward compatibility
+        if len(inputs) == 1 and len(self.compiled_model.inputs) == 1:
+            # Single input case - use the pre-allocated tensor for efficiency
+            input_data = list(inputs.values())[0]
+            np.copyto(self.input_tensor.data, input_data)
+            self.infer_request.infer(self.input_tensor)
+        else:
+            # Multiple inputs case - set each input by name
+            for input_name, input_data in inputs.items():
+                # Find the input by name
+                input_port = None
+                for port in self.compiled_model.inputs:
+                    if port.get_any_name() == input_name:
+                        input_port = port
+                        break
+                
+                if input_port is None:
+                    raise ValueError(f"Input '{input_name}' not found in model")
+                
+                # Create tensor with the correct element type
+                input_element_type = input_port.get_element_type()
+                input_tensor = ov.Tensor(input_element_type, input_data.shape)
+                np.copyto(input_tensor.data, input_data)
+                
+                # Set the input tensor
+                self.infer_request.set_input_tensor(input_tensor)
 
-        # Run inference
-        self.infer_request.infer(self.input_tensor)
+            # Run inference
+            self.infer_request.infer()
 
         # Get all output tensors
         outputs = []
