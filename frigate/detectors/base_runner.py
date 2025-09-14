@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from frigate.detectors.plugins.onnx import CudaGraphRunner
 import onnxruntime as ort
 
 from frigate.detectors.plugins.openvino import OpenVINOModelRunner
@@ -51,7 +52,7 @@ class ONNXModelRunner(BaseModelRunner):
         return self.ort.run(None, input)
 
 
-def get_optimized_runner(model_path: str, device: str, **kwargs) -> BaseModelRunner:
+def get_optimized_runner(model_path: str, device: str, complex_model: bool = True, **kwargs) -> BaseModelRunner:
     """Get an optimized runner for the hardware."""
     if device == "CPU":
         return ONNXModelRunner(model_path, device, **kwargs)
@@ -72,5 +73,8 @@ def get_optimized_runner(model_path: str, device: str, **kwargs) -> BaseModelRun
         providers=providers,
         provider_options=options,
     )
+
+    if not complex_model and providers[0] == "CUDAExecutionProvider":
+        return CudaGraphRunner(ort, options[0]["device_id"])
 
     return ONNXModelRunner(model_path, device, **kwargs)
