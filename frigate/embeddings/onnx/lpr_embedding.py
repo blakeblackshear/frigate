@@ -79,7 +79,6 @@ class PaddleOCRDetection(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
-                self.model_size,
             )
 
     def _preprocess_inputs(self, raw_inputs):
@@ -139,7 +138,6 @@ class PaddleOCRClassification(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
-                self.model_size,
             )
 
     def _preprocess_inputs(self, raw_inputs):
@@ -200,7 +198,6 @@ class PaddleOCRRecognition(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
-                self.model_size,
             )
 
     def _preprocess_inputs(self, raw_inputs):
@@ -261,7 +258,7 @@ class LicensePlateDetector(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
-                self.model_size,
+                complex_model=False,
             )
 
     def _preprocess_inputs(self, raw_inputs):
