@@ -24,6 +24,73 @@ class OvDetectorConfig(BaseDetectorConfig):
     device: str = Field(default=None, title="Device Type")
 
 
+"""OpenVINO model runner implementation."""
+
+import logging
+import os
+
+import numpy as np
+import openvino as ov
+
+logger = logging.getLogger(__name__)
+
+
+class OpenVINOModelRunner:
+    """OpenVINO model runner that handles inference efficiently."""
+
+    def __init__(self, model_path: str, device: str, **kwargs):
+        self.model_path = model_path
+        self.device = device
+        
+        if not os.path.isfile(model_path):
+            raise FileNotFoundError(f"OpenVINO model file {model_path} not found.")
+        
+        self.ov_core = ov.Core()
+        
+        # Apply performance optimization
+        self.ov_core.set_property(device, {"PERF_COUNT": "NO"})
+        
+        # Compile model
+        self.compiled_model = self.ov_core.compile_model(model=model_path, device_name=device)
+        
+        # Create reusable inference request
+        self.infer_request = self.compiled_model.create_infer_request()
+        input_shape = self.compiled_model.inputs[0].get_shape()
+        self.input_tensor = ov.Tensor(ov.Type.f32, input_shape)
+
+    def get_input_names(self) -> list[str]:
+        """Get input names for the model."""
+        return [input.get_any_name() for input in self.compiled_model.inputs]
+
+    def get_input_width(self) -> int:
+        """Get the input width of the model."""
+        input_shape = self.compiled_model.inputs[0].get_shape()
+        # Assuming NCHW format, width is the last dimension
+        return int(input_shape[-1])
+
+    def run(self, input_data: np.ndarray) -> list[np.ndarray]:
+        """Run inference with the model.
+        
+        Args:
+            input_data: Input tensor data
+            
+        Returns:
+            List of output tensors
+        """
+        # Copy input data to pre-allocated tensor
+        np.copyto(self.input_tensor.data, input_data)
+        
+        # Run inference
+        self.infer_request.infer(self.input_tensor)
+        
+        # Get all output tensors
+        outputs = []
+        for i in range(len(self.compiled_model.outputs)):
+            outputs.append(self.infer_request.get_output_tensor(i).data)
+        
+        return outputs
+
+
 class OvDetector(DetectionApi):
     type_key = DETECTOR_KEY
     supported_models = [
@@ -37,26 +104,15 @@ class OvDetector(DetectionApi):
 
     def __init__(self, detector_config: OvDetectorConfig):
         super().__init__(detector_config)
-        self.ov_core = ov.Core()
         self.ov_model_type = detector_config.model.model_type
 
         self.h = detector_config.model.height
         self.w = detector_config.model.width
 
-        if not os.path.isfile(detector_config.model.path):
-            logger.error(f"OpenVino model file {detector_config.model.path} not found.")
-            raise FileNotFoundError
-
-        # Disable performance counters to reduce overhead
-        self.ov_core.set_property(detector_config.device, {"PERF_COUNT": "NO"})
-        self.interpreter = self.ov_core.compile_model(
-            model=detector_config.model.path, device_name=detector_config.device
+        self.runner = OpenVINOModelRunner(
+            model_path=detector_config.model.path,
+            device=detector_config.device
         )
-
-        # Create a single reusable resources for optimal performance
-        self.infer_request = self.interpreter.create_infer_request()
-        input_shape = self.interpreter.inputs[0].get_shape()
-        self.input_tensor = ov.Tensor(ov.Type.f32, input_shape)
         
         # For dfine models, also pre-allocate target sizes tensor
         if self.ov_model_type == ModelTypeEnum.dfine:
@@ -73,8 +129,8 @@ class OvDetector(DetectionApi):
             self.model_invalid = True
 
         if self.ov_model_type == ModelTypeEnum.ssd:
-            model_inputs = self.interpreter.inputs
-            model_outputs = self.interpreter.outputs
+            model_inputs = self.runner.compiled_model.inputs
+            model_outputs = self.runner.compiled_model.outputs
 
             if len(model_inputs) != 1:
                 logger.error(
@@ -93,8 +149,8 @@ class OvDetector(DetectionApi):
                 self.model_invalid = True
 
         if self.ov_model_type == ModelTypeEnum.yolonas:
-            model_inputs = self.interpreter.inputs
-            model_outputs = self.interpreter.outputs
+            model_inputs = self.runner.compiled_model.inputs
+            model_outputs = self.runner.compiled_model.outputs
 
             if len(model_inputs) != 1:
                 logger.error(
@@ -117,7 +173,7 @@ class OvDetector(DetectionApi):
             self.output_indexes = 0
             while True:
                 try:
-                    tensor_shape = self.interpreter.output(self.output_indexes).shape
+                    tensor_shape = self.runner.compiled_model.output(self.output_indexes).shape
                     logger.info(
                         f"Model Output-{self.output_indexes} Shape: {tensor_shape}"
                     )
@@ -142,35 +198,32 @@ class OvDetector(DetectionApi):
         ]
 
     def detect_raw(self, tensor_input):
-        # Copy input data to pre-allocated tensor to avoid allocation overhead
-        np.copyto(self.input_tensor.data, tensor_input)
+        if self.model_invalid:
+            return np.zeros((20, 6), np.float32)
 
         if self.ov_model_type == ModelTypeEnum.dfine:
-            self.infer_request.set_tensor("images", self.input_tensor)
-            self.infer_request.set_tensor("orig_target_sizes", self.target_sizes_tensor)
-            self.infer_request.infer()
+            # Use named inputs for dfine models
+            inputs = {
+                "images": tensor_input,
+                "orig_target_sizes": np.array([[self.h, self.w]], dtype=np.int64)
+            }
+            outputs = self.runner.run_with_named_inputs(inputs)
             tensor_output = (
-                self.infer_request.get_output_tensor(0).data,
-                self.infer_request.get_output_tensor(1).data,
-                self.infer_request.get_output_tensor(2).data,
+                outputs["output0"],
+                outputs["output1"], 
+                outputs["output2"],
             )
             return post_process_dfine(tensor_output, self.w, self.h)
 
-        self.infer_request.infer(self.input_tensor)
+        # Run inference using the runner
+        outputs = self.runner.run(tensor_input)
 
         detections = np.zeros((20, 6), np.float32)
 
-        if self.model_invalid:
-            return detections
-        elif self.ov_model_type == ModelTypeEnum.rfdetr:
-            return post_process_rfdetr(
-                [
-                    self.infer_request.get_output_tensor(0).data,
-                    self.infer_request.get_output_tensor(1).data,
-                ]
-            )
+        if self.ov_model_type == ModelTypeEnum.rfdetr:
+            return post_process_rfdetr(outputs)
         elif self.ov_model_type == ModelTypeEnum.ssd:
-            results = self.infer_request.get_output_tensor(0).data[0][0]
+            results = outputs[0][0][0]
 
             for i, (_, class_id, score, xmin, ymin, xmax, ymax) in enumerate(results):
                 if i == 20:
@@ -185,7 +238,7 @@ class OvDetector(DetectionApi):
                 ]
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolonas:
-            predictions = self.infer_request.get_output_tensor(0).data
+            predictions = outputs[0]
 
             for i, prediction in enumerate(predictions):
                 if i == 20:
@@ -204,16 +257,10 @@ class OvDetector(DetectionApi):
                 ]
             return detections
         elif self.ov_model_type == ModelTypeEnum.yologeneric:
-            out_tensor = []
-
-            for item in self.infer_request.output_tensors:
-                out_tensor.append(item.data)
-
-            return post_process_yolo(out_tensor, self.w, self.h)
+            return post_process_yolo(outputs, self.w, self.h)
         elif self.ov_model_type == ModelTypeEnum.yolox:
-            out_tensor = self.infer_request.get_output_tensor()
             # [x, y, h, w, box_score, class_no_1, ..., class_no_80],
-            results = out_tensor.data
+            results = outputs[0]
             results[..., :2] = (results[..., :2] + self.grids) * self.expanded_strides
             results[..., 2:4] = np.exp(results[..., 2:4]) * self.expanded_strides
             image_pred = results[0, ...]
