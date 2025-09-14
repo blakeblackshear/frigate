@@ -41,18 +41,20 @@ class OpenVINOModelRunner:
     def __init__(self, model_path: str, device: str, **kwargs):
         self.model_path = model_path
         self.device = device
-        
+
         if not os.path.isfile(model_path):
             raise FileNotFoundError(f"OpenVINO model file {model_path} not found.")
-        
+
         self.ov_core = ov.Core()
-        
+
         # Apply performance optimization
         self.ov_core.set_property(device, {"PERF_COUNT": "NO"})
-        
+
         # Compile model
-        self.compiled_model = self.ov_core.compile_model(model=model_path, device_name=device)
-        
+        self.compiled_model = self.ov_core.compile_model(
+            model=model_path, device_name=device
+        )
+
         # Create reusable inference request
         self.infer_request = self.compiled_model.create_infer_request()
         input_shape = self.compiled_model.inputs[0].get_shape()
@@ -70,24 +72,24 @@ class OpenVINOModelRunner:
 
     def run(self, input_data: np.ndarray) -> list[np.ndarray]:
         """Run inference with the model.
-        
+
         Args:
             input_data: Input tensor data
-            
+
         Returns:
             List of output tensors
         """
         # Copy input data to pre-allocated tensor
         np.copyto(self.input_tensor.data, input_data)
-        
+
         # Run inference
         self.infer_request.infer(self.input_tensor)
-        
+
         # Get all output tensors
         outputs = []
         for i in range(len(self.compiled_model.outputs)):
             outputs.append(self.infer_request.get_output_tensor(i).data)
-        
+
         return outputs
 
 
@@ -110,16 +112,15 @@ class OvDetector(DetectionApi):
         self.w = detector_config.model.width
 
         self.runner = OpenVINOModelRunner(
-            model_path=detector_config.model.path,
-            device=detector_config.device
+            model_path=detector_config.model.path, device=detector_config.device
         )
-        
+
         # For dfine models, also pre-allocate target sizes tensor
         if self.ov_model_type == ModelTypeEnum.dfine:
             self.target_sizes_tensor = ov.Tensor(
                 np.array([[self.h, self.w]], dtype=np.int64)
             )
-        
+
         self.model_invalid = False
 
         if self.ov_model_type not in self.supported_models:
@@ -173,7 +174,9 @@ class OvDetector(DetectionApi):
             self.output_indexes = 0
             while True:
                 try:
-                    tensor_shape = self.runner.compiled_model.output(self.output_indexes).shape
+                    tensor_shape = self.runner.compiled_model.output(
+                        self.output_indexes
+                    ).shape
                     logger.info(
                         f"Model Output-{self.output_indexes} Shape: {tensor_shape}"
                     )
@@ -205,12 +208,12 @@ class OvDetector(DetectionApi):
             # Use named inputs for dfine models
             inputs = {
                 "images": tensor_input,
-                "orig_target_sizes": np.array([[self.h, self.w]], dtype=np.int64)
+                "orig_target_sizes": np.array([[self.h, self.w]], dtype=np.int64),
             }
             outputs = self.runner.run_with_named_inputs(inputs)
             tensor_output = (
                 outputs["output0"],
-                outputs["output1"], 
+                outputs["output1"],
                 outputs["output2"],
             )
             return post_process_dfine(tensor_output, self.w, self.h)

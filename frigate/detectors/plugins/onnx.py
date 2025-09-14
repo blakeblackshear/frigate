@@ -5,6 +5,7 @@ import onnxruntime as ort
 from pydantic import Field
 from typing_extensions import Literal
 
+from frigate.detectors.base_runner import BaseModelRunner
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
@@ -23,10 +24,13 @@ logger = logging.getLogger(__name__)
 DETECTOR_KEY = "onnx"
 
 
-class CudaGraphRunner:
+class CudaGraphRunner(BaseModelRunner):
     """Encapsulates CUDA Graph capture and replay using ONNX Runtime IOBinding.
 
     This runner assumes a single tensor input and binds all model outputs.
+
+    NOTE: CUDA Graphs limit supported model operations, so they are not usable
+    for more complex models like CLIP or PaddleOCR.
     """
 
     def __init__(self, session: ort.InferenceSession, cuda_device_id: int):
@@ -38,6 +42,14 @@ class CudaGraphRunner:
         self._output_names: list[str] | None = None
         self._input_ortvalue: ort.OrtValue | None = None
         self._output_ortvalues: ort.OrtValue | None = None
+
+    def get_input_names(self) -> list[str]:
+        """Get input names for the model."""
+        return [input.name for input in self._session.get_inputs()]
+
+    def get_input_width(self) -> int:
+        """Get the input width of the model."""
+        return self._session.get_inputs()[0].shape[3]
 
     def run(self, input_name: str, tensor_input: np.ndarray):
         tensor_input = np.ascontiguousarray(tensor_input)
@@ -114,7 +126,6 @@ class ONNXDetector(DetectionApi):
 
         try:
             if "CUDAExecutionProvider" in providers:
-                cuda_idx = providers.index("CUDAExecutionProvider")
                 self._cuda_device_id = options[cuda_idx].get("device_id", 0)
 
                 if options[cuda_idx].get("enable_cuda_graph"):
