@@ -141,16 +141,17 @@ class OvDetector(DetectionApi):
                 "images": tensor_input,
                 "orig_target_sizes": np.array([[self.h, self.w]], dtype=np.int64),
             }
-            outputs = self.runner.run_with_named_inputs(inputs)
+            outputs = self.runner.run(inputs)
             tensor_output = (
-                outputs["output0"],
-                outputs["output1"],
-                outputs["output2"],
+                outputs[0],
+                outputs[1],
+                outputs[2],
             )
             return post_process_dfine(tensor_output, self.w, self.h)
 
         # Run inference using the runner
-        outputs = self.runner.run(tensor_input)
+        input_name = self.runner.get_input_names()[0]
+        outputs = self.runner.run({input_name: tensor_input})
 
         detections = np.zeros((20, 6), np.float32)
 
