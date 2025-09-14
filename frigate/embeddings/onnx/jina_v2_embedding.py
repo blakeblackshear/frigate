@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 from PIL import Image
-from frigate.detectors.base_runner import get_optimized_runner
+from frigate.detectors.detection_runners import get_optimized_runner
 from transformers import AutoTokenizer
 from transformers.utils.logging import disable_progress_bar, set_verbosity_error
 

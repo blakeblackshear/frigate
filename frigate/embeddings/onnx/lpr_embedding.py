@@ -7,7 +7,7 @@ import numpy as np
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR
-from frigate.detectors.base_runner import BaseModelRunner, get_optimized_runner
+from frigate.detectors.detection_runners import BaseModelRunner, get_optimized_runner
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 

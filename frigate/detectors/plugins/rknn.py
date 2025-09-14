@@ -2,15 +2,15 @@ import logging
 import os.path
 import re
 import urllib.request
-from typing import Any, Literal
+from typing import Literal
 
 import cv2
 import numpy as np
 from pydantic import Field
 
 from frigate.const import MODEL_CACHE_DIR
-from frigate.detectors.base_runner import BaseModelRunner
 from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detection_runners import RKNNModelRunner
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import post_process_yolo
 from frigate.util.rknn_converter import auto_convert_model
@@ -33,108 +33,6 @@ model_cache_dir = os.path.join(MODEL_CACHE_DIR, "rknn_cache/")
 class RknnDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
     num_cores: int = Field(default=0, ge=0, le=3, title="Number of NPU cores to use.")
-
-
-class RKNNModelRunner(BaseModelRunner):
-    """Run RKNN models for embeddings."""
-
-    def __init__(self, model_path: str, model_type: str = None):
-        self.model_path = model_path
-        self.model_type = model_type
-        self.rknn = None
-        self._load_model()
-
-    def _load_model(self):
-        """Load the RKNN model."""
-        try:
-            from rknnlite.api import RKNNLite
-
-            self.rknn = RKNNLite(verbose=False)
-
-            if self.rknn.load_rknn(self.model_path) != 0:
-                logger.error(f"Failed to load RKNN model: {self.model_path}")
-                raise RuntimeError("Failed to load RKNN model")
-
-            if self.rknn.init_runtime() != 0:
-                logger.error("Failed to initialize RKNN runtime")
-                raise RuntimeError("Failed to initialize RKNN runtime")
-
-            logger.info(f"Successfully loaded RKNN model: {self.model_path}")
-
-        except ImportError:
-            logger.error("RKNN Lite not available")
-            raise ImportError("RKNN Lite not available")
-        except Exception as e:
-            logger.error(f"Error loading RKNN model: {e}")
-            raise
-
-    def get_input_names(self) -> list[str]:
-        """Get input names for the model."""
-        # For detection models, we typically use "input" as the default input name
-        # For CLIP models, we need to determine the model type from the path
-        model_name = os.path.basename(self.model_path).lower()
-
-        if "vision" in model_name:
-            return ["pixel_values"]
-        elif "arcface" in model_name:
-            return ["data"]
-        else:
-            # Default fallback - try to infer from model type
-            if self.model_type and "jina-clip" in self.model_type:
-                if "vision" in self.model_type:
-                    return ["pixel_values"]
-
-            # Generic fallback
-            return ["input"]
-
-    def get_input_width(self) -> int:
-        """Get the input width of the model."""
-        # For CLIP vision models, this is typically 224
-        model_name = os.path.basename(self.model_path).lower()
-        if "vision" in model_name:
-            return 224  # CLIP V1 uses 224x224
-        elif "arcface" in model_name:
-            return 112
-        # For detection models, we can't easily determine this from the RKNN model
-        # The calling code should provide this information
-        return -1
-
-    def run(self, inputs: dict[str, Any]) -> Any:
-        """Run inference with the RKNN model."""
-        if not self.rknn:
-            raise RuntimeError("RKNN model not loaded")
-
-        try:
-            input_names = self.get_input_names()
-            rknn_inputs = []
-
-            for name in input_names:
-                if name in inputs:
-                    if name == "pixel_values":
-                        # RKNN expects NHWC format, but ONNX typically provides NCHW
-                        # Transpose from [batch, channels, height, width] to [batch, height, width, channels]
-                        pixel_data = inputs[name]
-                        if len(pixel_data.shape) == 4 and pixel_data.shape[1] == 3:
-                            # Transpose from NCHW to NHWC
-                            pixel_data = np.transpose(pixel_data, (0, 2, 3, 1))
-                        rknn_inputs.append(pixel_data)
-                    else:
-                        rknn_inputs.append(inputs[name])
-
-            outputs = self.rknn.inference(inputs=rknn_inputs)
-            return outputs
-
-        except Exception as e:
-            logger.error(f"Error during RKNN inference: {e}")
-            raise
-
-    def __del__(self):
-        """Cleanup when the runner is destroyed."""
-        if self.rknn:
-            try:
-                self.rknn.release()
-            except Exception:
-                pass
 
 
 class Rknn(DetectionApi):
@@ -164,12 +62,12 @@ class Rknn(DetectionApi):
                     "For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html"
                 )
 
-        # Initialize the RKNN model runner
         self.runner = RKNNModelRunner(
             model_path=model_props["path"],
             model_type=config.model.model_type.value
             if config.model.model_type
             else None,
+            core_mask=core_mask,
         )
 
     def __del__(self):

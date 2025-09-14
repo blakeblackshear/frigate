@@ -1,5 +1,4 @@
 import logging
-import os
 
 import numpy as np
 import openvino as ov
@@ -7,6 +6,7 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detection_runners import OpenVINOModelRunner
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import (
     post_process_dfine,
@@ -22,75 +22,6 @@ DETECTOR_KEY = "openvino"
 class OvDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
     device: str = Field(default=None, title="Device Type")
-
-
-"""OpenVINO model runner implementation."""
-
-import logging
-import os
-
-import numpy as np
-import openvino as ov
-
-logger = logging.getLogger(__name__)
-
-
-class OpenVINOModelRunner:
-    """OpenVINO model runner that handles inference efficiently."""
-
-    def __init__(self, model_path: str, device: str, **kwargs):
-        self.model_path = model_path
-        self.device = device
-
-        if not os.path.isfile(model_path):
-            raise FileNotFoundError(f"OpenVINO model file {model_path} not found.")
-
-        self.ov_core = ov.Core()
-
-        # Apply performance optimization
-        self.ov_core.set_property(device, {"PERF_COUNT": "NO"})
-
-        # Compile model
-        self.compiled_model = self.ov_core.compile_model(
-            model=model_path, device_name=device
-        )
-
-        # Create reusable inference request
-        self.infer_request = self.compiled_model.create_infer_request()
-        input_shape = self.compiled_model.inputs[0].get_shape()
-        self.input_tensor = ov.Tensor(ov.Type.f32, input_shape)
-
-    def get_input_names(self) -> list[str]:
-        """Get input names for the model."""
-        return [input.get_any_name() for input in self.compiled_model.inputs]
-
-    def get_input_width(self) -> int:
-        """Get the input width of the model."""
-        input_shape = self.compiled_model.inputs[0].get_shape()
-        # Assuming NCHW format, width is the last dimension
-        return int(input_shape[-1])
-
-    def run(self, input_data: np.ndarray) -> list[np.ndarray]:
-        """Run inference with the model.
-
-        Args:
-            input_data: Input tensor data
-
-        Returns:
-            List of output tensors
-        """
-        # Copy input data to pre-allocated tensor
-        np.copyto(self.input_tensor.data, input_data)
-
-        # Run inference
-        self.infer_request.infer(self.input_tensor)
-
-        # Get all output tensors
-        outputs = []
-        for i in range(len(self.compiled_model.outputs)):
-            outputs.append(self.infer_request.get_output_tensor(i).data)
-
-        return outputs
 
 
 class OvDetector(DetectionApi):

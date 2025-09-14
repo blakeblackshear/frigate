@@ -6,7 +6,7 @@ import os
 import numpy as np
 
 from frigate.const import MODEL_CACHE_DIR
-from frigate.detectors.base_runner import get_optimized_runner
+from frigate.detectors.detection_runners import get_optimized_runner
 from frigate.log import redirect_output_to_logger
 from frigate.util.downloader import ModelDownloader
 

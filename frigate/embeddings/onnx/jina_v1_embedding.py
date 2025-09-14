@@ -7,7 +7,7 @@ import warnings
 # importing this without pytorch or others causes a warning
 # https://github.com/huggingface/transformers/issues/27214
 # suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
-from frigate.detectors.base_runner import BaseModelRunner, get_optimized_runner
+from frigate.detectors.detection_runners import BaseModelRunner, get_optimized_runner
 from transformers import AutoFeatureExtractor, AutoTokenizer
 from transformers.utils.logging import disable_progress_bar
 
