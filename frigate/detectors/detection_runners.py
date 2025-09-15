@@ -33,7 +33,7 @@ def get_openvino_available_devices() -> list[str]:
     try:
         core = ov.Core()
         available_devices = core.available_devices
-        logger.info(f"OpenVINO available devices: {available_devices}")
+        logger.debug(f"OpenVINO available devices: {available_devices}")
         return available_devices
     except Exception as e:
         logger.warning(f"Failed to get OpenVINO available devices: {e}")
@@ -209,7 +209,11 @@ class OpenVINOModelRunner(BaseModelRunner):
             List of output tensors
         """
         # Handle single input case for backward compatibility
-        if len(inputs) == 1 and len(self.compiled_model.inputs) == 1 and self.input_tensor is not None:
+        if (
+            len(inputs) == 1
+            and len(self.compiled_model.inputs) == 1
+            and self.input_tensor is not None
+        ):
             # Single input case - use the pre-allocated tensor for efficiency
             input_data = list(inputs.values())[0]
             np.copyto(self.input_tensor.data, input_data)
