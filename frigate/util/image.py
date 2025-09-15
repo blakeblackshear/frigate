@@ -66,7 +66,12 @@ def has_better_attr(current_thumb, new_obj, attr_label) -> bool:
     return max_new_attr > max_current_attr
 
 
-def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
+def is_better_thumbnail(
+    label: str,
+    current_thumb: dict[str, Any],
+    new_obj: dict[str, Any],
+    frame_shape: tuple[int, int],
+) -> bool:
     # larger is better
     # cutoff images are less ideal, but they should also be smaller?
     # better scores are obviously better too
