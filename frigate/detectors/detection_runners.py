@@ -354,7 +354,7 @@ def get_optimized_runner(
         if rknn_path:
             return RKNNModelRunner(rknn_path)
 
-    if is_openvino_gpu_npu_available():
+    if device != "CPU" and is_openvino_gpu_npu_available():
         return OpenVINOModelRunner(model_path, device, **kwargs)
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
