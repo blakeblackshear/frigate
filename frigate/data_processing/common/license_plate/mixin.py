@@ -50,6 +50,13 @@ class LicensePlateProcessingMixin:
         )
         self.batch_size = 6
 
+        # Object config
+        self.lp_objects: list[str] = []
+
+        for obj, attributes in self.config.model.attributes_map.items():
+            if "license_plate" in attributes:
+                self.lp_objects.append(obj)
+
         # Detection specific parameters
         self.min_size = 8
         self.max_size = 960
@@ -1254,7 +1261,7 @@ class LicensePlateProcessingMixin:
 
             # don't run for non car/motorcycle or non license plate (dedicated lpr with frigate+) objects
             if (
-                obj_data.get("label") not in ["car", "motorcycle"]
+                obj_data.get("label") not in self.lp_objects
                 and obj_data.get("label") != "license_plate"
             ):
                 logger.debug(
@@ -1346,7 +1353,7 @@ class LicensePlateProcessingMixin:
                     logger.debug(f"{camera}: No attributes to parse.")
                     return
 
-                if obj_data.get("label") in ["car", "motorcycle"]:
+                if obj_data.get("label") in self.lp_objects:
                     attributes: list[dict[str, Any]] = obj_data.get(
                         "current_attributes", []
                     )
