@@ -20,6 +20,38 @@ except ImportError:
     ov = None
 
 
+def get_openvino_available_devices() -> list[str]:
+    """Get available OpenVINO devices without using ONNX Runtime.
+
+    Returns:
+        List of available OpenVINO device names (e.g., ['CPU', 'GPU', 'MYRIAD'])
+    """
+    if ov is None:
+        logger.debug("OpenVINO is not available")
+        return []
+
+    try:
+        core = ov.Core()
+        available_devices = core.available_devices
+        logger.debug(f"OpenVINO available devices: {available_devices}")
+        return available_devices
+    except Exception as e:
+        logger.warning(f"Failed to get OpenVINO available devices: {e}")
+        return []
+
+
+def is_openvino_gpu_npu_available() -> bool:
+    """Check if OpenVINO GPU or NPU devices are available.
+
+    Returns:
+        True if GPU or NPU devices are available, False otherwise
+    """
+    available_devices = get_openvino_available_devices()
+    # Check for GPU, NPU, or other acceleration devices (excluding CPU)
+    acceleration_devices = ["GPU", "MYRIAD", "NPU", "GNA", "HDDL"]
+    return any(device in available_devices for device in acceleration_devices)
+
+
 class BaseModelRunner(ABC):
     """Abstract base class for model runners."""
 
@@ -148,9 +180,14 @@ class OpenVINOModelRunner(BaseModelRunner):
 
         # Create reusable inference request
         self.infer_request = self.compiled_model.create_infer_request()
-        input_shape = self.compiled_model.inputs[0].get_shape()
-        input_element_type = self.compiled_model.inputs[0].get_element_type()
-        self.input_tensor = ov.Tensor(input_element_type, input_shape)
+
+        try:
+            input_shape = self.compiled_model.inputs[0].get_shape()
+            input_element_type = self.compiled_model.inputs[0].get_element_type()
+            self.input_tensor = ov.Tensor(input_element_type, input_shape)
+        except RuntimeError:
+            # model is complex and has dynamic shape
+            self.input_tensor = None
 
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""
@@ -172,7 +209,11 @@ class OpenVINOModelRunner(BaseModelRunner):
             List of output tensors
         """
         # Handle single input case for backward compatibility
-        if len(inputs) == 1 and len(self.compiled_model.inputs) == 1:
+        if (
+            len(inputs) == 1
+            and len(self.compiled_model.inputs) == 1
+            and self.input_tensor is not None
+        ):
             # Single input case - use the pre-allocated tensor for efficiency
             input_data = list(inputs.values())[0]
             np.copyto(self.input_tensor.data, input_data)
@@ -322,20 +363,10 @@ def get_optimized_runner(
         if rknn_path:
             return RKNNModelRunner(rknn_path)
 
-    providers, options = get_ort_providers(device == "CPU", device, **kwargs)
-
-    if device == "CPU":
-        return ONNXModelRunner(
-            ort.InferenceSession(
-                model_path,
-                providers=providers,
-                provider_options=options,
-            )
-        )
-
-    if "OpenVINOExecutionProvider" in providers:
+    if device != "CPU" and is_openvino_gpu_npu_available():
         return OpenVINOModelRunner(model_path, device, **kwargs)
 
+    providers, options = get_ort_providers(device == "CPU", device, **kwargs)
     ortSession = ort.InferenceSession(
         model_path,
         providers=providers,
