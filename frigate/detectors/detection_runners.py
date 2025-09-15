@@ -180,9 +180,14 @@ class OpenVINOModelRunner(BaseModelRunner):
 
         # Create reusable inference request
         self.infer_request = self.compiled_model.create_infer_request()
-        input_shape = self.compiled_model.inputs[0].get_shape()
-        input_element_type = self.compiled_model.inputs[0].get_element_type()
-        self.input_tensor = ov.Tensor(input_element_type, input_shape)
+
+        try:
+            input_shape = self.compiled_model.inputs[0].get_shape()
+            input_element_type = self.compiled_model.inputs[0].get_element_type()
+            self.input_tensor = ov.Tensor(input_element_type, input_shape)
+        except RuntimeError:
+            # model is complex and has dynamic shape
+            self.input_tensor = None
 
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""
@@ -204,7 +209,7 @@ class OpenVINOModelRunner(BaseModelRunner):
             List of output tensors
         """
         # Handle single input case for backward compatibility
-        if len(inputs) == 1 and len(self.compiled_model.inputs) == 1:
+        if len(inputs) == 1 and len(self.compiled_model.inputs) == 1 and self.input_tensor is not None:
             # Single input case - use the pre-allocated tensor for efficiency
             input_data = list(inputs.values())[0]
             np.copyto(self.input_tensor.data, input_data)
