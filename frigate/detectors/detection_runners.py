@@ -369,7 +369,7 @@ class RKNNModelRunner(BaseModelRunner):
 
 
 def get_optimized_runner(
-    model_path: str, device: str, complex_model: bool = True, **kwargs
+    model_path: str, device: str | None, complex_model: bool = True, **kwargs
 ) -> BaseModelRunner:
     """Get an optimized runner for the hardware."""
     if is_rknn_compatible(model_path):
