@@ -17,16 +17,24 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { AuthContext } from "@/context/auth-context";
 import { useTranslation } from "react-i18next";
+import { useDocDomain } from "@/hooks/use-doc-domain";
+import { LuExternalLink } from "react-icons/lu";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const { t } = useTranslation(["components/auth"]);
+  const { getLocaleDocUrl } = useDocDomain();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const { login } = React.useContext(AuthContext);
 
@@ -120,6 +128,32 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                     {...field}
                   />
                 </FormControl>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="cursor-pointer p-0 text-right">
+                      <span className="text-sm">
+                        {t("form.forgotPassword.label")}
+                      </span>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 text-sm">
+                    {t("form.forgotPassword.tips")}
+                    <div className="mt-2 flex items-center text-primary">
+                      <a
+                        href={getLocaleDocUrl(
+                          "configuration/authentication/#resetting-admin-password",
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline"
+                      >
+                        {t("readTheDocumentation", { ns: "common" })}
+                        <LuExternalLink className="ml-2 inline-flex size-3" />
+                      </a>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </FormItem>
             )}
           />
