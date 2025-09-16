@@ -23,10 +23,16 @@ class SynapDetector(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: SynapDetectorConfig):
-
         try:
+            _, ext = os.path.splitext(detector_config.model.path)
+            if ext and ext != ".synap":
+                raise ValueError("Model path config for Synap1680 is wrong.")
+
             synap_network = Network(detector_config.model.path)
             logger.info(f"Synap NPU loaded model: {detector_config.model.path}")
+        except ValueError as ve:
+            logger.error(f"Config to Synap1680 was Failed: {ve}")
+            raise
         except Exception as e:
             logger.error(f"Failed to init Synap NPU: {e}")
             raise
@@ -42,6 +48,7 @@ class SynapDetector(DetectionApi):
         self.detector = Detector(score_threshold=0.4, iou_threshold=0.4)
 
     def detect_raw(self, tensor_input: np.ndarray):
+        # It has only been testing for pre-converted mobilenet80 .tflite -> .synap model currently
         postprocess_data = self.preprocessor.assign(self.network.inputs, tensor_input, Shape(tensor_input.shape), Layout.nhwc)
         output_tensor_obj = self.network.predict()
         output = self.detector.process(output_tensor_obj, postprocess_data)
