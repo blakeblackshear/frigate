@@ -195,9 +195,24 @@ class OpenVINOModelRunner(BaseModelRunner):
 
     def get_input_width(self) -> int:
         """Get the input width of the model."""
-        input_shape = self.compiled_model.inputs[0].get_shape()
-        # Assuming NCHW format, width is the last dimension
-        return int(input_shape[-1])
+        input_info = self.compiled_model.inputs
+        first_input = input_info[0]
+
+        try:
+            partial_shape = first_input.get_partial_shape()
+            # width dimension
+            if len(partial_shape) >= 4 and partial_shape[3].is_static:
+                return partial_shape[3].get_length()
+
+            # If width is dynamic or we can't determine it
+            return -1
+        except Exception:
+            try:
+                # gemini says some ov versions might still allow this
+                input_shape = first_input.shape
+                return input_shape[3] if len(input_shape) >= 4 else -1
+            except Exception:
+                return -1
 
     def run(self, inputs: dict[str, Any]) -> list[np.ndarray]:
         """Run inference with the model.
@@ -354,7 +369,7 @@ class RKNNModelRunner(BaseModelRunner):
 
 
 def get_optimized_runner(
-    model_path: str, device: str, complex_model: bool = True, **kwargs
+    model_path: str, device: str | None, complex_model: bool = True, **kwargs
 ) -> BaseModelRunner:
     """Get an optimized runner for the hardware."""
     if is_rknn_compatible(model_path):
@@ -364,7 +379,7 @@ def get_optimized_runner(
             return RKNNModelRunner(rknn_path)
 
     if device != "CPU" and is_openvino_gpu_npu_available():
-        return OpenVINOModelRunner(model_path, device, **kwargs)
+        return OpenVINOModelRunner(model_path, device or "AUTO", **kwargs)
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
     ortSession = ort.InferenceSession(

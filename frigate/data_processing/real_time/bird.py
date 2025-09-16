@@ -128,7 +128,11 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         ]
 
         if input.shape != (224, 224):
-            input = cv2.resize(input, (224, 224))
+            try:
+                input = cv2.resize(input, (224, 224))
+            except Exception:
+                logger.warning("Failed to resize image for bird classification")
+                return
 
         input = np.expand_dims(input, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
