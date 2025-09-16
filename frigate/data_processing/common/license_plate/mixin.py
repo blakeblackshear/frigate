@@ -385,11 +385,18 @@ class LicensePlateProcessingMixin:
                     )
                     continue
 
-                if self.lpr_config.format and not re.fullmatch(
-                    self.lpr_config.format, plate
-                ):
-                    logger.debug(f"Filtered out '{plate}' due to format mismatch")
-                    continue
+                if self.lpr_config.format:
+                    try:
+                        if not re.fullmatch(self.lpr_config.format, plate):
+                            logger.debug(
+                                f"Filtered out '{plate}' due to format mismatch"
+                            )
+                            continue
+                    except re.error:
+                        # Skip format filtering if regex is invalid
+                        logger.error(
+                            f"{camera}: Invalid regex in LPR format configuration: {self.lpr_config.format}"
+                        )
 
                 filtered_data.append((plate, conf_list, area))
 
