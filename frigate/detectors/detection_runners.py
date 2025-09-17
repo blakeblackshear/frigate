@@ -190,7 +190,7 @@ class OpenVINOModelRunner(BaseModelRunner):
                 self.input_tensor = ov.Tensor(input_element_type, input_shape)
             except RuntimeError:
                 # model is complex and has dynamic shape
-                raise
+                pass
 
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""

@@ -43,7 +43,7 @@ class OvDetector(DetectionApi):
         self.w = detector_config.model.width
 
         self.runner = OpenVINOModelRunner(
-            model_path=detector_config.model.path, device=detector_config.device
+            model_path=detector_config.model.path, device=detector_config.device, complex_model=False
         )
 
         # For dfine models, also pre-allocate target sizes tensor
