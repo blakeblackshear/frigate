@@ -7,6 +7,7 @@ import logging
 import os
 import traceback
 import urllib
+from typing import Dict, Any, List
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
@@ -21,7 +22,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from markupsafe import escape
-from peewee import SQL, operator
+from peewee import SQL, operator, fn
 from pydantic import ValidationError
 
 from frigate.api.auth import require_role
@@ -130,7 +131,10 @@ def metrics(request: Request):
     """Expose Prometheus metrics endpoint and update metrics with latest stats"""
     # Retrieve the latest statistics and update the Prometheus metrics
     stats = request.app.stats_emitter.get_latest_stats()
-    update_metrics(stats)
+    # query DB for count of events by camera, label
+    event_counts: List[Dict[str, Any]] = Event.select(Event.camera, Event.label, fn.Count()).group_by(Event.camera, Event.label).dicts()
+    
+    update_metrics(stats=stats, event_counts=event_counts)
     content, content_type = get_metrics()
     return Response(content=content, media_type=content_type)
 
