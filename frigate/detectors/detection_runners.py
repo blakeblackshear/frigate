@@ -156,9 +156,10 @@ class CudaGraphRunner(BaseModelRunner):
 class OpenVINOModelRunner(BaseModelRunner):
     """OpenVINO model runner that handles inference efficiently."""
 
-    def __init__(self, model_path: str, device: str, **kwargs):
+    def __init__(self, model_path: str, device: str, complex_model: bool, **kwargs):
         self.model_path = model_path
         self.device = device
+        self.complex_model = complex_model
 
         if not os.path.isfile(model_path):
             raise FileNotFoundError(f"OpenVINO model file {model_path} not found.")
@@ -180,14 +181,16 @@ class OpenVINOModelRunner(BaseModelRunner):
 
         # Create reusable inference request
         self.infer_request = self.compiled_model.create_infer_request()
+        self.input_tensor: ov.Tensor | None = None
 
-        try:
-            input_shape = self.compiled_model.inputs[0].get_shape()
-            input_element_type = self.compiled_model.inputs[0].get_element_type()
-            self.input_tensor = ov.Tensor(input_element_type, input_shape)
-        except RuntimeError:
-            # model is complex and has dynamic shape
-            self.input_tensor = None
+        if not complex_model:
+            try:
+                input_shape = self.compiled_model.inputs[0].get_shape()
+                input_element_type = self.compiled_model.inputs[0].get_element_type()
+                self.input_tensor = ov.Tensor(input_element_type, input_shape)
+            except RuntimeError:
+                # model is complex and has dynamic shape
+                pass
 
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""
@@ -234,6 +237,15 @@ class OpenVINOModelRunner(BaseModelRunner):
             np.copyto(self.input_tensor.data, input_data)
             self.infer_request.infer(self.input_tensor)
         else:
+            if self.complex_model:
+                try:
+                    # This ensures the model starts with a clean state for each sequence
+                    # Important for RNN models like PaddleOCR recognition
+                    self.infer_request.reset_state()
+                except Exception:
+                    # this will raise an exception for models with AUTO set as the device
+                    pass
+
             # Multiple inputs case - set each input by name
             for input_name, input_data in inputs.items():
                 # Find the input by name
@@ -379,7 +391,9 @@ def get_optimized_runner(
             return RKNNModelRunner(rknn_path)
 
     if device != "CPU" and is_openvino_gpu_npu_available():
-        return OpenVINOModelRunner(model_path, device or "AUTO", **kwargs)
+        return OpenVINOModelRunner(
+            model_path, device or "AUTO", complex_model, **kwargs
+        )
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
     ortSession = ort.InferenceSession(
