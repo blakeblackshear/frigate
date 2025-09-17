@@ -1292,7 +1292,7 @@ class LicensePlateProcessingMixin:
                     )
 
                 yolov9_start = datetime.datetime.now().timestamp()
-                license_plate = self._detect_license_plate(car)
+                license_plate = self._detect_license_plate(camera, car)
                 logger.debug(
                     f"{camera}: YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
                 )
