@@ -53,7 +53,7 @@ class SynapDetector(DetectionApi):
         output_tensor_obj = self.network.predict()
         output = self.detector.process(output_tensor_obj, postprocess_data)
 
-        if self.model_type == ModelTypeEnum.yologeneric:
+        if self.model_type == ModelTypeEnum.ssd:
             detections = np.zeros((20, 6), np.float32)
 
             for i, item in enumerate(output.items):
