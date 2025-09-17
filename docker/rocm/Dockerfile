@@ -67,6 +67,9 @@ FROM deps-prelim AS rocm-prelim-hsa-override0
 ENV HSA_ENABLE_SDMA=0
 ENV TF_ROCM_USE_IMMEDIATE_MODE=1
 
+# avoid kernel crashes
+ENV HIP_FORCE_DEV_KERNARG=1
+
 COPY --from=rocm-dist / /
 
 RUN ldconfig

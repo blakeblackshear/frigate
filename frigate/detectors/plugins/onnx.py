@@ -51,6 +51,13 @@ class ONNXDetector(DetectionApi):
                 "enable_cuda_graph": True,
             }
 
+        sess_options = None
+
+        if providers[0] == "ROCMExecutionProvider":
+            # avoid AMD GPU kernel crashes
+            sess_options = ort.SessionOptions()
+            sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL
+
         self.model = ort.InferenceSession(
             path, providers=providers, provider_options=options
         )
