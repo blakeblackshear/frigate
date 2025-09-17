@@ -159,6 +159,7 @@ class OpenVINOModelRunner(BaseModelRunner):
     def __init__(self, model_path: str, device: str, complex_model: bool, **kwargs):
         self.model_path = model_path
         self.device = device
+        self.complex_model = complex_model
 
         if not os.path.isfile(model_path):
             raise FileNotFoundError(f"OpenVINO model file {model_path} not found.")
@@ -236,6 +237,15 @@ class OpenVINOModelRunner(BaseModelRunner):
             np.copyto(self.input_tensor.data, input_data)
             self.infer_request.infer(self.input_tensor)
         else:
+            if self.complex_model:
+                try:
+                    # This ensures the model starts with a clean state for each sequence
+                    # Important for RNN models like PaddleOCR recognition
+                    self.infer_request.reset_state()
+                except Exception:
+                    # this will raise an exception for models with AUTO set as the device
+                    pass
+
             # Multiple inputs case - set each input by name
             for input_name, input_data in inputs.items():
                 # Find the input by name
