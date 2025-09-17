@@ -391,7 +391,9 @@ def get_optimized_runner(
             return RKNNModelRunner(rknn_path)
 
     if device != "CPU" and is_openvino_gpu_npu_available():
-        return OpenVINOModelRunner(model_path, device or "AUTO", complex_model, **kwargs)
+        return OpenVINOModelRunner(
+            model_path, device or "AUTO", complex_model, **kwargs
+        )
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
     ortSession = ort.InferenceSession(
