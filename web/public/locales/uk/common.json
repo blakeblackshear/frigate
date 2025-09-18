@@ -186,7 +186,7 @@
     },
     "restart": "Перезапустити Frigate",
     "live": {
-      "title": "Живи",
+      "title": "Пряма трансляція",
       "allCameras": "Всi камери",
       "cameras": {
         "title": "Камери",

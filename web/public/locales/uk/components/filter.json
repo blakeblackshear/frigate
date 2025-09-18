@@ -97,7 +97,7 @@
   "score": "Рахунок",
   "estimatedSpeed": "Розрахункова швидкість ({{unit}})",
   "review": {
-    "showReviewed": "Показати переглянув"
+    "showReviewed": "Показувати переглянуті"
   },
   "motion": {
     "showMotionOnly": "Показати тiльки рух"
