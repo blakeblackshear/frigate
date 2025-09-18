@@ -558,7 +558,8 @@
           "admin": "Beheerder",
           "adminDesc": "Volledige toegang tot alle functies.",
           "viewer": "Gebruiker",
-          "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports."
+          "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports.",
+          "customDesc": "Aangepaste rol met specifieke cameratoegang."
         },
         "select": "Selecteer een rol"
       },
@@ -825,6 +826,66 @@
         "createTriggerFailed": "Trigger kan niet worden gemaakt: {{errorMessage}}",
         "updateTriggerFailed": "Trigger kan niet worden bijgewerkt: {{errorMessage}}",
         "deleteTriggerFailed": "Trigger kan niet worden verwijderd: {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Beheer van kijkersrollen",
+      "desc": "Beheer aangepaste kijkersrollen en hun camera-toegangsrechten voor deze Frigate-instantie."
+    },
+    "addRole": "Rol toevoegen",
+    "table": {
+      "role": "Rol",
+      "cameras": "Camera's",
+      "actions": "Acties",
+      "noRoles": "Er zijn geen aangepaste rollen gevonden.",
+      "editCameras": "Camera's bewerken",
+      "deleteRole": "Rol verwijderen"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rol {{role}} succesvol aangemaakt",
+        "updateCameras": "Camera's bijgewerkt voor rol {{role}}",
+        "deleteRole": "Rol {{role}} succesvol verwijderd",
+        "userRolesUpdated": "{{count}} gebruiker(s) die aan deze rol waren toegewezen, zijn bijgewerkt naar ‘kijker’, die toegang heeft tot alle camera’s."
+      },
+      "error": {
+        "createRoleFailed": "Kan rol niet aanmaken: {{errorMessage}}",
+        "updateCamerasFailed": "Het is niet gelukt om de camera's bij te werken: {{errorMessage}}",
+        "deleteRoleFailed": "Kan rol niet verwijderen: {{errorMessage}}",
+        "userUpdateFailed": "Het bijwerken van gebruikersrollen is mislukt: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Nieuwe rol maken",
+        "desc": "Voeg een nieuwe rol toe en specificeer de camera-toegangsrechten."
+      },
+      "editCameras": {
+        "title": "Camera’s voor rol bewerken",
+        "desc": "Werk de camera-toegang bij voor de rol <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Rol verwijderen",
+        "desc": "Deze actie kan niet ongedaan worden gemaakt. De rol wordt permanent verwijderd en alle gebruikers met deze rol worden toegewezen aan de rol ‘kijker’, die toegang geeft tot alle camera’s.",
+        "warn": "Weet u zeker dat u <strong>{{role}}</strong> wilt verwijderen?",
+        "deleting": "Verwijderen..."
+      },
+      "form": {
+        "role": {
+          "title": "Rolnaam",
+          "placeholder": "Voer rolnaam in",
+          "desc": "Alleen letters, cijfers, punten en underscores zijn toegestaan.",
+          "roleIsRequired": "Rolnaam is vereist",
+          "roleOnlyInclude": "De rolnaam mag alleen letters, cijfers, . of _ bevatten",
+          "roleExists": "Er bestaat al een rol met deze naam."
+        },
+        "cameras": {
+          "title": "Camera's",
+          "desc": "Selecteer de camera's waartoe deze rol toegang heeft. Er is minimaal één camera vereist.",
+          "required": "Er moet minimaal één camera worden geselecteerd."
+        }
       }
     }
   }
