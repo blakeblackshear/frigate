@@ -69,7 +69,7 @@ Fine-tune the LPR feature using these optional parameters at the global level of
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
 - **`device`**: Device to use to run license plate detection _and_ recognition models.
   - Default: `CPU`
-  - This can be `CPU` or one of [onnxruntime's provider options](https://onnxruntime.ai/docs/execution-providers/). For users without a model that detects license plates natively, using a GPU may increase performance of the models, especially the YOLOv9 license plate detector model. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
+  - This can be `CPU`, `GPU`, or the GPU's device number. For users without a model that detects license plates natively, using a GPU may increase performance of the YOLOv9 license plate detector model. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation. However, for users who run a model that detects `license_plate` natively, there is little to no performance gain reported with running LPR on GPU compared to the CPU.
 - **`model_size`**: The size of the model used to identify regions of text on plates.
   - Default: `small`
   - This can be `small` or `large`.
@@ -107,7 +107,7 @@ Fine-tune the LPR feature using these optional parameters at the global level of
 
 ### Normalization Rules
 
-- **`replace_rules`**: List of regex replacement rules to normalize detected plates. These rules are applied sequentially. Each rule must have a `pattern` (which can be a string or a regex, prepended by `r`) and `replacement` (a string, which also supports backrefs like `\1`). These rules are useful for dealing with common OCR issues like noise characters, separators, or confusions (e.g., 'O'→'0').
+- **`replace_rules`**: List of regex replacement rules to normalize detected plates. These rules are applied sequentially. Each rule must have a `pattern` (which can be a string or a regex, prepended by `r`) and `replacement` (a string, which also supports [backrefs](https://docs.python.org/3/library/re.html#re.sub) like `\1`). These rules are useful for dealing with common OCR issues like noise characters, separators, or confusions (e.g., 'O'→'0').
 
 These rules must be defined at the global level of your `lpr` config.
 
@@ -165,6 +165,9 @@ lpr:
   recognition_threshold: 0.85
   format: "^[A-Z]{2} [A-Z][0-9]{4}$" # Only recognize plates that are two letters, followed by a space, followed by a single letter and 4 numbers
   match_distance: 1 # Allow one character variation in plate matching
+  replace_rules:
+    - pattern: "O"
+      replacement: "0" # Replace the letter O with the number 0 in every plate
   known_plates:
     Delivery Van:
       - "RJ K5678"

@@ -661,6 +661,8 @@ lpr:
   enhancement: 0
   # Optional: Save plate images to /media/frigate/clips/lpr for debugging purposes (default: shown below)
   debug_save_plates: False
+  # Optional: List of regex replacement rules to normalize detected plates (default: shown below)
+  replace_rules: {}
 
 # Optional: Configuration for AI generated tracked object descriptions
 # WARNING: Depending on the provider, this will send thumbnails over the internet
