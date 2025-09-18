@@ -543,7 +543,8 @@
           "admin": "Administrador",
           "adminDesc": "Accés complet a totes les funcionalitats.",
           "intro": "Selecciona el rol adequat per a aquest usuari:",
-          "viewerDesc": "Limitat només a panells en directe, revisió, exporació i exportació."
+          "viewerDesc": "Limitat només a panells en directe, revisió, exporació i exportació.",
+          "customDesc": "Rol personalitzat per accés específic a una cámera."
         },
         "title": "Canviar la funció d’usuari",
         "desc": "Actualitzar permisos per a <strong>{{username}}</strong>",
@@ -764,5 +765,65 @@
       "desc": "Gestionar els disparadors de {{camera}}. Usa les tipus de miniatures per disparar miniatures similars a l'objecte a seguir seleccionat, i el tipus de descripció per disparar en cas de descripcions similars a l'especificada."
     },
     "addTrigger": "Afegir disaprador"
+  },
+  "roles": {
+    "dialog": {
+      "form": {
+        "cameras": {
+          "required": "Almenys has de seleccionar una càmera.",
+          "title": "Càmeres",
+          "desc": "Selecciona les càmeres que tingui accés aquest rol. Com a mínim s'ha de seleccionar una càmera."
+        },
+        "role": {
+          "title": "Nom del Rol",
+          "placeholder": "Entra el nom del rol",
+          "desc": "Només lletres, números, els punts i subrallats están permesos.",
+          "roleIsRequired": "Nom del Rol requerit",
+          "roleOnlyInclude": "El nom de Rol només pot incloure lletres, nombres, . o _",
+          "roleExists": "Ja existeis un rol amb aquest nom."
+        }
+      },
+      "createRole": {
+        "title": "Crear nou Rol",
+        "desc": "Afegir nou rol y especificar permisos d'accés."
+      },
+      "editCameras": {
+        "title": "Editar Càmeres Rol",
+        "desc": "Actualitza l'acces a les càmeres per al rol <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Eliminar Rol",
+        "desc": "Aquesta acció no pot ser restablerta. S'esborrarà permenentment el rol y els usuaris asignats amb aquest rol de 'visor', que els dona accés a totes les càmeres.",
+        "warn": "Estas segur que vols eliminar <strong>{{role}}</strong>?",
+        "deleting": "Eliminant..."
+      }
+    },
+    "management": {
+      "title": "Gestió del Rols de Visors",
+      "desc": "Gestiona els rols visors personalitzats y els seus permisos d'accés per aquesta instancia de Frigate."
+    },
+    "addRole": "Afegir Rol",
+    "table": {
+      "role": "Rol",
+      "cameras": "Càmeres",
+      "actions": "Accions",
+      "noRoles": "No s'han trobat rols personalitzats.",
+      "editCameras": "Editar Càmeres",
+      "deleteRole": "Eliminar Rol"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rol {{role}} creat exitosament",
+        "updateCameras": "Càmeres actualitzades per al rol {{role}}",
+        "deleteRole": "Rol {{role}} eliminat exitosament",
+        "userRolesUpdated": "{{count}} usuari(s) asignats a aquest rol s'han actualitzat a 'visor', i tenen accés a totes les càmeres."
+      },
+      "error": {
+        "createRoleFailed": "Error al crear el rol: {{errorMessage}}",
+        "updateCamerasFailed": "Error a l'actualitzar les càmeres: {{errorMessage}}",
+        "deleteRoleFailed": "Error a l'eliminar el rol: {{errorMessage}}",
+        "userUpdateFailed": "Error a l'actualitzar els ros d'usuari: {{errorMessage}}"
+      }
+    }
   }
 }
