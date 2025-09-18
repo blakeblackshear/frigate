@@ -467,7 +467,8 @@
           "admin": "Administrator",
           "adminDesc": "Acces complet la toate funcțiile.",
           "viewer": "Vizualizator",
-          "viewerDesc": "Limitat doar la tablourile de bord Live, Revizuire, Explorare și Exporturi."
+          "viewerDesc": "Limitat doar la tablourile de bord Live, Revizuire, Explorare și Exporturi.",
+          "customDesc": "Rol personalizat cu acces specific la cameră."
         },
         "select": "Selectează un rol",
         "title": "Schimbă rolul utilizatorului"
@@ -764,6 +765,66 @@
         "createTriggerFailed": "Crearea declanșatorului a eșuat: {{errorMessage}}",
         "updateTriggerFailed": "Actualizarea declanșatorului a eșuat: {{errorMessage}}",
         "deleteTriggerFailed": "Eliminarea declanșatorului a eșuat: {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Gestionare rol vizualizator",
+      "desc": "Gestionează rolurile personalizate de vizualizator și permisiunile lor de acces la cameră pentru această instanță Frigate."
+    },
+    "addRole": "Adaugă rol",
+    "table": {
+      "role": "Rol",
+      "cameras": "Camere",
+      "actions": "Acțiuni",
+      "noRoles": "Nu au fost găsite roluri personalizate.",
+      "editCameras": "Editează camerele",
+      "deleteRole": "Șterge rol"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rolul {{role}} a fost creat cu succes",
+        "updateCameras": "Camerele au fost actualizate pentru rolul {{role}}",
+        "deleteRole": "Rolul {{role}} a fost șters cu succes",
+        "userRolesUpdated": "{{count}} utilizator(i) atribuiți acestui rol au fost actualizați la „vizualizator”, care are acces la toate camerele."
+      },
+      "error": {
+        "createRoleFailed": "Crearea rolului a eșuat: {{errorMessage}}",
+        "updateCamerasFailed": "Actualizarea camerelor a eșuat: {{errorMessage}}",
+        "deleteRoleFailed": "Ștergerea rolului a eșuat: {{errorMessage}}",
+        "userUpdateFailed": "Actualizarea rolurilor utilizatorilor a eșuat: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Creează rol nou",
+        "desc": "Adaugă un rol nou și specifică permisiunile de acces la camere."
+      },
+      "editCameras": {
+        "title": "Editează camerele rolului",
+        "desc": "Actualizează accesul la camere pentru rolul <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Șterge rolul",
+        "desc": "Această acțiune nu poate fi anulată. Aceasta va șterge permanent rolul și va atribui orice utilizatori cu acest rol la rolul „vizualizator”, care va oferi acces vizualizator la toate camerele.",
+        "warn": "Ești sigur că vrei să ștergi <strong>{{role}}</strong>?",
+        "deleting": "Se șterge..."
+      },
+      "form": {
+        "role": {
+          "title": "Nume rol",
+          "placeholder": "Introduceți numele rolului",
+          "desc": "Sunt permise doar litere, cifre, puncte și linii de subliniere.",
+          "roleIsRequired": "Numele rolului este obligatoriu",
+          "roleOnlyInclude": "Numele rolului poate include doar litere, cifre, . sau _",
+          "roleExists": "Un rol cu acest nume există deja."
+        },
+        "cameras": {
+          "title": "Camere",
+          "desc": "Selectați camerele la care acest rol are acces. Este necesară cel puțin o cameră.",
+          "required": "Trebuie selectată cel puțin o cameră."
+        }
       }
     }
   }
