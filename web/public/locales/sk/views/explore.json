@@ -55,7 +55,16 @@
     "recognizedLicensePlate": "Uznaná SPZ",
     "estimatedSpeed": "Odhadovaná rýchlosť",
     "objects": "Objekty",
-    "camera": "Kamera"
+    "camera": "Kamera",
+    "zones": "Zóny",
+    "button": {
+      "findSimilar": "Nájsť podobné"
+    },
+    "description": {
+      "placeholder": "Popis sledovaného objektu",
+      "aiTips": "Frigate si od vášho poskytovateľa generatívnej umelej inteligencie nevyžiada popis, kým sa neukončí životný cyklus sledovaného objektu."
+    },
+    "expandRegenerationMenu": "Rozbaľte ponuku regenerácie"
   },
   "exploreMore": "Preskumať viac {{label}} objektov",
   "exploreIsUnavailable": {
