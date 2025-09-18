@@ -10,7 +10,7 @@
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
     "notifications": "Paramètres de notification - Frigate",
-    "enrichments": "Paramètres d'enrichissement - Frigate"
+    "enrichments": "Paramètres d'enrichissements - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -662,7 +662,8 @@
           "admin": "Administrateur",
           "adminDesc": "Accès complet à l'ensemble des fonctionnalités.",
           "viewer": "Observateur",
-          "viewerDesc": "Limité aux tableaux de bord Direct, Revue d'événements, Explorer et Exports."
+          "viewerDesc": "Limité aux tableaux de bord Direct, Revue d'événements, Explorer et Exports.",
+          "customDesc": "Rôle personnalisé avec accès spécifique à la caméra"
         },
         "select": "Sélectionnez un rôle"
       },
@@ -675,7 +676,7 @@
     }
   },
   "enrichments": {
-    "title": "Paramètres d'enrichissement",
+    "title": "Paramètres d'enrichissements",
     "birdClassification": {
       "title": "Identification des oiseaux",
       "desc": "L'identification des oiseaux est réalisée à l'aide d'un modèle TensorFlow quantifié. Lorsqu'un oiseau est reconnu, son nom commun est automatiquement ajouté comme sous-libellé. Cette information est intégréesà l'interface utilisateur, aux filtres de recherche et aux notifications."
@@ -707,7 +708,7 @@
       },
       "desc": "La recherche sémantique de Frigate vous permet de retrouver les objets suivis dans votre revue d'évènements en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement."
     },
-    "unsavedChanges": "Modifications non enregistrées des paramètres d'enrichissement",
+    "unsavedChanges": "Modifications non enregistrées des paramètres d'enrichissements",
     "faceRecognition": {
       "title": "Reconnaissance faciale",
       "readTheDocumentation": "Lire la documentation",
@@ -732,9 +733,9 @@
     },
     "toast": {
       "error": "Échec de l'enregistrement des modifications de configuration : {{errorMessage}}",
-      "success": "Les paramètres d'enrichissement ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
+      "success": "Les paramètres d'enrichissements ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
     },
-    "restart_required": "Redémarrage nécessaire (paramètres d'enrichissement modifiés)"
+    "restart_required": "Redémarrage nécessaire (paramètres d'enrichissements modifiés)"
   },
   "triggers": {
     "documentTitle": "Déclencheurs",
@@ -828,6 +829,66 @@
         "createTriggerFailed": "Échec de la création du déclencheur : {{errorMessage}}",
         "updateTriggerFailed": "Échec de la mise à jour du déclencheur : {{errorMessage}}",
         "deleteTriggerFailed": "Échec de la suppression du déclencheur : {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Gestion des rôles de visionnage",
+      "desc": "Gérer les rôles personnalisés de visionnage et leurs permissions d'accès aux caméras pour cette instance de Frigate."
+    },
+    "addRole": "Ajouter un rôle",
+    "table": {
+      "role": "Rôle",
+      "cameras": "Caméras",
+      "actions": "Actions",
+      "noRoles": "Aucun rôle personnalisé trouvé.",
+      "editCameras": "Éditer les caméras",
+      "deleteRole": "Supprimer le rôle"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rôle {{role}} créé avec succès",
+        "updateCameras": "Caméras mis à jour pour le rôle {{role}}",
+        "deleteRole": "Rôle {{role}} supprimé avec succès",
+        "userRolesUpdated": "{{count}} utilisateurs affectés à ce rôle ont été mis à jour avec des droits 'visionnage', et ont accès à toutes les caméras."
+      },
+      "error": {
+        "createRoleFailed": "Échec dans la création du rôle : {{errorMessage}}",
+        "updateCamerasFailed": "Échec de la mise à jour des caméras : {{errorMessage}}",
+        "deleteRoleFailed": "Échec lors de la suppression du rôle : {{errorMessage}}",
+        "userUpdateFailed": "Echec lors de la mise à jour des rôles de l'utilisateur : {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Créer un nouveau rôle",
+        "desc": "Ajouter un nouveau rôle et définir les permissions d'accès à la caméra."
+      },
+      "editCameras": {
+        "title": "Editer les caméras du rôle",
+        "desc": "Mettre à jour les accès aux caméras pour le rôle <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Suppression du rôle",
+        "desc": "Cette action est irréversible. Elle supprimera définitivement le rôle et tous les utilisateurs associés seront affectés au rôle 'visionnage', avec un accès à toutes les caméras.",
+        "warn": "Êtes-vous sûr de vouloir supprimer <strong>{{role}}</strong> ?",
+        "deleting": "En cours de suppression..."
+      },
+      "form": {
+        "role": {
+          "title": "Nom du rôle",
+          "placeholder": "Saisissez un nom de rôle",
+          "desc": "Seuls les lettres, nombres, points et tirets bas sont autorisés.",
+          "roleIsRequired": "Un nom de rôle est requis",
+          "roleOnlyInclude": "Le nom de rôle peut uniquement contenir des lettres, nombres, . ou _",
+          "roleExists": "Un rôle avec ce nom existe déjà."
+        },
+        "cameras": {
+          "title": "Caméras",
+          "desc": "Sélectionnez les caméras auxquelles ce rôle aura accès. Au moins une caméra est requise.",
+          "required": "Au moins une caméra doit être sélectionnée."
+        }
       }
     }
   }
