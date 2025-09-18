@@ -7,7 +7,7 @@
       "label": "Ištrinti Kamerų Grupę",
       "confirm": {
         "title": "Patvirtinti ištrynimą",
-        "desc": "Ar tikrai norite ištrinti šią kamerų grupę <em>{{name}}</em>?"
+        "desc": "Esate įsitikinę, kad norite ištrinti šią kamerų grupę <em>{{name}}</em>?"
       }
     },
     "name": {

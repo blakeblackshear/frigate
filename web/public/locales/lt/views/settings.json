@@ -20,7 +20,8 @@
     "debug": "Derinimas",
     "users": "Vartotojai",
     "notifications": "Pranešimai",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "triggers": "Trigeriai"
   },
   "dialog": {
     "unsavedChanges": {
@@ -90,8 +91,8 @@
       "desc": "Paukščių klasifikatorius identifikuoja žinomus paukščius naudojant kvantinizuotą Tensorflow modelį. Kai žinomas paukštis atpažįstamas, jo bendrinis pavadinimas bus pridėtas prie sub_etikečių. Ši informacija yra pridedama vartotojo sąsajoje, filtruose, taip pat ir pranešimuose."
     },
     "semanticSearch": {
-      "title": "Prasmingų Reikšmių Paieška",
-      "desc": "Frigate Prasmingų Reikšmių Paieška leidžia jums atrasti sekamus objektus tarp peržiūrų, naudojant arba pačius paveiksliuks, vartotojo pateiktus tekstinius aprašymus arba automatiškai sugeneruotas reikšmes.",
+      "title": "Semantic Paieška",
+      "desc": "Frigate Semantic Paieška leidžia jums atrasti sekamus objektus tarp peržiūrų, naudojant arba pačius paveiksliuks, vartotojo pateiktus tekstinius aprašymus arba automatiškai sugeneruotas reikšmes.",
       "reindexNow": {
         "label": "Perindeksuoti Dabar",
         "desc": "Perindeksavimas sugeneruos įterpinius visiems sekamiems objektams. Šis procesas veiks fone ir priklausomai nuo jūsų turimo sekamų objektų kiekio gali maksimaliai apkrauti jūsų CPU bei užtrukti nemažai laiko.",
@@ -104,7 +105,7 @@
       },
       "modelSize": {
         "label": "Modelio Dydis",
-        "desc": "Modelio dydis naudojamas prasmingų reikšmių paieškos įterpiuose.",
+        "desc": "Modelio dydis naudojamas semantic paieškos įterpiuose.",
         "small": {
           "title": "mažas",
           "desc": "Naudojant <em>mažą</em> pasitelkiama kvantizuota modelio versija kuri reikalauja mažiau RAM, naudojant CPU veikia greičiau su nežįmiu skirtumu įterpių kokybei."
@@ -149,10 +150,12 @@
     },
     "review": {
       "desc": "Trumpam įjungti/išjungti įspėjimus ir aptikimus šiai kamerai iki kol Frigate bus perkrautas. Kai išjungta, naujos peržiūros nebus kuriamos. ",
-      "detections": "Aptikimai "
+      "detections": "Aptikimai ",
+      "title": "Peržiūra",
+      "alerts": "Įspėjimai "
     },
     "reviewClassification": {
-      "desc": "Frigate kategorizuoja peržiūras į Įspėjimus ir Aptikimus. Pagal nutylėjimą, visi <em>person</em> ir <em>car</em> objektai yra vertinami kaip įspėjimai. Jūs galite detalizuoti peržiūrų kategorizavimą priskiriant objektas privalomas zonas.",
+      "desc": "Frigate kategorizuoja peržiūras į Įspėjimus ir Aptikimus. Pagal nutylėjimą, visi <em>žmonių</em> ir <em>mašinų</em> objektai yra vertinami kaip įspėjimai. Jūs galite detalizuoti peržiūrų kategorizavimą priskiriant objektas privalomas zonas.",
       "zoneObjectAlertsTips": "Visi {{alertsLabels}} objektai aptikti {{zone}} ir {{cameraName}} bus rodomi kaip Įspėjimai.",
       "objectDetectionsTips": "Visi {{detectionsLabels}} objektai nekategorizuoti {{cameraName}} bus rodomi kaip Aptikimai nepriklausomai kurioje zonoje ji yra.",
       "zoneObjectDetectionsTips": {
@@ -161,38 +164,224 @@
         "regardlessOfZoneObjectDetectionsTips": "Visi {{detectionsLabels}} objektai nekategorizuoti {{cameraName}} bus rodomi kaip Aptikimai nepriklausomai kurioje zonoje ji yra."
       },
       "selectDetectionsZones": "Pasirinkti zonas Aptikimams",
-      "limitDetections": "Apriboti aptikimus specifinėms zonoms"
+      "limitDetections": "Apriboti aptikimus specifinėms zonoms",
+      "title": "Apžvalgų Kalsifikavimas",
+      "noDefinedZones": "Šiai kamerai sukurtų zonų nėra.",
+      "objectAlertsTips": "Visi {{alertsLabels}} objektai kemeroje {{cameraName}} bus rodomi kaip Įspėjimai.",
+      "unsavedChanges": "Neišsaugoti Apžvalgos Klasifikavimo nustatymai kamerai {{camera}}",
+      "selectAlertsZones": "Pasirinkti zonas Įspėjimams",
+      "toast": {
+        "success": "Apžvalgų Klasifikavimo konfiguracija buvo išsaugota. Restartuoti Frigate kad pokyčiai būtų pritaikyti."
+      }
     },
     "cameraConfig": {
       "ffmpeg": {
-        "rolesUnique": "Kiekviena role (garso, aptikimo, įrašymo) gali buti priskirta tik vienam srautui"
+        "rolesUnique": "Kiekviena role (garso, aptikimo, įrašymo) gali buti priskirta tik vienam srautui",
+        "inputs": "Įvesties Srautas",
+        "path": "Srauto Kelias",
+        "pathRequired": "Srauto Kelias yra privalomas",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Rolės",
+        "rolesRequired": "Privaloma bent viena rolė",
+        "addInput": "Pridėti Įvesties Srautą",
+        "removeInput": "Pašalinti Įvesties Srautą",
+        "inputsRequired": "Privalomas bent vienas įvesties srautas"
+      },
+      "add": "Pridėti Kamerą",
+      "edit": "Koreguoti Kamerą",
+      "description": "Konfiguruoti kameros nustatymus įskaitant įvesties srautus ir roles.",
+      "name": "Kamera Pavadinimas",
+      "nameRequired": "Kamera pavadinimas yra privalomas",
+      "nameLength": "Kamera pavadininas privalo būti trumpesnis nei 24 simboliai.",
+      "namePlaceholder": "pvz., priekinės_durys",
+      "enabled": "Šjungti",
+      "toast": {
+        "success": "Kamera {{cameraName}} sėkmingai išsaugota"
       }
-    }
+    },
+    "object_descriptions": {
+      "title": "Generatyvinio DI Objektų Aprašymai",
+      "desc": "Laikinai įjungti/ išjungti Ganaratyvinio DI objektų aprašymus šiai kamerai. Kai išjungta, šios kameros sekamiems objektams nebus generuojami aprašymai."
+    },
+    "review_descriptions": {
+      "title": "Generatyvinio DI Apžvalgų Aprašymai",
+      "desc": "Laikinai įjungti/ išjungti Ganaratyvinio DI apžvalgų aprašymus šiai kamerai. Kai išjungta, šios kameros apžvalgoms nebus generuojami aprašymai."
+    },
+    "addCamera": "Pridėti Naują Kamerą",
+    "editCamera": "Koreguoti Kamerą:",
+    "selectCamera": "Pasirinkti Kamera",
+    "backToSettings": "Atgal į Kameros Nustatymus"
   },
   "masksAndZones": {
     "zones": {
       "point_one": "{{count}} taškas",
       "point_few": "{{count}} taškai",
-      "point_other": "{{count}} taškų"
+      "point_other": "{{count}} taškų",
+      "label": "Zonos",
+      "documentTitle": "Redaguoti Zonas - Frigate",
+      "desc": {
+        "title": "Zonos leidžia apibrėžti specifinį kadro plotą tam, kad galėtumėte įvardinti ar objektas yra tam tikrame plote.",
+        "documentation": "Dokumentacija"
+      },
+      "add": "Pridėti Zoną",
+      "edit": "Redaguoti Zoną",
+      "clickDrawPolygon": "Spragtelkite ant paveiksliuko kad pradėtumėte piešti poligoną.",
+      "name": {
+        "title": "Pavadinimas",
+        "inputPlaceHolder": "Įveskite pavadinimą …",
+        "tips": "Pavadinimas privalo būti bent 2 simboliai ir negali būti toks pat kaip kita kamera ar zona."
+      },
+      "inertia": {
+        "title": "Inercija",
+        "desc": "Nurodo kiek kadrų objektas turi būti zonoje, kad užskaitytu kaip esantį zonoje. <em>Bazinis: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Delsos Laikas",
+        "desc": "Nurodo minimalų laiką sekundėmis, kurį objektas turi būti zonoje, kad aktyvuotūsi. <em>Bazinis: 0</em>"
+      },
+      "objects": {
+        "title": "Objektai",
+        "desc": "Objektų sąrašas kurie taikomi šiai zonai."
+      },
+      "allObjects": "Visi Objektai",
+      "speedEstimation": {
+        "title": "Greičio Vertinimas",
+        "desc": "Įjungti greičio vertinimą objektams šioje zonoje. Zona privalo turėti būtent 4 taškus.",
+        "lineADistance": "Linijos A atstumas ({{unit}})",
+        "lineBDistance": "Linijos B atstumas ({{unit}})",
+        "lineCDistance": "Linijos C atstumas ({{unit}})",
+        "lineDDistance": "Linijos D atstumas ({{unit}})"
+      },
+      "speedThreshold": {
+        "title": "Greičio Riba ({{unit}})",
+        "desc": "Nurodo mnimalų objekto greitį, kad užskaityti esantį zonoje.",
+        "toast": {
+          "error": {
+            "pointLengthError": "Greičio vertinimas buvo išjungtas šiai zonai. Zonos su greičio vertinimu privalo turėti tiksliai 4 taškus.",
+            "loiteringTimeError": "Zonos su delsos laiku didesniu nei 0 turėtų būti nenaudojamos su greičio vertinimu."
+          }
+        }
+      },
+      "toast": {
+        "success": "Zona ({{zoneName}}) buvo išsaugota. Perkrauti Frigate kad įgalinti pokyčius."
+      }
     },
     "motionMasks": {
       "point_one": "{{count}} taškas",
       "point_few": "{{count}} taškai",
       "point_other": "{{count}} taškų",
       "desc": {
-        "title": "Judesių maskavimai yra naudojami sumažinti aptikimų užklausoms dėl nepageidajamų judesių. Objektų sekimas taps kėblesnis jei maskuosite per daug."
+        "title": "Judesių maskavimai yra naudojami sumažinti aptikimų užklausoms dėl nepageidajamų judesių. Objektų sekimas taps kėblesnis jei maskuosite per daug.",
+        "documentation": "Dokumentacija"
       },
       "context": {
         "title": "Judesių maskavimai yra naudojami sumažinti aptikimų užklausoms dėl nepageidajamų judesių (pvz: medžių šakos, kameros laiko užrašas). Judesių maskavimas turi būti naudojamas <em>labai saikingai</em>, bjektų sekimas taps kėblesnis jei maskuosite per daug."
       },
       "polygonAreaTooLarge": {
-        "tips": "Judesių maskavimas netrukdo objektų aptikimui. Vietoj to turėtumėte naudoti privalomas zonas."
+        "tips": "Judesių maskavimas netrukdo objektų aptikimui. Vietoj to turėtumėte naudoti privalomas zonas.",
+        "title": "Judesio maskuoti dengia {{polygonArea}}% kameros ploto. Didelės judesio maskuotės nerekomenduojamos."
+      },
+      "label": "Judesio Maskuotė",
+      "documentTitle": "Redaguoti Judesio Maskuotę - Frigate",
+      "add": "Nauja Judesio Maskuotė",
+      "edit": "Redaguoti Judesio Maskuotę",
+      "clickDrawPolygon": "Spragtelti kad piešti poligoną ant atvaizdo.",
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} išsaugotas. Perkrauti Frigate, kad pritaikyti pokyčius.",
+          "noName": "Judesio Maskuotė buvo išsaugota. Perkrauti Frigate, kad pritaikyti pokyčius."
+        }
       }
     },
     "objectMasks": {
       "point_one": "{{count}} taškas",
       "point_few": "{{count}} taškai",
-      "point_other": "{{count}} taškų"
+      "point_other": "{{count}} taškų",
+      "label": "Objekto Maskuotė",
+      "documentTitle": "Redaguoti Objekto Maskuotę - Frigate",
+      "desc": {
+        "title": "Objektų filtravimo maskuotės naudojamos išfiltruoti klaidingus teigiamus rezultatus pagal vietą parinktam objekto tipui.",
+        "documentation": "Dokumentacija"
+      },
+      "add": "Pridėti Objekto Maskuotę",
+      "edit": "Redaguoti Objekto Maskuotę",
+      "context": "Objektų filtravimo maskuotės naudojamos išfiltruoti klaidingus teigiamus rezultatus pagal vietą parinktam objekto tipui.",
+      "clickDrawPolygon": "Spragtelti kad piešti poligoną ant atvaizdo.",
+      "objects": {
+        "title": "Objektai",
+        "desc": "Objekto tipai, kurie taikomi šiai objekto maskuotei.",
+        "allObjectTypes": "Visi objektų tipai"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} buvo išsaugotas. Perkrauti Frigate, kad pritaikyti pokyčius.",
+          "noName": "Objektų Maskuotė buvo išsaugota. Perkrauti Frigate, kad pritaikyti pokyčius."
+        }
+      }
+    },
+    "filter": {
+      "all": "Visos Maskuotės ir Zonos"
+    },
+    "restart_required": "Reikalingas perkrovimas (maskavimai/ zonos pakeisti)",
+    "toast": {
+      "success": {
+        "copyCoordinates": "Poligono {{polyName}} koordinatės nukopijuotos į iškarpinę."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Nepavyko koordinačių nukopijuoti į iškarpinę."
+      }
+    },
+    "motionMaskLabel": "Judesio Maskuotė {{number}}",
+    "objectMaskLabel": "Obejkto Maskuotė {{number}} {{label}}",
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "Zonos pavadinime turi būti bent 2 simboliai.",
+          "mustNotBeSameWithCamera": "Zonos pavadinimas privalo skirtis nuo kameros pavadinimo.",
+          "alreadyExists": "Šiai kamerai zona šiuo pavadinimu jau egzistuoja.",
+          "mustNotContainPeriod": "Zonos pavadinimas negali turėti taško.",
+          "hasIllegalCharacter": "Zonos pavadinime yra neleistinų simbolių."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Atstumas privalo būti didesnis arba lygu 0.1.",
+          "mustBeFilled": "Norint naudoti greičio nustatymą visi atstumų laukai privalo būti užpildyti."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Incerciją privalo būti virš 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Delsos laikas privalo būti didesnis arba lygus 0."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Greičio riba privalo būti didesnė arba lygi 0.1."
+        }
+      },
+      "polygonDrawing": {
+        "removeLastPoint": "Pašalinti paskutinį tašką",
+        "reset": {
+          "label": "Išvalyti visus taškus"
+        },
+        "snapPoints": {
+          "true": "Prikabinti taškus",
+          "false": "Neprikabinti taškų"
+        },
+        "delete": {
+          "title": "Patvirtinti Trynimą",
+          "desc": "Ar esate įsitikinę, kad norite ištrinti {{type}} <em>{{name}}</em>?",
+          "success": "{{name}} buvo ištrintas."
+        },
+        "error": {
+          "mustBeFinished": "Poligono brėžinys privalo būti užbaigtas prieš išsaugant."
+        }
+      }
     }
   },
   "motionDetectionTuner": {
@@ -204,15 +393,15 @@
     },
     "Threshold": {
       "title": "Riba",
-      "desc": "Ribos reikšmė diktuoja kiek pokyčio pikselio apšvietime turi būti, kad būtų traktuojama kaip judesys. <em>Pagal nutylėjimą: 30</em>"
+      "desc": "Ribos reikšmė diktuoja kiek pokyčio pikselio apšvietime turi būti, kad būtų traktuojama kaip judesys. <em>Bazinis: 30</em>"
     },
     "contourArea": {
       "title": "Kontūro Plotas",
-      "desc": "Kontūro ploto reikšmė yra naudojama įvertinti kurios grupės pasikeitusių pikselių bus vertinami kaip judesys. <em>Pagal nutylėjimą: 10</em>"
+      "desc": "Kontūro ploto reikšmė yra naudojama įvertinti kurios grupės pasikeitusių pikselių bus vertinami kaip judesys. <em>Bazinis: 10</em>"
     },
     "improveContrast": {
       "title": "Pagerinti Kontrastą",
-      "desc": "Pagerinti kontrastą tamsiose scenose. <em>Pagal nutylėjima: Įjungta</em>"
+      "desc": "Pagerinti kontrastą tamsiose scenose. <em>Bazinis: Įjungta</em>"
     },
     "toast": {
       "success": "Judesių nustatymai buvo išsaugoti."
@@ -221,7 +410,409 @@
   "debug": {
     "detectorDesc": "Frigate naudoja jūsų detektorius ({{detectors}}) objektų aptikimui jūsų kameros transliacijoje.",
     "audio": {
-      "noAudioDetections": "Nėra Garso aptikimų"
+      "noAudioDetections": "Nėra Garso aptikimų",
+      "title": "Garsas",
+      "score": "balai",
+      "currentRMS": "Dabartinis RMS",
+      "currentdbFS": "Dabartinis dbFS"
+    },
+    "title": "Derinti",
+    "desc": "Derinimo vaizde rodomas tiesioginis vaizdas sekamų objektų ir statistikos. Objektų sąrašas rodo užvėlintą santrauką aptiktų objektų.",
+    "openCameraWebUI": "Atverti {{camera}} kameros Web prieigą",
+    "debugging": "Derinama",
+    "objectList": "Objektų sąrašas",
+    "noObjects": "Objektų nėra",
+    "boundingBoxes": {
+      "title": "Apibrėžiančios dėžutės",
+      "desc": "Rodyti apibrėžiančias dėžutes aplink sekamus objektus",
+      "colors": {
+        "label": "Objektus Apibrėžiančių Dėžučių Spalvos",
+        "info": "<li>Pradžioje, skirtingos spalvos bus priskirtos kiekvienai objekto etiketei</li><li>Tamsiai mėlyna plona linija simbolizuoja, kad objektas esamu momentu dar nėra aptiktas</li><li>Pilka linija nurodo kad objektas yra aptiktas kaip nejudantis</li><li> Stora linija nurodo kad objektas yra automatiškai sekamas (kai įjungta)</li>"
+      }
+    },
+    "timestamp": {
+      "title": "Laiko Žyma",
+      "desc": "Atvaizduoti laiko žymą vaizde"
+    },
+    "zones": {
+      "title": "Zonos",
+      "desc": "Rodyti bet kurios zonos ribas"
+    },
+    "mask": {
+      "title": "Judesio maskuotės",
+      "desc": "Rodyti judesio maskavimo poligonus"
+    },
+    "motion": {
+      "title": "Judesio dėžutės",
+      "desc": "Rodyti dėžutes aplink vietas kur yra aptiktas judesys",
+      "tips": "<p><strong>Judesio Dėžutės</strong></p><br><p>Raudonos dėžutės bus kadro vietose kur judesys yra aptiktas</p>"
+    },
+    "regions": {
+      "title": "Regionai",
+      "desc": "Rodyti dėžutes regionų kurie yra parduoti į detektorių",
+      "tips": "<p><strong>Regionų Dėžutės</strong></p><br><p>Ryškiai žalios dėžutės atvaizduojamos vietose kurios yra perduotos objektų detektoriui.</p>"
+    },
+    "paths": {
+      "title": "Keliai",
+      "desc": "Rodyti sekamo objekto kelio išskirtinius taškus",
+      "tips": "<p><strong>Keliai</strong></p><br><p>Linijos ir apskritimai nurodo sekamo objekto judėjimo išskirtinius taškus</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Filtrų Brėžiniai Objektų Formoms",
+      "desc": "Norėdami sužinoti atvaizdo plotą ir santykio detales nubrėžkite keturkampį ant atvaizdo",
+      "score": "Balai",
+      "ratio": "Santykis",
+      "area": "Plotas",
+      "tips": "Įjunkite šią funkciją nupiešti keturkampį ant kameros vaizdo, kad parodyti plotą ir santykį. Šios reikšmės gali būti naudojamos objekto formos filtro parametrams jūsų konfiguracijoje."
+    }
+  },
+  "users": {
+    "dialog": {
+      "deleteUser": {
+        "warn": "Ar esate įsitikinę, kad norite ištrinti <strong>{{username}}</strong>?",
+        "title": "Ištrinti Vartotoją",
+        "desc": "Šis veiksmas negalės būti atkurtas. Tai visam laikui ištrins vartotojo paskyrą ir ištrins visą susijusią informaciją."
+      },
+      "form": {
+        "user": {
+          "title": "Vartotojo vardas",
+          "desc": "Leidžiamos tik raidės, skaičiai, taškai ir pabraukimai.",
+          "placeholder": "Įvesti vartotojo vardą"
+        },
+        "password": {
+          "title": "Slaptažodis",
+          "placeholder": "Įvesti slaptažodį",
+          "confirm": {
+            "title": "Patvirtinti Slaptažodį",
+            "placeholder": "Patvirtinti Slaptažodį"
+          },
+          "strength": {
+            "title": "Slaptažodžio sudėtingumas: ",
+            "weak": "Silpnas",
+            "medium": "Vidutinis",
+            "strong": "Stiprus",
+            "veryStrong": "Labai Stiprus"
+          },
+          "match": "Slaptažodžiai sutampa",
+          "notMatch": "Slaptažodžiai nesutampa"
+        },
+        "newPassword": {
+          "title": "Naujas Slaptažodis",
+          "placeholder": "Įveskite naują slaptažodį",
+          "confirm": {
+            "placeholder": "Pakartokite naują slaptažodį"
+          }
+        },
+        "usernameIsRequired": "Vartotojo vardas yra privalomas",
+        "passwordIsRequired": "Slaptažodis yra privalomas"
+      },
+      "createUser": {
+        "title": "Sukurti Naują Vartotoją",
+        "desc": "Pridėti naują vartotojo paskyrą ir nurodyti prieigos roles prie Frigate funkcijų.",
+        "usernameOnlyInclude": "Vartotojo vardas gali būti sudarytas iš raidžių, skaičių, . arba _",
+        "confirmPassword": "Prašome patvirtinti slaptažodį"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Slaptažodis negali būti tuščias",
+        "doNotMatch": "Slaptažodžiai nesutampa",
+        "updatePassword": "Atnaujinkite Spaltažodį vartotojui {{username}}",
+        "setPassword": "Sukurti Slaptažodį",
+        "desc": "Sukurti stiprų slaptažodį kad apsaugoti paskyrą."
+      },
+      "changeRole": {
+        "title": "Pakeisti vartotojo Rolę",
+        "select": "Pasirinkti rolę",
+        "desc": "Atnaujinti leidimus vartotojui <strong>{{username}}</strong>",
+        "roleInfo": {
+          "intro": "Pasirinkti tinkama rolę šiam vartotojui:",
+          "admin": "Admin",
+          "adminDesc": "Pilna prieiga prie visų funkcijų.",
+          "viewer": "Žiūrovas",
+          "viewerDesc": "Leidžiama prie Tiesioginio vaizdo tinklelio, Peržiūrų, Paieškų ir Eksportavimo funkcijų.",
+          "customDesc": "Specializuota rolė su prieiga prie konkrečios kameros."
+        }
+      }
+    },
+    "title": "Vartotojai",
+    "management": {
+      "title": "Vartotojų Valdymas",
+      "desc": "Valdyti šios Frigate aplinkos vartotojų paskyras."
+    },
+    "addUser": "Pridėti Vartotoją",
+    "updatePassword": "Atnaujinti Slaptažodį",
+    "toast": {
+      "success": {
+        "createUser": "Vartotojas {{user}} sėkmingai sukurtas",
+        "deleteUser": "Vartotojas {{user}} sėkmingai ištrintas",
+        "updatePassword": "Slaptažodis atnaujintas sėkmingai.",
+        "roleUpdated": "Vartotojui {{user}} rolė sėkmingai atnaujinta"
+      },
+      "error": {
+        "setPasswordFailed": "nepavyko išsaugoti slaptažodžio: {{errorMessage}}",
+        "createUserFailed": "Nepavyko sukurti vartotojo: {{errorMessage}}",
+        "deleteUserFailed": "Nepavyko ištrinti vartotojo: {{errorMessage}}",
+        "roleUpdateFailed": "Nepavyko atnaujinti rolės: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Vartotojo vardas",
+      "actions": "Veiksmai",
+      "role": "Rolė",
+      "noUsers": "Vartotojų nerasta.",
+      "changeRole": "Pakeisti vartotojo rolę",
+      "password": "Slaptažodis",
+      "deleteUser": "Ištrinti vartotoją"
+    }
+  },
+  "triggers": {
+    "dialog": {
+      "deleteTrigger": {
+        "desc": "Ar esate įsitikinę, kad norite ištrinti trigerį <strong>{{triggerName}}</strong>? Šis veiksmas negalės būti atstatytas.",
+        "title": "Ištrinti Trigerį"
+      },
+      "createTrigger": {
+        "title": "Sukurti Trigerį",
+        "desc": "Sukurti trigerį kamerai {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Koreguoti Trigerį",
+        "desc": "Koreguoti trigerio nustatymus kamerai {{camera}}"
+      },
+      "form": {
+        "name": {
+          "title": "Pavadinimas",
+          "placeholder": "Įvesti trigerio pavadinimą",
+          "error": {
+            "minLength": "Pavadinimas turi būti bent dviejų simbolių ilgio.",
+            "invalidCharacters": "Pavadinime gali būti tik raidės, skaičiai, pabraukimai ir brūkšnelis.",
+            "alreadyExists": "Trigeris su tokiu vardu jau yra šiai kamerai."
+          }
+        },
+        "enabled": {
+          "description": "Įjungti ar išjungti šį trigerį"
+        },
+        "type": {
+          "title": "Tipas",
+          "placeholder": "Pasirinkti trigerio tipą"
+        },
+        "content": {
+          "title": "Turinys",
+          "imagePlaceholder": "Pasirinkti paveikslėlį",
+          "textPlaceholder": "Įvesti teksto turinį",
+          "imageDesc": "Pasirinkite paveikslėli kad inicijuotumėte veiksmą kai panašus vaizdas bus aptiktas.",
+          "textDesc": "Įveskite tekstą kad inicijuotumėte veiksmą kai panašus sekamo objekto aprašymas bus aptiktas.",
+          "error": {
+            "required": "Turinys privalomas."
+          }
+        },
+        "threshold": {
+          "title": "Riba",
+          "error": {
+            "min": "Riba privalo būti bent jau 0",
+            "max": "Riba privalo būti daugiausiai 1"
+          }
+        },
+        "actions": {
+          "title": "Veiksmai",
+          "desc": "Pagal nutylėjimą, Frigate sukuria MQTT žinutę visiem trigeriams. Pasirinkite kokius papildomus veiksmus atlikti kai trigeris suveiks.",
+          "error": {
+            "min": "Bent vienas veiksmas privalo būti parinktas."
+          }
+        }
+      }
+    },
+    "documentTitle": "Trigeriai",
+    "management": {
+      "title": "Trigerių Valdymas",
+      "desc": "Valdykite trigerius kamerai {{camera}}. Naudokite miniatiūros tipą, kad panašios miniatiūros būtų jūsų pasirinkto objekto trigeris, o aprašymo trigerį kad panašūs aprašymai būtų trigeris pagal jūsų parašytą tekstą."
+    },
+    "addTrigger": "Pridėti Trigerį",
+    "table": {
+      "name": "Pavadinimas",
+      "type": "Tipas",
+      "content": "Turinys",
+      "threshold": "Riba",
+      "actions": "Veiksmai",
+      "noTriggers": "Šiai kamerai nėra sukonfiguruotų trigerių.",
+      "edit": "Koreguoti",
+      "deleteTrigger": "Trinti Trigerį",
+      "lastTriggered": "Paskutinį kartą suveikė"
+    },
+    "type": {
+      "thumbnail": "Miniatiūra",
+      "description": "Aprašymas"
+    },
+    "actions": {
+      "alert": "Pažymėti kaip įspėjimą",
+      "notification": "Siųsti Pranešimą"
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Trigeris {{name}} sėkmingai sukurtas.",
+        "updateTrigger": "Trigeris {{name}} sėkmingai atnaujintas.",
+        "deleteTrigger": "Trigeris {{name}} sėkmingai ištrintas."
+      },
+      "error": {
+        "createTriggerFailed": "Nepavyko sukurti trigerio: {{errorMessage}}",
+        "updateTriggerFailed": "Nepavyko atnaujinti trigerio: {{errorMessage}}",
+        "deleteTriggerFailed": "Nepavyko ištrinti trigerio: {{errorMessage}}"
+      }
+    }
+  },
+  "notification": {
+    "title": "Pranešimai",
+    "notificationSettings": {
+      "title": "Pranešimų Nustatymai",
+      "desc": "Frigate praneįimai sukurti veikti su push pranešimais į įrenginį kai naršoma per naršyklę arba įdiegta kaip PWA."
+    },
+    "notificationUnavailable": {
+      "title": "Pranešimai Negalimi",
+      "desc": "Web push pranešimai reikalauja saugios aplinkos (<code>https://...</code>). Tai yra naršyklės apribojimai. Atsidarykit Frigate saugiu kanalu kad galėtumėte naudotis pranešimais."
+    },
+    "globalSettings": {
+      "title": "Visuotiniai Nustatymai",
+      "desc": "Laikinai sustabdyti pranešimus iš konkrečios kameros į registruotus įrenginius."
+    },
+    "email": {
+      "title": "El.paštas",
+      "placeholder": "pvz.: laiskas@laiskas.com",
+      "desc": "El paštas turi būti veikiantis ir jums prieinamas, kad jus pasiektų informacija jei bus problemų su push pranešimų paslauga."
+    },
+    "cameras": {
+      "title": "Kameros",
+      "noCameras": "Nėra kamerų",
+      "desc": "Pasirinkite kurioms kameroms norite įjungti pranešimus."
+    },
+    "deviceSpecific": "Įrenginio Specifiniai Nustatymai",
+    "registerDevice": "Registruoti Šį Įrenginį",
+    "unregisterDevice": "Išregistruoti Šį Įrenginį",
+    "sendTestNotification": "Siųsti bandomąjį pranešimą",
+    "unsavedRegistrations": "Neišsaugotos Pranešimo registracijos",
+    "unsavedChanges": "Neišsaugoti Pranešimų pakeitimai",
+    "active": "Aktyvūs Pranešimai",
+    "suspended": "Pranešimai sustabdyti {{time}}",
+    "suspendTime": {
+      "suspend": "Sustabdyti",
+      "5minutes": "Sustabdyti 5 minutėms",
+      "10minutes": "Sustabdyti 10 minučių",
+      "30minutes": "Sustabdyti 30 minučių",
+      "1hour": "Sustabdyti 1 valandai",
+      "12hours": "Sustabdyti 12 valandų",
+      "24hours": "Sustabdyti 24 valandoms",
+      "untilRestart": "Sustabdyti iki perkrovimo"
+    },
+    "cancelSuspension": "Atšaukti Sustabdymą",
+    "toast": {
+      "success": {
+        "registered": "Sėkmingai užregistruota pranešimams. Frigate perkrovimas yra būtinas, kad nors kokie pranešimai būtų išsiųsti (net ir bandomieji).",
+        "settingSaved": "Pranešimų nustatymai buvo išsaugoti."
+      },
+      "error": {
+        "registerFailed": "Nepavyko išsaugoti pranešimų registravimo."
+      }
+    }
+  },
+  "frigatePlus": {
+    "title": "Frigate+ Nustatymai",
+    "apiKey": {
+      "title": "Frigate+ API raktas",
+      "validated": "Frigate+ API raktas aptiktas ir patvirtintas",
+      "notValidated": "Frigate+ API raktas neaptiktas ir nepatvirtintas",
+      "desc": "Frigate+ API raktas įgalina integraciją su Frigate+ paslauga.",
+      "plusLink": "Skaityti daugiau apie Frigate+"
+    },
+    "snapshotConfig": {
+      "title": "Momentinių kadrų Konfiguravimas",
+      "desc": "Pateikti į Frigate+ reikalauja abiejų, momentinių kadrų ir <code>švarios_kopijos</code>momentinių kadrų įjungimo jūsų konfiguracijoje.",
+      "cleanCopyWarning": "Kai kurios kameros turi momentinius kadrus įjungtus tačiau švari kopija išjungta. Turite įjungti <code>švarią_kopiją</code> savo momentinės kopijos nustatymuose, kad galėtumėte teikti paveikslėlius į Frigate+.",
+      "table": {
+        "camera": "Kamera",
+        "snapshots": "Momentiniai Kadrai",
+        "cleanCopySnapshots": "Momentiniai kadrai <code>švari_kopija</code>"
+      }
+    },
+    "modelInfo": {
+      "title": "Modelio Informacija",
+      "modelType": "Modelio Tipas",
+      "trainDate": "Apmokymo Data",
+      "baseModel": "Bazinis Modelis",
+      "plusModelType": {
+        "baseModel": "Bazinis Modelis",
+        "userModel": "Priderinta"
+      },
+      "supportedDetectors": "Palaikomi Detektoriai",
+      "cameras": "Kameros",
+      "loading": "Užkraunama modelio informacija…",
+      "error": "Nepavyko užkrauti modelio informacijos",
+      "availableModels": "Pireinami Modeliai",
+      "loadingAvailableModels": "Kraunami prieinami modeliai…",
+      "modelSelect": "Jūsų prieinami modeliai iš Frigate+ gali būti pasirinkti čia. Pastaba, pasirinkiti galite modelius tik tuos kurie suderinami su esamu detektoriumi."
+    },
+    "unsavedChanges": "Neišsaugoti Frigate+ nustatymų pokyčiai",
+    "restart_required": "Perkrovimas privalomas (Frigate+ modeliai pakeisti)",
+    "toast": {
+      "success": "Frigate+ nustatymai buvo išsaugoti. Perkraukite Frigate kad pritaikytumėte pokyčius.",
+      "error": "Nepavyko išsaugoti konfiguraijos pokyčių: {{errorMessage}}"
+    }
+  },
+  "roles": {
+    "addRole": "Pridėti rolę",
+    "table": {
+      "role": "Rolė",
+      "cameras": "Kameros",
+      "actions": "Veiksmai",
+      "deleteRole": "Pašalinti rolę",
+      "noRoles": "Specializuotų rolių nerasta.",
+      "editCameras": "Koreguoti Kameras"
+    },
+    "toast": {
+      "success": {
+        "deleteRole": "Rolė {{role}} sėkmingai pašalinta",
+        "userRolesUpdated": "{{count}} šios rolės vartotojai buvo priskirti rolei 'žiūrovas', kuri turi prieigą prie visų kamerų.",
+        "createRole": "Rolė {{role}} sėkmingai sukurta",
+        "updateCameras": "Atnaujintos kameros rolei {{role}}"
+      },
+      "error": {
+        "createRoleFailed": "Nepavyko sukurti rolės: {{errorMessage}}",
+        "updateCamerasFailed": "Nepavyko atnaujinti kamerų: {{errorMessage}}",
+        "deleteRoleFailed": "Nepavyko ištrinti rolės: {{errorMessage}}",
+        "userUpdateFailed": "Nepavyko atnaujinti vartotojo rolių: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "deleteRole": {
+        "title": "Pašalinti rolę",
+        "deleting": "Šalinama...",
+        "desc": "Šis veiksmas neatkuriamas. Rolė bus ištrinta, likusiems jos turėtojams bus priskirta 'žiūrovo' rolė, kuri leis vartotojui matyti visas kameras.",
+        "warn": "Ar esate įsitikinę, kad norite ištrinti <strong>{{role}}</strong>?"
+      },
+      "form": {
+        "cameras": {
+          "title": "Kameros",
+          "required": "Mažiausiai viena kamera turi būti pažymėta.",
+          "desc": "Pasirinkinte kamerą prie kurios ši rolė suteiks prieigą. Privaloma nurodyti bent vieną."
+        },
+        "role": {
+          "title": "Rolės pavadinimas",
+          "placeholder": "Įveskite rolės pavadinimą",
+          "roleIsRequired": "Rolės pavadinimas yra privalomas",
+          "roleExists": "Toks rolės pavadinimas jau egzistuoja.",
+          "desc": "Ledžiama naudoti tik raides, skaičius, taškus ir pabraukimus.",
+          "roleOnlyInclude": "Rolės pavadinime gali būti tik raides, skaičius, . ar _"
+        }
+      },
+      "createRole": {
+        "title": "Sukurti Naują Rolę",
+        "desc": "Pridėti naują rolę ir priskirti prieigas prie kamerų."
+      },
+      "editCameras": {
+        "title": "Koreguoti Rolės Kameras",
+        "desc": "Atnaujinti prieigą prie kameros rolei <strong>{{role}}</strong>."
+      }
+    },
+    "management": {
+      "title": "Žiūrovo Rolės Valdymas",
+      "desc": "Valdyti šios Frigate aplinkos specializuotas žiūrovo roles ir kamerų prieigos leidimus."
     }
   }
 }
