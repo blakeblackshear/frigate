@@ -121,7 +121,9 @@
     "noLicensePlatesFound": "Rendszámtábla nem található.",
     "selectPlatesFromList": "Válasszon ki egy vagy több rendszámtáblát a listából.",
     "loading": "Felismert rendszámtáblák betöltése…",
-    "placeholder": "Kezdjen gépelni a rendszámok közötti kereséshez…"
+    "placeholder": "Kezdjen gépelni a rendszámok közötti kereséshez…",
+    "selectAll": "Mindet kijelöl",
+    "clearAll": "Mindet törli"
   },
   "classes": {
     "label": "Osztályok",
