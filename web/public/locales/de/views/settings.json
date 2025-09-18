@@ -207,7 +207,8 @@
       "nameRequired": "Kameraname ist erforderlich",
       "toast": {
         "success": "Kamera {{cameraName}} erfolgreich gespeichert"
-      }
+      },
+      "nameLength": "Der Name der Kamera darf maximal 24 Zeichen lang sein."
     },
     "backToSettings": "Zurück zu den Kamera Einstellungen",
     "selectCamera": "Kamera wählen",
@@ -440,6 +441,14 @@
       "title": "Pfade",
       "desc": "Wichtige Punkte des Pfads des verfolgten Objekts anzeigen",
       "tips": "<p><strong>Pfade</strong></p><br><p>Linien und Kreise zeigen wichtige Punkte an, an denen sich das verfolgte Objekt während seines Lebenszyklus bewegt hat.</p>"
+    },
+    "openCameraWebUI": "Web-Benutzeroberfläche von {{camera}} öffnen",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Keine Audioerkennungen",
+      "score": "Punktzahl",
+      "currentRMS": "Aktueller Effektivwert",
+      "currentdbFS": "Aktuelle dbFS"
     }
   },
   "motionDetectionTuner": {
@@ -537,7 +546,8 @@
           "admin": "Admin",
           "adminDesc": "Voller Zugang zu allen Funktionen.",
           "viewer": "Betrachter",
-          "viewerDesc": "Nur auf Live-Dashboards, Überprüfung, Erkundung und Exporte beschränkt."
+          "viewerDesc": "Nur auf Live-Dashboards, Überprüfung, Erkundung und Exporte beschränkt.",
+          "customDesc": "Benutzerdefinierte Rolle mit spezifischem Kamerazugriff."
         },
         "title": "Benutzerrolle ändern",
         "select": "Wähle eine Rolle"
@@ -815,6 +825,66 @@
         "createTriggerFailed": "Auslöser konnte nicht erstellt werden: {{errorMessage}}",
         "updateTriggerFailed": "Auslöser könnte nicht aktualisiert werden: {{errorMessage}}",
         "deleteTriggerFailed": "Auslöser konnte nicht gelöscht werden: {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "dialog": {
+      "form": {
+        "cameras": {
+          "required": "Mindestens eine Kamera muss ausgewählt werden.",
+          "title": "Kameras",
+          "desc": "Wählen Sie die Kameras aus, auf die diese Rolle Zugriff hat. Mindestens eine Kamera ist erforderlich."
+        },
+        "role": {
+          "title": "Rolle Name",
+          "placeholder": "Rollen Name eingeben",
+          "desc": "Es sind nur Buchstaben, Zahlen, Punkte und Unterstriche zulässig.",
+          "roleIsRequired": "Rollen Name ist erforderlich",
+          "roleOnlyInclude": "Der Rollenname darf nur Buchstaben, Zahlen, . oder _ enthalten",
+          "roleExists": "Eine Rolle mit diesem Namen existiert bereits."
+        }
+      },
+      "createRole": {
+        "title": "Neue Rolle erstellen",
+        "desc": "Fügen Sie eine neue Rolle hinzu und legen Sie die Berechtigungen für den Kamerazugriff fest."
+      },
+      "editCameras": {
+        "title": "Rollenkameras bearbeiten",
+        "desc": "Aktualisieren Sie den Kamerazugriff für die Rolle <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Rolle löschen",
+        "desc": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird die Rolle dauerhaft gelöscht und allen Benutzern mit dieser Rolle die Rolle „Betrachter“ zugewiesen, die dann Zugriff auf alle Kameras erhält.",
+        "warn": "Möchten Sie <strong>{{role}}</strong> wirklich löschen?",
+        "deleting": "Lösche..."
+      }
+    },
+    "management": {
+      "title": "Zuschauer Rollenverwaltung",
+      "desc": "Verwalten Sie benutzerdefinierte Zuschauerrollen und ihre Kamerazugriffsberechtigungen für diese Frigate-Instanz."
+    },
+    "addRole": "Rolle hinzufügen",
+    "table": {
+      "role": "Rolle",
+      "cameras": "Kameras",
+      "actions": "Aktionen",
+      "noRoles": "Keine benutzerdefinierten Rollen gefunden.",
+      "editCameras": "Kameras bearbeiten",
+      "deleteRole": "Rolle löschen"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rolle {{role}} erfolgreich erstellt",
+        "updateCameras": "Kameras für Rolle {{role}} aktualisiert",
+        "deleteRole": "Rolle {{role}} erfolgreich gelöscht",
+        "userRolesUpdated": "{{count}} Benutzer, denen diese Rolle zugewiesen wurde, wurden auf „Zuschauer“ aktualisiert, der Zugriff auf alle Kameras hat."
+      },
+      "error": {
+        "createRoleFailed": "Fehler beim Erstellen der Rolle: {{errorMessage}}",
+        "updateCamerasFailed": "Aktualisierung der Kameras fehlgeschlagen: {{errorMessage}}",
+        "deleteRoleFailed": "Rolle konnte nicht gelöscht werden: {{errorMessage}}",
+        "userUpdateFailed": "Aktualisierung der Benutzerrollen fehlgeschlagen: {{errorMessage}}"
       }
     }
   }

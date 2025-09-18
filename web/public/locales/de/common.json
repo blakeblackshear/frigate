@@ -18,7 +18,7 @@
     "m": "{{time}} Min",
     "minute_one": "{{time}} Minute",
     "minute_other": "{{time}} Minuten",
-    "s": "{{time}} Sekunde",
+    "s": "{{time}}s",
     "second_one": "{{time}} Sekunde",
     "second_other": "{{time}} Sekunden",
     "formattedTimestamp2": {
@@ -107,7 +107,7 @@
     "off": "AUS",
     "reset": "Zurücksetzen",
     "copy": "Kopieren",
-    "twoWayTalk": "bidirecktionales Gespräch",
+    "twoWayTalk": "Zwei-Wege-Kommunikation",
     "exitFullscreen": "Vollbild verlassen",
     "unselect": "Selektion aufheben",
     "copyCoordinates": "Kopiere Koordinaten",
@@ -235,7 +235,7 @@
     }
   },
   "toast": {
-    "copyUrlToClipboard": "URL in zwischenablage kopiert.",
+    "copyUrlToClipboard": "URL in Zwischenablage kopiert.",
     "save": {
       "error": {
         "title": "Speichern der Konfigurationsänderungen gescheitert: {{errorMessage}}",
@@ -248,7 +248,7 @@
     "title": "Rolle",
     "admin": "Administrator",
     "viewer": "Zuschauer",
-    "desc": "Administratoren haben vollen Zugang zu allen funktionen der Frigate Benutzeroberfläche. Zuschauer können nur Kameras betrachten, erkannte Objekte überprüfen und historische Aufnahmen durchsehen."
+    "desc": "Administratoren haben vollen Zugang zu allen Funktionen der Frigate Benutzeroberfläche. Zuschauer können nur Kameras betrachten, erkannte Objekte überprüfen und historische Aufnahmen durchsehen."
   },
   "pagination": {
     "previous": {
