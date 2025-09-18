@@ -87,7 +87,8 @@
       "inferenceSpeed": "Érzékelők Inferencia Sebessége",
       "cpuUsage": "Érzékelő CPU Kihasználtság",
       "memoryUsage": "Érzékelő Memória Kihasználtság",
-      "temperature": "Érzékelő Hőmérséklete"
+      "temperature": "Érzékelő Hőmérséklete",
+      "cpuUsageInformation": "A detektálási modellekbe érkező és onnan távozó bemeneti és kimeneti adatok előkészítéséhez használt CPU. Ez az érték nem méri a következtetési kihasználtságot, még GPU vagy gyorsító használata esetén sem."
     },
     "hardwareInfo": {
       "title": "Hardver Infó",
@@ -178,7 +179,8 @@
     "detectIsSlow": "{{detect}} lassú ({{speed}} ms)",
     "reindexingEmbeddings": "Beágyazások újra indexelése ({{processed}}% kész)",
     "ffmpegHighCpuUsage": "{{camera}}-nak/-nek magas FFmpeg CPU felhasználása ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "A(z) {{camera}} kameránál magas az észlelési CPU-használat ({{detectAvg}}%)"
+    "detectHighCpuUsage": "A(z) {{camera}} kameránál magas az észlelési CPU-használat ({{detectAvg}}%)",
+    "shmTooLow": "A /dev/shm részére foglalt területet ({{total}} MB) legalább {{min}} MB-ra kell növelni."
   },
   "lastRefreshed": "Utoljára frissítve: "
 }
