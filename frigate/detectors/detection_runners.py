@@ -203,7 +203,7 @@ class OpenVINOModelRunner(BaseModelRunner):
         self.infer_request = self.compiled_model.create_infer_request()
         self.input_tensor: ov.Tensor | None = None
 
-        if not complex_model:
+        if not self.complex_model:
             try:
                 input_shape = self.compiled_model.inputs[0].get_shape()
                 input_element_type = self.compiled_model.inputs[0].get_element_type()

@@ -4,16 +4,17 @@ import logging
 import os
 import warnings
 
-# importing this without pytorch or others causes a warning
-# https://github.com/huggingface/transformers/issues/27214
-# suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
-from frigate.embeddings.types import EnrichmentModelTypeEnum
 from transformers import AutoFeatureExtractor, AutoTokenizer
 from transformers.utils.logging import disable_progress_bar
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.detectors.detection_runners import BaseModelRunner, get_optimized_runner
+
+# importing this without pytorch or others causes a warning
+# https://github.com/huggingface/transformers/issues/27214
+# suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
+from frigate.embeddings.types import EnrichmentModelTypeEnum
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 

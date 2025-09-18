@@ -3,7 +3,6 @@
 import logging
 import os
 from abc import ABC, abstractmethod
-from enum import Enum
 from io import BytesIO
 from typing import Any
 

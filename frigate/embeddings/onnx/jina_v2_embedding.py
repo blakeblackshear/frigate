@@ -6,13 +6,13 @@ import os
 
 import numpy as np
 from PIL import Image
-from frigate.embeddings.types import EnrichmentModelTypeEnum
 from transformers import AutoTokenizer
 from transformers.utils.logging import disable_progress_bar, set_verbosity_error
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.detectors.detection_runners import get_optimized_runner
+from frigate.embeddings.types import EnrichmentModelTypeEnum
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 
