@@ -55,7 +55,8 @@
       "inferenceSpeed": "Algılayıcı Çıkarım Hızı",
       "memoryUsage": "Algılayıcı Bellek Kullanımı",
       "cpuUsage": "Algılayıcı İşlemci Kullanımı",
-      "temperature": "Algılayıcı Sıcaklığı"
+      "temperature": "Algılayıcı Sıcaklığı",
+      "cpuUsageInformation": "Tespit modellerine giriş ve çıkış verilerini hazırlarken kullanılan işlemci yoğunluğu. Bu değer, grafik işlemci veya benzeri bir hızlandırıcı kullanılsa bile çıkarım yükünü ölçmek için kullanılmamalıdır."
     },
     "title": "Genel"
   },
@@ -138,7 +139,8 @@
     "healthy": "Sistem sağlıklı",
     "detectIsVerySlow": "{{detect}} çok yavaş çalışıyor ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} çevrimdışı",
-    "detectIsSlow": "{{detect}} yavaş çalışıyor ({{speed}} ms)"
+    "detectIsSlow": "{{detect}} yavaş çalışıyor ({{speed}} ms)",
+    "shmTooLow": "Ayrılan /dev/shm belleği (şu anda {{total}} MB), en az {{min}} MB'a çıkartılmalıdır."
   },
   "enrichments": {
     "embeddings": {
