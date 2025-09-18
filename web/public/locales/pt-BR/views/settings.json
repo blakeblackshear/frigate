@@ -558,7 +558,8 @@
           "admin": "Administrador",
           "adminDesc": "Acesso total a todos os recursos.",
           "viewer": "Espectador",
-          "viewerDesc": "Limitado aos Painéis ao Vivo, Revisar, Explorar, e Exportar somente."
+          "viewerDesc": "Limitado aos Painéis ao Vivo, Revisar, Explorar, e Exportar somente.",
+          "customDesc": "Papel customizado com acesso a câmeras específicas."
         }
       }
     },
@@ -763,6 +764,66 @@
         "createTriggerFailed": "Falha ao criar gatilho: {{errorMessage}}",
         "updateTriggerFailed": "Falha ao atualizar gatilho: {{errorMessage}}",
         "deleteTriggerFailed": "Falha ao apagar gatilho: {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Gerenciamento do Papel de Visualizador",
+      "desc": "Gerenciar papéis de visualizador customizados e suas permissões de acesso para essa instância do Frigate."
+    },
+    "addRole": "Adicionar Papel",
+    "table": {
+      "role": "Papel",
+      "cameras": "Câmeras",
+      "actions": "Ações",
+      "noRoles": "Nenhum papel customizado encontrado.",
+      "editCameras": "Editar Câmeras",
+      "deleteRole": "Apagar Papel"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Papel {{role}} criado com sucesso",
+        "updateCameras": "Câmeras atualizados para o papel {{role}}",
+        "deleteRole": "Papel {{role}} apagado com sucesso",
+        "userRolesUpdated": "{{count}} usuário(os) atribuídos a esse papel foram atualizados para 'visualizador', que possui acesso a todas as câmeras."
+      },
+      "error": {
+        "createRoleFailed": "Falha ao criar papel: {{errorMessage}}",
+        "updateCamerasFailed": "Falha ao atualizar câmeras: {{errorMessage}}",
+        "deleteRoleFailed": "Falha ao apagar papel: {{errorMessage}}",
+        "userUpdateFailed": "Falha ao atualizar papel do usuário: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Criar Novo Papel",
+        "desc": "Adicionar um novo papel e especificar permissões de acesso."
+      },
+      "editCameras": {
+        "title": "Editar Câmeras de Papéis",
+        "desc": "Atualizar acesso da câmera para o papel <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Deletar Papel",
+        "desc": "Essa ação não pode ser desfeita. Isso irá apagar permanentemente o papel e atribuir a quaisquer usuários com esse papel como 'visualizador', o que dará acesso de visualização para todas as câmeras.",
+        "warn": "Tem certeza que quer apagar <strong>{{role}}</strong>?",
+        "deleting": "Apagando…"
+      },
+      "form": {
+        "role": {
+          "title": "Nome do Papel",
+          "placeholder": "Digitar nome do papel",
+          "desc": "Apenas letras, números, pontos e sublinhados são permitidos.",
+          "roleIsRequired": "Nome para o papel é requerido",
+          "roleOnlyInclude": "O nome do papel pode conter apenas letras, números, pontos ou sublinhados",
+          "roleExists": "Um papel com esse nome já existe."
+        },
+        "cameras": {
+          "title": "Câmeras",
+          "desc": "Selecione as câmeras que esse papel terá acesso. Ao menos uma câmera é requerida.",
+          "required": "Ao menos uma câmera deve ser selecionada."
+        }
       }
     }
   }
