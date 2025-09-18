@@ -5,6 +5,7 @@ class EmbeddingTypeEnum(str, Enum):
     thumbnail = "thumbnail"
     description = "description"
 
+
 class EnrichmentModelTypeEnum(str, Enum):
     arcface = "arcface"
     facenet = "facenet"

@@ -106,7 +106,7 @@ class CudaGraphRunner(BaseModelRunner):
         # Import here to avoid circular imports
         from frigate.detectors.detector_config import ModelTypeEnum
         from frigate.embeddings.types import EnrichmentModelTypeEnum
-        
+
         return model_type in [
             ModelTypeEnum.yolonas.value,
             EnrichmentModelTypeEnum.paddleocr.value,
@@ -173,7 +173,7 @@ class OpenVINOModelRunner(BaseModelRunner):
     def is_complex_model(model_type: str) -> bool:
         # Import here to avoid circular imports
         from frigate.embeddings.types import EnrichmentModelTypeEnum
-        
+
         return model_type in [EnrichmentModelTypeEnum.paddleocr.value]
 
     def __init__(self, model_path: str, device: str, model_type: str, **kwargs):
