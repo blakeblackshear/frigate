@@ -133,9 +133,9 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             x:x2,
         ]
 
-        if input.shape != (224, 224):
+        if frame.shape != (224, 224):
             try:
-                input = cv2.resize(input, (224, 224))
+                frame = cv2.resize(frame, (224, 224))
             except Exception:
                 logger.warning("Failed to resize image for state classification")
                 return
@@ -258,11 +258,11 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             x:x2,
         ]
 
-        if input.shape != (224, 224):
+        if frame.shape != (224, 224):
             try:
-                input = cv2.resize(input, (224, 224))
+                frame = cv2.resize(frame, (224, 224))
             except Exception:
-                logger.warning("Failed to resize image for object classification")
+                logger.warning("Failed to resize image for state classification")
                 return
 
         input = np.expand_dims(crop, axis=0)
