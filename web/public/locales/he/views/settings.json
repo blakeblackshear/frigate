@@ -279,7 +279,8 @@
     "users": "משתמשים",
     "notifications": "התראות",
     "frigateplus": "+Frigate",
-    "enrichments": "תוספות"
+    "enrichments": "תוספות",
+    "triggers": "הפעלות"
   },
   "dialog": {
     "unsavedChanges": {
