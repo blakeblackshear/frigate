@@ -360,6 +360,27 @@ class LicensePlateProcessingMixin:
                 conf for conf_list in qualifying_confidences for conf in conf_list
             ]
 
+            # Apply replace rules to combined_plate if configured
+            original_combined = combined_plate
+            if self.lpr_config.replace_rules:
+                for rule in self.lpr_config.replace_rules:
+                    try:
+                        pattern = getattr(rule, "pattern", "")
+                        replacement = getattr(rule, "replacement", "")
+                        if pattern:
+                            combined_plate = re.sub(
+                                pattern, replacement, combined_plate
+                            )
+                    except re.error as e:
+                        logger.warning(
+                            f"{camera}: Invalid regex in replace_rules '{pattern}': {e}"
+                        )
+
+            if combined_plate != original_combined:
+                logger.debug(
+                    f"{camera}: Rules applied: '{original_combined}' -> '{combined_plate}'"
+                )
+
             # Compute the combined area for qualifying boxes
             qualifying_boxes = [boxes[i] for i in qualifying_indices]
             qualifying_plate_images = [
