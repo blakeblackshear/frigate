@@ -162,65 +162,6 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Intel Iris XE  | ~ 10 ms                    | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
 | Intel Arc A380 | ~ 6 ms                     | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
 | Intel Arc A750 | ~ 4 ms                     | 320: ~ 8 ms               |                        |                                    |
-:::
-
-### Hailo-8
-
-Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms—including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
-
-**Default Model Configuration:**
-
-- **Hailo-8L:** Default model is **YOLOv6n**.
-- **Hailo-8:** Default model is **YOLOv6n**.
-
-In real-world deployments, even with multiple cameras running concurrently, Frigate has demonstrated consistent performance. Testing on x86 platforms—with dual PCIe lanes—yields further improvements in FPS, throughput, and latency compared to the Raspberry Pi setup.
-
-| Name             | Hailo‑8 Inference Time | Hailo‑8L Inference Time |
-| ---------------- | ---------------------- | ----------------------- |
-| ssd mobilenet v1 | ~ 6 ms                 | ~ 10 ms                 |
-| yolov6n          | ~ 7 ms                 | ~ 11 ms                 |
-
-### Google Coral TPU
-
-Frigate supports both the USB and M.2 versions of the Google Coral.
-
-- The USB version is compatible with the widest variety of hardware and does not require a driver on the host machine. However, it does lack the automatic throttling features of the other versions.
-- The PCIe and M.2 versions require installation of a driver on the host. Follow the instructions for your version from https://coral.ai
-
-A single Coral can handle many cameras using the default model and will be sufficient for the majority of users. You can calculate the maximum performance of your Coral based on the inference speed reported by Frigate. With an inference speed of 10, your Coral will top out at `1000/10=100`, or 100 frames per second. If your detection fps is regularly getting close to that, you should first consider tuning motion masks. If those are already properly configured, a second Coral may be needed.
-
-### OpenVINO - Intel
-
-The OpenVINO detector type is able to run on:
-
-- 6th Gen Intel Platforms and newer that have an iGPU
-- x86 hosts with an Intel Arc GPU
-- Most modern AMD CPUs (though this is officially not supported by Intel)
-- x86 & Arm64 hosts via CPU (generally not recommended)
-
-:::note
-
-Intel NPUs have seen [limited success in community deployments](https://github.com/blakeblackshear/frigate/discussions/13248#discussioncomment-12347357), although they remain officially unsupported.
-
-In testing, the NPU delivered performance that was only comparable to — or in some cases worse than — the integrated GPU.
-
-:::
-
-More information is available [in the detector docs](/configuration/object_detectors#openvino-detector)
-
-Inference speeds vary greatly depending on the CPU or GPU used, some known examples of GPU inference times are below:
-
-| Name           | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time | Notes                              |
-| -------------- | -------------------------- | ------------------------- | ---------------------- | ---------------------------------- |
-| Intel HD 530   | 15 - 35 ms                 |                           |                        | Can only run one detector instance |
-| Intel HD 620   | 15 - 25 ms                 | 320: ~ 35 ms              |                        |                                    |
-| Intel HD 630   | ~ 15 ms                    | 320: ~ 30 ms              |                        |                                    |
-| Intel UHD 730  | ~ 10 ms                    | 320: ~ 19 ms 640: ~ 54 ms |                        |                                    |
-| Intel UHD 770  | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
-| Intel N100     | ~ 15 ms                    | 320: ~ 25 ms              |                        | Can only run one detector instance |
-| Intel Iris XE  | ~ 10 ms                    | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
-| Intel Arc A380 | ~ 6 ms                     | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
-| Intel Arc A750 | ~ 4 ms                     | 320: ~ 8 ms               |                        |                                    |
 
 ### TensorRT - Nvidia GPU
 

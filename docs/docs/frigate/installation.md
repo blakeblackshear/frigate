@@ -189,7 +189,7 @@ Next, you should configure [hardware object detection](/configuration/object_det
 
 #### Setup
 
-Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-synap`.
+Follow Frigate's default installation instructions, but use a docker image with `-synap1680` suffix for example `ghcr.io/blakeblackshear/frigate:stable-synap1680`.
 
 Next, you need to grant docker permissions to access your hardware:
 
