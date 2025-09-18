@@ -67,12 +67,15 @@ Fine-tune the LPR feature using these optional parameters at the global level of
 - **`min_area`**: Defines the minimum area (in pixels) a license plate must be before recognition runs.
   - Default: `1000` pixels. Note: this is intentionally set very low as it is an _area_ measurement (length x width). For reference, 1000 pixels represents a ~32x32 pixel square in your camera image.
   - Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant plates.
-- **`device`**: Device to use to run license plate detection *and* recognition models.
+- **`device`**: Device to use to run license plate detection _and_ recognition models.
   - Default: `CPU`
   - This can be `CPU` or one of [onnxruntime's provider options](https://onnxruntime.ai/docs/execution-providers/). For users without a model that detects license plates natively, using a GPU may increase performance of the models, especially the YOLOv9 license plate detector model. See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
-- **`model_size`**: The size of the model used to detect text on plates.
+- **`model_size`**: The size of the model used to identify regions of text on plates.
   - Default: `small`
-  - This can be `small` or `large`. The `large` model uses an enhanced text detector and is more accurate at finding text on plates but slower than the `small` model. For most users, the small model is recommended. For users in countries with multiple lines of text on plates, the large model is recommended. Note that using the large model does not improve _text recognition_, but it may improve _text detection_.
+  - This can be `small` or `large`.
+  - The `small` model is fast and identifies groups of Latin and Chinese characters.
+  - The `large` model identifies Latin characters only, but uses an enhanced text detector and is more capable at finding characters on multi-line plates. It is significantly slower than the `small` model. Note that using the `large` model does not improve _text recognition_, but it may improve _text detection_.
+  - For most users, the `small` model is recommended.
 
 ### Recognition
 
@@ -101,6 +104,32 @@ Fine-tune the LPR feature using these optional parameters at the global level of
   - Higher values increase contrast, sharpen details, and reduce noise, but excessive enhancement can blur or distort characters, actually making them much harder for Frigate to recognize.
   - This setting is best adjusted at the camera level if running LPR on multiple cameras.
   - If Frigate is already recognizing plates correctly, leave this setting at the default of `0`. However, if you're experiencing frequent character issues or incomplete plates and you can already easily read the plates yourself, try increasing the value gradually, starting at 5 and adjusting as needed. You should see how different enhancement levels affect your plates. Use the `debug_save_plates` configuration option (see below).
+
+### Normalization Rules
+
+- **`replace_rules`**: List of regex replacement rules to normalize detected plates. These rules are applied sequentially. Each rule must have a `pattern` (which can be a string or a regex, prepended by `r`) and `replacement` (a string, which also supports backrefs like `\1`). These rules are useful for dealing with common OCR issues like noise characters, separators, or confusions (e.g., 'O'→'0').
+
+These rules must be defined at the global level of your `lpr` config.
+
+```yaml
+lpr:
+  replace_rules:
+    - pattern: r'[%#*?]' # Remove noise symbols
+      replacement: ""
+    - pattern: r'[= ]' # Normalize = or space to dash
+      replacement: "-"
+    - pattern: "O" # Swap 'O' to '0' (common OCR error)
+      replacement: "0"
+    - pattern: r'I' # Swap 'I' to '1'
+      replacement: "1"
+    - pattern: r'(\w{3})(\w{3})' # Split 6 chars into groups (e.g., ABC123 → ABC-123)
+      replacement: r'\1-\2'
+```
+
+- Rules fire in order: In the example above: clean noise first, then separators, then swaps, then splits.
+- Backrefs (`\1`, `\2`) allow dynamic replacements (e.g., capture groups).
+- Any changes made by the rules are printed to the LPR debug log.
+- Tip: You can test patterns with tools like regex101.com.
 
 ### Debugging
 
