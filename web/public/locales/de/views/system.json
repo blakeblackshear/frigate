@@ -16,7 +16,7 @@
           "vbios": "VBios Info: {{vbios}}"
         },
         "closeInfo": {
-          "label": "Schhließe GPU Info"
+          "label": "Schließe GPU Info"
         },
         "copyInfo": {
           "label": "Kopiere GPU Info"
@@ -39,7 +39,8 @@
       "cpuUsage": "CPU-Auslastung des Detektors",
       "memoryUsage": "Arbeitsspeichernutzung des Detektors",
       "inferenceSpeed": "Detektoren Inferenzgeschwindigkeit",
-      "temperature": "Temperatur des Detektors"
+      "temperature": "Temperatur des Detektors",
+      "cpuUsageInformation": "CPU, die zur Vorbereitung von Eingabe- und Ausgabedaten für/aus Erkennungsmodellen verwendet wird. Dieser Wert misst nicht die Inferenzauslastung, selbst wenn eine GPU oder ein Beschleuniger verwendet wird."
     },
     "otherProcesses": {
       "title": "Andere Prozesse",
@@ -119,7 +120,7 @@
       "unknown": "Unbekannt",
       "audio": "Audio:",
       "error": "Fehler: {{error}}",
-      "cameraProbeInfo": "{{camera}} Kamera-Untersuchsungsinfo",
+      "cameraProbeInfo": "{{camera}} Kamera-Untersuchungsinfo",
       "streamDataFromFFPROBE": "Stream-Daten werden mit <code>ffprobe</code> erhalten.",
       "tips": {
         "title": "Kamera-Untersuchsungsinfo"
@@ -178,7 +179,8 @@
     "reindexingEmbeddings": "Neuindizierung von Einbettungen ({{processed}}% erledigt)",
     "detectIsSlow": "{{detect}} ist langsam ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} ist sehr langsam ({{speed}} ms)",
-    "cameraIsOffline": "{{camera}} ist offline"
+    "cameraIsOffline": "{{camera}} ist offline",
+    "shmTooLow": "Die Zuweisung für /dev/shm ({{total}} MB) sollte auf mindestens {{min}} MB erhöht werden."
   },
   "lastRefreshed": "Zuletzt aktualisiert: "
 }
