@@ -1,6 +1,6 @@
-from typing import Dict, Any, List
 import logging
 import re
+from typing import Any, Dict, List
 
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from prometheus_client.core import (

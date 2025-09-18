@@ -8,8 +8,8 @@ from playhouse.shortcuts import model_to_dict
 from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.models import Event, Recordings, ReviewSegment, Timeline
-from frigate.test.http_api.base_http_test import BaseTestHttp
 from frigate.stats.emitter import StatsEmitter
+from frigate.test.http_api.base_http_test import BaseTestHttp
 from frigate.test.test_storage import _insert_mock_event
 
 
