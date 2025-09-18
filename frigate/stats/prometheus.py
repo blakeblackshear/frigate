@@ -459,8 +459,10 @@ class CustomCollector(object):
 
         if len(self.all_events) > 0:
             for event_count in self.all_events:
-                camera_events.add_metric([event_count['camera'], event_count['label']], event_count['Count'])
-        
+                camera_events.add_metric(
+                    [event_count["camera"], event_count["label"]], event_count["Count"]
+                )
+
         yield camera_events
 
 

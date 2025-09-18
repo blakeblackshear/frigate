@@ -132,8 +132,12 @@ def metrics(request: Request):
     # Retrieve the latest statistics and update the Prometheus metrics
     stats = request.app.stats_emitter.get_latest_stats()
     # query DB for count of events by camera, label
-    event_counts: List[Dict[str, Any]] = Event.select(Event.camera, Event.label, fn.Count()).group_by(Event.camera, Event.label).dicts()
-    
+    event_counts: List[Dict[str, Any]] = (
+        Event.select(Event.camera, Event.label, fn.Count())
+        .group_by(Event.camera, Event.label)
+        .dicts()
+    )
+
     update_metrics(stats=stats, event_counts=event_counts)
     content, content_type = get_metrics()
     return Response(content=content, media_type=content_type)

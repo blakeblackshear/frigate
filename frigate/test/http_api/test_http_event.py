@@ -304,29 +304,99 @@ class TestHttpApp(BaseTestHttp):
         with TestClient(self.app) as client:
             ts_start = datetime.now().timestamp()
             ts_end = ts_start + 30
-            _insert_mock_event(id="abcde.random", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="01234.random", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="56789.random", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="101112.random", label="outside", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="131415.random", label="outside", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="161718.random", camera="porch", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="192021.random", camera="porch", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="222324.random", camera="porch", label="inside", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="252627.random", camera="porch", label="inside", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="282930.random", label="inside", start=ts_start, end=ts_end, retain=True)
-            _insert_mock_event(id="313233.random", label="inside", start=ts_start, end=ts_end, retain=True)
-            
+            _insert_mock_event(
+                id="abcde.random", start=ts_start, end=ts_end, retain=True
+            )
+            _insert_mock_event(
+                id="01234.random", start=ts_start, end=ts_end, retain=True
+            )
+            _insert_mock_event(
+                id="56789.random", start=ts_start, end=ts_end, retain=True
+            )
+            _insert_mock_event(
+                id="101112.random",
+                label="outside",
+                start=ts_start,
+                end=ts_end,
+                retain=True,
+            )
+            _insert_mock_event(
+                id="131415.random",
+                label="outside",
+                start=ts_start,
+                end=ts_end,
+                retain=True,
+            )
+            _insert_mock_event(
+                id="161718.random",
+                camera="porch",
+                start=ts_start,
+                end=ts_end,
+                retain=True,
+            )
+            _insert_mock_event(
+                id="192021.random",
+                camera="porch",
+                start=ts_start,
+                end=ts_end,
+                retain=True,
+            )
+            _insert_mock_event(
+                id="222324.random",
+                camera="porch",
+                label="inside",
+                start=ts_start,
+                end=ts_end,
+                retain=True,
+            )
+            _insert_mock_event(
+                id="252627.random",
+                camera="porch",
+                label="inside",
+                start=ts_start,
+                end=ts_end,
+                retain=True,
+            )
+            _insert_mock_event(
+                id="282930.random",
+                label="inside",
+                start=ts_start,
+                end=ts_end,
+                retain=True,
+            )
+            _insert_mock_event(
+                id="313233.random",
+                label="inside",
+                start=ts_start,
+                end=ts_end,
+                retain=True,
+            )
+
             stats_emitter = Mock(spec=StatsEmitter)
             stats_emitter.get_latest_stats.return_value = self.test_stats
             self.app.stats_emitter = stats_emitter
             event = client.get(f"/metrics")
-            
+
         assert "# TYPE frigate_detection_total_fps gauge" in event.text
-        assert "frigate_detection_total_fps 13.7"         in event.text
-        assert "# HELP frigate_camera_events_total Count of camera events since exporter started"   in event.text
-        assert "# TYPE frigate_camera_events_total counter"                                         in event.text
-        assert 'frigate_camera_events_total{camera="front_door",label="Mock"} 3.0'                  in event.text
-        assert 'frigate_camera_events_total{camera="front_door",label="inside"} 2.0'                in event.text
-        assert 'frigate_camera_events_total{camera="front_door",label="outside"} 2.0'               in event.text
-        assert 'frigate_camera_events_total{camera="porch",label="Mock"} 2.0'                       in event.text
-        assert 'frigate_camera_events_total{camera="porch",label="inside"} 2.0'   
+        assert "frigate_detection_total_fps 13.7" in event.text
+        assert (
+            "# HELP frigate_camera_events_total Count of camera events since exporter started"
+            in event.text
+        )
+        assert "# TYPE frigate_camera_events_total counter" in event.text
+        assert (
+            'frigate_camera_events_total{camera="front_door",label="Mock"} 3.0'
+            in event.text
+        )
+        assert (
+            'frigate_camera_events_total{camera="front_door",label="inside"} 2.0'
+            in event.text
+        )
+        assert (
+            'frigate_camera_events_total{camera="front_door",label="outside"} 2.0'
+            in event.text
+        )
+        assert (
+            'frigate_camera_events_total{camera="porch",label="Mock"} 2.0' in event.text
+        )
+        assert 'frigate_camera_events_total{camera="porch",label="inside"} 2.0'
