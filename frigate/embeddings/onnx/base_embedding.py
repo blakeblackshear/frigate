@@ -18,11 +18,6 @@ from frigate.util.downloader import ModelDownloader
 logger = logging.getLogger(__name__)
 
 
-class EmbeddingTypeEnum(str, Enum):
-    thumbnail = "thumbnail"
-    description = "description"
-
-
 class BaseEmbedding(ABC):
     """Base embedding class."""
 

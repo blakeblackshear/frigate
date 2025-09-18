@@ -7,6 +7,7 @@ import warnings
 # importing this without pytorch or others causes a warning
 # https://github.com/huggingface/transformers/issues/27214
 # suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
+from frigate.embeddings.types import EnrichmentModelTypeEnum
 from transformers import AutoFeatureExtractor, AutoTokenizer
 from transformers.utils.logging import disable_progress_bar
 
@@ -128,6 +129,7 @@ class JinaV1TextEmbedding(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
+                model_type=EnrichmentModelTypeEnum.jina_v1.value,
             )
 
     def _preprocess_inputs(self, raw_inputs):
@@ -206,6 +208,7 @@ class JinaV1ImageEmbedding(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
+                model_type=EnrichmentModelTypeEnum.jina_v1.value,
             )
 
     def _preprocess_inputs(self, raw_inputs):

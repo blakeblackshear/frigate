@@ -6,6 +6,7 @@ import os
 
 import numpy as np
 from PIL import Image
+from frigate.embeddings.types import EnrichmentModelTypeEnum
 from transformers import AutoTokenizer
 from transformers.utils.logging import disable_progress_bar, set_verbosity_error
 
@@ -128,6 +129,7 @@ class JinaV2Embedding(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
+                model_type=EnrichmentModelTypeEnum.jina_v2.value,
             )
 
     def _preprocess_image(self, image_data: bytes | Image.Image) -> np.ndarray:
