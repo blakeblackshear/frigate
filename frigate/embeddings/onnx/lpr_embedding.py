@@ -8,6 +8,7 @@ import numpy as np
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_runners import BaseModelRunner, get_optimized_runner
+from frigate.embeddings.types import EnrichmentModelTypeEnum
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 
@@ -79,6 +80,7 @@ class PaddleOCRDetection(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
+                model_type=EnrichmentModelTypeEnum.paddleocr.value,
             )
 
     def _preprocess_inputs(self, raw_inputs):
@@ -138,6 +140,7 @@ class PaddleOCRClassification(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
+                model_type=EnrichmentModelTypeEnum.paddleocr.value,
             )
 
     def _preprocess_inputs(self, raw_inputs):
@@ -198,6 +201,7 @@ class PaddleOCRRecognition(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
+                model_type=EnrichmentModelTypeEnum.paddleocr.value,
             )
 
     def _preprocess_inputs(self, raw_inputs):
@@ -258,7 +262,7 @@ class LicensePlateDetector(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
-                complex_model=False,
+                model_type="yolov9",
             )
 
     def _preprocess_inputs(self, raw_inputs):

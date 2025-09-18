@@ -101,6 +101,19 @@ class CudaGraphRunner(BaseModelRunner):
     for more complex models like CLIP or PaddleOCR.
     """
 
+    @staticmethod
+    def is_complex_model(model_type: str) -> bool:
+        # Import here to avoid circular imports
+        from frigate.detectors.detector_config import ModelTypeEnum
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        return model_type in [
+            ModelTypeEnum.yolonas.value,
+            EnrichmentModelTypeEnum.paddleocr.value,
+            EnrichmentModelTypeEnum.jina_v1.value,
+            EnrichmentModelTypeEnum.jina_v2.value,
+        ]
+
     def __init__(self, session: ort.InferenceSession, cuda_device_id: int):
         self._session = session
         self._cuda_device_id = cuda_device_id
@@ -156,10 +169,17 @@ class CudaGraphRunner(BaseModelRunner):
 class OpenVINOModelRunner(BaseModelRunner):
     """OpenVINO model runner that handles inference efficiently."""
 
-    def __init__(self, model_path: str, device: str, complex_model: bool, **kwargs):
+    @staticmethod
+    def is_complex_model(model_type: str) -> bool:
+        # Import here to avoid circular imports
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        return model_type in [EnrichmentModelTypeEnum.paddleocr.value]
+
+    def __init__(self, model_path: str, device: str, model_type: str, **kwargs):
         self.model_path = model_path
         self.device = device
-        self.complex_model = complex_model
+        self.complex_model = OpenVINOModelRunner.is_complex_model(model_type)
 
         if not os.path.isfile(model_path):
             raise FileNotFoundError(f"OpenVINO model file {model_path} not found.")
@@ -183,7 +203,7 @@ class OpenVINOModelRunner(BaseModelRunner):
         self.infer_request = self.compiled_model.create_infer_request()
         self.input_tensor: ov.Tensor | None = None
 
-        if not complex_model:
+        if not self.complex_model:
             try:
                 input_shape = self.compiled_model.inputs[0].get_shape()
                 input_element_type = self.compiled_model.inputs[0].get_element_type()
@@ -381,28 +401,35 @@ class RKNNModelRunner(BaseModelRunner):
 
 
 def get_optimized_runner(
-    model_path: str, device: str | None, complex_model: bool = True, **kwargs
+    model_path: str, device: str | None, model_type: str, **kwargs
 ) -> BaseModelRunner:
     """Get an optimized runner for the hardware."""
+    device = device or "AUTO"
     if is_rknn_compatible(model_path):
         rknn_path = auto_convert_model(model_path)
 
         if rknn_path:
             return RKNNModelRunner(rknn_path)
 
-    if device != "CPU" and is_openvino_gpu_npu_available():
-        return OpenVINOModelRunner(
-            model_path, device or "AUTO", complex_model, **kwargs
-        )
-
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
+
+    if providers[0] == "CPUExecutionProvider":
+        # In the default image, ONNXRuntime is used so we will only get CPUExecutionProvider
+        # In other images we will get CUDA / ROCm which are preferred over OpenVINO
+        # There is currently no way to prioritize OpenVINO over CUDA / ROCm in these images
+        if device != "CPU" and is_openvino_gpu_npu_available():
+            return OpenVINOModelRunner(model_path, device, model_type, **kwargs)
+
     ortSession = ort.InferenceSession(
         model_path,
         providers=providers,
         provider_options=options,
     )
 
-    if not complex_model and providers[0] == "CUDAExecutionProvider":
+    if (
+        not CudaGraphRunner.is_complex_model(model_type)
+        and providers[0] == "CUDAExecutionProvider"
+    ):
         return CudaGraphRunner(ortSession, options[0]["device_id"])
 
     return ONNXModelRunner(ortSession)

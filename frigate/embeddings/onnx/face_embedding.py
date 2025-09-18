@@ -7,6 +7,7 @@ import numpy as np
 
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_runners import get_optimized_runner
+from frigate.embeddings.types import EnrichmentModelTypeEnum
 from frigate.log import redirect_output_to_logger
 from frigate.util.downloader import ModelDownloader
 
@@ -151,7 +152,7 @@ class ArcfaceEmbedding(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 device=self.config.device or "GPU",
-                complex_model=False,
+                model_type=EnrichmentModelTypeEnum.arcface.value,
             )
 
     def _preprocess_inputs(self, raw_inputs):
