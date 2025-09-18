@@ -217,6 +217,13 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
+class ReplaceRule(FrigateBaseModel):
+    pattern: str = Field(..., title="Regex pattern to match.")
+    replacement: str = Field(
+        ..., title="Replacement string (supports backrefs like '\\1')."
+    )
+
+
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
     model_size: str = Field(
@@ -268,6 +275,10 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         default=None,
         title="The device key to use for LPR.",
         description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
+    )
+    replace_rules: List[ReplaceRule] = Field(
+        default_factory=list,
+        title="List of regex replacement rules for normalizing detected plates. Each rule has 'pattern' and 'replacement'.",
     )
 
 

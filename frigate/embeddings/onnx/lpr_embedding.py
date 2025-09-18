@@ -33,7 +33,7 @@ class PaddleOCRDetection(BaseEmbedding):
         device: str = "AUTO",
     ):
         model_file = (
-            "detection_v5-large.onnx"
+            "detection_v3-large.onnx"
             if model_size == "large"
             else "detection_v5-small.onnx"
         )
@@ -41,7 +41,7 @@ class PaddleOCRDetection(BaseEmbedding):
             model_name="paddleocr-onnx",
             model_file=model_file,
             download_urls={
-                model_file: f"https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/v5/{model_file}"
+                model_file: f"https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/{'v3' if model_size == 'large' else 'v5'}/{model_file}"
             },
         )
         self.requestor = requestor
