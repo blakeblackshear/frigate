@@ -22,7 +22,8 @@
     "users": "Utilizadores",
     "notifications": "Notificações",
     "frigateplus": "Frigate+",
-    "enrichments": "Avançado"
+    "enrichments": "Avançado",
+    "triggers": "Gatilhos"
   },
   "dialog": {
     "unsavedChanges": {
@@ -470,6 +471,14 @@
       "title": "Caminhos",
       "desc": "Mostrar pontos significativos do caminho do objeto rastreado",
       "tips": "<p><strong>Paths</strong></p><br><p>Linhas e círculos indicarão pontos significativos que o objeto rastreado moveu durante seu ciclo de vida.</p>"
+    },
+    "openCameraWebUI": "Abrir a Interface Web de {{camera}}",
+    "audio": {
+      "title": "Áudio",
+      "noAudioDetections": "Nenhuma detecção de áudio",
+      "score": "pontuanção",
+      "currentRMS": "RMS Atual",
+      "currentdbFS": "dbFS Atual"
     }
   },
   "camera": {
@@ -540,7 +549,8 @@
       },
       "toast": {
         "success": "Câmera {{cameraName}} guardada com sucesso"
-      }
+      },
+      "nameLength": "O nome da câmara deve ter ao menos 24 caracteres."
     }
   },
   "motionDetectionTuner": {
@@ -636,7 +646,8 @@
           "adminDesc": "Acesso total a todos os recursos.",
           "viewer": "Visualização",
           "viewerDesc": "Limitado apenas a painéis ao vivo, análise, exploração e exportações.",
-          "intro": "Selecione a função apropriada para este utilizador:"
+          "intro": "Selecione a função apropriada para este utilizador:",
+          "customDesc": "Papel customizado com acesso a câmaras específicas."
         },
         "title": "Alterar função do utilizador",
         "desc": "Atualizar permissões para <strong>{{username}}</strong>",
@@ -817,6 +828,66 @@
         "createTriggerFailed": "Falha ao criar trigger: {{errorMessage}}",
         "updateTriggerFailed": "Falha ao atualizar o trigger: {{errorMessage}}",
         "deleteTriggerFailed": "Falha ao apagar o trigger: {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Gestão do Papel de Visualizador",
+      "desc": "Gerir papéis de visualizador customizados e as suas permissões de acesso para esta instância do Frigate."
+    },
+    "addRole": "Adicionar Papel",
+    "table": {
+      "role": "Papel",
+      "cameras": "Câmaras",
+      "actions": "Ações",
+      "noRoles": "Nenhum papel customizado encontrado.",
+      "editCameras": "Editar Câmaras",
+      "deleteRole": "Apagar Papel"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Papel {{role}} criado com sucesso",
+        "updateCameras": "Câmaras atualizados para o papel {{role}}",
+        "deleteRole": "Papel {{role}} apagado com sucesso",
+        "userRolesUpdated": "{{count}} utilizador(os) atribuídos a este papel foram atualizados para 'visualizador', que possui acesso a todas as câmaras."
+      },
+      "error": {
+        "createRoleFailed": "Falha ao criar papel: {{errorMessage}}",
+        "updateCamerasFailed": "Falha ao atualizar câmaras: {{errorMessage}}",
+        "deleteRoleFailed": "Falha ao apagar papel: {{errorMessage}}",
+        "userUpdateFailed": "Falha ao atualizar papel do utilizador: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Criar Novo Papel",
+        "desc": "Adicionar um novo papel e especificar permissões de acesso."
+      },
+      "editCameras": {
+        "title": "Editar Câmaras de Papéis",
+        "desc": "Atualizar acesso da câmara para o papel <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Apagar Papel",
+        "desc": "Esta ação não pode ser desfeita. Isto irá apagar permanentemente o papel e atribuir a quaisquer utilizadores com este papel como 'visualizador', o que dará acesso de visualização para todas as câmaras.",
+        "warn": "Tem certeza que quer apagar <strong>{{role}}</strong>?",
+        "deleting": "A apagar…"
+      },
+      "form": {
+        "role": {
+          "title": "Nome do Papel",
+          "placeholder": "Digitar nome do papel",
+          "desc": "Apenas letras, números, pontos e sublinhados são permitidos.",
+          "roleIsRequired": "Nome para o papel é requerido",
+          "roleOnlyInclude": "O nome do papel pode conter apenas letras, números, pontos ou sublinhados",
+          "roleExists": "Um papel com este nome já existe."
+        },
+        "cameras": {
+          "title": "Câmaras",
+          "desc": "Selecione as câmaras que este papel terá acesso. Ao menos uma câmara é requerida.",
+          "required": "Ao menos uma câmara deve ser selecionada."
+        }
       }
     }
   }
