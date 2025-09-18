@@ -18,7 +18,16 @@
       }
     },
     "actions": {
-      "notification": "통지 전송"
+      "notification": "알림 전송"
+    }
+  },
+  "documentTitle": {
+    "default": "설정 - Frigate",
+    "authentication": "인증 설정 - Frigate"
+  },
+  "users": {
+    "table": {
+      "actions": "액션"
     }
   }
 }

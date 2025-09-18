@@ -1,1 +1,6 @@
-{}
+{
+  "restart": {
+    "title": "Frigate를 정말로 다시 시작할까요?",
+    "button": "재시작"
+  }
+}
