@@ -16,8 +16,8 @@ target rootfs {
   target = "rootfs"
 }
 
-target synap1680 {
-  dockerfile = "docker/synap1680/Dockerfile"
+target synaptics {
+  dockerfile = "docker/synaptics/Dockerfile"
   contexts = {
     wheels = "target:wheels",
     deps = "target:deps",

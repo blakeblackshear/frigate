@@ -429,13 +429,13 @@ cameras:
 
 :::
 
-## Synaptics SL1680
+## Synaptics
 
-Hardware accelerated video de-/encoding is supported on Synpatics SL1680 SoC.
+Hardware accelerated video de-/encoding is supported on Synpatics SL-series SoC.
 
 ### Prerequisites
 
-Make sure to follow the [Synap1680 specific installation instructions](/frigate/installation#synaptics-sl1680).
+Make sure to follow the [Synaptics specific installation instructions](/frigate/installation#synaptics).
 
 ### Configuration
 
@@ -451,8 +451,6 @@ output_args:
 
 :::warning
 
-Make sure that your SoC supports hardware acceleration for your input stream and your stream input is h264 encoding. For example, if your camera streams with h264 encoding, your SoC must be able to de- and encode with it. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
+Make sure that your SoC supports hardware acceleration for your input stream and your input stream is h264 encoding. For example, if your camera streams with h264 encoding, your SoC must be able to de- and encode with it. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
 
 :::
-
-```

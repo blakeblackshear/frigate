@@ -185,11 +185,13 @@ or add these options to your `docker run` command:
 
 Next, you should configure [hardware object detection](/configuration/object_detectors#rockchip-platform) and [hardware video processing](/configuration/hardware_acceleration_video#rockchip-platform).
 
-### Synaptics SL1680
+### Synaptics
+
+- SL1680
 
 #### Setup
 
-Follow Frigate's default installation instructions, but use a docker image with `-synap1680` suffix for example `ghcr.io/blakeblackshear/frigate:stable-synap1680`.
+Follow Frigate's default installation instructions, but use a docker image with `-synaptics` suffix for example `ghcr.io/blakeblackshear/frigate:stable-synaptics`.
 
 Next, you need to grant docker permissions to access your hardware:
 
@@ -212,7 +214,7 @@ or add these options to your `docker run` command:
 
 #### Configuration
 
-Next, you should configure [hardware object detection](/configuration/object_detectors#synaptics-sl1680) and [hardware video processing](/configuration/hardware_acceleration_video#synaptics-sl1680).
+Next, you should configure [hardware object detection](/configuration/object_detectors#synaptics) and [hardware video processing](/configuration/hardware_acceleration_video#synaptics).
 
 ## Docker
 

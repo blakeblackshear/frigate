@@ -90,20 +90,20 @@ Frigate supports multiple different detectors that work on different types of ha
   - Runs best with tiny or small size models
   - Runs efficiently on low power hardware
 
-**Synaptics SL1680**
+**Synaptics**
 
-- [Synaptics SL1680](#synaptics-sl1680): synap models can run on Synaptics devices(e.g astra machina) with included NPUs to provide efficient object detection.
+- [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs to provide efficient object detection.
 
 :::
 
-### Synaptics SL1680
+### Synaptics
 
-- **Synaptics SL1680** Default model is **mobilenet**
+- **Synaptics** Default model is **mobilenet**
 
 | Name             | Synaptics SL1680 Inference Time |
 | ---------------- | ------------------------------- |
 | ssd mobilenet    | ~ 25 ms                         |
-| yolov5n          | ~ 118 ms                        |
+| yolov5m          | ~ 118 ms                        |
 
 ### Hailo-8
 

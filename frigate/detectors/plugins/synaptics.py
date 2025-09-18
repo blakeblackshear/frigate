@@ -1,3 +1,4 @@
+import os
 import logging
 
 from typing_extensions import Literal
@@ -13,7 +14,7 @@ from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 
 logger = logging.getLogger(__name__)
 
-DETECTOR_KEY = "synap1680"
+DETECTOR_KEY = "synaptics"
 
 
 class SynapDetectorConfig(BaseDetectorConfig):
