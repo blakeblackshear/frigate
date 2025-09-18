@@ -60,7 +60,7 @@
     "title": "{{camera}} Ayarları",
     "autotracking": "Otomatik Takip",
     "cameraEnabled": "Kamera Açık",
-    "objectDetection": "Nesne Algılama",
+    "objectDetection": "Nesne Tespiti",
     "audioDetection": "Ses Algılama",
     "transcription": "Ses Çözümlemesi"
   },
