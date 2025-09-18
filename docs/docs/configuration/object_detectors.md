@@ -40,6 +40,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
 
+**Synaptics SL1680**
+
+- [Synap](#synaptics-sl1680): synap models can run on Synaptics devices(e.g astra machina) with included NPUs.
+
 **For Testing**
 
 - [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
@@ -836,6 +840,35 @@ model:
   input_pixel_format: rgb
   width: 320 # MUST match the chosen model i.e yolov7-320 -> 320, yolov4-416 -> 416
   height: 320 # MUST match the chosen model i.e yolov7-320 -> 320 yolov4-416 -> 416
+```
+
+## Synaptics SL1680
+
+Hardware accelerated object detection is supported on the following SoCs:
+
+- SL1680
+
+This implementation uses the [SL1680 model conversion](https://synaptics-synap.github.io/doc/v/latest/docs/manual/introduction.html#offline-model-conversion), version v3.1.0.
+
+See the [installation docs](../frigate/installation.md#synaptics-sl1680) for information on configuring the SL1680 NPU hardware.
+
+### Configuration
+
+When configuring the Synap detector, you have to specify the model: a local **path**.
+
+#### SSD
+
+Use this configuration for ssd models. Here's a default pre-converted ssd model under the root folder.
+
+```yaml
+detectors:
+  synap_npu:
+    type: synap1680
+
+model:
+  path: /model.synap
+  width: 224
+  height: 224
 ```
 
 ## Rockchip platform

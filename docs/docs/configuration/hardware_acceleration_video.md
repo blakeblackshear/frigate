@@ -428,3 +428,31 @@ cameras:
 ```
 
 :::
+
+## Synaptics SL1680
+
+Hardware accelerated video de-/encoding is supported on Synpatics SL1680 SoC.
+
+### Prerequisites
+
+Make sure to follow the [Synap1680 specific installation instructions](/frigate/installation#synaptics-sl1680).
+
+### Configuration
+
+Add one of the following FFmpeg presets to your `config.yml` to enable hardware video processing:
+
+```yaml
+ffmpeg:
+  hwaccel_args: -c:v h264_v4l2m2m
+  input_args: preset-rtsp-restream
+output_args:
+  record: preset-record-generic-audio-aac
+```
+
+:::warning
+
+Make sure that your SoC supports hardware acceleration for your input stream and your stream input is h264 encoding. For example, if your camera streams with h264 encoding, your SoC must be able to de- and encode with it. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
+
+:::
+
+```
