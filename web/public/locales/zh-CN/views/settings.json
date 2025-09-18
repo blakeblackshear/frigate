@@ -22,7 +22,8 @@
     "users": "用户",
     "notifications": "通知",
     "frigateplus": "Frigate+",
-    "enrichments": "增强功能"
+    "enrichments": "增强功能",
+    "triggers": "触发器"
   },
   "dialog": {
     "unsavedChanges": {
@@ -214,7 +215,8 @@
       },
       "toast": {
         "success": "摄像头 {{cameraName}} 保存已保存"
-      }
+      },
+      "nameLength": "摄像头名称必须少于24个字符。"
     }
   },
   "masksAndZones": {
@@ -466,7 +468,8 @@
       "score": "分值",
       "currentRMS": "当前均方根值（RMS）",
       "currentdbFS": "当前满量程相对分贝值（dbFS）"
-    }
+    },
+    "openCameraWebUI": "打开 {{camera}} 的管理页面"
   },
   "users": {
     "title": "用户",
@@ -559,7 +562,8 @@
           "viewer": "成员",
           "viewerDesc": "仅能够查看实时监控面板、核查、浏览和导出功能。",
           "adminDesc": "完全功能与访问权限。",
-          "intro": "为该用户选择一个合适的权限组："
+          "intro": "为该用户选择一个合适的权限组：",
+          "customDesc": "自定义特定摄像头的访问规则。"
         },
         "select": "选择权限组"
       }
@@ -819,6 +823,64 @@
         "createTriggerFailed": "创建触发器失败：{{errorMessage}}",
         "updateTriggerFailed": "更新触发器失败：{{errorMessage}}",
         "deleteTriggerFailed": "删除触发器失败：{{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "成员权限组管理",
+      "desc": "管理此 Frigate 实例的自定义权限组及其摄像头访问权限。"
+    },
+    "addRole": "添加权限组",
+    "table": {
+      "role": "权限组",
+      "cameras": "摄像头",
+      "actions": "操作",
+      "noRoles": "没有找到自定义权限组。",
+      "editCameras": "编辑摄像头",
+      "deleteRole": "删除权限组"
+    },
+    "toast": {
+      "success": {
+        "createRole": "权限组 {{role}} 创建成功",
+        "updateCameras": "已更新摄像头至 {{role}} 权限组",
+        "deleteRole": "已删除 {{role}} 权限组",
+        "userRolesUpdated": "已将分配到此权限组的 {{count}} 位用户更新为 “成员”，该权限组可访问所有摄像头。"
+      },
+      "error": {
+        "createRoleFailed": "创建权限组失败：{{errorMessage}}",
+        "updateCamerasFailed": "更新摄像头失败：{{errorMessage}}",
+        "deleteRoleFailed": "删除权限组失败：{{errorMessage}}",
+        "userUpdateFailed": "更新用户权限组失败：{{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "创建新权限组",
+        "desc": "添加新权限组并分配摄像头访问权限。"
+      },
+      "editCameras": {
+        "title": "编辑权限组的摄像头",
+        "desc": "为权限组 <strong>{{role}}</strong> 更新摄像头访问权限。"
+      },
+      "deleteRole": {
+        "title": "删除权限组",
+        "desc": "此操作无法撤销。这将永久删除该权限组，并将所有拥有此角色的用户分配到 “成员” 权限组，该权限组将赋予用户查看所有摄像头的权限。",
+        "warn": "你确定要删除权限组 <strong>{{role}}</strong> 吗？",
+        "deleting": "删除中…"
+      },
+      "form": {
+        "role": {
+          "title": "权限组名称",
+          "placeholder": "输入权限组名称",
+          "desc": "仅允许使用字母、数字、句点和下划线。",
+          "roleIsRequired": "必须输入权限组名称",
+          "roleOnlyInclude": "权限组名称仅支持字母、数字、英文句号和下划线",
+          "roleExists": "该权限组名称已存在。"
+        },
+        "cameras": {
+          "title": "摄像头"
+        }
       }
     }
   }
