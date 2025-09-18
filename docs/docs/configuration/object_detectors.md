@@ -863,7 +863,7 @@ Use this configuration for ssd models. Here's a default pre-converted ssd model 
 ```yaml
 detectors:
   synap_npu:
-    type: synap
+    type: synaptics
 
 model:
   path: /model.synap
