@@ -375,7 +375,7 @@ class TestHttpApp(BaseTestHttp):
             stats_emitter = Mock(spec=StatsEmitter)
             stats_emitter.get_latest_stats.return_value = self.test_stats
             self.app.stats_emitter = stats_emitter
-            event = client.get(f"/metrics")
+            event = client.get("/metrics")
 
         assert "# TYPE frigate_detection_total_fps gauge" in event.text
         assert "frigate_detection_total_fps 13.7" in event.text
