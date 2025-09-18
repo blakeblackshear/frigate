@@ -193,6 +193,14 @@
     "viewObjectLifecycle": {
       "label": "Zobrazit životní cyklus objektu",
       "aria": "Ukázat životní cyklus objektu"
+    },
+    "addTrigger": {
+      "label": "Přidat spouštěč",
+      "aria": "Přidat spouštěč pro tento sledovaný objekt"
+    },
+    "audioTranscription": {
+      "label": "Přepsat",
+      "aria": "Požádat o přepis zvukového záznamu"
     }
   },
   "dialog": {
@@ -210,5 +218,11 @@
   },
   "noTrackedObjects": "Žádné sledované objekty nebyly nalezeny",
   "fetchingTrackedObjectsFailed": "Chyba při načítání sledovaných objektů: {{errorMessage}}",
-  "exploreMore": "Prozkoumat více {{label}} objektů"
+  "exploreMore": "Prozkoumat více {{label}} objektů",
+  "aiAnalysis": {
+    "title": "Analýza AI"
+  },
+  "concerns": {
+    "label": "Obavy"
+  }
 }
