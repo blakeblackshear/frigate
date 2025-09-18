@@ -6,7 +6,7 @@
       "startingUp": "Startar upp…",
       "estimatedTime": "Beräknad återstående tid:",
       "finishingShortly": "Snart klar",
-      "context": "Utforska kan användas efter att spårade objektinbäddningar har slutförts omindexering.",
+      "context": "Utforskaren kan användas efter inbäddade spårade objekt har slutat återindexerat.",
       "step": {
         "thumbnailsEmbedded": "Miniatyrbilder inbäddad: ",
         "descriptionsEmbedded": "Beskrivningar inbäddade: ",

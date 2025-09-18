@@ -9,7 +9,7 @@
     "enrichments": "Förbättringsinställningar - Frigate",
     "frigatePlus": "Frigate+ Inställningar - Frigate",
     "notifications": "Notifikations Inställningar - Frigate",
-    "motionTuner": "Rörelsetuner - Frigate",
+    "motionTuner": "Rörelse inställning - Frigate",
     "object": "Felsöka - Frigate"
   },
   "general": {
@@ -362,7 +362,459 @@
     },
     "objectMasks": {
       "label": "Objektmasker",
-      "documentTitle": "Redigera objektmask - Frigate"
+      "documentTitle": "Redigera objektmask - Frigate",
+      "point_one": "{{count}} poäng",
+      "point_other": "{{count}} poäng",
+      "desc": {
+        "title": "Objektfiltermasker används för att filtrera bort falska positiva resultat för en given objekttyp baserat på plats.",
+        "documentation": "Dokumentation"
+      },
+      "add": "Lägg till objektmask",
+      "edit": "Redigera objektmask",
+      "context": "Objektfiltermasker används för att filtrera bort falska positiva resultat för en given objekttyp baserat på plats.",
+      "clickDrawPolygon": "Klicka för att rita en polygon på bilden.",
+      "objects": {
+        "title": "Objekt",
+        "desc": "Objekttypen som gäller för den här objektmasken.",
+        "allObjectTypes": "Alla objekttyper"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} har sparats. Starta om Frigate för att tillämpa ändringarna.",
+          "noName": "Objektmasken har sparats. Starta om Frigate för att tillämpa ändringarna."
+        }
+      }
+    }
+  },
+  "motionDetectionTuner": {
+    "title": "Rörelsedetekteringstuner",
+    "unsavedChanges": "Osparade ändringar i Motion Tuner ({{camera}})",
+    "desc": {
+      "title": "Frigate använder rörelsedetektering som en första kontroll för att se om det händer något i bilden som är värt att kontrollera med objektdetektering.",
+      "documentation": "Läs guiden för rörelsejustering"
+    },
+    "Threshold": {
+      "title": "Tröskel",
+      "desc": "Tröskelvärdet anger hur mycket förändring i en pixels luminans som krävs för att betraktas som rörelse. <em>Standard: 30</em>"
+    },
+    "contourArea": {
+      "title": "Konturområde",
+      "desc": "Konturareans värde används för att avgöra vilka grupper av ändrade pixlar som kvalificeras som rörelse. <em>Standard: 10</em>"
+    },
+    "improveContrast": {
+      "title": "Förbättra kontrasten",
+      "desc": "Förbättra kontrasten för mörkare scener. <em>Standard: PÅ</em>"
+    },
+    "toast": {
+      "success": "Rörelseinställningarna har sparats."
+    }
+  },
+  "debug": {
+    "title": "Felsök",
+    "detectorDesc": "Fregate använder dina detektorer ({{detectors}}) för att upptäcka objekt i din kameras videoström.",
+    "desc": "Felsökningsvyn visar en realtidsvy av spårade objekt och deras statistik. Objektlistan visar en tidsfördröjd sammanfattning av upptäckta objekt.",
+    "openCameraWebUI": "Öppna {{camera}}s webbgränssnitt",
+    "debugging": "Felsökning",
+    "objectList": "Objektlista",
+    "noObjects": "Inga föremål",
+    "audio": {
+      "title": "Ljud",
+      "noAudioDetections": "Inga ljuddetekteringar",
+      "score": "betyg",
+      "currentRMS": "Nuvarande RMS",
+      "currentdbFS": "Nuvarande dbFS"
+    },
+    "boundingBoxes": {
+      "title": "Avgränsande rutor",
+      "desc": "Visa avgränsningsrutor runt spårade objekt",
+      "colors": {
+        "label": "Färger för objektgränser",
+        "info": "<li>Vid uppstart tilldelas olika färger till varje objektetikett</li><li>En mörkblå tunn linje indikerar att objektet inte detekteras vid denna aktuella tidpunkt</li><li>En grå tunn linje indikerar att objektet detekteras som stillastående</li><li>En tjock linje indikerar att objektet är föremål för automatisk spårning (när det är aktiverat)</li>"
+      }
+    },
+    "timestamp": {
+      "title": "Tidsstämpel",
+      "desc": "Lägg en tidsstämpel över bilden"
+    },
+    "zones": {
+      "title": "Zoner",
+      "desc": "Visa en översikt över alla definierade zoner"
+    },
+    "mask": {
+      "title": "Rörelsemasker",
+      "desc": "Visa rörelsemaskpolygoner"
+    },
+    "motion": {
+      "title": "Rörelseboxar",
+      "desc": "Visa rutor runt områden där rörelse detekteras",
+      "tips": "<p><strong>Rörelserutor</strong></p><br><p>Röda rutor kommer att läggas över områden i bilden där rörelse för närvarande detekteras</p>"
+    },
+    "regions": {
+      "title": "Regioner",
+      "desc": "Visa en ruta med det intresseområde som skickats till objektdetektorn",
+      "tips": "<p><strong>Regionsrutor</strong></p><br><p>Ljusgröna rutor kommer att läggas över intressanta områden i bilden som skickas till objektdetektorn.</p>"
+    },
+    "paths": {
+      "title": "Vägar",
+      "desc": "Visa viktiga punkter i det spårade objektets bana",
+      "tips": "<p><strong>Vägar</strong></p><br><p>Linjer och cirklar indikerar viktiga punkter som det spårade objektet har flyttat under sin livscykel.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Ritning av objektformfilter",
+      "desc": "Rita en rektangel på bilden för att visa detaljer om area och förhållande",
+      "tips": "Aktivera det här alternativet för att rita en rektangel på kamerabilden för att visa dess area och förhållande. Dessa värden kan sedan användas för att ställa in parametrar för objektformsfilter i din konfiguration.",
+      "score": "Betyg",
+      "ratio": "Förhållandet",
+      "area": "Område"
+    }
+  },
+  "users": {
+    "title": "Användare",
+    "management": {
+      "title": "Användarhantering",
+      "desc": "Hantera användarkonton för denna Frigate-instans."
+    },
+    "addUser": "Lägg till användare",
+    "updatePassword": "Uppdatera lösenord",
+    "toast": {
+      "success": {
+        "createUser": "Användaren {{user}} har skapats",
+        "deleteUser": "Användaren {{user}} har raderats",
+        "updatePassword": "Lösenordet har uppdaterats.",
+        "roleUpdated": "Rollen uppdaterades för {{user}}"
+      },
+      "error": {
+        "setPasswordFailed": "Misslyckades med att spara lösenordet: {{errorMessage}}",
+        "createUserFailed": "Misslyckades med att skapa användare: {{errorMessage}}",
+        "deleteUserFailed": "Misslyckades med att ta bort användaren: {{errorMessage}}",
+        "roleUpdateFailed": "Misslyckades med att uppdatera rollen: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Användarnamn",
+      "actions": "Åtgärder",
+      "role": "Roll",
+      "noUsers": "Inga användare hittades.",
+      "changeRole": "Ändra användarroll",
+      "password": "Lösenord",
+      "deleteUser": "Ta bort användare"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Användarnamn",
+          "desc": "Endast bokstäver, siffror, punkter och understreck är tillåtna.",
+          "placeholder": "Ange användarnamn"
+        },
+        "password": {
+          "title": "Lösenord",
+          "strength": {
+            "title": "Lösenordsstyrka: ",
+            "weak": "Svag",
+            "medium": "Mellanstark",
+            "strong": "Stark",
+            "veryStrong": "Mycket stark"
+          },
+          "match": "Lösenorden matchar",
+          "notMatch": "Lösenorden matchar inte",
+          "placeholder": "Ange lösenord",
+          "confirm": {
+            "title": "Bekräfta lösenord",
+            "placeholder": "Bekräfta lösenord"
+          }
+        },
+        "newPassword": {
+          "title": "Nytt lösenord",
+          "placeholder": "Ange nytt lösenord",
+          "confirm": {
+            "placeholder": "Ange nytt lösenord igen"
+          }
+        },
+        "usernameIsRequired": "Användarnamn krävs",
+        "passwordIsRequired": "Lösenord krävs"
+      },
+      "createUser": {
+        "title": "Skapa ny användare",
+        "desc": "Lägg till ett nytt användarkonto och ange en roll för åtkomst till områden i Frigate gränssnittet.",
+        "usernameOnlyInclude": "Användarnamnet får endast innehålla bokstäver, siffror, . eller _",
+        "confirmPassword": "Vänligen bekräfta ditt lösenord"
+      },
+      "deleteUser": {
+        "title": "Ta bort användare",
+        "desc": "Den här åtgärden kan inte ångras. Detta kommer att permanent radera användarkontot och all tillhörande data.",
+        "warn": "Är du säker på att du vill ta bort <strong>{{username}}</strong>?"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Lösenordet får inte vara tomt",
+        "doNotMatch": "Lösenorden matchar inte",
+        "updatePassword": "Uppdatera lösenord för {{username}}",
+        "setPassword": "Ange lösenord",
+        "desc": "Skapa ett starkt lösenord för att säkra det här kontot."
+      },
+      "changeRole": {
+        "title": "Ändra användarroll",
+        "select": "Välj en roll",
+        "desc": "Uppdatera behörigheter för <strong>{{username}}</strong>",
+        "roleInfo": {
+          "intro": "Välj lämplig roll för den här användaren:",
+          "admin": "Administratör",
+          "adminDesc": "Full åtkomst till alla funktioner.",
+          "viewer": "Åskådare",
+          "viewerDesc": "Begränsat till Live-dashboards, Review, Explore, och Exports bara.",
+          "customDesc": "Anpassad roll med specifik kameraåtkomst."
+        }
+      }
+    }
+  },
+  "notification": {
+    "title": "Aviseringar",
+    "notificationSettings": {
+      "title": "Aviseringsinställningar",
+      "desc": "Frigate kan skicka push-notiser till din enhet när den körs i webbläsare eller installerad som PWA."
+    },
+    "globalSettings": {
+      "title": "Övergripande inställningar",
+      "desc": "Stäng tillfälligt av aviseringar för specifika kameror på alla registrerade enheter."
+    },
+    "email": {
+      "title": "E-post",
+      "placeholder": "t.ex. exempel@epost.se",
+      "desc": "En giltig e-postadress krävs och kommer att användas för att meddela dig om det uppstår problem med push-tjänsten."
+    },
+    "cameras": {
+      "title": "Kameror",
+      "noCameras": "Inga kameror tillgängliga",
+      "desc": "Välj vilka kameror som notifikationer ska aktiveras för."
+    },
+    "unregisterDevice": "Avregistrera enheten",
+    "sendTestNotification": "Skicka testnotis",
+    "active": "Notifieringar aktiva",
+    "notificationUnavailable": {
+      "title": "Meddelanden otillgängliga",
+      "desc": "Webb push-meddelanden kräver en säker kontext (<code>https://…</code>). Detta är en begränsning i webbläsaren. Få säker åtkomst till Frigate för att använda meddelanden."
+    },
+    "deviceSpecific": "Enhetsspecifika inställningar",
+    "registerDevice": "Registrera den här enheten",
+    "unsavedRegistrations": "Osparade aviseringsregistreringar",
+    "unsavedChanges": "Osparade ändringar till aviseringar",
+    "suspended": "Aviseringar avstängda {{time}}",
+    "suspendTime": {
+      "suspend": "Pausa",
+      "5minutes": "Pausa i 5 minuter",
+      "10minutes": "Pausa i 10 minuter",
+      "30minutes": "Pausa i 30 minuter",
+      "1hour": "Pausa i 1 timme",
+      "12hours": "Pausa i 12 timmar",
+      "24hours": "Pausa i 24 timmar",
+      "untilRestart": "Pausa tills omstart"
+    },
+    "cancelSuspension": "Avbryt pausning",
+    "toast": {
+      "success": {
+        "registered": "Registreringen för aviseringar har lyckats. Omstart av Frigate krävs innan några aviseringar (inklusive en testavisering) kan skickas.",
+        "settingSaved": "Aviseringsinställningarna har sparats."
+      },
+      "error": {
+        "registerFailed": "Det gick inte att spara aviseringsregistreringen."
+      }
+    }
+  },
+  "roles": {
+    "addRole": "Lägg till roll",
+    "table": {
+      "role": "Roll",
+      "cameras": "Kameror",
+      "noRoles": "Inga anpassade roller hittades.",
+      "editCameras": "Redigera kameror",
+      "deleteRole": "Radera roll",
+      "actions": "Åtgärder"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Roll {{role}} skapad",
+        "updateCameras": "Kameror uppdaterade för roll {{role}}",
+        "deleteRole": "Roll {{role}} raderad",
+        "userRolesUpdated": "{{count}} användare som tilldelats den här rollen har uppdaterats till 'tittare', vilket har åtkomst till alla kameror."
+      },
+      "error": {
+        "createRoleFailed": "Misslyckades att skapa roll: {{errorMessage}}",
+        "updateCamerasFailed": "Misslyckades att uppdatera kameror: {{errorMessage}}",
+        "deleteRoleFailed": "Misslyckades att radera roll: {{errorMessage}}",
+        "userUpdateFailed": "Misslyckades att uppdatera användar-roller: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Skapa ny roll",
+        "desc": "Skapa en ny roll och ange kamera åtkomstbehörigheter."
+      },
+      "deleteRole": {
+        "title": "Radera roll",
+        "deleting": "Raderar...",
+        "desc": "Den här åtgärden kan inte ångras. Detta kommer att ta bort rollen permanent och tilldela alla användare med rollen 'tittare', vilket ger tittaren åtkomst till alla kameror.",
+        "warn": "Är du säker på att du vill ta bort <strong>{{role}}</strong>?"
+      },
+      "form": {
+        "role": {
+          "placeholder": "Ange rollens namn",
+          "desc": "Enbart bokstäver, siffror, punkter och understreck tillåtna.",
+          "roleIsRequired": "Rollens namn krävs",
+          "roleExists": "En roll med detta namn finns redan.",
+          "title": "Rollnamn",
+          "roleOnlyInclude": "Rollnamnet får endast innehålla bokstäver, siffror, . eller _"
+        },
+        "cameras": {
+          "title": "Kameror",
+          "required": "Minst en kamera måste väljas.",
+          "desc": "Välj kameror som den här rollen har åtkomst till. Minst en kamera krävs."
+        }
+      },
+      "editCameras": {
+        "title": "Redigera rollkameror",
+        "desc": "Uppdatera kameraåtkomst för rollen <strong>{{role}}</strong>."
+      }
+    },
+    "management": {
+      "title": "Hantering av tittarroller",
+      "desc": "Hantera anpassade tittarroller och deras kameraåtkomstbehörigheter för den här Frigate instansen."
+    }
+  },
+  "frigatePlus": {
+    "title": "Frigate+ Inställningar",
+    "apiKey": {
+      "notValidated": "Frigate+ API-nyckeln upptäcktes inte eller validerades inte",
+      "desc": "Frigate+ API-nyckeln möjliggör integration med Frigate+-tjänsten.",
+      "plusLink": "Läs mer om Frigate+",
+      "title": "Frigate+ API-nyckel",
+      "validated": "Frigate+ API-nyckeln har upptäckts och validerats"
+    },
+    "snapshotConfig": {
+      "title": "Ögonblicksbild konfiguration",
+      "desc": "Att skicka till Frigate+ kräver att både snapshots och <code>clean_copy</code> snapshots är aktiverade i din konfiguration.",
+      "cleanCopyWarning": "Vissa kameror har aktiverade ögonblicksbilder men har ren kopia inaktiverad. Du måste aktivera <code>clean_copy</code> i din ögonblicksbild konfiguration för att kunna skicka bilder från dessa kameror till Frigate+.",
+      "table": {
+        "camera": "Kamera",
+        "snapshots": "Ögonblicksbilder",
+        "cleanCopySnapshots": "<code>clean_copy</code> Ögonblicksbilder"
+      }
+    },
+    "modelInfo": {
+      "title": "Modellinformation",
+      "modelType": "Modelltyp",
+      "trainDate": "Träningsdatum",
+      "baseModel": "Basmodell",
+      "plusModelType": {
+        "baseModel": "Basmodell",
+        "userModel": "Finjusterad"
+      },
+      "supportedDetectors": "Detektorer som stöds",
+      "cameras": "Kameror",
+      "loading": "Laddar modellinformation…",
+      "error": "Misslyckades med att ladda modellinformationen",
+      "availableModels": "Tillgängliga modeller",
+      "loadingAvailableModels": "Laddar tillgängliga modeller…",
+      "modelSelect": "Dina tillgängliga modeller på Frigate+ kan väljas här. Observera att endast modeller som är kompatibla med din nuvarande detektorkonfiguration kan väljas."
+    },
+    "unsavedChanges": "Osparade ändringar av inställningar för Frigate+",
+    "restart_required": "Omstart krävs (Frigate+ modell ändrad)",
+    "toast": {
+      "success": "Inställningarna för Frigate+ har sparats. Starta om Frigate för att tillämpa ändringarna.",
+      "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Utlösare",
+    "management": {
+      "title": "Utlösare hantering",
+      "desc": "Hantera utlösare för {{camera}}. Använd miniatyrtypen för att utlösa liknande miniatyrer som ditt valda spårade objekt och beskrivningstypen för att utlösa liknande beskrivningar av text du anger."
+    },
+    "addTrigger": "Lägg till utlösare",
+    "table": {
+      "name": "Namn",
+      "type": "Typ",
+      "content": "Innehåll",
+      "threshold": "Tröskel",
+      "actions": "Åtgärder",
+      "noTriggers": "Inga utlösare konfigurerade för den här kameran.",
+      "edit": "Redigera",
+      "deleteTrigger": "Ta bort utlösare",
+      "lastTriggered": "Senast utlöst"
+    },
+    "type": {
+      "thumbnail": "Miniatyrbild",
+      "description": "Beskrivning"
+    },
+    "actions": {
+      "notification": "Skicka avisering",
+      "alert": "Markera som varning"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Skapa utlösare",
+        "desc": "Skapa en utlösare för kamera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Redigera utlösare",
+        "desc": "Redigera inställningarna för utlösare på kameran {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Ta bort utlösare",
+        "desc": "Är du säker på att du vill ta bort utlösaren <strong>{{triggerName}}</strong>? Den här åtgärden kan inte ångras."
+      },
+      "form": {
+        "name": {
+          "title": "Namn",
+          "placeholder": "Ange utlösarens namn",
+          "error": {
+            "minLength": "Namnet måste vara minst 2 tecken lång.",
+            "invalidCharacters": "Namnet får bara innehålla bokstäver, siffror, understreck, och bindestreck.",
+            "alreadyExists": "En utlösare med detta namn finns redan för den här kameran."
+          }
+        },
+        "enabled": {
+          "description": "Aktivera eller inaktivera den här utlösaren"
+        },
+        "type": {
+          "title": "Typ",
+          "placeholder": "Välj utlösartyp"
+        },
+        "content": {
+          "title": "Innehåll",
+          "imagePlaceholder": "Välj en bild",
+          "textPlaceholder": "Ange textinnehåll",
+          "imageDesc": "Välj en bild för att utlösa den här åtgärden när en liknande bild upptäcks.",
+          "textDesc": "Ange text för att utlösa den här åtgärden när en liknande beskrivning av spårat objekt upptäcks.",
+          "error": {
+            "required": "Innehåll krävs."
+          }
+        },
+        "threshold": {
+          "title": "Tröskel",
+          "error": {
+            "min": "Tröskelvärdet måste vara minst 0",
+            "max": "Tröskelvärdet får vara högst 1"
+          }
+        },
+        "actions": {
+          "title": "Åtgärder",
+          "desc": "Som standard utlöser Frigate ett MQTT-meddelande för alla utlösare. Välj en ytterligare åtgärd att utföra när den här utlösaren utlöses.",
+          "error": {
+            "min": "Minst en åtgärd måste väljas."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Utlösaren {{name}} har skapats.",
+        "updateTrigger": "Utlösaren {{name}} har uppdaterats.",
+        "deleteTrigger": "Utlösaren {{name}} har raderats."
+      },
+      "error": {
+        "createTriggerFailed": "Misslyckades med att skapa utlösaren: {{errorMessage}}",
+        "updateTriggerFailed": "Misslyckades med att uppdatera utlösaren: {{errorMessage}}",
+        "deleteTriggerFailed": "Misslyckades med att ta bort utlösaren: {{errorMessage}}"
+      }
     }
   }
 }
