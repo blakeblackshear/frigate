@@ -384,18 +384,22 @@ def get_optimized_runner(
     model_path: str, device: str | None, complex_model: bool = True, **kwargs
 ) -> BaseModelRunner:
     """Get an optimized runner for the hardware."""
+    device = device or "AUTO"
     if is_rknn_compatible(model_path):
         rknn_path = auto_convert_model(model_path)
 
         if rknn_path:
             return RKNNModelRunner(rknn_path)
 
-    if device != "CPU" and is_openvino_gpu_npu_available():
-        return OpenVINOModelRunner(
-            model_path, device or "AUTO", complex_model, **kwargs
-        )
-
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
+
+    if providers[0] == "CPUExecutionProvider":
+        # In the default image, ONNXRuntime is used so we will only get CPUExecutionProvider
+        # In other images we will get CUDA / ROCm which are preferred over OpenVINO
+        # There is currently no way to prioritize OpenVINO over CUDA / ROCm in these images
+        if device != "CPU" and is_openvino_gpu_npu_available():
+            return OpenVINOModelRunner(model_path, device, complex_model, **kwargs)
+
     ortSession = ort.InferenceSession(
         model_path,
         providers=providers,
