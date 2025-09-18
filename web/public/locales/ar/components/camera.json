@@ -24,6 +24,28 @@
       "label": "الكاميرات",
       "desc": "اختر الكاميرات لهذه المجموعة."
     },
-    "icon": "أيقونة"
+    "icon": "أيقونة",
+    "camera": {
+      "setting": {
+        "streamMethod": {
+          "placeholder": "إختيار طريقة البث",
+          "method": {
+            "noStreaming": {
+              "label": "لايوجد بث",
+              "desc": "صور الكاميرا سيتم تحديثها مرة واحدة فقط كل دقيقة من دون بث حي."
+            },
+            "smartStreaming": {
+              "label": "البث الذكي (ينصح به)"
+            },
+            "continuousStreaming": {
+              "label": "بث متواصل"
+            }
+          }
+        }
+      }
+    }
+  },
+  "debug": {
+    "timestamp": "الختم الزمني"
   }
 }
