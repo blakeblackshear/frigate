@@ -20,7 +20,8 @@
     "debug": "除錯",
     "users": "使用者",
     "notifications": "通知",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "triggers": "觸發"
   },
   "dialog": {
     "unsavedChanges": {
