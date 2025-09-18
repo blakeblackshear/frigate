@@ -388,7 +388,8 @@
           "intro": "Seleziona il ruolo appropriato per questo utente:",
           "admin": "Amministratore",
           "adminDesc": "Accesso completo a tutte le funzionalità.",
-          "viewer": "Spettatore"
+          "viewer": "Spettatore",
+          "customDesc": "Ruolo personalizzato con accesso specifico alla telecamera."
         },
         "title": "Cambia ruolo utente",
         "desc": "Aggiorna i permessi per <strong>{{username}}</strong>",
@@ -827,6 +828,66 @@
         "createTriggerFailed": "Impossibile creare l'innesco: {{errorMessage}}",
         "updateTriggerFailed": "Impossibile aggiornare l'innesco: {{errorMessage}}",
         "deleteTriggerFailed": "Impossibile eliminare l'innesco: {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Gestione del ruolo di spettatore",
+      "desc": "Gestisci i ruoli di spettatori personalizzati e le relative autorizzazioni di accesso alla telecamera per questa istanza Frigate."
+    },
+    "addRole": "Aggiungi ruolo",
+    "table": {
+      "role": "Ruolo",
+      "cameras": "Telecamere",
+      "actions": "Azioni",
+      "noRoles": "Nessun ruolo personalizzato trovato.",
+      "editCameras": "Modifica telecamere",
+      "deleteRole": "Elimina ruolo"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Ruolo {{role}} creato con successo",
+        "updateCameras": "Telecamere aggiornate per il ruolo {{role}}",
+        "deleteRole": "Ruolo {{role}} eliminato con successo",
+        "userRolesUpdated": "{{count}} utenti assegnati a questo ruolo sono stati aggiornati a \"spettatore\", che ha accesso a tutte le telecamere."
+      },
+      "error": {
+        "createRoleFailed": "Impossibile creare il ruolo: {{errorMessage}}",
+        "updateCamerasFailed": "Impossibile aggiornare le telecamere: {{errorMessage}}",
+        "deleteRoleFailed": "Impossibile eliminare il ruolo: {{errorMessage}}",
+        "userUpdateFailed": "Impossibile aggiornare i ruoli utente: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Crea nuovo ruolo",
+        "desc": "Aggiungi un nuovo ruolo e specifica le autorizzazioni di accesso alla telecamera."
+      },
+      "editCameras": {
+        "title": "Modifica telecamere di ruolo",
+        "desc": "Aggiorna l'accesso alla telecamera per il ruolo <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Elimina ruolo",
+        "desc": "Questa azione non può essere annullata. Ciò eliminerà definitivamente il ruolo e assegnerà a tutti gli utenti il ruolo di 'spettatore', che darà loro accesso a tutte le telecamere.",
+        "warn": "Sei sicuro di voler eliminare <strong>{{role}}</strong>?",
+        "deleting": "Eliminazione in corso..."
+      },
+      "form": {
+        "role": {
+          "title": "Nome del ruolo",
+          "placeholder": "Inserisci il nome del ruolo",
+          "desc": "Sono consentiti solo lettere, numeri, punti e caratteri di sottolineatura.",
+          "roleIsRequired": "Il nome del ruolo è obbligatorio",
+          "roleOnlyInclude": "Il nome del ruolo può includere solo lettere, numeri, . o _",
+          "roleExists": "Esiste già un ruolo con questo nome."
+        },
+        "cameras": {
+          "title": "Telecamere",
+          "desc": "Seleziona le telecamere a cui questo ruolo ha accesso. È richiesta almeno una telecamera.",
+          "required": "È necessario selezionare almeno una telecamera."
+        }
       }
     }
   }
