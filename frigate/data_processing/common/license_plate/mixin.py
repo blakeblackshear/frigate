@@ -65,6 +65,7 @@ class LicensePlateProcessingMixin:
 
         # matching
         self.similarity_threshold = 0.8
+        self.cluster_threshold = 0.85
 
     def _detect(self, image: np.ndarray) -> List[np.ndarray]:
         """
@@ -1094,7 +1095,6 @@ class LicensePlateProcessingMixin:
                 f"  Variant {i + 1}: '{p['plate']}' (conf: {p['conf']:.3f}, area: {p['area']})"
             )
 
-        CLUSTER_THRESHOLD = 0.85
         clusters = []
         for i, plate in enumerate(plates):
             merged = False
@@ -1102,7 +1102,7 @@ class LicensePlateProcessingMixin:
                 sims = [jaro_winkler(plate["plate"], v["plate"]) for v in cluster]
                 if len(sims) > 0:
                     avg_sim = sum(sims) / len(sims)
-                    if avg_sim >= CLUSTER_THRESHOLD:
+                    if avg_sim >= self.cluster_threshold:
                         cluster.append(plate)
                         logger.debug(
                             f"  Merged variant {i + 1} '{plate['plate']}' (conf: {plate['conf']:.3f}) into cluster {j + 1} (avg_sim: {avg_sim:.3f})"
@@ -1493,11 +1493,13 @@ class LicensePlateProcessingMixin:
         self.detected_license_plates.setdefault(id, {"plates": [], "camera": camera})
         self.detected_license_plates[id]["plates"].append(variant)
 
-        # Prune old variants
-        if len(self.detected_license_plates[id]["plates"]) > 10:
+        # Prune old variants - this is probably higher than it needs to be
+        # since we don't detect a plate every frame
+        num_variants = self.config.cameras[camera].detect.fps * 5
+        if len(self.detected_license_plates[id]["plates"]) > num_variants:
             self.detected_license_plates[id]["plates"] = self.detected_license_plates[
                 id
-            ]["plates"][-10:]
+            ]["plates"][-num_variants:]
 
         # Cluster and select rep
         plates = self.detected_license_plates[id]["plates"]
