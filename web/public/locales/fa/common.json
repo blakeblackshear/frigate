@@ -1,1 +1,7 @@
-{}
+{
+  "time": {
+    "untilForTime": "تا {{time}}",
+    "untilForRestart": "تا زمانی که فریگیت دوباره شروع به کار کند.",
+    "untilRestart": "تا زمان ری‌استارت"
+  }
+}

@@ -1,1 +1,5 @@
-{}
+{
+  "noRecordingsFoundForThisTime": "ویدیویی برای این زمان وجود ندارد",
+  "noPreviewFound": "پیش‌نمایش پیدا نشد",
+  "noPreviewFoundFor": "هیچ پیش‌نمایشی برای  {{cameraName}} پیدا نشد"
+}
