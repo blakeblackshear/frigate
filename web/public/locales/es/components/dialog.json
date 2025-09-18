@@ -122,5 +122,12 @@
       "markAsReviewed": "Marcar como revisado",
       "deleteNow": "Eliminar ahora"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Seleccione la miniatura de un objeto rastreado",
+    "search": {
+      "placeholder": "Búsqueda por etiqueta o sub-etiqueta..."
+    },
+    "noImages": "No se encontraron miniaturas para esta cámara"
   }
 }
