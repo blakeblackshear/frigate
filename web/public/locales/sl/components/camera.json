@@ -50,7 +50,8 @@
         },
         "placeholder": "Izberite tok",
         "stream": "Tok"
-      }
+      },
+      "birdseye": "Ptičji pogled"
     },
     "name": {
       "label": "Ime",
