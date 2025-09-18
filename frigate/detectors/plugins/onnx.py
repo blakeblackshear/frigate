@@ -39,7 +39,7 @@ class ONNXDetector(DetectionApi):
         self.runner = get_optimized_runner(
             path,
             detector_config.device,
-            complex_model=False,
+            model_type=detector_config.model.model_type,
         )
 
         self.onnx_model_type = detector_config.model.model_type

@@ -6,8 +6,6 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import numpy as np
-from frigate.detectors.detector_types import ModelTypeEnum
-from frigate.embeddings.types import EnrichmentModelTypeEnum
 import onnxruntime as ort
 
 from frigate.util.model import get_ort_providers
@@ -105,6 +103,10 @@ class CudaGraphRunner(BaseModelRunner):
 
     @staticmethod
     def is_complex_model(model_type: str) -> bool:
+        # Import here to avoid circular imports
+        from frigate.detectors.detector_config import ModelTypeEnum
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+        
         return model_type in [
             ModelTypeEnum.yolonas.value,
             EnrichmentModelTypeEnum.paddleocr.value,
@@ -169,6 +171,9 @@ class OpenVINOModelRunner(BaseModelRunner):
 
     @staticmethod
     def is_complex_model(model_type: str) -> bool:
+        # Import here to avoid circular imports
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+        
         return model_type in [EnrichmentModelTypeEnum.paddleocr.value]
 
     def __init__(self, model_path: str, device: str, model_type: str, **kwargs):
