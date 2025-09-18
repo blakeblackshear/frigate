@@ -22,7 +22,8 @@
     "frigateplus": "Frigate+",
     "users": "Usuarios",
     "notifications": "Notificaciones",
-    "enrichments": "Análisis avanzado"
+    "enrichments": "Análisis avanzado",
+    "triggers": "Disparadores"
   },
   "dialog": {
     "unsavedChanges": {
@@ -214,7 +215,8 @@
       },
       "toast": {
         "success": "Cámara {{cameraName}} guardada con éxito"
-      }
+      },
+      "nameLength": "Nombre de cámara debe ser de mínimo 24 caracteres."
     }
   },
   "masksAndZones": {
@@ -465,6 +467,14 @@
       "title": "Rutas",
       "desc": "Mostrar puntos significativos de la ruta del objeto rastreado",
       "tips": "<p><strong>Rutas</strong></p><br><p>Líneas y círculos indicarán los puntos significativos por los que se ha movido el objeto rastreado durante su ciclo de vida.</p>"
+    },
+    "openCameraWebUI": "Abrir Web UI de {{camera}}",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "No hay detecciones de audio",
+      "score": "puntuación",
+      "currentRMS": "RMS actual",
+      "currentdbFS": "dbFS actual"
     }
   },
   "users": {

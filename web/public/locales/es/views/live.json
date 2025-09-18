@@ -42,7 +42,15 @@
         "label": "Haz clic en el marco para centrar la cámara PTZ"
       }
     },
-    "presets": "Preajustes de cámara PTZ"
+    "presets": "Preajustes de cámara PTZ",
+    "focus": {
+      "in": {
+        "label": "Enfocar camara PTZ"
+      },
+      "out": {
+        "label": "Desenfocar camara PTZ"
+      }
+    }
   },
   "camera": {
     "enable": "Habilitar cámara",
@@ -135,7 +143,8 @@
     "recording": "Grabación",
     "snapshots": "Capturas de pantalla",
     "autotracking": "Seguimiento automático",
-    "cameraEnabled": "Cámara habilitada"
+    "cameraEnabled": "Cámara habilitada",
+    "transcription": "Transcripción de audio"
   },
   "history": {
     "label": "Mostrar grabaciones históricas"
@@ -154,5 +163,9 @@
       "label": "Editar grupo de cámaras"
     },
     "exitEdit": "Salir de la edición"
+  },
+  "transcription": {
+    "enable": "Habilitar transcripción de audio en tiempo real",
+    "disable": "Deshabilitar transcripción de audio en tiempo real"
   }
 }
