@@ -5,12 +5,13 @@ from typing import Annotated
 from pydantic import AfterValidator, ValidationInfo
 
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
-# read docker secret files as env vars too
-if os.path.isdir("/run/secrets") and os.access("/run/secrets", os.R_OK):
-    for secret_file in os.listdir("/run/secrets"):
+secrets_dir = os.environ.get("CREDENTIALS_DIRECTORY", "/run/secrets")
+# read secret files as env vars too
+if os.path.isdir(secrets_dir) and os.access(secrets_dir, os.R_OK):
+    for secret_file in os.listdir(secrets_dir):
         if secret_file.startswith("FRIGATE_"):
             FRIGATE_ENV_VARS[secret_file] = (
-                Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
+                Path(os.path.join(secrets_dir, secret_file)).read_text().strip()
             )
 
 
