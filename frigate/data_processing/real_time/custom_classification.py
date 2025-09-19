@@ -39,7 +39,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         metrics: DataProcessorMetrics,
     ):
         super().__init__(config, metrics)
-        
+
         self.model_config = model_config
         self.requestor = requestor
         self.model_dir = os.path.join(MODEL_CACHE_DIR, self.model_config.name)
