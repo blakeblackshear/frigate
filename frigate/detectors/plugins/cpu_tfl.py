@@ -9,7 +9,6 @@ from frigate.log import redirect_output_to_logger
 
 from ..detector_utils import tflite_detect_raw, tflite_init
 
-
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "cpu"
