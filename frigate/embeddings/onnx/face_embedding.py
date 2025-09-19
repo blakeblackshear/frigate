@@ -14,11 +14,6 @@ from frigate.util.downloader import ModelDownloader
 from ...config import FaceRecognitionConfig
 from .base_embedding import BaseEmbedding
 
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter
-
 logger = logging.getLogger(__name__)
 
 ARCFACE_INPUT_SIZE = 112
@@ -61,6 +56,11 @@ class FaceNetEmbedding(BaseEmbedding):
         if self.runner is None:
             if self.downloader:
                 self.downloader.wait_for_download()
+
+            try:
+                from tflite_runtime.interpreter import Interpreter
+            except ModuleNotFoundError:
+                from tensorflow.lite.python.interpreter import Interpreter
 
             self.runner = Interpreter(
                 model_path=os.path.join(MODEL_CACHE_DIR, "facedet/facenet.tflite"),

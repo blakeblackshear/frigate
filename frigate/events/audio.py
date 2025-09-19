@@ -40,12 +40,6 @@ from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.util.process import FrigateProcess
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -369,6 +363,11 @@ class AudioEventMaintainer(threading.Thread):
 class AudioTfl:
     @redirect_output_to_logger(logger, logging.DEBUG)
     def __init__(self, stop_event: threading.Event, num_threads=2):
+        try:
+            from tflite_runtime.interpreter import Interpreter
+        except ModuleNotFoundError:
+            from tensorflow.lite.python.interpreter import Interpreter
+
         self.stop_event = stop_event
         self.num_threads = num_threads
         self.labels = load_labels("/audio-labelmap.txt", prefill=521)
