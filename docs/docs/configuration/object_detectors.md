@@ -869,6 +869,8 @@ model:
   path: /model.synap
   width: 224
   height: 224
+  tensor_format: nhwc
+  labelmap_path: /labelmap/coco-80.txt
 ```
 
 ## Rockchip platform
