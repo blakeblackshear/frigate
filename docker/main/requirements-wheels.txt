@@ -80,4 +80,4 @@ faster-whisper==1.1.*
 librosa==0.11.*
 soundfile==0.13.*
 # DeGirum detector
-degirum == 0.16.*
+degirum == 0.18.*
