@@ -175,14 +175,17 @@ There are improved capabilities in newer GPU architectures that TensorRT can ben
 [NVIDIA GPU Compute Capability](https://developer.nvidia.com/cuda-gpus)
 
 Inference speeds will vary greatly depending on the GPU and the model used.
-`tiny` variants are faster than the equivalent non-tiny model, some known examples are below:
+`tiny (t)` variants are faster than the equivalent non-tiny model, some known examples are below:
 
-| Name            | YOLOv9 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time |
-| --------------- | --------------------- | ------------------------- | ---------------------- |
-| RTX 3050        | t-320: 15 ms          | 320: ~ 10 ms 640: ~ 16 ms | Nano-320: ~ 12 ms      |
-| RTX 3070        | t-320: 11 ms          | 320: ~ 8 ms 640: ~ 14 ms  | Nano-320: ~ 9 ms       |
-| RTX A4000       |                       | 320: ~ 15 ms              |                        |
-| Tesla P40       |                       | 320: ~ 105 ms             |                        |
+✅ - Accelerated with CUDA Graphs
+❌ - Not accelerated with CUDA Graphs
+
+| Name            | ✅ YOLOv9 Inference Time  | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time 
+| --------------- | ------------------------ | ------------------------- | -------------------------- |
+| RTX 3050        | t-320: 8 ms s-320: 10 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms  |
+| RTX 3070        | t-320: 6 ms s-320: 8 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms   |
+| RTX A4000       |                          |                           | 320: ~ 15 ms               |
+| Tesla P40       |                          |                           | 320: ~ 105 ms              |
 
 ### Apple Silicon
 
@@ -203,9 +206,9 @@ Apple Silicon can not run within a container, so a ZMQ proxy is utilized to comm
 
 With the [ROCm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-| Name      | YOLOv9 Inference Time | YOLO-NAS Inference Time   |
-| --------- | --------------------- | ------------------------- |
-| AMD 780M  | ~ 14 ms               | 320: ~ 25 ms 640: ~ 50 ms |
+| Name      | YOLOv9 Inference Time     | YOLO-NAS Inference Time   |
+| --------- | ------------------------- | ------------------------- |
+| AMD 780M  | t-320: 14 ms s-320: 20 ms | 320: ~ 25 ms 640: ~ 50 ms |
 
 ## Community Supported Detectors
 
