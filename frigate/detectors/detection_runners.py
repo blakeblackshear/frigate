@@ -428,14 +428,19 @@ def get_optimized_runner(
             **options[0],
             "enable_cuda_graph": True,
         }
-        return CudaGraphRunner(ort.InferenceSession(
-        model_path,
-        providers=providers,
-        provider_options=options,
-    ), options[0]["device_id"])
+        return CudaGraphRunner(
+            ort.InferenceSession(
+                model_path,
+                providers=providers,
+                provider_options=options,
+            ),
+            options[0]["device_id"],
+        )
 
-    return ONNXModelRunner(ort.InferenceSession(
-        model_path,
-        providers=providers,
-        provider_options=options,
-    ))
+    return ONNXModelRunner(
+        ort.InferenceSession(
+            model_path,
+            providers=providers,
+            provider_options=options,
+        )
+    )
