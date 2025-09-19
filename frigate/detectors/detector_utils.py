@@ -3,11 +3,6 @@ import os
 
 import numpy as np
 
-try:
-    from tflite_runtime.interpreter import Interpreter, load_delegate
-except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter, load_delegate
-
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +45,11 @@ def tflite_detect_raw(self, tensor_input):
 def tflite_load_delegate_interpreter(
     delegate_library: str, detector_config, device_config
 ):
+    try:
+        from tflite_runtime.interpreter import Interpreter, load_delegate
+    except ModuleNotFoundError:
+        from tensorflow.lite.python.interpreter import Interpreter, load_delegate
+
     try:
         logger.info("Attempting to load NPU")
         tf_delegate = load_delegate(delegate_library, device_config)

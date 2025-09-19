@@ -8,12 +8,6 @@ from typing_extensions import Literal
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 
-try:
-    from tflite_runtime.interpreter import Interpreter, load_delegate
-except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter, load_delegate
-
-
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "edgetpu"
@@ -28,6 +22,12 @@ class EdgeTpuTfl(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: EdgeTpuDetectorConfig):
+        # Import TensorFlow Lite only when this detector is actually used
+        try:
+            from tflite_runtime.interpreter import Interpreter, load_delegate
+        except ModuleNotFoundError:
+            from tensorflow.lite.python.interpreter import Interpreter, load_delegate
+
         device_config = {}
         if detector_config.device is not None:
             device_config = {"device": detector_config.device}

@@ -9,11 +9,6 @@ from frigate.log import redirect_output_to_logger
 
 from ..detector_utils import tflite_detect_raw, tflite_init
 
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter
-
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +25,12 @@ class CpuTfl(DetectionApi):
 
     @redirect_output_to_logger(logger, logging.DEBUG)
     def __init__(self, detector_config: CpuDetectorConfig):
+        # Import TensorFlow Lite only when this detector is actually used
+        try:
+            from tflite_runtime.interpreter import Interpreter
+        except ModuleNotFoundError:
+            from tensorflow.lite.python.interpreter import Interpreter
+
         interpreter = Interpreter(
             model_path=detector_config.model.path,
             num_threads=detector_config.num_threads or 3,
