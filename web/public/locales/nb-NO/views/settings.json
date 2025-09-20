@@ -538,7 +538,8 @@
           "admin": "Administrator",
           "adminDesc": "Full tilgang til alle funksjoner.",
           "viewer": "Visningsbruker",
-          "viewerDesc": "Begrenset til kun Direkte-dashbord, Inspiser, Utforsk og Eksporter."
+          "viewerDesc": "Begrenset til kun Direkte-dashbord, Inspiser, Utforsk og Eksporter.",
+          "customDesc": "Tilpasset rolle med spesifikk kameratilgang."
         },
         "select": "Velg en rolle"
       },
@@ -825,6 +826,66 @@
         "createTriggerFailed": "Kunne ikke opprette utløser: {{errorMessage}}",
         "updateTriggerFailed": "Kunne ikke oppdatere utløser: {{errorMessage}}",
         "deleteTriggerFailed": "Kunne ikke slette utløser: {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Administrasjon av visningsrolle",
+      "desc": "Administrer tilpassede visningsroller og deres kameratilgangstillatelser for denne Frigate-instansen."
+    },
+    "addRole": "Legg til rolle",
+    "table": {
+      "role": "Rolle",
+      "cameras": "Kameraer",
+      "actions": "Handlinger",
+      "noRoles": "Ingen tilpassede roller funnet.",
+      "editCameras": "Rediger kameraer",
+      "deleteRole": "Slett rolle"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rollen {{role}} ble opprettet",
+        "updateCameras": "Kameraer oppdatert for rollen {{role}}",
+        "deleteRole": "Rollen {{role}} ble slettet",
+        "userRolesUpdated": "{{count}} bruker(e) som var tildelt denne rollen er oppdatert til \"visningsbruker\", som har tilgang til alle kameraer."
+      },
+      "error": {
+        "createRoleFailed": "Kunne ikke opprette rolle: {{errorMessage}}",
+        "updateCamerasFailed": "Kunne ikke oppdatere kameraer: {{errorMessage}}",
+        "deleteRoleFailed": "Kunne ikke slette rolle: {{errorMessage}}",
+        "userUpdateFailed": "Kunne ikke oppdatere brukerroller: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Opprett ny rolle",
+        "desc": "Legg til en ny rolle og angi tillatelser for kameratilgang."
+      },
+      "editCameras": {
+        "desc": "Oppdater kameratilgang for rollen <strong>{{role}}</strong>.",
+        "title": "Rediger kameraer for rolle"
+      },
+      "deleteRole": {
+        "title": "Slett rolle",
+        "desc": "Denne handlingen kan ikke angres. Dette vil permanent slette rollen og tildele alle brukere med denne rollen til «visningsbruker»-rollen, som gir tilgang til alle kameraer.",
+        "warn": "Er du sikker på at du vil slette <strong>{{role}}</strong>?",
+        "deleting": "Sletter..."
+      },
+      "form": {
+        "role": {
+          "title": "Rollenavn",
+          "placeholder": "Skriv inn rollenavn",
+          "desc": "Kun bokstaver, tall, punktum og understreker er tillatt.",
+          "roleIsRequired": "Rollenavn er påkrevd",
+          "roleOnlyInclude": "Rollenavn kan kun inneholde bokstaver, tall, . eller _",
+          "roleExists": "En rolle med dette navnet finnes allerede."
+        },
+        "cameras": {
+          "title": "Kameraer",
+          "desc": "Velg hvilke kameraer denne rollen skal ha tilgang til. Minst ett kamera må velges.",
+          "required": "Minst ett kamera må velges."
+        }
       }
     }
   }
