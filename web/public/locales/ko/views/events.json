@@ -1,4 +1,8 @@
 {
   "alerts": "알림",
-  "detections": "탐지"
+  "detections": "탐지",
+  "motion": {
+    "label": "움직임",
+    "only": "움직임만"
+  }
 }

@@ -1,4 +1,5 @@
 {
   "documentTitle": "설정 편집기 - Frigate",
-  "configEditor": "설정 편집기"
+  "configEditor": "설정 편집기",
+  "safeConfigEditor": "설정 편집기 (안전 모드)"
 }
