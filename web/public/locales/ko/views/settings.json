@@ -23,7 +23,8 @@
   },
   "documentTitle": {
     "default": "설정 - Frigate",
-    "authentication": "인증 설정 - Frigate"
+    "authentication": "인증 설정 - Frigate",
+    "camera": "카메라 설정 - Frigate"
   },
   "users": {
     "table": {

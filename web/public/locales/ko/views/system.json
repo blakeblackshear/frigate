@@ -1,6 +1,7 @@
 {
   "documentTitle": {
     "cameras": "카메라 통계 - Frigate",
-    "storage": "스토리지 통계 - Frigate"
+    "storage": "스토리지 통계 - Frigate",
+    "general": "기본 통계 - Frigate"
   }
 }

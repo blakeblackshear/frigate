@@ -1,4 +1,8 @@
 {
   "documentTitle": "실시간 - Frigate",
-  "documentTitle.withCamera": "실시간 - {{camera}} - Frigate"
+  "documentTitle.withCamera": "실시간 - {{camera}} - Frigate",
+  "lowBandwidthMode": "저대역폭 모드",
+  "twoWayTalk": {
+    "enable": "양방향 말하기 활성화"
+  }
 }

@@ -1,6 +1,10 @@
 {
   "restart": {
     "title": "Frigate를 정말로 다시 시작할까요?",
-    "button": "재시작"
+    "button": "재시작",
+    "restarting": {
+      "title": "Frigate가 재시작 중입니다",
+      "content": "이 페이지는 {{countdown}} 뒤에 새로 고침 됩니다."
+    }
   }
 }
