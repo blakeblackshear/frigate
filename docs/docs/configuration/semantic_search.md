@@ -85,13 +85,13 @@ semantic_search:
   enabled: True
   model_size: large
   # Optional, if using the 'large' model in a multi-GPU installation
-  device: 0 
+  device: 0
 ```
 
 :::info
 
-If the correct build is used for your GPU / NPU and the `large` model is configured, then the GPU / NPU will be detected and used automatically. 
-Specify the `device` option to target a specific GPU in a multi-GPU system (see [onnxruntime's provider options](https://onnxruntime.ai/docs/execution-providers/)). 
+If the correct build is used for your GPU / NPU and the `large` model is configured, then the GPU / NPU will be detected and used automatically.
+Specify the `device` option to target a specific GPU in a multi-GPU system (see [onnxruntime's provider options](https://onnxruntime.ai/docs/execution-providers/)).
 If you do not specify a device, the first available GPU will be used.
 
 See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_enrichments.md) documentation.
@@ -144,3 +144,11 @@ When a trigger fires, the UI highlights the trigger with a blue outline for 3 se
 - Triggers rely on the same Jina AI CLIP models (V1 or V2) used for semantic search. Ensure `semantic_search` is enabled and properly configured.
 - Reindexing embeddings (via the UI or `reindex: True`) does not affect trigger configurations but may update the embeddings used for matching.
 - For optimal performance, use a system with sufficient RAM (8GB minimum, 16GB recommended) and a GPU for `large` model configurations, as described in the Semantic Search requirements.
+
+### FAQ
+
+#### Why can't I create a trigger on thumbnails for some text, like "person with a blue shirt" and have it trigger when a person with a blue shirt is detected?
+
+TL;DR: Text-to-image triggers aren’t supported because CLIP can confuse similar images and give inconsistent scores, making automation unreliable.
+
+Text-to-image triggers are not supported due to fundamental limitations of CLIP-based similarity search. While CLIP works well for exploratory, manual queries, it is unreliable for automated triggers based on a threshold. Issues include embedding drift (the same text–image pair can yield different cosine distances over time), lack of true semantic grounding (visually similar but incorrect matches), and unstable thresholding (distance distributions are dataset-dependent and often too tightly clustered to separate relevant from irrelevant results). Instead, it is recommended to set up a workflow with thumbnail triggers: first use text search to manually select 3–5 representative reference tracked objects, then configure thumbnail triggers based on that visual similarity. This provides robust automation without the semantic ambiguity of text to image matching.
