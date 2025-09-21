@@ -195,6 +195,9 @@ class OpenVINOModelRunner(BaseModelRunner):
         # Apply performance optimization
         self.ov_core.set_property(device, {"PERF_COUNT": "NO"})
 
+        if device in ["GPU", "AUTO"]:
+            self.ov_core.set_property(device, {"PERFORMANCE_HINT": "LATENCY"})
+
         # Compile model
         self.compiled_model = self.ov_core.compile_model(
             model=model_path, device_name=device
