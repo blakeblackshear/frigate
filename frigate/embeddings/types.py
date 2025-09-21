@@ -12,3 +12,4 @@ class EnrichmentModelTypeEnum(str, Enum):
     jina_v1 = "jina_v1"
     jina_v2 = "jina_v2"
     paddleocr = "paddleocr"
+    yolov9_license_plate = "yolov9_license_plate"
