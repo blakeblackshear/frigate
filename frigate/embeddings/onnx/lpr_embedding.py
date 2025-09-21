@@ -262,7 +262,7 @@ class LicensePlateDetector(BaseEmbedding):
             self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
-                model_type="yolov9",
+                model_type=EnrichmentModelTypeEnum.yolov9_license_plate.value,
             )
 
     def _preprocess_inputs(self, raw_inputs):
