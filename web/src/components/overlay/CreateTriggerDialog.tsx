@@ -38,6 +38,15 @@ import { Trigger, TriggerAction, TriggerType } from "@/types/trigger";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "../ui/textarea";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import { isDesktop, isMobile } from "react-device-detect";
+import { cn } from "@/lib/utils";
+import {
+  MobilePage,
+  MobilePageContent,
+  MobilePageDescription,
+  MobilePageHeader,
+  MobilePageTitle,
+} from "../mobile/MobilePage";
 
 type CreateTriggerDialogProps = {
   show: boolean;
@@ -164,18 +173,30 @@ export default function CreateTriggerDialog({
 
   const cameraName = useCameraFriendlyName(selectedCamera);
 
+  const Overlay = isDesktop ? Dialog : MobilePage;
+  const Content = isDesktop ? DialogContent : MobilePageContent;
+  const Header = isDesktop ? DialogHeader : MobilePageHeader;
+  const Description = isDesktop ? DialogDescription : MobilePageDescription;
+  const Title = isDesktop ? DialogTitle : MobilePageTitle;
+
   return (
-    <Dialog open={show} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>
+    <Overlay open={show} onOpenChange={onCancel}>
+      <Content
+        className={cn(
+          "scrollbar-container overflow-y-auto",
+          isDesktop && "my-4 flex max-h-dvh flex-col",
+          isMobile && "px-4",
+        )}
+      >
+        <Header className="mt-2" onClose={onCancel}>
+          <Title>
             {t(
               trigger
                 ? "triggers.dialog.editTrigger.title"
                 : "triggers.dialog.createTrigger.title",
             )}
-          </DialogTitle>
-          <DialogDescription>
+          </Title>
+          <Description className={cn(!isDesktop && "sr-only")}>
             {t(
               trigger
                 ? "triggers.dialog.editTrigger.desc"
@@ -184,8 +205,8 @@ export default function CreateTriggerDialog({
                 camera: cameraName,
               },
             )}
-          </DialogDescription>
-        </DialogHeader>
+          </Description>
+        </Header>
 
         <Form {...form}>
           <form
@@ -415,7 +436,7 @@ export default function CreateTriggerDialog({
             </DialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </Content>
+    </Overlay>
   );
 }
