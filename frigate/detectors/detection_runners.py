@@ -1,5 +1,6 @@
 """Base runner implementation for ONNX models."""
 
+import json
 import logging
 import os
 from abc import ABC, abstractmethod
@@ -7,7 +8,9 @@ from typing import Any
 
 import numpy as np
 import onnxruntime as ort
+import zmq
 
+from frigate.comms.zmq_req_router_broker import REQ_ROUTER_ENDPOINT
 from frigate.util.model import get_ort_providers
 from frigate.util.rknn_converter import auto_convert_model, is_rknn_compatible
 
@@ -299,6 +302,163 @@ class OpenVINOModelRunner(BaseModelRunner):
             outputs.append(self.infer_request.get_output_tensor(i).data)
 
         return outputs
+
+
+class ZmqIpcRunner(BaseModelRunner):
+    """Runner that forwards inference over ZMQ REQ/ROUTER to backend workers.
+
+    This allows reusing the same interface as local runners while delegating
+    inference to the external ZMQ workers.
+    """
+
+    def __init__(
+        self,
+        model_path: str,
+        model_type: str,
+        request_timeout_ms: int = 200,
+        linger_ms: int = 0,
+        endpoint: str = REQ_ROUTER_ENDPOINT,
+    ):
+        self.model_type = model_type
+        self.model_path = model_path
+        self.model_name = os.path.basename(model_path)
+        self._endpoint = endpoint
+        self._context = zmq.Context()
+        self._socket = self._context.socket(zmq.REQ)
+        self._socket.setsockopt(zmq.RCVTIMEO, request_timeout_ms)
+        self._socket.setsockopt(zmq.SNDTIMEO, request_timeout_ms)
+        self._socket.setsockopt(zmq.LINGER, linger_ms)
+        self._socket.connect(self._endpoint)
+        self._model_ready = False
+
+    def get_input_names(self) -> list[str]:
+        return ["input"]
+
+    def get_input_width(self) -> int:
+        # Not known/required for ZMQ forwarding
+        return -1
+
+    def _build_header(self, tensor_input: np.ndarray) -> bytes:
+        header: dict[str, object] = {
+            "shape": list(tensor_input.shape),
+            "dtype": str(tensor_input.dtype.name),
+            "model_type": self.model_type,
+            "model_name": self.model_name,
+        }
+        return json.dumps(header).encode("utf-8")
+
+    def _decode_response(self, frames: list[bytes]) -> np.ndarray:
+        if len(frames) == 1:
+            buf = frames[0]
+            if len(buf) != 20 * 6 * 4:
+                raise ValueError(f"Unexpected payload size: {len(buf)}")
+            return np.frombuffer(buf, dtype=np.float32).reshape((20, 6))
+
+        if len(frames) >= 2:
+            header = json.loads(frames[0].decode("utf-8"))
+            shape = tuple(header.get("shape", []))
+            dtype = np.dtype(header.get("dtype", "float32"))
+            return np.frombuffer(frames[1], dtype=dtype).reshape(shape)
+
+        raise ValueError("Empty or malformed reply from ZMQ detector")
+
+    def run(self, input: dict[str, np.ndarray]) -> np.ndarray | None:
+        if not self._model_ready:
+            if not self.ensure_model_ready(self.model_path):
+                raise TimeoutError("ZMQ detector model is not ready after transfer")
+            self._model_ready = True
+
+        input_name = next(iter(input))
+        tensor = input[input_name]
+        header = self._build_header(tensor)
+        payload = memoryview(tensor.tobytes(order="C"))
+        try:
+            self._socket.send_multipart([header, payload])
+            frames = self._socket.recv_multipart()
+        except zmq.Again as e:
+            raise TimeoutError("ZMQ detector request timed out") from e
+        except zmq.ZMQError as e:
+            raise RuntimeError(f"ZMQ error: {e}") from e
+
+        return self._decode_response(frames)
+
+    def ensure_model_ready(self, model_path: str) -> bool:
+        """Ensure the remote has the model and it is loaded.
+
+        1) Send model_request with model_name
+        2) If not available, send model_data with the file contents
+        3) Wait for loaded confirmation
+        Returns True on success.
+        """
+        # Check model availability
+        req = {"model_request": True, "model_name": self.model_name}
+        self._socket.send_multipart([json.dumps(req).encode("utf-8")])
+
+        # Temporarily extend timeout for model ops
+        original_rcv = self._socket.getsockopt(zmq.RCVTIMEO)
+        try:
+            self._socket.setsockopt(zmq.RCVTIMEO, max(30000, int(original_rcv or 0)))
+            resp_frames = self._socket.recv_multipart()
+        except zmq.Again:
+            self._socket.setsockopt(zmq.RCVTIMEO, original_rcv)
+            return False
+        finally:
+            try:
+                self._socket.setsockopt(zmq.RCVTIMEO, original_rcv)
+            except Exception:
+                pass
+
+        try:
+            if len(resp_frames) != 1:
+                return False
+            resp = json.loads(resp_frames[0].decode("utf-8"))
+            if resp.get("model_available") and resp.get("model_loaded"):
+                logger.info(f"ZMQ detector model {self.model_name} is ready")
+                return True
+        except Exception:
+            return False
+
+        try:
+            with open(model_path, "rb") as f:
+                model_bytes = f.read()
+        except Exception:
+            return False
+
+        header = {"model_data": True, "model_name": self.model_name}
+        self._socket.send_multipart([json.dumps(header).encode("utf-8"), model_bytes])
+
+        original_rcv2 = self._socket.getsockopt(zmq.RCVTIMEO)
+        try:
+            self._socket.setsockopt(zmq.RCVTIMEO, max(30000, int(original_rcv2 or 0)))
+            resp2 = self._socket.recv_multipart()
+        except zmq.Again:
+            self._socket.setsockopt(zmq.RCVTIMEO, original_rcv2)
+            return False
+        finally:
+            try:
+                self._socket.setsockopt(zmq.RCVTIMEO, original_rcv2)
+            except Exception:
+                pass
+
+        try:
+            if len(resp2) != 1:
+                return False
+            j = json.loads(resp2[0].decode("utf-8"))
+            return bool(j.get("model_saved") and j.get("model_loaded"))
+        except Exception:
+            return False
+
+    def __del__(self) -> None:
+        try:
+            if self._socket is not None:
+                self._socket.close()
+        except Exception:
+            pass
+        try:
+            if self._context is not None:
+                self._context.term()
+        except Exception:
+            pass
 
 
 class RKNNModelRunner(BaseModelRunner):
