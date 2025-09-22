@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import Any, List, Optional
+from typing import Any, List
 
 import numpy as np
 import zmq
