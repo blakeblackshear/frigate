@@ -8,6 +8,7 @@ import zmq
 from pydantic import Field
 from typing_extensions import Literal
 
+from frigate.comms.zmq_req_router_broker import REQ_ROUTER_ENDPOINT
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 
@@ -60,7 +61,7 @@ class ZmqIpcDetector(DetectionApi):
         super().__init__(detector_config)
 
         self._context = zmq.Context()
-        self._endpoint = detector_config.endpoint
+        self._endpoint = REQ_ROUTER_ENDPOINT
         self._request_timeout_ms = detector_config.request_timeout_ms
         self._linger_ms = detector_config.linger_ms
         self._socket = None

@@ -28,6 +28,9 @@ from frigate.comms.object_detector_signaler import DetectorProxy
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
+from frigate.comms.zmq_req_router_broker import (
+    ZmqReqRouterBroker,
+)
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.config.config import FrigateConfig
 from frigate.const import (
@@ -307,6 +310,14 @@ class FrigateApp:
         self.event_metadata_updater = EventMetadataPublisher()
         self.inter_zmq_proxy = ZmqProxy()
         self.detection_proxy = DetectorProxy()
+        self.zmq_router_broker: ZmqReqRouterBroker | None = None
+
+        zmq_detectors = [
+            det for det in self.config.detectors.values() if det.type == "zmq"
+        ]
+        if any(zmq_detectors):
+            backend_endpoint = zmq_detectors[0].endpoint
+            self.zmq_router_broker = ZmqReqRouterBroker(backend_endpoint)
 
     def init_onvif(self) -> None:
         self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
@@ -643,6 +654,9 @@ class FrigateApp:
         self.event_metadata_updater.stop()
         self.inter_zmq_proxy.stop()
         self.detection_proxy.stop()
+
+        if self.zmq_router_broker:
+            self.zmq_router_broker.stop()
 
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
