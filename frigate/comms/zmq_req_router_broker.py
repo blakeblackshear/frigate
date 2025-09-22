@@ -31,7 +31,7 @@ class _RouterDealerRunner(threading.Thread):
         frontend.bind(REQ_ROUTER_ENDPOINT)
 
         backend = self.context.socket(zmq.DEALER)
-        backend.connect(self.backend_endpoint)
+        backend.bind(self.backend_endpoint)
 
         try:
             zmq.proxy(frontend, backend)
