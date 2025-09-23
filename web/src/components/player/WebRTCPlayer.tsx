@@ -37,6 +37,18 @@ export default function WebRtcPlayer({
     return `${baseUrl.replace(/^http/, "ws")}live/webrtc/api/ws?src=${camera}`;
   }, [camera]);
 
+  // error handler
+  const handleError = useCallback(
+    (error: LivePlayerError, description: string = "Unknown error") => {
+      // eslint-disable-next-line no-console
+      console.error(
+        `${camera} - WebRTC error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live`,
+      );
+      onError?.(error);
+    },
+    [camera, onError],
+  );
+
   // camera states
 
   const pcRef = useRef<RTCPeerConnection | undefined>();
@@ -212,7 +224,7 @@ export default function WebRtcPlayer({
 
   useEffect(() => {
     videoLoadTimeoutRef.current = setTimeout(() => {
-      onError?.("stalled");
+      handleError("stalled", "WebRTC connection timed out.");
     }, 5000);
 
     return () => {
@@ -327,7 +339,7 @@ export default function WebRtcPlayer({
                     document.visibilityState === "visible" &&
                     pcRef.current != undefined
                   ) {
-                    onError("stalled");
+                    handleError("stalled", "WebRTC connection stalled.");
                   }
                 }, 3000),
               );
@@ -344,7 +356,7 @@ export default function WebRtcPlayer({
           // @ts-expect-error code does exist
           e.target.error.code == MediaError.MEDIA_ERR_NETWORK
         ) {
-          onError?.("startup");
+          handleError("startup", "Browser reported a network error.");
         }
       }}
     />

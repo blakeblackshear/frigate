@@ -176,7 +176,7 @@ For devices that support two way talk, Frigate can be configured to use the feat
 
 To use the Reolink Doorbell with two way talk, you should use the [recommended Reolink configuration](/configuration/camera_specific#reolink-doorbell)
 
-As a starting point to check compatibility for your camera, view the list of cameras supported for two-way talk on the [go2rtc repository](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#two-way-audio). For cameras in the category `ONVIF Profile T`, you can use the [ONVIF Conformant Products Database](https://www.onvif.org/conformant-products/)'s FeatureList to check for the presence of `AudioOutput`. A camera that supports `ONVIF Profile T` *usually* supports this, but due to inconsistent support, a camera that explicitly lists this feature may still not work. If no entry for your camera exists on the database, it is recommended not to buy it or to consult with the manufacturer's support on the feature availability.
+As a starting point to check compatibility for your camera, view the list of cameras supported for two-way talk on the [go2rtc repository](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#two-way-audio). For cameras in the category `ONVIF Profile T`, you can use the [ONVIF Conformant Products Database](https://www.onvif.org/conformant-products/)'s FeatureList to check for the presence of `AudioOutput`. A camera that supports `ONVIF Profile T` _usually_ supports this, but due to inconsistent support, a camera that explicitly lists this feature may still not work. If no entry for your camera exists on the database, it is recommended not to buy it or to consult with the manufacturer's support on the feature availability.
 
 ### Streaming options on camera group dashboards
 
@@ -230,7 +230,26 @@ Note that disabling a camera through the config file (`enabled: False`) removes 
 
    If you are using continuous streaming or you are loading more than a few high resolution streams at once on the dashboard, your browser may struggle to begin playback of your streams before the timeout. Frigate always prioritizes showing a live stream as quickly as possible, even if it is a lower quality jsmpeg stream. You can use the "Reset" link/button to try loading your high resolution stream again.
 
-   If you are still experiencing Frigate falling back to low bandwidth mode, you may need to adjust your camera's settings per the [recommendations above](#camera_settings_recommendations).
+   Errors in stream playback (e.g., connection failures, codec issues, or buffering timeouts) that cause the fallback to low bandwidth mode (jsmpeg) are logged to the browser console for easier debugging. These errors may include:
+
+   - Network issues (e.g., MSE or WebRTC network connection problems).
+   - Unsupported codecs or stream formats (e.g., H.265 in WebRTC, which is not supported in some browsers).
+   - Buffering timeouts or low bandwidth conditions causing fallback to jsmpeg.
+   - Browser compatibility problems (e.g., iOS Safari limitations with MSE).
+
+   To view browser console logs:
+
+   1. Open the Frigate Live View in your browser.
+   2. Open the browser's Developer Tools (F12 or right-click > Inspect > Console tab).
+   3. Reproduce the error (e.g., load a problematic stream or simulate network issues).
+   4. Look for messages prefixed with the camera name.
+
+   These logs help identify if the issue is player-specific (MSE vs. WebRTC) or related to camera configuration (e.g., go2rtc streams, codecs). If you see frequent errors:
+
+   - Verify your camera's H.264/AAC settings (see [Frigate's camera settings recommendations](#camera_settings_recommendations)).
+   - Check go2rtc configuration for transcoding (e.g., audio to AAC/OPUS).
+   - Test with a different stream via the UI dropdown (if `live -> streams` is configured).
+   - For WebRTC-specific issues, ensure port 8555 is forwarded and candidates are set (see (WebRTC Extra Configuration)(#webrtc-extra-configuration)).
 
 3. **It doesn't seem like my cameras are streaming on the Live dashboard. Why?**
 

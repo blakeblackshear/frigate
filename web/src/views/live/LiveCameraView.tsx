@@ -28,7 +28,6 @@ import {
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
@@ -116,6 +115,7 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { usePersistence } from "@/hooks/use-persistence";
 import { Label } from "@/components/ui/label";
@@ -499,122 +499,118 @@ export default function LiveCameraView({
           ) : (
             <div />
           )}
-          <TooltipProvider>
-            <div
-              className={`flex flex-row items-center gap-2 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
-            >
-              {fullscreen && (
-                <Button
-                  className="bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-primary"
-                  aria-label={t("label.back", { ns: "common" })}
-                  size="sm"
-                  onClick={() => navigate(-1)}
-                >
-                  <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-                  {isDesktop && (
-                    <div className="text-secondary-foreground">
-                      {t("button.back", { ns: "common" })}
-                    </div>
-                  )}
-                </Button>
-              )}
-              {supportsFullscreen && (
-                <CameraFeatureToggle
-                  className="p-2 md:p-0"
-                  variant={fullscreen ? "overlay" : "primary"}
-                  Icon={fullscreen ? FaCompress : FaExpand}
-                  isActive={fullscreen}
-                  title={
-                    fullscreen
-                      ? t("button.close", { ns: "common" })
-                      : t("button.fullscreen", { ns: "common" })
-                  }
-                  onClick={toggleFullscreen}
-                />
-              )}
-              {!isIOS && !isFirefox && preferredLiveMode != "jsmpeg" && (
-                <CameraFeatureToggle
-                  className="p-2 md:p-0"
-                  variant={fullscreen ? "overlay" : "primary"}
-                  Icon={LuPictureInPicture}
-                  isActive={pip}
-                  title={
-                    pip
-                      ? t("button.close", { ns: "common" })
-                      : t("button.pictureInPicture", { ns: "common" })
-                  }
-                  onClick={() => {
-                    if (!pip) {
-                      setPip(true);
-                    } else {
-                      document.exitPictureInPicture();
-                      setPip(false);
-                    }
-                  }}
-                  disabled={!cameraEnabled}
-                />
-              )}
-              {supports2WayTalk && (
-                <CameraFeatureToggle
-                  className="p-2 md:p-0"
-                  variant={fullscreen ? "overlay" : "primary"}
-                  Icon={mic ? FaMicrophone : FaMicrophoneSlash}
-                  isActive={mic}
-                  title={
-                    mic
-                      ? t("twoWayTalk.disable", { ns: "views/live" })
-                      : t("twoWayTalk.enable", { ns: "views/live" })
-                  }
-                  onClick={() => {
-                    setMic(!mic);
-                    if (!mic && !audio) {
-                      setAudio(true);
-                    }
-                  }}
-                  disabled={!cameraEnabled}
-                />
-              )}
-              {supportsAudioOutput && preferredLiveMode != "jsmpeg" && (
-                <CameraFeatureToggle
-                  className="p-2 md:p-0"
-                  variant={fullscreen ? "overlay" : "primary"}
-                  Icon={audio ? GiSpeaker : GiSpeakerOff}
-                  isActive={audio ?? false}
-                  title={
-                    audio
-                      ? t("cameraAudio.disable", { ns: "views/live" })
-                      : t("cameraAudio.enable", { ns: "views/live" })
-                  }
-                  onClick={() => setAudio(!audio)}
-                  disabled={!cameraEnabled}
-                />
-              )}
-              <FrigateCameraFeatures
-                camera={camera}
-                recordingEnabled={camera.record.enabled_in_config}
-                audioDetectEnabled={camera.audio.enabled_in_config}
-                autotrackingEnabled={
-                  camera.onvif.autotracking.enabled_in_config
+          <div
+            className={`flex flex-row items-center gap-2 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
+          >
+            {fullscreen && (
+              <Button
+                className="bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-primary"
+                aria-label={t("label.back", { ns: "common" })}
+                size="sm"
+                onClick={() => navigate(-1)}
+              >
+                <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+                {isDesktop && (
+                  <div className="text-secondary-foreground">
+                    {t("button.back", { ns: "common" })}
+                  </div>
+                )}
+              </Button>
+            )}
+            {supportsFullscreen && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={fullscreen ? FaCompress : FaExpand}
+                isActive={fullscreen}
+                title={
+                  fullscreen
+                    ? t("button.close", { ns: "common" })
+                    : t("button.fullscreen", { ns: "common" })
                 }
-                transcriptionEnabled={
-                  camera.audio_transcription.enabled_in_config
-                }
-                fullscreen={fullscreen}
-                streamName={streamName ?? ""}
-                setStreamName={setStreamName}
-                preferredLiveMode={preferredLiveMode}
-                playInBackground={playInBackground ?? false}
-                setPlayInBackground={setPlayInBackground}
-                showStats={showStats}
-                setShowStats={setShowStats}
-                isRestreamed={isRestreamed ?? false}
-                setLowBandwidth={setLowBandwidth}
-                supportsAudioOutput={supportsAudioOutput}
-                supports2WayTalk={supports2WayTalk}
-                cameraEnabled={cameraEnabled}
+                onClick={toggleFullscreen}
               />
-            </div>
-          </TooltipProvider>
+            )}
+            {!isIOS && !isFirefox && preferredLiveMode != "jsmpeg" && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={LuPictureInPicture}
+                isActive={pip}
+                title={
+                  pip
+                    ? t("button.close", { ns: "common" })
+                    : t("button.pictureInPicture", { ns: "common" })
+                }
+                onClick={() => {
+                  if (!pip) {
+                    setPip(true);
+                  } else {
+                    document.exitPictureInPicture();
+                    setPip(false);
+                  }
+                }}
+                disabled={!cameraEnabled}
+              />
+            )}
+            {supports2WayTalk && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={mic ? FaMicrophone : FaMicrophoneSlash}
+                isActive={mic}
+                title={
+                  mic
+                    ? t("twoWayTalk.disable", { ns: "views/live" })
+                    : t("twoWayTalk.enable", { ns: "views/live" })
+                }
+                onClick={() => {
+                  setMic(!mic);
+                  if (!mic && !audio) {
+                    setAudio(true);
+                  }
+                }}
+                disabled={!cameraEnabled}
+              />
+            )}
+            {supportsAudioOutput && preferredLiveMode != "jsmpeg" && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={audio ? GiSpeaker : GiSpeakerOff}
+                isActive={audio ?? false}
+                title={
+                  audio
+                    ? t("cameraAudio.disable", { ns: "views/live" })
+                    : t("cameraAudio.enable", { ns: "views/live" })
+                }
+                onClick={() => setAudio(!audio)}
+                disabled={!cameraEnabled}
+              />
+            )}
+            <FrigateCameraFeatures
+              camera={camera}
+              recordingEnabled={camera.record.enabled_in_config}
+              audioDetectEnabled={camera.audio.enabled_in_config}
+              autotrackingEnabled={camera.onvif.autotracking.enabled_in_config}
+              transcriptionEnabled={
+                camera.audio_transcription.enabled_in_config
+              }
+              fullscreen={fullscreen}
+              streamName={streamName ?? ""}
+              setStreamName={setStreamName}
+              preferredLiveMode={preferredLiveMode}
+              playInBackground={playInBackground ?? false}
+              setPlayInBackground={setPlayInBackground}
+              showStats={showStats}
+              setShowStats={setShowStats}
+              isRestreamed={isRestreamed ?? false}
+              setLowBandwidth={setLowBandwidth}
+              supportsAudioOutput={supportsAudioOutput}
+              supports2WayTalk={supports2WayTalk}
+              cameraEnabled={cameraEnabled}
+            />
+          </div>
         </div>
         <div id="player-container" className="size-full" ref={containerRef}>
           <TransformComponent
@@ -707,27 +703,25 @@ function TooltipButton({
   ...props
 }: TooltipButtonProps) {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            aria-label={label}
-            onClick={onClick}
-            onMouseDown={onMouseDown}
-            onMouseUp={onMouseUp}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
-            className={className}
-            {...props}
-          >
-            {children}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{label}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          aria-label={label}
+          onClick={onClick}
+          onMouseDown={onMouseDown}
+          onMouseUp={onMouseUp}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          className={className}
+          {...props}
+        >
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{label}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -961,59 +955,56 @@ function PtzControlPanel({
       )}
 
       {ptz?.features?.includes("pt-r-fov") && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className={`${clickOverlay ? "text-selected" : "text-primary"}`}
-                aria-label={t("ptz.move.clickMove.label")}
-                onClick={() => setClickOverlay(!clickOverlay)}
-              >
-                <TbViewfinder />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>
-                {clickOverlay
-                  ? t("ptz.move.clickMove.disable")
-                  : t("ptz.move.clickMove.enable")}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className={`${clickOverlay ? "text-selected" : "text-primary"}`}
+              aria-label={t("ptz.move.clickMove.label")}
+              onClick={() => setClickOverlay(!clickOverlay)}
+            >
+              <TbViewfinder />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              {clickOverlay
+                ? t("ptz.move.clickMove.disable")
+                : t("ptz.move.clickMove.enable")}
+            </p>
+          </TooltipContent>
+        </Tooltip>
       )}
       {(ptz?.presets?.length ?? 0) > 0 && (
-        <TooltipProvider>
+        <DropdownMenu modal={!isDesktop}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <DropdownMenu modal={!isDesktop}>
-                <DropdownMenuTrigger asChild>
-                  <Button aria-label={t("ptz.presets")}>
-                    <BsThreeDotsVertical />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="scrollbar-container max-h-[40dvh] overflow-y-auto"
-                  onCloseAutoFocus={(e) => e.preventDefault()}
-                >
-                  {ptz?.presets.map((preset) => (
-                    <DropdownMenuItem
-                      key={preset}
-                      aria-label={preset}
-                      className="cursor-pointer"
-                      onSelect={() => sendPtz(`preset_${preset}`)}
-                    >
-                      {preset}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button aria-label={t("ptz.presets")}>
+                  <BsThreeDotsVertical />
+                </Button>
+              </DropdownMenuTrigger>
             </TooltipTrigger>
             <TooltipContent>
               <p>{t("ptz.presets")}</p>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
+
+          <DropdownMenuContent
+            className="scrollbar-container max-h-[40dvh] overflow-y-auto"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            {ptz?.presets.map((preset) => (
+              <DropdownMenuItem
+                key={preset}
+                aria-label={preset}
+                className="cursor-pointer"
+                onSelect={() => sendPtz(`preset_${preset}`)}
+              >
+                {preset}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );
@@ -1401,9 +1392,11 @@ function FrigateCameraFeatures({
                       }}
                     >
                       <SelectTrigger className="w-full">
-                        {Object.keys(camera.live.streams).find(
-                          (key) => camera.live.streams[key] === streamName,
-                        )}
+                        <SelectValue>
+                          {Object.keys(camera.live.streams).find(
+                            (key) => camera.live.streams[key] === streamName,
+                          )}
+                        </SelectValue>
                       </SelectTrigger>
 
                       <SelectContent>
@@ -1733,9 +1726,11 @@ function FrigateCameraFeatures({
                 }}
               >
                 <SelectTrigger className="w-full">
-                  {Object.keys(camera.live.streams).find(
-                    (key) => camera.live.streams[key] === streamName,
-                  )}
+                  <SelectValue>
+                    {Object.keys(camera.live.streams).find(
+                      (key) => camera.live.streams[key] === streamName,
+                    )}
+                  </SelectValue>
                 </SelectTrigger>
 
                 <SelectContent>
