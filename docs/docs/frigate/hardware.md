@@ -180,12 +180,12 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 ✅ - Accelerated with CUDA Graphs
 ❌ - Not accelerated with CUDA Graphs
 
-| Name            | ✅ YOLOv9 Inference Time  | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time 
-| --------------- | ------------------------ | ------------------------- | -------------------------- |
-| RTX 3050        | t-320: 8 ms s-320: 10 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms  |
-| RTX 3070        | t-320: 6 ms s-320: 8 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms   |
-| RTX A4000       |                          |                           | 320: ~ 15 ms               |
-| Tesla P40       |                          |                           | 320: ~ 105 ms              |
+| Name            | ✅ YOLOv9 Inference Time  | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time |
+| --------------- | ------------------------------------- | ------------------------- | --------------------------- |
+| RTX 3050        | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms   |
+| RTX 3070        | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms    |
+| RTX A4000       |                                       |                           | 320: ~ 15 ms                |
+| Tesla P40       |                                       |                           | 320: ~ 105 ms               |
 
 ### Apple Silicon
 
@@ -197,10 +197,11 @@ Apple Silicon can not run within a container, so a ZMQ proxy is utilized to comm
 
 :::
 
-| Name      | YOLOv9 Inference Time  |
-| --------- | ---------------------- |
-| M3 Pro    | t-320: 6 ms s-320: 8ms |
-| M1        | s-320: 9ms             |
+| Name      | YOLOv9 Inference Time                |
+| --------- | ------------------------------------ |
+| M4        | s-20: 10 ms                          |
+| M3 Pro    | t-320: 6 ms s-320: 8 ms s-640: 20 ms |
+| M1        | s-320: 9ms                           |
 
 ### ROCm - AMD GPU
 
@@ -234,7 +235,7 @@ The MX3 is a pipelined architecture, where the maximum frames per second support
 | YOLOv9s              | 640        | ~ 41 ms            | ~ 110         |
 | YOLOX-Small          | 640        | ~ 16 ms            | ~ 263         |
 | SSDlite MobileNet v2 | 320        | ~ 5 ms             | ~ 1056        |
-    
+
 Inference speeds may vary depending on the host platform. The above data was measured on an **Intel 13700 CPU**. Platforms like Raspberry Pi, Orange Pi, and other ARM-based SBCs have different levels of processing capability, which may limit total FPS.
 
 ### Nvidia Jetson
