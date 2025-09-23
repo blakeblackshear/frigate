@@ -43,6 +43,7 @@ class SynapDetector(DetectionApi):
         self.model_type = detector_config.model.model_type
         self.network = synap_network
         self.network_input_details = self.network.inputs[0]
+        self.input_tensor_layout = detector_config.model.input_tensor
 
         # Create Inference Engine
         self.preprocessor = Preprocessor()
@@ -50,7 +51,11 @@ class SynapDetector(DetectionApi):
 
     def detect_raw(self, tensor_input: np.ndarray):
         # It has only been testing for pre-converted mobilenet80 .tflite -> .synap model currently
-        postprocess_data = self.preprocessor.assign(self.network.inputs, tensor_input, Shape(tensor_input.shape), Layout.nhwc)
+        layout = Layout.nhwc  # default layout
+        if self.input_tensor_layout == InputTensorEnum.nhwc:
+            layout = Layout.nhwc
+        
+        postprocess_data = self.preprocessor.assign(self.network.inputs, tensor_input, Shape(tensor_input.shape), layout)
         output_tensor_obj = self.network.predict()
         output = self.detector.process(output_tensor_obj, postprocess_data)
 

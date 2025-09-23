@@ -850,27 +850,32 @@ Hardware accelerated object detection is supported on the following SoCs:
 
 This implementation uses the [Synaptics model conversion](https://synaptics-synap.github.io/doc/v/latest/docs/manual/introduction.html#offline-model-conversion), version v3.1.0.
 
+This implementation is based on sdk `v1.5.0`.
+
 See the [installation docs](../frigate/installation.md#synaptics) for information on configuring the SL-series NPU hardware.
 
 ### Configuration
 
 When configuring the Synap detector, you have to specify the model: a local **path**.
 
-#### SSD
+#### SSD Mobilenet
 
-Use this configuration for ssd models. Here's a default pre-converted ssd model under the root folder.
+A synap model is provided in the container at /mobilenet.synap and is used by this detector type by default. The model comes from [Synap-release Github](https://github.com/synaptics-astra/synap-release/tree/v1.5.0/models/dolphin/object_detection/coco/model/mobilenet224_full80).
+
+Use the model configuration shown below when using the synaptics detector with the default synap model:
 
 ```yaml
-detectors:
-  synap_npu:
-    type: synaptics
+detectors:  # required
+  synap_npu:  # required
+    type: synaptics  # required
 
-model:
-  path: /model.synap
-  width: 224
-  height: 224
-  tensor_format: nhwc
-  labelmap_path: /labelmap/coco-80.txt
+model:  # required
+  path: /mobilenet.synap  # required
+  width: 224  # required
+  height: 224  # required
+  # Currently, the tensor format is statically specify in the detector.
+  tensor_format: nhwc  # optional
+  labelmap_path: /labelmap/coco-80.txt  # required
 ```
 
 ## Rockchip platform
