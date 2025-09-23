@@ -42,6 +42,19 @@ const sidebars: SidebarsConfig = {
         "configuration/bird_classification",
         {
           type: "category",
+          label: "Custom Classification",
+          link: {
+            type: "generated-index",
+            title: "Custom Classification",
+            description: "Configuration for custom classification models",
+          },
+          items: [
+            "configuration/custom_classification/state_classification",
+            "configuration/custom_classification/object_classification",
+          ],
+        },
+        {
+          type: "category",
           label: "Generative AI",
           link: {
             type: "generated-index",
