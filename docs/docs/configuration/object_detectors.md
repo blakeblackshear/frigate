@@ -870,11 +870,10 @@ detectors:  # required
     type: synaptics  # required
 
 model:  # required
-  path: /mobilenet.synap  # required
+  path: /synaptics/mobilenet.synap  # required
   width: 224  # required
   height: 224  # required
-  # Currently, the tensor format is statically specify in the detector.
-  tensor_format: nhwc  # optional
+  tensor_format: nhwc  # default value (optional. If you change the model, it is required)
   labelmap_path: /labelmap/coco-80.txt  # required
 ```
 
