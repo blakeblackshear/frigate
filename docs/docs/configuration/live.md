@@ -230,7 +230,7 @@ Note that disabling a camera through the config file (`enabled: False`) removes 
 
    If you are using continuous streaming or you are loading more than a few high resolution streams at once on the dashboard, your browser may struggle to begin playback of your streams before the timeout. Frigate always prioritizes showing a live stream as quickly as possible, even if it is a lower quality jsmpeg stream. You can use the "Reset" link/button to try loading your high resolution stream again.
 
-   Errors in stream playback (e.g., connection failures, codec issues, or buffering timeouts) that cause the fallback to low bandwidth mode (jsmpeg) are logged to the browser console for easier debugging. These errors may include:
+   Errors in stream playback (e.g., connection failures, codec issues, or buffering timeouts) that cause the fallback to low bandwidth mode (jsmpeg) are logged to some browser consoles for easier debugging. These errors may include:
 
    - Network issues (e.g., MSE or WebRTC network connection problems).
    - Unsupported codecs or stream formats (e.g., H.265 in WebRTC, which is not supported).
