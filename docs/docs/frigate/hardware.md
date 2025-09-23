@@ -181,11 +181,11 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 ❌ - Not accelerated with CUDA Graphs
 
 | Name            | ✅ YOLOv9 Inference Time  | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time |
-| --------------- | ------------------------ | ------------------------- | --------------------------- |
-| RTX 3050        | t-320: 8 ms s-320: 10 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms   |
-| RTX 3070        | t-320: 6 ms s-320: 8 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms    |
-| RTX A4000       |                          |                           | 320: ~ 15 ms                |
-| Tesla P40       |                          |                           | 320: ~ 105 ms               |
+| --------------- | ------------------------------------- | ------------------------- | --------------------------- |
+| RTX 3050        | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms   |
+| RTX 3070        | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms    |
+| RTX A4000       |                                       |                           | 320: ~ 15 ms                |
+| Tesla P40       |                                       |                           | 320: ~ 105 ms               |
 
 ### Apple Silicon
 
