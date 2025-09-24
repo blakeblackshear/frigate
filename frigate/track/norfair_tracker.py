@@ -1,7 +1,7 @@
 import logging
 import random
 import string
-from typing import Any, Sequence
+from typing import Any, Sequence, cast
 
 import cv2
 import numpy as np
@@ -89,7 +89,7 @@ class StationaryMotionClassifier:
         crop_resized = cv2.resize(
             crop, (self.CROP_SIZE, self.CROP_SIZE), interpolation=cv2.INTER_AREA
         )
-        return gaussian_filter(crop_resized, sigma=0.5)
+        return cast(np.ndarray[Any, Any], gaussian_filter(crop_resized, sigma=0.5))
 
     def ensure_anchor(
         self, id: str, yuv_frame: np.ndarray, median_box: tuple[int, int, int, int]
@@ -478,13 +478,17 @@ class NorfairTracker(ObjectTracker):
             if id not in self.stationary_classifier.anchor_crops and len(history) >= 5:
                 stability_iou = intersection_over_union(avg_box, median_box)
                 if stability_iou >= 0.7:
-                    self.stationary_classifier.ensure_anchor(id, yuv_frame, median_box)
+                    self.stationary_classifier.ensure_anchor(
+                        id, yuv_frame, cast(tuple[int, int, int, int], median_box)
+                    )
 
         # object has minimal or zero iou
         # assume object is active
         if avg_iou < THRESHOLD_KNOWN_ACTIVE_IOU:
-            if stationary:
-                if not self.stationary_classifier.evaluate(id, yuv_frame, tuple(box)):
+            if stationary and yuv_frame is not None:
+                if not self.stationary_classifier.evaluate(
+                    id, yuv_frame, cast(tuple[int, int, int, int], tuple(box))
+                ):
                     self.positions[id] = {
                         "xmins": [xmin],
                         "ymins": [ymin],
@@ -519,7 +523,7 @@ class NorfairTracker(ObjectTracker):
                 # Before flipping to active, check with classifier if we have YUV frame
                 if stationary and yuv_frame is not None:
                     if not self.stationary_classifier.evaluate(
-                        id, yuv_frame, tuple(box)
+                        id, yuv_frame, cast(tuple[int, int, int, int], tuple(box))
                     ):
                         self.positions[id] = {
                             "xmins": [xmin],
