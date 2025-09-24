@@ -1707,7 +1707,7 @@ def label_thumbnail(request: Request, camera_name: str, label: str):
     try:
         event_id = event_query.scalar()
 
-        return event_thumbnail(request, event_id, 60)
+        return event_thumbnail(request, event_id, Extension.jpg, 60)
     except DoesNotExist:
         frame = np.zeros((175, 175, 3), np.uint8)
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])

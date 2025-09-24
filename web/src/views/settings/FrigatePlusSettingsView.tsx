@@ -391,7 +391,6 @@ export default function FrigatePlusSettingsView({
                                       className="cursor-pointer"
                                       value={id}
                                       disabled={
-                                        model.type != config.model.model_type ||
                                         !model.supportedDetectors.includes(
                                           Object.values(config.detectors)[0]
                                             .type,

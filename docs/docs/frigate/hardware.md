@@ -56,6 +56,7 @@ Frigate supports multiple different detectors that work on different types of ha
   - Runs best with tiny or small size models
 
 - [Google Coral EdgeTPU](#google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
+
   - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#edge-tpu-detector)
 
 - [MemryX](#memryx-mx3): The MX3 M.2 accelerator module is available in m.2 format allowing for a wide range of compatibility with devices.
@@ -110,6 +111,7 @@ In real-world deployments, even with multiple cameras running concurrently, Frig
 | Name             | Hailo‑8 Inference Time | Hailo‑8L Inference Time |
 | ---------------- | ---------------------- | ----------------------- |
 | ssd mobilenet v1 | ~ 6 ms                 | ~ 10 ms                 |
+| yolov9-tiny      |                        | 320: 18ms               |
 | yolov6n          | ~ 7 ms                 | ~ 11 ms                 |
 
 ### Google Coral TPU
@@ -142,17 +144,19 @@ More information is available [in the detector docs](/configuration/object_detec
 
 Inference speeds vary greatly depending on the CPU or GPU used, some known examples of GPU inference times are below:
 
-| Name           | MobileNetV2 Inference Time | YOLO-NAS Inference Time   | RF-DETR Inference Time | Notes                              |
-| -------------- | -------------------------- | ------------------------- | ---------------------- | ---------------------------------- |
-| Intel HD 530   | 15 - 35 ms                 |                           |                        | Can only run one detector instance |
-| Intel HD 620   | 15 - 25 ms                 | 320: ~ 35 ms              |                        |                                    |
-| Intel HD 630   | ~ 15 ms                    | 320: ~ 30 ms              |                        |                                    |
-| Intel UHD 730  | ~ 10 ms                    | 320: ~ 19 ms 640: ~ 54 ms |                        |                                    |
-| Intel UHD 770  | ~ 15 ms                    | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
-| Intel N100     | ~ 15 ms                    | 320: ~ 25 ms              |                        | Can only run one detector instance |
-| Intel Iris XE  | ~ 10 ms                    | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
-| Intel Arc A380 | ~ 6 ms                     | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
-| Intel Arc A750 | ~ 4 ms                     | 320: ~ 8 ms               |                        |                                    |
+| Name           | MobileNetV2 Inference Time | YOLOv9                                            | YOLO-NAS Inference Time   | RF-DETR Inference Time | Notes                              |
+| -------------- | -------------------------- | ------------------------------------------------- | ------------------------- | ---------------------- | ---------------------------------- |
+| Intel HD 530   | 15 - 35 ms                 |                                                   |                           |                        | Can only run one detector instance |
+| Intel HD 620   | 15 - 25 ms                 |                                                   | 320: ~ 35 ms              |                        |                                    |
+| Intel HD 630   | ~ 15 ms                    |                                                   | 320: ~ 30 ms              |                        |                                    |
+| Intel UHD 730  | ~ 10 ms                    |                                                   | 320: ~ 19 ms 640: ~ 54 ms |                        |                                    |
+| Intel UHD 770  | ~ 15 ms                    | t-320: ~ 16 ms s-320: ~ 20 ms s-640: ~ 40 ms      | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
+| Intel N100     | ~ 15 ms                    | s-320: 30 ms                                      | 320: ~ 25 ms              |                        | Can only run one detector instance |
+| Intel N150     | ~ 15 ms                    | t-320: 16 ms s-320: 24 ms                         |                           |                        |                                    |
+| Intel Iris XE  | ~ 10 ms                    | s-320: 12 ms s-640: 30 ms                         | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
+| Intel Arc A310 | ~ 5 ms                     | t-320: 7 ms t-640: 11 ms s-320: 8 ms s-640: 15 ms | 320: ~ 8 ms 640: ~ 14 ms  |                        |                                    |
+| Intel Arc A380 | ~ 6 ms                     |                                                   | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
+| Intel Arc A750 | ~ 4 ms                     |                                                   | 320: ~ 8 ms               |                        |                                    |
 
 ### TensorRT - Nvidia GPU
 
@@ -160,7 +164,7 @@ Frigate is able to utilize an Nvidia GPU which supports the 12.x series of CUDA 
 
 #### Minimum Hardware Support
 
- 12.x series of CUDA libraries are used which have minor version compatibility. The minimum driver version on the host system must be `>=545`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the NVIDIA GPU Compute Capability table linked below.
+12.x series of CUDA libraries are used which have minor version compatibility. The minimum driver version on the host system must be `>=545`. Also the GPU must support a Compute Capability of `5.0` or greater. This generally correlates to a Maxwell-era GPU or newer, check the NVIDIA GPU Compute Capability table linked below.
 
 Make sure your host system has the [nvidia-container-runtime](https://docs.docker.com/config/containers/resource_constraints/#access-an-nvidia-gpu) installed to pass through the GPU to the container and the host system has a compatible driver installed for your GPU.
 
@@ -180,12 +184,13 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 ✅ - Accelerated with CUDA Graphs
 ❌ - Not accelerated with CUDA Graphs
 
-| Name            | ✅ YOLOv9 Inference Time  | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time |
-| --------------- | ------------------------------------- | ------------------------- | --------------------------- |
-| RTX 3050        | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms   |
-| RTX 3070        | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms    |
-| RTX A4000       |                                       |                           | 320: ~ 15 ms                |
-| Tesla P40       |                                       |                           | 320: ~ 105 ms               |
+| Name      | ✅ YOLOv9 Inference Time              | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time |
+| --------- | ------------------------------------- | ------------------------- | -------------------------- |
+| GTX 1070  | s-320: 16 ms                          |                           | 320: 14 ms                 |
+| RTX 3050  | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms  |
+| RTX 3070  | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms   |
+| RTX A4000 |                                       |                           | 320: ~ 15 ms               |
+| Tesla P40 |                                       |                           | 320: ~ 105 ms              |
 
 ### Apple Silicon
 
@@ -197,19 +202,20 @@ Apple Silicon can not run within a container, so a ZMQ proxy is utilized to comm
 
 :::
 
-| Name      | YOLOv9 Inference Time                |
-| --------- | ------------------------------------ |
-| M4        | s-20: 10 ms                          |
-| M3 Pro    | t-320: 6 ms s-320: 8 ms s-640: 20 ms |
-| M1        | s-320: 9ms                           |
+| Name   | YOLOv9 Inference Time                |
+| ------ | ------------------------------------ |
+| M4     | s-320: 10 ms                         |
+| M3 Pro | t-320: 6 ms s-320: 8 ms s-640: 20 ms |
+| M1     | s-320: 9ms                           |
 
 ### ROCm - AMD GPU
 
 With the [ROCm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-| Name      | YOLOv9 Inference Time     | YOLO-NAS Inference Time   |
-| --------- | ------------------------- | ------------------------- |
-| AMD 780M  | t-320: 14 ms s-320: 20 ms | 320: ~ 25 ms 640: ~ 50 ms |
+| Name      | YOLOv9 Inference Time       | YOLO-NAS Inference Time   |
+| --------- | --------------------------- | ------------------------- |
+| AMD 780M  | t-320: ~ 14 ms s-320: 20 ms | 320: ~ 25 ms 640: ~ 50 ms |
+| AMD 8700G |                             | 320: ~ 20 ms 640: ~ 40 ms |
 
 ## Community Supported Detectors
 
@@ -228,7 +234,7 @@ Detailed information is available [in the detector docs](/configuration/object_d
 The MX3 is a pipelined architecture, where the maximum frames per second supported (and thus supported number of cameras) cannot be calculated as `1/latency` (1/"Inference Time") and is measured separately. When estimating how many camera streams you may support with your configuration, use the **MX3 Total FPS** column to approximate of the detector's limit, not the Inference Time.
 
 | Model                | Input Size | MX3 Inference Time | MX3 Total FPS |
-|----------------------|------------|--------------------|---------------|
+| -------------------- | ---------- | ------------------ | ------------- |
 | YOLO-NAS-Small       | 320        | ~ 9 ms             | ~ 378         |
 | YOLO-NAS-Small       | 640        | ~ 21 ms            | ~ 138         |
 | YOLOv9s              | 320        | ~ 16 ms            | ~ 382         |

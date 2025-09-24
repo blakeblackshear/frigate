@@ -34,6 +34,12 @@ Model IDs are not secret values and can be shared freely. Access to your model i
 
 :::
 
+:::tip
+
+When setting the plus model id, all other fields should be removed as these are configured automatically with the Frigate+ model config
+
+:::
+
 ## Step 4: Adjust your object filters for higher scores
 
 Frigate+ models generally have much higher scores than the default model provided in Frigate. You will likely need to increase your `threshold` and `min_score` values. Here is an example of how these values can be refined, but you should expect these to evolve as your model improves. For more information about how `threshold` and `min_score` are related, see the docs on [object filters](../configuration/object_filters.md#object-scores).

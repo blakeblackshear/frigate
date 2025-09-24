@@ -303,7 +303,7 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
         "-o",
         "-",
         "-s",
-        "1",
+        "1000",  # Intel changed this from seconds to milliseconds in 2024+ versions
     ]
 
     if intel_gpu_device:

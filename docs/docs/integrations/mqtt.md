@@ -29,12 +29,12 @@ Message published for each changed tracked object. The first message is publishe
     "camera": "front_door",
     "frame_time": 1607123961.837752,
     "snapshot": {
-        "frame_time": 1607123965.975463,
-        "box": [415, 489, 528, 700],
-        "area": 12728,
-        "region": [260, 446, 660, 846],
-        "score": 0.77546,
-        "attributes": [],
+      "frame_time": 1607123965.975463,
+      "box": [415, 489, 528, 700],
+      "area": 12728,
+      "region": [260, 446, 660, 846],
+      "score": 0.77546,
+      "attributes": []
     },
     "label": "person",
     "sub_label": null,
@@ -61,6 +61,7 @@ Message published for each changed tracked object. The first message is publishe
     }, // attributes with top score that have been identified on the object at any point
     "current_attributes": [], // detailed data about the current attributes in this frame
     "current_estimated_speed": 0.71, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
+    "average_estimated_speed": 14.3, // average estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
     "velocity_angle": 180, // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
     "recognized_license_plate": "ABC12345", // a recognized license plate for car objects
     "recognized_license_plate_score": 0.933451
@@ -70,12 +71,12 @@ Message published for each changed tracked object. The first message is publishe
     "camera": "front_door",
     "frame_time": 1607123962.082975,
     "snapshot": {
-        "frame_time": 1607123965.975463,
-        "box": [415, 489, 528, 700],
-        "area": 12728,
-        "region": [260, 446, 660, 846],
-        "score": 0.77546,
-        "attributes": [],
+      "frame_time": 1607123965.975463,
+      "box": [415, 489, 528, 700],
+      "area": 12728,
+      "region": [260, 446, 660, 846],
+      "score": 0.77546,
+      "attributes": []
     },
     "label": "person",
     "sub_label": ["John Smith", 0.79],
@@ -109,6 +110,7 @@ Message published for each changed tracked object. The first message is publishe
       }
     ],
     "current_estimated_speed": 0.77, // current estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
+    "average_estimated_speed": 14.31, // average estimated speed (mph or kph) for objects moving through zones with speed estimation enabled
     "velocity_angle": 180, // direction of travel relative to the frame for objects moving through zones with speed estimation enabled
     "recognized_license_plate": "ABC12345", // a recognized license plate for car objects
     "recognized_license_plate_score": 0.933451
