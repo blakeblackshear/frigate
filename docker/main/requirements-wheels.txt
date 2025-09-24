@@ -24,6 +24,7 @@ peewee == 3.17.*
 peewee_migrate == 1.13.*
 psutil == 7.1.*
 pydantic == 2.10.*
+ultralytics == 8.3.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 pytz == 2025.*
 pyzmq == 26.2.*

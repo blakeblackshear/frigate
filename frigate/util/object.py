@@ -221,6 +221,12 @@ def is_object_filtered(obj, objects_to_track, object_filters):
     object_ratio = obj[4]
 
     if object_name not in objects_to_track:
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "Filtered detection '%s' - not in track list %s",
+                object_name,
+                list(objects_to_track),
+            )
         return True
 
     if object_name in object_filters:
@@ -229,23 +235,58 @@ def is_object_filtered(obj, objects_to_track, object_filters):
         # if the min area is larger than the
         # detected object, don't add it to detected objects
         if obj_settings.min_area > object_area:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Filtered detection '%s' - area %.2f below min_area %.2f",
+                    object_name,
+                    object_area,
+                    obj_settings.min_area,
+                )
             return True
 
         # if the detected object is larger than the
         # max area, don't add it to detected objects
         if obj_settings.max_area < object_area:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Filtered detection '%s' - area %.2f above max_area %.2f",
+                    object_name,
+                    object_area,
+                    obj_settings.max_area,
+                )
             return True
 
         # if the score is lower than the min_score, skip
         if obj_settings.min_score > object_score:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Filtered detection '%s' - score %.3f below min_score %.3f",
+                    object_name,
+                    object_score,
+                    obj_settings.min_score,
+                )
             return True
 
         # if the object is not proportionally wide enough
         if obj_settings.min_ratio > object_ratio:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Filtered detection '%s' - ratio %.3f below min_ratio %.3f",
+                    object_name,
+                    object_ratio,
+                    obj_settings.min_ratio,
+                )
             return True
 
         # if the object is proportionally too wide
         if obj_settings.max_ratio < object_ratio:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Filtered detection '%s' - ratio %.3f above max_ratio %.3f",
+                    object_name,
+                    object_ratio,
+                    obj_settings.max_ratio,
+                )
             return True
 
         if obj_settings.mask is not None:
@@ -262,6 +303,13 @@ def is_object_filtered(obj, objects_to_track, object_filters):
 
             # if the object is in a masked location, don't add it to detected objects
             if obj_settings.mask[y_location][x_location] == 0:
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug(
+                        "Filtered detection '%s' - masked at (%d,%d)",
+                        object_name,
+                        x_location,
+                        y_location,
+                    )
                 return True
 
     return False

@@ -58,7 +58,7 @@ This does not affect using hardware for accelerating other tasks such as [semant
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `memryx`, `onnx`, `openvino`, `rknn`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `memryx`, `onnx`, `openvino`, `rknn`, `tensorrt`, and `ultralytics_pose`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 
@@ -137,6 +137,27 @@ detectors:
   coral_pci:
     type: edgetpu
     device: pci
+```
+
+---
+
+## Ultralytics Pose Detector
+
+The Ultralytics Pose detector runs a YOLO pose model and depends on the `ultralytics` package. To configure an Ultralytics Pose detector, set the `"type"` attribute to `"ultralytics_pose"`.
+
+:::note
+The `model_type` must be set to `yolo-pose` for this detector to work correctly.
+:::
+
+### Configuration
+
+```yaml
+detectors:
+  pose:
+    type: ultralytics_pose
+    device: cpu # or cuda for nvidia gpus
+    half_precision: False # optional, runs the model in half precision (GPU only)
+    max_detections: 20 # optional, maximum number of detections to return
 ```
 
 ---

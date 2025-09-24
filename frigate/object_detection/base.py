@@ -380,18 +380,43 @@ class RemoteObjectDetector:
         # copy input to shared memory
         self.np_shm[:] = tensor_input[:]
         self.detection_queue.put(self.name)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Detector %s queued frame for inference", self.name)
         result = self.detector_subscriber.check_for_update()
 
         # if it timed out
         if result is None:
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("Detector %s timed out waiting for inference result", self.name)
             return detections
 
         for d in self.out_np_shm:
             if d[1] < threshold:
+                if logger.isEnabledFor(logging.DEBUG) and d[1] != 0.0:
+                    logger.debug(
+                        "Detector %s stopping at class=%s conf=%.3f below threshold %.3f",
+                        self.name,
+                        int(d[0]),
+                        float(d[1]),
+                        threshold,
+                    )
                 break
-            detections.append(
-                (self.labels[int(d[0])], float(d[1]), (d[2], d[3], d[4], d[5]))
-            )
+            class_id = int(d[0])
+            label = self.labels.get(class_id, f"unknown_{class_id}")
+            confidence = float(d[1])
+            box = (d[2], d[3], d[4], d[5])
+
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "Detector %s detection label=%s class=%s conf=%.3f box=%s",
+                    self.name,
+                    label,
+                    class_id,
+                    confidence,
+                    box,
+                )
+
+            detections.append((label, confidence, box))
         self.fps.update()
         return detections
 
