@@ -5,14 +5,14 @@ import frigateHttpApiSidebar from "./docs/integrations/api/sidebar";
 const sidebars: SidebarsConfig = {
   docs: {
     Frigate: [
-      'frigate/index',
-      'frigate/hardware',
-      'frigate/planning_setup',
-      'frigate/installation',
-      'frigate/updating',
-      'frigate/camera_setup',
-      'frigate/video_pipeline',
-      'frigate/glossary',
+      "frigate/index",
+      "frigate/hardware",
+      "frigate/planning_setup",
+      "frigate/installation",
+      "frigate/updating",
+      "frigate/camera_setup",
+      "frigate/video_pipeline",
+      "frigate/glossary",
     ],
     Guides: [
       "guides/getting_started",
@@ -28,7 +28,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "link",
           label: "Go2RTC Configuration Reference",
-          href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.9#configuration",
+          href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.10#configuration",
         } as PropSidebarItemLink,
       ],
       Detectors: [
@@ -119,11 +119,11 @@ const sidebars: SidebarsConfig = {
       "configuration/metrics",
       "integrations/third_party_extensions",
     ],
-    'Frigate+': [
-      'plus/index',
-      'plus/annotating',
-      'plus/first_model',
-      'plus/faq',
+    "Frigate+": [
+      "plus/index",
+      "plus/annotating",
+      "plus/first_model",
+      "plus/faq",
     ],
     Troubleshooting: [
       "troubleshooting/faqs",
