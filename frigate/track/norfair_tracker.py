@@ -47,12 +47,12 @@ class StationaryMotionClassifier:
     SHIFT_KEEP_THRESHOLD = 0.02  # Small shift = keep stationary
     SHIFT_ACTIVE_THRESHOLD = 0.04  # Large shift = consider active
     DRIFT_ACTIVE_THRESHOLD = 0.12  # Cumulative drift over 5 frames
-    DISAGREE_FRAMES_TO_FLIP = 2
+    CHANGED_FRAMES_TO_FLIP = 2
 
     def __init__(self) -> None:
         self.anchor_crops: dict[str, np.ndarray] = {}
         self.anchor_boxes: dict[str, tuple[int, int, int, int]] = {}
-        self.disagree_counts: dict[str, int] = {}
+        self.changed_counts: dict[str, int] = {}
         self.shift_histories: dict[str, list[float]] = {}
 
         # Pre-compute Hanning window for phase correlation
@@ -64,7 +64,7 @@ class StationaryMotionClassifier:
             del self.anchor_crops[id]
         if id in self.anchor_boxes:
             del self.anchor_boxes[id]
-        self.disagree_counts[id] = 0
+        self.changed_counts[id] = 0
         self.shift_histories[id] = []
 
     def _extract_y_crop(
@@ -98,7 +98,7 @@ class StationaryMotionClassifier:
         if id not in self.anchor_crops:
             self.anchor_boxes[id] = median_box
             self.anchor_crops[id] = self._extract_y_crop(yuv_frame, median_box)
-            self.disagree_counts[id] = 0
+            self.changed_counts[id] = 0
             self.shift_histories[id] = []
 
     def on_active(self, id: str) -> None:
@@ -139,7 +139,7 @@ class StationaryMotionClassifier:
 
         # Early exit for clear stationary case
         if ncc >= self.NCC_KEEP_THRESHOLD and shift_norm < self.SHIFT_KEEP_THRESHOLD:
-            self.disagree_counts[id] = 0
+            self.changed_counts[id] = 0
             return True
 
         # Check for movement indicators
@@ -150,15 +150,15 @@ class StationaryMotionClassifier:
         )
 
         if movement_detected:
-            cnt = self.disagree_counts.get(id, 0) + 1
-            self.disagree_counts[id] = cnt
+            cnt = self.changed_counts.get(id, 0) + 1
+            self.changed_counts[id] = cnt
             if (
-                cnt >= self.DISAGREE_FRAMES_TO_FLIP
+                cnt >= self.CHANGED_FRAMES_TO_FLIP
                 or drift_sum >= self.DRIFT_ACTIVE_THRESHOLD
             ):
                 return False
         else:
-            self.disagree_counts[id] = 0
+            self.changed_counts[id] = 0
 
         return True
 
