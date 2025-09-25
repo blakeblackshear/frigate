@@ -4,7 +4,9 @@ on:
   pull_request:
     paths-ignore:
       - "docs/**"
-      - ".github/**"
+      - ".github/*.yml"
+      - ".github/DISCUSSION_TEMPLATE/**"
+      - ".github/ISSUE_TEMPLATE/**"
 
 env:
   DEFAULT_PYTHON: 3.11
