@@ -449,12 +449,13 @@ The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv
 
 :::
 
-After placing the downloaded onnx model in your config folder, you can use the following configuration:
+When Frigate is started with the following config it will connect to the detector client and transfer the model automatically:
 
 ```yaml
 detectors:
-  onnx:
-    type: onnx
+  apple-silicon:
+    type: zmq
+    endpoint: tcp://host.docker.internal:5555
 
 model:
   model_type: yolo-generic
