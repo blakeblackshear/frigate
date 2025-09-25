@@ -171,7 +171,8 @@ Rules for the report:
 
 - Event details
   - Present events in chronological order as a bullet list.
-  - Merge events with overlapping or identical timestamps into a single bullet.
+  - **If multiple events occur within the same minute or overlapping time range, COMBINE them into a single bullet.**
+    - Summarize the distinct activities as sub-points under the shared timestamp.
   - If no timestamp is given, preserve order but label as “Time not specified.”
   - Use bold timestamps for clarity.
   - Group bullets under subheadings when multiple events fall into the same category (e.g., Vehicle Activity, Porch Activity, Unusual Behavior).
