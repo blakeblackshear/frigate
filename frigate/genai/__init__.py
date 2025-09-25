@@ -99,7 +99,7 @@ Sequence details:
 **IMPORTANT:**
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
 {get_language_prompt()}
-        """
+"""
         logger.debug(
             f"Sending {len(thumbnails)} images to create review description on {review_data['camera']}"
         )
@@ -146,7 +146,11 @@ Sequence details:
             return None
 
     def generate_review_summary(
-        self, start_ts: float, end_ts: float, segments: list[dict[str, Any]]
+        self,
+        start_ts: float,
+        end_ts: float,
+        segments: list[dict[str, Any]],
+        debug_save: bool,
     ) -> str | None:
         """Generate a summary of review item descriptions over a period of time."""
         time_range = f"{datetime.datetime.fromtimestamp(start_ts).strftime('%I:%M %p')} to {datetime.datetime.fromtimestamp(end_ts).strftime('%I:%M %p')}"
@@ -168,12 +172,30 @@ Rules:
 - If no threats: "Final assessment: Only normal activity observed during this period."
 - No commentary, questions, or recommendations.
 - Output only the report.
-        """
+"""
 
         for item in segments:
             timeline_summary_prompt += f"\n{item}"
 
-        return self._send(timeline_summary_prompt, [])
+        if debug_save:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, "genai-requests", f"{start_ts}-{end_ts}", "prompt.txt"
+                ),
+                "w",
+            ) as f:
+                f.write(timeline_summary_prompt)
+
+        response = self._send(timeline_summary_prompt, [])
+
+        if debug_save and response:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, "genai-requests", f"{start_ts}-{end_ts}", "response.txt"
+                ),
+                "w",
+            ) as f:
+                f.write(response)
 
     def generate_object_description(
         self,
