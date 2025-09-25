@@ -287,6 +287,9 @@ detect:
   max_disappeared: 25
   # Optional: Configuration for stationary object tracking
   stationary:
+    # Optional: Stationary classifier that uses visual characteristics to determine if an object
+    # is stationary even if the box changes enough to be considered motion (default: shown below).
+    classifier: True
     # Optional: Frequency for confirming stationary objects (default: same as threshold)
     # When set to 1, object detection will run to confirm the object still exists on every frame.
     # If set to 10, object detection will run to confirm the object still exists on every 10th frame.

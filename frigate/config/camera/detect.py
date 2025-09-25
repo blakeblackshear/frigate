@@ -29,6 +29,10 @@ class StationaryConfig(FrigateBaseModel):
         default_factory=StationaryMaxFramesConfig,
         title="Max frames for stationary objects.",
     )
+    classifier: bool = Field(
+        default=True,
+        title="Enable visual classifier for determing if objects with jittery bounding boxes are stationary.",
+    )
 
 
 class DetectConfig(FrigateBaseModel):
