@@ -5,7 +5,6 @@ from typing import Any, Sequence, cast
 
 import cv2
 import numpy as np
-from frigate.track.stationary_classifier import StationaryMotionClassifier
 from norfair.drawing.draw_boxes import draw_boxes
 from norfair.drawing.drawer import Drawable, Drawer
 from norfair.filter import OptimizedKalmanFilterFactory
@@ -13,12 +12,12 @@ from norfair.tracker import Detection, TrackedObject, Tracker
 from rich import print
 from rich.console import Console
 from rich.table import Table
-from scipy.ndimage import gaussian_filter
 
 from frigate.camera import PTZMetrics
 from frigate.config import CameraConfig
 from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
+from frigate.track.stationary_classifier import StationaryMotionClassifier
 from frigate.util.image import (
     SharedMemoryFrameManager,
     get_histogram,

@@ -80,7 +80,7 @@ class StationaryMotionClassifier:
             y1,
             x2,
             y2,
-            crop.shape if 'crop' in locals() else None,
+            crop.shape if "crop" in locals() else None,
         )
         return result
 
@@ -115,9 +115,7 @@ class StationaryMotionClassifier:
         """
 
         if id not in self.anchor_crops or id not in self.anchor_boxes:
-            logger.debug(
-                "evaluate: id=%s has no anchor; default keep stationary", id
-            )
+            logger.debug("evaluate: id=%s has no anchor; default keep stationary", id)
             return True
 
         # Compare same spatial region across frames
