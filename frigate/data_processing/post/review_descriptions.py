@@ -93,7 +93,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
                 if camera_config.review.genai.debug_save_thumbnails:
                     id = data["after"]["id"]
-                    Path(os.path.join(CLIPS_DIR, f"genai-requests/{id}")).mkdir(
+                    Path(os.path.join(CLIPS_DIR, "genai-requests", f"{id}")).mkdir(
                         parents=True, exist_ok=True
                     )
                     shutil.copy(
@@ -157,11 +157,16 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             if not important_items:
                 return "No concerns were found during this time period."
 
+            if self.config.review.genai.debug_save_thumbnails:
+                Path(
+                    os.path.join(CLIPS_DIR, "genai-requests", f"{start_ts}-{end_ts}")
+                ).mkdir(parents=True, exist_ok=True)
+
             return self.genai_client.generate_review_summary(
                 start_ts,
                 end_ts,
                 important_items,
-                self.camera_config.review.genai.debug_save_thumbnails,
+                self.config.review.genai.debug_save_thumbnails,
             )
         else:
             return None
