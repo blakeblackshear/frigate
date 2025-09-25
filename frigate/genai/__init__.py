@@ -154,7 +154,7 @@ Sequence details:
         debug_save: bool,
     ) -> str | None:
         """Generate a summary of review item descriptions over a period of time."""
-        time_range = f"{datetime.datetime.fromtimestamp(start_ts).strftime('%I:%M %p')} to {datetime.datetime.fromtimestamp(end_ts).strftime('%I:%M %p')}"
+        time_range = f"{datetime.datetime.fromtimestamp(start_ts).strftime('%B %d, %Y at %I:%M %p')} to {datetime.datetime.fromtimestamp(end_ts).strftime('%B %d, %Y at %I:%M %p')}"
         timeline_summary_prompt = f"""
 You are a security officer.
 Time range: {time_range}.
