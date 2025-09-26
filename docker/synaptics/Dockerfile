@@ -10,7 +10,7 @@ FROM wheels AS synap1680-wheels
 ARG TARGETARCH
 
 # Install dependencies
-RUN wget -qO- "https://github.com/GaryHuang-ASUS/frigate-synaptics-rt/releases/download/v1.5.0-1.0/synaptics-rt-1.0.tar" | tar -C / -xzf -
+RUN wget -qO- "https://github.com/GaryHuang-ASUS/synaptics_astra_sdk/releases/download/v1.5.0/Synaptics-SL1680-v1.5.0-rt.tar" | tar -C / -xzf -
 RUN wget -P /wheels/ "https://github.com/synaptics-synap/synap-python/releases/download/v0.0.4-preview/synap_python-0.0.4-cp311-cp311-manylinux_2_35_aarch64.whl"
 
 FROM deps AS synap1680-deps
