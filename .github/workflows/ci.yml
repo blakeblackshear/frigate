@@ -173,6 +173,31 @@ jobs:
           set: |
             rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
+  synaptics_build:
+    runs-on: ubuntu-22.04-arm
+    name: Synaptics Build
+    needs:
+      - arm64_build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Synaptics build
+        uses: docker/bake-action@v6
+        with:
+          source: .
+          push: true
+          targets: synaptics
+          files: docker/synaptics/synaptics.hcl
+          set: |
+            synaptics.tags=${{ steps.setup.outputs.image-name }}-synaptics
+            *.cache-from=type=gha
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
