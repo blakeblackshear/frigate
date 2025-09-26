@@ -1,0 +1,12 @@
+var nl = {};
+module['exports'] = nl;
+nl.title = "Dutch";
+nl.address = require("./address");
+nl.commerce = require("./commerce");
+nl.company = require("./company");
+nl.date = require("./date");
+nl.hacker = require("./hacker");
+nl.internet = require("./internet");
+nl.lorem = require("./lorem");
+nl.name = require("./name");
+nl.phone_number = require("./phone_number");

@@ -1,0 +1,108 @@
+{
+    "name": "@types/node-forge",
+    "version": "1.3.14",
+    "description": "TypeScript definitions for node-forge",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node-forge",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Seth Westphal      ",
+            "githubUsername": "westy92",
+            "url": "https://github.com/westy92"
+        },
+        {
+            "name": "Kay Schecker       ",
+            "githubUsername": "flynetworks",
+            "url": "https://github.com/flynetworks"
+        },
+        {
+            "name": "Aakash Goenka      ",
+            "githubUsername": "a-k-g",
+            "url": "https://github.com/a-k-g"
+        },
+        {
+            "name": "Rafal2228          ",
+            "githubUsername": "rafal2228",
+            "url": "https://github.com/rafal2228"
+        },
+        {
+            "name": "Beeno Tung         ",
+            "githubUsername": "beenotung",
+            "url": "https://github.com/beenotung"
+        },
+        {
+            "name": "Joe Flateau        ",
+            "githubUsername": "joeflateau",
+            "url": "https://github.com/joeflateau"
+        },
+        {
+            "name": "timhwang21         ",
+            "githubUsername": "timhwang21",
+            "url": "https://github.com/timhwang21"
+        },
+        {
+            "name": "Anders Kaseorg     ",
+            "githubUsername": "andersk",
+            "url": "https://github.com/andersk"
+        },
+        {
+            "name": "Sascha Zarhuber    ",
+            "githubUsername": "saschazar21",
+            "url": "https://github.com/saschazar21"
+        },
+        {
+            "name": "Rogier Schouten    ",
+            "githubUsername": "rogierschouten",
+            "url": "https://github.com/rogierschouten"
+        },
+        {
+            "name": "Ivan Aseev         ",
+            "githubUsername": "aseevia",
+            "url": "https://github.com/aseevia"
+        },
+        {
+            "name": "Wiktor Kwapisiewicz",
+            "githubUsername": "wiktor-k",
+            "url": "https://github.com/wiktor-k"
+        },
+        {
+            "name": "Ligia Frangello    ",
+            "githubUsername": "frangello",
+            "url": "https://github.com/frangello"
+        },
+        {
+            "name": "Dmitry Avezov      ",
+            "githubUsername": "avezov",
+            "url": "https://github.com/avezov"
+        },
+        {
+            "name": "Jose Fuentes       ",
+            "githubUsername": "j-fuentes",
+            "url": "https://github.com/j-fuentes"
+        },
+        {
+            "name": "Anya Reyes         ",
+            "githubUsername": "darkade",
+            "url": "https://github.com/darkade"
+        },
+        {
+            "name": "BendingBender      ",
+            "githubUsername": "BendingBender",
+            "url": "https://github.com/BendingBender"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/node-forge"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*"
+    },
+    "peerDependencies": {},
+    "typesPublisherContentHash": "3850fefa5749c4445206076acefb67e5fa8dc76a45e03c7a668914788eb1d9af",
+    "typeScriptVersion": "5.2"
+}

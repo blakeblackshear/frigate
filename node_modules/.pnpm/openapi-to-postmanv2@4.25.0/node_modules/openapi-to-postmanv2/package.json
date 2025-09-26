@@ -1,0 +1,160 @@
+{
+  "name": "openapi-to-postmanv2",
+  "version": "4.25.0",
+  "description": "Convert a given OpenAPI specification to Postman Collection v2.0",
+  "homepage": "https://github.com/postmanlabs/openapi-to-postman",
+  "bugs": "https://github.com/postmanlabs/openapi-to-postman/issues",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/postmanlabs/openapi-to-postman.git"
+  },
+  "keywords": [
+    "openapi",
+    "postman",
+    "api",
+    "schema",
+    "swagger",
+    "oas"
+  ],
+  "com_postman_plugin": {
+    "plugin_type": "importer",
+    "name": "OPENAPI 3.0",
+    "source_format": "OPENAPI3.0",
+    "source_format_name": "OpenAPI 3.0",
+    "sample_input": {
+      "type": "json",
+      "data": {
+        "openapi": "3.0.0",
+        "info": {
+          "version": "1.0.0",
+          "title": "Swagger Petstore",
+          "license": {
+            "name": "MIT"
+          }
+        },
+        "servers": [
+          {
+            "url": "http://petstore.swagger.io/v1"
+          }
+        ],
+        "paths": {
+          "/pets": {
+            "get": {
+              "summary": "List all pets",
+              "operationId": "listPets",
+              "tags": [
+                "pets"
+              ],
+              "parameters": [
+                {
+                  "name": "limit",
+                  "in": "query",
+                  "description": "How many items to return at one time (max 100)",
+                  "required": false,
+                  "schema": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "An paged array of pets",
+                  "headers": {
+                    "x-next": {
+                      "description": "A link to the next page of responses",
+                      "schema": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/Pets"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "components": {
+          "schemas": {
+            "Pet": {
+              "required": [
+                "id",
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            },
+            "Pets": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "engines": {
+    "node": ">=8"
+  },
+  "main": "index.js",
+  "bin": {
+    "openapi2postmanv2": "./bin/openapi2postmanv2.js"
+  },
+  "dependencies": {
+    "ajv": "8.11.0",
+    "ajv-draft-04": "1.0.0",
+    "ajv-formats": "2.1.1",
+    "async": "3.2.4",
+    "commander": "2.20.3",
+    "graphlib": "2.1.8",
+    "js-yaml": "4.1.0",
+    "json-pointer": "0.6.2",
+    "json-schema-merge-allof": "0.8.1",
+    "lodash": "4.17.21",
+    "neotraverse": "0.6.15",
+    "oas-resolver-browser": "2.5.6",
+    "object-hash": "3.0.0",
+    "path-browserify": "1.0.1",
+    "postman-collection": "^4.4.0",
+    "swagger2openapi": "7.0.8",
+    "yaml": "1.10.2"
+  },
+  "author": "Postman Labs <help@getpostman.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "chai": "4.3.6",
+    "editorconfig": "0.15.3",
+    "eslint": "5.16.0",
+    "eslint-plugin-jsdoc": "3.8.0",
+    "eslint-plugin-mocha": "5.3.0",
+    "eslint-plugin-security": "1.5.0",
+    "expect.js": "0.3.1",
+    "mocha": "7.2.0",
+    "nyc": "15.1.0",
+    "parse-gitignore": "0.5.1"
+  },
+  "scripts": {
+    "test": "./scripts/test.sh",
+    "test-unit": "nyc --reporter=text -x **/assets/** -x **/test/** ./node_modules/mocha/bin/mocha --timeout 90000 \"test/unit/**/**.test.js\"",
+    "test-lint": "./scripts/test-lint.sh",
+    "test-system": "./node_modules/mocha/bin/mocha -x **/assets/** -x **/test/** \"test/system/**.test.js\"",
+    "test-regression": "./node_modules/mocha/bin/mocha test/integration/integration.test.js test/unit/sanity.test.js",
+    "release": "./scripts/release.sh",
+    "coverage": "nyc report --reporter=html --reporter=text mocha"
+  }
+}

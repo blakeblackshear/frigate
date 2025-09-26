@@ -1,0 +1,5 @@
+import * as ts from 'typescript';
+/*** Indicates whether identifiers require the use of quotation marks when accessing property definitions and dot notation. */
+declare function requiresQuoting(name: string, target?: ts.ScriptTarget): boolean;
+export { requiresQuoting };
+//# sourceMappingURL=requiresQuoting.d.ts.map

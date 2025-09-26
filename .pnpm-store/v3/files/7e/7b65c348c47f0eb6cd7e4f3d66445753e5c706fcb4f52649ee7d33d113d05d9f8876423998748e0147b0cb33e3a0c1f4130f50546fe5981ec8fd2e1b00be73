@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/use-escape-keydown.tsx"],
+  "sourcesContent": ["import * as React from 'react';\nimport { useCallbackRef } from '@radix-ui/react-use-callback-ref';\n\n/**\n * Listens for when the escape key is down\n */\nfunction useEscapeKeydown(\n  onEscapeKeyDownProp?: (event: KeyboardEvent) => void,\n  ownerDocument: Document = globalThis?.document\n) {\n  const onEscapeKeyDown = useCallbackRef(onEscapeKeyDownProp);\n\n  React.useEffect(() => {\n    const handleKeyDown = (event: KeyboardEvent) => {\n      if (event.key === 'Escape') {\n        onEscapeKeyDown(event);\n      }\n    };\n    ownerDocument.addEventListener('keydown', handleKeyDown, { capture: true });\n    return () => ownerDocument.removeEventListener('keydown', handleKeyDown, { capture: true });\n  }, [onEscapeKeyDown, ownerDocument]);\n}\n\nexport { useEscapeKeydown };\n"],
+  "mappings": ";AAAA,YAAY,WAAW;AACvB,SAAS,sBAAsB;AAK/B,SAAS,iBACP,qBACA,gBAA0B,YAAY,UACtC;AACA,QAAM,kBAAkB,eAAe,mBAAmB;AAE1D,EAAM,gBAAU,MAAM;AACpB,UAAM,gBAAgB,CAAC,UAAyB;AAC9C,UAAI,MAAM,QAAQ,UAAU;AAC1B,wBAAgB,KAAK;AAAA,MACvB;AAAA,IACF;AACA,kBAAc,iBAAiB,WAAW,eAAe,EAAE,SAAS,KAAK,CAAC;AAC1E,WAAO,MAAM,cAAc,oBAAoB,WAAW,eAAe,EAAE,SAAS,KAAK,CAAC;AAAA,EAC5F,GAAG,CAAC,iBAAiB,aAAa,CAAC;AACrC;",
+  "names": []
+}

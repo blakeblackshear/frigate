@@ -1,0 +1,11 @@
+export declare function RGBComponent(val: number): number;
+export declare function alphaComponent(val: number): number;
+export declare function getNumberValidator<T>(): ((val: T, attr: string) => T) | undefined;
+export declare function getNumberOrArrayOfNumbersValidator<T>(noOfElements: number): ((val: T, attr: string) => T) | undefined;
+export declare function getNumberOrAutoValidator<T>(): ((val: T, attr: string) => T) | undefined;
+export declare function getStringValidator<T>(): ((val: T, attr: string) => T) | undefined;
+export declare function getStringOrGradientValidator<T>(): ((val: T, attr: string) => T) | undefined;
+export declare function getFunctionValidator<T>(): ((val: T, attr: string) => T) | undefined;
+export declare function getNumberArrayValidator<T>(): ((val: T, attr: string) => T) | undefined;
+export declare function getBooleanValidator<T>(): ((val: T, attr: string) => T) | undefined;
+export declare function getComponentValidator<T>(components: string[]): ((val: T, attr: string) => T) | undefined;

@@ -1,0 +1,62 @@
+{
+  "name": "css-declaration-sorter",
+  "version": "7.3.0",
+  "description": "Sorts CSS declarations fast and automatically in a certain order.",
+  "type": "module",
+  "exports": {
+    "import": {
+      "types": "./src/core/main.d.mts",
+      "default": "./src/core/main.mjs"
+    },
+    "require": {
+      "types": "./src/core/main.d.cts",
+      "default": "./dist/main.cjs"
+    }
+  },
+  "types": "./src/core/main.d.cts",
+  "main": "./dist/main.cjs",
+  "files": [
+    "src/core/",
+    "src/orders/",
+    "dist/"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "preversion": "npm test",
+    "test": "uvu src .+\\.test\\.mjs",
+    "test:ci": "npm test && npm run lint -- --max-warnings 0",
+    "lint": "eslint src/core/*.mjs",
+    "scrape": "node src/property-scraper.mjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@mdn/browser-compat-data": "^7.1.6",
+    "@rollup/plugin-dynamic-import-vars": "^2.1.5",
+    "eslint": "^9.35.0",
+    "postcss": "^8.5.6",
+    "rollup": "^4.50.0",
+    "uvu": "^0.5.6"
+  },
+  "peerDependencies": {
+    "postcss": "^8.0.9"
+  },
+  "engines": {
+    "node": "^14 || ^16 || >=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Siilwyn/css-declaration-sorter.git"
+  },
+  "author": "Selwyn <talk@selwyn.cc> (https://selwyn.cc/)",
+  "license": "ISC",
+  "keywords": [
+    "postcss",
+    "postcss-plugin",
+    "css",
+    "declaration",
+    "sorter",
+    "property",
+    "order"
+  ]
+}

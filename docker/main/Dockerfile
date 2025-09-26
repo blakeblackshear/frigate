@@ -290,13 +290,13 @@ COPY docker/main/fake_frigate_run /etc/s6-overlay/s6-rc.d/frigate/run
 RUN mkdir -p /opt/frigate \
     && ln -svf /workspace/frigate/frigate /opt/frigate/frigate
 
-# Install Node 20
+# Install Node 20 and pnpm
 RUN curl -SLO https://deb.nodesource.com/nsolid_setup_deb.sh && \
     chmod 500 nsolid_setup_deb.sh && \
     ./nsolid_setup_deb.sh 20 && \
     apt-get install nodejs -y \
     && rm -rf /var/lib/apt/lists/* \
-    && npm install -g npm@10
+    && npm install -g pnpm@9
 
 WORKDIR /workspace/frigate
 
@@ -316,12 +316,15 @@ CMD ["sleep", "infinity"]
 # This should be architecture agnostic, so speed up the build on multiarch by not using QEMU.
 FROM --platform=$BUILDPLATFORM node:20 AS web-build
 
+# Install pnpm
+RUN npm install -g pnpm@9
+
 WORKDIR /work
-COPY web/package.json web/package-lock.json ./
-RUN npm install
+COPY web/package.json web/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY web/ ./
-RUN npm run build \
+RUN pnpm run build \
     && mv dist/BASE_PATH/monacoeditorwork/* dist/assets/ \
     && rm -rf dist/BASE_PATH
 

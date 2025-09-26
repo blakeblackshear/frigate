@@ -1,0 +1,19 @@
+{
+  "name": "@esbuild/netbsd-x64",
+  "version": "0.25.10",
+  "description": "The NetBSD AMD64 binary for esbuild, a JavaScript bundler.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evanw/esbuild.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "netbsd"
+  ],
+  "cpu": [
+    "x64"
+  ]
+}

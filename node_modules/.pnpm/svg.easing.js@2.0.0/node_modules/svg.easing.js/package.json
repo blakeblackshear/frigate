@@ -1,0 +1,41 @@
+{
+  "name": "svg.easing.js",
+  "version": "2.0.0",
+  "description": "Additional easing equations for the fx module in the svgjs.com library",
+  "main": "dist/svg.easing.js",
+  "keywords": [
+    "svg.js",
+    "easing"
+  ],
+  "bugs": "https://github.com/wout/svg.easing.js/issues",
+  "license": "MIT",
+  "author": {
+    "name": "Wout Fierens"
+  },
+  "contributors": [
+    { "name": "Wout Fierens" }
+  ],
+  "homepage": "https://github.com/wout/svg.easing.js",
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wout/svg.easing.js.git"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "devDependencies": {
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-watch": "~0.4.0",
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-contrib-copy": "^0.7.0",
+    "grunt": "~0.4.5",
+    "grunt-bumper": "^1.0.4"
+  },
+  "dependencies": {
+    "svg.js":">=2.3.x"
+  }
+}

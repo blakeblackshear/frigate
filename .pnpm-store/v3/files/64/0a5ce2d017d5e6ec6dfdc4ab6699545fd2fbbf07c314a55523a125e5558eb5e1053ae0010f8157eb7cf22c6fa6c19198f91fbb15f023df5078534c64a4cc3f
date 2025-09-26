@@ -1,0 +1,27 @@
+{
+    "name": "@types/estree-jsx",
+    "version": "1.0.5",
+    "description": "TypeScript definitions for estree-jsx",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/estree-jsx",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Tony Ross",
+            "githubUsername": "antross",
+            "url": "https://github.com/antross"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/estree-jsx"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/estree": "*"
+    },
+    "typesPublisherContentHash": "42fda803cc34f935c5a60a45e66b78e18fac56ef350d2d47c00759e16d4fef7f",
+    "typeScriptVersion": "4.6"
+}

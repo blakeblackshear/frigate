@@ -1,0 +1,63 @@
+name: CI
+on:
+  push:
+    branches:
+      - "+([0-9])?(.{+([0-9]),x}).x"
+      - "main"
+      - "master"
+      - "ci"
+      - "test"
+      - "next"
+      - "next-major"
+      - "beta"
+      - "alpha"
+      - "!all-contributors/**"
+  pull_request: {}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["14", "16", "17"]
+    name: Build & test (Node ${{ matrix.node }})
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+
+      # Install & build & test:
+      - run: npm install
+      - run: npm test
+      - run: npm run type:check
+      - run: npm run prettier:check
+      - run: npm run build
+      - run: npm pack
+      # Run the tests in the examples folder
+      # redux-saga:
+      - run: |
+          cd examples/redux-saga
+          npm install
+          npm install ../../jest-websocket-mock-*
+          npm test -- --coverage
+      # hooks:
+      - run: |
+          cd examples/hooks
+          npm install
+          npm install ../../jest-websocket-mock-*
+          npm test -- --coverage
+
+  coverage:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - run: npm install
+      - run: npm install -g codecov
+      - run: npm test -- --coverage
+      - run: codecov

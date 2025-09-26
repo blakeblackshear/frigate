@@ -1,0 +1,38 @@
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - git config --global core.autocrlf input
+
+# environment variables
+environment:
+  matrix:
+    - nodejs_version: "4"
+    - nodejs_version: "5"
+    - nodejs_version: "6"
+
+# scripts that run after cloning repository
+install:
+  - ps: Install-Product node $env:nodejs_version
+  - npm install
+
+build: off # Disable MSBuilds, not related to the regular build process
+
+# to run your custom scripts instead of automatic tests
+test_script:
+  - node --version && npm --version
+  - cmd: "npm test"
+
+# to disable deployment
+deploy: off
+
+#---------------------------------#
+#         notifications           #
+#---------------------------------#
+
+notifications:
+  - provider: Slack
+    incoming_webhook:
+      secure: PRDZ1nhG/cQrwMgCLXsWvTDJtYxv78GJrSlVYpMzpUploVWDzBlpMqmFr9WxZQkY/lxsqCSpGX4zgTYzlte1WMWnghqTIFE8u7svlXHa/tk=

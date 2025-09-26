@@ -1,0 +1,35 @@
+{
+  "name": "postcss-reduce-transforms",
+  "version": "6.0.2",
+  "description": "Reduce transform functions with PostCSS.",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "LICENSE-MIT",
+    "src",
+    "types"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/cssnano/cssnano",
+  "author": {
+    "name": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info"
+  },
+  "repository": "cssnano/cssnano",
+  "dependencies": {
+    "postcss-value-parser": "^4.2.0"
+  },
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "engines": {
+    "node": "^14 || ^16 || >=18.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.4.35"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.31"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/rendering-util/selectSvgElement.ts"],
+  "sourcesContent": ["import { select } from 'd3';\nimport { getConfig } from '../diagram-api/diagramAPI.js';\nimport type { HTML, SVG } from '../diagram-api/types.js';\n\n/**\n * Selects the SVG element using {@link id}.\n *\n * @param id - The diagram ID.\n * @returns The selected {@link SVG} element using {@link id}.\n */\nexport const selectSvgElement = (id: string): SVG => {\n  const { securityLevel } = getConfig();\n  // handle root and document for when rendering in sandbox mode\n  let root: HTML = select('body');\n  if (securityLevel === 'sandbox') {\n    const sandboxElement: HTML = select(`#i${id}`);\n    const doc: Document = sandboxElement.node()?.contentDocument ?? document;\n    root = select(doc.body as HTMLIFrameElement);\n  }\n  const svg: SVG = root.select(`#${id}`);\n  return svg;\n};\n"],
+  "mappings": "2HAUO,IAAMA,EAAmBC,EAACC,GAAoB,CACnD,GAAM,CAAE,cAAAC,CAAc,EAAIC,EAAU,EAEhCC,EAAaC,EAAO,MAAM,EAC9B,GAAIH,IAAkB,UAAW,CAE/B,IAAMI,EADuBD,EAAO,KAAKJ,CAAE,EAAE,EACR,KAAK,GAAG,iBAAmB,SAChEG,EAAOC,EAAOC,EAAI,IAAyB,CAC7C,CAEA,OADiBF,EAAK,OAAO,IAAIH,CAAE,EAAE,CAEvC,EAXgC",
+  "names": ["selectSvgElement", "__name", "id", "securityLevel", "getConfig", "root", "select_default", "doc"]
+}

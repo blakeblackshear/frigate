@@ -1,0 +1,78 @@
+{
+	"name": "@csstools/postcss-gamut-mapping",
+	"description": "Gamut map css colors to fit display specific gamuts",
+	"version": "2.0.11",
+	"contributors": [
+		{
+			"name": "Antonio Laguna",
+			"email": "antonio@laguna.es",
+			"url": "https://antonio.laguna.es"
+		},
+		{
+			"name": "Romain Menke",
+			"email": "romainmenke@gmail.com"
+		}
+	],
+	"license": "MIT-0",
+	"funding": [
+		{
+			"type": "github",
+			"url": "https://github.com/sponsors/csstools"
+		},
+		{
+			"type": "opencollective",
+			"url": "https://opencollective.com/csstools"
+		}
+	],
+	"engines": {
+		"node": ">=18"
+	},
+	"type": "module",
+	"main": "dist/index.cjs",
+	"module": "dist/index.mjs",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"CHANGELOG.md",
+		"LICENSE.md",
+		"README.md",
+		"dist"
+	],
+	"dependencies": {
+		"@csstools/css-color-parser": "^3.1.0",
+		"@csstools/css-parser-algorithms": "^3.0.5",
+		"@csstools/css-tokenizer": "^3.0.4"
+	},
+	"peerDependencies": {
+		"postcss": "^8.4"
+	},
+	"scripts": {},
+	"homepage": "https://github.com/csstools/postcss-plugins/tree/main/plugins/postcss-gamut-mapping#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/csstools/postcss-plugins.git",
+		"directory": "plugins/postcss-gamut-mapping"
+	},
+	"bugs": "https://github.com/csstools/postcss-plugins/issues",
+	"keywords": [
+		"color",
+		"css",
+		"display-p3",
+		"gamut mapping",
+		"p3",
+		"postcss",
+		"postcss-plugin",
+		"rec2020",
+		"srgb",
+		"wide gamut"
+	]
+}

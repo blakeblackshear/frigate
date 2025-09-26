@@ -1,0 +1,1 @@
+This is the darwin-x64 build of @parcel/watcher. See https://github.com/parcel-bundler/watcher for details.

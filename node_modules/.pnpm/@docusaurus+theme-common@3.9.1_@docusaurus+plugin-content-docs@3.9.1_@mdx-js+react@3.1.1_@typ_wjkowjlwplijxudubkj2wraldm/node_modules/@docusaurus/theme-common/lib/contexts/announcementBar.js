@@ -1,0 +1,72 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+import React, { useState, useEffect, useCallback, useMemo, useContext, } from 'react';
+import useIsBrowser from '@docusaurus/useIsBrowser';
+import { createStorageSlot } from '../utils/storageUtils';
+import { ReactContextError } from '../utils/reactUtils';
+import { useThemeConfig } from '../utils/useThemeConfig';
+// Keep these keys in sync with the inlined script
+// See packages/docusaurus-theme-classic/src/inlineScripts.ts
+const AnnouncementBarDismissStorage = createStorageSlot('docusaurus.announcement.dismiss');
+const IdStorage = createStorageSlot('docusaurus.announcement.id');
+const isDismissedInStorage = () => AnnouncementBarDismissStorage.get() === 'true';
+const setDismissedInStorage = (bool) => AnnouncementBarDismissStorage.set(String(bool));
+const Context = React.createContext(null);
+function useContextValue() {
+    const { announcementBar } = useThemeConfig();
+    const isBrowser = useIsBrowser();
+    const [isClosed, setClosed] = useState(() => isBrowser
+        ? // On client navigation: init with local storage value
+            isDismissedInStorage()
+        : // On server/hydration: always visible to prevent layout shifts (will be hidden with css if needed)
+            false);
+    // Update state after hydration
+    useEffect(() => {
+        setClosed(isDismissedInStorage());
+    }, []);
+    const handleClose = useCallback(() => {
+        setDismissedInStorage(true);
+        setClosed(true);
+    }, []);
+    useEffect(() => {
+        if (!announcementBar) {
+            return;
+        }
+        const { id } = announcementBar;
+        let viewedId = IdStorage.get();
+        // Retrocompatibility due to spelling mistake of default id
+        // see https://github.com/facebook/docusaurus/issues/3338
+        // cSpell:ignore annoucement
+        if (viewedId === 'annoucement-bar') {
+            viewedId = 'announcement-bar';
+        }
+        const isNewAnnouncement = id !== viewedId;
+        IdStorage.set(id);
+        if (isNewAnnouncement) {
+            setDismissedInStorage(false);
+        }
+        if (isNewAnnouncement || !isDismissedInStorage()) {
+            setClosed(false);
+        }
+    }, [announcementBar]);
+    return useMemo(() => ({
+        isActive: !!announcementBar && !isClosed,
+        close: handleClose,
+    }), [announcementBar, isClosed, handleClose]);
+}
+export function AnnouncementBarProvider({ children, }) {
+    const value = useContextValue();
+    return <Context.Provider value={value}>{children}</Context.Provider>;
+}
+export function useAnnouncementBar() {
+    const api = useContext(Context);
+    if (!api) {
+        throw new ReactContextError('AnnouncementBarProvider');
+    }
+    return api;
+}
+//# sourceMappingURL=announcementBar.js.map

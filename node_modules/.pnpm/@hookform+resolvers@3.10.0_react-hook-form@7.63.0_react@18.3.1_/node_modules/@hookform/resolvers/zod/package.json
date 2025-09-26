@@ -1,0 +1,17 @@
+{
+  "name": "@hookform/resolvers/zod",
+  "amdName": "hookformResolversZod",
+  "version": "1.0.0",
+  "private": true,
+  "description": "React Hook Form validation resolver: zod",
+  "main": "dist/zod.js",
+  "module": "dist/zod.module.js",
+  "umd:main": "dist/zod.umd.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "peerDependencies": {
+    "react-hook-form": "^7.0.0",
+    "@hookform/resolvers": "^2.0.0"
+  }
+}

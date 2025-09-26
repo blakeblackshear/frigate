@@ -1,0 +1,35 @@
+{
+  "name": "@postman/codegen-http",
+  "version": "0.1.1",
+  "description": "Generates http messages for a Postman request",
+  "main": "index.js",
+  "com_postman_plugin": {
+    "type": "code_generator",
+    "lang": "http",
+    "variant": "HTTP",
+    "syntax_mode": "text"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "codegen",
+    "http"
+  ],
+  "author": "Postman Labs <help@getpostman.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/postmanlabs/code-generators/tree/master/codegens/http",
+  "dependencies": {
+    "postman-collection": "^4.4.0"
+  },
+  "scripts": {
+    "test": "node npm/test.js",
+    "test-lint": "node npm/test-lint.js",
+    "test-unit": "node npm/test-unit.js"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=8"
+  }
+}

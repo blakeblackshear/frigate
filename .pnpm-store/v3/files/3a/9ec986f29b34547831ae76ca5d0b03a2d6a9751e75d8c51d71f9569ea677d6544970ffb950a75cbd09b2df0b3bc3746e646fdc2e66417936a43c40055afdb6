@@ -1,0 +1,57 @@
+{
+  "name": "@svgr/webpack",
+  "description": "SVGR webpack loader.",
+  "version": "8.1.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": "https://github.com/gregberge/svgr/tree/main/packages/webpack",
+  "author": "Greg Bergé <berge.greg@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "svgr",
+    "svg",
+    "react",
+    "webpack",
+    "webpack-loader"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "homepage": "https://react-svgr.com",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/gregberge"
+  },
+  "license": "MIT",
+  "scripts": {
+    "reset": "rm -rf dist",
+    "build": "rollup -c ../../build/rollup.config.mjs",
+    "prepublishOnly": "pnpm run reset && pnpm run build"
+  },
+  "dependencies": {
+    "@babel/core": "^7.21.3",
+    "@babel/plugin-transform-react-constant-elements": "^7.21.3",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/preset-typescript": "^7.21.0",
+    "@svgr/core": "8.1.0",
+    "@svgr/plugin-jsx": "8.1.0",
+    "@svgr/plugin-svgo": "8.1.0"
+  },
+  "devDependencies": {
+    "babel-loader": "^9.1.2",
+    "memory-fs": "^0.5.0",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.76.3"
+  },
+  "gitHead": "772592e042be5063e782bfb8711d024b2fefc6b8"
+}

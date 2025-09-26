@@ -1,0 +1,43 @@
+html[data-theme="dark"] .openapi-explorer__select-input {
+  margin-top: calc(var(--ifm-pre-padding) / 2);
+  background-color: var(--openapi-input-background);
+  border: none;
+  outline: none;
+  width: 100%;
+  color: var(--ifm-pre-color);
+
+  border-radius: 4px;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="white"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>');
+  background-repeat: no-repeat;
+  background-position: right var(--ifm-pre-padding) top 50%;
+  background-size: auto auto;
+}
+
+.openapi-explorer__select-input {
+  width: 100%;
+  margin-top: calc(var(--ifm-pre-padding) / 2);
+  padding: var(--openapi-explorer-padding-input);
+  border: none;
+  outline: none;
+  border-radius: 4px;
+  background-color: var(--openapi-input-background);
+  font-size: var(--openapi-explorer-font-size-input);
+  font-family: var(--ifm-font-family-monospace);
+  color: var(--ifm-pre-color);
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>');
+  background-repeat: no-repeat;
+  background-position: right var(--ifm-pre-padding) top 50%;
+  background-size: auto auto;
+
+  &:focus {
+    box-shadow: inset 0px 0px 0px 2px var(--openapi-input-border);
+  }
+}

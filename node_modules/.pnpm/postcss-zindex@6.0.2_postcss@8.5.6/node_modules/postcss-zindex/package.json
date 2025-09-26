@@ -1,0 +1,41 @@
+{
+  "name": "postcss-zindex",
+  "version": "6.0.2",
+  "description": "Reduce z-index values with PostCSS.",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "LICENSE-MIT",
+    "src",
+    "types"
+  ],
+  "keywords": [
+    "css",
+    "normalize",
+    "optimise",
+    "optimisation",
+    "postcss",
+    "postcss-plugin",
+    "z-index"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/cssnano/cssnano",
+  "author": {
+    "name": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info"
+  },
+  "repository": "cssnano/cssnano",
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "engines": {
+    "node": "^14 || ^16 || >=18.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.4.35"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.31"
+  }
+}

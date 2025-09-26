@@ -1,0 +1,60 @@
+{
+  "name": "eslint-plugin-prettier",
+  "version": "5.5.4",
+  "description": "Runs prettier as an eslint rule",
+  "repository": "https://github.com/prettier/eslint-plugin-prettier.git",
+  "homepage": "https://github.com/prettier/eslint-plugin-prettier#readme",
+  "author": "Teddy Katz",
+  "maintainers": [
+    "JounQin <admin@1stg.me> (https://github.com/JounQin)"
+  ],
+  "funding": "https://opencollective.com/eslint-plugin-prettier",
+  "license": "MIT",
+  "engines": {
+    "node": "^14.18.0 || >=16.0.0"
+  },
+  "main": "eslint-plugin-prettier.js",
+  "types": "eslint-plugin-prettier.d.ts",
+  "exports": {
+    ".": {
+      "types": "./eslint-plugin-prettier.d.ts",
+      "default": "./eslint-plugin-prettier.js"
+    },
+    "./recommended": {
+      "types": "./recommended.d.ts",
+      "default": "./recommended.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "eslint-plugin-prettier.d.ts",
+    "eslint-plugin-prettier.js",
+    "recommended.d.ts",
+    "recommended.js",
+    "worker.mjs"
+  ],
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "prettier"
+  ],
+  "peerDependencies": {
+    "@types/eslint": ">=8.0.0",
+    "eslint": ">=8.0.0",
+    "eslint-config-prettier": ">= 7.0.0 <10.0.0 || >=10.1.0",
+    "prettier": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/eslint": {
+      "optional": true
+    },
+    "eslint-config-prettier": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "prettier-linter-helpers": "^1.0.0",
+    "synckit": "^0.11.7"
+  }
+}

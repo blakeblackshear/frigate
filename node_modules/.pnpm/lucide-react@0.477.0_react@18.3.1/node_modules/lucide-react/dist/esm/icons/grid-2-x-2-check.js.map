@@ -1,0 +1,1 @@
+{"version":3,"file":"grid-2-x-2-check.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

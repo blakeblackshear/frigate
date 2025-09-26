@@ -1,0 +1,39 @@
+{
+  "name": "postcss-minify-font-values",
+  "version": "6.1.0",
+  "description": "Minify font declarations with PostCSS",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "src",
+    "LICENSE",
+    "types"
+  ],
+  "author": "Bogdan Chadkin <trysound@yandex.ru>",
+  "license": "MIT",
+  "keywords": [
+    "css",
+    "font",
+    "font-family",
+    "font-weight",
+    "optimise",
+    "postcss-plugin"
+  ],
+  "dependencies": {
+    "postcss-value-parser": "^4.2.0"
+  },
+  "repository": "cssnano/cssnano",
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "homepage": "https://github.com/cssnano/cssnano",
+  "engines": {
+    "node": "^14 || ^16 || >=18.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.4.37"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.31"
+  }
+}

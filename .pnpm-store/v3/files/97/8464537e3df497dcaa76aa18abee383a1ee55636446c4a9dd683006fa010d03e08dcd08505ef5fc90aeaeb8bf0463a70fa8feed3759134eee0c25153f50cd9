@@ -1,0 +1,33 @@
+{
+  "author": "Pierre Curto"
+, "name": "eval"
+, "description": "Evaluate node require() module content directly"
+, "keywords": ["require","eval","vm","module"]
+, "version": "0.1.8"
+, "homepage": "http://github.com/pierrec/node-eval"
+, "repository": {
+    "type": "git"
+  , "url": "git://github.com/pierrec/node-eval.git"
+  }
+, "main": "eval.js"
+, "types": "eval.d.ts"
+, "bugs": { "url" : "http://github.com/pierrec/node-eval/issues" }
+, "licenses":
+  [ {
+      "type": "MIT"
+    , "url": "http://github.com/pierrec/node-eval/raw/master/LICENSE"
+    }
+  ]
+, "engines": {
+    "node": ">= 0.8"
+  }
+, "dependencies": {
+    "@types/node": "*"
+  , "require-like": ">= 0.1.1"
+  }
+, "devDependencies": {
+  }
+, "scripts": {
+    "test": "node test.js"
+  }
+}

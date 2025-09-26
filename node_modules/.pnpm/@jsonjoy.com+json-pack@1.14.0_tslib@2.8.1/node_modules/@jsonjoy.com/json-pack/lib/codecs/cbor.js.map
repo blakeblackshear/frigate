@@ -1,0 +1,1 @@
+{"version":3,"file":"cbor.js","sourceRoot":"","sources":["../../src/codecs/cbor.ts"],"names":[],"mappings":";;;AAAA,qDAAgD;AAChD,qDAAgD;AAKhD,MAAa,kBAAkB;IAM7B,YAAY,MAAc;QALV,OAAE,GAAG,MAAM,CAAC;QACZ,WAAM,KAAuB;QAK3C,IAAI,CAAC,OAAO,GAAG,IAAI,yBAAW,CAAC,MAAM,CAAC,CAAC;QACvC,IAAI,CAAC,OAAO,GAAG,IAAI,yBAAW,EAAE,CAAC;IACnC,CAAC;CACF;AAVD,gDAUC"}

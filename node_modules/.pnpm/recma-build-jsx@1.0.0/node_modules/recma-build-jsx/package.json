@@ -1,0 +1,52 @@
+{
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "bugs": "https://github.com/mdx-js/recma/issues",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
+  ],
+  "description": "recma plugin to add support for parsing and serializing JSX",
+  "dependencies": {
+    "@types/estree": "^1.0.0",
+    "estree-util-build-jsx": "^3.0.0",
+    "vfile": "^6.0.0"
+  },
+  "exports": "./index.js",
+  "files": [
+    "lib/",
+    "index.d.ts",
+    "index.js"
+  ],
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "homepage": "https://github.com/mdx-js/recma",
+  "keywords": [
+    "abstract",
+    "ast",
+    "build",
+    "compile",
+    "javascript",
+    "jsx",
+    "plugin",
+    "recma-plugin",
+    "recma",
+    "runtime",
+    "syntax",
+    "tree",
+    "unified"
+  ],
+  "license": "MIT",
+  "name": "recma-build-jsx",
+  "repository": "https://github.com/mdx-js/recma/tree/main/packages/recma-build-jsx",
+  "scripts": {},
+  "sideEffects": false,
+  "typeCoverage": {
+    "atLeast": 100,
+    "detail": true,
+    "strict": true,
+    "ignoreCatch": true
+  },
+  "type": "module",
+  "version": "1.0.0"
+}

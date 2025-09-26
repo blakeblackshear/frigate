@@ -1,0 +1,18 @@
+{
+  "name": "@hookform/resolvers/typeschema",
+  "amdName": "hookformResolversTypeschema",
+  "version": "1.0.0",
+  "private": true,
+  "description": "React Hook Form validation resolver: typeschema",
+  "main": "dist/typeschema.js",
+  "module": "dist/typeschema.module.js",
+  "umd:main": "dist/typeschema.umd.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "peerDependencies": {
+    "react-hook-form": "^7.0.0",
+    "@hookform/resolvers": "^2.0.0",
+    "@typeschema/main": "^0.13.7"
+  }
+}

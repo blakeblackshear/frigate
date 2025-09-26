@@ -1,0 +1,74 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`computedTypesResolver > should return a single error from computedTypesResolver when validation fails 1`] = `
+{
+  "errors": {
+    "address": {
+      "city": {
+        "message": "Is required",
+        "ref": undefined,
+        "type": "ValidationError",
+      },
+      "zipCode": {
+        "message": "Must be 5 characters long",
+        "ref": undefined,
+        "type": "ValidationError",
+      },
+    },
+    "birthYear": {
+      "message": "Expect value to be "number"",
+      "ref": undefined,
+      "type": "ValidationError",
+    },
+    "email": {
+      "message": "Incorrect email",
+      "ref": {
+        "name": "email",
+      },
+      "type": "ValidationError",
+    },
+    "enabled": {
+      "message": "Expect value to be "boolean"",
+      "ref": undefined,
+      "type": "ValidationError",
+    },
+    "like": {
+      "id": {
+        "message": "Expect value to be "number"",
+        "ref": undefined,
+        "type": "ValidationError",
+      },
+      "name": {
+        "message": "Expect value to be "string"",
+        "ref": undefined,
+        "type": "ValidationError",
+      },
+    },
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "ValidationError",
+    },
+    "repeatPassword": {
+      "message": "Expect value to be "string"",
+      "ref": undefined,
+      "type": "ValidationError",
+    },
+    "tags": {
+      "message": "Expecting value to be an array",
+      "ref": undefined,
+      "type": "ValidationError",
+    },
+    "username": {
+      "message": "Expect value to be "string"",
+      "ref": {
+        "name": "username",
+      },
+      "type": "ValidationError",
+    },
+  },
+  "values": {},
+}
+`;

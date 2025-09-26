@@ -1,0 +1,129 @@
+.openapi-explorer__request-form {
+  background-color: var(--ifm-pre-background);
+  border-radius: var(--openapi-card-border-radius);
+  border: 1px solid var(--openapi-explorer-border-color);
+  box-shadow:
+    0 2px 3px hsla(222, 8%, 43%, 0.1),
+    0 8px 16px -10px hsla(222, 8%, 43%, 0.2);
+  color: var(--ifm-pre-color);
+  line-height: var(--ifm-pre-line-height);
+  margin-bottom: var(--ifm-spacing-vertical);
+  margin-top: 0;
+  overflow: auto;
+  transition: 300ms;
+
+  /* hack for view calculation when monaco is hidden */
+  position: relative;
+
+  &:empty {
+    display: none;
+  }
+
+  &:hover {
+    box-shadow:
+      0 0 0 2px rgba(38, 53, 61, 0.15),
+      0 2px 3px hsla(222, 8%, 43%, 0.15),
+      0 16px 16px -10px hsla(222, 8%, 43%, 0.2);
+  }
+
+  .required {
+    font-size: var(--ifm-code-font-size);
+    color: var(--openapi-required);
+
+    &.request-body {
+      padding-left: 0.25rem;
+    }
+  }
+}
+
+.openapi-explorer__request-header-container {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--openapi-explorer-border-color);
+  margin: 0;
+  padding: 0.75rem var(--ifm-pre-padding);
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.openapi-explorer__expand-details-btn {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.openapi-explorer__details-outer-container {
+  padding: 1rem;
+}
+
+.openapi-explorer__details-container[open] {
+  .openapi-explorer__details-summary::before {
+    transform: rotate(180deg);
+    margin-top: 0.25rem;
+  }
+}
+
+.openapi-explorer__details-summary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0;
+  font-size: 14px;
+  list-style: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &::before {
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+    margin-top: 0.25rem;
+    background-image: var(--openapi-explorer-caret-bg);
+    border: none !important;
+    transform: rotate(90deg);
+    content: "";
+    height: 1rem;
+    width: 1rem;
+  }
+}
+
+.openapi-explorer__request-btn {
+  border: none;
+  border-radius: var(--ifm-global-radius);
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
+  background-color: var(--ifm-color-primary-light);
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 12px;
+  color: white;
+  cursor: pointer;
+  transition: 300ms;
+
+  &:hover {
+    background-color: var(--ifm-color-primary-lightest);
+  }
+
+  &:active {
+    background-color: var(--ifm-color-primary-light);
+  }
+}
+
+.openapi-security__summary-container {
+  background: var(--ifm-pre-background);
+  border-radius: var(--ifm-pre-border-radius);
+}
+
+// Prevent auto zoom on mobile iOS devices when focusing on input elmenents
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (max-device-width: 1024px) {
+  .prism-code,
+  select,
+  input {
+    font-size: 1rem;
+  }
+}

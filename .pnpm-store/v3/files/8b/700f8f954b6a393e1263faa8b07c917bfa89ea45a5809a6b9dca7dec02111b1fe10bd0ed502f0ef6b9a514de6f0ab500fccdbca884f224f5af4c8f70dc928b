@@ -1,0 +1,2 @@
+// TypeScript only.
+export {}

@@ -1,0 +1,49 @@
+{
+  "name": "estree-util-value-to-estree",
+  "description": "Convert a JavaScript value to an estree expression",
+  "version": "3.4.0",
+  "main": "./dist/estree-util-value-to-estree.js",
+  "exports": "./dist/estree-util-value-to-estree.js",
+  "type": "module",
+  "files": [
+    "dist",
+    "src",
+    "!test*"
+  ],
+  "author": "Remco Haszing <remcohaszing@gmail.com>",
+  "license": "MIT",
+  "repository": "remcohaszing/estree-util-value-to-estree",
+  "sideEffects": false,
+  "bugs": "https://github.com/remcohaszing/estree-util-value-to-estree/issues",
+  "homepage": "https://github.com/remcohaszing/estree-util-value-to-estree#readme",
+  "funding": "https://github.com/sponsors/remcohaszing",
+  "keywords": [
+    "esast",
+    "estree",
+    "estree-util",
+    "language",
+    "unist"
+  ],
+  "scripts": {
+    "prepack": "tsc --build",
+    "pretest": "tsc --build",
+    "test": "c8 node --enable-source-maps dist/test.js"
+  },
+  "dependencies": {
+    "@types/estree": "^1.0.0"
+  },
+  "devDependencies": {
+    "@js-temporal/polyfill": "^0.4.0",
+    "@petamoriken/float16": "^3.0.0",
+    "@remcohaszing/eslint": "^11.0.0",
+    "@types/node": "^22.0.0",
+    "astring": "^1.0.0",
+    "c8": "^9.0.0",
+    "prettier": "^3.0.0",
+    "remark-cli": "^12.0.0",
+    "remark-preset-remcohaszing": "^3.0.0",
+    "snapshot-fixtures": "^1.0.0",
+    "source-map": "^0.7.0",
+    "typescript": "^5.0.0"
+  }
+}

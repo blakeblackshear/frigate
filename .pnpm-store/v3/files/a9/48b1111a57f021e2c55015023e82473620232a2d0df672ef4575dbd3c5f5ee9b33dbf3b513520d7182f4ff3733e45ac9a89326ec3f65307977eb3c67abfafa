@@ -1,0 +1,12 @@
+import { Buffer } from '../vendor/node/internal/buffer';
+import { TDataOut, TEncodingExtended } from '../encoding';
+export declare const isWin: boolean;
+type TData = TDataOut | ArrayBufferView | DataView;
+export declare const unixify: (filepath: string, stripTrailing?: boolean) => string;
+type TResolve = (filename: string, base?: string) => string;
+declare let resolve: TResolve;
+export { resolve };
+export declare const filenameToSteps: (filename: string, base?: string) => string[];
+export declare function isFd(path: any): boolean;
+export declare function validateFd(fd: any): void;
+export declare function dataToBuffer(data: TData, encoding?: TEncodingExtended): Buffer;

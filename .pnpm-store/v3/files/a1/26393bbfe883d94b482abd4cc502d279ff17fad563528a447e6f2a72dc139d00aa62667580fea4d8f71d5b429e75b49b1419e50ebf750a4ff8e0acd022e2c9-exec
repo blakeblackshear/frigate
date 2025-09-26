@@ -1,0 +1,6 @@
+{
+  "extends": "tsex/tsconfig.json",
+  "compilerOptions": {
+    "noImplicitAny": false
+  }
+}

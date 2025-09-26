@@ -1,0 +1,42 @@
+{
+  "name": "monaco-marker-data-provider",
+  "version": "1.2.4",
+  "description": "Provide Monaco marker data in a similar way as other integrations",
+  "type": "module",
+  "exports": "./dist/monaco-marker-data-provider.js",
+  "scripts": {
+    "prepack": "tsc --build",
+    "pretest": "tsc --build",
+    "test": "vitest run"
+  },
+  "repository": "remcohaszing/monaco-marker-data-provider",
+  "keywords": [
+    "diagnostics",
+    "monaco",
+    "monaco-editor",
+    "marker-data"
+  ],
+  "author": "Remco Haszing <remcohaszing@gmail.com>",
+  "license": "MIT",
+  "bugs": "https://github.com/remcohaszing/monaco-marker-data-provider/issues",
+  "homepage": "https://github.com/remcohaszing/monaco-marker-data-provider#readme",
+  "funding": "https://github.com/sponsors/remcohaszing",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "monaco-types": "^0.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "eslint-config-remcohaszing": "^10.0.0",
+    "jsdom": "^25.0.0",
+    "monaco-editor-core": "^0.52.0",
+    "prettier": "^3.0.0",
+    "remark-cli": "^12.0.0",
+    "remark-preset-remcohaszing": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  }
+}

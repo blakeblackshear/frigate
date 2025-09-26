@@ -1,0 +1,70 @@
+{
+  "name": "vaul",
+  "version": "0.9.9",
+  "description": "Drawer component for React.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "style.css"
+  ],
+  "exports": {
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "require": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "pnpm type-check && bunchee && pnpm copy-assets",
+    "copy-assets": "cp -r ./src/style.css ./style.css",
+    "dev": "bunchee --watch",
+    "dev:website": "turbo run dev --filter=website...",
+    "dev:test": "turbo run dev --filter=test...",
+    "format": "prettier --write .",
+    "test": "playwright test"
+  },
+  "keywords": [
+    "react",
+    "drawer",
+    "dialog",
+    "modal"
+  ],
+  "author": "Emil Kowalski <e@emilkowal.ski>",
+  "license": "MIT",
+  "homepage": "https://vaul.emilkowal.ski/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emilkowalski/vaul.git"
+  },
+  "bugs": {
+    "url": "https://github.com/emilkowalski/vaul/issues"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.37.1",
+    "@radix-ui/react-dialog": "^1.0.4",
+    "@types/node": "20.5.7",
+    "@types/react": "18.2.55",
+    "@types/react-dom": "18.2.18",
+    "bunchee": "^5.1.5",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "turbo": "1.6",
+    "typescript": "5.2.2"
+  },
+  "peerDependencies": {
+    "react": "^16.8 || ^17.0 || ^18.0",
+    "react-dom": "^16.8 || ^17.0 || ^18.0"
+  },
+  "packageManager": "pnpm@8.8.0",
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.1"
+  }
+}

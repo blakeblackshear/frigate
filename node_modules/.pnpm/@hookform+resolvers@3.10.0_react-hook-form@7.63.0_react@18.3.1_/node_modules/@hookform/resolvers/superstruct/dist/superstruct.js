@@ -1,0 +1,2 @@
+var e=require("@hookform/resolvers"),r=require("superstruct");exports.superstructResolver=function(s,t,a){return void 0===a&&(a={}),function(o,u,i){var l,n=r.validate(o,s,t);return n[0]?{values:{},errors:e.toNestErrors((l=n[0],l.failures().reduce(function(e,r){return(e[r.path.join(".")]={message:r.message,type:r.type})&&e},{})),i)}:(i.shouldUseNativeValidation&&e.validateFieldsNatively({},i),{values:a.raw?o:n[1],errors:{}})}};
+//# sourceMappingURL=superstruct.js.map

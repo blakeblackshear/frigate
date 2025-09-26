@@ -1,0 +1,26 @@
+{
+  "name": "http-reasons",
+  "version": "0.1.0",
+  "description": "Database to lookup http reasons from http response status code",
+  "author": "Postman Labs <help@postmanlabs.com>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/postmanlabs/http-reasons.git"
+  },
+  "keywords": [
+    "postman",
+    "http-code",
+    "response-code",
+    "reason"
+  ],
+  "author": "Shamasis Bhattacharya <mail@shamasis.net> (=)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/postmanlabs/http-reasons/issues"
+  },
+  "homepage": "https://github.com/postmanlabs/http-reasons#readme"
+}

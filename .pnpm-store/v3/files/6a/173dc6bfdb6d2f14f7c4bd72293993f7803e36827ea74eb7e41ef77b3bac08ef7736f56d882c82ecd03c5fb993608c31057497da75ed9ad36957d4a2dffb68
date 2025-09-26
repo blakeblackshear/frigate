@@ -1,0 +1,45 @@
+{
+	"name": "vscode-languageserver-protocol",
+	"description": "VSCode Language Server Protocol implementation",
+	"version": "3.17.5",
+	"author": "Microsoft Corporation",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Microsoft/vscode-languageserver-node.git",
+		"directory": "protocol"
+	},
+	"bugs": {
+		"url": "https://github.com/Microsoft/vscode-languageserver-node/issues"
+	},
+	"main": "./lib/node/main.js",
+	"browser": {
+		"./lib/node/main.js": "./lib/browser/main.js"
+	},
+	"typings": "./lib/common/api.d.ts",
+	"dependencies": {
+		"vscode-jsonrpc": "8.2.0",
+		"vscode-languageserver-types": "3.17.5"
+	},
+	"scripts": {
+		"prepublishOnly": "echo \"⛔ Can only publish from a secure pipeline ⛔\" && node ../build/npm/fail",
+		"prepack": "npm run all:publish",
+		"postpublish": "node ../build/npm/post-publish.js",
+		"preversion": "npm test",
+		"compile": "node ../build/bin/tsc -b ./tsconfig.json",
+		"watch": "node ../build/bin/tsc -b ./tsconfig.watch.json -w",
+		"clean": "node ../node_modules/.bin/rimraf lib && node ../node_modules/.bin/rimraf dist",
+		"lint": "node ../node_modules/eslint/bin/eslint.js --ext ts src",
+		"test": "npm run test:node && npm run test:browser",
+		"test:node": "node ../node_modules/mocha/bin/_mocha",
+		"test:browser": "npm run webpack:test:silent && node ../build/bin/runBrowserTests.js  http://127.0.0.1:8080/protocol/src/browser/test/",
+		"webpack:test": "cd ../types && npm run compile:esm && cd ../protocol && node ../build/bin/webpack --mode none --config ./src/browser/test/webpack.config.js",
+		"webpack:test:silent": "cd ../types && npm run compile:esm && cd ../protocol && node ../build/bin/webpack --no-stats --mode none --config ./src/browser/test/webpack.config.js",
+		"compile:metaModelTool": "cd ../tools && npm run compile && cd ../protocol",
+		"generate:metaModel": "node ../tools/lib/generator-main.js -p ./src/common/tsconfig.json > ./metaModel.json",
+		"generate:metaModelSchema": "ts-json-schema-generator --tsconfig ../tools/tsconfig.json --path ../tools/src/metaModel.ts > ./metaModel.schema.json",
+		"all": "npm run clean && npm run compile && npm run lint && npm run test && npm run compile:metaModelTool && npm run generate:metaModel && npm run generate:metaModelSchema",
+		"compile:publish": "node ../build/bin/tsc -b ./tsconfig.publish.json",
+		"all:publish": "git clean -xfd . && npm install && npm run compile:publish && npm run lint && npm run test && npm run compile:metaModelTool && npm run generate:metaModel && npm run generate:metaModelSchema"
+	}
+}

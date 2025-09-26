@@ -1,0 +1,70 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.openapi-tabs__mime-container {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+  overflow: hidden;
+}
+
+.openapi-tabs__mime-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid transparent;
+  margin-top: 0 !important;
+  margin-right: 0.5rem;
+  font-weight: var(--ifm-font-weight-bold);
+  font-size: 10px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: 300ms;
+
+  &:hover {
+    background-color: transparent;
+    border: 1px solid var(--ifm-toc-border-color);
+  }
+
+  &.active {
+    border: 1px solid var(--ifm-tabs-color-active-border);
+    color: var(--ifm-tabs-color-active);
+  }
+
+  &:last-child {
+    margin-right: 0 !important;
+  }
+}
+
+.openapi-tabs__mime-list-container {
+  overflow-y: hidden;
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.openapi-tabs__mime-schema-container {
+  max-width: 600px;
+}
+
+@media screen and (max-width: 500px) {
+  .mimeTabsTopSection {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mimeTabsContainer {
+    width: 100%;
+    margin-top: var(--ifm-spacing-vertical);
+    padding: 0;
+  }
+}

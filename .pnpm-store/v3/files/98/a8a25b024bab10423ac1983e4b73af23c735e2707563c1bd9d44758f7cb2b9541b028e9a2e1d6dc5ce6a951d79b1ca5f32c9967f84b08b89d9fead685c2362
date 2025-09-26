@@ -1,0 +1,45 @@
+{
+  "name": "monaco-worker-manager",
+  "version": "2.0.1",
+  "description": "Easily deal with monaco workers",
+  "type": "module",
+  "scripts": {
+    "prepack": "tsc --noEmit false"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/remcohaszing/monaco-worker-manager.git"
+  },
+  "keywords": [
+    "monaco",
+    "monaco-editor",
+    "worker",
+    "webworker"
+  ],
+  "author": "Remco Haszing <remcohaszing@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/remcohaszing/monaco-worker-manager/issues"
+  },
+  "homepage": "https://github.com/remcohaszing/monaco-worker-manager#readme",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "worker.js",
+    "worker.d.ts"
+  ],
+  "exports": {
+    ".": "./index.js",
+    "./worker": "./worker.js"
+  },
+  "peerDependencies": {
+    "monaco-editor": ">=0.30.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-remcohaszing": "^3.0.0",
+    "prettier": "^2.0.0",
+    "typescript": "^4.0.0"
+  }
+}

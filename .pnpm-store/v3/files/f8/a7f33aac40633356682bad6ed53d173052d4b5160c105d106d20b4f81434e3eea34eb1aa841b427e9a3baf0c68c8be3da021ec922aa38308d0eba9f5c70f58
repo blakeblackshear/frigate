@@ -1,0 +1,33 @@
+{
+  "name": "@postman/codegen-php-pecl-http",
+  "version": "0.1.1",
+  "description": "Generates code snippets for a php Pecl_http variant",
+  "com_postman_plugin": {
+    "type": "code_generator",
+    "lang": "php",
+    "variant": "pecl_http",
+    "syntax_mode": "php"
+  },
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node npm/test.js",
+    "test-lint": "node npm/test-lint.js",
+    "test-unit": "node npm/test-unit.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Postman Labs <help@getpostman.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/postmanlabs/code-generators/tree/master/codegens/php-pecl-http",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=8"
+  }
+}

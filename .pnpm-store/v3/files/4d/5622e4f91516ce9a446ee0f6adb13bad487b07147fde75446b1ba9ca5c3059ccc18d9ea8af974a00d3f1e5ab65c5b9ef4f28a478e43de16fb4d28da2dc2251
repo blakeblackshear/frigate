@@ -1,0 +1,41 @@
+{
+  "name": "emojilib",
+  "version": "2.4.0",
+  "description": "Emoji keyword library.",
+  "main": "index.js",
+  "files": [
+    "emojis.json",
+    "index.js",
+    "ordered.json",
+    "LICENSE",
+    "package.json",
+    "simplemap.json"
+  ],
+  "scripts": {
+    "build": "node build.js",
+    "prepublish": "npm run build",
+    "test": "node test.js | tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muan/emojilib.git"
+  },
+  "keywords": [
+    "emoji",
+    "keyword",
+    "search"
+  ],
+  "author": "Mu-An Chiou <me@muanchiou.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/muan/emojilib/issues"
+  },
+  "homepage": "https://github.com/muan/emojilib#readme",
+  "devDependencies": {
+    "JSONStream": "^1.0.4",
+    "format-json-stream": "^0.1.5",
+    "tap-spec": "^5.0.0",
+    "tape": "^4.9.1"
+  },
+  "dependencies": {}
+}

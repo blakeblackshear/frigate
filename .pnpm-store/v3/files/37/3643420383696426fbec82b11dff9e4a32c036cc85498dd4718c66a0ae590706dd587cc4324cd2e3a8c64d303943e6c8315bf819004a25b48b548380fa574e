@@ -1,0 +1,26 @@
+.openapi-explorer__server-container {
+  background: var(--openapi-card-background-color);
+  border-radius: var(--openapi-card-border-radius);
+  color: var(--ifm-pre-color);
+  line-height: var(--ifm-pre-line-height);
+  margin-bottom: var(--ifm-spacing-vertical);
+  margin-top: 0;
+  overflow: auto;
+
+  /* hack for view calculation when monaco is hidden */
+  position: relative;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.openapi-explorer__server-url {
+  font-size: var(--openapi-explorer-font-size-input);
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.openapi-explorer__server-description {
+  padding-left: 0.5rem;
+  font-weight: var(--ifm-font-weight-bold);
+}

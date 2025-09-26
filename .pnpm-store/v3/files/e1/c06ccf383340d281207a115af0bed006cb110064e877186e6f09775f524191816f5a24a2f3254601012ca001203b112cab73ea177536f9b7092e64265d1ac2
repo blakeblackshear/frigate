@@ -1,0 +1,10 @@
+export declare const isBoolean: (data: any) => data is boolean;
+export declare const isNumber: (data: any) => data is number;
+export declare const isBigInt: (data: any) => data is BigInt;
+export declare const isDate: (data: unknown) => data is Date;
+export declare const isString: (data: any) => data is string;
+export declare const isArray: (data: any) => data is any[];
+export declare const isObject: (data: any) => data is object;
+export declare const isNull: (data: any) => data is null;
+export declare const isUndefined: (data: any) => data is undefined;
+export declare const isFunction: (data: unknown) => data is Function;

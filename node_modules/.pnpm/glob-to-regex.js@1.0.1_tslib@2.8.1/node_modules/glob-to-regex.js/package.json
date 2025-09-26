@@ -1,0 +1,65 @@
+{
+  "name": "glob-to-regex.js",
+  "packageManager": "yarn@4.9.3",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "1.0.1",
+  "description": "Transform GLOB patterns to JavaScript regular expressions for fast file path matching.",
+  "author": {
+    "name": "streamich",
+    "url": "https://github.com/streamich"
+  },
+  "homepage": "https://github.com/streamich/glob-to-regex",
+  "repository": "streamich/glob-to-regex",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/streamich"
+  },
+  "keywords": [
+    "glob",
+    "regex",
+    "regexp",
+    "pattern",
+    "matcher",
+    "path",
+    "filesystem",
+    "wildcard"
+  ],
+  "engines": {
+    "node": ">=10.0"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "LICENSE",
+    "lib/"
+  ],
+  "license": "Apache-2.0",
+  "scripts": {
+    "format": "biome format ./src",
+    "format:fix": "biome format --write ./src",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --apply ./src",
+    "clean": "npx rimraf@6.0.1 lib typedocs coverage gh-pages yarn-error.log",
+    "build": "tsc --project tsconfig.build.json --module commonjs --target es2020 --outDir lib",
+    "test": "vitest ./src",
+    "coverage": "vitest run --coverage",
+    "typedoc": "npx typedoc@0.25.13 --tsconfig tsconfig.build.json",
+    "build:pages": "npx rimraf@6.0.1 gh-pages && mkdir -p gh-pages && cp -r typedocs/* gh-pages && cp -r coverage gh-pages/coverage",
+    "deploy:pages": "gh-pages -d gh-pages",
+    "publish-coverage-and-typedocs": "yarn typedoc && yarn coverage && yarn build:pages && yarn deploy:pages"
+  },
+  "peerDependencies": {
+    "tslib": "2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.2",
+    "@vitest/coverage-v8": "^3.2.4",
+    "config-galore": "^1.0.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

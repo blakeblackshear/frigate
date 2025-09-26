@@ -1,0 +1,1 @@
+{"version":3,"file":"percent-diamond.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

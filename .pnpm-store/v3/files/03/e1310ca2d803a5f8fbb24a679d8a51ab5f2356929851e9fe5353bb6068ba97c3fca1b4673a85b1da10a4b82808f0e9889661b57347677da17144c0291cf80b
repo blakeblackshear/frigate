@@ -1,0 +1,35 @@
+{
+  "name": "docusaurus-plugin-sass",
+  "version": "0.2.6",
+  "description": "Docusaurus plugin to provide support for SASS/SCSS",
+  "main": "docusaurus-plugin-sass.js",
+  "types": "docusaurus-plugin-sass.d.ts",
+  "dependencies": {
+    "sass-loader": "^16.0.2"
+  },
+  "peerDependencies": {
+    "@docusaurus/core": "^2.0.0-beta || ^3.0.0-alpha",
+    "sass": "^1.30.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rlamana/docusaurus-plugin-sass.git"
+  },
+  "homepage": "https://github.com/rlamana/docusaurus-plugin-sass",
+  "keywords": [
+    "docusaurus",
+    "docusaurus-plugin",
+    "sass",
+    "scss",
+    "css"
+  ],
+  "author": "rlamana",
+  "license": "MIT",
+  "readme": "README.md",
+  "bugs": {
+    "url": "https://github.com/rlamana/docusaurus-plugin-sass/issues"
+  }
+}

@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=function(e){if(null===e)return Promise.reject(new Error("combinePromises does not handle null argument"));if("object"!=typeof e)return Promise.reject(new Error("combinePromises does not handle argument of type "+typeof e));var r=Object.keys(e);return Promise.all(Object.values(e)).then((function(e){var t={};return e.forEach((function(e,o){t[r[o]]=e})),t}))};
+//# sourceMappingURL=combine-promises.cjs.production.min.js.map

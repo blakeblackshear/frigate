@@ -1,0 +1,1 @@
+{"version":3,"file":"asterisk-square.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

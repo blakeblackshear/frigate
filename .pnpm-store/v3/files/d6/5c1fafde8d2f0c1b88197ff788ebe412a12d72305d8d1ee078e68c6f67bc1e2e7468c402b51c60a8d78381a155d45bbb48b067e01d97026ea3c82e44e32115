@@ -1,0 +1,418 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`valibotResolver > should return a single error from valibotResolver when validation fails 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "access token is required",
+      "ref": undefined,
+      "type": "union",
+    },
+    "birthYear": {
+      "message": "Please enter your birth year",
+      "ref": undefined,
+      "type": "number",
+    },
+    "email": {
+      "message": "Invalid email address",
+      "ref": {
+        "name": "email",
+      },
+      "type": "email",
+    },
+    "enabled": {
+      "message": "Invalid type: Expected boolean but received undefined",
+      "ref": undefined,
+      "type": "boolean",
+    },
+    "like": {
+      "id": {
+        "message": "Like id is required",
+        "ref": undefined,
+        "type": "number",
+      },
+      "name": {
+        "message": "Like name is required",
+        "ref": undefined,
+        "type": "string",
+      },
+    },
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "regex",
+    },
+    "repeatPassword": {
+      "message": "Repeat Password is required",
+      "ref": undefined,
+      "type": "string",
+    },
+    "tags": [
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+      },
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+      },
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+      },
+    ],
+    "username": {
+      "message": "Invalid type: Expected string but received undefined",
+      "ref": {
+        "name": "username",
+      },
+      "type": "string",
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`valibotResolver > should return a single error from valibotResolver with \`mode: sync\` when validation fails 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "access token is required",
+      "ref": undefined,
+      "type": "union",
+    },
+    "birthYear": {
+      "message": "Please enter your birth year",
+      "ref": undefined,
+      "type": "number",
+    },
+    "email": {
+      "message": "Invalid email address",
+      "ref": {
+        "name": "email",
+      },
+      "type": "email",
+    },
+    "enabled": {
+      "message": "Invalid type: Expected boolean but received undefined",
+      "ref": undefined,
+      "type": "boolean",
+    },
+    "like": {
+      "id": {
+        "message": "Like id is required",
+        "ref": undefined,
+        "type": "number",
+      },
+      "name": {
+        "message": "Like name is required",
+        "ref": undefined,
+        "type": "string",
+      },
+    },
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "regex",
+    },
+    "repeatPassword": {
+      "message": "Repeat Password is required",
+      "ref": undefined,
+      "type": "string",
+    },
+    "tags": [
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+      },
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+      },
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+      },
+    ],
+    "username": {
+      "message": "Invalid type: Expected string but received undefined",
+      "ref": {
+        "name": "username",
+      },
+      "type": "string",
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`valibotResolver > should return all the errors from valibotResolver when validation fails with \`validateAllFieldCriteria\` set to true 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "access token is required",
+      "ref": undefined,
+      "type": "union",
+      "types": {
+        "union": "access token is required",
+      },
+    },
+    "birthYear": {
+      "message": "Please enter your birth year",
+      "ref": undefined,
+      "type": "number",
+      "types": {
+        "number": "Please enter your birth year",
+      },
+    },
+    "email": {
+      "message": "Invalid email address",
+      "ref": {
+        "name": "email",
+      },
+      "type": "email",
+      "types": {
+        "email": "Invalid email address",
+      },
+    },
+    "enabled": {
+      "message": "Invalid type: Expected boolean but received undefined",
+      "ref": undefined,
+      "type": "boolean",
+      "types": {
+        "boolean": "Invalid type: Expected boolean but received undefined",
+      },
+    },
+    "like": {
+      "id": {
+        "message": "Like id is required",
+        "ref": undefined,
+        "type": "number",
+        "types": {
+          "number": "Like id is required",
+        },
+      },
+      "name": {
+        "message": "Like name is required",
+        "ref": undefined,
+        "type": "string",
+        "types": {
+          "string": "Like name is required",
+        },
+      },
+    },
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "regex",
+      "types": {
+        "min_length": "Must be at least 8 characters in length",
+        "regex": [
+          "One uppercase character",
+          "One lowercase character",
+          "One number",
+        ],
+      },
+    },
+    "repeatPassword": {
+      "message": "Repeat Password is required",
+      "ref": undefined,
+      "type": "string",
+      "types": {
+        "string": "Repeat Password is required",
+      },
+    },
+    "tags": [
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+        "types": {
+          "string": "Tags should be strings",
+        },
+      },
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+        "types": {
+          "string": "Tags should be strings",
+        },
+      },
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+        "types": {
+          "string": "Tags should be strings",
+        },
+      },
+    ],
+    "username": {
+      "message": "Invalid type: Expected string but received undefined",
+      "ref": {
+        "name": "username",
+      },
+      "type": "string",
+      "types": {
+        "string": "Invalid type: Expected string but received undefined",
+      },
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`valibotResolver > should return all the errors from valibotResolver when validation fails with \`validateAllFieldCriteria\` set to true and \`mode: sync\` 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "access token is required",
+      "ref": undefined,
+      "type": "union",
+      "types": {
+        "union": "access token is required",
+      },
+    },
+    "birthYear": {
+      "message": "Please enter your birth year",
+      "ref": undefined,
+      "type": "number",
+      "types": {
+        "number": "Please enter your birth year",
+      },
+    },
+    "email": {
+      "message": "Invalid email address",
+      "ref": {
+        "name": "email",
+      },
+      "type": "email",
+      "types": {
+        "email": "Invalid email address",
+      },
+    },
+    "enabled": {
+      "message": "Invalid type: Expected boolean but received undefined",
+      "ref": undefined,
+      "type": "boolean",
+      "types": {
+        "boolean": "Invalid type: Expected boolean but received undefined",
+      },
+    },
+    "like": {
+      "id": {
+        "message": "Like id is required",
+        "ref": undefined,
+        "type": "number",
+        "types": {
+          "number": "Like id is required",
+        },
+      },
+      "name": {
+        "message": "Like name is required",
+        "ref": undefined,
+        "type": "string",
+        "types": {
+          "string": "Like name is required",
+        },
+      },
+    },
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "regex",
+      "types": {
+        "min_length": "Must be at least 8 characters in length",
+        "regex": [
+          "One uppercase character",
+          "One lowercase character",
+          "One number",
+        ],
+      },
+    },
+    "repeatPassword": {
+      "message": "Repeat Password is required",
+      "ref": undefined,
+      "type": "string",
+      "types": {
+        "string": "Repeat Password is required",
+      },
+    },
+    "tags": [
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+        "types": {
+          "string": "Tags should be strings",
+        },
+      },
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+        "types": {
+          "string": "Tags should be strings",
+        },
+      },
+      {
+        "message": "Tags should be strings",
+        "ref": undefined,
+        "type": "string",
+        "types": {
+          "string": "Tags should be strings",
+        },
+      },
+    ],
+    "username": {
+      "message": "Invalid type: Expected string but received undefined",
+      "ref": {
+        "name": "username",
+      },
+      "type": "string",
+      "types": {
+        "string": "Invalid type: Expected string but received undefined",
+      },
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`valibotResolver > should return parsed values from valibotResolver with \`mode: sync\` when validation pass 1`] = `
+{
+  "errors": {},
+  "values": {
+    "accessToken": "accessToken",
+    "birthYear": 2000,
+    "email": "john@doe.com",
+    "enabled": true,
+    "like": {
+      "id": 1,
+      "name": "name",
+    },
+    "password": "Password123_",
+    "repeatPassword": "Password123_",
+    "tags": [
+      "tag1",
+      "tag2",
+    ],
+    "username": "Doe",
+  },
+}
+`;

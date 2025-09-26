@@ -1,0 +1,4 @@
+# pnpm workspace configuration
+packages:
+  - 'web'
+  - 'docs'

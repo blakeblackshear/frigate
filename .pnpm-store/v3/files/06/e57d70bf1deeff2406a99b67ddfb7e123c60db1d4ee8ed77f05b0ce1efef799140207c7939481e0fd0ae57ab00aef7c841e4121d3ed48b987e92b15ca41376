@@ -1,0 +1,34 @@
+{
+  "name": "@postman/codegen-python-requests",
+  "version": "0.1.1",
+  "description": "Generates code snippets for python-requests variant",
+  "main": "index.js",
+  "com_postman_plugin": {
+    "type": "code_generator",
+    "lang": "python",
+    "variant": "Requests",
+    "syntax_mode": "python"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node npm/test.js",
+    "test-lint": "node npm/test-lint.js",
+    "test-newman": "node npm/test-newman.js",
+    "test-unit": "node npm/test-unit.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Postman Labs <help@getpostman.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/postmanlabs/code-generators/tree/master/codegens/python-requests",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=8"
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"paintbrush-2.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

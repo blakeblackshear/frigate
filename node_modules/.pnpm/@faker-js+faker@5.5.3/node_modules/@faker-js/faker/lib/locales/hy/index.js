@@ -1,0 +1,11 @@
+var hy = {};
+module['exports'] = hy;
+hy.title = "Armenian";
+hy.separator = " և ";
+hy.address = require("./address");
+hy.internet = require("./internet");
+hy.lorem = require("./lorem");
+hy.name = require("./name");
+hy.phone_number = require("./phone_number");
+hy.commerce = require("./commerce");
+hy.date = require("./date");

@@ -1,0 +1,52 @@
+{
+  "name": "its-fine",
+  "version": "1.2.5",
+  "description": "A collection of escape hatches for React.",
+  "keywords": [
+    "react",
+    "fiber",
+    "internal",
+    "reconciler",
+    "hooks"
+  ],
+  "author": "Cody Bennett (https://github.com/codyjasonbennett)",
+  "maintainers": [
+    "Paul Henschel (https://github.com/drcmda)"
+  ],
+  "homepage": "https://github.com/pmndrs/its-fine",
+  "repository": "https://github.com/pmndrs/its-fine",
+  "license": "MIT",
+  "files": [
+    "dist/*",
+    "src/*"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "react-native": "./dist/index.js",
+  "sideEffects": false,
+  "devDependencies": {
+    "@types/node": "^18.7.15",
+    "@types/react": "^18.0.17",
+    "@types/react-test-renderer": "^18.0.0",
+    "react": "^18.2.0",
+    "react-nil": "^1.2.0",
+    "react-test-renderer": "^18.2.0",
+    "rimraf": "^3.0.2",
+    "suspend-react": "^0.0.8",
+    "typescript": "^4.7.4",
+    "vite": "^3.1.0",
+    "vitest": "^0.23.1"
+  },
+  "dependencies": {
+    "@types/react-reconciler": "^0.28.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0"
+  },
+  "scripts": {
+    "build": "rimraf dist && vite build && tsc",
+    "test": "vitest run"
+  }
+}

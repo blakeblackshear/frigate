@@ -1,0 +1,14 @@
+{
+  "name": "@davidbonnet/astring",
+  "version": "1.8.6",
+  "exports": "./src/astring.js",
+  "publish": {
+    "include": [
+      "LICENSE",
+      "README.md",
+      "src/astring.js",
+      "astring.d.ts",
+      "deno.json"
+    ]
+  }
+}

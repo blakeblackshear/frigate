@@ -1,0 +1,25 @@
+module["exports"] = [
+  "ondersteunende",
+  "primaire",
+  "onderliggende",
+  "digitale",
+  "open source",
+  "virtuele",
+  "cross-platform",
+  "overtollige",
+  "online",
+  "haptische",
+  "multi-byte",
+  "Bluetooth",
+  "draadloze",
+  "minuscule",
+  "neurale",
+  "optische",
+  "solid state",
+  "mobiele",
+  "cruciale",
+  "kostbare",
+  "verwaarloosde",
+  "smakelijke"
+
+];

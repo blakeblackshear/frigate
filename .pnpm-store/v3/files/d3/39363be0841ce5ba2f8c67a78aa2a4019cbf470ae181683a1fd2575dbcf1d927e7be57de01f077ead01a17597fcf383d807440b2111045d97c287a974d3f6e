@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isEnterKey = exports.isNumberKey = exports.isTabKey = exports.isBackspaceKey = exports.isSpaceKey = exports.isDownKey = exports.isUpKey = void 0;
+const isUpKey = (key) => key.name === 'up';
+exports.isUpKey = isUpKey;
+const isDownKey = (key) => key.name === 'down';
+exports.isDownKey = isDownKey;
+const isSpaceKey = (key) => key.name === 'space';
+exports.isSpaceKey = isSpaceKey;
+const isBackspaceKey = (key) => key.name === 'backspace';
+exports.isBackspaceKey = isBackspaceKey;
+const isTabKey = (key) => key.name === 'tab';
+exports.isTabKey = isTabKey;
+const isNumberKey = (key) => '1234567890'.includes(key.name);
+exports.isNumberKey = isNumberKey;
+const isEnterKey = (key) => key.name === 'enter' || key.name === 'return';
+exports.isEnterKey = isEnterKey;

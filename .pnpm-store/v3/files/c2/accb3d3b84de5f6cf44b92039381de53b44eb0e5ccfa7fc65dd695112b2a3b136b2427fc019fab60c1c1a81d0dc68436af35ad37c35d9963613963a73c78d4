@@ -1,0 +1,31 @@
+{
+  "name": "@docusaurus/plugin-css-cascade-layers",
+  "version": "3.9.1",
+  "description": "CSS Cascade Layer plugin for Docusaurus.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "watch": "tsc --build --watch"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/docusaurus.git",
+    "directory": "packages/docusaurus-plugin-css-cascade-layers"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@docusaurus/core": "3.9.1",
+    "@docusaurus/types": "3.9.1",
+    "@docusaurus/utils": "3.9.1",
+    "@docusaurus/utils-validation": "3.9.1",
+    "tslib": "^2.6.0"
+  },
+  "engines": {
+    "node": ">=20.0"
+  },
+  "gitHead": "c0dd59f0e712f85b6053c59e46b0514b5d2d1414"
+}

@@ -1,0 +1,6 @@
+{
+  "main": "../../lib/browser/presets/browser.js",
+  "module": "../../lib/browser/presets/browser.mjs",
+  "browser": "../../lib/browser/presets/browser.js",
+  "types": "../../lib/browser/presets/browser.d.ts"
+}

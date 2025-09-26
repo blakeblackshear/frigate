@@ -1,0 +1,32 @@
+{
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "source": {
+    "include": ["index.js"],
+    "includePattern": ".+\\.js(doc)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+
+  "plugins": [],
+
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "highlightTutorialCode" : true
+  },
+
+  "opts": {
+    "template": "./node_modules/postman-jsdoc-theme",
+    "encoding": "utf8",
+    "destination": "./out/docs",
+    "recurse": true,
+    "readme": "README.md"
+  },
+
+  "markdown": {
+    "parser": "gfm",
+    "hardwrap": false
+  }
+}

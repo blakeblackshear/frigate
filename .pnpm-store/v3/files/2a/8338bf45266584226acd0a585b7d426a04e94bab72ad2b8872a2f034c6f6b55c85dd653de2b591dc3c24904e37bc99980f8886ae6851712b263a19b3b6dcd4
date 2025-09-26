@@ -1,0 +1,1 @@
+{"version":3,"file":"stop-circle.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

@@ -1,0 +1,35 @@
+{
+  "name": "xml-parser-xo",
+  "version": "3.2.0",
+  "repository": "github:chrisbottin/xml-parser",
+  "bugs": {
+    "url": "https://github.com/chrisbottin/xml-parser/issues"
+  },
+  "homepage": "https://github.com/chrisbottin/xml-parser#readme",
+  "description": "Parse a XML string into a proprietary syntax tree",
+  "author": "Chris Bottin <chrisbottin@gmail.com>",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "prepublishOnly": "eslint . && npm test"
+  },
+  "engines": {
+    "node": ">= 10"
+  },
+  "keywords": [
+    "xml",
+    "parse",
+    "parser",
+    "convert",
+    "converter",
+    "syntax",
+    "tree"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "eslint": "^6.8.0",
+    "mocha": "^6.2.1"
+  }
+}

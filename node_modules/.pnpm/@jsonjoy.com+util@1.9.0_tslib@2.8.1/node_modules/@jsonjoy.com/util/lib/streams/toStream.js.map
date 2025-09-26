@@ -1,0 +1,1 @@
+{"version":3,"file":"toStream.js","sourceRoot":"","sources":["../../src/streams/toStream.ts"],"names":[],"mappings":";;;AAAO,MAAM,QAAQ,GAAG,CAAC,IAAgB,EAA8B,EAAE;IACvE,OAAO,IAAI,cAAc,CAAC;QACxB,KAAK,CAAC,UAAU;YACd,UAAU,CAAC,OAAO,CAAC,IAAI,CAAC,CAAC;YACzB,UAAU,CAAC,KAAK,EAAE,CAAC;QACrB,CAAC;KACF,CAAC,CAAC;AACL,CAAC,CAAC;AAPW,QAAA,QAAQ,YAOnB"}

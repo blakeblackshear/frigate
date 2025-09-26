@@ -1,0 +1,20 @@
+{
+  "name": "layout-base",
+  "description": "Basic layout model and some utilities for Cytoscape.js layout extensions",
+  "main": "layout-base.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iVis-at-Bilkent/layout-base.git"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "keywords": [
+    "layout"
+  ],
+  "license": "MIT"
+}

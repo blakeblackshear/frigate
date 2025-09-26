@@ -1,0 +1,37 @@
+{
+  "type": "module",
+  "name": "rettime",
+  "version": "0.7.0",
+  "description": "A type-safe marriage of `EventTarget` and `EventEmitter`.",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "files": [
+    "build",
+    "src"
+  ],
+  "imports": {
+    "#src/*": "./src/*"
+  },
+  "keywords": [
+    "emitter",
+    "event",
+    "dispatcher",
+    "type-safe",
+    "strict",
+    "event-target"
+  ],
+  "author": "Artem Zakharchenko <kettanaito@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@ossjs/release": "^0.8.1",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  },
+  "scripts": {
+    "test": "vitest",
+    "benchmark": "vitest bench",
+    "build": "tsup",
+    "release": "release publish"
+  }
+}

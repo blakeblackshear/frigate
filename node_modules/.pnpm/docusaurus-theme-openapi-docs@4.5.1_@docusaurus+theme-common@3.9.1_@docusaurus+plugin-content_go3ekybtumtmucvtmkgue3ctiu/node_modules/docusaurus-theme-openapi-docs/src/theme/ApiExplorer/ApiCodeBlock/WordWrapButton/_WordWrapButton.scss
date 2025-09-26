@@ -1,0 +1,10 @@
+.openapi-explorer__code-block-word-wrap-btn-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.openapi-explorer__code-block-word-wrap-btn--enabled {
+  .openapi-explorer__code-block-word-wrap-btn-icon {
+    color: var(--ifm-color-primary);
+  }
+}

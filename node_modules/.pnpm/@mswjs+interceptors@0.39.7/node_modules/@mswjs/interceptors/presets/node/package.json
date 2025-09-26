@@ -1,0 +1,6 @@
+{
+  "main": "../../lib/node/presets/node.js",
+  "module": "../../lib/node/presets/node.mjs",
+  "browser": null,
+  "types": "../../lib/node/presets/node.d.ts"
+}

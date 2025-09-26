@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BLANK_URL = exports.relativeFirstCharacters = exports.whitespaceEscapeCharsRegex = exports.urlSchemeRegex = exports.ctrlCharactersRegex = exports.htmlCtrlEntityRegex = exports.htmlEntitiesRegex = exports.invalidProtocolRegex = void 0;
+exports.invalidProtocolRegex = /^([^\w]*)(javascript|data|vbscript)/im;
+exports.htmlEntitiesRegex = /&#(\w+)(^\w|;)?/g;
+exports.htmlCtrlEntityRegex = /&(newline|tab);/gi;
+exports.ctrlCharactersRegex = /[\u0000-\u001F\u007F-\u009F\u2000-\u200D\uFEFF]/gim;
+exports.urlSchemeRegex = /^.+(:|&colon;)/gim;
+exports.whitespaceEscapeCharsRegex = /(\\|%5[cC])((%(6[eE]|72|74))|[nrt])/g;
+exports.relativeFirstCharacters = [".", "/"];
+exports.BLANK_URL = "about:blank";

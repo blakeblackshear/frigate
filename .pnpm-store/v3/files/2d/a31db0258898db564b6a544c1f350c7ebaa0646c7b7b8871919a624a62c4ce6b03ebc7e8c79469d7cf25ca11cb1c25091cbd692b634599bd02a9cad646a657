@@ -1,0 +1,54 @@
+.openapi-params__list-item {
+  margin: 0 0 0 1rem !important;
+  position: relative;
+  padding-left: 1rem;
+  border-left: thin solid var(--openapi-tree-line-color) !important;
+  margin-top: unset !important;
+
+  // Horizonal line styling for param attributes
+  &::before {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    width: 0.7rem;
+    /* width of horizontal line */
+    height: 0.5rem;
+    /* vertical position of line */
+    vertical-align: top;
+    border-bottom: thin solid var(--openapi-tree-line-color);
+    content: "";
+    display: inline-block;
+  }
+
+  &:hover {
+    .openapi-schema__property {
+      color: var(--ifm-color-primary);
+    }
+  }
+}
+
+.openapi-schema__type {
+  opacity: 0.6;
+  padding-left: 0.3rem;
+}
+
+.openapi-schema__required {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: bold;
+  color: var(--openapi-required);
+  margin-left: 1%;
+  background-color: transparent;
+  text-transform: uppercase;
+}
+
+.openapi-schema__divider {
+  flex-grow: 1;
+  border-bottom: thin solid var(--ifm-toc-border-color);
+  margin: 10px;
+}
+
+.openapi-schema__container {
+  display: flex;
+}

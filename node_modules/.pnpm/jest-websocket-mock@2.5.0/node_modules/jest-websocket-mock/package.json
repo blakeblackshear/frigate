@@ -1,0 +1,66 @@
+{
+  "name": "jest-websocket-mock",
+  "version": "2.5.0",
+  "description": "Mock websockets and assert complex websocket interactions with Jest",
+  "main": "lib/jest-websocket-mock.cjs.js",
+  "module": "lib/jest-websocket-mock.es.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romgain/jest-websocket-mock.git"
+  },
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib",
+    "build": "npm run clean && npm run build:lib && npm run build:types",
+    "build:lib": "rollup -c",
+    "build:types": "tsc -p tsconfig.build.json",
+    "prettier:check": "prettier --list-different \"src/**/*.{ts,js,md}\" \"**/*.md\"",
+    "prettier:apply": "prettier --write \"src/**/*.{ts,js}\" \"**/*.md\"",
+    "type:check": "tsc --noEmit",
+    "prepublishOnly": "npm run build",
+    "test": "jest --colors"
+  },
+  "keywords": [
+    "jest",
+    "websocket",
+    "mock",
+    "unit-testing"
+  ],
+  "author": "Romain Bertrand",
+  "license": "MIT",
+  "jest": {
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/plugin-transform-runtime": "^7.4.0",
+    "@babel/plugin-transform-typescript": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "@babel/preset-typescript": "^7.3.3",
+    "@babel/runtime": "^7.4.2",
+    "@types/jest": "^28.1.6",
+    "babel-jest": "^29.2.0",
+    "jest": "^28.0.3",
+    "prettier": "^2.0.2",
+    "rimraf": "^5.0.0",
+    "rollup": "^2.0.3",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "jest-diff": "^29.2.0",
+    "mock-socket": "^9.3.0"
+  }
+}

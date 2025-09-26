@@ -1,0 +1,78 @@
+name: Draft new release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version you want to release. Must be a valid semver version.
+        required: true
+        type: string
+
+jobs:
+  draft-new-release:
+    if: startsWith(github.event.inputs.version, 'v')
+    name: Draft a new release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create release branch
+        run: git checkout -b release/${{ github.event.inputs.version }}
+
+      - name: Update changelog
+        uses: thomaseizinger/keep-a-changelog-new-release@1.1.0
+        with:
+          version: ${{ github.event.inputs.version }}
+
+      - name: Initialize mandatory git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email noreply@github.com
+
+      - name: Bump version
+        run: npm version ${{ github.event.inputs.version }} --git-tag-version false
+
+      - name: Commit changelog and manifest files
+        id: make-commit
+        run: |
+          git add CHANGELOG.md package.json package-lock.json
+          git commit --message "Prepare release ${{ github.event.inputs.version }}"
+          echo "::set-output name=commit::$(git rev-parse HEAD)"
+      
+      - name: Push new branch
+        run: git push origin release/${{ github.event.inputs.version }}
+
+      - name: Create pull request for master
+        uses: thomaseizinger/create-pull-request@1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          head: release/${{ github.event.inputs.version }}
+          base: master
+          title: "Release version ${{ github.event.inputs.version }}"
+          reviewers: ${{ github.actor }}
+          body: |
+            Hi @${{ github.actor }}!
+
+            This PR was created in response to a manual trigger of the release workflow here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+            I've updated the changelog and bumped the versions in the manifest files in this commit: ${{ steps.make-commit.outputs.commit }}.
+
+      - name: Create pull request for develop
+        uses: thomaseizinger/create-pull-request@1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          head: release/${{ github.event.inputs.version }}
+          base: develop
+          title: "Release version ${{ github.event.inputs.version }}"
+          reviewers: ${{ github.actor }}
+          body: |
+            Hi @${{ github.actor }}!
+
+            This PR was created in response to a manual trigger of the release workflow here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+            I've updated the changelog and bumped the versions in the manifest files in this commit: ${{ steps.make-commit.outputs.commit }}.

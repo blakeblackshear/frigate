@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema">
+    <import namespace="http://www.sitemaps.org/schemas/sitemap/0.9" schemaLocation="./sitemap.xsd" />
+    <import namespace="http://www.google.com/schemas/sitemap-video/1.1" schemaLocation="http://www.google.com/schemas/sitemap-video/1.1/sitemap-video.xsd"/>
+    <import namespace="http://www.google.com/schemas/sitemap-image/1.1" schemaLocation="http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd"/>
+    <import namespace="http://www.google.com/schemas/sitemap-news/0.9" schemaLocation="http://www.google.com/schemas/sitemap-news/0.9/sitemap-news.xsd"/>
+    <import namespace="http://www.w3.org/1999/xhtml" schemaLocation="http://www.w3.org/2002/08/xhtml/xhtml1-strict.xsd"/>
+</schema>

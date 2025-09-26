@@ -1,0 +1,27 @@
+{
+    "name": "@types/sockjs",
+    "version": "0.3.36",
+    "description": "TypeScript definitions for sockjs",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/sockjs",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Phil McCloghry-Laing",
+            "githubUsername": "pmccloghrylaing",
+            "url": "https://github.com/pmccloghrylaing"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/sockjs"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*"
+    },
+    "typesPublisherContentHash": "fe77463f92d47c65ca417ab3bb87eef15b8384cdce2ab2199fcc8deae14be36e",
+    "typeScriptVersion": "4.5"
+}

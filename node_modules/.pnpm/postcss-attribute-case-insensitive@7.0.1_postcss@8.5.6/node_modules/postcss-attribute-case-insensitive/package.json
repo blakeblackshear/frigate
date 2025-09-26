@@ -1,0 +1,76 @@
+{
+	"name": "postcss-attribute-case-insensitive",
+	"description": "Enable support for case insensitive attribute matching in selectors",
+	"version": "7.0.1",
+	"contributors": [
+		{
+			"name": "Antonio Laguna",
+			"email": "antonio@laguna.es",
+			"url": "https://antonio.laguna.es"
+		},
+		{
+			"name": "Romain Menke",
+			"email": "romainmenke@gmail.com"
+		},
+		{
+			"name": "Dmitry Semigradsky"
+		}
+	],
+	"license": "MIT",
+	"funding": [
+		{
+			"type": "github",
+			"url": "https://github.com/sponsors/csstools"
+		},
+		{
+			"type": "opencollective",
+			"url": "https://opencollective.com/csstools"
+		}
+	],
+	"engines": {
+		"node": ">=18"
+	},
+	"type": "module",
+	"main": "dist/index.cjs",
+	"module": "dist/index.mjs",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"CHANGELOG.md",
+		"LICENSE.md",
+		"README.md",
+		"dist"
+	],
+	"dependencies": {
+		"postcss-selector-parser": "^7.0.0"
+	},
+	"peerDependencies": {
+		"postcss": "^8.4"
+	},
+	"scripts": {},
+	"homepage": "https://github.com/csstools/postcss-plugins/tree/main/plugins/postcss-attribute-case-insensitive#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/csstools/postcss-plugins.git",
+		"directory": "plugins/postcss-attribute-case-insensitive"
+	},
+	"bugs": "https://github.com/csstools/postcss-plugins/issues",
+	"keywords": [
+		"attribute",
+		"css",
+		"CSS4",
+		"insensitive",
+		"postcss",
+		"postcss-plugin",
+		"sensitive"
+	]
+}

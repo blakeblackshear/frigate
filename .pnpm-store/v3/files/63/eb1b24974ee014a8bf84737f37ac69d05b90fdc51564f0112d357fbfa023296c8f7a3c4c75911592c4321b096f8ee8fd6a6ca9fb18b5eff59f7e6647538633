@@ -1,0 +1,47 @@
+{
+	"name": "copy-text-to-clipboard",
+	"version": "3.2.2",
+	"description": "Copy text to the clipboard in modern browsers (0.2 kB)",
+	"license": "MIT",
+	"repository": "sindresorhus/copy-text-to-clipboard",
+	"funding": "https://github.com/sponsors/sindresorhus",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "https://sindresorhus.com"
+	},
+	"type": "module",
+	"exports": {
+		"types": "./index.d.ts",
+		"default": "./index.js"
+	},
+	"sideEffects": false,
+	"engines": {
+		"node": ">=12"
+	},
+	"scripts": {
+		"//test": "xo && tsd",
+		"test": "xo"
+	},
+	"files": [
+		"index.js",
+		"index.d.ts"
+	],
+	"keywords": [
+		"copy",
+		"text",
+		"clipboard",
+		"browser",
+		"clipboard.js",
+		"modern"
+	],
+	"devDependencies": {
+		"tsd": "^0.14.0",
+		"xo": "^0.37.1"
+	},
+	"xo": {
+		"envs": [
+			"browser"
+		]
+	}
+}

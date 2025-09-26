@@ -1,0 +1,57 @@
+{
+  "name": "json-schema-merge-allof",
+  "version": "0.8.1",
+  "description": "Simplify your schema by combining allOf into the root schema, safely.",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "scripts": {
+    "eslint": "eslint src test",
+    "test": "npm run eslint && nyc --reporter=html --reporter=text mocha test/specs",
+    "develop-coverage": "nodemon --exec nyc --reporter=lcov mocha test/specs",
+    "develop": "mocha test/specs --recursive --watch",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "directories": {
+    "lib": "src",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mokkabonna/json-schema-merge-allof.git"
+  },
+  "keywords": [
+    "json",
+    "schema",
+    "jsonschema"
+  ],
+  "author": "Martin Hansen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mokkabonna/json-schema-merge-allof/issues"
+  },
+  "homepage": "https://github.com/mokkabonna/json-schema-merge-allof#readme",
+  "devDependencies": {
+    "ajv": "^7.0.4",
+    "chai": "^4.3.0",
+    "coveralls": "^3.1.0",
+    "eslint": "^7.19.0",
+    "eslint-config": "^0.3.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^5.0.0",
+    "json-schema-ref-parser": "^9.0.7",
+    "json-stringify-safe": "^5.0.1",
+    "mocha": "^8.2.1",
+    "nyc": "^15.1.0",
+    "sinon": "^9.2.4"
+  },
+  "dependencies": {
+    "compute-lcm": "^1.1.2",
+    "json-schema-compare": "^0.2.2",
+    "lodash": "^4.17.20"
+  }
+}

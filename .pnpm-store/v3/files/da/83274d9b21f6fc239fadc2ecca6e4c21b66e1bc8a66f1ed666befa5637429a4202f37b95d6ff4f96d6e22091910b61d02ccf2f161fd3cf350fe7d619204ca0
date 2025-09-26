@@ -1,0 +1,102 @@
+{
+  "name": "mdast-util-frontmatter",
+  "version": "2.0.1",
+  "description": "mdast extension to parse and serialize frontmatter (YAML, TOML, etc)",
+  "license": "MIT",
+  "keywords": [
+    "unist",
+    "mdast",
+    "mdast-util",
+    "util",
+    "utility",
+    "markdown",
+    "markup",
+    "frontmatter",
+    "yaml",
+    "toml",
+    "gfm"
+  ],
+  "repository": "syntax-tree/mdast-util-frontmatter",
+  "bugs": "https://github.com/syntax-tree/mdast-util-frontmatter/issues",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "exports": "./index.js",
+  "files": [
+    "lib/",
+    "index.d.ts",
+    "index.js"
+  ],
+  "dependencies": {
+    "@types/mdast": "^4.0.0",
+    "devlop": "^1.0.0",
+    "escape-string-regexp": "^5.0.0",
+    "mdast-util-from-markdown": "^2.0.0",
+    "mdast-util-to-markdown": "^2.0.0",
+    "micromark-extension-frontmatter": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "c8": "^8.0.0",
+    "prettier": "^3.0.0",
+    "remark-cli": "^11.0.0",
+    "remark-preset-wooorm": "^9.0.0",
+    "type-coverage": "^2.0.0",
+    "typescript": "^5.0.0",
+    "unist-util-remove-position": "^5.0.0",
+    "xo": "^0.56.0"
+  },
+  "scripts": {
+    "prepack": "npm run build && npm run format",
+    "build": "tsc --build --clean && tsc --build && type-coverage",
+    "format": "remark . -qfo && prettier . -w --log-level warn && xo --fix",
+    "test-api-prod": "node --conditions production test.js",
+    "test-api-dev": "node --conditions development test.js",
+    "test-api": "npm run test-api-dev && npm run test-api-prod",
+    "test-coverage": "c8 --100 --reporter lcov npm run test-api",
+    "test": "npm run build && npm run format && npm run test-coverage"
+  },
+  "prettier": {
+    "bracketSpacing": false,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "none",
+    "useTabs": false
+  },
+  "remarkConfig": {
+    "plugins": [
+      "remark-preset-wooorm"
+    ]
+  },
+  "typeCoverage": {
+    "atLeast": 100,
+    "detail": true,
+    "ignoreCatch": true,
+    "strict": true
+  },
+  "xo": {
+    "overrides": [
+      {
+        "files": [
+          "**/*.ts"
+        ],
+        "rules": {
+          "@typescript-eslint/consistent-type-definitions": "off"
+        }
+      }
+    ],
+    "prettier": true,
+    "rules": {
+      "unicorn/prefer-at": "off",
+      "unicorn/prefer-string-replace-all": "off"
+    }
+  }
+}

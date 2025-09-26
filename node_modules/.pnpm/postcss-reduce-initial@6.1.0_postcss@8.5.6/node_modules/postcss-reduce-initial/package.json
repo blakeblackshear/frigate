@@ -1,0 +1,46 @@
+{
+  "name": "postcss-reduce-initial",
+  "version": "6.1.0",
+  "description": "Reduce initial definitions to the actual initial value, where possible.",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "src",
+    "LICENSE-MIT",
+    "types"
+  ],
+  "keywords": [
+    "css",
+    "postcss",
+    "postcss-plugin"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/cssnano/cssnano",
+  "author": {
+    "name": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info"
+  },
+  "repository": "cssnano/cssnano",
+  "dependencies": {
+    "browserslist": "^4.23.0",
+    "caniuse-api": "^3.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "engines": {
+    "node": "^14 || ^16 || >=18.0"
+  },
+  "devDependencies": {
+    "@types/caniuse-api": "^3.0.6",
+    "html-to-text": "^9.0.5",
+    "postcss": "^8.4.35"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.31"
+  },
+  "scripts": {
+    "acquire": "node ./src/script/acquire.mjs"
+  }
+}

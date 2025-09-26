@@ -1,0 +1,127 @@
+{
+  "name": "micromark-extension-directive",
+  "version": "3.0.2",
+  "description": "micromark extension to support generic directives (`:cite[smith04]`)",
+  "license": "MIT",
+  "keywords": [
+    "micromark",
+    "micromark-extension",
+    "generic",
+    "directive",
+    "container",
+    "extension",
+    "markdown",
+    "unified"
+  ],
+  "repository": "micromark/micromark-extension-directive",
+  "bugs": "https://github.com/micromark/micromark-extension-directive/issues",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    "development": "./dev/index.js",
+    "default": "./index.js"
+  },
+  "files": [
+    "dev/",
+    "lib/",
+    "index.d.ts",
+    "index.js"
+  ],
+  "dependencies": {
+    "devlop": "^1.0.0",
+    "micromark-factory-space": "^2.0.0",
+    "micromark-factory-whitespace": "^2.0.0",
+    "micromark-util-character": "^2.0.0",
+    "micromark-util-symbol": "^2.0.0",
+    "micromark-util-types": "^2.0.0",
+    "parse-entities": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "c8": "^10.0.0",
+    "html-void-elements": "^3.0.0",
+    "micromark": "^4.0.0",
+    "micromark-build": "^2.0.0",
+    "prettier": "^3.0.0",
+    "remark-cli": "^12.0.0",
+    "remark-preset-wooorm": "^10.0.0",
+    "type-coverage": "^2.0.0",
+    "typescript": "^5.0.0",
+    "xo": "^0.59.0"
+  },
+  "scripts": {
+    "prepack": "npm run build && npm run format",
+    "build": "tsc --build --clean && tsc --build && type-coverage && micromark-build",
+    "format": "remark . -qfo && prettier . -w --log-level warn && xo --fix",
+    "test-api-prod": "node --conditions production test/index.js",
+    "test-api-dev": "node --conditions development test/index.js",
+    "test-api": "npm run test-api-dev && npm run test-api-prod",
+    "test-coverage": "c8 --100 --reporter lcov npm run test-api",
+    "test": "npm run build && npm run format && npm run test-coverage"
+  },
+  "prettier": {
+    "bracketSpacing": false,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "none",
+    "useTabs": false
+  },
+  "remarkConfig": {
+    "plugins": [
+      "remark-preset-wooorm"
+    ]
+  },
+  "typeCoverage": {
+    "atLeast": 100,
+    "detail": true,
+    "ignoreCatch": true,
+    "strict": true
+  },
+  "xo": {
+    "overrides": [
+      {
+        "files": [
+          "**/*.d.ts"
+        ],
+        "rules": {
+          "@typescript-eslint/array-type": [
+            "error",
+            {
+              "default": "generic"
+            }
+          ],
+          "@typescript-eslint/ban-types": [
+            "error",
+            {
+              "extendDefaults": true
+            }
+          ],
+          "@typescript-eslint/consistent-indexed-object-style": [
+            "error",
+            "index-signature"
+          ],
+          "@typescript-eslint/consistent-type-definitions": [
+            "error",
+            "interface"
+          ]
+        }
+      }
+    ],
+    "prettier": true,
+    "rules": {
+      "logical-assignment-operators": "off",
+      "max-params": "off",
+      "unicorn/no-this-assignment": "off",
+      "unicorn/prefer-at": "off"
+    }
+  }
+}

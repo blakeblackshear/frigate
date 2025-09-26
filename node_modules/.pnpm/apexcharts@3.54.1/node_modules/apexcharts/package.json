@@ -1,0 +1,112 @@
+{
+  "name": "apexcharts",
+  "version": "3.54.1",
+  "description": "A JavaScript Chart Library",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apexcharts/apexcharts.js.git"
+  },
+  "main": "dist/apexcharts.common.js",
+  "unpkg": "dist/apexcharts.js",
+  "jsdelivr": "dist/apexcharts.js",
+  "typings": "types/apexcharts.d.ts",
+  "files": [
+    "src",
+    "dist/*.js",
+    "dist/*.css",
+    "dist/locales/*.json",
+    "types/*.d.ts"
+  ],
+  "scripts": {
+    "dev": "rollup -w -c build/config.js --environment TARGET:web-umd-dev",
+    "dev:cjs": "rollup -w -c build/config.js --environment TARGET:web-cjs",
+    "bundle": "node build/build.js",
+    "build": "npm run bundle && webpack",
+    "build:umd": "rollup -w -c build/config.js --environment TARGET:web-umd-dev",
+    "build:amd": "webpack",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "npm run e2e && npm run unit",
+    "test:ci": "npm run e2e:ci && npm run unit",
+    "unit": "jest tests/unit/",
+    "e2e": "node tests/e2e/samples.js test",
+    "e2e:update": "node tests/e2e/samples.js update",
+    "e2e:ci": "node tests/e2e/samples.js test:ci",
+    "build:samples": "node samples/source/index.js generate"
+  },
+  "dependencies": {
+    "@yr/monotone-cubic-spline": "^1.0.3",
+    "svg.draggable.js": "^2.2.2",
+    "svg.easing.js": "^2.0.0",
+    "svg.filter.js": "^2.0.2",
+    "svg.pathmorphing.js": "^0.1.3",
+    "svg.resize.js": "^1.4.3",
+    "svg.select.js": "^3.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.8.7",
+    "@rollup/plugin-babel": "^5.2.1",
+    "@rollup/plugin-json": "4.0.1",
+    "@rollup/plugin-node-resolve": "6.0.0",
+    "@rollup/plugin-replace": "2.3.0",
+    "@rollup/plugin-strip": "1.3.1",
+    "@rollup/plugin-terser": "0.4.4",
+    "babel-eslint": "10.0.3",
+    "babel-jest": "27.3.1",
+    "babel-loader": "8.0.6",
+    "babel-plugin-istanbul": "6.0.0",
+    "chalk": "3.0.0",
+    "css-loader": "6.10.0",
+    "eslint": "8.36.0",
+    "eslint-config-prettier": "8.8.0",
+    "eslint-loader": "3.0.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "3.1.2",
+    "eslint-plugin-promise": "4.2.1",
+    "eslint-webpack-plugin": "4.0.0",
+    "fs-extra": "8.1.0",
+    "jest": "29.7.0",
+    "jest-environment-jsdom": "29.7.0",
+    "jest-puppeteer": "^10.0.1",
+    "nunjucks": "3.2.4",
+    "nyc": "15.0.0",
+    "pixelmatch": "5.1.0",
+    "pngjs": "3.4.0",
+    "postcss": "^8.4.21",
+    "prettier": "2.8.5",
+    "puppeteer": "22.12.1",
+    "puppeteer-cluster": "0.24.0",
+    "rollup": "3.29.5",
+    "rollup-plugin-babel": "4.4.0",
+    "rollup-plugin-copy-glob": "0.3.2",
+    "rollup-plugin-postcss": "4.0.2",
+    "rollup-plugin-svgo": "2.0.0",
+    "style-loader": "1.1.2",
+    "svg-inline-loader": "0.8.2",
+    "terser": "5.16.6",
+    "tslint": "6.1.3",
+    "typescript": "5.0.2",
+    "webpack": "5.94.0",
+    "webpack-bundle-analyzer": "4.8.0",
+    "webpack-cli": "5.0.1"
+  },
+  "bugs": {
+    "url": "https://github.com/apexcharts/apexcharts.js/issues"
+  },
+  "license": "MIT",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/mit-license.php"
+    }
+  ],
+  "homepage": "https://apexcharts.com",
+  "keywords": [
+    "charts",
+    "graphs",
+    "visualizations",
+    "data"
+  ]
+}

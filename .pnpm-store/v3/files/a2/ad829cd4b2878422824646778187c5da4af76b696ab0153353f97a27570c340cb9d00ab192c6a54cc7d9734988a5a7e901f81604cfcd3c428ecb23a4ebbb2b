@@ -1,0 +1,39 @@
+# PLATFORM
+# ========
+# All exclusions that are specific to the NPM, GIT, IDE and Operating Systems.
+
+# - Do not allow installed node modules to be committed. Doing `npm install -d` will bring them in root or other places.
+node_modules
+
+# - Do not commit any log file from anywhere
+*.log
+*.log.*
+
+# - Prevent addition of OS specific file explorer files
+Thumbs.db
+.DS_Store
+
+# Prevent IDE stuff
+.idea
+
+
+# PROJECT
+# =======
+# Configuration pertaining to project specific repository structure.
+
+# - Prevent Sublime text IDE files from being commited to repository
+*.sublime-*
+
+# - Allow sublime text project file to be commited in the development directory.
+!/develop/*.sublime-project
+
+# - Prevent CI output files from being Added
+/out/
+/newman/
+
+# - Prevent diff backups from SourceTree from showing as commit.
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+*.orig

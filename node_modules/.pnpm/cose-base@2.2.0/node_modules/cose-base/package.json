@@ -1,0 +1,40 @@
+{
+  "name": "cose-base",
+  "version": "2.2.0",
+  "description": "Core module for compound spring embedder based layout styles",
+  "main": "cose-base.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cross-env NODE_ENV=production webpack",
+    "build:min": "cross-env NODE_ENV=production MIN=true webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iVis-at-Bilkent/cose-base.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iVis-at-Bilkent/cose-base/issues"
+  },
+  "homepage": "https://github.com/iVis-at-Bilkent/cose-base#readme",
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.5.1",
+    "camelcase": "^4.1.0",
+    "cross-env": "^5.1.6",
+    "eslint": "^3.19.0",
+    "gh-pages": "^1.1.0",
+    "npm-run-all": "^4.1.2",
+    "rimraf": "^2.6.2",
+    "update": "^0.7.4",
+    "updater-license": "^1.0.0",
+    "webpack": "^5.36.1",
+    "webpack-cli": "^4.6.0",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "dependencies": {
+    "layout-base": "^2.0.0"
+  }
+}

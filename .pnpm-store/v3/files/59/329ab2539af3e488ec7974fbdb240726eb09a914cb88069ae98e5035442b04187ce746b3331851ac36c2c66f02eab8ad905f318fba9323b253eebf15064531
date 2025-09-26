@@ -1,0 +1,1 @@
+{"version":3,"file":"code-2.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

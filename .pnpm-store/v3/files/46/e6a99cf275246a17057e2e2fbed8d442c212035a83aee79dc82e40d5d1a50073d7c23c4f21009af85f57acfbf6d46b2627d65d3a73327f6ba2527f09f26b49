@@ -1,0 +1,1 @@
+import{a as i}from"./chunk-GTKDMUJJ.mjs";var n=i(({flowchart:r})=>{let t=r?.subGraphTitleMargin?.top??0,a=r?.subGraphTitleMargin?.bottom??0,o=t+a;return{subGraphTitleTopMargin:t,subGraphTitleBottomMargin:a,subGraphTitleTotalMargin:o}},"getSubGraphTitleMargins");export{n as a};

@@ -1,0 +1,94 @@
+{
+  "name": "chevrotain",
+  "version": "11.0.3",
+  "description": "Chevrotain is a high performance fault tolerant javascript parsing DSL for building recursive decent parsers",
+  "keywords": [
+    "parser",
+    "syntax",
+    "lexical",
+    "analysis",
+    "grammar",
+    "lexer",
+    "tokenizer",
+    "generator",
+    "compiler",
+    "fault",
+    "tolerant"
+  ],
+  "bugs": {
+    "url": "https://github.com/Chevrotain/chevrotain/issues"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Shahar Soel"
+  },
+  "type": "module",
+  "types": "./chevrotain.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/src/api.js",
+      "types": "./chevrotain.d.ts"
+    }
+  },
+  "files": [
+    "chevrotain.d.ts",
+    "lib/chevrotain.min.mjs",
+    "lib/chevrotain.mjs",
+    "lib/src/**/*.js",
+    "lib/src/**/*.map",
+    "src/**/*.ts",
+    "diagrams/**/*.*",
+    "BREAKING_CHANGES.md",
+    "CHANGELOG.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Chevrotain/chevrotain.git"
+  },
+  "homepage": "https://chevrotain.io/docs/",
+  "scripts": {
+    "---------- CI FLOWS --------": "",
+    "ci": "pnpm run build test",
+    "build": "npm-run-all clean compile bundle",
+    "test": "npm-run-all coverage",
+    "version": "node ./scripts/version-update.js",
+    "---------- DEV FLOWS --------": "",
+    "watch": "tsc -w",
+    "unit-tests": "mocha --enable-source-maps",
+    "quick-build": "tsc && npm-run-all run bundle",
+    "---------- BUILD STEPS --------": "",
+    "clean": "shx rm -rf coverage dev lib temp",
+    "compile": "tsc",
+    "compile:watch": "tsc -w",
+    "coverage": "c8 mocha --enable-source-maps",
+    "---------- BUNDLING --------": "",
+    "bundle": "npm-run-all bundle:**",
+    "bundle:esm:regular": "esbuild ./lib/src/api.js --bundle --sourcemap --format=esm --outfile=lib/chevrotain.mjs",
+    "bundle:esm:min": "esbuild ./lib/src/api.js --bundle --minify --format=esm --sourcemap --outfile=lib/chevrotain.min.mjs"
+  },
+  "dependencies": {
+    "@chevrotain/cst-dts-gen": "11.0.3",
+    "@chevrotain/gast": "11.0.3",
+    "@chevrotain/regexp-to-ast": "11.0.3",
+    "@chevrotain/types": "11.0.3",
+    "@chevrotain/utils": "11.0.3",
+    "lodash-es": "4.17.21"
+  },
+  "devDependencies": {
+    "@types/jsdom": "21.1.1",
+    "@types/lodash-es": "4.17.7",
+    "@types/sinon": "10.0.15",
+    "@types/sinon-chai": "3.2.9",
+    "error-stack-parser": "2.1.4",
+    "esbuild": "0.18.11",
+    "gen-esm-wrapper": "1.1.3",
+    "gitty": "3.7.2",
+    "jsdom": "22.1.0",
+    "jsonfile": "6.1.0",
+    "require-from-string": "2.0.2",
+    "sinon": "15.2.0",
+    "sinon-chai": "3.7.0",
+    "xregexp": "5.1.1"
+  },
+  "gitHead": "ac5806631779035c2c1955744a47d8ed4f25a175"
+}

@@ -1,0 +1,20 @@
+[version]
+^0.172.0
+
+[ignore]
+<PROJECT_ROOT>/build/.*
+<PROJECT_ROOT>/dist/.*
+<PROJECT_ROOT>/node_modules/resolve/.*
+<PROJECT_ROOT>/node_modules/.*/resolve/.*
+# Speeds parsing:
+.*/node_modules/@babel.*
+.*/node_modules/babel.*
+
+[include]
+
+[libs]
+flow-typed/
+
+[options]
+emoji=true
+module.use_strict=true

@@ -1,0 +1,4 @@
+<!DOCTYPE html>
+<link href="../../node_modules/mocha/mocha.css" rel="stylesheet" />
+<div id="mocha"></div>
+<script src="index.js"></script>

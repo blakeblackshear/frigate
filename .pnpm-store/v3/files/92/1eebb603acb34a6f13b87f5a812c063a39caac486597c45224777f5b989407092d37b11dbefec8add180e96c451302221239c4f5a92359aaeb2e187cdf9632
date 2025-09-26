@@ -1,0 +1,15 @@
+export declare const enum ERROR_CODE {
+    EPERM = "EPERM",
+    ENOENT = "ENOENT",
+    EBADF = "EBADF",
+    EINVAL = "EINVAL",
+    EEXIST = "EEXIST",
+    ENOTDIR = "ENOTDIR",
+    EMFILE = "EMFILE",
+    EACCES = "EACCES",
+    EISDIR = "EISDIR",
+    ENOTEMPTY = "ENOTEMPTY",
+    ENOSYS = "ENOSYS",
+    ERR_FS_EISDIR = "ERR_FS_EISDIR",
+    ERR_OUT_OF_RANGE = "ERR_OUT_OF_RANGE"
+}

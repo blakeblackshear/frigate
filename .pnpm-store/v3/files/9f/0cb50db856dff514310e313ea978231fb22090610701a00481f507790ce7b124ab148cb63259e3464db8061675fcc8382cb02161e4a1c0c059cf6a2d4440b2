@@ -1,0 +1,27 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+
+jobs:
+  Unit-Tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v3
+      - name: Setup Node JS
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install system dependencies
+        run: npm run cirequirements
+      - name: Install package dependencies
+        run: npm install
+      - name: Install dependencies for individual codegens
+        run: npm run deepinstall dev
+      - name: Run tests
+        run: npm run test

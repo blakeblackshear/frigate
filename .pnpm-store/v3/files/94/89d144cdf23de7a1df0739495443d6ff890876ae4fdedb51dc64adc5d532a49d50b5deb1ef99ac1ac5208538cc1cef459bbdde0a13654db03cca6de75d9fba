@@ -1,0 +1,62 @@
+{
+  "name": "dagre-d3-es",
+  "version": "7.0.11",
+  "description": "",
+  "license": "MIT",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "generate_types": "find src -name '*.d.ts' -type f -delete ; tsc --build",
+    "prepack": "npm run generate_types",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "test": "vitest ",
+    "my_1_npm_login": "npm login",
+    "my_2_publish": "echo update_package_version ; git clean -xdf ; npm ci ; npm publish",
+    "compile_js_as_ts": "tsc src/index.js --AllowJs --checkJs --outDir dist/"
+  },
+  "keywords": [
+    "dagre-d3"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tbo47/dagre-es.git"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/jest": "^29.5.13",
+    "@types/lodash-es": "^4.17.12",
+    "eslint-plugin-import": "^2.30.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
+  },
+  "contributors": [
+    {
+      "name": "Thibaut Lassalle",
+      "url": "https://tbo47.github.io/"
+    },
+    {
+      "name": "Alois Klink",
+      "url": "https://github.com/aloisklink"
+    },
+    {
+      "name": "David Newell",
+      "url": "https://github.com/rustedgrail"
+    },
+    {
+      "name": "Sidharth Vinod",
+      "url": "https://github.com/sidharthv96"
+    }
+  ],
+  "files": [
+    "src/**/*",
+    "!src/**/*.test.js"
+  ],
+  "types": "./src/index.d.ts"
+}

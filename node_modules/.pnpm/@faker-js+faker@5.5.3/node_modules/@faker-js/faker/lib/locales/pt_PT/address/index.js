@@ -1,0 +1,14 @@
+var address = {};
+module['exports'] = address;
+address.country = require("./country");
+address.street_name = require("./street_name");
+address.building_number = require("./building_number");
+address.street_prefix = require("./street_prefix");
+address.postcode = require("./postcode");
+address.city_prefix = require("./city_prefix");
+address.city_name = require("./city_name");
+address.city_suffix = require("./city_suffix");
+address.city = require("./city");
+address.direction = require("./direction");
+address.street_address = require("./street_address");
+address.default_country = require("./default_country");

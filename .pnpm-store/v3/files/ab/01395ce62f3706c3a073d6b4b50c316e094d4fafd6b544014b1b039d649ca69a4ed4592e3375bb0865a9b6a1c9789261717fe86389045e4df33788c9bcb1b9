@@ -1,0 +1,1 @@
+{"version":3,"file":"equal-square.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

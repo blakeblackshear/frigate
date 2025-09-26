@@ -1,0 +1,36 @@
+{
+  "name": "@docusaurus/theme-translations",
+  "version": "3.9.1",
+  "description": "Docusaurus theme translations.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/docusaurus.git",
+    "directory": "packages/docusaurus-theme-translations"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build",
+    "watch": "tsc --build --watch",
+    "update": "node ./update.mjs"
+  },
+  "dependencies": {
+    "fs-extra": "^11.1.1",
+    "tslib": "^2.6.0"
+  },
+  "devDependencies": {
+    "@docusaurus/babel": "3.9.1",
+    "@docusaurus/core": "3.9.1",
+    "@docusaurus/logger": "3.9.1",
+    "@docusaurus/utils": "3.9.1",
+    "lodash": "^4.17.21"
+  },
+  "engines": {
+    "node": ">=20.0"
+  },
+  "gitHead": "c0dd59f0e712f85b6053c59e46b0514b5d2d1414"
+}

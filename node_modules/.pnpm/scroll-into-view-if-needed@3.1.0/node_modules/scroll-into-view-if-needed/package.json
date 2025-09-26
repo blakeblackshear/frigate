@@ -1,0 +1,80 @@
+{
+  "name": "scroll-into-view-if-needed",
+  "version": "3.1.0",
+  "description": "Ponyfill for upcoming Element.scrollIntoView() APIs like scrollMode: if-needed, behavior: smooth and block: center",
+  "keywords": [
+    "behavior-smooth",
+    "if-needed",
+    "polyfill",
+    "ponyfill",
+    "scroll",
+    "scroll-into-view",
+    "scrollIntoView",
+    "scrollIntoViewIfNeeded",
+    "scrollMode",
+    "smooth",
+    "smoothscroll",
+    "typescript"
+  ],
+  "homepage": "https://scroll-into-view.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scroll-into-view/scroll-into-view-if-needed.git"
+  },
+  "license": "MIT",
+  "author": "Cody Olsen",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "source": "./src/index.ts",
+  "typings": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "pkg build --strict",
+    "clean": "npx rimraf 'dist'",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc && tsc --noEmit -p tests/typescript"
+  },
+  "browserslist": [
+    "> 0.2% and supports es6-module and supports es6-module-dynamic-import and not dead and not IE 11",
+    "maintained node versions"
+  ],
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
+  },
+  "dependencies": {
+    "compute-scroll-into-view": "^3.0.2"
+  },
+  "devDependencies": {
+    "@sanity/pkg-utils": "^2.2.5",
+    "@sanity/semantic-release-preset": "^4.0.0",
+    "cross-env": "^7.0.3",
+    "prettier": "^2.8.4",
+    "prettier-plugin-packagejson": "^2.4.3",
+    "rimraf": "^4.1.2",
+    "typescript": "^5.0.0"
+  },
+  "bundlesize": [
+    {
+      "path": "./dist/index.js",
+      "maxSize": "3.3 kB",
+      "compression": "none"
+    }
+  ]
+}

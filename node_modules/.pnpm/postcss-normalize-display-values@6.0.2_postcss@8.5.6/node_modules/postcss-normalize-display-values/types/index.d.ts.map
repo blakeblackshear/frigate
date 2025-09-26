@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../src/index.js"],"names":[],"mappings":";AAiCA;;;GAGG;AACH,kCAFY,OAAO,SAAS,EAAE,MAAM,CAgCnC"}

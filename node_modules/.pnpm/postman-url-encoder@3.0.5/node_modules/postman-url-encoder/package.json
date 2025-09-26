@@ -1,0 +1,70 @@
+{
+  "name": "postman-url-encoder",
+  "version": "3.0.5",
+  "description": "Implementation of the WHATWG URL Standard",
+  "author": "Postman Inc.",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "homepage": "https://github.com/postmanlabs/postman-url-encoder#readme",
+  "bugs": {
+    "url": "https://github.com/postmanlabs/postman-url-encoder/issues",
+    "email": "help@postman.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/postmanlabs/postman-url-encoder.git"
+  },
+  "keywords": [
+    "postman",
+    "url-encoder",
+    "url-parser",
+    "whatwg-url"
+  ],
+  "scripts": {
+    "build-docs": "node npm/build-docs.js",
+    "codecov": "node npm/publish-coverage.js",
+    "release": "node npm/create-release.js",
+    "test": "npm run test-lint && npm run test-unit && npm run test-browser",
+    "test-benchmark": "node npm/test-benchmark.js",
+    "test-browser": "node npm/test-browser.js",
+    "test-lint": "node npm/test-lint.js",
+    "test-system": "node npm/test-system.js",
+    "test-unit": "nyc --nycrc-path=.nycrc.js node npm/test-unit.js"
+  },
+  "dependencies": {
+    "punycode": "^2.1.1"
+  },
+  "devDependencies": {
+    "@postman/csv-parse": "^4.0.2",
+    "@postman/shipit": "^0.3.0",
+    "async": "^3.2.1",
+    "bipbip": "^0.4.2",
+    "browserify": "^17.0.0",
+    "chai": "^4.3.4",
+    "chalk": "^4.1.2",
+    "colors": "^1.4.0",
+    "editorconfig": "^0.15.3",
+    "eslint": "^7.32.0",
+    "eslint-plugin-jsdoc": "^36.0.7",
+    "eslint-plugin-lodash": "^7.3.0",
+    "eslint-plugin-mocha": "^9.0.0",
+    "eslint-plugin-security": "^1.4.0",
+    "jsdoc": "^3.6.7",
+    "karma": "^6.3.4",
+    "karma-browserify": "^8.1.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-mocha": "^2.0.1",
+    "karma-mocha-reporter": "^2.2.5",
+    "mocha": "^9.0.3",
+    "nyc": "^15.1.0",
+    "parse-gitignore": "^1.0.1",
+    "postman-collection": "^4.0.2",
+    "postman-jsdoc-theme": "^0.0.3",
+    "recursive-readdir": "^2.2.2",
+    "shelljs": "^0.8.3",
+    "watchify": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=10"
+  }
+}

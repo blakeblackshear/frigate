@@ -1,0 +1,29 @@
+{
+  "name": "@docusaurus/module-type-aliases",
+  "version": "3.9.1",
+  "description": "Docusaurus module type aliases.",
+  "types": "./src/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/docusaurus.git",
+    "directory": "packages/docusaurus-module-type-aliases"
+  },
+  "dependencies": {
+    "@docusaurus/types": "3.9.1",
+    "@types/history": "^4.7.11",
+    "@types/react": "*",
+    "@types/react-router-config": "*",
+    "@types/react-router-dom": "*",
+    "react-helmet-async": "npm:@slorber/react-helmet-async@1.3.0",
+    "react-loadable": "npm:@docusaurus/react-loadable@6.0.0"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
+  "license": "MIT",
+  "gitHead": "c0dd59f0e712f85b6053c59e46b0514b5d2d1414"
+}

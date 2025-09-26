@@ -1,0 +1,45 @@
+{
+  "name": "sort-by",
+  "version": "1.2.0",
+  "description": "Sort objects by property names using native Array.sort()",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kvnneff/sort-by.git"
+  },
+  "keywords": [
+    "array",
+    "object",
+    "sort"
+  ],
+  "author": "Kevin Neff",
+  "license": "MIT",
+  "readmeFilename": "Readme.md",
+  "scripts": {
+    "test": "make test"
+  },
+  "dependencies": {
+    "object-path": "0.6.0"
+  },
+  "devDependencies": {
+    "duo": "^0.9.6",
+    "duo-test": "^0.3.13",
+    "insist": "^0.2.3",
+    "mocha": "^2.0.1"
+  },
+  "testling": {
+    "harness": "mocha",
+    "scripts": ["test/build.js"],
+    "preprocess": "make build-test",
+    "browsers": [
+      "ie/6.0..latest",
+      "chrome/22.0..latest",
+      "firefox/16.0..latest",
+      "safari/latest",
+      "opera/11.0..latest",
+      "iphone/6.0",
+      "ipad/6.0",
+      "android-browser/latest"
+    ]
+  }
+}

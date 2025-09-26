@@ -1,0 +1,52 @@
+{
+  "name": "vite-plugin-monaco-editor",
+  "version": "1.1.0",
+  "description": "A vite plugin for the Monaco Editor",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublish": "npm run copy:cdn",
+    "test:build": "npm run build && vite build --config test/vite.config.js",
+    "test:dev": "npm run build && vite --config test/vite.config.js",
+    "test:preview": "vite preview --config test/vite.config.js",
+    "simulator:cdn": "http-server cdn/ --port 8888",
+    "copy:cdn": "node script/updateCDN.js"
+  },
+  "files": [
+    "dist",
+    "cdn"
+  ],
+  "author": "china-bin",
+  "license": "MIT",
+  "keywords": [
+    "vite-plugin",
+    "monaco",
+    "editor"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vdesjs/vite-plugin-monaco-editor"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "devDependencies": {
+    "@okikio/sharedworker": "^1.0.3",
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "^16.4.13",
+    "@vitejs/plugin-vue": "^1.4.0",
+    "@vue/compiler-sfc": "^3.1.5",
+    "fs-extra": "^10.0.0",
+    "http-server": "^13.0.2",
+    "monaco-editor": "^0.33.0",
+    "monaco-graphql": "^0.4.4",
+    "typescript": "^4.3.5",
+    "vite": "^2.4.4",
+    "vue": "^3.1.5",
+    "vue-router": "^4.0.12"
+  },
+  "peerDependencies": {
+    "monaco-editor": ">=0.33.0"
+  }
+}

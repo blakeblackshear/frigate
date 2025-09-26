@@ -1,0 +1,52 @@
+{
+  "name": "@chevrotain/gast",
+  "version": "11.0.3",
+  "description": "Grammar AST structure for Chevrotain Parsers",
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/Chevrotain/chevrotain/issues"
+  },
+  "license": "Apache-2.0",
+  "type": "module",
+  "types": "./lib/src/api.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/src/api.js",
+      "types": "./lib/src/api.d.ts"
+    }
+  },
+  "files": [
+    "lib/src/**/*.js",
+    "lib/src/**/*.map",
+    "lib/src/**/*.d.ts",
+    "src/**/*.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Chevrotain/chevrotain.git"
+  },
+  "scripts": {
+    "---------- CI FLOWS --------": "",
+    "ci": "pnpm run build test",
+    "build": "npm-run-all clean compile",
+    "test": "npm-run-all coverage",
+    "---------- DEV FLOWS --------": "",
+    "update-snapshots": "node ./scripts/update-snapshots.js",
+    "---------- BUILD STEPS --------": "",
+    "clean": "shx rm -rf lib coverage",
+    "compile:watch": "tsc -w",
+    "compile": "tsc",
+    "coverage": "c8 mocha --enable-source-maps"
+  },
+  "dependencies": {
+    "@chevrotain/types": "11.0.3",
+    "lodash-es": "4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "4.17.7"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "ac5806631779035c2c1955744a47d8ed4f25a175"
+}

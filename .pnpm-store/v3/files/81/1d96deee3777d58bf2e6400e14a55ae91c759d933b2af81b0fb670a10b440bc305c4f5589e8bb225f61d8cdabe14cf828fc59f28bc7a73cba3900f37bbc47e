@@ -1,0 +1,109 @@
+{
+  "name": "estree-util-scope",
+  "version": "1.0.0",
+  "description": "Check what’s defined in an estree scope",
+  "license": "MIT",
+  "keywords": [
+    "ast",
+    "ecmascript",
+    "estree",
+    "javascript",
+    "scope",
+    "tree"
+  ],
+  "repository": "syntax-tree/estree-util-scope",
+  "bugs": "https://github.com/syntax-tree/estree-util-scope/issues",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "exports": "./index.js",
+  "files": [
+    "lib/",
+    "index.d.ts",
+    "index.js"
+  ],
+  "dependencies": {
+    "@types/estree": "^1.0.0",
+    "devlop": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "acorn": "^8.0.0",
+    "c8": "^10.0.0",
+    "estree-walker": "^3.0.0",
+    "prettier": "^3.0.0",
+    "remark-api": "^1.1.0",
+    "remark-cli": "^12.0.0",
+    "remark-preset-wooorm": "^10.0.0",
+    "type-coverage": "^2.0.0",
+    "typescript": "^5.0.0",
+    "xo": "^0.59.0"
+  },
+  "scripts": {
+    "prepack": "npm run build && npm run format",
+    "build": "tsc --build --clean && tsc --build && type-coverage",
+    "format": "remark . -qfo && prettier . -w --log-level warn && xo --fix",
+    "test-api": "node --conditions development test.js",
+    "test-coverage": "c8 --100 --reporter lcov npm run test-api",
+    "test": "npm run build && npm run format && npm run test-coverage"
+  },
+  "prettier": {
+    "bracketSpacing": false,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "none",
+    "useTabs": false
+  },
+  "remarkConfig": {
+    "plugins": [
+      "remark-api",
+      "remark-preset-wooorm"
+    ]
+  },
+  "typeCoverage": {
+    "atLeast": 100,
+    "detail": true,
+    "ignoreCatch": true,
+    "strict": true
+  },
+  "xo": {
+    "overrides": [
+      {
+        "files": [
+          "**/*.d.ts"
+        ],
+        "rules": {
+          "@typescript-eslint/array-type": [
+            "error",
+            {
+              "default": "generic"
+            }
+          ],
+          "@typescript-eslint/ban-types": [
+            "error",
+            {
+              "extendDefaults": true
+            }
+          ],
+          "@typescript-eslint/consistent-type-definitions": [
+            "error",
+            "interface"
+          ]
+        }
+      }
+    ],
+    "prettier": true,
+    "rules": {
+      "complexity": "off",
+      "unicorn/prefer-switch": "off"
+    }
+  }
+}

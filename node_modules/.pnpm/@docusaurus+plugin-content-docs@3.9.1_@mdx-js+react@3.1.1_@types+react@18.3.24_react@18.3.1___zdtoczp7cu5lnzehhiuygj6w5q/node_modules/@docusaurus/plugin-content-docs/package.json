@@ -1,0 +1,71 @@
+{
+  "name": "@docusaurus/plugin-content-docs",
+  "version": "3.9.1",
+  "description": "Docs plugin for Docusaurus.",
+  "main": "lib/index.js",
+  "sideEffects": false,
+  "exports": {
+    "./lib/*": "./lib/*",
+    "./src/*": "./src/*",
+    "./client": {
+      "type": "./lib/client/index.d.ts",
+      "default": "./lib/client/index.js"
+    },
+    "./server": {
+      "type": "./lib/server-export.d.ts",
+      "default": "./lib/server-export.js"
+    },
+    ".": {
+      "types": "./src/plugin-content-docs.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "types": "src/plugin-content-docs.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "watch": "tsc --build --watch"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/docusaurus.git",
+    "directory": "packages/docusaurus-plugin-content-docs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@docusaurus/core": "3.9.1",
+    "@docusaurus/logger": "3.9.1",
+    "@docusaurus/mdx-loader": "3.9.1",
+    "@docusaurus/module-type-aliases": "3.9.1",
+    "@docusaurus/theme-common": "3.9.1",
+    "@docusaurus/types": "3.9.1",
+    "@docusaurus/utils": "3.9.1",
+    "@docusaurus/utils-common": "3.9.1",
+    "@docusaurus/utils-validation": "3.9.1",
+    "@types/react-router-config": "^5.0.7",
+    "combine-promises": "^1.1.0",
+    "fs-extra": "^11.1.1",
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "schema-dts": "^1.1.2",
+    "tslib": "^2.6.0",
+    "utility-types": "^3.10.0",
+    "webpack": "^5.88.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.5",
+    "@types/picomatch": "^2.3.0",
+    "commander": "^5.1.0",
+    "picomatch": "^2.3.1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "engines": {
+    "node": ">=20.0"
+  },
+  "gitHead": "c0dd59f0e712f85b6053c59e46b0514b5d2d1414"
+}

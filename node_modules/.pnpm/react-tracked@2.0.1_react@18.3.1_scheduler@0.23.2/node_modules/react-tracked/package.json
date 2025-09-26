@@ -1,0 +1,128 @@
+{
+  "name": "react-tracked",
+  "description": "State usage tracking with Proxies. Optimize re-renders for useState/useReducer, React Redux, Zustand and others.",
+  "version": "2.0.1",
+  "type": "module",
+  "author": "Daishi Kato",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dai-shi/react-tracked.git"
+  },
+  "homepage": "https://react-tracked.js.org",
+  "source": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      },
+      "default": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "src",
+    "dist"
+  ],
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "compile": "rm -rf dist && pnpm run '/^compile:.*/'",
+    "compile:esm": "tsc -p tsconfig.esm.json",
+    "compile:cjs": "tsc -p tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
+    "test": "pnpm run '/^test:.*/'",
+    "test:format": "prettier -c .",
+    "test:lint": "eslint .",
+    "test:types": "tsc -p . --noEmit",
+    "test:types:examples": "tsc -p examples --noEmit",
+    "test:spec": "vitest run --project=spec",
+    "test:e2e": "run-s prepare-e2e e2e:*",
+    "prepare-e2e": "test -z $CI || node node_modules/puppeteer/install.mjs",
+    "e2e:01_counter": "server-test examples:01_counter http://localhost:8080 'vitest run --project=e2e 01_counter'",
+    "e2e:02_person": "server-test examples:02_person http://localhost:8080 'vitest run --project=e2e 02_person'",
+    "e2e:03_usestate": "server-test examples:03_usestate http://localhost:8080 'vitest run --project=e2e 03_usestate'",
+    "e2e:04_selector": "server-test examples:04_selector http://localhost:8080 'vitest run --project=e2e 04_selector'",
+    "e2e:05_container": "server-test examples:05_container http://localhost:8080 'vitest run --project=e2e 05_container'",
+    "e2e:06_customhook": "server-test examples:06_customhook http://localhost:8080 'vitest run --project=e2e 06_customhook'",
+    "e2e:07_todolist": "server-test examples:07_todolist http://localhost:8080 'vitest run --project=e2e 07_todolist'",
+    "e2e:08_comparison": "server-test examples:08_comparison http://localhost:8080 'vitest run --project=e2e 08_comparison'",
+    "e2e:09_reactmemo": "server-test examples:09_reactmemo http://localhost:8080 'vitest run --project=e2e 09_reactmemo'",
+    "e2e:10_untracked": "server-test examples:10_untracked http://localhost:8080 'vitest run --project=e2e 10_untracked'",
+    "e2e:11_form": "server-test examples:11_form http://localhost:8080 'vitest run --project=e2e 11_form'",
+    "e2e:12_async": "server-test examples:12_async http://localhost:8080 'vitest run --project=e2e 12_async'",
+    "e2e:13_saga": "server-test examples:13_saga http://localhost:8080 'vitest run --project=e2e 13_saga'",
+    "e2e:14_dynamic": "server-test examples:14_dynamic http://localhost:8080 'vitest run --project=e2e 14_dynamic'",
+    "e2e:15_reactmemoref": "server-test examples:15_reactmemoref http://localhost:8080 'vitest run --project=e2e 15_reactmemoref'",
+    "examples:01_counter": "DIR=01_counter vite",
+    "examples:02_person": "DIR=02_person vite",
+    "examples:03_usestate": "DIR=03_usestate vite",
+    "examples:04_selector": "DIR=04_selector vite",
+    "examples:05_container": "DIR=05_container vite",
+    "examples:06_customhook": "DIR=06_customhook EXT=tsx vite",
+    "examples:07_todolist": "DIR=07_todolist vite",
+    "examples:08_comparison": "DIR=08_comparison vite",
+    "examples:09_reactmemo": "DIR=09_reactmemo vite",
+    "examples:10_untracked": "DIR=10_untracked vite",
+    "examples:11_form": "DIR=11_form vite",
+    "examples:12_async": "DIR=12_async vite",
+    "examples:13_saga": "DIR=13_saga vite",
+    "examples:14_dynamic": "DIR=14_dynamic vite",
+    "examples:15_reactmemoref": "DIR=15_reactmemoref vite"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "state",
+    "hooks"
+  ],
+  "license": "MIT",
+  "prettier": {
+    "singleQuote": true
+  },
+  "dependencies": {
+    "proxy-compare": "^3.0.0",
+    "use-context-selector": "^2.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.5",
+    "@testing-library/react": "^15.0.6",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^20.12.10",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "happy-dom": "^14.9.0",
+    "immer": "^10.1.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.2.5",
+    "puppeteer": "^22.8.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-tracked": "link:.",
+    "redux-saga": "^1.3.0",
+    "start-server-and-test": "^2.0.3",
+    "ts-expect": "^1.3.0",
+    "typescript": "^5.4.5",
+    "use-reducer-async": "^2.1.1",
+    "use-saga-reducer": "^3.0.0",
+    "vite": "^5.2.11",
+    "vitest": "^1.6.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "scheduler": ">=0.19.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@hookform/resolvers/class-validator",
+  "amdName": "hookformResolversClassValidator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "React Hook Form validation resolver: class-validator",
+  "main": "dist/class-validator.js",
+  "module": "dist/class-validator.module.js",
+  "umd:main": "dist/class-validator.umd.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "peerDependencies": {
+    "react-hook-form": ">=6.6.0",
+    "@hookform/resolvers": ">=2.0.0",
+    "class-transformer": "^0.4.0",
+    "class-validator": "^0.12.0"
+  }
+}

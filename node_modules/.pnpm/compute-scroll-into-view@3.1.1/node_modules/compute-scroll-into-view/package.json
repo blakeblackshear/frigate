@@ -1,0 +1,82 @@
+{
+  "name": "compute-scroll-into-view",
+  "version": "3.1.1",
+  "description": "The engine that powers scroll-into-view-if-needed",
+  "keywords": [
+    "if-needed",
+    "scroll",
+    "scroll-into-view",
+    "scroll-into-view-if-needed",
+    "scrollIntoView",
+    "scrollIntoViewIfNeeded",
+    "scrollMode",
+    "typescript"
+  ],
+  "homepage": "https://scroll-into-view.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scroll-into-view/compute-scroll-into-view.git"
+  },
+  "license": "MIT",
+  "author": "Cody Olsen",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "source": "./src/index.ts",
+  "typings": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "prebuild": "npx rimraf 'dist'",
+    "build": "pkg build --strict",
+    "prepublishOnly": "npm run build",
+    "test": "npx cross-env JEST_PUPPETEER_CONFIG='jest-puppeteer.config.cjs' jest -c integration/jest.config.cjs",
+    "typecheck": "tsc"
+  },
+  "browserslist": [
+    "> 0.2% and supports es6-module and supports es6-module-dynamic-import and not dead",
+    "maintained node versions"
+  ],
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
+  },
+  "devDependencies": {
+    "@sanity/pkg-utils": "^2.2.5",
+    "@sanity/semantic-release-preset": "^4.0.0",
+    "@types/expect-puppeteer": "^5.0.2",
+    "@types/jest": "^29.4.0",
+    "@types/jest-environment-puppeteer": "^5.0.3",
+    "@types/puppeteer": "^7.0.4",
+    "cross-env": "^7.0.3",
+    "jest": "^29.5.0",
+    "jest-junit": "^15.0.0",
+    "jest-puppeteer": "^8.0.0",
+    "prettier": "^2.8.4",
+    "prettier-plugin-packagejson": "^2.4.3",
+    "puppeteer": "^19.7.0",
+    "rimraf": "^4.1.2",
+    "serve": "^14.2.0",
+    "typescript": "^5.0.0"
+  },
+  "bundlesize": [
+    {
+      "path": "./dist/index.js",
+      "maxSize": "3 kB",
+      "compression": "none"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`nopeResolver > should return a single error from nopeResolver when validation fails 1`] = `
+{
+  "errors": {
+    "birthYear": {
+      "message": "The field is not a valid number",
+      "ref": undefined,
+    },
+    "like": {
+      "id": {
+        "message": "The field is not a valid number",
+        "ref": undefined,
+      },
+      "name": {
+        "message": "This field is required",
+        "ref": undefined,
+      },
+    },
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+    },
+    "repeatPassword": {
+      "message": "This field is required",
+      "ref": undefined,
+    },
+    "tags": {
+      "message": "One or more elements are of invalid type",
+      "ref": undefined,
+    },
+    "username": {
+      "message": "This field is required",
+      "ref": {
+        "name": "username",
+      },
+    },
+  },
+  "values": {},
+}
+`;

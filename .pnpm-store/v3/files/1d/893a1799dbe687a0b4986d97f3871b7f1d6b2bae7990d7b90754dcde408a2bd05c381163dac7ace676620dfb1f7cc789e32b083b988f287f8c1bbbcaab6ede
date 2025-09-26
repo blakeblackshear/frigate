@@ -1,0 +1,125 @@
+{
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "bugs": "https://github.com/syntax-tree/mdast-util-gfm/issues",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
+  ],
+  "dependencies": {
+    "mdast-util-from-markdown": "^2.0.0",
+    "mdast-util-gfm-autolink-literal": "^2.0.0",
+    "mdast-util-gfm-footnote": "^2.0.0",
+    "mdast-util-gfm-strikethrough": "^2.0.0",
+    "mdast-util-gfm-table": "^2.0.0",
+    "mdast-util-gfm-task-list-item": "^2.0.0",
+    "mdast-util-to-markdown": "^2.0.0"
+  },
+  "description": "mdast extension to parse and serialize GFM (GitHub Flavored Markdown)",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "c8": "^10.0.0",
+    "github-slugger": "^2.0.0",
+    "hast-util-to-html": "^9.0.0",
+    "mdast-util-to-hast": "^13.0.0",
+    "micromark-extension-gfm": "^3.0.0",
+    "prettier": "^3.0.0",
+    "remark-cli": "^12.0.0",
+    "remark-preset-wooorm": "^11.0.0",
+    "type-coverage": "^2.0.0",
+    "typescript": "^5.0.0",
+    "undici": "^7.0.0",
+    "xo": "^0.60.0"
+  },
+  "exports": "./index.js",
+  "files": [
+    "index.d.ts",
+    "index.js",
+    "lib/"
+  ],
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "keywords": [
+    "autolink",
+    "gfm",
+    "github",
+    "markdown",
+    "markup",
+    "mdast-util",
+    "mdast",
+    "strikethrough",
+    "table",
+    "tagfilter",
+    "tasklist",
+    "unist",
+    "utility",
+    "util"
+  ],
+  "license": "MIT",
+  "name": "mdast-util-gfm",
+  "prettier": {
+    "bracketSpacing": false,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "none",
+    "useTabs": false
+  },
+  "remarkConfig": {
+    "plugins": [
+      "remark-preset-wooorm"
+    ]
+  },
+  "repository": "syntax-tree/mdast-util-gfm",
+  "scripts": {
+    "build": "tsc --build --clean && tsc --build && type-coverage",
+    "crawl": "node --conditions development script/crawl-tests.js",
+    "format": "remark --frail --output --quiet -- . && prettier --log-level warn --write -- . && xo --fix",
+    "test-api-prod": "node --conditions production test/index.js",
+    "test-api-dev": "node --conditions development test/index.js",
+    "test-api": "npm run test-api-dev && npm run test-api-prod",
+    "test-coverage": "c8 --100 --reporter lcov -- npm run test-api",
+    "test": "npm run build && npm run format && npm run test-coverage"
+  },
+  "sideEffects": false,
+  "typeCoverage": {
+    "atLeast": 100,
+    "strict": true
+  },
+  "type": "module",
+  "version": "3.1.0",
+  "xo": {
+    "overrides": [
+      {
+        "files": [
+          "**/*.d.ts"
+        ],
+        "rules": {
+          "@typescript-eslint/array-type": [
+            "error",
+            {
+              "default": "generic"
+            }
+          ],
+          "@typescript-eslint/ban-types": [
+            "error",
+            {
+              "extendDefaults": true
+            }
+          ],
+          "@typescript-eslint/consistent-type-definitions": [
+            "error",
+            "interface"
+          ]
+        }
+      },
+      {
+        "files": "test/**/*.js",
+        "rules": {
+          "no-await-in-loop": "off"
+        }
+      }
+    ],
+    "prettier": true
+  }
+}

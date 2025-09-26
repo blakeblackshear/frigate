@@ -1,0 +1,59 @@
+{
+  "name": "sonner",
+  "version": "1.7.4",
+  "description": "An opinionated toast component for React.",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./dist/styles.css": "./dist/styles.css"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.tsx && cp src/styles.css dist/styles.css",
+    "dev": "tsup src/index.tsx --watch",
+    "dev:website": "turbo run dev --filter=website...",
+    "dev:test": "turbo run dev --filter=test...",
+    "format": "prettier --write .",
+    "test": "playwright test"
+  },
+  "keywords": [
+    "react",
+    "notifications",
+    "toast",
+    "snackbar",
+    "message"
+  ],
+  "author": "Emil Kowalski <e@emilkowal.ski>",
+  "license": "MIT",
+  "homepage": "https://sonner.emilkowal.ski/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emilkowalski/sonner.git"
+  },
+  "bugs": {
+    "url": "https://github.com/emilkowalski/sonner/issues"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^18.11.13",
+    "@types/react": "^18.0.26",
+    "prettier": "^2.8.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^6.4.0",
+    "turbo": "1.6",
+    "typescript": "^4.8.4"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0 || ^19.0.0-rc",
+    "react-dom": "^18.0.0 || ^19.0.0 || ^19.0.0-rc"
+  },
+  "packageManager": "pnpm@8.12.1"
+}

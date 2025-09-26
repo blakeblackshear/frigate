@@ -1,0 +1,279 @@
+{
+	"type": "array",
+	"title": "RequestList",
+	"items": {
+		"type": "object",
+		"title": "Item",
+		"properties": {
+			"id": {
+				"type": "string"
+			},
+			"request": {
+				"type": "object",
+				"title": "Request",
+				"properties": {
+					"url": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "raw": {
+                                        "type": "string"
+                                    },
+                                    "protocol": {
+                                        "type": "string"
+                                    },
+                                    "host": {
+                                        "title": "Host",
+                                        "oneOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "path": {
+                                        "oneOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "items": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "type": {
+                                                                    "type": "string"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "port": {
+                                        "type": "string"
+                                    },
+                                    "query": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "title": "QueryParam",
+                                            "properties": {
+                                                "key": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "value": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "disabled": {
+                                                    "type": "boolean",
+                                                    "default": false,
+                                                    "description": "If set to true, the current query parameter will not be sent with the request."
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "hash": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+					},
+					"method": {
+						"type": "string"
+					},
+					"header":   {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"key": {
+									"type": "string"
+								},
+								"value": {
+									"type": "string"
+								}
+							},
+							"required": ["key", "value"]
+						}
+					},
+					"body": {
+						"oneOf": [
+							{
+								"type": "object",
+								"description": "This field contains the data usually contained in the request body.",
+								"properties": {
+									"mode": {
+										"description": "Only raw supported for now",
+										"enum": [
+											"raw",
+											"urlencoded",
+											"formdata",
+											"graphql",
+											"file"
+										]
+									},
+									"raw": {
+										"type": "string"
+									},
+									"graphql": {
+										"type": "object"
+									},
+									"urlencoded": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"title": "UrlEncodedParameter",
+											"properties": {
+												"key": {
+													"type": "string"
+												},
+												"value": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"key"
+											]
+										}
+									},
+									"formdata": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"title": "FormParameter",
+											"oneOf": [
+												{
+													"properties": {
+														"key": {
+															"type": "string"
+														},
+														"value": {
+															"type": "string"
+														},
+														"type": {
+															"type": "string",
+															"const": "text"
+														},
+														"contentType": {
+															"type": "string",
+															"description": "Override Content-Type header of this form data entity."
+														}
+													},
+													"required": [
+														"key"
+													]
+												},
+												{
+													"properties": {
+														"key": {
+															"type": "string"
+														},
+														"src": {
+															"type": [
+																"array",
+																"string",
+																"null"
+															]
+														},
+														"disabled": {
+															"type": "boolean",
+															"default": false,
+															"description": "When set to true, prevents this form data entity from being sent."
+														},
+														"type": {
+															"type": "string",
+															"const": "file"
+														},
+														"contentType": {
+															"type": "string",
+															"description": "Override Content-Type header of this form data entity."
+														}
+													},
+													"required": [
+														"key"
+													]
+												}
+											]
+										}
+									}
+								}
+							},
+							{
+								"type": "null"
+							}
+						]
+					}
+				}
+			},
+			"response": {
+				"type": "array",
+				"title": "Responses",
+				"items": {
+					"$schema": "http://json-schema.org/draft-07/schema#",
+					"title": "Response",
+					"properties": {
+						"id": {
+							"type": "string"
+						},
+						"header": {
+							"type": "array",
+							"title": "Headers",
+							"items": {
+								"type": "object",
+								"properties": {
+									"key": {
+										"type": "string"
+									},
+									"value": {
+										"type": "string"
+									}
+								},
+								"required": ["key", "value"]
+							}
+						},
+						"body": {
+							"type": [
+								"null",
+								"string"
+							]
+						},
+						"code": {
+							"type": "integer"
+						}
+					},
+					"required": ["id", "code"]
+				}
+			}
+		},
+		"required": [
+			"id",
+			"request"
+		]
+	}
+}

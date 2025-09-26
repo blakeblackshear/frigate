@@ -1,0 +1,48 @@
+{
+  "name": "roughjs",
+  "version": "4.6.6",
+  "description": "Create graphics using HTML Canvas or SVG with a hand-drawn, sketchy, appearance.",
+  "main": "bundled/rough.cjs.js",
+  "module": "bundled/rough.esm.js",
+  "types": "bin/rough.d.ts",
+  "scripts": {
+    "build": "rm -rf bin && tsc && rollup -c",
+    "lint": "eslint --ext ts src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pshihn/rough.git"
+  },
+  "keywords": [
+    "canvas",
+    "svg",
+    "graphics",
+    "sketchy",
+    "hand drawn",
+    "hand-drawn"
+  ],
+  "author": "Preet Shihn <preetshihn@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pshihn/rough/issues"
+  },
+  "homepage": "https://roughjs.com",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.0.6",
+    "@rollup/plugin-typescript": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "eslint": "^7.32.0",
+    "rollup": "^2.61.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.3"
+  },
+  "dependencies": {
+    "hachure-fill": "^0.5.2",
+    "path-data-parser": "^0.1.0",
+    "points-on-curve": "^0.2.0",
+    "points-on-path": "^0.2.1"
+  }
+}

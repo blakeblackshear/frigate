@@ -1,0 +1,92 @@
+{
+  "name": "langium",
+  "version": "3.3.1",
+  "description": "A language engineering tool for the Language Server Protocol",
+  "homepage": "https://langium.org",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "language",
+    "dsl",
+    "low-code",
+    "lsp",
+    "language-server",
+    "vscode",
+    "typescript"
+  ],
+  "license": "MIT",
+  "files": [
+    "lib",
+    "src",
+    "node.js",
+    "node.d.ts",
+    "test.js",
+    "test.d.ts"
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    },
+    "./generate": {
+      "types": "./lib/generate/index.d.ts",
+      "import": "./lib/generate/index.js"
+    },
+    "./test": {
+      "types": "./lib/test/index.d.ts",
+      "import": "./lib/test/index.js"
+    },
+    "./node": {
+      "types": "./lib/node/index.d.ts",
+      "import": "./lib/node/index.js"
+    },
+    "./grammar": {
+      "types": "./lib/grammar/index.d.ts",
+      "import": "./lib/grammar/index.js"
+    },
+    "./lsp": {
+      "types": "./lib/lsp/index.d.ts",
+      "import": "./lib/lsp/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "shx rm -rf lib coverage",
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "lint": "eslint src test --ext .ts",
+    "docs": "typedoc",
+    "validate-exports": "tsc -p test/tsconfig.export-main.json",
+    "langium:generate": "langium generate",
+    "langium:generate:production": "langium generate --mode=production",
+    "publish:next": "npm --no-git-tag-version version \"$(semver $npm_package_version -i minor)-next.$(git rev-parse --short HEAD)\" && npm publish --tag next",
+    "publish:latest": "npm publish --tag latest --access public"
+  },
+  "dependencies": {
+    "chevrotain": "~11.0.3",
+    "chevrotain-allstar": "~0.3.0",
+    "vscode-languageserver": "~9.0.1",
+    "vscode-languageserver-textdocument": "~1.0.11",
+    "vscode-uri": "~3.0.8"
+  },
+  "devDependencies": {
+    "langium-cli": "~3.3.0",
+    "typedoc": "^0.26.7"
+  },
+  "volta": {
+    "node": "18.19.1",
+    "npm": "10.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipse-langium/langium",
+    "directory": "packages/langium"
+  },
+  "bugs": "https://github.com/eclipse-langium/langium/issues",
+  "author": {
+    "name": "TypeFox",
+    "url": "https://www.typefox.io"
+  }
+}

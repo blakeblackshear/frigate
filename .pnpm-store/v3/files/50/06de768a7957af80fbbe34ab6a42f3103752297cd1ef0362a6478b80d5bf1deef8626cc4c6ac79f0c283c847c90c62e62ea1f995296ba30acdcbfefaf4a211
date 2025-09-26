@@ -1,0 +1,37 @@
+{
+  "root": true,
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true,
+    "jest": true
+  },
+  "plugins": [
+    "import",
+    "jsx-a11y",
+    "prettier",
+    "react",
+    "react-hooks"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "react-hooks/rules-of-hooks": 2,
+    "react/forbid-prop-types": 0,
+    "react/require-default-props": 0
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}

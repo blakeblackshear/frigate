@@ -1,0 +1,1 @@
+{"version":3,"file":"more-vertical.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

@@ -1,0 +1,33 @@
+{
+  "name": "@docusaurus/logger",
+  "version": "3.9.1",
+  "description": "An encapsulated logger for semantically formatting console messages.",
+  "main": "./lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/docusaurus.git",
+    "directory": "packages/docusaurus-logger"
+  },
+  "bugs": {
+    "url": "https://github.com/facebook/docusaurus/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "tslib": "^2.6.0"
+  },
+  "engines": {
+    "node": ">=20.0"
+  },
+  "devDependencies": {
+    "@types/supports-color": "^8.1.1"
+  },
+  "gitHead": "c0dd59f0e712f85b6053c59e46b0514b5d2d1414"
+}

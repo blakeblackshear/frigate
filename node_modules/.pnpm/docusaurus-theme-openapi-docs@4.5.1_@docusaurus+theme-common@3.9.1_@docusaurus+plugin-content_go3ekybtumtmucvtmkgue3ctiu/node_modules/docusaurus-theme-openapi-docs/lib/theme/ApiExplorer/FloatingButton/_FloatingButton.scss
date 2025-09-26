@@ -1,0 +1,27 @@
+.openapi-explorer__floating-btn {
+  position: relative;
+
+  button {
+    position: relative;
+    background: var(--ifm-color-emphasis-900);
+    border: none;
+    border-radius: var(--ifm-global-radius);
+    color: var(--ifm-color-emphasis-100);
+    cursor: pointer;
+    padding: 0.4rem 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.2s ease-in-out,
+      visibility 0.2s ease-in-out,
+      bottom 0.2s ease-in-out;
+    position: absolute;
+    right: calc(var(--ifm-pre-padding) / 2);
+  }
+}
+.openapi-explorer__floating-btn:hover button,
+.openapi-explorer__floating-btn:focus-visible button,
+.openapi-explorer__floating-btn button:focus-visible {
+  visibility: visible;
+  opacity: 1;
+}

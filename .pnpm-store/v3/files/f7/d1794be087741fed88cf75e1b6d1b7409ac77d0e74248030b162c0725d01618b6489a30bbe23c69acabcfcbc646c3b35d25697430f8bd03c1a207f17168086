@@ -1,0 +1,134 @@
+{
+  "name": "@date-fns/tz",
+  "version": "1.4.1",
+  "description": "date-fns timezone utils",
+  "type": "module",
+  "main": "index.cjs",
+  "module": "index.js",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "require": {
+        "types": "./index.d.cts",
+        "default": "./index.cjs"
+      },
+      "import": {
+        "types": "./index.d.ts",
+        "default": "./index.js"
+      }
+    },
+    "./tzOffset": {
+      "require": {
+        "types": "./tzOffset/index.d.cts",
+        "default": "./tzOffset/index.cjs"
+      },
+      "import": {
+        "types": "./tzOffset/index.d.ts",
+        "default": "./tzOffset/index.js"
+      }
+    },
+    "./tzScan": {
+      "require": {
+        "types": "./tzScan/index.d.cts",
+        "default": "./tzScan/index.cjs"
+      },
+      "import": {
+        "types": "./tzScan/index.d.ts",
+        "default": "./tzScan/index.js"
+      }
+    },
+    "./tzName": {
+      "require": {
+        "types": "./tzName/index.d.cts",
+        "default": "./tzName/index.cjs"
+      },
+      "import": {
+        "types": "./tzName/index.d.ts",
+        "default": "./tzName/index.js"
+      }
+    },
+    "./date": {
+      "require": {
+        "types": "./date/index.d.cts",
+        "default": "./date/index.cjs"
+      },
+      "import": {
+        "types": "./date/index.d.ts",
+        "default": "./date/index.js"
+      }
+    },
+    "./date/mini": {
+      "require": {
+        "types": "./date/mini.d.cts",
+        "default": "./date/mini.cjs"
+      },
+      "import": {
+        "types": "./date/mini.d.ts",
+        "default": "./date/mini.js"
+      }
+    },
+    "./tz": {
+      "require": {
+        "types": "./tz/index.d.cts",
+        "default": "./tz/index.cjs"
+      },
+      "import": {
+        "types": "./tz/index.d.ts",
+        "default": "./tz/index.js"
+      }
+    },
+    "./constants": {
+      "require": {
+        "types": "./constants/index.d.cts",
+        "default": "./constants/index.cjs"
+      },
+      "import": {
+        "types": "./constants/index.d.ts",
+        "default": "./constants/index.js"
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/date-fns/tz.git"
+  },
+  "keywords": [
+    "date-fns",
+    "tz",
+    "timezones",
+    "date",
+    "time",
+    "datetime"
+  ],
+  "author": "Sasha Koss <koss@nocorp.me>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/date-fns/tz/issues"
+  },
+  "homepage": "https://github.com/date-fns/tz#readme",
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@babel/cli": "^7.28.0",
+    "@babel/core": "^7.28.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-typescript": "^7.27.1",
+    "@parcel/watcher": "^2.4.1",
+    "@sinonjs/fake-timers": "^11.2.2",
+    "@swc/core": "^1.4.13",
+    "@types/sinonjs__fake-timers": "^8.1.5",
+    "babel-plugin-replace-import-extension": "^1.1.5",
+    "bytes-iec": "^3.1.1",
+    "date-fns": "4.0.0-alpha.1",
+    "glob": "^10.3.12",
+    "minimatch": "^10.0.1",
+    "picocolors": "^1.0.0",
+    "prettier": "^3.6.2",
+    "tinybench": "^2.7.0",
+    "typescript": "5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}

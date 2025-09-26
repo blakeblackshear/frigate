@@ -1,0 +1,15 @@
+.openapi-explorer__playground-container {
+  margin-top: 1rem;
+  margin-bottom: var(--ifm-leading);
+  border-radius: var(--ifm-global-radius);
+  box-shadow: var(--ifm-global-shadow-lw);
+  overflow: auto;
+  max-height: 500px;
+}
+
+.openapi-explorer__playground-editor {
+  font: var(--ifm-code-font-size) / var(--ifm-pre-line-height)
+    var(--ifm-font-family-monospace) !important;
+  /* rtl:ignore */
+  direction: ltr;
+}

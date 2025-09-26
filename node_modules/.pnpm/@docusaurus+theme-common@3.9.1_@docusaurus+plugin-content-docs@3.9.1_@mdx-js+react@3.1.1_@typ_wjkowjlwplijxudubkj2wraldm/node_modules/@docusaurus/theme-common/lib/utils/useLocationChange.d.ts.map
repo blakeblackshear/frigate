@@ -1,0 +1,1 @@
+{"version":3,"file":"useLocationChange.d.ts","sourceRoot":"","sources":["../../src/utils/useLocationChange.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AAKH,OAAO,KAAK,EAAC,QAAQ,EAAC,MAAM,SAAS,CAAC;AAEtC;;;;GAIG;AACH,wBAAgB,iBAAiB,CAC/B,gBAAgB,EAAE,CAAC,mBAAmB,EAAE;IACtC,QAAQ,EAAE,QAAQ,CAAC;IACnB,gBAAgB,EAAE,QAAQ,GAAG,SAAS,CAAC;CACxC,KAAK,IAAI,GACT,IAAI,CAkBN"}

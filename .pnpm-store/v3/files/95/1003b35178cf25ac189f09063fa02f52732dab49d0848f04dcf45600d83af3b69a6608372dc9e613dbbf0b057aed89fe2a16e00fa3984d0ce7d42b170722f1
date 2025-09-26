@@ -1,0 +1,35 @@
+{
+  "name": "mime-format",
+  "version": "2.0.1",
+  "description": "Database to mime-format based on content-type header and content",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha unit-test.spec.js",
+    "build-docs": "./node_modules/.bin/jsdoc -c .jsdoc-config.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/postmanlabs/mime-format.git"
+  },
+  "keywords": [
+    "postman",
+    "http-code",
+    "mime",
+    "content-type"
+  ],
+  "author": "Postman Labs <help@getpostman.com> (=)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/postmanlabs/mime-format/issues"
+  },
+  "homepage": "https://github.com/postmanlabs/mime-format#readme",
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "jsdoc": "^3.4.3",
+    "mocha": "^8.3.2",
+    "postman-jsdoc-theme": "^0.0.3"
+  },
+  "dependencies": {
+    "charset": "^1.0.0"
+  }
+}

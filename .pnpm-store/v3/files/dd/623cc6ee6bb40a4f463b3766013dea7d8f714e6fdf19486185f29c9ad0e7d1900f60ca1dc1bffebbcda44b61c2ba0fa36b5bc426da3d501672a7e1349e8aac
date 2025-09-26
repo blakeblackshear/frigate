@@ -1,0 +1,27 @@
+{
+    "name": "motion-dom",
+    "version": "11.18.1",
+    "author": "Matt Perry",
+    "license": "MIT",
+    "repository": "https://github.com/motiondivision/motion",
+    "main": "./dist/cjs/index.js",
+    "types": "./dist/index.d.ts",
+    "module": "./dist/es/index.mjs",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "require": "./dist/cjs/index.js",
+            "import": "./dist/es/index.mjs",
+            "default": "./dist/cjs/index.js"
+        }
+    },
+    "dependencies": {
+        "motion-utils": "^11.18.1"
+    },
+    "scripts": {
+        "clean": "rm -rf types dist lib",
+        "build": "yarn clean && tsc -p . && rollup -c",
+        "dev": "concurrently -c blue,red -n tsc,rollup --kill-others \"tsc --watch -p . --preserveWatchOutput\" \"rollup --config --watch --no-watch.clearScreen\""
+    },
+    "gitHead": "95d7d7b515c886d195aad906fa4154f075764053"
+}

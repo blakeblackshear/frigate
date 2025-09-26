@@ -1,0 +1,95 @@
+{
+  "name": "postcss-sort-media-queries",
+  "version": "5.2.0",
+  "description": "PostCSS plugin for sorting and combining CSS media queries with mobile first / **desktop first methodologies",
+  "keywords": [
+    "postcss",
+    "postcss-plugin",
+    "css",
+    "css-optimizations",
+    "sort",
+    "mobile-first",
+    "desktop-first",
+    "mediaquery",
+    "media-queries",
+    "mq",
+    "responsive-css",
+    "combine-media-query",
+    "sort-media-query",
+    "css-mqpacker",
+    "node-css-mqpacker"
+  ],
+  "author": "Yunus Gaziyev <yunusga@yandex.ru>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yunusga/postcss-sort-media-queries.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yunusga/postcss-sort-media-queries/issues"
+  },
+  "homepage": "https://github.com/yunusga/postcss-sort-media-queries",
+  "scripts": {
+    "test": "jest-ci --coverage && eslint",
+    "refresh-deps": "rm -rf node_modules && rm package-lock.json && npm i"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "sort-css-media-queries": "2.2.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.0",
+    "eslint": "^8.3.0",
+    "eslint-ci": "^1.0.0",
+    "eslint-plugin-jest": "^25.3.0",
+    "husky": "^7.0.4",
+    "jest": "^27.3.1",
+    "jest-ci": "^0.1.1",
+    "jest-cli": "^27.3.1",
+    "lint-staged": "^13.2.1",
+    "postcss": "^8.4.23",
+    "postcss-flexbugs-fixes": "^5.0.2",
+    "postcss-media-minmax": "^5.0.0",
+    "postcss-nested": "^5.0.6"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.23"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": "eslint --fix"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 2017
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:jest/recommended"
+    ],
+    "rules": {
+      "jest/expect-expect": "off"
+    }
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "statements": 100
+      }
+    }
+  },
+  "sortCssMQ": {
+    "unitlessMqAlwaysFirst": false
+  }
+}

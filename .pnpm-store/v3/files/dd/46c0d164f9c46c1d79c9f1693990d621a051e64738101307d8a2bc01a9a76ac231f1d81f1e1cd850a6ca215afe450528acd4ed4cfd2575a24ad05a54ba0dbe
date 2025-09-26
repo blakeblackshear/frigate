@@ -1,0 +1,48 @@
+{
+  "name": "@svgr/plugin-svgo",
+  "description": "Optimize SVG",
+  "version": "8.1.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": "https://github.com/gregberge/svgr/tree/main/packages/plugin-svgo",
+  "author": "Greg Bergé <berge.greg@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "svgr-plugin"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "homepage": "https://react-svgr.com",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/gregberge"
+  },
+  "license": "MIT",
+  "scripts": {
+    "reset": "rm -rf dist",
+    "build": "rollup -c ../../build/rollup.config.mjs",
+    "prepublishOnly": "pnpm run reset && pnpm run build"
+  },
+  "peerDependencies": {
+    "@svgr/core": "*"
+  },
+  "dependencies": {
+    "cosmiconfig": "^8.1.3",
+    "deepmerge": "^4.3.1",
+    "svgo": "^3.0.2"
+  },
+  "devDependencies": {
+    "@svgr/core": "8.1.0"
+  },
+  "gitHead": "772592e042be5063e782bfb8711d024b2fefc6b8"
+}

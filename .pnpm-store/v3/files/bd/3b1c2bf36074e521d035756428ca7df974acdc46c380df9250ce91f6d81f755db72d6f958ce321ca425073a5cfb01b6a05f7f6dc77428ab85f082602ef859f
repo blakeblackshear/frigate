@@ -1,0 +1,37 @@
+{
+  "name": "layout-base",
+  "version": "2.0.1",
+  "description": "Basic layout model and some utilities for Cytoscape.js layout extensions",
+  "main": "layout-base.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cross-env NODE_ENV=production webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iVis-at-Bilkent/layout-base.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iVis-at-Bilkent/layout-base/issues"
+  },
+  "homepage": "https://github.com/iVis-at-Bilkent/layout-base#readme",
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.5.1",
+    "camelcase": "^4.1.0",
+    "cpy-cli": "^1.0.1",
+    "cross-env": "^5.1.6",
+    "eslint": "^3.19.0",
+    "gh-pages": "^1.1.0",
+    "npm-run-all": "^4.1.2",
+    "rimraf": "^2.6.2",
+    "update": "^0.7.4",
+    "updater-license": "^1.0.0",
+    "forever": "^0.15.3",
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.4.5"
+  }
+}

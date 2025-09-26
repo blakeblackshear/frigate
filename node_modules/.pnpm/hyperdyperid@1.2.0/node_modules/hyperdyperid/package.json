@@ -1,0 +1,51 @@
+{
+  "name": "hyperdyperid",
+  "version": "1.2.0",
+  "description": "",
+  "author": {
+    "name": "streamich",
+    "url": "https://github.com/streamich"
+  },
+  "homepage": "https://github.com/streamich/hyperdyperid",
+  "repository": "streamich/hyperdyperid",
+  "license": "MIT",
+  "engines": {
+    "node": ">=10.18"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib/"
+  ],
+  "types": "lib/index.d.ts",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "test": "jest --config='jest.config.js'",
+    "release": "semantic-release"
+  },
+  "keywords": [],
+  "dependencies": {},
+  "devDependencies": {
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/npm": "^7.0.6",
+    "@types/jest": "^26.0.14",
+    "benchmark": "^2.1.4",
+    "hyperid": "2.0.5",
+    "jest": "^26.4.2",
+    "semantic-release": "^17.1.2",
+    "nanoid": "^3.1.12",
+    "shortid": "^2.2.15"
+  },
+  "release": {
+    "verifyConditions": [
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/git"
+    ],
+    "prepare": [
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/git"
+    ]
+  }
+}

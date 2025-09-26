@@ -1,0 +1,108 @@
+{
+  "name": "@mdx-js/mdx",
+  "version": "3.1.1",
+  "description": "MDX compiler",
+  "license": "MIT",
+  "keywords": [
+    "jsx",
+    "markdown",
+    "mdx",
+    "remark"
+  ],
+  "homepage": "https://mdxjs.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mdx-js/mdx",
+    "directory": "packages/mdx/"
+  },
+  "bugs": "https://github.com/mdx-js/mdx/issues",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "author": "John Otander <johnotander@gmail.com> (https://johno.com)",
+  "contributors": [
+    "John Otander <johnotander@gmail.com> (https://johno.com)",
+    "Tim Neutkens <tim@vercel.com>",
+    "Matija Marohnić <matija.marohnic@gmail.com>",
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+    "JounQin <admin@1stg.me> (https://www.1stg.me)",
+    "Christian Murphy <christian.murphy.42@gmail.com>"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./index.js",
+    "./internal-create-format-aware-processors": "./lib/util/create-format-aware-processors.js",
+    "./internal-extnames-to-regex": "./lib/util/extnames-to-regex.js"
+  },
+  "files": [
+    "lib/",
+    "index.d.ts.map",
+    "index.d.ts",
+    "index.js"
+  ],
+  "dependencies": {
+    "@types/estree": "^1.0.0",
+    "@types/estree-jsx": "^1.0.0",
+    "@types/hast": "^3.0.0",
+    "@types/mdx": "^2.0.0",
+    "acorn": "^8.0.0",
+    "collapse-white-space": "^2.0.0",
+    "devlop": "^1.0.0",
+    "estree-util-is-identifier-name": "^3.0.0",
+    "estree-util-scope": "^1.0.0",
+    "estree-walker": "^3.0.0",
+    "hast-util-to-jsx-runtime": "^2.0.0",
+    "markdown-extensions": "^2.0.0",
+    "recma-build-jsx": "^1.0.0",
+    "recma-jsx": "^1.0.0",
+    "recma-stringify": "^1.0.0",
+    "rehype-recma": "^1.0.0",
+    "remark-mdx": "^3.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.0.0",
+    "source-map": "^0.7.0",
+    "unified": "^11.0.0",
+    "unist-util-position-from-estree": "^2.0.0",
+    "unist-util-stringify-position": "^4.0.0",
+    "unist-util-visit": "^5.0.0",
+    "vfile": "^6.0.0"
+  },
+  "scripts": {
+    "test": "npm run test-coverage",
+    "test-api": "node --conditions development --enable-source-maps test/index.js",
+    "test-coverage": "c8 --100 --reporter lcov npm run test-api"
+  },
+  "xo": {
+    "overrides": [
+      {
+        "files": [
+          "test/**/*.js"
+        ],
+        "rules": {
+          "no-restricted-globals": "off"
+        }
+      },
+      {
+        "files": [
+          "**/*.ts"
+        ],
+        "rules": {
+          "@typescript-eslint/array-type": "off",
+          "@typescript-eslint/ban-types": "off",
+          "@typescript-eslint/consistent-type-definitions": "off"
+        }
+      }
+    ],
+    "prettier": true,
+    "rules": {
+      "complexity": "off",
+      "logical-assignment-operators": "off",
+      "max-depth": "off",
+      "n/file-extension-in-import": "off",
+      "unicorn/prefer-at": "off",
+      "unicorn/prefer-code-point": "off"
+    }
+  }
+}

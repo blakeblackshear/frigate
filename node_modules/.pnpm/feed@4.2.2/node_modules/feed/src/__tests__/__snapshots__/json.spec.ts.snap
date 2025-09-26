@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`json 1 should generate a valid feed 1`] = `
+"{
+    \\"version\\": \\"https://jsonfeed.org/version/1\\",
+    \\"title\\": \\"Feed Title\\",
+    \\"home_page_url\\": \\"http://example.com/\\",
+    \\"feed_url\\": \\"http://example.com/sampleFeed.json\\",
+    \\"description\\": \\"This is my personnal feed!\\",
+    \\"icon\\": \\"http://example.com/image.png\\",
+    \\"author\\": {
+        \\"name\\": \\"John Doe\\",
+        \\"url\\": \\"https://example.com/johndoe?link=sanitized&value=2\\"
+    },
+    \\"_example_extension\\": {
+        \\"about\\": \\"just an extension example\\",
+        \\"dummy\\": \\"example\\"
+    },
+    \\"items\\": [
+        {
+            \\"id\\": \\"https://example.com/hello-world?id=this&that=true\\",
+            \\"content_html\\": \\"Content of my item\\",
+            \\"url\\": \\"https://example.com/hello-world?link=sanitized&value=2\\",
+            \\"title\\": \\"Hello World\\",
+            \\"summary\\": \\"This is an article about Hello World.\\",
+            \\"image\\": \\"https://example.com/hello-world.jpg\\",
+            \\"date_modified\\": \\"2013-07-13T23:00:00.000Z\\",
+            \\"date_published\\": \\"2013-07-10T23:00:00.000Z\\",
+            \\"author\\": {
+                \\"name\\": \\"Jane Doe\\",
+                \\"url\\": \\"https://example.com/janedoe?link=sanitized&value=2\\"
+            },
+            \\"tags\\": [
+                \\"Grateful Dead\\",
+                \\"MSFT\\"
+            ],
+            \\"_item_extension_1\\": {
+                \\"about\\": \\"just an item extension example\\",
+                \\"dummy1\\": \\"example\\"
+            },
+            \\"_item_extension_2\\": {
+                \\"about\\": \\"just a second item extension example\\",
+                \\"dummy1\\": \\"example\\"
+            }
+        }
+    ]
+}"
+`;

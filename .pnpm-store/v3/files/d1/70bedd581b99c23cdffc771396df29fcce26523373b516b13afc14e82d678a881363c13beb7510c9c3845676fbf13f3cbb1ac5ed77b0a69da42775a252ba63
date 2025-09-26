@@ -1,0 +1,430 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`zodResolver > should return a single error from zodResolver when validation fails 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "birthYear": {
+      "message": "Expected number, received string",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "dateStr": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "email": {
+      "message": "Invalid email",
+      "ref": {
+        "name": "email",
+      },
+      "type": "invalid_string",
+    },
+    "enabled": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "like": [
+      {
+        "id": {
+          "message": "Expected number, received string",
+          "ref": undefined,
+          "type": "invalid_type",
+        },
+        "name": {
+          "message": "Required",
+          "ref": undefined,
+          "type": "invalid_type",
+        },
+      },
+    ],
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "invalid_string",
+    },
+    "repeatPassword": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "tags": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "url": {
+      "message": "Custom error url",
+      "ref": undefined,
+      "type": "invalid_string",
+    },
+    "username": {
+      "message": "Required",
+      "ref": {
+        "name": "username",
+      },
+      "type": "invalid_type",
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`zodResolver > should return a single error from zodResolver with \`mode: sync\` when validation fails 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "birthYear": {
+      "message": "Expected number, received string",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "dateStr": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "email": {
+      "message": "Invalid email",
+      "ref": {
+        "name": "email",
+      },
+      "type": "invalid_string",
+    },
+    "enabled": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "like": [
+      {
+        "id": {
+          "message": "Expected number, received string",
+          "ref": undefined,
+          "type": "invalid_type",
+        },
+        "name": {
+          "message": "Required",
+          "ref": undefined,
+          "type": "invalid_type",
+        },
+      },
+    ],
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "invalid_string",
+    },
+    "repeatPassword": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "tags": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+    },
+    "url": {
+      "message": "Custom error url",
+      "ref": undefined,
+      "type": "invalid_string",
+    },
+    "username": {
+      "message": "Required",
+      "ref": {
+        "name": "username",
+      },
+      "type": "invalid_type",
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`zodResolver > should return all the errors from zodResolver when validation fails with \`validateAllFieldCriteria\` set to true 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": [
+          "Required",
+          "Required",
+        ],
+        "invalid_union": "Invalid input",
+      },
+    },
+    "birthYear": {
+      "message": "Expected number, received string",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Expected number, received string",
+      },
+    },
+    "dateStr": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+    "email": {
+      "message": "Invalid email",
+      "ref": {
+        "name": "email",
+      },
+      "type": "invalid_string",
+      "types": {
+        "invalid_string": "Invalid email",
+      },
+    },
+    "enabled": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+    "like": [
+      {
+        "id": {
+          "message": "Expected number, received string",
+          "ref": undefined,
+          "type": "invalid_type",
+          "types": {
+            "invalid_type": "Expected number, received string",
+          },
+        },
+        "name": {
+          "message": "Required",
+          "ref": undefined,
+          "type": "invalid_type",
+          "types": {
+            "invalid_type": "Required",
+          },
+        },
+      },
+    ],
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "invalid_string",
+      "types": {
+        "invalid_string": [
+          "One uppercase character",
+          "One lowercase character",
+          "One number",
+        ],
+        "too_small": "Must be at least 8 characters in length",
+      },
+    },
+    "repeatPassword": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+    "tags": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+    "url": {
+      "message": "Custom error url",
+      "ref": undefined,
+      "type": "invalid_string",
+      "types": {
+        "invalid_string": "Custom error url",
+      },
+    },
+    "username": {
+      "message": "Required",
+      "ref": {
+        "name": "username",
+      },
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`zodResolver > should return all the errors from zodResolver when validation fails with \`validateAllFieldCriteria\` set to true and \`mode: sync\` 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": [
+          "Required",
+          "Required",
+        ],
+        "invalid_union": "Invalid input",
+      },
+    },
+    "birthYear": {
+      "message": "Expected number, received string",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Expected number, received string",
+      },
+    },
+    "dateStr": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+    "email": {
+      "message": "Invalid email",
+      "ref": {
+        "name": "email",
+      },
+      "type": "invalid_string",
+      "types": {
+        "invalid_string": "Invalid email",
+      },
+    },
+    "enabled": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+    "like": [
+      {
+        "id": {
+          "message": "Expected number, received string",
+          "ref": undefined,
+          "type": "invalid_type",
+          "types": {
+            "invalid_type": "Expected number, received string",
+          },
+        },
+        "name": {
+          "message": "Required",
+          "ref": undefined,
+          "type": "invalid_type",
+          "types": {
+            "invalid_type": "Required",
+          },
+        },
+      },
+    ],
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "invalid_string",
+      "types": {
+        "invalid_string": [
+          "One uppercase character",
+          "One lowercase character",
+          "One number",
+        ],
+        "too_small": "Must be at least 8 characters in length",
+      },
+    },
+    "repeatPassword": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+    "tags": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+    "url": {
+      "message": "Custom error url",
+      "ref": undefined,
+      "type": "invalid_string",
+      "types": {
+        "invalid_string": "Custom error url",
+      },
+    },
+    "username": {
+      "message": "Required",
+      "ref": {
+        "name": "username",
+      },
+      "type": "invalid_type",
+      "types": {
+        "invalid_type": "Required",
+      },
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`zodResolver > should return parsed values from zodResolver with \`mode: sync\` when validation pass 1`] = `
+{
+  "errors": {},
+  "values": {
+    "accessToken": "accessToken",
+    "birthYear": 2000,
+    "dateStr": 2020-01-01T00:00:00.000Z,
+    "email": "john@doe.com",
+    "enabled": true,
+    "like": [
+      {
+        "id": 1,
+        "name": "name",
+      },
+    ],
+    "password": "Password123_",
+    "repeatPassword": "Password123_",
+    "tags": [
+      "tag1",
+      "tag2",
+    ],
+    "url": "https://react-hook-form.com/",
+    "username": "Doe",
+  },
+}
+`;

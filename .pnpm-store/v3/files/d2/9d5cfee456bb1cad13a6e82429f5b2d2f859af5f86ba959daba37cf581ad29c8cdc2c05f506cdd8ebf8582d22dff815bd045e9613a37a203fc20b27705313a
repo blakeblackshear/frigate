@@ -1,0 +1,1 @@
+define("vs/nls.messages-loader",["exports"],function(s){"use strict";function t(i,u,a,o){var n,l;const e=(l=(n=o["vs/nls"])==null?void 0:n.availableLanguages)==null?void 0:l["*"];!e||e==="en"?a({}):u([`vs/nls.messages.${e}`],()=>{a({})})}s.load=t,Object.defineProperties(s,{__esModule:{value:!0},[Symbol.toStringTag]:{value:"Module"}})});

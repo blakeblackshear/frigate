@@ -1,0 +1,38 @@
+import type { BoundingRect, Dimension, DrawableElem, Point, XYChartAxisConfig, XYChartAxisThemeConfig } from '../../interfaces.js';
+import type { TextDimensionCalculator } from '../../textDimensionCalculator.js';
+import type { Axis, AxisPosition } from './index.js';
+export declare abstract class BaseAxis implements Axis {
+    protected axisConfig: XYChartAxisConfig;
+    protected title: string;
+    protected textDimensionCalculator: TextDimensionCalculator;
+    protected axisThemeConfig: XYChartAxisThemeConfig;
+    protected boundingRect: BoundingRect;
+    protected axisPosition: AxisPosition;
+    private range;
+    protected showTitle: boolean;
+    protected showLabel: boolean;
+    protected showTick: boolean;
+    protected showAxisLine: boolean;
+    protected outerPadding: number;
+    protected titleTextHeight: number;
+    protected labelTextHeight: number;
+    constructor(axisConfig: XYChartAxisConfig, title: string, textDimensionCalculator: TextDimensionCalculator, axisThemeConfig: XYChartAxisThemeConfig);
+    setRange(range: [number, number]): void;
+    getRange(): [number, number];
+    setAxisPosition(axisPosition: AxisPosition): void;
+    abstract getScaleValue(value: number | string): number;
+    abstract recalculateScale(): void;
+    abstract getTickValues(): (string | number)[];
+    getTickDistance(): number;
+    getAxisOuterPadding(): number;
+    private getLabelDimension;
+    recalculateOuterPaddingToDrawBar(): void;
+    private calculateSpaceIfDrawnHorizontally;
+    private calculateSpaceIfDrawnVertical;
+    calculateSpace(availableSpace: Dimension): Dimension;
+    setBoundingBoxXY(point: Point): void;
+    private getDrawableElementsForLeftAxis;
+    private getDrawableElementsForBottomAxis;
+    private getDrawableElementsForTopAxis;
+    getDrawableElements(): DrawableElem[];
+}

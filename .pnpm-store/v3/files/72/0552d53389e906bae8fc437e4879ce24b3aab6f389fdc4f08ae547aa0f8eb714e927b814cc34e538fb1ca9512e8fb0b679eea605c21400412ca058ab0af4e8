@@ -1,0 +1,122 @@
+/* Markdown Details Styling */
+
+/* Top-Level Details Styling */
+.openapi-left-panel__container > .openapi-markdown__details > summary,
+.openapi-markdown__details.mime > summary,
+.openapi-markdown__details.response > summary {
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.openapi-left-panel__container > .openapi-markdown__details,
+.openapi-markdown__details.mime,
+.openapi-markdown__details.response {
+  margin-bottom: 1rem !important;
+}
+
+.openapi-markdown__details-summary-header-params,
+.openapi-markdown__details-summary-header-body {
+  font-size: 12px;
+  margin-bottom: 0;
+}
+/* End of Top-Level Details Styling */
+
+/* Top-Level Details Caret Styling */
+.openapi-left-panel__container > .openapi-markdown__details > summary::before,
+.openapi-markdown__details.mime > summary::before {
+  top: 0.1rem;
+}
+
+.openapi-markdown__details.response > summary::before {
+  top: 0.25rem; /* TODO: figure out why this is necessary */
+}
+/* End of Top-Level Details Caret Styling */
+
+.openapi-markdown__details {
+  margin: unset !important;
+  background-color: transparent;
+  color: var(--ifm-font-color-base);
+  padding: unset;
+  border: unset !important;
+  box-shadow: unset !important;
+  --docusaurus-details-decoration-color: var(--ifm-font-color-base) !important;
+}
+
+.openapi-markdown__details > summary::before {
+  content: "";
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>')
+    50% / 1.2rem 1.2rem;
+  filter: var(--ifm-menu-link-sublist-icon-filter);
+  height: 0.75rem;
+  transform: rotate(90deg) !important;
+  width: 0.75rem;
+  transition: transform var(--ifm-transition-fast) linear !important;
+  border: none !important;
+  transform-origin: unset !important;
+}
+
+.openapi-markdown__details ul {
+  padding-left: 0;
+  font-size: 14px;
+}
+
+.openapi-markdown__details li {
+  list-style: none;
+  padding-top: 5px;
+}
+
+.theme-api-markdown details[data-collapsed="false"] > summary::before {
+  transform: rotate(180deg) !important;
+}
+
+.openapi-markdown__details > div > div {
+  padding-top: unset !important;
+  border-top: unset !important;
+}
+
+.openapi-markdown__details p {
+  margin-bottom: 0;
+}
+
+.openapi-markdown__details-summary-mime {
+  display: flex;
+}
+
+/* Hide defaul details marker by default */
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+.openapi-security__details {
+  font-size: 12px;
+  margin-bottom: 1rem;
+  background-color: transparent;
+  color: var(--ifm-font-color-base);
+  padding: unset;
+  border: thin solid var(--ifm-toc-border-color);
+  border-radius: var(--ifm-pre-border-radius);
+  box-shadow: unset !important;
+  --docusaurus-details-decoration-color: var(--ifm-font-color-base) !important;
+}
+
+.openapi-security__details pre {
+  margin-bottom: unset;
+  border-top-left-radius: 0;
+  border-top: thin solid var(--ifm-toc-border-color);
+  border-top-right-radius: 0;
+}
+
+.openapi-security__summary-header {
+  font-size: 12px;
+  text-transform: uppercase;
+  margin-bottom: unset;
+}
+
+.openapi-security__summary-container {
+  padding: 1rem;
+  list-style-type: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@docusaurus/cssnano-preset",
+  "version": "3.9.1",
+  "description": "Advanced cssnano preset for maximum optimization.",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/docusaurus.git",
+    "directory": "packages/docusaurus-cssnano-preset"
+  },
+  "dependencies": {
+    "cssnano-preset-advanced": "^6.1.2",
+    "postcss": "^8.5.4",
+    "postcss-sort-media-queries": "^5.2.0",
+    "tslib": "^2.6.0"
+  },
+  "devDependencies": {
+    "to-vfile": "^6.1.0"
+  },
+  "engines": {
+    "node": ">=20.0"
+  },
+  "gitHead": "c0dd59f0e712f85b6053c59e46b0514b5d2d1414"
+}

@@ -1,0 +1,15 @@
+import { WebSocketClientConnectionProtocol } from '@mswjs/interceptors/lib/browser/interceptors/WebSocket';
+import { WebSocketClientStore, SerializedWebSocketClient } from './WebSocketClientStore.js';
+import '@mswjs/interceptors/WebSocket';
+
+declare class WebSocketIndexedDBClientStore implements WebSocketClientStore {
+    private db;
+    constructor();
+    add(client: WebSocketClientConnectionProtocol): Promise<void>;
+    getAll(): Promise<Array<SerializedWebSocketClient>>;
+    deleteMany(clientIds: Array<string>): Promise<void>;
+    private createDatabase;
+    private getStore;
+}
+
+export { WebSocketIndexedDBClientStore };

@@ -1,0 +1,59 @@
+{
+  "author": "Mohammad Younes",
+  "name": "rtlcss",
+  "version": "4.3.0",
+  "description": "Framework for transforming cascading style sheets (CSS) from left-to-right (LTR) to right-to-left (RTL)",
+  "homepage": "https://rtlcss.com/",
+  "bugs": {
+    "url": "https://github.com/MohammadYounes/rtlcss/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "rtl",
+    "css",
+    "ltr",
+    "rtlcss",
+    "framework",
+    "style",
+    "mirror",
+    "flip",
+    "convert",
+    "transform"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MohammadYounes/rtlcss.git"
+  },
+  "bin": {
+    "rtlcss": "bin/rtlcss.js"
+  },
+  "main": "./lib/rtlcss.js",
+  "files": [
+    "bin/*.js",
+    "lib/*.js"
+  ],
+  "dependencies": {
+    "escalade": "^3.1.1",
+    "picocolors": "^1.0.0",
+    "postcss": "^8.4.21",
+    "strip-json-comments": "^3.1.1"
+  },
+  "devDependencies": {
+    "c8": "^7.13.0",
+    "mocha": "^9.2.2",
+    "standard": "^17.0.0"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "scripts": {
+    "main": "node ./lib/rtlcss.js",
+    "lint": "standard",
+    "lint:fix": "npm run lint -- --fix",
+    "mocha": "mocha",
+    "mocha:special": "mocha --fgrep \"# Special\"",
+    "test": "npm run lint && npm run main && npm run mocha",
+    "test:ci": "npm run main && npm run mocha",
+    "coverage": "c8 npm run mocha"
+  }
+}

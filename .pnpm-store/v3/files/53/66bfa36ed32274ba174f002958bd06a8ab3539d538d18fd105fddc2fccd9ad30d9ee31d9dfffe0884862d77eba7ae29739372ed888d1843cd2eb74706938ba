@@ -1,0 +1,88 @@
+{
+	"name": "postcss-custom-media",
+	"description": "Use Custom Media Queries in CSS",
+	"version": "11.0.6",
+	"contributors": [
+		{
+			"name": "Antonio Laguna",
+			"email": "antonio@laguna.es",
+			"url": "https://antonio.laguna.es"
+		},
+		{
+			"name": "Romain Menke",
+			"email": "romainmenke@gmail.com"
+		},
+		{
+			"name": "Jonathan Neal",
+			"email": "jonathantneal@hotmail.com"
+		},
+		{
+			"name": "Maxime Thirouin"
+		}
+	],
+	"license": "MIT",
+	"funding": [
+		{
+			"type": "github",
+			"url": "https://github.com/sponsors/csstools"
+		},
+		{
+			"type": "opencollective",
+			"url": "https://opencollective.com/csstools"
+		}
+	],
+	"engines": {
+		"node": ">=18"
+	},
+	"type": "module",
+	"main": "dist/index.cjs",
+	"module": "dist/index.mjs",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"CHANGELOG.md",
+		"LICENSE.md",
+		"README.md",
+		"dist"
+	],
+	"dependencies": {
+		"@csstools/cascade-layer-name-parser": "^2.0.5",
+		"@csstools/css-parser-algorithms": "^3.0.5",
+		"@csstools/css-tokenizer": "^3.0.4",
+		"@csstools/media-query-list-parser": "^4.0.3"
+	},
+	"peerDependencies": {
+		"postcss": "^8.4"
+	},
+	"scripts": {},
+	"homepage": "https://github.com/csstools/postcss-plugins/tree/main/plugins/postcss-custom-media#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/csstools/postcss-plugins.git",
+		"directory": "plugins/postcss-custom-media"
+	},
+	"bugs": "https://github.com/csstools/postcss-plugins/issues",
+	"keywords": [
+		"at-rule",
+		"atrule",
+		"css",
+		"csswg",
+		"custom",
+		"media",
+		"postcss",
+		"postcss-plugin",
+		"queries",
+		"query",
+		"specification",
+		"w3c"
+	]
+}

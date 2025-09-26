@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Balci"
+  given-names: "Hasan"
+  orcid: "https://orcid.org/0000-0001-8319-7758"
+- family-names: "Dogrusoz"
+  given-names: "Ugur"
+  orcid: "https://orcid.org/0000-0002-7153-0784"
+title: "cytoscape.js-fcose"
+version: 2.1.0
+date-released: 2021-06-25
+url: "https://github.com/iVis-at-Bilkent/cytoscape.js-fcose"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Balci"
+    given-names: "Hasan"
+    orcid: "https://orcid.org/0000-0001-8319-7758"
+  - family-names: "Dogrusoz"
+    given-names: "Ugur"
+    orcid: "https://orcid.org/0000-0002-7153-0784"
+  doi: "10.1109/TVCG.2021.3095303"
+  journal: "IEEE Transactions on Visualization and Computer Graphics"
+  title: "fCoSE: A Fast Compound Graph Layout Algorithm with Constraint Support"
+  issue: 12
+  volume: 28  
+  start: 4582 # First page number
+  end: 4593 # Last page number
+  month: 12
+  year: 2022

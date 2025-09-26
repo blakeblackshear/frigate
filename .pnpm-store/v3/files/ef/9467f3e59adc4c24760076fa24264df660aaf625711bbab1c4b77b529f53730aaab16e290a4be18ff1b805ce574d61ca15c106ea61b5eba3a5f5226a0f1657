@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "allowJs": true,
+    "strict": true,
+    "target": "es5",
+    "resolveJsonModule": true,
+    "lib": ["es2015", "dom"]
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["**/__tests__/*"]
+}

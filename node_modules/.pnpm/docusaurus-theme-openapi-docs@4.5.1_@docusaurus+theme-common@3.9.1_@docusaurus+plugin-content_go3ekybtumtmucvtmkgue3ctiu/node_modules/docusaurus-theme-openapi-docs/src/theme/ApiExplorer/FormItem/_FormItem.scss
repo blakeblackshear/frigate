@@ -1,0 +1,21 @@
+.openapi-explorer__form-item {
+  padding: var(--openapi-explorer-padding-input);
+  font-size: var(--openapi-explorer-font-size-input);
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  .required {
+    color: var(--openapi-required);
+  }
+}
+
+.openapi-explorer__form-item-body-container {
+  padding: 0;
+}
+
+.openapi-explorer__form-item-label {
+  font-family: var(--ifm-font-family-monospace);
+  font-weight: bold;
+}

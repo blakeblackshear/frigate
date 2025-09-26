@@ -1,0 +1,42 @@
+{
+	"name": "vscode-languageserver",
+	"description": "Language server implementation for node",
+	"version": "9.0.1",
+	"author": "Microsoft Corporation",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Microsoft/vscode-languageserver-node.git",
+		"directory": "server"
+	},
+	"bugs": {
+		"url": "https://github.com/Microsoft/vscode-languageserver-node/issues"
+	},
+	"main": "./lib/node/main.js",
+	"browser": {
+		"./lib/node/main.js": "./lib/browser/main.js"
+	},
+	"typings": "./lib/common/api.d.ts",
+	"bin": {
+		"installServerIntoExtension": "./bin/installServerIntoExtension"
+	},
+	"devDependencies": {
+		"vscode-languageserver-textdocument": "1.0.11"
+	},
+	"dependencies": {
+		"vscode-languageserver-protocol": "3.17.5"
+	},
+	"scripts": {
+		"prepublishOnly": "echo \"⛔ Can only publish from a secure pipeline ⛔\" && node ../build/npm/fail",
+		"prepack": "npm run all:publish",
+		"compile": "node ../build/bin/tsc -b ./tsconfig.json",
+		"watch": "node ../build/bin/tsc -b ./tsconfig.watch.json -w",
+		"clean": "node ../node_modules/.bin/rimraf lib",
+		"lint": "node ../node_modules/eslint/bin/eslint.js --ext ts src",
+		"test": "node ../node_modules/mocha/bin/_mocha",
+		"all": "npm run clean && npm run compile && npm run lint && npm test",
+		"compile:publish": "node ../build/bin/tsc -b ./tsconfig.publish.json",
+		"all:publish": "git clean -xfd . && npm install && npm run compile:publish && npm run lint && npm test",
+		"preversion": "npm test"
+	}
+}

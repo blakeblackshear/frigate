@@ -1,0 +1,86 @@
+import { Animation } from './Animation.js';
+import { Node, NodeConfig } from './Node.js';
+declare class TweenEngine {
+    prop: string;
+    propFunc: Function;
+    begin: number;
+    _pos: number;
+    duration: number;
+    prevPos: number;
+    yoyo: boolean;
+    _time: number;
+    _position: number;
+    _startTime: number;
+    _finish: number;
+    func: Function;
+    _change: number;
+    state: number;
+    onPlay: Function;
+    onReverse: Function;
+    onPause: Function;
+    onReset: Function;
+    onFinish: Function;
+    onUpdate: Function;
+    constructor(prop: any, propFunc: any, func: any, begin: any, finish: any, duration: any, yoyo: any);
+    fire(str: any): void;
+    setTime(t: any): void;
+    getTime(): number;
+    setPosition(p: any): void;
+    getPosition(t: any): any;
+    play(): void;
+    reverse(): void;
+    seek(t: any): void;
+    reset(): void;
+    finish(): void;
+    update(): void;
+    onEnterFrame(): void;
+    pause(): void;
+    getTimer(): number;
+}
+export interface TweenConfig extends NodeConfig {
+    onFinish?: Function;
+    onUpdate?: Function;
+    duration?: number;
+    node: Node;
+}
+export declare class Tween {
+    static attrs: {};
+    static tweens: {};
+    node: Node;
+    anim: Animation;
+    tween: TweenEngine;
+    _id: number;
+    onFinish: Function | undefined;
+    onReset: Function | undefined;
+    onUpdate: Function | undefined;
+    constructor(config: TweenConfig);
+    _addAttr(key: any, end: any): void;
+    _tweenFunc(i: any): void;
+    _addListeners(): void;
+    play(): this;
+    reverse(): this;
+    reset(): this;
+    seek(t: any): this;
+    pause(): this;
+    finish(): this;
+    destroy(): void;
+}
+export declare const Easings: {
+    BackEaseIn(t: any, b: any, c: any, d: any): any;
+    BackEaseOut(t: any, b: any, c: any, d: any): any;
+    BackEaseInOut(t: any, b: any, c: any, d: any): any;
+    ElasticEaseIn(t: any, b: any, c: any, d: any, a: any, p: any): any;
+    ElasticEaseOut(t: any, b: any, c: any, d: any, a: any, p: any): any;
+    ElasticEaseInOut(t: any, b: any, c: any, d: any, a: any, p: any): any;
+    BounceEaseOut(t: any, b: any, c: any, d: any): any;
+    BounceEaseIn(t: any, b: any, c: any, d: any): any;
+    BounceEaseInOut(t: any, b: any, c: any, d: any): any;
+    EaseIn(t: any, b: any, c: any, d: any): any;
+    EaseOut(t: any, b: any, c: any, d: any): any;
+    EaseInOut(t: any, b: any, c: any, d: any): any;
+    StrongEaseIn(t: any, b: any, c: any, d: any): any;
+    StrongEaseOut(t: any, b: any, c: any, d: any): any;
+    StrongEaseInOut(t: any, b: any, c: any, d: any): any;
+    Linear(t: any, b: any, c: any, d: any): any;
+};
+export {};

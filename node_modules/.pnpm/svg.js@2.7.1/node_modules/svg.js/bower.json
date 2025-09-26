@@ -1,0 +1,21 @@
+{
+  "name": "svg.js",
+  "homepage": "https://svgdotjs.github.io/",
+  "authors": [
+    "Wout Fierens <wout@mick-wout.com>",
+    "Ulrich-Matthias Schäfer <ulima.ums@googlemail.com>",
+    "Jon Ege Ronnenberg <jon.ronnenberg+svgjs@gmail.com>"
+  ],
+  "description": "A lightweight library for manipulating and animating SVG",
+  "main": "dist/svg.js",
+  "keywords": [
+    "svg", "vector", "graphics"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "spec/",
+    "src/",
+    "gulpfile.js"
+  ]
+}

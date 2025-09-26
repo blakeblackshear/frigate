@@ -1,0 +1,3 @@
+.openapi-code__code-samples-container {
+  margin-top: 2rem;
+}

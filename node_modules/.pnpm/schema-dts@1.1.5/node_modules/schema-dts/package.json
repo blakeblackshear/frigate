@@ -1,0 +1,55 @@
+{
+  "name": "schema-dts",
+  "version": "1.1.5",
+  "displayName": "schema-dts: Strongly-typed Schema.org vocabulary declarations",
+  "description": "A TypeScript package with latest Schema.org Schema Typings",
+  "author": "Eyas Sharaiha <eyas@google.com> (https://eyas.sh/)",
+  "maintainers": [
+    "Eyas Sharaiha <npm@eyas.sh> (https://eyas.sh/)"
+  ],
+  "contributors": [
+    "Eyas Sharaiha <npm@eyas.sh> (https://eyas.sh/)"
+  ],
+  "files": [
+    "dist/schema.d.ts",
+    "dist/schema.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "types": "./dist/schema.d.ts",
+  "main": "./dist/schema.js",
+  "devDependencies": {
+    "mkdirp": "^3.0.1",
+    "schema-dts-gen": "*"
+  },
+  "keywords": [
+    "typescript",
+    "tsd",
+    "dts",
+    "schema.org",
+    "Semantic Web",
+    "semantic-web",
+    "Linked Data",
+    "linked-data",
+    "jsonld",
+    "JSON-LD",
+    "structured data",
+    "structured-data"
+  ],
+  "homepage": "https://opensource.google/projects/schema-dts",
+  "bugs": "https://github.com/google/schema-dts/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/google/schema-dts.git",
+    "directory": "packages/schema-dts"
+  },
+  "scripts": {
+    "lint:eslint": "eslint test/**/*.ts",
+    "prepare": "mkdirp lib/",
+    "build:generate": "schema-dts-gen > lib/schema.ts",
+    "build:compile": "tsc -p .",
+    "build": "npm run build:generate && npm run build:compile",
+    "test": "npm run build && tsc -p test/"
+  },
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/utils/imperativeState.ts"],
+  "sourcesContent": ["/**\n * Resettable state storage.\n * @example\n * ```\n * const state = new ImperativeState(() => ({\n *   foo: undefined as string | undefined,\n *   bar: [] as number[],\n *   baz: 1 as number | undefined,\n * }));\n *\n * state.records.foo = \"hi\";\n * console.log(state.records.foo); // prints \"hi\";\n * state.reset();\n * console.log(state.records.foo); // prints \"default\";\n *\n * // typeof state.records:\n * // {\n * //   foo: string | undefined, // actual: undefined\n * //   bar: number[],           // actual: []\n * //   baz: number | undefined, // actual: 1\n * // }\n * ```\n */\nexport class ImperativeState<S> {\n  public records: S;\n\n  /**\n   * @param init - Function that creates the default state.\n   */\n  constructor(private init: () => S) {\n    this.records = this.init();\n  }\n\n  reset() {\n    this.records = this.init();\n  }\n}\n"],
+  "mappings": "yCAuBO,IAAMA,EAAN,KAAyB,CAM9B,YAAoBC,EAAe,CAAf,UAAAA,EAClB,KAAK,QAAU,KAAK,KAAK,CAC3B,CA/BF,MAuBgC,CAAAC,EAAA,wBAU9B,OAAQ,CACN,KAAK,QAAU,KAAK,KAAK,CAC3B,CACF",
+  "names": ["ImperativeState", "init", "__name"]
+}

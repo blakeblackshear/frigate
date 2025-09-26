@@ -1,0 +1,62 @@
+.openapi-explorer__expand-modal-content {
+  padding: none;
+  border: thin solid var(--ifm-toc-border-color);
+  border-radius: var(--ifm-global-radius);
+  max-width: 95%;
+  width: 65vw;
+  height: 65vh;
+  overflow: auto;
+}
+
+.openapi-explorer__expand-modal-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0px;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 201;
+}
+
+.theme-code-block:hover .openapi-explorer__code-block-expand-btn--copied {
+  opacity: 1 !important;
+}
+
+.openapi-explorer__code-block-expand-btn-icons {
+  position: relative;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.openapi-explorer__code-block-expand-btn-icon,
+.openapi-explorer__code-block-expand-btn-icon--success {
+  position: absolute;
+  top: 0;
+  left: 0;
+  fill: currentColor;
+  opacity: inherit;
+  width: inherit;
+  height: inherit;
+  transition: all 0.15s ease;
+}
+
+.openapi-explorer__code-block-expand-btn-icon--success {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.33);
+  opacity: 0;
+  color: #00d600;
+}
+
+.openapi-explorer__code-block-expand-btn--copied
+  .openapi-explorer__code-block-expand-btn-icon {
+  transform: scale(0.33);
+  opacity: 0;
+}
+
+.openapi-explorer__code-block-expand-btn--copied
+  .openapi-explorer__code-block-expand-btn-icon--success {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  transition-delay: 0.075s;
+}

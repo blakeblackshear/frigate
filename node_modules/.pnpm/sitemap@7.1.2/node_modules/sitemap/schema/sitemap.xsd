@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.sitemaps.org/schemas/sitemap/0.9"
+            xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+            elementFormDefault="qualified">
+  <xsd:annotation>
+    <xsd:documentation>
+      XML Schema for Sitemap files.
+      Last Modifed 2008-03-26
+    </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:element name="urlset">
+    <xsd:annotation>
+      <xsd:documentation>
+        Container for a set of up to 50,000 document elements.
+        This is the root element of the XML file.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="strict"/>
+        <xsd:element name="url" type="tUrl" maxOccurs="unbounded"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:complexType name="tUrl">
+    <xsd:annotation>
+      <xsd:documentation>
+        Container for the data needed to describe a document to crawl.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="loc" type="tLoc"/>
+      <xsd:element name="lastmod" type="tLastmod" minOccurs="0"/>
+      <xsd:element name="changefreq" type="tChangeFreq" minOccurs="0"/>
+      <xsd:element name="priority" type="tPriority" minOccurs="0"/>
+      <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="strict"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:simpleType name="tLoc">
+    <xsd:annotation>
+      <xsd:documentation>
+        REQUIRED: The location URI of a document.
+        The URI must conform to RFC 2396 (http://www.ietf.org/rfc/rfc2396.txt).
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:anyURI">
+      <xsd:minLength value="12"/>
+      <xsd:maxLength value="2048"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="tLastmod">
+    <xsd:annotation>
+      <xsd:documentation>
+        OPTIONAL: The date the document was last modified. The date must conform
+        to the W3C DATETIME format (http://www.w3.org/TR/NOTE-datetime).
+        Example: 2005-05-10
+        Lastmod may also contain a timestamp.
+        Example: 2005-05-10T17:33:30+08:00
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:union>
+      <xsd:simpleType>
+        <xsd:restriction base="xsd:date"/>
+      </xsd:simpleType>
+      <xsd:simpleType>
+        <xsd:restriction base="xsd:dateTime"/>
+      </xsd:simpleType>
+    </xsd:union>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="tChangeFreq">
+    <xsd:annotation>
+      <xsd:documentation>
+        OPTIONAL: Indicates how frequently the content at a particular URL is
+        likely to change. The value "always" should be used to describe
+        documents that change each time they are accessed. The value "never"
+        should be used to describe archived URLs. Please note that web
+        crawlers may not necessarily crawl pages marked "always" more often.
+        Consider this element as a friendly suggestion and not a command.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="always"/>
+      <xsd:enumeration value="hourly"/>
+      <xsd:enumeration value="daily"/>
+      <xsd:enumeration value="weekly"/>
+      <xsd:enumeration value="monthly"/>
+      <xsd:enumeration value="yearly"/>
+      <xsd:enumeration value="never"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="tPriority">
+    <xsd:annotation>
+      <xsd:documentation>
+        OPTIONAL: The priority of a particular URL relative to other pages
+        on the same site. The value for this element is a number between
+        0.0 and 1.0 where 0.0 identifies the lowest priority page(s).
+        The default priority of a page is 0.5. Priority is used to select
+        between pages on your site. Setting a priority of 1.0 for all URLs
+        will not help you, as the relative priority of pages on your site
+        is what will be considered.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:decimal">
+      <xsd:minInclusive value="0.0"/>
+      <xsd:maxInclusive value="1.0"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+</xsd:schema>

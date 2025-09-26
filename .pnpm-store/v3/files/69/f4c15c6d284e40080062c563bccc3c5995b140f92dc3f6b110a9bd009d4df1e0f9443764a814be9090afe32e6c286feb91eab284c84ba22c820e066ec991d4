@@ -1,0 +1,14 @@
+var fa = {};
+module['exports'] = fa;
+fa.title = "Farsi";
+fa.name = require("./name");
+fa.address = require("./address");
+fa.phone_number = require("./phone_number");
+fa.lorem = require("./lorem");
+fa.cell_phone = require("./cell_phone");
+fa.date = require("./date");
+fa.vehicle = require("./vehicle");
+fa.internet = require("./internet");
+fa.commerce = require("./commerce");
+fa.company = require("./company");
+fa.finance = require("./finance");

@@ -1,0 +1,37 @@
+{
+  "name": "@docusaurus/utils-validation",
+  "version": "3.9.1",
+  "description": "Node validation utility functions for Docusaurus packages.",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/docusaurus.git",
+    "directory": "packages/docusaurus-utils-validation"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@docusaurus/logger": "3.9.1",
+    "@docusaurus/utils": "3.9.1",
+    "@docusaurus/utils-common": "3.9.1",
+    "fs-extra": "^11.2.0",
+    "joi": "^17.9.2",
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "tslib": "^2.6.0"
+  },
+  "devDependencies": {
+    "tmp-promise": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=20.0"
+  },
+  "gitHead": "c0dd59f0e712f85b6053c59e46b0514b5d2d1414"
+}

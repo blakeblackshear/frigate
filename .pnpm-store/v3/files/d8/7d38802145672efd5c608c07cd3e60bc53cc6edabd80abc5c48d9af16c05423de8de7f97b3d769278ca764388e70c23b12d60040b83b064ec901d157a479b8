@@ -1,0 +1,20 @@
+{
+  "name": "@esbuild/linux-s390x",
+  "version": "0.25.10",
+  "description": "The Linux IBM Z 64-bit Big Endian binary for esbuild, a JavaScript bundler.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evanw/esbuild.git"
+  },
+  "license": "MIT",
+  "preferUnplugged": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "s390x"
+  ]
+}

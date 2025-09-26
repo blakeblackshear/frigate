@@ -1,0 +1,49 @@
+{
+  "name": "@svgr/hast-util-to-babel-ast",
+  "description": "Transform HAST to Babel AST (JSX)",
+  "version": "8.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": "https://github.com/gregberge/svgr/tree/main/packages/hast-util-to-babel-ast",
+  "author": "Greg Bergé <berge.greg@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "html",
+    "hast",
+    "babel",
+    "hast-util",
+    "unist-util",
+    "unist"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "homepage": "https://react-svgr.com",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/gregberge"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@babel/types": "^7.21.3",
+    "entities": "^4.4.0"
+  },
+  "scripts": {
+    "reset": "rm -rf dist",
+    "build": "rollup -c ../../build/rollup.config.mjs",
+    "prepublishOnly": "npm run reset && npm run build"
+  },
+  "devDependencies": {
+    "@types/svg-parser": "^2.0.3"
+  },
+  "gitHead": "52a1079681477587ef0d842c0e78531adf2d2520"
+}

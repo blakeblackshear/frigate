@@ -1,0 +1,96 @@
+{
+  "name": "i18next-http-backend",
+  "version": "3.0.2",
+  "private": false,
+  "type": "module",
+  "main": "./cjs/index.js",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": {
+        "require": "./cjs/index.d.ts",
+        "import": "./esm/index.d.mts"
+      },
+      "module": "./esm/index.js",
+      "import": "./esm/index.js",
+      "require": "./cjs/index.js",
+      "default": "./esm/index.js"
+    },
+    "./cjs": {
+      "types": "./cjs/index.d.ts",
+      "default": "./cjs/index.js"
+    },
+    "./esm": {
+      "types": "./esm/index.d.ts",
+      "default": "./esm/index.js"
+    }
+  },
+  "module": "./esm/index.js",
+  "dependencies": {
+    "cross-fetch": "4.0.0"
+  },
+  "types": "./index.d.mts",
+  "devDependencies": {
+    "@babel/cli": "7.25.9",
+    "@babel/core": "7.26.0",
+    "@babel/preset-env": "7.26.0",
+    "babel-plugin-add-module-exports": "1.0.4",
+    "browserify": "17.0.1",
+    "dtslint": "4.2.1",
+    "eslint": "8.56.0",
+    "eslint-config-standard": "17.1.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-n": "16.6.2",
+    "eslint-plugin-promise": "6.1.1",
+    "eslint-plugin-require-path-exists": "1.1.9",
+    "eslint-plugin-standard": "5.0.0",
+    "expect.js": "0.3.1",
+    "i18next": "24.0.0",
+    "json-server": "0.17.4",
+    "json5": "2.2.3",
+    "jsonc-parser": "3.3.1",
+    "mocha": "10.8.2",
+    "tslint": "5.20.1",
+    "tsd": "0.31.2",
+    "typescript": "5.6.3",
+    "uglify-js": "3.19.3",
+    "xmlhttprequest": "1.8.0"
+  },
+  "description": "i18next-http-backend is a backend layer for i18next using in Node.js, in the browser and for Deno.",
+  "keywords": [
+    "i18next",
+    "i18next-backend",
+    "i18next-http-backend"
+  ],
+  "homepage": "https://github.com/i18next/i18next-http-backend",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:i18next/i18next-http-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/i18next/i18next-http-backend/issues"
+  },
+  "license": "MIT",
+  "config": {
+    "fixcjs": "fs.writeFileSync('cjs/request.js', fs.readFileSync('cjs/request.js').toString().replace(`Promise.resolve().then(function () {\n      return _interopRequireWildcard(require('cross-fetch'));\n    }).then(function (mod) {\n      fetchApi = mod.default;\n    }).catch(function () {});`, `fetchApi = require('cross-fetch');`))"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "fixcjs": "node -e \"$npm_package_config_fixcjs\"",
+    "compile:esm": "rm -rf esm && mkdir esm && BABEL_ENV=esm babel lib -d esm && cp index.d.mts esm/index.d.mts && cp index.d.ts esm/index.d.ts",
+    "compile:cjs": "rm -rf cjs && mkdir cjs && BABEL_ENV=cjs babel lib -d cjs && cp index.d.ts cjs/index.d.ts && echo '{\"type\":\"commonjs\"}' > cjs/package.json && npm run fixcjs",
+    "compile": "npm run compile:esm && npm run compile:cjs",
+    "browser": "browserify --ignore cross-fetch --standalone i18nextHttpBackend cjs/index.js -o i18nextHttpBackend.js && uglifyjs i18nextHttpBackend.js --compress --mangle -o i18nextHttpBackend.min.js",
+    "build": "npm run compile && npm run browser",
+    "test:xmlhttpreq": "mocha test -R spec --require test/fixtures/xmlHttpRequest.cjs --experimental-modules",
+    "test:fetch": "mocha test -R spec --experimental-modules",
+    "test": "npm run lint && npm run build && npm run test:fetch && npm run test:xmlhttpreq && npm run test:typescript",
+    "test:typescript": "tslint --project tsconfig.json && tsd",
+    "test:deno": "deno test --allow-net test/deno/*.js",
+    "preversion": "npm run test && npm run build && git push",
+    "postversion": "git push && git push --tags"
+  },
+  "tsd": {
+    "directory": "test/typescript"
+  }
+}

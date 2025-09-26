@@ -1,0 +1,98 @@
+/* ============================================================================
+ * Copyright (c) Palo Alto Networks
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ * ========================================================================== */
+.openapi-tabs__discriminator-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid transparent;
+  margin-top: 0 !important;
+  margin-right: 0.5rem;
+  font-weight: var(--ifm-font-weight-bold);
+  font-size: 10px;
+  font-family: var(--ifm-font-family-monospace);
+  white-space: nowrap;
+  transition: 300ms;
+
+  &:hover {
+    background-color: transparent;
+    border: 1px solid var(--ifm-toc-border-color);
+  }
+
+  &.active {
+    border: 1px solid var(--ifm-color-primary);
+    color: var(--ifm-color-primary);
+  }
+
+  &:last-child {
+    margin-right: 0 !important;
+  }
+}
+
+/* Open API Discriminator Tabs */
+.openapi-tabs__discriminator-top-section {
+  margin-top: 1rem;
+  margin-left: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.openapi-tabs__discriminator-top-section + hr {
+  display: none;
+}
+
+.openapi-tabs__discriminator-container {
+  display: flex;
+  align-items: center;
+  max-width: 600px;
+  padding-left: 3px;
+  overflow: hidden;
+}
+
+.openapi-tabs__discriminator-list-container {
+  padding: 0 0.25rem;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.openapi-tabs__discriminator-list-container::-webkit-scrollbar {
+  display: none;
+}
+
+.openapi-tabs__discriminator-tab-label {
+  white-space: nowrap;
+}
+
+.openapi-discriminator__item {
+  list-style: none;
+  position: relative;
+  margin: 0 !important;
+  padding: 5px 0 5px 0 !important;
+  border-left: thin solid var(--openapi-tree-line-color) !important;
+}
+
+.openapi-discriminator__name {
+  padding-left: 1rem;
+}
+
+@media screen and (max-width: 500px) {
+  .openapi-tabs__discriminator-top-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .openapi-tabs__discriminator-container {
+    width: 100%;
+  }
+
+  .openapi-tabs__discriminator-item {
+    height: 100%;
+  }
+}

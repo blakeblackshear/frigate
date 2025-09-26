@@ -1,0 +1,1 @@
+{"version":3,"file":"minus-square.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

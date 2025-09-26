@@ -1,0 +1,61 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.openapi-tabs__schema-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid transparent;
+  margin-top: 0 !important;
+  margin-right: 0.5rem;
+  font-weight: var(--ifm-font-weight-bold);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 10px;
+  white-space: nowrap;
+  transition: 300ms;
+
+  &:hover {
+    background-color: transparent;
+    border: 1px solid var(--ifm-toc-border-color);
+  }
+
+  &.active {
+    border: 1px solid var(--ifm-color-primary);
+    color: var(--ifm-color-primary);
+  }
+
+  &:last-child {
+    margin-right: 0 !important;
+  }
+}
+
+.openapi-tabs__schema-list-container {
+  overflow-y: hidden;
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &.active {
+    background-color: var(--ifm-color-emphasis-100);
+  }
+}
+
+.openapi-tabs__schema-label {
+  white-space: nowrap;
+}
+
+.openapi-tabs__schema-tabs-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}

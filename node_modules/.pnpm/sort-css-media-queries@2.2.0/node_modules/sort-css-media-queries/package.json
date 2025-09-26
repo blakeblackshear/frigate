@@ -1,0 +1,64 @@
+{
+  "name": "sort-css-media-queries",
+  "version": "2.2.0",
+  "description": "The custom `sort` method (mobile-first / desktop-first) of CSS media queries for `postcss-sort-media-queries`, `css-mqpacker` or `pleeease` (which uses css-mqpacker) or, perhaps, something else ))",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "npm run prettier && npm run eslint && npm run jest",
+    "test:fix": "npm run prettier:fix && npm run eslint:fix && npm run jest:coverage",
+    "prettier": "prettier \"./{lib,tests}/**\" --check",
+    "prettier:fix": "npm run prettier -- --write",
+    "eslint": "eslint \"./{lib,tests}/**/*.js\"",
+    "eslint:fix": "npm run eslint -- --fix",
+    "jest": "jest",
+    "jest:coverage": "npm run jest -- --coverage && istanbul-badges-readme"
+  },
+  "jest": {
+    "verbose": true,
+    "testURL": "http://localhost"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dutchenkoOleg/sort-css-media-queries.git"
+  },
+  "keywords": [
+    "postcss",
+    "css-mqpacker",
+    "node-css-mqpacker",
+    "pleeease",
+    "mobile-first",
+    "combine",
+    "mq",
+    "media",
+    "queries",
+    "mobile-first",
+    "desktop-first",
+    "sort"
+  ],
+  "author": "Oleg Dutchenko <dutchenko.o.dev@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dutchenkoOleg/sort-css-media-queries/issues"
+  },
+  "engines": {
+    "node": ">= 6.3.0"
+  },
+  "homepage": "https://github.com/dutchenkoOleg/sort-css-media-queries#readme",
+  "devDependencies": {
+    "@wezom/eslint-config": "^8.0.0",
+    "chalk": "^2.4.1",
+    "eslint": "^7.27.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.3",
+    "eslint-plugin-jest": "^24.3.6",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "istanbul-badges-readme": "^1.4.0",
+    "jest": "^26.4.2",
+    "mkdirp": "^1.0.4",
+    "prettier": "^2.3.0"
+  }
+}

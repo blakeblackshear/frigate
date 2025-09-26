@@ -1,0 +1,80 @@
+{
+  "name": "react-resizable",
+  "version": "3.0.5",
+  "description": "A component that is resizable with handles.",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint lib/ __tests__/ setupTests/; flow",
+    "test": "jest --coverage",
+    "unit": "jest --watch --verbose",
+    "build": "bash build.sh",
+    "build-example": "webpack",
+    "dev": "webpack serve --open",
+    "prepublishOnly": "npm run build",
+    "validate": "yarn check",
+    "preversion": "npm run lint",
+    "version": "git add CHANGELOG.md",
+    "postversion": "git push && git push --tags",
+    "flow": "flow"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:react-grid-layout/react-resizable.git"
+  },
+  "keywords": [
+    "react",
+    "resize",
+    "resizable"
+  ],
+  "author": "Samuel Reed <samuel.trace.reed@gmail.com> (http://strml.net/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/react-grid-layout/react-resizable/issues"
+  },
+  "homepage": "https://github.com/react-grid-layout/react-resizable",
+  "devDependencies": {
+    "@babel/cli": "^7.21.0",
+    "@babel/core": "^7.21.3",
+    "@babel/eslint-parser": "^7.21.3",
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-flow": "^7.18.6",
+    "@babel/preset-react": "^7.18.6",
+    "babel-loader": "^9.1.2",
+    "cross-env": "^7.0.2",
+    "css-loader": "^6.7.3",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.7",
+    "eslint": "^8.36.0",
+    "eslint-plugin-jest": "^27.2.1",
+    "eslint-plugin-react": "^7.32.2",
+    "flow-bin": "^0.153.0",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "lodash": "^4.17.20",
+    "pre-commit": "^1.1.2",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2",
+    "react-test-renderer": "^16.11.0",
+    "style-loader": "^3.3.2",
+    "webpack": "^5.76.2",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.13.1"
+  },
+  "dependencies": {
+    "prop-types": "15.x",
+    "react-draggable": "^4.0.3"
+  },
+  "peerDependencies": {
+    "react": ">= 16.3"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "pre-commit": [
+    "lint",
+    "validate",
+    "test"
+  ]
+}

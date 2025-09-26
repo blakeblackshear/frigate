@@ -1,0 +1,11 @@
+declare const _default: import("@storybook/core/csf").ComponentAnnotations<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;
+export default _default;
+export declare const Basic: import("@storybook/core/csf").AnnotatedStoryFn<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;
+export declare const DarkTheme: import("@storybook/core/csf").AnnotatedStoryFn<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;
+export declare const CollapsedNestedObjects: import("@storybook/core/csf").AnnotatedStoryFn<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;
+export declare const CollapsedRoot: import("@storybook/core/csf").AnnotatedStoryFn<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;
+export declare const RenderStringsWithoutQuotes: import("@storybook/core/csf").AnnotatedStoryFn<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;
+export declare const RenderFieldNamesWithQuotes: import("@storybook/core/csf").AnnotatedStoryFn<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;
+export declare const StringifyStringValues: import("@storybook/core/csf").AnnotatedStoryFn<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;
+export declare const ClickOnFieldNameToExpand: import("@storybook/core/csf").AnnotatedStoryFn<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;
+export declare const CompactRootLevel: import("@storybook/core/csf").AnnotatedStoryFn<import("@storybook/react/dist/types-5617c98e").R, import("..").Props>;

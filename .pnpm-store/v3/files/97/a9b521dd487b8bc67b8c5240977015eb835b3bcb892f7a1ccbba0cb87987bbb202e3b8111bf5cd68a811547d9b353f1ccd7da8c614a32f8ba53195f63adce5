@@ -1,0 +1,82 @@
+{
+  "name": "style-to-object",
+  "version": "1.0.9",
+  "description": "Parse CSS inline style to JavaScript object.",
+  "author": "Mark <mark@remarkablemark.org>",
+  "main": "./cjs/index.js",
+  "module": "./esm/index.mjs",
+  "exports": {
+    "import": "./esm/index.mjs",
+    "require": "./cjs/index.js"
+  },
+  "scripts": {
+    "build": "run-s build:*",
+    "build:cjs": "tsc",
+    "build:esm": "awk '!/sourceMappingURL/' cjs/index.d.ts > esm/index.d.mts",
+    "build:umd": "rollup --config --failAfterWarnings",
+    "clean": "rm -rf cjs coverage dist",
+    "lint": "eslint .",
+    "lint:fix": "npm run lint -- --fix",
+    "lint:tsc": "tsc --noEmit",
+    "prepare": "husky",
+    "prepublishOnly": "run-s lint lint:tsc test clean build",
+    "test": "jest",
+    "test:ci": "CI=true jest --ci --colors --coverage",
+    "test:esm": "npm run build:cjs && node --test __tests__",
+    "test:watch": "npm run test -- --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/remarkablemark/style-to-object.git"
+  },
+  "bugs": {
+    "url": "https://github.com/remarkablemark/style-to-object/issues"
+  },
+  "keywords": [
+    "style-to-object",
+    "inline",
+    "style",
+    "parser",
+    "css",
+    "object",
+    "pojo"
+  ],
+  "dependencies": {
+    "inline-style-parser": "0.2.4"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "19.8.1",
+    "@commitlint/config-conventional": "19.8.1",
+    "@eslint/compat": "1.2.9",
+    "@eslint/eslintrc": "3.3.1",
+    "@eslint/js": "9.28.0",
+    "@rollup/plugin-commonjs": "28.0.3",
+    "@rollup/plugin-node-resolve": "16.0.1",
+    "@rollup/plugin-terser": "0.4.4",
+    "@rollup/plugin-typescript": "12.1.2",
+    "@types/jest": "29.5.14",
+    "@types/node": "22.15.30",
+    "@typescript-eslint/eslint-plugin": "8.33.1",
+    "@typescript-eslint/parser": "8.33.1",
+    "eslint": "9.28.0",
+    "eslint-plugin-prettier": "5.4.1",
+    "eslint-plugin-simple-import-sort": "12.1.1",
+    "globals": "16.2.0",
+    "husky": "9.1.7",
+    "jest": "29.7.0",
+    "lint-staged": "16.1.0",
+    "npm-run-all": "4.1.5",
+    "prettier": "3.5.3",
+    "rollup": "4.42.0",
+    "ts-jest": "29.3.4",
+    "ts-node": "10.9.2",
+    "typescript": "5.8.3"
+  },
+  "files": [
+    "/cjs",
+    "/dist",
+    "/esm",
+    "/src"
+  ],
+  "license": "MIT"
+}

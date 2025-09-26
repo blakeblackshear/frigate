@@ -1,0 +1,1 @@
+{"version":3,"file":"loader-2.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

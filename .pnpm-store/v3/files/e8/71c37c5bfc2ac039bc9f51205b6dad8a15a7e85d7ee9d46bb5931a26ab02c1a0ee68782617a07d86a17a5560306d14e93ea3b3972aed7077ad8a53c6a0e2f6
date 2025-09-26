@@ -1,0 +1,51 @@
+{
+  "name": "@svgr/babel-preset",
+  "description": "SVGR preset that apply transformations from config",
+  "version": "8.1.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": "https://github.com/gregberge/svgr/tree/main/packages/babel-preset",
+  "author": "Greg Bergé <berge.greg@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "babel-plugin",
+    "babel-preset"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "homepage": "https://react-svgr.com",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/gregberge"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@svgr/babel-plugin-add-jsx-attribute": "8.0.0",
+    "@svgr/babel-plugin-remove-jsx-attribute": "8.0.0",
+    "@svgr/babel-plugin-remove-jsx-empty-expression": "8.0.0",
+    "@svgr/babel-plugin-replace-jsx-attribute-value": "8.0.0",
+    "@svgr/babel-plugin-svg-dynamic-title": "8.0.0",
+    "@svgr/babel-plugin-svg-em-dimensions": "8.0.0",
+    "@svgr/babel-plugin-transform-react-native-svg": "8.1.0",
+    "@svgr/babel-plugin-transform-svg-component": "8.0.0"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7.0.0-0"
+  },
+  "scripts": {
+    "reset": "rm -rf dist",
+    "build": "rollup -c ../../build/rollup.config.mjs",
+    "prepublishOnly": "pnpm run reset && pnpm run build"
+  },
+  "gitHead": "772592e042be5063e782bfb8711d024b2fefc6b8"
+}

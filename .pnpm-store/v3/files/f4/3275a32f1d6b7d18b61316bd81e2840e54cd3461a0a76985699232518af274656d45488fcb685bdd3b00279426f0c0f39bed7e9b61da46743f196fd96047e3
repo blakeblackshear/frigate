@@ -1,0 +1,42 @@
+{
+  "name": "@swc/core-win32-x64-msvc",
+  "version": "1.13.19",
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "main": "swc.win32-x64-msvc.node",
+  "files": [
+    "swc.win32-x64-msvc.node",
+    "swc.exe"
+  ],
+  "description": "Super-fast alternative for babel",
+  "keywords": [
+    "swc",
+    "swcpack",
+    "babel",
+    "typescript",
+    "rust",
+    "webpack",
+    "tsc"
+  ],
+  "author": "강동윤 <kdy1997.dev@gmail.com>",
+  "homepage": "https://swc.rs",
+  "license": "Apache-2.0 AND MIT",
+  "engines": {
+    "node": ">=10"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swc-project/swc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/swc-project/swc/issues"
+  }
+}

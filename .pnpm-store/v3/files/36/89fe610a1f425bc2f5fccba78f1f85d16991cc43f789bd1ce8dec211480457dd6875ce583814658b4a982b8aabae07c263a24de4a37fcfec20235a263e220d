@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../src/node-to-fsa/index.ts"],"names":[],"mappings":";;;;AAAA,mFAAgF;AAGhF,kDAAwB;AACxB,iEAAuC;AACvC,0EAAgD;AAChD,qEAA2C;AAEpC,MAAM,SAAS,GAAG,CACvB,EAAa,EACb,OAAe,EACf,GAA6B,EACE,EAAE;IACjC,OAAO,IAAI,6DAA6B,CAAC,EAAE,EAAE,OAAO,EAAE,GAAG,CAAC,CAAC;AAC7D,CAAC,CAAC;AANW,QAAA,SAAS,aAMpB"}

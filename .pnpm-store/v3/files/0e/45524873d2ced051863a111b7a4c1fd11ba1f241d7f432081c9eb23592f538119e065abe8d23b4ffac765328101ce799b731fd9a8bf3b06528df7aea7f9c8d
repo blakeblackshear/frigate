@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`atom 1.0 should generate a valid feed 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"utf-8\\"?>
+<feed xmlns=\\"http://www.w3.org/2005/Atom\\">
+    <id>http://example.com/</id>
+    <title>Feed Title</title>
+    <updated>2013-07-13T23:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <author>
+        <name>John Doe</name>
+        <email>johndoe@example.com</email>
+        <uri>https://example.com/johndoe?link=sanitized&amp;value=2</uri>
+    </author>
+    <link rel=\\"alternate\\" href=\\"http://example.com/\\"/>
+    <link rel=\\"self\\" href=\\"http://example.com/sampleFeed.rss\\"/>
+    <link rel=\\"hub\\" href=\\"wss://example.com/\\"/>
+    <subtitle>This is my personnal feed!</subtitle>
+    <logo>http://example.com/image.png</logo>
+    <icon>http://example.com/image.ico</icon>
+    <rights>All rights reserved 2013, John Doe</rights>
+    <category term=\\"Technology\\"/>
+    <contributor>
+        <name>Johan Cruyff</name>
+        <email>johancruyff@example.com</email>
+        <uri>https://example.com/johancruyff</uri>
+    </contributor>
+    <entry>
+        <title type=\\"html\\"><![CDATA[Hello World]]></title>
+        <id>https://example.com/hello-world?id=this&amp;that=true</id>
+        <link href=\\"https://example.com/hello-world?link=sanitized&amp;value=2\\"/>
+        <updated>2013-07-13T23:00:00.000Z</updated>
+        <summary type=\\"html\\"><![CDATA[This is an article about Hello World.]]></summary>
+        <content type=\\"html\\"><![CDATA[Content of my item]]></content>
+        <author>
+            <name>Jane Doe</name>
+            <email>janedoe@example.com</email>
+            <uri>https://example.com/janedoe?link=sanitized&amp;value=2</uri>
+        </author>
+        <author>
+            <name>Joe Smith</name>
+            <email>joesmith@example.com</email>
+            <uri>https://example.com/joesmith</uri>
+        </author>
+        <author>
+            <name>Joe Smith, Name Only</name>
+        </author>
+        <category label=\\"Grateful Dead\\"/>
+        <category label=\\"MSFT\\"/>
+        <contributor>
+            <name>Shawn Kemp</name>
+            <email>shawnkemp@example.com</email>
+            <uri>https://example.com/shawnkemp</uri>
+        </contributor>
+        <contributor>
+            <name>Reggie Miller</name>
+            <email>reggiemiller@example.com</email>
+            <uri>https://example.com/reggiemiller</uri>
+        </contributor>
+        <published>2013-07-10T23:00:00.000Z</published>
+    </entry>
+</feed>"
+`;

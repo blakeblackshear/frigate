@@ -1,0 +1,44 @@
+{
+  "name": "liquid-json",
+  "version": "0.3.1",
+  "description": "Implementation of JSON that ignores BOM and thows friendly error",
+  "main": "index.js",
+  "scripts": {
+    "test": "node npm/test.js",
+    "test-unit": "node npm/test-unit.js",
+    "test-lint": "node npm/test-lint.js"
+  },
+  "author": "Postman Labs <help@getpostman.com> (=)",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/postmanlabs/liquid-json.git"
+  },
+  "keywords": [
+    "json",
+    "parse",
+    "error",
+    "friendly",
+    "bom",
+    "postman"
+  ],
+  "bugs": {
+    "url": "https://github.com/postmanlabs/liquid-json/issues"
+  },
+  "homepage": "https://github.com/postmanlabs/liquid-json#readme",
+  "devDependencies": {
+    "async": "2.0.1",
+    "colors": "1.1.2",
+    "eslint": "3.4.0",
+    "eslint-plugin-jsdoc": "2.3.1",
+    "eslint-plugin-mocha": "4.5.1",
+    "eslint-plugin-security": "1.2.0",
+    "expect.js": "0.3.1",
+    "mocha": "3.0.2",
+    "pretty-ms": "2.1.0",
+    "shelljs": "0.7.4"
+  },
+  "engines": {
+    "node": ">=4"
+  }
+}

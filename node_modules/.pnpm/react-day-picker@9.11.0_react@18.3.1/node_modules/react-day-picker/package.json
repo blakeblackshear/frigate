@@ -1,0 +1,262 @@
+{
+  "name": "react-day-picker",
+  "version": "9.11.0",
+  "description": "Customizable Date Picker for React",
+  "author": "Giampaolo Bellavite <io@gpbl.dev>",
+  "homepage": "https://daypicker.dev",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gpbl/react-day-picker"
+  },
+  "bugs": {
+    "url": "https://github.com/gpbl/react-day-picker/issues"
+  },
+  "main": "./dist/cjs/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "module": "./dist/esm/index.js",
+  "style": "./src/style.css",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./jalali": {
+      "import": {
+        "types": "./dist/esm/jalali.d.ts",
+        "default": "./dist/esm/jalali.js"
+      },
+      "require": {
+        "types": "./dist/cjs/jalali.d.ts",
+        "default": "./dist/cjs/jalali.js"
+      }
+    },
+    "./persian": {
+      "import": {
+        "types": "./dist/esm/persian.d.ts",
+        "default": "./dist/esm/persian.js"
+      },
+      "require": {
+        "types": "./dist/cjs/persian.d.ts",
+        "default": "./dist/cjs/persian.js"
+      }
+    },
+    "./buddhist": {
+      "import": {
+        "types": "./dist/esm/buddhist/index.d.ts",
+        "default": "./dist/esm/buddhist/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/buddhist/index.d.ts",
+        "default": "./dist/cjs/buddhist/index.js"
+      }
+    },
+    "./hebrew": {
+      "import": {
+        "types": "./dist/esm/hebrew/index.d.ts",
+        "default": "./dist/esm/hebrew/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/hebrew/index.d.ts",
+        "default": "./dist/cjs/hebrew/index.js"
+      }
+    },
+    "./ethiopic": {
+      "import": {
+        "types": "./dist/esm/ethiopic/index.d.ts",
+        "default": "./dist/esm/ethiopic/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/ethiopic/index.d.ts",
+        "default": "./dist/cjs/ethiopic/index.js"
+      }
+    },
+    "./locale": {
+      "import": {
+        "types": "./dist/esm/locale.d.ts",
+        "default": "./dist/esm/locale.js"
+      },
+      "require": {
+        "types": "./dist/cjs/locale.d.ts",
+        "default": "./dist/cjs/locale.js"
+      }
+    },
+    "./style": {
+      "sass": "./src/style.css"
+    },
+    "./style.css": {
+      "style": {
+        "default": "./src/style.css"
+      },
+      "import": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.css"
+      },
+      "require": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.css"
+      }
+    },
+    "./style.module": {
+      "sass": "./src/style.module.css"
+    },
+    "./style.module.css": {
+      "style": {
+        "default": "./src/style.module.css"
+      },
+      "import": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.module.css"
+      },
+      "require": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.module.css"
+      }
+    },
+    "./src/style.css": {
+      "style": {
+        "default": "./src/style.css"
+      },
+      "import": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.css"
+      },
+      "require": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.css"
+      }
+    },
+    "./src/style.module.css": {
+      "style": {
+        "default": "./src/style.module.css"
+      },
+      "import": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.module.css"
+      },
+      "require": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.module.css"
+      }
+    },
+    "./dist/style.css": {
+      "style": {
+        "default": "./src/style.css"
+      },
+      "import": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.css"
+      },
+      "require": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.css"
+      }
+    },
+    "./dist/style.module.css": {
+      "style": {
+        "default": "./src/style.module.css"
+      },
+      "import": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.module.css"
+      },
+      "require": {
+        "types": "./src/style.module.css.d.ts",
+        "default": "./src/style.module.css"
+      }
+    },
+    "./package.json": {
+      "import": "./package.json",
+      "require": "./package.json",
+      "default": "./package.json"
+    },
+    "./examples": {
+      "types": "./examples/index.d.ts",
+      "import": "./examples/index.ts"
+    }
+  },
+  "scripts": {
+    "prepublish": "pnpm build",
+    "build": "pnpm build:cjs && pnpm build:esm && pnpm build:css",
+    "build:cjs": "tsc --project tsconfig-cjs.json && echo '{ \"type\": \"commonjs\" }' > dist/cjs/package.json",
+    "build:esm": "tsc --project tsconfig-esm.json",
+    "build:css": "./scripts/build-css.sh ./src/style.css ./src/style.module.css",
+    "format": "prettier -w \"**/*.{md,mdx,ts,tsx}\"",
+    "lint": "biome check",
+    "test": "jest --selectProjects examples --selectProjects src",
+    "test:build": "jest --selectProjects examples/built",
+    "test-watch": "jest --watch",
+    "typecheck": "tsc --project ./tsconfig.json --noEmit",
+    "typecheck-watch": "tsc --project ./tsconfig.json --noEmit --watch"
+  },
+  "files": [
+    "dist",
+    "src/style.css",
+    "src/style.module.css",
+    "src/style.css.d.ts",
+    "src/style.module.css.d.ts",
+    "jalali.js",
+    "jalali.d.ts",
+    "persian.js",
+    "persian.d.ts",
+    "buddhist.js",
+    "buddhist.d.ts",
+    "hebrew.js",
+    "hebrew.d.ts",
+    "locale.js",
+    "locale.d.ts"
+  ],
+  "dependencies": {
+    "@date-fns/tz": "^1.4.1",
+    "date-fns": "^4.1.0",
+    "date-fns-jalali": "^4.1.0-0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0",
+    "@jest/types": "^30.0.5",
+    "@radix-ui/react-select": "^2.2.6",
+    "@swc/core": "^1.13.3",
+    "@swc/jest": "^0.2.39",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.1",
+    "@types/react-dom": "^19.1.7",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "jest-transform-css": "^6.0.3",
+    "mockdate": "^3.0.5",
+    "prettier": "^3.6.2",
+    "prettier-plugin-jsdoc": "^1.3.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.2",
+    "typescript-css-modules": "^1.0.4"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/gpbl"
+  }
+}

@@ -1,0 +1,123 @@
+.openapi-explorer__plus-btn--expanded {
+  transition: transform 0.2s ease;
+  display: inline-block;
+  transform: rotate(0deg);
+  transform-origin: center;
+  margin-right: 6px;
+  transform: rotate(45deg);
+}
+
+.openapi-explorer__show-more-btn {
+  width: 100%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin-left: 0.25rem;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  cursor: pointer;
+  font-size: var(--openapi-explorer-font-size-input);
+  user-select: none;
+  white-space: nowrap;
+  border: 0px solid transparent;
+  display: block;
+  background-color: transparent;
+  color: var(--ifm-color-primary);
+  text-align: left;
+
+  &:hover {
+    color: var(--ifm-color-primary-hover);
+  }
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.openapi-explorer__delete-btn {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  cursor: pointer;
+  font-size: calc(0.875rem * var(--ifm-button-size-multiplier));
+  font-weight: normal;
+  line-height: 1.5;
+
+  transition-property: color, background, border-color, box-shadow;
+  transition-duration:
+    100ms, 100ms, 100ms, var(--ifm-button-transition-duration);
+  transition-timing-function: cubic-bezier(0.08, 0.52, 0.52, 1);
+
+  -webkit-user-select: none;
+  user-select: none;
+  white-space: nowrap;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 12px;
+
+  margin-top: calc(var(--ifm-pre-padding) / 2);
+  background-color: var(--openapi-input-background);
+  border: none;
+  outline: none;
+  color: var(--ifm-pre-color);
+  border-radius: 4px;
+  margin-left: 4px;
+
+  &:focus {
+    outline: 0;
+  }
+
+  &:active {
+    box-shadow: inset 0px 0px 0px 2px var(--openapi-input-border);
+  }
+}
+
+.openapi-explorer__thin-btn {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  font-size: 12px;
+  transition-property: color, background, border-color, box-shadow;
+  transition-duration:
+    100ms, 100ms, 100ms, var(--ifm-button-transition-duration);
+  transition-timing-function: cubic-bezier(0.08, 0.52, 0.52, 1);
+  user-select: none;
+  white-space: nowrap;
+  background-color: transparent;
+  color: var(--openapi-input-border);
+  border: 1px solid var(--openapi-input-border);
+  border-radius: var(--ifm-pre-border-radius);
+  margin-top: calc(var(--ifm-pre-padding) / 2);
+  text-transform: uppercase;
+
+  &:hover {
+    color: var(--openapi-inverse-color);
+    background-color: var(--openapi-input-border);
+  }
+
+  &:focus {
+    outline: 0;
+  }
+
+  &:active {
+    box-shadow:
+      inset 0 0 0 1px var(--openapi-input-border),
+      inset 0 0 0 2px var(--openapi-inverse-color);
+  }
+}
+
+.openapi-explorer__show-options {
+  visibility: visible;
+}
+
+.openapi-explorer__hide-options {
+  display: none;
+  visibility: hidden;
+}

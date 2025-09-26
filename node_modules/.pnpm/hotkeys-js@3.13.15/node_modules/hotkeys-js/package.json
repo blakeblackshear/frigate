@@ -1,0 +1,32 @@
+{
+  "name": "hotkeys-js",
+  "description": "A simple micro-library for defining and dispatching keyboard shortcuts. It has no dependencies.",
+  "version": "3.13.15",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "module": "dist/hotkeys.esm.js",
+  "files": [
+    "index.d.ts",
+    "dist",
+    "doc"
+  ],
+  "keywords": [
+    "hotkey",
+    "hotkeys",
+    "hotkeys-js",
+    "hotkeysjs",
+    "key",
+    "keys",
+    "keyboard",
+    "shortcuts",
+    "keypress"
+  ],
+  "author": "kenny wong <wowohoo@qq.com>",
+  "license": "MIT",
+  "homepage": "https://jaywcjlove.github.io/hotkeys-js",
+  "funding": "https://jaywcjlove.github.io/#/sponsor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaywcjlove/hotkeys-js.git"
+  }
+}

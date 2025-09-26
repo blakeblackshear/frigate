@@ -1,0 +1,21 @@
+module["exports"] = [
+  "Librería",
+  "Deportes",
+  "Videojuegos",
+  "Electrónica",
+  "Moda",
+  "Joyería",
+  "Marroquinería",
+  "Juguetería",
+  "Mascotas",
+  "Bebes",
+  "Bricolaje",
+  "Informática",
+  "Salud",
+  "Parafarmacia",
+  "Papelería",
+  "Cine",
+  "Música",
+  "Hogar",
+  "Decoración"
+]

@@ -1,0 +1,11 @@
+var name = {};
+module['exports'] = name;
+name.male_first_name = require("./first_name_male");
+name.female_first_name = require("./first_name_female");
+name.first_name = require("./first_name");
+name.last_name = require("./last_name");
+name.gender = require("./gender");
+name.prefix = require("./prefix");
+name.suffix = require("./suffix");
+name.title = require("./title");
+name.name = require("./name");

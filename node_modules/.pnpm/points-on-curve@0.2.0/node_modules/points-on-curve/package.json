@@ -1,0 +1,31 @@
+{
+  "name": "points-on-curve",
+  "version": "0.2.0",
+  "description": "Estimate points on a bezier curve or a set of connexted bezier curves",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "rm -rf lib && tsc",
+    "lint": "tslint -p tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pshihn/bezier-points.git"
+  },
+  "keywords": [
+    "Bezier",
+    "graphics"
+  ],
+  "author": "Preet Shihn",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pshihn/bezier-points/issues"
+  },
+  "homepage": "https://github.com/pshihn/bezier-points#readme",
+  "devDependencies": {
+    "tslint": "^6.1.1",
+    "typescript": "^3.8.3"
+  }
+}

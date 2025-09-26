@@ -1,0 +1,106 @@
+{
+  "name": "html-webpack-plugin",
+  "version": "5.6.4",
+  "license": "MIT",
+  "description": "Simplifies creation of HTML files to serve your webpack bundles",
+  "author": "Jan Nicklas <j.nicklas@me.com> (https://github.com/jantimon)",
+  "main": "index.js",
+  "types": "typings.d.ts",
+  "files": [
+    "lib/",
+    "index.js",
+    "default_index.ejs",
+    "typings.d.ts"
+  ],
+  "scripts": {
+    "posttest": "tsc",
+    "puml": "npx puml generate flow.puml -o flow.png",
+    "build-examples": "node examples/build-examples.js",
+    "commitlint": "commitlint --from=master",
+    "security": "npm audit --omit=dev",
+    "lint:prettier": "prettier --cache --list-different .",
+    "lint:js": "eslint --cache .",
+    "lint:spelling": "cspell --cache --no-must-find-files --quiet \"**/*.*\"",
+    "lint": "npm-run-all -l -p \"lint:**\"",
+    "fix:js": "npm run lint:js -- --fix",
+    "fix:prettier": "npm run lint:prettier -- --write",
+    "fix": "npm-run-all -l fix:js fix:prettier",
+    "test:only": "cross-env NODE_ENV=test jest",
+    "test:watch": "npm run test:only -- --watch",
+    "test:manual": "npm run build && webpack-dev-server test/manual/src/index.js --open --config test/manual/webpack.config.js",
+    "test:coverage": "npm run test:only -- --coverage",
+    "pretest": "npm run lint",
+    "test": "npm run test:coverage",
+    "prepare": "husky",
+    "release": "standard-version"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.4",
+    "@commitlint/config-conventional": "^18.4.4",
+    "@types/node": "^20.2.5",
+    "cross-env": "^7.0.3",
+    "cspell": "^8.3.2",
+    "css-loader": "5.0.1",
+    "cz-conventional-changelog": "2.1.0",
+    "dir-compare": "^3.3.0",
+    "eslint": "^8.56.0",
+    "html-loader": "2.1.1",
+    "husky": "^9.0.10",
+    "jest": "^27.2.5",
+    "lint-staged": "^15.2.2",
+    "mini-css-extract-plugin": "^1.6.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.2.5",
+    "pug": "3.0.2",
+    "pug-loader": "2.4.0",
+    "raw-loader": "4.0.2",
+    "rimraf": "2.6.3",
+    "standard-version": "^9.3.0",
+    "style-loader": "2.0.0",
+    "typescript": "4.9.4",
+    "webpack": "^5.101.0",
+    "webpack-cli": "4.5.0",
+    "webpack-recompilation-simulator": "3.2.0"
+  },
+  "dependencies": {
+    "@types/html-minifier-terser": "^6.0.0",
+    "html-minifier-terser": "^6.0.2",
+    "lodash": "^4.17.21",
+    "pretty-error": "^4.0.0",
+    "tapable": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@rspack/core": "0.x || 1.x",
+    "webpack": "^5.20.0"
+  },
+  "peerDependenciesMeta": {
+    "@rspack/core": {
+      "optional": true
+    },
+    "webpack": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "webpack",
+    "plugin",
+    "html",
+    "html-webpack-plugin"
+  ],
+  "bugs": "https://github.com/jantimon/html-webpack-plugin/issues",
+  "homepage": "https://github.com/jantimon/html-webpack-plugin",
+  "repository": "https://github.com/jantimon/html-webpack-plugin.git",
+  "engines": {
+    "node": ">=10.13.0"
+  },
+  "jest": {
+    "watchPathIgnorePatterns": [
+      "<rootDir>/dist"
+    ],
+    "testEnvironment": "node"
+  },
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/html-webpack-plugin"
+  }
+}

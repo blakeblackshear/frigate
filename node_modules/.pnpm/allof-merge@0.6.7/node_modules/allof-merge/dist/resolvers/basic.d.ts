@@ -1,0 +1,17 @@
+import type { MergeResolver } from "../types";
+export declare const first: MergeResolver;
+export declare const last: MergeResolver;
+export declare const alternative: MergeResolver;
+export declare const minValue: MergeResolver;
+export declare const maxValue: MergeResolver;
+export declare const mergePattern: MergeResolver;
+export declare const intersectItems: MergeResolver;
+export declare const equal: MergeResolver;
+export declare const mergeObjects: MergeResolver;
+export declare const mergeArray: MergeResolver;
+export declare const mergeNot: MergeResolver;
+export declare const mergeMultipleOf: MergeResolver;
+export declare const mergeEnum: MergeResolver;
+export declare const mergeTypes: MergeResolver;
+export declare const mergeStringItems: MergeResolver;
+export declare const dependenciesMergeResolver: MergeResolver;

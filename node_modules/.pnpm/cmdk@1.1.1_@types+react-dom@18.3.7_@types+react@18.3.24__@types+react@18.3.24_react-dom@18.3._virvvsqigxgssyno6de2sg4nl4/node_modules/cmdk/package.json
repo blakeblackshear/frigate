@@ -1,0 +1,49 @@
+{
+  "name": "cmdk",
+  "version": "1.1.1",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19 || ^19.0.0-rc",
+    "react-dom": "^18 || ^19 || ^19.0.0-rc"
+  },
+  "dependencies": {
+    "@radix-ui/react-compose-refs": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-id": "^1.1.0",
+    "@radix-ui/react-primitive": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "18.0.15"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pacocoursey/cmdk.git",
+    "directory": "cmdk"
+  },
+  "bugs": {
+    "url": "https://github.com/pacocoursey/cmdk/issues"
+  },
+  "homepage": "https://github.com/pacocoursey/cmdk#readme",
+  "author": {
+    "name": "Paco",
+    "url": "https://github.com/pacocoursey"
+  },
+  "scripts": {
+    "build": "tsup src",
+    "dev": "tsup src --watch"
+  }
+}

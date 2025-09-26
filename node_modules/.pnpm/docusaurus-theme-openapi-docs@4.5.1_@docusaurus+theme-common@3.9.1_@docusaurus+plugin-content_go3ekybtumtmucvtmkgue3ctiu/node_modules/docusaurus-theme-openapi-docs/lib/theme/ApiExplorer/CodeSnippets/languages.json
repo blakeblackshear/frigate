@@ -1,0 +1,1290 @@
+[
+  {
+    "key": "csharp",
+    "label": "C#",
+    "syntax_mode": "csharp",
+    "variants": [
+      {
+        "key": "RestSharp",
+        "options": [
+          {
+            "name": "Include boilerplate",
+            "id": "includeBoilerplate",
+            "type": "boolean",
+            "default": false,
+            "description": "Include class definition and import statements in snippet"
+          },
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "curl",
+    "label": "cURL",
+    "syntax_mode": "powershell",
+    "variants": [
+      {
+        "key": "cURL",
+        "options": [
+          {
+            "name": "Generate multiline snippet",
+            "id": "multiLine",
+            "type": "boolean",
+            "default": true,
+            "description": "Split cURL command across multiple lines"
+          },
+          {
+            "name": "Use long form options",
+            "id": "longFormat",
+            "type": "boolean",
+            "default": true,
+            "description": "Use the long form for cURL options (--header instead of -H)"
+          },
+          {
+            "name": "Line continuation character",
+            "id": "lineContinuationCharacter",
+            "availableOptions": ["\\", "^", "`"],
+            "type": "enum",
+            "default": "\\",
+            "description": "Set a character used to mark the continuation of a statement on the next line (generally, \\ for OSX/Linux, ^ for Windows cmd and ` for Powershell)"
+          },
+          {
+            "name": "Quote Type",
+            "id": "quoteType",
+            "availableOptions": ["single", "double"],
+            "type": "enum",
+            "default": "single",
+            "description": "String denoting the quote type to use (single or double) for URL (Use double quotes when running curl in cmd.exe and single quotes for the rest)"
+          },
+          {
+            "name": "Set request timeout (in seconds)",
+            "id": "requestTimeoutInSeconds",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of seconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Use Silent Mode",
+            "id": "silent",
+            "type": "boolean",
+            "default": false,
+            "description": "Display the requested data without showing the cURL progress meter or error messages"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "dart",
+    "label": "Dart",
+    "syntax_mode": "dart",
+    "variants": [
+      {
+        "key": "http",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Include boilerplate",
+            "id": "includeBoilerplate",
+            "type": "boolean",
+            "default": false,
+            "description": "Include class definition and import statements in snippet"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "go",
+    "label": "Go",
+    "syntax_mode": "golang",
+    "variants": [
+      {
+        "key": "Native",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "http",
+    "label": "HTTP",
+    "syntax_mode": "text",
+    "variants": [
+      {
+        "key": "HTTP",
+        "options": [
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "java",
+    "label": "Java",
+    "syntax_mode": "java",
+    "variants": [
+      {
+        "key": "OkHttp",
+        "options": [
+          {
+            "name": "Include boilerplate",
+            "id": "includeBoilerplate",
+            "type": "boolean",
+            "default": false,
+            "description": "Include class definition and import statements in snippet"
+          },
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      },
+      {
+        "key": "Unirest",
+        "options": [
+          {
+            "name": "Include boilerplate",
+            "id": "includeBoilerplate",
+            "type": "boolean",
+            "default": false,
+            "description": "Include class definition and import statements in snippet"
+          },
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "javascript",
+    "label": "JavaScript",
+    "syntax_mode": "javascript",
+    "variants": [
+      {
+        "key": "Fetch",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      },
+      {
+        "key": "jQuery",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      },
+      {
+        "key": "XHR",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "c",
+    "label": "C",
+    "syntax_mode": "c_cpp",
+    "variants": [
+      {
+        "key": "libcurl",
+        "options": [
+          {
+            "name": "Include boilerplate",
+            "id": "includeBoilerplate",
+            "type": "boolean",
+            "default": false,
+            "description": "Include class definition and import statements in snippet"
+          },
+          {
+            "name": "Protocol",
+            "id": "protocol",
+            "type": "enum",
+            "availableOptions": ["http", "https"],
+            "default": "https",
+            "description": "The protocol to be used to make the request"
+          },
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Use curl_mime",
+            "id": "useMimeType",
+            "type": "boolean",
+            "default": true,
+            "description": "Use curl_mime to send multipart/form-data requests"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "nodejs",
+    "label": "NodeJs",
+    "syntax_mode": "javascript",
+    "variants": [
+      {
+        "key": "Axios",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Enable ES6 features",
+            "id": "ES6_enabled",
+            "type": "boolean",
+            "default": false,
+            "description": "Modifies code snippet to incorporate ES6 (EcmaScript) features"
+          }
+        ]
+      },
+      {
+        "key": "Native",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Enable ES6 features",
+            "id": "ES6_enabled",
+            "type": "boolean",
+            "default": false,
+            "description": "Modifies code snippet to incorporate ES6 (EcmaScript) features"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "objective-c",
+    "label": "Objective-C",
+    "syntax_mode": "objectivec",
+    "variants": [
+      {
+        "key": "NSURLSession",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 10000,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Include boilerplate",
+            "id": "includeBoilerplate",
+            "type": "boolean",
+            "default": false,
+            "description": "Include class definition and import statements in snippet"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ocaml",
+    "label": "OCaml",
+    "syntax_mode": "ocaml",
+    "variants": [
+      {
+        "key": "Cohttp",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "php",
+    "label": "PHP",
+    "syntax_mode": "php",
+    "variants": [
+      {
+        "key": "cURL",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      },
+      {
+        "key": "Guzzle",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Set communication type",
+            "id": "asyncType",
+            "type": "enum",
+            "availableOptions": ["async", "sync"],
+            "default": "async",
+            "description": "Set if the requests will be asynchronous or synchronous"
+          },
+          {
+            "name": "Include boilerplate",
+            "id": "includeBoilerplate",
+            "type": "boolean",
+            "default": false,
+            "description": "Include class definition and import statements in snippet"
+          }
+        ]
+      },
+      {
+        "key": "HTTP_Request2",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "default": "Space",
+            "availableOptions": ["Tab", "Space"],
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          }
+        ]
+      },
+      {
+        "key": "pecl_http",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "default": "Space",
+            "availableOptions": ["Tab", "Space"],
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "powershell",
+    "label": "PowerShell",
+    "syntax_mode": "powershell",
+    "variants": [
+      {
+        "key": "RestMethod",
+        "options": [
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "python",
+    "label": "Python",
+    "syntax_mode": "python",
+    "variants": [
+      {
+        "key": "http.client",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "default": "Space",
+            "availableOptions": ["Tab", "Space"],
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      },
+      {
+        "key": "Requests",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "r",
+    "label": "R",
+    "syntax_mode": "r",
+    "variants": [
+      {
+        "key": "httr",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          }
+        ]
+      },
+      {
+        "key": "RCurl",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Ignore warnings",
+            "id": "ignoreWarnings",
+            "type": "boolean",
+            "default": false,
+            "description": "Ignore warnings from R"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "ruby",
+    "label": "Ruby",
+    "syntax_mode": "ruby",
+    "variants": [
+      {
+        "key": "Net::HTTP",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "shell",
+    "label": "Shell",
+    "syntax_mode": "powershell",
+    "variants": [
+      {
+        "key": "Httpie",
+        "options": [
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          }
+        ]
+      },
+      {
+        "key": "wget",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "swift",
+    "label": "Swift",
+    "syntax_mode": "swift",
+    "variants": [
+      {
+        "key": "URLSession",
+        "options": [
+          {
+            "name": "Set indentation count",
+            "id": "indentCount",
+            "type": "positiveInteger",
+            "default": 2,
+            "description": "Set the number of indentation characters to add per code level"
+          },
+          {
+            "name": "Set indentation type",
+            "id": "indentType",
+            "type": "enum",
+            "availableOptions": ["Tab", "Space"],
+            "default": "Space",
+            "description": "Select the character used to indent lines of code"
+          },
+          {
+            "name": "Set request timeout",
+            "id": "requestTimeout",
+            "type": "positiveInteger",
+            "default": 0,
+            "description": "Set number of milliseconds the request should wait for a response before timing out (use 0 for infinity)"
+          },
+          {
+            "name": "Trim request body fields",
+            "id": "trimRequestBody",
+            "type": "boolean",
+            "default": false,
+            "description": "Remove white space and additional lines that may affect the server's response"
+          },
+          {
+            "name": "Follow redirects",
+            "id": "followRedirect",
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically follow HTTP redirects"
+          }
+        ]
+      }
+    ]
+  }
+]

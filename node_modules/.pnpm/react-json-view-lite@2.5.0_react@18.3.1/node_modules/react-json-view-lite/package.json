@@ -1,0 +1,110 @@
+{
+  "name": "react-json-view-lite",
+  "version": "2.5.0",
+  "description": "JSON viewer component for React focused on performance for large volume input while still providing few customiziation features",
+  "homepage": "https://github.com/AnyRoad/react-json-view-lite",
+  "author": "AnyRoad",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "json",
+    "component",
+    "view",
+    "json-view",
+    "json-tree",
+    "lite"
+  ],
+  "repository": "AnyRoad/react-json-view-lite",
+  "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "dist/index.modern.js",
+  "source": "src/index.tsx",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "microbundle-crl --no-compress --format modern,cjs",
+    "start": "microbundle-crl watch --no-compress --format modern,cjs",
+    "prepare": "run-s build",
+    "test": "run-s test:unit test:lint test:build",
+    "test:build": "run-s build",
+    "test:lint": "eslint .",
+    "test:unit": "cross-env CI=1 jest --env=jsdom --coverage",
+    "predeploy": "npm run build-storybook",
+    "deploy-storybook": "gh-pages -d storybook-static",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.24.7",
+    "@chromatic-com/storybook": "^3.2.3",
+    "@storybook/addon-essentials": "^8.6.4",
+    "@storybook/addon-interactions": "^8.6.4",
+    "@storybook/addon-links": "^8.6.4",
+    "@storybook/blocks": "^8.6.4",
+    "@storybook/manager-api": "^8.6.4",
+    "@storybook/react": "^8.6.4",
+    "@storybook/react-vite": "^8.6.4",
+    "@storybook/test": "^8.6.4",
+    "@storybook/theming": "^8.6.4",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.0",
+    "@types/jest": "29.5.13",
+    "@types/node": "18.19.50",
+    "@types/react": "18.3.5",
+    "@types/react-dom": "18.2.7",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "cross-env": "7.0.3",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-config-standard": "17.1.0",
+    "eslint-config-standard-react": "13.0.0",
+    "eslint-plugin-import": "2.30.0",
+    "eslint-plugin-jsx-a11y": "^6.10.0",
+    "eslint-plugin-n": "^17.10.0",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-prettier": "^5.2.0",
+    "eslint-plugin-promise": "^7.1.0",
+    "eslint-plugin-react": "^7.36.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-standard": "5.0.0",
+    "eslint-plugin-storybook": "^0.11.2",
+    "gh-pages": "6.1.1",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "microbundle-crl": "0.13.11",
+    "npm-run-all": "4.1.5",
+    "postcss": "^8.4.47",
+    "prettier": "3.3.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rollup-jest": "^3.1.0",
+    "storybook": "^8.6.4",
+    "ts-jest": "29.1.2",
+    "typescript": "5.6.3"
+  },
+  "files": [
+    "dist"
+  ],
+  "jest": {
+    "collectCoverageFrom": [
+      "src/*.{ts,tsx}",
+      "!<rootDir>/node_modules/"
+    ],
+    "moduleNameMapper": {
+      "^.+\\.(css|less|scss)$": "identity-obj-proxy"
+    }
+  },
+  "packageManager": "yarn@3.6.3",
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
+  }
+}

@@ -1,0 +1,330 @@
+{
+  "name": "msw",
+  "version": "2.11.3",
+  "description": "Seamless REST/GraphQL API mocking library for browser and Node.js.",
+  "type": "commonjs",
+  "main": "./lib/core/index.js",
+  "module": "./lib/core/index.mjs",
+  "types": "./lib/core/index.d.ts",
+  "exports": {
+    ".": {
+      "module-sync": {
+        "types": "./lib/core/index.d.mts",
+        "default": "./lib/core/index.mjs"
+      },
+      "module": {
+        "types": "./lib/core/index.d.mts",
+        "default": "./lib/core/index.mjs"
+      },
+      "react-native": {
+        "import": {
+          "types": "./lib/core/index.d.mts",
+          "default": "./lib/core/index.mjs"
+        },
+        "default": {
+          "types": "./lib/core/index.d.ts",
+          "default": "./lib/core/index.js"
+        }
+      },
+      "import": {
+        "types": "./lib/core/index.d.mts",
+        "default": "./lib/core/index.mjs"
+      },
+      "default": {
+        "types": "./lib/core/index.d.ts",
+        "default": "./lib/core/index.js"
+      }
+    },
+    "./browser": {
+      "module-sync": {
+        "types": "./lib/browser/index.d.mts",
+        "default": "./lib/browser/index.mjs"
+      },
+      "module": {
+        "types": "./lib/browser/index.d.mts",
+        "default": "./lib/browser/index.mjs"
+      },
+      "browser": {
+        "types": "./lib/browser/index.d.mts",
+        "default": "./lib/browser/index.mjs"
+      },
+      "import": {
+        "types": "./lib/browser/index.d.mts",
+        "default": "./lib/browser/index.mjs"
+      },
+      "node": null,
+      "react-native": null,
+      "default": {
+        "types": "./lib/browser/index.d.ts",
+        "default": "./lib/browser/index.js"
+      }
+    },
+    "./node": {
+      "browser": null,
+      "react-native": null,
+      "module-sync": {
+        "types": "./lib/node/index.d.mts",
+        "default": "./lib/node/index.mjs"
+      },
+      "module": {
+        "types": "./lib/node/index.d.mts",
+        "default": "./lib/node/index.mjs"
+      },
+      "node": {
+        "require": "./lib/node/index.js",
+        "import": "./lib/node/index.mjs"
+      },
+      "import": {
+        "types": "./lib/node/index.d.mts",
+        "default": "./lib/node/index.mjs"
+      },
+      "default": {
+        "types": "./lib/node/index.d.ts",
+        "default": "./lib/node/index.js"
+      }
+    },
+    "./native": {
+      "browser": null,
+      "react-native": {
+        "import": {
+          "types": "./lib/native/index.d.mts",
+          "default": "./lib/native/index.mjs"
+        },
+        "default": {
+          "types": "./lib/native/index.d.ts",
+          "default": "./lib/native/index.js"
+        }
+      },
+      "import": {
+        "types": "./lib/native/index.d.mts",
+        "default": "./lib/native/index.mjs"
+      },
+      "default": {
+        "types": "./lib/native/index.d.ts",
+        "default": "./lib/native/index.js"
+      }
+    },
+    "./core/http": {
+      "module-sync": {
+        "types": "./lib/core/http.d.mts",
+        "default": "./lib/core/http.mjs"
+      },
+      "module": {
+        "types": "./lib/core/http.d.mts",
+        "default": "./lib/core/http.mjs"
+      },
+      "import": {
+        "types": "./lib/core/http.d.mts",
+        "default": "./lib/core/http.mjs"
+      },
+      "default": {
+        "types": "./lib/core/http.d.ts",
+        "default": "./lib/core/http.js"
+      }
+    },
+    "./core/graphql": {
+      "module-sync": {
+        "types": "./lib/core/graphql.d.mts",
+        "default": "./lib/core/graphql.mjs"
+      },
+      "module": {
+        "types": "./lib/core/graphql.d.mts",
+        "default": "./lib/core/graphql.mjs"
+      },
+      "import": {
+        "types": "./lib/core/graphql.d.mts",
+        "default": "./lib/core/graphql.mjs"
+      },
+      "default": {
+        "types": "./lib/core/graphql.d.ts",
+        "default": "./lib/core/graphql.js"
+      }
+    },
+    "./core/ws": {
+      "module-sync": {
+        "types": "./lib/core/ws.d.mts",
+        "default": "./lib/core/ws.mjs"
+      },
+      "module": {
+        "types": "./lib/core/ws.d.mts",
+        "default": "./lib/core/ws.mjs"
+      },
+      "import": {
+        "types": "./lib/core/ws.d.mts",
+        "default": "./lib/core/ws.mjs"
+      },
+      "default": {
+        "types": "./lib/core/ws.d.ts",
+        "default": "./lib/core/ws.js"
+      }
+    },
+    "./mockServiceWorker.js": "./lib/mockServiceWorker.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "msw": "cli/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "lint-staged": {
+    "**/*.ts": [
+      "eslint --fix"
+    ],
+    "**/*.{ts,json}": [
+      "prettier --write"
+    ]
+  },
+  "homepage": "https://mswjs.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mswjs/msw.git"
+  },
+  "author": {
+    "name": "Artem Zakharchenko",
+    "url": "https://github.com/kettanaito"
+  },
+  "license": "MIT",
+  "funding": "https://github.com/sponsors/mswjs",
+  "files": [
+    "config/package.json",
+    "config/constants.js",
+    "config/scripts/postinstall.js",
+    "cli",
+    "lib",
+    "src",
+    "browser",
+    "node",
+    "native",
+    "LICENSE.md",
+    "README.md"
+  ],
+  "keywords": [
+    "api",
+    "mock",
+    "mocking",
+    "worker",
+    "prototype",
+    "server",
+    "service",
+    "handler",
+    "testing",
+    "front-end",
+    "back-end"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@bundled-es-modules/cookie": "^2.0.1",
+    "@bundled-es-modules/statuses": "^1.0.1",
+    "@inquirer/confirm": "^5.0.0",
+    "@mswjs/interceptors": "^0.39.1",
+    "@open-draft/deferred-promise": "^2.2.0",
+    "@types/cookie": "^0.6.0",
+    "@types/statuses": "^2.0.4",
+    "graphql": "^16.8.1",
+    "headers-polyfill": "^4.0.2",
+    "is-node-process": "^1.2.0",
+    "outvariant": "^1.4.3",
+    "path-to-regexp": "^6.3.0",
+    "picocolors": "^1.1.1",
+    "rettime": "^0.7.0",
+    "strict-event-emitter": "^0.5.1",
+    "tough-cookie": "^6.0.0",
+    "type-fest": "^4.26.1",
+    "until-async": "^3.0.2",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.4",
+    "@commitlint/config-conventional": "^18.4.4",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.34.0",
+    "@fastify/websocket": "^8.3.1",
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "@open-draft/test-server": "^0.4.2",
+    "@ossjs/release": "^0.8.1",
+    "@playwright/test": "^1.48.0",
+    "@swc/core": "^1.13.5",
+    "@types/eslint__js": "^8.42.3",
+    "@types/express": "^4.17.21",
+    "@types/json-bigint": "^1.0.4",
+    "@types/node": "18.x",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "@web/dev-server": "^0.1.38",
+    "axios": "^1.6.5",
+    "babel-minify": "^0.5.1",
+    "commitizen": "^4.3.1",
+    "cross-env": "^7.0.3",
+    "cross-fetch": "^4.0.0",
+    "cz-conventional-changelog": "3.3.0",
+    "esbuild": "^0.25.3",
+    "esbuild-loader": "^4.2.2",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "express": "^5.0.0",
+    "fastify": "^4.26.0",
+    "fs-extra": "^11.2.0",
+    "fs-teardown": "^0.3.0",
+    "glob": "^11.0.0",
+    "jsdom": "^25.0.1",
+    "json-bigint": "^1.0.0",
+    "knip": "^5.51.1",
+    "lint-staged": "^15.2.10",
+    "page-with": "^0.6.1",
+    "prettier": "^3.6.2",
+    "publint": "^0.3.12",
+    "regenerator-runtime": "^0.14.1",
+    "rimraf": "^6.0.1",
+    "simple-git-hooks": "^2.9.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0",
+    "undici": "^6.20.0",
+    "url-loader": "^4.1.1",
+    "vitest": "^3.2.4",
+    "vitest-environment-miniflare": "^2.14.4",
+    "webpack": "^5.95.0",
+    "webpack-http-server": "^0.5.0",
+    "msw": "2.11.3"
+  },
+  "peerDependencies": {
+    "typescript": ">= 4.8.x"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged",
+    "prepare-commit-msg": "grep -qE '^[^#]' .git/COMMIT_EDITMSG || (exec < /dev/tty && pnpm cz --hook || true)",
+    "commit-msg": "pnpm commitlint --edit $1"
+  },
+  "scripts": {
+    "start": "tsup --watch",
+    "clean": "rimraf ./lib",
+    "lint": "eslint \"{cli,src,test}/**/*.ts\"",
+    "build": "pnpm clean && cross-env NODE_ENV=production tsup && pnpm patch:dts",
+    "patch:dts": "node \"./config/scripts/patch-ts.js\"",
+    "publint": "publint",
+    "test": "pnpm test:unit && pnpm test:node && pnpm test:browser && pnpm test:native",
+    "test:unit": "vitest",
+    "test:node": "vitest --config=./test/node/vitest.config.ts",
+    "test:native": "vitest --config=./test/native/vitest.config.ts",
+    "test:browser": "playwright test -c ./test/browser/playwright.config.ts",
+    "test:modules:node": "vitest run --config=./test/modules/node/vitest.config.ts",
+    "test:modules:browser": "playwright test -c ./test/modules/browser/playwright.config.ts",
+    "test:e2e": "vitest run --config=./test/e2e/vitest.config.ts",
+    "test:ts": "vitest --config=./test/typings/vitest.config.ts",
+    "release": "release publish",
+    "postinstall": "node -e \"import('./config/scripts/postinstall.js').catch(() => void 0)\"",
+    "knip": "knip"
+  }
+}

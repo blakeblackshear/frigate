@@ -1,0 +1,78 @@
+{
+  "name": "react-use-websocket",
+  "version": "4.13.0",
+  "description": "React Hook for WebSocket communication",
+  "main": "./dist/index.js",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "test": "cross-env node_modules/.bin/jest --verbose --no-cache",
+    "clear-dist": "cross-env rm -rf dist/",
+    "compile": "cross-env node_modules/.bin/tsc -p .",
+    "push": "cross-env npm run test && npm run clear-dist && npm run compile && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robtaussig/react-use-websocket.git"
+  },
+  "types": "./dist/index.d.ts",
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "16.0.1",
+    "@types/eventsource": "^1.1.15",
+    "@types/jest": "^29.5.13",
+    "@types/node": "^17.0.29",
+    "@types/react": "^18.3.8",
+    "@types/react-dom": "^18.3.0",
+    "@types/websocket": "1.0.10",
+    "babel-jest": "^29.7.0",
+    "cross-env": "^7.0.3",
+    "eventsourcemock": "^2.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jest-websocket-mock": "^2.5.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.2"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "clearMocks": true,
+    "coverageDirectory": "coverage",
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "<rootDir>/src/lib/**/*.test.(ts|tsx)"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)?$": "ts-jest"
+    },
+    "setupFiles": [
+      "./__test__/configJSDom.ts"
+    ]
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
+  },
+  "keywords": [
+    "react",
+    "react-hooks",
+    "websocket",
+    "websockets"
+  ],
+  "author": "Robert Taussig <robert.taussig@gmail.com> (robtaussig.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/robtaussig/react-use-websocket/issues"
+  },
+  "homepage": "https://github.com/robtaussig/react-use-websocket#readme",
+  "packageManager": "yarn@4.5.0"
+}

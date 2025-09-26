@@ -1,0 +1,48 @@
+{
+  "name": "xml-formatter",
+  "version": "2.6.1",
+  "repository": "github:chrisbottin/xml-formatter",
+  "bugs": {
+    "url": "https://github.com/chrisbottin/xml-formatter/issues"
+  },
+  "homepage": "https://github.com/chrisbottin/xml-formatter#readme",
+  "description": "Converts a XML string into a human readable format (pretty print) while respecting the xml:space attribute",
+  "author": "Chris Bottin <chrisbottin@gmail.com>",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "prepublishOnly": "eslint . && npm test && npm run dist:prepare && npm run dist:build",
+    "dist:prepare": "rm -rf ./dist && mkdir -p ./dist/browser",
+    "dist:build": "npm run dist:build:require && npm run dist:build:singleton",
+    "dist:build:require": "browserify -g [ babelify --presets [ @babel/preset-env ] ] -r ./index.js:xml-formatter -o ./dist/browser/xml-formatter.js",
+    "dist:build:singleton": "browserify -g [ babelify --presets [ @babel/preset-env ] ] -r ./index.js:xml-formatter -o ./dist/browser/xml-formatter-singleton.js -s xmlFormatter"
+  },
+  "engines": {
+    "node": ">= 10"
+  },
+  "keywords": [
+    "xml",
+    "pretty",
+    "print",
+    "pretty-print",
+    "indent",
+    "parser",
+    "formatter",
+    "xml:space",
+    "preserve"
+  ],
+  "dependencies": {
+    "xml-parser-xo": "^3.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/preset-env": "^7.15.8",
+    "babelify": "^10.0.0",
+    "browserify": "^13.1.1",
+    "chai": "^4.3.4",
+    "eslint": "^6.8.0",
+    "glob": "^7.1.7",
+    "mocha": "^6.2.1"
+  }
+}

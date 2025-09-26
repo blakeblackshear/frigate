@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/diagrams/common/populateCommonDb.ts"],
+  "sourcesContent": ["import type { DiagramAST } from '@mermaid-js/parser';\nimport type { DiagramDB } from '../../diagram-api/types.js';\n\nexport function populateCommonDb(ast: DiagramAST, db: DiagramDB) {\n  if (ast.accDescr) {\n    db.setAccDescription?.(ast.accDescr);\n  }\n  if (ast.accTitle) {\n    db.setAccTitle?.(ast.accTitle);\n  }\n  if (ast.title) {\n    db.setDiagramTitle?.(ast.title);\n  }\n}\n"],
+  "mappings": ";;;;;AAGO,SAAS,iBAAiB,KAAiB,IAAe;AAC/D,MAAI,IAAI,UAAU;AAChB,OAAG,oBAAoB,IAAI,QAAQ;AAAA,EACrC;AACA,MAAI,IAAI,UAAU;AAChB,OAAG,cAAc,IAAI,QAAQ;AAAA,EAC/B;AACA,MAAI,IAAI,OAAO;AACb,OAAG,kBAAkB,IAAI,KAAK;AAAA,EAChC;AACF;AAVgB;",
+  "names": []
+}

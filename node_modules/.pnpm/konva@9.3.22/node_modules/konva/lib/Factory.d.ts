@@ -1,0 +1,22 @@
+import { Node } from './Node.js';
+import { GetSet } from './types.js';
+type EnforceString<T> = T extends string ? T : never;
+type Constructor = abstract new (...args: any) => any;
+type Attr<T extends Constructor> = EnforceString<keyof InstanceType<T>>;
+type AfterFunc<T extends Constructor> = (this: InstanceType<T>) => void;
+type ExtractGetSet<T> = T extends GetSet<infer U, any> ? U : never;
+type Value<T extends Constructor, U extends Attr<T>> = ExtractGetSet<InstanceType<T>[U]>;
+type ValidatorFunc<T> = (val: ExtractGetSet<T>, attr: string) => T;
+type ExtractComponents<T extends Constructor, U extends Attr<T>> = Value<T, U> extends Record<string, any> ? EnforceString<keyof Value<T, U>>[] : never;
+export declare const Factory: {
+    addGetterSetter<T extends Constructor, U extends Attr<T>>(constructor: T, attr: U, def?: Value<T, U>, validator?: ValidatorFunc<Value<T, U>>, after?: AfterFunc<T>): void;
+    addGetter<T extends Constructor, U extends Attr<T>>(constructor: T, attr: U, def?: Value<T, U>): void;
+    addSetter<T extends Constructor, U extends Attr<T>>(constructor: T, attr: U, validator?: ValidatorFunc<Value<T, U>>, after?: AfterFunc<T>): void;
+    overWriteSetter<T extends Constructor, U extends Attr<T>>(constructor: T, attr: U, validator?: ValidatorFunc<Value<T, U>>, after?: AfterFunc<T>): void;
+    addComponentsGetterSetter<T extends Constructor, U extends Attr<T>>(constructor: T, attr: U, components: ExtractComponents<T, U>, validator?: ValidatorFunc<Value<T, U>>, after?: AfterFunc<T>): void;
+    addOverloadedGetterSetter<T extends Constructor, U extends Attr<T>>(constructor: T, attr: U): void;
+    addDeprecatedGetterSetter<T extends Constructor, U extends Attr<T>>(constructor: T, attr: U, def: Value<T, U>, validator: ValidatorFunc<Value<T, U>>): void;
+    backCompat<T extends Constructor>(constructor: T, methods: Record<string, string>): void;
+    afterSetFilter(this: Node): void;
+};
+export {};

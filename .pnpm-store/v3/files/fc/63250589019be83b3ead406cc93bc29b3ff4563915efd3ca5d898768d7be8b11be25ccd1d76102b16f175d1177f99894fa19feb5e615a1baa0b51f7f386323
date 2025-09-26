@@ -1,0 +1,71 @@
+import { FanOut } from 'thingies/lib/fanout';
+import { Buffer } from '../vendor/node/internal/buffer';
+export type NodeEventModify = [type: 'modify'];
+export type NodeEventDelete = [type: 'delete'];
+export type NodeEvent = NodeEventModify | NodeEventDelete;
+/**
+ * Node in a file system (like i-node, v-node).
+ */
+export declare class Node {
+    readonly changes: FanOut<NodeEvent>;
+    ino: number;
+    private _uid;
+    private _gid;
+    private _atime;
+    private _mtime;
+    private _ctime;
+    buf: Buffer;
+    rdev: number;
+    mode: number;
+    private _nlink;
+    symlink: string;
+    constructor(ino: number, mode?: number);
+    set ctime(ctime: Date);
+    get ctime(): Date;
+    set uid(uid: number);
+    get uid(): number;
+    set gid(gid: number);
+    get gid(): number;
+    set atime(atime: Date);
+    get atime(): Date;
+    set mtime(mtime: Date);
+    get mtime(): Date;
+    get perm(): number;
+    set perm(perm: number);
+    set nlink(nlink: number);
+    get nlink(): number;
+    getString(encoding?: BufferEncoding): string;
+    setString(str: string): void;
+    getBuffer(): Buffer;
+    setBuffer(buf: Buffer): void;
+    getSize(): number;
+    setModeProperty(property: number): void;
+    isFile(): boolean;
+    isDirectory(): boolean;
+    isSymlink(): boolean;
+    isCharacterDevice(): boolean;
+    makeSymlink(symlink: string): void;
+    write(buf: Buffer, off?: number, len?: number, pos?: number): number;
+    read(buf: Buffer | ArrayBufferView | DataView, off?: number, len?: number, pos?: number): number;
+    truncate(len?: number): void;
+    chmod(perm: number): void;
+    chown(uid: number, gid: number): void;
+    touch(): void;
+    canRead(uid?: number, gid?: number): boolean;
+    canWrite(uid?: number, gid?: number): boolean;
+    canExecute(uid?: number, gid?: number): boolean;
+    del(): void;
+    toJSON(): {
+        ino: number;
+        uid: number;
+        gid: number;
+        atime: number;
+        mtime: number;
+        ctime: number;
+        perm: number;
+        mode: number;
+        nlink: number;
+        symlink: string;
+        data: string;
+    };
+}

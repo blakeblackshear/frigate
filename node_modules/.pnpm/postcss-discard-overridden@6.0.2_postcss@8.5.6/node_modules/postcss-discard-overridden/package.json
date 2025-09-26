@@ -1,0 +1,37 @@
+{
+  "name": "postcss-discard-overridden",
+  "version": "6.0.2",
+  "description": "PostCSS plugin to discard overridden @keyframes or @counter-style.",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "LICENSE",
+    "src"
+  ],
+  "keywords": [
+    "postcss",
+    "css",
+    "postcss-plugin",
+    "at-rules",
+    "@keyframes",
+    "@counter-style"
+  ],
+  "author": "Justineo <justice360@gmail.com>",
+  "license": "MIT",
+  "repository": "cssnano/cssnano",
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "homepage": "https://github.com/cssnano/cssnano",
+  "engines": {
+    "node": "^14 || ^16 || >=18.0"
+  },
+  "devDependencies": {
+    "diff": "^5.2.0",
+    "picocolors": "^1.0.0",
+    "postcss": "^8.4.35"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.31"
+  }
+}

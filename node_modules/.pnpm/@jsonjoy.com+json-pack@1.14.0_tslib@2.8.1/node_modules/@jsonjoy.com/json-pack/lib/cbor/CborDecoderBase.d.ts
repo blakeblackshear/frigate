@@ -1,0 +1,35 @@
+import { JsonPackExtension } from '../JsonPackExtension';
+import { JsonPackValue } from '../JsonPackValue';
+import type { CachedUtf8Decoder } from '@jsonjoy.com/buffers/lib/utf8/CachedUtf8Decoder';
+import type { IReader, IReaderResettable } from '@jsonjoy.com/buffers/lib';
+import type { BinaryJsonDecoder, PackValue } from '../types';
+export declare class CborDecoderBase<R extends IReader & IReaderResettable = IReader & IReaderResettable> implements BinaryJsonDecoder {
+    reader: R;
+    readonly keyDecoder: CachedUtf8Decoder;
+    constructor(reader?: R, keyDecoder?: CachedUtf8Decoder);
+    read(uint8: Uint8Array): PackValue;
+    decode(uint8: Uint8Array): unknown;
+    val(): unknown;
+    readAny(): unknown;
+    readAnyRaw(octet: number): unknown;
+    readMinorLen(minor: number): number;
+    readUint(minor: number): number | bigint;
+    readNint(minor: number): number | bigint;
+    readBin(minor: number): Uint8Array;
+    readBinChunk(): Uint8Array;
+    readAsStr(): string;
+    readStr(minor: number): string;
+    readStrLen(minor: number): number;
+    readStrChunk(): string;
+    readArr(minor: number): unknown[];
+    readArrRaw(length: number): unknown[];
+    readArrIndef(): unknown[];
+    readObj(minor: number): Record<string, unknown>;
+    readObjRaw(length: number): Record<string, unknown>;
+    readObjIndef(): Record<string, unknown>;
+    key(): string;
+    readTag(minor: number): JsonPackExtension<unknown> | unknown;
+    readTagRaw(tag: number): JsonPackExtension<unknown> | unknown;
+    readTkn(minor: number): number | true | false | null | undefined | JsonPackValue<number>;
+    f16(): number;
+}

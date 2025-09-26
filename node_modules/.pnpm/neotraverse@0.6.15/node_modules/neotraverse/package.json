@@ -1,0 +1,77 @@
+{
+	"name": "neotraverse",
+	"version": "0.6.15",
+	"description": "traverse and transform objects by visiting every node on a recursive walk",
+	"main": "dist/legacy/legacy.cjs",
+	"type": "module",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist",
+		"legacy.*"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": {
+				"production": "./dist/min/index.js",
+				"development": "./dist/index.js",
+				"default": "./dist/index.js"
+			},
+			"default": "./dist/min/index.js"
+		},
+		"./modern": {
+			"types": "./dist/modern/modern.d.ts",
+			"import": {
+				"production": "./dist/modern/min/modern.js",
+				"development": "./dist/modern/modern.js",
+				"default": "./dist/modern/modern.js"
+			},
+			"default": "./dist/modern/modern.js"
+		},
+		"./legacy": {
+			"require": {
+				"types": "./dist/legacy/legacy.d.cts",
+				"default": "./dist/legacy/legacy.cjs"
+			},
+			"import": {
+				"types": "./dist/legacy/legacy.d.ts",
+				"default": "./dist/legacy/legacy.mjs"
+			},
+			"default": "./dist/legacy/legacy.cjs"
+		},
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"compile": "tsup && cp dist/legacy/legacy.cjs legacy.js && cp dist/legacy/legacy.d.cts legacy.d.ts",
+		"test": "vitest run"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/PuruVJ/neotraverse.git"
+	},
+	"homepage": "https://github.com/PuruVJ/neotraverse",
+	"keywords": [
+		"traverse",
+		"walk",
+		"recursive",
+		"map",
+		"forEach",
+		"deep",
+		"clone"
+	],
+	"author": {
+		"name": "Puru Vijay, James Halliday"
+	},
+	"license": "MIT",
+	"engines": {
+		"node": ">= 10"
+	},
+	"devDependencies": {
+		"@swc/core": "^1.6.13",
+		"@types/node": "^20.14.10",
+		"terser": "^5.31.2",
+		"tsup": "^8.1.0",
+		"typescript": "^5.5.3",
+		"vitest": "^2.0.1"
+	}
+}

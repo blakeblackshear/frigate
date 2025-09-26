@@ -1,0 +1,1 @@
+{"version":3,"file":"scissors-square.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

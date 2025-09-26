@@ -1,0 +1,1 @@
+export declare function hachureFill(points: [number, number][], angle?: number, gap?: number): [[number, number], [number, number]][];

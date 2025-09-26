@@ -1,0 +1,148 @@
+{
+	"name": "postcss-preset-env",
+	"description": "Convert modern CSS into something browsers understand",
+	"version": "10.4.0",
+	"contributors": [
+		{
+			"name": "Antonio Laguna",
+			"email": "antonio@laguna.es",
+			"url": "https://antonio.laguna.es"
+		},
+		{
+			"name": "Romain Menke",
+			"email": "romainmenke@gmail.com"
+		},
+		{
+			"name": "Jonathan Neal",
+			"email": "jonathantneal@hotmail.com"
+		}
+	],
+	"license": "MIT-0",
+	"funding": [
+		{
+			"type": "github",
+			"url": "https://github.com/sponsors/csstools"
+		},
+		{
+			"type": "opencollective",
+			"url": "https://opencollective.com/csstools"
+		}
+	],
+	"engines": {
+		"node": ">=18"
+	},
+	"type": "module",
+	"main": "dist/index.cjs",
+	"module": "dist/index.mjs",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"CHANGELOG.md",
+		"LICENSE.md",
+		"README.md",
+		"dist"
+	],
+	"dependencies": {
+		"@csstools/postcss-alpha-function": "^1.0.1",
+		"@csstools/postcss-cascade-layers": "^5.0.2",
+		"@csstools/postcss-color-function": "^4.0.12",
+		"@csstools/postcss-color-function-display-p3-linear": "^1.0.1",
+		"@csstools/postcss-color-mix-function": "^3.0.12",
+		"@csstools/postcss-color-mix-variadic-function-arguments": "^1.0.2",
+		"@csstools/postcss-content-alt-text": "^2.0.8",
+		"@csstools/postcss-contrast-color-function": "^2.0.12",
+		"@csstools/postcss-exponential-functions": "^2.0.9",
+		"@csstools/postcss-font-format-keywords": "^4.0.0",
+		"@csstools/postcss-gamut-mapping": "^2.0.11",
+		"@csstools/postcss-gradients-interpolation-method": "^5.0.12",
+		"@csstools/postcss-hwb-function": "^4.0.12",
+		"@csstools/postcss-ic-unit": "^4.0.4",
+		"@csstools/postcss-initial": "^2.0.1",
+		"@csstools/postcss-is-pseudo-class": "^5.0.3",
+		"@csstools/postcss-light-dark-function": "^2.0.11",
+		"@csstools/postcss-logical-float-and-clear": "^3.0.0",
+		"@csstools/postcss-logical-overflow": "^2.0.0",
+		"@csstools/postcss-logical-overscroll-behavior": "^2.0.0",
+		"@csstools/postcss-logical-resize": "^3.0.0",
+		"@csstools/postcss-logical-viewport-units": "^3.0.4",
+		"@csstools/postcss-media-minmax": "^2.0.9",
+		"@csstools/postcss-media-queries-aspect-ratio-number-values": "^3.0.5",
+		"@csstools/postcss-nested-calc": "^4.0.0",
+		"@csstools/postcss-normalize-display-values": "^4.0.0",
+		"@csstools/postcss-oklab-function": "^4.0.12",
+		"@csstools/postcss-progressive-custom-properties": "^4.2.1",
+		"@csstools/postcss-random-function": "^2.0.1",
+		"@csstools/postcss-relative-color-syntax": "^3.0.12",
+		"@csstools/postcss-scope-pseudo-class": "^4.0.1",
+		"@csstools/postcss-sign-functions": "^1.1.4",
+		"@csstools/postcss-stepped-value-functions": "^4.0.9",
+		"@csstools/postcss-text-decoration-shorthand": "^4.0.3",
+		"@csstools/postcss-trigonometric-functions": "^4.0.9",
+		"@csstools/postcss-unset-value": "^4.0.0",
+		"autoprefixer": "^10.4.21",
+		"browserslist": "^4.26.0",
+		"css-blank-pseudo": "^7.0.1",
+		"css-has-pseudo": "^7.0.3",
+		"css-prefers-color-scheme": "^10.0.0",
+		"cssdb": "^8.4.2",
+		"postcss-attribute-case-insensitive": "^7.0.1",
+		"postcss-clamp": "^4.1.0",
+		"postcss-color-functional-notation": "^7.0.12",
+		"postcss-color-hex-alpha": "^10.0.0",
+		"postcss-color-rebeccapurple": "^10.0.0",
+		"postcss-custom-media": "^11.0.6",
+		"postcss-custom-properties": "^14.0.6",
+		"postcss-custom-selectors": "^8.0.5",
+		"postcss-dir-pseudo-class": "^9.0.1",
+		"postcss-double-position-gradients": "^6.0.4",
+		"postcss-focus-visible": "^10.0.1",
+		"postcss-focus-within": "^9.0.1",
+		"postcss-font-variant": "^5.0.0",
+		"postcss-gap-properties": "^6.0.0",
+		"postcss-image-set-function": "^7.0.0",
+		"postcss-lab-function": "^7.0.12",
+		"postcss-logical": "^8.1.0",
+		"postcss-nesting": "^13.0.2",
+		"postcss-opacity-percentage": "^3.0.0",
+		"postcss-overflow-shorthand": "^6.0.0",
+		"postcss-page-break": "^3.0.4",
+		"postcss-place": "^10.0.0",
+		"postcss-pseudo-class-any-link": "^10.0.1",
+		"postcss-replace-overflow-wrap": "^4.0.0",
+		"postcss-selector-not": "^8.0.1"
+	},
+	"peerDependencies": {
+		"postcss": "^8.4"
+	},
+	"scripts": {},
+	"homepage": "https://github.com/csstools/postcss-plugins/tree/main/plugin-packs/postcss-preset-env#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/csstools/postcss-plugins.git",
+		"directory": "plugin-packs/postcss-preset-env"
+	},
+	"bugs": "https://github.com/csstools/postcss-plugins/issues",
+	"keywords": [
+		"css",
+		"csswg",
+		"features",
+		"future",
+		"lists",
+		"next",
+		"postcss",
+		"postcss-plugin",
+		"specifications",
+		"specs",
+		"stages",
+		"w3c"
+	]
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"isArrayBuffer.js","sourceRoot":"","sources":["../src/isArrayBuffer.ts"],"names":[],"mappings":";;;AAAO,MAAM,aAAa,GAAG,CAAC,KAAc,EAAwB,EAAE;IACpE,OAAO,KAAK,YAAY,WAAW,IAAI,QAAQ,CAAC,IAAI,CAAC,KAAK,CAAC,KAAK,sBAAsB,CAAC;AACzF,CAAC,CAAC;AAFW,QAAA,aAAa,iBAExB"}

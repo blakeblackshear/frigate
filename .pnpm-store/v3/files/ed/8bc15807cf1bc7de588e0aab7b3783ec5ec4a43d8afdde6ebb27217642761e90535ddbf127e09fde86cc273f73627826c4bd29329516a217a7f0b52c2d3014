@@ -1,0 +1,51 @@
+{
+  "name": "@svgr/core",
+  "description": "Transform SVG into React Components.",
+  "version": "8.1.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "repository": "https://github.com/gregberge/svgr/tree/main/packages/core",
+  "author": "Greg Bergé <berge.greg@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "svgr",
+    "svg",
+    "react",
+    "core",
+    "api"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "homepage": "https://react-svgr.com",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/gregberge"
+  },
+  "license": "MIT",
+  "scripts": {
+    "reset": "rm -rf dist",
+    "build": "rollup -c ../../build/rollup.config.mjs",
+    "prepublishOnly": "npm run reset && npm run build"
+  },
+  "dependencies": {
+    "@babel/core": "^7.21.3",
+    "@svgr/babel-preset": "8.1.0",
+    "camelcase": "^6.2.0",
+    "cosmiconfig": "^8.1.3",
+    "snake-case": "^3.0.4"
+  },
+  "devDependencies": {
+    "svgo": "^3.0.2"
+  },
+  "gitHead": "772592e042be5063e782bfb8711d024b2fefc6b8"
+}

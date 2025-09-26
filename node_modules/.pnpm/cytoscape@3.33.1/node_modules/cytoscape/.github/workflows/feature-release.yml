@@ -1,0 +1,95 @@
+name: Feature Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run the action on'
+        required: true
+        default: 'unstable'
+
+jobs:  
+  feature-release:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: checkout unstable branch
+        uses: actions/checkout@v3
+        with:
+          ref: 'unstable'
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 22
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install dependencies
+        run: npm install
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run tests
+        run : |
+          npm test
+      - name: Determine version for the release
+        id: get_new_patch_version
+        run: |
+          pwd
+          chmod 777 -R ./* ./.[!.]*
+          . ./.github/workflows/scripts/new-feature-version.sh
+        shell: bash
+      - name: See new master version and jq version
+        run: |
+          echo VERSION ${{ env.VERSION }}
+          jq --version
+        shell: bash
+      - name: Checkout Master Branch
+        uses: actions/checkout@v3
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Update documentation and Merge unstable to master branch
+        run: |
+          . ./.github/workflows/scripts/merge_unstable_to_master.sh
+      - name: Build release and verify changes
+        id: release
+        run: |
+          . .github/workflows/scripts/pre_release_test.sh master
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() && steps.release.conclusion == 'failure' }}
+        with:
+          name: npm-release--failure-report
+          path: /home/runner/.npm/_logs/
+      - name: Publish Package To npmjs
+        run:  npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish Package to GitHub Releases
+        run: |
+          curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.MAIN_GH_TOKEN }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{ github.repository }}/releases \
+          -d '{"tag_name":"v${{ env.VERSION }}","target_commitish":"master","name":"v${{ env.VERSION }}","body":"Release version v${{ env.VERSION }}","draft":false,"prerelease":false,"generate_release_notes":false}'
+      - name: Deploy to Github Pages 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: documentation   
+      - name: Create Issue
+        run: |
+          TITLE="Create a blog post for release v$VERSION"
+          echo "Issue title: $TITLE"
+          sed ':a;N;$!ba;s/\n/\\n/g' ./.github/workflows/md/blog-issue-template.md > output_file.txt
+          BODY="$(cat output_file.txt)"
+
+          echo "Body: $BODY"
+
+          curl -X POST \
+              -H "Authorization: token ${{ secrets.CYTOSCAPE_JS_BLOG_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/cytoscape/cytoscape.js-blog/issues" \
+              -d "{\"title\":\"$TITLE\",\"body\":\"$BODY\"}"
+       

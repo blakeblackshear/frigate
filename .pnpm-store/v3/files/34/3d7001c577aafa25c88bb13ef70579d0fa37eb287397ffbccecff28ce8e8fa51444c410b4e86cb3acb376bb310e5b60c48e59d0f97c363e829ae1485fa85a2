@@ -1,0 +1,37 @@
+{
+  "name": "@postman/codegen-js-fetch",
+  "version": "0.1.1",
+  "description": "Converts postman request to js fetch",
+  "com_postman_plugin": {
+    "type": "code_generator",
+    "lang": "JavaScript",
+    "variant": "Fetch",
+    "syntax_mode": "javascript"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "node npm/test.js",
+    "test-lint": "node npm/test-lint.js",
+    "test-newman": "node npm/test-newman.js",
+    "test-unit": "node npm/test-unit.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Postman Labs <help@getpostman.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/postmanlabs/code-generators/tree/master/codegens/js-fetch",
+  "dependencies": {},
+  "devDependencies": {
+    "form-data": "2.5.1",
+    "node-fetch": "2.6.7"
+  },
+  "engines": {
+    "node": ">=8"
+  }
+}

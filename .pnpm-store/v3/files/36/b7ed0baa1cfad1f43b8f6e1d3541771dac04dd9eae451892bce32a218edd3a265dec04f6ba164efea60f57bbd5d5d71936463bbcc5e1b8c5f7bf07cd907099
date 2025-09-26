@@ -1,0 +1,1 @@
+{"version":3,"file":"bar-chart-2.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

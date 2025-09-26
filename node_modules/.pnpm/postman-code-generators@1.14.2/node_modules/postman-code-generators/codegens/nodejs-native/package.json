@@ -1,0 +1,38 @@
+{
+  "name": "@postman/codegen-nodejs-native",
+  "version": "0.1.3",
+  "description": "Converts Postman-SDK Request into code snippet for NodeJS(Native)",
+  "com_postman_plugin": {
+    "type": "code_generator",
+    "lang": "nodejs",
+    "variant": "Native",
+    "syntax_mode": "javascript"
+  },
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node npm/test.js",
+    "test-lint": "node npm/test-lint.js",
+    "test-newman": "node npm/test-newman.js",
+    "test-unit": "node npm/test-unit.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Postman Labs <help@getpostman.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/postmanlabs/code-generators/tree/master/codegens/nodejs-native",
+  "dependencies": {
+    "postman-collection": "4.4.0"
+  },
+  "devDependencies": {
+    "follow-redirects": "1.15.2"
+  },
+  "engines": {
+    "node": ">=8"
+  }
+}

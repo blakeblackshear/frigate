@@ -1,0 +1,1 @@
+{"version":3,"file":"scissors-square-dashed-bottom.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

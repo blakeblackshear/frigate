@@ -1,0 +1,1 @@
+{"version":3,"file":"policy.js","sourceRoot":"file:///mnt/vss/_work/1/s/dependencies/vscode/out-editor-src","sources":["vs/base/common/policy.ts"],"names":[],"mappings":"","sourcesContent":["\n\nexport type PolicyName = string;\n\nexport interface IPolicy {\n\n\t/**\n\t * The policy name.\n\t */\n\treadonly name: PolicyName;\n}\n"]}

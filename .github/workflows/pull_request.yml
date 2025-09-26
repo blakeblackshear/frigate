@@ -21,11 +21,14 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@master
         with:
-          node-version: 16.x
-      - run: npm install
+          node-version: 20.x
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - run: pnpm install
         working-directory: ./web
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
         working-directory: ./web
 
   web_test:
@@ -38,13 +41,16 @@ jobs:
       - uses: actions/setup-node@master
         with:
           node-version: 20.x
-      - run: npm install
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - run: pnpm install
         working-directory: ./web
       - name: Build web
-        run: npm run build
+        run: pnpm run build
         working-directory: ./web
       # - name: Test
-      #   run: npm run test
+      #   run: pnpm run test
       #   working-directory: ./web
 
   python_checks:
@@ -81,8 +87,11 @@ jobs:
       - uses: actions/setup-node@master
         with:
           node-version: 20.x
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - name: Install devcontainer cli
-        run: npm install --global @devcontainers/cli
+        run: pnpm install --global @devcontainers/cli
       - name: Build devcontainer
         env:
           DOCKER_BUILDKIT: "1"

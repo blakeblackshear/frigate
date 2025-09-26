@@ -1,0 +1,63 @@
+{
+  "name": "webpackbar",
+  "version": "6.0.1",
+  "description": "Elegant ProgressBar and Profiler for Webpack",
+  "repository": "unjs/webpackbar",
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "type": "module",
+  "exports": {
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "webpack --config ./playground/webpack.config.cjs",
+    "lint": "eslint --ext .ts,.mjs . && prettier -c .",
+    "lint:fix": "eslint --fix --ext .ts,.mjs . && prettier -w .",
+    "prepack": "unbuild",
+    "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
+    "test": "pnpm lint && mocha ./test/*.test.*"
+  },
+  "dependencies": {
+    "ansi-escapes": "^4.3.2",
+    "chalk": "^4.1.2",
+    "consola": "^3.2.3",
+    "figures": "^3.2.0",
+    "markdown-table": "^2.0.0",
+    "pretty-time": "^1.1.0",
+    "std-env": "^3.7.0",
+    "wrap-ansi": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.16",
+    "changelogen": "^0.5.5",
+    "eslint": "^8.56.0",
+    "eslint-config-unjs": "^0.2.1",
+    "jiti": "^1.21.0",
+    "memory-fs": "^0.5.0",
+    "mocha": "^10.2.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3",
+    "unbuild": "^2.0.0",
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "peerDependencies": {
+    "webpack": "3 || 4 || 5"
+  },
+  "engines": {
+    "node": ">=14.21.3"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "@postman/codegen-java-unirest",
+  "version": "0.1.1",
+  "description": "Generates code snippets of java unirest from postman-SDK request",
+  "main": "index.js",
+  "com_postman_plugin": {
+    "type": "code_generator",
+    "lang": "java",
+    "variant": "Unirest",
+    "syntax_mode": "java"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node npm/test.js",
+    "test-lint": "node npm/test-lint.js",
+    "test-newman": "node npm/test-newman.js",
+    "test-unit": "node npm/test-unit.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Postman Labs <help@getpostman.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/postmanlabs/code-generators/tree/master/codegens/java-unirest",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=8"
+  }
+}

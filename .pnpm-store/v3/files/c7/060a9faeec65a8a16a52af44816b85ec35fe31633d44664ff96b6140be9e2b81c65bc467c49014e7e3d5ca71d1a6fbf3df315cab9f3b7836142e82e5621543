@@ -1,0 +1,38 @@
+{
+  "root": true,
+  "parser": "@babel/eslint-parser",
+  "plugins": [
+    "react"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:jest/recommended"
+  ],
+  "rules": {
+    "strict": 0,
+    "quotes": [0, "single"],
+    "curly": [1, "multi-line"],
+    "camelcase": 0,
+    "comma-dangle": 0,
+    "dot-notation": 0,
+    "no-console": 0,
+    "no-use-before-define": [1, "nofunc"],
+    "no-underscore-dangle": 0,
+    "no-unused-vars": 0,
+    "new-cap": 0,
+    "react/jsx-uses-vars": 1,
+    "semi": [1, "always"]
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "jest": true
+  },
+  "globals": {
+    // For Flow
+    "ReactElement": false,
+    "ReactClass": false,
+    "SyntheticEvent": false,
+    "ClientRect": false
+  }
+}

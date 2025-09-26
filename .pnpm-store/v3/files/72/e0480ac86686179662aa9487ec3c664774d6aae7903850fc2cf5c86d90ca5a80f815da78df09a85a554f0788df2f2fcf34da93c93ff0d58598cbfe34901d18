@@ -1,0 +1,19 @@
+/**
+ * @license lucide-react v0.477.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+import createLucideIcon from '../createLucideIcon.js';
+
+const __iconNode = [
+  [
+    "path",
+    { d: "M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z", key: "14u9p9" }
+  ]
+];
+const Triangle = createLucideIcon("Triangle", __iconNode);
+
+export { __iconNode, Triangle as default };
+//# sourceMappingURL=triangle.js.map

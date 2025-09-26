@@ -1,0 +1,59 @@
+{
+    "name": "@types/react-router-dom",
+    "version": "5.3.3",
+    "description": "TypeScript definitions for react-router-dom",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-router-dom",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Huy Nguyen",
+            "url": "https://github.com/huy-nguyen",
+            "githubUsername": "huy-nguyen"
+        },
+        {
+            "name": "Philip Jackson",
+            "url": "https://github.com/p-jackson",
+            "githubUsername": "p-jackson"
+        },
+        {
+            "name": "John Reilly",
+            "url": "https://github.com/johnnyreilly",
+            "githubUsername": "johnnyreilly"
+        },
+        {
+            "name": "Sebastian Silbermann",
+            "url": "https://github.com/eps1lon",
+            "githubUsername": "eps1lon"
+        },
+        {
+            "name": "Daniel Nixon",
+            "url": "https://github.com/danielnixon",
+            "githubUsername": "danielnixon"
+        },
+        {
+            "name": "Tony Ward",
+            "url": "https://github.com/ynotdraw",
+            "githubUsername": "ynotdraw"
+        },
+        {
+            "name": "Pirasis Leelatanon",
+            "url": "https://github.com/1pete",
+            "githubUsername": "1pete"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/react-router-dom"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/history": "^4.7.11",
+        "@types/react": "*",
+        "@types/react-router": "*"
+    },
+    "typesPublisherContentHash": "e0755682335fcda35af55012c81f34c3082bd681570954c4a515a7ada37f06af",
+    "typeScriptVersion": "3.8"
+}

@@ -1,0 +1,71 @@
+{
+  "name": "remark-stringify",
+  "version": "11.0.0",
+  "description": "remark plugin to add support for serializing markdown",
+  "license": "MIT",
+  "keywords": [
+    "abstract",
+    "ast",
+    "compile",
+    "markdown",
+    "markdown",
+    "mdast",
+    "plugin",
+    "remark",
+    "remark-plugin",
+    "serialize",
+    "stringify",
+    "syntax",
+    "tree",
+    "unified"
+  ],
+  "homepage": "https://remark.js.org",
+  "repository": "https://github.com/remarkjs/remark/tree/main/packages/remark-stringify",
+  "bugs": "https://github.com/remarkjs/remark/issues",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+    "Eugene Sharygin <eush77@gmail.com>"
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "exports": "./index.js",
+  "files": [
+    "lib/",
+    "index.d.ts",
+    "index.js"
+  ],
+  "dependencies": {
+    "@types/mdast": "^4.0.0",
+    "mdast-util-to-markdown": "^2.0.0",
+    "unified": "^11.0.0"
+  },
+  "scripts": {},
+  "typeCoverage": {
+    "atLeast": 100,
+    "detail": true,
+    "ignoreCatch": true,
+    "strict": true
+  },
+  "xo": {
+    "overrides": [
+      {
+        "files": [
+          "**/*.ts"
+        ],
+        "rules": {
+          "@typescript-eslint/ban-types": "off",
+          "@typescript-eslint/consistent-type-definitions": "off"
+        }
+      }
+    ],
+    "prettier": true,
+    "rules": {
+      "unicorn/no-this-assignment": "off"
+    }
+  }
+}

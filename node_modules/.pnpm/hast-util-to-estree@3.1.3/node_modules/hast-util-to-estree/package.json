@@ -1,0 +1,116 @@
+{
+  "author": "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)",
+  "bugs": "https://github.com/syntax-tree/hast-util-to-estree/issues",
+  "contributors": [
+    "Titus Wormer <tituswormer@gmail.com> (https://wooorm.com)"
+  ],
+  "dependencies": {
+    "@types/estree": "^1.0.0",
+    "@types/estree-jsx": "^1.0.0",
+    "@types/hast": "^3.0.0",
+    "comma-separated-tokens": "^2.0.0",
+    "devlop": "^1.0.0",
+    "estree-util-attach-comments": "^3.0.0",
+    "estree-util-is-identifier-name": "^3.0.0",
+    "hast-util-whitespace": "^3.0.0",
+    "mdast-util-mdx-expression": "^2.0.0",
+    "mdast-util-mdx-jsx": "^3.0.0",
+    "mdast-util-mdxjs-esm": "^2.0.0",
+    "property-information": "^7.0.0",
+    "space-separated-tokens": "^2.0.0",
+    "style-to-js": "^1.0.0",
+    "unist-util-position": "^5.0.0",
+    "zwitch": "^2.0.0"
+  },
+  "description": "hast utility to transform to estree (JavaScript AST) JSX",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "acorn-jsx": "^5.0.0",
+    "c8": "^10.0.0",
+    "esast-util-from-js": "^2.0.0",
+    "estree-util-to-js": "^2.0.0",
+    "estree-walker": "^3.0.0",
+    "hastscript": "^9.0.0",
+    "mdast-util-from-markdown": "^2.0.0",
+    "mdast-util-mdx": "^3.0.0",
+    "mdast-util-to-hast": "^13.0.0",
+    "micromark-extension-mdxjs": "^3.0.0",
+    "prettier": "^3.0.0",
+    "remark-cli": "^12.0.0",
+    "remark-preset-wooorm": "^11.0.0",
+    "type-coverage": "^2.0.0",
+    "typescript": "^5.0.0",
+    "unist-util-visit": "^5.0.0",
+    "xo": "^0.60.0"
+  },
+  "exports": "./index.js",
+  "files": [
+    "index.d.ts.map",
+    "index.d.ts",
+    "index.js",
+    "lib/"
+  ],
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/unified"
+  },
+  "keywords": [
+    "change",
+    "ecmascript",
+    "estree",
+    "hast-util",
+    "hast",
+    "html",
+    "javascript",
+    "jsx",
+    "mdx",
+    "rehype",
+    "transform",
+    "unist",
+    "utility",
+    "util"
+  ],
+  "license": "MIT",
+  "name": "hast-util-to-estree",
+  "prettier": {
+    "bracketSpacing": false,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "none",
+    "useTabs": false
+  },
+  "remarkConfig": {
+    "plugins": [
+      "remark-preset-wooorm"
+    ]
+  },
+  "repository": "syntax-tree/hast-util-to-estree",
+  "scripts": {
+    "build": "tsc --build --clean && tsc --build && type-coverage",
+    "format": "remark --frail --output --quiet -- . && prettier --log-level warn --write -- . && xo --fix",
+    "test-api": "node --conditions development test.js",
+    "test-coverage": "c8 --100 --reporter lcov -- npm run test-api",
+    "test": "npm run build && npm run format && npm run test-coverage"
+  },
+  "sideEffects": false,
+  "typeCoverage": {
+    "atLeast": 100,
+    "ignoreFiles#": "needed `any`",
+    "ignoreFiles": [
+      "lib/state.d.ts",
+      "lib/state.js"
+    ],
+    "strict": true
+  },
+  "type": "module",
+  "version": "3.1.3",
+  "xo": {
+    "prettier": true,
+    "rules": {
+      "logical-assignment-operators": "off",
+      "unicorn/prefer-code-point": "off",
+      "unicorn/prefer-string-replace-all": "off"
+    }
+  }
+}

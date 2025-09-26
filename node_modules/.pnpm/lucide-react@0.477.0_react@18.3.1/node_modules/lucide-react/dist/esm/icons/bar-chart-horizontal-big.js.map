@@ -1,0 +1,1 @@
+{"version":3,"file":"bar-chart-horizontal-big.js","sources":[],"sourcesContent":[],"names":[],"mappings":";;;;;;;"}

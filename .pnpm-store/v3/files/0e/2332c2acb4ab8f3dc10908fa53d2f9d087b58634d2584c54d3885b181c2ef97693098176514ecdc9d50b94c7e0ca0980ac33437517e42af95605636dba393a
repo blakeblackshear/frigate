@@ -1,0 +1,22 @@
+{
+  "name": "sort-by",
+  "repo": "staygrimm/sort-by",
+  "description": "create comparator functions for the native Array.sort()",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "component/assert": "0.5.0",
+    "component/stack": "0.0.1",
+    "jkroso/equals": "1.0.0",
+    "jkroso/type": "1.1.0",
+    "mariocasciaro/object-path": "v0.8.1",
+    "yields/fmt": "0.0.2"
+  },
+  "development": {
+    "seanmonstar/insist:insist.js": "*"
+  },
+  "scripts": [
+    "index.js"
+  ]
+}

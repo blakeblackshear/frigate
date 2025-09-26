@@ -1,0 +1,76 @@
+{
+  "name": "@floating-ui/react-dom",
+  "version": "2.1.6",
+  "description": "Floating UI for React DOM",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/floating-ui.react-dom.umd.js",
+  "module": "./dist/floating-ui.react-dom.esm.js",
+  "unpkg": "./dist/floating-ui.react-dom.umd.min.js",
+  "types": "./dist/floating-ui.react-dom.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "types": "./dist/floating-ui.react-dom.d.mts",
+        "default": "./dist/floating-ui.react-dom.mjs"
+      },
+      "types": "./dist/floating-ui.react-dom.d.ts",
+      "module": "./dist/floating-ui.react-dom.esm.js",
+      "default": "./dist/floating-ui.react-dom.umd.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "author": "atomiks",
+  "license": "MIT",
+  "bugs": "https://github.com/floating-ui/floating-ui",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/floating-ui/floating-ui.git",
+    "directory": "packages/react-dom"
+  },
+  "homepage": "https://floating-ui.com/docs/react-dom",
+  "keywords": [
+    "tooltip",
+    "popover",
+    "dropdown",
+    "menu",
+    "popup",
+    "positioning",
+    "react",
+    "react-dom"
+  ],
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.7.4"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.23.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/react": "^18.3.19",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "use-isomorphic-layout-effect": "^1.2.1",
+    "config": "0.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "clean": "rimraf dist out-tsc",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "build": "rollup -c",
+    "build:api": "build-api --tsc tsconfig.lib.json",
+    "publint": "publint",
+    "typecheck": "tsc -b"
+  }
+}

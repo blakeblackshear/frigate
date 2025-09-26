@@ -1,0 +1,70 @@
+{
+  "name": "monaco-yaml",
+  "version": "5.4.0",
+  "description": "YAML plugin for the Monaco Editor",
+  "homepage": "https://monaco-yaml.js.org",
+  "scripts": {
+    "prepack": "tsc -b && node build.js",
+    "prestart": "node build.js",
+    "pretest": "node build.js",
+    "start": "npm --workspace demo start",
+    "test": "vitest run"
+  },
+  "type": "module",
+  "main": "./index.js",
+  "typings": "./index.d.ts",
+  "files": [
+    "index.*",
+    "fillers/*.ts",
+    "src",
+    "yaml.worker.*"
+  ],
+  "workspaces": [
+    "examples/*"
+  ],
+  "author": "Kevin Decker <kpdecker@gmail.com> (http://incaseofstairs.com)",
+  "maintainers": [
+    "Remco Haszing <remcohaszing@gmail.com> (https://github.com/remcohaszing)"
+  ],
+  "license": "MIT",
+  "repository": "remcohaszing/monaco-yaml",
+  "bugs": "https://github.com/remcohaszing/monaco-yaml/issues",
+  "funding": "https://github.com/sponsors/remcohaszing",
+  "keywords": [
+    "editor",
+    "frontend",
+    "front-end",
+    "monaco",
+    "monaco-editor",
+    "yaml"
+  ],
+  "dependencies": {
+    "jsonc-parser": "^3.0.0",
+    "monaco-languageserver-types": "^0.4.0",
+    "monaco-marker-data-provider": "^1.0.0",
+    "monaco-types": "^0.1.0",
+    "monaco-worker-manager": "^2.0.0",
+    "path-browserify": "^1.0.0",
+    "prettier": "^3.0.0",
+    "vscode-languageserver-textdocument": "^1.0.0",
+    "vscode-languageserver-types": "^3.0.0",
+    "vscode-uri": "^3.0.0",
+    "yaml": "^2.0.0"
+  },
+  "peerDependencies": {
+    "monaco-editor": ">=0.36"
+  },
+  "devDependencies": {
+    "@remcohaszing/eslint": "^11.0.0",
+    "@vitest/browser": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "esbuild": "^0.25.0",
+    "monaco-editor": "^0.52.0",
+    "playwright": "^1.0.0",
+    "remark-cli": "^12.0.0",
+    "remark-preset-remcohaszing": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0",
+    "yaml-language-server": "1.18.0"
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/core/handlers/common.ts"],"sourcesContent":["export type HandlerKind = 'RequestHandler' | 'EventHandler'\n"],"mappings":";;;;;;;;;;;;;;AAAA;AAAA;","names":[]}

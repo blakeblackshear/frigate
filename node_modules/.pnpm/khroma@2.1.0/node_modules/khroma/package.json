@@ -1,0 +1,37 @@
+{
+  "name": "khroma",
+  "repository": "github:fabiospampinato/khroma",
+  "description": "A collection of functions for manipulating CSS colors, inspired by SASS.",
+  "version": "2.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.js",
+  "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "benchmark": "tsex benchmark",
+    "benchmark:watch": "tsex benchmark --watch",
+    "clean": "tsex clean",
+    "compile": "tsex compile",
+    "compile:watch": "tsex compile --watch",
+    "test": "tsex test",
+    "test:watch": "tsex test --watch",
+    "prepublishOnly": "tsex prepare"
+  },
+  "keywords": [
+    "sass",
+    "color",
+    "manipulation",
+    "manipulate",
+    "css",
+    "hex",
+    "rgb",
+    "hsl"
+  ],
+  "devDependencies": {
+    "benchloop": "^2.1.1",
+    "fava": "^0.2.1",
+    "tsex": "^3.0.1",
+    "typescript": "^5.1.6"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "name": "@ai-sdk/react",
+  "version": "2.0.55",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "CHANGELOG.md"
+  ],
+  "dependencies": {
+    "swr": "^2.2.5",
+    "throttleit": "2.1.0",
+    "ai": "5.0.55",
+    "@ai-sdk/provider-utils": "3.0.10"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/user-event": "^14.5.2",
+    "@testing-library/react": "^16.0.1",
+    "@types/node": "20.17.24",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "8.57.1",
+    "jsdom": "^24.0.0",
+    "msw": "2.6.4",
+    "react-dom": "^18",
+    "tsup": "^7.2.0",
+    "typescript": "5.8.3",
+    "zod": "3.25.76",
+    "@vercel/ai-tsconfig": "0.0.0",
+    "eslint-config-vercel-ai": "0.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19 || ^19.0.0-rc",
+    "zod": "^3.25.76 || ^4.1.8"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://ai-sdk.dev/docs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vercel/ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vercel/ai/issues"
+  },
+  "keywords": [
+    "ai",
+    "react"
+  ],
+  "scripts": {
+    "build": "pnpm clean && tsup --tsconfig tsconfig.build.json",
+    "build:watch": "pnpm clean && tsup --watch --tsconfig tsconfig.build.json",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "lint": "eslint \"./**/*.ts*\"",
+    "type-check": "tsc --build",
+    "prettier-check": "prettier --check \"./**/*.ts*\"",
+    "test": "vitest --config vitest.config.js --run",
+    "test:update": "vitest --config vitest.config.js --run -u",
+    "test:watch": "vitest --config vitest.config.js"
+  }
+}

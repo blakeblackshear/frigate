@@ -1,0 +1,100 @@
+{
+  "name": "cssdb",
+  "version": "8.4.2",
+  "type": "module",
+  "description": "A list of CSS features and their positions in the process of becoming implemented web standards",
+  "license": "MIT-0",
+  "contributors": [
+    {
+      "name": "Antonio Laguna",
+      "email": "antonio@laguna.es",
+      "url": "https://antonio.laguna.es"
+    },
+    {
+      "name": "Romain Menke",
+      "email": "romainmenke@gmail.com"
+    },
+    {
+      "name": "Jonathan Neal",
+      "email": "jonathantneal@hotmail.com"
+    }
+  ],
+  "funding": [
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/csstools"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/csstools"
+    }
+  ],
+  "repository": "csstools/cssdb",
+  "homepage": "https://github.com/csstools/cssdb#readme",
+  "bugs": "https://github.com/csstools/cssdb/issues",
+  "main": "cssdb.json",
+  "module": "cssdb.mjs",
+  "files": [
+    "cssdb.json",
+    "cssdb.mjs"
+  ],
+  "exports": {
+    ".": {
+      "import": "./cssdb.mjs",
+      "require": "./cssdb.json",
+      "default": "./cssdb.json"
+    }
+  },
+  "scripts": {
+    "start": "node ./tasks/preview-site.mjs",
+    "prestart": "npm run build",
+    "build": "node ./tasks/render-site.mjs",
+    "prebuild": "npm run preparesite",
+    "prepublishOnly": "npm run populatedb",
+    "populatedb": "node tasks/populate-db.mjs",
+    "create-badges": "node tasks/write-stage-badges.mjs && node tasks/write-baseline-badges.mjs",
+    "preparesite": "npm run populatedb && npm run create-badges && npm run buildcss",
+    "buildcss": "postcss src/styles/style.css -d dist/styles -m",
+    "test": "npm run test:css && npm run test:json",
+    "test:css": "stylelint src/styles/style.css",
+    "test:json": "node tasks/test.cjs",
+    "test:doc-links": "node tasks/check-doc-links.mjs"
+  },
+  "devDependencies": {
+    "@mdn/browser-compat-data": "^7.1.7",
+    "browserslist": "^4.25.4",
+    "glob": "^11.0.3",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "postcss-preset-env": "^10.3.1",
+    "semver": "^7.7.2",
+    "stylelint": "^16.24.0",
+    "stylelint-config-standard": "^39.0.0",
+    "web-features": "^2.48.1"
+  },
+  "stylelint": {
+    "extends": "stylelint-config-standard",
+    "rules": {
+      "property-no-unknown": [
+        true,
+        {
+          "ignoreProperties": [
+            "font-smoothing"
+          ]
+        }
+      ],
+      "selector-class-pattern": null,
+      "no-descending-specificity": null,
+      "value-keyword-case": null
+    }
+  },
+  "keywords": [
+    "css",
+    "features",
+    "specifications",
+    "stages"
+  ],
+  "volta": {
+    "node": "22.11.0"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "postcss-normalize-timing-functions",
+  "version": "6.0.2",
+  "description": "Normalize CSS animation/transition timing functions.",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "LICENSE-MIT",
+    "src",
+    "types"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "postcss-value-parser": "^4.2.0"
+  },
+  "author": {
+    "name": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info"
+  },
+  "repository": "cssnano/cssnano",
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "homepage": "https://github.com/cssnano/cssnano",
+  "engines": {
+    "node": "^14 || ^16 || >=18.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.4.35"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.31"
+  }
+}

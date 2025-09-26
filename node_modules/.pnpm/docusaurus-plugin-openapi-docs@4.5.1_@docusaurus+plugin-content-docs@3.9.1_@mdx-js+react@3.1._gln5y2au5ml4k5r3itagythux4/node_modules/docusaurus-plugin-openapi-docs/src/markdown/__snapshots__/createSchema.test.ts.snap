@@ -1,0 +1,1605 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createNodes additionalProperties should handle additionalProperties: {"allOf": [Array]} 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>property name*</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <div>
+        <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+          oneOf
+        </span>
+        <SchemaTabs>
+          <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"type\\"}
+              required={true}
+              schemaName={\\"string\\"}
+              qualifierMessage={\\"**Possible values:** [\`nose\`]\\"}
+              schema={{ type: \\"string\\", enum: [\\"nose\\"] }}
+            ></SchemaItem>
+          </TabItem>
+          <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"type\\"}
+              required={true}
+              schemaName={\\"string\\"}
+              qualifierMessage={\\"**Possible values:** [\`mouth\`]\\"}
+              schema={{ type: \\"string\\", enum: [\\"mouth\\"] }}
+            ></SchemaItem>
+          </TabItem>
+          <TabItem label={\\"MOD3\\"} value={\\"2-item-properties\\"}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"type\\"}
+              required={true}
+              schemaName={\\"string\\"}
+              qualifierMessage={\\"**Possible values:** [\`eyes\`]\\"}
+              schema={{ type: \\"string\\", enum: [\\"eyes\\"] }}
+            ></SchemaItem>
+            <SchemaItem
+              collapsible={false}
+              name={\\"default\\"}
+              required={false}
+              schemaName={\\"string\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"string\\" }}
+            ></SchemaItem>
+          </TabItem>
+        </SchemaTabs>
+      </div>
+      <SchemaItem
+        collapsible={false}
+        name={\\"description\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{
+          type: \\"string\\",
+          description: \\"Description of the body part.\\",
+        }}
+      ></SchemaItem>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes additionalProperties should handle additionalProperties: {"items": [Object], "type": "array"} 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>property name*</strong>
+        <span className={\\"openapi-schema__name\\"}>object[]</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <li>
+        <div
+          style={{
+            fontSize: \\"var(--ifm-code-font-size)\\",
+            opacity: \\"0.6\\",
+            marginLeft: \\"-.5rem\\",
+            paddingBottom: \\".5rem\\",
+          }}
+        >
+          Array [
+        </div>
+      </li>
+      <SchemaItem
+        collapsible={false}
+        name={\\"a\\"}
+        required={false}
+        schemaName={\\"\\"}
+        qualifierMessage={undefined}
+        schema={\\"string\\"}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"b\\"}
+        required={false}
+        schemaName={\\"\\"}
+        qualifierMessage={undefined}
+        schema={\\"number\\"}
+      ></SchemaItem>
+      <li>
+        <div
+          style={{
+            fontSize: \\"var(--ifm-code-font-size)\\",
+            opacity: \\"0.6\\",
+            marginLeft: \\"-.5rem\\",
+          }}
+        >
+          ]
+        </div>
+      </li>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes additionalProperties should handle additionalProperties: {"type": "boolean"} 1`] = `
+Array [
+  "<SchemaItem
+  name={\\"property name*\\"}
+  required={false}
+  schemaName={\\"boolean\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"boolean\\" }}
+  collapsible={false}
+  discriminator={false}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes additionalProperties should handle additionalProperties: {"type": "integer"} 1`] = `
+Array [
+  "<SchemaItem
+  name={\\"property name*\\"}
+  required={false}
+  schemaName={\\"integer\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"integer\\" }}
+  collapsible={false}
+  discriminator={false}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes additionalProperties should handle additionalProperties: {"type": "number"} 1`] = `
+Array [
+  "<SchemaItem
+  name={\\"property name*\\"}
+  required={false}
+  schemaName={\\"number\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"number\\" }}
+  collapsible={false}
+  discriminator={false}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes additionalProperties should handle additionalProperties: {"type": "string"} 1`] = `
+Array [
+  "<SchemaItem
+  name={\\"property name*\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+  collapsible={false}
+  discriminator={false}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes additionalProperties should handle additionalProperties: {} 1`] = `
+Array [
+  "<SchemaItem
+  name={\\"property name*\\"}
+  required={false}
+  schemaName={\\"any\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"object\\", additionalProperties: {} }}
+  collapsible={false}
+  discriminator={false}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes additionalProperties should handle additionalProperties: false 1`] = `Array []`;
+
+exports[`createNodes additionalProperties should handle additionalProperties: true 1`] = `
+Array [
+  "<SchemaItem
+  name={\\"property name*\\"}
+  required={false}
+  schemaName={\\"any\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"object\\", additionalProperties: true }}
+  collapsible={false}
+  discriminator={false}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes allOf should correctly deep merge properties in allOf schemas 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>deepProp</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"innerProp1\\"}
+        required={false}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"innerProp2\\"}
+        required={false}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes allOf should correctly handle shared required properties across allOf schemas 1`] = `
+Array [
+  "<SchemaItem
+  collapsible={false}
+  name={\\"sharedProp\\"}
+  required={true}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"anotherProp\\"}
+  required={true}
+  schemaName={\\"number\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"number\\" }}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes allOf should correctly merge nested properties from multiple allOf schemas 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>outerProp1</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"innerProp1\\"}
+        required={false}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </div>
+  </details>
+</SchemaItem>;
+",
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>outerProp2</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"innerProp2\\"}
+        required={false}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes allOf should render same-level properties with allOf 1`] = `
+Array [
+  "<SchemaItem
+  collapsible={false}
+  name={\\"parentProp1\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"parentProp2\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"allOfProp1\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"allOfProp2\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"parentProp1\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"parentProp2\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes anyOf should render oneOf within anyOf 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>oneOfProperty</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <div>
+        <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+          anyOf
+        </span>
+        <SchemaTabs>
+          <TabItem label={\\"An int or a bool\\"} value={\\"0-item-properties\\"}>
+            <div>
+              <span
+                className={\\"badge badge--info\\"}
+                style={{ marginBottom: \\"1rem\\" }}
+              >
+                oneOf
+              </span>
+              <SchemaTabs>
+                <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+                  <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+                    integer
+                  </div>
+                </TabItem>
+                <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+                  <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+                    boolean
+                  </div>
+                </TabItem>
+              </SchemaTabs>
+            </div>
+          </TabItem>
+          <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              string
+            </div>
+          </TabItem>
+        </SchemaTabs>
+      </div>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes anyOf should render primitives within anyOf 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>oneOfProperty</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <div>
+        <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+          anyOf
+        </span>
+        <SchemaTabs>
+          <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              integer
+            </div>
+          </TabItem>
+          <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              boolean
+            </div>
+          </TabItem>
+        </SchemaTabs>
+      </div>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle basic discriminator with mapping 1`] = `
+Array [
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propA\\"}
+        required={false}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propB\\"}
+        required={false}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<div className={\\"openapi-discriminator__item openapi-schema__list-item\\"}>
+  <div>
+    <span className={\\"openapi-schema__container\\"}>
+      <strong
+        className={\\"openapi-discriminator__name openapi-schema__property\\"}
+      >
+        type
+      </strong>
+      <span className={\\"openapi-schema__name\\"}>string</span>
+    </span>
+    <div style={{ paddingLeft: \\"1rem\\" }}>
+      **Possible values:** [\`typeA\`, \`typeB\`]
+    </div>
+    <DiscriminatorTabs className={\\"openapi-tabs__discriminator\\"}>
+      <TabItem label={\\"typeA\\"} value={\\"0-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeA
+        </div>
+      </TabItem>
+      <TabItem label={\\"typeB\\"} value={\\"1-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeB
+        </div>
+      </TabItem>
+    </DiscriminatorTabs>
+  </div>
+</div>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle basic discriminator with oneOf 1`] = `
+Array [
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propA\\"}
+        required={false}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propB\\"}
+        required={false}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"type\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle discriminator with additional properties 1`] = `
+Array [
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propA\\"}
+        required={false}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propB\\"}
+        required={false}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"type\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle discriminator with allOf 1`] = `
+Array [
+  "<SchemaItem
+  collapsible={false}
+  name={\\"type\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propA\\"}
+        required={false}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propB\\"}
+        required={false}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"sharedProp\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"type\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle discriminator with allOf and mapping 1`] = `
+Array [
+  "<div className={\\"openapi-discriminator__item openapi-schema__list-item\\"}>
+  <div>
+    <span className={\\"openapi-schema__container\\"}>
+      <strong
+        className={\\"openapi-discriminator__name openapi-schema__property\\"}
+      >
+        type
+      </strong>
+      <span className={\\"openapi-schema__name\\"}>string</span>
+    </span>
+    <div style={{ paddingLeft: \\"1rem\\" }}>
+      **Possible values:** [\`typeA\`, \`typeB\`]
+    </div>
+    <DiscriminatorTabs className={\\"openapi-tabs__discriminator\\"}>
+      <TabItem label={\\"typeA\\"} value={\\"0-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeA
+        </div>
+      </TabItem>
+      <TabItem label={\\"typeB\\"} value={\\"1-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeB
+        </div>
+      </TabItem>
+    </DiscriminatorTabs>
+  </div>
+</div>;
+",
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propA\\"}
+        required={false}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propB\\"}
+        required={false}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"sharedProp\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<div className={\\"openapi-discriminator__item openapi-schema__list-item\\"}>
+  <div>
+    <span className={\\"openapi-schema__container\\"}>
+      <strong
+        className={\\"openapi-discriminator__name openapi-schema__property\\"}
+      >
+        type
+      </strong>
+      <span className={\\"openapi-schema__name\\"}>string</span>
+    </span>
+    <div style={{ paddingLeft: \\"1rem\\" }}>
+      **Possible values:** [\`typeA\`, \`typeB\`]
+    </div>
+    <DiscriminatorTabs className={\\"openapi-tabs__discriminator\\"}>
+      <TabItem label={\\"typeA\\"} value={\\"0-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeA
+        </div>
+      </TabItem>
+      <TabItem label={\\"typeB\\"} value={\\"1-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeB
+        </div>
+      </TabItem>
+    </DiscriminatorTabs>
+  </div>
+</div>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle discriminator with nested schemas 1`] = `
+Array [
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+        <details style={{}} className={\\"openapi-markdown__details\\"}>
+          <summary style={{}}>
+            <span className={\\"openapi-schema__container\\"}>
+              <strong className={\\"openapi-schema__property\\"}>nestedA</strong>
+              <span className={\\"openapi-schema__name\\"}>object</span>
+            </span>
+          </summary>
+          <div style={{ marginLeft: \\"1rem\\" }}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"propA1\\"}
+              required={false}
+              schemaName={\\"string\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"string\\" }}
+            ></SchemaItem>
+            <SchemaItem
+              collapsible={false}
+              name={\\"propA2\\"}
+              required={false}
+              schemaName={\\"number\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"number\\" }}
+            ></SchemaItem>
+          </div>
+        </details>
+      </SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+        <details style={{}} className={\\"openapi-markdown__details\\"}>
+          <summary style={{}}>
+            <span className={\\"openapi-schema__container\\"}>
+              <strong className={\\"openapi-schema__property\\"}>nestedB</strong>
+              <span className={\\"openapi-schema__name\\"}>object</span>
+            </span>
+          </summary>
+          <div style={{ marginLeft: \\"1rem\\" }}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"propB1\\"}
+              required={false}
+              schemaName={\\"string\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"string\\" }}
+            ></SchemaItem>
+            <SchemaItem
+              collapsible={false}
+              name={\\"propB2\\"}
+              required={false}
+              schemaName={\\"boolean\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"boolean\\" }}
+            ></SchemaItem>
+          </div>
+        </details>
+      </SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"type\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle discriminator with required properties 1`] = `
+Array [
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propA\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propB\\"}
+        required={true}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"type\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle discriminator with required properties and mapping 1`] = `
+Array [
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propA\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propB\\"}
+        required={true}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<div className={\\"openapi-discriminator__item openapi-schema__list-item\\"}>
+  <div>
+    <span className={\\"openapi-schema__container\\"}>
+      <strong
+        className={\\"openapi-discriminator__name openapi-schema__property\\"}
+      >
+        type
+      </strong>
+      <span className={\\"openapi-schema__name\\"}>string</span>
+    </span>
+    <div style={{ paddingLeft: \\"1rem\\" }}>
+      **Possible values:** [\`typeA\`, \`typeB\`]
+    </div>
+    <DiscriminatorTabs className={\\"openapi-tabs__discriminator\\"}>
+      <TabItem label={\\"typeA\\"} value={\\"0-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeA
+        </div>
+      </TabItem>
+      <TabItem label={\\"typeB\\"} value={\\"1-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeB
+        </div>
+      </TabItem>
+    </DiscriminatorTabs>
+  </div>
+</div>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle discriminator with shared properties 1`] = `
+Array [
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propA\\"}
+        required={false}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propB\\"}
+        required={false}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"type\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"sharedProp\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes discriminator should handle discriminator with shared properties and mapping 1`] = `
+Array [
+  "<div>
+  <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+    oneOf
+  </span>
+  <SchemaTabs>
+    <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeA\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeA\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propA\\"}
+        required={false}
+        schemaName={\\"string\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"string\\" }}
+      ></SchemaItem>
+    </TabItem>
+    <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+      <SchemaItem
+        collapsible={false}
+        name={\\"type\\"}
+        required={true}
+        schemaName={\\"string\\"}
+        qualifierMessage={\\"**Possible values:** [\`typeB\`]\\"}
+        schema={{ type: \\"string\\", enum: [\\"typeB\\"] }}
+      ></SchemaItem>
+      <SchemaItem
+        collapsible={false}
+        name={\\"propB\\"}
+        required={false}
+        schemaName={\\"number\\"}
+        qualifierMessage={undefined}
+        schema={{ type: \\"number\\" }}
+      ></SchemaItem>
+    </TabItem>
+  </SchemaTabs>
+</div>;
+",
+  "<div className={\\"openapi-discriminator__item openapi-schema__list-item\\"}>
+  <div>
+    <span className={\\"openapi-schema__container\\"}>
+      <strong
+        className={\\"openapi-discriminator__name openapi-schema__property\\"}
+      >
+        type
+      </strong>
+      <span className={\\"openapi-schema__name\\"}>string</span>
+    </span>
+    <div style={{ paddingLeft: \\"1rem\\" }}>
+      **Possible values:** [\`typeA\`, \`typeB\`]
+    </div>
+    <DiscriminatorTabs className={\\"openapi-tabs__discriminator\\"}>
+      <TabItem label={\\"typeA\\"} value={\\"0-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeA
+        </div>
+      </TabItem>
+      <TabItem label={\\"typeB\\"} value={\\"1-item-discriminator\\"}>
+        <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+          #/definitions/TypeB
+        </div>
+      </TabItem>
+    </DiscriminatorTabs>
+  </div>
+</div>;
+",
+  "<SchemaItem
+  collapsible={false}
+  name={\\"sharedProp\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes oneOf should create readable MODs for oneOf primitive properties 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>oneOfProperty</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <div>
+        <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+          oneOf
+        </span>
+        <SchemaTabs>
+          <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+            <div
+              style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}
+              className={\\"openapi-schema__summary\\"}
+            >
+              Clown's nose length
+            </div>
+            <SchemaItem
+              collapsible={false}
+              name={\\"noseLength\\"}
+              required={true}
+              schemaName={\\"number\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"number\\" }}
+            ></SchemaItem>
+          </TabItem>
+          <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+            <div
+              style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}
+              className={\\"openapi-schema__summary\\"}
+            >
+              Array of strings
+            </div>
+            <li>
+              <div
+                style={{
+                  fontSize: \\"var(--ifm-code-font-size)\\",
+                  opacity: \\"0.6\\",
+                  marginLeft: \\"-.5rem\\",
+                  paddingBottom: \\".5rem\\",
+                }}
+              >
+                Array [
+              </div>
+            </li>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              string
+            </div>
+            <li>
+              <div
+                style={{
+                  fontSize: \\"var(--ifm-code-font-size)\\",
+                  opacity: \\"0.6\\",
+                  marginLeft: \\"-.5rem\\",
+                }}
+              >
+                ]
+              </div>
+            </li>
+          </TabItem>
+          <TabItem label={\\"MOD3\\"} value={\\"2-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              boolean
+            </div>
+          </TabItem>
+          <TabItem label={\\"MOD4\\"} value={\\"3-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              number
+            </div>
+          </TabItem>
+          <TabItem label={\\"MOD5\\"} value={\\"4-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              string
+            </div>
+          </TabItem>
+        </SchemaTabs>
+      </div>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes oneOf should handle nested oneOf clauses 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>oneOfProperty</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <div>
+        <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+          oneOf
+        </span>
+        <SchemaTabs>
+          <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+            <SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+              <details style={{}} className={\\"openapi-markdown__details\\"}>
+                <summary style={{}}>
+                  <span className={\\"openapi-schema__container\\"}>
+                    <strong className={\\"openapi-schema__property\\"}>
+                      nestedOneOfProp
+                    </strong>
+                    <span className={\\"openapi-schema__name\\"}>object</span>
+                  </span>
+                </summary>
+                <div style={{ marginLeft: \\"1rem\\" }}>
+                  <div>
+                    <span
+                      className={\\"badge badge--info\\"}
+                      style={{ marginBottom: \\"1rem\\" }}
+                    >
+                      oneOf
+                    </span>
+                    <SchemaTabs>
+                      <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+                        <div
+                          style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}
+                        >
+                          string
+                        </div>
+                      </TabItem>
+                      <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+                        <div
+                          style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}
+                        >
+                          number
+                        </div>
+                      </TabItem>
+                    </SchemaTabs>
+                  </div>
+                </div>
+              </details>
+            </SchemaItem>
+          </TabItem>
+          <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              boolean
+            </div>
+          </TabItem>
+        </SchemaTabs>
+      </div>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes oneOf should handle oneOf with complex types 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>oneOfProperty</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <div>
+        <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+          oneOf
+        </span>
+        <SchemaTabs>
+          <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"objectProp\\"}
+              required={false}
+              schemaName={\\"string\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"string\\" }}
+            ></SchemaItem>
+          </TabItem>
+          <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+            <li>
+              <div
+                style={{
+                  fontSize: \\"var(--ifm-code-font-size)\\",
+                  opacity: \\"0.6\\",
+                  marginLeft: \\"-.5rem\\",
+                  paddingBottom: \\".5rem\\",
+                }}
+              >
+                Array [
+              </div>
+            </li>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              number
+            </div>
+            <li>
+              <div
+                style={{
+                  fontSize: \\"var(--ifm-code-font-size)\\",
+                  opacity: \\"0.6\\",
+                  marginLeft: \\"-.5rem\\",
+                }}
+              >
+                ]
+              </div>
+            </li>
+          </TabItem>
+        </SchemaTabs>
+      </div>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes oneOf should handle oneOf with different primitive types 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>oneOfProperty</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <div>
+        <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+          oneOf
+        </span>
+        <SchemaTabs>
+          <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              string
+            </div>
+          </TabItem>
+          <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              number
+            </div>
+          </TabItem>
+          <TabItem label={\\"MOD3\\"} value={\\"2-item-properties\\"}>
+            <div style={{ marginTop: \\".5rem\\", marginBottom: \\".5rem\\" }}>
+              boolean
+            </div>
+          </TabItem>
+        </SchemaTabs>
+      </div>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes oneOf should handle oneOf with required properties 1`] = `
+Array [
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>oneOfProperty</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <div>
+        <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+          oneOf
+        </span>
+        <SchemaTabs>
+          <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"requiredPropA\\"}
+              required={true}
+              schemaName={\\"string\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"string\\" }}
+            ></SchemaItem>
+          </TabItem>
+          <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"requiredPropB\\"}
+              required={true}
+              schemaName={\\"number\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"number\\" }}
+            ></SchemaItem>
+          </TabItem>
+        </SchemaTabs>
+      </div>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;
+
+exports[`createNodes oneOf should handle oneOf with shared properties 1`] = `
+Array [
+  "<SchemaItem
+  collapsible={false}
+  name={\\"sharedProp\\"}
+  required={false}
+  schemaName={\\"string\\"}
+  qualifierMessage={undefined}
+  schema={{ type: \\"string\\" }}
+></SchemaItem>;
+",
+  "<SchemaItem collapsible={true} className={\\"schemaItem\\"}>
+  <details style={{}} className={\\"openapi-markdown__details\\"}>
+    <summary style={{}}>
+      <span className={\\"openapi-schema__container\\"}>
+        <strong className={\\"openapi-schema__property\\"}>oneOfProperty</strong>
+        <span className={\\"openapi-schema__name\\"}>object</span>
+      </span>
+    </summary>
+    <div style={{ marginLeft: \\"1rem\\" }}>
+      <div>
+        <span className={\\"badge badge--info\\"} style={{ marginBottom: \\"1rem\\" }}>
+          oneOf
+        </span>
+        <SchemaTabs>
+          <TabItem label={\\"MOD1\\"} value={\\"0-item-properties\\"}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"specificPropA\\"}
+              required={false}
+              schemaName={\\"string\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"string\\" }}
+            ></SchemaItem>
+          </TabItem>
+          <TabItem label={\\"MOD2\\"} value={\\"1-item-properties\\"}>
+            <SchemaItem
+              collapsible={false}
+              name={\\"specificPropB\\"}
+              required={false}
+              schemaName={\\"number\\"}
+              qualifierMessage={undefined}
+              schema={{ type: \\"number\\" }}
+            ></SchemaItem>
+          </TabItem>
+        </SchemaTabs>
+      </div>
+    </div>
+  </details>
+</SchemaItem>;
+",
+]
+`;

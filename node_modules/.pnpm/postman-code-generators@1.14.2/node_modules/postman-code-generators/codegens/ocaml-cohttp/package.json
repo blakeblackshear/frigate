@@ -1,0 +1,33 @@
+{
+  "name": "@postman/codegen-ocaml-cohttp",
+  "version": "0.0.1",
+  "description": "Converts Postman SDK Requests to ocaml code snippet",
+  "main": "index.js",
+  "com_postman_plugin": {
+    "type": "code_generator",
+    "lang": "ocaml",
+    "variant": "Cohttp",
+    "syntax_mode": "ocaml"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node npm/test.js",
+    "test-lint": "node npm/test-lint.js",
+    "test-unit": "node npm/test-unit.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Postman Labs <help@getpostman.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/postmanlabs/code-generators/tree/master/codegens/ocaml-cohttp",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=8"
+  }
+}

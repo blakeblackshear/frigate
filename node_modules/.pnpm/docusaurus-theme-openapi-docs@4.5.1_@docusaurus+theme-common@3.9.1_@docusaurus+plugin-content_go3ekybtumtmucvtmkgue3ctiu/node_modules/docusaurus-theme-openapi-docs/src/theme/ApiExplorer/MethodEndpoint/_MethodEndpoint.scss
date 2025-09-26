@@ -1,0 +1,22 @@
+.openapi__method-endpoint {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  width: fit-content;
+  padding: 0.65rem;
+  border: 1px solid var(--ifm-toc-border-color);
+}
+
+.openapi__method-endpoint-path {
+  margin-bottom: 0;
+  margin-left: 0.5rem;
+  font-size: 12px;
+  font-weight: normal;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.openapi__divider {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}

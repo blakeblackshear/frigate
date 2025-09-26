@@ -1,0 +1,1 @@
+{"version":3,"file":"lang_extensions.js","sourceRoot":"","sources":["../../../src/lang/lang_extensions.ts"],"names":[],"mappings":"AAAA,MAAM,IAAI,GAAG,MAAM,CAAC;AAEpB,MAAM,UAAU,cAAc,CAAC,GAAO,EAAE,SAAiB;IACvD,MAAM,CAAC,cAAc,CAAC,GAAG,EAAE,IAAI,EAAE;QAC/B,UAAU,EAAE,KAAK;QACjB,YAAY,EAAE,IAAI;QAClB,QAAQ,EAAE,KAAK;QACf,KAAK,EAAE,SAAS;KACjB,CAAC,CAAC;AACL,CAAC"}

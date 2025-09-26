@@ -1,0 +1,225 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`typeschemaResolver > should return a single error from typeschemaResolver when validation fails 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "Invalid input",
+      "ref": undefined,
+      "type": "",
+    },
+    "birthYear": {
+      "message": "Expected number, received string",
+      "ref": undefined,
+      "type": "",
+    },
+    "dateStr": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "",
+    },
+    "email": {
+      "message": "Invalid email",
+      "ref": {
+        "name": "email",
+      },
+      "type": "",
+    },
+    "enabled": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "",
+    },
+    "like": [
+      {
+        "id": {
+          "message": "Expected number, received string",
+          "ref": undefined,
+          "type": "",
+        },
+        "name": {
+          "message": "Required",
+          "ref": undefined,
+          "type": "",
+        },
+      },
+    ],
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "",
+    },
+    "repeatPassword": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "",
+    },
+    "tags": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "",
+    },
+    "url": {
+      "message": "Custom error url",
+      "ref": undefined,
+      "type": "",
+    },
+    "username": {
+      "message": "Required",
+      "ref": {
+        "name": "username",
+      },
+      "type": "",
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`typeschemaResolver > should return all the errors from typeschemaResolver when validation fails with \`validateAllFieldCriteria\` set to true 1`] = `
+{
+  "errors": {
+    "accessToken": {
+      "message": "Invalid input",
+      "ref": undefined,
+      "type": "",
+      "types": {
+        "": "Invalid input",
+      },
+    },
+    "birthYear": {
+      "message": "Expected number, received string",
+      "ref": undefined,
+      "type": "",
+      "types": {
+        "": "Expected number, received string",
+      },
+    },
+    "dateStr": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "",
+      "types": {
+        "": "Required",
+      },
+    },
+    "email": {
+      "message": "Invalid email",
+      "ref": {
+        "name": "email",
+      },
+      "type": "",
+      "types": {
+        "": "Invalid email",
+      },
+    },
+    "enabled": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "",
+      "types": {
+        "": "Required",
+      },
+    },
+    "like": [
+      {
+        "id": {
+          "message": "Expected number, received string",
+          "ref": undefined,
+          "type": "",
+          "types": {
+            "": "Expected number, received string",
+          },
+        },
+        "name": {
+          "message": "Required",
+          "ref": undefined,
+          "type": "",
+          "types": {
+            "": "Required",
+          },
+        },
+      },
+    ],
+    "password": {
+      "message": "One uppercase character",
+      "ref": {
+        "name": "password",
+      },
+      "type": "",
+      "types": {
+        "": [
+          "One uppercase character",
+          "One lowercase character",
+          "One number",
+          "Must be at least 8 characters in length",
+        ],
+      },
+    },
+    "repeatPassword": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "",
+      "types": {
+        "": "Required",
+      },
+    },
+    "tags": {
+      "message": "Required",
+      "ref": undefined,
+      "type": "",
+      "types": {
+        "": "Required",
+      },
+    },
+    "url": {
+      "message": "Custom error url",
+      "ref": undefined,
+      "type": "",
+      "types": {
+        "": "Custom error url",
+      },
+    },
+    "username": {
+      "message": "Required",
+      "ref": {
+        "name": "username",
+      },
+      "type": "",
+      "types": {
+        "": "Required",
+      },
+    },
+  },
+  "values": {},
+}
+`;
+
+exports[`typeschemaResolver > should return parsed values from typeschemaResolver when validation pass 1`] = `
+{
+  "errors": {},
+  "values": {
+    "accessToken": "accessToken",
+    "birthYear": 2000,
+    "dateStr": 2020-01-01T00:00:00.000Z,
+    "email": "john@doe.com",
+    "enabled": true,
+    "like": [
+      {
+        "id": 1,
+        "name": "name",
+      },
+    ],
+    "password": "Password123_",
+    "repeatPassword": "Password123_",
+    "tags": [
+      "tag1",
+      "tag2",
+    ],
+    "url": "https://react-hook-form.com/",
+    "username": "Doe",
+  },
+}
+`;

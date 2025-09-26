@@ -1,0 +1,43 @@
+{
+  "name": "postcss-minify-selectors",
+  "version": "6.0.4",
+  "description": "Minify selectors with PostCSS.",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "src",
+    "LICENSE-MIT",
+    "types"
+  ],
+  "keywords": [
+    "css",
+    "minify",
+    "optimise",
+    "postcss",
+    "postcss-plugin",
+    "selectors"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/cssnano/cssnano",
+  "author": {
+    "name": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info"
+  },
+  "repository": "cssnano/cssnano",
+  "dependencies": {
+    "postcss-selector-parser": "^6.0.16"
+  },
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "engines": {
+    "node": "^14 || ^16 || >=18.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.4.37"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.31"
+  }
+}

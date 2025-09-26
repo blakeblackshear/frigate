@@ -1,0 +1,36 @@
+import type { IWriter, IWriterGrowable } from '@jsonjoy.com/buffers/lib';
+import type { BinaryJsonEncoder, StreamingBinaryJsonEncoder } from '../types';
+export declare class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncoder {
+    readonly writer: IWriter & IWriterGrowable;
+    constructor(writer: IWriter & IWriterGrowable);
+    encode(value: unknown): Uint8Array;
+    writeUnknown(value: unknown): void;
+    writeAny(value: unknown): void;
+    writeNull(): void;
+    writeUndef(): void;
+    writeBoolean(bool: boolean): void;
+    writeNumber(num: number): void;
+    writeInteger(int: number): void;
+    writeUInteger(uint: number): void;
+    writeFloat(float: number): void;
+    writeBin(buf: Uint8Array): void;
+    writeStr(str: string): void;
+    writeAsciiStr(str: string): void;
+    writeArr(arr: unknown[]): void;
+    writeArrSeparator(): void;
+    writeObj(obj: Record<string, unknown>): void;
+    writeObjSeparator(): void;
+    writeObjKeySeparator(): void;
+    writeStartStr(): void;
+    writeStrChunk(str: string): void;
+    writeEndStr(): void;
+    writeStartBin(): void;
+    writeBinChunk(buf: Uint8Array): void;
+    writeEndBin(): void;
+    writeStartArr(): void;
+    writeArrChunk(item: unknown): void;
+    writeEndArr(): void;
+    writeStartObj(): void;
+    writeObjChunk(key: string, value: unknown): void;
+    writeEndObj(): void;
+}

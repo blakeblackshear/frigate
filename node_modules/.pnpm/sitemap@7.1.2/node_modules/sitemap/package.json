@@ -1,0 +1,190 @@
+{
+  "name": "sitemap",
+  "version": "7.1.2",
+  "description": "Sitemap-generating lib/cli",
+  "keywords": [
+    "sitemap",
+    "sitemap.xml"
+  ],
+  "homepage": "https://github.com/ekalinin/sitemap.js#readme",
+  "bugs": {
+    "url": "https://github.com/ekalinin/sitemap.js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ekalinin/sitemap.js.git"
+  },
+  "license": "MIT",
+  "author": "Eugene Kalinin <e.v.kalinin@gmail.com>",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": "./dist/cli.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "husky install",
+    "prepublishOnly": "rm -rf dist && npm run test",
+    "test": "eslint lib/* ./cli.ts && tsc && jest ./tests/sitemap*",
+    "test:full": "eslint lib/* ./cli.ts && tsc && jest && npm run test:xmllint",
+    "test:perf": "node ./tests/perf.js",
+    "test:schema": "node tests/alltags.js | xmllint --schema schema/all.xsd --noout -",
+    "test:typecheck": "tsc",
+    "test:xmllint": "if which xmllint; then npm run test:schema; else echo 'skipping xml tests. xmllint not installed'; fi"
+  },
+  "lint-staged": {
+    "package.json": [
+      "sort-package-json"
+    ],
+    "{lib,tests}/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "eslintConfig": {
+    "env": {
+      "es6": true,
+      "jest": true,
+      "node": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "module"
+    },
+    "plugins": [
+      "jest",
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier",
+      "plugin:prettier/recommended"
+    ],
+    "rules": {
+      "indent": "off",
+      "lines-between-class-members": [
+        "error",
+        "always",
+        {
+          "exceptAfterSingleLine": true
+        }
+      ],
+      "no-case-declarations": 0,
+      "no-console": 0,
+      "no-dupe-class-members": "off",
+      "no-unused-vars": 0,
+      "padding-line-between-statements": [
+        "error",
+        {
+          "blankLine": "always",
+          "prev": "multiline-expression",
+          "next": "multiline-expression"
+        }
+      ],
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        {
+          "ts-expect-error": "allow-with-description"
+        }
+      ],
+      "@typescript-eslint/explicit-member-accessibility": "off",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "default",
+          "format": null
+        },
+        {
+          "selector": "interface",
+          "prefix": [],
+          "format": null
+        }
+      ],
+      "@typescript-eslint/no-parameter-properties": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "args": "none"
+        }
+      ]
+    },
+    "overrides": [
+      {
+        "files": [
+          "*.js"
+        ],
+        "rules": {
+          "@typescript-eslint/explicit-function-return-type": [
+            "off"
+          ],
+          "@typescript-eslint/no-var-requires": [
+            "off"
+          ]
+        }
+      }
+    ]
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "lib/**/*.ts",
+      "!lib/**/*.d.ts",
+      "!lib/xmllint.ts",
+      "!node_modules/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 90,
+        "lines": 90,
+        "statements": 90
+      }
+    }
+  },
+  "dependencies": {
+    "@types/node": "^17.0.5",
+    "@types/sax": "^1.2.1",
+    "arg": "^5.0.0",
+    "sax": "^1.2.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.13.8",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.12",
+    "@babel/plugin-transform-typescript": "^7.13.0",
+    "@babel/preset-env": "^7.14.0",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/jest": "^27.4.0",
+    "@types/memorystream": "^0.3.0",
+    "@typescript-eslint/eslint-plugin": "^5.8.1",
+    "@typescript-eslint/parser": "^5.8.1",
+    "babel-eslint": "^10.1.0",
+    "babel-polyfill": "^6.26.0",
+    "eslint": "^8.5.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jest": "^25.3.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "express": "^4.17.1",
+    "husky": "^7.0.0",
+    "jest": "^27.4.5",
+    "lint-staged": "^12.1.4",
+    "memorystream": "^0.3.1",
+    "prettier": "^2.2.1",
+    "sort-package-json": "^1.49.0",
+    "source-map": "~0.7.3",
+    "stats-lite": "^2.2.0",
+    "stream-json": "^1.7.1",
+    "through2-map": "^3.0.0",
+    "typescript": "^4.2.4"
+  },
+  "engines": {
+    "node": ">=12.0.0",
+    "npm": ">=5.6.0"
+  }
+}

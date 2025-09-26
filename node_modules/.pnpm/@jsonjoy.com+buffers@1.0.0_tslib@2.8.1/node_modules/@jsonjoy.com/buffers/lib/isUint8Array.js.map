@@ -1,0 +1,1 @@
+{"version":3,"file":"isUint8Array.js","sourceRoot":"","sources":["../src/isUint8Array.ts"],"names":[],"mappings":";;;AAAa,QAAA,YAAY,GACvB,OAAO,MAAM,KAAK,UAAU;IAC1B,CAAC,CAAC,CAAC,CAAU,EAAmB,EAAE,CAAC,CAAC,YAAY,UAAU,IAAI,MAAM,CAAC,QAAQ,CAAC,CAAC,CAAC;IAChF,CAAC,CAAC,CAAC,CAAU,EAAmB,EAAE,CAAC,CAAC,YAAY,UAAU,CAAC"}

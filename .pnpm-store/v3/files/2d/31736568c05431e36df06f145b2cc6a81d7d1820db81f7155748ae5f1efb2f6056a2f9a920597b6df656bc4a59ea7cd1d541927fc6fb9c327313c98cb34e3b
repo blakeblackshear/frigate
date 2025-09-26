@@ -1,0 +1,41 @@
+{
+  "name": "cssnano-preset-advanced",
+  "version": "6.1.2",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "description": "Advanced optimisations for cssnano; may or may not break your CSS!",
+  "files": [
+    "LICENSE-MIT",
+    "src",
+    "types"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "autoprefixer": "^10.4.19",
+    "browserslist": "^4.23.0",
+    "cssnano-preset-default": "^6.1.2",
+    "postcss-discard-unused": "^6.0.5",
+    "postcss-merge-idents": "^6.0.3",
+    "postcss-reduce-idents": "^6.0.3",
+    "postcss-zindex": "^6.0.2"
+  },
+  "author": {
+    "name": "Ben Briggs",
+    "email": "beneb.info@gmail.com",
+    "url": "http://beneb.info"
+  },
+  "repository": "cssnano/cssnano",
+  "homepage": "https://github.com/cssnano/cssnano",
+  "bugs": {
+    "url": "https://github.com/cssnano/cssnano/issues"
+  },
+  "engines": {
+    "node": "^14 || ^16 || >=18.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.4.38"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.31"
+  }
+}

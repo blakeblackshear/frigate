@@ -1,0 +1,44 @@
+.theme-code-block:hover {
+  .openapi-explorer__code-block-copy-btn--copied {
+    opacity: 1 !important;
+  }
+}
+
+.openapi-explorer__code-block-copy-btn-icons {
+  position: relative;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.openapi-explorer__code-block-copy-btn-icon,
+.openapi-explorer__code-block-copy-btn-icon--success {
+  position: absolute;
+  top: 0;
+  left: 0;
+  fill: currentColor;
+  opacity: inherit;
+  width: inherit;
+  height: inherit;
+  transition: all 0.15s ease;
+}
+
+.openapi-explorer__code-block-copy-btn-icon--success {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.33);
+  opacity: 0;
+  color: #00d600;
+}
+
+.openapi-explorer__code-block-copy-btn--copied {
+  .openapi-explorer__code-block-copy-btn-icon {
+    transform: scale(0.33);
+    opacity: 0;
+  }
+
+  .openapi-explorer__code-block-copy-btn-icon--success {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    transition-delay: 0.075s;
+  }
+}

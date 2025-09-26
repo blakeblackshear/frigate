@@ -1,0 +1,467 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`arktypeResolver > should return a single error from arktypeResolver when validation fails 1`] = `
+{
+  "errors": {
+    "accessToken": ArkError {
+      "code": "required",
+      "data": {
+        "birthYear": "birthYear",
+        "email": "",
+        "like": [
+          {
+            "id": "z",
+          },
+        ],
+        "password": "___",
+        "url": "abc",
+      },
+      "input": {
+        "code": "required",
+        "missingValueDescription": "a number or a string",
+        "relativePath": [
+          "accessToken",
+        ],
+      },
+      "missingValueDescription": "a number or a string",
+      "nodeConfig": {
+        "actual": [Function],
+        "description": [Function],
+        "expected": [Function],
+        "message": [Function],
+        "problem": [Function],
+      },
+      "path": [
+        "accessToken",
+      ],
+      "ref": undefined,
+      "relativePath": [
+        "accessToken",
+      ],
+      "type": "required",
+      Symbol(ArkTypeInternalKind): "error",
+    },
+    "birthYear": ArkError {
+      "code": "domain",
+      "data": "birthYear",
+      "description": "a number",
+      "domain": "number",
+      "input": {
+        "code": "domain",
+        "description": "a number",
+        "domain": "number",
+      },
+      "nodeConfig": {
+        "actual": [Function],
+        "description": [Function],
+        "expected": [Function],
+        "message": [Function],
+        "problem": [Function],
+      },
+      "path": [
+        "birthYear",
+      ],
+      "ref": undefined,
+      "type": "domain",
+      Symbol(ArkTypeInternalKind): "error",
+    },
+    "dateStr": ArkError {
+      "code": "required",
+      "data": {
+        "birthYear": "birthYear",
+        "email": "",
+        "like": [
+          {
+            "id": "z",
+          },
+        ],
+        "password": "___",
+        "url": "abc",
+      },
+      "input": {
+        "code": "required",
+        "missingValueDescription": "a Date",
+        "relativePath": [
+          "dateStr",
+        ],
+      },
+      "missingValueDescription": "a Date",
+      "nodeConfig": {
+        "actual": [Function],
+        "description": [Function],
+        "expected": [Function],
+        "message": [Function],
+        "problem": [Function],
+      },
+      "path": [
+        "dateStr",
+      ],
+      "ref": undefined,
+      "relativePath": [
+        "dateStr",
+      ],
+      "type": "required",
+      Symbol(ArkTypeInternalKind): "error",
+    },
+    "email": ArkError {
+      "code": "pattern",
+      "data": "",
+      "description": "a valid email",
+      "flags": "",
+      "input": {
+        "code": "pattern",
+        "description": "a valid email",
+        "flags": "",
+        "rule": "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+      },
+      "nodeConfig": {
+        "actual": [Function],
+        "description": [Function],
+        "expected": [Function],
+        "message": [Function],
+        "problem": [Function],
+      },
+      "path": [
+        "email",
+      ],
+      "ref": {
+        "name": "email",
+      },
+      "rule": "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+      "type": "pattern",
+      Symbol(ArkTypeInternalKind): "error",
+    },
+    "enabled": ArkError {
+      "code": "required",
+      "data": {
+        "birthYear": "birthYear",
+        "email": "",
+        "like": [
+          {
+            "id": "z",
+          },
+        ],
+        "password": "___",
+        "url": "abc",
+      },
+      "input": {
+        "code": "required",
+        "missingValueDescription": "boolean",
+        "relativePath": [
+          "enabled",
+        ],
+      },
+      "missingValueDescription": "boolean",
+      "nodeConfig": {
+        "actual": [Function],
+        "description": [Function],
+        "expected": [Function],
+        "message": [Function],
+        "problem": [Function],
+      },
+      "path": [
+        "enabled",
+      ],
+      "ref": undefined,
+      "relativePath": [
+        "enabled",
+      ],
+      "type": "required",
+      Symbol(ArkTypeInternalKind): "error",
+    },
+    "like": [
+      {
+        "id": ArkError {
+          "code": "domain",
+          "data": "z",
+          "description": "a number",
+          "domain": "number",
+          "input": {
+            "code": "domain",
+            "description": "a number",
+            "domain": "number",
+          },
+          "nodeConfig": {
+            "actual": [Function],
+            "description": [Function],
+            "expected": [Function],
+            "message": [Function],
+            "problem": [Function],
+          },
+          "path": [
+            "like",
+            0,
+            "id",
+          ],
+          "ref": undefined,
+          "type": "domain",
+          Symbol(ArkTypeInternalKind): "error",
+        },
+        "name": ArkError {
+          "code": "required",
+          "data": {
+            "id": "z",
+          },
+          "input": {
+            "code": "required",
+            "missingValueDescription": "a string",
+            "relativePath": [
+              "name",
+            ],
+          },
+          "missingValueDescription": "a string",
+          "nodeConfig": {
+            "actual": [Function],
+            "description": [Function],
+            "expected": [Function],
+            "message": [Function],
+            "problem": [Function],
+          },
+          "path": [
+            "like",
+            0,
+            "name",
+          ],
+          "ref": undefined,
+          "relativePath": [
+            "name",
+          ],
+          "type": "required",
+          Symbol(ArkTypeInternalKind): "error",
+        },
+      },
+    ],
+    "password": ArkError {
+      "code": "union",
+      "data": "___",
+      "errors": [
+        ArkError {
+          "code": "pattern",
+          "data": "___",
+          "description": "matched by .*[A-Za-z].*",
+          "input": {
+            "code": "pattern",
+            "description": "matched by .*[A-Za-z].*",
+            "rule": ".*[A-Za-z].*",
+          },
+          "nodeConfig": {
+            "actual": [Function],
+            "description": [Function],
+            "expected": [Function],
+            "message": [Function],
+            "problem": [Function],
+          },
+          "path": [
+            "password",
+          ],
+          "rule": ".*[A-Za-z].*",
+          Symbol(ArkTypeInternalKind): "error",
+        },
+        ArkError {
+          "code": "pattern",
+          "data": "___",
+          "description": "matched by .*\\d.*",
+          "input": {
+            "code": "pattern",
+            "description": "matched by .*\\d.*",
+            "rule": ".*\\d.*",
+          },
+          "nodeConfig": {
+            "actual": [Function],
+            "description": [Function],
+            "expected": [Function],
+            "message": [Function],
+            "problem": [Function],
+          },
+          "path": [
+            "password",
+          ],
+          "rule": ".*\\d.*",
+          Symbol(ArkTypeInternalKind): "error",
+        },
+      ],
+      "input": {
+        "code": "union",
+        "errors": [
+          ArkError {
+            "code": "pattern",
+            "data": "___",
+            "description": "matched by .*[A-Za-z].*",
+            "input": {
+              "code": "pattern",
+              "description": "matched by .*[A-Za-z].*",
+              "rule": ".*[A-Za-z].*",
+            },
+            "nodeConfig": {
+              "actual": [Function],
+              "description": [Function],
+              "expected": [Function],
+              "message": [Function],
+              "problem": [Function],
+            },
+            "path": [
+              "password",
+            ],
+            "rule": ".*[A-Za-z].*",
+            Symbol(ArkTypeInternalKind): "error",
+          },
+          ArkError {
+            "code": "pattern",
+            "data": "___",
+            "description": "matched by .*\\d.*",
+            "input": {
+              "code": "pattern",
+              "description": "matched by .*\\d.*",
+              "rule": ".*\\d.*",
+            },
+            "nodeConfig": {
+              "actual": [Function],
+              "description": [Function],
+              "expected": [Function],
+              "message": [Function],
+              "problem": [Function],
+            },
+            "path": [
+              "password",
+            ],
+            "rule": ".*\\d.*",
+            Symbol(ArkTypeInternalKind): "error",
+          },
+        ],
+      },
+      "nodeConfig": {
+        "actual": [Function],
+        "description": [Function],
+        "expected": [Function],
+        "message": [Function],
+        "problem": [Function],
+      },
+      "path": [
+        "password",
+      ],
+      "ref": {
+        "name": "password",
+      },
+      "type": "union",
+      Symbol(ArkTypeInternalKind): "error",
+    },
+    "repeatPassword": ArkError {
+      "code": "required",
+      "data": {
+        "birthYear": "birthYear",
+        "email": "",
+        "like": [
+          {
+            "id": "z",
+          },
+        ],
+        "password": "___",
+        "url": "abc",
+      },
+      "input": {
+        "code": "required",
+        "missingValueDescription": "a string",
+        "relativePath": [
+          "repeatPassword",
+        ],
+      },
+      "missingValueDescription": "a string",
+      "nodeConfig": {
+        "actual": [Function],
+        "description": [Function],
+        "expected": [Function],
+        "message": [Function],
+        "problem": [Function],
+      },
+      "path": [
+        "repeatPassword",
+      ],
+      "ref": undefined,
+      "relativePath": [
+        "repeatPassword",
+      ],
+      "type": "required",
+      Symbol(ArkTypeInternalKind): "error",
+    },
+    "tags": ArkError {
+      "code": "required",
+      "data": {
+        "birthYear": "birthYear",
+        "email": "",
+        "like": [
+          {
+            "id": "z",
+          },
+        ],
+        "password": "___",
+        "url": "abc",
+      },
+      "input": {
+        "code": "required",
+        "missingValueDescription": "an array",
+        "relativePath": [
+          "tags",
+        ],
+      },
+      "missingValueDescription": "an array",
+      "nodeConfig": {
+        "actual": [Function],
+        "description": [Function],
+        "expected": [Function],
+        "message": [Function],
+        "problem": [Function],
+      },
+      "path": [
+        "tags",
+      ],
+      "ref": undefined,
+      "relativePath": [
+        "tags",
+      ],
+      "type": "required",
+      Symbol(ArkTypeInternalKind): "error",
+    },
+    "username": ArkError {
+      "code": "required",
+      "data": {
+        "birthYear": "birthYear",
+        "email": "",
+        "like": [
+          {
+            "id": "z",
+          },
+        ],
+        "password": "___",
+        "url": "abc",
+      },
+      "input": {
+        "code": "required",
+        "missingValueDescription": "a string",
+        "relativePath": [
+          "username",
+        ],
+      },
+      "missingValueDescription": "a string",
+      "nodeConfig": {
+        "actual": [Function],
+        "description": [Function],
+        "expected": [Function],
+        "message": [Function],
+        "problem": [Function],
+      },
+      "path": [
+        "username",
+      ],
+      "ref": {
+        "name": "username",
+      },
+      "relativePath": [
+        "username",
+      ],
+      "type": "required",
+      Symbol(ArkTypeInternalKind): "error",
+    },
+  },
+  "values": {},
+}
+`;
