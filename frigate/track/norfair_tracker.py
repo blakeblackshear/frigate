@@ -330,7 +330,6 @@ class NorfairTracker(ObjectTracker):
         stationary: bool,
         yuv_frame: np.ndarray | None,
     ) -> bool:
-
         def reset_position(xmin: int, ymin: int, xmax: int, ymax: int) -> None:
             self.positions[id] = {
                 "xmins": [xmin],
