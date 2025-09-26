@@ -1,19 +1,18 @@
-import os
 import logging
-
-from typing_extensions import Literal
+import os
 
 import numpy as np
 from synap import Network
-from synap.types import Shape, Layout
-from synap.preprocessor import Preprocessor
 from synap.postprocessor import Detector
+from synap.preprocessor import Preprocessor
+from synap.types import Layout, Shape
+from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
-    ModelTypeEnum,
     InputTensorEnum,
+    ModelTypeEnum,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,7 +42,6 @@ class SynapDetector(DetectionApi):
             logger.error(f"Failed to init Synap NPU: {e}")
             raise
 
-
         self.width = detector_config.model.width
         self.height = detector_config.model.height
         self.model_type = detector_config.model.model_type
@@ -62,7 +60,7 @@ class SynapDetector(DetectionApi):
 
         if self.input_tensor_layout == InputTensorEnum.nhwc:
             layout = Layout.nhwc
-        
+
         postprocess_data = self.preprocessor.assign(
             self.network.inputs, tensor_input, Shape(tensor_input.shape), layout
         )
@@ -75,15 +73,11 @@ class SynapDetector(DetectionApi):
                     break
 
                 bb = item.bounding_box
-
-
                 # Convert corner coordinates to normalized [0,1] range
                 x1 = bb.origin.x / self.width  # Top-left X
                 y1 = bb.origin.y / self.height  # Top-left Y
                 x2 = (bb.origin.x + bb.size.x) / self.width  # Bottom-right X
                 y2 = (bb.origin.y + bb.size.y) / self.height  # Bottom-right Y
-
-
                 detections[i] = [
                     item.class_index,
                     float(item.confidence),
@@ -94,6 +88,4 @@ class SynapDetector(DetectionApi):
                 ]
         else:
             logger.error(f"Unsupported model type: {self.model_type}")
-        
-        return np.zeros((20, 6), np.float32)
-
+        return detections
