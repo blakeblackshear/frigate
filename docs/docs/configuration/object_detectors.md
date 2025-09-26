@@ -43,6 +43,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
 
+**Synaptics**
+
+- [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs.
+
 **For Testing**
 
 - [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
@@ -1047,6 +1051,41 @@ model:
   input_pixel_format: rgb
   width: 320 # MUST match the chosen model i.e yolov7-320 -> 320, yolov4-416 -> 416
   height: 320 # MUST match the chosen model i.e yolov7-320 -> 320 yolov4-416 -> 416
+```
+
+## Synaptics
+
+Hardware accelerated object detection is supported on the following SoCs:
+
+- SL1680
+
+This implementation uses the [Synaptics model conversion](https://synaptics-synap.github.io/doc/v/latest/docs/manual/introduction.html#offline-model-conversion), version v3.1.0.
+
+This implementation is based on sdk `v1.5.0`.
+
+See the [installation docs](../frigate/installation.md#synaptics) for information on configuring the SL-series NPU hardware.
+
+### Configuration
+
+When configuring the Synap detector, you have to specify the model: a local **path**.
+
+#### SSD Mobilenet
+
+A synap model is provided in the container at /mobilenet.synap and is used by this detector type by default. The model comes from [Synap-release Github](https://github.com/synaptics-astra/synap-release/tree/v1.5.0/models/dolphin/object_detection/coco/model/mobilenet224_full80).
+
+Use the model configuration shown below when using the synaptics detector with the default synap model:
+
+```yaml
+detectors:  # required
+  synap_npu:  # required
+    type: synaptics  # required
+
+model:  # required
+  path: /synaptics/mobilenet.synap  # required
+  width: 224  # required
+  height: 224  # required
+  tensor_format: nhwc  # default value (optional. If you change the model, it is required)
+  labelmap_path: /labelmap/coco-80.txt  # required
 ```
 
 ## Rockchip platform

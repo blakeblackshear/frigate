@@ -256,6 +256,37 @@ or add these options to your `docker run` command:
 
 Next, you should configure [hardware object detection](/configuration/object_detectors#rockchip-platform) and [hardware video processing](/configuration/hardware_acceleration_video#rockchip-platform).
 
+### Synaptics
+
+- SL1680
+
+#### Setup
+
+Follow Frigate's default installation instructions, but use a docker image with `-synaptics` suffix for example `ghcr.io/blakeblackshear/frigate:stable-synaptics`.
+
+Next, you need to grant docker permissions to access your hardware:
+
+- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
+
+```yaml
+devices:
+  - /dev/synap
+  - /dev/video0
+  - /dev/video1
+```
+
+or add these options to your `docker run` command:
+
+```
+--device /dev/synap \
+--device /dev/video0 \
+--device /dev/video1 
+```
+
+#### Configuration
+
+Next, you should configure [hardware object detection](/configuration/object_detectors#synaptics) and [hardware video processing](/configuration/hardware_acceleration_video#synaptics).
+
 ## Docker
 
 Running through Docker with Docker Compose is the recommended install method.
