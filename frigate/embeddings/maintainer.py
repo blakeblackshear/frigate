@@ -524,20 +524,30 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_recordings_updates(self) -> None:
         """Process recordings updates."""
         while True:
-            recordings_data = self.recordings_subscriber.check_for_update()
+            update = self.recordings_subscriber.check_for_update()
 
-            if recordings_data == None:
+            if not update:
                 break
 
-            camera, recordings_available_through_timestamp = recordings_data
+            (raw_topic, payload) = update
 
-            self.recordings_available_through[camera] = (
-                recordings_available_through_timestamp
-            )
+            if not raw_topic or not payload:
+                break
 
-            logger.debug(
-                f"{camera} now has recordings available through {recordings_available_through_timestamp}"
-            )
+            topic = str(raw_topic)
+
+            if topic.endswith(
+                RecordingsDataTypeEnum.recordings_available_through.value
+            ):
+                camera, recordings_available_through_timestamp = payload
+
+                self.recordings_available_through[camera] = (
+                    recordings_available_through_timestamp
+                )
+
+                logger.debug(
+                    f"{camera} now has recordings available through {recordings_available_through_timestamp}"
+                )
 
     def _process_review_updates(self) -> None:
         """Process review updates."""
