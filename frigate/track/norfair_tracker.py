@@ -614,7 +614,11 @@ class NorfairTracker(ObjectTracker):
                     self.tracked_objects[id]["estimate"] = new_obj["estimate"]
             # else update it
             else:
-                self.update(str(t.global_id), new_obj, yuv_frame)
+                self.update(
+                    str(t.global_id),
+                    new_obj,
+                    yuv_frame if new_obj["label"] == "car" else None,
+                )
 
         # clear expired tracks
         expired_ids = [k for k in self.track_id_map.keys() if k not in active_ids]
