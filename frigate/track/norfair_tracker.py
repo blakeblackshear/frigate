@@ -410,7 +410,7 @@ class NorfairTracker(ObjectTracker):
 
         # if there are more than 5 and less than 10 entries for the position, add the bounding box
         # and recompute the position box
-        if 5 <= len(position["xmins"]) < 10:
+        if len(position["xmins"]) < 10:
             position["xmins"].append(xmin)
             position["ymins"].append(ymin)
             position["xmaxs"].append(xmax)
@@ -614,7 +614,11 @@ class NorfairTracker(ObjectTracker):
                     self.tracked_objects[id]["estimate"] = new_obj["estimate"]
             # else update it
             else:
-                self.update(str(t.global_id), new_obj, yuv_frame)
+                self.update(
+                    str(t.global_id),
+                    new_obj,
+                    yuv_frame if new_obj["label"] == "car" else None,
+                )
 
         # clear expired tracks
         expired_ids = [k for k in self.track_id_map.keys() if k not in active_ids]
