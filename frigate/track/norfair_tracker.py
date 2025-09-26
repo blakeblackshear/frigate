@@ -330,6 +330,19 @@ class NorfairTracker(ObjectTracker):
         stationary: bool,
         yuv_frame: np.ndarray | None,
     ) -> bool:
+
+        def reset_position(xmin: int, ymin: int, xmax: int, ymax: int) -> None:
+            self.positions[id] = {
+                "xmins": [xmin],
+                "ymins": [ymin],
+                "xmaxs": [xmax],
+                "ymaxs": [ymax],
+                "xmin": xmin,
+                "ymin": ymin,
+                "xmax": xmax,
+                "ymax": ymax,
+            }
+
         xmin, ymin, xmax, ymax = box
         position = self.positions[id]
         self.stationary_box_history[id].append(box)
@@ -360,17 +373,11 @@ class NorfairTracker(ObjectTracker):
                 if not self.stationary_classifier.evaluate(
                     id, yuv_frame, cast(tuple[int, int, int, int], tuple(box))
                 ):
-                    self.positions[id] = {
-                        "xmins": [xmin],
-                        "ymins": [ymin],
-                        "xmaxs": [xmax],
-                        "ymaxs": [ymax],
-                        "xmin": xmin,
-                        "ymin": ymin,
-                        "xmax": xmax,
-                        "ymax": ymax,
-                    }
+                    reset_position(xmin, ymin, xmax, ymax)
                     return False
+            else:
+                reset_position(xmin, ymin, xmax, ymax)
+                return False
 
         threshold = (
             THRESHOLD_STATIONARY_CHECK_IOU if stationary else THRESHOLD_ACTIVE_CHECK_IOU
@@ -391,22 +398,16 @@ class NorfairTracker(ObjectTracker):
             # if the median iou drops below the threshold
             # assume object is no longer stationary
             if median_iou < threshold:
-                # Before flipping to active, check with classifier if we have YUV frame
+                # If we have a yuv_frame to check before flipping to active, check with classifier if we have YUV frame
                 if stationary and yuv_frame is not None:
                     if not self.stationary_classifier.evaluate(
                         id, yuv_frame, cast(tuple[int, int, int, int], tuple(box))
                     ):
-                        self.positions[id] = {
-                            "xmins": [xmin],
-                            "ymins": [ymin],
-                            "xmaxs": [xmax],
-                            "ymaxs": [ymax],
-                            "xmin": xmin,
-                            "ymin": ymin,
-                            "xmax": xmax,
-                            "ymax": ymax,
-                        }
+                        reset_position(xmin, ymin, xmax, ymax)
                         return False
+                else:
+                    reset_position(xmin, ymin, xmax, ymax)
+                    return False
 
         # if there are more than 5 and less than 10 entries for the position, add the bounding box
         # and recompute the position box
