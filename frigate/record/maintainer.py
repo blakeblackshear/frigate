@@ -80,9 +80,7 @@ class RecordingMaintainer(threading.Thread):
             [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.record],
         )
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all.value)
-        self.recordings_publisher = RecordingsDataPublisher(
-            RecordingsDataTypeEnum.recordings_available_through
-        )
+        self.recordings_publisher = RecordingsDataPublisher()
 
         self.stop_event = stop_event
         self.object_recordings_info: dict[str, list] = defaultdict(list)
@@ -233,7 +231,8 @@ class RecordingMaintainer(threading.Thread):
                     recordings[0]["start_time"].timestamp()
                     if self.config.cameras[camera].record.enabled
                     else None,
-                )
+                ),
+                RecordingsDataTypeEnum.recordings_available_through.value,
             )
 
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
@@ -250,7 +249,7 @@ class RecordingMaintainer(threading.Thread):
 
     async def validate_and_move_segment(
         self, camera: str, reviews: list[ReviewSegment], recording: dict[str, Any]
-    ) -> None:
+    ) -> Optional[Recordings]:
         cache_path: str = recording["cache_path"]
         start_time: datetime.datetime = recording["start_time"]
         record_config = self.config.cameras[camera].record
@@ -261,7 +260,7 @@ class RecordingMaintainer(threading.Thread):
             or not self.config.cameras[camera].record.enabled
         ):
             self.drop_segment(cache_path)
-            return
+            return None
 
         if cache_path in self.end_time_cache:
             end_time, duration = self.end_time_cache[cache_path]
@@ -270,10 +269,14 @@ class RecordingMaintainer(threading.Thread):
                 self.config.ffmpeg, cache_path, get_duration=True
             )
 
-            if segment_info["duration"]:
-                duration = float(segment_info["duration"])
-            else:
-                duration = -1
+            if not segment_info.get("has_valid_video", False):
+                logger.warning(
+                    f"Invalid or missing video stream in segment {cache_path}. Discarding."
+                )
+                self.drop_segment(cache_path)
+                return None
+
+            duration = float(segment_info.get("duration", -1))
 
             # ensure duration is within expected length
             if 0 < duration < MAX_SEGMENT_DURATION:
@@ -284,8 +287,14 @@ class RecordingMaintainer(threading.Thread):
                     logger.warning(f"Failed to probe corrupt segment {cache_path}")
 
                 logger.warning(f"Discarding a corrupt recording segment: {cache_path}")
-                Path(cache_path).unlink(missing_ok=True)
-                return
+                self.drop_segment(cache_path)
+                return None
+
+            # this segment has a valid duration and has video data, so publish an update
+            self.recordings_publisher.publish(
+                (camera, start_time.timestamp(), cache_path),
+                RecordingsDataTypeEnum.latest_valid_segment.value,
+            )
 
         record_config = self.config.cameras[camera].record
         highest = None
