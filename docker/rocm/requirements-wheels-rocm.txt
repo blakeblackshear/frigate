@@ -1,1 +1,1 @@
-onnxruntime-rocm @ https://github.com/NickM-27/frigate-onnxruntime-rocm/releases/download/v6.4.1/onnxruntime_rocm-1.21.1-cp311-cp311-linux_x86_64.whl
+onnxruntime-rocm @ https://github.com/NickM-27/frigate-onnxruntime-rocm/releases/download/v7.0.1/onnxruntime_migraphx-1.23.0-cp311-cp311-linux_x86_64.whl
