@@ -1,1 +1,0 @@
-{"version":3,"file":"styleLoader.d.ts","sourceRoot":"","sources":["../../src/loaders/styleLoader.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AAGH,OAAO,KAAK,EAAC,qBAAqB,EAAE,cAAc,EAAC,MAAM,mBAAmB,CAAC;AAE7E,wBAAsB,yBAAyB,CAAC,EAC9C,cAAc,GACf,EAAE;IACD,cAAc,EAAE,cAAc,CAAC;CAChC,GAAG,OAAO,CAAC,qBAAqB,CAAC,iBAAiB,CAAC,CAAC,CAsEpD"}

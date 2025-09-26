@@ -1,4 +1,0 @@
-
-/* EXPORT */
-
-export * from '~/methods';

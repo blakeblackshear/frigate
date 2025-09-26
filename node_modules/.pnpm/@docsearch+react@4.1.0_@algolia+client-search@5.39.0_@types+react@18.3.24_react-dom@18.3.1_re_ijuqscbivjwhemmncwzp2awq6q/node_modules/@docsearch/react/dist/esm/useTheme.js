@@ -1,1 +1,0 @@
-import{useEffect as e}from"react";var t=function(t){var m=t.theme;e(function(){if(m){var e=document.documentElement.dataset.theme;if(m!==e)return document.documentElement.dataset.theme=m,function(){void 0===e?delete document.documentElement.dataset.theme:document.documentElement.dataset.theme=e}}},[m])};export{t as useTheme};

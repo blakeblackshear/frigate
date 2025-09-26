@@ -1,2 +1,0 @@
-var r=require("@hookform/resolvers"),e=require("arktype");exports.arktypeResolver=function(o,t,a){return void 0===a&&(a={}),function(t,s,i){var n,u=o(t);return u instanceof e.ArkErrors?{values:{},errors:r.toNestErrors((n=u,n.forEach(function(r){return Object.assign(r,{type:r.code})}),n.byPath),i)}:(i.shouldUseNativeValidation&&r.validateFieldsNatively({},i),{errors:{},values:a.raw?t:u})}};
-//# sourceMappingURL=arktype.js.map

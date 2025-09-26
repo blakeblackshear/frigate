@@ -1,2 +1,0 @@
-var r=require("@hookform/resolvers");exports.typanionResolver=function(e,o){return void 0===o&&(o={}),function(s,i,t){var n=[],a=e(s,Object.assign({},{errors:n},o)),u=function(r,e){return void 0===e&&(e={}),r.reduce(function(r,e){var o=e.indexOf(":"),s=e.slice(1,o),i=e.slice(o+1).trim();return r[s]={message:i},r},e)}(n);return a?(t.shouldUseNativeValidation&&r.validateFieldsNatively(u,t),{values:s,errors:{}}):{values:{},errors:r.toNestErrors(u,t)}}};
-//# sourceMappingURL=typanion.js.map

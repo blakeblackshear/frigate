@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../src/index.ts", "../src/use-previous.tsx"],
-  "sourcesContent": ["export { usePrevious } from './use-previous';\n", "import * as React from 'react';\n\nfunction usePrevious<T>(value: T) {\n  const ref = React.useRef({ value, previous: value });\n\n  // We compare values before making an update to ensure that\n  // a change has been made. This ensures the previous value is\n  // persisted correctly between renders.\n  return React.useMemo(() => {\n    if (ref.current.value !== value) {\n      ref.current.previous = ref.current.value;\n      ref.current.value = value;\n    }\n    return ref.current.previous;\n  }, [value]);\n}\n\nexport { usePrevious };\n"],
-  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;;;ACAA,YAAuB;AAEvB,SAAS,YAAe,OAAU;AAChC,QAAM,MAAY,aAAO,EAAE,OAAO,UAAU,MAAM,CAAC;AAKnD,SAAa,cAAQ,MAAM;AACzB,QAAI,IAAI,QAAQ,UAAU,OAAO;AAC/B,UAAI,QAAQ,WAAW,IAAI,QAAQ;AACnC,UAAI,QAAQ,QAAQ;AAAA,IACtB;AACA,WAAO,IAAI,QAAQ;AAAA,EACrB,GAAG,CAAC,KAAK,CAAC;AACZ;",
-  "names": []
-}

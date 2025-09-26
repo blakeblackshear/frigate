@@ -1,7 +1,0 @@
-ie 9-11
-firefox >= 4
-chrome >= 23
-> 1%
-node >= 0.10
-last 2 major versions
-since 2012

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../../src/diagrams/state/stateDiagram-v2.ts"],
-  "sourcesContent": ["import type { DiagramDefinition } from '../../diagram-api/types.js';\n// @ts-ignore: JISON doesn't support types\nimport parser from './parser/stateDiagram.jison';\nimport { StateDB } from './stateDb.js';\nimport styles from './styles.js';\nimport renderer from './stateRenderer-v3-unified.js';\n\nexport const diagram: DiagramDefinition = {\n  parser,\n  get db() {\n    return new StateDB(2);\n  },\n  renderer,\n  styles,\n  init: (cnf) => {\n    if (!cnf.state) {\n      cnf.state = {};\n    }\n    cnf.state.arrowMarkerAbsolute = cnf.arrowMarkerAbsolute;\n  },\n};\n"],
-  "mappings": "6fAOO,IAAMA,EAA6B,CACxC,OAAAC,EACA,IAAI,IAAK,CACP,OAAO,IAAIC,EAAQ,CAAC,CACtB,EACA,SAAAC,EACA,OAAAC,EACA,KAAMC,EAACC,GAAQ,CACRA,EAAI,QACPA,EAAI,MAAQ,CAAC,GAEfA,EAAI,MAAM,oBAAsBA,EAAI,mBACtC,EALM,OAMR",
-  "names": ["diagram", "stateDiagram_default", "StateDB", "stateRenderer_v3_unified_default", "styles_default", "__name", "cnf"]
-}

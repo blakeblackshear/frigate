@@ -1,1 +1,0 @@
-"use strict";var e=require("@csstools/css-calc");const s=/(?<![-\w])(?:exp|hypot|log|pow|sqrt)\(/i,creator=t=>{const o=Object.assign({preserve:!1},t);return{postcssPlugin:"postcss-exponential-functions",Declaration(t){if(!s.test(t.value))return;const c=e.calc(t.value);c!==t.value&&(t.cloneBefore({value:c}),o.preserve||t.remove())}}};creator.postcss=!0,module.exports=creator;

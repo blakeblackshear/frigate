@@ -1,0 +1,17 @@
+#!/bin/sh
+basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
+
+case `uname` in
+    *CYGWIN*) basedir=`cygpath -w "$basedir"`;;
+esac
+
+if [ -z "$NODE_PATH" ]; then
+  export NODE_PATH="/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/bin/node_modules:/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/node_modules:/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/node_modules:/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/uuid@8.3.2/node_modules:/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/node_modules"
+else
+  export NODE_PATH="/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/bin/node_modules:/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/node_modules:/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/node_modules:/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/uuid@8.3.2/node_modules:/workspace/frigate/docs/node_modules/.pnpm/postman-code-generators@1.14.2/node_modules/postman-code-generators/codegens/python-http.client/node_modules/.pnpm/node_modules:$NODE_PATH"
+fi
+if [ -x "$basedir/node" ]; then
+  exec "$basedir/node"  "$basedir/../uuid/dist/bin/uuid" "$@"
+else
+  exec node  "$basedir/../uuid/dist/bin/uuid" "$@"
+fi

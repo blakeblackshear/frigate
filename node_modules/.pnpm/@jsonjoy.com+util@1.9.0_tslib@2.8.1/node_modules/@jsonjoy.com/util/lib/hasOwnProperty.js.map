@@ -1,1 +1,0 @@
-{"version":3,"file":"hasOwnProperty.js","sourceRoot":"","sources":["../src/hasOwnProperty.ts"],"names":[],"mappings":";;;AAAA,MAAM,GAAG,GAAG,MAAM,CAAC,SAAS,CAAC,cAAc,CAAC;AAE5C,SAAgB,cAAc,CAAC,GAAW,EAAE,GAAW;IACrD,OAAO,GAAG,CAAC,IAAI,CAAC,GAAG,EAAE,GAAG,CAAC,CAAC;AAC5B,CAAC;AAFD,wCAEC"}

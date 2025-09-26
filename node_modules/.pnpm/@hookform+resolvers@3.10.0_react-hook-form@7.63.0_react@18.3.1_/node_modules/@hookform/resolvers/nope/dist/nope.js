@@ -1,2 +1,0 @@
-var r=require("@hookform/resolvers"),e=function r(e,o,t){return void 0===o&&(o={}),void 0===t&&(t=""),Object.keys(e).reduce(function(o,s){var a=t?t+"."+s:s,i=e[s];return"string"==typeof i?o[a]={message:i}:r(i,o,a),o},o)};exports.nopeResolver=function(o,t){return void 0===t&&(t={abortEarly:!1}),function(s,a,i){var n=o.validate(s,a,t);return n?{values:{},errors:r.toNestErrors(e(n),i)}:(i.shouldUseNativeValidation&&r.validateFieldsNatively({},i),{values:s,errors:{}})}};
-//# sourceMappingURL=nope.js.map

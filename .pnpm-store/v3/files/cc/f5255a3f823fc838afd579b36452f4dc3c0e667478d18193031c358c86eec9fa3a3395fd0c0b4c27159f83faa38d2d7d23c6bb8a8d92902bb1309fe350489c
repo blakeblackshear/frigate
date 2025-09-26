@@ -1,0 +1,50 @@
+{
+  "name": "shortid",
+  "version": "2.2.17",
+  "description": "Amazingly short non-sequential url-friendly unique id generator.",
+  "main": "index.js",
+  "scripts": {
+    "build": "grunt build",
+    "test": "grunt test && size-limit"
+  },
+  "keywords": [
+    "short",
+    "tiny",
+    "id",
+    "uuid",
+    "bitly",
+    "shorten",
+    "mongoid",
+    "shortid",
+    "tinyid"
+  ],
+  "author": "Dylan Greene <dylang@gmail.com>",
+  "repository": "dylang/shortid",
+  "browser": {
+    "./lib/random/random-byte.js": "./lib/random/random-byte-browser.js",
+    "./lib/util/cluster-worker-id.js": "./lib/util/cluster-worker-id-browser.js"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^2.1.3",
+    "chai": "^4.2.0",
+    "clean-publish": "^1.1.8",
+    "envify": "^4.1.0",
+    "grunt": "^1.0.3",
+    "grunt-browserify": "^5.3.0",
+    "grunt-cli": "^1.3.2",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-contrib-uglify": "^3.4.0",
+    "grunt-mocha-test": "^0.13.3",
+    "grunt-notify": "^0.4.1",
+    "grunt-open": "^0.2.3",
+    "grunt-release": "^0.14.0",
+    "load-grunt-tasks": "^4.0.0",
+    "mocha": "^5.2.0",
+    "time-grunt": "^1.2.1"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "nanoid": "^3.3.8"
+  }
+}

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../../src/utils/subGraphTitleMargins.ts"],
-  "sourcesContent": ["import type { FlowchartDiagramConfig } from '../config.type.js';\n\nexport const getSubGraphTitleMargins = ({\n  flowchart,\n}: {\n  flowchart: FlowchartDiagramConfig;\n}): {\n  subGraphTitleTopMargin: number;\n  subGraphTitleBottomMargin: number;\n  subGraphTitleTotalMargin: number;\n} => {\n  const subGraphTitleTopMargin = flowchart?.subGraphTitleMargin?.top ?? 0;\n  const subGraphTitleBottomMargin = flowchart?.subGraphTitleMargin?.bottom ?? 0;\n  const subGraphTitleTotalMargin = subGraphTitleTopMargin + subGraphTitleBottomMargin;\n\n  return {\n    subGraphTitleTopMargin,\n    subGraphTitleBottomMargin,\n    subGraphTitleTotalMargin,\n  };\n};\n"],
-  "mappings": "yCAEO,IAAMA,EAA0BC,EAAA,CAAC,CACtC,UAAAC,CACF,IAMK,CACH,IAAMC,EAAyBD,GAAW,qBAAqB,KAAO,EAChEE,EAA4BF,GAAW,qBAAqB,QAAU,EACtEG,EAA2BF,EAAyBC,EAE1D,MAAO,CACL,uBAAAD,EACA,0BAAAC,EACA,yBAAAC,CACF,CACF,EAlBuC",
-  "names": ["getSubGraphTitleMargins", "__name", "flowchart", "subGraphTitleTopMargin", "subGraphTitleBottomMargin", "subGraphTitleTotalMargin"]
-}

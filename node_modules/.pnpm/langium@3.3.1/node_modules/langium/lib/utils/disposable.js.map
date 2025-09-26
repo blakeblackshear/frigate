@@ -1,1 +1,0 @@
-{"version":3,"file":"disposable.js","sourceRoot":"","sources":["../../src/utils/disposable.ts"],"names":[],"mappings":"AAAA;;;;gFAIgF;AAgBhF,MAAM,KAAW,UAAU,CAQ1B;AARD,WAAiB,UAAU;IAGvB,SAAgB,MAAM,CAAC,QAAoC;QACvD,OAAO;YACH,OAAO,EAAE,KAAK,IAAI,EAAE,CAAC,MAAM,QAAQ,EAAE;SACxC,CAAC;IACN,CAAC;IAJe,iBAAM,SAIrB,CAAA;AACL,CAAC,EARgB,UAAU,KAAV,UAAU,QAQ1B"}

@@ -1,1 +1,0 @@
-{"version":3,"file":"grammar-formatter.d.ts","sourceRoot":"","sources":["../../../src/grammar/lsp/grammar-formatter.ts"],"names":[],"mappings":"AAAA;;;;gFAIgF;AAEhF,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,sBAAsB,CAAC;AACpD,OAAO,EAAE,iBAAiB,EAAc,MAAM,wBAAwB,CAAC;AAKvE,qBAAa,uBAAwB,SAAQ,iBAAiB;IAE1D,SAAS,CAAC,MAAM,CAAC,IAAI,EAAE,OAAO,GAAG,IAAI;CA2ExC"}

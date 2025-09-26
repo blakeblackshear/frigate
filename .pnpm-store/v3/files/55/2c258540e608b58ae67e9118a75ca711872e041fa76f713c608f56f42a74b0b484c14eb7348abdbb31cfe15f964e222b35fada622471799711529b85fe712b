@@ -1,0 +1,55 @@
+hoistPattern:
+  - '*'
+hoistedDependencies:
+  '@faker-js/faker@5.5.3':
+    '@faker-js/faker': private
+  charset@1.0.1:
+    charset: private
+  file-type@3.9.0:
+    file-type: private
+  http-reasons@0.1.0:
+    http-reasons: private
+  iconv-lite@0.6.3:
+    iconv-lite: private
+  liquid-json@0.3.1:
+    liquid-json: private
+  lodash@4.17.21:
+    lodash: private
+  lru-cache@6.0.0:
+    lru-cache: private
+  mime-db@1.52.0:
+    mime-db: private
+  mime-format@2.0.1:
+    mime-format: private
+  mime-types@2.1.35:
+    mime-types: private
+  postman-url-encoder@3.0.5:
+    postman-url-encoder: private
+  punycode@2.3.1:
+    punycode: private
+  safer-buffer@2.1.2:
+    safer-buffer: private
+  semver@7.5.4:
+    semver: private
+  uuid@8.3.2:
+    uuid: private
+  yallist@4.0.0:
+    yallist: private
+included:
+  dependencies: true
+  devDependencies: false
+  optionalDependencies: true
+injectedDeps: {}
+layoutVersion: 5
+nodeLinker: isolated
+packageManager: pnpm@9.0.0
+pendingBuilds: []
+prunedAt: Fri, 26 Sep 2025 20:31:17 GMT
+publicHoistPattern:
+  - '*eslint*'
+  - '*prettier*'
+registries:
+  default: https://registry.npmjs.org/
+skipped: []
+storeDir: /workspace/frigate/.pnpm-store/v3
+virtualStoreDir: .pnpm

@@ -1,1 +1,0 @@
-{"version":3,"file":"codeCompatPlugin.d.ts","sourceRoot":"","sources":["../../../src/remark/mdx1Compat/codeCompatPlugin.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AAEH,OAAO,KAAK,EAAc,MAAM,EAAC,MAAM,SAAS,CAAC;AACjD,OAAO,KAAK,EAAC,IAAI,EAAC,MAAM,OAAO,CAAC;AAShC,QAAA,MAAM,MAAM,EAAE,MAAM,CAAC,OAAO,EAAE,EAAE,IAAI,CAgBnC,CAAC;AAEF,eAAe,MAAM,CAAC"}

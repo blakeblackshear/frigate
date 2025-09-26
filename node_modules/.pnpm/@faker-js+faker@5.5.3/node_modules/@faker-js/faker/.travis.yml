@@ -1,9 +1,0 @@
-# Run on new travis container (docker) based infrastructure
-sudo: false
-language: node_js
-script:
-  - npm run lint
-  - npm test
-node_js:
-  - "node"
-  - "lts/*"

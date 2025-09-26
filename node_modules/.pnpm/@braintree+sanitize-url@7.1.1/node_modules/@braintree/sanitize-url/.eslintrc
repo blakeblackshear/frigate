@@ -1,6 +1,0 @@
-{
-  "extends": "braintree/client",
-  "rules": {
-    "no-control-regex": 0
-  }
-}

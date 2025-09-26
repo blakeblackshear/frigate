@@ -1,1 +1,0 @@
-{"version":3,"file":"esnext.collection.js","sourceRoot":"","sources":["../../src/lib/esnext.collection.ts"],"names":[],"mappings":";AAAA,wCAAwC;AACxC,gCAAgC;AAChC,mEAAmE;AACnE,2BAA2B;;;AAG3B,+CAAqC;AAExB,QAAA,iBAAiB,GAAG;IAC/B,cAAc,EAAE,kBAAI;IACpB,eAAe,EAAE,kBAAI;IACrB,GAAG,EAAE,kBAAI;IACT,WAAW,EAAE,kBAAI;CAC4B,CAAC"}

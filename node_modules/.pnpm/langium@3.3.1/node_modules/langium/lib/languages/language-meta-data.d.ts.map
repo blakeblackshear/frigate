@@ -1,1 +1,0 @@
-{"version":3,"file":"language-meta-data.d.ts","sourceRoot":"","sources":["../../src/languages/language-meta-data.ts"],"names":[],"mappings":"AAAA;;;;gFAIgF;AAEhF;;GAEG;AACH,MAAM,WAAW,gBAAgB;IAC7B,UAAU,EAAE,MAAM,CAAC;IACnB,cAAc,EAAE,SAAS,MAAM,EAAE,CAAC;IAClC,eAAe,EAAE,OAAO,CAAC;IACzB;;;;OAIG;IACH,IAAI,EAAE,aAAa,GAAG,YAAY,CAAC;CACtC"}

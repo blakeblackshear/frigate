@@ -1,0 +1,69 @@
+{
+    "name": "qs",
+    "description": "A querystring parser that supports nesting and arrays, with a depth limit",
+    "homepage": "https://github.com/ljharb/qs",
+    "version": "6.9.2",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ljharb/qs.git"
+    },
+    "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+    },
+    "main": "lib/index.js",
+    "contributors": [
+        {
+            "name": "Jordan Harband",
+            "email": "ljharb@gmail.com",
+            "url": "http://ljharb.codes"
+        }
+    ],
+    "keywords": [
+        "querystring",
+        "qs",
+        "query",
+        "url",
+        "parse",
+        "stringify"
+    ],
+    "engines": {
+        "node": ">=0.6"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@ljharb/eslint-config": "^16.0.0",
+        "browserify": "^16.5.0",
+        "covert": "^1.1.1",
+        "eclint": "^2.8.1",
+        "eslint": "^6.8.0",
+        "evalmd": "^0.0.19",
+        "for-each": "^0.3.3",
+        "has-symbols": "^1.0.1",
+        "iconv-lite": "^0.5.1",
+        "mkdirp": "^0.5.3",
+        "object-inspect": "^1.7.0",
+        "qs-iconv": "^1.0.4",
+        "safe-publish-latest": "^1.1.4",
+        "safer-buffer": "^2.1.2",
+        "tape": "^5.0.0-next.5"
+    },
+    "scripts": {
+        "prepublish": "safe-publish-latest && npm run dist",
+        "pretest": "npm run --silent readme && npm run --silent lint",
+        "test": "npm run --silent coverage",
+        "tests-only": "node test",
+        "posttest": "npx aud",
+        "readme": "evalmd README.md",
+        "postlint": "eclint check * lib/* test/*",
+        "lint": "eslint lib/*.js test/*.js",
+        "coverage": "covert test",
+        "dist": "mkdirp dist && browserify --standalone Qs lib/index.js > dist/qs.js"
+    },
+    "license": "BSD-3-Clause",
+    "greenkeeper": {
+        "ignore": [
+            "iconv-lite",
+            "mkdirp"
+        ]
+    }
+}

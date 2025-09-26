@@ -1,1 +1,0 @@
-{"version":3,"file":"bufferToUint8Array.js","sourceRoot":"","sources":["../src/bufferToUint8Array.ts"],"names":[],"mappings":";;;AAAO,MAAM,kBAAkB,GAAG,CAAC,GAAW,EAAc,EAAE,CAAC,IAAI,UAAU,CAAC,GAAG,CAAC,MAAM,EAAE,GAAG,CAAC,UAAU,EAAE,GAAG,CAAC,MAAM,CAAC,CAAC;AAAzG,QAAA,kBAAkB,sBAAuF"}

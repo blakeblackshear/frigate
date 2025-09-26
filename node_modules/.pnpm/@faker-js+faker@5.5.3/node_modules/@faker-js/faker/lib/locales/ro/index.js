@@ -1,9 +1,0 @@
-var ro = {};
-module['exports'] = ro;
-ro.title = "Romanian";
-ro.address = require("./address");
-ro.cell_phone = require("./cell_phone");
-ro.date = require("./date");
-ro.internet = require("./internet");
-ro.name = require("./name");
-ro.phone_number = require("./phone_number");

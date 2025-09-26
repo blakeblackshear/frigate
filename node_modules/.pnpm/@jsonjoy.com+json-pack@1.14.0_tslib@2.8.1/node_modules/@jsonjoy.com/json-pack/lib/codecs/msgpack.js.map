@@ -1,1 +1,0 @@
-{"version":3,"file":"msgpack.js","sourceRoot":"","sources":["../../src/codecs/msgpack.ts"],"names":[],"mappings":";;;AACA,wCAA0C;AAC1C,8DAAyD;AAIzD,MAAa,qBAAqB;IAMhC,YAAY,MAAc;QALV,OAAE,GAAG,SAAS,CAAC;QACf,WAAM,KAA0B;QAK9C,IAAI,CAAC,OAAO,GAAG,IAAI,wBAAc,CAAC,MAAM,CAAC,CAAC;QAC1C,IAAI,CAAC,OAAO,GAAG,IAAI,+BAAc,EAAE,CAAC;IACtC,CAAC;CACF;AAVD,sDAUC"}

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../src/use-rect.tsx"],
-  "sourcesContent": ["import * as React from 'react';\nimport { observeElementRect } from '@radix-ui/rect';\n\nimport type { Measurable } from '@radix-ui/rect';\n\n/**\n * Use this custom hook to get access to an element's rect (getBoundingClientRect)\n * and observe it along time.\n */\nfunction useRect(measurable: Measurable | null) {\n  const [rect, setRect] = React.useState<DOMRect>();\n  React.useEffect(() => {\n    if (measurable) {\n      const unobserve = observeElementRect(measurable, setRect);\n      return () => {\n        setRect(undefined);\n        unobserve();\n      };\n    }\n    return;\n  }, [measurable]);\n  return rect;\n}\n\nexport { useRect };\n"],
-  "mappings": ";AAAA,YAAY,WAAW;AACvB,SAAS,0BAA0B;AAQnC,SAAS,QAAQ,YAA+B;AAC9C,QAAM,CAAC,MAAM,OAAO,IAAU,eAAkB;AAChD,EAAM,gBAAU,MAAM;AACpB,QAAI,YAAY;AACd,YAAM,YAAY,mBAAmB,YAAY,OAAO;AACxD,aAAO,MAAM;AACX,gBAAQ,MAAS;AACjB,kBAAU;AAAA,MACZ;AAAA,IACF;AACA;AAAA,EACF,GAAG,CAAC,UAAU,CAAC;AACf,SAAO;AACT;",
-  "names": []
-}

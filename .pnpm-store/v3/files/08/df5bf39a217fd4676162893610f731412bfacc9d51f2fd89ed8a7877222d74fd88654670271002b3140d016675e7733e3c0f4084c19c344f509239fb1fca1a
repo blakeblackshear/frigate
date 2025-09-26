@@ -1,0 +1,24 @@
+{
+  "name": "xmlhttprequest",
+  "description": "XMLHttpRequest for Node",
+  "version": "1.8.0",
+  "author": {
+    "name": "Dan DeFelippi",
+    "url": "http://driverdan.com"
+  },
+  "keywords": ["xhr", "ajax"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/driverdan/node-XMLHttpRequest.git"
+  },
+  "bugs": "http://github.com/driverdan/node-XMLHttpRequest/issues",
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "directories": {
+    "lib": "./lib",
+    "example": "./example"
+  },
+  "main": "./lib/XMLHttpRequest.js"
+}

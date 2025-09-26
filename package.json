@@ -2,30 +2,5 @@
   "name": "frigate",
   "version": "1.0.0",
   "private": true,
-  "description": "Frigate - NVR with realtime local object detection for IP cameras",
-  "workspaces": [
-    "web",
-    "docs"
-  ],
-  "scripts": {
-    "build": "pnpm -r build",
-    "dev": "pnpm -r dev",
-    "lint": "pnpm -r lint",
-    "lint:fix": "pnpm -r lint:fix",
-    "test": "pnpm -r test",
-    "clean": "pnpm -r clean && rm -rf node_modules",
-    "install:all": "pnpm install",
-    "build:web": "pnpm --filter web build",
-    "build:docs": "pnpm --filter docs build",
-    "dev:web": "pnpm --filter web dev",
-    "dev:docs": "pnpm --filter docs start"
-  },
-  "devDependencies": {
-    "pnpm": "^9.0.0"
-  },
-  "engines": {
-    "node": ">=18.0",
-    "pnpm": ">=8.0.0"
-  },
-  "packageManager": "pnpm@9.0.0"
+  "description": "Frigate - NVR with realtime local object detection for IP cameras"
 }

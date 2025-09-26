@@ -1,1 +1,0 @@
-{"version":3,"file":"decorationProvider.js","sourceRoot":"file:///mnt/vss/_work/1/s/dependencies/vscode/out-editor-src","sources":["vs/editor/common/model/decorationProvider.ts"],"names":[],"mappings":"","sourcesContent":["\n\nexport interface DecorationProvider {\n}\n"]}

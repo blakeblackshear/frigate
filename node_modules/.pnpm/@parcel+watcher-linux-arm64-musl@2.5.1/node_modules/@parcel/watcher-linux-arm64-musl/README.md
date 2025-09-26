@@ -1,1 +1,0 @@
-This is the linux-arm64-musl build of @parcel/watcher. See https://github.com/parcel-bundler/watcher for details.

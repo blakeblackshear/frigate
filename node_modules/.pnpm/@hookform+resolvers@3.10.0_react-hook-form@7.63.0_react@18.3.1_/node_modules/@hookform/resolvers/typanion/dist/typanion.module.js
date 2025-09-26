@@ -1,2 +1,0 @@
-import{validateFieldsNatively as r,toNestErrors as e}from"@hookform/resolvers";var o=function(o,i){return void 0===i&&(i={}),function(n,s,t){var u=[],a=o(n,Object.assign({},{errors:u},i)),v=function(r,e){return void 0===e&&(e={}),r.reduce(function(r,e){var o=e.indexOf(":"),i=e.slice(1,o),n=e.slice(o+1).trim();return r[i]={message:n},r},e)}(u);return a?(t.shouldUseNativeValidation&&r(v,t),{values:n,errors:{}}):{values:{},errors:e(v,t)}}};export{o as typanionResolver};
-//# sourceMappingURL=typanion.module.js.map

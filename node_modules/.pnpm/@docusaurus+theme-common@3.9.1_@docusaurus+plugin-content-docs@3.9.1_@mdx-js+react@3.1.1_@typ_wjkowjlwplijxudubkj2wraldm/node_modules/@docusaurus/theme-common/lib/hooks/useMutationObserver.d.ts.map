@@ -1,1 +1,0 @@
-{"version":3,"file":"useMutationObserver.d.ts","sourceRoot":"","sources":["../../src/hooks/useMutationObserver.ts"],"names":[],"mappings":"AASA,KAAK,OAAO,GAAG,oBAAoB,CAAC;AASpC,wBAAgB,mBAAmB,CACjC,MAAM,EAAE,OAAO,GAAG,SAAS,GAAG,IAAI,EAClC,QAAQ,EAAE,gBAAgB,EAC1B,OAAO,GAAE,OAAwB,GAChC,IAAI,CAeN"}

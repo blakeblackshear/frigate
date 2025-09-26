@@ -1,0 +1,81 @@
+{
+  "name": "node-powershell",
+  "version": "4.0.0",
+  "description": "Easily run PowerShell from your NodeJS app",
+  "main": "./lib/index.js",
+  "files": [
+    "lib",
+    "docs",
+    "example",
+    "test"
+  ],
+  "directories": {
+    "lib": "lib",
+    "docs": "docs",
+    "example": "example",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "nyc mocha",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "lint": "eslint lib/",
+    "start": "cd ./example && node example.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rannn505/node-powershell.git"
+  },
+  "keywords": [
+    "node-powershell",
+    "ps",
+    "powershell",
+    "node-ps",
+    "microsoft",
+    "shell",
+    "cmd",
+    "commandline",
+    "command",
+    "Line",
+    "windows",
+    "windows powershell",
+    "script",
+    "spwan",
+    "shells",
+    "terminal",
+    "linux powershell",
+    "powershell github",
+    "PowerShell for every system",
+    "PowerShell cross-platform",
+    "powershell linux",
+    "powershell centos",
+    "powershell rhel",
+    "powershell ubuntu",
+    "powershell macos",
+    "powershell docker",
+    "PowerShell Core",
+    "PowerShell Core 6.0",
+    "PowerShell 6.0",
+    "pwsh"
+  ],
+  "author": "Ran Cohen <rannn505@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rannn505/node-powershell/issues"
+  },
+  "homepage": "http://rannn505.github.io/node-powershell/",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "shortid": "^2.2.14"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "coveralls": "^3.0.0",
+    "eslint": "^5.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "mocha": "^4.0.1",
+    "nyc": "^13.1.0",
+    "sinon": "^7.2.3"
+  }
+}

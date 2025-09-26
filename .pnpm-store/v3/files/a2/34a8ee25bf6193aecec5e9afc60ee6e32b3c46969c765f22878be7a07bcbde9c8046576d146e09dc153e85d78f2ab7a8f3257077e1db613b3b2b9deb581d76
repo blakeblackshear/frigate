@@ -1,0 +1,42 @@
+{
+  "name": "unirest",
+  "version": "0.6.0",
+  "description": "Simplified, lightweight HTTP client library",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "form-data": "^0.2.0",
+    "mime": "^2.4.0",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "body-parser": "^1.15.1",
+    "express": "^4.13.4",
+    "mocha": "^6.0.0",
+    "should": "~8.3.1"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Mashape/unirest-nodejs.git"
+  },
+  "keywords": [
+    "request",
+    "http",
+    "library",
+    "superagent",
+    "simple",
+    "util",
+    "utility",
+    "method"
+  ],
+  "author": "Mashape <opensource@mashape.com> (https://www.mashape.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mashape/unirest-nodejs/issues"
+  }
+}

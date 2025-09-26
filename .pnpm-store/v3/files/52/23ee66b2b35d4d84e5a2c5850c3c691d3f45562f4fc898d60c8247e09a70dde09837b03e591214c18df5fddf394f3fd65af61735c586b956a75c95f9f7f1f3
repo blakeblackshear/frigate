@@ -1,0 +1,23 @@
+{
+  "name": "hoek",
+  "description": "General purpose node utilities",
+  "version": "4.3.1",
+  "repository": "git://github.com/hapijs/hoek",
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "main": "lib/index.js",
+  "keywords": [
+    "utilities"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "code": "4.x.x",
+    "lab": "14.x.x"
+  },
+  "scripts": {
+    "test": "lab -a code -t 100 -L -l",
+    "test-cov-html": "lab -a code -t 100 -L -r html -o coverage.html -l"
+  },
+  "license": "SEE LICENSE IN LICENSE.md"
+}

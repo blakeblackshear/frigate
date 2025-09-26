@@ -1,0 +1,21 @@
+hoistPattern:
+  - '*'
+hoistedDependencies: {}
+included:
+  dependencies: true
+  devDependencies: false
+  optionalDependencies: true
+injectedDeps: {}
+layoutVersion: 5
+nodeLinker: isolated
+packageManager: pnpm@9.0.0
+pendingBuilds: []
+prunedAt: Fri, 26 Sep 2025 20:31:18 GMT
+publicHoistPattern:
+  - '*eslint*'
+  - '*prettier*'
+registries:
+  default: https://registry.npmjs.org/
+skipped: []
+storeDir: /workspace/frigate/.pnpm-store/v3
+virtualStoreDir: .pnpm

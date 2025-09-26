@@ -1,0 +1,27 @@
+{
+  "name": "cryptiles",
+  "description": "General purpose crypto utilities",
+  "version": "3.2.1",
+  "repository": "git://github.com/hapijs/cryptiles",
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "main": "lib/index.js",
+  "keywords": [
+    "cryptography",
+    "security",
+    "utilites"
+  ],
+  "dependencies": {
+    "boom": "5.x.x"
+  },
+  "devDependencies": {
+    "code": "4.x.x",
+    "lab": "14.x.x"
+  },
+  "scripts": {
+    "test": "lab -a code -t 100 -m 30000 -l",
+    "test-cov-html": "lab -a code -m 30000 -r html -o coverage.html -l"
+  },
+  "license": "SEE LICENSE IN LICENSE.md"
+}

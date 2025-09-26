@@ -1,6 +1,0 @@
-{
-    "private": true,
-    "types": "../dist/dom.d.ts",
-    "main": "../dist/cjs/dom.js",
-    "module": "../dist/es/dom.mjs"
-}

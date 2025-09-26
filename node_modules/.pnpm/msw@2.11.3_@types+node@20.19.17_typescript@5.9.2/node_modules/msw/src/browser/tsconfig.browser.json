@@ -1,9 +1,0 @@
-{
-  "extends": "../tsconfig.src.json",
-  "compilerOptions": {
-    // Expose browser-specific libraries only for the
-    // source code under the "src/browser" directory.
-    "lib": ["DOM", "WebWorker"]
-  },
-  "include": ["../../global.d.ts", "./global.browser.d.ts", "./**/*.ts"]
-}

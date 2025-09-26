@@ -1,1 +1,0 @@
-{"version":3,"file":"useAlternatePageUtils.d.ts","sourceRoot":"","sources":["../../src/utils/useAlternatePageUtils.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AAOH;;;;;GAKG;AACH,wBAAgB,qBAAqB,IAAI;IACvC;;;;OAIG;IACH,SAAS,EAAE,CAAC;IACV,kCAAkC;IAClC,MAAM;IACN;;;;OAIG;IACH,cAAc,GACf,EAAE;QACD,MAAM,EAAE,MAAM,CAAC;QACf,cAAc,EAAE,OAAO,CAAC;KACzB,KAAK,MAAM,CAAC;CACd,CA0CA"}

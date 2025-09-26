@@ -1,1 +1,0 @@
-{"version":3,"file":"grammar-folding-ranges.d.ts","sourceRoot":"","sources":["../../../src/grammar/lsp/grammar-folding-ranges.ts"],"names":[],"mappings":"AAAA;;;;gFAIgF;AAEhF,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,sBAAsB,CAAC;AACpD,OAAO,EAAE,2BAA2B,EAAE,MAAM,qCAAqC,CAAC;AAGlF;;GAEG;AACH,qBAAa,kCAAmC,SAAQ,2BAA2B;IAEtE,oBAAoB,CAAC,IAAI,EAAE,OAAO,GAAG,OAAO;CAIxD"}

@@ -1,6 +1,0 @@
-{
-    "private": true,
-    "types": "../dist/client.d.ts",
-    "main": "../dist/cjs/client.js",
-    "module": "../dist/es/client.mjs"
-}

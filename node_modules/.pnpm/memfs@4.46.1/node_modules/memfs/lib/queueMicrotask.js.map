@@ -1,1 +1,0 @@
-{"version":3,"file":"queueMicrotask.js","sourceRoot":"","sources":["../src/queueMicrotask.ts"],"names":[],"mappings":";;AAAA,kBAAe,OAAO,cAAc,KAAK,UAAU,CAAC,CAAC,CAAC,cAAc,CAAC,CAAC,CAAwB,CAAC,EAAE,CAAC,EAAE,CAC9F,OAAO,CAAC,OAAO,EAAE;KACd,IAAI,CAAC,GAAG,EAAE,CAAC,EAAE,EAAE,CAAC;KAChB,KAAK,CAAC,GAAG,EAAE,GAAE,CAAC,CAAC,CAAC,CAAC"}

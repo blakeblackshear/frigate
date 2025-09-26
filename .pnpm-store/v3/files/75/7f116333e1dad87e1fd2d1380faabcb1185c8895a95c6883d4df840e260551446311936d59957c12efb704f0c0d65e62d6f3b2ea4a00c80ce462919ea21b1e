@@ -1,0 +1,1746 @@
+4.4.0:
+  date: 2024-02-28
+  new features:
+    - GH-1356 Add new key `packages` to Script
+  chores:
+    - >-
+      GH-1357 Fixed a bug where invalid JSDoc prevented generating docs and
+      types
+    - GH-1357 Update types for `getPath`
+
+4.3.0:
+  date: 2023-11-18
+  new features:
+    - GH-1339 Added `getPath` method on Item
+  chores:
+    - Updated dependencies
+
+4.2.1:
+  date: 2023-09-11
+  fixed bugs:
+    - >-
+      GH-1332 Fixed a bug where `Variable~update` was not updating the
+      description
+  chores:
+    - Updated dependencies
+
+4.2.0:
+  date: 2023-08-03
+  new features:
+    - GH-1329 Added support for `fileName` property in formdata request body
+    - GH-1329 Retain string file content while parsing formdata and file bodies
+  chores:
+    - Updated dependencies
+
+4.1.7:
+  date: 2023-01-24
+  fixed bugs:
+    - GH-1300 Fixed incorrect using typeof operator
+  chores:
+    - GH-1302 Migrate to GitHub Actions
+    - Updated dependencies
+
+4.1.6:
+  date: 2022-11-28
+  chores:
+    - Updated Travis configuration to use an updated Ubuntu distribution
+    - Updated dependencies
+
+4.1.5:
+  date: 2022-08-02
+  chores:
+    - Preserve casing for Event.listen
+    - Updated dependencies
+
+4.1.4:
+  date: 2022-06-06
+  chores:
+    - Downgraded `@faker-js/faker` dependency to `5.5.3`
+
+4.1.3:
+  date: 2022-05-24
+  fixed bugs:
+    - >-
+      GH-1268 Fixed a bug where URL path variables are not replaced if followed
+      by a dot
+  chores:
+    - Run Travis coverage step in latest LTS Node.js release
+    - Updated dependencies
+
+4.1.2:
+  date: 2022-03-28
+  chores:
+    - Replaced unmaintained 'faker' dependency with '@faker-js/faker'
+    - Updated dependencies
+
+4.1.1:
+  date: 2022-01-03
+  fixed bugs:
+    - >-
+      GH-1231 Fixed the method `getPathWithQuery` where disabled params were
+      resulting into `?` at the end of the url
+  chores:
+    - Updated dependencies
+
+4.1.0:
+  date: 2021-08-16
+  new features:
+    - >-
+      GH-1213 Added Property.findSubstitutions to get list of variables used in
+      a property
+  chores:
+    - Updated dependencies
+
+4.0.2:
+  date: 2021-08-09
+  fixed bugs:
+    - >-
+      GH-1208, GH-1209 Fixed descriptions for `$randomInt` and `$randomPrice`
+      dynamic variables
+  chores:
+    - Updated dependencies
+
+4.0.1:
+  date: 2021-07-25
+  chores:
+    - Updated dependencies
+
+4.0.0:
+  date: 2021-06-22
+  breaking changes:
+    - GH-610 Dropped support for Node.js < v10
+    - >-
+      GH-1197 Dropped support for description type-based formatting on
+      `Description#toString`
+    - >-
+      GH-1198 Dropped support for deprecated `Url#getRaw` method, use
+      `Url#toString` instead
+    - |
+      GH-1198 Dropped support for deprecated object argument variant of:
+        -> `QueryParam.unparse`
+        -> `QueryParam.unparseSingle`
+        -> `Url#getPath`
+        -> `Url#getQueryString`
+        -> `Url#getPathWithQuery`
+        -> `Url#getRemote`
+    - >-
+      GH-1199 Dropped support for deprecated `Response#mime`  and
+      `Response#mimeInfo` methods, use `Response#contentInfo` instead
+    - >-
+      GH-1200 Dropped support for deprecated `RequestAuth#current` method, use
+      `RequestAuth#parameters` instead
+    - GH-1200 Dropped support for deprecated `VariableScope#variables` method
+    - GH-1200 Dropped support for deprecated "json" `Variable#type`
+    - GH-1201 Updated `Header.unparse` default separator from "\n" to "\r\n"
+    - GH-1201 `Header.unparse` excludes disabled header by default
+    - GH-1202 Removed collection schema, refer 'postmanlabs/schemas' repository
+  fixed bugs:
+    - GH-1202 Fixed serialization of cookie extensions on .toString()
+  chores:
+    - Added secure codecov publish script
+    - Updated deprecated faker methods
+    - GH-1200 Removed discontinued `Request#authorize` method
+    - GH-1202 Removed puppeteer dependency for browser tests
+    - GH-1202 Added unit tests for 100% code coverage
+    - GH-1202 Updated TypeScript Type Declaration
+    - GH-1202 Updated nyc configuration
+    - GH-1202 Updated ESLint rules
+    - GH-1202 Updated dependencies
+
+3.6.11:
+  date: 2021-04-11
+  fixed bugs:
+    - GH-1171 Fixed mime detection when Content-Type is missing
+  chores:
+    - Updated dependencies
+
+3.6.10:
+  date: 2021-03-23
+  chores:
+    - Updated dependencies
+
+3.6.9:
+  date: 2021-01-02
+  chores:
+    - Removed `types` property from package.json
+    - Updated dependencies
+
+3.6.8:
+  date: 2020-10-07
+  chores:
+    - GH-1113 Updated dependencies
+    - >-
+      GH-1114 Updated .npmignore to prevent the addition of tests and config
+      files in the published package
+    - GH-1114 Added system test for published package content
+    - GH-1115 Automated gh-pages docs deployment
+    - GH-1115 Automated releases and publish process
+
+3.6.7:
+  date: 2020-09-16
+  fixed bugs:
+    - >-
+      GH-1101 Fixed an issue in RequestAuth where the type was set to previous
+      auth type when update() called with invalid type
+    - >-
+      GH-1097 Fixed an issue in cookie where, PropertyList should've been added
+      as required module for cookie.js file
+    - >-
+      GH-1105 Fixed a bug where `toJSON()` on RequestBody returns
+      non-serializable object having streams for bodies containing file
+  chores:
+    - GH-1098, GH-1099 Added unit tests
+
+3.6.6:
+  date: 2020-08-31
+  fixed bugs:
+    - >-
+      GH-1081 Fixed a bug where multi-valued PropertyList throws on insert if a
+      key named `hasOwnProperty` is added
+  chores:
+    - Updated dependencies
+
+3.6.5:
+  date: 2020-08-13
+  chores:
+    - GH-1076 Added TypeScript Type Declaration
+    - Updated dependencies
+
+3.6.4:
+  date: 2020-07-13
+  chores:
+    - Updated dependencies
+
+3.6.3:
+  date: 2020-07-13
+  new features:
+    - GH-1060 Added $isoTimestamp to the dynamic variable list
+  chores:
+    - Updated dependencies
+
+3.6.2:
+  date: 2020-06-04
+  fixed bugs:
+    - >-
+      GH-1056 Fixed a bug where `Variable~toString` stringifies null to empty
+      string
+  chores:
+    - Updated dependencies
+
+3.6.1:
+  date: 2020-05-15
+  fixed bugs:
+    - >-
+      GH-1025 Fixed a bug where `Item.getProtocolProfileBehavior()` mutates the
+      `protocolProfileBehavior` of all its parents
+  chores:
+    - Updated dependencies
+
+3.6.0:
+  date: 2020-03-02
+  new features:
+    - GH-975 Updated URL parsing algorithm
+  fixed bugs:
+    - GH-983 Handle query params with empty key or value on unparseSingle
+    - >-
+      GH-984 Fixed a bug where empty port, auth, etc. are dropped on
+      url.toString
+    - GH-991 Handle protocol separated using `:\\` while parsing URL
+    - >-
+      GH-994 Handle `&`, `=` and `#` in query params on
+      `QueryParam~unparseSingle`
+  chores:
+    - GH-961 Added `nyc` and `codecov` for code coverage checks
+    - Updated dependencies
+
+3.5.5:
+  date: 2019-12-02
+  new features:
+    - GH-960 Accept Response.stream to be a Base64 string
+  fixed bugs:
+    - >
+      GH-958 Fixed a bug where special characters in proxy auth credentials
+      caused connection failure to the proxy server
+  chores:
+    - Updated dependencies
+
+3.5.4:
+  date: 2019-10-01
+  new features:
+    - GH-942 Updated `ProxyConfig` to support proxy bypass list
+
+3.5.3:
+  date: 2019-09-06
+  fixed bugs:
+    - GH-938 Fixed a bug where malformed cookie value throws URIError
+
+3.5.2:
+  date: 2019-09-04
+  new features:
+    - GH-921 Added support for request body `options`
+  fixed bugs:
+    - >-
+      GH-931 Fixed a bug where header with value `0` was being replaced by empty
+      string
+  chores:
+    - Updated dependencies
+
+3.5.1:
+  date: 2019-08-01
+  new features:
+    - >-
+      GH-914 Added `VariableScope~replaceIn` method to resolve variables to
+      their values in a given template
+    - >-
+      GH-915 Added helper methods (toString, unparse, and, unparseSingle) to the
+      Cookie instance
+  chores:
+    - >-
+      GH-897, GH-900, GH-901 Added dynamic generators for `SuperString` module
+      and removed invalid/unsupported faker generators
+    - >-
+      GH-904 Modify dynamic generators key-value pairs to key-object pairs which
+      can store variable descriptions as well
+    - Updated dependencies
+
+3.5.0:
+  date: 2019-06-17
+  new features:
+    - GH-882 Updated `VariableScope~has` method to search in all the scopes
+    - Deprecated `Description` formatter based on `Description.type`
+  fixed bugs:
+    - >-
+      GH-883 Fixed a bug where `VariableScope~get` method doesn't search all the
+      scopes if the variable is disabled in local scope
+    - >-
+      GH-884 Fixed a bug where `Request~authorizeUsing` was not handling
+      arguments passed as object correctly
+    - >-
+      GH-885 Fixed a bug where `Url~toString` adds query separator `?` even if
+      all query params are disabled
+
+3.4.9:
+  date: 2019-06-07
+  improvements:
+    - GH-873 Added faker library support to add `$random*` dynamic variables
+  chores:
+    - GH-873 Added benchmark test running system `bipbip`
+    - Updated dependencies
+
+3.4.8:
+  date: 2019-05-09
+  fixed bugs:
+    - GH-863 Fixed a bug that caused proxy matching for URL with ports to fail
+    - GH-864 Fixed a bug where duplicate path variables are not handled
+  chores:
+    - Updated dependencies
+
+3.4.7:
+  date: 2019-04-08
+  new features:
+    - GH-843 Added `graphql` request body mode
+  fixed bugs:
+    - GH-842 Fixed a bug where trailing spaces in an URL was getting removed
+  chores:
+    - Updated dependencies
+
+3.4.6:
+  date: 2019-03-19
+  new features:
+    - GH-825 Updated `ProxyConfig` to support proxy authentication
+  breaking changes:
+    - GH-832 Moved timings out of response instance
+  chores:
+    - GH-834 Suppressed lint warnings and fixed a few
+    - GH-834 Removed unwanted dev dependencies
+    - Updated dependencies
+
+3.4.5:
+  date: 2019-03-01
+  new features:
+    - GH-813 Added support for PFX certificate
+  chores:
+    - GH-814 Removed connection header(forced) from request size calculation
+    - GH-819 Switched to a YAML changelog
+    - Updated dependencies
+
+3.4.4:
+  date: 2019-02-19
+  new features:
+    - GH-798 Handle disabled property in `VariableScope` methods
+    - GH-809 Added client overhead properties in timing phases
+  chores:
+    - Updated dependencies
+
+3.4.3:
+  date: 2019-02-15
+  new features:
+    - GH-800 Added support for port match in `UrlMatchPattern`
+    - GH-802 Added detailed timing parameters in Response
+
+3.4.2:
+  date: 2019-02-1
+  new features:
+    - |
+      GH-783 Added support for Array and Object variable type
+      -> Deprecated JSON variable type
+    - |
+      GH-780 Reorganized URL parameters to always honour `disabled` status
+      -> Deprecated Url~getOAuth1BaseUrl, discontinue in v4.0
+      -> Deprecated object argument variant of:
+        -> `Url~getPath`
+        -> `Url~getQueryString`
+        -> `Url~getRemote`
+    - GH-769 Avoid substitution of disabled variables
+    - GH-781 Added function `Request~size` to calculate request size
+    - >-
+      GH-773 Added an option to exclude headers with falsy keys in
+      `Request~getHeaders`
+    - >-
+      GH-777 Handle disabled events in `EventList~listeners` and
+      `EventList~listenersOwn` correctly
+  fixed bugs:
+    - GH-792 Fixed headers size calculation on `HeaderList~contentSize`
+  chores:
+    - Updated dependencies
+
+3.4.1:
+  date: 2019-01-2
+  fixed bugs:
+    - GH-763 Fixed a bug where poly chained variables are not resolved correctly
+  chores:
+    - Updated dependencies
+
+3.4.0:
+  date: 2018-12-6
+  new features:
+    - >-
+      GH-743 Added support for ItemGroup and Collection level
+      protocolProfileBehaviour
+  chores:
+    - Migrated tests to chai expect assertions
+    - Switched over to Travis for Windows builds
+    - Updated dependencies
+
+3.3.0:
+  date: 2018-09-21
+  new features:
+    - GH-709 Added support for `protocolProfileBehaviour` overrides
+    - GH-701 Added support for disabled request bodies
+  chores:
+    - Updated dependencies
+
+3.2.1:
+  date: 2018-09-6
+  fixed bugs:
+    - GH-699 Handle non-string request method correctly
+  chores:
+    - Updated dependencies
+
+3.2.0:
+  date: 2018-08-20
+  new features:
+    - GH-689 Added support for `contentType` to form data request bodies.
+  fixed bugs:
+    - GH-679 Fixed URL path handling
+    - GH-681 Fixed a bug that caused URL parsing to ignore path variables
+  chores:
+    - GH-694 Updated dependencies
+
+3.1.1:
+  date: 2018-06-30
+  new features:
+    - >-
+      Added support for `Response.prototype.jsonp()` to easily extract `jsonp`
+      inside sandbox
+  fixed bugs:
+    - >-
+      Fixed: Remove `console` statement, which may not be available in some
+      environments
+    - 'Fixed: Added `info` to `Property~Definition` documentation'
+  chores:
+    - Updated dependencies
+
+3.1.0:
+  date: 2018-06-28
+  new features:
+    - |
+      Added support for tracking changes on a `VariableScope`. To use this
+      enable tracking on your variable scope
+
+        var variableScope = new VariableScope();
+
+        variableScope.enableTracking();
+    - |
+      If you are only interested in the last change for any key, you can use the
+      `autoCompact` option
+
+        var variableScope = new VariableScope();
+
+        variableScope.enableTracking({ autoCompact: true });
+    - >-
+      This makes sure that you are only provided with the most minimal set of
+      changes. Use this when you want to optimize memory usage or improve
+      performance when applying the changes back
+    - |
+      The `mutations` object allows you to then apply the same changes on a
+      different `VariableScope`
+
+        var scope1 = new VariableScope(),
+        scope2 = new VariableScope();
+
+        // enable tracking
+        scope1.enableTracking();
+
+        // this change is captured in scope1.changes
+        scope1.set('foo', 'bar');
+
+        // this applies the captured changes on scope2
+        scope1.mutations.applyOn(scope2);
+    - Added `MutationTracker` for tracking mutations
+    - >-
+      Added `Response~contentInfo` to extract mime info and filename from
+      response
+    - Deprecated `Response~mime` and `Response~mimeInfo`
+  chores:
+    - Updated dependencies
+    - Fixed documentation for `Description~definition`
+
+3.0.10:
+  date: 2018-05-22
+  fixed bugs:
+    - >-
+      Revert computing filename from content-disposition header in
+      `Response~mime`
+  chores:
+    - Updated dependencies
+
+3.0.9:
+  date: 2018-05-16
+  fixed bugs:
+    - Faster `QueryParam~unparse`
+    - >-
+      `Variable~toString` now stringifies falsy values instead of falling back
+      to empty string
+    - >-
+      `Response~mimeInfo` now computes filename from `content-disposition`
+      header
+    - Updated dependencies
+
+3.0.8:
+  date: 2018-03-21
+  fixed bugs:
+    - GH-607 Improved type checking in `RequestBody~update`
+    - GH-589 Fixed bug that caused missing descriptions in `Collection~toJSON`
+  chores:
+    - Updated dependencies
+
+3.0.7:
+  date: 2018-01-15
+  fixed bugs:
+    - GH-539 Improved pre-stringification variable type safety
+  chores:
+    - Updated dependencies
+
+3.0.6:
+  date: 2017-11-30
+  fixed bugs:
+    - Downgraded `sanitize-html` to continue support for `postman-sandbox`
+  chores:
+    - Updated dependencies
+
+3.0.5:
+  date: 2017-11-23
+  new features:
+    - Added `update` method to `Script`
+  chores:
+    - Updated dependencies
+
+3.0.4:
+  date: 2017-11-20
+  new features:
+    - |
+      Get and set objects in variables with `json` variable type
+        var variable = new Variable({ type: 'json' });
+
+        // set objects as values for `json types`
+        variable.set({ version: 'v1' });
+
+        // get object values
+        console.log(variable.get()); // { version: 'v1' }
+        console.log(typeof variable.get()); // object
+    - GH-502 Added support for system property in query parameters
+    - GH-503 `request~toJSON` no longer converts `url` to string
+    - Made sure all Script instances have an id
+  fixed bugs:
+    - Fixed a bug where updating types in a variable removed value functions
+    - '`auth` is now included in `collection.toJSON`'
+    - >-
+      Fixed a bug where `item.getAuth` would return an empty `RequestAuth`,
+      instead of looking up in the parent
+    - >-
+      Fixed a bug where empty `auth` was created for `new
+      {Request,ItemGroup,Collection}({auth: null})`. This affected the auth
+      lookup in parents.
+
+3.0.3:
+  date: 2017-11-8
+  fixed bugs:
+    - >-
+      GH-501 Fixed `Description~toString()` behaviour for falsy description
+      contents
+  chores:
+    - Updated dependencies.
+    - GH-499 Updated `.npmignore`
+
+3.0.2:
+  date: 2017-11-6
+  new features:
+    - GH-495 Added Node v8 to the CI.
+    - >-
+      GH-494 Allowed `VariableScope~toObjectResolved` to be called with parent
+      overrides
+    - >-
+      GH-484 Switched to 8fold-marked
+      (https://www.npmjs.com/package/8fold-marked) from marked
+      (https://www.npmjs.com/package/marked)
+  fixed bugs:
+    - GH-485 Fixed `VariableScope~toObject` to respect layers
+  chores:
+    - Updated dependencies
+
+3.0.1:
+  date: 2017-10-12
+  fixed bugs:
+    - GH-479 Corrected file URL handling
+  chores:
+    - Updated dependencies
+
+3.0.0:
+  date: 2017-09-26
+  breaking changes:
+    - Updated to using collection format schema v2.1 (auth structure change)
+    - Modified functioning of `Item#getAuth` to return `RequestAuth` directly
+    - Added sugar to RequestAuth to handle any auth type (refer docs)
+    - >-
+      Removed any auth type specific code from SDK. All individual
+      authentication related code is now moved to `postman-runtime`
+    - Added ability to deal with `PropertyList~upsert` operations
+    - Removed `.sign()` from Request Auth
+    - Made `Request.toJSON` use `PropertyBase` toJSON
+    - >-
+      Updated `.toObjectResolved` to accept reference tree for resolution of
+      variables
+    - >-
+      Updated variable substitution function to now look up the parent tree to
+      find variable replacement
+
+2.1.3:
+  date: 2017-08-28
+  fixed bugs:
+    - >-
+      GH-429 Added an option to ignore disabled parameters in
+      `QueryParam.unparse`
+    - GH-444 Ensured that all `_.get` calls use valid and sane fallback values
+    - GH-443 Ensured that empty hosts do not cause an exception in `Url~getHost`
+
+2.1.2:
+  date: 2017-08-21
+  fixed bugs:
+    - >-
+      GH-441 Renamed the property `_postman_requiresId` to
+      `_postman_propertyRequiresId` in order to be standard compliant
+
+2.1.1:
+  date: 2017-08-18
+  new features:
+    - GH-430 Added an option to sanitize Property keys in `PropertList~toObject`
+    - >-
+      GH-437 Initialized `VariableScope~_layers` only on demand, and not by
+      default
+  fixed bugs:
+    - GH-438 Fixed a bug that caused incorrect AWS Auth signatures
+  chores:
+    - Updated dependencies, added edge case unit tests.
+
+2.1.0:
+  date: 2017-07-18
+  new features:
+    - >-
+      GH-417 Updated `ProxyConfig#getProxyURL` to always return proxy URL with
+      HTTP protocol
+    - GH-411 Prevented `_details` from showing up in `Response#toJSON` results
+    - >-
+      GH-404 The `Script` constructor now accepts script arrays and strings as
+      well
+    - >-
+      GH-384 `VariableScope#toObject` now returns data across multiple layers as
+      well
+
+2.0.2:
+  date: 2017-07-5
+  fixed bugs:
+    - GH-403 Fixed typo in the `ALLOWED_PROTOCOLS` variable
+
+2.0.1:
+  date: 2017-07-3
+  new features:
+    - >-
+      GH-402 Updated `ProxyConfig` to match all protocols, hosts and paths by
+      default
+
+2.0.0:
+  date: 2017-07-3
+  breaking changes:
+    - >-
+      Updated the `ProxyConfig` & `UrlMatchPattern` to support multiple
+      protocols
+    - |
+      `ProxyConfig` and `ProxyConfigList` now accept the `host` and `port` keys
+      instead of `server`. The `match` property also takes in multiple
+      protocols:
+
+        // v1.2.9
+        var proxyConfig = new ProxyConfig({
+            match: 'http://*/foo',
+            server: 'https://proxy.com:8080', // This has been split into host and port in v2.0.0
+            tunnel: true
+        });
+        var proxyConfigList = new ProxyConfigList({}, [
+            {
+                match: 'http://*/foo',
+                server: 'https://proxy.com:8080', // This has been split into host and port in v2.0.0
+                tunnel: true
+            }
+        ]);
+
+        // v2.0.0
+        var proxyConfig = new ProxyConfig({
+            match: 'http+ftp://*/foo', // match now supports multiple plus(`+`) separated protocols
+            host: 'proxy.com', // In v1.2.9, `host` and `port` were combined into `server`
+            port: 8080,
+            tunnel: true
+        });
+
+        var ProxyConfigList = new ProxyConfigList({}, [
+            {
+                match: 'http+ftp://*/foo', // `match` now supports multiple plus(`+`) separated protocols
+                host: 'proxy.com', // In v1.2.9, `host` and `port` were combined into `server`
+                port: 8080,
+                tunnel: true
+            }
+        ]);
+    - |
+      `UrlMatchPattern` now returns an array of protocol strings:
+
+        // v1.2.9
+        var matchPattern = new UrlMatchPattern('http://*/*').createMatchPattern();
+        matchPattern.protocol // 'http'
+
+        // v2.0.0
+        var matchPattern = new UrlMatchPattern('http://*/*').createMatchPattern();
+        matchPattern.protocols // ['http'] (The singular protocol key has been replaced with the plural protocols in v2.0.0)
+
+        var anotherMatchPattern = new UrlMatchPattern('http+https+ftp+file://').createMatchPattern();
+        anotherMatchPatter.protocols // ['http', 'https', 'ftp', 'file']
+    - |
+      `ProxyConfig#server` has been removed in favour of the new host format:
+
+        // v1.2.9
+        var proxyConfigList = new ProxyConfigList({}, [
+            {
+                match: 'https://*/*',
+                host: 'proxy.com'
+            }
+        ]);
+        proxyConfigList.resolve('https://www.google.com').server.getHost(); // `proxy.com`
+
+        // v2.0.0
+        var proxyConfigList = new ProxyConfigList({}, [
+            {
+                match: 'https://*/*',
+                host: 'proxy.com'
+            }
+        ]);
+        proxyConfigList.resolve('https://www.google.com').host // `proxy.com`
+
+1.2.9:
+  date: 2017-06-27
+  new features:
+    - >-
+      Added support to allow duplicate indexed items to be exported as array via
+      `PropertyList.prototype.toObject`
+    - >-
+      Added a helper, `ItemGroup.oneDeep()` to recursively look for an `Item` in
+      an `ItemGroup`
+  fixed bugs:
+    - >-
+      Fixed a bug which caused `PropertyList.remove()` to remove uncalled for
+      elements from internal reference
+
+1.2.8:
+  date: 2017-05-31
+  fixed bugs:
+    - >-
+      Fixed a bug where converting `QueryParam` and `FormParam` lists to objects
+      was not working
+
+1.2.7:
+  date: 2017-05-30
+  fixed bugs:
+    - >-
+      Fixed path variable data representations to work correctly with `id` as
+      well as `key`.
+
+1.2.6:
+  date: 2017-05-29
+  new features:
+    - Enhanced `Url.toString()` to handle non-string path variable values
+    - Enhanced `PropertyList.has()` to also check for values (optionally)
+    - Added a data structure for NTLM authentication mechanism
+
+1.2.5:
+  date: 2017-05-11
+  new features:
+    - Added support for multi-layered variable resolution
+    - Added convenience method, `VariableScope.toObject()`
+    - '`VariableScope.variables()` is now deprecated in favor of above'
+
+1.2.4:
+  date: 2017-05-09
+  fixed bugs:
+    - >-
+      Fixed a bug in the response size computation which was caused due to
+      reliance on a hidden property
+
+1.2.3:
+  date: 2017-05-08
+  fixed bugs:
+    - '`Header` now inherits from `Property` instead of `PropertyBase`'
+    - Authorization helper fixes
+    - Descriptions have been shifted to `Property` from `PropertyBase`
+    - Header size sent is zero if no headers are present
+
+1.2.2:
+  date: 2017-04-26
+  new features:
+    - Updated signing logic to support inherited auth parameters
+    - Added a new helper function, `setParent` to `PropertyBase`
+
+1.2.1:
+  date: 2017-04-25
+  new features:
+    - Added a new property, `CookieList`
+  fixed bugs:
+    - >-
+      Fixed a bug in the `RequestAuth` implementation which caused authorization
+      step to be skipped
+  chores:
+    - Improved documentation
+
+1.2.0:
+  date: 2017-04-24
+  new features:
+    - Added support for variable types via VariableScope `.set` function
+    - Added `VariableScope~variables` to access all variables as a plain object
+    - Ensure that `Xyz.isXyz()` functions always return a boolean
+    - >-
+      Updated Cookie to behave properly in lists (`name` is now the key and it
+      is multi-value case insensitive)
+    - '`RequestAuthBase` inherits from `PropertyBase`'
+    - >-
+      All auth definitions inherit from `RequestAuthBase` (through a dynamic
+      intermediate class)
+    - >-
+      Added `Item.getAuth()` which returns an instance of the currently selected
+      auth-type (searches parent folders as well)
+    - >-
+      Added `PropertyBase.findInParents` which finds a given property in the
+      closest parent.
+    - >-
+      Added `PropertyBase.findParentContaining` which finds the closest parent
+      containing the given property.
+    - >-
+      Added `RequestAuth.current()` which returns an instance of the currently
+      selected auth.
+    - >-
+      Added `.toObject` and `.toString` method to PropertyList to work for Types
+      that has a .valueOf and `.unparse` defined.
+    - >-
+      Added HeaderList and discontinued `Header.headerValue` in favour of
+      `HeaderList.get`
+  fixed bugs:
+    - Fixed a bug which caused `Request` to not initialize headers
+    - >-
+      Fixed issue with Cookie constructor misbehaving when constructor
+      definition was missing
+    - >-
+      Fixed issue with `Cookie~update` function causing previosuly defined
+      properties from being overwritten
+
+1.1.0:
+  date: 2017-04-03
+  new features:
+    - Enhanced the `PropertyList` to allow keys with multiple values
+    - Removed Response details `fromServer` flag
+    - Added Response details `standardName` property
+    - Added `set`, `get`, `unset` and `clear `helpers to `VariableScope`
+    - Added `Response#details` helper to retain custom server HTTP reasons
+    - Added `Response.isResponse` and `Script.isScript` helpers
+    - Added `Request.isRequest` helper
+  fixed bugs:
+    - >-
+      Fixed a bug in `PropertyList#clear` which caused only the first property
+      of a list to be removed
+    - Fixed a script resolution bug in `Event#update`
+
+1.0.2:
+  date: 2017-03-21
+  fixed bugs:
+    - Downgraded `file-type` to v3.9.0, which is browserify compatible
+
+1.0.1:
+  date: 2017-03-14
+  new features:
+    - Added a helper function, `isProxyConfig`
+
+1.0.0:
+  date: 2017-03-06
+  breaking changes:
+    - Added proxy and certificate properties to request model
+    - Added UrlMatchPattern, UrlMatchPatternList classes
+    - Added Certificate and CertificateList classes for certificate information
+  chores:
+    - >-
+      Fixed a bug in `PropertyList` which caused members to not be JSONified
+      correctly
+
+0.5.13:
+  date: 2017-02-24
+  new features:
+    - >-
+      Added helper functions for traversing parent properties (`.parent()` &
+      `.forEachParent()`)
+
+0.5.12:
+  date: 2017-02-16
+  new features:
+    - Migrated code from echo.getpostman.com to postman-echo.com
+    - Allow options.stream to be a new Buffer().toJSON()
+
+0.5.11:
+  date: 2017-01-31
+  new features:
+    - Added test for multiple variables with host
+    - Added more test cases for url parse
+    - Removed unused quantifier from character class
+    - Update response.js
+    - >-
+      Improved response documentation structure and added encoding helper
+      function
+    - Reduced one more toString call :)
+    - Added the Buffer check instead of checking for ArrayBuffer
+    - Bail out early if it is a arraybuffer
+    - Moved the charset handling to mime-format
+    - Added the charset to the mime info
+    - >-
+      Find the encoding from the header and encode the stream response
+      accordingly
+  fixed bugs:
+    - Ignore dots within variables on host
+    - Fixes  `getOAuth1BaseUrl` to not lowercase the url path
+
+0.5.10:
+  date: 2016-12-26
+  new features:
+    - Provided the public api to test the match pattern
+  fixed bugs:
+    - Fixed invalid script reference
+    - >-
+      Returned undefined if the pattern is not a valid one for proxy match
+      pattern
+    - Respect the disabled prop in the proxyConfigList
+  chores:
+    - Renamed util lodash pluck to choose
+
+0.5.9:
+  date: 2016-12-19
+  fixed bugs:
+    - Fixed post build success documentation publish flow
+
+0.5.8:
+  date: 2016-12-14
+  new features:
+    - >-
+      Find the encoding from the header and encode the stream response
+      accordingly
+  fixed bugs:
+    - Replace node-uuid with uuid module since node-uuid has been deprecated
+  docs:
+    - Fixed the example in the readme file
+  chores:
+    - Converted `timeStamp` to `timestamp` in oAuth1
+
+0.5.7:
+  date: 2016-11-16
+  new features:
+    - Added the ability to provide the disabled prop to the the form-param
+    - Added response module contructor helper
+    - Improved validation, added isCookie method + tests
+    - Added response module contructor helper
+  fixed bugs:
+    - Fixed inheritance of formparam
+    - Set the disabled prop only if it is provided
+  chores:
+    - Skipped cookie tests
+    - Improved naming, added more tests
+
+0.5.6:
+  date: 2016-11-2
+  new features:
+    - Supports ProxyConfig and ProxyConfig List
+    - >-
+      added a Response.prototype.encoding private function to return encoding of
+      the response
+    - >-
+      Updated Response mime detection functions to use constants to improve
+      performance. + a few doc improvements
+    - Response objects are now marked to always use and generate IDs
+    - Proxy Config support
+    - >-
+      Added utility function (internal) to select the first non-empty value from
+      a set of values
+    - Added the test for default all_url policy to go through all the urls
+    - Replaced the .test with .match for better stateless reggae matching
+  chores:
+    - Cleanup directory structure in `package.json`
+    - Remove non-existing directories from `package.json`
+    - Removed Node v5 from the build configuration
+    - >-
+      Updated documentation of Response constructor and made .reason() function
+      use custom reason message
+
+0.5.5:
+  date: 2016-10-14
+  fixed bugs:
+    - fixed a bug in hawk auth
+  chores:
+    - Altered build-wiki script for breaking changes
+    - Unskipped body mime detection test
+
+0.5.4:
+  date: 2016-10-5
+  fixed bugs:
+    - Handle empty session token in aws auth
+    - If the app sends us an empty session token, do not give it to the library
+    - Corrected `_.merge` discrepancy
+  chores:
+    - Replaced deprecated fs.existsSync calls in system tests
+    - >-
+      Turned off the unit test cobertura reporter on CI. This would now allow to
+      see full build report on Travis
+    - Rename `name` to `key` to make our cookie compatible with tough cookie
+
+0.5.3:
+  date: 2016-09-28
+  new features:
+    - AppVeyor + system tests
+    - GH-130 Ported scripts to Shelljs
+    - Sync scope to object
+    - >-
+      Added helper function in collection to expand functionalities of list sync
+      to target object
+    - Added function in VariableList to sync its members to an object
+  fixed bugs:
+    - Updated `marked` dependency to 0.3.6 to patch security issue
+
+0.5.2:
+  date: 2016-09-21
+  new features:
+    - Create/Update header functionality
+    - Added a helper method to allow updating or inserting a header
+  fixed bugs:
+    - Ensure that AWS Auth updates headers if they already exist
+    - Do not remove aws sha256 header
+    - Ensure that upsertHeader does not blow up if no header is specified
+  chores:
+    - Renamed functional tests to unit
+
+0.5.1:
+  date: 2016-09-20
+  new features:
+    - Replaced JSHint + JSCS with ESLint + plugins
+    - Added support of query params to uri in digest
+  fixed bugs:
+    - Fixed a crash in request body empty check
+  chores:
+    - Renamed functional tests to unit
+    - Renamed unit tests to integration
+
+0.5.0:
+  date: 2016-09-16
+  new features:
+    - >-
+      Ensure that security token is removed from headers before sending the
+      request
+    - Oauth1 empty parameters
+    - AWSv4 session token support
+    - Added leviathan JSON test
+    - Respect the empty parameter setting
+    - VariableScope object (and other performance improvements)
+    - >-
+      Made the VariableScope always clone a list if provided in constructor
+      (reasons stated as inline comment) + added test
+    - >-
+      Relaxed the variable list transformation functions check on validity of
+      the object inside an array
+    - Added resolution correctness check for slashed variable names
+    - >-
+      Improved Url by storing all strings and regular expressions as
+      constant-like variables
+    - >-
+      Updated VariableScope tests to account for the changes in key for
+      VariableList
+    - Added toJSON to VariableScope
+    - >-
+      Made variableList use the indexing key property wherever it was
+      manipulating Variable objects
+    - >-
+      Updated path variables to be backward compatible with indexing key being
+      `id` (needed since indexing property of Variable changed to `key` from
+      `id`)
+    - Update indexing property of variable to `key`
+    - >-
+      For consistency, made property-list return blank array when it has no
+      members. + @czardoz
+    - >-
+      Updated base Property constructor to not create keys for `name` unless it
+      is defined. Also updated it to re-use its own instance properties in case
+      the constructor os re-applied on a plain object
+    - Added variable sync helper function in Collection.
+    - >-
+      Provided similar api to deal with collection variables compared to
+      environments and globals
+    - >-
+      Moved core value syncing function to variable-list and aliased in
+      variable-scope.
+    - This allows the syncing functionality to be usable as collection variable
+    - Added unit tests for VariableScope
+    - Added `id` property to response schema
+    - Added VariableScope to better manage environments, globals, etc
+    - >-
+      Added function isVariableList - will be needed during working with
+      VariableScope definition
+    - >-
+      Made PropertyList use its own list specific flags from prototype and
+      update the flags in list instances based on the type defined - example:
+      _postman_listIndexKey, _postman_listIndexCaseInsensitive
+    - >-
+      This prevents object clutter and adds reliability to the list operation
+      functions
+    - >-
+      Made the `disabled` key of properties be added only when one is provided
+      in construction definition. Prevents object clutter
+    - Used liquid-json to parse response.json() - strips BOM
+    - Updated Response Property to use relaxed internal JSON parser
+  fixed bugs:
+    - Fixed context binding operations
+    - >-
+      Fixed a bug introduced where variable-list was transforming to wrong
+      property value - `values` instead of `value`
+  chores:
+    - Updated Lodash to v4
+    - Added `hawk` to GreenKeeper ignore
+    - Added some TODO tasks with respect to Variables and VariableList
+
+0.4.14:
+  date: 2016-08-24
+  chores:
+    - Tightened dependency requirements to use precise versions only
+
+0.4.13:
+  date: 2016-08-18
+  new features:
+    - Added tests for the meta properties
+    - Added a function to get meta properties
+    - Updated propertyBase to pick description from `info` block if provided
+    - >-
+      Updated the `_.createDefined` util function to accept a fallback parameter
+      to set default
+  fixed bugs:
+    - Fix collection constructor `info` block description parsing
+    - >-
+      Ensure that meta keywords of base constructor `merges` the properties
+      instead of deleting them.
+
+0.4.12:
+  date: 2016-08-11
+  new features:
+    - Added a method to get the remote from a url
+    - Added an option to get the port when it is not specified
+    - Added Travis CI build notification capability
+    - Added a method to get the remote from a url
+    - Maintain integrity of URL query parameters
+    - Added unparsing tests for query params that lack value
+    - >-
+      Updated QueryParam.unparse to internally use unparseSingle -> thus
+      retaining parameter integrity
+    - >-
+      Updated query param constructor to inherit from Property (no clue why it
+      was not done) and split the constructor to use `update` function. Also,
+      made the toString() function of query param use `unparseSingle`
+    - >-
+      Updated the function of single query param parsing to (1) not trim
+      anything and (2) if value is missing, store it as undefined. These are
+      useful in retaining integrity during unparsing
+    - Added function to unparse a single query parameter
+  fixed bugs:
+    - >-
+      Fixed dead code and throwback logic in URL constructor and query param
+      getter.
+
+0.4.11:
+  date: 2016-08-5
+  fixed bugs:
+    - Ensure that aws auth does not use disabled headers
+
+0.4.10:
+  date: 2016-08-5
+  fixed bugs:
+    - Ensure that isEmpty checks in the file content as well
+    - Ensure that isEmpty checks in the file content as well
+  chores:
+    - Corrected the test case name
+    - >-
+      Updated the test names, added a testcase for both src and content being
+      empty
+    - Renamed ref to src
+
+0.4.9:
+  date: 2016-08-4
+  new features:
+    - Added tests for customer reported headers
+    - Updated to use mime-format for guessing mime type
+  fixed bugs:
+    - Ensure that aws auth does not add duplicate host header
+    - >-
+      Fixed a bug which caused url query-parameters to be truncated
+      postmanlabs/postman-app-support#2218
+
+0.4.8:
+  date: 2016-07-31
+  fixed bugs:
+    - Ensure that we do not sign unneeded headers
+
+0.4.7:
+  date: 2016-07-31
+  fixed bugs:
+    - Ensure that the oauth1 signature is encoded if necessary
+
+0.4.6:
+  date: 2016-07-29
+  new features:
+    - GH-70 Added poly chain variable resolution capability, associated tests
+  fixed bugs:
+    - Ensure that we do not throw on url stringification
+
+0.4.5:
+  date: 2016-07-26
+  new features:
+    - Updated aws4 version
+    - Optimized header splitting
+    - Added ability to specify custom separator when unparsing headers
+  fixed bugs:
+    - GH-65 Refactored to use unparse
+    - GH-69 Fixed parsing of headers containing colons
+    - Fixed parsing of headers containing colons
+    - Fixed header truncation on initialization
+  chores:
+    - Corrected the test name
+
+0.4.4:
+  date: 2016-07-25
+  fixed bugs:
+    - Ensure that properties with empty values can be added to property lists
+    - >-
+      Fixed issue in PropertyList.add where isNaN missed the `item` variable as
+      parameter
+  chores:
+    - >-
+      removed node v0.12 from travis config, updated it to not try document
+      shenanigans on pull requests
+
+0.4.3:
+  date: 2016-07-21
+  fixed bugs:
+    - Hawk nonce mutation
+    - Ensure that we create a timestamp for hawk auth (if not given already)
+    - >-
+      GH-63 Ensure that the helper params are mutated, so they can be shown on
+      the UI
+  chores:
+    - Removed unnecessary comments
+
+0.4.2:
+  date: 2016-07-21
+  fixed bugs:
+    - GH-62 Added a check to see if request body is empty
+    - Added a check to see if request body is empty
+    - Fixed whitespace
+    - Return empty string in the toString method
+    - Updated the isEmpty function to be more concise
+    - >-
+      GH-61 Updated the oauth1 helper to not forcibly override the nonce and
+      timestamp values
+
+0.4.1:
+  date: 2016-07-13
+  new features:
+    - Added an option to disable URL encoding
+    - >-
+      Disable url encoding by default, and only enable it by specifying an
+      option
+    - Remove the options in toString for Urls
+    - Optimized query parameter unparsing and added tests for it
+  fixed bugs:
+    - GH-60 Disabled URL encoding by default
+    - Do not unnecessarily create a new object while unparsing URLs
+
+0.4.0:
+  date: 2016-06-28
+  new features:
+    - Ensure that btoa is called directly, otherwise Chrome throws an illeg…
+    - Response body conversion sugar function
+    - >-
+      Ensure that btoa is called directly, otherwise Chrome throws an illegal
+      invocation error
+    - Added a property to determine whether headers were added as a byprodu…
+    - Moved HTTP Reason phrase and mime format databases to external module
+    - >-
+      Add Response#json function to procure response as POJO. Uses, parse-json
+      module to return more explicit error for JSON parse failures
+    - >-
+      Added Response#text function to return response body as text. Also adds
+      utility function to parse buffer (or array buffer) to string
+    - Moved HTTP Reason phrase and mine format databases to external module
+    - >-
+      Added a property to determine whether headers were added as a byproduct of
+      the sdk functions
+
+0.3.3-0.3.4:
+  date: 2016-06-9
+  fixed bugs:
+    - Ensure that we create a property-list by default in body parameters
+
+0.3.2:
+  date: 2016-06-9
+  fixed bugs:
+    - Ensure that body contains property lists even if not specified
+
+0.3.1:
+  date: 2016-06-9
+  fixed bugs:
+    - Remove oauth1 params from the body before sending them
+
+0.3.0:
+  date: 2016-06-9
+  new features:
+    - Case insensitive propertylist lookup index
+    - >-
+      Removed the property list construction arg validation since it is not part
+      of this concern of branch
+    - >-
+      Updated mime lookup function in mime-format to exclude extra parameters in
+      content type
+    - Made header property have case insensitive lookup.
+    - >-
+      Added ability in PropertyList to do case insensitive lookup and remove.
+      Also added tests.
+    - Update index.js
+    - >-
+      Updated mime lookup function in mime-format to exclude extra parameters in
+      content type
+    - >-
+      Made PropertyList call its `super_` and throw error if type parameter is
+      missing
+    - >-
+      Added util function to get a property on object if it is defined else,
+      return a default value.
+
+0.2.2:
+  date: 2016-06-9
+  fixed bugs:
+    - Fixed hawk auth nonce generation
+    - Fix iteration, move string constructors to constants
+
+0.2.1:
+  date: 2016-06-8
+  new features:
+    - >-
+      Added ability for Response#dataURI to fallback to response.body string as
+      source in case stream is absent
+    - Use Uint8Array contructor instead of `from` method
+  fixed bugs:
+    - Correctly add oauth1 params to the request body
+    - Fix arrayBufferToString
+    - >-
+      Added a hash map for accurate text type detection from mime in Response
+      property
+    - Fix arrayBufferToString
+    - Fixes postmanlabs/postman-collection#44
+
+0.2.0:
+  date: 2016-06-6
+  new features:
+    - Mime type detection in Response object
+    - Added ability to return data URI from string, buffer or array buffer
+    - Added mime and dataURI functions to Response property
+    - Added `_postman_propertyIndexKey` key in Properties
+    - Added ability to populate from an object
+
+0.1.4:
+  date: 2016-06-6
+  new features:
+    - Added a new mode for request body
+    - The description tag now allows markdown to have HTML
+    - >-
+      Moved Base64 to a separate ignored util file and documented the return of
+      Response#mime()
+    - Mime type detection from buffer body
+    - >-
+      Added `_postman_propertyIndexKey` key in Properties to be used for reading
+      in PropertyList to decide the indexing key name
+    - >-
+      Added functional test that checks header parsing and load from list in
+      various formats
+    - >-
+      Added Header.create and updated the constructor to accept value, key as
+      construction parameter
+    - >-
+      Updated PropertyList#populate function to accept an object as well and
+      treat individual keys in them as separate items to be sent to
+      PropertyList.add(). This allows simple object to be used as propertylist
+      source for properties that support Property.create
+    - >-
+      Update PropertyList#add function to be a bit more intelligent and use the
+      source Type.create function to add a new item whenever one is available.
+
+0.1.3:
+  date: 2016-06-5
+  new features:
+    - >-
+      Allow specifying an src for form parameters, in case we need to handle
+      files
+    - The description tag now allows markdown to have HTML
+  chores:
+    - Doc tutorials
+    - Added a config file for tutorials
+    - Updated documentation theme
+    - Added the first tutorial
+
+0.1.2:
+  date: 2016-06-2
+  fixed bugs:
+    - Formdata handling
+    - 'hotfix: use the correct service name in the aws auth helper'
+    - Return an empty string for form-data when stringifying a body
+    - Ensure that toString always returns a string
+    - Ensure that the raw body can be stringified
+    - Fix the order in which request body is processed
+    - >-
+      Ensure that we do not have an empty block - messes with the code style
+      checks
+    - Remove unnecessary error in request body stringification
+  docs:
+    - Update the link to docs
+    - Corrected module name
+    - Removed long commits
+    - Documentation updates
+    - Added documentation for the query parameters
+    - Added header documentation
+    - Updated docs
+    - Added examples and definition for a cookie
+
+0.1.1:
+  date: 2016-05-24
+  new features:
+    - Allow injecting default variables in the substitutor
+  fixed bugs:
+    - Fixed the handling of function variables in a URL
+    - Fixed the handling of function variables in a URL
+
+0.1.0:
+  date: 2016-05-23
+  new features:
+    - Move the default vars outside the main variable-list constructor
+    - Added recursive variable resolution capabilities
+    - >-
+      Improved variable naming, optimized intra-method declarations, shifted
+      resolution limit to a static member, reversed loop direction.
+    - Use the new SuperString in Property for variable replacement
+    - Add SuperString object t abstract variable replacement from collections
+    - >-
+      Removed superfluous string comparisons, adjusted loopCounter to start at 0
+      instead of -1
+    - Delimited iterative resolution depth to 20 cycles
+    - Added tests for recursion depth and cyclic resolution handling
+
+0.0.18:
+  date: 2016-05-18
+  new features:
+    - Added ability to substitute function variables, and tests
+    - >-
+      Removed unnecessary addition of function to allowed types, use Date.now()
+      instead of getTime()
+    - >-
+      Corrected the implementation, and moved the default function variables to
+      the right location.
+    - Add `_.find` in SDK for property List
+    - added a test for finding in a list
+    - Added support for function variables
+    - Added a test for variable substitution
+  chores:
+    - Remove double quotes from everywhere
+
+0.0.17:
+  date: 2016-05-6
+  new features:
+    - Added the ability to iterate over itemgroups
+
+0.0.16:
+  date: 2016-05-6
+  fixed bugs:
+    - Ensure that request descriptions are always
+    - Version is not longer a part of description
+    - Ensure that request descriptions are always returned when calling toJSON()
+
+0.0.15:
+  date: 2016-05-6
+  fixed bugs:
+    - Import property-base
+    - Fixed a broken change
+
+0.0.14:
+  date: 2016-05-6
+  fixed bugs:
+    - >-
+      Documentation changes, some bug fixes (and out of context feature of
+      variable substitution in Property)
+    - >-
+      Moved all substitution functions back in Property and made PropertyBase
+      private
+    - >-
+      Updated VariableList to use variable substitution logic from PropertyBase
+      instead of within itself
+    - >-
+      Added function to recursively substitute variables in an object from
+      PropertyBase.replaceSubstitutionsIn
+    - >-
+      Added replaceSubstitutions function in PropertyBase to replace variable
+      substitutions directly from Property instead of VariableList
+    - >-
+      Updated `util._.findValue` to also accept VariableList as a data source.
+      This will allow for easier usage of this utility function while using from
+      a place that cannot refer to VariableList. (One caveat is that this now
+      uses `_postman_propertyName` to detect VariableList and a note has been
+      added to ensure that this is not changed)
+    - >-
+      Added fake nsp scripts to exclude `marked` vulnerability. Also added infra
+      tests for the same
+  docs:
+    - >-
+      Made PropertyBase documentation public until the substitution functions
+      are moved to property
+    - Documentation typo fixes in Description property
+
+0.0.13:
+  date: 2016-04-7
+  fixed bugs:
+    - Fix url param stringification
+
+0.0.12:
+  date: 2016-04-4
+  new features:
+    - Added http reason phrases
+    - Added tests for response code and reason phrase (status)
+    - Added http reason phrases
+
+0.0.12-beta.1:
+  date: 2016-04-2
+  fixed bugs:
+    - >-
+      Added ability of Property.toObjectResolved to accept additional override
+      sources
+    - >-
+      Removed the duplicate `disabled` processing of Event and elaborated the
+      documentation
+    - >-
+      Fix issue with the newly added private `_nocast` parameter to
+      `Variable#valueType` function
+    - >-
+      Updated `Item` property to proceed with construction even when no
+      definition object is provided
+    - Allowed `ItemGroup` to be initialised without a construction object
+    - >-
+      Updated `Property.toObjectResolved` to accept and forward an additional
+      `overrides` parameter to the substitution function of variable replacement
+    - >-
+      Updated the .replace and .substitute to accept an additional `overrides`
+      parameter to accept an array of objects for additional variable resolution
+      lookup
+    - >-
+      Added lodash utility function `_.findValue` that returns the value of a
+      key within an array of objects
+    - >-
+      Renamed the internal `_postman_isGroup` flag to match the other flag
+      names. Now it is called `_postman_propertyIsList`
+  docs:
+    - '`ItemGroup` construction definition documentation added'
+    - Added variable constructor definition typeDef in documentation
+    - Added collection constructor definition typeDef in documentation
+    - Adds definition, examples and other documentation to Item property
+    - >-
+      Somewhat elaborated the documentation of `PropertyBase` (at least the
+      items that gets inherited)
+
+0.0.11:
+  date: 2016-03-25
+  new features:
+    - Updated travis config to publish when new tags are pushed
+    - Adding publish script to package.json
+    - Adding encrypted key
+    - Added function to create markdown wiki reference in out/wiki
+    - Added npm run publish-wiki
+    - Automatically deploy documentation to GH Pages from Travis CI
+    - Add nsp to infra test
+  fixed bugs:
+    - Fixed undefined values for propertylists
+    - Wiki publish script truncation fix.
+    - >-
+      Fixes the wiki publish script by ensuring that the Home.md file content is
+      created before doing modifications to sidebar data
+  chores:
+    - Ignore ci related files in npm publish config
+    - Move npmignore block to the top of the file
+    - Update hawk library version
+
+0.0.10:
+  date: 2016-03-21
+  new features:
+    - Added a new function to check whether an object is a collection
+    - Added draft and private `Property#toObjectResolved` to procure an Obj…
+    - Added a new function to check whether an object is a collection
+  chores:
+    - Removed unnecessary import
+    - Added notice in README.
+
+0.0.9:
+  date: 2016-03-21
+  new features:
+    - >-
+      Added draft and private `Property#toObjectResolved` to procure an Object
+      representation of a property with its variables resolved
+    - >-
+      Updated the url parsing algorithm to be able to better extract port and
+      auth
+    - Added a bunch of tests for Url parser (around ipv4 addresses)
+    - >-
+      Made the url parser code more readable (relatively) by merging the object
+      assignment and regex extractions
+    - >-
+      Updated URL parser to return url.auth as undefined when no username or
+      password was extracted
+    - Better `isPropertyX`
+    - Added property name to all constructors and a test to ensure it is present
+    - Removed extra property in Item prototype
+    - Renamed snake cased `_postman_property_name` to `_postman_propertyName`
+    - More infra tests
+    - >-
+      Updated the `isPropertyX` static functions to use `_postman_property_name`
+      in super chain to determine validity of property
+    - >-
+      Added `_postman_property_name` to all Properties that has an isX static
+      function
+    - >-
+      Added utility function that finds equality of a variable through the super
+      chain
+    - Added tests for schema file existence
+    - >-
+      Used the schema-compiler package to compile schema via npm run
+      build-schema
+    - Private environment access API
+    - Added Schema files to this repository
+    - Added infra test for Module Inheritance
+    - Made `PropertyList` inherit from `Base`
+  fixed bugs:
+    - Url Parser Fixes
+    - Fixed the failing dependent tests due to auth changes in Url
+    - >-
+      Fixed issue in Url path parsing where leading slash was needlessly being
+      added.
+    - Fixed path parsing where path splitting was not being done correctly
+    - Fixed issue with invalid regex in port parsing of URL
+    - >-
+      Add `VariableList#env` private function to perform environment
+      manipulation (also test updated since .environments array was made
+      private)
+    - >-
+      Fixed documentation of PropertyList.insertAfter and made
+      `_postman_isGroup` as private
+    - >-
+      Fined breaking documentation generation due to blank example tag in
+      property-base
+    - Added form param to the sdk exports
+    - Ensure that all modules are exported
+    - Fix issue where `Version` was not being inherited from `PropertyBase`
+    - Fix issue where new collection without options was throwing an error
+  docs:
+    - Made the README documentation link point to the wiki
+    - Jsdoc documentation fixes
+    - Updated README to point to the SDK documentation
+  chores:
+    - Added todo for future improvement of `VariableList#env`
+
+0.0.8:
+  date: 2016-03-14
+  new features:
+    - Implementation of a generic toJSON
+    - Added test for installation of packages
+    - Added test for installation of packages
+    - >-
+      Added a custom clone method, removed import of `PropertyList` from
+      `PropertyBase`
+    - Added a check for null values
+    - Reverting change to example code
+    - Inherit `FormParam` and `QueryParam` from `Property`
+    - Added a root `toJSON` for `PropertyList` as well
+    - Reformatted file for easy comparison
+    - Added a generic `toJSON` function
+    - Removing all `toJSON` methods, to consolidate them into a single one
+    - Inherit FormParam and QueryParam from Property
+    - >-
+      Added unit tests that checks the description related functionalities of a
+      property
+    - Added documentation to the `Description` constructor
+    - Added `.describe` helper function in Property
+    - >-
+      Added `.update` function to `Description` property. Also added
+      `isDescription` to `Description` static methods
+
+0.0.7:
+  date: 2016-02-29
+  chores:
+    - Additional renames in auth helpers
+
+0.0.6:
+  date: 2016-02-29
+  initial release:
+    - Rename request-data to request-body
+    - >-
+      Added jsDoc documentation to properties trailing one level from
+      collection.js
+    - added docs for description and event list
+    - >-
+      Moved the detection if `id` required properties and its auto generation to
+      property.js
+    - Initial commit with code migrated from proof-of-concept stage

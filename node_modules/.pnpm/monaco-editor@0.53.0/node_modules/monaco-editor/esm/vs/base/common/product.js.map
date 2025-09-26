@@ -1,1 +1,0 @@
-{"version":3,"file":"product.js","sourceRoot":"file:///mnt/vss/_work/1/s/dependencies/vscode/out-editor-src","sources":["vs/base/common/product.ts"],"names":[],"mappings":"","sourcesContent":["\n\nexport interface IProductConfiguration {\n\treadonly quality?: string;\n}\n"]}
