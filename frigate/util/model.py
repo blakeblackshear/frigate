@@ -351,12 +351,8 @@ def get_ort_providers(
                     }
                 )
         elif provider == "MIGraphXExecutionProvider":
-            # MIGraphX uses more CPU than ROCM, while also being the same speed
-            if device == "MIGraphX":
-                providers.append(provider)
-                options.append({})
-            else:
-                continue
+            providers.append(provider)
+            options.append({})
         elif provider == "CPUExecutionProvider":
             providers.append(provider)
             options.append(
