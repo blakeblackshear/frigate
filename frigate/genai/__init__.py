@@ -73,7 +73,7 @@ Your task is to provide a clear, security-focused description of the scene that:
 Facts come first, but identifying security risks is the primary goal.
 
 When forming your description:
-- Describe the time, people, and objects exactly as seen. Include any observable environmental changes (e.g., lighting changes triggered by activity).
+- Describe the people and objects exactly as seen. Include any observable environmental changes (e.g., lighting changes triggered by activity).
 - Time of day should **increase suspicion only when paired with unusual or security-relevant behaviors**. Do not raise the threat level for common residential activities (e.g., residents walking pets, retrieving mail, gardening, playing with pets, supervising children) even at unusual hours, unless other suspicious indicators are present.
 - Focus on behaviors that are uncharacteristic of innocent activity: loitering without clear purpose, avoiding cameras, inspecting vehicles/doors, changing behavior when lights activate, scanning surroundings without an apparent benign reason.
 - **Benign context override**: If scanning or looking around is clearly part of an innocent activity (such as playing with a dog, gardening, supervising children, or watching for a pet), do not treat it as suspicious.
@@ -99,7 +99,7 @@ Sequence details:
 **IMPORTANT:**
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
 {get_language_prompt()}
-        """
+"""
         logger.debug(
             f"Sending {len(thumbnails)} images to create review description on {review_data['camera']}"
         )
@@ -135,6 +135,7 @@ Sequence details:
                 if review_data["recognized_objects"]:
                     metadata.potential_threat_level = 0
 
+                metadata.time = review_data["start"]
                 return metadata
             except Exception as e:
                 # rarely LLMs can fail to follow directions on output format
@@ -146,34 +147,75 @@ Sequence details:
             return None
 
     def generate_review_summary(
-        self, start_ts: float, end_ts: float, segments: list[dict[str, Any]]
+        self,
+        start_ts: float,
+        end_ts: float,
+        segments: list[dict[str, Any]],
+        debug_save: bool,
     ) -> str | None:
         """Generate a summary of review item descriptions over a period of time."""
-        time_range = f"{datetime.datetime.fromtimestamp(start_ts).strftime('%I:%M %p')} to {datetime.datetime.fromtimestamp(end_ts).strftime('%I:%M %p')}"
+        time_range = f"{datetime.datetime.fromtimestamp(start_ts).strftime('%B %d, %Y at %I:%M %p')} to {datetime.datetime.fromtimestamp(end_ts).strftime('%B %d, %Y at %I:%M %p')}"
         timeline_summary_prompt = f"""
-You are a security officer. Time range: {time_range}.
+You are a security officer.
+Time range: {time_range}.
 Input: JSON list with "scene", "confidence", "potential_threat_level" (1-2), "other_concerns".
-Write a report:
 
-Security Summary - {time_range}
-[One-sentence overview of activity]
-[Chronological bullet list of events with timestamps if in scene]
-[Final threat assessment]
+Task: Write a concise, human-presentable security report in markdown format.
 
-Rules:
-- List events in order.
-- Highlight potential_threat_level ≥ 1 with exact times.
-- Note any of the additional concerns which are present.
-- Note unusual activity even if not threats.
-- If no threats: "Final assessment: Only normal activity observed during this period."
-- No commentary, questions, or recommendations.
-- Output only the report.
-        """
+Rules for the report:
+
+- Title & overview
+  - Start with:
+    # Security Summary - {time_range}
+  - Write a 1-2 sentence situational overview capturing the general pattern of the period.
+
+- Event details
+  - Present events in chronological order as a bullet list.
+  - **If multiple events occur within the same minute or overlapping time range, COMBINE them into a single bullet.**
+    - Summarize the distinct activities as sub-points under the shared timestamp.
+  - If no timestamp is given, preserve order but label as “Time not specified.”
+  - Use bold timestamps for clarity.
+  - Group bullets under subheadings when multiple events fall into the same category (e.g., Vehicle Activity, Porch Activity, Unusual Behavior).
+
+- Threat levels
+  - Always show (threat level: X) for each event.
+  - If multiple events at the same time share the same threat level, only state it once.
+
+- Final assessment
+  - End with a Final Assessment section.
+  - If all events are threat level 1 with no escalation:
+    Final assessment: Only normal residential activity observed during this period.
+  - If threat level 2+ events are present, clearly summarize them as Potential concerns requiring review.
+
+- Conciseness
+  - Do not repeat benign clothing/appearance details unless they distinguish individuals.
+  - Summarize similar routine events instead of restating full scene descriptions.
+"""
 
         for item in segments:
             timeline_summary_prompt += f"\n{item}"
 
-        return self._send(timeline_summary_prompt, [])
+        if debug_save:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, "genai-requests", f"{start_ts}-{end_ts}", "prompt.txt"
+                ),
+                "w",
+            ) as f:
+                f.write(timeline_summary_prompt)
+
+        response = self._send(timeline_summary_prompt, [])
+
+        if debug_save and response:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, "genai-requests", f"{start_ts}-{end_ts}", "response.txt"
+                ),
+                "w",
+            ) as f:
+                f.write(response)
+
+        return response
 
     def generate_object_description(
         self,

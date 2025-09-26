@@ -93,7 +93,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
                 if camera_config.review.genai.debug_save_thumbnails:
                     id = data["after"]["id"]
-                    Path(os.path.join(CLIPS_DIR, f"genai-requests/{id}")).mkdir(
+                    Path(os.path.join(CLIPS_DIR, "genai-requests", f"{id}")).mkdir(
                         parents=True, exist_ok=True
                     )
                     shutil.copy(
@@ -124,6 +124,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         if topic == EmbeddingsRequestEnum.summarize_review.value:
             start_ts = request_data["start_ts"]
             end_ts = request_data["end_ts"]
+            logger.debug(
+                f"Found GenAI Review Summary request for {start_ts} to {end_ts}"
+            )
             items: list[dict[str, Any]] = [
                 r["data"]["metadata"]
                 for r in (
@@ -141,7 +144,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
             if len(items) == 0:
                 logger.debug("No review items with metadata found during time period")
-                return None
+                return "No activity was found during this time."
 
             important_items = list(
                 filter(
@@ -154,8 +157,16 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             if not important_items:
                 return "No concerns were found during this time period."
 
+            if self.config.review.genai.debug_save_thumbnails:
+                Path(
+                    os.path.join(CLIPS_DIR, "genai-requests", f"{start_ts}-{end_ts}")
+                ).mkdir(parents=True, exist_ok=True)
+
             return self.genai_client.generate_review_summary(
-                start_ts, end_ts, important_items
+                start_ts,
+                end_ts,
+                important_items,
+                self.config.review.genai.debug_save_thumbnails,
             )
         else:
             return None

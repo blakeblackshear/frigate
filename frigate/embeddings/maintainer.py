@@ -313,6 +313,7 @@ class EmbeddingMaintainer(threading.Thread):
                         if resp is not None:
                             return resp
 
+                logger.error(f"No processor handled the topic {topic}")
                 return None
             except Exception as e:
                 logger.error(f"Unable to handle embeddings request {e}", exc_info=True)
