@@ -15,7 +15,7 @@ ARG AMDGPU
 
 RUN apt update -qq && \
     apt install -y wget gpg && \
-    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/6.4.1/ubuntu/jammy/amdgpu-install_6.4.60401-1_all.deb && \
+    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/7.0.1/ubuntu/jammy/amdgpu-install_7.0.1.70001-1_all.deb && \
     apt install -y ./rocm.deb && \
     apt update && \
     apt install -qq -y rocm
@@ -64,11 +64,6 @@ COPY --from=rocm /opt/rocm-dist/ /
 
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
-ENV HSA_ENABLE_SDMA=0
-ENV TF_ROCM_USE_IMMEDIATE_MODE=1
-
-# avoid kernel crashes
-ENV HIP_FORCE_DEV_KERNARG=1
 
 COPY --from=rocm-dist / /
 
