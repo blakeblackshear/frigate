@@ -410,7 +410,7 @@ class NorfairTracker(ObjectTracker):
 
         # if there are more than 5 and less than 10 entries for the position, add the bounding box
         # and recompute the position box
-        if 5 <= len(position["xmins"]) < 10:
+        if len(position["xmins"]) < 10:
             position["xmins"].append(xmin)
             position["ymins"].append(ymin)
             position["xmaxs"].append(xmax)
