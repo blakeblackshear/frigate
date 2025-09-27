@@ -284,7 +284,9 @@ def post_process_yolox(
 
 
 def get_ort_providers(
-    force_cpu: bool = False, device: str | None = "AUTO", requires_fp16: bool = False
+    force_cpu: bool = False,
+    device: str | None = "AUTO",
+    requires_fp16: bool = False,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     if force_cpu:
         return (
@@ -351,12 +353,15 @@ def get_ort_providers(
                     }
                 )
         elif provider == "MIGraphXExecutionProvider":
-            # MIGraphX uses more CPU than ROCM, while also being the same speed
-            if device == "MIGraphX":
-                providers.append(provider)
-                options.append({})
-            else:
-                continue
+            migraphx_cache_dir = os.path.join(MODEL_CACHE_DIR, "migraphx")
+            os.makedirs(migraphx_cache_dir, exist_ok=True)
+
+            providers.append(provider)
+            options.append(
+                {
+                    "migraphx_model_cache_dir": migraphx_cache_dir,
+                }
+            )
         elif provider == "CPUExecutionProvider":
             providers.append(provider)
             options.append(

@@ -15,14 +15,14 @@ ARG AMDGPU
 
 RUN apt update -qq && \
     apt install -y wget gpg && \
-    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/6.4.1/ubuntu/jammy/amdgpu-install_6.4.60401-1_all.deb && \
+    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/7.0.1/ubuntu/jammy/amdgpu-install_7.0.1.70001-1_all.deb && \
     apt install -y ./rocm.deb && \
     apt update && \
     apt install -qq -y rocm
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
 RUN cd /opt/rocm-$ROCM/lib && \
-    cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocsolver*.so* librocfft*.so* librocprofiler*.so* libroctx*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/ && \
+    cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocsolver*.so* librocfft*.so* librocprofiler*.so* libroctx*.so*  librocroller.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/ && \
     mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib && \
     cp -dpr migraphx/lib/* /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
@@ -64,11 +64,10 @@ COPY --from=rocm /opt/rocm-dist/ /
 
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
-ENV HSA_ENABLE_SDMA=0
-ENV TF_ROCM_USE_IMMEDIATE_MODE=1
-
-# avoid kernel crashes
-ENV HIP_FORCE_DEV_KERNARG=1
+ENV MIGRAPHX_DISABLE_MIOPEN_FUSION=1
+ENV MIGRAPHX_DISABLE_SCHEDULE_PASS=1
+ENV MIGRAPHX_DISABLE_REDUCE_FUSION=1
+ENV MIGRAPHX_ENABLE_HIPRTC_WORKAROUNDS=1
 
 COPY --from=rocm-dist / /
 

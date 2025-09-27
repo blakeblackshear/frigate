@@ -555,6 +555,17 @@ $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/
 
 ### ROCm Supported Models
 
+:::tip
+
+The AMD GPU kernel is known problematic especially when converting models to mxr format. The recommended approach is:
+
+1. Disable object detection in the config.
+2. Startup Frigate with the onnx detector configured, the main object detection model will be converted to mxr format and cached in the config directory.
+3. Once this is finished as indicated by the logs, enable object detection in the UI and confirm that it is working correctly.
+4. Re-enable object detection in the config.
+
+:::
+
 See [ONNX supported models](#supported-models) for supported models, there are some caveats:
 
 - D-FINE models are not supported
@@ -781,19 +792,19 @@ To verify that the integration is working correctly, start Frigate and observe t
 
 # Community Supported Detectors
 
-## MemryX MX3  
+## MemryX MX3
 
-This detector is available for use with the MemryX MX3 accelerator M.2 module. Frigate supports the MX3 on compatible hardware platforms, providing efficient and high-performance object detection.  
+This detector is available for use with the MemryX MX3 accelerator M.2 module. Frigate supports the MX3 on compatible hardware platforms, providing efficient and high-performance object detection.
 
 See the [installation docs](../frigate/installation.md#memryx-mx3) for information on configuring the MemryX hardware.
 
 To configure a MemryX detector, simply set the `type` attribute to `memryx` and follow the configuration guide below.
 
-### Configuration  
+### Configuration
 
-To configure the MemryX detector, use the following example configuration:  
+To configure the MemryX detector, use the following example configuration:
 
-#### Single PCIe MemryX MX3  
+#### Single PCIe MemryX MX3
 
 ```yaml
 detectors:
@@ -819,7 +830,7 @@ detectors:
     device: PCIe:2
 ```
 
-### Supported Models 
+### Supported Models
 
 MemryX `.dfp` models are automatically downloaded at runtime, if enabled, to the container at `/memryx_models/model_folder/`.
 
@@ -833,9 +844,9 @@ The input size for **YOLO-NAS** can be set to either **320x320** (default) or **
 
 - The default size of **320x320** is optimized for lower CPU usage and faster inference times.
 
-##### Configuration  
+##### Configuration
 
-Below is the recommended configuration for using the **YOLO-NAS** (small) model with the MemryX detector:  
+Below is the recommended configuration for using the **YOLO-NAS** (small) model with the MemryX detector:
 
 ```yaml
 detectors:
@@ -857,13 +868,13 @@ model:
           # └── yolonas_post.onnx    (optional; only if the model includes a cropped post-processing network)
 ```
 
-#### YOLOv9  
+#### YOLOv9
 
 The YOLOv9s model included in this detector is downloaded from [the original GitHub](https://github.com/WongKinYiu/yolov9) like in the [Models Section](#yolov9-1) and compiled to DFP with [mx_nc](https://developer.memryx.com/tools/neural_compiler.html#usage).
 
 ##### Configuration
 
-Below is the recommended configuration for using the **YOLOv9** (small) model with the MemryX detector:  
+Below is the recommended configuration for using the **YOLOv9** (small) model with the MemryX detector:
 
 ```yaml
 detectors:
@@ -872,7 +883,7 @@ detectors:
     device: PCIe:0
 
 model:
-  model_type: yolo-generic   
+  model_type: yolo-generic
   width: 320   # (Can be set to 640 for higher resolution)
   height: 320  # (Can be set to 640 for higher resolution)
   input_tensor: nchw
@@ -885,13 +896,13 @@ model:
           # └── yolov9_post.onnx    (optional; only if the model includes a cropped post-processing network)
 ```
 
-#### YOLOX  
+#### YOLOX
 
 The model is sourced from the [OpenCV Model Zoo](https://github.com/opencv/opencv_zoo) and precompiled to DFP.
 
-##### Configuration  
+##### Configuration
 
-Below is the recommended configuration for using the **YOLOX** (small) model with the MemryX detector:  
+Below is the recommended configuration for using the **YOLOX** (small) model with the MemryX detector:
 
 ```yaml
 detectors:
@@ -912,13 +923,13 @@ model:
           # ├── yolox.dfp          (a file ending with .dfp)
 ```
 
-#### SSDLite MobileNet v2  
+#### SSDLite MobileNet v2
 
 The model is sourced from the [OpenMMLab Model Zoo](https://mmdeploy-oss.openmmlab.com/model/mmdet-det/ssdlite-e8679f.onnx) and has been converted to DFP.
 
-##### Configuration  
+##### Configuration
 
-Below is the recommended configuration for using the **SSDLite MobileNet v2** model with the MemryX detector:  
+Below is the recommended configuration for using the **SSDLite MobileNet v2** model with the MemryX detector:
 
 ```yaml
 detectors:
