@@ -456,10 +456,10 @@ def get_optimized_runner(
             options[0]["device_id"],
         )
 
-    if providers[
-        0
-    ] == "MIGraphXExecutionProvider" and ONNXModelRunner.is_migraphx_complex_model(
-        model_type
+    if (
+        providers
+        and providers[0] == "MIGraphXExecutionProvider"
+        and ONNXModelRunner.is_migraphx_complex_model(model_type)
     ):
         # Don't use MIGraphX for models that are not supported
         providers.pop(0)
