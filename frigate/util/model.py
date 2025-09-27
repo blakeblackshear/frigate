@@ -366,19 +366,18 @@ def get_ort_providers(
                 )
 
                 if os.path.exists(compiled_model_path):
-                    providers.append(provider)
-                    options.append(
-                        {
-                            "migraphx_fp16_enable": 0,
-                        }
-                    )
+                    os.environ["ORT_MIGRAPHX_LOAD_COMPILED_MODEL"] = "1"
+                    os.environ["ORT_MIGRAPHX_LOAD_COMPILED_PATH"] = compiled_model_path
                 else:
-                    providers.append(provider)
-                    options.append(
-                        {
-                            "migraphx_fp16_enable": 0,
-                        }
-                    )
+                    os.environ["ORT_MIGRAPHX_SAVE_COMPILED_MODEL"] = "1"
+                    os.environ["ORT_MIGRAPHX_SAVE_COMPILED_PATH"] = compiled_model_path
+
+                providers.append(provider)
+                options.append(
+                    {
+                        "migraphx_fp16_enable": 0,
+                    }
+                )
             else:
                 providers.append(provider)
                 options.append({})
