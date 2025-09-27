@@ -144,7 +144,7 @@ class EmbeddingMaintainer(threading.Thread):
             EventMetadataTypeEnum.regenerate_description
         )
         self.recordings_subscriber = RecordingsDataSubscriber(
-            RecordingsDataTypeEnum.recordings_available_through
+            RecordingsDataTypeEnum.saved
         )
         self.review_subscriber = ReviewDataSubscriber("")
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video.value)
@@ -536,10 +536,8 @@ class EmbeddingMaintainer(threading.Thread):
 
             topic = str(raw_topic)
 
-            if topic.endswith(
-                RecordingsDataTypeEnum.recordings_available_through.value
-            ):
-                camera, recordings_available_through_timestamp = payload
+            if topic.endswith(RecordingsDataTypeEnum.saved.value):
+                camera, recordings_available_through_timestamp, _ = payload
 
                 self.recordings_available_through[camera] = (
                     recordings_available_through_timestamp

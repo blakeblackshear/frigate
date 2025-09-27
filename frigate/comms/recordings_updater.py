@@ -11,11 +11,13 @@ logger = logging.getLogger(__name__)
 
 class RecordingsDataTypeEnum(str, Enum):
     all = ""
-    recordings_available_through = "recordings_available_through"
-    latest_valid_segment = "latest_valid_segment"
+    saved = "saved"  # segment has been saved to db
+    latest = "latest"  # segment is in cache
+    valid = "valid"  # segment is valid
+    invalid = "invalid"  # segment is invalid
 
 
-class RecordingsDataPublisher(Publisher[tuple[str, float]]):
+class RecordingsDataPublisher(Publisher[Any]):
     """Publishes latest recording data."""
 
     topic_base = "recordings/"
