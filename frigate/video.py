@@ -286,7 +286,7 @@ class CameraWatchdog(threading.Thread):
                         continue
 
                     if topic.endswith(RecordingsDataTypeEnum.valid.value):
-                        self.logger.info(
+                        self.logger.debug(
                             f"Latest valid recording segment time on {camera}: {segment_time}"
                         )
                         self.latest_valid_segment_time = segment_time
