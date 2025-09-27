@@ -694,7 +694,7 @@ def process_frames(
     camera_metrics: CameraMetrics,
     stop_event: MpEvent,
     ptz_metrics: PTZMetrics,
-    region_grid: list[list, Any],
+    region_grid: list[list[dict[str, Any]]],
     exit_on_empty: bool = False,
 ):
     next_region_update = get_tomorrow_at_time(2)
