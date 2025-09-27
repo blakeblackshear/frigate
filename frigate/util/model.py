@@ -284,7 +284,10 @@ def post_process_yolox(
 
 
 def get_ort_providers(
-    force_cpu: bool = False, device: str | None = "AUTO", requires_fp16: bool = False
+    force_cpu: bool = False,
+    device: str | None = "AUTO",
+    requires_fp16: bool = False,
+    model_path: str | None = None,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     if force_cpu:
         return (
@@ -351,8 +354,34 @@ def get_ort_providers(
                     }
                 )
         elif provider == "MIGraphXExecutionProvider":
-            providers.append(provider)
-            options.append({})
+            # Create MIGraphX cache directory
+            migraphx_cache_dir = os.path.join(MODEL_CACHE_DIR, "migraphx")
+            os.makedirs(migraphx_cache_dir, exist_ok=True)
+
+            if model_path:
+                model_filename = os.path.basename(model_path)
+                model_name = os.path.splitext(model_filename)[0]  # Remove extension
+                compiled_model_path = os.path.join(
+                    migraphx_cache_dir, f"{model_name}.mxr"
+                )
+
+                if os.path.exists(compiled_model_path):
+                    providers.append(provider)
+                    options.append(
+                        {
+                            "migraphx_fp16_enable": 0,
+                        }
+                    )
+                else:
+                    providers.append(provider)
+                    options.append(
+                        {
+                            "migraphx_fp16_enable": 0,
+                        }
+                    )
+            else:
+                providers.append(provider)
+                options.append({})
         elif provider == "CPUExecutionProvider":
             providers.append(provider)
             options.append(
