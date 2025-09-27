@@ -430,9 +430,7 @@ def get_optimized_runner(
         if rknn_path:
             return RKNNModelRunner(rknn_path)
 
-    providers, options = get_ort_providers(
-        device == "CPU", device, model_path=model_path, **kwargs
-    )
+    providers, options = get_ort_providers(device == "CPU", device, **kwargs)
 
     if providers[0] == "CPUExecutionProvider":
         # In the default image, ONNXRuntime is used so we will only get CPUExecutionProvider

@@ -287,7 +287,6 @@ def get_ort_providers(
     force_cpu: bool = False,
     device: str | None = "AUTO",
     requires_fp16: bool = False,
-    model_path: str | None = None,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     if force_cpu:
         return (
