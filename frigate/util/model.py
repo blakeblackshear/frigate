@@ -373,11 +373,7 @@ def get_ort_providers(
                     os.environ["ORT_MIGRAPHX_SAVE_COMPILED_PATH"] = compiled_model_path
 
                 providers.append(provider)
-                options.append(
-                    {
-                        "migraphx_fp16_enable": 0,
-                    }
-                )
+                options.append({})
             else:
                 providers.append(provider)
                 options.append({})
