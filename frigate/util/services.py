@@ -603,87 +603,87 @@ def auto_detect_hwaccel() -> str:
 async def get_video_properties(
     ffmpeg, url: str, get_duration: bool = False
 ) -> dict[str, Any]:
-    async def calculate_duration(video: Optional[Any]) -> float:
-        duration = None
-
-        if video is not None:
-            # Get the frames per second (fps) of the video stream
-            fps = video.get(cv2.CAP_PROP_FPS)
-            total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-
-            if fps and total_frames:
-                duration = total_frames / fps
-
-        # if cv2 failed need to use ffprobe
-        if duration is None:
-            p = await asyncio.create_subprocess_exec(
-                ffmpeg.ffprobe_path,
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration",
-                "-of",
-                "default=noprint_wrappers=1:nokey=1",
-                f"{url}",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
+    async def probe_with_ffprobe(
+        url: str,
+    ) -> tuple[bool, int, int, Optional[str], float]:
+        """Fallback using ffprobe: returns (valid, width, height, codec, duration)."""
+        cmd = [
+            ffmpeg.ffprobe_path,
+            "-v",
+            "quiet",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            url,
+        ]
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            await p.wait()
+            stdout, _ = await proc.communicate()
+            if proc.returncode != 0:
+                return False, 0, 0, None, -1
 
-            if p.returncode == 0:
-                result = (await p.stdout.read()).decode()
-            else:
-                result = None
+            data = json.loads(stdout.decode())
+            video_streams = [
+                s for s in data.get("streams", []) if s.get("codec_type") == "video"
+            ]
+            if not video_streams:
+                return False, 0, 0, None, -1
 
-            if result:
-                try:
-                    duration = float(result.strip())
-                except ValueError:
-                    duration = -1
-            else:
-                duration = -1
+            v = video_streams[0]
+            width = int(v.get("width", 0))
+            height = int(v.get("height", 0))
+            codec = v.get("codec_name")
 
-        return duration
+            duration_str = data.get("format", {}).get("duration")
+            duration = float(duration_str) if duration_str else -1.0
 
-    width = height = 0
+            return True, width, height, codec, duration
+        except (json.JSONDecodeError, ValueError, KeyError, asyncio.SubprocessError):
+            return False, 0, 0, None, -1
 
-    try:
-        # Open the video stream using OpenCV
-        video = cv2.VideoCapture(url)
+    def probe_with_cv2(url: str) -> tuple[bool, int, int, Optional[str], float]:
+        """Primary attempt using cv2: returns (valid, width, height, fourcc, duration)."""
+        cap = cv2.VideoCapture(url)
+        if not cap.isOpened():
+            cap.release()
+            return False, 0, 0, None, -1
 
-        # Check if the video stream was opened successfully
-        if not video.isOpened():
-            video = None
-    except Exception:
-        video = None
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        valid = width > 0 and height > 0
+        fourcc = None
+        duration = -1.0
 
-    result = {}
+        if valid:
+            fourcc_int = int(cap.get(cv2.CAP_PROP_FOURCC))
+            fourcc = fourcc_int.to_bytes(4, "little").decode("latin-1").strip()
 
+            if get_duration:
+                fps = cap.get(cv2.CAP_PROP_FPS)
+                total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                if fps > 0 and total_frames > 0:
+                    duration = total_frames / fps
+
+        cap.release()
+        return valid, width, height, fourcc, duration
+
+    # try cv2 first
+    has_video, width, height, fourcc, duration = probe_with_cv2(url)
+
+    # fallback to ffprobe if needed
+    if not has_video or (get_duration and duration < 0):
+        has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
+
+    result: dict[str, Any] = {"has_valid_video": has_video}
+    if has_video:
+        result.update({"width": width, "height": height})
+        if fourcc:
+            result["fourcc"] = fourcc
     if get_duration:
-        result["duration"] = await calculate_duration(video)
-
-    if video is not None:
-        # Get the width of frames in the video stream
-        width = video.get(cv2.CAP_PROP_FRAME_WIDTH)
-
-        # Get the height of frames in the video stream
-        height = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
-
-        # Get the stream encoding
-        fourcc_int = int(video.get(cv2.CAP_PROP_FOURCC))
-        fourcc = (
-            chr((fourcc_int >> 0) & 255)
-            + chr((fourcc_int >> 8) & 255)
-            + chr((fourcc_int >> 16) & 255)
-            + chr((fourcc_int >> 24) & 255)
-        )
-
-        # Release the video stream
-        video.release()
-
-        result["width"] = round(width)
-        result["height"] = round(height)
-        result["fourcc"] = fourcc
+        result["duration"] = duration
 
     return result
 

@@ -144,7 +144,7 @@ class EmbeddingMaintainer(threading.Thread):
             EventMetadataTypeEnum.regenerate_description
         )
         self.recordings_subscriber = RecordingsDataSubscriber(
-            RecordingsDataTypeEnum.recordings_available_through
+            RecordingsDataTypeEnum.saved
         )
         self.review_subscriber = ReviewDataSubscriber("")
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video.value)
@@ -525,20 +525,28 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_recordings_updates(self) -> None:
         """Process recordings updates."""
         while True:
-            recordings_data = self.recordings_subscriber.check_for_update()
+            update = self.recordings_subscriber.check_for_update()
 
-            if recordings_data == None:
+            if not update:
                 break
 
-            camera, recordings_available_through_timestamp = recordings_data
+            (raw_topic, payload) = update
 
-            self.recordings_available_through[camera] = (
-                recordings_available_through_timestamp
-            )
+            if not raw_topic or not payload:
+                break
 
-            logger.debug(
-                f"{camera} now has recordings available through {recordings_available_through_timestamp}"
-            )
+            topic = str(raw_topic)
+
+            if topic.endswith(RecordingsDataTypeEnum.saved.value):
+                camera, recordings_available_through_timestamp, _ = payload
+
+                self.recordings_available_through[camera] = (
+                    recordings_available_through_timestamp
+                )
+
+                logger.debug(
+                    f"{camera} now has recordings available through {recordings_available_through_timestamp}"
+                )
 
     def _process_review_updates(self) -> None:
         """Process review updates."""
