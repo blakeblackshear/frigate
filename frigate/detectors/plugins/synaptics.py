@@ -2,10 +2,6 @@ import logging
 import os
 
 import numpy as np
-from synap import Network
-from synap.postprocessor import Detector
-from synap.preprocessor import Preprocessor
-from synap.types import Layout, Shape
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -14,6 +10,16 @@ from frigate.detectors.detector_config import (
     InputTensorEnum,
     ModelTypeEnum,
 )
+
+try:
+    from synap import Network
+    from synap.postprocessor import Detector
+    from synap.preprocessor import Preprocessor
+    from synap.types import Layout, Shape
+
+    SYNAP_SUPPORT = True
+except ImportError:
+    SYNAP_SUPPORT = False
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +34,11 @@ class SynapDetector(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, detector_config: SynapDetectorConfig):
+        if not SYNAP_SUPPORT:
+            raise ImportError(
+                "Error importing Synaptics SDK modules. You must use the -synaptics Docker image variant for Synaptics detector support."
+            )
+
         try:
             _, ext = os.path.splitext(detector_config.model.path)
             if ext and ext != ".synap":
