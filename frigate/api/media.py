@@ -822,9 +822,9 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified date-time on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
-def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str):
+async def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str):
     """VOD for specific hour. Uses the default timezone (UTC)."""
-    return vod_hour(
+    return await vod_hour(
         year_month, day, hour, camera_name, get_localzone_name().replace("/", ",")
     )
 
@@ -834,7 +834,9 @@ def vod_hour_no_timezone(year_month: str, day: int, hour: int, camera_name: str)
     dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified date-time (with timezone) on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
-def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: str):
+async def vod_hour(
+    year_month: str, day: int, hour: int, camera_name: str, tz_name: str
+):
     parts = year_month.split("-")
     start_date = (
         datetime(int(parts[0]), int(parts[1]), day, hour, tzinfo=timezone.utc)
@@ -844,7 +846,7 @@ def vod_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: st
     start_ts = start_date.timestamp()
     end_ts = end_date.timestamp()
 
-    return vod_ts(camera_name, start_ts, end_ts)
+    return await vod_ts(camera_name, start_ts, end_ts)
 
 
 @router.get(
@@ -875,7 +877,7 @@ async def vod_event(
         if event.end_time is None
         else (event.end_time + padding)
     )
-    vod_response = vod_ts(event.camera, event.start_time - padding, end_ts)
+    vod_response = await vod_ts(event.camera, event.start_time - padding, end_ts)
 
     # If the recordings are not found and the event started more than 5 minutes ago, set has_clip to false
     if (
@@ -1248,7 +1250,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
 
 @router.get("/events/{event_id}/clip.mp4")
-def event_clip(
+async def event_clip(
     request: Request,
     event_id: str,
     padding: int = Query(0, description="Padding to apply to clip."),
@@ -1270,7 +1272,9 @@ def event_clip(
         if event.end_time is None
         else event.end_time + padding
     )
-    return recording_clip(request, event.camera, event.start_time - padding, end_ts)
+    return await recording_clip(
+        request, event.camera, event.start_time - padding, end_ts
+    )
 
 
 @router.get("/events/{event_id}/preview.gif")
@@ -1698,7 +1702,7 @@ def preview_thumbnail(file_name: str):
     "/{camera_name}/{label}/thumbnail.jpg",
     dependencies=[Depends(require_camera_access)],
 )
-def label_thumbnail(request: Request, camera_name: str, label: str):
+async def label_thumbnail(request: Request, camera_name: str, label: str):
     label = unquote(label)
     event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name)
     if label != "any":
@@ -1707,7 +1711,7 @@ def label_thumbnail(request: Request, camera_name: str, label: str):
     try:
         event_id = event_query.scalar()
 
-        return event_thumbnail(request, event_id, Extension.jpg, 60)
+        return await event_thumbnail(request, event_id, Extension.jpg, 60)
     except DoesNotExist:
         frame = np.zeros((175, 175, 3), np.uint8)
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
@@ -1722,7 +1726,7 @@ def label_thumbnail(request: Request, camera_name: str, label: str):
 @router.get(
     "/{camera_name}/{label}/clip.mp4", dependencies=[Depends(require_camera_access)]
 )
-def label_clip(request: Request, camera_name: str, label: str):
+async def label_clip(request: Request, camera_name: str, label: str):
     label = unquote(label)
     event_query = Event.select(fn.MAX(Event.id)).where(
         Event.camera == camera_name, Event.has_clip == True
@@ -1733,7 +1737,7 @@ def label_clip(request: Request, camera_name: str, label: str):
     try:
         event = event_query.get()
 
-        return event_clip(request, event.id)
+        return await event_clip(request, event.id)
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
@@ -1743,7 +1747,7 @@ def label_clip(request: Request, camera_name: str, label: str):
 @router.get(
     "/{camera_name}/{label}/snapshot.jpg", dependencies=[Depends(require_camera_access)]
 )
-def label_snapshot(request: Request, camera_name: str, label: str):
+async def label_snapshot(request: Request, camera_name: str, label: str):
     """Returns the snapshot image from the latest event for the given camera and label combo"""
     label = unquote(label)
     if label == "any":
@@ -1764,7 +1768,7 @@ def label_snapshot(request: Request, camera_name: str, label: str):
 
     try:
         event: Event = event_query.get()
-        return event_snapshot(request, event.id, MediaEventsSnapshotQueryParams())
+        return await event_snapshot(request, event.id, MediaEventsSnapshotQueryParams())
     except DoesNotExist:
         frame = np.zeros((720, 1280, 3), np.uint8)
         _, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
