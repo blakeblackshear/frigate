@@ -35,19 +35,20 @@ class SynapDetector(DetectionApi):
 
     def __init__(self, detector_config: SynapDetectorConfig):
         if not SYNAP_SUPPORT:
-            raise ImportError(
+            logger.error(
                 "Error importing Synaptics SDK modules. You must use the -synaptics Docker image variant for Synaptics detector support."
             )
+            return
 
         try:
             _, ext = os.path.splitext(detector_config.model.path)
             if ext and ext != ".synap":
-                raise ValueError("Model path config for Synap1680 is wrong.")
+                raise ValueError("Model path config for Synap1680 is incorrect.")
 
             synap_network = Network(detector_config.model.path)
             logger.info(f"Synap NPU loaded model: {detector_config.model.path}")
         except ValueError as ve:
-            logger.error(f"Config to Synap1680 was Failed: {ve}")
+            logger.error(f"Synap1680 setup has failed: {ve}")
             raise
         except Exception as e:
             logger.error(f"Failed to init Synap NPU: {e}")
