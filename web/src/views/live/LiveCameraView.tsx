@@ -507,12 +507,13 @@ export default function LiveCameraView({
                 )}
               </Button>
             )}
-            {supportsFullscreen && !debug && (
+            {supportsFullscreen && (
               <CameraFeatureToggle
                 className="p-2 md:p-0"
                 variant={fullscreen ? "overlay" : "primary"}
                 Icon={fullscreen ? FaCompress : FaExpand}
                 isActive={fullscreen}
+                disabled={debug}
                 title={
                   fullscreen
                     ? t("button.close", { ns: "common" })
@@ -521,32 +522,29 @@ export default function LiveCameraView({
                 onClick={toggleFullscreen}
               />
             )}
-            {!isIOS &&
-              !isFirefox &&
-              !debug &&
-              preferredLiveMode != "jsmpeg" && (
-                <CameraFeatureToggle
-                  className="p-2 md:p-0"
-                  variant={fullscreen ? "overlay" : "primary"}
-                  Icon={LuPictureInPicture}
-                  isActive={pip}
-                  title={
-                    pip
-                      ? t("button.close", { ns: "common" })
-                      : t("button.pictureInPicture", { ns: "common" })
+            {!isIOS && !isFirefox && preferredLiveMode != "jsmpeg" && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={LuPictureInPicture}
+                isActive={pip}
+                title={
+                  pip
+                    ? t("button.close", { ns: "common" })
+                    : t("button.pictureInPicture", { ns: "common" })
+                }
+                onClick={() => {
+                  if (!pip) {
+                    setPip(true);
+                  } else {
+                    document.exitPictureInPicture();
+                    setPip(false);
                   }
-                  onClick={() => {
-                    if (!pip) {
-                      setPip(true);
-                    } else {
-                      document.exitPictureInPicture();
-                      setPip(false);
-                    }
-                  }}
-                  disabled={!cameraEnabled}
-                />
-              )}
-            {supports2WayTalk && !debug && (
+                }}
+                disabled={!cameraEnabled || debug}
+              />
+            )}
+            {supports2WayTalk && (
               <CameraFeatureToggle
                 className="p-2 md:p-0"
                 variant={fullscreen ? "overlay" : "primary"}
@@ -563,10 +561,10 @@ export default function LiveCameraView({
                     setAudio(true);
                   }
                 }}
-                disabled={!cameraEnabled}
+                disabled={!cameraEnabled || debug}
               />
             )}
-            {supportsAudioOutput && !debug && preferredLiveMode != "jsmpeg" && (
+            {supportsAudioOutput && preferredLiveMode != "jsmpeg" && (
               <CameraFeatureToggle
                 className="p-2 md:p-0"
                 variant={fullscreen ? "overlay" : "primary"}
@@ -578,7 +576,7 @@ export default function LiveCameraView({
                     : t("cameraAudio.enable", { ns: "views/live" })
                 }
                 onClick={() => setAudio(!audio)}
-                disabled={!cameraEnabled}
+                disabled={!cameraEnabled || debug}
               />
             )}
             <FrigateCameraFeatures
@@ -680,7 +678,7 @@ export default function LiveCameraView({
       {camera.onvif.host != "" && (
         <div className="flex flex-col items-center justify-center">
           <PtzControlPanel
-            className={debug ? "bottom-auto top-[25%]" : ""}
+            className={debug && isMobile ? "bottom-auto top-[25%]" : ""}
             camera={camera.name}
             enabled={cameraEnabled}
             clickOverlay={clickOverlay}
@@ -888,21 +886,17 @@ function FrigateCameraFeatures({
       <>
         {isAdmin && (
           <>
-            {!debug && (
-              <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={enabledState == "ON" ? LuPower : LuPowerOff}
-                isActive={enabledState == "ON"}
-                title={
-                  enabledState == "ON"
-                    ? t("camera.disable")
-                    : t("camera.enable")
-                }
-                onClick={() => sendEnabled(enabledState == "ON" ? "OFF" : "ON")}
-                disabled={false}
-              />
-            )}
+            <CameraFeatureToggle
+              className="p-2 md:p-0"
+              variant={fullscreen ? "overlay" : "primary"}
+              Icon={enabledState == "ON" ? LuPower : LuPowerOff}
+              isActive={enabledState == "ON"}
+              title={
+                enabledState == "ON" ? t("camera.disable") : t("camera.enable")
+              }
+              onClick={() => sendEnabled(enabledState == "ON" ? "OFF" : "ON")}
+              disabled={debug}
+            />
             <CameraFeatureToggle
               className="p-2 md:p-0"
               variant={fullscreen ? "overlay" : "primary"}
@@ -997,21 +991,18 @@ function FrigateCameraFeatures({
             )}
           </>
         )}
-        {!debug && (
-          <CameraFeatureToggle
-            className={cn(
-              "p-2 md:p-0",
-              isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
-            )}
-            variant={fullscreen ? "overlay" : "primary"}
-            Icon={isRecording ? TbRecordMail : TbRecordMailOff}
-            isActive={isRecording}
-            title={t("manualRecording." + (isRecording ? "stop" : "start"))}
-            onClick={handleEventButtonClick}
-            disabled={!cameraEnabled}
-          />
-        )}
-
+        <CameraFeatureToggle
+          className={cn(
+            "p-2 md:p-0",
+            isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
+          )}
+          variant={fullscreen ? "overlay" : "primary"}
+          Icon={isRecording ? TbRecordMail : TbRecordMailOff}
+          isActive={isRecording}
+          title={t("manualRecording." + (isRecording ? "stop" : "start"))}
+          onClick={handleEventButtonClick}
+          disabled={!cameraEnabled || debug}
+        />
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger>
             <div
