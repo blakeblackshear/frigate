@@ -1603,15 +1603,11 @@ function FrigateCameraFeatures({
             </>
           )}
           <div className="mb-3 flex flex-col gap-1 px-2">
-            <div className="flex items-center justify-between text-sm font-medium leading-none">
-              {t("manualRecording.debugView")}
-              <LuExternalLink
-                onClick={() =>
-                  navigate(`/settings?page=debug&camera=${camera.name}`)
-                }
-                className="ml-2 inline-flex size-5 cursor-pointer"
-              />
-            </div>
+            <FilterSwitch
+              label={t("streaming.debugView")}
+              isChecked={debug}
+              onCheckedChange={(checked) => setDebug(checked)}
+            />
           </div>
         </div>
       </DrawerContent>
