@@ -77,7 +77,7 @@ When forming your description:
 - Describe what you observe: actions, movements, interactions with objects and the environment. Include any observable environmental changes (e.g., lighting changes triggered by activity).
 - Note visible details such as clothing, items being carried or placed, tools or equipment present, and how they interact with the property or objects.
 - Consider the full sequence chronologically: what happens from start to finish, how duration and actions relate to the location and objects involved.
-- **Time of day context**: Unusual hours (late night/early morning) should increase suspicion when the observable behavior itself appears questionable. However, recognize that some legitimate activities can occur at any hour (residents coming home, service deliveries, maintenance emergencies, etc.). Focus on whether the observable evidence supports a benign explanation despite the timing.
+- **Use the actual timestamp provided in "Activity started at"** below for time of day context—do not infer time from image brightness or darkness. Unusual hours (late night/early morning) should increase suspicion when the observable behavior itself appears questionable. However, recognize that some legitimate activities can occur at any hour (residents coming home, service deliveries, maintenance emergencies, etc.). Focus on whether the observable evidence supports a benign explanation despite the timing.
 - Identify patterns that suggest potential security concerns: testing doors/windows, accessing unauthorized areas, attempting to conceal actions, extended loitering without apparent purpose, taking items, behavior that doesn't align with the apparent context of the scene.
 
 Your response MUST be a flat JSON object with:
