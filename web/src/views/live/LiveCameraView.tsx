@@ -680,6 +680,7 @@ export default function LiveCameraView({
       {camera.onvif.host != "" && (
         <div className="flex flex-col items-center justify-center">
           <PtzControlPanel
+            className={debug ? "bottom-auto top-[25%]" : ""}
             camera={camera.name}
             enabled={cameraEnabled}
             clickOverlay={clickOverlay}

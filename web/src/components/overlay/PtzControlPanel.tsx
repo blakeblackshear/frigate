@@ -36,11 +36,13 @@ import { useTranslation } from "react-i18next";
 import TooltipButton from "@/views/button/TooltipButton";
 
 export default function PtzControlPanel({
+  className,
   camera,
   enabled,
   clickOverlay,
   setClickOverlay,
 }: {
+  className?: string;
   camera: string;
   enabled: boolean;
   clickOverlay: boolean;
@@ -128,6 +130,7 @@ export default function PtzControlPanel({
     <div
       className={cn(
         "absolute inset-x-2 bottom-[10%] flex select-none flex-wrap items-center justify-center gap-1 md:left-[50%] md:-translate-x-[50%] md:flex-nowrap",
+        className ?? "",
         isMobile && "landscape:ml-12",
       )}
     >
