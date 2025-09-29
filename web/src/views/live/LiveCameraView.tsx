@@ -1213,7 +1213,7 @@ function FrigateCameraFeatures({
                       )}
                   </div>
                 )}
-              {isRestreamed && !debug && (
+              {isRestreamed && (
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <Label
@@ -1225,6 +1225,7 @@ function FrigateCameraFeatures({
                     <Switch
                       className="ml-1"
                       id="backgroundplay"
+                      disabled={debug}
                       checked={playInBackground}
                       onCheckedChange={(checked) =>
                         setPlayInBackground(checked)
@@ -1524,11 +1525,10 @@ function FrigateCameraFeatures({
                     )}
                   </div>
                 )}
-              {preferredLiveMode == "jsmpeg" && !debug && isRestreamed && (
+              {preferredLiveMode == "jsmpeg" && isRestreamed && (
                 <div className="mt-2 flex flex-col items-center gap-3">
                   <div className="flex flex-row items-center gap-2">
                     <IoIosWarning className="mr-1 size-8 text-danger" />
-
                     <p className="text-sm">{t("stream.lowBandwidth.tips")}</p>
                   </div>
                   <Button
@@ -1536,6 +1536,7 @@ function FrigateCameraFeatures({
                     aria-label={t("stream.lowBandwidth.resetStream")}
                     variant="outline"
                     size="sm"
+                    disabled={debug}
                     onClick={() => setLowBandwidth(false)}
                   >
                     <MdOutlineRestartAlt className="size-5 text-primary-variant" />
@@ -1565,7 +1566,7 @@ function FrigateCameraFeatures({
               {t("manualRecording.tips")}
             </p>
           </div>
-          {isRestreamed && !debug && (
+          {isRestreamed && (
             <>
               <div className="flex flex-col gap-2">
                 <FilterSwitch
@@ -1574,6 +1575,7 @@ function FrigateCameraFeatures({
                   onCheckedChange={(checked) => {
                     setPlayInBackground(checked);
                   }}
+                  disabled={debug}
                 />
                 <p className="mx-2 -mt-2 text-sm text-muted-foreground">
                   {t("manualRecording.playInBackground.desc")}
@@ -1586,6 +1588,7 @@ function FrigateCameraFeatures({
                   onCheckedChange={(checked) => {
                     setShowStats(checked);
                   }}
+                  disabled={debug}
                 />
                 <p className="mx-2 -mt-2 text-sm text-muted-foreground">
                   {t("manualRecording.showStats.desc")}
