@@ -881,10 +881,6 @@ function FrigateCameraFeatures({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // navigate for debug view
-
-  const navigate = useNavigate();
-
   // desktop shows icons part of row
   if (isDesktop || isTablet) {
     return (
