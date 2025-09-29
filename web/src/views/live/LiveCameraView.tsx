@@ -1615,7 +1615,7 @@ function FrigateCameraFeatures({
               </div>
             </>
           )}
-          <div className="mb-3 flex flex-col gap-1 px-2">
+          <div className="mb-3 flex flex-col">
             <FilterSwitch
               label={t("streaming.debugView", { ns: "components/dialog" })}
               isChecked={debug}
