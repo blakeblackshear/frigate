@@ -110,6 +110,7 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import PtzControlPanel from "@/components/overlay/PtzControlPanel";
+import ObjectSettingsView from "../settings/ObjectSettingsView";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -271,6 +272,7 @@ export default function LiveCameraView({
   );
 
   const [showStats, setShowStats] = useState(false);
+  const [debug, setDebug] = useState(false);
 
   const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
@@ -421,7 +423,11 @@ export default function LiveCameraView({
   );
 
   return (
-    <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
+    <TransformWrapper
+      minScale={1.0}
+      wheel={{ smoothStep: 0.005 }}
+      disabled={debug}
+    >
       <Toaster position="top-center" closeButton={true} />
       <div
         ref={mainRef}
@@ -593,10 +599,66 @@ export default function LiveCameraView({
               supportsAudioOutput={supportsAudioOutput}
               supports2WayTalk={supports2WayTalk}
               cameraEnabled={cameraEnabled}
+              debug={debug}
+              setDebug={setDebug}
             />
           </div>
         </div>
-        <div id="player-container" className="size-full" ref={containerRef}>
+        {!debug ? (
+          <div id="player-container" className="size-full" ref={containerRef}>
+            <TransformComponent
+              wrapperStyle={{
+                width: "100%",
+                height: "100%",
+              }}
+              contentStyle={{
+                position: "relative",
+                width: "100%",
+                height: "100%",
+                padding: "8px",
+              }}
+            >
+              <div
+                className={`flex flex-col items-center justify-center ${growClassName}`}
+                ref={clickOverlayRef}
+                onClick={handleOverlayClick}
+                style={{
+                  aspectRatio: constrainedAspectRatio,
+                }}
+              >
+                <LivePlayer
+                  key={camera.name}
+                  className={`${fullscreen ? "*:rounded-none" : ""}`}
+                  windowVisible
+                  showStillWithoutActivity={false}
+                  cameraConfig={camera}
+                  playAudio={audio}
+                  playInBackground={playInBackground ?? false}
+                  showStats={showStats}
+                  micEnabled={mic}
+                  iOSCompatFullScreen={isIOS}
+                  preferredLiveMode={preferredLiveMode}
+                  useWebGL={true}
+                  streamName={streamName ?? ""}
+                  pip={pip}
+                  containerRef={containerRef}
+                  setFullResolution={setFullResolution}
+                  onError={handleError}
+                />
+              </div>
+            </TransformComponent>
+            {camera?.audio?.enabled_in_config &&
+              audioTranscriptionState == "ON" &&
+              transcription != null && (
+                <div
+                  ref={transcriptionRef}
+                  className="text-md scrollbar-container absolute bottom-4 left-1/2 max-h-[15vh] w-[75%] -translate-x-1/2 overflow-y-auto rounded-lg bg-black/70 p-2 text-white md:w-[50%]"
+                >
+                  {transcription}
+                </div>
+              )}
+          </div>
+        ) : (
           <TransformComponent
             wrapperStyle={{
               width: "100%",
@@ -606,49 +668,11 @@ export default function LiveCameraView({
               position: "relative",
               width: "100%",
               height: "100%",
-              padding: "8px",
             }}
           >
-            <div
-              className={`flex flex-col items-center justify-center ${growClassName}`}
-              ref={clickOverlayRef}
-              onClick={handleOverlayClick}
-              style={{
-                aspectRatio: constrainedAspectRatio,
-              }}
-            >
-              <LivePlayer
-                key={camera.name}
-                className={`${fullscreen ? "*:rounded-none" : ""}`}
-                windowVisible
-                showStillWithoutActivity={false}
-                cameraConfig={camera}
-                playAudio={audio}
-                playInBackground={playInBackground ?? false}
-                showStats={showStats}
-                micEnabled={mic}
-                iOSCompatFullScreen={isIOS}
-                preferredLiveMode={preferredLiveMode}
-                useWebGL={true}
-                streamName={streamName ?? ""}
-                pip={pip}
-                containerRef={containerRef}
-                setFullResolution={setFullResolution}
-                onError={handleError}
-              />
-            </div>
+            <ObjectSettingsView selectedCamera={camera.name} />
           </TransformComponent>
-          {camera?.audio?.enabled_in_config &&
-            audioTranscriptionState == "ON" &&
-            transcription != null && (
-              <div
-                ref={transcriptionRef}
-                className="text-md scrollbar-container absolute bottom-4 left-1/2 max-h-[15vh] w-[75%] -translate-x-1/2 overflow-y-auto rounded-lg bg-black/70 p-2 text-white md:w-[50%]"
-              >
-                {transcription}
-              </div>
-            )}
-        </div>
+        )}
       </div>
       {camera.onvif.host != "" && (
         <div className="flex flex-col items-center justify-center">
@@ -719,6 +743,8 @@ type FrigateCameraFeaturesProps = {
   supportsAudioOutput: boolean;
   supports2WayTalk: boolean;
   cameraEnabled: boolean;
+  debug: boolean;
+  setDebug: (debug: boolean) => void;
 };
 function FrigateCameraFeatures({
   camera,
@@ -739,6 +765,8 @@ function FrigateCameraFeatures({
   supportsAudioOutput,
   supports2WayTalk,
   cameraEnabled,
+  debug,
+  setDebug,
 }: FrigateCameraFeaturesProps) {
   const { t } = useTranslation(["views/live", "components/dialog"]);
   const { getLocaleDocUrl } = useDocDomain();
@@ -1228,17 +1256,22 @@ function FrigateCameraFeatures({
                   })}
                 </p>
               </div>
-              <div
-                className="flex cursor-pointer flex-col gap-1"
-                onClick={() =>
-                  navigate(`/settings?page=debug&camera=${camera.name}`)
-                }
-              >
-                <div className="flex items-center justify-between text-sm font-medium leading-none">
-                  {t("streaming.debugView", {
-                    ns: "components/dialog",
-                  })}
-                  <LuExternalLink className="ml-2 inline-flex size-5" />
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <Label
+                    className="mx-0 cursor-pointer text-primary"
+                    htmlFor="debug"
+                  >
+                    {t("streaming.debugView", {
+                      ns: "components/dialog",
+                    })}
+                  </Label>
+                  <Switch
+                    className="ml-1"
+                    id="debug"
+                    checked={debug}
+                    onCheckedChange={(checked) => setDebug(checked)}
+                  />
                 </div>
               </div>
             </div>
