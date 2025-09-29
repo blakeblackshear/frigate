@@ -507,7 +507,7 @@ export default function LiveCameraView({
                 )}
               </Button>
             )}
-            {supportsFullscreen && (
+            {supportsFullscreen && !debug && (
               <CameraFeatureToggle
                 className="p-2 md:p-0"
                 variant={fullscreen ? "overlay" : "primary"}
@@ -521,29 +521,32 @@ export default function LiveCameraView({
                 onClick={toggleFullscreen}
               />
             )}
-            {!isIOS && !isFirefox && preferredLiveMode != "jsmpeg" && (
-              <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={LuPictureInPicture}
-                isActive={pip}
-                title={
-                  pip
-                    ? t("button.close", { ns: "common" })
-                    : t("button.pictureInPicture", { ns: "common" })
-                }
-                onClick={() => {
-                  if (!pip) {
-                    setPip(true);
-                  } else {
-                    document.exitPictureInPicture();
-                    setPip(false);
+            {!isIOS &&
+              !isFirefox &&
+              !debug &&
+              preferredLiveMode != "jsmpeg" && (
+                <CameraFeatureToggle
+                  className="p-2 md:p-0"
+                  variant={fullscreen ? "overlay" : "primary"}
+                  Icon={LuPictureInPicture}
+                  isActive={pip}
+                  title={
+                    pip
+                      ? t("button.close", { ns: "common" })
+                      : t("button.pictureInPicture", { ns: "common" })
                   }
-                }}
-                disabled={!cameraEnabled}
-              />
-            )}
-            {supports2WayTalk && (
+                  onClick={() => {
+                    if (!pip) {
+                      setPip(true);
+                    } else {
+                      document.exitPictureInPicture();
+                      setPip(false);
+                    }
+                  }}
+                  disabled={!cameraEnabled}
+                />
+              )}
+            {supports2WayTalk && !debug && (
               <CameraFeatureToggle
                 className="p-2 md:p-0"
                 variant={fullscreen ? "overlay" : "primary"}
@@ -563,7 +566,7 @@ export default function LiveCameraView({
                 disabled={!cameraEnabled}
               />
             )}
-            {supportsAudioOutput && preferredLiveMode != "jsmpeg" && (
+            {supportsAudioOutput && !debug && preferredLiveMode != "jsmpeg" && (
               <CameraFeatureToggle
                 className="p-2 md:p-0"
                 variant={fullscreen ? "overlay" : "primary"}
@@ -888,17 +891,21 @@ function FrigateCameraFeatures({
       <>
         {isAdmin && (
           <>
-            <CameraFeatureToggle
-              className="p-2 md:p-0"
-              variant={fullscreen ? "overlay" : "primary"}
-              Icon={enabledState == "ON" ? LuPower : LuPowerOff}
-              isActive={enabledState == "ON"}
-              title={
-                enabledState == "ON" ? t("camera.disable") : t("camera.enable")
-              }
-              onClick={() => sendEnabled(enabledState == "ON" ? "OFF" : "ON")}
-              disabled={false}
-            />
+            {!debug && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={enabledState == "ON" ? LuPower : LuPowerOff}
+                isActive={enabledState == "ON"}
+                title={
+                  enabledState == "ON"
+                    ? t("camera.disable")
+                    : t("camera.enable")
+                }
+                onClick={() => sendEnabled(enabledState == "ON" ? "OFF" : "ON")}
+                disabled={false}
+              />
+            )}
             <CameraFeatureToggle
               className="p-2 md:p-0"
               variant={fullscreen ? "overlay" : "primary"}
@@ -993,18 +1000,20 @@ function FrigateCameraFeatures({
             )}
           </>
         )}
-        <CameraFeatureToggle
-          className={cn(
-            "p-2 md:p-0",
-            isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
-          )}
-          variant={fullscreen ? "overlay" : "primary"}
-          Icon={isRecording ? TbRecordMail : TbRecordMailOff}
-          isActive={isRecording}
-          title={t("manualRecording." + (isRecording ? "stop" : "start"))}
-          onClick={handleEventButtonClick}
-          disabled={!cameraEnabled}
-        />
+        {!debug && (
+          <CameraFeatureToggle
+            className={cn(
+              "p-2 md:p-0",
+              isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
+            )}
+            variant={fullscreen ? "overlay" : "primary"}
+            Icon={isRecording ? TbRecordMail : TbRecordMailOff}
+            isActive={isRecording}
+            title={t("manualRecording." + (isRecording ? "stop" : "start"))}
+            onClick={handleEventButtonClick}
+            disabled={!cameraEnabled}
+          />
+        )}
 
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger>
@@ -1069,6 +1078,7 @@ function FrigateCameraFeatures({
                     </Label>
                     <Select
                       value={streamName}
+                      disabled={debug}
                       onValueChange={(value) => {
                         setStreamName?.(value);
                       }}
@@ -1098,48 +1108,51 @@ function FrigateCameraFeatures({
                       </SelectContent>
                     </Select>
 
-                    {preferredLiveMode != "jsmpeg" && isRestreamed && (
-                      <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                        {supportsAudioOutput ? (
-                          <>
-                            <LuCheck className="size-4 text-success" />
-                            <div>{t("stream.audio.available")}</div>
-                          </>
-                        ) : (
-                          <>
-                            <LuX className="size-4 text-danger" />
-                            <div>{t("stream.audio.unavailable")}</div>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <div className="cursor-pointer p-0">
-                                  <LuInfo className="size-4" />
-                                  <span className="sr-only">
-                                    {t("button.info", { ns: "common" })}
-                                  </span>
-                                </div>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-80 text-xs">
-                                {t("stream.audio.tips.title")}
-                                <div className="mt-2 flex items-center text-primary">
-                                  <Link
-                                    to={getLocaleDocUrl("configuration/live")}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline"
-                                  >
-                                    {t("readTheDocumentation", {
-                                      ns: "common",
-                                    })}
-                                    <LuExternalLink className="ml-2 inline-flex size-3" />
-                                  </Link>
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </>
-                        )}
-                      </div>
-                    )}
                     {preferredLiveMode != "jsmpeg" &&
+                      !debug &&
+                      isRestreamed && (
+                        <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                          {supportsAudioOutput ? (
+                            <>
+                              <LuCheck className="size-4 text-success" />
+                              <div>{t("stream.audio.available")}</div>
+                            </>
+                          ) : (
+                            <>
+                              <LuX className="size-4 text-danger" />
+                              <div>{t("stream.audio.unavailable")}</div>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <div className="cursor-pointer p-0">
+                                    <LuInfo className="size-4" />
+                                    <span className="sr-only">
+                                      {t("button.info", { ns: "common" })}
+                                    </span>
+                                  </div>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80 text-xs">
+                                  {t("stream.audio.tips.title")}
+                                  <div className="mt-2 flex items-center text-primary">
+                                    <Link
+                                      to={getLocaleDocUrl("configuration/live")}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline"
+                                    >
+                                      {t("readTheDocumentation", {
+                                        ns: "common",
+                                      })}
+                                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                                    </Link>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    {preferredLiveMode != "jsmpeg" &&
+                      !debug &&
                       isRestreamed &&
                       supportsAudioOutput && (
                         <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
@@ -1185,32 +1198,34 @@ function FrigateCameraFeatures({
                         </div>
                       )}
 
-                    {preferredLiveMode == "jsmpeg" && isRestreamed && (
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="flex flex-row items-center gap-2">
-                          <IoIosWarning className="mr-1 size-8 text-danger" />
+                    {preferredLiveMode == "jsmpeg" &&
+                      !debug &&
+                      isRestreamed && (
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="flex flex-row items-center gap-2">
+                            <IoIosWarning className="mr-1 size-8 text-danger" />
 
-                          <p className="text-sm">
-                            {t("stream.lowBandwidth.tips")}
-                          </p>
-                        </div>
-                        <Button
-                          className={`flex items-center gap-2.5 rounded-lg`}
-                          aria-label={t("stream.lowBandwidth.resetStream")}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setLowBandwidth(false)}
-                        >
-                          <MdOutlineRestartAlt className="size-5 text-primary-variant" />
-                          <div className="text-primary-variant">
-                            {t("stream.lowBandwidth.resetStream")}
+                            <p className="text-sm">
+                              {t("stream.lowBandwidth.tips")}
+                            </p>
                           </div>
-                        </Button>
-                      </div>
-                    )}
+                          <Button
+                            className={`flex items-center gap-2.5 rounded-lg`}
+                            aria-label={t("stream.lowBandwidth.resetStream")}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setLowBandwidth(false)}
+                          >
+                            <MdOutlineRestartAlt className="size-5 text-primary-variant" />
+                            <div className="text-primary-variant">
+                              {t("stream.lowBandwidth.resetStream")}
+                            </div>
+                          </Button>
+                        </div>
+                      )}
                   </div>
                 )}
-              {isRestreamed && (
+              {isRestreamed && !debug && (
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <Label
@@ -1246,6 +1261,7 @@ function FrigateCameraFeatures({
                   <Switch
                     className="ml-1"
                     id="showstats"
+                    disabled={debug}
                     checked={showStats}
                     onCheckedChange={(checked) => setShowStats(checked)}
                   />
