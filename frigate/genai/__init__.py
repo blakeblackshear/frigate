@@ -73,10 +73,12 @@ Your task is to provide a clear, security-focused description of the scene that:
 Facts come first, but identifying security risks is the primary goal.
 
 When forming your description:
-- Describe the people and objects exactly as seen. Include any observable environmental changes (e.g., lighting changes triggered by activity).
-- Time of day should **increase suspicion only when paired with unusual or security-relevant behaviors**. Do not raise the threat level for common residential activities (e.g., residents walking pets, retrieving mail, gardening, playing with pets, supervising children) even at unusual hours, unless other suspicious indicators are present.
-- Focus on behaviors that are uncharacteristic of innocent activity: loitering without clear purpose, avoiding cameras, inspecting vehicles/doors, changing behavior when lights activate, scanning surroundings without an apparent benign reason.
-- **Benign context override**: If scanning or looking around is clearly part of an innocent activity (such as playing with a dog, gardening, supervising children, or watching for a pet), do not treat it as suspicious.
+- **CRITICAL: Only describe objects explicitly listed in "Detected objects" below.** Do not infer or mention additional people, vehicles, or objects not present in the detected objects list, even if visual patterns suggest them. If only a car is detected, do not describe a person interacting with it unless "person" is also in the detected objects list.
+- Describe what you observe: actions, movements, interactions with objects and the environment. Include any observable environmental changes (e.g., lighting changes triggered by activity).
+- Note visible details such as clothing, items being carried or placed, tools or equipment present, and how they interact with the property or objects.
+- Consider the full sequence chronologically: what happens from start to finish, how duration and actions relate to the location and objects involved.
+- **Time of day context**: Unusual hours (late night/early morning) should increase suspicion when the observable behavior itself appears questionable. However, recognize that some legitimate activities can occur at any hour (residents coming home, service deliveries, maintenance emergencies, etc.). Focus on whether the observable evidence supports a benign explanation despite the timing.
+- Identify patterns that suggest potential security concerns: testing doors/windows, accessing unauthorized areas, attempting to conceal actions, extended loitering without apparent purpose, taking items, behavior that doesn't align with the apparent context of the scene.
 
 Your response MUST be a flat JSON object with:
 - `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
@@ -85,9 +87,9 @@ Your response MUST be a flat JSON object with:
 {get_concern_prompt()}
 
 Threat-level definitions:
-- 0 — Typical or expected activity for this location/time (includes residents, guests, or known animals engaged in normal activities, even if they glance around or scan surroundings).
-- 1 — Unusual or suspicious activity: At least one security-relevant behavior is present **and not explainable by a normal residential activity**.
-- 2 — Active or immediate threat: Breaking in, vandalism, aggression, weapon display.
+- 0 — Normal activity: What you observe is consistent with expected residential life (residents, family, guests, pets, deliveries, services, maintenance, etc.). The observable evidence—despite any unusual timing—supports a benign explanation.
+- 1 — Potentially suspicious: Observable behavior or context suggests this may warrant attention. The evidence doesn't clearly support a routine explanation. Examples: testing doors/windows, lingering without apparent purpose, accessing areas inappropriately, taking items, behavior inconsistent with the observable context, or activity at unusual hours without clear legitimate indicators.
+- 2 — Immediate threat: Clear evidence of forced entry, break-in, vandalism, aggression, weapons, theft in progress, or active property damage.
 
 Sequence details:
 - Frame 1 = earliest, Frame {len(thumbnails)} = latest
@@ -98,6 +100,7 @@ Sequence details:
 
 **IMPORTANT:**
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
+- Only describe objects from the "Detected objects" list above. Do not hallucinate additional objects.
 {get_language_prompt()}
 """
         logger.debug(
