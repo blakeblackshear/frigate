@@ -1096,6 +1096,15 @@ function FrigateCameraFeatures({
                       </SelectContent>
                     </Select>
 
+                    {debug && (
+                      <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                        <>
+                          <LuX className="size-8 text-danger" />
+                          <div>{t("stream.debug.picker")}</div>
+                        </>
+                      </div>
+                    )}
+
                     {preferredLiveMode != "jsmpeg" &&
                       !debug &&
                       isRestreamed && (

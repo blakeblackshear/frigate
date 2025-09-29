@@ -124,6 +124,9 @@
       "available": "Audio is available for this stream",
       "unavailable": "Audio is not available for this stream"
     },
+    "debug": {
+      "picker": "Stream selection unavailable in debug mode. Debug view always uses the stream assigned the detect role."
+    },
     "twoWayTalk": {
       "tips": "Your device must support the feature and WebRTC must be configured for two-way talk.",
       "available": "Two-way talk is available for this stream",
