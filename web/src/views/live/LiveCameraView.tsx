@@ -1415,6 +1415,7 @@ function FrigateCameraFeatures({
                 onValueChange={(value) => {
                   setStreamName?.(value);
                 }}
+                disabled={debug}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue>
@@ -1440,7 +1441,7 @@ function FrigateCameraFeatures({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              {preferredLiveMode != "jsmpeg" && isRestreamed && (
+              {preferredLiveMode != "jsmpeg" && !debug && isRestreamed && (
                 <div className="mt-1 flex flex-row items-center gap-1 text-sm text-muted-foreground">
                   {supportsAudioOutput ? (
                     <>
@@ -1480,6 +1481,7 @@ function FrigateCameraFeatures({
                 </div>
               )}
               {preferredLiveMode != "jsmpeg" &&
+                !debug &&
                 isRestreamed &&
                 supportsAudioOutput && (
                   <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
@@ -1522,7 +1524,7 @@ function FrigateCameraFeatures({
                     )}
                   </div>
                 )}
-              {preferredLiveMode == "jsmpeg" && isRestreamed && (
+              {preferredLiveMode == "jsmpeg" && !debug && isRestreamed && (
                 <div className="mt-2 flex flex-col items-center gap-3">
                   <div className="flex flex-row items-center gap-2">
                     <IoIosWarning className="mr-1 size-8 text-danger" />
@@ -1555,6 +1557,7 @@ function FrigateCameraFeatures({
                 "w-full",
                 isRecording && "animate-pulse bg-red-500 hover:bg-red-600",
               )}
+              disabled={debug}
             >
               {t("manualRecording." + (isRecording ? "end" : "start"))}
             </Button>
@@ -1562,7 +1565,7 @@ function FrigateCameraFeatures({
               {t("manualRecording.tips")}
             </p>
           </div>
-          {isRestreamed && (
+          {isRestreamed && !debug && (
             <>
               <div className="flex flex-col gap-2">
                 <FilterSwitch
