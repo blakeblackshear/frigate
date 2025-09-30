@@ -1,0 +1,2813 @@
+{
+  "FrigateConfig": {
+    "description": "Root Frigate configuration object",
+    "fields": {
+      "version": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Current config version.",
+        "required": false
+      },
+      "safe_mode": {
+        "type": "bool",
+        "default": false,
+        "title": "If Frigate should be started in safe mode.",
+        "required": false
+      },
+      "environment_vars": {
+        "type": "EnvVars (Dict[str, str])",
+        "default": {},
+        "title": "Frigate environment variables.",
+        "required": false
+      },
+      "logger": {
+        "type": "LoggerConfig",
+        "default": "LoggerConfig()",
+        "title": "Logging configuration.",
+        "required": false,
+        "nested": "LoggerConfig"
+      },
+      "auth": {
+        "type": "AuthConfig",
+        "default": "AuthConfig()",
+        "title": "Auth configuration.",
+        "required": false,
+        "nested": "AuthConfig"
+      },
+      "database": {
+        "type": "DatabaseConfig",
+        "default": "DatabaseConfig()",
+        "title": "Database configuration.",
+        "required": false,
+        "nested": "DatabaseConfig"
+      },
+      "go2rtc": {
+        "type": "RestreamConfig (BaseModel with extra='allow')",
+        "default": "RestreamConfig()",
+        "title": "Global restream configuration.",
+        "required": false,
+        "description": "This accepts any fields, passed through to go2rtc"
+      },
+      "mqtt": {
+        "type": "MqttConfig",
+        "title": "MQTT configuration.",
+        "required": true,
+        "nested": "MqttConfig"
+      },
+      "notifications": {
+        "type": "NotificationConfig",
+        "default": "NotificationConfig()",
+        "title": "Global notification configuration.",
+        "required": false,
+        "nested": "NotificationConfig"
+      },
+      "networking": {
+        "type": "NetworkingConfig",
+        "default": "NetworkingConfig()",
+        "title": "Networking configuration",
+        "required": false,
+        "nested": "NetworkingConfig"
+      },
+      "proxy": {
+        "type": "ProxyConfig",
+        "default": "ProxyConfig()",
+        "title": "Proxy configuration.",
+        "required": false,
+        "nested": "ProxyConfig"
+      },
+      "telemetry": {
+        "type": "TelemetryConfig",
+        "default": "TelemetryConfig()",
+        "title": "Telemetry configuration.",
+        "required": false,
+        "nested": "TelemetryConfig"
+      },
+      "tls": {
+        "type": "TlsConfig",
+        "default": "TlsConfig()",
+        "title": "TLS configuration.",
+        "required": false,
+        "nested": "TlsConfig"
+      },
+      "ui": {
+        "type": "UIConfig",
+        "default": "UIConfig()",
+        "title": "UI configuration.",
+        "required": false,
+        "nested": "UIConfig"
+      },
+      "detectors": {
+        "type": "Dict[str, BaseDetectorConfig]",
+        "default": {"cpu": {"type": "cpu"}},
+        "title": "Detector hardware configuration.",
+        "required": false,
+        "description": "Keys are detector names, values are detector configs",
+        "nested": "BaseDetectorConfig"
+      },
+      "model": {
+        "type": "ModelConfig",
+        "default": "ModelConfig()",
+        "title": "Detection model configuration.",
+        "required": false,
+        "nested": "ModelConfig"
+      },
+      "genai": {
+        "type": "GenAIConfig",
+        "default": "GenAIConfig()",
+        "title": "Generative AI configuration.",
+        "required": false,
+        "nested": "GenAIConfig"
+      },
+      "cameras": {
+        "type": "Dict[str, CameraConfig]",
+        "title": "Camera configuration.",
+        "required": true,
+        "description": "Keys are camera names, values are camera configs",
+        "nested": "CameraConfig"
+      },
+      "audio": {
+        "type": "AudioConfig",
+        "default": "AudioConfig()",
+        "title": "Global Audio events configuration.",
+        "required": false,
+        "nested": "AudioConfig"
+      },
+      "birdseye": {
+        "type": "BirdseyeConfig",
+        "default": "BirdseyeConfig()",
+        "title": "Birdseye configuration.",
+        "required": false,
+        "nested": "BirdseyeConfig"
+      },
+      "detect": {
+        "type": "DetectConfig",
+        "default": "DetectConfig()",
+        "title": "Global object tracking configuration.",
+        "required": false,
+        "nested": "DetectConfig"
+      },
+      "ffmpeg": {
+        "type": "FfmpegConfig",
+        "default": "FfmpegConfig()",
+        "title": "Global FFmpeg configuration.",
+        "required": false,
+        "nested": "FfmpegConfig"
+      },
+      "live": {
+        "type": "CameraLiveConfig",
+        "default": "CameraLiveConfig()",
+        "title": "Live playback settings.",
+        "required": false,
+        "nested": "CameraLiveConfig"
+      },
+      "motion": {
+        "type": "Optional[MotionConfig]",
+        "default": null,
+        "title": "Global motion detection configuration.",
+        "required": false,
+        "nested": "MotionConfig"
+      },
+      "objects": {
+        "type": "ObjectConfig",
+        "default": "ObjectConfig()",
+        "title": "Global object configuration.",
+        "required": false,
+        "nested": "ObjectConfig"
+      },
+      "record": {
+        "type": "RecordConfig",
+        "default": "RecordConfig()",
+        "title": "Global record configuration.",
+        "required": false,
+        "nested": "RecordConfig"
+      },
+      "review": {
+        "type": "ReviewConfig",
+        "default": "ReviewConfig()",
+        "title": "Review configuration.",
+        "required": false,
+        "nested": "ReviewConfig"
+      },
+      "snapshots": {
+        "type": "SnapshotsConfig",
+        "default": "SnapshotsConfig()",
+        "title": "Global snapshots configuration.",
+        "required": false,
+        "nested": "SnapshotsConfig"
+      },
+      "timestamp_style": {
+        "type": "TimestampStyleConfig",
+        "default": "TimestampStyleConfig()",
+        "title": "Global timestamp style configuration.",
+        "required": false,
+        "nested": "TimestampStyleConfig"
+      },
+      "audio_transcription": {
+        "type": "AudioTranscriptionConfig",
+        "default": "AudioTranscriptionConfig()",
+        "title": "Audio transcription config.",
+        "required": false,
+        "nested": "AudioTranscriptionConfig"
+      },
+      "classification": {
+        "type": "ClassificationConfig",
+        "default": "ClassificationConfig()",
+        "title": "Object classification config.",
+        "required": false,
+        "nested": "ClassificationConfig"
+      },
+      "semantic_search": {
+        "type": "SemanticSearchConfig",
+        "default": "SemanticSearchConfig()",
+        "title": "Semantic search configuration.",
+        "required": false,
+        "nested": "SemanticSearchConfig"
+      },
+      "face_recognition": {
+        "type": "FaceRecognitionConfig",
+        "default": "FaceRecognitionConfig()",
+        "title": "Face recognition config.",
+        "required": false,
+        "nested": "FaceRecognitionConfig"
+      },
+      "lpr": {
+        "type": "LicensePlateRecognitionConfig",
+        "default": "LicensePlateRecognitionConfig()",
+        "title": "License Plate recognition config.",
+        "required": false,
+        "nested": "LicensePlateRecognitionConfig"
+      },
+      "camera_groups": {
+        "type": "Dict[str, CameraGroupConfig]",
+        "default": {},
+        "title": "Camera group configuration",
+        "required": false,
+        "nested": "CameraGroupConfig"
+      }
+    }
+  },
+  "AuthConfig": {
+    "description": "Authentication configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable authentication",
+        "required": false
+      },
+      "reset_admin_password": {
+        "type": "bool",
+        "default": false,
+        "title": "Reset the admin password on startup",
+        "required": false
+      },
+      "cookie_name": {
+        "type": "str",
+        "default": "frigate_token",
+        "title": "Name for jwt token cookie",
+        "pattern": "^[a-z_]+$",
+        "required": false
+      },
+      "cookie_secure": {
+        "type": "bool",
+        "default": false,
+        "title": "Set secure flag on cookie",
+        "required": false
+      },
+      "session_length": {
+        "type": "int",
+        "default": 86400,
+        "title": "Session length for jwt session tokens",
+        "ge": 60,
+        "required": false
+      },
+      "refresh_time": {
+        "type": "int",
+        "default": 43200,
+        "title": "Refresh the session if it is going to expire in this many seconds",
+        "ge": 30,
+        "required": false
+      },
+      "failed_login_rate_limit": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Rate limits for failed login attempts.",
+        "required": false
+      },
+      "trusted_proxies": {
+        "type": "list[str]",
+        "default": [],
+        "title": "Trusted proxies for determining IP address to rate limit",
+        "required": false
+      },
+      "hash_iterations": {
+        "type": "int",
+        "default": 600000,
+        "title": "Password hash iterations",
+        "required": false
+      },
+      "roles": {
+        "type": "Dict[str, List[str]]",
+        "default": {},
+        "title": "Role to camera mappings. Empty list grants access to all cameras.",
+        "required": false,
+        "description": "Reserved roles 'admin' and 'viewer' are automatically added"
+      }
+    }
+  },
+  "MqttConfig": {
+    "description": "MQTT configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable MQTT Communication.",
+        "required": false
+      },
+      "host": {
+        "type": "str",
+        "default": "",
+        "title": "MQTT Host",
+        "required": false
+      },
+      "port": {
+        "type": "int",
+        "default": 1883,
+        "title": "MQTT Port",
+        "required": false
+      },
+      "topic_prefix": {
+        "type": "str",
+        "default": "frigate",
+        "title": "MQTT Topic Prefix",
+        "required": false
+      },
+      "client_id": {
+        "type": "str",
+        "default": "frigate",
+        "title": "MQTT Client ID",
+        "required": false
+      },
+      "stats_interval": {
+        "type": "int",
+        "default": 60,
+        "ge": "FREQUENCY_STATS_POINTS",
+        "title": "MQTT Camera Stats Interval",
+        "required": false
+      },
+      "user": {
+        "type": "Optional[EnvString]",
+        "default": null,
+        "title": "MQTT Username",
+        "required": false
+      },
+      "password": {
+        "type": "Optional[EnvString]",
+        "default": null,
+        "title": "MQTT Password",
+        "required": false
+      },
+      "tls_ca_certs": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "MQTT TLS CA Certificates",
+        "required": false
+      },
+      "tls_client_cert": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "MQTT TLS Client Certificate",
+        "required": false
+      },
+      "tls_client_key": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "MQTT TLS Client Key",
+        "required": false
+      },
+      "tls_insecure": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "MQTT TLS Insecure",
+        "required": false
+      },
+      "qos": {
+        "type": "int",
+        "default": 0,
+        "title": "MQTT QoS",
+        "required": false
+      }
+    }
+  },
+  "DatabaseConfig": {
+    "description": "Database configuration",
+    "fields": {
+      "path": {
+        "type": "str",
+        "default": "DEFAULT_DB_PATH",
+        "title": "Database path.",
+        "required": false
+      }
+    }
+  },
+  "LoggerConfig": {
+    "description": "Logger configuration",
+    "fields": {
+      "default": {
+        "type": "LogLevel (enum: debug, info, warning, error, critical)",
+        "default": "info",
+        "title": "Default logging level.",
+        "required": false
+      },
+      "logs": {
+        "type": "dict[str, LogLevel]",
+        "default": {},
+        "title": "Log level for specified processes.",
+        "required": false
+      }
+    }
+  },
+  "TelemetryConfig": {
+    "description": "Telemetry configuration",
+    "fields": {
+      "network_interfaces": {
+        "type": "list[str]",
+        "default": [],
+        "title": "Enabled network interfaces for bandwidth calculation.",
+        "required": false
+      },
+      "stats": {
+        "type": "StatsConfig",
+        "default": "StatsConfig()",
+        "title": "System Stats Configuration",
+        "required": false,
+        "nested": "StatsConfig"
+      },
+      "version_check": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable latest version check.",
+        "required": false
+      }
+    }
+  },
+  "StatsConfig": {
+    "description": "Statistics configuration",
+    "fields": {
+      "amd_gpu_stats": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable AMD GPU stats.",
+        "required": false
+      },
+      "intel_gpu_stats": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable Intel GPU stats.",
+        "required": false
+      },
+      "network_bandwidth": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable network bandwidth for ffmpeg processes.",
+        "required": false
+      },
+      "intel_gpu_device": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Define the device to use when gathering SR-IOV stats.",
+        "required": false
+      }
+    }
+  },
+  "UIConfig": {
+    "description": "UI configuration",
+    "fields": {
+      "timezone": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Override UI timezone.",
+        "required": false
+      },
+      "time_format": {
+        "type": "TimeFormatEnum (enum: browser, 12hour, 24hour)",
+        "default": "browser",
+        "title": "Override UI time format.",
+        "required": false
+      },
+      "date_style": {
+        "type": "DateTimeStyleEnum (enum: full, long, medium, short)",
+        "default": "short",
+        "title": "Override UI dateStyle.",
+        "required": false
+      },
+      "time_style": {
+        "type": "DateTimeStyleEnum (enum: full, long, medium, short)",
+        "default": "medium",
+        "title": "Override UI timeStyle.",
+        "required": false
+      },
+      "strftime_fmt": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Override date and time format using strftime syntax.",
+        "required": false
+      },
+      "unit_system": {
+        "type": "UnitSystemEnum (enum: imperial, metric)",
+        "default": "metric",
+        "title": "The unit system to use for measurements.",
+        "required": false
+      }
+    }
+  },
+  "NetworkingConfig": {
+    "description": "Networking configuration",
+    "fields": {
+      "ipv6": {
+        "type": "IPv6Config",
+        "default": "IPv6Config()",
+        "title": "Network configuration",
+        "required": false,
+        "nested": "IPv6Config"
+      }
+    }
+  },
+  "IPv6Config": {
+    "description": "IPv6 configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable IPv6 for port 5000 and/or 8971",
+        "required": false
+      }
+    }
+  },
+  "ProxyConfig": {
+    "description": "Proxy configuration",
+    "fields": {
+      "header_map": {
+        "type": "HeaderMappingConfig",
+        "default": "HeaderMappingConfig()",
+        "title": "Header mapping definitions for proxy user passing.",
+        "required": false,
+        "nested": "HeaderMappingConfig"
+      },
+      "logout_url": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Redirect url for logging out with proxy.",
+        "required": false
+      },
+      "auth_secret": {
+        "type": "Optional[EnvString]",
+        "default": null,
+        "title": "Secret value for proxy authentication.",
+        "required": false
+      },
+      "default_role": {
+        "type": "Optional[str]",
+        "default": "viewer",
+        "title": "Default role for proxy users.",
+        "required": false
+      },
+      "separator": {
+        "type": "Optional[str]",
+        "default": ",",
+        "title": "The character used to separate values in a mapped header.",
+        "required": false,
+        "validation": "Must be exactly one character"
+      }
+    }
+  },
+  "HeaderMappingConfig": {
+    "description": "Header mapping configuration for proxy",
+    "fields": {
+      "user": {
+        "type": "str",
+        "default": null,
+        "title": "Header name from upstream proxy to identify user.",
+        "required": false
+      },
+      "role": {
+        "type": "str",
+        "default": null,
+        "title": "Header name from upstream proxy to identify user role.",
+        "required": false
+      },
+      "role_map": {
+        "type": "Optional[dict[str, list[str]]]",
+        "default": {},
+        "title": "Mapping of Frigate roles to upstream group values.",
+        "required": false
+      }
+    }
+  },
+  "TlsConfig": {
+    "description": "TLS configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable TLS for port 8971",
+        "required": false
+      }
+    }
+  },
+  "CameraGroupConfig": {
+    "description": "Camera group configuration",
+    "fields": {
+      "cameras": {
+        "type": "Union[str, list[str]]",
+        "default": [],
+        "title": "List of cameras in this group.",
+        "required": false
+      },
+      "icon": {
+        "type": "str",
+        "default": "generic",
+        "title": "Icon that represents camera group.",
+        "required": false
+      },
+      "order": {
+        "type": "int",
+        "default": 0,
+        "title": "Sort order for group.",
+        "required": false
+      }
+    }
+  },
+  "ModelConfig": {
+    "description": "Detection model configuration",
+    "fields": {
+      "path": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Custom Object detection model path.",
+        "required": false
+      },
+      "labelmap_path": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Label map for custom object detector.",
+        "required": false
+      },
+      "width": {
+        "type": "int",
+        "default": 320,
+        "title": "Object detection model input width.",
+        "required": false
+      },
+      "height": {
+        "type": "int",
+        "default": 320,
+        "title": "Object detection model input height.",
+        "required": false
+      },
+      "labelmap": {
+        "type": "Dict[int, str]",
+        "default": {},
+        "title": "Labelmap customization.",
+        "required": false
+      },
+      "attributes_map": {
+        "type": "Dict[str, list[str]]",
+        "default": "DEFAULT_ATTRIBUTE_LABEL_MAP",
+        "title": "Map of object labels to their attribute labels.",
+        "required": false
+      },
+      "input_tensor": {
+        "type": "InputTensorEnum (enum: nchw, nhwc, hwnc, hwcn)",
+        "default": "nhwc",
+        "title": "Model Input Tensor Shape",
+        "required": false
+      },
+      "input_pixel_format": {
+        "type": "PixelFormatEnum (enum: rgb, bgr, yuv)",
+        "default": "rgb",
+        "title": "Model Input Pixel Color Format",
+        "required": false
+      },
+      "input_dtype": {
+        "type": "InputDTypeEnum (enum: float, float_denorm, int)",
+        "default": "int",
+        "title": "Model Input D Type",
+        "required": false
+      },
+      "model_type": {
+        "type": "ModelTypeEnum (enum: dfine, rfdetr, ssd, yolox, yolonas, yolo-generic)",
+        "default": "ssd",
+        "title": "Object Detection Model Type",
+        "required": false
+      }
+    }
+  },
+  "BaseDetectorConfig": {
+    "description": "Base detector configuration - all detector types inherit from this",
+    "fields": {
+      "type": {
+        "type": "str (enum: cpu, cpu_tfl, deepstack, degirum, edgetpu_tfl, hailo8l, memryx, onnx, openvino, rknn, synaptics, teflon_tfl, tensorrt, zmq_ipc)",
+        "default": "cpu",
+        "title": "Detector Type",
+        "required": false
+      },
+      "model": {
+        "type": "Optional[ModelConfig]",
+        "default": null,
+        "title": "Detector specific model configuration.",
+        "required": false,
+        "nested": "ModelConfig"
+      },
+      "model_path": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Detector specific model path.",
+        "required": false
+      }
+    },
+    "note": "Each detector type may have additional specific fields beyond these base fields"
+  },
+  "GenAIConfig": {
+    "description": "Generative AI configuration",
+    "fields": {
+      "api_key": {
+        "type": "Optional[EnvString]",
+        "default": null,
+        "title": "Provider API key.",
+        "required": false
+      },
+      "base_url": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Provider base url.",
+        "required": false
+      },
+      "model": {
+        "type": "str",
+        "default": "gpt-4o",
+        "title": "GenAI model.",
+        "required": false
+      },
+      "provider": {
+        "type": "GenAIProviderEnum (enum: openai, azure_openai, gemini, ollama) | None",
+        "default": null,
+        "title": "GenAI provider.",
+        "required": false
+      },
+      "provider_options": {
+        "type": "dict[str, Any]",
+        "default": {},
+        "title": "GenAI Provider extra options.",
+        "required": false
+      }
+    }
+  },
+  "CameraConfig": {
+    "description": "Individual camera configuration",
+    "fields": {
+      "name": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Camera name.",
+        "pattern": "REGEX_CAMERA_NAME",
+        "required": false
+      },
+      "friendly_name": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Camera friendly name used in the Frigate UI.",
+        "required": false
+      },
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable camera.",
+        "required": false
+      },
+      "audio": {
+        "type": "AudioConfig",
+        "default": "AudioConfig()",
+        "title": "Audio events configuration.",
+        "required": false,
+        "nested": "AudioConfig"
+      },
+      "audio_transcription": {
+        "type": "AudioTranscriptionConfig",
+        "default": "AudioTranscriptionConfig()",
+        "title": "Audio transcription config.",
+        "required": false,
+        "nested": "AudioTranscriptionConfig"
+      },
+      "birdseye": {
+        "type": "BirdseyeCameraConfig",
+        "default": "BirdseyeCameraConfig()",
+        "title": "Birdseye camera configuration.",
+        "required": false,
+        "nested": "BirdseyeCameraConfig"
+      },
+      "detect": {
+        "type": "DetectConfig",
+        "default": "DetectConfig()",
+        "title": "Object detection configuration.",
+        "required": false,
+        "nested": "DetectConfig"
+      },
+      "face_recognition": {
+        "type": "CameraFaceRecognitionConfig",
+        "default": "CameraFaceRecognitionConfig()",
+        "title": "Face recognition config.",
+        "required": false,
+        "nested": "CameraFaceRecognitionConfig"
+      },
+      "ffmpeg": {
+        "type": "CameraFfmpegConfig",
+        "title": "FFmpeg configuration for the camera.",
+        "required": true,
+        "nested": "CameraFfmpegConfig"
+      },
+      "live": {
+        "type": "CameraLiveConfig",
+        "default": "CameraLiveConfig()",
+        "title": "Live playback settings.",
+        "required": false,
+        "nested": "CameraLiveConfig"
+      },
+      "lpr": {
+        "type": "CameraLicensePlateRecognitionConfig",
+        "default": "CameraLicensePlateRecognitionConfig()",
+        "title": "LPR config.",
+        "required": false,
+        "nested": "CameraLicensePlateRecognitionConfig"
+      },
+      "motion": {
+        "type": "MotionConfig",
+        "default": null,
+        "title": "Motion detection configuration.",
+        "required": false,
+        "nested": "MotionConfig"
+      },
+      "objects": {
+        "type": "ObjectConfig",
+        "default": "ObjectConfig()",
+        "title": "Object configuration.",
+        "required": false,
+        "nested": "ObjectConfig"
+      },
+      "record": {
+        "type": "RecordConfig",
+        "default": "RecordConfig()",
+        "title": "Record configuration.",
+        "required": false,
+        "nested": "RecordConfig"
+      },
+      "review": {
+        "type": "ReviewConfig",
+        "default": "ReviewConfig()",
+        "title": "Review configuration.",
+        "required": false,
+        "nested": "ReviewConfig"
+      },
+      "semantic_search": {
+        "type": "CameraSemanticSearchConfig",
+        "default": "CameraSemanticSearchConfig()",
+        "title": "Semantic search configuration.",
+        "required": false,
+        "nested": "CameraSemanticSearchConfig"
+      },
+      "snapshots": {
+        "type": "SnapshotsConfig",
+        "default": "SnapshotsConfig()",
+        "title": "Snapshot configuration.",
+        "required": false,
+        "nested": "SnapshotsConfig"
+      },
+      "timestamp_style": {
+        "type": "TimestampStyleConfig",
+        "default": "TimestampStyleConfig()",
+        "title": "Timestamp style configuration.",
+        "required": false,
+        "nested": "TimestampStyleConfig"
+      },
+      "best_image_timeout": {
+        "type": "int",
+        "default": 60,
+        "title": "How long to wait for the image with the highest confidence score.",
+        "required": false
+      },
+      "mqtt": {
+        "type": "CameraMqttConfig",
+        "default": "CameraMqttConfig()",
+        "title": "MQTT configuration.",
+        "required": false,
+        "nested": "CameraMqttConfig"
+      },
+      "notifications": {
+        "type": "NotificationConfig",
+        "default": "NotificationConfig()",
+        "title": "Notifications configuration.",
+        "required": false,
+        "nested": "NotificationConfig"
+      },
+      "onvif": {
+        "type": "OnvifConfig",
+        "default": "OnvifConfig()",
+        "title": "Camera Onvif Configuration.",
+        "required": false,
+        "nested": "OnvifConfig"
+      },
+      "type": {
+        "type": "CameraTypeEnum (enum: generic, lpr)",
+        "default": "generic",
+        "title": "Camera Type",
+        "required": false
+      },
+      "ui": {
+        "type": "CameraUiConfig",
+        "default": "CameraUiConfig()",
+        "title": "Camera UI Modifications.",
+        "required": false,
+        "nested": "CameraUiConfig"
+      },
+      "webui_url": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "URL to visit the camera directly from system page",
+        "required": false
+      },
+      "zones": {
+        "type": "dict[str, ZoneConfig]",
+        "default": {},
+        "title": "Zone configuration.",
+        "required": false,
+        "nested": "ZoneConfig"
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of camera.",
+        "required": false
+      }
+    }
+  },
+  "AudioConfig": {
+    "description": "Audio events configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable audio events.",
+        "required": false
+      },
+      "max_not_heard": {
+        "type": "int",
+        "default": 30,
+        "title": "Seconds of not hearing the type of audio to end the event.",
+        "required": false
+      },
+      "min_volume": {
+        "type": "int",
+        "default": 500,
+        "title": "Min volume required to run audio detection.",
+        "required": false
+      },
+      "listen": {
+        "type": "list[str]",
+        "default": ["bark", "fire_alarm", "scream", "speech", "yell"],
+        "title": "Audio to listen for.",
+        "required": false
+      },
+      "filters": {
+        "type": "Optional[dict[str, AudioFilterConfig]]",
+        "default": null,
+        "title": "Audio filters.",
+        "required": false,
+        "nested": "AudioFilterConfig"
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of audio detection.",
+        "required": false
+      },
+      "num_threads": {
+        "type": "int",
+        "default": 2,
+        "title": "Number of detection threads",
+        "ge": 1,
+        "required": false
+      }
+    }
+  },
+  "AudioFilterConfig": {
+    "description": "Audio filter configuration",
+    "fields": {
+      "threshold": {
+        "type": "float",
+        "default": 0.8,
+        "ge": "AUDIO_MIN_CONFIDENCE",
+        "lt": 1.0,
+        "title": "Minimum detection confidence threshold for audio to be counted.",
+        "required": false
+      }
+    }
+  },
+  "BirdseyeConfig": {
+    "description": "Global birdseye configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable birdseye view.",
+        "required": false
+      },
+      "mode": {
+        "type": "BirdseyeModeEnum (enum: objects, motion, continuous)",
+        "default": "objects",
+        "title": "Tracking mode.",
+        "required": false
+      },
+      "restream": {
+        "type": "bool",
+        "default": false,
+        "title": "Restream birdseye via RTSP.",
+        "required": false
+      },
+      "width": {
+        "type": "int",
+        "default": 1280,
+        "title": "Birdseye width.",
+        "required": false
+      },
+      "height": {
+        "type": "int",
+        "default": 720,
+        "title": "Birdseye height.",
+        "required": false
+      },
+      "quality": {
+        "type": "int",
+        "default": 8,
+        "title": "Encoding quality.",
+        "ge": 1,
+        "le": 31,
+        "required": false
+      },
+      "inactivity_threshold": {
+        "type": "int",
+        "default": 30,
+        "title": "Birdseye Inactivity Threshold",
+        "gt": 0,
+        "required": false
+      },
+      "layout": {
+        "type": "BirdseyeLayoutConfig",
+        "default": "BirdseyeLayoutConfig()",
+        "title": "Birdseye Layout Config",
+        "required": false,
+        "nested": "BirdseyeLayoutConfig"
+      }
+    }
+  },
+  "BirdseyeLayoutConfig": {
+    "description": "Birdseye layout configuration",
+    "fields": {
+      "scaling_factor": {
+        "type": "float",
+        "default": 2.0,
+        "title": "Birdseye Scaling Factor",
+        "ge": 1.0,
+        "le": 5.0,
+        "required": false
+      },
+      "max_cameras": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Max cameras",
+        "required": false
+      }
+    }
+  },
+  "BirdseyeCameraConfig": {
+    "description": "Per-camera birdseye configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable birdseye view for camera.",
+        "required": false
+      },
+      "mode": {
+        "type": "BirdseyeModeEnum (enum: objects, motion, continuous)",
+        "default": "objects",
+        "title": "Tracking mode for camera.",
+        "required": false
+      },
+      "order": {
+        "type": "int",
+        "default": 0,
+        "title": "Position of the camera in the birdseye view.",
+        "required": false
+      }
+    }
+  },
+  "DetectConfig": {
+    "description": "Object detection configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Detection Enabled.",
+        "required": false
+      },
+      "height": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Height of the stream for the detect role.",
+        "required": false
+      },
+      "width": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Width of the stream for the detect role.",
+        "required": false
+      },
+      "fps": {
+        "type": "int",
+        "default": 5,
+        "title": "Number of frames per second to process through detection.",
+        "required": false
+      },
+      "min_initialized": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Minimum number of consecutive hits for an object to be initialized by the tracker.",
+        "required": false
+      },
+      "max_disappeared": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Maximum number of frames the object can disappear before detection ends.",
+        "required": false
+      },
+      "stationary": {
+        "type": "StationaryConfig",
+        "default": "StationaryConfig()",
+        "title": "Stationary objects config.",
+        "required": false,
+        "nested": "StationaryConfig"
+      },
+      "annotation_offset": {
+        "type": "int",
+        "default": 0,
+        "title": "Milliseconds to offset detect annotations by.",
+        "required": false
+      }
+    }
+  },
+  "StationaryConfig": {
+    "description": "Stationary object configuration",
+    "fields": {
+      "interval": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Frame interval for checking stationary objects.",
+        "gt": 0,
+        "required": false
+      },
+      "threshold": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Number of frames without a position change for an object to be considered stationary",
+        "ge": 1,
+        "required": false
+      },
+      "max_frames": {
+        "type": "StationaryMaxFramesConfig",
+        "default": "StationaryMaxFramesConfig()",
+        "title": "Max frames for stationary objects.",
+        "required": false,
+        "nested": "StationaryMaxFramesConfig"
+      },
+      "classifier": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable visual classifier for determing if objects with jittery bounding boxes are stationary.",
+        "required": false
+      }
+    }
+  },
+  "StationaryMaxFramesConfig": {
+    "description": "Stationary max frames configuration",
+    "fields": {
+      "default": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Default max frames.",
+        "ge": 1,
+        "required": false
+      },
+      "objects": {
+        "type": "dict[str, int]",
+        "default": {},
+        "title": "Object specific max frames.",
+        "required": false
+      }
+    }
+  },
+  "FfmpegConfig": {
+    "description": "Global FFmpeg configuration",
+    "fields": {
+      "path": {
+        "type": "str",
+        "default": "default",
+        "title": "FFmpeg path",
+        "required": false
+      },
+      "global_args": {
+        "type": "Union[str, list[str]]",
+        "default": ["-hide_banner", "-loglevel", "warning", "-threads", "2"],
+        "title": "Global FFmpeg arguments.",
+        "required": false
+      },
+      "hwaccel_args": {
+        "type": "Union[str, list[str]]",
+        "default": "auto",
+        "title": "FFmpeg hardware acceleration arguments.",
+        "required": false
+      },
+      "input_args": {
+        "type": "Union[str, list[str]]",
+        "default": "preset-rtsp-generic",
+        "title": "FFmpeg input arguments.",
+        "required": false
+      },
+      "output_args": {
+        "type": "FfmpegOutputArgsConfig",
+        "default": "FfmpegOutputArgsConfig()",
+        "title": "FFmpeg output arguments per role.",
+        "required": false,
+        "nested": "FfmpegOutputArgsConfig"
+      },
+      "retry_interval": {
+        "type": "float",
+        "default": 10.0,
+        "title": "Time in seconds to wait before FFmpeg retries connecting to the camera.",
+        "gt": 0.0,
+        "required": false
+      },
+      "apple_compatibility": {
+        "type": "bool",
+        "default": false,
+        "title": "Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players.",
+        "required": false
+      }
+    }
+  },
+  "FfmpegOutputArgsConfig": {
+    "description": "FFmpeg output arguments configuration",
+    "fields": {
+      "detect": {
+        "type": "Union[str, list[str]]",
+        "default": ["-threads", "2", "-f", "rawvideo", "-pix_fmt", "yuv420p"],
+        "title": "Detect role FFmpeg output arguments.",
+        "required": false
+      },
+      "record": {
+        "type": "Union[str, list[str]]",
+        "default": "preset-record-generic-audio-aac",
+        "title": "Record role FFmpeg output arguments.",
+        "required": false
+      }
+    }
+  },
+  "CameraFfmpegConfig": {
+    "description": "Camera-specific FFmpeg configuration",
+    "fields": {
+      "inputs": {
+        "type": "list[CameraInput]",
+        "title": "Camera inputs.",
+        "required": true,
+        "nested": "CameraInput"
+      },
+      "path": {
+        "type": "str",
+        "default": "default",
+        "title": "FFmpeg path",
+        "required": false
+      },
+      "global_args": {
+        "type": "Union[str, list[str]]",
+        "default": ["-hide_banner", "-loglevel", "warning", "-threads", "2"],
+        "title": "Global FFmpeg arguments.",
+        "required": false
+      },
+      "hwaccel_args": {
+        "type": "Union[str, list[str]]",
+        "default": "auto",
+        "title": "FFmpeg hardware acceleration arguments.",
+        "required": false
+      },
+      "input_args": {
+        "type": "Union[str, list[str]]",
+        "default": "preset-rtsp-generic",
+        "title": "FFmpeg input arguments.",
+        "required": false
+      },
+      "output_args": {
+        "type": "FfmpegOutputArgsConfig",
+        "default": "FfmpegOutputArgsConfig()",
+        "title": "FFmpeg output arguments per role.",
+        "required": false,
+        "nested": "FfmpegOutputArgsConfig"
+      },
+      "retry_interval": {
+        "type": "float",
+        "default": 10.0,
+        "title": "Time in seconds to wait before FFmpeg retries connecting to the camera.",
+        "gt": 0.0,
+        "required": false
+      },
+      "apple_compatibility": {
+        "type": "bool",
+        "default": false,
+        "title": "Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players.",
+        "required": false
+      }
+    }
+  },
+  "CameraInput": {
+    "description": "Camera input configuration",
+    "fields": {
+      "path": {
+        "type": "EnvString",
+        "title": "Camera input path.",
+        "required": true
+      },
+      "roles": {
+        "type": "list[CameraRoleEnum] (enum: audio, record, detect)",
+        "title": "Roles assigned to this input.",
+        "required": true
+      },
+      "global_args": {
+        "type": "Union[str, list[str]]",
+        "default": [],
+        "title": "FFmpeg global arguments.",
+        "required": false
+      },
+      "hwaccel_args": {
+        "type": "Union[str, list[str]]",
+        "default": [],
+        "title": "FFmpeg hardware acceleration arguments.",
+        "required": false
+      },
+      "input_args": {
+        "type": "Union[str, list[str]]",
+        "default": [],
+        "title": "FFmpeg input arguments.",
+        "required": false
+      }
+    }
+  },
+  "MotionConfig": {
+    "description": "Motion detection configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable motion on all cameras.",
+        "required": false
+      },
+      "threshold": {
+        "type": "int",
+        "default": 30,
+        "title": "Motion detection threshold (1-255).",
+        "ge": 1,
+        "le": 255,
+        "required": false
+      },
+      "lightning_threshold": {
+        "type": "float",
+        "default": 0.8,
+        "title": "Lightning detection threshold (0.3-1.0).",
+        "ge": 0.3,
+        "le": 1.0,
+        "required": false
+      },
+      "improve_contrast": {
+        "type": "bool",
+        "default": true,
+        "title": "Improve Contrast",
+        "required": false
+      },
+      "contour_area": {
+        "type": "Optional[int]",
+        "default": 10,
+        "title": "Contour Area",
+        "required": false
+      },
+      "delta_alpha": {
+        "type": "float",
+        "default": 0.2,
+        "title": "Delta Alpha",
+        "required": false
+      },
+      "frame_alpha": {
+        "type": "float",
+        "default": 0.01,
+        "title": "Frame Alpha",
+        "required": false
+      },
+      "frame_height": {
+        "type": "Optional[int]",
+        "default": 100,
+        "title": "Frame Height",
+        "required": false
+      },
+      "mask": {
+        "type": "Union[str, list[str]]",
+        "default": "",
+        "title": "Coordinates polygon for the motion mask.",
+        "required": false
+      },
+      "mqtt_off_delay": {
+        "type": "int",
+        "default": 30,
+        "title": "Delay for updating MQTT with no motion detected.",
+        "required": false
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of motion detection.",
+        "required": false
+      }
+    }
+  },
+  "ObjectConfig": {
+    "description": "Object tracking configuration",
+    "fields": {
+      "track": {
+        "type": "list[str]",
+        "default": ["person"],
+        "title": "Objects to track.",
+        "required": false
+      },
+      "filters": {
+        "type": "dict[str, FilterConfig]",
+        "default": {},
+        "title": "Object filters.",
+        "required": false,
+        "nested": "FilterConfig"
+      },
+      "mask": {
+        "type": "Union[str, list[str]]",
+        "default": "",
+        "title": "Object mask.",
+        "required": false
+      },
+      "genai": {
+        "type": "GenAIObjectConfig",
+        "default": "GenAIObjectConfig()",
+        "title": "Config for using genai to analyze objects.",
+        "required": false,
+        "nested": "GenAIObjectConfig"
+      }
+    }
+  },
+  "FilterConfig": {
+    "description": "Object filter configuration",
+    "fields": {
+      "min_area": {
+        "type": "Union[int, float]",
+        "default": 0,
+        "title": "Minimum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99).",
+        "required": false
+      },
+      "max_area": {
+        "type": "Union[int, float]",
+        "default": 24000000,
+        "title": "Maximum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99).",
+        "required": false
+      },
+      "min_ratio": {
+        "type": "float",
+        "default": 0,
+        "title": "Minimum ratio of bounding box's width/height for object to be counted.",
+        "required": false
+      },
+      "max_ratio": {
+        "type": "float",
+        "default": 24000000,
+        "title": "Maximum ratio of bounding box's width/height for object to be counted.",
+        "required": false
+      },
+      "threshold": {
+        "type": "float",
+        "default": 0.7,
+        "title": "Average detection confidence threshold for object to be counted.",
+        "required": false
+      },
+      "min_score": {
+        "type": "float",
+        "default": 0.5,
+        "title": "Minimum detection confidence for object to be counted.",
+        "required": false
+      },
+      "mask": {
+        "type": "Optional[Union[str, list[str]]]",
+        "default": null,
+        "title": "Detection area polygon mask for this filter configuration.",
+        "required": false
+      }
+    }
+  },
+  "GenAIObjectConfig": {
+    "description": "GenAI object analysis configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable GenAI for camera.",
+        "required": false
+      },
+      "use_snapshot": {
+        "type": "bool",
+        "default": false,
+        "title": "Use snapshots for generating descriptions.",
+        "required": false
+      },
+      "prompt": {
+        "type": "str",
+        "default": "Analyze the sequence of images containing the {label}. Focus on the likely intent or behavior of the {label} based on its actions and movement, rather than describing its appearance or the surroundings. Consider what the {label} is doing, why, and what it might do next.",
+        "title": "Default caption prompt.",
+        "required": false
+      },
+      "object_prompts": {
+        "type": "dict[str, str]",
+        "default": {},
+        "title": "Object specific prompts.",
+        "required": false
+      },
+      "objects": {
+        "type": "Union[str, list[str]]",
+        "default": [],
+        "title": "List of objects to run generative AI for.",
+        "required": false
+      },
+      "required_zones": {
+        "type": "Union[str, list[str]]",
+        "default": [],
+        "title": "List of required zones to be entered in order to run generative AI.",
+        "required": false
+      },
+      "debug_save_thumbnails": {
+        "type": "bool",
+        "default": false,
+        "title": "Save thumbnails sent to generative AI for debugging purposes.",
+        "required": false
+      },
+      "send_triggers": {
+        "type": "GenAIObjectTriggerConfig",
+        "default": "GenAIObjectTriggerConfig()",
+        "title": "What triggers to use to send frames to generative AI for a tracked object.",
+        "required": false,
+        "nested": "GenAIObjectTriggerConfig"
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of generative AI.",
+        "required": false
+      }
+    }
+  },
+  "GenAIObjectTriggerConfig": {
+    "description": "GenAI object trigger configuration",
+    "fields": {
+      "tracked_object_end": {
+        "type": "bool",
+        "default": true,
+        "title": "Send once the object is no longer tracked.",
+        "required": false
+      },
+      "after_significant_updates": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Send an early request to generative AI when X frames accumulated.",
+        "ge": 1,
+        "required": false
+      }
+    }
+  },
+  "RecordConfig": {
+    "description": "Recording configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable record on all cameras.",
+        "required": false
+      },
+      "sync_recordings": {
+        "type": "bool",
+        "default": false,
+        "title": "Sync recordings with disk on startup and once a day.",
+        "required": false
+      },
+      "expire_interval": {
+        "type": "int",
+        "default": 60,
+        "title": "Number of minutes to wait between cleanup runs.",
+        "required": false
+      },
+      "continuous": {
+        "type": "RecordRetainConfig",
+        "default": "RecordRetainConfig()",
+        "title": "Continuous recording retention settings.",
+        "required": false,
+        "nested": "RecordRetainConfig"
+      },
+      "motion": {
+        "type": "RecordRetainConfig",
+        "default": "RecordRetainConfig()",
+        "title": "Motion recording retention settings.",
+        "required": false,
+        "nested": "RecordRetainConfig"
+      },
+      "detections": {
+        "type": "EventsConfig",
+        "default": "EventsConfig()",
+        "title": "Detection specific retention settings.",
+        "required": false,
+        "nested": "EventsConfig"
+      },
+      "alerts": {
+        "type": "EventsConfig",
+        "default": "EventsConfig()",
+        "title": "Alert specific retention settings.",
+        "required": false,
+        "nested": "EventsConfig"
+      },
+      "export": {
+        "type": "RecordExportConfig",
+        "default": "RecordExportConfig()",
+        "title": "Recording Export Config",
+        "required": false,
+        "nested": "RecordExportConfig"
+      },
+      "preview": {
+        "type": "RecordPreviewConfig",
+        "default": "RecordPreviewConfig()",
+        "title": "Recording Preview Config",
+        "required": false,
+        "nested": "RecordPreviewConfig"
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of recording.",
+        "required": false
+      }
+    }
+  },
+  "RecordRetainConfig": {
+    "description": "Record retention configuration",
+    "fields": {
+      "days": {
+        "type": "float",
+        "default": 0,
+        "ge": 0,
+        "title": "Default retention period.",
+        "required": false
+      }
+    }
+  },
+  "EventsConfig": {
+    "description": "Events configuration",
+    "fields": {
+      "pre_capture": {
+        "type": "int",
+        "default": 5,
+        "title": "Seconds to retain before event starts.",
+        "le": "MAX_PRE_CAPTURE",
+        "ge": 0,
+        "required": false
+      },
+      "post_capture": {
+        "type": "int",
+        "default": 5,
+        "ge": 0,
+        "title": "Seconds to retain after event ends.",
+        "required": false
+      },
+      "retain": {
+        "type": "ReviewRetainConfig",
+        "default": "ReviewRetainConfig()",
+        "title": "Event retention settings.",
+        "required": false,
+        "nested": "ReviewRetainConfig"
+      }
+    }
+  },
+  "ReviewRetainConfig": {
+    "description": "Review retention configuration",
+    "fields": {
+      "days": {
+        "type": "float",
+        "default": 10,
+        "ge": 0,
+        "title": "Default retention period.",
+        "required": false
+      },
+      "mode": {
+        "type": "RetainModeEnum (enum: all, motion, active_objects)",
+        "default": "motion",
+        "title": "Retain mode.",
+        "required": false
+      }
+    }
+  },
+  "RecordExportConfig": {
+    "description": "Record export configuration",
+    "fields": {
+      "timelapse_args": {
+        "type": "str",
+        "default": "-vf setpts=0.04*PTS -r 30",
+        "title": "Timelapse Args",
+        "required": false
+      }
+    }
+  },
+  "RecordPreviewConfig": {
+    "description": "Record preview configuration",
+    "fields": {
+      "quality": {
+        "type": "RecordQualityEnum (enum: very_low, low, medium, high, very_high)",
+        "default": "medium",
+        "title": "Quality of recording preview.",
+        "required": false
+      }
+    }
+  },
+  "SnapshotsConfig": {
+    "description": "Snapshots configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Snapshots enabled.",
+        "required": false
+      },
+      "clean_copy": {
+        "type": "bool",
+        "default": true,
+        "title": "Create a clean copy of the snapshot image.",
+        "required": false
+      },
+      "timestamp": {
+        "type": "bool",
+        "default": false,
+        "title": "Add a timestamp overlay on the snapshot.",
+        "required": false
+      },
+      "bounding_box": {
+        "type": "bool",
+        "default": true,
+        "title": "Add a bounding box overlay on the snapshot.",
+        "required": false
+      },
+      "crop": {
+        "type": "bool",
+        "default": false,
+        "title": "Crop the snapshot to the detected object.",
+        "required": false
+      },
+      "required_zones": {
+        "type": "list[str]",
+        "default": [],
+        "title": "List of required zones to be entered in order to save a snapshot.",
+        "required": false
+      },
+      "height": {
+        "type": "Optional[int]",
+        "default": null,
+        "title": "Snapshot image height.",
+        "required": false
+      },
+      "retain": {
+        "type": "RetainConfig",
+        "default": "RetainConfig()",
+        "title": "Snapshot retention.",
+        "required": false,
+        "nested": "RetainConfig"
+      },
+      "quality": {
+        "type": "int",
+        "default": 70,
+        "title": "Quality of the encoded jpeg (0-100).",
+        "ge": 0,
+        "le": 100,
+        "required": false
+      }
+    }
+  },
+  "RetainConfig": {
+    "description": "Retain configuration",
+    "fields": {
+      "default": {
+        "type": "float",
+        "default": 10,
+        "title": "Default retention period.",
+        "required": false
+      },
+      "mode": {
+        "type": "RetainModeEnum (enum: all, motion, active_objects)",
+        "default": "motion",
+        "title": "Retain mode.",
+        "required": false
+      },
+      "objects": {
+        "type": "dict[str, float]",
+        "default": {},
+        "title": "Object retention period.",
+        "required": false
+      }
+    }
+  },
+  "OnvifConfig": {
+    "description": "ONVIF configuration",
+    "fields": {
+      "host": {
+        "type": "str",
+        "default": "",
+        "title": "Onvif Host",
+        "required": false
+      },
+      "port": {
+        "type": "int",
+        "default": 8000,
+        "title": "Onvif Port",
+        "required": false
+      },
+      "user": {
+        "type": "Optional[EnvString]",
+        "default": null,
+        "title": "Onvif Username",
+        "required": false
+      },
+      "password": {
+        "type": "Optional[EnvString]",
+        "default": null,
+        "title": "Onvif Password",
+        "required": false
+      },
+      "tls_insecure": {
+        "type": "bool",
+        "default": false,
+        "title": "Onvif Disable TLS verification",
+        "required": false
+      },
+      "autotracking": {
+        "type": "PtzAutotrackConfig",
+        "default": "PtzAutotrackConfig()",
+        "title": "PTZ auto tracking config.",
+        "required": false,
+        "nested": "PtzAutotrackConfig"
+      },
+      "ignore_time_mismatch": {
+        "type": "bool",
+        "default": false,
+        "title": "Onvif Ignore Time Synchronization Mismatch Between Camera and Server",
+        "required": false
+      }
+    }
+  },
+  "PtzAutotrackConfig": {
+    "description": "PTZ autotracking configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable PTZ object autotracking.",
+        "required": false
+      },
+      "calibrate_on_startup": {
+        "type": "bool",
+        "default": false,
+        "title": "Perform a camera calibration when Frigate starts.",
+        "required": false
+      },
+      "zooming": {
+        "type": "ZoomingModeEnum (enum: disabled, absolute, relative)",
+        "default": "disabled",
+        "title": "Autotracker zooming mode.",
+        "required": false
+      },
+      "zoom_factor": {
+        "type": "float",
+        "default": 0.3,
+        "title": "Zooming factor (0.1-0.75).",
+        "ge": 0.1,
+        "le": 0.75,
+        "required": false
+      },
+      "track": {
+        "type": "list[str]",
+        "default": ["person"],
+        "title": "Objects to track.",
+        "required": false
+      },
+      "required_zones": {
+        "type": "list[str]",
+        "default": [],
+        "title": "List of required zones to be entered in order to begin autotracking.",
+        "required": false
+      },
+      "return_preset": {
+        "type": "str",
+        "default": "home",
+        "title": "Name of camera preset to return to when object tracking is over.",
+        "required": false
+      },
+      "timeout": {
+        "type": "int",
+        "default": 10,
+        "title": "Seconds to delay before returning to preset.",
+        "required": false
+      },
+      "movement_weights": {
+        "type": "Optional[Union[str, list[str]]]",
+        "default": [],
+        "title": "Internal value used for PTZ movements based on the speed of your camera's motor.",
+        "required": false,
+        "validation": "Must have exactly 6 floats"
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of autotracking.",
+        "required": false
+      }
+    }
+  },
+  "ZoneConfig": {
+    "description": "Zone configuration",
+    "fields": {
+      "filters": {
+        "type": "dict[str, FilterConfig]",
+        "default": {},
+        "title": "Zone filters.",
+        "required": false,
+        "nested": "FilterConfig"
+      },
+      "coordinates": {
+        "type": "Union[str, list[str]]",
+        "title": "Coordinates polygon for the defined zone.",
+        "required": true
+      },
+      "distances": {
+        "type": "Optional[Union[str, list[str]]]",
+        "default": [],
+        "title": "Real-world distances for the sides of quadrilateral for the defined zone.",
+        "required": false,
+        "validation": "Must have exactly 4 values"
+      },
+      "inertia": {
+        "type": "int",
+        "default": 3,
+        "title": "Number of consecutive frames required for object to be considered present in the zone.",
+        "gt": 0,
+        "required": false
+      },
+      "loitering_time": {
+        "type": "int",
+        "default": 0,
+        "ge": 0,
+        "title": "Number of seconds that an object must loiter to be considered in the zone.",
+        "required": false
+      },
+      "speed_threshold": {
+        "type": "Optional[float]",
+        "default": null,
+        "ge": 0.1,
+        "title": "Minimum speed value for an object to be considered in the zone.",
+        "required": false
+      },
+      "objects": {
+        "type": "Union[str, list[str]]",
+        "default": [],
+        "title": "List of objects that can trigger the zone.",
+        "required": false
+      }
+    }
+  },
+  "CameraLiveConfig": {
+    "description": "Camera live view configuration",
+    "fields": {
+      "streams": {
+        "type": "Dict[str, str]",
+        "default": [],
+        "title": "Friendly names and restream names to use for live view.",
+        "required": false
+      },
+      "height": {
+        "type": "int",
+        "default": 720,
+        "title": "Live camera view height",
+        "required": false
+      },
+      "quality": {
+        "type": "int",
+        "default": 8,
+        "ge": 1,
+        "le": 31,
+        "title": "Live camera view quality",
+        "required": false
+      }
+    }
+  },
+  "CameraMqttConfig": {
+    "description": "Camera MQTT configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Send image over MQTT.",
+        "required": false
+      },
+      "timestamp": {
+        "type": "bool",
+        "default": true,
+        "title": "Add timestamp to MQTT image.",
+        "required": false
+      },
+      "bounding_box": {
+        "type": "bool",
+        "default": true,
+        "title": "Add bounding box to MQTT image.",
+        "required": false
+      },
+      "crop": {
+        "type": "bool",
+        "default": true,
+        "title": "Crop MQTT image to detected object.",
+        "required": false
+      },
+      "height": {
+        "type": "int",
+        "default": 270,
+        "title": "MQTT image height.",
+        "required": false
+      },
+      "required_zones": {
+        "type": "list[str]",
+        "default": [],
+        "title": "List of required zones to be entered in order to send the image.",
+        "required": false
+      },
+      "quality": {
+        "type": "int",
+        "default": 70,
+        "title": "Quality of the encoded jpeg (0-100).",
+        "ge": 0,
+        "le": 100,
+        "required": false
+      }
+    }
+  },
+  "ReviewConfig": {
+    "description": "Review configuration",
+    "fields": {
+      "alerts": {
+        "type": "AlertsConfig",
+        "default": "AlertsConfig()",
+        "title": "Review alerts config.",
+        "required": false,
+        "nested": "AlertsConfig"
+      },
+      "detections": {
+        "type": "DetectionsConfig",
+        "default": "DetectionsConfig()",
+        "title": "Review detections config.",
+        "required": false,
+        "nested": "DetectionsConfig"
+      },
+      "genai": {
+        "type": "GenAIReviewConfig",
+        "default": "GenAIReviewConfig()",
+        "title": "Review description genai config.",
+        "required": false,
+        "nested": "GenAIReviewConfig"
+      }
+    }
+  },
+  "AlertsConfig": {
+    "description": "Alerts configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable alerts.",
+        "required": false
+      },
+      "labels": {
+        "type": "list[str]",
+        "default": ["person", "car"],
+        "title": "Labels to create alerts for.",
+        "required": false
+      },
+      "required_zones": {
+        "type": "Union[str, list[str]]",
+        "default": [],
+        "title": "List of required zones to be entered in order to save the event as an alert.",
+        "required": false
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of alerts.",
+        "required": false
+      },
+      "cutoff_time": {
+        "type": "int",
+        "default": 40,
+        "title": "Time to cutoff alerts after no alert-causing activity has occurred.",
+        "required": false
+      }
+    }
+  },
+  "DetectionsConfig": {
+    "description": "Detections configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable detections.",
+        "required": false
+      },
+      "labels": {
+        "type": "Optional[list[str]]",
+        "default": null,
+        "title": "Labels to create detections for.",
+        "required": false
+      },
+      "required_zones": {
+        "type": "Union[str, list[str]]",
+        "default": [],
+        "title": "List of required zones to be entered in order to save the event as a detection.",
+        "required": false
+      },
+      "cutoff_time": {
+        "type": "int",
+        "default": 30,
+        "title": "Time to cutoff detection after no detection-causing activity has occurred.",
+        "required": false
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of detections.",
+        "required": false
+      }
+    }
+  },
+  "GenAIReviewConfig": {
+    "description": "GenAI review configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable GenAI descriptions for review items.",
+        "required": false
+      },
+      "alerts": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable GenAI for alerts.",
+        "required": false
+      },
+      "detections": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable GenAI for detections.",
+        "required": false
+      },
+      "additional_concerns": {
+        "type": "list[str]",
+        "default": [],
+        "title": "Additional concerns that GenAI should make note of on this camera.",
+        "required": false
+      },
+      "debug_save_thumbnails": {
+        "type": "bool",
+        "default": false,
+        "title": "Save thumbnails sent to generative AI for debugging purposes.",
+        "required": false
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of generative AI.",
+        "required": false
+      },
+      "preferred_language": {
+        "type": "str | None",
+        "default": null,
+        "title": "Preferred language for GenAI Response",
+        "required": false
+      }
+    }
+  },
+  "TimestampStyleConfig": {
+    "description": "Timestamp style configuration",
+    "fields": {
+      "position": {
+        "type": "TimestampPositionEnum (enum: tl, tr, bl, br)",
+        "default": "tl",
+        "title": "Timestamp position.",
+        "required": false
+      },
+      "format": {
+        "type": "str",
+        "default": "%m/%d/%Y %H:%M:%S",
+        "title": "Timestamp format.",
+        "required": false
+      },
+      "color": {
+        "type": "ColorConfig",
+        "default": "ColorConfig()",
+        "title": "Timestamp color.",
+        "required": false,
+        "nested": "ColorConfig"
+      },
+      "thickness": {
+        "type": "int",
+        "default": 2,
+        "title": "Timestamp thickness.",
+        "required": false
+      },
+      "effect": {
+        "type": "Optional[TimestampEffectEnum] (enum: solid, shadow)",
+        "default": null,
+        "title": "Timestamp effect.",
+        "required": false
+      }
+    }
+  },
+  "ColorConfig": {
+    "description": "Color configuration",
+    "fields": {
+      "red": {
+        "type": "int",
+        "default": 255,
+        "ge": 0,
+        "le": 255,
+        "title": "Red",
+        "required": false
+      },
+      "green": {
+        "type": "int",
+        "default": 255,
+        "ge": 0,
+        "le": 255,
+        "title": "Green",
+        "required": false
+      },
+      "blue": {
+        "type": "int",
+        "default": 255,
+        "ge": 0,
+        "le": 255,
+        "title": "Blue",
+        "required": false
+      }
+    }
+  },
+  "CameraUiConfig": {
+    "description": "Camera UI configuration",
+    "fields": {
+      "order": {
+        "type": "int",
+        "default": 0,
+        "title": "Order of camera in UI.",
+        "required": false
+      },
+      "dashboard": {
+        "type": "bool",
+        "default": true,
+        "title": "Show this camera in Frigate dashboard UI.",
+        "required": false
+      }
+    }
+  },
+  "NotificationConfig": {
+    "description": "Notification configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable notifications",
+        "required": false
+      },
+      "email": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Email required for push.",
+        "required": false
+      },
+      "cooldown": {
+        "type": "int",
+        "default": 0,
+        "ge": 0,
+        "title": "Cooldown period for notifications (time in seconds).",
+        "required": false
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of notifications.",
+        "required": false
+      }
+    }
+  },
+  "AudioTranscriptionConfig": {
+    "description": "Audio transcription configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable audio transcription.",
+        "required": false
+      },
+      "language": {
+        "type": "str",
+        "default": "en",
+        "title": "Language abbreviation to use for audio event transcription/translation.",
+        "required": false
+      },
+      "device": {
+        "type": "Optional[EnrichmentsDeviceEnum] (enum: GPU, CPU)",
+        "default": "CPU",
+        "title": "The device used for license plate recognition.",
+        "required": false
+      },
+      "model_size": {
+        "type": "str",
+        "default": "small",
+        "title": "The size of the embeddings model used.",
+        "required": false
+      },
+      "enabled_in_config": {
+        "type": "Optional[bool]",
+        "default": null,
+        "title": "Keep track of original state of camera.",
+        "required": false
+      },
+      "live_enabled": {
+        "type": "Optional[bool]",
+        "default": false,
+        "title": "Enable live transcriptions.",
+        "required": false
+      }
+    }
+  },
+  "ClassificationConfig": {
+    "description": "Classification configuration",
+    "fields": {
+      "bird": {
+        "type": "BirdClassificationConfig",
+        "default": "BirdClassificationConfig()",
+        "title": "Bird classification config.",
+        "required": false,
+        "nested": "BirdClassificationConfig"
+      },
+      "custom": {
+        "type": "Dict[str, CustomClassificationConfig]",
+        "default": {},
+        "title": "Custom Classification Model Configs.",
+        "required": false,
+        "nested": "CustomClassificationConfig"
+      }
+    }
+  },
+  "BirdClassificationConfig": {
+    "description": "Bird classification configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable bird classification.",
+        "required": false
+      },
+      "threshold": {
+        "type": "float",
+        "default": 0.9,
+        "title": "Minimum classification score required to be considered a match.",
+        "gt": 0.0,
+        "le": 1.0,
+        "required": false
+      }
+    }
+  },
+  "CustomClassificationConfig": {
+    "description": "Custom classification configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable running the model.",
+        "required": false
+      },
+      "name": {
+        "type": "str | None",
+        "default": null,
+        "title": "Name of classification model.",
+        "required": false
+      },
+      "threshold": {
+        "type": "float",
+        "default": 0.8,
+        "title": "Classification score threshold to change the state.",
+        "required": false
+      },
+      "object_config": {
+        "type": "CustomClassificationObjectConfig | None",
+        "default": null,
+        "required": false,
+        "nested": "CustomClassificationObjectConfig"
+      },
+      "state_config": {
+        "type": "CustomClassificationStateConfig | None",
+        "default": null,
+        "required": false,
+        "nested": "CustomClassificationStateConfig"
+      }
+    }
+  },
+  "CustomClassificationObjectConfig": {
+    "description": "Custom classification object configuration",
+    "fields": {
+      "objects": {
+        "type": "list[str]",
+        "title": "Object types to classify.",
+        "required": true
+      },
+      "classification_type": {
+        "type": "ObjectClassificationType (enum: sub_label, attribute)",
+        "default": "sub_label",
+        "title": "Type of classification that is applied.",
+        "required": false
+      }
+    }
+  },
+  "CustomClassificationStateConfig": {
+    "description": "Custom classification state configuration",
+    "fields": {
+      "cameras": {
+        "type": "Dict[str, CustomClassificationStateCameraConfig]",
+        "title": "Cameras to run classification on.",
+        "required": true,
+        "nested": "CustomClassificationStateCameraConfig"
+      },
+      "motion": {
+        "type": "bool",
+        "default": false,
+        "title": "If classification should be run when motion is detected in the crop.",
+        "required": false
+      },
+      "interval": {
+        "type": "int | None",
+        "default": null,
+        "title": "Interval to run classification on in seconds.",
+        "gt": 0,
+        "required": false
+      }
+    }
+  },
+  "CustomClassificationStateCameraConfig": {
+    "description": "Custom classification state camera configuration",
+    "fields": {
+      "crop": {
+        "type": "list[int, int, int, int]",
+        "title": "Crop of image frame on this camera to run classification on.",
+        "required": true
+      }
+    }
+  },
+  "SemanticSearchConfig": {
+    "description": "Semantic search configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable semantic search.",
+        "required": false
+      },
+      "reindex": {
+        "type": "Optional[bool]",
+        "default": false,
+        "title": "Reindex all tracked objects on startup.",
+        "required": false
+      },
+      "model": {
+        "type": "Optional[SemanticSearchModelEnum] (enum: jinav1, jinav2)",
+        "default": "jinav1",
+        "title": "The CLIP model to use for semantic search.",
+        "required": false
+      },
+      "model_size": {
+        "type": "str",
+        "default": "small",
+        "title": "The size of the embeddings model used.",
+        "required": false
+      },
+      "device": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "The device key to use for semantic search.",
+        "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
+        "required": false
+      }
+    }
+  },
+  "CameraSemanticSearchConfig": {
+    "description": "Camera semantic search configuration",
+    "fields": {
+      "triggers": {
+        "type": "Dict[str, TriggerConfig]",
+        "default": {},
+        "title": "Trigger actions on tracked objects that match existing thumbnails or descriptions",
+        "required": false,
+        "nested": "TriggerConfig"
+      }
+    }
+  },
+  "TriggerConfig": {
+    "description": "Trigger configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": true,
+        "title": "Enable this trigger",
+        "required": false
+      },
+      "type": {
+        "type": "TriggerType (enum: thumbnail, description)",
+        "default": "description",
+        "title": "Type of trigger",
+        "required": false
+      },
+      "data": {
+        "type": "str",
+        "title": "Trigger content (text phrase or image ID)",
+        "required": true
+      },
+      "threshold": {
+        "type": "float",
+        "default": 0.8,
+        "title": "Confidence score required to run the trigger",
+        "gt": 0.0,
+        "le": 1.0,
+        "required": false
+      },
+      "actions": {
+        "type": "List[TriggerAction] (enum: notification)",
+        "default": [],
+        "title": "Actions to perform when trigger is matched",
+        "required": false
+      }
+    }
+  },
+  "FaceRecognitionConfig": {
+    "description": "Face recognition configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable face recognition.",
+        "required": false
+      },
+      "model_size": {
+        "type": "str",
+        "default": "small",
+        "title": "The size of the embeddings model used.",
+        "required": false
+      },
+      "unknown_score": {
+        "type": "float",
+        "default": 0.8,
+        "title": "Minimum face distance score required to be marked as a potential match.",
+        "gt": 0.0,
+        "le": 1.0,
+        "required": false
+      },
+      "detection_threshold": {
+        "type": "float",
+        "default": 0.7,
+        "title": "Minimum face detection score required to be considered a face.",
+        "gt": 0.0,
+        "le": 1.0,
+        "required": false
+      },
+      "recognition_threshold": {
+        "type": "float",
+        "default": 0.9,
+        "title": "Minimum face distance score required to be considered a match.",
+        "gt": 0.0,
+        "le": 1.0,
+        "required": false
+      },
+      "min_area": {
+        "type": "int",
+        "default": 750,
+        "title": "Min area of face box to consider running face recognition.",
+        "required": false
+      },
+      "min_faces": {
+        "type": "int",
+        "default": 1,
+        "gt": 0,
+        "le": 6,
+        "title": "Min face recognitions for the sub label to be applied to the person object.",
+        "required": false
+      },
+      "save_attempts": {
+        "type": "int",
+        "default": 100,
+        "ge": 0,
+        "title": "Number of face attempts to save in the train tab.",
+        "required": false
+      },
+      "blur_confidence_filter": {
+        "type": "bool",
+        "default": true,
+        "title": "Apply blur quality filter to face confidence.",
+        "required": false
+      },
+      "device": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "The device key to use for face recognition.",
+        "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
+        "required": false
+      }
+    }
+  },
+  "CameraFaceRecognitionConfig": {
+    "description": "Camera face recognition configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable face recognition.",
+        "required": false
+      },
+      "min_area": {
+        "type": "int",
+        "default": 750,
+        "title": "Min area of face box to consider running face recognition.",
+        "required": false
+      }
+    }
+  },
+  "LicensePlateRecognitionConfig": {
+    "description": "License plate recognition configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable license plate recognition.",
+        "required": false
+      },
+      "model_size": {
+        "type": "str",
+        "default": "small",
+        "title": "The size of the embeddings model used.",
+        "required": false
+      },
+      "detection_threshold": {
+        "type": "float",
+        "default": 0.7,
+        "title": "License plate object confidence score required to begin running recognition.",
+        "gt": 0.0,
+        "le": 1.0,
+        "required": false
+      },
+      "min_area": {
+        "type": "int",
+        "default": 1000,
+        "title": "Minimum area of license plate to begin running recognition.",
+        "required": false
+      },
+      "recognition_threshold": {
+        "type": "float",
+        "default": 0.9,
+        "title": "Recognition confidence score required to add the plate to the object as a sub label.",
+        "gt": 0.0,
+        "le": 1.0,
+        "required": false
+      },
+      "min_plate_length": {
+        "type": "int",
+        "default": 4,
+        "title": "Minimum number of characters a license plate must have to be added to the object as a sub label.",
+        "required": false
+      },
+      "format": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "Regular expression for the expected format of license plate.",
+        "required": false
+      },
+      "match_distance": {
+        "type": "int",
+        "default": 1,
+        "title": "Allow this number of missing/incorrect characters to still cause a detected plate to match a known plate.",
+        "ge": 0,
+        "required": false
+      },
+      "known_plates": {
+        "type": "Optional[Dict[str, List[str]]]",
+        "default": {},
+        "title": "Known plates to track (strings or regular expressions).",
+        "required": false
+      },
+      "enhancement": {
+        "type": "int",
+        "default": 0,
+        "title": "Amount of contrast adjustment and denoising to apply to license plate images before recognition.",
+        "ge": 0,
+        "le": 10,
+        "required": false
+      },
+      "debug_save_plates": {
+        "type": "bool",
+        "default": false,
+        "title": "Save plates captured for LPR for debugging purposes.",
+        "required": false
+      },
+      "device": {
+        "type": "Optional[str]",
+        "default": null,
+        "title": "The device key to use for LPR.",
+        "description": "This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
+        "required": false
+      },
+      "replace_rules": {
+        "type": "List[ReplaceRule]",
+        "default": [],
+        "title": "List of regex replacement rules for normalizing detected plates. Each rule has 'pattern' and 'replacement'.",
+        "required": false,
+        "nested": "ReplaceRule"
+      }
+    }
+  },
+  "ReplaceRule": {
+    "description": "Regex replacement rule for license plates",
+    "fields": {
+      "pattern": {
+        "type": "str",
+        "title": "Regex pattern to match.",
+        "required": true
+      },
+      "replacement": {
+        "type": "str",
+        "title": "Replacement string (supports backrefs like '\\1').",
+        "required": true
+      }
+    }
+  },
+  "CameraLicensePlateRecognitionConfig": {
+    "description": "Camera license plate recognition configuration",
+    "fields": {
+      "enabled": {
+        "type": "bool",
+        "default": false,
+        "title": "Enable license plate recognition.",
+        "required": false
+      },
+      "expire_time": {
+        "type": "int",
+        "default": 3,
+        "title": "Expire plates not seen after number of seconds (for dedicated LPR cameras only).",
+        "gt": 0,
+        "required": false
+      },
+      "min_area": {
+        "type": "int",
+        "default": 1000,
+        "title": "Minimum area of license plate to begin running recognition.",
+        "required": false
+      },
+      "enhancement": {
+        "type": "int",
+        "default": 0,
+        "title": "Amount of contrast adjustment and denoising to apply to license plate images before recognition.",
+        "ge": 0,
+        "le": 10,
+        "required": false
+      }
+    }
+  }
+}

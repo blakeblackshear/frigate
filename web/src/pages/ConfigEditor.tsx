@@ -13,13 +13,18 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { LuCopy, LuSave } from "react-icons/lu";
 import { MdOutlineRestartAlt } from "react-icons/md";
+import { Settings, Code } from "lucide-react";
 import RestartDialog from "@/components/overlay/dialog/RestartDialog";
 import { useTranslation } from "react-i18next";
 import { useRestart } from "@/api/ws";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { GuiConfigEditor } from "@/components/config/GuiConfigEditor";
+import { configToYaml } from "@/lib/configUtils";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type SaveOptions = "saveonly" | "restart";
+type EditorMode = "yaml" | "gui";
 
 type ApiErrorResponse = {
   message?: string;
@@ -41,6 +46,7 @@ function ConfigEditor() {
 
   const { theme, systemTheme } = useTheme();
   const [error, setError] = useState<string | undefined>();
+  const [editorMode, setEditorMode] = useState<EditorMode>("yaml");
 
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const modelRef = useRef<monaco.editor.ITextModel | null>(null);
@@ -50,16 +56,29 @@ function ConfigEditor() {
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const { send: sendRestart } = useRestart();
 
+  // Store GUI config state
+  const [guiConfigData, setGuiConfigData] = useState<Record<string, unknown>>(
+    {},
+  );
+
   const onHandleSaveConfig = useCallback(
     async (save_option: SaveOptions): Promise<void> => {
-      if (!editorRef.current) {
-        return;
+      let configData: string;
+
+      if (editorMode === "yaml") {
+        if (!editorRef.current) {
+          return;
+        }
+        configData = editorRef.current.getValue();
+      } else {
+        // GUI mode - convert to YAML
+        configData = configToYaml(guiConfigData);
       }
 
       try {
         const response = await axios.post(
           `config/save?save_option=${save_option}`,
-          editorRef.current.getValue(),
+          configData,
           {
             headers: { "Content-Type": "text/plain" },
           },
@@ -83,19 +102,26 @@ function ConfigEditor() {
         throw new Error(errorMessage);
       }
     },
-    [editorRef, t],
+    [editorRef, editorMode, guiConfigData, t],
   );
 
   const handleCopyConfig = useCallback(async () => {
-    if (!editorRef.current) {
-      return;
+    let configData: string;
+
+    if (editorMode === "yaml") {
+      if (!editorRef.current) {
+        return;
+      }
+      configData = editorRef.current.getValue();
+    } else {
+      configData = configToYaml(guiConfigData);
     }
 
-    copy(editorRef.current.getValue());
+    copy(configData);
     toast.success(t("toast.success.copyToClipboard"), {
       position: "top-center",
     });
-  }, [editorRef, t]);
+  }, [editorRef, editorMode, guiConfigData, t]);
 
   const handleSaveAndRestart = useCallback(async () => {
     try {
@@ -107,7 +133,7 @@ function ConfigEditor() {
   }, [onHandleSaveConfig]);
 
   useEffect(() => {
-    if (!rawConfig) {
+    if (!rawConfig || editorMode !== "yaml") {
       return;
     }
 
@@ -169,7 +195,14 @@ function ConfigEditor() {
       }
       schemaConfiguredRef.current = false;
     };
-  }, [rawConfig, apiHost, systemTheme, theme, onHandleSaveConfig]);
+  }, [rawConfig, apiHost, systemTheme, theme, onHandleSaveConfig, editorMode]);
+
+  // Initialize GUI config from parsed config
+  useEffect(() => {
+    if (config && editorMode === "gui") {
+      setGuiConfigData(config as unknown as Record<string, unknown>);
+    }
+  }, [config, editorMode]);
 
   // monitoring state
 
@@ -247,7 +280,23 @@ function ConfigEditor() {
               </div>
             )}
           </div>
-          <div className="flex flex-row gap-1">
+          <div className="flex flex-row gap-2">
+            <ToggleGroup
+              type="single"
+              value={editorMode}
+              onValueChange={(value) => {
+                if (value) setEditorMode(value as EditorMode);
+              }}
+            >
+              <ToggleGroupItem value="yaml" aria-label="YAML mode">
+                <Code className="h-4 w-4 mr-2" />
+                <span className="hidden md:inline">YAML</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="gui" aria-label="GUI mode">
+                <Settings className="h-4 w-4 mr-2" />
+                <span className="hidden md:inline">GUI</span>
+              </ToggleGroupItem>
+            </ToggleGroup>
             <Button
               size="sm"
               className="flex items-center gap-2"
@@ -287,7 +336,21 @@ function ConfigEditor() {
               {error}
             </div>
           )}
-          <div ref={configRef} className="flex-1 overflow-hidden" />
+          {editorMode === "yaml" ? (
+            <div ref={configRef} className="flex-1 overflow-hidden" />
+          ) : (
+            <div className="flex-1 overflow-auto">
+              {config && (
+                <GuiConfigEditor
+                  config={guiConfigData}
+                  onSave={async (newConfig) => {
+                    setGuiConfigData(newConfig);
+                    setHasChanges(true);
+                  }}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
       <Toaster closeButton={true} />
