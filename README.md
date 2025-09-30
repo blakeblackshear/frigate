@@ -2,7 +2,30 @@
   <img align="center" alt="logo" src="docs/static/img/frigate.png">
 </p>
 
-# Frigate - NVR With Realtime Object Detection for IP Cameras
+# 🎨 Frigate with GUI Configuration Editor
+
+> **Fork of [blakeblackshear/frigate](https://github.com/blakeblackshear/frigate)** featuring a comprehensive GUI configuration editor - **No more YAML nightmares!**
+
+## ✨ What's Different in This Fork?
+
+This fork adds a **complete GUI-based configuration editor** that makes Frigate accessible to everyone:
+
+### 🚀 New Feature: GUI Configuration Editor
+
+**No YAML knowledge required!** Configure everything through beautiful forms:
+
+- ✅ **100% Coverage**: All 500+ configuration fields accessible
+- ✅ **17+ Organized Sections**: Cameras, Detectors, Objects, Recording, Motion, MQTT, Audio, Face Recognition, LPR, and more
+- ✅ **Smart Validation**: Real-time error checking with helpful messages
+- ✅ **Tooltips Everywhere**: Every field has descriptions and examples
+- ✅ **YAML Toggle**: Switch between GUI and YAML modes anytime
+- ✅ **Schema-Driven**: Automatically adapts when new Frigate features are added
+
+**[📖 Read the GUI Configuration Guide](docs/docs/guides/config_gui.md)**
+
+---
+
+## About Frigate
 
 <a href="https://hosted.weblate.org/engage/frigate-nvr/">
 <img src="https://hosted.weblate.org/widget/frigate-nvr/language-badge.svg" alt="Translation status" />
