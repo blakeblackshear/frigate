@@ -44,6 +44,7 @@ class GenAIClient:
         concerns: list[str],
         preferred_language: str | None,
         debug_save: bool,
+        activity_context_prompt: str,
     ) -> ReviewMetadata | None:
         """Generate a description for the review item activity."""
 
@@ -67,22 +68,23 @@ Please analyze the sequence of images ({len(thumbnails)} total) taken in chronol
 
 Your task is to provide a clear, accurate description of the scene that:
 1. States exactly what is happening based on observable actions and movements.
-2. Evaluates whether the observable evidence suggests normal residential activity or genuine security concerns.
+2. Evaluates whether the observable evidence suggests normal activity for this property or genuine security concerns.
 3. Assigns a potential_threat_level based on the definitions below, applying them consistently.
 
-Provide an objective assessment. The goal is accuracy—neither missing genuine threats nor over-flagging routine residential life.
+Provide an objective assessment. The goal is accuracy—neither missing genuine threats nor over-flagging routine activity for this property.
 
 When forming your description:
 - **CRITICAL: Only describe objects explicitly listed in "Detected objects" below.** Do not infer or mention additional people, vehicles, or objects not present in the detected objects list, even if visual patterns suggest them. If only a car is detected, do not describe a person interacting with it unless "person" is also in the detected objects list.
 - **Only describe actions actually visible in the frames.** Do not assume or infer actions that you don't observe happening. If someone walks toward furniture but you never see them sit, do not say they sat. Stick to what you can see across the sequence.
 - Describe what you observe: actions, movements, interactions with objects and the environment. Include any observable environmental changes (e.g., lighting changes triggered by activity).
 - Note visible details such as clothing, items being carried or placed, tools or equipment present, and how they interact with the property or objects.
-- **Zone context is critical**: Private enclosed spaces (back yards, back decks, fenced areas, inside garages) are resident territory where brief transient activity, routine tasks, and pet care are expected and normal. Front yards, driveways, and porches are semi-public but still resident spaces where deliveries, parking, and coming/going are routine. Consider whether the zone and activity align with normal residential use.
-- **Person + Pet = Normal Activity**: When both "Person" and "Dog" (or "Cat") are detected together in residential zones, this is routine pet care activity (walking, letting out, playing, supervising). Assign Level 0 unless there are OTHER strong suspicious behaviors present (like testing doors, taking items, etc.). A person with their pet in a residential zone is baseline normal activity.
-- Consider the full sequence chronologically: what happens from start to finish, how duration and actions relate to the location and objects involved. Brief appearances in private spaces (like someone letting a dog out or checking something) are normal residential patterns.
-- **Use the actual timestamp provided in "Activity started at"** below for time of day context—do not infer time from image brightness or darkness. Unusual hours (late night/early morning) should increase suspicion when the observable behavior itself appears questionable. However, recognize that some legitimate activities can occur at any hour (residents coming home, service deliveries, maintenance emergencies, etc.). Focus on whether the observable evidence supports a benign explanation despite the timing.
+- Consider the full sequence chronologically: what happens from start to finish, how duration and actions relate to the location and objects involved.
+- **Use the actual timestamp provided in "Activity started at"** below for time of day context—do not infer time from image brightness or darkness. Unusual hours (late night/early morning) should increase suspicion when the observable behavior itself appears questionable. However, recognize that some legitimate activities can occur at any hour.
 - Identify patterns that suggest genuine security concerns: testing doors/windows on vehicles or buildings, accessing unauthorized areas, attempting to conceal actions, extended loitering without apparent purpose, taking items, behavior that clearly doesn't align with the zone context and detected objects.
 - **Weigh all evidence holistically**: Consider the complete picture including zone, objects, time, and actions together. A single ambiguous action should not override strong contextual evidence of normal activity. The overall pattern determines the threat level.
+
+**Normal activity patterns for this property:**
+{activity_context_prompt}
 
 Your response MUST be a flat JSON object with:
 - `scene` (string): A narrative description of what happens across the sequence from start to finish. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
@@ -91,8 +93,8 @@ Your response MUST be a flat JSON object with:
 {get_concern_prompt()}
 
 Threat-level definitions:
-- 0 — Normal activity: What you observe is consistent with expected residential life. This includes: residents/family/guests in any zone, pets with people, deliveries, services, maintenance, routine tasks in appropriate zones (like letting dogs out in back yards, parking in driveways, checking mail, taking out trash). The observable evidence—considering zone context, detected objects, and timing together—supports a benign explanation. Use this for routine activities even if minor ambiguous elements exist.
-- 1 — Potentially suspicious: Observable behavior raises genuine security concerns that warrant human review. The evidence doesn't support a routine explanation when you consider the zone, objects, and actions together. Examples: testing doors/windows on vehicles or structures, accessing areas that don't align with the activity, taking items that likely don't belong to them, behavior clearly inconsistent with the zone and context (like lingering in front yards late at night with no clear purpose), or activity that lacks any visible legitimate indicators. Reserve this level for situations that actually merit closer attention—not routine residential activities in appropriate zones.
+- 0 — Normal activity: What you observe is consistent with expected activity for this property type. The observable evidence—considering zone context, detected objects, and timing together—supports a benign explanation. Use this for routine activities even if minor ambiguous elements exist.
+- 1 — Potentially suspicious: Observable behavior raises genuine security concerns that warrant human review. The evidence doesn't support a routine explanation when you consider the zone, objects, and actions together. Examples: testing doors/windows on vehicles or structures, accessing areas that don't align with the activity, taking items that likely don't belong to them, behavior clearly inconsistent with the zone and context, or activity that lacks any visible legitimate indicators. Reserve this level for situations that actually merit closer attention—not routine activities for this property.
 - 2 — Immediate threat: Clear evidence of forced entry, break-in, vandalism, aggression, weapons, theft in progress, or active property damage.
 
 Sequence details:
