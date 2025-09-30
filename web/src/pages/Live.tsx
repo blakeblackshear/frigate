@@ -24,13 +24,13 @@ function Live() {
   // selection
 
   const [selectedCameraName, setSelectedCameraName] = useHashState();
-  const [cameraGroup, setCameraGroup] = usePersistedOverlayState(
+  const [cameraGroup, setCameraGroup, loaded, ,] = usePersistedOverlayState(
     "cameraGroup",
     "default" as string,
   );
 
   useSearchEffect("group", (cameraGroup) => {
-    if (config && cameraGroup) {
+    if (config && cameraGroup && loaded) {
       const group = config.camera_groups[cameraGroup];
 
       if (group) {
