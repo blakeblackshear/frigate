@@ -109,7 +109,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
 
   // groups
 
-  const [group, setGroup, deleteGroup] = usePersistedOverlayState(
+  const [group, setGroup, , deleteGroup] = usePersistedOverlayState(
     "cameraGroup",
     "default" as string,
   );

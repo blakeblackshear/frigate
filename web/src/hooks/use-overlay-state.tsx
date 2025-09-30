@@ -40,6 +40,7 @@ export function usePersistedOverlayState<S extends string>(
 ): [
   S | undefined,
   (value: S | undefined, replace?: boolean) => void,
+  boolean,
   () => void,
 ] {
   const location = useLocation();
@@ -55,7 +56,7 @@ export function usePersistedOverlayState<S extends string>(
 
   // saved value from previous session
 
-  const [persistedValue, setPersistedValue, , deletePersistedValue] =
+  const [persistedValue, setPersistedValue, loaded, deletePersistedValue] =
     usePersistence<S>(key, overlayStateValue);
 
   const setOverlayStateValue = useCallback(
@@ -73,6 +74,7 @@ export function usePersistedOverlayState<S extends string>(
   return [
     overlayStateValue ?? persistedValue ?? defaultValue,
     setOverlayStateValue,
+    loaded,
     deletePersistedValue,
   ];
 }
