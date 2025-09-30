@@ -51,16 +51,16 @@ function set_libva_version() {
 }
 
 function setup_homekit_config() {
-    local homekit_config_path="$1"
+    local config_path="$1"
 
-    if [[ ! -f "${homekit_config_path}" ]]; then
+    if [[ ! -f "${config_path}" ]]; then
         echo "[INFO] Creating empty HomeKit config file..."
-        echo '{}' > "${homekit_config_path}"
+        echo '{}' > "${config_path}"
     fi
 
     # Convert YAML to JSON for jq processing
     local temp_json="/tmp/cache/homekit_config.json"
-    yq eval -o=json "${homekit_config_path}" > "${temp_json}" 2>/dev/null || {
+    yq eval -o=json "${config_path}" > "${temp_json}" 2>/dev/null || {
         echo "[WARNING] Failed to convert HomeKit config to JSON, skipping cleanup"
         return 0
     }
@@ -73,9 +73,9 @@ function setup_homekit_config() {
     ' "${temp_json}" > "${cleaned_json}" 2>/dev/null || echo '{"homekit": {}}' > "${cleaned_json}"
 
     # Convert back to YAML and write to the config file
-    yq eval -P "${cleaned_json}" > "${homekit_config_path}" 2>/dev/null || {
+    yq eval -P "${cleaned_json}" > "${config_path}" 2>/dev/null || {
         echo "[WARNING] Failed to convert cleaned config to YAML, creating minimal config"
-        echo '{"homekit": {}}' > "${homekit_config_path}"
+        echo '{"homekit": {}}' > "${config_path}"
     }
 
     # Clean up temp files
