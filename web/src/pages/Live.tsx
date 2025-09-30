@@ -142,6 +142,7 @@ function Live() {
         />
       ) : selectedCamera ? (
         <LiveCameraView
+          key={selectedCameraName}
           config={config}
           camera={selectedCamera}
           supportsFullscreen={supportsFullScreen}
