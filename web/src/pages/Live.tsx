@@ -35,9 +35,9 @@ function Live() {
 
       if (group) {
         setCameraGroup(cameraGroup);
-        // return false so that url cleanup doesn't occur here
+        // return false so that url cleanup doesn't occur here.
         // will be cleaned up by usePersistedOverlayState in the
-        // camera group selector s that the icon switches correctly
+        // camera group selector so that the icon switches correctly
         return false;
       }
 
