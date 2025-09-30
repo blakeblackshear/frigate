@@ -118,6 +118,16 @@ module.exports = {
         neutral_variant: {
           DEFAULT: "hsl(var(--neutral_variant))",
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+          primary: "hsl(var(--primary))",
+          "primary-foreground": "hsl(var(--primary-foreground))",
+          accent: "hsl(var(--primary-variant))",
+          "accent-foreground": "hsl(var(--primary-foreground))",
+          border: "hsl(var(--border))",
+          ring: "hsl(var(--ring))",
+        },
       },
       keyframes: {
         "accordion-down": {
