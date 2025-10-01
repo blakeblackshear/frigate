@@ -28,10 +28,17 @@ In the default mode, Frigate's LPR needs to first detect a `car` or `motorcycle`
 
 :::
 
+## OCR Model Details
+
+Frigate uses **PaddleOCR** (via an ONNX runtime) to perform text recognition on detected license plates. This model extracts characters from license plates and populates the `recognized_license_plate` field or a `sub_label` for tracked `car` or `motorcycle` objects. PaddleOCR provides accurate recognition even in challenging lighting and motion conditions, and it is lightweight enough to run on CPU or GPU depending on your configuration.
+
+- The PaddleOCR ONNX model is used internally and can be replaced with custom OCR models if desired.
+- For more details, visit the [PaddleOCR GitHub repository](https://github.com/PaddlePaddle/PaddleOCR).
+
+
 ## Minimum System Requirements
 
 License plate recognition works by running AI models locally on your system. The models are relatively lightweight and can run on your CPU or GPU, depending on your configuration. At least 4GB of RAM is required.
-
 ## Configuration
 
 License plate recognition is disabled by default. Enable it in your config file:
