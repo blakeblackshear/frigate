@@ -30,8 +30,7 @@ In the default mode, Frigate's LPR needs to first detect a `car` or `motorcycle`
 
 ## Minimum System Requirements
 
-License plate recognition works by running AI models locally on your system. The models are relatively lightweight and can run on your CPU or GPU, depending on your configuration. At least 4GB of RAM is required.
-
+License plate recognition works by running AI models locally on your system. The YOLOv9 plate detector model and the OCR models ([PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)) are relatively lightweight and can run on your CPU or GPU, depending on your configuration. At least 4GB of RAM is required.
 ## Configuration
 
 License plate recognition is disabled by default. Enable it in your config file:
