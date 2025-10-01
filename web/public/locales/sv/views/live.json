@@ -159,6 +159,9 @@
     "playInBackground": {
       "label": "Spela i bakgrunden",
       "tips": "Aktivera det här alternativet för att fortsätta strömma när spelaren är dold."
+    },
+    "debug": {
+      "picker": "Strömval är inte tillgängligt i felsökningsläge. Felsökningsvyn använder alltid den ström som tilldelats detekteringsrollen."
     }
   },
   "history": {
