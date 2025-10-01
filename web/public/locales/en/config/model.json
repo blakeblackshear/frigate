@@ -1,0 +1,35 @@
+{
+  "label": "Detection model configuration.",
+  "properties": {
+    "path": {
+      "label": "Custom Object detection model path."
+    },
+    "labelmap_path": {
+      "label": "Label map for custom object detector."
+    },
+    "width": {
+      "label": "Object detection model input width."
+    },
+    "height": {
+      "label": "Object detection model input height."
+    },
+    "labelmap": {
+      "label": "Labelmap customization."
+    },
+    "attributes_map": {
+      "label": "Map of object labels to their attribute labels."
+    },
+    "input_tensor": {
+      "label": "Model Input Tensor Shape"
+    },
+    "input_pixel_format": {
+      "label": "Model Input Pixel Color Format"
+    },
+    "input_dtype": {
+      "label": "Model Input D Type"
+    },
+    "model_type": {
+      "label": "Object Detection Model Type"
+    }
+  }
+}
