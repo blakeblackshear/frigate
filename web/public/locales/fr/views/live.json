@@ -125,7 +125,10 @@
       "tips": "Activer cette option pour continuer le streaming lorsque le lecteur est masqué.",
       "label": "Jouer en arrière plan"
     },
-    "title": "Flux"
+    "title": "Flux",
+    "debug": {
+      "picker": "La sélection de flux est indisponible en mode débogage. La vue de débogage utilise systématiquement le flux attribué au rôle de détection."
+    }
   },
   "cameraSettings": {
     "objectDetection": "Détection d'objets",
