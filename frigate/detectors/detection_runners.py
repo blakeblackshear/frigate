@@ -424,7 +424,8 @@ def get_optimized_runner(
 ) -> BaseModelRunner:
     """Get an optimized runner for the hardware."""
     device = device or "AUTO"
-    if is_rknn_compatible(model_path):
+
+    if device != "CPU" and is_rknn_compatible(model_path):
         rknn_path = auto_convert_model(model_path)
 
         if rknn_path:
