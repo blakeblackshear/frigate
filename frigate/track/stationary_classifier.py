@@ -20,7 +20,7 @@ class StationaryThresholds:
 
     # Objects to apply these thresholds to
     # If None, apply to all objects
-    objects: list[str] | None = None
+    objects: list[str] = []
 
     # Threshold of IoU that causes the object to immediately be considered active
     # Below this threshold, assume object is active
@@ -55,7 +55,6 @@ DYNAMIC_OBJECT_THRESHOLDS = StationaryThresholds(
 )
 
 
-@staticmethod
 def get_stationary_threshold(label: str) -> StationaryThresholds:
     """Get the stationary thresholds for a given object label."""
 
