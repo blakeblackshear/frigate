@@ -134,6 +134,9 @@
     "playInBackground": {
       "label": "Reproduzir em segundo plano",
       "tips": "Habilitar essa opção para continuar a transmissão quando o reprodutor estiver oculto."
+    },
+    "debug": {
+      "picker": "A seleção da transmissão fica indisponível em modo de depuração. A visualização de depuração sempre usa o papel de detecção atribuído à transmissão."
     }
   },
   "cameraSettings": {
