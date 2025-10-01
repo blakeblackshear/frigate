@@ -423,7 +423,7 @@
     "paths": {
       "title": "Cesty",
       "desc": "Zobrazit významné body trasy sledovaného objektu",
-      "tips": "<p><strong>Cesty</strong></p><br><p>Čáry a kruhy označují významné body, kterými se sledovaný objekt během svého životního cyklu pohyboval."
+      "tips": "<p><strong>Cesty</strong></p><br><p>Čáry a kruhy označují významné body, kterými se sledovaný objekt během svého životního cyklu pohyboval.</p>"
     }
   },
   "camera": {
@@ -604,7 +604,8 @@
           "admin": "Správce",
           "adminDesc": "Plný přístup ke všem funkcím.",
           "viewer": "Divák",
-          "viewerDesc": "Omezení pouze na Živé dashboardy, Revize, Průzkumníka a Exporty."
+          "viewerDesc": "Omezení pouze na Živé dashboardy, Revize, Průzkumníka a Exporty.",
+          "customDesc": "Vlastní role s konkrétním přístupem ke kameře."
         },
         "title": "Změnit Roli Uživatele",
         "desc": "Aktualizovat oprávnění pro <strong>{{username}}</strong>",
@@ -794,9 +795,99 @@
           "title": "Obsah",
           "imagePlaceholder": "Vybrat obrázek",
           "textPlaceholder": "Zadat textový obsah",
-          "imageDesc": "Vybrat obrázek, který spustí tuto akci, když bude detekován podobný obrázek."
+          "imageDesc": "Vybrat obrázek, který spustí tuto akci, když bude detekován podobný obrázek.",
+          "textDesc": "Zadejte text, který spustí tuto akci, když bude zjištěn podobný popis sledovaného objektu.",
+          "error": {
+            "required": "Obsah je povinný."
+          }
+        },
+        "actions": {
+          "title": "Akce",
+          "desc": "Ve výchozím nastavení Frigate odesílá MQTT zprávu pro všechny spouštěče. Zvolte dodatečnou akci, která se má provést, když se tento spouštěč aktivuje.",
+          "error": {
+            "min": "Musí být vybrána alespoň jedna akce."
+          }
+        },
+        "threshold": {
+          "title": "Práh",
+          "error": {
+            "min": "Práh musí být alespoň 0",
+            "max": "Práh musí být nanejvýš 1"
+          }
         }
       }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Spouštěč {{name}} byl úspěšně vytvořen.",
+        "updateTrigger": "Spouštěč {{name}} byl úspěšně aktualizován.",
+        "deleteTrigger": "Spouštěč {{name}} byl úspěšně smazán."
+      },
+      "error": {
+        "createTriggerFailed": "Nepodařilo se vytvořit spouštěč: {{errorMessage}}",
+        "updateTriggerFailed": "Nepodařilo se aktualizovat spouštěč: {{errorMessage}}",
+        "deleteTriggerFailed": "Nepodařilo se smazat spouštěč: {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "addRole": "Přidat roli",
+    "table": {
+      "role": "Role",
+      "cameras": "Kamery",
+      "actions": "Akce",
+      "noRoles": "Nebyly nalezeny žádné vlastní role.",
+      "editCameras": "Upravit kamery",
+      "deleteRole": "Smazat roli"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Role {{role}} byla úspěšně vytvořena",
+        "updateCameras": "Kamery byly aktualizovány pro roli {{role}}",
+        "deleteRole": "Role {{role}} byla úspěšně smazána",
+        "userRolesUpdated": "{{count}} uživatel(ů) přiřazených k této roli bylo aktualizováno na „Divák“, který má přístup ke všem kamerám."
+      },
+      "error": {
+        "createRoleFailed": "Nepodařilo se vytvořit roli: {{errorMessage}}",
+        "updateCamerasFailed": "Nepodařilo se aktualizovat kamery: {{errorMessage}}",
+        "deleteRoleFailed": "Nepodařilo se smazat roli: {{errorMessage}}",
+        "userUpdateFailed": "Nepodařilo se aktualizovat role uživatele: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Vytvořit novou roli",
+        "desc": "Přidejte novou roli a určete oprávnění k přístupu ke kamerám."
+      },
+      "deleteRole": {
+        "title": "Smazat roli",
+        "warn": "Opravdu chcete smazat roli <strong>{{role}}</strong>?",
+        "deleting": "Mazání...",
+        "desc": "Tuto akci nelze vrátit zpět. Role bude trvale smazána a všichni uživatelé s touto rolí budou přeřazeni do role „Divák“, která poskytne přístup ke všem kamerám."
+      },
+      "form": {
+        "role": {
+          "title": "Název role",
+          "placeholder": "Zadejte název role",
+          "desc": "Povolena jsou pouze písmena, čísla, tečky a podtržítka.",
+          "roleIsRequired": "Název role je povinný",
+          "roleOnlyInclude": "Název role smí obsahovat pouze písmena, čísla, . nebo _",
+          "roleExists": "Role s tímto názvem již existuje."
+        },
+        "cameras": {
+          "title": "Kamery",
+          "desc": "Vyberte kamery, ke kterým má tato role přístup. Je vyžadována alespoň jedna kamera.",
+          "required": "Musí být vybrána alespoň jedna kamera."
+        }
+      },
+      "editCameras": {
+        "desc": "Aktualizujte přístup ke kamerám pro roli <strong>{{role}}</strong>.",
+        "title": "Upravit kamery role"
+      }
+    },
+    "management": {
+      "title": "Správa role diváka",
+      "desc": "Spravujte vlastní role diváků a jejich oprávnění k přístupu ke kamerám pro tuto instanci Frigate."
     }
   }
 }
