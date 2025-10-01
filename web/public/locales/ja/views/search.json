@@ -1,11 +1,72 @@
 {
-  "searchFor": "{{inputValue}} を検索",
+  "searchFor": "「{{inputValue}}」を検索",
   "button": {
     "save": "検索を保存",
-    "delete": "保存した検索を削除",
-    "filterInformation": "フィルタ情報",
-    "clear": "検索をクリア"
+    "delete": "保存済み検索を削除",
+    "filterInformation": "フィルター情報",
+    "clear": "検索をクリア",
+    "filterActive": "フィルターが有効"
   },
   "search": "検索",
-  "savedSearches": "保存した検索"
+  "savedSearches": "保存済み検索",
+  "trackedObjectId": "追跡オブジェクトID",
+  "filter": {
+    "label": {
+      "cameras": "カメラ",
+      "labels": "ラベル",
+      "zones": "ゾーン",
+      "sub_labels": "サブラベル",
+      "search_type": "検索タイプ",
+      "time_range": "期間",
+      "before": "以前",
+      "after": "以後",
+      "min_score": "最小スコア",
+      "max_score": "最大スコア",
+      "min_speed": "最小速度",
+      "max_speed": "最大速度",
+      "recognized_license_plate": "認識されたナンバープレート",
+      "has_clip": "クリップあり",
+      "has_snapshot": "スナップショットあり"
+    },
+    "searchType": {
+      "thumbnail": "サムネイル",
+      "description": "説明"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "「以前」日付は「以後」日付より後である必要があります。",
+        "afterDatebeEarlierBefore": "「以後」日付は「以前」日付より前である必要があります。",
+        "minScoreMustBeLessOrEqualMaxScore": "「最小スコア」は「最大スコア」以下である必要があります。",
+        "maxScoreMustBeGreaterOrEqualMinScore": "「最大スコア」は「最小スコア」以上である必要があります。",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "「最小速度」は「最大速度」以下である必要があります。",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "「最大速度」は「最小速度」以上である必要があります。"
+      }
+    },
+    "tips": {
+      "title": "テキストフィルターの使い方",
+      "desc": {
+        "text": "フィルターを使うと検索結果を絞り込めます。入力欄での使い方は次の通りです。",
+        "step1": "フィルターのキー名の後にコロンを付けて入力します（例: \"cameras:\"）。",
+        "step2": "候補から値を選ぶか、自分で入力します。",
+        "step3": "複数のフィルターは、間にスペースを入れて続けて追加できます。",
+        "step4": "日付フィルター（before: と after:）は {{DateFormat}} 形式を使用します。",
+        "step5": "期間フィルターは {{exampleTime}} 形式を使用します。",
+        "step6": "フィルターは隣の 'x' をクリックして削除できます。",
+        "exampleLabel": "例:"
+      }
+    },
+    "header": {
+      "currentFilterType": "フィルター値",
+      "noFilters": "フィルター",
+      "activeFilters": "有効なフィルター"
+    }
+  },
+  "similaritySearch": {
+    "title": "類似検索",
+    "active": "類似検索を実行中",
+    "clear": "類似検索をクリア"
+  },
+  "placeholder": {
+    "search": "検索…"
+  }
 }

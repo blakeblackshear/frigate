@@ -1,5 +1,169 @@
 {
   "documentTitle": "ライブ - Frigate",
   "documentTitle.withCamera": "{{camera}} - ライブ - Frigate",
-  "lowBandwidthMode": "低帯域幅モード"
+  "lowBandwidthMode": "低帯域モード",
+  "twoWayTalk": {
+    "enable": "双方向通話を有効化",
+    "disable": "双方向通話を無効化"
+  },
+  "cameraAudio": {
+    "enable": "カメラ音声を有効化",
+    "disable": "カメラ音声を無効化"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "フレーム内をクリックしてカメラを中央に移動",
+        "enable": "クリック移動を有効化",
+        "disable": "クリック移動を無効化"
+      },
+      "left": {
+        "label": "PTZ カメラを左へ移動"
+      },
+      "up": {
+        "label": "PTZ カメラを上へ移動"
+      },
+      "down": {
+        "label": "PTZ カメラを下へ移動"
+      },
+      "right": {
+        "label": "PTZ カメラを右へ移動"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "PTZ カメラをズームイン"
+      },
+      "out": {
+        "label": "PTZ カメラをズームアウト"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "PTZ カメラをフォーカスイン"
+      },
+      "out": {
+        "label": "PTZ カメラをフォーカスアウト"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "フレーム内をクリックして PTZ カメラを中央へ"
+      }
+    },
+    "presets": "PTZ カメラのプリセット"
+  },
+  "camera": {
+    "enable": "カメラを有効化",
+    "disable": "カメラを無効化"
+  },
+  "muteCameras": {
+    "enable": "全カメラをミュート",
+    "disable": "全カメラのミュートを解除"
+  },
+  "detect": {
+    "enable": "検出を有効化",
+    "disable": "検出を無効化"
+  },
+  "recording": {
+    "enable": "録画を有効化",
+    "disable": "録画を無効化"
+  },
+  "snapshots": {
+    "enable": "スナップショットを有効化",
+    "disable": "スナップショットを無効化"
+  },
+  "audioDetect": {
+    "enable": "音声検出を有効化",
+    "disable": "音声検出を無効化"
+  },
+  "transcription": {
+    "enable": "ライブ音声文字起こしを有効化",
+    "disable": "ライブ音声文字起こしを無効化"
+  },
+  "autotracking": {
+    "enable": "オートトラッキングを有効化",
+    "disable": "オートトラッキングを無効化"
+  },
+  "streamStats": {
+    "enable": "ストリーム統計を表示",
+    "disable": "ストリーム統計を非表示"
+  },
+  "manualRecording": {
+    "title": "オンデマンド録画",
+    "tips": "このカメラの録画保持設定に基づく手動イベントを開始します。",
+    "playInBackground": {
+      "label": "バックグラウンドで再生",
+      "desc": "プレーヤーが非表示の場合でもストリーミングを継続するにはこのオプションを有効にします。"
+    },
+    "showStats": {
+      "label": "統計を表示",
+      "desc": "カメラ映像にストリーム統計をオーバーレイ表示するにはこのオプションを有効にします。"
+    },
+    "debugView": "デバッグビュー",
+    "start": "オンデマンド録画を開始",
+    "started": "手動のオンデマンド録画を開始しました。",
+    "failedToStart": "手動のオンデマンド録画の開始に失敗しました。",
+    "recordDisabledTips": "このカメラは設定で録画が無効または制限されているため、スナップショットのみ保存されます。",
+    "end": "オンデマンド録画を終了",
+    "ended": "手動のオンデマンド録画を終了しました。",
+    "failedToEnd": "手動のオンデマンド録画の終了に失敗しました。"
+  },
+  "streamingSettings": "ストリーミング設定",
+  "notifications": "通知",
+  "audio": "音声",
+  "suspend": {
+    "forTime": "一時停止: "
+  },
+  "stream": {
+    "title": "ストリーム",
+    "audio": {
+      "tips": {
+        "title": "このストリームで音声を使用するには、カメラから音声が出力され、go2rtc で設定されている必要があります。"
+      },
+      "available": "このストリームでは音声を利用できます",
+      "unavailable": "このストリームでは音声は利用できません"
+    },
+    "twoWayTalk": {
+      "tips": "端末が機能をサポートし、双方向通話に WebRTC が設定されている必要があります。",
+      "available": "このストリームで双方向通話を利用できます",
+      "unavailable": "このストリームで双方向通話は利用できません"
+    },
+    "lowBandwidth": {
+      "tips": "バッファリングやストリームエラーのため、ライブビューは低帯域モードになっています。",
+      "resetStream": "ストリームをリセット"
+    },
+    "playInBackground": {
+      "label": "バックグラウンドで再生",
+      "tips": "プレーヤーが非表示でもストリーミングを継続するにはこのオプションを有効にします。"
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} の設定",
+    "cameraEnabled": "カメラ有効",
+    "objectDetection": "物体検出",
+    "recording": "録画",
+    "snapshots": "スナップショット",
+    "audioDetection": "音声検出",
+    "transcription": "音声文字起こし",
+    "autotracking": "オートトラッキング"
+  },
+  "history": {
+    "label": "履歴映像を表示"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "すべて",
+      "motion": "モーション",
+      "active_objects": "アクティブなオブジェクト"
+    },
+    "notAllTips": "{{source}} の録画保持設定は <code>mode: {{effectiveRetainMode}}</code> になっているため、このオンデマンド録画では {{effectiveRetainModeName}} を含むセグメントのみが保持されます。"
+  },
+  "editLayout": {
+    "label": "レイアウトを編集",
+    "group": {
+      "label": "カメラグループを編集"
+    },
+    "exitEdit": "編集を終了"
+  }
 }

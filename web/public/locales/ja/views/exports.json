@@ -1,5 +1,17 @@
 {
-  "documentTitle": "エクスポート - Frigate",
-  "noExports": "エクスポートがありません",
-  "search": "検索"
+  "documentTitle": "書き出し - Frigate",
+  "noExports": "書き出しは見つかりません",
+  "search": "検索",
+  "deleteExport": "書き出しを削除",
+  "deleteExport.desc": "{{exportName}} を削除してもよろしいですか？",
+  "editExport": {
+    "title": "書き出し名を変更",
+    "desc": "この書き出しの新しい名前を入力してください。",
+    "saveExport": "書き出しを保存"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "書き出し名の変更に失敗しました: {{errorMessage}}"
+    }
+  }
 }

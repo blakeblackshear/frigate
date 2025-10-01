@@ -1,6 +1,95 @@
 {
   "description": {
-    "placeholder": "このコレクションの名前を入力してください",
-    "addFace": "フェイスライブラリに新しいコレクションを追加する手順を説明します。"
+    "placeholder": "このコレクションの名前を入力",
+    "addFace": "顔データベースに新しいコレクションを追加する手順を案内します。",
+    "invalidName": "無効な名前です。名前に使用できるのは英数字、スペース、アポストロフィ、アンダースコア、ハイフンのみです。"
+  },
+  "details": {
+    "person": "人物",
+    "face": "顔の詳細",
+    "timestamp": "タイムスタンプ",
+    "unknown": "不明",
+    "subLabelScore": "サブラベルスコア",
+    "scoreInfo": "サブラベルスコアは、認識された顔の信頼度の加重スコアです。スナップショットに表示されるスコアとは異なる場合があります。",
+    "faceDesc": "この顔を生成した追跡オブジェクトの詳細"
+  },
+  "documentTitle": "顔データベース - Frigate",
+  "uploadFaceImage": {
+    "title": "顔画像をアップロード",
+    "desc": "顔を検出するために画像をアップロードし、{{pageToggle}} に追加します"
+  },
+  "collections": "コレクション",
+  "createFaceLibrary": {
+    "title": "コレクションを作成",
+    "desc": "新しいコレクションを作成",
+    "new": "新しい顔を作成",
+    "nextSteps": "強固な基盤を作るために:<li>［学習］タブで各人物に対して画像を選択し学習させてください。</li><li>最良の結果のため、正面を向いた画像に集中し、斜めからの顔画像は学習に使わないでください。</li></ul>"
+  },
+  "selectItem": "{{item}} を選択",
+  "steps": {
+    "faceName": "顔の名前を入力",
+    "uploadFace": "顔画像をアップロード",
+    "nextSteps": "次のステップ",
+    "description": {
+      "uploadFace": "{{name}} の正面を向いた顔が写っている画像をアップロードしてください。顔部分だけにトリミングする必要はありません。"
+    }
+  },
+  "train": {
+    "title": "学習",
+    "aria": "学習を選択",
+    "empty": "最近の顔認識の試行はありません"
+  },
+  "selectFace": "顔を選択",
+  "deleteFaceLibrary": {
+    "title": "名前を削除",
+    "desc": "コレクション {{name}} を削除してもよろしいですか？関連する顔はすべて完全に削除されます。"
+  },
+  "deleteFaceAttempts": {
+    "title": "顔を削除",
+    "desc_other": "{{count}} 件の顔を削除してもよろしいですか？この操作は元に戻せません。"
+  },
+  "renameFace": {
+    "title": "顔の名前を変更",
+    "desc": "{{name}} の新しい名前を入力"
+  },
+  "button": {
+    "deleteFaceAttempts": "顔を削除",
+    "addFace": "顔を追加",
+    "renameFace": "顔の名前を変更",
+    "deleteFace": "顔を削除",
+    "uploadImage": "画像をアップロード",
+    "reprocessFace": "顔を再処理"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "画像ファイルを選択してください。"
+    },
+    "dropActive": "ここに画像をドロップ…",
+    "dropInstructions": "画像をここにドラッグ＆ドロップ、またはクリックして選択",
+    "maxSize": "最大サイズ: {{size}}MB"
+  },
+  "nofaces": "顔はありません",
+  "pixels": "{{area}}px",
+  "trainFaceAs": "顔を次として学習:",
+  "trainFace": "顔を学習",
+  "toast": {
+    "success": {
+      "uploadedImage": "画像をアップロードしました。",
+      "addFaceLibrary": "{{name}} を顔データベースに追加しました！",
+      "deletedFace_other": "{{count}} 件の顔を削除しました。",
+      "deletedName_other": "{{count}} 件の顔を削除しました。",
+      "renamedFace": "顔の名前を {{name}} に変更しました",
+      "trainedFace": "顔の学習が完了しました。",
+      "updatedFaceScore": "顔のスコアを更新しました。"
+    },
+    "error": {
+      "uploadingImageFailed": "画像のアップロードに失敗しました: {{errorMessage}}",
+      "addFaceLibraryFailed": "顔名の設定に失敗しました: {{errorMessage}}",
+      "deleteFaceFailed": "削除に失敗しました: {{errorMessage}}",
+      "deleteNameFailed": "名前の削除に失敗しました: {{errorMessage}}",
+      "renameFaceFailed": "顔の名前変更に失敗しました: {{errorMessage}}",
+      "trainFailed": "学習に失敗しました: {{errorMessage}}",
+      "updateFaceScoreFailed": "顔スコアの更新に失敗しました: {{errorMessage}}"
+    }
   }
 }
