@@ -7,7 +7,7 @@
       "short": "Etykiety"
     },
     "count_one": "{{count}} Etykieta",
-    "count_other": "{{count}} Etykiet"
+    "count_other": "{{count}} Etykiet(y)"
   },
   "zones": {
     "label": "Strefy",
@@ -85,7 +85,9 @@
     "noLicensePlatesFound": "Nie znaleziono tablic rejestracyjnych.",
     "title": "Rozpoznane Tablice Rejestracyjne",
     "loadFailed": "Nie udało się załadować rozpoznanych tablic rejestracyjnych.",
-    "selectPlatesFromList": "Wybierz jedną lub więcej tablic z listy."
+    "selectPlatesFromList": "Wybierz jedną lub więcej tablic z listy.",
+    "selectAll": "Wybierz wszystko",
+    "clearAll": "Wyczyść wszystko"
   },
   "dates": {
     "all": {
@@ -127,6 +129,8 @@
     "label": "Klasy",
     "all": {
       "title": "Wszystkie Klasy"
-    }
+    },
+    "count_one": "{{count}} Klasa",
+    "count_other": "{{count}} Klas(y)"
   }
 }

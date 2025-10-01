@@ -9,7 +9,8 @@
     "masksAndZones": "Maski / Strefy",
     "motionTuner": "Konfigurator Ruchu",
     "debug": "Debugowanie",
-    "enrichments": "Wzbogacenia"
+    "enrichments": "Wzbogacenia",
+    "triggers": "Wyzwalacze"
   },
   "dialog": {
     "unsavedChanges": {
@@ -173,11 +174,48 @@
       "alerts": "Alerty ",
       "title": "Przegląd",
       "detections": "Wykrycia ",
-      "desc": "Włącz/wyłącz alerty i wykrywania dla tej kamery. Po wyłączeniu nie będą generowane nowe elementy do przeglądu."
+      "desc": "Tymczasowo włącz/wyłącz alerty i wykrywania dla tej kamery do czasu restartu Frigate. Po wyłączeniu nie będą generowane nowe elementy do przeglądu. "
     },
     "streams": {
-      "desc": "Wyłączenie kamery całkowicie zatrzymuje przetwarzanie strumieni tej kamery przez Frigate. Wykrywanie, nagrywanie i debugowanie będą niedostępne.<br /><em>Uwaga: Nie wyłącza to przekazywania strumieni go2rtc.</em>",
+      "desc": "Tymczasowo wyłącz kamerę dopóki Frigate nie uruchomi się ponownie. Wyłączenie kamery całkowicie zatrzymuje przetwarzanie strumieni tej kamery przez Frigate. Wykrywanie, nagrywanie i debugowanie będą niedostępne.<br /><em>Uwaga: Nie wyłącza to przekazywania strumieni go2rtc.</em>",
       "title": "Strumienie"
+    },
+    "object_descriptions": {
+      "title": "Opisy obiektów wygenerowane przez Sztuczną Inteligencję",
+      "desc": "Tymczasowo włącz/wyłącz opisy obiektów generowane przez SI. Gdy zostanie to wyłączone, prośby o opis śledzonych obiektów dla tej kamery nie będzie przesyłany do SI."
+    },
+    "review_descriptions": {
+      "title": "Opis recenzji od SI",
+      "desc": "Tymczasowo włącz/wyłącz recenzje opisów SI dla tej kamery. Gdy wyłączone prośby o wykonanie opisów nie zostaną przekazane do SI dla tej kamery."
+    },
+    "addCamera": "Dodaj nową kamerę",
+    "editCamera": "Edytuj kamerę:",
+    "selectCamera": "Wybierz kamerę",
+    "backToSettings": "Powrót do ustawień kamery",
+    "cameraConfig": {
+      "add": "Dodaj kamerę",
+      "edit": "Edytuj kamerę",
+      "description": "Konfiguracja ustawień kamery wraz ze strumieniem wejściowym i rolami.",
+      "name": "Nazwa kamery",
+      "nameRequired": "Nazwa kamery jest wymagana",
+      "nameLength": "Nazwa kamery musi być krótsza niż 24 znaki.",
+      "namePlaceholder": "np. drzwi_wejsciowe",
+      "enabled": "Włączony",
+      "ffmpeg": {
+        "inputs": "Strumienie wejściowe",
+        "path": "Ścieżka do strumienia",
+        "pathRequired": "Ścieżka do strumienia jest wymagana",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Role",
+        "rolesRequired": "Przynajmniej jedna rola jest wymagana",
+        "rolesUnique": "Każda z ról (audio, detect, record) może być przypisana tylko do jednego strumienia",
+        "addInput": "Dodaj strumień wejściowy",
+        "removeInput": "Usuń strumień wejściowy",
+        "inputsRequired": "Przynajmniej jeden strumień wejściowy jest wymagany"
+      },
+      "toast": {
+        "success": "Konfiguracja kamery {{cameraName}} została zapisana"
+      }
     }
   },
   "masksAndZones": {
@@ -400,6 +438,19 @@
       "tips": "Włącz tę opcję, aby narysować prostokąt na obrazie kamery w celu pokazania jego obszaru i proporcji. Te wartości mogą być następnie użyte do ustawienia parametrów filtra kształtu obiektu w twojej konfiguracji.",
       "desc": "Narysuj prostokąt na obrazie, aby zobaczyć szczegóły obszaru i proporcji",
       "area": "Obszar"
+    },
+    "openCameraWebUI": "Otwórz interfejs kamery {{camera}}",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Nie wykryto dźwięku",
+      "score": "wynik",
+      "currentRMS": "Bieżąca moc RMS",
+      "currentdbFS": "Bieżące dbFS"
+    },
+    "paths": {
+      "title": "Ścieżki",
+      "desc": "Pokaż punkty znaczące ścieżki dla śledzonego obiektu",
+      "tips": "<p><strong>Ścieżki</strong></p><br><p>Linie i koła wskażą punkty znaczące po których poruszał się obiekt podczas śledzenia.</p>"
     }
   },
   "motionDetectionTuner": {
@@ -492,7 +543,8 @@
           "admin": "Admin",
           "adminDesc": "Pełny dostęp do wszystkich funkcjonalności.",
           "viewerDesc": "Ograniczony wyłącznie do pulpitów na żywo, przeglądania, eksploracji i eksportu.",
-          "viewer": "Przeglądający"
+          "viewer": "Przeglądający",
+          "customDesc": "Własna rola z dedykowanym dostępem do kamery."
         },
         "title": "Zmień rolę użytkownika",
         "select": "Wybierz role"
@@ -640,7 +692,7 @@
         }
       }
     },
-    "title": "Ustawienia wzbogacające",
+    "title": "Ustawienia wzbogaceń",
     "unsavedChanges": "Niezapisane zmiany ustawień wzbogacania",
     "birdClassification": {
       "title": "Klasyfikacja ptaków",
@@ -682,6 +734,161 @@
     "toast": {
       "success": "Ustawienia wzbogacania zostały zapisane. Uruchom ponownie Frigate, aby zastosować zmiany.",
       "error": "Nie udało się zapisać zmian konfiguracji: {{errorMessage}}"
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Zarządzanie rolami podglądu",
+      "desc": "Zarządzaj własnymi rolami podglądu i ich dostępem do kamer dla tej instancji Frigate."
+    },
+    "addRole": "Dodaj rolę",
+    "table": {
+      "role": "Rola",
+      "cameras": "Kamery",
+      "actions": "Akcje",
+      "noRoles": "Brak własnych ról.",
+      "editCameras": "Edytuj kamery",
+      "deleteRole": "Usuń rolę"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Utworzono rolę {{role}}",
+        "updateCameras": "Zaktualizowano kamery dla roli {{role}}",
+        "deleteRole": "Rola {{role}} została usunięta",
+        "userRolesUpdated": "{{count}} użytkowników przypisanych do tej roli zostało zaktualizowanych do roli 'viewer', która ma dostęp do wszystkich kamer."
+      },
+      "error": {
+        "createRoleFailed": "Nie udało się utworzyć roli: {{errorMessage}}",
+        "updateCamerasFailed": "Nie udało się zaktualizować kamery: {{errorMessage}}",
+        "deleteRoleFailed": "Nie udało się usunąć roli: {{errorMessage}}",
+        "userUpdateFailed": "Nie udało się zaktualizować ról użytkownika: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Dodaj nową rolę",
+        "desc": "Dodaj nową rolę i określ prawa dostępu do kamer."
+      },
+      "editCameras": {
+        "title": "Edytuj kamery roli",
+        "desc": "Aktualizuj dostęp do kamer dla roli <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Usuń rolę",
+        "desc": "Ta akcja nie może zostać wycofana. To usunie rolę na stałe i przypisze jej użytkowników do roli 'viewer' która ma dostęp do wszystkich kamer.",
+        "warn": "Czy na pewno chcesz usunąć rolę <strong>{{role}}</strong>?",
+        "deleting": "Usuwanie..."
+      },
+      "form": {
+        "role": {
+          "title": "Nazwa roli",
+          "placeholder": "Wprowadź nazwę roli",
+          "desc": "Tylko litery, liczby, kropki i podkreślenie są dozwolone.",
+          "roleIsRequired": "Nazwa roli jest wymagana",
+          "roleOnlyInclude": "Nazwa roli może zawierać litery, liczby, . albo _",
+          "roleExists": "Taka rola już istnieje."
+        },
+        "cameras": {
+          "title": "Kamery",
+          "desc": "Wybierz do jakich kamer ta rola ma dostęp. Wymagana jest przynajmniej jedna kamera.",
+          "required": "Przynajmniej jedna kamera musi zostać wybrana."
+        }
+      }
+    }
+  },
+  "triggers": {
+    "documentTitle": "Wyzwalacze",
+    "management": {
+      "title": "Zarządzanie wyzwalaczami",
+      "desc": "Zarządzaj wyzwalaczami dla kamery {{camera}}. Użyj typu miniatury, aby aktywować miniatury podobne do wybranego śledzonego obiektu, i typu opisu, aby aktywować opisy podobne do określonego tekstu."
+    },
+    "addTrigger": "Dodaj wyzwalacz",
+    "table": {
+      "name": "Nazwa",
+      "type": "Typ",
+      "content": "Zawartość",
+      "threshold": "Próg",
+      "actions": "Akcje",
+      "noTriggers": "Brak wyzwalaczy dla tej kamery.",
+      "edit": "Edytuj",
+      "deleteTrigger": "Usuń wyzwalacz",
+      "lastTriggered": "Ostatnio wyzwolony"
+    },
+    "type": {
+      "thumbnail": "Miniaturka",
+      "description": "Opis"
+    },
+    "actions": {
+      "alert": "Oznacz jako alarm",
+      "notification": "Wyślij powiadomienie"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Utwórz wyzwalacz",
+        "desc": "Utwórz wyzwalacz dla kamery {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Edytuj wyzwalacz",
+        "desc": "Edytuj ustawienia wyzwalacza na kamerze {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Usuń wyzwalacz",
+        "desc": "Czy na pewno chcesz usunąć wyzwalacz <strong>{{triggerName}}</strong>? To działanie jest nieodwracalne."
+      },
+      "form": {
+        "name": {
+          "title": "Nazwa",
+          "placeholder": "Wprowadź nazwę wyzwalacza",
+          "error": {
+            "minLength": "Nazwa musi mieć co najmniej 2 znaki.",
+            "invalidCharacters": "Nazwa może zawierać jedynie litery, liczby, podkreślenie i myślniki.",
+            "alreadyExists": "Wyzwalacz o tej nazwie istnieje już dla tej kamery."
+          }
+        },
+        "enabled": {
+          "description": "Włącz lub wyłącz ten wyzwalacz"
+        },
+        "type": {
+          "title": "Typ",
+          "placeholder": "Wybierz typ wyzwalacza"
+        },
+        "content": {
+          "title": "Zawartość",
+          "imagePlaceholder": "Wybierz obraz",
+          "textPlaceholder": "Wprowadź treść",
+          "imageDesc": "Wybierz obraz, aby uruchomić tę akcję po wykryciu podobnego obrazu.",
+          "textDesc": "Wprowadź tekst, który spowoduje uruchomienie tej akcji po wykryciu podobnego opisu śledzonego obiektu.",
+          "error": {
+            "required": "Zawartość jest wymagana."
+          }
+        },
+        "threshold": {
+          "title": "Próg",
+          "error": {
+            "min": "Próg musi wynosić co najmniej 0",
+            "max": "Próg nie może być większy niż 1"
+          }
+        },
+        "actions": {
+          "title": "Akcje",
+          "desc": "Domyślnie Frigate wysyła wiadomość MQTT dla wszystkich wyzwalaczy. Wybierz dodatkową akcję, która ma zostać wykonana po uruchomieniu tego wyzwalacza.",
+          "error": {
+            "min": "Musisz wybrać co najmniej jedną akcję."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Utworzono wyzwalacz {{name}}.",
+        "updateTrigger": "Zaktualizowano wyzwalacz {{name}}.",
+        "deleteTrigger": "Usunięto wyzwalacz {{name}}."
+      },
+      "error": {
+        "createTriggerFailed": "Nie udało się utworzyć wyzwalacza: {{errorMessage}}",
+        "updateTriggerFailed": "Nie udało się zaktualizować wyzwalacza: {{errorMessage}}",
+        "deleteTriggerFailed": "Nie udało się usunąć wyzwalacza: {{errorMessage}}"
+      }
     }
   }
 }
