@@ -134,6 +134,9 @@
     "playInBackground": {
       "label": "Afspelen op de achtergrond",
       "tips": "Schakel deze optie in om te blijven streamen wanneer de speler verborgen is."
+    },
+    "debug": {
+      "picker": "Streamselectie is niet beschikbaar in de debugmodus. De debugweergave gebruikt altijd de stream waaraan de detectierol is toegewezen."
     }
   },
   "cameraSettings": {
