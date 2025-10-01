@@ -1,0 +1,28 @@
+{
+  "label": "Telemetry configuration.",
+  "properties": {
+    "network_interfaces": {
+      "label": "Enabled network interfaces for bandwidth calculation."
+    },
+    "stats": {
+      "label": "System Stats Configuration",
+      "properties": {
+        "amd_gpu_stats": {
+          "label": "Enable AMD GPU stats."
+        },
+        "intel_gpu_stats": {
+          "label": "Enable Intel GPU stats."
+        },
+        "network_bandwidth": {
+          "label": "Enable network bandwidth for ffmpeg processes."
+        },
+        "intel_gpu_device": {
+          "label": "Define the device to use when gathering SR-IOV stats."
+        }
+      }
+    },
+    "version_check": {
+      "label": "Enable latest version check."
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "label": "Generative AI configuration.",
+  "properties": {
+    "api_key": {
+      "label": "Provider API key."
+    },
+    "base_url": {
+      "label": "Provider base url."
+    },
+    "model": {
+      "label": "GenAI model."
+    },
+    "provider": {
+      "label": "GenAI provider."
+    },
+    "provider_options": {
+      "label": "GenAI Provider extra options."
+    }
+  }
+}

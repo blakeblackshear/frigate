@@ -1,0 +1,58 @@
+{
+  "label": "Object classification config.",
+  "properties": {
+    "bird": {
+      "label": "Bird classification config.",
+      "properties": {
+        "enabled": {
+          "label": "Enable bird classification."
+        },
+        "threshold": {
+          "label": "Minimum classification score required to be considered a match."
+        }
+      }
+    },
+    "custom": {
+      "label": "Custom Classification Model Configs.",
+      "properties": {
+        "enabled": {
+          "label": "Enable running the model."
+        },
+        "name": {
+          "label": "Name of classification model."
+        },
+        "threshold": {
+          "label": "Classification score threshold to change the state."
+        },
+        "object_config": {
+          "properties": {
+            "objects": {
+              "label": "Object types to classify."
+            },
+            "classification_type": {
+              "label": "Type of classification that is applied."
+            }
+          }
+        },
+        "state_config": {
+          "properties": {
+            "cameras": {
+              "label": "Cameras to run classification on.",
+              "properties": {
+                "crop": {
+                  "label": "Crop of image frame on this camera to run classification on."
+                }
+              }
+            },
+            "motion": {
+              "label": "If classification should be run when motion is detected in the crop."
+            },
+            "interval": {
+              "label": "Interval to run classification on in seconds."
+            }
+          }
+        }
+      }
+    }
+  }
+}

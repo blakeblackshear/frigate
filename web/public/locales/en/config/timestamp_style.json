@@ -1,0 +1,31 @@
+{
+  "label": "Global timestamp style configuration.",
+  "properties": {
+    "position": {
+      "label": "Timestamp position."
+    },
+    "format": {
+      "label": "Timestamp format."
+    },
+    "color": {
+      "label": "Timestamp color.",
+      "properties": {
+        "red": {
+          "label": "Red"
+        },
+        "green": {
+          "label": "Green"
+        },
+        "blue": {
+          "label": "Blue"
+        }
+      }
+    },
+    "thickness": {
+      "label": "Timestamp thickness."
+    },
+    "effect": {
+      "label": "Timestamp effect."
+    }
+  }
+}
