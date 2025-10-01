@@ -1,1 +1,7 @@
-{}
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Download Video"
+    }
+  }
+}

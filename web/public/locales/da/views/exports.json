@@ -1,4 +1,9 @@
 {
   "documentTitle": "Eksporter - Frigate",
-  "search": "Søg"
+  "search": "Søg",
+  "deleteExport.desc": "Er du sikker på at du vil slette {{exportName}}?",
+  "editExport": {
+    "title": "Omdøb Eksport",
+    "saveExport": "Gem Eksport"
+  }
 }
