@@ -1,1 +1,9 @@
-{}
+{
+  "restart": {
+    "title": "Er du sikker på at du vil genstarte Frigate?",
+    "button": "Genstart",
+    "restarting": {
+      "title": "Frigate genstarter"
+    }
+  }
+}

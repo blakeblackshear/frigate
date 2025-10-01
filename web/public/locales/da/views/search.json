@@ -1,3 +1,11 @@
 {
-  "search": "Søg"
+  "search": "Søg",
+  "savedSearches": "Gemte Søgninger",
+  "searchFor": "Søg efter {{inputValue}}",
+  "button": {
+    "save": "Gem søgning",
+    "delete": "Slet gemt søgning",
+    "filterInformation": "Filter information",
+    "filterActive": "Filtre aktiv"
+  }
 }

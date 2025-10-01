@@ -1,5 +1,8 @@
 {
   "documentTitle": {
-    "default": "Indstillinger - Frigate"
+    "default": "Indstillinger - Frigate",
+    "authentication": "Bruger Indstillinger - Frigate",
+    "camera": "Kamera indstillinger - Frigate",
+    "object": "Debug - Frigate"
   }
 }

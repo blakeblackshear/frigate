@@ -1,3 +1,18 @@
 {
-  "person": "Person"
+  "person": "Person",
+  "bicycle": "Cykel",
+  "car": "Bil",
+  "motorcycle": "Motorcykel",
+  "airplane": "Flyvemaskine",
+  "bus": "Bus",
+  "train": "Tog",
+  "boat": "Båd",
+  "traffic_light": "Trafiklys",
+  "vehicle": "Køretøj",
+  "skateboard": "Skateboard",
+  "door": "Dør",
+  "sink": "Håndvask",
+  "toothbrush": "Tandbørste",
+  "scissors": "Saks",
+  "clock": "Ur"
 }

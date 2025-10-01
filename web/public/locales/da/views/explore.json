@@ -9,5 +9,11 @@
     "lifecycleItemDesc": {
       "active": "{{label}} blev aktiv"
     }
+  },
+  "exploreIsUnavailable": {
+    "embeddingsReindexing": {
+      "startingUp": "Starter…",
+      "estimatedTime": "Estimeret tid tilbage:"
+    }
   }
 }
