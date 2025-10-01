@@ -134,6 +134,9 @@
     "playInBackground": {
       "label": "Reproducir en segundo plano",
       "tips": "Habilita esta opción para continuar la transmisión cuando el reproductor esté oculto."
+    },
+    "debug": {
+      "picker": "Selección de transmisión no disponible en mode de debug. La vista de debug siempre usa la transmisión con el rol de deteccción asignado."
     }
   },
   "cameraSettings": {
