@@ -1,4 +1,6 @@
 {
   "person": "사람",
-  "bicycle": "자전거"
+  "bicycle": "자전거",
+  "car": "차량",
+  "motorcycle": "원동기"
 }

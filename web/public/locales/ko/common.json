@@ -8,7 +8,9 @@
     "1hour": "1시간",
     "24hours": "24시간",
     "30minutes": "30분",
-    "5minutes": "5분"
+    "5minutes": "5분",
+    "untilRestart": "재시작 될 때까지",
+    "ago": "{{timeAgo}} 전"
   },
   "notFound": {
     "title": "404"
