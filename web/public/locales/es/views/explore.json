@@ -192,6 +192,10 @@
     "audioTranscription": {
       "label": "Transcribir",
       "aria": "Solicitar transcripción de audio"
+    },
+    "addTrigger": {
+      "label": "Añadir disparador",
+      "aria": "Añadir disparador para el objeto seguido"
     }
   },
   "dialog": {

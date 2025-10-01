@@ -562,7 +562,8 @@
           "adminDesc": "Acceso completo a todas las funciones.",
           "viewerDesc": "Limitado a paneles en vivo, revisión, exploración y exportaciones únicamente.",
           "viewer": "Espectador",
-          "admin": "Administrador"
+          "admin": "Administrador",
+          "customDesc": "Rol personalizado con acceso a cámaras."
         },
         "select": "Selecciona un rol"
       },
@@ -741,6 +742,99 @@
     "management": {
       "title": "Gestión de disparadores",
       "desc": "Gestionar disparadores para {{camera}}. Usa el tipo de miniatura para activar en miniaturas similares al objeto rastreado seleccionado, y el tipo de descripción para activar en descripciones similares al texto que especifiques."
+    },
+    "addTrigger": "Añadir Disparador",
+    "table": {
+      "name": "Nombre",
+      "type": "Tipo",
+      "content": "Contenido",
+      "threshold": "Umbral",
+      "actions": "Acciones",
+      "noTriggers": "No hay disparadores configurados para esta cámara.",
+      "edit": "Editar",
+      "deleteTrigger": "Eliminar Disparador",
+      "lastTriggered": "Última activación"
+    },
+    "type": {
+      "description": "Descripción",
+      "thumbnail": "Miniatura"
+    },
+    "actions": {
+      "alert": "Marcar como Alerta",
+      "notification": "Enviar Notificación"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Crear Disparador",
+        "desc": "Crear un disparador par la cámara {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Editar Disparador",
+        "desc": "Editar configuractión del disparador para cámara {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Eliminar Disparador"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Administración del rol de visor",
+      "desc": "Administra roles de visor personalizados y sus permisos de acceso a cámaras para esta instancia de Frigate."
+    },
+    "addRole": "Añade un rol",
+    "table": {
+      "role": "Rol",
+      "cameras": "Cámaras",
+      "actions": "Acciones",
+      "noRoles": "No se encontraron roles personalizados.",
+      "editCameras": "Edita Cámaras",
+      "deleteRole": "Eliminar Rol"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rol {{role}} creado exitosamente",
+        "updateCameras": "Cámara actualizada para el rol {{role}}",
+        "deleteRole": "Rol {{role}} eliminado exitosamente",
+        "userRolesUpdated": "{{count}} usuarios asignados a este rol han sido actualizados a 'visor', que tiene acceso a todas las cámaras."
+      },
+      "error": {
+        "createRoleFailed": "Creación de rol fallida: {{errorMessage}}",
+        "updateCamerasFailed": "Actualización de cámaras fallida: {{errorMessage}}",
+        "deleteRoleFailed": "Eliminación de rol fallida: {{errorMessage}}",
+        "userUpdateFailed": "Actualización de roles de usuario fallida: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Crear Nuevo Rol",
+        "desc": "Añadir nuevo rol y especificar permisos de acceso a cámaras."
+      },
+      "deleteRole": {
+        "title": "Eliminar Rol",
+        "deleting": "Eliminando...",
+        "desc": "Esta acción no se puede deshacer. El rol va a ser eliminado permanentemente y usuarios associados serán asignados a rol de 'Visor', que les da acceso a ver todas las cámaras.",
+        "warn": "Estás seguro de que quieres eliminar <strong>{{role}}</strong>?"
+      },
+      "editCameras": {
+        "title": "Editar cámaras de rol",
+        "desc": "Actualizar acceso de cámara para el rol <strong>{{role}}</strong>."
+      },
+      "form": {
+        "role": {
+          "title": "Nombre de rol",
+          "placeholder": "Entre el nombre del rol",
+          "desc": "Solo se permiten letras, números, puntos y guión bajo.",
+          "roleIsRequired": "El nombre del rol es requerido",
+          "roleOnlyInclude": "El nombre del rol solo incluye letras, números, . o _",
+          "roleExists": "Un rol con este nombre ya existe."
+        },
+        "cameras": {
+          "title": "Cámaras",
+          "desc": "Seleccione las cámaras a las que este rol tiene accceso. Al menos una cámara es requerida.",
+          "required": "Al menos una cámara debe ser seleccionada."
+        }
+      }
     }
   }
 }
