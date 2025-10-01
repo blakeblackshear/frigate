@@ -10,6 +10,9 @@
   "toast": {
     "success": {
       "copyToClipboard": "コンフィグをクリップボードにコピー。"
+    },
+    "error": {
+      "savingError": "設定の保存に失敗しました"
     }
   }
 }
