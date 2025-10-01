@@ -1,7 +1,7 @@
 """Tools for determining if an object is stationary."""
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, cast
 
 import cv2
@@ -20,7 +20,7 @@ class StationaryThresholds:
 
     # Objects to apply these thresholds to
     # If None, apply to all objects
-    objects: list[str] = []
+    objects: list[str] = field(default_factory=list)
 
     # Threshold of IoU that causes the object to immediately be considered active
     # Below this threshold, assume object is active
@@ -51,6 +51,7 @@ STATIONARY_OBJECT_THRESHOLDS = StationaryThresholds(
 # Thresholds for objects that are active but can be stationary for longer periods of time
 DYNAMIC_OBJECT_THRESHOLDS = StationaryThresholds(
     objects=["bicycle", "boat", "car", "motorcycle", "tractor", "truck"],
+    active_check_iou=0.75,
     motion_classifier_enabled=True,
 )
 
