@@ -1,6 +1,7 @@
 """Tools for determining if an object is stationary."""
 
 import logging
+from dataclasses import dataclass
 from typing import Any, cast
 
 import cv2
@@ -10,10 +11,61 @@ from scipy.ndimage import gaussian_filter
 logger = logging.getLogger(__name__)
 
 
-THRESHOLD_KNOWN_ACTIVE_IOU = 0.2
-THRESHOLD_STATIONARY_CHECK_IOU = 0.6
-THRESHOLD_ACTIVE_CHECK_IOU = 0.9
-MAX_STATIONARY_HISTORY = 10
+@dataclass
+class StationaryThresholds:
+    """IOU thresholds and history parameters for stationary object classification.
+
+    This allows different sensitivity settings for different object types.
+    """
+
+    # Objects to apply these thresholds to
+    # If None, apply to all objects
+    objects: list[str] | None = None
+
+    # Threshold of IoU that causes the object to immediately be considered active
+    # Below this threshold, assume object is active
+    known_active_iou: float = 0.2
+
+    # IOU threshold for checking if stationary object has moved
+    # If mean and median IOU drops below this, assume object is no longer stationary
+    stationary_check_iou: float = 0.6
+
+    # IOU threshold for checking if active object has changed position
+    # Higher threshold makes it more difficult for the object to be considered stationary
+    active_check_iou: float = 0.9
+
+    # Maximum number of bounding boxes to keep in stationary history
+    max_stationary_history: int = 10
+
+    # Whether to use the motion classifier
+    motion_classifier_enabled: bool = False
+
+
+# Thresholds for objects that are expected to be stationary
+STATIONARY_OBJECT_THRESHOLDS = StationaryThresholds(
+    objects=["bbq_grill", "package", "waste_bin"],
+    known_active_iou=0.0,
+    motion_classifier_enabled=True,
+)
+
+# Thresholds for objects that are active but can be stationary for longer periods of time
+DYNAMIC_OBJECT_THRESHOLDS = StationaryThresholds(
+    objects=["bicycle", "boat", "car", "motorcycle", "tractor", "truck"],
+    motion_classifier_enabled=True,
+)
+
+
+@staticmethod
+def get_stationary_threshold(label: str) -> StationaryThresholds:
+    """Get the stationary thresholds for a given object label."""
+
+    if label in STATIONARY_OBJECT_THRESHOLDS.objects:
+        return STATIONARY_OBJECT_THRESHOLDS
+
+    if label in DYNAMIC_OBJECT_THRESHOLDS.objects:
+        return DYNAMIC_OBJECT_THRESHOLDS
+
+    return StationaryThresholds()
 
 
 class StationaryMotionClassifier:

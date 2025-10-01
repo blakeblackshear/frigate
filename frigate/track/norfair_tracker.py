@@ -17,7 +17,11 @@ from frigate.camera import PTZMetrics
 from frigate.config import CameraConfig
 from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
-from frigate.track.stationary_classifier import StationaryMotionClassifier
+from frigate.track.stationary_classifier import (
+    StationaryMotionClassifier,
+    StationaryThresholds,
+    get_stationary_threshold,
+)
 from frigate.util.image import (
     SharedMemoryFrameManager,
     get_histogram,
@@ -26,12 +30,6 @@ from frigate.util.image import (
 from frigate.util.object import average_boxes, median_of_boxes
 
 logger = logging.getLogger(__name__)
-
-
-THRESHOLD_KNOWN_ACTIVE_IOU = 0.2
-THRESHOLD_STATIONARY_CHECK_IOU = 0.6
-THRESHOLD_ACTIVE_CHECK_IOU = 0.9
-MAX_STATIONARY_HISTORY = 10
 
 
 # Normalizes distance from estimate relative to object size
@@ -328,6 +326,7 @@ class NorfairTracker(ObjectTracker):
         id: str,
         box: list[int],
         stationary: bool,
+        thresholds: StationaryThresholds,
         yuv_frame: np.ndarray | None,
     ) -> bool:
         def reset_position(xmin: int, ymin: int, xmax: int, ymax: int) -> None:
@@ -346,9 +345,9 @@ class NorfairTracker(ObjectTracker):
         position = self.positions[id]
         self.stationary_box_history[id].append(box)
 
-        if len(self.stationary_box_history[id]) > MAX_STATIONARY_HISTORY:
+        if len(self.stationary_box_history[id]) > thresholds.max_stationary_history:
             self.stationary_box_history[id] = self.stationary_box_history[id][
-                -MAX_STATIONARY_HISTORY:
+                -thresholds.max_stationary_history :
             ]
 
         avg_box = average_boxes(self.stationary_box_history[id])
@@ -367,7 +366,7 @@ class NorfairTracker(ObjectTracker):
 
         # object has minimal or zero iou
         # assume object is active
-        if avg_iou < THRESHOLD_KNOWN_ACTIVE_IOU:
+        if avg_iou < thresholds.known_active_iou:
             if stationary and yuv_frame is not None:
                 if not self.stationary_classifier.evaluate(
                     id, yuv_frame, cast(tuple[int, int, int, int], tuple(box))
@@ -379,7 +378,9 @@ class NorfairTracker(ObjectTracker):
                 return False
 
         threshold = (
-            THRESHOLD_STATIONARY_CHECK_IOU if stationary else THRESHOLD_ACTIVE_CHECK_IOU
+            thresholds.stationary_check_iou
+            if stationary
+            else thresholds.active_check_iou
         )
 
         # object has iou below threshold, check median and optionally crop similarity
@@ -447,6 +448,7 @@ class NorfairTracker(ObjectTracker):
         self,
         track_id: str,
         obj: dict[str, Any],
+        thresholds: StationaryThresholds,
         yuv_frame: np.ndarray | None,
     ) -> None:
         id = self.track_id_map[track_id]
@@ -456,7 +458,7 @@ class NorfairTracker(ObjectTracker):
             >= self.detect_config.stationary.threshold
         )
         # update the motionless count if the object has not moved to a new position
-        if self.update_position(id, obj["box"], stationary, yuv_frame):
+        if self.update_position(id, obj["box"], stationary, thresholds, yuv_frame):
             self.tracked_objects[id]["motionless_count"] += 1
             if self.is_expired(id):
                 self.deregister(id, track_id)
@@ -502,9 +504,9 @@ class NorfairTracker(ObjectTracker):
         detections_by_type: dict[str, list[Detection]] = {}
         yuv_frame: np.ndarray | None = None
 
-        if self.ptz_metrics.autotracker_enabled.value or (
-            self.detect_config.stationary.classifier
-            and any(obj[0] == "car" for obj in detections)
+        if (
+            self.ptz_metrics.autotracker_enabled.value
+            or self.detect_config.stationary.classifier
         ):
             yuv_frame = self.frame_manager.get(
                 frame_name, self.camera_config.frame_shape_yuv
@@ -614,10 +616,12 @@ class NorfairTracker(ObjectTracker):
                     self.tracked_objects[id]["estimate"] = new_obj["estimate"]
             # else update it
             else:
+                thresholds = get_stationary_threshold(new_obj["label"])
                 self.update(
                     str(t.global_id),
                     new_obj,
-                    yuv_frame if new_obj["label"] == "car" else None,
+                    thresholds,
+                    yuv_frame if thresholds.motion_classifier_enabled else None,
                 )
 
         # clear expired tracks
