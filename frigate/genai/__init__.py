@@ -234,9 +234,9 @@ Rules for the report:
     ) -> Optional[str]:
         """Generate a description for the frame."""
         try:
-            prompt = camera_config.genai.object_prompts.get(
+            prompt = camera_config.objects.genai.object_prompts.get(
                 event.label,
-                camera_config.genai.prompt,
+                camera_config.objects.genai.prompt,
             ).format(**model_to_dict(event))
         except KeyError as e:
             logger.error(f"Invalid key in GenAI prompt: {e}")
