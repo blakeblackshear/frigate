@@ -54,3 +54,9 @@ class OllamaClient(GenAIClient):
         except (TimeoutException, ResponseError) as e:
             logger.warning("Ollama returned an error: %s", str(e))
             return None
+
+    def get_context_size(self) -> int:
+        """Get the context window size for Ollama."""
+        return self.genai_config.provider_options.get("options", {}).get(
+            "num_ctx", 4096
+        )

@@ -66,3 +66,8 @@ class OpenAIClient(GenAIClient):
         except (TimeoutException, Exception) as e:
             logger.warning("OpenAI returned an error: %s", str(e))
             return None
+
+    def get_context_size(self) -> int:
+        """Get the context window size for OpenAI."""
+        # OpenAI GPT-4 Vision models have 128K token context window
+        return 128000

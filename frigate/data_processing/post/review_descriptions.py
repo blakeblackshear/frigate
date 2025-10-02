@@ -43,6 +43,21 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         self.review_descs_dps = EventsPerSecond()
         self.review_descs_dps.start()
 
+    def calculate_frame_count(self) -> int:
+        """Calculate optimal number of frames based on context size."""
+        # With our preview images (height of 180px) each image should be ~100 tokens per image
+        # We want to be conservative to not have too long of query times with too many images
+        context_size = self.genai_client.get_context_size()
+
+        if context_size > 10000:
+            return 20
+        elif context_size > 6000:
+            return 16
+        elif context_size > 4000:
+            return 12
+        else:
+            return 8
+
     def process_data(self, data, data_type):
         self.metrics.review_desc_dps.value = self.review_descs_dps.eps()
 
@@ -176,7 +191,6 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         camera: str,
         start_time: float,
         end_time: float,
-        desired_frame_count: int = 12,
     ) -> list[str]:
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
         file_start = f"preview_{camera}"
@@ -203,6 +217,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             all_frames.append(os.path.join(preview_dir, file))
 
         frame_count = len(all_frames)
+        desired_frame_count = self.calculate_frame_count()
+
         if frame_count <= desired_frame_count:
             return all_frames
 
@@ -235,7 +251,7 @@ def run_analysis(
         "start": datetime.datetime.fromtimestamp(final_data["start_time"]).strftime(
             "%A, %I:%M %p"
         ),
-        "duration": final_data["end_time"] - final_data["start_time"],
+        "duration": round(final_data["end_time"] - final_data["start_time"]),
     }
 
     objects = []

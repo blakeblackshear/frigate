@@ -53,3 +53,8 @@ class GeminiClient(GenAIClient):
             # No description was generated
             return None
         return description
+
+    def get_context_size(self) -> int:
+        """Get the context window size for Gemini."""
+        # Gemini Pro Vision has a 1M token context window
+        return 1000000
