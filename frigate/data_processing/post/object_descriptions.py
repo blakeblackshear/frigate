@@ -7,6 +7,7 @@ import threading
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import cv2
 import numpy as np
 from peewee import DoesNotExist
 
@@ -158,7 +159,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         )
 
         if event.has_snapshot and source == "snapshot":
-            snapshot_image = self._read_and_crop_snapshot(event, camera_config)
+            snapshot_image = self._read_and_crop_snapshot(event)
             if not snapshot_image:
                 return
 
@@ -203,11 +204,50 @@ class ObjectDescriptionProcessor(PostProcessorApi):
             )
         return None
 
+    def _read_and_crop_snapshot(self, event: Event) -> bytes | None:
+        """Read, decode, and crop the snapshot image."""
+
+        snapshot_file = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg")
+
+        if not os.path.isfile(snapshot_file):
+            logger.error(
+                f"Cannot load snapshot for {event.id}, file not found: {snapshot_file}"
+            )
+            return None
+
+        try:
+            with open(snapshot_file, "rb") as image_file:
+                snapshot_image = image_file.read()
+
+                img = cv2.imdecode(
+                    np.frombuffer(snapshot_image, dtype=np.int8),
+                    cv2.IMREAD_COLOR,
+                )
+
+                # Crop snapshot based on region
+                # provide full image if region doesn't exist (manual events)
+                height, width = img.shape[:2]
+                x1_rel, y1_rel, width_rel, height_rel = event.data.get(
+                    "region", [0, 0, 1, 1]
+                )
+                x1, y1 = int(x1_rel * width), int(y1_rel * height)
+
+                cropped_image = img[
+                    y1 : y1 + int(height_rel * height),
+                    x1 : x1 + int(width_rel * width),
+                ]
+
+                _, buffer = cv2.imencode(".jpg", cropped_image)
+
+                return buffer.tobytes()
+        except Exception:
+            return None
+
     def _process_genai_description(
         self, event: Event, camera_config: CameraConfig, thumbnail
     ) -> None:
         if event.has_snapshot and camera_config.objects.genai.use_snapshot:
-            snapshot_image = self._read_and_crop_snapshot(event, camera_config)
+            snapshot_image = self._read_and_crop_snapshot(event)
             if not snapshot_image:
                 return
 

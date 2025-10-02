@@ -3,13 +3,10 @@
 import base64
 import datetime
 import logging
-import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
-import cv2
-import numpy as np
 from peewee import DoesNotExist
 
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
@@ -34,9 +31,6 @@ from frigate.config.camera.camera import CameraTypeEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
-)
-from frigate.const import (
-    CLIPS_DIR,
 )
 from frigate.data_processing.common.license_plate.model import (
     LicensePlateModelRunner,
@@ -589,42 +583,3 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         self.embeddings.embed_thumbnail(event_id, thumbnail)
-
-    def _read_and_crop_snapshot(self, event: Event, camera_config) -> bytes | None:
-        """Read, decode, and crop the snapshot image."""
-
-        snapshot_file = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg")
-
-        if not os.path.isfile(snapshot_file):
-            logger.error(
-                f"Cannot load snapshot for {event.id}, file not found: {snapshot_file}"
-            )
-            return None
-
-        try:
-            with open(snapshot_file, "rb") as image_file:
-                snapshot_image = image_file.read()
-
-                img = cv2.imdecode(
-                    np.frombuffer(snapshot_image, dtype=np.int8),
-                    cv2.IMREAD_COLOR,
-                )
-
-                # Crop snapshot based on region
-                # provide full image if region doesn't exist (manual events)
-                height, width = img.shape[:2]
-                x1_rel, y1_rel, width_rel, height_rel = event.data.get(
-                    "region", [0, 0, 1, 1]
-                )
-                x1, y1 = int(x1_rel * width), int(y1_rel * height)
-
-                cropped_image = img[
-                    y1 : y1 + int(height_rel * height),
-                    x1 : x1 + int(width_rel * width),
-                ]
-
-                _, buffer = cv2.imencode(".jpg", cropped_image)
-
-                return buffer.tobytes()
-        except Exception:
-            return None
