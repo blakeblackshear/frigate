@@ -995,7 +995,26 @@ def get_histogram(image, x_min, y_min, x_max, y_max):
     return cv2.normalize(hist, hist).flatten()
 
 
-def ensure_jpeg_bytes(image_data):
+def create_thumbnail(
+    yuv_frame: np.ndarray, box: tuple[int, int, int, int], height=500
+) -> Optional[bytes]:
+    """Return jpg thumbnail of a region of the frame."""
+    frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2BGR_I420)
+    region = calculate_region(
+        frame.shape, box[0], box[1], box[2], box[3], height, multiplier=1.4
+    )
+    frame = frame[region[1] : region[3], region[0] : region[2]]
+    width = int(height * frame.shape[1] / frame.shape[0])
+    frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
+    ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+
+    if ret:
+        return jpg.tobytes()
+
+    return None
+
+
+def ensure_jpeg_bytes(image_data: bytes) -> bytes:
     """Ensure image data is jpeg bytes for genai"""
     try:
         img_array = np.frombuffer(image_data, dtype=np.uint8)

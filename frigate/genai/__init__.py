@@ -32,7 +32,7 @@ def register_genai_provider(key: GenAIProviderEnum):
 class GenAIClient:
     """Generative AI client for Frigate."""
 
-    def __init__(self, genai_config: GenAIConfig, timeout: int = 60) -> None:
+    def __init__(self, genai_config: GenAIConfig, timeout: int = 120) -> None:
         self.genai_config: GenAIConfig = genai_config
         self.timeout = timeout
         self.provider = self._init_provider()

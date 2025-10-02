@@ -361,6 +361,14 @@ def stats_snapshot(
                 embeddings_metrics.review_desc_dps.value, 2
             )
 
+        if embeddings_metrics.object_desc_speed.value > 0.0:
+            stats["embeddings"]["object_description_speed"] = round(
+                embeddings_metrics.object_desc_speed.value * 1000, 2
+            )
+            stats["embeddings"]["object_descriptions"] = round(
+                embeddings_metrics.object_desc_dps.value, 2
+            )
+
         for key in embeddings_metrics.classification_speeds.keys():
             stats["embeddings"][f"{key}_classification_speed"] = round(
                 embeddings_metrics.classification_speeds[key].value * 1000, 2
