@@ -235,7 +235,7 @@ def run_analysis(
         "start": datetime.datetime.fromtimestamp(final_data["start_time"]).strftime(
             "%A, %I:%M %p"
         ),
-        "duration": final_data["end_time"] - final_data["start_time"],
+        "duration": round(final_data["end_time"] - final_data["start_time"]),
     }
 
     objects = []
