@@ -46,7 +46,14 @@ import { FaceLibraryData, RecognizedFaceData } from "@/types/face";
 import { FaceRecognitionConfig, FrigateConfig } from "@/types/frigateConfig";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import {
@@ -263,16 +270,17 @@ export default function FaceLibrary() {
 
   // keyboard
 
+  const contentRef = useRef<HTMLDivElement | null>(null);
   useKeyboardListener(
-    ["a", "Escape"],
+    ["a", "Escape", "ArrowDown", "ArrowUp", "PageDown", "PageUp"],
     (key, modifiers) => {
-      if (modifiers.repeat || !modifiers.down) {
+      if (!modifiers.down) {
         return;
       }
 
       switch (key) {
         case "a":
-          if (modifiers.ctrl) {
+          if (modifiers.ctrl && !modifiers.repeat) {
             if (selectedFaces.length) {
               setSelectedFaces([]);
             } else {
@@ -284,6 +292,30 @@ export default function FaceLibrary() {
           break;
         case "Escape":
           setSelectedFaces([]);
+          break;
+        case "ArrowDown":
+          contentRef.current?.scrollBy({
+            top: 100,
+            behavior: "smooth",
+          });
+          break;
+        case "ArrowUp":
+          contentRef.current?.scrollBy({
+            top: -100,
+            behavior: "smooth",
+          });
+          break;
+        case "PageDown":
+          contentRef.current?.scrollBy({
+            top: contentRef.current.clientHeight / 2,
+            behavior: "smooth",
+          });
+          break;
+        case "PageUp":
+          contentRef.current?.scrollBy({
+            top: -contentRef.current.clientHeight / 2,
+            behavior: "smooth",
+          });
           break;
       }
     },
@@ -408,6 +440,7 @@ export default function FaceLibrary() {
         (pageToggle == "train" ? (
           <TrainingGrid
             config={config}
+            contentRef={contentRef}
             attemptImages={trainImages}
             faceNames={faces}
             selectedFaces={selectedFaces}
@@ -417,6 +450,7 @@ export default function FaceLibrary() {
           />
         ) : (
           <FaceGrid
+            contentRef={contentRef}
             faceImages={faceImages}
             pageToggle={pageToggle}
             selectedFaces={selectedFaces}
@@ -609,6 +643,7 @@ function LibrarySelector({
 
 type TrainingGridProps = {
   config: FrigateConfig;
+  contentRef: MutableRefObject<HTMLDivElement | null>;
   attemptImages: string[];
   faceNames: string[];
   selectedFaces: string[];
@@ -618,6 +653,7 @@ type TrainingGridProps = {
 };
 function TrainingGrid({
   config,
+  contentRef,
   attemptImages,
   faceNames,
   selectedFaces,
@@ -701,7 +737,10 @@ function TrainingGrid({
         setInputFocused={setInputFocused}
       />
 
-      <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
+      <div
+        ref={contentRef}
+        className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
+      >
         {Object.entries(faceGroups).map(([key, group]) => {
           const event = events?.find((ev) => ev.id == key);
           return (
@@ -1039,6 +1078,7 @@ function FaceAttempt({
 }
 
 type FaceGridProps = {
+  contentRef: MutableRefObject<HTMLDivElement | null>;
   faceImages: string[];
   pageToggle: string;
   selectedFaces: string[];
@@ -1046,6 +1086,7 @@ type FaceGridProps = {
   onDelete: (name: string, ids: string[]) => void;
 };
 function FaceGrid({
+  contentRef,
   faceImages,
   pageToggle,
   selectedFaces,
@@ -1070,6 +1111,7 @@ function FaceGrid({
 
   return (
     <div
+      ref={contentRef}
       className={cn(
         "scrollbar-container gap-2 overflow-y-scroll p-1",
         isDesktop ? "flex flex-wrap" : "grid grid-cols-2 md:grid-cols-4",

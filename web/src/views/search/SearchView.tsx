@@ -314,7 +314,7 @@ export default function SearchView({
 
       switch (key) {
         case "a":
-          if (modifiers.ctrl) {
+          if (modifiers.ctrl && !modifiers.repeat) {
             onSelectAllObjects();
           }
           break;
@@ -335,7 +335,6 @@ export default function SearchView({
             setSearchDetail(uniqueResults[newIndex]);
           }
           break;
-
         case "ArrowRight":
           if (uniqueResults.length > 0) {
             const currentIndex = searchDetail
@@ -351,6 +350,18 @@ export default function SearchView({
 
             setSearchDetail(uniqueResults[newIndex]);
           }
+          break;
+        case "ArrowDown":
+          contentRef.current?.scrollBy({
+            top: 100,
+            behavior: "smooth",
+          });
+          break;
+        case "ArrowUp":
+          contentRef.current?.scrollBy({
+            top: -100,
+            behavior: "smooth",
+          });
           break;
         case "PageDown":
           contentRef.current?.scrollBy({
@@ -370,7 +381,15 @@ export default function SearchView({
   );
 
   useKeyboardListener(
-    ["a", "ArrowLeft", "ArrowRight", "PageDown", "PageUp"],
+    [
+      "a",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "PageDown",
+      "PageUp",
+    ],
     onKeyboardShortcut,
     !inputFocused,
   );

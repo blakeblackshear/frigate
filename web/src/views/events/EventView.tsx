@@ -650,42 +650,57 @@ function DetectionReview({
 
   // keyboard
 
-  useKeyboardListener(["a", "r", "PageDown", "PageUp"], (key, modifiers) => {
-    if (modifiers.repeat || !modifiers.down) {
-      return;
-    }
+  useKeyboardListener(
+    ["a", "r", "ArrowDown", "ArrowUp", "PageDown", "PageUp"],
+    (key, modifiers) => {
+      if (!modifiers.down) {
+        return;
+      }
 
-    switch (key) {
-      case "a":
-        if (modifiers.ctrl) {
-          onSelectAllReviews();
-        }
-        break;
-      case "r":
-        if (selectedReviews.length > 0) {
-          currentItems?.forEach((item) => {
-            if (selectedReviews.includes(item.id)) {
-              item.has_been_reviewed = true;
-              markItemAsReviewed(item);
-            }
+      switch (key) {
+        case "a":
+          if (modifiers.ctrl && !modifiers.repeat) {
+            onSelectAllReviews();
+          }
+          break;
+        case "r":
+          if (selectedReviews.length > 0 && !modifiers.repeat) {
+            currentItems?.forEach((item) => {
+              if (selectedReviews.includes(item.id)) {
+                item.has_been_reviewed = true;
+                markItemAsReviewed(item);
+              }
+            });
+            setSelectedReviews([]);
+          }
+          break;
+        case "ArrowDown":
+          contentRef.current?.scrollBy({
+            top: 100,
+            behavior: "smooth",
           });
-          setSelectedReviews([]);
-        }
-        break;
-      case "PageDown":
-        contentRef.current?.scrollBy({
-          top: contentRef.current.clientHeight / 2,
-          behavior: "smooth",
-        });
-        break;
-      case "PageUp":
-        contentRef.current?.scrollBy({
-          top: -contentRef.current.clientHeight / 2,
-          behavior: "smooth",
-        });
-        break;
-    }
-  });
+          break;
+        case "ArrowUp":
+          contentRef.current?.scrollBy({
+            top: -100,
+            behavior: "smooth",
+          });
+          break;
+        case "PageDown":
+          contentRef.current?.scrollBy({
+            top: contentRef.current.clientHeight / 2,
+            behavior: "smooth",
+          });
+          break;
+        case "PageUp":
+          contentRef.current?.scrollBy({
+            top: -contentRef.current.clientHeight / 2,
+            behavior: "smooth",
+          });
+          break;
+      }
+    },
+  );
 
   return (
     <>
