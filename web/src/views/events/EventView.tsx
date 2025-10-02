@@ -651,7 +651,7 @@ function DetectionReview({
   // keyboard
 
   useKeyboardListener(
-    ["a", "r", "ArrowDown", "ArrowUp", "PageDown", "PageUp"],
+    ["a", "r", "Escape", "ArrowDown", "ArrowUp", "PageDown", "PageUp"],
     (key, modifiers) => {
       if (!modifiers.down) {
         return true;
@@ -676,6 +676,9 @@ function DetectionReview({
             return true;
           }
           break;
+        case "Escape":
+          setSelectedReviews([]);
+          return true;
         case "ArrowDown":
           contentRef.current?.scrollBy({
             top: 100,
