@@ -323,6 +323,9 @@ export default function SearchView({
             return true;
           }
           break;
+        case "Escape":
+          setSelectedObjects([]);
+          return true;
         case "ArrowLeft":
           if (uniqueResults.length > 0) {
             const currentIndex = searchDetail
@@ -390,6 +393,7 @@ export default function SearchView({
   useKeyboardListener(
     [
       "a",
+      "Escape",
       "ArrowDown",
       "ArrowLeft",
       "ArrowRight",
