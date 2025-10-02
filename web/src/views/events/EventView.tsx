@@ -673,8 +673,9 @@ function DetectionReview({
               }
             });
             setSelectedReviews([]);
+            return true;
           }
-          return true;
+          break;
         case "ArrowDown":
           contentRef.current?.scrollBy({
             top: 100,
