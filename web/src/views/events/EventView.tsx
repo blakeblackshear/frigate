@@ -651,7 +651,7 @@ function DetectionReview({
   // keyboard
 
   useKeyboardListener(
-    ["a", "r", "Escape", "ArrowDown", "ArrowUp", "PageDown", "PageUp"],
+    ["a", "r", "Escape"],
     (key, modifiers) => {
       if (!modifiers.down) {
         return true;
@@ -679,34 +679,11 @@ function DetectionReview({
         case "Escape":
           setSelectedReviews([]);
           return true;
-        case "ArrowDown":
-          contentRef.current?.scrollBy({
-            top: 100,
-            behavior: "smooth",
-          });
-          return true;
-        case "ArrowUp":
-          contentRef.current?.scrollBy({
-            top: -100,
-            behavior: "smooth",
-          });
-          return true;
-        case "PageDown":
-          contentRef.current?.scrollBy({
-            top: contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          return true;
-        case "PageUp":
-          contentRef.current?.scrollBy({
-            top: -contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          return true;
       }
 
       return false;
     },
+    contentRef,
   );
 
   return (

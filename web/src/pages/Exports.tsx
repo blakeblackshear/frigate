@@ -113,43 +113,7 @@ function Exports() {
   // Keyboard Listener
 
   const contentRef = useRef<HTMLDivElement | null>(null);
-  useKeyboardListener(
-    ["ArrowDown", "ArrowUp", "PageDown", "PageUp"],
-    (key, modifiers) => {
-      if (!modifiers.down) {
-        return true;
-      }
-
-      switch (key) {
-        case "ArrowDown":
-          contentRef.current?.scrollBy({
-            top: 100,
-            behavior: "smooth",
-          });
-          break;
-        case "ArrowUp":
-          contentRef.current?.scrollBy({
-            top: -100,
-            behavior: "smooth",
-          });
-          break;
-        case "PageDown":
-          contentRef.current?.scrollBy({
-            top: contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          break;
-        case "PageUp":
-          contentRef.current?.scrollBy({
-            top: -contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          break;
-      }
-
-      return true;
-    },
-  );
+  useKeyboardListener([], undefined, contentRef);
 
   return (
     <div className="flex size-full flex-col gap-2 overflow-hidden px-1 pt-2 md:p-2">

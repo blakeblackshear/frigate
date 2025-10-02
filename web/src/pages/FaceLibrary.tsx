@@ -270,7 +270,7 @@ export default function FaceLibrary() {
 
   const contentRef = useRef<HTMLDivElement | null>(null);
   useKeyboardListener(
-    ["a", "Escape", "ArrowDown", "ArrowUp", "PageDown", "PageUp"],
+    ["a", "Escape"],
     (key, modifiers) => {
       if (!modifiers.down) {
         return true;
@@ -293,34 +293,11 @@ export default function FaceLibrary() {
         case "Escape":
           setSelectedFaces([]);
           return true;
-        case "ArrowDown":
-          contentRef.current?.scrollBy({
-            top: 100,
-            behavior: "smooth",
-          });
-          return true;
-        case "ArrowUp":
-          contentRef.current?.scrollBy({
-            top: -100,
-            behavior: "smooth",
-          });
-          return true;
-        case "PageDown":
-          contentRef.current?.scrollBy({
-            top: contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          break;
-        case "PageUp":
-          contentRef.current?.scrollBy({
-            top: -contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          return true;
       }
 
       return false;
     },
+    contentRef,
   );
 
   useEffect(() => {

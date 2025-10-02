@@ -359,30 +359,6 @@ export default function SearchView({
             setSearchDetail(uniqueResults[newIndex]);
           }
           return true;
-        case "ArrowDown":
-          contentRef.current?.scrollBy({
-            top: 100,
-            behavior: "smooth",
-          });
-          return true;
-        case "ArrowUp":
-          contentRef.current?.scrollBy({
-            top: -100,
-            behavior: "smooth",
-          });
-          return true;
-        case "PageDown":
-          contentRef.current?.scrollBy({
-            top: contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          return true;
-        case "PageUp":
-          contentRef.current?.scrollBy({
-            top: -contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          return true;
       }
 
       return false;
@@ -391,17 +367,9 @@ export default function SearchView({
   );
 
   useKeyboardListener(
-    [
-      "a",
-      "Escape",
-      "ArrowDown",
-      "ArrowLeft",
-      "ArrowRight",
-      "ArrowUp",
-      "PageDown",
-      "PageUp",
-    ],
+    ["a", "Escape", "ArrowLeft", "ArrowRight"],
     onKeyboardShortcut,
+    contentRef,
   );
 
   // scroll into view
