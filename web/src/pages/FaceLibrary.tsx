@@ -109,6 +109,9 @@ export default function FaceLibrary() {
   const [upload, setUpload] = useState(false);
   const [addFace, setAddFace] = useState(false);
 
+  // input focus for keyboard shortcuts
+  const [inputFocused, setInputFocused] = useState(false);
+
   const onUploadImage = useCallback(
     (file: File) => {
       const formData = new FormData();
@@ -260,28 +263,32 @@ export default function FaceLibrary() {
 
   // keyboard
 
-  useKeyboardListener(["a", "Escape"], (key, modifiers) => {
-    if (modifiers.repeat || !modifiers.down) {
-      return;
-    }
+  useKeyboardListener(
+    ["a", "Escape"],
+    (key, modifiers) => {
+      if (modifiers.repeat || !modifiers.down) {
+        return;
+      }
 
-    switch (key) {
-      case "a":
-        if (modifiers.ctrl) {
-          if (selectedFaces.length) {
-            setSelectedFaces([]);
-          } else {
-            setSelectedFaces([
-              ...(pageToggle === "train" ? trainImages : faceImages),
-            ]);
+      switch (key) {
+        case "a":
+          if (modifiers.ctrl) {
+            if (selectedFaces.length) {
+              setSelectedFaces([]);
+            } else {
+              setSelectedFaces([
+                ...(pageToggle === "train" ? trainImages : faceImages),
+              ]);
+            }
           }
-        }
-        break;
-      case "Escape":
-        setSelectedFaces([]);
-        break;
-    }
-  });
+          break;
+        case "Escape":
+          setSelectedFaces([]);
+          break;
+      }
+    },
+    !inputFocused,
+  );
 
   useEffect(() => {
     setSelectedFaces([]);
@@ -406,6 +413,7 @@ export default function FaceLibrary() {
             selectedFaces={selectedFaces}
             onClickFaces={onClickFaces}
             onRefresh={refreshFaces}
+            setInputFocused={setInputFocused}
           />
         ) : (
           <FaceGrid
@@ -606,6 +614,7 @@ type TrainingGridProps = {
   selectedFaces: string[];
   onClickFaces: (images: string[], ctrl: boolean) => void;
   onRefresh: () => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function TrainingGrid({
   config,
@@ -614,6 +623,7 @@ function TrainingGrid({
   selectedFaces,
   onClickFaces,
   onRefresh,
+  setInputFocused,
 }: TrainingGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
 
@@ -688,7 +698,7 @@ function TrainingGrid({
         setSimilarity={undefined}
         setSearchPage={setDialogTab}
         setSearch={(search) => setSelectedEvent(search as unknown as Event)}
-        setInputFocused={() => {}}
+        setInputFocused={setInputFocused}
       />
 
       <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
@@ -1042,6 +1052,8 @@ function FaceGrid({
   onClickFaces,
   onDelete,
 }: FaceGridProps) {
+  const { t } = useTranslation(["views/faceLibrary"]);
+
   const sortedFaces = useMemo(
     () => (faceImages || []).sort().reverse(),
     [faceImages],
@@ -1051,7 +1063,7 @@ function FaceGrid({
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderCheck className="size-16" />
-        (t("nofaces"))
+        {t("nofaces")}
       </div>
     );
   }
