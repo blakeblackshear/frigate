@@ -45,14 +45,16 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
     def calculate_frame_count(self) -> int:
         """Calculate optimal number of frames based on context size."""
+        # With our preview images (height of 180px) each image should be ~100 tokens per image
+        # We want to be conservative to not have too long of query times with too many images
         context_size = self.genai_client.get_context_size()
 
         if context_size > 10000:
-            return 18
+            return 20
         elif context_size > 6000:
-            return 14
+            return 16
         elif context_size > 4000:
-            return 10
+            return 12
         else:
             return 8
 
