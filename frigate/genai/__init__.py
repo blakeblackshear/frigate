@@ -253,6 +253,10 @@ Rules for the report:
         """Submit a request to the provider."""
         return None
 
+    def get_context_size(self) -> int:
+        """Get the context window size for this provider in tokens."""
+        return 4096
+
 
 def get_genai_client(config: FrigateConfig) -> Optional[GenAIClient]:
     """Get the GenAI client."""
