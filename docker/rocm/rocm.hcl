@@ -11,6 +11,8 @@ variable "HSA_OVERRIDE" {
   default = "1"
 }
 
+target "docker-metadata-action" {}
+
 target wget {
   dockerfile = "docker/main/Dockerfile"
   platforms = ["linux/amd64"]
@@ -31,6 +33,7 @@ target rootfs {
 
 target rocm {
   dockerfile = "docker/rocm/Dockerfile"
+  inherits = ["docker-metadata-action"]
   contexts = {
     deps = "target:deps",
     wget = "target:wget",
