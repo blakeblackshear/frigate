@@ -46,7 +46,14 @@ import { FaceLibraryData, RecognizedFaceData } from "@/types/face";
 import { FaceRecognitionConfig, FrigateConfig } from "@/types/frigateConfig";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import {
@@ -110,8 +117,6 @@ export default function FaceLibrary() {
   const [addFace, setAddFace] = useState(false);
 
   // input focus for keyboard shortcuts
-  const [inputFocused, setInputFocused] = useState(false);
-
   const onUploadImage = useCallback(
     (file: File) => {
       const formData = new FormData();
@@ -263,16 +268,17 @@ export default function FaceLibrary() {
 
   // keyboard
 
+  const contentRef = useRef<HTMLDivElement | null>(null);
   useKeyboardListener(
     ["a", "Escape"],
     (key, modifiers) => {
-      if (modifiers.repeat || !modifiers.down) {
-        return;
+      if (!modifiers.down) {
+        return true;
       }
 
       switch (key) {
         case "a":
-          if (modifiers.ctrl) {
+          if (modifiers.ctrl && !modifiers.repeat) {
             if (selectedFaces.length) {
               setSelectedFaces([]);
             } else {
@@ -280,14 +286,18 @@ export default function FaceLibrary() {
                 ...(pageToggle === "train" ? trainImages : faceImages),
               ]);
             }
+
+            return true;
           }
           break;
         case "Escape":
           setSelectedFaces([]);
-          break;
+          return true;
       }
+
+      return false;
     },
-    !inputFocused,
+    contentRef,
   );
 
   useEffect(() => {
@@ -408,15 +418,16 @@ export default function FaceLibrary() {
         (pageToggle == "train" ? (
           <TrainingGrid
             config={config}
+            contentRef={contentRef}
             attemptImages={trainImages}
             faceNames={faces}
             selectedFaces={selectedFaces}
             onClickFaces={onClickFaces}
             onRefresh={refreshFaces}
-            setInputFocused={setInputFocused}
           />
         ) : (
           <FaceGrid
+            contentRef={contentRef}
             faceImages={faceImages}
             pageToggle={pageToggle}
             selectedFaces={selectedFaces}
@@ -609,21 +620,21 @@ function LibrarySelector({
 
 type TrainingGridProps = {
   config: FrigateConfig;
+  contentRef: MutableRefObject<HTMLDivElement | null>;
   attemptImages: string[];
   faceNames: string[];
   selectedFaces: string[];
   onClickFaces: (images: string[], ctrl: boolean) => void;
   onRefresh: () => void;
-  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function TrainingGrid({
   config,
+  contentRef,
   attemptImages,
   faceNames,
   selectedFaces,
   onClickFaces,
   onRefresh,
-  setInputFocused,
 }: TrainingGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
 
@@ -698,10 +709,13 @@ function TrainingGrid({
         setSimilarity={undefined}
         setSearchPage={setDialogTab}
         setSearch={(search) => setSelectedEvent(search as unknown as Event)}
-        setInputFocused={setInputFocused}
+        setInputFocused={() => {}}
       />
 
-      <div className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1">
+      <div
+        ref={contentRef}
+        className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
+      >
         {Object.entries(faceGroups).map(([key, group]) => {
           const event = events?.find((ev) => ev.id == key);
           return (
@@ -1039,6 +1053,7 @@ function FaceAttempt({
 }
 
 type FaceGridProps = {
+  contentRef: MutableRefObject<HTMLDivElement | null>;
   faceImages: string[];
   pageToggle: string;
   selectedFaces: string[];
@@ -1046,6 +1061,7 @@ type FaceGridProps = {
   onDelete: (name: string, ids: string[]) => void;
 };
 function FaceGrid({
+  contentRef,
   faceImages,
   pageToggle,
   selectedFaces,
@@ -1070,6 +1086,7 @@ function FaceGrid({
 
   return (
     <div
+      ref={contentRef}
       className={cn(
         "scrollbar-container gap-2 overflow-y-scroll p-1",
         isDesktop ? "flex flex-wrap" : "grid grid-cols-2 md:grid-cols-4",

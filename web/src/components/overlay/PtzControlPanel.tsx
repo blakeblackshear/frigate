@@ -83,7 +83,7 @@ export default function PtzControlPanel({
     ],
     (key, modifiers) => {
       if (modifiers.repeat || !key) {
-        return;
+        return true;
       }
 
       if (["1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(key)) {
@@ -95,34 +95,36 @@ export default function PtzControlPanel({
         ) {
           sendPtz(`preset_${ptz.presets[presetNumber - 1]}`);
         }
-        return;
+        return true;
       }
 
       if (!modifiers.down) {
         sendPtz("STOP");
-        return;
+        return true;
       }
 
       switch (key) {
         case "ArrowLeft":
           sendPtz("MOVE_LEFT");
-          break;
+          return true;
         case "ArrowRight":
           sendPtz("MOVE_RIGHT");
-          break;
+          return true;
         case "ArrowUp":
           sendPtz("MOVE_UP");
-          break;
+          return true;
         case "ArrowDown":
           sendPtz("MOVE_DOWN");
-          break;
+          return true;
         case "+":
           sendPtz(modifiers.shift ? "FOCUS_IN" : "ZOOM_IN");
-          break;
+          return true;
         case "-":
           sendPtz(modifiers.shift ? "FOCUS_OUT" : "ZOOM_OUT");
-          break;
+          return true;
       }
+
+      return false;
     },
   );
 

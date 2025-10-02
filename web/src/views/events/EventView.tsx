@@ -650,42 +650,41 @@ function DetectionReview({
 
   // keyboard
 
-  useKeyboardListener(["a", "r", "PageDown", "PageUp"], (key, modifiers) => {
-    if (modifiers.repeat || !modifiers.down) {
-      return;
-    }
+  useKeyboardListener(
+    ["a", "r", "Escape"],
+    (key, modifiers) => {
+      if (!modifiers.down) {
+        return true;
+      }
 
-    switch (key) {
-      case "a":
-        if (modifiers.ctrl) {
-          onSelectAllReviews();
-        }
-        break;
-      case "r":
-        if (selectedReviews.length > 0) {
-          currentItems?.forEach((item) => {
-            if (selectedReviews.includes(item.id)) {
-              item.has_been_reviewed = true;
-              markItemAsReviewed(item);
-            }
-          });
+      switch (key) {
+        case "a":
+          if (modifiers.ctrl && !modifiers.repeat) {
+            onSelectAllReviews();
+            return true;
+          }
+          break;
+        case "r":
+          if (selectedReviews.length > 0 && !modifiers.repeat) {
+            currentItems?.forEach((item) => {
+              if (selectedReviews.includes(item.id)) {
+                item.has_been_reviewed = true;
+                markItemAsReviewed(item);
+              }
+            });
+            setSelectedReviews([]);
+            return true;
+          }
+          break;
+        case "Escape":
           setSelectedReviews([]);
-        }
-        break;
-      case "PageDown":
-        contentRef.current?.scrollBy({
-          top: contentRef.current.clientHeight / 2,
-          behavior: "smooth",
-        });
-        break;
-      case "PageUp":
-        contentRef.current?.scrollBy({
-          top: -contentRef.current.clientHeight / 2,
-          behavior: "smooth",
-        });
-        break;
-    }
-  });
+          return true;
+      }
+
+      return false;
+    },
+    contentRef,
+  );
 
   return (
     <>

@@ -60,7 +60,7 @@ export function GenericVideoPlayer({
     ["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp", " ", "f", "m"],
     (key, modifiers) => {
       if (!modifiers.down || modifiers.repeat) {
-        return;
+        return true;
       }
 
       switch (key) {
@@ -92,6 +92,8 @@ export function GenericVideoPlayer({
           }
           break;
       }
+
+      return true;
     },
   );
 

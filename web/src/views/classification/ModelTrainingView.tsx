@@ -37,7 +37,14 @@ import { cn } from "@/lib/utils";
 import { CustomClassificationModelConfig } from "@/types/frigateConfig";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
@@ -226,30 +233,38 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
 
   // keyboard
 
-  useKeyboardListener(["a", "Escape"], (key, modifiers) => {
-    if (modifiers.repeat || !modifiers.down) {
-      return;
-    }
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  useKeyboardListener(
+    ["a", "Escape"],
+    (key, modifiers) => {
+      if (!modifiers.down) {
+        return true;
+      }
 
-    switch (key) {
-      case "a":
-        if (modifiers.ctrl) {
-          if (selectedImages.length) {
-            setSelectedImages([]);
-          } else {
-            setSelectedImages([
-              ...(pageToggle === "train"
-                ? trainImages || []
-                : dataset?.[pageToggle] || []),
-            ]);
+      switch (key) {
+        case "a":
+          if (modifiers.ctrl && !modifiers.repeat) {
+            if (selectedImages.length) {
+              setSelectedImages([]);
+            } else {
+              setSelectedImages([
+                ...(pageToggle === "train"
+                  ? trainImages || []
+                  : dataset?.[pageToggle] || []),
+              ]);
+            }
+            return true;
           }
-        }
-        break;
-      case "Escape":
-        setSelectedImages([]);
-        break;
-    }
-  });
+          break;
+        case "Escape":
+          setSelectedImages([]);
+          return true;
+      }
+
+      return false;
+    },
+    contentRef,
+  );
 
   useEffect(() => {
     setSelectedImages([]);
@@ -370,6 +385,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       {pageToggle == "train" ? (
         <TrainGrid
           model={model}
+          contentRef={contentRef}
           classes={Object.keys(dataset || {})}
           trainImages={trainImages || []}
           trainFilter={trainFilter}
@@ -380,6 +396,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
         />
       ) : (
         <DatasetGrid
+          contentRef={contentRef}
           modelName={model.name}
           categoryName={pageToggle}
           images={dataset?.[pageToggle] || []}
@@ -579,6 +596,7 @@ function LibrarySelector({
 }
 
 type DatasetGridProps = {
+  contentRef: MutableRefObject<HTMLDivElement | null>;
   modelName: string;
   categoryName: string;
   images: string[];
@@ -587,6 +605,7 @@ type DatasetGridProps = {
   onDelete: (ids: string[]) => void;
 };
 function DatasetGrid({
+  contentRef,
   modelName,
   categoryName,
   images,
@@ -602,7 +621,10 @@ function DatasetGrid({
   );
 
   return (
-    <div className="flex flex-wrap gap-2 overflow-y-auto p-2">
+    <div
+      ref={contentRef}
+      className="scrollbar-container flex flex-wrap gap-2 overflow-y-auto p-2"
+    >
       {classData.map((image) => (
         <div
           className={cn(
@@ -658,6 +680,7 @@ function DatasetGrid({
 
 type TrainGridProps = {
   model: CustomClassificationModelConfig;
+  contentRef: MutableRefObject<HTMLDivElement | null>;
   classes: string[];
   trainImages: string[];
   trainFilter?: TrainFilter;
@@ -668,6 +691,7 @@ type TrainGridProps = {
 };
 function TrainGrid({
   model,
+  contentRef,
   classes,
   trainImages,
   trainFilter,
@@ -726,8 +750,9 @@ function TrainGrid({
 
   return (
     <div
+      ref={contentRef}
       className={cn(
-        "flex flex-wrap gap-2 overflow-y-auto p-2",
+        "scrollbar-container flex flex-wrap gap-2 overflow-y-auto p-2",
         isMobile && "justify-center",
       )}
     >

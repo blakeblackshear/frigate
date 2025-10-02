@@ -56,14 +56,16 @@ function Live() {
 
   useKeyboardListener(["f"], (key, modifiers) => {
     if (!modifiers.down) {
-      return;
+      return true;
     }
 
     switch (key) {
       case "f":
         toggleFullscreen();
-        break;
+        return true;
     }
+
+    return false;
   });
 
   // document title

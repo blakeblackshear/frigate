@@ -308,16 +308,24 @@ export default function SearchView({
 
   const onKeyboardShortcut = useCallback(
     (key: string | null, modifiers: KeyModifiers) => {
-      if (!modifiers.down || !uniqueResults || inputFocused) {
-        return;
+      if (inputFocused) {
+        return false;
+      }
+
+      if (!modifiers.down || !uniqueResults) {
+        return true;
       }
 
       switch (key) {
         case "a":
-          if (modifiers.ctrl) {
+          if (modifiers.ctrl && !modifiers.repeat) {
             onSelectAllObjects();
+            return true;
           }
           break;
+        case "Escape":
+          setSelectedObjects([]);
+          return true;
         case "ArrowLeft":
           if (uniqueResults.length > 0) {
             const currentIndex = searchDetail
@@ -334,8 +342,7 @@ export default function SearchView({
 
             setSearchDetail(uniqueResults[newIndex]);
           }
-          break;
-
+          return true;
         case "ArrowRight":
           if (uniqueResults.length > 0) {
             const currentIndex = searchDetail
@@ -351,28 +358,18 @@ export default function SearchView({
 
             setSearchDetail(uniqueResults[newIndex]);
           }
-          break;
-        case "PageDown":
-          contentRef.current?.scrollBy({
-            top: contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          break;
-        case "PageUp":
-          contentRef.current?.scrollBy({
-            top: -contentRef.current.clientHeight / 2,
-            behavior: "smooth",
-          });
-          break;
+          return true;
       }
+
+      return false;
     },
     [uniqueResults, inputFocused, onSelectAllObjects, searchDetail],
   );
 
   useKeyboardListener(
-    ["a", "ArrowLeft", "ArrowRight", "PageDown", "PageUp"],
+    ["a", "Escape", "ArrowLeft", "ArrowRight"],
     onKeyboardShortcut,
-    !inputFocused,
+    contentRef,
   );
 
   // scroll into view
