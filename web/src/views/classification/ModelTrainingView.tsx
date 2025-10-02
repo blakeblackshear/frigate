@@ -237,13 +237,13 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   useKeyboardListener(
     ["a", "Escape", "ArrowDown", "ArrowUp", "PageDown", "PageUp"],
     (key, modifiers) => {
-      if (modifiers.repeat || !modifiers.down) {
-        return;
+      if (!modifiers.down) {
+        return true;
       }
 
       switch (key) {
         case "a":
-          if (modifiers.ctrl) {
+          if (modifiers.ctrl && !modifiers.repeat) {
             if (selectedImages.length) {
               setSelectedImages([]);
             } else {
@@ -253,36 +253,39 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
                   : dataset?.[pageToggle] || []),
               ]);
             }
+            return true;
           }
           break;
         case "Escape":
           setSelectedImages([]);
-          break;
+          return true;
         case "ArrowDown":
           contentRef.current?.scrollBy({
             top: 100,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "ArrowUp":
           contentRef.current?.scrollBy({
             top: -100,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "PageDown":
           contentRef.current?.scrollBy({
             top: contentRef.current.clientHeight / 2,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "PageUp":
           contentRef.current?.scrollBy({
             top: -contentRef.current.clientHeight / 2,
             behavior: "smooth",
           });
-          break;
+          return true;
       }
+
+      return false;
     },
   );
 

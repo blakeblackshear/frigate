@@ -175,6 +175,8 @@ export default function ReviewDetailDialog({
     if (key == "Esc" && modifiers.down && !modifiers.repeat) {
       setIsOpen(false);
     }
+
+    return true;
   });
 
   const Overlay = isDesktop ? Sheet : MobilePage;

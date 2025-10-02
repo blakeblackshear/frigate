@@ -117,7 +117,7 @@ function Exports() {
     ["ArrowDown", "ArrowUp", "PageDown", "PageUp"],
     (key, modifiers) => {
       if (!modifiers.down) {
-        return;
+        return true;
       }
 
       switch (key) {
@@ -146,6 +146,8 @@ function Exports() {
           });
           break;
       }
+
+      return true;
     },
   );
 

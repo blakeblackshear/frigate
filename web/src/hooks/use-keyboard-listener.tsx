@@ -9,8 +9,7 @@ export type KeyModifiers = {
 
 export default function useKeyboardListener(
   keys: string[],
-  listener: (key: string | null, modifiers: KeyModifiers) => void,
-  preventDefault: boolean = true,
+  listener: (key: string | null, modifiers: KeyModifiers) => boolean,
 ) {
   const keyDownListener = useCallback(
     (e: KeyboardEvent) => {
@@ -27,13 +26,13 @@ export default function useKeyboardListener(
       };
 
       if (keys.includes(e.key)) {
+        const preventDefault = listener(e.key, modifiers);
         if (preventDefault) e.preventDefault();
-        listener(e.key, modifiers);
       } else if (e.key === "Shift" || e.key === "Control" || e.key === "Meta") {
         listener(null, modifiers);
       }
     },
-    [keys, listener, preventDefault],
+    [keys, listener],
   );
 
   const keyUpListener = useCallback(

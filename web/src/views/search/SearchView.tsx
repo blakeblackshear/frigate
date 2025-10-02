@@ -308,14 +308,19 @@ export default function SearchView({
 
   const onKeyboardShortcut = useCallback(
     (key: string | null, modifiers: KeyModifiers) => {
-      if (!modifiers.down || !uniqueResults || inputFocused) {
-        return;
+      if (inputFocused) {
+        return false;
+      }
+
+      if (!modifiers.down || !uniqueResults) {
+        return true;
       }
 
       switch (key) {
         case "a":
           if (modifiers.ctrl && !modifiers.repeat) {
             onSelectAllObjects();
+            return true;
           }
           break;
         case "ArrowLeft":
@@ -334,7 +339,7 @@ export default function SearchView({
 
             setSearchDetail(uniqueResults[newIndex]);
           }
-          break;
+          return true;
         case "ArrowRight":
           if (uniqueResults.length > 0) {
             const currentIndex = searchDetail
@@ -350,32 +355,34 @@ export default function SearchView({
 
             setSearchDetail(uniqueResults[newIndex]);
           }
-          break;
+          return true;
         case "ArrowDown":
           contentRef.current?.scrollBy({
             top: 100,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "ArrowUp":
           contentRef.current?.scrollBy({
             top: -100,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "PageDown":
           contentRef.current?.scrollBy({
             top: contentRef.current.clientHeight / 2,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "PageUp":
           contentRef.current?.scrollBy({
             top: -contentRef.current.clientHeight / 2,
             behavior: "smooth",
           });
-          break;
+          return true;
       }
+
+      return false;
     },
     [uniqueResults, inputFocused, onSelectAllObjects, searchDetail],
   );
@@ -391,7 +398,6 @@ export default function SearchView({
       "PageUp",
     ],
     onKeyboardShortcut,
-    !inputFocused,
   );
 
   // scroll into view

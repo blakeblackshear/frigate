@@ -309,21 +309,25 @@ export default function LiveCameraView({
 
   useKeyboardListener(["m"], (key, modifiers) => {
     if (!modifiers.down) {
-      return;
+      return true;
     }
 
     switch (key) {
       case "m":
         if (supportsAudioOutput) {
           setAudio(!audio);
+          return true;
         }
         break;
       case "t":
         if (supports2WayTalk) {
           setMic(!mic);
+          return true;
         }
         break;
     }
+
+    return false;
   });
 
   // layout state

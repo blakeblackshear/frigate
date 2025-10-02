@@ -654,13 +654,14 @@ function DetectionReview({
     ["a", "r", "ArrowDown", "ArrowUp", "PageDown", "PageUp"],
     (key, modifiers) => {
       if (!modifiers.down) {
-        return;
+        return true;
       }
 
       switch (key) {
         case "a":
           if (modifiers.ctrl && !modifiers.repeat) {
             onSelectAllReviews();
+            return true;
           }
           break;
         case "r":
@@ -673,32 +674,34 @@ function DetectionReview({
             });
             setSelectedReviews([]);
           }
-          break;
+          return true;
         case "ArrowDown":
           contentRef.current?.scrollBy({
             top: 100,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "ArrowUp":
           contentRef.current?.scrollBy({
             top: -100,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "PageDown":
           contentRef.current?.scrollBy({
             top: contentRef.current.clientHeight / 2,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "PageUp":
           contentRef.current?.scrollBy({
             top: -contentRef.current.clientHeight / 2,
             behavior: "smooth",
           });
-          break;
+          return true;
       }
+
+      return false;
     },
   );
 

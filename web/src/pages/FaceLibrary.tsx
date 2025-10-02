@@ -117,8 +117,6 @@ export default function FaceLibrary() {
   const [addFace, setAddFace] = useState(false);
 
   // input focus for keyboard shortcuts
-  const [inputFocused, setInputFocused] = useState(false);
-
   const onUploadImage = useCallback(
     (file: File) => {
       const formData = new FormData();
@@ -275,7 +273,7 @@ export default function FaceLibrary() {
     ["a", "Escape", "ArrowDown", "ArrowUp", "PageDown", "PageUp"],
     (key, modifiers) => {
       if (!modifiers.down) {
-        return;
+        return true;
       }
 
       switch (key) {
@@ -288,23 +286,25 @@ export default function FaceLibrary() {
                 ...(pageToggle === "train" ? trainImages : faceImages),
               ]);
             }
+
+            return true;
           }
           break;
         case "Escape":
           setSelectedFaces([]);
-          break;
+          return true;
         case "ArrowDown":
           contentRef.current?.scrollBy({
             top: 100,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "ArrowUp":
           contentRef.current?.scrollBy({
             top: -100,
             behavior: "smooth",
           });
-          break;
+          return true;
         case "PageDown":
           contentRef.current?.scrollBy({
             top: contentRef.current.clientHeight / 2,
@@ -316,10 +316,11 @@ export default function FaceLibrary() {
             top: -contentRef.current.clientHeight / 2,
             behavior: "smooth",
           });
-          break;
+          return true;
       }
+
+      return false;
     },
-    !inputFocused,
   );
 
   useEffect(() => {
@@ -446,7 +447,6 @@ export default function FaceLibrary() {
             selectedFaces={selectedFaces}
             onClickFaces={onClickFaces}
             onRefresh={refreshFaces}
-            setInputFocused={setInputFocused}
           />
         ) : (
           <FaceGrid
@@ -649,7 +649,6 @@ type TrainingGridProps = {
   selectedFaces: string[];
   onClickFaces: (images: string[], ctrl: boolean) => void;
   onRefresh: () => void;
-  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
 };
 function TrainingGrid({
   config,
@@ -659,7 +658,6 @@ function TrainingGrid({
   selectedFaces,
   onClickFaces,
   onRefresh,
-  setInputFocused,
 }: TrainingGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
 
@@ -734,7 +732,7 @@ function TrainingGrid({
         setSimilarity={undefined}
         setSearchPage={setDialogTab}
         setSearch={(search) => setSelectedEvent(search as unknown as Event)}
-        setInputFocused={setInputFocused}
+        setInputFocused={() => {}}
       />
 
       <div

@@ -144,7 +144,7 @@ export default function VideoControls({
   const onKeyboardShortcut = useCallback(
     (key: string | null, modifiers: KeyModifiers) => {
       if (!modifiers.down) {
-        return;
+        return true;
       }
 
       switch (key) {
@@ -174,6 +174,8 @@ export default function VideoControls({
           onPlayPause(!isPlaying);
           break;
       }
+
+      return true;
     },
     // only update when preview only changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
