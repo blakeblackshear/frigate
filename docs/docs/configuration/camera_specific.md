@@ -213,7 +213,7 @@ go2rtc:
   streams:
     your_reolink_doorbell:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
-      - rtsp://reolink_ip/Preview_01_sub
+      - rtsp://username:password@reolink_ip/Preview_01_sub
     your_reolink_doorbell_sub:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
 ```
