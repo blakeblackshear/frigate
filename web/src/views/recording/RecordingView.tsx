@@ -103,18 +103,18 @@ export function RecordingView({
     () => allCameras.filter((camera) => allowedCameras.includes(camera)),
     [allCameras, allowedCameras],
   );
+  const [mainCamera, setMainCamera] = useState(startCamera);
 
   const { data: recordingsSummary } = useSWR<RecordingsSummary>([
     "recordings/summary",
     {
       timezone: timezone,
-      cameras: effectiveCameras.join(",") ?? null,
+      cameras: mainCamera ?? null,
     },
   ]);
 
   // controller state
 
-  const [mainCamera, setMainCamera] = useState(startCamera);
   const mainControllerRef = useRef<DynamicVideoController | null>(null);
   const mainLayoutRef = useRef<HTMLDivElement | null>(null);
   const cameraLayoutRef = useRef<HTMLDivElement | null>(null);
