@@ -720,6 +720,10 @@
   },
   "triggers": {
     "documentTitle": "Triggers",
+    "semanticSearch": {
+      "title": "Semantic Search is disabled",
+      "desc": "Semantic Search must be enabled to use Triggers."
+    },
     "management": {
       "title": "Trigger Management",
       "desc": "Manage triggers for {{camera}}. Use the thumbnail type to trigger on similar thumbnails to your selected tracked object, and the description type to trigger on similar descriptions to text you specify."
@@ -773,6 +777,11 @@
         "type": {
           "title": "Type",
           "placeholder": "Select trigger type"
+        },
+        "friendly_name": {
+          "title": "Friendly Name",
+          "placeholder": "Name or describe this trigger",
+          "description": "An optional friendly name or descriptive text for this trigger."
         },
         "content": {
           "title": "Content",
