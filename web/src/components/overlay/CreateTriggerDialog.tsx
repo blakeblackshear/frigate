@@ -60,6 +60,7 @@ type CreateTriggerDialogProps = {
     data: string,
     threshold: number,
     actions: TriggerAction[],
+    friendly_name: string,
   ) => void;
   onEdit: (trigger: Trigger) => void;
   onCancel: () => void;
@@ -102,6 +103,7 @@ export default function CreateTriggerDialog({
           !existingTriggerNames.includes(value) || value === trigger?.name,
         t("triggers.dialog.form.name.error.alreadyExists"),
       ),
+    friendly_name: z.string().optional(),
     type: z.enum(["thumbnail", "description"]),
     data: z.string().min(1, t("triggers.dialog.form.content.error.required")),
     threshold: z
@@ -117,6 +119,7 @@ export default function CreateTriggerDialog({
     defaultValues: {
       enabled: trigger?.enabled ?? true,
       name: trigger?.name ?? "",
+      friendly_name: trigger?.friendly_name ?? "",
       type: trigger?.type ?? "description",
       data: trigger?.data ?? "",
       threshold: trigger?.threshold ?? 0.5,
@@ -135,6 +138,7 @@ export default function CreateTriggerDialog({
         values.data,
         values.threshold,
         values.actions,
+        values.friendly_name ?? "",
       );
     }
   };
@@ -144,6 +148,7 @@ export default function CreateTriggerDialog({
       form.reset({
         enabled: true,
         name: "",
+        friendly_name: "",
         type: "description",
         data: "",
         threshold: 0.5,
@@ -154,6 +159,7 @@ export default function CreateTriggerDialog({
         {
           enabled: trigger.enabled,
           name: trigger.name,
+          friendly_name: trigger.friendly_name ?? "",
           type: trigger.type,
           data: trigger.data,
           threshold: trigger.threshold,
@@ -226,6 +232,31 @@ export default function CreateTriggerDialog({
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="friendly_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {t("triggers.dialog.form.friendly_name.title")}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={t(
+                        "triggers.dialog.form.friendly_name.placeholder",
+                      )}
+                      className="h-10"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t("triggers.dialog.form.friendly_name.description")}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

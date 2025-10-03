@@ -237,6 +237,7 @@ export interface CameraConfig {
         data: string;
         threshold: number;
         actions: TriggerAction[];
+        friendly_name: string;
       };
     };
   };
