@@ -109,11 +109,19 @@ See the [Hardware Accelerated Enrichments](/configuration/hardware_acceleration_
 
 ## Triggers
 
-Triggers utilize semantic search to automate actions when a tracked object matches a specified image or description. Triggers can be configured so that Frigate executes a specific actions when a tracked object's image or description matches a predefined image or text, based on a similarity threshold. Triggers are managed per camera and can be configured via the Frigate UI in the Settings page under the Triggers tab.
+Triggers utilize Semantic Search to automate actions when a tracked object matches a specified image or description. Triggers can be configured so that Frigate executes a specific actions when a tracked object's image or description matches a predefined image or text, based on a similarity threshold. Triggers are managed per camera and can be configured via the Frigate UI in the Settings page under the Triggers tab.
+
+:::note
+
+Semantic Search must be enabled to use Triggers.
+
+:::
 
 ### Configuration
 
-Triggers are defined within the `semantic_search` configuration for each camera in your Frigate configuration file or through the UI. Each trigger consists of a `type` (either `thumbnail` or `description`), a `data` field (the reference image event ID or text), a `threshold` for similarity matching, and a list of `actions` to perform when the trigger fires.
+Triggers are defined within the `semantic_search` configuration for each camera in your Frigate configuration file or through the UI. Each trigger consists of a `friendly_name`, a `type` (either `thumbnail` or `description`), a `data` field (the reference image event ID or text), a `threshold` for similarity matching, and a list of `actions` to perform when the trigger fires.
+
+Triggers are best configured through the Frigate UI.
 
 #### Managing Triggers in the UI
 
@@ -122,6 +130,7 @@ Triggers are defined within the `semantic_search` configuration for each camera 
 3. Click **Add Trigger** to create a new trigger or use the pencil icon to edit an existing one.
 4. In the **Create Trigger** dialog:
    - Enter a **Name** for the trigger (e.g., "red_car_alert").
+   - Enter a descriptive **Friendly Name** for the trigger (e.g., "Red car on the driveway camera").
    - Select the **Type** (`Thumbnail` or `Description`).
    - For `Thumbnail`, select an image to trigger this action when a similar thumbnail image is detected, based on the threshold.
    - For `Description`, enter text to trigger this action when a similar tracked object description is detected.
@@ -149,6 +158,6 @@ When a trigger fires, the UI highlights the trigger with a blue outline for 3 se
 
 #### Why can't I create a trigger on thumbnails for some text, like "person with a blue shirt" and have it trigger when a person with a blue shirt is detected?
 
-TL;DR: Text-to-image triggers aren’t supported because CLIP can confuse similar images and give inconsistent scores, making automation unreliable.
+TL;DR: Text-to-image triggers aren’t supported because CLIP can confuse similar images and give inconsistent scores, making automation unreliable. The same word–image pair can give different scores and the score ranges can be too close together to set a clear cutoff.
 
 Text-to-image triggers are not supported due to fundamental limitations of CLIP-based similarity search. While CLIP works well for exploratory, manual queries, it is unreliable for automated triggers based on a threshold. Issues include embedding drift (the same text–image pair can yield different cosine distances over time), lack of true semantic grounding (visually similar but incorrect matches), and unstable thresholding (distance distributions are dataset-dependent and often too tightly clustered to separate relevant from irrelevant results). Instead, it is recommended to set up a workflow with thumbnail triggers: first use text search to manually select 3–5 representative reference tracked objects, then configure thumbnail triggers based on that visual similarity. This provides robust automation without the semantic ambiguity of text to image matching.
