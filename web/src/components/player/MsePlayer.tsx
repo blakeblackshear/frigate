@@ -88,7 +88,7 @@ function MSEPlayer({
     (error: LivePlayerError, description: string = "Unknown error") => {
       // eslint-disable-next-line no-console
       console.error(
-        `${camera} - MSE error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live`,
+        `${camera} - MSE error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live/#live-view-faq`,
       );
       onError?.(error);
     },
@@ -484,7 +484,10 @@ function MSEPlayer({
             videoRef.current
           ) {
             onDisconnect();
-            handleError("stalled", "Media playback has stalled.");
+            handleError(
+              "stalled",
+              `Media playback has stalled after ${timeoutDuration / 1000} seconds due to insufficient buffering or a network interruption.`,
+            );
           }
         }, timeoutDuration),
       );

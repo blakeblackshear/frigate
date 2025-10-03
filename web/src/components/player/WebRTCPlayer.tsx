@@ -42,7 +42,7 @@ export default function WebRtcPlayer({
     (error: LivePlayerError, description: string = "Unknown error") => {
       // eslint-disable-next-line no-console
       console.error(
-        `${camera} - WebRTC error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live`,
+        `${camera} - WebRTC error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live/#live-view-faq`,
       );
       onError?.(error);
     },
@@ -339,7 +339,10 @@ export default function WebRtcPlayer({
                     document.visibilityState === "visible" &&
                     pcRef.current != undefined
                   ) {
-                    handleError("stalled", "WebRTC connection stalled.");
+                    handleError(
+                      "stalled",
+                      "Media playback has stalled after 3 seconds due to insufficient buffering or a network interruption.",
+                    );
                   }
                 }, 3000),
               );
