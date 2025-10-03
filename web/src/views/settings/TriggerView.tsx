@@ -159,7 +159,7 @@ export default function TriggerView({
       const embeddingBody: TriggerEmbeddingBody = { type, data, threshold };
       const embeddingUrl = isEdit
         ? `/trigger/embedding/${selectedCamera}/${name}`
-        : `/trigger/embedding?camera=${selectedCamera}&name=${name}`;
+        : `/trigger/embedding?camera_name=${selectedCamera}&name=${name}`;
       const embeddingMethod = isEdit ? axios.put : axios.post;
 
       embeddingMethod(embeddingUrl, embeddingBody)
