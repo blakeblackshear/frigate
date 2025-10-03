@@ -2,5 +2,17 @@
   "documentTitle": "محرر الإعدادات - فرايجيت",
   "configEditor": "محرر الإعدادات",
   "copyConfig": "نسخ الإعدادات",
-  "saveAndRestart": "حفظ وإعادة تشغيل"
+  "saveAndRestart": "حفظ وإعادة تشغيل",
+  "safeConfigEditor": "محرر التكوين في ( الوضع الامن )",
+  "safeModeDescription": "أصبح Frigate في الوضع الآمن بسبب خطأ في التحقق من صحة التكوين.",
+  "toast": {
+    "success": {
+      "copyToClipboard": "تم نسخ التكوين إلى الحافظة."
+    },
+    "error": {
+      "savingError": "خطأ في حفظ التكوين"
+    }
+  },
+  "saveOnly": "احفظ فقط",
+  "confirm": "أتود الخروج دون حفظ؟"
 }

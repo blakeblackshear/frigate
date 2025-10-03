@@ -70,7 +70,10 @@ export default function ExportCard({
         (editName.update?.length ?? 0) > 0
       ) {
         submitRename();
+        return true;
       }
+
+      return false;
     },
   );
 

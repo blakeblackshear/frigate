@@ -8,7 +8,7 @@ import { FrigateStats, PotentialProblem } from "@/types/stats";
 import { useMemo } from "react";
 import useSWR from "swr";
 import useDeepMemo from "./use-deep-memo";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { capitalizeAll, capitalizeFirstLetter } from "@/utils/stringUtil";
 import { useFrigateStats } from "@/api/ws";
 
 import { useTranslation } from "react-i18next";
@@ -30,6 +30,19 @@ export default function useStats(stats: FrigateStats | undefined) {
     // don't look for issues
     if (memoizedStats.service.uptime < 120) {
       return problems;
+    }
+
+    // check shm level
+    const shm = memoizedStats.service.storage["/dev/shm"];
+    if (shm?.total && shm?.min_shm && shm.total < shm.min_shm) {
+      problems.push({
+        text: t("stats.shmTooLow", {
+          total: shm.total,
+          min: shm.min_shm,
+        }),
+        color: "text-danger",
+        relevantLink: "/system#storage",
+      });
     }
 
     // check detectors for high inference speeds
@@ -61,10 +74,11 @@ export default function useStats(stats: FrigateStats | undefined) {
         return;
       }
 
+      const cameraName = config.cameras?.[name]?.friendly_name ?? name;
       if (config.cameras[name].enabled && cam["camera_fps"] == 0) {
         problems.push({
           text: t("stats.cameraIsOffline", {
-            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+            camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
           }),
           color: "text-danger",
           relevantLink: "logs",
@@ -81,10 +95,11 @@ export default function useStats(stats: FrigateStats | undefined) {
         memoizedStats["cpu_usages"][cam["pid"]]?.cpu_average,
       );
 
+      const cameraName = config?.cameras?.[name]?.friendly_name ?? name;
       if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push({
           text: t("stats.ffmpegHighCpuUsage", {
-            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+            camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
             ffmpegAvg,
           }),
           color: "text-danger",
@@ -95,7 +110,7 @@ export default function useStats(stats: FrigateStats | undefined) {
       if (!isNaN(detectAvg) && detectAvg >= CameraDetectThreshold.error) {
         problems.push({
           text: t("stats.detectHighCpuUsage", {
-            camera: capitalizeFirstLetter(name.replaceAll("_", " ")),
+            camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
             detectAvg,
           }),
           color: "text-danger",

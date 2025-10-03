@@ -12,5 +12,7 @@
       "savingError": "Erreur lors de l'enregistrement de la configuration"
     }
   },
-  "confirm": "Quitter sans enregistrer ?"
+  "confirm": "Quitter sans enregistrer ?",
+  "safeConfigEditor": "Éditeur de configuration (mode sans échec)",
+  "safeModeDescription": "Frigate est en mode sans échec en raison d'une erreur de validation de la configuration."
 }

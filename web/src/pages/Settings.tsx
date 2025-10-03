@@ -33,7 +33,8 @@ import CameraSettingsView from "@/views/settings/CameraSettingsView";
 import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
-import AuthenticationView from "@/views/settings/AuthenticationView";
+import UsersView from "@/views/settings/UsersView";
+import RolesView from "@/views/settings/RolesView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 import EnrichmentsSettingsView from "@/views/settings/EnrichmentsSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
@@ -45,6 +46,8 @@ import { isInIframe } from "@/utils/isIFrame";
 import { isPWA } from "@/utils/isPWA";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
+import TriggerView from "@/views/settings/TriggerView";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 const allSettingsViews = [
   "ui",
@@ -52,8 +55,10 @@ const allSettingsViews = [
   "cameras",
   "masksAndZones",
   "motionTuner",
+  "triggers",
   "debug",
   "users",
+  "roles",
   "notifications",
   "frigateplus",
 ] as const;
@@ -175,7 +180,7 @@ export default function Settings() {
       }
     }
     // don't clear url params if we're creating a new object mask
-    return !searchParams.has("object_mask");
+    return !(searchParams.has("object_mask") || searchParams.has("event_id"));
   });
 
   useSearchEffect("camera", (camera: string) => {
@@ -183,8 +188,8 @@ export default function Settings() {
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);
     }
-    // don't clear url params if we're creating a new object mask
-    return !searchParams.has("object_mask");
+    // don't clear url params if we're creating a new object mask or trigger
+    return !(searchParams.has("object_mask") || searchParams.has("event_id"));
   });
 
   useEffect(() => {
@@ -233,7 +238,8 @@ export default function Settings() {
         {(page == "debug" ||
           page == "cameras" ||
           page == "masksAndZones" ||
-          page == "motionTuner") && (
+          page == "motionTuner" ||
+          page == "triggers") && (
           <div className="ml-2 flex flex-shrink-0 items-center gap-2">
             {page == "masksAndZones" && (
               <ZoneMaskFilterButton
@@ -278,7 +284,14 @@ export default function Settings() {
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
-        {page == "users" && <AuthenticationView />}
+        {page === "triggers" && (
+          <TriggerView
+            selectedCamera={selectedCamera}
+            setUnsavedChanges={setUnsavedChanges}
+          />
+        )}
+        {page == "users" && <UsersView />}
+        {page == "roles" && <RolesView />}
         {page == "notifications" && (
           <NotificationView setUnsavedChanges={setUnsavedChanges} />
         )}
@@ -346,9 +359,11 @@ function CameraSelectButton({
     >
       <FaVideo className="text-background dark:text-primary" />
       <div className="hidden text-background dark:text-primary md:block">
-        {selectedCamera == undefined
-          ? t("cameraSetting.noCamera")
-          : selectedCamera.replaceAll("_", " ")}
+        {selectedCamera == undefined ? (
+          t("cameraSetting.noCamera")
+        ) : (
+          <CameraNameLabel camera={selectedCamera} />
+        )}
       </div>
     </Button>
   );
@@ -371,7 +386,8 @@ function CameraSelectButton({
               <FilterSwitch
                 key={item.name}
                 isChecked={item.name === selectedCamera}
-                label={item.name.replaceAll("_", " ")}
+                label={item.name}
+                isCameraName={true}
                 onCheckedChange={(isChecked) => {
                   if (isChecked && (isEnabled || isCameraSettingsPage)) {
                     setSelectedCamera(item.name);

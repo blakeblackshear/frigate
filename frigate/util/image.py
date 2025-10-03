@@ -66,7 +66,12 @@ def has_better_attr(current_thumb, new_obj, attr_label) -> bool:
     return max_new_attr > max_current_attr
 
 
-def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
+def is_better_thumbnail(
+    label: str,
+    current_thumb: dict[str, Any],
+    new_obj: dict[str, Any],
+    frame_shape: tuple[int, int],
+) -> bool:
     # larger is better
     # cutoff images are less ideal, but they should also be smaller?
     # better scores are obviously better too
@@ -990,7 +995,26 @@ def get_histogram(image, x_min, y_min, x_max, y_max):
     return cv2.normalize(hist, hist).flatten()
 
 
-def ensure_jpeg_bytes(image_data):
+def create_thumbnail(
+    yuv_frame: np.ndarray, box: tuple[int, int, int, int], height=500
+) -> Optional[bytes]:
+    """Return jpg thumbnail of a region of the frame."""
+    frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2BGR_I420)
+    region = calculate_region(
+        frame.shape, box[0], box[1], box[2], box[3], height, multiplier=1.4
+    )
+    frame = frame[region[1] : region[3], region[0] : region[2]]
+    width = int(height * frame.shape[1] / frame.shape[0])
+    frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
+    ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+
+    if ret:
+        return jpg.tobytes()
+
+    return None
+
+
+def ensure_jpeg_bytes(image_data: bytes) -> bytes:
     """Ensure image data is jpeg bytes for genai"""
     try:
         img_array = np.frombuffer(image_data, dtype=np.uint8)

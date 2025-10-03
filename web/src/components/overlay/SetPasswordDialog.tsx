@@ -114,7 +114,7 @@ export default function SetPasswordDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="password">
               {t("users.dialog.form.newPassword.title")}

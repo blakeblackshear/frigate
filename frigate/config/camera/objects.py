@@ -1,10 +1,10 @@
 from typing import Any, Optional, Union
 
-from pydantic import Field, PrivateAttr, field_serializer
+from pydantic import Field, PrivateAttr, field_serializer, field_validator
 
 from ..base import FrigateBaseModel
 
-__all__ = ["ObjectConfig", "FilterConfig"]
+__all__ = ["ObjectConfig", "GenAIObjectConfig", "FilterConfig"]
 
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
@@ -49,12 +49,69 @@ class FilterConfig(FrigateBaseModel):
         return None
 
 
+class GenAIObjectTriggerConfig(FrigateBaseModel):
+    tracked_object_end: bool = Field(
+        default=True, title="Send once the object is no longer tracked."
+    )
+    after_significant_updates: Optional[int] = Field(
+        default=None,
+        title="Send an early request to generative AI when X frames accumulated.",
+        ge=1,
+    )
+
+
+class GenAIObjectConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable GenAI for camera.")
+    use_snapshot: bool = Field(
+        default=False, title="Use snapshots for generating descriptions."
+    )
+    prompt: str = Field(
+        default="Analyze the sequence of images containing the {label}. Focus on the likely intent or behavior of the {label} based on its actions and movement, rather than describing its appearance or the surroundings. Consider what the {label} is doing, why, and what it might do next.",
+        title="Default caption prompt.",
+    )
+    object_prompts: dict[str, str] = Field(
+        default_factory=dict, title="Object specific prompts."
+    )
+
+    objects: Union[str, list[str]] = Field(
+        default_factory=list,
+        title="List of objects to run generative AI for.",
+    )
+    required_zones: Union[str, list[str]] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to run generative AI.",
+    )
+    debug_save_thumbnails: bool = Field(
+        default=False,
+        title="Save thumbnails sent to generative AI for debugging purposes.",
+    )
+    send_triggers: GenAIObjectTriggerConfig = Field(
+        default_factory=GenAIObjectTriggerConfig,
+        title="What triggers to use to send frames to generative AI for a tracked object.",
+    )
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of generative AI."
+    )
+
+    @field_validator("required_zones", mode="before")
+    @classmethod
+    def validate_required_zones(cls, v):
+        if isinstance(v, str) and "," not in v:
+            return [v]
+
+        return v
+
+
 class ObjectConfig(FrigateBaseModel):
     track: list[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
     filters: dict[str, FilterConfig] = Field(
         default_factory=dict, title="Object filters."
     )
     mask: Union[str, list[str]] = Field(default="", title="Object mask.")
+    genai: GenAIObjectConfig = Field(
+        default_factory=GenAIObjectConfig,
+        title="Config for using genai to analyze objects.",
+    )
     _all_objects: list[str] = PrivateAttr()
 
     @property

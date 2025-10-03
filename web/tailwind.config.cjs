@@ -42,6 +42,10 @@ module.exports = {
         wide: "32 / 9",
         tall: "8 / 9",
       },
+      backgroundImage: {
+        slashes:
+          "repeating-linear-gradient(45deg, hsl(var(--primary-variant) / 0.2), hsl(var(--primary-variant) / 0.2) 2px, transparent 2px, transparent 8px)",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -113,6 +117,16 @@ module.exports = {
         },
         neutral_variant: {
           DEFAULT: "hsl(var(--neutral_variant))",
+        },
+        sidebar: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+          primary: "hsl(var(--primary))",
+          "primary-foreground": "hsl(var(--primary-foreground))",
+          accent: "hsl(var(--primary-variant))",
+          "accent-foreground": "hsl(var(--primary-foreground))",
+          border: "hsl(var(--border))",
+          ring: "hsl(var(--ring))",
         },
       },
       keyframes: {

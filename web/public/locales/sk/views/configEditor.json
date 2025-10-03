@@ -12,5 +12,7 @@
     "error": {
       "savingError": "Chyba ukladaní konfigurácie"
     }
-  }
+  },
+  "safeConfigEditor": "Editor konfigurácie (núdzový režim)",
+  "safeModeDescription": "Frigate je v núdzovom režime kvôli chybe overenia konfigurácie."
 }

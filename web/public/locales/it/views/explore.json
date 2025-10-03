@@ -52,12 +52,14 @@
         "success": {
           "regenerate": "È stata richiesta una nuova descrizione a {{provider}}. A seconda della velocità del tuo provider, la rigenerazione della nuova descrizione potrebbe richiedere del tempo.",
           "updatedSublabel": "Sottoetichetta aggiornata correttamente.",
-          "updatedLPR": "Targa aggiornata con successo."
+          "updatedLPR": "Targa aggiornata con successo.",
+          "audioTranscription": "Trascrizione audio richiesta con successo."
         },
         "error": {
           "regenerate": "Impossibile chiamare {{provider}} per una nuova descrizione: {{errorMessage}}",
           "updatedSublabelFailed": "Impossibile aggiornare la sottoetichetta: {{errorMessage}}",
-          "updatedLPRFailed": "Impossibile aggiornare la targa: {{errorMessage}}"
+          "updatedLPRFailed": "Impossibile aggiornare la targa: {{errorMessage}}",
+          "audioTranscription": "Impossibile richiedere la trascrizione audio: {{errorMessage}}"
         }
       }
     },
@@ -98,6 +100,9 @@
     "tips": {
       "descriptionSaved": "Descrizione salvata correttamente",
       "saveDescriptionFailed": "Impossibile aggiornare la descrizione: {{errorMessage}}"
+    },
+    "score": {
+      "label": "Punteggio"
     }
   },
   "objectLifecycle": {
@@ -182,6 +187,14 @@
     "submitToPlus": {
       "label": "Invia a Frigate+",
       "aria": "Invia a Frigate Plus"
+    },
+    "addTrigger": {
+      "label": "Aggiungi innesco",
+      "aria": "Aggiungi un innesco per questo oggetto tracciato"
+    },
+    "audioTranscription": {
+      "label": "Trascrivere",
+      "aria": "Richiedi la trascrizione audio"
     }
   },
   "dialog": {
@@ -205,5 +218,11 @@
   "trackedObjectsCount_other": "{{count}} oggetti tracciati ",
   "fetchingTrackedObjectsFailed": "Errore durante il recupero degli oggetti tracciati: {{errorMessage}}",
   "noTrackedObjects": "Nessun oggetto tracciato trovato",
-  "exploreMore": "Esplora altri oggetti {{label}}"
+  "exploreMore": "Esplora altri oggetti {{label}}",
+  "aiAnalysis": {
+    "title": "Analisi IA"
+  },
+  "concerns": {
+    "label": "Preoccupazioni"
+  }
 }

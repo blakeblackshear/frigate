@@ -54,7 +54,8 @@
       "memoryUsage": "Mức sử dụng Bộ nhớ của Bộ phát hiện",
       "title": "Bộ phát hiện",
       "inferenceSpeed": "Tốc độ Suy luận của Bộ phát hiện",
-      "cpuUsage": "Mức sử dụng CPU của Bộ phát hiện"
+      "cpuUsage": "Mức sử dụng CPU của Bộ phát hiện",
+      "cpuUsageInformation": "Dùng CPU để chuẩn bị đầu vào và ngõ ra dữ liệu dùng cho mẫu nhận dạng. Giá trị này không đo lường mức sử dụng suy luận, ngay cả khi sử dụng GPU hoặc bộ tăng tốc."
     },
     "title": "Chung"
   },
@@ -77,6 +78,10 @@
       "title": "Bản ghi",
       "tips": "Giá trị này thể hiện tổng dung lượng lưu trữ được sử dụng bởi các bản ghi trong cơ sở dữ liệu của Frigate. Frigate không theo dõi việc sử dụng dung lượng lưu trữ cho tất cả các tệp trên đĩa của bạn.",
       "earliestRecording": "Bản ghi sớm nhất hiện có:"
+    },
+    "shm": {
+      "title": "Sắp xếp bộ nhớ được chia sẻ (SHM)",
+      "warning": "Bộ nhớ chia sẻ hiện tại quá thấp {{total}}MB. Tăng lên tối thiểu là {{min_shm}}MB."
     }
   },
   "cameras": {
@@ -133,7 +138,8 @@
     "ffmpegHighCpuUsage": "{{camera}} có mức sử dụng CPU FFmpeg cao ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} có mức sử dụng CPU phát hiện cao ({{detectAvg}}%)",
     "healthy": "Hệ thống đang hoạt động tốt",
-    "reindexingEmbeddings": "Đang lập chỉ mục lại các embedding (hoàn thành {{processed}}%)"
+    "reindexingEmbeddings": "Đang lập chỉ mục lại các embedding (hoàn thành {{processed}}%)",
+    "shmTooLow": "/dev/shm ({{total}} MB) cần được tăng lên tối thiểu {{min}} MB."
   },
   "enrichments": {
     "embeddings": {

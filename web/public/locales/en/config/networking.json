@@ -1,0 +1,13 @@
+{
+  "label": "Networking configuration",
+  "properties": {
+    "ipv6": {
+      "label": "Network configuration",
+      "properties": {
+        "enabled": {
+          "label": "Enable IPv6 for port 5000 and/or 8971"
+        }
+      }
+    }
+  }
+}

@@ -1,20 +1,11 @@
-import logging
-from enum import Enum
-
 from pydantic import Field, ValidationInfo, model_validator
 from typing_extensions import Self
 
+from frigate.log import LogLevel, apply_log_levels
+
 from .base import FrigateBaseModel
 
-__all__ = ["LoggerConfig", "LogLevel"]
-
-
-class LogLevel(str, Enum):
-    debug = "debug"
-    info = "info"
-    warning = "warning"
-    error = "error"
-    critical = "critical"
+__all__ = ["LoggerConfig"]
 
 
 class LoggerConfig(FrigateBaseModel):
@@ -26,16 +17,6 @@ class LoggerConfig(FrigateBaseModel):
     @model_validator(mode="after")
     def post_validation(self, info: ValidationInfo) -> Self:
         if isinstance(info.context, dict) and info.context.get("install", False):
-            logging.getLogger().setLevel(self.default.value.upper())
-
-            log_levels = {
-                "httpx": LogLevel.error,
-                "werkzeug": LogLevel.error,
-                "ws4py": LogLevel.error,
-                **self.logs,
-            }
-
-            for log, level in log_levels.items():
-                logging.getLogger(log).setLevel(level.value.upper())
+            apply_log_levels(self.default.value.upper(), self.logs)
 
         return self

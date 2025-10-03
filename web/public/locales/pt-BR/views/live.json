@@ -43,6 +43,14 @@
       "out": {
         "label": "Diminuir Zoom na câmera PTZ"
       }
+    },
+    "focus": {
+      "in": {
+        "label": "Aumentar foco da câmera PTZ"
+      },
+      "out": {
+        "label": "Tirar foco da câmera PTZ"
+      }
     }
   },
   "camera": {
@@ -126,6 +134,9 @@
     "playInBackground": {
       "label": "Reproduzir em segundo plano",
       "tips": "Habilitar essa opção para continuar a transmissão quando o reprodutor estiver oculto."
+    },
+    "debug": {
+      "picker": "A seleção da transmissão fica indisponível em modo de depuração. A visualização de depuração sempre usa o papel de detecção atribuído à transmissão."
     }
   },
   "cameraSettings": {
@@ -135,7 +146,8 @@
     "recording": "Gravação",
     "snapshots": "Capturas de Imagem",
     "audioDetection": "Detecção de Áudio",
-    "autotracking": "Auto Rastreamento"
+    "autotracking": "Auto Rastreamento",
+    "transcription": "Transcrição de Áudio"
   },
   "history": {
     "label": "Exibir gravação histórica"
@@ -154,5 +166,9 @@
       "label": "Editar Grupo de Câmera"
     },
     "exitEdit": "Sair da Edição"
+  },
+  "transcription": {
+    "enable": "Habilitar Transcrição de Áudio em Tempo Real",
+    "disable": "Desabilitar Transcrição de Áudio em Tempo Real"
   }
 }

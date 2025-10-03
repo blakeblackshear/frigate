@@ -5,6 +5,8 @@
   "button": {
     "clear": "Obriši pretragu",
     "save": "Sačuvaj pretragu",
-    "delete": "Izbrišite sačuvanu pretragu"
+    "delete": "Izbrišite sačuvanu pretragu",
+    "filterInformation": "Filtriraj informacije",
+    "filterActive": "Aktivni filteri"
   }
 }

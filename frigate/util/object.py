@@ -269,7 +269,20 @@ def is_object_filtered(obj, objects_to_track, object_filters):
 
 def get_min_region_size(model_config: ModelConfig) -> int:
     """Get the min region size."""
-    return max(model_config.height, model_config.width)
+    largest_dimension = max(model_config.height, model_config.width)
+
+    if largest_dimension > 320:
+        # We originally tested allowing any model to have a region down to half of the model size
+        # but this led to many false positives. In this case we specifically target larger models
+        # which can benefit from a smaller region in some cases to detect smaller objects.
+        half = int(largest_dimension / 2)
+
+        if half % 4 == 0:
+            return half
+
+        return int((half + 3) / 4) * 4
+
+    return largest_dimension
 
 
 def create_tensor_input(frame, model_config: ModelConfig, region):

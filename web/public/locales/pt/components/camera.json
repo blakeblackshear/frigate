@@ -1,27 +1,27 @@
 {
   "group": {
-    "label": "Grupos de câmaras",
-    "add": "Adicionar grupo de câmaras",
-    "edit": "Editar grupo de câmaras",
+    "label": "Grupos de Câmaras",
+    "add": "Adicionar Gupo de Câmaras",
+    "edit": "Editar Grupo de Câmaras",
     "delete": {
-      "label": "Excluir grupo de câmaras",
+      "label": "Eliminar Grupo de Câmaras",
       "confirm": {
-        "title": "Confirmar exclusão",
-        "desc": "Tem certeza de que deseja excluir o grupo de câmaras <em>{{name}}</em>?"
+        "title": "Confirmar Eliminar",
+        "desc": "Tem a certeza que deseja eliminar o grupo de câmaras <em>{{name}}</em>?"
       }
     },
     "name": {
       "label": "Nome",
-      "placeholder": "Digita um nome…",
+      "placeholder": "Inserir um nome…",
       "errorMessage": {
         "exists": "O nome do grupo de câmaras já existe.",
         "nameMustNotPeriod": "O nome do grupo de câmaras não deve conter pontos.",
-        "mustLeastCharacters": "O nome do grupo de câmaras deve ter pelo menos 2 caracteres.",
-        "invalid": "Nome de grupo de câmaras inválido."
+        "mustLeastCharacters": "O nome do grupo de câmaras deve ter pelo menos 2 carateres.",
+        "invalid": "Nome do grupo de câmaras inválido."
       }
     },
     "cameras": {
-      "desc": "Selecione câmaras para este grupo.",
+      "desc": "Selecione as câmaras para este grupo.",
       "label": "Câmaras"
     },
     "icon": "Ícone",
@@ -37,17 +37,17 @@
           }
         },
         "streamMethod": {
-          "label": "Método de transmissão",
+          "label": "Método de Transmissão",
           "method": {
             "smartStreaming": {
-              "label": "Transmissão inteligente (recomendado)",
-              "desc": "A transmissão inteligente atualizará a imagem da sua câmara uma vez por minuto quando nenhuma atividade detectável estiver ocorrendo para conservar largura de banda e recursos. Quando a atividade é detectada, a imagem muda perfeitamente para uma transmissão ao vivo."
+              "label": "Transmissão Inteligente (recomendado)",
+              "desc": "A transmissão inteligente atualizará a imagem da sua câmara uma vez por minuto quando não ocorrer nenhuma atividade detetável para conservar largura de banda e recursos. Quando a atividade é detetada, a imagem muda perfeitamente para uma transmissão ao vivo."
             },
             "continuousStreaming": {
-              "label": "Transmissão contínua",
+              "label": "Transmissão Contínua",
               "desc": {
-                "warning": "A transmissão contínua pode causar alto uso de largura de banda e problemas de desempenho. Use com precaução.",
-                "title": "A imagem da câmara sempre será uma transmissão ao vivo quando visível no painel, mesmo que nenhuma atividade esteja sendo detectada."
+                "warning": "A transmissão contínua pode causar a utilização alta da largura de banda e problemas de desempenho. Utilize com precaução.",
+                "title": "A imagem da câmara será sempre uma transmissão ao vivo quando visível no painel, mesmo que não esteja a ser detetada nenhuma atividade."
               }
             },
             "noStreaming": {
@@ -59,24 +59,25 @@
         },
         "compatibilityMode": {
           "label": "Modo de compatibilidade",
-          "desc": "Habilite esta opção somente se a transmissão ao vivo da sua câmara estiver exibindo artefatos de cor e tiver uma linha diagonal no lado direito da imagem."
+          "desc": "Ative esta opção apenas se a transmissão ao vivo da sua câmara estiver a exibir artefatos de cor e tiver uma linha diagonal no lado direito da imagem."
         },
-        "label": "Configurações de transmissão da câmara",
-        "desc": "Altere as opções de transmissão ao vivo para o painel deste grupo de câmaras. <em>Essas configurações são específicas do dispositivo/navegador.</em>",
-        "title": "{{cameraName}} configurações de transmissão",
+        "label": "Definições de Transmissão da Câmara",
+        "desc": "Altere as opções de transmissão ao vivo para o painel deste grupo de câmaras. <em>Estas definições são específicas do dispositivo/navegador.</em>",
+        "title": "{{cameraName}} Definições de Transmissão",
         "placeholder": "Escolha uma transmissão",
         "stream": "Transmissão"
-      }
+      },
+      "birdseye": "Vista Aérea"
     }
   },
   "debug": {
     "options": {
-      "label": "Configurações",
+      "label": "Definições",
       "title": "Opções",
-      "hideOptions": "Ocultar opções",
-      "showOptions": "Mostrar opções"
+      "hideOptions": "Ocultar Opções",
+      "showOptions": "Mostrar Opções"
     },
-    "boundingBox": "Caixa delimitadora",
+    "boundingBox": "Caixa Delimitadora",
     "timestamp": "Carimbo de hora",
     "zones": "Zonas",
     "mask": "Máscara",

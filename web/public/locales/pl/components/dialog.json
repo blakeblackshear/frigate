@@ -122,5 +122,12 @@
         }
       }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Wybierz miniaturkę śledzonego obiektu",
+    "search": {
+      "placeholder": "Wyszukaj po etykiecie (label) lub etykiecie potomnej (sub label)..."
+    },
+    "noImages": "Brak miniatur dla tej kamery"
   }
 }

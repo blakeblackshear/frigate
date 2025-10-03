@@ -173,7 +173,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         # don't run for non person objects
         if obj_data.get("label") != "person":
-            logger.debug("Not a processing face for non person object.")
+            logger.debug("Not processing face for a non person object.")
             return
 
         # don't overwrite sub label for objects that have a sub label
@@ -321,8 +321,8 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
         if weighted_score >= self.face_config.recognition_threshold:
             self.sub_label_publisher.publish(
-                EventMetadataTypeEnum.sub_label,
                 (id, weighted_sub_label, weighted_score),
+                EventMetadataTypeEnum.sub_label.value,
             )
 
         self.__update_metrics(datetime.datetime.now().timestamp() - start)

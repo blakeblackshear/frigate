@@ -20,12 +20,14 @@
         "success": {
           "regenerate": "Zażądano nowego opisu od {{provider}}. W zależności od szybkości twojego dostawcy, wygenerowanie nowego opisu może zająć trochę czasu.",
           "updatedSublabel": "Pomyślnie zaktualizowano podetykietę.",
-          "updatedLPR": "Pomyślnie zaktualizowano tablicę rejestracyjną."
+          "updatedLPR": "Pomyślnie zaktualizowano tablicę rejestracyjną.",
+          "audioTranscription": "Wysłano prośbę o audio transkrypcję."
         },
         "error": {
           "regenerate": "Nie udało się wezwać {{provider}} dla nowego opisu: {{errorMessage}}",
           "updatedSublabelFailed": "Nie udało się zaktualizować podetykiety: {{errorMessage}}",
-          "updatedLPRFailed": "Nie udało się zaktualizować tablicy rejestracyjnej: {{errorMessage}}"
+          "updatedLPRFailed": "Nie udało się zaktualizować tablicy rejestracyjnej: {{errorMessage}}",
+          "audioTranscription": "Nie udało się włączyć audio transkrypcji: {{errorMessage}}"
         }
       }
     },
@@ -70,6 +72,9 @@
     "regenerateFromThumbnails": "Regeneruj z miniatur",
     "snapshotScore": {
       "label": "Wynik zrzutu"
+    },
+    "score": {
+      "label": "Wynik"
     }
   },
   "objectLifecycle": {
@@ -183,6 +188,14 @@
     },
     "deleteTrackedObject": {
       "label": "Usuń ten śledzony obiekt"
+    },
+    "addTrigger": {
+      "label": "Dodaj wyzwalacz",
+      "aria": "Dodaj wyzwalacz dla tego śledzonego obiektu"
+    },
+    "audioTranscription": {
+      "label": "Rozpisz",
+      "aria": "Poproś o audiotranskrypcję"
     }
   },
   "trackedObjectsCount_one": "{{count}} śledzony obiekt ",
@@ -205,5 +218,11 @@
     },
     "tooltip": "Pasuje do {{type}} z pewnością {{confidence}}%"
   },
-  "exploreMore": "Odkryj więcej obiektów typu {{label}}"
+  "exploreMore": "Odkryj więcej obiektów typu {{label}}",
+  "aiAnalysis": {
+    "title": "Analiza SI"
+  },
+  "concerns": {
+    "label": "Obawy"
+  }
 }

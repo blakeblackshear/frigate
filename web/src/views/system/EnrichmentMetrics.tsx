@@ -1,8 +1,8 @@
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFrigateStats } from "@/api/ws";
-import { EmbeddingThreshold } from "@/types/graph";
+import { EmbeddingThreshold, GenAIThreshold, Threshold } from "@/types/graph";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
@@ -50,6 +50,14 @@ export default function EnrichmentMetrics({
     }
   }, [initialStats, updatedStats, statsHistory, lastUpdated, setLastUpdated]);
 
+  const getThreshold = useCallback((key: string) => {
+    if (key.includes("description")) {
+      return GenAIThreshold;
+    }
+
+    return EmbeddingThreshold;
+  }, []);
+
   // timestamps
 
   const updateTimes = useMemo(
@@ -65,7 +73,11 @@ export default function EnrichmentMetrics({
     }
 
     const series: {
-      [key: string]: { name: string; data: { x: number; y: number }[] };
+      [key: string]: {
+        name: string;
+        metrics: Threshold;
+        data: { x: number; y: number }[];
+      };
     } = {};
 
     statsHistory.forEach((stats, statsIdx) => {
@@ -79,6 +91,7 @@ export default function EnrichmentMetrics({
         if (!(key in series)) {
           series[key] = {
             name: t("enrichments.embeddings." + rawKey),
+            metrics: getThreshold(rawKey),
             data: [],
           };
         }
@@ -87,7 +100,7 @@ export default function EnrichmentMetrics({
       });
     });
     return Object.values(series);
-  }, [statsHistory, t]);
+  }, [statsHistory, t, getThreshold]);
 
   return (
     <>
@@ -112,7 +125,7 @@ export default function EnrichmentMetrics({
                       graphId={`${series.name}-inference`}
                       name={series.name}
                       unit="ms"
-                      threshold={EmbeddingThreshold}
+                      threshold={series.metrics}
                       updateTimes={updateTimes}
                       data={[series]}
                     />

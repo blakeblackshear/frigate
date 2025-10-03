@@ -56,7 +56,14 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "МММ д, гггг",
       "24hour": "МММ д, гггг"
-    }
+    },
+    "ago": "Преди {{timeAgo}}",
+    "untilForTime": "До {{time}}",
+    "untilForRestart": "Докато Frigate рестартира.",
+    "untilRestart": "До рестарт",
+    "mo": "{{time}}мес",
+    "m": "{{time}}м",
+    "s": "{{time}}с"
   },
   "button": {
     "apply": "Приложи",
@@ -106,5 +113,7 @@
   },
   "label": {
     "back": "Върни се"
-  }
+  },
+  "selectItem": "Избери {{item}}",
+  "readTheDocumentation": "Прочетете документацията"
 }

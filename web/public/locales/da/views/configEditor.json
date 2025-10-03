@@ -1,1 +1,6 @@
-{}
+{
+  "documentTitle": "Konfigurationsstyring - Frigate",
+  "copyConfig": "Kopiér konfiguration",
+  "saveAndRestart": "Gem & Genstart",
+  "saveOnly": "Kun gem"
+}

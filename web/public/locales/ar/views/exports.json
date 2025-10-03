@@ -1,5 +1,17 @@
 {
   "search": "بحث",
   "noExports": "لا يوجد تصديرات",
-  "documentTitle": "التصدير - فرايجيت"
+  "documentTitle": "التصدير - فرايجيت",
+  "deleteExport": "حذف التصدير",
+  "deleteExport.desc": "هل أنت متأكد من رغبتك في حذف{{exportName}}؟",
+  "editExport": {
+    "title": "إعادة تسمية التصدير",
+    "desc": "قم بإدخال اسم جديد لهذا التصدير.",
+    "saveExport": "حفظ التصدير"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "فشل إعادة تسمية التصدير: {{errorMessage}}"
+    }
+  }
 }

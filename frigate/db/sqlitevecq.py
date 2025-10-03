@@ -1,3 +1,4 @@
+import re
 import sqlite3
 
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -14,12 +15,27 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
         conn: sqlite3.Connection = super()._connect(*args, **kwargs)
         if self.load_vec_extension:
             self._load_vec_extension(conn)
+
+        # register REGEXP support
+        self._register_regexp(conn)
+
         return conn
 
     def _load_vec_extension(self, conn: sqlite3.Connection) -> None:
         conn.enable_load_extension(True)
         conn.load_extension(self.sqlite_vec_path)
         conn.enable_load_extension(False)
+
+    def _register_regexp(self, conn: sqlite3.Connection) -> None:
+        def regexp(expr: str, item: str) -> bool:
+            if item is None:
+                return False
+            try:
+                return re.search(expr, item) is not None
+            except re.error:
+                return False
+
+        conn.create_function("REGEXP", 2, regexp)
 
     def delete_embeddings_thumbnail(self, event_ids: list[str]) -> None:
         ids = ",".join(["?" for _ in event_ids])

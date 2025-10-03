@@ -12,5 +12,7 @@
       "savingError": "Error al desar la configuració"
     }
   },
-  "confirm": "Sortir sense desar?"
+  "confirm": "Sortir sense desar?",
+  "safeConfigEditor": "Editor de Configuració (Mode Segur)",
+  "safeModeDescription": "Frigate està en mode segur a causa d'un error de validació de la configuració."
 }

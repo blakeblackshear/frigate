@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Editor configurație - Frigate",
+  "documentTitle": "Editor de configurație - Frigate",
   "configEditor": "Editor de configurație",
   "copyConfig": "Copiază setările",
   "saveAndRestart": "Salvează și repornește",
@@ -12,5 +12,7 @@
       "savingError": "Eroare la salvarea setărilor"
     }
   },
-  "confirm": "Ieși fără să salvezi?"
+  "confirm": "Ieși fără să salvezi?",
+  "safeConfigEditor": "Editor de configurație (mod de siguranță)",
+  "safeModeDescription": "Frigate este în modul de siguranță din cauza unei erori de validare a configurației."
 }

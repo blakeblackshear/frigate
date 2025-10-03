@@ -6,10 +6,13 @@ import os
 import numpy as np
 
 from frigate.const import MODEL_CACHE_DIR
+from frigate.detectors.detection_runners import get_optimized_runner
+from frigate.embeddings.types import EnrichmentModelTypeEnum
+from frigate.log import redirect_output_to_logger
 from frigate.util.downloader import ModelDownloader
 
+from ...config import FaceRecognitionConfig
 from .base_embedding import BaseEmbedding
-from .runner import ONNXModelRunner
 
 try:
     from tflite_runtime.interpreter import Interpreter
@@ -54,6 +57,7 @@ class FaceNetEmbedding(BaseEmbedding):
             self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
 
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def _load_model_and_utils(self):
         if self.runner is None:
             if self.downloader:
@@ -110,7 +114,7 @@ class FaceNetEmbedding(BaseEmbedding):
 
 
 class ArcfaceEmbedding(BaseEmbedding):
-    def __init__(self):
+    def __init__(self, config: FaceRecognitionConfig):
         GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
         super().__init__(
             model_name="facedet",
@@ -119,6 +123,7 @@ class ArcfaceEmbedding(BaseEmbedding):
                 "arcface.onnx": f"{GITHUB_ENDPOINT}/NickM-27/facenet-onnx/releases/download/v1.0/arcface.onnx",
             },
         )
+        self.config = config
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
         self.tokenizer = None
         self.feature_extractor = None
@@ -146,9 +151,10 @@ class ArcfaceEmbedding(BaseEmbedding):
             if self.downloader:
                 self.downloader.wait_for_download()
 
-            self.runner = ONNXModelRunner(
+            self.runner = get_optimized_runner(
                 os.path.join(self.download_path, self.model_file),
-                "GPU",
+                device=self.config.device or "GPU",
+                model_type=EnrichmentModelTypeEnum.arcface.value,
             )
 
     def _preprocess_inputs(self, raw_inputs):

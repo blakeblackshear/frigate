@@ -7,13 +7,180 @@
       "go2rtc": "Go2RTC Žurnalas - Frigate",
       "nginx": "Nginx Žurnalas - Frigate"
     },
-    "general": "Bendroji Statistika - Frigate"
+    "general": "Bendroji Statistika - Frigate",
+    "enrichments": "Pagerinimų Statistika - Frigate"
   },
   "title": "Sistema",
   "metrics": "Sistemos metrikos",
   "logs": {
     "download": {
       "label": "Parsisiųsti Žurnalą"
+    },
+    "copy": {
+      "label": "Kopijuoti į iškarpinę",
+      "success": "Nukopijuoti įrašai į iškarpinę",
+      "error": "Nepavyko nukopijuoti įrašų į iškarpinę"
+    },
+    "type": {
+      "label": "Tipas",
+      "timestamp": "Laiko žymė",
+      "tag": "Žyma",
+      "message": "Žinutė"
+    },
+    "tips": "Įrašai yra transliuojami iš serverio",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Klaida nuskaitant įrašus: {{errorMessage}}",
+        "whileStreamingLogs": "Klaidai transliuojant įrašus: {{errorMessage}}"
+      }
     }
+  },
+  "general": {
+    "title": "Bendrinis",
+    "detector": {
+      "title": "Detektoriai",
+      "inferenceSpeed": "Detektorių darbo greitis",
+      "temperature": "Detektorių Temperatūra",
+      "cpuUsage": "Detektorių CPU Naudojimas",
+      "memoryUsage": "Detektorių Atminties Naudojimas",
+      "cpuUsageInformation": "CPU vartojimas ruošiant duomenis detektorių modeliams. Ši reikšmė nevertina inference vartojimo, net jei yra naudojamas GPU akseleratorius."
+    },
+    "hardwareInfo": {
+      "title": "Techninės įrangos Info",
+      "gpuUsage": "GPU Naudojimas",
+      "gpuMemory": "GPU Atmintis",
+      "gpuEncoder": "GPU Kodavimas",
+      "gpuDecoder": "GPU Dekodavimas",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo Išvestis",
+          "returnCode": "Grįžtamas Kodas: {{code}}",
+          "processOutput": "Proceso Išvestis:",
+          "processError": "Proceso Klaida:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI Išvestis",
+          "name": "Pavadinimas: {{name}}",
+          "driver": "Tvarkyklė: {{driver}}",
+          "cudaComputerCapability": "CUDA Compute Galimybės: {{cuda_compute}}",
+          "vbios": "VBios Info: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Užverti GPU info"
+        },
+        "copyInfo": {
+          "label": "Kopijuoti GPU Info"
+        },
+        "toast": {
+          "success": "Nukopijuota GPU info į iškarpinę"
+        }
+      },
+      "npuUsage": "NPU Naudojimas",
+      "npuMemory": "NPU Atmintis"
+    },
+    "otherProcesses": {
+      "title": "Kiti Procesai",
+      "processCpuUsage": "Procesų CPU Naudojimas",
+      "processMemoryUsage": "Procesu Atminties Naudojimas"
+    }
+  },
+  "storage": {
+    "title": "Saugykla",
+    "overview": "Apžvalga",
+    "recordings": {
+      "title": "Įrašai",
+      "tips": "Ši reikšmė nurodo kiek iš viso Frigate duombazėje esantys įrašai užima vietos saugykloje. Frigate neseka kiek vietos užima visi kiti failai esantys laikmenoje.",
+      "earliestRecording": "Anksčiausias esantis įrašas:"
+    },
+    "cameraStorage": {
+      "title": "Kameros Saugykla",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Neišnaudotos Saugyklos Informacija",
+      "storageUsed": "Saugykla",
+      "percentageOfTotalUsed": "Procentas nuo Viso",
+      "bandwidth": "Pralaidumas",
+      "unused": {
+        "title": "Nepanaudota",
+        "tips": "Jei saugykloje turite daugiau failų apart Frigate įrašų, ši reikšmė neatspindės tikslios likusios laisvos vietos Frigate panaudojimui. Frigate neseka saugyklos panaudojimo už savo įrašų ribų."
+      }
+    },
+    "shm": {
+      "title": "SHM (bendrinama atmintis) priskyrimas",
+      "warning": "Esamas SHM dydis {{total}}MB yra per mažas. Pridėkite bent jau {{min_shm}}MB."
+    }
+  },
+  "cameras": {
+    "title": "Kameros",
+    "overview": "Apžvalga",
+    "info": {
+      "aspectRatio": "formato santykis",
+      "cameraProbeInfo": "{{camera}} Kameros srauto informacija",
+      "streamDataFromFFPROBE": "Transliacijos duomenys yra surenkami su <code>ffprobe</code>.",
+      "fetching": "Gaunamai Kameros Duomenys",
+      "stream": "Transliacija {{idx}}",
+      "video": "Vaizdas:",
+      "codec": "Kodekas:",
+      "resolution": "Raiška:",
+      "fps": "FPS:",
+      "unknown": "Nežinoma",
+      "audio": "Garsas:",
+      "error": "Klaida:{{error}}",
+      "tips": {
+        "title": "Kameros Srauto Informacija"
+      }
+    },
+    "framesAndDetections": "Kadrai / Aptikimai",
+    "label": {
+      "camera": "kamera",
+      "detect": "aptikti",
+      "skipped": "praleista",
+      "ffmpeg": "FFmpeg",
+      "capture": "užfiksuota",
+      "overallFramesPerSecond": "viso kadrų per sekundę",
+      "overallDetectionsPerSecond": "viso aptikimų per sekundę",
+      "overallSkippedDetectionsPerSecond": "viso praleista aptikimų per sekundę",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} ufiksuota",
+      "cameraDetect": "{{camName}} susekta",
+      "cameraFramesPerSecond": "{{camName}} kadrai per sekundę",
+      "cameraDetectionsPerSecond": "{{camName}} aptikimai per sekundę",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} praleista aptikimų per sekundę"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Srauto informacija nukopijuotą į iškarpinę."
+      },
+      "error": {
+        "unableToProbeCamera": "Negalima gauti kameros mėginio: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Paskutinį kartą atnaujinta: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} turi aukštą CPU suvartojimą FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} turi auktšą CPU vartojimą aptikimams ({{detectAvg}}%)",
+    "healthy": "Sistemos būklė sveika",
+    "reindexingEmbeddings": "Įterpinių reideksavimas ({{processed}}% baigtas)",
+    "cameraIsOffline": "{{camera}} yra nepasiekiama",
+    "detectIsSlow": "{{detect}} yra lėtas ({{speed}}ms)",
+    "detectIsVerySlow": "{{detect}} yra labai lėtas ({{speed}}ms)",
+    "shmTooLow": "/dev/shm priskirta ({{total}} MB) turi būti padidinta bent jau iki {{min}} MB."
+  },
+  "enrichments": {
+    "title": "Patobulinimai",
+    "embeddings": {
+      "yolov9_plate_detection": "YOLOv9 Numerių Aptikimai",
+      "yolov9_plate_detection_speed": "YOLOv9 Numerių Aptikimų Greitis",
+      "text_embedding_speed": "Teksto Įterpimų Greitis",
+      "plate_recognition_speed": "Numerių Atpažinimo Greitis",
+      "face_recognition_speed": "Veidų Atpažinimo Greitis",
+      "face_embedding_speed": "Veidų Įterpimų Greitis",
+      "image_embedding_speed": "Vaizdo Įterpimo Greitis",
+      "plate_recognition": "Numerių Atpažinimas",
+      "face_recognition": "Veido Atpažinimas",
+      "text_embedding": "Teksto Įterpimas",
+      "image_embedding": "Vaizdo Įterpimas"
+    },
+    "infPerSecond": "Išvadų Per Sekundę"
   }
 }

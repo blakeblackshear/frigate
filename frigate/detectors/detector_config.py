@@ -154,12 +154,12 @@ class ModelConfig(BaseModel):
 
         self.width = model_info["width"]
         self.height = model_info["height"]
-        self.input_tensor = model_info["inputShape"]
-        self.input_pixel_format = model_info["pixelFormat"]
-        self.model_type = model_info["type"]
+        self.input_tensor = InputTensorEnum(model_info["inputShape"])
+        self.input_pixel_format = PixelFormatEnum(model_info["pixelFormat"])
+        self.model_type = ModelTypeEnum(model_info["type"])
 
         if model_info.get("inputDataType"):
-            self.input_dtype = model_info["inputDataType"]
+            self.input_dtype = InputDTypeEnum(model_info["inputDataType"])
 
         # RKNN always uses NHWC
         if detector == "rknn":

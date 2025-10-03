@@ -51,7 +51,8 @@
         },
         "stream": "Strøm",
         "placeholder": "Velg en strøm"
-      }
+      },
+      "birdseye": "Fugleperspektiv"
     },
     "add": "Legg til kameragruppe",
     "edit": "Rediger kameragruppe",

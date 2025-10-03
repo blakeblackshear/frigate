@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Dict, List, Optional
 
-from pydantic import Field
+from pydantic import Field, field_validator, model_validator
 
 from .base import FrigateBaseModel
 
@@ -34,3 +34,41 @@ class AuthConfig(FrigateBaseModel):
     )
     # As of Feb 2023, OWASP recommends 600000 iterations for PBKDF2-SHA256
     hash_iterations: int = Field(default=600000, title="Password hash iterations")
+    roles: Dict[str, List[str]] = Field(
+        default_factory=dict,
+        title="Role to camera mappings. Empty list grants access to all cameras.",
+    )
+
+    @field_validator("roles")
+    @classmethod
+    def validate_roles(cls, v: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        # Ensure role names are valid (alphanumeric with underscores)
+        for role in v.keys():
+            if not role.replace("_", "").isalnum():
+                raise ValueError(
+                    f"Invalid role name '{role}'. Must be alphanumeric with underscores."
+                )
+
+        # Ensure 'admin' and 'viewer' are not used as custom role names
+        reserved_roles = {"admin", "viewer"}
+        if v.keys() & reserved_roles:
+            raise ValueError(
+                f"Reserved roles {reserved_roles} cannot be used as custom roles."
+            )
+
+        # Ensure no role has an empty camera list
+        for role, allowed_cameras in v.items():
+            if not allowed_cameras:
+                raise ValueError(
+                    f"Role '{role}' has no cameras assigned. Custom roles must have at least one camera."
+                )
+
+        return v
+
+    @model_validator(mode="after")
+    def ensure_default_roles(self):
+        # Ensure admin and viewer are never overridden
+        self.roles["admin"] = []
+        self.roles["viewer"] = []
+
+        return self
