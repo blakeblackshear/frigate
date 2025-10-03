@@ -138,6 +138,9 @@ class SemanticSearchConfig(FrigateBaseModel):
 
 
 class TriggerConfig(FrigateBaseModel):
+    friendly_name: Optional[str] = Field(
+        None, title="Trigger friendly name used in the Frigate UI."
+    )
     enabled: bool = Field(default=True, title="Enable this trigger")
     type: TriggerType = Field(default=TriggerType.DESCRIPTION, title="Type of trigger")
     data: str = Field(title="Trigger content (text phrase or image ID)")
