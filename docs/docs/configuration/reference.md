@@ -912,6 +912,8 @@ cameras:
       trigger_name:
         # Required: Enable or disable the trigger. (default: shown below)
         enabled: true
+        # Optional: A friendly name or descriptive text for the trigger
+        friendly_name: Unique name or descriptive text
         # Type of trigger, either `thumbnail` for image-based matching or `description` for text-based matching. (default: none)
         type: thumbnail
         # Reference data for matching, either an event ID for `thumbnail` or a text string for `description`. (default: none)

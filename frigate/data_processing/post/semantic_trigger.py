@@ -159,7 +159,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
 
             # Check if similarity meets threshold
             if similarity >= trigger["threshold"]:
-                logger.info(
+                logger.debug(
                     f"Trigger {trigger['name']} activated with similarity {similarity:.4f}"
                 )
 

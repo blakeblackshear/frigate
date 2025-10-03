@@ -8,4 +8,5 @@ export type Trigger = {
   data: string;
   threshold: number;
   actions: TriggerAction[];
+  friendly_name?: string;
 };
