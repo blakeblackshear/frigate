@@ -15,7 +15,7 @@
     },
     "maxSize": "Tamanho máximo: {{size}}MB",
     "dropActive": "Solte a imagem aqui…",
-    "dropInstructions": "Arraste e solte uma imagem aqui, ou clique para selecionar"
+    "dropInstructions": "Arraste e solte ou cole uma imagem aqui ou clique para selecionar"
   },
   "deleteFaceLibrary": {
     "title": "Apagar Nome",
@@ -45,7 +45,7 @@
     "title": "Renomear Rosto",
     "desc": "Entre com o novo nome para {{name}}"
   },
-  "nofaces": "Sem rostos disponíveis",
+  "nofaces": "Nenhum rosto disponível",
   "pixels": "{{area}}px",
   "readTheDocs": "Leia a documentação",
   "steps": {
