@@ -20,13 +20,13 @@
   },
   "cameraSettings": {
     "objectDetection": "Objektų Aptikimai",
-    "audioDetection": "Garso Aptikimai",
+    "audioDetection": "Garso Aptikimas",
     "title": "{{camera}} Nustatymai",
     "cameraEnabled": "Kamera įjungta",
     "recording": "Įrašinėjimas",
     "snapshots": "Momentinės Nuotraukos",
-    "transcription": "Garso Aprašymas",
-    "autotracking": "Autosekimas"
+    "transcription": "Garso Transkripcija",
+    "autotracking": "Automatinis sekimas"
   },
   "ptz": {
     "move": {
@@ -111,19 +111,19 @@
       "desc": "Įjungti šią funkciją, kad matytumėte transliacijos statistiką kameros vaizde."
     },
     "debugView": "Derinimo Vaizdas",
-    "start": "Pradėti įrašymą pagal poreikį",
-    "started": "Pradėtas rankinis pagal poreikį įrašinėjimas.",
-    "failedToStart": "Nepavyko pradėti rankinio įrašinėjimo pagal poreikį.",
-    "recordDisabledTips": "Tik momentinės nuotraukos bus saugomos, nes įrašinėjimai šiai kamera yra išjungti.",
-    "end": "Baigti įrašymą pagal poreikį",
-    "ended": "Baigtas rankinis įrašymas pagal poreikį.",
-    "failedToEnd": "Nepavyko nutraukti rankinio įrašinėjimo pagal poreikį."
+    "start": "Pradėti įrašymą pagal pageidavimą",
+    "started": "Pradėtas įrašymas pagal pageidavimą",
+    "failedToStart": "Nepavyko pradėti įrašymo pagal poreikį.",
+    "recordDisabledTips": "Įrašymas šiai kamerai yra išjungtas todėl bus saugomos tik momentinės nuotraukos.",
+    "end": "Baigti įrašymą pagal pageidavimą",
+    "ended": "Baigtas įrašymas pagal pageidavimą.",
+    "failedToEnd": "Nepavyko sustabdyti įrašymo pagal pageidavimą."
   },
   "streamingSettings": "Transliacijos Nustatymai",
   "notifications": "Pranešimai",
   "audio": "Garsas",
   "suspend": {
-    "forTime": "Sustabdymo laikas: "
+    "forTime": "Sustabdyti laikui: "
   },
   "stream": {
     "title": "Transliacija",
@@ -131,8 +131,8 @@
       "tips": {
         "title": "Šiai transliacijai garso išvestis turi būti sukonfiguruota naudojant go2rtc."
       },
-      "available": "Šioje transliacijoje yra garsas",
-      "unavailable": "Šioje transliacijoje nėra garso"
+      "available": "Ši transliacija palaiko garsą",
+      "unavailable": "Ši transliacija nepalaiko garso"
     },
     "twoWayTalk": {
       "tips": "Jūsų įranga turi palaikyti šią funkciją, taip pat dvipusiam pokalbiui reikia sukonfiguruoti WebRTC.",
@@ -162,8 +162,8 @@
   "editLayout": {
     "label": "Redaguoti Išdėstymą",
     "group": {
-      "label": "Koreguoti Kamerų Grupę"
+      "label": "Redaguoti Kamerų Grupę"
     },
-    "exitEdit": "Palikti Redagavimą"
+    "exitEdit": "Išeiti Iš Redagavimo"
   }
 }
