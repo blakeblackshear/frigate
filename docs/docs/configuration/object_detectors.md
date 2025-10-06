@@ -498,7 +498,7 @@ See [ONNX supported models](#supported-models) for supported models, there are s
 
 ## ONNX
 
-ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, ROCm, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
+ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, ROCm, ONNX RUNTIME, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
 
 :::info
 
