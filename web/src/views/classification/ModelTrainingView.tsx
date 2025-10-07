@@ -700,7 +700,7 @@ function TrainGrid({
             filepath: `clips/${model.name}/train/${raw}`,
             timestamp: Number.parseFloat(parts[2]),
             eventId: `${parts[0]}-${parts[1]}`,
-            name: parts[1],
+            name: parts[3],
             score: rawScore,
           };
         })
@@ -961,6 +961,7 @@ function ObjectTrainGrid({
               threshold={threshold}
               selectedItems={selectedImages}
               i18nLibrary="views/classificationModel"
+              objectType={model.object_config?.objects?.at(0) ?? "Object"}
               onClick={(data) => {
                 if (data) {
                   onClickImages([data.filename], true);

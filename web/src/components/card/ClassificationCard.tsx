@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { LuSearch } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { useNavigate } from "react-router-dom";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type ClassificationCardProps = {
   className?: string;
@@ -133,6 +134,7 @@ type GroupedClassificationCardProps = {
   threshold?: ClassificationThreshold;
   selectedItems: string[];
   i18nLibrary: string;
+  objectType: string;
   onClick: (data: ClassificationItemData | undefined) => void;
   onSelectEvent: (event: Event) => void;
   children?: (data: ClassificationItemData) => React.ReactNode;
@@ -143,6 +145,7 @@ export function GroupedClassificationCard({
   threshold,
   selectedItems,
   i18nLibrary,
+  objectType,
   onClick,
   onSelectEvent,
   children,
@@ -190,7 +193,7 @@ export function GroupedClassificationCard({
       <div className="flex flex-row justify-between">
         <div className="flex flex-col gap-1">
           <div className="select-none smart-capitalize">
-            {t("details.person")}
+            {getTranslatedLabel(objectType)}
             {event?.sub_label
               ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
               : ": " + t("details.unknown")}

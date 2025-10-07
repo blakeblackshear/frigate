@@ -865,6 +865,7 @@ function FaceAttemptGroup({
       threshold={threshold}
       selectedItems={selectedFaces}
       i18nLibrary="views/faceLibrary"
+      objectType="person"
       onClick={(data) => {
         if (data) {
           onClickFaces([data.filename], true);

@@ -5,7 +5,6 @@
     "invalidName": "Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens."
   },
   "details": {
-    "person": "Person",
     "subLabelScore": "Sub Label Score",
     "scoreInfo": "The sub label score is the weighted score for all of the recognized face confidences, so this may differ from the score shown on the snapshot.",
     "face": "Face Details",
