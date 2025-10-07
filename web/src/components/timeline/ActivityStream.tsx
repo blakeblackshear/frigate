@@ -18,7 +18,7 @@ export default function ActivityStream({
   const { selectedObjectId } = useActivityStream();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Group activities by timestamp (within 1 second resolution window)
+  // group activities by timestamp (within 1 second resolution window)
   const groupedActivities = useMemo(() => {
     const groups: { [key: number]: ObjectLifecycleSequence[] } = {};
 
@@ -31,10 +31,15 @@ export default function ActivityStream({
     });
 
     return Object.entries(groups)
-      .map(([timestamp, activities]) => ({
-        timestamp: parseInt(timestamp),
-        activities: activities.sort((a, b) => a.timestamp - b.timestamp),
-      }))
+      .map(([_timestamp, activities]) => {
+        const sortedActivities = activities.sort(
+          (a, b) => a.timestamp - b.timestamp,
+        );
+        return {
+          timestamp: sortedActivities[0].timestamp, // use the earliest activity timestamp
+          activities: sortedActivities,
+        };
+      })
       .sort((a, b) => a.timestamp - b.timestamp);
   }, [timelineData]);
 
@@ -57,9 +62,14 @@ export default function ActivityStream({
   useEffect(() => {
     if (!scrollRef.current) return;
 
-    const currentGroupIndex = filteredGroups.findIndex(
-      (group) => group.timestamp >= currentTime,
-    );
+    // Find the last group where timestamp <= currentTime
+    let currentGroupIndex = -1;
+    for (let i = filteredGroups.length - 1; i >= 0; i--) {
+      if (filteredGroups[i].timestamp <= currentTime) {
+        currentGroupIndex = i;
+        break;
+      }
+    }
 
     if (currentGroupIndex !== -1) {
       const element = scrollRef.current.children[
@@ -72,7 +82,7 @@ export default function ActivityStream({
         });
       }
     }
-  }, [currentTime, filteredGroups]);
+  }, [filteredGroups, currentTime]);
 
   return (
     <div

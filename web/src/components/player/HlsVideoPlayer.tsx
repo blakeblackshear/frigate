@@ -321,6 +321,7 @@ export default function HlsVideoPlayer({
           videoDimensions.height > 0 && (
             <div className="absolute z-50 size-full">
               <ObjectTrackOverlay
+                key={`${selectedObjectId}-${currentTime}`}
                 camera={camera}
                 selectedObjectId={selectedObjectId}
                 currentTime={currentTime}
