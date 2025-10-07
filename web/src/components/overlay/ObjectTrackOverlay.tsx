@@ -103,6 +103,7 @@ export default function ObjectTrackOverlay({
       }));
   }, [config, camera, getZoneColor, currentObjectZones]);
 
+  // get saved path points from event
   const savedPathPoints = useMemo(() => {
     return (
       eventData?.[0].data?.path_data?.map(
@@ -116,6 +117,7 @@ export default function ObjectTrackOverlay({
     );
   }, [eventData]);
 
+  // timeline points for selected event
   const eventSequencePoints = useMemo(() => {
     return (
       objectTimeline
@@ -124,8 +126,8 @@ export default function ObjectTrackOverlay({
           const [left, top, width, height] = event.data.box!;
 
           return {
-            x: left + width / 2, // Center x-coordinate
-            y: top + height, // Bottom y-coordinate
+            x: left + width / 2, // Center x
+            y: top + height, // Bottom y
             timestamp: event.timestamp,
             lifecycle_item: event,
           };
@@ -152,6 +154,7 @@ export default function ObjectTrackOverlay({
     );
   }, [savedPathPoints, eventSequencePoints, config, camera, currentTime]);
 
+  // get absolute positions on the svg canvas for each point
   const getAbsolutePositions = useCallback(() => {
     if (!pathPoints) return [];
     return pathPoints.map((point) => {
@@ -165,7 +168,7 @@ export default function ObjectTrackOverlay({
         timestamp: point.timestamp,
         lifecycle_item:
           timelineEntry ||
-          (point.box
+          (point.box // normal path point
             ? {
                 timestamp: point.timestamp,
                 camera: camera,
@@ -220,21 +223,87 @@ export default function ObjectTrackOverlay({
     [typeColorMap],
   );
 
+  const handlePointClick = useCallback(
+    (timestamp: number) => {
+      onSeekToTime?.(timestamp);
+    },
+    [onSeekToTime],
+  );
+
+  // render bounding box for object at current time if we have a timeline entry
+  const currentBoundingBox = useMemo(() => {
+    if (!objectTimeline) return null;
+
+    // Find the most recent timeline event at or before effective current time with a bounding box
+    const relevantEvents = objectTimeline
+      .filter(
+        (event) => event.timestamp <= effectiveCurrentTime && event.data.box,
+      )
+      .sort((a, b) => b.timestamp - a.timestamp); // Most recent first
+
+    const currentEvent = relevantEvents[0];
+
+    if (!currentEvent?.data.box) return null;
+
+    const [left, top, width, height] = currentEvent.data.box;
+    return {
+      left,
+      top,
+      width,
+      height,
+      centerX: left + width / 2,
+      centerY: top + height,
+    };
+  }, [objectTimeline, effectiveCurrentTime]);
+
+  const objectColor = useMemo(() => {
+    return pathPoints[0]?.label
+      ? getObjectColor(pathPoints[0].label)
+      : "rgb(255, 0, 0)";
+  }, [pathPoints, getObjectColor]);
+
+  const objectColorArray = useMemo(() => {
+    return pathPoints[0]?.label
+      ? getObjectColor(pathPoints[0].label).match(/\d+/g)?.map(Number) || [
+          255, 0, 0,
+        ]
+      : [255, 0, 0];
+  }, [pathPoints, getObjectColor]);
+
+  const absolutePositions = useMemo(
+    () => getAbsolutePositions(),
+    [getAbsolutePositions],
+  );
+
+  // render any zones for object at current time
+  const zonePolygons = useMemo(() => {
+    return zones.map((zone) => {
+      // Convert zone coordinates from normalized (0-1) to pixel coordinates
+      const points = zone.coordinates
+        .split(",")
+        .map(Number.parseFloat)
+        .reduce((acc: string[], value, index) => {
+          const isXCoordinate = index % 2 === 0;
+          const coordinate = isXCoordinate
+            ? value * videoWidth
+            : value * videoHeight;
+          acc.push(coordinate.toString());
+          return acc;
+        }, [])
+        .join(",");
+
+      return {
+        key: zone.name,
+        points,
+        fill: `rgba(${zone.color.replace("rgb(", "").replace(")", "")}, 0.3)`,
+        stroke: zone.color,
+      };
+    });
+  }, [zones, videoWidth, videoHeight]);
+
   if (!pathPoints.length || !config) {
     return null;
   }
-
-  // Get the object color from the first point's label
-  const objectColor = pathPoints[0]?.label
-    ? getObjectColor(pathPoints[0].label)
-    : "rgb(255, 0, 0)";
-  const objectColorArray = pathPoints[0]?.label
-    ? getObjectColor(pathPoints[0].label).match(/\d+/g)?.map(Number) || [
-        255, 0, 0,
-      ]
-    : [255, 0, 0];
-
-  const absolutePositions = getAbsolutePositions();
 
   return (
     <svg
@@ -246,35 +315,17 @@ export default function ObjectTrackOverlay({
       }}
       preserveAspectRatio="xMidYMid slice"
     >
-      {/* Render zones */}
-      {zones.map((zone) => {
-        // Convert zone coordinates from normalized (0-1) to pixel coordinates
-        const points = zone.coordinates
-          .split(",")
-          .map(Number.parseFloat)
-          .reduce((acc: string[], value, index) => {
-            const isXCoordinate = index % 2 === 0;
-            const coordinate = isXCoordinate
-              ? value * videoWidth
-              : value * videoHeight;
-            acc.push(coordinate.toString());
-            return acc;
-          }, [])
-          .join(",");
+      {zonePolygons.map((zone) => (
+        <polygon
+          key={zone.key}
+          points={zone.points}
+          fill={zone.fill}
+          stroke={zone.stroke}
+          strokeWidth="5"
+          opacity="0.7"
+        />
+      ))}
 
-        return (
-          <polygon
-            key={zone.name}
-            points={points}
-            fill={`rgba(${zone.color.replace("rgb(", "").replace(")", "")}, 0.3)`}
-            stroke={zone.color}
-            strokeWidth="5"
-            opacity="0.7"
-          />
-        );
-      })}
-
-      {/* Draw path connecting the points */}
       {absolutePositions.length > 1 && (
         <path
           d={generateStraightPath(absolutePositions)}
@@ -286,7 +337,6 @@ export default function ObjectTrackOverlay({
         />
       )}
 
-      {/* Draw points with tooltips */}
       {absolutePositions.map((pos, index) => (
         <Tooltip key={`point-${index}`}>
           <TooltipTrigger asChild>
@@ -301,9 +351,7 @@ export default function ObjectTrackOverlay({
               stroke="white"
               strokeWidth="3"
               style={{ cursor: onSeekToTime ? "pointer" : "default" }}
-              onClick={() => {
-                onSeekToTime?.(pos.timestamp);
-              }}
+              onClick={() => handlePointClick(pos.timestamp)}
             />
           </TooltipTrigger>
           <TooltipPortal>
@@ -321,53 +369,30 @@ export default function ObjectTrackOverlay({
         </Tooltip>
       ))}
 
-      {/* Highlight current position with bounding box */}
-      {(() => {
-        if (!objectTimeline) return null;
+      {currentBoundingBox && (
+        <g>
+          <rect
+            x={currentBoundingBox.left * videoWidth}
+            y={currentBoundingBox.top * videoHeight}
+            width={currentBoundingBox.width * videoWidth}
+            height={currentBoundingBox.height * videoHeight}
+            fill="none"
+            stroke={objectColor}
+            strokeWidth="5"
+            opacity="0.9"
+          />
 
-        // Find the most recent timeline event at or before effective current time with a bounding box
-        const relevantEvents = objectTimeline
-          .filter(
-            (event) =>
-              event.timestamp <= effectiveCurrentTime && event.data.box,
-          )
-          .sort((a, b) => b.timestamp - a.timestamp); // Most recent first
-
-        const currentEvent = relevantEvents[0];
-
-        if (currentEvent && currentEvent.data.box) {
-          const [left, top, width, height] = currentEvent.data.box;
-          const centerX = left + width / 2;
-          const centerY = top + height;
-
-          return (
-            <g>
-              {/* Bounding box */}
-              <rect
-                x={left * videoWidth}
-                y={top * videoHeight}
-                width={width * videoWidth}
-                height={height * videoHeight}
-                fill="none"
-                stroke={objectColor}
-                strokeWidth="5"
-                opacity="0.9"
-              />
-              {/* Center point highlight */}
-              <circle
-                cx={centerX * videoWidth}
-                cy={centerY * videoHeight}
-                r="5"
-                fill="rgb(255, 255, 0)" // yellow highlight
-                stroke={objectColor}
-                strokeWidth="5"
-                opacity="1"
-              />
-            </g>
-          );
-        }
-        return null;
-      })()}
+          <circle
+            cx={currentBoundingBox.centerX * videoWidth}
+            cy={currentBoundingBox.centerY * videoHeight}
+            r="5"
+            fill="rgb(255, 255, 0)" // yellow highlight
+            stroke={objectColor}
+            strokeWidth="5"
+            opacity="1"
+          />
+        </g>
+      )}
     </svg>
   );
 }
