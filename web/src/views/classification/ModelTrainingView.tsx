@@ -818,3 +818,79 @@ function StateTrainGrid({
     </div>
   );
 }
+
+type ObjectTrainGridProps = {
+  model: CustomClassificationModelConfig;
+  contentRef: MutableRefObject<HTMLDivElement | null>;
+  classes: string[];
+  trainData?: ClassificationItemData[];
+  selectedImages: string[];
+  onClickImages: (images: string[], ctrl: boolean) => void;
+  onRefresh: () => void;
+  onDelete: (ids: string[]) => void;
+};
+function ObjectTrainGrid({
+  model,
+  contentRef,
+  classes,
+  trainData,
+  selectedImages,
+  onClickImages,
+  onRefresh,
+  onDelete,
+}: ObjectTrainGridProps) {
+  const { t } = useTranslation(["views/classificationModel"]);
+
+  const threshold = useMemo(() => {
+    return {
+      recognition: model.threshold,
+      unknown: model.threshold,
+    };
+  }, [model]);
+
+  return (
+    <div
+      ref={contentRef}
+      className={cn(
+        "scrollbar-container flex flex-wrap gap-2 overflow-y-auto p-2",
+        isMobile && "justify-center",
+      )}
+    >
+      {trainData?.map((data) => (
+        <ClassificationCard
+          className="w-60 gap-2 rounded-lg bg-card p-2"
+          imgClassName="size-auto"
+          data={data}
+          threshold={threshold}
+          selected={selectedImages.includes(data.filename)}
+          i18nLibrary="views/classificationModel"
+          showArea={false}
+          onClick={(data, meta) => onClickImages([data.filename], meta)}
+        >
+          <ClassificationSelectionDialog
+            classes={classes}
+            modelName={model.name}
+            image={data.filename}
+            onRefresh={onRefresh}
+          >
+            <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+          </ClassificationSelectionDialog>
+          <Tooltip>
+            <TooltipTrigger>
+              <LuTrash2
+                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete([data.filename]);
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              {t("button.deleteClassificationAttempts")}
+            </TooltipContent>
+          </Tooltip>
+        </ClassificationCard>
+      ))}
+    </div>
+  );
+}

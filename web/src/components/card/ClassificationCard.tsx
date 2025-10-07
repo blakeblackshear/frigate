@@ -5,9 +5,15 @@ import {
   ClassificationItemData,
   ClassificationThreshold,
 } from "@/types/classification";
+import { Event } from "@/types/event";
 import { useMemo, useRef, useState } from "react";
-import { isMobile } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
+import TimeAgo from "../dynamic/TimeAgo";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { LuSearch } from "react-icons/lu";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { useNavigate } from "react-router-dom";
 
 type ClassificationCardProps = {
   className?: string;
@@ -118,5 +124,137 @@ export function ClassificationCard({
         </div>
       </div>
     </>
+  );
+}
+
+type GroupedClassificationCardProps = {
+  group: ClassificationItemData[];
+  event?: Event;
+  threshold?: ClassificationThreshold;
+  selectedItems: string[];
+  i18nLibrary: string;
+  onClick: (data: ClassificationItemData | undefined) => void;
+  onSelectEvent: (event: Event) => void;
+  children?: (data: ClassificationItemData) => React.ReactNode;
+};
+export function GroupedClassificationCard({
+  group,
+  event,
+  threshold,
+  selectedItems,
+  i18nLibrary,
+  onClick,
+  onSelectEvent,
+  children,
+}: GroupedClassificationCardProps) {
+  const navigate = useNavigate();
+  const { t } = useTranslation(["views/explore", i18nLibrary]);
+
+  // data
+
+  const allItemsSelected = useMemo(
+    () => group.every((data) => selectedItems.includes(data.filename)),
+    [group, selectedItems],
+  );
+
+  const time = useMemo(() => {
+    const item = group[0];
+
+    if (!item?.timestamp) {
+      return undefined;
+    }
+
+    return item.timestamp * 1000;
+  }, [group]);
+
+  return (
+    <div
+      className={cn(
+        "flex cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
+        isMobile && "w-full",
+        allItemsSelected
+          ? "shadow-selected outline-selected"
+          : "outline-transparent duration-500",
+      )}
+      onClick={() => {
+        if (selectedItems.length) {
+          onClick(undefined);
+        }
+      }}
+      onContextMenu={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onClick(undefined);
+      }}
+    >
+      <div className="flex flex-row justify-between">
+        <div className="flex flex-col gap-1">
+          <div className="select-none smart-capitalize">
+            {t("details.person")}
+            {event?.sub_label
+              ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
+              : ": " + t("details.unknown")}
+          </div>
+          {time && (
+            <TimeAgo
+              className="text-sm text-secondary-foreground"
+              time={time}
+              dense
+            />
+          )}
+        </div>
+        {event && (
+          <Tooltip>
+            <TooltipTrigger>
+              <div
+                className="cursor-pointer"
+                onClick={() => {
+                  navigate(`/explore?event_id=${event.id}`);
+                }}
+              >
+                <LuSearch className="size-4 text-muted-foreground" />
+              </div>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>
+                {t("details.item.button.viewInExplore", {
+                  ns: "views/explore",
+                })}
+              </TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
+        )}
+      </div>
+
+      <div
+        className={cn(
+          "gap-2",
+          isDesktop
+            ? "flex flex-row flex-wrap"
+            : "grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-6",
+        )}
+      >
+        {group.map((data: ClassificationItemData) => (
+          <ClassificationCard
+            key={data.filename}
+            data={data}
+            threshold={threshold}
+            selected={
+              allItemsSelected ? false : selectedItems.includes(data.filename)
+            }
+            i18nLibrary={i18nLibrary}
+            onClick={(data, meta) => {
+              if (meta || selectedItems.length > 0) {
+                onClick(data);
+              } else if (event) {
+                onSelectEvent(event);
+              }
+            }}
+          >
+            {children?.(data)}
+          </ClassificationCard>
+        ))}
+      </div>
+    </div>
   );
 }

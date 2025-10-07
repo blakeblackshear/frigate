@@ -1,4 +1,3 @@
-import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
@@ -52,7 +51,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import {
   LuFolderCheck,
@@ -60,17 +59,18 @@ import {
   LuPencil,
   LuRefreshCw,
   LuScanFace,
-  LuSearch,
   LuTrash2,
 } from "react-icons/lu";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import SearchDetailDialog, {
   SearchTab,
 } from "@/components/overlay/detail/SearchDetailDialog";
 import { SearchResult } from "@/types/search";
-import { ClassificationCard } from "@/components/card/ClassificationCard";
+import {
+  ClassificationCard,
+  GroupedClassificationCard,
+} from "@/components/card/ClassificationCard";
 import { ClassificationItemData } from "@/types/classification";
 
 export default function FaceLibrary() {
@@ -758,15 +758,9 @@ function FaceAttemptGroup({
   onSelectEvent,
   onRefresh,
 }: FaceAttemptGroupProps) {
-  const navigate = useNavigate();
   const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
 
   // data
-
-  const allFacesSelected = useMemo(
-    () => group.every((face) => selectedFaces.includes(face.filename)),
-    [group, selectedFaces],
-  );
 
   const threshold = useMemo(() => {
     return {
@@ -774,16 +768,6 @@ function FaceAttemptGroup({
       unknown: config.face_recognition.unknown_score,
     };
   }, [config]);
-
-  const time = useMemo(() => {
-    const item = group[0];
-
-    if (!item?.timestamp) {
-      return undefined;
-    }
-
-    return item.timestamp * 1000;
-  }, [group]);
 
   // interaction
 
@@ -875,108 +859,41 @@ function FaceAttemptGroup({
   );
 
   return (
-    <div
-      className={cn(
-        "flex cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
-        isMobile && "w-full",
-        allFacesSelected
-          ? "shadow-selected outline-selected"
-          : "outline-transparent duration-500",
-      )}
-      onClick={() => {
-        if (selectedFaces.length) {
+    <GroupedClassificationCard
+      group={group}
+      event={event}
+      threshold={threshold}
+      selectedItems={selectedFaces}
+      i18nLibrary="views/faceLibrary"
+      onClick={(data) => {
+        if (data) {
+          onClickFaces([data.filename], true);
+        } else {
           handleClickEvent(true);
         }
       }}
-      onContextMenu={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        handleClickEvent(true);
-      }}
+      onSelectEvent={onSelectEvent}
     >
-      <div className="flex flex-row justify-between">
-        <div className="flex flex-col gap-1">
-          <div className="select-none smart-capitalize">
-            {t("details.person")}
-            {event?.sub_label
-              ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
-              : ": " + t("details.unknown")}
-          </div>
-          {time && (
-            <TimeAgo
-              className="text-sm text-secondary-foreground"
-              time={time}
-              dense
-            />
-          )}
-        </div>
-        {event && (
+      {(data) => (
+        <>
+          <FaceSelectionDialog
+            faceNames={faceNames}
+            onTrainAttempt={(name) => onTrainAttempt(data, name)}
+          >
+            <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+          </FaceSelectionDialog>
           <Tooltip>
             <TooltipTrigger>
-              <div
-                className="cursor-pointer"
-                onClick={() => {
-                  navigate(`/explore?event_id=${event.id}`);
-                }}
-              >
-                <LuSearch className="size-4 text-muted-foreground" />
-              </div>
+              <LuRefreshCw
+                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                onClick={() => onReprocess(data)}
+              />
             </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent>
-                {t("details.item.button.viewInExplore", {
-                  ns: "views/explore",
-                })}
-              </TooltipContent>
-            </TooltipPortal>
+            <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
           </Tooltip>
-        )}
-      </div>
-
-      <div
-        className={cn(
-          "gap-2",
-          isDesktop
-            ? "flex flex-row flex-wrap"
-            : "grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-6",
-        )}
-      >
-        {group.map((data: ClassificationItemData) => (
-          <ClassificationCard
-            key={data.filename}
-            data={data}
-            threshold={threshold}
-            selected={
-              allFacesSelected ? false : selectedFaces.includes(data.filename)
-            }
-            i18nLibrary="views/faceLibrary"
-            onClick={(data, meta) => {
-              if (meta || selectedFaces.length > 0) {
-                onClickFaces([data.filename], true);
-              } else if (event) {
-                onSelectEvent(event);
-              }
-            }}
-          >
-            <FaceSelectionDialog
-              faceNames={faceNames}
-              onTrainAttempt={(name) => onTrainAttempt(data, name)}
-            >
-              <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-            </FaceSelectionDialog>
-            <Tooltip>
-              <TooltipTrigger>
-                <LuRefreshCw
-                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={() => onReprocess(data)}
-                />
-              </TooltipTrigger>
-              <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
-            </Tooltip>
-          </ClassificationCard>
-        ))}
-      </div>
-    </div>
+        </>
+      )}
+    </GroupedClassificationCard>
   );
 }
 
