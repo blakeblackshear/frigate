@@ -3,6 +3,8 @@ import { ObjectLifecycleSequence } from "@/types/timeline";
 import { LifecycleIcon } from "@/components/overlay/detail/ObjectLifecycle";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { useActivityStream } from "@/contexts/ActivityStreamContext";
+import scrollIntoView from "scroll-into-view-if-needed";
+import useUserInteraction from "@/hooks/use-user-interaction";
 
 type ActivityStreamProps = {
   timelineData: ObjectLifecycleSequence[];
@@ -19,6 +21,11 @@ export default function ActivityStream({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const effectiveTime = currentTime + annotationOffset;
+
+  // Track user interaction and adjust scrolling behavior
+  const { userInteracting, setProgrammaticScroll } = useUserInteraction({
+    elementRef: scrollRef,
+  });
 
   // group activities by timestamp (within 1 second resolution window)
   const groupedActivities = useMemo(() => {
@@ -63,7 +70,7 @@ export default function ActivityStream({
 
   // Auto-scroll to current time
   useEffect(() => {
-    if (!scrollRef.current) return;
+    if (!scrollRef.current || userInteracting) return;
 
     // Find the last group where effectiveTimestamp <= currentTime + annotationOffset
     let currentGroupIndex = -1;
@@ -75,17 +82,24 @@ export default function ActivityStream({
     }
 
     if (currentGroupIndex !== -1) {
-      const element = scrollRef.current.children[
-        currentGroupIndex
-      ] as HTMLElement;
+      const element = scrollRef.current.querySelector(
+        `[data-timestamp="${filteredGroups[currentGroupIndex].timestamp}"]`,
+      ) as HTMLElement;
       if (element) {
-        element.scrollIntoView({
+        setProgrammaticScroll();
+        scrollIntoView(element, {
+          scrollMode: "if-needed",
           behavior: "smooth",
-          block: "center",
         });
       }
     }
-  }, [filteredGroups, effectiveTime, annotationOffset]);
+  }, [
+    filteredGroups,
+    effectiveTime,
+    annotationOffset,
+    userInteracting,
+    setProgrammaticScroll,
+  ]);
 
   return (
     <div
@@ -127,6 +141,7 @@ function ActivityGroup({ group, isCurrent, onSeek }: ActivityGroupProps) {
 
   return (
     <div
+      data-timestamp={group.timestamp}
       className={`cursor-pointer rounded-lg border p-3 transition-colors ${
         isCurrent
           ? "border-primary/20 bg-primary/10"
