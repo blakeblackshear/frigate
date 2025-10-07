@@ -19,6 +19,8 @@ import { usePersistence } from "@/hooks/use-persistence";
 import { cn } from "@/lib/utils";
 import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 import { useTranslation } from "react-i18next";
+import ObjectTrackOverlay from "@/components/overlay/ObjectTrackOverlay";
+import { useActivityStream } from "@/contexts/ActivityStreamContext";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = !isAndroid;
@@ -47,6 +49,7 @@ type HlsVideoPlayerProps = {
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
+  onSeekToTime?: (timestamp: number) => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
   toggleFullscreen?: () => void;
@@ -66,6 +69,7 @@ export default function HlsVideoPlayer({
   onPlayerLoaded,
   onTimeUpdate,
   onPlaying,
+  onSeekToTime,
   setFullResolution,
   onUploadFrame,
   toggleFullscreen,
@@ -73,6 +77,8 @@ export default function HlsVideoPlayer({
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation("components/player");
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { selectedObjectId, currentTime, camera, isActivityMode } =
+    useActivityStream();
 
   // playback
 
@@ -84,17 +90,19 @@ export default function HlsVideoPlayer({
   const handleLoadedMetadata = useCallback(() => {
     setLoadedMetadata(true);
     if (videoRef.current) {
+      const width = videoRef.current.videoWidth;
+      const height = videoRef.current.videoHeight;
+
       if (setFullResolution) {
         setFullResolution({
-          width: videoRef.current.videoWidth,
-          height: videoRef.current.videoHeight,
+          width,
+          height,
         });
       }
 
-      setTallCamera(
-        videoRef.current.videoWidth / videoRef.current.videoHeight <
-          ASPECT_VERTICAL_LAYOUT,
-      );
+      setVideoDimensions({ width, height });
+
+      setTallCamera(width / height < ASPECT_VERTICAL_LAYOUT);
     }
   }, [videoRef, setFullResolution]);
 
@@ -174,6 +182,10 @@ export default function HlsVideoPlayer({
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [zoomScale, setZoomScale] = useState(1.0);
+  const [videoDimensions, setVideoDimensions] = useState<{
+    width: number;
+    height: number;
+  }>({ width: 0, height: 0 });
 
   useEffect(() => {
     if (!isDesktop) {
@@ -296,6 +308,28 @@ export default function HlsVideoPlayer({
           height: isMobile ? "100%" : undefined,
         }}
       >
+        {isActivityMode &&
+          selectedObjectId &&
+          camera &&
+          currentTime &&
+          videoDimensions.width > 0 &&
+          videoDimensions.height > 0 && (
+            <div className="absolute z-50 size-full">
+              <ObjectTrackOverlay
+                camera={camera}
+                selectedObjectId={selectedObjectId}
+                currentTime={currentTime}
+                videoWidth={videoDimensions.width}
+                videoHeight={videoDimensions.height}
+                className="absolute inset-0 z-10"
+                onSeekToTime={(timestamp) => {
+                  if (onSeekToTime) {
+                    onSeekToTime(timestamp);
+                  }
+                }}
+              />
+            </div>
+          )}
         <video
           ref={videoRef}
           className={`size-full rounded-lg bg-black md:rounded-2xl ${loadedMetadata ? "" : "invisible"} cursor-pointer`}
