@@ -2,6 +2,7 @@
 
 import logging
 import os
+import platform
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -12,6 +13,30 @@ from frigate.util.model import get_ort_providers
 from frigate.util.rknn_converter import auto_convert_model, is_rknn_compatible
 
 logger = logging.getLogger(__name__)
+
+
+def is_arm64_platform() -> bool:
+    """Check if we're running on an ARM platform."""
+    machine = platform.machine().lower()
+    return machine in ("aarch64", "arm64", "armv8", "armv7l")
+
+
+def get_ort_session_options() -> ort.SessionOptions | None:
+    """Get ONNX Runtime session options with appropriate settings.
+
+    On ARM/RKNN platforms, use basic optimizations to avoid graph fusion issues
+    that can break certain models. On amd64, use default optimizations for better performance.
+    """
+    sess_options = None
+
+    if is_arm64_platform():
+        sess_options = ort.SessionOptions()
+        sess_options.graph_optimization_level = (
+            ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
+        )
+
+    return sess_options
+
 
 # Import OpenVINO only when needed to avoid circular dependencies
 try:
@@ -469,6 +494,7 @@ def get_optimized_runner(
     return ONNXModelRunner(
         ort.InferenceSession(
             model_path,
+            sess_options=get_ort_session_options(),
             providers=providers,
             provider_options=options,
         )
