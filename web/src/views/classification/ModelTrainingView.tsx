@@ -61,6 +61,7 @@ import { MdAutoFixHigh } from "react-icons/md";
 import TrainFilterDialog from "@/components/overlay/dialog/TrainFilterDialog";
 import useApiFilter from "@/hooks/use-api-filter";
 import { TrainFilter } from "@/types/classification";
+import { ClassificationCard } from "@/components/card/ClassificationCard";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
@@ -626,53 +627,34 @@ function DatasetGrid({
       className="scrollbar-container flex flex-wrap gap-2 overflow-y-auto p-2"
     >
       {classData.map((image) => (
-        <div
-          className={cn(
-            "flex w-60 cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
-            selectedImages.includes(image)
-              ? "shadow-selected outline-selected"
-              : "outline-transparent duration-500",
-          )}
-          onClick={(e) => {
-            e.stopPropagation();
-
-            if (e.ctrlKey || e.metaKey) {
-              onClickImages([image], true);
-            }
+        <ClassificationCard
+          key={image}
+          className="w-60 gap-4 rounded-lg bg-card p-2"
+          imgClassName="size-auto"
+          data={{
+            filename: image,
+            filepath: `clips/${modelName}/dataset/${categoryName}/${image}`,
+            name: "",
           }}
+          selected={selectedImages.includes(image)}
+          i18nLibrary="views/classificationModel"
+          onClick={(data, _) => onClickImages([data.filename], true)}
         >
-          <div
-            className={cn(
-              "w-full overflow-hidden p-2 *:text-card-foreground",
-              isMobile && "flex justify-center",
-            )}
-          >
-            <img
-              className="rounded-lg"
-              src={`${baseUrl}clips/${modelName}/dataset/${categoryName}/${image}`}
-            />
-          </div>
-          <div className="rounded-b-lg bg-card p-3">
-            <div className="flex w-full flex-row items-center justify-between gap-2">
-              <div className="flex w-full flex-row items-start justify-end gap-5 md:gap-4">
-                <Tooltip>
-                  <TooltipTrigger>
-                    <LuTrash2
-                      className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete([image]);
-                      }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {t("button.deleteClassificationAttempts")}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-        </div>
+          <Tooltip>
+            <TooltipTrigger>
+              <LuTrash2
+                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete([image]);
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              {t("button.deleteClassificationAttempts")}
+            </TooltipContent>
+          </Tooltip>
+        </ClassificationCard>
       ))}
     </div>
   );

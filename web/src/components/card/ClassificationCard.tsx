@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 
 type ClassificationCardProps = {
   className?: string;
+  imgClassName?: string;
   data: ClassificationItemData;
   threshold?: ClassificationThreshold;
   selected: boolean;
@@ -20,6 +21,7 @@ type ClassificationCardProps = {
 };
 export function ClassificationCard({
   className,
+  imgClassName,
   data,
   threshold,
   selected,
@@ -75,7 +77,7 @@ export function ClassificationCard({
           <img
             ref={imgRef}
             onLoad={() => setImageLoaded(true)}
-            className={cn("size-44", isMobile && "w-full")}
+            className={cn("size-44", imgClassName, isMobile && "w-full")}
             src={`${baseUrl}${data.filepath}`}
             onClick={(e) => {
               e.stopPropagation();
@@ -84,7 +86,7 @@ export function ClassificationCard({
           />
           {imageArea != undefined && (
             <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
-              {t("pixels", { area: imageArea })}
+              {t("information.pixels", { ns: "common", area: imageArea })}
             </div>
           )}
         </div>
