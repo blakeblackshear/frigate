@@ -87,6 +87,7 @@ When forming your description:
 - **Weigh all evidence holistically**: Start by checking if the activity matches the normal patterns above. If it does, assign Level 0. Only consider Level 1 if the activity clearly deviates from normal patterns or shows genuine security concerns that warrant attention.
 
 Your response MUST be a flat JSON object with:
+- `title` (string): A concise, one-sentence title that captures the main activity. Include any verified recognized objects (from the "Verified recognized objects" list below) and key detected objects. Examples: "Joe walking dog in backyard", "Unknown person testing car doors at night".
 - `scene` (string): A narrative description of what happens across the sequence from start to finish. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
 - `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below. Your threat level must be consistent with your scene description and the guidance above.
@@ -167,7 +168,7 @@ Sequence details:
         timeline_summary_prompt = f"""
 You are a security officer.
 Time range: {time_range}.
-Input: JSON list with "scene", "confidence", "potential_threat_level" (1-2), "other_concerns".
+Input: JSON list with "title", "scene", "confidence", "potential_threat_level" (1-2), "other_concerns".
 
 Task: Write a concise, human-presentable security report in markdown format.
 

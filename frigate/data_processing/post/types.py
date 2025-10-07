@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class ReviewMetadata(BaseModel):
     model_config = ConfigDict(extra="ignore", protected_namespaces=())
 
+    title: str = Field(description="A concise title for the activity.")
     scene: str = Field(
         description="A comprehensive description of the setting and entities, including relevant context and plausible inferences if supported by visual evidence."
     )
