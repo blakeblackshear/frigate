@@ -60,7 +60,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { MdAutoFixHigh } from "react-icons/md";
 import TrainFilterDialog from "@/components/overlay/dialog/TrainFilterDialog";
 import useApiFilter from "@/hooks/use-api-filter";
-import { TrainFilter } from "@/types/classification";
+import { ClassificationItemData, TrainFilter } from "@/types/classification";
 import { ClassificationCard } from "@/components/card/ClassificationCard";
 
 type ModelTrainingViewProps = {
@@ -682,20 +682,18 @@ function TrainGrid({
   onRefresh,
   onDelete,
 }: TrainGridProps) {
-  const { t } = useTranslation(["views/classificationModel"]);
-
-  const trainData = useMemo(
+  const trainData = useMemo<ClassificationItemData[]>(
     () =>
       trainImages
         .map((raw) => {
           const parts = raw.replaceAll(".webp", "").split("-");
           const rawScore = Number.parseFloat(parts[2]);
           return {
-            raw,
-            timestamp: parts[0],
-            label: parts[1],
-            score: rawScore * 100,
-            truePositive: rawScore >= model.threshold,
+            filename: raw,
+            filepath: `clips/${model.name}/train/${raw}`,
+            timestamp: Number.parseFloat(parts[0]),
+            name: parts[1],
+            score: rawScore,
           };
         })
         .filter((data) => {
@@ -703,10 +701,7 @@ function TrainGrid({
             return true;
           }
 
-          if (
-            trainFilter.classes &&
-            !trainFilter.classes.includes(data.label)
-          ) {
+          if (trainFilter.classes && !trainFilter.classes.includes(data.name)) {
             return false;
           }
 
@@ -726,9 +721,56 @@ function TrainGrid({
 
           return true;
         })
-        .sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
+        .sort((a, b) => b.timestamp - a.timestamp),
     [model, trainImages, trainFilter],
   );
+
+  if (model.state_config) {
+    return (
+      <StateTrainGrid
+        model={model}
+        contentRef={contentRef}
+        classes={classes}
+        trainData={trainData}
+        selectedImages={selectedImages}
+        onClickImages={onClickImages}
+        onRefresh={onRefresh}
+        onDelete={onDelete}
+      />
+    );
+  }
+
+  return <div />;
+}
+
+type StateTrainGridProps = {
+  model: CustomClassificationModelConfig;
+  contentRef: MutableRefObject<HTMLDivElement | null>;
+  classes: string[];
+  trainData?: ClassificationItemData[];
+  selectedImages: string[];
+  onClickImages: (images: string[], ctrl: boolean) => void;
+  onRefresh: () => void;
+  onDelete: (ids: string[]) => void;
+};
+function StateTrainGrid({
+  model,
+  contentRef,
+  classes,
+  trainData,
+  selectedImages,
+  onClickImages,
+  onRefresh,
+  onDelete,
+}: StateTrainGridProps) {
+  const { t } = useTranslation(["views/classificationModel"]);
+
+  const threshold = useMemo(() => {
+    return {
+      recognition: model.threshold,
+      unknown: model.threshold,
+    };
+  }, [model]);
 
   return (
     <div
@@ -739,73 +781,39 @@ function TrainGrid({
       )}
     >
       {trainData?.map((data) => (
-        <div
-          key={data.timestamp}
-          className={cn(
-            "flex w-56 cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
-            selectedImages.includes(data.raw)
-              ? "shadow-selected outline-selected"
-              : "outline-transparent duration-500",
-            isMobile && "w-[48%]",
-          )}
-          onClick={(e) => {
-            e.stopPropagation();
-            onClickImages([data.raw], e.ctrlKey || e.metaKey);
-          }}
+        <ClassificationCard
+          className="w-60 gap-2 rounded-lg bg-card p-2"
+          imgClassName="size-auto"
+          data={data}
+          threshold={threshold}
+          selected={selectedImages.includes(data.filename)}
+          i18nLibrary="views/classificationModel"
+          showArea={false}
+          onClick={(data, meta) => onClickImages([data.filename], meta)}
         >
-          <div
-            className={cn(
-              "w-full overflow-hidden p-2 *:text-card-foreground",
-              isMobile && "flex justify-center",
-            )}
+          <ClassificationSelectionDialog
+            classes={classes}
+            modelName={model.name}
+            image={data.filename}
+            onRefresh={onRefresh}
           >
-            <img
-              className="w-56 rounded-lg"
-              src={`${baseUrl}clips/${model.name}/train/${data.raw}`}
-            />
-          </div>
-          <div className="rounded-b-lg bg-card p-3">
-            <div className="flex w-full flex-row items-center justify-between gap-2">
-              <div className="flex flex-col items-start text-xs text-primary-variant">
-                <div className="smart-capitalize">
-                  {data.label.replaceAll("_", " ")}
-                </div>
-                <div
-                  className={cn(
-                    "",
-                    data.truePositive ? "text-success" : "text-danger",
-                  )}
-                >
-                  {data.score}%
-                </div>
-              </div>
-              <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-                <ClassificationSelectionDialog
-                  classes={classes}
-                  modelName={model.name}
-                  image={data.raw}
-                  onRefresh={onRefresh}
-                >
-                  <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-                </ClassificationSelectionDialog>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <LuTrash2
-                      className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete([data.raw]);
-                      }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {t("button.deleteClassificationAttempts")}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-        </div>
+            <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+          </ClassificationSelectionDialog>
+          <Tooltip>
+            <TooltipTrigger>
+              <LuTrash2
+                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete([data.filename]);
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              {t("button.deleteClassificationAttempts")}
+            </TooltipContent>
+          </Tooltip>
+        </ClassificationCard>
       ))}
     </div>
   );

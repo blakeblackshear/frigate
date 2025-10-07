@@ -16,6 +16,7 @@ type ClassificationCardProps = {
   threshold?: ClassificationThreshold;
   selected: boolean;
   i18nLibrary: string;
+  showArea?: boolean;
   onClick: (data: ClassificationItemData, meta: boolean) => void;
   children?: React.ReactNode;
 };
@@ -26,6 +27,7 @@ export function ClassificationCard({
   threshold,
   selected,
   i18nLibrary,
+  showArea = true,
   onClick,
   children,
 }: ClassificationCardProps) {
@@ -55,12 +57,12 @@ export function ClassificationCard({
   });
 
   const imageArea = useMemo(() => {
-    if (imgRef.current == null || !imageLoaded) {
+    if (!showArea || imgRef.current == null || !imageLoaded) {
       return undefined;
     }
 
     return imgRef.current.naturalWidth * imgRef.current.naturalHeight;
-  }, [imageLoaded]);
+  }, [showArea, imageLoaded]);
 
   return (
     <>
