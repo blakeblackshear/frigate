@@ -248,9 +248,7 @@ def run_analysis(
         "id": final_data["id"],
         "camera": camera,
         "zones": final_data["data"]["zones"],
-        "start": datetime.datetime.fromtimestamp(final_data["start_time"]).strftime(
-            "%A, %I:%M %p"
-        ),
+        "start": "03:33:10 AM",
         "duration": round(final_data["end_time"] - final_data["start_time"]),
     }
 
