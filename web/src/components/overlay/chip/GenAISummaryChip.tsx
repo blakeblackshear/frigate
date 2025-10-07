@@ -12,17 +12,22 @@ type GenAISummaryChipProps = {
   onClick: () => void;
 };
 export function GenAISummaryChip({ review, onClick }: GenAISummaryChipProps) {
-  if (!review?.data?.metadata) {
-    return null;
-  }
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(review?.data?.metadata != undefined);
+  }, [review]);
 
   return (
     <div
-      className="absolute left-1/2 top-8 z-30 flex max-w-[90vw] -translate-x-[50%] cursor-pointer select-none items-center gap-2 rounded-full bg-card p-2 text-sm"
+      className={cn(
+        "absolute left-1/2 top-8 z-30 flex max-w-[90vw] -translate-x-[50%] cursor-pointer select-none items-center gap-2 rounded-full bg-card p-2 text-sm transition-all duration-500",
+        isVisible ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0",
+      )}
       onClick={onClick}
     >
       <MdAutoAwesome className="shrink-0" />
-      <span className="truncate">{review.data.metadata.title}</span>
+      <span className="truncate">{review?.data.metadata?.title}</span>
     </div>
   );
 }
