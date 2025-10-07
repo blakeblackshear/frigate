@@ -801,6 +801,7 @@ function StateTrainGrid({
     >
       {trainData?.map((data) => (
         <ClassificationCard
+          key={data.filename}
           className="w-60 gap-2 rounded-lg bg-card p-2"
           imgClassName="size-auto"
           data={data}
