@@ -15,8 +15,10 @@ export default function ActivityStream({
   currentTime,
   onSeek,
 }: ActivityStreamProps) {
-  const { selectedObjectId } = useActivityStream();
+  const { selectedObjectId, annotationOffset } = useActivityStream();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const effectiveTime = currentTime + annotationOffset;
 
   // group activities by timestamp (within 1 second resolution window)
   const groupedActivities = useMemo(() => {
@@ -36,12 +38,13 @@ export default function ActivityStream({
           (a, b) => a.timestamp - b.timestamp,
         );
         return {
-          timestamp: sortedActivities[0].timestamp, // use the earliest activity timestamp
+          timestamp: sortedActivities[0].timestamp, // Original timestamp for display
+          effectiveTimestamp: sortedActivities[0].timestamp + annotationOffset, // Adjusted for sorting/comparison
           activities: sortedActivities,
         };
       })
       .sort((a, b) => a.timestamp - b.timestamp);
-  }, [timelineData]);
+  }, [timelineData, annotationOffset]);
 
   // Filter activities if object is selected
   const filteredGroups = useMemo(() => {
@@ -62,10 +65,10 @@ export default function ActivityStream({
   useEffect(() => {
     if (!scrollRef.current) return;
 
-    // Find the last group where timestamp <= currentTime
+    // Find the last group where effectiveTimestamp <= currentTime + annotationOffset
     let currentGroupIndex = -1;
     for (let i = filteredGroups.length - 1; i >= 0; i--) {
-      if (filteredGroups[i].timestamp <= currentTime) {
+      if (filteredGroups[i].effectiveTimestamp <= effectiveTime) {
         currentGroupIndex = i;
         break;
       }
@@ -82,7 +85,7 @@ export default function ActivityStream({
         });
       }
     }
-  }, [filteredGroups, currentTime]);
+  }, [filteredGroups, effectiveTime, annotationOffset]);
 
   return (
     <div
@@ -99,7 +102,7 @@ export default function ActivityStream({
             <ActivityGroup
               key={group.timestamp}
               group={group}
-              isCurrent={group.timestamp <= currentTime}
+              isCurrent={group.effectiveTimestamp <= currentTime}
               onSeek={onSeek}
             />
           ))
@@ -112,6 +115,7 @@ export default function ActivityStream({
 type ActivityGroupProps = {
   group: {
     timestamp: number;
+    effectiveTimestamp: number;
     activities: ObjectLifecycleSequence[];
   };
   isCurrent: boolean;

@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useState, useMemo } from "react";
 import { ObjectLifecycleSequence } from "@/types/timeline";
+import { FrigateConfig } from "@/types/frigateConfig";
+import useSWR from "swr";
 
 interface ActivityStreamContextType {
   selectedObjectId: string | undefined;
   selectedObjectTimeline: ObjectLifecycleSequence[] | undefined;
   currentTime: number;
   camera: string;
+  annotationOffset: number;
   setSelectedObjectId: (id: string | undefined) => void;
   isActivityMode: boolean;
 }
@@ -33,6 +36,16 @@ export function ActivityStreamProvider({
     string | undefined
   >();
 
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  const annotationOffset = useMemo(() => {
+    if (!config) {
+      return 0;
+    }
+
+    return (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000; // Convert to seconds
+  }, [config, camera]);
+
   const selectedObjectTimeline = useMemo(() => {
     if (!selectedObjectId || !timelineData) return undefined;
     return timelineData.filter((item) => item.source_id === selectedObjectId);
@@ -43,6 +56,7 @@ export function ActivityStreamProvider({
     selectedObjectTimeline,
     currentTime,
     camera,
+    annotationOffset,
     setSelectedObjectId,
     isActivityMode,
   };

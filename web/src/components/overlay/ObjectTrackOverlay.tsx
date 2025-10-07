@@ -2,6 +2,7 @@ import { useMemo, useCallback } from "react";
 import { ObjectLifecycleSequence, LifecycleClassType } from "@/types/timeline";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
+import { useActivityStream } from "@/contexts/ActivityStreamContext";
 import {
   Tooltip,
   TooltipContent,
@@ -32,6 +33,10 @@ export default function ObjectTrackOverlay({
   objectTimeline,
 }: ObjectTrackOverlayProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { annotationOffset } = useActivityStream();
+
+  // Offset currentTime by annotation offset for rendering
+  const effectiveCurrentTime = currentTime - annotationOffset;
 
   // Fetch the full event data to get saved path points
   const { data: eventData } = useSWR(["event_ids", { ids: selectedObjectId }]);
@@ -76,14 +81,14 @@ export default function ObjectTrackOverlay({
   const currentObjectZones = useMemo(() => {
     if (!objectTimeline) return [];
 
-    // Find the most recent timeline event at or before current time
+    // Find the most recent timeline event at or before effective current time
     const relevantEvents = objectTimeline
-      .filter((event) => event.timestamp <= currentTime)
+      .filter((event) => event.timestamp <= effectiveCurrentTime)
       .sort((a, b) => b.timestamp - a.timestamp); // Most recent first
 
     // Get zones from the most recent event
     return relevantEvents[0]?.data?.zones || [];
-  }, [objectTimeline, currentTime]);
+  }, [objectTimeline, effectiveCurrentTime]);
 
   const zones = useMemo(() => {
     if (!config?.cameras?.[camera]?.zones || !currentObjectZones.length)
@@ -320,9 +325,12 @@ export default function ObjectTrackOverlay({
       {(() => {
         if (!objectTimeline) return null;
 
-        // Find the most recent timeline event at or before current time with a bounding box
+        // Find the most recent timeline event at or before effective current time with a bounding box
         const relevantEvents = objectTimeline
-          .filter((event) => event.timestamp <= currentTime && event.data.box)
+          .filter(
+            (event) =>
+              event.timestamp <= effectiveCurrentTime && event.data.box,
+          )
           .sort((a, b) => b.timestamp - a.timestamp); // Most recent first
 
         const currentEvent = relevantEvents[0];
