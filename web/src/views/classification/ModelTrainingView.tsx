@@ -65,6 +65,10 @@ import {
   GroupedClassificationCard,
 } from "@/components/card/ClassificationCard";
 import { Event } from "@/types/event";
+import SearchDetailDialog, {
+  SearchTab,
+} from "@/components/overlay/detail/SearchDetailDialog";
+import { SearchResult } from "@/types/search";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
@@ -889,53 +893,113 @@ function ObjectTrainGrid({
     };
   }, [model]);
 
+  // selection
+
+  const [selectedEvent, setSelectedEvent] = useState<Event>();
+  const [dialogTab, setDialogTab] = useState<SearchTab>("details");
+
+  // handlers
+
+  const handleClickEvent = useCallback(
+    (
+      group: ClassificationItemData[],
+      event: Event | undefined,
+      meta: boolean,
+    ) => {
+      if (event && selectedImages.length == 0 && !meta) {
+        setSelectedEvent(event);
+      } else {
+        const anySelected =
+          group.find((item) => selectedImages.includes(item.filename)) !=
+          undefined;
+
+        if (anySelected) {
+          // deselect all
+          const toDeselect: string[] = [];
+          group.forEach((item) => {
+            if (selectedImages.includes(item.filename)) {
+              toDeselect.push(item.filename);
+            }
+          });
+          onClickImages(toDeselect, false);
+        } else {
+          // select all
+          onClickImages(
+            group.map((item) => item.filename),
+            true,
+          );
+        }
+      }
+    },
+    [selectedImages, onClickImages],
+  );
+
   return (
-    <div
-      ref={contentRef}
-      className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
-    >
-      {Object.entries(groups).map(([key, group]) => {
-        const event = events?.find((ev) => ev.id == key);
-        return (
-          <GroupedClassificationCard
-            key={key}
-            group={group}
-            event={event}
-            threshold={threshold}
-            selectedItems={selectedImages}
-            i18nLibrary="views/classificationModel"
-            onClick={() => {}}
-            onSelectEvent={() => {}}
-          >
-            {(data) => (
-              <>
-                <ClassificationSelectionDialog
-                  classes={classes}
-                  modelName={model.name}
-                  image={data.filename}
-                  onRefresh={onRefresh}
-                >
-                  <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-                </ClassificationSelectionDialog>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <LuTrash2
-                      className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete([data.filename]);
-                      }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {t("button.deleteClassificationAttempts")}
-                  </TooltipContent>
-                </Tooltip>
-              </>
-            )}
-          </GroupedClassificationCard>
-        );
-      })}
-    </div>
+    <>
+      <SearchDetailDialog
+        search={
+          selectedEvent ? (selectedEvent as unknown as SearchResult) : undefined
+        }
+        page={dialogTab}
+        setSimilarity={undefined}
+        setSearchPage={setDialogTab}
+        setSearch={(search) => setSelectedEvent(search as unknown as Event)}
+        setInputFocused={() => {}}
+      />
+
+      <div
+        ref={contentRef}
+        className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
+      >
+        {Object.entries(groups).map(([key, group]) => {
+          const event = events?.find((ev) => ev.id == key);
+          return (
+            <GroupedClassificationCard
+              key={key}
+              group={group}
+              event={event}
+              threshold={threshold}
+              selectedItems={selectedImages}
+              i18nLibrary="views/classificationModel"
+              onClick={(data) => {
+                if (data) {
+                  onClickImages([data.filename], true);
+                } else {
+                  handleClickEvent(group, event, true);
+                }
+              }}
+              onSelectEvent={() => {}}
+            >
+              {(data) => (
+                <>
+                  <ClassificationSelectionDialog
+                    classes={classes}
+                    modelName={model.name}
+                    image={data.filename}
+                    onRefresh={onRefresh}
+                  >
+                    <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+                  </ClassificationSelectionDialog>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <LuTrash2
+                        className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete([data.filename]);
+                        }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("button.deleteClassificationAttempts")}
+                    </TooltipContent>
+                  </Tooltip>
+                </>
+              )}
+            </GroupedClassificationCard>
+          );
+        })}
+      </div>
+    </>
   );
 }
