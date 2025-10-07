@@ -151,6 +151,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             write_classification_attempt(
                 self.train_dir,
                 cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+                "none-none",
                 now,
                 "unknown",
                 0.0,
@@ -171,6 +172,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         write_classification_attempt(
             self.train_dir,
             cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+            "none-none",
             now,
             self.labelmap[best_id],
             score,
@@ -293,6 +295,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             write_classification_attempt(
                 self.train_dir,
                 cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
+                obj_data["id"],
                 now,
                 "unknown",
                 0.0,
@@ -314,6 +317,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         write_classification_attempt(
             self.train_dir,
             cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
+            obj_data["id"],
             now,
             self.labelmap[best_id],
             score,
@@ -372,6 +376,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 def write_classification_attempt(
     folder: str,
     frame: np.ndarray,
+    event_id: str,
     timestamp: float,
     label: str,
     score: float,
@@ -379,7 +384,7 @@ def write_classification_attempt(
     if "-" in label:
         label = label.replace("-", "_")
 
-    file = os.path.join(folder, f"{timestamp}-{label}-{score}.webp")
+    file = os.path.join(folder, f"{event_id}-{timestamp}-{label}-{score}.webp")
     os.makedirs(folder, exist_ok=True)
     cv2.imwrite(file, frame)
 
