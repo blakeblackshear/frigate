@@ -77,8 +77,13 @@ export default function HlsVideoPlayer({
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation("components/player");
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { selectedObjectId, currentTime, camera, isActivityMode } =
-    useActivityStream();
+  const {
+    selectedObjectId,
+    selectedObjectTimeline,
+    currentTime,
+    camera,
+    isActivityMode,
+  } = useActivityStream();
 
   // playback
 
@@ -327,6 +332,7 @@ export default function HlsVideoPlayer({
                     onSeekToTime(timestamp);
                   }
                 }}
+                objectTimeline={selectedObjectTimeline}
               />
             </div>
           )}

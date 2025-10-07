@@ -18,6 +18,7 @@ type ObjectTrackOverlayProps = {
   videoHeight: number;
   className?: string;
   onSeekToTime?: (timestamp: number) => void;
+  objectTimeline?: ObjectLifecycleSequence[];
 };
 
 export default function ObjectTrackOverlay({
@@ -28,16 +29,9 @@ export default function ObjectTrackOverlay({
   videoHeight,
   className,
   onSeekToTime,
+  objectTimeline,
 }: ObjectTrackOverlayProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
-
-  // Fetch timeline data for the selected object
-  const { data: objectTimeline } = useSWR<ObjectLifecycleSequence[]>([
-    "timeline",
-    {
-      source_id: selectedObjectId,
-    },
-  ]);
 
   // Fetch the full event data to get saved path points
   const { data: eventData } = useSWR(["event_ids", { ids: selectedObjectId }]);
@@ -158,9 +152,8 @@ export default function ObjectTrackOverlay({
     return pathPoints.map((point) => {
       // Find the corresponding timeline entry for this point
       const timelineEntry = objectTimeline?.find(
-        (entry) => Math.abs(entry.timestamp - point.timestamp) < 0.1,
+        (entry) => entry.timestamp == point.timestamp,
       );
-
       return {
         x: point.x * videoWidth,
         y: point.y * videoHeight,

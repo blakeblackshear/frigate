@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useMemo } from "react";
+import { ObjectLifecycleSequence } from "@/types/timeline";
 
 interface ActivityStreamContextType {
   selectedObjectId: string | undefined;
+  selectedObjectTimeline: ObjectLifecycleSequence[] | undefined;
   currentTime: number;
   camera: string;
   setSelectedObjectId: (id: string | undefined) => void;
@@ -17,6 +19,7 @@ interface ActivityStreamProviderProps {
   isActivityMode: boolean;
   currentTime: number;
   camera: string;
+  timelineData: ObjectLifecycleSequence[];
 }
 
 export function ActivityStreamProvider({
@@ -24,13 +27,20 @@ export function ActivityStreamProvider({
   isActivityMode,
   currentTime,
   camera,
+  timelineData,
 }: ActivityStreamProviderProps) {
   const [selectedObjectId, setSelectedObjectId] = useState<
     string | undefined
   >();
 
+  const selectedObjectTimeline = useMemo(() => {
+    if (!selectedObjectId || !timelineData) return undefined;
+    return timelineData.filter((item) => item.source_id === selectedObjectId);
+  }, [timelineData, selectedObjectId]);
+
   const value: ActivityStreamContextType = {
     selectedObjectId,
+    selectedObjectTimeline,
     currentTime,
     camera,
     setSelectedObjectId,

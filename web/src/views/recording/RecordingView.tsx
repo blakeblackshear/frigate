@@ -571,6 +571,7 @@ export function RecordingView({
       isActivityMode={timelineType === "activity"}
       currentTime={currentTime}
       camera={mainCamera}
+      timelineData={timelineData}
     >
       <div ref={contentRef} className="flex size-full flex-col pt-2">
         <Toaster closeButton={true} />
