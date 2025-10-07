@@ -107,8 +107,11 @@ class Rknn(DetectionApi):
                 # Determine model type from config
                 model_type = self.detector_config.model.model_type
 
+                # Convert enum to string if needed
+                model_type_str = model_type.value if model_type else None
+
                 # Auto-convert the model
-                converted_path = auto_convert_model(model_path, model_type.value)
+                converted_path = auto_convert_model(model_path, model_type_str)
 
                 if converted_path:
                     model_props["path"] = converted_path

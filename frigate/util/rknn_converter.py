@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 MODEL_TYPE_CONFIGS = {
     "yolo-generic": {
         "mean_values": [[0, 0, 0]],
-        "std_values": [[255, 255, 255]],
+        "std_values": [[1, 1, 1]],
         "target_platform": None,  # Will be set dynamically
     },
     "yolonas": {
@@ -179,6 +179,22 @@ def convert_onnx_to_rknn(
     config = MODEL_TYPE_CONFIGS[model_type].copy()
     config["target_platform"] = soc
 
+    # RKNN toolkit requires .onnx extension, create temporary copy if needed
+    temp_onnx_path = None
+    onnx_model_path = onnx_path
+
+    if not onnx_path.endswith(".onnx"):
+        import shutil
+
+        temp_onnx_path = f"{onnx_path}.onnx"
+        logger.debug(f"Creating temporary ONNX copy: {temp_onnx_path}")
+        try:
+            shutil.copy2(onnx_path, temp_onnx_path)
+            onnx_model_path = temp_onnx_path
+        except Exception as e:
+            logger.error(f"Failed to create temporary ONNX copy: {e}")
+            return False
+
     try:
         from rknn.api import RKNN  # type: ignore
 
@@ -188,18 +204,18 @@ def convert_onnx_to_rknn(
 
         if model_type == "jina-clip-v1-vision":
             load_output = rknn.load_onnx(
-                model=onnx_path,
+                model=onnx_model_path,
                 inputs=["pixel_values"],
                 input_size_list=[[1, 3, 224, 224]],
             )
         elif model_type == "arcface-r100":
             load_output = rknn.load_onnx(
-                model=onnx_path,
+                model=onnx_model_path,
                 inputs=["data"],
                 input_size_list=[[1, 3, 112, 112]],
             )
         else:
-            load_output = rknn.load_onnx(model=onnx_path)
+            load_output = rknn.load_onnx(model=onnx_model_path)
 
         if load_output != 0:
             logger.error("Failed to load ONNX model")
@@ -219,6 +235,14 @@ def convert_onnx_to_rknn(
     except Exception as e:
         logger.error(f"Error during RKNN conversion: {e}")
         return False
+    finally:
+        # Clean up temporary file if created
+        if temp_onnx_path and os.path.exists(temp_onnx_path):
+            try:
+                os.remove(temp_onnx_path)
+                logger.debug(f"Removed temporary ONNX file: {temp_onnx_path}")
+            except Exception as e:
+                logger.warning(f"Failed to remove temporary ONNX file: {e}")
 
 
 def cleanup_stale_lock(lock_file_path: Path) -> bool:
