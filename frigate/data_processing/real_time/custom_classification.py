@@ -142,7 +142,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
 
         if frame.shape != (224, 224):
             try:
-                frame = cv2.resize(frame, (224, 224))
+                resized_frame = cv2.resize(frame, (224, 224))
             except Exception:
                 logger.warning("Failed to resize image for state classification")
                 return
@@ -158,7 +158,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             )
             return
 
-        input = np.expand_dims(frame, axis=0)
+        input = np.expand_dims(resized_frame, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
         res: np.ndarray = self.interpreter.get_tensor(
@@ -286,7 +286,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 
         if crop.shape != (224, 224):
             try:
-                crop = cv2.resize(crop, (224, 224))
+                resized_crop = cv2.resize(crop, (224, 224))
             except Exception:
                 logger.warning("Failed to resize image for state classification")
                 return
@@ -302,7 +302,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             )
             return
 
-        input = np.expand_dims(crop, axis=0)
+        input = np.expand_dims(resized_crop, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
         res: np.ndarray = self.interpreter.get_tensor(
