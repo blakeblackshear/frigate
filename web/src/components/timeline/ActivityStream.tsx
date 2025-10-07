@@ -5,6 +5,11 @@ import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { useActivityStream } from "@/contexts/ActivityStreamContext";
 import scrollIntoView from "scroll-into-view-if-needed";
 import useUserInteraction from "@/hooks/use-user-interaction";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { useTranslation } from "react-i18next";
+import { FrigateConfig } from "@/types/frigateConfig";
+import useSWR from "swr";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 type ActivityStreamProps = {
   timelineData: ObjectLifecycleSequence[];
@@ -17,6 +22,8 @@ export default function ActivityStream({
   currentTime,
   onSeek,
 }: ActivityStreamProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const { t } = useTranslation("views/events");
   const { selectedObjectId, annotationOffset } = useActivityStream();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +108,10 @@ export default function ActivityStream({
     setProgrammaticScroll,
   ]);
 
+  if (!config) {
+    return <ActivityIndicator />;
+  }
+
   return (
     <div
       ref={scrollRef}
@@ -109,13 +120,14 @@ export default function ActivityStream({
       <div className="space-y-2 p-4">
         {filteredGroups.length === 0 ? (
           <div className="py-8 text-center text-muted-foreground">
-            No activities found
+            {t("activity.noActivitiesFound")}
           </div>
         ) : (
           filteredGroups.map((group) => (
             <ActivityGroup
               key={group.timestamp}
               group={group}
+              config={config}
               isCurrent={group.effectiveTimestamp <= currentTime}
               onSeek={onSeek}
             />
@@ -132,11 +144,18 @@ type ActivityGroupProps = {
     effectiveTimestamp: number;
     activities: ObjectLifecycleSequence[];
   };
+  config: FrigateConfig;
   isCurrent: boolean;
   onSeek: (timestamp: number) => void;
 };
 
-function ActivityGroup({ group, isCurrent, onSeek }: ActivityGroupProps) {
+function ActivityGroup({
+  group,
+  config,
+  isCurrent,
+  onSeek,
+}: ActivityGroupProps) {
+  const { t } = useTranslation("views/events");
   const shouldExpand = group.activities.length > 1;
 
   return (
@@ -152,11 +171,25 @@ function ActivityGroup({ group, isCurrent, onSeek }: ActivityGroupProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="text-sm font-medium">
-            {new Date(group.timestamp * 1000).toLocaleTimeString()}
+            {formatUnixTimestampToDateTime(group.timestamp, {
+              timezone: config.ui.timezone,
+              date_format:
+                config.ui.time_format == "24hour"
+                  ? t("time.formattedTimestamp.24hour", {
+                      ns: "common",
+                    })
+                  : t("time.formattedTimestamp.12hour", {
+                      ns: "common",
+                    }),
+              time_style: "medium",
+              date_style: "medium",
+            })}
           </div>
           {shouldExpand && (
             <div className="text-xs text-muted-foreground">
-              {group.activities.length} activities
+              {t("activity.activitiesCount", {
+                count: group.activities.length,
+              })}
             </div>
           )}
         </div>
@@ -177,6 +210,7 @@ type ActivityItemProps = {
 };
 
 function ActivityItem({ activity }: ActivityItemProps) {
+  const { t } = useTranslation("views/events");
   const { selectedObjectId, setSelectedObjectId } = useActivityStream();
   const handleObjectClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -202,7 +236,7 @@ function ActivityItem({ activity }: ActivityItemProps) {
               : "bg-muted hover:bg-muted/80"
           }`}
         >
-          Object
+          {t("activity.object")}
         </button>
       )}
     </div>

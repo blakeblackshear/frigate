@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type ObjectTrackOverlayProps = {
   camera: string;
@@ -32,6 +33,7 @@ export default function ObjectTrackOverlay({
   onSeekToTime,
   objectTimeline,
 }: ObjectTrackOverlayProps) {
+  const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
   const { annotationOffset } = useActivityStream();
 
@@ -358,10 +360,10 @@ export default function ObjectTrackOverlay({
             <TooltipContent side="top" className="smart-capitalize">
               {pos.lifecycle_item
                 ? `${pos.lifecycle_item.class_type.replace("_", " ")} at ${new Date(pos.timestamp * 1000).toLocaleTimeString()}`
-                : "Tracked point"}
+                : t("objectTrack.trackedPoint")}
               {onSeekToTime && (
                 <div className="mt-1 text-xs text-muted-foreground">
-                  Click to seek to this time
+                  {t("objectTrack.clickToSeek")}
                 </div>
               )}
             </TooltipContent>

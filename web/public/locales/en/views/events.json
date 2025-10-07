@@ -18,6 +18,16 @@
     "aria": "Select events",
     "noFoundForTimePeriod": "No events found for this time period."
   },
+  "activity": {
+    "noActivitiesFound": "No activities found",
+    "activitiesCount_one": "{{count}} activity",
+    "activitiesCount_other": "{{count}} activities",
+    "object": "Object"
+  },
+  "objectTrack": {
+    "trackedPoint": "Tracked point",
+    "clickToSeek": "Click to seek to this time"
+  },
   "documentTitle": "Review - Frigate",
   "recordings": {
     "documentTitle": "Recordings - Frigate"
