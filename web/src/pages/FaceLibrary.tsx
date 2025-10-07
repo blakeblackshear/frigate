@@ -1,5 +1,3 @@
-import { baseUrl } from "@/api/baseUrl";
-import TimeAgo from "@/components/dynamic/TimeAgo";
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
@@ -37,13 +35,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import useContextMenu from "@/hooks/use-contextmenu";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
 import { Event } from "@/types/event";
-import { FaceLibraryData, RecognizedFaceData } from "@/types/face";
-import { FaceRecognitionConfig, FrigateConfig } from "@/types/frigateConfig";
+import { FaceLibraryData } from "@/types/face";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import axios from "axios";
 import {
@@ -54,7 +51,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import {
   LuFolderCheck,
@@ -62,16 +59,19 @@ import {
   LuPencil,
   LuRefreshCw,
   LuScanFace,
-  LuSearch,
   LuTrash2,
 } from "react-icons/lu";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import SearchDetailDialog, {
   SearchTab,
 } from "@/components/overlay/detail/SearchDetailDialog";
 import { SearchResult } from "@/types/search";
+import {
+  ClassificationCard,
+  GroupedClassificationCard,
+} from "@/components/card/ClassificationCard";
+import { ClassificationItemData } from "@/types/classification";
 
 export default function FaceLibrary() {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -641,7 +641,7 @@ function TrainingGrid({
   // face data
 
   const faceGroups = useMemo(() => {
-    const groups: { [eventId: string]: RecognizedFaceData[] } = {};
+    const groups: { [eventId: string]: ClassificationItemData[] } = {};
 
     const faces = attemptImages
       .map((image) => {
@@ -650,6 +650,7 @@ function TrainingGrid({
         try {
           return {
             filename: image,
+            filepath: `clips/faces/train/${image}`,
             timestamp: Number.parseFloat(parts[2]),
             eventId: `${parts[0]}-${parts[1]}`,
             name: parts[3],
@@ -739,7 +740,7 @@ function TrainingGrid({
 
 type FaceAttemptGroupProps = {
   config: FrigateConfig;
-  group: RecognizedFaceData[];
+  group: ClassificationItemData[];
   event?: Event;
   faceNames: string[];
   selectedFaces: string[];
@@ -757,15 +758,16 @@ function FaceAttemptGroup({
   onSelectEvent,
   onRefresh,
 }: FaceAttemptGroupProps) {
-  const navigate = useNavigate();
   const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
 
   // data
 
-  const allFacesSelected = useMemo(
-    () => group.every((face) => selectedFaces.includes(face.filename)),
-    [group, selectedFaces],
-  );
+  const threshold = useMemo(() => {
+    return {
+      recognition: config.face_recognition.recognition_threshold,
+      unknown: config.face_recognition.unknown_score,
+    };
+  }, [config]);
 
   // interaction
 
@@ -799,144 +801,10 @@ function FaceAttemptGroup({
     [event, group, selectedFaces, onClickFaces, onSelectEvent],
   );
 
-  return (
-    <div
-      className={cn(
-        "flex cursor-pointer flex-col gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
-        isMobile && "w-full",
-        allFacesSelected
-          ? "shadow-selected outline-selected"
-          : "outline-transparent duration-500",
-      )}
-      onClick={() => {
-        if (selectedFaces.length) {
-          handleClickEvent(true);
-        }
-      }}
-      onContextMenu={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        handleClickEvent(true);
-      }}
-    >
-      <div className="flex flex-row justify-between">
-        <div className="flex flex-col gap-1">
-          <div className="select-none smart-capitalize">
-            {t("details.person")}
-            {event?.sub_label
-              ? `: ${event.sub_label} (${Math.round((event.data.sub_label_score || 0) * 100)}%)`
-              : ": " + t("details.unknown")}
-          </div>
-          <TimeAgo
-            className="text-sm text-secondary-foreground"
-            time={group[0].timestamp * 1000}
-            dense
-          />
-        </div>
-        {event && (
-          <Tooltip>
-            <TooltipTrigger>
-              <div
-                className="cursor-pointer"
-                onClick={() => {
-                  navigate(`/explore?event_id=${event.id}`);
-                }}
-              >
-                <LuSearch className="size-4 text-muted-foreground" />
-              </div>
-            </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent>
-                {t("details.item.button.viewInExplore", {
-                  ns: "views/explore",
-                })}
-              </TooltipContent>
-            </TooltipPortal>
-          </Tooltip>
-        )}
-      </div>
-
-      <div
-        className={cn(
-          "gap-2",
-          isDesktop
-            ? "flex flex-row flex-wrap"
-            : "grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-6",
-        )}
-      >
-        {group.map((data: RecognizedFaceData) => (
-          <FaceAttempt
-            key={data.filename}
-            data={data}
-            faceNames={faceNames}
-            recognitionConfig={config.face_recognition}
-            selected={
-              allFacesSelected ? false : selectedFaces.includes(data.filename)
-            }
-            onClick={(data, meta) => {
-              if (meta || selectedFaces.length > 0) {
-                onClickFaces([data.filename], true);
-              } else if (event) {
-                onSelectEvent(event);
-              }
-            }}
-            onRefresh={onRefresh}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-type FaceAttemptProps = {
-  data: RecognizedFaceData;
-  faceNames: string[];
-  recognitionConfig: FaceRecognitionConfig;
-  selected: boolean;
-  onClick: (data: RecognizedFaceData, meta: boolean) => void;
-  onRefresh: () => void;
-};
-function FaceAttempt({
-  data,
-  faceNames,
-  recognitionConfig,
-  selected,
-  onClick,
-  onRefresh,
-}: FaceAttemptProps) {
-  const { t } = useTranslation(["views/faceLibrary"]);
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const scoreStatus = useMemo(() => {
-    if (data.score >= recognitionConfig.recognition_threshold) {
-      return "match";
-    } else if (data.score >= recognitionConfig.unknown_score) {
-      return "potential";
-    } else {
-      return "unknown";
-    }
-  }, [data, recognitionConfig]);
-
-  // interaction
-
-  const imgRef = useRef<HTMLImageElement | null>(null);
-
-  useContextMenu(imgRef, () => {
-    onClick(data, true);
-  });
-
-  const imageArea = useMemo(() => {
-    if (imgRef.current == null || !imageLoaded) {
-      return undefined;
-    }
-
-    return imgRef.current.naturalWidth * imgRef.current.naturalHeight;
-  }, [imageLoaded]);
-
   // api calls
 
   const onTrainAttempt = useCallback(
-    (trainName: string) => {
+    (data: ClassificationItemData, trainName: string) => {
       axios
         .post(`/faces/train/${trainName}/classify`, {
           training_file: data.filename,
@@ -959,96 +827,74 @@ function FaceAttempt({
           });
         });
     },
-    [data, onRefresh, t],
+    [onRefresh, t],
   );
 
-  const onReprocess = useCallback(() => {
-    axios
-      .post(`/faces/reprocess`, { training_file: data.filename })
-      .then((resp) => {
-        if (resp.status == 200) {
-          toast.success(t("toast.success.updatedFaceScore"), {
-            position: "top-center",
-          });
-          onRefresh();
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(t("toast.error.updateFaceScoreFailed", { errorMessage }), {
-          position: "top-center",
+  const onReprocess = useCallback(
+    (data: ClassificationItemData) => {
+      axios
+        .post(`/faces/reprocess`, { training_file: data.filename })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(t("toast.success.updatedFaceScore"), {
+              position: "top-center",
+            });
+            onRefresh();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(
+            t("toast.error.updateFaceScoreFailed", { errorMessage }),
+            {
+              position: "top-center",
+            },
+          );
         });
-      });
-  }, [data, onRefresh, t]);
+    },
+    [onRefresh, t],
+  );
 
   return (
-    <>
-      <div
-        className={cn(
-          "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
-          selected
-            ? "shadow-selected outline-selected"
-            : "outline-transparent duration-500",
-        )}
-      >
-        <div className="relative w-full select-none overflow-hidden rounded-lg">
-          <img
-            ref={imgRef}
-            onLoad={() => setImageLoaded(true)}
-            className={cn("size-44", isMobile && "w-full")}
-            src={`${baseUrl}clips/faces/train/${data.filename}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick(data, e.metaKey || e.ctrlKey);
-            }}
-          />
-          {imageArea != undefined && (
-            <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
-              {t("pixels", { area: imageArea })}
-            </div>
-          )}
-        </div>
-        <div className="select-none p-2">
-          <div className="flex w-full flex-row items-center justify-between gap-2">
-            <div className="flex flex-col items-start text-xs text-primary-variant">
-              <div className="smart-capitalize">
-                {data.name == "unknown" ? t("details.unknown") : data.name}
-              </div>
-              <div
-                className={cn(
-                  "",
-                  scoreStatus == "match" && "text-success",
-                  scoreStatus == "potential" && "text-orange-400",
-                  scoreStatus == "unknown" && "text-danger",
-                )}
-              >
-                {Math.round(data.score * 100)}%
-              </div>
-            </div>
-            <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-              <FaceSelectionDialog
-                faceNames={faceNames}
-                onTrainAttempt={onTrainAttempt}
-              >
-                <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-              </FaceSelectionDialog>
-              <Tooltip>
-                <TooltipTrigger>
-                  <LuRefreshCw
-                    className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                    onClick={() => onReprocess()}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+    <GroupedClassificationCard
+      group={group}
+      event={event}
+      threshold={threshold}
+      selectedItems={selectedFaces}
+      i18nLibrary="views/faceLibrary"
+      objectType="person"
+      onClick={(data) => {
+        if (data) {
+          onClickFaces([data.filename], true);
+        } else {
+          handleClickEvent(true);
+        }
+      }}
+      onSelectEvent={onSelectEvent}
+    >
+      {(data) => (
+        <>
+          <FaceSelectionDialog
+            faceNames={faceNames}
+            onTrainAttempt={(name) => onTrainAttempt(data, name)}
+          >
+            <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+          </FaceSelectionDialog>
+          <Tooltip>
+            <TooltipTrigger>
+              <LuRefreshCw
+                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                onClick={() => onReprocess(data)}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
+          </Tooltip>
+        </>
+      )}
+    </GroupedClassificationCard>
   );
 }
 
@@ -1093,80 +939,32 @@ function FaceGrid({
       )}
     >
       {sortedFaces.map((image: string) => (
-        <FaceImage
+        <ClassificationCard
+          className="gap-2 rounded-lg bg-card p-2"
           key={image}
-          name={pageToggle}
-          image={image}
+          data={{
+            name: pageToggle,
+            filename: image,
+            filepath: `clips/faces/${pageToggle}/${image}`,
+          }}
           selected={selectedFaces.includes(image)}
-          onClickFaces={onClickFaces}
-          onDelete={onDelete}
-        />
+          i18nLibrary="views/faceLibrary"
+          onClick={(data, meta) => onClickFaces([data.filename], meta)}
+        >
+          <Tooltip>
+            <TooltipTrigger>
+              <LuTrash2
+                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(pageToggle, [image]);
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
+          </Tooltip>
+        </ClassificationCard>
       ))}
-    </div>
-  );
-}
-
-type FaceImageProps = {
-  name: string;
-  image: string;
-  selected: boolean;
-  onClickFaces: (images: string[], ctrl: boolean) => void;
-  onDelete: (name: string, ids: string[]) => void;
-};
-function FaceImage({
-  name,
-  image,
-  selected,
-  onClickFaces,
-  onDelete,
-}: FaceImageProps) {
-  const { t } = useTranslation(["views/faceLibrary"]);
-
-  return (
-    <div
-      className={cn(
-        "flex cursor-pointer flex-col gap-2 rounded-lg bg-card outline outline-[3px]",
-        selected
-          ? "shadow-selected outline-selected"
-          : "outline-transparent duration-500",
-      )}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClickFaces([image], e.ctrlKey || e.metaKey);
-      }}
-    >
-      <div
-        className={cn(
-          "w-full overflow-hidden p-2 *:text-card-foreground",
-          isMobile && "flex justify-center",
-        )}
-      >
-        <img
-          className="h-40 rounded-lg"
-          src={`${baseUrl}clips/faces/${name}/${image}`}
-        />
-      </div>
-      <div className="rounded-b-lg bg-card p-3">
-        <div className="flex w-full flex-row items-center justify-between gap-2">
-          <div className="flex flex-col items-start text-xs text-primary-variant">
-            <div className="smart-capitalize">{name}</div>
-          </div>
-          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-            <Tooltip>
-              <TooltipTrigger>
-                <LuTrash2
-                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(name, [image]);
-                  }}
-                />
-              </TooltipTrigger>
-              <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

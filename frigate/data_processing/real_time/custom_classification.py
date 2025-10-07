@@ -142,7 +142,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
 
         if frame.shape != (224, 224):
             try:
-                frame = cv2.resize(frame, (224, 224))
+                resized_frame = cv2.resize(frame, (224, 224))
             except Exception:
                 logger.warning("Failed to resize image for state classification")
                 return
@@ -151,13 +151,14 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             write_classification_attempt(
                 self.train_dir,
                 cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+                "none-none",
                 now,
                 "unknown",
                 0.0,
             )
             return
 
-        input = np.expand_dims(frame, axis=0)
+        input = np.expand_dims(resized_frame, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
         res: np.ndarray = self.interpreter.get_tensor(
@@ -171,6 +172,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         write_classification_attempt(
             self.train_dir,
             cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+            "none-none",
             now,
             self.labelmap[best_id],
             score,
@@ -284,7 +286,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 
         if crop.shape != (224, 224):
             try:
-                crop = cv2.resize(crop, (224, 224))
+                resized_crop = cv2.resize(crop, (224, 224))
             except Exception:
                 logger.warning("Failed to resize image for state classification")
                 return
@@ -293,13 +295,14 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             write_classification_attempt(
                 self.train_dir,
                 cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
+                obj_data["id"],
                 now,
                 "unknown",
                 0.0,
             )
             return
 
-        input = np.expand_dims(crop, axis=0)
+        input = np.expand_dims(resized_crop, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
         self.interpreter.invoke()
         res: np.ndarray = self.interpreter.get_tensor(
@@ -314,6 +317,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         write_classification_attempt(
             self.train_dir,
             cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
+            obj_data["id"],
             now,
             self.labelmap[best_id],
             score,
@@ -372,6 +376,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 def write_classification_attempt(
     folder: str,
     frame: np.ndarray,
+    event_id: str,
     timestamp: float,
     label: str,
     score: float,
@@ -379,7 +384,7 @@ def write_classification_attempt(
     if "-" in label:
         label = label.replace("-", "_")
 
-    file = os.path.join(folder, f"{timestamp}-{label}-{score}.webp")
+    file = os.path.join(folder, f"{event_id}-{timestamp}-{label}-{score}.webp")
     os.makedirs(folder, exist_ok=True)
     cv2.imwrite(file, frame)
 

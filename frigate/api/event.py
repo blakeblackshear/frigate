@@ -434,10 +434,8 @@ async def event_ids(ids: str, request: Request):
             event = Event.get(Event.id == event_id)
             await require_camera_access(event.camera, request=request)
         except DoesNotExist:
-            return JSONResponse(
-                content=({"success": False, "message": f"Event {event_id} not found"}),
-                status_code=404,
-            )
+            # we should not fail the entire request if an event is not found
+            continue
 
     try:
         events = Event.select().where(Event.id << ids).dicts().iterator()

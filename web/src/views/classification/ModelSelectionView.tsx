@@ -38,7 +38,11 @@ export default function ModelSelectionView({
   return (
     <div className="flex size-full gap-2 p-2">
       {classificationConfigs.map((config) => (
-        <ModelCard config={config} onClick={() => onClick(config)} />
+        <ModelCard
+          key={config.name}
+          config={config}
+          onClick={() => onClick(config)}
+        />
       ))}
     </div>
   );
