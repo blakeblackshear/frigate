@@ -78,8 +78,11 @@ export default function TriggerView({
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const { data: trigger_status, mutate } = useSWR(
-    `/triggers/status/${selectedCamera}`,
-
+    config?.cameras[selectedCamera]?.semantic_search?.triggers &&
+      Object.keys(config.cameras[selectedCamera].semantic_search.triggers)
+        .length > 0
+      ? `/triggers/status/${selectedCamera}`
+      : null,
     {
       revalidateOnFocus: false,
     },
