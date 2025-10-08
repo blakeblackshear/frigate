@@ -333,9 +333,11 @@ export default function Settings() {
           open={contentMobileOpen}
           onOpenChange={setContentMobileOpen}
         >
-          <MobilePageContent className="scrollbar-container overflow-y-auto px-2">
+          <MobilePageContent
+            className={cn("px-2", "scrollbar-container overflow-y-auto")}
+          >
             <MobilePageHeader
-              className="top-0"
+              className="top-0 mb-0"
               actions={
                 [
                   "debug",
@@ -343,7 +345,7 @@ export default function Settings() {
                   "masksAndZones",
                   "motionTuner",
                   "triggers",
-                ].includes(page) ? (
+                ].includes(pageToggle) ? (
                   <div className="flex items-center gap-2">
                     {pageToggle == "masksAndZones" && (
                       <ZoneMaskFilterButton
