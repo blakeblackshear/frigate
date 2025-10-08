@@ -56,11 +56,16 @@ import {
   SidebarMenuSubItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { IoMdArrowRoundBack } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
 import { LuChevronRight } from "react-icons/lu";
 import Logo from "@/components/Logo";
+import {
+  MobilePage,
+  MobilePageContent,
+  MobilePageHeader,
+  MobilePageTitle,
+} from "@/components/mobile/MobilePage";
 
 const allSettingsViews = [
   "ui",
@@ -131,7 +136,7 @@ function MobileMenuItem({
 }: {
   item: { key: string };
   onSelect: (key: string) => void;
-  onClose: () => void;
+  onClose?: () => void;
   className?: string;
 }) {
   const { t } = useTranslation(["views/settings"]);
@@ -142,7 +147,7 @@ function MobileMenuItem({
       className={cn("w-full justify-between pr-2", className)}
       onClick={() => {
         onSelect(item.key);
-        onClose();
+        onClose?.();
       }}
     >
       <div className="smart-capitalize">{t("menu." + item.key)}</div>
@@ -155,7 +160,7 @@ export default function Settings() {
   const { t } = useTranslation(["views/settings"]);
   const [page, setPage] = useState<SettingsType>("ui");
   const [_, setPageToggle] = useOptimisticState(page, setPage, 100);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(isMobile);
+  const [contentMobileOpen, setContentMobileOpen] = useState(false);
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -271,7 +276,7 @@ export default function Settings() {
   if (isMobile) {
     return (
       <>
-        {mobileMenuOpen ? (
+        {!contentMobileOpen && (
           <div className="flex size-full flex-col">
             <div className="sticky -top-2 z-50 mb-2 bg-background p-4">
               <div className="flex items-center justify-center">
@@ -311,8 +316,8 @@ export default function Settings() {
                           } else {
                             setPageToggle(key as SettingsType);
                           }
+                          setContentMobileOpen(true);
                         }}
-                        onClose={() => setMobileMenuOpen(false)}
                       />
                     ))}
                   </div>
@@ -320,61 +325,54 @@ export default function Settings() {
               })}
             </div>
           </div>
-        ) : (
-          <div
-            className={cn(
-              "sticky -top-2 z-50 mb-2 flex items-center bg-background p-4",
-            )}
-          >
-            <Button
-              className="absolute left-4 z-10 rounded-lg"
-              aria-label="Open menu"
-              size="sm"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-            </Button>
-            <h2 className="flex-1 text-center text-lg font-semibold smart-capitalize">
-              {t("menu." + page)}
-            </h2>
-            {[
-              "debug",
-              "cameras",
-              "masksAndZones",
-              "motionTuner",
-              "triggers",
-            ].includes(page) && (
-              <div className="absolute right-4 flex items-center gap-2">
-                {page == "masksAndZones" && (
-                  <ZoneMaskFilterButton
-                    selectedZoneMask={filterZoneMask}
-                    updateZoneMaskFilter={setFilterZoneMask}
-                  />
-                )}
-                <CameraSelectButton
-                  allCameras={cameras}
-                  selectedCamera={selectedCamera}
-                  setSelectedCamera={setSelectedCamera}
-                  cameraEnabledStates={cameraEnabledStates}
-                  currentPage={page}
-                />
-              </div>
-            )}
-          </div>
         )}
-        <div className="flex-1 overflow-auto p-2">
-          {(() => {
-            const CurrentComponent = getCurrentComponent(page);
-            if (!CurrentComponent) return null;
-            return (
-              <CurrentComponent
-                selectedCamera={selectedCamera}
-                setUnsavedChanges={setUnsavedChanges}
-                selectedZoneMask={filterZoneMask}
-              />
-            );
-          })()}
-        </div>
+        <MobilePage
+          open={contentMobileOpen}
+          onOpenChange={setContentMobileOpen}
+        >
+          <MobilePageContent className="scrollbar-container overflow-y-auto px-4">
+            <MobilePageHeader>
+              <MobilePageTitle>{t("menu." + page)}</MobilePageTitle>
+              {[
+                "debug",
+                "cameras",
+                "masksAndZones",
+                "motionTuner",
+                "triggers",
+              ].includes(page) && (
+                <div className="absolute right-2 top-2 flex items-center gap-2">
+                  {page == "masksAndZones" && (
+                    <ZoneMaskFilterButton
+                      selectedZoneMask={filterZoneMask}
+                      updateZoneMaskFilter={setFilterZoneMask}
+                    />
+                  )}
+                  <CameraSelectButton
+                    allCameras={cameras}
+                    selectedCamera={selectedCamera}
+                    setSelectedCamera={setSelectedCamera}
+                    cameraEnabledStates={cameraEnabledStates}
+                    currentPage={page}
+                  />
+                </div>
+              )}
+            </MobilePageHeader>
+
+            <div className="p-2">
+              {(() => {
+                const CurrentComponent = getCurrentComponent(page);
+                if (!CurrentComponent) return null;
+                return (
+                  <CurrentComponent
+                    selectedCamera={selectedCamera}
+                    setUnsavedChanges={setUnsavedChanges}
+                    selectedZoneMask={filterZoneMask}
+                  />
+                );
+              })()}
+            </div>
+          </MobilePageContent>
+        </MobilePage>
         {confirmationDialogOpen && (
           <AlertDialog
             open={confirmationDialogOpen}
