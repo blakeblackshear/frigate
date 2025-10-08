@@ -78,7 +78,11 @@ export default function TriggerView({
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const { data: trigger_status, mutate } = useSWR(
-    `/triggers/status/${selectedCamera}`,
+    config?.cameras[selectedCamera]?.semantic_search?.triggers &&
+      Object.keys(config.cameras[selectedCamera].semantic_search.triggers)
+        .length > 0
+      ? `/triggers/status/${selectedCamera}`
+      : null,
     {
       revalidateOnFocus: false,
     },
@@ -414,7 +418,7 @@ export default function TriggerView({
   return (
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mr-3 md:mt-0">
         {!isSemanticSearchEnabled ? (
           <div className="mb-5 flex flex-row items-center justify-between gap-2">
             <div className="flex flex-col items-start">

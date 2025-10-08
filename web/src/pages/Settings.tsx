@@ -448,9 +448,9 @@ export default function Settings() {
           </div>
         )}
       </div>
-      <SidebarProvider className="md:h-dvh md:pb-24">
-        <Sidebar variant="inset" className="relative mb-8 pt-0">
-          <SidebarContent className="border-r-[1px] border-secondary bg-background pt-2">
+      <SidebarProvider>
+        <Sidebar variant="inset" className="relative mb-8 pl-0 pt-0">
+          <SidebarContent className="scrollbar-container mb-20 overflow-y-auto border-r-[1px] border-secondary bg-background py-2">
             <SidebarMenu>
               {settingsGroups.map((group) => {
                 const filteredItems = group.items.filter((item) =>
@@ -463,7 +463,7 @@ export default function Settings() {
                       <SidebarMenu>
                         <SidebarMenuItem>
                           <SidebarMenuButton
-                            className="ml-0 pl-0"
+                            className="ml-0"
                             isActive={pageToggle === filteredItems[0].key}
                             onClick={() => {
                               if (
@@ -490,7 +490,7 @@ export default function Settings() {
                       <>
                         <SidebarGroupLabel
                           className={cn(
-                            "ml-0 cursor-default pl-0 text-sm",
+                            "ml-2 cursor-default pl-0 text-sm",
                             filteredItems.some(
                               (item) => pageToggle === item.key,
                             )
@@ -500,7 +500,7 @@ export default function Settings() {
                         >
                           {group.label}
                         </SidebarGroupLabel>
-                        <SidebarMenuSub className="mx-1 border-0">
+                        <SidebarMenuSub className="mx-2 border-0">
                           {filteredItems.map((item) => (
                             <SidebarMenuSubItem key={item.key}>
                               <SidebarMenuSubButton

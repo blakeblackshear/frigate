@@ -385,7 +385,7 @@ export default function NotificationView({
     <>
       <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
-        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto p-2 md:order-none">
+        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
           <div
             className={cn(
               isAdmin && "grid w-full grid-cols-1 gap-4 md:grid-cols-2",
