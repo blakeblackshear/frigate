@@ -75,23 +75,23 @@ audio:
 
 ### Audio Transcription
 
-Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI’s open-source Whisper models via `faster-whisper`. To enable transcription, it is recommended to only configure the features at the global level, and enable it at the individual camera level.
+Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI’s open-source Whisper models via `faster-whisper`. To enable transcription, enable it in your config. Note that audio detection must also be enabled as described above in order to use audio transcription features.
 
 ```yaml
 audio_transcription:
-  enabled: False
+  enabled: True
   device: ...
   model_size: ...
 ```
 
-Enable audio transcription for select cameras at the camera level:
+Disable audio transcription for select cameras at the camera level:
 
 ```yaml
 cameras:
   back_yard:
     ...
     audio_transcription:
-      enabled: True
+      enabled: False
 ```
 
 :::note
@@ -111,7 +111,6 @@ The optional config parameters that can be set at the global level include:
 - **`model_size`**: The size of the model used for live transcription.
   - Default: `small`
   - This can be `small` or `large`. The `small` setting uses `sherpa-onnx` models that are fast, lightweight, and always run on the CPU but are not as accurate as the `whisper` model.
-  - The
   - This config option applies to **live transcription only**. Recorded `speech` events will always use a different `whisper` model (and can be accelerated for CUDA hardware if available with `device: GPU`).
 - **`language`**: Defines the language used by `whisper` to translate `speech` audio events (and live audio only if using the `large` model).
   - Default: `en`

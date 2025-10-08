@@ -95,6 +95,12 @@ class AudioProcessor(FrigateProcess):
         self.cameras = cameras
         self.config = config
 
+    def run(self) -> None:
+        self.pre_run_setup(self.config.logger)
+        audio_threads: list[AudioEventMaintainer] = []
+
+        threading.current_thread().name = "process:audio_manager"
+
         if self.config.audio_transcription.enabled:
             self.transcription_model_runner = AudioTranscriptionModelRunner(
                 self.config.audio_transcription.device,
@@ -102,12 +108,6 @@ class AudioProcessor(FrigateProcess):
             )
         else:
             self.transcription_model_runner = None
-
-    def run(self) -> None:
-        self.pre_run_setup(self.config.logger)
-        audio_threads: list[AudioEventMaintainer] = []
-
-        threading.current_thread().name = "process:audio_manager"
 
         if len(self.cameras) == 0:
             return
@@ -180,7 +180,7 @@ class AudioEventMaintainer(threading.Thread):
         )
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio.value)
 
-        if self.camera_config.audio_transcription.enabled_in_config:
+        if self.config.audio_transcription.enabled:
             # init the transcription processor for this camera
             self.transcription_processor = AudioTranscriptionRealTimeProcessor(
                 config=self.config,
