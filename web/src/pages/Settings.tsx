@@ -529,7 +529,7 @@ export default function Settings() {
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <div className="flex-1 overflow-auto p-2">
+          <div className="flex-1 overflow-auto p-2 pr-0">
             {(() => {
               const CurrentComponent = getCurrentComponent(page);
               if (!CurrentComponent) return null;

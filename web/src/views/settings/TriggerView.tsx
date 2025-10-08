@@ -414,11 +414,11 @@ export default function TriggerView({
   return (
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
         {!isSemanticSearchEnabled ? (
           <div className="mb-5 flex flex-row items-center justify-between gap-2">
             <div className="flex flex-col items-start">
-              <Heading as="h4" className="my-2">
+              <Heading as="h4" className="mb-2">
                 {t("triggers.management.title")}
               </Heading>
               <p className="mb-5 text-sm text-muted-foreground">
@@ -452,7 +452,7 @@ export default function TriggerView({
           <>
             <div className="mb-5 flex flex-row items-center justify-between gap-2">
               <div className="flex flex-col items-start">
-                <Heading as="h3" className="my-2">
+                <Heading as="h4" className="mb-2">
                   {t("triggers.management.title")}
                 </Heading>
                 <p className="text-sm text-muted-foreground">

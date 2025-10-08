@@ -331,10 +331,10 @@ export default function NotificationView({
 
   if (!("Notification" in window) || !window.isSecureContext) {
     return (
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
           <div className="col-span-1">
-            <Heading as="h4" className="my-2">
+            <Heading as="h4" className="mb-2">
               {t("notification.notificationSettings.title")}
             </Heading>
             <div className="max-w-6xl">
@@ -385,14 +385,14 @@ export default function NotificationView({
     <>
       <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
-        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
+        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto p-2 md:order-none">
           <div
             className={cn(
               isAdmin && "grid w-full grid-cols-1 gap-4 md:grid-cols-2",
             )}
           >
             <div className="col-span-1">
-              <Heading as="h4" className="my-2">
+              <Heading as="h4" className="mb-2">
                 {t("notification.notificationSettings.title")}
               </Heading>
 

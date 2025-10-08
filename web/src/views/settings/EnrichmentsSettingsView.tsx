@@ -244,8 +244,8 @@ export default function EnrichmentsSettingsView({
   return (
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
-        <Heading as="h4" className="my-2">
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
+        <Heading as="h4" className="mb-2">
           {t("enrichments.title")}
         </Heading>
         <Separator className="my-2 flex bg-secondary" />
