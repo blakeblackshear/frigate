@@ -20,6 +20,7 @@ from frigate.util.builtin import (
 from ..base import FrigateBaseModel
 from ..classification import (
     AudioTranscriptionConfig,
+    CameraAudioTranscriptionConfig,
     CameraFaceRecognitionConfig,
     CameraLicensePlateRecognitionConfig,
     CameraSemanticSearchConfig,
@@ -87,6 +88,10 @@ class CameraConfig(FrigateBaseModel):
     )
     lpr: CameraLicensePlateRecognitionConfig = Field(
         default_factory=CameraLicensePlateRecognitionConfig, title="LPR config."
+    )
+    audio_transcription: CameraAudioTranscriptionConfig = Field(
+        default_factory=CameraAudioTranscriptionConfig,
+        title="Audio transcription config.",
     )
     motion: MotionConfig = Field(None, title="Motion detection configuration.")
     objects: ObjectConfig = Field(

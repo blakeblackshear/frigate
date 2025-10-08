@@ -8,6 +8,7 @@ from .base import FrigateBaseModel
 __all__ = [
     "CameraFaceRecognitionConfig",
     "CameraLicensePlateRecognitionConfig",
+    "CameraAudioTranscriptionConfig",
     "FaceRecognitionConfig",
     "SemanticSearchConfig",
     "CameraSemanticSearchConfig",
@@ -47,13 +48,10 @@ class AudioTranscriptionConfig(FrigateBaseModel):
     )
     device: Optional[EnrichmentsDeviceEnum] = Field(
         default=EnrichmentsDeviceEnum.CPU,
-        title="The device used for license plate recognition.",
+        title="The device used for audio transcription.",
     )
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
-    )
-    enabled_in_config: Optional[bool] = Field(
-        default=None, title="Keep track of original state of camera."
     )
     live_enabled: Optional[bool] = Field(
         default=False, title="Enable live transcriptions."
@@ -301,6 +299,18 @@ class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
         title="Amount of contrast adjustment and denoising to apply to license plate images before recognition.",
         ge=0,
         le=10,
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+
+class CameraAudioTranscriptionConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable audio transcription.")
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of audio transcription."
+    )
+    live_enabled: Optional[bool] = Field(
+        default=False, title="Enable live transcriptions."
     )
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
