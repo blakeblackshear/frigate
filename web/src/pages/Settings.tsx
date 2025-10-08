@@ -406,13 +406,36 @@ export default function Settings() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-secondary p-4">
+      <div className="flex items-center justify-between border-b border-secondary p-3">
         <Heading as="h3" className="mb-0">
           {t("settings", { ns: "common" })}
         </Heading>
+        {[
+          "debug",
+          "cameras",
+          "masksAndZones",
+          "motionTuner",
+          "triggers",
+        ].includes(page) && (
+          <div className="flex items-center gap-2">
+            {page == "masksAndZones" && (
+              <ZoneMaskFilterButton
+                selectedZoneMask={filterZoneMask}
+                updateZoneMaskFilter={setFilterZoneMask}
+              />
+            )}
+            <CameraSelectButton
+              allCameras={cameras}
+              selectedCamera={selectedCamera}
+              setSelectedCamera={setSelectedCamera}
+              cameraEnabledStates={cameraEnabledStates}
+              currentPage={page}
+            />
+          </div>
+        )}
       </div>
-      <SidebarProvider>
-        <Sidebar variant="inset" className="relative pt-0">
+      <SidebarProvider className="md:h-dvh md:pb-24">
+        <Sidebar variant="inset" className="relative mb-8 pt-0">
           <SidebarContent className="border-r-[1px] border-secondary bg-background pt-2">
             <SidebarMenu>
               {settingsGroups.map((group) => {
@@ -452,7 +475,7 @@ export default function Settings() {
                       <>
                         <SidebarGroupLabel
                           className={cn(
-                            "cursor-default text-sm",
+                            "ml-0 cursor-default pl-0 text-sm",
                             filteredItems.some((item) => page === item.key)
                               ? "text-primary"
                               : "text-sidebar-foreground/80",
@@ -494,43 +517,18 @@ export default function Settings() {
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <div className="flex h-full flex-col">
-            {[
-              "debug",
-              "cameras",
-              "masksAndZones",
-              "motionTuner",
-              "triggers",
-            ].includes(page) && (
-              <div className="flex items-center justify-end gap-2 border-b p-2">
-                {page == "masksAndZones" && (
-                  <ZoneMaskFilterButton
-                    selectedZoneMask={filterZoneMask}
-                    updateZoneMaskFilter={setFilterZoneMask}
-                  />
-                )}
-                <CameraSelectButton
-                  allCameras={cameras}
+          <div className="flex-1 overflow-auto p-2">
+            {(() => {
+              const CurrentComponent = getCurrentComponent(page);
+              if (!CurrentComponent) return null;
+              return (
+                <CurrentComponent
                   selectedCamera={selectedCamera}
-                  setSelectedCamera={setSelectedCamera}
-                  cameraEnabledStates={cameraEnabledStates}
-                  currentPage={page}
+                  setUnsavedChanges={setUnsavedChanges}
+                  selectedZoneMask={filterZoneMask}
                 />
-              </div>
-            )}
-            <div className="flex-1 overflow-auto p-2">
-              {(() => {
-                const CurrentComponent = getCurrentComponent(page);
-                if (!CurrentComponent) return null;
-                return (
-                  <CurrentComponent
-                    selectedCamera={selectedCamera}
-                    setUnsavedChanges={setUnsavedChanges}
-                    selectedZoneMask={filterZoneMask}
-                  />
-                );
-              })()}
-            </div>
+              );
+            })()}
           </div>
         </SidebarInset>
         {confirmationDialogOpen && (
