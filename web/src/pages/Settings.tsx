@@ -56,11 +56,11 @@ import {
   SidebarMenuSubItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { ChevronRight } from "lucide-react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
-import { isPWA } from "@/utils/isPWA";
+import { LuChevronRight } from "react-icons/lu";
+import Logo from "@/components/Logo";
 
 const allSettingsViews = [
   "ui",
@@ -127,24 +127,26 @@ function MobileMenuItem({
   item,
   onSelect,
   onClose,
+  className,
 }: {
   item: { key: string };
   onSelect: (key: string) => void;
   onClose: () => void;
+  className?: string;
 }) {
   const { t } = useTranslation(["views/settings"]);
 
   return (
     <Button
       variant="ghost"
-      className="w-full justify-between"
+      className={cn("w-full justify-between pr-2", className)}
       onClick={() => {
         onSelect(item.key);
         onClose();
       }}
     >
       <div className="smart-capitalize">{t("menu." + item.key)}</div>
-      <ChevronRight className="h-4 w-4" />
+      <LuChevronRight className="size-4" />
     </Button>
   );
 }
@@ -268,95 +270,96 @@ export default function Settings() {
 
   if (isMobile) {
     return (
-      <div className="flex size-full flex-col">
-        <div className="sticky -top-2 z-50 mb-2 flex items-center bg-background p-4">
-          <Button
-            className="absolute left-4 z-10 rounded-lg"
-            aria-label="Open menu"
-            size="sm"
-            onClick={() => setMobileMenuOpen(true)}
-          >
-            <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-          </Button>
-          <h2 className="flex-1 text-center text-lg font-semibold smart-capitalize">
-            {t("menu." + page)}
-          </h2>
-          {[
-            "debug",
-            "cameras",
-            "masksAndZones",
-            "motionTuner",
-            "triggers",
-          ].includes(page) && (
-            <div className="absolute right-4 flex items-center gap-2">
-              {page == "masksAndZones" && (
-                <ZoneMaskFilterButton
-                  selectedZoneMask={filterZoneMask}
-                  updateZoneMaskFilter={setFilterZoneMask}
-                />
-              )}
-              <CameraSelectButton
-                allCameras={cameras}
-                selectedCamera={selectedCamera}
-                setSelectedCamera={setSelectedCamera}
-                cameraEnabledStates={cameraEnabledStates}
-                currentPage={page}
-              />
-            </div>
-          )}
-        </div>
-        {mobileMenuOpen && (
-          <div
-            className={cn(
-              "absolute top-0 z-50 mb-12 bg-background",
-              isPWA && "mb-16",
-              "landscape:mb-14 landscape:md:mb-16",
-            )}
-          >
-            <div className="px-4">
-              <div className="sticky -top-2 z-50 mb-2 flex items-center justify-center bg-background p-4">
-                <div className="flex flex-row text-center">
-                  <h2 className="text-lg font-semibold">
-                    {t("settings", { ns: "common" })}
-                  </h2>
-                </div>
+      <>
+        {mobileMenuOpen ? (
+          <div className="flex size-full flex-col">
+            <div className="sticky -top-2 z-50 mb-2 bg-background p-4">
+              <div className="flex items-center justify-center">
+                <Logo className="h-8" />
               </div>
+              <div className="flex flex-row text-center">
+                <h2 className="ml-2 text-lg font-semibold">
+                  {t("settings", { ns: "common" })}
+                </h2>
+              </div>
+            </div>
 
-              <div className="scrollbar-container max-h-[calc(100vh-8rem)] overflow-y-auto">
-                {settingsGroups.map((group) => {
-                  const filteredItems = group.items.filter((item) =>
-                    visibleSettingsViews.includes(item.key as SettingsType),
-                  );
-                  if (filteredItems.length === 0) return null;
-                  return (
-                    <div key={group.label} className="mb-3">
-                      <h3 className="mb-2 text-sm font-medium text-muted-foreground">
+            <div className="scrollbar-container overflow-y-auto px-4">
+              {settingsGroups.map((group) => {
+                const filteredItems = group.items.filter((item) =>
+                  visibleSettingsViews.includes(item.key as SettingsType),
+                );
+                if (filteredItems.length === 0) return null;
+                return (
+                  <div key={group.label} className="mb-3">
+                    {filteredItems.length > 1 && (
+                      <h3 className="mb-2 ml-2 text-sm font-medium text-secondary-foreground">
                         {group.label}
                       </h3>
-                      {filteredItems.map((item) => (
-                        <MobileMenuItem
-                          key={item.key}
-                          item={item}
-                          onSelect={(key) => {
-                            if (
-                              !isAdmin &&
-                              !allowedViewsForViewer.includes(
-                                key as SettingsType,
-                              )
-                            ) {
-                              setPageToggle("ui");
-                            } else {
-                              setPageToggle(key as SettingsType);
-                            }
-                          }}
-                          onClose={() => setMobileMenuOpen(false)}
-                        />
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
+                    )}
+                    {filteredItems.map((item) => (
+                      <MobileMenuItem
+                        key={item.key}
+                        item={item}
+                        className={cn(filteredItems.length == 1 && "pl-2")}
+                        onSelect={(key) => {
+                          if (
+                            !isAdmin &&
+                            !allowedViewsForViewer.includes(key as SettingsType)
+                          ) {
+                            setPageToggle("ui");
+                          } else {
+                            setPageToggle(key as SettingsType);
+                          }
+                        }}
+                        onClose={() => setMobileMenuOpen(false)}
+                      />
+                    ))}
+                  </div>
+                );
+              })}
             </div>
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "sticky -top-2 z-50 mb-2 flex items-center bg-background p-4",
+            )}
+          >
+            <Button
+              className="absolute left-4 z-10 rounded-lg"
+              aria-label="Open menu"
+              size="sm"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+            </Button>
+            <h2 className="flex-1 text-center text-lg font-semibold smart-capitalize">
+              {t("menu." + page)}
+            </h2>
+            {[
+              "debug",
+              "cameras",
+              "masksAndZones",
+              "motionTuner",
+              "triggers",
+            ].includes(page) && (
+              <div className="absolute right-4 flex items-center gap-2">
+                {page == "masksAndZones" && (
+                  <ZoneMaskFilterButton
+                    selectedZoneMask={filterZoneMask}
+                    updateZoneMaskFilter={setFilterZoneMask}
+                  />
+                )}
+                <CameraSelectButton
+                  allCameras={cameras}
+                  selectedCamera={selectedCamera}
+                  setSelectedCamera={setSelectedCamera}
+                  cameraEnabledStates={cameraEnabledStates}
+                  currentPage={page}
+                />
+              </div>
+            )}
           </div>
         )}
         <div className="flex-1 overflow-auto p-2">
@@ -397,7 +400,7 @@ export default function Settings() {
             </AlertDialogContent>
           </AlertDialog>
         )}
-      </div>
+      </>
     );
   }
 
