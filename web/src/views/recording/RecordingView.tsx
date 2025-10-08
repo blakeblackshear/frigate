@@ -66,6 +66,7 @@ import {
 } from "@/components/ui/tooltip";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
+import { GenAISummaryDialog } from "@/components/overlay/chip/GenAISummaryChip";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -458,6 +459,29 @@ export function RecordingView({
     [visiblePreviewObserver.current],
   );
 
+  const activeReviewItem = useMemo(() => {
+    if (!config?.cameras?.[mainCamera].review.genai?.enabled_in_config) {
+      return undefined;
+    }
+
+    return mainCameraReviewItems.find(
+      (rev) =>
+        rev.start_time < currentTime &&
+        rev.end_time &&
+        currentTime < rev.end_time,
+    );
+  }, [config, currentTime, mainCameraReviewItems, mainCamera]);
+  const onAnalysisOpen = useCallback(
+    (open: boolean) => {
+      if (open) {
+        mainControllerRef.current?.pause();
+      } else {
+        mainControllerRef.current?.play();
+      }
+    },
+    [mainControllerRef],
+  );
+
   return (
     <div ref={contentRef} className="flex size-full flex-col pt-2">
       <Toaster closeButton={true} />
@@ -654,6 +678,11 @@ export function RecordingView({
                   : Math.max(1, getCameraAspect(mainCamera) ?? 0),
               }}
             >
+              <GenAISummaryDialog
+                review={activeReviewItem}
+                onOpen={onAnalysisOpen}
+              />
+
               <DynamicVideoPlayer
                 className={grow}
                 camera={mainCamera}
