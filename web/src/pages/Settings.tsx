@@ -60,7 +60,6 @@ import {
 import {
   MobilePage,
   MobilePageContent,
-  MobilePageHeader,
   MobilePagePortal,
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
@@ -318,11 +317,18 @@ export default function Settings() {
         <MobilePage open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <MobilePagePortal>
             <MobilePageContent className="px-4">
-              <MobilePageHeader>
-                <MobilePageTitle>
-                  {t("settings", { ns: "common" })}
-                </MobilePageTitle>
-              </MobilePageHeader>
+              <div
+                className={cn(
+                  "sticky -top-2 z-50 mb-2 flex items-center justify-center bg-background p-4",
+                )}
+              >
+                <div className="flex flex-row text-center">
+                  <MobilePageTitle>
+                    {t("settings", { ns: "common" })}
+                  </MobilePageTitle>
+                </div>
+              </div>
+
               <div>
                 {settingsGroups.map((group) => {
                   const filteredItems = group.items.filter((item) =>
