@@ -159,7 +159,7 @@ function MobileMenuItem({
 export default function Settings() {
   const { t } = useTranslation(["views/settings"]);
   const [page, setPage] = useState<SettingsType>("ui");
-  const [_, setPageToggle] = useOptimisticState(page, setPage, 100);
+  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const [contentMobileOpen, setContentMobileOpen] = useState(false);
 
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -236,7 +236,10 @@ export default function Settings() {
         const firstEnabledCamera =
           cameras.find((cam) => cameraEnabledStates[cam.name]) || cameras[0];
         setSelectedCamera(firstEnabledCamera.name);
-      } else if (!cameraEnabledStates[selectedCamera] && page !== "cameras") {
+      } else if (
+        !cameraEnabledStates[selectedCamera] &&
+        pageToggle !== "cameras"
+      ) {
         // Switch to first enabled camera if current one is disabled, unless on "camera settings" page
         const firstEnabledCamera =
           cameras.find((cam) => cameraEnabledStates[cam.name]) || cameras[0];
@@ -245,15 +248,15 @@ export default function Settings() {
         }
       }
     }
-  }, [cameras, selectedCamera, cameraEnabledStates, page]);
+  }, [cameras, selectedCamera, cameraEnabledStates, pageToggle]);
 
   useSearchEffect("page", (page: string) => {
     if (allSettingsViews.includes(page as SettingsType)) {
       // Restrict viewer to UI settings
       if (!isAdmin && !allowedViewsForViewer.includes(page as SettingsType)) {
-        setPage("ui");
+        setPageToggle("ui");
       } else {
-        setPage(page as SettingsType);
+        setPageToggle(page as SettingsType);
       }
     }
     // don't clear url params if we're creating a new object mask
@@ -342,7 +345,7 @@ export default function Settings() {
                   "triggers",
                 ].includes(page) ? (
                   <div className="flex items-center gap-2">
-                    {page == "masksAndZones" && (
+                    {pageToggle == "masksAndZones" && (
                       <ZoneMaskFilterButton
                         selectedZoneMask={filterZoneMask}
                         updateZoneMaskFilter={setFilterZoneMask}
@@ -420,7 +423,7 @@ export default function Settings() {
           "triggers",
         ].includes(page) && (
           <div className="flex items-center gap-2">
-            {page == "masksAndZones" && (
+            {pageToggle == "masksAndZones" && (
               <ZoneMaskFilterButton
                 selectedZoneMask={filterZoneMask}
                 updateZoneMaskFilter={setFilterZoneMask}
@@ -452,7 +455,7 @@ export default function Settings() {
                         <SidebarMenuItem>
                           <SidebarMenuButton
                             className="ml-0 pl-0"
-                            isActive={page === filteredItems[0].key}
+                            isActive={pageToggle === filteredItems[0].key}
                             onClick={() => {
                               if (
                                 !isAdmin &&
@@ -479,7 +482,9 @@ export default function Settings() {
                         <SidebarGroupLabel
                           className={cn(
                             "ml-0 cursor-default pl-0 text-sm",
-                            filteredItems.some((item) => page === item.key)
+                            filteredItems.some(
+                              (item) => pageToggle === item.key,
+                            )
                               ? "text-primary"
                               : "text-sidebar-foreground/80",
                           )}
@@ -490,7 +495,7 @@ export default function Settings() {
                           {filteredItems.map((item) => (
                             <SidebarMenuSubItem key={item.key}>
                               <SidebarMenuSubButton
-                                isActive={page === item.key}
+                                isActive={pageToggle === item.key}
                                 onClick={() => {
                                   if (
                                     !isAdmin &&
