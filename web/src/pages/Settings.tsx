@@ -162,7 +162,7 @@ export default function Settings() {
   const { t } = useTranslation(["views/settings"]);
   const [page, setPage] = useState<SettingsType>("ui");
   const [_, setPageToggle] = useOptimisticState(page, setPage, 100);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(isMobile);
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -278,7 +278,7 @@ export default function Settings() {
   if (isMobile) {
     return (
       <div className="flex size-full flex-col">
-        <div className="relative sticky -top-2 z-50 mb-2 flex items-center bg-background p-4">
+        <div className="sticky -top-2 z-50 mb-2 flex items-center bg-background p-4">
           <Button
             className="absolute left-4 z-10 rounded-lg"
             aria-label="Open menu"
@@ -329,7 +329,11 @@ export default function Settings() {
                 </div>
               </div>
 
-              <div>
+              <div
+                className={cn(
+                  "scrollbar-container max-h-[calc(100vh-8rem)] overflow-y-auto",
+                )}
+              >
                 {settingsGroups.map((group) => {
                   const filteredItems = group.items.filter((item) =>
                     visibleSettingsViews.includes(item.key as SettingsType),
