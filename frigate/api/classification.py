@@ -16,7 +16,12 @@ from playhouse.shortcuts import model_to_dict
 from frigate.api.auth import require_role
 from frigate.api.defs.request.classification_body import (
     AudioTranscriptionBody,
+    DeleteFaceImagesBody,
     RenameFaceBody,
+)
+from frigate.api.defs.response.classification_response import (
+    FaceRecognitionResponse,
+    FacesResponse,
 )
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
@@ -28,10 +33,18 @@ from frigate.util.path import get_event_snapshot
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=[Tags.events])
+router = APIRouter(tags=[Tags.classification])
 
 
-@router.get("/faces")
+@router.get(
+    "/faces",
+    response_model=FacesResponse,
+    summary="Get all registered faces",
+    description="""Returns a dictionary mapping face names to lists of image filenames.
+    Each key represents a registered face name, and the value is a list of image
+    files associated with that face. Supported image formats include .webp, .png,
+    .jpg, and .jpeg.""",
+)
 def get_faces():
     face_dict: dict[str, list[str]] = {}
 
@@ -55,7 +68,15 @@ def get_faces():
     return JSONResponse(status_code=200, content=face_dict)
 
 
-@router.post("/faces/reprocess", dependencies=[Depends(require_role(["admin"]))])
+@router.post(
+    "/faces/reprocess",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Reprocess a face training image",
+    description="""Reprocesses a face training image to update the prediction.
+    Requires face recognition to be enabled in the configuration. The training file
+    must exist in the faces/train directory. Returns a success response or an error
+    message if face recognition is not enabled or the training file is invalid.""",
+)
 def reclassify_face(request: Request, body: dict = None):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -88,7 +109,16 @@ def reclassify_face(request: Request, body: dict = None):
     )
 
 
-@router.post("/faces/train/{name}/classify")
+@router.post(
+    "/faces/train/{name}/classify",
+    summary="Classify and save a face training image",
+    description="""Adds a training image to a specific face name for face recognition.
+    Accepts either a training file from the train directory or an event_id to extract
+    the face from. The image is saved to the face's directory and the face classifier
+    is cleared to incorporate the new training data. Returns a success message with
+    the new filename or an error if face recognition is not enabled, the file/event
+    is invalid, or the face cannot be extracted.""",
+)
 def train_face(request: Request, name: str, body: dict = None):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -192,7 +222,15 @@ def train_face(request: Request, name: str, body: dict = None):
     )
 
 
-@router.post("/faces/{name}/create", dependencies=[Depends(require_role(["admin"]))])
+@router.post(
+    "/faces/{name}/create",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Create a new face name",
+    description="""Creates a new folder for a face name in the faces directory.
+    This is used to organize face training images. The face name is sanitized and
+    spaces are replaced with underscores. Returns a success message or an error if
+    face recognition is not enabled.""",
+)
 async def create_face(request: Request, name: str):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -209,7 +247,15 @@ async def create_face(request: Request, name: str):
     )
 
 
-@router.post("/faces/{name}/register", dependencies=[Depends(require_role(["admin"]))])
+@router.post(
+    "/faces/{name}/register",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Register a face image",
+    description="""Registers a face image for a specific face name by uploading an image file.
+    The uploaded image is processed and added to the face recognition system. Returns a
+    success response with details about the registration, or an error if face recognition
+    is not enabled or the image cannot be processed.""",
+)
 async def register_face(request: Request, name: str, file: UploadFile):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -235,7 +281,14 @@ async def register_face(request: Request, name: str, file: UploadFile):
     )
 
 
-@router.post("/faces/recognize")
+@router.post(
+    "/faces/recognize",
+    response_model=FaceRecognitionResponse,
+    summary="Recognize a face from an uploaded image",
+    description="""Recognizes a face from an uploaded image file by comparing it against
+    registered faces in the system. Returns the recognized face name and confidence score,
+    or an error if face recognition is not enabled or the image cannot be processed.""",
+)
 async def recognize_face(request: Request, file: UploadFile):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -261,28 +314,36 @@ async def recognize_face(request: Request, file: UploadFile):
     )
 
 
-@router.post("/faces/{name}/delete", dependencies=[Depends(require_role(["admin"]))])
-def deregister_faces(request: Request, name: str, body: dict = None):
+@router.post(
+    "/faces/{name}/delete",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete face images",
+    description="""Deletes specific face images for a given face name. The image IDs must belong
+    to the specified face folder. To delete an entire face folder, all image IDs in that
+    folder must be sent. Returns a success message or an error if face recognition is not enabled.""",
+)
+def deregister_faces(request: Request, name: str, body: DeleteFaceImagesBody):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
             status_code=400,
             content={"message": "Face recognition is not enabled.", "success": False},
         )
 
-    json: dict[str, Any] = body or {}
-    list_of_ids = json.get("ids", "")
-
     context: EmbeddingsContext = request.app.embeddings
-    context.delete_face_ids(
-        name, map(lambda file: sanitize_filename(file), list_of_ids)
-    )
+    context.delete_face_ids(name, map(lambda file: sanitize_filename(file), body.ids))
     return JSONResponse(
         content=({"success": True, "message": "Successfully deleted faces."}),
         status_code=200,
     )
 
 
-@router.put("/faces/{old_name}/rename", dependencies=[Depends(require_role(["admin"]))])
+@router.put(
+    "/faces/{old_name}/rename",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Rename a face name",
+    description="""Renames a face name in the system. The old name must exist and the new
+    name must be valid. Returns a success message or an error if face recognition is not enabled.""",
+)
 def rename_face(request: Request, old_name: str, body: RenameFaceBody):
     if not request.app.frigate_config.face_recognition.enabled:
         return JSONResponse(
@@ -311,7 +372,14 @@ def rename_face(request: Request, old_name: str, body: RenameFaceBody):
         )
 
 
-@router.put("/lpr/reprocess")
+@router.put(
+    "/lpr/reprocess",
+    summary="Reprocess a license plate",
+    description="""Reprocesses a license plate image to update the plate.
+    Requires license plate recognition to be enabled in the configuration. The event_id
+    must exist in the database. Returns a success message or an error if license plate
+    recognition is not enabled or the event_id is invalid.""",
+)
 def reprocess_license_plate(request: Request, event_id: str):
     if not request.app.frigate_config.lpr.enabled:
         message = "License plate recognition is not enabled."
@@ -344,7 +412,13 @@ def reprocess_license_plate(request: Request, event_id: str):
     )
 
 
-@router.put("/reindex", dependencies=[Depends(require_role(["admin"]))])
+@router.put(
+    "/reindex",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Reindex embeddings",
+    description="""Reindexes the embeddings for all tracked objects.
+    Requires semantic search to be enabled in the configuration. Returns a success message or an error if semantic search is not enabled.""",
+)
 def reindex_embeddings(request: Request):
     if not request.app.frigate_config.semantic_search.enabled:
         message = (
@@ -390,7 +464,13 @@ def reindex_embeddings(request: Request):
         )
 
 
-@router.put("/audio/transcribe")
+@router.put(
+    "/audio/transcribe",
+    summary="Transcribe audio",
+    description="""Transcribes audio from a specific event.
+    Requires audio transcription to be enabled in the configuration. The event_id
+    must exist in the database. Returns a success message or an error if audio transcription is not enabled or the event_id is invalid.""",
+)
 def transcribe_audio(request: Request, body: AudioTranscriptionBody):
     event_id = body.event_id
 
@@ -448,7 +528,12 @@ def transcribe_audio(request: Request, body: AudioTranscriptionBody):
 # custom classification training
 
 
-@router.get("/classification/{name}/dataset")
+@router.get(
+    "/classification/{name}/dataset",
+    summary="Get classification dataset",
+    description="""Gets the dataset for a specific classification model.
+    The name must exist in the classification models. Returns a success message or an error if the name is invalid.""",
+)
 def get_classification_dataset(name: str):
     dataset_dict: dict[str, list[str]] = {}
 
@@ -474,7 +559,12 @@ def get_classification_dataset(name: str):
     return JSONResponse(status_code=200, content=dataset_dict)
 
 
-@router.get("/classification/{name}/train")
+@router.get(
+    "/classification/{name}/train",
+    summary="Get classification train images",
+    description="""Gets the train images for a specific classification model.
+    The name must exist in the classification models. Returns a success message or an error if the name is invalid.""",
+)
 def get_classification_images(name: str):
     train_dir = os.path.join(CLIPS_DIR, sanitize_filename(name), "train")
 
@@ -492,7 +582,12 @@ def get_classification_images(name: str):
     )
 
 
-@router.post("/classification/{name}/train")
+@router.post(
+    "/classification/{name}/train",
+    summary="Train a classification model",
+    description="""Trains a specific classification model.
+    The name must exist in the classification models. Returns a success message or an error if the name is invalid.""",
+)
 async def train_configured_model(request: Request, name: str):
     config: FrigateConfig = request.app.frigate_config
 
@@ -518,6 +613,9 @@ async def train_configured_model(request: Request, name: str):
 @router.post(
     "/classification/{name}/dataset/{category}/delete",
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete classification dataset images",
+    description="""Deletes specific dataset images for a given classification model and category.
+    The image IDs must belong to the specified category. Returns a success message or an error if the name or category is invalid.""",
 )
 def delete_classification_dataset_images(
     request: Request, name: str, category: str, body: dict = None
@@ -556,6 +654,9 @@ def delete_classification_dataset_images(
 @router.post(
     "/classification/{name}/dataset/categorize",
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Categorize a classification image",
+    description="""Categorizes a specific classification image for a given classification model and category.
+    The image must exist in the specified category. Returns a success message or an error if the name or category is invalid.""",
 )
 def categorize_classification_image(request: Request, name: str, body: dict = None):
     config: FrigateConfig = request.app.frigate_config
@@ -611,6 +712,9 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
 @router.post(
     "/classification/{name}/train/delete",
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete classification train images",
+    description="""Deletes specific train images for a given classification model.
+    The image IDs must belong to the specified train folder. Returns a success message or an error if the name is invalid.""",
 )
 def delete_classification_train_images(request: Request, name: str, body: dict = None):
     config: FrigateConfig = request.app.frigate_config
