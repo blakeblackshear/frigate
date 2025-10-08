@@ -279,35 +279,58 @@ export default function Settings() {
   if (isMobile) {
     return (
       <div className="flex size-full flex-col">
-        <div className="sticky -top-2 z-50 mb-2 flex items-center justify-center bg-background p-4">
+        <div className="relative sticky -top-2 z-50 mb-2 flex items-center bg-background p-4">
           <Button
-            className="absolute left-0 rounded-lg"
+            className="absolute left-4 z-10 rounded-lg"
             aria-label="Open menu"
             size="sm"
             onClick={() => setMobileMenuOpen(true)}
           >
-            <IoMdArrowRoundBack className="h-5 w-5 text-secondary-foreground" />
+            <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
           </Button>
-          <h2 className="text-lg font-semibold smart-capitalize">
+          <h2 className="flex-1 text-center text-lg font-semibold smart-capitalize">
             {t("menu." + page)}
           </h2>
+          {[
+            "debug",
+            "cameras",
+            "masksAndZones",
+            "motionTuner",
+            "triggers",
+          ].includes(page) && (
+            <div className="absolute right-4 flex items-center gap-2">
+              {page == "masksAndZones" && (
+                <ZoneMaskFilterButton
+                  selectedZoneMask={filterZoneMask}
+                  updateZoneMaskFilter={setFilterZoneMask}
+                />
+              )}
+              <CameraSelectButton
+                allCameras={cameras}
+                selectedCamera={selectedCamera}
+                setSelectedCamera={setSelectedCamera}
+                cameraEnabledStates={cameraEnabledStates}
+                currentPage={page}
+              />
+            </div>
+          )}
         </div>
         <MobilePage open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <MobilePagePortal>
-            <MobilePageContent>
+            <MobilePageContent className="px-4">
               <MobilePageHeader>
                 <MobilePageTitle>
                   {t("settings", { ns: "common" })}
                 </MobilePageTitle>
               </MobilePageHeader>
-              <div className="p-4">
+              <div>
                 {settingsGroups.map((group) => {
                   const filteredItems = group.items.filter((item) =>
                     visibleSettingsViews.includes(item.key as SettingsType),
                   );
                   if (filteredItems.length === 0) return null;
                   return (
-                    <div key={group.label} className="mb-4">
+                    <div key={group.label} className="mb-3">
                       <h3 className="mb-2 text-sm font-medium text-muted-foreground">
                         {group.label}
                       </h3>
@@ -337,43 +360,18 @@ export default function Settings() {
             </MobilePageContent>
           </MobilePagePortal>
         </MobilePage>
-        {[
-          "debug",
-          "cameras",
-          "masksAndZones",
-          "motionTuner",
-          "triggers",
-        ].includes(page) && (
-          <div className="ml-2 flex flex-shrink-0 items-center gap-2">
-            {page == "masksAndZones" && (
-              <ZoneMaskFilterButton
+        <div className="flex-1 overflow-auto p-2">
+          {(() => {
+            const CurrentComponent = getCurrentComponent(page);
+            if (!CurrentComponent) return null;
+            return (
+              <CurrentComponent
+                selectedCamera={selectedCamera}
+                setUnsavedChanges={setUnsavedChanges}
                 selectedZoneMask={filterZoneMask}
-                updateZoneMaskFilter={setFilterZoneMask}
               />
-            )}
-            <CameraSelectButton
-              allCameras={cameras}
-              selectedCamera={selectedCamera}
-              setSelectedCamera={setSelectedCamera}
-              cameraEnabledStates={cameraEnabledStates}
-              currentPage={page}
-            />
-          </div>
-        )}
-        <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
-          <div className="flex-1 overflow-auto p-2">
-            {(() => {
-              const CurrentComponent = getCurrentComponent(page);
-              if (!CurrentComponent) return null;
-              return (
-                <CurrentComponent
-                  selectedCamera={selectedCamera}
-                  setUnsavedChanges={setUnsavedChanges}
-                  selectedZoneMask={filterZoneMask}
-                />
-              );
-            })()}
-          </div>
+            );
+          })()}
         </div>
         {confirmationDialogOpen && (
           <AlertDialog
