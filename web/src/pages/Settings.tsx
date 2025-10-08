@@ -451,6 +451,7 @@ export default function Settings() {
                       <SidebarMenu>
                         <SidebarMenuItem>
                           <SidebarMenuButton
+                            className="ml-0 pl-0"
                             isActive={page === filteredItems[0].key}
                             onClick={() => {
                               if (
