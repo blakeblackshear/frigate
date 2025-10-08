@@ -67,6 +67,7 @@ import {
 import { ChevronRight } from "lucide-react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { cn } from "@/lib/utils";
+import Heading from "@/components/ui/heading";
 
 const allSettingsViews = [
   "ui",
@@ -405,14 +406,14 @@ export default function Settings() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b p-4">
-        <h1 className="text-lg font-medium">
+      <div className="border-b border-secondary p-4">
+        <Heading as="h3" className="mb-0">
           {t("settings", { ns: "common" })}
-        </h1>
+        </Heading>
       </div>
       <SidebarProvider>
-        <Sidebar variant="inset" className="relative">
-          <SidebarContent className="bg-background">
+        <Sidebar variant="inset" className="relative pt-0">
+          <SidebarContent className="border-r-[1px] border-secondary bg-background pt-2">
             <SidebarMenu>
               {settingsGroups.map((group) => {
                 const filteredItems = group.items.filter((item) =>
