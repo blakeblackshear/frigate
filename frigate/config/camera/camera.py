@@ -89,10 +89,6 @@ class CameraConfig(FrigateBaseModel):
     lpr: CameraLicensePlateRecognitionConfig = Field(
         default_factory=CameraLicensePlateRecognitionConfig, title="LPR config."
     )
-    audio_transcription: CameraAudioTranscriptionConfig = Field(
-        default_factory=CameraAudioTranscriptionConfig,
-        title="Audio transcription config.",
-    )
     motion: MotionConfig = Field(None, title="Motion detection configuration.")
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Object configuration."
