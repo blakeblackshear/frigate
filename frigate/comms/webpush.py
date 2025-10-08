@@ -371,13 +371,14 @@ class WebPushClient(Communicator):
 
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
 
-        title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"
         image = f"{payload['after']['thumb_path'].replace('/media/frigate', '')}"
         ended = state == "end" or state == "genai"
 
         if state == "genai" and payload["after"]["data"]["metadata"]:
+            title = payload["after"]["data"]["metadata"]["title"]
             message = payload["after"]["data"]["metadata"]["scene"]
         else:
+            title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"
             message = f"Detected on {camera_name}"
 
         if ended:
