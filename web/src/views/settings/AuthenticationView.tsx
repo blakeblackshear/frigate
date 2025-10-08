@@ -405,7 +405,7 @@ export default function AuthenticationView({
   // Users section
   const UsersSection = (
     <>
-      <div className="mb-5 flex flex-row items-center justify-between gap-2 md:pr-2">
+      <div className="mb-5 flex flex-row items-center justify-between gap-2 md:mr-3">
         <div className="flex flex-col items-start">
           <Heading as="h4" className="mb-2">
             {t("users.management.title")}
@@ -425,7 +425,7 @@ export default function AuthenticationView({
         </Button>
       </div>
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt md:mr-2">
+        <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt md:mr-3">
           <div className="h-full overflow-auto">
             <Table>
               <TableHeader className="sticky top-0 bg-muted/50">
@@ -594,7 +594,7 @@ export default function AuthenticationView({
   // Roles section
   const RolesSection = (
     <>
-      <div className="mb-5 flex flex-row items-center justify-between gap-2 md:pr-2">
+      <div className="mb-5 flex flex-row items-center justify-between gap-2 md:mr-3">
         <div className="flex flex-col items-start">
           <Heading as="h4" className="mb-2">
             {t("roles.management.title")}
@@ -614,7 +614,7 @@ export default function AuthenticationView({
         </Button>
       </div>
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt md:mr-2">
+        <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt md:mr-3">
           <div className="h-full overflow-auto">
             <Table>
               <TableHeader className="sticky top-0 bg-muted/50">
@@ -784,7 +784,7 @@ export default function AuthenticationView({
   return (
     <div className="flex size-full flex-col">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mr-2 md:mt-0">
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mr-3 md:mt-0">
         {section === "users" && UsersSection}
         {section === "roles" && RolesSection}
         {!section && (
