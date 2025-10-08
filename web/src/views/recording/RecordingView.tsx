@@ -468,7 +468,7 @@ export function RecordingView({
       (rev) =>
         rev.start_time - REVIEW_PADDING < currentTime &&
         rev.end_time &&
-        currentTime < rev.end_time,
+        currentTime < rev.end_time + REVIEW_PADDING,
     );
   }, [config, currentTime, mainCameraReviewItems, mainCamera]);
   const onAnalysisOpen = useCallback(
