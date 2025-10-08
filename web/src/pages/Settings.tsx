@@ -56,16 +56,11 @@ import {
   SidebarMenuSubItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import {
-  MobilePage,
-  MobilePageContent,
-  MobilePagePortal,
-  MobilePageTitle,
-} from "@/components/mobile/MobilePage";
 import { ChevronRight } from "lucide-react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
+import { isPWA } from "@/utils/isPWA";
 
 const allSettingsViews = [
   "ui",
@@ -310,26 +305,24 @@ export default function Settings() {
             </div>
           )}
         </div>
-        <MobilePage open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <MobilePagePortal>
-            <MobilePageContent className="px-4">
-              <div
-                className={cn(
-                  "sticky -top-2 z-50 mb-2 flex items-center justify-center bg-background p-4",
-                )}
-              >
+        {mobileMenuOpen && (
+          <div
+            className={cn(
+              "absolute top-0 z-50 mb-12 bg-background",
+              isPWA && "mb-16",
+              "landscape:mb-14 landscape:md:mb-16",
+            )}
+          >
+            <div className="px-4">
+              <div className="sticky -top-2 z-50 mb-2 flex items-center justify-center bg-background p-4">
                 <div className="flex flex-row text-center">
-                  <MobilePageTitle>
+                  <h2 className="text-lg font-semibold">
                     {t("settings", { ns: "common" })}
-                  </MobilePageTitle>
+                  </h2>
                 </div>
               </div>
 
-              <div
-                className={cn(
-                  "scrollbar-container max-h-[calc(100vh-8rem)] overflow-y-auto",
-                )}
-              >
+              <div className="scrollbar-container max-h-[calc(100vh-8rem)] overflow-y-auto">
                 {settingsGroups.map((group) => {
                   const filteredItems = group.items.filter((item) =>
                     visibleSettingsViews.includes(item.key as SettingsType),
@@ -363,9 +356,9 @@ export default function Settings() {
                   );
                 })}
               </div>
-            </MobilePageContent>
-          </MobilePagePortal>
-        </MobilePage>
+            </div>
+          </div>
+        )}
         <div className="flex-1 overflow-auto p-2">
           {(() => {
             const CurrentComponent = getCurrentComponent(page);
