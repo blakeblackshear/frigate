@@ -66,6 +66,7 @@ import {
 } from "@/components/mobile/MobilePage";
 import { ChevronRight } from "lucide-react";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { cn } from "@/lib/utils";
 
 const allSettingsViews = [
   "ui",
@@ -403,146 +404,161 @@ export default function Settings() {
   }
 
   return (
-    <SidebarProvider>
-      <Sidebar variant="inset" className="relative">
-        <SidebarContent className="bg-background">
-          <SidebarMenu>
-            {settingsGroups.map((group) => {
-              const filteredItems = group.items.filter((item) =>
-                visibleSettingsViews.includes(item.key as SettingsType),
-              );
-              if (filteredItems.length === 0) return null;
-              return (
-                <SidebarGroup key={group.label}>
-                  <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-                  {filteredItems.length === 1 ? (
-                    <SidebarMenu>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton
-                          isActive={page === filteredItems[0].key}
-                          onClick={() => {
-                            if (
-                              !isAdmin &&
-                              !allowedViewsForViewer.includes(
-                                filteredItems[0].key as SettingsType,
-                              )
-                            ) {
-                              setPageToggle("ui");
-                            } else {
-                              setPageToggle(
-                                filteredItems[0].key as SettingsType,
-                              );
-                            }
-                          }}
-                        >
-                          <div className="smart-capitalize">
-                            {t("menu." + filteredItems[0].key)}
-                          </div>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </SidebarMenu>
-                  ) : (
-                    <SidebarMenuSub>
-                      {filteredItems.map((item) => (
-                        <SidebarMenuSubItem key={item.key}>
-                          <SidebarMenuSubButton
-                            isActive={page === item.key}
+    <div className="flex h-full flex-col">
+      <div className="border-b p-4">
+        <h1 className="text-lg font-medium">
+          {t("settings", { ns: "common" })}
+        </h1>
+      </div>
+      <SidebarProvider>
+        <Sidebar variant="inset" className="relative">
+          <SidebarContent className="bg-background">
+            <SidebarMenu>
+              {settingsGroups.map((group) => {
+                const filteredItems = group.items.filter((item) =>
+                  visibleSettingsViews.includes(item.key as SettingsType),
+                );
+                if (filteredItems.length === 0) return null;
+                return (
+                  <SidebarGroup key={group.label} className="py-1">
+                    {filteredItems.length === 1 ? (
+                      <SidebarMenu>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton
+                            isActive={page === filteredItems[0].key}
                             onClick={() => {
                               if (
                                 !isAdmin &&
                                 !allowedViewsForViewer.includes(
-                                  item.key as SettingsType,
+                                  filteredItems[0].key as SettingsType,
                                 )
                               ) {
                                 setPageToggle("ui");
                               } else {
-                                setPageToggle(item.key as SettingsType);
+                                setPageToggle(
+                                  filteredItems[0].key as SettingsType,
+                                );
                               }
                             }}
                           >
                             <div className="smart-capitalize">
-                              {t("menu." + item.key)}
+                              {t("menu." + filteredItems[0].key)}
                             </div>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  )}
-                </SidebarGroup>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-      <SidebarInset>
-        <div className="flex h-full flex-col">
-          <div className="border-b p-4">
-            <h1 className="text-lg font-medium">Settings</h1>
-          </div>
-          {[
-            "debug",
-            "cameras",
-            "masksAndZones",
-            "motionTuner",
-            "triggers",
-          ].includes(page) && (
-            <div className="flex items-center justify-end gap-2 border-b p-2">
-              {page == "masksAndZones" && (
-                <ZoneMaskFilterButton
-                  selectedZoneMask={filterZoneMask}
-                  updateZoneMaskFilter={setFilterZoneMask}
-                />
-              )}
-              <CameraSelectButton
-                allCameras={cameras}
-                selectedCamera={selectedCamera}
-                setSelectedCamera={setSelectedCamera}
-                cameraEnabledStates={cameraEnabledStates}
-                currentPage={page}
-              />
-            </div>
-          )}
-          <div className="flex-1 overflow-auto p-2">
-            {(() => {
-              const CurrentComponent = getCurrentComponent(page);
-              if (!CurrentComponent) return null;
-              return (
-                <CurrentComponent
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </SidebarMenu>
+                    ) : (
+                      <>
+                        <SidebarGroupLabel
+                          className={cn(
+                            "cursor-default text-sm",
+                            filteredItems.some((item) => page === item.key)
+                              ? "text-primary"
+                              : "text-sidebar-foreground/80",
+                          )}
+                        >
+                          {group.label}
+                        </SidebarGroupLabel>
+                        <SidebarMenuSub className="mx-1 border-0">
+                          {filteredItems.map((item) => (
+                            <SidebarMenuSubItem key={item.key}>
+                              <SidebarMenuSubButton
+                                isActive={page === item.key}
+                                onClick={() => {
+                                  if (
+                                    !isAdmin &&
+                                    !allowedViewsForViewer.includes(
+                                      item.key as SettingsType,
+                                    )
+                                  ) {
+                                    setPageToggle("ui");
+                                  } else {
+                                    setPageToggle(item.key as SettingsType);
+                                  }
+                                }}
+                              >
+                                <div className="w-full cursor-pointer smart-capitalize">
+                                  {t("menu." + item.key)}
+                                </div>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </>
+                    )}
+                  </SidebarGroup>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarContent>
+        </Sidebar>
+        <SidebarInset>
+          <div className="flex h-full flex-col">
+            {[
+              "debug",
+              "cameras",
+              "masksAndZones",
+              "motionTuner",
+              "triggers",
+            ].includes(page) && (
+              <div className="flex items-center justify-end gap-2 border-b p-2">
+                {page == "masksAndZones" && (
+                  <ZoneMaskFilterButton
+                    selectedZoneMask={filterZoneMask}
+                    updateZoneMaskFilter={setFilterZoneMask}
+                  />
+                )}
+                <CameraSelectButton
+                  allCameras={cameras}
                   selectedCamera={selectedCamera}
-                  setUnsavedChanges={setUnsavedChanges}
-                  selectedZoneMask={filterZoneMask}
+                  setSelectedCamera={setSelectedCamera}
+                  cameraEnabledStates={cameraEnabledStates}
+                  currentPage={page}
                 />
-              );
-            })()}
+              </div>
+            )}
+            <div className="flex-1 overflow-auto p-2">
+              {(() => {
+                const CurrentComponent = getCurrentComponent(page);
+                if (!CurrentComponent) return null;
+                return (
+                  <CurrentComponent
+                    selectedCamera={selectedCamera}
+                    setUnsavedChanges={setUnsavedChanges}
+                    selectedZoneMask={filterZoneMask}
+                  />
+                );
+              })()}
+            </div>
           </div>
-        </div>
-      </SidebarInset>
-      {confirmationDialogOpen && (
-        <AlertDialog
-          open={confirmationDialogOpen}
-          onOpenChange={() => setConfirmationDialogOpen(false)}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {t("dialog.unsavedChanges.title")}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("dialog.unsavedChanges.desc")}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => handleDialog(false)}>
-                {t("button.cancel", { ns: "common" })}
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={() => handleDialog(true)}>
-                {t("button.save", { ns: "common" })}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-    </SidebarProvider>
+        </SidebarInset>
+        {confirmationDialogOpen && (
+          <AlertDialog
+            open={confirmationDialogOpen}
+            onOpenChange={() => setConfirmationDialogOpen(false)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t("dialog.unsavedChanges.title")}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("dialog.unsavedChanges.desc")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => handleDialog(false)}>
+                  {t("button.cancel", { ns: "common" })}
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleDialog(true)}>
+                  {t("button.save", { ns: "common" })}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </SidebarProvider>
+    </div>
   );
 }
 
