@@ -215,7 +215,7 @@ class EmbeddingMaintainer(threading.Thread):
                 )
             )
 
-        if any(
+        if self.config.audio_transcription.enabled and any(
             c.enabled_in_config and c.audio_transcription.enabled
             for c in self.config.cameras.values()
         ):
