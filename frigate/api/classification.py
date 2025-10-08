@@ -23,6 +23,7 @@ from frigate.api.defs.response.classification_response import (
     FaceRecognitionResponse,
     FacesResponse,
 )
+from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera import DetectConfig
@@ -111,6 +112,7 @@ def reclassify_face(request: Request, body: dict = None):
 
 @router.post(
     "/faces/train/{name}/classify",
+    response_model=GenericResponse,
     summary="Classify and save a face training image",
     description="""Adds a training image to a specific face name for face recognition.
     Accepts either a training file from the train directory or an event_id to extract
@@ -224,6 +226,7 @@ def train_face(request: Request, name: str, body: dict = None):
 
 @router.post(
     "/faces/{name}/create",
+    response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Create a new face name",
     description="""Creates a new folder for a face name in the faces directory.
@@ -249,6 +252,7 @@ async def create_face(request: Request, name: str):
 
 @router.post(
     "/faces/{name}/register",
+    response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Register a face image",
     description="""Registers a face image for a specific face name by uploading an image file.
@@ -316,6 +320,7 @@ async def recognize_face(request: Request, file: UploadFile):
 
 @router.post(
     "/faces/{name}/delete",
+    response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Delete face images",
     description="""Deletes specific face images for a given face name. The image IDs must belong
@@ -339,6 +344,7 @@ def deregister_faces(request: Request, name: str, body: DeleteFaceImagesBody):
 
 @router.put(
     "/faces/{old_name}/rename",
+    response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Rename a face name",
     description="""Renames a face name in the system. The old name must exist and the new
@@ -414,6 +420,7 @@ def reprocess_license_plate(request: Request, event_id: str):
 
 @router.put(
     "/reindex",
+    response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Reindex embeddings",
     description="""Reindexes the embeddings for all tracked objects.
@@ -466,6 +473,7 @@ def reindex_embeddings(request: Request):
 
 @router.put(
     "/audio/transcribe",
+    response_model=GenericResponse,
     summary="Transcribe audio",
     description="""Transcribes audio from a specific event.
     Requires audio transcription to be enabled in the configuration. The event_id
@@ -584,6 +592,7 @@ def get_classification_images(name: str):
 
 @router.post(
     "/classification/{name}/train",
+    response_model=GenericResponse,
     summary="Train a classification model",
     description="""Trains a specific classification model.
     The name must exist in the classification models. Returns a success message or an error if the name is invalid.""",
@@ -612,6 +621,7 @@ async def train_configured_model(request: Request, name: str):
 
 @router.post(
     "/classification/{name}/dataset/{category}/delete",
+    response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Delete classification dataset images",
     description="""Deletes specific dataset images for a given classification model and category.
@@ -653,6 +663,7 @@ def delete_classification_dataset_images(
 
 @router.post(
     "/classification/{name}/dataset/categorize",
+    response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Categorize a classification image",
     description="""Categorizes a specific classification image for a given classification model and category.
@@ -711,6 +722,7 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
 
 @router.post(
     "/classification/{name}/train/delete",
+    response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Delete classification train images",
     description="""Deletes specific train images for a given classification model.
