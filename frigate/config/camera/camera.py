@@ -19,7 +19,6 @@ from frigate.util.builtin import (
 
 from ..base import FrigateBaseModel
 from ..classification import (
-    AudioTranscriptionConfig,
     CameraAudioTranscriptionConfig,
     CameraFaceRecognitionConfig,
     CameraLicensePlateRecognitionConfig,
@@ -70,8 +69,9 @@ class CameraConfig(FrigateBaseModel):
     audio: AudioConfig = Field(
         default_factory=AudioConfig, title="Audio events configuration."
     )
-    audio_transcription: AudioTranscriptionConfig = Field(
-        default_factory=AudioTranscriptionConfig, title="Audio transcription config."
+    audio_transcription: CameraAudioTranscriptionConfig = Field(
+        default_factory=CameraAudioTranscriptionConfig,
+        title="Audio transcription config.",
     )
     birdseye: BirdseyeCameraConfig = Field(
         default_factory=BirdseyeCameraConfig, title="Birdseye camera configuration."
