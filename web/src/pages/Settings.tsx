@@ -330,32 +330,36 @@ export default function Settings() {
           open={contentMobileOpen}
           onOpenChange={setContentMobileOpen}
         >
-          <MobilePageContent className="scrollbar-container overflow-y-auto px-4">
-            <MobilePageHeader>
-              <MobilePageTitle>{t("menu." + page)}</MobilePageTitle>
-              {[
-                "debug",
-                "cameras",
-                "masksAndZones",
-                "motionTuner",
-                "triggers",
-              ].includes(page) && (
-                <div className="absolute right-2 top-2 flex items-center gap-2">
-                  {page == "masksAndZones" && (
-                    <ZoneMaskFilterButton
-                      selectedZoneMask={filterZoneMask}
-                      updateZoneMaskFilter={setFilterZoneMask}
+          <MobilePageContent className="scrollbar-container overflow-y-auto px-2">
+            <MobilePageHeader
+              className="top-0"
+              actions={
+                [
+                  "debug",
+                  "cameras",
+                  "masksAndZones",
+                  "motionTuner",
+                  "triggers",
+                ].includes(page) ? (
+                  <div className="flex items-center gap-2">
+                    {page == "masksAndZones" && (
+                      <ZoneMaskFilterButton
+                        selectedZoneMask={filterZoneMask}
+                        updateZoneMaskFilter={setFilterZoneMask}
+                      />
+                    )}
+                    <CameraSelectButton
+                      allCameras={cameras}
+                      selectedCamera={selectedCamera}
+                      setSelectedCamera={setSelectedCamera}
+                      cameraEnabledStates={cameraEnabledStates}
+                      currentPage={page}
                     />
-                  )}
-                  <CameraSelectButton
-                    allCameras={cameras}
-                    selectedCamera={selectedCamera}
-                    setSelectedCamera={setSelectedCamera}
-                    cameraEnabledStates={cameraEnabledStates}
-                    currentPage={page}
-                  />
-                </div>
-              )}
+                  </div>
+                ) : undefined
+              }
+            >
+              <MobilePageTitle>{t("menu." + page)}</MobilePageTitle>
             </MobilePageHeader>
 
             <div className="p-2">

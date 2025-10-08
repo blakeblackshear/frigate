@@ -170,12 +170,14 @@ export function MobilePageContent({
 
 interface MobilePageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   onClose?: () => void;
+  actions?: React.ReactNode;
 }
 
 export function MobilePageHeader({
   children,
   className,
   onClose,
+  actions,
   ...props
 }: MobilePageHeaderProps) {
   const { t } = useTranslation(["common"]);
@@ -208,6 +210,11 @@ export function MobilePageHeader({
         <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
       </Button>
       <div className="flex flex-row text-center">{children}</div>
+      {actions && (
+        <div className="absolute right-0 flex items-center gap-2">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
