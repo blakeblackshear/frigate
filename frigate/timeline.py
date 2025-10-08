@@ -156,7 +156,7 @@ class TimelineProcessor(threading.Thread):
         event_type: str,
         event_data: dict[Any, Any],
     ) -> bool:
-        if event_type != "new":
+        if event_type != "start":
             return False
 
         if event_data.get("type", "api") == "audio":
