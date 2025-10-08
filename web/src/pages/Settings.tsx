@@ -84,11 +84,11 @@ type SettingsType = (typeof allSettingsViews)[number];
 
 const settingsGroups = [
   {
-    label: "General",
+    label: "general",
     items: [{ key: "ui", component: UiSettingsView }],
   },
   {
-    label: "Cameras",
+    label: "cameras",
     items: [
       { key: "cameras", component: CameraSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
@@ -96,25 +96,25 @@ const settingsGroups = [
     ],
   },
   {
-    label: "Enrichments",
+    label: "enrichments",
     items: [{ key: "enrichments", component: EnrichmentsSettingsView }],
   },
   {
-    label: "Users",
+    label: "users",
     items: [
       { key: "users", component: UsersView },
       { key: "roles", component: RolesView },
     ],
   },
   {
-    label: "Notifications",
+    label: "notifications",
     items: [
       { key: "notifications", component: NotificationView },
       { key: "triggers", component: TriggerView },
     ],
   },
   {
-    label: "Frigate+",
+    label: "frigateplus",
     items: [{ key: "frigateplus", component: FrigatePlusSettingsView }],
   },
 ];
@@ -293,7 +293,7 @@ export default function Settings() {
               </div>
               <div className="flex flex-row text-center">
                 <h2 className="ml-2 text-lg font-semibold">
-                  {t("settings", { ns: "common" })}
+                  {t("menu.settings", { ns: "common" })}
                 </h2>
               </div>
             </div>
@@ -308,7 +308,9 @@ export default function Settings() {
                   <div key={group.label} className="mb-3">
                     {filteredItems.length > 1 && (
                       <h3 className="mb-2 ml-2 text-sm font-medium text-secondary-foreground">
-                        {group.label}
+                        <div className="smart-capitalize">
+                          {t("menu." + group.label)}
+                        </div>
                       </h3>
                     )}
                     {filteredItems.map((item) => (
@@ -422,7 +424,7 @@ export default function Settings() {
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-secondary p-3">
         <Heading as="h3" className="mb-0">
-          {t("settings", { ns: "common" })}
+          {t("menu.settings", { ns: "common" })}
         </Heading>
         {[
           "debug",
@@ -498,7 +500,9 @@ export default function Settings() {
                               : "text-sidebar-foreground/80",
                           )}
                         >
-                          {group.label}
+                          <div className="smart-capitalize">
+                            {t("menu." + group.label)}
+                          </div>
                         </SidebarGroupLabel>
                         <SidebarMenuSub className="mx-2 border-0">
                           {filteredItems.map((item) => (
