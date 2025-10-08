@@ -24,6 +24,7 @@ from frigate.api.defs.response.export_response import (
     ExportsResponse,
     StartExportResponse,
 )
+from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.const import EXPORT_DIR
 from frigate.models import Export, Previews, Recordings
@@ -165,7 +166,13 @@ def export_recording(
 
 
 @router.patch(
-    "/export/{event_id}/rename", dependencies=[Depends(require_role(["admin"]))]
+    "/export/{event_id}/rename",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Rename export",
+    description="""Renames an export.
+    NOTE: This changes the friendly name of the export, not the filename.
+    """,
 )
 async def export_rename(event_id: str, body: ExportRenameBody, request: Request):
     try:
@@ -195,7 +202,12 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
     )
 
 
-@router.delete("/export/{event_id}", dependencies=[Depends(require_role(["admin"]))])
+@router.delete(
+    "/export/{event_id}",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete export",
+)
 async def export_delete(event_id: str, request: Request):
     try:
         export: Export = Export.get(Export.id == event_id)
@@ -254,7 +266,7 @@ async def export_delete(event_id: str, request: Request):
     response_model=ExportModel,
     summary="Get a single export",
     description="""Gets a specific export by ID. The user must have access to the camera
-    associated with the export. Returns the export details or an error if not found.""",
+    associated with the export.""",
 )
 async def get_export(export_id: str, request: Request):
     try:

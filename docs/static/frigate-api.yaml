@@ -1640,8 +1640,12 @@ paths:
     get:
       tags:
         - Preview
-      summary: Preview Ts
-      description: Get all mp4 previews relevant for time period.
+      summary: Get preview clips for time range
+      description: |-
+        Gets all preview clips for a specified camera and time range.
+            Returns a list of preview video clips that overlap with the requested time period,
+            ordered by start time. Use camera_name='all' to get previews from all cameras.
+            Returns an error if no previews are found.
       operationId: preview_ts_preview__camera_name__start__start_ts__end__end_ts__get
       parameters:
         - name: camera_name
@@ -1669,7 +1673,13 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreviewModel'
+                title: >-
+                  Response Preview Ts Preview  Camera Name  Start  Start Ts
+                  End  End Ts  Get
         '422':
           description: Validation Error
           content:
@@ -1680,8 +1690,12 @@ paths:
     get:
       tags:
         - Preview
-      summary: Preview Hour
-      description: Get all mp4 previews relevant for time period given the timezone
+      summary: Get preview clips for specific hour
+      description: |-
+        Gets all preview clips for a specific hour in a given timezone.
+            Converts the provided date/time from the specified timezone to UTC and retrieves
+            all preview clips for that hour. Use camera_name='all' to get previews from all cameras.
+            The tz_name should be a timezone like 'America/New_York' (use commas instead of slashes).
       operationId: >-
         preview_hour_preview__year_month___day___hour___camera_name___tz_name__get
       parameters:
@@ -1722,7 +1736,13 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreviewModel'
+                title: >-
+                  Response Preview Hour Preview  Year Month   Day   Hour
+                  Camera Name   Tz Name  Get
         '422':
           description: Validation Error
           content:
@@ -1733,8 +1753,12 @@ paths:
     get:
       tags:
         - Preview
-      summary: Get Preview Frames From Cache
-      description: Get list of cached preview frames
+      summary: Get cached preview frame filenames
+      description: >-
+        Gets a list of cached preview frame filenames for a specific camera and
+        time range.
+            Returns an array of filenames for preview frames that fall within the specified time period,
+            sorted in chronological order. These are individual frame images cached for quick preview display.
       operationId: >-
         get_preview_frames_from_cache_preview__camera_name__start__start_ts__end__end_ts__frames_get
       parameters:
@@ -1763,7 +1787,13 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                type: array
+                items:
+                  type: string
+                title: >-
+                  Response Get Preview Frames From Cache Preview  Camera Name
+                  Start  Start Ts  End  End Ts  Frames Get
         '422':
           description: Validation Error
           content:
@@ -1774,7 +1804,10 @@ paths:
     get:
       tags:
         - Notifications
-      summary: Get Vapid Pub Key
+      summary: Get VAPID public key
+      description: |-
+        Gets the VAPID public key for the notifications.
+            Returns the public key or an error if notifications are not enabled.
       operationId: get_vapid_pub_key_notifications_pubkey_get
       responses:
         '200':
@@ -1786,7 +1819,10 @@ paths:
     post:
       tags:
         - Notifications
-      summary: Register Notifications
+      summary: Register notifications
+      description: |-
+        Registers a notifications subscription.
+            Returns a success message or an error if the subscription is not provided.
       operationId: register_notifications_notifications_register_post
       requestBody:
         content:
@@ -1881,7 +1917,10 @@ paths:
     patch:
       tags:
         - Export
-      summary: Export Rename
+      summary: Rename export
+      description: |-
+        Renames an export.
+            NOTE: This changes the friendly name of the export, not the filename.
       operationId: export_rename_export__event_id__rename_patch
       parameters:
         - name: event_id
@@ -1901,7 +1940,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -1912,7 +1952,7 @@ paths:
     delete:
       tags:
         - Export
-      summary: Export Delete
+      summary: Delete export
       operationId: export_delete_export__event_id__delete
       parameters:
         - name: event_id
@@ -1926,7 +1966,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -1940,7 +1981,7 @@ paths:
       summary: Get a single export
       description: |-
         Gets a specific export by ID. The user must have access to the camera
-            associated with the export. Returns the export details or an error if not found.
+            associated with the export.
       operationId: get_export_exports__export_id__get
       parameters:
         - name: export_id
@@ -3572,14 +3613,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1759931186.373319
+            default: 1759931691.091933
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1759934786.373327
+            default: 1759935291.09194
             title: Before
       responses:
         '200':
@@ -4691,6 +4732,537 @@ components:
         data:
           type: object
           title: Data
+      type: object
+      required:
+        - id
+        - label
+        - sub_label
+        - camera
+        - start_time
+        - end_time
+        - false_positive
+        - zones
+        - thumbnail
+        - has_clip
+        - has_snapshot
+        - retain_indefinitely
+        - plus_id
+        - model_hash
+        - detector_type
+        - model_type
+        - data
+      title: EventResponse
+    EventUploadPlusResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        plus_id:
+          type: string
+          title: Plus Id
+      type: object
+      required:
+        - success
+        - plus_id
+      title: EventUploadPlusResponse
+    EventsCreateBody:
+      properties:
+        source_type:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Source Type
+          default: api
+        sub_label:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Sub Label
+        score:
+          anyOf:
+            - type: number
+            - type: 'null'
+          title: Score
+          default: 0
+        duration:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Duration
+          default: 30
+        include_recording:
+          anyOf:
+            - type: boolean
+            - type: 'null'
+          title: Include Recording
+          default: true
+        draw:
+          anyOf:
+            - type: object
+            - type: 'null'
+          title: Draw
+          default: {}
+      type: object
+      title: EventsCreateBody
+    EventsDeleteBody:
+      properties:
+        event_ids:
+          items:
+            type: string
+          type: array
+          title: The event IDs to delete
+      type: object
+      required:
+        - event_ids
+      title: EventsDeleteBody
+    EventsDescriptionBody:
+      properties:
+        description:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: The description of the event
+      type: object
+      required:
+        - description
+      title: EventsDescriptionBody
+    EventsEndBody:
+      properties:
+        end_time:
+          anyOf:
+            - type: number
+            - type: 'null'
+          title: End Time
+      type: object
+      title: EventsEndBody
+    EventsLPRBody:
+      properties:
+        recognizedLicensePlate:
+          type: string
+          maxLength: 100
+          title: Recognized License Plate
+        recognizedLicensePlateScore:
+          anyOf:
+            - type: number
+              maximum: 1
+              exclusiveMinimum: 0
+            - type: 'null'
+          title: Score for recognized license plate
+      type: object
+      required:
+        - recognizedLicensePlate
+      title: EventsLPRBody
+    EventsSubLabelBody:
+      properties:
+        subLabel:
+          type: string
+          maxLength: 100
+          title: Sub label
+        subLabelScore:
+          anyOf:
+            - type: number
+              maximum: 1
+              exclusiveMinimum: 0
+            - type: 'null'
+          title: Score for sub label
+        camera:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Camera this object is detected on.
+      type: object
+      required:
+        - subLabel
+      title: EventsSubLabelBody
+    ExportModel:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Unique identifier for the export
+        camera:
+          type: string
+          title: Camera
+          description: Camera name associated with this export
+        name:
+          type: string
+          title: Name
+          description: Friendly name of the export
+        date:
+          type: number
+          title: Date
+          description: Unix timestamp when the export was created
+        video_path:
+          type: string
+          title: Video Path
+          description: File path to the exported video
+        thumb_path:
+          type: string
+          title: Thumb Path
+          description: File path to the export thumbnail
+        in_progress:
+          type: boolean
+          title: In Progress
+          description: Whether the export is currently being processed
+      type: object
+      required:
+        - id
+        - camera
+        - name
+        - date
+        - video_path
+        - thumb_path
+        - in_progress
+      title: ExportModel
+      description: Model representing a single export.
+    ExportRecordingsBody:
+      properties:
+        playback:
+          $ref: '#/components/schemas/PlaybackFactorEnum'
+          title: Playback factor
+          default: realtime
+        source:
+          $ref: '#/components/schemas/PlaybackSourceEnum'
+          title: Playback source
+          default: recordings
+        name:
+          type: string
+          maxLength: 256
+          title: Friendly name
+        image_path:
+          type: string
+          title: Image Path
+      type: object
+      title: ExportRecordingsBody
+    ExportRenameBody:
+      properties:
+        name:
+          type: string
+          maxLength: 256
+          title: Friendly name
+      type: object
+      required:
+        - name
+      title: ExportRenameBody
+    Extension:
+      type: string
+      enum:
+        - webp
+        - png
+        - jpg
+        - jpeg
+      title: Extension
+    FaceRecognitionResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Whether the face recognition was successful
+        score:
+          anyOf:
+            - type: number
+            - type: 'null'
+          title: Score
+          description: Confidence score of the recognition (0-1)
+        face_name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Face Name
+          description: The recognized face name if successful
+      type: object
+      required:
+        - success
+      title: FaceRecognitionResponse
+      description: >-
+        Response model for face recognition endpoint.
+
+
+        Returns the result of attempting to recognize a face from an uploaded
+        image.
+    FacesResponse:
+      additionalProperties:
+        items:
+          type: string
+        type: array
+      type: object
+      title: FacesResponse
+      description: |-
+        Response model for the get_faces endpoint.
+
+        Returns a mapping of face names to lists of image filenames.
+        Each face name corresponds to a directory in the faces folder,
+        and the list contains the names of image files for that face.
+
+        Example:
+            {
+                "john_doe": ["face1.webp", "face2.jpg"],
+                "jane_smith": ["face3.png"]
+            }
+    GenericResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+        - success
+        - message
+      title: GenericResponse
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Last24HoursReview:
+      properties:
+        reviewed_alert:
+          type: integer
+          title: Reviewed Alert
+        reviewed_detection:
+          type: integer
+          title: Reviewed Detection
+        total_alert:
+          type: integer
+          title: Total Alert
+        total_detection:
+          type: integer
+          title: Total Detection
+      type: object
+      required:
+        - reviewed_alert
+        - reviewed_detection
+        - total_alert
+        - total_detection
+      title: Last24HoursReview
+    PlaybackFactorEnum:
+      type: string
+      enum:
+        - realtime
+        - timelapse_25x
+      title: PlaybackFactorEnum
+    PlaybackSourceEnum:
+      type: string
+      enum:
+        - recordings
+        - preview
+      title: PlaybackSourceEnum
+    PreviewModel:
+      properties:
+        camera:
+          type: string
+          title: Camera
+          description: Camera name for this preview
+        src:
+          type: string
+          title: Src
+          description: Path to the preview video file
+        type:
+          type: string
+          title: Type
+          description: MIME type of the preview video (video/mp4)
+        start:
+          type: number
+          title: Start
+          description: Unix timestamp when the preview starts
+        end:
+          type: number
+          title: End
+          description: Unix timestamp when the preview ends
+      type: object
+      required:
+        - camera
+        - src
+        - type
+        - start
+        - end
+      title: PreviewModel
+      description: Model representing a single preview clip.
+    RegenerateDescriptionEnum:
+      type: string
+      enum:
+        - thumbnails
+        - snapshot
+      title: RegenerateDescriptionEnum
+    RenameFaceBody:
+      properties:
+        new_name:
+          type: string
+          title: New Name
+      type: object
+      required:
+        - new_name
+      title: RenameFaceBody
+    ReviewActivityMotionResponse:
+      properties:
+        start_time:
+          type: integer
+          title: Start Time
+        motion:
+          type: number
+          title: Motion
+        camera:
+          type: string
+          title: Camera
+      type: object
+      required:
+        - start_time
+        - motion
+        - camera
+      title: ReviewActivityMotionResponse
+    ReviewModifyMultipleBody:
+      properties:
+        ids:
+          items:
+            type: string
+            minLength: 1
+          type: array
+          minItems: 1
+          title: Ids
+      type: object
+      required:
+        - ids
+      title: ReviewModifyMultipleBody
+    ReviewSegmentResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        camera:
+          type: string
+          title: Camera
+        start_time:
+          type: string
+          format: date-time
+          title: Start Time
+        end_time:
+          type: string
+          format: date-time
+          title: End Time
+        has_been_reviewed:
+          type: boolean
+          title: Has Been Reviewed
+        severity:
+          $ref: '#/components/schemas/SeverityEnum'
+        thumb_path:
+          type: string
+          title: Thumb Path
+        data:
+          title: Data
+      type: object
+      required:
+        - id
+        - camera
+        - start_time
+        - end_time
+        - has_been_reviewed
+        - severity
+        - thumb_path
+        - data
+      title: ReviewSegmentResponse
+    ReviewSummaryResponse:
+      properties:
+        last24Hours:
+          $ref: '#/components/schemas/Last24HoursReview'
+        root:
+          additionalProperties:
+            $ref: '#/components/schemas/DayReview'
+          type: object
+          title: Root
+      type: object
+      required:
+        - last24Hours
+        - root
+      title: ReviewSummaryResponse
+    SeverityEnum:
+      type: string
+      enum:
+        - alert
+        - detection
+      title: SeverityEnum
+    StartExportResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Whether the export was started successfully
+        message:
+          type: string
+          title: Message
+          description: Status or error message
+        export_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Export Id
+          description: The export ID if successfully started
+      type: object
+      required:
+        - success
+        - message
+      title: StartExportResponse
+      description: Response model for starting an export.
+    SubmitPlusBody:
+      properties:
+        include_annotation:
+          type: integer
+          title: Include Annotation
+          default: 1
+      type: object
+      title: SubmitPlusBody
+    TriggerEmbeddingBody:
+      properties:
+        type:
+          $ref: '#/components/schemas/TriggerType'
+        data:
+          type: string
+          title: Data
+        threshold:
+          type: number
+          maximum: 1
+          minimum: 0
+          title: Threshold
+          default: 0.5
+      type: object
+      required:
+        - type
+        - data
+      title: TriggerEmbeddingBody
+    TriggerType:
+      type: string
+      enum:
+        - thumbnail
+        - description
+      title: TriggerType
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+
       type: object
       required:
         - id
