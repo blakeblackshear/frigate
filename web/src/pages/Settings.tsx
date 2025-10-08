@@ -36,7 +36,7 @@ import EnrichmentsSettingsView from "@/views/settings/EnrichmentsSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
@@ -185,6 +185,8 @@ export default function Settings() {
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
+  const navigate = useNavigate();
+
   const cameras = useMemo(() => {
     if (!config) {
       return [];
@@ -275,8 +277,10 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    document.title = t("documentTitle.default");
-  }, [t]);
+    if (!contentMobileOpen) {
+      document.title = t("documentTitle.default");
+    }
+  }, [t, contentMobileOpen]);
 
   if (isMobile) {
     return (
@@ -340,6 +344,7 @@ export default function Settings() {
           >
             <MobilePageHeader
               className="top-0 mb-0"
+              onClose={() => navigate(-1)}
               actions={
                 [
                   "debug",
