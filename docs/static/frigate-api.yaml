@@ -1938,7 +1938,8 @@ paths:
     get:
       tags:
         - Events
-      summary: Events
+      summary: Get events
+      description: Returns a list of events.
       operationId: events_events_get
       parameters:
         - name: camera
@@ -2198,7 +2199,10 @@ paths:
     get:
       tags:
         - Events
-      summary: Events Explore
+      summary: Get summary of objects.
+      description: |-
+        Gets a summary of objects from the database.
+            Returns a list of objects with a max of `limit` objects for each label.
       operationId: events_explore_events_explore_get
       parameters:
         - name: limit
@@ -2228,7 +2232,10 @@ paths:
     get:
       tags:
         - Events
-      summary: Event Ids
+      summary: Get events by ids.
+      description: |-
+        Gets events by a list of ids.
+            Returns a list of events.
       operationId: event_ids_event_ids_get
       parameters:
         - name: ids
@@ -2257,7 +2264,10 @@ paths:
     get:
       tags:
         - Events
-      summary: Events Search
+      summary: Search events.
+      description: |-
+        Searches for events in the database.
+            Returns a list of events.
       operationId: events_search_events_search_get
       parameters:
         - name: query
@@ -2497,7 +2507,8 @@ paths:
     get:
       tags:
         - Events
-      summary: Event
+      summary: Get event by id.
+      description: Gets an event by its id.
       operationId: event_events__event_id__get
       parameters:
         - name: event_id
@@ -2522,7 +2533,10 @@ paths:
     delete:
       tags:
         - Events
-      summary: Delete Event
+      summary: Delete event.
+      description: |-
+        Deletes an event from the database.
+            Returns a success message or an error if the event is not found.
       operationId: delete_event_events__event_id__delete
       parameters:
         - name: event_id
@@ -2548,7 +2562,11 @@ paths:
     post:
       tags:
         - Events
-      summary: Set Retain
+      summary: Set event retain indefinitely.
+      description: |-
+        Sets an event to retain indefinitely.
+            Returns a success message or an error if the event is not found.
+            NOTE: This is a legacy endpoint and is not supported in the frontend.
       operationId: set_retain_events__event_id__retain_post
       parameters:
         - name: event_id
@@ -2573,7 +2591,11 @@ paths:
     delete:
       tags:
         - Events
-      summary: Delete Retain
+      summary: Stop event from being retained indefinitely.
+      description: |-
+        Stops an event from being retained indefinitely.
+            Returns a success message or an error if the event is not found.
+            NOTE: This is a legacy endpoint and is not supported in the frontend.
       operationId: delete_retain_events__event_id__retain_delete
       parameters:
         - name: event_id
@@ -2599,7 +2621,10 @@ paths:
     post:
       tags:
         - Events
-      summary: Send To Plus
+      summary: Send event to Frigate+.
+      description: |-
+        Sends an event to Frigate+.
+            Returns a success message or an error if the event is not found.
       operationId: send_to_plus_events__event_id__plus_post
       parameters:
         - name: event_id
@@ -2630,7 +2655,11 @@ paths:
     put:
       tags:
         - Events
-      summary: False Positive
+      summary: Submit false positive to Frigate+
+      description: |-
+        Submit an event as a false positive to Frigate+.
+            This endpoint is the same as the standard Frigate+ submission endpoint,
+            but is specifically for marking an event as a false positive.
       operationId: false_positive_events__event_id__false_positive_put
       parameters:
         - name: event_id
@@ -2656,7 +2685,10 @@ paths:
     post:
       tags:
         - Events
-      summary: Set Sub Label
+      summary: Set event sub label.
+      description: |-
+        Sets an event's sub label.
+            Returns a success message or an error if the event is not found.
       operationId: set_sub_label_events__event_id__sub_label_post
       parameters:
         - name: event_id
@@ -2688,7 +2720,10 @@ paths:
     post:
       tags:
         - Events
-      summary: Set Plate
+      summary: Set event license plate.
+      description: |-
+        Sets an event's license plate.
+            Returns a success message or an error if the event is not found.
       operationId: set_plate_events__event_id__recognized_license_plate_post
       parameters:
         - name: event_id
@@ -2720,7 +2755,10 @@ paths:
     post:
       tags:
         - Events
-      summary: Set Description
+      summary: Set event description.
+      description: |-
+        Sets an event's description.
+            Returns a success message or an error if the event is not found.
       operationId: set_description_events__event_id__description_post
       parameters:
         - name: event_id
@@ -2752,7 +2790,10 @@ paths:
     put:
       tags:
         - Events
-      summary: Regenerate Description
+      summary: Regenerate event description.
+      description: |-
+        Regenerates an event's description.
+            Returns a success message or an error if the event is not found.
       operationId: regenerate_description_events__event_id__description_regenerate_put
       parameters:
         - name: event_id
@@ -2796,7 +2837,10 @@ paths:
     post:
       tags:
         - Events
-      summary: Generate Description Embedding
+      summary: Generate description embedding.
+      description: |-
+        Generates an embedding for an event's description.
+            Returns a success message or an error if the event is not found.
       operationId: generate_description_embedding_description_generate_post
       requestBody:
         required: true
@@ -2821,7 +2865,10 @@ paths:
     delete:
       tags:
         - Events
-      summary: Delete Events
+      summary: Delete events.
+      description: |-
+        Deletes a list of events from the database.
+            Returns a success message or an error if the events are not found.
       operationId: delete_events_events__delete
       requestBody:
         required: true
@@ -2846,7 +2893,13 @@ paths:
     post:
       tags:
         - Events
-      summary: Create Event
+      summary: Create manual event.
+      description: |-
+        Creates a manual event in the database.
+            Returns a success message or an error if the event is not found.
+            NOTES:
+            - Creating a manual event does not trigger an update to /events MQTT topic.
+            - If a duration is set to null, the event will need to be ended manually by calling /events/{event_id}/end.
       operationId: create_event_events__camera_name___label__create_post
       parameters:
         - name: camera_name
@@ -2889,7 +2942,11 @@ paths:
     put:
       tags:
         - Events
-      summary: End Event
+      summary: End manual event.
+      description: |-
+        Ends a manual event.
+            Returns a success message or an error if the event is not found.
+            NOTE: This should only be used for manual events.
       operationId: end_event_events__event_id__end_put
       parameters:
         - name: event_id
@@ -2921,7 +2978,10 @@ paths:
     post:
       tags:
         - Events
-      summary: Create Trigger Embedding
+      summary: Create trigger embedding.
+      description: |-
+        Creates a trigger embedding for a specific trigger.
+            Returns a success message or an error if the trigger is not found.
       operationId: create_trigger_embedding_trigger_embedding_post
       parameters:
         - name: camera_name
@@ -2960,7 +3020,10 @@ paths:
     put:
       tags:
         - Events
-      summary: Update Trigger Embedding
+      summary: Update trigger embedding.
+      description: |-
+        Updates a trigger embedding for a specific trigger.
+            Returns a success message or an error if the trigger is not found.
       operationId: update_trigger_embedding_trigger_embedding__camera_name___name__put
       parameters:
         - name: camera_name
@@ -3000,7 +3063,10 @@ paths:
     delete:
       tags:
         - Events
-      summary: Delete Trigger Embedding
+      summary: Delete trigger embedding.
+      description: |-
+        Deletes a trigger embedding for a specific trigger.
+            Returns a success message or an error if the trigger is not found.
       operationId: delete_trigger_embedding_trigger_embedding__camera_name___name__delete
       parameters:
         - name: camera_name
@@ -3035,7 +3101,10 @@ paths:
     get:
       tags:
         - Events
-      summary: Get Triggers Status
+      summary: Get triggers status.
+      description: |-
+        Gets the status of all triggers for a specific camera.
+            Returns a success message or an error if the camera is not found.
       operationId: get_triggers_status_triggers_status__camera_name__get
       parameters:
         - name: camera_name
@@ -3475,14 +3544,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1759925464.421221
+            default: 1759928397.31333
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1759929064.421228
+            default: 1759931997.313336
             title: Before
       responses:
         '200':
