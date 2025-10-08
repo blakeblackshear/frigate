@@ -195,7 +195,7 @@ paths:
   /faces:
     get:
       tags:
-        - classification
+        - Classification
       summary: Get all registered faces
       description: |-
         Returns a dictionary mapping face names to lists of image filenames.
@@ -213,7 +213,7 @@ paths:
   /faces/reprocess:
     post:
       tags:
-        - classification
+        - Classification
       summary: Reprocess a face training image
       description: |-
         Reprocesses a face training image to update the prediction.
@@ -242,7 +242,7 @@ paths:
   /faces/train/{name}/classify:
     post:
       tags:
-        - classification
+        - Classification
       summary: Classify and save a face training image
       description: |-
         Adds a training image to a specific face name for face recognition.
@@ -280,7 +280,7 @@ paths:
   /faces/{name}/create:
     post:
       tags:
-        - classification
+        - Classification
       summary: Create a new face name
       description: |-
         Creates a new folder for a face name in the faces directory.
@@ -310,7 +310,7 @@ paths:
   /faces/{name}/register:
     post:
       tags:
-        - classification
+        - Classification
       summary: Register a face image
       description: >-
         Registers a face image for a specific face name by uploading an image
@@ -348,7 +348,7 @@ paths:
   /faces/recognize:
     post:
       tags:
-        - classification
+        - Classification
       summary: Recognize a face from an uploaded image
       description: |-
         Recognizes a face from an uploaded image file by comparing it against
@@ -377,7 +377,7 @@ paths:
   /faces/{name}/delete:
     post:
       tags:
-        - classification
+        - Classification
       summary: Delete face images
       description: >-
         Deletes specific face images for a given face name. The image IDs must
@@ -413,7 +413,7 @@ paths:
   /faces/{old_name}/rename:
     put:
       tags:
-        - classification
+        - Classification
       summary: Rename a face name
       description: |-
         Renames a face name in the system. The old name must exist and the new
@@ -447,7 +447,7 @@ paths:
   /lpr/reprocess:
     put:
       tags:
-        - classification
+        - Classification
       summary: Reprocess a license plate
       description: |-
         Reprocesses a license plate image to update the plate.
@@ -477,7 +477,7 @@ paths:
   /reindex:
     put:
       tags:
-        - classification
+        - Classification
       summary: Reindex embeddings
       description: |-
         Reindexes the embeddings for all tracked objects.
@@ -492,7 +492,7 @@ paths:
   /audio/transcribe:
     put:
       tags:
-        - classification
+        - Classification
       summary: Transcribe audio
       description: |-
         Transcribes audio from a specific event.
@@ -520,7 +520,7 @@ paths:
   /classification/{name}/dataset:
     get:
       tags:
-        - classification
+        - Classification
       summary: Get classification dataset
       description: |-
         Gets the dataset for a specific classification model.
@@ -548,7 +548,7 @@ paths:
   /classification/{name}/train:
     get:
       tags:
-        - classification
+        - Classification
       summary: Get classification train images
       description: |-
         Gets the train images for a specific classification model.
@@ -575,7 +575,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     post:
       tags:
-        - classification
+        - Classification
       summary: Train a classification model
       description: |-
         Trains a specific classification model.
@@ -603,7 +603,7 @@ paths:
   /classification/{name}/dataset/{category}/delete:
     post:
       tags:
-        - classification
+        - Classification
       summary: Delete classification dataset images
       description: >-
         Deletes specific dataset images for a given classification model and
@@ -645,7 +645,7 @@ paths:
   /classification/{name}/dataset/categorize:
     post:
       tags:
-        - classification
+        - Classification
       summary: Categorize a classification image
       description: >-
         Categorizes a specific classification image for a given classification
@@ -681,7 +681,7 @@ paths:
   /classification/{name}/train/delete:
     post:
       tags:
-        - classification
+        - Classification
       summary: Delete classification train images
       description: |-
         Deletes specific train images for a given classification model.
