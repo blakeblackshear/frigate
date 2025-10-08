@@ -19,6 +19,12 @@ from frigate.api.auth import (
 )
 from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
 from frigate.api.defs.request.export_rename_body import ExportRenameBody
+from frigate.api.defs.response.export_response import (
+    ExportModel,
+    ExportsResponse,
+    StartExportResponse,
+)
+from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.const import EXPORT_DIR
 from frigate.models import Export, Previews, Recordings
@@ -34,7 +40,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.export])
 
 
-@router.get("/exports")
+@router.get(
+    "/exports",
+    response_model=ExportsResponse,
+    summary="Get exports",
+    description="""Gets all exports from the database for cameras the user has access to.
+    Returns a list of exports ordered by date (most recent first).""",
+)
 def get_exports(
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
@@ -50,7 +62,13 @@ def get_exports(
 
 @router.post(
     "/export/{camera_name}/start/{start_time}/end/{end_time}",
+    response_model=StartExportResponse,
     dependencies=[Depends(require_camera_access)],
+    summary="Start recording export",
+    description="""Starts an export of a recording for the specified time range.
+    The export can be from recordings or preview footage. Returns the export ID if
+    successful, or an error message if the camera is invalid or no recordings/previews
+    are found for the time range.""",
 )
 def export_recording(
     request: Request,
@@ -148,7 +166,13 @@ def export_recording(
 
 
 @router.patch(
-    "/export/{event_id}/rename", dependencies=[Depends(require_role(["admin"]))]
+    "/export/{event_id}/rename",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Rename export",
+    description="""Renames an export.
+    NOTE: This changes the friendly name of the export, not the filename.
+    """,
 )
 async def export_rename(event_id: str, body: ExportRenameBody, request: Request):
     try:
@@ -178,7 +202,12 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
     )
 
 
-@router.delete("/export/{event_id}", dependencies=[Depends(require_role(["admin"]))])
+@router.delete(
+    "/export/{event_id}",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete export",
+)
 async def export_delete(event_id: str, request: Request):
     try:
         export: Export = Export.get(Export.id == event_id)
@@ -232,7 +261,13 @@ async def export_delete(event_id: str, request: Request):
     )
 
 
-@router.get("/exports/{export_id}")
+@router.get(
+    "/exports/{export_id}",
+    response_model=ExportModel,
+    summary="Get a single export",
+    description="""Gets a specific export by ID. The user must have access to the camera
+    associated with the export.""",
+)
 async def get_export(export_id: str, request: Request):
     try:
         export = Export.get(Export.id == export_id)
