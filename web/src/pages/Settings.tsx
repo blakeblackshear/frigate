@@ -15,20 +15,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
-import { isIOS, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import scrollIntoView from "scroll-into-view-if-needed";
 import CameraSettingsView from "@/views/settings/CameraSettingsView";
 import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
@@ -42,12 +39,33 @@ import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
-import { isInIframe } from "@/utils/isIFrame";
-import { isPWA } from "@/utils/isPWA";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
 import TriggerView from "@/views/settings/TriggerView";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
+import {
+  MobilePage,
+  MobilePageContent,
+  MobilePageHeader,
+  MobilePagePortal,
+  MobilePageTitle,
+} from "@/components/mobile/MobilePage";
+import { ChevronRight } from "lucide-react";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 const allSettingsViews = [
   "ui",
@@ -64,11 +82,86 @@ const allSettingsViews = [
 ] as const;
 type SettingsType = (typeof allSettingsViews)[number];
 
+const settingsGroups = [
+  {
+    label: "General",
+    items: [
+      { key: "ui", component: UiSettingsView },
+      { key: "debug", component: ObjectSettingsView },
+    ],
+  },
+  {
+    label: "Cameras",
+    items: [
+      { key: "cameras", component: CameraSettingsView },
+      { key: "masksAndZones", component: MasksAndZonesView },
+      { key: "motionTuner", component: MotionTunerView },
+      { key: "triggers", component: TriggerView },
+    ],
+  },
+  {
+    label: "Enrichments",
+    items: [{ key: "enrichments", component: EnrichmentsSettingsView }],
+  },
+  {
+    label: "Users",
+    items: [
+      { key: "users", component: UsersView },
+      { key: "roles", component: RolesView },
+    ],
+  },
+  {
+    label: "Notifications",
+    items: [{ key: "notifications", component: NotificationView }],
+  },
+  {
+    label: "Frigate+",
+    items: [{ key: "frigateplus", component: FrigatePlusSettingsView }],
+  },
+];
+
+const getCurrentComponent = (page: SettingsType) => {
+  for (const group of settingsGroups) {
+    for (const item of group.items) {
+      if (item.key === page) {
+        return item.component;
+      }
+    }
+  }
+  return null;
+};
+
+function MobileMenuItem({
+  item,
+  onSelect,
+  onClose,
+}: {
+  item: { key: string };
+  onSelect: (key: string) => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation(["views/settings"]);
+
+  return (
+    <Button
+      variant="ghost"
+      className="w-full justify-between"
+      onClick={() => {
+        onSelect(item.key);
+        onClose();
+      }}
+    >
+      <div className="smart-capitalize">{t("menu." + item.key)}</div>
+      <ChevronRight className="h-4 w-4" />
+    </Button>
+  );
+}
+
 export default function Settings() {
   const { t } = useTranslation(["views/settings"]);
   const [page, setPage] = useState<SettingsType>("ui");
-  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
-  const tabsRef = useRef<HTMLDivElement | null>(null);
+  const [_, setPageToggle] = useOptimisticState(page, setPage, 100);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -155,21 +248,6 @@ export default function Settings() {
     }
   }, [cameras, selectedCamera, cameraEnabledStates, page]);
 
-  useEffect(() => {
-    if (tabsRef.current) {
-      const element = tabsRef.current.querySelector(
-        `[data-nav-item="${pageToggle}"]`,
-      );
-      if (element instanceof HTMLElement) {
-        scrollIntoView(element, {
-          behavior:
-            isMobile && isIOS && !isPWA && isInIframe ? "auto" : "smooth",
-          inline: "start",
-        });
-      }
-    }
-  }, [tabsRef, pageToggle]);
-
   useSearchEffect("page", (page: string) => {
     if (allSettingsViews.includes(page as SettingsType)) {
       // Restrict viewer to UI settings
@@ -196,50 +274,74 @@ export default function Settings() {
     document.title = t("documentTitle.default");
   }, [t]);
 
-  return (
-    <div className="flex size-full flex-col p-2">
-      <div className="relative flex h-11 w-full items-center justify-between">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div ref={tabsRef} className="flex flex-row">
-            <ToggleGroup
-              className="*:rounded-md *:px-3 *:py-4"
-              type="single"
-              size="sm"
-              value={pageToggle}
-              onValueChange={(value: SettingsType) => {
-                if (value) {
-                  // Restrict viewer navigation
-                  if (!isAdmin && !allowedViewsForViewer.includes(value)) {
-                    setPageToggle("ui");
-                  } else {
-                    setPageToggle(value);
-                  }
-                }
-              }}
-            >
-              {visibleSettingsViews.map((item) => (
-                <ToggleGroupItem
-                  key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "ui" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-                  value={item}
-                  data-nav-item={item}
-                  aria-label={t("selectItem", {
-                    ns: "common",
-                    item: t("menu." + item),
-                  })}
-                >
-                  <div className="smart-capitalize">{t("menu." + item)}</div>
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-            <ScrollBar orientation="horizontal" className="h-0" />
-          </div>
-        </ScrollArea>
-        {(page == "debug" ||
-          page == "cameras" ||
-          page == "masksAndZones" ||
-          page == "motionTuner" ||
-          page == "triggers") && (
+  if (isMobile) {
+    return (
+      <div className="flex size-full flex-col">
+        <div className="sticky -top-2 z-50 mb-2 flex items-center justify-center bg-background p-4">
+          <Button
+            className="absolute left-0 rounded-lg"
+            aria-label="Open menu"
+            size="sm"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <IoMdArrowRoundBack className="h-5 w-5 text-secondary-foreground" />
+          </Button>
+          <h2 className="text-lg font-semibold smart-capitalize">
+            {t("menu." + page)}
+          </h2>
+        </div>
+        <MobilePage open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <MobilePagePortal>
+            <MobilePageContent>
+              <MobilePageHeader>
+                <MobilePageTitle>
+                  {t("settings", { ns: "common" })}
+                </MobilePageTitle>
+              </MobilePageHeader>
+              <div className="p-4">
+                {settingsGroups.map((group) => {
+                  const filteredItems = group.items.filter((item) =>
+                    visibleSettingsViews.includes(item.key as SettingsType),
+                  );
+                  if (filteredItems.length === 0) return null;
+                  return (
+                    <div key={group.label} className="mb-4">
+                      <h3 className="mb-2 text-sm font-medium text-muted-foreground">
+                        {group.label}
+                      </h3>
+                      {filteredItems.map((item) => (
+                        <MobileMenuItem
+                          key={item.key}
+                          item={item}
+                          onSelect={(key) => {
+                            if (
+                              !isAdmin &&
+                              !allowedViewsForViewer.includes(
+                                key as SettingsType,
+                              )
+                            ) {
+                              setPageToggle("ui");
+                            } else {
+                              setPageToggle(key as SettingsType);
+                            }
+                          }}
+                          onClose={() => setMobileMenuOpen(false)}
+                        />
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </MobilePageContent>
+          </MobilePagePortal>
+        </MobilePage>
+        {[
+          "debug",
+          "cameras",
+          "masksAndZones",
+          "motionTuner",
+          "triggers",
+        ].includes(page) && (
           <div className="ml-2 flex flex-shrink-0 items-center gap-2">
             {page == "masksAndZones" && (
               <ZoneMaskFilterButton
@@ -256,49 +358,165 @@ export default function Settings() {
             />
           </div>
         )}
-      </div>
-      <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
-        {page == "ui" && <UiSettingsView />}
-        {page == "enrichments" && (
-          <EnrichmentsSettingsView setUnsavedChanges={setUnsavedChanges} />
-        )}
-        {page == "debug" && (
-          <ObjectSettingsView selectedCamera={selectedCamera} />
-        )}
-        {page == "cameras" && (
-          <CameraSettingsView
-            selectedCamera={selectedCamera}
-            setUnsavedChanges={setUnsavedChanges}
-          />
-        )}
-        {page == "masksAndZones" && (
-          <MasksAndZonesView
-            selectedCamera={selectedCamera}
-            selectedZoneMask={filterZoneMask}
-            setUnsavedChanges={setUnsavedChanges}
-          />
-        )}
-        {page == "motionTuner" && (
-          <MotionTunerView
-            selectedCamera={selectedCamera}
-            setUnsavedChanges={setUnsavedChanges}
-          />
-        )}
-        {page === "triggers" && (
-          <TriggerView
-            selectedCamera={selectedCamera}
-            setUnsavedChanges={setUnsavedChanges}
-          />
-        )}
-        {page == "users" && <UsersView />}
-        {page == "roles" && <RolesView />}
-        {page == "notifications" && (
-          <NotificationView setUnsavedChanges={setUnsavedChanges} />
-        )}
-        {page == "frigateplus" && (
-          <FrigatePlusSettingsView setUnsavedChanges={setUnsavedChanges} />
+        <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
+          <div className="flex-1 overflow-auto p-2">
+            {(() => {
+              const CurrentComponent = getCurrentComponent(page);
+              if (!CurrentComponent) return null;
+              return (
+                <CurrentComponent
+                  selectedCamera={selectedCamera}
+                  setUnsavedChanges={setUnsavedChanges}
+                  selectedZoneMask={filterZoneMask}
+                />
+              );
+            })()}
+          </div>
+        </div>
+        {confirmationDialogOpen && (
+          <AlertDialog
+            open={confirmationDialogOpen}
+            onOpenChange={() => setConfirmationDialogOpen(false)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t("dialog.unsavedChanges.title")}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("dialog.unsavedChanges.desc")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => handleDialog(false)}>
+                  {t("button.cancel", { ns: "common" })}
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleDialog(true)}>
+                  {t("button.save", { ns: "common" })}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
+    );
+  }
+
+  return (
+    <SidebarProvider>
+      <Sidebar variant="inset" className="relative">
+        <SidebarContent className="bg-background">
+          <SidebarMenu>
+            {settingsGroups.map((group) => {
+              const filteredItems = group.items.filter((item) =>
+                visibleSettingsViews.includes(item.key as SettingsType),
+              );
+              if (filteredItems.length === 0) return null;
+              return (
+                <SidebarGroup key={group.label}>
+                  <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+                  {filteredItems.length === 1 ? (
+                    <SidebarMenu>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          isActive={page === filteredItems[0].key}
+                          onClick={() => {
+                            if (
+                              !isAdmin &&
+                              !allowedViewsForViewer.includes(
+                                filteredItems[0].key as SettingsType,
+                              )
+                            ) {
+                              setPageToggle("ui");
+                            } else {
+                              setPageToggle(
+                                filteredItems[0].key as SettingsType,
+                              );
+                            }
+                          }}
+                        >
+                          <div className="smart-capitalize">
+                            {t("menu." + filteredItems[0].key)}
+                          </div>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  ) : (
+                    <SidebarMenuSub>
+                      {filteredItems.map((item) => (
+                        <SidebarMenuSubItem key={item.key}>
+                          <SidebarMenuSubButton
+                            isActive={page === item.key}
+                            onClick={() => {
+                              if (
+                                !isAdmin &&
+                                !allowedViewsForViewer.includes(
+                                  item.key as SettingsType,
+                                )
+                              ) {
+                                setPageToggle("ui");
+                              } else {
+                                setPageToggle(item.key as SettingsType);
+                              }
+                            }}
+                          >
+                            <div className="smart-capitalize">
+                              {t("menu." + item.key)}
+                            </div>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarGroup>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarContent>
+      </Sidebar>
+      <SidebarInset>
+        <div className="flex h-full flex-col">
+          <div className="border-b p-4">
+            <h1 className="text-lg font-medium">Settings</h1>
+          </div>
+          {[
+            "debug",
+            "cameras",
+            "masksAndZones",
+            "motionTuner",
+            "triggers",
+          ].includes(page) && (
+            <div className="flex items-center justify-end gap-2 border-b p-2">
+              {page == "masksAndZones" && (
+                <ZoneMaskFilterButton
+                  selectedZoneMask={filterZoneMask}
+                  updateZoneMaskFilter={setFilterZoneMask}
+                />
+              )}
+              <CameraSelectButton
+                allCameras={cameras}
+                selectedCamera={selectedCamera}
+                setSelectedCamera={setSelectedCamera}
+                cameraEnabledStates={cameraEnabledStates}
+                currentPage={page}
+              />
+            </div>
+          )}
+          <div className="flex-1 overflow-auto p-2">
+            {(() => {
+              const CurrentComponent = getCurrentComponent(page);
+              if (!CurrentComponent) return null;
+              return (
+                <CurrentComponent
+                  selectedCamera={selectedCamera}
+                  setUnsavedChanges={setUnsavedChanges}
+                  selectedZoneMask={filterZoneMask}
+                />
+              );
+            })()}
+          </div>
+        </div>
+      </SidebarInset>
       {confirmationDialogOpen && (
         <AlertDialog
           open={confirmationDialogOpen}
@@ -324,7 +542,7 @@ export default function Settings() {
           </AlertDialogContent>
         </AlertDialog>
       )}
-    </div>
+    </SidebarProvider>
   );
 }
 
