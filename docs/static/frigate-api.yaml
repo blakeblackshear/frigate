@@ -270,7 +270,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -300,7 +301,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -338,7 +340,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -403,7 +406,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -437,7 +441,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -488,7 +493,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
   /audio/transcribe:
     put:
       tags:
@@ -510,7 +516,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -593,7 +600,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -635,7 +643,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -671,7 +680,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -706,7 +716,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -1799,19 +1810,31 @@ paths:
     get:
       tags:
         - Export
-      summary: Get Exports
+      summary: Get exports
+      description: |-
+        Gets all exports from the database for cameras the user has access to.
+            Returns a list of exports ordered by date (most recent first).
       operationId: get_exports_exports_get
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExportModel'
+                title: Response Get Exports Exports Get
   /export/{camera_name}/start/{start_time}/end/{end_time}:
     post:
       tags:
         - Export
-      summary: Export Recording
+      summary: Start recording export
+      description: |-
+        Starts an export of a recording for the specified time range.
+            The export can be from recordings or preview footage. Returns the export ID if
+            successful, or an error message if the camera is invalid or no recordings/previews
+            are found for the time range.
       operationId: >-
         export_recording_export__camera_name__start__start_time__end__end_time__post
       parameters:
@@ -1846,7 +1869,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/StartExportResponse'
         '422':
           description: Validation Error
           content:
@@ -1913,7 +1937,10 @@ paths:
     get:
       tags:
         - Export
-      summary: Get Export
+      summary: Get a single export
+      description: |-
+        Gets a specific export by ID. The user must have access to the camera
+            associated with the export. Returns the export details or an error if not found.
       operationId: get_export_exports__export_id__get
       parameters:
         - name: export_id
@@ -1927,7 +1954,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/ExportModel'
         '422':
           description: Validation Error
           content:
@@ -3544,14 +3572,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1759928397.31333
+            default: 1759931186.373319
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1759931997.313336
+            default: 1759934786.373327
             title: Before
       responses:
         '200':
@@ -4805,6 +4833,47 @@ components:
       required:
         - subLabel
       title: EventsSubLabelBody
+    ExportModel:
+      properties:
+        id:
+          type: string
+          title: Id
+          description: Unique identifier for the export
+        camera:
+          type: string
+          title: Camera
+          description: Camera name associated with this export
+        name:
+          type: string
+          title: Name
+          description: Friendly name of the export
+        date:
+          type: number
+          title: Date
+          description: Unix timestamp when the export was created
+        video_path:
+          type: string
+          title: Video Path
+          description: File path to the exported video
+        thumb_path:
+          type: string
+          title: Thumb Path
+          description: File path to the export thumbnail
+        in_progress:
+          type: boolean
+          title: In Progress
+          description: Whether the export is currently being processed
+      type: object
+      required:
+        - id
+        - camera
+        - name
+        - date
+        - video_path
+        - thumb_path
+        - in_progress
+      title: ExportModel
+      description: Model representing a single export.
     ExportRecordingsBody:
       properties:
         playback:
@@ -5046,6 +5115,28 @@ components:
         - alert
         - detection
       title: SeverityEnum
+    StartExportResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          description: Whether the export was started successfully
+        message:
+          type: string
+          title: Message
+          description: Status or error message
+        export_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Export Id
+          description: The export ID if successfully started
+      type: object
+      required:
+        - success
+        - message
+      title: StartExportResponse
+      description: Response model for starting an export.
     SubmitPlusBody:
       properties:
         include_annotation:
