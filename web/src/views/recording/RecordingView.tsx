@@ -678,10 +678,12 @@ export function RecordingView({
                   : Math.max(1, getCameraAspect(mainCamera) ?? 0),
               }}
             >
-              <GenAISummaryDialog
-                review={activeReviewItem}
-                onOpen={onAnalysisOpen}
-              />
+              {isDesktop && (
+                <GenAISummaryDialog
+                  review={activeReviewItem}
+                  onOpen={onAnalysisOpen}
+                />
+              )}
 
               <DynamicVideoPlayer
                 className={grow}
@@ -773,12 +775,14 @@ export function RecordingView({
           }
           timeRange={timeRange}
           mainCameraReviewItems={mainCameraReviewItems}
+          activeReviewItem={activeReviewItem}
           currentTime={currentTime}
           exportRange={exportMode == "timeline" ? exportRange : undefined}
           setCurrentTime={setCurrentTime}
           manuallySetCurrentTime={manuallySetCurrentTime}
           setScrubbing={setScrubbing}
           setExportRange={setExportRange}
+          onAnalysisOpen={onAnalysisOpen}
         />
       </div>
     </div>
@@ -792,12 +796,14 @@ type TimelineProps = {
   timelineType: TimelineType;
   timeRange: TimeRange;
   mainCameraReviewItems: ReviewSegment[];
+  activeReviewItem?: ReviewSegment;
   currentTime: number;
   exportRange?: TimeRange;
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   manuallySetCurrentTime: (time: number, force: boolean) => void;
   setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
   setExportRange: (range: TimeRange) => void;
+  onAnalysisOpen: (open: boolean) => void;
 };
 function Timeline({
   contentRef,
@@ -806,12 +812,14 @@ function Timeline({
   timelineType,
   timeRange,
   mainCameraReviewItems,
+  activeReviewItem,
   currentTime,
   exportRange,
   setCurrentTime,
   manuallySetCurrentTime,
   setScrubbing,
   setExportRange,
+  onAnalysisOpen,
 }: TimelineProps) {
   const { t } = useTranslation(["views/events"]);
   const internalTimelineRef = useRef<HTMLDivElement>(null);
@@ -889,12 +897,17 @@ function Timeline({
 
   return (
     <div
-      className={`${
+      className={cn(
+        "relative",
         isDesktop
           ? `${timelineType == "timeline" ? "w-[100px]" : "w-60"} no-scrollbar overflow-y-auto`
-          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : "landscape:w-[175px]"} `
-      } relative`}
+          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : "landscape:w-[175px]"}`,
+      )}
     >
+      {isMobile && (
+        <GenAISummaryDialog review={activeReviewItem} onOpen={onAnalysisOpen} />
+      )}
+
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
       {timelineType == "timeline" ? (
@@ -946,7 +959,7 @@ function Timeline({
                   <ReviewCard
                     key={review.id}
                     event={review}
-                    currentTime={currentTime}
+                    activeReviewItem={activeReviewItem}
                     onClick={() => {
                       manuallySetCurrentTime(
                         review.start_time - REVIEW_PADDING,

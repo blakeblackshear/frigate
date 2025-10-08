@@ -6,7 +6,7 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { isDesktop, isIOS, isSafari } from "react-device-detect";
 import useSWR from "swr";
 import TimeAgo from "../dynamic/TimeAgo";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import { FaCompactDisc } from "react-icons/fa";
@@ -36,15 +36,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { buttonVariants } from "../ui/button";
 import { Trans, useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 type ReviewCardProps = {
   event: ReviewSegment;
-  currentTime: number;
+  activeReviewItem?: ReviewSegment;
   onClick?: () => void;
 };
 export default function ReviewCard({
   event,
-  currentTime,
+  activeReviewItem,
   onClick,
 }: ReviewCardProps) {
   const { t } = useTranslation(["components/dialog"]);
@@ -56,12 +57,6 @@ export default function ReviewCard({
       ? t("time.formattedTimestampHourMinute.24hour", { ns: "common" })
       : t("time.formattedTimestampHourMinute.12hour", { ns: "common" }),
     config?.ui.timezone,
-  );
-  const isSelected = useMemo(
-    () =>
-      event.start_time <= currentTime &&
-      (event.end_time ?? Date.now() / 1000) >= currentTime,
-    [event, currentTime],
   );
 
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -139,7 +134,12 @@ export default function ReviewCard({
       />
       <img
         ref={imgRef}
-        className={`size-full rounded-lg ${isSelected ? "outline outline-[3px] outline-offset-1 outline-selected" : ""} ${imgLoaded ? "visible" : "invisible"}`}
+        className={cn(
+          "size-full rounded-lg",
+          activeReviewItem?.id == event.id &&
+            "outline outline-[3px] outline-offset-1 outline-selected",
+          imgLoaded ? "visible" : "invisible",
+        )}
         src={`${baseUrl}${event.thumb_path.replace("/media/frigate/", "")}`}
         loading={isSafari ? "eager" : "lazy"}
         style={
