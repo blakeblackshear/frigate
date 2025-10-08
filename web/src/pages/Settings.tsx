@@ -27,7 +27,6 @@ import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 import CameraSettingsView from "@/views/settings/CameraSettingsView";
-import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import UsersView from "@/views/settings/UsersView";
@@ -86,10 +85,7 @@ type SettingsType = (typeof allSettingsViews)[number];
 const settingsGroups = [
   {
     label: "General",
-    items: [
-      { key: "ui", component: UiSettingsView },
-      { key: "debug", component: ObjectSettingsView },
-    ],
+    items: [{ key: "ui", component: UiSettingsView }],
   },
   {
     label: "Cameras",
