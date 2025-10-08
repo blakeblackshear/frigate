@@ -93,7 +93,6 @@ const settingsGroups = [
       { key: "cameras", component: CameraSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
       { key: "motionTuner", component: MotionTunerView },
-      { key: "triggers", component: TriggerView },
     ],
   },
   {
@@ -109,7 +108,10 @@ const settingsGroups = [
   },
   {
     label: "Notifications",
-    items: [{ key: "notifications", component: NotificationView }],
+    items: [
+      { key: "notifications", component: NotificationView },
+      { key: "triggers", component: TriggerView },
+    ],
   },
   {
     label: "Frigate+",
