@@ -112,7 +112,8 @@ export function useSearchEffect(
   callback: (value: string) => boolean,
 ) {
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const param = useMemo(() => {
     const param = searchParams.get(key);
@@ -132,7 +133,17 @@ export function useSearchEffect(
     const remove = callback(param[1]);
 
     if (remove) {
-      setSearchParams(undefined, { state: location.state, replace: true });
+      navigate(location.pathname + location.hash, {
+        state: location.state,
+        replace: true,
+      });
     }
-  }, [param, location.state, callback, setSearchParams]);
+  }, [
+    param,
+    location.state,
+    location.pathname,
+    location.hash,
+    callback,
+    navigate,
+  ]);
 }

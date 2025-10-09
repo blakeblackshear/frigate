@@ -355,9 +355,7 @@ export default function LiveContextMenu({
             <div
               className="flex w-full cursor-pointer items-center justify-start gap-2"
               onClick={
-                isEnabled
-                  ? () => navigate(`/settings?page=debug&camera=${camera}`)
-                  : undefined
+                isEnabled ? () => navigate(`?debug=true#${camera}`) : undefined
               }
             >
               <div className="text-primary">
