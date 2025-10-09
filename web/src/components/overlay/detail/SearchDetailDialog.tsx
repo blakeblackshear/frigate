@@ -1170,11 +1170,7 @@ export function ObjectSnapshotTab({
                 <Card className="p-1 text-sm md:p-2">
                   <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
                     <div className={cn("flex flex-col space-y-3")}>
-                      <div
-                        className={
-                          "text-lg font-semibold leading-none tracking-tight"
-                        }
-                      >
+                      <div className={"text-lg leading-none"}>
                         {t("explore.plus.submitToPlus.label")}
                       </div>
                       <div className="text-sm text-muted-foreground">

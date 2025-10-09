@@ -292,7 +292,7 @@ export default function Settings() {
                 <Logo className="h-8" />
               </div>
               <div className="flex flex-row text-center">
-                <h2 className="ml-2 text-lg font-semibold">
+                <h2 className="ml-2 text-lg">
                   {t("menu.settings", { ns: "common" })}
                 </h2>
               </div>

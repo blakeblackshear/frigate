@@ -42,7 +42,7 @@ export default function RoleChangeDialog({
     <Dialog open={show} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="text-xl">
             {t("users.dialog.changeRole.title")}
           </DialogTitle>
           <DialogDescription>
