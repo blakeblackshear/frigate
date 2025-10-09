@@ -58,29 +58,14 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import Heading from "@/components/ui/heading";
-import { LuChevronRight } from "react-icons/lu";
-import Logo from "@/components/Logo";
 import {
   MobilePage,
   MobilePageContent,
   MobilePageHeader,
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
-
-const allSettingsViews = [
-  "ui",
-  "enrichments",
-  "cameras",
-  "masksAndZones",
-  "motionTuner",
-  "triggers",
-  "debug",
-  "users",
-  "roles",
-  "notifications",
-  "frigateplus",
-] as const;
-type SettingsType = (typeof allSettingsViews)[number];
+import MobileSettingsMenu from "@/components/mobile/MobileSettingsMenu";
+import { allSettingsViews, SettingsType } from "@/types/settings";
 
 const settingsGroups = [
   {
@@ -129,34 +114,6 @@ const getCurrentComponent = (page: SettingsType) => {
   }
   return null;
 };
-
-function MobileMenuItem({
-  item,
-  onSelect,
-  onClose,
-  className,
-}: {
-  item: { key: string };
-  onSelect: (key: string) => void;
-  onClose?: () => void;
-  className?: string;
-}) {
-  const { t } = useTranslation(["views/settings"]);
-
-  return (
-    <Button
-      variant="ghost"
-      className={cn("w-full justify-between pr-2", className)}
-      onClick={() => {
-        onSelect(item.key);
-        onClose?.();
-      }}
-    >
-      <div className="smart-capitalize">{t("menu." + item.key)}</div>
-      <LuChevronRight className="size-4" />
-    </Button>
-  );
-}
 
 export default function Settings() {
   const { t } = useTranslation(["views/settings"]);
@@ -282,61 +239,29 @@ export default function Settings() {
     }
   }, [t, contentMobileOpen]);
 
+  // mobile
+
   if (isMobile) {
     return (
       <>
-        {!contentMobileOpen && (
-          <div className="flex size-full flex-col">
-            <div className="sticky -top-2 z-50 mb-2 bg-background p-4">
-              <div className="flex items-center justify-center">
-                <Logo className="h-8" />
-              </div>
-              <div className="flex flex-row text-center">
-                <h2 className="ml-2 text-lg font-semibold">
-                  {t("menu.settings", { ns: "common" })}
-                </h2>
-              </div>
-            </div>
-
-            <div className="scrollbar-container overflow-y-auto px-4">
-              {settingsGroups.map((group) => {
-                const filteredItems = group.items.filter((item) =>
-                  visibleSettingsViews.includes(item.key as SettingsType),
-                );
-                if (filteredItems.length === 0) return null;
-                return (
-                  <div key={group.label} className="mb-3">
-                    {filteredItems.length > 1 && (
-                      <h3 className="mb-2 ml-2 text-sm font-medium text-secondary-foreground">
-                        <div className="smart-capitalize">
-                          {t("menu." + group.label)}
-                        </div>
-                      </h3>
-                    )}
-                    {filteredItems.map((item) => (
-                      <MobileMenuItem
-                        key={item.key}
-                        item={item}
-                        className={cn(filteredItems.length == 1 && "pl-2")}
-                        onSelect={(key) => {
-                          if (
-                            !isAdmin &&
-                            !allowedViewsForViewer.includes(key as SettingsType)
-                          ) {
-                            setPageToggle("ui");
-                          } else {
-                            setPageToggle(key as SettingsType);
-                          }
-                          setContentMobileOpen(true);
-                        }}
-                      />
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <MobileSettingsMenu
+          settingsGroups={settingsGroups}
+          visibleSettingsViews={visibleSettingsViews}
+          onSelect={(key) => {
+            if (
+              !isAdmin &&
+              !allowedViewsForViewer.includes(key as SettingsType)
+            ) {
+              setPageToggle("ui");
+            } else {
+              setPageToggle(key as SettingsType);
+            }
+            setContentMobileOpen(true);
+          }}
+          isAdmin={isAdmin}
+          allowedViewsForViewer={allowedViewsForViewer}
+          setPageToggle={setPageToggle}
+        />
         <MobilePage
           open={contentMobileOpen}
           onOpenChange={setContentMobileOpen}
@@ -419,6 +344,8 @@ export default function Settings() {
       </>
     );
   }
+
+  // desktop
 
   return (
     <div className="flex h-full flex-col">
