@@ -222,7 +222,7 @@ export function MobilePageHeader({
 type MobilePageTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
 
 export function MobilePageTitle({ className, ...props }: MobilePageTitleProps) {
-  return <h2 className={cn("text-lg font-semibold", className)} {...props} />;
+  return <h2 className={cn("text-lg", className)} {...props} />;
 }
 
 type MobilePageDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>;

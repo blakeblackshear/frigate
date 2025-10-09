@@ -14,12 +14,7 @@ const Heading = ({
   switch (as) {
     case "h1":
       return (
-        <h1
-          className={cn(
-            "scroll-m-20 text-3xl font-extrabold tracking-tight",
-            className
-          )}
-        >
+        <h1 className={cn("scroll-m-20 text-3xl font-extrabold", className)}>
           {children}
         </h1>
       );
@@ -27,8 +22,8 @@ const Heading = ({
       return (
         <h2
           className={cn(
-            "scroll-m-20 text-3xl font-semibold tracking-tight transition-colors first:mt-0 mb-3",
-            className
+            "mb-3 scroll-m-20 text-3xl font-semibold transition-colors first:mt-0",
+            className,
           )}
         >
           {children}
@@ -36,34 +31,19 @@ const Heading = ({
       );
     case "h3":
       return (
-        <h3
-          className={cn(
-            "scroll-m-20 text-2xl font-semibold tracking-tight mb-3",
-            className
-          )}
-        >
+        <h3 className={cn("mb-3 scroll-m-20 text-2xl font-medium", className)}>
           {children}
         </h3>
       );
     case "h4":
       return (
-        <h4
-          className={cn(
-            "scroll-m-20 text-xl font-semibold tracking-tight",
-            className
-          )}
-        >
+        <h4 className={cn("scroll-m-20 text-xl font-medium", className)}>
           {children}
         </h4>
       );
     default:
       return (
-        <h1
-          className={cn(
-            "scroll-m-20 text-3xl font-extrabold tracking-tight",
-            className
-          )}
-        >
+        <h1 className={cn("scroll-m-20 text-3xl font-extrabold", className)}>
           {children}
         </h1>
       );
