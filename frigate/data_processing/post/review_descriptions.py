@@ -256,18 +256,21 @@ def run_analysis(
 
     objects = []
     verified_objects = []
+    named_objects = []
 
     for label in set(final_data["data"]["objects"] + final_data["data"]["sub_labels"]):
         if "-verified" in label:
+            verified_objects.append(label)
             continue
 
         if label in labelmap_objects:
             objects.append(label.replace("_", " ").title())
-        else:
-            verified_objects.append(label.replace("_", " ").title())
+
+    for label in verified_objects:
+        named_objects.append(f'{label.replace("_", " ").title()} ({label.replace("-verified", "")})')
 
     analytics_data["objects"] = objects
-    analytics_data["recognized_objects"] = verified_objects
+    analytics_data["recognized_objects"] = named_objects
 
     metadata = genai_client.generate_review_description(
         analytics_data,
