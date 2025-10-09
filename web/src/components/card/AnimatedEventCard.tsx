@@ -50,6 +50,27 @@ export function AnimatedEventCard({
     fetchPreviews: !currentHour,
   });
 
+  const tooltipText = useMemo(() => {
+    if (event?.data?.metadata?.title) {
+      return event.data.metadata.title;
+    }
+
+    return (
+      `${[
+        ...new Set([
+          ...(event.data.objects || []),
+          ...(event.data.sub_labels || []),
+          ...(event.data.audio || []),
+        ]),
+      ]
+        .filter((item) => item !== undefined && !item.includes("-verified"))
+        .map((text) => text.charAt(0).toUpperCase() + text.substring(1))
+        .sort()
+        .join(", ")
+        .replaceAll("-verified", "")} ` + t("detected")
+    );
+  }, [event, t]);
+
   // visibility
 
   const [windowVisible, setWindowVisible] = useState(true);
@@ -220,20 +241,7 @@ export function AnimatedEventCard({
           )}
         </div>
       </TooltipTrigger>
-      <TooltipContent>
-        {`${[
-          ...new Set([
-            ...(event.data.objects || []),
-            ...(event.data.sub_labels || []),
-            ...(event.data.audio || []),
-          ]),
-        ]
-          .filter((item) => item !== undefined && !item.includes("-verified"))
-          .map((text) => text.charAt(0).toUpperCase() + text.substring(1))
-          .sort()
-          .join(", ")
-          .replaceAll("-verified", "")} ` + t("detected")}
-      </TooltipContent>
+      <TooltipContent>{tooltipText}</TooltipContent>
     </Tooltip>
   );
 }

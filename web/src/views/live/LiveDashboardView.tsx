@@ -114,7 +114,11 @@ export default function LiveDashboardView({
 
     // if event is ended and was saved, update events list
     if (eventUpdate.after.severity == "alert") {
-      if (eventUpdate.type == "end" || eventUpdate.type == "new") {
+      if (
+        eventUpdate.type == "end" ||
+        eventUpdate.type == "new" ||
+        eventUpdate.type == "genai"
+      ) {
         setTimeout(
           () => updateEvents(),
           eventUpdate.type == "end" ? 1000 : 6000,

@@ -111,6 +111,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import PtzControlPanel from "@/components/overlay/PtzControlPanel";
 import ObjectSettingsView from "../settings/ObjectSettingsView";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -273,6 +274,14 @@ export default function LiveCameraView({
 
   const [showStats, setShowStats] = useState(false);
   const [debug, setDebug] = useState(false);
+
+  useSearchEffect("debug", (value: string) => {
+    if (value === "true") {
+      setDebug(true);
+    }
+
+    return true;
+  });
 
   const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
