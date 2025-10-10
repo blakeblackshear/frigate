@@ -69,7 +69,7 @@ importlib-resources==5.1.*
 netaddr==0.8.*
 netifaces==0.10.*
 verboselogs==1.7.*
-virtualenv==20.17.*
+virtualenv==20.35.*
 prometheus-client == 0.21.*
 # TFLite
 tflite_runtime @ https://github.com/frigate-nvr/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_x86_64.whl; platform_machine == 'x86_64'
