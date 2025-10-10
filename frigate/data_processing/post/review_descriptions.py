@@ -259,19 +259,17 @@ def run_analysis(
 
     objects_list = final_data["data"]["objects"]
     sub_labels_list = final_data["data"]["sub_labels"]
-    verified_index = 0
 
     for label in objects_list:
         if "-verified" in label:
-            try:
-                named_objects.append(
-                    f"{sub_labels_list[verified_index].replace('_', ' ').title()} ({label.replace('-verified', '')})"
-                )
-                verified_index += 1
-            except IndexError:
-                continue
+            continue
         elif label in labelmap_objects:
             objects.append(label.replace("_", " ").title())
+
+    for i, verified_label in enumerate(final_data["data"]["verified_objects"]):
+        named_objects.append(
+            f"{sub_labels_list[i].replace('_', ' ').title()} ({verified_label.replace('-verified', '')})"
+        )
 
     analytics_data["objects"] = objects
     analytics_data["recognized_objects"] = named_objects
