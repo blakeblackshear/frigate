@@ -255,19 +255,20 @@ def run_analysis(
     }
 
     objects = []
-    verified_objects = []
     named_objects = []
 
-    for label in set(final_data["data"]["objects"] + final_data["data"]["sub_labels"]):
+    objects_list = final_data["data"]["objects"]
+    sub_labels_list = final_data["data"]["sub_labels"]
+    verified_index = 0
+
+    for label in objects_list:
         if "-verified" in label:
-            verified_objects.append(label)
-            continue
-
-        if label in labelmap_objects:
+            named_objects.append(
+                f"{sub_labels_list[verified_index].replace('_', ' ').title()} ({label.replace('-verified', '')})"
+            )
+            verified_index += 1
+        elif label in labelmap_objects:
             objects.append(label.replace("_", " ").title())
-
-    for label in verified_objects:
-        named_objects.append(f'{label.replace("_", " ").title()} ({label.replace("-verified", "")})')
 
     analytics_data["objects"] = objects
     analytics_data["recognized_objects"] = named_objects
