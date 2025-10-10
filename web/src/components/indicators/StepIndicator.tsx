@@ -6,6 +6,7 @@ type StepIndicatorProps = {
   currentStep: number;
   variant?: "default" | "dots";
   translationNameSpace?: string;
+  className?: string;
 };
 
 export default function StepIndicator({
@@ -13,17 +14,18 @@ export default function StepIndicator({
   currentStep,
   variant = "default",
   translationNameSpace,
+  className,
 }: StepIndicatorProps) {
   const { t } = useTranslation(translationNameSpace);
 
   if (variant == "dots") {
     return (
-      <div className="flex flex-row justify-center gap-2">
+      <div className={cn("flex flex-row justify-center gap-2", className)}>
         {steps.map((_, idx) => (
           <div
             key={idx}
             className={cn(
-              "size-2 rounded-full transition-colors",
+              "size-3 rounded-full border border-primary/10 transition-colors",
               currentStep === idx
                 ? "bg-selected"
                 : currentStep > idx
@@ -38,7 +40,7 @@ export default function StepIndicator({
 
   // Default variant (original behavior)
   return (
-    <div className="flex flex-row justify-evenly">
+    <div className={cn("flex flex-row justify-evenly", className)}>
       {steps.map((name, idx) => (
         <div key={idx} className="flex flex-col items-center gap-2">
           <div
