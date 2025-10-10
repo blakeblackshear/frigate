@@ -453,7 +453,7 @@ def config_set(request: Request, body: AppConfigSetBody):
 
 
 @router.get("/ffprobe")
-def ffprobe(request: Request, paths: str = ""):
+def ffprobe(request: Request, paths: str = "", detailed: bool = False):
     path_param = paths
 
     if not path_param:
@@ -492,24 +492,109 @@ def ffprobe(request: Request, paths: str = ""):
     output = []
 
     for path in paths:
-        ffprobe = ffprobe_stream(request.app.frigate_config.ffmpeg, path.strip())
-        output.append(
-            {
-                "return_code": ffprobe.returncode,
-                "stderr": (
-                    ffprobe.stderr.decode("unicode_escape").strip()
-                    if ffprobe.returncode != 0
-                    else ""
-                ),
-                "stdout": (
-                    json.loads(ffprobe.stdout.decode("unicode_escape").strip())
-                    if ffprobe.returncode == 0
-                    else ""
-                ),
-            }
+        ffprobe = ffprobe_stream(
+            request.app.frigate_config.ffmpeg, path.strip(), detailed=detailed
         )
 
+        result = {
+            "return_code": ffprobe.returncode,
+            "stderr": (
+                ffprobe.stderr.decode("unicode_escape").strip()
+                if ffprobe.returncode != 0
+                else ""
+            ),
+            "stdout": (
+                json.loads(ffprobe.stdout.decode("unicode_escape").strip())
+                if ffprobe.returncode == 0
+                else ""
+            ),
+        }
+
+        # Add detailed metadata if requested and probe was successful
+        if detailed and ffprobe.returncode == 0 and result["stdout"]:
+            try:
+                probe_data = result["stdout"]
+                metadata = {}
+
+                # Extract video stream information
+                video_stream = None
+                audio_stream = None
+
+                for stream in probe_data.get("streams", []):
+                    if stream.get("codec_type") == "video":
+                        video_stream = stream
+                    elif stream.get("codec_type") == "audio":
+                        audio_stream = stream
+
+                # Video metadata
+                if video_stream:
+                    metadata["video"] = {
+                        "codec": video_stream.get("codec_name"),
+                        "width": video_stream.get("width"),
+                        "height": video_stream.get("height"),
+                        "fps": _extract_fps(video_stream.get("r_frame_rate")),
+                        "bitrate": _extract_bitrate(video_stream.get("bit_rate")),
+                        "pixel_format": video_stream.get("pix_fmt"),
+                        "profile": video_stream.get("profile"),
+                        "level": video_stream.get("level"),
+                    }
+
+                    # Calculate resolution string
+                    if video_stream.get("width") and video_stream.get("height"):
+                        metadata["video"]["resolution"] = (
+                            f"{video_stream['width']}x{video_stream['height']}"
+                        )
+
+                # Audio metadata
+                if audio_stream:
+                    metadata["audio"] = {
+                        "codec": audio_stream.get("codec_name"),
+                        "channels": audio_stream.get("channels"),
+                        "sample_rate": audio_stream.get("sample_rate"),
+                        "bitrate": _extract_bitrate(audio_stream.get("bit_rate")),
+                        "channel_layout": audio_stream.get("channel_layout"),
+                    }
+
+                # Container/format metadata
+                if probe_data.get("format"):
+                    format_info = probe_data["format"]
+                    metadata["container"] = {
+                        "format": format_info.get("format_name"),
+                        "duration": format_info.get("duration"),
+                        "size": format_info.get("size"),
+                        "bitrate": _extract_bitrate(format_info.get("bit_rate")),
+                    }
+
+                result["metadata"] = metadata
+
+            except Exception as e:
+                logger.warning(f"Failed to extract detailed metadata: {e}")
+                # Continue without metadata if parsing fails
+
+        output.append(result)
+
     return JSONResponse(content=output)
+
+
+def _extract_fps(r_frame_rate: str) -> float | None:
+    """Extract FPS from ffprobe r_frame_rate string (e.g., '30/1' -> 30.0)"""
+    if not r_frame_rate:
+        return None
+    try:
+        num, den = r_frame_rate.split("/")
+        return round(float(num) / float(den), 2)
+    except (ValueError, ZeroDivisionError):
+        return None
+
+
+def _extract_bitrate(bit_rate: str) -> int | None:
+    """Extract bitrate in kbps from ffprobe bit_rate string"""
+    if not bit_rate:
+        return None
+    try:
+        return round(int(bit_rate) / 1000)  # Convert to kbps
+    except ValueError:
+        return None
 
 
 @router.get("/vainfo")
