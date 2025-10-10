@@ -43,6 +43,7 @@ from frigate.util.builtin import (
     update_yaml_file_bulk,
 )
 from frigate.util.config import find_config_file
+from frigate.util.image import run_ffmpeg_snapshot
 from frigate.util.services import (
     ffprobe_stream,
     get_nvidia_driver_info,
@@ -105,6 +106,45 @@ def go2rtc_camera_stream(request: Request, camera_name: str):
     for producer in stream_data.get("producers", []):
         producer["url"] = clean_camera_user_pass(producer.get("url", ""))
     return JSONResponse(content=stream_data)
+
+
+@router.put(
+    "/go2rtc/streams/{stream_name}", dependencies=[Depends(require_role(["admin"]))]
+)
+def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
+    """Add or update a go2rtc stream configuration."""
+    try:
+        params = {"name": stream_name}
+        if src:
+            params["src"] = src
+
+        r = requests.put(
+            "http://127.0.0.1:1984/api/streams",
+            params=params,
+            timeout=10,
+        )
+        if not r.ok:
+            logger.error(f"Failed to add go2rtc stream {stream_name}: {r.text}")
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": f"Failed to add stream: {r.text}"}
+                ),
+                status_code=r.status_code,
+            )
+        return JSONResponse(
+            content={"success": True, "message": "Stream added successfully"}
+        )
+    except requests.RequestException as e:
+        logger.error(f"Error communicating with go2rtc: {e}")
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"Error communicating with go2rtc: {str(e)}",
+                }
+            ),
+            status_code=500,
+        )
 
 
 @router.get("/version", response_class=PlainTextResponse)
@@ -533,7 +573,6 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
                         "width": video_stream.get("width"),
                         "height": video_stream.get("height"),
                         "fps": _extract_fps(video_stream.get("r_frame_rate")),
-                        "bitrate": _extract_bitrate(video_stream.get("bit_rate")),
                         "pixel_format": video_stream.get("pix_fmt"),
                         "profile": video_stream.get("profile"),
                         "level": video_stream.get("level"),
@@ -551,7 +590,6 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
                         "codec": audio_stream.get("codec_name"),
                         "channels": audio_stream.get("channels"),
                         "sample_rate": audio_stream.get("sample_rate"),
-                        "bitrate": _extract_bitrate(audio_stream.get("bit_rate")),
                         "channel_layout": audio_stream.get("channel_layout"),
                     }
 
@@ -562,7 +600,6 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
                         "format": format_info.get("format_name"),
                         "duration": format_info.get("duration"),
                         "size": format_info.get("size"),
-                        "bitrate": _extract_bitrate(format_info.get("bit_rate")),
                     }
 
                 result["metadata"] = metadata
@@ -576,6 +613,40 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
     return JSONResponse(content=output)
 
 
+@router.get("/ffprobe/snapshot", dependencies=[Depends(require_role(["admin"]))])
+def ffprobe_snapshot(request: Request, url: str = "", timeout: int = 10):
+    """Get a snapshot from a stream URL using ffmpeg."""
+    if not url:
+        return JSONResponse(
+            content={"success": False, "message": "URL parameter is required"},
+            status_code=400,
+        )
+
+    config: FrigateConfig = request.app.frigate_config
+
+    image_data, error = run_ffmpeg_snapshot(
+        config.ffmpeg, url, "mjpeg", timeout=timeout
+    )
+
+    if image_data:
+        return Response(
+            image_data,
+            media_type="image/jpeg",
+            headers={"Cache-Control": "no-store"},
+        )
+    elif error == "timeout":
+        return JSONResponse(
+            content={"success": False, "message": "Timeout capturing snapshot"},
+            status_code=408,
+        )
+    else:
+        logger.error(f"ffmpeg failed: {error}")
+        return JSONResponse(
+            content={"success": False, "message": "Failed to capture snapshot"},
+            status_code=500,
+        )
+
+
 def _extract_fps(r_frame_rate: str) -> float | None:
     """Extract FPS from ffprobe r_frame_rate string (e.g., '30/1' -> 30.0)"""
     if not r_frame_rate:
@@ -584,16 +655,6 @@ def _extract_fps(r_frame_rate: str) -> float | None:
         num, den = r_frame_rate.split("/")
         return round(float(num) / float(den), 2)
     except (ValueError, ZeroDivisionError):
-        return None
-
-
-def _extract_bitrate(bit_rate: str) -> int | None:
-    """Extract bitrate in kbps from ffprobe bit_rate string"""
-    if not bit_rate:
-        return None
-    try:
-        return round(int(bit_rate) / 1000)  # Convert to kbps
-    except ValueError:
         return None
 
 
