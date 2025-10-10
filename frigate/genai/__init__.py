@@ -65,7 +65,7 @@ class GenAIClient:
 
         def get_verified_objects() -> str:
             if review_data["recognized_objects"]:
-                return "\n  - " + "\n  - ".join(review_data["recognized_objects"])
+                return "  - " + "\n  - ".join(review_data["recognized_objects"])
             else:
                 return "  None"
 
