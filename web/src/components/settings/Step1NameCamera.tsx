@@ -21,7 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback, useMemo } from "react";
-import { LuEye, LuEyeOff } from "react-icons/lu";
+import { LuCircleCheck, LuEye, LuEyeOff } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import axios from "axios";
 import { toast } from "sonner";
@@ -40,12 +40,15 @@ type Step1NameCameraProps = {
   wizardData: Partial<WizardFormData>;
   onUpdate: (data: Partial<WizardFormData>) => void;
   onCancel: () => void;
+  onNext?: () => void;
+  canProceed?: boolean;
 };
 
 export default function Step1NameCamera({
   wizardData,
   onUpdate,
   onCancel,
+  onNext,
 }: Step1NameCameraProps) {
   const { t } = useTranslation(["views/settings"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -147,97 +150,120 @@ export default function Step1NameCamera({
     setIsTesting(true);
     setTestResult(null);
 
-    await axios
-      .get("ffprobe", {
-        params: { paths: streamUrl, detailed: true },
-        timeout: 10000,
-      })
-      .then((response) => {
-        if (
-          response.data &&
-          response.data.length > 0 &&
-          response.data[0].return_code === 0
-        ) {
-          const probeData = response.data[0];
-          const ffprobeData = probeData.stdout;
-          const streams = ffprobeData.streams || [];
+    // First get probe data for metadata
+    const probePromise = axios.get("ffprobe", {
+      params: { paths: streamUrl, detailed: true },
+      timeout: 10000,
+    });
 
-          // Extract video stream info
-          const videoStream = streams.find(
-            (s: FfprobeStream) =>
-              s.codec_type === "video" ||
-              s.codec_name?.includes("h264") ||
-              s.codec_name?.includes("h265"),
-          );
-          const audioStream = streams.find(
-            (s: FfprobeStream) =>
-              s.codec_type === "audio" ||
-              s.codec_name?.includes("aac") ||
-              s.codec_name?.includes("mp3"),
-          );
+    // Then get snapshot for preview
+    const snapshotPromise = axios.get("ffprobe/snapshot", {
+      params: { url: streamUrl },
+      responseType: "blob",
+      timeout: 10000,
+    });
 
-          // Calculate resolution
-          const resolution = videoStream
-            ? `${videoStream.width}x${videoStream.height}`
-            : undefined;
+    try {
+      // First get probe data for metadata
+      const probeResponse = await probePromise;
+      let probeData = null;
+      if (
+        probeResponse.data &&
+        probeResponse.data.length > 0 &&
+        probeResponse.data[0].return_code === 0
+      ) {
+        probeData = probeResponse.data[0];
+      }
 
-          // Extract FPS from rational (e.g., "15/1" -> 15)
-          const fps = videoStream?.r_frame_rate
-            ? parseFloat(videoStream.r_frame_rate.split("/")[0]) /
-              parseFloat(videoStream.r_frame_rate.split("/")[1])
-            : undefined;
-
-          const testResult: TestResult = {
-            success: true,
-            resolution,
-            videoCodec: videoStream?.codec_name,
-            audioCodec: audioStream?.codec_name,
-            fps: fps && !isNaN(fps) ? fps : undefined,
-          };
-
-          setTestResult(testResult);
-          toast.success(t("cameraWizard.step1.testSuccess"));
-
-          // Auto-populate stream if successful
-          const streamId = `stream_${Date.now()}`;
-          onUpdate({
-            ...data,
-            streams: [
-              {
-                id: streamId,
-                url: streamUrl,
-                roles: ["detect"],
-                resolution: testResult.resolution,
-                testResult,
-              },
-            ],
-          });
-        } else {
-          const error = response.data?.[0]?.stderr || "Unknown error";
-          setTestResult({
-            success: false,
-            error: error,
-          });
-          toast.error(t("cameraWizard.step1.testFailed", { error }));
+      // Then get snapshot for preview (only if probe succeeded)
+      let snapshotBlob = null;
+      if (probeData) {
+        try {
+          const snapshotResponse = await snapshotPromise;
+          snapshotBlob = snapshotResponse.data;
+        } catch (snapshotError) {
+          // Snapshot is optional, don't fail if it doesn't work
+          toast.warning(t("cameraWizard.step1.warnings.noSnapshot"));
         }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Connection failed";
+      }
+
+      if (probeData) {
+        const ffprobeData = probeData.stdout;
+        const streams = ffprobeData.streams || [];
+
+        // Extract video stream info
+        const videoStream = streams.find(
+          (s: FfprobeStream) =>
+            s.codec_type === "video" ||
+            s.codec_name?.includes("h264") ||
+            s.codec_name?.includes("h265"),
+        );
+        const audioStream = streams.find(
+          (s: FfprobeStream) =>
+            s.codec_type === "audio" ||
+            s.codec_name?.includes("aac") ||
+            s.codec_name?.includes("mp3"),
+        );
+
+        // Calculate resolution
+        const resolution = videoStream
+          ? `${videoStream.width}x${videoStream.height}`
+          : undefined;
+
+        // Extract FPS from rational (e.g., "15/1" -> 15)
+        const fps = videoStream?.r_frame_rate
+          ? parseFloat(videoStream.r_frame_rate.split("/")[0]) /
+            parseFloat(videoStream.r_frame_rate.split("/")[1])
+          : undefined;
+
+        // Convert snapshot blob to base64 if available
+        let snapshotBase64 = undefined;
+        if (snapshotBlob) {
+          snapshotBase64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(snapshotBlob);
+          });
+        }
+
+        const testResult: TestResult = {
+          success: true,
+          snapshot: snapshotBase64,
+          resolution,
+          videoCodec: videoStream?.codec_name,
+          audioCodec: audioStream?.codec_name,
+          fps: fps && !isNaN(fps) ? fps : undefined,
+        };
+
+        setTestResult(testResult);
+        toast.success(t("cameraWizard.step1.testSuccess"));
+      } else {
+        const error = probeData?.stderr || "Unknown error";
         setTestResult({
           success: false,
-          error: errorMessage,
+          error: error,
         });
-        toast.error(
-          t("cameraWizard.step1.testFailed", { error: errorMessage }),
-        );
-      })
-      .finally(() => {
-        setIsTesting(false);
+        toast.error(t("cameraWizard.step1.testFailed", { error }));
+      }
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string; detail?: string } };
+        message?: string;
+      };
+      const errorMessage =
+        axiosError.response?.data?.message ||
+        axiosError.response?.data?.detail ||
+        axiosError.message ||
+        "Connection failed";
+      setTestResult({
+        success: false,
+        error: errorMessage,
       });
-  }, [form, generateStreamUrl, onUpdate, t]);
+      toast.error(t("cameraWizard.step1.testFailed", { error: errorMessage }));
+    } finally {
+      setIsTesting(false);
+    }
+  }, [form, generateStreamUrl, t]);
 
   const onSubmit = (data: z.infer<typeof step1FormData>) => {
     onUpdate(data);
@@ -245,104 +271,25 @@ export default function Step1NameCamera({
 
   return (
     <div className="space-y-6">
-      <div className="text-sm text-muted-foreground">
-        {t("cameraWizard.step1.description")}
-      </div>
+      {!testResult?.success && (
+        <>
+          <div className="text-sm text-muted-foreground">
+            {t("cameraWizard.step1.description")}
+          </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="cameraName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("cameraWizard.step1.cameraName")}</FormLabel>
-                <FormControl>
-                  <Input
-                    className="h-8"
-                    placeholder={t("cameraWizard.step1.cameraNamePlaceholder")}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="brandTemplate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("cameraWizard.step1.cameraBrand")}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="h-8">
-                      <SelectValue
-                        placeholder={t("cameraWizard.step1.selectBrand")}
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {CAMERA_BRANDS.map((brand) => (
-                      <SelectItem key={brand.value} value={brand.value}>
-                        {brand.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-                {field.value &&
-                  (() => {
-                    const selectedBrand = CAMERA_BRANDS.find(
-                      (brand) => brand.value === field.value,
-                    );
-                    return selectedBrand ? (
-                      <FormDescription className="pt-0.5">
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {selectedBrand.exampleUrl}
-                        </div>
-                      </FormDescription>
-                    ) : null;
-                  })()}
-              </FormItem>
-            )}
-          />
-
-          {watchedBrand !== "other" && (
-            <>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="host"
+                name="cameraName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("cameraWizard.step1.host")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="h-8"
-                        placeholder="192.168.1.100"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("cameraWizard.step1.username")}</FormLabel>
+                    <FormLabel>{t("cameraWizard.step1.cameraName")}</FormLabel>
                     <FormControl>
                       <Input
                         className="h-8"
                         placeholder={t(
-                          "cameraWizard.step1.usernamePlaceholder",
+                          "cameraWizard.step1.cameraNamePlaceholder",
                         )}
                         {...field}
                       />
@@ -354,109 +301,264 @@ export default function Step1NameCamera({
 
               <FormField
                 control={form.control}
-                name="password"
+                name="brandTemplate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("cameraWizard.step1.password")}</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          className="h-8 pr-10"
-                          type={showPassword ? "text" : "password"}
-                          placeholder={t(
-                            "cameraWizard.step1.passwordPlaceholder",
-                          )}
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? (
-                            <LuEyeOff className="h-4 w-4" />
-                          ) : (
-                            <LuEye className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
+                    <FormLabel>{t("cameraWizard.step1.cameraBrand")}</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-8">
+                          <SelectValue
+                            placeholder={t("cameraWizard.step1.selectBrand")}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CAMERA_BRANDS.map((brand) => (
+                          <SelectItem key={brand.value} value={brand.value}>
+                            {brand.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
+                    {field.value &&
+                      (() => {
+                        const selectedBrand = CAMERA_BRANDS.find(
+                          (brand) => brand.value === field.value,
+                        );
+                        return selectedBrand ? (
+                          <FormDescription className="pt-0.5">
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              {selectedBrand.exampleUrl}
+                            </div>
+                          </FormDescription>
+                        ) : null;
+                      })()}
                   </FormItem>
                 )}
               />
-            </>
-          )}
 
-          {watchedBrand == "other" && (
-            <FormField
-              control={form.control}
-              name="customUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("cameraWizard.step1.customUrl")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="h-8"
-                      placeholder="rtsp://username:password@host:port/path"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              {watchedBrand !== "other" && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="host"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("cameraWizard.step1.host")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="h-8"
+                            placeholder="192.168.1.100"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("cameraWizard.step1.username")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            className="h-8"
+                            placeholder={t(
+                              "cameraWizard.step1.usernamePlaceholder",
+                            )}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("cameraWizard.step1.password")}
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              className="h-8 pr-10"
+                              type={showPassword ? "text" : "password"}
+                              placeholder={t(
+                                "cameraWizard.step1.passwordPlaceholder",
+                              )}
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <LuEyeOff className="size-4" />
+                              ) : (
+                                <LuEye className="size-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
               )}
-            />
-          )}
 
-          {testResult && (
-            <div className="mt-4">
-              <div
-                className={`text-sm font-medium ${testResult.success ? "text-success" : "text-danger"}`}
-              >
-                {testResult.success
-                  ? t("cameraWizard.step1.testSuccess")
-                  : t("cameraWizard.step1.testFailed")}
+              {watchedBrand == "other" && (
+                <FormField
+                  control={form.control}
+                  name="customUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("cameraWizard.step1.customUrl")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="h-8"
+                          placeholder="rtsp://username:password@host:port/path"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </form>
+          </Form>
+        </>
+      )}
+
+      {testResult?.success && (
+        <div className="p-4">
+          <div className="mb-3 flex flex-row items-center gap-2 text-sm font-medium text-success">
+            <LuCircleCheck />
+            {t("cameraWizard.step1.testSuccess")}
+          </div>
+
+          <div className="space-y-3">
+            {testResult.snapshot && (
+              <div className="flex justify-center">
+                <img
+                  src={testResult.snapshot}
+                  alt="Camera snapshot"
+                  className="max-h-[50dvh] max-w-full rounded-lg object-contain"
+                />
               </div>
-              {testResult.success ? (
-                <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                  {testResult.resolution && (
-                    <div>Resolution: {testResult.resolution}</div>
-                  )}
-                  {testResult.videoCodec && (
-                    <div>Video: {testResult.videoCodec}</div>
-                  )}
-                  {testResult.audioCodec && (
-                    <div>Audio: {testResult.audioCodec}</div>
-                  )}
-                  {testResult.fps && <div>FPS: {testResult.fps}</div>}
+            )}
+
+            <div className="text-sm font-semibold text-primary-variant">
+              {t("cameraWizard.step1.streamDetails")}
+            </div>
+            <div className="text-sm">
+              {testResult.resolution && (
+                <div>
+                  <span className="text-secondary-foreground">
+                    {t("cameraWizard.step1.testResultLabels.resolution")}:
+                  </span>{" "}
+                  <span className="text-primary">{testResult.resolution}</span>
                 </div>
-              ) : (
-                <div className="mt-2 text-xs text-danger">
-                  {testResult.error}
+              )}
+              {testResult.videoCodec && (
+                <div>
+                  <span className="text-secondary-foreground">
+                    {t("cameraWizard.step1.testResultLabels.video")}:
+                  </span>{" "}
+                  <span className="text-primary">{testResult.videoCodec}</span>
+                </div>
+              )}
+              {testResult.audioCodec && (
+                <div>
+                  <span className="text-secondary-foreground">
+                    {t("cameraWizard.step1.testResultLabels.audio")}:
+                  </span>{" "}
+                  <span className="text-primary">{testResult.audioCodec}</span>
+                </div>
+              )}
+              {testResult.fps && (
+                <div>
+                  <span className="text-secondary-foreground">
+                    {t("cameraWizard.step1.testResultLabels.fps")}:
+                  </span>{" "}
+                  <span className="text-primary">{testResult.fps}</span>
                 </div>
               )}
             </div>
-          )}
-
-          <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-end sm:gap-4">
-            <Button type="button" onClick={onCancel} className="sm:flex-1">
-              {t("button.cancel", { ns: "common" })}
-            </Button>
-            <Button
-              type="button"
-              onClick={testConnection}
-              disabled={isTesting || !isTestButtonEnabled}
-              variant="select"
-              className="flex items-center justify-center gap-2 sm:flex-1"
-            >
-              {isTesting && <ActivityIndicator className="size-4" />}
-              {t("cameraWizard.step1.testConnection")}
-            </Button>
           </div>
-        </form>
-      </Form>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-end sm:gap-4">
+        <Button
+          type="button"
+          onClick={testResult?.success ? () => setTestResult(null) : onCancel}
+          className="sm:flex-1"
+        >
+          {testResult?.success
+            ? t("button.back", { ns: "common" })
+            : t("button.cancel", { ns: "common" })}
+        </Button>
+        {testResult?.success ? (
+          <Button
+            type="button"
+            onClick={() => {
+              // Auto-populate stream and proceed to next step
+              const data = form.getValues();
+              const streamUrl = generateStreamUrl(data);
+
+              const streamId = `stream_${Date.now()}`;
+              onUpdate({
+                ...data,
+                streams: [
+                  {
+                    id: streamId,
+                    url: streamUrl,
+                    roles: ["detect"],
+                    resolution: testResult.resolution,
+                    testResult: testResult || undefined,
+                  },
+                ],
+              });
+
+              onNext?.();
+            }}
+            variant="select"
+            className="flex items-center justify-center gap-2 sm:flex-1"
+          >
+            {t("button.continue", { ns: "common" })}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            onClick={testConnection}
+            disabled={isTesting || !isTestButtonEnabled}
+            variant="select"
+            className="flex items-center justify-center gap-2 sm:flex-1"
+          >
+            {isTesting && <ActivityIndicator className="size-4" />}
+            {t("cameraWizard.step1.testConnection")}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
