@@ -143,6 +143,43 @@
       "error": "Failed to save config changes: {{errorMessage}}"
     }
   },
+  "cameraWizard": {
+    "title": "Add Camera",
+    "description": "Follow the steps below to add a new camera to your Frigate installation.",
+    "steps": {
+      "nameAndConnection": "Name & Connection",
+      "streamConfiguration": "Stream Configuration",
+      "validationAndTesting": "Validation & Testing"
+    },
+    "step1": {
+      "description": "Enter your camera details and test the connection.",
+      "cameraName": "Camera Name",
+      "cameraNamePlaceholder": "e.g., front_door",
+      "host": "Host/IP Address",
+      "port": "Port",
+      "username": "Username",
+      "usernamePlaceholder": "Optional",
+      "password": "Password",
+      "passwordPlaceholder": "Optional",
+      "selectTransport": "Select transport protocol",
+      "cameraBrand": "Camera Brand",
+      "selectBrand": "Select camera brand for URL template",
+      "customUrl": "Custom Stream URL",
+      "customUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "testConnection": "Test Connection",
+      "testSuccess": "Connection test successful!",
+      "testFailed": "Connection test failed. Please check your input and try again.",
+      "errors": {
+        "noUrl": "Please provide a valid stream URL",
+        "testFailed": "Connection test failed: {{error}}",
+        "brandOrCustomUrlRequired": "Either select a camera brand with host/IP or choose 'Other' with a custom URL"
+      }
+    },
+    "save": {
+      "successWithLive": "Camera {{cameraName}} saved successfully with live streaming configured.",
+      "successWithoutLive": "Camera {{cameraName}} saved successfully, but live streaming configuration failed."
+    }
+  },
   "camera": {
     "title": "Camera Settings",
     "streams": {
