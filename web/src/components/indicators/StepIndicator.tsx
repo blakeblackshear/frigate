@@ -4,15 +4,39 @@ import { useTranslation } from "react-i18next";
 type StepIndicatorProps = {
   steps: string[];
   currentStep: number;
-  translationNameSpace: string;
+  variant?: "default" | "dots";
+  translationNameSpace?: string;
 };
+
 export default function StepIndicator({
   steps,
   currentStep,
+  variant = "default",
   translationNameSpace,
 }: StepIndicatorProps) {
   const { t } = useTranslation(translationNameSpace);
 
+  if (variant == "dots") {
+    return (
+      <div className="flex flex-row justify-center gap-2">
+        {steps.map((_, idx) => (
+          <div
+            key={idx}
+            className={cn(
+              "size-2 rounded-full transition-colors",
+              currentStep === idx
+                ? "bg-selected"
+                : currentStep > idx
+                  ? "bg-muted-foreground"
+                  : "bg-muted",
+            )}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Default variant (original behavior)
   return (
     <div className="flex flex-row justify-evenly">
       {steps.map((name, idx) => (
