@@ -1,3 +1,5 @@
+target "docker-metadata-action" {}
+
 target wheels {
   dockerfile = "docker/main/Dockerfile"
   platforms = ["linux/arm64"]
@@ -18,6 +20,7 @@ target rootfs {
 
 target rk {
   dockerfile = "docker/rockchip/Dockerfile"
+  inherits = ["docker-metadata-action"]
   contexts = {
     wheels = "target:wheels",
     deps = "target:deps",
