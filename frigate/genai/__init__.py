@@ -63,6 +63,12 @@ class GenAIClient:
             else:
                 return ""
 
+        def get_verified_objects() -> str:
+            if review_data["recognized_objects"]:
+                return "  - " + "\n  - ".join(review_data["recognized_objects"])
+            else:
+                return "  None"
+
         context_prompt = f"""
 Please analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
 
@@ -102,7 +108,8 @@ Sequence details:
 - Frame 1 = earliest, Frame {len(thumbnails)} = latest
 - Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
 - Detected objects: {", ".join(review_data["objects"])}
-- Verified recognized objects: {", ".join(review_data["recognized_objects"]) or "None"}
+- Verified recognized objects (use these names when describing these objects):
+{get_verified_objects()}
 - Zones involved: {", ".join(z.replace("_", " ").title() for z in review_data["zones"]) or "None"}
 
 **IMPORTANT:**

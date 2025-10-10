@@ -147,6 +147,9 @@ class PendingReviewSegment:
                 ReviewSegment.data.name: {
                     "detections": list(set(self.detections.keys())),
                     "objects": list(set(self.detections.values())),
+                    "verified_objects": [
+                        o for o in self.detections.values() if "-verified" in o
+                    ],
                     "sub_labels": list(self.sub_labels.values()),
                     "zones": self.zones,
                     "audio": list(self.audio),
