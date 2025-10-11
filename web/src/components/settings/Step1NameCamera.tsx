@@ -38,6 +38,7 @@ import {
   StreamConfig,
 } from "@/types/cameraWizard";
 import { FaCircleCheck } from "react-icons/fa6";
+import { Card, CardContent, CardTitle } from "../ui/card";
 
 type Step1NameCameraProps = {
   wizardData: Partial<WizardFormData>;
@@ -109,7 +110,7 @@ export default function Step1NameCamera({
         wizardData.brandTemplate &&
         CAMERA_BRAND_VALUES.includes(wizardData.brandTemplate as CameraBrand)
           ? (wizardData.brandTemplate as CameraBrand)
-          : "hikvision",
+          : "dahua",
       customUrl: wizardData.customUrl || "",
     },
     mode: "onChange",
@@ -357,10 +358,8 @@ export default function Step1NameCamera({
                           (brand) => brand.value === field.value,
                         );
                         return selectedBrand ? (
-                          <FormDescription className="pt-0.5">
-                            <div className="mt-1 text-xs text-muted-foreground">
-                              {selectedBrand.exampleUrl}
-                            </div>
+                          <FormDescription className="mt-1 pt-0.5 text-xs text-muted-foreground">
+                            {selectedBrand.exampleUrl}
                           </FormDescription>
                         ) : null;
                       })()}
@@ -492,43 +491,51 @@ export default function Step1NameCamera({
               </div>
             )}
 
-            <div className="text-sm font-semibold text-primary-variant">
-              {t("cameraWizard.step1.streamDetails")}
-            </div>
-            <div className="text-sm">
-              {testResult.resolution && (
-                <div>
-                  <span className="text-secondary-foreground">
-                    {t("cameraWizard.testResultLabels.resolution")}:
-                  </span>{" "}
-                  <span className="text-primary">{testResult.resolution}</span>
-                </div>
-              )}
-              {testResult.videoCodec && (
-                <div>
-                  <span className="text-secondary-foreground">
-                    {t("cameraWizard.testResultLabels.video")}:
-                  </span>{" "}
-                  <span className="text-primary">{testResult.videoCodec}</span>
-                </div>
-              )}
-              {testResult.audioCodec && (
-                <div>
-                  <span className="text-secondary-foreground">
-                    {t("cameraWizard.testResultLabels.audio")}:
-                  </span>{" "}
-                  <span className="text-primary">{testResult.audioCodec}</span>
-                </div>
-              )}
-              {testResult.fps && (
-                <div>
-                  <span className="text-secondary-foreground">
-                    {t("cameraWizard.testResultLabels.fps")}:
-                  </span>{" "}
-                  <span className="text-primary">{testResult.fps}</span>
-                </div>
-              )}
-            </div>
+            <Card className="p-4">
+              <CardTitle className="mb-2 text-sm">
+                {t("cameraWizard.step1.streamDetails")}
+              </CardTitle>
+              <CardContent className="p-0 text-sm">
+                {testResult.resolution && (
+                  <div>
+                    <span className="text-secondary-foreground">
+                      {t("cameraWizard.testResultLabels.resolution")}:
+                    </span>{" "}
+                    <span className="text-primary">
+                      {testResult.resolution}
+                    </span>
+                  </div>
+                )}
+                {testResult.videoCodec && (
+                  <div>
+                    <span className="text-secondary-foreground">
+                      {t("cameraWizard.testResultLabels.video")}:
+                    </span>{" "}
+                    <span className="text-primary">
+                      {testResult.videoCodec}
+                    </span>
+                  </div>
+                )}
+                {testResult.audioCodec && (
+                  <div>
+                    <span className="text-secondary-foreground">
+                      {t("cameraWizard.testResultLabels.audio")}:
+                    </span>{" "}
+                    <span className="text-primary">
+                      {testResult.audioCodec}
+                    </span>
+                  </div>
+                )}
+                {testResult.fps && (
+                  <div>
+                    <span className="text-secondary-foreground">
+                      {t("cameraWizard.testResultLabels.fps")}:
+                    </span>{" "}
+                    <span className="text-primary">{testResult.fps}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}

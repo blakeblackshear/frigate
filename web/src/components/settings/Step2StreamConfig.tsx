@@ -247,8 +247,8 @@ export default function Step2StreamConfig({
                   )}
                   {stream.testResult && !stream.testResult.success && (
                     <div className="flex items-center gap-2 text-sm">
-                      <LuX className="size-4 text-destructive" />
-                      <span className="text-destructive">
+                      <LuX className="size-4 text-danger" />
+                      <span className="text-danger">
                         {t("cameraWizard.step2.notConnected")}
                       </span>
                     </div>
@@ -301,7 +301,7 @@ export default function Step2StreamConfig({
               {stream.testResult &&
                 !stream.testResult.success &&
                 stream.userTested && (
-                  <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+                  <div className="rounded-md border border-danger/20 bg-danger/10 p-3 text-sm text-danger">
                     <div className="font-medium">
                       {t("cameraWizard.step2.testFailedTitle")}
                     </div>
@@ -340,7 +340,7 @@ export default function Step2StreamConfig({
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium">
-                  {t("cameraWizard.step2.liveViewTitle")}
+                  {t("cameraWizard.step2.featuresTitle")}
                 </Label>
                 <div className="rounded-lg bg-background p-3">
                   <div className="flex items-center justify-between">
