@@ -212,14 +212,33 @@
       "testFailedTitle": "Test Failed",
       "connected": "Connected",
       "notConnected": "Not Connected",
-      "liveViewTitle": "Live View",
-      "liveViewStream": "Live View Stream",
-      "go2rtc": "Use enhanced live view",
+      "featuresTitle": "Features",
+      "go2rtc": "Reduce connections to camera",
       "detectRoleWarning": "At least one stream must have the \"detect\" role to proceed."
     },
-    "save": {
-      "successWithLive": "Camera {{cameraName}} saved successfully with live streaming configured.",
-      "successWithoutLive": "Camera {{cameraName}} saved successfully, but live streaming configuration failed."
+    "step3": {
+      "description": "Final validation and bandwidth analysis before saving your camera configuration.",
+      "validationTitle": "Stream Validation",
+      "validating": "Validating...",
+      "revalidateStreams": "Re-validate Streams",
+      "validationSuccess": "Validation completed successfully!",
+      "validationPartial": "Some streams failed validation.",
+      "streamUnavailable": "Stream unavailable",
+      "reload": "Reload",
+      "connecting": "Connecting...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Valid",
+      "failed": "Failed",
+      "notTested": "Not tested",
+      "testStream": "Test Stream",
+      "estimatedBandwidth": "Estimated Bandwidth:",
+      "roles": "Roles",
+      "none": "None",
+      "error": "Error",
+      "streamValidated": "Stream {{number}} validated successfully",
+      "streamValidationFailed": "Stream {{number}} validation failed",
+      "saveAndApply": "Save New Camera Configuration",
+      "saveError": "Invalid configuration. Please check your settings."
     }
   },
   "camera": {
