@@ -39,6 +39,7 @@ import {
   useReviewDescriptionState,
 } from "@/api/ws";
 import CameraEditForm from "@/components/settings/CameraEditForm";
+import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import { LuPlus } from "react-icons/lu";
 import {
   Select,
@@ -87,6 +88,7 @@ export default function CameraSettingsView({
   const [editCameraName, setEditCameraName] = useState<string | undefined>(
     undefined,
   ); // Track camera being edited
+  const [showWizard, setShowWizard] = useState(false);
 
   const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
@@ -322,7 +324,7 @@ export default function CameraSettingsView({
               <div className="mb-4 flex flex-col gap-4">
                 <Button
                   variant="select"
-                  onClick={() => setViewMode("add")}
+                  onClick={() => setShowWizard(true)}
                   className="flex max-w-48 items-center gap-2"
                 >
                   <LuPlus className="h-4 w-4" />
@@ -835,6 +837,11 @@ export default function CameraSettingsView({
           )}
         </div>
       </div>
+
+      <CameraWizardDialog
+        open={showWizard}
+        onClose={() => setShowWizard(false)}
+      />
     </>
   );
 }
