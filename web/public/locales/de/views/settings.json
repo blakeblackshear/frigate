@@ -23,7 +23,8 @@
     "users": "Benutzer",
     "notifications": "Benachrichtigungen",
     "enrichments": "Erkennungsfunktionen",
-    "triggers": "Auslöser"
+    "triggers": "Auslöser",
+    "roles": "Rollen"
   },
   "dialog": {
     "unsavedChanges": {
@@ -812,6 +813,11 @@
           "error": {
             "min": "Mindesten eine Aktion muss ausgewählt sein."
           }
+        },
+        "friendly_name": {
+          "title": "Nutzerfreundlicher Name",
+          "placeholder": "Benenne oder beschreibe diesen Auslöser",
+          "description": "Ein optionaler nutzerfreundlicher Name oder eine Beschreibung für diesen Auslöser."
         }
       }
     },
@@ -826,6 +832,10 @@
         "updateTriggerFailed": "Auslöser könnte nicht aktualisiert werden: {{errorMessage}}",
         "deleteTriggerFailed": "Auslöser konnte nicht gelöscht werden: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Semantische Suche ist deaktiviert",
+      "desc": "Semantische Suche muss aktiviert sein um Auslöser nutzen zu können."
     }
   },
   "roles": {
