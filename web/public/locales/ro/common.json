@@ -270,5 +270,8 @@
     "title": "404",
     "desc": "Pagină negăsită"
   },
-  "readTheDocumentation": "Citește documentația"
+  "readTheDocumentation": "Citește documentația",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

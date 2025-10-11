@@ -134,6 +134,9 @@
     "playInBackground": {
       "label": "Redare în fundal",
       "tips": "Activează această opțiune pentru a continua streaming-ul când player-ul este ascuns."
+    },
+    "debug": {
+      "picker": "Selectarea fluxului nu este disponibilă în modul de depanare. Vizualizarea de depanare folosește întotdeauna fluxul atribuit rolului de detectare."
     }
   },
   "cameraSettings": {
