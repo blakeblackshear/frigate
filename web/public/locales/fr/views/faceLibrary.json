@@ -46,7 +46,7 @@
   },
   "imageEntry": {
     "dropActive": "Déposez l'image ici…",
-    "dropInstructions": "Glissez et déposez une image ici, ou cliquez pour sélectionner",
+    "dropInstructions": "Glissez-déposez ou coller une image ici, ou cliquez pour la sélectionner",
     "maxSize": "Taille max : {{size}}Mo",
     "validation": {
       "selectImage": "Veuillez sélectionner un fichier image."

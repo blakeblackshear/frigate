@@ -23,7 +23,8 @@
     "notifications": "Notifications",
     "frigateplus": "Frigate+",
     "enrichments": "Enrichissements",
-    "triggers": "Déclencheurs"
+    "triggers": "Déclencheurs",
+    "roles": "Rôles"
   },
   "dialog": {
     "unsavedChanges": {
@@ -816,6 +817,11 @@
           "error": {
             "min": "Au moins une action doit être sélectionnée."
           }
+        },
+        "friendly_name": {
+          "title": "Nom convivial",
+          "placeholder": "Nommez ou décrivez ce déclencheur",
+          "description": "Nom convivial ou texte descriptif facultatif pour ce déclencheur."
         }
       }
     },
@@ -830,6 +836,10 @@
         "updateTriggerFailed": "Échec de la mise à jour du déclencheur : {{errorMessage}}",
         "deleteTriggerFailed": "Échec de la suppression du déclencheur : {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "La recherche sémantique est désactivée",
+      "desc": "La recherche sémantique doit être activée pour utiliser les déclencheurs."
     }
   },
   "roles": {
