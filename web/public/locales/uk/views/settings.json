@@ -564,7 +564,8 @@
     "notifications": "Сповіщення",
     "frigateplus": "Frigate+",
     "enrichments": "Збагачення",
-    "triggers": "Тригери"
+    "triggers": "Тригери",
+    "roles": "Ролі"
   },
   "dialog": {
     "unsavedChanges": {
@@ -815,6 +816,11 @@
           "error": {
             "min": "Потрібно вибрати принаймні одну дію."
           }
+        },
+        "friendly_name": {
+          "title": "Зрозуміле ім'я",
+          "placeholder": "Назвіть або опишіть цей тригер",
+          "description": "Зрозуміла назва або описовий текст (необов'язково) для цього тригера."
         }
       }
     },
@@ -829,6 +835,10 @@
         "updateTriggerFailed": "Не вдалося оновити тригер: {{errorMessage}}",
         "deleteTriggerFailed": "Не вдалося видалити тригер: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Семантичний пошук вимкнено",
+      "desc": "Для використання тригерів необхідно ввімкнути семантичний пошук."
     }
   },
   "roles": {

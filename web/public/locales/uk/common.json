@@ -271,5 +271,8 @@
     "title": "404"
   },
   "selectItem": "Вибрати {{item}}",
-  "readTheDocumentation": "Прочитати документацію"
+  "readTheDocumentation": "Прочитати документацію",
+  "information": {
+    "pixels": "{{area}}пикс"
+  }
 }
