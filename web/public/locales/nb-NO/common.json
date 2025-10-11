@@ -273,5 +273,8 @@
     "desc": "Siden ble ikke funnet"
   },
   "selectItem": "Velg {{item}}",
-  "readTheDocumentation": "Se dokumentasjonen"
+  "readTheDocumentation": "Se dokumentasjonen",
+  "information": {
+    "pixels": "{{area}}piklser"
+  }
 }
