@@ -13,7 +13,7 @@
   },
   "menu": {
     "ui": "UI",
-    "enrichments": "エンリッチメント",
+    "enrichments": "高度な追加機能",
     "cameras": "カメラ設定",
     "masksAndZones": "マスク／ゾーン",
     "motionTuner": "モーションチューナー",
@@ -793,6 +793,11 @@
           "error": {
             "min": "少なくとも1つのアクションを選択してください。"
           }
+        },
+        "friendly_name": {
+          "title": "表示名",
+          "placeholder": "このトリガーの名前または説明",
+          "description": "このトリガーの表示名または説明文"
         }
       }
     },
@@ -807,6 +812,10 @@
         "updateTriggerFailed": "トリガーの更新に失敗しました: {{errorMessage}}",
         "deleteTriggerFailed": "トリガーの削除に失敗しました: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "desc": "トリガーを使用するにはセマンティック検索を有効にする必要があります。",
+      "title": "セマンティック検索が無効です"
     }
   }
 }
