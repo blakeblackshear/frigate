@@ -10,7 +10,8 @@
     "motionTuner": "Konfigurator Ruchu",
     "debug": "Debugowanie",
     "enrichments": "Wzbogacenia",
-    "triggers": "Wyzwalacze"
+    "triggers": "Wyzwalacze",
+    "roles": "Role"
   },
   "dialog": {
     "unsavedChanges": {
@@ -875,6 +876,11 @@
           "error": {
             "min": "Musisz wybrać co najmniej jedną akcję."
           }
+        },
+        "friendly_name": {
+          "title": "Przyjazna nazwa",
+          "placeholder": "Nazwij lub opisz ten trigger",
+          "description": "Opcjonalna przyjazna nazwa lub opis tego triggera."
         }
       }
     },
@@ -889,6 +895,10 @@
         "updateTriggerFailed": "Nie udało się zaktualizować wyzwalacza: {{errorMessage}}",
         "deleteTriggerFailed": "Nie udało się usunąć wyzwalacza: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Wyszukiwanie semantyczne jest zablokowane",
+      "desc": "Wyszukiwanie semantyczne musi być włączone, aby korzystać z triggerów."
     }
   }
 }
