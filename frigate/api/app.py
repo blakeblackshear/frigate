@@ -147,6 +147,41 @@ def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
         )
 
 
+@router.delete(
+    "/go2rtc/streams/{stream_name}", dependencies=[Depends(require_role(["admin"]))]
+)
+def go2rtc_delete_stream(stream_name: str):
+    """Delete a go2rtc stream."""
+    try:
+        r = requests.delete(
+            "http://127.0.0.1:1984/api/streams",
+            params={"src": stream_name},
+            timeout=10,
+        )
+        if not r.ok:
+            logger.error(f"Failed to delete go2rtc stream {stream_name}: {r.text}")
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": f"Failed to delete stream: {r.text}"}
+                ),
+                status_code=r.status_code,
+            )
+        return JSONResponse(
+            content={"success": True, "message": "Stream deleted successfully"}
+        )
+    except requests.RequestException as e:
+        logger.error(f"Error communicating with go2rtc: {e}")
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"Error communicating with go2rtc: {str(e)}",
+                }
+            ),
+            status_code=500,
+        )
+
+
 @router.get("/version", response_class=PlainTextResponse)
 def version():
     return VERSION
