@@ -378,7 +378,8 @@
     "users": "Utenti",
     "frigateplus": "Frigate+",
     "enrichments": "Miglioramenti",
-    "triggers": "Inneschi"
+    "triggers": "Inneschi",
+    "roles": "Ruoli"
   },
   "users": {
     "dialog": {
@@ -815,6 +816,11 @@
           "error": {
             "min": "È necessario selezionare almeno un'azione."
           }
+        },
+        "friendly_name": {
+          "title": "Nome semplice",
+          "placeholder": "Assegna un nome o descrivi questo innesco",
+          "description": "Un nome semplice o un testo descrittivo facoltativo per questo innesco."
         }
       }
     },
@@ -829,6 +835,10 @@
         "updateTriggerFailed": "Impossibile aggiornare l'innesco: {{errorMessage}}",
         "deleteTriggerFailed": "Impossibile eliminare l'innesco: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "La ricerca semantica è disabilitata",
+      "desc": "Per utilizzare gli inneschi, è necessario abilitare la ricerca semantica."
     }
   },
   "roles": {
