@@ -151,6 +151,16 @@
       "streamConfiguration": "Stream Configuration",
       "validationAndTesting": "Validation & Testing"
     },
+    "testResultLabels": {
+      "resolution": "Resolution",
+      "video": "Video",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Please provide a valid stream URL",
+      "testFailed": "Stream test failed: {{error}}"
+    },
     "step1": {
       "description": "Enter your camera details and test the connection.",
       "cameraName": "Camera Name",
@@ -169,11 +179,43 @@
       "testConnection": "Test Connection",
       "testSuccess": "Connection test successful!",
       "testFailed": "Connection test failed. Please check your input and try again.",
+      "streamDetails": "Stream Details",
+      "warnings": {
+        "noSnapshot": "Unable to fetch a snapshot from the configured stream."
+      },
       "errors": {
-        "noUrl": "Please provide a valid stream URL",
-        "testFailed": "Connection test failed: {{error}}",
         "brandOrCustomUrlRequired": "Either select a camera brand with host/IP or choose 'Other' with a custom URL"
       }
+    },
+    "step2": {
+      "description": "Configure stream roles and add additional streams for your camera.",
+      "streamsTitle": "Camera Streams",
+      "addStream": "Add Stream",
+      "addAnotherStream": "Add Another Stream",
+      "streamTitle": "Stream {{number}}",
+      "streamUrl": "Stream URL",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "url": "URL",
+      "resolution": "Resolution",
+      "selectResolution": "Select resolution",
+      "quality": "Quality",
+      "selectQuality": "Select quality",
+      "roles": "Roles",
+      "roleLabels": {
+        "detect": "Object Detection",
+        "record": "Recording",
+        "audio": "Audio"
+      },
+      "testStream": "Test Stream",
+      "testSuccess": "Stream test successful!",
+      "testFailed": "Stream test failed",
+      "testFailedTitle": "Test Failed",
+      "connected": "Connected",
+      "notConnected": "Not Connected",
+      "liveViewTitle": "Live View",
+      "liveViewStream": "Live View Stream",
+      "go2rtc": "Use enhanced live view",
+      "detectRoleWarning": "At least one stream must have the \"detect\" role to proceed."
     },
     "save": {
       "successWithLive": "Camera {{cameraName}} saved successfully with live streaming configured.",
