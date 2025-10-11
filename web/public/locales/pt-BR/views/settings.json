@@ -21,7 +21,8 @@
     "motionTuner": "Ajuste de Movimento",
     "debug": "Depurar",
     "enrichments": "Enriquecimentos",
-    "triggers": "Gatilhos"
+    "triggers": "Gatilhos",
+    "roles": "Papéis"
   },
   "dialog": {
     "unsavedChanges": {
@@ -751,6 +752,11 @@
           "error": {
             "min": "Ao menos uma ação deve ser selecionada."
           }
+        },
+        "friendly_name": {
+          "title": "Nome Amigável",
+          "placeholder": "Nomeie ou descreva esse gatilho",
+          "description": "Um nome amigável ou descritivo opcional para esse gatilho."
         }
       }
     },
@@ -765,6 +771,10 @@
         "updateTriggerFailed": "Falha ao atualizar gatilho: {{errorMessage}}",
         "deleteTriggerFailed": "Falha ao apagar gatilho: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Busca Semântica desativada",
+      "desc": "Busca Semântica deve estar habilitada para usar os Gatilhos."
     }
   },
   "roles": {
