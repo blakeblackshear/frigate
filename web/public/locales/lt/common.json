@@ -270,5 +270,8 @@
     "desc": "Puslapis nerastas"
   },
   "selectItem": "Pasirinkti {{item}}",
-  "readTheDocumentation": "Skaityti dokumentaciją"
+  "readTheDocumentation": "Skaityti dokumentaciją",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

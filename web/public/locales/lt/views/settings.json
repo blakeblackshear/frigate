@@ -3,7 +3,7 @@
     "default": "Nustatymai - Frigate",
     "authentication": "Autentifikavimo Nustatymai - Frigate",
     "camera": "Kameros Nustatymai - Frigate",
-    "object": "Derinti - Frigate",
+    "object": "Debug - Frigate",
     "general": "Bendrieji Nustatymai - Frigate",
     "frigatePlus": "Frigate+ Nustatymai - Frigate",
     "notifications": "Pranešimų Nustatymai - Frigate",
@@ -17,11 +17,12 @@
     "cameras": "Kameros Nustatymai",
     "masksAndZones": "Maskavimai / Zonos",
     "motionTuner": "Judesio Derintojas",
-    "debug": "Derinimas",
+    "debug": "Debug",
     "users": "Vartotojai",
     "notifications": "Pranešimai",
     "frigateplus": "Frigate+",
-    "triggers": "Trigeriai"
+    "triggers": "Trigeriai",
+    "roles": "Rolės"
   },
   "dialog": {
     "unsavedChanges": {
@@ -146,7 +147,7 @@
     "title": "Kamerų Nustatymai",
     "streams": {
       "title": "Transliacijos",
-      "desc": "Laikinai išjunkite kamerą kol Frigate bus perkrautas. Išjungiant kamerą visiškai sustabdo Frigate veiklą šiai kamerai. Nebus aptikimų, įrašų ar derinimų.<br /><em>Pastaba: Tai neišjungs go2rtc sratų.</em>"
+      "desc": "Laikinai išjunkite kamerą kol Frigate bus perkrautas. Išjungiant kamerą visiškai sustabdo Frigate veiklą šiai kamerai. Nebus aptikimų, įrašų ar debug informacijos.<br /><em>Pastaba: Tai neišjungs go2rtc sratų.</em>"
     },
     "review": {
       "desc": "Trumpam įjungti/išjungti įspėjimus ir aptikimus šiai kamerai iki kol Frigate bus perkrautas. Kai išjungta, naujos peržiūros nebus kuriamos. ",
@@ -416,10 +417,10 @@
       "currentRMS": "Dabartinis RMS",
       "currentdbFS": "Dabartinis dbFS"
     },
-    "title": "Derinti",
-    "desc": "Derinimo vaizde rodomas tiesioginis vaizdas sekamų objektų ir statistikos. Objektų sąrašas rodo užvėlintą santrauką aptiktų objektų.",
+    "title": "Debug",
+    "desc": "Debug vaizde rodomas tiesioginis vaizdas sekamų objektų ir statistikos. Objektų sąrašas rodo užvėlintą santrauką aptiktų objektų.",
     "openCameraWebUI": "Atverti {{camera}} kameros Web prieigą",
-    "debugging": "Derinama",
+    "debugging": "Debugging",
     "objectList": "Objektų sąrašas",
     "noObjects": "Objektų nėra",
     "boundingBoxes": {
@@ -618,6 +619,11 @@
           "error": {
             "min": "Bent vienas veiksmas privalo būti parinktas."
           }
+        },
+        "friendly_name": {
+          "title": "Draugiškas Pavadinimas",
+          "placeholder": "Pavadinikite ar apibūdinkite trigerį",
+          "description": "Draugiškas pavadinimas ar apibūdinimas šiam trigeriui nėra būtinas."
         }
       }
     },
@@ -657,6 +663,10 @@
         "updateTriggerFailed": "Nepavyko atnaujinti trigerio: {{errorMessage}}",
         "deleteTriggerFailed": "Nepavyko ištrinti trigerio: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Semantic Paieška išjungta",
+      "desc": "Norint naudoti Trigerius Semantic Paieška privalo būti įjungta."
     }
   },
   "notification": {

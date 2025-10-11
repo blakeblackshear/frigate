@@ -42,7 +42,7 @@
       "label": "Rodyti transliacijos statistiką",
       "desc": "Įjungti šią galimybę rodyti transliacijos statistiką kaip pridėtinę informaciją kameros vaizde."
     },
-    "debugView": "Derinimo Vaizdas"
+    "debugView": "Debug Vaizdas"
   },
   "export": {
     "time": {
