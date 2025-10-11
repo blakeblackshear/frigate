@@ -38,7 +38,7 @@
   "general": {
     "title": "全般",
     "detector": {
-      "title": "ディテクタ",
+      "title": "検出器",
       "inferenceSpeed": "ディテクタ推論速度",
       "temperature": "ディテクタ温度",
       "cpuUsage": "ディテクタの CPU 使用率",

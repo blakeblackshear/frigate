@@ -280,5 +280,8 @@
       "feet": "pieds",
       "meters": "mètres"
     }
+  },
+  "information": {
+    "pixels": "{{area}}px"
   }
 }

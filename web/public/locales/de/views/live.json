@@ -118,6 +118,9 @@
     "playInBackground": {
       "tips": "Aktivieren Sie diese Option, um das Streaming fortzusetzen, wenn der Player ausgeblendet ist.",
       "label": "Im Hintergrund abspielen"
+    },
+    "debug": {
+      "picker": "Stream Auswahl nicht verfügbar im Debug Modus. Die Debug Ansicht nutzt immer den Stream, welcher der Rolle zugewiesen ist."
     }
   },
   "effectiveRetainMode": {

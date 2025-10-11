@@ -138,7 +138,8 @@
     "enrichments": "Förbättringar",
     "motionTuner": "Rörelsemottagare",
     "debug": "Felsök",
-    "triggers": "Utlösare"
+    "triggers": "Utlösare",
+    "roles": "Roller"
   },
   "dialog": {
     "unsavedChanges": {
@@ -801,6 +802,11 @@
           "error": {
             "min": "Minst en åtgärd måste väljas."
           }
+        },
+        "friendly_name": {
+          "title": "Vänligt namn",
+          "placeholder": "Namnge eller beskriv denna utlösare",
+          "description": "Ett valfritt vänligt namn eller en beskrivande text för denna utlösare."
         }
       }
     },
@@ -815,6 +821,10 @@
         "updateTriggerFailed": "Misslyckades med att uppdatera utlösaren: {{errorMessage}}",
         "deleteTriggerFailed": "Misslyckades med att ta bort utlösaren: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Semantisk sökning är inaktiverad",
+      "desc": "Semantisk sökning måste vara aktiverad för att använda Utlösare."
     }
   }
 }

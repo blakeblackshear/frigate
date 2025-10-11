@@ -273,5 +273,8 @@
     "desc": "Du hast keine Berechtigung diese Seite anzuzeigen.",
     "documentTitle": "Zugang verweigert - Frigate",
     "title": "Zugang verweigert"
+  },
+  "information": {
+    "pixels": "{{area}}px"
   }
 }

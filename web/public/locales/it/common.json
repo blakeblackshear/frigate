@@ -280,5 +280,8 @@
     }
   },
   "selectItem": "Seleziona {{item}}",
-  "readTheDocumentation": "Leggi la documentazione"
+  "readTheDocumentation": "Leggi la documentazione",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

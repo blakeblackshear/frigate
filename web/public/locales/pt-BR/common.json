@@ -270,5 +270,8 @@
     "title": "404",
     "desc": "Página não encontrada"
   },
-  "readTheDocumentation": "Leia a documentação"
+  "readTheDocumentation": "Leia a documentação",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

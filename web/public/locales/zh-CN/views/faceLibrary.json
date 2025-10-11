@@ -49,7 +49,7 @@
       "selectImage": "请选择图片文件。"
     },
     "dropActive": "拖动图片文件到这里…",
-    "dropInstructions": "拖动图片文件到此处或点击选择",
+    "dropInstructions": "拖动或粘贴图片文件到此处，也可以点击选择文件",
     "maxSize": "最大文件大小：{{size}}MB"
   },
   "readTheDocs": "阅读文档",

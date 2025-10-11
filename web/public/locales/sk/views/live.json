@@ -136,6 +136,9 @@
     "playInBackground": {
       "label": "Hrať na pozadí",
       "tips": "Povoľte túto možnosť, ak chcete pokračovať v streamovaní, aj keď je prehrávač skrytý."
+    },
+    "debug": {
+      "picker": "Výber streamu nie je k dispozícii v režime ladenia. Zobrazenie ladenia vždy používa stream, ktorému je priradená rola detekcie."
     }
   },
   "cameraSettings": {

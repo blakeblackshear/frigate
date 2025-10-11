@@ -58,13 +58,24 @@
     "camera": "Kamera",
     "zones": "Zóny",
     "button": {
-      "findSimilar": "Nájsť podobné"
+      "findSimilar": "Nájsť podobné",
+      "regenerate": {
+        "title": "Regenerovať",
+        "label": "Obnoviť popis sledovaného objektu"
+      }
     },
     "description": {
       "placeholder": "Popis sledovaného objektu",
-      "aiTips": "Frigate si od vášho poskytovateľa generatívnej umelej inteligencie nevyžiada popis, kým sa neukončí životný cyklus sledovaného objektu."
+      "aiTips": "Frigate si od vášho poskytovateľa generatívnej umelej inteligencie nevyžiada popis, kým sa neukončí životný cyklus sledovaného objektu.",
+      "label": "Popis"
     },
-    "expandRegenerationMenu": "Rozbaľte ponuku regenerácie"
+    "expandRegenerationMenu": "Rozbaľte ponuku regenerácie",
+    "regenerateFromSnapshot": "Obnoviť zo snímky",
+    "regenerateFromThumbnails": "Obnoviť z miniatúr",
+    "tips": {
+      "descriptionSaved": "Úspešne uložený popis",
+      "saveDescriptionFailed": "Nepodarilo sa aktualizovať popis: {{errorMessage}}"
+    }
   },
   "exploreMore": "Preskumať viac {{label}} objektov",
   "exploreIsUnavailable": {
@@ -149,6 +160,24 @@
     "carousel": {
       "previous": "Predchádzajúca snímka",
       "next": "Ďalšia snímka"
+    }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Stiahnut video",
+      "aria": "Stiahnite si video"
+    },
+    "downloadSnapshot": {
+      "label": "Stiahnite si snímok",
+      "aria": "Stiahnite si snímok"
+    },
+    "viewObjectLifecycle": {
+      "label": "Pozrieť životný cyklus objektu",
+      "aria": "Životný cyklus objektu"
+    },
+    "findSimilar": {
+      "label": "Nájsť podobné",
+      "aria": "Nájdite podobné sledované objekty"
     }
   }
 }

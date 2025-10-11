@@ -273,5 +273,8 @@
     "documentTitle": "Niet gevonden - Frigate"
   },
   "selectItem": "Selecteer {{item}}",
-  "readTheDocumentation": "Lees de documentatie"
+  "readTheDocumentation": "Lees de documentatie",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

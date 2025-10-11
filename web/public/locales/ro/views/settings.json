@@ -22,7 +22,8 @@
     "users": "Utilizatori",
     "notifications": "Notificări",
     "frigateplus": "Frigate+",
-    "triggers": "Declanșatoare"
+    "triggers": "Declanșatoare",
+    "roles": "Roluri"
   },
   "dialog": {
     "unsavedChanges": {
@@ -752,6 +753,11 @@
           "error": {
             "min": "Trebuie selectată cel puțin o acțiune."
           }
+        },
+        "friendly_name": {
+          "title": "Nume prietenos",
+          "placeholder": "Denumește sau descrie acest declanșator",
+          "description": "Un nume prietenos opțional sau un text descriptiv pentru acest declanșator."
         }
       }
     },
@@ -766,6 +772,10 @@
         "updateTriggerFailed": "Actualizarea declanșatorului a eșuat: {{errorMessage}}",
         "deleteTriggerFailed": "Eliminarea declanșatorului a eșuat: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Căutarea semantică este dezactivată",
+      "desc": "Căutarea semantică trebuie să fie activată pentru a utiliza declanșatoarele."
     }
   },
   "roles": {

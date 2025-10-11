@@ -774,7 +774,39 @@
       },
       "deleteTrigger": {
         "title": "Eliminar Disparador"
+      },
+      "form": {
+        "name": {
+          "title": "Nombre",
+          "placeholder": "Entre nombre de disparador",
+          "error": {
+            "minLength": "El nombre debe tener al menos 2 caracteres."
+          }
+        },
+        "enabled": {
+          "description": "Activa o desactiva este disparador"
+        },
+        "type": {
+          "title": "Tipo",
+          "placeholder": "Seleccione tipo de disparador"
+        },
+        "friendly_name": {
+          "title": "Nombre amigable",
+          "placeholder": "Nombre o describa este disparador"
+        },
+        "content": {
+          "title": "Contenido",
+          "imagePlaceholder": "Seleccione una imágen",
+          "textPlaceholder": "Entre contenido de texto",
+          "error": {
+            "required": "El contenido es requrido."
+          }
+        }
       }
+    },
+    "semanticSearch": {
+      "title": "Búsqueda semántica desactivada",
+      "desc": "Búsqueda semántica debe estar activada para usar Disparadores."
     }
   },
   "roles": {

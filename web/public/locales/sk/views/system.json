@@ -138,7 +138,30 @@
       "capture": "zachytiť",
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraCapture": "zachytiť{{camName}}",
-      "cameraDetect": "Detekcia {{camName}}"
+      "cameraDetect": "Detekcia {{camName}}",
+      "overallFramesPerSecond": "celkový počet snímok za sekundu",
+      "overallDetectionsPerSecond": "celkový počet detekcií za sekundu",
+      "overallSkippedDetectionsPerSecond": "celkový počet vynechaných detekcií za sekundu",
+      "cameraFramesPerSecond": "{{camName}}snimky za sekundu",
+      "cameraDetectionsPerSecond": "{{camName}}detekcie za sekundu",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} vynechaných detekcií za sekundu"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Dáta sondy boli skopírované do schránky."
+      },
+      "error": {
+        "unableToProbeCamera": "Nepodarilo sa overiť kameru: {{errorMessage}}"
+      }
     }
+  },
+  "lastRefreshed": "Naposledy obnovené: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} má vysoké využitie CPU vo formáte FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} má vysoké využitie CPU pri detekcii ({{detectAvg}}%)",
+    "healthy": "Systém je zdravý",
+    "reindexingEmbeddings": "Preindexovanie vložených prvkov (dokončené na {{processed}} %)",
+    "cameraIsOffline": "{{camera}} je offline",
+    "detectIsSlow": "{{detect}} je pomalý ({{speed}} ms)"
   }
 }
