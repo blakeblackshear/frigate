@@ -3,7 +3,8 @@ import { createContext, useEffect, useState } from "react";
 import useSWR from "swr";
 
 interface AuthState {
-  user: { username: string; role: "admin" | "viewer" | null } | null;
+  user: { username: string; role: string | null } | null;
+  allowedCameras: string[];
   isLoading: boolean;
   isAuthenticated: boolean; // true if auth is required
 }
@@ -15,7 +16,12 @@ interface AuthContextType {
 }
 
 export const AuthContext = createContext<AuthContextType>({
-  auth: { user: null, isLoading: true, isAuthenticated: false },
+  auth: {
+    user: null,
+    allowedCameras: [],
+    isLoading: true,
+    isAuthenticated: false,
+  },
   login: () => {},
   logout: () => {},
 });
@@ -23,6 +29,7 @@ export const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [auth, setAuth] = useState<AuthState>({
     user: null,
+    allowedCameras: [],
     isLoading: true,
     isAuthenticated: false,
   });
@@ -38,7 +45,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         // auth required but not logged in
-        setAuth({ user: null, isLoading: false, isAuthenticated: true });
+        setAuth({
+          user: null,
+          allowedCameras: [],
+          isLoading: false,
+          isAuthenticated: true,
+        });
       }
       return;
     }
@@ -49,20 +61,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           username: profile.username,
           role: profile.role || "viewer",
         };
-        setAuth({ user: newUser, isLoading: false, isAuthenticated: true });
+
+        const allowedCameras = Array.isArray(profile.allowed_cameras)
+          ? profile.allowed_cameras
+          : [];
+        setAuth({
+          user: newUser,
+          allowedCameras,
+          isLoading: false,
+          isAuthenticated: true,
+        });
       } else {
         // Unauthenticated mode (anonymous)
-        setAuth({ user: null, isLoading: false, isAuthenticated: false });
+        setAuth({
+          user: null,
+          allowedCameras: [],
+          isLoading: false,
+          isAuthenticated: false,
+        });
       }
     }
   }, [profile, error]);
 
   const login = (user: AuthState["user"]) => {
-    setAuth({ user, isLoading: false, isAuthenticated: true });
+    setAuth((current) => ({
+      ...current,
+      user,
+      isLoading: false,
+      isAuthenticated: true,
+    }));
   };
 
   const logout = () => {
-    setAuth({ user: null, isLoading: false, isAuthenticated: true });
+    setAuth({
+      user: null,
+      allowedCameras: [],
+      isLoading: false,
+      isAuthenticated: true,
+    });
     axios.get("/logout", { withCredentials: true });
   };
 

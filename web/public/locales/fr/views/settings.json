@@ -10,7 +10,7 @@
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
     "notifications": "Paramètres de notification - Frigate",
-    "enrichments": "Paramètres de données augmentées - Frigate"
+    "enrichments": "Paramètres d'enrichissements - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -22,7 +22,8 @@
     "users": "Utilisateurs",
     "notifications": "Notifications",
     "frigateplus": "Frigate+",
-    "enrichments": "Données augmentées"
+    "enrichments": "Enrichissements",
+    "triggers": "Déclencheurs"
   },
   "dialog": {
     "unsavedChanges": {
@@ -278,6 +279,44 @@
     "streams": {
       "title": "Flux",
       "desc": "Désactive temporairement une caméra jusqu'au redémarrage de Frigate. La désactivation complète d'une caméra interrompt le traitement des flux de cette caméra par Frigate. La détection, l'enregistrement et le débogage seront indisponibles.<br /> <em>Remarque : cela ne désactive pas les rediffusions go2rtc.</em>"
+    },
+    "object_descriptions": {
+      "title": "Description d'objets par IA générative",
+      "desc": "Activer / désactiver temporairement les descriptions d'objets par IA générative pour cette caméra. Lorsqu'elles sont désactivées, les descriptions générées par IA ne seront pas demandées pour les objets suivis par cette caméra."
+    },
+    "review_descriptions": {
+      "title": "Revue de descriptions par IA générative",
+      "desc": "Activer / désactiver temporairement la revue de descriptions d'objets par IA générative pour cette caméra. Lorsqu'elles sont désactivées, les descriptions générées par IA ne seront plus demandées pour la revue d'éléments de cette caméra."
+    },
+    "addCamera": "Ajouter une nouvelle caméra",
+    "editCamera": "Éditer la caméra :",
+    "selectCamera": "Sélectionner une caméra",
+    "backToSettings": "Retour aux paramètres de la caméra",
+    "cameraConfig": {
+      "add": "Ajouter une caméra",
+      "edit": "Éditer la caméra",
+      "description": "Configurer les paramètres de la caméra y compris les flux et les rôles.",
+      "name": "Nom de la caméra",
+      "nameRequired": "Un nom de caméra est nécessaire",
+      "nameInvalid": "Les noms de caméra peuvent contenir uniquement des lettres, des chiffres, des tirets bas, ou des tirets",
+      "namePlaceholder": "par exemple, porte_entree",
+      "enabled": "Activé",
+      "ffmpeg": {
+        "inputs": "Flux entrants",
+        "path": "Chemin d'accès du flux",
+        "pathRequired": "Un chemin d'accès de flux est nécessaire",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Rôles",
+        "rolesRequired": "Au moins un rôle est nécessaire",
+        "rolesUnique": "Chaque rôle (audio, détection, enregistrement) ne peut être assigné qu'à un seul flux",
+        "addInput": "Ajouter un flux entrant",
+        "removeInput": "Supprimer le flux entrant",
+        "inputsRequired": "Au moins un flux entrant est nécessaire"
+      },
+      "toast": {
+        "success": "Caméra {{cameraName}} enregistrée avec succès"
+      },
+      "nameLength": "Le nom de la caméra doit comporter au plus 24 caractères."
     }
   },
   "masksAndZones": {
@@ -523,7 +562,20 @@
     "noObjects": "Aucun objet",
     "title": "Débogage",
     "detectorDesc": "Frigate utilise vos détecteurs ({{detectors}}) pour détecter les objets dans le flux vidéo de votre caméra.",
-    "desc": "La vue de débogage affiche en temps réel les objets suivis et leurs statistiques. La liste des objets affiche un résumé différé des objets détectés."
+    "desc": "La vue de débogage affiche en temps réel les objets suivis et leurs statistiques. La liste des objets affiche un résumé différé des objets détectés.",
+    "paths": {
+      "title": "Chemins",
+      "desc": "Montrer les points notables du chemin de l'objet suivi",
+      "tips": "<p><strong>Chemins</strong></p><br><p>Les lignes et les cercles indiqueront les points notables des déplacements de l'objet suivi pendant son cycle de vie.</p>"
+    },
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Aucune détection audio",
+      "score": "score",
+      "currentRMS": "RMS actuel",
+      "currentdbFS": "dbFS actuel"
+    },
+    "openCameraWebUI": "Ouvre l'interface Web de {{camera}}"
   },
   "users": {
     "title": "Utilisateurs",
@@ -610,7 +662,8 @@
           "admin": "Administrateur",
           "adminDesc": "Accès complet à l'ensemble des fonctionnalités.",
           "viewer": "Observateur",
-          "viewerDesc": "Limité aux tableaux de bord Direct, Revue d'événements, Explorer et Exports."
+          "viewerDesc": "Limité aux tableaux de bord Direct, Revue d'événements, Explorer et Exports.",
+          "customDesc": "Rôle personnalisé avec accès spécifique à la caméra"
         },
         "select": "Sélectionnez un rôle"
       },
@@ -623,7 +676,7 @@
     }
   },
   "enrichments": {
-    "title": "Paramètres des données augmentées",
+    "title": "Paramètres d'enrichissements",
     "birdClassification": {
       "title": "Identification des oiseaux",
       "desc": "L'identification des oiseaux est réalisée à l'aide d'un modèle TensorFlow quantifié. Lorsqu'un oiseau est reconnu, son nom commun est automatiquement ajouté comme sous-libellé. Cette information est intégréesà l'interface utilisateur, aux filtres de recherche et aux notifications."
@@ -655,7 +708,7 @@
       },
       "desc": "La recherche sémantique de Frigate vous permet de retrouver les objets suivis dans votre revue d'évènements en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement."
     },
-    "unsavedChanges": "Modifications non enregistrées des paramètres des données augmentées",
+    "unsavedChanges": "Modifications non enregistrées des paramètres d'enrichissements",
     "faceRecognition": {
       "title": "Reconnaissance faciale",
       "readTheDocumentation": "Lire la documentation",
@@ -680,8 +733,163 @@
     },
     "toast": {
       "error": "Échec de l'enregistrement des modifications de configuration : {{errorMessage}}",
-      "success": "Les paramètres de données augmentées ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
+      "success": "Les paramètres d'enrichissements ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
     },
-    "restart_required": "Redémarrage nécessaire (paramètres des données augmentées modifiés)"
+    "restart_required": "Redémarrage nécessaire (paramètres d'enrichissements modifiés)"
+  },
+  "triggers": {
+    "documentTitle": "Déclencheurs",
+    "management": {
+      "title": "Gestion des déclencheurs",
+      "desc": "Gérer les déclencheurs pour {{camera}}. Utilisez le type vignette pour déclencher à partir de vignettes similaires à l'objet suivi sélectionné. Utilisez le type description pour déclencher à partir de textes de description similaires que vous avez spécifiés."
+    },
+    "addTrigger": "Ajouter un déclencheur",
+    "table": {
+      "name": "Nom",
+      "type": "Type",
+      "content": "Contenu",
+      "threshold": "Seuil",
+      "actions": "Actions",
+      "noTriggers": "Aucun déclencheur configuré pour cette caméra.",
+      "edit": "Éditer",
+      "deleteTrigger": "Supprimer le déclencheur",
+      "lastTriggered": "Dernier déclencheur"
+    },
+    "type": {
+      "thumbnail": "Vignette",
+      "description": "Description"
+    },
+    "actions": {
+      "alert": "Marquer comme alerte",
+      "notification": "Envoyer une notification"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Créer un déclencheur",
+        "desc": "Créer un déclencheur pour la caméra {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Éditer le déclencheur",
+        "desc": "Éditer les paramètres du déclencheur de la caméra {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Supprimer le déclencheur",
+        "desc": "Êtes-vous sûr de vouloir supprimer le déclencheur <strong>{{triggerName}}</strong> ? Cette action est irréversible."
+      },
+      "form": {
+        "name": {
+          "title": "Nom",
+          "placeholder": "Entrez le nom du déclencheur",
+          "error": {
+            "minLength": "Le nom soit comporter au moins deux caractères.",
+            "invalidCharacters": "Le nom peut contenir uniquement des lettres, des nombres, des tirets bas, et des tirets.",
+            "alreadyExists": "Un déclencheur avec le même nom existe déjà pour cette caméra."
+          }
+        },
+        "enabled": {
+          "description": "Activer ou désactiver ce déclencheur"
+        },
+        "type": {
+          "title": "Type",
+          "placeholder": "Sélectionner un type de déclencheur"
+        },
+        "content": {
+          "title": "Contenu",
+          "imagePlaceholder": "Sélectionner une image",
+          "textPlaceholder": "Saisir le contenu du texte",
+          "imageDesc": "Sélectionnez une image pour déclencher cette action lorsqu'une image similaire est détectée.",
+          "textDesc": "Entrez un texte pour déclencher cette action lorsqu'une description similaire d'objet suivi est détectée.",
+          "error": {
+            "required": "Le contenu est requis."
+          }
+        },
+        "threshold": {
+          "title": "Seuil",
+          "error": {
+            "min": "Le seuil doit être au moins 0",
+            "max": "Le seuil peut être au plus 1"
+          }
+        },
+        "actions": {
+          "title": "Actions",
+          "desc": "Par défaut, Frigate publie un message MQTT à chaque déclenchement. Sélectionnez une action complémentaire à exécuter lors de ce déclenchement.",
+          "error": {
+            "min": "Au moins une action doit être sélectionnée."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Le déclencheur {{name}} a été créé avec succès.",
+        "updateTrigger": "Le déclencheur {{name}} a été mis à jour avec succès.",
+        "deleteTrigger": "Le déclencheur {{name}} a été supprimé avec succès."
+      },
+      "error": {
+        "createTriggerFailed": "Échec de la création du déclencheur : {{errorMessage}}",
+        "updateTriggerFailed": "Échec de la mise à jour du déclencheur : {{errorMessage}}",
+        "deleteTriggerFailed": "Échec de la suppression du déclencheur : {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Gestion des rôles de visionnage",
+      "desc": "Gérer les rôles personnalisés de visionnage et leurs permissions d'accès aux caméras pour cette instance de Frigate."
+    },
+    "addRole": "Ajouter un rôle",
+    "table": {
+      "role": "Rôle",
+      "cameras": "Caméras",
+      "actions": "Actions",
+      "noRoles": "Aucun rôle personnalisé trouvé.",
+      "editCameras": "Éditer les caméras",
+      "deleteRole": "Supprimer le rôle"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rôle {{role}} créé avec succès",
+        "updateCameras": "Caméras mis à jour pour le rôle {{role}}",
+        "deleteRole": "Rôle {{role}} supprimé avec succès",
+        "userRolesUpdated": "{{count}} utilisateurs affectés à ce rôle ont été mis à jour avec des droits 'visionnage', et ont accès à toutes les caméras."
+      },
+      "error": {
+        "createRoleFailed": "Échec dans la création du rôle : {{errorMessage}}",
+        "updateCamerasFailed": "Échec de la mise à jour des caméras : {{errorMessage}}",
+        "deleteRoleFailed": "Échec lors de la suppression du rôle : {{errorMessage}}",
+        "userUpdateFailed": "Echec lors de la mise à jour des rôles de l'utilisateur : {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Créer un nouveau rôle",
+        "desc": "Ajouter un nouveau rôle et définir les permissions d'accès à la caméra."
+      },
+      "editCameras": {
+        "title": "Editer les caméras du rôle",
+        "desc": "Mettre à jour les accès aux caméras pour le rôle <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Suppression du rôle",
+        "desc": "Cette action est irréversible. Elle supprimera définitivement le rôle et tous les utilisateurs associés seront affectés au rôle 'visionnage', avec un accès à toutes les caméras.",
+        "warn": "Êtes-vous sûr de vouloir supprimer <strong>{{role}}</strong> ?",
+        "deleting": "En cours de suppression..."
+      },
+      "form": {
+        "role": {
+          "title": "Nom du rôle",
+          "placeholder": "Saisissez un nom de rôle",
+          "desc": "Seuls les lettres, nombres, points et tirets bas sont autorisés.",
+          "roleIsRequired": "Un nom de rôle est requis",
+          "roleOnlyInclude": "Le nom de rôle peut uniquement contenir des lettres, nombres, . ou _",
+          "roleExists": "Un rôle avec ce nom existe déjà."
+        },
+        "cameras": {
+          "title": "Caméras",
+          "desc": "Sélectionnez les caméras auxquelles ce rôle aura accès. Au moins une caméra est requise.",
+          "required": "Au moins une caméra doit être sélectionnée."
+        }
+      }
+    }
   }
 }

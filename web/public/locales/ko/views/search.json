@@ -1,1 +1,7 @@
-{}
+{
+  "search": "검색",
+  "savedSearches": "저장된 검색들",
+  "button": {
+    "clear": "검색 초기화"
+  }
+}

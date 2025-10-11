@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from peewee import DoesNotExist
 
-from frigate.api.auth import get_current_user
+from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 from frigate.models import Event, Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
 from frigate.test.http_api.base_http_test import BaseTestHttp
@@ -20,6 +20,10 @@ class TestHttpReview(BaseTestHttp):
             return {"username": self.user_id, "role": "admin"}
 
         self.app.dependency_overrides[get_current_user] = mock_get_current_user
+
+        self.app.dependency_overrides[get_allowed_cameras_for_filter] = lambda: [
+            "front_door"
+        ]
 
     def tearDown(self):
         self.app.dependency_overrides.clear()

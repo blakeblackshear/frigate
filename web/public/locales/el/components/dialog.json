@@ -32,7 +32,19 @@
   },
   "export": {
     "time": {
-      "fromTimeline": "Επιλογή από Χρονολόγιο"
+      "fromTimeline": "Επιλογή από Χρονολόγιο",
+      "lastHour_one": "Τελευταία ώρα",
+      "lastHour_other": "Τελευταίες {{count}} Ώρες",
+      "custom": "Προσαρμοσμένο",
+      "start": {
+        "title": "Αρχή Χρόνου"
+      }
+    },
+    "select": "Επιλογή",
+    "export": "Εξαγωγή",
+    "selectOrExport": "Επιλογή ή Εξαγωγή",
+    "toast": {
+      "success": "Επιτυχής έναρξη εξαγωγής. Δείτε το αρχείο στον φάκελο /exports."
     }
   }
 }

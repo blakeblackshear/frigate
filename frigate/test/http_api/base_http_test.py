@@ -45,6 +45,9 @@ class BaseTestHttp(unittest.TestCase):
             },
         }
         self.test_stats = {
+            "camera_fps": 5.0,
+            "process_fps": 5.0,
+            "skipped_fps": 0.0,
             "detection_fps": 13.7,
             "detectors": {
                 "cpu1": {
@@ -109,7 +112,7 @@ class BaseTestHttp(unittest.TestCase):
         except OSError:
             pass
 
-    def create_app(self, stats=None):
+    def create_app(self, stats=None, event_metadata_publisher=None):
         return create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
@@ -118,6 +121,7 @@ class BaseTestHttp(unittest.TestCase):
             None,
             None,
             stats,
+            event_metadata_publisher,
             None,
         )
 
@@ -130,12 +134,13 @@ class BaseTestHttp(unittest.TestCase):
         top_score: int = 100,
         score: int = 0,
         data: Json = {},
+        camera: str = "front_door",
     ) -> Event:
         """Inserts a basic event model with a given id."""
         return Event.insert(
             id=id,
             label="Mock",
-            camera="front_door",
+            camera=camera,
             start_time=start_time,
             end_time=end_time,
             top_score=top_score,
@@ -154,15 +159,23 @@ class BaseTestHttp(unittest.TestCase):
     def insert_mock_review_segment(
         self,
         id: str,
-        start_time: float = datetime.datetime.now().timestamp(),
-        end_time: float = datetime.datetime.now().timestamp() + 20,
+        start_time: float | None = None,
+        end_time: float | None = None,
         severity: SeverityEnum = SeverityEnum.alert,
-        data: Json = {},
+        data: dict | None = None,
+        camera: str = "front_door",
     ) -> ReviewSegment:
         """Inserts a review segment model with a given id."""
+        if start_time is None:
+            start_time = datetime.datetime.now().timestamp()
+        if end_time is None:
+            end_time = start_time + 20
+        if data is None:
+            data = {}
+
         return ReviewSegment.insert(
             id=id,
-            camera="front_door",
+            camera=camera,
             start_time=start_time,
             end_time=end_time,
             severity=severity,

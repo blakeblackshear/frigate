@@ -34,5 +34,7 @@
   "detections": "Detecții",
   "detected": "detectat",
   "selected_one": "{{count}} selectate",
-  "selected_other": "{{count}} selectate"
+  "selected_other": "{{count}} selectate",
+  "suspiciousActivity": "Activitate suspectă",
+  "threateningActivity": "Activitate amenințătoare"
 }

@@ -38,8 +38,8 @@
   "deleteFaceAttempts": {
     "title": "Apagar Rostos",
     "desc_one": "Você tem certeza que quer deletar {{count}} rosto? Essa ação não pode ser desfeita.",
-    "desc_many": "Você tem certeza que quer deletar {{count}} rostos? Essa ação não pode ser desfeita.",
-    "desc_other": ""
+    "desc_many": "Você tem certeza que quer deletar os {{count}} rostos? Essa ação não pode ser desfeita.",
+    "desc_other": "Você tem certeza que quer deletar os {{count}} rostos? Essa ação não pode ser desfeita."
   },
   "renameFace": {
     "title": "Renomear Rosto",

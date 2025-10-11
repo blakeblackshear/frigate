@@ -97,7 +97,7 @@
         "label": "Keresés Forrás",
         "options": {
           "description": "Leírás",
-          "thumbnailImage": "Bélyegkép"
+          "thumbnailImage": "Indexkép"
         },
         "desc": "Válassza ki, hogy a követett objektumok bélyegképeiben vagy leírásaiban szeretne keresni."
       },
@@ -121,6 +121,16 @@
     "noLicensePlatesFound": "Rendszámtábla nem található.",
     "selectPlatesFromList": "Válasszon ki egy vagy több rendszámtáblát a listából.",
     "loading": "Felismert rendszámtáblák betöltése…",
-    "placeholder": "Kezdjen gépelni a rendszámok közötti kereséshez…"
+    "placeholder": "Kezdjen gépelni a rendszámok közötti kereséshez…",
+    "selectAll": "Mindet kijelöl",
+    "clearAll": "Mindet törli"
+  },
+  "classes": {
+    "label": "Osztályok",
+    "all": {
+      "title": "Minden Osztály"
+    },
+    "count_one": "{{count}} Osztály",
+    "count_other": "{{count}} Osztályok"
   }
 }

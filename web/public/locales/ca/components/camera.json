@@ -63,11 +63,12 @@
         "desc": "Cambia les opcions de transmissió en viu del panell de control d'aquest grup de càmeres. <em>Aquest paràmetres son específics del dispositiu/navegador.</em>",
         "stream": "Transmissió",
         "placeholder": "Seleccionar una transmissió"
-      }
+      },
+      "birdseye": "Ull d'ocell"
     },
     "success": "El grup de càmeres ({{name}}) ha estat guardat.",
     "icon": "Icona",
-    "label": "Grups de càmeres"
+    "label": "Grups de Càmeres"
   },
   "debug": {
     "options": {

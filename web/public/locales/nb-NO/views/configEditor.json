@@ -12,5 +12,7 @@
   "copyConfig": "Kopier konfigurasjonen",
   "saveAndRestart": "Lagre og omstart",
   "saveOnly": "Kun lagre",
-  "confirm": "Avslutt uten å lagre?"
+  "confirm": "Avslutt uten å lagre?",
+  "safeConfigEditor": "Konfigurasjonsredigering (Sikker modus)",
+  "safeModeDescription": "Frigate er i sikker modus grunnet en feil i validering av konfigurasjonen."
 }

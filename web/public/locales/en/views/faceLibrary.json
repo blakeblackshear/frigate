@@ -5,7 +5,6 @@
     "invalidName": "Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens."
   },
   "details": {
-    "person": "Person",
     "subLabelScore": "Sub Label Score",
     "scoreInfo": "The sub label score is the weighted score for all of the recognized face confidences, so this may differ from the score shown on the snapshot.",
     "face": "Face Details",
@@ -66,12 +65,11 @@
       "selectImage": "Please select an image file."
     },
     "dropActive": "Drop the image here…",
-    "dropInstructions": "Drag and drop an image here, or click to select",
+    "dropInstructions": "Drag and drop or paste an image here, or click to select",
     "maxSize": "Max size: {{size}}MB"
   },
   "nofaces": "No faces available",
   "pixels": "{{area}}px",
-  "readTheDocs": "Read the documentation",
   "trainFaceAs": "Train Face as:",
   "trainFace": "Train Face",
   "toast": {

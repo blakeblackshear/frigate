@@ -73,5 +73,15 @@
         "readTheDocumentation": "Lue dokumentaatio"
       }
     }
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Tallenna haku"
+    }
+  },
+  "imagePicker": {
+    "search": {
+      "placeholder": "Hae nimikkeen tai alinimikkeen mukaan..."
+    }
   }
 }

@@ -47,7 +47,7 @@
   "imageEntry": {
     "dropActive": "Déposez l'image ici…",
     "dropInstructions": "Glissez et déposez une image ici, ou cliquez pour sélectionner",
-    "maxSize": "Taille max : {{size}}MB",
+    "maxSize": "Taille max : {{size}}Mo",
     "validation": {
       "selectImage": "Veuillez sélectionner un fichier image."
     }

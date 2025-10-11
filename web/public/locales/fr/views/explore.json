@@ -41,12 +41,14 @@
         "success": {
           "regenerate": "Une nouvelle description a été demandée à {{provider}}. Selon la vitesse de votre fournisseur, la régénération de la nouvelle description peut prendre un certain temps.",
           "updatedSublabel": "Sous-libellé mis à jour avec succès.",
-          "updatedLPR": "Plaque d'immatriculation mise à jour avec succès."
+          "updatedLPR": "Plaque d'immatriculation mise à jour avec succès.",
+          "audioTranscription": "Requête de la transcription audio réussie."
         },
         "error": {
           "regenerate": "Échec de l'appel de {{provider}} pour une nouvelle description : {{errorMessage}}",
           "updatedSublabelFailed": "Échec de la mise à jour du sous-libellé : {{errorMessage}}",
-          "updatedLPRFailed": "Échec de la mise à jour de la plaque d'immatriculation : {{errorMessage}}"
+          "updatedLPRFailed": "Échec de la mise à jour de la plaque d'immatriculation : {{errorMessage}}",
+          "audioTranscription": "Échec de la requête de transcription audio : {{errorMessage}}"
         }
       },
       "tips": {
@@ -98,6 +100,9 @@
     },
     "snapshotScore": {
       "label": "Score de l'instantané"
+    },
+    "score": {
+      "label": "Score"
     }
   },
   "type": {
@@ -183,6 +188,14 @@
     },
     "deleteTrackedObject": {
       "label": "Supprimer cet objet suivi"
+    },
+    "addTrigger": {
+      "label": "Ajouter un déclencheur",
+      "aria": "Ajouter un déclencheur pour cet objet suivi"
+    },
+    "audioTranscription": {
+      "label": "Transcrire",
+      "aria": "Demander une transcription audio"
     }
   },
   "dialog": {
@@ -205,5 +218,11 @@
     },
     "tooltip": "Correspondance : {{type}} à {{confidence}}%"
   },
-  "exploreMore": "Explorer plus d'objets {{label}}"
+  "exploreMore": "Explorer plus d'objets {{label}}",
+  "aiAnalysis": {
+    "title": "Analyse IA"
+  },
+  "concerns": {
+    "label": "Préoccupations"
+  }
 }

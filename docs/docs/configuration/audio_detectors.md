@@ -50,7 +50,7 @@ cameras:
 
 ### Configuring Minimum Volume
 
-The audio detector uses volume levels in the same way that motion in a camera feed is used for object detection. This means that frigate will not run audio detection unless the audio volume is above the configured level in order to reduce resource usage. Audio levels can vary widely between camera models so it is important to run tests to see what volume levels are. MQTT explorer can be used on the audio topic to see what volume level is being detected.
+The audio detector uses volume levels in the same way that motion in a camera feed is used for object detection. This means that frigate will not run audio detection unless the audio volume is above the configured level in order to reduce resource usage. Audio levels can vary widely between camera models so it is important to run tests to see what volume levels are. The Debug view in the Frigate UI has an Audio tab for cameras that have the `audio` role assigned where a graph and the current levels are is displayed. The `min_volume` parameter should be set to the minimum the `RMS` level required to run audio detection.
 
 :::tip
 
@@ -72,3 +72,76 @@ audio:
     - speech
     - yell
 ```
+
+### Audio Transcription
+
+Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI’s open-source Whisper models via `faster-whisper`. To enable transcription, enable it in your config. Note that audio detection must also be enabled as described above in order to use audio transcription features.
+
+```yaml
+audio_transcription:
+  enabled: True
+  device: ...
+  model_size: ...
+```
+
+Disable audio transcription for select cameras at the camera level:
+
+```yaml
+cameras:
+  back_yard:
+    ...
+    audio_transcription:
+      enabled: False
+```
+
+:::note
+
+Audio detection must be enabled and configured as described above in order to use audio transcription features.
+
+:::
+
+The optional config parameters that can be set at the global level include:
+
+- **`enabled`**: Enable or disable the audio transcription feature.
+  - Default: `False`
+  - It is recommended to only configure the features at the global level, and enable it at the individual camera level.
+- **`device`**: Device to use to run transcription and translation models.
+  - Default: `CPU`
+  - This can be `CPU` or `GPU`. The `sherpa-onnx` models are lightweight and run on the CPU only. The `whisper` models can run on GPU but are only supported on CUDA hardware.
+- **`model_size`**: The size of the model used for live transcription.
+  - Default: `small`
+  - This can be `small` or `large`. The `small` setting uses `sherpa-onnx` models that are fast, lightweight, and always run on the CPU but are not as accurate as the `whisper` model.
+  - This config option applies to **live transcription only**. Recorded `speech` events will always use a different `whisper` model (and can be accelerated for CUDA hardware if available with `device: GPU`).
+- **`language`**: Defines the language used by `whisper` to translate `speech` audio events (and live audio only if using the `large` model).
+  - Default: `en`
+  - You must use a valid [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
+  - Transcriptions for `speech` events are translated.
+  - Live audio is translated only if you are using the `large` model. The `small` `sherpa-onnx` model is English-only.
+
+The only field that is valid at the camera level is `enabled`.
+
+#### Live transcription
+
+The single camera Live view in the Frigate UI supports live transcription of audio for streams defined with the `audio` role. Use the Enable/Disable Live Audio Transcription button/switch to toggle transcription processing. When speech is heard, the UI will display a black box over the top of the camera stream with text. The MQTT topic `frigate/<camera_name>/audio/transcription` will also be updated in real-time with transcribed text.
+
+Results can be error-prone due to a number of factors, including:
+
+- Poor quality camera microphone
+- Distance of the audio source to the camera microphone
+- Low audio bitrate setting in the camera
+- Background noise
+- Using the `small` model - it's fast, but not accurate for poor quality audio
+
+For speech sources close to the camera with minimal background noise, use the `small` model.
+
+If you have CUDA hardware, you can experiment with the `large` `whisper` model on GPU. Performance is not quite as fast as the `sherpa-onnx` `small` model, but live transcription is far more accurate. Using the `large` model with CPU will likely be too slow for real-time transcription.
+
+#### Transcription and translation of `speech` audio events
+
+Any `speech` events in Explore can be transcribed and/or translated through the Transcribe button in the Tracked Object Details pane.
+
+In order to use transcription and translation for past events, you must enable audio detection and define `speech` as an audio type to listen for in your config. To have `speech` events translated into the language of your choice, set the `language` config parameter with the correct [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
+
+The transcribed/translated speech will appear in the description box in the Tracked Object Details pane. If Semantic Search is enabled, embeddings are generated for the transcription text and are fully searchable using the description search type.
+
+Recorded `speech` events will always use a `whisper` model, regardless of the `model_size` config setting. Without a GPU, generating transcriptions for longer `speech` events may take a fair amount of time, so be patient.

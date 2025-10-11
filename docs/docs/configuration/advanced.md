@@ -177,9 +177,11 @@ listen [::]:5000 ipv6only=off;
 By default, Frigate runs at the root path (`/`). However some setups require to run Frigate under a custom path prefix (e.g. `/frigate`), especially when Frigate is located behind a reverse proxy that requires path-based routing.
 
 ### Set Base Path via HTTP Header
+
 The preferred way to configure the base path is through the `X-Ingress-Path` HTTP header, which needs to be set to the desired base path in an upstream reverse proxy.
 
 For example, in Nginx:
+
 ```
 location /frigate {
     proxy_set_header X-Ingress-Path /frigate;
@@ -188,9 +190,11 @@ location /frigate {
 ```
 
 ### Set Base Path via Environment Variable
+
 When it is not feasible to set the base path via a HTTP header, it can also be set via the `FRIGATE_BASE_PATH` environment variable in the Docker Compose file.
 
 For example:
+
 ```
 services:
   frigate:
@@ -200,6 +204,7 @@ services:
 ```
 
 This can be used for example to access Frigate via a Tailscale agent (https), by simply forwarding all requests to the base path (http):
+
 ```
 tailscale serve --https=443 --bg --set-path /frigate http://localhost:5000/frigate
 ```
@@ -218,7 +223,7 @@ To do this:
 
 ### Custom go2rtc version
 
-Frigate currently includes go2rtc v1.9.9, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.10, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 

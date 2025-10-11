@@ -15,5 +15,122 @@
       "title": "Visos Zonos",
       "short": "Zonos"
     }
+  },
+  "review": {
+    "showReviewed": "Rodyti Peržiūrėtus"
+  },
+  "trackedObjectDelete": {
+    "desc": "Trinant šiuos {{objectLength}} sekamus objektus taip pat pašalins momentines iškarpas, išsaugotus įterpius, priskirtus objekto gyvavimo ciklo įrašus. Šių sekamų objektų įrašyta filmuota medžiaga Istorijos vaizde ištrinta <em>NEBUS</em>.<br /><br />Ar esate įsitikinę, kad norite tęsti?<br /><br />Laikykite <em>Shift</em> norint ateityje praleisti šį pranešimą.",
+    "title": "Patvirtinkite Ištrynimą",
+    "toast": {
+      "success": "Sekami objektai sėkmingai ištrinti.",
+      "error": "Nepavyko ištrinti sekamų objektų: {{errorMessage}}"
+    }
+  },
+  "classes": {
+    "label": "Klasės",
+    "all": {
+      "title": "Visos Klasės"
+    },
+    "count_one": "{{count}} Klasė",
+    "count_other": "{{count}} Klasių"
+  },
+  "dates": {
+    "selectPreset": "Pasirinkti Nustatytą poziciją…",
+    "all": {
+      "title": "Visos Datos",
+      "short": "Datos"
+    }
+  },
+  "more": "Daugiau Filtrų",
+  "reset": {
+    "label": "Atstatyti bazines filtrų reikšmes"
+  },
+  "timeRange": "Laiko Rėžis",
+  "subLabels": {
+    "label": "Sub Etiketės",
+    "all": "Visos Sub Etiktės"
+  },
+  "score": "Balas",
+  "estimatedSpeed": "Nustatytas Greitis ({{unit}})",
+  "features": {
+    "label": "Funkcijos",
+    "hasSnapshot": "Turi Momentinę Nuotrauką",
+    "hasVideoClip": "Turi vaizdo klipą",
+    "submittedToFrigatePlus": {
+      "label": "Pateikta į Frigate+",
+      "tips": "Pradžioje turite išfiltruoti sekamus objektus su momentinėmis nuotraukomis.<br /><br />Sekami Objektai be momentinių nuotraukų negali būti pateikti į Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Rikiuoti",
+    "dateAsc": "Datos (Didėjančiai)",
+    "dateDesc": "Datos (Mažėjančiai)",
+    "scoreAsc": "Objekto Balai (Didėjančiai)",
+    "scoreDesc": "Objekto Balai (Mažėjančiai)",
+    "speedAsc": "Įvertintas Greitis (Didėjančiai)",
+    "speedDesc": "Įvertintas Greitis (Mažėjančiai)",
+    "relevance": "Aktualumą"
+  },
+  "cameras": {
+    "label": "Kamerų Filtrai",
+    "all": {
+      "title": "Visos Kameros",
+      "short": "Kameros"
+    }
+  },
+  "motion": {
+    "showMotionOnly": "Rodyti Tik Judesius"
+  },
+  "explore": {
+    "settings": {
+      "title": "Nustatymai",
+      "defaultView": {
+        "title": "Bazinis Vaizdas",
+        "summary": "Santrauka",
+        "unfilteredGrid": "Nefiltruotas Tinklelis",
+        "desc": "Kai jokie filtrai nėra parinkti, rodom santrauka naujienų sekamiems objektas pagal etiketę arba nefiltruotas tinklelis."
+      },
+      "gridColumns": {
+        "title": "Tiklelio Stulpeliai",
+        "desc": "Pasirinkti kiekį stulpelių atvaizduojant tinkleliu."
+      },
+      "searchSource": {
+        "label": "Paiškos Šaltinis",
+        "desc": "Pasirinkite kaip jūsų sekamiems objektams bus vykdoma paieška, naudojant miniatiūras ar tekstinius aprašymus.",
+        "options": {
+          "thumbnailImage": "Miniatiūros Paveikslėlis",
+          "description": "Aprašymas"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Pasirinkite datą filtravimui"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtruoti sekimo įrašų lygį",
+    "filterBySeverity": "Filtruoti įrašus pagal svarbą",
+    "loading": {
+      "title": "Kraunama",
+      "desc": "Kai įrašų puslapyje pasiekiama įrašų pabaiga, nauji įrašai atsiras automatiškai."
+    },
+    "disableLogStreaming": "Išjungti įrašų transliavimą",
+    "allLogs": "Visi įrašai"
+  },
+  "zoneMask": {
+    "filterBy": "Filtruoti naudojant zonų maskavimus"
+  },
+  "recognizedLicensePlates": {
+    "title": "Atpažinti Registracijos Numeriai",
+    "loadFailed": "Nepavyko pateikti atpažintų registracijos numerių.",
+    "loading": "Ištraukiami atpažinti registracijos numeriai…",
+    "placeholder": "Įveskite norėdami ieškoti registracijos numerių…",
+    "noLicensePlatesFound": "Registracjos numerių nerasta.",
+    "selectPlatesFromList": "Pasirinkti vieną ar daugiau numerių iš sąrašo.",
+    "selectAll": "Pasirinkti viską",
+    "clearAll": "Išvalyti viską"
   }
 }

@@ -1,5 +1,12 @@
 {
-  "filter": "フィルタ",
+  "filter": "フィルター",
   "calendar": "カレンダー",
-  "export": "エクスポート"
+  "export": "書き出し",
+  "filters": "フィルター",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "適切な時刻の範囲が選択されていません",
+      "endTimeMustAfterStartTime": "終了時刻は開始時刻より後である必要があります"
+    }
+  }
 }

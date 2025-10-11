@@ -119,5 +119,12 @@
       "markAsReviewed": "Merk som inspisert",
       "deleteNow": "Slett nå"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Velg et sporet objekts miniatyrbilde",
+    "search": {
+      "placeholder": "Søk etter (under-)merkelapp..."
+    },
+    "noImages": "Ingen miniatyrbilder funnet for dette kameraet"
   }
 }

@@ -65,7 +65,8 @@
         "title": "{{cameraName}} Streaming-instellingen",
         "stream": "Stream",
         "placeholder": "Kies een stream"
-      }
+      },
+      "birdseye": "Birdseye"
     },
     "icon": "Icon"
   },

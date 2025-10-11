@@ -7,7 +7,8 @@
       "frigate": "Frigate dnevniki - Frigate",
       "go2rtc": "Go2RTC dnevniki - Frigate",
       "nginx": "Nginx dnevniki - Frigate"
-    }
+    },
+    "enrichments": "Statistika Obogatitev - Frigate"
   },
   "logs": {
     "download": {
@@ -23,6 +24,13 @@
       "timestamp": "Časovni žig",
       "message": "Sporočilo",
       "tag": "Oznaka"
+    },
+    "tips": "Dnevniki se pretakajo s strežnika",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Napaka pri pridobivanju dnevnikov: {{errorMessage}}",
+        "whileStreamingLogs": "Napaka med pretakanjem dnevnikov: {{errorMessage}}"
+      }
     }
   },
   "storage": {
@@ -100,7 +108,67 @@
     "title": "Kamere",
     "overview": "Pregled",
     "info": {
-      "aspectRatio": "razmerje stranic"
+      "aspectRatio": "razmerje stranic",
+      "cameraProbeInfo": "{{camera}} Podrobne Informacije Kamere",
+      "streamDataFromFFPROBE": "Podatki o pretoku se pridobijo z ukazom <code>ffprobe</code>.",
+      "fetching": "Pridobivanje Podatkov Kamere",
+      "stream": "Pretok {{idx}}",
+      "video": "Video:",
+      "codec": "Kodek:",
+      "resolution": "Ločljivost:",
+      "fps": "FPS:",
+      "unknown": "Neznano",
+      "audio": "Zvok:",
+      "error": "Napaka: {{error}}",
+      "tips": {
+        "title": "Podrobne Informacije Kamere"
+      }
+    },
+    "framesAndDetections": "Okvirji / Zaznave",
+    "label": {
+      "camera": "kamera",
+      "detect": "zaznaj",
+      "skipped": "preskočeno",
+      "ffmpeg": "FFmpeg",
+      "capture": "zajemanje",
+      "overallFramesPerSecond": "skupno število sličic na sekundo (FPS)",
+      "overallDetectionsPerSecond": "skupno število zaznav na sekundo",
+      "overallSkippedDetectionsPerSecond": "skupno število preskočenih zaznav na sekundo",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} zajem",
+      "cameraDetect": "{{camName}} zaznavanje",
+      "cameraFramesPerSecond": "{{camName}} sličic na sekundo (FPS)",
+      "cameraDetectionsPerSecond": "{{camName}} detekcij na sekundo",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} preskočenih zaznav na sekundo"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Podatki sonde so bili kopirani v odložišče."
+      },
+      "error": {
+        "unableToProbeCamera": "Ni mogoče preveriti podrobnosti kamere: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Zadnja osvežitev: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} ima visoko porabo procesorja FFmpeg ({{ffmpegAvg}} %)",
+    "detectHighCpuUsage": "{{camera}} ima visoko porabo procesorja za zaznavanje ({{detectAvg}} %)",
+    "healthy": "Sistem je zdrav",
+    "reindexingEmbeddings": "Ponovno indeksiranje vdelanih elementov (embeddings) ({{processed}}% končano)",
+    "cameraIsOffline": "{{camera}} je nedosegljiva",
+    "detectIsSlow": "{{detect}} je počasen ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} je zelo počasen ({{speed}} ms)"
+  },
+  "enrichments": {
+    "title": "Obogatitve",
+    "infPerSecond": "Inference Na Sekundo",
+    "embeddings": {
+      "face_recognition": "Prepoznavanje Obrazov",
+      "plate_recognition": "Prepoznavanje Registrskih Tablic",
+      "face_recognition_speed": "Hitrost Prepoznavanja Obrazov",
+      "plate_recognition_speed": "Hitrost Prepoznavanja Registrskih Tablic",
+      "yolov9_plate_detection": "YOLOv9 Zaznavanje Registrskih Tablic"
     }
   }
 }

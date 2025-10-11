@@ -39,7 +39,15 @@
         "label": "Fă clic în cadru pentru a centra camera PTZ"
       }
     },
-    "presets": "Presetări cameră PTZ"
+    "presets": "Presetări cameră PTZ",
+    "focus": {
+      "in": {
+        "label": "Focalizează camera PTZ în interior"
+      },
+      "out": {
+        "label": "Focalizează camera PTZ în exterior"
+      }
+    }
   },
   "cameraAudio": {
     "enable": "Activează sunetul camerei",
@@ -135,7 +143,8 @@
     "recording": "Înregistrare",
     "snapshots": "Snapshot-uri",
     "audioDetection": "Detectare sunet",
-    "autotracking": "Urmărire automată"
+    "autotracking": "Urmărire automată",
+    "transcription": "Transcriere audio"
   },
   "history": {
     "label": "Afișează înregistrările istorice"
@@ -154,5 +163,9 @@
       "label": "Editează grupul de camere"
     },
     "exitEdit": "Ieși din modul de editare"
+  },
+  "transcription": {
+    "enable": "Activează transcrierea audio în timp real",
+    "disable": "Dezactivează transcrierea audio în timp real"
   }
 }

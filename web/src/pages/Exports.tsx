@@ -13,12 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 
@@ -109,6 +110,11 @@ function Exports() {
     [mutate, t],
   );
 
+  // Keyboard Listener
+
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  useKeyboardListener([], undefined, contentRef);
+
   return (
     <div className="flex size-full flex-col gap-2 overflow-hidden px-1 pt-2 md:p-2">
       <Toaster closeButton={true} />
@@ -149,7 +155,10 @@ function Exports() {
         }}
       >
         <DialogContent
-          className={cn("max-w-[80%]", isMobile && "landscape:max-w-[60%]")}
+          className={cn(
+            "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
+            isMobile && "landscape:max-w-[60%]",
+          )}
         >
           <DialogTitle className="smart-capitalize">
             {selected?.name?.replaceAll("_", " ")}
@@ -191,7 +200,10 @@ function Exports() {
 
       <div className="w-full overflow-hidden">
         {exports && filteredExports && filteredExports.length > 0 ? (
-          <div className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div
+            ref={contentRef}
+            className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
             {Object.values(exports).map((item) => (
               <ExportCard
                 key={item.name}

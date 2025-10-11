@@ -62,7 +62,8 @@
           "label": "Kompatibilitetsläge",
           "desc": "Aktivera endast det här alternativet om kamerans livestream visar färgartefakter och har en diagonal linje på höger sida av bilden."
         }
-      }
+      },
+      "birdseye": "Fågelöga"
     },
     "cameras": {
       "desc": "Välj kameror för denna guppen.",

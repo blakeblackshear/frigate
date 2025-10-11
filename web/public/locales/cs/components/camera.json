@@ -41,7 +41,8 @@
         "desc": "Změní možnosti živého vysílání pro dashboard této skupiny kamer. <em>Tato nastavení jsou specifická pro zařízení/prohlížeč.</em>",
         "stream": "Proud",
         "placeholder": "Vyberte proud"
-      }
+      },
+      "birdseye": "Ptačí oko"
     },
     "delete": {
       "confirm": {

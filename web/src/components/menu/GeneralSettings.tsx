@@ -65,6 +65,7 @@ import { useTranslation } from "react-i18next";
 import { supportedLanguageKeys } from "@/lib/const";
 
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { MdCategory } from "react-icons/md";
 
 type GeneralSettingsProps = {
   className?: string;
@@ -311,6 +312,19 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     >
                       <LuScanFace className="mr-2 size-4" />
                       <span>{t("menu.faceLibrary")}</span>
+                    </MenuItem>
+                  </Link>
+                </>
+              )}
+              {isAdmin && isMobile && (
+                <>
+                  <Link to="/classification">
+                    <MenuItem
+                      className="flex w-full items-center p-2 text-sm"
+                      aria-label={t("menu.classification")}
+                    >
+                      <MdCategory className="mr-2 size-4" />
+                      <span>{t("menu.classification")}</span>
                     </MenuItem>
                   </Link>
                 </>

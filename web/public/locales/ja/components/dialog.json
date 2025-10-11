@@ -1,9 +1,118 @@
 {
   "restart": {
-    "title": "Frigateを再起動しますか?",
+    "title": "Frigate を再起動してもよろしいですか？",
     "restarting": {
-      "title": "Frigateは再起動中です"
+      "title": "Frigate を再起動中",
+      "content": "このページは {{countdown}} 秒後に再読み込みされます。",
+      "button": "今すぐ強制再読み込み"
     },
     "button": "再起動"
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Frigate+ に送信",
+        "desc": "回避したい場所でのオブジェクトは誤検出ではありません。誤検出として送信するとモデルが混乱します。"
+      },
+      "review": {
+        "question": {
+          "label": "Frigate Plus 用ラベルの確認",
+          "ask_a": "このオブジェクトは <code>{{label}}</code> ですか？",
+          "ask_an": "このオブジェクトは <code>{{label}}</code> ですか？",
+          "ask_full": "このオブジェクトは <code>{{untranslatedLabel}}</code>（{{translatedLabel}}）ですか？"
+        },
+        "state": {
+          "submitted": "送信済み"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "履歴で表示"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "タイムラインから選択",
+      "lastHour_other": "直近{{count}}時間",
+      "custom": "カスタム",
+      "start": {
+        "title": "開始時刻",
+        "label": "開始時刻を選択"
+      },
+      "end": {
+        "title": "終了時刻",
+        "label": "終了時刻を選択"
+      }
+    },
+    "name": {
+      "placeholder": "書き出しに名前を付ける"
+    },
+    "select": "選択",
+    "export": "書き出し",
+    "selectOrExport": "選択または書き出し",
+    "toast": {
+      "success": "書き出しを開始しました。/exports フォルダでファイルを確認できます。",
+      "error": {
+        "failed": "書き出しの開始に失敗しました: {{error}}",
+        "endTimeMustAfterStartTime": "終了時間は開始時間より後である必要があります",
+        "noVaildTimeSelected": "有効な時間範囲が選択されていません"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "書き出しを保存",
+      "previewExport": "書き出しをプレビュー"
+    }
+  },
+  "streaming": {
+    "label": "ストリーム",
+    "restreaming": {
+      "disabled": "このカメラではリストリーミングは有効になっていません。",
+      "desc": {
+        "title": "このカメラで追加のライブビューと音声を利用するには go2rtc をセットアップしてください。"
+      }
+    },
+    "showStats": {
+      "label": "ストリーム統計を表示",
+      "desc": "有効にすると、カメラ映像に統計情報をオーバーレイ表示します。"
+    },
+    "debugView": "デバッグビュー"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "検索を保存",
+      "desc": "この保存済み検索の名前を入力してください。",
+      "placeholder": "検索名を入力",
+      "overwrite": "{{searchName}} は既に存在します。保存すると上書きされます。",
+      "success": "検索（{{searchName}}）を保存しました。",
+      "button": {
+        "save": {
+          "label": "この検索を保存"
+        }
+      }
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "削除の確認",
+      "desc": {
+        "selected": "このレビュー項目に関連付けられた録画動画をすべて削除してもよろしいですか？<br /><br />今後このダイアログを表示しない場合は <em>Shift</em> キーを押しながら操作してください。"
+      },
+      "toast": {
+        "success": "選択したレビュー項目に関連する動画を削除しました。",
+        "error": "削除に失敗しました: {{error}}"
+      }
+    },
+    "button": {
+      "export": "書き出し",
+      "markAsReviewed": "レビュー済みにする",
+      "deleteNow": "今すぐ削除"
+    }
+  },
+  "imagePicker": {
+    "selectImage": "追跡オブジェクトのサムネイルを選択",
+    "search": {
+      "placeholder": "ラベルまたはサブラベルで検索…"
+    },
+    "noImages": "このカメラのサムネイルは見つかりません"
   }
 }

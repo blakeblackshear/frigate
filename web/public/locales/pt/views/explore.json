@@ -2,7 +2,7 @@
   "generativeAI": "IA Generativa",
   "exploreIsUnavailable": {
     "embeddingsReindexing": {
-      "startingUp": "Iniciando…",
+      "startingUp": "A iniciar…",
       "estimatedTime": "Tempo restante estimado:",
       "finishingShortly": "Terminando em breve",
       "step": {
@@ -17,14 +17,14 @@
         "visionModel": "Modelo de visão",
         "textModel": "Modelo de texto",
         "textTokenizer": "Tokenizador de texto",
-        "visionModelFeatureExtractor": "Extrator de características de modelo de visão"
+        "visionModelFeatureExtractor": "Extrator de funcionalidade de modelo de visão"
       },
-      "context": "O Frigate está descarregando os modelos de incorporação necessários para dar suporte a funcionalidade de pesquisa semântica. Isso pode levar vários minutos, dependendo da velocidade da sua conexão de rede.",
+      "context": "O Frigate está a transferir os modelos de incorporação necessários para suportar a funcionalidade de \"Procura Semântica\". Isto pode levar vários minutos, dependendo da velocidade da sua ligação de rede.",
       "tips": {
-        "context": "Talvez você queira reindexar as incorporações dos seus objetos rastreados depois que os modelos forem descarregados.",
+        "context": "Talvez queira reindexar as incorporações dos seus objetos rastreados depois de os modelos serem transferidos.",
         "documentation": "Leia a documentação"
       },
-      "error": "Ocorreu um erro. Verifique os logs do Frigate."
+      "error": "Ocorreu um erro. Verifique os registos do Frigate."
     },
     "title": "Explorar não está disponível"
   },
@@ -43,12 +43,14 @@
         "success": {
           "regenerate": "Uma nova descrição foi solicitada pelo {{provider}}. Dependendo da velocidade do seu fornecedor, a nova descrição pode levar algum tempo para ser regenerada.",
           "updatedSublabel": "Sub-rotulo atualizado com sucesso.",
-          "updatedLPR": "Matrícula atualizada com sucesso."
+          "updatedLPR": "Matrícula atualizada com sucesso.",
+          "audioTranscription": "Transcrição de áudio solicitada com sucesso."
         },
         "error": {
           "regenerate": "Falha ao chamar {{provider}} para uma nova descrição: {{errorMessage}}",
           "updatedSublabelFailed": "Falha ao atualizar o sub-rotulo: {{errorMessage}}",
-          "updatedLPRFailed": "Falha ao atualizar a matrícula: {{errorMessage}}"
+          "updatedLPRFailed": "Falha ao atualizar a matrícula: {{errorMessage}}",
+          "audioTranscription": "Falha ao solicitar transcrição de áudio: {{errorMessage}}"
         }
       },
       "button": {
@@ -97,27 +99,30 @@
     "tips": {
       "descriptionSaved": "Descrição salva com sucesso",
       "saveDescriptionFailed": "Falha ao atualizar a descrição: {{errorMessage}}"
+    },
+    "score": {
+      "label": "Classificação"
     }
   },
-  "documentTitle": "Explorar - Frigate",
+  "documentTitle": "Frigate - Explorar",
   "trackedObjectDetails": "Detalhes do objeto rastreado",
   "type": {
     "details": "detalhes",
     "video": "vídeo",
     "object_lifecycle": "ciclo de vida do objeto",
-    "snapshot": "snapshot"
+    "snapshot": "captura de ecrã"
   },
   "objectLifecycle": {
     "title": "Ciclo de vida do objeto",
     "lifecycleItemDesc": {
       "attribute": {
         "other": "{{label}} reconhecido como {{attribute}}",
-        "faceOrLicense_plate": "{{attribute}} detectado por {{label}}"
+        "faceOrLicense_plate": "{{attribute}} detetado por {{label}}"
       },
       "gone": "{{label}} saiu",
       "heard": "{{label}} ouvido",
       "visible": "{{label}} detectado",
-      "external": "{{label}} detectado",
+      "external": "{{label}} detetado",
       "entered_zone": "{{label}} entrou em {{zones}}",
       "active": "{{label}} se tornou ativo",
       "stationary": "{{label}} se tornou estacionário",
@@ -128,7 +133,7 @@
       }
     },
     "annotationSettings": {
-      "title": "Configurações de anotação",
+      "title": "Definições de Anotação",
       "offset": {
         "documentation": "Leia a documentação ",
         "desc": "Esses dados vêm do feed de detecção da sua câmara, mas são sobrepostos nas imagens do feed de gravação. É improvável que os dois streams estejam perfeitamente sincronizados. Como resultado, a caixa delimitadora e o vídeo não se alinharão perfeitamente. No entanto, o campo <code>annotation_offset</code> pode ser usado para ajustar isso.",
@@ -140,8 +145,8 @@
         }
       },
       "showAllZones": {
-        "title": "Mostrar todas as zonas",
-        "desc": "Sempre mostrar zonas nos quadros onde os objetos entraram em uma zona."
+        "title": "Mostrar Todas as Zonas",
+        "desc": "Mostrar sempre as zonas nas imagens onde os objetos entraram numa zona."
       }
     },
     "carousel": {
@@ -150,9 +155,9 @@
     },
     "noImageFound": "Nenhuma imagem encontrada para este carimbo de data/hora.",
     "createObjectMask": "Criar Máscara de Objeto",
-    "adjustAnnotationSettings": "Ajustar configurações de anotação",
-    "autoTrackingTips": "As posições da caixa delimitadora serão imprecisas para câmeras com rastreamento automático.",
-    "scrollViewTips": "Faça scroll para ver os momentos significativos do ciclo de vida deste objeto.",
+    "adjustAnnotationSettings": "Ajustar definições de anotação",
+    "autoTrackingTips": "As posições da caixa delimitadora serão imprecisas para as câmaras com rastreamento automático.",
+    "scrollViewTips": "Deslize para ver os momentos significativos do ciclo de vida deste objeto.",
     "count": "{{first}} de {{second}}",
     "trackedPoint": "Ponto Rastreado"
   },
@@ -183,6 +188,14 @@
     },
     "deleteTrackedObject": {
       "label": "Excluir este objeto rastreado"
+    },
+    "addTrigger": {
+      "label": "Adicionar gatilho",
+      "aria": "Adicione um gatilho para este objeto rastreado"
+    },
+    "audioTranscription": {
+      "label": "Transcrever",
+      "aria": "Solicitar transcrição de áudio"
     }
   },
   "searchResult": {
@@ -205,5 +218,11 @@
   "trackedObjectsCount_one": "{{count}} objeto rastreado ",
   "trackedObjectsCount_many": "{{count}} objetos rastreados ",
   "trackedObjectsCount_other": "",
-  "exploreMore": "Explora mais objetos {{label}}"
+  "exploreMore": "Explora mais objetos {{label}}",
+  "aiAnalysis": {
+    "title": "Análise IA"
+  },
+  "concerns": {
+    "label": "Preocupações"
+  }
 }

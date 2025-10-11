@@ -1,1 +1,12 @@
-{}
+{
+  "documentTitle": {
+    "cameras": "Kamera Statistik - Frigate",
+    "storage": "Lagrings Statistik - Frigate",
+    "logs": {
+      "frigate": "Frigate Logs - Frigate",
+      "go2rtc": "Go2RTC Logs - Frigate",
+      "nginx": "Nginx Logs - Frigate"
+    }
+  },
+  "title": "System"
+}

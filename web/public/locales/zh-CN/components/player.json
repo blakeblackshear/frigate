@@ -11,7 +11,7 @@
     "title": "视频流离线",
     "desc": "未在 {{cameraName}} 的 <code>detect</code> 流上接收到任何帧，请检查错误日志"
   },
-  "cameraDisabled": "摄像机已禁用",
+  "cameraDisabled": "摄像头已禁用",
   "stats": {
     "streamType": {
       "title": "流类型：",

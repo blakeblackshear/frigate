@@ -41,7 +41,8 @@
       "title": "Detectors",
       "inferenceSpeed": "Velocitat d'inferència del detector",
       "cpuUsage": "Ús de CPU del detector",
-      "temperature": "Temperatura del detector"
+      "temperature": "Temperatura del detector",
+      "cpuUsageInformation": "CPU usada en la preparació d'entrades i sortides desde/cap als models de detecció. Aquest valor no mesura l'utilització d'inferència, encara que usis una GPU o accelerador."
     },
     "title": "General",
     "hardwareInfo": {
@@ -102,7 +103,11 @@
       },
       "percentageOfTotalUsed": "Percentatge del total"
     },
-    "overview": "Visió general"
+    "overview": "Visió general",
+    "shm": {
+      "title": "Ubicació de SHM (memória compartida)",
+      "warning": "El tamany de la SHM oh {{total}}MB es massa petita. Augmenta almenys fins a {{min_shm}}MB."
+    }
   },
   "cameras": {
     "framesAndDetections": "Fotogrames / Deteccions",
@@ -158,7 +163,8 @@
     "ffmpegHighCpuUsage": "{{camera}} te un ús elevat de CPU per FFmpeg ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} te un ús elevat de CPU per la detecció ({{detectAvg}}%)",
     "detectIsVerySlow": "{{detect}} és molt lent ({{speed}} ms)",
-    "detectIsSlow": "{{detect}} és lent ({{speed}} ms)"
+    "detectIsSlow": "{{detect}} és lent ({{speed}} ms)",
+    "shmTooLow": "/dev/shm directori ({{total}} MB) hauria de ser incrementat com a mínim {{min}} MB."
   },
   "enrichments": {
     "title": "Enriquiments",

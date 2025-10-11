@@ -208,6 +208,20 @@ Message published for each changed review item. The first message is published w
 }
 ```
 
+### `frigate/triggers`
+
+Message published when a trigger defined in a camera's `semantic_search` configuration fires.
+
+```json
+{
+  "name": "car_trigger",
+  "camera": "driveway",
+  "event_id": "1751565549.853251-b69j73",
+  "type": "thumbnail",
+  "score": 0.85
+}
+```
+
 ### `frigate/stats`
 
 Same data available at `/api/stats` published at a configurable interval.
@@ -225,6 +239,14 @@ Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
 Topic with current state of notifications. Published values are `ON` and `OFF`.
 
 ## Frigate Camera Topics
+
+### `frigate/<camera_name>/<role>/status`
+
+Publishes the current health status of each role that is enabled (`audio`, `detect`, `record`). Possible values are:
+
+- `online`: Stream is running and being processed
+- `offline`: Stream is offline and is being restarted
+- `disabled`: Camera is currently disabled
 
 ### `frigate/<camera_name>/<object_name>`
 
@@ -259,6 +281,8 @@ The height and crop of snapshots can be configured in the config.
 
 Publishes "ON" when a type of audio is detected and "OFF" when it is not for the camera for use as a sensor in Home Assistant.
 
+`all` can be used as the audio_type for the status of all audio types.
+
 ### `frigate/<camera_name>/audio/dBFS`
 
 Publishes the dBFS value for audio detected on this camera.
@@ -270,6 +294,12 @@ Publishes the dBFS value for audio detected on this camera.
 Publishes the rms value for audio detected on this camera.
 
 **NOTE:** Requires audio detection to be enabled
+
+### `frigate/<camera_name>/audio/transcription`
+
+Publishes transcribed text for audio detected on this camera.
+
+**NOTE:** Requires audio detection and transcription to be enabled
 
 ### `frigate/<camera_name>/enabled/set`
 
@@ -392,6 +422,22 @@ Topic to turn review detections for a camera on or off. Expected values are `ON`
 ### `frigate/<camera_name>/review_detections/state`
 
 Topic with current state of review detections for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/object_descriptions/set`
+
+Topic to turn generative AI object descriptions for a camera on or off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/object_descriptions/state`
+
+Topic with current state of generative AI object descriptions for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/review_descriptions/set`
+
+Topic to turn generative AI review descriptions for a camera on or off. Expected values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/review_descriptions/state`
+
+Topic with current state of generative AI review descriptions for a camera. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/birdseye/set`
 

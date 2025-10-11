@@ -21,7 +21,9 @@ class OpenAIClient(GenAIClient):
 
     def _init_provider(self):
         """Initialize the client."""
-        return OpenAI(api_key=self.genai_config.api_key)
+        return OpenAI(
+            api_key=self.genai_config.api_key, **self.genai_config.provider_options
+        )
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to OpenAI."""
@@ -64,3 +66,8 @@ class OpenAIClient(GenAIClient):
         except (TimeoutException, Exception) as e:
             logger.warning("OpenAI returned an error: %s", str(e))
             return None
+
+    def get_context_size(self) -> int:
+        """Get the context window size for OpenAI."""
+        # OpenAI GPT-4 Vision models have 128K token context window
+        return 128000

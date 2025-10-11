@@ -62,6 +62,7 @@ export default function SearchActionGroup({
 
   useKeyboardListener(["Shift"], (_, modifiers) => {
     setBypassDialog(modifiers.shift);
+    return false;
   });
 
   const handleDelete = useCallback(() => {

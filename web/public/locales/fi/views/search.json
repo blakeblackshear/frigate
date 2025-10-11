@@ -44,7 +44,14 @@
     },
     "tips": {
       "desc": {
-        "exampleLabel": "Esimerkki:"
+        "exampleLabel": "Esimerkki:",
+        "step6": "Poista suodattimet napsauttamalla niiden vieressä olevaa 'x' merkkiä.",
+        "text": "Suodattimien avulla voit rajata hakutuloksia. Näin käytät niitä syöttökentässä:",
+        "step1": "Kirjoita suodattimen avaimen nimi ja sen perään kaksoispiste (esim. ”kamerat:”).",
+        "step2": "Valitse arvo ehdotuksista tai kirjoita oma arvo.",
+        "step3": "Käytä useita suodattimia lisäämällä ne peräkkäin välilyönnillä erotettuina.",
+        "step4": "Päivämääräsuodattimet (ennen: ja jälkeen:) käyttävät {{DateFormat}} muotoa.",
+        "step5": "Aikavälin suodatin käyttää {{exampleTime}} muotoa."
       },
       "title": "Tekstisuodattimien käyttö"
     },
@@ -58,5 +65,8 @@
     "title": "Samankaltaisten kohteiden haku",
     "active": "Samankaltaisuushaku aktiivinen",
     "clear": "Poista samankaltaisuushaku"
+  },
+  "placeholder": {
+    "search": "Hae…"
   }
 }

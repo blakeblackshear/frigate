@@ -2,14 +2,12 @@
 
 import datetime
 import logging
-import multiprocessing as mp
 import os
 import shutil
-import signal
 import threading
+from multiprocessing.synchronize import Event as MpEvent
 from wsgiref.simple_server import make_server
 
-from setproctitle import setproctitle
 from ws4py.server.wsgirefserver import (
     WebSocketWSGIHandler,
     WebSocketWSGIRequestHandler,
@@ -17,15 +15,19 @@ from ws4py.server.wsgirefserver import (
 )
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.ws import WebSocket
 from frigate.config import FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
+from frigate.const import CACHE_DIR, CLIPS_DIR, PROCESS_PRIORITY_MED
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
 from frigate.util.image import SharedMemoryFrameManager, get_blank_yuv_frame
+from frigate.util.process import FrigateProcess
 
 logger = logging.getLogger(__name__)
 
@@ -70,183 +72,201 @@ def check_disabled_camera_update(
         birdseye.all_cameras_disabled()
 
 
-def output_frames(
-    config: FrigateConfig,
-):
-    threading.current_thread().name = "output"
-    setproctitle("frigate.output")
+class OutputProcess(FrigateProcess):
+    def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
+        super().__init__(
+            stop_event, PROCESS_PRIORITY_MED, name="frigate.output", daemon=True
+        )
+        self.config = config
 
-    stop_event = mp.Event()
+    def run(self) -> None:
+        self.pre_run_setup(self.config.logger)
 
-    def receiveSignal(signalNumber, frame):
-        stop_event.set()
+        frame_manager = SharedMemoryFrameManager()
 
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
+        # start a websocket server on 8082
+        WebSocketWSGIHandler.http_version = "1.1"
+        websocket_server = make_server(
+            "127.0.0.1",
+            8082,
+            server_class=WSGIServer,
+            handler_class=WebSocketWSGIRequestHandler,
+            app=WebSocketWSGIApplication(handler_cls=WebSocket),
+        )
+        websocket_server.initialize_websockets_manager()
+        websocket_thread = threading.Thread(target=websocket_server.serve_forever)
 
-    frame_manager = SharedMemoryFrameManager()
+        detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video.value)
+        config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [
+                CameraConfigUpdateEnum.add,
+                CameraConfigUpdateEnum.birdseye,
+                CameraConfigUpdateEnum.enabled,
+                CameraConfigUpdateEnum.record,
+            ],
+        )
 
-    # start a websocket server on 8082
-    WebSocketWSGIHandler.http_version = "1.1"
-    websocket_server = make_server(
-        "127.0.0.1",
-        8082,
-        server_class=WSGIServer,
-        handler_class=WebSocketWSGIRequestHandler,
-        app=WebSocketWSGIApplication(handler_cls=WebSocket),
-    )
-    websocket_server.initialize_websockets_manager()
-    websocket_thread = threading.Thread(target=websocket_server.serve_forever)
+        jsmpeg_cameras: dict[str, JsmpegCamera] = {}
+        birdseye: Birdseye | None = None
+        preview_recorders: dict[str, PreviewRecorder] = {}
+        preview_write_times: dict[str, float] = {}
+        failed_frame_requests: dict[str, int] = {}
+        last_disabled_cam_check = datetime.datetime.now().timestamp()
 
-    detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
-    config_enabled_subscriber = ConfigSubscriber("config/enabled/")
+        move_preview_frames("cache")
 
-    jsmpeg_cameras: dict[str, JsmpegCamera] = {}
-    birdseye: Birdseye | None = None
-    preview_recorders: dict[str, PreviewRecorder] = {}
-    preview_write_times: dict[str, float] = {}
-    failed_frame_requests: dict[str, int] = {}
-    last_disabled_cam_check = datetime.datetime.now().timestamp()
+        for camera, cam_config in self.config.cameras.items():
+            if not cam_config.enabled_in_config:
+                continue
 
-    move_preview_frames("cache")
-
-    for camera, cam_config in config.cameras.items():
-        if not cam_config.enabled_in_config:
-            continue
-
-        jsmpeg_cameras[camera] = JsmpegCamera(cam_config, stop_event, websocket_server)
-        preview_recorders[camera] = PreviewRecorder(cam_config)
-        preview_write_times[camera] = 0
-
-    if config.birdseye.enabled:
-        birdseye = Birdseye(config, stop_event, websocket_server)
-
-    websocket_thread.start()
-
-    while not stop_event.is_set():
-        # check if there is an updated config
-        while True:
-            (
-                updated_enabled_topic,
-                updated_enabled_config,
-            ) = config_enabled_subscriber.check_for_update()
-
-            if not updated_enabled_topic:
-                break
-
-            if updated_enabled_config:
-                camera_name = updated_enabled_topic.rpartition("/")[-1]
-                config.cameras[camera_name].enabled = updated_enabled_config.enabled
-
-        (topic, data) = detection_subscriber.check_for_update(timeout=1)
-        now = datetime.datetime.now().timestamp()
-
-        if now - last_disabled_cam_check > 5:
-            # check disabled cameras every 5 seconds
-            last_disabled_cam_check = now
-            check_disabled_camera_update(
-                config, birdseye, preview_recorders, preview_write_times
+            jsmpeg_cameras[camera] = JsmpegCamera(
+                cam_config, self.stop_event, websocket_server
             )
+            preview_recorders[camera] = PreviewRecorder(cam_config)
+            preview_write_times[camera] = 0
 
-        if not topic:
-            continue
+        if self.config.birdseye.enabled:
+            birdseye = Birdseye(self.config, self.stop_event, websocket_server)
 
-        (
-            camera,
-            frame_name,
-            frame_time,
-            current_tracked_objects,
-            motion_boxes,
-            _,
-        ) = data
+        websocket_thread.start()
 
-        if not config.cameras[camera].enabled:
-            continue
+        while not self.stop_event.is_set():
+            # check if there is an updated config
+            updates = config_subscriber.check_for_updates()
 
-        frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
+            if CameraConfigUpdateEnum.add in updates:
+                for camera in updates["add"]:
+                    jsmpeg_cameras[camera] = JsmpegCamera(
+                        cam_config, self.stop_event, websocket_server
+                    )
+                    preview_recorders[camera] = PreviewRecorder(cam_config)
+                    preview_write_times[camera] = 0
 
-        if frame is None:
-            logger.debug(f"Failed to get frame {frame_name} from SHM")
-            failed_frame_requests[camera] = failed_frame_requests.get(camera, 0) + 1
+                    if (
+                        self.config.birdseye.enabled
+                        and self.config.cameras[camera].birdseye.enabled
+                    ):
+                        birdseye.add_camera(camera)
 
-            if failed_frame_requests[camera] > config.cameras[camera].detect.fps:
-                logger.warning(
-                    f"Failed to retrieve many frames for {camera} from SHM, consider increasing SHM size if this continues."
+            (topic, data) = detection_subscriber.check_for_update(timeout=1)
+            now = datetime.datetime.now().timestamp()
+
+            if now - last_disabled_cam_check > 5:
+                # check disabled cameras every 5 seconds
+                last_disabled_cam_check = now
+                check_disabled_camera_update(
+                    self.config, birdseye, preview_recorders, preview_write_times
                 )
 
-            continue
-        else:
-            failed_frame_requests[camera] = 0
+            if not topic:
+                continue
 
-        # send frames for low fps recording
-        preview_recorders[camera].write_data(
-            current_tracked_objects, motion_boxes, frame_time, frame
-        )
-        preview_write_times[camera] = frame_time
-
-        # send camera frame to ffmpeg process if websockets are connected
-        if any(
-            ws.environ["PATH_INFO"].endswith(camera) for ws in websocket_server.manager
-        ):
-            # write to the converter for the camera if clients are listening to the specific camera
-            jsmpeg_cameras[camera].write_frame(frame.tobytes())
-
-        # send output data to birdseye if websocket is connected or restreaming
-        if config.birdseye.enabled and (
-            config.birdseye.restream
-            or any(
-                ws.environ["PATH_INFO"].endswith("birdseye")
-                for ws in websocket_server.manager
-            )
-        ):
-            birdseye.write_data(
+            (
                 camera,
+                frame_name,
+                frame_time,
                 current_tracked_objects,
                 motion_boxes,
-                frame_time,
-                frame,
+                _,
+            ) = data
+
+            if not self.config.cameras[camera].enabled:
+                continue
+
+            frame = frame_manager.get(
+                frame_name, self.config.cameras[camera].frame_shape_yuv
             )
 
-        frame_manager.close(frame_name)
+            if frame is None:
+                logger.debug(f"Failed to get frame {frame_name} from SHM")
+                failed_frame_requests[camera] = failed_frame_requests.get(camera, 0) + 1
 
-    move_preview_frames("clips")
+                if (
+                    failed_frame_requests[camera]
+                    > self.config.cameras[camera].detect.fps
+                ):
+                    logger.warning(
+                        f"Failed to retrieve many frames for {camera} from SHM, consider increasing SHM size if this continues."
+                    )
 
-    while True:
-        (topic, data) = detection_subscriber.check_for_update(timeout=0)
+                continue
+            else:
+                failed_frame_requests[camera] = 0
 
-        if not topic:
-            break
+            # send frames for low fps recording
+            preview_recorders[camera].write_data(
+                current_tracked_objects, motion_boxes, frame_time, frame
+            )
+            preview_write_times[camera] = frame_time
 
-        (
-            camera,
-            frame_name,
-            frame_time,
-            current_tracked_objects,
-            motion_boxes,
-            regions,
-        ) = data
+            # send camera frame to ffmpeg process if websockets are connected
+            if any(
+                ws.environ["PATH_INFO"].endswith(camera)
+                for ws in websocket_server.manager
+            ):
+                # write to the converter for the camera if clients are listening to the specific camera
+                jsmpeg_cameras[camera].write_frame(frame.tobytes())
 
-        frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
-        frame_manager.close(frame_name)
+            # send output data to birdseye if websocket is connected or restreaming
+            if self.config.birdseye.enabled and (
+                self.config.birdseye.restream
+                or any(
+                    ws.environ["PATH_INFO"].endswith("birdseye")
+                    for ws in websocket_server.manager
+                )
+            ):
+                birdseye.write_data(
+                    camera,
+                    current_tracked_objects,
+                    motion_boxes,
+                    frame_time,
+                    frame,
+                )
 
-    detection_subscriber.stop()
+            frame_manager.close(frame_name)
 
-    for jsmpeg in jsmpeg_cameras.values():
-        jsmpeg.stop()
+        move_preview_frames("clips")
 
-    for preview in preview_recorders.values():
-        preview.stop()
+        while True:
+            (topic, data) = detection_subscriber.check_for_update(timeout=0)
 
-    if birdseye is not None:
-        birdseye.stop()
+            if not topic:
+                break
 
-    config_enabled_subscriber.stop()
-    websocket_server.manager.close_all()
-    websocket_server.manager.stop()
-    websocket_server.manager.join()
-    websocket_server.shutdown()
-    websocket_thread.join()
-    logger.info("exiting output process...")
+            (
+                camera,
+                frame_name,
+                frame_time,
+                current_tracked_objects,
+                motion_boxes,
+                regions,
+            ) = data
+
+            frame = frame_manager.get(
+                frame_name, self.config.cameras[camera].frame_shape_yuv
+            )
+            frame_manager.close(frame_name)
+
+        detection_subscriber.stop()
+
+        for jsmpeg in jsmpeg_cameras.values():
+            jsmpeg.stop()
+
+        for preview in preview_recorders.values():
+            preview.stop()
+
+        if birdseye is not None:
+            birdseye.stop()
+
+        config_subscriber.stop()
+        websocket_server.manager.close_all()
+        websocket_server.manager.stop()
+        websocket_server.manager.join()
+        websocket_server.shutdown()
+        websocket_thread.join()
+        logger.info("exiting output process...")
 
 
 def move_preview_frames(loc: str):

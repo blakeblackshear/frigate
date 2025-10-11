@@ -1,4 +1,8 @@
 {
   "alerts": "अलर्टस",
-  "detections": "खोजें"
+  "detections": "खोजें",
+  "motion": {
+    "label": "गति",
+    "only": "केवल गति"
+  }
 }
