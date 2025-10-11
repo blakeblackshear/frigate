@@ -151,7 +151,31 @@
     "review": {
       "title": "Recenzia",
       "desc": "Dočasne povoliť/zakázať upozornenia a detekcie pre túto kameru, kým sa Frigate nereštartuje. Po zakázaní sa nebudú generovať žiadne nové položky kontroly. ",
-      "alerts": "Upozornenia "
+      "alerts": "Upozornenia ",
+      "detections": "Detekcie "
+    },
+    "object_descriptions": {
+      "title": "Generatívne popisy objektov umelej inteligencie",
+      "desc": "Dočasne povoliť/zakázať generatívne popisy objektov AI pre túto kameru. Ak je táto funkcia zakázaná, pre sledované objekty na tejto kamere sa nebudú vyžadovať popisy generované AI."
+    },
+    "review_descriptions": {
+      "title": "Popisy generatívnej umelej inteligencie",
+      "desc": "Dočasne povoliť/zakázať generatívne popisy kontroly pomocou umelej inteligencie pre túto kameru. Ak je táto funkcia zakázaná, popisy generované umelou inteligenciou sa nebudú vyžadovať pre položky kontroly v tejto kamere."
+    },
+    "reviewClassification": {
+      "title": "Preskúmať klasifikáciu",
+      "desc": "Frigate kategorizuje položky recenzií ako Upozornenia a Detekcie. Predvolene sa všetky objekty typu <em>osoba</em> a <em>auto</em> považujú za Upozornenia. Kategorizáciu položiek recenzií môžete spresniť konfiguráciou požadovaných zón pre ne.",
+      "noDefinedZones": "Pre túto kameru nie sú definované žiadne zóny.",
+      "objectAlertsTips": "Všetky objekty {{alertsLabels}} na {{cameraName}} sa zobrazia ako Upozornenia.",
+      "zoneObjectAlertsTips": "Všetky objekty {{alertsLabels}} detekované v {{zone}} na {{cameraName}} budú zobrazené ako Upozornenia.",
+      "objectDetectionsTips": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{cameraName}}, sa zobrazia ako detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú.",
+      "zoneObjectDetectionsTips": {
+        "text": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{zone}} na kamere {{cameraName}}, budú zobrazené ako detekcie.",
+        "notSelectDetections": "Všetky objekty typu {{detectionsLabels}} detekované v zóne {{zone}} na kamere {{cameraName}}, ktoré nie sú zaradené do kategórie Upozornenia, sa zobrazia ako Detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú.",
+        "regardlessOfZoneObjectDetectionsTips": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{cameraName}}, sa zobrazia ako detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú."
+      },
+      "unsavedChanges": "Neuložené nastavenia klasifikácie recenzií pre {{camera}}",
+      "selectAlertsZones": "Vyberte podobné sledované objekty"
     }
   }
 }
