@@ -44,6 +44,8 @@ import { useResizeObserver } from "@/hooks/resize-observer";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { useTranslation } from "react-i18next";
+import { EmptyCard } from "@/components/card/EmptyCard";
+import { BsFillCameraVideoOffFill } from "react-icons/bs";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -352,6 +354,10 @@ export default function LiveDashboardView({
     onSaveMuting(true);
   };
 
+  if (cameras.length == 0) {
+    return <NoCameraView />;
+  }
+
   return (
     <div
       className="scrollbar-container size-full select-none overflow-y-auto px-1 pt-2 md:p-2"
@@ -605,6 +611,19 @@ export default function LiveDashboardView({
           toggleFullscreen={toggleFullscreen}
         />
       )}
+    </div>
+  );
+}
+
+function NoCameraView() {
+  return (
+    <div className="flex size-full items-center justify-center">
+      <EmptyCard
+        icon={<BsFillCameraVideoOffFill className="size-8" />}
+        title="No Cameras Set Up"
+        description="Get started by connecting a camera."
+        buttonText="Add Camera"
+      />
     </div>
   );
 }
