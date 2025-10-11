@@ -80,18 +80,7 @@ DEFAULT_CONFIG = """
 mqtt:
   enabled: False
 
-cameras:
-  name_of_your_camera: # <------ Name the camera
-    enabled: True
-    ffmpeg:
-      inputs:
-        - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
-          roles:
-            - detect
-    detect:
-      enabled: False # <---- disable detection until you have a working camera feed
-      width: 1280
-      height: 720
+cameras: {}  # No cameras defined, UI wizard should be used
 """
 
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
