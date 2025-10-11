@@ -82,6 +82,14 @@
     "length": {
       "feet": "feet",
       "meters": "meters"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB / h",
+      "mbph": "MB / h",
+      "gbph": "GB / hour"
     }
   },
   "label": {
