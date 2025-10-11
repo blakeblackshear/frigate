@@ -263,5 +263,8 @@
     }
   },
   "selectItem": "Välj {{item}}",
-  "readTheDocumentation": "Läs dokumentationen"
+  "readTheDocumentation": "Läs dokumentationen",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }
