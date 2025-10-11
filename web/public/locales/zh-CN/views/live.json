@@ -134,6 +134,9 @@
     "playInBackground": {
       "label": "后台播放",
       "tips": "启用此选项可在播放器隐藏时继续视频流播放。"
+    },
+    "debug": {
+      "picker": "调试模式下无法切换视频流。调试将始终使用检测（detect）功能的视频流。"
     }
   },
   "cameraSettings": {

@@ -23,7 +23,8 @@
     "notifications": "通知",
     "frigateplus": "Frigate+",
     "enrichments": "增强功能",
-    "triggers": "触发器"
+    "triggers": "触发器",
+    "roles": "权限组"
   },
   "dialog": {
     "unsavedChanges": {
@@ -810,6 +811,11 @@
           "error": {
             "min": "必须至少选择一项动作。"
           }
+        },
+        "friendly_name": {
+          "title": "友好名称",
+          "placeholder": "为此触发器命名或添加描述",
+          "description": "（可选）为触发器添加友好名称或描述。"
         }
       }
     },
@@ -824,6 +830,10 @@
         "updateTriggerFailed": "更新触发器失败：{{errorMessage}}",
         "deleteTriggerFailed": "删除触发器失败：{{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "语义搜索已关闭",
+      "desc": "必须启用语义搜索功能才能使用触发器。"
     }
   },
   "roles": {
@@ -879,7 +889,9 @@
           "roleExists": "该权限组名称已存在。"
         },
         "cameras": {
-          "title": "摄像头"
+          "title": "摄像头",
+          "desc": "请选择该权限组能够访问的摄像头。至少需要选择一个摄像头。",
+          "required": "至少要选择一个摄像头。"
         }
       }
     }

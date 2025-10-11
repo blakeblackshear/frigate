@@ -66,7 +66,8 @@
         },
         "stream": "视频流",
         "placeholder": "选择视频流"
-      }
+      },
+      "birdseye": "鸟瞰图"
     }
   },
   "debug": {

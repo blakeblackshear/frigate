@@ -266,5 +266,8 @@
     "desc": "页面未找到"
   },
   "selectItem": "选择 {{item}}",
-  "readTheDocumentation": "阅读文档"
+  "readTheDocumentation": "阅读文档",
+  "information": {
+    "pixels": "{{area}} 像素"
+  }
 }
