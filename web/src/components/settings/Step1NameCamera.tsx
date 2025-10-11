@@ -21,7 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback, useMemo } from "react";
-import { LuCircleCheck, LuEye, LuEyeOff } from "react-icons/lu";
+import { LuEye, LuEyeOff } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import axios from "axios";
 import { toast } from "sonner";
@@ -34,21 +34,24 @@ import {
   CAMERA_BRAND_VALUES,
   TestResult,
   FfprobeStream,
+  StreamRole,
+  StreamConfig,
 } from "@/types/cameraWizard";
+import { FaCircleCheck } from "react-icons/fa6";
 
 type Step1NameCameraProps = {
   wizardData: Partial<WizardFormData>;
   onUpdate: (data: Partial<WizardFormData>) => void;
+  onNext: (data?: Partial<WizardFormData>) => void;
   onCancel: () => void;
-  onNext?: () => void;
   canProceed?: boolean;
 };
 
 export default function Step1NameCamera({
   wizardData,
   onUpdate,
-  onCancel,
   onNext,
+  onCancel,
 }: Step1NameCameraProps) {
   const { t } = useTranslation(["views/settings"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -143,7 +146,7 @@ export default function Step1NameCamera({
     const streamUrl = generateStreamUrl(data);
 
     if (!streamUrl) {
-      toast.error(t("cameraWizard.step1.errors.noUrl"));
+      toast.error(t("cameraWizard.commonErrors.noUrl"));
       return;
     }
 
@@ -191,13 +194,13 @@ export default function Step1NameCamera({
         const ffprobeData = probeData.stdout;
         const streams = ffprobeData.streams || [];
 
-        // Extract video stream info
         const videoStream = streams.find(
           (s: FfprobeStream) =>
             s.codec_type === "video" ||
             s.codec_name?.includes("h264") ||
             s.codec_name?.includes("h265"),
         );
+
         const audioStream = streams.find(
           (s: FfprobeStream) =>
             s.codec_type === "audio" ||
@@ -205,7 +208,6 @@ export default function Step1NameCamera({
             s.codec_name?.includes("mp3"),
         );
 
-        // Calculate resolution
         const resolution = videoStream
           ? `${videoStream.width}x${videoStream.height}`
           : undefined;
@@ -243,7 +245,7 @@ export default function Step1NameCamera({
           success: false,
           error: error,
         });
-        toast.error(t("cameraWizard.step1.testFailed", { error }));
+        toast.error(t("cameraWizard.commonErrors.testFailed", { error }));
       }
     } catch (error) {
       const axiosError = error as {
@@ -259,7 +261,9 @@ export default function Step1NameCamera({
         success: false,
         error: errorMessage,
       });
-      toast.error(t("cameraWizard.step1.testFailed", { error: errorMessage }));
+      toast.error(
+        t("cameraWizard.commonErrors.testFailed", { error: errorMessage }),
+      );
     } finally {
       setIsTesting(false);
     }
@@ -268,6 +272,28 @@ export default function Step1NameCamera({
   const onSubmit = (data: z.infer<typeof step1FormData>) => {
     onUpdate(data);
   };
+
+  const handleContinue = useCallback(() => {
+    const data = form.getValues();
+    const streamUrl = generateStreamUrl(data);
+    const streamId = `stream_${Date.now()}`;
+
+    const streamConfig: StreamConfig = {
+      id: streamId,
+      url: streamUrl,
+      roles: ["detect" as StreamRole],
+      resolution: testResult?.resolution,
+      testResult: testResult || undefined,
+      userTested: false,
+    };
+
+    const updatedData = {
+      ...data,
+      streams: [streamConfig],
+    };
+
+    onNext(updatedData);
+  }, [form, generateStreamUrl, testResult, onNext]);
 
   return (
     <div className="space-y-6">
@@ -451,7 +477,7 @@ export default function Step1NameCamera({
       {testResult?.success && (
         <div className="p-4">
           <div className="mb-3 flex flex-row items-center gap-2 text-sm font-medium text-success">
-            <LuCircleCheck />
+            <FaCircleCheck className="size-4" />
             {t("cameraWizard.step1.testSuccess")}
           </div>
 
@@ -473,7 +499,7 @@ export default function Step1NameCamera({
               {testResult.resolution && (
                 <div>
                   <span className="text-secondary-foreground">
-                    {t("cameraWizard.step1.testResultLabels.resolution")}:
+                    {t("cameraWizard.testResultLabels.resolution")}:
                   </span>{" "}
                   <span className="text-primary">{testResult.resolution}</span>
                 </div>
@@ -481,7 +507,7 @@ export default function Step1NameCamera({
               {testResult.videoCodec && (
                 <div>
                   <span className="text-secondary-foreground">
-                    {t("cameraWizard.step1.testResultLabels.video")}:
+                    {t("cameraWizard.testResultLabels.video")}:
                   </span>{" "}
                   <span className="text-primary">{testResult.videoCodec}</span>
                 </div>
@@ -489,7 +515,7 @@ export default function Step1NameCamera({
               {testResult.audioCodec && (
                 <div>
                   <span className="text-secondary-foreground">
-                    {t("cameraWizard.step1.testResultLabels.audio")}:
+                    {t("cameraWizard.testResultLabels.audio")}:
                   </span>{" "}
                   <span className="text-primary">{testResult.audioCodec}</span>
                 </div>
@@ -497,7 +523,7 @@ export default function Step1NameCamera({
               {testResult.fps && (
                 <div>
                   <span className="text-secondary-foreground">
-                    {t("cameraWizard.step1.testResultLabels.fps")}:
+                    {t("cameraWizard.testResultLabels.fps")}:
                   </span>{" "}
                   <span className="text-primary">{testResult.fps}</span>
                 </div>
@@ -520,27 +546,7 @@ export default function Step1NameCamera({
         {testResult?.success ? (
           <Button
             type="button"
-            onClick={() => {
-              // Auto-populate stream and proceed to next step
-              const data = form.getValues();
-              const streamUrl = generateStreamUrl(data);
-
-              const streamId = `stream_${Date.now()}`;
-              onUpdate({
-                ...data,
-                streams: [
-                  {
-                    id: streamId,
-                    url: streamUrl,
-                    roles: ["detect"],
-                    resolution: testResult.resolution,
-                    testResult: testResult || undefined,
-                  },
-                ],
-              });
-
-              onNext?.();
-            }}
+            onClick={handleContinue}
             variant="select"
             className="flex items-center justify-center gap-2 sm:flex-1"
           >
