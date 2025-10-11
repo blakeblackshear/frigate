@@ -616,13 +616,15 @@ export default function LiveDashboardView({
 }
 
 function NoCameraView() {
+  const { t } = useTranslation(["views/live"]);
+
   return (
     <div className="flex size-full items-center justify-center">
       <EmptyCard
         icon={<BsFillCameraVideoOffFill className="size-8" />}
-        title="No Cameras Set Up"
-        description="Get started by connecting a camera."
-        buttonText="Add Camera"
+        title={t("noCameras.title")}
+        description={t("noCameras.description")}
+        buttonText={t("noCameras.buttonText")}
       />
     </div>
   );
