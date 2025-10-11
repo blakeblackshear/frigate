@@ -116,6 +116,7 @@ const sidebars: SidebarsConfig = {
         items: frigateHttpApiSidebar,
       },
       "integrations/mqtt",
+      "integrations/homekit",
       "configuration/metrics",
       "integrations/third_party_extensions",
     ],
