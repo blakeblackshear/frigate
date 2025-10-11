@@ -92,7 +92,7 @@ export type WizardFormData = {
   brandTemplate?: CameraBrand;
   customUrl?: string;
   streams?: StreamConfig[];
-  liveViewStreamIds?: string[];
+  restreamIds?: string[];
 };
 
 // API Response Types
