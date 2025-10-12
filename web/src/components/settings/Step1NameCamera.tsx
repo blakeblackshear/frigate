@@ -39,6 +39,12 @@ import {
 } from "@/types/cameraWizard";
 import { FaCircleCheck } from "react-icons/fa6";
 import { Card, CardContent, CardTitle } from "../ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { LuInfo } from "react-icons/lu";
 
 type Step1NameCameraProps = {
   wizardData: Partial<WizardFormData>;
@@ -71,12 +77,15 @@ export default function Step1NameCamera({
     .object({
       cameraName: z
         .string()
-        .min(1, "Camera name is required")
-        .max(64, "Camera name must be 64 characters or less")
-        .regex(/^[a-zA-Z0-9\s_-]+$/, "Camera name contains invalid characters")
+        .min(1, t("cameraWizard.step1.errors.nameRequired"))
+        .max(64, t("cameraWizard.step1.errors.nameLength"))
+        .regex(
+          /^[a-zA-Z0-9\s_-]+$/,
+          t("cameraWizard.step1.errors.invalidCharacters"),
+        )
         .refine(
           (value) => !existingCameraNames.includes(value),
-          "Camera name already exists",
+          t("cameraWizard.step1.errors.nameExists"),
         ),
       host: z.string().optional(),
       username: z.string().optional(),
@@ -357,9 +366,29 @@ export default function Step1NameCamera({
                         const selectedBrand = CAMERA_BRANDS.find(
                           (brand) => brand.value === field.value,
                         );
-                        return selectedBrand ? (
+                        return selectedBrand &&
+                          selectedBrand.value != "other" ? (
                           <FormDescription className="mt-1 pt-0.5 text-xs text-muted-foreground">
-                            {selectedBrand.exampleUrl}
+                            <Popover>
+                              <PopoverTrigger>
+                                <div className="flex flex-row items-center gap-0.5 text-xs text-muted-foreground hover:text-primary">
+                                  <LuInfo className="mr-1 size-3" />
+                                  {t("cameraWizard.step1.brandInformation")}
+                                </div>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80">
+                                <div className="space-y-2">
+                                  <h4 className="font-medium">
+                                    {selectedBrand.label}
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {t("cameraWizard.step1.brandUrlFormat", {
+                                      exampleUrl: selectedBrand.exampleUrl,
+                                    })}
+                                  </p>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
                           </FormDescription>
                         ) : null;
                       })()}

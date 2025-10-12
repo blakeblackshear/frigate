@@ -164,7 +164,7 @@
     "step1": {
       "description": "Enter your camera details and test the connection.",
       "cameraName": "Camera Name",
-      "cameraNamePlaceholder": "e.g., front_door",
+      "cameraNamePlaceholder": "e.g., front_door or Back Yard Overview",
       "host": "Host/IP Address",
       "port": "Port",
       "username": "Username",
@@ -175,6 +175,8 @@
       "cameraBrand": "Camera Brand",
       "selectBrand": "Select camera brand for URL template",
       "customUrl": "Custom Stream URL",
+      "brandInformation": "Brand information",
+      "brandUrlFormat": "For cameras with the RTSP URL format as: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://username:password@host:port/path",
       "testConnection": "Test Connection",
       "testSuccess": "Connection test successful!",
@@ -184,7 +186,11 @@
         "noSnapshot": "Unable to fetch a snapshot from the configured stream."
       },
       "errors": {
-        "brandOrCustomUrlRequired": "Either select a camera brand with host/IP or choose 'Other' with a custom URL"
+        "brandOrCustomUrlRequired": "Either select a camera brand with host/IP or choose 'Other' with a custom URL",
+        "nameRequired": "Camera name is required",
+        "nameLength": "Camera name must be 64 characters or less",
+        "invalidCharacters": "Camera name contains invalid characters",
+        "nameExists": "Camera name already exists"
       }
     },
     "step2": {
@@ -292,8 +298,8 @@
       "description": "Configure camera settings including stream inputs and roles.",
       "name": "Camera Name",
       "nameRequired": "Camera name is required",
-      "nameLength": "Camera name must be less than 24 characters.",
-      "namePlaceholder": "e.g., front_door",
+      "nameLength": "Camera name must be less than 64 characters.",
+      "namePlaceholder": "e.g., front_door or Back Yard Overview",
       "enabled": "Enabled",
       "ffmpeg": {
         "inputs": "Input Streams",

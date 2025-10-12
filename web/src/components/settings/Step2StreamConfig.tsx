@@ -226,7 +226,7 @@ export default function Step2StreamConfig({
                       {[
                         stream.testResult.resolution,
                         stream.testResult.fps
-                          ? `${stream.testResult.fps} fps`
+                          ? `${stream.testResult.fps} ${t("cameraWizard.testResultLabels.fps")}`
                           : null,
                         stream.testResult.videoCodec,
                         stream.testResult.audioCodec,
