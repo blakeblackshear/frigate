@@ -71,7 +71,6 @@ class LibvaGpuSelector:
             return f"-hwaccel_device {self._valid_gpus[0]}"
 
 
-
 FPS_VFR_PARAM = "-fps_mode vfr" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-vsync 2"
 TIMEOUT_PARAM = "-timeout" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-stimeout"
 
