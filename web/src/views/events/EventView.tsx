@@ -135,11 +135,11 @@ export default function EventView({
 
   // review interaction
 
-  const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
+  const [selectedReviews, setSelectedReviews] = useState<ReviewSegment[]>([]);
   const onSelectReview = useCallback(
     (review: ReviewSegment, ctrl: boolean) => {
       if (selectedReviews.length > 0 || ctrl) {
-        const index = selectedReviews.indexOf(review.id);
+        const index = selectedReviews.findIndex((r) => r.id === review.id);
 
         if (index != -1) {
           if (selectedReviews.length == 1) {
@@ -153,7 +153,7 @@ export default function EventView({
           }
         } else {
           const copy = [...selectedReviews];
-          copy.push(review.id);
+          copy.push(review);
           setSelectedReviews(copy);
         }
       } else {
@@ -175,7 +175,7 @@ export default function EventView({
     }
 
     if (selectedReviews.length < currentReviewItems.length) {
-      setSelectedReviews(currentReviewItems.map((seg) => seg.id));
+      setSelectedReviews(currentReviewItems);
     } else {
       setSelectedReviews([]);
     }
@@ -429,7 +429,7 @@ type DetectionReviewProps = {
   currentItems: ReviewSegment[] | null;
   itemsToReview?: number;
   relevantPreviews?: Preview[];
-  selectedReviews: string[];
+  selectedReviews: ReviewSegment[];
   severity: ReviewSeverity;
   filter?: ReviewFilter;
   timeRange: { before: number; after: number };
@@ -439,7 +439,7 @@ type DetectionReviewProps = {
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
   onSelectAllReviews: () => void;
-  setSelectedReviews: (reviewIds: string[]) => void;
+  setSelectedReviews: (reviews: ReviewSegment[]) => void;
   pullLatestData: () => void;
 };
 function DetectionReview({
@@ -667,7 +667,7 @@ function DetectionReview({
         case "r":
           if (selectedReviews.length > 0 && !modifiers.repeat) {
             currentItems?.forEach((item) => {
-              if (selectedReviews.includes(item.id)) {
+              if (selectedReviews.some((r) => r.id === item.id)) {
                 item.has_been_reviewed = true;
                 markItemAsReviewed(item);
               }
@@ -723,7 +723,7 @@ function DetectionReview({
         >
           {!loading && currentItems
             ? currentItems.map((value) => {
-                const selected = selectedReviews.includes(value.id);
+                const selected = selectedReviews.some((r) => r.id === value.id);
 
                 return (
                   <div
