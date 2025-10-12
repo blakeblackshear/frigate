@@ -334,7 +334,12 @@ export default function CameraWizardDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-h-[90dvh] max-w-4xl overflow-y-auto">
+      <DialogContent
+        className="max-h-[90dvh] max-w-4xl overflow-y-auto"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+      >
         <StepIndicator
           steps={STEPS}
           currentStep={currentStep}
