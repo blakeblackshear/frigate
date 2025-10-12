@@ -220,7 +220,17 @@
       "notConnected": "Not Connected",
       "featuresTitle": "Features",
       "go2rtc": "Reduce connections to camera",
-      "detectRoleWarning": "At least one stream must have the \"detect\" role to proceed."
+      "detectRoleWarning": "At least one stream must have the \"detect\" role to proceed.",
+      "rolesPopover": {
+        "title": "Stream Roles",
+        "detect": "Main feed for object detection.",
+        "record": "Saves segments of the video feed based on configuration settings.",
+        "audio": "Feed for audio based detection."
+      },
+      "featuresPopover": {
+        "title": "Stream Features",
+        "description": "Use go2rtc restreaming to reduce connections to your camera."
+      }
     },
     "step3": {
       "description": "Final validation and bandwidth analysis before saving your camera configuration.",

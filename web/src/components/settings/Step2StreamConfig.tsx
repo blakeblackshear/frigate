@@ -17,6 +17,14 @@ import {
 } from "@/types/cameraWizard";
 import { Label } from "../ui/label";
 import { FaCircleCheck } from "react-icons/fa6";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { LuInfo, LuExternalLink } from "react-icons/lu";
+import { Link } from "react-router-dom";
+import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type Step2StreamConfigProps = {
   wizardData: Partial<WizardFormData>;
@@ -33,7 +41,8 @@ export default function Step2StreamConfig({
   onNext,
   canProceed,
 }: Step2StreamConfigProps) {
-  const { t } = useTranslation(["views/settings"]);
+  const { t } = useTranslation(["views/settings", "components/dialog"]);
+  const { getLocaleDocUrl } = useDocDomain();
   const [testingStreams, setTestingStreams] = useState<Set<string>>(new Set());
 
   const streams = useMemo(() => wizardData.streams || [], [wizardData.streams]);
@@ -312,7 +321,50 @@ export default function Step2StreamConfig({
                 )}
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Roles</Label>
+                <div className="flex items-center gap-1">
+                  <Label className="text-sm font-medium">
+                    {t("cameraWizard.step2.roles")}
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                        <LuInfo className="size-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 text-xs">
+                      <div className="space-y-2">
+                        <div className="font-medium">
+                          {t("cameraWizard.step2.rolesPopover.title")}
+                        </div>
+                        <div className="space-y-1 text-muted-foreground">
+                          <div>
+                            <strong>detect</strong> -{" "}
+                            {t("cameraWizard.step2.rolesPopover.detect")}
+                          </div>
+                          <div>
+                            <strong>record</strong> -{" "}
+                            {t("cameraWizard.step2.rolesPopover.record")}
+                          </div>
+                          <div>
+                            <strong>audio</strong> -{" "}
+                            {t("cameraWizard.step2.rolesPopover.audio")}
+                          </div>
+                        </div>
+                        <div className="mt-3 flex items-center text-primary">
+                          <Link
+                            to={getLocaleDocUrl("configuration/cameras")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline"
+                          >
+                            {t("readTheDocumentation", { ns: "common" })}
+                            <LuExternalLink className="ml-2 inline-flex size-3" />
+                          </Link>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
                 <div className="rounded-lg bg-background p-3">
                   <div className="flex flex-wrap gap-2">
                     {(["detect", "record", "audio"] as const).map((role) => {
@@ -339,9 +391,41 @@ export default function Step2StreamConfig({
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  {t("cameraWizard.step2.featuresTitle")}
-                </Label>
+                <div className="flex items-center gap-1">
+                  <Label className="text-sm font-medium">
+                    {t("cameraWizard.step2.featuresTitle")}
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                        <LuInfo className="size-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 text-xs">
+                      <div className="space-y-2">
+                        <div className="font-medium">
+                          {t("cameraWizard.step2.featuresPopover.title")}
+                        </div>
+                        <div className="text-muted-foreground">
+                          {t("cameraWizard.step2.featuresPopover.description")}
+                        </div>
+                        <div className="mt-3 flex items-center text-primary">
+                          <Link
+                            to={getLocaleDocUrl(
+                              "configuration/restream#reduce-connections-to-camera",
+                            )}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline"
+                          >
+                            {t("readTheDocumentation", { ns: "common" })}
+                            <LuExternalLink className="ml-2 inline-flex size-3" />
+                          </Link>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
                 <div className="rounded-lg bg-background p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">
