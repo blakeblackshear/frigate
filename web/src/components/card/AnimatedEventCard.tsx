@@ -145,7 +145,7 @@ export function AnimatedEventCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  className="absolute right-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  className="absolute left-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                   size="xs"
                   aria-label={t("markAsReviewed")}
                   onClick={async () => {
