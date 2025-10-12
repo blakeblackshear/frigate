@@ -106,6 +106,7 @@
     "button": {
       "export": "Export",
       "markAsReviewed": "Mark as reviewed",
+      "markAsUnreviewed": "Mark as unreviewed",
       "deleteNow": "Delete Now"
     }
   },
