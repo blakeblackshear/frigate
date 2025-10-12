@@ -586,7 +586,7 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
 
   if (error) {
     return (
-      <div className="flex h-32 flex-col items-center justify-center gap-2 rounded-lg bg-danger/20 p-4">
+      <div className="flex h-32 flex-col items-center justify-center gap-2 rounded-lg bg-secondary p-4">
         <span className="text-sm text-danger">
           {t("cameraWizard.step3.streamUnavailable")}
         </span>

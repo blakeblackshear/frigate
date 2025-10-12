@@ -239,7 +239,7 @@
       "testAllStreams": "Test All Streams",
       "validationSuccess": "Validation completed successfully!",
       "validationPartial": "Some streams failed validation.",
-      "streamUnavailable": "Stream unavailable",
+      "streamUnavailable": "Stream preview unavailable",
       "reload": "Reload",
       "connecting": "Connecting...",
       "streamTitle": "Stream {{number}}",
@@ -253,7 +253,7 @@
       "error": "Error",
       "streamValidated": "Stream {{number}} validated successfully",
       "streamValidationFailed": "Stream {{number}} validation failed",
-      "saveAndApply": "Save New Camera Configuration",
+      "saveAndApply": "Save New Camera",
       "saveError": "Invalid configuration. Please check your settings.",
       "issues": {
         "title": "Stream Validation",
