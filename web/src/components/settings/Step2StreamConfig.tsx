@@ -284,7 +284,10 @@ export default function Step2StreamConfig({
                     <Input
                       value={stream.url}
                       onChange={(e) =>
-                        updateStream(stream.id, { url: e.target.value })
+                        updateStream(stream.id, {
+                          url: e.target.value,
+                          testResult: undefined,
+                        })
                       }
                       className="h-8 flex-1"
                       placeholder={t("cameraWizard.step2.streamUrlPlaceholder")}
