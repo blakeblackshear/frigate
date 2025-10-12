@@ -19,6 +19,7 @@ import type {
   CameraConfigData,
   ConfigSetBody,
 } from "@/types/cameraWizard";
+import { processCameraName } from "@/utils/cameraUtil";
 
 type WizardState = {
   wizardData: Partial<WizardFormData>;
@@ -158,12 +159,17 @@ export default function CameraWizardDialog({
 
       setIsLoading(true);
 
+      // Process camera name and friendly name
+      const { finalCameraName, friendlyName } = processCameraName(
+        wizardData.cameraName,
+      );
+
       // Convert wizard data to Frigate config format
-      const cameraName = wizardData.cameraName;
       const configData: CameraConfigData = {
         cameras: {
-          [cameraName]: {
+          [finalCameraName]: {
             enabled: true,
+            ...(friendlyName && { friendly_name: friendlyName }),
             ffmpeg: {
               inputs: wizardData.streams.map((stream, index) => {
                 const isRestreamed =
@@ -171,8 +177,8 @@ export default function CameraWizardDialog({
                 if (isRestreamed) {
                   const go2rtcStreamName =
                     wizardData.streams!.length === 1
-                      ? cameraName
-                      : `${cameraName}_${index + 1}`;
+                      ? finalCameraName
+                      : `${finalCameraName}_${index + 1}`;
                   return {
                     path: `rtsp://127.0.0.1:8554/${go2rtcStreamName}`,
                     input_args: "preset-rtsp-restream",
@@ -190,30 +196,26 @@ export default function CameraWizardDialog({
         },
       };
 
-      // Add friendly name if different from camera name
-      if (wizardData.cameraName !== cameraName) {
-        configData.cameras[cameraName].friendly_name = wizardData.cameraName;
-      }
-
       // Add live.streams configuration for go2rtc streams
       if (wizardData.streams && wizardData.streams.length > 0) {
-        configData.cameras[cameraName].live = {
+        configData.cameras[finalCameraName].live = {
           streams: {},
         };
         wizardData.streams.forEach((_, index) => {
           const go2rtcStreamName =
             wizardData.streams!.length === 1
-              ? cameraName
-              : `${cameraName}_${index + 1}`;
-          configData.cameras[cameraName].live!.streams[`Stream ${index + 1}`] =
-            go2rtcStreamName;
+              ? finalCameraName
+              : `${finalCameraName}_${index + 1}`;
+          configData.cameras[finalCameraName].live!.streams[
+            `Stream ${index + 1}`
+          ] = go2rtcStreamName;
         });
       }
 
       const requestBody: ConfigSetBody = {
         requires_restart: 1,
         config_data: configData,
-        update_topic: `config/cameras/${cameraName}/add`,
+        update_topic: `config/cameras/${finalCameraName}/add`,
       };
 
       axios
@@ -228,8 +230,8 @@ export default function CameraWizardDialog({
                 // Use camera name with index suffix for multiple streams
                 const streamName =
                   wizardData.streams!.length === 1
-                    ? cameraName
-                    : `${cameraName}_${index + 1}`;
+                    ? finalCameraName
+                    : `${finalCameraName}_${index + 1}`;
                 go2rtcStreams[streamName] = [stream.url];
               });
 
@@ -260,7 +262,7 @@ export default function CameraWizardDialog({
                     Promise.allSettled(updatePromises).then(() => {
                       toast.success(
                         t("cameraWizard.save.successWithLive", {
-                          cameraName: wizardData.cameraName,
+                          cameraName: friendlyName || finalCameraName,
                         }),
                         { position: "top-center" },
                       );
@@ -272,7 +274,7 @@ export default function CameraWizardDialog({
                     // log the error but don't fail the entire save
                     toast.warning(
                       t("cameraWizard.save.successWithoutLive", {
-                        cameraName: wizardData.cameraName,
+                        cameraName: friendlyName || finalCameraName,
                       }),
                       { position: "top-center" },
                     );
@@ -283,7 +285,7 @@ export default function CameraWizardDialog({
                 // No valid streams found
                 toast.success(
                   t("cameraWizard.save.successWithoutLive", {
-                    cameraName: wizardData.cameraName,
+                    cameraName: friendlyName || finalCameraName,
                   }),
                   { position: "top-center" },
                 );

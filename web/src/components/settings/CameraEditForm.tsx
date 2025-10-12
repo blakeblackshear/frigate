@@ -22,6 +22,7 @@ import { LuTrash2, LuPlus } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
+import { processCameraName } from "@/utils/cameraUtil";
 
 type ConfigSetBody = {
   requires_restart: number;
@@ -29,12 +30,6 @@ type ConfigSetBody = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config_data: any;
   update_topic?: string;
-};
-const generateFixedHash = (name: string): string => {
-  const encoded = encodeURIComponent(name);
-  const base64 = btoa(encoded);
-  const cleanHash = base64.replace(/[^a-zA-Z0-9]/g, "").substring(0, 8);
-  return `cam_${cleanHash.toLowerCase()}`;
 };
 
 const RoleEnum = z.enum(["audio", "detect", "record"]);
@@ -168,19 +163,15 @@ export default function CameraEditForm({
 
   const saveCameraConfig = (values: FormValues) => {
     setIsLoading(true);
-    let finalCameraName = values.cameraName;
-    let friendly_name: string | undefined = undefined;
-    const isValidName = /^[a-zA-Z0-9_-]+$/.test(values.cameraName);
-    if (!isValidName) {
-      finalCameraName = generateFixedHash(finalCameraName);
-      friendly_name = values.cameraName;
-    }
+    const { finalCameraName, friendlyName } = processCameraName(
+      values.cameraName,
+    );
 
     const configData: ConfigSetBody["config_data"] = {
       cameras: {
         [finalCameraName]: {
           enabled: values.enabled,
-          ...(friendly_name && { friendly_name }),
+          ...(friendlyName && { friendly_name: friendlyName }),
           ffmpeg: {
             inputs: values.ffmpeg.inputs.map((input) => ({
               path: input.path,
