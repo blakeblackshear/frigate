@@ -510,61 +510,29 @@ export default function Step1NameCamera({
           </div>
 
           <div className="space-y-3">
-            {testResult.snapshot && (
-              <div className="flex justify-center">
+            {testResult.snapshot ? (
+              <div className="relative flex justify-center">
                 <img
                   src={testResult.snapshot}
                   alt="Camera snapshot"
                   className="max-h-[50dvh] max-w-full rounded-lg object-contain"
                 />
+                <div className="absolute bottom-2 right-2 rounded-md bg-black/70 p-3 text-sm backdrop-blur-sm">
+                  <div className="space-y-1">
+                    <StreamDetails testResult={testResult} />
+                  </div>
+                </div>
               </div>
+            ) : (
+              <Card className="p-4">
+                <CardTitle className="mb-2 text-sm">
+                  {t("cameraWizard.step1.streamDetails")}
+                </CardTitle>
+                <CardContent className="p-0 text-sm">
+                  <StreamDetails testResult={testResult} />
+                </CardContent>
+              </Card>
             )}
-
-            <Card className="p-4">
-              <CardTitle className="mb-2 text-sm">
-                {t("cameraWizard.step1.streamDetails")}
-              </CardTitle>
-              <CardContent className="p-0 text-sm">
-                {testResult.resolution && (
-                  <div>
-                    <span className="text-secondary-foreground">
-                      {t("cameraWizard.testResultLabels.resolution")}:
-                    </span>{" "}
-                    <span className="text-primary">
-                      {testResult.resolution}
-                    </span>
-                  </div>
-                )}
-                {testResult.videoCodec && (
-                  <div>
-                    <span className="text-secondary-foreground">
-                      {t("cameraWizard.testResultLabels.video")}:
-                    </span>{" "}
-                    <span className="text-primary">
-                      {testResult.videoCodec}
-                    </span>
-                  </div>
-                )}
-                {testResult.audioCodec && (
-                  <div>
-                    <span className="text-secondary-foreground">
-                      {t("cameraWizard.testResultLabels.audio")}:
-                    </span>{" "}
-                    <span className="text-primary">
-                      {testResult.audioCodec}
-                    </span>
-                  </div>
-                )}
-                {testResult.fps && (
-                  <div>
-                    <span className="text-secondary-foreground">
-                      {t("cameraWizard.testResultLabels.fps")}:
-                    </span>{" "}
-                    <span className="text-primary">{testResult.fps}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
         </div>
       )}
@@ -602,5 +570,46 @@ export default function Step1NameCamera({
         )}
       </div>
     </div>
+  );
+}
+
+function StreamDetails({ testResult }: { testResult: TestResult }) {
+  const { t } = useTranslation(["views/settings"]);
+
+  return (
+    <>
+      {testResult.resolution && (
+        <div>
+          <span className="text-white/70">
+            {t("cameraWizard.testResultLabels.resolution")}:
+          </span>{" "}
+          <span className="text-white">{testResult.resolution}</span>
+        </div>
+      )}
+      {testResult.fps && (
+        <div>
+          <span className="text-white/70">
+            {t("cameraWizard.testResultLabels.fps")}:
+          </span>{" "}
+          <span className="text-white">{testResult.fps}</span>
+        </div>
+      )}
+      {testResult.videoCodec && (
+        <div>
+          <span className="text-white/70">
+            {t("cameraWizard.testResultLabels.video")}:
+          </span>{" "}
+          <span className="text-white">{testResult.videoCodec}</span>
+        </div>
+      )}
+      {testResult.audioCodec && (
+        <div>
+          <span className="text-white/70">
+            {t("cameraWizard.testResultLabels.audio")}:
+          </span>{" "}
+          <span className="text-white">{testResult.audioCodec}</span>
+        </div>
+      )}
+    </>
   );
 }
