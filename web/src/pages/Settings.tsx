@@ -452,7 +452,7 @@ export default function Settings() {
       </div>
       <SidebarProvider>
         <Sidebar variant="inset" className="relative mb-8 pl-0 pt-0">
-          <SidebarContent className="scrollbar-container mb-20 overflow-y-auto border-r-[1px] border-secondary bg-background py-2">
+          <SidebarContent className="scrollbar-container mb-24 overflow-y-auto border-r-[1px] border-secondary bg-background py-2">
             <SidebarMenu>
               {settingsGroups.map((group) => {
                 const filteredItems = group.items.filter((item) =>
@@ -538,7 +538,7 @@ export default function Settings() {
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <div className="flex-1 overflow-auto p-2 pr-0">
+          <div className="scrollbar-container mb-24 flex-1 overflow-y-auto p-2 pr-0">
             {(() => {
               const CurrentComponent = getCurrentComponent(page);
               if (!CurrentComponent) return null;
