@@ -416,7 +416,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response = response.json()
             assert response["success"] == True
-            assert response["message"] == "Reviewed multiple items"
+            assert response["message"] == "Marked multiple items as reviewed"
             # Verify that in DB the review segment was not changed
             with self.assertRaises(DoesNotExist):
                 UserReviewStatus.get(
@@ -433,7 +433,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             assert response_json["success"] == True
-            assert response_json["message"] == "Reviewed multiple items"
+            assert response_json["message"] == "Marked multiple items as reviewed"
             # Verify UserReviewStatus was created
             user_review = UserReviewStatus.get(
                 UserReviewStatus.user_id == self.user_id,
