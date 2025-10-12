@@ -161,7 +161,14 @@ Message published for updates to tracked object metadata, for example:
 
 ### `frigate/reviews`
 
-Message published for each changed review item. The first message is published when the `detection` or `alert` is initiated. When additional objects are detected or when a zone change occurs, it will publish a, `update` message with the same id. When the review activity has ended a final `end` message is published.
+Message published for each changed review item. The first message is published when the `detection` or `alert` is initiated. 
+
+An `update` with the same ID will be published when:
+- The severity changes from `detection` to `alert`
+- Additional objects are detected
+- An object is recognized via face, lpr, etc.
+
+When the review activity has ended a final `end` message is published.
 
 ```json
 {
