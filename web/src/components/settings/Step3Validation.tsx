@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { LuRotateCcw } from "react-icons/lu";
 import { useState, useCallback, useMemo, useEffect } from "react";
@@ -8,6 +9,9 @@ import { toast } from "sonner";
 import MSEPlayer from "@/components/player/MsePlayer";
 import { WizardFormData, StreamConfig, TestResult } from "@/types/cameraWizard";
 import { PlayerStatsType } from "@/types/live";
+import { FaCircleCheck, FaTriangleExclamation } from "react-icons/fa6";
+import { LuX } from "react-icons/lu";
+import { Card, CardContent } from "../ui/card";
 
 type Step3ValidationProps = {
   wizardData: Partial<WizardFormData>;
@@ -16,107 +20,6 @@ type Step3ValidationProps = {
   onBack?: () => void;
   isLoading?: boolean;
 };
-
-type StreamPreviewProps = {
-  stream: StreamConfig;
-  onBandwidthUpdate?: (streamId: string, bandwidth: number) => void;
-};
-
-// live stream preview using MSEPlayer with temp go2rtc streams
-function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
-  const { t } = useTranslation(["views/settings"]);
-  const [streamId, setStreamId] = useState(`wizard_${stream.id}_${Date.now()}`);
-  const [registered, setRegistered] = useState(false);
-  const [error, setError] = useState(false);
-
-  const handleStats = useCallback(
-    (stats: PlayerStatsType) => {
-      if (stats.bandwidth > 0) {
-        onBandwidthUpdate?.(stream.id, stats.bandwidth);
-      }
-    },
-    [stream.id, onBandwidthUpdate],
-  );
-
-  const handleReload = useCallback(async () => {
-    // Clean up old stream first
-    if (streamId) {
-      axios.delete(`go2rtc/streams/${streamId}`).catch(() => {
-        // do nothing on cleanup errors - go2rtc won't consume the streams
-      });
-    }
-
-    // Reset state and create new stream ID
-    setError(false);
-    setRegistered(false);
-    setStreamId(`wizard_${stream.id}_${Date.now()}`);
-  }, [stream.id, streamId]);
-
-  useEffect(() => {
-    // Register stream with go2rtc
-    axios
-      .put(`go2rtc/streams/${streamId}`, null, {
-        params: { src: stream.url },
-      })
-      .then(() => {
-        // Add small delay to allow go2rtc api to run and initialize the stream
-        setTimeout(() => {
-          setRegistered(true);
-        }, 500);
-      })
-      .catch(() => {
-        setError(true);
-      });
-
-    // Cleanup on unmount
-    return () => {
-      axios.delete(`go2rtc/streams/${streamId}`).catch(() => {
-        // do nothing on cleanup errors - go2rtc won't consume the streams
-      });
-    };
-  }, [stream.url, streamId]);
-
-  if (error) {
-    return (
-      <div className="flex h-32 flex-col items-center justify-center gap-2 rounded-lg bg-danger/20 p-4">
-        <span className="text-sm text-danger">
-          {t("cameraWizard.step3.streamUnavailable")}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleReload}
-          className="flex items-center gap-2"
-        >
-          <LuRotateCcw className="size-4" />
-          {t("cameraWizard.step3.reload")}
-        </Button>
-      </div>
-    );
-  }
-
-  if (!registered) {
-    return (
-      <div className="flex h-32 items-center justify-center rounded-lg bg-secondary">
-        <ActivityIndicator className="size-4" />
-        <span className="ml-2 text-sm">
-          {t("cameraWizard.step3.connecting")}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <MSEPlayer
-      camera={streamId}
-      playbackEnabled={true}
-      className="max-h-[20dvh] w-full rounded-lg"
-      getStats={true}
-      setStats={handleStats}
-      onError={() => setError(true)}
-    />
-  );
-}
 
 export default function Step3Validation({
   wizardData,
@@ -127,6 +30,7 @@ export default function Step3Validation({
 }: Step3ValidationProps) {
   const { t } = useTranslation(["views/settings"]);
   const [isValidating, setIsValidating] = useState(false);
+  const [testingStreams, setTestingStreams] = useState<Set<string>>(new Set());
   const [measuredBandwidth, setMeasuredBandwidth] = useState<
     Map<string, number>
   >(new Map());
@@ -216,6 +120,13 @@ export default function Step3Validation({
 
   const validateStream = useCallback(
     async (stream: StreamConfig) => {
+      if (!stream.url.trim()) {
+        toast.error(t("cameraWizard.commonErrors.noUrl"));
+        return;
+      }
+
+      setTestingStreams((prev) => new Set(prev).add(stream.id));
+
       const testResult = await performStreamValidation(stream);
 
       onUpdate({
@@ -237,6 +148,12 @@ export default function Step3Validation({
           }),
         );
       }
+
+      setTestingStreams((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(stream.id);
+        return newSet;
+      });
     },
     [streams, onUpdate, t, performStreamValidation],
   );
@@ -332,7 +249,7 @@ export default function Step3Validation({
             {isValidating && <ActivityIndicator className="mr-2 size-4" />}
             {isValidating
               ? t("cameraWizard.step3.validating")
-              : t("cameraWizard.step3.revalidateStreams")}
+              : t("cameraWizard.step3.testAllStreams")}
           </Button>
         </div>
 
@@ -340,122 +257,98 @@ export default function Step3Validation({
           {streams.map((stream, index) => {
             const result = validationResults.get(stream.id);
             return (
-              <div key={stream.id} className="rounded-lg border p-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <h4 className="font-medium">
-                    {t("cameraWizard.step3.streamTitle", { number: index + 1 })}
-                  </h4>
-                  {result ? (
-                    <span
-                      className={`rounded px-2 py-1 text-sm ${
-                        result.success
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {result.success
-                        ? t("cameraWizard.step3.valid")
-                        : t("cameraWizard.step3.failed")}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">
-                      {t("cameraWizard.step3.notTested")}
-                    </span>
-                  )}
-                </div>
-
-                <div className="mb-3">
-                  <StreamPreview
-                    stream={stream}
-                    onBandwidthUpdate={handleBandwidthUpdate}
-                  />
-                </div>
-
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    {stream.url}
-                  </span>
-                  <Button
-                    onClick={() => validateStream(stream)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    {t("cameraWizard.step3.testStream")}
-                  </Button>
-                </div>
-
-                {(() => {
-                  const streamBandwidth = measuredBandwidth.get(stream.id);
-                  if (!streamBandwidth) return null;
-
-                  const perHour = streamBandwidth * 3600; // kB/hour
-                  const perHourDisplay =
-                    perHour >= 1000000
-                      ? `${(perHour / 1000000).toFixed(1)} ${t("unit.data.gbph", { ns: "common" })}`
-                      : perHour >= 1000
-                        ? `${(perHour / 1000).toFixed(1)} ${t("unit.data.mbph", { ns: "common" })}`
-                        : `${perHour.toFixed(0)} ${t("unit.data.kbph", { ns: "common" })}`;
-
-                  return (
-                    <div className="mb-2 text-sm">
-                      <span className="font-medium">
-                        {t("cameraWizard.step3.estimatedBandwidth")}:
-                      </span>{" "}
-                      <span className="text-selected">
-                        {streamBandwidth.toFixed(1)}{" "}
-                        {t("unit.data.kbps", { ns: "common" })}
-                      </span>
-                      <span className="ml-2 text-muted-foreground">
-                        ({perHourDisplay})
-                      </span>
+              <Card key={stream.id} className="bg-secondary text-primary">
+                <CardContent className="space-y-4 p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="flex items-end gap-2">
+                      <h4 className="mr-2 font-medium">
+                        {t("cameraWizard.step3.streamTitle", {
+                          number: index + 1,
+                        })}
+                      </h4>
+                      {stream.roles.map((role) => (
+                        <Badge variant="outline" key={role} className="text-xs">
+                          {role}
+                        </Badge>
+                      ))}
                     </div>
-                  );
-                })()}
-
-                <div className="text-sm">
-                  <span className="font-medium">
-                    {t("cameraWizard.step3.roles")}:
-                  </span>{" "}
-                  {stream.roles.join(", ") || t("cameraWizard.step3.none")}
-                </div>
-
-                {result && (
-                  <div className="mt-2 text-sm">
-                    {result.success ? (
-                      <div className="space-y-1">
-                        {result.resolution && (
-                          <div>
-                            {t("cameraWizard.testResultLabels.resolution")}:{" "}
-                            {result.resolution}
-                          </div>
-                        )}
-                        {result.videoCodec && (
-                          <div>
-                            {t("cameraWizard.testResultLabels.video")}:{" "}
-                            {result.videoCodec}
-                          </div>
-                        )}
-                        {result.audioCodec && (
-                          <div>
-                            {t("cameraWizard.testResultLabels.audio")}:{" "}
-                            {result.audioCodec}
-                          </div>
-                        )}
-                        {result.fps && (
-                          <div>
-                            {t("cameraWizard.testResultLabels.fps")}:{" "}
-                            {result.fps}
-                          </div>
-                        )}
+                    {result?.success && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <FaCircleCheck className="size-4 text-success" />
+                        <span className="text-success">
+                          {t("cameraWizard.step2.connected")}
+                        </span>
                       </div>
-                    ) : (
-                      <div className="text-danger">
-                        {t("cameraWizard.step3.error")}: {result.error}
+                    )}
+                    {result && !result.success && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <LuX className="size-4 text-danger" />
+                        <span className="text-danger">
+                          {t("cameraWizard.step2.notConnected")}
+                        </span>
                       </div>
                     )}
                   </div>
-                )}
-              </div>
+
+                  {result && result.success && (
+                    <div className="mb-2 text-sm text-muted-foreground">
+                      {[
+                        result.resolution,
+                        result.fps
+                          ? `${result.fps} ${t("cameraWizard.testResultLabels.fps")}`
+                          : null,
+                        result.videoCodec,
+                        result.audioCodec,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </div>
+                  )}
+
+                  <div className="mb-3">
+                    <StreamPreview
+                      stream={stream}
+                      onBandwidthUpdate={handleBandwidthUpdate}
+                    />
+                  </div>
+
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      {stream.url}
+                    </span>
+                    <Button
+                      onClick={() => validateStream(stream)}
+                      disabled={
+                        testingStreams.has(stream.id) || !stream.url.trim()
+                      }
+                      variant="outline"
+                      size="sm"
+                    >
+                      {testingStreams.has(stream.id) && (
+                        <ActivityIndicator className="mr-2 size-4" />
+                      )}
+                      {t("cameraWizard.step3.testStream")}
+                    </Button>
+                  </div>
+
+                  <div className="rounded-lg bg-background p-3">
+                    <StreamIssues
+                      stream={stream}
+                      measuredBandwidth={measuredBandwidth}
+                      wizardData={wizardData}
+                    />
+                  </div>
+
+                  {result && !result.success && (
+                    <div className="rounded-md border border-danger/20 bg-danger/10 p-3 text-sm text-danger">
+                      <div className="font-medium">
+                        {t("cameraWizard.step2.testFailedTitle")}
+                      </div>
+                      <div className="mt-1 text-xs">{result.error}</div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             );
           })}
         </div>
@@ -463,12 +356,7 @@ export default function Step3Validation({
 
       <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-end sm:gap-4">
         {onBack && (
-          <Button
-            type="button"
-            onClick={onBack}
-            variant="outline"
-            className="sm:flex-1"
-          >
+          <Button type="button" onClick={onBack} className="sm:flex-1">
             {t("button.back", { ns: "common" })}
           </Button>
         )}
@@ -486,5 +374,251 @@ export default function Step3Validation({
         </Button>
       </div>
     </div>
+  );
+}
+
+type StreamIssuesProps = {
+  stream: StreamConfig;
+  measuredBandwidth: Map<string, number>;
+  wizardData: Partial<WizardFormData>;
+};
+
+function StreamIssues({
+  stream,
+  measuredBandwidth,
+  wizardData,
+}: StreamIssuesProps) {
+  const { t } = useTranslation(["views/settings"]);
+
+  const issues = useMemo(() => {
+    const result: Array<{
+      type: "good" | "warning" | "error";
+      message: string;
+    }> = [];
+
+    // Video codec check
+    if (stream.testResult?.videoCodec) {
+      const videoCodec = stream.testResult.videoCodec.toLowerCase();
+      if (["h264", "h265", "hevc"].includes(videoCodec)) {
+        result.push({
+          type: "good",
+          message: t("cameraWizard.step3.issues.videoCodecGood", {
+            codec: stream.testResult.videoCodec,
+          }),
+        });
+      }
+    }
+
+    // Audio codec check
+    if (stream.roles.includes("record")) {
+      if (stream.testResult?.audioCodec) {
+        const audioCodec = stream.testResult.audioCodec.toLowerCase();
+        if (audioCodec === "aac") {
+          result.push({
+            type: "good",
+            message: t("cameraWizard.step3.issues.audioCodecGood"),
+          });
+        } else {
+          result.push({
+            type: "error",
+            message: t("cameraWizard.step3.issues.audioCodecError"),
+          });
+        }
+      } else {
+        result.push({
+          type: "warning",
+          message: t("cameraWizard.step3.issues.noAudioWarning"),
+        });
+      }
+    }
+
+    // Restreaming check
+    if (stream.roles.includes("record")) {
+      const restreamIds = wizardData.restreamIds || [];
+      if (restreamIds.includes(stream.id)) {
+        result.push({
+          type: "warning",
+          message: t("cameraWizard.step3.issues.restreamingWarning"),
+        });
+      }
+    }
+
+    return result;
+  }, [stream, wizardData, t]);
+
+  if (issues.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="font-medium">{t("cameraWizard.step3.issues.title")}</div>
+      <BandwidthDisplay
+        streamId={stream.id}
+        measuredBandwidth={measuredBandwidth}
+      />
+      <div className="space-y-1">
+        {issues.map((issue, index) => (
+          <div key={index} className="flex items-center gap-2 text-sm">
+            {issue.type === "good" && (
+              <FaCircleCheck className="size-4 flex-shrink-0 text-success" />
+            )}
+            {issue.type === "warning" && (
+              <FaTriangleExclamation className="size-4 flex-shrink-0 text-yellow-500" />
+            )}
+            {issue.type === "error" && (
+              <LuX className="size-4 flex-shrink-0 text-danger" />
+            )}
+            <span
+              className={
+                issue.type === "good"
+                  ? "text-success"
+                  : issue.type === "warning"
+                    ? "text-yellow-500"
+                    : "text-danger"
+              }
+            >
+              {issue.message}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+type BandwidthDisplayProps = {
+  streamId: string;
+  measuredBandwidth: Map<string, number>;
+};
+
+function BandwidthDisplay({
+  streamId,
+  measuredBandwidth,
+}: BandwidthDisplayProps) {
+  const { t } = useTranslation(["views/settings"]);
+  const streamBandwidth = measuredBandwidth.get(streamId);
+
+  if (!streamBandwidth) return null;
+
+  const perHour = streamBandwidth * 3600; // kB/hour
+  const perHourDisplay =
+    perHour >= 1000000
+      ? `${(perHour / 1000000).toFixed(1)} ${t("unit.data.gbph", { ns: "common" })}`
+      : perHour >= 1000
+        ? `${(perHour / 1000).toFixed(1)} ${t("unit.data.mbph", { ns: "common" })}`
+        : `${perHour.toFixed(0)} ${t("unit.data.kbph", { ns: "common" })}`;
+
+  return (
+    <div className="mb-2 text-sm">
+      <span className="font-medium text-muted-foreground">
+        {t("cameraWizard.step3.estimatedBandwidth")}:
+      </span>{" "}
+      <span className="text-secondary-foreground">
+        {streamBandwidth.toFixed(1)} {t("unit.data.kbps", { ns: "common" })}
+      </span>
+      <span className="ml-2 text-muted-foreground">({perHourDisplay})</span>
+    </div>
+  );
+}
+
+type StreamPreviewProps = {
+  stream: StreamConfig;
+  onBandwidthUpdate?: (streamId: string, bandwidth: number) => void;
+};
+
+// live stream preview using MSEPlayer with temp go2rtc streams
+function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
+  const { t } = useTranslation(["views/settings"]);
+  const [streamId, setStreamId] = useState(`wizard_${stream.id}_${Date.now()}`);
+  const [registered, setRegistered] = useState(false);
+  const [error, setError] = useState(false);
+
+  const handleStats = useCallback(
+    (stats: PlayerStatsType) => {
+      if (stats.bandwidth > 0) {
+        onBandwidthUpdate?.(stream.id, stats.bandwidth);
+      }
+    },
+    [stream.id, onBandwidthUpdate],
+  );
+
+  const handleReload = useCallback(async () => {
+    // Clean up old stream first
+    if (streamId) {
+      axios.delete(`go2rtc/streams/${streamId}`).catch(() => {
+        // do nothing on cleanup errors - go2rtc won't consume the streams
+      });
+    }
+
+    // Reset state and create new stream ID
+    setError(false);
+    setRegistered(false);
+    setStreamId(`wizard_${stream.id}_${Date.now()}`);
+  }, [stream.id, streamId]);
+
+  useEffect(() => {
+    // Register stream with go2rtc
+    axios
+      .put(`go2rtc/streams/${streamId}`, null, {
+        params: { src: stream.url },
+      })
+      .then(() => {
+        // Add small delay to allow go2rtc api to run and initialize the stream
+        setTimeout(() => {
+          setRegistered(true);
+        }, 500);
+      })
+      .catch(() => {
+        setError(true);
+      });
+
+    // Cleanup on unmount
+    return () => {
+      axios.delete(`go2rtc/streams/${streamId}`).catch(() => {
+        // do nothing on cleanup errors - go2rtc won't consume the streams
+      });
+    };
+  }, [stream.url, streamId]);
+
+  if (error) {
+    return (
+      <div className="flex h-32 flex-col items-center justify-center gap-2 rounded-lg bg-danger/20 p-4">
+        <span className="text-sm text-danger">
+          {t("cameraWizard.step3.streamUnavailable")}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleReload}
+          className="flex items-center gap-2"
+        >
+          <LuRotateCcw className="size-4" />
+          {t("cameraWizard.step3.reload")}
+        </Button>
+      </div>
+    );
+  }
+
+  if (!registered) {
+    return (
+      <div className="flex h-32 items-center justify-center rounded-lg bg-secondary">
+        <ActivityIndicator className="size-4" />
+        <span className="ml-2 text-sm">
+          {t("cameraWizard.step3.connecting")}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <MSEPlayer
+      camera={streamId}
+      playbackEnabled={true}
+      className="max-h-[30dvh] rounded-lg md:max-h-[20dvh]"
+      getStats={true}
+      setStats={handleStats}
+      onError={() => setError(true)}
+    />
   );
 }

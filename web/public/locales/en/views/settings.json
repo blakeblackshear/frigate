@@ -236,7 +236,7 @@
       "description": "Final validation and bandwidth analysis before saving your camera configuration.",
       "validationTitle": "Stream Validation",
       "validating": "Validating...",
-      "revalidateStreams": "Re-validate Streams",
+      "testAllStreams": "Test All Streams",
       "validationSuccess": "Validation completed successfully!",
       "validationPartial": "Some streams failed validation.",
       "streamUnavailable": "Stream unavailable",
@@ -247,14 +247,22 @@
       "failed": "Failed",
       "notTested": "Not tested",
       "testStream": "Test Stream",
-      "estimatedBandwidth": "Estimated Bandwidth:",
+      "estimatedBandwidth": "Estimated Bandwidth",
       "roles": "Roles",
       "none": "None",
       "error": "Error",
       "streamValidated": "Stream {{number}} validated successfully",
       "streamValidationFailed": "Stream {{number}} validation failed",
       "saveAndApply": "Save New Camera Configuration",
-      "saveError": "Invalid configuration. Please check your settings."
+      "saveError": "Invalid configuration. Please check your settings.",
+      "issues": {
+        "title": "Stream Validation",
+        "videoCodecGood": "Video codec is {{codec}}.",
+        "audioCodecGood": "Audio codec is AAC.",
+        "noAudioWarning": "No audio detected for this stream, recordings will not have audio.",
+        "audioCodecError": "The AAC audio codec is required to support audio in recordings.",
+        "restreamingWarning": "Reducing connections to the camera for the record stream may increase CPU usage slightly."
+      }
     }
   },
   "camera": {
