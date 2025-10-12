@@ -151,8 +151,8 @@ export default function Step3Validation({
     return results;
   }, [streams]);
 
-  const validateStream = useCallback(
-    async (stream: StreamConfig) => {
+  const performStreamValidation = useCallback(
+    async (stream: StreamConfig): Promise<TestResult> => {
       try {
         const response = await axios.get("ffprobe", {
           params: { paths: stream.url, detailed: true },
@@ -186,38 +186,16 @@ export default function Step3Validation({
               parseFloat(videoStream.r_frame_rate.split("/")[1])
             : undefined;
 
-          const testResult: TestResult = {
+          return {
             success: true,
             resolution,
             videoCodec: videoStream?.codec_name,
             audioCodec: audioStream?.codec_name,
             fps: fps && !isNaN(fps) ? fps : undefined,
           };
-
-          onUpdate({
-            streams: streams.map((s) =>
-              s.id === stream.id ? { ...s, testResult } : s,
-            ),
-          });
-
-          toast.success(
-            t("cameraWizard.step3.streamValidated", {
-              number: streams.findIndex((s) => s.id === stream.id) + 1,
-            }),
-          );
         } else {
           const error = response.data?.[0]?.stderr || "Unknown error";
-          const testResult: TestResult = { success: false, error };
-
-          onUpdate({
-            streams: streams.map((s) =>
-              s.id === stream.id ? { ...s, testResult } : s,
-            ),
-          });
-
-          toast.error(
-            `Stream ${streams.findIndex((s) => s.id === stream.id) + 1} validation failed`,
-          );
+          return { success: false, error };
         }
       } catch (error) {
         const axiosError = error as {
@@ -230,14 +208,29 @@ export default function Step3Validation({
           axiosError.message ||
           "Connection failed";
 
-        const testResult: TestResult = { success: false, error: errorMessage };
+        return { success: false, error: errorMessage };
+      }
+    },
+    [],
+  );
 
-        onUpdate({
-          streams: streams.map((s) =>
-            s.id === stream.id ? { ...s, testResult } : s,
-          ),
-        });
+  const validateStream = useCallback(
+    async (stream: StreamConfig) => {
+      const testResult = await performStreamValidation(stream);
 
+      onUpdate({
+        streams: streams.map((s) =>
+          s.id === stream.id ? { ...s, testResult } : s,
+        ),
+      });
+
+      if (testResult.success) {
+        toast.success(
+          t("cameraWizard.step3.streamValidated", {
+            number: streams.findIndex((s) => s.id === stream.id) + 1,
+          }),
+        );
+      } else {
         toast.error(
           t("cameraWizard.step3.streamValidationFailed", {
             number: streams.findIndex((s) => s.id === stream.id) + 1,
@@ -245,7 +238,7 @@ export default function Step3Validation({
         );
       }
     },
-    [streams, onUpdate, t],
+    [streams, onUpdate, t, performStreamValidation],
   );
 
   const validateAllStreams = useCallback(async () => {
@@ -260,64 +253,8 @@ export default function Step3Validation({
     for (const stream of streamsToTest) {
       if (!stream.url.trim()) continue;
 
-      try {
-        const response = await axios.get("ffprobe", {
-          params: { paths: stream.url, detailed: true },
-          timeout: 10000,
-        });
-
-        if (response.data?.[0]?.return_code === 0) {
-          const probeData = response.data[0];
-          const streamData = probeData.stdout.streams || [];
-
-          const videoStream = streamData.find(
-            (s: { codec_type?: string; codec_name?: string }) =>
-              s.codec_type === "video" ||
-              s.codec_name?.includes("h264") ||
-              s.codec_name?.includes("h265"),
-          );
-
-          const audioStream = streamData.find(
-            (s: { codec_type?: string; codec_name?: string }) =>
-              s.codec_type === "audio" ||
-              s.codec_name?.includes("aac") ||
-              s.codec_name?.includes("mp3"),
-          );
-
-          const resolution = videoStream
-            ? `${videoStream.width}x${videoStream.height}`
-            : undefined;
-
-          const fps = videoStream?.r_frame_rate
-            ? parseFloat(videoStream.r_frame_rate.split("/")[0]) /
-              parseFloat(videoStream.r_frame_rate.split("/")[1])
-            : undefined;
-
-          const testResult: TestResult = {
-            success: true,
-            resolution,
-            videoCodec: videoStream?.codec_name,
-            audioCodec: audioStream?.codec_name,
-            fps: fps && !isNaN(fps) ? fps : undefined,
-          };
-
-          results.set(stream.id, testResult);
-        } else {
-          const error = response.data?.[0]?.stderr || "Unknown error";
-          results.set(stream.id, { success: false, error });
-        }
-      } catch (error) {
-        const axiosError = error as {
-          response?: { data?: { message?: string; detail?: string } };
-          message?: string;
-        };
-        const errorMessage =
-          axiosError.response?.data?.message ||
-          axiosError.response?.data?.detail ||
-          axiosError.message ||
-          "Connection failed";
-        results.set(stream.id, { success: false, error: errorMessage });
-      }
+      const testResult = await performStreamValidation(stream);
+      results.set(stream.id, testResult);
     }
 
     // Update wizard data with new test results
@@ -345,7 +282,7 @@ export default function Step3Validation({
         toast.warning(t("cameraWizard.step3.validationPartial"));
       }
     }
-  }, [streams, onUpdate, t]);
+  }, [streams, onUpdate, t, performStreamValidation]);
 
   const handleSave = useCallback(() => {
     if (!wizardData.cameraName || !wizardData.streams?.length) {
