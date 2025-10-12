@@ -226,7 +226,8 @@ export default function Step3Validation({
     return (
       wizardData.cameraName &&
       wizardData.streams?.length &&
-      wizardData.streams.some((s) => s.roles.includes("detect"))
+      wizardData.streams.some((s) => s.roles.includes("detect")) &&
+      wizardData.streams.every((s) => s.testResult) // All streams must be tested
     );
   }, [wizardData]);
 
@@ -331,13 +332,15 @@ export default function Step3Validation({
                     </Button>
                   </div>
 
-                  <div className="rounded-lg bg-background p-3">
-                    <StreamIssues
-                      stream={stream}
-                      measuredBandwidth={measuredBandwidth}
-                      wizardData={wizardData}
-                    />
-                  </div>
+                  {result && (
+                    <div className="rounded-lg bg-background p-3">
+                      <StreamIssues
+                        stream={stream}
+                        measuredBandwidth={measuredBandwidth}
+                        wizardData={wizardData}
+                      />
+                    </div>
+                  )}
 
                   {result && !result.success && (
                     <div className="rounded-md border border-danger/20 bg-danger/10 p-3 text-sm text-danger">
