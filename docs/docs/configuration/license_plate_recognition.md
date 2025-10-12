@@ -5,7 +5,7 @@ title: License Plate Recognition (LPR)
 
 Frigate can recognize license plates on vehicles and automatically add the detected characters to the `recognized_license_plate` field or a known name as a `sub_label` to tracked objects of type `car` or `motorcycle`. A common use case may be to read the license plates of cars pulling into a driveway or cars passing by on a street.
 
-LPR works best when the license plate is clearly visible to the camera. For moving vehicles, Frigate continuously refines the recognition process, keeping the most confident result. However, LPR does not run on stationary vehicles.
+LPR works best when the license plate is clearly visible to the camera. For moving vehicles, Frigate continuously refines the recognition process, keeping the most confident result. When a vehicle becomes stationary, LPR continues to run for a short time after to attempt recognition.
 
 When a plate is recognized, the details are:
 
