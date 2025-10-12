@@ -54,10 +54,6 @@ class LibvaGpuSelector:
                 self._valid_gpus.append(f"/dev/dri/{device}")
 
     def get_gpu_arg(self, preset, gpu: int) -> str:
-        if gpu == 0:
-            # no need to select a GPU for the default GPU
-            return ""
-
         if "nvidia" in preset:
             return f"-hwaccel_device {gpu}"
 
