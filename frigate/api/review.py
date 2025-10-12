@@ -435,22 +435,27 @@ async def set_multiple_reviewed(
                 UserReviewStatus.user_id == user_id,
                 UserReviewStatus.review_segment == review_id,
             )
-            # If it exists and isn’t reviewed, update it
-            if not review_status.has_been_reviewed:
-                review_status.has_been_reviewed = True
+            # Update based on the reviewed parameter
+            if review_status.has_been_reviewed != body.reviewed:
+                review_status.has_been_reviewed = body.reviewed
                 review_status.save()
         except DoesNotExist:
             try:
                 UserReviewStatus.create(
                     user_id=user_id,
                     review_segment=ReviewSegment.get(id=review_id),
-                    has_been_reviewed=True,
+                    has_been_reviewed=body.reviewed,
                 )
             except (DoesNotExist, IntegrityError):
                 pass
 
     return JSONResponse(
-        content=({"success": True, "message": "Reviewed multiple items"}),
+        content=(
+            {
+                "success": True,
+                "message": f"Marked multiple items as {'reviewed' if body.reviewed else 'unreviewed'}",
+            }
+        ),
         status_code=200,
     )
 
