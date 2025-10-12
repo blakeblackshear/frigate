@@ -55,7 +55,11 @@ class BirdseyeConfig(FrigateBaseModel):
     layout: BirdseyeLayoutConfig = Field(
         default_factory=BirdseyeLayoutConfig, title="Birdseye Layout Config"
     )
-
+    idle_heartbeat_fps: float = Field(
+        default=0.0,
+        ge=0.0,
+        title="Idle heartbeat FPS (0 disables)",
+    )
 
 # uses BaseModel because some global attributes are not available at the camera level
 class BirdseyeCameraConfig(BaseModel):

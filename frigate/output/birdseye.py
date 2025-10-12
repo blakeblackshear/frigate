@@ -11,6 +11,7 @@ import subprocess as sp
 import threading
 import traceback
 from typing import Any, Optional
+import time
 
 import cv2
 import numpy as np
@@ -791,7 +792,16 @@ class Birdseye:
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
         self.requestor = InterProcessRequestor()
+        self._heartbeat_thread = None
 
+        # --- Optional idle heartbeat (disabled by default) ---
+        # If FRIGATE_BIRDSEYE_IDLE_FPS > 0, periodically re-send the last frame
+        # when no frames have been output recently. This improves client attach times
+        # without altering default behavior.
+        self.idle_fps = float(self.config.birdseye.idle_heartbeat_fps or 0.0)
+        self.idle_fps = max(0.0, self.idle_fps)
+        self._idle_interval: Optional[float] = (1.0 / self.idle_fps) if self.idle_fps > 0 else None
+ 
         if config.birdseye.restream:
             self.birdseye_buffer = self.frame_manager.create(
                 "birdseye",
@@ -800,6 +810,16 @@ class Birdseye:
 
         self.converter.start()
         self.broadcaster.start()
+
+
+        # Start heartbeat loop only if enabled
+        if self._idle_interval:
+            self._heartbeat_thread = threading.Thread(
+                target=self._idle_heartbeat_loop,
+                name="birdseye_idle_heartbeat",
+                daemon=True,
+            )
+            self._heartbeat_thread.start()
 
     def __send_new_frame(self) -> None:
         frame_bytes = self.birdseye_manager.frame.tobytes()
@@ -849,6 +869,27 @@ class Birdseye:
                 coordinates = self.birdseye_manager.get_camera_coordinates()
                 self.requestor.send_data(UPDATE_BIRDSEYE_LAYOUT, coordinates)
 
+    def _idle_heartbeat_loop(self) -> None:
+        """
+        Periodically re-send the last composed frame when idle.
+        Active only if FRIGATE_BIRDSEYE_IDLE_FPS > 0.
+        """
+        # Small sleep granularity to check often without busy-spinning.
+        min_sleep = 0.2
+        while not self.stop_event.is_set():
+            try:
+                if self._idle_interval:
+                    now = datetime.datetime.now().timestamp()
+                    if (now - self.birdseye_manager.last_output_time) >= self._idle_interval:
+                        self.__send_new_frame()
+            finally:
+                # Sleep at the smaller of idle interval or a safe minimum
+                sleep_for = self._idle_interval if self._idle_interval and self._idle_interval < min_sleep else min_sleep
+                time.sleep(sleep_for)
+
     def stop(self) -> None:
         self.converter.join()
         self.broadcaster.join()
+        if self._heartbeat_thread and self._heartbeat_thread.is_alive():
+            # the thread is daemon=True; join a moment just for cleanliness
+            self._heartbeat_thread.join(timeout=0.2)
