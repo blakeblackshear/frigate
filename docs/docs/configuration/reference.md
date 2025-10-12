@@ -241,7 +241,7 @@ birdseye:
     # Optional: Maximum number of cameras to show at one time, showing the most recent (default: show all cameras)
     max_cameras: 1
   # Optional: Frames-per-second to re-send the last composed Birdseye frame when idle (no motion or active updates). (default: shown below)
-  idle_heartbeat_fps: 10.0
+  idle_heartbeat_fps: 0.0
 
 # Optional: ffmpeg configuration
 # More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
