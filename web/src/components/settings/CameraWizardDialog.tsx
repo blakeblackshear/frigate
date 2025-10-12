@@ -343,10 +343,20 @@ export default function CameraWizardDialog({
         />
         <DialogHeader>
           <DialogTitle>{t("cameraWizard.title")}</DialogTitle>
-          <DialogDescription>{t("cameraWizard.description")}</DialogDescription>
+          {currentStep === 0 && (
+            <DialogDescription>
+              {t("cameraWizard.description")}
+            </DialogDescription>
+          )}
         </DialogHeader>
 
-        <div className="py-4">
+        {currentStep > 0 && state.wizardData.cameraName && (
+          <div className="text-primary-variant">
+            {state.wizardData.cameraName}
+          </div>
+        )}
+
+        <div className="pb-4">
           <div className="size-full">
             {currentStep === 0 && (
               <Step1NameCamera
