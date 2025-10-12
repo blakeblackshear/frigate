@@ -268,6 +268,8 @@ ffmpeg:
   retry_interval: 10
   # Optional: Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players. (default: shown below)
   apple_compatibility: false
+  # Optional: Set the index of the GPU to use for hardware acceleration. (default: shown below)
+  gpu: 0
 
 # Optional: Detect configuration
 # NOTE: Can be overridden at the camera level
