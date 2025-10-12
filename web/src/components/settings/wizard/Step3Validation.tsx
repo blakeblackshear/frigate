@@ -11,7 +11,7 @@ import { WizardFormData, StreamConfig, TestResult } from "@/types/cameraWizard";
 import { PlayerStatsType } from "@/types/live";
 import { FaCircleCheck, FaTriangleExclamation } from "react-icons/fa6";
 import { LuX } from "react-icons/lu";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "../../ui/card";
 
 type Step3ValidationProps = {
   wizardData: Partial<WizardFormData>;

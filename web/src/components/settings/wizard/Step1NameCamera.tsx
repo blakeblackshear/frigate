@@ -38,7 +38,7 @@ import {
   StreamConfig,
 } from "@/types/cameraWizard";
 import { FaCircleCheck } from "react-icons/fa6";
-import { Card, CardContent, CardTitle } from "../ui/card";
+import { Card, CardContent, CardTitle } from "../../ui/card";
 import {
   Popover,
   PopoverContent,

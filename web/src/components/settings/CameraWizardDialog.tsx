@@ -11,9 +11,9 @@ import { useCallback, useState, useEffect, useReducer } from "react";
 import { toast } from "sonner";
 import useSWR from "swr";
 import axios from "axios";
-import Step1NameCamera from "./Step1NameCamera";
-import Step2StreamConfig from "./Step2StreamConfig";
-import Step3Validation from "./Step3Validation";
+import Step1NameCamera from "@/components/settings/wizard/Step1NameCamera";
+import Step2StreamConfig from "@/components/settings/wizard/Step2StreamConfig";
+import Step3Validation from "@/components/settings/wizard/Step3Validation";
 import type {
   WizardFormData,
   CameraConfigData,

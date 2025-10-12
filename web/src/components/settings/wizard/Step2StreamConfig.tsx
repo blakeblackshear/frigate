@@ -15,7 +15,7 @@ import {
   TestResult,
   FfprobeStream,
 } from "@/types/cameraWizard";
-import { Label } from "../ui/label";
+import { Label } from "../../ui/label";
 import { FaCircleCheck } from "react-icons/fa6";
 import {
   Popover,
