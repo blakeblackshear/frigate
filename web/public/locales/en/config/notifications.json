@@ -1,0 +1,17 @@
+{
+  "label": "Global notification configuration.",
+  "properties": {
+    "enabled": {
+      "label": "Enable notifications"
+    },
+    "email": {
+      "label": "Email required for push."
+    },
+    "cooldown": {
+      "label": "Cooldown period for notifications (time in seconds)."
+    },
+    "enabled_in_config": {
+      "label": "Keep track of original state of notifications."
+    }
+  }
+}

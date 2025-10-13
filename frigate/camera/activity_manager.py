@@ -1,9 +1,20 @@
 """Manage camera activity and updating listeners."""
 
+import datetime
+import json
+import logging
+import random
+import string
 from collections import Counter
 from typing import Any, Callable
 
-from frigate.config.config import FrigateConfig
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+    EventMetadataTypeEnum,
+)
+from frigate.config import CameraConfig, FrigateConfig
+
+logger = logging.getLogger(__name__)
 
 
 class CameraActivityManager:
@@ -23,26 +34,33 @@ class CameraActivityManager:
             if not camera_config.enabled_in_config:
                 continue
 
-            self.last_camera_activity[camera_config.name] = {}
-            self.camera_all_object_counts[camera_config.name] = Counter()
-            self.camera_active_object_counts[camera_config.name] = Counter()
+            self.__init_camera(camera_config)
 
-            for zone, zone_config in camera_config.zones.items():
-                if zone not in self.all_zone_labels:
-                    self.zone_all_object_counts[zone] = Counter()
-                    self.zone_active_object_counts[zone] = Counter()
-                    self.all_zone_labels[zone] = set()
+    def __init_camera(self, camera_config: CameraConfig) -> None:
+        self.last_camera_activity[camera_config.name] = {}
+        self.camera_all_object_counts[camera_config.name] = Counter()
+        self.camera_active_object_counts[camera_config.name] = Counter()
 
-                self.all_zone_labels[zone].update(
-                    zone_config.objects
-                    if zone_config.objects
-                    else camera_config.objects.track
-                )
+        for zone, zone_config in camera_config.zones.items():
+            if zone not in self.all_zone_labels:
+                self.zone_all_object_counts[zone] = Counter()
+                self.zone_active_object_counts[zone] = Counter()
+                self.all_zone_labels[zone] = set()
+
+            self.all_zone_labels[zone].update(
+                zone_config.objects
+                if zone_config.objects
+                else camera_config.objects.track
+            )
 
     def update_activity(self, new_activity: dict[str, dict[str, Any]]) -> None:
         all_objects: list[dict[str, Any]] = []
 
         for camera in new_activity.keys():
+            # handle cameras that were added dynamically
+            if camera not in self.camera_all_object_counts:
+                self.__init_camera(self.config.cameras[camera])
+
             new_objects = new_activity[camera].get("objects", [])
             all_objects.extend(new_objects)
 
@@ -132,3 +150,110 @@ class CameraActivityManager:
         if any_changed:
             self.publish(f"{camera}/all", sum(list(all_objects.values())))
             self.publish(f"{camera}/all/active", sum(list(active_objects.values())))
+
+
+class AudioActivityManager:
+    def __init__(
+        self, config: FrigateConfig, publish: Callable[[str, Any], None]
+    ) -> None:
+        self.config = config
+        self.publish = publish
+        self.current_audio_detections: dict[str, dict[str, dict[str, Any]]] = {}
+        self.event_metadata_publisher = EventMetadataPublisher()
+
+        for camera_config in config.cameras.values():
+            if not camera_config.audio.enabled_in_config:
+                continue
+
+            self.__init_camera(camera_config)
+
+    def __init_camera(self, camera_config: CameraConfig) -> None:
+        self.current_audio_detections[camera_config.name] = {}
+
+    def update_activity(self, new_activity: dict[str, dict[str, Any]]) -> None:
+        now = datetime.datetime.now().timestamp()
+
+        for camera in new_activity.keys():
+            # handle cameras that were added dynamically
+            if camera not in self.current_audio_detections:
+                self.__init_camera(self.config.cameras[camera])
+
+            new_detections = new_activity[camera].get("detections", [])
+            if self.compare_audio_activity(camera, new_detections, now):
+                logger.debug(f"Audio detections for {camera}: {new_activity}")
+                self.publish(
+                    f"{camera}/audio/all",
+                    "ON" if len(self.current_audio_detections[camera]) > 0 else "OFF",
+                )
+                self.publish(
+                    "audio_detections",
+                    json.dumps(self.current_audio_detections),
+                )
+
+    def compare_audio_activity(
+        self, camera: str, new_detections: list[tuple[str, float]], now: float
+    ) -> None:
+        max_not_heard = self.config.cameras[camera].audio.max_not_heard
+        current = self.current_audio_detections[camera]
+
+        any_changed = False
+
+        for label, score in new_detections:
+            any_changed = True
+            if label in current:
+                current[label]["last_detection"] = now
+                current[label]["score"] = score
+            else:
+                rand_id = "".join(
+                    random.choices(string.ascii_lowercase + string.digits, k=6)
+                )
+                event_id = f"{now}-{rand_id}"
+                self.publish(f"{camera}/audio/{label}", "ON")
+
+                self.event_metadata_publisher.publish(
+                    (
+                        now,
+                        camera,
+                        label,
+                        event_id,
+                        True,
+                        score,
+                        None,
+                        None,
+                        "audio",
+                        {},
+                    ),
+                    EventMetadataTypeEnum.manual_event_create.value,
+                )
+                current[label] = {
+                    "id": event_id,
+                    "score": score,
+                    "last_detection": now,
+                }
+
+        # expire detections
+        for label in list(current.keys()):
+            if now - current[label]["last_detection"] > max_not_heard:
+                any_changed = True
+                self.publish(f"{camera}/audio/{label}", "OFF")
+
+                self.event_metadata_publisher.publish(
+                    (current[label]["id"], now),
+                    EventMetadataTypeEnum.manual_event_end.value,
+                )
+                del current[label]
+
+        return any_changed
+
+    def expire_all(self, camera: str) -> None:
+        now = datetime.datetime.now().timestamp()
+        current = self.current_audio_detections.get(camera, {})
+
+        for label in list(current.keys()):
+            self.publish(f"{camera}/audio/{label}", "OFF")
+
+            self.event_metadata_publisher.publish(
+                (current[label]["id"], now),
+                EventMetadataTypeEnum.manual_event_end.value,
+            )
+            del current[label]

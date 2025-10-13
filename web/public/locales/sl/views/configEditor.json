@@ -12,5 +12,7 @@
       "savingError": "Napaka pri shranjevanju konfiguracije"
     }
   },
-  "confirm": "Izhod brez shranjevanja?"
+  "confirm": "Izhod brez shranjevanja?",
+  "safeConfigEditor": "Urejevalnik konfiguracij (Varni Način)",
+  "safeModeDescription": "Frigate je v varnem načinu zaradi napake pri preverjanju konfiguracije."
 }

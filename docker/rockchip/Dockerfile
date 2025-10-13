@@ -11,7 +11,8 @@ COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 COPY docker/rockchip/requirements-wheels-rk.txt /requirements-wheels-rk.txt
 RUN sed -i "/https:\/\//d" /requirements-wheels.txt
 RUN sed -i "/onnxruntime/d" /requirements-wheels.txt
-RUN pip3 wheel --wheel-dir=/rk-wheels -c /requirements-wheels.txt -r /requirements-wheels-rk.txt
+RUN sed -i '/\[.*\]/d' /requirements-wheels.txt \
+    && pip3 wheel --wheel-dir=/rk-wheels -c /requirements-wheels.txt -r /requirements-wheels-rk.txt
 RUN rm -rf /rk-wheels/opencv_python-*
 RUN rm -rf /rk-wheels/torch-*
 

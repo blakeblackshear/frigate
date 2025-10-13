@@ -1,5 +1,39 @@
 {
   "documentTitle": {
-    "cameras": "Στατιστικά Καμερών - Frigate"
+    "cameras": "Στατιστικά Καμερών - Frigate",
+    "storage": "Στατιστικά αποθήκευσης - Frigate",
+    "general": "Γενικά στατιστικά - Frigate",
+    "enrichments": "Στατιστικά Εμπλουτισμού - Frigate",
+    "logs": {
+      "frigate": "Frigate αρχέιο καταγραφών - Frigate",
+      "go2rtc": "Αρχείο καταγραφής Go2RTC - Frigate",
+      "nginx": "Αρχείο καταγραφών Nginx - Frigate"
+    }
+  },
+  "title": "Σύστημα",
+  "metrics": "Μετρήσεις συστήματος",
+  "logs": {
+    "download": {
+      "label": "Λήψη Αρχείων Καταγραφής"
+    },
+    "copy": {
+      "label": "Αντιγραφή στο πρόχειρο",
+      "success": "Αρχεία καταγραφής αντιγράφτηκαν στο πρόχειρο",
+      "error": "Αποτυχία αντιγραφής των αρχείων καταγραφής στο πρόχειρο"
+    },
+    "type": {
+      "label": "Τύπος",
+      "timestamp": "Χρονοσήμανση",
+      "tag": "Λέξη Κλειδί",
+      "message": "Μήνυμα"
+    }
+  },
+  "general": {
+    "title": "Γενικά",
+    "detector": {
+      "title": "Ανιχνευτές",
+      "inferenceSpeed": "Ταχύτητα Συμπεράσματος Ανιχνευτή",
+      "temperature": "Θερμοκρασία Ανιχνευτή"
+    }
   }
 }

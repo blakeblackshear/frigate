@@ -35,5 +35,7 @@
   "selected": "{{count}} выбрано",
   "selected_one": "{{count}} выбрано",
   "selected_other": "{{count}} выбрано",
-  "detected": "обнаружен"
+  "detected": "обнаружен",
+  "suspiciousActivity": "Подозрительная активность",
+  "threateningActivity": "Угрожающая активность"
 }

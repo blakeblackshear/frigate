@@ -244,8 +244,8 @@ export default function EnrichmentsSettingsView({
   return (
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
-        <Heading as="h3" className="my-2">
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
+        <Heading as="h4" className="mb-2">
           {t("enrichments.title")}
         </Heading>
         <Separator className="my-2 flex bg-secondary" />
@@ -263,7 +263,7 @@ export default function EnrichmentsSettingsView({
                 rel="noopener noreferrer"
                 className="inline"
               >
-                {t("enrichments.semanticSearch.readTheDocumentation")}
+                {t("readTheDocumentation", { ns: "common" })}
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
             </div>
@@ -409,7 +409,7 @@ export default function EnrichmentsSettingsView({
                   rel="noopener noreferrer"
                   className="inline"
                 >
-                  {t("enrichments.faceRecognition.readTheDocumentation")}
+                  {t("readTheDocumentation", { ns: "common" })}
                   <LuExternalLink className="ml-2 inline-flex size-3" />
                 </Link>
               </div>
@@ -512,9 +512,7 @@ export default function EnrichmentsSettingsView({
                   rel="noopener noreferrer"
                   className="inline"
                 >
-                  {t(
-                    "enrichments.licensePlateRecognition.readTheDocumentation",
-                  )}
+                  {t("readTheDocumentation", { ns: "common" })}
                   <LuExternalLink className="ml-2 inline-flex size-3" />
                 </Link>
               </div>
@@ -558,7 +556,7 @@ export default function EnrichmentsSettingsView({
                   rel="noopener noreferrer"
                   className="inline"
                 >
-                  {t("enrichments.semanticSearch.readTheDocumentation")}
+                  {t("readTheDocumentation", { ns: "common" })}
                   <LuExternalLink className="ml-2 inline-flex size-3" />
                 </Link>
               </div>

@@ -1,0 +1,43 @@
+{
+  "label": "Global snapshots configuration.",
+  "properties": {
+    "enabled": {
+      "label": "Snapshots enabled."
+    },
+    "clean_copy": {
+      "label": "Create a clean copy of the snapshot image."
+    },
+    "timestamp": {
+      "label": "Add a timestamp overlay on the snapshot."
+    },
+    "bounding_box": {
+      "label": "Add a bounding box overlay on the snapshot."
+    },
+    "crop": {
+      "label": "Crop the snapshot to the detected object."
+    },
+    "required_zones": {
+      "label": "List of required zones to be entered in order to save a snapshot."
+    },
+    "height": {
+      "label": "Snapshot image height."
+    },
+    "retain": {
+      "label": "Snapshot retention.",
+      "properties": {
+        "default": {
+          "label": "Default retention period."
+        },
+        "mode": {
+          "label": "Retain mode."
+        },
+        "objects": {
+          "label": "Object retention period."
+        }
+      }
+    },
+    "quality": {
+      "label": "Quality of the encoded jpeg (0-100)."
+    }
+  }
+}

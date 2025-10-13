@@ -11,6 +11,9 @@ class ObjectTracker(ABC):
 
     @abstractmethod
     def match_and_update(
-        self, frame_name: str, frame_time: float, detections: list[dict[str, Any]]
+        self,
+        frame_name: str,
+        frame_time: float,
+        detections: list[tuple[Any, Any, Any, Any, Any, Any]],
     ) -> None:
         pass

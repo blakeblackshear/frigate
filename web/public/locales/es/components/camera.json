@@ -66,7 +66,8 @@
         "desc": "Cambia las opciones de transmisión en vivo para el panel de control de este grupo de cámaras. <em>Estos ajustes son específicos del dispositivo/navegador.</em>",
         "placeholder": "Elige una transmisión",
         "stream": "Transmitir"
-      }
+      },
+      "birdseye": "Vista Aérea"
     }
   },
   "debug": {

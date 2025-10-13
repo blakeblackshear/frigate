@@ -130,7 +130,7 @@
       "meters": "metry"
     }
   },
-  "selectItem": "Vyberte {{item}}",
+  "selectItem": "Vybrat {{item}}",
   "menu": {
     "documentation": {
       "label": "Dokumentace Frigate",
@@ -185,7 +185,15 @@
       "hu": "Magyar (Maďarština)",
       "pl": "Polski (Polština)",
       "th": "ไทย (Thaiština)",
-      "ca": "Català (Katalánština)"
+      "ca": "Català (Katalánština)",
+      "sl": "Slovinština (Slovinsko)",
+      "ptBR": "Português brasileiro (Brazilian Portuguese)",
+      "sr": "Српски (Serbian)",
+      "lt": "Lietuvių (Lithuanian)",
+      "bg": "Български (Bulgarian)",
+      "gl": "Galego (Galician)",
+      "id": "Bahasa Indonesia (Indonesian)",
+      "ur": "اردو (Urdu)"
     },
     "theme": {
       "highcontrast": "Vysoký kontrast",
@@ -261,5 +269,6 @@
     "admin": "Správce",
     "viewer": "Divák",
     "desc": "Správci mají plný přístup ke všem funkcím v uživatelském rozhraní Frigate. Diváci jsou omezeni na sledování kamer, položek přehledu a historických záznamů v UI."
-  }
+  },
+  "readTheDocumentation": "Přečtěte si dokumentaci"
 }

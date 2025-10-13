@@ -43,7 +43,15 @@
         "label": "Klikněte do snímku pro vycentrování PTZ kamery"
       }
     },
-    "presets": "Předvolby PTZ kamery"
+    "presets": "Předvolby PTZ kamery",
+    "focus": {
+      "in": {
+        "label": "Zaostření PTZ kamery"
+      },
+      "out": {
+        "label": "Rozostření PTZ kamery"
+      }
+    }
   },
   "camera": {
     "enable": "Povolit kameru",
@@ -103,7 +111,7 @@
     "forTime": "Pozastavení na: "
   },
   "stream": {
-    "title": "Stream",
+    "title": "Proud",
     "audio": {
       "tips": {
         "title": "Zvuk musí být kamerou vysílán a nakonfigurován v go2rtc pro tento stream.",
@@ -134,7 +142,8 @@
     "snapshots": "Snímky",
     "audioDetection": "Detekce Zvuku",
     "autotracking": "Automatické sledování",
-    "recording": "Nahrávání"
+    "recording": "Nahrávání",
+    "transcription": "Zvukový přepis"
   },
   "history": {
     "label": "Zobrazit historické záznamy"
@@ -154,5 +163,9 @@
       "label": "Upravit Skupinu Kamer"
     }
   },
-  "notifications": "Notifikace"
+  "notifications": "Notifikace",
+  "transcription": {
+    "enable": "Povolit živý přepis zvuku",
+    "disable": "Zakázat živý přepis zvuku"
+  }
 }

@@ -78,6 +78,8 @@ import { TbFaceId } from "react-icons/tb";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import FaceSelectionDialog from "../FaceSelectionDialog";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { CgTranscript } from "react-icons/cg";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 
 const SEARCH_TABS = [
   "details",
@@ -710,6 +712,34 @@ function ObjectDetailsTab({
     [search, t],
   );
 
+  // speech transcription
+
+  const onTranscribe = useCallback(() => {
+    axios
+      .put(`/audio/transcribe`, { event_id: search.id })
+      .then((resp) => {
+        if (resp.status == 202) {
+          toast.success(t("details.item.toast.success.audioTranscription"), {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(
+          t("details.item.toast.error.audioTranscription", {
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
+      });
+  }, [search, t]);
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
@@ -835,7 +865,7 @@ function ObjectDetailsTab({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.camera")}</div>
             <div className="text-sm smart-capitalize">
-              {search.camera.replaceAll("_", " ")}
+              <CameraNameLabel camera={search.camera} />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -893,18 +923,31 @@ function ObjectDetailsTab({
                 </Button>
               </FaceSelectionDialog>
             )}
+            {config?.cameras[search?.camera].audio_transcription.enabled &&
+              search?.label == "speech" &&
+              search?.end_time && (
+                <Button className="w-full" onClick={onTranscribe}>
+                  <div className="flex gap-1">
+                    <CgTranscript />
+                    {t("itemMenu.audioTranscription.label")}
+                  </div>
+                </Button>
+              )}
           </div>
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        {config?.cameras[search.camera].genai.enabled &&
+        {config?.cameras[search.camera].objects.genai.enabled &&
         !search.end_time &&
-        (config.cameras[search.camera].genai.required_zones.length === 0 ||
+        (config.cameras[search.camera].objects.genai.required_zones.length ===
+          0 ||
           search.zones.some((zone) =>
-            config.cameras[search.camera].genai.required_zones.includes(zone),
+            config.cameras[search.camera].objects.genai.required_zones.includes(
+              zone,
+            ),
           )) &&
-        (config.cameras[search.camera].genai.objects.length === 0 ||
-          config.cameras[search.camera].genai.objects.includes(
+        (config.cameras[search.camera].objects.genai.objects.length === 0 ||
+          config.cameras[search.camera].objects.genai.objects.includes(
             search.label,
           )) ? (
           <>
@@ -933,47 +976,49 @@ function ObjectDetailsTab({
         )}
 
         <div className="flex w-full flex-row justify-end gap-2">
-          {config?.cameras[search.camera].genai.enabled && search.end_time && (
-            <div className="flex items-start">
-              <Button
-                className="rounded-r-none border-r-0"
-                aria-label={t("details.button.regenerate.label")}
-                onClick={() => regenerateDescription("thumbnails")}
-              >
-                {t("details.button.regenerate.title")}
-              </Button>
-              {search.has_snapshot && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className="rounded-l-none border-l-0 px-2"
-                      aria-label={t("details.expandRegenerationMenu")}
-                    >
-                      <FaChevronDown className="size-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      aria-label={t("details.regenerateFromSnapshot")}
-                      onClick={() => regenerateDescription("snapshot")}
-                    >
-                      {t("details.regenerateFromSnapshot")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      aria-label={t("details.regenerateFromThumbnails")}
-                      onClick={() => regenerateDescription("thumbnails")}
-                    >
-                      {t("details.regenerateFromThumbnails")}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          )}
-          {((config?.cameras[search.camera].genai.enabled && search.end_time) ||
-            !config?.cameras[search.camera].genai.enabled) && (
+          {config?.cameras[search.camera].objects.genai.enabled &&
+            search.end_time && (
+              <div className="flex items-start">
+                <Button
+                  className="rounded-r-none border-r-0"
+                  aria-label={t("details.button.regenerate.label")}
+                  onClick={() => regenerateDescription("thumbnails")}
+                >
+                  {t("details.button.regenerate.title")}
+                </Button>
+                {search.has_snapshot && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        className="rounded-l-none border-l-0 px-2"
+                        aria-label={t("details.expandRegenerationMenu")}
+                      >
+                        <FaChevronDown className="size-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        aria-label={t("details.regenerateFromSnapshot")}
+                        onClick={() => regenerateDescription("snapshot")}
+                      >
+                        {t("details.regenerateFromSnapshot")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        aria-label={t("details.regenerateFromThumbnails")}
+                        onClick={() => regenerateDescription("thumbnails")}
+                      >
+                        {t("details.regenerateFromThumbnails")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            )}
+          {((config?.cameras[search.camera].objects.genai.enabled &&
+            search.end_time) ||
+            !config?.cameras[search.camera].objects.genai.enabled) && (
             <Button
               variant="select"
               aria-label={t("button.save", { ns: "common" })}
@@ -1125,11 +1170,7 @@ export function ObjectSnapshotTab({
                 <Card className="p-1 text-sm md:p-2">
                   <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
                     <div className={cn("flex flex-col space-y-3")}>
-                      <div
-                        className={
-                          "text-lg font-semibold leading-none tracking-tight"
-                        }
-                      >
+                      <div className={"text-lg leading-none"}>
                         {t("explore.plus.submitToPlus.label")}
                       </div>
                       <div className="text-sm text-muted-foreground">

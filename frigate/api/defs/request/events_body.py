@@ -2,6 +2,8 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from frigate.config.classification import TriggerType
+
 
 class EventsSubLabelBody(BaseModel):
     subLabel: str = Field(title="Sub label", max_length=100)
@@ -45,3 +47,9 @@ class EventsDeleteBody(BaseModel):
 
 class SubmitPlusBody(BaseModel):
     include_annotation: int = Field(default=1)
+
+
+class TriggerEmbeddingBody(BaseModel):
+    type: TriggerType
+    data: str
+    threshold: float = Field(default=0.5, ge=0.0, le=1.0)

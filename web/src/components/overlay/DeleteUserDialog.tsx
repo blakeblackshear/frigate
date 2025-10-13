@@ -60,7 +60,7 @@ export default function DeleteUserDialog({
               <Button
                 variant="destructive"
                 aria-label={t("button.delete", { ns: "common" })}
-                className="flex flex-1"
+                className="flex flex-1 text-white"
                 onClick={onDelete}
               >
                 {t("button.delete", { ns: "common" })}

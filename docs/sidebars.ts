@@ -5,14 +5,14 @@ import frigateHttpApiSidebar from "./docs/integrations/api/sidebar";
 const sidebars: SidebarsConfig = {
   docs: {
     Frigate: [
-      'frigate/index',
-      'frigate/hardware',
-      'frigate/planning_setup',
-      'frigate/installation',
-      'frigate/updating',
-      'frigate/camera_setup',
-      'frigate/video_pipeline',
-      'frigate/glossary',
+      "frigate/index",
+      "frigate/hardware",
+      "frigate/planning_setup",
+      "frigate/installation",
+      "frigate/updating",
+      "frigate/camera_setup",
+      "frigate/video_pipeline",
+      "frigate/glossary",
     ],
     Guides: [
       "guides/getting_started",
@@ -28,7 +28,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "link",
           label: "Go2RTC Configuration Reference",
-          href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.9#configuration",
+          href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.10#configuration",
         } as PropSidebarItemLink,
       ],
       Detectors: [
@@ -37,10 +37,36 @@ const sidebars: SidebarsConfig = {
       ],
       Enrichments: [
         "configuration/semantic_search",
-        "configuration/genai",
         "configuration/face_recognition",
         "configuration/license_plate_recognition",
         "configuration/bird_classification",
+        {
+          type: "category",
+          label: "Custom Classification",
+          link: {
+            type: "generated-index",
+            title: "Custom Classification",
+            description: "Configuration for custom classification models",
+          },
+          items: [
+            "configuration/custom_classification/state_classification",
+            "configuration/custom_classification/object_classification",
+          ],
+        },
+        {
+          type: "category",
+          label: "Generative AI",
+          link: {
+            type: "generated-index",
+            title: "Generative AI",
+            description: "Generative AI Features",
+          },
+          items: [
+            "configuration/genai/genai_config",
+            "configuration/genai/genai_review",
+            "configuration/genai/genai_objects",
+          ],
+        },
       ],
       Cameras: [
         "configuration/cameras",
@@ -90,14 +116,15 @@ const sidebars: SidebarsConfig = {
         items: frigateHttpApiSidebar,
       },
       "integrations/mqtt",
+      "integrations/homekit",
       "configuration/metrics",
       "integrations/third_party_extensions",
     ],
-    'Frigate+': [
-      'plus/index',
-      'plus/annotating',
-      'plus/first_model',
-      'plus/faq',
+    "Frigate+": [
+      "plus/index",
+      "plus/annotating",
+      "plus/first_model",
+      "plus/faq",
     ],
     Troubleshooting: [
       "troubleshooting/faqs",

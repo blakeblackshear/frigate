@@ -1,1 +1,26 @@
-{}
+{
+  "submitFrigatePlus": {
+    "submit": "제출",
+    "title": "이 프레임을 Frigate+로 전송하시겠습니까?"
+  },
+  "stats": {
+    "bandwidth": {
+      "short": "대역폭",
+      "title": "대역폭:"
+    },
+    "latency": {
+      "short": {
+        "title": "지연"
+      },
+      "title": "지연:"
+    },
+    "streamType": {
+      "short": "종류",
+      "title": "스트림 종류:"
+    },
+    "totalFrames": "총 프레임:"
+  },
+  "noRecordingsFoundForThisTime": "이 시간에는 녹화본이 없습니다",
+  "noPreviewFound": "미리 보기가 없습니다",
+  "noPreviewFoundFor": "{{cameraName}}에 미리보기가 없습니다"
+}

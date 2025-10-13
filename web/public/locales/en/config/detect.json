@@ -1,0 +1,51 @@
+{
+  "label": "Global object tracking configuration.",
+  "properties": {
+    "enabled": {
+      "label": "Detection Enabled."
+    },
+    "height": {
+      "label": "Height of the stream for the detect role."
+    },
+    "width": {
+      "label": "Width of the stream for the detect role."
+    },
+    "fps": {
+      "label": "Number of frames per second to process through detection."
+    },
+    "min_initialized": {
+      "label": "Minimum number of consecutive hits for an object to be initialized by the tracker."
+    },
+    "max_disappeared": {
+      "label": "Maximum number of frames the object can disappear before detection ends."
+    },
+    "stationary": {
+      "label": "Stationary objects config.",
+      "properties": {
+        "interval": {
+          "label": "Frame interval for checking stationary objects."
+        },
+        "threshold": {
+          "label": "Number of frames without a position change for an object to be considered stationary"
+        },
+        "max_frames": {
+          "label": "Max frames for stationary objects.",
+          "properties": {
+            "default": {
+              "label": "Default max frames."
+            },
+            "objects": {
+              "label": "Object specific max frames."
+            }
+          }
+        },
+        "classifier": {
+          "label": "Enable visual classifier for determing if objects with jittery bounding boxes are stationary."
+        }
+      }
+    },
+    "annotation_offset": {
+      "label": "Milliseconds to offset detect annotations by."
+    }
+  }
+}

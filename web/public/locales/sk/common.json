@@ -39,7 +39,97 @@
     "hour_few": "{{time}}hodiny",
     "hour_other": "{{time}}hodin",
     "m": "{{time}} min",
-    "s": "{{time}}s"
+    "s": "{{time}}s",
+    "minute_one": "{{time}}minuta",
+    "minute_few": "{{time}}minuty",
+    "minute_other": "{{time}}minut",
+    "second_one": "{{time}}sekunda",
+    "second_few": "{{time}}sekundy",
+    "second_other": "{{time}}sekund",
+    "formattedTimestamp": {
+      "12hour": "Deň MMM, h:mm:ss aaa",
+      "24hour": "Deň MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    }
   },
-  "selectItem": "Vyberte {{item}}"
+  "selectItem": "Vyberte {{item}}",
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "Km/h"
+    },
+    "length": {
+      "feet": "nohy",
+      "meters": "metrov"
+    }
+  },
+  "readTheDocumentation": "Prečítajte si dokumentáciu",
+  "label": {
+    "back": "Choď späť"
+  },
+  "button": {
+    "apply": "Použiť",
+    "reset": "Resetovať",
+    "done": "Hotovo",
+    "enabled": "Povolené",
+    "enable": "Povoliť",
+    "disabled": "Zakázané",
+    "disable": "Zakázať",
+    "save": "Uložiť",
+    "saving": "Ukladá sa…",
+    "cancel": "Zrušiť",
+    "close": "Zavrieť",
+    "copy": "Kopírovať",
+    "back": "Späť",
+    "history": "História",
+    "fullscreen": "Celá obrazovka",
+    "exitFullscreen": "Opustiť režim celú obrazovku",
+    "pictureInPicture": "Obraz v obraze",
+    "twoWayTalk": "Obojsmerná komunikácia",
+    "cameraAudio": "Zvuk kamery",
+    "on": "ON",
+    "off": "OFF",
+    "edit": "Upraviť",
+    "copyCoordinates": "Kopírovať súradnice",
+    "delete": "Odstrániť",
+    "yes": "Ano",
+    "no": "Nie",
+    "download": "Stiahnuť",
+    "info": "Informacie",
+    "suspended": "Pozastavené",
+    "export": "Exportovať",
+    "deleteNow": "Odstrániť teraz",
+    "next": "Ďalej"
+  },
+  "menu": {
+    "system": "Systém"
+  }
 }

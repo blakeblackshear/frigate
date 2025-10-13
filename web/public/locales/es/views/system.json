@@ -42,7 +42,8 @@
       "inferenceSpeed": "Velocidad de inferencia del detector",
       "cpuUsage": "Uso de CPU del Detector",
       "memoryUsage": "Uso de Memoria del Detector",
-      "temperature": "Detector de Temperatura"
+      "temperature": "Detector de Temperatura",
+      "cpuUsageInformation": "CPU utilizado para preparar los datos de entrada y salida desde/hacia la detección del modelo. Este valor no mide el uso de inferencia, incluso si se está utilizando una GPU o un acelerador."
     },
     "hardwareInfo": {
       "title": "Información de Hardware",
@@ -102,6 +103,10 @@
       "title": "Almacenamiento de la Cámara",
       "storageUsed": "Almacenamiento",
       "unusedStorageInformation": "Información de Almacenamiento No Utilizado"
+    },
+    "shm": {
+      "title": "Asignación SHM (memoria compartida)",
+      "warning": "El tamaño actual de SHM de {{total}}MB es muy pequeño. Aumente al menos a {{min_shm}}MB."
     }
   },
   "cameras": {
@@ -175,6 +180,7 @@
     "reindexingEmbeddings": "Reindexando incrustaciones ({{processed}}% completado)",
     "detectIsSlow": "{{detect}} es lento ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} está desconectada",
-    "detectIsVerySlow": "{{detect}} es muy lento ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} es muy lento ({{speed}} ms)",
+    "shmTooLow": "Asignación de /dev/shm ({{total}} MB) debe aumentarse al menos a {{min}} MB."
   }
 }

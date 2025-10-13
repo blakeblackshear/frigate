@@ -1,7 +1,40 @@
 {
   "detections": "検出",
   "motion": {
-    "label": "動作"
+    "label": "モーション",
+    "only": "モーションのみ"
   },
-  "alerts": "アラート"
+  "alerts": "アラート",
+  "empty": {
+    "detection": "レビューする検出はありません",
+    "alert": "レビューするアラートはありません",
+    "motion": "モーションデータは見つかりません"
+  },
+  "camera": "カメラ",
+  "allCameras": "全カメラ",
+  "timeline": "タイムライン",
+  "timeline.aria": "タイムラインを選択",
+  "events": {
+    "label": "イベント",
+    "aria": "イベントを選択",
+    "noFoundForTimePeriod": "この期間のイベントは見つかりません。"
+  },
+  "documentTitle": "レビュー - Frigate",
+  "recordings": {
+    "documentTitle": "録画 - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "直近24時間"
+  },
+  "markAsReviewed": "レビュー済みにする",
+  "markTheseItemsAsReviewed": "これらの項目をレビュー済みにする",
+  "newReviewItems": {
+    "label": "新しいレビュー項目を表示",
+    "button": "レビューすべき新規項目"
+  },
+  "selected_one": "{{count}} 件選択",
+  "selected_other": "{{count}} 件選択",
+  "detected": "検出",
+  "suspiciousActivity": "不審なアクティビティ",
+  "threateningActivity": "脅威となるアクティビティ"
 }

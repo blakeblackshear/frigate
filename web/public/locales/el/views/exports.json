@@ -1,5 +1,17 @@
 {
   "documentTitle": "Εξαγωγή - Frigate",
   "search": "Αναζήτηση",
-  "deleteExport": "Διαγραφή εξαγωγής"
+  "deleteExport": "Διαγραφή εξαγωγής",
+  "noExports": "Δεν βρέθηκαν εξαγωγές",
+  "deleteExport.desc": "Είστε σίγουροι οτι θέλετε να διαγράψετε {{exportName}};",
+  "editExport": {
+    "title": "Μετονομασία Εξαγωγής",
+    "desc": "Εισάγετε ένα νέο όνομα για την εξαγωγή.",
+    "saveExport": "Αποθήκευση Εξαγωγής"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Αποτυχία μετονομασίας εξαγωγής:{{errorMessage}}"
+    }
+  }
 }

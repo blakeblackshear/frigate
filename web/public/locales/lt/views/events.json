@@ -34,5 +34,7 @@
     "label": "Pamatyti naujus peržiūros įrašus",
     "button": "Nauji Įrašai Peržiūrėjimui"
   },
-  "detected": "aptikta"
+  "detected": "aptikta",
+  "suspiciousActivity": "Įtartina Veikla",
+  "threateningActivity": "Grėsminga Veikla"
 }

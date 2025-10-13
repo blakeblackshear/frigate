@@ -1,0 +1,23 @@
+{
+  "label": "UI configuration.",
+  "properties": {
+    "timezone": {
+      "label": "Override UI timezone."
+    },
+    "time_format": {
+      "label": "Override UI time format."
+    },
+    "date_style": {
+      "label": "Override UI dateStyle."
+    },
+    "time_style": {
+      "label": "Override UI timeStyle."
+    },
+    "strftime_fmt": {
+      "label": "Override date and time format using strftime syntax."
+    },
+    "unit_system": {
+      "label": "The unit system to use for measurements."
+    }
+  }
+}

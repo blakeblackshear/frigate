@@ -27,5 +27,6 @@
     "year_few": "2,3,4,22,23,24,32,33,34,42,...",
     "year_other": "",
     "mo": "{{time}}mes"
-  }
+  },
+  "readTheDocumentation": "Прочитајте документацију"
 }

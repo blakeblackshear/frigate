@@ -22,7 +22,8 @@
     "notifications": "Meldingen",
     "cameras": "Camera-instellingen",
     "frigateplus": "Frigate+",
-    "enrichments": "Verrijkingen"
+    "enrichments": "Verrijkingen",
+    "triggers": "Triggers"
   },
   "dialog": {
     "unsavedChanges": {
@@ -178,7 +179,45 @@
       "desc": "Schakel een camera tijdelijk uit totdat Frigate opnieuw wordt gestart. Het uitschakelen van een camera stopt de verwerking van de streams van deze camera volledig door Frigate. Detectie, opname en foutopsporing zijn dan niet beschikbaar.<br /> <em>Let op: dit schakelt go2rtc-restreams niet uit.</em>",
       "title": "Streams"
     },
-    "title": "Camera-instellingen"
+    "title": "Camera-instellingen",
+    "object_descriptions": {
+      "title": "AI-gegenereerde objectomschrijvingen",
+      "desc": "AI-gegenereerde objectomschrijvingen tijdelijk uitschakelen voor deze camera. Wanneer uitgeschakeld, zullen omschrijvingen van gevolgde objecten op deze camera niet aangevraagd worden."
+    },
+    "review_descriptions": {
+      "title": "Generatieve-AI Beoordelingsbeschrijvingen",
+      "desc": "Tijdelijk generatieve-AI-beoordelingsbeschrijvingen voor deze camera in- of uitschakelen. Wanneer dit is uitgeschakeld, worden er geen door AI gegenereerde beschrijvingen opgevraagd voor beoordelingsitems van deze camera."
+    },
+    "addCamera": "Nieuwe camera toevoegen",
+    "editCamera": "Camera bewerken:",
+    "selectCamera": "Selecteer een camera",
+    "backToSettings": "Terug naar camera-instellingen",
+    "cameraConfig": {
+      "add": "Camera toevoegen",
+      "edit": "Camera bewerken",
+      "description": "Configureer de camera-instellingen, inclusief streaming-inputs en functies.",
+      "name": "Cameranaam",
+      "nameRequired": "Cameranaam is vereist",
+      "nameInvalid": "De cameranaam mag alleen letters, cijfers, onderstrepingstekens of koppeltekens bevatten",
+      "namePlaceholder": "bijv. voor_deur",
+      "enabled": "Ingeschakeld",
+      "ffmpeg": {
+        "inputs": "Streams-Input",
+        "path": "Stroompad",
+        "pathRequired": "Streampad is vereist",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Functie",
+        "rolesRequired": "Er is ten minste één functie vereist",
+        "rolesUnique": "Elke functie (audio, detecteren, opnemen) kan slechts aan één stream worden toegewezen",
+        "addInput": "Inputstream toevoegen",
+        "removeInput": "Inputstream verwijderen",
+        "inputsRequired": "Er is ten minste één stream-input vereist"
+      },
+      "toast": {
+        "success": "Camera {{cameraName}} is succesvol opgeslagen"
+      },
+      "nameLength": "Cameranaam mag niet langer zijn dan 24 tekens."
+    }
   },
   "masksAndZones": {
     "filter": {
@@ -420,7 +459,20 @@
       "score": "Score",
       "ratio": "Verhouding"
     },
-    "detectorDesc": "Frigate gebruikt je detectoren ({{detectors}}) om objecten in de videostream van je camera te detecteren."
+    "detectorDesc": "Frigate gebruikt je detectoren ({{detectors}}) om objecten in de videostream van je camera te detecteren.",
+    "paths": {
+      "title": "Paden",
+      "desc": "Toon belangrijke punten van het pad van het gevolgde object",
+      "tips": "<p><strong>Paden</strong></p><br><p>Lijnen en cirkels geven belangrijke punten aan waar het gevolgde object zich tijdens zijn levensduur heeft verplaatst.</p>"
+    },
+    "openCameraWebUI": "Open de webinterface van {{camera}}",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Geen audiodetecties",
+      "score": "score",
+      "currentRMS": "Huidige RMS",
+      "currentdbFS": "Huidige dbFS"
+    }
   },
   "users": {
     "title": "Gebruikers",
@@ -506,7 +558,8 @@
           "admin": "Beheerder",
           "adminDesc": "Volledige toegang tot alle functies.",
           "viewer": "Gebruiker",
-          "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports."
+          "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports.",
+          "customDesc": "Aangepaste rol met specifieke cameratoegang."
         },
         "select": "Selecteer een rol"
       },
@@ -679,6 +732,161 @@
     "toast": {
       "success": "Verrijkingsinstellingen zijn opgeslagen. Start Frigate opnieuw op om je wijzigingen toe te passen.",
       "error": "Configuratiewijzigingen konden niet worden opgeslagen: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Triggers",
+    "management": {
+      "title": "Triggerbeheer",
+      "desc": "Beheer triggers voor {{camera}}. Gebruik een thumbnail om te triggeren op vergelijkbare thumbnails van het door jou gevolgde object, of gebruik een objectbeschrijving om te triggeren op vergelijkbare beschrijvingen van de door jou opgegeven tekst."
+    },
+    "addTrigger": "Trigger toevoegen",
+    "table": {
+      "name": "Naam",
+      "type": "Type",
+      "content": "Inhoud",
+      "threshold": "Drempel",
+      "actions": "Acties",
+      "noTriggers": "Er zijn geen triggers geconfigureerd voor deze camera.",
+      "edit": "Bewerken",
+      "deleteTrigger": "Trigger verwijderen",
+      "lastTriggered": "Laatst geactiveerd"
+    },
+    "type": {
+      "thumbnail": "Thumbnail",
+      "description": "Beschrijving"
+    },
+    "actions": {
+      "alert": "Markeren als waarschuwing",
+      "notification": "Melding verzenden"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Trigger aanmaken",
+        "desc": "Maak een trigger voor camera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Trigger bewerken",
+        "desc": "Wijzig de instellingen voor de trigger op camera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Trigger verwijderen",
+        "desc": "Weet u zeker dat u de trigger <strong>{{triggerName}}</strong> wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+      },
+      "form": {
+        "name": {
+          "title": "Naam",
+          "placeholder": "Voer de naam van de trigger in",
+          "error": {
+            "minLength": "De naam moet minimaal 2 tekens lang zijn.",
+            "invalidCharacters": "De naam mag alleen letters, cijfers, onderstrepingstekens en koppeltekens bevatten.",
+            "alreadyExists": "Er bestaat al een trigger met deze naam voor deze camera."
+          }
+        },
+        "enabled": {
+          "description": "Deze trigger in- of uitschakelen"
+        },
+        "type": {
+          "title": "Type",
+          "placeholder": "Selecteer het type trigger"
+        },
+        "content": {
+          "title": "Inhoud",
+          "imagePlaceholder": "Selecteer een afbeelding",
+          "textPlaceholder": "Tekst invoeren",
+          "imageDesc": "Selecteer een afbeelding om deze actie te activeren wanneer een vergelijkbare afbeelding wordt gedetecteerd.",
+          "textDesc": "Voer tekst in om deze actie te activeren wanneer een vergelijkbare beschrijving van een gevolgd object wordt gedetecteerd.",
+          "error": {
+            "required": "Inhoud is vereist."
+          }
+        },
+        "threshold": {
+          "title": "Drempel",
+          "error": {
+            "min": "De drempelwaarde moet minimaal 0 zijn",
+            "max": "De drempelwaarde mag maximaal 1 zijn"
+          }
+        },
+        "actions": {
+          "title": "Acties",
+          "desc": "Standaard verstuurt Frigate een MQTT-bericht voor alle triggers. Kies een extra actie die moet worden uitgevoerd wanneer deze trigger wordt geactiveerd.",
+          "error": {
+            "min": "Er moet ten minste één actie worden geselecteerd."
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Trigger {{name}} is succesvol aangemaakt.",
+        "updateTrigger": "Trigger {{name}} is succesvol bijgewerkt.",
+        "deleteTrigger": "Trigger {{name}} succesvol verwijderd."
+      },
+      "error": {
+        "createTriggerFailed": "Trigger kan niet worden gemaakt: {{errorMessage}}",
+        "updateTriggerFailed": "Trigger kan niet worden bijgewerkt: {{errorMessage}}",
+        "deleteTriggerFailed": "Trigger kan niet worden verwijderd: {{errorMessage}}"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Beheer van kijkersrollen",
+      "desc": "Beheer aangepaste kijkersrollen en hun camera-toegangsrechten voor deze Frigate-instantie."
+    },
+    "addRole": "Rol toevoegen",
+    "table": {
+      "role": "Rol",
+      "cameras": "Camera's",
+      "actions": "Acties",
+      "noRoles": "Er zijn geen aangepaste rollen gevonden.",
+      "editCameras": "Camera's bewerken",
+      "deleteRole": "Rol verwijderen"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rol {{role}} succesvol aangemaakt",
+        "updateCameras": "Camera's bijgewerkt voor rol {{role}}",
+        "deleteRole": "Rol {{role}} succesvol verwijderd",
+        "userRolesUpdated": "{{count}} gebruiker(s) die aan deze rol waren toegewezen, zijn bijgewerkt naar ‘kijker’, die toegang heeft tot alle camera’s."
+      },
+      "error": {
+        "createRoleFailed": "Kan rol niet aanmaken: {{errorMessage}}",
+        "updateCamerasFailed": "Het is niet gelukt om de camera's bij te werken: {{errorMessage}}",
+        "deleteRoleFailed": "Kan rol niet verwijderen: {{errorMessage}}",
+        "userUpdateFailed": "Het bijwerken van gebruikersrollen is mislukt: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Nieuwe rol maken",
+        "desc": "Voeg een nieuwe rol toe en specificeer de camera-toegangsrechten."
+      },
+      "editCameras": {
+        "title": "Camera’s voor rol bewerken",
+        "desc": "Werk de camera-toegang bij voor de rol <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Rol verwijderen",
+        "desc": "Deze actie kan niet ongedaan worden gemaakt. De rol wordt permanent verwijderd en alle gebruikers met deze rol worden toegewezen aan de rol ‘kijker’, die toegang geeft tot alle camera’s.",
+        "warn": "Weet u zeker dat u <strong>{{role}}</strong> wilt verwijderen?",
+        "deleting": "Verwijderen..."
+      },
+      "form": {
+        "role": {
+          "title": "Rolnaam",
+          "placeholder": "Voer rolnaam in",
+          "desc": "Alleen letters, cijfers, punten en underscores zijn toegestaan.",
+          "roleIsRequired": "Rolnaam is vereist",
+          "roleOnlyInclude": "De rolnaam mag alleen letters, cijfers, . of _ bevatten",
+          "roleExists": "Er bestaat al een rol met deze naam."
+        },
+        "cameras": {
+          "title": "Camera's",
+          "desc": "Selecteer de camera's waartoe deze rol toegang heeft. Er is minimaal één camera vereist.",
+          "required": "Er moet minimaal één camera worden geselecteerd."
+        }
+      }
     }
   }
 }

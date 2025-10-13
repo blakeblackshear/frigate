@@ -1,7 +1,812 @@
 {
   "documentTitle": {
     "authentication": "認証設定 - Frigate",
-    "camera": "カメラの設定 - Frigate",
-    "default": "設定 - Frigate"
+    "camera": "カメラ設定 - Frigate",
+    "default": "設定 - Frigate",
+    "enrichments": "エンリッチメント設定 - Frigate",
+    "masksAndZones": "マスク／ゾーンエディタ - Frigate",
+    "motionTuner": "モーションチューナー - Frigate",
+    "object": "デバッグ - Frigate",
+    "general": "一般設定 - Frigate",
+    "frigatePlus": "Frigate+ 設定 - Frigate",
+    "notifications": "通知設定 - Frigate"
+  },
+  "menu": {
+    "ui": "UI",
+    "enrichments": "エンリッチメント",
+    "cameras": "カメラ設定",
+    "masksAndZones": "マスク／ゾーン",
+    "motionTuner": "モーションチューナー",
+    "triggers": "トリガー",
+    "debug": "デバッグ",
+    "users": "ユーザー",
+    "notifications": "通知",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "未保存の変更があります。",
+      "desc": "続行する前に変更を保存しますか？"
+    }
+  },
+  "cameraSetting": {
+    "camera": "カメラ",
+    "noCamera": "カメラなし"
+  },
+  "general": {
+    "title": "一般設定",
+    "liveDashboard": {
+      "title": "ライブダッシュボード",
+      "automaticLiveView": {
+        "label": "自動ライブビュー",
+        "desc": "アクティビティ検知時に自動でそのカメラのライブビューへ切り替えます。無効にすると、ライブダッシュボード上の静止画像は1分に1回のみ更新されます。"
+      },
+      "playAlertVideos": {
+        "label": "アラート動画を再生",
+        "desc": "既定では、ライブダッシュボードの最近のアラートは小さなループ動画として再生されます。無効にすると、最近のアラートはこのデバイス／ブラウザでは静止画像のみ表示されます。"
+      }
+    },
+    "storedLayouts": {
+      "title": "保存済みレイアウト",
+      "desc": "カメラグループ内のレイアウトはドラッグ／リサイズできます。位置情報はブラウザのローカルストレージに保存されます。",
+      "clearAll": "すべてのレイアウトをクリア"
+    },
+    "cameraGroupStreaming": {
+      "title": "カメラグループのストリーミング設定",
+      "desc": "各カメラグループのストリーミング設定はブラウザのローカルストレージに保存されます。",
+      "clearAll": "すべてのストリーミング設定をクリア"
+    },
+    "recordingsViewer": {
+      "title": "録画ビューア",
+      "defaultPlaybackRate": {
+        "label": "既定の再生速度",
+        "desc": "録画再生の既定の再生速度です。"
+      }
+    },
+    "calendar": {
+      "title": "カレンダー",
+      "firstWeekday": {
+        "label": "週の開始曜日",
+        "desc": "レビューカレンダーで週が始まる曜日。",
+        "sunday": "日曜日",
+        "monday": "月曜日"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "{{cameraName}} の保存済みレイアウトをクリアしました",
+        "clearStreamingSettings": "すべてのカメラグループのストリーミング設定をクリアしました。"
+      },
+      "error": {
+        "clearStoredLayoutFailed": "保存済みレイアウトのクリアに失敗しました: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "ストリーミング設定のクリアに失敗しました: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "title": "エンリッチメント設定",
+    "unsavedChanges": "未保存のエンリッチメント設定の変更",
+    "birdClassification": {
+      "title": "鳥類分類",
+      "desc": "量子化された TensorFlow モデルを使って既知の鳥を識別します。既知の鳥を認識した場合、その一般名を sub_label として追加します。この情報は UI、フィルタ、通知に含まれます。"
+    },
+    "semanticSearch": {
+      "title": "セマンティック検索",
+      "desc": "Frigate のセマンティック検索では、画像そのもの、ユーザー定義のテキスト説明、または自動生成された説明を用いて、レビュー項目内の追跡オブジェクトを検索できます。",
+      "reindexNow": {
+        "label": "今すぐ再インデックス",
+        "desc": "再インデックスは、すべての追跡オブジェクトの埋め込みを再生成します。バックグラウンドで実行され、追跡オブジェクト数によっては CPU を使い切り、相応の時間がかかる場合があります。",
+        "confirmTitle": "再インデックスの確認",
+        "confirmDesc": "すべての追跡オブジェクトの埋め込みを再インデックスしますか？この処理はバックグラウンドで実行されますが、CPU を使い切り、時間がかかる場合があります。進行状況は［探索］ページで確認できます。",
+        "confirmButton": "再インデックス",
+        "success": "再インデックスを開始しました。",
+        "alreadyInProgress": "再インデックスはすでに進行中です。",
+        "error": "再インデックスの開始に失敗しました: {{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "モデルサイズ",
+        "desc": "セマンティック検索の埋め込みに使用するモデルのサイズです。",
+        "small": {
+          "title": "スモール",
+          "desc": "<em>small</em> を使用すると、量子化モデルにより RAM 使用量が少なく、CPU 上で高速に動作します。埋め込み品質の差はごく僅かです。"
+        },
+        "large": {
+          "title": "ラージ",
+          "desc": "<em>large</em> を使用すると、完全な Jina モデルを用い、可能であれば自動的に GPU で動作します。"
+        }
+      }
+    },
+    "faceRecognition": {
+      "title": "顔認識",
+      "desc": "顔認識により、人に名前を割り当て、顔を認識した際にその人名をサブラベルとして付与します。この情報は UI、フィルタ、通知に含まれます。",
+      "modelSize": {
+        "label": "モデルサイズ",
+        "desc": "顔認識に使用するモデルのサイズです。",
+        "small": {
+          "title": "スモール",
+          "desc": "<em>small</em> は FaceNet ベースの顔埋め込みモデルを使用し、多くの CPU で効率よく動作します。"
+        },
+        "large": {
+          "title": "ラージ",
+          "desc": "<em>large</em> は ArcFace ベースの顔埋め込みモデルを使用し、可能であれば自動的に GPU で動作します。"
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "ナンバープレート認識",
+      "desc": "車両のナンバープレートを認識し、検出文字列を recognized_license_plate フィールドへ、または既知の名称を car タイプのオブジェクトの sub_label として自動追加できます。一般的な用途として、私道に入ってくる車や道路を通過する車のナンバー読み取りがあります。"
+    },
+    "restart_required": "再起動が必要です（エンリッチメント設定を変更）",
+    "toast": {
+      "success": "エンリッチメント設定を保存しました。変更を適用するには Frigate を再起動してください。",
+      "error": "設定変更の保存に失敗しました: {{errorMessage}}"
+    }
+  },
+  "camera": {
+    "title": "カメラ設定",
+    "streams": {
+      "title": "ストリーム",
+      "desc": "Frigate の再起動まで、カメラを一時的に無効化します。無効化すると、このカメラのストリーム処理は完全に停止します。検出、録画、デバッグは利用できません。<br /> <em>注: これは go2rtc のリストリームは無効化しません。</em>"
+    },
+    "object_descriptions": {
+      "title": "生成 AI オブジェクト説明",
+      "desc": "このカメラの生成 AI によるオブジェクト説明を一時的に有効／無効にします。無効にすると、追跡オブジェクトに対して説明はリクエストされません。"
+    },
+    "review_descriptions": {
+      "title": "生成 AI レビュー説明",
+      "desc": "このカメラの生成 AI によるレビュー説明を一時的に有効／無効にします。無効にすると、レビュー項目に対して説明はリクエストされません。"
+    },
+    "review": {
+      "title": "レビュー",
+      "desc": "Frigate の再起動まで、このカメラのアラートと検出を一時的に有効／無効にします。無効時は新しいレビュー項目は生成されません。 ",
+      "alerts": "アラート ",
+      "detections": "検出 "
+    },
+    "reviewClassification": {
+      "title": "レビュー分類",
+      "desc": "Frigate はレビュー項目をアラートと検出に分類します。既定では <em>person</em> と <em>car</em> はアラートです。必要ゾーンを設定することで分類を細かく調整できます。",
+      "noDefinedZones": "このカメラにはゾーンが定義されていません。",
+      "objectAlertsTips": "{{cameraName}} 上の {{alertsLabels}} はすべてアラートとして表示されます。",
+      "zoneObjectAlertsTips": "{{cameraName}} の {{zone}} で検出された {{alertsLabels}} はすべてアラートとして表示されます。",
+      "objectDetectionsTips": "{{cameraName}} で未分類の {{detectionsLabels}} は、ゾーンに関わらず検出として表示されます。",
+      "zoneObjectDetectionsTips": {
+        "text": "{{cameraName}} の {{zone}} で未分類の {{detectionsLabels}} は検出として表示されます。",
+        "notSelectDetections": "{{cameraName}} の {{zone}} で検出された {{detectionsLabels}} のうちアラートに分類されないものは、ゾーンに関わらず検出として表示されます。",
+        "regardlessOfZoneObjectDetectionsTips": "{{cameraName}} で未分類の {{detectionsLabels}} は、ゾーンに関わらず検出として表示されます。"
+      },
+      "unsavedChanges": "{{camera}} のレビュー分類設定に未保存の変更があります",
+      "selectAlertsZones": "アラートのゾーンを選択",
+      "selectDetectionsZones": "検出のゾーンを選択",
+      "limitDetections": "検出を特定ゾーンに制限",
+      "toast": {
+        "success": "レビュー分類設定を保存しました。変更を適用するには Frigate を再起動してください。"
+      }
+    },
+    "addCamera": "新しいカメラを追加",
+    "editCamera": "カメラを編集:",
+    "selectCamera": "カメラを選択",
+    "backToSettings": "カメラ設定に戻る",
+    "cameraConfig": {
+      "add": "カメラを追加",
+      "edit": "カメラを編集",
+      "description": "ストリーム入力とロールを含むカメラ設定を構成します。",
+      "name": "カメラ名",
+      "nameRequired": "カメラ名は必須です",
+      "nameLength": "カメラ名は24文字未満である必要があります。",
+      "namePlaceholder": "例: front_door",
+      "enabled": "有効",
+      "ffmpeg": {
+        "inputs": "入力ストリーム",
+        "path": "ストリームパス",
+        "pathRequired": "ストリームパスは必須です",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "ロール",
+        "rolesRequired": "少なくとも1つのロールが必要です",
+        "rolesUnique": "各ロール（audio, detect, record）は1つのストリームにのみ割り当て可能です",
+        "addInput": "入力ストリームを追加",
+        "removeInput": "入力ストリームを削除",
+        "inputsRequired": "少なくとも1つの入力ストリームが必要です"
+      },
+      "toast": {
+        "success": "カメラ {{cameraName}} を保存しました"
+      }
+    }
+  },
+  "masksAndZones": {
+    "filter": {
+      "all": "すべてのマスクとゾーン"
+    },
+    "restart_required": "再起動が必要です（マスク／ゾーンを変更）",
+    "toast": {
+      "success": {
+        "copyCoordinates": "{{polyName}} の座標をクリップボードにコピーしました。"
+      },
+      "error": {
+        "copyCoordinatesFailed": "座標をクリップボードにコピーできませんでした。"
+      }
+    },
+    "motionMaskLabel": "モーションマスク {{number}}",
+    "objectMaskLabel": "オブジェクトマスク {{number}}（{{label}}）",
+    "form": {
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "ゾーン名は2文字以上である必要があります。",
+          "mustNotBeSameWithCamera": "ゾーン名はカメラ名と同一にできません。",
+          "alreadyExists": "この名前のゾーンはこのカメラに既に存在します。",
+          "mustNotContainPeriod": "ゾーン名にピリオドは使用できません。",
+          "hasIllegalCharacter": "ゾーン名に不正な文字が含まれています。"
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "距離は 0.1 以上である必要があります。",
+          "mustBeFilled": "速度推定を使用するには、すべての距離フィールドを入力してください。"
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "慣性は 0 より大きい必要があります。"
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "滞留時間は 0 以上である必要があります。"
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "速度しきい値は 0.1 以上である必要があります。"
+        }
+      },
+      "polygonDrawing": {
+        "removeLastPoint": "最後の点を削除",
+        "reset": {
+          "label": "すべての点をクリア"
+        },
+        "snapPoints": {
+          "true": "点をスナップ",
+          "false": "点をスナップしない"
+        },
+        "delete": {
+          "title": "削除の確認",
+          "desc": "{{type}} <em>{{name}}</em> を削除してもよろしいですか？",
+          "success": "{{name}} を削除しました。"
+        },
+        "error": {
+          "mustBeFinished": "保存する前に多角形の作図を完了してください。"
+        }
+      }
+    },
+    "zones": {
+      "label": "ゾーン",
+      "documentTitle": "ゾーンを編集 - Frigate",
+      "desc": {
+        "title": "ゾーンを使うと、フレーム内の特定領域を定義し、オブジェクトがその領域内にいるかどうかを判断できます。",
+        "documentation": "ドキュメント"
+      },
+      "add": "ゾーンを追加",
+      "edit": "ゾーンを編集",
+      "point_other": "{{count}} 点",
+      "clickDrawPolygon": "画像上をクリックして多角形を描画します。",
+      "name": {
+        "title": "名称",
+        "inputPlaceHolder": "名前を入力…",
+        "tips": "名前は2文字以上、かつカメラ名や他のゾーン名と重複しない必要があります。"
+      },
+      "inertia": {
+        "title": "慣性",
+        "desc": "オブジェクトがゾーン内にいるとみなすまでに必要なフレーム数を指定します。<em>既定: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "滞留時間",
+        "desc": "ゾーンが有効化されるまでに、オブジェクトがゾーン内に留まる必要がある最小秒数です。<em>既定: 0</em>"
+      },
+      "objects": {
+        "title": "オブジェクト",
+        "desc": "このゾーンに適用するオブジェクトの一覧。"
+      },
+      "allObjects": "すべてのオブジェクト",
+      "speedEstimation": {
+        "title": "速度推定",
+        "desc": "このゾーン内のオブジェクトに対して速度推定を有効にします。ゾーンはちょうど4点である必要があります。",
+        "lineADistance": "A 線の距離（{{unit}}）",
+        "lineBDistance": "B 線の距離（{{unit}}）",
+        "lineCDistance": "C 線の距離（{{unit}}）",
+        "lineDDistance": "D 線の距離（{{unit}}）"
+      },
+      "speedThreshold": {
+        "title": "速度しきい値（{{unit}}）",
+        "desc": "このゾーンで考慮するオブジェクトの最小速度を指定します。",
+        "toast": {
+          "error": {
+            "pointLengthError": "このゾーンの速度推定を無効化しました。速度推定を使うゾーンは4点である必要があります。",
+            "loiteringTimeError": "滞留時間が 0 より大きいゾーンでは速度推定は使用しないでください。"
+          }
+        }
+      },
+      "toast": {
+        "success": "ゾーン（{{zoneName}}）を保存しました。変更を適用するには Frigate を再起動してください。"
+      }
+    },
+    "motionMasks": {
+      "label": "モーションマスク",
+      "documentTitle": "モーションマスクを編集 - Frigate",
+      "desc": {
+        "title": "モーションマスクは、望ましくない種類の動きで検出がトリガーされるのを防ぎます。過度なマスクはオブジェクト追跡を困難にします。",
+        "documentation": "ドキュメント"
+      },
+      "add": "新しいモーションマスク",
+      "edit": "モーションマスクを編集",
+      "context": {
+        "title": "モーションマスクは、望ましくない動き（例: 木の枝、カメラのタイムスタンプ）で検出がトリガーされるのを防ぐために使用します。<em>ごく控えめ</em>に使用してください。過度なマスクはオブジェクト追跡を困難にします。"
+      },
+      "point_other": "{{count}} 点",
+      "clickDrawPolygon": "画像上をクリックして多角形を描画します。",
+      "polygonAreaTooLarge": {
+        "title": "モーションマスクがカメラフレームの {{polygonArea}}% を覆っています。大きなモーションマスクは推奨されません。",
+        "tips": "モーションマスクはオブジェクトの検出自体を防ぎません。代わりに必須ゾーンを使用してください。"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} を保存しました。変更を適用するには Frigate を再起動してください。",
+          "noName": "モーションマスクを保存しました。変更を適用するには Frigate を再起動してください。"
+        }
+      }
+    },
+    "objectMasks": {
+      "label": "オブジェクトマスク",
+      "documentTitle": "オブジェクトマスクを編集 - Frigate",
+      "desc": {
+        "title": "オブジェクトフィルタマスクは、位置に基づいて特定のオブジェクトタイプの誤検出を除外するために使用します。",
+        "documentation": "ドキュメント"
+      },
+      "add": "オブジェクトマスクを追加",
+      "edit": "オブジェクトマスクを編集",
+      "context": "オブジェクトフィルタマスクは、位置に基づいて特定のオブジェクトタイプの誤検出を除外するために使用します。",
+      "point_other": "{{count}} 点",
+      "clickDrawPolygon": "画像上をクリックして多角形を描画します。",
+      "objects": {
+        "title": "オブジェクト",
+        "desc": "このオブジェクトマスクに適用するオブジェクトタイプ。",
+        "allObjectTypes": "すべてのオブジェクトタイプ"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} を保存しました。変更を適用するには Frigate を再起動してください。",
+          "noName": "オブジェクトマスクを保存しました。変更を適用するには Frigate を再起動してください。"
+        }
+      }
+    }
+  },
+  "motionDetectionTuner": {
+    "title": "モーション検出チューナー",
+    "unsavedChanges": "未保存のモーションチューナーの変更（{{camera}}）",
+    "desc": {
+      "title": "Frigate は、フレーム内に物体検出で確認すべき動きがあるかの一次チェックとしてモーション検出を使用します。",
+      "documentation": "モーション調整ガイドを読む"
+    },
+    "Threshold": {
+      "title": "しきい値",
+      "desc": "しきい値は、ピクセルの輝度変化がモーションとみなされるために必要な変化量を決定します。<em>既定: 30</em>"
+    },
+    "contourArea": {
+      "title": "輪郭面積",
+      "desc": "どの変化ピクセルのグループをモーションとして扱うかを決める値です。<em>既定: 10</em>"
+    },
+    "improveContrast": {
+      "title": "コントラスト改善",
+      "desc": "暗いシーンのコントラストを改善します。<em>既定: ON</em>"
+    },
+    "toast": {
+      "success": "モーション設定を保存しました。"
+    }
+  },
+  "debug": {
+    "title": "デバッグ",
+    "detectorDesc": "Frigate は検出器（{{detectors}}）を使用して、カメラの映像ストリーム内のオブジェクトを検出します。",
+    "desc": "デバッグビューは、追跡オブジェクトとその統計をリアルタイムに表示します。オブジェクト一覧には、検出オブジェクトの時差サマリが表示されます。",
+    "openCameraWebUI": "{{camera}} の Web UI を開く",
+    "debugging": "デバッグ",
+    "objectList": "オブジェクト一覧",
+    "noObjects": "オブジェクトなし",
+    "audio": {
+      "title": "音声",
+      "noAudioDetections": "音声検出なし",
+      "score": "スコア",
+      "currentRMS": "現在の RMS",
+      "currentdbFS": "現在の dBFS"
+    },
+    "boundingBoxes": {
+      "title": "バウンディングボックス",
+      "desc": "追跡オブジェクトの周囲にバウンディングボックスを表示します",
+      "colors": {
+        "label": "オブジェクトのボックス色",
+        "info": "<li>起動時に、各オブジェクトラベルへ異なる色が割り当てられます</li><li>細い濃青線は、現在時点では未検出であることを示します</li><li>細い灰線は、静止していると検出されたことを示します</li><li>太線は、（有効時）オートトラッキングの対象であることを示します</li>"
+      }
+    },
+    "timestamp": {
+      "title": "タイムスタンプ",
+      "desc": "画像にタイムスタンプを重ねて表示します"
+    },
+    "zones": {
+      "title": "ゾーン",
+      "desc": "定義済みゾーンのアウトラインを表示します"
+    },
+    "mask": {
+      "title": "モーションマスク",
+      "desc": "モーションマスクの多角形を表示します"
+    },
+    "motion": {
+      "title": "モーションボックス",
+      "desc": "モーションが検出された領域のボックスを表示します",
+      "tips": "<p><strong>モーションボックス</strong></p><br><p>現在モーションが検出されている領域に赤いボックスが重ねて表示されます</p>"
+    },
+    "regions": {
+      "title": "領域",
+      "desc": "物体検出器へ送られる関心領域のボックスを表示します",
+      "tips": "<p><strong>領域ボックス</strong></p><br><p>物体検出器へ送られるフレーム内の関心領域に明るい緑のボックスが重ねて表示されます。</p>"
+    },
+    "paths": {
+      "title": "軌跡",
+      "desc": "追跡オブジェクトの重要ポイントを表示します",
+      "tips": "<p><strong>軌跡</strong></p><br><p>線や円で、オブジェクトのライフサイクル中に移動した重要ポイントを示します。</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "オブジェクト形状フィルタの作図",
+      "desc": "画像上に矩形を描いて面積と比率の詳細を表示します",
+      "tips": "このオプションを有効にすると、カメラ画像上に矩形を描いてその面積と比率を表示できます。これらの値は設定ファイルのオブジェクト形状フィルタのパラメータ設定に利用できます。",
+      "score": "スコア",
+      "ratio": "比率",
+      "area": "面積"
+    }
+  },
+  "users": {
+    "title": "ユーザー",
+    "management": {
+      "title": "ユーザー管理",
+      "desc": "この Frigate インスタンスのユーザーアカウントを管理します。"
+    },
+    "addUser": "ユーザーを追加",
+    "updatePassword": "パスワードを更新",
+    "toast": {
+      "success": {
+        "createUser": "ユーザー {{user}} を作成しました",
+        "deleteUser": "ユーザー {{user}} を削除しました",
+        "updatePassword": "パスワードを更新しました。",
+        "roleUpdated": "{{user}} のロールを更新しました"
+      },
+      "error": {
+        "setPasswordFailed": "パスワードの保存に失敗しました: {{errorMessage}}",
+        "createUserFailed": "ユーザーの作成に失敗しました: {{errorMessage}}",
+        "deleteUserFailed": "ユーザーの削除に失敗しました: {{errorMessage}}",
+        "roleUpdateFailed": "ロールの更新に失敗しました: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "ユーザー名",
+      "actions": "操作",
+      "role": "ロール",
+      "noUsers": "ユーザーが見つかりません。",
+      "changeRole": "ユーザーロールを変更",
+      "password": "パスワード",
+      "deleteUser": "ユーザーを削除"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "ユーザー名",
+          "desc": "使用できるのは英数字、ピリオド、アンダースコアのみです。",
+          "placeholder": "ユーザー名を入力"
+        },
+        "password": {
+          "title": "パスワード",
+          "placeholder": "パスワードを入力",
+          "confirm": {
+            "title": "パスワードの確認",
+            "placeholder": "パスワードを再入力"
+          },
+          "strength": {
+            "title": "パスワード強度: ",
+            "weak": "弱い",
+            "medium": "普通",
+            "strong": "強い",
+            "veryStrong": "非常に強い"
+          },
+          "match": "パスワードが一致しています",
+          "notMatch": "パスワードが一致しません"
+        },
+        "newPassword": {
+          "title": "新しいパスワード",
+          "placeholder": "新しいパスワードを入力",
+          "confirm": {
+            "placeholder": "新しいパスワードを再入力"
+          }
+        },
+        "usernameIsRequired": "ユーザー名は必須です",
+        "passwordIsRequired": "パスワードは必須です"
+      },
+      "createUser": {
+        "title": "新規ユーザーを作成",
+        "desc": "新しいユーザーアカウントを追加し、Frigate UI へのアクセスロールを指定します。",
+        "usernameOnlyInclude": "ユーザー名に使用できるのは英数字、.、_ のみです",
+        "confirmPassword": "パスワードを確認してください"
+      },
+      "deleteUser": {
+        "title": "ユーザーを削除",
+        "desc": "この操作は元に戻せません。ユーザーアカウントおよび関連データは完全に削除されます。",
+        "warn": "<strong>{{username}}</strong> を削除してもよろしいですか？"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "パスワードを空にはできません",
+        "doNotMatch": "パスワードが一致しません",
+        "updatePassword": "{{username}} のパスワードを更新",
+        "setPassword": "パスワードを設定",
+        "desc": "強力なパスワードを作成して、このアカウントを保護してください。"
+      },
+      "changeRole": {
+        "title": "ユーザーロールを変更",
+        "select": "ロールを選択",
+        "desc": "<strong>{{username}}</strong> の権限を更新します",
+        "roleInfo": {
+          "intro": "このユーザーに適切なロールを選択してください:",
+          "admin": "管理者",
+          "adminDesc": "すべての機能にフルアクセス。",
+          "viewer": "閲覧者",
+          "viewerDesc": "ライブ、レビュー、探索、書き出しに限定。",
+          "customDesc": "特定のカメラアクセスを持つカスタムロール。"
+        }
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "閲覧者ロール管理",
+      "desc": "この Frigate インスタンスのカスタム閲覧者ロールと、そのカメラアクセス権を管理します。"
+    },
+    "addRole": "ロールを追加",
+    "table": {
+      "role": "ロール",
+      "cameras": "カメラ",
+      "actions": "操作",
+      "noRoles": "カスタムロールが見つかりません。",
+      "editCameras": "カメラを編集",
+      "deleteRole": "ロールを削除"
+    },
+    "toast": {
+      "success": {
+        "createRole": "ロール {{role}} を作成しました",
+        "updateCameras": "ロール {{role}} のカメラを更新しました",
+        "deleteRole": "ロール {{role}} を削除しました",
+        "userRolesUpdated": "このロールに割り当てられていた {{count}} ユーザーは「viewer」に更新され、すべてのカメラへの閲覧アクセスが付与されました。"
+      },
+      "error": {
+        "createRoleFailed": "ロールの作成に失敗しました: {{errorMessage}}",
+        "updateCamerasFailed": "カメラの更新に失敗しました: {{errorMessage}}",
+        "deleteRoleFailed": "ロールの削除に失敗しました: {{errorMessage}}",
+        "userUpdateFailed": "ユーザーロールの更新に失敗しました: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "新しいロールを作成",
+        "desc": "新しいロールを追加し、カメラアクセス権を指定します。"
+      },
+      "editCameras": {
+        "title": "ロールのカメラを編集",
+        "desc": "ロール <strong>{{role}}</strong> のカメラアクセスを更新します。"
+      },
+      "deleteRole": {
+        "title": "ロールを削除",
+        "desc": "この操作は元に戻せません。ロールは完全に削除され、このロールを持っていたユーザーは「viewer」ロールに再割り当てされ、すべてのカメラへの閲覧アクセスが付与されます。",
+        "warn": "<strong>{{role}}</strong> を削除してもよろしいですか？",
+        "deleting": "削除中…"
+      },
+      "form": {
+        "role": {
+          "title": "ロール名",
+          "placeholder": "ロール名を入力",
+          "desc": "使用できるのは英数字、ピリオド、アンダースコアのみです。",
+          "roleIsRequired": "ロール名は必須です",
+          "roleOnlyInclude": "ロール名に使用できるのは英数字、.、_ のみです",
+          "roleExists": "この名前のロールは既に存在します。"
+        },
+        "cameras": {
+          "title": "カメラ",
+          "desc": "このロールでアクセス可能なカメラを選択します。少なくとも1台が必要です。",
+          "required": "少なくとも1台のカメラを選択してください。"
+        }
+      }
+    }
+  },
+  "notification": {
+    "title": "通知",
+    "notificationSettings": {
+      "title": "通知設定",
+      "desc": "Frigate はブラウザで実行中、または PWA としてインストールされている場合に、端末へネイティブのプッシュ通知を送信できます。"
+    },
+    "notificationUnavailable": {
+      "title": "通知は利用できません",
+      "desc": "Web プッシュ通知にはセキュアコンテキスト（<code>https://…</code>）が必要です。これはブラウザの制限です。通知を利用するには、セキュアに Frigate へアクセスしてください。"
+    },
+    "globalSettings": {
+      "title": "グローバル設定",
+      "desc": "登録済みのすべてのデバイスで、特定のカメラの通知を一時停止します。"
+    },
+    "email": {
+      "title": "メール",
+      "placeholder": "例: example@email.com",
+      "desc": "有効なメールが必要です。プッシュサービスに問題がある場合の通知に使用します。"
+    },
+    "cameras": {
+      "title": "カメラ",
+      "noCameras": "利用可能なカメラがありません",
+      "desc": "通知を有効にするカメラを選択します。"
+    },
+    "deviceSpecific": "デバイス固有の設定",
+    "registerDevice": "このデバイスを登録",
+    "unregisterDevice": "このデバイスの登録を解除",
+    "sendTestNotification": "テスト通知を送信",
+    "unsavedRegistrations": "未保存の通知登録",
+    "unsavedChanges": "未保存の通知設定の変更",
+    "active": "通知は有効",
+    "suspended": "通知は一時停止中 {{time}}",
+    "suspendTime": {
+      "suspend": "一時停止",
+      "5minutes": "5分間一時停止",
+      "10minutes": "10分間一時停止",
+      "30minutes": "30分間一時停止",
+      "1hour": "1時間一時停止",
+      "12hours": "12時間一時停止",
+      "24hours": "24時間一時停止",
+      "untilRestart": "再起動まで一時停止"
+    },
+    "cancelSuspension": "一時停止を解除",
+    "toast": {
+      "success": {
+        "registered": "通知の登録に成功しました。通知（テスト通知を含む）を送信するには Frigate の再起動が必要です。",
+        "settingSaved": "通知設定を保存しました。"
+      },
+      "error": {
+        "registerFailed": "通知登録の保存に失敗しました。"
+      }
+    }
+  },
+  "frigatePlus": {
+    "title": "Frigate+ 設定",
+    "apiKey": {
+      "title": "Frigate+ API キー",
+      "validated": "Frigate+ API キーが検出され、検証されました",
+      "notValidated": "Frigate+ API キーが検出されないか、検証されていません",
+      "desc": "Frigate+ API キーは Frigate+ サービスとの統合を有効にします。",
+      "plusLink": "Frigate+ の詳細を読む"
+    },
+    "snapshotConfig": {
+      "title": "スナップショット設定",
+      "desc": "Frigate+ への送信には、設定でスナップショットと <code>clean_copy</code> スナップショットの両方を有効にする必要があります。",
+      "cleanCopyWarning": "一部のカメラではスナップショットは有効ですが、クリーンコピーが無効です。これらのカメラから Frigate+ へ画像を送信するには、スナップショット設定で <code>clean_copy</code> を有効にしてください。",
+      "table": {
+        "camera": "カメラ",
+        "snapshots": "スナップショット",
+        "cleanCopySnapshots": "<code>clean_copy</code> スナップショット"
+      }
+    },
+    "modelInfo": {
+      "title": "モデル情報",
+      "modelType": "モデルタイプ",
+      "trainDate": "学習日",
+      "baseModel": "ベースモデル",
+      "plusModelType": {
+        "baseModel": "ベースモデル",
+        "userModel": "ファインチューニング済み"
+      },
+      "supportedDetectors": "対応検出器",
+      "cameras": "カメラ",
+      "loading": "モデル情報を読み込み中…",
+      "error": "モデル情報の読み込みに失敗しました",
+      "availableModels": "利用可能なモデル",
+      "loadingAvailableModels": "利用可能なモデルを読み込み中…",
+      "modelSelect": "ここで Frigate+ 上の利用可能なモデルを選択できます。現在の検出器構成と互換性のあるモデルのみ選択可能です。"
+    },
+    "unsavedChanges": "未保存の Frigate+ 設定の変更",
+    "restart_required": "再起動が必要です（Frigate+ モデルを変更）",
+    "toast": {
+      "success": "Frigate+ 設定を保存しました。変更を適用するには Frigate を再起動してください。",
+      "error": "設定変更の保存に失敗しました: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "トリガー",
+    "management": {
+      "title": "トリガー管理",
+      "desc": "{{camera}} のトリガーを管理します。サムネイルタイプでは、選択した追跡オブジェクトに類似するサムネイルでトリガーし、説明タイプでは、指定したテキストに類似する説明でトリガーします。"
+    },
+    "addTrigger": "トリガーを追加",
+    "table": {
+      "name": "名称",
+      "type": "タイプ",
+      "content": "コンテンツ",
+      "threshold": "しきい値",
+      "actions": "操作",
+      "noTriggers": "このカメラに設定されたトリガーはありません。",
+      "edit": "編集",
+      "deleteTrigger": "トリガーを削除",
+      "lastTriggered": "最終トリガー時刻"
+    },
+    "type": {
+      "thumbnail": "サムネイル",
+      "description": "説明"
+    },
+    "actions": {
+      "alert": "アラートとしてマーク",
+      "notification": "通知を送信"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "トリガーを作成",
+        "desc": "カメラ {{camera}} のトリガーを作成します"
+      },
+      "editTrigger": {
+        "title": "トリガーを編集",
+        "desc": "カメラ {{camera}} のトリガー設定を編集します"
+      },
+      "deleteTrigger": {
+        "title": "トリガーを削除",
+        "desc": "トリガー <strong>{{triggerName}}</strong> を削除してもよろしいですか？この操作は元に戻せません。"
+      },
+      "form": {
+        "name": {
+          "title": "名称",
+          "placeholder": "トリガー名を入力",
+          "error": {
+            "minLength": "名称は2文字以上である必要があります。",
+            "invalidCharacters": "名称に使用できるのは英数字、アンダースコア、ハイフンのみです。",
+            "alreadyExists": "このカメラには同名のトリガーが既に存在します。"
+          }
+        },
+        "enabled": {
+          "description": "このトリガーを有効／無効にする"
+        },
+        "type": {
+          "title": "タイプ",
+          "placeholder": "トリガータイプを選択"
+        },
+        "content": {
+          "title": "コンテンツ",
+          "imagePlaceholder": "画像を選択",
+          "textPlaceholder": "テキストを入力",
+          "imageDesc": "類似画像が検出されたときにこのアクションをトリガーするための画像を選択します。",
+          "textDesc": "類似する追跡オブジェクトの説明が検出されたときにこのアクションをトリガーするためのテキストを入力します。",
+          "error": {
+            "required": "コンテンツは必須です。"
+          }
+        },
+        "threshold": {
+          "title": "しきい値",
+          "error": {
+            "min": "しきい値は 0 以上である必要があります",
+            "max": "しきい値は 1 以下である必要があります"
+          }
+        },
+        "actions": {
+          "title": "アクション",
+          "desc": "既定では、すべてのトリガーに対して MQTT メッセージが送信されます。必要に応じて、トリガー時に実行する追加アクションを選択してください。",
+          "error": {
+            "min": "少なくとも1つのアクションを選択してください。"
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "トリガー {{name}} を作成しました。",
+        "updateTrigger": "トリガー {{name}} を更新しました。",
+        "deleteTrigger": "トリガー {{name}} を削除しました。"
+      },
+      "error": {
+        "createTriggerFailed": "トリガーの作成に失敗しました: {{errorMessage}}",
+        "updateTriggerFailed": "トリガーの更新に失敗しました: {{errorMessage}}",
+        "deleteTriggerFailed": "トリガーの削除に失敗しました: {{errorMessage}}"
+      }
+    }
   }
 }

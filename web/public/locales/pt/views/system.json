@@ -1,14 +1,14 @@
 {
   "documentTitle": {
-    "storage": "Estatísticas de armazenamento - Frigate",
-    "general": "Estatísticas gerais - Frigate",
-    "enrichments": "Estatísticas de enriquecimento - Frigate",
+    "storage": "Frigate - Estatísticas de Armazenamento",
+    "general": "Frigate - Estatísticas Gerais",
+    "enrichments": "Frigate - Estatísticas de Enriquecimento",
     "logs": {
-      "frigate": "Logs do Frigate - Frigate",
-      "go2rtc": "Logs do Go2RTC - Frigate",
-      "nginx": "Logs do Nginx - Frigate"
+      "frigate": "Frigate - Registos de Eventos do Frigate",
+      "go2rtc": "Frigate - Registos de Eventos do Go2RTC",
+      "nginx": "Frigate - Registos de Eventos do Nginx"
     },
-    "cameras": "Estatísticas das câmaras - Frigate"
+    "cameras": "Frigate - Estatísticas das Câmaras"
   },
   "title": "Sistema",
   "metrics": "Métricas do sistema",
@@ -16,22 +16,22 @@
     "type": {
       "label": "Tipo",
       "timestamp": "Carimbo de hora",
-      "tag": "Tag",
+      "tag": "Etiqueta",
       "message": "Mensagem"
     },
     "copy": {
-      "success": "Logs copiados para a área de transferência",
-      "label": "Copiar para a área de transferência",
-      "error": "Não foi possível copiar os logs para a área de transferência"
+      "success": "Registos copiados para a área de transferência",
+      "label": "Copiar para a Área de Transferência",
+      "error": "Não foi possível copiar os registos para a área de transferência"
     },
     "download": {
-      "label": "Descarregar logs"
+      "label": "Transferir Registos"
     },
-    "tips": "Os logs estão a ser transmitidos do servidor",
+    "tips": "Os registos estão a ser transmitidos do servidor",
     "toast": {
       "error": {
-        "fetchingLogsFailed": "Erro ao buscar logs: {{errorMessage}}",
-        "whileStreamingLogs": "Erro ao transmitir logs: {{errorMessage}}"
+        "fetchingLogsFailed": "Erro ao obter os registos: {{errorMessage}}",
+        "whileStreamingLogs": "Erro enquanto transmitia os registos: {{errorMessage}}"
       }
     }
   },
@@ -49,11 +49,15 @@
       "title": "Armazenamento da câmara"
     },
     "title": "Armazenamento",
-    "overview": "Visão geral",
+    "overview": "Sinopse",
     "recordings": {
       "title": "Gravações",
       "earliestRecording": "Primeira gravação disponível:",
-      "tips": "Esse valor representa o armazenamento total usado pelas gravações na base de dados do Frigate. O Frigate não acompanha o uso de armazenamento de todos os ficheiros no seu disco."
+      "tips": "Este valor representa o armazenamento total utilizado pelas gravações na base de dados do Frigate. O Frigate não acompanha a utilização do armazenamento de todos os ficheiros no seu disco."
+    },
+    "shm": {
+      "title": "Alocação SHM (memória partilhada)",
+      "warning": "A tamanho atual de SHM de {{total}} MB é muito pequeno. Aumente-o para pelo menos {{min_shm}} MB."
     }
   },
   "cameras": {
@@ -83,19 +87,19 @@
       "skipped": "ignorado",
       "ffmpeg": "FFmpeg",
       "cameraFfmpeg": "{{camName}} FFmpeg",
-      "cameraFramesPerSecond": "quadros por segundo de {{camName}}",
+      "cameraFramesPerSecond": "imagens por segundo de {{camName}}",
       "cameraCapture": "captura de {{camName}}",
-      "cameraDetectionsPerSecond": "detecções por segundo de {{camName}}",
-      "overallFramesPerSecond": "quadros por segundo totais (FPS)",
-      "overallDetectionsPerSecond": "detecções por segundo totais",
-      "overallSkippedDetectionsPerSecond": "detecções ignoradas por segundo totais",
-      "cameraDetect": "detecção de {{camName}}",
-      "cameraSkippedDetectionsPerSecond": "detecções ignoradas por segundo de {{camName}}"
+      "cameraDetectionsPerSecond": "deteções por segundo de {{camName}}",
+      "overallFramesPerSecond": "imagens por segundo totais (FPS)",
+      "overallDetectionsPerSecond": "deteções por segundo totais",
+      "overallSkippedDetectionsPerSecond": "deteções ignoradas por segundo totais",
+      "cameraDetect": "deteção de {{camName}}",
+      "cameraSkippedDetectionsPerSecond": "deteções ignoradas por segundo de {{camName}}"
     },
     "overview": "Visão geral",
     "toast": {
       "success": {
-        "copyToClipboard": "Dados de Exploração copiados para a área de transferência."
+        "copyToClipboard": "Dados de exploração copiados para a área de transferência."
       },
       "error": {
         "unableToProbeCamera": "Não foi possível explorar a câmara: {{errorMessage}}"
@@ -104,43 +108,45 @@
   },
   "lastRefreshed": "Última atualização: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} tem alto uso de CPU FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} tem alto uso de CPU de detecção ({{detectAvg}}%)",
+    "ffmpegHighCpuUsage": "{{camera}} tem alta utilização da CPU FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} tem alta utilização da CPU de deteção ({{detectAvg}}%)",
     "healthy": "O sistema está saudável",
     "reindexingEmbeddings": "Reindexando incorporações ({{processed}}% completo)",
     "detectIsVerySlow": "{{detect}} está muito lento ({{speed}} ms)",
-    "cameraIsOffline": "{{camera}} está offline",
-    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)"
+    "cameraIsOffline": "{{camera}} está off-line",
+    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)",
+    "shmTooLow": "/dev/shm alocação ({{total}} MB) deveria ser aumentada pelo menos {{min}} MB."
   },
   "general": {
     "title": "Geral",
     "detector": {
-      "title": "Detectores",
-      "cpuUsage": "Utilização do CPU do Detector",
-      "memoryUsage": "Utilização da memória do Detector",
-      "inferenceSpeed": "Velocidade de Inferência do Detector",
-      "temperature": "Temperatura do Detector"
+      "title": "Detetores",
+      "cpuUsage": "Utilização do CPU do Detetor",
+      "memoryUsage": "Utilização da Memória do Detetor",
+      "inferenceSpeed": "Velocidade de Inferência do Detetor",
+      "temperature": "Temperatura do Detetor",
+      "cpuUsageInformation": "CPU utilizada na preparação de dados de entrada e saída de/para os modelos de deteção. Este valor não mede oa utilização da inferência, mesmo se estiver a utilizar uma GPU ou acelerador."
     },
     "hardwareInfo": {
-      "title": "Informações de hardware",
-      "gpuUsage": "Utilização GPU",
-      "gpuMemory": "Memória GPU",
+      "title": "Informação de Hardware",
+      "gpuUsage": "Utilização da GPU",
+      "gpuMemory": "Memória da GPU",
       "gpuInfo": {
         "nvidiaSMIOutput": {
-          "driver": "Driver: {{driver}}",
+          "driver": "Controlador: {{driver}}",
           "vbios": "Informação VBios: {{vbios}}",
           "name": "Nome: {{name}}",
           "cudaComputerCapability": "Capacidade de computação CUDA: {{cuda_compute}}",
           "title": "Saída Nvidia SMI"
         },
         "copyInfo": {
-          "label": "Copiar informações do GPU"
+          "label": "Copiar informação da GPU"
         },
         "closeInfo": {
-          "label": "Fechar informações do GPU"
+          "label": "Fechar informação da GPU"
         },
         "toast": {
-          "success": "Informações do GPU copiadas para a área de transferência"
+          "success": "Informação da GPU copiada para a área de transferência"
         },
         "vainfoOutput": {
           "title": "Saída do Vainfo",
@@ -149,32 +155,32 @@
           "processError": "Erro no processo:"
         }
       },
-      "gpuEncoder": "GPU Encoder",
-      "gpuDecoder": "GPU Decoder",
+      "gpuEncoder": "Codificador da GPU",
+      "gpuDecoder": "Descodificador da GPU",
       "npuUsage": "Utilização NPU",
       "npuMemory": "Memória NPU"
     },
     "otherProcesses": {
-      "title": "Outros processos",
-      "processCpuUsage": "Uso de CPU do processo",
-      "processMemoryUsage": "Uso de memória do processo"
+      "title": "Outros Processos",
+      "processCpuUsage": "Utilização da CPU do Processo",
+      "processMemoryUsage": "Utilização da Memória do Processo"
     }
   },
   "enrichments": {
     "title": "Enriquecimentos",
-    "infPerSecond": "Inferências por segundo",
+    "infPerSecond": "Inferências por Segundo",
     "embeddings": {
-      "image_embedding_speed": "Velocidade de incorporação de imagem",
-      "face_embedding_speed": "Velocidade de incorporação facial",
-      "plate_recognition_speed": "Velocidade de reconhecimento de placas",
-      "text_embedding_speed": "Velocidade de incorporação de texto",
+      "image_embedding_speed": "Velocidade de Incorporação de Imagem",
+      "face_embedding_speed": "Velocidade de Incorporação Facial",
+      "plate_recognition_speed": "Velocidade de Reconhecimento de Placas",
+      "text_embedding_speed": "Velocidade de Incorporação de Texto",
       "face_recognition_speed": "Velocidade de Reconhecimento Facial",
       "plate_recognition": "Reconhecimento de Placas",
       "image_embedding": "Incorporação de Imagem",
       "text_embedding": "Incorporação de Texto",
       "face_recognition": "Reconhecimento Facial",
-      "yolov9_plate_detection_speed": "Velocidade de Detecção de Placas YOLOv9",
-      "yolov9_plate_detection": "Detecção de Placas YOLOv9"
+      "yolov9_plate_detection_speed": "Velocidade de Deteção de Placas YOLOv9",
+      "yolov9_plate_detection": "Deteção de Placas YOLOv9"
     }
   }
 }

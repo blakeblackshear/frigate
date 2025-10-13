@@ -33,10 +33,6 @@ def preprocess_tensor(image: np.ndarray, model_w: int, model_h: int) -> np.ndarr
         image = image[0]
 
     h, w = image.shape[:2]
-
-    if (w, h) == (320, 320) and (model_w, model_h) == (640, 640):
-        return cv2.resize(image, (model_w, model_h), interpolation=cv2.INTER_LINEAR)
-
     scale = min(model_w / w, model_h / h)
     new_w, new_h = int(w * scale), int(h * scale)
     resized_image = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_CUBIC)

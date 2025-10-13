@@ -1,5 +1,51 @@
 {
   "noPreviewFound": "プレビューが見つかりません",
-  "noRecordingsFoundForThisTime": "この時間帯に録画は見つかりませんでした",
-  "noPreviewFoundFor": "{{cameraName}} のプレビューが見つかりません"
+  "noRecordingsFoundForThisTime": "この時間の録画は見つかりません",
+  "noPreviewFoundFor": "{{cameraName}} のプレビューが見つかりません",
+  "streamOffline": {
+    "title": "ストリームオフライン",
+    "desc": "{{cameraName}} の <code>detect</code> ストリームでフレームが受信されていません。エラーログを確認してください"
+  },
+  "submitFrigatePlus": {
+    "title": "このフレームを Frigate+ に送信しますか？",
+    "submit": "送信"
+  },
+  "livePlayerRequiredIOSVersion": "このライブストリームタイプには iOS 17.1 以上が必要です。",
+  "cameraDisabled": "カメラは無効です",
+  "stats": {
+    "streamType": {
+      "title": "ストリームタイプ:",
+      "short": "タイプ"
+    },
+    "bandwidth": {
+      "title": "帯域:",
+      "short": "帯域"
+    },
+    "latency": {
+      "title": "遅延:",
+      "value": "{{seconds}} 秒",
+      "short": {
+        "title": "遅延",
+        "value": "{{seconds}} 秒"
+      }
+    },
+    "totalFrames": "総フレーム:",
+    "droppedFrames": {
+      "title": "ドロップしたフレーム:",
+      "short": {
+        "title": "ドロップ",
+        "value": "{{droppedFrames}} フレーム"
+      }
+    },
+    "decodedFrames": "デコードしたフレーム:",
+    "droppedFrameRate": "ドロップしたフレームレート:"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "フレームを Frigate+ に送信しました"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "フレームの Frigate+ への送信に失敗しました"
+    }
+  }
 }

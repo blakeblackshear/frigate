@@ -10,6 +10,10 @@
     "count_other": "{{count}} Oznake"
   },
   "zones": {
-    "label": "Zone"
+    "label": "Zone",
+    "all": {
+      "title": "Sve zone",
+      "short": "Zone"
+    }
   }
 }

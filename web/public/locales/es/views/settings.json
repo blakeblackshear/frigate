@@ -22,7 +22,8 @@
     "frigateplus": "Frigate+",
     "users": "Usuarios",
     "notifications": "Notificaciones",
-    "enrichments": "Análisis avanzado"
+    "enrichments": "Análisis avanzado",
+    "triggers": "Disparadores"
   },
   "dialog": {
     "unsavedChanges": {
@@ -178,6 +179,44 @@
     "streams": {
       "title": "Transmisiones",
       "desc": "Desactivar temporalmente una cámara hasta que Frigate se reinicie. Desactivar una cámara detiene por completo el procesamiento de las transmisiones de esta cámara por parte de Frigate. La detección, grabación y depuración no estarán disponibles.<br /> <em>Nota: Esto no desactiva las retransmisiones de go2rtc.</em>"
+    },
+    "object_descriptions": {
+      "title": "Descripciones de objetos de IA generativa",
+      "desc": "Habilitar/deshabilitar temporalmente las descripciones de objetos de IA generativa para esta cámara. Cuando está deshabilitado, no se solicitarán descripciones generadas por IA para los objetos rastreados en esta cámara."
+    },
+    "review_descriptions": {
+      "title": "Descripciones de revisión de IA generativa",
+      "desc": "Habilitar/deshabilitar temporalmente las descripciones de revisión de IA generativa para esta cámara. Cuando está deshabilitado, no se solicitarán descripciones generadas por IA para los elementos de revisión en esta cámara."
+    },
+    "addCamera": "Añadir nueva cámara",
+    "editCamera": "Editar cámara:",
+    "selectCamera": "Seleccionar una cámara",
+    "backToSettings": "Volver a la configuración de la cámara",
+    "cameraConfig": {
+      "add": "Añadir cámara",
+      "edit": "Editar cámara",
+      "description": "Configurar los ajustes de la cámara, incluyendo las entradas de flujo y los roles.",
+      "name": "Nombre de la cámara",
+      "nameRequired": "El nombre de la cámara es obligatorio",
+      "nameInvalid": "El nombre de la cámara debe contener solo letras, números, guiones bajos o guiones",
+      "namePlaceholder": "p. ej., puerta_principal",
+      "enabled": "Habilitado",
+      "ffmpeg": {
+        "inputs": "Flujos de entrada",
+        "path": "Ruta del flujo",
+        "pathRequired": "La ruta del flujo es obligatoria",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roles",
+        "rolesRequired": "Se requiere al menos un rol",
+        "rolesUnique": "Cada rol (audio, detección, grabación) solo puede asignarse a un flujo",
+        "addInput": "Añadir flujo de entrada",
+        "removeInput": "Eliminar flujo de entrada",
+        "inputsRequired": "Se requiere al menos un flujo de entrada"
+      },
+      "toast": {
+        "success": "Cámara {{cameraName}} guardada con éxito"
+      },
+      "nameLength": "Nombre de cámara debe ser de mínimo 24 caracteres."
     }
   },
   "masksAndZones": {
@@ -423,6 +462,19 @@
       "score": "Puntuación",
       "ratio": "Proporción",
       "area": "Área"
+    },
+    "paths": {
+      "title": "Rutas",
+      "desc": "Mostrar puntos significativos de la ruta del objeto rastreado",
+      "tips": "<p><strong>Rutas</strong></p><br><p>Líneas y círculos indicarán los puntos significativos por los que se ha movido el objeto rastreado durante su ciclo de vida.</p>"
+    },
+    "openCameraWebUI": "Abrir Web UI de {{camera}}",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "No hay detecciones de audio",
+      "score": "puntuación",
+      "currentRMS": "RMS actual",
+      "currentdbFS": "dbFS actual"
     }
   },
   "users": {
@@ -510,7 +562,8 @@
           "adminDesc": "Acceso completo a todas las funciones.",
           "viewerDesc": "Limitado a paneles en vivo, revisión, exploración y exportaciones únicamente.",
           "viewer": "Espectador",
-          "admin": "Administrador"
+          "admin": "Administrador",
+          "customDesc": "Rol personalizado con acceso a cámaras."
         },
         "select": "Selecciona un rol"
       },
@@ -682,6 +735,106 @@
     "toast": {
       "success": "Los ajustes de enriquecimientos se han guardado. Reinicia Frigate para aplicar los cambios.",
       "error": "No se pudieron guardar los cambios en la configuración: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Disparadores",
+    "management": {
+      "title": "Gestión de disparadores",
+      "desc": "Gestionar disparadores para {{camera}}. Usa el tipo de miniatura para activar en miniaturas similares al objeto rastreado seleccionado, y el tipo de descripción para activar en descripciones similares al texto que especifiques."
+    },
+    "addTrigger": "Añadir Disparador",
+    "table": {
+      "name": "Nombre",
+      "type": "Tipo",
+      "content": "Contenido",
+      "threshold": "Umbral",
+      "actions": "Acciones",
+      "noTriggers": "No hay disparadores configurados para esta cámara.",
+      "edit": "Editar",
+      "deleteTrigger": "Eliminar Disparador",
+      "lastTriggered": "Última activación"
+    },
+    "type": {
+      "description": "Descripción",
+      "thumbnail": "Miniatura"
+    },
+    "actions": {
+      "alert": "Marcar como Alerta",
+      "notification": "Enviar Notificación"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Crear Disparador",
+        "desc": "Crear un disparador par la cámara {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Editar Disparador",
+        "desc": "Editar configuractión del disparador para cámara {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Eliminar Disparador"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Administración del rol de visor",
+      "desc": "Administra roles de visor personalizados y sus permisos de acceso a cámaras para esta instancia de Frigate."
+    },
+    "addRole": "Añade un rol",
+    "table": {
+      "role": "Rol",
+      "cameras": "Cámaras",
+      "actions": "Acciones",
+      "noRoles": "No se encontraron roles personalizados.",
+      "editCameras": "Edita Cámaras",
+      "deleteRole": "Eliminar Rol"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rol {{role}} creado exitosamente",
+        "updateCameras": "Cámara actualizada para el rol {{role}}",
+        "deleteRole": "Rol {{role}} eliminado exitosamente",
+        "userRolesUpdated": "{{count}} usuarios asignados a este rol han sido actualizados a 'visor', que tiene acceso a todas las cámaras."
+      },
+      "error": {
+        "createRoleFailed": "Creación de rol fallida: {{errorMessage}}",
+        "updateCamerasFailed": "Actualización de cámaras fallida: {{errorMessage}}",
+        "deleteRoleFailed": "Eliminación de rol fallida: {{errorMessage}}",
+        "userUpdateFailed": "Actualización de roles de usuario fallida: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Crear Nuevo Rol",
+        "desc": "Añadir nuevo rol y especificar permisos de acceso a cámaras."
+      },
+      "deleteRole": {
+        "title": "Eliminar Rol",
+        "deleting": "Eliminando...",
+        "desc": "Esta acción no se puede deshacer. El rol va a ser eliminado permanentemente y usuarios associados serán asignados a rol de 'Visor', que les da acceso a ver todas las cámaras.",
+        "warn": "Estás seguro de que quieres eliminar <strong>{{role}}</strong>?"
+      },
+      "editCameras": {
+        "title": "Editar cámaras de rol",
+        "desc": "Actualizar acceso de cámara para el rol <strong>{{role}}</strong>."
+      },
+      "form": {
+        "role": {
+          "title": "Nombre de rol",
+          "placeholder": "Entre el nombre del rol",
+          "desc": "Solo se permiten letras, números, puntos y guión bajo.",
+          "roleIsRequired": "El nombre del rol es requerido",
+          "roleOnlyInclude": "El nombre del rol solo incluye letras, números, . o _",
+          "roleExists": "Un rol con este nombre ya existe."
+        },
+        "cameras": {
+          "title": "Cámaras",
+          "desc": "Seleccione las cámaras a las que este rol tiene accceso. Al menos una cámara es requerida.",
+          "required": "Al menos una cámara debe ser seleccionada."
+        }
+      }
     }
   }
 }

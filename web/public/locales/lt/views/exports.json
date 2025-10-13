@@ -3,7 +3,7 @@
   "documentTitle": "Eksportuoti - Frigate",
   "noExports": "Eksportuotų įrašų nerasta",
   "deleteExport": "Ištrinti Eksportuotą Įrašą",
-  "deleteExport.desc": "Esate įsitikine, kad norite ištrinti {{exportName}}?",
+  "deleteExport.desc": "Esate įsitikinę, kad norite ištrinti {{exportName}}?",
   "editExport": {
     "title": "Pervadinti Eksportuojamą įrašą",
     "desc": "Įveskite nauja pavadinimą šiam eksportuojamam įrašui.",

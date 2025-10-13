@@ -42,6 +42,14 @@
       "center": {
         "label": "Clique no quadro para centralizar a câmara PTZ"
       }
+    },
+    "focus": {
+      "in": {
+        "label": "Em foco da câmera PTZ"
+      },
+      "out": {
+        "label": "Fora foco da câmera PTZ em"
+      }
     }
   },
   "lowBandwidthMode": "Modo de baixa largura de banda",
@@ -130,7 +138,8 @@
     "recording": "Gravando",
     "audioDetection": "Detecção de áudio",
     "autotracking": "Rastreamento automático",
-    "snapshots": "Snapshots"
+    "snapshots": "Snapshots",
+    "transcription": "Transcrição de áudio"
   },
   "effectiveRetainMode": {
     "modes": {
@@ -154,5 +163,9 @@
   },
   "history": {
     "label": "Mostrar filmagens históricas"
+  },
+  "transcription": {
+    "enable": "Habilitar transcrição de áudio ao vivo",
+    "disable": "Desabilitar transcrição de áudio ao vivo"
   }
 }
