@@ -140,7 +140,7 @@ def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
             content=(
                 {
                     "success": False,
-                    "message": f"Error communicating with go2rtc: {str(e)}",
+                    "message": "Error communicating with go2rtc",
                 }
             ),
             status_code=500,
@@ -175,7 +175,7 @@ def go2rtc_delete_stream(stream_name: str):
             content=(
                 {
                     "success": False,
-                    "message": f"Error communicating with go2rtc: {str(e)}",
+                    "message": "Error communicating with go2rtc",
                 }
             ),
             status_code=500,
