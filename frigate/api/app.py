@@ -14,7 +14,6 @@ from pathlib import Path as FilePath
 from typing import Any, Dict, List, Optional
 
 import aiofiles
-import requests
 import ruamel.yaml
 from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
@@ -43,9 +42,7 @@ from frigate.util.builtin import (
     update_yaml_file_bulk,
 )
 from frigate.util.config import find_config_file
-from frigate.util.image import run_ffmpeg_snapshot
 from frigate.util.services import (
-    ffprobe_stream,
     get_nvidia_driver_info,
     process_logs,
     restart_frigate,
