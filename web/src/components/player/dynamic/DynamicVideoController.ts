@@ -62,6 +62,10 @@ export class DynamicVideoController {
     this.playerController.pause();
   }
 
+  isPlaying(): boolean {
+    return !this.playerController.paused && !this.playerController.ended;
+  }
+
   seekToTimestamp(time: number, play: boolean = false) {
     if (time < this.timeRange.after || time > this.timeRange.before) {
       this.timeToStart = time;

@@ -68,6 +68,8 @@ import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { GenAISummaryDialog } from "@/components/overlay/chip/GenAISummaryChip";
 
+const DATA_REFRESH_TIME = 600000; // 10 minutes
+
 type RecordingViewProps = {
   startCamera: string;
   startTime: number;
@@ -78,6 +80,7 @@ type RecordingViewProps = {
   allPreviews?: Preview[];
   filter?: ReviewFilter;
   updateFilter: (newFilter: ReviewFilter) => void;
+  refreshData?: () => void;
 };
 export function RecordingView({
   startCamera,
@@ -89,6 +92,7 @@ export function RecordingView({
   allPreviews,
   filter,
   updateFilter,
+  refreshData,
 }: RecordingViewProps) {
   const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -191,6 +195,40 @@ export function RecordingView({
       setSelectedRangeIdx(selectedRangeIdx + 1);
     }
   }, [selectedRangeIdx, chunkedTimeRange]);
+
+  // visibility tracking for refreshing stale data
+
+  const lastVisibilityTime = useRef<number>(Date.now());
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        const now = Date.now();
+        const timeSinceLastVisible = now - lastVisibilityTime.current;
+
+        // Only refresh if user was away for a while
+        // and the video is not currently playing
+        if (
+          timeSinceLastVisible >= DATA_REFRESH_TIME &&
+          refreshData &&
+          mainControllerRef.current &&
+          !mainControllerRef.current.isPlaying()
+        ) {
+          refreshData();
+        }
+
+        lastVisibilityTime.current = now;
+      } else {
+        lastVisibilityTime.current = Date.now();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [refreshData]);
 
   // scrubbing and timeline state
 
