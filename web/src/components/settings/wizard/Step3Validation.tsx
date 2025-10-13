@@ -322,7 +322,7 @@ export default function Step3Validation({
                     </div>
                   )}
 
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-2 flex flex-col justify-between gap-1 md:flex-row md:items-center">
                     <span className="text-sm text-muted-foreground">
                       {stream.url}
                     </span>
@@ -627,9 +627,21 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
     };
   }, [stream.url, streamId]);
 
+  const resolution = stream.testResult?.resolution;
+  let aspectRatio = "16/9";
+  if (resolution) {
+    const [width, height] = resolution.split("x").map(Number);
+    if (width && height) {
+      aspectRatio = `${width}/${height}`;
+    }
+  }
+
   if (error) {
     return (
-      <div className="flex h-32 flex-col items-center justify-center gap-2 rounded-lg bg-secondary p-4">
+      <div
+        className="flex max-h-[30dvh] flex-col items-center justify-center gap-2 rounded-lg bg-secondary p-4 md:max-h-[20dvh]"
+        style={{ aspectRatio }}
+      >
         <span className="text-sm text-danger">
           {t("cameraWizard.step3.streamUnavailable")}
         </span>
@@ -647,16 +659,6 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
   }
 
   if (!registered) {
-    const resolution = stream.testResult?.resolution;
-    let aspectRatio = "16/9";
-
-    if (resolution) {
-      const [width, height] = resolution.split("x").map(Number);
-      if (width && height) {
-        aspectRatio = `${width}/${height}`;
-      }
-    }
-
     return (
       <div
         className="flex max-h-[30dvh] items-center justify-center rounded-lg bg-secondary md:max-h-[20dvh]"
@@ -671,13 +673,18 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
   }
 
   return (
-    <MSEPlayer
-      camera={streamId}
-      playbackEnabled={true}
-      className="max-h-[30dvh] rounded-lg md:max-h-[20dvh]"
-      getStats={true}
-      setStats={handleStats}
-      onError={() => setError(true)}
-    />
+    <div
+      className="relative max-h-[30dvh] md:max-h-[20dvh]"
+      style={{ aspectRatio }}
+    >
+      <MSEPlayer
+        camera={streamId}
+        playbackEnabled={true}
+        className="max-h-[30dvh] rounded-lg md:max-h-[20dvh]"
+        getStats={true}
+        setStats={handleStats}
+        onError={() => setError(true)}
+      />
+    </div>
   );
 }
