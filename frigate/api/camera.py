@@ -380,21 +380,21 @@ def reolink_detect(host: str = "", username: str = "", password: str = ""):
                 "message": "Connection timeout - camera did not respond",
             }
         )
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         return JSONResponse(
             content={
                 "success": False,
                 "protocol": None,
-                "message": f"Connection error: {str(e)}",
+                "message": "Failed to connect to camera",
             }
         )
-    except Exception as e:
+    except Exception:
         logger.exception(f"Error detecting Reolink camera at {host}")
         return JSONResponse(
             content={
                 "success": False,
                 "protocol": None,
-                "message": f"Unexpected error: {str(e)}",
+                "message": "Unable to detect camera capabilities",
             }
         )
 
