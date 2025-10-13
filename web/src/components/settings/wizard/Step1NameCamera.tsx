@@ -140,30 +140,30 @@ export default function Step1NameCamera({
       const brand = CAMERA_BRANDS.find((b) => b.value === data.brandTemplate);
       if (!brand || !data.host) return null;
 
+      let protocol = undefined;
       if (data.brandTemplate === "reolink" && data.username && data.password) {
         try {
-          const protocol = await detectReolinkCamera(
+          protocol = await detectReolinkCamera(
             data.host,
             data.username,
             data.password,
           );
-
-          // Use detected protocol or fallback to rtsp
-          const protocolKey = protocol || "rtsp";
-          const templates: Record<string, string> =
-            brand.dynamicTemplates || {};
-
-          if (Object.keys(templates).includes(protocolKey)) {
-            const template =
-              templates[protocolKey as keyof typeof brand.dynamicTemplates];
-            return template
-              .replace("{username}", data.username || "")
-              .replace("{password}", data.password || "")
-              .replace("{host}", data.host);
-          }
         } catch (error) {
           return null;
         }
+      }
+
+      // Use detected protocol or fallback to rtsp
+      const protocolKey = protocol || "rtsp";
+      const templates: Record<string, string> = brand.dynamicTemplates || {};
+
+      if (Object.keys(templates).includes(protocolKey)) {
+        const template =
+          templates[protocolKey as keyof typeof brand.dynamicTemplates];
+        return template
+          .replace("{username}", data.username || "")
+          .replace("{password}", data.password || "")
+          .replace("{host}", data.host);
       }
 
       return null;
@@ -255,14 +255,16 @@ export default function Step1NameCamera({
           (s: FfprobeStream) =>
             s.codec_type === "video" ||
             s.codec_name?.includes("h264") ||
-            s.codec_name?.includes("h265"),
+            s.codec_name?.includes("hevc"),
         );
 
         const audioStream = streams.find(
           (s: FfprobeStream) =>
             s.codec_type === "audio" ||
             s.codec_name?.includes("aac") ||
-            s.codec_name?.includes("mp3"),
+            s.codec_name?.includes("mp3") ||
+            s.codec_name?.includes("pcm_mulaw") ||
+            s.codec_name?.includes("pcm_alaw"),
         );
 
         const resolution = videoStream
