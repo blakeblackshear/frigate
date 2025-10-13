@@ -45,6 +45,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { LuInfo } from "react-icons/lu";
+import { detectReolinkCamera } from "@/utils/cameraUtil";
 
 type Step1NameCameraProps = {
   wizardData: Partial<WizardFormData>;
@@ -134,8 +135,44 @@ export default function Step1NameCamera({
       ? !!(watchedCustomUrl && watchedCustomUrl.trim())
       : !!(watchedHost && watchedHost.trim());
 
+  const generateDynamicStreamUrl = useCallback(
+    async (data: z.infer<typeof step1FormData>): Promise<string | null> => {
+      const brand = CAMERA_BRANDS.find((b) => b.value === data.brandTemplate);
+      if (!brand || !data.host) return null;
+
+      if (data.brandTemplate === "reolink" && data.username && data.password) {
+        try {
+          const protocol = await detectReolinkCamera(
+            data.host,
+            data.username,
+            data.password,
+          );
+
+          // Use detected protocol or fallback to rtsp
+          const protocolKey = protocol || "rtsp";
+          const templates: Record<string, string> =
+            brand.dynamicTemplates || {};
+
+          if (Object.keys(templates).includes(protocolKey)) {
+            const template =
+              templates[protocolKey as keyof typeof brand.dynamicTemplates];
+            return template
+              .replace("{username}", data.username || "")
+              .replace("{password}", data.password || "")
+              .replace("{host}", data.host);
+          }
+        } catch (error) {
+          return null;
+        }
+      }
+
+      return null;
+    },
+    [],
+  );
+
   const generateStreamUrl = useCallback(
-    (data: z.infer<typeof step1FormData>): string => {
+    async (data: z.infer<typeof step1FormData>): Promise<string> => {
       if (data.brandTemplate === "other") {
         return data.customUrl || "";
       }
@@ -143,17 +180,27 @@ export default function Step1NameCamera({
       const brand = CAMERA_BRANDS.find((b) => b.value === data.brandTemplate);
       if (!brand || !data.host) return "";
 
+      if (brand.template === "dynamic" && "dynamicTemplates" in brand) {
+        const dynamicUrl = await generateDynamicStreamUrl(data);
+
+        if (dynamicUrl) {
+          return dynamicUrl;
+        }
+
+        return "";
+      }
+
       return brand.template
         .replace("{username}", data.username || "")
         .replace("{password}", data.password || "")
         .replace("{host}", data.host);
     },
-    [],
+    [generateDynamicStreamUrl],
   );
 
   const testConnection = useCallback(async () => {
     const data = form.getValues();
-    const streamUrl = generateStreamUrl(data);
+    const streamUrl = await generateStreamUrl(data);
 
     if (!streamUrl) {
       toast.error(t("cameraWizard.commonErrors.noUrl"));
@@ -283,9 +330,9 @@ export default function Step1NameCamera({
     onUpdate(data);
   };
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
     const data = form.getValues();
-    const streamUrl = generateStreamUrl(data);
+    const streamUrl = await generateStreamUrl(data);
     const streamId = `stream_${Date.now()}`;
 
     const streamConfig: StreamConfig = {

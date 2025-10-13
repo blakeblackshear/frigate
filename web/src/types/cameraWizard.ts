@@ -7,6 +7,7 @@ export const CAMERA_BRANDS = [
       "rtsp://{username}:{password}@{host}:554/cam/realmonitor?channel=1&subtype=0",
     exampleUrl:
       "rtsp://admin:password@192.168.1.100:554/cam/realmonitor?channel=1&subtype=0",
+    dynamicTemplates: undefined,
   },
   {
     value: "hikvision" as const,
@@ -14,42 +15,54 @@ export const CAMERA_BRANDS = [
     template: "rtsp://{username}:{password}@{host}:554/Streaming/Channels/101",
     exampleUrl:
       "rtsp://admin:password@192.168.1.100:554/Streaming/Channels/101",
+    dynamicTemplates: undefined,
   },
   {
     value: "ubiquiti" as const,
     label: "Ubiquiti",
     template: "rtsp://{username}:{password}@{host}:554/live/ch0",
     exampleUrl: "rtsp://ubnt:password@192.168.1.100:554/live/ch0",
+    dynamicTemplates: undefined,
   },
   {
     value: "reolink" as const,
     label: "Reolink",
-    template: "rtsp://{username}:{password}@{host}:554/h264Preview_01_main",
-    exampleUrl: "rtsp://admin:password@192.168.1.100:554/h264Preview_01_main",
+    template: "dynamic",
+    dynamicTemplates: {
+      "http-flv":
+        "http://{host}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={username}&password={password}",
+      rtsp: "rtsp://{username}:{password}@{host}:554/Preview_01_main",
+    },
+    exampleUrl:
+      "http://192.168.1.100/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=admin&password=password or rtsp://admin:password@192.168.1.100:554/Preview_01_main",
   },
   {
     value: "axis" as const,
     label: "Axis",
     template: "rtsp://{username}:{password}@{host}:554/axis-media/media.amp",
     exampleUrl: "rtsp://root:password@192.168.1.100:554/axis-media/media.amp",
+    dynamicTemplates: undefined,
   },
   {
     value: "tplink" as const,
     label: "TP-Link",
     template: "rtsp://{username}:{password}@{host}:554/stream1",
     exampleUrl: "rtsp://admin:password@192.168.1.100:554/stream1",
+    dynamicTemplates: undefined,
   },
   {
     value: "foscam" as const,
     label: "Foscam",
     template: "rtsp://{username}:{password}@{host}:88/videoMain",
     exampleUrl: "rtsp://admin:password@192.168.1.100:88/videoMain",
+    dynamicTemplates: undefined,
   },
   {
     value: "other" as const,
     label: "Other",
     template: "",
     exampleUrl: "rtsp://username:password@host:port/path",
+    dynamicTemplates: undefined,
   },
 ] as const;
 
