@@ -55,7 +55,7 @@ class LibvaGpuSelector:
 
     def get_gpu_arg(self, preset: str, gpu: int) -> str:
         if "nvidia" in preset:
-            return f"-hwaccel_device {gpu}"
+            return str(gpu)
 
         if self._valid_gpus is None:
             self.__get_valid_gpus()
@@ -64,10 +64,10 @@ class LibvaGpuSelector:
             return ""
 
         if gpu <= len(self._valid_gpus):
-            return f"-hwaccel_device {self._valid_gpus[gpu]}"
+            return self._valid_gpus[gpu]
         else:
             logger.warning(f"Invalid GPU index {gpu}, using first valid GPU")
-            return f"-hwaccel_device {self._valid_gpus[0]}"
+            return self._valid_gpus[0]
 
 
 FPS_VFR_PARAM = "-fps_mode vfr" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-vsync 2"
@@ -87,7 +87,7 @@ PRESETS_HW_ACCEL_DECODE = {
     FFMPEG_HWACCEL_VAAPI: "-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {3} -hwaccel_output_format vaapi",
     "preset-intel-qsv-h264": "-hwaccel qsv -qsv_device {3} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
     "preset-intel-qsv-h265": "-load_plugin hevc_hw -hwaccel qsv -qsv_device {3} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
-    FFMPEG_HWACCEL_NVIDIA: "{3} -hwaccel cuda -hwaccel_output_format cuda",
+    FFMPEG_HWACCEL_NVIDIA: "-hwaccel_device {3} -hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
     f"{FFMPEG_HWACCEL_RKMPP}-no-dump_extra": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
