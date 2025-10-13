@@ -1,3 +1,5 @@
+// ==================== Camera Name Processing ====================
+
 /**
  * Generates a fixed-length hash from a camera name for use as a valid camera identifier.
  * Works safely with Unicode input while outputting Latin-only identifiers.
@@ -57,4 +59,50 @@ export function processCameraName(userInput: string): {
     finalCameraName: generateFixedHash(userInput),
     friendlyName: userInput,
   };
+}
+
+// ==================== Reolink Camera Detection ====================
+
+/**
+ * Detect Reolink camera capabilities and recommend optimal protocol
+ *
+ * Calls the Frigate backend API which queries the Reolink camera to determine
+ * its resolution and recommends either http-flv (for 5MP and below) or rtsp
+ * (for higher resolutions).
+ *
+ * @param host - Camera IP address or hostname
+ * @param username - Camera username
+ * @param password - Camera password
+ * @returns The recommended protocol key ("http-flv" or "rtsp"), or null if detection failed
+ */
+export async function detectReolinkCamera(
+  host: string,
+  username: string,
+  password: string,
+): Promise<"http-flv" | "rtsp" | null> {
+  try {
+    const params = new URLSearchParams({
+      host,
+      username,
+      password,
+    });
+
+    const response = await fetch(`/api/reolink/detect?${params.toString()}`, {
+      method: "GET",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.protocol) {
+      return data.protocol;
+    }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
 }

@@ -45,6 +45,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { LuInfo } from "react-icons/lu";
+import { detectReolinkCamera } from "@/utils/cameraUtil";
 
 type Step1NameCameraProps = {
   wizardData: Partial<WizardFormData>;
@@ -134,8 +135,44 @@ export default function Step1NameCamera({
       ? !!(watchedCustomUrl && watchedCustomUrl.trim())
       : !!(watchedHost && watchedHost.trim());
 
+  const generateDynamicStreamUrl = useCallback(
+    async (data: z.infer<typeof step1FormData>): Promise<string | null> => {
+      const brand = CAMERA_BRANDS.find((b) => b.value === data.brandTemplate);
+      if (!brand || !data.host) return null;
+
+      let protocol = undefined;
+      if (data.brandTemplate === "reolink" && data.username && data.password) {
+        try {
+          protocol = await detectReolinkCamera(
+            data.host,
+            data.username,
+            data.password,
+          );
+        } catch (error) {
+          return null;
+        }
+      }
+
+      // Use detected protocol or fallback to rtsp
+      const protocolKey = protocol || "rtsp";
+      const templates: Record<string, string> = brand.dynamicTemplates || {};
+
+      if (Object.keys(templates).includes(protocolKey)) {
+        const template =
+          templates[protocolKey as keyof typeof brand.dynamicTemplates];
+        return template
+          .replace("{username}", data.username || "")
+          .replace("{password}", data.password || "")
+          .replace("{host}", data.host);
+      }
+
+      return null;
+    },
+    [],
+  );
+
   const generateStreamUrl = useCallback(
-    (data: z.infer<typeof step1FormData>): string => {
+    async (data: z.infer<typeof step1FormData>): Promise<string> => {
       if (data.brandTemplate === "other") {
         return data.customUrl || "";
       }
@@ -143,17 +180,27 @@ export default function Step1NameCamera({
       const brand = CAMERA_BRANDS.find((b) => b.value === data.brandTemplate);
       if (!brand || !data.host) return "";
 
+      if (brand.template === "dynamic" && "dynamicTemplates" in brand) {
+        const dynamicUrl = await generateDynamicStreamUrl(data);
+
+        if (dynamicUrl) {
+          return dynamicUrl;
+        }
+
+        return "";
+      }
+
       return brand.template
         .replace("{username}", data.username || "")
         .replace("{password}", data.password || "")
         .replace("{host}", data.host);
     },
-    [],
+    [generateDynamicStreamUrl],
   );
 
   const testConnection = useCallback(async () => {
     const data = form.getValues();
-    const streamUrl = generateStreamUrl(data);
+    const streamUrl = await generateStreamUrl(data);
 
     if (!streamUrl) {
       toast.error(t("cameraWizard.commonErrors.noUrl"));
@@ -208,14 +255,16 @@ export default function Step1NameCamera({
           (s: FfprobeStream) =>
             s.codec_type === "video" ||
             s.codec_name?.includes("h264") ||
-            s.codec_name?.includes("h265"),
+            s.codec_name?.includes("hevc"),
         );
 
         const audioStream = streams.find(
           (s: FfprobeStream) =>
             s.codec_type === "audio" ||
             s.codec_name?.includes("aac") ||
-            s.codec_name?.includes("mp3"),
+            s.codec_name?.includes("mp3") ||
+            s.codec_name?.includes("pcm_mulaw") ||
+            s.codec_name?.includes("pcm_alaw"),
         );
 
         const resolution = videoStream
@@ -223,9 +272,9 @@ export default function Step1NameCamera({
           : undefined;
 
         // Extract FPS from rational (e.g., "15/1" -> 15)
-        const fps = videoStream?.r_frame_rate
-          ? parseFloat(videoStream.r_frame_rate.split("/")[0]) /
-            parseFloat(videoStream.r_frame_rate.split("/")[1])
+        const fps = videoStream?.avg_frame_rate
+          ? parseFloat(videoStream.avg_frame_rate.split("/")[0]) /
+            parseFloat(videoStream.avg_frame_rate.split("/")[1])
           : undefined;
 
         // Convert snapshot blob to base64 if available
@@ -283,9 +332,9 @@ export default function Step1NameCamera({
     onUpdate(data);
   };
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
     const data = form.getValues();
-    const streamUrl = generateStreamUrl(data);
+    const streamUrl = await generateStreamUrl(data);
     const streamId = `stream_${Date.now()}`;
 
     const streamConfig: StreamConfig = {
@@ -381,7 +430,7 @@ export default function Step1NameCamera({
                                   <h4 className="font-medium">
                                     {selectedBrand.label}
                                   </h4>
-                                  <p className="text-sm text-muted-foreground">
+                                  <p className="break-all text-sm text-muted-foreground">
                                     {t("cameraWizard.step1.brandUrlFormat", {
                                       exampleUrl: selectedBrand.exampleUrl,
                                     })}

@@ -196,7 +196,13 @@
         "nameRequired": "Camera name is required",
         "nameLength": "Camera name must be 64 characters or less",
         "invalidCharacters": "Camera name contains invalid characters",
-        "nameExists": "Camera name already exists"
+        "nameExists": "Camera name already exists",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP is not recommended. It is recommended to enable http in the camera settings and restart the camera wizard."
+        }
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
       }
     },
     "step2": {
