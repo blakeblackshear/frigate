@@ -2,6 +2,8 @@
 
 import json
 import logging
+import re
+from urllib.parse import quote_plus
 
 import requests
 from fastapi import APIRouter, Depends, Request, Response
@@ -17,6 +19,29 @@ from frigate.util.services import ffprobe_stream
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.camera])
+
+
+def _is_valid_host(host: str) -> bool:
+    """
+    Validate that the host is in a valid format.
+    Allows private IPs since cameras are typically on local networks.
+    Only blocks obviously malicious input to prevent injection attacks.
+    """
+    try:
+        # Remove port if present
+        host_without_port = host.split(":")[0] if ":" in host else host
+
+        # Block whitespace, newlines, and control characters
+        if not host_without_port or re.search(r"[\s\x00-\x1f]", host_without_port):
+            return False
+
+        # Allow standard hostname/IP characters: alphanumeric, dots, hyphens
+        if not re.match(r"^[a-zA-Z0-9.-]+$", host_without_port):
+            return False
+
+        return True
+    except Exception:
+        return False
 
 
 @router.get("/go2rtc/streams")
@@ -311,10 +336,18 @@ def reolink_detect(host: str = "", username: str = "", password: str = ""):
             status_code=400,
         )
 
-    try:
-        api_url = (
-            f"http://{host}/api.cgi?cmd=GetEnc&user={username}&password={password}"
+    # Validate host format to prevent injection attacks
+    if not _is_valid_host(host):
+        return JSONResponse(
+            content={"success": False, "message": "Invalid host format"},
+            status_code=400,
         )
+
+    try:
+        # URL-encode credentials to prevent injection
+        encoded_user = quote_plus(username)
+        encoded_password = quote_plus(password)
+        api_url = f"http://{host}/api.cgi?cmd=GetEnc&user={encoded_user}&password={encoded_password}"
 
         response = requests.get(api_url, timeout=5)
 
