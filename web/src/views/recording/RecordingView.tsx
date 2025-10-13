@@ -68,7 +68,7 @@ import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { GenAISummaryDialog } from "@/components/overlay/chip/GenAISummaryChip";
 
-const DATA_REFRESH_TIME = 60000; // 1 minute
+const DATA_REFRESH_TIME = 600000; // 10 minutes
 
 type RecordingViewProps = {
   startCamera: string;
