@@ -18,10 +18,10 @@ genai:
   enabled: True
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-1.5-flash
+  model: gemini-2.0-flash
 
 cameras:
-  front_camera: 
+  front_camera:
     genai:
       enabled: True # <- enable GenAI for your front camera
       use_snapshot: True
@@ -30,7 +30,7 @@ cameras:
       required_zones:
         - steps
   indoor_camera:
-    genai: 
+    genai:
       enabled: False # <- disable GenAI for your indoor camera
 ```
 
@@ -78,7 +78,7 @@ Google Gemini has a free tier allowing [15 queries per minute](https://ai.google
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini). At the time of writing, this includes `gemini-1.5-pro` and `gemini-1.5-flash`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini).
 
 ### Get API Key
 
@@ -96,7 +96,7 @@ genai:
   enabled: True
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-1.5-flash
+  model: gemini-2.0-flash
 ```
 
 :::note
@@ -202,7 +202,7 @@ genai:
     car: "Observe the primary vehicle in these images. Focus on its movement, direction, or purpose (e.g., parking, approaching, circling). If it's a delivery vehicle, mention the company."
 ```
 
-Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire. 
+Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire.
 
 ```yaml
 cameras:
