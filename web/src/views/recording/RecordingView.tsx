@@ -68,6 +68,8 @@ import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { GenAISummaryDialog } from "@/components/overlay/chip/GenAISummaryChip";
 
+const DATA_REFRESH_TIME = 60000; // 1 minute
+
 type RecordingViewProps = {
   startCamera: string;
   startTime: number;
@@ -203,9 +205,15 @@ export function RecordingView({
       if (document.visibilityState === "visible") {
         const now = Date.now();
         const timeSinceLastVisible = now - lastVisibilityTime.current;
-        const tenMinutesInMs = 10 * 60 * 1000;
 
-        if (timeSinceLastVisible >= tenMinutesInMs && refreshData) {
+        // Only refresh if user was away for a while
+        // and the video is not currently playing
+        if (
+          timeSinceLastVisible >= DATA_REFRESH_TIME &&
+          refreshData &&
+          mainControllerRef.current &&
+          !mainControllerRef.current.isPlaying()
+        ) {
           refreshData();
         }
 
