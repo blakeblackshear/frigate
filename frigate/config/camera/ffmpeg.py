@@ -67,6 +67,7 @@ class FfmpegConfig(FrigateBaseModel):
         default=False,
         title="Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players.",
     )
+    gpu: int = Field(default=0, title="GPU index to use for hardware acceleration.")
 
     @property
     def ffmpeg_path(self) -> str:
