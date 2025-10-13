@@ -210,7 +210,7 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
                         "codec": video_stream.get("codec_name"),
                         "width": video_stream.get("width"),
                         "height": video_stream.get("height"),
-                        "fps": _extract_fps(video_stream.get("r_frame_rate")),
+                        "fps": _extract_fps(video_stream.get("avg_frame_rate")),
                         "pixel_format": video_stream.get("pix_fmt"),
                         "profile": video_stream.get("profile"),
                         "level": video_stream.get("level"),
@@ -400,7 +400,7 @@ def reolink_detect(host: str = "", username: str = "", password: str = ""):
 
 
 def _extract_fps(r_frame_rate: str) -> float | None:
-    """Extract FPS from ffprobe r_frame_rate string (e.g., '30/1' -> 30.0)"""
+    """Extract FPS from ffprobe avg_frame_rate / r_frame_rate string (e.g., '30/1' -> 30.0)"""
     if not r_frame_rate:
         return None
     try:
