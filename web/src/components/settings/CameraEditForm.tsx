@@ -50,22 +50,26 @@ export default function CameraEditForm({
       z.object({
         cameraName: z
           .string()
-          .min(1, { message: t("cameraAddEdit.cameraConfig.nameRequired") }),
+          .min(1, { message: t("cameraManagement.cameraConfig.nameRequired") }),
         enabled: z.boolean(),
         ffmpeg: z.object({
           inputs: z
             .array(
               z.object({
                 path: z.string().min(1, {
-                  message: t("cameraAddEdit.cameraConfig.ffmpeg.pathRequired"),
+                  message: t(
+                    "cameraManagement.cameraConfig.ffmpeg.pathRequired",
+                  ),
                 }),
                 roles: z.array(RoleEnum).min(1, {
-                  message: t("cameraAddEdit.cameraConfig.ffmpeg.rolesRequired"),
+                  message: t(
+                    "cameraManagement.cameraConfig.ffmpeg.rolesRequired",
+                  ),
                 }),
               }),
             )
             .min(1, {
-              message: t("cameraAddEdit.cameraConfig.ffmpeg.inputsRequired"),
+              message: t("cameraManagement.cameraConfig.ffmpeg.inputsRequired"),
             })
             .refine(
               (inputs) => {
@@ -83,7 +87,7 @@ export default function CameraEditForm({
                 );
               },
               {
-                message: t("cameraAddEdit.cameraConfig.ffmpeg.rolesUnique"),
+                message: t("cameraManagement.cameraConfig.ffmpeg.rolesUnique"),
                 path: ["inputs"],
               },
             ),
@@ -257,7 +261,7 @@ export default function CameraEditForm({
 
             Promise.allSettled(updatePromises).then(() => {
               toast.success(
-                t("cameraAddEdit.cameraConfig.toast.success", {
+                t("cameraManagement.cameraConfig.toast.success", {
                   cameraName: values.cameraName,
                 }),
                 { position: "top-center" },
@@ -266,7 +270,7 @@ export default function CameraEditForm({
             });
           } else {
             toast.success(
-              t("cameraAddEdit.cameraConfig.toast.success", {
+              t("cameraManagement.cameraConfig.toast.success", {
                 cameraName: values.cameraName,
               }),
               { position: "top-center" },
@@ -354,11 +358,11 @@ export default function CameraEditForm({
       <Toaster position="top-center" closeButton />
       <Heading as="h3" className="my-2">
         {cameraName
-          ? t("cameraAddEdit.cameraConfig.edit")
-          : t("cameraAddEdit.cameraConfig.add")}
+          ? t("cameraManagement.cameraConfig.edit")
+          : t("cameraManagement.cameraConfig.add")}
       </Heading>
       <div className="my-3 text-sm text-muted-foreground">
-        {t("cameraAddEdit.cameraConfig.description")}
+        {t("cameraManagement.cameraConfig.description")}
       </div>
       <Separator className="my-3 bg-secondary" />
 
@@ -369,11 +373,11 @@ export default function CameraEditForm({
             name="cameraName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("cameraAddEdit.cameraConfig.name")}</FormLabel>
+                <FormLabel>{t("cameraManagement.cameraConfig.name")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder={t(
-                      "cameraAddEdit.cameraConfig.namePlaceholder",
+                      "cameraManagement.cameraConfig.namePlaceholder",
                     )}
                     {...field}
                     disabled={!!cameraName} // Prevent editing name for existing cameras
@@ -395,7 +399,9 @@ export default function CameraEditForm({
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <FormLabel>{t("cameraAddEdit.cameraConfig.enabled")}</FormLabel>
+                <FormLabel>
+                  {t("cameraManagement.cameraConfig.enabled")}
+                </FormLabel>
                 <FormMessage />
               </FormItem>
             )}
@@ -403,7 +409,7 @@ export default function CameraEditForm({
 
           <div className="space-y-4">
             <Label className="text-sm font-medium">
-              {t("cameraAddEdit.cameraConfig.ffmpeg.inputs")}
+              {t("cameraManagement.cameraConfig.ffmpeg.inputs")}
             </Label>
             {fields.map((field, index) => (
               <Card key={field.id} className="bg-secondary text-primary">
@@ -431,13 +437,13 @@ export default function CameraEditForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium">
-                          {t("cameraAddEdit.cameraConfig.ffmpeg.path")}
+                          {t("cameraManagement.cameraConfig.ffmpeg.path")}
                         </FormLabel>
                         <FormControl>
                           <Input
                             className="h-8"
                             placeholder={t(
-                              "cameraAddEdit.cameraConfig.ffmpeg.pathPlaceholder",
+                              "cameraManagement.cameraConfig.ffmpeg.pathPlaceholder",
                             )}
                             {...field}
                           />
@@ -449,7 +455,7 @@ export default function CameraEditForm({
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">
-                      {t("cameraAddEdit.cameraConfig.ffmpeg.roles")}
+                      {t("cameraManagement.cameraConfig.ffmpeg.roles")}
                     </Label>
                     <div className="rounded-lg bg-background p-3">
                       <div className="flex flex-wrap gap-2">
@@ -504,7 +510,7 @@ export default function CameraEditForm({
               className=""
             >
               <LuPlus className="mr-2 size-4" />
-              {t("cameraAddEdit.cameraConfig.ffmpeg.addInput")}
+              {t("cameraManagement.cameraConfig.ffmpeg.addInput")}
             </Button>
           </div>
 
@@ -512,7 +518,7 @@ export default function CameraEditForm({
           {Object.keys(watchedGo2rtcStreams).length > 0 && (
             <div className="space-y-4">
               <Label className="text-sm font-medium">
-                {t("cameraAddEdit.cameraConfig.go2rtcStreams")}
+                {t("cameraManagement.cameraConfig.go2rtcStreams")}
               </Label>
               {Object.entries(watchedGo2rtcStreams).map(
                 ([streamName, urls]) => (
@@ -536,7 +542,7 @@ export default function CameraEditForm({
 
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">
-                          {t("cameraAddEdit.cameraConfig.streamUrls")}
+                          {t("cameraManagement.cameraConfig.streamUrls")}
                         </Label>
                         {(Array.isArray(urls) ? urls : [urls]).map(
                           (url, urlIndex) => (
@@ -612,7 +618,7 @@ export default function CameraEditForm({
                           className="w-fit"
                         >
                           <LuPlus className="mr-2 size-4" />
-                          {t("cameraAddEdit.cameraConfig.addUrl")}
+                          {t("cameraManagement.cameraConfig.addUrl")}
                         </Button>
                       </div>
                     </CardContent>
@@ -633,7 +639,7 @@ export default function CameraEditForm({
                 className=""
               >
                 <LuPlus className="mr-2 size-4" />
-                {t("cameraAddEdit.cameraConfig.addGo2rtcStream")}
+                {t("cameraManagement.cameraConfig.addGo2rtcStream")}
               </Button>
             </div>
           )}

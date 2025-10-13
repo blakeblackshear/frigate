@@ -2,7 +2,8 @@
   "documentTitle": {
     "default": "Settings - Frigate",
     "authentication": "Authentication Settings - Frigate",
-    "camera": "Camera Settings - Frigate",
+    "cameraManagement": "Manage Cameras - Frigate",
+    "cameraReview": "Camera Review Settings - Frigate",
     "enrichments": "Enrichments Settings - Frigate",
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
@@ -14,7 +15,8 @@
   "menu": {
     "ui": "UI",
     "enrichments": "Enrichments",
-    "cameras": "Camera Settings",
+    "cameraManagement": "Management",
+    "cameraReview": "Review",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion Tuner",
     "triggers": "Triggers",
@@ -272,8 +274,44 @@
       }
     }
   },
-  "camera": {
-    "title": "Camera Settings",
+  "cameraManagement": {
+    "title": "Manage Cameras",
+    "addCamera": "Add New Camera",
+    "editCamera": "Edit Camera:",
+    "selectCamera": "Select a Camera",
+    "backToSettings": "Back to Camera Settings",
+    "cameraConfig": {
+      "add": "Add Camera",
+      "edit": "Edit Camera",
+      "description": "Configure camera settings including stream inputs and roles.",
+      "name": "Camera Name",
+      "nameRequired": "Camera name is required",
+      "nameLength": "Camera name must be less than 64 characters.",
+      "namePlaceholder": "e.g., front_door or Back Yard Overview",
+      "enabled": "Enabled",
+      "ffmpeg": {
+        "inputs": "Input Streams",
+        "path": "Stream Path",
+        "pathRequired": "Stream path is required",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roles",
+        "rolesRequired": "At least one role is required",
+        "rolesUnique": "Each role (audio, detect, record) can only be assigned to one stream",
+        "addInput": "Add Input Stream",
+        "removeInput": "Remove Input Stream",
+        "inputsRequired": "At least one input stream is required"
+      },
+      "go2rtcStreams": "go2rtc Streams",
+      "streamUrls": "Stream URLs",
+      "addUrl": "Add URL",
+      "addGo2rtcStream": "Add go2rtc Stream",
+      "toast": {
+        "success": "Camera {{cameraName}} saved successfully"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Camera Review Settings",
     "streams": {
       "title": "Streams",
       "desc": "Temporarily disable a camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>"
@@ -311,35 +349,6 @@
       "limitDetections": "Limit detections to specific zones",
       "toast": {
         "success": "Review Classification configuration has been saved. Restart Frigate to apply changes."
-      }
-    },
-    "addCamera": "Add New Camera",
-    "editCamera": "Edit Camera:",
-    "selectCamera": "Select a Camera",
-    "backToSettings": "Back to Camera Settings",
-    "cameraConfig": {
-      "add": "Add Camera",
-      "edit": "Edit Camera",
-      "description": "Configure camera settings including stream inputs and roles.",
-      "name": "Camera Name",
-      "nameRequired": "Camera name is required",
-      "nameLength": "Camera name must be less than 64 characters.",
-      "namePlaceholder": "e.g., front_door or Back Yard Overview",
-      "enabled": "Enabled",
-      "ffmpeg": {
-        "inputs": "Input Streams",
-        "path": "Stream Path",
-        "pathRequired": "Stream path is required",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "Roles",
-        "rolesRequired": "At least one role is required",
-        "rolesUnique": "Each role (audio, detect, record) can only be assigned to one stream",
-        "addInput": "Add Input Stream",
-        "removeInput": "Remove Input Stream",
-        "inputsRequired": "At least one input stream is required"
-      },
-      "toast": {
-        "success": "Camera {{cameraName}} saved successfully"
       }
     }
   },
