@@ -34,7 +34,6 @@ import { getTranslatedLabel } from "@/utils/i18n";
 import {
   useAlertsState,
   useDetectionsState,
-  useEnabledState,
   useObjectDescriptionState,
   useReviewDescriptionState,
 } from "@/api/ws";
@@ -133,8 +132,6 @@ export default function CameraSettingsView({
   const watchedAlertsZones = form.watch("alerts_zones");
   const watchedDetectionsZones = form.watch("detections_zones");
 
-  const { payload: enabledState, send: sendEnabled } =
-    useEnabledState(selectedCamera);
   const { payload: alertsState, send: sendAlerts } =
     useAlertsState(selectedCamera);
   const { payload: detectionsState, send: sendDetections } =
@@ -307,32 +304,6 @@ export default function CameraSettingsView({
               <Heading as="h4" className="mb-2">
                 {t("cameraReview.title")}
               </Heading>
-
-              <Separator className="my-2 flex bg-secondary" />
-
-              <Heading as="h4" className="my-2">
-                <Trans ns="views/settings">cameraReview.streams.title</Trans>
-              </Heading>
-
-              <div className="flex flex-row items-center">
-                <Switch
-                  id="camera-enabled"
-                  className="mr-3"
-                  checked={enabledState === "ON"}
-                  onCheckedChange={(isChecked) => {
-                    sendEnabled(isChecked ? "ON" : "OFF");
-                  }}
-                />
-                <div className="space-y-0.5">
-                  <Label htmlFor="camera-enabled">
-                    <Trans>button.enabled</Trans>
-                  </Label>
-                </div>
-              </div>
-              <div className="mt-3 text-sm text-muted-foreground">
-                <Trans ns="views/settings">cameraReview.streams.desc</Trans>
-              </div>
-              <Separator className="mb-2 mt-4 flex bg-secondary" />
 
               <Heading as="h4" className="my-2">
                 <Trans ns="views/settings">cameraReview.review.title</Trans>

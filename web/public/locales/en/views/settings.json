@@ -280,6 +280,10 @@
     "editCamera": "Edit Camera:",
     "selectCamera": "Select a Camera",
     "backToSettings": "Back to Camera Settings",
+    "streams": {
+      "title": "Enable / Disable Cameras",
+      "desc": "Temporarily disable a camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>"
+    },
     "cameraConfig": {
       "add": "Add Camera",
       "edit": "Edit Camera",
@@ -312,10 +316,6 @@
   },
   "cameraReview": {
     "title": "Camera Review Settings",
-    "streams": {
-      "title": "Streams",
-      "desc": "Temporarily disable a camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>"
-    },
     "object_descriptions": {
       "title": "Generative AI Object Descriptions",
       "desc": "Temporarily enable/disable Generative AI object descriptions for this camera. When disabled, AI generated descriptions will not be requested for tracked objects on this camera."

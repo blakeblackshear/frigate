@@ -19,6 +19,10 @@ import {
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { isDesktop } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { Switch } from "@/components/ui/switch";
+import { Trans } from "react-i18next";
+import { Separator } from "@/components/ui/separator";
+import { useEnabledState } from "@/api/ws";
 
 type CameraManagementViewProps = {
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
@@ -80,30 +84,59 @@ export default function CameraManagementView({
                   {t("cameraManagement.addCamera")}
                 </Button>
                 {cameras.length > 0 && (
-                  <div className="my-4 flex flex-col gap-2">
-                    <Label>{t("cameraManagement.editCamera")}</Label>
-                    <Select
-                      onValueChange={(value) => {
-                        setEditCameraName(value);
-                        setViewMode("edit");
-                      }}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue
-                          placeholder={t("cameraManagement.selectCamera")}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cameras.map((camera) => {
-                          return (
-                            <SelectItem key={camera} value={camera}>
-                              <CameraNameLabel camera={camera} />
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <>
+                    <div className="my-4 flex flex-col gap-2">
+                      <Label>{t("cameraManagement.editCamera")}</Label>
+                      <Select
+                        onValueChange={(value) => {
+                          setEditCameraName(value);
+                          setViewMode("edit");
+                        }}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue
+                            placeholder={t("cameraManagement.selectCamera")}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {cameras.map((camera) => {
+                            return (
+                              <SelectItem key={camera} value={camera}>
+                                <CameraNameLabel camera={camera} />
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Separator className="my-2 flex bg-secondary" />
+                    <div className="max-w-7xl space-y-4">
+                      <Heading as="h4" className="my-2">
+                        <Trans ns="views/settings">
+                          cameraManagement.streams.title
+                        </Trans>
+                      </Heading>
+                      <div className="mt-3 text-sm text-muted-foreground">
+                        <Trans ns="views/settings">
+                          cameraManagement.streams.desc
+                        </Trans>
+                      </div>
+
+                      <div className="max-w-md space-y-2 rounded-lg bg-secondary p-4">
+                        {cameras.map((camera) => (
+                          <div
+                            key={camera}
+                            className="flex items-center justify-between smart-capitalize"
+                          >
+                            <CameraNameLabel camera={camera} />
+                            <CameraEnableSwitch cameraName={camera} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <Separator className="mb-2 mt-4 flex bg-secondary" />
+                  </>
                 )}
               </div>
             </>
@@ -141,5 +174,26 @@ export default function CameraManagementView({
         onClose={() => setShowWizard(false)}
       />
     </>
+  );
+}
+
+type CameraEnableSwitchProps = {
+  cameraName: string;
+};
+
+function CameraEnableSwitch({ cameraName }: CameraEnableSwitchProps) {
+  const { payload: enabledState, send: sendEnabled } =
+    useEnabledState(cameraName);
+
+  return (
+    <div className="flex flex-row items-center">
+      <Switch
+        id={`camera-enabled-${cameraName}`}
+        checked={enabledState === "ON"}
+        onCheckedChange={(isChecked) => {
+          sendEnabled(isChecked ? "ON" : "OFF");
+        }}
+      />
+    </div>
   );
 }
