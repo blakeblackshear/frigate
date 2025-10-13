@@ -431,6 +431,16 @@ function StreamIssues({
       message: string;
     }> = [];
 
+    if (wizardData.brandTemplate === "reolink") {
+      const streamUrl = stream.url.toLowerCase();
+      if (streamUrl.startsWith("rtsp://")) {
+        result.push({
+          type: "warning",
+          message: t("cameraWizard.step1.errors.brands.reolink-rtsp"),
+        });
+      }
+    }
+
     // Video codec check
     if (stream.testResult?.videoCodec) {
       const videoCodec = stream.testResult.videoCodec.toLowerCase();
