@@ -3,6 +3,7 @@ from enum import Enum
 
 class Tags(Enum):
     app = "App"
+    camera = "Camera"
     preview = "Preview"
     logs = "Logs"
     media = "Media"
