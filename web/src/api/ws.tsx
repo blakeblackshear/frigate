@@ -33,14 +33,9 @@ function useValue(): useValueReturn {
 
   // main state
 
-  const [hasCameraState, setHasCameraState] = useState(false);
   const [wsState, setWsState] = useState<WsState>({});
 
   useEffect(() => {
-    if (hasCameraState) {
-      return;
-    }
-
     const activityValue: string = wsState["camera_activity"] as string;
 
     if (!activityValue) {
@@ -105,12 +100,9 @@ function useValue(): useValueReturn {
       ...cameraStates,
     }));
 
-    if (Object.keys(cameraStates).length > 0) {
-      setHasCameraState(true);
-    }
     // we only want this to run initially when the config is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wsState]);
+  }, [wsState["camera_activity"]]);
 
   // ws handler
   const { sendJsonMessage, readyState } = useWebSocket(wsUrl, {
@@ -131,9 +123,7 @@ function useValue(): useValueReturn {
         retain: false,
       });
     },
-    onClose: () => {
-      setHasCameraState(false);
-    },
+    onClose: () => {},
     shouldReconnect: () => true,
     retryOnError: true,
   });
