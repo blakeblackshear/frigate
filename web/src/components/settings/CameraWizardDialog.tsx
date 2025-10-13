@@ -261,7 +261,7 @@ export default function CameraWizardDialog({
 
                     Promise.allSettled(updatePromises).then(() => {
                       toast.success(
-                        t("cameraWizard.save.successWithLive", {
+                        t("cameraWizard.save.success", {
                           cameraName: friendlyName || finalCameraName,
                         }),
                         { position: "top-center" },
@@ -273,7 +273,7 @@ export default function CameraWizardDialog({
                   .catch(() => {
                     // log the error but don't fail the entire save
                     toast.warning(
-                      t("cameraWizard.save.successWithoutLive", {
+                      t("cameraWizard.save.failure", {
                         cameraName: friendlyName || finalCameraName,
                       }),
                       { position: "top-center" },
@@ -284,7 +284,7 @@ export default function CameraWizardDialog({
               } else {
                 // No valid streams found
                 toast.success(
-                  t("cameraWizard.save.successWithoutLive", {
+                  t("cameraWizard.save.failure", {
                     cameraName: friendlyName || finalCameraName,
                   }),
                   { position: "top-center" },

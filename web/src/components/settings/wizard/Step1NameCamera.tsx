@@ -537,7 +537,7 @@ export default function Step1NameCamera({
         </div>
       )}
 
-      <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-end sm:gap-4">
+      <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
         <Button
           type="button"
           onClick={testResult?.success ? () => setTestResult(null) : onCancel}

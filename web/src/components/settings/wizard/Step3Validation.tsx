@@ -194,9 +194,9 @@ export default function Step3Validation({
         (r) => r.success,
       ).length;
       if (successfulTests === results.size) {
-        toast.success(t("cameraWizard.step3.validationSuccess"));
+        toast.success(t("cameraWizard.step3.reconnectionSuccess"));
       } else {
-        toast.warning(t("cameraWizard.step3.validationPartial"));
+        toast.warning(t("cameraWizard.step3.reconnectionPartial"));
       }
     }
   }, [streams, onUpdate, t, performStreamValidation]);
@@ -249,8 +249,8 @@ export default function Step3Validation({
           >
             {isValidating && <ActivityIndicator className="mr-2 size-4" />}
             {isValidating
-              ? t("cameraWizard.step3.validating")
-              : t("cameraWizard.step3.testAllStreams")}
+              ? t("cameraWizard.step3.reconnecting")
+              : t("cameraWizard.step3.reconnectAllStreams")}
           </Button>
         </div>
 
@@ -262,16 +262,38 @@ export default function Step3Validation({
                 <CardContent className="space-y-4 p-4">
                   <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-end gap-2">
-                      <h4 className="mr-2 font-medium">
-                        {t("cameraWizard.step3.streamTitle", {
-                          number: index + 1,
-                        })}
-                      </h4>
-                      {stream.roles.map((role) => (
-                        <Badge variant="outline" key={role} className="text-xs">
-                          {role}
-                        </Badge>
-                      ))}
+                      <div className="flex flex-col space-y-1">
+                        <div className="flex flex-row items-center">
+                          <h4 className="mr-2 font-medium">
+                            {t("cameraWizard.step3.streamTitle", {
+                              number: index + 1,
+                            })}
+                          </h4>
+                          {stream.roles.map((role) => (
+                            <Badge
+                              variant="outline"
+                              key={role}
+                              className="mx-1 text-xs"
+                            >
+                              {role}
+                            </Badge>
+                          ))}
+                        </div>
+                        {result && result.success && (
+                          <div className="mb-2 text-sm text-muted-foreground">
+                            {[
+                              result.resolution,
+                              result.fps
+                                ? `${result.fps} ${t("cameraWizard.testResultLabels.fps")}`
+                                : null,
+                              result.videoCodec,
+                              result.audioCodec,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     {result?.success && (
                       <div className="flex items-center gap-2 text-sm">
@@ -291,34 +313,35 @@ export default function Step3Validation({
                     )}
                   </div>
 
-                  {result && result.success && (
-                    <div className="mb-2 text-sm text-muted-foreground">
-                      {[
-                        result.resolution,
-                        result.fps
-                          ? `${result.fps} ${t("cameraWizard.testResultLabels.fps")}`
-                          : null,
-                        result.videoCodec,
-                        result.audioCodec,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
+                  {result?.success && (
+                    <div className="mb-3">
+                      <StreamPreview
+                        stream={stream}
+                        onBandwidthUpdate={handleBandwidthUpdate}
+                      />
                     </div>
                   )}
-
-                  <div className="mb-3">
-                    <StreamPreview
-                      stream={stream}
-                      onBandwidthUpdate={handleBandwidthUpdate}
-                    />
-                  </div>
 
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       {stream.url}
                     </span>
                     <Button
-                      onClick={() => validateStream(stream)}
+                      onClick={() => {
+                        if (result?.success) {
+                          // Disconnect: clear the test result
+                          onUpdate({
+                            streams: streams.map((s) =>
+                              s.id === stream.id
+                                ? { ...s, testResult: undefined }
+                                : s,
+                            ),
+                          });
+                        } else {
+                          // Test/Connect: perform validation
+                          validateStream(stream);
+                        }
+                      }}
                       disabled={
                         testingStreams.has(stream.id) || !stream.url.trim()
                       }
@@ -328,17 +351,26 @@ export default function Step3Validation({
                       {testingStreams.has(stream.id) && (
                         <ActivityIndicator className="mr-2 size-4" />
                       )}
-                      {t("cameraWizard.step3.testStream")}
+                      {result?.success
+                        ? t("cameraWizard.step3.disconnectStream")
+                        : testingStreams.has(stream.id)
+                          ? t("cameraWizard.step3.connectingStream")
+                          : t("cameraWizard.step3.connectStream")}
                     </Button>
                   </div>
 
                   {result && (
-                    <div className="rounded-lg bg-background p-3">
-                      <StreamIssues
-                        stream={stream}
-                        measuredBandwidth={measuredBandwidth}
-                        wizardData={wizardData}
-                      />
+                    <div className="space-y-2">
+                      <div className="text-xs">
+                        {t("cameraWizard.step3.issues.title")}
+                      </div>
+                      <div className="rounded-lg bg-background p-3">
+                        <StreamIssues
+                          stream={stream}
+                          measuredBandwidth={measuredBandwidth}
+                          wizardData={wizardData}
+                        />
+                      </div>
                     </div>
                   )}
 
@@ -419,18 +451,30 @@ function StreamIssues({
         if (audioCodec === "aac") {
           result.push({
             type: "good",
-            message: t("cameraWizard.step3.issues.audioCodecGood"),
+            message: t("cameraWizard.step3.issues.audioCodecGood", {
+              codec: stream.testResult.audioCodec,
+            }),
           });
         } else {
           result.push({
             type: "error",
-            message: t("cameraWizard.step3.issues.audioCodecError"),
+            message: t("cameraWizard.step3.issues.audioCodecRecordError"),
           });
         }
       } else {
         result.push({
           type: "warning",
           message: t("cameraWizard.step3.issues.noAudioWarning"),
+        });
+      }
+    }
+
+    // Audio detection check
+    if (stream.roles.includes("audio")) {
+      if (!stream.testResult?.audioCodec) {
+        result.push({
+          type: "error",
+          message: t("cameraWizard.step3.issues.audioCodecRequired"),
         });
       }
     }
@@ -455,7 +499,6 @@ function StreamIssues({
 
   return (
     <div className="space-y-2">
-      <div className="font-medium">{t("cameraWizard.step3.issues.title")}</div>
       <BandwidthDisplay
         streamId={stream.id}
         measuredBandwidth={measuredBandwidth}

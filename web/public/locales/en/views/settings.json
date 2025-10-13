@@ -151,6 +151,10 @@
       "streamConfiguration": "Stream Configuration",
       "validationAndTesting": "Validation & Testing"
     },
+    "save": {
+      "success": "Successfully saved new camera {{cameraName}}.",
+      "failure": "Error saving {{cameraName}}."
+    },
     "testResultLabels": {
       "resolution": "Resolution",
       "video": "Video",
@@ -212,7 +216,7 @@
         "record": "Recording",
         "audio": "Audio"
       },
-      "testStream": "Test Stream",
+      "testStream": "Test Connection",
       "testSuccess": "Stream test successful!",
       "testFailed": "Stream test failed",
       "testFailedTitle": "Test Failed",
@@ -233,12 +237,12 @@
       }
     },
     "step3": {
-      "description": "Final validation and bandwidth analysis before saving your camera configuration.",
+      "description": "Final validation and analysis before saving your new camera. Connect each stream before saving.",
       "validationTitle": "Stream Validation",
-      "validating": "Validating...",
-      "testAllStreams": "Test All Streams",
-      "validationSuccess": "Validation completed successfully!",
-      "validationPartial": "Some streams failed validation.",
+      "validating": "Reconnecting...",
+      "reconnectAllStreams": "Reconnect All Streams",
+      "validationSuccess": "Reconnection successful.",
+      "validationPartial": "Some streams failed to reconnect.",
       "streamUnavailable": "Stream preview unavailable",
       "reload": "Reload",
       "connecting": "Connecting...",
@@ -246,7 +250,9 @@
       "valid": "Valid",
       "failed": "Failed",
       "notTested": "Not tested",
-      "testStream": "Test Stream",
+      "connectStream": "Connect",
+      "connectingStream": "Connecting",
+      "disconnectStream": "Disconnect",
       "estimatedBandwidth": "Estimated Bandwidth",
       "roles": "Roles",
       "none": "None",
@@ -258,9 +264,10 @@
       "issues": {
         "title": "Stream Validation",
         "videoCodecGood": "Video codec is {{codec}}.",
-        "audioCodecGood": "Audio codec is AAC.",
+        "audioCodecGood": "Audio codec is {{codec}}.",
         "noAudioWarning": "No audio detected for this stream, recordings will not have audio.",
-        "audioCodecError": "The AAC audio codec is required to support audio in recordings.",
+        "audioCodecRecordError": "The AAC audio codec is required to support audio in recordings.",
+        "audioCodecRequired": "An audio stream is required to support audio detection.",
         "restreamingWarning": "Reducing connections to the camera for the record stream may increase CPU usage slightly."
       }
     }
