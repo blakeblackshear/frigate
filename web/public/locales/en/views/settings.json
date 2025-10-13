@@ -241,10 +241,9 @@
     "step3": {
       "description": "Final validation and analysis before saving your new camera. Connect each stream before saving.",
       "validationTitle": "Stream Validation",
-      "validating": "Reconnecting...",
-      "reconnectAllStreams": "Reconnect All Streams",
-      "validationSuccess": "Reconnection successful.",
-      "validationPartial": "Some streams failed to reconnect.",
+      "connectAllStreams": "Connect All Streams",
+      "reconnectionSuccess": "Reconnection successful.",
+      "reconnectionPartial": "Some streams failed to reconnect.",
       "streamUnavailable": "Stream preview unavailable",
       "reload": "Reload",
       "connecting": "Connecting...",

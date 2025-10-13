@@ -249,8 +249,8 @@ export default function Step3Validation({
           >
             {isValidating && <ActivityIndicator className="mr-2 size-4" />}
             {isValidating
-              ? t("cameraWizard.step3.reconnecting")
-              : t("cameraWizard.step3.reconnectAllStreams")}
+              ? t("cameraWizard.step3.connecting")
+              : t("cameraWizard.step3.connectAllStreams")}
           </Button>
         </div>
 
@@ -647,8 +647,21 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
   }
 
   if (!registered) {
+    const resolution = stream.testResult?.resolution;
+    let aspectRatio = "16/9";
+
+    if (resolution) {
+      const [width, height] = resolution.split("x").map(Number);
+      if (width && height) {
+        aspectRatio = `${width}/${height}`;
+      }
+    }
+
     return (
-      <div className="flex h-32 items-center justify-center rounded-lg bg-secondary">
+      <div
+        className="flex max-h-[30dvh] items-center justify-center rounded-lg bg-secondary md:max-h-[20dvh]"
+        style={{ aspectRatio }}
+      >
         <ActivityIndicator className="size-4" />
         <span className="ml-2 text-sm">
           {t("cameraWizard.step3.connecting")}
