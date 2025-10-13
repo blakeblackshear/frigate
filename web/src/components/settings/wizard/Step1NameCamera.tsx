@@ -272,9 +272,9 @@ export default function Step1NameCamera({
           : undefined;
 
         // Extract FPS from rational (e.g., "15/1" -> 15)
-        const fps = videoStream?.r_frame_rate
-          ? parseFloat(videoStream.r_frame_rate.split("/")[0]) /
-            parseFloat(videoStream.r_frame_rate.split("/")[1])
+        const fps = videoStream?.avg_frame_rate
+          ? parseFloat(videoStream.avg_frame_rate.split("/")[0]) /
+            parseFloat(videoStream.avg_frame_rate.split("/")[1])
           : undefined;
 
         // Convert snapshot blob to base64 if available
