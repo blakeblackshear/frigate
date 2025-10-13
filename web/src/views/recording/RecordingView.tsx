@@ -220,7 +220,7 @@ export function RecordingView({
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [onRefreshNeeded]);
+  }, [refreshData]);
 
   // scrubbing and timeline state
 
