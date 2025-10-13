@@ -515,9 +515,20 @@ def get_jetson_stats() -> Optional[dict[int, dict]]:
     return results
 
 
-def ffprobe_stream(ffmpeg, path: str) -> sp.CompletedProcess:
+def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     clean_path = escape_special_characters(path)
+
+    # Base entries that are always included
+    stream_entries = "codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate"
+
+    # Additional detailed entries
+    if detailed:
+        stream_entries += ",codec_name,profile,level,pix_fmt,channels,sample_rate,channel_layout,r_frame_rate"
+        format_entries = "format_name,size,bit_rate,duration"
+    else:
+        format_entries = None
+
     ffprobe_cmd = [
         ffmpeg.ffprobe_path,
         "-timeout",
@@ -525,11 +536,15 @@ def ffprobe_stream(ffmpeg, path: str) -> sp.CompletedProcess:
         "-print_format",
         "json",
         "-show_entries",
-        "stream=codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate",
-        "-loglevel",
-        "quiet",
-        clean_path,
+        f"stream={stream_entries}",
     ]
+
+    # Add format entries for detailed mode
+    if detailed and format_entries:
+        ffprobe_cmd.extend(["-show_entries", f"format={format_entries}"])
+
+    ffprobe_cmd.extend(["-loglevel", "quiet", clean_path])
+
     return sp.run(ffprobe_cmd, capture_output=True)
 
 

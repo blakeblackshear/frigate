@@ -27,6 +27,7 @@ import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 import CameraSettingsView from "@/views/settings/CameraSettingsView";
+import CameraManagementView from "@/views/settings/CameraManagementView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import UsersView from "@/views/settings/UsersView";
@@ -70,7 +71,8 @@ import {
 const allSettingsViews = [
   "ui",
   "enrichments",
-  "cameras",
+  "cameraManagement",
+  "cameraReview",
   "masksAndZones",
   "motionTuner",
   "triggers",
@@ -90,7 +92,8 @@ const settingsGroups = [
   {
     label: "cameras",
     items: [
-      { key: "cameras", component: CameraSettingsView },
+      { key: "cameraManagement", component: CameraManagementView },
+      { key: "cameraReview", component: CameraSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
       { key: "motionTuner", component: MotionTunerView },
     ],
@@ -118,6 +121,16 @@ const settingsGroups = [
     items: [{ key: "frigateplus", component: FrigatePlusSettingsView }],
   },
 ];
+
+const CAMERA_SELECT_BUTTON_PAGES = [
+  "debug",
+  "cameraReview",
+  "masksAndZones",
+  "motionTuner",
+  "triggers",
+];
+
+const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
 
 const getCurrentComponent = (page: SettingsType) => {
   for (const group of settingsGroups) {
@@ -172,13 +185,8 @@ export default function Settings() {
 
   const isAdmin = useIsAdmin();
 
-  const allowedViewsForViewer: SettingsType[] = [
-    "ui",
-    "debug",
-    "notifications",
-  ];
   const visibleSettingsViews = !isAdmin
-    ? allowedViewsForViewer
+    ? ALLOWED_VIEWS_FOR_VIEWER
     : allSettingsViews;
 
   // TODO: confirm leave page
@@ -242,7 +250,7 @@ export default function Settings() {
         setSelectedCamera(firstEnabledCamera.name);
       } else if (
         !cameraEnabledStates[selectedCamera] &&
-        pageToggle !== "cameras"
+        pageToggle !== "cameraReview"
       ) {
         // Switch to first enabled camera if current one is disabled, unless on "camera settings" page
         const firstEnabledCamera =
@@ -257,7 +265,10 @@ export default function Settings() {
   useSearchEffect("page", (page: string) => {
     if (allSettingsViews.includes(page as SettingsType)) {
       // Restrict viewer to UI settings
-      if (!isAdmin && !allowedViewsForViewer.includes(page as SettingsType)) {
+      if (
+        !isAdmin &&
+        !ALLOWED_VIEWS_FOR_VIEWER.includes(page as SettingsType)
+      ) {
         setPageToggle("ui");
       } else {
         setPageToggle(page as SettingsType);
@@ -321,7 +332,9 @@ export default function Settings() {
                         onSelect={(key) => {
                           if (
                             !isAdmin &&
-                            !allowedViewsForViewer.includes(key as SettingsType)
+                            !ALLOWED_VIEWS_FOR_VIEWER.includes(
+                              key as SettingsType,
+                            )
                           ) {
                             setPageToggle("ui");
                           } else {
@@ -348,13 +361,7 @@ export default function Settings() {
               className="top-0 mb-0"
               onClose={() => navigate(-1)}
               actions={
-                [
-                  "debug",
-                  "cameras",
-                  "masksAndZones",
-                  "motionTuner",
-                  "triggers",
-                ].includes(pageToggle) ? (
+                CAMERA_SELECT_BUTTON_PAGES.includes(pageToggle) ? (
                   <div className="flex items-center gap-2">
                     {pageToggle == "masksAndZones" && (
                       <ZoneMaskFilterButton
@@ -426,13 +433,7 @@ export default function Settings() {
         <Heading as="h3" className="mb-0">
           {t("menu.settings", { ns: "common" })}
         </Heading>
-        {[
-          "debug",
-          "cameras",
-          "masksAndZones",
-          "motionTuner",
-          "triggers",
-        ].includes(page) && (
+        {CAMERA_SELECT_BUTTON_PAGES.includes(page) && (
           <div className="flex items-center gap-2">
             {pageToggle == "masksAndZones" && (
               <ZoneMaskFilterButton
@@ -470,7 +471,7 @@ export default function Settings() {
                             onClick={() => {
                               if (
                                 !isAdmin &&
-                                !allowedViewsForViewer.includes(
+                                !ALLOWED_VIEWS_FOR_VIEWER.includes(
                                   filteredItems[0].key as SettingsType,
                                 )
                               ) {
@@ -512,7 +513,7 @@ export default function Settings() {
                                 onClick={() => {
                                   if (
                                     !isAdmin &&
-                                    !allowedViewsForViewer.includes(
+                                    !ALLOWED_VIEWS_FOR_VIEWER.includes(
                                       item.key as SettingsType,
                                     )
                                   ) {
@@ -635,7 +636,7 @@ function CameraSelectButton({
         <div className="flex flex-col gap-2.5">
           {allCameras.map((item) => {
             const isEnabled = cameraEnabledStates[item.name];
-            const isCameraSettingsPage = currentPage === "cameras";
+            const isCameraSettingsPage = currentPage === "cameraReview";
             return (
               <FilterSwitch
                 key={item.name}

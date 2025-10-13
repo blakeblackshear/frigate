@@ -2,7 +2,8 @@
   "documentTitle": {
     "default": "Settings - Frigate",
     "authentication": "Authentication Settings - Frigate",
-    "camera": "Camera Settings - Frigate",
+    "cameraManagement": "Manage Cameras - Frigate",
+    "cameraReview": "Camera Review Settings - Frigate",
     "enrichments": "Enrichments Settings - Frigate",
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
@@ -14,7 +15,8 @@
   "menu": {
     "ui": "UI",
     "enrichments": "Enrichments",
-    "cameras": "Camera Settings",
+    "cameraManagement": "Management",
+    "cameraReview": "Review",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion Tuner",
     "triggers": "Triggers",
@@ -143,12 +145,176 @@
       "error": "Failed to save config changes: {{errorMessage}}"
     }
   },
-  "camera": {
-    "title": "Camera Settings",
+  "cameraWizard": {
+    "title": "Add Camera",
+    "description": "Follow the steps below to add a new camera to your Frigate installation.",
+    "steps": {
+      "nameAndConnection": "Name & Connection",
+      "streamConfiguration": "Stream Configuration",
+      "validationAndTesting": "Validation & Testing"
+    },
+    "save": {
+      "success": "Successfully saved new camera {{cameraName}}.",
+      "failure": "Error saving {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Resolution",
+      "video": "Video",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Please provide a valid stream URL",
+      "testFailed": "Stream test failed: {{error}}"
+    },
+    "step1": {
+      "description": "Enter your camera details and test the connection.",
+      "cameraName": "Camera Name",
+      "cameraNamePlaceholder": "e.g., front_door or Back Yard Overview",
+      "host": "Host/IP Address",
+      "port": "Port",
+      "username": "Username",
+      "usernamePlaceholder": "Optional",
+      "password": "Password",
+      "passwordPlaceholder": "Optional",
+      "selectTransport": "Select transport protocol",
+      "cameraBrand": "Camera Brand",
+      "selectBrand": "Select camera brand for URL template",
+      "customUrl": "Custom Stream URL",
+      "brandInformation": "Brand information",
+      "brandUrlFormat": "For cameras with the RTSP URL format as: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "testConnection": "Test Connection",
+      "testSuccess": "Connection test successful!",
+      "testFailed": "Connection test failed. Please check your input and try again.",
+      "streamDetails": "Stream Details",
+      "warnings": {
+        "noSnapshot": "Unable to fetch a snapshot from the configured stream."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Either select a camera brand with host/IP or choose 'Other' with a custom URL",
+        "nameRequired": "Camera name is required",
+        "nameLength": "Camera name must be 64 characters or less",
+        "invalidCharacters": "Camera name contains invalid characters",
+        "nameExists": "Camera name already exists"
+      }
+    },
+    "step2": {
+      "description": "Configure stream roles and add additional streams for your camera.",
+      "streamsTitle": "Camera Streams",
+      "addStream": "Add Stream",
+      "addAnotherStream": "Add Another Stream",
+      "streamTitle": "Stream {{number}}",
+      "streamUrl": "Stream URL",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "url": "URL",
+      "resolution": "Resolution",
+      "selectResolution": "Select resolution",
+      "quality": "Quality",
+      "selectQuality": "Select quality",
+      "roles": "Roles",
+      "roleLabels": {
+        "detect": "Object Detection",
+        "record": "Recording",
+        "audio": "Audio"
+      },
+      "testStream": "Test Connection",
+      "testSuccess": "Stream test successful!",
+      "testFailed": "Stream test failed",
+      "testFailedTitle": "Test Failed",
+      "connected": "Connected",
+      "notConnected": "Not Connected",
+      "featuresTitle": "Features",
+      "go2rtc": "Reduce connections to camera",
+      "detectRoleWarning": "At least one stream must have the \"detect\" role to proceed.",
+      "rolesPopover": {
+        "title": "Stream Roles",
+        "detect": "Main feed for object detection.",
+        "record": "Saves segments of the video feed based on configuration settings.",
+        "audio": "Feed for audio based detection."
+      },
+      "featuresPopover": {
+        "title": "Stream Features",
+        "description": "Use go2rtc restreaming to reduce connections to your camera."
+      }
+    },
+    "step3": {
+      "description": "Final validation and analysis before saving your new camera. Connect each stream before saving.",
+      "validationTitle": "Stream Validation",
+      "connectAllStreams": "Connect All Streams",
+      "reconnectionSuccess": "Reconnection successful.",
+      "reconnectionPartial": "Some streams failed to reconnect.",
+      "streamUnavailable": "Stream preview unavailable",
+      "reload": "Reload",
+      "connecting": "Connecting...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Valid",
+      "failed": "Failed",
+      "notTested": "Not tested",
+      "connectStream": "Connect",
+      "connectingStream": "Connecting",
+      "disconnectStream": "Disconnect",
+      "estimatedBandwidth": "Estimated Bandwidth",
+      "roles": "Roles",
+      "none": "None",
+      "error": "Error",
+      "streamValidated": "Stream {{number}} validated successfully",
+      "streamValidationFailed": "Stream {{number}} validation failed",
+      "saveAndApply": "Save New Camera",
+      "saveError": "Invalid configuration. Please check your settings.",
+      "issues": {
+        "title": "Stream Validation",
+        "videoCodecGood": "Video codec is {{codec}}.",
+        "audioCodecGood": "Audio codec is {{codec}}.",
+        "noAudioWarning": "No audio detected for this stream, recordings will not have audio.",
+        "audioCodecRecordError": "The AAC audio codec is required to support audio in recordings.",
+        "audioCodecRequired": "An audio stream is required to support audio detection.",
+        "restreamingWarning": "Reducing connections to the camera for the record stream may increase CPU usage slightly."
+      }
+    }
+  },
+  "cameraManagement": {
+    "title": "Manage Cameras",
+    "addCamera": "Add New Camera",
+    "editCamera": "Edit Camera:",
+    "selectCamera": "Select a Camera",
+    "backToSettings": "Back to Camera Settings",
     "streams": {
-      "title": "Streams",
+      "title": "Enable / Disable Cameras",
       "desc": "Temporarily disable a camera until Frigate restarts. Disabling a camera completely stops Frigate's processing of this camera's streams. Detection, recording, and debugging will be unavailable.<br /> <em>Note: This does not disable go2rtc restreams.</em>"
     },
+    "cameraConfig": {
+      "add": "Add Camera",
+      "edit": "Edit Camera",
+      "description": "Configure camera settings including stream inputs and roles.",
+      "name": "Camera Name",
+      "nameRequired": "Camera name is required",
+      "nameLength": "Camera name must be less than 64 characters.",
+      "namePlaceholder": "e.g., front_door or Back Yard Overview",
+      "enabled": "Enabled",
+      "ffmpeg": {
+        "inputs": "Input Streams",
+        "path": "Stream Path",
+        "pathRequired": "Stream path is required",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roles",
+        "rolesRequired": "At least one role is required",
+        "rolesUnique": "Each role (audio, detect, record) can only be assigned to one stream",
+        "addInput": "Add Input Stream",
+        "removeInput": "Remove Input Stream",
+        "inputsRequired": "At least one input stream is required"
+      },
+      "go2rtcStreams": "go2rtc Streams",
+      "streamUrls": "Stream URLs",
+      "addUrl": "Add URL",
+      "addGo2rtcStream": "Add go2rtc Stream",
+      "toast": {
+        "success": "Camera {{cameraName}} saved successfully"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Camera Review Settings",
     "object_descriptions": {
       "title": "Generative AI Object Descriptions",
       "desc": "Temporarily enable/disable Generative AI object descriptions for this camera. When disabled, AI generated descriptions will not be requested for tracked objects on this camera."
@@ -182,35 +348,6 @@
       "limitDetections": "Limit detections to specific zones",
       "toast": {
         "success": "Review Classification configuration has been saved. Restart Frigate to apply changes."
-      }
-    },
-    "addCamera": "Add New Camera",
-    "editCamera": "Edit Camera:",
-    "selectCamera": "Select a Camera",
-    "backToSettings": "Back to Camera Settings",
-    "cameraConfig": {
-      "add": "Add Camera",
-      "edit": "Edit Camera",
-      "description": "Configure camera settings including stream inputs and roles.",
-      "name": "Camera Name",
-      "nameRequired": "Camera name is required",
-      "nameLength": "Camera name must be less than 24 characters.",
-      "namePlaceholder": "e.g., front_door",
-      "enabled": "Enabled",
-      "ffmpeg": {
-        "inputs": "Input Streams",
-        "path": "Stream Path",
-        "pathRequired": "Stream path is required",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "Roles",
-        "rolesRequired": "At least one role is required",
-        "rolesUnique": "Each role (audio, detect, record) can only be assigned to one stream",
-        "addInput": "Add Input Stream",
-        "removeInput": "Remove Input Stream",
-        "inputsRequired": "At least one input stream is required"
-      },
-      "toast": {
-        "success": "Camera {{cameraName}} saved successfully"
       }
     }
   },
