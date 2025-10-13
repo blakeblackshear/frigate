@@ -484,6 +484,7 @@ export default function Events() {
           timeRange={selectedTimeRange}
           filter={reviewFilter}
           updateFilter={onUpdateFilter}
+          refreshData={reloadData}
         />
       );
     }

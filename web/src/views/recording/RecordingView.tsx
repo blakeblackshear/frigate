@@ -78,6 +78,7 @@ type RecordingViewProps = {
   allPreviews?: Preview[];
   filter?: ReviewFilter;
   updateFilter: (newFilter: ReviewFilter) => void;
+  refreshData?: () => void;
 };
 export function RecordingView({
   startCamera,
@@ -89,6 +90,7 @@ export function RecordingView({
   allPreviews,
   filter,
   updateFilter,
+  refreshData,
 }: RecordingViewProps) {
   const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -191,6 +193,34 @@ export function RecordingView({
       setSelectedRangeIdx(selectedRangeIdx + 1);
     }
   }, [selectedRangeIdx, chunkedTimeRange]);
+
+  // visibility tracking for refreshing stale data
+
+  const lastVisibilityTime = useRef<number>(Date.now());
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        const now = Date.now();
+        const timeSinceLastVisible = now - lastVisibilityTime.current;
+        const tenMinutesInMs = 10 * 60 * 1000;
+
+        if (timeSinceLastVisible >= tenMinutesInMs && refreshData) {
+          refreshData();
+        }
+
+        lastVisibilityTime.current = now;
+      } else {
+        lastVisibilityTime.current = Date.now();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [onRefreshNeeded]);
 
   // scrubbing and timeline state
 
