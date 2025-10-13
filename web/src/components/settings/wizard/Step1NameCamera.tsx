@@ -430,7 +430,7 @@ export default function Step1NameCamera({
                                   <h4 className="font-medium">
                                     {selectedBrand.label}
                                   </h4>
-                                  <p className="text-sm text-muted-foreground">
+                                  <p className="break-all text-sm text-muted-foreground">
                                     {t("cameraWizard.step1.brandUrlFormat", {
                                       exampleUrl: selectedBrand.exampleUrl,
                                     })}
