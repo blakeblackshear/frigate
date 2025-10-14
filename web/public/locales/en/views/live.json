@@ -73,6 +73,12 @@
     "enable": "Enable Snapshots",
     "disable": "Disable Snapshots"
   },
+  "snapshot": {
+    "takeSnapshot": "Download instant snapshot",
+    "noVideoSource": "No video source available for snapshot.",
+    "captureFailed": "Failed to capture snapshot.",
+    "downloadStarted": "Snapshot download started."
+  },
   "audioDetect": {
     "enable": "Enable Audio Detect",
     "disable": "Disable Audio Detect"
@@ -90,8 +96,8 @@
     "disable": "Hide Stream Stats"
   },
   "manualRecording": {
-    "title": "On-Demand Recording",
-    "tips": "Start a manual event based on this camera's recording retention settings.",
+    "title": "On-Demand",
+    "tips": "Download an instant snapshot or start a manual event based on this camera's recording retention settings.",
     "playInBackground": {
       "label": "Play in background",
       "desc": "Enable this option to continue streaming when the player is hidden."
