@@ -432,7 +432,7 @@ class TrackedObject:
             _, img = cv2.imencode(f".{ext}", np.zeros((175, 175, 3), np.uint8))
             return img.tobytes()
 
-    def get_clean_png(self) -> bytes | None:
+    def get_clean_webp(self) -> bytes | None:
         if self.thumbnail_data is None:
             return None
 
@@ -443,13 +443,15 @@ class TrackedObject:
             )
         except KeyError:
             logger.warning(
-                f"Unable to create clean png because frame {self.thumbnail_data['frame_time']} is not in the cache"
+                f"Unable to create clean webp because frame {self.thumbnail_data['frame_time']} is not in the cache"
             )
             return None
 
-        ret, png = cv2.imencode(".png", best_frame)
+        ret, webp = cv2.imencode(
+            ".webp", best_frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+        )
         if ret:
-            return png.tobytes()
+            return webp.tobytes()
         else:
             return None
 
@@ -583,8 +585,8 @@ class TrackedObject:
 
         # write clean snapshot if enabled
         if snapshot_config.clean_copy:
-            png_bytes = self.get_clean_png()
-            if png_bytes is None:
+            webp_bytes = self.get_clean_webp()
+            if webp_bytes is None:
                 logger.warning(
                     f"Unable to save clean snapshot for {self.obj_data['id']}."
                 )
@@ -592,11 +594,11 @@ class TrackedObject:
                 with open(
                     os.path.join(
                         CLIPS_DIR,
-                        f"{self.camera_config.name}-{self.obj_data['id']}-clean.png",
+                        f"{self.camera_config.name}-{self.obj_data['id']}-clean.webp",
                     ),
                     "wb",
                 ) as p:
-                    p.write(png_bytes)
+                    p.write(webp_bytes)
 
     def write_thumbnail_to_disk(self) -> None:
         if not self.camera_config.name:
