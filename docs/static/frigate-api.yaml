@@ -4077,7 +4077,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /events/{event_id}/snapshot-clean.png:
+  /events/{event_id}/snapshot-clean.webp:
     get:
       tags:
         - Media
