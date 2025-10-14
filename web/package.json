@@ -100,7 +100,7 @@
     "@types/react-icons": "^3.0.0",
     "@types/react-transition-group": "^4.4.10",
     "@types/strftime": "^0.9.8",
-    "@typescript-eslint/eslint-plugin": "^7.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
     "@typescript-eslint/parser": "^7.5.0",
     "@vitejs/plugin-react-swc": "^3.8.0",
     "@vitest/coverage-v8": "^3.0.7",
