@@ -42,6 +42,9 @@ def delete_event_snapshot(event: Event) -> bool:
 
     try:
         media_path.unlink(missing_ok=True)
+        media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.webp")
+        media_path.unlink(missing_ok=True)
+        # also delete clean.png (legacy) for backward compatibility
         media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
         media_path.unlink(missing_ok=True)
         return True
