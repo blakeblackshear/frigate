@@ -275,7 +275,13 @@
         "noAudioWarning": "No audio detected for this stream, recordings will not have audio.",
         "audioCodecRecordError": "The AAC audio codec is required to support audio in recordings.",
         "audioCodecRequired": "An audio stream is required to support audio detection.",
-        "restreamingWarning": "Reducing connections to the camera for the record stream may increase CPU usage slightly."
+        "restreamingWarning": "Reducing connections to the camera for the record stream may increase CPU usage slightly.",
+        "dahua": {
+          "substreamWarning": "Substream 1 is locked to a low resolution. Many Dahua / Amcrest / EmpireTech cameras support additional substreams that need to be enabled in the camera's settings. It is recommended to check and utilize those streams if available."
+        },
+        "hikvision": {
+          "substreamWarning": "Substream 1 is locked to a low resolution. Many Hikvision cameras support additional substreams that need to be enabled in the camera's settings. It is recommended to check and utilize those streams if available."
+        }
       }
     }
   },

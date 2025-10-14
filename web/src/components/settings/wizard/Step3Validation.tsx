@@ -500,6 +500,28 @@ function StreamIssues({
       }
     }
 
+    // Substream Check
+    if (
+      wizardData.brandTemplate == "dahua" &&
+      stream.roles.includes("detect") &&
+      stream.url.includes("subtype=1")
+    ) {
+      result.push({
+        type: "warning",
+        message: t("cameraWizard.step3.issues.dahua.substreamWarning"),
+      });
+    }
+    if (
+      wizardData.brandTemplate == "hikvision" &&
+      stream.roles.includes("detect") &&
+      stream.url.includes("/102")
+    ) {
+      result.push({
+        type: "warning",
+        message: t("cameraWizard.step3.issues.hikvision.substreamWarning"),
+      });
+    }
+
     return result;
   }, [stream, wizardData, t]);
 
