@@ -574,7 +574,7 @@ record:
 snapshots:
   # Optional: Enable writing jpg snapshot to /media/frigate/clips (default: shown below)
   enabled: False
-  # Optional: save a clean PNG copy of the snapshot image (default: shown below)
+  # Optional: save a clean copy of the snapshot image (default: shown below)
   clean_copy: True
   # Optional: print a timestamp on the snapshots (default: shown below)
   timestamp: False
