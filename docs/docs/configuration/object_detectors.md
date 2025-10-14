@@ -1012,9 +1012,9 @@ FROM python:3.11 AS build
 RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
 COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
 WORKDIR /rfdetr
-RUN uv pip install --system rfdetr onnx onnxruntime onnxsim onnx-graphsurgeon
+RUN uv pip install --system rfdetr[onnxexport]
 ARG MODEL_SIZE
-RUN python3 -c "from rfdetr import RFDETR${MODEL_SIZE}; x = RFDETR${MODEL_SIZE}(resolution=320); x.export()"
+RUN python3 -c "from rfdetr import RFDETR${MODEL_SIZE}; x = RFDETR${MODEL_SIZE}(resolution=320); x.export(simplify=True)"
 FROM scratch
 ARG MODEL_SIZE
 COPY --from=build /rfdetr/output/inference_model.onnx /rfdetr-${MODEL_SIZE}.onnx
