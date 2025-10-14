@@ -16,7 +16,7 @@ from frigate.api.auth import require_role
 from frigate.api.defs.request.export_recordings_body import ExportRecordingsBody
 from frigate.api.defs.request.export_rename_body import ExportRenameBody
 from frigate.api.defs.tags import Tags
-from frigate.const import EXPORT_DIR
+from frigate.const import CLIPS_DIR, EXPORT_DIR
 from frigate.models import Export, Previews, Recordings
 from frigate.record.export import (
     PlaybackFactorEnum,
@@ -58,7 +58,7 @@ def export_recording(
     existing_image = sanitize_filepath(body.image_path) if body.image_path else None
 
     # Ensure that existing_image is a valid path
-    if existing_image and not existing_image.startswith("/media/frigate/clips/"):
+    if existing_image and not existing_image.startswith(CLIPS_DIR):
         return JSONResponse(
             content=({"success": False, "message": "Invalid image path"}),
             status_code=400,
