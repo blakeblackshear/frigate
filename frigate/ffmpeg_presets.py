@@ -85,8 +85,8 @@ PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
     "preset-rpi-64-h265": "-c:v:1 hevc_v4l2m2m",
     FFMPEG_HWACCEL_VAAPI: "-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {3} -hwaccel_output_format vaapi",
-    "preset-intel-qsv-h264": "-hwaccel qsv -qsv_device {3} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
-    "preset-intel-qsv-h265": "-load_plugin hevc_hw -hwaccel qsv -qsv_device {3} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
+    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {{3}} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
+    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {{3}} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
     FFMPEG_HWACCEL_NVIDIA: "-hwaccel_device {3} -hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
