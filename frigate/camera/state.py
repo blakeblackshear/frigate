@@ -531,7 +531,7 @@ class CameraState:
         # write clean snapshot if enabled
         if self.camera_config.snapshots.clean_copy:
             ret, webp = cv2.imencode(
-                ".webp", img_frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+                ".webp", img_frame, [int(cv2.IMWRITE_WEBP_QUALITY), 80]
             )
 
             if ret:
