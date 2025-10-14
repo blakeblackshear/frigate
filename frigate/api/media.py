@@ -1165,9 +1165,9 @@ def grid_snapshot(
         )
 
 
-@router.get("/events/{event_id}/snapshot-clean.png")
+@router.get("/events/{event_id}/snapshot-clean.webp")
 def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
-    png_bytes = None
+    webp_bytes = None
     try:
         event = Event.get(Event.id == event_id)
         snapshot_config = request.app.frigate_config.cameras[event.camera].snapshots
@@ -1189,7 +1189,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
                     if event_id in camera_state.tracked_objects:
                         tracked_obj = camera_state.tracked_objects.get(event_id)
                         if tracked_obj is not None:
-                            png_bytes = tracked_obj.get_clean_png()
+                            webp_bytes = tracked_obj.get_clean_webp()
                             break
             except Exception:
                 return JSONResponse(
@@ -1205,12 +1205,56 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
         )
-    if png_bytes is None:
+    if webp_bytes is None:
         try:
-            clean_snapshot_path = os.path.join(
+            # webp
+            clean_snapshot_path_webp = os.path.join(
+                CLIPS_DIR, f"{event.camera}-{event.id}-clean.webp"
+            )
+            # png (legacy)
+            clean_snapshot_path_png = os.path.join(
                 CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"
             )
-            if not os.path.exists(clean_snapshot_path):
+
+            if os.path.exists(clean_snapshot_path_webp):
+                with open(clean_snapshot_path_webp, "rb") as image_file:
+                    webp_bytes = image_file.read()
+            elif os.path.exists(clean_snapshot_path_png):
+                # convert png to webp and save for future use
+                png_image = cv2.imread(clean_snapshot_path_png, cv2.IMREAD_UNCHANGED)
+                if png_image is None:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Invalid png snapshot",
+                        },
+                        status_code=400,
+                    )
+
+                ret, webp_data = cv2.imencode(
+                    ".webp", png_image, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+                )
+                if not ret:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Unable to convert png to webp",
+                        },
+                        status_code=400,
+                    )
+
+                webp_bytes = webp_data.tobytes()
+
+                # save the converted webp for future requests
+                try:
+                    with open(clean_snapshot_path_webp, "wb") as f:
+                        f.write(webp_bytes)
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to save converted webp for event {event.id}: {e}"
+                    )
+                    # continue since we now have the data to return
+            else:
                 return JSONResponse(
                     content={
                         "success": False,
@@ -1218,33 +1262,29 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
                     },
                     status_code=404,
                 )
-            with open(
-                os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"), "rb"
-            ) as image_file:
-                png_bytes = image_file.read()
         except Exception:
-            logger.error(f"Unable to load clean png for event: {event.id}")
+            logger.error(f"Unable to load clean snapshot for event: {event.id}")
             return JSONResponse(
                 content={
                     "success": False,
-                    "message": "Unable to load clean png for event",
+                    "message": "Unable to load clean snapshot for event",
                 },
                 status_code=400,
             )
 
     headers = {
-        "Content-Type": "image/png",
+        "Content-Type": "image/webp",
         "Cache-Control": "private, max-age=31536000",
     }
 
     if download:
         headers["Content-Disposition"] = (
-            f"attachment; filename=snapshot-{event_id}-clean.png"
+            f"attachment; filename=snapshot-{event_id}-clean.webp"
         )
 
     return Response(
-        png_bytes,
-        media_type="image/png",
+        webp_bytes,
+        media_type="image/webp",
         headers=headers,
     )
 
