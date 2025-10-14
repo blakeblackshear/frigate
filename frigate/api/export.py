@@ -8,6 +8,7 @@ from pathlib import Path
 import psutil
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
+from pathvalidate import sanitize_filepath
 from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
@@ -54,7 +55,14 @@ def export_recording(
     playback_factor = body.playback
     playback_source = body.source
     friendly_name = body.name
-    existing_image = body.image_path
+    existing_image = sanitize_filepath(body.image_path) if body.image_path else None
+
+    # Ensure that existing_image is a valid path
+    if existing_image and not existing_image.startswith("/media/frigate/clips/"):
+        return JSONResponse(
+            content=({"success": False, "message": "Invalid image path"}),
+            status_code=400,
+        )
 
     if playback_source == "recordings":
         recordings_count = (
