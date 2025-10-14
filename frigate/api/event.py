@@ -939,12 +939,12 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
         include_annotation = None
 
     if event.end_time is None:
-        logger.error(f"Unable to load clean png for in-progress event: {event.id}")
+        logger.error(f"Unable to load clean snapshot for in-progress event: {event.id}")
         return JSONResponse(
             content=(
                 {
                     "success": False,
-                    "message": "Unable to load clean png for in-progress event",
+                    "message": "Unable to load clean snapshot for in-progress event",
                 }
             ),
             status_code=400,
@@ -957,24 +957,44 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
             content=({"success": False, "message": message}), status_code=400
         )
 
-    # load clean.png
+    # load clean.webp or clean.png (legacy)
     try:
-        filename = f"{event.camera}-{event.id}-clean.png"
-        image = cv2.imread(os.path.join(CLIPS_DIR, filename))
+        filename_webp = f"{event.camera}-{event.id}-clean.webp"
+        filename_png = f"{event.camera}-{event.id}-clean.png"
+
+        image_path = None
+        if os.path.exists(os.path.join(CLIPS_DIR, filename_webp)):
+            image_path = os.path.join(CLIPS_DIR, filename_webp)
+        elif os.path.exists(os.path.join(CLIPS_DIR, filename_png)):
+            image_path = os.path.join(CLIPS_DIR, filename_png)
+
+        if image_path is None:
+            logger.error(f"Unable to find clean snapshot for event: {event.id}")
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": "Unable to find clean snapshot for event",
+                    }
+                ),
+                status_code=400,
+            )
+
+        image = cv2.imread(image_path)
     except Exception:
-        logger.error(f"Unable to load clean png for event: {event.id}")
+        logger.error(f"Unable to load clean snapshot for event: {event.id}")
         return JSONResponse(
             content=(
-                {"success": False, "message": "Unable to load clean png for event"}
+                {"success": False, "message": "Unable to load clean snapshot for event"}
             ),
             status_code=400,
         )
 
     if image is None or image.size == 0:
-        logger.error(f"Unable to load clean png for event: {event.id}")
+        logger.error(f"Unable to load clean snapshot for event: {event.id}")
         return JSONResponse(
             content=(
-                {"success": False, "message": "Unable to load clean png for event"}
+                {"success": False, "message": "Unable to load clean snapshot for event"}
             ),
             status_code=400,
         )
@@ -1422,6 +1442,7 @@ async def delete_single_event(event_id: str, request: Request) -> dict:
         snapshot_paths = [
             Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg"),
             Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"),
+            Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.webp"),
         ]
         for media in snapshot_paths:
             media.unlink(missing_ok=True)
