@@ -5,7 +5,21 @@ import HttpBackend from "i18next-http-backend";
 export const getTranslatedLabel = (label: string) => {
   if (!label) return "";
 
-  return t(`${label.replace(/\s+/g, "_").toLowerCase()}`, { ns: "objects" });
+  const normalize = (s: string) =>
+    s
+      .trim()
+      .replace(/[-'\s]+/g, "_")
+      .replace(/__+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .toLowerCase();
+
+  const key = normalize(label);
+
+  if (i18n.exists(key, { ns: "objects" })) return t(key, { ns: "objects" });
+  if (i18n.exists(key, { ns: "audio" })) return t(key, { ns: "audio" });
+
+  // fallback
+  return t(key, { ns: "objects" });
 };
 
 i18n
