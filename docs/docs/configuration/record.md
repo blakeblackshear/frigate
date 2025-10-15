@@ -25,16 +25,14 @@ record:
   alerts:
     retain:
       days: 30
-      mode: motion
   detections:
     retain:
       days: 30
-      mode: motion
 ```
 
 ### Reduced storage: Only saving video when motion is detected
 
-In order to reduce storage requirements, you can adjust your config to only retain video where motion was detected.
+In order to reduce storage requirements, you can adjust your config to only retain video where motion / activity was detected.
 
 ```yaml
 record:
@@ -44,16 +42,14 @@ record:
   alerts:
     retain:
       days: 30
-      mode: motion
   detections:
     retain:
       days: 30
-      mode: motion
 ```
 
 ### Minimum: Alerts only
 
-If you only want to retain video that occurs during a tracked object, this config will discard video unless an alert is ongoing.
+If you only want to retain video that occurs during activity caused by tracked object(s), this config will discard video unless an alert is ongoing.
 
 ```yaml
 record:
@@ -63,7 +59,6 @@ record:
   alerts:
     retain:
       days: 30
-      mode: motion
 ```
 
 ## Will Frigate delete old recordings if my storage runs out?
