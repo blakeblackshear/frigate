@@ -712,42 +712,6 @@ export default function LiveCameraView({
   );
 }
 
-function OnDemandRetentionMessage({ camera }: { camera: CameraConfig }) {
-  const { t } = useTranslation(["views/live", "views/events"]);
-  const rankMap = { all: 0, motion: 1, active_objects: 2 };
-  const getValidMode = (retain?: { mode?: string }): keyof typeof rankMap => {
-    const mode = retain?.mode;
-    return mode && mode in rankMap ? (mode as keyof typeof rankMap) : "all";
-  };
-
-  const recordRetainMode = getValidMode(camera.record.retain);
-  const alertsRetainMode = getValidMode(camera.review.alerts.retain);
-
-  const effectiveRetainMode =
-    rankMap[alertsRetainMode] < rankMap[recordRetainMode]
-      ? recordRetainMode
-      : alertsRetainMode;
-
-  const source = effectiveRetainMode === recordRetainMode ? "camera" : "alerts";
-
-  return effectiveRetainMode !== "all" ? (
-    <div>
-      <Trans
-        ns="views/live"
-        values={{
-          source,
-          effectiveRetainMode,
-          effectiveRetainModeName: t(
-            "effectiveRetainMode.modes." + effectiveRetainMode,
-          ),
-        }}
-      >
-        effectiveRetainMode.notAllTips
-      </Trans>
-    </div>
-  ) : null;
-}
-
 type FrigateCameraFeaturesProps = {
   camera: CameraConfig;
   recordingEnabled: boolean;
@@ -841,11 +805,10 @@ function FrigateCameraFeatures({
         const toastId = toast.success(
           <div className="flex flex-col space-y-3">
             <div className="font-semibold">{t("manualRecording.started")}</div>
-            {!camera.record.enabled || camera.record.alerts.retain.days == 0 ? (
-              <div>{t("manualRecording.recordDisabledTips")}</div>
-            ) : (
-              <OnDemandRetentionMessage camera={camera} />
-            )}
+            {!camera.record.enabled ||
+              (camera.record.alerts.retain.days == 0 && (
+                <div>{t("manualRecording.recordDisabledTips")}</div>
+              ))}
           </div>,
           {
             position: "top-center",
