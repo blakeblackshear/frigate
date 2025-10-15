@@ -57,14 +57,25 @@ class SegmentInfo:
         self.average_dBFS = average_dBFS
 
     def should_discard_segment(self, retain_mode: RetainModeEnum) -> bool:
-        return (
-            retain_mode == RetainModeEnum.motion
-            and self.motion_count == 0
-            and self.average_dBFS == 0
-        ) or (
-            retain_mode == RetainModeEnum.active_objects
-            and self.active_object_count == 0
-        )
+        keep = False
+
+        # all mode should never discard
+        if retain_mode == RetainModeEnum.all:
+            keep = True
+
+        # motion mode should keep if motion or audio is detected
+        if (
+            not keep
+            and retain_mode == RetainModeEnum.motion
+            and (self.motion_count > 0 or self.average_dBFS > 0)
+        ):
+            keep = True
+
+        # active objects mode should keep if any active objects are detected
+        if not keep and self.active_object_count > 0:
+            keep = True
+
+        return not keep
 
 
 class RecordingMaintainer(threading.Thread):
@@ -348,63 +359,10 @@ class RecordingMaintainer(threading.Thread):
         elif record_config.motion.days > 0:
             highest = "motion"
 
-        # continuous / motion recording is not enabled
-        if highest is None:
-            # if the cached segment overlaps with the review items:
-            overlaps = False
-            for review in reviews:
-                severity = SeverityEnum[review.severity]
-
-                # if the review item starts in the future, stop checking review items
-                # and remove this segment
-                if (
-                    review.start_time - record_config.get_review_pre_capture(severity)
-                ) > end_time.timestamp():
-                    overlaps = False
-                    break
-
-                # if the review item is in progress or ends after the recording starts, keep it
-                # and stop looking at review items
-                if (
-                    review.end_time is None
-                    or (
-                        review.end_time
-                        + record_config.get_review_post_capture(severity)
-                    )
-                    >= start_time.timestamp()
-                ):
-                    overlaps = True
-                    break
-
-            if overlaps:
-                record_mode = (
-                    record_config.alerts.retain.mode
-                    if review.severity == "alert"
-                    else record_config.detections.retain.mode
-                )
-                # move from cache to recordings immediately
-                return await self.move_segment(
-                    camera,
-                    start_time,
-                    end_time,
-                    duration,
-                    cache_path,
-                    record_mode,
-                )
-            # if it doesn't overlap with an review item, go ahead and drop the segment
-            # if it ends more than the configured pre_capture for the camera
-            else:
-                camera_info = self.object_recordings_info[camera]
-                most_recently_processed_frame_time = (
-                    camera_info[-1][0] if len(camera_info) > 0 else 0
-                )
-                retain_cutoff = datetime.datetime.fromtimestamp(
-                    most_recently_processed_frame_time - record_config.event_pre_capture
-                ).astimezone(datetime.timezone.utc)
-                if end_time < retain_cutoff:
-                    self.drop_segment(cache_path)
-        # continuous / motion is enabled
-        else:
+        # if we have continuous or motion recording enabled
+        # we should first just check if this segment matches that
+        # and avoid any DB calls
+        if highest is not None:
             # assume that empty means the relevant recording info has not been received yet
             camera_info = self.object_recordings_info[camera]
             most_recently_processed_frame_time = (
@@ -426,6 +384,59 @@ class RecordingMaintainer(threading.Thread):
                 return await self.move_segment(
                     camera, start_time, end_time, duration, cache_path, record_mode
                 )
+
+        # we fell through the continuous / motion check, so we need to check the review items
+        # if the cached segment overlaps with the review items:
+        overlaps = False
+        for review in reviews:
+            severity = SeverityEnum[review.severity]
+
+            # if the review item starts in the future, stop checking review items
+            # and remove this segment
+            if (
+                review.start_time - record_config.get_review_pre_capture(severity)
+            ) > end_time.timestamp():
+                overlaps = False
+                break
+
+            # if the review item is in progress or ends after the recording starts, keep it
+            # and stop looking at review items
+            if (
+                review.end_time is None
+                or (review.end_time + record_config.get_review_post_capture(severity))
+                >= start_time.timestamp()
+            ):
+                overlaps = True
+                break
+
+        if overlaps:
+            record_mode = (
+                record_config.alerts.retain.mode
+                if review.severity == "alert"
+                else record_config.detections.retain.mode
+            )
+            # move from cache to recordings immediately
+            return await self.move_segment(
+                camera,
+                start_time,
+                end_time,
+                duration,
+                cache_path,
+                record_mode,
+            )
+        # if it doesn't overlap with an review item, go ahead and drop the segment
+        # if it ends more than the configured pre_capture for the camera
+        # BUT only if continuous/motion is NOT enabled (otherwise wait for processing)
+        elif highest is None:
+            camera_info = self.object_recordings_info[camera]
+            most_recently_processed_frame_time = (
+                camera_info[-1][0] if len(camera_info) > 0 else 0
+            )
+            retain_cutoff = datetime.datetime.fromtimestamp(
+                most_recently_processed_frame_time - record_config.event_pre_capture
+            ).astimezone(datetime.timezone.utc)
+            if end_time < retain_cutoff:
+                self.drop_segment(cache_path)
 
     def segment_stats(
         self, camera: str, start_time: datetime.datetime, end_time: datetime.datetime

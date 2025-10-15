@@ -180,7 +180,11 @@ class RecordingCleanup(threading.Thread):
             # Delete recordings outside of the retention window or based on the retention mode
             if (
                 not keep
-                or (mode == RetainModeEnum.motion and recording.motion == 0)
+                or (
+                    mode == RetainModeEnum.motion
+                    and recording.motion == 0
+                    and recording.objects == 0
+                )
                 or (mode == RetainModeEnum.active_objects and recording.objects == 0)
             ):
                 Path(recording.path).unlink(missing_ok=True)

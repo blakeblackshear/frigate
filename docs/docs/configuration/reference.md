@@ -537,7 +537,7 @@ record:
     # Optional: Retention settings for recordings of alerts
     retain:
       # Required: Retention days (default: shown below)
-      days: 14
+      days: 10
       # Optional: Mode for retention. (default: shown below)
       #   all - save all recording segments for alerts regardless of activity
       #   motion - save all recordings segments for alerts with any detected motion
@@ -557,7 +557,7 @@ record:
     # Optional: Retention settings for recordings of detections
     retain:
       # Required: Retention days (default: shown below)
-      days: 14
+      days: 10
       # Optional: Mode for retention. (default: shown below)
       #   all - save all recording segments for detections regardless of activity
       #   motion - save all recordings segments for detections with any detected motion
