@@ -184,7 +184,7 @@ function ThumbnailRow({
         ))}
         <div
           className="flex cursor-pointer items-center justify-center"
-          onClick={() => handleSearch(objectType)}
+          onClick={() => handleSearch(label)}
         >
           <Tooltip>
             <TooltipTrigger>
@@ -195,7 +195,9 @@ function ThumbnailRow({
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent>
-                {t("exploreMore", { label: getTranslatedLabel(objectType) })}
+                {t("exploreMore", {
+                  label: getTranslatedLabel(label, labelType),
+                })}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
