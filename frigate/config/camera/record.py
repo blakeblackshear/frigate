@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 
 from pydantic import Field
-R
+
 from frigate.const import MAX_PRE_CAPTURE
 from frigate.review.types import SeverityEnum
 
