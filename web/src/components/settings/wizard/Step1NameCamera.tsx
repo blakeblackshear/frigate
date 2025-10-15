@@ -80,10 +80,6 @@ export default function Step1NameCamera({
         .string()
         .min(1, t("cameraWizard.step1.errors.nameRequired"))
         .max(64, t("cameraWizard.step1.errors.nameLength"))
-        .regex(
-          /^[a-zA-Z0-9\s_-]+$/,
-          t("cameraWizard.step1.errors.invalidCharacters"),
-        )
         .refine(
           (value) => !existingCameraNames.includes(value),
           t("cameraWizard.step1.errors.nameExists"),
