@@ -37,8 +37,7 @@ export default function ObjectTrackOverlay({
   const { data: config } = useSWR<FrigateConfig>("config");
   const { annotationOffset } = useActivityStream();
 
-  // Offset currentTime by annotation offset for rendering
-  const effectiveCurrentTime = currentTime - annotationOffset;
+  const effectiveCurrentTime = currentTime - annotationOffset / 1000;
 
   // Fetch the full event data to get saved path points
   const { data: eventData } = useSWR(["event_ids", { ids: selectedObjectId }]);
@@ -157,8 +156,9 @@ export default function ObjectTrackOverlay({
   }, [savedPathPoints, eventSequencePoints, config, camera, currentTime]);
 
   // get absolute positions on the svg canvas for each point
-  const getAbsolutePositions = useCallback(() => {
+  const absolutePositions = useMemo(() => {
     if (!pathPoints) return [];
+
     return pathPoints.map((point) => {
       // Find the corresponding timeline entry for this point
       const timelineEntry = objectTimeline?.find(
@@ -271,11 +271,6 @@ export default function ObjectTrackOverlay({
         ]
       : [255, 0, 0];
   }, [pathPoints, getObjectColor]);
-
-  const absolutePositions = useMemo(
-    () => getAbsolutePositions(),
-    [getAbsolutePositions],
-  );
 
   // render any zones for object at current time
   const zonePolygons = useMemo(() => {

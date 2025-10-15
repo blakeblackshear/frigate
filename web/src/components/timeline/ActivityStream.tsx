@@ -7,6 +7,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import useUserInteraction from "@/hooks/use-user-interaction";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useTranslation } from "react-i18next";
+import AnnotationOffsetSlider from "@/components/overlay/detail/AnnotationOffsetSlider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
@@ -27,7 +28,7 @@ export default function ActivityStream({
   const { selectedObjectId, annotationOffset } = useActivityStream();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const effectiveTime = currentTime + annotationOffset;
+  const effectiveTime = currentTime + annotationOffset / 1000;
 
   // Track user interaction and adjust scrolling behavior
   const { userInteracting, setProgrammaticScroll } = useUserInteraction({
@@ -53,7 +54,8 @@ export default function ActivityStream({
         );
         return {
           timestamp: sortedActivities[0].timestamp, // Original timestamp for display
-          effectiveTimestamp: sortedActivities[0].timestamp + annotationOffset, // Adjusted for sorting/comparison
+          effectiveTimestamp:
+            sortedActivities[0].timestamp + annotationOffset / 1000,
           activities: sortedActivities,
         };
       })
@@ -113,27 +115,31 @@ export default function ActivityStream({
   }
 
   return (
-    <div
-      ref={scrollRef}
-      className="scrollbar-container h-full overflow-y-auto bg-secondary"
-    >
-      <div className="space-y-2 p-4">
-        {filteredGroups.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            {t("activity.noActivitiesFound")}
-          </div>
-        ) : (
-          filteredGroups.map((group) => (
-            <ActivityGroup
-              key={group.timestamp}
-              group={group}
-              config={config}
-              isCurrent={group.effectiveTimestamp <= currentTime}
-              onSeek={onSeek}
-            />
-          ))
-        )}
+    <div className="relative">
+      <div
+        ref={scrollRef}
+        className="scrollbar-container h-[calc(100vh-70px)] overflow-y-auto bg-secondary"
+      >
+        <div className="space-y-2 p-4">
+          {filteredGroups.length === 0 ? (
+            <div className="py-8 text-center text-muted-foreground">
+              {t("activity.noActivitiesFound")}
+            </div>
+          ) : (
+            filteredGroups.map((group) => (
+              <ActivityGroup
+                key={group.timestamp}
+                group={group}
+                config={config}
+                isCurrent={group.effectiveTimestamp <= currentTime}
+                onSeek={onSeek}
+              />
+            ))
+          )}
+        </div>
       </div>
+
+      <AnnotationOffsetSlider />
     </div>
   );
 }

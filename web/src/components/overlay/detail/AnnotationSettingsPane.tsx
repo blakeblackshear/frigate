@@ -174,7 +174,7 @@ export function AnnotationSettingsPane({
                   {t("objectLifecycle.annotationSettings.offset.label")}
                 </FormLabel>
                 <div className="flex flex-col gap-3 md:flex-row-reverse md:gap-8">
-                  <div className="flex flex-row items-center gap-3 rounded-lg bg-destructive/50 p-3 text-sm text-primary-variant md:my-0 md:my-5">
+                  <div className="flex flex-row items-center gap-3 rounded-lg bg-destructive/50 p-3 text-sm text-primary-variant md:my-5">
                     <PiWarningCircle className="size-24" />
                     <div>
                       <Trans ns="views/explore">
