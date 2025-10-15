@@ -9,9 +9,7 @@ export const getTranslatedLabel = (
 ) => {
   if (!label) return "";
 
-  if (type === "manual") {
-    return label;
-  }
+  if (type === "manual") return label;
 
   const normalize = (s: string) =>
     s
@@ -23,12 +21,9 @@ export const getTranslatedLabel = (
 
   const key = normalize(label);
 
-  if (type === "audio") {
-    return t(`audio.${key}`, { ns: "audio" });
-  }
+  const ns = type === "audio" ? "audio" : "objects";
 
-  // fallback
-  return t(key, { ns: "objects" });
+  return t(key, { ns });
 };
 
 i18n
