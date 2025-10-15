@@ -220,7 +220,7 @@ export default function ObjectLifecycle({
   const [timeIndex, setTimeIndex] = useState(0);
 
   const handleSetBox = useCallback(
-    (box: number[]) => {
+    (box: number[], attrBox: number[] | undefined) => {
       if (imgRef.current && Array.isArray(box) && box.length === 4) {
         const imgElement = imgRef.current;
         const imgRect = imgElement.getBoundingClientRect();
@@ -232,30 +232,21 @@ export default function ObjectLifecycle({
           height: `${box[3] * imgRect.height}px`,
           borderColor: `rgb(${getObjectColor(event.label)?.join(",")})`,
         };
+
+        if (attrBox) {
+          const attrStyle = {
+            left: `${attrBox[0] * imgRect.width}px`,
+            top: `${attrBox[1] * imgRect.height}px`,
+            width: `${attrBox[2] * imgRect.width}px`,
+            height: `${attrBox[3] * imgRect.height}px`,
+            borderColor: `rgb(${getObjectColor(event.label)?.join(",")})`,
+          };
+          setAttributeBoxStyle(attrStyle);
+        } else {
+          setAttributeBoxStyle(null);
+        }
 
         setBoxStyle(style);
-      }
-    },
-    [imgRef, event, getObjectColor],
-  );
-
-  const handleSetAttributeBox = useCallback(
-    (box: number[] | undefined) => {
-      if (imgRef.current && Array.isArray(box) && box.length === 4) {
-        const imgElement = imgRef.current;
-        const imgRect = imgElement.getBoundingClientRect();
-
-        const style = {
-          left: `${box[0] * imgRect.width}px`,
-          top: `${box[1] * imgRect.height}px`,
-          width: `${box[2] * imgRect.width}px`,
-          height: `${box[3] * imgRect.height}px`,
-          borderColor: `rgb(${getObjectColor(event.label)?.join(",")})`,
-        };
-
-        setAttributeBoxStyle(style);
-      } else {
-        setAttributeBoxStyle(null);
       }
     },
     [imgRef, event, getObjectColor],
@@ -316,13 +307,15 @@ export default function ObjectLifecycle({
       } else {
         // lifecycle point
         setTimeIndex(eventSequence?.[current].timestamp);
-        handleSetBox(eventSequence?.[current].data.box ?? []);
-        handleSetAttributeBox(eventSequence?.[current].data?.attribute_box);
+        handleSetBox(
+          eventSequence?.[current].data.box ?? [],
+          eventSequence?.[current].data?.attribute_box,
+        );
         setLifecycleZones(eventSequence?.[current].data.zones);
       }
       setSelectedZone("");
     }
-  }, [current, imgLoaded, handleSetBox, handleSetAttributeBox, eventSequence]);
+  }, [current, imgLoaded, handleSetBox, eventSequence]);
 
   useEffect(() => {
     if (!mainApi || !thumbnailApi || !eventSequence || !event) {
