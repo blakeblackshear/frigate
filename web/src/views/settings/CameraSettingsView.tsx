@@ -100,7 +100,12 @@ export default function CameraSettingsView({
   const alertsLabels = useMemo(() => {
     return cameraConfig?.review.alerts.labels
       ? cameraConfig.review.alerts.labels
-          .map((label) => getTranslatedLabel(label))
+          .map((label) =>
+            getTranslatedLabel(
+              label,
+              cameraConfig?.audio?.listen?.includes(label) ? "audio" : "object",
+            ),
+          )
           .join(", ")
       : "";
   }, [cameraConfig]);
@@ -108,7 +113,12 @@ export default function CameraSettingsView({
   const detectionsLabels = useMemo(() => {
     return cameraConfig?.review.detections.labels
       ? cameraConfig.review.detections.labels
-          .map((label) => getTranslatedLabel(label))
+          .map((label) =>
+            getTranslatedLabel(
+              label,
+              cameraConfig?.audio?.listen?.includes(label) ? "audio" : "object",
+            ),
+          )
           .join(", ")
       : "";
   }, [cameraConfig]);
