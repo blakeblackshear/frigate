@@ -392,10 +392,7 @@ class RecordingMaintainer(threading.Thread):
             # and stop looking at review items
             if (
                 review.end_time is None
-                or (
-                    review.end_time
-                    + record_config.get_review_post_capture(severity)
-                )
+                or (review.end_time + record_config.get_review_post_capture(severity))
                 >= start_time.timestamp()
             ):
                 overlaps = True
@@ -418,7 +415,8 @@ class RecordingMaintainer(threading.Thread):
             )
         # if it doesn't overlap with an review item, go ahead and drop the segment
         # if it ends more than the configured pre_capture for the camera
-        else:
+        # BUT only if continuous/motion is NOT enabled (otherwise wait for processing)
+        elif highest is None:
             camera_info = self.object_recordings_info[camera]
             most_recently_processed_frame_time = (
                 camera_info[-1][0] if len(camera_info) > 0 else 0
