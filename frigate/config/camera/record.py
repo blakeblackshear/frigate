@@ -34,7 +34,7 @@ class RetainModeEnum(str, Enum):
 
 class ReviewRetainConfig(FrigateBaseModel):
     days: float = Field(default=10, ge=0, title="Default retention period.")
-    mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
+    mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
 
 class EventsConfig(FrigateBaseModel):
