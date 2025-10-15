@@ -25,9 +25,11 @@ record:
   alerts:
     retain:
       days: 30
+      mode: all
   detections:
     retain:
       days: 30
+      mode: all
 ```
 
 ### Reduced storage: Only saving video when motion is detected
@@ -42,9 +44,11 @@ record:
   alerts:
     retain:
       days: 30
+      mode: motion
   detections:
     retain:
       days: 30
+      mode: motion
 ```
 
 ### Minimum: Alerts only
@@ -59,6 +63,7 @@ record:
   alerts:
     retain:
       days: 30
+      mode: motion
 ```
 
 ## Will Frigate delete old recordings if my storage runs out?

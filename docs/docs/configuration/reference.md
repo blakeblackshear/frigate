@@ -547,7 +547,7 @@ record:
       #       here, the segments will already be gone by the time this mode is applied.
       #       For example, if the camera retain mode is "motion", the segments without motion are
       #       never stored, so setting the mode to "all" here won't bring them back.
-      mode: all
+      mode: motion
   # Optional: detection recording settings
   detections:
     # Optional: Number of seconds before the detection to include (default: shown below)
@@ -567,7 +567,7 @@ record:
       #       here, the segments will already be gone by the time this mode is applied.
       #       For example, if the camera retain mode is "motion", the segments without motion are
       #       never stored, so setting the mode to "all" here won't bring them back.
-      mode: all
+      mode: motion
 
 # Optional: Configuration for the jpg snapshots written to the clips directory for each tracked object
 # NOTE: Can be overridden at the camera level

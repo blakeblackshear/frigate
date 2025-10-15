@@ -57,14 +57,25 @@ class SegmentInfo:
         self.average_dBFS = average_dBFS
 
     def should_discard_segment(self, retain_mode: RetainModeEnum) -> bool:
-        return (
-            retain_mode == RetainModeEnum.motion
-            and self.motion_count == 0
-            and self.average_dBFS == 0
-        ) or (
-            retain_mode == RetainModeEnum.active_objects
-            and self.active_object_count == 0
-        )
+        keep = False
+
+        # all mode should never discard
+        if retain_mode == RetainModeEnum.all:
+            keep = True
+
+        # motion mode should keep if motion or audio is detected
+        if (
+            not keep
+            and retain_mode == RetainModeEnum.motion
+            and (self.motion_count > 0 or self.average_dBFS > 0)
+        ):
+            keep = True
+
+        # active objects mode should keep if any active objects are detected
+        if not keep and self.active_object_count > 0:
+            keep = True
+
+        return not keep
 
 
 class RecordingMaintainer(threading.Thread):
