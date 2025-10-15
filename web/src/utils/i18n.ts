@@ -1,9 +1,17 @@
 import i18n, { t } from "i18next";
 import { initReactI18next } from "react-i18next";
 import HttpBackend from "i18next-http-backend";
+import { EventType } from "@/types/search";
 
-export const getTranslatedLabel = (label: string) => {
+export const getTranslatedLabel = (
+  label: string,
+  type: EventType = "object",
+) => {
   if (!label) return "";
+
+  if (type === "manual") {
+    return label;
+  }
 
   const normalize = (s: string) =>
     s
@@ -15,8 +23,9 @@ export const getTranslatedLabel = (label: string) => {
 
   const key = normalize(label);
 
-  if (i18n.exists(key, { ns: "objects" })) return t(key, { ns: "objects" });
-  if (i18n.exists(key, { ns: "audio" })) return t(key, { ns: "audio" });
+  if (type === "audio") {
+    return t(`audio.${key}`, { ns: "audio" });
+  }
 
   // fallback
   return t(key, { ns: "objects" });
