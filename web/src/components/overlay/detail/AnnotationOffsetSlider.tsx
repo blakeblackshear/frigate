@@ -65,7 +65,7 @@ export default function AnnotationOffsetSlider({ className }: Props) {
 
   return (
     <div
-      className={`absolute bottom-0 left-0 right-0 z-30 flex items-center gap-3 bg-gradient-to-t from-secondary/90 to-transparent p-3 ${className ?? ""}`}
+      className={`absolute bottom-0 left-0 right-0 z-30 flex items-center gap-3 bg-background p-3 ${className ?? ""}`}
       style={{ pointerEvents: "auto" }}
     >
       <div className="w-56 text-sm">
