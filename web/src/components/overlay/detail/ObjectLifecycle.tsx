@@ -151,6 +151,8 @@ export default function ObjectLifecycle({
   );
 
   const [boxStyle, setBoxStyle] = useState<React.CSSProperties | null>(null);
+  const [attributeBoxStyle, setAttributeBoxStyle] =
+    useState<React.CSSProperties | null>(null);
 
   const configAnnotationOffset = useMemo(() => {
     if (!config) {
@@ -237,6 +239,28 @@ export default function ObjectLifecycle({
     [imgRef, event, getObjectColor],
   );
 
+  const handleSetAttributeBox = useCallback(
+    (box: number[] | undefined) => {
+      if (imgRef.current && Array.isArray(box) && box.length === 4) {
+        const imgElement = imgRef.current;
+        const imgRect = imgElement.getBoundingClientRect();
+
+        const style = {
+          left: `${box[0] * imgRect.width}px`,
+          top: `${box[1] * imgRect.height}px`,
+          width: `${box[2] * imgRect.width}px`,
+          height: `${box[3] * imgRect.height}px`,
+          borderColor: `rgb(${getObjectColor(event.label)?.join(",")})`,
+        };
+
+        setAttributeBoxStyle(style);
+      } else {
+        setAttributeBoxStyle(null);
+      }
+    },
+    [imgRef, event, getObjectColor],
+  );
+
   // image
 
   const [src, setSrc] = useState(
@@ -293,11 +317,12 @@ export default function ObjectLifecycle({
         // lifecycle point
         setTimeIndex(eventSequence?.[current].timestamp);
         handleSetBox(eventSequence?.[current].data.box ?? []);
+        handleSetAttributeBox(eventSequence?.[current].data?.attribute_box);
         setLifecycleZones(eventSequence?.[current].data.zones);
       }
       setSelectedZone("");
     }
-  }, [current, imgLoaded, handleSetBox, eventSequence]);
+  }, [current, imgLoaded, handleSetBox, handleSetAttributeBox, eventSequence]);
 
   useEffect(() => {
     if (!mainApi || !thumbnailApi || !eventSequence || !event) {
@@ -447,6 +472,9 @@ export default function ObjectLifecycle({
                 <div className="absolute border-2" style={boxStyle}>
                   <div className="absolute bottom-[-3px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 transform bg-yellow-500" />
                 </div>
+              )}
+              {attributeBoxStyle && (
+                <div className="absolute border-2" style={attributeBoxStyle} />
               )}
               {imgRef.current?.width &&
                 imgRef.current?.height &&
