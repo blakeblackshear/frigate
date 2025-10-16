@@ -253,11 +253,11 @@ Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-proc
 
 ## OpenVINO Detector
 
-The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel VPU hardware. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
+The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel NPUs. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
 
-The OpenVINO device to be used is specified using the `"device"` attribute according to the naming conventions in the [Device Documentation](https://docs.openvino.ai/2024/openvino-workflow/running-inference/inference-devices-and-modes.html). The most common devices are `CPU` and `GPU`. Currently, there is a known issue with using `AUTO`. For backwards compatibility, Frigate will attempt to use `GPU` if `AUTO` is set in your configuration.
+The OpenVINO device to be used is specified using the `"device"` attribute according to the naming conventions in the [Device Documentation](https://docs.openvino.ai/2025/openvino-workflow/running-inference/inference-devices-and-modes.html). The most common devices are `CPU`, `GPU`, or `NPU`.
 
-OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will also run on AMD CPUs despite having no official support for it. A supported Intel platform is required to use the `GPU` device with OpenVINO. For detailed system requirements, see [OpenVINO System Requirements](https://docs.openvino.ai/2024/about-openvino/release-notes-openvino/system-requirements.html)
+OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will also run on AMD CPUs despite having no official support for it. A supported Intel platform is required to use the `GPU` or `NPU` device with OpenVINO. For detailed system requirements, see [OpenVINO System Requirements](https://docs.openvino.ai/2025/about-openvino/release-notes-openvino/system-requirements.html)
 
 :::tip
 
@@ -267,15 +267,24 @@ When using many cameras one detector may not be enough to keep up. Multiple dete
 detectors:
   ov_0:
     type: openvino
-    device: GPU
+    device: GPU  # or NPU
   ov_1:
     type: openvino
-    device: GPU
+    device: GPU  # or NPU
 ```
 
 :::
 
 ### OpenVINO Supported Models
+
+| Model                                 | GPU | NPU | Notes                                                        |
+| ------------------------------------- | --- | --- | ------------------------------------------------------------ |
+| [YOLOv9](#yolo-v3-v4-v7-v9)           | ✅  | ✅  | Recommended for GPU & NPU                                    |
+| [RF-DETR](#rf-detr)                   | ✅  |     |                                                              |
+| [YOLO-NAS](#yolo-nas)                 | ✅  | ❌  | YOLO-NAS only works on NPU in non-flat format                |
+| [MobileNet v2](#ssdlite-mobilenet-v2) | ✅  | ✅  | Fast and lightweight model, less accurate than larger models |
+| [YOLOX](#yolox)                       | ✅  |     |                                                              |
+| [D-FINE](#d-fine)                     | ❌  | ❌  |                                                              |
 
 #### SSDLite MobileNet v2
 
@@ -287,7 +296,7 @@ Use the model configuration shown below when using the OpenVINO detector with th
 detectors:
   ov:
     type: openvino
-    device: GPU
+    device: GPU  # Or NPU
 
 model:
   width: 300
@@ -348,7 +357,7 @@ After placing the downloaded onnx model in your config folder, you can use the f
 detectors:
   ov:
     type: openvino
-    device: GPU
+    device: GPU  # or NPU
 
 model:
   model_type: yolo-generic
@@ -608,6 +617,14 @@ detectors:
 :::
 
 ### ONNX Supported Models
+
+| Model                                 | Nvidia GPU | AMD GPU | Notes                                                        |
+| ------------------------------------- | ---------- | ------- | ------------------------------------------------------------ |
+| [YOLOv9](#yolo-v3-v4-v7-v9-2)         | ✅         | ✅      | Supports CUDA Graphs for optimal Nvidia performance          |
+| [RF-DETR](#rf-detr)                   | ✅         | ❌      | Supports CUDA Graphs for optimal Nvidia performance          |
+| [YOLO-NAS](#yolo-nas-1)               | ⚠️         | ⚠️      | Not supported by CUDA Graphs                                 |
+| [YOLOX](#yolox-1)                     | ✅         | ✅      | Supports CUDA Graphs for optimal Nvidia performance          |
+| [D-FINE](#d-fine)                     | ⚠️         | ❌      | Not supported by CUDA Graphs                                 |
 
 There is no default model provided, the following formats are supported:
 

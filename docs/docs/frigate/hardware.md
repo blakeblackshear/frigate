@@ -78,7 +78,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Intel**
 
-- [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
+- [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel NPUs to provide efficient object detection.
   - [Supports majority of model architectures](../../configuration/object_detectors#openvino-supported-models)
   - Runs best with tiny, small, or medium models
 
@@ -142,6 +142,7 @@ The OpenVINO detector type is able to run on:
 
 - 6th Gen Intel Platforms and newer that have an iGPU
 - x86 hosts with an Intel Arc GPU
+- Intel NPUs
 - Most modern AMD CPUs (though this is officially not supported by Intel)
 - x86 & Arm64 hosts via CPU (generally not recommended)
 
