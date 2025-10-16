@@ -42,7 +42,7 @@
       "label": "Rodyti transliacijos statistiką",
       "desc": "Įjungti šią galimybę rodyti transliacijos statistiką kaip pridėtinę informaciją kameros vaizde."
     },
-    "debugView": "Derinimo Vaizdas"
+    "debugView": "Debug Vaizdas"
   },
   "export": {
     "time": {
@@ -83,7 +83,8 @@
     "button": {
       "markAsReviewed": "Žymėti kaip peržiūrėtą",
       "export": "Eksportuoti",
-      "deleteNow": "Ištrinti Dabar"
+      "deleteNow": "Ištrinti Dabar",
+      "markAsUnreviewed": "Pažymėti kaip nematytą"
     },
     "confirmDelete": {
       "desc": {

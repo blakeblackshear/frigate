@@ -3,13 +3,15 @@
     "default": "Nustatymai - Frigate",
     "authentication": "Autentifikavimo Nustatymai - Frigate",
     "camera": "Kameros Nustatymai - Frigate",
-    "object": "Derinti - Frigate",
+    "object": "Debug - Frigate",
     "general": "Bendrieji Nustatymai - Frigate",
     "frigatePlus": "Frigate+ Nustatymai - Frigate",
     "notifications": "Pranešimų Nustatymai - Frigate",
     "motionTuner": "Judesio Derinimas - Frigate",
     "enrichments": "Patobulinimų Nustatymai - Frigate",
-    "masksAndZones": "Maskavimo ir Zonų redaktorius - Frigate"
+    "masksAndZones": "Maskavimo ir Zonų redaktorius - Frigate",
+    "cameraManagement": "Valdyti Kameras - Frigate",
+    "cameraReview": "Kameros Peržiūros Nustatymai - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -17,11 +19,14 @@
     "cameras": "Kameros Nustatymai",
     "masksAndZones": "Maskavimai / Zonos",
     "motionTuner": "Judesio Derintojas",
-    "debug": "Derinimas",
+    "debug": "Debug",
     "users": "Vartotojai",
     "notifications": "Pranešimai",
     "frigateplus": "Frigate+",
-    "triggers": "Trigeriai"
+    "triggers": "Trigeriai",
+    "roles": "Rolės",
+    "cameraManagement": "Valdymas",
+    "cameraReview": "Peržiūra"
   },
   "dialog": {
     "unsavedChanges": {
@@ -146,7 +151,7 @@
     "title": "Kamerų Nustatymai",
     "streams": {
       "title": "Transliacijos",
-      "desc": "Laikinai išjunkite kamerą kol Frigate bus perkrautas. Išjungiant kamerą visiškai sustabdo Frigate veiklą šiai kamerai. Nebus aptikimų, įrašų ar derinimų.<br /><em>Pastaba: Tai neišjungs go2rtc sratų.</em>"
+      "desc": "Laikinai išjunkite kamerą kol Frigate bus perkrautas. Išjungiant kamerą visiškai sustabdo Frigate veiklą šiai kamerai. Nebus aptikimų, įrašų ar debug informacijos.<br /><em>Pastaba: Tai neišjungs go2rtc sratų.</em>"
     },
     "review": {
       "desc": "Trumpam įjungti/išjungti įspėjimus ir aptikimus šiai kamerai iki kol Frigate bus perkrautas. Kai išjungta, naujos peržiūros nebus kuriamos. ",
@@ -416,10 +421,10 @@
       "currentRMS": "Dabartinis RMS",
       "currentdbFS": "Dabartinis dbFS"
     },
-    "title": "Derinti",
-    "desc": "Derinimo vaizde rodomas tiesioginis vaizdas sekamų objektų ir statistikos. Objektų sąrašas rodo užvėlintą santrauką aptiktų objektų.",
+    "title": "Debug",
+    "desc": "Debug vaizde rodomas tiesioginis vaizdas sekamų objektų ir statistikos. Objektų sąrašas rodo užvėlintą santrauką aptiktų objektų.",
     "openCameraWebUI": "Atverti {{camera}} kameros Web prieigą",
-    "debugging": "Derinama",
+    "debugging": "Debugging",
     "objectList": "Objektų sąrašas",
     "noObjects": "Objektų nėra",
     "boundingBoxes": {
@@ -618,6 +623,11 @@
           "error": {
             "min": "Bent vienas veiksmas privalo būti parinktas."
           }
+        },
+        "friendly_name": {
+          "title": "Draugiškas Pavadinimas",
+          "placeholder": "Pavadinikite ar apibūdinkite trigerį",
+          "description": "Draugiškas pavadinimas ar apibūdinimas šiam trigeriui nėra būtinas."
         }
       }
     },
@@ -657,6 +667,10 @@
         "updateTriggerFailed": "Nepavyko atnaujinti trigerio: {{errorMessage}}",
         "deleteTriggerFailed": "Nepavyko ištrinti trigerio: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Semantic Paieška išjungta",
+      "desc": "Norint naudoti Trigerius Semantic Paieška privalo būti įjungta."
     }
   },
   "notification": {
@@ -813,6 +827,49 @@
     "management": {
       "title": "Žiūrovo Rolės Valdymas",
       "desc": "Valdyti šios Frigate aplinkos specializuotas žiūrovo roles ir kamerų prieigos leidimus."
+    }
+  },
+  "cameraWizard": {
+    "title": "Pridėti Kamerą",
+    "description": "Sekite žemiau nurodytus žingsnius norėdami pridėti naują kamerą prie savo Frigate.",
+    "steps": {
+      "nameAndConnection": "Pavadinimas ir Jungtis",
+      "streamConfiguration": "Transliacijos Nustatymai",
+      "validationAndTesting": "Patikra ir Testavimas"
+    },
+    "save": {
+      "success": "Nauja kamera sėkmingai išsaugota {{cameraName}}.",
+      "failure": "Klaida išsaugant {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Rezoliucija",
+      "video": "Vaizdas",
+      "audio": "Garsas",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Prašau pateikti galiojantį transliacijos URL",
+      "testFailed": "Transliacijos testas nepavyko: {{error}}"
+    },
+    "step1": {
+      "description": "Įveskite savo kameros informaciją ir testuokite prisijungimą",
+      "cameraName": "Kameros Pavadinimas",
+      "cameraNamePlaceholder": "pvz., priekines_durys arba Galinio Kiemo Vaizdas",
+      "host": "Host/IP Adresas",
+      "port": "Port",
+      "username": "Vartotojo vardas",
+      "usernamePlaceholder": "Pasirinktinai",
+      "password": "Slaptažodis",
+      "passwordPlaceholder": "Pasirinktinai",
+      "selectTransport": "Pasirinkite perdavimo protokolą",
+      "cameraBrand": "Kameros Gamintojas",
+      "selectBrand": "Pasirinkite kameros gamintoją URL šablonui",
+      "customUrl": "Kameros Transliacijos URL",
+      "brandInformation": "Gamintojo informacija",
+      "brandUrlFormat": "Kamerai su RTSP URL formatas kaip: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://vartotojas:slaptažodis@host:port/path",
+      "testConnection": "Testuoti Susijungimą",
+      "testSuccess": "Susijungimo testas sėkmingas!"
     }
   }
 }
