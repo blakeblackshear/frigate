@@ -18,6 +18,17 @@
     "aria": "Select events",
     "noFoundForTimePeriod": "No events found for this time period."
   },
+  "detail": {
+    "noDataFound": "No detail data to review",
+    "aria": "Toggle detail view",
+    "trackedObject_one": "tracked object",
+    "trackedObject_other": "tracked objects",
+    "noObjectDetailData": "No object detail data available."
+  },
+  "objectTrack": {
+    "trackedPoint": "Tracked point",
+    "clickToSeek": "Click to seek to this time"
+  },
   "documentTitle": "Review - Frigate",
   "recordings": {
     "documentTitle": "Recordings - Frigate"
