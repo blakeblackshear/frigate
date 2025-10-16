@@ -473,7 +473,6 @@ type LifecycleItemProps = {
   event: ObjectLifecycleSequence;
   isActive?: boolean;
   onSeek?: (timestamp: number, play?: boolean) => void;
-  play?: boolean;
 };
 
 function LifecycleItem({ event, isActive, onSeek }: LifecycleItemProps) {
