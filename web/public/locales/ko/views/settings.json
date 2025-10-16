@@ -24,11 +24,50 @@
   "documentTitle": {
     "default": "설정 - Frigate",
     "authentication": "인증 설정 - Frigate",
-    "camera": "카메라 설정 - Frigate"
+    "camera": "카메라 설정 - Frigate",
+    "enrichments": "고급 설정 - Frigate",
+    "masksAndZones": "마스크와 구역 편집기 - Frigate",
+    "motionTuner": "모션 튜너 - Frigate",
+    "object": "디버그 - Frigate",
+    "general": "일반 설정 - Frigate",
+    "frigatePlus": "Frigate+ 설정 - Frigate",
+    "notifications": "알림 설정 - Frigate"
   },
   "users": {
     "table": {
       "actions": "액션"
+    }
+  },
+  "menu": {
+    "ui": "UI",
+    "enrichments": "고급",
+    "cameras": "카메라 설정",
+    "masksAndZones": "마스크 / 구역",
+    "motionTuner": "모션 튜너",
+    "triggers": "트리거",
+    "debug": "디버그",
+    "users": "사용자",
+    "roles": "역할",
+    "notifications": "알림",
+    "frigateplus": "Frigate+"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "저장되지 않은 변경 사항이 있습니다.",
+      "desc": "계속하기 전에 변경 사항을 저장하시겠습니까?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "카메라",
+    "noCamera": "카메라 없음"
+  },
+  "general": {
+    "title": "일반 세팅",
+    "liveDashboard": {
+      "title": "라이브 대시보드",
+      "automaticLiveView": {
+        "label": "자동 라이브 뷰"
+      }
     }
   }
 }
