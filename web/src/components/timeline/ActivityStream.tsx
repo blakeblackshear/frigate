@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ObjectLifecycleSequence } from "@/types/timeline";
 import { LifecycleIcon } from "@/components/overlay/detail/ObjectLifecycle";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
@@ -11,88 +11,112 @@ import AnnotationOffsetSlider from "@/components/overlay/detail/AnnotationOffset
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
+import { Event } from "@/types/event";
+import { getIconForLabel } from "@/utils/iconUtil";
+import { ReviewSegment, REVIEW_PADDING } from "@/types/review";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
+import { LuChevronUp, LuChevronDown } from "react-icons/lu";
+import { getTranslatedLabel } from "@/utils/i18n";
+import EventMenu from "@/components/timeline/EventMenu";
+import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
+import { cn } from "@/lib/utils";
 
 type ActivityStreamProps = {
-  timelineData: ObjectLifecycleSequence[];
+  reviewItems?: ReviewSegment[];
   currentTime: number;
   onSeek: (timestamp: number) => void;
 };
 
 export default function ActivityStream({
-  timelineData,
+  reviewItems,
   currentTime,
   onSeek,
 }: ActivityStreamProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const { t } = useTranslation("views/events");
-  const { selectedObjectId, annotationOffset } = useActivityStream();
+  const { annotationOffset } = useActivityStream();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const effectiveTime = currentTime + annotationOffset / 1000;
-
-  // Track user interaction and adjust scrolling behavior
+  const [activeReviewId, setActiveReviewId] = useState<string | undefined>(
+    undefined,
+  );
   const { userInteracting, setProgrammaticScroll } = useUserInteraction({
     elementRef: scrollRef,
   });
 
-  // group activities by timestamp (within 1 second resolution window)
-  const groupedActivities = useMemo(() => {
-    const groups: { [key: number]: ObjectLifecycleSequence[] } = {};
+  const effectiveTime = currentTime + annotationOffset / 1000;
+  const PAD = 0; // REVIEW_PADDING ?? 2;
+  const [upload, setUpload] = useState<Event | undefined>(undefined);
 
-    timelineData.forEach((activity) => {
-      const groupKey = Math.floor(activity.timestamp);
-      if (!groups[groupKey]) {
-        groups[groupKey] = [];
+  // Ensure we initialize the active review when reviewItems first arrive.
+  // This helps when the component mounts while the video is already
+  // playing — it guarantees the matching review is highlighted right
+  // away instead of waiting for a future effectiveTime change.
+  useEffect(() => {
+    if (!reviewItems || reviewItems.length === 0) return;
+    if (activeReviewId) return;
+
+    let target: ReviewSegment | undefined;
+    let closest: { r: ReviewSegment; diff: number } | undefined;
+
+    for (const r of reviewItems) {
+      const start = (r.start_time ?? 0) - PAD;
+      const end = (r.end_time ?? r.start_time ?? start) + PAD;
+      if (effectiveTime >= start && effectiveTime <= end) {
+        target = r;
+        break;
       }
-      groups[groupKey].push(activity);
-    });
-
-    return Object.entries(groups)
-      .map(([_timestamp, activities]) => {
-        const sortedActivities = activities.sort(
-          (a, b) => a.timestamp - b.timestamp,
-        );
-        return {
-          timestamp: sortedActivities[0].timestamp, // Original timestamp for display
-          effectiveTimestamp:
-            sortedActivities[0].timestamp + annotationOffset / 1000,
-          activities: sortedActivities,
-        };
-      })
-      .sort((a, b) => a.timestamp - b.timestamp);
-  }, [timelineData, annotationOffset]);
-
-  // Filter activities if object is selected
-  const filteredGroups = useMemo(() => {
-    if (!selectedObjectId) {
-      return groupedActivities;
+      const mid = (start + end) / 2;
+      const diff = Math.abs(effectiveTime - mid);
+      if (!closest || diff < closest.diff) closest = { r, diff };
     }
-    return groupedActivities
-      .map((group) => ({
-        ...group,
-        activities: group.activities.filter(
-          (activity) => activity.source_id === selectedObjectId,
-        ),
-      }))
-      .filter((group) => group.activities.length > 0);
-  }, [groupedActivities, selectedObjectId]);
+
+    if (!target && closest) target = closest.r;
+
+    if (target) {
+      const start = (target.start_time ?? 0) - PAD;
+      setActiveReviewId(
+        `review-${target.id ?? target.start_time ?? Math.floor(start)}`,
+      );
+    }
+  }, [reviewItems, activeReviewId, effectiveTime, PAD]);
 
   // Auto-scroll to current time
   useEffect(() => {
     if (!scrollRef.current || userInteracting) return;
+    // Prefer the review whose range contains the effectiveTime. If none
+    // contains it, pick the nearest review (by mid-point distance). This is
+    // robust to unordered reviewItems and avoids always picking the last
+    // element.
+    const items = reviewItems ?? [];
+    if (items.length === 0) return;
 
-    // Find the last group where effectiveTimestamp <= currentTime + annotationOffset
-    let currentGroupIndex = -1;
-    for (let i = filteredGroups.length - 1; i >= 0; i--) {
-      if (filteredGroups[i].effectiveTimestamp <= effectiveTime) {
-        currentGroupIndex = i;
+    let target: ReviewSegment | undefined;
+    let closest: { r: ReviewSegment; diff: number } | undefined;
+
+    for (const r of items) {
+      const start = (r.start_time ?? 0) - PAD;
+      const end = (r.end_time ?? r.start_time ?? start) + PAD;
+      if (effectiveTime >= start && effectiveTime <= end) {
+        target = r;
         break;
       }
+      const mid = (start + end) / 2;
+      const diff = Math.abs(effectiveTime - mid);
+      if (!closest || diff < closest.diff) closest = { r, diff };
     }
 
-    if (currentGroupIndex !== -1) {
+    if (!target && closest) target = closest.r;
+
+    if (target) {
+      const start = (target.start_time ?? 0) - PAD;
+      const id = `review-${target.id ?? target.start_time ?? Math.floor(start)}`;
       const element = scrollRef.current.querySelector(
-        `[data-timestamp="${filteredGroups[currentGroupIndex].timestamp}"]`,
+        `[data-review-id="${id}"]`,
       ) as HTMLElement;
       if (element) {
         setProgrammaticScroll();
@@ -103,12 +127,28 @@ export default function ActivityStream({
       }
     }
   }, [
-    filteredGroups,
+    reviewItems,
     effectiveTime,
     annotationOffset,
     userInteracting,
     setProgrammaticScroll,
+    PAD,
   ]);
+
+  // Auto-select active review based on effectiveTime (if inside a review range)
+  useEffect(() => {
+    if (!reviewItems || reviewItems.length === 0) return;
+    for (const r of reviewItems) {
+      const start = (r.start_time ?? 0) - PAD;
+      const end = (r.end_time ?? r.start_time ?? start) + PAD;
+      if (effectiveTime >= start && effectiveTime <= end) {
+        setActiveReviewId(
+          `review-${r.id ?? r.start_time ?? Math.floor(start)}`,
+        );
+        return;
+      }
+    }
+  }, [effectiveTime, reviewItems, PAD]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -116,25 +156,38 @@ export default function ActivityStream({
 
   return (
     <div className="relative">
+      <FrigatePlusDialog
+        upload={upload}
+        onClose={() => setUpload(undefined)}
+        onEventUploaded={() => setUpload(undefined)}
+      />
+
       <div
         ref={scrollRef}
         className="scrollbar-container h-[calc(100vh-70px)] overflow-y-auto bg-secondary"
       >
         <div className="space-y-2 p-4">
-          {filteredGroups.length === 0 ? (
+          {reviewItems?.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
               {t("activity.noActivitiesFound")}
             </div>
           ) : (
-            filteredGroups.map((group) => (
-              <ActivityGroup
-                key={group.timestamp}
-                group={group}
-                config={config}
-                isCurrent={group.effectiveTimestamp <= currentTime}
-                onSeek={onSeek}
-              />
-            ))
+            reviewItems?.map((review: ReviewSegment) => {
+              const id = `review-${review.id ?? review.start_time ?? Math.floor((review.start_time ?? 0) - PAD)}`;
+              return (
+                <ReviewGroup
+                  key={id}
+                  id={id}
+                  review={review}
+                  config={config}
+                  onSeek={onSeek}
+                  effectiveTime={effectiveTime}
+                  isActive={activeReviewId == id}
+                  onActivate={() => setActiveReviewId(id)}
+                  onOpenUpload={(e) => setUpload(e)}
+                />
+              );
+            })
           )}
         </div>
       </div>
@@ -144,107 +197,352 @@ export default function ActivityStream({
   );
 }
 
-type ActivityGroupProps = {
-  group: {
-    timestamp: number;
-    effectiveTimestamp: number;
-    activities: ObjectLifecycleSequence[];
-  };
+type ReviewGroupProps = {
+  review: ReviewSegment;
+  id: string;
   config: FrigateConfig;
-  isCurrent: boolean;
   onSeek: (timestamp: number) => void;
+  isActive?: boolean;
+  onActivate?: () => void;
+  onOpenUpload?: (e: Event) => void;
+  effectiveTime?: number;
 };
 
-function ActivityGroup({
-  group,
+function ReviewGroup({
+  review,
+  id,
   config,
-  isCurrent,
   onSeek,
-}: ActivityGroupProps) {
+  isActive = false,
+  onActivate,
+  onOpenUpload,
+  effectiveTime,
+}: ReviewGroupProps) {
   const { t } = useTranslation("views/events");
-  const shouldExpand = group.activities.length > 1;
+  const PAD = REVIEW_PADDING ?? 2;
 
+  // derive start timestamp from the review
+  const start = (review.start_time ?? 0) - PAD;
+
+  // display time first in the header
+  const displayTime = formatUnixTimestampToDateTime(start, {
+    timezone: config.ui.timezone,
+    date_format:
+      config.ui.time_format == "24hour"
+        ? t("time.formattedTimestamp.24hour", { ns: "common" })
+        : t("time.formattedTimestamp.12hour", { ns: "common" }),
+    time_style: "medium",
+    date_style: "medium",
+  });
+
+  const { data: fetchedEvents } = useSWR<Event[]>(
+    review?.data?.detections?.length
+      ? ["event_ids", { ids: review.data.detections.join(",") }]
+      : null,
+  );
+
+  const rawIconLabels: string[] = fetchedEvents
+    ? fetchedEvents.map((e) => e.label)
+    : (review.data?.objects ?? []);
+
+  // limit to 5 icons
+  const seen = new Set<string>();
+  const iconLabels: string[] = [];
+  for (const lbl of rawIconLabels) {
+    if (!seen.has(lbl)) {
+      seen.add(lbl);
+      iconLabels.push(lbl);
+      if (iconLabels.length >= 5) break;
+    }
+  }
   return (
     <div
-      data-timestamp={group.timestamp}
-      className={`cursor-pointer rounded-lg border p-3 transition-colors ${
-        isCurrent
-          ? "border-primary/20 bg-primary/10"
-          : "border-border bg-background hover:bg-muted/50"
+      data-review-id={id}
+      className={`cursor-pointer rounded-lg border bg-background p-3 outline outline-[3px] -outline-offset-[2.8px] ${
+        isActive
+          ? "shadow-selected outline-selected"
+          : "outline-transparent duration-500"
       }`}
-      onClick={() => onSeek(group.timestamp)}
     >
-      <div className="flex items-center justify-between">
+      <div
+        className="flex items-center justify-between"
+        onClick={() => {
+          onActivate?.();
+          onSeek(start);
+        }}
+      >
         <div className="flex items-center gap-2">
-          <div className="text-sm font-medium">
-            {formatUnixTimestampToDateTime(group.timestamp, {
-              timezone: config.ui.timezone,
-              date_format:
-                config.ui.time_format == "24hour"
-                  ? t("time.formattedTimestamp.24hour", {
-                      ns: "common",
-                    })
-                  : t("time.formattedTimestamp.12hour", {
-                      ns: "common",
-                    }),
-              time_style: "medium",
-              date_style: "medium",
-            })}
-          </div>
-          {shouldExpand && (
+          <div className="flex flex-col">
+            <div className="text-sm font-medium">{displayTime}</div>
             <div className="text-xs text-muted-foreground">
-              {t("activity.activitiesCount", {
-                count: group.activities.length,
-              })}
+              {fetchedEvents
+                ? fetchedEvents.length
+                : (review.data.objects ?? []).length}{" "}
+              tracked objects
             </div>
-          )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {iconLabels.slice(0, 5).map((lbl, idx) => (
+            <span key={`${lbl}-${idx}`}>
+              {getIconForLabel(lbl, "size-4 text-primary dark:text-white")}
+            </span>
+          ))}
         </div>
       </div>
 
-      <div className="mt-2 space-y-1">
-        {group.activities.map((activity, index) => (
-          <ActivityItem key={index} activity={activity} onSeek={onSeek} />
-        ))}
+      {isActive && (
+        <div className="mt-2 space-y-2">
+          {!fetchedEvents ? (
+            <ActivityIndicator />
+          ) : (
+            fetchedEvents.map((event) => {
+              return (
+                <EventCollapsible
+                  key={event.id}
+                  event={event}
+                  effectiveTime={effectiveTime}
+                  onSeek={onSeek}
+                  onOpenUpload={onOpenUpload}
+                />
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type EventCollapsibleProps = {
+  event: Event;
+  effectiveTime?: number;
+  onSeek: (ts: number) => void;
+  onOpenUpload?: (e: Event) => void;
+};
+function EventCollapsible({
+  event,
+  effectiveTime,
+  onSeek,
+  onOpenUpload,
+}: EventCollapsibleProps) {
+  const [open, setOpen] = useState(false);
+  const { t } = useTranslation("views/events");
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  const { selectedObjectId, setSelectedObjectId } = useActivityStream();
+
+  const formattedStart = config
+    ? formatUnixTimestampToDateTime(event.start_time ?? 0, {
+        timezone: config.ui.timezone,
+        date_format:
+          config.ui.time_format == "24hour"
+            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+                ns: "common",
+              })
+            : t("time.formattedTimestampHourMinuteSecond.12hour", {
+                ns: "common",
+              }),
+        time_style: "medium",
+        date_style: "medium",
+      })
+    : "";
+
+  const formattedEnd = config
+    ? formatUnixTimestampToDateTime(event.end_time ?? 0, {
+        timezone: config.ui.timezone,
+        date_format:
+          config.ui.time_format == "24hour"
+            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+                ns: "common",
+              })
+            : t("time.formattedTimestampHourMinuteSecond.12hour", {
+                ns: "common",
+              }),
+        time_style: "medium",
+        date_style: "medium",
+      })
+    : "";
+
+  // Clear selectedObjectId when effectiveTime has passed this event's end_time
+  useEffect(() => {
+    if (selectedObjectId === event.id && effectiveTime && event.end_time) {
+      if (effectiveTime > event.end_time) {
+        setSelectedObjectId(undefined);
+      }
+    }
+  }, [
+    selectedObjectId,
+    event.id,
+    event.end_time,
+    effectiveTime,
+    setSelectedObjectId,
+  ]);
+
+  return (
+    <Collapsible open={open} onOpenChange={(o) => setOpen(o)}>
+      <div
+        className={cn(
+          "rounded-md bg-secondary p-2 outline outline-[3px] -outline-offset-[2.8px]",
+          event.id == selectedObjectId
+            ? "shadow-selected outline-selected"
+            : "outline-transparent duration-500",
+          event.id != selectedObjectId &&
+            (effectiveTime ?? 0) >= (event.start_time ?? 0) &&
+            (effectiveTime ?? 0) <= (event.end_time ?? event.start_time ?? 0) &&
+            "bg-secondary-highlight/80 outline-[1px] -outline-offset-[0.8px] outline-primary/40",
+        )}
+      >
+        <div className="flex w-full items-center justify-between">
+          <div
+            className="flex items-center gap-2 text-sm font-medium"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSeek(event.start_time ?? 0);
+              if (event.id) setSelectedObjectId(event.id);
+            }}
+            role="button"
+          >
+            {getIconForLabel(
+              event.label,
+              "size-4 text-primary dark:text-white",
+            )}
+            <div className="flex items-end gap-2">
+              <span>{getTranslatedLabel(event.label)}</span>
+              <span className="text-xs text-secondary-foreground">
+                {formattedStart ?? ""} - {formattedEnd ?? ""}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-1 flex-row justify-end">
+            <EventMenu
+              event={event}
+              config={config}
+              onOpenUpload={(e) => onOpenUpload?.(e)}
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <CollapsibleTrigger asChild>
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="rounded bg-muted px-2 py-1 text-xs"
+                aria-label={t("activity.details")}
+              >
+                {open ? (
+                  <LuChevronUp className="size-3" />
+                ) : (
+                  <LuChevronDown className="size-3" />
+                )}
+              </button>
+            </CollapsibleTrigger>
+          </div>
+        </div>
+        <CollapsibleContent>
+          <div className="mt-2">
+            <ObjectTimeline
+              eventId={event.id}
+              onSeek={(ts) => {
+                onSeek(ts);
+              }}
+              effectiveTime={effectiveTime}
+            />
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+}
+
+type LifecycleItemProps = {
+  event: ObjectLifecycleSequence;
+  onSeek: (timestamp: number) => void;
+  isActive?: boolean;
+};
+
+function LifecycleItem({ event, isActive }: LifecycleItemProps) {
+  const { t } = useTranslation("views/events");
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  const formattedEventTimestamp = config
+    ? formatUnixTimestampToDateTime(event.timestamp ?? 0, {
+        timezone: config.ui.timezone,
+        date_format:
+          config.ui.time_format == "24hour"
+            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+                ns: "common",
+              })
+            : t("time.formattedTimestampHourMinuteSecond.12hour", {
+                ns: "common",
+              }),
+        time_style: "medium",
+        date_style: "medium",
+      })
+    : "";
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 text-sm text-primary-variant",
+        isActive ? "text-white" : "duration-500",
+      )}
+    >
+      <div className="flex size-4 items-center justify-center">
+        <LifecycleIcon lifecycleItem={event} className="size-3" />
+      </div>
+      <div className="flex w-full flex-row justify-between">
+        <div>{getLifecycleItemDescription(event)}</div>
+        <div className={cn("p-1 text-xs")}>{formattedEventTimestamp}</div>
       </div>
     </div>
   );
 }
 
-type ActivityItemProps = {
-  activity: ObjectLifecycleSequence;
-  onSeek: (timestamp: number) => void;
-};
+// Fetch and render timeline entries for a single event id on demand.
+function ObjectTimeline({
+  eventId,
+  onSeek,
+  effectiveTime,
+}: {
+  eventId: string;
+  onSeek: (ts: number) => void;
+  effectiveTime?: number;
+}) {
+  const { data: timeline, isValidating } = useSWR<ObjectLifecycleSequence[]>([
+    "timeline",
+    {
+      source_id: eventId,
+    },
+  ]);
 
-function ActivityItem({ activity }: ActivityItemProps) {
-  const { t } = useTranslation("views/events");
-  const { selectedObjectId, setSelectedObjectId } = useActivityStream();
-  const handleObjectClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (selectedObjectId === activity.source_id) {
-      setSelectedObjectId(undefined);
-    } else {
-      setSelectedObjectId(activity.source_id);
-    }
-  };
+  if ((!timeline || timeline.length === 0) && isValidating) {
+    return <ActivityIndicator className="h-2 w-2" size={2} />;
+  }
+
+  if (!timeline || timeline.length === 0) {
+    return (
+      <div className="py-2 text-sm text-muted-foreground">
+        No timeline entries
+      </div>
+    );
+  }
 
   return (
-    <div className="flex items-center gap-2 text-sm">
-      <div className="flex h-4 w-4 items-center justify-center rounded bg-muted">
-        <LifecycleIcon lifecycleItem={activity} className="h-3 w-3" />
-      </div>
-      <div className="flex-1">{getLifecycleItemDescription(activity)}</div>
-      {activity.source_id && (
-        <button
-          onClick={handleObjectClick}
-          className={`rounded px-2 py-1 text-xs ${
-            selectedObjectId === activity.source_id
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted hover:bg-muted/80"
-          }`}
-        >
-          {t("activity.object")}
-        </button>
-      )}
+    <div className="mx-2 mt-4 space-y-2">
+      {timeline.map((event, idx) => {
+        const isActive =
+          Math.abs((effectiveTime ?? 0) - (event.timestamp ?? 0)) <= 0.5;
+        return (
+          <div
+            key={`${event.timestamp}-${event.source_id ?? idx}`}
+            onClick={() => {
+              onSeek(event.timestamp);
+            }}
+          >
+            <LifecycleItem event={event} onSeek={onSeek} isActive={isActive} />
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -41,11 +41,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
-import {
-  TimeRange,
-  TimelineType,
-  ObjectLifecycleSequence,
-} from "@/types/timeline";
+import { TimeRange, TimelineType } from "@/types/timeline";
 import MobileCameraDrawer from "@/components/overlay/MobileCameraDrawer";
 import MobileTimelineDrawer from "@/components/overlay/MobileTimelineDrawer";
 import MobileReviewSettingsDrawer from "@/components/overlay/MobileReviewSettingsDrawer";
@@ -165,45 +161,6 @@ export function RecordingView({
       chunkedTimeRange[chunkedTimeRange.length - 1],
     [selectedRangeIdx, chunkedTimeRange],
   );
-
-  // timeline data for activity stream
-  const { data: timelineResponse } = useSWR<{
-    start: number;
-    end: number;
-    count: number;
-    hours: { [key: string]: ObjectLifecycleSequence[] };
-  }>([
-    "timeline/hourly",
-    {
-      cameras: mainCamera,
-      before: timeRange.before,
-      after: timeRange.after,
-      limit: 1000,
-    },
-  ]);
-
-  const timelineData = useMemo(() => {
-    if (!timelineResponse?.hours) return [];
-    let data = Object.values(timelineResponse.hours).flat();
-
-    // Filter by review filter
-    if (filter?.labels && filter.labels.length > 0) {
-      data = data.filter((item) =>
-        filter.labels!.includes(item.data.label.replace("-verified", "")),
-      );
-    }
-
-    if (filter?.zones && filter.zones.length > 0) {
-      data = data.filter(
-        (item) =>
-          item.data.zones &&
-          Array.isArray(item.data.zones) &&
-          item.data.zones.some((zone) => filter.zones!.includes(zone)),
-      );
-    }
-
-    return data;
-  }, [timelineResponse, filter]);
 
   const reviewFilterList = useMemo(() => {
     const uniqueLabels = new Set<string>();
@@ -571,7 +528,6 @@ export function RecordingView({
       isActivityMode={timelineType === "activity"}
       currentTime={currentTime}
       camera={mainCamera}
-      timelineData={timelineData}
     >
       <div ref={contentRef} className="flex size-full flex-col pt-2">
         <Toaster closeButton={true} />
@@ -892,7 +848,6 @@ export function RecordingView({
             manuallySetCurrentTime={manuallySetCurrentTime}
             setScrubbing={setScrubbing}
             setExportRange={setExportRange}
-            timelineData={timelineData}
             onAnalysisOpen={onAnalysisOpen}
         />
         </div>
@@ -915,7 +870,6 @@ type TimelineProps = {
   manuallySetCurrentTime: (time: number, force: boolean) => void;
   setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
   setExportRange: (range: TimeRange) => void;
-  timelineData?: ObjectLifecycleSequence[];
   onAnalysisOpen: (open: boolean) => void;
 };
 function Timeline({
@@ -932,7 +886,6 @@ function Timeline({
   manuallySetCurrentTime,
   setScrubbing,
   setExportRange,
-  timelineData,
   onAnalysisOpen,
 }: TimelineProps) {
   const { t } = useTranslation(["views/events"]);
@@ -1053,9 +1006,9 @@ function Timeline({
         )
       ) : timelineType == "activity" ? (
         <ActivityStream
-          timelineData={timelineData ?? []}
           currentTime={currentTime}
           onSeek={(timestamp) => manuallySetCurrentTime(timestamp, true)}
+          reviewItems={mainCameraReviewItems}
         />
       ) : (
         <div className="scrollbar-container h-full overflow-auto bg-secondary">
