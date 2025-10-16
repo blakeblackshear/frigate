@@ -130,6 +130,9 @@
     "playInBackground": {
       "label": "Reproduir en segon pla",
       "tips": "Habilita aquesta opció per a contiuar la transmissió tot i que el reproductor estigui ocult."
+    },
+    "debug": {
+      "picker": "Selecció de stream no disponible en mode debug. La vista debug sempre fa servir el stream assignat pel rol de detecció."
     }
   },
   "streamingSettings": "Paràmetres de transmissió",
@@ -167,5 +170,14 @@
   "transcription": {
     "enable": "Habilita la transcripció d'àudio en temps real",
     "disable": "Deshabilita la transcripció d'àudio en temps real"
+  },
+  "snapshot": {
+    "takeSnapshot": "Descarregar una instantània",
+    "noVideoSource": "No hi ha cap font de video per fer una instantània.",
+    "captureFailed": "Error capturant una instantània.",
+    "downloadStarted": "Inici de baixada d'instantània."
+  },
+  "noCameras": {
+    "title": "Sense càmeres per configurar"
   }
 }
