@@ -269,7 +269,6 @@ export default function DynamicVideoPlayer({
         onClipEnded={onValidateClipEnd}
         onSeekToTime={(timestamp, play) => {
           if (onSeekToTime) {
-            console.log("hls player seek", timestamp, play);
             onSeekToTime(timestamp, play);
           }
         }}

@@ -330,7 +330,6 @@ export default function HlsVideoPlayer({
                 className="absolute inset-0 z-10"
                 onSeekToTime={(timestamp, play) => {
                   if (onSeekToTime) {
-                    console.log("object track overlay seek", timestamp, play);
                     onSeekToTime(timestamp, play);
                   }
                 }}

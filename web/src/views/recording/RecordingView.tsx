@@ -287,7 +287,6 @@ export function RecordingView({
       if (!currentTimeRange) {
         return;
       }
-      console.log("manually set time", time, play);
       setCurrentTime(time);
 
       if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
@@ -310,7 +309,7 @@ export function RecordingView({
         } else {
           updateSelectedSegment(currentTime, true);
         }
-      } else if (playerTime != currentTime) {
+      } else if (playerTime != currentTime && timelineType != "detail") {
         mainControllerRef.current?.play();
       }
     }
@@ -740,12 +739,12 @@ export function RecordingView({
                     : Math.max(1, getCameraAspect(mainCamera) ?? 0),
                 }}
               >
-                {isDesktop && (
+                {/* {isDesktop && (
                   <GenAISummaryDialog
                     review={activeReviewItem}
                     onOpen={onAnalysisOpen}
                   />
-                )}
+                )} */}
 
                 <DynamicVideoPlayer
                   className={grow}
