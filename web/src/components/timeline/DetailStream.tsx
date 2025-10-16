@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ObjectLifecycleSequence } from "@/types/timeline";
 import { LifecycleIcon } from "@/components/overlay/detail/ObjectLifecycle";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
@@ -256,9 +256,18 @@ function ReviewGroup({
     }
   }
 
-  const objectCount = fetchedEvents
-    ? fetchedEvents.length
-    : (review.data.objects ?? []).length;
+  const reviewInfo = useMemo(() => {
+    if (review.data.metadata?.title) {
+      return review.data.metadata.title;
+    } else {
+      const objectCount = fetchedEvents
+        ? fetchedEvents.length
+        : (review.data.objects ?? []).length;
+
+      return `${objectCount} ${t("detail.trackedObject", { count: objectCount })}`;
+    }
+  }, [review, t, fetchedEvents]);
+
   return (
     <div
       data-review-id={id}
@@ -278,9 +287,7 @@ function ReviewGroup({
         <div className="flex items-center gap-2">
           <div className="flex flex-col">
             <div className="text-sm font-medium">{displayTime}</div>
-            <div className="text-xs text-muted-foreground">
-              {objectCount} {t("detail.trackedObject", { count: objectCount })}
-            </div>
+            <div className="text-xs text-muted-foreground">{reviewInfo}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
