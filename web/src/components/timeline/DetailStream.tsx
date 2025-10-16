@@ -28,7 +28,6 @@ import { cn } from "@/lib/utils";
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
   currentTime: number;
-  // `play` follows DynamicVideoController convention; pass `false` to pause
   onSeek: (timestamp: number, play?: boolean) => void;
 };
 

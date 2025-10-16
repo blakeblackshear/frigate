@@ -739,12 +739,12 @@ export function RecordingView({
                     : Math.max(1, getCameraAspect(mainCamera) ?? 0),
                 }}
               >
-                {/* {isDesktop && (
+                {isDesktop && (
                   <GenAISummaryDialog
                     review={activeReviewItem}
                     onOpen={onAnalysisOpen}
                   />
-                )} */}
+                )}
 
                 <DynamicVideoPlayer
                   className={grow}
