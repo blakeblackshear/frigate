@@ -147,7 +147,7 @@
     "snapshots": "Capturas de pantalla",
     "autotracking": "Seguimiento automático",
     "cameraEnabled": "Cámara habilitada",
-    "transcription": "Transcripción de audio"
+    "transcription": "Transcripción de Audio"
   },
   "history": {
     "label": "Mostrar grabaciones históricas"
@@ -170,5 +170,10 @@
   "transcription": {
     "enable": "Habilitar transcripción de audio en tiempo real",
     "disable": "Deshabilitar transcripción de audio en tiempo real"
+  },
+  "noCameras": {
+    "title": "No hay cámaras configuradas",
+    "description": "Comienza conectando una cámara.",
+    "buttonText": "Añade Cámara"
   }
 }
