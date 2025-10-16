@@ -774,62 +774,61 @@ export function RecordingView({
                   containerRef={mainLayoutRef}
                 />
               </div>
-              {isDesktop &&
-                effectiveCameras.length > 1 &&
-                timelineType !== "detail" && (
-                  <div
-                    ref={previewRowRef}
-                    className={cn(
-                      "scrollbar-container flex gap-2 overflow-auto",
-                      mainCameraAspect == "tall"
-                        ? "h-full w-72 flex-col"
-                        : `h-28 w-full`,
-                      previewRowOverflows ? "" : "items-center justify-center",
-                    )}
-                  >
-                    <div className="w-2" />
-                    {effectiveCameras.map((cam) => {
-                      if (cam == mainCamera || cam == "birdseye") {
-                        return;
-                      }
+              {isDesktop && effectiveCameras.length > 1 && (
+                <div
+                  ref={previewRowRef}
+                  className={cn(
+                    "scrollbar-container flex gap-2 overflow-auto",
+                    mainCameraAspect == "tall"
+                      ? "h-full w-72 flex-col"
+                      : `h-28 w-full`,
+                    previewRowOverflows ? "" : "items-center justify-center",
+                    timelineType == "detail" && "mt-4",
+                  )}
+                >
+                  <div className="w-2" />
+                  {effectiveCameras.map((cam) => {
+                    if (cam == mainCamera || cam == "birdseye") {
+                      return;
+                    }
 
-                      return (
-                        <Tooltip key={cam}>
-                          <TooltipTrigger asChild>
-                            <div
-                              className={
-                                mainCameraAspect == "tall" ? "w-full" : "h-full"
-                              }
-                              style={{
-                                aspectRatio: getCameraAspect(cam),
+                    return (
+                      <Tooltip key={cam}>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={
+                              mainCameraAspect == "tall" ? "w-full" : "h-full"
+                            }
+                            style={{
+                              aspectRatio: getCameraAspect(cam),
+                            }}
+                          >
+                            <PreviewPlayer
+                              previewRef={previewRef}
+                              className="size-full"
+                              camera={cam}
+                              timeRange={currentTimeRange}
+                              cameraPreviews={allPreviews ?? []}
+                              startTime={startTime}
+                              isScrubbing={scrubbing}
+                              isVisible={visiblePreviews.includes(cam)}
+                              onControllerReady={(controller) => {
+                                previewRefs.current[cam] = controller;
+                                controller.scrubToTimestamp(startTime);
                               }}
-                            >
-                              <PreviewPlayer
-                                previewRef={previewRef}
-                                className="size-full"
-                                camera={cam}
-                                timeRange={currentTimeRange}
-                                cameraPreviews={allPreviews ?? []}
-                                startTime={startTime}
-                                isScrubbing={scrubbing}
-                                isVisible={visiblePreviews.includes(cam)}
-                                onControllerReady={(controller) => {
-                                  previewRefs.current[cam] = controller;
-                                  controller.scrubToTimestamp(startTime);
-                                }}
-                                onClick={() => onSelectCamera(cam)}
-                              />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="smart-capitalize">
-                            <CameraNameLabel camera={cam} />
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                    <div className="w-2" />
-                  </div>
-                )}
+                              onClick={() => onSelectCamera(cam)}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="smart-capitalize">
+                          <CameraNameLabel camera={cam} />
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                  <div className="w-2" />
+                </div>
+              )}
             </div>
           </div>
           <Timeline
