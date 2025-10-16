@@ -324,6 +324,7 @@ export default function HlsVideoPlayer({
                 key={`${selectedObjectId}-${currentTime}`}
                 camera={camera}
                 selectedObjectId={selectedObjectId}
+                showBoundingBoxes={!isPlaying}
                 currentTime={currentTime}
                 videoWidth={videoDimensions.width}
                 videoHeight={videoDimensions.height}
