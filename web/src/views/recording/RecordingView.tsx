@@ -290,7 +290,7 @@ export function RecordingView({
       setCurrentTime(time);
 
       if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
-        mainControllerRef.current?.seekToTimestamp(time, !play);
+        mainControllerRef.current?.seekToTimestamp(time, play);
       } else {
         updateSelectedSegment(time, true);
       }
@@ -1005,7 +1005,9 @@ function Timeline({
       ) : timelineType == "detail" ? (
         <DetailStream
           currentTime={currentTime}
-          onSeek={(timestamp) => manuallySetCurrentTime(timestamp, true)}
+          onSeek={(timestamp, play) =>
+            manuallySetCurrentTime(timestamp, play ?? true)
+          }
           reviewItems={mainCameraReviewItems}
         />
       ) : (

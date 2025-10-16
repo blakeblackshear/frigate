@@ -201,7 +201,7 @@ type ReviewGroupProps = {
   review: ReviewSegment;
   id: string;
   config: FrigateConfig;
-  onSeek: (timestamp: number) => void;
+  onSeek: (timestamp: number, play?: boolean) => void;
   isActive?: boolean;
   onActivate?: () => void;
   onOpenUpload?: (e: Event) => void;
@@ -325,7 +325,7 @@ function ReviewGroup({
 type EventCollapsibleProps = {
   event: Event;
   effectiveTime?: number;
-  onSeek: (ts: number) => void;
+  onSeek: (ts: number, play?: boolean) => void;
   onOpenUpload?: (e: Event) => void;
 };
 function EventCollapsible({
@@ -450,9 +450,7 @@ function EventCollapsible({
           <div className="mt-2">
             <ObjectTimeline
               eventId={event.id}
-              onSeek={(ts) => {
-                onSeek(ts);
-              }}
+              onSeek={onSeek}
               effectiveTime={effectiveTime}
             />
           </div>
@@ -492,7 +490,9 @@ function LifecycleItem({ event, isActive, onSeek }: LifecycleItemProps) {
   return (
     <div
       role="button"
-      onClick={() => onSeek?.(event.timestamp ?? 0, false)}
+      onClick={() => {
+        onSeek?.(event.timestamp ?? 0, false);
+      }}
       className={cn(
         "flex cursor-pointer items-center gap-2 text-sm text-primary-variant",
         isActive
@@ -518,7 +518,7 @@ function ObjectTimeline({
   effectiveTime,
 }: {
   eventId: string;
-  onSeek: (ts: number) => void;
+  onSeek: (ts: number, play?: boolean) => void;
   effectiveTime?: number;
 }) {
   const { t } = useTranslation("views/events");
@@ -548,7 +548,7 @@ function ObjectTimeline({
           Math.abs((effectiveTime ?? 0) - (event.timestamp ?? 0)) <= 0.5;
         return (
           <LifecycleItem
-            key={`${event.timestamp}-${event.source_id ?? idx}`}
+            key={`${event.timestamp}-${event.source_id ?? ""}-${idx}`}
             event={event}
             onSeek={onSeek}
             isActive={isActive}
