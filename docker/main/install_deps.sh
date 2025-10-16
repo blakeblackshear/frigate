@@ -114,25 +114,18 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-opencl_1.0.17537.24_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17537.24/intel-igc-core_1.0.17537.24_amd64.deb
     # standard packages
-    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.16/intel-opencl-icd_25.13.33276.16_amd64.deb
-    wget https://github.com/intel/compute-runtime/releases/download/25.13.33276.16/intel-level-zero-gpu_1.6.33276.16_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/intel-opencl-icd_24.52.32224.5_amd64.deb
+    wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/intel-level-zero-gpu_1.6.32224.5_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-opencl-2_2.5.6+18417_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-core-2_2.5.6+18417_amd64.deb
+    # npu packages
+    wget https://github.com/oneapi-src/level-zero/releases/download/v1.21.9/level-zero_1.21.9+u22.04_amd64.deb
+    wget https://github.com/intel/linux-npu-driver/releases/download/v1.17.0/intel-driver-compiler-npu_1.17.0.20250508-14912879441_ubuntu22.04_amd64.deb
+    wget https://github.com/intel/linux-npu-driver/releases/download/v1.17.0/intel-fw-npu_1.17.0.20250508-14912879441_ubuntu22.04_amd64.deb
+    wget https://github.com/intel/linux-npu-driver/releases/download/v1.17.0/intel-level-zero-npu_1.17.0.20250508-14912879441_ubuntu22.04_amd64.deb
 
     dpkg -i *.deb
     rm *.deb
-
-    # intel NPU packages (v1.24.0 - validated with OpenVINO 2025.3)
-    # https://github.com/intel/linux-npu-driver/releases/tag/v1.24.0
-    wget https://github.com/intel/linux-npu-driver/releases/download/v1.24.0/linux-npu-driver-v1.24.0.20251003-18218973328-ubuntu2204.tar.gz
-    tar -xf linux-npu-driver-v1.24.0.20251003-18218973328-ubuntu2204.tar.gz
-    dpkg -i *.deb
-    rm *.deb linux-npu-driver-v1.24.0.20251003-18218973328-ubuntu2204.tar.gz
-
-    # install Level Zero v1.24.2 for NPU support
-    wget https://github.com/oneapi-src/level-zero/releases/download/v1.24.2/level-zero_1.24.2+u22.04_amd64.deb
-    dpkg -i level-zero_1.24.2+u22.04_amd64.deb
-    rm level-zero_1.24.2+u22.04_amd64.deb
 fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then
