@@ -170,5 +170,10 @@
   "transcription": {
     "enable": "Habilitar Transcrição de Áudio em Tempo Real",
     "disable": "Desabilitar Transcrição de Áudio em Tempo Real"
+  },
+  "noCameras": {
+    "title": "Nenhuma Câmera Configurada",
+    "description": "Inicie conectando uma câmera.",
+    "buttonText": "Adicionar Câmera"
   }
 }
