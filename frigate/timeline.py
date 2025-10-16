@@ -142,6 +142,11 @@ class TimelineProcessor(threading.Thread):
                 timeline_entry[Timeline.data]["attribute"] = list(
                     event_data["attributes"].keys()
                 )[0]
+                timeline_entry[Timeline.data]["attribute_box"] = to_relative_box(
+                    camera_config.detect.width,
+                    camera_config.detect.height,
+                    event_data["current_attributes"][0]["box"],
+                )
                 save = True
         elif event_type == EventStateEnum.end:
             timeline_entry[Timeline.class_type] = "gone"
