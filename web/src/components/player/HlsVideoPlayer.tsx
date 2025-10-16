@@ -49,7 +49,7 @@ type HlsVideoPlayerProps = {
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
-  onSeekToTime?: (timestamp: number) => void;
+  onSeekToTime?: (timestamp: number, play?: boolean) => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
   toggleFullscreen?: () => void;
@@ -328,9 +328,10 @@ export default function HlsVideoPlayer({
                 videoWidth={videoDimensions.width}
                 videoHeight={videoDimensions.height}
                 className="absolute inset-0 z-10"
-                onSeekToTime={(timestamp) => {
+                onSeekToTime={(timestamp, play) => {
                   if (onSeekToTime) {
-                    onSeekToTime(timestamp);
+                    console.log("object track overlay seek", timestamp, play);
+                    onSeekToTime(timestamp, play);
                   }
                 }}
                 objectTimeline={selectedObjectTimeline}

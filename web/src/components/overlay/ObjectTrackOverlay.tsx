@@ -19,7 +19,7 @@ type ObjectTrackOverlayProps = {
   videoWidth: number;
   videoHeight: number;
   className?: string;
-  onSeekToTime?: (timestamp: number) => void;
+  onSeekToTime?: (timestamp: number, play?: boolean) => void;
   objectTimeline?: ObjectLifecycleSequence[];
 };
 
@@ -227,7 +227,7 @@ export default function ObjectTrackOverlay({
 
   const handlePointClick = useCallback(
     (timestamp: number) => {
-      onSeekToTime?.(timestamp);
+      onSeekToTime?.(timestamp, false);
     },
     [onSeekToTime],
   );

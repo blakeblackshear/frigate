@@ -28,7 +28,8 @@ import { cn } from "@/lib/utils";
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
   currentTime: number;
-  onSeek: (timestamp: number) => void;
+  // `play` follows DynamicVideoController convention; pass `false` to pause
+  onSeek: (timestamp: number, play?: boolean) => void;
 };
 
 export default function DetailStream({
@@ -398,7 +399,7 @@ function EventCollapsible({
           event.id != selectedObjectId &&
             (effectiveTime ?? 0) >= (event.start_time ?? 0) &&
             (effectiveTime ?? 0) <= (event.end_time ?? event.start_time ?? 0) &&
-            "bg-secondary-highlight/80 outline-[1px] -outline-offset-[0.8px] outline-primary/40",
+            "bg-secondary outline-[1px] -outline-offset-[0.8px] outline-primary/40",
         )}
       >
         <div className="flex w-full items-center justify-between">
@@ -464,11 +465,12 @@ function EventCollapsible({
 
 type LifecycleItemProps = {
   event: ObjectLifecycleSequence;
-  onSeek: (timestamp: number) => void;
   isActive?: boolean;
+  onSeek?: (timestamp: number, play?: boolean) => void;
+  play?: boolean;
 };
 
-function LifecycleItem({ event, isActive }: LifecycleItemProps) {
+function LifecycleItem({ event, isActive, onSeek }: LifecycleItemProps) {
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -490,9 +492,13 @@ function LifecycleItem({ event, isActive }: LifecycleItemProps) {
 
   return (
     <div
+      role="button"
+      onClick={() => onSeek?.(event.timestamp ?? 0, false)}
       className={cn(
-        "flex items-center gap-2 text-sm text-primary-variant",
-        isActive ? "text-white" : "duration-500",
+        "flex cursor-pointer items-center gap-2 text-sm text-primary-variant",
+        isActive
+          ? "font-semibold text-primary dark:font-normal"
+          : "duration-500",
       )}
     >
       <div className="flex size-4 items-center justify-center">
@@ -542,14 +548,12 @@ function ObjectTimeline({
         const isActive =
           Math.abs((effectiveTime ?? 0) - (event.timestamp ?? 0)) <= 0.5;
         return (
-          <div
+          <LifecycleItem
             key={`${event.timestamp}-${event.source_id ?? idx}`}
-            onClick={() => {
-              onSeek(event.timestamp);
-            }}
-          >
-            <LifecycleItem event={event} onSeek={onSeek} isActive={isActive} />
-          </div>
+            event={event}
+            onSeek={onSeek}
+            isActive={isActive}
+          />
         );
       })}
     </div>

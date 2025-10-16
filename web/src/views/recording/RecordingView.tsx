@@ -283,15 +283,15 @@ export function RecordingView({
   ]);
 
   const manuallySetCurrentTime = useCallback(
-    (time: number) => {
+    (time: number, play: boolean = false) => {
       if (!currentTimeRange) {
         return;
       }
-
+      console.log("manually set time", time, play);
       setCurrentTime(time);
 
       if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
-        mainControllerRef.current?.seekToTimestamp(time, true);
+        mainControllerRef.current?.seekToTimestamp(time, !play);
       } else {
         updateSelectedSegment(time, true);
       }

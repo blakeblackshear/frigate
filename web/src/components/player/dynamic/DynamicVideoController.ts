@@ -111,6 +111,7 @@ export class DynamicVideoController {
       if (play) {
         this.waitAndPlay();
       } else {
+        console.log("called pause", Date.now());
         this.playerController.pause();
       }
     } else {
