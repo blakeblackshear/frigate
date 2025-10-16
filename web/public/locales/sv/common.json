@@ -260,8 +260,19 @@
     "length": {
       "feet": "fot",
       "meters": "meter"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/timme",
+      "mbph": "MB/timme",
+      "gbph": "GB/timme"
     }
   },
   "selectItem": "Välj {{item}}",
-  "readTheDocumentation": "Läs dokumentationen"
+  "readTheDocumentation": "Läs dokumentationen",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }
