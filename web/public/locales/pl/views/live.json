@@ -113,6 +113,9 @@
     "playInBackground": {
       "tips": "Włącz tę opcję, aby kontynuować transmisję, gdy odtwarzacz jest ukryty.",
       "label": "Odtwarzaj w tle"
+    },
+    "debug": {
+      "picker": "Wybór strumienia jest niedostępny w trybie debug. Widok w trybie debug zawsze pokazuje strumień przypisany do detektora."
     }
   },
   "cameraSettings": {
@@ -167,5 +170,10 @@
   "transcription": {
     "enable": "Włącz audio transkrypcję na żywo",
     "disable": "Wyłącz audio transkrypcję na żywo"
+  },
+  "noCameras": {
+    "buttonText": "Dodaj kamerę",
+    "description": "Zacznij od podłączenia kamery.",
+    "title": "Nie ustawiono żadnej kamery"
   }
 }
