@@ -67,7 +67,7 @@
       "selectImage": "Vyberte súbor s obrázkom."
     },
     "dropActive": "Presunte obrázok sem…",
-    "dropInstructions": "Potiahnite sem obrázok alebo ho vyberte kliknutím",
+    "dropInstructions": "Pretiahnite obrázok tu, alebo kliknite na výber",
     "maxSize": "Max velkosť: {{size}} MB"
   },
   "nofaces": "Žiadne tváre",

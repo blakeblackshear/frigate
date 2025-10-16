@@ -58,13 +58,24 @@
     "camera": "Kamera",
     "zones": "Zóny",
     "button": {
-      "findSimilar": "Nájsť podobné"
+      "findSimilar": "Nájsť podobné",
+      "regenerate": {
+        "title": "Regenerovať",
+        "label": "Obnoviť popis sledovaného objektu"
+      }
     },
     "description": {
       "placeholder": "Popis sledovaného objektu",
-      "aiTips": "Frigate si od vášho poskytovateľa generatívnej umelej inteligencie nevyžiada popis, kým sa neukončí životný cyklus sledovaného objektu."
+      "aiTips": "Frigate si od vášho poskytovateľa generatívnej umelej inteligencie nevyžiada popis, kým sa neukončí životný cyklus sledovaného objektu.",
+      "label": "Popis"
     },
-    "expandRegenerationMenu": "Rozbaľte ponuku regenerácie"
+    "expandRegenerationMenu": "Rozbaľte ponuku regenerácie",
+    "regenerateFromSnapshot": "Obnoviť zo snímky",
+    "regenerateFromThumbnails": "Obnoviť z miniatúr",
+    "tips": {
+      "descriptionSaved": "Úspešne uložený popis",
+      "saveDescriptionFailed": "Nepodarilo sa aktualizovať popis: {{errorMessage}}"
+    }
   },
   "exploreMore": "Preskumať viac {{label}} objektov",
   "exploreIsUnavailable": {
@@ -150,5 +161,68 @@
       "previous": "Predchádzajúca snímka",
       "next": "Ďalšia snímka"
     }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Stiahnut video",
+      "aria": "Stiahnite si video"
+    },
+    "downloadSnapshot": {
+      "label": "Stiahnite si snímok",
+      "aria": "Stiahnite si snímok"
+    },
+    "viewObjectLifecycle": {
+      "label": "Pozrieť životný cyklus objektu",
+      "aria": "Životný cyklus objektu"
+    },
+    "findSimilar": {
+      "label": "Nájsť podobné",
+      "aria": "Nájdite podobné sledované objekty"
+    },
+    "addTrigger": {
+      "label": "Pridať spúšťač",
+      "aria": "Pridať spúšťač pre tento sledovaný objekt"
+    },
+    "audioTranscription": {
+      "label": "Prepisovať",
+      "aria": "Požiadajte o prepis zvuku"
+    },
+    "submitToPlus": {
+      "label": "Odoslať na Frigate+",
+      "aria": "Odoslať na Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "Zobraziť v histórii",
+      "aria": "Zobraziť v histórii"
+    },
+    "deleteTrackedObject": {
+      "label": "Odstrániť tento sledovaný objekt"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Potvrdiť zmazanie",
+      "desc": "Odstránením tohto sledovaného objektu sa odstráni snímka, všetky uložené vloženia a všetky súvisiace položky životného cyklu objektu. Zaznamenaný záznam tohto sledovaného objektu v zobrazení História <em>NEBUDE</em> zmazaný.<br /><br />Naozaj chcete pokračovať?"
+    }
+  },
+  "noTrackedObjects": "Žiadne sledované objekty neboli nájdené",
+  "fetchingTrackedObjectsFailed": "Chyba pri načítaní sledovaných objektov: {{errorMessage}}",
+  "trackedObjectsCount_one": "{{count}} sledovaný objekt ",
+  "trackedObjectsCount_few": "{{count}} sledované objekty ",
+  "trackedObjectsCount_other": "{{count}} sledovaných objektov ",
+  "searchResult": {
+    "tooltip": "Zhoda s {{type}} na {{confidence}} %",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Sledovaný objekt úspešne zmazaný.",
+        "error": "Sledovaný objekt sa nepodarilo zmazať: {{errorMessage}}"
+      }
+    }
+  },
+  "aiAnalysis": {
+    "title": "Analýza AI"
+  },
+  "concerns": {
+    "label": "Obavy"
   }
 }
