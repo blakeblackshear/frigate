@@ -741,13 +741,13 @@ export function RecordingView({
                 }}
               >
                 {isDesktop && (
-                <GenAISummaryDialog
-                  review={activeReviewItem}
-                  onOpen={onAnalysisOpen}
-                />
-              )}
+                  <GenAISummaryDialog
+                    review={activeReviewItem}
+                    onOpen={onAnalysisOpen}
+                  />
+                )}
 
-              <DynamicVideoPlayer
+                <DynamicVideoPlayer
                   className={grow}
                   camera={mainCamera}
                   timeRange={currentTimeRange}
@@ -842,14 +842,14 @@ export function RecordingView({
             timeRange={timeRange}
             mainCameraReviewItems={mainCameraReviewItems}
             activeReviewItem={activeReviewItem}
-          currentTime={currentTime}
+            currentTime={currentTime}
             exportRange={exportMode == "timeline" ? exportRange : undefined}
             setCurrentTime={setCurrentTime}
             manuallySetCurrentTime={manuallySetCurrentTime}
             setScrubbing={setScrubbing}
             setExportRange={setExportRange}
             onAnalysisOpen={onAnalysisOpen}
-        />
+          />
         </div>
       </div>
     </DetailStreamProvider>
@@ -965,11 +965,10 @@ function Timeline({
   return (
     <div
       className={cn(
-        "relative",
         isDesktop
           ? `${timelineType == "timeline" ? "w-[100px]" : timelineType == "detail" ? "w-[30%]" : "w-60"} no-scrollbar overflow-y-auto`
-          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : timelineType == "detail" ? "flex-1" : "landscape:w-[175px]"} `
-      } relative`}
+          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : timelineType == "detail" ? "flex-1" : "landscape:w-[175px]"} `,
+      )}
     >
       {isMobile && (
         <GenAISummaryDialog review={activeReviewItem} onOpen={onAnalysisOpen} />
