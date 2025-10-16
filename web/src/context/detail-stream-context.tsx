@@ -3,7 +3,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { ObjectLifecycleSequence } from "@/types/timeline";
 
-interface ActivityStreamContextType {
+interface DetailStreamContextType {
   selectedObjectId: string | undefined;
   selectedObjectTimeline?: ObjectLifecycleSequence[];
   currentTime: number;
@@ -11,26 +11,26 @@ interface ActivityStreamContextType {
   annotationOffset: number; // milliseconds
   setAnnotationOffset: (ms: number) => void;
   setSelectedObjectId: (id: string | undefined) => void;
-  isActivityMode: boolean;
+  isDetailMode: boolean;
 }
 
-const ActivityStreamContext = createContext<
-  ActivityStreamContextType | undefined
->(undefined);
+const DetailStreamContext = createContext<DetailStreamContextType | undefined>(
+  undefined,
+);
 
-interface ActivityStreamProviderProps {
+interface DetailStreamProviderProps {
   children: React.ReactNode;
-  isActivityMode: boolean;
+  isDetailMode: boolean;
   currentTime: number;
   camera: string;
 }
 
-export function ActivityStreamProvider({
+export function DetailStreamProvider({
   children,
-  isActivityMode,
+  isDetailMode,
   currentTime,
   camera,
-}: ActivityStreamProviderProps) {
+}: DetailStreamProviderProps) {
   const [selectedObjectId, setSelectedObjectId] = useState<
     string | undefined
   >();
@@ -52,7 +52,7 @@ export function ActivityStreamProvider({
     setAnnotationOffset(cfgOffset);
   }, [config, camera]);
 
-  const value: ActivityStreamContextType = {
+  const value: DetailStreamContextType = {
     selectedObjectId,
     selectedObjectTimeline,
     currentTime,
@@ -60,22 +60,22 @@ export function ActivityStreamProvider({
     annotationOffset,
     setAnnotationOffset,
     setSelectedObjectId,
-    isActivityMode,
+    isDetailMode,
   };
 
   return (
-    <ActivityStreamContext.Provider value={value}>
+    <DetailStreamContext.Provider value={value}>
       {children}
-    </ActivityStreamContext.Provider>
+    </DetailStreamContext.Provider>
   );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function useActivityStream() {
-  const context = useContext(ActivityStreamContext);
+export function useDetailStream() {
+  const context = useContext(DetailStreamContext);
   if (context === undefined) {
     throw new Error(
-      "useActivityStream must be used within an ActivityStreamProvider",
+      "useDetailStream must be used within an DetailStreamProvider",
     );
   }
   return context;

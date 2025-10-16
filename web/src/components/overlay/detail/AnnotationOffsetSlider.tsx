@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { useActivityStream } from "@/contexts/ActivityStreamContext";
+import { useDetailStream } from "@/context/detail-stream-context";
 import axios from "axios";
 import { useSWRConfig } from "swr";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ type Props = {
 };
 
 export default function AnnotationOffsetSlider({ className }: Props) {
-  const { annotationOffset, setAnnotationOffset, camera } = useActivityStream();
+  const { annotationOffset, setAnnotationOffset, camera } = useDetailStream();
   const { mutate } = useSWRConfig();
   const { t } = useTranslation(["views/explore"]);
   const [isSaving, setIsSaving] = useState(false);

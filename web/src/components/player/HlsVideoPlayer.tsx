@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 import { useTranslation } from "react-i18next";
 import ObjectTrackOverlay from "@/components/overlay/ObjectTrackOverlay";
-import { useActivityStream } from "@/contexts/ActivityStreamContext";
+import { useDetailStream } from "@/context/detail-stream-context";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = !isAndroid;
@@ -82,8 +82,8 @@ export default function HlsVideoPlayer({
     selectedObjectTimeline,
     currentTime,
     camera,
-    isActivityMode,
-  } = useActivityStream();
+    isDetailMode,
+  } = useDetailStream();
 
   // playback
 
@@ -313,7 +313,7 @@ export default function HlsVideoPlayer({
           height: isMobile ? "100%" : undefined,
         }}
       >
-        {isActivityMode &&
+        {isDetailMode &&
           selectedObjectId &&
           camera &&
           currentTime &&

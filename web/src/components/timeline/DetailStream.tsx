@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ObjectLifecycleSequence } from "@/types/timeline";
 import { LifecycleIcon } from "@/components/overlay/detail/ObjectLifecycle";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
-import { useActivityStream } from "@/contexts/ActivityStreamContext";
+import { useDetailStream } from "@/context/detail-stream-context";
 import scrollIntoView from "scroll-into-view-if-needed";
 import useUserInteraction from "@/hooks/use-user-interaction";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
@@ -25,20 +25,20 @@ import EventMenu from "@/components/timeline/EventMenu";
 import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
 import { cn } from "@/lib/utils";
 
-type ActivityStreamProps = {
+type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
   currentTime: number;
   onSeek: (timestamp: number) => void;
 };
 
-export default function ActivityStream({
+export default function DetailStream({
   reviewItems,
   currentTime,
   onSeek,
-}: ActivityStreamProps) {
+}: DetailStreamProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const { t } = useTranslation("views/events");
-  const { annotationOffset } = useActivityStream();
+  const { annotationOffset } = useDetailStream();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [activeReviewId, setActiveReviewId] = useState<string | undefined>(
@@ -330,7 +330,7 @@ function EventCollapsible({
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const { selectedObjectId, setSelectedObjectId } = useActivityStream();
+  const { selectedObjectId, setSelectedObjectId } = useDetailStream();
 
   const formattedStart = config
     ? formatUnixTimestampToDateTime(event.start_time ?? 0, {

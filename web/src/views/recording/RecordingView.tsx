@@ -7,7 +7,7 @@ import PreviewPlayer, {
 import { DynamicVideoController } from "@/components/player/dynamic/DynamicVideoController";
 import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
-import ActivityStream from "@/components/timeline/ActivityStream";
+import DetailStream from "@/components/timeline/DetailStream";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useOverlayState } from "@/hooks/use-overlay-state";
@@ -67,7 +67,7 @@ import {
 } from "@/components/ui/tooltip";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
-import { ActivityStreamProvider } from "@/contexts/ActivityStreamContext";
+import { DetailStreamProvider } from "@/context/detail-stream-context";
 import { GenAISummaryDialog } from "@/components/overlay/chip/GenAISummaryChip";
 
 const DATA_REFRESH_TIME = 600000; // 10 minutes
@@ -524,8 +524,8 @@ export function RecordingView({
   );
 
   return (
-    <ActivityStreamProvider
-      isActivityMode={timelineType === "activity"}
+    <DetailStreamProvider
+      isDetailMode={timelineType === "detail"}
       currentTime={currentTime}
       camera={mainCamera}
     >
@@ -644,11 +644,11 @@ export function RecordingView({
                   <div className="">{t("events.label")}</div>
                 </ToggleGroupItem>
                 <ToggleGroupItem
-                  className={`${timelineType == "activity" ? "" : "text-muted-foreground"}`}
-                  value="activity"
-                  aria-label="Activity Stream"
+                  className={`${timelineType == "detail" ? "" : "text-muted-foreground"}`}
+                  value="detail"
+                  aria-label="Detail Stream"
                 >
-                  <div className="">Activity</div>
+                  <div className="">Detail</div>
                 </ToggleGroupItem>
               </ToggleGroup>
             ) : (
@@ -688,7 +688,7 @@ export function RecordingView({
             className={cn(
               "flex flex-1 flex-wrap",
               isDesktop
-                ? timelineType === "activity"
+                ? timelineType === "detail"
                   ? "w-full"
                   : "w-[80%]"
                 : "",
@@ -697,7 +697,7 @@ export function RecordingView({
             <div
               className={cn(
                 "flex size-full items-center",
-                timelineType === "activity"
+                timelineType === "detail"
                   ? "flex-col"
                   : mainCameraAspect == "tall"
                     ? "flex-row justify-evenly"
@@ -776,7 +776,7 @@ export function RecordingView({
               </div>
               {isDesktop &&
                 effectiveCameras.length > 1 &&
-                timelineType !== "activity" && (
+                timelineType !== "detail" && (
                   <div
                     ref={previewRowRef}
                     className={cn(
@@ -852,7 +852,7 @@ export function RecordingView({
         />
         </div>
       </div>
-    </ActivityStreamProvider>
+    </DetailStreamProvider>
   );
 }
 
@@ -967,8 +967,8 @@ function Timeline({
       className={cn(
         "relative",
         isDesktop
-          ? `${timelineType == "timeline" ? "w-[100px]" : timelineType == "activity" ? "w-[30%]" : "w-60"} no-scrollbar overflow-y-auto`
-          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : timelineType == "activity" ? "flex-1" : "landscape:w-[175px]"} `
+          ? `${timelineType == "timeline" ? "w-[100px]" : timelineType == "detail" ? "w-[30%]" : "w-60"} no-scrollbar overflow-y-auto`
+          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : timelineType == "detail" ? "flex-1" : "landscape:w-[175px]"} `
       } relative`}
     >
       {isMobile && (
@@ -1004,8 +1004,8 @@ function Timeline({
         ) : (
           <Skeleton className="size-full" />
         )
-      ) : timelineType == "activity" ? (
-        <ActivityStream
+      ) : timelineType == "detail" ? (
+        <DetailStream
           currentTime={currentTime}
           onSeek={(timestamp) => manuallySetCurrentTime(timestamp, true)}
           reviewItems={mainCameraReviewItems}

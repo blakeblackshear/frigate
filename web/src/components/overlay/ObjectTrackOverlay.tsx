@@ -2,7 +2,7 @@ import { useMemo, useCallback } from "react";
 import { ObjectLifecycleSequence, LifecycleClassType } from "@/types/timeline";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
-import { useActivityStream } from "@/contexts/ActivityStreamContext";
+import { useDetailStream } from "@/context/detail-stream-context";
 import {
   Tooltip,
   TooltipContent,
@@ -35,7 +35,7 @@ export default function ObjectTrackOverlay({
 }: ObjectTrackOverlayProps) {
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { annotationOffset } = useActivityStream();
+  const { annotationOffset } = useDetailStream();
 
   const effectiveCurrentTime = currentTime - annotationOffset / 1000;
 
