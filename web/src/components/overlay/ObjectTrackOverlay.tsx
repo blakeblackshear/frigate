@@ -15,17 +15,19 @@ import { useTranslation } from "react-i18next";
 type ObjectTrackOverlayProps = {
   camera: string;
   selectedObjectId: string;
+  showBoundingBoxes?: boolean;
   currentTime: number;
   videoWidth: number;
   videoHeight: number;
   className?: string;
-  onSeekToTime?: (timestamp: number) => void;
+  onSeekToTime?: (timestamp: number, play?: boolean) => void;
   objectTimeline?: ObjectLifecycleSequence[];
 };
 
 export default function ObjectTrackOverlay({
   camera,
   selectedObjectId,
+  showBoundingBoxes = false,
   currentTime,
   videoWidth,
   videoHeight,
@@ -227,7 +229,7 @@ export default function ObjectTrackOverlay({
 
   const handlePointClick = useCallback(
     (timestamp: number) => {
-      onSeekToTime?.(timestamp);
+      onSeekToTime?.(timestamp, false);
     },
     [onSeekToTime],
   );
@@ -366,7 +368,7 @@ export default function ObjectTrackOverlay({
         </Tooltip>
       ))}
 
-      {currentBoundingBox && (
+      {currentBoundingBox && showBoundingBoxes && (
         <g>
           <rect
             x={currentBoundingBox.left * videoWidth}

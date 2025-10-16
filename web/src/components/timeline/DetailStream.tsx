@@ -5,7 +5,10 @@ import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { useDetailStream } from "@/context/detail-stream-context";
 import scrollIntoView from "scroll-into-view-if-needed";
 import useUserInteraction from "@/hooks/use-user-interaction";
-import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import {
+  formatUnixTimestampToDateTime,
+  formatSecondsToDuration,
+} from "@/utils/dateUtil";
 import { useTranslation } from "react-i18next";
 import AnnotationOffsetSlider from "@/components/overlay/detail/AnnotationOffsetSlider";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -13,7 +16,7 @@ import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Event } from "@/types/event";
 import { getIconForLabel } from "@/utils/iconUtil";
-import { ReviewSegment, REVIEW_PADDING } from "@/types/review";
+import { ReviewSegment } from "@/types/review";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -28,7 +31,7 @@ import { cn } from "@/lib/utils";
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
   currentTime: number;
-  onSeek: (timestamp: number) => void;
+  onSeek: (timestamp: number, play?: boolean) => void;
 };
 
 export default function DetailStream({
@@ -49,7 +52,6 @@ export default function DetailStream({
   });
 
   const effectiveTime = currentTime + annotationOffset / 1000;
-  const PAD = 0; // REVIEW_PADDING ?? 2;
   const [upload, setUpload] = useState<Event | undefined>(undefined);
 
   // Ensure we initialize the active review when reviewItems first arrive.
@@ -64,8 +66,8 @@ export default function DetailStream({
     let closest: { r: ReviewSegment; diff: number } | undefined;
 
     for (const r of reviewItems) {
-      const start = (r.start_time ?? 0) - PAD;
-      const end = (r.end_time ?? r.start_time ?? start) + PAD;
+      const start = r.start_time ?? 0;
+      const end = r.end_time ?? r.start_time ?? start;
       if (effectiveTime >= start && effectiveTime <= end) {
         target = r;
         break;
@@ -78,12 +80,12 @@ export default function DetailStream({
     if (!target && closest) target = closest.r;
 
     if (target) {
-      const start = (target.start_time ?? 0) - PAD;
+      const start = target.start_time ?? 0;
       setActiveReviewId(
         `review-${target.id ?? target.start_time ?? Math.floor(start)}`,
       );
     }
-  }, [reviewItems, activeReviewId, effectiveTime, PAD]);
+  }, [reviewItems, activeReviewId, effectiveTime]);
 
   // Auto-scroll to current time
   useEffect(() => {
@@ -99,8 +101,8 @@ export default function DetailStream({
     let closest: { r: ReviewSegment; diff: number } | undefined;
 
     for (const r of items) {
-      const start = (r.start_time ?? 0) - PAD;
-      const end = (r.end_time ?? r.start_time ?? start) + PAD;
+      const start = r.start_time ?? 0;
+      const end = r.end_time ?? r.start_time ?? start;
       if (effectiveTime >= start && effectiveTime <= end) {
         target = r;
         break;
@@ -113,7 +115,7 @@ export default function DetailStream({
     if (!target && closest) target = closest.r;
 
     if (target) {
-      const start = (target.start_time ?? 0) - PAD;
+      const start = target.start_time ?? 0;
       const id = `review-${target.id ?? target.start_time ?? Math.floor(start)}`;
       const element = scrollRef.current.querySelector(
         `[data-review-id="${id}"]`,
@@ -132,15 +134,14 @@ export default function DetailStream({
     annotationOffset,
     userInteracting,
     setProgrammaticScroll,
-    PAD,
   ]);
 
   // Auto-select active review based on effectiveTime (if inside a review range)
   useEffect(() => {
     if (!reviewItems || reviewItems.length === 0) return;
     for (const r of reviewItems) {
-      const start = (r.start_time ?? 0) - PAD;
-      const end = (r.end_time ?? r.start_time ?? start) + PAD;
+      const start = r.start_time ?? 0;
+      const end = r.end_time ?? r.start_time ?? start;
       if (effectiveTime >= start && effectiveTime <= end) {
         setActiveReviewId(
           `review-${r.id ?? r.start_time ?? Math.floor(start)}`,
@@ -148,7 +149,7 @@ export default function DetailStream({
         return;
       }
     }
-  }, [effectiveTime, reviewItems, PAD]);
+  }, [effectiveTime, reviewItems]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -173,7 +174,7 @@ export default function DetailStream({
             </div>
           ) : (
             reviewItems?.map((review: ReviewSegment) => {
-              const id = `review-${review.id ?? review.start_time ?? Math.floor((review.start_time ?? 0) - PAD)}`;
+              const id = `review-${review.id ?? review.start_time ?? Math.floor(review.start_time ?? 0)}`;
               return (
                 <ReviewGroup
                   key={id}
@@ -201,7 +202,7 @@ type ReviewGroupProps = {
   review: ReviewSegment;
   id: string;
   config: FrigateConfig;
-  onSeek: (timestamp: number) => void;
+  onSeek: (timestamp: number, play?: boolean) => void;
   isActive?: boolean;
   onActivate?: () => void;
   onOpenUpload?: (e: Event) => void;
@@ -219,18 +220,14 @@ function ReviewGroup({
   effectiveTime,
 }: ReviewGroupProps) {
   const { t } = useTranslation("views/events");
-  const PAD = REVIEW_PADDING ?? 2;
+  const start = review.start_time ?? 0;
 
-  // derive start timestamp from the review
-  const start = (review.start_time ?? 0) - PAD;
-
-  // display time first in the header
   const displayTime = formatUnixTimestampToDateTime(start, {
     timezone: config.ui.timezone,
     date_format:
       config.ui.time_format == "24hour"
-        ? t("time.formattedTimestamp.24hour", { ns: "common" })
-        : t("time.formattedTimestamp.12hour", { ns: "common" }),
+        ? t("time.formattedTimestampHourMinuteSecond.24hour", { ns: "common" })
+        : t("time.formattedTimestampHourMinuteSecond.12hour", { ns: "common" }),
     time_style: "medium",
     date_style: "medium",
   });
@@ -268,6 +265,13 @@ function ReviewGroup({
     }
   }, [review, t, fetchedEvents]);
 
+  const reviewDuration =
+    review.end_time != null
+      ? formatSecondsToDuration(
+          Math.max(0, Math.floor((review.end_time ?? 0) - start)),
+        )
+      : null;
+
   return (
     <div
       data-review-id={id}
@@ -287,6 +291,11 @@ function ReviewGroup({
         <div className="flex items-center gap-2">
           <div className="flex flex-col">
             <div className="text-sm font-medium">{displayTime}</div>
+            {reviewDuration && (
+              <div className="text-xs text-muted-foreground">
+                {reviewDuration}
+              </div>
+            )}
             <div className="text-xs text-muted-foreground">{reviewInfo}</div>
           </div>
         </div>
@@ -325,7 +334,7 @@ function ReviewGroup({
 type EventCollapsibleProps = {
   event: Event;
   effectiveTime?: number;
-  onSeek: (ts: number) => void;
+  onSeek: (ts: number, play?: boolean) => void;
   onOpenUpload?: (e: Event) => void;
 };
 function EventCollapsible({
@@ -398,7 +407,7 @@ function EventCollapsible({
           event.id != selectedObjectId &&
             (effectiveTime ?? 0) >= (event.start_time ?? 0) &&
             (effectiveTime ?? 0) <= (event.end_time ?? event.start_time ?? 0) &&
-            "bg-secondary-highlight/80 outline-[1px] -outline-offset-[0.8px] outline-primary/40",
+            "bg-secondary-highlight outline-[1.5px] -outline-offset-[1.1px] outline-primary/40",
         )}
       >
         <div className="flex w-full items-center justify-between">
@@ -450,9 +459,7 @@ function EventCollapsible({
           <div className="mt-2">
             <ObjectTimeline
               eventId={event.id}
-              onSeek={(ts) => {
-                onSeek(ts);
-              }}
+              onSeek={onSeek}
               effectiveTime={effectiveTime}
             />
           </div>
@@ -464,11 +471,11 @@ function EventCollapsible({
 
 type LifecycleItemProps = {
   event: ObjectLifecycleSequence;
-  onSeek: (timestamp: number) => void;
   isActive?: boolean;
+  onSeek?: (timestamp: number, play?: boolean) => void;
 };
 
-function LifecycleItem({ event, isActive }: LifecycleItemProps) {
+function LifecycleItem({ event, isActive, onSeek }: LifecycleItemProps) {
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -490,9 +497,15 @@ function LifecycleItem({ event, isActive }: LifecycleItemProps) {
 
   return (
     <div
+      role="button"
+      onClick={() => {
+        onSeek?.(event.timestamp ?? 0, false);
+      }}
       className={cn(
-        "flex items-center gap-2 text-sm text-primary-variant",
-        isActive ? "text-white" : "duration-500",
+        "flex cursor-pointer items-center gap-2 text-sm text-primary-variant",
+        isActive
+          ? "font-semibold text-primary dark:font-normal"
+          : "duration-500",
       )}
     >
       <div className="flex size-4 items-center justify-center">
@@ -513,7 +526,7 @@ function ObjectTimeline({
   effectiveTime,
 }: {
   eventId: string;
-  onSeek: (ts: number) => void;
+  onSeek: (ts: number, play?: boolean) => void;
   effectiveTime?: number;
 }) {
   const { t } = useTranslation("views/events");
@@ -542,14 +555,12 @@ function ObjectTimeline({
         const isActive =
           Math.abs((effectiveTime ?? 0) - (event.timestamp ?? 0)) <= 0.5;
         return (
-          <div
-            key={`${event.timestamp}-${event.source_id ?? idx}`}
-            onClick={() => {
-              onSeek(event.timestamp);
-            }}
-          >
-            <LifecycleItem event={event} onSeek={onSeek} isActive={isActive} />
-          </div>
+          <LifecycleItem
+            key={`${event.timestamp}-${event.source_id ?? ""}-${idx}`}
+            event={event}
+            onSeek={onSeek}
+            isActive={isActive}
+          />
         );
       })}
     </div>

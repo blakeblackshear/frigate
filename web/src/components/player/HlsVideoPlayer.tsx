@@ -49,7 +49,7 @@ type HlsVideoPlayerProps = {
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
-  onSeekToTime?: (timestamp: number) => void;
+  onSeekToTime?: (timestamp: number, play?: boolean) => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
   toggleFullscreen?: () => void;
@@ -324,13 +324,14 @@ export default function HlsVideoPlayer({
                 key={`${selectedObjectId}-${currentTime}`}
                 camera={camera}
                 selectedObjectId={selectedObjectId}
+                showBoundingBoxes={!isPlaying}
                 currentTime={currentTime}
                 videoWidth={videoDimensions.width}
                 videoHeight={videoDimensions.height}
                 className="absolute inset-0 z-10"
-                onSeekToTime={(timestamp) => {
+                onSeekToTime={(timestamp, play) => {
                   if (onSeekToTime) {
-                    onSeekToTime(timestamp);
+                    onSeekToTime(timestamp, play);
                   }
                 }}
                 objectTimeline={selectedObjectTimeline}

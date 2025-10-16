@@ -283,15 +283,14 @@ export function RecordingView({
   ]);
 
   const manuallySetCurrentTime = useCallback(
-    (time: number) => {
+    (time: number, play: boolean = false) => {
       if (!currentTimeRange) {
         return;
       }
-
       setCurrentTime(time);
 
       if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
-        mainControllerRef.current?.seekToTimestamp(time, true);
+        mainControllerRef.current?.seekToTimestamp(time, play);
       } else {
         updateSelectedSegment(time, true);
       }
@@ -310,7 +309,7 @@ export function RecordingView({
         } else {
           updateSelectedSegment(currentTime, true);
         }
-      } else if (playerTime != currentTime) {
+      } else if (playerTime != currentTime && timelineType != "detail") {
         mainControllerRef.current?.play();
       }
     }
@@ -1006,7 +1005,9 @@ function Timeline({
       ) : timelineType == "detail" ? (
         <DetailStream
           currentTime={currentTime}
-          onSeek={(timestamp) => manuallySetCurrentTime(timestamp, true)}
+          onSeek={(timestamp, play) =>
+            manuallySetCurrentTime(timestamp, play ?? true)
+          }
           reviewItems={mainCameraReviewItems}
         />
       ) : (
