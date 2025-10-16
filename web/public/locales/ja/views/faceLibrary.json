@@ -65,7 +65,7 @@
       "selectImage": "画像ファイルを選択してください。"
     },
     "dropActive": "ここに画像をドロップ…",
-    "dropInstructions": "画像をここにドラッグ＆ドロップ、またはクリックして選択",
+    "dropInstructions": "画像をここにドラッグ＆ドロップ、ペースト、またはクリックして選択",
     "maxSize": "最大サイズ: {{size}}MB"
   },
   "nofaces": "顔はありません",

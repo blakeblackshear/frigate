@@ -105,7 +105,8 @@
     "button": {
       "export": "書き出し",
       "markAsReviewed": "レビュー済みにする",
-      "deleteNow": "今すぐ削除"
+      "deleteNow": "今すぐ削除",
+      "markAsUnreviewed": "未レビューに戻す"
     }
   },
   "imagePicker": {
