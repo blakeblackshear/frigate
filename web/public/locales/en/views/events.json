@@ -18,11 +18,9 @@
     "aria": "Select events",
     "noFoundForTimePeriod": "No events found for this time period."
   },
-  "activity": {
-    "noActivitiesFound": "No activities found",
-    "activitiesCount_one": "{{count}} activity",
-    "activitiesCount_other": "{{count}} activities",
-    "object": "Object"
+  "detail": {
+    "noDataFound": "No detail data to review",
+    "aria": "Toggle detail view"
   },
   "objectTrack": {
     "trackedPoint": "Tracked point",

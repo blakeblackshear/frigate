@@ -169,7 +169,7 @@ export default function DetailStream({
         <div className="space-y-2 p-4">
           {reviewItems?.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
-              {t("activity.noActivitiesFound")}
+              {t("detail.noDataFound")}
             </div>
           ) : (
             reviewItems?.map((review: ReviewSegment) => {
@@ -427,7 +427,7 @@ function EventCollapsible({
               <button
                 onClick={(e) => e.stopPropagation()}
                 className="rounded bg-muted px-2 py-1 text-xs"
-                aria-label={t("activity.details")}
+                aria-label={t("detail.aria")}
               >
                 {open ? (
                   <LuChevronUp className="size-3" />
@@ -522,7 +522,7 @@ function ObjectTimeline({
   if (!timeline || timeline.length === 0) {
     return (
       <div className="py-2 text-sm text-muted-foreground">
-        No timeline entries
+        No object detail data available.
       </div>
     );
   }

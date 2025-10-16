@@ -965,6 +965,7 @@ function Timeline({
   return (
     <div
       className={cn(
+        "relative",
         isDesktop
           ? `${timelineType == "timeline" ? "w-[100px]" : timelineType == "detail" ? "w-[30%]" : "w-60"} no-scrollbar overflow-y-auto`
           : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : timelineType == "detail" ? "flex-1" : "landscape:w-[175px]"} `,

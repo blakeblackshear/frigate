@@ -50,7 +50,7 @@ export default function EventMenu({
                   : `${apiHost}api/events/${event.id}/thumbnail.webp`
               }
             >
-              {t("button.download", { ns: "common" })}
+              {t("itemMenu.downloadSnapshot.label")}
             </a>
           </DropdownMenuItem>
 
