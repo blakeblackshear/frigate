@@ -40,7 +40,8 @@
         "audioIsUnavailable": "此串流沒有音訊",
         "placeholder": "選擇串流來源",
         "stream": "串流"
-      }
+      },
+      "birdseye": "鳥瞰"
     },
     "delete": {
       "confirm": {

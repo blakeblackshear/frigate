@@ -10,7 +10,9 @@
     "general": "一般設定 - Frigate",
     "frigatePlus": "Frigate+ 設定 - Frigate",
     "notifications": "通知設定 - Frigate",
-    "enrichments": "進階功能設定 - Frigate"
+    "enrichments": "進階功能設定 - Frigate",
+    "cameraManagement": "管理鏡頭 - Frigate",
+    "cameraReview": "鏡頭檢視設定 - Frigate"
   },
   "menu": {
     "ui": "介面",
@@ -22,7 +24,11 @@
     "users": "用戶",
     "notifications": "通知",
     "frigateplus": "Frigate+",
-    "enrichments": "進階功能"
+    "enrichments": "進階功能",
+    "triggers": "觸發器",
+    "roles": "角色",
+    "cameraManagement": "管理",
+    "cameraReview": "審查"
   },
   "dialog": {
     "unsavedChanges": {
@@ -178,6 +184,43 @@
         "success": "審查分類設定已儲存。請重新啟動Frigate以套用更改。"
       },
       "unsavedChanges": "{{camera}}的審查分類設定尚未儲存"
+    },
+    "object_descriptions": {
+      "title": "生成式 AI 物件描述",
+      "desc": "暫時啟用或停用此鏡頭生成式 AI 物件描述。停用時，不會為此鏡頭的追蹤物件請求 AI 描述。"
+    },
+    "review_descriptions": {
+      "title": "生成式 AI 審查描述",
+      "desc": "暫時啟用或停用此鏡頭生成式 AI 審查描述。停用時，不會為此鏡頭的審查項目請求 AI 描述。"
+    },
+    "addCamera": "新增鏡頭",
+    "editCamera": "編輯鏡頭：",
+    "selectCamera": "選擇鏡頭",
+    "backToSettings": "返回鏡頭設定",
+    "cameraConfig": {
+      "add": "新增鏡頭",
+      "edit": "編輯鏡頭",
+      "description": "設定鏡頭，包括串流輸入同角色分配。",
+      "name": "鏡頭名稱",
+      "nameRequired": "必須填寫鏡頭名稱",
+      "nameLength": "鏡頭名稱不得多於 24 個字元。",
+      "namePlaceholder": "例如：front_door",
+      "enabled": "已啟用",
+      "ffmpeg": {
+        "inputs": "輸入串流",
+        "path": "串流路徑",
+        "pathRequired": "必須填寫串流路徑",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "角色",
+        "rolesRequired": "至少需要分配一個角色",
+        "rolesUnique": "每個角色（音訊、偵測、錄影）只可分配到一個串流",
+        "addInput": "新增輸入串流",
+        "removeInput": "移除輸入串流",
+        "inputsRequired": "至少需要一個輸入串流"
+      },
+      "toast": {
+        "success": "鏡頭 {{cameraName}} 已成功儲存"
+      }
     }
   },
   "masksAndZones": {
@@ -417,6 +460,19 @@
       "ratio": "比例",
       "desc": "在圖片上畫矩形以查看面積與比例詳情",
       "tips": "啟用此選項後，會於鏡頭畫面上繪製矩形，以顯示其面積及比例。這些數值可用於設定物件形狀過濾參數。"
+    },
+    "openCameraWebUI": "打開 {{camera}} 的網頁介面",
+    "audio": {
+      "title": "音訊",
+      "noAudioDetections": "未偵測到音訊",
+      "score": "分數",
+      "currentRMS": "目前 RMS",
+      "currentdbFS": "目前 dbFS"
+    },
+    "paths": {
+      "title": "軌跡",
+      "desc": "顯示追蹤物件軌跡上的重要點",
+      "tips": "<p><strong>軌跡</strong></p><br><p>線條同圓圈會標示追蹤物件整個生命周期中移動過的重要點。</p>"
     }
   },
   "users": {
@@ -502,7 +558,8 @@
           "adminDesc": "可使用所有功能。",
           "viewer": "觀看者",
           "viewerDesc": "只限使用即時儀表板、審查、瀏覽及匯出功能。",
-          "admin": "管理員"
+          "admin": "管理員",
+          "customDesc": "自訂角色，具特定鏡頭存取權限。"
         },
         "select": "選擇角色"
       },
@@ -675,6 +732,387 @@
     "toast": {
       "success": "進階功能設定已儲存。請重新啟動 Frigate 以套用你的更改。",
       "error": "儲存設定變更失敗：{{errorMessage}}"
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "觀察者角色管理",
+      "desc": "管理自訂觀察者角色及其對此 Frigate 實例的鏡頭存取權限。"
+    },
+    "addRole": "新增角色",
+    "table": {
+      "role": "角色",
+      "cameras": "鏡頭",
+      "actions": "操作",
+      "noRoles": "未找到自訂角色。",
+      "editCameras": "編輯鏡頭",
+      "deleteRole": "刪除角色"
+    },
+    "toast": {
+      "success": {
+        "createRole": "角色 {{role}} 已成功建立",
+        "updateCameras": "角色 {{role}} 的鏡頭已更新",
+        "deleteRole": "角色 {{role}} 已成功刪除",
+        "userRolesUpdated": "{{count}} 位使用者被更新為「觀察者」角色，將可存取所有鏡頭。"
+      },
+      "error": {
+        "createRoleFailed": "建立角色失敗：{{errorMessage}}",
+        "updateCamerasFailed": "更新鏡頭失敗：{{errorMessage}}",
+        "deleteRoleFailed": "刪除角色失敗：{{errorMessage}}",
+        "userUpdateFailed": "更新使用者角色失敗：{{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "建立新角色",
+        "desc": "新增角色，並指定鏡頭存取權限。"
+      },
+      "editCameras": {
+        "title": "編輯角色鏡頭",
+        "desc": "更新角色 <strong>{{role}}</strong> 的鏡頭存取權限。"
+      },
+      "deleteRole": {
+        "title": "刪除角色",
+        "desc": "此操作無法復原。將永久刪除該角色，並將使用此角色的所有使用者改為「觀察者」角色，可存取所有鏡頭。",
+        "warn": "你確定要刪除 <strong>{{role}}</strong> 嗎？",
+        "deleting": "正在刪除…"
+      },
+      "form": {
+        "role": {
+          "title": "角色名稱",
+          "placeholder": "輸入角色名稱",
+          "desc": "只允許字母、數字、句號或底線。",
+          "roleIsRequired": "必須填寫角色名稱",
+          "roleOnlyInclude": "角色名稱只可包含字母、數字、句號或底線",
+          "roleExists": "已有相同名稱的角色存在。"
+        },
+        "cameras": {
+          "title": "鏡頭",
+          "desc": "選擇此角色可存取的鏡頭。至少需要選擇一個鏡頭。",
+          "required": "至少需要選擇一個鏡頭。"
+        }
+      }
+    }
+  },
+  "triggers": {
+    "documentTitle": "觸發器",
+    "semanticSearch": {
+      "title": "語意搜尋已停用",
+      "desc": "必須啟用語意搜尋才能使用觸發器。"
+    },
+    "management": {
+      "title": "觸發器管理",
+      "desc": "管理 {{camera}} 的觸發器。使用縮圖類型可對與所選追蹤物件相似的縮圖觸發，使用描述類型可對與你指定文字描述相似的事件觸發。"
+    },
+    "addTrigger": "新增觸發器",
+    "table": {
+      "name": "名稱",
+      "type": "類型",
+      "content": "內容",
+      "threshold": "閾值",
+      "actions": "操作",
+      "noTriggers": "此鏡頭尚未設定任何觸發器。",
+      "edit": "編輯",
+      "deleteTrigger": "刪除觸發器",
+      "lastTriggered": "上次觸發"
+    },
+    "type": {
+      "thumbnail": "縮圖",
+      "description": "描述"
+    },
+    "actions": {
+      "alert": "標記為警報",
+      "notification": "發送通知"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "建立觸發器",
+        "desc": "為鏡頭 {{camera}} 建立觸發器"
+      },
+      "editTrigger": {
+        "title": "編輯觸發器",
+        "desc": "編輯鏡頭 {{camera}} 的觸發器設定"
+      },
+      "deleteTrigger": {
+        "title": "刪除觸發器",
+        "desc": "你確定要刪除觸發器 <strong>{{triggerName}}</strong> 嗎？此操作無法復原。"
+      },
+      "form": {
+        "name": {
+          "title": "名稱",
+          "placeholder": "輸入觸發器名稱",
+          "error": {
+            "minLength": "名稱至少需 2 個字元。",
+            "invalidCharacters": "名稱只可包含字母、數字、底線及連字符。",
+            "alreadyExists": "此鏡頭已有相同名稱的觸發器。"
+          }
+        },
+        "enabled": {
+          "description": "啟用或停用此觸發器"
+        },
+        "type": {
+          "title": "類型",
+          "placeholder": "選擇觸發器類型"
+        },
+        "friendly_name": {
+          "title": "顯示名稱",
+          "placeholder": "為此觸發器命名或描述",
+          "description": "此觸發器的可選顯示名稱或描述文字。"
+        },
+        "content": {
+          "title": "內容",
+          "imagePlaceholder": "選擇圖片",
+          "textPlaceholder": "輸入文字內容",
+          "imageDesc": "選擇圖片，當偵測到相似圖片時觸發此動作。",
+          "textDesc": "輸入文字，當偵測到相似追蹤物件描述時觸發此動作。",
+          "error": {
+            "required": "必須提供內容。"
+          }
+        },
+        "threshold": {
+          "title": "閾值",
+          "error": {
+            "min": "閾值至少為 0",
+            "max": "閾值最多為 1"
+          }
+        },
+        "actions": {
+          "title": "操作",
+          "desc": "預設情況下，Frigate 會對所有觸發器發送 MQTT 訊息。可選擇額外操作，在觸發器觸發時執行。",
+          "error": {
+            "min": "至少需要選擇一個操作。"
+          }
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "觸發器 {{name}} 已成功建立。",
+        "updateTrigger": "觸發器 {{name}} 已成功更新。",
+        "deleteTrigger": "觸發器 {{name}} 已成功刪除。"
+      },
+      "error": {
+        "createTriggerFailed": "建立觸發器失敗：{{errorMessage}}",
+        "updateTriggerFailed": "更新觸發器失敗：{{errorMessage}}",
+        "deleteTriggerFailed": "刪除觸發器失敗：{{errorMessage}}"
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "新增鏡頭",
+    "description": "請依照以下步驟，將新鏡頭加入 Frigate。",
+    "steps": {
+      "nameAndConnection": "名稱與連線",
+      "streamConfiguration": "串流設定",
+      "validationAndTesting": "驗證與測試"
+    },
+    "save": {
+      "success": "已成功儲存新鏡頭 {{cameraName}}。",
+      "failure": "儲存 {{cameraName}} 時發生錯誤。"
+    },
+    "testResultLabels": {
+      "resolution": "解析度",
+      "video": "影像",
+      "audio": "音訊",
+      "fps": "每秒影格數"
+    },
+    "commonErrors": {
+      "noUrl": "請輸入有效的串流網址",
+      "testFailed": "串流測試失敗：{{error}}"
+    },
+    "step1": {
+      "description": "輸入鏡頭詳細資料並測試連線。",
+      "cameraName": "鏡頭名稱",
+      "cameraNamePlaceholder": "例如：front_door 或 back_yard_overview",
+      "host": "主機名稱／IP 位址",
+      "port": "連接埠",
+      "username": "用戶名稱",
+      "usernamePlaceholder": "可選",
+      "password": "密碼",
+      "passwordPlaceholder": "選擇傳輸協定",
+      "selectTransport": "選擇傳輸協定",
+      "cameraBrand": "鏡頭品牌",
+      "selectBrand": "選擇鏡頭品牌以套用 URL 模板",
+      "customUrl": "自訂串流網址",
+      "brandInformation": "品牌資訊",
+      "brandUrlFormat": "適用於 RTSP 網址格式如下的鏡頭：{{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "testConnection": "測試連線",
+      "testSuccess": "連線測試成功！",
+      "testFailed": "連線測試失敗，請檢查輸入內容後再試一次。",
+      "streamDetails": "串流詳情",
+      "warnings": {
+        "noSnapshot": "無法從設定的串流中擷取快照。"
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "請選擇包含主機/IP 的鏡頭品牌，或選擇「其他」並輸入自訂網址",
+        "nameRequired": "必須輸入鏡頭名稱",
+        "nameLength": "鏡頭名稱長度不得超過 64 個字元",
+        "invalidCharacters": "鏡頭名稱包含無效字元",
+        "nameExists": "鏡頭名稱已存在",
+        "brands": {
+          "reolink-rtsp": "不建議使用 Reolink RTSP。建議在鏡頭設定中啟用 HTTP，並重新啟動鏡頭設定精靈。"
+        }
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      }
+    },
+    "step2": {
+      "description": "設定鏡頭的串流角色，並可新增額外串流。",
+      "streamsTitle": "鏡頭串流",
+      "addStream": "新增串流",
+      "addAnotherStream": "新增另一個串流",
+      "streamTitle": "串流 {{number}}",
+      "streamUrl": "串流網址",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "url": "網址",
+      "resolution": "解析度",
+      "selectResolution": "選擇解析度",
+      "quality": "畫質",
+      "selectQuality": "選擇畫質",
+      "roles": "角色",
+      "roleLabels": {
+        "detect": "物件偵測",
+        "record": "錄影",
+        "audio": "音訊"
+      },
+      "testStream": "測試連線",
+      "testSuccess": "串流測試成功！",
+      "testFailed": "串流測試失敗",
+      "testFailedTitle": "測試失敗",
+      "connected": "已連線",
+      "notConnected": "未連線",
+      "featuresTitle": "功能",
+      "go2rtc": "減少與鏡頭的連線數",
+      "detectRoleWarning": "至少需有一個串流設定為「偵測」角色才能繼續。",
+      "rolesPopover": {
+        "title": "串流角色",
+        "detect": "用於物件偵測的主要影像來源。",
+        "record": "根據設定儲存影片片段。",
+        "audio": "用於音訊偵測的來源。"
+      },
+      "featuresPopover": {
+        "title": "串流功能",
+        "description": "使用 go2rtc 轉串流以減少與鏡頭的直接連線。"
+      }
+    },
+    "step3": {
+      "description": "在儲存新鏡頭前進行最後驗證與分析。請先連線所有串流後再儲存。",
+      "validationTitle": "串流驗證",
+      "connectAllStreams": "連線所有串流",
+      "reconnectionSuccess": "重新連線成功。",
+      "reconnectionPartial": "部分串流重新連線失敗。",
+      "streamUnavailable": "無法預覽串流",
+      "reload": "重新載入",
+      "connecting": "正在連線...",
+      "streamTitle": "串流 {{number}}",
+      "valid": "有效",
+      "failed": "失敗",
+      "notTested": "未測試",
+      "connectStream": "連線",
+      "connectingStream": "連線中",
+      "disconnectStream": "中斷連線",
+      "estimatedBandwidth": "預計頻寬",
+      "roles": "角色",
+      "none": "無",
+      "error": "錯誤",
+      "streamValidated": "串流 {{number}} 驗證成功",
+      "streamValidationFailed": "串流 {{number}} 驗證失敗",
+      "saveAndApply": "儲存新鏡頭",
+      "saveError": "設定無效，請檢查你的設定。",
+      "issues": {
+        "title": "串流驗證",
+        "videoCodecGood": "影片編碼格式為 {{codec}}。",
+        "audioCodecGood": "音訊編碼格式為 {{codec}}。",
+        "noAudioWarning": "此串流未偵測到音訊，錄影將不會有聲音。",
+        "audioCodecRecordError": "錄影要支援音訊，必須使用 AAC 編碼。",
+        "audioCodecRequired": "要支援音訊偵測，必須有音訊串流。",
+        "restreamingWarning": "若減少錄影串流與鏡頭的連線，CPU 使用率可能會略微增加。",
+        "dahua": {
+          "substreamWarning": "子串流 1 被鎖定為低解析度。許多 Dahua / Amcrest / EmpireTech 鏡頭支援額外子串流，需要在鏡頭設定中啟用。建議如有可用，檢查並使用這些子串流。"
+        },
+        "hikvision": {
+          "substreamWarning": "子串流 1 被鎖定為低解析度。許多 Hikvision 鏡頭支援額外子串流，需要在鏡頭設定中啟用。建議如有可用，檢查並使用這些子串流。"
+        }
+      }
+    }
+  },
+  "cameraManagement": {
+    "title": "管理鏡頭",
+    "addCamera": "新增鏡頭",
+    "editCamera": "編輯鏡頭：",
+    "selectCamera": "選擇鏡頭",
+    "backToSettings": "返回鏡頭設定",
+    "streams": {
+      "title": "啟用／停用鏡頭",
+      "desc": "暫時停用鏡頭，直到 Frigate 重新啟動。停用鏡頭會完全停止 Frigate 對該鏡頭串流的處理。偵測、錄影及除錯功能將無法使用。<br /><em>注意：這不會停用 go2rtc 轉串流。</em>"
+    },
+    "cameraConfig": {
+      "add": "新增鏡頭",
+      "edit": "編輯鏡頭",
+      "description": "設定鏡頭，包括串流輸入與角色。",
+      "name": "鏡頭名稱",
+      "nameRequired": "必須輸入鏡頭名稱",
+      "nameLength": "鏡頭名稱長度不得超過 64 個字元。",
+      "namePlaceholder": "例如：front_door 或 back_yard_overview",
+      "enabled": "已啟用",
+      "ffmpeg": {
+        "inputs": "輸入串流",
+        "path": "串流路徑",
+        "pathRequired": "必須提供串流路徑",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "角色",
+        "rolesRequired": "至少需要一個角色",
+        "rolesUnique": "每個角色（音訊 / 偵測 / 錄影）只能分配給一個串流",
+        "addInput": "新增輸入串流",
+        "removeInput": "移除輸入串流",
+        "inputsRequired": "至少需要一個輸入串流"
+      },
+      "go2rtcStreams": "go2rtc 串流",
+      "streamUrls": "串流網址",
+      "addUrl": "新增網址",
+      "addGo2rtcStream": "新增 go2rtc 串流",
+      "toast": {
+        "success": "鏡頭 {{cameraName}} 已成功儲存"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "鏡頭檢視設定",
+    "object_descriptions": {
+      "title": "生成式 AI 物件描述",
+      "desc": "暫時啟用／停用此鏡頭的生成式 AI 物件描述。停用時，系統不會為此鏡頭的追蹤物件生成 AI 描述。"
+    },
+    "review_descriptions": {
+      "title": "生成式 AI 審查描述",
+      "desc": "暫時啟用／停用此鏡頭的生成式 AI 審查描述。停用時，系統不會為此鏡頭的審查項目生成 AI 描述。"
+    },
+    "review": {
+      "title": "審查",
+      "desc": "暫時啟用／停用此鏡頭的警報與偵測，直到 Frigate 重啟。停用時，不會產生新的審查項目。 ",
+      "alerts": "警報 ",
+      "detections": "偵測 "
+    },
+    "reviewClassification": {
+      "title": "審查分類",
+      "desc": "Frigate 將審查項目分類為警報與偵測。預設情況下，所有 <em>person</em> 與 <em>car</em> 物件會視為警報。你可以透過設定對應區域來精確分類審查項目。",
+      "noDefinedZones": "此鏡頭未定義任何區域。",
+      "objectAlertsTips": "在{{cameraName}}上所有{{alertsLabels}}物件將會顯示為警報。",
+      "zoneObjectAlertsTips": "在{{cameraName}}的{{zone}}區域偵測到的所有{{alertsLabels}}物件將會顯示為警報。",
+      "objectDetectionsTips": "無論位於哪個區域，在{{cameraName}}上所有未分類的{{detectionsLabels}}物件將會顯示為偵測結果。",
+      "zoneObjectDetectionsTips": {
+        "text": "在{{cameraName}}的{{zone}}區域內所有未分類的{{detectionsLabels}}物件將會顯示為偵測結果。",
+        "notSelectDetections": "無論位於哪個區域，在{{cameraName}}的{{zone}}區域偵測到、但未分類為警報的{{detectionsLabels}}物件將會顯示為偵測結果。",
+        "regardlessOfZoneObjectDetectionsTips": "無論位於哪個區域，在{{cameraName}}上所有未分類的{{detectionsLabels}}物件將會顯示為偵測結果。"
+      },
+      "unsavedChanges": "{{camera}}的審查分類設定尚未儲存",
+      "selectAlertsZones": "選擇警報的區域",
+      "selectDetectionsZones": "選擇偵測的區域",
+      "limitDetections": "限制偵測至特定區域",
+      "toast": {
+        "success": "審查分類設定已儲存。請重新啟動Frigate以套用更改。"
+      }
     }
   }
 }
