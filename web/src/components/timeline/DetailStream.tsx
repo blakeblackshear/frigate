@@ -255,6 +255,10 @@ function ReviewGroup({
       if (iconLabels.length >= 5) break;
     }
   }
+
+  const objectCount = fetchedEvents
+    ? fetchedEvents.length
+    : (review.data.objects ?? []).length;
   return (
     <div
       data-review-id={id}
@@ -275,10 +279,7 @@ function ReviewGroup({
           <div className="flex flex-col">
             <div className="text-sm font-medium">{displayTime}</div>
             <div className="text-xs text-muted-foreground">
-              {fetchedEvents
-                ? fetchedEvents.length
-                : (review.data.objects ?? []).length}{" "}
-              tracked objects
+              {objectCount} {t("detail.trackedObject", { count: objectCount })}
             </div>
           </div>
         </div>
@@ -508,6 +509,7 @@ function ObjectTimeline({
   onSeek: (ts: number) => void;
   effectiveTime?: number;
 }) {
+  const { t } = useTranslation("views/events");
   const { data: timeline, isValidating } = useSWR<ObjectLifecycleSequence[]>([
     "timeline",
     {
@@ -522,7 +524,7 @@ function ObjectTimeline({
   if (!timeline || timeline.length === 0) {
     return (
       <div className="py-2 text-sm text-muted-foreground">
-        No object detail data available.
+        {t("detail.noObjectDetailData")}
       </div>
     );
   }

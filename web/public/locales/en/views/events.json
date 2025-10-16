@@ -20,7 +20,10 @@
   },
   "detail": {
     "noDataFound": "No detail data to review",
-    "aria": "Toggle detail view"
+    "aria": "Toggle detail view",
+    "trackedObject_one": "tracked object",
+    "trackedObject_other": "tracked objects",
+    "noObjectDetailData": "No object detail data available."
   },
   "objectTrack": {
     "trackedPoint": "Tracked point",
