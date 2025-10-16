@@ -94,8 +94,8 @@
     "failedToEnd": "Impossible de terminer l'enregistrement manuel à la demande.",
     "started": "Enregistrement à la demande démarré.",
     "recordDisabledTips": "Puisque l'enregistrement est désactivé ou restreint dans la configuration de cette caméra, seul un instantané sera enregistré.",
-    "title": "Enregistrement à la demande",
-    "tips": "Démarrez un événement manuel en fonction des paramètres de conservation d'enregistrement de cette caméra."
+    "title": "À la demande",
+    "tips": "Téléchargez un instantané immédiat ou démarrez un événement manuel en fonction des paramètres de conservation d'enregistrement de cette caméra."
   },
   "streamingSettings": "Paramètres de streaming",
   "notifications": "Notifications",
@@ -170,5 +170,16 @@
   "transcription": {
     "enable": "Activer la transcription audio en direct",
     "disable": "Désactiver la transcription audio en direct"
+  },
+  "noCameras": {
+    "title": "Aucune caméra configurée",
+    "description": "Pour commencer, connectez une caméra.",
+    "buttonText": "Ajouter une caméra"
+  },
+  "snapshot": {
+    "takeSnapshot": "Télécharger un instantané immédiat",
+    "noVideoSource": "Aucune source disponible pour un instantané.",
+    "captureFailed": "Échec de la capture d'instantané.",
+    "downloadStarted": "Démarrage du téléchargement de l'instantané."
   }
 }
