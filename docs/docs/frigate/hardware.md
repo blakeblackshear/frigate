@@ -78,7 +78,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Intel**
 
-- [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
+- [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel NPUs to provide efficient object detection.
   - [Supports majority of model architectures](../../configuration/object_detectors#openvino-supported-models)
   - Runs best with tiny, small, or medium models
 
@@ -142,6 +142,7 @@ The OpenVINO detector type is able to run on:
 
 - 6th Gen Intel Platforms and newer that have an iGPU
 - x86 hosts with an Intel Arc GPU
+- Intel NPUs
 - Most modern AMD CPUs (though this is officially not supported by Intel)
 - x86 & Arm64 hosts via CPU (generally not recommended)
 
@@ -166,7 +167,8 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Intel UHD 770  | ~ 15 ms                    | t-320: ~ 16 ms s-320: ~ 20 ms s-640: ~ 40 ms      | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
 | Intel N100     | ~ 15 ms                    | s-320: 30 ms                                      | 320: ~ 25 ms              |                        | Can only run one detector instance |
 | Intel N150     | ~ 15 ms                    | t-320: 16 ms s-320: 24 ms                         |                           |                        |                                    |
-| Intel Iris XE  | ~ 10 ms                    | s-320: 12 ms s-640: 30 ms                         | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
+| Intel Iris XE  | ~ 10 ms                    | s-320: 8 ms s-640: 30 ms                          | 320: ~ 18 ms 640: ~ 50 ms | 320-n: 33 ms           |                                    |
+| Intel NPU      | ~ 6 ms                     | s-320: 11 ms                                      |                           | 320-n: 40 ms           |                                    |
 | Intel Arc A310 | ~ 5 ms                     | t-320: 7 ms t-640: 11 ms s-320: 8 ms s-640: 15 ms | 320: ~ 8 ms 640: ~ 14 ms  |                        |                                    |
 | Intel Arc A380 | ~ 6 ms                     |                                                   | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
 | Intel Arc A750 | ~ 4 ms                     |                                                   | 320: ~ 8 ms               |                        |                                    |
