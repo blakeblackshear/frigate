@@ -107,7 +107,8 @@
     "button": {
       "export": "Exportera",
       "markAsReviewed": "Markera som granskad",
-      "deleteNow": "Ta bort nu"
+      "deleteNow": "Ta bort nu",
+      "markAsUnreviewed": "Markera som ogranskad"
     }
   },
   "imagePicker": {

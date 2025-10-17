@@ -114,7 +114,8 @@
     "button": {
       "export": "导出",
       "markAsReviewed": "标记为已核查",
-      "deleteNow": "立即删除"
+      "deleteNow": "立即删除",
+      "markAsUnreviewed": "标记为未核查"
     }
   },
   "imagePicker": {

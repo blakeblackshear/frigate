@@ -3,7 +3,7 @@
     "cameras": "カメラ統計 - Frigate",
     "general": "一般統計 - Frigate",
     "storage": "ストレージ統計 - Frigate",
-    "enrichments": "エンリッチメント統計 - Frigate",
+    "enrichments": "高度解析統計 - Frigate",
     "logs": {
       "frigate": "Frigate ログ - Frigate",
       "go2rtc": "Go2RTC ログ - Frigate",
@@ -38,7 +38,7 @@
   "general": {
     "title": "全般",
     "detector": {
-      "title": "ディテクタ",
+      "title": "検出器",
       "inferenceSpeed": "ディテクタ推論速度",
       "temperature": "ディテクタ温度",
       "cpuUsage": "ディテクタの CPU 使用率",
@@ -167,7 +167,7 @@
     "shmTooLow": "/dev/shm の割り当て（{{total}} MB）は少なくとも {{min}} MB に増やす必要があります。"
   },
   "enrichments": {
-    "title": "エンリッチメント",
+    "title": "高度解析",
     "infPerSecond": "毎秒推論回数",
     "embeddings": {
       "image_embedding": "画像埋め込み",

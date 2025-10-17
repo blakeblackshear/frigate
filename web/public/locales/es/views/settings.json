@@ -23,7 +23,8 @@
     "users": "Usuarios",
     "notifications": "Notificaciones",
     "enrichments": "Análisis avanzado",
-    "triggers": "Disparadores"
+    "triggers": "Disparadores",
+    "roles": "Rols"
   },
   "dialog": {
     "unsavedChanges": {
@@ -773,7 +774,71 @@
         "desc": "Editar configuractión del disparador para cámara {{camera}}"
       },
       "deleteTrigger": {
-        "title": "Eliminar Disparador"
+        "title": "Eliminar Disparador",
+        "desc": "Está seguro de que desea eliminar el disparador <strong>{{triggerName}}</strong>? Esta acción no se puede deshacer."
+      },
+      "form": {
+        "name": {
+          "title": "Nombre",
+          "placeholder": "Entre nombre de disparador",
+          "error": {
+            "minLength": "El nombre debe tener al menos 2 caracteres.",
+            "invalidCharacters": "El nombre sólo puede contener letras, números, guiones bajos, y guiones.",
+            "alreadyExists": "Un disparador con este nombre ya existe para esta cámara."
+          }
+        },
+        "enabled": {
+          "description": "Activa o desactiva este disparador"
+        },
+        "type": {
+          "title": "Tipo",
+          "placeholder": "Seleccione tipo de disparador"
+        },
+        "friendly_name": {
+          "title": "Nombre amigable",
+          "placeholder": "Nombre o describa este disparador",
+          "description": "Un nombre o texto descriptivo amigable (opcional) para este disparador."
+        },
+        "content": {
+          "title": "Contenido",
+          "imagePlaceholder": "Seleccione una imágen",
+          "textPlaceholder": "Entre contenido de texto",
+          "error": {
+            "required": "El contenido es requrido."
+          },
+          "imageDesc": "Seleccione una imágen para iniciar esta acción cuando una imágen similar es detectada.",
+          "textDesc": "Entre texto para iniciar esta acción cuando la descripción de un objecto seguido similar es detectado."
+        },
+        "threshold": {
+          "title": "Umbral",
+          "error": {
+            "min": "El umbral debe ser al menos 0",
+            "max": "El umbral debe ser al menos 1"
+          }
+        },
+        "actions": {
+          "title": "Acciones",
+          "error": {
+            "min": "Al menos una acción debe ser seleccionada."
+          },
+          "desc": "Por defecto, Frigate manda un mensaje MQTT por todos los disparadores. Seleccione una acción adicional que se realizará cuando este disparador se accione."
+        }
+      }
+    },
+    "semanticSearch": {
+      "title": "Búsqueda semántica desactivada",
+      "desc": "Búsqueda semántica debe estar activada para usar Disparadores."
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Disparador {{name}} creado exitosamente.",
+        "updateTrigger": "Disparador {{name}} actualizado exitosamente.",
+        "deleteTrigger": "Disparador {{name}} eliminado exitosamente."
+      },
+      "error": {
+        "createTriggerFailed": "Fallo al crear el disparador: {{errorMessage}}",
+        "updateTriggerFailed": "Fallo al actualizar el disparador: {{errorMessage}}",
+        "deleteTriggerFailed": "Fallo al eliminar el disparador: {{errorMessage}}"
       }
     }
   },

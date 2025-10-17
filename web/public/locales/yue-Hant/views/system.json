@@ -41,7 +41,8 @@
       "memoryUsage": "偵測器記憶體使用量",
       "title": "偵測器",
       "cpuUsage": "偵測器 CPU 使用率",
-      "temperature": "偵測器溫度"
+      "temperature": "偵測器溫度",
+      "cpuUsageInformation": "CPU 用於準備偵測模型的輸入同輸出數據。此數值不計算推理運算，即使使用 GPU 或加速器也是一樣。"
     },
     "hardwareInfo": {
       "gpuUsage": "GPU 使用率",
@@ -102,6 +103,10 @@
       },
       "title": "鏡頭儲存",
       "percentageOfTotalUsed": "佔總量百分比"
+    },
+    "shm": {
+      "title": "SHM(共享記憶體) 分配",
+      "warning": "目前 SHM 大小 {{total}}MB 太小，請增加至至少 {{min_shm}}MB。"
     }
   },
   "cameras": {
@@ -158,7 +163,8 @@
     "detectHighCpuUsage": "{{camera}} 的偵測 CPU 使用率過高 ({{detectAvg}}%)",
     "healthy": "系統運作正常",
     "ffmpegHighCpuUsage": "{{camera}} 的 FFmpeg CPU 使用率過高 ({{ffmpegAvg}}%)",
-    "reindexingEmbeddings": "重新索引嵌入資料 (已完成 {{processed}}%)"
+    "reindexingEmbeddings": "重新索引嵌入資料 (已完成 {{processed}}%)",
+    "shmTooLow": "/dev/shm 分配（{{total}} MB）太小，請增加至至少 {{min}} MB。"
   },
   "enrichments": {
     "title": "進階功能",

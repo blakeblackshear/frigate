@@ -9,7 +9,9 @@
     "masksAndZones": "Editor de màscares i zones - Frigate",
     "general": "Paràmetres Generals - Frigate",
     "frigatePlus": "Paràmetres de Frigate+ - Frigate",
-    "notifications": "Paràmetres de notificació - Frigate"
+    "notifications": "Paràmetres de notificació - Frigate",
+    "cameraManagement": "Gestionar càmeres - Frigate",
+    "cameraReview": "Configuració Revisió de Càmeres - Frigate"
   },
   "menu": {
     "ui": "Interfície d'usuari",
@@ -21,7 +23,10 @@
     "debug": "Depuració",
     "frigateplus": "Frigate+",
     "enrichments": "Enriquiments",
-    "triggers": "Disparadors"
+    "triggers": "Disparadors",
+    "cameraManagement": "Gestió",
+    "cameraReview": "Revisió",
+    "roles": "Rols"
   },
   "dialog": {
     "unsavedChanges": {
@@ -824,6 +829,17 @@
         "deleteRoleFailed": "Error a l'eliminar el rol: {{errorMessage}}",
         "userUpdateFailed": "Error a l'actualitzar els ros d'usuari: {{errorMessage}}"
       }
+    }
+  },
+  "cameraWizard": {
+    "title": "Afegir C àmera",
+    "description": "Seguiu els passos de sota per afegir una nova càmera a la instal·lació.",
+    "steps": {
+      "nameAndConnection": "Nom i connexió",
+      "streamConfiguration": "Configuració de stream"
+    },
+    "step1": {
+      "cameraBrand": "Marca de la càmera"
     }
   }
 }

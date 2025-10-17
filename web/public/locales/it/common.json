@@ -134,6 +134,14 @@
     "length": {
       "feet": "piedi",
       "meters": "metri"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/ora",
+      "mbph": "MB/ora",
+      "gbph": "GB/ora"
     }
   },
   "label": {
@@ -280,5 +288,8 @@
     }
   },
   "selectItem": "Seleziona {{item}}",
-  "readTheDocumentation": "Leggi la documentazione"
+  "readTheDocumentation": "Leggi la documentazione",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

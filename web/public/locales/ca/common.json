@@ -207,6 +207,14 @@
     "length": {
       "feet": "peus",
       "meters": "metres"
+    },
+    "data": {
+      "kbps": "Kb/s",
+      "mbps": "Mb/s",
+      "gbps": "Gb/s",
+      "kbph": "kB/hora",
+      "mbph": "MB/hora",
+      "gbph": "GB/hora"
     }
   },
   "label": {
@@ -270,5 +278,8 @@
     "desc": "Pàgina no trobada"
   },
   "selectItem": "Selecciona {{item}}",
-  "readTheDocumentation": "Llegir la documentació"
+  "readTheDocumentation": "Llegir la documentació",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

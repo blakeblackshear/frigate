@@ -85,6 +85,14 @@
     "length": {
       "feet": "英尺",
       "meters": "米"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/每小时",
+      "mbph": "MB/每小时",
+      "gbph": "GB/每小时"
     }
   },
   "label": {
@@ -266,5 +274,8 @@
     "desc": "页面未找到"
   },
   "selectItem": "选择 {{item}}",
-  "readTheDocumentation": "阅读文档"
+  "readTheDocumentation": "阅读文档",
+  "information": {
+    "pixels": "{{area}} 像素"
+  }
 }

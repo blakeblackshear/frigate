@@ -120,7 +120,8 @@
     "button": {
       "export": "Exportar",
       "markAsReviewed": "Marcar como revisado",
-      "deleteNow": "Eliminar ahora"
+      "deleteNow": "Eliminar ahora",
+      "markAsUnreviewed": "Marcar como no revisado"
     }
   },
   "imagePicker": {

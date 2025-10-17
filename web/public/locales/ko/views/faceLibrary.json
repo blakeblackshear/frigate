@@ -6,5 +6,6 @@
   },
   "details": {
     "person": "사람"
-  }
+  },
+  "selectItem": "{{item}} 선택"
 }

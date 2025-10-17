@@ -10,7 +10,9 @@
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
     "notifications": "Paramètres de notification - Frigate",
-    "enrichments": "Paramètres d'enrichissements - Frigate"
+    "enrichments": "Paramètres d'enrichissements - Frigate",
+    "cameraManagement": "Gestion des caméras - Frigate",
+    "cameraReview": "Paramètres de revue des caméras - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -23,7 +25,10 @@
     "notifications": "Notifications",
     "frigateplus": "Frigate+",
     "enrichments": "Enrichissements",
-    "triggers": "Déclencheurs"
+    "triggers": "Déclencheurs",
+    "roles": "Rôles",
+    "cameraManagement": "Gestion",
+    "cameraReview": "Revue"
   },
   "dialog": {
     "unsavedChanges": {
@@ -816,6 +821,11 @@
           "error": {
             "min": "Au moins une action doit être sélectionnée."
           }
+        },
+        "friendly_name": {
+          "title": "Nom convivial",
+          "placeholder": "Nommez ou décrivez ce déclencheur",
+          "description": "Nom convivial ou texte descriptif facultatif pour ce déclencheur."
         }
       }
     },
@@ -830,6 +840,10 @@
         "updateTriggerFailed": "Échec de la mise à jour du déclencheur : {{errorMessage}}",
         "deleteTriggerFailed": "Échec de la suppression du déclencheur : {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "La recherche sémantique est désactivée",
+      "desc": "La recherche sémantique doit être activée pour utiliser les déclencheurs."
     }
   },
   "roles": {
@@ -890,6 +904,47 @@
           "required": "Au moins une caméra doit être sélectionnée."
         }
       }
+    }
+  },
+  "cameraWizard": {
+    "title": "Ajouter une caméra",
+    "description": "Suivez les étapes ci-dessous pour ajouter une nouvelle caméra à votre installation Frigate.",
+    "steps": {
+      "nameAndConnection": "Nom et connexion",
+      "streamConfiguration": "Configuration du flux",
+      "validationAndTesting": "Validation et tests"
+    },
+    "save": {
+      "success": "Réussite de l'enregistrement de la nouvelle caméra {{cameraName}}.",
+      "failure": "Échec lors de l'enregistrement de {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Résolution",
+      "video": "Vidéo",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Saisissez une URL de flux valide s'il vous plait",
+      "testFailed": "Échec du test de flux : {{error}}"
+    },
+    "step1": {
+      "description": "Saisissez les détails de votre caméra et testez la connexion.",
+      "cameraName": "Nom de la caméra",
+      "cameraNamePlaceholder": "par exemple, porte-entree ou Apercu Arriere_Cour",
+      "host": "Hôte / Adresse IP",
+      "port": "Port",
+      "username": "Nom d'utilisateur",
+      "usernamePlaceholder": "Facultatif",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Facultatif",
+      "selectTransport": "Sélectionnez le protocole de transport",
+      "cameraBrand": "Marque de la caméra",
+      "selectBrand": "Sélectionnez la marque de la caméra pour le modèle de l'URL",
+      "customUrl": "URL de flux personnalisé",
+      "brandInformation": "Information sur la marque",
+      "brandUrlFormat": "Pour les caméras avec un format d'URL RTSP comme : {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://nomutilisateur:motdepasse@hote:port/chemin"
     }
   }
 }

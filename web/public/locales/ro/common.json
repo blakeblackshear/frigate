@@ -226,6 +226,14 @@
     "length": {
       "feet": "picioare",
       "meters": "metri"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/oră",
+      "mbph": "MB/oră",
+      "gbph": "GB/oră"
     }
   },
   "label": {
@@ -270,5 +278,8 @@
     "title": "404",
     "desc": "Pagină negăsită"
   },
-  "readTheDocumentation": "Citește documentația"
+  "readTheDocumentation": "Citește documentația",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }
