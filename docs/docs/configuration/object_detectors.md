@@ -280,7 +280,7 @@ detectors:
 | Model                                 | GPU | NPU | Notes                                                        |
 | ------------------------------------- | --- | --- | ------------------------------------------------------------ |
 | [YOLOv9](#yolo-v3-v4-v7-v9)           | ✅  | ✅  | Recommended for GPU & NPU                                    |
-| [RF-DETR](#rf-detr)                   | ✅  |  ?  |                                                              |
+| [RF-DETR](#rf-detr)                   | ✅  | ✅  | Requires XE iGPU or Arc                                      |
 | [YOLO-NAS](#yolo-nas)                 | ✅  | ⚠️  | YOLO-NAS only works on NPU in non-flat format                |
 | [MobileNet v2](#ssdlite-mobilenet-v2) | ✅  | ✅  | Fast and lightweight model, less accurate than larger models |
 | [YOLOX](#yolox)                       | ✅  |  ?  |                                                              |
