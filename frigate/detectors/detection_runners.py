@@ -327,8 +327,8 @@ class OpenVINOModelRunner(BaseModelRunner):
                 input_tensor = ov.Tensor(input_element_type, input_data.shape)
                 np.copyto(input_tensor.data, input_data)
 
-                # Set the input tensor
-                self.infer_request.set_input_tensor(input_tensor)
+                # Set the input tensor for the specific port
+                self.infer_request.set_input_tensor(input_port, input_tensor)
 
             # Run inference
             self.infer_request.infer()
