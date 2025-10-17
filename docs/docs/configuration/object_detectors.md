@@ -281,7 +281,7 @@ detectors:
 | ------------------------------------- | --- | --- | ------------------------------------------------------------ |
 | [YOLOv9](#yolo-v3-v4-v7-v9)           | ✅  | ✅  | Recommended for GPU & NPU                                    |
 | [RF-DETR](#rf-detr)                   | ✅  | ✅  | Requires XE iGPU or Arc                                      |
-| [YOLO-NAS](#yolo-nas)                 | ✅  | ⚠️  | YOLO-NAS only works on NPU in non-flat format                |
+| [YOLO-NAS](#yolo-nas)                 | ✅  | ✅  |                                                              |
 | [MobileNet v2](#ssdlite-mobilenet-v2) | ✅  | ✅  | Fast and lightweight model, less accurate than larger models |
 | [YOLOX](#yolox)                       | ✅  |  ?  |                                                              |
 | [D-FINE](#d-fine)                     | ❌  | ❌  |                                                              |
@@ -429,7 +429,7 @@ Currently D-FINE models only run on OpenVINO in CPU mode, GPUs currently fail to
 :::
 
 <details>
-  <summary>YOLO-NAS Setup & Config</summary>
+  <summary>D-FINE Setup & Config</summary>
 
 After placing the downloaded onnx model in your config/model_cache folder, you can use the following configuration:
 
@@ -445,7 +445,7 @@ model:
   height: 640
   input_tensor: nchw
   input_dtype: float
-  path: /config/model_cache/dfine_s_obj2coco.onnx
+  path: /config/model_cache/dfine-s.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
 
