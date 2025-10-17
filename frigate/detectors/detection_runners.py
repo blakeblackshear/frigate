@@ -312,11 +312,13 @@ class OpenVINOModelRunner(BaseModelRunner):
 
             # Multiple inputs case - set each input by name
             for input_name, input_data in inputs.items():
-                # Find the input by name
+                # Find the input by name and its index
                 input_port = None
-                for port in self.compiled_model.inputs:
+                input_index = None
+                for idx, port in enumerate(self.compiled_model.inputs):
                     if port.get_any_name() == input_name:
                         input_port = port
+                        input_index = idx
                         break
 
                 if input_port is None:
@@ -327,8 +329,8 @@ class OpenVINOModelRunner(BaseModelRunner):
                 input_tensor = ov.Tensor(input_element_type, input_data.shape)
                 np.copyto(input_tensor.data, input_data)
 
-                # Set the input tensor
-                self.infer_request.set_input_tensor(input_tensor)
+                # Set the input tensor for the specific port index
+                self.infer_request.set_input_tensor(input_index, input_tensor)
 
             # Run inference
             self.infer_request.infer()
