@@ -58,7 +58,8 @@ class BirdseyeConfig(FrigateBaseModel):
     idle_heartbeat_fps: float = Field(
         default=0.0,
         ge=0.0,
-        title="Idle heartbeat FPS (0 disables)",
+        le=10.0,
+        title="Idle heartbeat FPS (0 disables, max 10)",
     )
 
 # uses BaseModel because some global attributes are not available at the camera level
