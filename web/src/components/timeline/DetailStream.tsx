@@ -407,7 +407,7 @@ function EventCollapsible({
   // Clear selectedObjectId when effectiveTime has passed this event's end_time
   useEffect(() => {
     if (selectedObjectId === event.id && effectiveTime && event.end_time) {
-      if (effectiveTime > event.end_time) {
+      if (effectiveTime >= event.end_time) {
         setSelectedObjectId(undefined);
       }
     }
@@ -428,8 +428,9 @@ function EventCollapsible({
             ? "shadow-selected outline-selected"
             : "outline-transparent duration-500",
           event.id != selectedObjectId &&
-            (effectiveTime ?? 0) >= (event.start_time ?? 0) &&
-            (effectiveTime ?? 0) <= (event.end_time ?? event.start_time ?? 0) &&
+            (effectiveTime ?? 0) >= (event.start_time ?? 0) - 0.5 &&
+            (effectiveTime ?? 0) <=
+              (event.end_time ?? event.start_time ?? 0) + 0.5 &&
             "bg-secondary-highlight outline-[1.5px] -outline-offset-[1.1px] outline-primary/40",
         )}
       >
