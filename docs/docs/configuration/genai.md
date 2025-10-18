@@ -111,7 +111,7 @@ OpenAI does not have a free tier for their API. With the release of gpt-4o, pric
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://platform.openai.com/docs/models). At the time of writing, this includes `gpt-4o` and `gpt-4-turbo`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://platform.openai.com/docs/models).
 
 ### Get API Key
 
@@ -139,11 +139,11 @@ Microsoft offers several vision models through Azure OpenAI. A subscription is r
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models). At the time of writing, this includes `gpt-4o` and `gpt-4-turbo`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models).
 
 ### Create Resource and Get API Key
 
-To start using Azure OpenAI, you must first [create a resource](https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource?pivots=web-portal#create-a-resource). You'll need your API key and resource URL, which must include the `api-version` parameter (see the example below). The model field is not required in your configuration as the model is part of the deployment name you chose when deploying the resource.
+To start using Azure OpenAI, you must first [create a resource](https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource?pivots=web-portal#create-a-resource). You'll need your API key, model name, and resource URL, which must include the `api-version` parameter (see the example below).
 
 ### Configuration
 
@@ -152,6 +152,7 @@ genai:
   enabled: True
   provider: azure_openai
   base_url: https://example-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview
+  model: gpt-5-mini
   api_key: "{FRIGATE_OPENAI_API_KEY}"
 ```
 
