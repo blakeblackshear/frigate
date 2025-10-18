@@ -62,6 +62,7 @@ class BirdseyeConfig(FrigateBaseModel):
         title="Idle heartbeat FPS (0 disables, max 10)",
     )
 
+
 # uses BaseModel because some global attributes are not available at the camera level
 class BirdseyeCameraConfig(BaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view for camera.")
