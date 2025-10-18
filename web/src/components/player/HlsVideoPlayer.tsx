@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 import { useTranslation } from "react-i18next";
 import ObjectTrackOverlay from "@/components/overlay/ObjectTrackOverlay";
-import { useDetailStream } from "@/context/detail-stream-context";
+import { DetailStreamContextType } from "@/context/detail-stream-context";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = !isAndroid;
@@ -54,6 +54,7 @@ type HlsVideoPlayerProps = {
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
   toggleFullscreen?: () => void;
   onError?: (error: RecordingPlayerError) => void;
+  detail?: Partial<DetailStreamContextType>;
 };
 export default function HlsVideoPlayer({
   videoRef,
@@ -74,16 +75,17 @@ export default function HlsVideoPlayer({
   onUploadFrame,
   toggleFullscreen,
   onError,
+  detail,
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation("components/player");
   const { data: config } = useSWR<FrigateConfig>("config");
-  const {
-    selectedObjectId,
-    selectedObjectTimeline,
-    currentTime,
-    camera,
-    isDetailMode,
-  } = useDetailStream();
+
+  // for detail stream context in History
+  const selectedObjectId = detail?.selectedObjectId;
+  const selectedObjectTimeline = detail?.selectedObjectTimeline;
+  const currentTime = detail?.currentTime;
+  const camera = detail?.camera;
+  const isDetailMode = detail?.isDetailMode ?? false;
 
   // playback
 
