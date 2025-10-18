@@ -41,6 +41,13 @@ export default function EventMenu({
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
         <DropdownMenuContent>
+          <DropdownMenuItem
+            onSelect={() => {
+              navigate(`/explore?event_id=${event.id}`);
+            }}
+          >
+            {t("details.item.button.viewInExplore")}
+          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <a
               download

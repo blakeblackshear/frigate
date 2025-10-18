@@ -2,14 +2,6 @@ import useSWR from "swr";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import {
-  Carousel,
-  CarouselApi,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { ObjectLifecycleSequence } from "@/types/timeline";
 import Heading from "@/components/ui/heading";
@@ -33,7 +25,6 @@ import {
   MdOutlinePictureInPictureAlt,
 } from "react-icons/md";
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
 import { useApiHost } from "@/api";
 import { isDesktop, isIOS, isSafari } from "react-device-detect";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
@@ -55,6 +46,7 @@ import { ObjectPath } from "./ObjectPath";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { IoPlayCircleOutline } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type ObjectLifecycleProps = {
   className?: string;
@@ -166,16 +158,6 @@ export default function ObjectLifecycle({
     configAnnotationOffset,
   );
 
-  const detectArea = useMemo(() => {
-    if (!config) {
-      return 0;
-    }
-    return (
-      config.cameras[event.camera]?.detect?.width *
-      config.cameras[event.camera]?.detect?.height
-    );
-  }, [config, event.camera]);
-
   const savedPathPoints = useMemo(() => {
     return (
       event.data.path_data?.map(([coords, timestamp]: [number[], number]) => ({
@@ -272,91 +254,108 @@ export default function ObjectLifecycle({
 
   // carousels
 
-  const [mainApi, setMainApi] = useState<CarouselApi>();
-  const [thumbnailApi, setThumbnailApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
-
-  const handleThumbnailClick = (index: number) => {
-    if (!mainApi || !thumbnailApi) {
-      return;
-    }
-    mainApi.scrollTo(index);
-    setCurrent(index);
-  };
-
-  const handleThumbnailNavigation = useCallback(
-    (direction: "next" | "previous") => {
-      if (!mainApi || !thumbnailApi || !eventSequence) return;
-      const newIndex =
-        direction === "next"
-          ? Math.min(current + 1, eventSequence.length - 1)
-          : Math.max(current - 1, 0);
-      mainApi.scrollTo(newIndex);
-      thumbnailApi.scrollTo(newIndex);
-      setCurrent(newIndex);
-    },
-    [mainApi, thumbnailApi, current, eventSequence],
-  );
-
-  useEffect(() => {
-    if (eventSequence && eventSequence.length > 0) {
-      if (current == -1) {
-        // normal path point
-        setBoxStyle(null);
-        setLifecycleZones([]);
-      } else {
-        // lifecycle point
-        setTimeIndex(eventSequence?.[current].timestamp);
-        handleSetBox(
-          eventSequence?.[current].data.box ?? [],
-          eventSequence?.[current].data?.attribute_box,
-        );
-        setLifecycleZones(eventSequence?.[current].data.zones);
-      }
-      setSelectedZone("");
-    }
-  }, [current, imgLoaded, handleSetBox, eventSequence]);
-
-  useEffect(() => {
-    if (!mainApi || !thumbnailApi || !eventSequence || !event) {
-      return;
-    }
-
-    const handleTopSelect = () => {
-      const selected = mainApi.selectedScrollSnap();
-      setCurrent(selected);
-      thumbnailApi.scrollTo(selected);
-    };
-
-    mainApi.on("select", handleTopSelect).on("reInit", handleTopSelect);
-
-    return () => {
-      mainApi.off("select", handleTopSelect);
-    };
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mainApi, thumbnailApi]);
+  // Selected lifecycle item index; -1 when viewing a path-only point
 
   const handlePathPointClick = useCallback(
     (index: number) => {
-      if (!mainApi || !thumbnailApi || !eventSequence) return;
+      if (!eventSequence) return;
       const sequenceIndex = eventSequence.findIndex(
         (item) => item.timestamp === pathPoints[index].timestamp,
       );
       if (sequenceIndex !== -1) {
-        mainApi.scrollTo(sequenceIndex);
-        thumbnailApi.scrollTo(sequenceIndex);
-        setCurrent(sequenceIndex);
+        setTimeIndex(eventSequence[sequenceIndex].timestamp);
+        handleSetBox(
+          eventSequence[sequenceIndex]?.data.box ?? [],
+          eventSequence[sequenceIndex]?.data?.attribute_box,
+        );
+        setLifecycleZones(eventSequence[sequenceIndex]?.data.zones);
       } else {
         // click on a normal path point, not a lifecycle point
-        setCurrent(-1);
         setTimeIndex(pathPoints[index].timestamp);
+        setBoxStyle(null);
+        setLifecycleZones([]);
       }
     },
-    [mainApi, thumbnailApi, eventSequence, pathPoints],
+    [eventSequence, pathPoints, handleSetBox],
   );
 
-  if (!event.id || !eventSequence || !config || !timeIndex) {
+  const formattedStart = config
+    ? formatUnixTimestampToDateTime(event.start_time ?? 0, {
+        timezone: config.ui.timezone,
+        date_format:
+          config.ui.time_format == "24hour"
+            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+                ns: "common",
+              })
+            : t("time.formattedTimestampHourMinuteSecond.12hour", {
+                ns: "common",
+              }),
+        time_style: "medium",
+        date_style: "medium",
+      })
+    : "";
+
+  const formattedEnd = config
+    ? formatUnixTimestampToDateTime(event.end_time ?? 0, {
+        timezone: config.ui.timezone,
+        date_format:
+          config.ui.time_format == "24hour"
+            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+                ns: "common",
+              })
+            : t("time.formattedTimestampHourMinuteSecond.12hour", {
+                ns: "common",
+              }),
+        time_style: "medium",
+        date_style: "medium",
+      })
+    : "";
+
+  useEffect(() => {
+    if (!eventSequence || eventSequence.length === 0) return;
+    // If timeIndex hasn't been set to a non-zero value, prefer the first lifecycle timestamp
+    if (!timeIndex) {
+      setTimeIndex(eventSequence[0].timestamp);
+      handleSetBox(
+        eventSequence[0]?.data.box ?? [],
+        eventSequence[0]?.data?.attribute_box,
+      );
+      setLifecycleZones(eventSequence[0]?.data.zones);
+    }
+  }, [eventSequence, timeIndex, handleSetBox]);
+
+  // When timeIndex changes or image finishes loading, sync the box/zones to matching lifecycle, else clear
+  useEffect(() => {
+    if (!eventSequence || timeIndex == null) return;
+    const idx = eventSequence.findIndex((i) => i.timestamp === timeIndex);
+    if (idx !== -1) {
+      if (imgLoaded) {
+        handleSetBox(
+          eventSequence[idx]?.data.box ?? [],
+          eventSequence[idx]?.data?.attribute_box,
+        );
+      }
+      setLifecycleZones(eventSequence[idx]?.data.zones);
+    } else {
+      // Non-lifecycle point (e.g., saved path point)
+      setBoxStyle(null);
+      setLifecycleZones([]);
+    }
+  }, [timeIndex, imgLoaded, eventSequence, handleSetBox]);
+
+  const selectedLifecycle = useMemo(() => {
+    if (!eventSequence || eventSequence.length === 0) return undefined;
+    const idx = eventSequence.findIndex((i) => i.timestamp === timeIndex);
+    return idx !== -1 ? eventSequence[idx] : eventSequence[0];
+  }, [eventSequence, timeIndex]);
+
+  const selectedIndex = useMemo(() => {
+    if (!eventSequence || eventSequence.length === 0) return 0;
+    const idx = eventSequence.findIndex((i) => i.timestamp === timeIndex);
+    return idx === -1 ? 0 : idx;
+  }, [eventSequence, timeIndex]);
+
+  if (!config) {
     return <ActivityIndicator />;
   }
 
@@ -502,7 +501,7 @@ export default function ObjectLifecycle({
                   className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
                   onClick={() =>
                     navigate(
-                      `/settings?page=masksAndZones&camera=${event.camera}&object_mask=${eventSequence?.[current].data.box}`,
+                      `/settings?page=masksAndZones&camera=${event.camera}&object_mask=${selectedLifecycle?.data.box}`,
                     )
                   }
                 >
@@ -547,8 +546,8 @@ export default function ObjectLifecycle({
         </div>
         <div className="min-w-20 text-right text-sm text-muted-foreground">
           {t("objectLifecycle.count", {
-            first: current + 1,
-            second: eventSequence.length,
+            first: selectedIndex + 1,
+            second: eventSequence?.length ?? 0,
           })}
         </div>
       </div>
@@ -567,205 +566,187 @@ export default function ObjectLifecycle({
         />
       )}
 
-      <div className="relative flex flex-col items-center justify-center">
-        <Carousel className="m-0 w-full" setApi={setMainApi}>
-          <CarouselContent>
-            {eventSequence.map((item, index) => (
-              <CarouselItem key={index}>
-                <Card className="p-1 text-sm md:p-2" key={index}>
-                  <CardContent className="flex flex-row items-center gap-3 p-1 md:p-2">
-                    <div className="flex flex-1 flex-row items-center justify-start p-3 pl-1">
-                      <div
-                        className="rounded-lg p-2"
-                        style={{
-                          backgroundColor: "rgb(110,110,110)",
-                        }}
-                      >
-                        <div
-                          key={item.data.label}
-                          className="relative flex aspect-square size-4 flex-row items-center md:size-8"
-                        >
-                          {getIconForLabel(
-                            item.data.label,
-                            "size-4 md:size-6 absolute left-0 top-0",
-                          )}
+      <div className="mt-4">
+        <div
+          className={cn(
+            "rounded-md bg-secondary p-2 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500",
+          )}
+        >
+          <div className="flex w-full items-center justify-between">
+            <div
+              className="flex items-center gap-2 font-medium"
+              onClick={(e) => {
+                e.stopPropagation();
+                setTimeIndex(event.start_time ?? 0);
+              }}
+              role="button"
+            >
+              {getIconForLabel(
+                event.label,
+                "size-6 text-primary dark:text-white",
+              )}
+              <div className="flex items-end gap-2">
+                <span>{getTranslatedLabel(event.label)}</span>
+                <span className="text-secondary-foreground">
+                  {formattedStart ?? ""} - {formattedEnd ?? ""}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-2">
+            {!eventSequence ? (
+              <ActivityIndicator className="size-2" size={2} />
+            ) : eventSequence.length === 0 ? (
+              <div className="py-2 text-muted-foreground">
+                {t("detail.noObjectDetailData", { ns: "views/events" })}
+              </div>
+            ) : (
+              <div className="mx-2 mt-4 space-y-2">
+                {eventSequence.map((item, idx) => {
+                  const isActive =
+                    Math.abs((timeIndex ?? 0) - (item.timestamp ?? 0)) <= 0.5;
+                  const formattedEventTimestamp = config
+                    ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
+                        timezone: config.ui.timezone,
+                        date_format:
+                          config.ui.time_format == "24hour"
+                            ? t(
+                                "time.formattedTimestampHourMinuteSecond.24hour",
+                                { ns: "common" },
+                              )
+                            : t(
+                                "time.formattedTimestampHourMinuteSecond.12hour",
+                                { ns: "common" },
+                              ),
+                        time_style: "medium",
+                        date_style: "medium",
+                      })
+                    : "";
+
+                  const ratio =
+                    Array.isArray(item.data.box) && item.data.box.length >= 4
+                      ? (
+                          aspectRatio *
+                          (item.data.box[2] / item.data.box[3])
+                        ).toFixed(2)
+                      : "N/A";
+                  const areaPx =
+                    Array.isArray(item.data.box) && item.data.box.length >= 4
+                      ? Math.round(
+                          (config.cameras[event.camera]?.detect?.width ?? 0) *
+                            (config.cameras[event.camera]?.detect?.height ??
+                              0) *
+                            (item.data.box[2] * item.data.box[3]),
+                        )
+                      : undefined;
+                  const areaPct =
+                    Array.isArray(item.data.box) && item.data.box.length >= 4
+                      ? (item.data.box[2] * item.data.box[3]).toFixed(4)
+                      : undefined;
+
+                  return (
+                    <div
+                      key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
+                      role="button"
+                      onClick={() => {
+                        setTimeIndex(item.timestamp ?? 0);
+                        handleSetBox(
+                          item.data.box ?? [],
+                          item.data.attribute_box,
+                        );
+                        setLifecycleZones(item.data.zones);
+                        setSelectedZone("");
+                      }}
+                      className={cn(
+                        "flex cursor-pointer flex-col gap-1 rounded-md p-2 text-sm text-primary-variant",
+                        isActive
+                          ? "bg-secondary-highlight font-semibold text-primary outline-[1.5px] -outline-offset-[1.1px] outline-primary/40 dark:font-normal"
+                          : "duration-500",
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="flex size-7 items-center justify-center">
                           <LifecycleIcon
-                            className="absolute bottom-0 right-0 size-2 md:size-4"
                             lifecycleItem={item}
+                            className="size-5"
                           />
                         </div>
-                      </div>
-                      <div className="mx-3 text-lg">
-                        <div className="flex flex-row items-center text-primary smart-capitalize">
-                          {getLifecycleItemDescription(item)}
-                        </div>
-                        <div className="text-sm text-primary-variant">
-                          {formatUnixTimestampToDateTime(item.timestamp, {
-                            timezone: config.ui.timezone,
-                            date_format:
-                              config.ui.time_format == "24hour"
-                                ? t("time.formattedTimestamp2.24hour", {
-                                    ns: "common",
-                                  })
-                                : t("time.formattedTimestamp2.12hour", {
-                                    ns: "common",
-                                  }),
-                            time_style: "medium",
-                            date_style: "medium",
-                          })}
+                        <div className="flex w-full flex-row justify-between">
+                          <div>{getLifecycleItemDescription(item)}</div>
+                          <div className={cn("p-1 text-sm")}>
+                            {formattedEventTimestamp}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex w-5/12 flex-row items-start justify-start">
-                      <div className="text-md mr-2 w-1/3">
-                        <div className="flex flex-col items-end justify-start">
-                          <p className="mb-1.5 text-sm text-primary-variant">
-                            {t(
-                              "objectLifecycle.lifecycleItemDesc.header.zones",
+
+                      <div className="ml-8 mt-1 flex flex-wrap items-center gap-3 text-sm text-secondary-foreground">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1">
+                            <span className="text-muted-foreground">
+                              {t(
+                                "objectLifecycle.lifecycleItemDesc.header.ratio",
+                              )}
+                            </span>
+                            <span className="font-medium text-foreground">
+                              {ratio}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <span className="text-muted-foreground">
+                              {t(
+                                "objectLifecycle.lifecycleItemDesc.header.area",
+                              )}
+                            </span>
+                            {areaPx !== undefined && areaPct !== undefined ? (
+                              <span className="font-medium text-foreground">
+                                px: {areaPx} · %: {areaPct}
+                              </span>
+                            ) : (
+                              <span>N/A</span>
                             )}
-                          </p>
-                          {item.class_type === "entered_zone"
-                            ? item.data.zones.map((zone, index) => (
-                                <div
-                                  key={index}
-                                  className="flex flex-row items-center gap-1"
-                                >
-                                  {true && (
+                          </div>
+                          {item.class_type === "entered_zone" && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-muted-foreground">
+                                {t(
+                                  "objectLifecycle.lifecycleItemDesc.header.zones",
+                                )}
+                              </span>
+                              <div className="flex flex-wrap items-center gap-2">
+                                {item.data.zones.map((zone, zidx) => (
+                                  <div
+                                    key={`${zone}-${zidx}`}
+                                    className="flex cursor-pointer items-center gap-1"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedZone(zone);
+                                    }}
+                                  >
                                     <div
-                                      className="size-3 rounded-lg"
+                                      className="size-3 rounded"
                                       style={{
                                         backgroundColor: `rgb(${getZoneColor(zone)})`,
                                       }}
                                     />
-                                  )}
-                                  <div
-                                    key={index}
-                                    className="cursor-pointer smart-capitalize"
-                                    onClick={() => setSelectedZone(zone)}
-                                  >
-                                    {zone.replaceAll("_", " ")}
+                                    <span className="smart-capitalize">
+                                      {zone.replaceAll("_", " ")}
+                                    </span>
                                   </div>
-                                </div>
-                              ))
-                            : "-"}
-                        </div>
-                      </div>
-                      <div className="text-md mr-2 w-1/3">
-                        <div className="flex flex-col items-end justify-start">
-                          <p className="mb-1.5 text-sm text-primary-variant">
-                            {t(
-                              "objectLifecycle.lifecycleItemDesc.header.ratio",
-                            )}
-                          </p>
-                          {Array.isArray(item.data.box) &&
-                          item.data.box.length >= 4
-                            ? (
-                                aspectRatio *
-                                (item.data.box[2] / item.data.box[3])
-                              ).toFixed(2)
-                            : "N/A"}
-                        </div>
-                      </div>
-                      <div className="text-md mr-2 w-1/3">
-                        <div className="flex flex-col items-end justify-start">
-                          <p className="mb-1.5 text-sm text-primary-variant">
-                            {t("objectLifecycle.lifecycleItemDesc.header.area")}
-                          </p>
-                          {Array.isArray(item.data.box) &&
-                          item.data.box.length >= 4 ? (
-                            <>
-                              <div className="flex flex-col text-xs">
-                                px:{" "}
-                                {Math.round(
-                                  detectArea *
-                                    (item.data.box[2] * item.data.box[3]),
-                                )}
+                                ))}
                               </div>
-                              <div className="flex flex-col text-xs">
-                                %:{" "}
-                                {(
-                                  (detectArea *
-                                    (item.data.box[2] * item.data.box[3])) /
-                                  detectArea
-                                ).toFixed(4)}
-                              </div>
-                            </>
-                          ) : (
-                            "N/A"
+                            </div>
                           )}
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
-      <div className="relative mt-4 flex flex-col items-center justify-center">
-        <Carousel
-          opts={{
-            align: "center",
-            containScroll: "keepSnaps",
-            dragFree: true,
-          }}
-          className="max-w-[72%] md:max-w-[85%]"
-          setApi={setThumbnailApi}
-        >
-          <CarouselContent
-            className={cn(
-              "-ml-1 flex select-none flex-row",
-              eventSequence.length > 4 ? "justify-start" : "justify-center",
+                  );
+                })}
+              </div>
             )}
-          >
-            {eventSequence.map((item, index) => (
-              <CarouselItem
-                key={index}
-                className={cn("basis-auto cursor-pointer pl-1")}
-                onClick={() => handleThumbnailClick(index)}
-              >
-                <div className="p-1">
-                  <Card>
-                    <CardContent
-                      className={cn(
-                        "flex aspect-square items-center justify-center rounded-md p-2",
-                        index === current && "bg-selected",
-                      )}
-                    >
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <LifecycleIcon
-                            className={cn(
-                              "size-8",
-                              index === current
-                                ? "bg-selected text-white"
-                                : "text-muted-foreground",
-                            )}
-                            lifecycleItem={item}
-                          />
-                        </TooltipTrigger>
-                        <TooltipPortal>
-                          <TooltipContent className="smart-capitalize">
-                            {getLifecycleItemDescription(item)}
-                          </TooltipContent>
-                        </TooltipPortal>
-                      </Tooltip>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious
-            disabled={current === 0}
-            onClick={() => handleThumbnailNavigation("previous")}
-          />
-          <CarouselNext
-            disabled={current === eventSequence.length - 1}
-            onClick={() => handleThumbnailNavigation("next")}
-          />
-        </Carousel>
+          </div>
+        </div>
       </div>
     </div>
   );

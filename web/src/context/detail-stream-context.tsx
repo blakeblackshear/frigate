@@ -3,7 +3,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { ObjectLifecycleSequence } from "@/types/timeline";
 
-interface DetailStreamContextType {
+export interface DetailStreamContextType {
   selectedObjectId: string | undefined;
   selectedObjectTimeline?: ObjectLifecycleSequence[];
   currentTime: number;

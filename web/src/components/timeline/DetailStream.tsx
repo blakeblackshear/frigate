@@ -232,15 +232,20 @@ function ReviewGroup({
     date_style: "medium",
   });
 
+  const shouldFetchEvents = review?.data?.detections?.length > 0;
+
   const { data: fetchedEvents } = useSWR<Event[]>(
-    review?.data?.detections?.length
+    shouldFetchEvents
       ? ["event_ids", { ids: review.data.detections.join(",") }]
       : null,
   );
 
-  const rawIconLabels: string[] = fetchedEvents
-    ? fetchedEvents.map((e) => e.label)
-    : (review.data?.objects ?? []);
+  const rawIconLabels: string[] = [
+    ...(fetchedEvents
+      ? fetchedEvents.map((e) => e.label)
+      : (review.data?.objects ?? [])),
+    ...(review.data?.audio ?? []),
+  ];
 
   // limit to 5 icons
   const seen = new Set<string>();
@@ -310,10 +315,10 @@ function ReviewGroup({
 
       {isActive && (
         <div className="mt-2 space-y-2">
-          {!fetchedEvents ? (
+          {shouldFetchEvents && !fetchedEvents ? (
             <ActivityIndicator />
           ) : (
-            fetchedEvents.map((event) => {
+            (fetchedEvents || []).map((event) => {
               return (
                 <EventCollapsible
                   key={event.id}
@@ -324,6 +329,24 @@ function ReviewGroup({
                 />
               );
             })
+          )}
+          {review.data.audio && review.data.audio.length > 0 && (
+            <div className="space-y-1">
+              {review.data.audio.map((audioLabel) => (
+                <div
+                  key={audioLabel}
+                  className="rounded-md bg-secondary p-2 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500"
+                >
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    {getIconForLabel(
+                      audioLabel,
+                      "size-4 text-primary dark:text-white",
+                    )}
+                    <span>{getTranslatedLabel(audioLabel)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
@@ -384,7 +407,7 @@ function EventCollapsible({
   // Clear selectedObjectId when effectiveTime has passed this event's end_time
   useEffect(() => {
     if (selectedObjectId === event.id && effectiveTime && event.end_time) {
-      if (effectiveTime > event.end_time) {
+      if (effectiveTime >= event.end_time) {
         setSelectedObjectId(undefined);
       }
     }
@@ -405,8 +428,9 @@ function EventCollapsible({
             ? "shadow-selected outline-selected"
             : "outline-transparent duration-500",
           event.id != selectedObjectId &&
-            (effectiveTime ?? 0) >= (event.start_time ?? 0) &&
-            (effectiveTime ?? 0) <= (event.end_time ?? event.start_time ?? 0) &&
+            (effectiveTime ?? 0) >= (event.start_time ?? 0) - 0.5 &&
+            (effectiveTime ?? 0) <=
+              (event.end_time ?? event.start_time ?? 0) + 0.5 &&
             "bg-secondary-highlight outline-[1.5px] -outline-offset-[1.1px] outline-primary/40",
         )}
       >
