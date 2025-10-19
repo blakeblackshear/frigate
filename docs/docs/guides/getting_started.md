@@ -282,10 +282,11 @@ cameras:
         - path: rtsp://10.0.10.10:554/high_res_stream # <----- Add stream you want to record from
           roles:
             - record
-    detect: ...
-    record: # <----- Enable recording
-      enabled: True
-    motion: ...
+
+detect: ...
+record: # <----- Enable recording
+   enabled: True
+motion: ...
 ```
 
 If you don't have separate streams for detect and record, you would just add the record role to the list on the first input.
