@@ -149,6 +149,11 @@ export default function ZoneEditPane({
         )
         .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
           message: t("masksAndZones.form.zoneName.error.hasIllegalCharacter"),
+        })
+        .refine((value: string) => /[a-zA-Z]/.test(value), {
+          message: t(
+            "masksAndZones.form.zoneName.error.mustHaveAtLeastOneLetter",
+          ),
         }),
       inertia: z.coerce
         .number()

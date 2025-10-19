@@ -385,7 +385,8 @@
           "mustNotBeSameWithCamera": "Zone name must not be the same as camera name.",
           "alreadyExists": "A zone with this name already exists for this camera.",
           "mustNotContainPeriod": "Zone name must not contain periods.",
-          "hasIllegalCharacter": "Zone name contains illegal characters."
+          "hasIllegalCharacter": "Zone name contains illegal characters.",
+          "mustHaveAtLeastOneLetter": "Zone name must have at least one letter."
         }
       },
       "distance": {
@@ -443,7 +444,7 @@
       "name": {
         "title": "Name",
         "inputPlaceHolder": "Enter a name…",
-        "tips": "Name must be at least 2 characters and must not be the name of a camera or another zone."
+        "tips": "Name must be at least 2 characters, must have at least one letter, and must not be the name of a camera or another zone."
       },
       "inertia": {
         "title": "Inertia",
