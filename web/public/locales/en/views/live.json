@@ -175,8 +175,8 @@
     "exitEdit": "Exit Editing"
   },
   "noCameras": {
-    "title": "No Cameras Set Up",
-    "description": "Get started by connecting a camera.",
+    "title": "No Cameras Configured",
+    "description": "Get started by connecting a camera to Frigate.",
     "buttonText": "Add Camera"
   }
 }
