@@ -1,5 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,7 @@ import {
 import { useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
+import { FaFolderPlus } from "react-icons/fa";
 import useSWR from "swr";
 
 const allModelTypes = ["objects", "states"] as const;
@@ -60,8 +62,8 @@ export default function ModelSelectionView({
 
   return (
     <div className="flex size-full flex-col p-2">
-      <div className="flex h-12 w-full items-center">
-        <div className="flex flex-row">
+      <div className="flex h-12 w-full items-center justify-between">
+        <div className="flex flex-row items-center">
           <ToggleGroup
             className="*:rounded-md *:px-3 *:py-4"
             type="single"
@@ -90,6 +92,12 @@ export default function ModelSelectionView({
             ))}
           </ToggleGroup>
         </div>
+        <div className="flex flex-row items-center">
+          <Button className="flex flex-row items-center gap-2" variant="select">
+            <FaFolderPlus />
+            Add Classification
+          </Button>
+        </div>
       </div>
       <div className="flex size-full gap-2 p-2">
         {classificationConfigs.map((config) => (
@@ -113,44 +121,38 @@ function ModelCard({ config, onClick }: ModelCardProps) {
     [id: string]: string[];
   }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
 
-  const coverImages = useMemo(() => {
+  const coverImage = useMemo(() => {
     if (!dataset) {
-      return {};
+      return undefined;
     }
 
-    const imageMap: { [key: string]: string } = {};
+    const keys = Object.keys(dataset).filter((key) => key != "none");
+    const selectedKey = keys[0];
 
-    for (const [key, imageList] of Object.entries(dataset)) {
-      if (imageList.length > 0) {
-        imageMap[key] = imageList[0];
-      }
-    }
-
-    return imageMap;
+    return {
+      name: selectedKey,
+      img: dataset[selectedKey][0],
+    };
   }, [dataset]);
 
   return (
     <div
       key={config.name}
       className={cn(
-        "flex h-60 cursor-pointer flex-col items-center gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
+        "relative size-60 cursor-pointer overflow-hidden rounded-lg",
         "outline-transparent duration-500",
         isMobile && "w-full",
       )}
       onClick={() => onClick()}
     >
-      <div
-        className={cn("grid size-48 grid-cols-2 gap-2", isMobile && "w-full")}
-      >
-        {Object.entries(coverImages).map(([key, image]) => (
-          <img
-            key={key}
-            className=""
-            src={`${baseUrl}clips/${config.name}/dataset/${key}/${image}`}
-          />
-        ))}
+      <img
+        className={cn("size-full", isMobile && "w-full")}
+        src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
+      />
+      <div className="absolute bottom-0 h-[50%] w-full bg-gradient-to-t from-black/60 to-transparent" />
+      <div className="absolute bottom-2 left-3 text-lg smart-capitalize">
+        {config.name}
       </div>
-      <div className="smart-capitalize">{config.name}</div>
     </div>
   );
 }
