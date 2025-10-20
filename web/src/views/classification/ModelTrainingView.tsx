@@ -757,7 +757,6 @@ function TrainGrid({
       selectedImages={selectedImages}
       onClickImages={onClickImages}
       onRefresh={onRefresh}
-      onDelete={onDelete}
     />
   );
 }
@@ -780,10 +779,7 @@ function StateTrainGrid({
   selectedImages,
   onClickImages,
   onRefresh,
-  onDelete,
 }: StateTrainGridProps) {
-  const { t } = useTranslation(["views/classificationModel"]);
-
   const threshold = useMemo(() => {
     return {
       recognition: model.threshold,
@@ -817,7 +813,7 @@ function StateTrainGrid({
             image={data.filename}
             onRefresh={onRefresh}
           >
-            <TbCategoryPlus className="size-7 cursor-pointer p-1 text-white hover:rounded-full hover:bg-primary-foreground" />
+            <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
           </ClassificationSelectionDialog>
         </ClassificationCard>
       ))}
@@ -833,7 +829,6 @@ type ObjectTrainGridProps = {
   selectedImages: string[];
   onClickImages: (images: string[], ctrl: boolean) => void;
   onRefresh: () => void;
-  onDelete: (ids: string[]) => void;
 };
 function ObjectTrainGrid({
   model,
@@ -843,10 +838,7 @@ function ObjectTrainGrid({
   selectedImages,
   onClickImages,
   onRefresh,
-  onDelete,
 }: ObjectTrainGridProps) {
-  const { t } = useTranslation(["views/classificationModel"]);
-
   // item data
 
   const groups = useMemo(() => {
@@ -966,22 +958,8 @@ function ObjectTrainGrid({
                     image={data.filename}
                     onRefresh={onRefresh}
                   >
-                    <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+                    <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
                   </ClassificationSelectionDialog>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <LuTrash2
-                        className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete([data.filename]);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {t("button.deleteClassificationAttempts")}
-                    </TooltipContent>
-                  </Tooltip>
                 </>
               )}
             </GroupedClassificationCard>
