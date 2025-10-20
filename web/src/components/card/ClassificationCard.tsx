@@ -99,28 +99,32 @@ export function ClassificationCard({
           {t("information.pixels", { ns: "common", area: imageArea })}
         </div>
       )}
-      <div className="absolute bottom-0 left-0 right-0 flex h-12 select-none gap-2 bg-gradient-to-t from-black/60 to-transparent p-2">
-        <div className="flex w-full flex-row items-center justify-between gap-2">
-          <div className="text-xs flex flex-col items-start text-white">
-            <div className="smart-capitalize">
-              {data.name == "unknown" ? t("details.unknown") : data.name}
+      <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-black/60 to-transparent" />
+      <div className="absolute bottom-0 flex w-full select-none flex-row items-center justify-between gap-2 p-2">
+        <div
+          className={cn(
+            "flex flex-col items-start text-white",
+            data.score ? "text-xs" : "text-sm",
+          )}
+        >
+          <div className="smart-capitalize">
+            {data.name == "unknown" ? t("details.unknown") : data.name}
+          </div>
+          {data.score && (
+            <div
+              className={cn(
+                "",
+                scoreStatus == "match" && "text-success",
+                scoreStatus == "potential" && "text-orange-400",
+                scoreStatus == "unknown" && "text-danger",
+              )}
+            >
+              {Math.round(data.score * 100)}%
             </div>
-            {data.score && (
-              <div
-                className={cn(
-                  "",
-                  scoreStatus == "match" && "text-success",
-                  scoreStatus == "potential" && "text-orange-400",
-                  scoreStatus == "unknown" && "text-danger",
-                )}
-              >
-                {Math.round(data.score * 100)}%
-              </div>
-            )}
-          </div>
-          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-            {children}
-          </div>
+          )}
+        </div>
+        <div className="flex flex-row items-start justify-end gap-5 md:gap-2">
+          {children}
         </div>
       </div>
     </div>

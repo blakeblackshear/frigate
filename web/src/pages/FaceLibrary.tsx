@@ -881,12 +881,12 @@ function FaceAttemptGroup({
             faceNames={faceNames}
             onTrainAttempt={(name) => onTrainAttempt(data, name)}
           >
-            <AddFaceIcon className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+            <AddFaceIcon className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
           </FaceSelectionDialog>
           <Tooltip>
             <TooltipTrigger>
               <LuRefreshCw
-                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground"
                 onClick={() => onReprocess(data)}
               />
             </TooltipTrigger>
@@ -954,7 +954,7 @@ function FaceGrid({
           <Tooltip>
             <TooltipTrigger>
               <LuTrash2
-                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                className="size-5 cursor-pointer text-gray-200 hover:text-danger"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(pageToggle, [image]);
