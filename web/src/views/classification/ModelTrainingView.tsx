@@ -650,7 +650,7 @@ function DatasetGrid({
           <Tooltip>
             <TooltipTrigger>
               <LuTrash2
-                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                className="size-5 cursor-pointer text-primary-variant hover:text-danger"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete([image]);
@@ -817,22 +817,8 @@ function StateTrainGrid({
             image={data.filename}
             onRefresh={onRefresh}
           >
-            <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+            <TbCategoryPlus className="size-7 cursor-pointer p-1 text-white hover:rounded-full hover:bg-primary-foreground" />
           </ClassificationSelectionDialog>
-          <Tooltip>
-            <TooltipTrigger>
-              <LuTrash2
-                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete([data.filename]);
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent>
-              {t("button.deleteClassificationAttempts")}
-            </TooltipContent>
-          </Tooltip>
         </ClassificationCard>
       ))}
     </div>

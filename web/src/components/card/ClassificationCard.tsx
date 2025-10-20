@@ -72,59 +72,58 @@ export function ClassificationCard({
   }, [showArea, imageLoaded]);
 
   return (
-    <>
-      <div
+    <div
+      className={cn(
+        "relative flex size-48 cursor-pointer flex-col overflow-hidden rounded-lg outline outline-[3px]",
+        selected
+          ? "shadow-selected outline-selected"
+          : "outline-transparent duration-500",
+      )}
+    >
+      <img
+        ref={imgRef}
         className={cn(
-          "relative flex cursor-pointer flex-col rounded-lg outline outline-[3px]",
-          className,
-          selected
-            ? "shadow-selected outline-selected"
-            : "outline-transparent duration-500",
+          "absolute bottom-0 left-0 right-0 top-0 size-full",
+          imgClassName,
+          isMobile && "w-full",
         )}
-      >
-        <div className="relative w-full select-none overflow-hidden rounded-lg">
-          <img
-            ref={imgRef}
-            onLoad={() => setImageLoaded(true)}
-            className={cn("size-44", imgClassName, isMobile && "w-full")}
-            src={`${baseUrl}${data.filepath}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick(data, e.metaKey || e.ctrlKey);
-            }}
-          />
-          {imageArea != undefined && (
-            <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
-              {t("information.pixels", { ns: "common", area: imageArea })}
-            </div>
-          )}
+        onLoad={() => setImageLoaded(true)}
+        src={`${baseUrl}${data.filepath}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick(data, e.metaKey || e.ctrlKey);
+        }}
+      />
+      {false && imageArea != undefined && (
+        <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+          {t("information.pixels", { ns: "common", area: imageArea })}
         </div>
-        <div className="select-none p-2">
-          <div className="flex w-full flex-row items-center justify-between gap-2">
-            <div className="flex flex-col items-start text-xs text-primary-variant">
-              <div className="smart-capitalize">
-                {data.name == "unknown" ? t("details.unknown") : data.name}
+      )}
+      <div className="absolute bottom-0 left-0 right-0 flex h-12 select-none gap-2 bg-gradient-to-t from-black/60 to-transparent p-2">
+        <div className="flex w-full flex-row items-center justify-between gap-2">
+          <div className="text-xs flex flex-col items-start text-white">
+            <div className="smart-capitalize">
+              {data.name == "unknown" ? t("details.unknown") : data.name}
+            </div>
+            {data.score && (
+              <div
+                className={cn(
+                  "",
+                  scoreStatus == "match" && "text-success",
+                  scoreStatus == "potential" && "text-orange-400",
+                  scoreStatus == "unknown" && "text-danger",
+                )}
+              >
+                {Math.round(data.score * 100)}%
               </div>
-              {data.score && (
-                <div
-                  className={cn(
-                    "",
-                    scoreStatus == "match" && "text-success",
-                    scoreStatus == "potential" && "text-orange-400",
-                    scoreStatus == "unknown" && "text-danger",
-                  )}
-                >
-                  {Math.round(data.score * 100)}%
-                </div>
-              )}
-            </div>
-            <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
-              {children}
-            </div>
+            )}
+          </div>
+          <div className="flex flex-row items-start justify-end gap-5 md:gap-4">
+            {children}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -41,8 +41,8 @@
     "invalidName": "Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens."
   },
   "train": {
-    "title": "Train",
-    "aria": "Select Train"
+    "title": "Recent Classifications",
+    "aria": "Select Recent Classifications"
   },
   "categories": "Classes",
   "createCategory": {
