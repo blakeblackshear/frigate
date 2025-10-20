@@ -152,36 +152,38 @@ export default function CameraEditForm({
         }))
       : defaultValues.ffmpeg.inputs;
 
-    // Load go2rtc streams for this camera
     const go2rtcStreams = config.go2rtc?.streams || {};
     const cameraStreams: Record<string, string[]> = {};
 
-    // Find streams that match this camera's name pattern
-    Object.entries(go2rtcStreams).forEach(([streamName, urls]) => {
-      if (streamName.startsWith(cameraName) || streamName === cameraName) {
-        cameraStreams[streamName] = Array.isArray(urls) ? urls : [urls];
-      }
-    });
+    // get candidate stream names for this camera. could be the camera's own name,
+    // any restream names referenced by this camera, or any keys under live --> streams
+    const validNames = new Set<string>();
+    validNames.add(cameraName);
 
-    // Also deduce go2rtc streams from restream URLs in camera inputs
-    camera.ffmpeg?.inputs?.forEach((input, index) => {
+    // deduce go2rtc stream names from rtsp restream inputs
+    camera.ffmpeg?.inputs?.forEach((input) => {
+      // exclude any query strings or trailing slashes from the stream name
       const restreamMatch = input.path.match(
-        /^rtsp:\/\/127\.0\.0\.1:8554\/(.+)$/,
+        /^rtsp:\/\/127\.0\.0\.1:8554\/([^?#/]+)(?:[?#].*)?$/,
       );
       if (restreamMatch) {
         const streamName = restreamMatch[1];
-        // Find the corresponding go2rtc stream
-        const go2rtcStream = Object.entries(go2rtcStreams).find(
-          ([name]) =>
-            name === streamName ||
-            name === `${cameraName}_${index + 1}` ||
-            name === cameraName,
-        );
-        if (go2rtcStream) {
-          cameraStreams[go2rtcStream[0]] = Array.isArray(go2rtcStream[1])
-            ? go2rtcStream[1]
-            : [go2rtcStream[1]];
-        }
+        validNames.add(streamName);
+      }
+    });
+
+    // Include live --> streams keys
+    const liveStreams = camera?.live?.streams;
+    if (liveStreams) {
+      Object.keys(liveStreams).forEach((key) => {
+        validNames.add(key);
+      });
+    }
+
+    // Map only go2rtc entries that match the collected names
+    Object.entries(go2rtcStreams).forEach(([name, urls]) => {
+      if (validNames.has(name)) {
+        cameraStreams[name] = Array.isArray(urls) ? urls : [urls];
       }
     });
 
