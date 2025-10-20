@@ -56,7 +56,6 @@ import { ModelState } from "@/types/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { MdAutoFixHigh } from "react-icons/md";
 import TrainFilterDialog from "@/components/overlay/dialog/TrainFilterDialog";
 import useApiFilter from "@/hooks/use-api-filter";
 import { ClassificationItemData, TrainFilter } from "@/types/classification";
@@ -69,6 +68,7 @@ import SearchDetailDialog, {
   SearchTab,
 } from "@/components/overlay/detail/SearchDetailDialog";
 import { SearchResult } from "@/types/search";
+import { HiSparkles } from "react-icons/hi";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
@@ -378,12 +378,13 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
             <Button
               className="flex justify-center gap-2"
               onClick={trainModel}
+              variant="select"
               disabled={modelState != "complete"}
             >
               {modelState == "training" ? (
                 <ActivityIndicator size={20} />
               ) : (
-                <MdAutoFixHigh className="text-secondary-foreground" />
+                <HiSparkles className="text-white" />
               )}
               {isDesktop && t("button.trainModel")}
             </Button>
