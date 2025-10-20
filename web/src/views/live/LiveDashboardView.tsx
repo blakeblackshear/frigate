@@ -354,7 +354,7 @@ export default function LiveDashboardView({
     onSaveMuting(true);
   };
 
-  if (cameras.length == 0) {
+  if (cameras.length == 0 && !includeBirdseye) {
     return <NoCameraView />;
   }
 
@@ -625,6 +625,7 @@ function NoCameraView() {
         title={t("noCameras.title")}
         description={t("noCameras.description")}
         buttonText={t("noCameras.buttonText")}
+        link="/settings?page=cameraManagement"
       />
     </div>
   );
