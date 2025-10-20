@@ -150,7 +150,9 @@ export default function SearchThumbnail({
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),
                   )
-                  .map((text) => getTranslatedLabel(text, searchResult.data.type))
+                  .map((text) =>
+                    getTranslatedLabel(text, searchResult.data.type),
+                  )
                   .sort()
                   .join(", ")
                   .replaceAll("-verified", "")}
