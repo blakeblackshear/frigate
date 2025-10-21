@@ -10,7 +10,9 @@
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
     "notifications": "Paramètres de notification - Frigate",
-    "enrichments": "Paramètres d'enrichissements - Frigate"
+    "enrichments": "Paramètres d'enrichissements - Frigate",
+    "cameraManagement": "Gestion des caméras - Frigate",
+    "cameraReview": "Paramètres de revue des caméras - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
@@ -23,7 +25,10 @@
     "notifications": "Notifications",
     "frigateplus": "Frigate+",
     "enrichments": "Enrichissements",
-    "triggers": "Déclencheurs"
+    "triggers": "Déclencheurs",
+    "roles": "Rôles",
+    "cameraManagement": "Gestion",
+    "cameraReview": "Revue"
   },
   "dialog": {
     "unsavedChanges": {
@@ -816,6 +821,11 @@
           "error": {
             "min": "Au moins une action doit être sélectionnée."
           }
+        },
+        "friendly_name": {
+          "title": "Nom convivial",
+          "placeholder": "Nommez ou décrivez ce déclencheur",
+          "description": "Nom convivial ou texte descriptif facultatif pour ce déclencheur."
         }
       }
     },
@@ -830,6 +840,10 @@
         "updateTriggerFailed": "Échec de la mise à jour du déclencheur : {{errorMessage}}",
         "deleteTriggerFailed": "Échec de la suppression du déclencheur : {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "La recherche sémantique est désactivée",
+      "desc": "La recherche sémantique doit être activée pour utiliser les déclencheurs."
     }
   },
   "roles": {
@@ -889,6 +903,223 @@
           "desc": "Sélectionnez les caméras auxquelles ce rôle aura accès. Au moins une caméra est requise.",
           "required": "Au moins une caméra doit être sélectionnée."
         }
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Ajouter une caméra",
+    "description": "Suivez les étapes ci-dessous pour ajouter une nouvelle caméra à votre installation Frigate.",
+    "steps": {
+      "nameAndConnection": "Nom et connexion",
+      "streamConfiguration": "Configuration du flux",
+      "validationAndTesting": "Validation et tests"
+    },
+    "save": {
+      "success": "Réussite de l'enregistrement de la nouvelle caméra {{cameraName}}.",
+      "failure": "Échec lors de l'enregistrement de {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Résolution",
+      "video": "Vidéo",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Saisissez une URL de flux valide s'il vous plait",
+      "testFailed": "Échec du test de flux : {{error}}"
+    },
+    "step1": {
+      "description": "Saisissez les détails de votre caméra et testez la connexion.",
+      "cameraName": "Nom de la caméra",
+      "cameraNamePlaceholder": "par exemple, porte-entree ou Apercu Arriere_Cour",
+      "host": "Hôte / Adresse IP",
+      "port": "Port",
+      "username": "Nom d'utilisateur",
+      "usernamePlaceholder": "Facultatif",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Facultatif",
+      "selectTransport": "Sélectionnez le protocole de transport",
+      "cameraBrand": "Marque de la caméra",
+      "selectBrand": "Sélectionnez la marque de la caméra pour le modèle de l'URL",
+      "customUrl": "URL de flux personnalisé",
+      "brandInformation": "Information sur la marque",
+      "brandUrlFormat": "Pour les caméras avec un format d'URL RTSP comme : {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://nomutilisateur:motdepasse@hote:port/chemin",
+      "testConnection": "Tester la connexion",
+      "testSuccess": "Test de connexion réussi !",
+      "testFailed": "Échec du test de connexion. Veuillez vérifier votre saisie et réessayer.",
+      "streamDetails": "Détails du flux",
+      "warnings": {
+        "noSnapshot": "Impossible de récupérer un instantané à partir du flux configuré."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Sélectionnez une marque de caméra avec hôte/IP ou choisissez « Autre » avec une URL personnalisée",
+        "nameRequired": "Le nom de la caméra est requis",
+        "nameLength": "Le nom de la caméra doit comporter 64 caractères ou moins",
+        "invalidCharacters": "Le nom de la caméra contient des caractères non valides",
+        "nameExists": "Le nom de la caméra existe déjà",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP n'est pas recommandé. Il est recommandé d'activer le protocole HTTP dans les paramètres de la caméra et de redémarrer l'assistant."
+        }
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      }
+    },
+    "step2": {
+      "description": "Configurez les rôles du flux et ajoutez des flux supplémentaires pour votre caméra.",
+      "streamsTitle": "Flux de caméra",
+      "addStream": "Ajouter un flux",
+      "addAnotherStream": "Ajouter un autre flux",
+      "streamTitle": "Flux {{number}}",
+      "streamUrl": "URL du flux",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "url": "URL",
+      "resolution": "Résolution",
+      "selectResolution": "Sélectionnez la résolution",
+      "quality": "Qualité",
+      "selectQuality": "Sélectionnez la qualité",
+      "roles": "Rôles",
+      "roleLabels": {
+        "record": "Enregistrement",
+        "audio": "Audio",
+        "detect": "Détection d'objet"
+      },
+      "testStream": "Tester la connexion",
+      "testSuccess": "Test de diffusion réussi !",
+      "testFailed": "Le test du flux a échoué",
+      "testFailedTitle": "Échec du test",
+      "connected": "Connecté",
+      "notConnected": "Non connecté",
+      "featuresTitle": "Caractéristiques",
+      "go2rtc": "Réduire les connexions à la caméra",
+      "detectRoleWarning": "Au moins un flux doit avoir le rôle « détecter » pour continuer.",
+      "rolesPopover": {
+        "title": "Rôles du flux",
+        "detect": "Flux principal pour la détection d'objets.",
+        "record": "Enregistre des segments du flux vidéo en fonction des paramètres de configuration.",
+        "audio": "Flux pour la détection basée sur l'audio."
+      },
+      "featuresPopover": {
+        "title": "Fonctionnalités du flux",
+        "description": "Utilisez le flux go2rtc pour réduire le nombre de connexions à votre caméra."
+      }
+    },
+    "step3": {
+      "description": "Validation finale et analyse avant d'enregistrer votre nouvelle caméra. Connectez chaque flux avant d'enregistrer.",
+      "validationTitle": "Validation du flux",
+      "connectAllStreams": "Connecter tous les flux",
+      "reconnectionSuccess": "Reconnexion réussie.",
+      "reconnectionPartial": "Certains flux n'ont pas pu se reconnecter.",
+      "streamUnavailable": "Aperçu du flux indisponible",
+      "reload": "Recharger",
+      "connecting": "Connexion...",
+      "streamTitle": "Flux {{number}}",
+      "failed": "Échoué",
+      "notTested": "Non testé",
+      "connectStream": "Connecter",
+      "connectingStream": "Connexion",
+      "disconnectStream": "Déconnecter",
+      "estimatedBandwidth": "Bande passante estimée",
+      "roles": "Rôles",
+      "none": "Aucun",
+      "error": "Erreur",
+      "streamValidated": "Flux {{number}} validé avec succès",
+      "streamValidationFailed": "La validation du flux {{number}} a échoué",
+      "saveAndApply": "Enregistrer une nouvelle caméra",
+      "saveError": "Configuration invalide. Veuillez vérifier vos paramètres.",
+      "issues": {
+        "title": "Validation du flux",
+        "videoCodecGood": "Le codec vidéo est {{codec}}.",
+        "audioCodecGood": "Le codec audio est {{codec}}.",
+        "noAudioWarning": "Aucun audio détecté pour ce flux, les enregistrements n'auront pas d'audio.",
+        "audioCodecRecordError": "Le codec audio AAC est requis pour prendre en charge l'audio dans les enregistrements.",
+        "audioCodecRequired": "Un flux audio est requis pour prendre en charge la détection audio.",
+        "restreamingWarning": "La réduction des connexions à la caméra pour le flux d'enregistrement peut augmenter légèrement l'utilisation du processeur.",
+        "dahua": {
+          "substreamWarning": "Le sous-flux 1 est verrouillé en basse résolution. De nombreuses caméras Dahua / Amcrest / EmpireTech prennent en charge des sous-flux supplémentaires qui doivent être activés dans les paramètres de la caméra. Il est recommandé de vérifier et d'utiliser ces flux s'ils sont disponibles."
+        },
+        "hikvision": {
+          "substreamWarning": "Le sous-flux 1 est verrouillé en basse résolution. De nombreuses caméras Hikvision prennent en charge des sous-flux supplémentaires qui doivent être activés dans les paramètres de la caméra. Il est recommandé de vérifier et d'utiliser ces flux s'ils sont disponibles."
+        }
+      },
+      "valid": "Validation"
+    }
+  },
+  "cameraManagement": {
+    "title": "Gérer les caméras",
+    "addCamera": "Ajouter une nouvelle caméra",
+    "editCamera": "Modifier la caméra:",
+    "selectCamera": "Sélectionnez une caméra",
+    "backToSettings": "Retour aux paramètres de la caméra",
+    "streams": {
+      "title": "Activer/Désactiver les caméras",
+      "desc": "Désactivez temporairement une caméra jusqu'au redémarrage de Frigate. La désactivation d'une caméra interrompt complètement le traitement des flux de cette caméra par Frigate. La détection, l'enregistrement et le débogage seront indisponibles.<br /><em>Remarque : Ceci ne désactive pas les rediffusions go2rtc.</em>"
+    },
+    "cameraConfig": {
+      "add": "Ajouter une caméra",
+      "edit": "Modifier la caméra",
+      "description": "Configurez les paramètres de la caméra, y compris les entrées de flux et les rôles.",
+      "name": "Nom de la caméra",
+      "nameRequired": "Le nom de la caméra est requis",
+      "nameLength": "Le nom de la caméra doit comporter moins de 64 caractères.",
+      "namePlaceholder": "par exemple, porte d'entrée ou aperçu de la cour arrière",
+      "enabled": "Activé",
+      "ffmpeg": {
+        "inputs": "Flux d'entrée",
+        "path": "Chemin du flux",
+        "pathRequired": "Le chemin du flux est requis",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Rôles",
+        "rolesRequired": "Au moins un rôle est requis",
+        "rolesUnique": "Chaque rôle (audio, détection, enregistrement) ne peut être attribué qu'à un seul flux",
+        "addInput": "Ajouter un flux d'entrée",
+        "removeInput": "Supprimer le flux d'entrée",
+        "inputsRequired": "Au moins un flux d'entrée est requis"
+      },
+      "go2rtcStreams": "Flux go2rtc",
+      "streamUrls": "URLs des flux",
+      "addUrl": "Ajouter une URL",
+      "addGo2rtcStream": "Ajouter un flux go2rtc",
+      "toast": {
+        "success": "La caméra {{cameraName}} a été enregistrée avec succès"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Paramètres d'examen de la caméra",
+    "object_descriptions": {
+      "title": "Descriptions d'objets IA génératives",
+      "desc": "Activez/désactivez temporairement les descriptions d'objets générées par l'IA pour cette caméra. Si elles sont désactivées, les descriptions générées par l'IA ne seront pas demandées pour les objets suivis par cette caméra."
+    },
+    "review_descriptions": {
+      "title": "Descriptions des évaluations de l'IA générative",
+      "desc": "Activez/désactivez temporairement les descriptions d'évaluation génératrices par l'IA pour cette caméra. Si elles sont désactivées, les descriptions générées par l'IA ne seront pas demandées pour les éléments d'évaluation de cette caméra."
+    },
+    "review": {
+      "title": "Revoir",
+      "desc": "Activez/désactivez temporairement les alertes et les détections pour cette caméra jusqu'au redémarrage de Frigate. Une fois désactivée, aucun nouvel élément d'analyse ne sera généré. ",
+      "alerts": "Alertes. ",
+      "detections": "Détections. "
+    },
+    "reviewClassification": {
+      "title": "Classement des avis",
+      "desc": "Frigate catégorise les éléments d'évaluation en alertes et détections. Par défaut, tous les objets <em>personne</em> et <em>voiture</em> sont considérés comme des alertes. Vous pouvez affiner la catégorisation de vos éléments d'évaluation en configurant les zones requises.",
+      "noDefinedZones": "Aucune zone n'est définie pour cette caméra.",
+      "objectAlertsTips": "Tous les objets {{alertsLabels}} sur {{cameraName}} seront affichés sous forme d'alertes.",
+      "zoneObjectAlertsTips": "Tous les objets {{alertsLabels}} détectés dans {{zone}} sur {{cameraName}} seront affichés sous forme d'alertes.",
+      "objectDetectionsTips": "Tous les objets {{detectionsLabels}} non classés sur {{cameraName}} seront affichés comme détections, quelle que soit la zone dans laquelle ils se trouvent.",
+      "zoneObjectDetectionsTips": {
+        "text": "Tous les objets {{detectionsLabels}} non classés dans {{zone}} sur {{cameraName}} seront affichés comme détections.",
+        "notSelectDetections": "Tous les objets {{detectionsLabels}} détectés dans {{zone}} sur {{cameraName}} non classés comme alertes seront affichés comme détections, quelle que soit la zone dans laquelle ils se trouvent.",
+        "regardlessOfZoneObjectDetectionsTips": "Tous les objets {{detectionsLabels}} non classés sur {{cameraName}} seront affichés comme détections, quelle que soit la zone dans laquelle ils se trouvent."
+      },
+      "unsavedChanges": "Paramètres de classification des avis non enregistrés pour {{camera}}",
+      "selectAlertsZones": "Sélectionnez les zones pour les alertes",
+      "selectDetectionsZones": "Sélectionner les zones pour les détections",
+      "limitDetections": "Limiter les détections à des zones spécifiques",
+      "toast": {
+        "success": "La configuration de la classification a été enregistrée. Redémarrez Frigate pour appliquer les modifications."
       }
     }
   }
