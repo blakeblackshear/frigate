@@ -36,5 +36,16 @@
   "camera": "Câmera",
   "detected": "detectado",
   "suspiciousActivity": "Atividade Suspeita",
-  "threateningActivity": "Atividade de Ameaça"
+  "threateningActivity": "Atividade de Ameaça",
+  "detail": {
+    "noDataFound": "Nenhum dado de detalhe para revisar",
+    "aria": "Alternar visualização de detalhe",
+    "trackedObject_one": "objeto rastreado",
+    "trackedObject_other": "objetos rastreados",
+    "noObjectDetailData": "Nenhum dado de detalhe de objeto disponível."
+  },
+  "objectTrack": {
+    "trackedPoint": "Ponto rastreado",
+    "clickToSeek": "Clique para ir para esse horário"
+  }
 }
