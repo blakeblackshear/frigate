@@ -20,16 +20,18 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
 import {
-  Drawer,
-  DrawerTrigger,
-  DrawerContent,
-  DrawerTitle,
-  DrawerDescription,
-} from "../ui/drawer";
+  MobilePage,
+  MobilePageContent,
+  MobilePageDescription,
+  MobilePageHeader,
+  MobilePageTitle,
+  MobilePageTrigger,
+} from "../mobile/MobilePage";
 
 type ClassificationCardProps = {
   imgClassName?: string;
@@ -247,11 +249,14 @@ export function GroupedClassificationCard({
     return null;
   }
 
-  const Overlay = isDesktop ? Dialog : Drawer;
-  const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
-  const Content = isDesktop ? DialogContent : DrawerContent;
-  const ContentTitle = isDesktop ? DialogTitle : DrawerTitle;
-  const ContentDescription = isDesktop ? DialogDescription : DrawerDescription;
+  const Overlay = isDesktop ? Dialog : MobilePage;
+  const Trigger = isDesktop ? DialogTrigger : MobilePageTrigger;
+  const Header = isDesktop ? DialogHeader : MobilePageHeader;
+  const Content = isDesktop ? DialogContent : MobilePageContent;
+  const ContentTitle = isDesktop ? DialogTitle : MobilePageTitle;
+  const ContentDescription = isDesktop
+    ? DialogDescription
+    : MobilePageDescription;
 
   return (
     <>
@@ -282,8 +287,7 @@ export function GroupedClassificationCard({
           className={cn(
             "",
             isDesktop && "w-auto max-w-[85%]",
-            !isDesktop &&
-              "max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4",
+            isMobile && "flex flex-col",
           )}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
@@ -314,38 +318,42 @@ export function GroupedClassificationCard({
                 )}
               </div>
             )}
-            <ContentTitle
-              className={cn(
-                "flex items-center gap-1 font-normal capitalize",
-                isMobile && "px-2",
-              )}
-            >
-              {event?.sub_label ? event.sub_label : t("details.unknown")}
-              {event?.sub_label && (
-                <div
+            <Header className={cn("mx-2", isMobile && "flex-shrink-0")}>
+              <div>
+                <ContentTitle
                   className={cn(
-                    "",
-                    bestScoreStatus == "match" && "text-success",
-                    bestScoreStatus == "potential" && "text-orange-400",
-                    bestScoreStatus == "unknown" && "text-danger",
+                    "flex items-center gap-1 font-normal capitalize",
+                    isMobile && "px-2",
                   )}
-                >{`${Math.round((event.data.sub_label_score || 0) * 100)}%`}</div>
-              )}
-            </ContentTitle>
-            <ContentDescription className={cn("", isMobile && "px-2")}>
-              {time && (
-                <TimeAgo
-                  className="text-sm text-secondary-foreground"
-                  time={time}
-                  dense
-                />
-              )}
-            </ContentDescription>
+                >
+                  {event?.sub_label ? event.sub_label : t("details.unknown")}
+                  {event?.sub_label && (
+                    <div
+                      className={cn(
+                        "",
+                        bestScoreStatus == "match" && "text-success",
+                        bestScoreStatus == "potential" && "text-orange-400",
+                        bestScoreStatus == "unknown" && "text-danger",
+                      )}
+                    >{`${Math.round((event.data.sub_label_score || 0) * 100)}%`}</div>
+                  )}
+                </ContentTitle>
+                <ContentDescription className={cn("", isMobile && "px-2")}>
+                  {time && (
+                    <TimeAgo
+                      className="text-sm text-secondary-foreground"
+                      time={time}
+                      dense
+                    />
+                  )}
+                </ContentDescription>
+              </div>
+            </Header>
             <div
               className={cn(
                 "flex cursor-pointer flex-col gap-2 rounded-lg",
                 isDesktop && "p-2",
-                isMobile && "scrollbar-container w-full overflow-y-auto",
+                isMobile && "scrollbar-container w-full flex-1 overflow-y-auto",
               )}
             >
               <div
@@ -353,7 +361,7 @@ export function GroupedClassificationCard({
                   "gap-2",
                   isDesktop
                     ? "flex flex-row flex-wrap"
-                    : "grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-6",
+                    : "grid grid-cols-2 justify-items-center gap-2 px-2 sm:grid-cols-5 lg:grid-cols-6",
                 )}
               >
                 {group.map((data: ClassificationItemData) => (

@@ -695,7 +695,7 @@ function TrainingGrid({
     <div
       ref={contentRef}
       className={cn(
-        "scrollbar-container gap-2 overflow-y-scroll p-1",
+        "scrollbar-container gap-3 overflow-y-scroll p-1",
         isMobileOnly ? "grid grid-cols-2" : "flex flex-wrap",
       )}
     >

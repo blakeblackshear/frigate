@@ -791,7 +791,7 @@ function StateTrainGrid({
     <div
       ref={contentRef}
       className={cn(
-        "scrollbar-container flex flex-wrap gap-2 overflow-y-auto p-2",
+        "scrollbar-container flex flex-wrap gap-3 overflow-y-auto p-2",
         isMobile && "justify-center",
       )}
     >
@@ -927,7 +927,7 @@ function ObjectTrainGrid({
 
       <div
         ref={contentRef}
-        className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
+        className="scrollbar-container flex flex-wrap gap-3 overflow-y-scroll p-1"
       >
         {Object.entries(groups).map(([key, group]) => {
           const event = events?.find((ev) => ev.id == key);
