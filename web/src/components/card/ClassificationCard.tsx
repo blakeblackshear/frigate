@@ -197,18 +197,24 @@ export function GroupedClassificationCard({
     let best: undefined | ClassificationItemData = undefined;
 
     group.forEach((item) => {
-      if (best?.score == undefined || (item.score && best.score < item.score)) {
-        best = item;
+      if (item?.name != undefined && item.name != "none") {
+        if (
+          best?.score == undefined ||
+          (item.score && best.score < item.score)
+        ) {
+          best = item;
+        }
       }
     });
 
     if (!best) {
-      return undefined;
+      return group[0];
     }
 
     const bestTyped: ClassificationItemData = best;
     return {
       ...bestTyped,
+      name: event?.sub_label || bestTyped.name,
       score: event?.data?.sub_label_score || bestTyped.score,
     };
   }, [group, event]);
