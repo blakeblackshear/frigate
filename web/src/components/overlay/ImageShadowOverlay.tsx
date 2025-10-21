@@ -12,13 +12,13 @@ export function ImageShadowOverlay({
     <>
       <div
         className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b to-transparent md:rounded-2xl",
+          "pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl",
           upperClassName,
         )}
       />
       <div
         className={cn(
-          "pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t to-transparent md:rounded-2xl",
+          "pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl",
           lowerClassName,
         )}
       />

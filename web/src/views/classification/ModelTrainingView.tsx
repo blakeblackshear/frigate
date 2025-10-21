@@ -44,7 +44,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
@@ -927,40 +927,45 @@ function ObjectTrainGrid({
 
       <div
         ref={contentRef}
-        className="scrollbar-container flex flex-wrap gap-3 overflow-y-scroll p-1"
+        className={cn(
+          "scrollbar-container gap-3 overflow-y-scroll p-1",
+          isMobileOnly ? "grid grid-cols-2 px-2" : "flex flex-wrap",
+        )}
       >
         {Object.entries(groups).map(([key, group]) => {
           const event = events?.find((ev) => ev.id == key);
           return (
-            <GroupedClassificationCard
-              key={key}
-              group={group}
-              event={event}
-              threshold={threshold}
-              selectedItems={selectedImages}
-              i18nLibrary="views/classificationModel"
-              objectType={model.object_config?.objects?.at(0) ?? "Object"}
-              onClick={(data) => {
-                if (data) {
-                  onClickImages([data.filename], true);
-                } else {
-                  handleClickEvent(group, event, true);
-                }
-              }}
-            >
-              {(data) => (
-                <>
-                  <ClassificationSelectionDialog
-                    classes={classes}
-                    modelName={model.name}
-                    image={data.filename}
-                    onRefresh={onRefresh}
-                  >
-                    <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
-                  </ClassificationSelectionDialog>
-                </>
-              )}
-            </GroupedClassificationCard>
+            <div>
+              <GroupedClassificationCard
+                key={key}
+                group={group}
+                event={event}
+                threshold={threshold}
+                selectedItems={selectedImages}
+                i18nLibrary="views/classificationModel"
+                objectType={model.object_config?.objects?.at(0) ?? "Object"}
+                onClick={(data) => {
+                  if (data) {
+                    onClickImages([data.filename], true);
+                  } else {
+                    handleClickEvent(group, event, true);
+                  }
+                }}
+              >
+                {(data) => (
+                  <>
+                    <ClassificationSelectionDialog
+                      classes={classes}
+                      modelName={model.name}
+                      image={data.filename}
+                      onRefresh={onRefresh}
+                    >
+                      <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
+                    </ClassificationSelectionDialog>
+                  </>
+                )}
+              </GroupedClassificationCard>
+            </div>
           );
         })}
       </div>
