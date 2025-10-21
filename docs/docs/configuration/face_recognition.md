@@ -114,9 +114,9 @@ When choosing images to include in the face training set it is recommended to al
 
 :::
 
-### Understanding the Train Tab
+### Understanding the Recent Recognitions Tab
 
-The Train tab in the face library displays recent face recognition attempts. Detected face images are grouped according to the person they were identified as potentially matching.
+The Recent Recognitions tab in the face library displays recent face recognition attempts. Detected face images are grouped according to the person they were identified as potentially matching.
 
 Each face image is labeled with a name (or `Unknown`) along with the confidence score of the recognition attempt. While each image can be used to train the system for a specific person, not all images are suitable for training.
 
@@ -140,7 +140,7 @@ Once front-facing images are performing well, start choosing slightly off-angle 
 
 Start with the [Usage](#usage) section and re-read the [Model Requirements](#model-requirements) above.
 
-1. Ensure `person` is being _detected_. A `person` will automatically be scanned by Frigate for a face. Any detected faces will appear in the Train tab in the Frigate UI's Face Library.
+1. Ensure `person` is being _detected_. A `person` will automatically be scanned by Frigate for a face. Any detected faces will appear in the Recent Recognitions tab in the Frigate UI's Face Library.
 
    If you are using a Frigate+ or `face` detecting model:
 
@@ -186,7 +186,7 @@ Avoid training on images that already score highly, as this can lead to over-fit
 No, face recognition does not support negative training (i.e., explicitly telling it who someone is _not_). Instead, the best approach is to improve the training data by using a more diverse and representative set of images for each person.
 For more guidance, refer to the section above on improving recognition accuracy.
 
-### I see scores above the threshold in the train tab, but a sub label wasn't assigned?
+### I see scores above the threshold in the Recent Recognitions tab, but a sub label wasn't assigned?
 
 The Frigate considers the recognition scores across all recognition attempts for each person object. The scores are continually weighted based on the area of the face, and a sub label will only be assigned to person if a person is confidently recognized consistently. This avoids cases where a single high confidence recognition would throw off the results.
 

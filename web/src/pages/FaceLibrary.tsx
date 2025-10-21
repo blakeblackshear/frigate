@@ -702,16 +702,18 @@ function TrainingGrid({
       {Object.entries(faceGroups).map(([key, group]) => {
         const event = events?.find((ev) => ev.id == key);
         return (
-          <FaceAttemptGroup
-            key={key}
-            config={config}
-            group={group}
-            event={event}
-            faceNames={faceNames}
-            selectedFaces={selectedFaces}
-            onClickFaces={onClickFaces}
-            onRefresh={onRefresh}
-          />
+          <div>
+            <FaceAttemptGroup
+              key={key}
+              config={config}
+              group={group}
+              event={event}
+              faceNames={faceNames}
+              selectedFaces={selectedFaces}
+              onClickFaces={onClickFaces}
+              onRefresh={onRefresh}
+            />
+          </div>
         );
       })}
     </div>

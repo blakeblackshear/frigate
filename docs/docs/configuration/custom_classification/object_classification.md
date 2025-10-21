@@ -67,7 +67,7 @@ When choosing which objects to classify, start with a small number of visually d
 ### Improving the Model
 
 - **Problem framing**: Keep classes visually distinct and relevant to the chosen object types.
-- **Data collection**: Use the model’s Train tab to gather balanced examples across times of day, weather, and distances.
+- **Data collection**: Use the model’s Recent Classification tab to gather balanced examples across times of day, weather, and distances.
 - **Preprocessing**: Ensure examples reflect object crops similar to Frigate’s boxes; keep the subject centered.
 - **Labels**: Keep label names short and consistent; include a `none` class if you plan to ignore uncertain predictions for sub labels.
 - **Threshold**: Tune `threshold` per model to reduce false assignments. Start at `0.8` and adjust based on validation.

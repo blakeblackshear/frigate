@@ -49,4 +49,4 @@ When choosing a portion of the camera frame for state classification, it is impo
 ### Improving the Model
 
 - **Problem framing**: Keep classes visually distinct and state-focused (e.g., `open`, `closed`, `unknown`). Avoid combining object identity with state in a single model unless necessary.
-- **Data collection**: Use the model’s Train tab to gather balanced examples across times of day and weather.
+- **Data collection**: Use the model’s Recent Classifications tab to gather balanced examples across times of day and weather.
