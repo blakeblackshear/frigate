@@ -17,7 +17,6 @@ import { useNavigate } from "react-router-dom";
 import { getTranslatedLabel } from "@/utils/i18n";
 
 type ClassificationCardProps = {
-  className?: string;
   imgClassName?: string;
   data: ClassificationItemData;
   threshold?: ClassificationThreshold;
@@ -28,7 +27,6 @@ type ClassificationCardProps = {
   children?: React.ReactNode;
 };
 export function ClassificationCard({
-  className,
   imgClassName,
   data,
   threshold,

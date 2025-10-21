@@ -27,7 +27,7 @@ export default function ClassificationModelWizardDialog({
   const { t } = useTranslation(["views/classificationModel"]);
 
   // step management
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, _] = useState(0);
 
   return (
     <Dialog

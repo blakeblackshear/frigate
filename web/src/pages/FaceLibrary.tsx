@@ -940,7 +940,6 @@ function FaceGrid({
     >
       {sortedFaces.map((image: string) => (
         <ClassificationCard
-          className="gap-2 rounded-lg bg-card p-2"
           key={image}
           data={{
             name: pageToggle,
