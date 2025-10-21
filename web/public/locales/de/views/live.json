@@ -30,16 +30,16 @@
     },
     "zoom": {
       "in": {
-        "label": "PTZ-Kamera vergrößern"
+        "label": "PTZ-Kamera rein zoomen"
       },
       "out": {
-        "label": "PTZ-Kamera herauszoomen"
+        "label": "PTZ-Kamera heraus zoomen"
       }
     },
-    "presets": "PTZ-Kameravoreinstellungen",
+    "presets": "PTZ-Kamera Voreinstellungen",
     "frame": {
       "center": {
-        "label": "Klicken Sie in den Rahmen, um die PTZ-Kamera zu zentrieren"
+        "label": "Klicke in den Rahmen, um die PTZ-Kamera zu zentrieren"
       }
     },
     "focus": {
@@ -62,8 +62,8 @@
     "enable": "Aufzeichnung aktivieren"
   },
   "snapshots": {
-    "enable": "Snapshots aktivieren",
-    "disable": "Snapshots deaktivieren"
+    "enable": "Schnappschüsse aktivieren",
+    "disable": "Schnappschüsse deaktivieren"
   },
   "autotracking": {
     "disable": "Autotracking deaktivieren",
@@ -74,7 +74,7 @@
     "disable": "Stream-Statistiken ausblenden"
   },
   "manualRecording": {
-    "title": "On-Demand Aufzeichnung",
+    "title": "On-Demand",
     "showStats": {
       "label": "Statistiken anzeigen",
       "desc": "Aktivieren Sie diese Option, um Stream-Statistiken als Overlay über dem Kamera-Feed anzuzeigen."
@@ -88,7 +88,7 @@
       "desc": "Aktivieren Sie diese Option, um das Streaming fortzusetzen, wenn der Player ausgeblendet ist.",
       "label": "Im Hintergrund abspielen"
     },
-    "tips": "Starten Sie ein manuelles Ereignis basierend auf den Aufzeichnung Aufbewahrungseinstellungen dieser Kamera.",
+    "tips": "Lade einen Sofort-Schnappschuss herunter oder starte ein manuelles Ereignis basierend auf den Aufbewahrungseinstellungen für Aufzeichnungen dieser Kamera.",
     "debugView": "Debug-Ansicht",
     "start": "On-Demand Aufzeichnung starten",
     "failedToEnd": "Die manuelle On-Demand Aufzeichnung konnte nicht beendet werden."
@@ -118,6 +118,9 @@
     "playInBackground": {
       "tips": "Aktivieren Sie diese Option, um das Streaming fortzusetzen, wenn der Player ausgeblendet ist.",
       "label": "Im Hintergrund abspielen"
+    },
+    "debug": {
+      "picker": "Stream Auswahl nicht verfügbar im Debug Modus. Die Debug Ansicht nutzt immer den Stream, welcher der Rolle zugewiesen ist."
     }
   },
   "effectiveRetainMode": {
@@ -167,5 +170,16 @@
   "transcription": {
     "enable": "Live Audio Transkription einschalten",
     "disable": "Live Audio Transkription ausschalten"
+  },
+  "noCameras": {
+    "title": "Keine Kameras eingerichtet",
+    "description": "Beginne indem du eine Kamera anschließt.",
+    "buttonText": "Kamera hinzufügen"
+  },
+  "snapshot": {
+    "takeSnapshot": "Sofort-Schnappschuss herunterladen",
+    "noVideoSource": "Keine Video-Quelle für Schnappschuss verfügbar.",
+    "captureFailed": "Die Aufnahme des Schnappschusses ist fehlgeschlagen.",
+    "downloadStarted": "Schnappschuss Download gestartet."
   }
 }
