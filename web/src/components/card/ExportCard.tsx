@@ -21,6 +21,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { shareOrCopy } from "@/utils/browserUtil";
 import { useTranslation } from "react-i18next";
+import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 
 type ExportProps = {
   className: string;
@@ -224,7 +225,7 @@ export default function ExportCard({
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
-        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 h-[50%] rounded-lg bg-gradient-to-t from-black/60 to-transparent md:rounded-2xl" />
+        <ImageShadowOverlay />
         <div className="absolute bottom-2 left-3 flex h-full items-end justify-between text-white smart-capitalize">
           {exportedRecording.name.replaceAll("_", " ")}
         </div>

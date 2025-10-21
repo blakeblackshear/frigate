@@ -1,6 +1,7 @@
 import { baseUrl } from "@/api/baseUrl";
 import ClassificationModelWizardDialog from "@/components/classification/ClassificationModelWizardDialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { ImageShadowOverlay } from "@/components/overlay/ImageShadowOverlay";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import useOptimisticState from "@/hooks/use-optimistic-state";
@@ -163,7 +164,7 @@ function ModelCard({ config, onClick }: ModelCardProps) {
         className={cn("size-full", isMobile && "w-full")}
         src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
       />
-      <div className="absolute bottom-0 h-[50%] w-full bg-gradient-to-t from-black/60 to-transparent" />
+      <ImageShadowOverlay />
       <div className="absolute bottom-2 left-3 text-lg smart-capitalize">
         {config.name}
       </div>
