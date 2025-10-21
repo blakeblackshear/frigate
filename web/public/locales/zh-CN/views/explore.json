@@ -217,5 +217,8 @@
   "exploreMore": "浏览更多的 {{label}}",
   "aiAnalysis": {
     "title": "AI分析"
+  },
+  "concerns": {
+    "label": "风险等级"
   }
 }

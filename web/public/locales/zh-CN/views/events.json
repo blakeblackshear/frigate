@@ -37,5 +37,16 @@
   "selected_other": "已选择 {{count}} 个",
   "detected": "已检测",
   "suspiciousActivity": "可疑活动",
-  "threateningActivity": "威胁性活动"
+  "threateningActivity": "风险类活动",
+  "detail": {
+    "noDataFound": "没有可供核查的详细数据",
+    "aria": "切换详细视图",
+    "trackedObject_one": "追踪目标",
+    "trackedObject_other": "追踪目标",
+    "noObjectDetailData": "没有目标详细信息。"
+  },
+  "objectTrack": {
+    "trackedPoint": "追踪点",
+    "clickToSeek": "点击从该时间进行寻找"
+  }
 }

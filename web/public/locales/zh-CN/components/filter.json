@@ -122,7 +122,9 @@
     "loading": "正在加载识别的车牌…",
     "placeholder": "输入以搜索车牌…",
     "noLicensePlatesFound": "未找到车牌。",
-    "selectPlatesFromList": "从列表中选择一个或多个车牌。"
+    "selectPlatesFromList": "从列表中选择一个或多个车牌。",
+    "selectAll": "选择所有",
+    "clearAll": "清除所有"
   },
   "classes": {
     "label": "分类",
