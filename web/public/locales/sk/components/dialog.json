@@ -108,7 +108,8 @@
     "button": {
       "export": "Exportovať",
       "markAsReviewed": "Označiť ako skontrolované",
-      "deleteNow": "Odstrániť teraz"
+      "deleteNow": "Odstrániť teraz",
+      "markAsUnreviewed": "Označiť ako neskontrolované"
     }
   },
   "imagePicker": {
