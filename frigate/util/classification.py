@@ -18,9 +18,10 @@ from frigate.const import (
     UPDATE_MODEL_STATE,
 )
 from frigate.log import redirect_output_to_logger
-from frigate.models import Recordings, ReviewSegment
+from frigate.models import Event, Recordings, ReviewSegment
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.image import get_image_from_recording
+from frigate.util.path import get_event_thumbnail_bytes
 from frigate.util.process import FrigateProcess
 
 BATCH_SIZE = 16
@@ -500,5 +501,175 @@ def _select_distinct_images(
 
 
 @staticmethod
-def collect_object_classification_examples(dataset_dir: str) -> list[str]:
-    pass
+def collect_object_classification_examples(
+    model_name: str, label: str, cameras: list[str]
+) -> None:
+    """
+    Collect representative object classification examples from event thumbnails.
+
+    This function:
+    1. Queries events for the specified label and cameras
+    2. Selects 100 balanced events across different cameras and times
+    3. Retrieves thumbnails for selected events
+    4. Selects 20 most visually distinct thumbnails
+    5. Saves them to the dataset directory
+
+    Args:
+        model_name: Name of the classification model
+        label: Object label to collect (e.g., "person", "car")
+        cameras: List of camera names to collect examples from
+    """
+    logger.info(
+        f"Collecting examples for {model_name} with label '{label}' from {len(cameras)} cameras"
+    )
+
+    dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
+    temp_dir = os.path.join(dataset_dir, "temp")
+    os.makedirs(temp_dir, exist_ok=True)
+
+    # Step 1: Query events for the specified label and cameras
+    events = list(
+        Event.select()
+        .where(
+            (Event.label == label)
+            & (Event.camera.in_(cameras))
+            & (Event.false_positive == False)
+        )
+        .order_by(Event.start_time.asc())
+    )
+
+    if not events:
+        logger.warning(f"No events found for label '{label}' on cameras: {cameras}")
+        return
+
+    logger.info(f"Found {len(events)} events")
+
+    # Step 2: Select balanced events (100 samples)
+    selected_events = _select_balanced_events(events, target_count=100)
+    logger.info(f"Selected {len(selected_events)} events")
+
+    # Step 3: Extract thumbnails from events
+    thumbnails = _extract_event_thumbnails(selected_events, temp_dir)
+
+    if len(thumbnails) < 20:
+        logger.warning(f"Only extracted {len(thumbnails)} thumbnails, need at least 20")
+        return
+
+    logger.info(f"Successfully extracted {len(thumbnails)} thumbnails")
+
+    # Step 4: Select 20 most visually distinct thumbnails
+    distinct_images = _select_distinct_images(thumbnails, target_count=20)
+    logger.info(f"Selected {len(distinct_images)} distinct images")
+
+    # Step 5: Save to dataset directory (in "unknown" subfolder for unlabeled data)
+    unknown_dir = os.path.join(dataset_dir, "unknown")
+    os.makedirs(unknown_dir, exist_ok=True)
+
+    saved_count = 0
+    for idx, image_path in enumerate(distinct_images):
+        dest_path = os.path.join(unknown_dir, f"example_{idx:03d}.jpg")
+        try:
+            img = cv2.imread(image_path)
+
+            if img is not None:
+                cv2.imwrite(dest_path, img)
+                saved_count += 1
+        except Exception as e:
+            logger.error(f"Failed to save image {image_path}: {e}")
+
+    import shutil
+
+    try:
+        shutil.rmtree(temp_dir)
+    except Exception as e:
+        logger.warning(f"Failed to clean up temp directory: {e}")
+
+    logger.info(
+        f"Successfully collected {saved_count} classification examples in {unknown_dir}"
+    )
+
+
+def _select_balanced_events(
+    events: list[Event], target_count: int = 100
+) -> list[Event]:
+    """
+    Select balanced events from the event list.
+
+    Strategy:
+    - Group events by camera and time of day
+    - Sample evenly across groups to ensure diversity
+    - Prioritize events with higher scores
+
+    Returns:
+        List of selected events
+    """
+    grouped = defaultdict(list)
+
+    for event in events:
+        camera = event.camera
+        hour_block = int(event.start_time // (6 * 3600))
+        key = f"{camera}_{hour_block}"
+        grouped[key].append(event)
+
+    num_groups = len(grouped)
+    if num_groups == 0:
+        return []
+
+    samples_per_group = max(1, target_count // num_groups)
+    selected = []
+
+    for group_events in grouped.values():
+        sorted_events = sorted(
+            group_events,
+            key=lambda e: e.data.get("score", 0) if e.data else 0,
+            reverse=True,
+        )
+
+        sample_size = min(samples_per_group, len(sorted_events))
+        selected.extend(sorted_events[:sample_size])
+
+    if len(selected) < target_count:
+        remaining = [e for e in events if e not in selected]
+        remaining_sorted = sorted(
+            remaining,
+            key=lambda e: e.data.get("score", 0) if e.data else 0,
+            reverse=True,
+        )
+        needed = target_count - len(selected)
+        selected.extend(remaining_sorted[:needed])
+
+    return selected[:target_count]
+
+
+def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]:
+    """
+    Extract thumbnails from events and save to disk.
+
+    Args:
+        events: List of Event objects
+        output_dir: Directory to save thumbnails
+
+    Returns:
+        List of paths to successfully extracted thumbnail images
+    """
+    thumbnail_paths = []
+
+    for idx, event in enumerate(events):
+        try:
+            thumbnail_bytes = get_event_thumbnail_bytes(event)
+
+            if thumbnail_bytes:
+                nparr = np.frombuffer(thumbnail_bytes, np.uint8)
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+                if img is not None:
+                    resized = cv2.resize(img, (224, 224))
+                    output_path = os.path.join(output_dir, f"thumbnail_{idx:04d}.jpg")
+                    cv2.imwrite(output_path, resized)
+                    thumbnail_paths.append(output_path)
+
+        except Exception as e:
+            logger.debug(f"Failed to extract thumbnail for event {event.id}: {e}")
+            continue
+
+    return thumbnail_paths
