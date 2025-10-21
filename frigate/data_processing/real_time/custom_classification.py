@@ -35,10 +35,6 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
-MAX_CLASSIFICATION_VERIFICATION_ATTEMPTS = 6
-MAX_CLASSIFICATION_ATTEMPTS = 12
-
-
 class CustomStateClassificationProcessor(RealTimeProcessorApi):
     def __init__(
         self,
@@ -267,26 +263,6 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 
         if obj_data["label"] not in self.model_config.object_config.objects:
             return
-
-        if (
-            obj_data["id"] in self.detected_objects
-            and len(self.detected_objects[obj_data["id"]])
-            >= MAX_CLASSIFICATION_VERIFICATION_ATTEMPTS
-        ):
-            # if we are at max attempts after rec and we have a rec
-            if obj_data.get("sub_label"):
-                logger.debug(
-                    "Not processing due to hitting max attempts after true recognition."
-                )
-                return
-
-            # if we don't have a rec and are at max attempts
-            if (
-                len(self.detected_objects[obj_data["id"]])
-                >= MAX_CLASSIFICATION_ATTEMPTS
-            ):
-                logger.debug("Not processing due to hitting max rec attempts.")
-                return
 
         now = datetime.datetime.now().timestamp()
         x, y, x2, y2 = calculate_region(
