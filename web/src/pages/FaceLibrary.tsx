@@ -63,10 +63,6 @@ import {
 } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
-import SearchDetailDialog, {
-  SearchTab,
-} from "@/components/overlay/detail/SearchDetailDialog";
-import { SearchResult } from "@/types/search";
 import {
   ClassificationCard,
   GroupedClassificationCard,
@@ -686,11 +682,6 @@ function TrainingGrid({
     { ids: eventIdsQuery },
   ]);
 
-  // selection
-
-  const [selectedEvent, setSelectedEvent] = useState<Event>();
-  const [dialogTab, setDialogTab] = useState<SearchTab>("details");
-
   if (attemptImages.length == 0) {
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
@@ -701,40 +692,26 @@ function TrainingGrid({
   }
 
   return (
-    <>
-      <SearchDetailDialog
-        search={
-          selectedEvent ? (selectedEvent as unknown as SearchResult) : undefined
-        }
-        page={dialogTab}
-        setSimilarity={undefined}
-        setSearchPage={setDialogTab}
-        setSearch={(search) => setSelectedEvent(search as unknown as Event)}
-        setInputFocused={() => {}}
-      />
-
-      <div
-        ref={contentRef}
-        className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
-      >
-        {Object.entries(faceGroups).map(([key, group]) => {
-          const event = events?.find((ev) => ev.id == key);
-          return (
-            <FaceAttemptGroup
-              key={key}
-              config={config}
-              group={group}
-              event={event}
-              faceNames={faceNames}
-              selectedFaces={selectedFaces}
-              onClickFaces={onClickFaces}
-              onSelectEvent={setSelectedEvent}
-              onRefresh={onRefresh}
-            />
-          );
-        })}
-      </div>
-    </>
+    <div
+      ref={contentRef}
+      className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
+    >
+      {Object.entries(faceGroups).map(([key, group]) => {
+        const event = events?.find((ev) => ev.id == key);
+        return (
+          <FaceAttemptGroup
+            key={key}
+            config={config}
+            group={group}
+            event={event}
+            faceNames={faceNames}
+            selectedFaces={selectedFaces}
+            onClickFaces={onClickFaces}
+            onRefresh={onRefresh}
+          />
+        );
+      })}
+    </div>
   );
 }
 
@@ -745,7 +722,6 @@ type FaceAttemptGroupProps = {
   faceNames: string[];
   selectedFaces: string[];
   onClickFaces: (image: string[], ctrl: boolean) => void;
-  onSelectEvent: (event: Event) => void;
   onRefresh: () => void;
 };
 function FaceAttemptGroup({
@@ -755,7 +731,6 @@ function FaceAttemptGroup({
   faceNames,
   selectedFaces,
   onClickFaces,
-  onSelectEvent,
   onRefresh,
 }: FaceAttemptGroupProps) {
   const { t } = useTranslation(["views/faceLibrary", "views/explore"]);
@@ -773,8 +748,8 @@ function FaceAttemptGroup({
 
   const handleClickEvent = useCallback(
     (meta: boolean) => {
-      if (event && selectedFaces.length == 0 && !meta) {
-        onSelectEvent(event);
+      if (!meta) {
+        return;
       } else {
         const anySelected =
           group.find((face) => selectedFaces.includes(face.filename)) !=
@@ -798,7 +773,7 @@ function FaceAttemptGroup({
         }
       }
     },
-    [event, group, selectedFaces, onClickFaces, onSelectEvent],
+    [group, selectedFaces, onClickFaces],
   );
 
   // api calls
@@ -873,7 +848,6 @@ function FaceAttemptGroup({
           handleClickEvent(true);
         }
       }}
-      onSelectEvent={onSelectEvent}
     >
       {(data) => (
         <>
