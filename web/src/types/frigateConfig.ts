@@ -304,10 +304,10 @@ export type CustomClassificationModelConfig = {
   enabled: boolean;
   name: string;
   threshold: number;
-  object_config: null | {
+  object_config?: {
     objects: string[];
   };
-  state_config: null | {
+  state_config?: {
     cameras: {
       [cameraName: string]: {
         crop: [number, number, number, number];

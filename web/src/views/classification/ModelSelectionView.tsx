@@ -1,4 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
+import ClassificationModelWizardDialog from "@/components/classification/ClassificationModelWizardDialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -52,6 +53,10 @@ export default function ModelSelectionView({
     });
   }, [config, pageToggle]);
 
+  // new model wizard
+
+  const [newModel, setNewModel] = useState(false);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -62,6 +67,11 @@ export default function ModelSelectionView({
 
   return (
     <div className="flex size-full flex-col p-2">
+      <ClassificationModelWizardDialog
+        open={newModel}
+        onClose={() => setNewModel(false)}
+      />
+
       <div className="flex h-12 w-full items-center justify-between">
         <div className="flex flex-row items-center">
           <ToggleGroup
@@ -93,7 +103,11 @@ export default function ModelSelectionView({
           </ToggleGroup>
         </div>
         <div className="flex flex-row items-center">
-          <Button className="flex flex-row items-center gap-2" variant="select">
+          <Button
+            className="flex flex-row items-center gap-2"
+            variant="select"
+            onClick={() => setNewModel(true)}
+          >
             <FaFolderPlus />
             Add Classification
           </Button>
