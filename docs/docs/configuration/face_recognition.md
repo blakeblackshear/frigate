@@ -70,7 +70,7 @@ Fine-tune face recognition with these optional parameters at the global level of
 - `min_faces`: Min face recognitions for the sub label to be applied to the person object.
   - Default: `1`
 - `save_attempts`: Number of images of recognized faces to save for training.
-  - Default: `100`.
+  - Default: `200`.
 - `blur_confidence_filter`: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
   - Default: `True`.
 - `device`: Target a specific device to run the face recognition model on (multi-GPU installation).

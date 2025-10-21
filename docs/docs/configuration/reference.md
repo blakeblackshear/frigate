@@ -630,7 +630,7 @@ face_recognition:
   # Optional: Min face recognitions for the sub label to be applied to the person object (default: shown below)
   min_faces: 1
   # Optional: Number of images of recognized faces to save for training (default: shown below)
-  save_attempts: 100
+  save_attempts: 200
   # Optional: Apply a blur quality filter to adjust confidence based on the blur level of the image (default: shown below)
   blur_confidence_filter: True
   # Optional: Set the model size used face recognition. (default: shown below)
