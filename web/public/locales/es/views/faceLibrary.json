@@ -49,7 +49,7 @@
       "selectImage": "Por favor, selecciona un archivo de imagen."
     },
     "dropActive": "Suelta la imagen aquí…",
-    "dropInstructions": "Arrastra y suelta una imagen aquí, o haz clic para seleccionar",
+    "dropInstructions": "Arrastra y suelta, o pega una imagen aquí, o haz clic para seleccionar",
     "maxSize": "Tamaño máximo: {{size}}MB"
   },
   "toast": {
