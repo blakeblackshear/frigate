@@ -2,7 +2,7 @@
   "documentTitle": "내보내기 - Frigate",
   "search": "검색",
   "noExports": "내보내기가 없습니다",
-  "deleteExport": "내보내기 제거",
+  "deleteExport": "내보내기 삭제",
   "deleteExport.desc": "{{exportName}}을 지우시겠습니까?",
   "editExport": {
     "title": "내보내기 이름 변경",
