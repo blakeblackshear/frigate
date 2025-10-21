@@ -12,8 +12,8 @@
   },
   "manualRecording": {
     "recordDisabledTips": "Poiché la registrazione è disabilitata o limitata nella configurazione di questa telecamera, verrà salvata solo un'istantanea.",
-    "title": "Registrazione su richiesta",
-    "tips": "Avvia un evento manuale in base alle impostazioni di conservazione della registrazione di questa telecamera.",
+    "title": "Su richiesta",
+    "tips": "Scarica un'istantanea attuale o avvia un evento manuale in base alle impostazioni di conservazione della registrazione di questa telecamera.",
     "playInBackground": {
       "label": "Riproduci in sottofondo",
       "desc": "Abilita questa opzione per continuare la trasmissione quando il lettore è nascosto."
@@ -147,6 +147,9 @@
     "lowBandwidth": {
       "tips": "La visualizzazione dal vivo è in modalità a bassa larghezza di banda a causa di errori di caricamento o di trasmissione.",
       "resetStream": "Reimposta flusso"
+    },
+    "debug": {
+      "picker": "Selezione del flusso non disponibile in modalità correzioni. La visualizzazione correzioni utilizza sempre il flusso a cui è assegnato il ruolo di rilevamento."
     }
   },
   "effectiveRetainMode": {
@@ -167,5 +170,16 @@
   "transcription": {
     "enable": "Abilita la trascrizione audio in tempo reale",
     "disable": "Disabilita la trascrizione audio in tempo reale"
+  },
+  "noCameras": {
+    "buttonText": "Aggiungi telecamera",
+    "title": "Nessuna telecamera configurata",
+    "description": "Per iniziare, collega una telecamera."
+  },
+  "snapshot": {
+    "takeSnapshot": "Scarica l'istantanea attuale",
+    "noVideoSource": "Nessuna sorgente video disponibile per l'istantanea.",
+    "captureFailed": "Impossibile catturare l'istantanea.",
+    "downloadStarted": "Scaricamento istantanea avviato."
   }
 }
