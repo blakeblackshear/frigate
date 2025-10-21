@@ -947,7 +947,6 @@ function ObjectTrainGrid({
                   handleClickEvent(group, event, true);
                 }
               }}
-              onSelectEvent={() => {}}
             >
               {(data) => (
                 <>
