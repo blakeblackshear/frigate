@@ -145,7 +145,7 @@ export default function ExportCard({
           <>
             {exportedRecording.thumb_path.length > 0 ? (
               <img
-                className="absolute inset-0 aspect-video size-full rounded-lg object-contain md:rounded-2xl"
+                className="absolute inset-0 aspect-video size-full rounded-lg object-cover md:rounded-2xl"
                 src={`${baseUrl}${exportedRecording.thumb_path.replace("/media/frigate/", "")}`}
                 onLoad={() => setLoading(false)}
               />
@@ -224,10 +224,9 @@ export default function ExportCard({
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
-        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 h-[20%] rounded-lg bg-gradient-to-t from-black/60 to-transparent md:rounded-2xl">
-          <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm text-white smart-capitalize">
-            {exportedRecording.name.replaceAll("_", " ")}
-          </div>
+        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 h-[50%] rounded-lg bg-gradient-to-t from-black/60 to-transparent md:rounded-2xl" />
+        <div className="absolute bottom-2 left-3 flex h-full items-end justify-between text-white smart-capitalize">
+          {exportedRecording.name.replaceAll("_", " ")}
         </div>
       </div>
     </>
