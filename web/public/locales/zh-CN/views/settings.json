@@ -10,7 +10,9 @@
     "general": "常规设置 - Frigate",
     "frigatePlus": "Frigate+ 设置 - Frigate",
     "notifications": "通知设置 - Frigate",
-    "enrichments": "增强功能设置 - Frigate"
+    "enrichments": "增强功能设置 - Frigate",
+    "cameraManagement": "管理摄像头 - Frigate",
+    "cameraReview": "摄像头核查设置 - Frigate"
   },
   "menu": {
     "ui": "界面设置",
@@ -23,7 +25,10 @@
     "notifications": "通知",
     "frigateplus": "Frigate+",
     "enrichments": "增强功能",
-    "triggers": "触发器"
+    "triggers": "触发器",
+    "roles": "权限组",
+    "cameraManagement": "管理",
+    "cameraReview": "核查"
   },
   "dialog": {
     "unsavedChanges": {
@@ -238,7 +243,8 @@
           "mustNotBeSameWithCamera": "区域名称不能与摄像头名称相同。",
           "alreadyExists": "该摄像头已有相同的区域名称。",
           "mustNotContainPeriod": "区域名称不能包含句点。",
-          "hasIllegalCharacter": "区域名称包含非法字符。"
+          "hasIllegalCharacter": "区域名称包含非法字符。",
+          "mustHaveAtLeastOneLetter": "区域名称必须至少包含一个字母。"
         }
       },
       "distance": {
@@ -295,7 +301,7 @@
       "name": {
         "title": "区域名称",
         "inputPlaceHolder": "请输入名称…",
-        "tips": "名称至少包含两个字符，且不能和摄像头或其他区域同名。<br>当前仅支持英文与数字组合。"
+        "tips": "名称至少包含两个字符，其中至少需要一个英文字母，且不能和摄像头或其他区域同名。同时，当前仅支持英文与数字组合。"
       },
       "inertia": {
         "title": "惯性",
@@ -810,6 +816,11 @@
           "error": {
             "min": "必须至少选择一项动作。"
           }
+        },
+        "friendly_name": {
+          "title": "友好名称",
+          "placeholder": "为此触发器命名或添加描述",
+          "description": "（可选）为触发器添加友好名称或描述。"
         }
       }
     },
@@ -824,6 +835,10 @@
         "updateTriggerFailed": "更新触发器失败：{{errorMessage}}",
         "deleteTriggerFailed": "删除触发器失败：{{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "语义搜索已关闭",
+      "desc": "必须启用语义搜索功能才能使用触发器。"
     }
   },
   "roles": {
@@ -879,8 +894,227 @@
           "roleExists": "该权限组名称已存在。"
         },
         "cameras": {
-          "title": "摄像头"
+          "title": "摄像头",
+          "desc": "请选择该权限组能够访问的摄像头。至少需要选择一个摄像头。",
+          "required": "至少要选择一个摄像头。"
         }
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "添加摄像头",
+    "description": "请按照以下步骤添加摄像头至Frigate中。",
+    "steps": {
+      "nameAndConnection": "名称与连接",
+      "streamConfiguration": "视频流配置",
+      "validationAndTesting": "验证与测试"
+    },
+    "save": {
+      "success": "已保存新摄像头 {{cameraName}}。",
+      "failure": "保存摄像头 {{cameraName}} 遇到了错误。"
+    },
+    "testResultLabels": {
+      "resolution": "分辨率",
+      "video": "视频",
+      "audio": "音频",
+      "fps": "帧率"
+    },
+    "commonErrors": {
+      "noUrl": "请提供正确的视频流地址",
+      "testFailed": "视频流测试失败：{{error}}"
+    },
+    "step1": {
+      "description": "请输入你的摄像头信息并测试连接是否正常。",
+      "cameraName": "摄像头名称",
+      "cameraNamePlaceholder": "例如：大门，后院等",
+      "host": "主机/IP地址",
+      "port": "端口号",
+      "username": "用户名",
+      "usernamePlaceholder": "可选",
+      "password": "密码",
+      "passwordPlaceholder": "可选",
+      "selectTransport": "选择传输协议",
+      "cameraBrand": "摄像头品牌",
+      "selectBrand": "选择摄像头品牌用于生成URL地址模板",
+      "customUrl": "自定义视频流地址",
+      "brandInformation": "品牌信息",
+      "brandUrlFormat": "对于采用RTSP URL格式的摄像头，其格式为：{{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://用户名:密码@主机或IP地址:端口/路径",
+      "testConnection": "测试连接",
+      "testSuccess": "连接测试通过！",
+      "testFailed": "连接测试失败。请检查输入是否正确并重试。",
+      "streamDetails": "视频流信息",
+      "warnings": {
+        "noSnapshot": "无法从配置的视频流中获取快照。"
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "请选择摄像头品牌并配置主机/IP地址，或选择“其他”后手动配置视频流地址",
+        "nameRequired": "摄像头名称为必填项",
+        "nameLength": "摄像头名称要少于64个字符",
+        "invalidCharacters": "摄像头名称内有不允许使用的字符",
+        "nameExists": "该摄像头名称已存在",
+        "brands": {
+          "reolink-rtsp": "不建议使用萤石RTSP协议。建议在摄像头设置中启用HTTP协议，并重新执行摄像头向导。"
+        }
+      },
+      "docs": {
+        "reolink": "https://docs.frigate-cn.video/configuration/camera_specific.html#reolink-cameras"
+      }
+    },
+    "step2": {
+      "description": "配置视频流的功能并为摄像头添加额外的视频流。",
+      "streamsTitle": "摄像头视频流",
+      "addStream": "添加视频流",
+      "addAnotherStream": "添加另一个视频流",
+      "streamTitle": "{{number}} 号视频流",
+      "streamUrl": "视频流地址",
+      "streamUrlPlaceholder": "rtsp://用户名:密码@主机或IP:端口/路径",
+      "url": "URL地址",
+      "resolution": "分辨率",
+      "selectResolution": "选择分辨率",
+      "quality": "质量",
+      "selectQuality": "选择质量",
+      "roles": "功能",
+      "roleLabels": {
+        "detect": "目标/物体检测",
+        "record": "录制",
+        "audio": "音频"
+      },
+      "testStream": "测试连接",
+      "testSuccess": "视频流测试通过！",
+      "testFailed": "视频流测试失败",
+      "testFailedTitle": "测试失败",
+      "connected": "已连接",
+      "notConnected": "未连接",
+      "featuresTitle": "特殊功能",
+      "go2rtc": "减少摄像头连接数",
+      "detectRoleWarning": "至少需要一个视频流分配\"detect\"功能才能继续。",
+      "rolesPopover": {
+        "title": "视频流功能",
+        "detect": "目标/物体的主数据流。",
+        "record": "根据配置设置保存视频流的片段。",
+        "audio": "用于音频的检测的输入流。"
+      },
+      "featuresPopover": {
+        "title": "视频流特殊功能",
+        "description": "将使用go2rtc的转流功能来减少摄像头连接数。"
+      }
+    },
+    "step3": {
+      "description": "在保存新摄像头前将进行最终验证与分析。保存前请连接所有视频流。",
+      "validationTitle": "视频流验证",
+      "connectAllStreams": "连接所有视频流",
+      "reconnectionSuccess": "重连成功。",
+      "reconnectionPartial": "有些视频流重连失败了。",
+      "streamUnavailable": "视频流预览不可用",
+      "reload": "重新加载",
+      "connecting": "连接中……",
+      "streamTitle": "{{number}} 号视频流",
+      "valid": "通过",
+      "failed": "失败",
+      "notTested": "未测试",
+      "connectStream": "连接",
+      "connectingStream": "连接中",
+      "disconnectStream": "断开连接",
+      "estimatedBandwidth": "预计带宽",
+      "roles": "功能",
+      "none": "无",
+      "error": "错误",
+      "streamValidated": "{{number}} 号视频流验证通过",
+      "streamValidationFailed": "{{number}} 号视频流验证失败",
+      "saveAndApply": "保存新摄像头",
+      "saveError": "配置无效，请检查你的设置。",
+      "issues": {
+        "title": "视频流验证",
+        "videoCodecGood": "视频编码为 {{codec}}。",
+        "audioCodecGood": "音频编码为 {{codec}}。",
+        "noAudioWarning": "未检测到此视频流包含音频，录制将不会有声音。",
+        "audioCodecRecordError": "录制音频需要支持AAC音频编码器。",
+        "audioCodecRequired": "需要带音频的流才能开启声音检测。",
+        "restreamingWarning": "为录制流开启减少与摄像头的连接数可能会导致 CPU 使用率略有提升。",
+        "dahua": {
+          "substreamWarning": "子码流1被锁定为低分辨率。多数大华的摄像头支持额外的子码流，但需要在摄像头设置中手动开启。如果可以，建议检查并使用这些子码流。"
+        },
+        "hikvision": {
+          "substreamWarning": "子码流1被锁定为低分辨率。多数海康威视的摄像头支持额外的子码流，但需要在摄像头设置中手动开启。如果可以，建议检查并使用这些子码流。"
+        }
+      }
+    }
+  },
+  "cameraManagement": {
+    "title": "管理摄像头",
+    "addCamera": "添加新摄像头",
+    "editCamera": "编辑摄像头：",
+    "selectCamera": "选择摄像头",
+    "backToSettings": "返回摄像头设置",
+    "streams": {
+      "title": "开启或关闭摄像头",
+      "desc": "将临时禁用摄像头直至Frigate重启。禁用摄像头将完全停止Frigate对该摄像头视频流的处理，届时检测、录制及调试功能均不可用。<br /><em>注意：此操作不会影响go2rtc的转流服务。</em>"
+    },
+    "cameraConfig": {
+      "add": "添加摄像头",
+      "edit": "编辑摄像头",
+      "description": "配置摄像头设置，包括视频流输入和功能选择。",
+      "name": "摄像头名称",
+      "nameRequired": "摄像头名称为必填项",
+      "nameLength": "摄像头名称必须少于64个字符。",
+      "namePlaceholder": "例如：大门、后院等",
+      "enabled": "开启",
+      "ffmpeg": {
+        "inputs": "视频流输入",
+        "path": "视频流地址",
+        "pathRequired": "视频流地址为必填项",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "功能",
+        "rolesRequired": "至少选择一个功能",
+        "rolesUnique": "每个功能（音频audio、检测detect、录制record）只能分配给一个视频流",
+        "addInput": "添加输入视频流",
+        "removeInput": "移除输入视频流",
+        "inputsRequired": "至少需要一个输入视频流"
+      },
+      "go2rtcStreams": "go2rtc 视频流",
+      "streamUrls": "视频流地址",
+      "addUrl": "添加地址",
+      "addGo2rtcStream": "添加 go2rtc 视频流",
+      "toast": {
+        "success": "摄像头 {{cameraName}} 已保存"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "摄像头核查设置",
+    "object_descriptions": {
+      "title": "生成式AI目标描述",
+      "desc": "临时启用或禁用此摄像头的 生成式AI目标描述 功能。禁用后，系统将不再请求该摄像头追踪目标和物体的AI生成描述。"
+    },
+    "review_descriptions": {
+      "title": "生成式AI核查描述",
+      "desc": "临时启用或禁用此摄像头的 生成式AI核查描述 功能。禁用后，系统将不再请求该摄像头核查项目的AI生成描述。"
+    },
+    "review": {
+      "title": "核查",
+      "desc": "临时禁用/启用此摄像头的警报与检测功能，直至Frigate重启。禁用期间，系统将不再生成新的核查项目。 ",
+      "alerts": "警报 ",
+      "detections": "检测 "
+    },
+    "reviewClassification": {
+      "title": "核查分类",
+      "desc": "Frigate 将核查项分为“警报”和“检测”。默认情况下，所有的<strong>人</strong>、<strong>汽车</strong> 目标都将视为警报。你可以通过修改配置文件配置区域来细分。",
+      "noDefinedZones": "此摄像头未设置任何监控区。",
+      "objectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下都将显示为警报。",
+      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下的 {{zone}} 区内都将显示为警报。",
+      "objectDetectionsTips": "所有在摄像头 {{cameraName}} 上，检测到的 {{detectionsLabels}} 目标或物体，无论它位于哪个区，都将显示为检测。",
+      "zoneObjectDetectionsTips": {
+        "text": "所有在摄像头 {{cameraName}} 下的 {{zone}} 区内检测到未分类的 {{detectionsLabels}} 目标或物体，都将显示为检测。",
+        "notSelectDetections": "所有在摄像头 {{cameraName}}下的 {{zone}} 区内检测到的 {{detectionsLabels}} 目标或物体，如果它未归类为警报，无论它位于哪个区，都将显示为检测。",
+        "regardlessOfZoneObjectDetectionsTips": "在摄像头 {{cameraName}} 上，所有未分类的 {{detectionsLabels}} 检测目标或物体，无论出现在哪个区域，都将显示为检测。"
+      },
+      "unsavedChanges": "摄像头 {{camera}} 的核查分类设置尚未保存",
+      "selectAlertsZones": "选择警报区",
+      "selectDetectionsZones": "选择检测区",
+      "limitDetections": "限制仅在特定区内进行检测",
+      "toast": {
+        "success": "核查分类设置已保存，重启后生效。"
       }
     }
   }
