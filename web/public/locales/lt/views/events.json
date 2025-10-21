@@ -36,5 +36,15 @@
   },
   "detected": "aptikta",
   "suspiciousActivity": "Įtartina Veikla",
-  "threateningActivity": "Grėsminga Veikla"
+  "threateningActivity": "Grėsminga Veikla",
+  "detail": {
+    "noDataFound": "Peržiūrai informacijos nėra",
+    "aria": "Perjungti į detalų vaizdą",
+    "trackedObject_one": "sekami objektas",
+    "trackedObject_other": "sekami objektai",
+    "noObjectDetailData": "Nėra objekto detalių duomenų."
+  },
+  "objectTrack": {
+    "trackedPoint": "Susektas taškas"
+  }
 }

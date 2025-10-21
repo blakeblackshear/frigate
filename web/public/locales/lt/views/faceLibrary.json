@@ -91,7 +91,7 @@
       "selectImage": "Prašome pasirinkti nuotraukos bylą."
     },
     "dropActive": "Įkelkite nuotrauką čia…",
-    "dropInstructions": "Drag and drop nuotrauką čia, arba spragtelkite pasirinkti",
+    "dropInstructions": "Užvilkite nuotrauką čia, arba spragtelkite pasirinkti",
     "maxSize": "Max dydis: {{size}}MB"
   },
   "nofaces": "Nėra veidų",
