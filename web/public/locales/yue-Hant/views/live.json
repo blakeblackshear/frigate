@@ -37,6 +37,14 @@
       "out": {
         "label": "縮小 PTZ 鏡頭"
       }
+    },
+    "focus": {
+      "in": {
+        "label": "PTZ 鏡頭拉近焦距"
+      },
+      "out": {
+        "label": "PTZ 鏡頭拉遠焦距"
+      }
     }
   },
   "twoWayTalk": {
@@ -66,7 +74,7 @@
     "disable": "隱藏串流統計資料"
   },
   "manualRecording": {
-    "title": "按需錄影",
+    "title": "按需",
     "tips": "根據此鏡頭的錄影保留設定手動啟動事件。",
     "debugView": "除錯視圖",
     "start": "開始按需錄影",
@@ -126,6 +134,9 @@
     "playInBackground": {
       "tips": "啟用此選項可在播放器隱藏時繼續串流播放。",
       "label": "背景播放"
+    },
+    "debug": {
+      "picker": "除錯模式下無法選擇串流。除錯視圖永遠使用已分配偵測角色的串流。"
     }
   },
   "cameraSettings": {
@@ -135,7 +146,8 @@
     "snapshots": "快照",
     "autotracking": "自動追蹤",
     "audioDetection": "音訊偵測",
-    "title": "{{camera}} 設定"
+    "title": "{{camera}} 設定",
+    "transcription": "音訊轉錄"
   },
   "history": {
     "label": "顯示歷史影像"
@@ -154,5 +166,20 @@
       "label": "編輯鏡頭群組"
     },
     "exitEdit": "結束編輯"
+  },
+  "transcription": {
+    "enable": "啟用即時音訊轉錄",
+    "disable": "停用即時音訊轉錄"
+  },
+  "noCameras": {
+    "title": "未設置任何鏡頭",
+    "description": "連接鏡頭開始使用。",
+    "buttonText": "新增鏡頭"
+  },
+  "snapshot": {
+    "takeSnapshot": "下載即時快照",
+    "noVideoSource": "無可用影片來源以擷取快照。",
+    "captureFailed": "擷取快照失敗。",
+    "downloadStarted": "已開始下載快照。"
   }
 }

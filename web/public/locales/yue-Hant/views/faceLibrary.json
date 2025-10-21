@@ -61,7 +61,7 @@
       "selectImage": "請選擇一個圖片檔案。"
     },
     "dropActive": "將圖片拖到這裡…",
-    "dropInstructions": "拖放圖片到此處，或點擊選取",
+    "dropInstructions": "拖放圖片或貼上到此處，或點擊選取",
     "maxSize": "最大檔案大小：{{size}}MB"
   },
   "readTheDocs": "閱讀文件",
