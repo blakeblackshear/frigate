@@ -70,7 +70,7 @@
       "offset": {
         "label": "Compensare adnotare",
         "documentation": "Citește documentația ",
-        "desc": "Aceste date provin din fluxul de detecție al camerei tale, dar sunt suprapuse pe imaginile din fluxul de înregistrare. Este puțin probabil ca cele două fluxuri să fie perfect sincronizate. Ca urmare, caseta de delimitare și materialul video nu se vor potrivi perfect. Totuși, câmpul <code>annotation_offset</code> poate fi folosit pentru a ajusta acest lucru.",
+        "desc": "Aceste date provin din stream-ul de detecție al camerei tale, dar sunt suprapuse pe imaginile din stream-ul de înregistrare. Este puțin probabil ca cele două stream-uri să fie perfect sincronizate. Ca urmare, caseta de delimitare și materialul video nu se vor potrivi perfect. Totuși, câmpul <code>annotation_offset</code> poate fi folosit pentru a ajusta acest lucru.",
         "millisecondsToOffset": "Millisecondele cu care să compensezi adnotările de detecție. <em>Implicit: 0</em>",
         "tips": "SFAT: Imaginează-ți că există un clip de eveniment cu o persoană care merge de la stânga la dreapta. Dacă caseta de delimitare de pe linia temporală a evenimentului este constant în partea stângă a persoanei, atunci valoarea ar trebui să fie scăzută. În mod similar, dacă persoana merge de la stânga la dreapta și caseta de delimitare este constant înaintea persoanei, atunci valoarea ar trebui să fie crescută.",
         "toast": {

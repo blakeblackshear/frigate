@@ -88,7 +88,7 @@
   },
   "imageEntry": {
     "dropActive": "Trage imaginea aici…",
-    "dropInstructions": "Trage și plasează o imagine aici sau fă clic pentru a selecta",
+    "dropInstructions": "Trage și plasează sau lipește o imagine aici sau fă clic pentru a selecta",
     "maxSize": "Dimensiunea maximă: {{size}}MB",
     "validation": {
       "selectImage": "Te rog să selectezi un fișier imagine."

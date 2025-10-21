@@ -46,7 +46,8 @@
     "button": {
       "deleteNow": "Șterge acum",
       "export": "Exportă",
-      "markAsReviewed": "Marchează ca revizuit"
+      "markAsReviewed": "Marchează ca revizuit",
+      "markAsUnreviewed": "Marchează ca nerevizuit"
     },
     "confirmDelete": {
       "toast": {
@@ -105,7 +106,7 @@
     },
     "showStats": {
       "label": "Afișează statistici streaming",
-      "desc": "Activează această opțiune pentru a afișa statisticile de streaming ca un overlay peste fluxul camerei."
+      "desc": "Activează această opțiune pentru a afișa statisticile de streaming ca un overlay peste stream-ul camerei."
     },
     "debugView": "Vizualizator depanare"
   },

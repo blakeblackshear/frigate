@@ -36,5 +36,16 @@
   "selected_one": "{{count}} selectate",
   "selected_other": "{{count}} selectate",
   "suspiciousActivity": "Activitate suspectă",
-  "threateningActivity": "Activitate amenințătoare"
+  "threateningActivity": "Activitate amenințătoare",
+  "detail": {
+    "noDataFound": "Nicio dată detaliată de revizuit",
+    "aria": "Comută vizualizarea detaliată",
+    "trackedObject_one": "obiect urmărit",
+    "trackedObject_other": "obiecte urmărite",
+    "noObjectDetailData": "Nicio dată de detaliu obiect disponibilă."
+  },
+  "objectTrack": {
+    "trackedPoint": "Punct urmărit",
+    "clickToSeek": "Fă clic pentru a naviga la acest moment"
+  }
 }
