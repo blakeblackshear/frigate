@@ -164,13 +164,35 @@ According to [this discussion](https://github.com/blakeblackshear/frigate/issues
 Cameras connected via a Reolink NVR can be connected with the http stream, use `channel[0..15]` in the stream url for the additional channels.
 The setup of main stream can be also done via RTSP, but isn't always reliable on all hardware versions. The example configuration is working with the oldest HW version RLN16-410 device with multiple types of cameras.
 
+<details>
+  <summary>Example Config</summary>
+
+:::tip
+
+Reolink's latest cameras support two way audio via go2rtc and other applications. It is important that the http-flv stream is still used for stability, a secondary rtsp stream can be added that will be using for the two way audio only.
+
+NOTE: The RTSP stream can not be prefixed with `ffmpeg:`, as go2rtc needs to handle the stream to support two way audio.
+
+Ensure HTTP is enabled in the camera's advanced network settings. To use two way talk with Frigate, see the [Live view documentation](/configuration/live#two-way-talk).
+
+:::
+
 ```yaml
 go2rtc:
   streams:
+    # example for connecting to a standard Reolink camera
     your_reolink_camera:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
     your_reolink_camera_sub:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
+    # example for connectin to a Reolink camera that supports two way talk
+    your_reolink_camera_twt:
+      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
+      - "rtsp://username:password@reolink_ip/Preview_01_sub
+    your_reolink_camera_twt_sub:
+      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
+      - "rtsp://username:password@reolink_ip/Preview_01_sub
+    # example for connecting to a Reolink NVR
     your_reolink_camera_via_nvr:
       - "ffmpeg:http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_main.bcs&user=username&password=password" # channel numbers are 0-15
       - "ffmpeg:your_reolink_camera_via_nvr#audio=aac"
@@ -201,22 +223,7 @@ cameras:
           roles:
             - detect
 ```
-
-#### Reolink Doorbell
-
-The reolink doorbell supports two way audio via go2rtc and other applications. It is important that the http-flv stream is still used for stability, a secondary rtsp stream can be added that will be using for the two way audio only.
-
-Ensure HTTP is enabled in the camera's advanced network settings. To use two way talk with Frigate, see the [Live view documentation](/configuration/live#two-way-talk).
-
-```yaml
-go2rtc:
-  streams:
-    your_reolink_doorbell:
-      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
-      - rtsp://username:password@reolink_ip/Preview_01_sub
-    your_reolink_doorbell_sub:
-      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
-```
+</details>
 
 ### Unifi Protect Cameras
 
