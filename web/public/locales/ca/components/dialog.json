@@ -98,7 +98,8 @@
     "button": {
       "deleteNow": "Suprimir ara",
       "export": "Exportar",
-      "markAsReviewed": "Marcar com a revisat"
+      "markAsReviewed": "Marcar com a revisat",
+      "markAsUnreviewed": "Marcar com no revisat"
     },
     "confirmDelete": {
       "title": "Confirmar la supressió",
