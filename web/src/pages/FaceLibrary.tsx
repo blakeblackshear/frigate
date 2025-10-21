@@ -51,7 +51,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobileOnly } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import {
   LuFolderCheck,
@@ -694,7 +694,10 @@ function TrainingGrid({
   return (
     <div
       ref={contentRef}
-      className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
+      className={cn(
+        "scrollbar-container gap-2 overflow-y-scroll p-1",
+        isMobileOnly ? "grid grid-cols-2" : "flex flex-wrap",
+      )}
     >
       {Object.entries(faceGroups).map(([key, group]) => {
         const event = events?.find((ev) => ev.id == key);

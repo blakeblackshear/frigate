@@ -272,7 +272,15 @@ export function GroupedClassificationCard({
         }}
       >
         <Trigger asChild></Trigger>
-        <Content className={cn("", isDesktop && "w-auto max-w-[85%]")}>
+        <Content
+          className={cn(
+            "",
+            isDesktop && "w-auto max-w-[85%]",
+            !isDesktop &&
+              "max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4",
+          )}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <>
             {isDesktop && (
               <div className="absolute right-10 top-4 flex flex-row justify-between">
@@ -300,7 +308,12 @@ export function GroupedClassificationCard({
                 )}
               </div>
             )}
-            <ContentTitle className="flex items-center gap-1 font-normal capitalize">
+            <ContentTitle
+              className={cn(
+                "flex items-center gap-1 font-normal capitalize",
+                isMobile && "px-2",
+              )}
+            >
               {event?.sub_label ? event.sub_label : t("details.unknown")}
               {event?.sub_label && (
                 <div
@@ -313,7 +326,7 @@ export function GroupedClassificationCard({
                 >{`${Math.round((event.data.sub_label_score || 0) * 100)}%`}</div>
               )}
             </ContentTitle>
-            <ContentDescription>
+            <ContentDescription className={cn("", isMobile && "px-2")}>
               {time && (
                 <TimeAgo
                   className="text-sm text-secondary-foreground"
@@ -324,8 +337,9 @@ export function GroupedClassificationCard({
             </ContentDescription>
             <div
               className={cn(
-                "flex cursor-pointer flex-col gap-2 rounded-lg p-2",
-                isMobile && "w-full",
+                "flex cursor-pointer flex-col gap-2 rounded-lg",
+                isDesktop && "p-2",
+                isMobile && "scrollbar-container w-full overflow-y-auto",
               )}
             >
               <div
