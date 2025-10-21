@@ -77,6 +77,14 @@
     "length": {
       "feet": "フィート",
       "meters": "メートル"
+    },
+    "data": {
+      "gbph": "GB/hour",
+      "gbps": "GB/s",
+      "kbph": "kB/hour",
+      "kbps": "kB/s",
+      "mbph": "MB/hour",
+      "mbps": "MB/s"
     }
   },
   "label": {
@@ -256,5 +264,8 @@
     "title": "404",
     "desc": "ページが見つかりません"
   },
-  "selectItem": "{{item}} を選択"
+  "selectItem": "{{item}} を選択",
+  "information": {
+    "pixels": "{{area}}ピクセル"
+  }
 }
