@@ -91,8 +91,8 @@
       "desc": "Schakel deze optie in om te blijven streamen wanneer de speler verborgen is."
     },
     "recordDisabledTips": "Aangezien opnemen is uitgeschakeld of beperkt in de configuratie van deze camera, zal alleen een momentopname worden opgeslagen.",
-    "title": "Opname op aanvraag",
-    "tips": "Start een handmatige gebeurtenis op basis van de opnamebehoudinstellingen van deze camera.",
+    "title": "Op aanvraag",
+    "tips": "Download direct een snapshot of start handmatig een gebeurtenis op basis van de opnamebewaarinstellingen van deze camera.",
     "failedToStart": "Handmatige opname starten mislukt."
   },
   "notifications": "Meldingen",
@@ -170,5 +170,16 @@
   "transcription": {
     "enable": "Live audiotranscriptie inschakelen",
     "disable": "Live audiotranscriptie uitschakelen"
+  },
+  "snapshot": {
+    "takeSnapshot": "Direct een snapshot downloaden",
+    "noVideoSource": "Geen videobron beschikbaar voor snapshot.",
+    "captureFailed": "Het is niet gelukt om een snapshot te maken.",
+    "downloadStarted": "Snapshot downloaden gestart."
+  },
+  "noCameras": {
+    "title": "Geen camera’s ingesteld",
+    "description": "Begin door een camera te verbinden.",
+    "buttonText": "Camera toevoegen"
   }
 }
