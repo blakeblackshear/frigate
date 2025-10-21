@@ -91,7 +91,9 @@
     "selectPlatesFromList": "從列表中選取一個或多個車牌。",
     "placeholder": "輸入以搜尋車牌…",
     "title": "已識別車牌",
-    "loadFailed": "載入已識別車牌失敗。"
+    "loadFailed": "載入已識別車牌失敗。",
+    "selectAll": "全部選取",
+    "clearAll": "全部清除"
   },
   "estimatedSpeed": "預計速度（{{unit}}）",
   "labels": {
@@ -122,5 +124,13 @@
     "selectPreset": "選擇預設設定…"
   },
   "more": "更多篩選條件",
-  "timeRange": "時間範圍"
+  "timeRange": "時間範圍",
+  "classes": {
+    "label": "分類",
+    "all": {
+      "title": "所有分類"
+    },
+    "count_one": "{{count}} 個分類",
+    "count_other": "{{count}} 個分類"
+  }
 }
