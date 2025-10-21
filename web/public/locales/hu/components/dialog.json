@@ -4,7 +4,7 @@
     "button": "Újraindítás",
     "restarting": {
       "title": "A Frigate újraindul",
-      "content": "Az oldal újrtölt {{countdown}} másodperc múlva.",
+      "content": "Az oldal újratölt {{countdown}} másodperc múlva.",
       "button": "Erőltetett újraindítás azonnal"
     }
   },
@@ -107,7 +107,8 @@
     "button": {
       "markAsReviewed": "Megjelölés áttekintettként",
       "deleteNow": "Törlés Most",
-      "export": "Exportálás"
+      "export": "Exportálás",
+      "markAsUnreviewed": "Megjelölés nem ellenőrzöttként"
     }
   },
   "imagePicker": {
