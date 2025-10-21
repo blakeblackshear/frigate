@@ -100,10 +100,10 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
 
         camera_config = self.model_config.state_config.cameras[camera]
         crop = [
-            camera_config.crop[0] * camera_config.width,
-            camera_config.crop[1] * camera_config.height,
-            camera_config.crop[2] * camera_config.width,
-            camera_config.crop[3] * camera_config.height,
+            camera_config.crop[0] * self.config.cameras[camera].detect.width,
+            camera_config.crop[1] * self.config.cameras[camera].detect.height,
+            camera_config.crop[2] * self.config.cameras[camera].detect.width,
+            camera_config.crop[3] * self.config.cameras[camera].detect.height,
         ]
         should_run = False
 
