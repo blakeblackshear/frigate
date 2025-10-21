@@ -241,6 +241,14 @@
     "length": {
       "meters": "meter",
       "feet": "fot"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/time",
+      "mbph": "MB/time",
+      "gbph": "GB/time"
     }
   },
   "label": {
@@ -273,5 +281,8 @@
     "desc": "Siden ble ikke funnet"
   },
   "selectItem": "Velg {{item}}",
-  "readTheDocumentation": "Se dokumentasjonen"
+  "readTheDocumentation": "Se dokumentasjonen",
+  "information": {
+    "pixels": "{{area}}piklser"
+  }
 }
