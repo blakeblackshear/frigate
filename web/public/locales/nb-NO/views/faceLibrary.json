@@ -57,7 +57,7 @@
   },
   "imageEntry": {
     "dropActive": "Slipp bildet her…",
-    "dropInstructions": "Dra og slipp et bilde her, eller klikk for å velge",
+    "dropInstructions": "Dra og slipp, lim inn et bilde her eller klikk for å velge",
     "maxSize": "Maks størrelse: {{size}}MB",
     "validation": {
       "selectImage": "Vennligst velg en bildefil."
