@@ -120,7 +120,7 @@
       "resolution": "Upplösning:",
       "fps": "FPS:",
       "unknown": "Okänd",
-      "audio": "Audio:",
+      "audio": "Ljud:",
       "error": "Fel: {{error}}",
       "tips": {
         "title": "Kamera sond information"
