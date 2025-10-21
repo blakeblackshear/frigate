@@ -10,7 +10,9 @@
     "general": "Impostazioni generali - Frigate",
     "frigatePlus": "Impostazioni Frigate+ - Frigate",
     "notifications": "Impostazioni di notifiche - Frigate",
-    "enrichments": "Impostazioni di miglioramento - Frigate"
+    "enrichments": "Impostazioni di miglioramento - Frigate",
+    "cameraManagement": "Gestisci telecamere - Frigate",
+    "cameraReview": "Impostazioni revisione telecamera - Frigate"
   },
   "frigatePlus": {
     "snapshotConfig": {
@@ -378,7 +380,10 @@
     "users": "Utenti",
     "frigateplus": "Frigate+",
     "enrichments": "Miglioramenti",
-    "triggers": "Inneschi"
+    "triggers": "Inneschi",
+    "roles": "Ruoli",
+    "cameraManagement": "Gestione",
+    "cameraReview": "Rivedi"
   },
   "users": {
     "dialog": {
@@ -815,6 +820,11 @@
           "error": {
             "min": "È necessario selezionare almeno un'azione."
           }
+        },
+        "friendly_name": {
+          "title": "Nome semplice",
+          "placeholder": "Assegna un nome o descrivi questo innesco",
+          "description": "Un nome semplice o un testo descrittivo facoltativo per questo innesco."
         }
       }
     },
@@ -829,6 +839,10 @@
         "updateTriggerFailed": "Impossibile aggiornare l'innesco: {{errorMessage}}",
         "deleteTriggerFailed": "Impossibile eliminare l'innesco: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "La ricerca semantica è disabilitata",
+      "desc": "Per utilizzare gli inneschi, è necessario abilitare la ricerca semantica."
     }
   },
   "roles": {
@@ -889,6 +903,223 @@
           "required": "È necessario selezionare almeno una telecamera."
         }
       }
+    }
+  },
+  "cameraReview": {
+    "title": "Impostazioni revisione telecamera",
+    "object_descriptions": {
+      "title": "Descrizioni oggetti IA generativa",
+      "desc": "Abilita/disabilita temporaneamente le descrizioni degli oggetti generate dall'IA per questa telecamera. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli oggetti tracciati su questa telecamera."
+    },
+    "review_descriptions": {
+      "title": "Descrizioni revisioni IA generativa",
+      "desc": "Abilita/disabilita temporaneamente le descrizioni delle revisioni generate dall'IA per questa telecamera. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli elementi da rivedere su questa telecamera."
+    },
+    "review": {
+      "title": "Rivedi",
+      "desc": "Abilita/disabilita temporaneamente avvisi e rilevamenti per questa telecamera fino al riavvio di Frigate. Se disabilitato, non verranno generati nuovi elementi di revisione. ",
+      "alerts": "Avvisi ",
+      "detections": "Rilevamenti "
+    },
+    "reviewClassification": {
+      "title": "Classificazione revisione",
+      "desc": "Frigate categorizza gli elementi di revisione come Avvisi e Rilevamenti. Per impostazione predefinita, tutti gli oggetti <em>persona</em> e <em>auto</em> sono considerati Avvisi. È possibile perfezionare la categorizzazione degli elementi di revisione configurando le zone richieste per ciascuno di essi.",
+      "noDefinedZones": "Per questa telecamera non sono definite zone.",
+      "objectAlertsTips": "Tutti gli oggetti {{alertsLabels}} su {{cameraName}} verranno mostrati come Avvisi.",
+      "zoneObjectAlertsTips": "Tutti gli oggetti {{alertsLabels}} rilevati in {{zone}} su {{cameraName}} verranno mostrati come Avvisi.",
+      "objectDetectionsTips": "Tutti gli oggetti {{detectionsLabels}} non categorizzati su {{cameraName}} verranno mostrati come Rilevamenti, indipendentemente dalla zona in cui si trovano.",
+      "zoneObjectDetectionsTips": {
+        "text": "Tutti gli oggetti {{detectionsLabels}} non categorizzati in {{zone}} su {{cameraName}} verranno mostrati come Rilevamenti.",
+        "notSelectDetections": "Tutti gli oggetti {{detectionsLabels}} rilevati in {{zone}} su {{cameraName}} non classificati come Avvisi verranno mostrati come Rilevamenti, indipendentemente dalla zona in cui si trovano.",
+        "regardlessOfZoneObjectDetectionsTips": "Tutti gli oggetti {{detectionsLabels}} non categorizzati su {{cameraName}} verranno mostrati come Rilevamenti, indipendentemente dalla zona in cui si trovano."
+      },
+      "unsavedChanges": "Impostazioni di classificazione delle revisioni non salvate per {{camera}}",
+      "selectAlertsZones": "Seleziona le zone per gli Avvisi",
+      "selectDetectionsZones": "Seleziona le zone per i Rilevamenti",
+      "limitDetections": "Limita i rilevamenti a zone specifiche",
+      "toast": {
+        "success": "La configurazione della classificazione di revisione è stata salvata. Riavvia Frigate per applicare le modifiche."
+      }
+    }
+  },
+  "cameraWizard": {
+    "step3": {
+      "streamUnavailable": "Anteprima trasmissione non disponibile",
+      "description": "Convalida e analisi finale prima di salvare la nuova telecamera. Connetti ogni flusso prima di salvare.",
+      "validationTitle": "Convalida del flusso",
+      "connectAllStreams": "Connetti tutti i flussi",
+      "reconnectionSuccess": "Riconnessione riuscita.",
+      "reconnectionPartial": "Alcuni flussi non sono riusciti a riconnettersi.",
+      "reload": "Ricarica",
+      "connecting": "Connessione...",
+      "streamTitle": "Flusso {{number}}",
+      "valid": "Convalida",
+      "failed": "Fallito",
+      "notTested": "Non verificata",
+      "connectStream": "Connetti",
+      "connectingStream": "Connessione",
+      "disconnectStream": "Disconnetti",
+      "estimatedBandwidth": "Larghezza di banda stimata",
+      "roles": "Ruoli",
+      "none": "Nessuno",
+      "error": "Errore",
+      "streamValidated": "Flusso {{number}} convalidato con successo",
+      "streamValidationFailed": "Convalida del flusso {{number}} non riuscita",
+      "saveAndApply": "Salva nuova telecamera",
+      "saveError": "Configurazione non valida. Controlla le impostazioni.",
+      "issues": {
+        "title": "Convalida del flusso",
+        "videoCodecGood": "Il codec video è {{codec}}.",
+        "audioCodecGood": "Il codec audio è {{codec}}.",
+        "noAudioWarning": "Nessun audio rilevato per questo flusso, le registrazioni non avranno audio.",
+        "audioCodecRecordError": "Per supportare l'audio nelle registrazioni è necessario il codec audio AAC.",
+        "audioCodecRequired": "Per supportare il rilevamento audio è necessario un flusso audio.",
+        "restreamingWarning": "Riducendo le connessioni alla telecamera per il flusso di registrazione l'utilizzo della CPU potrebbe aumentare leggermente.",
+        "dahua": {
+          "substreamWarning": "Il flusso 1 è bloccato a bassa risoluzione. Molte telecamere Dahua/Amcrest/EmpireTech supportano flussi aggiuntivi che devono essere abilitati nelle impostazioni della telecamera. Si consiglia di controllare e utilizzare tali flussi, se disponibili."
+        },
+        "hikvision": {
+          "substreamWarning": "Il flusso 1 è bloccato a bassa risoluzione. Molte telecamere Hikvision supportano flussi aggiuntivi che devono essere abilitati nelle impostazioni della telecamera. Si consiglia di controllare e utilizzare tali flussi, se disponibili."
+        }
+      }
+    },
+    "title": "Aggiungi telecamera",
+    "description": "Per aggiungere una nuova telecamera alla tua installazione Frigate, segui i passaggi indicati di seguito.",
+    "steps": {
+      "nameAndConnection": "Nome e connessione",
+      "streamConfiguration": "Configurazione flusso",
+      "validationAndTesting": "Validazione e prova"
+    },
+    "save": {
+      "success": "Nuova telecamera {{cameraName}} salvata correttamente.",
+      "failure": "Errore durante il salvataggio di {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Risoluzione",
+      "video": "Video",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Si prega di fornire un URL di flusso valido",
+      "testFailed": "Prova del flusso fallita: {{error}}"
+    },
+    "step1": {
+      "description": "Inserisci i dettagli della tua telecamera e verifica la connessione.",
+      "cameraName": "Nome telecamera",
+      "cameraNamePlaceholder": "ad esempio, porta_anteriore o Panoramica cortile",
+      "host": "Indirizzo sistema/IP",
+      "port": "Porta",
+      "username": "Nome utente",
+      "usernamePlaceholder": "Opzionale",
+      "password": "Password",
+      "passwordPlaceholder": "Opzionale",
+      "selectTransport": "Seleziona il protocollo di trasmissione",
+      "cameraBrand": "Marca telecamera",
+      "selectBrand": "Seleziona la marca della telecamera per il modello URL",
+      "customUrl": "URL del flusso personalizzato",
+      "brandInformation": "Informazioni sul marchio",
+      "brandUrlFormat": "Per le telecamere con formato URL RTSP come: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://nomeutente:password@sistema:porta/percorso",
+      "testConnection": "Prova connessione",
+      "testSuccess": "Prova di connessione riuscita!",
+      "testFailed": "Prova di connessione fallita. Controlla i dati immessi e riprova.",
+      "streamDetails": "Dettagli del flusso",
+      "warnings": {
+        "noSnapshot": "Impossibile recuperare un'immagine dal flusso configurato."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Seleziona una marca di telecamera con sistema/IP oppure scegli \"Altro\" con un URL personalizzato",
+        "nameRequired": "Il nome della telecamera è obbligatorio",
+        "nameLength": "Il nome della telecamera deve contenere al massimo 64 caratteri",
+        "invalidCharacters": "Il nome della telecamera contiene caratteri non validi",
+        "nameExists": "Il nome della telecamera esiste già",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP non è consigliato. Si consiglia di abilitare http nelle impostazioni della telecamera e riavviare la procedura guidata."
+        }
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      }
+    },
+    "step2": {
+      "description": "Configura i ruoli del flusso e aggiungi altri flussi per la tua telecamera.",
+      "streamsTitle": "Flussi della telecamera",
+      "addStream": "Aggiungi flusso",
+      "addAnotherStream": "Aggiungi un altro flusso",
+      "streamTitle": "Flusso {{number}}",
+      "streamUrl": "URL del flusso",
+      "streamUrlPlaceholder": "rtsp://nomeutente:password@sistema:porta/percorso",
+      "url": "URL",
+      "resolution": "Risoluzione",
+      "selectResolution": "Seleziona la risoluzione",
+      "quality": "Qualità",
+      "selectQuality": "Seleziona la qualità",
+      "roles": "Ruoli",
+      "roleLabels": {
+        "detect": "Rilevamento oggetti",
+        "record": "Registrazione",
+        "audio": "Audio"
+      },
+      "testStream": "Prova connessione",
+      "testSuccess": "Prova del flusso riuscita!",
+      "testFailed": "Prova del flusso fallita",
+      "testFailedTitle": "Prova fallita",
+      "connected": "Connessa",
+      "notConnected": "Non connessa",
+      "featuresTitle": "Caratteristiche",
+      "go2rtc": "Riduci le connessioni alla telecamera",
+      "detectRoleWarning": "Per procedere, almeno un flusso deve avere il ruolo \"rileva\".",
+      "rolesPopover": {
+        "title": "Ruoli del flusso",
+        "detect": "Flusso principale per il rilevamento degli oggetti.",
+        "record": "Salva segmenti del flusso video in base alle impostazioni di configurazione.",
+        "audio": "Flusso per il rilevamento basato sull'audio."
+      },
+      "featuresPopover": {
+        "title": "Caratteristiche del flusso",
+        "description": "Utilizza la ritrasmissione go2rtc per ridurre le connessioni alla tua telecamera."
+      }
+    }
+  },
+  "cameraManagement": {
+    "title": "Gestisci telecamere",
+    "addCamera": "Aggiungi nuova telecamera",
+    "editCamera": "Modifica telecamera:",
+    "selectCamera": "Seleziona una telecamera",
+    "backToSettings": "Torna alle impostazioni della telecamera",
+    "streams": {
+      "title": "Abilita/Disabilita telecamere",
+      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi di questa telecamera da parte di Frigate. Rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disattiva le ritrasmissioni di go2rtc.</em>"
+    },
+    "cameraConfig": {
+      "add": "Aggiungi telecamera",
+      "edit": "Modifica telecamera",
+      "description": "Configura le impostazioni della telecamera, inclusi gli ingressi ed i ruoli dei flussi.",
+      "name": "Nome telecamera",
+      "nameRequired": "Il nome della telecamera è obbligatorio",
+      "nameLength": "Il nome della telecamera deve contenere al massimo 64 caratteri.",
+      "namePlaceholder": "ad esempio, porta_anteriore o Panoramica cortile",
+      "toast": {
+        "success": "La telecamera {{cameraName}} è stata salvata correttamente"
+      },
+      "enabled": "Abilitata",
+      "ffmpeg": {
+        "inputs": "Flussi di ingresso",
+        "path": "Percorso del flusso",
+        "pathRequired": "Il percorso del flusso è obbligatorio",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Ruoli",
+        "rolesRequired": "È richiesto almeno un ruolo",
+        "rolesUnique": "Ogni ruolo (audio, rilevamento, registrazione) può essere assegnato solo ad un flusso",
+        "addInput": "Aggiungi flusso di ingresso",
+        "removeInput": "Rimuovi flusso di ingresso",
+        "inputsRequired": "È richiesto almeno un flusso di ingresso"
+      },
+      "go2rtcStreams": "Flussi go2rtc",
+      "streamUrls": "URL dei flussi",
+      "addUrl": "Aggiungi URL",
+      "addGo2rtcStream": "Aggiungi flusso go2rtc"
     }
   }
 }

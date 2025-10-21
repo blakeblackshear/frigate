@@ -37,5 +37,16 @@
   "selected_other": "{{count}} selezionati",
   "detected": "rilevato",
   "suspiciousActivity": "Attività sospetta",
-  "threateningActivity": "Attività minacciosa"
+  "threateningActivity": "Attività minacciosa",
+  "detail": {
+    "noDataFound": "Nessun dato dettagliato da rivedere",
+    "aria": "Attiva/disattiva la visualizzazione dettagliata",
+    "trackedObject_one": "oggetto tracciato",
+    "trackedObject_other": "oggetti tracciati",
+    "noObjectDetailData": "Non sono disponibili dati dettagliati sull'oggetto."
+  },
+  "objectTrack": {
+    "trackedPoint": "Punto tracciato",
+    "clickToSeek": "Premi per cercare in questo momento"
+  }
 }
