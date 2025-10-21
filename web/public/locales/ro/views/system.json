@@ -121,7 +121,7 @@
       "face_recognition_speed": "Viteză recunoaștere facială",
       "plate_recognition_speed": "Viteză recunoaștere numere de înmatriculare",
       "face_embedding_speed": "Viteză încorporare fețe",
-      "yolov9_plate_detection_speed": "Viteza detectării numerelor de înmatriculare YOLOv9",
+      "yolov9_plate_detection_speed": "Viteza detecției numerelor de înmatriculare YOLOv9",
       "text_embedding_speed": "Viteză încorporare text",
       "yolov9_plate_detection": "Detectare numere de înmatriculare YOLOv9"
     },

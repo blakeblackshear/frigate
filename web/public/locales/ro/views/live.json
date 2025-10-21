@@ -86,8 +86,8 @@
     "disable": "Ascunde statisticile de streaming"
   },
   "manualRecording": {
-    "title": "Înregistrare la cerere",
-    "tips": "Pornește un eveniment manual bazat pe setările de păstrare a înregistrărilor pentru această cameră.",
+    "title": "La-cerere",
+    "tips": "Descarcă un snapshot instant sau pornește un eveniment manual pe baza setărilor de reținere a înregistrărilor acestei camere.",
     "playInBackground": {
       "label": "Redă în fundal",
       "desc": "Activează această opțiune pentru a continua redarea streaming-ului chiar și atunci când playerul este ascuns."
@@ -134,6 +134,9 @@
     "playInBackground": {
       "label": "Redare în fundal",
       "tips": "Activează această opțiune pentru a continua streaming-ul când player-ul este ascuns."
+    },
+    "debug": {
+      "picker": "Selectarea stream-ului nu este disponibilă în modul de depanare. Vizualizarea de depanare folosește întotdeauna stream-ul atribuit rolului de detectare."
     }
   },
   "cameraSettings": {
@@ -167,5 +170,16 @@
   "transcription": {
     "enable": "Activează transcrierea audio în timp real",
     "disable": "Dezactivează transcrierea audio în timp real"
+  },
+  "snapshot": {
+    "takeSnapshot": "Descarcă snapshot instant",
+    "noVideoSource": "Nicio sursă video disponibilă pentru snapshot.",
+    "captureFailed": "Eșec la capturarea snapshot-ului.",
+    "downloadStarted": "Descărcarea snapshot-ului a început."
+  },
+  "noCameras": {
+    "title": "Nicio Cameră Configurată",
+    "description": "Începe prin a conecta o cameră la Frigate.",
+    "buttonText": "Adaugă cameră"
   }
 }
