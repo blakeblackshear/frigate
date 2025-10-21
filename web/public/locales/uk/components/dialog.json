@@ -89,7 +89,8 @@
     "button": {
       "export": "Експорт",
       "markAsReviewed": "Позначити як переглянуте",
-      "deleteNow": "Вилучити зараз"
+      "deleteNow": "Вилучити зараз",
+      "markAsUnreviewed": "Позначити як непереглянуте"
     },
     "confirmDelete": {
       "title": "Підтвердити вилучення",
