@@ -10,7 +10,8 @@
     "object": "Ladění - Frigate",
     "general": "Obecné nastavení - Frigate",
     "frigatePlus": "Frigate+ nastavení - Frigate",
-    "enrichments": "Nastavení obohacení - Frigate"
+    "enrichments": "Nastavení obohacení - Frigate",
+    "cameraManagement": "Správa kamer - Frigate"
   },
   "frigatePlus": {
     "toast": {
