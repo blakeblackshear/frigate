@@ -69,7 +69,7 @@ class BirdClassificationConfig(FrigateBaseModel):
 
 
 class CustomClassificationStateCameraConfig(FrigateBaseModel):
-    crop: list[int, int, int, int] = Field(
+    crop: list[float, float, float, float] = Field(
         title="Crop of image frame on this camera to run classification on."
     )
 
