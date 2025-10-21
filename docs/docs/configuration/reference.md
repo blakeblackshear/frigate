@@ -671,20 +671,18 @@ lpr:
   # Optional: List of regex replacement rules to normalize detected plates (default: shown below)
   replace_rules: {}
 
-# Optional: Configuration for AI generated tracked object descriptions
+# Optional: Configuration for AI / LLM provider
 # WARNING: Depending on the provider, this will send thumbnails over the internet
-# to Google or OpenAI's LLMs to generate descriptions. It can be overridden at
-# the camera level (enabled: False) to enhance privacy for indoor cameras.
+# to Google or OpenAI's LLMs to generate descriptions. GenAI features can be configured at
+# the camera level to enhance privacy for indoor cameras.
 genai:
-  # Optional: Enable AI description generation (default: shown below)
-  enabled: False
-  # Required if enabled: Provider must be one of ollama, gemini, or openai
+  # Required: Provider must be one of ollama, gemini, or openai
   provider: ollama
   # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
   base_url: http://localhost::11434
   # Required if gemini or openai
   api_key: "{FRIGATE_GENAI_API_KEY}"
-  # Required if enabled: The model to use with the provider.
+  # Required: The model to use with the provider.
   model: gemini-1.5-flash
   # Optional additional args to pass to the GenAI Provider (default: None)
   provider_options:
