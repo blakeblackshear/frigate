@@ -356,44 +356,40 @@ export default function Step2StateArea({
                           "bottom-left",
                           "bottom-right",
                         ]}
-                        boundBoxFunc={(oldBox, newBox) => {
+                        boundBoxFunc={(_oldBox, newBox) => {
                           const minSize = 50;
-                          const avgSize = (newBox.width + newBox.height) / 2;
-                          const size = Math.max(minSize, avgSize);
+                          const maxSize = Math.min(
+                            imageSize.width,
+                            imageSize.height,
+                          );
 
-                          const maxX = imageSize.width - size;
-                          const maxY = imageSize.height - size;
+                          // Clamp dimensions to stage bounds first
+                          const clampedWidth = Math.max(
+                            minSize,
+                            Math.min(newBox.width, maxSize),
+                          );
+                          const clampedHeight = Math.max(
+                            minSize,
+                            Math.min(newBox.height, maxSize),
+                          );
 
-                          if (
-                            newBox.x < 0 ||
-                            newBox.y < 0 ||
-                            newBox.x > maxX ||
-                            newBox.y > maxY
-                          ) {
-                            const maxSizeFromPos = Math.min(
-                              imageSize.width - newBox.x,
-                              imageSize.height - newBox.y,
-                              newBox.x + oldBox.width,
-                              newBox.y + oldBox.height,
-                            );
+                          // Enforce square using average
+                          const size = (clampedWidth + clampedHeight) / 2;
 
-                            if (maxSizeFromPos < minSize) {
-                              return oldBox;
-                            }
-
-                            const constrainedSize = Math.min(
-                              size,
-                              maxSizeFromPos,
-                            );
-                            return {
-                              ...newBox,
-                              width: constrainedSize,
-                              height: constrainedSize,
-                            };
-                          }
+                          // Clamp position to keep square within bounds
+                          const x = Math.max(
+                            0,
+                            Math.min(newBox.x, imageSize.width - size),
+                          );
+                          const y = Math.max(
+                            0,
+                            Math.min(newBox.y, imageSize.height - size),
+                          );
 
                           return {
                             ...newBox,
+                            x,
+                            y,
                             width: size,
                             height: size,
                           };
