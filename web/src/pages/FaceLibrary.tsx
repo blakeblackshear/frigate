@@ -695,16 +695,13 @@ function TrainingGrid({
     <div
       ref={contentRef}
       className={cn(
-        "scrollbar-container gap-3 overflow-y-scroll p-1",
-        isMobile
-          ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8"
-          : "flex flex-wrap",
+        "scrollbar-container grid grid-cols-2 gap-3 overflow-y-scroll p-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12",
       )}
     >
       {Object.entries(faceGroups).map(([key, group]) => {
         const event = events?.find((ev) => ev.id == key);
         return (
-          <div key={key} className={cn(isMobile && "aspect-square size-full")}>
+          <div key={key} className="aspect-square w-full">
             <FaceAttemptGroup
               config={config}
               group={group}
@@ -914,35 +911,35 @@ function FaceGrid({
     <div
       ref={contentRef}
       className={cn(
-        "scrollbar-container gap-2 overflow-y-scroll p-1",
-        isDesktop ? "flex flex-wrap" : "grid grid-cols-2 md:grid-cols-4",
+        "scrollbar-container grid grid-cols-2 gap-2 overflow-y-scroll p-1 md:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12",
       )}
     >
       {sortedFaces.map((image: string) => (
-        <ClassificationCard
-          key={image}
-          data={{
-            name: pageToggle,
-            filename: image,
-            filepath: `clips/faces/${pageToggle}/${image}`,
-          }}
-          selected={selectedFaces.includes(image)}
-          i18nLibrary="views/faceLibrary"
-          onClick={(data, meta) => onClickFaces([data.filename], meta)}
-        >
-          <Tooltip>
-            <TooltipTrigger>
-              <LuTrash2
-                className="size-5 cursor-pointer text-gray-200 hover:text-danger"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(pageToggle, [image]);
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
-          </Tooltip>
-        </ClassificationCard>
+        <div key={image} className="aspect-square w-full">
+          <ClassificationCard
+            data={{
+              name: pageToggle,
+              filename: image,
+              filepath: `clips/faces/${pageToggle}/${image}`,
+            }}
+            selected={selectedFaces.includes(image)}
+            i18nLibrary="views/faceLibrary"
+            onClick={(data, meta) => onClickFaces([data.filename], meta)}
+          >
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-gray-200 hover:text-danger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(pageToggle, [image]);
+                  }}
+                />
+              </TooltipTrigger>
+              <TooltipContent>{t("button.deleteFaceAttempts")}</TooltipContent>
+            </Tooltip>
+          </ClassificationCard>
+        </div>
       ))}
     </div>
   );

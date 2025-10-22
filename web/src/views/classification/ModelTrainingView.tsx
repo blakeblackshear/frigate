@@ -928,10 +928,7 @@ function ObjectTrainGrid({
       <div
         ref={contentRef}
         className={cn(
-          "scrollbar-container gap-3 overflow-y-scroll p-1",
-          isMobile
-            ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8"
-            : "flex flex-wrap",
+          "scrollbar-container grid grid-cols-2 gap-3 overflow-y-scroll p-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12",
         )}
       >
         {Object.entries(groups).map(([key, group]) => {

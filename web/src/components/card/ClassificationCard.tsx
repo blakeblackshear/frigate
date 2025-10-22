@@ -34,6 +34,7 @@ import {
 } from "../mobile/MobilePage";
 
 type ClassificationCardProps = {
+  className?: string;
   imgClassName?: string;
   data: ClassificationItemData;
   threshold?: ClassificationThreshold;
@@ -49,6 +50,7 @@ export const ClassificationCard = forwardRef<
   ClassificationCardProps
 >(function ClassificationCard(
   {
+    className,
     imgClassName,
     data,
     threshold,
@@ -98,8 +100,8 @@ export const ClassificationCard = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex cursor-pointer flex-col overflow-hidden rounded-lg outline outline-[3px]",
-        isMobile ? "!size-full" : "size-48",
+        "relative flex size-full cursor-pointer flex-col overflow-hidden rounded-lg outline outline-[3px]",
+        className,
         selected
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500",
@@ -217,7 +219,7 @@ export function GroupedClassificationCard({
     const bestTyped: ClassificationItemData = best;
     return {
       ...bestTyped,
-      name: event?.sub_label || bestTyped.name,
+      name: event ? (event.sub_label ?? "") : bestTyped.name,
       score: event?.data?.sub_label_score || bestTyped.score,
     };
   }, [group, event]);
@@ -287,7 +289,7 @@ export function GroupedClassificationCard({
         <Content
           className={cn(
             "",
-            isDesktop && "w-auto max-w-[85%]",
+            isDesktop && "min-w-[50%] max-w-[65%]",
             isMobile && "flex flex-col",
           )}
           onOpenAutoFocus={(e) => e.preventDefault()}
@@ -357,40 +359,31 @@ export function GroupedClassificationCard({
             </Header>
             <div
               className={cn(
-                "flex cursor-pointer flex-col gap-2 rounded-lg",
+                "size-full gap-2",
                 isDesktop && "p-2",
                 isMobile && "scrollbar-container w-full flex-1 overflow-y-auto",
+                isDesktop
+                  ? "grid grid-cols-6"
+                  : "grid grid-cols-2 justify-items-center gap-2 px-2 sm:grid-cols-5 lg:grid-cols-6",
               )}
             >
-              <div
-                className={cn(
-                  "gap-2",
-                  isDesktop
-                    ? "flex flex-row flex-wrap"
-                    : "grid grid-cols-2 justify-items-center gap-2 px-2 sm:grid-cols-5 lg:grid-cols-6",
-                )}
-              >
-                {group.map((data: ClassificationItemData) => (
-                  <div
-                    key={data.filename}
-                    className={cn(isMobile && "aspect-square size-full")}
+              {group.map((data: ClassificationItemData) => (
+                <div key={data.filename} className="aspect-square w-full">
+                  <ClassificationCard
+                    data={data}
+                    threshold={threshold}
+                    selected={false}
+                    i18nLibrary={i18nLibrary}
+                    onClick={(data, meta) => {
+                      if (meta || selectedItems.length > 0) {
+                        onClick(data);
+                      }
+                    }}
                   >
-                    <ClassificationCard
-                      data={data}
-                      threshold={threshold}
-                      selected={false}
-                      i18nLibrary={i18nLibrary}
-                      onClick={(data, meta) => {
-                        if (meta || selectedItems.length > 0) {
-                          onClick(data);
-                        }
-                      }}
-                    >
-                      {children?.(data)}
-                    </ClassificationCard>
-                  </div>
-                ))}
-              </div>
+                    {children?.(data)}
+                  </ClassificationCard>
+                </div>
+              ))}
             </div>
           </>
         </Content>
