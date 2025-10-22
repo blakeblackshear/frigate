@@ -51,7 +51,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import {
   LuFolderCheck,
