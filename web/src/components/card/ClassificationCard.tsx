@@ -98,7 +98,8 @@ export const ClassificationCard = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex size-48 cursor-pointer flex-col overflow-hidden rounded-lg outline outline-[3px]",
+        "relative flex cursor-pointer flex-col overflow-hidden rounded-lg outline outline-[3px]",
+        isMobile ? "!size-full" : "size-48",
         selected
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500",

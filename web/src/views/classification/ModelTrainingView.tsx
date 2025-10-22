@@ -929,13 +929,18 @@ function ObjectTrainGrid({
         ref={contentRef}
         className={cn(
           "scrollbar-container gap-3 overflow-y-scroll p-1",
-          isMobileOnly ? "grid grid-cols-2 px-2" : "flex flex-wrap",
+          isMobile
+            ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8"
+            : "flex flex-wrap",
         )}
       >
         {Object.entries(groups).map(([key, group]) => {
           const event = events?.find((ev) => ev.id == key);
           return (
-            <div>
+            <div
+              key={key}
+              className={cn(isMobile && "aspect-square size-full")}
+            >
               <GroupedClassificationCard
                 key={key}
                 group={group}
