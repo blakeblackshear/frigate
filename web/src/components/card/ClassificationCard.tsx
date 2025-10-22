@@ -366,20 +366,24 @@ export function GroupedClassificationCard({
                 )}
               >
                 {group.map((data: ClassificationItemData) => (
-                  <ClassificationCard
+                  <div
                     key={data.filename}
-                    data={data}
-                    threshold={threshold}
-                    selected={false}
-                    i18nLibrary={i18nLibrary}
-                    onClick={(data, meta) => {
-                      if (meta || selectedItems.length > 0) {
-                        onClick(data);
-                      }
-                    }}
+                    className={cn(isMobile && "aspect-square size-full")}
                   >
-                    {children?.(data)}
-                  </ClassificationCard>
+                    <ClassificationCard
+                      data={data}
+                      threshold={threshold}
+                      selected={false}
+                      i18nLibrary={i18nLibrary}
+                      onClick={(data, meta) => {
+                        if (meta || selectedItems.length > 0) {
+                          onClick(data);
+                        }
+                      }}
+                    >
+                      {children?.(data)}
+                    </ClassificationCard>
+                  </div>
                 ))}
               </div>
             </div>
