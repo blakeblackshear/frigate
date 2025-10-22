@@ -52,7 +52,6 @@
   "categorizeImage": "Classify Image",
   "wizard": {
     "title": "Create New Classification",
-    "description": "Create a new state or object classification model.",
     "steps": {
       "nameAndDefine": "Name & Define",
       "stateArea": "State Area",
@@ -60,6 +59,7 @@
       "train": "Train"
     },
     "step1": {
+      "description": "Create a new state or object classification model.",
       "name": "Name",
       "namePlaceholder": "Enter model name...",
       "type": "Type",

@@ -150,8 +150,16 @@ export default function ClassificationModelWizardDialog({
         <DialogHeader>
           <DialogTitle>{t("wizard.title")}</DialogTitle>
           {wizardState.currentStep === 0 && (
-            <DialogDescription>{t("wizard.description")}</DialogDescription>
+            <DialogDescription>
+              {t("wizard.step1.description")}
+            </DialogDescription>
           )}
+          {wizardState.currentStep === 1 &&
+            wizardState.step1Data?.modelType === "state" && (
+              <DialogDescription>
+                {t("wizard.step2.description")}
+              </DialogDescription>
+            )}
         </DialogHeader>
 
         <div className="pb-4">

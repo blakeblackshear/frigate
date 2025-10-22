@@ -15,6 +15,7 @@ import Konva from "konva";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { useApiHost } from "@/api";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
+import Heading from "@/components/ui/heading";
 
 export type CameraAreaConfig = {
   camera: string;
@@ -45,6 +46,7 @@ export default function Step2StateArea({
   );
   const [selectedCameraIndex, setSelectedCameraIndex] = useState<number>(0);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -108,15 +110,39 @@ export default function Step2StateArea({
 
   const handleAddCamera = useCallback(
     (cameraName: string) => {
+      // Calculate a square crop in pixel space
+      const camera = config?.cameras[cameraName];
+      if (!camera) return;
+
+      const cameraAspect = camera.detect.width / camera.detect.height;
+      const cropSize = 0.3;
+      let x1, y1, x2, y2;
+
+      if (cameraAspect >= 1) {
+        const pixelSize = cropSize * camera.detect.height;
+        const normalizedWidth = pixelSize / camera.detect.width;
+        x1 = (1 - normalizedWidth) / 2;
+        y1 = (1 - cropSize) / 2;
+        x2 = x1 + normalizedWidth;
+        y2 = y1 + cropSize;
+      } else {
+        const pixelSize = cropSize * camera.detect.width;
+        const normalizedHeight = pixelSize / camera.detect.height;
+        x1 = (1 - cropSize) / 2;
+        y1 = (1 - normalizedHeight) / 2;
+        x2 = x1 + cropSize;
+        y2 = y1 + normalizedHeight;
+      }
+
       const newArea: CameraAreaConfig = {
         camera: cameraName,
-        crop: [0.385, 0.385, 0.535, 0.535],
+        crop: [x1, y1, x2, y2],
       };
       setCameraAreas([...cameraAreas, newArea]);
       setSelectedCameraIndex(cameraAreas.length);
       setIsPopoverOpen(false);
     },
-    [cameraAreas],
+    [cameraAreas, config],
   );
 
   const handleRemoveCamera = useCallback(
@@ -143,16 +169,26 @@ export default function Step2StateArea({
   );
 
   useEffect(() => {
+    setImageLoaded(false);
+  }, [selectedCamera]);
+
+  useEffect(() => {
     const rect = rectRef.current;
     const transformer = transformerRef.current;
 
-    if (rect && transformer) {
+    if (
+      rect &&
+      transformer &&
+      selectedCamera &&
+      imageSize.width > 0 &&
+      imageLoaded
+    ) {
       rect.scaleX(1);
       rect.scaleY(1);
       transformer.nodes([rect]);
       transformer.getLayer()?.batchDraw();
     }
-  }, [selectedCamera, imageSize]);
+  }, [selectedCamera, imageSize, imageLoaded]);
 
   const handleRectChange = useCallback(() => {
     const rect = rectRef.current;
@@ -186,10 +222,6 @@ export default function Step2StateArea({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-sm text-muted-foreground">
-        {t("wizard.step2.description")}
-      </div>
-
       <div className="flex gap-4 overflow-hidden">
         <div className="flex w-64 flex-shrink-0 flex-col gap-2 overflow-y-auto rounded-lg bg-secondary p-4">
           <div className="flex items-center justify-between">
@@ -205,7 +237,7 @@ export default function Step2StateArea({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 p-0"
+                    className="size-6 p-0"
                     aria-label="Add camera"
                   >
                     <MdAddBox className="size-6 text-primary" />
@@ -218,17 +250,17 @@ export default function Step2StateArea({
                   onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                   <div className="flex flex-col gap-2">
-                    <h4 className="text-sm font-medium">
+                    <Heading as="h4" className="text-sm font-medium">
                       {t("wizard.step2.selectCamera")}
-                    </h4>
-                    <div className="scrollbar-container flex max-h-64 flex-col gap-1 overflow-y-auto">
+                    </Heading>
+                    <div className="scrollbar-container flex max-h-[30vh] flex-col gap-1 overflow-y-auto">
                       {availableCameras.map((cam) => (
                         <Button
                           key={cam.name}
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="capit h-auto justify-start px-3 py-2 capitalize"
+                          className="h-auto justify-start p-2 capitalize text-primary"
                           onClick={() => {
                             handleAddCamera(cam.name);
                           }}
@@ -286,130 +318,129 @@ export default function Step2StateArea({
         </div>
 
         <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg p-4">
-          {selectedCamera && selectedCameraConfig ? (
-            <div
-              ref={containerRef}
-              className="flex items-center justify-center"
-              style={{
-                width: "100%",
-                aspectRatio: "16 / 9",
-                maxHeight: "100%",
-              }}
-            >
-              {imageSize.width > 0 && (
-                <div
-                  style={{
-                    width: imageSize.width,
-                    height: imageSize.height,
-                    position: "relative",
-                  }}
+          <div
+            ref={containerRef}
+            className="flex items-center justify-center"
+            style={{
+              width: "100%",
+              aspectRatio: "16 / 9",
+              maxHeight: "100%",
+            }}
+          >
+            {selectedCamera && selectedCameraConfig && imageSize.width > 0 ? (
+              <div
+                style={{
+                  width: imageSize.width,
+                  height: imageSize.height,
+                  position: "relative",
+                }}
+              >
+                <img
+                  ref={imageRef}
+                  src={`${apiHost}api/${selectedCamera.camera}/latest.jpg?h=500`}
+                  alt={resolveCameraName(config, selectedCamera.camera)}
+                  className="h-full w-full object-contain"
+                  onLoad={() => setImageLoaded(true)}
+                />
+                <Stage
+                  ref={stageRef}
+                  width={imageSize.width}
+                  height={imageSize.height}
+                  className="absolute inset-0"
                 >
-                  <img
-                    ref={imageRef}
-                    src={`${apiHost}api/${selectedCamera.camera}/latest.jpg?h=500`}
-                    alt={resolveCameraName(config, selectedCamera.camera)}
-                    className="h-full w-full object-contain"
-                  />
-                  <Stage
-                    ref={stageRef}
-                    width={imageSize.width}
-                    height={imageSize.height}
-                    className="absolute inset-0"
-                  >
-                    <Layer>
-                      <Rect
-                        ref={rectRef}
-                        x={selectedCamera.crop[0] * imageSize.width}
-                        y={selectedCamera.crop[1] * imageSize.height}
-                        width={
-                          (selectedCamera.crop[2] - selectedCamera.crop[0]) *
-                          imageSize.width
-                        }
-                        height={
-                          (selectedCamera.crop[3] - selectedCamera.crop[1]) *
-                          imageSize.height
-                        }
-                        stroke="#3b82f6"
-                        strokeWidth={2}
-                        fill="rgba(59, 130, 246, 0.1)"
-                        draggable
-                        dragBoundFunc={(pos) => {
-                          const rect = rectRef.current;
-                          if (!rect) return pos;
+                  <Layer>
+                    <Rect
+                      ref={rectRef}
+                      x={selectedCamera.crop[0] * imageSize.width}
+                      y={selectedCamera.crop[1] * imageSize.height}
+                      width={
+                        (selectedCamera.crop[2] - selectedCamera.crop[0]) *
+                        imageSize.width
+                      }
+                      height={
+                        (selectedCamera.crop[3] - selectedCamera.crop[1]) *
+                        imageSize.height
+                      }
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      fill="rgba(59, 130, 246, 0.1)"
+                      draggable
+                      dragBoundFunc={(pos) => {
+                        const rect = rectRef.current;
+                        if (!rect) return pos;
 
-                          const size = rect.width();
-                          const x = Math.max(
-                            0,
-                            Math.min(pos.x, imageSize.width - size),
-                          );
-                          const y = Math.max(
-                            0,
-                            Math.min(pos.y, imageSize.height - size),
-                          );
+                        const size = rect.width();
+                        const x = Math.max(
+                          0,
+                          Math.min(pos.x, imageSize.width - size),
+                        );
+                        const y = Math.max(
+                          0,
+                          Math.min(pos.y, imageSize.height - size),
+                        );
 
-                          return { x, y };
-                        }}
-                        onDragEnd={handleRectChange}
-                        onTransformEnd={handleRectChange}
-                      />
-                      <Transformer
-                        ref={transformerRef}
-                        rotateEnabled={false}
-                        enabledAnchors={[
-                          "top-left",
-                          "top-right",
-                          "bottom-left",
-                          "bottom-right",
-                        ]}
-                        boundBoxFunc={(_oldBox, newBox) => {
-                          const minSize = 50;
-                          const maxSize = Math.min(
-                            imageSize.width,
-                            imageSize.height,
-                          );
+                        return { x, y };
+                      }}
+                      onDragEnd={handleRectChange}
+                      onTransformEnd={handleRectChange}
+                    />
+                    <Transformer
+                      ref={transformerRef}
+                      rotateEnabled={false}
+                      enabledAnchors={[
+                        "top-left",
+                        "top-right",
+                        "bottom-left",
+                        "bottom-right",
+                      ]}
+                      boundBoxFunc={(_oldBox, newBox) => {
+                        const minSize = 50;
+                        const maxSize = Math.min(
+                          imageSize.width,
+                          imageSize.height,
+                        );
 
-                          // Clamp dimensions to stage bounds first
-                          const clampedWidth = Math.max(
-                            minSize,
-                            Math.min(newBox.width, maxSize),
-                          );
-                          const clampedHeight = Math.max(
-                            minSize,
-                            Math.min(newBox.height, maxSize),
-                          );
+                        // Clamp dimensions to stage bounds first
+                        const clampedWidth = Math.max(
+                          minSize,
+                          Math.min(newBox.width, maxSize),
+                        );
+                        const clampedHeight = Math.max(
+                          minSize,
+                          Math.min(newBox.height, maxSize),
+                        );
 
-                          // Enforce square using average
-                          const size = (clampedWidth + clampedHeight) / 2;
+                        // Enforce square using average
+                        const size = (clampedWidth + clampedHeight) / 2;
 
-                          // Clamp position to keep square within bounds
-                          const x = Math.max(
-                            0,
-                            Math.min(newBox.x, imageSize.width - size),
-                          );
-                          const y = Math.max(
-                            0,
-                            Math.min(newBox.y, imageSize.height - size),
-                          );
+                        // Clamp position to keep square within bounds
+                        const x = Math.max(
+                          0,
+                          Math.min(newBox.x, imageSize.width - size),
+                        );
+                        const y = Math.max(
+                          0,
+                          Math.min(newBox.y, imageSize.height - size),
+                        );
 
-                          return {
-                            ...newBox,
-                            x,
-                            y,
-                            width: size,
-                            height: size,
-                          };
-                        }}
-                      />
-                    </Layer>
-                  </Stage>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              {t("wizard.step2.selectCameraPrompt")}
-            </div>
-          )}
+                        return {
+                          ...newBox,
+                          x,
+                          y,
+                          width: size,
+                          height: size,
+                        };
+                      }}
+                    />
+                  </Layer>
+                </Stage>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center text-muted-foreground">
+                {t("wizard.step2.selectCameraPrompt")}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
