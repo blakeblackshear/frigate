@@ -272,6 +272,8 @@
         "title": "Stream Validation",
         "videoCodecGood": "Video codec is {{codec}}.",
         "audioCodecGood": "Audio codec is {{codec}}.",
+        "resolutionHigh": "A resolution of {{resolution}} may cause increased resource usage.",
+        "resolutionLow": "A resolution of {{resolution}} may be too low for reliable detection of small objects.",
         "noAudioWarning": "No audio detected for this stream, recordings will not have audio.",
         "audioCodecRecordError": "The AAC audio codec is required to support audio in recordings.",
         "audioCodecRequired": "An audio stream is required to support audio detection.",
