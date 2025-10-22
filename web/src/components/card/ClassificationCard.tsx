@@ -219,10 +219,10 @@ export function GroupedClassificationCard({
     const bestTyped: ClassificationItemData = best;
     return {
       ...bestTyped,
-      name: event ? (event.sub_label ?? "") : bestTyped.name,
+      name: event ? (event.sub_label ?? t("details.unknown")) : bestTyped.name,
       score: event?.data?.sub_label_score || bestTyped.score,
     };
-  }, [group, event]);
+  }, [group, event, t]);
 
   const bestScoreStatus = useMemo(() => {
     if (!bestItem?.score || !threshold) {
