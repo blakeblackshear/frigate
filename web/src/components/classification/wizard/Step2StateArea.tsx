@@ -16,6 +16,8 @@ import { useResizeObserver } from "@/hooks/resize-observer";
 import { useApiHost } from "@/api";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 import Heading from "@/components/ui/heading";
+import { isMobile } from "react-device-detect";
+import { cn } from "@/lib/utils";
 
 export type CameraAreaConfig = {
   camera: string;
@@ -222,8 +224,18 @@ export default function Step2StateArea({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-4 overflow-hidden">
-        <div className="flex w-64 flex-shrink-0 flex-col gap-2 overflow-y-auto rounded-lg bg-secondary p-4">
+      <div
+        className={cn(
+          "flex gap-4 overflow-hidden",
+          isMobile ? "flex-col" : "flex-row",
+        )}
+      >
+        <div
+          className={cn(
+            "flex flex-shrink-0 flex-col gap-2 overflow-y-auto rounded-lg bg-secondary p-4",
+            isMobile ? "w-full" : "w-64",
+          )}
+        >
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">{t("wizard.step2.cameras")}</h3>
             {availableCameras.length > 0 ? (

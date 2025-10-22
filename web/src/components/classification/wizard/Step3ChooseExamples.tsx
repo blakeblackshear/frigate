@@ -15,6 +15,8 @@ import { Step1FormData } from "./Step1NameAndDefine";
 import { Step2FormData } from "./Step2StateArea";
 import useSWR from "swr";
 import { baseUrl } from "@/api/baseUrl";
+import { isMobile } from "react-device-detect";
+import { cn } from "@/lib/utils";
 
 export type Step3FormData = {
   examplesGenerated: boolean;
@@ -245,7 +247,12 @@ export default function Step3ChooseExamples({
           <div className="text-sm text-muted-foreground">
             {t("wizard.step3.description")}
           </div>
-          <div className="rounded-lg bg-secondary/30 p-4">
+          <div
+            className={cn(
+              "rounded-lg bg-secondary/30 p-4",
+              isMobile && "max-h-[60vh] overflow-y-auto",
+            )}
+          >
             {!unknownImages || unknownImages.length === 0 ? (
               <div className="flex h-[40vh] items-center justify-center">
                 <p className="text-muted-foreground">
@@ -253,11 +260,11 @@ export default function Step3ChooseExamples({
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-6">
                 {unknownImages.slice(0, 24).map((imageName, index) => (
                   <div
                     key={imageName}
-                    className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg border bg-background transition-all hover:ring-2 hover:ring-primary"
+                    className="group relative aspect-square overflow-hidden rounded-lg border bg-background"
                   >
                     <img
                       src={`${baseUrl}clips/${step1Data.modelName}/train/${imageName}`}

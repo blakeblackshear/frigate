@@ -292,11 +292,9 @@ class EmbeddingMaintainer(threading.Thread):
                 f"Received classification config update for model: {model_name}"
             )
 
-            # Update config
             self.config.classification.custom[model_name] = model_config
-
-            # Check if processor already exists for this model
             existing_processor_index = None
+
             for i, processor in enumerate(self.realtime_processors):
                 if isinstance(
                     processor,
@@ -309,14 +307,12 @@ class EmbeddingMaintainer(threading.Thread):
                         existing_processor_index = i
                         break
 
-            # Remove existing processor if found
             if existing_processor_index is not None:
                 logger.info(
                     f"Removing existing classification processor for model: {model_name}"
                 )
                 self.realtime_processors.pop(existing_processor_index)
 
-            # Add new processor
             if model_config.state_config is not None:
                 processor = CustomStateClassificationProcessor(
                     self.config, model_config, self.requestor, self.metrics
