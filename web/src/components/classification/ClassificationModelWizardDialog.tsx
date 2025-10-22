@@ -19,14 +19,12 @@ import { isDesktop } from "react-device-detect";
 const OBJECT_STEPS = [
   "wizard.steps.nameAndDefine",
   "wizard.steps.chooseExamples",
-  "wizard.steps.train",
 ];
 
 const STATE_STEPS = [
   "wizard.steps.nameAndDefine",
   "wizard.steps.stateArea",
   "wizard.steps.chooseExamples",
-  "wizard.steps.train",
 ];
 
 type ClassificationModelWizardDialogProps = {
@@ -116,10 +114,6 @@ export default function ClassificationModelWizardDialog({
     dispatch({ type: "SET_STEP_2", payload: data });
   };
 
-  const handleStep3Next = (data: Step3FormData) => {
-    dispatch({ type: "SET_STEP_3", payload: data });
-  };
-
   const handleBack = () => {
     dispatch({ type: "PREVIOUS_STEP" });
   };
@@ -185,7 +179,7 @@ export default function ClassificationModelWizardDialog({
                 step1Data={wizardState.step1Data}
                 step2Data={wizardState.step2Data}
                 initialData={wizardState.step3Data}
-                onNext={handleStep3Next}
+                onClose={onClose}
                 onBack={handleBack}
               />
             )}

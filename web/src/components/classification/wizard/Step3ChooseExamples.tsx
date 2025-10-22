@@ -25,7 +25,7 @@ type Step3ChooseExamplesProps = {
   step1Data: Step1FormData;
   step2Data?: Step2FormData;
   initialData?: Partial<Step3FormData>;
-  onNext: (data: Step3FormData) => void;
+  onClose: () => void;
   onBack: () => void;
 };
 
@@ -33,7 +33,7 @@ export default function Step3ChooseExamples({
   step1Data,
   step2Data,
   initialData,
-  onNext,
+  onClose,
   onBack,
 }: Step3ChooseExamplesProps) {
   const { t } = useTranslation(["views/classificationModel"]);
@@ -202,7 +202,7 @@ export default function Step3ChooseExamples({
       await axios.post(`/classification/${step1Data.modelName}/train`);
 
       toast.success(t("wizard.step3.trainingStarted"));
-      onNext({ examplesGenerated: true, imageClassifications });
+      onClose();
     } catch (error) {
       const axiosError = error as {
         response?: { data?: { message?: string; detail?: string } };
@@ -218,7 +218,7 @@ export default function Step3ChooseExamples({
         t("wizard.step3.errors.classifyFailed", { error: errorMessage }),
       );
     }
-  }, [onNext, imageClassifications, step1Data, step2Data, t]);
+  }, [onClose, imageClassifications, step1Data, step2Data, t]);
 
   const allImagesClassified = useMemo(() => {
     if (!unknownImages || unknownImages.length === 0) return false;
