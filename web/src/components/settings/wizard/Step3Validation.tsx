@@ -500,6 +500,21 @@ function StreamIssues({
       }
     }
 
+    if (stream.roles.includes("detect") && stream.resolution) {
+      const [width, height] = stream.resolution.split("x").map(Number);
+      if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+        const minDimension = Math.min(width, height);
+        if (minDimension > 720) {
+          result.push({
+            type: "warning",
+            message: t("cameraWizard.step3.issues.resolutionHigh", {
+              resolution: stream.resolution,
+            }),
+          });
+        }
+      }
+    }
+
     // Substream Check
     if (
       wizardData.brandTemplate == "dahua" &&
