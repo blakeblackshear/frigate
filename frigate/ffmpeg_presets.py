@@ -246,7 +246,7 @@ def parse_preset_hardware_acceleration_scale(
         ",hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5" in scale
         and os.environ.get("FFMPEG_DISABLE_GAMMA_EQUALIZER") is not None
     ):
-        scale.replace(
+        scale = scale.replace(
             ",hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5",
             ":format=nv12,hwdownload,format=nv12,format=yuv420p",
         )
