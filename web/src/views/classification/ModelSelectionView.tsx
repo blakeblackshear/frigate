@@ -139,7 +139,7 @@ function ModelCard({ config, onClick }: ModelCardProps) {
   }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
 
   const coverImage = useMemo(() => {
-    if (!dataset) {
+    if (!dataset?.length) {
       return undefined;
     }
 
