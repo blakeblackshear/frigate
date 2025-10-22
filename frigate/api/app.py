@@ -401,6 +401,13 @@ def config_set(request: Request, body: AppConfigSetBody):
                 CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
                 settings,
             )
+        elif body.update_topic and "/config/" in body.update_topic[1:]:
+            # Handle nested config updates (e.g., config/classification/custom/{name})
+            settings = config.get_nested_object(body.update_topic)
+            if settings:
+                request.app.config_publisher.publisher.publish(
+                    body.update_topic, settings
+                )
 
     return JSONResponse(
         content=(

@@ -98,12 +98,16 @@
       },
       "retryGenerate": "Retry Generation",
       "selectClass": "Select class...",
+      "none": "None",
       "noImages": "No sample images generated",
+      "classifying": "Classifying & Training...",
+      "trainingStarted": "Training started successfully",
       "errors": {
         "noCameras": "No cameras configured",
         "noObjectLabel": "No object label selected",
         "generateFailed": "Failed to generate examples: {{error}}",
-        "generationFailed": "Generation failed. Please try again."
+        "generationFailed": "Generation failed. Please try again.",
+        "classifyFailed": "Failed to classify images: {{error}}"
       },
       "generateSuccess": "Successfully generated sample images"
     }

@@ -45,14 +45,14 @@ export default function Step3ChooseExamples({
     [imageName: string]: string;
   }>(initialData?.imageClassifications || {});
 
-  const { data: dataset, mutate: refreshDataset } = useSWR<{
-    [id: string]: string[];
-  }>(hasGenerated ? `classification/${step1Data.modelName}/dataset` : null);
+  const { data: trainImages, mutate: refreshTrainImages } = useSWR<string[]>(
+    hasGenerated ? `classification/${step1Data.modelName}/train` : null,
+  );
 
   const unknownImages = useMemo(() => {
-    if (!dataset || !dataset.unknown) return [];
-    return dataset.unknown;
-  }, [dataset]);
+    if (!trainImages) return [];
+    return trainImages;
+  }, [trainImages]);
 
   const handleClassificationChange = useCallback(
     (imageName: string, className: string) => {
@@ -104,7 +104,7 @@ export default function Step3ChooseExamples({
       setHasGenerated(true);
       toast.success(t("wizard.step3.generateSuccess"));
 
-      await refreshDataset();
+      await refreshTrainImages();
     } catch (error) {
       const axiosError = error as {
         response?: { data?: { message?: string; detail?: string } };
@@ -122,7 +122,7 @@ export default function Step3ChooseExamples({
     } finally {
       setIsGenerating(false);
     }
-  }, [step1Data, step2Data, t, refreshDataset]);
+  }, [step1Data, step2Data, t, refreshTrainImages]);
 
   useEffect(() => {
     if (!hasGenerated && !isGenerating) {
@@ -131,9 +131,94 @@ export default function Step3ChooseExamples({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleContinue = useCallback(() => {
-    onNext({ examplesGenerated: true, imageClassifications });
-  }, [onNext, imageClassifications]);
+  const handleContinue = useCallback(async () => {
+    try {
+      // Step 1: Create config for the new model
+      const modelConfig: {
+        enabled: boolean;
+        name: string;
+        threshold: number;
+        state_config?: {
+          cameras: Record<string, { crop: number[] }>;
+          motion: boolean;
+        };
+        object_config?: { objects: string[]; classification_type: string };
+      } = {
+        enabled: true,
+        name: step1Data.modelName,
+        threshold: 0.8,
+      };
+
+      if (step1Data.modelType === "state") {
+        // State model config
+        const cameras: Record<string, { crop: number[] }> = {};
+        step2Data?.cameraAreas.forEach((area) => {
+          cameras[area.camera] = {
+            crop: area.crop,
+          };
+        });
+
+        modelConfig.state_config = {
+          cameras,
+          motion: true,
+        };
+      } else {
+        // Object model config
+        modelConfig.object_config = {
+          objects: step1Data.objectLabel ? [step1Data.objectLabel] : [],
+          classification_type: step1Data.objectType || "sub_label",
+        } as { objects: string[]; classification_type: string };
+      }
+
+      // Update config via config API
+      await axios.put("/config/set", {
+        requires_restart: 0,
+        update_topic: `config/classification/custom/${step1Data.modelName}`,
+        config_data: {
+          classification: {
+            custom: {
+              [step1Data.modelName]: modelConfig,
+            },
+          },
+        },
+      });
+
+      // Step 2: Classify each image by moving it to the correct category folder
+      for (const [imageName, className] of Object.entries(
+        imageClassifications,
+      )) {
+        if (!className) continue;
+
+        await axios.post(
+          `/classification/${step1Data.modelName}/dataset/categorize`,
+          {
+            training_file: imageName,
+            category: className === "none" ? "none" : className,
+          },
+        );
+      }
+
+      // Step 3: Kick off training
+      await axios.post(`/classification/${step1Data.modelName}/train`);
+
+      toast.success(t("wizard.step3.trainingStarted"));
+      onNext({ examplesGenerated: true, imageClassifications });
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string; detail?: string } };
+        message?: string;
+      };
+      const errorMessage =
+        axiosError.response?.data?.message ||
+        axiosError.response?.data?.detail ||
+        axiosError.message ||
+        "Failed to classify images";
+
+      toast.error(
+        t("wizard.step3.errors.classifyFailed", { error: errorMessage }),
+      );
+    }
+  }, [onNext, imageClassifications, step1Data, step2Data, t]);
 
   const allImagesClassified = useMemo(() => {
     if (!unknownImages || unknownImages.length === 0) return false;
@@ -175,7 +260,7 @@ export default function Step3ChooseExamples({
                     className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg border bg-background transition-all hover:ring-2 hover:ring-primary"
                   >
                     <img
-                      src={`${baseUrl}clips/${step1Data.modelName}/dataset/unknown/${imageName}`}
+                      src={`${baseUrl}clips/${step1Data.modelName}/train/${imageName}`}
                       alt={`Example ${index + 1}`}
                       className="h-full w-full object-cover"
                     />
@@ -192,6 +277,14 @@ export default function Step3ChooseExamples({
                           />
                         </SelectTrigger>
                         <SelectContent>
+                          {step1Data.modelType === "object" && (
+                            <SelectItem
+                              value="none"
+                              className="cursor-pointer text-xs"
+                            >
+                              {t("wizard.step3.none")}
+                            </SelectItem>
+                          )}
                           {step1Data.classes.map((className) => (
                             <SelectItem
                               key={className}

@@ -225,13 +225,13 @@ def collect_state_classification_examples(
     # Step 4: Select 24 most visually distinct images (they're already cropped)
     distinct_images = _select_distinct_images(keyframes, target_count=24)
 
-    # Step 5: Save to dataset directory (in "unknown" subfolder for unlabeled data)
-    unknown_dir = os.path.join(dataset_dir, "unknown")
-    os.makedirs(unknown_dir, exist_ok=True)
+    # Step 5: Save to train directory for later classification
+    train_dir = os.path.join(CLIPS_DIR, model_name, "train")
+    os.makedirs(train_dir, exist_ok=True)
 
     saved_count = 0
     for idx, image_path in enumerate(distinct_images):
-        dest_path = os.path.join(unknown_dir, f"example_{idx:03d}.jpg")
+        dest_path = os.path.join(train_dir, f"example_{idx:03d}.jpg")
         try:
             img = cv2.imread(image_path)
 
@@ -549,13 +549,13 @@ def collect_object_classification_examples(
     distinct_images = _select_distinct_images(thumbnails, target_count=24)
     logger.debug(f"Selected {len(distinct_images)} distinct images")
 
-    # Step 5: Save to dataset directory
-    unknown_dir = os.path.join(dataset_dir, "unknown")
-    os.makedirs(unknown_dir, exist_ok=True)
+    # Step 5: Save to train directory for later classification
+    train_dir = os.path.join(CLIPS_DIR, model_name, "train")
+    os.makedirs(train_dir, exist_ok=True)
 
     saved_count = 0
     for idx, image_path in enumerate(distinct_images):
-        dest_path = os.path.join(unknown_dir, f"example_{idx:03d}.jpg")
+        dest_path = os.path.join(train_dir, f"example_{idx:03d}.jpg")
         try:
             img = cv2.imread(image_path)
 
@@ -573,7 +573,7 @@ def collect_object_classification_examples(
         logger.warning(f"Failed to clean up temp directory: {e}")
 
     logger.debug(
-        f"Successfully collected {saved_count} classification examples in {unknown_dir}"
+        f"Successfully collected {saved_count} classification examples in {train_dir}"
     )
 
 
