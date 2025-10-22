@@ -359,12 +359,9 @@ export function GroupedClassificationCard({
             </Header>
             <div
               className={cn(
-                "size-full gap-2",
+                "grid w-full auto-rows-min grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-8",
                 isDesktop && "p-2",
-                isMobile && "scrollbar-container w-full flex-1 overflow-y-auto",
-                isDesktop
-                  ? "grid grid-cols-6"
-                  : "grid grid-cols-2 justify-items-center gap-2 px-2 sm:grid-cols-5 lg:grid-cols-6",
+                isMobile && "scrollbar-container flex-1 overflow-y-auto",
               )}
             >
               {group.map((data: ClassificationItemData) => (
