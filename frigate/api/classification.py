@@ -17,6 +17,8 @@ from frigate.api.auth import require_role
 from frigate.api.defs.request.classification_body import (
     AudioTranscriptionBody,
     DeleteFaceImagesBody,
+    GenerateObjectExamplesBody,
+    GenerateStateExamplesBody,
     RenameFaceBody,
 )
 from frigate.api.defs.response.classification_response import (
@@ -30,6 +32,10 @@ from frigate.config.camera import DetectConfig
 from frigate.const import CLIPS_DIR, FACE_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event
+from frigate.util.classification import (
+    collect_object_classification_examples,
+    collect_state_classification_examples,
+)
 from frigate.util.path import get_event_snapshot
 
 logger = logging.getLogger(__name__)
@@ -756,3 +762,73 @@ def delete_classification_train_images(request: Request, name: str, body: dict =
         content=({"success": True, "message": "Successfully deleted faces."}),
         status_code=200,
     )
+
+
+@router.post(
+    "/classification/generate_examples/state",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Generate state classification examples",
+)
+async def generate_state_examples(request: Request, body: GenerateStateExamplesBody):
+    """Generate examples for state classification."""
+    try:
+        cameras_with_pixels = {}
+        config: FrigateConfig = request.app.frigate_config
+
+        for camera_name, crop in body.cameras.items():
+            if camera_name not in config.cameras:
+                continue
+
+            camera_config = config.cameras[camera_name]
+            width = camera_config.detect.width
+            height = camera_config.detect.height
+
+            x1 = int(crop[0] * width)
+            y1 = int(crop[1] * height)
+            x2 = int((crop[0] + crop[2]) * width)
+            y2 = int((crop[1] + crop[3]) * height)
+
+            cameras_with_pixels[camera_name] = (x1, y1, x2, y2)
+
+        collect_state_classification_examples(body.model_name, cameras_with_pixels)
+
+        return JSONResponse(
+            content={"success": True, "message": "Example generation completed"},
+            status_code=200,
+        )
+    except Exception as e:
+        logger.error(f"Failed to generate state examples: {e}")
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Failed to generate examples: {str(e)}",
+            },
+            status_code=500,
+        )
+
+
+@router.post(
+    "/classification/generate_examples/object",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Generate object classification examples",
+)
+async def generate_object_examples(request: Request, body: GenerateObjectExamplesBody):
+    """Generate examples for object classification."""
+    try:
+        collect_object_classification_examples(body.model_name, body.label)
+
+        return JSONResponse(
+            content={"success": True, "message": "Example generation completed"},
+            status_code=200,
+        )
+    except Exception as e:
+        logger.error(f"Failed to generate object examples: {e}")
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Failed to generate examples: {str(e)}",
+            },
+            status_code=500,
+        )

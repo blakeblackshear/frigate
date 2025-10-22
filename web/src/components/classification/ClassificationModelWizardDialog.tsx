@@ -10,6 +10,9 @@ import {
 import { useReducer, useMemo } from "react";
 import Step1NameAndDefine, { Step1FormData } from "./wizard/Step1NameAndDefine";
 import Step2StateArea, { Step2FormData } from "./wizard/Step2StateArea";
+import Step3ChooseExamples, {
+  Step3FormData,
+} from "./wizard/Step3ChooseExamples";
 import { cn } from "@/lib/utils";
 import { isDesktop } from "react-device-detect";
 
@@ -35,8 +38,7 @@ type WizardState = {
   currentStep: number;
   step1Data?: Step1FormData;
   step2Data?: Step2FormData;
-  // Future steps can be added here
-  // step3Data?: Step3FormData;
+  step3Data?: Step3FormData;
 };
 
 type WizardAction =
@@ -44,6 +46,7 @@ type WizardAction =
   | { type: "PREVIOUS_STEP" }
   | { type: "SET_STEP_1"; payload: Step1FormData }
   | { type: "SET_STEP_2"; payload: Step2FormData }
+  | { type: "SET_STEP_3"; payload: Step3FormData }
   | { type: "RESET" };
 
 const initialState: WizardState = {
@@ -63,6 +66,12 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         ...state,
         step2Data: action.payload,
         currentStep: 2,
+      };
+    case "SET_STEP_3":
+      return {
+        ...state,
+        step3Data: action.payload,
+        currentStep: 3,
       };
     case "NEXT_STEP":
       return {
@@ -105,6 +114,10 @@ export default function ClassificationModelWizardDialog({
 
   const handleStep2Next = (data: Step2FormData) => {
     dispatch({ type: "SET_STEP_2", payload: data });
+  };
+
+  const handleStep3Next = (data: Step3FormData) => {
+    dispatch({ type: "SET_STEP_3", payload: data });
   };
 
   const handleBack = () => {
@@ -160,6 +173,19 @@ export default function ClassificationModelWizardDialog({
               <Step2StateArea
                 initialData={wizardState.step2Data}
                 onNext={handleStep2Next}
+                onBack={handleBack}
+              />
+            )}
+          {((wizardState.currentStep === 2 &&
+            wizardState.step1Data?.modelType === "state") ||
+            (wizardState.currentStep === 1 &&
+              wizardState.step1Data?.modelType === "object")) &&
+            wizardState.step1Data && (
+              <Step3ChooseExamples
+                step1Data={wizardState.step1Data}
+                step2Data={wizardState.step2Data}
+                initialData={wizardState.step3Data}
+                onNext={handleStep3Next}
                 onBack={handleBack}
               />
             )}

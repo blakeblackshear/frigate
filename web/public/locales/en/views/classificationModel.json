@@ -89,6 +89,23 @@
       "selectCamera": "Select Camera",
       "noCameras": "Click + to add cameras",
       "selectCameraPrompt": "Select a camera from the list to define its monitoring area"
+    },
+    "step3": {
+      "description": "Classify the example images below. These samples will be used to train your model.",
+      "generating": {
+        "title": "Generating Sample Images",
+        "description": "We're pulling representative images from your recordings. This may take a moment..."
+      },
+      "retryGenerate": "Retry Generation",
+      "selectClass": "Select class...",
+      "noImages": "No sample images generated",
+      "errors": {
+        "noCameras": "No cameras configured",
+        "noObjectLabel": "No object label selected",
+        "generateFailed": "Failed to generate examples: {{error}}",
+        "generationFailed": "Generation failed. Please try again."
+      },
+      "generateSuccess": "Successfully generated sample images"
     }
   }
 }

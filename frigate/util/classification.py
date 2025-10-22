@@ -145,7 +145,6 @@ class ClassificationTrainingProcess(FrigateProcess):
             f.write(tflite_model)
 
 
-@staticmethod
 def kickoff_model_training(
     embeddingRequestor: EmbeddingsRequestor, model_name: str
 ) -> None:
@@ -222,12 +221,8 @@ def collect_state_classification_examples(
         "/usr/lib/ffmpeg/7.0/bin/ffmpeg", timestamps, temp_dir, cameras
     )
 
-    if len(keyframes) < 20:
-        logger.warning(f"Only extracted {len(keyframes)} keyframes, need at least 20")
-        return
-
-    # Step 4: Select 20 most visually distinct images (they're already cropped)
-    distinct_images = _select_distinct_images(keyframes, target_count=20)
+    # Step 4: Select 24 most visually distinct images (they're already cropped)
+    distinct_images = _select_distinct_images(keyframes, target_count=24)
 
     # Step 5: Save to dataset directory (in "unknown" subfolder for unlabeled data)
     unknown_dir = os.path.join(dataset_dir, "unknown")
@@ -502,66 +497,52 @@ def _select_distinct_images(
 
 @staticmethod
 def collect_object_classification_examples(
-    model_name: str, label: str, cameras: list[str]
+    model_name: str,
+    label: str,
 ) -> None:
     """
     Collect representative object classification examples from event thumbnails.
 
     This function:
-    1. Queries events for the specified label and cameras
+    1. Queries events for the specified label
     2. Selects 100 balanced events across different cameras and times
-    3. Retrieves thumbnails for selected events
-    4. Selects 20 most visually distinct thumbnails
-    5. Saves them to the dataset directory
+    3. Retrieves thumbnails for selected events (with 33% center crop applied)
+    4. Selects 24 most visually distinct thumbnails
+    5. Saves to dataset directory
 
     Args:
         model_name: Name of the classification model
         label: Object label to collect (e.g., "person", "car")
         cameras: List of camera names to collect examples from
     """
-    logger.info(
-        f"Collecting examples for {model_name} with label '{label}' from {len(cameras)} cameras"
-    )
-
     dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
     temp_dir = os.path.join(dataset_dir, "temp")
     os.makedirs(temp_dir, exist_ok=True)
 
     # Step 1: Query events for the specified label and cameras
     events = list(
-        Event.select()
-        .where(
-            (Event.label == label)
-            & (Event.camera.in_(cameras))
-            & (Event.false_positive == False)
-        )
-        .order_by(Event.start_time.asc())
+        Event.select().where((Event.label == label)).order_by(Event.start_time.asc())
     )
 
     if not events:
-        logger.warning(f"No events found for label '{label}' on cameras: {cameras}")
+        logger.warning(f"No events found for label '{label}'")
         return
 
-    logger.info(f"Found {len(events)} events")
+    logger.debug(f"Found {len(events)} events")
 
     # Step 2: Select balanced events (100 samples)
     selected_events = _select_balanced_events(events, target_count=100)
-    logger.info(f"Selected {len(selected_events)} events")
+    logger.debug(f"Selected {len(selected_events)} events")
 
     # Step 3: Extract thumbnails from events
     thumbnails = _extract_event_thumbnails(selected_events, temp_dir)
+    logger.debug(f"Successfully extracted {len(thumbnails)} thumbnails")
 
-    if len(thumbnails) < 20:
-        logger.warning(f"Only extracted {len(thumbnails)} thumbnails, need at least 20")
-        return
+    # Step 4: Select 24 most visually distinct thumbnails
+    distinct_images = _select_distinct_images(thumbnails, target_count=24)
+    logger.debug(f"Selected {len(distinct_images)} distinct images")
 
-    logger.info(f"Successfully extracted {len(thumbnails)} thumbnails")
-
-    # Step 4: Select 20 most visually distinct thumbnails
-    distinct_images = _select_distinct_images(thumbnails, target_count=20)
-    logger.info(f"Selected {len(distinct_images)} distinct images")
-
-    # Step 5: Save to dataset directory (in "unknown" subfolder for unlabeled data)
+    # Step 5: Save to dataset directory
     unknown_dir = os.path.join(dataset_dir, "unknown")
     os.makedirs(unknown_dir, exist_ok=True)
 
@@ -584,7 +565,7 @@ def collect_object_classification_examples(
     except Exception as e:
         logger.warning(f"Failed to clean up temp directory: {e}")
 
-    logger.info(
+    logger.debug(
         f"Successfully collected {saved_count} classification examples in {unknown_dir}"
     )
 
@@ -663,7 +644,46 @@ def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]
                 img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
                 if img is not None:
-                    resized = cv2.resize(img, (224, 224))
+                    height, width = img.shape[:2]
+
+                    # Calculate crop based on object size relative to the thumbnail region
+                    crop_size = 1.0  # Default to no crop
+                    if event.data and "box" in event.data and "region" in event.data:
+                        # Box is [x, y, w, h] format
+                        box = event.data["box"]
+                        region = event.data["region"]
+
+                        if len(box) == 4 and len(region) == 4:
+                            box_w, box_h = box[2], box[3]
+                            region_w, region_h = region[2], region[3]
+
+                            # Calculate what percentage of the region the box occupies
+                            box_area = (box_w * box_h) / (region_w * region_h)
+
+                            # Crop inversely proportional to object size in thumbnail
+                            # Small objects need more crop (zoom in), large objects need less
+                            if box_area < 0.05:  # Very small (< 5%)
+                                crop_size = 0.4
+                            elif box_area < 0.10:  # Small (5-10%)
+                                crop_size = 0.5
+                            elif box_area < 0.20:  # Medium-small (10-20%)
+                                crop_size = 0.65
+                            elif box_area < 0.35:  # Medium (20-35%)
+                                crop_size = 0.80
+                            else:  # Large (>35%)
+                                crop_size = 0.95
+
+                    crop_width = int(width * crop_size)
+                    crop_height = int(height * crop_size)
+
+                    # Calculate center crop coordinates
+                    x1 = (width - crop_width) // 2
+                    y1 = (height - crop_height) // 2
+                    x2 = x1 + crop_width
+                    y2 = y1 + crop_height
+
+                    cropped = img[y1:y2, x1:x2]
+                    resized = cv2.resize(cropped, (224, 224))
                     output_path = os.path.join(output_dir, f"thumbnail_{idx:04d}.jpg")
                     cv2.imwrite(output_path, resized)
                     thumbnail_paths.append(output_path)
