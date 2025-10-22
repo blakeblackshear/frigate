@@ -39,9 +39,11 @@ export default function ModelSelectionView({
       return [];
     }
 
-    const allModels = Object.values(config.classification.custom);
+    return Object.values(config.classification.custom);
+  }, [config]);
 
-    return allModels.filter((model) => {
+  const selectedClassificationConfigs = useMemo(() => {
+    return classificationConfigs.filter((model) => {
       if (pageToggle == "objects" && model.object_config != undefined) {
         return true;
       }
@@ -52,7 +54,7 @@ export default function ModelSelectionView({
 
       return false;
     });
-  }, [config, pageToggle]);
+  }, [classificationConfigs, pageToggle]);
 
   // new model wizard
 
@@ -115,7 +117,7 @@ export default function ModelSelectionView({
         </div>
       </div>
       <div className="flex size-full gap-2 p-2">
-        {classificationConfigs.map((config) => (
+        {selectedClassificationConfigs.map((config) => (
           <ModelCard
             key={config.name}
             config={config}
