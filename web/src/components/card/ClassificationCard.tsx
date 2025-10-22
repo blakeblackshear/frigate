@@ -293,33 +293,12 @@ export function GroupedClassificationCard({
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <>
-            {isDesktop && (
-              <div className="absolute right-10 top-4 flex flex-row justify-between">
-                {event && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="cursor-pointer"
-                        tabIndex={-1}
-                        onClick={() => {
-                          navigate(`/explore?event_id=${event.id}`);
-                        }}
-                      >
-                        <LuSearch className="size-4 text-secondary-foreground" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipPortal>
-                      <TooltipContent>
-                        {t("details.item.button.viewInExplore", {
-                          ns: "views/explore",
-                        })}
-                      </TooltipContent>
-                    </TooltipPortal>
-                  </Tooltip>
-                )}
-              </div>
-            )}
-            <Header className={cn("mx-2", isMobile && "flex-shrink-0")}>
+            <Header
+              className={cn(
+                "mx-2 flex flex-row items-center gap-4",
+                isMobile && "flex-shrink-0",
+              )}
+            >
               <div>
                 <ContentTitle
                   className={cn(
@@ -349,6 +328,32 @@ export function GroupedClassificationCard({
                   )}
                 </ContentDescription>
               </div>
+              {isDesktop && (
+                <div className="flex flex-row justify-between">
+                  {event && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className="cursor-pointer"
+                          tabIndex={-1}
+                          onClick={() => {
+                            navigate(`/explore?event_id=${event.id}`);
+                          }}
+                        >
+                          <LuSearch className="size-4 text-secondary-foreground" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>
+                          {t("details.item.button.viewInExplore", {
+                            ns: "views/explore",
+                          })}
+                        </TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                  )}
+                </div>
+              )}
             </Header>
             <div
               className={cn(
