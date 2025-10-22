@@ -34,6 +34,7 @@ import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { processZoneName } from "@/utils/zoneUtil";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -146,15 +147,7 @@ export default function ZoneEditPane({
               "masksAndZones.form.zoneName.error.mustNotContainPeriod",
             ),
           },
-        )
-        .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
-          message: t("masksAndZones.form.zoneName.error.hasIllegalCharacter"),
-        })
-        .refine((value: string) => /[a-zA-Z]/.test(value), {
-          message: t(
-            "masksAndZones.form.zoneName.error.mustHaveAtLeastOneLetter",
-          ),
-        }),
+        ),
       inertia: z.coerce
         .number()
         .min(1, {
@@ -246,7 +239,11 @@ export default function ZoneEditPane({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
     defaultValues: {
-      name: polygon?.name ?? "",
+      name:
+        polygon?.camera && polygon?.name
+          ? config?.cameras[polygon.camera]?.zones[polygon.name]
+              ?.friendly_name || polygon?.name
+          : "",
       inertia:
         polygon?.camera &&
         polygon?.name &&
@@ -305,7 +302,12 @@ export default function ZoneEditPane({
       let alertQueries = "";
       let detectionQueries = "";
 
-      const renamingZone = zoneName != polygon.name && polygon.name != "";
+      const renamingZone =
+        zoneName != polygon.name &&
+        zoneName != polygon.friendlyName &&
+        polygon.name != "";
+
+      const { finalZoneName, friendlyName } = processZoneName(zoneName);
 
       if (renamingZone) {
         // rename - delete old zone and replace with new
@@ -349,7 +351,7 @@ export default function ZoneEditPane({
 
         // make sure new zone name is readded to review
         ({ alertQueries, detectionQueries } = reviewQueries(
-          zoneName,
+          finalZoneName,
           zoneInAlerts,
           zoneInDetections,
           polygon.camera,
@@ -367,7 +369,7 @@ export default function ZoneEditPane({
       let objectQueries = objects
         .map(
           (object) =>
-            `&cameras.${polygon?.camera}.zones.${zoneName}.objects=${object}`,
+            `&cameras.${polygon?.camera}.zones.${finalZoneName}.objects=${object}`,
         )
         .join("");
 
@@ -379,45 +381,50 @@ export default function ZoneEditPane({
 
       // deleting objects
       if (!objectQueries && !same_objects && !renamingZone) {
-        objectQueries = `&cameras.${polygon?.camera}.zones.${zoneName}.objects`;
+        objectQueries = `&cameras.${polygon?.camera}.zones.${finalZoneName}.objects`;
       }
 
       let inertiaQuery = "";
       if (inertia) {
-        inertiaQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.inertia=${inertia}`;
+        inertiaQuery = `&cameras.${polygon?.camera}.zones.${finalZoneName}.inertia=${inertia}`;
       }
 
       let loiteringTimeQuery = "";
       if (loitering_time >= 0) {
-        loiteringTimeQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}`;
+        loiteringTimeQuery = `&cameras.${polygon?.camera}.zones.${finalZoneName}.loitering_time=${loitering_time}`;
       }
 
       let distancesQuery = "";
       const distances = [lineA, lineB, lineC, lineD].filter(Boolean).join(",");
       if (speedEstimation) {
-        distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances=${distances}`;
+        distancesQuery = `&cameras.${polygon?.camera}.zones.${finalZoneName}.distances=${distances}`;
       } else {
         if (distances != "") {
-          distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances`;
+          distancesQuery = `&cameras.${polygon?.camera}.zones.${finalZoneName}.distances`;
         }
       }
 
       let speedThresholdQuery = "";
       if (speed_threshold >= 0 && speedEstimation) {
-        speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold=${speed_threshold}`;
+        speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${finalZoneName}.speed_threshold=${speed_threshold}`;
       } else {
         if (
           polygon?.camera &&
           polygon?.name &&
           config?.cameras[polygon.camera]?.zones[polygon.name]?.speed_threshold
         ) {
-          speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold`;
+          speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${finalZoneName}.speed_threshold`;
         }
+      }
+
+      let friendlyNameQuery = "";
+      if (friendlyName) {
+        friendlyNameQuery = `&cameras.${polygon?.camera}.zones.${finalZoneName}.friendly_name=${encodeURIComponent(friendlyName)}`;
       }
 
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${alertQueries}${detectionQueries}`,
+          `config/set?cameras.${polygon?.camera}.zones.${finalZoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${friendlyNameQuery}${alertQueries}${detectionQueries}`,
           {
             requires_restart: 0,
             update_topic: `config/cameras/${polygon.camera}/zones`,
@@ -427,7 +434,7 @@ export default function ZoneEditPane({
           if (res.status === 200) {
             toast.success(
               t("masksAndZones.zones.toast.success", {
-                zoneName,
+                zoneName: friendlyName,
               }),
               {
                 position: "top-center",

@@ -53,7 +53,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { MdImageSearch } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
-import { CameraNameLabel } from "../camera/CameraNameLabel";
+import { CameraNameLabel } from "../camera/FriendlyNameLabel";
 
 type InputWithTagsProps = {
   inputFocused: boolean;

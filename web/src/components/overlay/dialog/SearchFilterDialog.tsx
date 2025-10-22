@@ -429,7 +429,8 @@ export function ZoneFilterContent({
               {allZones.map((item) => (
                 <FilterSwitch
                   key={item}
-                  label={item.replaceAll("_", " ")}
+                  label={item}
+                  type={"zone"}
                   isChecked={zones?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {

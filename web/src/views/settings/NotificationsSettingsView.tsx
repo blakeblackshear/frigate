@@ -45,7 +45,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Trans, useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { cn } from "@/lib/utils";
 
@@ -476,7 +476,7 @@ export default function NotificationView({
                                   <FilterSwitch
                                     key={camera.name}
                                     label={camera.name}
-                                    isCameraName={true}
+                                    type={"camera"}
                                     isChecked={field.value?.includes(
                                       camera.name,
                                     )}

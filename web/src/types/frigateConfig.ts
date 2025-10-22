@@ -272,6 +272,7 @@ export interface CameraConfig {
   webui_url: string | null;
   zones: {
     [zoneName: string]: {
+      friendly_name?: string;
       coordinates: string;
       distances: string[];
       filters: Record<string, unknown>;

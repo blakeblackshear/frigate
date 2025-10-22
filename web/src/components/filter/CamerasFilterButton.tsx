@@ -190,7 +190,7 @@ export function CamerasFilterContent({
               key={item}
               isChecked={currentCameras?.includes(item) ?? false}
               label={item}
-              isCameraName={true}
+              type="camera"
               disabled={
                 mainCamera !== undefined &&
                 currentCameras !== undefined &&

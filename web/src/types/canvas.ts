@@ -4,6 +4,7 @@ export type Polygon = {
   typeIndex: number;
   camera: string;
   name: string;
+  friendlyName?: string;
   type: PolygonType;
   objects: string[];
   points: number[][];

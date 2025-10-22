@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Trans, useTranslation } from "react-i18next";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 
 type EditRoleCamerasOverlayProps = {
   show: boolean;

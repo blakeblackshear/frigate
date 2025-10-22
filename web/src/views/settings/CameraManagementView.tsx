@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { isDesktop } from "react-device-detect";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { Switch } from "@/components/ui/switch";
 import { Trans } from "react-i18next";
 import { Separator } from "@/components/ui/separator";

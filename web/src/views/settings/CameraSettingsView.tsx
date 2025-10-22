@@ -42,6 +42,7 @@ import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { isDesktop } from "react-device-detect";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 
 type CameraSettingsViewProps = {
   selectedCamera: string;
@@ -86,16 +87,23 @@ export default function CameraSettingsView({
 
   // zones and labels
 
+  const getZoneName = useCallback(
+    (cameraId: string, zoneId: string) =>
+      resolveZoneName(config, zoneId, cameraId),
+    [config],
+  );
+
   const zones = useMemo(() => {
     if (cameraConfig) {
       return Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
         camera: cameraConfig.name,
         name,
+        friendly_name: getZoneName(cameraConfig.name, name),
         objects: zoneData.objects,
         color: zoneData.color,
       }));
     }
-  }, [cameraConfig]);
+  }, [cameraConfig, getZoneName]);
 
   const alertsLabels = useMemo(() => {
     return cameraConfig?.review.alerts.labels
@@ -526,7 +534,7 @@ export default function CameraSettingsView({
                                           />
                                         </FormControl>
                                         <FormLabel className="font-normal smart-capitalize">
-                                          {zone.name.replaceAll("_", " ")}
+                                          {zone.friendly_name}
                                         </FormLabel>
                                       </FormItem>
                                     )}
@@ -628,7 +636,7 @@ export default function CameraSettingsView({
                                             />
                                           </FormControl>
                                           <FormLabel className="font-normal smart-capitalize">
-                                            {zone.name.replaceAll("_", " ")}
+                                            {zone.friendly_name}
                                           </FormLabel>
                                         </FormItem>
                                       )}

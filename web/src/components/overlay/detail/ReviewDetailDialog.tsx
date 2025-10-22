@@ -47,7 +47,7 @@ import { LuSearch } from "react-icons/lu";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Trans, useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;

@@ -261,7 +261,9 @@ export default function PolygonItem({
               }}
             />
           )}
-          <p className="cursor-default">{polygon.name}</p>
+          <p className="cursor-default">
+            {polygon.friendlyName ?? polygon.name}
+          </p>
         </div>
         <AlertDialog
           open={deleteDialogOpen}
@@ -278,7 +280,7 @@ export default function PolygonItem({
                 ns="views/settings"
                 values={{
                   type: polygon.type.replace("_", " "),
-                  name: polygon.name,
+                  name: polygon.friendlyName || polygon.name,
                 }}
               >
                 masksAndZones.form.polygonDrawing.delete.desc
