@@ -18,7 +18,7 @@ import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 
 export type CameraAreaConfig = {
   camera: string;
-  crop: [number, number, number, number]; // [x, y, width, height] normalized 0-1
+  crop: [number, number, number, number];
 };
 
 export type Step2FormData = {
@@ -110,7 +110,7 @@ export default function Step2StateArea({
     (cameraName: string) => {
       const newArea: CameraAreaConfig = {
         camera: cameraName,
-        crop: [0.385, 0.385, 0.15, 0.15],
+        crop: [0.385, 0.385, 0.535, 0.535],
       };
       setCameraAreas([...cameraAreas, newArea]);
       setSelectedCameraIndex(cameraAreas.length);
@@ -169,13 +169,12 @@ export default function Step2StateArea({
       rect.scaleX(1);
       rect.scaleY(1);
 
-      // Normalize to 0-1 range for storage
-      const x = rect.x() / imageSize.width;
-      const y = rect.y() / imageSize.height;
-      const width = size / imageSize.width;
-      const height = size / imageSize.height;
+      const x1 = rect.x() / imageSize.width;
+      const y1 = rect.y() / imageSize.height;
+      const x2 = (rect.x() + size) / imageSize.width;
+      const y2 = (rect.y() + size) / imageSize.height;
 
-      handleCropChange([x, y, width, height]);
+      handleCropChange([x1, y1, x2, y2]);
     }
   }, [imageSize, handleCropChange]);
 
@@ -322,8 +321,14 @@ export default function Step2StateArea({
                         ref={rectRef}
                         x={selectedCamera.crop[0] * imageSize.width}
                         y={selectedCamera.crop[1] * imageSize.height}
-                        width={selectedCamera.crop[2] * imageSize.width}
-                        height={selectedCamera.crop[2] * imageSize.width}
+                        width={
+                          (selectedCamera.crop[2] - selectedCamera.crop[0]) *
+                          imageSize.width
+                        }
+                        height={
+                          (selectedCamera.crop[3] - selectedCamera.crop[1]) *
+                          imageSize.height
+                        }
                         stroke="#3b82f6"
                         strokeWidth={2}
                         fill="rgba(59, 130, 246, 0.1)"

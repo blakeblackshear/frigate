@@ -181,7 +181,7 @@ def kickoff_model_training(
 
 @staticmethod
 def collect_state_classification_examples(
-    model_name: str, cameras: dict[str, tuple[int, int, int, int]]
+    model_name: str, cameras: dict[str, tuple[float, float, float, float]]
 ) -> None:
     """
     Collect representative state classification examples from review items.
@@ -195,7 +195,7 @@ def collect_state_classification_examples(
 
     Args:
         model_name: Name of the classification model
-        cameras: Dict mapping camera names to crop coordinates (x1, y1, x2, y2)
+        cameras: Dict mapping camera names to normalized crop coordinates [x1, y1, x2, y2] (0-1)
     """
     dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
     temp_dir = os.path.join(dataset_dir, "temp")
@@ -206,6 +206,7 @@ def collect_state_classification_examples(
     review_items = list(
         ReviewSegment.select()
         .where(ReviewSegment.camera.in_(camera_names))
+        .where(ReviewSegment.end_time.is_null(False))
         .order_by(ReviewSegment.start_time.asc())
     )
 
@@ -336,7 +337,7 @@ def _extract_keyframes(
     ffmpeg_path: str,
     timestamps: list[dict],
     output_dir: str,
-    camera_crops: dict[str, tuple[int, int, int, int]],
+    camera_crops: dict[str, tuple[float, float, float, float]],
 ) -> list[str]:
     """
     Extract keyframes from recordings at specified timestamps and crop to specified regions.
@@ -345,7 +346,7 @@ def _extract_keyframes(
         ffmpeg_path: Path to ffmpeg binary
         timestamps: List of timestamp dicts from _select_balanced_timestamps
         output_dir: Directory to save extracted frames
-        camera_crops: Dict mapping camera names to crop coordinates (x1, y1, x2, y2)
+        camera_crops: Dict mapping camera names to normalized crop coordinates [x1, y1, x2, y2] (0-1)
 
     Returns:
         List of paths to successfully extracted and cropped keyframe images
@@ -360,7 +361,7 @@ def _extract_keyframes(
             logger.warning(f"No crop coordinates for camera {camera}")
             continue
 
-        x1, y1, x2, y2 = camera_crops[camera]
+        norm_x1, norm_y1, norm_x2, norm_y2 = camera_crops[camera]
 
         try:
             recording = (
@@ -395,6 +396,12 @@ def _extract_keyframes(
 
                 if img is not None:
                     height, width = img.shape[:2]
+
+                    x1 = int(norm_x1 * width)
+                    y1 = int(norm_y1 * height)
+                    x2 = int(norm_x2 * width)
+                    y2 = int(norm_y2 * height)
+
                     x1_clipped = max(0, min(x1, width))
                     y1_clipped = max(0, min(y1, height))
                     x2_clipped = max(0, min(x2, width))
@@ -646,10 +653,8 @@ def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]
                 if img is not None:
                     height, width = img.shape[:2]
 
-                    # Calculate crop based on object size relative to the thumbnail region
-                    crop_size = 1.0  # Default to no crop
+                    crop_size = 1.0
                     if event.data and "box" in event.data and "region" in event.data:
-                        # Box is [x, y, w, h] format
                         box = event.data["box"]
                         region = event.data["region"]
 
@@ -657,26 +662,22 @@ def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]
                             box_w, box_h = box[2], box[3]
                             region_w, region_h = region[2], region[3]
 
-                            # Calculate what percentage of the region the box occupies
                             box_area = (box_w * box_h) / (region_w * region_h)
 
-                            # Crop inversely proportional to object size in thumbnail
-                            # Small objects need more crop (zoom in), large objects need less
-                            if box_area < 0.05:  # Very small (< 5%)
+                            if box_area < 0.05:
                                 crop_size = 0.4
-                            elif box_area < 0.10:  # Small (5-10%)
+                            elif box_area < 0.10:
                                 crop_size = 0.5
-                            elif box_area < 0.20:  # Medium-small (10-20%)
+                            elif box_area < 0.20:
                                 crop_size = 0.65
-                            elif box_area < 0.35:  # Medium (20-35%)
+                            elif box_area < 0.35:
                                 crop_size = 0.80
-                            else:  # Large (>35%)
+                            else:
                                 crop_size = 0.95
 
                     crop_width = int(width * crop_size)
                     crop_height = int(height * crop_size)
 
-                    # Calculate center crop coordinates
                     x1 = (width - crop_width) // 2
                     y1 = (height - crop_height) // 2
                     x2 = x1 + crop_width

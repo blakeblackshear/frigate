@@ -773,25 +773,13 @@ def delete_classification_train_images(request: Request, name: str, body: dict =
 async def generate_state_examples(request: Request, body: GenerateStateExamplesBody):
     """Generate examples for state classification."""
     try:
-        cameras_with_pixels = {}
-        config: FrigateConfig = request.app.frigate_config
+        cameras_normalized = {
+            camera_name: tuple(crop)
+            for camera_name, crop in body.cameras.items()
+            if camera_name in request.app.frigate_config.cameras
+        }
 
-        for camera_name, crop in body.cameras.items():
-            if camera_name not in config.cameras:
-                continue
-
-            camera_config = config.cameras[camera_name]
-            width = camera_config.detect.width
-            height = camera_config.detect.height
-
-            x1 = int(crop[0] * width)
-            y1 = int(crop[1] * height)
-            x2 = int((crop[0] + crop[2]) * width)
-            y2 = int((crop[1] + crop[3]) * height)
-
-            cameras_with_pixels[camera_name] = (x1, y1, x2, y2)
-
-        collect_state_classification_examples(body.model_name, cameras_with_pixels)
+        collect_state_classification_examples(body.model_name, cameras_normalized)
 
         return JSONResponse(
             content={"success": True, "message": "Example generation completed"},
