@@ -504,10 +504,18 @@ function StreamIssues({
       const [width, height] = stream.resolution.split("x").map(Number);
       if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
         const minDimension = Math.min(width, height);
+        const maxDimension = Math.max(width, height);
         if (minDimension > 1080) {
           result.push({
             type: "warning",
             message: t("cameraWizard.step3.issues.resolutionHigh", {
+              resolution: stream.resolution,
+            }),
+          });
+        } else if (maxDimension < 640) {
+          result.push({
+            type: "error",
+            message: t("cameraWizard.step3.issues.resolutionLow", {
               resolution: stream.resolution,
             }),
           });
