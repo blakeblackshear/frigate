@@ -139,12 +139,16 @@ function ModelCard({ config, onClick }: ModelCardProps) {
   }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
 
   const coverImage = useMemo(() => {
-    if (!dataset?.length) {
+    if (!dataset) {
       return undefined;
     }
 
     const keys = Object.keys(dataset).filter((key) => key != "none");
     const selectedKey = keys[0];
+
+    if (!dataset[selectedKey]) {
+      return undefined;
+    }
 
     return {
       name: selectedKey,
