@@ -44,7 +44,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
