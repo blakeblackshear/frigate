@@ -632,36 +632,36 @@ function DatasetGrid({
   return (
     <div
       ref={contentRef}
-      className="scrollbar-container flex flex-wrap gap-2 overflow-y-auto p-2"
+      className="scrollbar-container grid grid-cols-2 gap-2 overflow-y-scroll p-1 md:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12"
     >
       {classData.map((image) => (
-        <ClassificationCard
-          key={image}
-          imgClassName="size-auto"
-          data={{
-            filename: image,
-            filepath: `clips/${modelName}/dataset/${categoryName}/${image}`,
-            name: "",
-          }}
-          selected={selectedImages.includes(image)}
-          i18nLibrary="views/classificationModel"
-          onClick={(data, _) => onClickImages([data.filename], true)}
-        >
-          <Tooltip>
-            <TooltipTrigger>
-              <LuTrash2
-                className="size-5 cursor-pointer text-primary-variant hover:text-danger"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete([image]);
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent>
-              {t("button.deleteClassificationAttempts")}
-            </TooltipContent>
-          </Tooltip>
-        </ClassificationCard>
+        <div key={image} className="aspect-square w-full">
+          <ClassificationCard
+            data={{
+              filename: image,
+              filepath: `clips/${modelName}/dataset/${categoryName}/${image}`,
+              name: "",
+            }}
+            selected={selectedImages.includes(image)}
+            i18nLibrary="views/classificationModel"
+            onClick={(data, _) => onClickImages([data.filename], true)}
+          >
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-primary-variant hover:text-danger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete([image]);
+                  }}
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                {t("button.deleteClassificationAttempts")}
+              </TooltipContent>
+            </Tooltip>
+          </ClassificationCard>
+        </div>
       ))}
     </div>
   );
@@ -791,30 +791,29 @@ function StateTrainGrid({
     <div
       ref={contentRef}
       className={cn(
-        "scrollbar-container flex flex-wrap gap-3 overflow-y-auto p-2",
-        isMobile && "justify-center",
+        "scrollbar-container grid grid-cols-2 gap-3 overflow-y-scroll p-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12",
       )}
     >
       {trainData?.map((data) => (
-        <ClassificationCard
-          key={data.filename}
-          imgClassName="size-auto"
-          data={data}
-          threshold={threshold}
-          selected={selectedImages.includes(data.filename)}
-          i18nLibrary="views/classificationModel"
-          showArea={false}
-          onClick={(data, meta) => onClickImages([data.filename], meta)}
-        >
-          <ClassificationSelectionDialog
-            classes={classes}
-            modelName={model.name}
-            image={data.filename}
-            onRefresh={onRefresh}
+        <div key={data.filename} className="aspect-square w-full">
+          <ClassificationCard
+            data={data}
+            threshold={threshold}
+            selected={selectedImages.includes(data.filename)}
+            i18nLibrary="views/classificationModel"
+            showArea={false}
+            onClick={(data, meta) => onClickImages([data.filename], meta)}
           >
-            <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
-          </ClassificationSelectionDialog>
-        </ClassificationCard>
+            <ClassificationSelectionDialog
+              classes={classes}
+              modelName={model.name}
+              image={data.filename}
+              onRefresh={onRefresh}
+            >
+              <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
+            </ClassificationSelectionDialog>
+          </ClassificationCard>
+        </div>
       ))}
     </div>
   );
@@ -934,12 +933,8 @@ function ObjectTrainGrid({
         {Object.entries(groups).map(([key, group]) => {
           const event = events?.find((ev) => ev.id == key);
           return (
-            <div
-              key={key}
-              className={cn(isMobile && "aspect-square size-full")}
-            >
+            <div key={key} className="aspect-square w-full">
               <GroupedClassificationCard
-                key={key}
                 group={group}
                 event={event}
                 threshold={threshold}
