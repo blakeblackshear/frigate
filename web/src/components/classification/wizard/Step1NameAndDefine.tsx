@@ -10,12 +10,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
 import { LuX } from "react-icons/lu";
 import { MdAddBox } from "react-icons/md";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 export type ModelType = "state" | "object";
 export type ObjectClassificationType = "sub_label" | "attribute";
@@ -23,6 +34,7 @@ export type ObjectClassificationType = "sub_label" | "attribute";
 export type Step1FormData = {
   modelName: string;
   modelType: ModelType;
+  objectLabel?: string;
   objectType?: ObjectClassificationType;
   classes: string[];
 };
@@ -39,6 +51,27 @@ export default function Step1NameAndDefine({
   onCancel,
 }: Step1NameAndDefineProps) {
   const { t } = useTranslation(["views/classificationModel"]);
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  const objectLabels = useMemo(() => {
+    if (!config) return [];
+
+    const labels = new Set<string>();
+
+    Object.values(config.cameras).forEach((cameraConfig) => {
+      if (!cameraConfig.enabled || !cameraConfig.enabled_in_config) {
+        return;
+      }
+
+      cameraConfig.objects.track.forEach((label) => {
+        if (!config.model.all_attributes.includes(label)) {
+          labels.add(label);
+        }
+      });
+    });
+
+    return [...labels].sort();
+  }, [config]);
 
   const step1FormData = z
     .object({
@@ -50,6 +83,7 @@ export default function Step1NameAndDefine({
           message: t("wizard.step1.errors.nameOnlyNumbers"),
         }),
       modelType: z.enum(["state", "object"]),
+      objectLabel: z.string().optional(),
       objectType: z.enum(["sub_label", "attribute"]).optional(),
       classes: z
         .array(z.string())
@@ -86,7 +120,18 @@ export default function Step1NameAndDefine({
     )
     .refine(
       (data) => {
-        // Object models require objectType to be selected
+        if (data.modelType === "object") {
+          return data.objectLabel !== undefined && data.objectLabel !== "";
+        }
+        return true;
+      },
+      {
+        message: t("wizard.step1.errors.objectLabelRequired"),
+        path: ["objectLabel"],
+      },
+    )
+    .refine(
+      (data) => {
         if (data.modelType === "object") {
           return data.objectType !== undefined;
         }
@@ -103,6 +148,7 @@ export default function Step1NameAndDefine({
     defaultValues: {
       modelName: initialData?.modelName || "",
       modelType: initialData?.modelType || "state",
+      objectLabel: initialData?.objectLabel,
       objectType: initialData?.objectType || "sub_label",
       classes: initialData?.classes?.length ? initialData.classes : [""],
     },
@@ -209,52 +255,92 @@ export default function Step1NameAndDefine({
           />
 
           {watchedModelType === "object" && (
-            <FormField
-              control={form.control}
-              name="objectType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("wizard.step1.classificationType")}</FormLabel>
-                  <FormControl>
-                    <RadioGroup
+            <>
+              <FormField
+                control={form.control}
+                name="objectLabel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("wizard.step1.objectLabel")}</FormLabel>
+                    <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="flex flex-col gap-4 pt-2"
                     >
-                      <div className="flex items-center gap-2">
-                        <RadioGroupItem
-                          className={
-                            watchedObjectType === "sub_label"
-                              ? "bg-selected from-selected/50 to-selected/90 text-selected"
-                              : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
-                          }
-                          id="sub_label"
-                          value="sub_label"
-                        />
-                        <Label className="cursor-pointer" htmlFor="sub_label">
-                          {t("wizard.step1.classificationSubLabel")}
-                        </Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <RadioGroupItem
-                          className={
-                            watchedObjectType === "attribute"
-                              ? "bg-selected from-selected/50 to-selected/90 text-selected"
-                              : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
-                          }
-                          id="attribute"
-                          value="attribute"
-                        />
-                        <Label className="cursor-pointer" htmlFor="attribute">
-                          {t("wizard.step1.classificationAttribute")}
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <FormControl>
+                        <SelectTrigger className="h-8">
+                          <SelectValue
+                            placeholder={t(
+                              "wizard.step1.objectLabelPlaceholder",
+                            )}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {objectLabels.map((label) => (
+                          <SelectItem
+                            key={label}
+                            value={label}
+                            className="cursor-pointer hover:bg-secondary-highlight"
+                          >
+                            {getTranslatedLabel(label)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="objectType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t("wizard.step1.classificationType")}
+                    </FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col gap-4 pt-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem
+                            className={
+                              watchedObjectType === "sub_label"
+                                ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                                : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                            }
+                            id="sub_label"
+                            value="sub_label"
+                          />
+                          <Label className="cursor-pointer" htmlFor="sub_label">
+                            {t("wizard.step1.classificationSubLabel")}
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem
+                            className={
+                              watchedObjectType === "attribute"
+                                ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                                : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                            }
+                            id="attribute"
+                            value="attribute"
+                          />
+                          <Label className="cursor-pointer" htmlFor="attribute">
+                            {t("wizard.step1.classificationAttribute")}
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
           )}
 
           <div className="space-y-2">
