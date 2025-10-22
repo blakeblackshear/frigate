@@ -52,6 +52,33 @@
   "categorizeImage": "Classify Image",
   "wizard": {
     "title": "Create New Classification",
-    "description": "Create a new state or object classification model."
+    "description": "Create a new state or object classification model.",
+    "steps": {
+      "nameAndDefine": "Name & Define",
+      "stateArea": "State Area",
+      "chooseExamples": "Choose Examples",
+      "train": "Train"
+    },
+    "step1": {
+      "name": "Name",
+      "namePlaceholder": "Enter model name...",
+      "type": "Type",
+      "typeState": "State",
+      "typeObject": "Object",
+      "classificationType": "Classification Type",
+      "classificationSubLabel": "Sub Label",
+      "classificationAttribute": "Attribute",
+      "classes": "Classes",
+      "classPlaceholder": "Enter class name...",
+      "errors": {
+        "nameRequired": "Model name is required",
+        "nameLength": "Model name must be 64 characters or less",
+        "nameOnlyNumbers": "Model name cannot contain only numbers",
+        "classRequired": "At least 1 class is required",
+        "classesUnique": "Class names must be unique",
+        "stateRequiresTwoClasses": "State models require at least 2 classes",
+        "objectTypeRequired": "Please select a classification type"
+      }
+    }
   }
 }

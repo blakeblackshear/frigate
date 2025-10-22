@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { LuX } from "react-icons/lu";
 import { MdAddBox } from "react-icons/md";
 
@@ -37,26 +38,28 @@ export default function Step1NameAndDefine({
   onNext,
   onCancel,
 }: Step1NameAndDefineProps) {
+  const { t } = useTranslation(["views/classificationModel"]);
+
   const step1FormData = z
     .object({
       modelName: z
         .string()
-        .min(1, "Model name is required")
-        .max(64, "Model name must be 64 characters or less")
+        .min(1, t("wizard.step1.errors.nameRequired"))
+        .max(64, t("wizard.step1.errors.nameLength"))
         .refine((value) => !/^\d+$/.test(value), {
-          message: "Model name cannot contain only numbers",
+          message: t("wizard.step1.errors.nameOnlyNumbers"),
         }),
       modelType: z.enum(["state", "object"]),
       objectType: z.enum(["sub_label", "attribute"]).optional(),
       classes: z
         .array(z.string())
-        .min(1, "At least one class field is required")
+        .min(1, t("wizard.step1.errors.classRequired"))
         .refine(
           (classes) => {
             const nonEmpty = classes.filter((c) => c.trim().length > 0);
             return nonEmpty.length >= 1;
           },
-          { message: "At least 1 class is required" },
+          { message: t("wizard.step1.errors.classRequired") },
         )
         .refine(
           (classes) => {
@@ -64,7 +67,7 @@ export default function Step1NameAndDefine({
             const unique = new Set(nonEmpty.map((c) => c.toLowerCase()));
             return unique.size === nonEmpty.length;
           },
-          { message: "Class names must be unique" },
+          { message: t("wizard.step1.errors.classesUnique") },
         ),
     })
     .refine(
@@ -77,7 +80,7 @@ export default function Step1NameAndDefine({
         return true;
       },
       {
-        message: "State models require at least 2 classes",
+        message: t("wizard.step1.errors.stateRequiresTwoClasses"),
         path: ["classes"],
       },
     )
@@ -90,7 +93,7 @@ export default function Step1NameAndDefine({
         return true;
       },
       {
-        message: "Please select a classification type",
+        message: t("wizard.step1.errors.objectTypeRequired"),
         path: ["objectType"],
       },
     );
@@ -145,11 +148,11 @@ export default function Step1NameAndDefine({
             name="modelName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>{t("wizard.step1.name")}</FormLabel>
                 <FormControl>
                   <Input
                     className="h-8"
-                    placeholder="Enter model name..."
+                    placeholder={t("wizard.step1.namePlaceholder")}
                     {...field}
                   />
                 </FormControl>
@@ -163,7 +166,7 @@ export default function Step1NameAndDefine({
             name="modelType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Type</FormLabel>
+                <FormLabel>{t("wizard.step1.type")}</FormLabel>
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
@@ -181,7 +184,7 @@ export default function Step1NameAndDefine({
                         value="state"
                       />
                       <Label className="cursor-pointer" htmlFor="state">
-                        State
+                        {t("wizard.step1.typeState")}
                       </Label>
                     </div>
                     <div className="flex items-center gap-2">
@@ -195,7 +198,7 @@ export default function Step1NameAndDefine({
                         value="object"
                       />
                       <Label className="cursor-pointer" htmlFor="object">
-                        Object
+                        {t("wizard.step1.typeObject")}
                       </Label>
                     </div>
                   </RadioGroup>
@@ -211,7 +214,7 @@ export default function Step1NameAndDefine({
               name="objectType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Classification Type</FormLabel>
+                  <FormLabel>{t("wizard.step1.classificationType")}</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -229,7 +232,7 @@ export default function Step1NameAndDefine({
                           value="sub_label"
                         />
                         <Label className="cursor-pointer" htmlFor="sub_label">
-                          Sub Label
+                          {t("wizard.step1.classificationSubLabel")}
                         </Label>
                       </div>
                       <div className="flex items-center gap-2">
@@ -243,7 +246,7 @@ export default function Step1NameAndDefine({
                           value="attribute"
                         />
                         <Label className="cursor-pointer" htmlFor="attribute">
-                          Attribute
+                          {t("wizard.step1.classificationAttribute")}
                         </Label>
                       </div>
                     </RadioGroup>
@@ -256,7 +259,7 @@ export default function Step1NameAndDefine({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <FormLabel>Classes</FormLabel>
+              <FormLabel>{t("wizard.step1.classes")}</FormLabel>
               <MdAddBox
                 className="size-7 cursor-pointer text-primary hover:text-primary/80"
                 onClick={handleAddClass}
@@ -274,7 +277,7 @@ export default function Step1NameAndDefine({
                         <div className="flex items-center gap-2">
                           <Input
                             className="h-8"
-                            placeholder="Enter class name..."
+                            placeholder={t("wizard.step1.classPlaceholder")}
                             {...field}
                           />
                           {watchedClasses.length > 1 && (
@@ -306,7 +309,7 @@ export default function Step1NameAndDefine({
 
       <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
         <Button type="button" onClick={onCancel} className="sm:flex-1">
-          Cancel
+          {t("button.cancel", { ns: "common" })}
         </Button>
         <Button
           type="button"
@@ -315,7 +318,7 @@ export default function Step1NameAndDefine({
           className="flex items-center justify-center gap-2 sm:flex-1"
           disabled={!form.formState.isValid}
         >
-          Continue
+          {t("button.continue", { ns: "common" })}
         </Button>
       </div>
     </div>

@@ -7,14 +7,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { useReducer } from "react";
+import { useReducer, useMemo } from "react";
 import Step1NameAndDefine, { Step1FormData } from "./wizard/Step1NameAndDefine";
 
-const STEPS = [
-  "classificationWizard.steps.nameAndDefine",
-  "classificationWizard.steps.stateArea",
-  "classificationWizard.steps.chooseExamples",
-  "classificationWizard.steps.train",
+const OBJECT_STEPS = [
+  "wizard.steps.nameAndDefine",
+  "wizard.steps.chooseExamples",
+  "wizard.steps.train",
+];
+
+const STATE_STEPS = [
+  "wizard.steps.nameAndDefine",
+  "wizard.steps.stateArea",
+  "wizard.steps.chooseExamples",
+  "wizard.steps.train",
 ];
 
 type ClassificationModelWizardDialogProps = {
@@ -74,6 +80,15 @@ export default function ClassificationModelWizardDialog({
 
   const [wizardState, dispatch] = useReducer(wizardReducer, initialState);
 
+  const steps = useMemo(() => {
+    if (!wizardState.step1Data) {
+      return OBJECT_STEPS;
+    }
+    return wizardState.step1Data.modelType === "state"
+      ? STATE_STEPS
+      : OBJECT_STEPS;
+  }, [wizardState.step1Data]);
+
   const handleStep1Next = (data: Step1FormData) => {
     dispatch({ type: "SET_STEP_1", payload: data });
   };
@@ -99,7 +114,7 @@ export default function ClassificationModelWizardDialog({
         }}
       >
         <StepIndicator
-          steps={STEPS}
+          steps={steps}
           currentStep={wizardState.currentStep}
           variant="dots"
           className="mb-4 justify-start"
