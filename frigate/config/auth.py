@@ -38,6 +38,13 @@ class AuthConfig(FrigateBaseModel):
         default_factory=dict,
         title="Role to camera mappings. Empty list grants access to all cameras.",
     )
+    admin_first_time_login: Optional[bool] = Field(
+        default=False,
+        title="Internal field to expose first-time admin login flag to the UI",
+        description=(
+            "When true the UI may show a help link on the login page informing users how to sign in after an admin password reset. "
+        ),
+    )
 
     @field_validator("roles")
     @classmethod
