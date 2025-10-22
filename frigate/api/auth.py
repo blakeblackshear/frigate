@@ -534,14 +534,9 @@ def login(request: Request, body: AppPostLoginBody):
         )
         # Clear admin_first_time_login flag after successful admin login so the
         # UI stops showing the first-time login documentation link.
-        try:
-            if role == "admin":
-                if getattr(
-                    request.app.frigate_config.auth, "admin_first_time_login", False
-                ):
-                    request.app.frigate_config.auth.admin_first_time_login = False
-        except Exception:
-            logger.exception("Failed to clear admin_first_time_login flag on config")
+        if role == "admin":
+            request.app.frigate_config.auth.admin_first_time_login = False
+
         return response
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
