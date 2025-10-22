@@ -35,6 +35,23 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.auth])
 
 
+@router.get("/auth/first_time_login")
+def first_time_login(request: Request):
+    """Return whether the admin first-time login help flag is set in config.
+
+    This endpoint is intentionally unauthenticated so the login page can
+    query it before a user is authenticated.
+    """
+    auth_config = request.app.frigate_config.auth
+
+    return JSONResponse(
+        content={
+            "admin_first_time_login": auth_config.admin_first_time_login
+            or auth_config.reset_admin_password
+        }
+    )
+
+
 class RateLimiter:
     _limit = ""
 
@@ -515,6 +532,16 @@ def login(request: Request, body: AppPostLoginBody):
         set_jwt_cookie(
             response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
         )
+        # Clear admin_first_time_login flag after successful admin login so the
+        # UI stops showing the first-time login documentation link.
+        try:
+            if role == "admin":
+                if getattr(
+                    request.app.frigate_config.auth, "admin_first_time_login", False
+                ):
+                    request.app.frigate_config.auth.admin_first_time_login = False
+        except Exception:
+            logger.exception("Failed to clear admin_first_time_login flag on config")
         return response
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
