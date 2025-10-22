@@ -20,15 +20,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { isDesktop, isMobile } from "react-device-detect";
-import { LuPlus } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import React, { ReactNode, useCallback, useMemo, useState } from "react";
 import TextEntryDialog from "./dialog/TextEntryDialog";
 import { Button } from "../ui/button";
-import { MdCategory } from "react-icons/md";
 import axios from "axios";
 import { toast } from "sonner";
+import { Separator } from "../ui/separator";
 
 type ClassificationSelectionDialogProps = {
   className?: string;
@@ -97,7 +96,7 @@ export default function ClassificationSelectionDialog({
       );
 
   return (
-    <div className={className ?? ""}>
+    <div className={className ?? "flex"}>
       {newClass && (
         <TextEntryDialog
           open={true}
@@ -128,23 +127,22 @@ export default function ClassificationSelectionDialog({
                 isMobile && "gap-2 pb-4",
               )}
             >
-              <SelectorItem
-                className="flex cursor-pointer gap-2 smart-capitalize"
-                onClick={() => setNewClass(true)}
-              >
-                <LuPlus />
-                {t("createCategory.new")}
-              </SelectorItem>
               {classes.sort().map((category) => (
                 <SelectorItem
                   key={category}
                   className="flex cursor-pointer gap-2 smart-capitalize"
                   onClick={() => onCategorizeImage(category)}
                 >
-                  <MdCategory />
                   {category.replaceAll("_", " ")}
                 </SelectorItem>
               ))}
+              <Separator />
+              <SelectorItem
+                className="flex cursor-pointer gap-2 smart-capitalize"
+                onClick={() => setNewClass(true)}
+              >
+                {t("createCategory.new")}
+              </SelectorItem>
             </div>
           </SelectorContent>
         </Selector>

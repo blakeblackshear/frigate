@@ -1,13 +1,23 @@
 import { baseUrl } from "@/api/baseUrl";
+import ClassificationModelWizardDialog from "@/components/classification/ClassificationModelWizardDialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { ImageShadowOverlay } from "@/components/overlay/ImageShadowOverlay";
+import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
 import {
   CustomClassificationModelConfig,
   FrigateConfig,
 } from "@/types/frigateConfig";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
+import { useTranslation } from "react-i18next";
+import { FaFolderPlus } from "react-icons/fa";
 import useSWR from "swr";
+
+const allModelTypes = ["objects", "states"] as const;
+type ModelType = (typeof allModelTypes)[number];
 
 type ModelSelectionViewProps = {
   onClick: (model: CustomClassificationModelConfig) => void;
@@ -15,9 +25,14 @@ type ModelSelectionViewProps = {
 export default function ModelSelectionView({
   onClick,
 }: ModelSelectionViewProps) {
+  const { t } = useTranslation(["views/classificationModel"]);
+  const [page, setPage] = useState<ModelType>("objects");
+  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+
+  // data
 
   const classificationConfigs = useMemo(() => {
     if (!config) {
@@ -26,6 +41,24 @@ export default function ModelSelectionView({
 
     return Object.values(config.classification.custom);
   }, [config]);
+
+  const selectedClassificationConfigs = useMemo(() => {
+    return classificationConfigs.filter((model) => {
+      if (pageToggle == "objects" && model.object_config != undefined) {
+        return true;
+      }
+
+      if (pageToggle == "states" && model.state_config != undefined) {
+        return true;
+      }
+
+      return false;
+    });
+  }, [classificationConfigs, pageToggle]);
+
+  // new model wizard
+
+  const [newModel, setNewModel] = useState(false);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -36,14 +69,62 @@ export default function ModelSelectionView({
   }
 
   return (
-    <div className="flex size-full gap-2 p-2">
-      {classificationConfigs.map((config) => (
-        <ModelCard
-          key={config.name}
-          config={config}
-          onClick={() => onClick(config)}
-        />
-      ))}
+    <div className="flex size-full flex-col p-2">
+      <ClassificationModelWizardDialog
+        open={newModel}
+        onClose={() => setNewModel(false)}
+      />
+
+      <div className="flex h-12 w-full items-center justify-between">
+        <div className="flex flex-row items-center">
+          <ToggleGroup
+            className="*:rounded-md *:px-3 *:py-4"
+            type="single"
+            size="sm"
+            value={pageToggle}
+            onValueChange={(value: ModelType) => {
+              if (value) {
+                // Restrict viewer navigation
+                setPageToggle(value);
+              }
+            }}
+          >
+            {allModelTypes.map((item) => (
+              <ToggleGroupItem
+                key={item}
+                className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                value={item}
+                data-nav-item={item}
+                aria-label={t("selectItem", {
+                  ns: "common",
+                  item: t("menu." + item),
+                })}
+              >
+                <div className="smart-capitalize">{t("menu." + item)}</div>
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
+        <div className="flex flex-row items-center">
+          <Button
+            className="flex flex-row items-center gap-2"
+            variant="select"
+            onClick={() => setNewModel(true)}
+          >
+            <FaFolderPlus />
+            Add Classification
+          </Button>
+        </div>
+      </div>
+      <div className="flex size-full gap-2 p-2">
+        {selectedClassificationConfigs.map((config) => (
+          <ModelCard
+            key={config.name}
+            config={config}
+            onClick={() => onClick(config)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -57,46 +138,37 @@ function ModelCard({ config, onClick }: ModelCardProps) {
     [id: string]: string[];
   }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
 
-  const coverImages = useMemo(() => {
-    if (!dataset) {
-      return {};
+  const coverImage = useMemo(() => {
+    if (!dataset?.length) {
+      return undefined;
     }
 
-    const imageMap: { [key: string]: string } = {};
+    const keys = Object.keys(dataset).filter((key) => key != "none");
+    const selectedKey = keys[0];
 
-    for (const [key, imageList] of Object.entries(dataset)) {
-      if (imageList.length > 0) {
-        imageMap[key] = imageList[0];
-      }
-    }
-
-    return imageMap;
+    return {
+      name: selectedKey,
+      img: dataset[selectedKey][0],
+    };
   }, [dataset]);
 
   return (
     <div
       key={config.name}
       className={cn(
-        "flex h-60 cursor-pointer flex-col items-center gap-2 rounded-lg bg-card p-2 outline outline-[3px]",
+        "relative size-60 cursor-pointer overflow-hidden rounded-lg",
         "outline-transparent duration-500",
         isMobile && "w-full",
       )}
       onClick={() => onClick()}
     >
-      <div
-        className={cn("grid size-48 grid-cols-2 gap-2", isMobile && "w-full")}
-      >
-        {Object.entries(coverImages).map(([key, image]) => (
-          <img
-            key={key}
-            className=""
-            src={`${baseUrl}clips/${config.name}/dataset/${key}/${image}`}
-          />
-        ))}
-      </div>
-      <div className="smart-capitalize">
-        {config.name} ({config.state_config != null ? "State" : "Object"}{" "}
-        Classification)
+      <img
+        className={cn("size-full", isMobile && "w-full")}
+        src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
+      />
+      <ImageShadowOverlay />
+      <div className="absolute bottom-2 left-3 text-lg smart-capitalize">
+        {config.name}
       </div>
     </div>
   );

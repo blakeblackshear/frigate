@@ -41,13 +41,17 @@
     "invalidName": "Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens."
   },
   "train": {
-    "title": "Train",
-    "aria": "Select Train"
+    "title": "Recent Classifications",
+    "aria": "Select Recent Classifications"
   },
   "categories": "Classes",
   "createCategory": {
     "new": "Create New Class"
   },
   "categorizeImageAs": "Classify Image As:",
-  "categorizeImage": "Classify Image"
+  "categorizeImage": "Classify Image",
+  "wizard": {
+    "title": "Create New Classification",
+    "description": "Create a new state or object classification model."
+  }
 }
