@@ -14,7 +14,9 @@ import { useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
+import { MdModelTraining } from "react-icons/md";
 import useSWR from "swr";
+import Heading from "@/components/ui/heading";
 
 const allModelTypes = ["objects", "states"] as const;
 type ModelType = (typeof allModelTypes)[number];
@@ -65,7 +67,7 @@ export default function ModelSelectionView({
   }
 
   if (classificationConfigs.length == 0) {
-    return <div>You need to setup a custom model configuration.</div>;
+    return <NoModelsView onCreateModel={() => setNewModel(true)} />;
   }
 
   return (
@@ -124,6 +126,25 @@ export default function ModelSelectionView({
             onClick={() => onClick(config)}
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+function NoModelsView({ onCreateModel }: { onCreateModel: () => void }) {
+  const { t } = useTranslation(["views/classificationModel"]);
+
+  return (
+    <div className="flex size-full items-center justify-center">
+      <div className="flex flex-col items-center gap-2">
+        <MdModelTraining className="size-8" />
+        <Heading as="h4">{t("noModels.title")}</Heading>
+        <div className="mb-3 text-center text-secondary-foreground">
+          {t("noModels.description")}
+        </div>
+        <Button size="sm" variant="select" onClick={onCreateModel}>
+          {t("noModels.buttonText")}
+        </Button>
       </div>
     </div>
   );

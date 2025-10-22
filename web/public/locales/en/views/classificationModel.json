@@ -50,6 +50,11 @@
   },
   "categorizeImageAs": "Classify Image As:",
   "categorizeImage": "Classify Image",
+  "noModels": {
+    "title": "No Classification Models",
+    "description": "Create a custom model to classify objects or monitor state changes in your cameras.",
+    "buttonText": "Create Classification Model"
+  },
   "wizard": {
     "title": "Create New Classification",
     "steps": {
