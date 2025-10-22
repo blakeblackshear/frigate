@@ -810,7 +810,7 @@ function StateTrainGrid({
               image={data.filename}
               onRefresh={onRefresh}
             >
-              <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
+              <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground/40" />
             </ClassificationSelectionDialog>
           </ClassificationCard>
         </div>
@@ -957,7 +957,7 @@ function ObjectTrainGrid({
                       image={data.filename}
                       onRefresh={onRefresh}
                     >
-                      <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
+                      <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground/40" />
                     </ClassificationSelectionDialog>
                   </>
                 )}

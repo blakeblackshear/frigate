@@ -858,12 +858,12 @@ function FaceAttemptGroup({
             faceNames={faceNames}
             onTrainAttempt={(name) => onTrainAttempt(data, name)}
           >
-            <AddFaceIcon className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground" />
+            <AddFaceIcon className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground/40" />
           </FaceSelectionDialog>
           <Tooltip>
             <TooltipTrigger>
               <LuRefreshCw
-                className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground"
+                className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground/40"
                 onClick={() => onReprocess(data)}
               />
             </TooltipTrigger>
