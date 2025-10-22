@@ -9,6 +9,9 @@ import {
 } from "../ui/dialog";
 import { useReducer, useMemo } from "react";
 import Step1NameAndDefine, { Step1FormData } from "./wizard/Step1NameAndDefine";
+import Step2StateArea, { Step2FormData } from "./wizard/Step2StateArea";
+import { cn } from "@/lib/utils";
+import { isDesktop } from "react-device-detect";
 
 const OBJECT_STEPS = [
   "wizard.steps.nameAndDefine",
@@ -31,8 +34,8 @@ type ClassificationModelWizardDialogProps = {
 type WizardState = {
   currentStep: number;
   step1Data?: Step1FormData;
+  step2Data?: Step2FormData;
   // Future steps can be added here
-  // step2Data?: Step2FormData;
   // step3Data?: Step3FormData;
 };
 
@@ -40,6 +43,7 @@ type WizardAction =
   | { type: "NEXT_STEP"; payload?: Partial<WizardState> }
   | { type: "PREVIOUS_STEP" }
   | { type: "SET_STEP_1"; payload: Step1FormData }
+  | { type: "SET_STEP_2"; payload: Step2FormData }
   | { type: "RESET" };
 
 const initialState: WizardState = {
@@ -53,6 +57,12 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
         ...state,
         step1Data: action.payload,
         currentStep: 1,
+      };
+    case "SET_STEP_2":
+      return {
+        ...state,
+        step2Data: action.payload,
+        currentStep: 2,
       };
     case "NEXT_STEP":
       return {
@@ -93,6 +103,14 @@ export default function ClassificationModelWizardDialog({
     dispatch({ type: "SET_STEP_1", payload: data });
   };
 
+  const handleStep2Next = (data: Step2FormData) => {
+    dispatch({ type: "SET_STEP_2", payload: data });
+  };
+
+  const handleBack = () => {
+    dispatch({ type: "PREVIOUS_STEP" });
+  };
+
   const handleCancel = () => {
     dispatch({ type: "RESET" });
     onClose();
@@ -108,7 +126,10 @@ export default function ClassificationModelWizardDialog({
       }}
     >
       <DialogContent
-        className="max-h-[90dvh] max-w-4xl overflow-y-auto"
+        className={cn(
+          "",
+          isDesktop && "max-h-[75dvh] max-w-6xl overflow-y-auto",
+        )}
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
@@ -134,6 +155,14 @@ export default function ClassificationModelWizardDialog({
               onCancel={handleCancel}
             />
           )}
+          {wizardState.currentStep === 1 &&
+            wizardState.step1Data?.modelType === "state" && (
+              <Step2StateArea
+                initialData={wizardState.step2Data}
+                onNext={handleStep2Next}
+                onBack={handleBack}
+              />
+            )}
         </div>
       </DialogContent>
     </Dialog>

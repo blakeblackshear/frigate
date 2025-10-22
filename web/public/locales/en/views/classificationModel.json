@@ -79,6 +79,13 @@
         "stateRequiresTwoClasses": "State models require at least 2 classes",
         "objectTypeRequired": "Please select a classification type"
       }
+    },
+    "step2": {
+      "description": "Select cameras and define the area to monitor for each camera. The model will classify the state of these areas.",
+      "cameras": "Cameras",
+      "selectCamera": "Select Camera",
+      "noCameras": "Click + to add cameras",
+      "selectCameraPrompt": "Select a camera from the list to define its monitoring area"
     }
   }
 }
