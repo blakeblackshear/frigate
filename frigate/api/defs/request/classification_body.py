@@ -4,11 +4,11 @@ from pydantic import BaseModel, Field
 
 
 class RenameFaceBody(BaseModel):
-    new_name: str
+    new_name: str = Field(description="New name for the face")
 
 
 class AudioTranscriptionBody(BaseModel):
-    event_id: str
+    event_id: str = Field(description="ID of the event to transcribe audio for")
 
 
 class DeleteFaceImagesBody(BaseModel):
@@ -18,12 +18,14 @@ class DeleteFaceImagesBody(BaseModel):
 
 
 class GenerateStateExamplesBody(BaseModel):
-    model_name: str
+    model_name: str = Field(description="Name of the classification model")
     cameras: Dict[str, Tuple[float, float, float, float]] = Field(
-        description="Dictionary mapping camera names to crop coordinates (x, y, width, height) normalized 0-1"
+        description="Dictionary mapping camera names to normalized crop coordinates in [x1, y1, x2, y2] format (values 0-1)"
     )
 
 
 class GenerateObjectExamplesBody(BaseModel):
-    model_name: str
-    label: str
+    model_name: str = Field(description="Name of the classification model")
+    label: str = Field(
+        description="Object label to collect examples for (e.g., 'person', 'car')"
+    )

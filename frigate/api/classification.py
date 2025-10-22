@@ -772,28 +772,19 @@ def delete_classification_train_images(request: Request, name: str, body: dict =
 )
 async def generate_state_examples(request: Request, body: GenerateStateExamplesBody):
     """Generate examples for state classification."""
-    try:
-        cameras_normalized = {
-            camera_name: tuple(crop)
-            for camera_name, crop in body.cameras.items()
-            if camera_name in request.app.frigate_config.cameras
-        }
+    model_name = sanitize_filename(body.model_name)
+    cameras_normalized = {
+        camera_name: tuple(crop)
+        for camera_name, crop in body.cameras.items()
+        if camera_name in request.app.frigate_config.cameras
+    }
 
-        collect_state_classification_examples(body.model_name, cameras_normalized)
+    collect_state_classification_examples(model_name, cameras_normalized)
 
-        return JSONResponse(
-            content={"success": True, "message": "Example generation completed"},
-            status_code=200,
-        )
-    except Exception as e:
-        logger.error(f"Failed to generate state examples: {e}")
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": f"Failed to generate examples: {str(e)}",
-            },
-            status_code=500,
-        )
+    return JSONResponse(
+        content={"success": True, "message": "Example generation completed"},
+        status_code=200,
+    )
 
 
 @router.post(
@@ -804,19 +795,10 @@ async def generate_state_examples(request: Request, body: GenerateStateExamplesB
 )
 async def generate_object_examples(request: Request, body: GenerateObjectExamplesBody):
     """Generate examples for object classification."""
-    try:
-        collect_object_classification_examples(body.model_name, body.label)
+    model_name = sanitize_filename(body.model_name)
+    collect_object_classification_examples(model_name, body.label)
 
-        return JSONResponse(
-            content={"success": True, "message": "Example generation completed"},
-            status_code=200,
-        )
-    except Exception as e:
-        logger.error(f"Failed to generate object examples: {e}")
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": f"Failed to generate examples: {str(e)}",
-            },
-            status_code=500,
-        )
+    return JSONResponse(
+        content={"success": True, "message": "Example generation completed"},
+        status_code=200,
+    )
