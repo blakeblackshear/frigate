@@ -16,6 +16,7 @@
     "ui": "UI",
     "enrichments": "Enrichments",
     "cameraManagement": "Management",
+    "cameraReview": "Review",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion Tuner",
     "triggers": "Triggers",
