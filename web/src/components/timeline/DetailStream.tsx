@@ -9,7 +9,7 @@ import {
   formatUnixTimestampToDateTime,
   formatSecondsToDuration,
 } from "@/utils/dateUtil";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import AnnotationOffsetSlider from "@/components/overlay/detail/AnnotationOffsetSlider";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
@@ -27,6 +27,7 @@ import { getTranslatedLabel } from "@/utils/i18n";
 import EventMenu from "@/components/timeline/EventMenu";
 import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
 import { cn } from "@/lib/utils";
+import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
@@ -503,6 +504,10 @@ function LifecycleItem({ event, isActive, onSeek }: LifecycleItemProps) {
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
 
+  event.data.zones_friendly_names = event?.data?.zones?.map((zone) => {
+    return resolveZoneName(config, zone);
+  });
+
   const formattedEventTimestamp = config
     ? formatUnixTimestampToDateTime(event.timestamp ?? 0, {
         timezone: config.ui.timezone,
@@ -536,7 +541,9 @@ function LifecycleItem({ event, isActive, onSeek }: LifecycleItemProps) {
         <LifecycleIcon lifecycleItem={event} className="size-3" />
       </div>
       <div className="flex w-full flex-row justify-between">
-        <div>{getLifecycleItemDescription(event)}</div>
+        <Trans>
+          <div>{getLifecycleItemDescription(event)}</div>
+        </Trans>
         <div className={cn("p-1 text-xs")}>{formattedEventTimestamp}</div>
       </div>
     </div>

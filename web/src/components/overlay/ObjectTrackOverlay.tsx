@@ -11,6 +11,7 @@ import {
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 
 type ObjectTrackOverlayProps = {
   camera: string;
@@ -127,6 +128,9 @@ export default function ObjectTrackOverlay({
         ?.filter((event) => event.data.box !== undefined)
         .map((event) => {
           const [left, top, width, height] = event.data.box!;
+          event.data.zones_friendly_names = event?.data?.zones?.map((zone) => {
+            return resolveZoneName(config, zone);
+          });
 
           return {
             x: left + width / 2, // Center x
@@ -136,7 +140,7 @@ export default function ObjectTrackOverlay({
           };
         }) || []
     );
-  }, [objectTimeline]);
+  }, [config, objectTimeline]);
 
   // final object path with timeline points included
   const pathPoints = useMemo(() => {
