@@ -337,7 +337,7 @@ export default function Step1NameAndDefine({
                                 )}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline cursor-pointer underline hover:no-underline"
+                                className="inline cursor-pointer"
                               >
                                 {t("readTheDocumentation", { ns: "common" })}
                                 <LuExternalLink className="ml-2 inline-flex size-3" />
@@ -418,7 +418,7 @@ export default function Step1NameAndDefine({
                           )}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline cursor-pointer underline hover:no-underline"
+                          className="inline cursor-pointer"
                         >
                           {t("readTheDocumentation", { ns: "common" })}
                           <LuExternalLink className="ml-2 inline-flex size-3" />
