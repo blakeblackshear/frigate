@@ -23,7 +23,6 @@ import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { MdCircle } from "react-icons/md";
 import { cn } from "@/lib/utils";
 import { Trans, useTranslation } from "react-i18next";
@@ -88,7 +87,7 @@ export default function CameraSettingsView({
   // zones and labels
 
   const getZoneName = useCallback(
-    (cameraId: string, zoneId: string) =>
+    (zoneId: string, cameraId?: string) =>
       resolveZoneName(config, zoneId, cameraId),
     [config],
   );
@@ -98,7 +97,7 @@ export default function CameraSettingsView({
       return Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
         camera: cameraConfig.name,
         name,
-        friendly_name: getZoneName(cameraConfig.name, name),
+        friendly_name: getZoneName(name, cameraConfig.name),
         objects: zoneData.objects,
         color: zoneData.color,
       }));
@@ -557,12 +556,7 @@ export default function CameraSettingsView({
                                   {
                                     alertsLabels,
                                     zone: watchedAlertsZones
-                                      .map((zone) =>
-                                        capitalizeFirstLetter(zone).replaceAll(
-                                          "_",
-                                          " ",
-                                        ),
-                                      )
+                                      .map((zone) => getZoneName(zone))
                                       .join(", "),
                                     cameraName: selectCameraName,
                                   },
@@ -676,12 +670,7 @@ export default function CameraSettingsView({
                                   values={{
                                     detectionsLabels,
                                     zone: watchedDetectionsZones
-                                      .map((zone) =>
-                                        capitalizeFirstLetter(zone).replaceAll(
-                                          "_",
-                                          " ",
-                                        ),
-                                      )
+                                      .map((zone) => getZoneName(zone))
                                       .join(", "),
                                     cameraName: selectCameraName,
                                   }}
@@ -693,12 +682,7 @@ export default function CameraSettingsView({
                                   values={{
                                     detectionsLabels,
                                     zone: watchedDetectionsZones
-                                      .map((zone) =>
-                                        capitalizeFirstLetter(zone).replaceAll(
-                                          "_",
-                                          " ",
-                                        ),
-                                      )
+                                      .map((zone) => getZoneName(zone))
                                       .join(", "),
                                     cameraName: selectCameraName,
                                   }}
