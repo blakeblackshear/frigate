@@ -286,16 +286,11 @@ class EmbeddingMaintainer(threading.Thread):
         topic, model_config = self.classification_config_subscriber.check_for_update()
 
         if topic and model_config:
-            # Extract model name from topic: config/classification/custom/{model_name}
             model_name = topic.split("/")[-1]
-            logger.info(
-                f"Received classification config update for model: {model_name}"
-            )
-
             self.config.classification.custom[model_name] = model_config
-            existing_processor_index = None
 
-            for i, processor in enumerate(self.realtime_processors):
+            # Check if processor already exists
+            for processor in self.realtime_processors:
                 if isinstance(
                     processor,
                     (
@@ -304,14 +299,10 @@ class EmbeddingMaintainer(threading.Thread):
                     ),
                 ):
                     if processor.model_config.name == model_name:
-                        existing_processor_index = i
-                        break
-
-            if existing_processor_index is not None:
-                logger.info(
-                    f"Removing existing classification processor for model: {model_name}"
-                )
-                self.realtime_processors.pop(existing_processor_index)
+                        logger.debug(
+                            f"Classification processor for model {model_name} already exists, skipping"
+                        )
+                        return
 
             if model_config.state_config is not None:
                 processor = CustomStateClassificationProcessor(
@@ -326,7 +317,9 @@ class EmbeddingMaintainer(threading.Thread):
                 )
 
             self.realtime_processors.append(processor)
-            logger.info(f"Added classification processor for model: {model_name}")
+            logger.info(
+                f"Added classification processor for model: {model_name} (type: {type(processor).__name__})"
+            )
 
     def _process_requests(self) -> None:
         """Process embeddings requests"""

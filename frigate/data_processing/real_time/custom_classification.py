@@ -353,6 +353,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             )
 
     def handle_request(self, topic, request_data):
+        logger.info(f"comparing with topic {topic} and the {request_data.get('model_name')} and the {self.model_config.name}")
         if topic == EmbeddingsRequestEnum.reload_classification_model.value:
             if request_data.get("model_name") == self.model_config.name:
                 logger.info(

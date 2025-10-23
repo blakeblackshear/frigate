@@ -30,9 +30,12 @@ export default function ModelSelectionView({
   const { t } = useTranslation(["views/classificationModel"]);
   const [page, setPage] = useState<ModelType>("objects");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
-  const { data: config } = useSWR<FrigateConfig>("config", {
-    revalidateOnFocus: false,
-  });
+  const { data: config, mutate: refreshConfig } = useSWR<FrigateConfig>(
+    "config",
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   // data
 
@@ -71,7 +74,10 @@ export default function ModelSelectionView({
       <>
         <ClassificationModelWizardDialog
           open={newModel}
-          onClose={() => setNewModel(false)}
+          onClose={() => {
+            setNewModel(false);
+            refreshConfig();
+          }}
         />
         <NoModelsView onCreateModel={() => setNewModel(true)} />;
       </>
@@ -82,7 +88,10 @@ export default function ModelSelectionView({
     <div className="flex size-full flex-col p-2">
       <ClassificationModelWizardDialog
         open={newModel}
-        onClose={() => setNewModel(false)}
+        onClose={() => {
+          setNewModel(false);
+          refreshConfig();
+        }}
       />
 
       <div className="flex h-12 w-full items-center justify-between">

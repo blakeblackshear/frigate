@@ -46,6 +46,7 @@ export default function Step3ChooseExamples({
   const [imageClassifications, setImageClassifications] = useState<{
     [imageName: string]: string;
   }>(initialData?.imageClassifications || {});
+  const [isTraining, setIsTraining] = useState(false);
 
   const { data: trainImages, mutate: refreshTrainImages } = useSWR<string[]>(
     hasGenerated ? `classification/${step1Data.modelName}/train` : null,
@@ -186,25 +187,25 @@ export default function Step3ChooseExamples({
       });
 
       // Step 2: Classify each image by moving it to the correct category folder
-      for (const [imageName, className] of Object.entries(
-        imageClassifications,
-      )) {
-        if (!className) continue;
-
-        await axios.post(
-          `/classification/${step1Data.modelName}/dataset/categorize`,
-          {
-            training_file: imageName,
-            category: className === "none" ? "none" : className,
-          },
-        );
-      }
+      const categorizePromises = Object.entries(imageClassifications).map(
+        ([imageName, className]) => {
+          if (!className) return Promise.resolve();
+          return axios.post(
+            `/classification/${step1Data.modelName}/dataset/categorize`,
+            {
+              training_file: imageName,
+              category: className === "none" ? "none" : className,
+            },
+          );
+        },
+      );
+      await Promise.all(categorizePromises);
 
       // Step 3: Kick off training
       await axios.post(`/classification/${step1Data.modelName}/train`);
 
       toast.success(t("wizard.step3.trainingStarted"));
-      onClose();
+      setIsTraining(true);
     } catch (error) {
       const axiosError = error as {
         response?: { data?: { message?: string; detail?: string } };
@@ -220,7 +221,7 @@ export default function Step3ChooseExamples({
         t("wizard.step3.errors.classifyFailed", { error: errorMessage }),
       );
     }
-  }, [onClose, imageClassifications, step1Data, step2Data, t]);
+  }, [imageClassifications, step1Data, step2Data, t]);
 
   const allImagesClassified = useMemo(() => {
     if (!unknownImages || unknownImages.length === 0) return false;
@@ -230,7 +231,22 @@ export default function Step3ChooseExamples({
 
   return (
     <div className="flex flex-col gap-6">
-      {isGenerating ? (
+      {isTraining ? (
+        <div className="flex flex-col items-center gap-6 py-12">
+          <ActivityIndicator className="size-12" />
+          <div className="text-center">
+            <h3 className="mb-2 text-lg font-medium">
+              {t("wizard.step3.training.title")}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {t("wizard.step3.training.description")}
+            </p>
+          </div>
+          <Button onClick={onClose} variant="select" className="mt-4">
+            {t("button.close", { ns: "common" })}
+          </Button>
+        </div>
+      ) : isGenerating ? (
         <div className="flex h-[50vh] flex-col items-center justify-center gap-4">
           <ActivityIndicator className="size-12" />
           <div className="text-center">
@@ -321,20 +337,22 @@ export default function Step3ChooseExamples({
         </div>
       )}
 
-      <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
-        <Button type="button" onClick={onBack} className="sm:flex-1">
-          {t("button.back", { ns: "common" })}
-        </Button>
-        <Button
-          type="button"
-          onClick={handleContinue}
-          variant="select"
-          className="flex items-center justify-center gap-2 sm:flex-1"
-          disabled={!hasGenerated || isGenerating || !allImagesClassified}
-        >
-          {t("button.continue", { ns: "common" })}
-        </Button>
-      </div>
+      {!isTraining && (
+        <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+          <Button type="button" onClick={onBack} className="sm:flex-1">
+            {t("button.back", { ns: "common" })}
+          </Button>
+          <Button
+            type="button"
+            onClick={handleContinue}
+            variant="select"
+            className="flex items-center justify-center gap-2 sm:flex-1"
+            disabled={!hasGenerated || isGenerating || !allImagesClassified}
+          >
+            {t("button.continue", { ns: "common" })}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

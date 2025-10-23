@@ -3,7 +3,9 @@
 import datetime
 import logging
 import os
+import random
 import shutil
+import string
 from typing import Any
 
 import cv2
@@ -707,7 +709,9 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
             status_code=404,
         )
 
-    new_name = f"{category}-{datetime.datetime.now().timestamp()}.png"
+    random_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    timestamp = datetime.datetime.now().timestamp()
+    new_name = f"{category}-{timestamp}-{random_id}.png"
     new_file_folder = os.path.join(
         CLIPS_DIR, sanitize_filename(name), "dataset", category
     )

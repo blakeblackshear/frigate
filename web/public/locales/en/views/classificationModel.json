@@ -101,6 +101,10 @@
         "title": "Generating Sample Images",
         "description": "We're pulling representative images from your recordings. This may take a moment..."
       },
+      "training": {
+        "title": "Training Model",
+        "description": "Your model is being trained in the background. You can close this wizard and the training will continue."
+      },
       "retryGenerate": "Retry Generation",
       "selectClass": "Select class...",
       "none": "None",
