@@ -67,7 +67,15 @@ export default function ModelSelectionView({
   }
 
   if (classificationConfigs.length == 0) {
-    return <NoModelsView onCreateModel={() => setNewModel(true)} />;
+    return (
+      <>
+        <ClassificationModelWizardDialog
+          open={newModel}
+          onClose={() => setNewModel(false)}
+        />
+        <NoModelsView onCreateModel={() => setNewModel(true)} />;
+      </>
+    );
   }
 
   return (

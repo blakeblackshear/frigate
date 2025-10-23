@@ -75,6 +75,7 @@ class ClassificationTrainingProcess(FrigateProcess):
         logger.info(f"Kicking off classification training for {self.model_name}.")
         dataset_dir = os.path.join(CLIPS_DIR, self.model_name, "dataset")
         model_dir = os.path.join(MODEL_CACHE_DIR, self.model_name)
+        os.makedirs(model_dir, exist_ok=True)
         num_classes = len(
             [
                 d
