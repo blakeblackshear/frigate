@@ -126,6 +126,7 @@ export const ClassificationCard = forwardRef<
           imgClassName,
           isMobile && "w-full",
         )}
+        loading="lazy"
         onLoad={() => setImageLoaded(true)}
         src={`${baseUrl}${data.filepath}`}
       />
