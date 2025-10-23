@@ -8,8 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { MdAddBox } from "react-icons/md";
-import { LuX } from "react-icons/lu";
+import { LuX, LuPlus } from "react-icons/lu";
 import { Stage, Layer, Rect, Transformer } from "react-konva";
 import Konva from "konva";
 import { useResizeObserver } from "@/hooks/resize-observer";
@@ -247,12 +246,11 @@ export default function Step2StateArea({
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-6 p-0"
+                    variant="secondary"
+                    className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
                     aria-label="Add camera"
                   >
-                    <MdAddBox className="size-6 text-primary" />
+                    <LuPlus />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -285,7 +283,13 @@ export default function Step2StateArea({
                 </PopoverContent>
               </Popover>
             ) : (
-              <MdAddBox className="size-6 cursor-not-allowed text-muted" />
+              <Button
+                variant="secondary"
+                className="size-6 cursor-not-allowed rounded-md bg-muted p-1 text-muted-foreground"
+                disabled
+              >
+                <LuPlus />
+              </Button>
             )}
           </div>
 

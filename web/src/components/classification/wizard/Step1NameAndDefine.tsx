@@ -22,8 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
-import { LuX } from "react-icons/lu";
-import { MdAddBox } from "react-icons/md";
+import { LuX, LuPlus } from "react-icons/lu";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { getTranslatedLabel } from "@/utils/i18n";
@@ -346,10 +345,14 @@ export default function Step1NameAndDefine({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <FormLabel>{t("wizard.step1.classes")}</FormLabel>
-              <MdAddBox
-                className="size-7 cursor-pointer text-primary hover:text-primary/80"
+              <Button
+                type="button"
+                variant="secondary"
+                className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
                 onClick={handleAddClass}
-              />
+              >
+                <LuPlus />
+              </Button>
             </div>
             <div className="space-y-2">
               {watchedClasses.map((_, index) => (
