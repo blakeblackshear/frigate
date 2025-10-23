@@ -53,7 +53,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { MdImageSearch } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
-import { CameraNameLabel } from "../camera/FriendlyNameLabel";
+import { CameraNameLabel, ZoneNameLabel } from "../camera/FriendlyNameLabel";
 
 type InputWithTagsProps = {
   inputFocused: boolean;
@@ -831,6 +831,8 @@ export default function InputWithTags({
                               getTranslatedLabel(value)
                             ) : filterType === "cameras" ? (
                               <CameraNameLabel camera={value} />
+                            ) : filterType === "zones" ? (
+                              <ZoneNameLabel zone={value} />
                             ) : (
                               value.replaceAll("_", " ")
                             )}
@@ -934,6 +936,11 @@ export default function InputWithTags({
                         <CameraNameLabel camera={suggestion} />
                         {")"}
                       </>
+                    ) : currentFilterType === "zones" ? (
+                      <>
+                        {suggestion} {" ("} <ZoneNameLabel zone={suggestion} />
+                        {")"}
+                      </>
                     ) : (
                       suggestion
                     )
@@ -943,6 +950,8 @@ export default function InputWithTags({
                       {currentFilterType ? (
                         currentFilterType === "cameras" ? (
                           <CameraNameLabel camera={suggestion} />
+                        ) : currentFilterType === "zones" ? (
+                          <ZoneNameLabel zone={suggestion} />
                         ) : (
                           formatFilterValues(currentFilterType, suggestion)
                         )
