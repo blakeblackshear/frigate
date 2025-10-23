@@ -1,6 +1,6 @@
 import { ObjectLifecycleSequence } from "@/types/timeline";
 import { t } from "i18next";
-import { getTranslatedLabel } from "./i18n";
+import i18n, { getTranslatedLabel } from "./i18n";
 
 export function getLifecycleItemDescription(
   lifecycleItem: ObjectLifecycleSequence,
@@ -10,6 +10,17 @@ export function getLifecycleItemDescription(
     : lifecycleItem.data.sub_label || lifecycleItem.data.label;
 
   const label = getTranslatedLabel(rawLabel);
+
+  let supportedListFormat = false;
+  let zonesFormatter: Intl.ListFormat | null = null;
+
+  if (typeof Intl !== "undefined" && Intl.ListFormat) {
+    supportedListFormat = true;
+    zonesFormatter = new Intl.ListFormat(i18n.language, {
+      style: "long",
+      type: "conjunction",
+    });
+  }
 
   switch (lifecycleItem.class_type) {
     case "visible":
@@ -21,7 +32,18 @@ export function getLifecycleItemDescription(
       return t("objectLifecycle.lifecycleItemDesc.entered_zone", {
         ns: "views/explore",
         label,
-        zones: lifecycleItem.data.zones.join(" and ").replaceAll("_", " "),
+        zones:
+          supportedListFormat && zonesFormatter
+            ? zonesFormatter.format(
+                lifecycleItem.data.zones_friendly_names?.map(
+                  (x) => `<strong>${x}</strong>`,
+                ) ??
+                  lifecycleItem.data.zones.map((x) => `<strong>${x}</strong>`),
+              )
+            : (
+                lifecycleItem.data.zones_friendly_names ??
+                lifecycleItem.data.zones
+              ).join(" and "),
       });
     case "active":
       return t("objectLifecycle.lifecycleItemDesc.active", {

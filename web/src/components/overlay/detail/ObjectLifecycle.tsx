@@ -45,8 +45,9 @@ import { useNavigate } from "react-router-dom";
 import { ObjectPath } from "./ObjectPath";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { IoPlayCircleOutline } from "react-icons/io5";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 
 type ObjectLifecycleProps = {
   className?: string;
@@ -62,7 +63,7 @@ export default function ObjectLifecycle({
   setPane,
 }: ObjectLifecycleProps) {
   const { t } = useTranslation(["views/explore"]);
-
+  const { data: config } = useSWR<FrigateConfig>("config");
   const { data: eventSequence } = useSWR<ObjectLifecycleSequence[]>([
     "timeline",
     {
@@ -70,7 +71,12 @@ export default function ObjectLifecycle({
     },
   ]);
 
-  const { data: config } = useSWR<FrigateConfig>("config");
+  eventSequence?.map((event) => {
+    event.data.zones_friendly_names = event.data?.zones?.map((zone) => {
+      return resolveZoneName(config, zone);
+    });
+  });
+
   const apiHost = useApiHost();
   const navigate = useNavigate();
 
@@ -673,7 +679,9 @@ export default function ObjectLifecycle({
                           />
                         </div>
                         <div className="flex w-full flex-row justify-between">
-                          <div>{getLifecycleItemDescription(item)}</div>
+                          <Trans>
+                            <div>{getLifecycleItemDescription(item)}</div>
+                          </Trans>
                           <div className={cn("p-1 text-sm")}>
                             {formattedEventTimestamp}
                           </div>
@@ -731,7 +739,9 @@ export default function ObjectLifecycle({
                                       }}
                                     />
                                     <span className="smart-capitalize">
-                                      {zone.replaceAll("_", " ")}
+                                      {item.data?.zones_friendly_names?.[
+                                        zidx
+                                      ] ?? zone.replaceAll("_", " ")}
                                     </span>
                                   </div>
                                 ))}
