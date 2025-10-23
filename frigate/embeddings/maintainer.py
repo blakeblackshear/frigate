@@ -304,6 +304,9 @@ class EmbeddingMaintainer(threading.Thread):
                         )
                         return
 
+            if self.metrics:
+                self.metrics.add_classification_model(model_name)
+
             if model_config.state_config is not None:
                 processor = CustomStateClassificationProcessor(
                     self.config, model_config, self.requestor, self.metrics

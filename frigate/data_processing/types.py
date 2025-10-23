@@ -10,6 +10,7 @@ from frigate.data_processing.real_time.whisper_online import FasterWhisperASR
 
 
 class DataProcessorMetrics:
+    manager: SyncManager
     image_embeddings_speed: Synchronized
     image_embeddings_eps: Synchronized
     text_embeddings_speed: Synchronized
@@ -28,6 +29,7 @@ class DataProcessorMetrics:
     classification_cps: dict[str, Synchronized]
 
     def __init__(self, manager: SyncManager, custom_classification_models: list[str]):
+        self.manager = manager
         self.image_embeddings_speed = manager.Value("d", 0.0)
         self.image_embeddings_eps = manager.Value("d", 0.0)
         self.text_embeddings_speed = manager.Value("d", 0.0)
@@ -49,6 +51,12 @@ class DataProcessorMetrics:
             for key in custom_classification_models:
                 self.classification_speeds[key] = manager.Value("d", 0.0)
                 self.classification_cps[key] = manager.Value("d", 0.0)
+
+    def add_classification_model(self, model_name: str) -> None:
+        """Add metrics for a new classification model dynamically."""
+        if model_name not in self.classification_speeds:
+            self.classification_speeds[model_name] = self.manager.Value("d", 0.0)
+            self.classification_cps[model_name] = self.manager.Value("d", 0.0)
 
 
 class DataProcessorModelRunner:
