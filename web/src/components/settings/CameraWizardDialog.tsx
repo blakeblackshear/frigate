@@ -20,6 +20,8 @@ import type {
   ConfigSetBody,
 } from "@/types/cameraWizard";
 import { processCameraName } from "@/utils/cameraUtil";
+import { isDesktop } from "react-device-detect";
+import { cn } from "@/lib/utils";
 
 type WizardState = {
   wizardData: Partial<WizardFormData>;
@@ -335,7 +337,15 @@ export default function CameraWizardDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="max-h-[90dvh] max-w-4xl overflow-y-auto"
+        className={cn(
+          "max-h-[90dvh] max-w-xl overflow-y-auto",
+          isDesktop &&
+            currentStep == 0 &&
+            state.wizardData?.streams?.[0]?.testResult?.snapshot &&
+            "max-w-4xl",
+          isDesktop && currentStep == 1 && "max-w-2xl",
+          isDesktop && currentStep > 1 && "max-w-4xl",
+        )}
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
