@@ -300,12 +300,18 @@ export default function Step1NameCamera({
         setTestResult(testResult);
         toast.success(t("cameraWizard.step1.testSuccess"));
       } else {
-        const error = probeData?.stderr || "Unknown error";
+        const error =
+          Array.isArray(probeResponse.data?.[0]?.stderr) &&
+          probeResponse.data[0].stderr.length > 0
+            ? probeResponse.data[0].stderr.join("\n")
+            : "Unable to probe stream";
         setTestResult({
           success: false,
           error: error,
         });
-        toast.error(t("cameraWizard.commonErrors.testFailed", { error }));
+        toast.error(t("cameraWizard.commonErrors.testFailed", { error }), {
+          duration: 6000,
+        });
       }
     } catch (error) {
       const axiosError = error as {
@@ -323,6 +329,9 @@ export default function Step1NameCamera({
       });
       toast.error(
         t("cameraWizard.commonErrors.testFailed", { error: errorMessage }),
+        {
+          duration: 10000,
+        },
       );
     } finally {
       setIsTesting(false);
