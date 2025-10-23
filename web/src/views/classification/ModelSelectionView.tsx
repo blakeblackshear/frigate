@@ -75,21 +75,6 @@ export default function ModelSelectionView({
     return <ActivityIndicator />;
   }
 
-  if (classificationConfigs.length == 0) {
-    return (
-      <>
-        <ClassificationModelWizardDialog
-          open={newModel}
-          onClose={() => {
-            setNewModel(false);
-            refreshConfig();
-          }}
-        />
-        <NoModelsView onCreateModel={() => setNewModel(true)} />;
-      </>
-    );
-  }
-
   return (
     <div className="flex size-full flex-col p-2">
       <ClassificationModelWizardDialog
@@ -109,7 +94,6 @@ export default function ModelSelectionView({
             value={pageToggle}
             onValueChange={(value: ModelType) => {
               if (value) {
-                // Restrict viewer navigation
                 setPageToggle(value);
               }
             }}
@@ -142,31 +126,45 @@ export default function ModelSelectionView({
         </div>
       </div>
       <div className="flex size-full gap-2 p-2">
-        {selectedClassificationConfigs.map((config) => (
-          <ModelCard
-            key={config.name}
-            config={config}
-            onClick={() => onClick(config)}
+        {selectedClassificationConfigs.length === 0 ? (
+          <NoModelsView
+            onCreateModel={() => setNewModel(true)}
+            modelType={pageToggle}
           />
-        ))}
+        ) : (
+          selectedClassificationConfigs.map((config) => (
+            <ModelCard
+              key={config.name}
+              config={config}
+              onClick={() => onClick(config)}
+            />
+          ))
+        )}
       </div>
     </div>
   );
 }
 
-function NoModelsView({ onCreateModel }: { onCreateModel: () => void }) {
+function NoModelsView({
+  onCreateModel,
+  modelType,
+}: {
+  onCreateModel: () => void;
+  modelType: ModelType;
+}) {
   const { t } = useTranslation(["views/classificationModel"]);
+  const typeKey = modelType === "objects" ? "object" : "state";
 
   return (
     <div className="flex size-full items-center justify-center">
       <div className="flex flex-col items-center gap-2">
         <MdModelTraining className="size-8" />
-        <Heading as="h4">{t("noModels.title")}</Heading>
+        <Heading as="h4">{t(`noModels.${typeKey}.title`)}</Heading>
         <div className="mb-3 text-center text-secondary-foreground">
-          {t("noModels.description")}
+          {t(`noModels.${typeKey}.description`)}
         </div>
         <Button size="sm" variant="select" onClick={onCreateModel}>
-          {t("noModels.buttonText")}
+          {t(`noModels.${typeKey}.buttonText`)}
         </Button>
       </div>
     </div>
