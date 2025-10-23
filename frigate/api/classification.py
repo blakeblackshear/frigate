@@ -167,8 +167,7 @@ def train_face(request: Request, name: str, body: dict = None):
     new_name = f"{sanitized_name}-{datetime.datetime.now().timestamp()}.webp"
     new_file_folder = os.path.join(FACE_DIR, f"{sanitized_name}")
 
-    if not os.path.exists(new_file_folder):
-        os.mkdir(new_file_folder)
+    os.makedirs(new_file_folder, exist_ok=True)
 
     if training_file_name:
         shutil.move(training_file, os.path.join(new_file_folder, new_name))
@@ -716,8 +715,7 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
         CLIPS_DIR, sanitize_filename(name), "dataset", category
     )
 
-    if not os.path.exists(new_file_folder):
-        os.mkdir(new_file_folder)
+    os.makedirs(new_file_folder, exist_ok=True)
 
     # use opencv because webp images can not be used to train
     img = cv2.imread(training_file)

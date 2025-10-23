@@ -1,4 +1,5 @@
 {
+  "documentTitle": "Classification Models",
   "button": {
     "deleteClassificationAttempts": "Delete Classification Images",
     "renameCategory": "Rename Class",
@@ -96,6 +97,10 @@
       "selectCameraPrompt": "Select a camera from the list to define its monitoring area"
     },
     "step3": {
+      "selectImagesPrompt": "Select all images with: {{className}}",
+      "selectImagesDescription": "Click on images to select them. Click Continue when you're done with this class.",
+      "allImagesClassified": "All images classified!",
+      "readyToContinue": "Click Continue to finish and start training.",
       "description": "Classify the example images below. These samples will be used to train your model.",
       "generating": {
         "title": "Generating Sample Images",

@@ -135,7 +135,7 @@ export default function ClassificationModelWizardDialog({
       <DialogContent
         className={cn(
           "",
-          isDesktop && "max-h-[75dvh] max-w-6xl overflow-y-auto",
+          isDesktop && "max-h-[75dvh] max-w-[40%] overflow-y-auto",
         )}
         onInteractOutside={(e) => {
           e.preventDefault();

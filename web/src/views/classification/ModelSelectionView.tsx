@@ -10,7 +10,7 @@ import {
   CustomClassificationModelConfig,
   FrigateConfig,
 } from "@/types/frigateConfig";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
@@ -36,6 +36,12 @@ export default function ModelSelectionView({
       revalidateOnFocus: false,
     },
   );
+
+  // title
+
+  useEffect(() => {
+    document.title = t("documentTitle");
+  }, [t]);
 
   // data
 
