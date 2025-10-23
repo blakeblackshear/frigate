@@ -16,7 +16,6 @@
     "ui": "UI",
     "enrichments": "Enrichments",
     "cameraManagement": "Management",
-    "cameraReview": "Review",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion Tuner",
     "triggers": "Triggers",
@@ -188,6 +187,10 @@
       "testSuccess": "Connection test successful!",
       "testFailed": "Connection test failed. Please check your input and try again.",
       "streamDetails": "Stream Details",
+      "testing": {
+        "probingMetadata": "Probing camera metadata...",
+        "fetchingSnapshot": "Fetching camera snapshot..."
+      },
       "warnings": {
         "noSnapshot": "Unable to fetch a snapshot from the configured stream."
       },
@@ -197,8 +200,9 @@
         "nameLength": "Camera name must be 64 characters or less",
         "invalidCharacters": "Camera name contains invalid characters",
         "nameExists": "Camera name already exists",
+        "customUrlRtspRequired": "Custom URLs must begin with \"rtsp://\". Manual configuration is required for non-RTSP camera streams.",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP is not recommended. It is recommended to enable http in the camera settings and restart the camera wizard."
+          "reolink-rtsp": "Reolink RTSP is not recommended. Enable HTTP in the camera's firmware settings and restart the wizard."
         }
       },
       "docs": {

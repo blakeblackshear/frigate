@@ -85,9 +85,9 @@ export default function Step3Validation({
             ? `${videoStream.width}x${videoStream.height}`
             : undefined;
 
-          const fps = videoStream?.r_frame_rate
-            ? parseFloat(videoStream.r_frame_rate.split("/")[0]) /
-              parseFloat(videoStream.r_frame_rate.split("/")[1])
+          const fps = videoStream?.avg_frame_rate
+            ? parseFloat(videoStream.avg_frame_rate.split("/")[0]) /
+              parseFloat(videoStream.avg_frame_rate.split("/")[1])
             : undefined;
 
           return {
@@ -323,7 +323,7 @@ export default function Step3Validation({
                   )}
 
                   <div className="mb-2 flex flex-col justify-between gap-1 md:flex-row md:items-center">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="break-all text-sm text-muted-foreground">
                       {stream.url}
                     </span>
                     <Button

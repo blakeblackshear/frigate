@@ -151,9 +151,9 @@ export default function Step2StreamConfig({
               ? `${videoStream.width}x${videoStream.height}`
               : undefined;
 
-            const fps = videoStream?.r_frame_rate
-              ? parseFloat(videoStream.r_frame_rate.split("/")[0]) /
-                parseFloat(videoStream.r_frame_rate.split("/")[1])
+            const fps = videoStream?.avg_frame_rate
+              ? parseFloat(videoStream.avg_frame_rate.split("/")[0]) /
+                parseFloat(videoStream.avg_frame_rate.split("/")[1])
               : undefined;
 
             const testResult: TestResult = {

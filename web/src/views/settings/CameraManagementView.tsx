@@ -66,8 +66,13 @@ export default function CameraManagementView({
 
   return (
     <>
+      <Toaster
+        richColors
+        className="z-[1000]"
+        position="top-center"
+        closeButton
+      />
       <div className="flex size-full flex-col md:flex-row">
-        <Toaster position="top-center" closeButton={true} />
         <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
           {viewMode === "settings" ? (
             <>

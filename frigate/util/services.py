@@ -577,7 +577,7 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
     if detailed and format_entries:
         ffprobe_cmd.extend(["-show_entries", f"format={format_entries}"])
 
-    ffprobe_cmd.extend(["-loglevel", "quiet", clean_path])
+    ffprobe_cmd.extend(["-loglevel", "error", clean_path])
 
     return sp.run(ffprobe_cmd, capture_output=True)
 
