@@ -107,7 +107,7 @@ In real-world deployments, even with multiple cameras running concurrently, Frig
 Frigate supports both the USB and M.2 versions of the Google Coral.
 
 - The USB version is compatible with the widest variety of hardware and does not require a driver on the host machine. However, it does lack the automatic throttling features of the other versions.
-- The PCIe and M.2 versions require installation of a driver on the host. Follow the instructions for your version from https://coral.ai
+- The PCIe and M.2 versions require installation of a driver on the host. https://github.com/jnicolson/gasket-builder should be used.
 
 A single Coral can handle many cameras using the default model and will be sufficient for the majority of users. You can calculate the maximum performance of your Coral based on the inference speed reported by Frigate. With an inference speed of 10, your Coral will top out at `1000/10=100`, or 100 frames per second. If your detection fps is regularly getting close to that, you should first consider tuning motion masks. If those are already properly configured, a second Coral may be needed.
 
