@@ -47,6 +47,7 @@ export default function Step3ChooseExamples({
     [imageName: string]: string;
   }>(initialData?.imageClassifications || {});
   const [isTraining, setIsTraining] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { data: trainImages, mutate: refreshTrainImages } = useSWR<string[]>(
     hasGenerated ? `classification/${step1Data.modelName}/train` : null,
@@ -135,6 +136,7 @@ export default function Step3ChooseExamples({
   }, []);
 
   const handleContinue = useCallback(async () => {
+    setIsProcessing(true);
     try {
       // Step 1: Create config for the new model
       const modelConfig: {
@@ -220,6 +222,7 @@ export default function Step3ChooseExamples({
       toast.error(
         t("wizard.step3.errors.classifyFailed", { error: errorMessage }),
       );
+      setIsProcessing(false);
     }
   }, [imageClassifications, step1Data, step2Data, t]);
 
@@ -347,8 +350,14 @@ export default function Step3ChooseExamples({
             onClick={handleContinue}
             variant="select"
             className="flex items-center justify-center gap-2 sm:flex-1"
-            disabled={!hasGenerated || isGenerating || !allImagesClassified}
+            disabled={
+              !hasGenerated ||
+              isGenerating ||
+              !allImagesClassified ||
+              isProcessing
+            }
           >
+            {isProcessing && <ActivityIndicator className="size-4" />}
             {t("button.continue", { ns: "common" })}
           </Button>
         </div>
