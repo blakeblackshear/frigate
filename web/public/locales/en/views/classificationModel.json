@@ -61,8 +61,7 @@
     "steps": {
       "nameAndDefine": "Name & Define",
       "stateArea": "State Area",
-      "chooseExamples": "Choose Examples",
-      "train": "Train"
+      "chooseExamples": "Choose Examples"
     },
     "step1": {
       "description": "Create a new state or object classification model.",
@@ -99,9 +98,6 @@
     "step3": {
       "selectImagesPrompt": "Select all images with: {{className}}",
       "selectImagesDescription": "Click on images to select them. Click Continue when you're done with this class.",
-      "allImagesClassified": "All images classified!",
-      "readyToContinue": "Click Continue to finish and start training.",
-      "description": "Classify the example images below. These samples will be used to train your model.",
       "generating": {
         "title": "Generating Sample Images",
         "description": "We're pulling representative images from your recordings. This may take a moment..."
@@ -111,8 +107,6 @@
         "description": "Your model is being trained in the background. You can close this wizard and the training will continue."
       },
       "retryGenerate": "Retry Generation",
-      "selectClass": "Select class...",
-      "none": "None",
       "noImages": "No sample images generated",
       "classifying": "Classifying & Training...",
       "trainingStarted": "Training started successfully",
