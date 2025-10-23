@@ -100,11 +100,11 @@
       "selectImagesDescription": "Click on images to select them. Click Continue when you're done with this class.",
       "generating": {
         "title": "Generating Sample Images",
-        "description": "We're pulling representative images from your recordings. This may take a moment..."
+        "description": "Frigate is pulling representative images from your recordings. This may take a moment..."
       },
       "training": {
         "title": "Training Model",
-        "description": "Your model is being trained in the background. You can close this wizard and the training will continue."
+        "description": "Your model is being trained in the background. Close this dialog, and your model will start running as soon as training is complete."
       },
       "retryGenerate": "Retry Generation",
       "noImages": "No sample images generated",
