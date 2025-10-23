@@ -277,7 +277,7 @@ export default function Step2StreamConfig({
 
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">
+                  <label className="text-sm font-medium text-primary-variant">
                     {t("cameraWizard.step2.url")}
                   </label>
                   <div className="flex flex-row items-center gap-2">
@@ -325,7 +325,7 @@ export default function Step2StreamConfig({
 
               <div className="space-y-2">
                 <div className="flex items-center gap-1">
-                  <Label className="text-sm font-medium">
+                  <Label className="text-sm font-medium text-primary-variant">
                     {t("cameraWizard.step2.roles")}
                   </Label>
                   <Popover>
@@ -334,7 +334,7 @@ export default function Step2StreamConfig({
                         <LuInfo className="size-3" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-80 text-xs">
+                    <PopoverContent className="pointer-events-auto w-80 text-xs">
                       <div className="space-y-2">
                         <div className="font-medium">
                           {t("cameraWizard.step2.rolesPopover.title")}
@@ -395,7 +395,7 @@ export default function Step2StreamConfig({
 
               <div className="space-y-2">
                 <div className="flex items-center gap-1">
-                  <Label className="text-sm font-medium">
+                  <Label className="text-sm font-medium text-primary-variant">
                     {t("cameraWizard.step2.featuresTitle")}
                   </Label>
                   <Popover>
@@ -404,7 +404,7 @@ export default function Step2StreamConfig({
                         <LuInfo className="size-3" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-80 text-xs">
+                    <PopoverContent className="pointer-events-auto w-80 text-xs">
                       <div className="space-y-2">
                         <div className="font-medium">
                           {t("cameraWizard.step2.featuresPopover.title")}
