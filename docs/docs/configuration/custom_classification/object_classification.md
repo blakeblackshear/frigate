@@ -12,7 +12,18 @@ Object classification models are lightweight and run very fast on CPU. Inference
 Training the model does briefly use a high amount of system resources for about 1–3 minutes per training run. On lower-power devices, training may take longer.
 When running the `-tensorrt` image, Nvidia GPUs will automatically be used to accelerate training.
 
-### Sub label vs Attribute
+## Classes
+
+Classes are the categories your model will learn to distinguish between. Each class represents a distinct visual category that the model will predict.
+
+For object classification:
+
+- Define classes that represent different types or attributes of the detected object
+- Examples: For `person` objects, classes might be `delivery_person`, `resident`, `stranger`
+- Include a `none` class for objects that don't fit any specific category
+- Keep classes visually distinct to improve accuracy
+
+### Classification Type
 
 - **Sub label**:
 

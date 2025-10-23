@@ -10,11 +10,14 @@ import {
   CustomClassificationModelConfig,
   FrigateConfig,
 } from "@/types/frigateConfig";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
+import { MdModelTraining } from "react-icons/md";
 import useSWR from "swr";
+import Heading from "@/components/ui/heading";
+import { useOverlayState } from "@/hooks/use-overlay-state";
 
 const allModelTypes = ["objects", "states"] as const;
 type ModelType = (typeof allModelTypes)[number];
@@ -26,11 +29,24 @@ export default function ModelSelectionView({
   onClick,
 }: ModelSelectionViewProps) {
   const { t } = useTranslation(["views/classificationModel"]);
-  const [page, setPage] = useState<ModelType>("objects");
-  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
-  const { data: config } = useSWR<FrigateConfig>("config", {
-    revalidateOnFocus: false,
-  });
+  const [page, setPage] = useOverlayState<ModelType>("objects", "objects");
+  const [pageToggle, setPageToggle] = useOptimisticState(
+    page || "objects",
+    setPage,
+    100,
+  );
+  const { data: config, mutate: refreshConfig } = useSWR<FrigateConfig>(
+    "config",
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  // title
+
+  useEffect(() => {
+    document.title = t("documentTitle");
+  }, [t]);
 
   // data
 
@@ -64,15 +80,15 @@ export default function ModelSelectionView({
     return <ActivityIndicator />;
   }
 
-  if (classificationConfigs.length == 0) {
-    return <div>You need to setup a custom model configuration.</div>;
-  }
-
   return (
     <div className="flex size-full flex-col p-2">
       <ClassificationModelWizardDialog
         open={newModel}
-        onClose={() => setNewModel(false)}
+        defaultModelType={pageToggle === "objects" ? "object" : "state"}
+        onClose={() => {
+          setNewModel(false);
+          refreshConfig();
+        }}
       />
 
       <div className="flex h-12 w-full items-center justify-between">
@@ -84,7 +100,6 @@ export default function ModelSelectionView({
             value={pageToggle}
             onValueChange={(value: ModelType) => {
               if (value) {
-                // Restrict viewer navigation
                 setPageToggle(value);
               }
             }}
@@ -117,13 +132,46 @@ export default function ModelSelectionView({
         </div>
       </div>
       <div className="flex size-full gap-2 p-2">
-        {selectedClassificationConfigs.map((config) => (
-          <ModelCard
-            key={config.name}
-            config={config}
-            onClick={() => onClick(config)}
+        {selectedClassificationConfigs.length === 0 ? (
+          <NoModelsView
+            onCreateModel={() => setNewModel(true)}
+            modelType={pageToggle}
           />
-        ))}
+        ) : (
+          selectedClassificationConfigs.map((config) => (
+            <ModelCard
+              key={config.name}
+              config={config}
+              onClick={() => onClick(config)}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NoModelsView({
+  onCreateModel,
+  modelType,
+}: {
+  onCreateModel: () => void;
+  modelType: ModelType;
+}) {
+  const { t } = useTranslation(["views/classificationModel"]);
+  const typeKey = modelType === "objects" ? "object" : "state";
+
+  return (
+    <div className="flex size-full items-center justify-center">
+      <div className="flex flex-col items-center gap-2">
+        <MdModelTraining className="size-8" />
+        <Heading as="h4">{t(`noModels.${typeKey}.title`)}</Heading>
+        <div className="mb-3 text-center text-secondary-foreground">
+          {t(`noModels.${typeKey}.description`)}
+        </div>
+        <Button size="sm" variant="select" onClick={onCreateModel}>
+          {t(`noModels.${typeKey}.buttonText`)}
+        </Button>
       </div>
     </div>
   );
@@ -139,12 +187,16 @@ function ModelCard({ config, onClick }: ModelCardProps) {
   }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
 
   const coverImage = useMemo(() => {
-    if (!dataset?.length) {
+    if (!dataset) {
       return undefined;
     }
 
     const keys = Object.keys(dataset).filter((key) => key != "none");
     const selectedKey = keys[0];
+
+    if (!dataset[selectedKey]) {
+      return undefined;
+    }
 
     return {
       name: selectedKey,

@@ -1,4 +1,5 @@
 {
+  "documentTitle": "Classification Models",
   "button": {
     "deleteClassificationAttempts": "Delete Classification Images",
     "renameCategory": "Rename Class",
@@ -50,8 +51,85 @@
   },
   "categorizeImageAs": "Classify Image As:",
   "categorizeImage": "Classify Image",
+  "noModels": {
+    "object": {
+      "title": "No Object Classification Models",
+      "description": "Create a custom model to classify detected objects.",
+      "buttonText": "Create Object Model"
+    },
+    "state": {
+      "title": "No State Classification Models",
+      "description": "Create a custom model to monitor and classify state changes in specific camera areas.",
+      "buttonText": "Create State Model"
+    }
+  },
   "wizard": {
     "title": "Create New Classification",
-    "description": "Create a new state or object classification model."
+    "steps": {
+      "nameAndDefine": "Name & Define",
+      "stateArea": "State Area",
+      "chooseExamples": "Choose Examples"
+    },
+    "step1": {
+      "description": "State models monitor fixed camera areas for changes (e.g., door open/closed). Object models add classifications to detected objects (e.g., known animals, delivery persons, etc.).",
+      "name": "Name",
+      "namePlaceholder": "Enter model name...",
+      "type": "Type",
+      "typeState": "State",
+      "typeObject": "Object",
+      "objectLabel": "Object Label",
+      "objectLabelPlaceholder": "Select object type...",
+      "classificationType": "Classification Type",
+      "classificationTypeTip": "Learn about classification types",
+      "classificationTypeDesc": "Sub Labels add additional text to the object label (e.g., 'Person: UPS'). Attributes are searchable metadata stored separately in the object metadata.",
+      "classificationSubLabel": "Sub Label",
+      "classificationAttribute": "Attribute",
+      "classes": "Classes",
+      "classesTip": "Learn about classes",
+      "classesStateDesc": "Define the different states your camera area can be in. For example: 'open' and 'closed' for a garage door.",
+      "classesObjectDesc": "Define the different categories to classify detected objects into. For example: 'delivery_person', 'resident', 'stranger' for person classification.",
+      "classPlaceholder": "Enter class name...",
+      "errors": {
+        "nameRequired": "Model name is required",
+        "nameLength": "Model name must be 64 characters or less",
+        "nameOnlyNumbers": "Model name cannot contain only numbers",
+        "classRequired": "At least 1 class is required",
+        "classesUnique": "Class names must be unique",
+        "stateRequiresTwoClasses": "State models require at least 2 classes",
+        "objectLabelRequired": "Please select an object label",
+        "objectTypeRequired": "Please select a classification type"
+      }
+    },
+    "step2": {
+      "description": "Select cameras and define the area to monitor for each camera. The model will classify the state of these areas.",
+      "cameras": "Cameras",
+      "selectCamera": "Select Camera",
+      "noCameras": "Click + to add cameras",
+      "selectCameraPrompt": "Select a camera from the list to define its monitoring area"
+    },
+    "step3": {
+      "selectImagesPrompt": "Select all images with: {{className}}",
+      "selectImagesDescription": "Click on images to select them. Click Continue when you're done with this class.",
+      "generating": {
+        "title": "Generating Sample Images",
+        "description": "Frigate is pulling representative images from your recordings. This may take a moment..."
+      },
+      "training": {
+        "title": "Training Model",
+        "description": "Your model is being trained in the background. Close this dialog, and your model will start running as soon as training is complete."
+      },
+      "retryGenerate": "Retry Generation",
+      "noImages": "No sample images generated",
+      "classifying": "Classifying & Training...",
+      "trainingStarted": "Training started successfully",
+      "errors": {
+        "noCameras": "No cameras configured",
+        "noObjectLabel": "No object label selected",
+        "generateFailed": "Failed to generate examples: {{error}}",
+        "generationFailed": "Generation failed. Please try again.",
+        "classifyFailed": "Failed to classify images: {{error}}"
+      },
+      "generateSuccess": "Successfully generated sample images"
+    }
   }
 }

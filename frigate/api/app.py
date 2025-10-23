@@ -387,20 +387,28 @@ def config_set(request: Request, body: AppConfigSetBody):
         old_config: FrigateConfig = request.app.frigate_config
         request.app.frigate_config = config
 
-        if body.update_topic and body.update_topic.startswith("config/cameras/"):
-            _, _, camera, field = body.update_topic.split("/")
+        if body.update_topic:
+            if body.update_topic.startswith("config/cameras/"):
+                _, _, camera, field = body.update_topic.split("/")
 
-            if field == "add":
-                settings = config.cameras[camera]
-            elif field == "remove":
-                settings = old_config.cameras[camera]
+                if field == "add":
+                    settings = config.cameras[camera]
+                elif field == "remove":
+                    settings = old_config.cameras[camera]
+                else:
+                    settings = config.get_nested_object(body.update_topic)
+
+                request.app.config_publisher.publish_update(
+                    CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
+                    settings,
+                )
             else:
+                # Handle nested config updates (e.g., config/classification/custom/{name})
                 settings = config.get_nested_object(body.update_topic)
-
-            request.app.config_publisher.publish_update(
-                CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
-                settings,
-            )
+                if settings:
+                    request.app.config_publisher.publisher.publish(
+                        body.update_topic, settings
+                    )
 
     return JSONResponse(
         content=(
