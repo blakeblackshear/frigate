@@ -642,6 +642,7 @@ function DatasetGrid({
               filepath: `clips/${modelName}/dataset/${categoryName}/${image}`,
               name: "",
             }}
+            showArea={false}
             selected={selectedImages.includes(image)}
             i18nLibrary="views/classificationModel"
             onClick={(data, _) => onClickImages([data.filename], true)}

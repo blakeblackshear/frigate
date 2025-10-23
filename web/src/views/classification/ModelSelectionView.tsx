@@ -17,6 +17,7 @@ import { FaFolderPlus } from "react-icons/fa";
 import { MdModelTraining } from "react-icons/md";
 import useSWR from "swr";
 import Heading from "@/components/ui/heading";
+import { useOverlayState } from "@/hooks/use-overlay-state";
 
 const allModelTypes = ["objects", "states"] as const;
 type ModelType = (typeof allModelTypes)[number];
@@ -28,8 +29,12 @@ export default function ModelSelectionView({
   onClick,
 }: ModelSelectionViewProps) {
   const { t } = useTranslation(["views/classificationModel"]);
-  const [page, setPage] = useState<ModelType>("objects");
-  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+  const [page, setPage] = useOverlayState<ModelType>("objects", "objects");
+  const [pageToggle, setPageToggle] = useOptimisticState(
+    page || "objects",
+    setPage,
+    100,
+  );
   const { data: config, mutate: refreshConfig } = useSWR<FrigateConfig>(
     "config",
     {
