@@ -71,7 +71,7 @@
       "chooseExamples": "Choose Examples"
     },
     "step1": {
-      "description": "Create a new state or object classification model.",
+      "description": "Create a custom classification model. State models monitor fixed camera areas for changes (e.g., door open/closed). Object models add classifications to detected objects (e.g., known animals, delivery persons, etc.).",
       "name": "Name",
       "namePlaceholder": "Enter model name...",
       "type": "Type",
@@ -80,9 +80,14 @@
       "objectLabel": "Object Label",
       "objectLabelPlaceholder": "Select object type...",
       "classificationType": "Classification Type",
+      "classificationTypeTip": "Learn about classification types",
+      "classificationTypeDesc": "Sub Labels add additional next to the object label (e.g., 'Person: UPS'). Attributes are searchable metadata stored separately in the object metadata.",
       "classificationSubLabel": "Sub Label",
       "classificationAttribute": "Attribute",
       "classes": "Classes",
+      "classesTip": "Learn about classes",
+      "classesStateDesc": "Define the different states your camera area can be in. For example: 'open' and 'closed' for a garage door.",
+      "classesObjectDesc": "Define the different categories to classify detected objects into. For example: 'delivery_person', 'resident', 'stranger' for person classification.",
       "classPlaceholder": "Enter class name...",
       "errors": {
         "nameRequired": "Model name is required",

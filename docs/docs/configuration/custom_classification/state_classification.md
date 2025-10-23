@@ -12,6 +12,17 @@ State classification models are lightweight and run very fast on CPU. Inference 
 Training the model does briefly use a high amount of system resources for about 1–3 minutes per training run. On lower-power devices, training may take longer.
 When running the `-tensorrt` image, Nvidia GPUs will automatically be used to accelerate training.
 
+## Classes
+
+Classes are the different states an area on your camera can be in. Each class represents a distinct visual state that the model will learn to recognize.
+
+For state classification:
+
+- Define classes that represent mutually exclusive states
+- Examples: `open` and `closed` for a garage door, `on` and `off` for lights
+- Use at least 2 classes (typically binary states work best)
+- Keep class names clear and descriptive
+
 ## Example use cases
 
 - **Door state**: Detect if a garage or front door is open vs closed.
