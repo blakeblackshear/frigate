@@ -193,7 +193,9 @@ export default function Step1NameAndDefine({
             name="modelName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("wizard.step1.name")}</FormLabel>
+                <FormLabel className="text-primary-variant">
+                  {t("wizard.step1.name")}
+                </FormLabel>
                 <FormControl>
                   <Input
                     className="h-8"
@@ -211,7 +213,9 @@ export default function Step1NameAndDefine({
             name="modelType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("wizard.step1.type")}</FormLabel>
+                <FormLabel className="text-primary-variant">
+                  {t("wizard.step1.type")}
+                </FormLabel>
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
@@ -260,7 +264,9 @@ export default function Step1NameAndDefine({
                 name="objectLabel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("wizard.step1.objectLabel")}</FormLabel>
+                    <FormLabel className="text-primary-variant">
+                      {t("wizard.step1.objectLabel")}
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -296,7 +302,7 @@ export default function Step1NameAndDefine({
                 name="objectType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
+                    <FormLabel className="text-primary-variant">
                       {t("wizard.step1.classificationType")}
                     </FormLabel>
                     <FormControl>
@@ -344,7 +350,9 @@ export default function Step1NameAndDefine({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <FormLabel>{t("wizard.step1.classes")}</FormLabel>
+              <FormLabel className="text-primary-variant">
+                {t("wizard.step1.classes")}
+              </FormLabel>
               <Button
                 type="button"
                 variant="secondary"
