@@ -30,6 +30,7 @@ const STATE_STEPS = [
 type ClassificationModelWizardDialogProps = {
   open: boolean;
   onClose: () => void;
+  defaultModelType?: "state" | "object";
 };
 
 type WizardState = {
@@ -92,6 +93,7 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
 export default function ClassificationModelWizardDialog({
   open,
   onClose,
+  defaultModelType,
 }: ClassificationModelWizardDialogProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
@@ -166,6 +168,7 @@ export default function ClassificationModelWizardDialog({
           {wizardState.currentStep === 0 && (
             <Step1NameAndDefine
               initialData={wizardState.step1Data}
+              defaultModelType={defaultModelType}
               onNext={handleStep1Next}
               onCancel={handleCancel}
             />

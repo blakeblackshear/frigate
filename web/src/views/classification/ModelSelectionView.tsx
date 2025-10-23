@@ -79,6 +79,7 @@ export default function ModelSelectionView({
     <div className="flex size-full flex-col p-2">
       <ClassificationModelWizardDialog
         open={newModel}
+        defaultModelType={pageToggle === "objects" ? "object" : "state"}
         onClose={() => {
           setNewModel(false);
           refreshConfig();

@@ -40,12 +40,14 @@ export type Step1FormData = {
 
 type Step1NameAndDefineProps = {
   initialData?: Partial<Step1FormData>;
+  defaultModelType?: "state" | "object";
   onNext: (data: Step1FormData) => void;
   onCancel: () => void;
 };
 
 export default function Step1NameAndDefine({
   initialData,
+  defaultModelType,
   onNext,
   onCancel,
 }: Step1NameAndDefineProps) {
@@ -146,7 +148,7 @@ export default function Step1NameAndDefine({
     resolver: zodResolver(step1FormData),
     defaultValues: {
       modelName: initialData?.modelName || "",
-      modelType: initialData?.modelType || "state",
+      modelType: initialData?.modelType || defaultModelType || "state",
       objectLabel: initialData?.objectLabel,
       objectType: initialData?.objectType || "sub_label",
       classes: initialData?.classes?.length ? initialData.classes : [""],
