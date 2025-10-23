@@ -260,7 +260,7 @@ export default function Step2StateArea({
                   onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                   <div className="flex flex-col gap-2">
-                    <Heading as="h4" className="text-sm font-medium">
+                    <Heading as="h4" className="text-sm text-primary-variant">
                       {t("wizard.step2.selectCamera")}
                     </Heading>
                     <div className="scrollbar-container flex max-h-[30vh] flex-col gap-1 overflow-y-auto">
