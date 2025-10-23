@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,7 +27,6 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-import { Link } from "react-router-dom";
 import {
   Popover,
   PopoverContent,
@@ -313,41 +311,42 @@ export default function Step1NameAndDefine({
                 name="objectType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-primary-variant">
-                      {t("wizard.step1.classificationType")}
-                    </FormLabel>
-                    <FormDescription className="mt-1 pt-0.5 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <FormLabel className="text-primary-variant">
+                        {t("wizard.step1.classificationType")}
+                      </FormLabel>
                       <Popover>
-                        <PopoverTrigger>
-                          <div className="flex flex-row items-center gap-0.5 text-xs text-muted-foreground hover:text-primary">
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-4 w-4 p-0"
+                          >
                             <LuInfo className="size-3" />
-                            <span className="cursor-pointer">
-                              {t("wizard.step1.classificationTypeTip")}
-                            </span>
-                          </div>
+                          </Button>
                         </PopoverTrigger>
-                        <PopoverContent>
+                        <PopoverContent className="pointer-events-auto w-80 text-xs">
                           <div className="flex flex-col gap-2">
                             <div className="text-sm">
                               {t("wizard.step1.classificationTypeDesc")}
                             </div>
                             <div className="mt-3 flex items-center text-primary">
-                              <Link
-                                to={getLocaleDocUrl(
+                              <a
+                                href={getLocaleDocUrl(
                                   "configuration/custom_classification/object_classification#classification-type",
                                 )}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline"
+                                className="inline cursor-pointer underline hover:no-underline"
                               >
                                 {t("readTheDocumentation", { ns: "common" })}
                                 <LuExternalLink className="ml-2 inline-flex size-3" />
-                              </Link>
+                              </a>
                             </div>
                           </div>
                         </PopoverContent>
                       </Popover>
-                    </FormDescription>
+                    </div>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
@@ -393,46 +392,41 @@ export default function Step1NameAndDefine({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex flex-col">
+              <div className="flex items-center gap-1">
                 <FormLabel className="text-primary-variant">
                   {t("wizard.step1.classes")}
                 </FormLabel>
-                <FormDescription className="mt-1 pt-0.5 text-xs text-muted-foreground">
-                  <Popover>
-                    <PopoverTrigger>
-                      <div className="flex flex-row items-center gap-0.5 text-xs text-muted-foreground hover:text-primary">
-                        <LuInfo className="size-3" />
-                        <span className="cursor-pointer">
-                          {t("wizard.step1.classesTip")}
-                        </span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                      <LuInfo className="size-3" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="pointer-events-auto w-80 text-xs">
+                    <div className="flex flex-col gap-2">
+                      <div className="text-sm">
+                        {watchedModelType === "state"
+                          ? t("wizard.step1.classesStateDesc")
+                          : t("wizard.step1.classesObjectDesc")}
                       </div>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <div className="flex flex-col gap-2">
-                        <div className="text-sm">
-                          {watchedModelType === "state"
-                            ? t("wizard.step1.classesStateDesc")
-                            : t("wizard.step1.classesObjectDesc")}
-                        </div>
-                        <div className="mt-3 flex items-center text-primary">
-                          <Link
-                            to={getLocaleDocUrl(
-                              watchedModelType === "state"
-                                ? "configuration/custom_classification/state_classification"
-                                : "configuration/custom_classification/object_classification",
-                            )}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline"
-                          >
-                            {t("readTheDocumentation", { ns: "common" })}
-                            <LuExternalLink className="ml-2 inline-flex size-3" />
-                          </Link>
-                        </div>
+                      <div className="mt-3 flex items-center text-primary">
+                        <a
+                          href={getLocaleDocUrl(
+                            watchedModelType === "state"
+                              ? "configuration/custom_classification/state_classification"
+                              : "configuration/custom_classification/object_classification",
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline cursor-pointer underline hover:no-underline"
+                        >
+                          {t("readTheDocumentation", { ns: "common" })}
+                          <LuExternalLink className="ml-2 inline-flex size-3" />
+                        </a>
                       </div>
-                    </PopoverContent>
-                  </Popover>
-                </FormDescription>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
               <Button
                 type="button"
