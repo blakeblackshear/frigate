@@ -367,10 +367,13 @@ export default function Step3ChooseExamples({
             )}
           >
             {!unknownImages || unknownImages.length === 0 ? (
-              <div className="flex h-[40vh] items-center justify-center">
+              <div className="flex h-[40vh] flex-col items-center justify-center gap-4">
                 <p className="text-muted-foreground">
                   {t("wizard.step3.noImages")}
                 </p>
+                <Button onClick={generateExamples} variant="select">
+                  {t("wizard.step3.retryGenerate")}
+                </Button>
               </div>
             ) : allImagesClassified && isProcessing ? (
               <div className="flex h-[40vh] flex-col items-center justify-center gap-4">
@@ -388,9 +391,7 @@ export default function Step3ChooseExamples({
                       key={imageName}
                       className={cn(
                         "aspect-square cursor-pointer overflow-hidden rounded-lg border-2 bg-background transition-all",
-                        isSelected
-                          ? "border-selected ring-2 ring-selected"
-                          : "border-border hover:border-primary",
+                        isSelected && "border-selected ring-2 ring-selected",
                       )}
                       onClick={() => toggleImageSelection(imageName)}
                     >
