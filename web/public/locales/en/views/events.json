@@ -19,10 +19,11 @@
     "noFoundForTimePeriod": "No events found for this time period."
   },
   "detail": {
+    "label": "Detail",
     "noDataFound": "No detail data to review",
     "aria": "Toggle detail view",
-    "trackedObject_one": "tracked object",
-    "trackedObject_other": "tracked objects",
+    "trackedObject_one": "object",
+    "trackedObject_other": "objects",
     "noObjectDetailData": "No object detail data available."
   },
   "objectTrack": {
