@@ -63,11 +63,7 @@ export class DynamicVideoController {
   }
 
   isPlaying(): boolean {
-    return (
-      !this.playerController.paused &&
-      !this.playerController.ended &&
-      this.playerController.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA
-    );
+    return !this.playerController.paused && !this.playerController.ended;
   }
 
   seekToTimestamp(time: number, play: boolean = false) {
