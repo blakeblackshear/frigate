@@ -36,5 +36,16 @@
   "selected_one": "{{count}} valda",
   "selected_other": "{{count}} valda",
   "suspiciousActivity": "Misstänkt aktivitet",
-  "threateningActivity": "Hotande aktivitet"
+  "threateningActivity": "Hotande aktivitet",
+  "detail": {
+    "noDataFound": "Inga detaljerade data att granska",
+    "aria": "Växla detaljvy",
+    "trackedObject_one": "spårat objekt",
+    "trackedObject_other": "spårade objekt",
+    "noObjectDetailData": "Inga objektdetaljdata tillgängliga."
+  },
+  "objectTrack": {
+    "trackedPoint": "Spårad punkt",
+    "clickToSeek": "Klicka för att söka till den här tiden"
+  }
 }

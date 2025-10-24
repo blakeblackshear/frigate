@@ -53,9 +53,17 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         self.tensor_output_details: dict[str, Any] | None = None
         self.labelmap: dict[int, str] = {}
         self.classifications_per_second = EventsPerSecond()
-        self.inference_speed = InferenceSpeed(
-            self.metrics.classification_speeds[self.model_config.name]
-        )
+
+        if (
+            self.metrics
+            and self.model_config.name in self.metrics.classification_speeds
+        ):
+            self.inference_speed = InferenceSpeed(
+                self.metrics.classification_speeds[self.model_config.name]
+            )
+        else:
+            self.inference_speed = None
+
         self.last_run = datetime.datetime.now().timestamp()
         self.__build_detector()
 
@@ -83,12 +91,14 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
 
     def __update_metrics(self, duration: float) -> None:
         self.classifications_per_second.update()
-        self.inference_speed.update(duration)
+        if self.inference_speed:
+            self.inference_speed.update(duration)
 
     def process_frame(self, frame_data: dict[str, Any], frame: np.ndarray):
-        self.metrics.classification_cps[
-            self.model_config.name
-        ].value = self.classifications_per_second.eps()
+        if self.metrics and self.model_config.name in self.metrics.classification_cps:
+            self.metrics.classification_cps[
+                self.model_config.name
+            ].value = self.classifications_per_second.eps()
         camera = frame_data.get("camera")
 
         if camera not in self.model_config.state_config.cameras:
@@ -96,10 +106,10 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
 
         camera_config = self.model_config.state_config.cameras[camera]
         crop = [
-            camera_config.crop[0],
-            camera_config.crop[1],
-            camera_config.crop[2],
-            camera_config.crop[3],
+            camera_config.crop[0] * self.config.cameras[camera].detect.width,
+            camera_config.crop[1] * self.config.cameras[camera].detect.height,
+            camera_config.crop[2] * self.config.cameras[camera].detect.width,
+            camera_config.crop[3] * self.config.cameras[camera].detect.height,
         ]
         should_run = False
 
@@ -223,9 +233,17 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         self.detected_objects: dict[str, float] = {}
         self.labelmap: dict[int, str] = {}
         self.classifications_per_second = EventsPerSecond()
-        self.inference_speed = InferenceSpeed(
-            self.metrics.classification_speeds[self.model_config.name]
-        )
+
+        if (
+            self.metrics
+            and self.model_config.name in self.metrics.classification_speeds
+        ):
+            self.inference_speed = InferenceSpeed(
+                self.metrics.classification_speeds[self.model_config.name]
+            )
+        else:
+            self.inference_speed = None
+
         self.__build_detector()
 
     @redirect_output_to_logger(logger, logging.DEBUG)
@@ -251,12 +269,14 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
 
     def __update_metrics(self, duration: float) -> None:
         self.classifications_per_second.update()
-        self.inference_speed.update(duration)
+        if self.inference_speed:
+            self.inference_speed.update(duration)
 
     def process_frame(self, obj_data, frame):
-        self.metrics.classification_cps[
-            self.model_config.name
-        ].value = self.classifications_per_second.eps()
+        if self.metrics and self.model_config.name in self.metrics.classification_cps:
+            self.metrics.classification_cps[
+                self.model_config.name
+            ].value = self.classifications_per_second.eps()
 
         if obj_data["false_positive"]:
             return

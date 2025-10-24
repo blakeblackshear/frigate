@@ -280,5 +280,8 @@
       "title": "Zapisz"
     }
   },
-  "readTheDocumentation": "Przeczytaj dokumentację"
+  "readTheDocumentation": "Przeczytaj dokumentację",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

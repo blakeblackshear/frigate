@@ -9,7 +9,9 @@ export function getLifecycleItemDescription(
     ? lifecycleItem.data.sub_label[0]
     : lifecycleItem.data.sub_label || lifecycleItem.data.label;
 
-  const label = getTranslatedLabel(rawLabel);
+  const label = lifecycleItem.data.sub_label
+    ? rawLabel
+    : getTranslatedLabel(rawLabel);
 
   let supportedListFormat = false;
   let zonesFormatter: Intl.ListFormat | null = null;
@@ -66,14 +68,18 @@ export function getLifecycleItemDescription(
           {
             ns: "views/explore",
             label,
-            attribute: lifecycleItem.data.attribute.replaceAll("_", " "),
+            attribute: getTranslatedLabel(
+              lifecycleItem.data.attribute.replaceAll("_", " "),
+            ),
           },
         );
       } else {
         title = t("objectLifecycle.lifecycleItemDesc.attribute.other", {
           ns: "views/explore",
           label: lifecycleItem.data.label,
-          attribute: lifecycleItem.data.attribute.replaceAll("_", " "),
+          attribute: getTranslatedLabel(
+            lifecycleItem.data.attribute.replaceAll("_", " "),
+          ),
         });
       }
       return title;

@@ -117,7 +117,8 @@
     "button": {
       "export": "Exportieren",
       "markAsReviewed": "Als geprüft markieren",
-      "deleteNow": "Jetzt löschen"
+      "deleteNow": "Jetzt löschen",
+      "markAsUnreviewed": "Als ungeprüft markieren"
     }
   },
   "imagePicker": {

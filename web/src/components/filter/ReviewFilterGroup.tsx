@@ -495,8 +495,7 @@ export function GeneralFilterContent({
             checked={filter.labels === undefined}
             onCheckedChange={(isChecked) => {
               if (isChecked) {
-                const { labels: _labels, ...rest } = filter;
-                onUpdateFilter(rest);
+                onUpdateFilter({ ...filter, labels: undefined });
               }
             }}
           />
@@ -542,8 +541,7 @@ export function GeneralFilterContent({
                 checked={filter.zones === undefined}
                 onCheckedChange={(isChecked) => {
                   if (isChecked) {
-                    const { zones: _zones, ...rest } = filter;
-                    onUpdateFilter(rest);
+                    onUpdateFilter({ ...filter, zones: undefined });
                   }
                 }}
               />

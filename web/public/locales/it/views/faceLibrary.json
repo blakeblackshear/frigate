@@ -55,7 +55,7 @@
   },
   "imageEntry": {
     "dropActive": "Rilascia l'immagine qui…",
-    "dropInstructions": "Trascina e rilascia un'immagine qui oppure fai clic per selezionarla",
+    "dropInstructions": "Trascina e rilascia o incolla un'immagine qui oppure fai clic per selezionarla",
     "maxSize": "Dimensione massima: {{size}} MB",
     "validation": {
       "selectImage": "Seleziona un file immagine."

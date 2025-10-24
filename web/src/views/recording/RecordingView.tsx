@@ -696,7 +696,7 @@ export function RecordingView({
             <div
               className={cn(
                 "flex size-full items-center",
-                timelineType === "detail"
+                timelineType === "detail" && isDesktop
                   ? "flex-col"
                   : mainCameraAspect == "tall"
                     ? "flex-row justify-evenly"
@@ -782,7 +782,7 @@ export function RecordingView({
                       ? "h-full w-72 flex-col"
                       : `h-28 w-full`,
                     previewRowOverflows ? "" : "items-center justify-center",
-                    timelineType == "detail" && "mt-4",
+                    timelineType == "detail" && isDesktop && "mt-4",
                   )}
                 >
                   <div className="w-2" />
@@ -847,6 +847,7 @@ export function RecordingView({
             setScrubbing={setScrubbing}
             setExportRange={setExportRange}
             onAnalysisOpen={onAnalysisOpen}
+            isPlaying={mainControllerRef?.current?.isPlaying() ?? false}
           />
         </div>
       </div>
@@ -864,6 +865,7 @@ type TimelineProps = {
   activeReviewItem?: ReviewSegment;
   currentTime: number;
   exportRange?: TimeRange;
+  isPlaying?: boolean;
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   manuallySetCurrentTime: (time: number, force: boolean) => void;
   setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
@@ -880,6 +882,7 @@ function Timeline({
   activeReviewItem,
   currentTime,
   exportRange,
+  isPlaying,
   setCurrentTime,
   manuallySetCurrentTime,
   setScrubbing,
@@ -966,15 +969,19 @@ function Timeline({
         "relative",
         isDesktop
           ? `${timelineType == "timeline" ? "w-[100px]" : timelineType == "detail" ? "w-[30%]" : "w-60"} no-scrollbar overflow-y-auto`
-          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : timelineType == "detail" ? "flex-1" : "landscape:w-[175px]"} `,
+          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : timelineType == "detail" && isDesktop ? "flex-1" : "landscape:w-[300px]"} `,
       )}
     >
       {isMobile && (
         <GenAISummaryDialog review={activeReviewItem} onOpen={onAnalysisOpen} />
       )}
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
+      {timelineType != "detail" && (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
+        </>
+      )}
       {timelineType == "timeline" ? (
         !isLoading ? (
           <MotionReviewTimeline
@@ -1009,6 +1016,7 @@ function Timeline({
             manuallySetCurrentTime(timestamp, play ?? true)
           }
           reviewItems={mainCameraReviewItems}
+          isPlaying={isPlaying}
         />
       ) : (
         <div className="scrollbar-container h-full overflow-auto bg-secondary">

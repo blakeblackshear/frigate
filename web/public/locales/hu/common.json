@@ -176,7 +176,7 @@
   },
   "role": {
     "viewer": "Néző",
-    "title": "Szerep",
+    "title": "Szerepkör",
     "admin": "Adminisztrátor",
     "desc": "Az adminisztrátoroknak teljes hozzáférése van az összes feature-höz. A nézők csak a kamerákat láthatják, áttekinthetik az elemeket és az előzményeket a UI-on."
   },
@@ -221,6 +221,14 @@
     "length": {
       "feet": "láb",
       "meters": "méter"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/óra",
+      "mbph": "MB/óra",
+      "gbph": "GB/óra"
     }
   },
   "button": {
@@ -263,5 +271,8 @@
   "label": {
     "back": "Vissza"
   },
-  "readTheDocumentation": "Olvassa el a dokumentációt"
+  "readTheDocumentation": "Olvassa el a dokumentációt",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

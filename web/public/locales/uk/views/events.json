@@ -36,5 +36,16 @@
   },
   "detected": "виявлено",
   "suspiciousActivity": "Підозріла активність",
-  "threateningActivity": "Загрозлива діяльність"
+  "threateningActivity": "Загрозлива діяльність",
+  "detail": {
+    "noDataFound": "Немає детальних даних для перегляду",
+    "aria": "Перемикання детального перегляду",
+    "trackedObject_one": "відстежуваний об'єкт",
+    "trackedObject_other": "відстежувані об'єкти",
+    "noObjectDetailData": "Детальні дані про об'єкт недоступні."
+  },
+  "objectTrack": {
+    "trackedPoint": "Відстежувана Точка",
+    "clickToSeek": "Натисніть, щоб перейти до цього часу"
+  }
 }

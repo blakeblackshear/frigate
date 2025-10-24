@@ -44,7 +44,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
@@ -56,7 +56,6 @@ import { ModelState } from "@/types/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { MdAutoFixHigh } from "react-icons/md";
 import TrainFilterDialog from "@/components/overlay/dialog/TrainFilterDialog";
 import useApiFilter from "@/hooks/use-api-filter";
 import { ClassificationItemData, TrainFilter } from "@/types/classification";
@@ -69,6 +68,7 @@ import SearchDetailDialog, {
   SearchTab,
 } from "@/components/overlay/detail/SearchDetailDialog";
 import { SearchResult } from "@/types/search";
+import { HiSparkles } from "react-icons/hi";
 
 type ModelTrainingViewProps = {
   model: CustomClassificationModelConfig;
@@ -378,12 +378,13 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
             <Button
               className="flex justify-center gap-2"
               onClick={trainModel}
+              variant="select"
               disabled={modelState != "complete"}
             >
               {modelState == "training" ? (
                 <ActivityIndicator size={20} />
               ) : (
-                <MdAutoFixHigh className="text-secondary-foreground" />
+                <HiSparkles className="text-white" />
               )}
               {isDesktop && t("button.trainModel")}
             </Button>
@@ -631,37 +632,37 @@ function DatasetGrid({
   return (
     <div
       ref={contentRef}
-      className="scrollbar-container flex flex-wrap gap-2 overflow-y-auto p-2"
+      className="scrollbar-container grid grid-cols-2 gap-2 overflow-y-scroll p-1 md:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12"
     >
       {classData.map((image) => (
-        <ClassificationCard
-          key={image}
-          className="w-60 gap-4 rounded-lg bg-card p-2"
-          imgClassName="size-auto"
-          data={{
-            filename: image,
-            filepath: `clips/${modelName}/dataset/${categoryName}/${image}`,
-            name: "",
-          }}
-          selected={selectedImages.includes(image)}
-          i18nLibrary="views/classificationModel"
-          onClick={(data, _) => onClickImages([data.filename], true)}
-        >
-          <Tooltip>
-            <TooltipTrigger>
-              <LuTrash2
-                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete([image]);
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent>
-              {t("button.deleteClassificationAttempts")}
-            </TooltipContent>
-          </Tooltip>
-        </ClassificationCard>
+        <div key={image} className="aspect-square w-full">
+          <ClassificationCard
+            data={{
+              filename: image,
+              filepath: `clips/${modelName}/dataset/${categoryName}/${image}`,
+              name: "",
+            }}
+            showArea={false}
+            selected={selectedImages.includes(image)}
+            i18nLibrary="views/classificationModel"
+            onClick={(data, _) => onClickImages([data.filename], true)}
+          >
+            <Tooltip>
+              <TooltipTrigger>
+                <LuTrash2
+                  className="size-5 cursor-pointer text-primary-variant hover:text-danger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete([image]);
+                  }}
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                {t("button.deleteClassificationAttempts")}
+              </TooltipContent>
+            </Tooltip>
+          </ClassificationCard>
+        </div>
       ))}
     </div>
   );
@@ -757,7 +758,6 @@ function TrainGrid({
       selectedImages={selectedImages}
       onClickImages={onClickImages}
       onRefresh={onRefresh}
-      onDelete={onDelete}
     />
   );
 }
@@ -780,10 +780,7 @@ function StateTrainGrid({
   selectedImages,
   onClickImages,
   onRefresh,
-  onDelete,
 }: StateTrainGridProps) {
-  const { t } = useTranslation(["views/classificationModel"]);
-
   const threshold = useMemo(() => {
     return {
       recognition: model.threshold,
@@ -795,45 +792,29 @@ function StateTrainGrid({
     <div
       ref={contentRef}
       className={cn(
-        "scrollbar-container flex flex-wrap gap-2 overflow-y-auto p-2",
-        isMobile && "justify-center",
+        "scrollbar-container grid grid-cols-2 gap-3 overflow-y-scroll p-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12",
       )}
     >
       {trainData?.map((data) => (
-        <ClassificationCard
-          key={data.filename}
-          className="w-60 gap-2 rounded-lg bg-card p-2"
-          imgClassName="size-auto"
-          data={data}
-          threshold={threshold}
-          selected={selectedImages.includes(data.filename)}
-          i18nLibrary="views/classificationModel"
-          showArea={false}
-          onClick={(data, meta) => onClickImages([data.filename], meta)}
-        >
-          <ClassificationSelectionDialog
-            classes={classes}
-            modelName={model.name}
-            image={data.filename}
-            onRefresh={onRefresh}
+        <div key={data.filename} className="aspect-square w-full">
+          <ClassificationCard
+            data={data}
+            threshold={threshold}
+            selected={selectedImages.includes(data.filename)}
+            i18nLibrary="views/classificationModel"
+            showArea={false}
+            onClick={(data, meta) => onClickImages([data.filename], meta)}
           >
-            <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-          </ClassificationSelectionDialog>
-          <Tooltip>
-            <TooltipTrigger>
-              <LuTrash2
-                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete([data.filename]);
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent>
-              {t("button.deleteClassificationAttempts")}
-            </TooltipContent>
-          </Tooltip>
-        </ClassificationCard>
+            <ClassificationSelectionDialog
+              classes={classes}
+              modelName={model.name}
+              image={data.filename}
+              onRefresh={onRefresh}
+            >
+              <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground/40" />
+            </ClassificationSelectionDialog>
+          </ClassificationCard>
+        </div>
       ))}
     </div>
   );
@@ -847,7 +828,6 @@ type ObjectTrainGridProps = {
   selectedImages: string[];
   onClickImages: (images: string[], ctrl: boolean) => void;
   onRefresh: () => void;
-  onDelete: (ids: string[]) => void;
 };
 function ObjectTrainGrid({
   model,
@@ -857,10 +837,7 @@ function ObjectTrainGrid({
   selectedImages,
   onClickImages,
   onRefresh,
-  onDelete,
 }: ObjectTrainGridProps) {
-  const { t } = useTranslation(["views/classificationModel"]);
-
   // item data
 
   const groups = useMemo(() => {
@@ -950,55 +927,43 @@ function ObjectTrainGrid({
 
       <div
         ref={contentRef}
-        className="scrollbar-container flex flex-wrap gap-2 overflow-y-scroll p-1"
+        className={cn(
+          "scrollbar-container grid grid-cols-2 gap-3 overflow-y-scroll p-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12",
+        )}
       >
         {Object.entries(groups).map(([key, group]) => {
           const event = events?.find((ev) => ev.id == key);
           return (
-            <GroupedClassificationCard
-              key={key}
-              group={group}
-              event={event}
-              threshold={threshold}
-              selectedItems={selectedImages}
-              i18nLibrary="views/classificationModel"
-              objectType={model.object_config?.objects?.at(0) ?? "Object"}
-              onClick={(data) => {
-                if (data) {
-                  onClickImages([data.filename], true);
-                } else {
-                  handleClickEvent(group, event, true);
-                }
-              }}
-              onSelectEvent={() => {}}
-            >
-              {(data) => (
-                <>
-                  <ClassificationSelectionDialog
-                    classes={classes}
-                    modelName={model.name}
-                    image={data.filename}
-                    onRefresh={onRefresh}
-                  >
-                    <TbCategoryPlus className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-                  </ClassificationSelectionDialog>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <LuTrash2
-                        className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete([data.filename]);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {t("button.deleteClassificationAttempts")}
-                    </TooltipContent>
-                  </Tooltip>
-                </>
-              )}
-            </GroupedClassificationCard>
+            <div key={key} className="aspect-square w-full">
+              <GroupedClassificationCard
+                group={group}
+                event={event}
+                threshold={threshold}
+                selectedItems={selectedImages}
+                i18nLibrary="views/classificationModel"
+                objectType={model.object_config?.objects?.at(0) ?? "Object"}
+                onClick={(data) => {
+                  if (data) {
+                    onClickImages([data.filename], true);
+                  } else {
+                    handleClickEvent(group, event, true);
+                  }
+                }}
+              >
+                {(data) => (
+                  <>
+                    <ClassificationSelectionDialog
+                      classes={classes}
+                      modelName={model.name}
+                      image={data.filename}
+                      onRefresh={onRefresh}
+                    >
+                      <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground/40" />
+                    </ClassificationSelectionDialog>
+                  </>
+                )}
+              </GroupedClassificationCard>
+            </div>
           );
         })}
       </div>

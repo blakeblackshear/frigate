@@ -36,5 +36,16 @@
   "selected_one": "{{count}} geselecteerd",
   "detected": "gedetecteerd",
   "suspiciousActivity": "Verdachte activiteit",
-  "threateningActivity": "Bedreigende activiteit"
+  "threateningActivity": "Bedreigende activiteit",
+  "detail": {
+    "noDataFound": "Geen gedetailleerde gegevens om te beoordelen",
+    "aria": "Detailweergave in- of uitschakelen",
+    "trackedObject_one": "gevolgd object",
+    "trackedObject_other": "gevolgde objecten",
+    "noObjectDetailData": "Geen objectdetails beschikbaar."
+  },
+  "objectTrack": {
+    "trackedPoint": "Gevolgd punt",
+    "clickToSeek": "Klik om naar deze tijd te zoeken"
+  }
 }

@@ -62,7 +62,7 @@
     "disable": "Deaktiver automatisk sporing"
   },
   "manualRecording": {
-    "tips": "Start en manuell hendelse basert på kameraets innstillinger for opptaksbevaring.",
+    "tips": "Last ned et øyeblikksbilde umiddelbart, eller start en manuell hendelse basert på dette kameraets innstillinger for opptaksbevaring.",
     "playInBackground": {
       "label": "Spill av i bakgrunnen",
       "desc": "Aktiver dette alternativet for å fortsette strømming når spilleren er skjult."
@@ -73,7 +73,7 @@
     },
     "started": "Startet manuelt opptak på forespørsel.",
     "end": "Avslutt opptak på forespørsel",
-    "title": "Opptak på forespørsel",
+    "title": "På forespørsel",
     "debugView": "Feilsøkingsvisning",
     "start": "Start opptak på forespørsel",
     "failedToStart": "Kunne ikke starte manuelt opptak på forespørsel.",

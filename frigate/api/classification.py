@@ -3,7 +3,9 @@
 import datetime
 import logging
 import os
+import random
 import shutil
+import string
 from typing import Any
 
 import cv2
@@ -17,6 +19,8 @@ from frigate.api.auth import require_role
 from frigate.api.defs.request.classification_body import (
     AudioTranscriptionBody,
     DeleteFaceImagesBody,
+    GenerateObjectExamplesBody,
+    GenerateStateExamplesBody,
     RenameFaceBody,
 )
 from frigate.api.defs.response.classification_response import (
@@ -30,6 +34,10 @@ from frigate.config.camera import DetectConfig
 from frigate.const import CLIPS_DIR, FACE_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event
+from frigate.util.classification import (
+    collect_object_classification_examples,
+    collect_state_classification_examples,
+)
 from frigate.util.path import get_event_snapshot
 
 logger = logging.getLogger(__name__)
@@ -159,8 +167,7 @@ def train_face(request: Request, name: str, body: dict = None):
     new_name = f"{sanitized_name}-{datetime.datetime.now().timestamp()}.webp"
     new_file_folder = os.path.join(FACE_DIR, f"{sanitized_name}")
 
-    if not os.path.exists(new_file_folder):
-        os.mkdir(new_file_folder)
+    os.makedirs(new_file_folder, exist_ok=True)
 
     if training_file_name:
         shutil.move(training_file, os.path.join(new_file_folder, new_name))
@@ -701,13 +708,14 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
             status_code=404,
         )
 
-    new_name = f"{category}-{datetime.datetime.now().timestamp()}.png"
+    random_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    timestamp = datetime.datetime.now().timestamp()
+    new_name = f"{category}-{timestamp}-{random_id}.png"
     new_file_folder = os.path.join(
         CLIPS_DIR, sanitize_filename(name), "dataset", category
     )
 
-    if not os.path.exists(new_file_folder):
-        os.mkdir(new_file_folder)
+    os.makedirs(new_file_folder, exist_ok=True)
 
     # use opencv because webp images can not be used to train
     img = cv2.imread(training_file)
@@ -754,5 +762,45 @@ def delete_classification_train_images(request: Request, name: str, body: dict =
 
     return JSONResponse(
         content=({"success": True, "message": "Successfully deleted faces."}),
+        status_code=200,
+    )
+
+
+@router.post(
+    "/classification/generate_examples/state",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Generate state classification examples",
+)
+async def generate_state_examples(request: Request, body: GenerateStateExamplesBody):
+    """Generate examples for state classification."""
+    model_name = sanitize_filename(body.model_name)
+    cameras_normalized = {
+        camera_name: tuple(crop)
+        for camera_name, crop in body.cameras.items()
+        if camera_name in request.app.frigate_config.cameras
+    }
+
+    collect_state_classification_examples(model_name, cameras_normalized)
+
+    return JSONResponse(
+        content={"success": True, "message": "Example generation completed"},
+        status_code=200,
+    )
+
+
+@router.post(
+    "/classification/generate_examples/object",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Generate object classification examples",
+)
+async def generate_object_examples(request: Request, body: GenerateObjectExamplesBody):
+    """Generate examples for object classification."""
+    model_name = sanitize_filename(body.model_name)
+    collect_object_classification_examples(model_name, body.label)
+
+    return JSONResponse(
+        content={"success": True, "message": "Example generation completed"},
         status_code=200,
     )

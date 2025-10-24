@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ObjectLifecycleSequence } from "@/types/timeline";
-import { LifecycleIcon } from "@/components/overlay/detail/ObjectLifecycle";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { useDetailStream } from "@/context/detail-stream-context";
 import scrollIntoView from "scroll-into-view-if-needed";
 import useUserInteraction from "@/hooks/use-user-interaction";
 import {
   formatUnixTimestampToDateTime,
-  formatSecondsToDuration,
+  getDurationFromTimestamps,
 } from "@/utils/dateUtil";
 import { Trans, useTranslation } from "react-i18next";
 import AnnotationOffsetSlider from "@/components/overlay/detail/AnnotationOffsetSlider";
@@ -17,27 +16,25 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { Event } from "@/types/event";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { ReviewSegment } from "@/types/review";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
-import { LuChevronUp, LuChevronDown } from "react-icons/lu";
+import { LuChevronDown, LuCircle, LuChevronRight } from "react-icons/lu";
 import { getTranslatedLabel } from "@/utils/i18n";
 import EventMenu from "@/components/timeline/EventMenu";
 import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
 import { cn } from "@/lib/utils";
 import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
   currentTime: number;
+  isPlaying?: boolean;
   onSeek: (timestamp: number, play?: boolean) => void;
 };
 
 export default function DetailStream({
   reviewItems,
   currentTime,
+  isPlaying = false,
   onSeek,
 }: DetailStreamProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -54,6 +51,10 @@ export default function DetailStream({
 
   const effectiveTime = currentTime + annotationOffset / 1000;
   const [upload, setUpload] = useState<Event | undefined>(undefined);
+
+  const onSeekCheckPlaying = (timestamp: number) => {
+    onSeek(timestamp, isPlaying);
+  };
 
   // Ensure we initialize the active review when reviewItems first arrive.
   // This helps when the component mounts while the video is already
@@ -90,7 +91,7 @@ export default function DetailStream({
 
   // Auto-scroll to current time
   useEffect(() => {
-    if (!scrollRef.current || userInteracting) return;
+    if (!scrollRef.current || userInteracting || !isPlaying) return;
     // Prefer the review whose range contains the effectiveTime. If none
     // contains it, pick the nearest review (by mid-point distance). This is
     // robust to unordered reviewItems and avoids always picking the last
@@ -122,11 +123,20 @@ export default function DetailStream({
         `[data-review-id="${id}"]`,
       ) as HTMLElement;
       if (element) {
-        setProgrammaticScroll();
-        scrollIntoView(element, {
-          scrollMode: "if-needed",
-          behavior: "smooth",
-        });
+        // Only scroll if element is completely out of view
+        const containerRect = scrollRef.current.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        const isFullyInvisible =
+          elementRect.bottom < containerRect.top ||
+          elementRect.top > containerRect.bottom;
+
+        if (isFullyInvisible) {
+          setProgrammaticScroll();
+          scrollIntoView(element, {
+            scrollMode: "if-needed",
+            behavior: "smooth",
+          });
+        }
       }
     }
   }, [
@@ -135,6 +145,7 @@ export default function DetailStream({
     annotationOffset,
     userInteracting,
     setProgrammaticScroll,
+    isPlaying,
   ]);
 
   // Auto-select active review based on effectiveTime (if inside a review range)
@@ -166,9 +177,9 @@ export default function DetailStream({
 
       <div
         ref={scrollRef}
-        className="scrollbar-container h-[calc(100vh-70px)] overflow-y-auto bg-secondary"
+        className="scrollbar-container h-[calc(100vh-70px)] overflow-y-auto"
       >
-        <div className="space-y-2 p-4">
+        <div className="space-y-4 py-2">
           {reviewItems?.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
               {t("detail.noDataFound")}
@@ -182,7 +193,7 @@ export default function DetailStream({
                   id={id}
                   review={review}
                   config={config}
-                  onSeek={onSeek}
+                  onSeek={onSeekCheckPlaying}
                   effectiveTime={effectiveTime}
                   isActive={activeReviewId == id}
                   onActivate={() => setActiveReviewId(id)}
@@ -221,6 +232,7 @@ function ReviewGroup({
   effectiveTime,
 }: ReviewGroupProps) {
   const { t } = useTranslation("views/events");
+  const [open, setOpen] = useState(false);
   const start = review.start_time ?? 0;
 
   const displayTime = formatUnixTimestampToDateTime(start, {
@@ -235,7 +247,7 @@ function ReviewGroup({
 
   const shouldFetchEvents = review?.data?.detections?.length > 0;
 
-  const { data: fetchedEvents } = useSWR<Event[]>(
+  const { data: fetchedEvents, isValidating } = useSWR<Event[]>(
     shouldFetchEvents
       ? ["event_ids", { ids: review.data.detections.join(",") }]
       : null,
@@ -260,28 +272,27 @@ function ReviewGroup({
   }
 
   const reviewInfo = useMemo(() => {
-    if (review.data.metadata?.title) {
-      return review.data.metadata.title;
-    } else {
-      const objectCount = fetchedEvents
-        ? fetchedEvents.length
-        : (review.data.objects ?? []).length;
+    const objectCount = fetchedEvents
+      ? fetchedEvents.length
+      : (review.data.objects ?? []).length;
 
-      return `${objectCount} ${t("detail.trackedObject", { count: objectCount })}`;
-    }
+    return `${objectCount} ${t("detail.trackedObject", { count: objectCount })}`;
   }, [review, t, fetchedEvents]);
 
-  const reviewDuration =
-    review.end_time != null
-      ? formatSecondsToDuration(
-          Math.max(0, Math.floor((review.end_time ?? 0) - start)),
-        )
-      : null;
+  const reviewDuration = useMemo(
+    () =>
+      getDurationFromTimestamps(
+        review.start_time,
+        review.end_time ?? null,
+        true,
+      ),
+    [review.start_time, review.end_time],
+  );
 
   return (
     <div
       data-review-id={id}
-      className={`cursor-pointer rounded-lg border bg-background p-3 outline outline-[3px] -outline-offset-[2.8px] ${
+      className={`cursor-pointer rounded-lg bg-secondary p-3 outline outline-[3px] -outline-offset-[2.8px] ${
         isActive
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500"
@@ -294,40 +305,75 @@ function ReviewGroup({
           onSeek(start);
         }}
       >
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col">
+        <div className="ml-1 flex flex-col items-start gap-1.5">
+          <div className="flex flex-row gap-3">
             <div className="text-sm font-medium">{displayTime}</div>
-            {reviewDuration && (
-              <div className="text-xs text-muted-foreground">
-                {reviewDuration}
+            <div className="flex items-center gap-2">
+              {iconLabels.slice(0, 5).map((lbl, idx) => (
+                <div
+                  key={`${lbl}-${idx}`}
+                  className="rounded-full bg-muted-foreground p-1"
+                >
+                  {getIconForLabel(lbl, "size-3 text-primary dark:text-white")}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            {review.data.metadata?.title && (
+              <div className="mb-1 text-sm text-primary-variant">
+                {review.data.metadata.title}
               </div>
             )}
-            <div className="text-xs text-muted-foreground">{reviewInfo}</div>
+            <div className="flex flex-row items-center gap-1.5">
+              <div className="text-xs text-primary-variant">{reviewInfo}</div>
+
+              {reviewDuration && (
+                <>
+                  <span className="text-[5px] text-primary-variant">•</span>
+                  <div className="text-xs text-primary-variant">
+                    {reviewDuration}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {iconLabels.slice(0, 5).map((lbl, idx) => (
-            <span key={`${lbl}-${idx}`}>
-              {getIconForLabel(lbl, "size-4 text-primary dark:text-white")}
-            </span>
-          ))}
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((v) => !v);
+          }}
+          aria-label={open ? "Collapse" : "Expand"}
+          className="ml-2 inline-flex items-center justify-center rounded p-1 hover:bg-secondary/10"
+        >
+          {open ? (
+            <LuChevronDown className="size-4 text-primary-variant" />
+          ) : (
+            <LuChevronRight className="size-4 text-primary-variant" />
+          )}
         </div>
       </div>
 
-      {isActive && (
-        <div className="mt-2 space-y-2">
-          {shouldFetchEvents && !fetchedEvents ? (
+      {open && (
+        <div className="mt-2 space-y-0.5">
+          {shouldFetchEvents && isValidating && !fetchedEvents ? (
             <ActivityIndicator />
           ) : (
-            (fetchedEvents || []).map((event) => {
+            (fetchedEvents || []).map((event, index) => {
               return (
-                <EventCollapsible
-                  key={event.id}
-                  event={event}
-                  effectiveTime={effectiveTime}
-                  onSeek={onSeek}
-                  onOpenUpload={onOpenUpload}
-                />
+                <div
+                  key={`event-${event.id}-${index}`}
+                  className="border-b border-secondary-highlight pb-0.5 last:border-0 last:pb-0"
+                >
+                  <EventList
+                    key={event.id}
+                    event={event}
+                    effectiveTime={effectiveTime}
+                    onSeek={onSeek}
+                    onOpenUpload={onOpenUpload}
+                  />
+                </div>
               );
             })
           )}
@@ -338,11 +384,13 @@ function ReviewGroup({
                   key={audioLabel}
                   className="rounded-md bg-secondary p-2 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500"
                 >
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    {getIconForLabel(
-                      audioLabel,
-                      "size-4 text-primary dark:text-white",
-                    )}
+                  <div className="ml-1.5 flex items-center gap-2 text-sm font-medium">
+                    <div className="rounded-full bg-muted-foreground p-1">
+                      {getIconForLabel(
+                        audioLabel,
+                        "size-3 text-primary dark:text-white",
+                      )}
+                    </div>
                     <span>{getTranslatedLabel(audioLabel)}</span>
                   </div>
                 </div>
@@ -355,55 +403,30 @@ function ReviewGroup({
   );
 }
 
-type EventCollapsibleProps = {
+type EventListProps = {
   event: Event;
   effectiveTime?: number;
   onSeek: (ts: number, play?: boolean) => void;
   onOpenUpload?: (e: Event) => void;
 };
-function EventCollapsible({
+function EventList({
   event,
   effectiveTime,
   onSeek,
   onOpenUpload,
-}: EventCollapsibleProps) {
-  const [open, setOpen] = useState(false);
-  const { t } = useTranslation("views/events");
+}: EventListProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const { selectedObjectId, setSelectedObjectId } = useDetailStream();
 
-  const formattedStart = config
-    ? formatUnixTimestampToDateTime(event.start_time ?? 0, {
-        timezone: config.ui.timezone,
-        date_format:
-          config.ui.time_format == "24hour"
-            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
-                ns: "common",
-              })
-            : t("time.formattedTimestampHourMinuteSecond.12hour", {
-                ns: "common",
-              }),
-        time_style: "medium",
-        date_style: "medium",
-      })
-    : "";
-
-  const formattedEnd = config
-    ? formatUnixTimestampToDateTime(event.end_time ?? 0, {
-        timezone: config.ui.timezone,
-        date_format:
-          config.ui.time_format == "24hour"
-            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
-                ns: "common",
-              })
-            : t("time.formattedTimestampHourMinuteSecond.12hour", {
-                ns: "common",
-              }),
-        time_style: "medium",
-        date_style: "medium",
-      })
-    : "";
+  const handleObjectSelect = (event: Event | undefined) => {
+    if (event) {
+      onSeek(event.start_time ?? 0);
+      setSelectedObjectId(event.id);
+    } else {
+      setSelectedObjectId(undefined);
+    }
+  };
 
   // Clear selectedObjectId when effectiveTime has passed this event's end_time
   useEffect(() => {
@@ -421,95 +444,105 @@ function EventCollapsible({
   ]);
 
   return (
-    <Collapsible open={open} onOpenChange={(o) => setOpen(o)}>
+    <>
       <div
         className={cn(
           "rounded-md bg-secondary p-2 outline outline-[3px] -outline-offset-[2.8px]",
           event.id == selectedObjectId
-            ? "shadow-selected outline-selected"
+            ? "bg-secondary-highlight shadow-selected outline-selected"
             : "outline-transparent duration-500",
           event.id != selectedObjectId &&
             (effectiveTime ?? 0) >= (event.start_time ?? 0) - 0.5 &&
             (effectiveTime ?? 0) <=
               (event.end_time ?? event.start_time ?? 0) + 0.5 &&
-            "bg-secondary-highlight outline-[1.5px] -outline-offset-[1.1px] outline-primary/40",
+            "bg-secondary-highlight",
         )}
       >
-        <div className="flex w-full items-center justify-between">
+        <div className="ml-1.5 flex w-full items-center justify-between">
           <div
             className="flex items-center gap-2 text-sm font-medium"
             onClick={(e) => {
               e.stopPropagation();
-              onSeek(event.start_time ?? 0);
-              if (event.id) setSelectedObjectId(event.id);
+              handleObjectSelect(
+                event.id == selectedObjectId ? undefined : event,
+              );
             }}
             role="button"
           >
-            {getIconForLabel(
-              event.label,
-              "size-4 text-primary dark:text-white",
-            )}
+            <div
+              className={cn(
+                "rounded-full p-1",
+                event.id == selectedObjectId
+                  ? "bg-selected"
+                  : "bg-muted-foreground",
+              )}
+            >
+              {getIconForLabel(
+                event.label,
+                "size-3 text-primary dark:text-white",
+              )}
+            </div>
             <div className="flex items-end gap-2">
               <span>{getTranslatedLabel(event.label)}</span>
-              <span className="text-xs text-secondary-foreground">
-                {formattedStart ?? ""} - {formattedEnd ?? ""}
-              </span>
             </div>
           </div>
-          <div className="flex flex-1 flex-row justify-end">
+          <div className="mr-2 flex flex-1 flex-row justify-end">
             <EventMenu
               event={event}
               config={config}
               onOpenUpload={(e) => onOpenUpload?.(e)}
+              selectedObjectId={selectedObjectId}
+              setSelectedObjectId={handleObjectSelect}
             />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <CollapsibleTrigger asChild>
-              <button
-                onClick={(e) => e.stopPropagation()}
-                className="rounded bg-muted px-2 py-1 text-xs"
-                aria-label={t("detail.aria")}
-              >
-                {open ? (
-                  <LuChevronUp className="size-3" />
-                ) : (
-                  <LuChevronDown className="size-3" />
-                )}
-              </button>
-            </CollapsibleTrigger>
           </div>
         </div>
-        <CollapsibleContent>
-          <div className="mt-2">
-            <ObjectTimeline
-              eventId={event.id}
-              onSeek={onSeek}
-              effectiveTime={effectiveTime}
-            />
-          </div>
-        </CollapsibleContent>
+
+        <div className="mt-2">
+          <ObjectTimeline
+            eventId={event.id}
+            onSeek={onSeek}
+            effectiveTime={effectiveTime}
+          />
+        </div>
       </div>
-    </Collapsible>
+    </>
   );
 }
 
 type LifecycleItemProps = {
-  event: ObjectLifecycleSequence;
+  item: ObjectLifecycleSequence;
   isActive?: boolean;
   onSeek?: (timestamp: number, play?: boolean) => void;
+  effectiveTime?: number;
 };
 
-function LifecycleItem({ event, isActive, onSeek }: LifecycleItemProps) {
+function LifecycleItem({
+  item,
+  isActive,
+  onSeek,
+  effectiveTime,
+}: LifecycleItemProps) {
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
 
+  
   event.data.zones_friendly_names = event?.data?.zones?.map((zone) => {
     return resolveZoneName(config, zone);
   });
+  
+  const aspectRatio = useMemo(() => {
+    if (!config || !item?.camera) {
+      return 16 / 9;
+    }
+
+    return (
+      config.cameras[item.camera].detect.width /
+      config.cameras[item.camera].detect.height
+    );
+  }, [config, item]);
 
   const formattedEventTimestamp = config
-    ? formatUnixTimestampToDateTime(event.timestamp ?? 0, {
+    ? formatUnixTimestampToDateTime(item?.timestamp ?? 0, {
         timezone: config.ui.timezone,
         date_format:
           config.ui.time_format == "24hour"
@@ -524,11 +557,28 @@ function LifecycleItem({ event, isActive, onSeek }: LifecycleItemProps) {
       })
     : "";
 
+  const ratio =
+    Array.isArray(item?.data.box) && item?.data.box.length >= 4
+      ? (aspectRatio * (item?.data.box[2] / item?.data.box[3])).toFixed(2)
+      : "N/A";
+  const areaPx =
+    Array.isArray(item?.data.box) && item?.data.box.length >= 4
+      ? Math.round(
+          (config?.cameras[item?.camera]?.detect?.width ?? 0) *
+            (config?.cameras[item?.camera]?.detect?.height ?? 0) *
+            (item?.data.box[2] * item?.data.box[3]),
+        )
+      : undefined;
+  const areaPct =
+    Array.isArray(item?.data.box) && item?.data.box.length >= 4
+      ? (item?.data.box[2] * item?.data.box[3]).toFixed(4)
+      : undefined;
+
   return (
     <div
       role="button"
       onClick={() => {
-        onSeek?.(event.timestamp ?? 0, false);
+        onSeek?.(item.timestamp ?? 0, false);
       }}
       className={cn(
         "flex cursor-pointer items-center gap-2 text-sm text-primary-variant",
@@ -537,13 +587,48 @@ function LifecycleItem({ event, isActive, onSeek }: LifecycleItemProps) {
           : "duration-500",
       )}
     >
-      <div className="flex size-4 items-center justify-center">
-        <LifecycleIcon lifecycleItem={event} className="size-3" />
+      <div className="relative flex size-4 items-center justify-center">
+        <LuCircle
+          className={cn(
+            "relative z-10 ml-[1px] size-2.5 fill-secondary-foreground stroke-none",
+            (isActive || (effectiveTime ?? 0) >= (item?.timestamp ?? 0)) &&
+              "fill-selected duration-300",
+          )}
+        />
       </div>
       <div className="flex w-full flex-row justify-between">
-        <Trans>
-          <div>{getLifecycleItemDescription(event)}</div>
-        </Trans>
+        <Tooltip>
+          <TooltipTrigger>
+            <Trans>
+              <span>{getLifecycleItemDescription(item)}</span>
+            </Trans>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className="mt-1 flex flex-wrap items-start gap-3 text-sm text-secondary-foreground">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-start gap-1">
+                  <span className="text-muted-foreground">
+                    {t("objectLifecycle.lifecycleItemDesc.header.ratio")}
+                  </span>
+                  <span className="font-medium text-foreground">{ratio}</span>
+                </div>
+
+                <div className="flex items-start gap-1">
+                  <span className="text-muted-foreground">
+                    {t("objectLifecycle.lifecycleItemDesc.header.area")}
+                  </span>
+                  {areaPx !== undefined && areaPct !== undefined ? (
+                    <span className="font-medium text-foreground">
+                      {areaPx} {t("pixels", { ns: "common" })} · {areaPct}%
+                    </span>
+                  ) : (
+                    <span>N/A</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
         <div className={cn("p-1 text-xs")}>{formattedEventTimestamp}</div>
       </div>
     </div>
@@ -568,8 +653,8 @@ function ObjectTimeline({
     },
   ]);
 
-  if ((!timeline || timeline.length === 0) && isValidating) {
-    return <ActivityIndicator className="h-2 w-2" size={2} />;
+  if (isValidating && (!timeline || timeline.length === 0)) {
+    return <ActivityIndicator className="ml-2 size-3" />;
   }
 
   if (!timeline || timeline.length === 0) {
@@ -580,20 +665,75 @@ function ObjectTimeline({
     );
   }
 
+  // Calculate how far down the blue line should extend based on effectiveTime
+  const calculateLineHeight = () => {
+    if (!timeline || timeline.length === 0) return 0;
+
+    const currentTime = effectiveTime ?? 0;
+
+    // Find which events have been passed
+    let lastPassedIndex = -1;
+    for (let i = 0; i < timeline.length; i++) {
+      if (currentTime >= (timeline[i].timestamp ?? 0)) {
+        lastPassedIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    // No events passed yet
+    if (lastPassedIndex < 0) return 0;
+
+    // All events passed
+    if (lastPassedIndex >= timeline.length - 1) return 100;
+
+    // Calculate percentage based on item position, not time
+    // Each item occupies an equal visual space regardless of time gaps
+    const itemPercentage = 100 / (timeline.length - 1);
+
+    // Find progress between current and next event for smooth transition
+    const currentEvent = timeline[lastPassedIndex];
+    const nextEvent = timeline[lastPassedIndex + 1];
+    const currentTimestamp = currentEvent.timestamp ?? 0;
+    const nextTimestamp = nextEvent.timestamp ?? 0;
+
+    // Calculate interpolation between the two events
+    const timeBetween = nextTimestamp - currentTimestamp;
+    const timeElapsed = currentTime - currentTimestamp;
+    const interpolation = timeBetween > 0 ? timeElapsed / timeBetween : 0;
+
+    // Base position plus interpolated progress to next item
+    return Math.min(
+      100,
+      lastPassedIndex * itemPercentage + interpolation * itemPercentage,
+    );
+  };
+
+  const blueLineHeight = calculateLineHeight();
+
   return (
-    <div className="mx-2 mt-4 space-y-2">
-      {timeline.map((event, idx) => {
-        const isActive =
-          Math.abs((effectiveTime ?? 0) - (event.timestamp ?? 0)) <= 0.5;
-        return (
-          <LifecycleItem
-            key={`${event.timestamp}-${event.source_id ?? ""}-${idx}`}
-            event={event}
-            onSeek={onSeek}
-            isActive={isActive}
-          />
-        );
-      })}
+    <div className="-pb-2 relative mx-2">
+      <div className="absolute -top-2 bottom-2 left-2 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
+      <div
+        className="absolute left-2 top-2 z-[5] max-h-[calc(100%-1rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
+        style={{ height: `${blueLineHeight}%` }}
+      />
+      <div className="space-y-2">
+        {timeline.map((event, idx) => {
+          const isActive =
+            Math.abs((effectiveTime ?? 0) - (event.timestamp ?? 0)) <= 0.5;
+
+          return (
+            <LifecycleItem
+              key={`${event.timestamp}-${event.source_id ?? ""}-${idx}`}
+              item={event}
+              onSeek={onSeek}
+              isActive={isActive}
+              effectiveTime={effectiveTime}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -46,7 +46,7 @@
   },
   "imageEntry": {
     "dropActive": "Zet de afbeelding hier neer…",
-    "dropInstructions": "Sleep een afbeelding hierheen of klik om te selecteren",
+    "dropInstructions": "Sleep een afbeelding hierheen, of klik om te selecteren",
     "maxSize": "Maximale grootte: {{size}}MB",
     "validation": {
       "selectImage": "Selecteer een afbeeldingbestand."

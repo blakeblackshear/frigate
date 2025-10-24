@@ -6,7 +6,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -65,6 +64,7 @@ export default function Step1NameCamera({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [showPassword, setShowPassword] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [testStatus, setTestStatus] = useState<string>("");
   const [testResult, setTestResult] = useState<TestResult | null>(null);
 
   const existingCameraNames = useMemo(() => {
@@ -88,7 +88,13 @@ export default function Step1NameCamera({
       username: z.string().optional(),
       password: z.string().optional(),
       brandTemplate: z.enum(CAMERA_BRAND_VALUES).optional(),
-      customUrl: z.string().optional(),
+      customUrl: z
+        .string()
+        .optional()
+        .refine(
+          (val) => !val || val.startsWith("rtsp://"),
+          t("cameraWizard.step1.errors.customUrlRtspRequired"),
+        ),
     })
     .refine(
       (data) => {
@@ -204,24 +210,17 @@ export default function Step1NameCamera({
     }
 
     setIsTesting(true);
+    setTestStatus("");
     setTestResult(null);
-
-    // First get probe data for metadata
-    const probePromise = axios.get("ffprobe", {
-      params: { paths: streamUrl, detailed: true },
-      timeout: 10000,
-    });
-
-    // Then get snapshot for preview
-    const snapshotPromise = axios.get("ffprobe/snapshot", {
-      params: { url: streamUrl },
-      responseType: "blob",
-      timeout: 10000,
-    });
 
     try {
       // First get probe data for metadata
-      const probeResponse = await probePromise;
+      setTestStatus(t("cameraWizard.step1.testing.probingMetadata"));
+      const probeResponse = await axios.get("ffprobe", {
+        params: { paths: streamUrl, detailed: true },
+        timeout: 10000,
+      });
+
       let probeData = null;
       if (
         probeResponse.data &&
@@ -234,8 +233,13 @@ export default function Step1NameCamera({
       // Then get snapshot for preview (only if probe succeeded)
       let snapshotBlob = null;
       if (probeData) {
+        setTestStatus(t("cameraWizard.step1.testing.fetchingSnapshot"));
         try {
-          const snapshotResponse = await snapshotPromise;
+          const snapshotResponse = await axios.get("ffprobe/snapshot", {
+            params: { url: streamUrl },
+            responseType: "blob",
+            timeout: 10000,
+          });
           snapshotBlob = snapshotResponse.data;
         } catch (snapshotError) {
           // Snapshot is optional, don't fail if it doesn't work
@@ -293,14 +297,21 @@ export default function Step1NameCamera({
         };
 
         setTestResult(testResult);
+        onUpdate({ streams: [{ id: "", url: "", roles: [], testResult }] });
         toast.success(t("cameraWizard.step1.testSuccess"));
       } else {
-        const error = probeData?.stderr || "Unknown error";
+        const error =
+          Array.isArray(probeResponse.data?.[0]?.stderr) &&
+          probeResponse.data[0].stderr.length > 0
+            ? probeResponse.data[0].stderr.join("\n")
+            : "Unable to probe stream";
         setTestResult({
           success: false,
           error: error,
         });
-        toast.error(t("cameraWizard.commonErrors.testFailed", { error }));
+        toast.error(t("cameraWizard.commonErrors.testFailed", { error }), {
+          duration: 6000,
+        });
       }
     } catch (error) {
       const axiosError = error as {
@@ -318,11 +329,15 @@ export default function Step1NameCamera({
       });
       toast.error(
         t("cameraWizard.commonErrors.testFailed", { error: errorMessage }),
+        {
+          duration: 10000,
+        },
       );
     } finally {
       setIsTesting(false);
+      setTestStatus("");
     }
-  }, [form, generateStreamUrl, t]);
+  }, [form, generateStreamUrl, t, onUpdate]);
 
   const onSubmit = (data: z.infer<typeof step1FormData>) => {
     onUpdate(data);
@@ -365,7 +380,9 @@ export default function Step1NameCamera({
                 name="cameraName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("cameraWizard.step1.cameraName")}</FormLabel>
+                    <FormLabel className="text-primary-variant">
+                      {t("cameraWizard.step1.cameraName")}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         className="h-8"
@@ -385,7 +402,43 @@ export default function Step1NameCamera({
                 name="brandTemplate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("cameraWizard.step1.cameraBrand")}</FormLabel>
+                    <div className="flex items-center gap-1 pb-1">
+                      <FormLabel className="text-primary-variant">
+                        {t("cameraWizard.step1.cameraBrand")}
+                      </FormLabel>
+                      {field.value &&
+                        (() => {
+                          const selectedBrand = CAMERA_BRANDS.find(
+                            (brand) => brand.value === field.value,
+                          );
+                          return selectedBrand &&
+                            selectedBrand.value != "other" ? (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-4 w-4 p-0"
+                                >
+                                  <LuInfo className="size-3" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="pointer-events-auto w-80 text-primary-variant">
+                                <div className="space-y-2">
+                                  <h4 className="font-medium">
+                                    {selectedBrand.label}
+                                  </h4>
+                                  <p className="break-all text-sm text-muted-foreground">
+                                    {t("cameraWizard.step1.brandUrlFormat", {
+                                      exampleUrl: selectedBrand.exampleUrl,
+                                    })}
+                                  </p>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          ) : null;
+                        })()}
+                    </div>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -406,37 +459,6 @@ export default function Step1NameCamera({
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                    {field.value &&
-                      (() => {
-                        const selectedBrand = CAMERA_BRANDS.find(
-                          (brand) => brand.value === field.value,
-                        );
-                        return selectedBrand &&
-                          selectedBrand.value != "other" ? (
-                          <FormDescription className="mt-1 pt-0.5 text-xs text-muted-foreground">
-                            <Popover>
-                              <PopoverTrigger>
-                                <div className="flex flex-row items-center gap-0.5 text-xs text-muted-foreground hover:text-primary">
-                                  <LuInfo className="mr-1 size-3" />
-                                  {t("cameraWizard.step1.brandInformation")}
-                                </div>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-80">
-                                <div className="space-y-2">
-                                  <h4 className="font-medium">
-                                    {selectedBrand.label}
-                                  </h4>
-                                  <p className="break-all text-sm text-muted-foreground">
-                                    {t("cameraWizard.step1.brandUrlFormat", {
-                                      exampleUrl: selectedBrand.exampleUrl,
-                                    })}
-                                  </p>
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </FormDescription>
-                        ) : null;
-                      })()}
                   </FormItem>
                 )}
               />
@@ -448,7 +470,9 @@ export default function Step1NameCamera({
                     name="host"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("cameraWizard.step1.host")}</FormLabel>
+                        <FormLabel className="text-primary-variant">
+                          {t("cameraWizard.step1.host")}
+                        </FormLabel>
                         <FormControl>
                           <Input
                             className="h-8"
@@ -466,7 +490,7 @@ export default function Step1NameCamera({
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
+                        <FormLabel className="text-primary-variant">
                           {t("cameraWizard.step1.username")}
                         </FormLabel>
                         <FormControl>
@@ -488,7 +512,7 @@ export default function Step1NameCamera({
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
+                        <FormLabel className="text-primary-variant">
                           {t("cameraWizard.step1.password")}
                         </FormLabel>
                         <FormControl>
@@ -529,7 +553,9 @@ export default function Step1NameCamera({
                   name="customUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("cameraWizard.step1.customUrl")}</FormLabel>
+                      <FormLabel className="text-primary-variant">
+                        {t("cameraWizard.step1.customUrl")}
+                      </FormLabel>
                       <FormControl>
                         <Input
                           className="h-8"
@@ -610,7 +636,9 @@ export default function Step1NameCamera({
             className="flex items-center justify-center gap-2 sm:flex-1"
           >
             {isTesting && <ActivityIndicator className="size-4" />}
-            {t("cameraWizard.step1.testConnection")}
+            {isTesting && testStatus
+              ? testStatus
+              : t("cameraWizard.step1.testConnection")}
           </Button>
         )}
       </div>

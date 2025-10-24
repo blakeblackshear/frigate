@@ -85,9 +85,9 @@ export default function Step3Validation({
             ? `${videoStream.width}x${videoStream.height}`
             : undefined;
 
-          const fps = videoStream?.r_frame_rate
-            ? parseFloat(videoStream.r_frame_rate.split("/")[0]) /
-              parseFloat(videoStream.r_frame_rate.split("/")[1])
+          const fps = videoStream?.avg_frame_rate
+            ? parseFloat(videoStream.avg_frame_rate.split("/")[0]) /
+              parseFloat(videoStream.avg_frame_rate.split("/")[1])
             : undefined;
 
           return {
@@ -323,7 +323,7 @@ export default function Step3Validation({
                   )}
 
                   <div className="mb-2 flex flex-col justify-between gap-1 md:flex-row md:items-center">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="break-all text-sm text-muted-foreground">
                       {stream.url}
                     </span>
                     <Button
@@ -497,6 +497,29 @@ function StreamIssues({
           type: "warning",
           message: t("cameraWizard.step3.issues.restreamingWarning"),
         });
+      }
+    }
+
+    if (stream.roles.includes("detect") && stream.resolution) {
+      const [width, height] = stream.resolution.split("x").map(Number);
+      if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+        const minDimension = Math.min(width, height);
+        const maxDimension = Math.max(width, height);
+        if (minDimension > 1080) {
+          result.push({
+            type: "warning",
+            message: t("cameraWizard.step3.issues.resolutionHigh", {
+              resolution: stream.resolution,
+            }),
+          });
+        } else if (maxDimension < 640) {
+          result.push({
+            type: "error",
+            message: t("cameraWizard.step3.issues.resolutionLow", {
+              resolution: stream.resolution,
+            }),
+          });
+        }
       }
     }
 

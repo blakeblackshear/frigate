@@ -106,7 +106,7 @@
     "enable": "Увімкнути",
     "disabled": "Вимкнено",
     "disable": "Вимкнути",
-    "save": "Зберегти",
+    "save": "Зберігати",
     "download": "Завантажити",
     "info": "Інфо",
     "suspended": "Призупинено",
@@ -227,6 +227,14 @@
     "length": {
       "feet": "ноги",
       "meters": "метрів"
+    },
+    "data": {
+      "kbps": "кБ/с",
+      "mbps": "МБ/с",
+      "gbps": "ГБ/с",
+      "kbph": "кБ/годину",
+      "mbph": "МБ/годину",
+      "gbph": "ГБ/годину"
     }
   },
   "label": {
@@ -271,5 +279,8 @@
     "title": "404"
   },
   "selectItem": "Вибрати {{item}}",
-  "readTheDocumentation": "Прочитати документацію"
+  "readTheDocumentation": "Прочитати документацію",
+  "information": {
+    "pixels": "{{area}}пикс"
+  }
 }

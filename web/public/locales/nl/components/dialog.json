@@ -107,7 +107,8 @@
     "button": {
       "deleteNow": "Nu verwijderen",
       "export": "Exporteren",
-      "markAsReviewed": "Markeren als beoordeeld"
+      "markAsReviewed": "Markeren als beoordeeld",
+      "markAsUnreviewed": "Markeren als niet beoordeeld"
     },
     "confirmDelete": {
       "desc": {

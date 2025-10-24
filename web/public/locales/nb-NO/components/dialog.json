@@ -117,7 +117,8 @@
     "button": {
       "export": "Eksportér",
       "markAsReviewed": "Merk som inspisert",
-      "deleteNow": "Slett nå"
+      "deleteNow": "Slett nå",
+      "markAsUnreviewed": "Merk som ikke inspisert"
     }
   },
   "imagePicker": {

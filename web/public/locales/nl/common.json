@@ -128,6 +128,14 @@
     "length": {
       "feet": "voet",
       "meters": "meter"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/uur",
+      "mbph": "MB/uur",
+      "gbph": "GB/uur"
     }
   },
   "label": {
@@ -273,5 +281,8 @@
     "documentTitle": "Niet gevonden - Frigate"
   },
   "selectItem": "Selecteer {{item}}",
-  "readTheDocumentation": "Lees de documentatie"
+  "readTheDocumentation": "Lees de documentatie",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

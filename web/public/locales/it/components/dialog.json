@@ -110,7 +110,8 @@
     "button": {
       "export": "Esporta",
       "markAsReviewed": "Segna come visto",
-      "deleteNow": "Elimina ora"
+      "deleteNow": "Elimina ora",
+      "markAsUnreviewed": "Segna come non visto"
     },
     "confirmDelete": {
       "desc": {

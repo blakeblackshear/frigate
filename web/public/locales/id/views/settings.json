@@ -8,6 +8,11 @@
     "motionTuner": "Penyetel Gerakan - Frigate",
     "general": "Frigate - Pengaturan Umum",
     "object": "Debug - Frigate",
-    "enrichments": "Frigate - Pengaturan Pengayaan"
+    "enrichments": "Frigate - Pengaturan Pengayaan",
+    "cameraManagement": "Pengaturan Kamera - Frigate"
+  },
+  "menu": {
+    "cameraManagement": "Pengaturan",
+    "notifications": "Notifikasi"
   }
 }

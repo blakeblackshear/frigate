@@ -60,7 +60,7 @@ export default function TrainFilterDialog({
           moreFiltersSelected ? "text-white" : "text-secondary-foreground",
         )}
       />
-      {isDesktop && t("more")}
+      {isDesktop && t("filter")}
     </Button>
   );
   const content = (
@@ -122,7 +122,7 @@ export default function TrainFilterDialog({
   return (
     <PlatformAwareSheet
       trigger={trigger}
-      title={t("more")}
+      title={t("filter")}
       content={content}
       contentClassName={cn(
         "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",

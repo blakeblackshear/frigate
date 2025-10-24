@@ -25,6 +25,7 @@ import { PlayerStats } from "./PlayerStats";
 import { LuVideoOff } from "react-icons/lu";
 import { Trans, useTranslation } from "react-i18next";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -328,10 +329,7 @@ export default function LivePlayer({
     >
       {cameraEnabled &&
         ((showStillWithoutActivity && !liveReady) || liveReady) && (
-          <>
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
-          </>
+          <ImageShadowOverlay />
         )}
       {player}
       {cameraEnabled &&

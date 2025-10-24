@@ -52,7 +52,7 @@
   },
   "imageEntry": {
     "dropActive": "Släpp bilden här…",
-    "dropInstructions": "Dra och släpp en bild här, eller klicka för att välja",
+    "dropInstructions": "Dra och släpp eller klistra in en bild här, eller klicka för att välja",
     "maxSize": "Maxstorlek: {{size}}MB",
     "validation": {
       "selectImage": "Välj en bildfil."

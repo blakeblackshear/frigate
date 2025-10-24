@@ -194,6 +194,12 @@
     },
     "deleteTrackedObject": {
       "label": "Delete this tracked object"
+    },
+    "showObjectDetails": {
+      "label": "Show object path"
+    },
+    "hideObjectDetails": {
+      "label": "Hide object path"
     }
   },
   "dialog": {

@@ -10,7 +10,9 @@
     "frigatePlus": "Frigate+ beállítások - Frigate",
     "notifications": "Értesítések beállítása - Frigate",
     "motionTuner": "Mozgás Hangoló - Frigate",
-    "enrichments": "Kiegészítés Beállítások - Frigate"
+    "enrichments": "Kiegészítés Beállítások - Frigate",
+    "cameraManagement": "Kamerák kezelése - Frigate",
+    "cameraReview": "Kamera beállítások áttekintése – Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -23,7 +25,10 @@
     "notifications": "Értesítések",
     "frigateplus": "Frigate+",
     "enrichments": "Extra funkciók",
-    "triggers": "Triggerek"
+    "triggers": "Triggerek",
+    "roles": "Szerepkörök",
+    "cameraManagement": "Menedzsment",
+    "cameraReview": "Vizsgálat"
   },
   "dialog": {
     "unsavedChanges": {
@@ -254,7 +259,8 @@
           "admin": "Adminisztrátor",
           "intro": "Válassza ki a megfelelő szerepkört ehhez a felhasználóhoz:",
           "adminDesc": "Teljes hozzáférés az összes funkcióhoz.",
-          "viewerDesc": "Csak az Élő irányítópultokhoz, Ellenőrzéshez, Felfedezéshez és Exportokhoz korlátozva."
+          "viewerDesc": "Csak az Élő irányítópultokhoz, Ellenőrzéshez, Felfedezéshez és Exportokhoz korlátozva.",
+          "customDesc": "Egyéni szerepkör meghatározott kamerahozzáféréssel."
         },
         "title": "Felhasználói szerepkör módosítása",
         "select": "Válasszon szerepkört",
@@ -317,7 +323,7 @@
       "username": "Felhasználói név",
       "password": "Jelszó",
       "deleteUser": "Felhasználó törlése",
-      "actions": "Műveletek",
+      "actions": "Akciók",
       "role": "Szerepkör",
       "changeRole": "felhasználói szerepkör módosítása"
     },
@@ -749,6 +755,11 @@
           "error": {
             "min": "Legalább egy műveletet ki kell választani."
           }
+        },
+        "friendly_name": {
+          "title": "Barátságos név",
+          "placeholder": "Nevezd meg vagy írd le ezt a triggert",
+          "description": "Egy opcionális felhasználóbarát név vagy leíró szöveg ehhez az eseményindítóhoz."
         }
       }
     },
@@ -763,6 +774,79 @@
         "updateTriggerFailed": "A trigger módosítása sikertelen: {{errorMessage}}",
         "deleteTriggerFailed": "A trigger törlése sikertelen: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Szemantikus keresés le van tiltva",
+      "desc": "A Triggerek használatához engedélyezni kell a szemantikus keresést."
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Megtekintői szerepkör-kezelés",
+      "desc": "Kezelje az egyéni nézői szerepköröket és a kamera-hozzáférési engedélyeiket ehhez a Frigate-példányhoz."
+    },
+    "addRole": "Szerepkör hozzáadása",
+    "table": {
+      "role": "Szerepkör",
+      "cameras": "Kamerák",
+      "actions": "Akciók",
+      "noRoles": "Nem találhatók egyéni szerepkörök.",
+      "editCameras": "Kamerák módosítása",
+      "deleteRole": "Szerepkör törlése"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Szerepkör létrehozva: {{role}}",
+        "updateCameras": "Kamerák frissítve a szerepkörhöz: {{role}}",
+        "deleteRole": "Szerepkör sikeresen törölve: {{role}}",
+        "userRolesUpdated": "{{count}} felhasználó, akit ehhez a szerepkörhöz rendeltünk, frissült „néző”-re, amely hozzáféréssel rendelkezik az összes kamerához."
+      },
+      "error": {
+        "createRoleFailed": "Nem sikerült létrehozni a szerepkört: {{errorMessage}}",
+        "updateCamerasFailed": "Nem sikerült frissíteni a kamerákat: {{errorMessage}}",
+        "deleteRoleFailed": "Nem sikerült törölni a szerepkört: {{errorMessage}}",
+        "userUpdateFailed": "Nem sikerült frissíteni a felhasználói szerepköröket: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Új szerepkör létrehozása",
+        "desc": "Adjon hozzá egy új szerepkört, és adja meg a kamera hozzáférési engedélyeit."
+      },
+      "editCameras": {
+        "title": "Szerepkör kamerák szerkesztése",
+        "desc": "Frissítse a kamerahozzáférést a(z) <strong>{{role}}</strong> szerepkörhöz."
+      },
+      "deleteRole": {
+        "title": "Szerepkör törlése",
+        "desc": "Ez a művelet nem vonható vissza. Ez véglegesen törli a szerepkört, és az ezzel a szerepkörrel rendelkező összes felhasználót a „megtekintő” szerepkörhöz rendeli, amivel a megtekintő hozzáférhet az összes kamerához.",
+        "warn": "Biztosan törölni szeretnéd a(z) <strong>{{role}}</strong> szerepkört?",
+        "deleting": "Törlés..."
+      },
+      "form": {
+        "role": {
+          "title": "Szerepkör neve",
+          "placeholder": "Adja meg a szerepkör nevét",
+          "desc": "Csak betűk, számok, pontok és aláhúzásjelek engedélyezettek.",
+          "roleIsRequired": "A szerepkör nevének megadása kötelező",
+          "roleOnlyInclude": "A szerepkör neve csak betűket, számokat , . vagy _ karaktereket tartalmazhat",
+          "roleExists": "Már létezik egy ilyen nevű szerepkör."
+        },
+        "cameras": {
+          "title": "Kamerák",
+          "desc": "Válassza ki azokat a kamerákat, amelyekhez ennek a szerepkörnek hozzáférése van. Legalább egy kamera megadása szükséges.",
+          "required": "Legalább egy kamerát ki kell választani."
+        }
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Kamera hozzáadása",
+    "description": "Kövesse az alábbi lépéseket, hogy új kamerát adjon hozzá a Frigate telepítéséhez.",
+    "steps": {
+      "nameAndConnection": "Név & adatkapcsolat",
+      "streamConfiguration": "Stream beállítások",
+      "validationAndTesting": "Validálás és tesztelés"
     }
   }
 }

@@ -36,5 +36,16 @@
   "camera": "Kamera",
   "detected": "Detekované",
   "suspiciousActivity": "Podozrivá aktivita",
-  "threateningActivity": "Ohrozujúca činnosť"
+  "threateningActivity": "Ohrozujúca činnosť",
+  "detail": {
+    "noDataFound": "Žiadne podrobné údaje na kontrolu",
+    "aria": "Prepnúť zobrazenie detailov",
+    "trackedObject_one": "sledovaný objekt",
+    "trackedObject_other": "sledované objekty",
+    "noObjectDetailData": "Nie sú k dispozícii žiadne podrobné údaje o objekte."
+  },
+  "objectTrack": {
+    "trackedPoint": "Sledovaný bod",
+    "clickToSeek": "Kliknutím prejdete na tento čas"
+  }
 }

@@ -199,19 +199,30 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
             request.app.frigate_config.ffmpeg, path.strip(), detailed=detailed
         )
 
-        result = {
-            "return_code": ffprobe.returncode,
-            "stderr": (
-                ffprobe.stderr.decode("unicode_escape").strip()
-                if ffprobe.returncode != 0
-                else ""
-            ),
-            "stdout": (
-                json.loads(ffprobe.stdout.decode("unicode_escape").strip())
-                if ffprobe.returncode == 0
-                else ""
-            ),
-        }
+        if ffprobe.returncode != 0:
+            try:
+                stderr_decoded = ffprobe.stderr.decode("utf-8")
+            except UnicodeDecodeError:
+                try:
+                    stderr_decoded = ffprobe.stderr.decode("unicode_escape")
+                except Exception:
+                    stderr_decoded = str(ffprobe.stderr)
+
+            stderr_lines = [
+                line.strip() for line in stderr_decoded.split("\n") if line.strip()
+            ]
+
+            result = {
+                "return_code": ffprobe.returncode,
+                "stderr": stderr_lines,
+                "stdout": "",
+            }
+        else:
+            result = {
+                "return_code": ffprobe.returncode,
+                "stderr": [],
+                "stdout": json.loads(ffprobe.stdout.decode("unicode_escape").strip()),
+            }
 
         # Add detailed metadata if requested and probe was successful
         if detailed and ffprobe.returncode == 0 and result["stdout"]:

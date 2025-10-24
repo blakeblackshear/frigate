@@ -36,5 +36,16 @@
   "selected_other": "{{count}} valgt",
   "detected": "detektert",
   "suspiciousActivity": "Mistenkelig aktivitet",
-  "threateningActivity": "Truende aktivitet"
+  "threateningActivity": "Truende aktivitet",
+  "detail": {
+    "noDataFound": "Ingen detaljer å inspisere",
+    "aria": "Vis/skjul detaljvisning",
+    "trackedObject_one": "sporet objekt",
+    "trackedObject_other": "sporede objekter",
+    "noObjectDetailData": "Ingen detaljdata for objektet tilgjengelig."
+  },
+  "objectTrack": {
+    "trackedPoint": "Sporingspunkt",
+    "clickToSeek": "Klikk for å gå til dette tidspunktet"
+  }
 }
