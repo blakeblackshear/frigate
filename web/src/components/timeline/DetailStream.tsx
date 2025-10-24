@@ -461,7 +461,9 @@ function EventList({
             className="flex items-center gap-2 text-sm font-medium"
             onClick={(e) => {
               e.stopPropagation();
-              handleObjectSelect(selectedObjectId ? undefined : event);
+              handleObjectSelect(
+                event.id == selectedObjectId ? undefined : event,
+              );
             }}
             role="button"
           >
@@ -482,7 +484,7 @@ function EventList({
               <span>{getTranslatedLabel(event.label)}</span>
             </div>
           </div>
-          <div className="flex flex-1 flex-row justify-end">
+          <div className="mr-2 flex flex-1 flex-row justify-end">
             <EventMenu
               event={event}
               config={config}
