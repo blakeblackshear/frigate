@@ -577,7 +577,7 @@ export default function SearchView({
                   >
                     <div
                       className={cn(
-                        "aspect-square w-full overflow-hidden rounded-t-lg border",
+                        "relative aspect-square w-full overflow-hidden rounded-lg",
                       )}
                     >
                       <SearchThumbnail
@@ -634,38 +634,38 @@ export default function SearchView({
                           </Tooltip>
                         </div>
                       )}
+                      <div className="absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-black/70 to-transparent p-2">
+                        <SearchThumbnailFooter
+                          searchResult={value}
+                          columns={columns}
+                          findSimilar={() => {
+                            if (config?.semantic_search.enabled) {
+                              setSimilaritySearch(value);
+                            }
+                          }}
+                          refreshResults={refresh}
+                          showObjectLifecycle={() =>
+                            onSelectSearch(value, false, "object_lifecycle")
+                          }
+                          showSnapshot={() =>
+                            onSelectSearch(value, false, "snapshot")
+                          }
+                          addTrigger={() => {
+                            if (
+                              config?.semantic_search.enabled &&
+                              value.data.type == "object"
+                            ) {
+                              navigate(
+                                `/settings?page=triggers&camera=${value.camera}&event_id=${value.id}`,
+                              );
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                     <div
                       className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-selected outline-selected` : "outline-transparent duration-500"}`}
                     />
-                    <div className="flex w-full grow items-center justify-between rounded-b-lg border border-t-0 bg-card p-3 text-card-foreground">
-                      <SearchThumbnailFooter
-                        searchResult={value}
-                        columns={columns}
-                        findSimilar={() => {
-                          if (config?.semantic_search.enabled) {
-                            setSimilaritySearch(value);
-                          }
-                        }}
-                        refreshResults={refresh}
-                        showObjectLifecycle={() =>
-                          onSelectSearch(value, false, "object_lifecycle")
-                        }
-                        showSnapshot={() =>
-                          onSelectSearch(value, false, "snapshot")
-                        }
-                        addTrigger={() => {
-                          if (
-                            config?.semantic_search.enabled &&
-                            value.data.type == "object"
-                          ) {
-                            navigate(
-                              `/settings?page=triggers&camera=${value.camera}&event_id=${value.id}`,
-                            );
-                          }
-                        }}
-                      />
-                    </div>
                   </div>
                 );
               })}
