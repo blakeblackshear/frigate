@@ -695,7 +695,7 @@ export function RecordingView({
               "flex flex-1 flex-wrap",
               isDesktop
                 ? timelineType === "detail"
-                  ? "w-full"
+                  ? "md:w-[40%] lg:w-[70%] xl:w-full"
                   : "w-[80%]"
                 : "",
             )}
@@ -703,11 +703,9 @@ export function RecordingView({
             <div
               className={cn(
                 "flex size-full items-center",
-                timelineType === "detail" && isDesktop
-                  ? "flex-col"
-                  : mainCameraAspect == "tall"
-                    ? "flex-row justify-evenly"
-                    : "flex-col justify-center gap-2",
+                mainCameraAspect == "tall"
+                  ? "flex-row justify-evenly"
+                  : "flex-col justify-center gap-2",
               )}
             >
               <div
@@ -975,7 +973,7 @@ function Timeline({
       className={cn(
         "relative",
         isDesktop
-          ? `${timelineType == "timeline" ? "w-[100px]" : timelineType == "detail" ? "w-[30%]" : "w-60"} no-scrollbar overflow-y-auto`
+          ? `${timelineType == "timeline" ? "w-[100px]" : timelineType == "detail" ? "w-[30%] min-w-[350px]" : "w-60"} no-scrollbar overflow-y-auto`
           : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : timelineType == "detail" && isDesktop ? "flex-1" : "landscape:w-[300px]"} `,
       )}
     >
