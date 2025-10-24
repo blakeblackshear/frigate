@@ -52,7 +52,6 @@ export default function DetailStream({
   const [upload, setUpload] = useState<Event | undefined>(undefined);
 
   const onSeekCheckPlaying = (timestamp: number) => {
-    console.log("DetailStream onSeekCheckPlaying, isPlaying:", isPlaying);
     onSeek(timestamp, isPlaying);
   };
 
@@ -129,7 +128,6 @@ export default function DetailStream({
         const isFullyInvisible =
           elementRect.bottom < containerRect.top ||
           elementRect.top > containerRect.bottom;
-        console.log(scrollRef.current, element, isFullyInvisible);
 
         if (isFullyInvisible) {
           setProgrammaticScroll();
@@ -341,7 +339,8 @@ function ReviewGroup({
           </div>
         </div>
         <div
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setOpen((v) => !v);
           }}
           aria-label={open ? "Collapse" : "Expand"}
