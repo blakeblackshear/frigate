@@ -284,17 +284,14 @@ export function RecordingView({
 
   const manuallySetCurrentTime = useCallback(
     (time: number, play: boolean = false) => {
-      console.log("manuallySetCurrentTime:", time, "play:", play);
       if (!currentTimeRange) {
         return;
       }
       setCurrentTime(time);
 
       if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
-        console.log("in range, seeking player");
         mainControllerRef.current?.seekToTimestamp(time, play);
       } else {
-        console.log("out of range, updating segment");
         updateSelectedSegment(time, true);
       }
     },
@@ -313,7 +310,6 @@ export function RecordingView({
           updateSelectedSegment(currentTime, true);
         }
       } else if (playerTime != currentTime && timelineType != "detail") {
-        console.log("Resuming playback after seek");
         mainControllerRef.current?.play();
       }
     }
@@ -520,14 +516,11 @@ export function RecordingView({
       if (open) {
         mainControllerRef.current?.pause();
       } else {
-        console.log("Resuming playback after closing analysis dialog");
         mainControllerRef.current?.play();
       }
     },
     [mainControllerRef],
   );
-
-  console.log("in recordingview:", mainControllerRef?.current?.isPlaying());
 
   return (
     <DetailStreamProvider
