@@ -63,7 +63,11 @@ export class DynamicVideoController {
   }
 
   isPlaying(): boolean {
-    return !this.playerController.paused && !this.playerController.ended;
+    return (
+      !this.playerController.paused &&
+      !this.playerController.ended &&
+      this.playerController.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA
+    );
   }
 
   seekToTimestamp(time: number, play: boolean = false) {
@@ -109,8 +113,10 @@ export class DynamicVideoController {
       this.playerController.currentTime = seekSeconds;
 
       if (play) {
+        console.log("seeking and playing");
         this.waitAndPlay();
       } else {
+        console.log("seeking and pausing");
         this.playerController.pause();
       }
     } else {
