@@ -309,7 +309,7 @@ function ReviewGroup({
               "size-3",
               isActive
                 ? "fill-selected text-selected"
-                : "fill-secondary-highlight text-secondary-highlight duration-500",
+                : "fill-muted duration-500 dark:fill-secondary-highlight dark:text-secondary-highlight",
             )}
           />
         </div>
@@ -323,10 +323,7 @@ function ReviewGroup({
                     key={`${lbl}-${idx}`}
                     className="rounded-full bg-muted-foreground p-1"
                   >
-                    {getIconForLabel(
-                      lbl,
-                      "size-3 text-primary dark:text-white",
-                    )}
+                    {getIconForLabel(lbl, "size-3 text-white")}
                   </div>
                 ))}
               </div>
@@ -398,10 +395,7 @@ function ReviewGroup({
                 >
                   <div className="ml-1.5 flex items-center gap-2 text-sm font-medium">
                     <div className="rounded-full bg-muted-foreground p-1">
-                      {getIconForLabel(
-                        audioLabel,
-                        "size-3 text-primary dark:text-white",
-                      )}
+                      {getIconForLabel(audioLabel, "size-3 text-white")}
                     </div>
                     <span>{getTranslatedLabel(audioLabel)}</span>
                   </div>
@@ -489,10 +483,7 @@ function EventList({
                   : "bg-muted-foreground",
               )}
             >
-              {getIconForLabel(
-                event.label,
-                "size-3 text-primary dark:text-white",
-              )}
+              {getIconForLabel(event.label, "size-3 text-white")}
             </div>
             <div className="flex items-end gap-2">
               <span>{getTranslatedLabel(event.label)}</span>
