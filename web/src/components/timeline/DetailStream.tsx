@@ -359,19 +359,20 @@ function ReviewGroup({
           {shouldFetchEvents && isValidating && !fetchedEvents ? (
             <ActivityIndicator />
           ) : (
-            (fetchedEvents || []).map((event) => {
+            (fetchedEvents || []).map((event, index) => {
               return (
-                <>
-                  <div className="border-b border-secondary-highlight pb-0.5 last:border-0 last:pb-0">
-                    <EventList
-                      key={event.id}
-                      event={event}
-                      effectiveTime={effectiveTime}
-                      onSeek={onSeek}
-                      onOpenUpload={onOpenUpload}
-                    />
-                  </div>
-                </>
+                <div
+                  key={`event-${event.id}-${index}`}
+                  className="border-b border-secondary-highlight pb-0.5 last:border-0 last:pb-0"
+                >
+                  <EventList
+                    key={event.id}
+                    event={event}
+                    effectiveTime={effectiveTime}
+                    onSeek={onSeek}
+                    onOpenUpload={onOpenUpload}
+                  />
+                </div>
               );
             })
           )}
