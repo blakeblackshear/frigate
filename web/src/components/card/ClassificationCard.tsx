@@ -305,7 +305,7 @@ export function GroupedClassificationCard({
               <div>
                 <ContentTitle
                   className={cn(
-                    "flex items-center gap-1 font-normal capitalize",
+                    "flex items-center gap-2 font-normal capitalize",
                     isMobile && "px-2",
                   )}
                 >
