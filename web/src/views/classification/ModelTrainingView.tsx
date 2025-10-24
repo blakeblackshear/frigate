@@ -811,7 +811,10 @@ function StateTrainGrid({
               image={data.filename}
               onRefresh={onRefresh}
             >
-              <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground/40" />
+              <div className="group relative inline-flex items-center justify-center">
+                <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
+                <TbCategoryPlus className="relative z-10 size-5 cursor-pointer text-white/85 hover:text-white" />
+              </div>
             </ClassificationSelectionDialog>
           </ClassificationCard>
         </div>
@@ -958,7 +961,10 @@ function ObjectTrainGrid({
                       image={data.filename}
                       onRefresh={onRefresh}
                     >
-                      <TbCategoryPlus className="size-7 cursor-pointer p-1 text-gray-200 hover:rounded-full hover:bg-primary-foreground/40" />
+                      <div className="group relative inline-flex items-center justify-center">
+                        <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
+                        <TbCategoryPlus className="relative z-10 size-5 cursor-pointer text-white/85 hover:text-white" />
+                      </div>
                     </ClassificationSelectionDialog>
                   </>
                 )}
