@@ -21,6 +21,7 @@ import { getTranslatedLabel } from "@/utils/i18n";
 import EventMenu from "@/components/timeline/EventMenu";
 import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
@@ -506,14 +507,14 @@ function EventList({
 }
 
 type LifecycleItemProps = {
-  event: ObjectLifecycleSequence;
+  item: ObjectLifecycleSequence;
   isActive?: boolean;
   onSeek?: (timestamp: number, play?: boolean) => void;
   effectiveTime?: number;
 };
 
 function LifecycleItem({
-  event,
+  item,
   isActive,
   onSeek,
   effectiveTime,
@@ -521,8 +522,19 @@ function LifecycleItem({
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
 
+  const aspectRatio = useMemo(() => {
+    if (!config || !item?.camera) {
+      return 16 / 9;
+    }
+
+    return (
+      config.cameras[item.camera].detect.width /
+      config.cameras[item.camera].detect.height
+    );
+  }, [config, item]);
+
   const formattedEventTimestamp = config
-    ? formatUnixTimestampToDateTime(event.timestamp ?? 0, {
+    ? formatUnixTimestampToDateTime(item?.timestamp ?? 0, {
         timezone: config.ui.timezone,
         date_format:
           config.ui.time_format == "24hour"
@@ -537,11 +549,28 @@ function LifecycleItem({
       })
     : "";
 
+  const ratio =
+    Array.isArray(item?.data.box) && item?.data.box.length >= 4
+      ? (aspectRatio * (item?.data.box[2] / item?.data.box[3])).toFixed(2)
+      : "N/A";
+  const areaPx =
+    Array.isArray(item?.data.box) && item?.data.box.length >= 4
+      ? Math.round(
+          (config?.cameras[item?.camera]?.detect?.width ?? 0) *
+            (config?.cameras[item?.camera]?.detect?.height ?? 0) *
+            (item?.data.box[2] * item?.data.box[3]),
+        )
+      : undefined;
+  const areaPct =
+    Array.isArray(item?.data.box) && item?.data.box.length >= 4
+      ? (item?.data.box[2] * item?.data.box[3]).toFixed(4)
+      : undefined;
+
   return (
     <div
       role="button"
       onClick={() => {
-        onSeek?.(event.timestamp ?? 0, false);
+        onSeek?.(item.timestamp ?? 0, false);
       }}
       className={cn(
         "flex cursor-pointer items-center gap-2 text-sm text-primary-variant",
@@ -553,14 +582,43 @@ function LifecycleItem({
       <div className="relative flex size-4 items-center justify-center">
         <LuCircle
           className={cn(
-            "relative z-10 size-2.5 fill-secondary-foreground stroke-none",
-            (isActive || (effectiveTime ?? 0) >= (event.timestamp ?? 0)) &&
+            "relative z-10 ml-[1px] size-2.5 fill-secondary-foreground stroke-none",
+            (isActive || (effectiveTime ?? 0) >= (item?.timestamp ?? 0)) &&
               "fill-selected duration-300",
           )}
         />
       </div>
       <div className="flex w-full flex-row justify-between">
-        <div>{getLifecycleItemDescription(event)}</div>
+        <Tooltip>
+          <TooltipTrigger>
+            <span>{getLifecycleItemDescription(item)}</span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className="mt-1 flex flex-wrap items-start gap-3 text-sm text-secondary-foreground">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-start gap-1">
+                  <span className="text-muted-foreground">
+                    {t("objectLifecycle.lifecycleItemDesc.header.ratio")}
+                  </span>
+                  <span className="font-medium text-foreground">{ratio}</span>
+                </div>
+
+                <div className="flex items-start gap-1">
+                  <span className="text-muted-foreground">
+                    {t("objectLifecycle.lifecycleItemDesc.header.area")}
+                  </span>
+                  {areaPx !== undefined && areaPct !== undefined ? (
+                    <span className="font-medium text-foreground">
+                      {areaPx} {t("pixels", { ns: "common" })} · {areaPct}%
+                    </span>
+                  ) : (
+                    <span>N/A</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
         <div className={cn("p-1 text-xs")}>{formattedEventTimestamp}</div>
       </div>
     </div>
@@ -601,24 +659,53 @@ function ObjectTimeline({
   const calculateLineHeight = () => {
     if (!timeline || timeline.length === 0) return 0;
 
-    const firstTimestamp = timeline[0].timestamp ?? 0;
-    const lastTimestamp = timeline[timeline.length - 1].timestamp ?? 0;
+    const currentTime = effectiveTime ?? 0;
 
-    if ((effectiveTime ?? 0) <= firstTimestamp) return 0;
-    if ((effectiveTime ?? 0) >= lastTimestamp) return 100;
+    // Find which events have been passed
+    let lastPassedIndex = -1;
+    for (let i = 0; i < timeline.length; i++) {
+      if (currentTime >= (timeline[i].timestamp ?? 0)) {
+        lastPassedIndex = i;
+      } else {
+        break;
+      }
+    }
 
-    const totalDuration = lastTimestamp - firstTimestamp;
-    const elapsed = (effectiveTime ?? 0) - firstTimestamp;
-    return Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+    // No events passed yet
+    if (lastPassedIndex < 0) return 0;
+
+    // All events passed
+    if (lastPassedIndex >= timeline.length - 1) return 100;
+
+    // Calculate percentage based on item position, not time
+    // Each item occupies an equal visual space regardless of time gaps
+    const itemPercentage = 100 / (timeline.length - 1);
+
+    // Find progress between current and next event for smooth transition
+    const currentEvent = timeline[lastPassedIndex];
+    const nextEvent = timeline[lastPassedIndex + 1];
+    const currentTimestamp = currentEvent.timestamp ?? 0;
+    const nextTimestamp = nextEvent.timestamp ?? 0;
+
+    // Calculate interpolation between the two events
+    const timeBetween = nextTimestamp - currentTimestamp;
+    const timeElapsed = currentTime - currentTimestamp;
+    const interpolation = timeBetween > 0 ? timeElapsed / timeBetween : 0;
+
+    // Base position plus interpolated progress to next item
+    return Math.min(
+      100,
+      lastPassedIndex * itemPercentage + interpolation * itemPercentage,
+    );
   };
 
   const blueLineHeight = calculateLineHeight();
 
   return (
     <div className="-pb-2 relative mx-2">
-      <div className="absolute -top-2 bottom-2 left-2 z-0 w-[1px] -translate-x-1/2 bg-secondary-foreground" />
+      <div className="absolute -top-2 bottom-2 left-2 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
       <div
-        className="absolute left-2 top-2 z-[5] max-h-[calc(100%-1rem)] w-[1px] -translate-x-1/2 bg-selected transition-all duration-300"
+        className="absolute left-2 top-2 z-[5] max-h-[calc(100%-1rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
         style={{ height: `${blueLineHeight}%` }}
       />
       <div className="space-y-2">
@@ -629,7 +716,7 @@ function ObjectTimeline({
           return (
             <LifecycleItem
               key={`${event.timestamp}-${event.source_id ?? ""}-${idx}`}
-              event={event}
+              item={event}
               onSeek={onSeek}
               isActive={isActive}
               effectiveTime={effectiveTime}
