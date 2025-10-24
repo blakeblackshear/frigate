@@ -695,7 +695,7 @@ export function RecordingView({
           >
             <div
               className={cn(
-                "aaa flex size-full items-center",
+                "flex size-full items-center",
                 timelineType === "detail" && isDesktop
                   ? "flex-col"
                   : mainCameraAspect == "tall"
