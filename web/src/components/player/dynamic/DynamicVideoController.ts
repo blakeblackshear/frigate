@@ -113,10 +113,8 @@ export class DynamicVideoController {
       this.playerController.currentTime = seekSeconds;
 
       if (play) {
-        console.log("seeking and playing");
         this.waitAndPlay();
       } else {
-        console.log("seeking and pausing");
         this.playerController.pause();
       }
     } else {
