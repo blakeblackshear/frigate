@@ -53,6 +53,7 @@ import {
   ASPECT_VERTICAL_LAYOUT,
   ASPECT_WIDE_LAYOUT,
   RecordingSegment,
+  RecordingStartingPoint,
 } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
@@ -141,9 +142,15 @@ export function RecordingView({
 
   // timeline
 
+  const [recording] = useOverlayState<RecordingStartingPoint>(
+    "recording",
+    undefined,
+    false,
+  );
+
   const [timelineType, setTimelineType] = useOverlayState<TimelineType>(
     "timelineType",
-    "timeline",
+    recording?.timelineType ?? "timeline",
   );
 
   const chunkedTimeRange = useMemo(

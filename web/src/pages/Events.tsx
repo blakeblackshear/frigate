@@ -66,6 +66,7 @@ export default function Events() {
               camera: resp.data.camera,
               startTime,
               severity: resp.data.severity,
+              timelineType: "detail",
             },
             true,
           );
