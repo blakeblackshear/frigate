@@ -53,8 +53,6 @@ import { cn } from "@/lib/utils";
 import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import ReviewDetailDialog from "@/components/overlay/detail/ReviewDetailDialog";
-
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTranslation } from "react-i18next";
 
@@ -398,6 +396,7 @@ export default function EventView({
             onSelectAllReviews={onSelectAllReviews}
             setSelectedReviews={setSelectedReviews}
             pullLatestData={pullLatestData}
+            onOpenRecording={onOpenRecording}
           />
         )}
         {severity == "significant_motion" && (
@@ -441,6 +440,7 @@ type DetectionReviewProps = {
   onSelectAllReviews: () => void;
   setSelectedReviews: (reviews: ReviewSegment[]) => void;
   pullLatestData: () => void;
+  onOpenRecording: (recordingInfo: RecordingStartingPoint) => void;
 };
 function DetectionReview({
   contentRef,
@@ -460,14 +460,11 @@ function DetectionReview({
   onSelectAllReviews,
   setSelectedReviews,
   pullLatestData,
+  onOpenRecording,
 }: DetectionReviewProps) {
   const { t } = useTranslation(["views/events"]);
 
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
-
-  // detail
-
-  const [reviewDetail, setReviewDetail] = useState<ReviewSegment>();
 
   // preview
 
@@ -688,8 +685,6 @@ function DetectionReview({
 
   return (
     <>
-      <ReviewDetailDialog review={reviewDetail} setReview={setReviewDetail} />
-
       <div
         ref={contentRef}
         className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4"
@@ -750,7 +745,12 @@ function DetectionReview({
                           detail: boolean,
                         ) => {
                           if (detail) {
-                            setReviewDetail(review);
+                            onOpenRecording({
+                              camera: review.camera,
+                              startTime: review.start_time - REVIEW_PADDING,
+                              severity: review.severity,
+                              timelineType: "detail",
+                            });
                           } else {
                             onSelectReview(review, ctrl);
                           }

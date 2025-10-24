@@ -37,6 +37,7 @@ export type RecordingStartingPoint = {
   camera: string;
   startTime: number;
   severity: ReviewSeverity;
+  timelineType?: "timeline" | "events" | "detail";
 };
 
 export type RecordingPlayerError = "stalled" | "startup";

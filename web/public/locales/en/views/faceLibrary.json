@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Walk through adding a new collection to the Face Library.",
+    "addFace": "Add a new collection to the Face Library by uploading your first image.",
     "placeholder": "Enter a name for this collection",
     "invalidName": "Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens."
   },
