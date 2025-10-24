@@ -110,6 +110,20 @@ Frigate supports multiple different detectors that work on different types of ha
 | ssd mobilenet    | ~ 25 ms                         |
 | yolov5m          | ~ 118 ms                        |
 
+**Synaptics**
+
+- [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs to provide efficient object detection.
+
+:::
+
+### AXERA
+
+- **AXEngine** Default model is **yolov5s_320**
+
+| Name             | AXERA AX650N/AX8850N Inference Time |
+| ---------------- | ----------------------------------- |
+| yolov5s_320      | ~ 1.676 ms                             |
+
 ### Hailo-8
 
 Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms—including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.

@@ -47,6 +47,11 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs.
 
+**AXERA**
+
+- [AXEngine](#axera): axmodels can run on AXERA AI acceleration.
+
+
 **For Testing**
 
 - [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
@@ -1096,6 +1101,40 @@ model:  # required
   width: 224  # required
   height: 224  # required
   tensor_format: nhwc  # default value (optional. If you change the model, it is required)
+  labelmap_path: /labelmap/coco-80.txt  # required
+```
+
+## AXERA
+
+Hardware accelerated object detection is supported on the following SoCs:
+
+- AX650N
+- AX8850N
+
+This implementation uses the [AXera Pulsar2 Toolchain](https://huggingface.co/AXERA-TECH/Pulsar2).
+
+See the [installation docs](../frigate/installation.md#axera) for information on configuring the AXEngine hardware.
+
+### Configuration
+
+When configuring the AXEngine detector, you have to specify the model name.
+
+#### yolov5s
+
+A yolov5s model is provided in the container at /axmodels and is used by this detector type by default. 
+
+Use the model configuration shown below when using the axengine detector with the default axmodel:
+
+```yaml
+detectors:  # required
+  axengine:  # required
+    type: axengine  # required
+
+model:  # required
+  path: yolov5s_320  # required
+  width: 320  # required
+  height: 320  # required
+  tensor_format: bgr  # required
   labelmap_path: /labelmap/coco-80.txt  # required
 ```
 

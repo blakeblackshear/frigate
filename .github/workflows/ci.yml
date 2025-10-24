@@ -225,3 +225,29 @@ jobs:
           sources: |
             ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}-amd64
             ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}-rpi
+  axera_build:
+    runs-on: ubuntu-22.04
+    name: AXERA Build
+    needs:
+      - amd64_build
+      - arm64_build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Axera build
+        uses: docker/bake-action@v6
+        with:
+          source: .
+          push: true
+          targets: axcl
+          files: docker/axcl/axcl.hcl
+          set: |
+            axcl.tags=${{ steps.setup.outputs.image-name }}-axcl
+            *.cache-from=type=gha
