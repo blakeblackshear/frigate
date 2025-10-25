@@ -1524,12 +1524,12 @@ YOLOv9 model can be exported as ONNX using the command below. You can copy and p
 ```sh
 docker build . --build-arg MODEL_SIZE=t --build-arg IMG_SIZE=320 --output . -f- <<'EOF'
 FROM python:3.11 AS build
-RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install --no-install-recommends -y libgl1 cmake && rm -rf /var/lib/apt/lists/*
 COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
 WORKDIR /yolov9
 ADD https://github.com/WongKinYiu/yolov9.git .
 RUN uv pip install --system -r requirements.txt
-RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier>=0.4.1 onnxscript
+RUN uv pip install --system onnx==1.18.0 onnxruntime onnxsim>=0.4.1 onnxscript
 ARG MODEL_SIZE
 ARG IMG_SIZE
 ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-${MODEL_SIZE}-converted.pt yolov9-${MODEL_SIZE}.pt
