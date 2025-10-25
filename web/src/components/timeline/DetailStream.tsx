@@ -171,7 +171,11 @@ export default function DetailStream({
       <FrigatePlusDialog
         upload={upload}
         onClose={() => setUpload(undefined)}
-        onEventUploaded={() => setUpload(undefined)}
+        onEventUploaded={() => {
+          if (upload) {
+            upload.plus_id = "new_upload";
+          }
+        }}
       />
 
       <div

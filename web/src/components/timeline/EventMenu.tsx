@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { useState } from "react";
 
 type EventMenuProps = {
   event: Event;
@@ -33,6 +34,7 @@ export default function EventMenu({
   const apiHost = useApiHost();
   const navigate = useNavigate();
   const { t } = useTranslation("views/explore");
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleObjectSelect = () => {
     if (isSelected) {
@@ -45,7 +47,7 @@ export default function EventMenu({
   return (
     <>
       <span tabIndex={0} className="sr-only" />
-      <DropdownMenu>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger>
           <div className="rounded p-1 pr-2" role="button">
             <HiDotsHorizontal className="size-4 text-muted-foreground" />
@@ -85,6 +87,7 @@ export default function EventMenu({
               config?.plus?.enabled && (
                 <DropdownMenuItem
                   onSelect={() => {
+                    setIsOpen(false);
                     onOpenUpload?.(event);
                   }}
                 >
