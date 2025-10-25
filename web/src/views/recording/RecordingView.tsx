@@ -11,6 +11,7 @@ import DetailStream from "@/components/timeline/DetailStream";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import { useResizeObserver } from "@/hooks/resize-observer";
 import { ExportMode } from "@/types/filter";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
@@ -31,12 +32,7 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  isDesktop,
-  isMobile,
-  isMobileOnly,
-  isTablet,
-} from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
@@ -55,7 +51,6 @@ import {
   RecordingSegment,
   RecordingStartingPoint,
 } from "@/types/record";
-import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useTimezone } from "@/hooks/use-date-utils";
@@ -399,49 +394,47 @@ export function RecordingView({
     }
   }, [mainCameraAspect]);
 
-  const [{ width: mainWidth, height: mainHeight }] =
+  // use a resize observer to determine whether to use w-full or h-full based on container aspect ratio
+  const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(cameraLayoutRef);
+  const [{ width: previewRowWidth, height: previewRowHeight }] =
+    useResizeObserver(previewRowRef);
 
-  const mainCameraStyle = useMemo(() => {
-    if (isMobile || mainCameraAspect != "normal" || !config) {
-      return undefined;
+  const useHeightBased = useMemo(() => {
+    if (!containerWidth || !containerHeight) {
+      return false;
     }
 
-    const camera = config.cameras[mainCamera];
-
-    if (!camera) {
-      return undefined;
+    const cameraAspectRatio = getCameraAspect(mainCamera);
+    if (!cameraAspectRatio) {
+      return false;
     }
 
-    const aspect = getCameraAspect(mainCamera);
+    // Calculate available space for camera after accounting for preview row
+    // For tall cameras: preview row is side-by-side (takes width)
+    // For wide/normal cameras: preview row is stacked (takes height)
+    const availableWidth =
+      mainCameraAspect == "tall" && previewRowWidth
+        ? containerWidth - previewRowWidth
+        : containerWidth;
+    const availableHeight =
+      mainCameraAspect != "tall" && previewRowHeight
+        ? containerHeight - previewRowHeight
+        : containerHeight;
 
-    if (!aspect) {
-      return undefined;
-    }
+    const availableAspectRatio = availableWidth / availableHeight;
 
-    const availableHeight = mainHeight - 112;
-
-    let percent;
-    if (mainWidth / availableHeight < aspect) {
-      percent = 100;
-    } else {
-      const availableWidth = aspect * availableHeight;
-      percent =
-        (mainWidth < availableWidth
-          ? mainWidth / availableWidth
-          : availableWidth / mainWidth) * 100;
-    }
-
-    return {
-      width: `${Math.round(percent)}%`,
-    };
+    // If available space is wider than camera aspect, constrain by height (h-full)
+    // If available space is taller than camera aspect, constrain by width (w-full)
+    return availableAspectRatio >= cameraAspectRatio;
   }, [
-    config,
-    mainCameraAspect,
-    mainWidth,
-    mainHeight,
-    mainCamera,
+    containerWidth,
+    containerHeight,
+    previewRowWidth,
+    previewRowHeight,
     getCameraAspect,
+    mainCamera,
+    mainCameraAspect,
   ]);
 
   const previewRowOverflows = useMemo(() => {
@@ -685,19 +678,17 @@ export function RecordingView({
         <div
           ref={mainLayoutRef}
           className={cn(
-            "flex h-full justify-center overflow-hidden",
-            isDesktop ? "" : "flex-col gap-2 landscape:flex-row",
+            "flex flex-1 overflow-hidden",
+            isDesktop ? "flex-row" : "flex-col gap-2 landscape:flex-row",
           )}
         >
           <div
             ref={cameraLayoutRef}
             className={cn(
-              "flex flex-1 flex-wrap",
+              "flex flex-1 flex-wrap overflow-hidden",
               isDesktop
-                ? timelineType === "detail"
-                  ? "md:w-[40%] lg:w-[70%] xl:w-full"
-                  : "w-[80%]"
-                : "",
+                ? "min-w-0 px-4"
+                : "portrait:max-h-[50dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto",
             )}
           >
             <div
@@ -711,37 +702,25 @@ export function RecordingView({
               <div
                 key={mainCamera}
                 className={cn(
-                  "relative",
+                  "relative flex max-h-full min-h-0 min-w-0 max-w-full items-center justify-center",
                   isDesktop
-                    ? cn(
-                        "flex justify-center px-4",
-                        mainCameraAspect == "tall"
-                          ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]"
-                          : mainCameraAspect == "wide"
-                            ? "w-full"
-                            : "",
-                      )
+                    ? // Desktop: dynamically switch between w-full and h-full based on
+                      // container vs camera aspect ratio to ensure proper fitting
+                      useHeightBased
+                      ? "h-full"
+                      : "w-full"
                     : cn(
-                        "pt-2 portrait:w-full",
-                        isMobileOnly &&
-                          (mainCameraAspect == "wide"
-                            ? "aspect-wide landscape:w-full"
-                            : "aspect-video landscape:h-[94%] landscape:xl:h-[65%]"),
-                        isTablet &&
-                          (mainCameraAspect == "wide"
-                            ? "aspect-wide landscape:w-full"
-                            : mainCameraAspect == "normal"
-                              ? "landscape:w-full"
-                              : "aspect-video landscape:h-[100%]"),
+                        "flex-shrink-0 pt-2",
+                        mainCameraAspect == "wide"
+                          ? "aspect-wide"
+                          : mainCameraAspect == "tall"
+                            ? "aspect-tall"
+                            : "aspect-video",
+                        "portrait:w-full landscape:h-full",
                       ),
                 )}
                 style={{
-                  width: mainCameraStyle ? mainCameraStyle.width : undefined,
-                  aspectRatio: isDesktop
-                    ? mainCameraAspect == "tall"
-                      ? getCameraAspect(mainCamera)
-                      : undefined
-                    : Math.max(1, getCameraAspect(mainCamera) ?? 0),
+                  aspectRatio: getCameraAspect(mainCamera),
                 }}
               >
                 {isDesktop && (
@@ -782,10 +761,10 @@ export function RecordingView({
                 <div
                   ref={previewRowRef}
                   className={cn(
-                    "scrollbar-container flex gap-2 overflow-auto",
+                    "scrollbar-container flex flex-shrink-0 gap-2 overflow-auto",
                     mainCameraAspect == "tall"
-                      ? "h-full w-72 flex-col"
-                      : `h-28 w-full`,
+                      ? "ml-2 h-full w-72 min-w-72 flex-col"
+                      : "h-28 min-h-28 w-full",
                     previewRowOverflows ? "" : "items-center justify-center",
                     timelineType == "detail" && isDesktop && "mt-4",
                   )}
@@ -971,10 +950,23 @@ function Timeline({
   return (
     <div
       className={cn(
-        "relative",
+        "relative overflow-hidden",
         isDesktop
-          ? `${timelineType == "timeline" ? "w-[100px]" : timelineType == "detail" ? "w-[30%] min-w-[350px]" : "w-60"} no-scrollbar overflow-y-auto`
-          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : timelineType == "detail" && isDesktop ? "flex-1" : "landscape:w-[300px]"} `,
+          ? cn(
+              "no-scrollbar overflow-y-auto",
+              timelineType == "timeline"
+                ? "w-[100px] flex-shrink-0"
+                : timelineType == "detail"
+                  ? "min-w-[20rem] max-w-[30%] flex-shrink-0 flex-grow-0 basis-[30rem] md:min-w-[20rem] md:max-w-[25%] lg:min-w-[30rem] lg:max-w-[33%]"
+                  : "w-60 flex-shrink-0",
+            )
+          : cn(
+              timelineType == "timeline"
+                ? "portrait:flex-grow landscape:w-[100px] landscape:flex-shrink-0"
+                : timelineType == "detail"
+                  ? "portrait:flex-grow landscape:w-[19rem] landscape:flex-shrink-0"
+                  : "portrait:flex-grow landscape:w-[19rem] landscape:flex-shrink-0",
+            ),
       )}
     >
       {isMobile && (
