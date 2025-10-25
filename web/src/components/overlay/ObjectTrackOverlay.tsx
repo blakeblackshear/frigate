@@ -165,7 +165,6 @@ export default function ObjectTrackOverlay({
               };
             }) || [];
 
-        // combine and filter by object lifetime, but only show up to current time for active objects
         // show full path once current time has reached the object's start time
         const combinedPoints = [...savedPathPoints, ...eventSequencePoints]
           .sort((a, b) => a.timestamp - b.timestamp)
