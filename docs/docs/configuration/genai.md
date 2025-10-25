@@ -17,18 +17,17 @@ To use Generative AI, you must define a single provider at the global level of y
 genai:
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-1.5-flash
+  model: gemini-2.0-flash
 
 cameras:
   front_camera:
-    objects:
     genai:
-        enabled: True # <- enable GenAI for your front camera
-        use_snapshot: True
-        objects:
-          - person
-        required_zones:
-          - steps
+      enabled: True # <- enable GenAI for your front camera
+      use_snapshot: True
+      objects:
+        - person
+      required_zones:
+        - steps
   indoor_camera:
     objects:
       genai:
@@ -80,7 +79,7 @@ Google Gemini has a free tier allowing [15 queries per minute](https://ai.google
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini). At the time of writing, this includes `gemini-1.5-pro` and `gemini-1.5-flash`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini).
 
 ### Get API Key
 
@@ -97,7 +96,7 @@ To start using Gemini, you must first get an API key from [Google AI Studio](htt
 genai:
   provider: gemini
   api_key: "{FRIGATE_GEMINI_API_KEY}"
-  model: gemini-1.5-flash
+  model: gemini-2.0-flash
 ```
 
 :::note
@@ -112,7 +111,7 @@ OpenAI does not have a free tier for their API. With the release of gpt-4o, pric
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://platform.openai.com/docs/models). At the time of writing, this includes `gpt-4o` and `gpt-4-turbo`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://platform.openai.com/docs/models).
 
 ### Get API Key
 
@@ -139,18 +138,19 @@ Microsoft offers several vision models through Azure OpenAI. A subscription is r
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models). At the time of writing, this includes `gpt-4o` and `gpt-4-turbo`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models).
 
 ### Create Resource and Get API Key
 
-To start using Azure OpenAI, you must first [create a resource](https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource?pivots=web-portal#create-a-resource). You'll need your API key and resource URL, which must include the `api-version` parameter (see the example below). The model field is not required in your configuration as the model is part of the deployment name you chose when deploying the resource.
+To start using Azure OpenAI, you must first [create a resource](https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource?pivots=web-portal#create-a-resource). You'll need your API key, model name, and resource URL, which must include the `api-version` parameter (see the example below).
 
 ### Configuration
 
 ```yaml
 genai:
   provider: azure_openai
-  base_url: https://example-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview
+  base_url: https://instance.cognitiveservices.azure.com/openai/responses?api-version=2025-04-01-preview
+  model: gpt-5-mini
   api_key: "{FRIGATE_OPENAI_API_KEY}"
 ```
 
@@ -196,10 +196,10 @@ genai:
   model: llava
 
 objects:
-    prompt: "Analyze the {label} in these images from the {camera} security camera. Focus on the actions, behavior, and potential intent of the {label}, rather than just describing its appearance."
-    object_prompts:
-      person: "Examine the main person in these images. What are they doing and what might their actions suggest about their intent (e.g., approaching a door, leaving an area, standing still)? Do not describe the surroundings or static details."
-      car: "Observe the primary vehicle in these images. Focus on its movement, direction, or purpose (e.g., parking, approaching, circling). If it's a delivery vehicle, mention the company."
+  prompt: "Analyze the {label} in these images from the {camera} security camera. Focus on the actions, behavior, and potential intent of the {label}, rather than just describing its appearance."
+  object_prompts:
+    person: "Examine the main person in these images. What are they doing and what might their actions suggest about their intent (e.g., approaching a door, leaving an area, standing still)? Do not describe the surroundings or static details."
+    car: "Observe the primary vehicle in these images. Focus on its movement, direction, or purpose (e.g., parking, approaching, circling). If it's a delivery vehicle, mention the company."
 ```
 
 Prompts can also be overridden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire.
