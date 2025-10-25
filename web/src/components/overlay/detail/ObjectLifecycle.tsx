@@ -632,13 +632,17 @@ export default function ObjectLifecycle({
               }}
               role="button"
             >
-              <div className={cn("ml-1 rounded-full bg-muted-foreground p-2")}>
+              <div
+                className={cn(
+                  "relative ml-2 rounded-full bg-muted-foreground p-2",
+                )}
+              >
                 {getIconForLabel(
-                  event.label,
-                  "size-6 text-primary dark:text-white",
+                  event.sub_label ? event.label + "-verified" : event.label,
+                  "size-4 text-white",
                 )}
               </div>
-              <div className="flex items-end gap-2">
+              <div className="flex items-center gap-2">
                 <span>{label}</span>
                 <span className="text-secondary-foreground">
                   {formattedStart ?? ""} - {formattedEnd ?? ""}
