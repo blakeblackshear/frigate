@@ -11,38 +11,80 @@ import {
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { Event } from "@/types/event";
 
 type ObjectTrackOverlayProps = {
   camera: string;
-  selectedObjectId: string;
   showBoundingBoxes?: boolean;
   currentTime: number;
   videoWidth: number;
   videoHeight: number;
   className?: string;
   onSeekToTime?: (timestamp: number, play?: boolean) => void;
-  objectTimeline?: ObjectLifecycleSequence[];
+};
+
+type PathPoint = {
+  x: number;
+  y: number;
+  timestamp: number;
+  lifecycle_item?: ObjectLifecycleSequence;
+  objectId: string;
+};
+
+type ObjectData = {
+  objectId: string;
+  label: string;
+  color: string;
+  pathPoints: PathPoint[];
+  currentZones: string[];
+  currentBox?: number[];
 };
 
 export default function ObjectTrackOverlay({
   camera,
-  selectedObjectId,
   showBoundingBoxes = false,
   currentTime,
   videoWidth,
   videoHeight,
   className,
   onSeekToTime,
-  objectTimeline,
 }: ObjectTrackOverlayProps) {
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { annotationOffset } = useDetailStream();
+  const { annotationOffset, selectedObjectIds } = useDetailStream();
 
   const effectiveCurrentTime = currentTime - annotationOffset / 1000;
 
-  // Fetch the full event data to get saved path points
-  const { data: eventData } = useSWR(["event_ids", { ids: selectedObjectId }]);
+  // Fetch all event data in a single request (CSV ids)
+  const { data: eventsData } = useSWR<Event[]>(
+    selectedObjectIds.length > 0
+      ? ["event_ids", { ids: selectedObjectIds.join(",") }]
+      : null,
+  );
+
+  // Fetch timeline data for each object ID using fixed number of hooks
+  const { data: timelineData } = useSWR<ObjectLifecycleSequence[]>(
+    selectedObjectIds.length > 0
+      ? `timeline?source_id=${selectedObjectIds.join(",")}&limit=1000`
+      : null,
+    { revalidateOnFocus: false },
+  );
+
+  const timelineResults = useMemo(() => {
+    // Group timeline entries by source_id
+    if (!timelineData) return selectedObjectIds.map(() => []);
+
+    const grouped: Record<string, ObjectLifecycleSequence[]> = {};
+    for (const entry of timelineData) {
+      if (!grouped[entry.source_id]) {
+        grouped[entry.source_id] = [];
+      }
+      grouped[entry.source_id].push(entry);
+    }
+
+    // Return timeline arrays in the same order as selectedObjectIds
+    return selectedObjectIds.map((id) => grouped[id] || []);
+  }, [selectedObjectIds, timelineData]);
 
   const typeColorMap = useMemo(
     () => ({
@@ -58,16 +100,18 @@ export default function ObjectTrackOverlay({
     [],
   );
 
-  const getObjectColor = useMemo(() => {
-    return (label: string) => {
+  const getObjectColor = useCallback(
+    (label: string, objectId: string) => {
       const objectColor = config?.model?.colormap[label];
       if (objectColor) {
         const reversed = [...objectColor].reverse();
         return `rgb(${reversed.join(",")})`;
       }
-      return "rgb(255, 0, 0)"; // fallback red
-    };
-  }, [config]);
+      // Fallback to deterministic color based on object ID
+      return generateColorFromId(objectId);
+    },
+    [config],
+  );
 
   const getZoneColor = useCallback(
     (zoneName: string) => {
@@ -81,125 +125,122 @@ export default function ObjectTrackOverlay({
     [config, camera],
   );
 
-  const currentObjectZones = useMemo(() => {
-    if (!objectTimeline) return [];
-
-    // Find the most recent timeline event at or before effective current time
-    const relevantEvents = objectTimeline
-      .filter((event) => event.timestamp <= effectiveCurrentTime)
-      .sort((a, b) => b.timestamp - a.timestamp); // Most recent first
-
-    // Get zones from the most recent event
-    return relevantEvents[0]?.data?.zones || [];
-  }, [objectTimeline, effectiveCurrentTime]);
-
-  const zones = useMemo(() => {
-    if (!config?.cameras?.[camera]?.zones || !currentObjectZones.length)
+  // Build per-object data structures
+  const objectsData = useMemo<ObjectData[]>(() => {
+    if (!eventsData || !Array.isArray(eventsData)) return [];
+    if (config?.cameras[camera]?.onvif.autotracking.enabled_in_config)
       return [];
 
+    return selectedObjectIds
+      .map((objectId, index) => {
+        const eventData = eventsData.find((e) => e.id === objectId);
+        const timelineData = timelineResults[index];
+
+        // get saved path points from event
+        const savedPathPoints: PathPoint[] =
+          eventData?.data?.path_data?.map(
+            ([coords, timestamp]: [number[], number]) => ({
+              x: coords[0],
+              y: coords[1],
+              timestamp,
+              lifecycle_item: undefined,
+              objectId,
+            }),
+          ) || [];
+
+        // timeline points for this object
+        const eventSequencePoints: PathPoint[] =
+          timelineData
+            ?.filter(
+              (event: ObjectLifecycleSequence) => event.data.box !== undefined,
+            )
+            .map((event: ObjectLifecycleSequence) => {
+              const [left, top, width, height] = event.data.box!;
+              return {
+                x: left + width / 2, // Center x
+                y: top + height, // Bottom y
+                timestamp: event.timestamp,
+                lifecycle_item: event,
+                objectId,
+              };
+            }) || [];
+
+        // combine and filter by object lifetime, but only show up to current time for active objects
+        // show full path once current time has reached the object's start time
+        const combinedPoints = [...savedPathPoints, ...eventSequencePoints]
+          .sort((a, b) => a.timestamp - b.timestamp)
+          .filter(
+            (point) =>
+              currentTime >= (eventData?.start_time ?? 0) &&
+              point.timestamp >= (eventData?.start_time ?? 0) &&
+              point.timestamp <= (eventData?.end_time ?? Infinity),
+          );
+
+        // Get color for this object
+        const label = eventData?.label || "unknown";
+        const color = getObjectColor(label, objectId);
+
+        // Get current zones
+        const currentZones =
+          timelineData
+            ?.filter(
+              (event: ObjectLifecycleSequence) =>
+                event.timestamp <= effectiveCurrentTime,
+            )
+            .sort(
+              (a: ObjectLifecycleSequence, b: ObjectLifecycleSequence) =>
+                b.timestamp - a.timestamp,
+            )[0]?.data?.zones || [];
+
+        // Get current bounding box
+        const currentBox = timelineData
+          ?.filter(
+            (event: ObjectLifecycleSequence) =>
+              event.timestamp <= effectiveCurrentTime && event.data.box,
+          )
+          .sort(
+            (a: ObjectLifecycleSequence, b: ObjectLifecycleSequence) =>
+              b.timestamp - a.timestamp,
+          )[0]?.data?.box;
+
+        return {
+          objectId,
+          label,
+          color,
+          pathPoints: combinedPoints,
+          currentZones,
+          currentBox,
+        };
+      })
+      .filter((obj: ObjectData) => obj.pathPoints.length > 0); // Only include objects with path data
+  }, [
+    eventsData,
+    selectedObjectIds,
+    timelineResults,
+    currentTime,
+    effectiveCurrentTime,
+    getObjectColor,
+    config,
+    camera,
+  ]);
+
+  // Collect all zones across all objects
+  const allZones = useMemo(() => {
+    if (!config?.cameras?.[camera]?.zones) return [];
+
+    const zoneNames = new Set<string>();
+    objectsData.forEach((obj) => {
+      obj.currentZones.forEach((zone) => zoneNames.add(zone));
+    });
+
     return Object.entries(config.cameras[camera].zones)
-      .filter(([name]) => currentObjectZones.includes(name))
+      .filter(([name]) => zoneNames.has(name))
       .map(([name, zone]) => ({
         name,
         coordinates: zone.coordinates,
         color: getZoneColor(name),
       }));
-  }, [config, camera, getZoneColor, currentObjectZones]);
-
-  // get saved path points from event
-  const savedPathPoints = useMemo(() => {
-    return (
-      eventData?.[0].data?.path_data?.map(
-        ([coords, timestamp]: [number[], number]) => ({
-          x: coords[0],
-          y: coords[1],
-          timestamp,
-          lifecycle_item: undefined,
-        }),
-      ) || []
-    );
-  }, [eventData]);
-
-  // timeline points for selected event
-  const eventSequencePoints = useMemo(() => {
-    return (
-      objectTimeline
-        ?.filter((event) => event.data.box !== undefined)
-        .map((event) => {
-          const [left, top, width, height] = event.data.box!;
-
-          return {
-            x: left + width / 2, // Center x
-            y: top + height, // Bottom y
-            timestamp: event.timestamp,
-            lifecycle_item: event,
-          };
-        }) || []
-    );
-  }, [objectTimeline]);
-
-  // final object path with timeline points included
-  const pathPoints = useMemo(() => {
-    // don't display a path for autotracking cameras
-    if (config?.cameras[camera]?.onvif.autotracking.enabled_in_config)
-      return [];
-
-    const combinedPoints = [...savedPathPoints, ...eventSequencePoints].sort(
-      (a, b) => a.timestamp - b.timestamp,
-    );
-
-    // Filter points around current time (within a reasonable window)
-    const timeWindow = 30; // 30 seconds window
-    return combinedPoints.filter(
-      (point) =>
-        point.timestamp >= currentTime - timeWindow &&
-        point.timestamp <= currentTime + timeWindow,
-    );
-  }, [savedPathPoints, eventSequencePoints, config, camera, currentTime]);
-
-  // get absolute positions on the svg canvas for each point
-  const absolutePositions = useMemo(() => {
-    if (!pathPoints) return [];
-
-    return pathPoints.map((point) => {
-      // Find the corresponding timeline entry for this point
-      const timelineEntry = objectTimeline?.find(
-        (entry) => entry.timestamp == point.timestamp,
-      );
-      return {
-        x: point.x * videoWidth,
-        y: point.y * videoHeight,
-        timestamp: point.timestamp,
-        lifecycle_item:
-          timelineEntry ||
-          (point.box // normal path point
-            ? {
-                timestamp: point.timestamp,
-                camera: camera,
-                source: "tracked_object",
-                source_id: selectedObjectId,
-                class_type: "visible" as LifecycleClassType,
-                data: {
-                  camera: camera,
-                  label: point.label,
-                  sub_label: "",
-                  box: point.box,
-                  region: [0, 0, 0, 0], // placeholder
-                  attribute: "",
-                  zones: [],
-                },
-              }
-            : undefined),
-      };
-    });
-  }, [
-    pathPoints,
-    videoWidth,
-    videoHeight,
-    objectTimeline,
-    camera,
-    selectedObjectId,
-  ]);
+  }, [config, camera, objectsData, getZoneColor]);
 
   const generateStraightPath = useCallback(
     (points: { x: number; y: number }[]) => {
@@ -214,15 +255,20 @@ export default function ObjectTrackOverlay({
   );
 
   const getPointColor = useCallback(
-    (baseColor: number[], type?: string) => {
+    (baseColorString: string, type?: string) => {
       if (type && typeColorMap[type as keyof typeof typeColorMap]) {
         const typeColor = typeColorMap[type as keyof typeof typeColorMap];
         if (typeColor) {
           return `rgb(${typeColor.join(",")})`;
         }
       }
-      // normal path point
-      return `rgb(${baseColor.map((c) => Math.max(0, c - 10)).join(",")})`;
+      // Parse and darken base color slightly for path points
+      const match = baseColorString.match(/\d+/g);
+      if (match) {
+        const [r, g, b] = match.map(Number);
+        return `rgb(${Math.max(0, r - 10)}, ${Math.max(0, g - 10)}, ${Math.max(0, b - 10)})`;
+      }
+      return baseColorString;
     },
     [typeColorMap],
   );
@@ -234,49 +280,8 @@ export default function ObjectTrackOverlay({
     [onSeekToTime],
   );
 
-  // render bounding box for object at current time if we have a timeline entry
-  const currentBoundingBox = useMemo(() => {
-    if (!objectTimeline) return null;
-
-    // Find the most recent timeline event at or before effective current time with a bounding box
-    const relevantEvents = objectTimeline
-      .filter(
-        (event) => event.timestamp <= effectiveCurrentTime && event.data.box,
-      )
-      .sort((a, b) => b.timestamp - a.timestamp); // Most recent first
-
-    const currentEvent = relevantEvents[0];
-
-    if (!currentEvent?.data.box) return null;
-
-    const [left, top, width, height] = currentEvent.data.box;
-    return {
-      left,
-      top,
-      width,
-      height,
-      centerX: left + width / 2,
-      centerY: top + height,
-    };
-  }, [objectTimeline, effectiveCurrentTime]);
-
-  const objectColor = useMemo(() => {
-    return pathPoints[0]?.label
-      ? getObjectColor(pathPoints[0].label)
-      : "rgb(255, 0, 0)";
-  }, [pathPoints, getObjectColor]);
-
-  const objectColorArray = useMemo(() => {
-    return pathPoints[0]?.label
-      ? getObjectColor(pathPoints[0].label).match(/\d+/g)?.map(Number) || [
-          255, 0, 0,
-        ]
-      : [255, 0, 0];
-  }, [pathPoints, getObjectColor]);
-
-  // render any zones for object at current time
   const zonePolygons = useMemo(() => {
-    return zones.map((zone) => {
+    return allZones.map((zone) => {
       // Convert zone coordinates from normalized (0-1) to pixel coordinates
       const points = zone.coordinates
         .split(",")
@@ -298,9 +303,9 @@ export default function ObjectTrackOverlay({
         stroke: zone.color,
       };
     });
-  }, [zones, videoWidth, videoHeight]);
+  }, [allZones, videoWidth, videoHeight]);
 
-  if (!pathPoints.length || !config) {
+  if (objectsData.length === 0 || !config) {
     return null;
   }
 
@@ -325,73 +330,102 @@ export default function ObjectTrackOverlay({
         />
       ))}
 
-      {absolutePositions.length > 1 && (
-        <path
-          d={generateStraightPath(absolutePositions)}
-          fill="none"
-          stroke={objectColor}
-          strokeWidth="5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      )}
+      {objectsData.map((objData) => {
+        const absolutePositions = objData.pathPoints.map((point) => ({
+          x: point.x * videoWidth,
+          y: point.y * videoHeight,
+          timestamp: point.timestamp,
+          lifecycle_item: point.lifecycle_item,
+        }));
 
-      {absolutePositions.map((pos, index) => (
-        <Tooltip key={`point-${index}`}>
-          <TooltipTrigger asChild>
-            <circle
-              cx={pos.x}
-              cy={pos.y}
-              r="7"
-              fill={getPointColor(
-                objectColorArray,
-                pos.lifecycle_item?.class_type,
-              )}
-              stroke="white"
-              strokeWidth="3"
-              style={{ cursor: onSeekToTime ? "pointer" : "default" }}
-              onClick={() => handlePointClick(pos.timestamp)}
-            />
-          </TooltipTrigger>
-          <TooltipPortal>
-            <TooltipContent side="top" className="smart-capitalize">
-              {pos.lifecycle_item
-                ? `${pos.lifecycle_item.class_type.replace("_", " ")} at ${new Date(pos.timestamp * 1000).toLocaleTimeString()}`
-                : t("objectTrack.trackedPoint")}
-              {onSeekToTime && (
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {t("objectTrack.clickToSeek")}
-                </div>
-              )}
-            </TooltipContent>
-          </TooltipPortal>
-        </Tooltip>
-      ))}
+        return (
+          <g key={objData.objectId}>
+            {absolutePositions.length > 1 && (
+              <path
+                d={generateStraightPath(absolutePositions)}
+                fill="none"
+                stroke={objData.color}
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            )}
 
-      {currentBoundingBox && showBoundingBoxes && (
-        <g>
-          <rect
-            x={currentBoundingBox.left * videoWidth}
-            y={currentBoundingBox.top * videoHeight}
-            width={currentBoundingBox.width * videoWidth}
-            height={currentBoundingBox.height * videoHeight}
-            fill="none"
-            stroke={objectColor}
-            strokeWidth="5"
-            opacity="0.9"
-          />
+            {absolutePositions.map((pos, index) => (
+              <Tooltip key={`${objData.objectId}-point-${index}`}>
+                <TooltipTrigger asChild>
+                  <circle
+                    cx={pos.x}
+                    cy={pos.y}
+                    r="7"
+                    fill={getPointColor(
+                      objData.color,
+                      pos.lifecycle_item?.class_type,
+                    )}
+                    stroke="white"
+                    strokeWidth="3"
+                    style={{ cursor: onSeekToTime ? "pointer" : "default" }}
+                    onClick={() => handlePointClick(pos.timestamp)}
+                  />
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent side="top" className="smart-capitalize">
+                    {pos.lifecycle_item
+                      ? `${pos.lifecycle_item.class_type.replace("_", " ")} at ${new Date(pos.timestamp * 1000).toLocaleTimeString()}`
+                      : t("objectTrack.trackedPoint")}
+                    {onSeekToTime && (
+                      <div className="mt-1 text-xs capitalize text-muted-foreground">
+                        {t("objectTrack.clickToSeek")}
+                      </div>
+                    )}
+                  </TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
+            ))}
 
-          <circle
-            cx={currentBoundingBox.centerX * videoWidth}
-            cy={currentBoundingBox.centerY * videoHeight}
-            r="5"
-            fill="rgb(255, 255, 0)" // yellow highlight
-            stroke={objectColor}
-            strokeWidth="5"
-            opacity="1"
-          />
-        </g>
-      )}
+            {objData.currentBox && showBoundingBoxes && (
+              <g>
+                <rect
+                  x={objData.currentBox[0] * videoWidth}
+                  y={objData.currentBox[1] * videoHeight}
+                  width={objData.currentBox[2] * videoWidth}
+                  height={objData.currentBox[3] * videoHeight}
+                  fill="none"
+                  stroke={objData.color}
+                  strokeWidth="5"
+                  opacity="0.9"
+                />
+                <circle
+                  cx={
+                    (objData.currentBox[0] + objData.currentBox[2] / 2) *
+                    videoWidth
+                  }
+                  cy={
+                    (objData.currentBox[1] + objData.currentBox[3]) *
+                    videoHeight
+                  }
+                  r="5"
+                  fill="rgb(255, 255, 0)" // yellow highlight
+                  stroke={objData.color}
+                  strokeWidth="5"
+                  opacity="1"
+                />
+              </g>
+            )}
+          </g>
+        );
+      })}
     </svg>
   );
+}
+
+// Generate a deterministic HSL color from a string (object ID)
+function generateColorFromId(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  // Use golden ratio to distribute hues evenly
+  const hue = (hash * 137.508) % 360;
+  return `hsl(${hue}, 70%, 50%)`;
 }
