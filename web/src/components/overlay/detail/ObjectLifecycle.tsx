@@ -94,6 +94,10 @@ export default function ObjectLifecycle({
     );
   }, [config, event]);
 
+  const label = event.sub_label
+    ? event.sub_label
+    : getTranslatedLabel(event.label);
+
   const getZoneColor = useCallback(
     (zoneName: string) => {
       const zoneColor =
@@ -635,10 +639,18 @@ export default function ObjectLifecycle({
                 )}
               </div>
               <div className="flex items-end gap-2">
-                <span>{getTranslatedLabel(event.label)}</span>
+                <span>{label}</span>
                 <span className="text-secondary-foreground">
                   {formattedStart ?? ""} - {formattedEnd ?? ""}
                 </span>
+                {event.data?.recognized_license_plate && (
+                  <>
+                    ·{" "}
+                    <span className="text-sm text-secondary-foreground">
+                      {event.data.recognized_license_plate}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
