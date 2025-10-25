@@ -373,7 +373,7 @@ export default function ObjectTrackOverlay({
                       ? `${pos.lifecycle_item.class_type.replace("_", " ")} at ${new Date(pos.timestamp * 1000).toLocaleTimeString()}`
                       : t("objectTrack.trackedPoint")}
                     {onSeekToTime && (
-                      <div className="mt-1 text-xs capitalize text-muted-foreground">
+                      <div className="mt-1 text-xs normal-case text-muted-foreground">
                         {t("objectTrack.clickToSeek")}
                       </div>
                     )}
