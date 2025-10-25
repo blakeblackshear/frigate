@@ -643,7 +643,7 @@ export default function ObjectLifecycle({
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <span>{label}</span>
+                <span className="capitalize">{label}</span>
                 <span className="text-secondary-foreground">
                   {formattedStart ?? ""} - {formattedEnd ?? ""}
                 </span>

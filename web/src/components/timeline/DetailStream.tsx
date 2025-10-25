@@ -499,7 +499,7 @@ function EventList({
               }}
               role="button"
             >
-              <span>{label}</span>
+              <span className="capitalize">{label}</span>
               {event.data?.recognized_license_plate && (
                 <>
                   ·{" "}
