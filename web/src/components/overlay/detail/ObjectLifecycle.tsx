@@ -94,6 +94,10 @@ export default function ObjectLifecycle({
     );
   }, [config, event]);
 
+  const label = event.sub_label
+    ? event.sub_label
+    : getTranslatedLabel(event.label);
+
   const getZoneColor = useCallback(
     (zoneName: string) => {
       const zoneColor =
@@ -628,17 +632,29 @@ export default function ObjectLifecycle({
               }}
               role="button"
             >
-              <div className={cn("ml-1 rounded-full bg-muted-foreground p-2")}>
+              <div
+                className={cn(
+                  "relative ml-2 rounded-full bg-muted-foreground p-2",
+                )}
+              >
                 {getIconForLabel(
-                  event.label,
-                  "size-6 text-primary dark:text-white",
+                  event.sub_label ? event.label + "-verified" : event.label,
+                  "size-4 text-white",
                 )}
               </div>
-              <div className="flex items-end gap-2">
-                <span>{getTranslatedLabel(event.label)}</span>
+              <div className="flex items-center gap-2">
+                <span className="capitalize">{label}</span>
                 <span className="text-secondary-foreground">
                   {formattedStart ?? ""} - {formattedEnd ?? ""}
                 </span>
+                {event.data?.recognized_license_plate && (
+                  <>
+                    ·{" "}
+                    <span className="text-sm text-secondary-foreground">
+                      {event.data.recognized_license_plate}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>

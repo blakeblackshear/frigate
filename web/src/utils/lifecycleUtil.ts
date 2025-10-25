@@ -1,6 +1,7 @@
 import { ObjectLifecycleSequence } from "@/types/timeline";
 import { t } from "i18next";
 import { getTranslatedLabel } from "./i18n";
+import { capitalizeFirstLetter } from "./stringUtil";
 
 export function getLifecycleItemDescription(
   lifecycleItem: ObjectLifecycleSequence,
@@ -10,7 +11,7 @@ export function getLifecycleItemDescription(
     : lifecycleItem.data.sub_label || lifecycleItem.data.label;
 
   const label = lifecycleItem.data.sub_label
-    ? rawLabel
+    ? capitalizeFirstLetter(rawLabel)
     : getTranslatedLabel(rawLabel);
 
   switch (lifecycleItem.class_type) {
