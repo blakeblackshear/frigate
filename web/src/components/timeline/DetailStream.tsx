@@ -423,30 +423,32 @@ function EventList({
 }: EventListProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const { selectedObjectId, setSelectedObjectId } = useDetailStream();
+  const { selectedObjectIds, toggleObjectSelection } = useDetailStream();
+
+  const isSelected = selectedObjectIds.includes(event.id);
 
   const handleObjectSelect = (event: Event | undefined) => {
     if (event) {
-      onSeek(event.start_time ?? 0);
-      setSelectedObjectId(event.id);
+      // onSeek(event.start_time ?? 0);
+      toggleObjectSelection(event.id);
     } else {
-      setSelectedObjectId(undefined);
+      toggleObjectSelection(undefined);
     }
   };
 
-  // Clear selectedObjectId when effectiveTime has passed this event's end_time
+  // Clear selection when effectiveTime has passed this event's end_time
   useEffect(() => {
-    if (selectedObjectId === event.id && effectiveTime && event.end_time) {
+    if (isSelected && effectiveTime && event.end_time) {
       if (effectiveTime >= event.end_time) {
-        setSelectedObjectId(undefined);
+        toggleObjectSelection(event.id);
       }
     }
   }, [
-    selectedObjectId,
+    isSelected,
     event.id,
     event.end_time,
     effectiveTime,
-    setSelectedObjectId,
+    toggleObjectSelection,
   ]);
 
   return (
@@ -454,10 +456,10 @@ function EventList({
       <div
         className={cn(
           "rounded-md bg-secondary p-2",
-          event.id == selectedObjectId
+          isSelected
             ? "bg-secondary-highlight"
             : "outline-transparent duration-500",
-          event.id != selectedObjectId &&
+          !isSelected &&
             (effectiveTime ?? 0) >= (event.start_time ?? 0) - 0.5 &&
             (effectiveTime ?? 0) <=
               (event.end_time ?? event.start_time ?? 0) + 0.5 &&
@@ -469,18 +471,14 @@ function EventList({
             className="flex items-center gap-2 text-sm font-medium"
             onClick={(e) => {
               e.stopPropagation();
-              handleObjectSelect(
-                event.id == selectedObjectId ? undefined : event,
-              );
+              handleObjectSelect(isSelected ? undefined : event);
             }}
             role="button"
           >
             <div
               className={cn(
                 "rounded-full p-1",
-                event.id == selectedObjectId
-                  ? "bg-selected"
-                  : "bg-muted-foreground",
+                isSelected ? "bg-selected" : "bg-muted-foreground",
               )}
             >
               {getIconForLabel(event.label, "size-3 text-white")}
@@ -494,8 +492,8 @@ function EventList({
               event={event}
               config={config}
               onOpenUpload={(e) => onOpenUpload?.(e)}
-              selectedObjectId={selectedObjectId}
-              setSelectedObjectId={handleObjectSelect}
+              isSelected={isSelected}
+              onToggleSelection={handleObjectSelect}
             />
           </div>
         </div>
