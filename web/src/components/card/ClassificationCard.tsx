@@ -214,7 +214,9 @@ export function GroupedClassificationCard({
     });
 
     if (!best) {
-      return group.at(-1);
+      // select an item from the middle of the time series as this usually correlates
+      // to a more representative image than the first or last
+      return group.at(Math.floor(group.length / 2));
     }
 
     const bestTyped: ClassificationItemData = best;
@@ -305,7 +307,7 @@ export function GroupedClassificationCard({
               <div>
                 <ContentTitle
                   className={cn(
-                    "flex items-center gap-1 font-normal capitalize",
+                    "flex items-center gap-2 font-normal capitalize",
                     isMobile && "px-2",
                   )}
                 >

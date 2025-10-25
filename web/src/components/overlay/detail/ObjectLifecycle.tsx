@@ -48,6 +48,7 @@ import { IoPlayCircleOutline } from "react-icons/io5";
 import { Trans, useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
+import { Badge } from "@/components/ui/badge";
 
 type ObjectLifecycleProps = {
   className?: string;
@@ -361,6 +362,52 @@ export default function ObjectLifecycle({
     return idx === -1 ? 0 : idx;
   }, [eventSequence, timeIndex]);
 
+  // Calculate how far down the blue line should extend based on timeIndex
+  const calculateLineHeight = () => {
+    if (!eventSequence || eventSequence.length === 0) return 0;
+
+    const currentTime = timeIndex ?? 0;
+
+    // Find which events have been passed
+    let lastPassedIndex = -1;
+    for (let i = 0; i < eventSequence.length; i++) {
+      if (currentTime >= (eventSequence[i].timestamp ?? 0)) {
+        lastPassedIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    // No events passed yet
+    if (lastPassedIndex < 0) return 0;
+
+    // All events passed
+    if (lastPassedIndex >= eventSequence.length - 1) return 100;
+
+    // Calculate percentage based on item position, not time
+    // Each item occupies an equal visual space regardless of time gaps
+    const itemPercentage = 100 / (eventSequence.length - 1);
+
+    // Find progress between current and next event for smooth transition
+    const currentEvent = eventSequence[lastPassedIndex];
+    const nextEvent = eventSequence[lastPassedIndex + 1];
+    const currentTimestamp = currentEvent.timestamp ?? 0;
+    const nextTimestamp = nextEvent.timestamp ?? 0;
+
+    // Calculate interpolation between the two events
+    const timeBetween = nextTimestamp - currentTimestamp;
+    const timeElapsed = currentTime - currentTimestamp;
+    const interpolation = timeBetween > 0 ? timeElapsed / timeBetween : 0;
+
+    // Base position plus interpolated progress to next item
+    return Math.min(
+      100,
+      lastPassedIndex * itemPercentage + interpolation * itemPercentage,
+    );
+  };
+
+  const blueLineHeight = calculateLineHeight();
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -575,7 +622,7 @@ export default function ObjectLifecycle({
       <div className="mt-4">
         <div
           className={cn(
-            "rounded-md bg-secondary p-2 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500",
+            "rounded-md bg-secondary p-3 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500",
           )}
         >
           <div className="flex w-full items-center justify-between">
@@ -587,10 +634,12 @@ export default function ObjectLifecycle({
               }}
               role="button"
             >
-              {getIconForLabel(
-                event.label,
-                "size-6 text-primary dark:text-white",
-              )}
+              <div className={cn("ml-1 rounded-full bg-muted-foreground p-2")}>
+                {getIconForLabel(
+                  event.label,
+                  "size-6 text-primary dark:text-white",
+                )}
+              </div>
               <div className="flex items-end gap-2">
                 <span>{getTranslatedLabel(event.label)}</span>
                 <span className="text-secondary-foreground">
@@ -608,151 +657,79 @@ export default function ObjectLifecycle({
                 {t("detail.noObjectDetailData", { ns: "views/events" })}
               </div>
             ) : (
-              <div className="mx-2 mt-4 space-y-2">
-                {eventSequence.map((item, idx) => {
-                  const isActive =
-                    Math.abs((timeIndex ?? 0) - (item.timestamp ?? 0)) <= 0.5;
-                  const formattedEventTimestamp = config
-                    ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
-                        timezone: config.ui.timezone,
-                        date_format:
-                          config.ui.time_format == "24hour"
-                            ? t(
-                                "time.formattedTimestampHourMinuteSecond.24hour",
-                                { ns: "common" },
-                              )
-                            : t(
-                                "time.formattedTimestampHourMinuteSecond.12hour",
-                                { ns: "common" },
-                              ),
-                        time_style: "medium",
-                        date_style: "medium",
-                      })
-                    : "";
+              <div className="-pb-2 relative mx-2">
+                <div className="absolute -top-2 bottom-8 left-4 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
+                <div
+                  className="absolute left-4 top-2 z-[5] max-h-[calc(100%-3rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
+                  style={{ height: `${blueLineHeight}%` }}
+                />
+                <div className="space-y-2">
+                  {eventSequence.map((item, idx) => {
+                    const isActive =
+                      Math.abs((timeIndex ?? 0) - (item.timestamp ?? 0)) <= 0.5;
+                    const formattedEventTimestamp = config
+                      ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
+                          timezone: config.ui.timezone,
+                          date_format:
+                            config.ui.time_format == "24hour"
+                              ? t(
+                                  "time.formattedTimestampHourMinuteSecond.24hour",
+                                  { ns: "common" },
+                                )
+                              : t(
+                                  "time.formattedTimestampHourMinuteSecond.12hour",
+                                  { ns: "common" },
+                                ),
+                          time_style: "medium",
+                          date_style: "medium",
+                        })
+                      : "";
 
-                  const ratio =
-                    Array.isArray(item.data.box) && item.data.box.length >= 4
-                      ? (
-                          aspectRatio *
-                          (item.data.box[2] / item.data.box[3])
-                        ).toFixed(2)
-                      : "N/A";
-                  const areaPx =
-                    Array.isArray(item.data.box) && item.data.box.length >= 4
-                      ? Math.round(
-                          (config.cameras[event.camera]?.detect?.width ?? 0) *
-                            (config.cameras[event.camera]?.detect?.height ??
-                              0) *
-                            (item.data.box[2] * item.data.box[3]),
-                        )
-                      : undefined;
-                  const areaPct =
-                    Array.isArray(item.data.box) && item.data.box.length >= 4
-                      ? (item.data.box[2] * item.data.box[3]).toFixed(4)
-                      : undefined;
+                    const ratio =
+                      Array.isArray(item.data.box) && item.data.box.length >= 4
+                        ? (
+                            aspectRatio *
+                            (item.data.box[2] / item.data.box[3])
+                          ).toFixed(2)
+                        : "N/A";
+                    const areaPx =
+                      Array.isArray(item.data.box) && item.data.box.length >= 4
+                        ? Math.round(
+                            (config.cameras[event.camera]?.detect?.width ?? 0) *
+                              (config.cameras[event.camera]?.detect?.height ??
+                                0) *
+                              (item.data.box[2] * item.data.box[3]),
+                          )
+                        : undefined;
+                    const areaPct =
+                      Array.isArray(item.data.box) && item.data.box.length >= 4
+                        ? (item.data.box[2] * item.data.box[3]).toFixed(4)
+                        : undefined;
 
-                  return (
-                    <div
-                      key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
-                      role="button"
-                      onClick={() => {
-                        setTimeIndex(item.timestamp ?? 0);
-                        handleSetBox(
-                          item.data.box ?? [],
-                          item.data.attribute_box,
-                        );
-                        setLifecycleZones(item.data.zones);
-                        setSelectedZone("");
-                      }}
-                      className={cn(
-                        "flex cursor-pointer flex-col gap-1 rounded-md p-2 text-sm text-primary-variant",
-                        isActive
-                          ? "bg-secondary-highlight font-semibold text-primary outline-[1.5px] -outline-offset-[1.1px] outline-primary/40 dark:font-normal"
-                          : "duration-500",
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="flex size-7 items-center justify-center">
-                          <LifecycleIcon
-                            lifecycleItem={item}
-                            className="size-5"
-                          />
-                        </div>
-                        <div className="flex w-full flex-row justify-between">
-                          <Trans>
-                            <div>{getLifecycleItemDescription(item)}</div>
-                          </Trans>
-                          <div className={cn("p-1 text-sm")}>
-                            {formattedEventTimestamp}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="ml-8 mt-1 flex flex-wrap items-center gap-3 text-sm text-secondary-foreground">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-1">
-                            <span className="text-muted-foreground">
-                              {t(
-                                "objectLifecycle.lifecycleItemDesc.header.ratio",
-                              )}
-                            </span>
-                            <span className="font-medium text-foreground">
-                              {ratio}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-1">
-                            <span className="text-muted-foreground">
-                              {t(
-                                "objectLifecycle.lifecycleItemDesc.header.area",
-                              )}
-                            </span>
-                            {areaPx !== undefined && areaPct !== undefined ? (
-                              <span className="font-medium text-foreground">
-                                px: {areaPx} · %: {areaPct}
-                              </span>
-                            ) : (
-                              <span>N/A</span>
-                            )}
-                          </div>
-                          {item.class_type === "entered_zone" && (
-                            <div className="flex items-center gap-2">
-                              <span className="text-muted-foreground">
-                                {t(
-                                  "objectLifecycle.lifecycleItemDesc.header.zones",
-                                )}
-                              </span>
-                              <div className="flex flex-wrap items-center gap-2">
-                                {item.data.zones.map((zone, zidx) => (
-                                  <div
-                                    key={`${zone}-${zidx}`}
-                                    className="flex cursor-pointer items-center gap-1"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedZone(zone);
-                                    }}
-                                  >
-                                    <div
-                                      className="size-3 rounded"
-                                      style={{
-                                        backgroundColor: `rgb(${getZoneColor(zone)})`,
-                                      }}
-                                    />
-                                    <span className="smart-capitalize">
-                                      {item.data?.zones_friendly_names?.[
-                                        zidx
-                                      ] ?? zone.replaceAll("_", " ")}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                    return (
+                      <LifecycleIconRow
+                        key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
+                        item={item}
+                        isActive={isActive}
+                        formattedEventTimestamp={formattedEventTimestamp}
+                        ratio={ratio}
+                        areaPx={areaPx}
+                        areaPct={areaPct}
+                        onClick={() => {
+                          setTimeIndex(item.timestamp ?? 0);
+                          handleSetBox(
+                            item.data.box ?? [],
+                            item.data.attribute_box,
+                          );
+                          setLifecycleZones(item.data.zones);
+                          setSelectedZone("");
+                        }}
+                        setSelectedZone={setSelectedZone}
+                        getZoneColor={getZoneColor}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -798,4 +775,122 @@ export function LifecycleIcon({
     default:
       return null;
   }
+}
+
+type LifecycleIconRowProps = {
+  item: ObjectLifecycleSequence;
+  isActive?: boolean;
+  formattedEventTimestamp: string;
+  ratio: string;
+  areaPx?: number;
+  areaPct?: string;
+  onClick: () => void;
+  setSelectedZone: (z: string) => void;
+  getZoneColor: (zoneName: string) => number[] | undefined;
+};
+
+function LifecycleIconRow({
+  item,
+  isActive,
+  formattedEventTimestamp,
+  ratio,
+  areaPx,
+  areaPct,
+  onClick,
+  setSelectedZone,
+  getZoneColor,
+}: LifecycleIconRowProps) {
+  const { t } = useTranslation(["views/explore"]);
+
+  return (
+    <div
+      role="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-md p-2 text-sm text-primary-variant",
+        isActive && "bg-secondary-highlight font-semibold text-primary",
+        !isActive && "duration-500",
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <div className="relative flex size-4 items-center justify-center">
+          <LuCircle
+            className={cn(
+              "relative z-10 ml-[1px] size-2.5 fill-secondary-foreground stroke-none",
+              isActive && "fill-selected duration-300",
+            )}
+          />
+        </div>
+
+        <div className="flex w-full flex-row justify-between">
+          <div className="flex flex-col">
+            <Trans>
+              <div>{getLifecycleItemDescription(item)}</div>
+            </Trans>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-secondary-foreground md:gap-5">
+              <div className="flex items-center gap-1">
+                <span className="text-primary-variant">
+                  {t("objectLifecycle.lifecycleItemDesc.header.ratio")}
+                </span>
+                <span className="font-medium text-primary">{ratio}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-primary-variant">
+                  {t("objectLifecycle.lifecycleItemDesc.header.area")}
+                </span>
+                {areaPx !== undefined && areaPct !== undefined ? (
+                  <span className="font-medium text-primary">
+                    {t("information.pixels", { ns: "common", area: areaPx })} ·{" "}
+                    {areaPct}%
+                  </span>
+                ) : (
+                  <span>N/A</span>
+                )}
+              </div>
+
+              {item.data?.zones && item.data.zones.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  {item.data.zones.map((zone, zidx) => {
+                    const color = getZoneColor(zone)?.join(",") ?? "0,0,0";
+                    return (
+                      <Badge
+                        key={`${zone}-${zidx}`}
+                        variant="outline"
+                        className="inline-flex cursor-pointer items-center gap-2"
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          setSelectedZone(zone);
+                        }}
+                        style={{
+                          borderColor: `rgba(${color}, 0.6)`,
+                          background: `rgba(${color}, 0.08)`,
+                        }}
+                      >
+                        <span
+                          className="size-1 rounded-full"
+                          style={{
+                            display: "inline-block",
+                            width: 10,
+                            height: 10,
+                            backgroundColor: `rgb(${color})`,
+                          }}
+                        />
+                        <span className="smart-capitalize">
+                          {item.data?.zones_friendly_names?.[
+                            zidx
+                          ] ?? zone.replaceAll("_", " ")}
+                        </span>
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={cn("p-1 text-sm")}>{formattedEventTimestamp}</div>
+        </div>
+      </div>
+    </div>
+  );
 }

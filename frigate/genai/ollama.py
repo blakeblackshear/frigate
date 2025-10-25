@@ -20,8 +20,8 @@ class OllamaClient(GenAIClient):
     LOCAL_OPTIMIZED_OPTIONS = {
         "options": {
             "temperature": 0.5,
-            "repeat_penalty": 1.15,
-            "presence_penalty": 0.1,
+            "repeat_penalty": 1.05,
+            "presence_penalty": 0.3,
         },
     }
 

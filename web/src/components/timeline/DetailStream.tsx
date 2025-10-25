@@ -292,71 +292,81 @@ function ReviewGroup({
   return (
     <div
       data-review-id={id}
-      className={`cursor-pointer rounded-lg bg-secondary p-3 outline outline-[3px] -outline-offset-[2.8px] ${
-        isActive
-          ? "shadow-selected outline-selected"
-          : "outline-transparent duration-500"
-      }`}
+      className="cursor-pointer rounded-lg bg-secondary py-3"
     >
       <div
-        className="flex items-center justify-between"
+        className={cn(
+          "flex items-start",
+          open && "border-b border-secondary-highlight pb-4",
+        )}
         onClick={() => {
           onActivate?.();
           onSeek(start);
         }}
       >
-        <div className="ml-1 flex flex-col items-start gap-1.5">
-          <div className="flex flex-row gap-3">
-            <div className="text-sm font-medium">{displayTime}</div>
-            <div className="flex items-center gap-2">
-              {iconLabels.slice(0, 5).map((lbl, idx) => (
-                <div
-                  key={`${lbl}-${idx}`}
-                  className="rounded-full bg-muted-foreground p-1"
-                >
-                  {getIconForLabel(lbl, "size-3 text-primary dark:text-white")}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            {review.data.metadata?.title && (
-              <div className="mb-1 text-sm text-primary-variant">
-                {review.data.metadata.title}
-              </div>
+        <div className="ml-4 mr-2 mt-1.5 flex flex-row items-start">
+          <LuCircle
+            className={cn(
+              "size-3",
+              isActive
+                ? "fill-selected text-selected"
+                : "fill-muted duration-500 dark:fill-secondary-highlight dark:text-secondary-highlight",
             )}
-            <div className="flex flex-row items-center gap-1.5">
-              <div className="text-xs text-primary-variant">{reviewInfo}</div>
-
-              {reviewDuration && (
-                <>
-                  <span className="text-[5px] text-primary-variant">•</span>
-                  <div className="text-xs text-primary-variant">
-                    {reviewDuration}
+          />
+        </div>
+        <div className="mr-3 flex w-full justify-between">
+          <div className="ml-1 flex flex-col items-start gap-1.5">
+            <div className="flex flex-row gap-3">
+              <div className="text-sm font-medium">{displayTime}</div>
+              <div className="flex items-center gap-2">
+                {iconLabels.slice(0, 5).map((lbl, idx) => (
+                  <div
+                    key={`${lbl}-${idx}`}
+                    className="rounded-full bg-muted-foreground p-1"
+                  >
+                    {getIconForLabel(lbl, "size-3 text-white")}
                   </div>
-                </>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              {review.data.metadata?.title && (
+                <div className="mb-1 text-sm text-primary-variant">
+                  {review.data.metadata.title}
+                </div>
               )}
+              <div className="flex flex-row items-center gap-1.5">
+                <div className="text-xs text-primary-variant">{reviewInfo}</div>
+
+                {reviewDuration && (
+                  <>
+                    <span className="text-[5px] text-primary-variant">•</span>
+                    <div className="text-xs text-primary-variant">
+                      {reviewDuration}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpen((v) => !v);
-          }}
-          aria-label={open ? "Collapse" : "Expand"}
-          className="ml-2 inline-flex items-center justify-center rounded p-1 hover:bg-secondary/10"
-        >
-          {open ? (
-            <LuChevronDown className="size-4 text-primary-variant" />
-          ) : (
-            <LuChevronRight className="size-4 text-primary-variant" />
-          )}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((v) => !v);
+            }}
+            className="ml-2 inline-flex items-center justify-center rounded p-1 hover:bg-secondary/10"
+          >
+            {open ? (
+              <LuChevronDown className="size-4 text-primary-variant" />
+            ) : (
+              <LuChevronRight className="size-4 text-primary-variant" />
+            )}
+          </div>
         </div>
       </div>
 
       {open && (
-        <div className="mt-2 space-y-0.5">
+        <div className="space-y-0.5">
           {shouldFetchEvents && isValidating && !fetchedEvents ? (
             <ActivityIndicator />
           ) : (
@@ -386,10 +396,7 @@ function ReviewGroup({
                 >
                   <div className="ml-1.5 flex items-center gap-2 text-sm font-medium">
                     <div className="rounded-full bg-muted-foreground p-1">
-                      {getIconForLabel(
-                        audioLabel,
-                        "size-3 text-primary dark:text-white",
-                      )}
+                      {getIconForLabel(audioLabel, "size-3 text-white")}
                     </div>
                     <span>{getTranslatedLabel(audioLabel)}</span>
                   </div>
@@ -447,9 +454,9 @@ function EventList({
     <>
       <div
         className={cn(
-          "rounded-md bg-secondary p-2 outline outline-[3px] -outline-offset-[2.8px]",
+          "rounded-md bg-secondary p-2",
           event.id == selectedObjectId
-            ? "bg-secondary-highlight shadow-selected outline-selected"
+            ? "bg-secondary-highlight"
             : "outline-transparent duration-500",
           event.id != selectedObjectId &&
             (effectiveTime ?? 0) >= (event.start_time ?? 0) - 0.5 &&
@@ -477,10 +484,7 @@ function EventList({
                   : "bg-muted-foreground",
               )}
             >
-              {getIconForLabel(
-                event.label,
-                "size-3 text-primary dark:text-white",
-              )}
+              {getIconForLabel(event.label, "size-3 text-white")}
             </div>
             <div className="flex items-end gap-2">
               <span>{getTranslatedLabel(event.label)}</span>
@@ -598,9 +602,11 @@ function LifecycleItem({
       <div className="flex w-full flex-row justify-between">
         <Tooltip>
           <TooltipTrigger>
-            <Trans>
-              <span>{getLifecycleItemDescription(item)}</span>
-            </Trans>
+            <div className="flex items-start text-left">
+              <Trans>
+                {getLifecycleItemDescription(item)}
+              </Trans>
+            </div>
           </TooltipTrigger>
           <TooltipContent>
             <div className="mt-1 flex flex-wrap items-start gap-3 text-sm text-secondary-foreground">
