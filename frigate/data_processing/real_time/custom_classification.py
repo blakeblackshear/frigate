@@ -284,6 +284,9 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         if obj_data["label"] not in self.model_config.object_config.objects:
             return
 
+        if obj_data.get("end_time") is not None:
+            return
+
         now = datetime.datetime.now().timestamp()
         x, y, x2, y2 = calculate_region(
             frame.shape,
