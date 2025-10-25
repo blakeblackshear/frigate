@@ -603,9 +603,7 @@ function LifecycleItem({
         <Tooltip>
           <TooltipTrigger>
             <div className="flex items-start text-left">
-              <Trans>
-                {getLifecycleItemDescription(item)}
-              </Trans>
+              <Trans>{getLifecycleItemDescription(item)}</Trans>
             </div>
           </TooltipTrigger>
           <TooltipContent>

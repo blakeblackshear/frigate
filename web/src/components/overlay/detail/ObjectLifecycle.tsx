@@ -876,9 +876,8 @@ function LifecycleIconRow({
                           }}
                         />
                         <span className="smart-capitalize">
-                          {item.data?.zones_friendly_names?.[
-                            zidx
-                          ] ?? zone.replaceAll("_", " ")}
+                          {item.data?.zones_friendly_names?.[zidx] ??
+                            zone.replaceAll("_", " ")}
                         </span>
                       </Badge>
                     );
