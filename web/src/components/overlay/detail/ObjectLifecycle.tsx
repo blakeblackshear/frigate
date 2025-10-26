@@ -289,10 +289,10 @@ export default function ObjectLifecycle({
         timezone: config.ui.timezone,
         date_format:
           config.ui.time_format == "24hour"
-            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+            ? t("time.formattedTimestamp.24hour", {
                 ns: "common",
               })
-            : t("time.formattedTimestampHourMinuteSecond.12hour", {
+            : t("time.formattedTimestamp.12hour", {
                 ns: "common",
               }),
         time_style: "medium",
@@ -305,10 +305,10 @@ export default function ObjectLifecycle({
         timezone: config.ui.timezone,
         date_format:
           config.ui.time_format == "24hour"
-            ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+            ? t("time.formattedTimestamp.24hour", {
                 ns: "common",
               })
-            : t("time.formattedTimestampHourMinuteSecond.12hour", {
+            : t("time.formattedTimestamp.12hour", {
                 ns: "common",
               }),
         time_style: "medium",
