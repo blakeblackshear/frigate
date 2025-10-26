@@ -35,7 +35,7 @@ import {
   FaVideo,
 } from "react-icons/fa";
 import { FaRotate } from "react-icons/fa6";
-import ObjectLifecycle from "./ObjectLifecycle";
+import TrackingDetails from "./TrackingDetails";
 import {
   MobilePage,
   MobilePageContent,
@@ -85,7 +85,7 @@ const SEARCH_TABS = [
   "details",
   "snapshot",
   "video",
-  "object_lifecycle",
+  "tracking_details",
 ] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
 
@@ -160,7 +160,7 @@ export default function SearchDetailDialog({
     }
 
     if (search.data.type != "object" || !search.has_clip) {
-      const index = views.indexOf("object_lifecycle");
+      const index = views.indexOf("tracking_details");
       views.splice(index, 1);
     }
 
@@ -235,7 +235,7 @@ export default function SearchDetailDialog({
                   {item == "details" && <FaRegListAlt className="size-4" />}
                   {item == "snapshot" && <FaImage className="size-4" />}
                   {item == "video" && <FaVideo className="size-4" />}
-                  {item == "object_lifecycle" && (
+                  {item == "tracking_details" && (
                     <FaRotate className="size-4" />
                   )}
                   <div className="smart-capitalize">{t(`type.${item}`)}</div>
@@ -268,8 +268,8 @@ export default function SearchDetailDialog({
           />
         )}
         {page == "video" && <VideoTab search={search} />}
-        {page == "object_lifecycle" && (
-          <ObjectLifecycle
+        {page == "tracking_details" && (
+          <TrackingDetails
             className="w-full overflow-x-hidden"
             event={search as unknown as Event}
             fullscreen={true}

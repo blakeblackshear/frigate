@@ -10,7 +10,7 @@ export enum LifecycleClassType {
   PATH_POINT = "path_point",
 }
 
-export type ObjectLifecycleSequence = {
+export type TrackingDetailsSequence = {
   camera: string;
   timestamp: number;
   data: {
@@ -38,5 +38,5 @@ export type Position = {
   x: number;
   y: number;
   timestamp: number;
-  lifecycle_item?: ObjectLifecycleSequence;
+  lifecycle_item?: TrackingDetailsSequence;
 };

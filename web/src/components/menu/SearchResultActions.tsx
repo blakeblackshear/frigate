@@ -47,7 +47,7 @@ type SearchResultActionsProps = {
   searchResult: SearchResult;
   findSimilar: () => void;
   refreshResults: () => void;
-  showObjectLifecycle: () => void;
+  showTrackingDetails: () => void;
   showSnapshot: () => void;
   addTrigger: () => void;
   isContextMenu?: boolean;
@@ -58,7 +58,7 @@ export default function SearchResultActions({
   searchResult,
   findSimilar,
   refreshResults,
-  showObjectLifecycle,
+  showTrackingDetails,
   showSnapshot,
   addTrigger,
   isContextMenu = false,
@@ -125,11 +125,11 @@ export default function SearchResultActions({
       )}
       {searchResult.data.type == "object" && (
         <MenuItem
-          aria-label={t("itemMenu.viewObjectLifecycle.aria")}
-          onClick={showObjectLifecycle}
+          aria-label={t("itemMenu.viewTrackingDetails.aria")}
+          onClick={showTrackingDetails}
         >
           <FaArrowsRotate className="mr-2 size-4" />
-          <span>{t("itemMenu.viewObjectLifecycle.label")}</span>
+          <span>{t("itemMenu.viewTrackingDetails.label")}</span>
         </MenuItem>
       )}
       {config?.semantic_search?.enabled && isContextMenu && (

@@ -13,7 +13,7 @@ type SearchThumbnailProps = {
   columns: number;
   findSimilar: () => void;
   refreshResults: () => void;
-  showObjectLifecycle: () => void;
+  showTrackingDetails: () => void;
   showSnapshot: () => void;
   addTrigger: () => void;
 };
@@ -23,7 +23,7 @@ export default function SearchThumbnailFooter({
   columns,
   findSimilar,
   refreshResults,
-  showObjectLifecycle,
+  showTrackingDetails,
   showSnapshot,
   addTrigger,
 }: SearchThumbnailProps) {
@@ -61,7 +61,7 @@ export default function SearchThumbnailFooter({
           searchResult={searchResult}
           findSimilar={findSimilar}
           refreshResults={refreshResults}
-          showObjectLifecycle={showObjectLifecycle}
+          showTrackingDetails={showTrackingDetails}
           showSnapshot={showSnapshot}
           addTrigger={addTrigger}
         />

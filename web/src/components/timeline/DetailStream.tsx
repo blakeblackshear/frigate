@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ObjectLifecycleSequence } from "@/types/timeline";
+import { TrackingDetailsSequence } from "@/types/timeline";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { useDetailStream } from "@/context/detail-stream-context";
 import scrollIntoView from "scroll-into-view-if-needed";
@@ -553,7 +553,7 @@ function EventList({
 }
 
 type LifecycleItemProps = {
-  item: ObjectLifecycleSequence;
+  item: TrackingDetailsSequence;
   isActive?: boolean;
   onSeek?: (timestamp: number, play?: boolean) => void;
   effectiveTime?: number;
@@ -650,14 +650,14 @@ function LifecycleItem({
               <div className="flex flex-col gap-1">
                 <div className="flex items-start gap-1">
                   <span className="text-muted-foreground">
-                    {t("objectLifecycle.lifecycleItemDesc.header.ratio")}
+                    {t("trackingDetails.lifecycleItemDesc.header.ratio")}
                   </span>
                   <span className="font-medium text-foreground">{ratio}</span>
                 </div>
 
                 <div className="flex items-start gap-1">
                   <span className="text-muted-foreground">
-                    {t("objectLifecycle.lifecycleItemDesc.header.area")}
+                    {t("trackingDetails.lifecycleItemDesc.header.area")}
                   </span>
                   {areaPx !== undefined && areaPct !== undefined ? (
                     <span className="font-medium text-foreground">
@@ -697,7 +697,7 @@ function ObjectTimeline({
   endTime?: number;
 }) {
   const { t } = useTranslation("views/events");
-  const { data: timeline, isValidating } = useSWR<ObjectLifecycleSequence[]>([
+  const { data: timeline, isValidating } = useSWR<TrackingDetailsSequence[]>([
     "timeline",
     {
       source_id: eventId,

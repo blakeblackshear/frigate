@@ -40,7 +40,7 @@ export default function AnnotationOffsetSlider({ className }: Props) {
       );
 
       toast.success(
-        t("objectLifecycle.annotationSettings.offset.toast.success", {
+        t("trackingDetails.annotationSettings.offset.toast.success", {
           camera,
         }),
         { position: "top-center" },
