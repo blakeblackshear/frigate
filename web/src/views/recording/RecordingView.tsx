@@ -308,7 +308,9 @@ export function RecordingView({
       }
 
       // Sort all events by start time to ensure correct order
-      const sortedEvents = [...mainCameraReviewItems].sort((a, b) => a.start_time - b.start_time);
+      const sortedEvents = [...mainCameraReviewItems].sort(
+        (a, b) => a.start_time - b.start_time,
+      );
 
       // Find which event we're currently viewing
       // Check if current time is between (event start - REVIEW_PADDING) and (event end or start + 60s)
@@ -319,7 +321,7 @@ export function RecordingView({
       });
 
       let targetEvent;
-      
+
       if (currentEventIndex >= 0) {
         // We identified the current event - use index-based navigation
         if (direction === "next") {
