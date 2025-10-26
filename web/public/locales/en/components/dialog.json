@@ -52,7 +52,7 @@
     "export": "Export",
     "selectOrExport": "Select or Export",
     "toast": {
-      "success": "Successfully started export. View the file in the /exports folder.",
+      "success": "Successfully started export. View the file in the exports page.",
       "error": {
         "failed": "Failed to start export: {{error}}",
         "endTimeMustAfterStartTime": "End time must be after start time",
