@@ -202,7 +202,7 @@ services:
     ...
     devices:
       - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
-      - /dev/apex_0:/dev/apex_0 # passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
+      - /dev/apex_0:/dev/apex_0 # passes a PCIe Coral, follow driver instructions here https://github.com/jnicolson/gasket-builder
     ...
 ```
 
