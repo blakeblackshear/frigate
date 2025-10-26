@@ -104,6 +104,12 @@ In real-world deployments, even with multiple cameras running concurrently, Frig
 
 ### Google Coral TPU
 
+:::warning
+
+The Coral is no longer recommended for new Frigate installations, except in deployments with particularly low power requirements or hardware incapable of utilizing alternative AI accelerators for object detection. Instead, we suggest using one of the numerous other supported object detectors. Frigate will continue to provide support for the Coral TPU for as long as practicably possible given its still one of the most power-efficient devices for executing object detection models.
+
+:::
+
 Frigate supports both the USB and M.2 versions of the Google Coral.
 
 - The USB version is compatible with the widest variety of hardware and does not require a driver on the host machine. However, it does lack the automatic throttling features of the other versions.
