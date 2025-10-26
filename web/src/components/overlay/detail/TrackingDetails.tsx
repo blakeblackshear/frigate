@@ -55,7 +55,6 @@ import { IoPlayCircleOutline } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { Badge } from "@/components/ui/badge";
-import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 import { HiDotsHorizontal } from "react-icons/hi";
 import axios from "axios";
 import { toast } from "sonner";
@@ -828,8 +827,10 @@ function LifecycleIconRow({
   getZoneColor,
 }: LifecycleIconRowProps) {
   const { t } = useTranslation(["views/explore", "components/player"]);
-  const [isOpen, setIsOpen] = useState(false);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   return (
     <div
@@ -918,7 +919,7 @@ function LifecycleIconRow({
         <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
           <div className="flex flex-row items-center gap-3">
             <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
-            {config?.plus?.enabled && (
+            {(config?.plus?.enabled || item.data.box) && (
               <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
                 <DropdownMenuTrigger>
                   <div className="rounded p-1 pr-2" role="button">
@@ -956,8 +957,22 @@ function LifecycleIconRow({
                           }
                         }}
                       >
-                        <FrigatePlusIcon className="mr-2 size-4 text-primary-variant hover:text-primary" />
                         {t("itemMenu.submitToPlus.label")}
+                      </DropdownMenuItem>
+                    )}
+                    {item.data.box && (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={() => {
+                          setIsOpen(false);
+                          setTimeout(() => {
+                            navigate(
+                              `/settings?page=masksAndZones&camera=${item.camera}&object_mask=${item.data.box}`,
+                            );
+                          }, 0);
+                        }}
+                      >
+                        {t("trackingDetails.createObjectMask")}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
