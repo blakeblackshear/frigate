@@ -63,20 +63,11 @@ class GenAIClient:
             else:
                 return ""
 
-        def get_verified_object_prompt() -> str:
-            if review_data["recognized_objects"]:
-                object_list = "  - " + "\n  - ".join(review_data["recognized_objects"])
-                return f"""## Verified Objects (USE THESE NAMES)
-When any of the following verified objects are present in the scene, you MUST use these exact names in your title and scene description:
-{object_list}
-"""
-            else:
-                return ""
-
         context_prompt = f"""
 Your task is to analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
 
 ## Normal Activity Patterns for This Property
+
 {activity_context_prompt}
 
 ## Task Instructions
@@ -91,7 +82,7 @@ Your task is to provide a clear, accurate description of the scene that:
 ## Analysis Guidelines
 
 When forming your description:
-- **CRITICAL: Only describe objects explicitly listed in "Detected objects" below.** Do not infer or mention additional people, vehicles, or objects not present in the detected objects list, even if visual patterns suggest them. If only a car is detected, do not describe a person interacting with it unless "person" is also in the detected objects list.
+- **CRITICAL: Only describe objects explicitly listed in "Objects in Scene" below.** Do not infer or mention additional people, vehicles, or objects not present in this list, even if visual patterns suggest them. If only a car is listed, do not describe a person interacting with it unless "person" is also in the objects list.
 - **Only describe actions actually visible in the frames.** Do not assume or infer actions that you don't observe happening. If someone walks toward furniture but you never see them sit, do not say they sat. Stick to what you can see across the sequence.
 - Describe what you observe: actions, movements, interactions with objects and the environment. Include any observable environmental changes (e.g., lighting changes triggered by activity).
 - Note visible details such as clothing, items being carried or placed, tools or equipment present, and how they interact with the property or objects.
@@ -103,7 +94,7 @@ When forming your description:
 ## Response Format
 
 Your response MUST be a flat JSON object with:
-- `title` (string): A concise, one-sentence title that captures the main activity. Include any verified recognized objects (from the "Verified recognized objects" list below) and key detected objects. Examples: "Joe walking dog in backyard", "Unknown person testing car doors at night".
+- `title` (string): A concise, one-sentence title that captures the main activity. Use the exact names from "Objects in Scene" below (e.g., if the list shows "Joe (person)" and "Unknown (person)", say "Joe and unknown person"). Examples: "Joe walking dog in backyard", "Unknown person testing car doors at night", "Joe and unknown person in driveway".
 - `scene` (string): A narrative description of what happens across the sequence from start to finish. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
 - `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below. Your threat level must be consistent with your scene description and the guidance above.
@@ -119,14 +110,17 @@ Your response MUST be a flat JSON object with:
 
 - Frame 1 = earliest, Frame {len(thumbnails)} = latest
 - Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
-- Detected objects: {", ".join(review_data["objects"])}
 - Zones involved: {", ".join(z.replace("_", " ").title() for z in review_data["zones"]) or "None"}
 
-{get_verified_object_prompt()}
+## Objects in Scene
+
+Each line represents one object in the scene. Named objects are verified identities; "Unknown" indicates unverified objects of that type:
+{"".join(f"\n- {obj}" for obj in review_data["unified_objects"])}
 
 ## Important Notes
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
-- Only describe objects from the "Detected objects" list above. Do not hallucinate additional objects.
+- Only describe objects from the "Objects in Scene" list above. Do not hallucinate additional objects.
+- When describing people or vehicles, use the exact names provided.
 {get_language_prompt()}
 """
         logger.debug(
@@ -161,7 +155,10 @@ Your response MUST be a flat JSON object with:
             try:
                 metadata = ReviewMetadata.model_validate_json(clean_json)
 
-                if review_data["recognized_objects"]:
+                if any(
+                    not obj.startswith("Unknown")
+                    for obj in review_data["unified_objects"]
+                ):
                     metadata.potential_threat_level = 0
 
                 metadata.time = review_data["start"]
