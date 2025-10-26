@@ -58,6 +58,11 @@ export function DetailStreamProvider({
     setAnnotationOffset(cfgOffset);
   }, [config, camera]);
 
+  // Clear selected objects when exiting detail mode or changing cameras
+  useEffect(() => {
+    setSelectedObjectIds([]);
+  }, [isDetailMode, camera]);
+
   const value: DetailStreamContextType = {
     selectedObjectIds,
     currentTime,
