@@ -644,8 +644,8 @@ export default function SearchView({
                             }
                           }}
                           refreshResults={refresh}
-                          showObjectLifecycle={() =>
-                            onSelectSearch(value, false, "object_lifecycle")
+                          showTrackingDetails={() =>
+                            onSelectSearch(value, false, "tracking_details")
                           }
                           showSnapshot={() =>
                             onSelectSearch(value, false, "snapshot")

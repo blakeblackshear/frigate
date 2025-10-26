@@ -79,7 +79,7 @@ export function AnnotationSettingsPane({
         .then((res) => {
           if (res.status === 200) {
             toast.success(
-              t("objectLifecycle.annotationSettings.offset.toast.success", {
+              t("trackingDetails.annotationSettings.offset.toast.success", {
                 camera: event?.camera,
               }),
               {
@@ -142,7 +142,7 @@ export function AnnotationSettingsPane({
   return (
     <div className="mb-3 space-y-3 rounded-lg border border-secondary-foreground bg-background_alt p-2">
       <Heading as="h4" className="my-2">
-        {t("objectLifecycle.annotationSettings.title")}
+        {t("trackingDetails.annotationSettings.title")}
       </Heading>
       <div className="flex flex-col">
         <div className="flex flex-row items-center justify-start gap-2 p-3">
@@ -152,11 +152,11 @@ export function AnnotationSettingsPane({
             onCheckedChange={setShowZones}
           />
           <Label className="cursor-pointer" htmlFor="show-zones">
-            {t("objectLifecycle.annotationSettings.showAllZones.title")}
+            {t("trackingDetails.annotationSettings.showAllZones.title")}
           </Label>
         </div>
         <div className="text-sm text-muted-foreground">
-          {t("objectLifecycle.annotationSettings.showAllZones.desc")}
+          {t("trackingDetails.annotationSettings.showAllZones.desc")}
         </div>
       </div>
       <Separator className="my-2 flex bg-secondary" />
@@ -171,14 +171,14 @@ export function AnnotationSettingsPane({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  {t("objectLifecycle.annotationSettings.offset.label")}
+                  {t("trackingDetails.annotationSettings.offset.label")}
                 </FormLabel>
                 <div className="flex flex-col gap-3 md:flex-row-reverse md:gap-8">
                   <div className="flex flex-row items-center gap-3 rounded-lg bg-destructive/50 p-3 text-sm text-primary-variant md:my-5">
                     <PiWarningCircle className="size-24" />
                     <div>
                       <Trans ns="views/explore">
-                        objectLifecycle.annotationSettings.offset.desc
+                        trackingDetails.annotationSettings.offset.desc
                       </Trans>
                       <div className="mt-2 flex items-center text-primary">
                         <Link
@@ -203,10 +203,10 @@ export function AnnotationSettingsPane({
                     </FormControl>
                     <FormDescription>
                       <Trans ns="views/explore">
-                        objectLifecycle.annotationSettings.offset.millisecondsToOffset
+                        trackingDetails.annotationSettings.offset.millisecondsToOffset
                       </Trans>
                       <div className="mt-2">
-                        {t("objectLifecycle.annotationSettings.offset.tips")}
+                        {t("trackingDetails.annotationSettings.offset.tips")}
                       </div>
                     </FormDescription>
                   </div>

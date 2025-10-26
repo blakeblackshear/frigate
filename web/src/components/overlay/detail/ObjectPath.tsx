@@ -105,7 +105,7 @@ export function ObjectPath({
             <TooltipContent side="top" className="smart-capitalize">
               {pos.lifecycle_item
                 ? getLifecycleItemDescription(pos.lifecycle_item)
-                : t("objectLifecycle.trackedPoint")}
+                : t("trackingDetails.trackedPoint")}
             </TooltipContent>
           </TooltipPortal>
         </Tooltip>

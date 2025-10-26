@@ -232,8 +232,8 @@ function ExploreThumbnailImage({
     }
   };
 
-  const handleShowObjectLifecycle = () => {
-    onSelectSearch(event, false, "object_lifecycle");
+  const handleShowTrackingDetails = () => {
+    onSelectSearch(event, false, "tracking_details");
   };
 
   const handleShowSnapshot = () => {
@@ -251,7 +251,7 @@ function ExploreThumbnailImage({
       searchResult={event}
       findSimilar={handleFindSimilar}
       refreshResults={mutate}
-      showObjectLifecycle={handleShowObjectLifecycle}
+      showTrackingDetails={handleShowTrackingDetails}
       showSnapshot={handleShowSnapshot}
       addTrigger={handleAddTrigger}
       isContextMenu={true}
