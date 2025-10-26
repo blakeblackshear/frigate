@@ -710,13 +710,12 @@ export function RecordingView({
                       ? "h-full"
                       : "w-full"
                     : cn(
-                        "flex-shrink-0 pt-2",
+                        "flex-shrink-0 portrait:w-full landscape:h-full",
                         mainCameraAspect == "wide"
                           ? "aspect-wide"
                           : mainCameraAspect == "tall"
-                            ? "aspect-tall"
+                            ? "aspect-tall portrait:h-full"
                             : "aspect-video",
-                        "portrait:w-full landscape:h-full",
                       ),
                 )}
                 style={{
