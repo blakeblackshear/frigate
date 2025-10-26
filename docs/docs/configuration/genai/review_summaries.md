@@ -39,6 +39,26 @@ Each installation and even camera can have different parameters for what is cons
 - Brief movement with legitimate items (bags, packages, tools, equipment) in appropriate zones is routine.
 ```
 
+### Image Source
+
+By default, review summaries use preview images (cached preview frames) which have a lower resolution but use fewer tokens per image. For better image quality and more detailed analysis, you can configure Frigate to extract frames directly from recordings at a higher resolution:
+
+```yaml
+review:
+  genai:
+    enabled: true
+    image_source: recordings # Options: "preview" (default) or "recordings"
+```
+
+When using `recordings`, frames are extracted at 480p resolution (480px height), providing better detail for the LLM while being mindful of context window size. This is particularly useful for scenarios where fine details matter, such as identifying license plates, reading text, or analyzing distant objects. Note that using recordings will:
+
+- Provide higher quality images to the LLM (480p vs 180p preview images)
+- Use more tokens per image (~200-300 tokens vs ~100 tokens for preview)
+- Result in fewer frames being sent to stay within context limits (typically 6-12 frames vs 8-20 frames)
+- Require that recordings are enabled for the camera
+
+If recordings are not available for a given time period, the system will automatically fall back to using preview frames.
+
 ### Additional Concerns
 
 Along with the concern of suspicious activity or immediate threat, you may have concerns such as animals in your garden or a gate being left open. These concerns can be configured so that the review summaries will make note of them if the activity requires additional review. For example:

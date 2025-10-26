@@ -1,10 +1,18 @@
+from enum import Enum
 from typing import Optional, Union
 
 from pydantic import Field, field_validator
 
 from ..base import FrigateBaseModel
 
-__all__ = ["ReviewConfig", "DetectionsConfig", "AlertsConfig"]
+__all__ = ["ReviewConfig", "DetectionsConfig", "AlertsConfig", "ImageSourceEnum"]
+
+
+class ImageSourceEnum(str, Enum):
+    """Image source options for GenAI Review."""
+
+    preview = "preview"
+    recordings = "recordings"
 
 
 DEFAULT_ALERT_OBJECTS = ["person", "car"]
@@ -77,6 +85,10 @@ class GenAIReviewConfig(FrigateBaseModel):
     )
     alerts: bool = Field(default=True, title="Enable GenAI for alerts.")
     detections: bool = Field(default=False, title="Enable GenAI for detections.")
+    image_source: ImageSourceEnum = Field(
+        default=ImageSourceEnum.preview,
+        title="Image source for review descriptions.",
+    )
     additional_concerns: list[str] = Field(
         default=[],
         title="Additional concerns that GenAI should make note of on this camera.",
