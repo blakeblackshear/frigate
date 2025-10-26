@@ -34,7 +34,6 @@ import {
   FaRegListAlt,
   FaVideo,
 } from "react-icons/fa";
-import { FaRotate } from "react-icons/fa6";
 import TrackingDetails from "./TrackingDetails";
 import {
   MobilePage,
@@ -80,6 +79,7 @@ import FaceSelectionDialog from "../FaceSelectionDialog";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { CgTranscript } from "react-icons/cg";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { PiPath } from "react-icons/pi";
 
 const SEARCH_TABS = [
   "details",
@@ -235,9 +235,7 @@ export default function SearchDetailDialog({
                   {item == "details" && <FaRegListAlt className="size-4" />}
                   {item == "snapshot" && <FaImage className="size-4" />}
                   {item == "video" && <FaVideo className="size-4" />}
-                  {item == "tracking_details" && (
-                    <FaRotate className="size-4" />
-                  )}
+                  {item == "tracking_details" && <PiPath className="size-4" />}
                   <div className="smart-capitalize">{t(`type.${item}`)}</div>
                 </ToggleGroupItem>
               ))}
