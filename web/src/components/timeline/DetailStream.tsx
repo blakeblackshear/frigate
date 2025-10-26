@@ -22,6 +22,7 @@ import EventMenu from "@/components/timeline/EventMenu";
 import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Link } from "react-router-dom";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
@@ -499,15 +500,22 @@ function EventList({
               }}
               role="button"
             >
-              <span className="capitalize">{label}</span>
-              {event.data?.recognized_license_plate && (
-                <>
-                  ·{" "}
-                  <span className="text-sm text-secondary-foreground">
-                    {event.data.recognized_license_plate}
-                  </span>
-                </>
-              )}
+              <div className="flex gap-2">
+                <span className="capitalize">{label}</span>
+                {event.data?.recognized_license_plate && (
+                  <>
+                    <span className="text-secondary-foreground">·</span>
+                    <div className="text-sm text-secondary-foreground">
+                      <Link
+                        to={`/explore?recognized_license_plate=${event.data.recognized_license_plate}`}
+                        className="text-sm"
+                      >
+                        {event.data.recognized_license_plate}
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <div className="mr-2 flex flex-row justify-end">
@@ -615,10 +623,11 @@ function LifecycleItem({
           )}
         />
       </div>
-      <div className="flex w-full flex-row justify-between">
+
+      <div className="ml-0.5 flex min-w-0 flex-1">
         <Tooltip>
           <TooltipTrigger>
-            <div className="flex items-start text-left">
+            <div className="flex items-start break-words text-left">
               {getLifecycleItemDescription(item)}
             </div>
           </TooltipTrigger>
@@ -638,7 +647,9 @@ function LifecycleItem({
                   </span>
                   {areaPx !== undefined && areaPct !== undefined ? (
                     <span className="font-medium text-foreground">
-                      {areaPx} {t("pixels", { ns: "common" })} · {areaPct}%
+                      {areaPx} {t("pixels", { ns: "common" })}{" "}
+                      <span className="text-secondary-foreground">·</span>{" "}
+                      {areaPct}%
                     </span>
                   ) : (
                     <span>N/A</span>
@@ -648,7 +659,10 @@ function LifecycleItem({
             </div>
           </TooltipContent>
         </Tooltip>
-        <div className={cn("p-1 text-xs")}>{formattedEventTimestamp}</div>
+      </div>
+
+      <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
+        <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
       </div>
     </div>
   );
