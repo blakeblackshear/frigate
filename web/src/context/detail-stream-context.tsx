@@ -7,6 +7,7 @@ export interface DetailStreamContextType {
   currentTime: number;
   camera: string;
   annotationOffset: number; // milliseconds
+  setSelectedObjectIds: React.Dispatch<React.SetStateAction<string[]>>;
   setAnnotationOffset: (ms: number) => void;
   toggleObjectSelection: (id: string | undefined) => void;
   isDetailMode: boolean;
@@ -69,6 +70,7 @@ export function DetailStreamProvider({
     camera,
     annotationOffset,
     setAnnotationOffset,
+    setSelectedObjectIds,
     toggleObjectSelection,
     isDetailMode,
   };

@@ -430,7 +430,8 @@ function EventList({
 }: EventListProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const { selectedObjectIds, toggleObjectSelection } = useDetailStream();
+  const { selectedObjectIds, setSelectedObjectIds, toggleObjectSelection } =
+    useDetailStream();
 
   const isSelected = selectedObjectIds.includes(event.id);
 
@@ -438,11 +439,17 @@ function EventList({
 
   const handleObjectSelect = (event: Event | undefined) => {
     if (event) {
-      // onSeek(event.start_time ?? 0);
-      toggleObjectSelection(event.id);
+      setSelectedObjectIds([]);
+      setSelectedObjectIds([event.id]);
+      onSeek(event.start_time ?? 0);
     } else {
-      toggleObjectSelection(undefined);
+      setSelectedObjectIds([]);
     }
+  };
+
+  const handleTimelineClick = (ts: number, play?: boolean) => {
+    handleObjectSelect(event);
+    onSeek(ts, play);
   };
 
   // Clear selection when effectiveTime has passed this event's end_time
@@ -468,11 +475,6 @@ function EventList({
           isSelected
             ? "bg-secondary-highlight"
             : "outline-transparent duration-500",
-          !isSelected &&
-            (effectiveTime ?? 0) >= (event.start_time ?? 0) - 0.5 &&
-            (effectiveTime ?? 0) <=
-              (event.end_time ?? event.start_time ?? 0) + 0.5 &&
-            "bg-secondary-highlight",
         )}
       >
         <div className="ml-1.5 flex w-full items-end justify-between">
@@ -480,12 +482,18 @@ function EventList({
             <div
               className={cn(
                 "relative rounded-full p-1 text-white",
-                isSelected ? "bg-selected" : "bg-muted-foreground",
+                (effectiveTime ?? 0) >= (event.start_time ?? 0) - 0.5 &&
+                  (effectiveTime ?? 0) <=
+                    (event.end_time ?? event.start_time ?? 0) + 0.5
+                  ? "bg-selected"
+                  : "bg-muted-foreground",
               )}
               onClick={(e) => {
                 e.stopPropagation();
-                handleObjectSelect(isSelected ? undefined : event);
+                onSeek(event.start_time ?? 0);
+                handleObjectSelect(event);
               }}
+              role="button"
             >
               {getIconForLabel(
                 event.sub_label ? event.label + "-verified" : event.label,
@@ -497,6 +505,7 @@ function EventList({
               onClick={(e) => {
                 e.stopPropagation();
                 onSeek(event.start_time ?? 0);
+                handleObjectSelect(event);
               }}
               role="button"
             >
@@ -532,8 +541,10 @@ function EventList({
         <div className="mt-2">
           <ObjectTimeline
             eventId={event.id}
-            onSeek={onSeek}
+            onSeek={handleTimelineClick}
             effectiveTime={effectiveTime}
+            startTime={event.start_time}
+            endTime={event.end_time}
           />
         </div>
       </div>
@@ -546,6 +557,7 @@ type LifecycleItemProps = {
   isActive?: boolean;
   onSeek?: (timestamp: number, play?: boolean) => void;
   effectiveTime?: number;
+  isTimelineActive?: boolean;
 };
 
 function LifecycleItem({
@@ -553,6 +565,7 @@ function LifecycleItem({
   isActive,
   onSeek,
   effectiveTime,
+  isTimelineActive = false,
 }: LifecycleItemProps) {
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -617,8 +630,9 @@ function LifecycleItem({
       <div className="relative flex size-4 items-center justify-center">
         <LuCircle
           className={cn(
-            "relative z-10 ml-[1px] size-2.5 fill-secondary-foreground stroke-none",
+            "relative z-10 size-2.5 fill-secondary-foreground stroke-none",
             (isActive || (effectiveTime ?? 0) >= (item?.timestamp ?? 0)) &&
+              isTimelineActive &&
               "fill-selected duration-300",
           )}
         />
@@ -673,10 +687,14 @@ function ObjectTimeline({
   eventId,
   onSeek,
   effectiveTime,
+  startTime,
+  endTime,
 }: {
   eventId: string;
   onSeek: (ts: number, play?: boolean) => void;
   effectiveTime?: number;
+  startTime?: number;
+  endTime?: number;
 }) {
   const { t } = useTranslation("views/events");
   const { data: timeline, isValidating } = useSWR<ObjectLifecycleSequence[]>([
@@ -698,9 +716,17 @@ function ObjectTimeline({
     );
   }
 
+  // Check if current time is within the event's start/stop range
+  const isWithinEventRange =
+    effectiveTime !== undefined &&
+    startTime !== undefined &&
+    endTime !== undefined &&
+    effectiveTime >= startTime &&
+    effectiveTime <= endTime;
+
   // Calculate how far down the blue line should extend based on effectiveTime
   const calculateLineHeight = () => {
-    if (!timeline || timeline.length === 0) return 0;
+    if (!timeline || timeline.length === 0 || !isWithinEventRange) return 0;
 
     const currentTime = effectiveTime ?? 0;
 
@@ -742,15 +768,19 @@ function ObjectTimeline({
     );
   };
 
-  const blueLineHeight = calculateLineHeight();
+  const activeLineHeight = calculateLineHeight();
 
   return (
     <div className="-pb-2 relative mx-2">
       <div className="absolute -top-2 bottom-2 left-2 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
-      <div
-        className="absolute left-2 top-2 z-[5] max-h-[calc(100%-1rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
-        style={{ height: `${blueLineHeight}%` }}
-      />
+      {isWithinEventRange && (
+        <div
+          className={cn(
+            "absolute left-2 top-2 z-[5] max-h-[calc(100%-1rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300",
+          )}
+          style={{ height: `${activeLineHeight}%` }}
+        />
+      )}
       <div className="space-y-2">
         {timeline.map((event, idx) => {
           const isActive =
@@ -763,6 +793,7 @@ function ObjectTimeline({
               onSeek={onSeek}
               isActive={isActive}
               effectiveTime={effectiveTime}
+              isTimelineActive={isWithinEventRange}
             />
           );
         })}
