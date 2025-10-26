@@ -846,13 +846,8 @@ function LifecycleIconRow({
 
         <div className="ml-2 flex w-full min-w-0 flex-1">
           <div className="flex flex-col">
-              <div>{getLifecycleItemDescription(item)}</div>
-            
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-secondary-foreground md:gap-5">
             <div className="text-md flex items-start break-words text-left">
-              <Trans>
-                {getLifecycleItemDescription(item)}
-              </Trans>
+              <Trans>{getLifecycleItemDescription(item)}</Trans>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-secondary-foreground md:gap-5">
               <div className="flex items-center gap-1">

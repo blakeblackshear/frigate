@@ -157,9 +157,11 @@ export default function ObjectTrackOverlay({
             )
             .map((event: ObjectLifecycleSequence) => {
               const [left, top, width, height] = event.data.box!;
-              event.data.zones_friendly_names = event?.data?.zones?.map((zone) => {
-                return resolveZoneName(config, zone);
-              });
+              event.data.zones_friendly_names = event?.data?.zones?.map(
+                (zone) => {
+                  return resolveZoneName(config, zone);
+                },
+              );
               return {
                 x: left + width / 2, // Center x
                 y: top + height, // Bottom y
@@ -168,7 +170,6 @@ export default function ObjectTrackOverlay({
                 objectId,
               };
             }) || [];
-      
 
         // show full path once current time has reached the object's start time
         const combinedPoints = [...savedPathPoints, ...eventSequencePoints]
