@@ -402,25 +402,25 @@ def run_analysis(
         "duration": round(final_data["end_time"] - final_data["start_time"]),
     }
 
-    objects = []
-    named_objects = []
+    unified_objects = []
 
     objects_list = final_data["data"]["objects"]
     sub_labels_list = final_data["data"]["sub_labels"]
 
+    for i, verified_label in enumerate(final_data["data"]["verified_objects"]):
+        object_type = verified_label.replace("-verified", "").replace("_", " ")
+        name = sub_labels_list[i].replace("_", " ").title()
+        unified_objects.append(f"{name} ({object_type})")
+
+    # Add non-verified objects as "Unknown (type)"
     for label in objects_list:
         if "-verified" in label:
             continue
         elif label in labelmap_objects:
-            objects.append(label.replace("_", " ").title())
+            object_type = label.replace("_", " ")
+            unified_objects.append(f"Unknown ({object_type})")
 
-    for i, verified_label in enumerate(final_data["data"]["verified_objects"]):
-        named_objects.append(
-            f"{sub_labels_list[i].replace('_', ' ').title()} ({verified_label.replace('-verified', '')})"
-        )
-
-    analytics_data["objects"] = objects
-    analytics_data["recognized_objects"] = named_objects
+    analytics_data["unified_objects"] = unified_objects
 
     metadata = genai_client.generate_review_description(
         analytics_data,
