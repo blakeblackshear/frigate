@@ -41,7 +41,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ObjectPath } from "./ObjectPath";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { IoPlayCircleOutline } from "react-icons/io5";
@@ -649,10 +649,15 @@ export default function ObjectLifecycle({
                 </span>
                 {event.data?.recognized_license_plate && (
                   <>
-                    ·{" "}
-                    <span className="text-sm text-secondary-foreground">
-                      {event.data.recognized_license_plate}
-                    </span>
+                    <span className="text-secondary-foreground">·</span>
+                    <div className="text-sm text-secondary-foreground">
+                      <Link
+                        to={`/explore?recognized_license_plate=${event.data.recognized_license_plate}`}
+                        className="text-sm"
+                      >
+                        {event.data.recognized_license_plate}
+                      </Link>
+                    </div>
                   </>
                 )}
               </div>
@@ -832,10 +837,12 @@ function LifecycleIconRow({
           />
         </div>
 
-        <div className="flex w-full flex-row justify-between">
+        <div className="ml-2 flex w-full min-w-0 flex-1">
           <div className="flex flex-col">
-            <div>{getLifecycleItemDescription(item)}</div>
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-secondary-foreground md:gap-5">
+            <div className="text-md flex items-start break-words text-left">
+              {getLifecycleItemDescription(item)}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-secondary-foreground md:gap-5">
               <div className="flex items-center gap-1">
                 <span className="text-primary-variant">
                   {t("objectLifecycle.lifecycleItemDesc.header.ratio")}
@@ -893,8 +900,9 @@ function LifecycleIconRow({
               )}
             </div>
           </div>
-
-          <div className={cn("p-1 text-sm")}>{formattedEventTimestamp}</div>
+        </div>
+        <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
+          <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
         </div>
       </div>
     </div>
