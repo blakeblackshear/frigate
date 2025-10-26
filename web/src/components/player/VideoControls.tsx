@@ -302,7 +302,6 @@ export default function VideoControls({
         <>
           <IoMdSkipBackward
             className="size-5 cursor-pointer"
-            title={t("eventNavigation.previous")}
             onClick={(e) => {
               e.stopPropagation();
               onJumpToEvent("previous");
@@ -310,7 +309,6 @@ export default function VideoControls({
           />
           <IoMdSkipForward
             className="size-5 cursor-pointer"
-            title={t("eventNavigation.next")}
             onClick={(e) => {
               e.stopPropagation();
               onJumpToEvent("next");
