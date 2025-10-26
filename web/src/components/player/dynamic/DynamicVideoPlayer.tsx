@@ -34,6 +34,7 @@ type DynamicVideoPlayerProps = {
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
   onSeekToTime?: (timestamp: number, play?: boolean) => void;
+  onJumpToEvent?: (direction: "next" | "previous") => void;
   setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   toggleFullscreen: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
@@ -52,6 +53,7 @@ export default function DynamicVideoPlayer({
   onTimestampUpdate,
   onClipEnded,
   onSeekToTime,
+  onJumpToEvent,
   setFullResolution,
   toggleFullscreen,
   containerRef,
@@ -280,6 +282,7 @@ export default function DynamicVideoPlayer({
             onSeekToTime(timestamp, play);
           }
         }}
+        onJumpToEvent={onJumpToEvent}
         onPlaying={() => {
           if (isScrubbing) {
             playerRef.current?.pause();

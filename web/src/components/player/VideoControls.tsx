@@ -16,6 +16,7 @@ import {
   MdVolumeOff,
   MdVolumeUp,
 } from "react-icons/md";
+import { IoMdSkipBackward, IoMdSkipForward } from "react-icons/io";
 import useKeyboardListener, {
   KeyModifiers,
 } from "@/hooks/use-keyboard-listener";
@@ -41,6 +42,7 @@ type VideoControls = {
   playbackRate?: boolean;
   plusUpload?: boolean;
   fullscreen?: boolean;
+  eventNavigation?: boolean;
 };
 
 const CONTROLS_DEFAULT: VideoControls = {
@@ -49,6 +51,7 @@ const CONTROLS_DEFAULT: VideoControls = {
   playbackRate: true,
   plusUpload: false,
   fullscreen: false,
+  eventNavigation: false,
 };
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 const MIN_ITEMS_WRAP = 6;
@@ -71,6 +74,7 @@ type VideoControlsProps = {
   onSeek: (diff: number) => void;
   onSetPlaybackRate: (rate: number) => void;
   onUploadFrame?: () => void;
+  onJumpToEvent?: (direction: "next" | "previous") => void;
   toggleFullscreen?: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
@@ -92,6 +96,7 @@ export default function VideoControls({
   onSeek,
   onSetPlaybackRate,
   onUploadFrame,
+  onJumpToEvent,
   toggleFullscreen,
   containerRef,
 }: VideoControlsProps) {
@@ -290,6 +295,26 @@ export default function VideoControls({
           onUploadFrame={onUploadFrame}
           containerRef={containerRef}
         />
+      )}
+      {features.eventNavigation && onJumpToEvent && (
+        <>
+          <IoMdSkipBackward
+            className="size-5 cursor-pointer"
+            title="Previous Event"
+            onClick={(e) => {
+              e.stopPropagation();
+              onJumpToEvent("previous");
+            }}
+          />
+          <IoMdSkipForward
+            className="size-5 cursor-pointer"
+            title="Next Event"
+            onClick={(e) => {
+              e.stopPropagation();
+              onJumpToEvent("next");
+            }}
+          />
+        </>
       )}
       {features.fullscreen && toggleFullscreen && (
         <div className="cursor-pointer" onClick={toggleFullscreen}>

@@ -49,6 +49,7 @@ type HlsVideoPlayerProps = {
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
   onSeekToTime?: (timestamp: number, play?: boolean) => void;
+  onJumpToEvent?: (direction: "next" | "previous") => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
   toggleFullscreen?: () => void;
@@ -73,6 +74,7 @@ export default function HlsVideoPlayer({
   onTimeUpdate,
   onPlaying,
   onSeekToTime,
+  onJumpToEvent,
   setFullResolution,
   onUploadFrame,
   toggleFullscreen,
@@ -257,6 +259,7 @@ export default function HlsVideoPlayer({
             playbackRate: true,
             plusUpload: config?.plus?.enabled == true,
             fullscreen: supportsFullscreen,
+            eventNavigation: onJumpToEvent != undefined,
           }}
           setControlsOpen={setControlsOpen}
           setMuted={(muted) => setMuted(muted)}
@@ -296,6 +299,7 @@ export default function HlsVideoPlayer({
               }
             }
           }}
+          onJumpToEvent={onJumpToEvent}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
           containerRef={containerRef}

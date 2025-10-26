@@ -300,6 +300,69 @@ export function RecordingView({
     [currentTimeRange, updateSelectedSegment],
   );
 
+  // event navigation
+  const onJumpToEvent = useCallback(
+    (direction: "next" | "previous") => {
+      if (!mainCameraReviewItems || mainCameraReviewItems.length === 0) {
+        return;
+      }
+
+      // Sort all events by start time to ensure correct order
+      const sortedEvents = [...mainCameraReviewItems].sort((a, b) => a.start_time - b.start_time);
+
+      // Find which event we're currently viewing
+      // Check if current time is between (event start - REVIEW_PADDING) and (event end or start + 60s)
+      const currentEventIndex = sortedEvents.findIndex((item) => {
+        const eventStart = item.start_time - REVIEW_PADDING;
+        const eventEnd = item.end_time || item.start_time + 60; // Assume max 60s if no end_time
+        return currentTime >= eventStart && currentTime <= eventEnd;
+      });
+
+      let targetEvent;
+      
+      if (currentEventIndex >= 0) {
+        // We identified the current event - use index-based navigation
+        if (direction === "next") {
+          if (currentEventIndex < sortedEvents.length - 1) {
+            targetEvent = sortedEvents[currentEventIndex + 1];
+          } else {
+            // At the last event, loop to the first
+            targetEvent = sortedEvents[0];
+          }
+        } else {
+          if (currentEventIndex > 0) {
+            targetEvent = sortedEvents[currentEventIndex - 1];
+          } else {
+            // At the first event, loop to the last
+            targetEvent = sortedEvents[sortedEvents.length - 1];
+          }
+        }
+      } else {
+        // Can't identify current event - fall back to time-based navigation
+        if (direction === "next") {
+          // Find the first event that starts after current time
+          targetEvent = sortedEvents.find(
+            (item) => item.start_time > currentTime,
+          );
+        } else {
+          // Find the last event that starts before current time
+          const previousEvents = sortedEvents.filter(
+            (item) => item.start_time < currentTime,
+          );
+          if (previousEvents.length > 0) {
+            targetEvent = previousEvents[previousEvents.length - 1];
+          }
+        }
+      }
+
+      // Only navigate if we found a target event
+      if (targetEvent) {
+        manuallySetCurrentTime(targetEvent.start_time - REVIEW_PADDING, true);
+      }
+    },
+    [mainCameraReviewItems, currentTime, manuallySetCurrentTime],
+  );
+
   useEffect(() => {
     if (!scrubbing) {
       if (Math.abs(currentTime - playerTime) > 10) {
@@ -746,6 +809,7 @@ export function RecordingView({
                   }}
                   onClipEnded={onClipEnded}
                   onSeekToTime={manuallySetCurrentTime}
+                  onJumpToEvent={onJumpToEvent}
                   onControllerReady={(controller) => {
                     mainControllerRef.current = controller;
                   }}
