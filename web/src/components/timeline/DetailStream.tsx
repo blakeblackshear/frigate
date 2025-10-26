@@ -441,7 +441,7 @@ function EventList({
     if (event) {
       setSelectedObjectIds([]);
       setSelectedObjectIds([event.id]);
-      onSeek(event.start_time ?? 0);
+      onSeek(event.start_time);
     } else {
       setSelectedObjectIds([]);
     }
@@ -490,7 +490,7 @@ function EventList({
               )}
               onClick={(e) => {
                 e.stopPropagation();
-                onSeek(event.start_time ?? 0);
+                onSeek(event.start_time);
                 handleObjectSelect(event);
               }}
               role="button"
@@ -504,7 +504,7 @@ function EventList({
               className="flex flex-1 items-center gap-2"
               onClick={(e) => {
                 e.stopPropagation();
-                onSeek(event.start_time ?? 0);
+                onSeek(event.start_time);
                 handleObjectSelect(event);
               }}
               role="button"
@@ -618,7 +618,7 @@ function LifecycleItem({
     <div
       role="button"
       onClick={() => {
-        onSeek?.(item.timestamp ?? 0, false);
+        onSeek?.(item.timestamp, false);
       }}
       className={cn(
         "flex cursor-pointer items-center gap-2 text-sm text-primary-variant",
