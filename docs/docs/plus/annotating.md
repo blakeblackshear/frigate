@@ -42,6 +42,7 @@ Misidentified objects should have a correct label added. For example, if a perso
 | `w`               | Add box                       |
 | `d`               | Toggle difficult              |
 | `s`               | Switch to the next label      |
+| `Shift + s`       | Switch to the previous label  |
 | `tab`             | Select next largest box       |
 | `del`             | Delete current box            |
 | `esc`             | Deselect/Cancel               |

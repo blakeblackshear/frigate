@@ -696,7 +696,11 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
         clauses.append((Timeline.camera == camera))
 
     if source_id:
-        clauses.append((Timeline.source_id == source_id))
+        source_ids = [sid.strip() for sid in source_id.split(",")]
+        if len(source_ids) == 1:
+            clauses.append((Timeline.source_id == source_ids[0]))
+        else:
+            clauses.append((Timeline.source_id.in_(source_ids)))
 
     if len(clauses) == 0:
         clauses.append((True))

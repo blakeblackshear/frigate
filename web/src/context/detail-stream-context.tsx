@@ -1,16 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
-import { ObjectLifecycleSequence } from "@/types/timeline";
 
 export interface DetailStreamContextType {
-  selectedObjectId: string | undefined;
-  selectedObjectTimeline?: ObjectLifecycleSequence[];
+  selectedObjectIds: string[];
   currentTime: number;
   camera: string;
   annotationOffset: number; // milliseconds
   setAnnotationOffset: (ms: number) => void;
-  setSelectedObjectId: (id: string | undefined) => void;
+  toggleObjectSelection: (id: string | undefined) => void;
   isDetailMode: boolean;
 }
 
@@ -31,13 +29,21 @@ export function DetailStreamProvider({
   currentTime,
   camera,
 }: DetailStreamProviderProps) {
-  const [selectedObjectId, setSelectedObjectId] = useState<
-    string | undefined
-  >();
+  const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([]);
 
-  const { data: selectedObjectTimeline } = useSWR<ObjectLifecycleSequence[]>(
-    selectedObjectId ? ["timeline", { source_id: selectedObjectId }] : null,
-  );
+  const toggleObjectSelection = (id: string | undefined) => {
+    if (id === undefined) {
+      setSelectedObjectIds([]);
+    } else {
+      setSelectedObjectIds((prev) => {
+        if (prev.includes(id)) {
+          return prev.filter((existingId) => existingId !== id);
+        } else {
+          return [...prev, id];
+        }
+      });
+    }
+  };
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -53,13 +59,12 @@ export function DetailStreamProvider({
   }, [config, camera]);
 
   const value: DetailStreamContextType = {
-    selectedObjectId,
-    selectedObjectTimeline,
+    selectedObjectIds,
     currentTime,
     camera,
     annotationOffset,
     setAnnotationOffset,
-    setSelectedObjectId,
+    toggleObjectSelection,
     isDetailMode,
   };
 

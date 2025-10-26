@@ -12,14 +12,15 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { useState } from "react";
 
 type EventMenuProps = {
   event: Event;
   config?: FrigateConfig;
   onOpenUpload?: (e: Event) => void;
   onOpenSimilarity?: (e: Event) => void;
-  selectedObjectId?: string;
-  setSelectedObjectId?: (event: Event | undefined) => void;
+  isSelected?: boolean;
+  onToggleSelection?: (event: Event | undefined) => void;
 };
 
 export default function EventMenu({
@@ -27,25 +28,26 @@ export default function EventMenu({
   config,
   onOpenUpload,
   onOpenSimilarity,
-  selectedObjectId,
-  setSelectedObjectId,
+  isSelected = false,
+  onToggleSelection,
 }: EventMenuProps) {
   const apiHost = useApiHost();
   const navigate = useNavigate();
   const { t } = useTranslation("views/explore");
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleObjectSelect = () => {
-    if (event.id === selectedObjectId) {
-      setSelectedObjectId?.(undefined);
+    if (isSelected) {
+      onToggleSelection?.(undefined);
     } else {
-      setSelectedObjectId?.(event);
+      onToggleSelection?.(event);
     }
   };
 
   return (
     <>
       <span tabIndex={0} className="sr-only" />
-      <DropdownMenu>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger>
           <div className="rounded p-1 pr-2" role="button">
             <HiDotsHorizontal className="size-4 text-muted-foreground" />
@@ -54,7 +56,7 @@ export default function EventMenu({
         <DropdownMenuPortal>
           <DropdownMenuContent>
             <DropdownMenuItem onSelect={handleObjectSelect}>
-              {event.id === selectedObjectId
+              {isSelected
                 ? t("itemMenu.hideObjectDetails.label")
                 : t("itemMenu.showObjectDetails.label")}
             </DropdownMenuItem>
@@ -85,6 +87,7 @@ export default function EventMenu({
               config?.plus?.enabled && (
                 <DropdownMenuItem
                   onSelect={() => {
+                    setIsOpen(false);
                     onOpenUpload?.(event);
                   }}
                 >

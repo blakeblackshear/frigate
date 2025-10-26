@@ -61,7 +61,11 @@ export default function DynamicVideoPlayer({
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // for detail stream context in History
-  const detail = useDetailStream();
+  const {
+    isDetailMode,
+    camera: contextCamera,
+    currentTime,
+  } = useDetailStream();
 
   // controlling playback
 
@@ -295,7 +299,9 @@ export default function DynamicVideoPlayer({
             setIsBuffering(true);
           }
         }}
-        detail={detail}
+        isDetailMode={isDetailMode}
+        camera={contextCamera || camera}
+        currentTimeOverride={currentTime}
       />
       <PreviewPlayer
         className={cn(

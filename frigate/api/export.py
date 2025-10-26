@@ -9,6 +9,7 @@ from typing import List
 import psutil
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
+from pathvalidate import sanitize_filepath
 from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
@@ -26,7 +27,7 @@ from frigate.api.defs.response.export_response import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
-from frigate.const import EXPORT_DIR
+from frigate.const import CLIPS_DIR, EXPORT_DIR
 from frigate.models import Export, Previews, Recordings
 from frigate.record.export import (
     PlaybackFactorEnum,
@@ -88,7 +89,14 @@ def export_recording(
     playback_factor = body.playback
     playback_source = body.source
     friendly_name = body.name
-    existing_image = body.image_path
+    existing_image = sanitize_filepath(body.image_path) if body.image_path else None
+
+    # Ensure that existing_image is a valid path
+    if existing_image and not existing_image.startswith(CLIPS_DIR):
+        return JSONResponse(
+            content=({"success": False, "message": "Invalid image path"}),
+            status_code=400,
+        )
 
     if playback_source == "recordings":
         recordings_count = (

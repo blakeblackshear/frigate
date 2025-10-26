@@ -172,7 +172,11 @@ export default function DetailStream({
       <FrigatePlusDialog
         upload={upload}
         onClose={() => setUpload(undefined)}
-        onEventUploaded={() => setUpload(undefined)}
+        onEventUploaded={() => {
+          if (upload) {
+            upload.plus_id = "new_upload";
+          }
+        }}
       />
 
       <div
@@ -255,7 +259,9 @@ function ReviewGroup({
 
   const rawIconLabels: string[] = [
     ...(fetchedEvents
-      ? fetchedEvents.map((e) => e.label)
+      ? fetchedEvents.map((e) =>
+          e.sub_label ? e.label + "-verified" : e.label,
+        )
       : (review.data?.objects ?? [])),
     ...(review.data?.audio ?? []),
   ];
@@ -318,7 +324,7 @@ function ReviewGroup({
           <div className="ml-1 flex flex-col items-start gap-1.5">
             <div className="flex flex-row gap-3">
               <div className="text-sm font-medium">{displayTime}</div>
-              <div className="flex items-center gap-2">
+              <div className="relative flex items-center gap-2 text-white">
                 {iconLabels.slice(0, 5).map((lbl, idx) => (
                   <div
                     key={`${lbl}-${idx}`}
@@ -424,30 +430,34 @@ function EventList({
 }: EventListProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const { selectedObjectId, setSelectedObjectId } = useDetailStream();
+  const { selectedObjectIds, toggleObjectSelection } = useDetailStream();
+
+  const isSelected = selectedObjectIds.includes(event.id);
+
+  const label = event.sub_label || getTranslatedLabel(event.label);
 
   const handleObjectSelect = (event: Event | undefined) => {
     if (event) {
-      onSeek(event.start_time ?? 0);
-      setSelectedObjectId(event.id);
+      // onSeek(event.start_time ?? 0);
+      toggleObjectSelection(event.id);
     } else {
-      setSelectedObjectId(undefined);
+      toggleObjectSelection(undefined);
     }
   };
 
-  // Clear selectedObjectId when effectiveTime has passed this event's end_time
+  // Clear selection when effectiveTime has passed this event's end_time
   useEffect(() => {
-    if (selectedObjectId === event.id && effectiveTime && event.end_time) {
+    if (isSelected && effectiveTime && event.end_time) {
       if (effectiveTime >= event.end_time) {
-        setSelectedObjectId(undefined);
+        toggleObjectSelection(event.id);
       }
     }
   }, [
-    selectedObjectId,
+    isSelected,
     event.id,
     event.end_time,
     effectiveTime,
-    setSelectedObjectId,
+    toggleObjectSelection,
   ]);
 
   return (
@@ -455,48 +465,59 @@ function EventList({
       <div
         className={cn(
           "rounded-md bg-secondary p-2",
-          event.id == selectedObjectId
+          isSelected
             ? "bg-secondary-highlight"
             : "outline-transparent duration-500",
-          event.id != selectedObjectId &&
+          !isSelected &&
             (effectiveTime ?? 0) >= (event.start_time ?? 0) - 0.5 &&
             (effectiveTime ?? 0) <=
               (event.end_time ?? event.start_time ?? 0) + 0.5 &&
             "bg-secondary-highlight",
         )}
       >
-        <div className="ml-1.5 flex w-full items-center justify-between">
-          <div
-            className="flex items-center gap-2 text-sm font-medium"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleObjectSelect(
-                event.id == selectedObjectId ? undefined : event,
-              );
-            }}
-            role="button"
-          >
+        <div className="ml-1.5 flex w-full items-end justify-between">
+          <div className="flex flex-1 items-center gap-2 text-sm font-medium">
             <div
               className={cn(
-                "rounded-full p-1",
-                event.id == selectedObjectId
-                  ? "bg-selected"
-                  : "bg-muted-foreground",
+                "relative rounded-full p-1 text-white",
+                isSelected ? "bg-selected" : "bg-muted-foreground",
               )}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleObjectSelect(isSelected ? undefined : event);
+              }}
             >
-              {getIconForLabel(event.label, "size-3 text-white")}
+              {getIconForLabel(
+                event.sub_label ? event.label + "-verified" : event.label,
+                "size-3 text-white",
+              )}
             </div>
-            <div className="flex items-end gap-2">
-              <span>{getTranslatedLabel(event.label)}</span>
+            <div
+              className="flex flex-1 items-center gap-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSeek(event.start_time ?? 0);
+              }}
+              role="button"
+            >
+              <span className="capitalize">{label}</span>
+              {event.data?.recognized_license_plate && (
+                <>
+                  ·{" "}
+                  <span className="text-sm text-secondary-foreground">
+                    {event.data.recognized_license_plate}
+                  </span>
+                </>
+              )}
             </div>
           </div>
-          <div className="mr-2 flex flex-1 flex-row justify-end">
+          <div className="mr-2 flex flex-row justify-end">
             <EventMenu
               event={event}
               config={config}
               onOpenUpload={(e) => onOpenUpload?.(e)}
-              selectedObjectId={selectedObjectId}
-              setSelectedObjectId={handleObjectSelect}
+              isSelected={isSelected}
+              onToggleSelection={handleObjectSelect}
             />
           </div>
         </div>

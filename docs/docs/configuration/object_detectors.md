@@ -1455,7 +1455,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
 WORKDIR /dfine
 RUN git clone https://github.com/Peterande/D-FINE.git .
 RUN uv pip install --system -r requirements.txt
-RUN uv pip install --system onnx onnxruntime onnxsim
+RUN uv pip install --system onnx onnxruntime onnxsim onnxscript
 # Create output directory and download checkpoint
 RUN mkdir -p output
 ARG MODEL_SIZE
@@ -1479,9 +1479,9 @@ FROM python:3.11 AS build
 RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
 COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
 WORKDIR /rfdetr
-RUN uv pip install --system rfdetr onnx onnxruntime onnxsim onnx-graphsurgeon
+RUN uv pip install --system rfdetr[onnxexport] torch==2.8.0 onnxscript
 ARG MODEL_SIZE
-RUN python3 -c "from rfdetr import RFDETR${MODEL_SIZE}; x = RFDETR${MODEL_SIZE}(resolution=320); x.export()"
+RUN python3 -c "from rfdetr import RFDETR${MODEL_SIZE}; x = RFDETR${MODEL_SIZE}(resolution=320); x.export(simplify=True)"
 FROM scratch
 ARG MODEL_SIZE
 COPY --from=build /rfdetr/output/inference_model.onnx /rfdetr-${MODEL_SIZE}.onnx
@@ -1529,7 +1529,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
 WORKDIR /yolov9
 ADD https://github.com/WongKinYiu/yolov9.git .
 RUN uv pip install --system -r requirements.txt
-RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier>=0.4.1
+RUN uv pip install --system onnx==1.18.0 onnxruntime onnx-simplifier>=0.4.1 onnxscript
 ARG MODEL_SIZE
 ARG IMG_SIZE
 ADD https://github.com/WongKinYiu/yolov9/releases/download/v0.1/yolov9-${MODEL_SIZE}-converted.pt yolov9-${MODEL_SIZE}.pt
