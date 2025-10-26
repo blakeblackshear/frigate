@@ -100,6 +100,8 @@ export default function VideoControls({
   toggleFullscreen,
   containerRef,
 }: VideoControlsProps) {
+  const { t } = useTranslation(["components/player"]);
+
   // layout
 
   const controlsContainerRef = useRef<HTMLDivElement | null>(null);
@@ -300,7 +302,7 @@ export default function VideoControls({
         <>
           <IoMdSkipBackward
             className="size-5 cursor-pointer"
-            title="Previous Event"
+            title={t("eventNavigation.previous")}
             onClick={(e) => {
               e.stopPropagation();
               onJumpToEvent("previous");
@@ -308,7 +310,7 @@ export default function VideoControls({
           />
           <IoMdSkipForward
             className="size-5 cursor-pointer"
-            title="Next Event"
+            title={t("eventNavigation.next")}
             onClick={(e) => {
               e.stopPropagation();
               onJumpToEvent("next");

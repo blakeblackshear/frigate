@@ -6,6 +6,10 @@
     "title": "Submit this frame to Frigate+?",
     "submit": "Submit"
   },
+  "eventNavigation": {
+    "previous": "Previous Event",
+    "next": "Next Event"
+  },
   "livePlayerRequiredIOSVersion": "iOS 17.1 or greater is required for this live stream type.",
   "streamOffline": {
     "title": "Stream Offline",
