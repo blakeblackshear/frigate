@@ -63,6 +63,12 @@ class GenAIClient:
             else:
                 return ""
 
+        def get_objects_list() -> str:
+            if review_data["unified_objects"]:
+                return "\n- " + "\n- ".join(review_data["unified_objects"])
+            else:
+                return "\n- (No objects detected)"
+
         context_prompt = f"""
 Your task is to analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
 
@@ -115,7 +121,7 @@ Your response MUST be a flat JSON object with:
 ## Objects in Scene
 
 Each line represents one object in the scene. Named objects are verified identities; "Unknown" indicates unverified objects of that type:
-{"".join(f"\n- {obj}" for obj in review_data["unified_objects"])}
+{get_objects_list()}
 
 ## Important Notes
 - Values must be plain strings, floats, or integers — no nested objects, no extra commentary.
