@@ -412,6 +412,7 @@ export default function ObjectLifecycle({
 
   return (
     <div className={className}>
+      <span tabIndex={0} className="sr-only" />
       {!fullscreen && (
         <div className={cn("flex items-center gap-2")}>
           <Button
