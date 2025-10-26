@@ -41,6 +41,13 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+} from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { ObjectPath } from "./ObjectPath";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
@@ -48,6 +55,10 @@ import { IoPlayCircleOutline } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { Badge } from "@/components/ui/badge";
+import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
+import { HiDotsHorizontal } from "react-icons/hi";
+import axios from "axios";
+import { toast } from "sonner";
 
 type ObjectLifecycleProps = {
   className?: string;
@@ -816,7 +827,9 @@ function LifecycleIconRow({
   setSelectedZone,
   getZoneColor,
 }: LifecycleIconRowProps) {
-  const { t } = useTranslation(["views/explore"]);
+  const { t } = useTranslation(["views/explore", "components/player"]);
+  const [isOpen, setIsOpen] = useState(false);
+  const { data: config } = useSWR<FrigateConfig>("config");
 
   return (
     <div
@@ -903,7 +916,55 @@ function LifecycleIconRow({
           </div>
         </div>
         <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
-          <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
+          <div className="flex flex-row items-center gap-3">
+            <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
+            {config?.plus?.enabled && (
+              <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+                <DropdownMenuTrigger>
+                  <div className="rounded p-1 pr-2" role="button">
+                    <HiDotsHorizontal className="size-4 text-muted-foreground" />
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuContent>
+                    {config?.plus?.enabled && (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={async () => {
+                          const resp = await axios.post(
+                            `/${item.camera}/plus/${item.timestamp}`,
+                          );
+
+                          if (resp && resp.status == 200) {
+                            toast.success(
+                              t("toast.success.submittedFrigatePlus", {
+                                ns: "components/player",
+                              }),
+                              {
+                                position: "top-center",
+                              },
+                            );
+                          } else {
+                            toast.success(
+                              t("toast.error.submitFrigatePlusFailed", {
+                                ns: "components/player",
+                              }),
+                              {
+                                position: "top-center",
+                              },
+                            );
+                          }
+                        }}
+                      >
+                        <FrigatePlusIcon className="mr-2 size-4 text-primary-variant hover:text-primary" />
+                        {t("itemMenu.submitToPlus.label")}
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenuPortal>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </div>
     </div>
