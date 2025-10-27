@@ -922,10 +922,11 @@
       "form": {
         "name": {
           "title": "Name",
-          "placeholder": "Enter trigger name",
+          "placeholder": "Name this trigger",
+          "description": "Enter a unique name or description to identify this trigger",
           "error": {
-            "minLength": "Name must be at least 2 characters long.",
-            "invalidCharacters": "Name can only contain letters, numbers, underscores, and hyphens.",
+            "minLength": "Field must be at least 2 characters long.",
+            "invalidCharacters": "Field can only contain letters, numbers, underscores, and hyphens.",
             "alreadyExists": "A trigger with this name already exists for this camera."
           }
         },
@@ -934,18 +935,15 @@
         },
         "type": {
           "title": "Type",
-          "placeholder": "Select trigger type"
-        },
-        "friendly_name": {
-          "title": "Friendly Name",
-          "placeholder": "Name or describe this trigger",
-          "description": "An optional friendly name or descriptive text for this trigger."
+          "placeholder": "Select trigger type",
+          "description": "Trigger when a similar tracked object description is detected",
+          "thumbnail": "Trigger when a similar tracked object thumbnail is detected"
         },
         "content": {
           "title": "Content",
-          "imagePlaceholder": "Select an image",
+          "imagePlaceholder": "Select a thumbnail",
           "textPlaceholder": "Enter text content",
-          "imageDesc": "Select an image to trigger this action when a similar image is detected.",
+          "imageDesc": "Only the most recent 100 thumbnails are displayed. If you can't find your desired thumbnail, please review earlier objects in Explore and set up a trigger from the menu there.",
           "textDesc": "Enter text to trigger this action when a similar tracked object description is detected.",
           "error": {
             "required": "Content is required."
@@ -953,6 +951,7 @@
         },
         "threshold": {
           "title": "Threshold",
+          "desc": "Set the similarity threshold for this trigger. A higher threshold means a closer match is required to fire the trigger.",
           "error": {
             "min": "Threshold must be at least 0",
             "max": "Threshold must be at most 1"
@@ -965,6 +964,23 @@
             "min": "At least one action must be selected."
           }
         }
+      }
+    },
+    "wizard": {
+      "title": "Create Trigger",
+      "step1": {
+        "description": "Configure the basic settings for your trigger."
+      },
+      "step2": {
+        "description": "Set up the content that will trigger this action."
+      },
+      "step3": {
+        "description": "Configure the threshold and actions for this trigger."
+      },
+      "steps": {
+        "nameAndType": "Name and Type",
+        "configureData": "Configure Data",
+        "thresholdAndActions": "Threshold and Actions"
       }
     },
     "toast": {

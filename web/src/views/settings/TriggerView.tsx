@@ -21,6 +21,7 @@ import {
   LuExternalLink,
 } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import TriggerWizardDialog from "@/components/trigger/TriggerWizardDialog";
 import CreateTriggerDialog from "@/components/overlay/CreateTriggerDialog";
 import DeleteTriggerDialog from "@/components/overlay/DeleteTriggerDialog";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -641,8 +642,21 @@ export default function TriggerView({
           </>
         )}
       </div>
+      <TriggerWizardDialog
+        open={showCreate && (!selectedTrigger || selectedTrigger.name === "")}
+        onClose={() => {
+          setShowCreate(false);
+          setSelectedTrigger(null);
+          setUnsavedChanges(false);
+        }}
+        selectedCamera={selectedCamera}
+        trigger={null}
+        onCreate={onCreate}
+        onEdit={onEdit}
+        isLoading={isLoading}
+      />
       <CreateTriggerDialog
-        show={showCreate}
+        show={showCreate && !!selectedTrigger && selectedTrigger.name !== ""}
         trigger={selectedTrigger}
         selectedCamera={selectedCamera}
         isLoading={isLoading}
