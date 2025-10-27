@@ -229,6 +229,7 @@ export default function TriggerView({
         .finally(() => {
           setIsLoading(false);
           setShowCreate(false);
+          setSelectedTrigger(null);
         });
     },
     [t, updateConfig, selectedCamera, setUnsavedChanges],
@@ -314,7 +315,6 @@ export default function TriggerView({
         // Regular update without rename
         saveToConfig(trigger, true);
       }
-      setSelectedTrigger(null);
     },
     [t, saveToConfig, selectedCamera, selectedTrigger, setUnsavedChanges],
   );
@@ -597,7 +597,7 @@ export default function TriggerView({
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="h-8 w-8 p-0"
+                                    className="h-8 px-2"
                                     onClick={() => {
                                       setSelectedTrigger(trigger);
                                       setShowCreate(true);
@@ -605,6 +605,9 @@ export default function TriggerView({
                                     disabled={isLoading}
                                   >
                                     <LuPencil className="size-3.5" />
+                                    <span className="ml-1.5 hidden sm:inline-block">
+                                      {t("triggers.table.edit")}
+                                    </span>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -616,7 +619,7 @@ export default function TriggerView({
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    className="h-8 w-8 p-0 text-white"
+                                    className="h-8 px-2"
                                     onClick={() => {
                                       setSelectedTrigger(trigger);
                                       setShowDelete(true);
@@ -624,6 +627,9 @@ export default function TriggerView({
                                     disabled={isLoading}
                                   >
                                     <LuTrash className="size-3.5" />
+                                    <span className="ml-1.5 hidden sm:inline-block">
+                                      {t("triggers.table.deleteTrigger")}
+                                    </span>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>

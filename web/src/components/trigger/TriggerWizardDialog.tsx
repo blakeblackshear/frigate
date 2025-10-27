@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { useReducer } from "react";
+import { useReducer, useEffect } from "react";
 import Step1NameAndType, {
   Step1FormData,
 } from "@/components/trigger/wizard/Step1NameAndType";
@@ -117,6 +117,19 @@ export default function TriggerWizardDialog({
 
   const [wizardState, dispatch] = useReducer(wizardReducer, initialState);
 
+  useEffect(() => {
+    if (!open) {
+      dispatch({ type: "RESET" });
+    }
+  }, [open]);
+
+  // Reset wizard state when opening for a different trigger or when creating new
+  useEffect(() => {
+    if (open) {
+      dispatch({ type: "RESET" });
+    }
+  }, [open, trigger]);
+
   const handleStep1Next = (data: Step1FormData) => {
     dispatch({ type: "SET_STEP_1", payload: data });
   };
@@ -146,7 +159,7 @@ export default function TriggerWizardDialog({
         combinedData.friendly_name || "",
       );
     }
-    handleClose();
+    // Remove handleClose() - let the parent component handle closing after save completes
   };
 
   const handleBack = () => {
@@ -162,7 +175,7 @@ export default function TriggerWizardDialog({
     <Dialog
       open={open}
       onOpenChange={(open) => {
-        if (!open) {
+        if (!open && !isLoading) {
           handleClose();
         }
       }}
