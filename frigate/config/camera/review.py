@@ -120,7 +120,7 @@ class GenAIReviewConfig(FrigateBaseModel):
 - Taking items that don't belong to them (stealing packages, objects from porches/driveways)
 - Climbing or jumping fences/barriers to access property
 - Attempting to conceal actions or items from view
-- Lingering without interaction: standing near vehicles/private zones across multiple frames without approaching, entering, leaving, or clear task
+- Prolonged presence without purpose: remaining in same area (near vehicles, private zones) throughout most/all of the sequence without clear activity or task. Brief stops (a few seconds of standing) are normal; sustained presence (most of the duration) without interaction is concerning.
 - Activity at unusual hours (very late night/early morning) combined with suspicious behavior patterns
 
 ### Critical Threat Indicators (Level 2)
