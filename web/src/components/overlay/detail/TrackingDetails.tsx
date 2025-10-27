@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
-import { ObjectLifecycleSequence } from "@/types/timeline";
+import { TrackingDetailsSequence } from "@/types/timeline";
 import Heading from "@/components/ui/heading";
 import { ReviewDetailPaneType } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -41,6 +41,13 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+} from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { ObjectPath } from "./ObjectPath";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
@@ -49,23 +56,27 @@ import { Trans, useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 import { Badge } from "@/components/ui/badge";
+import { HiDotsHorizontal } from "react-icons/hi";
+import axios from "axios";
+import { toast } from "sonner";
 
-type ObjectLifecycleProps = {
+type TrackingDetailsProps = {
   className?: string;
   event: Event;
   fullscreen?: boolean;
   setPane: React.Dispatch<React.SetStateAction<ReviewDetailPaneType>>;
 };
 
-export default function ObjectLifecycle({
+export default function TrackingDetails({
   className,
   event,
   fullscreen = false,
   setPane,
-}: ObjectLifecycleProps) {
+}: TrackingDetailsProps) {
   const { t } = useTranslation(["views/explore"]);
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { data: eventSequence } = useSWR<ObjectLifecycleSequence[]>([
+
+  const { data: eventSequence } = useSWR<TrackingDetailsSequence[]>([
     "timeline",
     {
       source_id: event.id,
@@ -453,7 +464,7 @@ export default function ObjectLifecycle({
           <div className="relative aspect-video">
             <div className="flex flex-col items-center justify-center p-20 text-center">
               <LuFolderX className="size-16" />
-              {t("objectLifecycle.noImageFound")}
+              {t("trackingDetails.noImageFound")}
             </div>
           </div>
         )}
@@ -564,7 +575,7 @@ export default function ObjectLifecycle({
                   }
                 >
                   <div className="text-primary">
-                    {t("objectLifecycle.createObjectMask")}
+                    {t("trackingDetails.createObjectMask")}
                   </div>
                 </div>
               </ContextMenuItem>
@@ -574,7 +585,7 @@ export default function ObjectLifecycle({
       </div>
 
       <div className="mt-3 flex flex-row items-center justify-between">
-        <Heading as="h4">{t("objectLifecycle.title")}</Heading>
+        <Heading as="h4">{t("trackingDetails.title")}</Heading>
 
         <div className="flex flex-row gap-2">
           <Tooltip>
@@ -582,7 +593,7 @@ export default function ObjectLifecycle({
               <Button
                 variant={showControls ? "select" : "default"}
                 className="size-7 p-1.5"
-                aria-label={t("objectLifecycle.adjustAnnotationSettings")}
+                aria-label={t("trackingDetails.adjustAnnotationSettings")}
               >
                 <LuSettings
                   className="size-5"
@@ -592,7 +603,7 @@ export default function ObjectLifecycle({
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent>
-                {t("objectLifecycle.adjustAnnotationSettings")}
+                {t("trackingDetails.adjustAnnotationSettings")}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -600,10 +611,10 @@ export default function ObjectLifecycle({
       </div>
       <div className="flex flex-row items-center justify-between">
         <div className="mb-2 text-sm text-muted-foreground">
-          {t("objectLifecycle.scrollViewTips")}
+          {t("trackingDetails.scrollViewTips")}
         </div>
         <div className="min-w-20 text-right text-sm text-muted-foreground">
-          {t("objectLifecycle.count", {
+          {t("trackingDetails.count", {
             first: selectedIndex + 1,
             second: eventSequence?.length ?? 0,
           })}
@@ -611,7 +622,7 @@ export default function ObjectLifecycle({
       </div>
       {config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config && (
         <div className="-mt-2 mb-2 text-sm text-danger">
-          {t("objectLifecycle.autoTrackingTips")}
+          {t("trackingDetails.autoTrackingTips")}
         </div>
       )}
       {showControls && (
@@ -762,7 +773,7 @@ export default function ObjectLifecycle({
 }
 
 type GetTimelineIconParams = {
-  lifecycleItem: ObjectLifecycleSequence;
+  lifecycleItem: TrackingDetailsSequence;
   className?: string;
 };
 
@@ -800,7 +811,7 @@ export function LifecycleIcon({
 }
 
 type LifecycleIconRowProps = {
-  item: ObjectLifecycleSequence;
+  item: TrackingDetailsSequence;
   isActive?: boolean;
   formattedEventTimestamp: string;
   ratio: string;
@@ -822,7 +833,11 @@ function LifecycleIconRow({
   setSelectedZone,
   getZoneColor,
 }: LifecycleIconRowProps) {
-  const { t } = useTranslation(["views/explore"]);
+  const { t } = useTranslation(["views/explore", "components/player"]);
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   return (
     <div
@@ -852,13 +867,13 @@ function LifecycleIconRow({
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-secondary-foreground md:gap-5">
               <div className="flex items-center gap-1">
                 <span className="text-primary-variant">
-                  {t("objectLifecycle.lifecycleItemDesc.header.ratio")}
+                  {t("trackingDetails.lifecycleItemDesc.header.ratio")}
                 </span>
                 <span className="font-medium text-primary">{ratio}</span>
               </div>
               <div className="flex items-center gap-1">
                 <span className="text-primary-variant">
-                  {t("objectLifecycle.lifecycleItemDesc.header.area")}
+                  {t("trackingDetails.lifecycleItemDesc.header.area")}
                 </span>
                 {areaPx !== undefined && areaPct !== undefined ? (
                   <span className="font-medium text-primary">
@@ -910,7 +925,69 @@ function LifecycleIconRow({
           </div>
         </div>
         <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
-          <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
+          <div className="flex flex-row items-center gap-3">
+            <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
+            {(config?.plus?.enabled || item.data.box) && (
+              <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+                <DropdownMenuTrigger>
+                  <div className="rounded p-1 pr-2" role="button">
+                    <HiDotsHorizontal className="size-4 text-muted-foreground" />
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuContent>
+                    {config?.plus?.enabled && (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={async () => {
+                          const resp = await axios.post(
+                            `/${item.camera}/plus/${item.timestamp}`,
+                          );
+
+                          if (resp && resp.status == 200) {
+                            toast.success(
+                              t("toast.success.submittedFrigatePlus", {
+                                ns: "components/player",
+                              }),
+                              {
+                                position: "top-center",
+                              },
+                            );
+                          } else {
+                            toast.success(
+                              t("toast.error.submitFrigatePlusFailed", {
+                                ns: "components/player",
+                              }),
+                              {
+                                position: "top-center",
+                              },
+                            );
+                          }
+                        }}
+                      >
+                        {t("itemMenu.submitToPlus.label")}
+                      </DropdownMenuItem>
+                    )}
+                    {item.data.box && (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={() => {
+                          setIsOpen(false);
+                          setTimeout(() => {
+                            navigate(
+                              `/settings?page=masksAndZones&camera=${item.camera}&object_mask=${item.data.box}`,
+                            );
+                          }, 0);
+                        }}
+                      >
+                        {t("trackingDetails.createObjectMask")}
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenuPortal>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
-import { buttonVariants } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { Trans, useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +83,11 @@ export default function ReviewCard({
         if (response.status == 200) {
           toast.success(t("export.toast.success"), {
             position: "top-center",
+            action: (
+              <a href="/export" target="_blank" rel="noopener noreferrer">
+                <Button>View</Button>
+              </a>
+            ),
           });
         }
       })

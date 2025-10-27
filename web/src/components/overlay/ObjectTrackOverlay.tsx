@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from "react";
-import { ObjectLifecycleSequence, LifecycleClassType } from "@/types/timeline";
+import { TrackingDetailsSequence, LifecycleClassType } from "@/types/timeline";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { useDetailStream } from "@/context/detail-stream-context";
@@ -28,7 +28,7 @@ type PathPoint = {
   x: number;
   y: number;
   timestamp: number;
-  lifecycle_item?: ObjectLifecycleSequence;
+  lifecycle_item?: TrackingDetailsSequence;
   objectId: string;
 };
 
@@ -64,7 +64,7 @@ export default function ObjectTrackOverlay({
   );
 
   // Fetch timeline data for each object ID using fixed number of hooks
-  const { data: timelineData } = useSWR<ObjectLifecycleSequence[]>(
+  const { data: timelineData } = useSWR<TrackingDetailsSequence[]>(
     selectedObjectIds.length > 0
       ? `timeline?source_id=${selectedObjectIds.join(",")}&limit=1000`
       : null,
@@ -78,7 +78,7 @@ export default function ObjectTrackOverlay({
   const timelineResults = useMemo(() => {
     if (!timelineData) return selectedObjectIds.map(() => []);
 
-    const grouped: Record<string, ObjectLifecycleSequence[]> = {};
+    const grouped: Record<string, TrackingDetailsSequence[]> = {};
     for (const entry of timelineData) {
       if (!grouped[entry.source_id]) {
         grouped[entry.source_id] = [];
@@ -166,9 +166,9 @@ export default function ObjectTrackOverlay({
         const eventSequencePoints: PathPoint[] =
           timelineData
             ?.filter(
-              (event: ObjectLifecycleSequence) => event.data.box !== undefined,
+              (event: TrackingDetailsSequence) => event.data.box !== undefined,
             )
-            .map((event: ObjectLifecycleSequence) => {
+            .map((event: TrackingDetailsSequence) => {
               const [left, top, width, height] = event.data.box!;
               return {
                 x: left + width / 2, // Center x
@@ -197,22 +197,22 @@ export default function ObjectTrackOverlay({
         const currentZones =
           timelineData
             ?.filter(
-              (event: ObjectLifecycleSequence) =>
+              (event: TrackingDetailsSequence) =>
                 event.timestamp <= effectiveCurrentTime,
             )
             .sort(
-              (a: ObjectLifecycleSequence, b: ObjectLifecycleSequence) =>
+              (a: TrackingDetailsSequence, b: TrackingDetailsSequence) =>
                 b.timestamp - a.timestamp,
             )[0]?.data?.zones || [];
 
         // Get current bounding box
         const currentBox = timelineData
           ?.filter(
-            (event: ObjectLifecycleSequence) =>
+            (event: TrackingDetailsSequence) =>
               event.timestamp <= effectiveCurrentTime && event.data.box,
           )
           .sort(
-            (a: ObjectLifecycleSequence, b: ObjectLifecycleSequence) =>
+            (a: TrackingDetailsSequence, b: TrackingDetailsSequence) =>
               b.timestamp - a.timestamp,
           )[0]?.data?.box;
 

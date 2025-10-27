@@ -123,7 +123,7 @@ export function ObjectPath({
               <Trans>
                 {pos.lifecycle_item
                   ? getLifecycleItemDescription(pos.lifecycle_item)
-                  : t("objectLifecycle.trackedPoint")}
+                  : t("trackingDetails.trackedPoint")}
               </Trans>
             </TooltipContent>
           </TooltipPortal>

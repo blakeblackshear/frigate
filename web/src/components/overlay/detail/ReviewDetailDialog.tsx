@@ -20,7 +20,7 @@ import { Event } from "@/types/event";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { FrigatePlusDialog } from "../dialog/FrigatePlusDialog";
-import ObjectLifecycle from "./ObjectLifecycle";
+import TrackingDetails from "./TrackingDetails";
 import Chip from "@/components/indicators/Chip";
 import { FaDownload, FaImages, FaShareAlt } from "react-icons/fa";
 import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
@@ -411,7 +411,7 @@ export default function ReviewDetailDialog({
 
           {pane == "details" && selectedEvent && (
             <div className="mt-0 flex size-full flex-col gap-2">
-              <ObjectLifecycle event={selectedEvent} setPane={setPane} />
+              <TrackingDetails event={selectedEvent} setPane={setPane} />
             </div>
           )}
         </Content>
@@ -544,7 +544,7 @@ function EventItem({
                     </Chip>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {t("itemMenu.viewObjectLifecycle.label")}
+                    {t("itemMenu.viewTrackingDetails.label")}
                   </TooltipContent>
                 </Tooltip>
               )}

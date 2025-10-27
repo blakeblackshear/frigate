@@ -34,6 +34,8 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger(__name__)
 
+MAX_OBJECT_CLASSIFICATIONS = 16
+
 
 class CustomStateClassificationProcessor(RealTimeProcessorApi):
     def __init__(
@@ -396,6 +398,18 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         if obj_data.get("end_time") is not None:
             return
 
+        if obj_data.get("stationary"):
+            return
+
+        object_id = obj_data["id"]
+
+        if (
+            object_id in self.classification_history
+            and len(self.classification_history[object_id])
+            >= MAX_OBJECT_CLASSIFICATIONS
+        ):
+            return
+
         now = datetime.datetime.now().timestamp()
         x, y, x2, y2 = calculate_region(
             frame.shape,
@@ -427,7 +441,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             write_classification_attempt(
                 self.train_dir,
                 cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
-                obj_data["id"],
+                object_id,
                 now,
                 "unknown",
                 0.0,
@@ -448,7 +462,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         write_classification_attempt(
             self.train_dir,
             cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
-            obj_data["id"],
+            object_id,
             now,
             self.labelmap[best_id],
             score,
@@ -461,7 +475,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         sub_label = self.labelmap[best_id]
 
         consensus_label, consensus_score = self.get_weighted_score(
-            obj_data["id"], sub_label, score, now
+            object_id, sub_label, score, now
         )
 
         if consensus_label is not None:
@@ -470,7 +484,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                 == ObjectClassificationType.sub_label
             ):
                 self.sub_label_publisher.publish(
-                    (obj_data["id"], consensus_label, consensus_score),
+                    (object_id, consensus_label, consensus_score),
                     EventMetadataTypeEnum.sub_label,
                 )
             elif (
@@ -479,7 +493,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             ):
                 self.sub_label_publisher.publish(
                     (
-                        obj_data["id"],
+                        object_id,
                         self.model_config.name,
                         consensus_label,
                         consensus_score,

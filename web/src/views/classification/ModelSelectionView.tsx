@@ -11,7 +11,6 @@ import {
   FrigateConfig,
 } from "@/types/frigateConfig";
 import { useEffect, useMemo, useState } from "react";
-import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
 import { MdModelTraining } from "react-icons/md";
@@ -131,7 +130,7 @@ export default function ModelSelectionView({
           </Button>
         </div>
       </div>
-      <div className="flex size-full gap-2 p-2">
+      <div className="grid auto-rows-max grid-cols-2 gap-2 overflow-y-auto p-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 3xl:grid-cols-10">
         {selectedClassificationConfigs.length === 0 ? (
           <NoModelsView
             onCreateModel={() => setNewModel(true)}
@@ -208,14 +207,13 @@ function ModelCard({ config, onClick }: ModelCardProps) {
     <div
       key={config.name}
       className={cn(
-        "relative size-60 cursor-pointer overflow-hidden rounded-lg",
+        "relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg",
         "outline-transparent duration-500",
-        isMobile && "w-full",
       )}
       onClick={() => onClick()}
     >
       <img
-        className={cn("size-full", isMobile && "w-full")}
+        className="size-full"
         src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
       />
       <ImageShadowOverlay />
