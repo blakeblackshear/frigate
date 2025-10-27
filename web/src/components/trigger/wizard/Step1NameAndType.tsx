@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import useSWR from "swr";
-import NameAndIdFields from "@/components/ui/NameAndIdFields";
+import NameAndIdFields from "@/components/input/NameAndIdFields";
 import { Form, FormDescription } from "@/components/ui/form";
 import {
   FormControl,

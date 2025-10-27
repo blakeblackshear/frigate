@@ -47,7 +47,7 @@ import {
   MobilePageHeader,
   MobilePageTitle,
 } from "../mobile/MobilePage";
-import NameAndIdFields from "@/components/ui/NameAndIdFields";
+import NameAndIdFields from "@/components/input/NameAndIdFields";
 
 type CreateTriggerDialogProps = {
   show: boolean;
