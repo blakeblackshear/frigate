@@ -93,7 +93,14 @@
     }
   },
   "label": {
-    "back": "Go back"
+    "back": "Go back",
+    "hide": "Hide {{item}}",
+    "show": "Show {{item}}",
+    "ID": "ID"
+  },
+  "field": {
+    "optional": "Optional",
+    "internalID": "The Internal ID Frigate uses in the configuration and database"
   },
   "button": {
     "apply": "Apply",
