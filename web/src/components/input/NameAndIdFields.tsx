@@ -1,4 +1,4 @@
-import { Control } from "react-hook-form";
+import { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -13,11 +13,11 @@ import { useFormContext } from "react-hook-form";
 import { generateFixedHash, isValidId } from "@/utils/stringUtil";
 import { useTranslation } from "react-i18next";
 
-type NameAndIdFieldsProps = {
-  control: Control<any>;
+type NameAndIdFieldsProps<T extends FieldValues = FieldValues> = {
+  control: Control<T>;
   type?: string;
-  nameField: string;
-  idField: string;
+  nameField: Path<T>;
+  idField: Path<T>;
   nameLabel: string;
   nameDescription?: string;
   idLabel?: string;
@@ -27,7 +27,7 @@ type NameAndIdFieldsProps = {
   placeholderId?: string;
 };
 
-export default function NameAndIdFields({
+export default function NameAndIdFields<T extends FieldValues = FieldValues>({
   control,
   type,
   nameField,
@@ -39,9 +39,9 @@ export default function NameAndIdFields({
   processId,
   placeholderName,
   placeholderId,
-}: NameAndIdFieldsProps) {
+}: NameAndIdFieldsProps<T>) {
   const { t } = useTranslation(["common"]);
-  const { watch, setValue, trigger } = useFormContext();
+  const { watch, setValue, trigger } = useFormContext<T>();
   const [isIdVisible, setIsIdVisible] = useState(false);
 
   const defaultProcessId = (name: string) => {
@@ -59,7 +59,7 @@ export default function NameAndIdFields({
     const subscription = watch((value, { name }) => {
       if (name === nameField) {
         const processedId = effectiveProcessId(value[nameField] || "");
-        setValue(idField, processedId);
+        setValue(idField, processedId as PathValue<T, Path<T>>);
         trigger(idField);
       }
     });
