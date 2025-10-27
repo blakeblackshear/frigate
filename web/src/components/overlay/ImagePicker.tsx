@@ -34,7 +34,7 @@ export default function ImagePicker({
   direct = false,
   className,
 }: ImagePickerProps) {
-  const { t } = useTranslation(["components/dialog"]);
+  const { t } = useTranslation(["components/dialog", "views/settings"]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -160,8 +160,8 @@ export default function ImagePicker({
           ) : (
             <div className="hover:cursor-pointer">
               <div className="my-3 flex w-full flex-row items-center justify-between gap-2">
-                <div className="flex flex-row items-center gap-2">
-                  <div className="relative h-8 w-8">
+                <div className="flex flex-row items-center gap-4">
+                  <div className="relative size-16">
                     <img
                       src={
                         selectedImage
@@ -169,7 +169,7 @@ export default function ImagePicker({
                           : `${apiHost}clips/triggers/${camera}/${selectedImageId}.webp`
                       }
                       alt={selectedImage?.label || "Selected image"}
-                      className="h-8 w-8 rounded object-cover"
+                      className="size-16 rounded object-cover"
                       onLoad={() => handleImageLoad(selectedImageId || "")}
                       loading="lazy"
                     />
@@ -180,7 +180,7 @@ export default function ImagePicker({
                     )}
                   </div>
                   <div className="text-sm smart-capitalize">
-                    {selectedImage?.label || selectedImageId}
+                    {selectedImage?.label || t("imagePicker.unknownLabel")}
                     {selectedImage?.sub_label
                       ? ` (${selectedImage.sub_label})`
                       : ""}
@@ -204,13 +204,18 @@ export default function ImagePicker({
         <DialogContent
           className={cn(
             "scrollbar-container overflow-y-auto",
-            isDesktop && "max-h-[75dvh] sm:max-w-xl md:max-w-3xl",
+            isDesktop && "max-h-[75dvh] sm:max-w-xl md:max-w-[70%]",
             isMobile && "px-4",
             className,
           )}
         >
-          <div className="mb-3 flex flex-row items-center justify-between">
+          <div className="mb-3 flex flex-col items-start justify-start">
             <Heading as="h4">{t("imagePicker.selectImage")}</Heading>
+            <div className="text-sm text-muted-foreground">
+              {t("triggers.dialog.form.content.imageDesc", {
+                ns: "views/settings",
+              })}
+            </div>
             <span tabIndex={0} className="sr-only" />
           </div>
           {renderSearchInput()}

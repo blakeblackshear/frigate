@@ -112,6 +112,7 @@
   },
   "imagePicker": {
     "selectImage": "Select a tracked object's thumbnail",
+    "unknownLabel": "Saved Trigger Image",
     "search": {
       "placeholder": "Search by label or sub label..."
     },
