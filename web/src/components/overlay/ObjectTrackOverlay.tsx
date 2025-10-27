@@ -71,8 +71,11 @@ export default function ObjectTrackOverlay({
     { revalidateOnFocus: false },
   );
 
+  const getZonesFriendlyNames = (zones: string[], config: FrigateConfig) => {
+    return zones?.map((zone) => resolveZoneName(config, zone)) ?? [];
+  };
+
   const timelineResults = useMemo(() => {
-    // Group timeline entries by source_id
     if (!timelineData) return selectedObjectIds.map(() => []);
 
     const grouped: Record<string, ObjectLifecycleSequence[]> = {};
@@ -83,9 +86,19 @@ export default function ObjectTrackOverlay({
       grouped[entry.source_id].push(entry);
     }
 
-    // Return timeline arrays in the same order as selectedObjectIds
-    return selectedObjectIds.map((id) => grouped[id] || []);
-  }, [selectedObjectIds, timelineData]);
+    return selectedObjectIds.map((id) => {
+      const entries = grouped[id] || [];
+      return entries.map((event) => ({
+        ...event,
+        data: {
+          ...event.data,
+          zones_friendly_names: config
+            ? getZonesFriendlyNames(event.data?.zones, config)
+            : [],
+        },
+      }));
+    });
+  }, [selectedObjectIds, timelineData, config]);
 
   const typeColorMap = useMemo(
     () => ({
@@ -157,11 +170,6 @@ export default function ObjectTrackOverlay({
             )
             .map((event: ObjectLifecycleSequence) => {
               const [left, top, width, height] = event.data.box!;
-              event.data.zones_friendly_names = event?.data?.zones?.map(
-                (zone) => {
-                  return resolveZoneName(config, zone);
-                },
-              );
               return {
                 x: left + width / 2, // Center x
                 y: top + height, // Bottom y

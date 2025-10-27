@@ -558,9 +558,15 @@ function LifecycleItem({
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  item.data.zones_friendly_names = item?.data?.zones?.map((zone) => {
-    return resolveZoneName(config, zone);
-  });
+  item = {
+    ...item,
+    data: {
+      ...item.data,
+      zones_friendly_names: item?.data?.zones?.map((zone) => {
+        return resolveZoneName(config, zone);
+      }),
+    },
+  };
 
   const aspectRatio = useMemo(() => {
     if (!config || !item?.camera) {

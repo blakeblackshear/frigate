@@ -51,10 +51,15 @@ export function ObjectPath({
     const imgRect = imgRef.current.getBoundingClientRect();
     return positions.map((pos) => {
       if (config && pos.lifecycle_item?.data?.zones) {
-        pos.lifecycle_item.data.zones_friendly_names =
-          pos.lifecycle_item.data.zones.map((zone) => {
-            return resolveZoneName(config, zone);
-          });
+        pos.lifecycle_item = {
+          ...pos.lifecycle_item,
+          data: {
+            ...pos.lifecycle_item.data,
+            zones_friendly_names: pos.lifecycle_item.data.zones.map((zone) => {
+              return resolveZoneName(config, zone);
+            }),
+          },
+        };
       }
       return {
         x: pos.x * imgRect.width,
