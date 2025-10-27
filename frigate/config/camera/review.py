@@ -105,13 +105,34 @@ class GenAIReviewConfig(FrigateBaseModel):
         default=None,
     )
     activity_context_prompt: str = Field(
-        default="""- **Zone context is critical**: Private enclosed spaces (back yards, back decks, fenced areas, inside garages) are resident territory where brief transient activity, routine tasks, and pet care are expected and normal. Front yards, driveways, and porches are semi-public but still resident spaces where deliveries, parking, and coming/going are routine. Consider whether the zone and activity align with normal residential use.
-- **Person + Pet = Normal Activity**: When both "Person" and "Dog" (or "Cat") are detected together in residential zones, this is routine pet care activity (walking, letting out, playing, supervising). Assign Level 0 unless there are OTHER strong suspicious behaviors present (like testing doors, taking items, etc.). A person with their pet in a residential zone is baseline normal activity.
-- Brief appearances in private zones (back yards, garages) are normal residential patterns.
-- Normal residential activity includes: residents, family members, guests, deliveries, services, maintenance workers, routine property use (parking, unloading, mail pickup, trash removal).
-- Brief movement with legitimate items (bags, packages, tools, equipment) in appropriate zones is routine.
-""",
-        title="Custom activity context prompt defining normal activity patterns for this property.",
+        default="""### Normal Activity Indicators (Level 0)
+- Known/verified people in any zone
+- People with pets in residential areas
+- Deliveries: carrying packages to porches/doors, placing packages, leaving
+- Access to private areas: entering back yards, garages, or homes
+- Brief movement through semi-public areas (driveways, front yards) with clear purpose (carrying items, going to/from vehicles)
+- Activity on public areas only (sidewalks, streets) without entering property
+- Services/maintenance with visible indicators (tools, uniforms, work vehicles)
+
+### Suspicious Activity Indicators (Level 1)
+- Testing doors or windows on vehicles or buildings
+- Standing near vehicles or in private zones without clear purpose or direct movement to destination
+- Taking items from property (packages, objects from porches/driveways)
+- Accessing areas at unusual hours without visible legitimate indicators (items, tools, purpose)
+- Climbing or jumping fences/barriers
+- Attempting to conceal actions or items
+- Person in semi-public areas (driveways, front yards) at unusual hours without clear purpose
+
+### Critical Threat Indicators (Level 2)
+- Holding break-in tools (crowbars, pry bars, bolt cutters)
+- Weapons visible (guns, knives, bats used aggressively)
+- Forced entry in progress
+- Physical aggression or violence
+- Active property damage or theft
+
+### Assessment Guidance
+These patterns are guidance, not absolute rules. Context matters: time of day, visible items/tools, and apparent purpose help distinguish normal from suspicious. Not all cameras show full entry/exit paths - focus on observable behavior in frame. Use judgment based on the complete picture.""",
+        title="Custom activity context prompt defining normal and suspicious activity patterns for this property.",
     )
 
 
