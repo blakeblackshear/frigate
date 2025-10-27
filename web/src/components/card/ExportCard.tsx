@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import { useCallback, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { FaDownload, FaPlay, FaShareAlt } from "react-icons/fa";
-import Chip from "../indicators/Chip";
 import { Skeleton } from "../ui/skeleton";
 import {
   Dialog,
@@ -22,6 +21,8 @@ import { cn } from "@/lib/utils";
 import { shareOrCopy } from "@/utils/browserUtil";
 import { useTranslation } from "react-i18next";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
+import BlurredIconButton from "../button/BlurredIconButton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type ExportProps = {
   className: string;
@@ -156,56 +157,77 @@ export default function ExportCard({
           </>
         )}
         {hovered && (
-          <div>
+          <>
             <div className="absolute inset-0 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
-            <div className="absolute right-1 top-1 flex items-center gap-2">
-              {!exportedRecording.in_progress && (
-                <Chip
-                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                  onClick={() =>
-                    shareOrCopy(
-                      `${baseUrl}export?id=${exportedRecording.id}`,
-                      exportedRecording.name.replaceAll("_", " "),
-                    )
-                  }
-                >
-                  <FaShareAlt className="size-4 text-white" />
-                </Chip>
-              )}
-              {!exportedRecording.in_progress && (
-                <a
-                  download
-                  href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
-                >
-                  <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                    <FaDownload className="size-4 text-white" />
-                  </Chip>
-                </a>
-              )}
-              {!exportedRecording.in_progress && (
-                <Chip
-                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                  onClick={() =>
-                    setEditName({
-                      original: exportedRecording.name,
-                      update: undefined,
-                    })
-                  }
-                >
-                  <MdEditSquare className="size-4 text-white" />
-                </Chip>
-              )}
-              <Chip
-                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                onClick={() =>
-                  onDelete({
-                    file: exportedRecording.id,
-                    exportName: exportedRecording.name,
-                  })
-                }
-              >
-                <LuTrash className="size-4 fill-destructive text-destructive" />
-              </Chip>
+            <div className="absolute right-3 top-2">
+              <div className="flex items-center justify-center gap-4">
+                {!exportedRecording.in_progress && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <BlurredIconButton
+                        onClick={() =>
+                          shareOrCopy(
+                            `${baseUrl}export?id=${exportedRecording.id}`,
+                            exportedRecording.name.replaceAll("_", " "),
+                          )
+                        }
+                      >
+                        <FaShareAlt className="size-4" />
+                      </BlurredIconButton>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("tooltip.shareExport")}</TooltipContent>
+                  </Tooltip>
+                )}
+                {!exportedRecording.in_progress && (
+                  <a
+                    download
+                    href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
+                  >
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <BlurredIconButton>
+                          <FaDownload className="size-4" />
+                        </BlurredIconButton>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t("tooltip.downloadVideo")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </a>
+                )}
+                {!exportedRecording.in_progress && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <BlurredIconButton
+                        onClick={() =>
+                          setEditName({
+                            original: exportedRecording.name,
+                            update: undefined,
+                          })
+                        }
+                      >
+                        <MdEditSquare className="size-4" />
+                      </BlurredIconButton>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("tooltip.editName")}</TooltipContent>
+                  </Tooltip>
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <BlurredIconButton
+                      onClick={() =>
+                        onDelete({
+                          file: exportedRecording.id,
+                          exportName: exportedRecording.name,
+                        })
+                      }
+                    >
+                      <LuTrash className="size-4 fill-destructive text-destructive hover:text-white" />
+                    </BlurredIconButton>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("tooltip.deleteExport")}</TooltipContent>
+                </Tooltip>
+              </div>
             </div>
 
             {!exportedRecording.in_progress && (
@@ -220,13 +242,13 @@ export default function ExportCard({
                 <FaPlay />
               </Button>
             )}
-          </div>
+          </>
         )}
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
         <ImageShadowOverlay />
-        <div className="absolute bottom-2 left-3 flex h-full items-end justify-between text-white smart-capitalize">
+        <div className="absolute bottom-2 left-3 flex items-end text-white smart-capitalize">
           {exportedRecording.name.replaceAll("_", " ")}
         </div>
       </div>
