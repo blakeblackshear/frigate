@@ -108,20 +108,20 @@ class GenAIReviewConfig(FrigateBaseModel):
         default="""### Normal Activity Indicators (Level 0)
 - Known/verified people in any zone
 - People with pets in residential areas
-- Deliveries: carrying packages to porches/doors, placing packages, leaving
-- Access to private areas: entering back yards, garages, or homes
-- Brief movement through semi-public areas (driveways, front yards) with clear purpose (carrying items, going to/from vehicles)
+- Brief activity near vehicles: approaching vehicles, brief standing, then leaving or entering vehicle (unloading, loading, checking something)
+- Deliveries or services: brief approach to doors/porches, standing briefly, placing or retrieving items, then leaving
+- Access to private areas: entering back yards, garages, or homes (with or without visible purpose in frame)
+- Brief movement through semi-public areas (driveways, front yards) with items or approaching structure/vehicle
 - Activity on public areas only (sidewalks, streets) without entering property
-- Services/maintenance with visible indicators (tools, uniforms, work vehicles)
+- Services/maintenance workers with tools, uniforms, or vehicles
 
 ### Suspicious Activity Indicators (Level 1)
-- Testing doors or windows on vehicles or buildings
-- Standing near vehicles or in private zones without clear purpose or direct movement to destination
-- Taking items from property (packages, objects from porches/driveways)
-- Accessing areas at unusual hours without visible legitimate indicators (items, tools, purpose)
-- Climbing or jumping fences/barriers
-- Attempting to conceal actions or items
-- Person in semi-public areas (driveways, front yards) at unusual hours without clear purpose
+- Testing or attempting to open doors/windows on vehicles or buildings
+- Taking items that don't belong to them (stealing packages, objects from porches/driveways)
+- Climbing or jumping fences/barriers to access property
+- Attempting to conceal actions or items from view
+- Lingering without interaction: standing near vehicles/private zones across multiple frames without approaching, entering, leaving, or clear task
+- Activity at unusual hours (very late night/early morning) combined with suspicious behavior patterns
 
 ### Critical Threat Indicators (Level 2)
 - Holding break-in tools (crowbars, pry bars, bolt cutters)
@@ -131,7 +131,9 @@ class GenAIReviewConfig(FrigateBaseModel):
 - Active property damage or theft
 
 ### Assessment Guidance
-These patterns are guidance, not absolute rules. Context matters: time of day, visible items/tools, and apparent purpose help distinguish normal from suspicious. Not all cameras show full entry/exit paths - focus on observable behavior in frame. Use judgment based on the complete picture.""",
+When evaluating activity, first check if it matches Normal Activity Indicators. If it clearly matches normal patterns (brief vehicle access, delivery behavior, known people, pet activity), assign Level 0. Only consider Level 1 if the activity shows clear suspicious behaviors that don't fit normal patterns (testing access, stealing items, lingering across many frames without task, forced entry attempts).
+
+These patterns are guidance, not rigid rules. Consider the complete context: time, zone, objects, and sequence of actions. Brief activity with apparent purpose is generally normal. Sustained problematic behavior or clear security violations warrant elevation.""",
         title="Custom activity context prompt defining normal and suspicious activity patterns for this property.",
     )
 

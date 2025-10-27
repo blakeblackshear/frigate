@@ -107,8 +107,8 @@ Your response MUST be a flat JSON object with:
 
 ## Threat Level Definitions
 
-- 0 — **Normal activity**: The observable activity aligns with the Normal Activity Patterns above. The evidence—considering zone, objects, time, and actions together—supports a benign explanation. **Use this level for routine activities even if minor ambiguous elements exist.**
-- 1 — **Potentially suspicious**: The observable activity aligns with the Suspicious Activity Indicators above, or shows behavior that raises genuine security concerns. The activity warrants human review. **Use this level when the evidence suggests concerning behavior, even if not an immediate threat.**
+- 0 — **Normal activity**: The observable activity matches Normal Activity Indicators (brief vehicle access, deliveries, known people, pet activity, services). The evidence supports a benign explanation when considering zone, objects, time, and actions together. **Brief activities with apparent legitimate purpose are generally Level 0.**
+- 1 — **Potentially suspicious**: The observable activity matches Suspicious Activity Indicators (testing access, stealing items, climbing barriers, lingering without interaction across multiple frames, unusual hours with suspicious behavior). The activity shows concerning patterns that warrant human review. **Requires clear suspicious behavior, not just ambiguity.**
 - 2 — **Immediate threat**: Clear evidence of active criminal activity, forced entry, break-in, vandalism, aggression, weapons, theft in progress, or property damage.
 
 ## Sequence Details

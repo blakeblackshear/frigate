@@ -29,8 +29,7 @@ from ..types import DataProcessorMetrics
 
 logger = logging.getLogger(__name__)
 
-RECORDING_BUFFER_START_SECONDS = 5
-RECORDING_BUFFER_END_SECONDS = 10
+RECORDING_BUFFER_EXTENSION_PERCENT = 0.10
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
@@ -112,10 +111,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             image_source = camera_config.review.genai.image_source
 
             if image_source == ImageSourceEnum.recordings:
+                duration = final_data["end_time"] - final_data["start_time"]
+                buffer_extension = duration * RECORDING_BUFFER_EXTENSION_PERCENT
+
                 thumbs = self.get_recording_frames(
                     camera,
-                    final_data["start_time"] - RECORDING_BUFFER_START_SECONDS,
-                    final_data["end_time"] + RECORDING_BUFFER_END_SECONDS,
+                    final_data["start_time"],
+                    final_data["end_time"] + buffer_extension,
                     height=480,  # Use 480p for good balance between quality and token usage
                 )
 
