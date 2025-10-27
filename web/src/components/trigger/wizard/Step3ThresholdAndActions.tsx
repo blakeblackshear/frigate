@@ -180,7 +180,7 @@ export default function Step3ThresholdAndActions({
             className="flex-1"
             variant="select"
           >
-            {isLoading && <ActivityIndicator className="mr-2 size-4" />}
+            {isLoading && <ActivityIndicator className="mr-2 size-5" />}
             {isLoading
               ? t("button.saving", { ns: "common" })
               : t("triggers.dialog.form.save", {
