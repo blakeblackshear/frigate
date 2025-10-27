@@ -417,13 +417,13 @@ def run_analysis(
         name = sub_labels_list[i].replace("_", " ").title()
         unified_objects.append(f"{name} ({object_type})")
 
-    # Add non-verified objects as "Unknown (type)"
+    # Add non-verified objects as "Unrecognized (type)"
     for label in objects_list:
         if "-verified" in label:
             continue
         elif label in labelmap_objects:
             object_type = label.replace("_", " ")
-            unified_objects.append(f"Unknown ({object_type})")
+            unified_objects.append(f"Unrecognized ({object_type})")
 
     analytics_data["unified_objects"] = unified_objects
 

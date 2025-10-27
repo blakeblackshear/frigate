@@ -99,7 +99,7 @@ When forming your description:
 ## Response Format
 
 Your response MUST be a flat JSON object with:
-- `title` (string): A concise, one-sentence title that captures the main activity. Use the exact names from "Objects in Scene" below (e.g., if the list shows "Joe (person)" and "Unknown (person)", say "Joe and unknown person"). Examples: "Joe walking dog in backyard", "Unknown person testing car doors at night", "Joe and unknown person in driveway".
+- `title` (string): A concise, one-sentence title that captures the main activity. Use the exact names from "Objects in Scene" below (e.g., if the list shows "Joe (person)" and "Unrecognized (person)", say "Joe and an unrecognized person"). Examples: "Joe walking dog in backyard", "Unrecognized person delivering package", "Joe and an unrecognized person in driveway".
 - `scene` (string): A narrative description of what happens across the sequence from start to finish. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
 - `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below. Your threat level must be consistent with your scene description and the guidance above.
@@ -119,7 +119,7 @@ Your response MUST be a flat JSON object with:
 
 ## Objects in Scene
 
-Each line represents one object in the scene. Named objects are verified identities; "Unknown" indicates unverified objects of that type:
+Each line represents one object in the scene. Named objects are recognized/verified identities; "Unrecognized" indicates objects detected but not identified. **Note: "Unrecognized" is NOT an indicator of suspicious activity—it simply means the system hasn't identified that object.**
 {get_objects_list()}
 
 ## Important Notes
