@@ -181,7 +181,7 @@ export default function CreateTriggerDialog({
         {
           enabled: trigger.enabled,
           name: trigger.name,
-          friendly_name: trigger.friendly_name ?? "",
+          friendly_name: trigger.friendly_name ?? trigger.name,
           type: trigger.type,
           data: trigger.data,
           threshold: trigger.threshold,
