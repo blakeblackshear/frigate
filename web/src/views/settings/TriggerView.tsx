@@ -14,13 +14,23 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   LuPlus,
   LuTrash,
   LuPencil,
   LuSearch,
   LuExternalLink,
+  LuCircle,
 } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import TriggerWizardDialog from "@/components/trigger/TriggerWizardDialog";
 import CreateTriggerDialog from "@/components/overlay/CreateTriggerDialog";
 import DeleteTriggerDialog from "@/components/overlay/DeleteTriggerDialog";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -90,7 +100,7 @@ export default function TriggerView({
   const [showCreate, setShowCreate] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [selectedTrigger, setSelectedTrigger] = useState<Trigger | null>(null);
-  const [triggeredTrigger, setTriggeredTrigger] = useState<string>();
+  const [triggeredTrigger, setTriggeredTrigger] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const cameraName = useCameraFriendlyName(selectedCamera);
@@ -127,28 +137,22 @@ export default function TriggerView({
 
     mutate();
 
-    setTriggeredTrigger(triggers_status_ws.name);
-    const target = document.querySelector(
-      `#trigger-${triggers_status_ws.name}`,
-    );
-    if (target) {
-      target.scrollIntoView({
-        block: "center",
-        behavior: "smooth",
-        inline: "nearest",
-      });
-      const ring = target.querySelector(".trigger-ring");
-      if (ring) {
-        ring.classList.add(`outline-selected`);
-        ring.classList.remove("outline-transparent");
-
-        const timeout = setTimeout(() => {
-          ring.classList.remove(`outline-selected`);
-          ring.classList.add("outline-transparent");
-        }, 3000);
-        return () => clearTimeout(timeout);
+    setTriggeredTrigger((prev) => {
+      const current = prev || [];
+      if (!current.includes(triggers_status_ws.name)) {
+        const newTriggers = [...current, triggers_status_ws.name];
+        return newTriggers;
       }
-    }
+      return current;
+    });
+
+    const timeout = setTimeout(() => {
+      setTriggeredTrigger((prev) =>
+        (prev || []).filter((name) => name !== triggers_status_ws.name),
+      );
+    }, 3000);
+
+    return () => clearTimeout(timeout);
   }, [triggers_status_ws, selectedCamera, mutate]);
 
   useEffect(() => {
@@ -228,6 +232,7 @@ export default function TriggerView({
         .finally(() => {
           setIsLoading(false);
           setShowCreate(false);
+          setSelectedTrigger(null);
         });
     },
     [t, updateConfig, selectedCamera, setUnsavedChanges],
@@ -313,7 +318,6 @@ export default function TriggerView({
         // Regular update without rename
         saveToConfig(trigger, true);
       }
-      setSelectedTrigger(null);
     },
     [t, saveToConfig, selectedCamera, selectedTrigger, setUnsavedChanges],
   );
@@ -386,6 +390,7 @@ export default function TriggerView({
       setShowCreate(false);
       setShowDelete(false);
       setUnsavedChanges(false);
+      setTriggeredTrigger([]);
     }
   }, [selectedCamera, setUnsavedChanges]);
 
@@ -480,72 +485,69 @@ export default function TriggerView({
               </Button>
             </div>
             <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt">
-                <div className="h-full overflow-auto p-0">
-                  {triggers.length === 0 ? (
-                    <div className="flex h-24 items-center justify-center">
-                      <p className="text-center text-muted-foreground">
-                        {t("triggers.table.noTriggers")}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {triggers.map((trigger) => (
-                        <div
-                          key={trigger.name}
-                          id={`trigger-${trigger.name}`}
-                          className="relative flex items-center justify-between rounded-lg border border-border bg-background p-4 transition-all"
-                        >
-                          <div
-                            className={cn(
-                              "trigger-ring pointer-events-none absolute inset-0 z-10 size-full rounded-md outline outline-[3px] -outline-offset-[2.8px] duration-500",
-                              triggeredTrigger === trigger.name
-                                ? "shadow-selected outline-selected"
-                                : "outline-transparent duration-500",
-                            )}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <h3
+              <div className="flex flex-1 flex-col gap-2 md:hidden">
+                {triggers.length === 0 ? (
+                  <div className="flex h-24 items-center justify-center rounded-lg border border-border bg-background_alt">
+                    <p className="text-center text-muted-foreground">
+                      {t("triggers.table.noTriggers")}
+                    </p>
+                  </div>
+                ) : (
+                  triggers.map((trigger) => (
+                    <div
+                      key={trigger.name}
+                      id={`trigger-${trigger.name}`}
+                      className="rounded-lg border border-border bg-background p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-1">
+                            <LuCircle
                               className={cn(
-                                "truncate text-lg font-medium",
+                                "size-3 duration-500",
+                                triggeredTrigger.includes(trigger.name)
+                                  ? "fill-selected text-selected"
+                                  : "fill-muted text-muted dark:fill-secondary-highlight dark:text-secondary-highlight",
+                              )}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <div
+                              className={cn(
+                                "font-medium",
                                 !trigger.enabled && "opacity-60",
                               )}
                             >
                               {trigger.friendly_name || trigger.name}
-                            </h3>
-                            <div
-                              className={cn(
-                                "mt-1 flex flex-col gap-1 text-sm text-muted-foreground md:flex-row md:items-center md:gap-3",
-                                !trigger.enabled && "opacity-60",
-                              )}
-                            >
-                              <div>
-                                <Badge
-                                  variant={
-                                    trigger.type === "thumbnail"
-                                      ? "default"
-                                      : "outline"
-                                  }
-                                  className={
-                                    trigger.type === "thumbnail"
-                                      ? "bg-primary/20 text-primary hover:bg-primary/30"
-                                      : ""
-                                  }
-                                >
-                                  {t(`triggers.type.${trigger.type}`)}
-                                </Badge>
-                              </div>
-
+                            </div>
+                            <div className="mt-2 flex flex-col gap-2">
+                              <Badge
+                                variant={
+                                  trigger.type === "thumbnail"
+                                    ? "default"
+                                    : "outline"
+                                }
+                                className={cn(
+                                  "w-fit",
+                                  trigger.type === "thumbnail"
+                                    ? "bg-primary/20 text-primary hover:bg-primary/30"
+                                    : "",
+                                  !trigger.enabled && "opacity-60",
+                                )}
+                              >
+                                {t(`triggers.type.${trigger.type}`)}
+                              </Badge>
                               <Link
                                 to={`/explore?event_id=${trigger_status?.triggers[trigger.name]?.triggering_event_id || ""}`}
                                 className={cn(
-                                  "text-sm",
+                                  "flex items-center gap-1.5 text-xs text-muted-foreground",
                                   !trigger_status?.triggers[trigger.name]
                                     ?.triggering_event_id &&
                                     "pointer-events-none",
+                                  !trigger.enabled && "opacity-60",
                                 )}
                               >
-                                <div className="flex flex-row items-center">
+                                <span>
                                   {t("triggers.table.lastTriggered")}:{" "}
                                   {trigger_status &&
                                   trigger_status.triggers[trigger.name]
@@ -574,9 +576,173 @@ export default function TriggerView({
                                         },
                                       )
                                     : "Never"}
+                                </span>
+                                {trigger_status?.triggers[trigger.name]
+                                  ?.triggering_event_id && (
+                                  <LuSearch className="size-3" />
+                                )}
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                        <TooltipProvider>
+                          <div className="flex items-center gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => {
+                                    setSelectedTrigger(trigger);
+                                    setShowCreate(true);
+                                  }}
+                                  disabled={isLoading}
+                                >
+                                  <LuPencil className="size-3.5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{t("triggers.table.edit")}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => {
+                                    setSelectedTrigger(trigger);
+                                    setShowDelete(true);
+                                  }}
+                                  disabled={isLoading}
+                                >
+                                  <LuTrash className="size-3.5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{t("triggers.table.deleteTrigger")}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TooltipProvider>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="scrollbar-container hidden flex-1 overflow-hidden rounded-lg border border-border bg-background_alt md:mr-3 md:block">
+                <div className="h-full overflow-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-muted/50">
+                      <TableRow>
+                        <TableHead className="w-4"></TableHead>
+                        <TableHead>{t("name", { ns: "common" })}</TableHead>
+                        <TableHead>{t("triggers.table.type")}</TableHead>
+                        <TableHead>
+                          {t("triggers.table.lastTriggered")}
+                        </TableHead>
+                        <TableHead className="text-right">
+                          {t("triggers.table.actions")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {triggers.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="h-24 text-center">
+                            {t("triggers.table.noTriggers")}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        triggers.map((trigger) => (
+                          <TableRow
+                            key={trigger.name}
+                            id={`trigger-${trigger.name}`}
+                            className="group"
+                          >
+                            <TableCell>
+                              <LuCircle
+                                className={cn(
+                                  "size-3 duration-500",
+                                  triggeredTrigger.includes(trigger.name)
+                                    ? "fill-selected text-selected"
+                                    : "fill-muted text-muted dark:fill-secondary-highlight dark:text-secondary-highlight",
+                                )}
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              <div
+                                className={cn(!trigger.enabled && "opacity-60")}
+                              >
+                                {trigger.friendly_name || trigger.name}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  trigger.type === "thumbnail"
+                                    ? "default"
+                                    : "outline"
+                                }
+                                className={cn(
+                                  trigger.type === "thumbnail"
+                                    ? "bg-primary/20 text-primary hover:bg-primary/30"
+                                    : "",
+                                  !trigger.enabled && "opacity-60",
+                                )}
+                              >
+                                {t(`triggers.type.${trigger.type}`)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Link
+                                to={`/explore?event_id=${trigger_status?.triggers[trigger.name]?.triggering_event_id || ""}`}
+                                className={cn(
+                                  "flex items-center gap-1.5 text-sm",
+                                  !trigger_status?.triggers[trigger.name]
+                                    ?.triggering_event_id &&
+                                    "pointer-events-none",
+                                  !trigger.enabled && "opacity-60",
+                                )}
+                              >
+                                <span>
+                                  {trigger_status &&
+                                  trigger_status.triggers[trigger.name]
+                                    ?.last_triggered
+                                    ? formatUnixTimestampToDateTime(
+                                        trigger_status.triggers[trigger.name]
+                                          ?.last_triggered,
+                                        {
+                                          timezone: config.ui.timezone,
+                                          date_format:
+                                            config.ui.time_format == "24hour"
+                                              ? t(
+                                                  "time.formattedTimestamp2.24hour",
+                                                  {
+                                                    ns: "common",
+                                                  },
+                                                )
+                                              : t(
+                                                  "time.formattedTimestamp2.12hour",
+                                                  {
+                                                    ns: "common",
+                                                  },
+                                                ),
+                                          time_style: "medium",
+                                          date_style: "medium",
+                                        },
+                                      )
+                                    : "Never"}
+                                </span>
+                                {trigger_status?.triggers[trigger.name]
+                                  ?.triggering_event_id && (
                                   <Tooltip>
                                     <TooltipTrigger>
-                                      <LuSearch className="ml-2 size-3.5" />
+                                      <LuSearch className="size-3.5" />
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       {t("details.item.button.viewInExplore", {
@@ -584,65 +750,85 @@ export default function TriggerView({
                                       })}
                                     </TooltipContent>
                                   </Tooltip>
-                                </div>
+                                )}
                               </Link>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => {
-                                      setSelectedTrigger(trigger);
-                                      setShowCreate(true);
-                                    }}
-                                    disabled={isLoading}
-                                  >
-                                    <LuPencil className="size-3.5" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{t("triggers.table.edit")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    className="h-8 w-8 p-0 text-white"
-                                    onClick={() => {
-                                      setSelectedTrigger(trigger);
-                                      setShowDelete(true);
-                                    }}
-                                    disabled={isLoading}
-                                  >
-                                    <LuTrash className="size-3.5" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{t("triggers.table.deleteTrigger")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <TooltipProvider>
+                                <div className="flex items-center justify-end gap-2">
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-8 px-2"
+                                        onClick={() => {
+                                          setSelectedTrigger(trigger);
+                                          setShowCreate(true);
+                                        }}
+                                        disabled={isLoading}
+                                      >
+                                        <LuPencil className="size-3.5" />
+                                        <span className="ml-1.5 hidden sm:inline-block">
+                                          {t("triggers.table.edit")}
+                                        </span>
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{t("triggers.table.edit")}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        className="h-8 px-2"
+                                        onClick={() => {
+                                          setSelectedTrigger(trigger);
+                                          setShowDelete(true);
+                                        }}
+                                        disabled={isLoading}
+                                      >
+                                        <LuTrash className="size-3.5" />
+                                        <span className="ml-1.5 hidden sm:inline-block">
+                                          {t("triggers.table.deleteTrigger")}
+                                        </span>
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{t("triggers.table.deleteTrigger")}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </TooltipProvider>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             </div>
           </>
         )}
       </div>
+      <TriggerWizardDialog
+        open={showCreate && (!selectedTrigger || selectedTrigger.name === "")}
+        onClose={() => {
+          setShowCreate(false);
+          setSelectedTrigger(null);
+          setUnsavedChanges(false);
+        }}
+        selectedCamera={selectedCamera}
+        trigger={null}
+        onCreate={onCreate}
+        onEdit={onEdit}
+        isLoading={isLoading}
+      />
       <CreateTriggerDialog
-        show={showCreate}
+        show={showCreate && !!selectedTrigger && selectedTrigger.name !== ""}
         trigger={selectedTrigger}
         selectedCamera={selectedCamera}
         isLoading={isLoading}
