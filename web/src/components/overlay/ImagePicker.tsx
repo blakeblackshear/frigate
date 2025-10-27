@@ -205,7 +205,7 @@ export default function ImagePicker({
           className={cn(
             "scrollbar-container overflow-y-auto",
             isDesktop && "max-h-[75dvh] sm:max-w-xl md:max-w-[70%]",
-            isMobile && "px-4",
+            isMobile && "scrollbar-container max-h-[90%] overflow-y-auto px-4",
             className,
           )}
         >

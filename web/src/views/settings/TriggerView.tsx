@@ -511,7 +511,7 @@ export default function TriggerView({
                                 : "outline-transparent duration-500",
                             )}
                           />
-                          <div className="min-w-0 flex-1">
+                          <div className="mr-5 min-w-0 flex-1">
                             <h3
                               className={cn(
                                 "truncate text-lg font-medium",
@@ -552,7 +552,7 @@ export default function TriggerView({
                                     "pointer-events-none",
                                 )}
                               >
-                                <div className="flex flex-row items-center">
+                                <div className="flex flex-row items-center text-xs">
                                   {t("triggers.table.lastTriggered")}:{" "}
                                   {trigger_status &&
                                   trigger_status.triggers[trigger.name]
