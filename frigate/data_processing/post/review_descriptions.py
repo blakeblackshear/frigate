@@ -29,6 +29,9 @@ from ..types import DataProcessorMetrics
 
 logger = logging.getLogger(__name__)
 
+RECORDING_BUFFER_START_SECONDS = 5
+RECORDING_BUFFER_END_SECONDS = 10
+
 
 class ReviewDescriptionProcessor(PostProcessorApi):
     def __init__(
@@ -111,8 +114,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             if image_source == ImageSourceEnum.recordings:
                 thumbs = self.get_recording_frames(
                     camera,
-                    final_data["start_time"],
-                    final_data["end_time"],
+                    final_data["start_time"] - RECORDING_BUFFER_START_SECONDS,
+                    final_data["end_time"] + RECORDING_BUFFER_END_SECONDS,
                     height=480,  # Use 480p for good balance between quality and token usage
                 )
 

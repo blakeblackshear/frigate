@@ -80,10 +80,10 @@ Your task is to analyze the sequence of images ({len(thumbnails)} total) taken i
 
 Your task is to provide a clear, accurate description of the scene that:
 1. States exactly what is happening based on observable actions and movements.
-2. Evaluates whether the observable evidence suggests normal activity for this property or genuine security concerns.
+2. Evaluates the activity against the Normal and Suspicious Activity Indicators above.
 3. Assigns a potential_threat_level based on the definitions below, applying them consistently.
 
-**IMPORTANT: Start by checking if the activity matches the normal patterns above. If it does, assign Level 0. Only consider higher threat levels if the activity clearly deviates from normal patterns or shows genuine security concerns.**
+**Use the activity patterns above as guidance to calibrate your assessment. Match the activity against both normal and suspicious indicators, then use your judgment based on the complete context.**
 
 ## Analysis Guidelines
 
@@ -94,8 +94,7 @@ When forming your description:
 - Note visible details such as clothing, items being carried or placed, tools or equipment present, and how they interact with the property or objects.
 - Consider the full sequence chronologically: what happens from start to finish, how duration and actions relate to the location and objects involved.
 - **Use the actual timestamp provided in "Activity started at"** below for time of day context—do not infer time from image brightness or darkness. Unusual hours (late night/early morning) should increase suspicion when the observable behavior itself appears questionable. However, recognize that some legitimate activities can occur at any hour.
-- Identify patterns that suggest genuine security concerns: testing doors/windows on vehicles or buildings, accessing unauthorized areas, attempting to conceal actions, extended loitering without apparent purpose, taking items, behavior that clearly doesn't align with the zone context and detected objects.
-- **Weigh all evidence holistically**: Start by checking if the activity matches the normal patterns above. If it does, assign Level 0. Only consider Level 1 if the activity clearly deviates from normal patterns or shows genuine security concerns that warrant attention.
+- **Weigh all evidence holistically**: Match the activity against both the normal and suspicious patterns above, then evaluate based on the complete context (zone, objects, time, actions). Activities matching normal patterns should be Level 0. Activities matching suspicious indicators should be Level 1. Use your judgment for edge cases.
 
 ## Response Format
 
@@ -108,9 +107,9 @@ Your response MUST be a flat JSON object with:
 
 ## Threat Level Definitions
 
-- 0 — **Normal activity (DEFAULT)**: What you observe matches the normal activity patterns above or is consistent with expected activity for this property type. The observable evidence—considering zone context, detected objects, and timing together—supports a benign explanation. **Use this level for routine activities even if minor ambiguous elements exist.**
-- 1 — **Potentially suspicious**: Observable behavior raises genuine security concerns that warrant human review. The evidence doesn't support a routine explanation and clearly deviates from the normal patterns above. Examples: testing doors/windows on vehicles or structures, accessing areas that don't align with the activity, taking items that likely don't belong to them, behavior clearly inconsistent with the zone and context, or activity that lacks any visible legitimate indicators. **Only use this level when the activity clearly doesn't match normal patterns.**
-- 2 — **Immediate threat**: Clear evidence of forced entry, break-in, vandalism, aggression, weapons, theft in progress, or active property damage.
+- 0 — **Normal activity**: The observable activity aligns with the Normal Activity Patterns above. The evidence—considering zone, objects, time, and actions together—supports a benign explanation. **Use this level for routine activities even if minor ambiguous elements exist.**
+- 1 — **Potentially suspicious**: The observable activity aligns with the Suspicious Activity Indicators above, or shows behavior that raises genuine security concerns. The activity warrants human review. **Use this level when the evidence suggests concerning behavior, even if not an immediate threat.**
+- 2 — **Immediate threat**: Clear evidence of active criminal activity, forced entry, break-in, vandalism, aggression, weapons, theft in progress, or property damage.
 
 ## Sequence Details
 
