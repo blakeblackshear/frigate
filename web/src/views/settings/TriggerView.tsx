@@ -130,22 +130,8 @@ export default function TriggerView({
 
     setTriggeredTrigger((prev) => {
       const current = prev || [];
-      const isFirstTrigger = current.length === 0;
       if (!current.includes(triggers_status_ws.name)) {
         const newTriggers = [...current, triggers_status_ws.name];
-        // Only scroll if this is the first triggered trigger
-        if (isFirstTrigger) {
-          const target = document.querySelector(
-            `#trigger-${triggers_status_ws.name}`,
-          );
-          if (target) {
-            target.scrollIntoView({
-              block: "center",
-              behavior: "smooth",
-              inline: "nearest",
-            });
-          }
-        }
         return newTriggers;
       }
       return current;
