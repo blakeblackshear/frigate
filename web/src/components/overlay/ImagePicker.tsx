@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import {
@@ -70,7 +70,6 @@ export default function ImagePicker({
       if (setSelectedImageId) {
         setSelectedImageId(id);
       }
-      setSearchTerm("");
       if (!direct) {
         setOpen(false);
       }
@@ -88,7 +87,13 @@ export default function ImagePicker({
       placeholder={t("imagePicker.search.placeholder")}
       className="text-md mb-3 md:text-sm"
       value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
+      onChange={(e) => {
+        setSearchTerm(e.target.value);
+        // Clear selected image when user starts typing
+        if (setSelectedImageId) {
+          setSelectedImageId("");
+        }
+      }}
     />
   );
 
@@ -126,11 +131,6 @@ export default function ImagePicker({
       )}
     </div>
   );
-
-  // Reset loaded images when images change
-  useEffect(() => {
-    setLoadedImages(new Set());
-  }, [images]);
 
   if (direct) {
     return (
