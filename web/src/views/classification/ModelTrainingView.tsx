@@ -51,6 +51,7 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import ClassificationSelectionDialog from "@/components/overlay/ClassificationSelectionDialog";
 import { TbCategoryPlus } from "react-icons/tb";
+import BlurredIconButton from "@/components/button/BlurredIconButton";
 import { useModelState } from "@/api/ws";
 import { ModelState } from "@/types/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -811,10 +812,9 @@ function StateTrainGrid({
               image={data.filename}
               onRefresh={onRefresh}
             >
-              <div className="group relative inline-flex items-center justify-center">
-                <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
-                <TbCategoryPlus className="relative z-10 size-5 cursor-pointer text-white/85 hover:text-white" />
-              </div>
+              <BlurredIconButton>
+                <TbCategoryPlus className="size-5" />
+              </BlurredIconButton>
             </ClassificationSelectionDialog>
           </ClassificationCard>
         </div>
@@ -961,10 +961,9 @@ function ObjectTrainGrid({
                       image={data.filename}
                       onRefresh={onRefresh}
                     >
-                      <div className="group relative inline-flex items-center justify-center">
-                        <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
-                        <TbCategoryPlus className="relative z-10 size-5 cursor-pointer text-white/85 hover:text-white" />
-                      </div>
+                      <BlurredIconButton>
+                        <TbCategoryPlus className="size-5" />
+                      </BlurredIconButton>
                     </ClassificationSelectionDialog>
                   </>
                 )}
