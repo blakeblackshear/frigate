@@ -98,6 +98,10 @@
     "show": "Show {{item}}",
     "ID": "ID"
   },
+  "list": {
+    "two": "{{0}} and {{1}}",
+    "many": "{{items}}, and {{last}}"
+  },
   "field": {
     "optional": "Optional",
     "internalID": "The Internal ID Frigate uses in the configuration and database"
