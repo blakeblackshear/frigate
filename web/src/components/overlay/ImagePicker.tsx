@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import {
@@ -15,11 +15,13 @@ import { cn } from "@/lib/utils";
 import { Event } from "@/types/event";
 import { useApiHost } from "@/api";
 import { isDesktop, isMobile } from "react-device-detect";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 type ImagePickerProps = {
   selectedImageId?: string;
   setSelectedImageId?: (id: string) => void;
   camera: string;
+  limit?: number;
   direct?: boolean;
   className?: string;
 };
@@ -28,6 +30,7 @@ export default function ImagePicker({
   selectedImageId,
   setSelectedImageId,
   camera,
+  limit = 100,
   direct = false,
   className,
 }: ImagePickerProps) {
@@ -35,9 +38,10 @@ export default function ImagePicker({
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
 
   const { data: events } = useSWR<Event[]>(
-    `events?camera=${camera}&limit=100`,
+    `events?camera=${camera}&limit=${limit}`,
     {
       revalidateOnFocus: false,
     },
@@ -74,6 +78,10 @@ export default function ImagePicker({
     [setSelectedImageId, direct],
   );
 
+  const handleImageLoad = useCallback((imageId: string) => {
+    setLoadedImages((prev) => new Set(prev).add(imageId));
+  }, []);
+
   const renderSearchInput = () => (
     <Input
       type="text"
@@ -95,7 +103,7 @@ export default function ImagePicker({
           <div
             key={image.id}
             className={cn(
-              "aspect-square cursor-pointer overflow-hidden rounded-lg border-2 bg-background transition-all",
+              "relative aspect-square cursor-pointer overflow-hidden rounded-lg border-2 bg-background transition-all",
               selectedImageId === image.id &&
                 "border-selected ring-2 ring-selected",
             )}
@@ -105,12 +113,24 @@ export default function ImagePicker({
               alt={image.label}
               className="h-full w-full object-cover"
               onClick={() => handleImageSelect(image.id)}
+              onLoad={() => handleImageLoad(image.id)}
+              loading="lazy"
             />
+            {!loadedImages.has(image.id) && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <ActivityIndicator />
+              </div>
+            )}
           </div>
         ))
       )}
     </div>
   );
+
+  // Reset loaded images when images change
+  useEffect(() => {
+    setLoadedImages(new Set());
+  }, [images]);
 
   if (direct) {
     return (
@@ -141,15 +161,24 @@ export default function ImagePicker({
             <div className="hover:cursor-pointer">
               <div className="my-3 flex w-full flex-row items-center justify-between gap-2">
                 <div className="flex flex-row items-center gap-2">
-                  <img
-                    src={
-                      selectedImage
-                        ? `${apiHost}api/events/${selectedImage.id}/thumbnail.webp`
-                        : `${apiHost}clips/triggers/${camera}/${selectedImageId}.webp`
-                    }
-                    alt={selectedImage?.label || "Selected image"}
-                    className="h-8 w-8 rounded object-cover"
-                  />
+                  <div className="relative h-8 w-8">
+                    <img
+                      src={
+                        selectedImage
+                          ? `${apiHost}api/events/${selectedImage.id}/thumbnail.webp`
+                          : `${apiHost}clips/triggers/${camera}/${selectedImageId}.webp`
+                      }
+                      alt={selectedImage?.label || "Selected image"}
+                      className="h-8 w-8 rounded object-cover"
+                      onLoad={() => handleImageLoad(selectedImageId || "")}
+                      loading="lazy"
+                    />
+                    {selectedImageId && !loadedImages.has(selectedImageId) && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ActivityIndicator />
+                      </div>
+                    )}
+                  </div>
                   <div className="text-sm smart-capitalize">
                     {selectedImage?.label || selectedImageId}
                     {selectedImage?.sub_label
