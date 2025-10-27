@@ -91,7 +91,7 @@ export default function TriggerView({
   const [showCreate, setShowCreate] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [selectedTrigger, setSelectedTrigger] = useState<Trigger | null>(null);
-  const [triggeredTrigger, setTriggeredTrigger] = useState<string>();
+  const [triggeredTrigger, setTriggeredTrigger] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const cameraName = useCameraFriendlyName(selectedCamera);
@@ -128,16 +128,32 @@ export default function TriggerView({
 
     mutate();
 
-    setTriggeredTrigger(triggers_status_ws.name);
+    setTriggeredTrigger((prev) => {
+      const current = prev || [];
+      const isFirstTrigger = current.length === 0;
+      if (!current.includes(triggers_status_ws.name)) {
+        const newTriggers = [...current, triggers_status_ws.name];
+        // Only scroll if this is the first triggered trigger
+        if (isFirstTrigger) {
+          const target = document.querySelector(
+            `#trigger-${triggers_status_ws.name}`,
+          );
+          if (target) {
+            target.scrollIntoView({
+              block: "center",
+              behavior: "smooth",
+              inline: "nearest",
+            });
+          }
+        }
+        return newTriggers;
+      }
+      return current;
+    });
     const target = document.querySelector(
       `#trigger-${triggers_status_ws.name}`,
     );
     if (target) {
-      target.scrollIntoView({
-        block: "center",
-        behavior: "smooth",
-        inline: "nearest",
-      });
       const ring = target.querySelector(".trigger-ring");
       if (ring) {
         ring.classList.add(`outline-selected`);
@@ -146,6 +162,9 @@ export default function TriggerView({
         const timeout = setTimeout(() => {
           ring.classList.remove(`outline-selected`);
           ring.classList.add("outline-transparent");
+          setTriggeredTrigger((prev) =>
+            (prev || []).filter((name) => name !== triggers_status_ws.name),
+          );
         }, 3000);
         return () => clearTimeout(timeout);
       }
@@ -387,6 +406,7 @@ export default function TriggerView({
       setShowCreate(false);
       setShowDelete(false);
       setUnsavedChanges(false);
+      setTriggeredTrigger([]);
     }
   }, [selectedCamera, setUnsavedChanges]);
 
@@ -500,7 +520,7 @@ export default function TriggerView({
                           <div
                             className={cn(
                               "trigger-ring pointer-events-none absolute inset-0 z-10 size-full rounded-md outline outline-[3px] -outline-offset-[2.8px] duration-500",
-                              triggeredTrigger === trigger.name
+                              triggeredTrigger.includes(trigger.name)
                                 ? "shadow-selected outline-selected"
                                 : "outline-transparent duration-500",
                             )}
