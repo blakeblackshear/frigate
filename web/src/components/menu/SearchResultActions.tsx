@@ -42,6 +42,7 @@ import useSWR from "swr";
 
 import { Trans, useTranslation } from "react-i18next";
 import { BsFillLightningFill } from "react-icons/bs";
+import BlurredIconButton from "../button/BlurredIconButton";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
@@ -213,15 +214,13 @@ export default function SearchResultActions({
           {config?.semantic_search?.enabled &&
             searchResult.data.type == "object" && (
               <Tooltip>
-                <TooltipTrigger>
-                  <div className="group relative inline-flex items-center justify-center">
-                    {/* blurred circular hover background */}
-                    <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
-                    <MdImageSearch
-                      className="relative z-10 size-5 cursor-pointer text-white/85 hover:text-white"
-                      onClick={findSimilar}
-                    />
-                  </div>
+                <TooltipTrigger asChild>
+                  <BlurredIconButton
+                    onClick={findSimilar}
+                    aria-label={t("itemMenu.findSimilar.aria")}
+                  >
+                    <MdImageSearch className="size-5" />
+                  </BlurredIconButton>
                 </TooltipTrigger>
                 <TooltipContent>
                   {t("itemMenu.findSimilar.label")}
@@ -236,14 +235,13 @@ export default function SearchResultActions({
             searchResult.data.type == "object" &&
             !searchResult.plus_id && (
               <Tooltip>
-                <TooltipTrigger>
-                  <div className="group relative inline-flex items-center justify-center">
-                    <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
-                    <FrigatePlusIcon
-                      className="relative z-10 size-5 cursor-pointer text-white/85 hover:text-white"
-                      onClick={showSnapshot}
-                    />
-                  </div>
+                <TooltipTrigger asChild>
+                  <BlurredIconButton
+                    onClick={showSnapshot}
+                    aria-label={t("itemMenu.submitToPlus.aria")}
+                  >
+                    <FrigatePlusIcon className="size-5" />
+                  </BlurredIconButton>
                 </TooltipTrigger>
                 <TooltipContent>
                   {t("itemMenu.submitToPlus.label")}
@@ -252,11 +250,10 @@ export default function SearchResultActions({
             )}
 
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <div className="group relative inline-flex items-center justify-center">
-                <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
-                <FiMoreVertical className="relative z-10 size-5 cursor-pointer text-white/85 hover:text-white" />
-              </div>
+            <DropdownMenuTrigger asChild>
+              <BlurredIconButton aria-label={t("itemMenu.more.aria")}>
+                <FiMoreVertical className="size-5" />
+              </BlurredIconButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">{menuItems}</DropdownMenuContent>
           </DropdownMenu>

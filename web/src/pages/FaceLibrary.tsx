@@ -5,6 +5,7 @@ import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
 import FaceSelectionDialog from "@/components/overlay/FaceSelectionDialog";
 import { Button, buttonVariants } from "@/components/ui/button";
+import BlurredIconButton from "@/components/button/BlurredIconButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -858,20 +859,15 @@ function FaceAttemptGroup({
             faceNames={faceNames}
             onTrainAttempt={(name) => onTrainAttempt(data, name)}
           >
-            <div className="group relative inline-flex items-center justify-center">
-              <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
-              <AddFaceIcon className="relative z-10 size-5 cursor-pointer text-white/85 hover:text-white" />
-            </div>
+            <BlurredIconButton>
+              <AddFaceIcon className="size-5" />
+            </BlurredIconButton>
           </FaceSelectionDialog>
           <Tooltip>
-            <TooltipTrigger>
-              <div className="group relative inline-flex items-center justify-center">
-                <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
-                <LuRefreshCw
-                  className="relative z-10 size-5 cursor-pointer text-white/85 hover:text-white"
-                  onClick={() => onReprocess(data)}
-                />
-              </div>
+            <TooltipTrigger asChild>
+              <BlurredIconButton onClick={() => onReprocess(data)}>
+                <LuRefreshCw className="size-5" />
+              </BlurredIconButton>
             </TooltipTrigger>
             <TooltipContent>{t("button.reprocessFace")}</TooltipContent>
           </Tooltip>
