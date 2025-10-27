@@ -20,12 +20,16 @@ type ImagePickerProps = {
   selectedImageId?: string;
   setSelectedImageId?: (id: string) => void;
   camera: string;
+  direct?: boolean;
+  className?: string;
 };
 
 export default function ImagePicker({
   selectedImageId,
   setSelectedImageId,
   camera,
+  direct = false,
+  className,
 }: ImagePickerProps) {
   const { t } = useTranslation(["components/dialog"]);
   const [open, setOpen] = useState(false);
@@ -63,10 +67,59 @@ export default function ImagePicker({
         setSelectedImageId(id);
       }
       setSearchTerm("");
-      setOpen(false);
+      if (!direct) {
+        setOpen(false);
+      }
     },
-    [setSelectedImageId],
+    [setSelectedImageId, direct],
   );
+
+  const renderSearchInput = () => (
+    <Input
+      type="text"
+      placeholder={t("imagePicker.search.placeholder")}
+      className="text-md mb-3 md:text-sm"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+  );
+
+  const renderImageGrid = () => (
+    <div className="grid grid-cols-2 gap-4 pr-1 sm:grid-cols-6">
+      {images.length === 0 ? (
+        <div className="col-span-2 text-center text-sm text-muted-foreground sm:col-span-6">
+          {t("imagePicker.noImages")}
+        </div>
+      ) : (
+        images.map((image) => (
+          <div
+            key={image.id}
+            className={cn(
+              "aspect-square cursor-pointer overflow-hidden rounded-lg border-2 bg-background transition-all",
+              selectedImageId === image.id &&
+                "border-selected ring-2 ring-selected",
+            )}
+          >
+            <img
+              src={`${apiHost}api/events/${image.id}/thumbnail.webp`}
+              alt={image.label}
+              className="h-full w-full object-cover"
+              onClick={() => handleImageSelect(image.id)}
+            />
+          </div>
+        ))
+      )}
+    </div>
+  );
+
+  if (direct) {
+    return (
+      <div ref={containerRef} className={className}>
+        {renderSearchInput()}
+        {renderImageGrid()}
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef}>
@@ -124,46 +177,16 @@ export default function ImagePicker({
             "scrollbar-container overflow-y-auto",
             isDesktop && "max-h-[75dvh] sm:max-w-xl md:max-w-3xl",
             isMobile && "px-4",
+            className,
           )}
         >
           <div className="mb-3 flex flex-row items-center justify-between">
             <Heading as="h4">{t("imagePicker.selectImage")}</Heading>
             <span tabIndex={0} className="sr-only" />
           </div>
-          <Input
-            type="text"
-            placeholder={t("imagePicker.search.placeholder")}
-            className="text-md mb-3 md:text-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          {renderSearchInput()}
           <div className="scrollbar-container flex h-full flex-col overflow-y-auto">
-            <div className="grid grid-cols-3 gap-2 pr-1">
-              {images.length === 0 ? (
-                <div className="col-span-3 text-center text-sm text-muted-foreground">
-                  {t("imagePicker.noImages")}
-                </div>
-              ) : (
-                images.map((image) => (
-                  <div
-                    key={image.id}
-                    className={cn(
-                      "flex flex-row items-center justify-center rounded-lg p-1 hover:cursor-pointer",
-                      selectedImageId === image.id
-                        ? "bg-selected text-white"
-                        : "hover:bg-secondary-foreground",
-                    )}
-                  >
-                    <img
-                      src={`${apiHost}api/events/${image.id}/thumbnail.webp`}
-                      alt={image.label}
-                      className="rounded object-cover"
-                      onClick={() => handleImageSelect(image.id)}
-                    />
-                  </div>
-                ))
-              )}
-            </div>
+            {renderImageGrid()}
           </div>
         </DialogContent>
       </Dialog>
