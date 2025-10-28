@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +17,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Trigger, TriggerAction } from "@/types/trigger";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 export type Step3FormData = {
   threshold: number;
@@ -39,13 +41,23 @@ export default function Step3ThresholdAndActions({
   isLoading = false,
 }: Step3ThresholdAndActionsProps) {
   const { t } = useTranslation("views/settings");
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  const availableActions = useMemo(() => {
+    if (!config) return [];
+
+    if (config.notifications.enabled) {
+      return ["notification", "sub_label", "attribute"];
+    }
+    return ["sub_label", "attribute"];
+  }, [config]);
 
   const formSchema = z.object({
     threshold: z
       .number()
       .min(0, t("triggers.dialog.form.threshold.error.min"))
       .max(1, t("triggers.dialog.form.threshold.error.max")),
-    actions: z.array(z.enum(["notification"])),
+    actions: z.array(z.enum(["notification", "sub_label", "attribute"])),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -127,7 +139,7 @@ export default function Step3ThresholdAndActions({
             <FormItem>
               <FormLabel>{t("triggers.dialog.form.actions.title")}</FormLabel>
               <div className="space-y-2">
-                {["notification"].map((action) => (
+                {availableActions.map((action) => (
                   <div key={action} className="flex items-center space-x-2">
                     <FormControl>
                       <Checkbox
