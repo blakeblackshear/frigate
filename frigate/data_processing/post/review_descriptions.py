@@ -58,7 +58,11 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             # With recordings at 480p resolution (480px height), each image uses ~200-300 tokens
             # This is ~2-3x more than preview images, so we reduce frame count accordingly
             # to avoid exceeding context limits and maintain reasonable inference times
-            if context_size > 10000:
+            if context_size > 14000:
+                return 16
+            elif context_size > 12000:
+                return 14
+            elif context_size > 10000:
                 return 12
             elif context_size > 6000:
                 return 10
