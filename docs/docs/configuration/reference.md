@@ -924,10 +924,13 @@ cameras:
         type: thumbnail
         # Reference data for matching, either an event ID for `thumbnail` or a text string for `description`. (default: none)
         data: 1751565549.853251-b69j73
-        # Similarity threshold for triggering. (default: none)
-        threshold: 0.7
+        # Similarity threshold for triggering. (default: shown below)
+        threshold: 0.8
         # List of actions to perform when the trigger fires. (default: none)
-        # Available options: `notification` (send a webpush notification)
+        # Available options:
+        # - `notification` (send a webpush notification)
+        # - `sub_label` (add trigger friendly name as a sub label to the triggering tracked object)
+        # - `attribute` (add trigger's name and similarity score as a data attribute to the triggering tracked object)
         actions:
           - notification
 

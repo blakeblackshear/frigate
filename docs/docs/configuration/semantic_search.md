@@ -119,7 +119,7 @@ Semantic Search must be enabled to use Triggers.
 
 ### Configuration
 
-Triggers are defined within the `semantic_search` configuration for each camera in your Frigate configuration file or through the UI. Each trigger consists of a `friendly_name`, a `type` (either `thumbnail` or `description`), a `data` field (the reference image event ID or text), a `threshold` for similarity matching, and a list of `actions` to perform when the trigger fires.
+Triggers are defined within the `semantic_search` configuration for each camera in your Frigate configuration file or through the UI. Each trigger consists of a `friendly_name`, a `type` (either `thumbnail` or `description`), a `data` field (the reference image event ID or text), a `threshold` for similarity matching, and a list of `actions` to perform when the trigger fires - `notification`, `sub_label`, and `attribute`.
 
 Triggers are best configured through the Frigate UI.
 
@@ -128,17 +128,20 @@ Triggers are best configured through the Frigate UI.
 1. Navigate to the **Settings** page and select the **Triggers** tab.
 2. Choose a camera from the dropdown menu to view or manage its triggers.
 3. Click **Add Trigger** to create a new trigger or use the pencil icon to edit an existing one.
-4. In the **Create Trigger** dialog:
-   - Enter a **Name** for the trigger (e.g., "red_car_alert").
+4. In the **Create Trigger** wizard:
+   - Enter a **Name** for the trigger (e.g., "Red Car Alert").
    - Enter a descriptive **Friendly Name** for the trigger (e.g., "Red car on the driveway camera").
    - Select the **Type** (`Thumbnail` or `Description`).
    - For `Thumbnail`, select an image to trigger this action when a similar thumbnail image is detected, based on the threshold.
    - For `Description`, enter text to trigger this action when a similar tracked object description is detected.
    - Set the **Threshold** for similarity matching.
    - Select **Actions** to perform when the trigger fires.
+     If native webpush notifications are enabled, check the `Send Notification` box to send a notification.
+     Check the `Add Sub Label` box to add the trigger's friendly name as a sub label to any triggering tracked objects.
+     Check the `Add Attribute` box to add the trigger's internal ID (e.g., "red_car_alert") to a data attribute on the tracked object that can be processed via the API or MQTT.
 5. Save the trigger to update the configuration and store the embedding in the database.
 
-When a trigger fires, the UI highlights the trigger with a blue outline for 3 seconds for easy identification.
+When a trigger fires, the UI highlights the trigger with a blue dot for 3 seconds for easy identification.
 
 ### Usage and Best Practices
 
