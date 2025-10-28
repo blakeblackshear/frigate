@@ -20,6 +20,7 @@ apt-get -qq install --no-install-recommends -y \
     libgl1 \
     libglib2.0-0 \
     libusb-1.0.0 \
+    python3-h2 \
     libgomp1  # memryx detector
 
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
