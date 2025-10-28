@@ -29,8 +29,7 @@ from ..types import DataProcessorMetrics
 
 logger = logging.getLogger(__name__)
 
-RECORDING_BUFFER_START_SECONDS = 5
-RECORDING_BUFFER_END_SECONDS = 10
+RECORDING_BUFFER_EXTENSION_PERCENT = 0.10
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
@@ -59,7 +58,11 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             # With recordings at 480p resolution (480px height), each image uses ~200-300 tokens
             # This is ~2-3x more than preview images, so we reduce frame count accordingly
             # to avoid exceeding context limits and maintain reasonable inference times
-            if context_size > 10000:
+            if context_size > 14000:
+                return 16
+            elif context_size > 12000:
+                return 14
+            elif context_size > 10000:
                 return 12
             elif context_size > 6000:
                 return 10
@@ -112,10 +115,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             image_source = camera_config.review.genai.image_source
 
             if image_source == ImageSourceEnum.recordings:
+                duration = final_data["end_time"] - final_data["start_time"]
+                buffer_extension = duration * RECORDING_BUFFER_EXTENSION_PERCENT
+
                 thumbs = self.get_recording_frames(
                     camera,
-                    final_data["start_time"] - RECORDING_BUFFER_START_SECONDS,
-                    final_data["end_time"] + RECORDING_BUFFER_END_SECONDS,
+                    final_data["start_time"],
+                    final_data["end_time"] + buffer_extension,
                     height=480,  # Use 480p for good balance between quality and token usage
                 )
 
@@ -415,13 +421,13 @@ def run_analysis(
         name = sub_labels_list[i].replace("_", " ").title()
         unified_objects.append(f"{name} ({object_type})")
 
-    # Add non-verified objects as "Unknown (type)"
+    # Add non-verified objects as "Unrecognized (type)"
     for label in objects_list:
         if "-verified" in label:
             continue
         elif label in labelmap_objects:
             object_type = label.replace("_", " ")
-            unified_objects.append(f"Unknown ({object_type})")
+            unified_objects.append(f"Unrecognized ({object_type})")
 
     analytics_data["unified_objects"] = unified_objects
 

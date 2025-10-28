@@ -99,7 +99,7 @@ When forming your description:
 ## Response Format
 
 Your response MUST be a flat JSON object with:
-- `title` (string): A concise, one-sentence title that captures the main activity. Use the exact names from "Objects in Scene" below (e.g., if the list shows "Joe (person)" and "Unknown (person)", say "Joe and unknown person"). Examples: "Joe walking dog in backyard", "Unknown person testing car doors at night", "Joe and unknown person in driveway".
+- `title` (string): A concise, one-sentence title that captures the main activity. Use names from "Objects in Scene" based on what you visually observe. If you see both a recognized name and "Unrecognized" for the same type but visually observe only one person/object, use ONLY the recognized name. Examples: "Joe walking dog in backyard", "Britt near vehicle in driveway", "Joe and an unrecognized person on front porch".
 - `scene` (string): A narrative description of what happens across the sequence from start to finish. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
 - `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below. Your threat level must be consistent with your scene description and the guidance above.
@@ -107,8 +107,8 @@ Your response MUST be a flat JSON object with:
 
 ## Threat Level Definitions
 
-- 0 — **Normal activity**: The observable activity aligns with the Normal Activity Patterns above. The evidence—considering zone, objects, time, and actions together—supports a benign explanation. **Use this level for routine activities even if minor ambiguous elements exist.**
-- 1 — **Potentially suspicious**: The observable activity aligns with the Suspicious Activity Indicators above, or shows behavior that raises genuine security concerns. The activity warrants human review. **Use this level when the evidence suggests concerning behavior, even if not an immediate threat.**
+- 0 — **Normal activity**: The observable activity matches Normal Activity Indicators (brief vehicle access, deliveries, known people, pet activity, services). The evidence supports a benign explanation when considering zone, objects, time, and actions together. **Brief activities with apparent legitimate purpose are generally Level 0.**
+- 1 — **Potentially suspicious**: The observable activity matches Suspicious Activity Indicators (testing access, stealing items, climbing barriers, lingering without interaction across multiple frames, unusual hours with suspicious behavior). The activity shows concerning patterns that warrant human review. **Requires clear suspicious behavior, not just ambiguity.**
 - 2 — **Immediate threat**: Clear evidence of active criminal activity, forced entry, break-in, vandalism, aggression, weapons, theft in progress, or property damage.
 
 ## Sequence Details
@@ -119,7 +119,11 @@ Your response MUST be a flat JSON object with:
 
 ## Objects in Scene
 
-Each line represents one object in the scene. Named objects are verified identities; "Unknown" indicates unverified objects of that type:
+Each line represents a detection state, not necessarily unique individuals. Named objects are recognized/verified identities; "Unrecognized" indicates objects detected but not identified.
+
+**CRITICAL: When you see both recognized and unrecognized entries of the same type (e.g., "Name (person)" and "Unrecognized (person)"), visually count how many distinct people/objects you actually see based on appearance and clothing. If you observe only ONE person throughout the sequence, use ONLY the recognized name (e.g., "Name"), not "Unrecognized". The same person may be recognized in some frames but not others. Only describe both recognized and unrecognized if you visually see MULTIPLE distinct people with clearly different appearances.**
+
+**Note: "Unrecognized" is NOT an indicator of suspicious activity—it simply means the system hasn't identified that object.**
 {get_objects_list()}
 
 ## Important Notes
@@ -161,7 +165,7 @@ Each line represents one object in the scene. Named objects are verified identit
                 metadata = ReviewMetadata.model_validate_json(clean_json)
 
                 if any(
-                    not obj.startswith("Unknown")
+                    not obj.startswith("Unrecognized")
                     for obj in review_data["unified_objects"]
                 ):
                     metadata.potential_threat_level = 0
