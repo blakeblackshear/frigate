@@ -110,19 +110,13 @@ Frigate supports multiple different detectors that work on different types of ha
 | ssd mobilenet    | ~ 25 ms                         |
 | yolov5m          | ~ 118 ms                        |
 
-**Synaptics**
-
-- [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs to provide efficient object detection.
-
-:::
-
 ### AXERA
 
 - **AXEngine** Default model is **yolov5s_320**
 
 | Name             | AXERA AX650N/AX8850N Inference Time |
 | ---------------- | ----------------------------------- |
-| yolov5s_320      | ~ 1.676 ms                             |
+| yolov5s_320      | ~ 1.676 ms                          |
 
 ### Hailo-8
 
