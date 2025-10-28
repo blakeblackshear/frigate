@@ -82,11 +82,11 @@ export default function CreateTriggerDialog({
   const availableActions = useMemo(() => {
     if (!config) return [];
 
-    if (config.notifications.enabled) {
+    if (config.cameras[selectedCamera].notifications.enabled_in_config) {
       return ["notification", "sub_label", "attribute"];
     }
     return ["sub_label", "attribute"];
-  }, [config]);
+  }, [config, selectedCamera]);
 
   const existingTriggerNames = useMemo(() => {
     if (

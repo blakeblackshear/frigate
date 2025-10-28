@@ -243,6 +243,7 @@ export default function TriggerWizardDialog({
               <Step3ThresholdAndActions
                 initialData={wizardState.step3Data}
                 trigger={trigger}
+                camera={selectedCamera}
                 onNext={handleStep3Next}
                 onBack={handleBack}
                 isLoading={isLoading}

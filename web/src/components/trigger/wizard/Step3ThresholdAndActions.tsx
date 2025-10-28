@@ -28,6 +28,7 @@ export type Step3FormData = {
 type Step3ThresholdAndActionsProps = {
   initialData?: Step3FormData;
   trigger?: Trigger | null;
+  camera: string;
   onNext: (data: Step3FormData) => void;
   onBack: () => void;
   isLoading?: boolean;
@@ -36,6 +37,7 @@ type Step3ThresholdAndActionsProps = {
 export default function Step3ThresholdAndActions({
   initialData,
   trigger,
+  camera,
   onNext,
   onBack,
   isLoading = false,
@@ -46,11 +48,11 @@ export default function Step3ThresholdAndActions({
   const availableActions = useMemo(() => {
     if (!config) return [];
 
-    if (config.notifications.enabled) {
+    if (config.cameras[camera].notifications.enabled_in_config) {
       return ["notification", "sub_label", "attribute"];
     }
     return ["sub_label", "attribute"];
-  }, [config]);
+  }, [config, camera]);
 
   const formSchema = z.object({
     threshold: z
