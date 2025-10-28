@@ -10,6 +10,10 @@ import cv2
 import numpy as np
 from peewee import DoesNotExist
 
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+    EventMetadataTypeEnum,
+)
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
@@ -34,6 +38,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
         db: SqliteVecQueueDatabase,
         config: FrigateConfig,
         requestor: InterProcessRequestor,
+        sub_label_publisher: EventMetadataPublisher,
         metrics: DataProcessorMetrics,
         embeddings,
     ):
@@ -41,6 +46,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
         self.db = db
         self.embeddings = embeddings
         self.requestor = requestor
+        self.sub_label_publisher = sub_label_publisher
         self.trigger_embeddings: list[np.ndarray] = []
 
         self.thumb_stats = ZScoreNormalization()
@@ -184,14 +190,44 @@ class SemanticTriggerProcessor(PostProcessorApi):
                     ),
                 )
 
+                friendly_name = (
+                    self.config.cameras[camera]
+                    .semantic_search.triggers[trigger["name"]]
+                    .friendly_name
+                )
+
                 if (
                     self.config.cameras[camera]
                     .semantic_search.triggers[trigger["name"]]
                     .actions
                 ):
-                    # TODO: handle actions for the trigger
+                    # handle actions for the trigger
                     # notifications already handled by webpush
-                    pass
+                    if (
+                        "sub_label"
+                        in self.config.cameras[camera]
+                        .semantic_search.triggers[trigger["name"]]
+                        .actions
+                    ):
+                        self.sub_label_publisher.publish(
+                            (event_id, friendly_name, similarity),
+                            EventMetadataTypeEnum.sub_label,
+                        )
+                    if (
+                        "attribute"
+                        in self.config.cameras[camera]
+                        .semantic_search.triggers[trigger["name"]]
+                        .actions
+                    ):
+                        self.sub_label_publisher.publish(
+                            (
+                                event_id,
+                                trigger["name"],
+                                trigger["type"],
+                                similarity,
+                            ),
+                            EventMetadataTypeEnum.attribute.value,
+                        )
 
             if WRITE_DEBUG_IMAGES:
                 try:

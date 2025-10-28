@@ -233,6 +233,7 @@ class EmbeddingMaintainer(threading.Thread):
                 db,
                 self.config,
                 self.requestor,
+                self.event_metadata_publisher,
                 metrics,
                 self.embeddings,
             )
