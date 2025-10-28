@@ -18,6 +18,9 @@
     },
     "unit_system": {
       "label": "The unit system to use for measurements."
+    },
+    "show_camera_names": {
+      "label": "Show the camera name in the player"
     }
   }
 }

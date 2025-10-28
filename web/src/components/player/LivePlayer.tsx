@@ -35,6 +35,7 @@ type LivePlayerProps = {
   streamName: string;
   preferredLiveMode: LivePlayerMode;
   showStillWithoutActivity?: boolean;
+  alwaysShowCameraName?: boolean;
   useWebGL: boolean;
   windowVisible?: boolean;
   playAudio?: boolean;
@@ -59,6 +60,7 @@ export default function LivePlayer({
   streamName,
   preferredLiveMode,
   showStillWithoutActivity = true,
+  alwaysShowCameraName = false,
   useWebGL = false,
   windowVisible = true,
   playAudio = false,
@@ -433,20 +435,26 @@ export default function LivePlayer({
         </div>
       )}
 
-      <div className="absolute right-2 top-2">
+      <div className="absolute right-2 top-2 flex items-center gap-3">
+        {(alwaysShowCameraName ||
+          (offline && showStillWithoutActivity) ||
+          !cameraEnabled) && (
+          <Chip
+            className={`z-0 flex items-start justify-between space-x-1 text-xs capitalize ${
+              (offline && showStillWithoutActivity) || !cameraEnabled
+                ? "bg-red-500 bg-gradient-to-br from-red-400 to-red-500"
+                : "bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+            }`}
+          >
+            {cameraName}
+          </Chip>
+        )}
         {autoLive &&
           !offline &&
           activeMotion &&
           ((showStillWithoutActivity && !liveReady) || liveReady) && (
             <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
           )}
-        {((offline && showStillWithoutActivity) || !cameraEnabled) && (
-          <Chip
-            className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
-          >
-            {cameraName}
-          </Chip>
-        )}
       </div>
       {showStats && (
         <PlayerStats stats={stats} minimal={cameraRef !== undefined} />

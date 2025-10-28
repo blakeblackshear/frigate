@@ -43,3 +43,4 @@ class UIConfig(FrigateBaseModel):
     unit_system: UnitSystemEnum = Field(
         default=UnitSystemEnum.metric, title="The unit system to use for measurements."
     )
+    show_camera_names: Optional[bool] = Field(default=False, title="Show camera name")
