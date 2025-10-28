@@ -903,8 +903,9 @@
       "description": "Description"
     },
     "actions": {
-      "alert": "Mark as Alert",
-      "notification": "Send Notification"
+      "notification": "Send Notification",
+      "sub_label": "Add Sub Label",
+      "attribute": "Add Attribute"
     },
     "dialog": {
       "createTrigger": {
@@ -959,7 +960,7 @@
         },
         "actions": {
           "title": "Actions",
-          "desc": "By default, Frigate fires an MQTT message for all triggers. Choose an additional action to perform when this trigger fires.",
+          "desc": "By default, Frigate fires an MQTT message for all triggers. Sub labels add the trigger name to the object label. Attributes are searchable metadata stored separately in the tracked object metadata.",
           "error": {
             "min": "At least one action must be selected."
           }

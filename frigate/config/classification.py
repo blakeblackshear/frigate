@@ -33,6 +33,8 @@ class TriggerType(str, Enum):
 
 class TriggerAction(str, Enum):
     NOTIFICATION = "notification"
+    SUB_LABEL = "sub_label"
+    ATTRIBUTE = "attribute"
 
 
 class ObjectClassificationType(str, Enum):

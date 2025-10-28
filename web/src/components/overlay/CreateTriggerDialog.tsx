@@ -79,6 +79,15 @@ export default function CreateTriggerDialog({
   const { t } = useTranslation("views/settings");
   const { data: config } = useSWR<FrigateConfig>("config");
 
+  const availableActions = useMemo(() => {
+    if (!config) return [];
+
+    if (config.cameras[selectedCamera].notifications.enabled_in_config) {
+      return ["notification", "sub_label", "attribute"];
+    }
+    return ["sub_label", "attribute"];
+  }, [config, selectedCamera]);
+
   const existingTriggerNames = useMemo(() => {
     if (
       !config ||
@@ -132,7 +141,7 @@ export default function CreateTriggerDialog({
       .number()
       .min(0, t("triggers.dialog.form.threshold.error.min"))
       .max(1, t("triggers.dialog.form.threshold.error.max")),
-    actions: z.array(z.enum(["notification"])),
+    actions: z.array(z.enum(["notification", "sub_label", "attribute"])),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -383,7 +392,7 @@ export default function CreateTriggerDialog({
                     {t("triggers.dialog.form.actions.title")}
                   </FormLabel>
                   <div className="space-y-2">
-                    {["notification"].map((action) => (
+                    {availableActions.map((action) => (
                       <div key={action} className="flex items-center space-x-2">
                         <FormControl>
                           <Checkbox
