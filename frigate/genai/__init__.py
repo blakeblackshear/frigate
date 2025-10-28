@@ -94,7 +94,8 @@ When forming your description:
 - Note visible details such as clothing, items being carried or placed, tools or equipment present, and how they interact with the property or objects.
 - Consider the full sequence chronologically: what happens from start to finish, how duration and actions relate to the location and objects involved.
 - **Use the actual timestamp provided in "Activity started at"** below for time of day context—do not infer time from image brightness or darkness. Unusual hours (late night/early morning) should increase suspicion when the observable behavior itself appears questionable. However, recognize that some legitimate activities can occur at any hour.
-- **Weigh all evidence holistically**: Match the activity against both the normal and suspicious patterns above, then evaluate based on the complete context (zone, objects, time, actions). Activities matching normal patterns should be Level 0. Activities matching suspicious indicators should be Level 1. Use your judgment for edge cases.
+- **Consider duration as a primary factor**: Very short sequences (under 15 seconds) during normal hours (6 AM - 11 PM) are almost always Level 0 unless explicit suspicious actions are visible (testing doors, stealing, climbing). Brief activity with apparent purpose (vehicle access, deliveries, passing through) is normal.
+- **Weigh all evidence holistically**: Match the activity against both the normal and suspicious patterns above, then evaluate based on the complete context (zone, objects, time, actions, duration). Activities matching normal patterns should be Level 0. Activities matching suspicious indicators should be Level 1. Use your judgment for edge cases.
 
 ## Response Format
 
@@ -107,8 +108,8 @@ Your response MUST be a flat JSON object with:
 
 ## Threat Level Definitions
 
-- 0 — **Normal activity**: The observable activity matches Normal Activity Indicators (brief vehicle access, deliveries, known people, pet activity, services). The evidence supports a benign explanation when considering zone, objects, time, and actions together. **Brief activities with apparent legitimate purpose are generally Level 0.**
-- 1 — **Potentially suspicious**: The observable activity matches Suspicious Activity Indicators (testing access, stealing items, climbing barriers, lingering without interaction across multiple frames, unusual hours with suspicious behavior). The activity shows concerning patterns that warrant human review. **Requires clear suspicious behavior, not just ambiguity.**
+- 0 — **Normal activity**: The observable activity matches Normal Activity Indicators (brief vehicle access, deliveries, known people, pet activity, services). **Very short sequences (under 15 seconds) during normal hours (6 AM - 11 PM) with apparent purpose (vehicle access, deliveries, passing through) are Level 0.** Brief activities are generally normal.
+- 1 — **Potentially suspicious**: The observable activity matches Suspicious Activity Indicators (testing access, stealing items, climbing barriers, lingering throughout most of sequence without task, unusual hours 11 PM - 5 AM with suspicious behavior). **Requires clear suspicious actions visible in frames, not just ambiguity or brief presence.**
 - 2 — **Immediate threat**: Clear evidence of active criminal activity, forced entry, break-in, vandalism, aggression, weapons, theft in progress, or property damage.
 
 ## Sequence Details
