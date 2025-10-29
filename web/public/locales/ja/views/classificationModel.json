@@ -1,0 +1,14 @@
+{
+  "documentTitle": "分類モデル",
+  "button": {
+    "deleteImages": "画像を削除"
+  },
+  "toast": {
+    "success": {
+      "deletedImage": "削除された画像",
+      "categorizedImage": "画像の分類に成功しました",
+      "trainedModel": "モデルを正常に学習させました。",
+      "trainingModel": "モデルのトレーニングを正常に開始しました。"
+    }
+  }
+}
