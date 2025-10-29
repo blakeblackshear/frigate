@@ -120,15 +120,15 @@ export function MotionSegment({
     return showMinimap && segmentTime === alignedMinimapEndTime;
   }, [showMinimap, segmentTime, alignedMinimapEndTime]);
 
-  // Top border: current segment has no recording, but previous segment has recordings
+  // Bottom border: current segment HAS recording, but next segment (below/earlier) has NO recording
   const isFirstSegmentWithoutRecording = useMemo(() => {
-    return hasRecording === false && prevIsNoRecording === false;
-  }, [hasRecording, prevIsNoRecording]);
-
-  // Bottom border: current segment has no recording, but next segment has recordings
-  const isLastSegmentWithoutRecording = useMemo(() => {
-    return hasRecording === false && nextIsNoRecording === false;
+    return hasRecording === true && nextIsNoRecording === true;
   }, [hasRecording, nextIsNoRecording]);
+
+  // Top border: current segment HAS recording, but prev segment (above/later) has NO recording
+  const isLastSegmentWithoutRecording = useMemo(() => {
+    return hasRecording === true && prevIsNoRecording === true;
+  }, [hasRecording, prevIsNoRecording]);
 
   const firstMinimapSegmentRef = useRef<HTMLDivElement>(null);
 
@@ -198,10 +198,10 @@ export function MotionSegment({
           onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
         >
           {isFirstSegmentWithoutRecording && (
-            <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-primary-variant/50" />
+            <div className="absolute bottom-[0px] left-0 right-0 h-[1px] bg-primary-variant/50" />
           )}
           {isLastSegmentWithoutRecording && (
-            <div className="absolute bottom-[0px] left-0 right-0 h-[1px] bg-primary-variant/50" />
+            <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-primary-variant/50" />
           )}
           {!motionOnly && (
             <>

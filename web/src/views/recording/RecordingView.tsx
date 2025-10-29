@@ -924,7 +924,7 @@ function Timeline({
     {
       before: timeRange.before,
       after: timeRange.after,
-      scale: Math.round(zoomSettings.segmentDuration / 2),
+      scale: Math.round(zoomSettings.segmentDuration),
       cameras: mainCamera,
     },
   ]);
