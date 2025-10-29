@@ -130,22 +130,22 @@ export default function ModelSelectionView({
           </Button>
         </div>
       </div>
-      <div className="grid auto-rows-max grid-cols-2 gap-2 overflow-y-auto p-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 3xl:grid-cols-10">
-        {selectedClassificationConfigs.length === 0 ? (
-          <NoModelsView
-            onCreateModel={() => setNewModel(true)}
-            modelType={pageToggle}
-          />
-        ) : (
-          selectedClassificationConfigs.map((config) => (
+      {selectedClassificationConfigs.length === 0 ? (
+        <NoModelsView
+          onCreateModel={() => setNewModel(true)}
+          modelType={pageToggle}
+        />
+      ) : (
+        <div className="grid auto-rows-max grid-cols-2 gap-2 overflow-y-auto p-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 3xl:grid-cols-10">
+          {selectedClassificationConfigs.map((config) => (
             <ModelCard
               key={config.name}
               config={config}
               onClick={() => onClick(config)}
             />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
