@@ -198,7 +198,7 @@ export function MotionSegment({
           onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
         >
           {isFirstSegmentWithoutRecording && (
-            <div className="absolute bottom-[0px] left-0 right-0 h-[1px] bg-primary-variant/50" />
+            <div className="absolute bottom-[0px] left-0 right-0 h-[1px] bg-primary-variant/40" />
           )}
           {isLastSegmentWithoutRecording && (
             <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-primary-variant/50" />
