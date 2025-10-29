@@ -91,8 +91,8 @@ export default function AnnotationOffsetSlider({ className }: Props) {
         <div className="w-full flex-1 landscape:flex">
           <Slider
             value={[annotationOffset]}
-            min={-1500}
-            max={1500}
+            min={-2500}
+            max={2500}
             step={50}
             onValueChange={handleChange}
           />
