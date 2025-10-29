@@ -203,6 +203,7 @@ export function MotionReviewTimeline({
       scrollToSegment={scrollToSegment}
       isZooming={isZooming}
       zoomDirection={zoomDirection}
+      getRecordingAvailability={getRecordingAvailability}
     >
       <VirtualizedMotionSegments
         ref={virtualizedSegmentsRef}

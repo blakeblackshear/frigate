@@ -158,6 +158,15 @@ export const VirtualizedMotionSegments = forwardRef<
 
         const hasRecording = getRecordingAvailability(segmentTime);
 
+        const prevSegmentTime = segmentTime + segmentDuration;
+        const nextSegmentTime = segmentTime - segmentDuration;
+
+        const prevHasRecording = getRecordingAvailability(prevSegmentTime);
+        const nextHasRecording = getRecordingAvailability(nextSegmentTime);
+
+        const prevIsNoRecording = prevHasRecording === false;
+        const nextIsNoRecording = nextHasRecording === false;
+
         if ((!segmentMotion || overlappingReviewItems) && motionOnly) {
           return null; // Skip rendering this segment in motion only mode
         }
@@ -177,6 +186,8 @@ export const VirtualizedMotionSegments = forwardRef<
               firstHalfMotionValue={firstHalfMotionValue}
               secondHalfMotionValue={secondHalfMotionValue}
               hasRecording={hasRecording}
+              prevIsNoRecording={prevIsNoRecording}
+              nextIsNoRecording={nextIsNoRecording}
               segmentDuration={segmentDuration}
               segmentTime={segmentTime}
               timestampSpread={timestampSpread}
