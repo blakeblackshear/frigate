@@ -16,13 +16,20 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { Event } from "@/types/event";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { ReviewSegment } from "@/types/review";
-import { LuChevronDown, LuCircle, LuChevronRight } from "react-icons/lu";
+import {
+  LuChevronDown,
+  LuCircle,
+  LuChevronRight,
+  LuSettings,
+} from "react-icons/lu";
 import { getTranslatedLabel } from "@/utils/i18n";
 import EventMenu from "@/components/timeline/EventMenu";
 import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Link } from "react-router-dom";
+import { Switch } from "@/components/ui/switch";
+import { usePersistence } from "@/hooks/use-persistence";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
@@ -51,6 +58,11 @@ export default function DetailStream({
 
   const effectiveTime = currentTime + annotationOffset / 1000;
   const [upload, setUpload] = useState<Event | undefined>(undefined);
+  const [controlsExpanded, setControlsExpanded] = useState(false);
+  const [alwaysExpandActive, setAlwaysExpandActive] = usePersistence(
+    "detailStreamActiveExpanded",
+    true,
+  );
 
   const onSeekCheckPlaying = (timestamp: number) => {
     onSeek(timestamp, isPlaying);
@@ -168,7 +180,7 @@ export default function DetailStream({
   }
 
   return (
-    <div className="relative">
+    <>
       <FrigatePlusDialog
         upload={upload}
         onClose={() => setUpload(undefined)}
@@ -179,38 +191,76 @@ export default function DetailStream({
         }}
       />
 
-      <div
-        ref={scrollRef}
-        className="scrollbar-container h-[calc(100vh-70px)] overflow-y-auto"
-      >
-        <div className="space-y-4 py-2">
-          {reviewItems?.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              {t("detail.noDataFound")}
+      <div className="relative flex h-full flex-col">
+        <div
+          ref={scrollRef}
+          className="scrollbar-container flex-1 overflow-y-auto pb-14"
+        >
+          <div className="space-y-4 py-2">
+            {reviewItems?.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">
+                {t("detail.noDataFound")}
+              </div>
+            ) : (
+              reviewItems?.map((review: ReviewSegment) => {
+                const id = `review-${review.id ?? review.start_time ?? Math.floor(review.start_time ?? 0)}`;
+                return (
+                  <ReviewGroup
+                    key={id}
+                    id={id}
+                    review={review}
+                    config={config}
+                    onSeek={onSeekCheckPlaying}
+                    effectiveTime={effectiveTime}
+                    isActive={activeReviewId == id}
+                    onActivate={() => setActiveReviewId(id)}
+                    onOpenUpload={(e) => setUpload(e)}
+                    alwaysExpandActive={alwaysExpandActive}
+                  />
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Collapsible Controls Section - Absolutely positioned at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 z-30 rounded-t-md border border-secondary-highlight bg-background shadow-md">
+          <button
+            onClick={() => setControlsExpanded(!controlsExpanded)}
+            className="flex w-full items-center justify-between p-3"
+          >
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <LuSettings className="size-4" />
+              <span>{t("detail.settings")}</span>
             </div>
-          ) : (
-            reviewItems?.map((review: ReviewSegment) => {
-              const id = `review-${review.id ?? review.start_time ?? Math.floor(review.start_time ?? 0)}`;
-              return (
-                <ReviewGroup
-                  key={id}
-                  id={id}
-                  review={review}
-                  config={config}
-                  onSeek={onSeekCheckPlaying}
-                  effectiveTime={effectiveTime}
-                  isActive={activeReviewId == id}
-                  onActivate={() => setActiveReviewId(id)}
-                  onOpenUpload={(e) => setUpload(e)}
-                />
-              );
-            })
+            {controlsExpanded ? (
+              <LuChevronDown className="size-4 text-primary-variant" />
+            ) : (
+              <LuChevronRight className="size-4 text-primary-variant" />
+            )}
+          </button>
+          {controlsExpanded && (
+            <div className="space-y-3 px-3 pb-3">
+              <AnnotationOffsetSlider />
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">
+                    {t("detail.alwaysExpandActive.title")}
+                  </label>
+                  <Switch
+                    checked={alwaysExpandActive}
+                    onCheckedChange={setAlwaysExpandActive}
+                  />
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {t("detail.alwaysExpandActive.desc")}
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
-
-      <AnnotationOffsetSlider />
-    </div>
+    </>
   );
 }
 
@@ -223,6 +273,7 @@ type ReviewGroupProps = {
   onActivate?: () => void;
   onOpenUpload?: (e: Event) => void;
   effectiveTime?: number;
+  alwaysExpandActive?: boolean;
 };
 
 function ReviewGroup({
@@ -234,10 +285,18 @@ function ReviewGroup({
   onActivate,
   onOpenUpload,
   effectiveTime,
+  alwaysExpandActive = false,
 }: ReviewGroupProps) {
   const { t } = useTranslation("views/events");
   const [open, setOpen] = useState(false);
   const start = review.start_time ?? 0;
+
+  // Auto-expand when this review becomes active and alwaysExpandActive is enabled
+  useEffect(() => {
+    if (isActive && alwaysExpandActive) {
+      setOpen(true);
+    }
+  }, [isActive, alwaysExpandActive]);
 
   const displayTime = formatUnixTimestampToDateTime(start, {
     timezone: config.ui.timezone,
