@@ -740,7 +740,7 @@
   "triggers": {
     "documentTitle": "触发器",
     "management": {
-      "title": "触发器管理",
+      "title": "触发器",
       "desc": "管理 {{camera}} 的触发器。您可以使用“缩略图”类型，基于与所选追踪对象相似的缩略图来触发；也可以使用“描述”类型，基于与您指定的文本相似的描述来触发。"
     },
     "addTrigger": "添加触发器",
@@ -779,25 +779,28 @@
       "form": {
         "name": {
           "title": "名称",
-          "placeholder": "输入触发器名称",
+          "placeholder": "触发器名称",
           "error": {
-            "minLength": "名称至少要两个字符。",
-            "invalidCharacters": "名称只能包含字母、数字、下划线和连字符。",
+            "minLength": "该字段至少需要两个字符。",
+            "invalidCharacters": "该字段只能包含字母、数字、下划线和连字符。",
             "alreadyExists": "此摄像头已存在同名触发器。"
-          }
+          },
+          "description": "请输入用于识别此触发器的唯一名称或描述"
         },
         "enabled": {
           "description": "开启/关闭此触发器"
         },
         "type": {
           "title": "类型",
-          "placeholder": "选择触发类型"
+          "placeholder": "选择触发类型",
+          "description": "当检测到相似的追踪目标描述时触发",
+          "thumbnail": "当检测到相似的追踪目标缩略图时触发"
         },
         "content": {
           "title": "内容",
           "imagePlaceholder": "选择图片",
           "textPlaceholder": "输入文字内容",
-          "imageDesc": "选择一张图片，当检测到相似图片时触发此操作。",
+          "imageDesc": "仅显示最近的 100 张缩略图。如果找不到需要的图片，请前往“浏览”页面查看更早的目标，并从菜单中设置触发器。",
           "textDesc": "输入文本，当检测到相似的追踪对象描述时触发此操作。",
           "error": {
             "required": "内容为必填项。"
@@ -808,7 +811,8 @@
           "error": {
             "min": "阈值必须大于 0",
             "max": "阈值必须小于 1"
-          }
+          },
+          "desc": "设置此触发器的相似度阈值。阈值越高，触发所需的匹配就越精确。"
         },
         "actions": {
           "title": "动作",
@@ -839,6 +843,23 @@
     "semanticSearch": {
       "title": "语义搜索已关闭",
       "desc": "必须启用语义搜索功能才能使用触发器。"
+    },
+    "wizard": {
+      "title": "创建触发器",
+      "step1": {
+        "description": "配置触发器的基础设置。"
+      },
+      "step2": {
+        "description": "设置触发此操作的内容。"
+      },
+      "step3": {
+        "description": "配置此触发器的相似度阈值与执行动作。"
+      },
+      "steps": {
+        "nameAndType": "名称与类型",
+        "configureData": "配置数据",
+        "thresholdAndActions": "阈值与动作"
+      }
     }
   },
   "roles": {
@@ -954,11 +975,16 @@
         "invalidCharacters": "摄像头名称内有不允许使用的字符",
         "nameExists": "该摄像头名称已存在",
         "brands": {
-          "reolink-rtsp": "不建议使用萤石RTSP协议。建议在摄像头设置中启用HTTP协议，并重新执行摄像头向导。"
-        }
+          "reolink-rtsp": "不建议使用萤石 RTSP 协议。建议在摄像头设置中启用 HTTP 协议，并重新运行摄像头添加向导。"
+        },
+        "customUrlRtspRequired": "自定义URL必须以“rtsp://”开头；对于非 RTSP 协议的摄像头流，需手动添加至配置文件。"
       },
       "docs": {
         "reolink": "https://docs.frigate-cn.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "正在获取摄像头基本数据……",
+        "fetchingSnapshot": "正在获取摄像头快照……"
       }
     },
     "step2": {
@@ -1037,7 +1063,9 @@
         },
         "hikvision": {
           "substreamWarning": "子码流1被锁定为低分辨率。多数海康威视的摄像头支持额外的子码流，但需要在摄像头设置中手动开启。如果可以，建议检查并使用这些子码流。"
-        }
+        },
+        "resolutionHigh": "使用 {{resolution}} 分辨率可能会导致占用更多的系统资源。",
+        "resolutionLow": "使用 {{resolution}} 分辨率可能过低，难以检测较小的物体。"
       }
     }
   },
