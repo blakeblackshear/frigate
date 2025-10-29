@@ -32,7 +32,7 @@
   },
   "export": {
     "time": {
-      "lastHour_one": "Zadnja ura",
+      "lastHour_one": "Zadnja {{count}} ura",
       "lastHour_two": "Zadnji {{count}} uri",
       "lastHour_few": "Zadnje {{count}} ure",
       "lastHour_other": "Zadnjih {{count}} ur",
@@ -54,7 +54,7 @@
     "export": "Izvoz",
     "selectOrExport": "Izberi ali Izvozi",
     "toast": {
-      "success": "Izvoz se je uspešno začel. Datoteko si oglejte v mapi /exports.",
+      "success": "Izvoz se je uspešno začel. Datoteko si oglejte v izvozih.",
       "error": {
         "failed": "Npaka pri začetku izvoza: {{error}}",
         "endTimeMustAfterStartTime": "Končni čas mora biti po začetnem čase",
@@ -109,7 +109,8 @@
     "button": {
       "export": "Izvoz",
       "markAsReviewed": "Označi kot pregledano",
-      "deleteNow": "Izbriši Zdaj"
+      "deleteNow": "Izbriši Zdaj",
+      "markAsUnreviewed": "Označi kot nepregledano"
     }
   },
   "imagePicker": {
