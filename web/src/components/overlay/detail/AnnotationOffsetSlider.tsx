@@ -1,11 +1,15 @@
 import { useCallback, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { useDetailStream } from "@/context/detail-stream-context";
 import axios from "axios";
 import { useSWRConfig } from "swr";
 import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
+import { LuInfo } from "react-icons/lu";
+import { cn } from "@/lib/utils";
+import { isMobile } from "react-device-detect";
 
 type Props = {
   className?: string;
@@ -65,30 +69,67 @@ export default function AnnotationOffsetSlider({ className }: Props) {
 
   return (
     <div
-      className={`absolute bottom-0 left-0 right-0 z-30 flex items-center gap-3 bg-background p-3 ${className ?? ""}`}
-      style={{ pointerEvents: "auto" }}
+      className={cn(
+        "flex flex-col gap-0.5",
+        isMobile && "landscape:gap-3",
+        className,
+      )}
     >
-      <div className="w-56 text-sm">
-        Annotation offset (ms): {annotationOffset}
+      <div
+        className={cn(
+          "flex items-center gap-3",
+          isMobile &&
+            "landscape:flex-col landscape:items-start landscape:gap-4",
+        )}
+      >
+        <div className="flex max-w-28 flex-row items-center gap-2 text-sm md:max-w-48">
+          <span className="max-w-24 md:max-w-44">
+            {t("trackingDetails.annotationSettings.offset.label")}:
+          </span>
+          <span className="text-primary-variant">{annotationOffset}</span>
+        </div>
+        <div className="w-full flex-1 landscape:flex">
+          <Slider
+            value={[annotationOffset]}
+            min={-1500}
+            max={1500}
+            step={50}
+            onValueChange={handleChange}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="ghost" onClick={reset}>
+            {t("button.reset", { ns: "common" })}
+          </Button>
+          <Button size="sm" onClick={save} disabled={isSaving}>
+            {isSaving
+              ? t("button.saving", { ns: "common" })
+              : t("button.save", { ns: "common" })}
+          </Button>
+        </div>
       </div>
-      <div className="flex-1">
-        <Slider
-          value={[annotationOffset]}
-          min={-1500}
-          max={1500}
-          step={50}
-          onValueChange={handleChange}
-        />
-      </div>
-      <div className="flex items-center gap-2">
-        <Button size="sm" variant="ghost" onClick={reset}>
-          Reset
-        </Button>
-        <Button size="sm" onClick={save} disabled={isSaving}>
-          {isSaving
-            ? t("button.saving", { ns: "common" })
-            : t("button.save", { ns: "common" })}
-        </Button>
+      <div
+        className={cn(
+          "flex items-center gap-2 text-xs text-muted-foreground",
+          isMobile && "landscape:flex-col landscape:items-start",
+        )}
+      >
+        <Trans ns="views/explore">
+          trackingDetails.annotationSettings.offset.millisecondsToOffset
+        </Trans>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className="focus:outline-none"
+              aria-label={t("trackingDetails.annotationSettings.offset.desc")}
+            >
+              <LuInfo className="size-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 text-sm">
+            {t("trackingDetails.annotationSettings.offset.desc")}
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   );
