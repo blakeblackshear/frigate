@@ -8,6 +8,7 @@ import { useSWRConfig } from "swr";
 import { toast } from "sonner";
 import { Trans, useTranslation } from "react-i18next";
 import { LuInfo } from "react-icons/lu";
+import { cn } from "@/lib/utils";
 
 type Props = {
   className?: string;
@@ -66,13 +67,13 @@ export default function AnnotationOffsetSlider({ className }: Props) {
   }, [annotationOffset, camera, mutate, t]);
 
   return (
-    <div className="flex flex-col gap-0.5">
-      <div className={`flex items-center gap-3 ${className ?? ""}`}>
+    <div className={cn("flex flex-col gap-0.5 landscape:gap-3", className)}>
+      <div className="flex items-center gap-3 landscape:flex-col landscape:items-start landscape:gap-4">
         <div className="flex flex-row gap-2 text-sm">
           {t("trackingDetails.annotationSettings.offset.label")}:
           <span className="text-primary-variant">{annotationOffset}</span>
         </div>
-        <div className="flex-1">
+        <div className="w-full flex-1 landscape:flex">
           <Slider
             value={[annotationOffset]}
             min={-1500}
@@ -92,7 +93,7 @@ export default function AnnotationOffsetSlider({ className }: Props) {
           </Button>
         </div>
       </div>
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground landscape:flex-col landscape:items-start">
         <Trans ns="views/explore">
           trackingDetails.annotationSettings.offset.millisecondsToOffset
         </Trans>
