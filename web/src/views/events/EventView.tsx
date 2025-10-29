@@ -830,7 +830,6 @@ function DetectionReview({
               dense={isMobile}
               isZooming={isZooming}
               zoomDirection={zoomDirection}
-              onZoomChange={handleZoomChange}
               possibleZoomLevels={possibleZoomLevels}
               currentZoomLevel={currentZoomLevel}
             />
