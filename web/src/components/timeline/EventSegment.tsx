@@ -235,7 +235,7 @@ export function EventSegment({
                   <div className="flex w-[20px] flex-row justify-center md:w-[40px]">
                     <div className="flex justify-center">
                       <div
-                        className="absolute left-1/2 z-10 ml-[2px] h-[8px] w-[8px] -translate-x-1/2 transform cursor-pointer"
+                        className="absolute left-1/2 z-10 ml-[2px] h-[8px] w-[8px] -translate-x-1/2 transform cursor-pointer md:ml-0"
                         data-severity={severityValue}
                       >
                         <div

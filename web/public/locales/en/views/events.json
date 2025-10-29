@@ -13,6 +13,8 @@
   },
   "timeline": "Timeline",
   "timeline.aria": "Select timeline",
+  "zoomIn": "Zoom In",
+  "zoomOut": "Zoom Out",
   "events": {
     "label": "Events",
     "aria": "Select events",

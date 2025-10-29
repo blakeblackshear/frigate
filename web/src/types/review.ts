@@ -81,6 +81,11 @@ export type ConsolidatedSegmentData = {
 
 export type TimelineZoomDirection = "in" | "out" | null;
 
+export type ZoomLevel = {
+  segmentDuration: number;
+  timestampSpread: number;
+};
+
 export enum ThreatLevel {
   SUSPICIOUS = 1,
   DANGER = 2,

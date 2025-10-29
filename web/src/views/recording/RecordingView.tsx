@@ -22,6 +22,7 @@ import {
   ReviewFilter,
   ReviewSegment,
   ReviewSummary,
+  ZoomLevel,
 } from "@/types/review";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
 import {
@@ -884,7 +885,7 @@ function Timeline({
     timestampSpread: 15,
   });
 
-  const possibleZoomLevels = useMemo(
+  const possibleZoomLevels: ZoomLevel[] = useMemo(
     () => [
       { segmentDuration: 30, timestampSpread: 15 },
       { segmentDuration: 15, timestampSpread: 5 },
@@ -898,6 +899,14 @@ function Timeline({
       setZoomSettings(possibleZoomLevels[newZoomLevel]);
     },
     [possibleZoomLevels],
+  );
+
+  const currentZoomLevel = useMemo(
+    () =>
+      possibleZoomLevels.findIndex(
+        (level) => level.segmentDuration === zoomSettings.segmentDuration,
+      ),
+    [possibleZoomLevels, zoomSettings.segmentDuration],
   );
 
   const { isZooming, zoomDirection } = useTimelineZoom({
@@ -1010,6 +1019,9 @@ function Timeline({
             onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
             isZooming={isZooming}
             zoomDirection={zoomDirection}
+            onZoomChange={handleZoomChange}
+            possibleZoomLevels={possibleZoomLevels}
+            currentZoomLevel={currentZoomLevel}
           />
         ) : (
           <Skeleton className="size-full" />
