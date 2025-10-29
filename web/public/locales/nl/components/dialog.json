@@ -12,7 +12,7 @@
     "plus": {
       "submitToPlus": {
         "label": "Verzenden naar Frigate+",
-        "desc": "Objecten op locaties die je wilt vermijden, zijn geen valspositieven. Als je ze als valspositieven indient, brengt dit het model in verwarring."
+        "desc": "Objecten op locaties die je wilt vermijden, zijn geen vals-positieven. Als je ze als vals-positieven indient, brengt dit het model in verwarring."
       },
       "review": {
         "true": {
@@ -42,7 +42,7 @@
   },
   "export": {
     "time": {
-      "fromTimeline": "Selecteer uit tijdlijn",
+      "fromTimeline": "Selecteer uit Tijdlijn",
       "end": {
         "label": "Selecteer eindtijd",
         "title": "Eindtijd"
@@ -65,7 +65,7 @@
         "noVaildTimeSelected": "Geen geldig tijdsbereik geselecteerd",
         "endTimeMustAfterStartTime": "Eindtijd moet na starttijd zijn"
       },
-      "success": "Export is succesvol gestart. Bekijk het bestand in de map /exports."
+      "success": "Export is succesvol gestart. Bekijk het bestand op de exportpagina."
     },
     "fromTimeline": {
       "saveExport": "Export opslaan",
@@ -105,7 +105,7 @@
   },
   "recording": {
     "button": {
-      "deleteNow": "Nu verwijderen",
+      "deleteNow": "Verwijder nu",
       "export": "Exporteren",
       "markAsReviewed": "Markeren als beoordeeld",
       "markAsUnreviewed": "Markeren als niet beoordeeld"
@@ -122,10 +122,11 @@
     }
   },
   "imagePicker": {
-    "selectImage": "Kies thumbnail van gevolgd object",
-    "noImages": "Geen thumbnails gevonden voor deze camera",
+    "selectImage": "Kies miniatuur van gevolgd object",
+    "noImages": "Geen miniaturen gevonden voor deze camera",
     "search": {
       "placeholder": "Zoeken op label of sub label..."
-    }
+    },
+    "unknownLabel": "Opgeslagen triggerafbeelding"
   }
 }

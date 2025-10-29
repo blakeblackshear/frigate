@@ -139,7 +139,10 @@
     }
   },
   "label": {
-    "back": "Ga terug"
+    "back": "Ga terug",
+    "hide": "Verberg {{item}}",
+    "show": "Toon {{item}}",
+    "ID": "ID"
   },
   "menu": {
     "system": "Systeem",
@@ -284,5 +287,13 @@
   "readTheDocumentation": "Lees de documentatie",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} en {{1}}",
+    "many": "{{items}}, en {{last}}"
+  },
+  "field": {
+    "optional": "Optioneel",
+    "internalID": "De interne ID die Frigate gebruikt in de configuratie en database"
   }
 }
