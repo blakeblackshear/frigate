@@ -19,6 +19,7 @@ import {
   ReviewSeverity,
   ReviewSummary,
   SegmentedReviewData,
+  ZoomLevel,
 } from "@/types/review";
 import { getChunkedTimeRange } from "@/utils/timelineUtil";
 import axios from "axios";
@@ -501,7 +502,7 @@ function DetectionReview({
     timestampSpread: 15,
   });
 
-  const possibleZoomLevels = useMemo(
+  const possibleZoomLevels: ZoomLevel[] = useMemo(
     () => [
       { segmentDuration: 60, timestampSpread: 15 },
       { segmentDuration: 30, timestampSpread: 5 },
@@ -799,7 +800,7 @@ function DetectionReview({
         </div>
       </div>
       <div className="flex w-[65px] flex-row md:w-[110px]">
-        <div className="no-scrollbar w-[55px] md:w-[100px]">
+        <div className="no-scrollbar relative w-[55px] md:w-[100px]">
           {loading ? (
             <Skeleton className="size-full" />
           ) : (
@@ -821,6 +822,8 @@ function DetectionReview({
               dense={isMobile}
               isZooming={isZooming}
               zoomDirection={zoomDirection}
+              onZoomChange={handleZoomChange}
+              possibleZoomLevels={possibleZoomLevels}
             />
           )}
         </div>

@@ -2,7 +2,7 @@ import useDraggableElement from "@/hooks/use-draggable-element";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { cn } from "@/lib/utils";
 import { DraggableElement } from "@/types/draggable-element";
-import { TimelineZoomDirection } from "@/types/review";
+import { TimelineZoomDirection, ZoomLevel } from "@/types/review";
 import {
   ReactNode,
   RefObject,
@@ -13,6 +13,8 @@ import {
   useState,
 } from "react";
 import { isIOS, isMobile } from "react-device-detect";
+import { Button } from "../ui/button";
+import { LuZoomIn, LuZoomOut } from "react-icons/lu";
 
 export type ReviewTimelineProps = {
   timelineRef: RefObject<HTMLDivElement>;
@@ -37,6 +39,9 @@ export type ReviewTimelineProps = {
   isZooming: boolean;
   zoomDirection: TimelineZoomDirection;
   getRecordingAvailability?: (time: number) => boolean | undefined;
+  onZoomChange?: (newZoomLevel: number) => void;
+  possibleZoomLevels?: ZoomLevel[];
+  currentZoomLevel?: number;
   children: ReactNode;
 };
 
@@ -63,6 +68,9 @@ export function ReviewTimeline({
   isZooming,
   zoomDirection,
   getRecordingAvailability,
+  onZoomChange,
+  possibleZoomLevels,
+  currentZoomLevel,
   children,
 }: ReviewTimelineProps) {
   const [isDraggingHandlebar, setIsDraggingHandlebar] = useState(false);
@@ -77,6 +85,13 @@ export function ReviewTimeline({
   const exportStartTimeRef = useRef<HTMLDivElement>(null);
   const exportEndRef = useRef<HTMLDivElement>(null);
   const exportEndTimeRef = useRef<HTMLDivElement>(null);
+
+  // Use provided zoom levels or fallback to empty array
+  const zoomLevels = possibleZoomLevels ?? [];
+
+  const currentZoomLevelIndex =
+    currentZoomLevel ??
+    zoomLevels.findIndex((level) => level.segmentDuration === segmentDuration);
 
   const isDragging = useMemo(
     () => isDraggingHandlebar || isDraggingExportStart || isDraggingExportEnd,
@@ -348,148 +363,188 @@ export function ReviewTimeline({
   }, [getRecordingAvailability, handlebarTime, segmentDuration]);
 
   return (
-    <div
-      ref={timelineRef}
-      className={cn(
-        "no-scrollbar relative h-full select-none overflow-y-auto bg-secondary transition-all duration-500 ease-in-out",
-        isZooming && zoomDirection === "in" && "animate-timeline-zoom-in",
-        isZooming && zoomDirection === "out" && "animate-timeline-zoom-out",
-        isDragging && (showHandlebar || showExportHandles)
-          ? "cursor-grabbing"
-          : "cursor-auto",
-      )}
-    >
-      <div ref={segmentsRef} className="relative flex flex-col">
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
-        {children}
+    <>
+      <div
+        ref={timelineRef}
+        className={cn(
+          "no-scrollbar relative h-full select-none overflow-y-auto bg-secondary transition-all duration-500 ease-in-out",
+          isZooming && zoomDirection === "in" && "animate-timeline-zoom-in",
+          isZooming && zoomDirection === "out" && "animate-timeline-zoom-out",
+          isDragging && (showHandlebar || showExportHandles)
+            ? "cursor-grabbing"
+            : "cursor-auto",
+        )}
+      >
+        <div ref={segmentsRef} className="relative flex flex-col">
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
+          {children}
+        </div>
+        {children && (
+          <>
+            {showHandlebar && (
+              <div
+                className={`absolute left-0 top-0 ${isDraggingHandlebar && isIOS ? "" : "z-20"} w-full`}
+                role="scrollbar"
+                ref={handlebarRef}
+              >
+                <div
+                  className="flex touch-none select-none items-center justify-center"
+                  onMouseDown={handleHandlebar}
+                  onTouchStart={handleHandlebar}
+                >
+                  <div
+                    className={`relative w-full ${
+                      isDraggingHandlebar ? "cursor-grabbing" : "cursor-grab"
+                    }`}
+                  >
+                    <div
+                      className={`mx-auto rounded-full bg-destructive ${
+                        dense
+                          ? "w-12 md:w-20"
+                          : segmentDuration < 60
+                            ? "w-[80px]"
+                            : "w-20"
+                      } h-5 ${isDraggingHandlebar && isMobile ? "fixed left-1/2 top-[18px] z-20 h-[30px] w-auto -translate-x-1/2 transform bg-destructive/80 px-3" : "static"} flex items-center justify-center`}
+                    >
+                      <div
+                        ref={handlebarTimeRef}
+                        className={`pointer-events-none text-white ${textSizeClasses("handlebar")} z-10`}
+                      ></div>
+                    </div>
+                    <div
+                      className={`absolute h-[4px] w-full bg-destructive ${isDraggingHandlebar && isMobile ? "top-1" : "top-1/2 -translate-y-1/2 transform"}`}
+                    ></div>
+                  </div>
+                </div>
+                {/* TODO: determine if we should keep this tooltip */}
+                {false && isHandlebarInNoRecordingPeriod && (
+                  <div className="absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 rounded-md bg-destructive/80 px-4 py-1 text-center text-xs text-white shadow-lg">
+                    No recordings
+                  </div>
+                )}
+              </div>
+            )}
+            {showExportHandles && (
+              <>
+                <div
+                  className={`export-end absolute left-0 top-0 ${isDraggingExportEnd && isIOS ? "" : "z-20"} w-full`}
+                  role="scrollbar"
+                  ref={exportEndRef}
+                >
+                  <div
+                    className="flex touch-none select-none items-center justify-center"
+                    onMouseDown={handleExportEnd}
+                    onTouchStart={handleExportEnd}
+                  >
+                    <div
+                      className={`relative mt-[6.5px] w-full ${
+                        isDraggingExportEnd ? "cursor-grabbing" : "cursor-grab"
+                      }`}
+                    >
+                      <div
+                        className={`mx-auto -mt-4 bg-selected ${
+                          dense
+                            ? "w-12 md:w-20"
+                            : segmentDuration < 60
+                              ? "w-[80px]"
+                              : "w-20"
+                        } h-5 ${isDraggingExportEnd && isMobile ? "fixed left-1/2 top-[18px] z-20 mt-0 h-[30px] w-auto -translate-x-1/2 transform rounded-full bg-selected/80 px-3" : "static rounded-tl-lg rounded-tr-lg"} flex items-center justify-center`}
+                      >
+                        <div
+                          ref={exportEndTimeRef}
+                          className={`pointer-events-none text-white ${isDraggingExportEnd && isMobile ? "mt-0" : ""} ${textSizeClasses("export_end")} z-10`}
+                        ></div>
+                      </div>
+                      <div
+                        className={`absolute h-[4px] w-full bg-selected ${isDraggingExportEnd && isMobile ? "top-0" : "top-1/2 -translate-y-1/2 transform"}`}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  ref={exportSectionRef}
+                  className="absolute w-full bg-selected/50"
+                ></div>
+                <div
+                  className={`export-start absolute left-0 top-0 ${isDraggingExportStart && isIOS ? "" : "z-20"} w-full`}
+                  role="scrollbar"
+                  ref={exportStartRef}
+                >
+                  <div
+                    className="flex touch-none select-none items-center justify-center"
+                    onMouseDown={handleExportStart}
+                    onTouchStart={handleExportStart}
+                  >
+                    <div
+                      className={`relative -mt-[6.5px] w-full ${
+                        isDragging ? "cursor-grabbing" : "cursor-grab"
+                      }`}
+                    >
+                      <div
+                        className={`absolute h-[4px] w-full bg-selected ${isDraggingExportStart && isMobile ? "top-[12px]" : "top-1/2 -translate-y-1/2 transform"}`}
+                      ></div>
+                      <div
+                        className={`mx-auto mt-4 bg-selected ${
+                          dense
+                            ? "w-12 md:w-20"
+                            : segmentDuration < 60
+                              ? "w-[80px]"
+                              : "w-20"
+                        } h-5 ${isDraggingExportStart && isMobile ? "fixed left-1/2 top-[4px] z-20 mt-0 h-[30px] w-auto -translate-x-1/2 transform rounded-full bg-selected/80 px-3" : "static rounded-bl-lg rounded-br-lg"} flex items-center justify-center`}
+                      >
+                        <div
+                          ref={exportStartTimeRef}
+                          className={`pointer-events-none text-white ${isDraggingExportStart && isMobile ? "mt-0" : ""} ${textSizeClasses("export_start")} z-10`}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </>
+        )}
       </div>
-      {children && (
-        <>
-          {showHandlebar && (
-            <div
-              className={`absolute left-0 top-0 ${isDraggingHandlebar && isIOS ? "" : "z-20"} w-full`}
-              role="scrollbar"
-              ref={handlebarRef}
-            >
-              <div
-                className="flex touch-none select-none items-center justify-center"
-                onMouseDown={handleHandlebar}
-                onTouchStart={handleHandlebar}
-              >
-                <div
-                  className={`relative w-full ${
-                    isDraggingHandlebar ? "cursor-grabbing" : "cursor-grab"
-                  }`}
-                >
-                  <div
-                    className={`mx-auto rounded-full bg-destructive ${
-                      dense
-                        ? "w-12 md:w-20"
-                        : segmentDuration < 60
-                          ? "w-[80px]"
-                          : "w-20"
-                    } h-5 ${isDraggingHandlebar && isMobile ? "fixed left-1/2 top-[18px] z-20 h-[30px] w-auto -translate-x-1/2 transform bg-destructive/80 px-3" : "static"} flex items-center justify-center`}
-                  >
-                    <div
-                      ref={handlebarTimeRef}
-                      className={`pointer-events-none text-white ${textSizeClasses("handlebar")} z-10`}
-                    ></div>
-                  </div>
-                  <div
-                    className={`absolute h-[4px] w-full bg-destructive ${isDraggingHandlebar && isMobile ? "top-1" : "top-1/2 -translate-y-1/2 transform"}`}
-                  ></div>
-                </div>
-              </div>
-              {/* TODO: determine if we should keep this tooltip */}
-              {false && isHandlebarInNoRecordingPeriod && (
-                <div className="absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 rounded-md bg-destructive/80 px-4 py-1 text-center text-xs text-white shadow-lg">
-                  No recordings
-                </div>
-              )}
-            </div>
-          )}
-          {showExportHandles && (
-            <>
-              <div
-                className={`export-end absolute left-0 top-0 ${isDraggingExportEnd && isIOS ? "" : "z-20"} w-full`}
-                role="scrollbar"
-                ref={exportEndRef}
-              >
-                <div
-                  className="flex touch-none select-none items-center justify-center"
-                  onMouseDown={handleExportEnd}
-                  onTouchStart={handleExportEnd}
-                >
-                  <div
-                    className={`relative mt-[6.5px] w-full ${
-                      isDraggingExportEnd ? "cursor-grabbing" : "cursor-grab"
-                    }`}
-                  >
-                    <div
-                      className={`mx-auto -mt-4 bg-selected ${
-                        dense
-                          ? "w-12 md:w-20"
-                          : segmentDuration < 60
-                            ? "w-[80px]"
-                            : "w-20"
-                      } h-5 ${isDraggingExportEnd && isMobile ? "fixed left-1/2 top-[18px] z-20 mt-0 h-[30px] w-auto -translate-x-1/2 transform rounded-full bg-selected/80 px-3" : "static rounded-tl-lg rounded-tr-lg"} flex items-center justify-center`}
-                    >
-                      <div
-                        ref={exportEndTimeRef}
-                        className={`pointer-events-none text-white ${isDraggingExportEnd && isMobile ? "mt-0" : ""} ${textSizeClasses("export_end")} z-10`}
-                      ></div>
-                    </div>
-                    <div
-                      className={`absolute h-[4px] w-full bg-selected ${isDraggingExportEnd && isMobile ? "top-0" : "top-1/2 -translate-y-1/2 transform"}`}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-              <div
-                ref={exportSectionRef}
-                className="absolute w-full bg-selected/50"
-              ></div>
-              <div
-                className={`export-start absolute left-0 top-0 ${isDraggingExportStart && isIOS ? "" : "z-20"} w-full`}
-                role="scrollbar"
-                ref={exportStartRef}
-              >
-                <div
-                  className="flex touch-none select-none items-center justify-center"
-                  onMouseDown={handleExportStart}
-                  onTouchStart={handleExportStart}
-                >
-                  <div
-                    className={`relative -mt-[6.5px] w-full ${
-                      isDragging ? "cursor-grabbing" : "cursor-grab"
-                    }`}
-                  >
-                    <div
-                      className={`absolute h-[4px] w-full bg-selected ${isDraggingExportStart && isMobile ? "top-[12px]" : "top-1/2 -translate-y-1/2 transform"}`}
-                    ></div>
-                    <div
-                      className={`mx-auto mt-4 bg-selected ${
-                        dense
-                          ? "w-12 md:w-20"
-                          : segmentDuration < 60
-                            ? "w-[80px]"
-                            : "w-20"
-                      } h-5 ${isDraggingExportStart && isMobile ? "fixed left-1/2 top-[4px] z-20 mt-0 h-[30px] w-auto -translate-x-1/2 transform rounded-full bg-selected/80 px-3" : "static rounded-bl-lg rounded-br-lg"} flex items-center justify-center`}
-                    >
-                      <div
-                        ref={exportStartTimeRef}
-                        className={`pointer-events-none text-white ${isDraggingExportStart && isMobile ? "mt-0" : ""} ${textSizeClasses("export_start")} z-10`}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </>
+
+      {onZoomChange && currentZoomLevelIndex !== -1 && (
+        <div
+          className={`absolute z-30 flex gap-2 ${
+            isMobile
+              ? "bottom-4 right-2 flex-col gap-4"
+              : "bottom-2 left-1/2 -translate-x-1/2"
+          }`}
+        >
+          <Button
+            onClick={() => {
+              const newLevel = Math.max(0, currentZoomLevelIndex - 1);
+              onZoomChange(newLevel);
+            }}
+            variant="outline"
+            disabled={currentZoomLevelIndex === 0}
+            className="p-3"
+            title="Zoom out"
+          >
+            <LuZoomOut className={isMobile ? "size-5" : "size-4"} />
+          </Button>
+          <Button
+            onClick={() => {
+              const newLevel = Math.min(
+                zoomLevels.length - 1,
+                currentZoomLevelIndex + 1,
+              );
+              onZoomChange(newLevel);
+            }}
+            variant="outline"
+            disabled={currentZoomLevelIndex === zoomLevels.length - 1}
+            className="p-3"
+            title="Zoom in"
+          >
+            <LuZoomIn className={isMobile ? "size-5" : "size-4"} />
+          </Button>
+        </div>
       )}
-    </div>
+    </>
   );
 }
 

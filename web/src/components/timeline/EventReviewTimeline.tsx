@@ -10,6 +10,7 @@ import {
   ReviewSegment,
   ReviewSeverity,
   TimelineZoomDirection,
+  ZoomLevel,
 } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
 import {
@@ -42,6 +43,9 @@ export type EventReviewTimelineProps = {
   isZooming: boolean;
   zoomDirection: TimelineZoomDirection;
   dense?: boolean;
+  onZoomChange?: (newZoomLevel: number) => void;
+  possibleZoomLevels?: ZoomLevel[];
+  currentZoomLevel?: number;
 };
 
 export function EventReviewTimeline({
@@ -69,6 +73,9 @@ export function EventReviewTimeline({
   isZooming,
   zoomDirection,
   dense = false,
+  onZoomChange,
+  possibleZoomLevels,
+  currentZoomLevel,
 }: EventReviewTimelineProps) {
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
@@ -157,6 +164,9 @@ export function EventReviewTimeline({
       scrollToSegment={scrollToSegment}
       isZooming={isZooming}
       zoomDirection={zoomDirection}
+      onZoomChange={onZoomChange}
+      possibleZoomLevels={possibleZoomLevels}
+      currentZoomLevel={currentZoomLevel}
     >
       <VirtualizedEventSegments
         ref={virtualizedSegmentsRef}
