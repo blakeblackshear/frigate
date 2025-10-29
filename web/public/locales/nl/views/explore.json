@@ -154,7 +154,7 @@
     },
     "recognizedLicensePlate": "Erkende kentekenplaat",
     "snapshotScore": {
-      "label": "Snapshot scoren"
+      "label": "Snapshot score"
     },
     "score": {
       "label": "Score"
@@ -195,6 +195,16 @@
     "audioTranscription": {
       "label": "Transcriberen",
       "aria": "Audiotranscriptie aanvragen"
+    },
+    "showObjectDetails": {
+      "label": "Objectpad weergeven"
+    },
+    "hideObjectDetails": {
+      "label": "Verberg objectpad"
+    },
+    "viewTrackingDetails": {
+      "label": "Bekijk trackinggegevens",
+      "aria": "Toon de trackinggegevens"
     }
   },
   "noTrackedObjects": "Geen gevolgde objecten gevonden",
@@ -212,7 +222,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Bevestig Verwijderen",
-      "desc": "Het verwijderen van dit gevolgde object verwijdert de snapshot, alle opgeslagen embeddings en eventuele bijbehorende levenscyclusgegevens van het object. Opgenomen videobeelden van dit object in de Geschiedenisweergave worden <em>NIET</em> verwijderd.<br /><br />Weet je zeker dat je wilt doorgaan?"
+      "desc": "Het verwijderen van dit gevolgde object verwijdert de snapshot, alle opgeslagen embeddings en eventuele bijbehorende trackinggegevens van het object. Opgenomen videobeelden van dit object in de Geschiedenisweergave worden <em>NIET</em> verwijderd.<br /><br />Weet je zeker dat je wilt doorgaan?"
     }
   },
   "fetchingTrackedObjectsFailed": "Fout bij het ophalen van gevolgde objecten: {{errorMessage}}",
@@ -222,5 +232,53 @@
   },
   "concerns": {
     "label": "Zorgen"
+  },
+  "trackingDetails": {
+    "title": "Trackinggegevens",
+    "noImageFound": "Er is geen afbeelding beschikbaar voor dit tijdstip.",
+    "createObjectMask": "Objectmasker maken",
+    "adjustAnnotationSettings": "Annotatie-instellingen aanpassen",
+    "scrollViewTips": "Scroll om de belangrijke momenten uit de levenscyclus van dit object te bekijken.",
+    "autoTrackingTips": "Als u een automatische objectvolgende camera gebruikt, zal het objectkader onnauwkeurig zijn.",
+    "count": "{{first}} van {{second}}",
+    "trackedPoint": "Volgpunt",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} gedetecteerd",
+      "entered_zone": "{{label}} in zone {{zones}}",
+      "active": "{{label}} Werd actief",
+      "stationary": "{{label}} werd stationair",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} Gedetecteerd voor {{label}}",
+        "other": "{{label}} Herkend als {{attribute}}"
+      },
+      "gone": "{{label}} Links",
+      "heard": "{{label}} gehoord",
+      "external": "{{label}} gedetecteerd",
+      "header": {
+        "zones": "Zones",
+        "ratio": "Verhouding",
+        "area": "Gebied"
+      }
+    },
+    "annotationSettings": {
+      "title": "Annotatie-instellingen",
+      "showAllZones": {
+        "title": "Toon alle zones",
+        "desc": "Toon altijd zones op frames waar objecten een zone zijn binnengegaan."
+      },
+      "offset": {
+        "label": "Annotatie-afwijking",
+        "desc": "Deze gegevens zijn afkomstig van de detectiestream van je camera, maar worden weergegeven op beelden uit de opnamestream. Het is onwaarschijnlijk dat deze twee streams perfect gesynchroniseerd zijn. Hierdoor zullen het objectkader en het beeld niet exact op elkaar aansluiten. Het veld <code>annotation_offset</code> kan echter worden gebruikt om deze annotatie-afwijking te corrigeren.",
+        "millisecondsToOffset": "Aantal milliseconden om objectkader mee te verschuiven. <em>Standaard: 0</em>",
+        "tips": "TIP: Stel je voor dat er een clip is waarin een persoon van links naar rechts loopt. Als het objectkader in de tijdlijn van de activiteit steeds links van de persoon ligt, dan moet de waarde verlaagd worden. Op dezelfde manier als het objectkader consequent vóór de persoon ligt dus vooruitloopt, moet de waarde verhoogd worden.",
+        "toast": {
+          "success": "Annotatieverschuiving voor {{camera}} is opgeslagen in het configuratiebestand. Herstart Frigate om je wijzigingen toe te passen."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Vorige dia",
+      "next": "Volgende dia"
+    }
   }
 }

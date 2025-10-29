@@ -13,12 +13,12 @@
   "documentTitle": "Gezichtsbibliotheek - Frigate",
   "description": {
     "placeholder": "Voer een naam in voor deze verzameling",
-    "addFace": "Doorloop het toevoegen van een nieuwe collectie aan de gezichtenbibliotheek.",
+    "addFace": "Voeg een nieuwe collectie toe aan de gezichtenbibliotheek door je eerste afbeelding te uploaden.",
     "invalidName": "Ongeldige naam. Namen mogen alleen letters, cijfers, spaties, apostroffen, underscores en koppeltekens bevatten."
   },
   "train": {
-    "title": "Train",
-    "aria": "Selecteer trainen",
+    "title": "Recente herkenningen",
+    "aria": "Selecteer recente herkenningen",
     "empty": "Er zijn geen recente pogingen tot gezichtsherkenning"
   },
   "selectFace": "Selecteer gezicht",
@@ -56,7 +56,7 @@
     "title": "Collectie maken",
     "desc": "Een nieuwe collectie maken",
     "new": "Creëer een nieuw gezicht",
-    "nextSteps": "Om een sterke basis op te bouwen:<li>Gebruik het tabblad Trainen om per gedetecteerd persoon afbeeldingen te selecteren en te trainen.</li> <li>Richt je op frontale afbeeldingen voor het beste resultaat; vermijd trainingsbeelden waarop gezichten vanuit een hoek te zien zijn.</li>"
+    "nextSteps": "Om een sterke basis op te bouwen:<li>Gebruik het tabblad ‘Recente herkenningen’ om afbeeldingen te selecteren en te trainen voor elke gedetecteerde persoon.</li> <li>Richt je op afbeeldingen die recht van voren genomen zijn voor de beste resultaten, vermijd trainingsafbeeldingen waarop gezichten onder een hoek te zien zijn.</li>"
   },
   "button": {
     "addFace": "Gezicht toevoegen",

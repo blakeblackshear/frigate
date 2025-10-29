@@ -40,9 +40,10 @@
   "detail": {
     "noDataFound": "Geen gedetailleerde gegevens om te beoordelen",
     "aria": "Detailweergave in- of uitschakelen",
-    "trackedObject_one": "gevolgd object",
-    "trackedObject_other": "gevolgde objecten",
-    "noObjectDetailData": "Geen objectdetails beschikbaar."
+    "trackedObject_one": "object",
+    "trackedObject_other": "objecten",
+    "noObjectDetailData": "Geen objectdetails beschikbaar.",
+    "label": "Detail"
   },
   "objectTrack": {
     "trackedPoint": "Gevolgd punt",

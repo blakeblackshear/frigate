@@ -179,7 +179,7 @@
   },
   "noCameras": {
     "title": "Geen camera’s ingesteld",
-    "description": "Begin door een camera te verbinden.",
+    "description": "Begin door een camera te verbinden met Frigate.",
     "buttonText": "Camera toevoegen"
   }
 }
