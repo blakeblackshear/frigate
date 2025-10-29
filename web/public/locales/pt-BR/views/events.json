@@ -42,7 +42,8 @@
     "aria": "Alternar visualização de detalhe",
     "trackedObject_one": "objeto rastreado",
     "trackedObject_other": "objetos rastreados",
-    "noObjectDetailData": "Nenhum dado de detalhe de objeto disponível."
+    "noObjectDetailData": "Nenhum dado de detalhe de objeto disponível.",
+    "label": "Detalhe"
   },
   "objectTrack": {
     "trackedPoint": "Ponto rastreado",

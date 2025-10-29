@@ -87,7 +87,7 @@
   },
   "manualRecording": {
     "title": "Sob Demanda",
-    "tips": "Inicie um evento manual baseado nas configurações de retenção de gravação dessa câmera.",
+    "tips": "Baixe uma captura de tela instantânea ou Inicie um evento manual baseado nas configurações de retenção de gravação dessa câmera.",
     "playInBackground": {
       "label": "Reproduzir em segundo plano",
       "desc": "Habilite essa opção para continuar transmitindo quando o reprodutor estiver oculto."
@@ -173,7 +173,7 @@
   },
   "noCameras": {
     "title": "Nenhuma Câmera Configurada",
-    "description": "Inicie conectando uma câmera.",
+    "description": "Inicie conectando uma câmera ao Frigate",
     "buttonText": "Adicionar Câmera"
   },
   "snapshot": {

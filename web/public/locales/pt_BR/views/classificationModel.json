@@ -1,0 +1,24 @@
+{
+  "documentTitle": "Modelos de Classificação",
+  "button": {
+    "deleteClassificationAttempts": "Apagar Imagens de Classificação",
+    "renameCategory": "Renomear Classe",
+    "deleteCategory": "Apagar Classe",
+    "deleteImages": "Apagar Imagens",
+    "trainModel": "Treinar Modelo"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Classe Apagada",
+      "deletedImage": "Imagens Apagadas",
+      "categorizedImage": "Imagem Classificada com Sucesso",
+      "trainedModel": "Modelo treinado com sucesso.",
+      "trainingModel": "Treinamento do modelo iniciado com sucesso."
+    },
+    "error": {
+      "deleteImageFailed": "Falha ao deletar:{{errorMessage}}",
+      "deleteCategoryFailed": "Falha ao deletar classe:{{errorMessage}}",
+      "categorizeFailed": "Falha ao categorizar imagem:{{errorMessage}}"
+    }
+  }
+}

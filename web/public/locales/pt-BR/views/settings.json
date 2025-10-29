@@ -889,7 +889,12 @@
       },
       "errors": {
         "brandOrCustomUrlRequired": "Selecione a marca da câmera com o host/IP or selecione 'Outro' com uma URL customizada",
-        "nameRequired": "Nome para a câmera requerido"
+        "nameRequired": "Nome para a câmera requerido",
+        "nameLength": "O nome da câmera deve ter 64 caracteres ou menos"
+      },
+      "testing": {
+        "probingMetadata": "Inferindo o metadata da câmera...",
+        "fetchingSnapshot": "Buscando a captura de imagem da câmera..."
       }
     }
   }
