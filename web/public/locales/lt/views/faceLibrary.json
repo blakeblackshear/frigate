@@ -1,8 +1,8 @@
 {
   "description": {
-    "addFace": "Apžiūrėkite naujų kolekcijų pridėjimą prie Veidų Bibliotekos.",
+    "addFace": "Pridėkite naują kolekciją į Veidų Kolekciją įkeldami savo pirmą nuotrauką.",
     "placeholder": "Įveskite pavadinimą šiai kolekcijai",
-    "invalidName": "Netinkamas vardas. Vardai gali turėti tik raides, numerius, tarpus, apostrofus, pabraukimus ir brukšnelius."
+    "invalidName": "Netinkamas vardas. Vardas gali būti sudarytas tik iš raidžiū, skaičių, tarpų, apostrofų, pabraukimų ar brūkšnelių."
   },
   "details": {
     "person": "Žmogus",
@@ -45,7 +45,7 @@
     }
   },
   "createFaceLibrary": {
-    "nextSteps": "Kad sukurtumėte stiprų pagrindą:<li>Naudokite Apmokymų skirtuką pasirinkti ir paveikslėliais apmokyti kiekvieną aptiktą asmenį.</li><li>Norint pasiekti geriausią režultatą, susitelkite prie nuotraukų iš priekio; Venkite naudoti veidų nuotraukas kampu pasuktu veidu.</li></ul>",
+    "nextSteps": "Kad sukurtumėte stiprų pagrindą:<li>Naudokite Pastarieji Atpažinimai skirtuką pasirinkti ir paveikslėliais apmokyti kiekvieną aptiktą asmenį.</li><li>Norint pasiekti geriausią režultatą, susitelkite prie nuotraukų iš priekio; Venkite naudoti veidų nuotraukas kampu pasuktu veidu.</li></ul>",
     "title": "Sukurti Kolekciją",
     "desc": "Sukurti naują kolekciją",
     "new": "Sukurti Naują Veidą"
@@ -69,8 +69,8 @@
     }
   },
   "train": {
-    "title": "Traukinys",
-    "aria": "Pasirinkti traukinį",
+    "title": "Pastarieji Atpažinimai",
+    "aria": "Pasirinkti pastaruosius atpažinimus",
     "empty": "Pastaruoju metu nebuvo atliktas veidų atpažinimas"
   },
   "selectFace": "Pasirinkti Veidą",
