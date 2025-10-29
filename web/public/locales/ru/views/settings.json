@@ -10,7 +10,9 @@
     "classification": "Настройки распознавания - Frigate",
     "object": "Отладка - Frigate",
     "notifications": "Настройки уведомлений - Frigate",
-    "enrichments": "Настройки обогащения - Frigate"
+    "enrichments": "Настройки обогащения - Frigate",
+    "cameraManagement": "Управление камерами - Frigate",
+    "cameraReview": "Настройки просмотра камеры - Frigate"
   },
   "menu": {
     "cameras": "Настройки камеры",
@@ -23,7 +25,10 @@
     "ui": "Интерфейс",
     "classification": "Распознавание",
     "enrichments": "Обогащения",
-    "triggers": "Триггеры"
+    "triggers": "Триггеры",
+    "cameraManagement": "Управление",
+    "cameraReview": "Обзор",
+    "roles": "Роли"
   },
   "dialog": {
     "unsavedChanges": {
@@ -401,7 +406,7 @@
       "name": {
         "title": "Название",
         "inputPlaceHolder": "Введите название…",
-        "tips": "Название должно содержать не менее 2 символов и не совпадать с названием камеры или другой зоны."
+        "tips": "Имя должно содержать не менее 2 символов, включать хотя бы одну букву и не совпадать с названием камеры или другой зоны."
       },
       "inertia": {
         "title": "Инерция",
@@ -838,6 +843,90 @@
     "semanticSearch": {
       "title": "Семантический поиск выключен",
       "desc": "Для использования триггеров необходимо включить семантический поиск."
+    }
+  },
+  "cameraWizard": {
+    "title": "Добавить камеру",
+    "description": "Следуйте инструкциям ниже, чтобы добавить новую камеру в вашу установку Frigate.",
+    "steps": {
+      "nameAndConnection": "Имя и подключение",
+      "streamConfiguration": "Конфигурация потока",
+      "validationAndTesting": "Проверка и тестирование"
+    },
+    "save": {
+      "success": "Новая камера {{cameraName}} успешно сохранена.",
+      "failure": "Ошибка при сохранении {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Разрешение",
+      "video": "Видео",
+      "audio": "Аудио",
+      "fps": "Кадры в секунду (FPS)"
+    },
+    "commonErrors": {
+      "noUrl": "Пожалуйста, укажите корректный URL потока",
+      "testFailed": "Тест потока не удался: {{error}}"
+    },
+    "step1": {
+      "description": "Введите данные камеры и проверьте подключение.",
+      "cameraName": "Имя камеры",
+      "cameraNamePlaceholder": "Например, front_door или Обзор заднего двора",
+      "host": "Хост/IP-адрес",
+      "port": "Порт",
+      "username": "Имя пользователя",
+      "usernamePlaceholder": "Необязательно",
+      "password": "Пароль",
+      "passwordPlaceholder": "Необязательно",
+      "selectTransport": "Выберите транспортный протокол",
+      "cameraBrand": "Бренд камеры",
+      "selectBrand": "Выберите бренд камеры для шаблона URL",
+      "customUrl": "Пользовательский URL потока",
+      "brandInformation": "Информация о бренде",
+      "brandUrlFormat": "Для камер с форматом RTSP-URL вида: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://имя_пользователя:пароль@хост:порт/путь",
+      "testConnection": "Проверить соединение",
+      "testSuccess": "Соединение успешно установлено!",
+      "testFailed": "Проверка соединения не удалась. Проверьте введённые данные и попробуйте снова.",
+      "streamDetails": "Детали потока",
+      "warnings": {
+        "noSnapshot": "Не удалось получить снимок из настроенного потока."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Выберите бренд камеры с указанием хоста/IP или выберите \"Другое\" и укажите пользовательский URL",
+        "nameRequired": "Необходимо указать имя камеры",
+        "nameLength": "Имя камеры должно содержать не более 64 символов",
+        "invalidCharacters": "Имя камеры содержит недопустимые символы",
+        "nameExists": "Имя камеры уже используется",
+        "brands": {
+          "reolink-rtsp": "RTSP от Reolink не рекомендуется. Включите HTTP в настройках камеры и перезапустите мастер настройки камеры."
+        }
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      }
+    },
+    "step2": {
+      "description": "Настройте роли потоков и добавьте дополнительные потоки для вашей камеры.",
+      "streamsTitle": "Потоки камеры",
+      "addStream": "Добавить поток",
+      "addAnotherStream": "Добавить ещё один поток",
+      "streamTitle": "Поток {{number}}",
+      "streamUrl": "URL потока",
+      "streamUrlPlaceholder": "rtsp://имя_пользователя:пароль@хост:порт/путь",
+      "url": "URL",
+      "resolution": "Разрешение",
+      "selectResolution": "Выберите разрешение",
+      "quality": "Качество",
+      "selectQuality": "Выберите качество",
+      "roles": "Роли",
+      "roleLabels": {
+        "detect": "Обнаружение объектов",
+        "record": "Запись",
+        "audio": "Аудио"
+      },
+      "testStream": "Проверить соединение",
+      "testSuccess": "Тест потока выполнен успешно!",
+      "testFailed": "Тест потока не пройден"
     }
   }
 }
