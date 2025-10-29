@@ -37,5 +37,16 @@
   "selected_other": "{{count}} выбрано",
   "detected": "обнаружен",
   "suspiciousActivity": "Подозрительная активность",
-  "threateningActivity": "Угрожающая активность"
+  "threateningActivity": "Угрожающая активность",
+  "detail": {
+    "noDataFound": "Нет данных для просмотра",
+    "aria": "Переключить подробный режим просмотра",
+    "trackedObject_one": "отслеживаемый объект",
+    "trackedObject_other": "отслеживаемые объекты",
+    "noObjectDetailData": "Данные о деталях объекта недоступны."
+  },
+  "objectTrack": {
+    "trackedPoint": "Отслеживаемая точка",
+    "clickToSeek": "Перейти к этому моменту"
+  }
 }
