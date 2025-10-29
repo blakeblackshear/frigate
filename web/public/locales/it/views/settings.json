@@ -155,7 +155,8 @@
           "mustNotBeSameWithCamera": "Il nome della zona non deve essere uguale al nome della telecamera.",
           "mustBeAtLeastTwoCharacters": "Il nome della zona deve essere composto da almeno 2 caratteri.",
           "alreadyExists": "Per questa telecamera esiste già una zona con questo nome.",
-          "mustNotContainPeriod": "Il nome della zona non deve contenere punti."
+          "mustNotContainPeriod": "Il nome della zona non deve contenere punti.",
+          "mustHaveAtLeastOneLetter": "Il nome della zona deve contenere almeno una lettera."
         }
       },
       "distance": {
@@ -238,7 +239,7 @@
       "name": {
         "inputPlaceHolder": "Inserisci un nome…",
         "title": "Nome",
-        "tips": "Il nome deve essere composto da almeno 2 caratteri e non deve essere il nome di una telecamera o di un'altra zona."
+        "tips": "Il nome deve essere composto da almeno 2 caratteri, contenere almeno una lettera e non deve essere il nome di una telecamera o di un'altra zona."
       },
       "clickDrawPolygon": "Fai clic per disegnare un poligono sull'immagine.",
       "point_one": "{{count}} punto",
@@ -980,7 +981,9 @@
         },
         "hikvision": {
           "substreamWarning": "Il flusso 1 è bloccato a bassa risoluzione. Molte telecamere Hikvision supportano flussi aggiuntivi che devono essere abilitati nelle impostazioni della telecamera. Si consiglia di controllare e utilizzare tali flussi, se disponibili."
-        }
+        },
+        "resolutionHigh": "Una risoluzione di {{resolution}} potrebbe causare un aumento dell'utilizzo delle risorse.",
+        "resolutionLow": "Una risoluzione di {{resolution}} potrebbe essere troppo bassa per un rilevamento affidabile di oggetti di piccole dimensioni."
       }
     },
     "title": "Aggiungi telecamera",
@@ -1035,11 +1038,16 @@
         "invalidCharacters": "Il nome della telecamera contiene caratteri non validi",
         "nameExists": "Il nome della telecamera esiste già",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP non è consigliato. Si consiglia di abilitare http nelle impostazioni della telecamera e riavviare la procedura guidata."
-        }
+          "reolink-rtsp": "Reolink RTSP non è consigliato. Abilita HTTP nelle impostazioni del firmware della telecamera e riavvia la procedura guidata."
+        },
+        "customUrlRtspRequired": "Gli URL personalizzati devono iniziare con \"rtsp://\". Per i flussi di telecamere non RTSP è richiesta la configurazione manuale."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Analisi dei metadati della telecamera in corso...",
+        "fetchingSnapshot": "Recupero istantanea della telecamera in corso..."
       }
     },
     "step2": {
