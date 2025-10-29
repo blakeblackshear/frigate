@@ -589,7 +589,7 @@ async def no_recordings(
     )
     scale = params.scale
 
-    clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
+    clauses = [(Recordings.end_time >= after) & (Recordings.start_time <= before)]
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((Recordings.camera << camera_list))
@@ -608,33 +608,39 @@ async def no_recordings(
     # Convert recordings to list of (start, end) tuples
     recordings = [(r["start_time"], r["end_time"]) for r in data]
 
-    # Generate all time segments
-    current = after
+    # Iterate through time segments and check if each has any recording
     no_recording_segments = []
-    current_start = None
+    current = after
+    current_gap_start = None
 
     while current < before:
-        segment_end = current + scale
-        # Check if segment overlaps with any recording
+        segment_end = min(current + scale, before)
+
+        # Check if this segment overlaps with any recording
         has_recording = any(
-            start <= segment_end and end >= current for start, end in recordings
+            rec_start < segment_end and rec_end > current
+            for rec_start, rec_end in recordings
         )
+
         if not has_recording:
-            if current_start is None:
-                current_start = current  # Start a new gap
+            # This segment has no recordings
+            if current_gap_start is None:
+                current_gap_start = current  # Start a new gap
         else:
-            if current_start is not None:
+            # This segment has recordings
+            if current_gap_start is not None:
                 # End the current gap and append it
                 no_recording_segments.append(
-                    {"start_time": int(current_start), "end_time": int(current)}
+                    {"start_time": int(current_gap_start), "end_time": int(current)}
                 )
-                current_start = None
+                current_gap_start = None
+
         current = segment_end
 
     # Append the last gap if it exists
-    if current_start is not None:
+    if current_gap_start is not None:
         no_recording_segments.append(
-            {"start_time": int(current_start), "end_time": int(before)}
+            {"start_time": int(current_gap_start), "end_time": int(before)}
         )
 
     return JSONResponse(content=no_recording_segments)

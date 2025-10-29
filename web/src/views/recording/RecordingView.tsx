@@ -56,6 +56,7 @@ import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTranslation } from "react-i18next";
+import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import {
   Tooltip,
   TooltipContent,
@@ -908,12 +909,20 @@ function Timeline({
   });
 
   // motion data
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    {
+      segmentDuration: zoomSettings.segmentDuration,
+    },
+  );
+
+  const alignedAfter = alignStartDateToTimeline(timeRange.after);
+  const alignedBefore = alignEndDateToTimeline(timeRange.before);
 
   const { data: motionData, isLoading } = useSWR<MotionData[]>([
     "review/activity/motion",
     {
-      before: timeRange.before,
-      after: timeRange.after,
+      before: alignedBefore,
+      after: alignedAfter,
       scale: Math.round(zoomSettings.segmentDuration / 2),
       cameras: mainCamera,
     },
@@ -922,9 +931,9 @@ function Timeline({
   const { data: noRecordings } = useSWR<RecordingSegment[]>([
     "recordings/unavailable",
     {
-      before: timeRange.before,
-      after: timeRange.after,
-      scale: Math.round(zoomSettings.segmentDuration / 2),
+      before: alignedBefore,
+      after: alignedAfter,
+      scale: Math.round(zoomSettings.segmentDuration),
       cameras: mainCamera,
     },
   ]);
