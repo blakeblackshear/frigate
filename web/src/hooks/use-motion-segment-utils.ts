@@ -43,9 +43,14 @@ export const useMotionSegmentUtils = (
       const segmentStart = getSegmentStart(time);
       const segmentEnd = getSegmentEnd(time);
       const matchingEvents = motion_events.filter((event) => {
-        return (
-          event.start_time >= segmentStart && event.start_time < segmentEnd
-        );
+        // Use integer ms math to avoid floating point rounding issues
+        // when halfSegmentDuration is not an integer
+        // (eg, 2.5 seconds from timeline zooming)
+        const eventMs = Math.round(event.start_time * 1000);
+        const halfMs = Math.round(halfSegmentDuration * 1000);
+        const eventBucketMs = Math.round(eventMs / halfMs) * halfMs;
+        const eventRounded = eventBucketMs / 1000;
+        return eventRounded >= segmentStart && eventRounded < segmentEnd;
       });
 
       const totalMotion = matchingEvents.reduce(
@@ -55,7 +60,7 @@ export const useMotionSegmentUtils = (
 
       return totalMotion;
     },
-    [motion_events, getSegmentStart, getSegmentEnd],
+    [motion_events, getSegmentStart, getSegmentEnd, halfSegmentDuration],
   );
 
   const getAudioSegmentValue = useCallback(
