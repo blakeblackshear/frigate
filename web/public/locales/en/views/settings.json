@@ -47,6 +47,10 @@
       "playAlertVideos": {
         "label": "Play Alert Videos",
         "desc": "By default, recent alerts on the Live dashboard play as small looping videos. Disable this option to only show a static image of recent alerts on this device/browser."
+      },
+      "displayCameraNames": {
+        "label": "Display Camera Names",
+        "desc": "Displays the camera name in the top-right corner at all times, not just when offline or disabled. Useful for quick identification in multi-camera views."
       }
     },
     "storedLayouts": {

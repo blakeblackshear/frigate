@@ -92,6 +92,10 @@ export default function UiSettingsView() {
   // settings
 
   const [autoLive, setAutoLive] = usePersistence("autoLiveView", true);
+  const [cameraNames, setCameraName] = usePersistence(
+    "displayCameraNames",
+    false,
+  );
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
   const [weekStartsOn, setWeekStartsOn] = usePersistence("weekStartsOn", 0);
   const [alertVideos, setAlertVideos] = usePersistence("alertVideos", true);
@@ -140,6 +144,21 @@ export default function UiSettingsView() {
               </div>
               <div className="my-2 max-w-5xl text-sm text-muted-foreground">
                 <p>{t("general.liveDashboard.playAlertVideos.desc")}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex flex-row items-center justify-start gap-2">
+                <Switch
+                  id="camera-names"
+                  checked={cameraNames}
+                  onCheckedChange={setCameraName}
+                />
+                <Label className="cursor-pointer" htmlFor="auto-live">
+                  {t("general.liveDashboard.displayCameraNames.label")}
+                </Label>
+              </div>
+              <div className="my-2 max-w-5xl text-sm text-muted-foreground">
+                <p>{t("general.liveDashboard.displayCameraNames.desc")}</p>
               </div>
             </div>
           </div>

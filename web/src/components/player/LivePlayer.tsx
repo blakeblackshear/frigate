@@ -440,11 +440,7 @@ export default function LivePlayer({
           (offline && showStillWithoutActivity) ||
           !cameraEnabled) && (
           <Chip
-            className={`z-0 flex items-start justify-between space-x-1 text-xs capitalize ${
-              (offline && showStillWithoutActivity) || !cameraEnabled
-                ? "bg-red-500 bg-gradient-to-br from-red-400 to-red-500"
-                : "bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-            }`}
+            className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
           >
             {cameraName}
           </Chip>

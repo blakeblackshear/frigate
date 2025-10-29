@@ -10,7 +10,6 @@ export interface UiConfig {
   dashboard: boolean;
   order: number;
   unit_system?: "metric" | "imperial";
-  show_camera_names?: boolean;
 }
 
 export interface BirdseyeConfig {

@@ -95,6 +95,7 @@ export default function DraggableGridLayout({
   } = useCameraLiveMode(cameras, windowVisible);
 
   const [globalAutoLive] = usePersistence("autoLiveView", true);
+  const [displayCameraNames] = usePersistence("displayCameraNames", false);
 
   const { allGroupsStreamingSettings, setAllGroupsStreamingSettings } =
     useStreamingSettings();
@@ -610,7 +611,7 @@ export default function DraggableGridLayout({
                     streamName={streamName}
                     autoLive={autoLive ?? globalAutoLive}
                     showStillWithoutActivity={showStillWithoutActivity ?? true}
-                    alwaysShowCameraName={config?.ui.show_camera_names ?? false}
+                    alwaysShowCameraName={displayCameraNames}
                     useWebGL={useWebGL}
                     cameraRef={cameraRef}
                     className={cn(
