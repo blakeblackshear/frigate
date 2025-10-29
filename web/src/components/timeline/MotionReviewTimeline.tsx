@@ -46,6 +46,7 @@ export type MotionReviewTimelineProps = {
   dense?: boolean;
   isZooming: boolean;
   zoomDirection: TimelineZoomDirection;
+  alwaysShowMotionLine?: boolean;
 };
 
 export function MotionReviewTimeline({
@@ -75,6 +76,7 @@ export function MotionReviewTimeline({
   dense = false,
   isZooming,
   zoomDirection,
+  alwaysShowMotionLine = false,
 }: MotionReviewTimelineProps) {
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
@@ -222,6 +224,7 @@ export function MotionReviewTimeline({
         motionOnly={motionOnly}
         getMotionSegmentValue={getMotionSegmentValue}
         getRecordingAvailability={getRecordingAvailability}
+        alwaysShowMotionLine={alwaysShowMotionLine}
       />
     </ReviewTimeline>
   );

@@ -895,11 +895,20 @@ function MotionReview({
 
   // motion data
 
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    {
+      segmentDuration,
+    },
+  );
+
+  const alignedAfter = alignStartDateToTimeline(timeRange.after);
+  const alignedBefore = alignEndDateToTimeline(timeRange.before);
+
   const { data: motionData } = useSWR<MotionData[]>([
     "review/activity/motion",
     {
-      before: timeRange.before,
-      after: timeRange.after,
+      before: alignedBefore,
+      after: alignedAfter,
       scale: segmentDuration / 2,
       cameras: filter?.cameras?.join(",") ?? null,
     },
@@ -1005,10 +1014,6 @@ function MotionReview({
       };
     }
   }, [playing, playbackRate, nextTimestamp, setPlaying, timeRange]);
-
-  const { alignStartDateToTimeline } = useTimelineUtils({
-    segmentDuration,
-  });
 
   const getDetectionType = useCallback(
     (cameraName: string) => {
@@ -1159,6 +1164,7 @@ function MotionReview({
             dense={isMobileOnly}
             isZooming={false}
             zoomDirection={null}
+            alwaysShowMotionLine={true}
           />
         ) : (
           <Skeleton className="size-full" />

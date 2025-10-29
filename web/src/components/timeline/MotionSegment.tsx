@@ -25,6 +25,7 @@ type MotionSegmentProps = {
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
   dense: boolean;
+  alwaysShowMotionLine?: boolean;
 };
 
 export function MotionSegment({
@@ -44,6 +45,7 @@ export function MotionSegment({
   setHandlebarTime,
   scrollToSegment,
   dense,
+  alwaysShowMotionLine = false,
 }: MotionSegmentProps) {
   const severityType = "all";
   const { getSeverity, getReviewed, displaySeverityType } =
@@ -235,7 +237,8 @@ export function MotionSegment({
 
           {(hasRecording ||
             firstHalfSegmentWidth > 0 ||
-            secondHalfSegmentWidth > 0) && (
+            secondHalfSegmentWidth > 0 ||
+            alwaysShowMotionLine) && (
             <div className="absolute left-1/2 z-10 h-[8px] w-[20px] -translate-x-1/2 transform cursor-pointer md:w-[40px]">
               <div className="mb-[1px] flex w-[20px] flex-row justify-center pt-[1px] md:w-[40px]">
                 <div className="mb-[1px] flex justify-center">
