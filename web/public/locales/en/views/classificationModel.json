@@ -43,6 +43,7 @@
   },
   "train": {
     "title": "Recent Classifications",
+    "titleShort": "Recent",
     "aria": "Select Recent Classifications"
   },
   "categories": "Classes",

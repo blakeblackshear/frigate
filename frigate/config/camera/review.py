@@ -108,7 +108,7 @@ class GenAIReviewConfig(FrigateBaseModel):
         default="""### Normal Activity Indicators (Level 0)
 - Known/verified people in any zone
 - People with pets in residential areas
-- Brief activity near vehicles: approaching vehicles, brief standing, then leaving or entering vehicle (unloading, loading, checking something)
+- Brief activity near vehicles: approaching vehicles, brief standing, then leaving or entering vehicle (unloading, loading, checking something). Very short sequences (under 15 seconds) of vehicle access during typical hours (6 AM - 10 PM) are almost always normal.
 - Deliveries or services: brief approach to doors/porches, standing briefly, placing or retrieving items, then leaving
 - Access to private areas: entering back yards, garages, or homes (with or without visible purpose in frame)
 - Brief movement through semi-public areas (driveways, front yards) with items or approaching structure/vehicle
@@ -121,7 +121,7 @@ class GenAIReviewConfig(FrigateBaseModel):
 - Climbing or jumping fences/barriers to access property
 - Attempting to conceal actions or items from view
 - Prolonged presence without purpose: remaining in same area (near vehicles, private zones) throughout most/all of the sequence without clear activity or task. Brief stops (a few seconds of standing) are normal; sustained presence (most of the duration) without interaction is concerning.
-- Activity at unusual hours (very late night/early morning) combined with suspicious behavior patterns
+- Activity at unusual hours (11 PM - 5 AM) combined with suspicious behavior patterns. Normal commute/daytime hours (6 AM - 6 PM) do not increase suspicion by themselves.
 
 ### Critical Threat Indicators (Level 2)
 - Holding break-in tools (crowbars, pry bars, bolt cutters)
@@ -131,9 +131,11 @@ class GenAIReviewConfig(FrigateBaseModel):
 - Active property damage or theft
 
 ### Assessment Guidance
-When evaluating activity, first check if it matches Normal Activity Indicators. If it clearly matches normal patterns (brief vehicle access, delivery behavior, known people, pet activity), assign Level 0. Only consider Level 1 if the activity shows clear suspicious behaviors that don't fit normal patterns (testing access, stealing items, lingering across many frames without task, forced entry attempts).
+**Default to Level 0** for brief activity during normal hours. When evaluating, first check if it matches Normal Activity Indicators. Very short sequences (under 15 seconds) of vehicle access, deliveries, or movement through property during typical hours (6 AM - 11 PM) should be Level 0 unless there are clear suspicious actions visible (testing doors, stealing, climbing barriers).
 
-These patterns are guidance, not rigid rules. Consider the complete context: time, zone, objects, and sequence of actions. Brief activity with apparent purpose is generally normal. Sustained problematic behavior or clear security violations warrant elevation.""",
+Only assign Level 1 if the activity shows clear suspicious behaviors: testing access points, stealing items, lingering throughout most of the sequence without task, climbing barriers, or other explicit violations. Brief activity with apparent purpose (approaching vehicle, delivery, passing through) is Level 0.
+
+Consider duration, time, zone, and actions holistically. Brief is normal; sustained suspicious behavior is concerning.""",
         title="Custom activity context prompt defining normal and suspicious activity patterns for this property.",
     )
 

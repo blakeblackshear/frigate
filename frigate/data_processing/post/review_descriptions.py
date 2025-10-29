@@ -120,7 +120,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
                 thumbs = self.get_recording_frames(
                     camera,
-                    final_data["start_time"],
+                    final_data["start_time"] - buffer_extension,
                     final_data["end_time"] + buffer_extension,
                     height=480,  # Use 480p for good balance between quality and token usage
                 )
@@ -421,13 +421,12 @@ def run_analysis(
         name = sub_labels_list[i].replace("_", " ").title()
         unified_objects.append(f"{name} ({object_type})")
 
-    # Add non-verified objects as "Unrecognized (type)"
     for label in objects_list:
         if "-verified" in label:
             continue
         elif label in labelmap_objects:
-            object_type = label.replace("_", " ")
-            unified_objects.append(f"Unrecognized ({object_type})")
+            object_type = label.replace("_", " ").title()
+            unified_objects.append(object_type)
 
     analytics_data["unified_objects"] = unified_objects
 
