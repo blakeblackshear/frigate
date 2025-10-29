@@ -40,9 +40,10 @@
   "detail": {
     "noDataFound": "Žiadne podrobné údaje na kontrolu",
     "aria": "Prepnúť zobrazenie detailov",
-    "trackedObject_one": "sledovaný objekt",
-    "trackedObject_other": "sledované objekty",
-    "noObjectDetailData": "Nie sú k dispozícii žiadne podrobné údaje o objekte."
+    "trackedObject_one": "objekt",
+    "trackedObject_other": "objekty",
+    "noObjectDetailData": "Nie sú k dispozícii žiadne podrobné údaje o objekte.",
+    "label": "Detail"
   },
   "objectTrack": {
     "trackedPoint": "Sledovaný bod",
