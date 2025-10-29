@@ -120,7 +120,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
                 thumbs = self.get_recording_frames(
                     camera,
-                    final_data["start_time"],
+                    final_data["start_time"] - buffer_extension,
                     final_data["end_time"] + buffer_extension,
                     height=480,  # Use 480p for good balance between quality and token usage
                 )
