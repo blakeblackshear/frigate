@@ -9,7 +9,9 @@
     "notifications": "通知設定 - Frigate",
     "masksAndZones": "遮罩與區域編輯器 - Frigate",
     "motionTuner": "移動偵測調教器 - Frigate",
-    "object": "除錯 - Frigate"
+    "object": "除錯 - Frigate",
+    "cameraManagement": "管理鏡頭 - Frigate",
+    "cameraReview": "相機預覽設置 - Frigate"
   },
   "menu": {
     "ui": "使用者介面",
@@ -21,7 +23,9 @@
     "users": "使用者",
     "notifications": "通知",
     "frigateplus": "Frigate+",
-    "triggers": "觸發"
+    "triggers": "觸發",
+    "cameraManagement": "管理",
+    "cameraReview": "預覽"
   },
   "dialog": {
     "unsavedChanges": {
@@ -85,6 +89,41 @@
   },
   "enrichments": {
     "title": "強化設定",
-    "unsavedChanges": "尚未儲存的強化設定變更"
+    "unsavedChanges": "尚未儲存的強化設定變更",
+    "semanticSearch": {
+      "modelSize": {
+        "label": "模型大小",
+        "small": {
+          "title": "小"
+        }
+      }
+    },
+    "faceRecognition": {
+      "title": "人臉識別"
+    }
+  },
+  "cameraWizard": {
+    "title": "新增相機",
+    "testResultLabels": {
+      "resolution": "解析度",
+      "video": "影像",
+      "audio": "語音"
+    },
+    "commonErrors": {
+      "testFailed": "串流測試失敗: {{error}}"
+    },
+    "step1": {
+      "description": "輸入相機詳細資訊並測試連線。",
+      "cameraName": "相機名稱",
+      "cameraNamePlaceholder": "例: 前門 / 後院",
+      "host": "主機/IP 位置",
+      "port": "埠",
+      "username": "用戶名稱",
+      "usernamePlaceholder": "選填",
+      "password": "密碼",
+      "passwordPlaceholder": "選填",
+      "selectTransport": "選擇協議",
+      "cameraBrand": "相機品牌"
+    }
   }
 }
