@@ -30,6 +30,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Link } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { usePersistence } from "@/hooks/use-persistence";
+import { isDesktop } from "react-device-detect";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
@@ -223,7 +224,12 @@ export default function DetailStream({
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 z-30 rounded-t-md border border-secondary-highlight bg-background_alt shadow-md">
+        <div
+          className={cn(
+            "absolute bottom-0 left-0 right-0 z-30 rounded-t-md border border-secondary-highlight bg-background_alt shadow-md",
+            isDesktop && "border-b-0",
+          )}
+        >
           <button
             onClick={() => setControlsExpanded(!controlsExpanded)}
             className="flex w-full items-center justify-between p-3"

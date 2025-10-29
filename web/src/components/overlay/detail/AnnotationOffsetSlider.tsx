@@ -82,8 +82,10 @@ export default function AnnotationOffsetSlider({ className }: Props) {
             "landscape:flex-col landscape:items-start landscape:gap-4",
         )}
       >
-        <div className="flex flex-row gap-2 text-sm">
-          {t("trackingDetails.annotationSettings.offset.label")}:
+        <div className="flex max-w-28 flex-row items-center gap-2 text-sm md:max-w-48">
+          <span className="max-w-24 md:max-w-44">
+            {t("trackingDetails.annotationSettings.offset.label")}:
+          </span>
           <span className="text-primary-variant">{annotationOffset}</span>
         </div>
         <div className="w-full flex-1 landscape:flex">
