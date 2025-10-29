@@ -654,6 +654,7 @@ export default function LiveCameraView({
                   className={`${fullscreen ? "*:rounded-none" : ""}`}
                   windowVisible
                   showStillWithoutActivity={false}
+                  alwaysShowCameraName={false}
                   cameraConfig={camera}
                   playAudio={audio}
                   playInBackground={playInBackground ?? false}
