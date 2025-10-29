@@ -15,6 +15,9 @@ import {
 import { isIOS, isMobile } from "react-device-detect";
 import { Button } from "../ui/button";
 import { LuZoomIn, LuZoomOut } from "react-icons/lu";
+import { useTranslation } from "react-i18next";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 export type ReviewTimelineProps = {
   timelineRef: RefObject<HTMLDivElement>;
@@ -73,6 +76,7 @@ export function ReviewTimeline({
   currentZoomLevel,
   children,
 }: ReviewTimelineProps) {
+  const { t } = useTranslation("views/events");
   const [isDraggingHandlebar, setIsDraggingHandlebar] = useState(false);
   const [isDraggingExportStart, setIsDraggingExportStart] = useState(false);
   const [isDraggingExportEnd, setIsDraggingExportEnd] = useState(false);
@@ -515,35 +519,49 @@ export function ReviewTimeline({
               : "bottom-2 left-1/2 -translate-x-1/2"
           }`}
         >
-          <Button
-            onClick={(e) => {
-              const newLevel = Math.max(0, currentZoomLevelIndex - 1);
-              onZoomChange(newLevel);
-              e.currentTarget.blur();
-            }}
-            variant="outline"
-            disabled={currentZoomLevelIndex === 0}
-            className="bg-background_alt p-3 hover:bg-accent hover:text-accent-foreground active:scale-95 [@media(hover:none)]:hover:bg-background_alt"
-            type="button"
-          >
-            <LuZoomOut className={cn("size-5 text-primary-variant")} />
-          </Button>
-          <Button
-            onClick={(e) => {
-              const newLevel = Math.min(
-                zoomLevels.length - 1,
-                currentZoomLevelIndex + 1,
-              );
-              onZoomChange(newLevel);
-              e.currentTarget.blur();
-            }}
-            variant="outline"
-            disabled={currentZoomLevelIndex === zoomLevels.length - 1}
-            className="bg-background_alt p-3 hover:bg-accent hover:text-accent-foreground active:scale-95 [@media(hover:none)]:hover:bg-background_alt"
-            type="button"
-          >
-            <LuZoomIn className={cn("size-5 text-primary-variant")} />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={(e) => {
+                  const newLevel = Math.max(0, currentZoomLevelIndex - 1);
+                  onZoomChange(newLevel);
+                  e.currentTarget.blur();
+                }}
+                variant="outline"
+                disabled={currentZoomLevelIndex === 0}
+                className="bg-background_alt p-3 hover:bg-accent hover:text-accent-foreground active:scale-95 [@media(hover:none)]:hover:bg-background_alt"
+                type="button"
+              >
+                <LuZoomOut className={cn("size-5 text-primary-variant")} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>{t("zoomIn")}</TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={(e) => {
+                  const newLevel = Math.min(
+                    zoomLevels.length - 1,
+                    currentZoomLevelIndex + 1,
+                  );
+                  onZoomChange(newLevel);
+                  e.currentTarget.blur();
+                }}
+                variant="outline"
+                disabled={currentZoomLevelIndex === zoomLevels.length - 1}
+                className="bg-background_alt p-3 hover:bg-accent hover:text-accent-foreground active:scale-95 [@media(hover:none)]:hover:bg-background_alt"
+                type="button"
+              >
+                <LuZoomIn className={cn("size-5 text-primary-variant")} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>{t("zoomOut")}</TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
         </div>
       )}
     </>
