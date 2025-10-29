@@ -223,8 +223,7 @@ export default function DetailStream({
           </div>
         </div>
 
-        {/* Collapsible Controls Section - Absolutely positioned at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 z-30 rounded-t-md border border-secondary-highlight bg-background shadow-md">
+        <div className="absolute bottom-0 left-0 right-0 z-30 rounded-t-md border border-secondary-highlight bg-background_alt shadow-md">
           <button
             onClick={() => setControlsExpanded(!controlsExpanded)}
             className="flex w-full items-center justify-between p-3"
