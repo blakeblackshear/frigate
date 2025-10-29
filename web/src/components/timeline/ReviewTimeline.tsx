@@ -402,7 +402,7 @@ export function ReviewTimeline({
                 </div>
               </div>
               {/* TODO: determine if we should keep this tooltip */}
-              {isHandlebarInNoRecordingPeriod && (
+              {false && isHandlebarInNoRecordingPeriod && (
                 <div className="absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 rounded-md bg-destructive/80 px-4 py-1 text-center text-xs text-white shadow-lg">
                   No recordings
                 </div>
