@@ -10,7 +10,9 @@
     "general": "Configuración General - Frigate",
     "frigatePlus": "Configuración de Frigate+ - Frigate",
     "notifications": "Configuración de Notificaciones - Frigate",
-    "enrichments": "Configuración de Análisis Avanzado - Frigate"
+    "enrichments": "Configuración de Análisis Avanzado - Frigate",
+    "cameraManagement": "Administrar Cámaras - Frigate",
+    "cameraReview": "Revisar Configuración de Cámaras - Frigate"
   },
   "menu": {
     "cameras": "Configuración de Cámara",
@@ -24,7 +26,8 @@
     "notifications": "Notificaciones",
     "enrichments": "Análisis avanzado",
     "triggers": "Disparadores",
-    "roles": "Rols"
+    "roles": "Rols",
+    "cameraManagement": "Administración"
   },
   "dialog": {
     "unsavedChanges": {
