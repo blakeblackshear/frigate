@@ -206,13 +206,23 @@
     "audioTranscription": {
       "label": "Transcriu",
       "aria": "Demanar una transcripció d'audio"
+    },
+    "showObjectDetails": {
+      "label": "Mostra la ruta de l'objecte"
+    },
+    "hideObjectDetails": {
+      "label": "Amaga la ruta de l'objecte"
+    },
+    "viewTrackingDetails": {
+      "label": "Veure detalls de seguiment",
+      "aria": "Mostra els detalls de seguiment"
     }
   },
   "noTrackedObjects": "No s'han trobat objectes rastrejats",
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar la supressió",
-      "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol objecte associat. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
+      "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol detall de seguiment. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
     }
   },
   "fetchingTrackedObjectsFailed": "Error al obtenir objectes rastrejats: {{errorMessage}}",
@@ -224,5 +234,53 @@
   },
   "concerns": {
     "label": "Preocupacions"
+  },
+  "trackingDetails": {
+    "title": "Detalls de seguiment",
+    "noImageFound": "No s'ha trobat cap imatge amb aquesta hora.",
+    "createObjectMask": "Crear màscara d'objecte",
+    "adjustAnnotationSettings": "Ajustar configuració d'anotacions",
+    "scrollViewTips": "Desplaça per veure els moments significants del cicle de vida d'aquest objecte.",
+    "autoTrackingTips": "Limitar les posicións de la caixa serà inacurat per càmeras de seguiment automàtic.",
+    "count": "{{first}} de {{second}}",
+    "trackedPoint": "Punt Seguit",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} detectat",
+      "entered_zone": "{{label}} ha entrat a {{zones}}",
+      "active": "{{label}} ha esdevingut actiu",
+      "stationary": "{{label}} ha esdevingut estacionari",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detectat per {{label}}",
+        "other": "{{label}} reconegut com a {{attribute}}"
+      },
+      "gone": "{{label}} esquerra",
+      "heard": "{{label}} sentit",
+      "external": "{{label}} detectat",
+      "header": {
+        "zones": "Zones",
+        "ratio": "Ràtio",
+        "area": "Àrea"
+      }
+    },
+    "annotationSettings": {
+      "title": "Configuració d'anotacions",
+      "showAllZones": {
+        "title": "Mostra totes les Zones",
+        "desc": "Mostra sempre les zones amb marcs on els objectes hagin entrat a la zona."
+      },
+      "offset": {
+        "label": "Òfset d'Anotació",
+        "desc": "Aquestes dades provenen del flux de detecció de la càmera, però se superposen a les imatges del flux de gravació. És poc probable que els dos fluxos estiguin perfectament sincronitzats. Com a resultat, el quadre delimitador i el metratge no s'alinearan perfectament. Tanmateix, es pot utilitzar el camp <code>annotation_offset</code> per ajustar-ho.",
+        "millisecondsToOffset": "Millisegons per l'òfset de detecció d'anotacions per. <em>Per defecte: 0</em>",
+        "tips": "CONSELL: Imagineu-vos que hi ha un clip d'esdeveniment amb una persona caminant d'esquerra a dreta. Si el quadre delimitador de la cronologia de l'esdeveniment està constantment a l'esquerra de la persona, aleshores s'hauria de disminuir el valor. De la mateixa manera, si una persona camina d'esquerra a dreta i el quadre delimitador està constantment per davant de la persona, aleshores s'hauria d'augmentar el valor.",
+        "toast": {
+          "success": "L'Òfset d'anotació per a {{camera}} s'ha desat al fitxer de configuració. Reinicieu Frigate per aplicar els canvis."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Diapositiva anterior",
+      "next": "Dispositiva posterior"
+    }
   }
 }

@@ -53,7 +53,7 @@
     "export": "Exportar",
     "selectOrExport": "Seleccionar o exportar",
     "toast": {
-      "success": "Exportació inciada amb èxit. Pots veure l'arxiu a la carpeta /exports.",
+      "success": "Exportació inciada amb èxit. Pots veure l'arxiu a la pàgina d'exportacions.",
       "error": {
         "endTimeMustAfterStartTime": "L'hora de finalització ha de ser posterior a l'hora d'inici",
         "noVaildTimeSelected": "No s'ha seleccionat un rang de temps vàlid",
