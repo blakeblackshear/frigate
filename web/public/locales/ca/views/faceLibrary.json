@@ -12,13 +12,13 @@
   "collections": "Col·leccions",
   "train": {
     "empty": "No hi ha intents recents de reconeixement de rostres",
-    "title": "Entrenar",
-    "aria": "Seleccionar entrenament"
+    "title": "Reconeixements recents",
+    "aria": "Selecciona els reconeixements recents"
   },
   "description": {
-    "addFace": "Guia per a agregar una nova colecció a la biblioteca de rostres.",
+    "addFace": "Afegiu una col·lecció nova a la biblioteca de cares pujant la vostra primera imatge.",
     "placeholder": "Introduïu un nom per a aquesta col·lecció",
-    "invalidName": "Nom no vàlid. Els noms només poden incloure lletres, números, espais, apòstrofs, guions baixos i guionets."
+    "invalidName": "Nom no vàlid. Els noms només poden incloure lletres, números, espais, apòstrofs, guions baixos i guions."
   },
   "documentTitle": "Biblioteca de rostres - Frigate",
   "uploadFaceImage": {
@@ -54,7 +54,7 @@
       "selectImage": "Siusplau, selecciona un fixer d'imatge."
     },
     "maxSize": "Mida màxima: {{size}}MB",
-    "dropInstructions": "Arrastra una imatge aquí, o fes clic per a selccionar-ne una"
+    "dropInstructions": "Arrossegueu i deixeu anar o enganxeu una imatge aquí, o feu clic per seleccionar"
   },
   "button": {
     "uploadImage": "Pujar imatge",

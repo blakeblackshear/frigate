@@ -86,8 +86,8 @@
     "disable": "Amaga estadístiques de la transmissió"
   },
   "manualRecording": {
-    "title": "Gravació sota demanda",
-    "tips": "Iniciar un event manual basat en els paràmetres de retenció de gravació per aquesta càmera.",
+    "title": "Sota demanda",
+    "tips": "Baixeu una instantània o inicieu un esdeveniment manual basat en la configuració de retenció d'enregistrament d'aquesta càmera.",
     "playInBackground": {
       "label": "Reproduir en segon pla",
       "desc": "Habilita aquesta opció per a continuar la transmissió quan el reproductor està amagat."
@@ -178,6 +178,8 @@
     "downloadStarted": "Inici de baixada d'instantània."
   },
   "noCameras": {
-    "title": "Sense càmeres per configurar"
+    "title": "No s'ha configurat cap càmera",
+    "description": "Comenceu connectant una càmera a Frigate.",
+    "buttonText": "Afegeix una càmera"
   }
 }
