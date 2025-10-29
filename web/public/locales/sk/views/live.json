@@ -170,8 +170,8 @@
     "exitEdit": "Ukončiť úpravy"
   },
   "noCameras": {
-    "title": "Nie sú nastavené žiadne kamery",
-    "description": "Začnite pripojením kamery.",
+    "title": "Nie sú konfigurované žiadne kamery",
+    "description": "Začnite tým, že pripojíte kameru do Frigate.",
     "buttonText": "Pridať kameru"
   },
   "snapshot": {

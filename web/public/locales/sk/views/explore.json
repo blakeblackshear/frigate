@@ -197,6 +197,12 @@
     },
     "deleteTrackedObject": {
       "label": "Odstrániť tento sledovaný objekt"
+    },
+    "showObjectDetails": {
+      "label": "Zobraziť cestu objektu"
+    },
+    "hideObjectDetails": {
+      "label": "Skryť cestu objektu"
     }
   },
   "dialog": {

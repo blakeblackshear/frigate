@@ -1,7 +1,7 @@
 {
   "description": {
     "addFace": "Sprievodca pridáním novej kolekcie do Knižnice tvárí.",
-    "invalidName": "Neplatný názov. Názov može obsahovať iba písmená, čísla, medzery, apostrofy, podtržníky a pomlčky.",
+    "invalidName": "Neplatné meno. Mená môžu obsahovať iba písmená, čísla, medzery, apostrofy, podčiarkovníky a spojovníky.",
     "placeholder": "Zadajte názov pre túto kolekciu"
   },
   "details": {
@@ -34,8 +34,8 @@
     }
   },
   "train": {
-    "title": "Trénovať",
-    "aria": "Vybrať tréning",
+    "title": "Nedávne uznania",
+    "aria": "Vyberte posledné rozpoznania",
     "empty": "Neexistujú žiadne predchádzajúce pokusy o rozpoznávanie tváre"
   },
   "selectItem": "Vyberte {{item}}",

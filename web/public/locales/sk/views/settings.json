@@ -454,7 +454,22 @@
       "tips": "<p><strong>Boxy pohybu</strong></p><br><p>Červené boxy budú prekryté na miestach snímky, kde je práve detekovaný pohyb.</p>"
     },
     "regions": {
-      "title": "Regióny"
+      "title": "Regióny",
+      "desc": "Zobraziť rámček oblasti záujmu odoslaný do detektora objektov",
+      "tips": "<p><strong>Oblasti regiónov</strong></p><br><p>Jasnozelené políčka budú prekrývať oblasti záujmu v zábere, ktoré sa odosielajú do detektora objektov.</p>"
+    },
+    "paths": {
+      "title": "Cesty",
+      "desc": "Zobraziť významné body dráhy sledovaného objektu",
+      "tips": "<p><strong>Cesty</strong></p><br><p>Čiary a kruhy označujú významné body, ktorými sa sledovaný objekt počas svojho životného cyklu pohyboval.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Výkres filtra tvaru objektu",
+      "desc": "Nakreslite na obrázok obdĺžnik, aby ste zobrazili podrobnosti o ploche a pomere",
+      "tips": "Povolením tejto možnosti nakreslíte na obraze kamery obdĺžnik, ktorý zobrazuje jeho plochu a pomer strán. Tieto hodnoty sa potom dajú použiť na nastavenie parametrov filtra tvaru objektu vo vašej konfigurácii.",
+      "score": "Skóre",
+      "ratio": "Pomer",
+      "area": "Oblasť"
     }
   },
   "cameraWizard": {
@@ -510,11 +525,16 @@
         "invalidCharacters": "Názov kamery obsahuje neplatné znaky",
         "nameExists": "Názov kamery už existuje",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP sa neodporúča. Odporúča sa povoliť http v nastavení kamery a reštartovať sprievodca kamery."
-        }
+          "reolink-rtsp": "Reolink RTSP sa neodporúča. Odporúča sa povoliť HTTP v nastavení kamery a reštartovať sprievodca kamery."
+        },
+        "customUrlRtspRequired": "Vlastné URL musia začať s \"rtsp / \"\". Manuálna konfigurácia je potrebná pre non-RTSP kamerové prúdy."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Skúmanie metadát kamery...",
+        "fetchingSnapshot": "Načítava sa snímka z kamery..."
       }
     },
     "step2": {
@@ -581,7 +601,9 @@
         },
         "hikvision": {
           "substreamWarning": "Substream 1 je uzamknutý na nízke rozlíšenie. Mnoho Hikvision kamery podporujú ďalšie podstreamy, ktoré musia byť povolené v nastavení kamery. Odporúča sa skontrolovať a využiť tie prúdy, ak je k dispozícii."
-        }
+        },
+        "resolutionHigh": "Rozlíšenie {{resolution}} môže spôsobiť zvýšenú spotrebu zdrojov.",
+        "resolutionLow": "Rozlíšenie {{resolution}} môže byť príliš nízka pre spoľahlivú detekciu malých objektov."
       },
       "description": "Záverečné overenie a analýza pred uložením nového fotoaparátu. Pripojte každý prúd pred uložením.",
       "validationTitle": "Stream Platnosť",
@@ -671,6 +693,104 @@
       "limitDetections": "Obmedziť detekciu na konkrétne zóny",
       "toast": {
         "success": "Konfigurácia klasifikácie bola uložená. Reštartujte Frigate, aby sa zmeny prejavili."
+      }
+    }
+  },
+  "users": {
+    "title": "Používatelia",
+    "management": {
+      "title": "Správa používateľov",
+      "desc": "Spravovať používateľské účty tejto inštancie Frigate."
+    },
+    "addUser": "Pridať používateľa",
+    "updatePassword": "Aktualizovať heslo",
+    "toast": {
+      "success": {
+        "createUser": "Užívateľ {{user}} úspešne vytvorený",
+        "deleteUser": "Užívateľ {{user}} úspešne odobraný",
+        "updatePassword": "Heslo úspešne aktualizované.",
+        "roleUpdated": "Aktualizovaná rola pre používateľa {{user}}"
+      },
+      "error": {
+        "setPasswordFailed": "Nepodarilo sa uložiť heslo: {{errorMessage}}",
+        "createUserFailed": "Nepodarilo sa vytvoriť používateľa: {{errorMessage}}",
+        "deleteUserFailed": "Nepodarilo sa odstrániť používateľa: {{errorMessage}}",
+        "roleUpdateFailed": "Nepodarilo sa aktualizovať rolu: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Používateľské meno",
+      "actions": "Akcie",
+      "role": "Rola",
+      "noUsers": "Nenašli sa žiadni používatelia.",
+      "changeRole": "Zmeniť rolu používateľa",
+      "password": "Heslo",
+      "deleteUser": "Odstrániť používateľa"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Používateľské meno",
+          "desc": "Povolené sú iba písmená, čísla, bodky a podčiarkovníky.",
+          "placeholder": "Zadajte používateľské meno"
+        },
+        "password": {
+          "title": "Heslo",
+          "placeholder": "Zadajte heslo",
+          "confirm": {
+            "title": "Potvrdiť heslo",
+            "placeholder": "Potvrdiť heslo"
+          },
+          "strength": {
+            "title": "Sila hesla: ",
+            "weak": "Slabý",
+            "medium": "Stredná",
+            "strong": "Silný",
+            "veryStrong": "Veľmi silný"
+          },
+          "match": "Heslá sa zhodujú",
+          "notMatch": "Heslá sa nezhodujú"
+        },
+        "newPassword": {
+          "title": "Nové heslo",
+          "placeholder": "Zadajte nové heslo",
+          "confirm": {
+            "placeholder": "Znovu zadajte nové heslo"
+          }
+        },
+        "usernameIsRequired": "Vyžaduje sa používateľské meno",
+        "passwordIsRequired": "Heslo je povinné"
+      },
+      "createUser": {
+        "title": "Vytvorenie nového užívateľa",
+        "desc": "Pridajte nový používateľský účet a zadajte rolu pre prístup k oblastiam používateľského rozhrania Frigate.",
+        "usernameOnlyInclude": "Používateľské meno môže obsahovať iba písmená, číslice, . alebo _",
+        "confirmPassword": "Potvrďte svoje heslo"
+      },
+      "deleteUser": {
+        "title": "Odstrániť užívateľa",
+        "desc": "Túto akciu nie je možné vrátiť späť. Týmto sa natrvalo odstráni používateľský účet a odstránia sa všetky súvisiace údaje.",
+        "warn": "Naozaj chcete odstrániť používateľa <strong>{{username}}<strong>?"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Heslo nemôže byť prázdne",
+        "doNotMatch": "Heslá sa nezhodujú",
+        "updatePassword": "Aktualizácia hesla pre {{username}}",
+        "setPassword": "Nastaviť heslo",
+        "desc": "Vytvorte si silné heslo na zabezpečenie tohto účtu."
+      },
+      "changeRole": {
+        "title": "Zmeniť rolu používateľa",
+        "select": "Vyberte rolu",
+        "desc": "Aktualizovať povolenia pre používateľa <strong>{{username}}<strong>",
+        "roleInfo": {
+          "intro": "Vyberte príslušnú rolu pre tohto používateľa:",
+          "admin": "Správca",
+          "adminDesc": "Úplný prístup ku všetkým funkciám.",
+          "viewer": "Divák",
+          "viewerDesc": "Obmedzené iba na živé dashboardy, funkcie Review, Explore a Exports.",
+          "customDesc": "Vlastná rola so špecifickým prístupom k kamere."
+        }
       }
     }
   }
