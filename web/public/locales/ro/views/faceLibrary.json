@@ -20,15 +20,15 @@
   "createFaceLibrary": {
     "desc": "Creează o colecție nouă",
     "title": "Creează colecție",
-    "nextSteps": "Pentru a construi o bază solidă:<li>Folosește fila „antrenare” pentru a selecta și antrena pe imagini pentru fiecare persoană detectată.</li><li>Concentrează-te pe imagini frontale pentru cele mai bune rezultate; evită imaginile de antrenament care surprind fețe din unghiuri laterale.</li></ul>",
+    "nextSteps": "Pentru a construi o bază solidă:<li>Folosește fila „Recunoașteri Recente” pentru a selecta și antrena pe imagini pentru fiecare persoană detectată.</li><li>Concentrează-te pe imagini frontale pentru cele mai bune rezultate; evită imaginile de antrenament care surprind fețe din unghiuri laterale.</li></ul>",
     "new": "Crează o față nouă"
   },
   "collections": "Colecții",
   "documentTitle": "Bibliotecă fețe - Frigate",
   "train": {
     "empty": "Nu există încercări recente de recunoaștere facială",
-    "title": "Antrenează",
-    "aria": "Selectează antrenarea"
+    "title": "Recunoașteri Recente",
+    "aria": "Selectează Recunoașteri Recente"
   },
   "steps": {
     "description": {
