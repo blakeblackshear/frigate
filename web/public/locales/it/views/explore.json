@@ -195,6 +195,12 @@
     "audioTranscription": {
       "label": "Trascrivere",
       "aria": "Richiedi la trascrizione audio"
+    },
+    "showObjectDetails": {
+      "label": "Mostra il percorso dell'oggetto"
+    },
+    "hideObjectDetails": {
+      "label": "Nascondi il percorso dell'oggetto"
     }
   },
   "dialog": {

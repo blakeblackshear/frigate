@@ -174,7 +174,7 @@
   "noCameras": {
     "buttonText": "Aggiungi telecamera",
     "title": "Nessuna telecamera configurata",
-    "description": "Per iniziare, collega una telecamera."
+    "description": "Per iniziare, collega una telecamera a Frigate."
   },
   "snapshot": {
     "takeSnapshot": "Scarica l'istantanea attuale",

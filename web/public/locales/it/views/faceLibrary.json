@@ -16,8 +16,8 @@
     "unknown": "Sconosciuto"
   },
   "train": {
-    "title": "Addestra",
-    "aria": "Seleziona addestramento",
+    "title": "Riconoscimenti recenti",
+    "aria": "Seleziona i riconoscimenti recenti",
     "empty": "Non ci sono recenti tentativi di riconoscimento facciale"
   },
   "button": {
@@ -63,7 +63,7 @@
   },
   "createFaceLibrary": {
     "title": "Crea raccolta",
-    "nextSteps": "Per costruire una base solida:<li>Usa la scheda Addestra per selezionare e addestrare le immagini per ogni persona rilevata.</li><li>Concentrati sulle immagini dritte per ottenere risultati migliori; evita di addestrare immagini che catturano i volti da un'angolazione.</li></ul>",
+    "nextSteps": "Per costruire una base solida:<li>Usa la scheda \"Riconoscimenti recenti\" per selezionare e addestrare le immagini per ogni persona rilevata.</li><li>Concentrati sulle immagini dritte per ottenere risultati migliori; evita di addestrare immagini che catturano i volti da un'angolazione.</li></ul>",
     "desc": "Crea una nuova raccolta",
     "new": "Crea nuovo volto"
   },
