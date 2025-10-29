@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Sprehodite se skozi dodajanje nove zbirke v knjižnico obrazov.",
+    "addFace": "Dodajanje nove zbirke v knjižnico obrazov z nalaganjem slike",
     "placeholder": "Vnesite ime za to zbirko",
     "invalidName": "Neveljavno ime. Ime lahko vsebuje črke, števila, presledke, narekovaje, podčrtaje in pomišljaje."
   },
@@ -55,7 +55,8 @@
   "createFaceLibrary": {
     "title": "Ustvari Zbirko",
     "desc": "Ustvari novo zbirko",
-    "new": "Ustvari Nov Obraz"
+    "new": "Ustvari Nov Obraz",
+    "nextSteps": "Za vzpoztavitev trdnih osnov: <li>V zavihku Nedavne prepoznave izberi in uporabi slike za učenje vsake zaznane osebe.</li><li>Za najboljše rezultate se osredotoči na slike, kjer je obraz obrnjen naravnost; izogibaj se slikam, na katerih so obrazi posneti pod kotom.</li>"
   },
   "steps": {
     "faceName": "Vnesi Ime Obraza",
@@ -66,8 +67,8 @@
     }
   },
   "train": {
-    "title": "Vlak",
-    "aria": "Izberite treniranje",
+    "title": "Nedavne prepoznave",
+    "aria": "Izberite nedavne prepoznave",
     "empty": "Ni nedavnih poskusov prepoznavanja obrazov"
   },
   "selectItem": "Izberi {{item}}",
@@ -93,7 +94,7 @@
       "selectImage": "Izberite slikovno datoteko."
     },
     "dropActive": "Sliko spustite tukaj…",
-    "dropInstructions": "Povlecite in spustite sliko sem ali kliknite za izbiro",
+    "dropInstructions": "Povlecite in spustite ali prilepite sliko sem ali kliknite za izbiro",
     "maxSize": "Največja velikost: {{size}}MB"
   },
   "nofaces": "Noben obraz ni na voljo",
