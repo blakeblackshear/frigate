@@ -100,8 +100,8 @@
     "disable": "Paslėpti Transliacijos Stats"
   },
   "manualRecording": {
-    "title": "Įrašymai pagal poreikį",
-    "tips": "Kurti manualaus saugojimo nustatymus pagal įvykius iš šios kameros.",
+    "title": "Pagal-Poreikį",
+    "tips": "Atsisiųsti momentinę nuotrauką arba kurti manualaus saugojimo nustatymus pagal įvykius iš šios kameros.",
     "playInBackground": {
       "label": "Paleisti fone",
       "desc": "Įjungti šią funkciją kad transliaciją išliktų net paslėpus grotuvą."
@@ -170,8 +170,14 @@
     "exitEdit": "Išeiti Iš Redagavimo"
   },
   "noCameras": {
-    "title": "Sukonfiguruotų Kamerų Nėra",
-    "description": "Pradėti nuo kameros prijungimo.",
+    "title": "Nėra Sukonfiguruotų Kamerų",
+    "description": "Pradėti nuo kameros prijungimo pire Frigate.",
     "buttonText": "Pridėti Kamerą"
+  },
+  "snapshot": {
+    "takeSnapshot": "Atsisiųsti momentinį kadrą",
+    "noVideoSource": "Momentinei nuotraukai nėra prieinamo video šaltinio.",
+    "captureFailed": "Nepavyko užfiksuoti kadro.",
+    "downloadStarted": "Momentinės nuotraukos atsisiuntimas pradėtas."
   }
 }
