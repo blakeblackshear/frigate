@@ -40,9 +40,10 @@
   "detail": {
     "noDataFound": "Ingen detaljer å inspisere",
     "aria": "Vis/skjul detaljvisning",
-    "trackedObject_one": "sporet objekt",
-    "trackedObject_other": "sporede objekter",
-    "noObjectDetailData": "Ingen detaljdata for objektet tilgjengelig."
+    "trackedObject_one": "objekt",
+    "trackedObject_other": "objekter",
+    "noObjectDetailData": "Ingen detaljdata for objektet tilgjengelig.",
+    "label": "Detalj"
   },
   "objectTrack": {
     "trackedPoint": "Sporingspunkt",
