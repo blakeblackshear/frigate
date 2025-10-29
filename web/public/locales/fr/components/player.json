@@ -10,8 +10,8 @@
     "title": "Flux hors ligne",
     "desc": "Aucune image n'a été reçue sur le flux de <code>détection</code> de la caméra {{cameraName}}. Vérifiez le journal d'erreurs."
   },
-  "livePlayerRequiredIOSVersion": "iOS 17.1 ou une version supérieure est requis pour ce type de flux en direct.",
-  "cameraDisabled": "La caméra est désactivée",
+  "livePlayerRequiredIOSVersion": "iOS 17.1 ou une version supérieure est requise pour ce type de flux en direct.",
+  "cameraDisabled": "La caméra est désactivée.",
   "stats": {
     "streamType": {
       "title": "Type de flux :",
@@ -37,7 +37,7 @@
       "title": "Images perdues :"
     },
     "decodedFrames": "Images décodées :",
-    "droppedFrameRate": "Proportion d'images perdues :",
+    "droppedFrameRate": "Taux d'images perdues :",
     "totalFrames": "Total images :"
   },
   "toast": {

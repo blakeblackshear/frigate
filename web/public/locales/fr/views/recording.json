@@ -1,12 +1,12 @@
 {
-  "export": "Exporter",
+  "export": "Exports",
   "calendar": "Calendrier",
   "filter": "Filtre",
   "filters": "Filtres",
   "toast": {
     "error": {
-      "noValidTimeSelected": "Pas de période valide sélectionnée",
-      "endTimeMustAfterStartTime": "L'heure de fin doit être après l'heure de début"
+      "noValidTimeSelected": "Aucune plage horaire valide sélectionnée",
+      "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début."
     }
   }
 }
