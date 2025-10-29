@@ -1,7 +1,7 @@
 {
   "selectItem": "Wybierz {{item}}",
   "description": {
-    "addFace": "Poznaj proces dodawania nowej kolekcji do biblioteki twarzy.",
+    "addFace": "Dodaj nową kolekcję do biblioteki twarzy, przesyłając swoje pierwsze zdjęcie.",
     "placeholder": "Wprowadź nazwę tej kolekcji",
     "invalidName": "Nieprawidłowa nazwa. Nazwy mogą zawierać tylko litery, cyfry, spacje, apostrofy, podkreślenia oraz myślniki."
   },
