@@ -979,7 +979,9 @@
         },
         "hikvision": {
           "substreamWarning": "Substream-ul 1 este blocat la o rezoluție scăzută. Multe camere Hikvision suportă substream-uri suplimentare care trebuie să fie activate în setările camerei. Este recomandat să verifici și să utilizezi acele strem-uri, dacă sunt disponibile."
-        }
+        },
+        "resolutionHigh": "O rezoluție de {{resolution}} poate cauza o utilizare crescută a resurselor.",
+        "resolutionLow": "O rezoluție de {{resolution}} poate fi prea mică pentru detectarea fiabilă a obiectelor mici."
       }
     }
   },
