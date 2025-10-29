@@ -11,8 +11,8 @@
   },
   "description": {
     "placeholder": "Ange ett namn för denna samling",
-    "addFace": "Gå genom för att lägga till nya ansikte till biblioteket.",
-    "invalidName": "Felaktigt namn. Namn kan endast innehålla bokstäver, siffror, mellanslag, apostrofer, understreck och bindestreck."
+    "addFace": "Lägg till en ny samling i ansiktsbiblioteket genom att ladda upp din första bild.",
+    "invalidName": "Ogiltigt namn. Namn får endast innehålla bokstäver, siffror, mellanslag, apostrofer, understreck och bindestreck."
   },
   "documentTitle": "Ansiktsbibliotek - Frigate",
   "steps": {
@@ -26,12 +26,12 @@
   "createFaceLibrary": {
     "title": "Skapa samling",
     "desc": "Skapa ny samling",
-    "nextSteps": "För att bygga en stark grund:<li>Använd fliken Träna för att välja och träna på bilder för varje upptäckt person.</li><li>Fokusera på raka bilder för bästa resultat; undvik träningsbilder som fångar ansikten i vinkel.</li></ul>",
+    "nextSteps": "För att bygga en stark grund:<li>Använd fliken Senaste Igenkänningar för att välja och träna bilder för varje detekterad person.</li><li>Fokusera på raka bilder för bästa resultat; undvik att träna bilder som fångar ansikten i en vinkel.</li></ul>",
     "new": "Skapa nytt ansikte"
   },
   "train": {
-    "title": "Träna",
-    "aria": "Välj träna",
+    "title": "Senaste Igenkänningar",
+    "aria": "Välj senaste igenkänningar",
     "empty": "Det finns inga ny försök till ansiktsigenkänning"
   },
   "uploadFaceImage": {

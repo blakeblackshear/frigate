@@ -40,9 +40,10 @@
   "detail": {
     "noDataFound": "Inga detaljerade data att granska",
     "aria": "Växla detaljvy",
-    "trackedObject_one": "spårat objekt",
-    "trackedObject_other": "spårade objekt",
-    "noObjectDetailData": "Inga objektdetaljdata tillgängliga."
+    "trackedObject_one": "objekt",
+    "trackedObject_other": "objekt",
+    "noObjectDetailData": "Inga objektdetaljdata tillgängliga.",
+    "label": "Detalj"
   },
   "objectTrack": {
     "trackedPoint": "Spårad punkt",

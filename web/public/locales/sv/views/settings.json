@@ -885,7 +885,7 @@
         "invalidCharacters": "Kameranamnet innehåller ogiltiga tecken",
         "nameExists": "Kameranamnet finns redan",
         "brands": {
-          "reolink-rtsp": "Reolink RTSP rekommenderas inte. Det rekommenderas att aktivera http i kamerainställningarna och starta om kameraguiden."
+          "reolink-rtsp": "Reolink RTSP rekommenderas inte. Aktivera HTTP i kamerans firmwareinställningar och starta om guiden."
         }
       },
       "docs": {

@@ -196,12 +196,15 @@
     },
     "deleteTrackedObject": {
       "label": "Ta bort det här spårade objektet"
+    },
+    "showObjectDetails": {
+      "label": "Visa objektets plats"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Bekräfta radering",
-      "desc": "Om du tar bort det här spårade objektet tas bort ögonblicksbilden, alla sparade inbäddningar och alla tillhörande objektlivscykelposter bort. Inspelade bilder av det här spårade objektet i historikvyn kommer <em>INTE</em> att raderas.<br /><br />Är du säker på att du vill fortsätta?"
+      "desc": "Om du tar bort det här spårade objektet tas ögonblicksbilden, alla sparade inbäddningar och alla tillhörande spårningsdetaljer bort. Inspelade bilder av det här spårade objektet i historikvyn kommer <em>INTE</em> att raderas.<br /><br />Är du säker på att du vill fortsätta?"
     }
   },
   "noTrackedObjects": "Inga spårade objekt hittades",
@@ -222,5 +225,52 @@
   },
   "concerns": {
     "label": "Oro"
+  },
+  "trackingDetails": {
+    "title": "Spårningsdetaljer",
+    "noImageFound": "Ingen bild hittades för denna tidsstämpel.",
+    "createObjectMask": "Skapa objektmask",
+    "adjustAnnotationSettings": "Justera annoteringsinställningar",
+    "scrollViewTips": "Scrolla för att se de viktiga ögonblicken i detta objekts livscykel.",
+    "autoTrackingTips": "Begränsningsrutornas positioner kommer att vara felaktiga för autospårningskameror.",
+    "count": "{{first}} av {{second}}",
+    "trackedPoint": "Spårad punkt",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} upptäckt",
+      "entered_zone": "{{label}} gick in i {{zones}}",
+      "active": "{{label}} blev aktiv",
+      "stationary": "{{label}} blev stationär",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} upptäckt för {{label}}",
+        "other": "{{label}} igenkänd som {{attribute}}"
+      },
+      "gone": "{{label}} vänster",
+      "heard": "{{label}} hördes",
+      "external": "{{label}} upptäckt",
+      "header": {
+        "zones": "Zoner",
+        "ratio": "Förhållandet",
+        "area": "Område"
+      }
+    },
+    "annotationSettings": {
+      "title": "Annoteringsinställningar",
+      "showAllZones": {
+        "title": "Visa alla zoner",
+        "desc": "Visa alltid zoner på ramar där objekt har kommit in i en zon."
+      },
+      "offset": {
+        "label": "Annoteringsförskjutning",
+        "desc": "Denna data kommer från din kameras detekteringsflöde men läggs ovanpå bilder från inspelningsflödet. Det är osannolikt att de två strömmarna är helt synkroniserade. Som ett resultat kommer avgränsningsramen och filmmaterialet inte att radas upp perfekt. Fältet <code>annotation_offset</code> kan dock användas för att justera detta.",
+        "millisecondsToOffset": "Millisekunder för att förskjuta detektera annoteringar med. <em>Standard: 0</em>",
+        "tips": "TIPS: Föreställ dig ett händelseklipp med en person som går från vänster till höger. Om tidslinjens avgränsningsram konsekvent är till vänster om personen bör värdet minskas. På samma sätt, om en person går från vänster till höger och avgränsningsramen konsekvent är framför personen bör värdet ökas.",
+        "toast": {
+          "success": "Annoteringsförskjutningen för {{camera}} har sparats i konfigurationsfilen. Starta om Frigate för att tillämpa dina ändringar."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Föregående bild"
+    }
   }
 }
