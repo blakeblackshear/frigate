@@ -2,8 +2,8 @@
   "restart": {
     "title": "Êtes-vous sûr de vouloir redémarrer Frigate ?",
     "restarting": {
-      "title": "Frigate redémarre",
-      "content": "Actualisation de la page dans {{countdown}} secondes.",
+      "title": "Redémarrage de Frigate en cours",
+      "content": "Cette page sera rechargée dans {{countdown}} secondes.",
       "button": "Forcer l'actualisation maintenant"
     },
     "button": "Redémarrer"
@@ -31,10 +31,10 @@
           "submitted": "Soumis"
         },
         "question": {
-          "label": "Confirmez ce libellé pour Frigate+",
-          "ask_an": "Est-ce que cet objet est un(e) <code>{{label}}</code> ?",
-          "ask_a": "Est-ce que cet objet est un(e) <code>{{label}}</code> ?",
-          "ask_full": "Est-ce-que cet objet est un(e) <code>{{translatedLabel}}</code>  ?"
+          "label": "Confirmez cette étiquette pour Frigate+.",
+          "ask_an": "Cet objet est-il un(e) <code>{{label}}</code> ?",
+          "ask_a": "Cet objet est-il un(e) <code>{{label}}</code> ?",
+          "ask_full": "Cet objet est-il un(e) <code>{{translatedLabel}}</code>  ?"
         }
       }
     },
@@ -61,25 +61,25 @@
     "selectOrExport": "Sélectionner ou exporter",
     "toast": {
       "error": {
-        "failed": "Échec du démarrage de l'export : {{error}}",
-        "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début",
-        "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide"
+        "failed": "Échec du démarrage de l'exportation : {{error}}",
+        "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début.",
+        "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide."
       },
-      "success": "Exportation démarrée avec succès. Consultez le fichier dans le dossier /exports."
+      "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations."
     },
     "select": "Sélectionner",
     "name": {
-      "placeholder": "Nommer l'export"
+      "placeholder": "Nommer l'exportation"
     },
     "export": "Exporter",
     "fromTimeline": {
-      "saveExport": "Enregistrer l'export",
-      "previewExport": "Prévisualiser l'export"
+      "saveExport": "Enregistrer l'exportation",
+      "previewExport": "Aperçu de l'exportation"
     }
   },
   "search": {
     "saveSearch": {
-      "desc": "Donnez un nom à cette recherche enregistrée.",
+      "desc": "Saisissez un nom pour cette recherche enregistrée.",
       "label": "Enregistrer la recherche",
       "success": "La recherche ({{searchName}}) a été enregistrée.",
       "button": {
@@ -88,7 +88,7 @@
         }
       },
       "overwrite": "{{searchName}} existe déjà. L'enregistrement écrasera la recherche existante.",
-      "placeholder": "Saisissez un nom pour votre recherche"
+      "placeholder": "Saisissez un nom pour votre recherche."
     }
   },
   "streaming": {
@@ -102,33 +102,34 @@
     },
     "showStats": {
       "label": "Afficher les statistiques du flux",
-      "desc": "Activez cette option pour montrer les statistiques de diffusion en incrustation sur le flux vidéo de la caméra."
+      "desc": "Activez cette option pour afficher les statistiques de diffusion en incrustation sur le flux vidéo de la caméra."
     },
     "debugView": "Affichage de débogage"
   },
   "recording": {
     "confirmDelete": {
       "desc": {
-        "selected": "Êtes-vous sûr(e) de vouloir supprimer toutes les vidéos enregistrées associées à cet élément de la revue d'événements ? <br /><br />Maintenez la touche <em>Maj</em> enfoncée pour éviter cette boîte de dialogue à l'avenir."
+        "selected": "Êtes-vous sûr(e) de vouloir supprimer toutes les vidéos enregistrées associées à cet événement ? <br /><br />Maintenez la touche <em>Maj</em> enfoncée pour éviter cette boîte de dialogue à l'avenir."
       },
       "title": "Confirmer la suppression",
       "toast": {
-        "success": "Les vidéos associées aux éléments de revue d'événements sélectionnés ont été supprimées.",
+        "success": "Les vidéos associées aux événements sélectionnés ont été supprimées.",
         "error": "Échec de la suppression : {{error}}"
       }
     },
     "button": {
       "export": "Exporter",
-      "markAsReviewed": "Marquer comme passé en revue",
+      "markAsReviewed": "Marquer comme vérifié",
       "deleteNow": "Supprimer maintenant",
-      "markAsUnreviewed": "Marqué comme non passé en revue"
+      "markAsUnreviewed": "Marquer comme non vérifié"
     }
   },
   "imagePicker": {
-    "selectImage": "Sélectionnez une vignette d'objet suivi",
+    "selectImage": "Sélectionnez une vignette d'objet suivi.",
     "search": {
-      "placeholder": "Chercher par libellé ou sous-libellé..."
+      "placeholder": "Rechercher par étiquette ou sous-étiquette"
     },
-    "noImages": "Aucune vignette trouvée pour cette caméra"
+    "noImages": "Aucune vignette trouvée pour cette caméra",
+    "unknownLabel": "Image de déclencheur enregistrée"
   }
 }
