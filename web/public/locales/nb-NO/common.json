@@ -252,7 +252,10 @@
     }
   },
   "label": {
-    "back": "Gå tilbake"
+    "back": "Gå tilbake",
+    "hide": "Skjul {{item}}",
+    "show": "Vis {{item}}",
+    "ID": "ID"
   },
   "toast": {
     "copyUrlToClipboard": "Nettadresse kopiert til utklippstavlen.",
@@ -284,5 +287,13 @@
   "readTheDocumentation": "Se dokumentasjonen",
   "information": {
     "pixels": "{{area}}piklser"
+  },
+  "field": {
+    "internalID": "Den interne ID-en som Frigate bruker i konfigurasjonen og databasen",
+    "optional": "Valgfritt"
+  },
+  "list": {
+    "two": "{{0}} og {{1}}",
+    "many": "{{items}}, og {{last}}"
   }
 }

@@ -62,7 +62,7 @@
     "disable": "Deaktiver automatisk sporing"
   },
   "manualRecording": {
-    "tips": "Last ned et øyeblikksbilde umiddelbart, eller start en manuell hendelse basert på dette kameraets innstillinger for opptaksbevaring.",
+    "tips": "Last ned et øyeblikksbilde, eller start en manuell hendelse basert på dette kameraets innstillinger for opptaksbevaring.",
     "playInBackground": {
       "label": "Spill av i bakgrunnen",
       "desc": "Aktiver dette alternativet for å fortsette strømming når spilleren er skjult."
@@ -170,5 +170,16 @@
   "transcription": {
     "enable": "Aktiver direkte lydtranskripsjon",
     "disable": "Deaktiver direkte lydtranskripsjon"
+  },
+  "snapshot": {
+    "noVideoSource": "Ingen videokilde tilgjengelig for øyeblikksbilde.",
+    "captureFailed": "Kunne ikke ta øyeblikksbilde.",
+    "downloadStarted": "Nedlasting av øyeblikksbilde startet.",
+    "takeSnapshot": "Last ned øyeblikksbilde"
+  },
+  "noCameras": {
+    "title": "Ingen kameraer konfigurert",
+    "description": "Kom i gang ved å koble et kamera til Frigate.",
+    "buttonText": "Legg til kamera"
   }
 }

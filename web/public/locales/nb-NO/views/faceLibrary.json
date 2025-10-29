@@ -1,9 +1,9 @@
 {
   "selectItem": "Velg {{item}}",
   "description": {
-    "addFace": "Gå gjennom prosessen med å legge til en ny samling i ansiktsbiblioteket.",
+    "addFace": "Legg til en ny samling i ansiktsbiblioteket ved å laste opp ditt første bilde.",
     "placeholder": "Skriv inn et navn for denne samlingen",
-    "invalidName": "Ugyldig navn. Navn kan kun inneholde bokstaver, tall, mellomrom, apostrofer, understreker og bindestreker."
+    "invalidName": "Ugyldig navn. Navn kan kun inneholde bokstaver, tall, mellomrom, apostrof, understrek og bindestrek."
   },
   "details": {
     "person": "Person",
@@ -20,11 +20,11 @@
     "new": "Opprett nytt ansikt",
     "title": "Opprett samling",
     "desc": "Opprett en ny samling",
-    "nextSteps": "For å bygge et sterkt grunnlag:<li>Bruk Tren-fanen for å velge og trene på bilder for hver oppdaget person.</li><li>Fokuser på bilder rett forfra for best resultat; unngå å trene bilder som fanger ansikter i vinkel.</li></ul>"
+    "nextSteps": "For å bygge et sterkt grunnlag:<li>Bruk Nylige gjenkjennelser-fanen for å velge og trene på bilder for hver oppdaget person.</li><li>Fokuser på bilder rett forfra for best resultat; unngå å trene bilder som fanger ansikter i vinkel.</li></ul>"
   },
   "train": {
-    "aria": "Velg tren",
-    "title": "Tren",
+    "aria": "Velg nylige gjenkjennelser",
+    "title": "Nylige gjenkjennelser",
     "empty": "Det er ingen nylige forsøk på ansiktsgjenkjenning"
   },
   "selectFace": "Velg ansikt",

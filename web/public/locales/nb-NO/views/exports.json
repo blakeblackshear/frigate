@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "Kunne ikke gi nytt navn til eksport: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Del eksport",
+    "downloadVideo": "Last ned video",
+    "editName": "Rediger navn",
+    "deleteExport": "Slett eksport"
   }
 }

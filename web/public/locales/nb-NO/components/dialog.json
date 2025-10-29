@@ -56,7 +56,7 @@
       }
     },
     "toast": {
-      "success": "Eksporten startet. Se filen i /exports-mappen.",
+      "success": "Eksport startet. Se filen på eksport­siden.",
       "error": {
         "failed": "Klarte ikke å starte eksport: {{error}}",
         "noVaildTimeSelected": "Ingen gyldig tidsperiode valgt",
@@ -126,6 +126,7 @@
     "search": {
       "placeholder": "Søk etter (under-)merkelapp..."
     },
-    "noImages": "Ingen miniatyrbilder funnet for dette kameraet"
+    "noImages": "Ingen miniatyrbilder funnet for dette kameraet",
+    "unknownLabel": "Lagret utløserbilde"
   }
 }

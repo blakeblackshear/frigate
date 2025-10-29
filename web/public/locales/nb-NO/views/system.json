@@ -118,7 +118,7 @@
       "fetching": "Henter kameradata",
       "stream": "Strøm {{idx}}",
       "video": "Video:",
-      "fps": "Bilder per sekund:",
+      "fps": "FPS:",
       "unknown": "Ukjent",
       "tips": {
         "title": "Kamerainformasjon"
