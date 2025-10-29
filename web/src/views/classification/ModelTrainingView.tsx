@@ -44,7 +44,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobileOnly } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
@@ -436,8 +436,24 @@ function LibrarySelector({
   onRename,
 }: LibrarySelectorProps) {
   const { t } = useTranslation(["views/classificationModel"]);
+
+  // data
+
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [renameClass, setRenameFace] = useState<string | null>(null);
+  const pageTitle = useMemo(() => {
+    if (pageToggle != "train") {
+      return pageToggle;
+    }
+
+    if (isMobileOnly) {
+      return t("train.titleShort");
+    }
+
+    return t("train.title");
+  }, [pageToggle, t]);
+
+  // interaction
 
   const handleDeleteFace = useCallback(
     (name: string) => {
@@ -507,7 +523,7 @@ function LibrarySelector({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
-            {pageToggle == "train" ? t("train.title") : pageToggle}
+            {pageTitle}
             <span className="ml-2 text-primary-variant">
               (
               {(pageToggle &&
