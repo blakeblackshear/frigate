@@ -511,36 +511,38 @@ export function ReviewTimeline({
         <div
           className={`absolute z-30 flex gap-2 ${
             isMobile
-              ? "bottom-4 right-2 flex-col gap-4"
+              ? "bottom-4 right-1 flex-col gap-3"
               : "bottom-2 left-1/2 -translate-x-1/2"
           }`}
         >
           <Button
-            onClick={() => {
+            onClick={(e) => {
               const newLevel = Math.max(0, currentZoomLevelIndex - 1);
               onZoomChange(newLevel);
+              e.currentTarget.blur();
             }}
             variant="outline"
             disabled={currentZoomLevelIndex === 0}
-            className="p-3"
-            title="Zoom out"
+            className="bg-background_alt p-3 hover:bg-accent hover:text-accent-foreground active:scale-95 [@media(hover:none)]:hover:bg-background_alt"
+            type="button"
           >
-            <LuZoomOut className={isMobile ? "size-5" : "size-4"} />
+            <LuZoomOut className={cn("size-5 text-primary-variant")} />
           </Button>
           <Button
-            onClick={() => {
+            onClick={(e) => {
               const newLevel = Math.min(
                 zoomLevels.length - 1,
                 currentZoomLevelIndex + 1,
               );
               onZoomChange(newLevel);
+              e.currentTarget.blur();
             }}
             variant="outline"
             disabled={currentZoomLevelIndex === zoomLevels.length - 1}
-            className="p-3"
-            title="Zoom in"
+            className="bg-background_alt p-3 hover:bg-accent hover:text-accent-foreground active:scale-95 [@media(hover:none)]:hover:bg-background_alt"
+            type="button"
           >
-            <LuZoomIn className={isMobile ? "size-5" : "size-4"} />
+            <LuZoomIn className={cn("size-5 text-primary-variant")} />
           </Button>
         </div>
       )}
