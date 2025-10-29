@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "重命名导出失败：{{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "分享导出",
+    "downloadVideo": "下载视频",
+    "editName": "编辑名称",
+    "deleteExport": "删除导出"
   }
 }

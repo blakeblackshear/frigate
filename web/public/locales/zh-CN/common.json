@@ -96,7 +96,10 @@
     }
   },
   "label": {
-    "back": "返回"
+    "back": "返回",
+    "hide": "隐藏 {{item}}",
+    "show": "显示 {{item}}",
+    "ID": "ID"
   },
   "pagination": {
     "label": "分页",
@@ -277,5 +280,13 @@
   "readTheDocumentation": "阅读文档",
   "information": {
     "pixels": "{{area}} 像素"
+  },
+  "list": {
+    "two": "{{0}} 和 {{1}}",
+    "many": "{{items}} 以及 {{last}}"
+  },
+  "field": {
+    "optional": "可选",
+    "internalID": "Frigate 在配置与数据库中使用的内部 ID"
   }
 }

@@ -41,9 +41,10 @@
   "detail": {
     "noDataFound": "没有可供核查的详细数据",
     "aria": "切换详细视图",
-    "trackedObject_one": "追踪目标",
-    "trackedObject_other": "追踪目标",
-    "noObjectDetailData": "没有目标详细信息。"
+    "trackedObject_one": "目标或物体",
+    "trackedObject_other": "目标或物体",
+    "noObjectDetailData": "没有目标详细信息。",
+    "label": "详细信息"
   },
   "objectTrack": {
     "trackedPoint": "追踪点",
