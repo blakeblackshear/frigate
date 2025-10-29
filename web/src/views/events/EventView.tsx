@@ -518,6 +518,14 @@ function DetectionReview({
     [possibleZoomLevels],
   );
 
+  const currentZoomLevel = useMemo(
+    () =>
+      possibleZoomLevels.findIndex(
+        (level) => level.segmentDuration === zoomSettings.segmentDuration,
+      ),
+    [possibleZoomLevels, zoomSettings.segmentDuration],
+  );
+
   const { isZooming, zoomDirection } = useTimelineZoom({
     zoomSettings,
     zoomLevels: possibleZoomLevels,
@@ -824,6 +832,7 @@ function DetectionReview({
               zoomDirection={zoomDirection}
               onZoomChange={handleZoomChange}
               possibleZoomLevels={possibleZoomLevels}
+              currentZoomLevel={currentZoomLevel}
             />
           )}
         </div>

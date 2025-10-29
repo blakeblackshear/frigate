@@ -901,6 +901,14 @@ function Timeline({
     [possibleZoomLevels],
   );
 
+  const currentZoomLevel = useMemo(
+    () =>
+      possibleZoomLevels.findIndex(
+        (level) => level.segmentDuration === zoomSettings.segmentDuration,
+      ),
+    [possibleZoomLevels, zoomSettings.segmentDuration],
+  );
+
   const { isZooming, zoomDirection } = useTimelineZoom({
     zoomSettings,
     zoomLevels: possibleZoomLevels,
@@ -1013,6 +1021,7 @@ function Timeline({
             zoomDirection={zoomDirection}
             onZoomChange={handleZoomChange}
             possibleZoomLevels={possibleZoomLevels}
+            currentZoomLevel={currentZoomLevel}
           />
         ) : (
           <Skeleton className="size-full" />

@@ -197,6 +197,14 @@ function UIPlayground() {
     [possibleZoomLevels],
   );
 
+  const currentZoomLevel = useMemo(
+    () =>
+      possibleZoomLevels.findIndex(
+        (level) => level.segmentDuration === zoomSettings.segmentDuration,
+      ),
+    [possibleZoomLevels, zoomSettings.segmentDuration],
+  );
+
   const { zoomLevel, handleZoom, isZooming, zoomDirection } = useTimelineZoom({
     zoomSettings,
     zoomLevels: possibleZoomLevels,
@@ -417,6 +425,7 @@ function UIPlayground() {
                 zoomDirection={zoomDirection} // is the timeline zooming in or out
                 onZoomChange={handleZoomChange}
                 possibleZoomLevels={possibleZoomLevels}
+                currentZoomLevel={currentZoomLevel}
               />
             )}
             {isEventsReviewTimeline && (
@@ -446,6 +455,7 @@ function UIPlayground() {
                 zoomDirection={zoomDirection} // is the timeline zooming in or out
                 onZoomChange={handleZoomChange}
                 possibleZoomLevels={possibleZoomLevels}
+                currentZoomLevel={currentZoomLevel}
               />
             )}
           </div>
