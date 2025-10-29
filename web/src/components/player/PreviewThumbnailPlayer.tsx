@@ -24,6 +24,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { useTranslation } from "react-i18next";
 import { FaExclamationTriangle } from "react-icons/fa";
 import { MdOutlinePersonSearch } from "react-icons/md";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -270,20 +271,22 @@ export default function PreviewThumbnailPlayer({
               </TooltipTrigger>
             </div>
             <TooltipContent className="smart-capitalize">
-              {[
-                ...new Set([
-                  ...(review.data.objects || []),
-                  ...(review.data.sub_labels || []),
-                  ...(review.data.audio || []),
-                ]),
-              ]
-                .filter(
-                  (item) => item !== undefined && !item.includes("-verified"),
-                )
-                .map((text) => capitalizeFirstLetter(text))
-                .sort()
-                .join(", ")
-                .replaceAll("-verified", "")}
+              {review.data.metadata
+                ? review.data.metadata.title
+                : [
+                    ...new Set([
+                      ...(review.data.objects || []),
+                      ...(review.data.sub_labels || []),
+                      ...(review.data.audio || []),
+                    ]),
+                  ]
+                    .filter(
+                      (item) =>
+                        item !== undefined && !item.includes("-verified"),
+                    )
+                    .map((text) => getTranslatedLabel(text))
+                    .sort()
+                    .join(", ")}
             </TooltipContent>
           </Tooltip>
           {!!(
