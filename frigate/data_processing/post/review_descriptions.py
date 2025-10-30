@@ -49,42 +49,49 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         self.review_descs_dps.start()
 
     def calculate_frame_count(
-        self, image_source: ImageSourceEnum = ImageSourceEnum.preview
+        self,
+        camera: str,
+        image_source: ImageSourceEnum = ImageSourceEnum.preview,
+        height: int = 480,
     ) -> int:
-        """Calculate optimal number of frames based on context size and image source.
+        """Calculate optimal number of frames based on context size, image source, and resolution.
 
-        Recordings (480p): ~500 tokens/image, capped at 20 frames
-        Previews (180p): ~170 tokens/image, capped at 20 frames
-        Targets 75% context utilization while keeping inference time reasonable.
+        Token usage varies by resolution: larger images (ultrawide aspect ratios) use more tokens.
+        Estimates ~1 token per 1250 pixels. Targets 95% context utilization, capped at 20 frames.
         """
         context_size = self.genai_client.get_context_size()
+        camera_config = self.config.cameras[camera]
+
+        detect_width = camera_config.detect.width
+        detect_height = camera_config.detect.height
+        aspect_ratio = detect_width / detect_height
 
         if image_source == ImageSourceEnum.recordings:
-            if context_size > 16000:
-                return 20
-            elif context_size > 14000:
-                return 18
-            elif context_size > 12000:
-                return 14
-            elif context_size > 10000:
-                return 10
-            elif context_size > 8000:
-                return 8
-            elif context_size > 6000:
-                return 6
+            if aspect_ratio >= 1:
+                # Landscape or square: constrain height
+                width = int(height * aspect_ratio)
             else:
-                return 4
+                # Portrait: constrain width
+                width = height
+                height = int(width / aspect_ratio)
         else:
-            if context_size > 12000:
-                return 20
-            elif context_size > 8000:
-                return 16
-            elif context_size > 6000:
-                return 12
-            elif context_size > 4000:
-                return 10
+            if aspect_ratio >= 1:
+                # Landscape or square: constrain height
+                target_height = 180
+                width = int(target_height * aspect_ratio)
+                height = target_height
             else:
-                return 6
+                # Portrait: constrain width
+                target_width = 180
+                width = target_width
+                height = int(target_width / aspect_ratio)
+
+        pixels_per_image = width * height
+        tokens_per_image = pixels_per_image / 1250
+        prompt_tokens = 3500
+        max_frames = int((context_size * 0.95 - prompt_tokens) / tokens_per_image)
+
+        return min(max(max_frames, 3), 20)
 
     def process_data(self, data, data_type):
         self.metrics.review_desc_dps.value = self.review_descs_dps.eps()
@@ -262,7 +269,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             all_frames.append(os.path.join(preview_dir, file))
 
         frame_count = len(all_frames)
-        desired_frame_count = self.calculate_frame_count()
+        desired_frame_count = self.calculate_frame_count(camera)
 
         if frame_count <= desired_frame_count:
             return all_frames
@@ -285,7 +292,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
     ) -> list[bytes]:
         """Get frames from recordings at specified timestamps."""
         duration = end_time - start_time
-        desired_frame_count = self.calculate_frame_count(ImageSourceEnum.recordings)
+        desired_frame_count = self.calculate_frame_count(
+            camera, ImageSourceEnum.recordings, height
+        )
 
         # Calculate evenly spaced timestamps throughout the duration
         if desired_frame_count == 1:
