@@ -64,6 +64,9 @@ class OllamaClient(GenAIClient):
                 images=images if images else None,
                 **self.provider_options,
             )
+            logger.debug(
+                f"Ollama tokens used: eval_count={result.get('eval_count')}, prompt_eval_count={result.get('prompt_eval_count')}"
+            )
             return result["response"].strip()
         except (TimeoutException, ResponseError) as e:
             logger.warning("Ollama returned an error: %s", str(e))
