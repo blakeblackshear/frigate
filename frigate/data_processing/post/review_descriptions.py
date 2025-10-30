@@ -53,32 +53,38 @@ class ReviewDescriptionProcessor(PostProcessorApi):
     ) -> int:
         """Calculate optimal number of frames based on context size and image source.
 
-        Recordings (480p): ~250 tokens/image, capped at 20 frames
-        Previews (180p): ~100 tokens/image, capped at 20 frames
-        Targets 70-80% context utilization while keeping inference time reasonable.
+        Recordings (480p): ~500 tokens/image, capped at 20 frames
+        Previews (180p): ~170 tokens/image, capped at 20 frames
+        Targets 75% context utilization while keeping inference time reasonable.
         """
         context_size = self.genai_client.get_context_size()
 
         if image_source == ImageSourceEnum.recordings:
+            if context_size > 16000:
+                return 20
+            elif context_size > 14000:
+                return 18
+            elif context_size > 12000:
+                return 14
+            elif context_size > 10000:
+                return 10
+            elif context_size > 8000:
+                return 8
+            elif context_size > 6000:
+                return 6
+            else:
+                return 4
+        else:
             if context_size > 12000:
                 return 20
-            elif context_size > 10000:
-                return 18
+            elif context_size > 8000:
+                return 16
             elif context_size > 6000:
-                return 14
+                return 12
             elif context_size > 4000:
                 return 10
             else:
                 return 6
-        else:
-            if context_size > 10000:
-                return 20
-            elif context_size > 6000:
-                return 16
-            elif context_size > 4000:
-                return 12
-            else:
-                return 8
 
     def process_data(self, data, data_type):
         self.metrics.review_desc_dps.value = self.review_descs_dps.eps()
