@@ -57,7 +57,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         """Calculate optimal number of frames based on context size, image source, and resolution.
 
         Token usage varies by resolution: larger images (ultrawide aspect ratios) use more tokens.
-        Estimates ~1 token per 1250 pixels. Targets 95% context utilization, capped at 20 frames.
+        Estimates ~1 token per 1250 pixels. Targets 98% context utilization with safety margin.
+        Capped at 20 frames.
         """
         context_size = self.genai_client.get_context_size()
         camera_config = self.config.cameras[camera]
@@ -89,7 +90,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         pixels_per_image = width * height
         tokens_per_image = pixels_per_image / 1250
         prompt_tokens = 3500
-        max_frames = int((context_size * 0.95 - prompt_tokens) / tokens_per_image)
+        available_tokens = context_size * 0.98 - prompt_tokens
+        max_frames = int(available_tokens / tokens_per_image)
 
         return min(max(max_frames, 3), 20)
 
