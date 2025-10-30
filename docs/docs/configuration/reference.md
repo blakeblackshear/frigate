@@ -429,6 +429,10 @@ review:
     alerts: True
     # Optional: Enable GenAI review summaries for detections (default: shown below)
     detections: False
+    # Optional: Activity Context Prompt to give context to the GenAI what activity is and is not suspicious.
+    # It is important to be direct and detailed.
+    activity_context_prompt: """Define what is and is not suspicious
+"""
     # Optional: Image source for GenAI (default: preview)
     # Options: "preview" (uses cached preview frames at 180p) or "recordings" (extracts frames from recordings at 480p)
     # Using "recordings" provides better image quality but uses ~2-3x more tokens per image (~200-300 vs ~100 tokens)

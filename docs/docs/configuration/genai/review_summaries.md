@@ -7,37 +7,69 @@ Generative AI can be used to automatically generate structured summaries of revi
 
 Requests for a summary are requested automatically to your AI provider for alert review items when the activity has ended, they can also be optionally enabled for detections as well.
 
-Generative AI review summaries can also be toggled dynamically for a camera via MQTT with the topic `frigate/<camera_name>/review_descriptions/set`. See the [MQTT documentation](/integrations/mqtt/#frigatecamera_namereviewdescriptionsset).
+Generative AI review summaries can also be toggled dynamically for a [camera via MQTT](/integrations/mqtt/#frigatecamera_namereviewdescriptionsset).
 
 ## Review Summary Usage and Best Practices
 
 Review summaries provide structured JSON responses that are saved for each review item:
 
 ```
-- `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
-- `confidence` (float): 0-1 confidence in the analysis.
+- `title` (string): A concise, one-sentence title that captures the main activity.
+- `scene` (string): A narrative description of what happens across the sequence from start to finish, including setting, detected objects, and their observable actions.
+- `confidence` (float): 0-1 confidence in the analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous.
 - `other_concerns` (list): List of user-defined concerns that may need additional investigation.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below.
 
 Threat-level definitions:
-- 0 — Typical or expected activity for this location/time (includes residents, guests, or known animals engaged in normal activities, even if they glance around or scan surroundings).
-- 1 — Unusual or suspicious activity: At least one security-relevant behavior is present **and not explainable by a normal residential activity**.
-- 2 — Active or immediate threat: Breaking in, vandalism, aggression, weapon display.
+- 0 — **Normal activity**: The observable activity matches Normal Activity Indicators (brief vehicle access, deliveries, known people, pet activity, services). Very short sequences (under 15 seconds) during normal hours (6 AM - 11 PM) with apparent purpose (vehicle access, deliveries, passing through) are Level 0. Brief activities are generally normal.
+- 1 — **Potentially suspicious**: The observable activity matches Suspicious Activity Indicators (testing access, stealing items, climbing barriers, lingering throughout most of sequence without task, unusual hours 11 PM - 5 AM with suspicious behavior). Requires clear suspicious actions visible in frames, not just ambiguity or brief presence.
+- 2 — **Immediate threat**: Clear evidence of active criminal activity, forced entry, break-in, vandalism, aggression, weapons, theft in progress, or property damage.
 ```
 
 This will show in the UI as a list of concerns that each review item has along with the general description.
 
 ### Defining Typical Activity
 
-Each installation and even camera can have different parameters for what is considered suspicious activity. Frigate allows the `activity_context_prompt` to be defined globally and at the camera level, which allows you to define more specifically what should be considered normal activity. It is important that this is not overly specific as it can sway the output of the response. The default `activity_context_prompt` is below:
+Each installation and even camera can have different parameters for what is considered suspicious activity. Frigate allows the `activity_context_prompt` to be defined globally and at the camera level, which allows you to define more specifically what should be considered normal activity. It is important that this is not overly specific as it can sway the output of the response.
+
+<details>
+  <summary>Default Activity Context Prompt</summary>
 
 ```
-- **Zone context is critical**: Private enclosed spaces (back yards, back decks, fenced areas, inside garages) are resident territory where brief transient activity, routine tasks, and pet care are expected and normal. Front yards, driveways, and porches are semi-public but still resident spaces where deliveries, parking, and coming/going are routine. Consider whether the zone and activity align with normal residential use.
-- **Person + Pet = Normal Activity**: When both "Person" and "Dog" (or "Cat") are detected together in residential zones, this is routine pet care activity (walking, letting out, playing, supervising). Assign Level 0 unless there are OTHER strong suspicious behaviors present (like testing doors, taking items, etc.). A person with their pet in a residential zone is baseline normal activity.
-- Brief appearances in private zones (back yards, garages) are normal residential patterns.
-- Normal residential activity includes: residents, family members, guests, deliveries, services, maintenance workers, routine property use (parking, unloading, mail pickup, trash removal).
-- Brief movement with legitimate items (bags, packages, tools, equipment) in appropriate zones is routine.
+### Normal Activity Indicators (Level 0)
+- Known/verified people in any zone
+- People with pets in residential areas
+- Brief activity near vehicles: approaching vehicles, brief standing, then leaving or entering vehicle (unloading, loading, checking something). Very short sequences (under 15 seconds) of vehicle access during typical hours (6 AM - 10 PM) are almost always normal.
+- Deliveries or services: brief approach to doors/porches, standing briefly, placing or retrieving items, then leaving
+- Access to private areas: entering back yards, garages, or homes (with or without visible purpose in frame)
+- Brief movement through semi-public areas (driveways, front yards) with items or approaching structure/vehicle
+- Activity on public areas only (sidewalks, streets) without entering property
+- Services/maintenance workers with tools, uniforms, or vehicles
+
+### Suspicious Activity Indicators (Level 1)
+- Testing or attempting to open doors/windows on vehicles or buildings
+- Taking items that don't belong to them (stealing packages, objects from porches/driveways)
+- Climbing or jumping fences/barriers to access property
+- Attempting to conceal actions or items from view
+- Prolonged presence without purpose: remaining in same area (near vehicles, private zones) throughout most/all of the sequence without clear activity or task. Brief stops (a few seconds of standing) are normal; sustained presence (most of the duration) without interaction is concerning.
+- Activity at unusual hours (11 PM - 5 AM) combined with suspicious behavior patterns. Normal commute/daytime hours (6 AM - 6 PM) do not increase suspicion by themselves.
+
+### Critical Threat Indicators (Level 2)
+- Holding break-in tools (crowbars, pry bars, bolt cutters)
+- Weapons visible (guns, knives, bats used aggressively)
+- Forced entry in progress
+- Physical aggression or violence
+- Active property damage or theft
+
+### Assessment Guidance
+**Default to Level 0** for brief activity during normal hours. When evaluating, first check if it matches Normal Activity Indicators. Very short sequences (under 15 seconds) of vehicle access, deliveries, or movement through property during typical hours (6 AM - 11 PM) should be Level 0 unless there are clear suspicious actions visible (testing doors, stealing, climbing barriers).
+
+Only assign Level 1 if the activity shows clear suspicious behaviors: testing access points, stealing items, lingering throughout most of the sequence without task, climbing barriers, or other explicit violations. Brief activity with apparent purpose (approaching vehicle, delivery, passing through) is Level 0.
+
+Consider duration, time, zone, and actions holistically. Brief is normal; sustained suspicious behavior is concerning.
 ```
+
+</details>
 
 ### Image Source
 
