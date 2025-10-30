@@ -20,13 +20,8 @@ Review summaries provide structured JSON responses that are saved for each revie
 - `other_concerns` (list): List of user-defined concerns that may need additional investigation.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below.
 
-Threat-level definitions:
-- 0 — **Normal activity**: The observable activity matches Normal Activity Indicators (brief vehicle access, deliveries, known people, pet activity, services). Very short sequences (under 15 seconds) during normal hours (6 AM - 11 PM) with apparent purpose (vehicle access, deliveries, passing through) are Level 0. Brief activities are generally normal.
-- 1 — **Potentially suspicious**: The observable activity matches Suspicious Activity Indicators (testing access, stealing items, climbing barriers, lingering throughout most of sequence without task, unusual hours 11 PM - 5 AM with suspicious behavior). Requires clear suspicious actions visible in frames, not just ambiguity or brief presence.
-- 2 — **Immediate threat**: Clear evidence of active criminal activity, forced entry, break-in, vandalism, aggression, weapons, theft in progress, or property damage.
-```
 
-This will show in the UI as a list of concerns that each review item has along with the general description.
+This will show in multiple places in the UI to give additional context about each activity, and allow viewing more details when extra attention is required. Frigate's built in notifications will also automatically show the title and description when the data is available.
 
 ### Defining Typical Activity
 
