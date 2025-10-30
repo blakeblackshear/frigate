@@ -51,28 +51,26 @@ class ReviewDescriptionProcessor(PostProcessorApi):
     def calculate_frame_count(
         self, image_source: ImageSourceEnum = ImageSourceEnum.preview
     ) -> int:
-        """Calculate optimal number of frames based on context size and image source."""
+        """Calculate optimal number of frames based on context size and image source.
+
+        Recordings (480p): ~250 tokens/image, capped at 20 frames
+        Previews (180p): ~100 tokens/image, capped at 20 frames
+        Targets 70-80% context utilization while keeping inference time reasonable.
+        """
         context_size = self.genai_client.get_context_size()
 
         if image_source == ImageSourceEnum.recordings:
-            # With recordings at 480p resolution (480px height), each image uses ~200-300 tokens
-            # This is ~2-3x more than preview images, so we reduce frame count accordingly
-            # to avoid exceeding context limits and maintain reasonable inference times
-            if context_size > 14000:
-                return 16
-            elif context_size > 12000:
-                return 14
+            if context_size > 12000:
+                return 20
             elif context_size > 10000:
-                return 12
+                return 18
             elif context_size > 6000:
-                return 10
+                return 14
             elif context_size > 4000:
-                return 8
+                return 10
             else:
                 return 6
         else:
-            # With preview images (180px height), each image uses ~100 tokens
-            # We can send more frames since they're lower resolution
             if context_size > 10000:
                 return 20
             elif context_size > 6000:
