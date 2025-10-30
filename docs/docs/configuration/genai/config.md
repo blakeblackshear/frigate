@@ -43,9 +43,10 @@ The following models are recommended:
 
 | Model             | Notes                                                       |
 | ----------------- | ----------------------------------------------------------- |
-| `Intern3.5VL`     | Relatively fast with good vision comprehension
+| `qwen3-vl`        | Strong visual and situational understanding                 |
+| `Intern3.5VL`     | Relatively fast with good vision comprehension              |
 | `gemma3`          | Strong frame-to-frame understanding, slower inference times |
-| `qwen2.5vl`       | Fast but capable model with good vision comprehension       |
+| `qwen2.5-vl`      | Fast but capable model with good vision comprehension       |
 | `llava-phi3`      | Lightweight and fast model with vision comprehension        |
 
 :::note
