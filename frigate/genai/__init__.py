@@ -81,7 +81,7 @@ Your task is to analyze the sequence of images ({len(thumbnails)} total) taken i
 Your task is to provide a clear, accurate description of the scene that:
 1. States exactly what is happening based on observable actions and movements.
 2. Evaluates the activity against the Normal and Suspicious Activity Indicators above.
-3. Assigns a potential_threat_level based on the definitions below, applying them consistently.
+3. Assigns a potential_threat_level (0, 1, or 2) based on the threat level indicators defined above, applying them consistently.
 
 **Use the activity patterns above as guidance to calibrate your assessment. Match the activity against both normal and suspicious indicators, then use your judgment based on the complete context.**
 
@@ -94,23 +94,17 @@ When forming your description:
 - Note visible details such as clothing, items being carried or placed, tools or equipment present, and how they interact with the property or objects.
 - Consider the full sequence chronologically: what happens from start to finish, how duration and actions relate to the location and objects involved.
 - **Use the actual timestamp provided in "Activity started at"** below for time of day context—do not infer time from image brightness or darkness. Unusual hours (late night/early morning) should increase suspicion when the observable behavior itself appears questionable. However, recognize that some legitimate activities can occur at any hour.
-- **Consider duration as a primary factor**: Very short sequences (under 15 seconds) during normal hours (6 AM - 11 PM) are almost always Level 0 unless explicit suspicious actions are visible (testing doors, stealing, climbing). Brief activity with apparent purpose (vehicle access, deliveries, passing through) is normal.
-- **Weigh all evidence holistically**: Match the activity against both the normal and suspicious patterns above, then evaluate based on the complete context (zone, objects, time, actions, duration). Activities matching normal patterns should be Level 0. Activities matching suspicious indicators should be Level 1. Use your judgment for edge cases.
+- **Consider duration as a primary factor**: Apply the duration thresholds defined in the activity patterns above. Brief sequences during normal hours with apparent purpose typically indicate normal activity unless explicit suspicious actions are visible.
+- **Weigh all evidence holistically**: Match the activity against the normal and suspicious patterns defined above, then evaluate based on the complete context (zone, objects, time, actions, duration). Apply the threat level indicators consistently. Use your judgment for edge cases.
 
 ## Response Format
 
 Your response MUST be a flat JSON object with:
-- `title` (string): A concise, one-sentence title that captures the main activity. Use names from "Objects in Scene" based on what you visually observe. If you see both a name and an unidentified object of the same type but visually observe only one person/object, use ONLY the name. Examples: "Joe walking dog in backyard", "Joe near vehicle in driveway", "Joe and a person on front porch".
+- `title` (string): A concise, direct title that describes the purpose or overall action, not just what you literally see. Use names from "Objects in Scene" based on what you visually observe. If you see both a name and an unidentified object of the same type but visually observe only one person/object, use ONLY the name. Examples: "Joe walking dog", "Person taking out trash", "Joe accessing vehicle", "Joe and person on front porch".
 - `scene` (string): A narrative description of what happens across the sequence from start to finish. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
 - `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
-- `potential_threat_level` (integer): 0, 1, or 2 as defined below. Your threat level must be consistent with your scene description and the guidance above.
+- `potential_threat_level` (integer): 0, 1, or 2 as defined in "Normal Activity Patterns for This Property" above. Your threat level must be consistent with your scene description and the guidance above.
 {get_concern_prompt()}
-
-## Threat Level Definitions
-
-- 0 — **Normal activity**: The observable activity matches Normal Activity Indicators (brief vehicle access, deliveries, known people, pet activity, services). **Very short sequences (under 15 seconds) during normal hours (6 AM - 11 PM) with apparent purpose (vehicle access, deliveries, passing through) are Level 0.** Brief activities are generally normal.
-- 1 — **Potentially suspicious**: The observable activity matches Suspicious Activity Indicators (testing access, stealing items, climbing barriers, lingering throughout most of sequence without task, unusual hours 11 PM - 5 AM with suspicious behavior). **Requires clear suspicious actions visible in frames, not just ambiguity or brief presence.**
-- 2 — **Immediate threat**: Clear evidence of active criminal activity, forced entry, break-in, vandalism, aggression, weapons, theft in progress, or property damage.
 
 ## Sequence Details
 

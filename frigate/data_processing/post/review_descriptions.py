@@ -49,38 +49,51 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         self.review_descs_dps.start()
 
     def calculate_frame_count(
-        self, image_source: ImageSourceEnum = ImageSourceEnum.preview
+        self,
+        camera: str,
+        image_source: ImageSourceEnum = ImageSourceEnum.preview,
+        height: int = 480,
     ) -> int:
-        """Calculate optimal number of frames based on context size and image source."""
+        """Calculate optimal number of frames based on context size, image source, and resolution.
+
+        Token usage varies by resolution: larger images (ultrawide aspect ratios) use more tokens.
+        Estimates ~1 token per 1250 pixels. Targets 98% context utilization with safety margin.
+        Capped at 20 frames.
+        """
         context_size = self.genai_client.get_context_size()
+        camera_config = self.config.cameras[camera]
+
+        detect_width = camera_config.detect.width
+        detect_height = camera_config.detect.height
+        aspect_ratio = detect_width / detect_height
 
         if image_source == ImageSourceEnum.recordings:
-            # With recordings at 480p resolution (480px height), each image uses ~200-300 tokens
-            # This is ~2-3x more than preview images, so we reduce frame count accordingly
-            # to avoid exceeding context limits and maintain reasonable inference times
-            if context_size > 14000:
-                return 16
-            elif context_size > 12000:
-                return 14
-            elif context_size > 10000:
-                return 12
-            elif context_size > 6000:
-                return 10
-            elif context_size > 4000:
-                return 8
+            if aspect_ratio >= 1:
+                # Landscape or square: constrain height
+                width = int(height * aspect_ratio)
             else:
-                return 6
+                # Portrait: constrain width
+                width = height
+                height = int(width / aspect_ratio)
         else:
-            # With preview images (180px height), each image uses ~100 tokens
-            # We can send more frames since they're lower resolution
-            if context_size > 10000:
-                return 20
-            elif context_size > 6000:
-                return 16
-            elif context_size > 4000:
-                return 12
+            if aspect_ratio >= 1:
+                # Landscape or square: constrain height
+                target_height = 180
+                width = int(target_height * aspect_ratio)
+                height = target_height
             else:
-                return 8
+                # Portrait: constrain width
+                target_width = 180
+                width = target_width
+                height = int(target_width / aspect_ratio)
+
+        pixels_per_image = width * height
+        tokens_per_image = pixels_per_image / 1250
+        prompt_tokens = 3500
+        available_tokens = context_size * 0.98 - prompt_tokens
+        max_frames = int(available_tokens / tokens_per_image)
+
+        return min(max(max_frames, 3), 20)
 
     def process_data(self, data, data_type):
         self.metrics.review_desc_dps.value = self.review_descs_dps.eps()
@@ -258,7 +271,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             all_frames.append(os.path.join(preview_dir, file))
 
         frame_count = len(all_frames)
-        desired_frame_count = self.calculate_frame_count()
+        desired_frame_count = self.calculate_frame_count(camera)
 
         if frame_count <= desired_frame_count:
             return all_frames
@@ -281,7 +294,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
     ) -> list[bytes]:
         """Get frames from recordings at specified timestamps."""
         duration = end_time - start_time
-        desired_frame_count = self.calculate_frame_count(ImageSourceEnum.recordings)
+        desired_frame_count = self.calculate_frame_count(
+            camera, ImageSourceEnum.recordings, height
+        )
 
         # Calculate evenly spaced timestamps throughout the duration
         if desired_frame_count == 1:
