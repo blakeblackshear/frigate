@@ -109,6 +109,7 @@ export default function SearchDetailDialog({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const apiHost = useApiHost();
 
   // tabs
 
@@ -117,6 +118,12 @@ export default function SearchDetailDialog({
     setSearchPage,
     100,
   );
+
+  // tracking details state
+
+  const [trackingTimeIndex, setTrackingTimeIndex] = useState<
+    number | undefined
+  >(undefined);
 
   // dialog and mobile page
 
@@ -200,6 +207,9 @@ export default function SearchDetailDialog({
           "scrollbar-container overflow-y-auto",
           isDesktop &&
             "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
+          isDesktop &&
+            page == "tracking_details" &&
+            "lg:max-w-[75%] xl:max-w-[80%]",
           isMobile && "px-4",
         )}
       >
@@ -209,70 +219,213 @@ export default function SearchDetailDialog({
             {t("trackedObjectDetails")}
           </Description>
         </Header>
-        <ScrollArea
-          className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
-        >
-          <div className="flex flex-row">
-            <ToggleGroup
-              className="*:rounded-md *:px-3 *:py-4"
-              type="single"
-              size="sm"
-              value={pageToggle}
-              onValueChange={(value: SearchTab) => {
-                if (value) {
-                  setPageToggle(value);
-                }
-              }}
-            >
-              {Object.values(searchTabs).map((item) => (
-                <ToggleGroupItem
-                  key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "details" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-                  value={item}
-                  data-nav-item={item}
-                  aria-label={`Select ${item}`}
-                >
-                  {item == "details" && <FaRegListAlt className="size-4" />}
-                  {item == "snapshot" && <FaImage className="size-4" />}
-                  {item == "video" && <FaVideo className="size-4" />}
-                  {item == "tracking_details" && <PiPath className="size-4" />}
-                  <div className="smart-capitalize">{t(`type.${item}`)}</div>
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-            <ScrollBar orientation="horizontal" className="h-0" />
+        {isDesktop ? (
+          <div className="flex h-full gap-4 overflow-hidden">
+            <div className="scrollbar-container flex-[3] overflow-y-auto">
+              {page === "snapshot" && search.has_snapshot && (
+                <ObjectSnapshotTab
+                  search={
+                    {
+                      ...search,
+                      plus_id: config?.plus?.enabled
+                        ? search.plus_id
+                        : "not_enabled",
+                    } as unknown as Event
+                  }
+                  onEventUploaded={() => {
+                    search.plus_id = "new_upload";
+                  }}
+                />
+              )}
+              {page === "video" && search.has_clip && (
+                <VideoTab search={search} />
+              )}
+              {page === "tracking_details" && (
+                <TrackingDetails
+                  event={search as unknown as Event}
+                  showImage={true}
+                  showLifecycle={false}
+                  timeIndex={trackingTimeIndex}
+                  setTimeIndex={setTrackingTimeIndex}
+                />
+              )}
+              {(page === "details" ||
+                (!search.has_snapshot && page === "snapshot") ||
+                (!search.has_clip && page === "video")) && (
+                <img
+                  className="aspect-video select-none rounded-lg object-contain transition-opacity"
+                  style={
+                    isIOS
+                      ? {
+                          WebkitUserSelect: "none",
+                          WebkitTouchCallout: "none",
+                        }
+                      : undefined
+                  }
+                  draggable={false}
+                  src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
+                />
+              )}
+            </div>
+            <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
+              <ScrollArea className="w-full whitespace-nowrap">
+                <div className="flex flex-row">
+                  <ToggleGroup
+                    className="*:rounded-md *:px-3 *:py-4"
+                    type="single"
+                    size="sm"
+                    value={pageToggle}
+                    onValueChange={(value: SearchTab) => {
+                      if (value) {
+                        setPageToggle(value);
+                      }
+                    }}
+                  >
+                    {Object.values(searchTabs).map((item) => (
+                      <ToggleGroupItem
+                        key={item}
+                        className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "details" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                        value={item}
+                        data-nav-item={item}
+                        aria-label={`Select ${item}`}
+                      >
+                        {item == "details" && (
+                          <FaRegListAlt className="size-4" />
+                        )}
+                        {item == "snapshot" && <FaImage className="size-4" />}
+                        {item == "video" && <FaVideo className="size-4" />}
+                        {item == "tracking_details" && (
+                          <PiPath className="size-4" />
+                        )}
+                        <div className="smart-capitalize">
+                          {t(`type.${item}`)}
+                        </div>
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                  <ScrollBar orientation="horizontal" className="h-0" />
+                </div>
+              </ScrollArea>
+              <div className="scrollbar-container flex-1 overflow-y-auto">
+                {page == "details" && (
+                  <ObjectDetailsTab
+                    search={search}
+                    config={config}
+                    setSearch={setSearch}
+                    setSimilarity={setSimilarity}
+                    setInputFocused={setInputFocused}
+                    showThumbnail={false}
+                  />
+                )}
+                {page == "snapshot" && (
+                  <ObjectDetailsTab
+                    search={search}
+                    config={config}
+                    setSearch={setSearch}
+                    setSimilarity={setSimilarity}
+                    setInputFocused={setInputFocused}
+                    showThumbnail={false}
+                  />
+                )}
+                {page == "video" && (
+                  <ObjectDetailsTab
+                    search={search}
+                    config={config}
+                    setSearch={setSearch}
+                    setSimilarity={setSimilarity}
+                    setInputFocused={setInputFocused}
+                    showThumbnail={false}
+                  />
+                )}
+                {page == "tracking_details" && (
+                  <TrackingDetails
+                    className="w-full overflow-x-hidden"
+                    event={search as unknown as Event}
+                    showImage={false}
+                    showLifecycle={true}
+                    timeIndex={trackingTimeIndex}
+                    setTimeIndex={setTrackingTimeIndex}
+                  />
+                )}
+              </div>
+            </div>
           </div>
-        </ScrollArea>
-        {page == "details" && (
-          <ObjectDetailsTab
-            search={search}
-            config={config}
-            setSearch={setSearch}
-            setSimilarity={setSimilarity}
-            setInputFocused={setInputFocused}
-          />
-        )}
-        {page == "snapshot" && (
-          <ObjectSnapshotTab
-            search={
-              {
-                ...search,
-                plus_id: config?.plus?.enabled ? search.plus_id : "not_enabled",
-              } as unknown as Event
-            }
-            onEventUploaded={() => {
-              search.plus_id = "new_upload";
-            }}
-          />
-        )}
-        {page == "video" && <VideoTab search={search} />}
-        {page == "tracking_details" && (
-          <TrackingDetails
-            className="w-full overflow-x-hidden"
-            event={search as unknown as Event}
-            fullscreen={true}
-            setPane={() => {}}
-          />
+        ) : (
+          <>
+            <ScrollArea
+              className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
+            >
+              <div className="flex flex-row">
+                <ToggleGroup
+                  className="*:rounded-md *:px-3 *:py-4"
+                  type="single"
+                  size="sm"
+                  value={pageToggle}
+                  onValueChange={(value: SearchTab) => {
+                    if (value) {
+                      setPageToggle(value);
+                    }
+                  }}
+                >
+                  {Object.values(searchTabs).map((item) => (
+                    <ToggleGroupItem
+                      key={item}
+                      className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "details" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                      value={item}
+                      data-nav-item={item}
+                      aria-label={`Select ${item}`}
+                    >
+                      {item == "details" && <FaRegListAlt className="size-4" />}
+                      {item == "snapshot" && <FaImage className="size-4" />}
+                      {item == "video" && <FaVideo className="size-4" />}
+                      {item == "tracking_details" && (
+                        <PiPath className="size-4" />
+                      )}
+                      <div className="smart-capitalize">
+                        {t(`type.${item}`)}
+                      </div>
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+                <ScrollBar orientation="horizontal" className="h-0" />
+              </div>
+            </ScrollArea>
+            {page == "details" && (
+              <ObjectDetailsTab
+                search={search}
+                config={config}
+                setSearch={setSearch}
+                setSimilarity={setSimilarity}
+                setInputFocused={setInputFocused}
+              />
+            )}
+            {page == "snapshot" && (
+              <ObjectSnapshotTab
+                search={
+                  {
+                    ...search,
+                    plus_id: config?.plus?.enabled
+                      ? search.plus_id
+                      : "not_enabled",
+                  } as unknown as Event
+                }
+                onEventUploaded={() => {
+                  search.plus_id = "new_upload";
+                }}
+              />
+            )}
+            {page == "video" && <VideoTab search={search} />}
+            {page == "tracking_details" && (
+              <TrackingDetails
+                className="w-full overflow-x-hidden"
+                event={search as unknown as Event}
+                showImage={true}
+                showLifecycle={true}
+                timeIndex={trackingTimeIndex}
+                setTimeIndex={setTrackingTimeIndex}
+              />
+            )}
+          </>
         )}
       </Content>
     </Overlay>
@@ -285,6 +438,7 @@ type ObjectDetailsTabProps = {
   setSearch: (search: SearchResult | undefined) => void;
   setSimilarity?: () => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  showThumbnail?: boolean;
 };
 function ObjectDetailsTab({
   search,
@@ -292,6 +446,7 @@ function ObjectDetailsTab({
   setSearch,
   setSimilarity,
   setInputFocused,
+  showThumbnail = true,
 }: ObjectDetailsTabProps) {
   const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
 
@@ -873,66 +1028,71 @@ function ObjectDetailsTab({
             <div className="text-sm">{formattedDate}</div>
           </div>
         </div>
-        <div className="flex w-full flex-col gap-2 pl-6">
-          <img
-            className="aspect-video select-none rounded-lg object-contain transition-opacity"
-            style={
-              isIOS
-                ? {
-                    WebkitUserSelect: "none",
-                    WebkitTouchCallout: "none",
-                  }
-                : undefined
-            }
-            draggable={false}
-            src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-          />
-          <div
-            className={cn("flex w-full flex-row gap-2", isMobile && "flex-col")}
-          >
-            {config?.semantic_search.enabled &&
-              setSimilarity != undefined &&
-              search.data.type == "object" && (
-                <Button
+        {showThumbnail && (
+          <div className="flex w-full flex-col gap-2 pl-6">
+            <img
+              className="aspect-video select-none rounded-lg object-contain transition-opacity"
+              style={
+                isIOS
+                  ? {
+                      WebkitUserSelect: "none",
+                      WebkitTouchCallout: "none",
+                    }
+                  : undefined
+              }
+              draggable={false}
+              src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
+            />
+            <div
+              className={cn(
+                "flex w-full flex-row gap-2",
+                isMobile && "flex-col",
+              )}
+            >
+              {config?.semantic_search.enabled &&
+                setSimilarity != undefined &&
+                search.data.type == "object" && (
+                  <Button
+                    className="w-full"
+                    aria-label={t("itemMenu.findSimilar.aria")}
+                    onClick={() => {
+                      setSearch(undefined);
+                      setSimilarity();
+                    }}
+                  >
+                    <div className="flex gap-1">
+                      <LuSearch />
+                      {t("itemMenu.findSimilar.label")}
+                    </div>
+                  </Button>
+                )}
+              {hasFace && (
+                <FaceSelectionDialog
                   className="w-full"
-                  aria-label={t("itemMenu.findSimilar.aria")}
-                  onClick={() => {
-                    setSearch(undefined);
-                    setSimilarity();
-                  }}
+                  faceNames={faceNames}
+                  onTrainAttempt={onTrainFace}
                 >
-                  <div className="flex gap-1">
-                    <LuSearch />
-                    {t("itemMenu.findSimilar.label")}
-                  </div>
-                </Button>
+                  <Button className="w-full">
+                    <div className="flex gap-1">
+                      <TbFaceId />
+                      {t("trainFace", { ns: "views/faceLibrary" })}
+                    </div>
+                  </Button>
+                </FaceSelectionDialog>
               )}
-            {hasFace && (
-              <FaceSelectionDialog
-                className="w-full"
-                faceNames={faceNames}
-                onTrainAttempt={onTrainFace}
-              >
-                <Button className="w-full">
-                  <div className="flex gap-1">
-                    <TbFaceId />
-                    {t("trainFace", { ns: "views/faceLibrary" })}
-                  </div>
-                </Button>
-              </FaceSelectionDialog>
-            )}
-            {config?.cameras[search?.camera].audio_transcription.enabled &&
-              search?.label == "speech" &&
-              search?.end_time && (
-                <Button className="w-full" onClick={onTranscribe}>
-                  <div className="flex gap-1">
-                    <CgTranscript />
-                    {t("itemMenu.audioTranscription.label")}
-                  </div>
-                </Button>
-              )}
+              {config?.cameras[search?.camera].audio_transcription.enabled &&
+                search?.label == "speech" &&
+                search?.end_time && (
+                  <Button className="w-full" onClick={onTranscribe}>
+                    <div className="flex gap-1">
+                      <CgTranscript />
+                      {t("itemMenu.audioTranscription.label")}
+                    </div>
+                  </Button>
+                )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div className="flex flex-col gap-1.5">
         {config?.cameras[search.camera].objects.genai.enabled &&

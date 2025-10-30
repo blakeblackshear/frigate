@@ -5,7 +5,6 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import { TrackingDetailsSequence } from "@/types/timeline";
 import Heading from "@/components/ui/heading";
-import { ReviewDetailPaneType } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
@@ -18,7 +17,7 @@ import {
   LuSettings,
   LuTruck,
 } from "react-icons/lu";
-import { IoMdArrowRoundBack, IoMdExit } from "react-icons/io";
+import { IoMdExit } from "react-icons/io";
 import {
   MdFaceUnlock,
   MdOutlineLocationOn,
@@ -26,7 +25,7 @@ import {
 } from "react-icons/md";
 import { cn } from "@/lib/utils";
 import { useApiHost } from "@/api";
-import { isDesktop, isIOS, isSafari } from "react-device-detect";
+import { isIOS, isSafari } from "react-device-detect";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import {
   Tooltip,
@@ -63,14 +62,19 @@ type TrackingDetailsProps = {
   className?: string;
   event: Event;
   fullscreen?: boolean;
-  setPane: React.Dispatch<React.SetStateAction<ReviewDetailPaneType>>;
+  showImage?: boolean;
+  showLifecycle?: boolean;
+  timeIndex?: number;
+  setTimeIndex?: (index: number) => void;
 };
 
 export default function TrackingDetails({
   className,
   event,
-  fullscreen = false,
-  setPane,
+  showImage = true,
+  showLifecycle = false,
+  timeIndex: propTimeIndex,
+  setTimeIndex: propSetTimeIndex,
 }: TrackingDetailsProps) {
   const { t } = useTranslation(["views/explore"]);
 
@@ -214,7 +218,11 @@ export default function TrackingDetails({
     );
   }, [savedPathPoints, eventSequencePoints, config, event]);
 
-  const [timeIndex, setTimeIndex] = useState(0);
+  const [localTimeIndex, setLocalTimeIndex] = useState<number>(0);
+
+  const timeIndex =
+    propTimeIndex !== undefined ? propTimeIndex : localTimeIndex;
+  const setTimeIndex = propSetTimeIndex || setLocalTimeIndex;
 
   const handleSetBox = useCallback(
     (box: number[], attrBox: number[] | undefined) => {
@@ -257,15 +265,15 @@ export default function TrackingDetails({
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    if (timeIndex) {
-      const newSrc = `${apiHost}api/${event.camera}/recordings/${timeIndex + annotationOffset / 1000}/snapshot.jpg?height=500`;
+    if (propTimeIndex !== undefined) {
+      const newSrc = `${apiHost}api/${event.camera}/recordings/${propTimeIndex + annotationOffset / 1000}/snapshot.jpg?height=500`;
       setSrc(newSrc);
     }
     setImgLoaded(false);
     setHasError(false);
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeIndex, annotationOffset]);
+  }, [propTimeIndex, annotationOffset]);
 
   // carousels
 
@@ -291,7 +299,7 @@ export default function TrackingDetails({
         setLifecycleZones([]);
       }
     },
-    [eventSequence, pathPoints, handleSetBox],
+    [eventSequence, pathPoints, handleSetBox, setTimeIndex],
   );
 
   const formattedStart = config
@@ -329,7 +337,7 @@ export default function TrackingDetails({
   useEffect(() => {
     if (!eventSequence || eventSequence.length === 0) return;
     // If timeIndex hasn't been set to a non-zero value, prefer the first lifecycle timestamp
-    if (!timeIndex) {
+    if (timeIndex == null || timeIndex === 0) {
       setTimeIndex(eventSequence[0].timestamp);
       handleSetBox(
         eventSequence[0]?.data.box ?? [],
@@ -337,12 +345,12 @@ export default function TrackingDetails({
       );
       setLifecycleZones(eventSequence[0]?.data.zones);
     }
-  }, [eventSequence, timeIndex, handleSetBox]);
+  }, [eventSequence, timeIndex, handleSetBox, setTimeIndex]);
 
   // When timeIndex changes or image finishes loading, sync the box/zones to matching lifecycle, else clear
   useEffect(() => {
-    if (!eventSequence || timeIndex == null) return;
-    const idx = eventSequence.findIndex((i) => i.timestamp === timeIndex);
+    if (!eventSequence || propTimeIndex == null) return;
+    const idx = eventSequence.findIndex((i) => i.timestamp === propTimeIndex);
     if (idx !== -1) {
       if (imgLoaded) {
         handleSetBox(
@@ -356,7 +364,7 @@ export default function TrackingDetails({
       setBoxStyle(null);
       setLifecycleZones([]);
     }
-  }, [timeIndex, imgLoaded, eventSequence, handleSetBox]);
+  }, [propTimeIndex, imgLoaded, eventSequence, handleSetBox]);
 
   const selectedLifecycle = useMemo(() => {
     if (!eventSequence || eventSequence.length === 0) return undefined;
@@ -423,344 +431,344 @@ export default function TrackingDetails({
   return (
     <div className={className}>
       <span tabIndex={0} className="sr-only" />
-      {!fullscreen && (
-        <div className={cn("flex items-center gap-2")}>
-          <Button
-            className="mb-2 mt-3 flex items-center gap-2.5 rounded-lg md:mt-0"
-            aria-label={t("label.back", { ns: "common" })}
-            size="sm"
-            onClick={() => setPane("overview")}
+
+      {showImage && (
+        <div
+          className={cn(
+            "relative mx-auto flex max-h-[50dvh] flex-row justify-center",
+          )}
+          style={{
+            aspectRatio: !imgLoaded ? aspectRatio : undefined,
+          }}
+        >
+          <ImageLoadingIndicator
+            className="absolute inset-0"
+            imgLoaded={imgLoaded}
+          />
+          {hasError && (
+            <div className="relative aspect-video">
+              <div className="flex flex-col items-center justify-center p-20 text-center">
+                <LuFolderX className="size-16" />
+                {t("trackingDetails.noImageFound")}
+              </div>
+            </div>
+          )}
+          <div
+            className={cn(
+              "relative inline-block",
+              imgLoaded ? "visible" : "invisible",
+            )}
           >
-            <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-            {isDesktop && (
-              <div className="text-primary">
-                {t("button.back", { ns: "common" })}
-              </div>
-            )}
-          </Button>
-        </div>
-      )}
-
-      <div
-        className={cn(
-          "relative mx-auto flex max-h-[50dvh] flex-row justify-center",
-        )}
-        style={{
-          aspectRatio: !imgLoaded ? aspectRatio : undefined,
-        }}
-      >
-        <ImageLoadingIndicator
-          className="absolute inset-0"
-          imgLoaded={imgLoaded}
-        />
-        {hasError && (
-          <div className="relative aspect-video">
-            <div className="flex flex-col items-center justify-center p-20 text-center">
-              <LuFolderX className="size-16" />
-              {t("trackingDetails.noImageFound")}
-            </div>
-          </div>
-        )}
-        <div
-          className={cn(
-            "relative inline-block",
-            imgLoaded ? "visible" : "invisible",
-          )}
-        >
-          <ContextMenu>
-            <ContextMenuTrigger>
-              <img
-                key={event.id}
-                ref={imgRef}
-                className={cn(
-                  "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
-                )}
-                loading={isSafari ? "eager" : "lazy"}
-                style={
-                  isIOS
-                    ? {
-                        WebkitUserSelect: "none",
-                        WebkitTouchCallout: "none",
-                      }
-                    : undefined
-                }
-                draggable={false}
-                src={src}
-                onLoad={() => setImgLoaded(true)}
-                onError={() => setHasError(true)}
-              />
-
-              {showZones &&
-                imgRef.current?.width &&
-                imgRef.current?.height &&
-                lifecycleZones?.map((zone) => (
-                  <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{
-                      width: imgRef.current?.clientWidth,
-                      height: imgRef.current?.clientHeight,
-                    }}
-                    key={zone}
-                  >
-                    <svg
-                      viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
-                      className="absolute inset-0"
-                    >
-                      <polygon
-                        points={getZonePolygon(zone)}
-                        className="fill-none stroke-2"
-                        style={{
-                          stroke: `rgb(${getZoneColor(zone)?.join(",")})`,
-                          fill:
-                            selectedZone == zone
-                              ? `rgba(${getZoneColor(zone)?.join(",")}, 0.5)`
-                              : `rgba(${getZoneColor(zone)?.join(",")}, 0.3)`,
-                          strokeWidth: selectedZone == zone ? 4 : 2,
-                        }}
-                      />
-                    </svg>
-                  </div>
-                ))}
-
-              {boxStyle && (
-                <div className="absolute border-2" style={boxStyle}>
-                  <div className="absolute bottom-[-3px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 transform bg-yellow-500" />
-                </div>
-              )}
-              {attributeBoxStyle && (
-                <div className="absolute border-2" style={attributeBoxStyle} />
-              )}
-              {imgRef.current?.width &&
-                imgRef.current?.height &&
-                pathPoints &&
-                pathPoints.length > 0 && (
-                  <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{
-                      width: imgRef.current?.clientWidth,
-                      height: imgRef.current?.clientHeight,
-                    }}
-                    key="path"
-                  >
-                    <svg
-                      viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
-                      className="absolute inset-0"
-                    >
-                      <ObjectPath
-                        positions={pathPoints}
-                        color={getObjectColor(event.label)}
-                        width={2}
-                        imgRef={imgRef}
-                        onPointClick={handlePathPointClick}
-                      />
-                    </svg>
-                  </div>
-                )}
-            </ContextMenuTrigger>
-            <ContextMenuContent>
-              <ContextMenuItem>
-                <div
-                  className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
-                  onClick={() =>
-                    navigate(
-                      `/settings?page=masksAndZones&camera=${event.camera}&object_mask=${selectedLifecycle?.data.box}`,
-                    )
+            <ContextMenu>
+              <ContextMenuTrigger>
+                <img
+                  key={event.id}
+                  ref={imgRef}
+                  className={cn(
+                    "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
+                  )}
+                  loading={isSafari ? "eager" : "lazy"}
+                  style={
+                    isIOS
+                      ? {
+                          WebkitUserSelect: "none",
+                          WebkitTouchCallout: "none",
+                        }
+                      : undefined
                   }
+                  draggable={false}
+                  src={src}
+                  onLoad={() => setImgLoaded(true)}
+                  onError={() => setHasError(true)}
+                />
+
+                {showZones &&
+                  imgRef.current?.width &&
+                  imgRef.current?.height &&
+                  lifecycleZones?.map((zone) => (
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{
+                        width: imgRef.current?.clientWidth,
+                        height: imgRef.current?.clientHeight,
+                      }}
+                      key={zone}
+                    >
+                      <svg
+                        viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
+                        className="absolute inset-0"
+                      >
+                        <polygon
+                          points={getZonePolygon(zone)}
+                          className="fill-none stroke-2"
+                          style={{
+                            stroke: `rgb(${getZoneColor(zone)?.join(",")})`,
+                            fill:
+                              selectedZone == zone
+                                ? `rgba(${getZoneColor(zone)?.join(",")}, 0.5)`
+                                : `rgba(${getZoneColor(zone)?.join(",")}, 0.3)`,
+                            strokeWidth: selectedZone == zone ? 4 : 2,
+                          }}
+                        />
+                      </svg>
+                    </div>
+                  ))}
+
+                {boxStyle && (
+                  <div className="absolute border-2" style={boxStyle}>
+                    <div className="absolute bottom-[-3px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 transform bg-yellow-500" />
+                  </div>
+                )}
+                {attributeBoxStyle && (
+                  <div
+                    className="absolute border-2"
+                    style={attributeBoxStyle}
+                  />
+                )}
+                {imgRef.current?.width &&
+                  imgRef.current?.height &&
+                  pathPoints &&
+                  pathPoints.length > 0 && (
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{
+                        width: imgRef.current?.clientWidth,
+                        height: imgRef.current?.clientHeight,
+                      }}
+                      key="path"
+                    >
+                      <svg
+                        viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
+                        className="absolute inset-0"
+                      >
+                        <ObjectPath
+                          positions={pathPoints}
+                          color={getObjectColor(event.label)}
+                          width={2}
+                          imgRef={imgRef}
+                          onPointClick={handlePathPointClick}
+                        />
+                      </svg>
+                    </div>
+                  )}
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem>
+                  <div
+                    className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
+                    onClick={() =>
+                      navigate(
+                        `/settings?page=masksAndZones&camera=${event.camera}&object_mask=${selectedLifecycle?.data.box}`,
+                      )
+                    }
+                  >
+                    <div className="text-primary">
+                      {t("trackingDetails.createObjectMask")}
+                    </div>
+                  </div>
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          </div>
+        </div>
+      )}
+
+      {showLifecycle && (
+        <>
+          <div className="mt-3 flex flex-row items-center justify-between">
+            <Heading as="h4">{t("trackingDetails.title")}</Heading>
+
+            <div className="flex flex-row gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={showControls ? "select" : "default"}
+                    className="size-7 p-1.5"
+                    aria-label={t("trackingDetails.adjustAnnotationSettings")}
+                  >
+                    <LuSettings
+                      className="size-5"
+                      onClick={() => setShowControls(!showControls)}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>
+                    {t("trackingDetails.adjustAnnotationSettings")}
+                  </TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
+            </div>
+          </div>
+
+          <div className="flex flex-row items-center justify-between">
+            <div className="mb-2 text-sm text-muted-foreground">
+              {t("trackingDetails.scrollViewTips")}
+            </div>
+            <div className="min-w-20 text-right text-sm text-muted-foreground">
+              {t("trackingDetails.count", {
+                first: selectedIndex + 1,
+                second: eventSequence?.length ?? 0,
+              })}
+            </div>
+          </div>
+          {config?.cameras[event.camera]?.onvif.autotracking
+            .enabled_in_config && (
+            <div className="-mt-2 mb-2 text-sm text-danger">
+              {t("trackingDetails.autoTrackingTips")}
+            </div>
+          )}
+          {showControls && (
+            <AnnotationSettingsPane
+              event={event}
+              showZones={showZones}
+              setShowZones={setShowZones}
+              annotationOffset={annotationOffset}
+              setAnnotationOffset={setAnnotationOffset}
+            />
+          )}
+
+          <div className="mt-4">
+            <div
+              className={cn(
+                "rounded-md bg-secondary p-3 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500",
+              )}
+            >
+              <div className="flex w-full items-center justify-between">
+                <div
+                  className="flex items-center gap-2 font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTimeIndex(event.start_time ?? 0);
+                  }}
+                  role="button"
                 >
-                  <div className="text-primary">
-                    {t("trackingDetails.createObjectMask")}
+                  <div
+                    className={cn(
+                      "relative ml-2 rounded-full bg-muted-foreground p-2",
+                    )}
+                  >
+                    {getIconForLabel(
+                      event.sub_label ? event.label + "-verified" : event.label,
+                      "size-4 text-white",
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="capitalize">{label}</span>
+                    <span className="text-secondary-foreground">
+                      {formattedStart ?? ""} - {formattedEnd ?? ""}
+                    </span>
+                    {event.data?.recognized_license_plate && (
+                      <>
+                        <span className="text-secondary-foreground">·</span>
+                        <div className="text-sm text-secondary-foreground">
+                          <Link
+                            to={`/explore?recognized_license_plate=${event.data.recognized_license_plate}`}
+                            className="text-sm"
+                          >
+                            {event.data.recognized_license_plate}
+                          </Link>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
-              </ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
-        </div>
-      </div>
-
-      <div className="mt-3 flex flex-row items-center justify-between">
-        <Heading as="h4">{t("trackingDetails.title")}</Heading>
-
-        <div className="flex flex-row gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={showControls ? "select" : "default"}
-                className="size-7 p-1.5"
-                aria-label={t("trackingDetails.adjustAnnotationSettings")}
-              >
-                <LuSettings
-                  className="size-5"
-                  onClick={() => setShowControls(!showControls)}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent>
-                {t("trackingDetails.adjustAnnotationSettings")}
-              </TooltipContent>
-            </TooltipPortal>
-          </Tooltip>
-        </div>
-      </div>
-      <div className="flex flex-row items-center justify-between">
-        <div className="mb-2 text-sm text-muted-foreground">
-          {t("trackingDetails.scrollViewTips")}
-        </div>
-        <div className="min-w-20 text-right text-sm text-muted-foreground">
-          {t("trackingDetails.count", {
-            first: selectedIndex + 1,
-            second: eventSequence?.length ?? 0,
-          })}
-        </div>
-      </div>
-      {config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config && (
-        <div className="-mt-2 mb-2 text-sm text-danger">
-          {t("trackingDetails.autoTrackingTips")}
-        </div>
-      )}
-      {showControls && (
-        <AnnotationSettingsPane
-          event={event}
-          showZones={showZones}
-          setShowZones={setShowZones}
-          annotationOffset={annotationOffset}
-          setAnnotationOffset={setAnnotationOffset}
-        />
-      )}
-
-      <div className="mt-4">
-        <div
-          className={cn(
-            "rounded-md bg-secondary p-3 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500",
-          )}
-        >
-          <div className="flex w-full items-center justify-between">
-            <div
-              className="flex items-center gap-2 font-medium"
-              onClick={(e) => {
-                e.stopPropagation();
-                setTimeIndex(event.start_time ?? 0);
-              }}
-              role="button"
-            >
-              <div
-                className={cn(
-                  "relative ml-2 rounded-full bg-muted-foreground p-2",
-                )}
-              >
-                {getIconForLabel(
-                  event.sub_label ? event.label + "-verified" : event.label,
-                  "size-4 text-white",
-                )}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="capitalize">{label}</span>
-                <span className="text-secondary-foreground">
-                  {formattedStart ?? ""} - {formattedEnd ?? ""}
-                </span>
-                {event.data?.recognized_license_plate && (
-                  <>
-                    <span className="text-secondary-foreground">·</span>
-                    <div className="text-sm text-secondary-foreground">
-                      <Link
-                        to={`/explore?recognized_license_plate=${event.data.recognized_license_plate}`}
-                        className="text-sm"
-                      >
-                        {event.data.recognized_license_plate}
-                      </Link>
+
+              <div className="mt-2">
+                {!eventSequence ? (
+                  <ActivityIndicator className="size-2" size={2} />
+                ) : eventSequence.length === 0 ? (
+                  <div className="py-2 text-muted-foreground">
+                    {t("detail.noObjectDetailData", { ns: "views/events" })}
+                  </div>
+                ) : (
+                  <div className="-pb-2 relative mx-2">
+                    <div className="absolute -top-2 bottom-8 left-4 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
+                    <div
+                      className="absolute left-4 top-2 z-[5] max-h-[calc(100%-3rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
+                      style={{ height: `${blueLineHeight}%` }}
+                    />
+                    <div className="space-y-2">
+                      {eventSequence.map((item, idx) => {
+                        const isActive =
+                          Math.abs(
+                            (propTimeIndex ?? 0) - (item.timestamp ?? 0),
+                          ) <= 0.5;
+                        const formattedEventTimestamp = config
+                          ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
+                              timezone: config.ui.timezone,
+                              date_format:
+                                config.ui.time_format == "24hour"
+                                  ? t(
+                                      "time.formattedTimestampHourMinuteSecond.24hour",
+                                      { ns: "common" },
+                                    )
+                                  : t(
+                                      "time.formattedTimestampHourMinuteSecond.12hour",
+                                      { ns: "common" },
+                                    ),
+                              time_style: "medium",
+                              date_style: "medium",
+                            })
+                          : "";
+
+                        const ratio =
+                          Array.isArray(item.data.box) &&
+                          item.data.box.length >= 4
+                            ? (
+                                aspectRatio *
+                                (item.data.box[2] / item.data.box[3])
+                              ).toFixed(2)
+                            : "N/A";
+                        const areaPx =
+                          Array.isArray(item.data.box) &&
+                          item.data.box.length >= 4
+                            ? Math.round(
+                                (config.cameras[event.camera]?.detect?.width ??
+                                  0) *
+                                  (config.cameras[event.camera]?.detect
+                                    ?.height ?? 0) *
+                                  (item.data.box[2] * item.data.box[3]),
+                              )
+                            : undefined;
+                        const areaPct =
+                          Array.isArray(item.data.box) &&
+                          item.data.box.length >= 4
+                            ? (item.data.box[2] * item.data.box[3]).toFixed(4)
+                            : undefined;
+
+                        return (
+                          <LifecycleIconRow
+                            key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
+                            item={item}
+                            isActive={isActive}
+                            formattedEventTimestamp={formattedEventTimestamp}
+                            ratio={ratio}
+                            areaPx={areaPx}
+                            areaPct={areaPct}
+                            onClick={() => {
+                              setTimeIndex(item.timestamp ?? 0);
+                              handleSetBox(
+                                item.data.box ?? [],
+                                item.data.attribute_box,
+                              );
+                              setLifecycleZones(item.data.zones);
+                              setSelectedZone("");
+                            }}
+                            setSelectedZone={setSelectedZone}
+                            getZoneColor={getZoneColor}
+                          />
+                        );
+                      })}
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
           </div>
-
-          <div className="mt-2">
-            {!eventSequence ? (
-              <ActivityIndicator className="size-2" size={2} />
-            ) : eventSequence.length === 0 ? (
-              <div className="py-2 text-muted-foreground">
-                {t("detail.noObjectDetailData", { ns: "views/events" })}
-              </div>
-            ) : (
-              <div className="-pb-2 relative mx-2">
-                <div className="absolute -top-2 bottom-8 left-4 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
-                <div
-                  className="absolute left-4 top-2 z-[5] max-h-[calc(100%-3rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
-                  style={{ height: `${blueLineHeight}%` }}
-                />
-                <div className="space-y-2">
-                  {eventSequence.map((item, idx) => {
-                    const isActive =
-                      Math.abs((timeIndex ?? 0) - (item.timestamp ?? 0)) <= 0.5;
-                    const formattedEventTimestamp = config
-                      ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
-                          timezone: config.ui.timezone,
-                          date_format:
-                            config.ui.time_format == "24hour"
-                              ? t(
-                                  "time.formattedTimestampHourMinuteSecond.24hour",
-                                  { ns: "common" },
-                                )
-                              : t(
-                                  "time.formattedTimestampHourMinuteSecond.12hour",
-                                  { ns: "common" },
-                                ),
-                          time_style: "medium",
-                          date_style: "medium",
-                        })
-                      : "";
-
-                    const ratio =
-                      Array.isArray(item.data.box) && item.data.box.length >= 4
-                        ? (
-                            aspectRatio *
-                            (item.data.box[2] / item.data.box[3])
-                          ).toFixed(2)
-                        : "N/A";
-                    const areaPx =
-                      Array.isArray(item.data.box) && item.data.box.length >= 4
-                        ? Math.round(
-                            (config.cameras[event.camera]?.detect?.width ?? 0) *
-                              (config.cameras[event.camera]?.detect?.height ??
-                                0) *
-                              (item.data.box[2] * item.data.box[3]),
-                          )
-                        : undefined;
-                    const areaPct =
-                      Array.isArray(item.data.box) && item.data.box.length >= 4
-                        ? (item.data.box[2] * item.data.box[3]).toFixed(4)
-                        : undefined;
-
-                    return (
-                      <LifecycleIconRow
-                        key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
-                        item={item}
-                        isActive={isActive}
-                        formattedEventTimestamp={formattedEventTimestamp}
-                        ratio={ratio}
-                        areaPx={areaPx}
-                        areaPct={areaPct}
-                        onClick={() => {
-                          setTimeIndex(item.timestamp ?? 0);
-                          handleSetBox(
-                            item.data.box ?? [],
-                            item.data.attribute_box,
-                          );
-                          setLifecycleZones(item.data.zones);
-                          setSelectedZone("");
-                        }}
-                        setSelectedZone={setSelectedZone}
-                        getZoneColor={getZoneColor}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
