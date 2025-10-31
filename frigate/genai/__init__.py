@@ -114,7 +114,7 @@ Your response MUST be a flat JSON object with:
 
 ## Objects in Scene
 
-Each line represents a detection state, not necessarily unique individuals. Objects with names in parentheses (e.g., "Name (person)") are verified identities. Objects without names (e.g., "Person") are detected but not identified.
+Each line represents a detection state, not necessarily unique individuals. Parentheses indicate object type or category, use only the name/label in your response, not the parentheses.
 
 **CRITICAL: When you see both recognized and unrecognized entries of the same type (e.g., "Joe (person)" and "Person"), visually count how many distinct people/objects you actually see based on appearance and clothing. If you observe only ONE person throughout the sequence, use ONLY the recognized name (e.g., "Joe"). The same person may be recognized in some frames but not others. Only describe both if you visually see MULTIPLE distinct people with clearly different appearances.**
 
