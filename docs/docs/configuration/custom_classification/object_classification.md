@@ -10,7 +10,6 @@ Object classification allows you to train a custom MobileNetV2 classification mo
 Object classification models are lightweight and run very fast on CPU. Inference should be usable on virtually any machine that can run Frigate.
 
 Training the model does briefly use a high amount of system resources for about 1–3 minutes per training run. On lower-power devices, training may take longer.
-When running the `-tensorrt` image, Nvidia GPUs will automatically be used to accelerate training.
 
 ## Classes
 
