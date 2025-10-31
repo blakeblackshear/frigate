@@ -54,13 +54,13 @@ import {
   DetailStreamProvider,
   useDetailStream,
 } from "@/context/detail-stream-context";
+import { isDesktop } from "react-device-detect";
 
 type TrackingDetailsProps = {
   className?: string;
   event: Event;
   fullscreen?: boolean;
-  showImage?: boolean;
-  showLifecycle?: boolean;
+  tabs?: React.ReactNode;
 };
 
 // Wrapper component that provides DetailStreamContext
@@ -82,8 +82,7 @@ export default function TrackingDetails(props: TrackingDetailsProps) {
 function TrackingDetailsInner({
   className,
   event,
-  showImage = true,
-  showLifecycle = false,
+  tabs,
   onTimeUpdate,
 }: TrackingDetailsProps & { onTimeUpdate: (time: number) => void }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -155,7 +154,6 @@ function TrackingDetailsInner({
     _setSelectedZone("");
 
     // Set the target timestamp to seek to
-    console.log("handled, seeking to", timestamp);
     setSeekToTimestamp(timestamp);
   }, []);
 
@@ -198,7 +196,6 @@ function TrackingDetailsInner({
 
   // Handle seeking when seekToTimestamp is set
   useEffect(() => {
-    console.log("seeking to", seekToTimestamp, videoRef.current);
     if (seekToTimestamp === null || !videoRef.current) return;
 
     const relativeTime =
@@ -309,43 +306,53 @@ function TrackingDetailsInner({
   if (!config) {
     return <ActivityIndicator />;
   }
-
   return (
-    <div className={cn("flex size-full flex-col gap-2", className)}>
+    <div
+      className={cn(
+        isDesktop
+          ? "flex size-full gap-4 overflow-hidden"
+          : "flex size-full flex-col gap-2",
+        className,
+      )}
+    >
       <span tabIndex={0} className="sr-only" />
 
-      {showImage && (
+      <div
+        className={cn(
+          "relative flex items-center justify-center",
+          isDesktop && "flex-[3]",
+          cameraAspect === "wide"
+            ? "aspect-wide w-full"
+            : cameraAspect === "tall"
+              ? "aspect-tall max-h-[60vh]"
+              : "aspect-video w-full",
+        )}
+        ref={containerRef}
+      >
+        <HlsVideoPlayer
+          videoRef={videoRef}
+          containerRef={containerRef}
+          visible={true}
+          currentSource={videoSource}
+          hotKeys={false}
+          supportsFullscreen={false}
+          fullscreen={false}
+          frigateControls={false}
+          onTimeUpdate={handleTimeUpdate}
+          onSeekToTime={handleSeekToTime}
+          isDetailMode={true}
+          camera={event.camera}
+          currentTimeOverride={currentTime}
+        />
+      </div>
+
+      <div className={cn(isDesktop && "flex-[2] overflow-hidden")}>
+        {isDesktop && tabs && <div className="mb-4">{tabs}</div>}
         <div
           className={cn(
-            "relative flex items-center justify-center",
-            cameraAspect === "wide"
-              ? "aspect-wide w-full"
-              : cameraAspect === "tall"
-                ? "aspect-tall max-h-[60vh]"
-                : "aspect-video w-full",
+            isDesktop && "scrollbar-container h-full overflow-y-auto",
           )}
-          ref={containerRef}
         >
-          <HlsVideoPlayer
-            videoRef={videoRef}
-            containerRef={containerRef}
-            visible={true}
-            currentSource={videoSource}
-            hotKeys={false}
-            supportsFullscreen={false}
-            fullscreen={false}
-            frigateControls={false}
-            onTimeUpdate={handleTimeUpdate}
-            onSeekToTime={handleSeekToTime}
-            isDetailMode={true}
-            camera={event.camera}
-            currentTimeOverride={currentTime}
-          />
-        </div>
-      )}
-
-      {showLifecycle && (
-        <>
           <div className="mt-3 flex flex-row items-center justify-between">
             <Heading as="h4">{t("trackingDetails.title")}</Heading>
 
@@ -538,8 +545,8 @@ function TrackingDetailsInner({
               </div>
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
