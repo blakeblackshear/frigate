@@ -186,6 +186,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     thumbs,
                     camera_config.review.genai,
                     list(self.config.model.merged_labelmap.values()),
+                    self.config.model.all_attributes,
                 ),
             ).start()
 
@@ -414,6 +415,7 @@ def run_analysis(
     thumbs: list[bytes],
     genai_config: GenAIReviewConfig,
     labelmap_objects: list[str],
+    attribute_labels: list[str],
 ) -> None:
     start = datetime.datetime.now().timestamp()
     analytics_data = {
@@ -441,7 +443,11 @@ def run_analysis(
             continue
         elif label in labelmap_objects:
             object_type = label.replace("_", " ").title()
-            unified_objects.append(object_type)
+
+            if label in attribute_labels:
+                unified_objects.append(f"{object_type} (delivery/service)")
+            else:
+                unified_objects.append(object_type)
 
     analytics_data["unified_objects"] = unified_objects
 
