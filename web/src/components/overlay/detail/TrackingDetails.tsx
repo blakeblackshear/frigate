@@ -281,13 +281,13 @@ export function TrackingDetails({
       <div
         className={cn(
           "relative flex items-center justify-center",
-          isDesktop && "flex-[3]",
           cameraAspect === "wide"
-            ? "aspect-wide w-full"
+            ? "w-full flex-1"
             : cameraAspect === "tall"
-              ? "aspect-tall max-h-[60vh]"
-              : "aspect-video w-full",
+              ? "max-h-[50dvh] lg:max-h-[70dvh]"
+              : isDesktop && "w-full flex-[3]",
         )}
+        style={{ aspectRatio: aspectRatio }}
         ref={containerRef}
       >
         <HlsVideoPlayer
