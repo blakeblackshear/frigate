@@ -394,7 +394,9 @@ export default function Step1NameAndDefine({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <FormLabel className="text-primary-variant">
-                  {t("wizard.step1.classes")}
+                  {watchedModelType === "state"
+                    ? t("wizard.step1.states")
+                    : t("wizard.step1.classes")}
                 </FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>

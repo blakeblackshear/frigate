@@ -86,6 +86,7 @@
       "classificationSubLabel": "Sub Label",
       "classificationAttribute": "Attribute",
       "classes": "Classes",
+      "states": "States",
       "classesTip": "Learn about classes",
       "classesStateDesc": "Define the different states your camera area can be in. For example: 'open' and 'closed' for a garage door.",
       "classesObjectDesc": "Define the different categories to classify detected objects into. For example: 'delivery_person', 'resident', 'stranger' for person classification.",
