@@ -8,20 +8,7 @@ import Heading from "@/components/ui/heading";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
-import {
-  LuCircle,
-  LuCircleDot,
-  LuEar,
-  LuPlay,
-  LuSettings,
-  LuTruck,
-} from "react-icons/lu";
-import { IoMdExit } from "react-icons/io";
-import {
-  MdFaceUnlock,
-  MdOutlineLocationOn,
-  MdOutlinePictureInPictureAlt,
-} from "react-icons/md";
+import { LuCircle, LuSettings } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -43,17 +30,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
-import { IoPlayCircleOutline } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { Badge } from "@/components/ui/badge";
 import { HiDotsHorizontal } from "react-icons/hi";
 import axios from "axios";
 import { toast } from "sonner";
-import {
-  DetailStreamProvider,
-  useDetailStream,
-} from "@/context/detail-stream-context";
+import { useDetailStream } from "@/context/detail-stream-context";
 import { isDesktop } from "react-device-detect";
 
 type TrackingDetailsProps = {
@@ -63,36 +46,16 @@ type TrackingDetailsProps = {
   tabs?: React.ReactNode;
 };
 
-// Wrapper component that provides DetailStreamContext
-export default function TrackingDetails(props: TrackingDetailsProps) {
-  const [currentTime, setCurrentTime] = useState(props.event.start_time ?? 0);
-
-  return (
-    <DetailStreamProvider
-      isDetailMode={true}
-      currentTime={currentTime}
-      camera={props.event.camera}
-    >
-      <TrackingDetailsInner {...props} onTimeUpdate={setCurrentTime} />
-    </DetailStreamProvider>
-  );
-}
-
-// Inner component with access to DetailStreamContext
-function TrackingDetailsInner({
+export function TrackingDetails({
   className,
   event,
   tabs,
-  onTimeUpdate,
-}: TrackingDetailsProps & { onTimeUpdate: (time: number) => void }) {
+}: TrackingDetailsProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useTranslation(["views/explore"]);
-  const {
-    setSelectedObjectIds,
-    annotationOffset,
-    setAnnotationOffset,
-    currentTime,
-  } = useDetailStream();
+  const { setSelectedObjectIds, annotationOffset, setAnnotationOffset } =
+    useDetailStream();
+  const [currentTime, setCurrentTime] = useState(event.start_time ?? 0);
 
   const { data: eventSequence } = useSWR<TrackingDetailsSequence[]>([
     "timeline",
@@ -110,7 +73,7 @@ function TrackingDetailsInner({
   );
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [_selectedZone, _setSelectedZone] = useState("");
+  const [_selectedZone, setSelectedZone] = useState("");
   const [_lifecycleZones, setLifecycleZones] = useState<string[]>([]);
   const [showControls, setShowControls] = useState(false);
   const [showZones, setShowZones] = useState(true);
@@ -151,7 +114,7 @@ function TrackingDetailsInner({
   const handleLifecycleClick = useCallback((item: TrackingDetailsSequence) => {
     const timestamp = item.timestamp ?? 0;
     setLifecycleZones(item.data.zones);
-    _setSelectedZone("");
+    setSelectedZone("");
 
     // Set the target timestamp to seek to
     setSeekToTimestamp(timestamp);
@@ -287,8 +250,6 @@ function TrackingDetailsInner({
     }
   }, [aspectRatio]);
 
-  // Container layout classes - no longer needed, handled in return JSX
-
   const handleSeekToTime = useCallback((timestamp: number, _play?: boolean) => {
     // Set the target timestamp to seek to
     setSeekToTimestamp(timestamp);
@@ -296,16 +257,16 @@ function TrackingDetailsInner({
 
   const handleTimeUpdate = useCallback(
     (time: number) => {
-      // Convert video time to absolute timestamp
       const absoluteTime = time - REVIEW_PADDING + event.start_time;
-      onTimeUpdate(absoluteTime);
+      setCurrentTime(absoluteTime);
     },
-    [event.start_time, onTimeUpdate],
+    [event.start_time],
   );
 
   if (!config) {
     return <ActivityIndicator />;
   }
+
   return (
     <div
       className={cn(
@@ -337,7 +298,7 @@ function TrackingDetailsInner({
           hotKeys={false}
           supportsFullscreen={false}
           fullscreen={false}
-          frigateControls={false}
+          frigateControls={true}
           onTimeUpdate={handleTimeUpdate}
           onSeekToTime={handleSeekToTime}
           isDetailMode={true}
@@ -534,8 +495,10 @@ function TrackingDetailsInner({
                             areaPx={areaPx}
                             areaPct={areaPct}
                             onClick={() => handleLifecycleClick(item)}
-                            setSelectedZone={_setSelectedZone}
+                            setSelectedZone={setSelectedZone}
                             getZoneColor={getZoneColor}
+                            effectiveTime={effectiveTime}
+                            isTimelineActive={isWithinEventRange}
                           />
                         );
                       })}
@@ -551,43 +514,6 @@ function TrackingDetailsInner({
   );
 }
 
-type GetTimelineIconParams = {
-  lifecycleItem: TrackingDetailsSequence;
-  className?: string;
-};
-
-export function LifecycleIcon({
-  lifecycleItem,
-  className,
-}: GetTimelineIconParams) {
-  switch (lifecycleItem.class_type) {
-    case "visible":
-      return <LuPlay className={cn("size-5", className)} />;
-    case "gone":
-      return <IoMdExit className={cn("size-5", className)} />;
-    case "active":
-      return <LuCircleDot className={cn("size-5", className)} />;
-    case "stationary":
-      return <LuCircle className={cn("size-5", className)} />;
-    case "entered_zone":
-      return <MdOutlineLocationOn className={cn("size-5", className)} />;
-    case "attribute":
-      return lifecycleItem.data.attribute === "face" ? (
-        <MdFaceUnlock className={cn("size-5", className)} />
-      ) : lifecycleItem.data.attribute === "license_plate" ? (
-        <MdOutlinePictureInPictureAlt className={cn("size-5", className)} />
-      ) : (
-        <LuTruck className={cn("size-5", className)} />
-      );
-    case "heard":
-      return <LuEar className={cn("size-5", className)} />;
-    case "external":
-      return <IoPlayCircleOutline className={cn("size-5", className)} />;
-    default:
-      return null;
-  }
-}
-
 type LifecycleIconRowProps = {
   item: TrackingDetailsSequence;
   isActive?: boolean;
@@ -598,6 +524,8 @@ type LifecycleIconRowProps = {
   onClick: () => void;
   setSelectedZone: (z: string) => void;
   getZoneColor: (zoneName: string) => number[] | undefined;
+  effectiveTime?: number;
+  isTimelineActive?: boolean;
 };
 
 function LifecycleIconRow({
@@ -610,6 +538,8 @@ function LifecycleIconRow({
   onClick,
   setSelectedZone,
   getZoneColor,
+  effectiveTime,
+  isTimelineActive,
 }: LifecycleIconRowProps) {
   const { t } = useTranslation(["views/explore", "components/player"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -632,7 +562,9 @@ function LifecycleIconRow({
           <LuCircle
             className={cn(
               "relative z-10 ml-[1px] size-2.5 fill-secondary-foreground stroke-none",
-              isActive && "fill-selected duration-300",
+              (isActive || (effectiveTime ?? 0) >= (item?.timestamp ?? 0)) &&
+                isTimelineActive &&
+                "fill-selected duration-300",
             )}
           />
         </div>

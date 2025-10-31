@@ -22,6 +22,7 @@ interface DetailStreamProviderProps {
   isDetailMode: boolean;
   currentTime: number;
   camera: string;
+  initialSelectedObjectIds?: string[];
 }
 
 export function DetailStreamProvider({
@@ -29,8 +30,11 @@ export function DetailStreamProvider({
   isDetailMode,
   currentTime,
   camera,
+  initialSelectedObjectIds,
 }: DetailStreamProviderProps) {
-  const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>([]);
+  const [selectedObjectIds, setSelectedObjectIds] = useState<string[]>(
+    () => initialSelectedObjectIds ?? [],
+  );
 
   const toggleObjectSelection = (id: string | undefined) => {
     if (id === undefined) {
