@@ -119,12 +119,6 @@ export default function SearchDetailDialog({
     100,
   );
 
-  // tracking details state
-
-  const [trackingTimeIndex, setTrackingTimeIndex] = useState<
-    number | undefined
-  >(undefined);
-
   // dialog and mobile page
 
   const [isOpen, setIsOpen] = useState(search != undefined);
@@ -184,6 +178,42 @@ export default function SearchDetailDialog({
     }
   }, [pageToggle, searchTabs, setSearchPage]);
 
+  // Tabs component for reuse
+  const tabsComponent = (
+    <ScrollArea className="w-full whitespace-nowrap">
+      <div className="flex flex-row">
+        <ToggleGroup
+          className="*:rounded-md *:px-3 *:py-4"
+          type="single"
+          size="sm"
+          value={pageToggle}
+          onValueChange={(value: SearchTab) => {
+            if (value) {
+              setPageToggle(value);
+            }
+          }}
+        >
+          {Object.values(searchTabs).map((item) => (
+            <ToggleGroupItem
+              key={item}
+              className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "details" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+              value={item}
+              data-nav-item={item}
+              aria-label={`Select ${item}`}
+            >
+              {item == "details" && <FaRegListAlt className="size-4" />}
+              {item == "snapshot" && <FaImage className="size-4" />}
+              {item == "video" && <FaVideo className="size-4" />}
+              {item == "tracking_details" && <PiPath className="size-4" />}
+              <div className="smart-capitalize">{t(`type.${item}`)}</div>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        <ScrollBar orientation="horizontal" className="h-0" />
+      </div>
+    </ScrollArea>
+  );
+
   if (!search) {
     return;
   }
@@ -220,136 +250,88 @@ export default function SearchDetailDialog({
           </Description>
         </Header>
         {isDesktop ? (
-          <div className="flex h-full gap-4 overflow-hidden">
-            <div className="scrollbar-container flex-[3] overflow-y-auto">
-              {page === "snapshot" && search.has_snapshot && (
-                <ObjectSnapshotTab
-                  search={
-                    {
-                      ...search,
-                      plus_id: config?.plus?.enabled
-                        ? search.plus_id
-                        : "not_enabled",
-                    } as unknown as Event
-                  }
-                  onEventUploaded={() => {
-                    search.plus_id = "new_upload";
-                  }}
-                />
-              )}
-              {page === "video" && search.has_clip && (
-                <VideoTab search={search} />
-              )}
-              {page === "tracking_details" && (
-                <TrackingDetails
-                  event={search as unknown as Event}
-                  showImage={true}
-                  showLifecycle={false}
-                  timeIndex={trackingTimeIndex}
-                  setTimeIndex={setTrackingTimeIndex}
-                />
-              )}
-              {(page === "details" ||
-                (!search.has_snapshot && page === "snapshot") ||
-                (!search.has_clip && page === "video")) && (
-                <img
-                  className="aspect-video select-none rounded-lg object-contain transition-opacity"
-                  style={
-                    isIOS
-                      ? {
-                          WebkitUserSelect: "none",
-                          WebkitTouchCallout: "none",
-                        }
-                      : undefined
-                  }
-                  draggable={false}
-                  src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-                />
-              )}
-            </div>
-            <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
-              <ScrollArea className="w-full whitespace-nowrap">
-                <div className="flex flex-row">
-                  <ToggleGroup
-                    className="*:rounded-md *:px-3 *:py-4"
-                    type="single"
-                    size="sm"
-                    value={pageToggle}
-                    onValueChange={(value: SearchTab) => {
-                      if (value) {
-                        setPageToggle(value);
-                      }
+          page === "tracking_details" ? (
+            <TrackingDetails
+              className="size-full"
+              event={search as unknown as Event}
+              tabs={tabsComponent}
+            />
+          ) : (
+            <div className="flex h-full gap-4 overflow-hidden">
+              <div className="scrollbar-container flex-[3] overflow-y-hidden">
+                {page === "snapshot" && search.has_snapshot && (
+                  <ObjectSnapshotTab
+                    search={
+                      {
+                        ...search,
+                        plus_id: config?.plus?.enabled
+                          ? search.plus_id
+                          : "not_enabled",
+                      } as unknown as Event
+                    }
+                    onEventUploaded={() => {
+                      search.plus_id = "new_upload";
                     }}
-                  >
-                    {Object.values(searchTabs).map((item) => (
-                      <ToggleGroupItem
-                        key={item}
-                        className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "details" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-                        value={item}
-                        data-nav-item={item}
-                        aria-label={`Select ${item}`}
-                      >
-                        {item == "details" && (
-                          <FaRegListAlt className="size-4" />
-                        )}
-                        {item == "snapshot" && <FaImage className="size-4" />}
-                        {item == "video" && <FaVideo className="size-4" />}
-                        {item == "tracking_details" && (
-                          <PiPath className="size-4" />
-                        )}
-                        <div className="smart-capitalize">
-                          {t(`type.${item}`)}
-                        </div>
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                  <ScrollBar orientation="horizontal" className="h-0" />
-                </div>
-              </ScrollArea>
-              <div className="scrollbar-container flex-1 overflow-y-auto">
-                {page == "details" && (
-                  <ObjectDetailsTab
-                    search={search}
-                    config={config}
-                    setSearch={setSearch}
-                    setSimilarity={setSimilarity}
-                    setInputFocused={setInputFocused}
-                    showThumbnail={false}
                   />
                 )}
-                {page == "snapshot" && (
-                  <ObjectDetailsTab
-                    search={search}
-                    config={config}
-                    setSearch={setSearch}
-                    setSimilarity={setSimilarity}
-                    setInputFocused={setInputFocused}
-                    showThumbnail={false}
-                  />
+                {page === "video" && search.has_clip && (
+                  <VideoTab search={search} />
                 )}
-                {page == "video" && (
-                  <ObjectDetailsTab
-                    search={search}
-                    config={config}
-                    setSearch={setSearch}
-                    setSimilarity={setSimilarity}
-                    setInputFocused={setInputFocused}
-                    showThumbnail={false}
-                  />
-                )}
-                {page == "tracking_details" && (
-                  <TrackingDetails
-                    className="w-full overflow-x-hidden"
-                    event={search as unknown as Event}
-                    showImage={false}
-                    showLifecycle={true}
-                    timeIndex={trackingTimeIndex}
-                    setTimeIndex={setTrackingTimeIndex}
+                {(page === "details" ||
+                  (!search.has_snapshot && page === "snapshot") ||
+                  (!search.has_clip && page === "video")) && (
+                  <img
+                    className="aspect-video select-none rounded-lg object-contain transition-opacity"
+                    style={
+                      isIOS
+                        ? {
+                            WebkitUserSelect: "none",
+                            WebkitTouchCallout: "none",
+                          }
+                        : undefined
+                    }
+                    draggable={false}
+                    src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
                   />
                 )}
               </div>
+              <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
+                {tabsComponent}
+                <div className="scrollbar-container flex-1 overflow-y-auto">
+                  {page == "details" && (
+                    <ObjectDetailsTab
+                      search={search}
+                      config={config}
+                      setSearch={setSearch}
+                      setSimilarity={setSimilarity}
+                      setInputFocused={setInputFocused}
+                      showThumbnail={false}
+                    />
+                  )}
+                  {page == "snapshot" && (
+                    <ObjectDetailsTab
+                      search={search}
+                      config={config}
+                      setSearch={setSearch}
+                      setSimilarity={setSimilarity}
+                      setInputFocused={setInputFocused}
+                      showThumbnail={false}
+                    />
+                  )}
+                  {page == "video" && (
+                    <ObjectDetailsTab
+                      search={search}
+                      config={config}
+                      setSearch={setSearch}
+                      setSimilarity={setSimilarity}
+                      setInputFocused={setInputFocused}
+                      showThumbnail={false}
+                    />
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
+          )
         ) : (
           <>
             <ScrollArea
@@ -419,10 +401,6 @@ export default function SearchDetailDialog({
               <TrackingDetails
                 className="w-full overflow-x-hidden"
                 event={search as unknown as Event}
-                showImage={true}
-                showLifecycle={true}
-                timeIndex={trackingTimeIndex}
-                setTimeIndex={setTrackingTimeIndex}
               />
             )}
           </>
