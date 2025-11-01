@@ -91,7 +91,7 @@ class OpenAIClient(GenAIClient):
 
         # Default to 128K for ChatGPT models, 8K for others
         model_name = self.genai_config.model.lower()
-        if "gpt-4o" in model_name:
+        if "gpt" in model_name:
             self.context_size = 128000
         else:
             self.context_size = 8192
