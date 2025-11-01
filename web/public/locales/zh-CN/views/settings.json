@@ -51,6 +51,10 @@
       "playAlertVideos": {
         "label": "播放警报视频",
         "desc": "默认情况下，实时监控页面上的最新警报会以一小段循环视频的形式进行播放。禁用此选项将仅显示浏览器本地缓存的静态图片。"
+      },
+      "displayCameraNames": {
+        "label": "始终显示摄像头名称",
+        "desc": "在有多摄像头情况下的实时监控页面，将始终显示摄像头名称标签。"
       }
     },
     "storedLayouts": {
@@ -761,7 +765,9 @@
     },
     "actions": {
       "alert": "标记为警报",
-      "notification": "发送通知"
+      "notification": "发送通知",
+      "sub_label": "添加子标签",
+      "attribute": "添加属性"
     },
     "dialog": {
       "createTrigger": {
@@ -816,7 +822,7 @@
         },
         "actions": {
           "title": "动作",
-          "desc": "默认情况下，Frigate 会为所有触发器发送 MQTT 消息。请选择此触发器触发时需要执行的附加操作。",
+          "desc": "默认情况下，Frigate 会为所有触发器发送 MQTT 消息。子标签会将触发器名称添加到对象标签中。属性是可搜索的元数据，独立存储在追踪对象的元数据中。",
           "error": {
             "min": "必须至少选择一项动作。"
           }
