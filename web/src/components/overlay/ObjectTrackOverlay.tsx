@@ -13,6 +13,9 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { Event } from "@/types/event";
 
+// Use a small tolerance (10ms) for browsers with seek precision by-design issues
+const TOLERANCE = 0.01;
+
 type ObjectTrackOverlayProps = {
   camera: string;
   showBoundingBoxes?: boolean;
@@ -166,41 +169,45 @@ export default function ObjectTrackOverlay({
             }) || [];
 
         // show full path once current time has reached the object's start time
-        const combinedPoints = [...savedPathPoints, ...eventSequencePoints]
-          .sort((a, b) => a.timestamp - b.timestamp)
-          .filter(
-            (point) =>
-              currentTime >= (eventData?.start_time ?? 0) &&
-              point.timestamp >= (eventData?.start_time ?? 0) &&
-              point.timestamp <= (eventData?.end_time ?? Infinity),
-          );
+        // event.start_time is in DETECT stream time, so convert it to record stream time for comparison
+        const eventStartTimeRecord =
+          (eventData?.start_time ?? 0) + annotationOffset / 1000;
+
+        const allPoints = [...savedPathPoints, ...eventSequencePoints].sort(
+          (a, b) => a.timestamp - b.timestamp,
+        );
+        const combinedPoints = allPoints.filter(
+          (point) =>
+            currentTime >= eventStartTimeRecord - TOLERANCE &&
+            point.timestamp <= effectiveCurrentTime + TOLERANCE,
+        );
 
         // Get color for this object
         const label = eventData?.label || "unknown";
         const color = getObjectColor(label, objectId);
 
-        // Get current zones
+        // zones (with tolerance for browsers with seek precision by-design issues)
         const currentZones =
           timelineData
             ?.filter(
               (event: TrackingDetailsSequence) =>
-                event.timestamp <= effectiveCurrentTime,
+                event.timestamp <= effectiveCurrentTime + TOLERANCE,
             )
             .sort(
               (a: TrackingDetailsSequence, b: TrackingDetailsSequence) =>
                 b.timestamp - a.timestamp,
             )[0]?.data?.zones || [];
 
-        // Get current bounding box
-        const currentBox = timelineData
-          ?.filter(
-            (event: TrackingDetailsSequence) =>
-              event.timestamp <= effectiveCurrentTime && event.data.box,
-          )
-          .sort(
-            (a: TrackingDetailsSequence, b: TrackingDetailsSequence) =>
-              b.timestamp - a.timestamp,
-          )[0]?.data?.box;
+        // bounding box (with tolerance for browsers with seek precision by-design issues)
+        const boxCandidates = timelineData?.filter(
+          (event: TrackingDetailsSequence) =>
+            event.timestamp <= effectiveCurrentTime + TOLERANCE &&
+            event.data.box,
+        );
+        const currentBox = boxCandidates?.sort(
+          (a: TrackingDetailsSequence, b: TrackingDetailsSequence) =>
+            b.timestamp - a.timestamp,
+        )[0]?.data?.box;
 
         return {
           objectId,
@@ -221,6 +228,7 @@ export default function ObjectTrackOverlay({
     getObjectColor,
     config,
     camera,
+    annotationOffset,
   ]);
 
   // Collect all zones across all objects
@@ -274,9 +282,10 @@ export default function ObjectTrackOverlay({
 
   const handlePointClick = useCallback(
     (timestamp: number) => {
-      onSeekToTime?.(timestamp, false);
+      // Convert detect stream timestamp to record stream timestamp before seeking
+      onSeekToTime?.(timestamp + annotationOffset / 1000, false);
     },
-    [onSeekToTime],
+    [onSeekToTime, annotationOffset],
   );
 
   const zonePolygons = useMemo(() => {

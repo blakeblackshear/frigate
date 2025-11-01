@@ -5,29 +5,11 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import { TrackingDetailsSequence } from "@/types/timeline";
 import Heading from "@/components/ui/heading";
-import { ReviewDetailPaneType } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
-import {
-  LuCircle,
-  LuCircleDot,
-  LuEar,
-  LuFolderX,
-  LuPlay,
-  LuSettings,
-  LuTruck,
-} from "react-icons/lu";
-import { IoMdArrowRoundBack, IoMdExit } from "react-icons/io";
-import {
-  MdFaceUnlock,
-  MdOutlineLocationOn,
-  MdOutlinePictureInPictureAlt,
-} from "react-icons/md";
+import { LuCircle, LuSettings } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import { useApiHost } from "@/api";
-import { isDesktop, isIOS, isSafari } from "react-device-detect";
-import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import {
   Tooltip,
   TooltipContent,
@@ -35,12 +17,10 @@ import {
 } from "@/components/ui/tooltip";
 import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
+import { baseUrl } from "@/api/baseUrl";
+import { REVIEW_PADDING } from "@/types/review";
+import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -49,30 +29,40 @@ import {
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
-import { ObjectPath } from "./ObjectPath";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
-import { IoPlayCircleOutline } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { Badge } from "@/components/ui/badge";
 import { HiDotsHorizontal } from "react-icons/hi";
 import axios from "axios";
 import { toast } from "sonner";
+import { useDetailStream } from "@/context/detail-stream-context";
+import { isDesktop, isIOS } from "react-device-detect";
+import Chip from "@/components/indicators/Chip";
+import { FaDownload, FaHistory } from "react-icons/fa";
 
 type TrackingDetailsProps = {
   className?: string;
   event: Event;
   fullscreen?: boolean;
-  setPane: React.Dispatch<React.SetStateAction<ReviewDetailPaneType>>;
+  tabs?: React.ReactNode;
 };
 
-export default function TrackingDetails({
+export function TrackingDetails({
   className,
   event,
-  fullscreen = false,
-  setPane,
+  tabs,
 }: TrackingDetailsProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useTranslation(["views/explore"]);
+  const navigate = useNavigate();
+  const { setSelectedObjectIds, annotationOffset, setAnnotationOffset } =
+    useDetailStream();
+
+  // event.start_time is detect time, convert to record, then subtract padding
+  const [currentTime, setCurrentTime] = useState(
+    (event.start_time ?? 0) + annotationOffset / 1000 - REVIEW_PADDING,
+  );
 
   const { data: eventSequence } = useSWR<TrackingDetailsSequence[]>([
     "timeline",
@@ -82,16 +72,17 @@ export default function TrackingDetails({
   ]);
 
   const { data: config } = useSWR<FrigateConfig>("config");
-  const apiHost = useApiHost();
-  const navigate = useNavigate();
 
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const effectiveTime = useMemo(() => {
+    return currentTime - annotationOffset / 1000;
+  }, [currentTime, annotationOffset]);
 
-  const [selectedZone, setSelectedZone] = useState("");
-  const [lifecycleZones, setLifecycleZones] = useState<string[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [_selectedZone, setSelectedZone] = useState("");
+  const [_lifecycleZones, setLifecycleZones] = useState<string[]>([]);
   const [showControls, setShowControls] = useState(false);
   const [showZones, setShowZones] = useState(true);
+  const [seekToTimestamp, setSeekToTimestamp] = useState<number | null>(null);
 
   const aspectRatio = useMemo(() => {
     if (!config) {
@@ -120,178 +111,27 @@ export default function TrackingDetails({
     [config, event],
   );
 
-  const getObjectColor = useCallback(
-    (label: string) => {
-      const objectColor = config?.model?.colormap[label];
-      if (objectColor) {
-        const reversed = [...objectColor].reverse();
-        return reversed;
-      }
-    },
-    [config],
-  );
-
-  const getZonePolygon = useCallback(
-    (zoneName: string) => {
-      if (!imgRef.current || !config) {
-        return;
-      }
-      const zonePoints =
-        config?.cameras[event.camera].zones[zoneName].coordinates;
-      const imgElement = imgRef.current;
-      const imgRect = imgElement.getBoundingClientRect();
-
-      return zonePoints
-        .split(",")
-        .map(Number.parseFloat)
-        .reduce((acc, value, index) => {
-          const isXCoordinate = index % 2 === 0;
-          const coordinate = isXCoordinate
-            ? value * imgRect.width
-            : value * imgRect.height;
-          acc.push(coordinate);
-          return acc;
-        }, [] as number[])
-        .join(",");
-    },
-    [config, imgRef, event],
-  );
-
-  const [boxStyle, setBoxStyle] = useState<React.CSSProperties | null>(null);
-  const [attributeBoxStyle, setAttributeBoxStyle] =
-    useState<React.CSSProperties | null>(null);
-
-  const configAnnotationOffset = useMemo(() => {
-    if (!config) {
-      return 0;
-    }
-
-    return config.cameras[event.camera]?.detect?.annotation_offset || 0;
-  }, [config, event]);
-
-  const [annotationOffset, setAnnotationOffset] = useState<number>(
-    configAnnotationOffset,
-  );
-
-  const savedPathPoints = useMemo(() => {
-    return (
-      event.data.path_data?.map(([coords, timestamp]: [number[], number]) => ({
-        x: coords[0],
-        y: coords[1],
-        timestamp,
-        lifecycle_item: undefined,
-      })) || []
-    );
-  }, [event.data.path_data]);
-
-  const eventSequencePoints = useMemo(() => {
-    return (
-      eventSequence
-        ?.filter((event) => event.data.box !== undefined)
-        .map((event) => {
-          const [left, top, width, height] = event.data.box!;
-
-          return {
-            x: left + width / 2, // Center x-coordinate
-            y: top + height, // Bottom y-coordinate
-            timestamp: event.timestamp,
-            lifecycle_item: event,
-          };
-        }) || []
-    );
-  }, [eventSequence]);
-
-  // final object path with timeline points included
-  const pathPoints = useMemo(() => {
-    // don't display a path if we don't have any saved path points
-    if (
-      savedPathPoints.length === 0 ||
-      config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config
-    )
-      return [];
-    return [...savedPathPoints, ...eventSequencePoints].sort(
-      (a, b) => a.timestamp - b.timestamp,
-    );
-  }, [savedPathPoints, eventSequencePoints, config, event]);
-
-  const [timeIndex, setTimeIndex] = useState(0);
-
-  const handleSetBox = useCallback(
-    (box: number[], attrBox: number[] | undefined) => {
-      if (imgRef.current && Array.isArray(box) && box.length === 4) {
-        const imgElement = imgRef.current;
-        const imgRect = imgElement.getBoundingClientRect();
-
-        const style = {
-          left: `${box[0] * imgRect.width}px`,
-          top: `${box[1] * imgRect.height}px`,
-          width: `${box[2] * imgRect.width}px`,
-          height: `${box[3] * imgRect.height}px`,
-          borderColor: `rgb(${getObjectColor(event.label)?.join(",")})`,
-        };
-
-        if (attrBox) {
-          const attrStyle = {
-            left: `${attrBox[0] * imgRect.width}px`,
-            top: `${attrBox[1] * imgRect.height}px`,
-            width: `${attrBox[2] * imgRect.width}px`,
-            height: `${attrBox[3] * imgRect.height}px`,
-            borderColor: `rgb(${getObjectColor(event.label)?.join(",")})`,
-          };
-          setAttributeBoxStyle(attrStyle);
-        } else {
-          setAttributeBoxStyle(null);
-        }
-
-        setBoxStyle(style);
-      }
-    },
-    [imgRef, event, getObjectColor],
-  );
-
-  // image
-
-  const [src, setSrc] = useState(
-    `${apiHost}api/${event.camera}/recordings/${event.start_time + annotationOffset / 1000}/snapshot.jpg?height=500`,
-  );
-  const [hasError, setHasError] = useState(false);
-
+  // Set the selected object ID in the context so ObjectTrackOverlay can display it
   useEffect(() => {
-    if (timeIndex) {
-      const newSrc = `${apiHost}api/${event.camera}/recordings/${timeIndex + annotationOffset / 1000}/snapshot.jpg?height=500`;
-      setSrc(newSrc);
-    }
-    setImgLoaded(false);
-    setHasError(false);
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeIndex, annotationOffset]);
+    setSelectedObjectIds([event.id]);
+  }, [event.id, setSelectedObjectIds]);
 
-  // carousels
+  const handleLifecycleClick = useCallback(
+    (item: TrackingDetailsSequence) => {
+      if (!videoRef.current) return;
 
-  // Selected lifecycle item index; -1 when viewing a path-only point
+      // Convert lifecycle timestamp (detect stream) to record stream time
+      const targetTimeRecord = item.timestamp + annotationOffset / 1000;
 
-  const handlePathPointClick = useCallback(
-    (index: number) => {
-      if (!eventSequence) return;
-      const sequenceIndex = eventSequence.findIndex(
-        (item) => item.timestamp === pathPoints[index].timestamp,
-      );
-      if (sequenceIndex !== -1) {
-        setTimeIndex(eventSequence[sequenceIndex].timestamp);
-        handleSetBox(
-          eventSequence[sequenceIndex]?.data.box ?? [],
-          eventSequence[sequenceIndex]?.data?.attribute_box,
-        );
-        setLifecycleZones(eventSequence[sequenceIndex]?.data.zones);
-      } else {
-        // click on a normal path point, not a lifecycle point
-        setTimeIndex(pathPoints[index].timestamp);
-        setBoxStyle(null);
-        setLifecycleZones([]);
-      }
+      // Convert to video-relative time for seeking
+      const eventStartRecord =
+        (event.start_time ?? 0) + annotationOffset / 1000;
+      const videoStartTime = eventStartRecord - REVIEW_PADDING;
+      const relativeTime = targetTimeRecord - videoStartTime;
+
+      videoRef.current.currentTime = relativeTime;
     },
-    [eventSequence, pathPoints, handleSetBox],
+    [event.start_time, annotationOffset],
   );
 
   const formattedStart = config
@@ -328,53 +168,38 @@ export default function TrackingDetails({
 
   useEffect(() => {
     if (!eventSequence || eventSequence.length === 0) return;
-    // If timeIndex hasn't been set to a non-zero value, prefer the first lifecycle timestamp
-    if (!timeIndex) {
-      setTimeIndex(eventSequence[0].timestamp);
-      handleSetBox(
-        eventSequence[0]?.data.box ?? [],
-        eventSequence[0]?.data?.attribute_box,
-      );
-      setLifecycleZones(eventSequence[0]?.data.zones);
-    }
-  }, [eventSequence, timeIndex, handleSetBox]);
+    setLifecycleZones(eventSequence[0]?.data.zones);
+  }, [eventSequence]);
 
-  // When timeIndex changes or image finishes loading, sync the box/zones to matching lifecycle, else clear
   useEffect(() => {
-    if (!eventSequence || timeIndex == null) return;
-    const idx = eventSequence.findIndex((i) => i.timestamp === timeIndex);
-    if (idx !== -1) {
-      if (imgLoaded) {
-        handleSetBox(
-          eventSequence[idx]?.data.box ?? [],
-          eventSequence[idx]?.data?.attribute_box,
-        );
-      }
-      setLifecycleZones(eventSequence[idx]?.data.zones);
-    } else {
-      // Non-lifecycle point (e.g., saved path point)
-      setBoxStyle(null);
-      setLifecycleZones([]);
+    if (seekToTimestamp === null || !videoRef.current) return;
+
+    // seekToTimestamp is a record stream timestamp
+    // event.start_time is detect stream time, convert to record
+    // The video clip starts at (eventStartRecord - REVIEW_PADDING)
+    const eventStartRecord = event.start_time + annotationOffset / 1000;
+    const videoStartTime = eventStartRecord - REVIEW_PADDING;
+    const relativeTime = seekToTimestamp - videoStartTime;
+    if (relativeTime >= 0) {
+      videoRef.current.currentTime = relativeTime;
     }
-  }, [timeIndex, imgLoaded, eventSequence, handleSetBox]);
+    setSeekToTimestamp(null);
+  }, [seekToTimestamp, event.start_time, annotationOffset]);
 
-  const selectedLifecycle = useMemo(() => {
-    if (!eventSequence || eventSequence.length === 0) return undefined;
-    const idx = eventSequence.findIndex((i) => i.timestamp === timeIndex);
-    return idx !== -1 ? eventSequence[idx] : eventSequence[0];
-  }, [eventSequence, timeIndex]);
+  const isWithinEventRange =
+    effectiveTime !== undefined &&
+    event.start_time !== undefined &&
+    event.end_time !== undefined &&
+    effectiveTime >= event.start_time &&
+    effectiveTime <= event.end_time;
 
-  const selectedIndex = useMemo(() => {
-    if (!eventSequence || eventSequence.length === 0) return 0;
-    const idx = eventSequence.findIndex((i) => i.timestamp === timeIndex);
-    return idx === -1 ? 0 : idx;
-  }, [eventSequence, timeIndex]);
+  // Calculate how far down the blue line should extend based on effectiveTime
+  const calculateLineHeight = useCallback(() => {
+    if (!eventSequence || eventSequence.length === 0 || !isWithinEventRange) {
+      return 0;
+    }
 
-  // Calculate how far down the blue line should extend based on timeIndex
-  const calculateLineHeight = () => {
-    if (!eventSequence || eventSequence.length === 0) return 0;
-
-    const currentTime = timeIndex ?? 0;
+    const currentTime = effectiveTime ?? 0;
 
     // Find which events have been passed
     let lastPassedIndex = -1;
@@ -412,395 +237,361 @@ export default function TrackingDetails({
       100,
       lastPassedIndex * itemPercentage + interpolation * itemPercentage,
     );
-  };
+  }, [eventSequence, effectiveTime, isWithinEventRange]);
 
   const blueLineHeight = calculateLineHeight();
+
+  const videoSource = useMemo(() => {
+    // event.start_time and event.end_time are in DETECT stream time
+    // Convert to record stream time, then create video clip with padding
+    const eventStartRecord = event.start_time + annotationOffset / 1000;
+    const eventEndRecord =
+      (event.end_time ?? Date.now() / 1000) + annotationOffset / 1000;
+    const startTime = eventStartRecord - REVIEW_PADDING;
+    const endTime = eventEndRecord + REVIEW_PADDING;
+    const playlist = `${baseUrl}vod/${event.camera}/start/${startTime}/end/${endTime}/index.m3u8`;
+
+    return {
+      playlist,
+      startPosition: 0,
+    };
+  }, [event, annotationOffset]);
+
+  // Determine camera aspect ratio category
+  const cameraAspect = useMemo(() => {
+    if (!aspectRatio) {
+      return "normal";
+    } else if (aspectRatio > ASPECT_WIDE_LAYOUT) {
+      return "wide";
+    } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
+      return "tall";
+    } else {
+      return "normal";
+    }
+  }, [aspectRatio]);
+
+  const handleSeekToTime = useCallback((timestamp: number, _play?: boolean) => {
+    // Set the target timestamp to seek to
+    setSeekToTimestamp(timestamp);
+  }, []);
+
+  const handleTimeUpdate = useCallback(
+    (time: number) => {
+      // event.start_time is detect stream time, convert to record
+      const eventStartRecord = event.start_time + annotationOffset / 1000;
+      const videoStartTime = eventStartRecord - REVIEW_PADDING;
+      const absoluteTime = time + videoStartTime;
+
+      setCurrentTime(absoluteTime);
+    },
+    [event.start_time, annotationOffset],
+  );
 
   if (!config) {
     return <ActivityIndicator />;
   }
 
   return (
-    <div className={className}>
-      <span tabIndex={0} className="sr-only" />
-      {!fullscreen && (
-        <div className={cn("flex items-center gap-2")}>
-          <Button
-            className="mb-2 mt-3 flex items-center gap-2.5 rounded-lg md:mt-0"
-            aria-label={t("label.back", { ns: "common" })}
-            size="sm"
-            onClick={() => setPane("overview")}
-          >
-            <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-            {isDesktop && (
-              <div className="text-primary">
-                {t("button.back", { ns: "common" })}
-              </div>
-            )}
-          </Button>
-        </div>
+    <div
+      className={cn(
+        isDesktop
+          ? "flex size-full gap-4 overflow-hidden"
+          : "flex size-full flex-col gap-2",
+        className,
       )}
+    >
+      <span tabIndex={0} className="sr-only" />
 
       <div
         className={cn(
-          "relative mx-auto flex max-h-[50dvh] flex-row justify-center",
+          "flex w-full items-center justify-center",
+          isDesktop && "overflow-hidden",
+          cameraAspect === "tall" ? "max-h-[50dvh] lg:max-h-[70dvh]" : "w-full",
+          cameraAspect !== "tall" && isDesktop && "flex-[3]",
         )}
-        style={{
-          aspectRatio: !imgLoaded ? aspectRatio : undefined,
-        }}
+        style={{ aspectRatio: aspectRatio }}
+        ref={containerRef}
       >
-        <ImageLoadingIndicator
-          className="absolute inset-0"
-          imgLoaded={imgLoaded}
-        />
-        {hasError && (
-          <div className="relative aspect-video">
-            <div className="flex flex-col items-center justify-center p-20 text-center">
-              <LuFolderX className="size-16" />
-              {t("trackingDetails.noImageFound")}
-            </div>
-          </div>
-        )}
         <div
           className={cn(
-            "relative inline-block",
-            imgLoaded ? "visible" : "invisible",
+            "relative",
+            cameraAspect === "tall" ? "h-full" : "w-full",
           )}
         >
-          <ContextMenu>
-            <ContextMenuTrigger>
-              <img
-                key={event.id}
-                ref={imgRef}
-                className={cn(
-                  "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
-                )}
-                loading={isSafari ? "eager" : "lazy"}
-                style={
-                  isIOS
-                    ? {
-                        WebkitUserSelect: "none",
-                        WebkitTouchCallout: "none",
-                      }
-                    : undefined
-                }
-                draggable={false}
-                src={src}
-                onLoad={() => setImgLoaded(true)}
-                onError={() => setHasError(true)}
-              />
-
-              {showZones &&
-                imgRef.current?.width &&
-                imgRef.current?.height &&
-                lifecycleZones?.map((zone) => (
-                  <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{
-                      width: imgRef.current?.clientWidth,
-                      height: imgRef.current?.clientHeight,
-                    }}
-                    key={zone}
-                  >
-                    <svg
-                      viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
-                      className="absolute inset-0"
-                    >
-                      <polygon
-                        points={getZonePolygon(zone)}
-                        className="fill-none stroke-2"
-                        style={{
-                          stroke: `rgb(${getZoneColor(zone)?.join(",")})`,
-                          fill:
-                            selectedZone == zone
-                              ? `rgba(${getZoneColor(zone)?.join(",")}, 0.5)`
-                              : `rgba(${getZoneColor(zone)?.join(",")}, 0.3)`,
-                          strokeWidth: selectedZone == zone ? 4 : 2,
-                        }}
-                      />
-                    </svg>
-                  </div>
-                ))}
-
-              {boxStyle && (
-                <div className="absolute border-2" style={boxStyle}>
-                  <div className="absolute bottom-[-3px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 transform bg-yellow-500" />
-                </div>
-              )}
-              {attributeBoxStyle && (
-                <div className="absolute border-2" style={attributeBoxStyle} />
-              )}
-              {imgRef.current?.width &&
-                imgRef.current?.height &&
-                pathPoints &&
-                pathPoints.length > 0 && (
-                  <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{
-                      width: imgRef.current?.clientWidth,
-                      height: imgRef.current?.clientHeight,
-                    }}
-                    key="path"
-                  >
-                    <svg
-                      viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
-                      className="absolute inset-0"
-                    >
-                      <ObjectPath
-                        positions={pathPoints}
-                        color={getObjectColor(event.label)}
-                        width={2}
-                        imgRef={imgRef}
-                        onPointClick={handlePathPointClick}
-                      />
-                    </svg>
-                  </div>
-                )}
-            </ContextMenuTrigger>
-            <ContextMenuContent>
-              <ContextMenuItem>
-                <div
-                  className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
-                  onClick={() =>
-                    navigate(
-                      `/settings?page=masksAndZones&camera=${event.camera}&object_mask=${selectedLifecycle?.data.box}`,
-                    )
-                  }
-                >
-                  <div className="text-primary">
-                    {t("trackingDetails.createObjectMask")}
-                  </div>
-                </div>
-              </ContextMenuItem>
-            </ContextMenuContent>
-          </ContextMenu>
-        </div>
-      </div>
-
-      <div className="mt-3 flex flex-row items-center justify-between">
-        <Heading as="h4">{t("trackingDetails.title")}</Heading>
-
-        <div className="flex flex-row gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={showControls ? "select" : "default"}
-                className="size-7 p-1.5"
-                aria-label={t("trackingDetails.adjustAnnotationSettings")}
-              >
-                <LuSettings
-                  className="size-5"
-                  onClick={() => setShowControls(!showControls)}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent>
-                {t("trackingDetails.adjustAnnotationSettings")}
-              </TooltipContent>
-            </TooltipPortal>
-          </Tooltip>
-        </div>
-      </div>
-      <div className="flex flex-row items-center justify-between">
-        <div className="mb-2 text-sm text-muted-foreground">
-          {t("trackingDetails.scrollViewTips")}
-        </div>
-        <div className="min-w-20 text-right text-sm text-muted-foreground">
-          {t("trackingDetails.count", {
-            first: selectedIndex + 1,
-            second: eventSequence?.length ?? 0,
-          })}
-        </div>
-      </div>
-      {config?.cameras[event.camera]?.onvif.autotracking.enabled_in_config && (
-        <div className="-mt-2 mb-2 text-sm text-danger">
-          {t("trackingDetails.autoTrackingTips")}
-        </div>
-      )}
-      {showControls && (
-        <AnnotationSettingsPane
-          event={event}
-          showZones={showZones}
-          setShowZones={setShowZones}
-          annotationOffset={annotationOffset}
-          setAnnotationOffset={setAnnotationOffset}
-        />
-      )}
-
-      <div className="mt-4">
-        <div
-          className={cn(
-            "rounded-md bg-secondary p-3 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500",
-          )}
-        >
-          <div className="flex w-full items-center justify-between">
-            <div
-              className="flex items-center gap-2 font-medium"
-              onClick={(e) => {
-                e.stopPropagation();
-                setTimeIndex(event.start_time ?? 0);
-              }}
-              role="button"
-            >
-              <div
-                className={cn(
-                  "relative ml-2 rounded-full bg-muted-foreground p-2",
-                )}
-              >
-                {getIconForLabel(
-                  event.sub_label ? event.label + "-verified" : event.label,
-                  "size-4 text-white",
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="capitalize">{label}</span>
-                <span className="text-secondary-foreground">
-                  {formattedStart ?? ""} - {formattedEnd ?? ""}
-                </span>
-                {event.data?.recognized_license_plate && (
-                  <>
-                    <span className="text-secondary-foreground">·</span>
-                    <div className="text-sm text-secondary-foreground">
-                      <Link
-                        to={`/explore?recognized_license_plate=${event.data.recognized_license_plate}`}
-                        className="text-sm"
-                      >
-                        {event.data.recognized_license_plate}
-                      </Link>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-2">
-            {!eventSequence ? (
-              <ActivityIndicator className="size-2" size={2} />
-            ) : eventSequence.length === 0 ? (
-              <div className="py-2 text-muted-foreground">
-                {t("detail.noObjectDetailData", { ns: "views/events" })}
-              </div>
-            ) : (
-              <div className="-pb-2 relative mx-2">
-                <div className="absolute -top-2 bottom-8 left-4 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
-                <div
-                  className="absolute left-4 top-2 z-[5] max-h-[calc(100%-3rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
-                  style={{ height: `${blueLineHeight}%` }}
-                />
-                <div className="space-y-2">
-                  {eventSequence.map((item, idx) => {
-                    const isActive =
-                      Math.abs((timeIndex ?? 0) - (item.timestamp ?? 0)) <= 0.5;
-                    const formattedEventTimestamp = config
-                      ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
-                          timezone: config.ui.timezone,
-                          date_format:
-                            config.ui.time_format == "24hour"
-                              ? t(
-                                  "time.formattedTimestampHourMinuteSecond.24hour",
-                                  { ns: "common" },
-                                )
-                              : t(
-                                  "time.formattedTimestampHourMinuteSecond.12hour",
-                                  { ns: "common" },
-                                ),
-                          time_style: "medium",
-                          date_style: "medium",
-                        })
-                      : "";
-
-                    const ratio =
-                      Array.isArray(item.data.box) && item.data.box.length >= 4
-                        ? (
-                            aspectRatio *
-                            (item.data.box[2] / item.data.box[3])
-                          ).toFixed(2)
-                        : "N/A";
-                    const areaPx =
-                      Array.isArray(item.data.box) && item.data.box.length >= 4
-                        ? Math.round(
-                            (config.cameras[event.camera]?.detect?.width ?? 0) *
-                              (config.cameras[event.camera]?.detect?.height ??
-                                0) *
-                              (item.data.box[2] * item.data.box[3]),
-                          )
-                        : undefined;
-                    const areaPct =
-                      Array.isArray(item.data.box) && item.data.box.length >= 4
-                        ? (item.data.box[2] * item.data.box[3]).toFixed(4)
-                        : undefined;
-
-                    return (
-                      <LifecycleIconRow
-                        key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
-                        item={item}
-                        isActive={isActive}
-                        formattedEventTimestamp={formattedEventTimestamp}
-                        ratio={ratio}
-                        areaPx={areaPx}
-                        areaPct={areaPct}
-                        onClick={() => {
-                          setTimeIndex(item.timestamp ?? 0);
-                          handleSetBox(
-                            item.data.box ?? [],
-                            item.data.attribute_box,
-                          );
-                          setLifecycleZones(item.data.zones);
-                          setSelectedZone("");
-                        }}
-                        setSelectedZone={setSelectedZone}
-                        getZoneColor={getZoneColor}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
+          <HlsVideoPlayer
+            videoRef={videoRef}
+            containerRef={containerRef}
+            visible={true}
+            currentSource={videoSource}
+            hotKeys={false}
+            supportsFullscreen={false}
+            fullscreen={false}
+            frigateControls={true}
+            onTimeUpdate={handleTimeUpdate}
+            onSeekToTime={handleSeekToTime}
+            isDetailMode={true}
+            camera={event.camera}
+            currentTimeOverride={currentTime}
+          />
+          <div
+            className={cn(
+              "absolute top-2 z-[5] flex items-center gap-2",
+              isIOS ? "right-8" : "right-2",
             )}
+          >
+            {event && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <Chip
+                    className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                    onClick={() => {
+                      if (event?.id) {
+                        const params = new URLSearchParams({
+                          id: event.id,
+                        }).toString();
+                        navigate(`/review?${params}`);
+                      }
+                    }}
+                  >
+                    <FaHistory className="size-4 text-white" />
+                  </Chip>
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>
+                    {t("itemMenu.viewInHistory.label")}
+                  </TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a
+                  download
+                  href={`${baseUrl}api/${event.camera}/start/${event.start_time - REVIEW_PADDING}/end/${(event.end_time ?? Date.now() / 1000) + REVIEW_PADDING}/clip.mp4`}
+                >
+                  <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
+                    <FaDownload className="size-4 text-white" />
+                  </Chip>
+                </a>
+              </TooltipTrigger>
+              <TooltipPortal>
+                <TooltipContent>
+                  {t("button.download", { ns: "common" })}
+                </TooltipContent>
+              </TooltipPortal>
+            </Tooltip>
+          </div>
+        </div>
+      </div>
+
+      <div className={cn(isDesktop && "flex-[2] overflow-hidden")}>
+        {isDesktop && tabs && <div className="mb-4">{tabs}</div>}
+        <div
+          className={cn(
+            isDesktop && "scrollbar-container h-full overflow-y-auto",
+          )}
+        >
+          <div className="flex flex-row items-center justify-between">
+            <Heading as="h4">{t("trackingDetails.title")}</Heading>
+
+            <div className="flex flex-row gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={showControls ? "select" : "default"}
+                    className="size-7 p-1.5"
+                    aria-label={t("trackingDetails.adjustAnnotationSettings")}
+                  >
+                    <LuSettings
+                      className="size-5"
+                      onClick={() => setShowControls(!showControls)}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>
+                    {t("trackingDetails.adjustAnnotationSettings")}
+                  </TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
+            </div>
+          </div>
+          <div className="flex flex-row items-center justify-between">
+            <div className="mb-2 text-sm text-muted-foreground">
+              {t("trackingDetails.scrollViewTips")}
+            </div>
+            <div className="min-w-20 text-right text-sm text-muted-foreground">
+              {t("trackingDetails.count", {
+                first: eventSequence?.length ?? 0,
+                second: eventSequence?.length ?? 0,
+              })}
+            </div>
+          </div>
+          {config?.cameras[event.camera]?.onvif.autotracking
+            .enabled_in_config && (
+            <div className="-mt-2 mb-2 text-sm text-danger">
+              {t("trackingDetails.autoTrackingTips")}
+            </div>
+          )}
+          {showControls && (
+            <AnnotationSettingsPane
+              event={event}
+              showZones={showZones}
+              setShowZones={setShowZones}
+              annotationOffset={annotationOffset}
+              setAnnotationOffset={(value) => {
+                if (typeof value === "function") {
+                  const newValue = value(annotationOffset);
+                  setAnnotationOffset(newValue);
+                } else {
+                  setAnnotationOffset(value);
+                }
+              }}
+            />
+          )}
+
+          <div className="mt-4">
+            <div
+              className={cn(
+                "rounded-md bg-secondary p-3 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500",
+              )}
+            >
+              <div className="flex w-full items-center justify-between">
+                <div
+                  className="flex items-center gap-2 font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // event.start_time is detect time, convert to record
+                    handleSeekToTime(
+                      (event.start_time ?? 0) + annotationOffset / 1000,
+                    );
+                  }}
+                  role="button"
+                >
+                  <div
+                    className={cn(
+                      "relative ml-2 rounded-full bg-muted-foreground p-2",
+                    )}
+                  >
+                    {getIconForLabel(
+                      event.sub_label ? event.label + "-verified" : event.label,
+                      "size-4 text-white",
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="capitalize">{label}</span>
+                    <span className="text-secondary-foreground">
+                      {formattedStart ?? ""} - {formattedEnd ?? ""}
+                    </span>
+                    {event.data?.recognized_license_plate && (
+                      <>
+                        <span className="text-secondary-foreground">·</span>
+                        <div className="text-sm text-secondary-foreground">
+                          <Link
+                            to={`/explore?recognized_license_plate=${event.data.recognized_license_plate}`}
+                            className="text-sm"
+                          >
+                            {event.data.recognized_license_plate}
+                          </Link>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-2">
+                {!eventSequence ? (
+                  <ActivityIndicator className="size-2" size={2} />
+                ) : eventSequence.length === 0 ? (
+                  <div className="py-2 text-muted-foreground">
+                    {t("detail.noObjectDetailData", { ns: "views/events" })}
+                  </div>
+                ) : (
+                  <div className="-pb-2 relative mx-0">
+                    <div className="absolute -top-2 bottom-8 left-6 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
+                    {isWithinEventRange && (
+                      <div
+                        className="absolute left-6 top-2 z-[5] max-h-[calc(100%-3rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
+                        style={{ height: `${blueLineHeight}%` }}
+                      />
+                    )}
+                    <div className="space-y-2">
+                      {eventSequence.map((item, idx) => {
+                        const isActive =
+                          Math.abs(
+                            (effectiveTime ?? 0) - (item.timestamp ?? 0),
+                          ) <= 0.5;
+                        const formattedEventTimestamp = config
+                          ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
+                              timezone: config.ui.timezone,
+                              date_format:
+                                config.ui.time_format == "24hour"
+                                  ? t(
+                                      "time.formattedTimestampHourMinuteSecond.24hour",
+                                      { ns: "common" },
+                                    )
+                                  : t(
+                                      "time.formattedTimestampHourMinuteSecond.12hour",
+                                      { ns: "common" },
+                                    ),
+                              time_style: "medium",
+                              date_style: "medium",
+                            })
+                          : "";
+
+                        const ratio =
+                          Array.isArray(item.data.box) &&
+                          item.data.box.length >= 4
+                            ? (
+                                aspectRatio *
+                                (item.data.box[2] / item.data.box[3])
+                              ).toFixed(2)
+                            : "N/A";
+                        const areaPx =
+                          Array.isArray(item.data.box) &&
+                          item.data.box.length >= 4
+                            ? Math.round(
+                                (config.cameras[event.camera]?.detect?.width ??
+                                  0) *
+                                  (config.cameras[event.camera]?.detect
+                                    ?.height ?? 0) *
+                                  (item.data.box[2] * item.data.box[3]),
+                              )
+                            : undefined;
+                        const areaPct =
+                          Array.isArray(item.data.box) &&
+                          item.data.box.length >= 4
+                            ? (item.data.box[2] * item.data.box[3]).toFixed(4)
+                            : undefined;
+
+                        return (
+                          <LifecycleIconRow
+                            key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
+                            item={item}
+                            isActive={isActive}
+                            formattedEventTimestamp={formattedEventTimestamp}
+                            ratio={ratio}
+                            areaPx={areaPx}
+                            areaPct={areaPct}
+                            onClick={() => handleLifecycleClick(item)}
+                            setSelectedZone={setSelectedZone}
+                            getZoneColor={getZoneColor}
+                            effectiveTime={effectiveTime}
+                            isTimelineActive={isWithinEventRange}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
-
-type GetTimelineIconParams = {
-  lifecycleItem: TrackingDetailsSequence;
-  className?: string;
-};
-
-export function LifecycleIcon({
-  lifecycleItem,
-  className,
-}: GetTimelineIconParams) {
-  switch (lifecycleItem.class_type) {
-    case "visible":
-      return <LuPlay className={cn(className)} />;
-    case "gone":
-      return <IoMdExit className={cn(className)} />;
-    case "active":
-      return <IoPlayCircleOutline className={cn(className)} />;
-    case "stationary":
-      return <LuCircle className={cn(className)} />;
-    case "entered_zone":
-      return <MdOutlineLocationOn className={cn(className)} />;
-    case "attribute":
-      switch (lifecycleItem.data?.attribute) {
-        case "face":
-          return <MdFaceUnlock className={cn(className)} />;
-        case "license_plate":
-          return <MdOutlinePictureInPictureAlt className={cn(className)} />;
-        default:
-          return <LuTruck className={cn(className)} />;
-      }
-    case "heard":
-      return <LuEar className={cn(className)} />;
-    case "external":
-      return <LuCircleDot className={cn(className)} />;
-    default:
-      return null;
-  }
 }
 
 type LifecycleIconRowProps = {
@@ -813,6 +604,8 @@ type LifecycleIconRowProps = {
   onClick: () => void;
   setSelectedZone: (z: string) => void;
   getZoneColor: (zoneName: string) => number[] | undefined;
+  effectiveTime?: number;
+  isTimelineActive?: boolean;
 };
 
 function LifecycleIconRow({
@@ -825,6 +618,8 @@ function LifecycleIconRow({
   onClick,
   setSelectedZone,
   getZoneColor,
+  effectiveTime,
+  isTimelineActive,
 }: LifecycleIconRowProps) {
   const { t } = useTranslation(["views/explore", "components/player"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -837,17 +632,19 @@ function LifecycleIconRow({
       role="button"
       onClick={onClick}
       className={cn(
-        "rounded-md p-2 text-sm text-primary-variant",
+        "rounded-md p-2 pr-0 text-sm text-primary-variant",
         isActive && "bg-secondary-highlight font-semibold text-primary",
         !isActive && "duration-500",
       )}
     >
       <div className="flex items-center gap-2">
-        <div className="relative flex size-4 items-center justify-center">
+        <div className="relative ml-2 flex size-4 items-center justify-center">
           <LuCircle
             className={cn(
-              "relative z-10 ml-[1px] size-2.5 fill-secondary-foreground stroke-none",
-              isActive && "fill-selected duration-300",
+              "relative z-10 size-2.5 fill-secondary-foreground stroke-none",
+              (isActive || (effectiveTime ?? 0) >= (item?.timestamp ?? 0)) &&
+                isTimelineActive &&
+                "fill-selected duration-300",
             )}
           />
         </div>

@@ -33,6 +33,7 @@
   "type": {
     "details": "details",
     "snapshot": "snapshot",
+    "thumbnail": "thumbnail",
     "video": "video",
     "object_lifecycle": "object lifecycle"
   },
@@ -41,7 +42,7 @@
     "noImageFound": "No image found for this timestamp.",
     "createObjectMask": "Create Object Mask",
     "adjustAnnotationSettings": "Adjust annotation settings",
-    "scrollViewTips": "Scroll to view the significant moments of this object's lifecycle.",
+    "scrollViewTips": "Click to view the significant moments of this object's lifecycle.",
     "autoTrackingTips": "Bounding box positions will be inaccurate for autotracking cameras.",
     "count": "{{first}} of {{second}}",
     "trackedPoint": "Tracked Point",

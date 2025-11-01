@@ -893,7 +893,7 @@ function ObjectTrainGrid({
   // selection
 
   const [selectedEvent, setSelectedEvent] = useState<Event>();
-  const [dialogTab, setDialogTab] = useState<SearchTab>("details");
+  const [dialogTab, setDialogTab] = useState<SearchTab>("snapshot");
 
   // handlers
 

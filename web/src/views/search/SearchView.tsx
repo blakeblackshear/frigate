@@ -214,7 +214,7 @@ export default function SearchView({
   // detail
 
   const [searchDetail, setSearchDetail] = useState<SearchResult>();
-  const [page, setPage] = useState<SearchTab>("details");
+  const [page, setPage] = useState<SearchTab>("snapshot");
 
   // search interaction
 
@@ -222,7 +222,7 @@ export default function SearchView({
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const onSelectSearch = useCallback(
-    (item: SearchResult, ctrl: boolean, page: SearchTab = "details") => {
+    (item: SearchResult, ctrl: boolean, page: SearchTab = "snapshot") => {
       if (selectedObjects.length > 1 || ctrl) {
         const index = selectedObjects.indexOf(item.id);
 
