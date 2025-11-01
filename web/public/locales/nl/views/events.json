@@ -43,10 +43,17 @@
     "trackedObject_one": "object",
     "trackedObject_other": "objecten",
     "noObjectDetailData": "Geen objectdetails beschikbaar.",
-    "label": "Detail"
+    "label": "Detail",
+    "settings": "Instellingen voor detailweergave",
+    "alwaysExpandActive": {
+      "desc": "Altijd de objectdetails van het actieve beoordelingsitem uitklappen wanneer deze beschikbaar zijn.",
+      "title": "Het huidige item altijd uitvouwen"
+    }
   },
   "objectTrack": {
     "trackedPoint": "Gevolgd punt",
     "clickToSeek": "Klik om naar deze tijd te zoeken"
-  }
+  },
+  "zoomIn": "Zoom in",
+  "zoomOut": "Zoom uit"
 }
