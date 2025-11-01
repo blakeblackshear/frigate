@@ -12,14 +12,14 @@
   "filter": {
     "label": {
       "cameras": "Kameraer",
-      "labels": "Merkelapper",
+      "labels": "Etiketter",
       "search_type": "Søketype",
       "after": "Etter",
       "min_score": "Min. poengsum",
       "max_score": "Maks. poengsum",
       "min_speed": "Min. hastighet",
       "zones": "Soner",
-      "sub_labels": "Under-merkelapper",
+      "sub_labels": "Underetiketter",
       "time_range": "Tidsintervall",
       "before": "Før",
       "max_speed": "Maks. hastighet",

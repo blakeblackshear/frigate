@@ -44,10 +44,17 @@
     "trackedObject_one": "objet",
     "trackedObject_other": "objets",
     "noObjectDetailData": "Aucun détail d'objet disponible",
-    "label": "Détail"
+    "label": "Détail",
+    "settings": "Paramètres de la vue Détail",
+    "alwaysExpandActive": {
+      "title": "Toujours développer l'élément actif",
+      "desc": "Toujours développer les détails de l'objet de l'événement actif si disponibles"
+    }
   },
   "objectTrack": {
     "trackedPoint": "Point suivi",
     "clickToSeek": "Cliquez pour atteindre ce moment."
-  }
+  },
+  "zoomIn": "Zoom avant",
+  "zoomOut": "Zoom arrière"
 }

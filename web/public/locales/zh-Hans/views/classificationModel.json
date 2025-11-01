@@ -43,7 +43,8 @@
   },
   "train": {
     "title": "最近分类记录",
-    "aria": "选择最近分类记录"
+    "aria": "选择最近分类记录",
+    "titleShort": "最近"
   },
   "categories": "类别",
   "createCategory": {

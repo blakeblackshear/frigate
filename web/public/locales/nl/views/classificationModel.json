@@ -43,7 +43,8 @@
   },
   "train": {
     "title": "Recente classificaties",
-    "aria": "Selecteer recente classificaties"
+    "aria": "Selecteer recente classificaties",
+    "titleShort": "Recent"
   },
   "categories": "Klassen",
   "createCategory": {
@@ -98,7 +99,8 @@
         "stateRequiresTwoClasses": "Toestandsmodellen vereisen minimaal 2 klassen",
         "objectLabelRequired": "Selecteer een objectlabel",
         "objectTypeRequired": "Selecteer een classificatietype"
-      }
+      },
+      "states": "Staten"
     },
     "step2": {
       "description": "Selecteer camera’s en definieer voor elke camera het te monitoren gebied. Het model zal de toestand van deze gebieden classificeren.",

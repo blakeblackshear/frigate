@@ -44,10 +44,17 @@
     "trackedObject_one": "目标或物体",
     "trackedObject_other": "目标或物体",
     "noObjectDetailData": "没有目标详细信息。",
-    "label": "详细信息"
+    "label": "详细信息",
+    "settings": "详细视图设置",
+    "alwaysExpandActive": {
+      "title": "始终展开当前项",
+      "desc": "在可用情况下，将始终展开当前核查项的对象详细信息。"
+    }
   },
   "objectTrack": {
     "trackedPoint": "追踪点",
     "clickToSeek": "点击从该时间进行寻找"
-  }
+  },
+  "zoomIn": "放大",
+  "zoomOut": "缩小"
 }

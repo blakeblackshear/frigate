@@ -43,7 +43,8 @@
   },
   "train": {
     "title": "Nylige klassifiseringer",
-    "aria": "Velg nylige klassifiseringer"
+    "aria": "Velg nylige klassifiseringer",
+    "titleShort": "Nylig"
   },
   "categories": "Kategorier",
   "createCategory": {

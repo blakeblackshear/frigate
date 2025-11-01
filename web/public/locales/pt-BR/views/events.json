@@ -40,8 +40,8 @@
   "detail": {
     "noDataFound": "Nenhum dado de detalhe para revisar",
     "aria": "Alternar visualização de detalhe",
-    "trackedObject_one": "objeto rastreado",
-    "trackedObject_other": "objetos rastreados",
+    "trackedObject_one": "objeto",
+    "trackedObject_other": "objetos",
     "noObjectDetailData": "Nenhum dado de detalhe de objeto disponível.",
     "label": "Detalhe"
   },
