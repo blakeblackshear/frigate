@@ -55,7 +55,11 @@ export function TrackingDetails({
   const { t } = useTranslation(["views/explore"]);
   const { setSelectedObjectIds, annotationOffset, setAnnotationOffset } =
     useDetailStream();
-  const [currentTime, setCurrentTime] = useState(event.start_time ?? 0);
+
+  // event.start_time is detect time, convert to record, then subtract padding
+  const [currentTime, setCurrentTime] = useState(
+    (event.start_time ?? 0) + annotationOffset / 1000 - REVIEW_PADDING,
+  );
 
   const { data: eventSequence } = useSWR<TrackingDetailsSequence[]>([
     "timeline",
@@ -66,11 +70,9 @@ export function TrackingDetails({
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // Calculate effective time (currentTime + annotation offset)
-  const effectiveTime = useMemo(
-    () => currentTime + annotationOffset / 1000,
-    [currentTime, annotationOffset],
-  );
+  const effectiveTime = useMemo(() => {
+    return currentTime - annotationOffset / 1000;
+  }, [currentTime, annotationOffset]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [_selectedZone, setSelectedZone] = useState("");
@@ -111,14 +113,23 @@ export function TrackingDetails({
     setSelectedObjectIds([event.id]);
   }, [event.id, setSelectedObjectIds]);
 
-  const handleLifecycleClick = useCallback((item: TrackingDetailsSequence) => {
-    const timestamp = item.timestamp ?? 0;
-    setLifecycleZones(item.data.zones);
-    setSelectedZone("");
+  const handleLifecycleClick = useCallback(
+    (item: TrackingDetailsSequence) => {
+      if (!videoRef.current) return;
 
-    // Set the target timestamp to seek to
-    setSeekToTimestamp(timestamp);
-  }, []);
+      // Convert lifecycle timestamp (detect stream) to record stream time
+      const targetTimeRecord = item.timestamp + annotationOffset / 1000;
+
+      // Convert to video-relative time for seeking
+      const eventStartRecord =
+        (event.start_time ?? 0) + annotationOffset / 1000;
+      const videoStartTime = eventStartRecord - REVIEW_PADDING;
+      const relativeTime = targetTimeRecord - videoStartTime;
+
+      videoRef.current.currentTime = relativeTime;
+    },
+    [event.start_time, annotationOffset],
+  );
 
   const formattedStart = config
     ? formatUnixTimestampToDateTime(event.start_time ?? 0, {
@@ -157,22 +168,21 @@ export function TrackingDetails({
     setLifecycleZones(eventSequence[0]?.data.zones);
   }, [eventSequence]);
 
-  // Handle seeking when seekToTimestamp is set
   useEffect(() => {
     if (seekToTimestamp === null || !videoRef.current) return;
 
-    const relativeTime =
-      seekToTimestamp -
-      event.start_time +
-      REVIEW_PADDING +
-      annotationOffset / 1000;
+    // seekToTimestamp is a record stream timestamp
+    // event.start_time is detect stream time, convert to record
+    // The video clip starts at (eventStartRecord - REVIEW_PADDING)
+    const eventStartRecord = event.start_time + annotationOffset / 1000;
+    const videoStartTime = eventStartRecord - REVIEW_PADDING;
+    const relativeTime = seekToTimestamp - videoStartTime;
     if (relativeTime >= 0) {
       videoRef.current.currentTime = relativeTime;
     }
     setSeekToTimestamp(null);
   }, [seekToTimestamp, event.start_time, annotationOffset]);
 
-  // Check if current time is within the event's start/stop range
   const isWithinEventRange =
     effectiveTime !== undefined &&
     event.start_time !== undefined &&
@@ -229,13 +239,20 @@ export function TrackingDetails({
   const blueLineHeight = calculateLineHeight();
 
   const videoSource = useMemo(() => {
-    const startTime = event.start_time - REVIEW_PADDING;
-    const endTime = (event.end_time ?? Date.now() / 1000) + REVIEW_PADDING;
+    // event.start_time and event.end_time are in DETECT stream time
+    // Convert to record stream time, then create video clip with padding
+    const eventStartRecord = event.start_time + annotationOffset / 1000;
+    const eventEndRecord =
+      (event.end_time ?? Date.now() / 1000) + annotationOffset / 1000;
+    const startTime = eventStartRecord - REVIEW_PADDING;
+    const endTime = eventEndRecord + REVIEW_PADDING;
+    const playlist = `${baseUrl}vod/${event.camera}/start/${startTime}/end/${endTime}/index.m3u8`;
+
     return {
-      playlist: `${baseUrl}vod/${event.camera}/start/${startTime}/end/${endTime}/index.m3u8`,
+      playlist,
       startPosition: 0,
     };
-  }, [event]);
+  }, [event, annotationOffset]);
 
   // Determine camera aspect ratio category
   const cameraAspect = useMemo(() => {
@@ -257,10 +274,14 @@ export function TrackingDetails({
 
   const handleTimeUpdate = useCallback(
     (time: number) => {
-      const absoluteTime = time - REVIEW_PADDING + event.start_time;
+      // event.start_time is detect stream time, convert to record
+      const eventStartRecord = event.start_time + annotationOffset / 1000;
+      const videoStartTime = eventStartRecord - REVIEW_PADDING;
+      const absoluteTime = time + videoStartTime;
+
       setCurrentTime(absoluteTime);
     },
-    [event.start_time],
+    [event.start_time, annotationOffset],
   );
 
   if (!config) {
@@ -384,7 +405,10 @@ export function TrackingDetails({
                   className="flex items-center gap-2 font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleSeekToTime(event.start_time ?? 0);
+                    // event.start_time is detect time, convert to record
+                    handleSeekToTime(
+                      (event.start_time ?? 0) + annotationOffset / 1000,
+                    );
                   }}
                   role="button"
                 >
@@ -428,11 +452,11 @@ export function TrackingDetails({
                     {t("detail.noObjectDetailData", { ns: "views/events" })}
                   </div>
                 ) : (
-                  <div className="-pb-2 relative mx-2">
-                    <div className="absolute -top-2 bottom-8 left-4 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
+                  <div className="-pb-2 relative mx-0">
+                    <div className="absolute -top-2 bottom-8 left-6 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
                     {isWithinEventRange && (
                       <div
-                        className="absolute left-4 top-2 z-[5] max-h-[calc(100%-3rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
+                        className="absolute left-6 top-2 z-[5] max-h-[calc(100%-3rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
                         style={{ height: `${blueLineHeight}%` }}
                       />
                     )}
@@ -552,16 +576,16 @@ function LifecycleIconRow({
       role="button"
       onClick={onClick}
       className={cn(
-        "rounded-md p-2 text-sm text-primary-variant",
+        "rounded-md p-2 pr-0 text-sm text-primary-variant",
         isActive && "bg-secondary-highlight font-semibold text-primary",
         !isActive && "duration-500",
       )}
     >
       <div className="flex items-center gap-2">
-        <div className="relative flex size-4 items-center justify-center">
+        <div className="relative ml-2 flex size-4 items-center justify-center">
           <LuCircle
             className={cn(
-              "relative z-10 ml-[1px] size-2.5 fill-secondary-foreground stroke-none",
+              "relative z-10 size-2.5 fill-secondary-foreground stroke-none",
               (isActive || (effectiveTime ?? 0) >= (item?.timestamp ?? 0)) &&
                 isTimelineActive &&
                 "fill-selected duration-300",
