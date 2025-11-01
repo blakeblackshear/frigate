@@ -34,5 +34,16 @@
   "selected_one": "נבחרו {{count}}",
   "selected_other": "{{count}} נבחרו",
   "camera": "מצלמה",
-  "detected": "זוהה"
+  "detected": "זוהה",
+  "detail": {
+    "noDataFound": "אין נתונים מפורטים לבדיקה",
+    "aria": "הפעלה/כיבוי תצוגת פרטים",
+    "trackedObject_one": "אובייקט במעקב",
+    "trackedObject_other": "אובייקטים במעקב",
+    "noObjectDetailData": "אין נתוני אובייקט זמינים."
+  },
+  "objectTrack": {
+    "trackedPoint": "נקודה במעקב",
+    "clickToSeek": "לחץ כדי לחפש את הזמן הזה"
+  }
 }

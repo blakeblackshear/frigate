@@ -1,38 +1,38 @@
 {
   "group": {
-    "edit": "Éditer le groupe de caméras",
-    "label": "Groupe de caméras",
+    "edit": "Modifier le groupe de caméras",
+    "label": "Groupes de caméras",
     "add": "Ajouter un groupe de caméras",
     "delete": {
       "label": "Supprimer le groupe de caméras",
       "confirm": {
-        "title": "Confirmer la suppression",
+        "title": "Confirmez la suppression",
         "desc": "Êtes-vous sûr de vouloir supprimer le groupe de caméras <em>{{name}}</em> ?"
       }
     },
     "name": {
-      "placeholder": "Saisissez un nom…",
+      "placeholder": "Saisissez un nom.",
       "label": "Nom",
       "errorMessage": {
         "mustLeastCharacters": "Le nom du groupe de caméras doit comporter au moins 2 caractères.",
         "exists": "Le nom du groupe de caméras existe déjà.",
-        "nameMustNotPeriod": "Le nom de groupe de caméras ne doit pas contenir de période.",
-        "invalid": "Nom de groupe de caméras invalide."
+        "nameMustNotPeriod": "Le nom de groupe de caméras ne doit pas contenir de point.",
+        "invalid": "Nom de groupe de caméras invalide"
       }
     },
     "cameras": {
       "label": "Caméras",
-      "desc": "Sélectionner les caméras pour ce groupe."
+      "desc": "Sélectionnez les caméras pour ce groupe."
     },
     "success": "Le groupe de caméras ({{name}}) a été enregistré.",
     "icon": "Icône",
     "camera": {
       "setting": {
-        "label": "Paramètres de flux de caméra",
-        "title": "Paramètres de flux de {{cameraName}}",
-        "audioIsUnavailable": "L'audio n'est pas disponible pour ce flux",
-        "audioIsAvailable": "L'audio est disponible pour ce flux",
-        "desc": "Modifie les options du flux temps réel pour le tableau de bord de ce groupe de caméras. <em>Ces paramètres sont spécifiques à un périphérique et/ou navigateur.</em>",
+        "label": "Paramètres du flux de la caméra",
+        "title": "Paramètres du flux de {{cameraName}}",
+        "audioIsUnavailable": "L'audio n'est pas disponible pour ce flux.",
+        "audioIsAvailable": "L'audio est disponible pour ce flux.",
+        "desc": "Modifier les options du flux temps réel pour le tableau de bord de ce groupe de caméras. <em>Ces paramètres sont spécifiques à l'appareil ou au navigateur.</em>",
         "audio": {
           "tips": {
             "document": "Lire la documentation ",
@@ -40,33 +40,34 @@
           }
         },
         "streamMethod": {
-          "label": "Méthode de streaming",
+          "label": "Méthode de diffusion",
           "method": {
             "noStreaming": {
-              "label": "Pas de diffusion",
-              "desc": "Les images provenant de la caméra ne seront mises à jour qu'une fois par minute et il n'y aura pas de diffusion en direct."
+              "label": "Aucune diffusion",
+              "desc": "Les images provenant de la caméra ne seront mises à jour qu'une fois par minute et il n'y aura aucune diffusion en direct."
             },
             "smartStreaming": {
-              "label": "Diffusion intelligente (recommandé)",
-              "desc": "La diffusion intelligente mettra à jour les images de la caméra une fois par minute lorsqu'aucune activité n'est détectée afin de conserver la bande-passante et les ressources. Quand une activité est détectée, le flux bascule automatiquement en diffusion temps réel."
+              "label": "Diffusion intelligente (recommandée)",
+              "desc": "La diffusion intelligente mettra à jour l'image de la caméra une fois par minute lorsqu'aucune activité n'est détectée, afin de préserver la bande passante et les ressources. Quand une activité est détectée, l'image bascule automatiquement en flux temps réel."
             },
             "continuousStreaming": {
               "label": "Diffusion en continu",
               "desc": {
                 "title": "L'image de la caméra sera toujours un flux temps réel lorsqu'elle est visible dans le tableau de bord, même si aucune activité n'est détectée.",
-                "warning": "La diffusion en continu peut engendrer une bande-passante élevée et des problèmes de performance. A utiliser avec précaution."
+                "warning": "La diffusion en continu peut entraîner une consommation de bande passante élevée et des problèmes de performance. À utiliser avec prudence."
               }
             }
           },
-          "placeholder": "Choisissez une méthode de diffusion"
+          "placeholder": "Choisissez une méthode de diffusion."
         },
         "compatibilityMode": {
           "label": "Mode de compatibilité",
-          "desc": "Activer cette option uniquement si votre flux temps réel affiche des erreurs chromatiques et a une ligne diagonale sur le côté droit de l'image."
+          "desc": "Activez cette option uniquement si votre flux temps réel affiche des artefacts chromatiques et présente une ligne diagonale sur le côté droit de l'image."
         },
         "stream": "Flux",
-        "placeholder": "Choisissez un flux"
-      }
+        "placeholder": "Choisissez un flux."
+      },
+      "birdseye": "Birdseye"
     }
   },
   "debug": {
@@ -79,7 +80,7 @@
       "label": "Paramètres",
       "hideOptions": "Masquer les options"
     },
-    "boundingBox": "Boîte de délimitation",
+    "boundingBox": "Cadre de détection",
     "zones": "Zones",
     "regions": "Régions"
   }

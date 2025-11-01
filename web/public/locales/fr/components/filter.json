@@ -1,13 +1,13 @@
 {
   "labels": {
-    "label": "Libellés",
+    "label": "Étiquettes",
     "all": {
-      "title": "Tous les libellés",
-      "short": "Libellés"
+      "title": "Toutes les étiquettes",
+      "short": "Étiquettes"
     },
     "count": "{{count}} Étiquettes",
-    "count_one": "{{count}} libellé",
-    "count_other": "{{count}} libellés"
+    "count_one": "{{count}} étiquette",
+    "count_other": "{{count}} étiquettes"
   },
   "filter": "Filtre",
   "zones": {
@@ -22,16 +22,16 @@
       "title": "Toutes les dates",
       "short": "Dates"
     },
-    "selectPreset": "Sélectionnez un préréglage…"
+    "selectPreset": "Sélectionnez un préréglage."
   },
   "more": "Plus de filtres",
   "reset": {
     "label": "Réinitialiser les filtres aux valeurs par défaut"
   },
-  "timeRange": "Plage de temps",
+  "timeRange": "Plage horaire",
   "subLabels": {
-    "label": "Sous-libellés",
-    "all": "Tous les sous-libellés"
+    "label": "Sous-étiquettes",
+    "all": "Toutes les sous-étiquettes"
   },
   "score": "Score",
   "estimatedSpeed": "Vitesse estimée ({{unit}})",
@@ -50,9 +50,9 @@
       "tips": "Vous devez d'abord filtrer les objets suivis qui ont un instantané.<br /><br />Les objets suivis sans instantané ne peuvent pas être soumis à Frigate+.",
       "label": "Soumis à Frigate+"
     },
-    "hasVideoClip": "A un clip vidéo",
-    "hasSnapshot": "A un instantané",
-    "label": "Fonctionnalités"
+    "hasVideoClip": "Avec une séquence vidéo",
+    "hasSnapshot": "Avec un instantané",
+    "label": "Caractéristiques"
   },
   "explore": {
     "settings": {
@@ -61,7 +61,7 @@
         "title": "Vue par défaut",
         "summary": "Résumé",
         "unfilteredGrid": "Grille non filtrée",
-        "desc": "Lorsqu'aucun filtre n'est sélectionné, affiche un résumé des objets suivis les plus récents par libellé, ou affiche une grille non filtrée."
+        "desc": "Lorsqu'aucun filtre n'est sélectionné, afficher un résumé des objets suivis les plus récents par étiquette, ou afficher une grille non filtrée"
       },
       "gridColumns": {
         "desc": "Sélectionner le nombre de colonnes dans la vue grille.",
@@ -70,7 +70,7 @@
       "searchSource": {
         "label": "Source de recherche",
         "options": {
-          "thumbnailImage": "Image de miniature",
+          "thumbnailImage": "Miniature",
           "description": "Description"
         },
         "desc": "Choisissez si vous souhaitez rechercher les miniatures ou les descriptions de vos objets suivis."
@@ -83,7 +83,7 @@
     }
   },
   "review": {
-    "showReviewed": "Montrer les éléments passés en revue"
+    "showReviewed": "Afficher les éléments vérifiés"
   },
   "cameras": {
     "label": "Filtre des caméras",
@@ -101,27 +101,37 @@
       "title": "Chargement",
       "desc": "Lorsque le volet de journalisation est défilé jusqu'en bas, les nouveaux enregistrements s'affichent automatiquement au fur et à mesure qu'ils sont ajoutés."
     },
-    "label": "Niveau de journalisation du filtre",
-    "disableLogStreaming": "Désactiver la diffusion des journaux",
+    "label": "Filtrer par niveau de journal",
+    "disableLogStreaming": "Désactiver le flux des journaux",
     "allLogs": "Tous les journaux"
   },
   "recognizedLicensePlates": {
-    "placeholder": "Tapez pour rechercher des plaques d'immatriculation…",
-    "noLicensePlatesFound": "Aucune plaque d'immatriculation trouvée.",
+    "placeholder": "Tapez pour rechercher des plaques d'immatriculation.",
+    "noLicensePlatesFound": "Aucune plaque d'immatriculation trouvée",
     "loading": "Chargement des plaques d'immatriculation reconnues…",
     "title": "Plaques d'immatriculation reconnues",
     "loadFailed": "Échec du chargement des plaques d'immatriculation reconnues.",
-    "selectPlatesFromList": "Sélectionner une ou plusieurs plaques d'immatriculation dans la liste."
+    "selectPlatesFromList": "Sélectionnez une ou plusieurs plaques d'immatriculation dans la liste.",
+    "selectAll": "Tout sélectionner",
+    "clearAll": "Tout désélectionner"
   },
   "trackedObjectDelete": {
     "title": "Confirmer la suppression",
     "toast": {
-      "success": "Les objets suivis ont été supprimés avec succès.",
+      "success": "Objets suivis supprimés avec succès.",
       "error": "Échec de la suppression des objets suivis : {{errorMessage}}"
     },
-    "desc": "Supprimer ces objets suivis {{objectLength}} retirera l'instantané, les représentations numériques enregistrées et les entrées du cycle de vie de l'objet associées. Les séquences enregistrées de ces objets suivis dans la vue Historique <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Voulez-vous vraiment continuer ?<br /><br />Maintenez la touche <em>Maj</em> enfoncée pour ignorer cette boîte de dialogue à l'avenir."
+    "desc": "La suppression de ces {{objectLength}} objets suivis retirera l'instantané, les embeddings enregistrés et les entrées du cycle de vie de l'objet associées. Les séquences enregistrées de ces objets suivis dans la vue Chronologie <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Voulez-vous vraiment continuer?<br /><br />Maintenez la touche <em>Maj</em> enfoncée pour ignorer cette boîte de dialogue à l'avenir."
   },
   "zoneMask": {
     "filterBy": "Filtrer par masque de zone"
+  },
+  "classes": {
+    "label": "Classes",
+    "all": {
+      "title": "Toutes les classes"
+    },
+    "count_one": "{{count}} classe",
+    "count_other": "{{count}} classes"
   }
 }

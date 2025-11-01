@@ -31,11 +31,9 @@ import {
   FaDownload,
   FaHistory,
   FaImage,
-  FaRegListAlt,
-  FaVideo,
 } from "react-icons/fa";
-import { FaRotate } from "react-icons/fa6";
-import ObjectLifecycle from "./ObjectLifecycle";
+import { TrackingDetails } from "./TrackingDetails";
+import { DetailStreamProvider } from "@/context/detail-stream-context";
 import {
   MobilePage,
   MobilePageContent,
@@ -78,13 +76,12 @@ import { TbFaceId } from "react-icons/tb";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import FaceSelectionDialog from "../FaceSelectionDialog";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { CgTranscript } from "react-icons/cg";
+import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { PiPath } from "react-icons/pi";
+import Heading from "@/components/ui/heading";
 
-const SEARCH_TABS = [
-  "details",
-  "snapshot",
-  "video",
-  "object_lifecycle",
-] as const;
+const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
 
 type SearchDetailDialogProps = {
@@ -107,6 +104,7 @@ export default function SearchDetailDialog({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const apiHost = useApiHost();
 
   // tabs
 
@@ -147,18 +145,8 @@ export default function SearchDetailDialog({
 
     const views = [...SEARCH_TABS];
 
-    if (!search.has_snapshot) {
-      const index = views.indexOf("snapshot");
-      views.splice(index, 1);
-    }
-
-    if (!search.has_clip) {
-      const index = views.indexOf("video");
-      views.splice(index, 1);
-    }
-
     if (search.data.type != "object" || !search.has_clip) {
-      const index = views.indexOf("object_lifecycle");
+      const index = views.indexOf("tracking_details");
       views.splice(index, 1);
     }
 
@@ -171,9 +159,49 @@ export default function SearchDetailDialog({
     }
 
     if (!searchTabs.includes(pageToggle)) {
-      setSearchPage("details");
+      setSearchPage("snapshot");
     }
   }, [pageToggle, searchTabs, setSearchPage]);
+
+  // Tabs component for reuse
+  const tabsComponent = (
+    <ScrollArea className="w-full whitespace-nowrap">
+      <div className="flex flex-row">
+        <ToggleGroup
+          className="*:rounded-md *:px-3 *:py-4"
+          type="single"
+          size="sm"
+          value={pageToggle}
+          onValueChange={(value: SearchTab) => {
+            if (value) {
+              setPageToggle(value);
+            }
+          }}
+        >
+          {Object.values(searchTabs).map((item) => (
+            <ToggleGroupItem
+              key={item}
+              className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+              value={item}
+              data-nav-item={item}
+              aria-label={`Select ${item}`}
+            >
+              {item == "snapshot" && <FaImage className="size-4" />}
+              {item == "tracking_details" && <PiPath className="size-4" />}
+              <div className="smart-capitalize">
+                {item === "snapshot"
+                  ? search?.has_snapshot
+                    ? t("type.snapshot")
+                    : t("type.thumbnail")
+                  : t(`type.${item}`)}
+              </div>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        <ScrollBar orientation="horizontal" className="h-0" />
+      </div>
+    </ScrollArea>
+  );
 
   if (!search) {
     return;
@@ -188,94 +216,188 @@ export default function SearchDetailDialog({
   const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
-    <Overlay
-      open={isOpen}
-      onOpenChange={handleOpenChange}
-      enableHistoryBack={true}
+    <DetailStreamProvider
+      isDetailMode={true}
+      currentTime={(search as unknown as Event)?.start_time ?? 0}
+      camera={(search as unknown as Event)?.camera ?? ""}
+      initialSelectedObjectIds={[(search as unknown as Event).id as string]}
     >
-      <Content
-        className={cn(
-          "scrollbar-container overflow-y-auto",
-          isDesktop &&
-            "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
-          isMobile && "px-4",
-        )}
+      <Overlay
+        open={isOpen}
+        onOpenChange={handleOpenChange}
+        enableHistoryBack={true}
       >
-        <Header>
-          <Title>{t("trackedObjectDetails")}</Title>
-          <Description className="sr-only">
-            {t("trackedObjectDetails")}
-          </Description>
-        </Header>
-        <ScrollArea
-          className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
+        <Content
+          className={cn(
+            "scrollbar-container overflow-y-auto",
+            isDesktop &&
+              "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
+            isDesktop &&
+              page == "tracking_details" &&
+              "lg:max-w-[75%] xl:max-w-[80%]",
+            isMobile && "px-4",
+          )}
         >
-          <div className="flex flex-row">
-            <ToggleGroup
-              className="*:rounded-md *:px-3 *:py-4"
-              type="single"
-              size="sm"
-              value={pageToggle}
-              onValueChange={(value: SearchTab) => {
-                if (value) {
-                  setPageToggle(value);
-                }
-              }}
-            >
-              {Object.values(searchTabs).map((item) => (
-                <ToggleGroupItem
-                  key={item}
-                  className={`flex scroll-mx-10 items-center justify-between gap-2 ${page == "details" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-                  value={item}
-                  data-nav-item={item}
-                  aria-label={`Select ${item}`}
-                >
-                  {item == "details" && <FaRegListAlt className="size-4" />}
-                  {item == "snapshot" && <FaImage className="size-4" />}
-                  {item == "video" && <FaVideo className="size-4" />}
-                  {item == "object_lifecycle" && (
-                    <FaRotate className="size-4" />
+          <Header>
+            <Title>{t("trackedObjectDetails")}</Title>
+            <Description className="sr-only">
+              {t("trackedObjectDetails")}
+            </Description>
+          </Header>
+          {isDesktop ? (
+            page === "tracking_details" ? (
+              <TrackingDetails
+                className="size-full"
+                event={search as unknown as Event}
+                tabs={tabsComponent}
+              />
+            ) : (
+              <div className="flex h-full gap-4 overflow-hidden">
+                <div
+                  className={cn(
+                    "scrollbar-container flex-[3] overflow-y-hidden",
+                    page === "snapshot" && !search.has_snapshot && "flex-[2]",
                   )}
-                  <div className="smart-capitalize">{t(`type.${item}`)}</div>
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-            <ScrollBar orientation="horizontal" className="h-0" />
-          </div>
-        </ScrollArea>
-        {page == "details" && (
-          <ObjectDetailsTab
-            search={search}
-            config={config}
-            setSearch={setSearch}
-            setSimilarity={setSimilarity}
-            setInputFocused={setInputFocused}
-          />
-        )}
-        {page == "snapshot" && (
-          <ObjectSnapshotTab
-            search={
-              {
-                ...search,
-                plus_id: config?.plus?.enabled ? search.plus_id : "not_enabled",
-              } as unknown as Event
-            }
-            onEventUploaded={() => {
-              search.plus_id = "new_upload";
-            }}
-          />
-        )}
-        {page == "video" && <VideoTab search={search} />}
-        {page == "object_lifecycle" && (
-          <ObjectLifecycle
-            className="w-full overflow-x-hidden"
-            event={search as unknown as Event}
-            fullscreen={true}
-            setPane={() => {}}
-          />
-        )}
-      </Content>
-    </Overlay>
+                >
+                  {page === "snapshot" && search.has_snapshot && (
+                    <ObjectSnapshotTab
+                      search={
+                        {
+                          ...search,
+                          plus_id: config?.plus?.enabled
+                            ? search.plus_id
+                            : "not_enabled",
+                        } as unknown as Event
+                      }
+                      onEventUploaded={() => {
+                        search.plus_id = "new_upload";
+                      }}
+                    />
+                  )}
+                  {page === "snapshot" && !search.has_snapshot && (
+                    <img
+                      className="size-full select-none rounded-lg object-contain transition-opacity"
+                      style={
+                        isIOS
+                          ? {
+                              WebkitUserSelect: "none",
+                              WebkitTouchCallout: "none",
+                            }
+                          : undefined
+                      }
+                      draggable={false}
+                      src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
+                    />
+                  )}
+                </div>
+                <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
+                  {tabsComponent}
+                  <div className="scrollbar-container flex-1 overflow-y-auto">
+                    {page == "snapshot" && (
+                      <ObjectDetailsTab
+                        search={search}
+                        config={config}
+                        setSearch={setSearch}
+                        setSimilarity={setSimilarity}
+                        setInputFocused={setInputFocused}
+                        showThumbnail={false}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          ) : (
+            <>
+              <ScrollArea
+                className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
+              >
+                <div className="flex flex-row">
+                  <ToggleGroup
+                    className="*:rounded-md *:px-3 *:py-4"
+                    type="single"
+                    size="sm"
+                    value={pageToggle}
+                    onValueChange={(value: SearchTab) => {
+                      if (value) {
+                        setPageToggle(value);
+                      }
+                    }}
+                  >
+                    {Object.values(searchTabs).map((item) => (
+                      <ToggleGroupItem
+                        key={item}
+                        className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                        value={item}
+                        data-nav-item={item}
+                        aria-label={`Select ${item}`}
+                      >
+                        {item == "snapshot" && <FaImage className="size-4" />}
+                        {item == "tracking_details" && (
+                          <PiPath className="size-4" />
+                        )}
+                        <div className="smart-capitalize">
+                          {t(`type.${item}`)}
+                        </div>
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                  <ScrollBar orientation="horizontal" className="h-0" />
+                </div>
+              </ScrollArea>
+              {page == "snapshot" && (
+                <>
+                  {search.has_snapshot && (
+                    <ObjectSnapshotTab
+                      search={
+                        {
+                          ...search,
+                          plus_id: config?.plus?.enabled
+                            ? search.plus_id
+                            : "not_enabled",
+                        } as unknown as Event
+                      }
+                      onEventUploaded={() => {
+                        search.plus_id = "new_upload";
+                      }}
+                    />
+                  )}
+                  {page == "snapshot" && !search.has_snapshot && (
+                    <img
+                      className="w-full select-none rounded-lg object-contain transition-opacity"
+                      style={
+                        isIOS
+                          ? {
+                              WebkitUserSelect: "none",
+                              WebkitTouchCallout: "none",
+                            }
+                          : undefined
+                      }
+                      draggable={false}
+                      src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
+                    />
+                  )}
+                  <Heading as="h3" className="mt-2 smart-capitalize">
+                    {t("type.details")}
+                  </Heading>
+                  <ObjectDetailsTab
+                    search={search}
+                    config={config}
+                    setSearch={setSearch}
+                    setSimilarity={setSimilarity}
+                    setInputFocused={setInputFocused}
+                    showThumbnail={false}
+                  />
+                </>
+              )}
+              {page == "tracking_details" && (
+                <TrackingDetails event={search as unknown as Event} />
+              )}
+            </>
+          )}
+        </Content>
+      </Overlay>
+    </DetailStreamProvider>
   );
 }
 
@@ -285,6 +407,7 @@ type ObjectDetailsTabProps = {
   setSearch: (search: SearchResult | undefined) => void;
   setSimilarity?: () => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  showThumbnail?: boolean;
 };
 function ObjectDetailsTab({
   search,
@@ -292,6 +415,7 @@ function ObjectDetailsTab({
   setSearch,
   setSimilarity,
   setInputFocused,
+  showThumbnail = true,
 }: ObjectDetailsTabProps) {
   const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
 
@@ -710,6 +834,34 @@ function ObjectDetailsTab({
     [search, t],
   );
 
+  // speech transcription
+
+  const onTranscribe = useCallback(() => {
+    axios
+      .put(`/audio/transcribe`, { event_id: search.id })
+      .then((resp) => {
+        if (resp.status == 202) {
+          toast.success(t("details.item.toast.success.audioTranscription"), {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(
+          t("details.item.toast.error.audioTranscription", {
+            errorMessage,
+          }),
+          {
+            position: "top-center",
+          },
+        );
+      });
+  }, [search, t]);
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
@@ -835,7 +987,7 @@ function ObjectDetailsTab({
           <div className="flex flex-col gap-1.5">
             <div className="text-sm text-primary/40">{t("details.camera")}</div>
             <div className="text-sm smart-capitalize">
-              {search.camera.replaceAll("_", " ")}
+              <CameraNameLabel camera={search.camera} />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -845,66 +997,84 @@ function ObjectDetailsTab({
             <div className="text-sm">{formattedDate}</div>
           </div>
         </div>
-        <div className="flex w-full flex-col gap-2 pl-6">
-          <img
-            className="aspect-video select-none rounded-lg object-contain transition-opacity"
-            style={
-              isIOS
-                ? {
-                    WebkitUserSelect: "none",
-                    WebkitTouchCallout: "none",
-                  }
-                : undefined
-            }
-            draggable={false}
-            src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-          />
-          <div
-            className={cn("flex w-full flex-row gap-2", isMobile && "flex-col")}
-          >
-            {config?.semantic_search.enabled &&
-              setSimilarity != undefined &&
-              search.data.type == "object" && (
-                <Button
-                  className="w-full"
-                  aria-label={t("itemMenu.findSimilar.aria")}
-                  onClick={() => {
-                    setSearch(undefined);
-                    setSimilarity();
-                  }}
-                >
-                  <div className="flex gap-1">
-                    <LuSearch />
-                    {t("itemMenu.findSimilar.label")}
-                  </div>
-                </Button>
+        {showThumbnail && (
+          <div className="flex w-full flex-col gap-2 pl-6">
+            <img
+              className="aspect-video select-none rounded-lg object-contain transition-opacity"
+              style={
+                isIOS
+                  ? {
+                      WebkitUserSelect: "none",
+                      WebkitTouchCallout: "none",
+                    }
+                  : undefined
+              }
+              draggable={false}
+              src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
+            />
+            <div
+              className={cn(
+                "flex w-full flex-row gap-2",
+                isMobile && "flex-col",
               )}
-            {hasFace && (
-              <FaceSelectionDialog
-                className="w-full"
-                faceNames={faceNames}
-                onTrainAttempt={onTrainFace}
-              >
-                <Button className="w-full">
-                  <div className="flex gap-1">
-                    <TbFaceId />
-                    {t("trainFace", { ns: "views/faceLibrary" })}
-                  </div>
-                </Button>
-              </FaceSelectionDialog>
-            )}
+            >
+              {config?.semantic_search.enabled &&
+                setSimilarity != undefined &&
+                search.data.type == "object" && (
+                  <Button
+                    className="w-full"
+                    aria-label={t("itemMenu.findSimilar.aria")}
+                    onClick={() => {
+                      setSearch(undefined);
+                      setSimilarity();
+                    }}
+                  >
+                    <div className="flex gap-1">
+                      <LuSearch />
+                      {t("itemMenu.findSimilar.label")}
+                    </div>
+                  </Button>
+                )}
+              {hasFace && (
+                <FaceSelectionDialog
+                  className="w-full"
+                  faceNames={faceNames}
+                  onTrainAttempt={onTrainFace}
+                >
+                  <Button className="w-full">
+                    <div className="flex gap-1">
+                      <TbFaceId />
+                      {t("trainFace", { ns: "views/faceLibrary" })}
+                    </div>
+                  </Button>
+                </FaceSelectionDialog>
+              )}
+              {config?.cameras[search?.camera].audio_transcription.enabled &&
+                search?.label == "speech" &&
+                search?.end_time && (
+                  <Button className="w-full" onClick={onTranscribe}>
+                    <div className="flex gap-1">
+                      <CgTranscript />
+                      {t("itemMenu.audioTranscription.label")}
+                    </div>
+                  </Button>
+                )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div className="flex flex-col gap-1.5">
-        {config?.cameras[search.camera].genai.enabled &&
+        {config?.cameras[search.camera].objects.genai.enabled &&
         !search.end_time &&
-        (config.cameras[search.camera].genai.required_zones.length === 0 ||
+        (config.cameras[search.camera].objects.genai.required_zones.length ===
+          0 ||
           search.zones.some((zone) =>
-            config.cameras[search.camera].genai.required_zones.includes(zone),
+            config.cameras[search.camera].objects.genai.required_zones.includes(
+              zone,
+            ),
           )) &&
-        (config.cameras[search.camera].genai.objects.length === 0 ||
-          config.cameras[search.camera].genai.objects.includes(
+        (config.cameras[search.camera].objects.genai.objects.length === 0 ||
+          config.cameras[search.camera].objects.genai.objects.includes(
             search.label,
           )) ? (
           <>
@@ -933,47 +1103,49 @@ function ObjectDetailsTab({
         )}
 
         <div className="flex w-full flex-row justify-end gap-2">
-          {config?.cameras[search.camera].genai.enabled && search.end_time && (
-            <div className="flex items-start">
-              <Button
-                className="rounded-r-none border-r-0"
-                aria-label={t("details.button.regenerate.label")}
-                onClick={() => regenerateDescription("thumbnails")}
-              >
-                {t("details.button.regenerate.title")}
-              </Button>
-              {search.has_snapshot && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className="rounded-l-none border-l-0 px-2"
-                      aria-label={t("details.expandRegenerationMenu")}
-                    >
-                      <FaChevronDown className="size-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      aria-label={t("details.regenerateFromSnapshot")}
-                      onClick={() => regenerateDescription("snapshot")}
-                    >
-                      {t("details.regenerateFromSnapshot")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      aria-label={t("details.regenerateFromThumbnails")}
-                      onClick={() => regenerateDescription("thumbnails")}
-                    >
-                      {t("details.regenerateFromThumbnails")}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          )}
-          {((config?.cameras[search.camera].genai.enabled && search.end_time) ||
-            !config?.cameras[search.camera].genai.enabled) && (
+          {config?.cameras[search.camera].objects.genai.enabled &&
+            search.end_time && (
+              <div className="flex items-start">
+                <Button
+                  className="rounded-r-none border-r-0"
+                  aria-label={t("details.button.regenerate.label")}
+                  onClick={() => regenerateDescription("thumbnails")}
+                >
+                  {t("details.button.regenerate.title")}
+                </Button>
+                {search.has_snapshot && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        className="rounded-l-none border-l-0 px-2"
+                        aria-label={t("details.expandRegenerationMenu")}
+                      >
+                        <FaChevronDown className="size-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        aria-label={t("details.regenerateFromSnapshot")}
+                        onClick={() => regenerateDescription("snapshot")}
+                      >
+                        {t("details.regenerateFromSnapshot")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        aria-label={t("details.regenerateFromThumbnails")}
+                        onClick={() => regenerateDescription("thumbnails")}
+                      >
+                        {t("details.regenerateFromThumbnails")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            )}
+          {((config?.cameras[search.camera].objects.genai.enabled &&
+            search.end_time) ||
+            !config?.cameras[search.camera].objects.genai.enabled) && (
             <Button
               variant="select"
               aria-label={t("button.save", { ns: "common" })}
@@ -1124,12 +1296,8 @@ export function ObjectSnapshotTab({
               search.label != "on_demand" && (
                 <Card className="p-1 text-sm md:p-2">
                   <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
-                    <div className={cn("flex flex-col space-y-3")}>
-                      <div
-                        className={
-                          "text-lg font-semibold leading-none tracking-tight"
-                        }
-                      >
+                    <div className={cn("flex max-w-sm flex-col space-y-3")}>
+                      <div className={"text-lg leading-none"}>
                         {t("explore.plus.submitToPlus.label")}
                       </div>
                       <div className="text-sm text-muted-foreground">
@@ -1137,7 +1305,7 @@ export function ObjectSnapshotTab({
                       </div>
                     </div>
 
-                    <div className="flex w-full flex-1 flex-col justify-center gap-2 md:ml-8 md:w-auto md:justify-end">
+                    <div className="flex w-full flex-1 flex-col justify-center gap-2 md:ml-8 md:flex-1 md:justify-end">
                       {state == "reviewing" && (
                         <>
                           <div>

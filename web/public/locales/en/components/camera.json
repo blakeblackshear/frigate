@@ -27,6 +27,7 @@
     "icon": "Icon",
     "success": "Camera group ({{name}}) has been saved.",
     "camera": {
+      "birdseye": "Birdseye",
       "setting": {
         "label": "Camera Streaming Settings",
         "title": "{{cameraName}} Streaming Settings",
@@ -35,8 +36,7 @@
         "audioIsUnavailable": "Audio is unavailable for this stream",
         "audio": {
           "tips": {
-            "title": "Audio must be output from your camera and configured in go2rtc for this stream.",
-            "document": "Read the documentation "
+            "title": "Audio must be output from your camera and configured in go2rtc for this stream."
           }
         },
         "stream": "Stream",

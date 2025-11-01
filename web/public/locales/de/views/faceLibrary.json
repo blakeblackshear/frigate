@@ -29,7 +29,7 @@
   "selectFace": "Wähle Gesicht",
   "imageEntry": {
     "dropActive": "Ziehe das Bild hierher…",
-    "dropInstructions": "Ziehe ein Bild hier her oder klicke um eines auszuwählen",
+    "dropInstructions": "Ziehe ein Bild hier her, füge es ein oder klicke um eines auszuwählen",
     "maxSize": "Maximale Größe: {{size}} MB",
     "validation": {
       "selectImage": "Bitte wähle ein Bild aus."
@@ -46,7 +46,7 @@
   "train": {
     "title": "Trainiere",
     "aria": "Wähle Training",
-    "empty": "Es gibt keine aktuellen Versuche zurGesichtserkennung"
+    "empty": "Es gibt keine aktuellen Versuche zur Gesichtserkennung"
   },
   "deleteFaceLibrary": {
     "title": "Lösche Name",

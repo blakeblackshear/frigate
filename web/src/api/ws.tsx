@@ -8,6 +8,9 @@ import {
   FrigateReview,
   ModelState,
   ToggleableSetting,
+  TrackedObjectUpdateReturnType,
+  TriggerStatus,
+  FrigateAudioDetections,
 } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
 import { createContainer } from "react-tracked";
@@ -30,14 +33,9 @@ function useValue(): useValueReturn {
 
   // main state
 
-  const [hasCameraState, setHasCameraState] = useState(false);
   const [wsState, setWsState] = useState<WsState>({});
 
   useEffect(() => {
-    if (hasCameraState) {
-      return;
-    }
-
     const activityValue: string = wsState["camera_activity"] as string;
 
     if (!activityValue) {
@@ -60,17 +58,23 @@ function useValue(): useValueReturn {
         enabled,
         snapshots,
         audio,
+        audio_transcription,
         notifications,
         notifications_suspended,
         autotracking,
         alerts,
         detections,
+        object_descriptions,
+        review_descriptions,
       } = state["config"];
       cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
       cameraStates[`${name}/enabled/state`] = enabled ? "ON" : "OFF";
       cameraStates[`${name}/detect/state`] = detect ? "ON" : "OFF";
       cameraStates[`${name}/snapshots/state`] = snapshots ? "ON" : "OFF";
       cameraStates[`${name}/audio/state`] = audio ? "ON" : "OFF";
+      cameraStates[`${name}/audio_transcription/state`] = audio_transcription
+        ? "ON"
+        : "OFF";
       cameraStates[`${name}/notifications/state`] = notifications
         ? "ON"
         : "OFF";
@@ -83,6 +87,12 @@ function useValue(): useValueReturn {
       cameraStates[`${name}/review_detections/state`] = detections
         ? "ON"
         : "OFF";
+      cameraStates[`${name}/object_descriptions/state`] = object_descriptions
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/review_descriptions/state`] = review_descriptions
+        ? "ON"
+        : "OFF";
     });
 
     setWsState((prevState) => ({
@@ -90,12 +100,9 @@ function useValue(): useValueReturn {
       ...cameraStates,
     }));
 
-    if (Object.keys(cameraStates).length > 0) {
-      setHasCameraState(true);
-    }
     // we only want this to run initially when the config is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wsState]);
+  }, [wsState["camera_activity"]]);
 
   // ws handler
   const { sendJsonMessage, readyState } = useWebSocket(wsUrl, {
@@ -116,9 +123,7 @@ function useValue(): useValueReturn {
         retain: false,
       });
     },
-    onClose: () => {
-      setHasCameraState(false);
-    },
+    onClose: () => {},
     shouldReconnect: () => true,
     retryOnError: true,
   });
@@ -220,6 +225,20 @@ export function useAudioState(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
+export function useAudioTranscriptionState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/audio_transcription/state`,
+    `${camera}/audio_transcription/set`,
+  );
+  return { payload: payload as ToggleableSetting, send };
+}
+
 export function useAutotrackingState(camera: string): {
   payload: ToggleableSetting;
   send: (payload: ToggleableSetting, retain?: boolean) => void;
@@ -256,6 +275,34 @@ export function useDetectionsState(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
+export function useObjectDescriptionState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/object_descriptions/state`,
+    `${camera}/object_descriptions/set`,
+  );
+  return { payload: payload as ToggleableSetting, send };
+}
+
+export function useReviewDescriptionState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/review_descriptions/state`,
+    `${camera}/review_descriptions/set`,
+  );
+  return { payload: payload as ToggleableSetting, send };
+}
+
 export function usePtzCommand(camera: string): {
   payload: string;
   send: (payload: string, retain?: boolean) => void;
@@ -282,6 +329,13 @@ export function useFrigateEvents(): { payload: FrigateEvent } {
   const {
     value: { payload },
   } = useWs("events", "");
+  return { payload: JSON.parse(payload as string) };
+}
+
+export function useAudioDetections(): { payload: FrigateAudioDetections } {
+  const {
+    value: { payload },
+  } = useWs("audio_detections", "");
   return { payload: JSON.parse(payload as string) };
 }
 
@@ -407,6 +461,40 @@ export function useEmbeddingsReindexProgress(
   return { payload: data };
 }
 
+export function useBirdseyeLayout(revalidateOnFocus: boolean = true): {
+  payload: string;
+} {
+  const {
+    value: { payload },
+    send: sendCommand,
+  } = useWs("birdseye_layout", "birdseyeLayout");
+
+  const data = useDeepMemo(JSON.parse(payload as string));
+
+  useEffect(() => {
+    let listener = undefined;
+    if (revalidateOnFocus) {
+      sendCommand("birdseyeLayout");
+      listener = () => {
+        if (document.visibilityState == "visible") {
+          sendCommand("birdseyeLayout");
+        }
+      };
+      addEventListener("visibilitychange", listener);
+    }
+
+    return () => {
+      if (listener) {
+        removeEventListener("visibilitychange", listener);
+      }
+    };
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revalidateOnFocus]);
+
+  return { payload: data };
+}
+
 export function useMotionActivity(camera: string): { payload: string } {
   const {
     value: { payload },
@@ -419,6 +507,15 @@ export function useAudioActivity(camera: string): { payload: number } {
     value: { payload },
   } = useWs(`${camera}/audio/rms`, "");
   return { payload: payload as number };
+}
+
+export function useAudioLiveTranscription(camera: string): {
+  payload: string;
+} {
+  const {
+    value: { payload },
+  } = useWs(`${camera}/audio/transcription`, "");
+  return { payload: payload as string };
 }
 
 export function useMotionThreshold(camera: string): {
@@ -463,11 +560,16 @@ export function useImproveContrast(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
-export function useTrackedObjectUpdate(): { payload: string } {
+export function useTrackedObjectUpdate(): {
+  payload: TrackedObjectUpdateReturnType;
+} {
   const {
     value: { payload },
   } = useWs("tracked_object_update", "");
-  return useDeepMemo(JSON.parse(payload as string));
+  const parsed = payload
+    ? JSON.parse(payload as string)
+    : { type: "", id: "", camera: "" };
+  return { payload: useDeepMemo(parsed) };
 }
 
 export function useNotifications(camera: string): {
@@ -504,4 +606,14 @@ export function useNotificationTest(): {
     send,
   } = useWs("notification_test", "notification_test");
   return { payload: payload as string, send };
+}
+
+export function useTriggers(): { payload: TriggerStatus } {
+  const {
+    value: { payload },
+  } = useWs("triggers", "");
+  const parsed = payload
+    ? JSON.parse(payload as string)
+    : { name: "", camera: "", event_id: "", type: "", score: 0 };
+  return { payload: useDeepMemo(parsed) };
 }

@@ -1,1 +1,18 @@
-{}
+{
+  "documentTitle": "설정 편집기 - Frigate",
+  "configEditor": "설정 편집기",
+  "safeConfigEditor": "설정 편집기 (안전 모드)",
+  "safeModeDescription": "설정 오류로 인해 Frigate가 안전 모드로 전환되었습니다.",
+  "copyConfig": "설정 복사",
+  "saveAndRestart": "저장 & 재시작",
+  "saveOnly": "저장만 하기",
+  "confirm": "저장 없이 나갈까요?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "설정이 클립보드에 저장되었습니다."
+    },
+    "error": {
+      "savingError": "설정 저장 오류"
+    }
+  }
+}

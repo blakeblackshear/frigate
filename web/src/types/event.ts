@@ -22,6 +22,7 @@ export interface Event {
     area: number;
     ratio: number;
     type: "object" | "audio" | "manual";
+    recognized_license_plate?: string;
     path_data: [number[], number][];
   };
 }

@@ -42,7 +42,8 @@
       "inferenceSpeed": "偵測器推理速度",
       "temperature": "偵測器溫度",
       "cpuUsage": "偵測器 CPU 使用率",
-      "memoryUsage": "偵測器記憶體使用量"
+      "memoryUsage": "偵測器記憶體使用量",
+      "cpuUsageInformation": "用於準備輸入和輸出數據至/從偵測模型的CPU。此值不衡量推論使用量，即使使用GPU或加速器。"
     },
     "hardwareInfo": {
       "title": "硬體資訊",

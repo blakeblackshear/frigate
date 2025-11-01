@@ -2,6 +2,79 @@
   "documentTitle": {
     "cameras": "إحصاءات الكاميرات - فرايجيت",
     "storage": "إحصاءات التخزين - فرايجيت",
-    "general": "إحصاءات عامة - فرايجيت"
+    "general": "إحصاءات عامة - فرايجيت",
+    "enrichments": "إحصاء العمليات",
+    "logs": {
+      "frigate": "سجلات Frigate - Frigate",
+      "go2rtc": "Go2RTC  سجلات  -  Frigate",
+      "nginx": "سجلات إنجنإكس - Frigate"
+    }
+  },
+  "metrics": "مقاييس النظام",
+  "logs": {
+    "download": {
+      "label": "تنزيل السجلات"
+    },
+    "copy": {
+      "label": "نسخ إلى الحافظة",
+      "success": "نسخ السجلات إلى الحافظة",
+      "error": "تعذر نسخ السجلات إلى الحافظة"
+    },
+    "type": {
+      "label": "النوع",
+      "timestamp": "الختم الزمني"
+    },
+    "tips": "يتم بث السجلات من الخادم"
+  },
+  "title": "النظام",
+  "general": {
+    "hardwareInfo": {
+      "gpuEncoder": "مشفر ترميز GPU",
+      "gpuDecoder": "مفكك ترميز GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "مخرجات Vainfo",
+          "processOutput": "ناتج العملية:",
+          "processError": "خطأ في العملية:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "مخرجات Nvidia SMI",
+          "name": "الاسم: {{name}}",
+          "driver": "برنامج التشغيل: {{driver}}",
+          "cudaComputerCapability": "قدرة الحوسبة CUDA: {{cuda_compute}}"
+        }
+      },
+      "title": "معلومات الاجهزة المادية",
+      "gpuUsage": "مقدار استخدام GPU",
+      "gpuMemory": "ذاكرة GPU"
+    },
+    "title": "لمحة عامة",
+    "detector": {
+      "title": "أجهزة الكشف",
+      "inferenceSpeed": "سرعة استنتاج الكاشف",
+      "temperature": "درجة حرارة الكاشف",
+      "cpuUsage": "كشف استخدام CPU",
+      "memoryUsage": "كشف استخدام الذاكرة"
+    },
+    "otherProcesses": {
+      "title": "عمليات أخرى",
+      "processCpuUsage": "استخدام وحدة المعالجة المركزية (CPU)",
+      "processMemoryUsage": "استخدام ذاكرة العملية"
+    }
+  },
+  "storage": {
+    "title": "التخزين",
+    "overview": "نظرة عامة",
+    "recordings": {
+      "title": "التسجيلات",
+      "tips": "تمثل هذه القيمة إجمالي مساحة التخزين المستخدمة للتسجيلات في قاعدة بيانات Frigate. لا يتتبع Frigate استخدام مساحة التخزين لجميع الملفات الموجودة على القرص.",
+      "earliestRecording": "أقدم تسجيل متاح:"
+    }
+  },
+  "cameras": {
+    "overview": "نظرة عامة",
+    "info": {
+      "unknown": "غير معروف"
+    }
   }
 }

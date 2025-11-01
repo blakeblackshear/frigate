@@ -1,1 +1,10 @@
-{}
+{
+  "button": {
+    "downloadVideo": {
+      "label": "비디오 다운로드",
+      "toast": {
+        "success": "다시보기 항목 다운로드가 시작되었습니다."
+      }
+    }
+  }
+}

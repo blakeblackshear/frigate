@@ -10,7 +10,7 @@ export enum LifecycleClassType {
   PATH_POINT = "path_point",
 }
 
-export type ObjectLifecycleSequence = {
+export type TrackingDetailsSequence = {
   camera: string;
   timestamp: number;
   data: {
@@ -20,6 +20,7 @@ export type ObjectLifecycleSequence = {
     box?: [number, number, number, number];
     region: [number, number, number, number];
     attribute: string;
+    attribute_box?: [number, number, number, number];
     zones: string[];
   };
   class_type: LifecycleClassType;
@@ -29,7 +30,7 @@ export type ObjectLifecycleSequence = {
 
 export type TimeRange = { before: number; after: number };
 
-export type TimelineType = "timeline" | "events";
+export type TimelineType = "timeline" | "events" | "detail";
 
 export type TimelineScrubMode = "auto" | "drag" | "hover" | "compat";
 
@@ -37,5 +38,5 @@ export type Position = {
   x: number;
   y: number;
   timestamp: number;
-  lifecycle_item?: ObjectLifecycleSequence;
+  lifecycle_item?: TrackingDetailsSequence;
 };

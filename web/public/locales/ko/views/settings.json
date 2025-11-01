@@ -1,1 +1,122 @@
-{}
+{
+  "triggers": {
+    "dialog": {
+      "form": {
+        "threshold": {
+          "title": "임계치"
+        },
+        "name": {
+          "title": "이름"
+        },
+        "type": {
+          "title": "종류",
+          "placeholder": "트리거 종류 선택"
+        }
+      },
+      "createTrigger": {
+        "title": "트리거 생성"
+      }
+    },
+    "actions": {
+      "notification": "알림 전송"
+    }
+  },
+  "documentTitle": {
+    "default": "설정 - Frigate",
+    "authentication": "인증 설정 - Frigate",
+    "camera": "카메라 설정 - Frigate",
+    "enrichments": "고급 설정 - Frigate",
+    "masksAndZones": "마스크와 구역 편집기 - Frigate",
+    "motionTuner": "움직임 감지 조정 - Frigate",
+    "object": "디버그 - Frigate",
+    "general": "일반 설정 - Frigate",
+    "frigatePlus": "Frigate+ 설정 - Frigate",
+    "notifications": "알림 설정 - Frigate",
+    "cameraManagement": "카메라 관리 - Frigate",
+    "cameraReview": "카메라 다시보기 설정 - Frigate"
+  },
+  "users": {
+    "table": {
+      "actions": "액션"
+    }
+  },
+  "menu": {
+    "ui": "UI",
+    "enrichments": "고급",
+    "cameras": "카메라 설정",
+    "masksAndZones": "마스크 / 구역",
+    "motionTuner": "움직임 감지 조정",
+    "triggers": "트리거",
+    "debug": "디버그",
+    "users": "사용자",
+    "roles": "역할",
+    "notifications": "알림",
+    "frigateplus": "Frigate+",
+    "cameraManagement": "관리",
+    "cameraReview": "다시보기"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "저장되지 않은 변경 사항이 있습니다.",
+      "desc": "계속하기 전에 변경 사항을 저장하시겠습니까?"
+    }
+  },
+  "cameraSetting": {
+    "camera": "카메라",
+    "noCamera": "카메라 없음"
+  },
+  "general": {
+    "title": "일반 세팅",
+    "liveDashboard": {
+      "title": "실시간 보기 대시보드",
+      "automaticLiveView": {
+        "label": "자동으로 실시간 보기 전환",
+        "desc": "활동이 감지되면 자동으로 실시간 보기로 전환합니다. 이 옵션을 끄면 대시보드의 카메라 화면은 1분마다 한 번만 갱신됩니다."
+      },
+      "playAlertVideos": {
+        "label": "경보 영상 보기",
+        "desc": "기본적으로 실시간 보기 대시보드의 최근 경보 영상을 작은 반복 영상으로 재생됩니다. 이 옵션을 끄면 이 기기(또는 브라우저)에서는 정적 이미지로만 표시됩니다."
+      }
+    },
+    "storedLayouts": {
+      "title": "저장된 레이아웃",
+      "desc": "카메라 그룹의 화면 배치는 드래그하거나 크기를 조정할 수 있습니다. 변경된 위치는 브라우저의 로컬 저장소에 저장됩니다.",
+      "clearAll": "레이아웃 지우기"
+    },
+    "cameraGroupStreaming": {
+      "title": "카메라 그룹 스트리밍 설정",
+      "desc": "각각의 카메라 그룹의 스트리밍 설정은 브라우저의 로컬 저장소에 저장됩니다.",
+      "clearAll": "스트리밍 설정 모두 지우기"
+    },
+    "recordingsViewer": {
+      "title": "녹화 영상 보기",
+      "defaultPlaybackRate": {
+        "label": "기본으로 설정된 다시보기 배속",
+        "desc": "다시보기 영상 재생할 때 기본 배속을 설정합니다."
+      }
+    },
+    "calendar": {
+      "title": "캘린더",
+      "firstWeekday": {
+        "label": "주 첫째날",
+        "desc": "다시보기 캘린더에서 주가 시작되는 첫째날을 설정합니다.",
+        "sunday": "일요일",
+        "monday": "월요일"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "{{cameraName}}의 레이아웃을 지웠습니다",
+        "clearStreamingSettings": "모든 카메라 그룹 스트리밍 설정을 지웠습니다."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "레이아웃 지우기에 실패했습니다:{{errorMessage}}",
+        "clearStreamingSettingsFailed": "카메라 스트리밍 설정 지우기에 실패했습니다:{{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "title": "고급 설정",
+    "unsavedChanges": "변경된 고급 설정을 저장하지 않았습니다"
+  }
+}

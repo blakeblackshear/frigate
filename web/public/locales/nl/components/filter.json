@@ -75,7 +75,9 @@
     "title": "Herkende kentekenplaten",
     "noLicensePlatesFound": "Geen kentekenplaten gevonden.",
     "selectPlatesFromList": "Selecteer een of meer kentekens uit de lijst.",
-    "loading": "Herkende kentekenplaten laden…"
+    "loading": "Herkende kentekenplaten laden…",
+    "selectAll": "Selecteer alles",
+    "clearAll": "Alles wissen"
   },
   "score": "Score",
   "sort": {
@@ -123,5 +125,13 @@
     "label": "Filters resetten naar standaardwaarden"
   },
   "more": "Meer filters",
-  "estimatedSpeed": "Geschatte snelheid ({{unit}})"
+  "estimatedSpeed": "Geschatte snelheid ({{unit}})",
+  "classes": {
+    "label": "Klassen",
+    "all": {
+      "title": "Alle klassen"
+    },
+    "count_one": "{{count}} klasse",
+    "count_other": "{{count}} Klassen"
+  }
 }

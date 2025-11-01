@@ -84,7 +84,9 @@
     "title": "Gjenkjente kjennemerker",
     "loadFailed": "Kunne ikke laste inn gjenkjente kjennemerker.",
     "loading": "Laster inn gjenkjente kjennemerker…",
-    "placeholder": "Skriv for å søke etter kjennemerker…"
+    "placeholder": "Skriv for å søke etter kjennemerker…",
+    "selectAll": "Velg alle",
+    "clearAll": "Fjern alle"
   },
   "dates": {
     "all": {
@@ -123,5 +125,13 @@
       "title": "Alle soner",
       "short": "Soner"
     }
+  },
+  "classes": {
+    "label": "Klasser",
+    "all": {
+      "title": "Alle klasser"
+    },
+    "count_one": "{{count}} Klasse",
+    "count_other": "{{count}} Klasser"
   }
 }

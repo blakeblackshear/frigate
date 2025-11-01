@@ -29,6 +29,8 @@ export type SearchSortType =
   | "score_desc"
   | "relevance";
 
+export type EventType = "object" | "audio" | "manual";
+
 export type SearchResult = {
   id: string;
   camera: string;
@@ -54,7 +56,7 @@ export type SearchResult = {
     box: number[];
     area: number;
     ratio: number;
-    type: "object" | "audio" | "manual";
+    type: EventType;
     description?: string;
     average_estimated_speed: number;
     velocity_angle: number;

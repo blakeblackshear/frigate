@@ -12,5 +12,7 @@
     }
   },
   "saveOnly": "僅保存",
-  "confirm": "是否不保存就離開？"
+  "confirm": "是否不保存就離開？",
+  "safeConfigEditor": "設定編輯器（安全模式）",
+  "safeModeDescription": "由於設定驗證有誤，Frigate 進入安全模式。"
 }

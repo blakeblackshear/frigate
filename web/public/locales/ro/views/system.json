@@ -49,7 +49,8 @@
       "title": "Detectori",
       "cpuUsage": "Utilizarea procesorului",
       "inferenceSpeed": "Viteza de inferență",
-      "memoryUsage": "Utilizare memorie detector"
+      "memoryUsage": "Utilizare memorie detector",
+      "cpuUsageInformation": "Procesorul utilizat pentru pregătirea datelor de intrare și ieșire către/dinspre modelele de detecție. Această valoare nu măsoară utilizarea în timpul inferenței, chiar dacă este folosit un GPU sau un accelerator."
     },
     "otherProcesses": {
       "title": "Alte Procese",
@@ -77,7 +78,12 @@
       },
       "bandwidth": "Lățime de bandă"
     },
-    "overview": "Prezentare generală"
+    "overview": "Prezentare generală",
+    "shm": {
+      "title": "Alocare SHM (memorie partajată)",
+      "warning": "Dimensiunea curentă a SHM de {{total}}MB este prea mică. Măriți-o la cel puțin {{min_shm}}MB.",
+      "readTheDocumentation": "Citește documentația"
+    }
   },
   "title": "Sistem",
   "logs": {
@@ -115,7 +121,7 @@
       "face_recognition_speed": "Viteză recunoaștere facială",
       "plate_recognition_speed": "Viteză recunoaștere numere de înmatriculare",
       "face_embedding_speed": "Viteză încorporare fețe",
-      "yolov9_plate_detection_speed": "Viteza detectării numerelor de înmatriculare YOLOv9",
+      "yolov9_plate_detection_speed": "Viteza detecției numerelor de înmatriculare YOLOv9",
       "text_embedding_speed": "Viteză încorporare text",
       "yolov9_plate_detection": "Detectare numere de înmatriculare YOLOv9"
     },
@@ -174,7 +180,8 @@
     "detectHighCpuUsage": "Camera {{camera}} are o utilizare ridicată a procesorului pentru detecție ({{detectAvg}}%)",
     "ffmpegHighCpuUsage": "Camera {{camera}} are o utilizare ridicată a procesorului FFmpeg ({{ffmpegAvg}}%)",
     "cameraIsOffline": "{{camera}} este offline",
-    "healthy": "Sistemul funcționează normal"
+    "healthy": "Sistemul funcționează normal",
+    "shmTooLow": "Alocarea /dev/shm ({{total}} MB) ar trebui mărită la cel puțin {{min}} MB."
   },
   "lastRefreshed": "Ultima reîmprospătare: "
 }

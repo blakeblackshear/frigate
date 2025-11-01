@@ -121,7 +121,15 @@
       },
       "yue": "粵語 (Tiếng Quảng Đông)",
       "ca": "Català (Tiếng Catalan)",
-      "th": "ไทย (Tiếng Thái)"
+      "th": "ไทย (Tiếng Thái)",
+      "ptBR": "Português brasileiro (Brazilian Portuguese)",
+      "sr": "Српски (Serbian)",
+      "sl": "Slovenščina (Slovenian)",
+      "lt": "Lietuvių (Lithuanian)",
+      "bg": "Български (Bulgarian)",
+      "gl": "Galego (Galician)",
+      "id": "Bahasa Indonesia (Indonesian)",
+      "ur": "اردو (Urdu)"
     },
     "system": "Hệ thống",
     "systemMetrics": "Thông số hệ thống",
@@ -257,5 +265,6 @@
     "title": "Không tìm thấy",
     "desc": "Trang bạn đang tìm không tồn tại"
   },
-  "selectItem": "Chọn mục {{item}}"
+  "selectItem": "Chọn mục {{item}}",
+  "readTheDocumentation": "Đọc tài liệu"
 }

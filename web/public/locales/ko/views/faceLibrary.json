@@ -1,1 +1,84 @@
-{}
+{
+  "description": {
+    "placeholder": "이 모음집의 이름을 입력해주세요",
+    "addFace": "얼굴 라이브러리에 새 모음집 추가하는 방법을 단계별로 알아보세요.",
+    "invalidName": "잘못된 이름입니다. 이름은 문자, 숫자, 공백, 따옴표 ('), 밑줄 (_), 그리고 붙임표 (-)만 포함이 가능합니다."
+  },
+  "details": {
+    "person": "사람",
+    "subLabelScore": "보조 레이블 신뢰도",
+    "face": "얼굴 상세정보",
+    "timestamp": "시간 기록",
+    "unknown": "알 수 없음"
+  },
+  "selectItem": "{{item}} 선택",
+  "documentTitle": "얼굴 라이브러리 - Frigate",
+  "uploadFaceImage": {
+    "title": "얼굴 사진 올리기"
+  },
+  "collections": "모음집",
+  "createFaceLibrary": {
+    "title": "모음집 만들기",
+    "desc": "새로운 모음집 만들기",
+    "new": "새 얼굴 만들기"
+  },
+  "steps": {
+    "faceName": "얼굴 이름 입력",
+    "uploadFace": "얼굴 사진 올리기",
+    "nextSteps": "다음 단계"
+  },
+  "train": {
+    "title": "학습",
+    "aria": "학습 선택"
+  },
+  "selectFace": "얼굴 선택",
+  "deleteFaceLibrary": {
+    "title": "이름 삭제"
+  },
+  "deleteFaceAttempts": {
+    "title": "얼굴 삭제"
+  },
+  "renameFace": {
+    "title": "얼굴 이름 바꾸기",
+    "desc": "{{name}}의 새 이름을 입력하세요"
+  },
+  "button": {
+    "deleteFaceAttempts": "얼굴 삭제",
+    "addFace": "얼굴 추가",
+    "renameFace": "얼굴 이름 바꾸기",
+    "deleteFace": "얼굴 삭제",
+    "uploadImage": "이미지 올리기",
+    "reprocessFace": "얼굴 재조정"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "이미지 파일을 선택해주세요."
+    },
+    "dropActive": "여기에 이미지 놓기…",
+    "dropInstructions": "이미지를 끌어다 놓거나 여기에 붙여넣으세요. 선택할 수도 있습니다.",
+    "maxSize": "최대 용량: {{size}}MB"
+  },
+  "nofaces": "얼굴을 찾을 수 없습니다",
+  "pixels": "{{area}}px",
+  "trainFaceAs": "얼굴을 다음과 같이 훈련하기:",
+  "trainFace": "얼굴 훈련하기",
+  "toast": {
+    "success": {
+      "uploadedImage": "이미지 업로드에 성공했습니다.",
+      "addFaceLibrary": "{{name}} 을 성공적으로 얼굴 라이브러리에 추가했습니다!",
+      "deletedFace_other": "{{count}} 얼굴을 성공적으로 삭제했습니다.",
+      "renamedFace": "얼굴 이름을 {{name}} 으로 성공적으로 바꿨습니다",
+      "trainedFace": "얼굴 훈련을 성공적으로 마쳤습니다.",
+      "updatedFaceScore": "얼굴 신뢰도를 성공적으로 업데이트 했습니다."
+    },
+    "error": {
+      "uploadingImageFailed": "이미지 업로드 실패:{{errorMessage}}",
+      "addFaceLibraryFailed": "얼굴 이름 설정 실패:{{errorMessage}}",
+      "deleteFaceFailed": "삭제 실패:{{errorMessage}}",
+      "deleteNameFailed": "이름 삭제 실패:{{errorMessage}}",
+      "renameFaceFailed": "이름 바꾸기 실패:{{errorMessage}}",
+      "trainFailed": "훈련 실패:{{errorMessage}}",
+      "updateFaceScoreFailed": "얼굴 신뢰도 업데이트 실패:{{errorMessage}}"
+    }
+  }
+}

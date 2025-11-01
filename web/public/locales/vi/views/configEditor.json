@@ -12,5 +12,7 @@
     }
   },
   "configEditor": "Trình chỉnh sửa cấu hình",
-  "documentTitle": "Trình chỉnh sửa - Frigate"
+  "documentTitle": "Trình chỉnh sửa - Frigate",
+  "safeConfigEditor": "Chỉnh sửa cấu hình (Chế độ an toàn)",
+  "safeModeDescription": "Frigate đang ở chế độ an toàn do lỗi kiểm tra cấu hình."
 }

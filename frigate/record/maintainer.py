@@ -16,7 +16,6 @@ from typing import Any, Optional, Tuple
 import numpy as np
 import psutil
 
-from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.comms.recordings_updater import (
@@ -24,6 +23,10 @@ from frigate.comms.recordings_updater import (
     RecordingsDataTypeEnum,
 )
 from frigate.config import FrigateConfig, RetainModeEnum
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
@@ -54,14 +57,25 @@ class SegmentInfo:
         self.average_dBFS = average_dBFS
 
     def should_discard_segment(self, retain_mode: RetainModeEnum) -> bool:
-        return (
-            retain_mode == RetainModeEnum.motion
-            and self.motion_count == 0
-            and self.average_dBFS == 0
-        ) or (
-            retain_mode == RetainModeEnum.active_objects
-            and self.active_object_count == 0
-        )
+        keep = False
+
+        # all mode should never discard
+        if retain_mode == RetainModeEnum.all:
+            keep = True
+
+        # motion mode should keep if motion or audio is detected
+        if (
+            not keep
+            and retain_mode == RetainModeEnum.motion
+            and (self.motion_count > 0 or self.average_dBFS > 0)
+        ):
+            keep = True
+
+        # active objects mode should keep if any active objects are detected
+        if not keep and self.active_object_count > 0:
+            keep = True
+
+        return not keep
 
 
 class RecordingMaintainer(threading.Thread):
@@ -71,11 +85,13 @@ class RecordingMaintainer(threading.Thread):
 
         # create communication for retained recordings
         self.requestor = InterProcessRequestor()
-        self.config_subscriber = ConfigSubscriber("config/record/")
-        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
-        self.recordings_publisher = RecordingsDataPublisher(
-            RecordingsDataTypeEnum.recordings_available_through
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.record],
         )
+        self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all.value)
+        self.recordings_publisher = RecordingsDataPublisher()
 
         self.stop_event = stop_event
         self.object_recordings_info: dict[str, list] = defaultdict(list)
@@ -91,6 +107,41 @@ class RecordingMaintainer(threading.Thread):
             and not d.startswith("preview_")
         ]
 
+        # publish newest cached segment per camera (including in use files)
+        newest_cache_segments: dict[str, dict[str, Any]] = {}
+        for cache in cache_files:
+            cache_path = os.path.join(CACHE_DIR, cache)
+            basename = os.path.splitext(cache)[0]
+            camera, date = basename.rsplit("@", maxsplit=1)
+            start_time = datetime.datetime.strptime(
+                date, CACHE_SEGMENT_FORMAT
+            ).astimezone(datetime.timezone.utc)
+            if (
+                camera not in newest_cache_segments
+                or start_time > newest_cache_segments[camera]["start_time"]
+            ):
+                newest_cache_segments[camera] = {
+                    "start_time": start_time,
+                    "cache_path": cache_path,
+                }
+
+        for camera, newest in newest_cache_segments.items():
+            self.recordings_publisher.publish(
+                (
+                    camera,
+                    newest["start_time"].timestamp(),
+                    newest["cache_path"],
+                ),
+                RecordingsDataTypeEnum.latest.value,
+            )
+        # publish None for cameras with no cache files (but only if we know the camera exists)
+        for camera_name in self.config.cameras:
+            if camera_name not in newest_cache_segments:
+                self.recordings_publisher.publish(
+                    (camera_name, None, None),
+                    RecordingsDataTypeEnum.latest.value,
+                )
+
         files_in_use = []
         for process in psutil.process_iter():
             try:
@@ -104,7 +155,7 @@ class RecordingMaintainer(threading.Thread):
             except psutil.Error:
                 continue
 
-        # group recordings by camera
+        # group recordings by camera (skip in-use for validation/moving)
         grouped_recordings: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
         for cache in cache_files:
             # Skip files currently in use
@@ -226,7 +277,9 @@ class RecordingMaintainer(threading.Thread):
                     recordings[0]["start_time"].timestamp()
                     if self.config.cameras[camera].record.enabled
                     else None,
-                )
+                    None,
+                ),
+                RecordingsDataTypeEnum.saved.value,
             )
 
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
@@ -243,7 +296,7 @@ class RecordingMaintainer(threading.Thread):
 
     async def validate_and_move_segment(
         self, camera: str, reviews: list[ReviewSegment], recording: dict[str, Any]
-    ) -> None:
+    ) -> Optional[Recordings]:
         cache_path: str = recording["cache_path"]
         start_time: datetime.datetime = recording["start_time"]
         record_config = self.config.cameras[camera].record
@@ -254,7 +307,7 @@ class RecordingMaintainer(threading.Thread):
             or not self.config.cameras[camera].record.enabled
         ):
             self.drop_segment(cache_path)
-            return
+            return None
 
         if cache_path in self.end_time_cache:
             end_time, duration = self.end_time_cache[cache_path]
@@ -263,10 +316,18 @@ class RecordingMaintainer(threading.Thread):
                 self.config.ffmpeg, cache_path, get_duration=True
             )
 
-            if segment_info["duration"]:
-                duration = float(segment_info["duration"])
-            else:
-                duration = -1
+            if not segment_info.get("has_valid_video", False):
+                logger.warning(
+                    f"Invalid or missing video stream in segment {cache_path}. Discarding."
+                )
+                self.recordings_publisher.publish(
+                    (camera, start_time.timestamp(), cache_path),
+                    RecordingsDataTypeEnum.invalid.value,
+                )
+                self.drop_segment(cache_path)
+                return None
+
+            duration = float(segment_info.get("duration", -1))
 
             # ensure duration is within expected length
             if 0 < duration < MAX_SEGMENT_DURATION:
@@ -277,71 +338,31 @@ class RecordingMaintainer(threading.Thread):
                     logger.warning(f"Failed to probe corrupt segment {cache_path}")
 
                 logger.warning(f"Discarding a corrupt recording segment: {cache_path}")
-                Path(cache_path).unlink(missing_ok=True)
-                return
-
-        # if cached file's start_time is earlier than the retain days for the camera
-        # meaning continuous recording is not enabled
-        if start_time <= (
-            datetime.datetime.now().astimezone(datetime.timezone.utc)
-            - datetime.timedelta(days=self.config.cameras[camera].record.retain.days)
-        ):
-            # if the cached segment overlaps with the review items:
-            overlaps = False
-            for review in reviews:
-                severity = SeverityEnum[review.severity]
-
-                # if the review item starts in the future, stop checking review items
-                # and remove this segment
-                if (
-                    review.start_time - record_config.get_review_pre_capture(severity)
-                ) > end_time.timestamp():
-                    overlaps = False
-                    break
-
-                # if the review item is in progress or ends after the recording starts, keep it
-                # and stop looking at review items
-                if (
-                    review.end_time is None
-                    or (
-                        review.end_time
-                        + record_config.get_review_post_capture(severity)
-                    )
-                    >= start_time.timestamp()
-                ):
-                    overlaps = True
-                    break
-
-            if overlaps:
-                record_mode = (
-                    record_config.alerts.retain.mode
-                    if review.severity == "alert"
-                    else record_config.detections.retain.mode
+                self.recordings_publisher.publish(
+                    (camera, start_time.timestamp(), cache_path),
+                    RecordingsDataTypeEnum.invalid.value,
                 )
-                # move from cache to recordings immediately
-                return await self.move_segment(
-                    camera,
-                    start_time,
-                    end_time,
-                    duration,
-                    cache_path,
-                    record_mode,
-                )
-            # if it doesn't overlap with an review item, go ahead and drop the segment
-            # if it ends more than the configured pre_capture for the camera
-            else:
-                camera_info = self.object_recordings_info[camera]
-                most_recently_processed_frame_time = (
-                    camera_info[-1][0] if len(camera_info) > 0 else 0
-                )
-                retain_cutoff = datetime.datetime.fromtimestamp(
-                    most_recently_processed_frame_time - record_config.event_pre_capture
-                ).astimezone(datetime.timezone.utc)
-                if end_time < retain_cutoff:
-                    self.drop_segment(cache_path)
-        # else retain days includes this segment
-        # meaning continuous recording is enabled
-        else:
+                self.drop_segment(cache_path)
+                return None
+
+            # this segment has a valid duration and has video data, so publish an update
+            self.recordings_publisher.publish(
+                (camera, start_time.timestamp(), cache_path),
+                RecordingsDataTypeEnum.valid.value,
+            )
+
+        record_config = self.config.cameras[camera].record
+        highest = None
+
+        if record_config.continuous.days > 0:
+            highest = "continuous"
+        elif record_config.motion.days > 0:
+            highest = "motion"
+
+        # if we have continuous or motion recording enabled
+        # we should first just check if this segment matches that
+        # and avoid any DB calls
+        if highest is not None:
             # assume that empty means the relevant recording info has not been received yet
             camera_info = self.object_recordings_info[camera]
             most_recently_processed_frame_time = (
@@ -355,10 +376,67 @@ class RecordingMaintainer(threading.Thread):
                 ).astimezone(datetime.timezone.utc)
                 >= end_time
             ):
-                record_mode = self.config.cameras[camera].record.retain.mode
+                record_mode = (
+                    RetainModeEnum.all
+                    if highest == "continuous"
+                    else RetainModeEnum.motion
+                )
                 return await self.move_segment(
                     camera, start_time, end_time, duration, cache_path, record_mode
                 )
+
+        # we fell through the continuous / motion check, so we need to check the review items
+        # if the cached segment overlaps with the review items:
+        overlaps = False
+        for review in reviews:
+            severity = SeverityEnum[review.severity]
+
+            # if the review item starts in the future, stop checking review items
+            # and remove this segment
+            if (
+                review.start_time - record_config.get_review_pre_capture(severity)
+            ) > end_time.timestamp():
+                overlaps = False
+                break
+
+            # if the review item is in progress or ends after the recording starts, keep it
+            # and stop looking at review items
+            if (
+                review.end_time is None
+                or (review.end_time + record_config.get_review_post_capture(severity))
+                >= start_time.timestamp()
+            ):
+                overlaps = True
+                break
+
+        if overlaps:
+            record_mode = (
+                record_config.alerts.retain.mode
+                if review.severity == "alert"
+                else record_config.detections.retain.mode
+            )
+            # move from cache to recordings immediately
+            return await self.move_segment(
+                camera,
+                start_time,
+                end_time,
+                duration,
+                cache_path,
+                record_mode,
+            )
+        # if it doesn't overlap with an review item, go ahead and drop the segment
+        # if it ends more than the configured pre_capture for the camera
+        # BUT only if continuous/motion is NOT enabled (otherwise wait for processing)
+        elif highest is None:
+            camera_info = self.object_recordings_info[camera]
+            most_recently_processed_frame_time = (
+                camera_info[-1][0] if len(camera_info) > 0 else 0
+            )
+            retain_cutoff = datetime.datetime.fromtimestamp(
+                most_recently_processed_frame_time - record_config.event_pre_capture
+            ).astimezone(datetime.timezone.utc)
+            if end_time < retain_cutoff:
+                self.drop_segment(cache_path)
 
     def segment_stats(
         self, camera: str, start_time: datetime.datetime, end_time: datetime.datetime
@@ -518,17 +596,7 @@ class RecordingMaintainer(threading.Thread):
             run_start = datetime.datetime.now().timestamp()
 
             # check if there is an updated config
-            while True:
-                (
-                    updated_topic,
-                    updated_record_config,
-                ) = self.config_subscriber.check_for_update()
-
-                if not updated_topic:
-                    break
-
-                camera_name = updated_topic.rpartition("/")[-1]
-                self.config.cameras[camera_name].record = updated_record_config
+            self.config_subscriber.check_for_updates()
 
             stale_frame_count = 0
             stale_frame_count_threshold = 10
@@ -541,7 +609,7 @@ class RecordingMaintainer(threading.Thread):
                 if not topic:
                     break
 
-                if topic == DetectionTypeEnum.video:
+                if topic == DetectionTypeEnum.video.value:
                     (
                         camera,
                         _,
@@ -560,7 +628,7 @@ class RecordingMaintainer(threading.Thread):
                                 regions,
                             )
                         )
-                elif topic == DetectionTypeEnum.audio:
+                elif topic == DetectionTypeEnum.audio.value:
                     (
                         camera,
                         frame_time,
@@ -576,7 +644,9 @@ class RecordingMaintainer(threading.Thread):
                                 audio_detections,
                             )
                         )
-                elif topic == DetectionTypeEnum.api or DetectionTypeEnum.lpr:
+                elif (
+                    topic == DetectionTypeEnum.api.value or DetectionTypeEnum.lpr.value
+                ):
                     continue
 
                 if frame_time < run_start - stale_frame_count_threshold:

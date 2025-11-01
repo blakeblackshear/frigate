@@ -43,7 +43,15 @@
         "label": "Kliknij w ramce, aby wyśrodkować kamerę PTZ"
       }
     },
-    "presets": "Presety kamery PTZ"
+    "presets": "Presety kamery PTZ",
+    "focus": {
+      "in": {
+        "label": "Zmniejsz ostrość kamery PTZ"
+      },
+      "out": {
+        "label": "Wyostrz kamerę PTZ"
+      }
+    }
   },
   "recording": {
     "enable": "Włącz nagrywanie",
@@ -105,6 +113,9 @@
     "playInBackground": {
       "tips": "Włącz tę opcję, aby kontynuować transmisję, gdy odtwarzacz jest ukryty.",
       "label": "Odtwarzaj w tle"
+    },
+    "debug": {
+      "picker": "Wybór strumienia jest niedostępny w trybie debug. Widok w trybie debug zawsze pokazuje strumień przypisany do detektora."
     }
   },
   "cameraSettings": {
@@ -114,7 +125,8 @@
     "recording": "Nagrywanie",
     "snapshots": "Zrzuty ekranu",
     "audioDetection": "Wykrywanie dźwięku",
-    "autotracking": "Automatyczne śledzenie"
+    "autotracking": "Automatyczne śledzenie",
+    "transcription": "Stenogram"
   },
   "effectiveRetainMode": {
     "modes": {
@@ -154,5 +166,14 @@
   "streamingSettings": "Ustawienia transmisji",
   "history": {
     "label": "Pokaż nagrania archiwalne"
+  },
+  "transcription": {
+    "enable": "Włącz audio transkrypcję na żywo",
+    "disable": "Wyłącz audio transkrypcję na żywo"
+  },
+  "noCameras": {
+    "buttonText": "Dodaj kamerę",
+    "description": "Zacznij od podłączenia kamery.",
+    "title": "Nie ustawiono żadnej kamery"
   }
 }

@@ -39,7 +39,15 @@
         "label": "點擊畫面以置中 PTZ 鏡頭"
       }
     },
-    "presets": "PTZ 鏡頭預設"
+    "presets": "PTZ 鏡頭預設",
+    "focus": {
+      "in": {
+        "label": "聚焦 PTZ 鏡頭"
+      },
+      "out": {
+        "label": "離焦 PTZ 鏡頭"
+      }
+    }
   },
   "cameraAudio": {
     "enable": "啟用鏡頭音訊",
@@ -154,5 +162,9 @@
       "label": "編輯鏡頭群組"
     },
     "exitEdit": "結束編輯"
+  },
+  "transcription": {
+    "enable": "啟用即時語音轉錄",
+    "disable": "停用即時語音轉錄"
   }
 }

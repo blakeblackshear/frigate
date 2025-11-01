@@ -71,7 +71,15 @@
         "label": "Di chuyển camera PTZ sang phải"
       }
     },
-    "presets": "Các thiết lập sẵn cho camera PTZ"
+    "presets": "Các thiết lập sẵn cho camera PTZ",
+    "focus": {
+      "in": {
+        "label": "Lấy nét gần (camera PTZ)"
+      },
+      "out": {
+        "label": "Lấy nét xa (camera PTZ)"
+      }
+    }
   },
   "manualRecording": {
     "playInBackground": {
@@ -142,7 +150,8 @@
     "recording": "Ghi hình",
     "snapshots": "Ảnh chụp",
     "audioDetection": "Phát hiện âm thanh",
-    "autotracking": "Tự động theo dõi"
+    "autotracking": "Tự động theo dõi",
+    "transcription": "Phiên âm"
   },
   "history": {
     "label": "Hiện cảnh quay lịch sử"
@@ -154,5 +163,9 @@
       "active_objects": "Đối tượng hoạt động"
     },
     "notAllTips": "Cấu hình giữ lại ghi hình {{source}} của bạn được đặt là <code>mode: {{effectiveRetainMode}}</code>, vì vậy lần ghi hình theo yêu cầu này chỉ giữ lại các đoạn có {{effectiveRetainModeName}}."
+  },
+  "transcription": {
+    "enable": "Bật phiên âm trực tiếp",
+    "disable": "Tắt phiên âm trực tiếp"
   }
 }

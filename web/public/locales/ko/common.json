@@ -1,1 +1,271 @@
-{}
+{
+  "readTheDocumentation": "문서 읽기",
+  "time": {
+    "untilForTime": "{{time}}까지",
+    "untilForRestart": "Frigate가 재시작될 때 까지.",
+    "10minutes": "10분",
+    "12hours": "12시간",
+    "1hour": "1시간",
+    "24hours": "24시간",
+    "30minutes": "30분",
+    "5minutes": "5분",
+    "untilRestart": "재시작 될 때까지",
+    "ago": "{{timeAgo}} 전",
+    "justNow": "지금 막",
+    "today": "오늘",
+    "yesterday": "어제",
+    "last7": "최근 7일",
+    "last14": "최근 14일",
+    "last30": "최근 30일",
+    "thisWeek": "이번 주",
+    "lastWeek": "저번 주",
+    "thisMonth": "이번 달",
+    "lastMonth": "저번 달",
+    "pm": "오후",
+    "am": "오전",
+    "yr": "{{time}}년",
+    "year_other": "{{time}} 년",
+    "mo": "{{time}}월",
+    "month_other": "{{time}} 월",
+    "d": "{{time}}일",
+    "day_other": "{{time}} 일",
+    "h": "{{time}}시",
+    "hour_other": "{{time}} 시",
+    "m": "{{time}}분",
+    "minute_other": "{{time}} 분",
+    "s": "{{time}}초",
+    "second_other": "{{time}} 초",
+    "formattedTimestamp": {
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    }
+  },
+  "notFound": {
+    "title": "404",
+    "documentTitle": "찾을 수 없음 - Frigate",
+    "desc": "페이지 찾을 수 없음"
+  },
+  "accessDenied": {
+    "title": "접근 거부",
+    "documentTitle": "접근 거부 - Frigate",
+    "desc": "이 페이지 접근 권한이 없습니다."
+  },
+  "menu": {
+    "user": {
+      "account": "계정",
+      "title": "사용자",
+      "current": "현재 사용자:{{user}}",
+      "anonymous": "익명",
+      "logout": "로그아웃",
+      "setPassword": "비밀번호 설정"
+    },
+    "system": "시스템",
+    "systemMetrics": "시스템 지표",
+    "configuration": "설정",
+    "systemLogs": "시스템 로그",
+    "settings": "설정",
+    "configurationEditor": "설정 편집기",
+    "languages": "언어",
+    "language": {
+      "en": "English (English)",
+      "es": "Español (Spanish)",
+      "zhCN": "简体中文 (Simplified Chinese)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Français (French)",
+      "ar": "العربية (Arabic)",
+      "pt": "Português (Portuguese)",
+      "ptBR": "Português brasileiro (Brazilian Portuguese)",
+      "ru": "Русский (Russian)",
+      "de": "Deutsch (German)",
+      "ja": "日本語 (Japanese)",
+      "tr": "Türkçe (Turkish)",
+      "it": "Italiano (Italian)",
+      "nl": "Nederlands (Dutch)",
+      "sv": "Svenska (Swedish)",
+      "cs": "Čeština (Czech)",
+      "nb": "Norsk Bokmål (Norwegian Bokmål)",
+      "ko": "한국어 (Korean)",
+      "vi": "Tiếng Việt (Vietnamese)",
+      "fa": "فارسی (Persian)",
+      "pl": "Polski (Polish)",
+      "uk": "Українська (Ukrainian)",
+      "he": "עברית (Hebrew)",
+      "el": "Ελληνικά (Greek)",
+      "ro": "Română (Romanian)",
+      "hu": "Magyar (Hungarian)",
+      "fi": "Suomi (Finnish)",
+      "da": "Dansk (Danish)",
+      "sk": "Slovenčina (Slovak)",
+      "yue": "粵語 (Cantonese)",
+      "th": "ไทย (Thai)",
+      "ca": "Català (Catalan)",
+      "sr": "Српски (Serbian)",
+      "sl": "Slovenščina (Slovenian)",
+      "lt": "Lietuvių (Lithuanian)",
+      "bg": "Български (Bulgarian)",
+      "gl": "Galego (Galician)",
+      "id": "Bahasa Indonesia (Indonesian)",
+      "ur": "اردو (Urdu)",
+      "withSystem": {
+        "label": "시스템 설정 언어 사용"
+      }
+    },
+    "appearance": "화면 설정",
+    "darkMode": {
+      "label": "다크 모드",
+      "light": "라이트",
+      "dark": "다크",
+      "withSystem": {
+        "label": "시스템 설정에 따라 설정"
+      }
+    },
+    "withSystem": "시스템",
+    "theme": {
+      "label": "테마",
+      "blue": "파랑",
+      "green": "녹색",
+      "nord": "노드 (Nord)",
+      "red": "빨강",
+      "highcontrast": "고 대비",
+      "default": "기본값"
+    },
+    "help": "도움말",
+    "documentation": {
+      "title": "문서",
+      "label": "Frigate 문서"
+    },
+    "restart": "Frigate 재시작",
+    "live": {
+      "title": "실시간",
+      "allCameras": "모든 카메라",
+      "cameras": {
+        "title": "카메라",
+        "count_other": "{{count}} 카메라"
+      }
+    },
+    "review": "다시보기",
+    "explore": "탐색",
+    "export": "내보내기",
+    "uiPlayground": "UI 실험장",
+    "faceLibrary": "얼굴 라이브러리"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "length": {
+      "feet": "피트",
+      "meters": "미터"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/hour",
+      "mbph": "MB/hour",
+      "gbph": "GB/hour"
+    }
+  },
+  "label": {
+    "back": "뒤로"
+  },
+  "button": {
+    "apply": "적용",
+    "reset": "리셋",
+    "done": "완료",
+    "enabled": "활성화됨",
+    "enable": "활성화",
+    "disabled": "비활성화됨",
+    "disable": "비활성화",
+    "save": "저장",
+    "saving": "저장 중…",
+    "cancel": "취소",
+    "close": "닫기",
+    "copy": "복사",
+    "back": "뒤로",
+    "history": "히스토리",
+    "fullscreen": "전체화면",
+    "exitFullscreen": "전체화면 나가기",
+    "pictureInPicture": "Picture in Picture",
+    "twoWayTalk": "양방향 말하기",
+    "cameraAudio": "카메라 오디오",
+    "on": "켜기",
+    "off": "끄기",
+    "edit": "편집",
+    "copyCoordinates": "코디네이트 복사",
+    "delete": "삭제",
+    "yes": "예",
+    "no": "아니오",
+    "download": "다운로드",
+    "info": "정보",
+    "suspended": "일시 정지됨",
+    "unsuspended": "재개",
+    "play": "재생",
+    "unselect": "선택 해제",
+    "export": "내보내기",
+    "deleteNow": "바로 삭제하기",
+    "next": "다음"
+  },
+  "toast": {
+    "copyUrlToClipboard": "클립보드에 URL이 복사되었습니다.",
+    "save": {
+      "title": "저장",
+      "error": {
+        "title": "설정 저장 실패: {{errorMessage}}",
+        "noMessage": "설정 저장이 실패했습니다"
+      }
+    }
+  },
+  "role": {
+    "title": "역할",
+    "admin": "관리자",
+    "viewer": "감시자",
+    "desc": "관리자는 Frigate UI에 모든 접근 권한이 있습니다. 감시자는 카메라 감시, 돌아보기, 과거 영상 조회만 가능합니다."
+  },
+  "pagination": {
+    "label": "나눠보기",
+    "previous": {
+      "title": "이전",
+      "label": "이전 페이지"
+    },
+    "next": {
+      "title": "다음",
+      "label": "다음 페이지"
+    },
+    "more": "더 많은 페이지"
+  },
+  "selectItem": "{{item}} 선택",
+  "information": {
+    "pixels": "{{area}}px"
+  }
+}

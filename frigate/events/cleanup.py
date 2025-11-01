@@ -230,6 +230,11 @@ class EventCleanup(threading.Thread):
                 media_path.unlink(missing_ok=True)
                 if file_extension == "jpg":
                     media_path = Path(
+                        f"{os.path.join(CLIPS_DIR, media_name)}-clean.webp"
+                    )
+                    media_path.unlink(missing_ok=True)
+                    # Also delete clean.png (legacy) for backward compatibility
+                    media_path = Path(
                         f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
                     )
                     media_path.unlink(missing_ok=True)

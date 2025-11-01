@@ -1,1 +1,92 @@
-{}
+{
+  "restart": {
+    "title": "Frigate을 정말로 다시 시작할까요?",
+    "button": "재시작",
+    "restarting": {
+      "title": "Frigate이 재시작 중입니다",
+      "content": "이 페이지는 {{countdown}} 뒤에 새로 고침 됩니다.",
+      "button": "강제 재시작"
+    }
+  },
+  "explore": {
+    "plus": {
+      "submitToPlus": {
+        "label": "Frigate+에 등록하기"
+      },
+      "review": {
+        "question": {
+          "label": "Frigate +에 이 레이블 등록하기"
+        }
+      }
+    },
+    "video": {
+      "viewInHistory": "히스토리 보기"
+    }
+  },
+  "export": {
+    "time": {
+      "fromTimeline": "타임라인에서 선택하기",
+      "lastHour_other": "지난 시간",
+      "custom": "커스텀",
+      "start": {
+        "title": "시작 시간",
+        "label": "시작 시간 선택"
+      },
+      "end": {
+        "title": "종료 시간",
+        "label": "종료 시간 선택"
+      }
+    },
+    "name": {
+      "placeholder": "내보내기 이름"
+    },
+    "select": "선택",
+    "export": "내보내기",
+    "selectOrExport": "선택 또는 내보내기",
+    "toast": {
+      "success": "내보내기가 성공적으로 시작되었습니다. /exports 폴더에서 파일을 보실 수 있습니다.",
+      "error": {
+        "failed": "내보내기 시작 실패:{{error}}",
+        "endTimeMustAfterStartTime": "종료 시간은 시작 시간보다 뒤에 있어야합니다",
+        "noVaildTimeSelected": "유효한 시간 범위가 선택되지 않았습니다"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "내보내기 저장",
+      "previewExport": "내보내기 미리보기"
+    }
+  },
+  "streaming": {
+    "label": "스트림",
+    "restreaming": {
+      "disabled": "이 카메라는 재 스트리밍이 되지 않습니다.",
+      "desc": {
+        "title": "이 카메라를 위해 추가적인 라이브 뷰 옵션과 오디오를 go2rtc에서 설정하세요."
+      }
+    },
+    "showStats": {
+      "label": "스트림 통계 보기",
+      "desc": "이 옵션을 활성화하면 스트림 통계가 카메라 피드에 나타납니다."
+    },
+    "debugView": "디버그 뷰"
+  },
+  "search": {
+    "saveSearch": {
+      "label": "검색 저장",
+      "desc": "저장된 검색에 이름을 지정해주세요.",
+      "placeholder": "검색에 이름 입력하기",
+      "overwrite": "{{searchName}} (이/가) 이미 존재합니다. 값을 덮어 씌웁니다.",
+      "success": "{{searchName}} 검색이 저장되었습니다.",
+      "button": {
+        "save": {
+          "label": "이 검색 저장하기"
+        }
+      }
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "삭제 확인"
+    }
+  }
+}

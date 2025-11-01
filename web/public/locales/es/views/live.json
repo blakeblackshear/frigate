@@ -42,7 +42,15 @@
         "label": "Haz clic en el marco para centrar la cámara PTZ"
       }
     },
-    "presets": "Preajustes de cámara PTZ"
+    "presets": "Preajustes de cámara PTZ",
+    "focus": {
+      "in": {
+        "label": "Enfocar camara PTZ"
+      },
+      "out": {
+        "label": "Desenfocar camara PTZ"
+      }
+    }
   },
   "camera": {
     "enable": "Habilitar cámara",
@@ -126,6 +134,9 @@
     "playInBackground": {
       "label": "Reproducir en segundo plano",
       "tips": "Habilita esta opción para continuar la transmisión cuando el reproductor esté oculto."
+    },
+    "debug": {
+      "picker": "Selección de transmisión no disponible en mode de debug. La vista de debug siempre usa la transmisión con el rol de deteccción asignado."
     }
   },
   "cameraSettings": {
@@ -135,7 +146,8 @@
     "recording": "Grabación",
     "snapshots": "Capturas de pantalla",
     "autotracking": "Seguimiento automático",
-    "cameraEnabled": "Cámara habilitada"
+    "cameraEnabled": "Cámara habilitada",
+    "transcription": "Transcripción de Audio"
   },
   "history": {
     "label": "Mostrar grabaciones históricas"
@@ -154,5 +166,14 @@
       "label": "Editar grupo de cámaras"
     },
     "exitEdit": "Salir de la edición"
+  },
+  "transcription": {
+    "enable": "Habilitar transcripción de audio en tiempo real",
+    "disable": "Deshabilitar transcripción de audio en tiempo real"
+  },
+  "noCameras": {
+    "title": "No hay cámaras configuradas",
+    "description": "Comienza conectando una cámara.",
+    "buttonText": "Añade Cámara"
   }
 }

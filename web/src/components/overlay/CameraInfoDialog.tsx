@@ -16,6 +16,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { Trans, useTranslation } from "react-i18next";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 
 type CameraInfoDialogProps = {
   camera: CameraConfig;
@@ -74,6 +75,8 @@ export default function CameraInfoDialog({
     return b === 0 ? a : gcd(b, a % b);
   }
 
+  const cameraName = useCameraFriendlyName(camera);
+
   return (
     <>
       <Toaster position="top-center" />
@@ -85,7 +88,7 @@ export default function CameraInfoDialog({
           <DialogHeader>
             <DialogTitle className="smart-capitalize">
               {t("cameras.info.cameraProbeInfo", {
-                camera: camera.name.replaceAll("_", " "),
+                camera: cameraName,
               })}
             </DialogTitle>
           </DialogHeader>

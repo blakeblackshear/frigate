@@ -1,0 +1,135 @@
+{
+  "documentTitle": "Klassifiseringsmodeller",
+  "button": {
+    "deleteClassificationAttempts": "Slett klassifiseringsbilder",
+    "renameCategory": "Gi nytt navn til kategori",
+    "deleteCategory": "Slett kategori",
+    "deleteImages": "Slett bilder",
+    "trainModel": "Tren modell"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Kategori slettet",
+      "deletedImage": "Bilder slettet",
+      "categorizedImage": "Bildet ble klassifisert",
+      "trainedModel": "Modellen ble trent.",
+      "trainingModel": "Modelltrening startet."
+    },
+    "error": {
+      "deleteImageFailed": "Kunne ikke slette: {{errorMessage}}",
+      "deleteCategoryFailed": "Kunne ikke slette kategori: {{errorMessage}}",
+      "categorizeFailed": "Kunne ikke klassifisere bilde: {{errorMessage}}",
+      "trainingFailed": "Kunne ikke starte modelltrening: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Slett kategori",
+    "desc": "Er du sikker på at du vil slette kategorien {{name}}? Dette vil permanent slette alle tilknyttede bilder og kreve at modellen trenes på nytt."
+  },
+  "deleteDatasetImages": {
+    "title": "Slett datasettbilder",
+    "desc": "Er du sikker på at du vil slette {{count}} bilder fra {{dataset}}? Denne handlingen kan ikke angres og krever at modellen trenes på nytt."
+  },
+  "deleteTrainImages": {
+    "title": "Slett treningsbilder",
+    "desc": "Er du sikker på at du vil slette {{count}} bilder? Denne handlingen kan ikke angres."
+  },
+  "renameCategory": {
+    "title": "Gi nytt navn til kategori",
+    "desc": "Skriv inn et nytt navn for {{name}}. Du må trene modellen på nytt for at navneendringen skal tre i kraft."
+  },
+  "description": {
+    "invalidName": "Ugyldig navn. Navn kan kun inneholde bokstaver, tall, mellomrom, apostrof, understrek og bindestrek."
+  },
+  "train": {
+    "title": "Nylige klassifiseringer",
+    "aria": "Velg nylige klassifiseringer"
+  },
+  "categories": "Kategorier",
+  "createCategory": {
+    "new": "Opprett ny kategori"
+  },
+  "categorizeImageAs": "Klassifiser bilde som:",
+  "categorizeImage": "Klassifiser bilde",
+  "noModels": {
+    "object": {
+      "title": "Ingen objektklassifiseringsmodeller",
+      "description": "Opprett en tilpasset modell for å klassifisere oppdagede objekter.",
+      "buttonText": "Opprett objektmodell"
+    },
+    "state": {
+      "title": "Ingen tilstands­klassifiseringsmodeller",
+      "description": "Opprett en tilpasset modell for å overvåke og klassifisere tilstandsendringer i spesifikke kamerasoner.",
+      "buttonText": "Opprett tilstandsmodell"
+    }
+  },
+  "wizard": {
+    "title": "Opprett ny klassifisering",
+    "steps": {
+      "nameAndDefine": "Navn og definér",
+      "stateArea": "Tilstandsområde",
+      "chooseExamples": "Velg eksempler"
+    },
+    "step1": {
+      "description": "Tilstandsmodeller overvåker faste kamerasoner for endringer (f.eks. dør åpen/lukket). Objektmodeller legger til klassifiseringer for oppdagede objekter (f.eks. kjente dyr, bud, osv.).",
+      "name": "Navn",
+      "namePlaceholder": "Skriv inn modellnavn...",
+      "type": "Type",
+      "typeState": "Tilstand",
+      "typeObject": "Objekt",
+      "objectLabel": "Objektetikett",
+      "objectLabelPlaceholder": "Velg objekttype...",
+      "classificationType": "Klassifiseringstype",
+      "classificationTypeTip": "Lær om klassifiseringstyper",
+      "classificationTypeDesc": "Underetiketter legger til ekstra tekst på objektetiketten (f.eks. 'Person: Posten'). Attributter er søkbare metadata som lagres separat i objektets metadata.",
+      "classificationSubLabel": "Underetikett",
+      "classificationAttribute": "Attributt",
+      "classes": "Kategorier",
+      "classesTip": "Lær om kategorier",
+      "classesStateDesc": "Definer de ulike tilstandene kamerasonen kan være i. For eksempel: 'åpen' og 'lukket' for en garasjeport.",
+      "classesObjectDesc": "Definer kategoriene du vil klassifisere oppdagede objekter i. For eksempel: 'bud', 'beboer', 'fremmed' for personklassifisering.",
+      "classPlaceholder": "Skriv inn kategorinavn...",
+      "errors": {
+        "nameRequired": "Modellnavn er påkrevd",
+        "nameLength": "Modellnavn må være på 64 tegn eller mindre",
+        "nameOnlyNumbers": "Modellnavn kan ikke bare inneholde tall",
+        "classRequired": "Minst én kategori er påkrevd",
+        "classesUnique": "Kategorinavn må være unike",
+        "stateRequiresTwoClasses": "Tilstandsmodeller krever minst to kategorier",
+        "objectLabelRequired": "Velg en objektetikett",
+        "objectTypeRequired": "Velg en klassifiseringstype"
+      }
+    },
+    "step2": {
+      "description": "Velg kameraer og definer området som skal overvåkes for hvert kamera. Modellen vil klassifisere tilstanden til disse områdene.",
+      "cameras": "Kameraer",
+      "selectCamera": "Velg kamera",
+      "noCameras": "Klikk + for å legge til kameraer",
+      "selectCameraPrompt": "Velg et kamera fra listen for å definere overvåkingsområdet"
+    },
+    "step3": {
+      "selectImagesPrompt": "Velg alle bilder med: {{className}}",
+      "selectImagesDescription": "Klikk på bilder for å velge dem. Klikk Fortsett når du er ferdig med denne kategorien.",
+      "generating": {
+        "title": "Genererer eksempelbilder",
+        "description": "Frigate henter representative bilder fra opptakene dine. Dette kan ta litt tid..."
+      },
+      "training": {
+        "title": "Trener modell",
+        "description": "Modellen din trenes i bakgrunnen. Lukk dette vinduet, så starter modellen når treningen er ferdig."
+      },
+      "retryGenerate": "Prøv å generere på nytt",
+      "noImages": "Ingen eksempelbilder generert",
+      "classifying": "Klassifiserer og trener...",
+      "trainingStarted": "Trening startet",
+      "errors": {
+        "noCameras": "Ingen kameraer konfigurert",
+        "noObjectLabel": "Ingen objektetikett valgt",
+        "generateFailed": "Kunne ikke generere eksempler: {{error}}",
+        "generationFailed": "Generering mislyktes. Prøv igjen.",
+        "classifyFailed": "Kunne ikke klassifisere bilder: {{error}}"
+      },
+      "generateSuccess": "Eksempelbilder ble generert"
+    }
+  }
+}

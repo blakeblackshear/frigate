@@ -71,3 +71,7 @@ class OpenAIClient(GenAIClient):
         if len(result.choices) > 0:
             return result.choices[0].message.content.strip()
         return None
+
+    def get_context_size(self) -> int:
+        """Get the context window size for Azure OpenAI."""
+        return 128000

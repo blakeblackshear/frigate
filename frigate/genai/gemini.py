@@ -21,7 +21,9 @@ class GeminiClient(GenAIClient):
     def _init_provider(self):
         """Initialize the client."""
         genai.configure(api_key=self.genai_config.api_key)
-        return genai.GenerativeModel(self.genai_config.model)
+        return genai.GenerativeModel(
+            self.genai_config.model, **self.genai_config.provider_options
+        )
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to Gemini."""
@@ -51,3 +53,8 @@ class GeminiClient(GenAIClient):
             # No description was generated
             return None
         return description
+
+    def get_context_size(self) -> int:
+        """Get the context window size for Gemini."""
+        # Gemini Pro Vision has a 1M token context window
+        return 1000000

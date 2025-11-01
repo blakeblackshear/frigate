@@ -110,7 +110,8 @@
     "button": {
       "export": "Esporta",
       "markAsReviewed": "Segna come visto",
-      "deleteNow": "Elimina ora"
+      "deleteNow": "Elimina ora",
+      "markAsUnreviewed": "Segna come non visto"
     },
     "confirmDelete": {
       "desc": {
@@ -122,5 +123,12 @@
         "error": "Impossibile eliminare: {{error}}"
       }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Seleziona la miniatura di un oggetto tracciato",
+    "search": {
+      "placeholder": "Cerca per etichetta o sottoetichetta..."
+    },
+    "noImages": "Nessuna miniatura trovata per questa fotocamera"
   }
 }

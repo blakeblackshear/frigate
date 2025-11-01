@@ -6,7 +6,9 @@
     "enrichments": "Statistika obogaćivanja - Frigate",
     "logs": {
       "frigate": "Frigate logovi - Frigate",
-      "go2rtc": "Go2RTC dnevnici - Frigate"
+      "go2rtc": "Go2RTC dnevnici - Frigate",
+      "nginx": "Nginx logovi - Frigate"
     }
-  }
+  },
+  "title": "Sistem"
 }

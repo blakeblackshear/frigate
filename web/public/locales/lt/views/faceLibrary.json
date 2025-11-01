@@ -1,13 +1,101 @@
 {
   "description": {
-    "addFace": "Apžiūrėkite naujų kolekcijų pridėjimą prie Veidų Bibliotekos.",
+    "addFace": "Pridėkite naują kolekciją į Veidų Kolekciją įkeldami savo pirmą nuotrauką.",
     "placeholder": "Įveskite pavadinimą šiai kolekcijai",
-    "invalidName": "Netinkamas vardas. Vardai gali turėti tik raides, numerius, tarpus, apostrofus, pabraukimus ir brukšnelius."
+    "invalidName": "Netinkamas vardas. Vardas gali būti sudarytas tik iš raidžiū, skaičių, tarpų, apostrofų, pabraukimų ar brūkšnelių."
   },
   "details": {
     "person": "Žmogus",
     "face": "Veido detelės",
     "timestamp": "Laiko žyma",
-    "unknown": "Nežinoma"
-  }
+    "unknown": "Nežinoma",
+    "subLabelScore": "Sub Etiketės Balas",
+    "scoreInfo": "Sub etiketės balas yra pasvertas balas pagal visų atpažintų veidų užtikrintumą, taigi gali skirtis nuo balo rodomo momentinėje nuotraukoje.",
+    "faceDesc": "Papildoma informacija sekamo objekto, kuris sugeneravo šį veidą"
+  },
+  "selectItem": "Pasirinkti {{item}}",
+  "deleteFaceAttempts": {
+    "desc_one": "Esate įsitikine, kad norite ištrinti {{count}} veidą? Šio veiksmo sugrąžinimas negalimas.",
+    "desc_few": "Esate įsitikine, kad norite ištrinti {{count}} veidus? Šio veiksmo sugrąžinimas negalimas.",
+    "desc_other": "Esate įsitikine, kad norite ištrinti {{count}} veidų? Šio veiksmo sugrąžinimas negalimas.",
+    "title": "Ištrinti Veidus"
+  },
+  "toast": {
+    "success": {
+      "deletedFace_one": "Sėkmingai ištrintas{{count}} veidas.",
+      "deletedFace_few": "Sėkmingai ištrinti {{count}} veidai.",
+      "deletedFace_other": "Sėkmingai ištrinta {{count}} veidų.",
+      "deletedName_one": "{{count}} veidas buvo sėkmingai ištrintas.",
+      "deletedName_few": "{{count}} veidai buvo sėkmingai ištrinti.",
+      "deletedName_other": "{{count}} veidų buvo sėkmingai ištrinta.",
+      "uploadedImage": "Nuotrauka sėkmingai įkelta.",
+      "addFaceLibrary": "{{name}} vardas buvo sėkmingai pridėtas į Veidų Katalogą!",
+      "renamedFace": "Sėkmingai veidas pervadintas į {{name}}",
+      "trainedFace": "Veidas apmokytas sėkmingai.",
+      "updatedFaceScore": "Veido balas atnaujintas sėkmingai."
+    },
+    "error": {
+      "uploadingImageFailed": "Nepavyko įkelti nuotraukos: {{errorMessage}}",
+      "addFaceLibraryFailed": "Nepavyko priskirti vardo veidui: {{errorMessage}}",
+      "deleteFaceFailed": "Nepavyko ištrinti: {{errorMessage}}",
+      "deleteNameFailed": "Vardo ištrinti nepavyko: {{errorMessage}}",
+      "renameFaceFailed": "Nepavyko pervardinti veido: {{errorMessage}}",
+      "trainFailed": "Nepavyko apmokinti: {{errorMessage}}",
+      "updateFaceScoreFailed": "Veido balų atnaujinti nepavyko: {{errorMessage}}"
+    }
+  },
+  "createFaceLibrary": {
+    "nextSteps": "Kad sukurtumėte stiprų pagrindą:<li>Naudokite Pastarieji Atpažinimai skirtuką pasirinkti ir paveikslėliais apmokyti kiekvieną aptiktą asmenį.</li><li>Norint pasiekti geriausią režultatą, susitelkite prie nuotraukų iš priekio; Venkite naudoti veidų nuotraukas kampu pasuktu veidu.</li></ul>",
+    "title": "Sukurti Kolekciją",
+    "desc": "Sukurti naują kolekciją",
+    "new": "Sukurti Naują Veidą"
+  },
+  "deleteFaceLibrary": {
+    "desc": "Esate įsitikinę, kad norite ištrinti kolenkciją vardu {{name}}? Visi susiję veidai bus ištrinti negražinamai.",
+    "title": "Ištrinti Vardą"
+  },
+  "documentTitle": "Veidų Katalogas - Frigate",
+  "uploadFaceImage": {
+    "title": "Įkelti Veido Nuotrauką",
+    "desc": "Įkelti nuotrauką veidų skanavimui ir įtraukti {{pageToggle}}"
+  },
+  "collections": "Kolekcijos",
+  "steps": {
+    "faceName": "Įveskite Vardą Veidui",
+    "uploadFace": "Įkelti Veido Nuotrauką",
+    "nextSteps": "Sekantis Žingsnis",
+    "description": {
+      "uploadFace": "Įkelti nuotrauką {{name}} kuri atvaizduoja veidą iš priekio. Nuotraukos kadruoti nereikia."
+    }
+  },
+  "train": {
+    "title": "Pastarieji Atpažinimai",
+    "aria": "Pasirinkti pastaruosius atpažinimus",
+    "empty": "Pastaruoju metu nebuvo atliktas veidų atpažinimas"
+  },
+  "selectFace": "Pasirinkti Veidą",
+  "renameFace": {
+    "title": "Pervadinti Veidą",
+    "desc": "Įveskite {{name}} naują vardą"
+  },
+  "button": {
+    "deleteFaceAttempts": "Ištrinti Veidus",
+    "addFace": "Pridėti Veidą",
+    "renameFace": "Pervadinti Veidą",
+    "deleteFace": "Ištrinti Veidą",
+    "uploadImage": "Įkelti Nuotrauką",
+    "reprocessFace": "Patikrinti Veidą"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Prašome pasirinkti nuotraukos bylą."
+    },
+    "dropActive": "Įkelkite nuotrauką čia…",
+    "dropInstructions": "Užvilkite nuotrauką čia, arba spragtelkite pasirinkti",
+    "maxSize": "Max dydis: {{size}}MB"
+  },
+  "nofaces": "Nėra veidų",
+  "pixels": "{{area}}px",
+  "trainFaceAs": "Apmokyti Veidą kaip:",
+  "trainFace": "Apmokyti Veidą"
 }

@@ -1,0 +1,761 @@
+{
+  "label": "Camera configuration.",
+  "properties": {
+    "name": {
+      "label": "Camera name."
+    },
+    "friendly_name": {
+      "label": "Camera friendly name used in the Frigate UI."
+    },
+    "enabled": {
+      "label": "Enable camera."
+    },
+    "audio": {
+      "label": "Audio events configuration.",
+      "properties": {
+        "enabled": {
+          "label": "Enable audio events."
+        },
+        "max_not_heard": {
+          "label": "Seconds of not hearing the type of audio to end the event."
+        },
+        "min_volume": {
+          "label": "Min volume required to run audio detection."
+        },
+        "listen": {
+          "label": "Audio to listen for."
+        },
+        "filters": {
+          "label": "Audio filters."
+        },
+        "enabled_in_config": {
+          "label": "Keep track of original state of audio detection."
+        },
+        "num_threads": {
+          "label": "Number of detection threads"
+        }
+      }
+    },
+    "audio_transcription": {
+      "label": "Audio transcription config.",
+      "properties": {
+        "enabled": {
+          "label": "Enable audio transcription."
+        },
+        "language": {
+          "label": "Language abbreviation to use for audio event transcription/translation."
+        },
+        "device": {
+          "label": "The device used for license plate recognition."
+        },
+        "model_size": {
+          "label": "The size of the embeddings model used."
+        },
+        "enabled_in_config": {
+          "label": "Keep track of original state of camera."
+        },
+        "live_enabled": {
+          "label": "Enable live transcriptions."
+        }
+      }
+    },
+    "birdseye": {
+      "label": "Birdseye camera configuration.",
+      "properties": {
+        "enabled": {
+          "label": "Enable birdseye view for camera."
+        },
+        "mode": {
+          "label": "Tracking mode for camera."
+        },
+        "order": {
+          "label": "Position of the camera in the birdseye view."
+        }
+      }
+    },
+    "detect": {
+      "label": "Object detection configuration.",
+      "properties": {
+        "enabled": {
+          "label": "Detection Enabled."
+        },
+        "height": {
+          "label": "Height of the stream for the detect role."
+        },
+        "width": {
+          "label": "Width of the stream for the detect role."
+        },
+        "fps": {
+          "label": "Number of frames per second to process through detection."
+        },
+        "min_initialized": {
+          "label": "Minimum number of consecutive hits for an object to be initialized by the tracker."
+        },
+        "max_disappeared": {
+          "label": "Maximum number of frames the object can disappear before detection ends."
+        },
+        "stationary": {
+          "label": "Stationary objects config.",
+          "properties": {
+            "interval": {
+              "label": "Frame interval for checking stationary objects."
+            },
+            "threshold": {
+              "label": "Number of frames without a position change for an object to be considered stationary"
+            },
+            "max_frames": {
+              "label": "Max frames for stationary objects.",
+              "properties": {
+                "default": {
+                  "label": "Default max frames."
+                },
+                "objects": {
+                  "label": "Object specific max frames."
+                }
+              }
+            },
+            "classifier": {
+              "label": "Enable visual classifier for determing if objects with jittery bounding boxes are stationary."
+            }
+          }
+        },
+        "annotation_offset": {
+          "label": "Milliseconds to offset detect annotations by."
+        }
+      }
+    },
+    "face_recognition": {
+      "label": "Face recognition config.",
+      "properties": {
+        "enabled": {
+          "label": "Enable face recognition."
+        },
+        "min_area": {
+          "label": "Min area of face box to consider running face recognition."
+        }
+      }
+    },
+    "ffmpeg": {
+      "label": "FFmpeg configuration for the camera.",
+      "properties": {
+        "path": {
+          "label": "FFmpeg path"
+        },
+        "global_args": {
+          "label": "Global FFmpeg arguments."
+        },
+        "hwaccel_args": {
+          "label": "FFmpeg hardware acceleration arguments."
+        },
+        "input_args": {
+          "label": "FFmpeg input arguments."
+        },
+        "output_args": {
+          "label": "FFmpeg output arguments per role.",
+          "properties": {
+            "detect": {
+              "label": "Detect role FFmpeg output arguments."
+            },
+            "record": {
+              "label": "Record role FFmpeg output arguments."
+            }
+          }
+        },
+        "retry_interval": {
+          "label": "Time in seconds to wait before FFmpeg retries connecting to the camera."
+        },
+        "apple_compatibility": {
+          "label": "Set tag on HEVC (H.265) recording stream to improve compatibility with Apple players."
+        },
+        "inputs": {
+          "label": "Camera inputs."
+        }
+      }
+    },
+    "live": {
+      "label": "Live playback settings.",
+      "properties": {
+        "streams": {
+          "label": "Friendly names and restream names to use for live view."
+        },
+        "height": {
+          "label": "Live camera view height"
+        },
+        "quality": {
+          "label": "Live camera view quality"
+        }
+      }
+    },
+    "lpr": {
+      "label": "LPR config.",
+      "properties": {
+        "enabled": {
+          "label": "Enable license plate recognition."
+        },
+        "expire_time": {
+          "label": "Expire plates not seen after number of seconds (for dedicated LPR cameras only)."
+        },
+        "min_area": {
+          "label": "Minimum area of license plate to begin running recognition."
+        },
+        "enhancement": {
+          "label": "Amount of contrast adjustment and denoising to apply to license plate images before recognition."
+        }
+      }
+    },
+    "motion": {
+      "label": "Motion detection configuration.",
+      "properties": {
+        "enabled": {
+          "label": "Enable motion on all cameras."
+        },
+        "threshold": {
+          "label": "Motion detection threshold (1-255)."
+        },
+        "lightning_threshold": {
+          "label": "Lightning detection threshold (0.3-1.0)."
+        },
+        "improve_contrast": {
+          "label": "Improve Contrast"
+        },
+        "contour_area": {
+          "label": "Contour Area"
+        },
+        "delta_alpha": {
+          "label": "Delta Alpha"
+        },
+        "frame_alpha": {
+          "label": "Frame Alpha"
+        },
+        "frame_height": {
+          "label": "Frame Height"
+        },
+        "mask": {
+          "label": "Coordinates polygon for the motion mask."
+        },
+        "mqtt_off_delay": {
+          "label": "Delay for updating MQTT with no motion detected."
+        },
+        "enabled_in_config": {
+          "label": "Keep track of original state of motion detection."
+        }
+      }
+    },
+    "objects": {
+      "label": "Object configuration.",
+      "properties": {
+        "track": {
+          "label": "Objects to track."
+        },
+        "filters": {
+          "label": "Object filters.",
+          "properties": {
+            "min_area": {
+              "label": "Minimum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+            },
+            "max_area": {
+              "label": "Maximum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+            },
+            "min_ratio": {
+              "label": "Minimum ratio of bounding box's width/height for object to be counted."
+            },
+            "max_ratio": {
+              "label": "Maximum ratio of bounding box's width/height for object to be counted."
+            },
+            "threshold": {
+              "label": "Average detection confidence threshold for object to be counted."
+            },
+            "min_score": {
+              "label": "Minimum detection confidence for object to be counted."
+            },
+            "mask": {
+              "label": "Detection area polygon mask for this filter configuration."
+            }
+          }
+        },
+        "mask": {
+          "label": "Object mask."
+        },
+        "genai": {
+          "label": "Config for using genai to analyze objects.",
+          "properties": {
+            "enabled": {
+              "label": "Enable GenAI for camera."
+            },
+            "use_snapshot": {
+              "label": "Use snapshots for generating descriptions."
+            },
+            "prompt": {
+              "label": "Default caption prompt."
+            },
+            "object_prompts": {
+              "label": "Object specific prompts."
+            },
+            "objects": {
+              "label": "List of objects to run generative AI for."
+            },
+            "required_zones": {
+              "label": "List of required zones to be entered in order to run generative AI."
+            },
+            "debug_save_thumbnails": {
+              "label": "Save thumbnails sent to generative AI for debugging purposes."
+            },
+            "send_triggers": {
+              "label": "What triggers to use to send frames to generative AI for a tracked object.",
+              "properties": {
+                "tracked_object_end": {
+                  "label": "Send once the object is no longer tracked."
+                },
+                "after_significant_updates": {
+                  "label": "Send an early request to generative AI when X frames accumulated."
+                }
+              }
+            },
+            "enabled_in_config": {
+              "label": "Keep track of original state of generative AI."
+            }
+          }
+        }
+      }
+    },
+    "record": {
+      "label": "Record configuration.",
+      "properties": {
+        "enabled": {
+          "label": "Enable record on all cameras."
+        },
+        "sync_recordings": {
+          "label": "Sync recordings with disk on startup and once a day."
+        },
+        "expire_interval": {
+          "label": "Number of minutes to wait between cleanup runs."
+        },
+        "continuous": {
+          "label": "Continuous recording retention settings.",
+          "properties": {
+            "days": {
+              "label": "Default retention period."
+            }
+          }
+        },
+        "motion": {
+          "label": "Motion recording retention settings.",
+          "properties": {
+            "days": {
+              "label": "Default retention period."
+            }
+          }
+        },
+        "detections": {
+          "label": "Detection specific retention settings.",
+          "properties": {
+            "pre_capture": {
+              "label": "Seconds to retain before event starts."
+            },
+            "post_capture": {
+              "label": "Seconds to retain after event ends."
+            },
+            "retain": {
+              "label": "Event retention settings.",
+              "properties": {
+                "days": {
+                  "label": "Default retention period."
+                },
+                "mode": {
+                  "label": "Retain mode."
+                }
+              }
+            }
+          }
+        },
+        "alerts": {
+          "label": "Alert specific retention settings.",
+          "properties": {
+            "pre_capture": {
+              "label": "Seconds to retain before event starts."
+            },
+            "post_capture": {
+              "label": "Seconds to retain after event ends."
+            },
+            "retain": {
+              "label": "Event retention settings.",
+              "properties": {
+                "days": {
+                  "label": "Default retention period."
+                },
+                "mode": {
+                  "label": "Retain mode."
+                }
+              }
+            }
+          }
+        },
+        "export": {
+          "label": "Recording Export Config",
+          "properties": {
+            "timelapse_args": {
+              "label": "Timelapse Args"
+            }
+          }
+        },
+        "preview": {
+          "label": "Recording Preview Config",
+          "properties": {
+            "quality": {
+              "label": "Quality of recording preview."
+            }
+          }
+        },
+        "enabled_in_config": {
+          "label": "Keep track of original state of recording."
+        }
+      }
+    },
+    "review": {
+      "label": "Review configuration.",
+      "properties": {
+        "alerts": {
+          "label": "Review alerts config.",
+          "properties": {
+            "enabled": {
+              "label": "Enable alerts."
+            },
+            "labels": {
+              "label": "Labels to create alerts for."
+            },
+            "required_zones": {
+              "label": "List of required zones to be entered in order to save the event as an alert."
+            },
+            "enabled_in_config": {
+              "label": "Keep track of original state of alerts."
+            },
+            "cutoff_time": {
+              "label": "Time to cutoff alerts after no alert-causing activity has occurred."
+            }
+          }
+        },
+        "detections": {
+          "label": "Review detections config.",
+          "properties": {
+            "enabled": {
+              "label": "Enable detections."
+            },
+            "labels": {
+              "label": "Labels to create detections for."
+            },
+            "required_zones": {
+              "label": "List of required zones to be entered in order to save the event as a detection."
+            },
+            "cutoff_time": {
+              "label": "Time to cutoff detection after no detection-causing activity has occurred."
+            },
+            "enabled_in_config": {
+              "label": "Keep track of original state of detections."
+            }
+          }
+        },
+        "genai": {
+          "label": "Review description genai config.",
+          "properties": {
+            "enabled": {
+              "label": "Enable GenAI descriptions for review items."
+            },
+            "alerts": {
+              "label": "Enable GenAI for alerts."
+            },
+            "detections": {
+              "label": "Enable GenAI for detections."
+            },
+            "additional_concerns": {
+              "label": "Additional concerns that GenAI should make note of on this camera."
+            },
+            "debug_save_thumbnails": {
+              "label": "Save thumbnails sent to generative AI for debugging purposes."
+            },
+            "enabled_in_config": {
+              "label": "Keep track of original state of generative AI."
+            },
+            "preferred_language": {
+              "label": "Preferred language for GenAI Response"
+            },
+            "activity_context_prompt": {
+              "label": "Custom activity context prompt defining normal activity patterns for this property."
+            }
+          }
+        }
+      }
+    },
+    "semantic_search": {
+      "label": "Semantic search configuration.",
+      "properties": {
+        "triggers": {
+          "label": "Trigger actions on tracked objects that match existing thumbnails or descriptions",
+          "properties": {
+            "enabled": {
+              "label": "Enable this trigger"
+            },
+            "type": {
+              "label": "Type of trigger"
+            },
+            "data": {
+              "label": "Trigger content (text phrase or image ID)"
+            },
+            "threshold": {
+              "label": "Confidence score required to run the trigger"
+            },
+            "actions": {
+              "label": "Actions to perform when trigger is matched"
+            }
+          }
+        }
+      }
+    },
+    "snapshots": {
+      "label": "Snapshot configuration.",
+      "properties": {
+        "enabled": {
+          "label": "Snapshots enabled."
+        },
+        "clean_copy": {
+          "label": "Create a clean copy of the snapshot image."
+        },
+        "timestamp": {
+          "label": "Add a timestamp overlay on the snapshot."
+        },
+        "bounding_box": {
+          "label": "Add a bounding box overlay on the snapshot."
+        },
+        "crop": {
+          "label": "Crop the snapshot to the detected object."
+        },
+        "required_zones": {
+          "label": "List of required zones to be entered in order to save a snapshot."
+        },
+        "height": {
+          "label": "Snapshot image height."
+        },
+        "retain": {
+          "label": "Snapshot retention.",
+          "properties": {
+            "default": {
+              "label": "Default retention period."
+            },
+            "mode": {
+              "label": "Retain mode."
+            },
+            "objects": {
+              "label": "Object retention period."
+            }
+          }
+        },
+        "quality": {
+          "label": "Quality of the encoded jpeg (0-100)."
+        }
+      }
+    },
+    "timestamp_style": {
+      "label": "Timestamp style configuration.",
+      "properties": {
+        "position": {
+          "label": "Timestamp position."
+        },
+        "format": {
+          "label": "Timestamp format."
+        },
+        "color": {
+          "label": "Timestamp color.",
+          "properties": {
+            "red": {
+              "label": "Red"
+            },
+            "green": {
+              "label": "Green"
+            },
+            "blue": {
+              "label": "Blue"
+            }
+          }
+        },
+        "thickness": {
+          "label": "Timestamp thickness."
+        },
+        "effect": {
+          "label": "Timestamp effect."
+        }
+      }
+    },
+    "best_image_timeout": {
+      "label": "How long to wait for the image with the highest confidence score."
+    },
+    "mqtt": {
+      "label": "MQTT configuration.",
+      "properties": {
+        "enabled": {
+          "label": "Send image over MQTT."
+        },
+        "timestamp": {
+          "label": "Add timestamp to MQTT image."
+        },
+        "bounding_box": {
+          "label": "Add bounding box to MQTT image."
+        },
+        "crop": {
+          "label": "Crop MQTT image to detected object."
+        },
+        "height": {
+          "label": "MQTT image height."
+        },
+        "required_zones": {
+          "label": "List of required zones to be entered in order to send the image."
+        },
+        "quality": {
+          "label": "Quality of the encoded jpeg (0-100)."
+        }
+      }
+    },
+    "notifications": {
+      "label": "Notifications configuration.",
+      "properties": {
+        "enabled": {
+          "label": "Enable notifications"
+        },
+        "email": {
+          "label": "Email required for push."
+        },
+        "cooldown": {
+          "label": "Cooldown period for notifications (time in seconds)."
+        },
+        "enabled_in_config": {
+          "label": "Keep track of original state of notifications."
+        }
+      }
+    },
+    "onvif": {
+      "label": "Camera Onvif Configuration.",
+      "properties": {
+        "host": {
+          "label": "Onvif Host"
+        },
+        "port": {
+          "label": "Onvif Port"
+        },
+        "user": {
+          "label": "Onvif Username"
+        },
+        "password": {
+          "label": "Onvif Password"
+        },
+        "tls_insecure": {
+          "label": "Onvif Disable TLS verification"
+        },
+        "autotracking": {
+          "label": "PTZ auto tracking config.",
+          "properties": {
+            "enabled": {
+              "label": "Enable PTZ object autotracking."
+            },
+            "calibrate_on_startup": {
+              "label": "Perform a camera calibration when Frigate starts."
+            },
+            "zooming": {
+              "label": "Autotracker zooming mode."
+            },
+            "zoom_factor": {
+              "label": "Zooming factor (0.1-0.75)."
+            },
+            "track": {
+              "label": "Objects to track."
+            },
+            "required_zones": {
+              "label": "List of required zones to be entered in order to begin autotracking."
+            },
+            "return_preset": {
+              "label": "Name of camera preset to return to when object tracking is over."
+            },
+            "timeout": {
+              "label": "Seconds to delay before returning to preset."
+            },
+            "movement_weights": {
+              "label": "Internal value used for PTZ movements based on the speed of your camera's motor."
+            },
+            "enabled_in_config": {
+              "label": "Keep track of original state of autotracking."
+            }
+          }
+        },
+        "ignore_time_mismatch": {
+          "label": "Onvif Ignore Time Synchronization Mismatch Between Camera and Server"
+        }
+      }
+    },
+    "type": {
+      "label": "Camera Type"
+    },
+    "ui": {
+      "label": "Camera UI Modifications.",
+      "properties": {
+        "order": {
+          "label": "Order of camera in UI."
+        },
+        "dashboard": {
+          "label": "Show this camera in Frigate dashboard UI."
+        }
+      }
+    },
+    "webui_url": {
+      "label": "URL to visit the camera directly from system page"
+    },
+    "zones": {
+      "label": "Zone configuration.",
+      "properties": {
+        "filters": {
+          "label": "Zone filters.",
+          "properties": {
+            "min_area": {
+              "label": "Minimum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+            },
+            "max_area": {
+              "label": "Maximum area of bounding box for object to be counted. Can be pixels (int) or percentage (float between 0.000001 and 0.99)."
+            },
+            "min_ratio": {
+              "label": "Minimum ratio of bounding box's width/height for object to be counted."
+            },
+            "max_ratio": {
+              "label": "Maximum ratio of bounding box's width/height for object to be counted."
+            },
+            "threshold": {
+              "label": "Average detection confidence threshold for object to be counted."
+            },
+            "min_score": {
+              "label": "Minimum detection confidence for object to be counted."
+            },
+            "mask": {
+              "label": "Detection area polygon mask for this filter configuration."
+            }
+          }
+        },
+        "coordinates": {
+          "label": "Coordinates polygon for the defined zone."
+        },
+        "distances": {
+          "label": "Real-world distances for the sides of quadrilateral for the defined zone."
+        },
+        "inertia": {
+          "label": "Number of consecutive frames required for object to be considered present in the zone."
+        },
+        "loitering_time": {
+          "label": "Number of seconds that an object must loiter to be considered in the zone."
+        },
+        "speed_threshold": {
+          "label": "Minimum speed value for an object to be considered in the zone."
+        },
+        "objects": {
+          "label": "List of objects that can trigger the zone."
+        }
+      }
+    },
+    "enabled_in_config": {
+      "label": "Keep track of original state of camera."
+    }
+  }
+}

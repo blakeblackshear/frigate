@@ -5,9 +5,14 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import pytz
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
+from frigate.api.auth import require_camera_access
+from frigate.api.defs.response.preview_response import (
+    PreviewFramesResponse,
+    PreviewsResponse,
+)
 from frigate.api.defs.tags import Tags
 from frigate.const import BASE_DIR, CACHE_DIR, PREVIEW_FRAME_TYPE
 from frigate.models import Previews
@@ -18,7 +23,16 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.preview])
 
 
-@router.get("/preview/{camera_name}/start/{start_ts}/end/{end_ts}")
+@router.get(
+    "/preview/{camera_name}/start/{start_ts}/end/{end_ts}",
+    response_model=PreviewsResponse,
+    dependencies=[Depends(require_camera_access)],
+    summary="Get preview clips for time range",
+    description="""Gets all preview clips for a specified camera and time range.
+    Returns a list of preview video clips that overlap with the requested time period,
+    ordered by start time. Use camera_name='all' to get previews from all cameras.
+    Returns an error if no previews are found.""",
+)
 def preview_ts(camera_name: str, start_ts: float, end_ts: float):
     """Get all mp4 previews relevant for time period."""
     if camera_name != "all":
@@ -71,7 +85,16 @@ def preview_ts(camera_name: str, start_ts: float, end_ts: float):
     return JSONResponse(content=clips, status_code=200)
 
 
-@router.get("/preview/{year_month}/{day}/{hour}/{camera_name}/{tz_name}")
+@router.get(
+    "/preview/{year_month}/{day}/{hour}/{camera_name}/{tz_name}",
+    response_model=PreviewsResponse,
+    dependencies=[Depends(require_camera_access)],
+    summary="Get preview clips for specific hour",
+    description="""Gets all preview clips for a specific hour in a given timezone.
+    Converts the provided date/time from the specified timezone to UTC and retrieves
+    all preview clips for that hour. Use camera_name='all' to get previews from all cameras.
+    The tz_name should be a timezone like 'America/New_York' (use commas instead of slashes).""",
+)
 def preview_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: str):
     """Get all mp4 previews relevant for time period given the timezone"""
     parts = year_month.split("-")
@@ -86,7 +109,15 @@ def preview_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name
     return preview_ts(camera_name, start_ts, end_ts)
 
 
-@router.get("/preview/{camera_name}/start/{start_ts}/end/{end_ts}/frames")
+@router.get(
+    "/preview/{camera_name}/start/{start_ts}/end/{end_ts}/frames",
+    response_model=PreviewFramesResponse,
+    dependencies=[Depends(require_camera_access)],
+    summary="Get cached preview frame filenames",
+    description="""Gets a list of cached preview frame filenames for a specific camera and time range.
+    Returns an array of filenames for preview frames that fall within the specified time period,
+    sorted in chronological order. These are individual frame images cached for quick preview display.""",
+)
 def get_preview_frames_from_cache(camera_name: str, start_ts: float, end_ts: float):
     """Get list of cached preview frames"""
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")

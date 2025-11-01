@@ -315,9 +315,9 @@ export function InProgressPreview({
   const apiHost = useApiHost();
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const { data: previewFrames } = useSWR<string[]>(
-    `preview/${camera}/start/${Math.floor(startTime) - PREVIEW_PADDING}/end/${
-      Math.ceil(endTime ?? timeRange.before) + PREVIEW_PADDING
-    }/frames`,
+    `preview/${camera}/start/${Math.floor(startTime) - PREVIEW_PADDING}/end/${Math.ceil(
+      endTime ?? timeRange.before,
+    )}/frames`,
     { revalidateOnFocus: false },
   );
 

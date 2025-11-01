@@ -5,6 +5,7 @@ import os
 import secrets
 import shutil
 from multiprocessing import Queue
+from multiprocessing.managers import DictProxy, SyncManager
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Optional
@@ -14,19 +15,20 @@ import uvicorn
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 
-import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
+from frigate.camera.maintainer import CameraMaintainer
 from frigate.comms.base_communicator import Communicator
-from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
+from frigate.comms.object_detector_signaler import DetectorProxy
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
+from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.config.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
@@ -36,12 +38,12 @@ from frigate.const import (
     FACE_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
-    SHM_FRAMES_VAR,
     THUMB_DIR,
+    TRIGGER_DIR,
 )
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.embeddings import EmbeddingsContext, manage_embeddings
+from frigate.embeddings import EmbeddingProcess, EmbeddingsContext
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.maintainer import EventProcessor
@@ -55,56 +57,58 @@ from frigate.models import (
     Regions,
     ReviewSegment,
     Timeline,
+    Trigger,
     User,
 )
 from frigate.object_detection.base import ObjectDetectProcess
-from frigate.output.output import output_frames
+from frigate.output.output import OutputProcess
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.export import migrate_exports
-from frigate.record.record import manage_recordings
-from frigate.review.review import manage_review_segments
+from frigate.record.record import RecordProcess
+from frigate.review.review import ReviewProcess
 from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
-from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
-from frigate.util.object import get_camera_regions_grid
+from frigate.util.image import UntrackedSharedMemory
 from frigate.util.services import set_file_limit
 from frigate.version import VERSION
-from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
 
 logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    def __init__(self, config: FrigateConfig) -> None:
+    def __init__(
+        self, config: FrigateConfig, manager: SyncManager, stop_event: MpEvent
+    ) -> None:
+        self.metrics_manager = manager
         self.audio_process: Optional[mp.Process] = None
-        self.stop_event: MpEvent = mp.Event()
+        self.stop_event = stop_event
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
-        self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.camera_metrics: dict[str, CameraMetrics] = {}
+        self.camera_metrics: DictProxy = self.metrics_manager.dict()
         self.embeddings_metrics: DataProcessorMetrics | None = (
-            DataProcessorMetrics()
+            DataProcessorMetrics(
+                self.metrics_manager, list(config.classification.custom.keys())
+            )
             if (
                 config.semantic_search.enabled
                 or config.lpr.enabled
                 or config.face_recognition.enabled
+                or len(config.classification.custom) > 0
             )
             else None
         )
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.embeddings: Optional[EmbeddingsContext] = None
-        self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
-        self.frame_manager = SharedMemoryFrameManager()
         self.config = config
 
     def ensure_dirs(self) -> None:
@@ -121,6 +125,9 @@ class FrigateApp:
         if self.config.face_recognition.enabled:
             dirs.append(FACE_DIR)
 
+        if self.config.semantic_search.enabled:
+            dirs.append(TRIGGER_DIR)
+
         for d in dirs:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
@@ -131,7 +138,7 @@ class FrigateApp:
     def init_camera_metrics(self) -> None:
         # create camera_metrics
         for camera_name in self.config.cameras.keys():
-            self.camera_metrics[camera_name] = CameraMetrics()
+            self.camera_metrics[camera_name] = CameraMetrics(self.metrics_manager)
             self.ptz_metrics[camera_name] = PTZMetrics(
                 autotracker_enabled=self.config.cameras[
                     camera_name
@@ -140,8 +147,16 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to
+        # leaving room for 2 extra cameras to be added
         self.detected_frames_queue: Queue = mp.Queue(
-            maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
+            maxsize=(
+                sum(
+                    camera.enabled_in_config == True
+                    for camera in self.config.cameras.values()
+                )
+                + 2
+            )
+            * 2
         )
 
         # Queue for timeline events
@@ -217,52 +232,24 @@ class FrigateApp:
                 self.processes["go2rtc"] = proc.info["pid"]
 
     def init_recording_manager(self) -> None:
-        recording_process = util.Process(
-            target=manage_recordings,
-            name="recording_manager",
-            args=(self.config,),
-        )
-        recording_process.daemon = True
+        recording_process = RecordProcess(self.config, self.stop_event)
         self.recording_process = recording_process
         recording_process.start()
         self.processes["recording"] = recording_process.pid or 0
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def init_review_segment_manager(self) -> None:
-        review_segment_process = util.Process(
-            target=manage_review_segments,
-            name="review_segment_manager",
-            args=(self.config,),
-        )
-        review_segment_process.daemon = True
+        review_segment_process = ReviewProcess(self.config, self.stop_event)
         self.review_segment_process = review_segment_process
         review_segment_process.start()
         self.processes["review_segment"] = review_segment_process.pid or 0
         logger.info(f"Review process started: {review_segment_process.pid}")
 
     def init_embeddings_manager(self) -> None:
-        genai_cameras = [
-            c for c in self.config.cameras.values() if c.enabled and c.genai.enabled
-        ]
-
-        if (
-            not self.config.semantic_search.enabled
-            and not genai_cameras
-            and not self.config.lpr.enabled
-            and not self.config.face_recognition.enabled
-            and not self.config.classification.bird.enabled
-        ):
-            return
-
-        embedding_process = util.Process(
-            target=manage_embeddings,
-            name="embeddings_manager",
-            args=(
-                self.config,
-                self.embeddings_metrics,
-            ),
+        # always start the embeddings process
+        embedding_process = EmbeddingProcess(
+            self.config, self.embeddings_metrics, self.stop_event
         )
-        embedding_process.daemon = True
         self.embedding_process = embedding_process
         embedding_process.start()
         self.processes["embeddings"] = embedding_process.pid or 0
@@ -279,7 +266,9 @@ class FrigateApp:
                 "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
             },
             timeout=max(
-                60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
+                60,
+                10
+                * len([c for c in self.config.cameras.values() if c.enabled_in_config]),
             ),
             load_vec_extension=self.config.semantic_search.enabled,
         )
@@ -293,6 +282,7 @@ class FrigateApp:
             ReviewSegment,
             Timeline,
             User,
+            Trigger,
         ]
         self.db.bind(models)
 
@@ -308,24 +298,15 @@ class FrigateApp:
             migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
 
     def init_embeddings_client(self) -> None:
-        genai_cameras = [
-            c for c in self.config.cameras.values() if c.enabled and c.genai.enabled
-        ]
-
-        if (
-            self.config.semantic_search.enabled
-            or self.config.lpr.enabled
-            or genai_cameras
-            or self.config.face_recognition.enabled
-        ):
-            # Create a client for other processes to use
-            self.embeddings = EmbeddingsContext(self.db)
+        # Create a client for other processes to use
+        self.embeddings = EmbeddingsContext(self.db)
 
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
-        self.inter_config_updater = ConfigPublisher()
+        self.inter_config_updater = CameraConfigUpdatePublisher()
         self.event_metadata_updater = EventMetadataPublisher()
         self.inter_zmq_proxy = ZmqProxy()
+        self.detection_proxy = DetectorProxy()
 
     def init_onvif(self) -> None:
         self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
@@ -358,8 +339,6 @@ class FrigateApp:
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
-            self.detection_out_events[name] = mp.Event()
-
             try:
                 largest_frame = max(
                     [
@@ -391,8 +370,10 @@ class FrigateApp:
             self.detectors[name] = ObjectDetectProcess(
                 name,
                 self.detection_queue,
-                self.detection_out_events,
+                list(self.config.cameras.keys()),
+                self.config,
                 detector_config,
+                self.stop_event,
             )
 
     def start_ptz_autotracker(self) -> None:
@@ -416,79 +397,22 @@ class FrigateApp:
         self.detected_frames_processor.start()
 
     def start_video_output_processor(self) -> None:
-        output_processor = util.Process(
-            target=output_frames,
-            name="output_processor",
-            args=(self.config,),
-        )
-        output_processor.daemon = True
+        output_processor = OutputProcess(self.config, self.stop_event)
         self.output_processor = output_processor
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
 
-    def init_historical_regions(self) -> None:
-        # delete region grids for removed or renamed cameras
-        cameras = list(self.config.cameras.keys())
-        Regions.delete().where(~(Regions.camera << cameras)).execute()
-
-        # create or update region grids for each camera
-        for camera in self.config.cameras.values():
-            assert camera.name is not None
-            self.region_grids[camera.name] = get_camera_regions_grid(
-                camera.name,
-                camera.detect,
-                max(self.config.model.width, self.config.model.height),
-            )
-
-    def start_camera_processors(self) -> None:
-        for name, config in self.config.cameras.items():
-            if not self.config.cameras[name].enabled_in_config:
-                logger.info(f"Camera processor not started for disabled camera {name}")
-                continue
-
-            camera_process = util.Process(
-                target=track_camera,
-                name=f"camera_processor:{name}",
-                args=(
-                    name,
-                    config,
-                    self.config.model,
-                    self.config.model.merged_labelmap,
-                    self.detection_queue,
-                    self.detection_out_events[name],
-                    self.detected_frames_queue,
-                    self.camera_metrics[name],
-                    self.ptz_metrics[name],
-                    self.region_grids[name],
-                ),
-                daemon=True,
-            )
-            self.camera_metrics[name].process = camera_process
-            camera_process.start()
-            logger.info(f"Camera processor started for {name}: {camera_process.pid}")
-
-    def start_camera_capture_processes(self) -> None:
-        shm_frame_count = self.shm_frame_count()
-
-        for name, config in self.config.cameras.items():
-            if not self.config.cameras[name].enabled_in_config:
-                logger.info(f"Capture process not started for disabled camera {name}")
-                continue
-
-            # pre-create shms
-            for i in range(shm_frame_count):
-                frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
-                self.frame_manager.create(f"{config.name}_frame{i}", frame_size)
-
-            capture_process = util.Process(
-                target=capture_camera,
-                name=f"camera_capture:{name}",
-                args=(name, config, shm_frame_count, self.camera_metrics[name]),
-            )
-            capture_process.daemon = True
-            self.camera_metrics[name].capture_process = capture_process
-            capture_process.start()
-            logger.info(f"Capture process started for {name}: {capture_process.pid}")
+    def start_camera_processor(self) -> None:
+        self.camera_maintainer = CameraMaintainer(
+            self.config,
+            self.detection_queue,
+            self.detected_frames_queue,
+            self.camera_metrics,
+            self.ptz_metrics,
+            self.stop_event,
+            self.metrics_manager,
+        )
+        self.camera_maintainer.start()
 
     def start_audio_processor(self) -> None:
         audio_cameras = [
@@ -498,7 +422,9 @@ class FrigateApp:
         ]
 
         if audio_cameras:
-            self.audio_process = AudioProcessor(audio_cameras, self.camera_metrics)
+            self.audio_process = AudioProcessor(
+                self.config, audio_cameras, self.camera_metrics, self.stop_event
+            )
             self.audio_process.start()
             self.processes["audio_detector"] = self.audio_process.pid or 0
 
@@ -546,45 +472,6 @@ class FrigateApp:
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
         self.frigate_watchdog.start()
 
-    def shm_frame_count(self) -> int:
-        total_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
-
-        # required for log files + nginx cache
-        min_req_shm = 40 + 10
-
-        if self.config.birdseye.restream:
-            min_req_shm += 8
-
-        available_shm = total_shm - min_req_shm
-        cam_total_frame_size = 0.0
-
-        for camera in self.config.cameras.values():
-            if camera.enabled and camera.detect.width and camera.detect.height:
-                cam_total_frame_size += round(
-                    (camera.detect.width * camera.detect.height * 1.5 + 270480)
-                    / 1048576,
-                    1,
-                )
-
-        if cam_total_frame_size == 0.0:
-            return 0
-
-        shm_frame_count = min(
-            int(os.environ.get(SHM_FRAMES_VAR, "50")),
-            int(available_shm / (cam_total_frame_size)),
-        )
-
-        logger.debug(
-            f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {shm_frame_count} frames for each camera in SHM"
-        )
-
-        if shm_frame_count < 20:
-            logger.warning(
-                f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + cam_total_frame_size * 20)}MB."
-            )
-
-        return shm_frame_count
-
     def init_auth(self) -> None:
         if self.config.auth.enabled:
             if User.select().count() == 0:
@@ -600,6 +487,8 @@ class FrigateApp:
                         User.notification_tokens: [],
                     }
                 ).execute()
+
+                self.config.auth.admin_first_time_login = True
 
                 logger.info("********************************************************")
                 logger.info("********************************************************")
@@ -645,19 +534,17 @@ class FrigateApp:
         self.init_recording_manager()
         self.init_review_segment_manager()
         self.init_go2rtc()
-        self.start_detectors()
         self.init_embeddings_manager()
         self.bind_database()
         self.check_db_data_migrations()
         self.init_inter_process_communicator()
+        self.start_detectors()
         self.init_dispatcher()
         self.init_embeddings_client()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
-        self.init_historical_regions()
         self.start_detected_frames_processor()
-        self.start_camera_processors()
-        self.start_camera_capture_processes()
+        self.start_camera_processor()
         self.start_audio_processor()
         self.start_storage_maintainer()
         self.start_stats_emitter()
@@ -680,6 +567,7 @@ class FrigateApp:
                     self.onvif_controller,
                     self.stats_emitter,
                     self.event_metadata_updater,
+                    self.inter_config_updater,
                 ),
                 host="127.0.0.1",
                 port=5001,
@@ -712,24 +600,6 @@ class FrigateApp:
         # stop the onvif controller
         if self.onvif_controller:
             self.onvif_controller.close()
-
-        # ensure the capture processes are done
-        for camera, metrics in self.camera_metrics.items():
-            capture_process = metrics.capture_process
-            if capture_process is not None:
-                logger.info(f"Waiting for capture process for {camera} to stop")
-                capture_process.terminate()
-                capture_process.join()
-
-        # ensure the camera processors are done
-        for camera, metrics in self.camera_metrics.items():
-            camera_process = metrics.process
-            if camera_process is not None:
-                logger.info(f"Waiting for process for {camera} to stop")
-                camera_process.terminate()
-                camera_process.join()
-                logger.info(f"Closing frame queue for {camera}")
-                empty_and_close_queue(metrics.frame_queue)
 
         # ensure the detectors are done
         for detector in self.detectors.values():
@@ -774,14 +644,12 @@ class FrigateApp:
         self.inter_config_updater.stop()
         self.event_metadata_updater.stop()
         self.inter_zmq_proxy.stop()
+        self.detection_proxy.stop()
 
-        self.frame_manager.cleanup()
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
 
-        # exit the mp Manager process
         _stop_logging()
-
-        os._exit(os.EX_OK)
+        self.metrics_manager.shutdown()

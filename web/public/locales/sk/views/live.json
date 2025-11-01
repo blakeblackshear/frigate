@@ -43,10 +43,18 @@
         "label": "Kliknite do rámčeka pre vycentrovanie PTZ kamery"
       }
     },
-    "presets": "Predvoľby PTZ kamery"
+    "presets": "Predvoľby PTZ kamery",
+    "focus": {
+      "in": {
+        "label": "Zaostrenie PTZ kamery v"
+      },
+      "out": {
+        "label": "Výstup zaostrenia PTZ kamery"
+      }
+    }
   },
   "camera": {
-    "enable": "Povoliť fotoaparát",
+    "enable": "Povoliť kameru",
     "disable": "Zakázať kameru"
   },
   "muteCameras": {
@@ -72,5 +80,104 @@
   "autotracking": {
     "enable": "Povoliť automatické sledovanie",
     "disable": "Zakázať automatické sledovanie"
+  },
+  "transcription": {
+    "enable": "Povoliť živý prepis zvuku",
+    "disable": "Zakázať živý prepis zvuku"
+  },
+  "streamStats": {
+    "enable": "Zobraziť štatistiky streamu",
+    "disable": "Skryť štatistiky streamu"
+  },
+  "manualRecording": {
+    "title": "Na požiadanie",
+    "tips": "Stiahnite si okamžité snímky alebo začnite manuálnu akciu založenú na nastavení nahrávania tejto kamery.",
+    "playInBackground": {
+      "label": "Hrať na pozadí",
+      "desc": "Povoľte túto možnosť, ak chcete pokračovať v streamovaní, aj keď je prehrávač skrytý."
+    },
+    "showStats": {
+      "label": "Zobraziť štatistiky",
+      "desc": "Povoľte túto možnosť, ak chcete zobraziť štatistiky streamu ako prekrytie na obraze z kamery."
+    },
+    "debugView": "Zobrazenie ladenia",
+    "start": "Spustiť nahrávanie na požiadanie",
+    "started": "Spustené manuálne nahrávanie na požiadanie.",
+    "failedToStart": "Nepodarilo sa spustiť manuálne nahrávanie na požiadanie.",
+    "recordDisabledTips": "Keďže nahrávanie je v konfigurácii tejto kamery zakázané alebo obmedzené, uloží sa iba snímka.",
+    "end": "Ukončiť nahrávanie na požiadanie",
+    "ended": "Manuálne nahrávanie na požiadanie bolo ukončené.",
+    "failedToEnd": "Nepodarilo sa ukončiť manuálne nahrávanie na požiadanie."
+  },
+  "streamingSettings": "Nastavenia streamovania",
+  "notifications": "Notifikacie",
+  "audio": "Zvuk",
+  "suspend": {
+    "forTime": "Pozastaviť na: "
+  },
+  "stream": {
+    "title": "Stream",
+    "audio": {
+      "tips": {
+        "title": "Zvuk musí byť vyvedený z vašej kamery a nakonfigurovaný v go2rtc pre tento stream."
+      },
+      "available": "Pre tento stream je k dispozícii zvuk",
+      "unavailable": "Zvuk nie je pre tento stream k dispozícii"
+    },
+    "twoWayTalk": {
+      "tips": "Vaše zariadenie musí túto funkciu podporovať a WebRTC musí byť nakonfigurované na obojsmernú komunikáciu.",
+      "available": "Pre tento stream je k dispozícii obojsmerná komunikácia",
+      "unavailable": "Obojsmerná komunikácia nie je pre tento stream k dispozícii"
+    },
+    "lowBandwidth": {
+      "tips": "Živý náhľad je v režime nízkej šírky pásma z dôvodu chýb načítavania do vyrovnávacej pamäte alebo streamu.",
+      "resetStream": "Obnoviť stream"
+    },
+    "playInBackground": {
+      "label": "Hrať na pozadí",
+      "tips": "Povoľte túto možnosť, ak chcete pokračovať v streamovaní, aj keď je prehrávač skrytý."
+    },
+    "debug": {
+      "picker": "Výber streamu nie je k dispozícii v režime ladenia. Zobrazenie ladenia vždy používa stream, ktorému je priradená rola detekcie."
+    }
+  },
+  "cameraSettings": {
+    "title": "Nastavenia {{camera}}",
+    "cameraEnabled": "Kamera povolená",
+    "objectDetection": "Detekcia objektov",
+    "recording": "Nahrávanie",
+    "snapshots": "Snímky",
+    "audioDetection": "Detekcia zvuku",
+    "transcription": "Zvukový prepis",
+    "autotracking": "Automatické sledovanie"
+  },
+  "history": {
+    "label": "Zobraziť historické zábery"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Všetko",
+      "motion": "Pohyb",
+      "active_objects": "Aktívne objekty"
+    },
+    "notAllTips": "Vaša konfigurácia uchovávania nahrávok {{source}} je nastavená na režim <code>: {{effectiveRetainMode}}<code>, takže táto nahrávka na požiadanie uchová iba segmenty s nastavením {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Upraviť rozloženie",
+    "group": {
+      "label": "Upraviť skupinu kamier"
+    },
+    "exitEdit": "Ukončiť úpravy"
+  },
+  "noCameras": {
+    "title": "Nie sú konfigurované žiadne kamery",
+    "description": "Začnite tým, že pripojíte kameru do Frigate.",
+    "buttonText": "Pridať kameru"
+  },
+  "snapshot": {
+    "takeSnapshot": "Stiahnite si okamžité snímky",
+    "noVideoSource": "Žiadny zdroj videa k dispozícii pre snapshot.",
+    "captureFailed": "Nepodarilo sa zachytiť snímku.",
+    "downloadStarted": "Sťahovanie snímky sa začalo."
   }
 }

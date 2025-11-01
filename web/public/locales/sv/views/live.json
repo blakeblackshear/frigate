@@ -2,8 +2,8 @@
   "documentTitle": "Live - Frigate",
   "documentTitle.withCamera": "{{camera}} - Live - Frigate",
   "twoWayTalk": {
-    "enable": "Aktivera Two Way Talk",
-    "disable": "Avaktivera Two Way Talk"
+    "enable": "Aktivera tvåvägssamtal",
+    "disable": "Avaktivera tvåvägssamtal"
   },
   "cameraAudio": {
     "disable": "Inaktivera kameraljud",
@@ -42,7 +42,15 @@
         "label": "Klicka i bilden för att centrera PTZ kamera"
       }
     },
-    "presets": "PTZ kamera förinställningar"
+    "presets": "PTZ kamera förinställningar",
+    "focus": {
+      "in": {
+        "label": "Fokusera PTZ-kameran in"
+      },
+      "out": {
+        "label": "Fokusera PTZ-kameran ut"
+      }
+    }
   },
   "streamStats": {
     "enable": "Visa videostatistik",
@@ -74,8 +82,8 @@
   "manualRecording": {
     "failedToEnd": "Misslyckades med att avsluta manuell vid behov-inspelning.",
     "started": "Starta manuell inspelning vid behov.",
-    "title": "Aktivera inspelning vid behov",
-    "tips": "Starta en manuell händelse enligt denna kameras inställningar för inspelningslagring.",
+    "title": "Vid behov",
+    "tips": "Ladda ner en omedelbar ögonblicksbild eller starta en manuell händelse baserat på kamerans inställningar för inspelningslagring.",
     "playInBackground": {
       "label": "Spela upp i bakgrunden",
       "desc": "Strömma vidare när spelaren inte visas."
@@ -98,7 +106,8 @@
     "objectDetection": "Objektsdetektering",
     "recording": "Inspelning",
     "snapshots": "Ögonblicksbilder",
-    "autotracking": "Autospårning"
+    "autotracking": "Autospårning",
+    "transcription": "Ljudtranskription"
   },
   "effectiveRetainMode": {
     "modes": {
@@ -150,9 +159,27 @@
     "playInBackground": {
       "label": "Spela i bakgrunden",
       "tips": "Aktivera det här alternativet för att fortsätta strömma när spelaren är dold."
+    },
+    "debug": {
+      "picker": "Strömval är inte tillgängligt i felsökningsläge. Felsökningsvyn använder alltid den ström som tilldelats detekteringsrollen."
     }
   },
   "history": {
     "label": "Visa historiskt videomaterial"
+  },
+  "transcription": {
+    "enable": "Aktivera live-ljudtranskription",
+    "disable": "Inaktivera live-ljudtranskription"
+  },
+  "noCameras": {
+    "title": "Inga kameror konfigurerade",
+    "description": "Börja med att ansluta en kamera till Frigate.",
+    "buttonText": "Lägg till kamera"
+  },
+  "snapshot": {
+    "takeSnapshot": "Ladda ner omedelbar ögonblicksbild",
+    "noVideoSource": "Ingen videokälla tillgänglig för ögonblicksbilden.",
+    "captureFailed": "Misslyckades med att ta en ögonblicksbild.",
+    "downloadStarted": "Nedladdning av ögonblicksbild har startat."
   }
 }

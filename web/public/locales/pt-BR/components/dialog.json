@@ -108,7 +108,15 @@
     "button": {
       "markAsReviewed": "Marcar como revisado",
       "export": "Exportar",
-      "deleteNow": "Deletar Agora"
+      "deleteNow": "Deletar Agora",
+      "markAsUnreviewed": "Marcar como não revisado"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Selecionar a miniatura de um objeto rastreado",
+    "search": {
+      "placeholder": "Pesquisar por rótulo ou sub-rótulo…"
+    },
+    "noImages": "Nenhuma miniatura encontrada para essa câmera"
   }
 }

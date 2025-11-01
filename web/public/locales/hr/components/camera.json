@@ -1,0 +1,40 @@
+{
+  "group": {
+    "label": "Grupe kamera",
+    "add": "Dodaj grupu kamera",
+    "edit": "Uredi grupu kamera",
+    "delete": {
+      "label": "Izbriši grupu kamera",
+      "confirm": {
+        "title": "Potvrda brisanja",
+        "desc": "Da li ste sigurni da želite obrisati grupu kamera <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Ime",
+      "placeholder": "Unesite ime…",
+      "errorMessage": {
+        "mustLeastCharacters": "Ime grupe kamera mora sadržavati barem 2 karaktera.",
+        "exists": "Grupa kamera sa ovim imenom već postoji.",
+        "nameMustNotPeriod": "Naziv grupe kamera ne smije sadržavati točku.",
+        "invalid": "Nevažeći naziv grupe kamera."
+      }
+    },
+    "cameras": {
+      "label": "Kamere",
+      "desc": "Izaberite kamere za ovu grupu."
+    },
+    "icon": "Ikona",
+    "success": "Grupa kamera ({{name}}) je pohranjena.",
+    "camera": {
+      "birdseye": "Ptičja perspektiva",
+      "setting": {
+        "label": "Postavke streamanja kamere",
+        "title": "{{cameraName}} Streaming Postavke",
+        "desc": "Promijenite opcije streamanja uživo za nadzornu ploču ove grupe kamera. <em>Ove postavke su specifične za uređaj/preglednik.</em>",
+        "audioIsAvailable": "Za ovaj prijenos dostupan je zvuk",
+        "audioIsUnavailable": "Za ovaj prijenos zvuk nije dostupan"
+      }
+    }
+  }
+}

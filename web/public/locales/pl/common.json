@@ -179,7 +179,15 @@
       "fi": "Suomi (Fiński)",
       "yue": "粵語 (Kantoński)",
       "th": "ไทย (Tajski)",
-      "ca": "Català (Kataloński)"
+      "ca": "Català (Kataloński)",
+      "ptBR": "Português brasileiro (portugalski - Brazylia)",
+      "sr": "Српски (Serbski)",
+      "sl": "Slovenščina (Słowacki)",
+      "lt": "Lietuvių (Litewski)",
+      "bg": "Български (Bułgarski)",
+      "gl": "Galego (Galicyjski)",
+      "id": "Bahasa Indonesia (Indonezyjski)",
+      "ur": "اردو (Urdu)"
     },
     "appearance": "Wygląd",
     "darkMode": {
@@ -271,5 +279,9 @@
       },
       "title": "Zapisz"
     }
+  },
+  "readTheDocumentation": "Przeczytaj dokumentację",
+  "information": {
+    "pixels": "{{area}}px"
   }
 }

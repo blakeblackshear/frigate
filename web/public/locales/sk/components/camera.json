@@ -56,12 +56,32 @@
             "continuousStreaming": {
               "label": "Nepretržité streamovanie",
               "desc": {
-                "title": "Obraz z kamery bude vždy vysielaný naživo, keď bude viditeľný na palubnej doske, aj keď nebude detekovaná žiadna aktivita."
+                "title": "Obraz z kamery bude vždy vysielaný naživo, keď bude viditeľný na palubnej doske, aj keď nebude detekovaná žiadna aktivita.",
+                "warning": "Nepretržité streamovanie môže spôsobiť vysoké využitie šírky pásma a problémy s výkonom. Používajte opatrne."
               }
             }
           }
+        },
+        "compatibilityMode": {
+          "label": "Režim kompatibility",
+          "desc": "Túto možnosť povoľte iba v prípade, že živý prenos z vašej kamery zobrazuje farebné artefakty a na pravej strane obrazu sa nachádza diagonálna čiara."
         }
-      }
+      },
+      "birdseye": "Vtáčie oko"
     }
+  },
+  "debug": {
+    "options": {
+      "label": "Nastavenia",
+      "title": "Možnosti",
+      "showOptions": "Zobraziť možnosti",
+      "hideOptions": "Skryť možnosti"
+    },
+    "boundingBox": "Hranica",
+    "timestamp": "Časová pečiatka",
+    "zones": "Zóny",
+    "mask": "Maska",
+    "motion": "Pohyb",
+    "regions": "Kraje"
   }
 }

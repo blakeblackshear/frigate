@@ -268,7 +268,9 @@
     "notifications": "הגדרת התראות - Frigate",
     "authentication": "הגדרות אימות - Frigate",
     "default": "הגדרות - Frigate",
-    "general": "הגדרות כלליות - Frigate"
+    "general": "הגדרות כלליות - Frigate",
+    "cameraManagement": "ניהול מצלמות - Frigate",
+    "cameraReview": "הגדרות סקירת מצלמה - Frigate"
   },
   "menu": {
     "ui": "UI - ממשק משתמש",
@@ -279,7 +281,11 @@
     "users": "משתמשים",
     "notifications": "התראות",
     "frigateplus": "+Frigate",
-    "enrichments": "תוספות"
+    "enrichments": "תוספות",
+    "triggers": "הפעלות",
+    "cameraManagement": "ניהול",
+    "cameraReview": "סְקִירָה",
+    "roles": "תפקידים"
   },
   "dialog": {
     "unsavedChanges": {

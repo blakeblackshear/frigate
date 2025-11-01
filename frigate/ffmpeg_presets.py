@@ -7,6 +7,7 @@ from typing import Any
 
 from frigate.const import (
     FFMPEG_HVC1_ARGS,
+    FFMPEG_HWACCEL_AMF,
     FFMPEG_HWACCEL_NVIDIA,
     FFMPEG_HWACCEL_RKMPP,
     FFMPEG_HWACCEL_VAAPI,
@@ -22,35 +23,51 @@ logger = logging.getLogger(__name__)
 class LibvaGpuSelector:
     "Automatically selects the correct libva GPU."
 
-    _selected_gpu = None
+    _valid_gpus: list[str] | None = None
 
-    def get_selected_gpu(self) -> str:
-        """Get selected libva GPU."""
+    def __get_valid_gpus(self) -> None:
+        """Get valid libva GPUs."""
         if not os.path.exists("/dev/dri"):
-            return ""
+            self._valid_gpus = []
+            return
 
-        if self._selected_gpu:
-            return self._selected_gpu
+        if self._valid_gpus:
+            return
 
         devices = list(filter(lambda d: d.startswith("render"), os.listdir("/dev/dri")))
 
         if not devices:
-            return "/dev/dri/renderD128"
+            self._valid_gpus = ["/dev/dri/renderD128"]
+            return
 
         if len(devices) < 2:
-            self._selected_gpu = f"/dev/dri/{devices[0]}"
-            return self._selected_gpu
+            self._valid_gpus = [f"/dev/dri/{devices[0]}"]
+            return
 
+        self._valid_gpus = []
         for device in devices:
             check = vainfo_hwaccel(device_name=device)
 
             logger.debug(f"{device} return vainfo status code: {check.returncode}")
 
             if check.returncode == 0:
-                self._selected_gpu = f"/dev/dri/{device}"
-                return self._selected_gpu
+                self._valid_gpus.append(f"/dev/dri/{device}")
 
-        return ""
+    def get_gpu_arg(self, preset: str, gpu: int) -> str:
+        if "nvidia" in preset:
+            return str(gpu)
+
+        if self._valid_gpus is None:
+            self.__get_valid_gpus()
+
+        if not self._valid_gpus:
+            return ""
+
+        if gpu <= len(self._valid_gpus):
+            return self._valid_gpus[gpu]
+        else:
+            logger.warning(f"Invalid GPU index {gpu}, using first valid GPU")
+            return self._valid_gpus[0]
 
 
 FPS_VFR_PARAM = "-fps_mode vfr" if LIBAVFORMAT_VERSION_MAJOR >= 59 else "-vsync 2"
@@ -62,18 +79,21 @@ _user_agent_args = [
     f"FFmpeg Frigate/{VERSION}",
 ]
 
+# Presets for FFMPEG Stream Decoding (detect role)
+
 PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
     "preset-rpi-64-h265": "-c:v:1 hevc_v4l2m2m",
-    FFMPEG_HWACCEL_VAAPI: f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
-    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
-    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
-    FFMPEG_HWACCEL_NVIDIA: "-hwaccel cuda -hwaccel_output_format cuda",
+    FFMPEG_HWACCEL_VAAPI: "-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {3} -hwaccel_output_format vaapi",
+    "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {{3}} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
+    "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {{3}} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
+    FFMPEG_HWACCEL_NVIDIA: "-hwaccel_device {3} -hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
     f"{FFMPEG_HWACCEL_RKMPP}-no-dump_extra": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
     # experimental presets
     FFMPEG_HWACCEL_VULKAN: "-hwaccel vulkan -init_hw_device vulkan=gpu:0 -filter_hw_device gpu -hwaccel_output_format vulkan",
+    FFMPEG_HWACCEL_AMF: "-hwaccel amf -init_hw_device amf=gpu:0 -filter_hw_device gpu -hwaccel_output_format amf",
 }
 PRESETS_HW_ACCEL_DECODE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_DECODE[
     FFMPEG_HWACCEL_NVIDIA
@@ -95,6 +115,8 @@ PRESETS_HW_ACCEL_DECODE["preset-rk-h265"] = PRESETS_HW_ACCEL_DECODE[
     FFMPEG_HWACCEL_RKMPP
 ]
 
+# Presets for FFMPEG Stream Scaling (detect role)
+
 PRESETS_HW_ACCEL_SCALE = {
     "preset-rpi-64-h264": "-r {0} -vf fps={0},scale={1}:{2}",
     "preset-rpi-64-h265": "-r {0} -vf fps={0},scale={1}:{2}",
@@ -108,6 +130,7 @@ PRESETS_HW_ACCEL_SCALE = {
     "default": "-r {0} -vf fps={0},scale={1}:{2}",
     # experimental presets
     FFMPEG_HWACCEL_VULKAN: "-r {0} -vf fps={0},hwupload,scale_vulkan=w={1}:h={2},hwdownload",
+    FFMPEG_HWACCEL_AMF: "-r {0} -vf fps={0},hwupload,scale_amf=w={1}:h={2},hwdownload",
 }
 PRESETS_HW_ACCEL_SCALE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_SCALE[
     FFMPEG_HWACCEL_NVIDIA
@@ -122,17 +145,20 @@ PRESETS_HW_ACCEL_SCALE[f"{FFMPEG_HWACCEL_RKMPP}-no-dump_extra"] = (
 PRESETS_HW_ACCEL_SCALE["preset-rk-h264"] = PRESETS_HW_ACCEL_SCALE[FFMPEG_HWACCEL_RKMPP]
 PRESETS_HW_ACCEL_SCALE["preset-rk-h265"] = PRESETS_HW_ACCEL_SCALE[FFMPEG_HWACCEL_RKMPP]
 
+# Presets for FFMPEG Stream Encoding (birdseye feature)
+
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-rpi-64-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m {2}",
     "preset-rpi-64-h265": "{0} -hide_banner {1} -c:v hevc_v4l2m2m {2}",
     FFMPEG_HWACCEL_VAAPI: "{0} -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {3} {1} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {2}",
     "preset-intel-qsv-h264": "{0} -hide_banner {1} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {2}",
     "preset-intel-qsv-h265": "{0} -hide_banner {1} -c:v h264_qsv -g 50 -bf 0 -profile:v main -level:v 4.1 -async_depth:v 1 {2}",
-    FFMPEG_HWACCEL_NVIDIA: "{0} -hide_banner {1} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {2}",
+    FFMPEG_HWACCEL_NVIDIA: "{0} -hide_banner {1} -hwaccel device {3} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {2}",
     "preset-jetson-h264": "{0} -hide_banner {1} -c:v h264_nvmpi -profile high {2}",
     "preset-jetson-h265": "{0} -hide_banner {1} -c:v h264_nvmpi -profile main {2}",
     FFMPEG_HWACCEL_RKMPP: "{0} -hide_banner {1} -c:v h264_rkmpp -profile:v high {2}",
     "preset-rk-h265": "{0} -hide_banner {1} -c:v hevc_rkmpp -profile:v main {2}",
+    FFMPEG_HWACCEL_AMF: "{0} -hide_banner {1} -c:v h264_amf -g 50 -profile:v high {2}",
     "default": "{0} -hide_banner {1} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {2}",
 }
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-nvidia-h264"] = (
@@ -149,6 +175,8 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-rk-h264"] = PRESETS_HW_ACCEL_ENCODE_BIR
     FFMPEG_HWACCEL_RKMPP
 ]
 
+# Presets for FFMPEG Stream Encoding (timelapse feature)
+
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rpi-64-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m -pix_fmt yuv420p {2}",
     "preset-rpi-64-h265": "{0} -hide_banner {1} -c:v hevc_v4l2m2m -pix_fmt yuv420p {2}",
@@ -161,6 +189,7 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-jetson-h265": "{0} -hide_banner {1} -c:v hevc_nvmpi -profile main {2}",
     FFMPEG_HWACCEL_RKMPP: "{0} -hide_banner {1} -c:v h264_rkmpp -profile:v high {2}",
     "preset-rk-h265": "{0} -hide_banner {1} -c:v hevc_rkmpp -profile:v main {2}",
+    FFMPEG_HWACCEL_AMF: "{0} -hide_banner {1} -c:v h264_amf -profile:v high {2}",
     "default": "{0} -hide_banner {1} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {2}",
 }
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE["preset-nvidia-h264"] = (
@@ -185,6 +214,7 @@ def parse_preset_hardware_acceleration_decode(
     fps: int,
     width: int,
     height: int,
+    gpu: int,
 ) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
@@ -195,7 +225,8 @@ def parse_preset_hardware_acceleration_decode(
     if not decode:
         return None
 
-    return decode.format(fps, width, height).split(" ")
+    gpu_arg = _gpu_selector.get_gpu_arg(arg, gpu)
+    return decode.format(fps, width, height, gpu_arg).split(" ")
 
 
 def parse_preset_hardware_acceleration_scale(
@@ -215,7 +246,7 @@ def parse_preset_hardware_acceleration_scale(
         ",hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5" in scale
         and os.environ.get("FFMPEG_DISABLE_GAMMA_EQUALIZER") is not None
     ):
-        scale.replace(
+        scale = scale.replace(
             ",hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5",
             ":format=nv12,hwdownload,format=nv12,format=yuv420p",
         )
@@ -257,7 +288,7 @@ def parse_preset_hardware_acceleration_encode(
         ffmpeg_path,
         input,
         output,
-        _gpu_selector.get_selected_gpu(),
+        _gpu_selector.get_gpu_arg(arg, 0),
     )
 
 

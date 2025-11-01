@@ -42,7 +42,8 @@
       "inferenceSpeed": "检测器推理速度",
       "cpuUsage": "检测器CPU使用率",
       "memoryUsage": "检测器内存使用率",
-      "temperature": "检测器温度"
+      "temperature": "检测器温度",
+      "cpuUsageInformation": "用于准备输入和输出数据的 CPU 资源，这些数据是供检测模型使用或由检测模型产生的。该数值并不衡量推理过程中的 CPU 使用情况，即使使用了 GPU 或加速器也是如此。"
     },
     "hardwareInfo": {
       "title": "硬件信息",
@@ -102,6 +103,10 @@
         "title": "未使用",
         "tips": "如果您的驱动器上存储了除 Frigate 录制内容之外的其他文件，该值可能无法准确反映 Frigate 可用的剩余空间。Frigate 不会追踪录制内容以外的存储使用情况。"
       }
+    },
+    "shm": {
+      "title": "共享内存（SHM）分配",
+      "warning": "当前共享内存（SHM）容量过小（ {{total}}MB），请将其至少增加到 {{min_shm}}MB。"
     }
   },
   "cameras": {
@@ -158,7 +163,8 @@
     "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）",
     "detectIsSlow": "{{detect}} 运行缓慢（{{speed}}毫秒）",
     "detectIsVerySlow": "{{detect}} 运行非常缓慢（{{speed}}毫秒）",
-    "cameraIsOffline": "{{camera}} 已离线"
+    "cameraIsOffline": "{{camera}} 已离线",
+    "shmTooLow": "/dev/shm 的分配空间过低（当前 {{total}} MB），应至少增加到 {{min}} MB。"
   },
   "enrichments": {
     "title": "增强功能",

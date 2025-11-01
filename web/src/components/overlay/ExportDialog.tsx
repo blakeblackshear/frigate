@@ -95,6 +95,11 @@ export default function ExportDialog({
         if (response.status == 200) {
           toast.success(t("export.toast.success"), {
             position: "top-center",
+            action: (
+              <a href="/export" target="_blank" rel="noopener noreferrer">
+                <Button>View</Button>
+              </a>
+            ),
           });
           setName("");
           setRange(undefined);

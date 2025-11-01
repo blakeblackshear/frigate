@@ -9,15 +9,16 @@ import os
 import queue
 import subprocess as sp
 import threading
+import time
 import traceback
 from typing import Any, Optional
 
 import cv2
 import numpy as np
 
-from frigate.comms.config_updater import ConfigSubscriber
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import BirdseyeModeEnum, FfmpegConfig, FrigateConfig
-from frigate.const import BASE_DIR, BIRDSEYE_PIPE, INSTALL_DIR
+from frigate.const import BASE_DIR, BIRDSEYE_PIPE, INSTALL_DIR, UPDATE_BIRDSEYE_LAYOUT
 from frigate.util.image import (
     SharedMemoryFrameManager,
     copy_yuv_to_position,
@@ -319,34 +320,47 @@ class BirdsEyeFrameManager:
         self.frame[:] = self.blank_frame
 
         self.cameras = {}
-        for camera, settings in self.config.cameras.items():
-            # precalculate the coordinates for all the channels
-            y, u1, u2, v1, v2 = get_yuv_crop(
-                settings.frame_shape_yuv,
-                (
-                    0,
-                    0,
-                    settings.frame_shape[1],
-                    settings.frame_shape[0],
-                ),
-            )
-            self.cameras[camera] = {
-                "dimensions": [settings.detect.width, settings.detect.height],
-                "last_active_frame": 0.0,
-                "current_frame": 0.0,
-                "layout_frame": 0.0,
-                "channel_dims": {
-                    "y": y,
-                    "u1": u1,
-                    "u2": u2,
-                    "v1": v1,
-                    "v2": v2,
-                },
-            }
+        for camera in self.config.cameras.keys():
+            self.add_camera(camera)
 
         self.camera_layout = []
         self.active_cameras = set()
         self.last_output_time = 0.0
+
+    def add_camera(self, cam: str):
+        """Add a camera to self.cameras with the correct structure."""
+        settings = self.config.cameras[cam]
+        # precalculate the coordinates for all the channels
+        y, u1, u2, v1, v2 = get_yuv_crop(
+            settings.frame_shape_yuv,
+            (
+                0,
+                0,
+                settings.frame_shape[1],
+                settings.frame_shape[0],
+            ),
+        )
+        self.cameras[cam] = {
+            "dimensions": [
+                settings.detect.width,
+                settings.detect.height,
+            ],
+            "last_active_frame": 0.0,
+            "current_frame": 0.0,
+            "layout_frame": 0.0,
+            "channel_dims": {
+                "y": y,
+                "u1": u1,
+                "u2": u2,
+                "v1": v1,
+                "v2": v2,
+            },
+        }
+
+    def remove_camera(self, cam: str):
+        """Remove a camera from self.cameras."""
+        if cam in self.cameras:
+            del self.cameras[cam]
 
     def clear_frame(self):
         logger.debug("Clearing the birdseye frame")
@@ -381,10 +395,24 @@ class BirdsEyeFrameManager:
         if mode == BirdseyeModeEnum.objects and object_box_count > 0:
             return True
 
-    def update_frame(self, frame: Optional[np.ndarray] = None) -> bool:
+    def get_camera_coordinates(self) -> dict[str, dict[str, int]]:
+        """Return the coordinates of each camera in the current layout."""
+        coordinates = {}
+        for row in self.camera_layout:
+            for position in row:
+                camera_name, (x, y, width, height) = position
+                coordinates[camera_name] = {
+                    "x": x,
+                    "y": y,
+                    "width": width,
+                    "height": height,
+                }
+        return coordinates
+
+    def update_frame(self, frame: Optional[np.ndarray] = None) -> tuple[bool, bool]:
         """
         Update birdseye, optionally with a new frame.
-        When no frame is passed, check the layout and update for any disabled cameras.
+        Returns (frame_changed, layout_changed) to indicate if the frame or layout changed.
         """
 
         # determine how many cameras are tracking objects within the last inactivity_threshold seconds
@@ -422,19 +450,21 @@ class BirdsEyeFrameManager:
                 max_camera_refresh = True
                 self.last_refresh_time = now
 
-        # Track if the frame changes
+        # Track if the frame or layout changes
         frame_changed = False
+        layout_changed = False
 
         # If no active cameras and layout is already empty, no update needed
         if len(active_cameras) == 0:
             # if the layout is already cleared
             if len(self.camera_layout) == 0:
-                return False
+                return False, False
             # if the layout needs to be cleared
             self.camera_layout = []
             self.active_cameras = set()
             self.clear_frame()
             frame_changed = True
+            layout_changed = True
         else:
             # Determine if layout needs resetting
             if len(self.active_cameras) - len(active_cameras) == 0:
@@ -454,7 +484,7 @@ class BirdsEyeFrameManager:
                 logger.debug("Resetting Birdseye layout...")
                 self.clear_frame()
                 self.active_cameras = active_cameras
-
+                layout_changed = True  # Layout is changing due to reset
                 # this also converts added_cameras from a set to a list since we need
                 # to pop elements in order
                 active_cameras_to_add = sorted(
@@ -504,7 +534,7 @@ class BirdsEyeFrameManager:
                     # decrease scaling coefficient until height of all cameras can fit into the birdseye canvas
                     while calculating:
                         if self.stop_event.is_set():
-                            return
+                            return frame_changed, layout_changed
 
                         layout_candidate = self.calculate_layout(
                             active_cameras_to_add, coefficient
@@ -518,7 +548,7 @@ class BirdsEyeFrameManager:
                                 logger.error(
                                     "Error finding appropriate birdseye layout"
                                 )
-                                return
+                                return frame_changed, layout_changed
                         calculating = False
                         self.canvas.set_coefficient(len(active_cameras), coefficient)
 
@@ -536,7 +566,7 @@ class BirdsEyeFrameManager:
             if frame is not None:  # Frame presence indicates a potential change
                 frame_changed = True
 
-        return frame_changed
+        return frame_changed, layout_changed
 
     def calculate_layout(
         self,
@@ -688,7 +718,11 @@ class BirdsEyeFrameManager:
         motion_count: int,
         frame_time: float,
         frame: np.ndarray,
-    ) -> bool:
+    ) -> tuple[bool, bool]:
+        """
+        Update birdseye for a specific camera with new frame data.
+        Returns (frame_changed, layout_changed) to indicate if the frame or layout changed.
+        """
         # don't process if birdseye is disabled for this camera
         camera_config = self.config.cameras[camera]
         force_update = False
@@ -701,7 +735,7 @@ class BirdsEyeFrameManager:
                 self.cameras[camera]["last_active_frame"] = 0
                 force_update = True
             else:
-                return False
+                return False, False
 
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame.copy()
@@ -713,21 +747,22 @@ class BirdsEyeFrameManager:
 
         # limit output to 10 fps
         if not force_update and (now - self.last_output_time) < 1 / 10:
-            return False
+            return False, False
 
         try:
-            updated_frame = self.update_frame(frame)
+            frame_changed, layout_changed = self.update_frame(frame)
         except Exception:
-            updated_frame = False
+            frame_changed, layout_changed = False, False
             self.active_cameras = []
             self.camera_layout = []
             print(traceback.format_exc())
 
         # if the frame was updated or the fps is too low, send frame
-        if force_update or updated_frame or (now - self.last_output_time) > 1:
+        if force_update or frame_changed or (now - self.last_output_time) > 1:
             self.last_output_time = now
-            return True
-        return False
+            return True, layout_changed
+
+        return False, layout_changed
 
 
 class Birdseye:
@@ -753,10 +788,14 @@ class Birdseye:
         self.broadcaster = BroadcastThread(
             "birdseye", self.converter, websocket_server, stop_event
         )
-        self.birdseye_manager = BirdsEyeFrameManager(config, stop_event)
-        self.birdseye_subscriber = ConfigSubscriber("config/birdseye/")
+        self.birdseye_manager = BirdsEyeFrameManager(self.config, stop_event)
         self.frame_manager = SharedMemoryFrameManager()
         self.stop_event = stop_event
+        self.requestor = InterProcessRequestor()
+        self.idle_fps: float = self.config.birdseye.idle_heartbeat_fps
+        self._idle_interval: Optional[float] = (
+            (1.0 / self.idle_fps) if self.idle_fps > 0 else None
+        )
 
         if config.birdseye.restream:
             self.birdseye_buffer = self.frame_manager.create(
@@ -783,6 +822,16 @@ class Birdseye:
         self.birdseye_manager.clear_frame()
         self.__send_new_frame()
 
+    def add_camera(self, camera: str) -> None:
+        """Add a camera to the birdseye manager."""
+        self.birdseye_manager.add_camera(camera)
+        logger.debug(f"Added camera {camera} to birdseye")
+
+    def remove_camera(self, camera: str) -> None:
+        """Remove a camera from the birdseye manager."""
+        self.birdseye_manager.remove_camera(camera)
+        logger.debug(f"Removed camera {camera} from birdseye")
+
     def write_data(
         self,
         camera: str,
@@ -791,30 +840,29 @@ class Birdseye:
         frame_time: float,
         frame: np.ndarray,
     ) -> None:
-        # check if there is an updated config
-        while True:
-            (
-                updated_birdseye_topic,
-                updated_birdseye_config,
-            ) = self.birdseye_subscriber.check_for_update()
-
-            if not updated_birdseye_topic:
-                break
-
-            if updated_birdseye_config:
-                camera_name = updated_birdseye_topic.rpartition("/")[-1]
-                self.config.cameras[camera_name].birdseye = updated_birdseye_config
-
-        if self.birdseye_manager.update(
+        frame_changed, frame_layout_changed = self.birdseye_manager.update(
             camera,
             len([o for o in current_tracked_objects if not o["stationary"]]),
             len(motion_boxes),
             frame_time,
             frame,
-        ):
+        )
+        if frame_changed:
             self.__send_new_frame()
 
+            if frame_layout_changed:
+                coordinates = self.birdseye_manager.get_camera_coordinates()
+                self.requestor.send_data(UPDATE_BIRDSEYE_LAYOUT, coordinates)
+        if self._idle_interval:
+            now = time.monotonic()
+            is_idle = len(self.birdseye_manager.camera_layout) == 0
+            if (
+                is_idle
+                and (now - self.birdseye_manager.last_output_time)
+                >= self._idle_interval
+            ):
+                self.__send_new_frame()
+
     def stop(self) -> None:
-        self.birdseye_subscriber.stop()
         self.converter.join()
         self.broadcaster.join()

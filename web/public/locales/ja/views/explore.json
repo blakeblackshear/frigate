@@ -1,3 +1,222 @@
 {
-  "generativeAI": "生成AI"
+  "generativeAI": "生成AI",
+  "documentTitle": "探索 - Frigate",
+  "details": {
+    "timestamp": "タイムスタンプ",
+    "item": {
+      "title": "レビュー項目の詳細",
+      "desc": "レビュー項目の詳細",
+      "button": {
+        "share": "このレビュー項目を共有",
+        "viewInExplore": "探索で表示"
+      },
+      "tips": {
+        "mismatch_other": "利用不可のオブジェクトが {{count}} 件、このレビュー項目に含まれています。これらはアラートまたは検出の条件を満たしていないか、既にクリーンアップ／削除されています。",
+        "hasMissingObjects": "次のラベルの追跡オブジェクトを保存したい場合は設定を調整してください: <em>{{objects}}</em>"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "{{provider}} に新しい説明をリクエストしました。プロバイダの速度により再生成に時間がかかる場合があります。",
+          "updatedSublabel": "サブラベルを更新しました。",
+          "updatedLPR": "ナンバープレートを更新しました。",
+          "audioTranscription": "音声文字起こしをリクエストしました。"
+        },
+        "error": {
+          "regenerate": "{{provider}} への新しい説明の呼び出しに失敗しました: {{errorMessage}}",
+          "updatedSublabelFailed": "サブラベルの更新に失敗しました: {{errorMessage}}",
+          "updatedLPRFailed": "ナンバープレートの更新に失敗しました: {{errorMessage}}",
+          "audioTranscription": "音声文字起こしのリクエストに失敗しました: {{errorMessage}}"
+        }
+      }
+    },
+    "label": "ラベル",
+    "editSubLabel": {
+      "title": "サブラベルを編集",
+      "desc": "この {{label}} の新しいサブラベルを入力",
+      "descNoLabel": "この追跡オブジェクトの新しいサブラベルを入力"
+    },
+    "editLPR": {
+      "title": "ナンバープレートを編集",
+      "desc": "この {{label}} の新しいナンバープレート値を入力",
+      "descNoLabel": "この追跡オブジェクトの新しいナンバープレート値を入力"
+    },
+    "snapshotScore": {
+      "label": "スナップショットスコア"
+    },
+    "topScore": {
+      "label": "トップスコア",
+      "info": "トップスコアは追跡オブジェクトの最高中央値スコアであり、検索結果のサムネイルに表示されるスコアとは異なる場合があります。"
+    },
+    "score": {
+      "label": "スコア"
+    },
+    "recognizedLicensePlate": "認識されたナンバープレート",
+    "estimatedSpeed": "推定速度",
+    "objects": "オブジェクト",
+    "camera": "カメラ",
+    "zones": "ゾーン",
+    "button": {
+      "findSimilar": "類似を検索",
+      "regenerate": {
+        "title": "再生成",
+        "label": "追跡オブジェクトの説明を再生成"
+      }
+    },
+    "description": {
+      "label": "説明",
+      "placeholder": "追跡オブジェクトの説明",
+      "aiTips": "追跡オブジェクトのライフサイクルが終了するまで、生成AIプロバイダに説明はリクエストされません。"
+    },
+    "expandRegenerationMenu": "再生成メニューを展開",
+    "regenerateFromSnapshot": "スナップショットから再生成",
+    "regenerateFromThumbnails": "サムネイルから再生成",
+    "tips": {
+      "descriptionSaved": "説明を保存しました",
+      "saveDescriptionFailed": "説明の更新に失敗しました: {{errorMessage}}"
+    }
+  },
+  "exploreMore": "{{label}} のオブジェクトをさらに探索",
+  "exploreIsUnavailable": {
+    "title": "探索は利用できません",
+    "embeddingsReindexing": {
+      "context": "追跡オブジェクトの埋め込みの再インデックスが完了すると「探索」を使用できます。",
+      "startingUp": "起動中…",
+      "estimatedTime": "残りの推定時間:",
+      "finishingShortly": "まもなく完了",
+      "step": {
+        "thumbnailsEmbedded": "埋め込み済みサムネイル: ",
+        "descriptionsEmbedded": "埋め込み済み説明: ",
+        "trackedObjectsProcessed": "処理済み追跡オブジェクト: "
+      }
+    },
+    "downloadingModels": {
+      "context": "Frigate はセマンティック検索(意味理解型画像検索)をサポートするために必要な埋め込みモデルをダウンロードしています。ネットワーク速度により数分かかる場合があります。",
+      "setup": {
+        "visionModel": "ビジョンモデル",
+        "visionModelFeatureExtractor": "ビジョンモデル特徴抽出器",
+        "textModel": "テキストモデル",
+        "textTokenizer": "テキストトークナイザー"
+      },
+      "tips": {
+        "context": "モデルのダウンロード後、追跡オブジェクトの埋め込みを再インデックスすることを検討してください。"
+      },
+      "error": "エラーが発生しました。Frigate のログを確認してください。"
+    }
+  },
+  "trackedObjectDetails": "追跡オブジェクトの詳細",
+  "type": {
+    "details": "詳細",
+    "snapshot": "スナップショット",
+    "video": "動画",
+    "object_lifecycle": "オブジェクトのライフサイクル"
+  },
+  "objectLifecycle": {
+    "title": "オブジェクトのライフサイクル",
+    "noImageFound": "このタイムスタンプの画像は見つかりません。",
+    "createObjectMask": "オブジェクトマスクを作成",
+    "adjustAnnotationSettings": "アノテーション設定を調整",
+    "scrollViewTips": "スクロールしてこのオブジェクトのライフサイクルの重要な瞬間を表示します。",
+    "autoTrackingTips": "オートトラッキングカメラではバウンディングボックスの位置が正確でない場合があります。",
+    "count": "{{first}} / {{second}}",
+    "trackedPoint": "追跡ポイント",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} を検出",
+      "entered_zone": "{{label}} が {{zones}} に進入",
+      "active": "{{label}} がアクティブになりました",
+      "stationary": "{{label}} が静止しました",
+      "attribute": {
+        "faceOrLicense_plate": "{{label}} の {{attribute}} を検出",
+        "other": "{{label}} を {{attribute}} として認識"
+      },
+      "gone": "{{label}} が離脱",
+      "heard": "{{label}} を検知（音声）",
+      "external": "{{label}} を検出",
+      "header": {
+        "zones": "ゾーン",
+        "ratio": "比率",
+        "area": "面積"
+      }
+    },
+    "annotationSettings": {
+      "title": "アノテーション設定",
+      "showAllZones": {
+        "title": "すべてのゾーンを表示",
+        "desc": "オブジェクトがゾーンに入ったフレームでは常にゾーンを表示します。"
+      },
+      "offset": {
+        "label": "アノテーションオフセット",
+        "desc": "このデータはカメラの detect フィードから来ていますが、record フィードの画像に重ねて表示されます。2つのストリームが完全に同期していない可能性があるため、バウンディングボックスと映像が完全には一致しないことがあります。<code>annotation_offset</code> フィールドで調整できます。",
+        "millisecondsToOffset": "detect のアノテーションをオフセットするミリ秒数。<em>既定: 0</em>",
+        "tips": "ヒント: 左から右へ歩く人物のイベントクリップを想像してください。タイムラインのバウンディングボックスが人物より常に左側にあるなら値を小さく、常に先行しているなら値を大きくします。",
+        "toast": {
+          "success": "{{camera}} のアノテーションオフセットを設定ファイルに保存しました。変更を適用するには Frigate を再起動してください。"
+        }
+      }
+    },
+    "carousel": {
+      "previous": "前のスライド",
+      "next": "次のスライド"
+    }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "動画をダウンロード",
+      "aria": "動画をダウンロード"
+    },
+    "downloadSnapshot": {
+      "label": "スナップショットをダウンロード",
+      "aria": "スナップショットをダウンロード"
+    },
+    "viewObjectLifecycle": {
+      "label": "オブジェクトのライフサイクルを表示",
+      "aria": "オブジェクトのライフサイクルを表示"
+    },
+    "findSimilar": {
+      "label": "類似を検索",
+      "aria": "類似する追跡オブジェクトを検索"
+    },
+    "addTrigger": {
+      "label": "トリガーを追加",
+      "aria": "この追跡オブジェクトのトリガーを追加"
+    },
+    "audioTranscription": {
+      "label": "文字起こし",
+      "aria": "音声文字起こしをリクエスト"
+    },
+    "submitToPlus": {
+      "label": "Frigate+ に送信",
+      "aria": "Frigate Plus に送信"
+    },
+    "viewInHistory": {
+      "label": "履歴で表示",
+      "aria": "履歴で表示"
+    },
+    "deleteTrackedObject": {
+      "label": "この追跡オブジェクトを削除"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "削除の確認",
+      "desc": "この追跡オブジェクトを削除すると、スナップショット、保存された埋め込み、および関連するライフサイクル項目が削除されます。履歴ビューの録画映像は削除<em>されません</em>。<br /><br />続行してもよろしいですか？"
+    }
+  },
+  "noTrackedObjects": "追跡オブジェクトは見つかりませんでした",
+  "fetchingTrackedObjectsFailed": "追跡オブジェクトの取得エラー: {{errorMessage}}",
+  "trackedObjectsCount_other": "{{count}} 件の追跡オブジェクト ",
+  "searchResult": {
+    "tooltip": "{{type}} と一致（{{confidence}}%）",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "追跡オブジェクトを削除しました。",
+        "error": "追跡オブジェクトの削除に失敗しました: {{errorMessage}}"
+      }
+    }
+  },
+  "aiAnalysis": {
+    "title": "AI 解析"
+  },
+  "concerns": {
+    "label": "懸念"
+  }
 }

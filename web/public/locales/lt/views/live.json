@@ -9,5 +9,175 @@
   "twoWayTalk": {
     "enable": "Įgalinti Dvipusį Pokalbį",
     "disable": "Išjungti Dvipusį Pokalbį"
+  },
+  "detect": {
+    "enable": "Įjungti Aptikimą",
+    "disable": "Išjungti Aptikimą"
+  },
+  "audioDetect": {
+    "enable": "Įjungti Garso Aptikimą",
+    "disable": "Išjungti Garso Aptikimą"
+  },
+  "cameraSettings": {
+    "objectDetection": "Objektų Aptikimai",
+    "audioDetection": "Garso Aptikimas",
+    "title": "{{camera}} Nustatymai",
+    "cameraEnabled": "Kamera įjungta",
+    "recording": "Įrašinėjimas",
+    "snapshots": "Momentinės Nuotraukos",
+    "transcription": "Garso Transkripcija",
+    "autotracking": "Automatinis sekimas"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Norint išcentruoti kamerą, spragtelti kadre",
+        "enable": "Įjungti paspaudimą, kad judinti",
+        "disable": "Išjungti paspaudimą kad judinti"
+      },
+      "left": {
+        "label": "Pasukti PTZ kamerą į kairę"
+      },
+      "up": {
+        "label": "Pasukti PTZ kamerą į viršų"
+      },
+      "down": {
+        "label": "Pasukti PTZ kamera žemyn"
+      },
+      "right": {
+        "label": "Pasukti PTZ kamerą į dešinę"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Priartinti PTZ kamerą"
+      },
+      "out": {
+        "label": "Atitolinti PTZ kamerą"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "Sutelkti PTZ kameros fokusą"
+      },
+      "out": {
+        "label": "Išleisti PTZ kameros fokusą"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Spragtelkite kadre norint centruoti PTZ kamerą"
+      }
+    },
+    "presets": "PTZ kameros nustatytos pozicijos"
+  },
+  "camera": {
+    "enable": "Įjungti Kamerą",
+    "disable": "Išjungti Kamerą"
+  },
+  "muteCameras": {
+    "enable": "Užtildyti Visas Kameras",
+    "disable": "Aktyvuoti Garsą Visoms Kameroms"
+  },
+  "recording": {
+    "enable": "Įjungti Įrašymus",
+    "disable": "Įšjungti Įrašymus"
+  },
+  "snapshots": {
+    "enable": "Įjungti Momentines Nuotraukas",
+    "disable": "Išjungti Momentines Nuotraukas"
+  },
+  "transcription": {
+    "enable": "Įjungti Gyvą Garso Aprašymą",
+    "disable": "Išjungti Gyvą Garso Aprašymą"
+  },
+  "autotracking": {
+    "enable": "Įjungti Autosekimą",
+    "disable": "Išjungti Autosekimą"
+  },
+  "streamStats": {
+    "enable": "Rodyti Transliacijos Stats",
+    "disable": "Paslėpti Transliacijos Stats"
+  },
+  "manualRecording": {
+    "title": "Pagal-Poreikį",
+    "tips": "Atsisiųsti momentinę nuotrauką arba kurti manualaus saugojimo nustatymus pagal įvykius iš šios kameros.",
+    "playInBackground": {
+      "label": "Paleisti fone",
+      "desc": "Įjungti šią funkciją kad transliaciją išliktų net paslėpus grotuvą."
+    },
+    "showStats": {
+      "label": "Rodytis Stats",
+      "desc": "Įjungti šią funkciją, kad matytumėte transliacijos statistiką kameros vaizde."
+    },
+    "debugView": "Debug Vaizdas",
+    "start": "Pradėti įrašymą pagal pageidavimą",
+    "started": "Pradėtas įrašymas pagal pageidavimą.",
+    "failedToStart": "Nepavyko pradėti įrašymo pagal poreikį.",
+    "recordDisabledTips": "Įrašymas šiai kamerai yra išjungtas todėl bus saugomos tik momentinės nuotraukos.",
+    "end": "Baigti įrašymą pagal pageidavimą",
+    "ended": "Baigtas įrašymas pagal pageidavimą.",
+    "failedToEnd": "Nepavyko sustabdyti įrašymo pagal pageidavimą."
+  },
+  "streamingSettings": "Transliacijos Nustatymai",
+  "notifications": "Pranešimai",
+  "audio": "Garsas",
+  "suspend": {
+    "forTime": "Sustabdyti laikui: "
+  },
+  "stream": {
+    "title": "Transliacija",
+    "audio": {
+      "tips": {
+        "title": "Šiai transliacijai garso išvestis turi būti sukonfiguruota naudojant go2rtc."
+      },
+      "available": "Ši transliacija palaiko garsą",
+      "unavailable": "Ši transliacija nepalaiko garso"
+    },
+    "twoWayTalk": {
+      "tips": "Jūsų įranga turi palaikyti šią funkciją, taip pat dvipusiam pokalbiui reikia sukonfiguruoti WebRTC.",
+      "available": "Šioje transliacijoje galimas dvipusis pokalbis",
+      "unavailable": "Šioje transliacijoje dvipusio pokalbio galimybių nėra"
+    },
+    "lowBandwidth": {
+      "tips": "Dėl buffering ar transliacijos klaidų tiesioginė transliacija yra mažos reiškos rėžime.",
+      "resetStream": "Atstatyti transliaciją"
+    },
+    "playInBackground": {
+      "label": "Paleisti fone",
+      "tips": "Norėdami kad transliacija tęstūsi kai grotuvas paslėpiamas įjunkite šią funkciją."
+    },
+    "debug": {
+      "picker": "Debug rėžime srauto pasirinkimas negalimas. Debug lange naudojamas tas srautas, kuris priskirtas aptikimo rolei."
+    }
+  },
+  "history": {
+    "label": "Rodyti istorinius įrašus"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Visi",
+      "motion": "Judesys",
+      "active_objects": "Aktyvūs Objektai"
+    },
+    "notAllTips": "Jūsų {{source}} įrašų saugojimo pasirinkimas nustatytas <code>rėžime: {{effectiveRetainMode}}</code>, taigi įrašai pagal poreikį irgi bus saugomi pritaikant {{effectiveRetainModeName}}."
+  },
+  "editLayout": {
+    "label": "Redaguoti Išdėstymą",
+    "group": {
+      "label": "Redaguoti Kamerų Grupę"
+    },
+    "exitEdit": "Išeiti Iš Redagavimo"
+  },
+  "noCameras": {
+    "title": "Nėra Sukonfiguruotų Kamerų",
+    "description": "Pradėti nuo kameros prijungimo pire Frigate.",
+    "buttonText": "Pridėti Kamerą"
+  },
+  "snapshot": {
+    "takeSnapshot": "Atsisiųsti momentinį kadrą",
+    "noVideoSource": "Momentinei nuotraukai nėra prieinamo video šaltinio.",
+    "captureFailed": "Nepavyko užfiksuoti kadro.",
+    "downloadStarted": "Momentinės nuotraukos atsisiuntimas pradėtas."
   }
 }

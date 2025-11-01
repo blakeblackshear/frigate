@@ -43,7 +43,15 @@
         "label": "点击将PTZ摄像头画面居中"
       }
     },
-    "presets": "PTZ摄像头预设"
+    "presets": "PTZ摄像头预设",
+    "focus": {
+      "in": {
+        "label": "PTZ摄像头聚焦"
+      },
+      "out": {
+        "label": "PTZ摄像头拉远"
+      }
+    }
   },
   "camera": {
     "enable": "开启摄像头",
@@ -79,7 +87,7 @@
   },
   "manualRecording": {
     "title": "按需录制",
-    "tips": "根据此摄像头的录制保留设置，手动启动事件。",
+    "tips": "根据此摄像头的录像存储设置，可以下载即时快照或手动触发事件记录。",
     "playInBackground": {
       "label": "后台播放",
       "desc": "启用此选项可在播放器隐藏时继续视频流播放。"
@@ -126,6 +134,9 @@
     "playInBackground": {
       "label": "后台播放",
       "tips": "启用此选项可在播放器隐藏时继续视频流播放。"
+    },
+    "debug": {
+      "picker": "调试模式下无法切换视频流。调试将始终使用检测（detect）功能的视频流。"
     }
   },
   "cameraSettings": {
@@ -135,7 +146,8 @@
     "recording": "录制",
     "snapshots": "快照",
     "audioDetection": "音频检测",
-    "autotracking": "自动跟踪"
+    "autotracking": "自动跟踪",
+    "transcription": "音频转录"
   },
   "history": {
     "label": "显示历史录像"
@@ -151,8 +163,23 @@
   "editLayout": {
     "label": "编辑布局",
     "group": {
-      "label": "编辑摄像机分组"
+      "label": "编辑摄像头分组"
     },
     "exitEdit": "退出编辑"
+  },
+  "transcription": {
+    "enable": "启用实时音频转录",
+    "disable": "关闭实时音频转录"
+  },
+  "noCameras": {
+    "title": "未设置摄像头",
+    "description": "准备开始连接摄像头至 Frigate 。",
+    "buttonText": "添加摄像头"
+  },
+  "snapshot": {
+    "takeSnapshot": "下载即时快照",
+    "noVideoSource": "当前无可用于快照的视频源。",
+    "captureFailed": "捕获快照失败。",
+    "downloadStarted": "快照下载已开始。"
   }
 }

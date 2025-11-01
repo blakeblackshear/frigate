@@ -119,5 +119,12 @@
       "markAsReviewed": "İncelendi olarak işaretle",
       "deleteNow": "Şimdi Sil"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Takip edilen nesnenin küçük resmini seçin",
+    "noImages": "Bu kamera için küçük resim bulunamadı",
+    "search": {
+      "placeholder": "Etiket/alt etiket kullanarak arama yapın..."
+    }
   }
 }

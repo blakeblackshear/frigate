@@ -12,7 +12,61 @@
   "trackedObjectId": "Sekamo Objekto ID",
   "filter": {
     "label": {
-      "cameras": "Kameros"
+      "cameras": "Kameros",
+      "labels": "Etiketės",
+      "zones": "Zonos",
+      "search_type": "Paieškos Tipas",
+      "time_range": "Laiko rėžis",
+      "before": "Prieš",
+      "after": "Po",
+      "min_score": "Min Balas",
+      "max_score": "Max Balas",
+      "min_speed": "Min Greitis",
+      "max_speed": "Max Greitis",
+      "recognized_license_plate": "Atpažinti Registracijos Numeriai",
+      "has_clip": "Turi Klipą",
+      "has_snapshot": "Turi Nuotrauką",
+      "sub_labels": "Sub Etiketės"
+    },
+    "searchType": {
+      "thumbnail": "Miniatiūra",
+      "description": "Aprašymas"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Data 'prieš' turi būti vėliau nei data 'po'.",
+        "afterDatebeEarlierBefore": "Data 'po' turi būti anksčiau nei data 'prieš'.",
+        "minScoreMustBeLessOrEqualMaxScore": "'min balas' turi būti mažesnis arba lygus 'max balui'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "'max balas' turi būti didesnis arba lygus 'min balui'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'min greitis' privalo būti mažesnis arba lygus 'max greičiui'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'max greitis' privalo būti didesnis arba lygus 'min greičiui'."
+      }
+    },
+    "tips": {
+      "title": "Kaip naudoti tekstinius filtrus",
+      "desc": {
+        "text": "Filtrai leidžia susiaurinti paieškos rezultatus. Štai kaip juos naudoti įvesties laukelyje:",
+        "step1": "Įveskite filtravimo raktą po kurio seks dvitaškis (pvz., \"cameras:\").",
+        "step2": "Pasirinkite reikšmę iš siūlomų arba įveskite savo sugalvotą.",
+        "step3": "Naudokite kelis filtrus įvesdami juos vieną paskui kitą su tarpu tarp jų.",
+        "step5": "Laiko rėžio filtro naudojamas {{exampleTime}} formatas.",
+        "step6": "Pašalinti filtrus spaudžiant 'x' šalia jų.",
+        "exampleLabel": "Pavyzdys:",
+        "step4": "Datų filtrai (before: and after:) naudoti {{DateFormat}} formatą."
+      }
+    },
+    "header": {
+      "currentFilterType": "Filtruoti Reikšmes",
+      "noFilters": "Filtrai",
+      "activeFilters": "Aktyvūs Filtrai"
     }
+  },
+  "similaritySearch": {
+    "title": "Panašumų Paieška",
+    "active": "Panašumų paieška aktyvi",
+    "clear": "Išvalyti panašumų paiešką"
+  },
+  "placeholder": {
+    "search": "Ieškoma…"
   }
 }

@@ -40,6 +40,7 @@ export function usePersistedOverlayState<S extends string>(
 ): [
   S | undefined,
   (value: S | undefined, replace?: boolean) => void,
+  boolean,
   () => void,
 ] {
   const location = useLocation();
@@ -55,7 +56,7 @@ export function usePersistedOverlayState<S extends string>(
 
   // saved value from previous session
 
-  const [persistedValue, setPersistedValue, , deletePersistedValue] =
+  const [persistedValue, setPersistedValue, loaded, deletePersistedValue] =
     usePersistence<S>(key, overlayStateValue);
 
   const setOverlayStateValue = useCallback(
@@ -73,6 +74,7 @@ export function usePersistedOverlayState<S extends string>(
   return [
     overlayStateValue ?? persistedValue ?? defaultValue,
     setOverlayStateValue,
+    loaded,
     deletePersistedValue,
   ];
 }
@@ -110,7 +112,8 @@ export function useSearchEffect(
   callback: (value: string) => boolean,
 ) {
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const param = useMemo(() => {
     const param = searchParams.get(key);
@@ -130,7 +133,17 @@ export function useSearchEffect(
     const remove = callback(param[1]);
 
     if (remove) {
-      setSearchParams(undefined, { state: location.state, replace: true });
+      navigate(location.pathname + location.hash, {
+        state: location.state,
+        replace: true,
+      });
     }
-  }, [param, location.state, callback, setSearchParams]);
+  }, [
+    param,
+    location.state,
+    location.pathname,
+    location.hash,
+    callback,
+    navigate,
+  ]);
 }

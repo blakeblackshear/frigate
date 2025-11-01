@@ -191,8 +191,8 @@ export default function MotionTunerView({
   return (
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
-        <Heading as="h3" className="my-2">
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12">
+        <Heading as="h4" className="mb-2">
           {t("motionDetectionTuner.title")}
         </Heading>
         <div className="my-3 space-y-3 text-sm text-muted-foreground">
@@ -205,7 +205,7 @@ export default function MotionTunerView({
               rel="noopener noreferrer"
               className="inline"
             >
-              {t("motionDetectionTuner.desc.documentation")}{" "}
+              {t("readTheDocumentation", { ns: "common" })}
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>
@@ -325,7 +325,7 @@ export default function MotionTunerView({
       </div>
 
       {cameraConfig ? (
-        <div className="flex max-h-[70%] md:h-dvh md:max-h-full md:w-7/12 md:grow">
+        <div className="flex max-h-[70%] md:mr-3 md:h-dvh md:max-h-full md:w-7/12 md:grow">
           <div className="size-full min-h-10">
             <AutoUpdatingCameraImage
               camera={cameraConfig.name}

@@ -17,6 +17,10 @@ from titlecase import titlecase
 from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 from frigate.const import CONFIG_DIR
 from frigate.models import User
 
@@ -35,7 +39,7 @@ class PushNotification:
     ttl: int = 0
 
 
-class WebPushClient(Communicator):  # type: ignore[misc]
+class WebPushClient(Communicator):
     """Frigate wrapper for webpush client."""
 
     def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
@@ -46,10 +50,12 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         self.web_pushers: dict[str, list[WebPusher]] = {}
         self.expired_subs: dict[str, list[str]] = {}
         self.suspended_cameras: dict[str, int] = {
-            c.name: 0 for c in self.config.cameras.values()
+            c.name: 0  # type: ignore[misc]
+            for c in self.config.cameras.values()
         }
         self.last_camera_notification_time: dict[str, float] = {
-            c.name: 0 for c in self.config.cameras.values()
+            c.name: 0  # type: ignore[misc]
+            for c in self.config.cameras.values()
         }
         self.last_notification_time: float = 0
         self.notification_queue: queue.Queue[PushNotification] = queue.Queue()
@@ -64,7 +70,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         # Pull keys from PEM or generate if they do not exist
         self.vapid = Vapid01.from_file(os.path.join(CONFIG_DIR, "notifications.pem"))
 
-        users: list[User] = (
+        users: list[dict[str, Any]] = (
             User.select(User.username, User.notification_tokens).dicts().iterator()
         )
         for user in users:
@@ -73,7 +79,12 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                 self.web_pushers[user["username"]].append(WebPusher(sub))
 
         # notification config updater
-        self.config_subscriber = ConfigSubscriber("config/notifications")
+        self.global_config_subscriber = ConfigSubscriber(
+            "config/notifications", exact=True
+        )
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config, self.config.cameras, [CameraConfigUpdateEnum.notifications]
+        )
 
     def subscribe(self, receiver: Callable) -> None:
         """Wrapper for allowing dispatcher to subscribe."""
@@ -154,15 +165,19 @@ class WebPushClient(Communicator):  # type: ignore[misc]
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
         # check for updated notification config
-        _, updated_notification_config = self.config_subscriber.check_for_update()
+        _, updated_notification_config = (
+            self.global_config_subscriber.check_for_update()
+        )
 
         if updated_notification_config:
-            for key, value in updated_notification_config.items():
-                if key == "_global_notifications":
-                    self.config.notifications = value
+            self.config.notifications = updated_notification_config
 
-                elif key in self.config.cameras:
-                    self.config.cameras[key].notifications = value
+        updates = self.config_subscriber.check_for_updates()
+
+        if "add" in updates:
+            for camera in updates["add"]:
+                self.suspended_cameras[camera] = 0
+                self.last_camera_notification_time[camera] = 0
 
         if topic == "reviews":
             decoded = json.loads(payload)
@@ -173,6 +188,28 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                 logger.debug(f"Notifications for {camera} are currently suspended.")
                 return
             self.send_alert(decoded)
+        if topic == "triggers":
+            decoded = json.loads(payload)
+
+            camera = decoded["camera"]
+            name = decoded["name"]
+
+            # ensure notifications are enabled and the specific trigger has
+            # notification action enabled
+            if (
+                not self.config.cameras[camera].notifications.enabled
+                or name not in self.config.cameras[camera].semantic_search.triggers
+                or "notification"
+                not in self.config.cameras[camera]
+                .semantic_search.triggers[name]
+                .actions
+            ):
+                return
+
+            if self.is_camera_suspended(camera):
+                logger.debug(f"Notifications for {camera} are currently suspended.")
+                return
+            self.send_trigger(decoded)
         elif topic == "notification_test":
             if not self.config.notifications.enabled and not any(
                 cam.notifications.enabled for cam in self.config.cameras.values()
@@ -254,6 +291,23 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             except Exception as e:
                 logger.error(f"Error processing notification: {str(e)}")
 
+    def _within_cooldown(self, camera: str) -> bool:
+        now = datetime.datetime.now().timestamp()
+        if now - self.last_notification_time < self.config.notifications.cooldown:
+            logger.debug(
+                f"Skipping notification for {camera} - in global cooldown period"
+            )
+            return True
+        if (
+            now - self.last_camera_notification_time[camera]
+            < self.config.cameras[camera].notifications.cooldown
+        ):
+            logger.debug(
+                f"Skipping notification for {camera} - in camera-specific cooldown period"
+            )
+            return True
+        return False
+
     def send_notification_test(self) -> None:
         if not self.config.notifications.email:
             return
@@ -280,26 +334,12 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             return
 
         camera: str = payload["after"]["camera"]
+        camera_name: str = getattr(
+            self.config.cameras[camera], "friendly_name", None
+        ) or titlecase(camera.replace("_", " "))
         current_time = datetime.datetime.now().timestamp()
 
-        # Check global cooldown period
-        if (
-            current_time - self.last_notification_time
-            < self.config.notifications.cooldown
-        ):
-            logger.debug(
-                f"Skipping notification for {camera} - in global cooldown period"
-            )
-            return
-
-        # Check camera-specific cooldown period
-        if (
-            current_time - self.last_camera_notification_time[camera]
-            < self.config.cameras[camera].notifications.cooldown
-        ):
-            logger.debug(
-                f"Skipping notification for {camera} - in camera-specific cooldown period"
-            )
+        if self._within_cooldown(camera):
             return
 
         self.check_registrations()
@@ -331,15 +371,73 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
 
-        title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"
-        message = f"Detected on {titlecase(camera.replace('_', ' '))}"
         image = f"{payload['after']['thumb_path'].replace('/media/frigate', '')}"
+        ended = state == "end" or state == "genai"
+
+        if state == "genai" and payload["after"]["data"]["metadata"]:
+            title = payload["after"]["data"]["metadata"]["title"]
+            message = payload["after"]["data"]["metadata"]["scene"]
+        else:
+            title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"
+            message = f"Detected on {camera_name}"
+
+        if ended:
+            logger.debug(
+                f"Sending a notification with state {state} and message {message}"
+            )
 
         # if event is ongoing open to live view otherwise open to recordings view
-        direct_url = f"/review?id={reviewId}" if state == "end" else f"/#{camera}"
-        ttl = 3600 if state == "end" else 0
+        direct_url = f"/review?id={reviewId}" if ended else f"/#{camera}"
+        ttl = 3600 if ended else 0
 
         logger.debug(f"Sending push notification for {camera}, review ID {reviewId}")
+
+        for user in self.web_pushers:
+            self.send_push_notification(
+                user=user,
+                payload=payload,
+                title=title,
+                message=message,
+                direct_url=direct_url,
+                image=image,
+                ttl=ttl,
+            )
+
+        self.cleanup_registrations()
+
+    def send_trigger(self, payload: dict[str, Any]) -> None:
+        if not self.config.notifications.email:
+            return
+
+        camera: str = payload["camera"]
+        camera_name: str = getattr(
+            self.config.cameras[camera], "friendly_name", None
+        ) or titlecase(camera.replace("_", " "))
+        current_time = datetime.datetime.now().timestamp()
+
+        if self._within_cooldown(camera):
+            return
+
+        self.check_registrations()
+
+        self.last_camera_notification_time[camera] = current_time
+        self.last_notification_time = current_time
+
+        trigger_type = payload["type"]
+        event_id = payload["event_id"]
+        name = payload["name"]
+        score = payload["score"]
+
+        title = f"{name.replace('_', ' ')} triggered on {camera_name}"
+        message = f"{titlecase(trigger_type)} trigger fired for {camera_name} with score {score:.2f}"
+        image = f"clips/triggers/{camera}/{event_id}.webp"
+
+        direct_url = f"/explore?event_id={event_id}"
+        ttl = 0
+
+        logger.debug(
+            f"Sending push notification for {camera_name}, trigger name {name}"
+        )
 
         for user in self.web_pushers:
             self.send_push_notification(

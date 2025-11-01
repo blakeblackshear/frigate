@@ -101,12 +101,14 @@
         "success": {
           "updatedSublabel": "成功更新子標籤。",
           "updatedLPR": "成功更新車牌號碼。",
-          "regenerate": "已從 {{provider}} 請求新的描述。根據提供者的速度，生成新的描述可能需要一些時間。"
+          "regenerate": "已從 {{provider}} 請求新的描述。根據提供者的速度，生成新的描述可能需要一些時間。",
+          "audioTranscription": "成功請求音訊轉錄。"
         },
         "error": {
           "regenerate": "呼叫 {{provider}} 以獲取新描述失敗：{{errorMessage}}",
           "updatedSublabelFailed": "更新子標籤失敗：{{errorMessage}}",
-          "updatedLPRFailed": "更新車牌號碼失敗：{{errorMessage}}"
+          "updatedLPRFailed": "更新車牌號碼失敗：{{errorMessage}}",
+          "audioTranscription": "請求音訊轉錄失敗：{{errorMessage}}"
         }
       }
     },
@@ -152,7 +154,10 @@
       "label": "快照分數"
     },
     "expandRegenerationMenu": "展開重新生成選單",
-    "regenerateFromThumbnails": "從縮圖重新生成"
+    "regenerateFromThumbnails": "從縮圖重新生成",
+    "score": {
+      "label": "分數"
+    }
   },
   "itemMenu": {
     "downloadVideo": {
@@ -181,6 +186,14 @@
     },
     "deleteTrackedObject": {
       "label": "刪除此追蹤物件"
+    },
+    "addTrigger": {
+      "label": "新增觸發器",
+      "aria": "為此追蹤物件新增觸發器"
+    },
+    "audioTranscription": {
+      "label": "轉錄音訊",
+      "aria": "請求音訊轉錄"
     }
   },
   "dialog": {
@@ -201,5 +214,11 @@
     "tooltip": "已配對{{type}}（{{confidence}}% 信心"
   },
   "trackedObjectsCount_other": "{{count}} 個追蹤物件 ",
-  "exploreMore": "瀏覽更多{{label}}物件"
+  "exploreMore": "瀏覽更多{{label}}物件",
+  "aiAnalysis": {
+    "title": "AI 分析"
+  },
+  "concerns": {
+    "label": "關注"
+  }
 }

@@ -19,7 +19,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.notifications])
 
 
-@router.get("/notifications/pubkey")
+@router.get(
+    "/notifications/pubkey",
+    summary="Get VAPID public key",
+    description="""Gets the VAPID public key for the notifications.
+    Returns the public key or an error if notifications are not enabled.
+    """,
+)
 def get_vapid_pub_key(request: Request):
     config = request.app.frigate_config
     notifications_enabled = config.notifications.enabled
@@ -39,7 +45,13 @@ def get_vapid_pub_key(request: Request):
     return JSONResponse(content=utils.b64urlencode(raw_pub), status_code=200)
 
 
-@router.post("/notifications/register")
+@router.post(
+    "/notifications/register",
+    summary="Register notifications",
+    description="""Registers a notifications subscription.
+    Returns a success message or an error if the subscription is not provided.
+    """,
+)
 def register_notifications(request: Request, body: dict = None):
     if request.app.frigate_config.auth.enabled:
         # FIXME: For FastAPI the remote-user is not being populated

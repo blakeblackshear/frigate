@@ -42,7 +42,8 @@
       "inferenceSpeed": "Detekčná rýchlosť",
       "temperature": "Detekčná teplota",
       "cpuUsage": "Detektor využitia CPU",
-      "memoryUsage": "Detektor využitia pamäte"
+      "memoryUsage": "Detektor využitia pamäte",
+      "cpuUsageInformation": "CPU použitý na prípravu vstupných a výstupných údajov do/z detekčných modelov. Táto hodnota nemeria využitie inferencie, a to ani v prípade použitia GPU alebo akcelerátora."
     },
     "hardwareInfo": {
       "title": "Informácie o hardvéri",
@@ -52,9 +53,134 @@
       "gpuDecoder": "GPU dekodér",
       "gpuInfo": {
         "vainfoOutput": {
-          "title": "Výstup Vainfo"
+          "title": "Výstup Vainfo",
+          "returnCode": "Návratový kód: {{code}}",
+          "processOutput": "Výstup procesu:",
+          "processError": "Chyba procesu:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Výstup Nvidia SMI",
+          "name": "Meno: {{name}}",
+          "driver": "Vodič: {{driver}}",
+          "cudaComputerCapability": "Výpočtové možnosti CUDA: {{cuda_compute}}",
+          "vbios": "Informácie o VBiose: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Zatvorte informácie o GPU"
+        },
+        "copyInfo": {
+          "label": "Kopírovať informácie o GPU"
+        },
+        "toast": {
+          "success": "Informácie o grafickej karte boli skopírované do schránky"
         }
+      },
+      "npuUsage": "Použitie NPU",
+      "npuMemory": "Pamäť NPU"
+    },
+    "otherProcesses": {
+      "title": "Iné procesy",
+      "processCpuUsage": "Proces využitia CPU",
+      "processMemoryUsage": "Procesné využitie pamäte"
+    }
+  },
+  "storage": {
+    "title": "Skladovanie",
+    "overview": "Prehľad",
+    "recordings": {
+      "title": "Nahrávky",
+      "tips": "Táto hodnota predstavuje celkové úložisko, ktoré používajú nahrávky v databáze Frigate. Frigate nesleduje využitie úložiska pre všetky súbory na vašom disku.",
+      "earliestRecording": "Najstaršia dostupná nahrávka:"
+    },
+    "shm": {
+      "title": "Alokácia SHM (zdieľanej pamäte)",
+      "warning": "Aktuálna veľkosť SHM {{total}}MB je príliš malá. Zvýšte ju aspoň na {{min_shm}}MB."
+    },
+    "cameraStorage": {
+      "title": "Úložisko kamery",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Nepoužité informácie o úložisku",
+      "storageUsed": "Skladovanie",
+      "percentageOfTotalUsed": "Percento z celkového počtu",
+      "bandwidth": "Šírka pásma",
+      "unused": {
+        "title": "Nepoužité",
+        "tips": "Táto hodnota nemusí presne zodpovedať voľnému miestu dostupnému pre Frigate, ak máte na disku uložené aj iné súbory okrem nahrávok Frigate. Frigate nesleduje využitie úložiska mimo svojich nahrávok."
       }
+    }
+  },
+  "cameras": {
+    "title": "Kamery",
+    "overview": "Prehľad",
+    "info": {
+      "aspectRatio": "pomer strán",
+      "cameraProbeInfo": "{{camera}} Informácie o sonde kamery",
+      "streamDataFromFFPROBE": "Údaje zo streamu sa získavajú pomocou príkazu <code>ffprobe</code>.",
+      "fetching": "Načítavajú sa údaje z kamery",
+      "stream": "Stream {{idx}}",
+      "video": "Video:",
+      "codec": "Kodek:",
+      "resolution": "Rozlíšenie:",
+      "fps": "FPS:",
+      "unknown": "Neznámy",
+      "audio": "Zvuk:",
+      "error": "Chyba: {{error}}",
+      "tips": {
+        "title": "Informácie o kamerovej sonde"
+      }
+    },
+    "framesAndDetections": "Rámy / Detekcie",
+    "label": {
+      "camera": "kamera",
+      "detect": "odhaliť",
+      "skipped": "preskočené",
+      "ffmpeg": "FFmpeg",
+      "capture": "zachytiť",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "zachytiť{{camName}}",
+      "cameraDetect": "Detekcia {{camName}}",
+      "overallFramesPerSecond": "celkový počet snímok za sekundu",
+      "overallDetectionsPerSecond": "celkový počet detekcií za sekundu",
+      "overallSkippedDetectionsPerSecond": "celkový počet vynechaných detekcií za sekundu",
+      "cameraFramesPerSecond": "{{camName}}snimky za sekundu",
+      "cameraDetectionsPerSecond": "{{camName}}detekcie za sekundu",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} vynechaných detekcií za sekundu"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Dáta sondy boli skopírované do schránky."
+      },
+      "error": {
+        "unableToProbeCamera": "Nepodarilo sa overiť kameru: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Naposledy obnovené: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} má vysoké využitie CPU vo formáte FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} má vysoké využitie CPU pri detekcii ({{detectAvg}}%)",
+    "healthy": "Systém je zdravý",
+    "reindexingEmbeddings": "Preindexovanie vložených prvkov (dokončené na {{processed}} %)",
+    "cameraIsOffline": "{{camera}} je offline",
+    "detectIsSlow": "{{detect}} je pomalý ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} je veľmi pomalý ({{speed}} ms)",
+    "shmTooLow": "Alokácia /dev/shm ({{total}} MB) by sa mala zvýšiť aspoň na {{min}} MB."
+  },
+  "enrichments": {
+    "title": "Obohatenia",
+    "infPerSecond": "Inferencie za sekundu",
+    "embeddings": {
+      "image_embedding": "Vkladanie obrázkov",
+      "text_embedding": "Vkladanie textu",
+      "face_recognition": "Rozpoznávanie tváre",
+      "plate_recognition": "Rozpoznávanie ŠPZ",
+      "image_embedding_speed": "Rýchlosť vkladania obrázkov",
+      "face_embedding_speed": "Rýchlosť vkladania tváre",
+      "face_recognition_speed": "Rýchlosť rozpoznávania tváre",
+      "plate_recognition_speed": "Rýchlosť rozpoznávania ŠPZ",
+      "text_embedding_speed": "Rýchlosť vkladania textu",
+      "yolov9_plate_detection_speed": "YOLOv9 rýchlosť detekcie ŠPZ",
+      "yolov9_plate_detection": "YOLOv9 Detekcia ŠPZ"
     }
   }
 }

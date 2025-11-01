@@ -13,8 +13,9 @@ type SearchThumbnailProps = {
   columns: number;
   findSimilar: () => void;
   refreshResults: () => void;
-  showObjectLifecycle: () => void;
+  showTrackingDetails: () => void;
   showSnapshot: () => void;
+  addTrigger: () => void;
 };
 
 export default function SearchThumbnailFooter({
@@ -22,8 +23,9 @@ export default function SearchThumbnailFooter({
   columns,
   findSimilar,
   refreshResults,
-  showObjectLifecycle,
+  showTrackingDetails,
   showSnapshot,
+  addTrigger,
 }: SearchThumbnailProps) {
   const { t } = useTranslation(["views/search"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -40,11 +42,11 @@ export default function SearchThumbnailFooter({
   return (
     <div
       className={cn(
-        "flex w-full flex-row items-center justify-between gap-2",
+        "flex w-full flex-row items-center justify-between gap-2 text-white",
         columns > 4 && "items-start sm:flex-col lg:flex-row lg:items-center",
       )}
     >
-      <div className="flex flex-col items-start text-xs text-primary-variant">
+      <div className="flex flex-col items-start text-xs text-white/90 drop-shadow-lg">
         {searchResult.end_time ? (
           <TimeAgo time={searchResult.start_time * 1000} dense />
         ) : (
@@ -59,8 +61,9 @@ export default function SearchThumbnailFooter({
           searchResult={searchResult}
           findSimilar={findSimilar}
           refreshResults={refreshResults}
-          showObjectLifecycle={showObjectLifecycle}
+          showTrackingDetails={showTrackingDetails}
           showSnapshot={showSnapshot}
+          addTrigger={addTrigger}
         />
       </div>
     </div>

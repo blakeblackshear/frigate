@@ -15,10 +15,10 @@
     "d": "{{time}} Tag",
     "day_one": "{{time}} Tag",
     "day_other": "{{time}} Tage",
-    "m": "{{time}} Minute",
+    "m": "{{time}} Min",
     "minute_one": "{{time}} Minute",
     "minute_other": "{{time}} Minuten",
-    "s": "{{time}} Sekunde",
+    "s": "{{time}}s",
     "second_one": "{{time}} Sekunde",
     "second_other": "{{time}} Sekunden",
     "formattedTimestamp2": {
@@ -38,7 +38,7 @@
     "1hour": "1 Stunde",
     "lastWeek": "Letzte Woche",
     "h": "{{time}} Stunde",
-    "ago": "{{timeAgo}} her",
+    "ago": "vor {{timeAgo}}",
     "untilRestart": "Bis zum Neustart",
     "justNow": "Gerade",
     "pm": "nachmittags",
@@ -107,7 +107,7 @@
     "off": "AUS",
     "reset": "Zurücksetzen",
     "copy": "Kopieren",
-    "twoWayTalk": "bidirecktionales Gespräch",
+    "twoWayTalk": "Zwei-Wege-Kommunikation",
     "exitFullscreen": "Vollbild verlassen",
     "unselect": "Selektion aufheben",
     "copyCoordinates": "Kopiere Koordinaten",
@@ -160,7 +160,15 @@
       "sk": "Slowakisch",
       "yue": "粵語 (Kantonesisch)",
       "th": "ไทย (Thailändisch)",
-      "ca": "Català (Katalanisch)"
+      "ca": "Català (Katalanisch)",
+      "ur": "اردو (Urdu)",
+      "ptBR": "Portugiesisch (Brasilianisch)",
+      "sr": "Српски (Serbisch)",
+      "sl": "Slovenščina (Slowenisch)",
+      "lt": "Lietuvių (Litauisch)",
+      "bg": "Български (bulgarisch)",
+      "gl": "Galego (Galicisch)",
+      "id": "Bahasa Indonesia (Indonesisch)"
     },
     "appearance": "Erscheinung",
     "theme": {
@@ -168,7 +176,7 @@
       "blue": "Blau",
       "green": "Grün",
       "default": "Standard",
-      "nord": "Norden",
+      "nord": "Nord",
       "red": "Rot",
       "contrast": "Hoher Kontrast",
       "highcontrast": "Hoher Kontrast"
@@ -224,10 +232,18 @@
     "length": {
       "feet": "Fuß",
       "meters": "Meter"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/Stunde",
+      "mbph": "MB/Stunde",
+      "gbph": "GB/Stunde"
     }
   },
   "toast": {
-    "copyUrlToClipboard": "URL in zwischenablage kopiert.",
+    "copyUrlToClipboard": "URL in Zwischenablage kopiert.",
     "save": {
       "error": {
         "title": "Speichern der Konfigurationsänderungen gescheitert: {{errorMessage}}",
@@ -240,7 +256,7 @@
     "title": "Rolle",
     "admin": "Administrator",
     "viewer": "Zuschauer",
-    "desc": "Administratoren haben vollen Zugang zu allen funktionen der Frigate Benutzeroberfläche. Zuschauer können nur Kameras betrachten, erkannte Objekte überprüfen und historische Aufnahmen durchsehen."
+    "desc": "Administratoren haben vollen Zugang zu allen Funktionen der Frigate Benutzeroberfläche. Zuschauer können nur Kameras betrachten, erkannte Objekte überprüfen und historische Aufnahmen durchsehen."
   },
   "pagination": {
     "previous": {
@@ -260,9 +276,13 @@
     "documentTitle": "Nicht gefunden - Frigate"
   },
   "selectItem": "Wähle {{item}}",
+  "readTheDocumentation": "Dokumentation lesen",
   "accessDenied": {
     "desc": "Du hast keine Berechtigung diese Seite anzuzeigen.",
     "documentTitle": "Zugang verweigert - Frigate",
     "title": "Zugang verweigert"
+  },
+  "information": {
+    "pixels": "{{area}}px"
   }
 }

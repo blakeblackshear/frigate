@@ -1,0 +1,64 @@
+{
+  "documentTitle": "Klasifikavimo Modeliai",
+  "button": {
+    "deleteClassificationAttempts": "Trinti Klasisifikavimo Nuotraukas",
+    "renameCategory": "Pervadinti Klasę",
+    "deleteCategory": "Trinti Klasę",
+    "deleteImages": "Trinti Nuotraukas",
+    "trainModel": "Treniruoti Modelį"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Ištrinta Klasę",
+      "deletedImage": "Ištrinti Nuotraukas",
+      "categorizedImage": "Sekmingai Klasifikuotas Nuotrauka",
+      "trainedModel": "Modelis sėkmingai apmokytas.",
+      "trainingModel": "Sėkmingai pradėtas modelio apmokymas."
+    },
+    "error": {
+      "deleteImageFailed": "Nepavyko ištrinti:{{errorMessage}}",
+      "deleteCategoryFailed": "Nepavyko ištrinti klasės:{{errorMessage}}",
+      "categorizeFailed": "Nepavyko kategorizuoti nuotraukos:{{errorMessage}}",
+      "trainingFailed": "Nepavyko pradėti modelio apmokymo:{{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Trinti Klasę",
+    "desc": "Esate įsitikinę, norite ištrinti klasę {{name}}? Tai negrįžtamai ištrins visas susijusias nuotraukas ir reikės iš naujo apmokinti modelį."
+  },
+  "deleteDatasetImages": {
+    "title": "Ištrinti Imties Nuotraukas",
+    "desc": "Esate įsitikinę norite ištrinti {{count}} nautraukas iš {{dataset}}? Šis veiksmas negrįžtamas ir reikės iš naujo apmokinti modelį."
+  },
+  "deleteTrainImages": {
+    "title": "Ištrinti Apmokymo Nuotraukas",
+    "desc": "Ar esate įsitikinę, kad norite ištrinti {{count}} nuotraukas? Šis veiksmas negrįžtamas."
+  },
+  "renameCategory": {
+    "title": "Pervadinti Klasę",
+    "desc": "Įveskite naują vardą vietoje {{name}}. Jums reikės iš naujo apmokinti modelį, kad vardas įsigaliotų."
+  },
+  "description": {
+    "invalidName": "Netinkamas vardas. Vardas gali būti sudarytas tik iš raidžiū, skaičių, tarpų, apostrofų, pabraukimų ar brūkšnelių."
+  },
+  "train": {
+    "title": "Pastarosios Klasifikacijos",
+    "aria": "Pasirinkti Pastarasias Klasifikacijas"
+  },
+  "categories": "Klasės",
+  "createCategory": {
+    "new": "Sukurti Naują Klasę"
+  },
+  "categorizeImageAs": "Klasifikuoti Nuotrauką Kaip:",
+  "categorizeImage": "Klasifikuoti Nuotrauką",
+  "noModels": {
+    "object": {
+      "title": "Nėra Objektų Klasifikavimo Modelių",
+      "description": "Sukurti individualų modelį ištrintų objektų klasifikavimui.",
+      "buttonText": "Sukurti Objekto Modelį"
+    },
+    "state": {
+      "title": "Nėra Būklės Klasifikavimo Modelių"
+    }
+  }
+}

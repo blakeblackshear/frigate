@@ -62,7 +62,7 @@ export default function FaceSelectionDialog({
       );
 
   return (
-    <div className={className ?? ""}>
+    <div className={className ?? "flex"}>
       {newFace && (
         <TextEntryDialog
           open={true}

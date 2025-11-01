@@ -1,0 +1,22 @@
+{
+  "button": {
+    "deleteClassificationAttempts": "حذف تصاویر طبقه بندی",
+    "renameCategory": "تغییر نام کلاس",
+    "deleteCategory": "حذف کردن کلاس",
+    "deleteImages": "حذف کردن عکس ها",
+    "trainModel": "مدل آموزش"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "کلاس حذف شده",
+      "deletedImage": "عکس های حذف شده",
+      "categorizedImage": "تصویر طبقه بندی شده",
+      "trainedModel": "مدل آموزش دیده شده.",
+      "trainingModel": "آموزش دادن مدل با موفقیت شروع شد."
+    },
+    "error": {
+      "deleteImageFailed": "حذف نشد:{{پیغام خطا}}",
+      "deleteCategoryFailed": "کلاس حذف نشد:{{پیغام خطا}}"
+    }
+  }
+}

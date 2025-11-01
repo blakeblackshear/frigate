@@ -12,5 +12,7 @@
       "savingError": "儲存設定時出錯"
     }
   },
-  "confirm": "是否不儲存就離開？"
+  "confirm": "是否不儲存就離開？",
+  "safeConfigEditor": "設定編輯器 (安全模式)",
+  "safeModeDescription": "Frigate 因配置驗證錯誤而進入安全模式。"
 }

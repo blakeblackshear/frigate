@@ -2,6 +2,55 @@
   "documentTitle": {
     "default": "Ρυθμίσεις - Frigate",
     "authentication": "Ρυθμίσεις ελέγχου ταυτοποίησης - Frigate",
-    "camera": "Ρυθμίσεις Κάμερας - Frigate"
+    "camera": "Ρυθμίσεις Κάμερας - Frigate",
+    "enrichments": "Ρυθμίσεις εμπλουτισμού - Frigate",
+    "masksAndZones": "Ρυθμίσεις Μασκών και Ζωνών - Frigate",
+    "motionTuner": "Ρύθμιση Κίνησης - Frigate",
+    "object": "Επίλυση σφαλμάτων - Frigate",
+    "general": "Γενικές ρυθμίσεις - Frigate",
+    "frigatePlus": "Ρυθμίσεις Frigate+ - Frigate",
+    "notifications": "Ρυθμίσεις Ειδοποιήσεων"
+  },
+  "masksAndZones": {
+    "zones": {
+      "point_one": "{{count}} σημέιο",
+      "point_other": "{{count}} σημεία"
+    },
+    "motionMasks": {
+      "point_one": "{{count}} σημείο",
+      "point_other": "{{count}} σημεία"
+    },
+    "objectMasks": {
+      "point_one": "{{count}} σημέιο",
+      "point_other": "{{count}} σημεία"
+    }
+  },
+  "menu": {
+    "ui": "Επιφάνεια Εργασίας",
+    "enrichments": "Εμπλουτισμοί",
+    "cameras": "Ρυθμίσεις Κάμερας",
+    "masksAndZones": "Μάσκες / Ζώνες",
+    "motionTuner": "Ρυθμιστής Κίνησης",
+    "debug": "Επίλυση Σφαλμάτων"
+  },
+  "dialog": {
+    "unsavedChanges": {
+      "title": "Έχετε μη αποθηκευμένες αλλαγές.",
+      "desc": "Θέλετε να αποθηκεύσετε τις αλλαγές σας πριν την συνέχεια;"
+    }
+  },
+  "cameraSetting": {
+    "camera": "Κάμερα",
+    "noCamera": "Δεν υπάρχει Κάμερα"
+  },
+  "triggers": {
+    "dialog": {
+      "form": {
+        "friendly_name": {
+          "placeholder": "Ονομάτισε ή περιέγραψε αυτό το εύνασμα",
+          "description": "Ένα προαιρετικό φιλικό όνομα, ή ένα περιγραφικό κείμενο για αυτό το εύνασμα."
+        }
+      }
+    }
   }
 }

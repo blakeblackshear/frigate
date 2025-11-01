@@ -1,6 +1,6 @@
 {
   "restart": {
-    "title": "Ar įsitikinę kad norite perkrauti Frigate?",
+    "title": "Esate įsitikinę, kad norite perkrauti Frigate?",
     "button": "Perkrauti",
     "restarting": {
       "title": "Frigate Persikrauna",
@@ -14,12 +14,108 @@
         "question": {
           "ask_a": "Ar šis objektas yra <code>{{label}}</code>?",
           "ask_an": "Ar šis objektas yra <code>{{label}}</code>?",
-          "label": "Patvirtinti šią etiketę į Frigate Plus"
+          "label": "Patvirtinti šią etiketę į Frigate Plus",
+          "ask_full": "Ar šis objektas yra <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "state": {
+          "submitted": "Pateikta"
         }
       },
       "submitToPlus": {
-        "label": "Pateiktį į Frigate+"
+        "label": "Pateiktį į Frigate+",
+        "desc": "Objektai vietose kurių norite vengti nėra klaidingai teigiami. Pateikiant juos kaip klaidingai teigiamus įneš neatitikimų į modelį."
+      }
+    },
+    "video": {
+      "viewInHistory": "Pažiūrėti Istorijoje"
+    }
+  },
+  "streaming": {
+    "restreaming": {
+      "disabled": "Šiai kamerai pertransliavimas nėra įjungtas.",
+      "desc": {
+        "title": "Nustatyti go2rtc papildomoms tiesioginės transliacijos galimybėms ir šios kameros garsui."
+      }
+    },
+    "label": "Srautas",
+    "showStats": {
+      "label": "Rodyti transliacijos statistiką",
+      "desc": "Įjungti šią galimybę rodyti transliacijos statistiką kaip pridėtinę informaciją kameros vaizde."
+    },
+    "debugView": "Debug Vaizdas"
+  },
+  "export": {
+    "time": {
+      "lastHour_one": "Paskutinė {{count}} Valanda",
+      "lastHour_few": "Paskutinės {{count}} Valandos",
+      "lastHour_other": "Paskutinės {{count}} Valandų",
+      "fromTimeline": "Pasirinkit iš Laiko juostos",
+      "custom": "Pasirinkimas",
+      "start": {
+        "title": "Pradžios Laikas",
+        "label": "Pasirinkti Pradžios Laiką"
+      },
+      "end": {
+        "title": "Pabaigos Laikas",
+        "label": "Pasirinkti Pabaigos Laiką"
+      }
+    },
+    "fromTimeline": {
+      "previewExport": "Peržiūrėti Eksportuotus",
+      "saveExport": "Išsaugoti Exportuojamą"
+    },
+    "name": {
+      "placeholder": "Pavadinti eksportuojamą įrašą"
+    },
+    "select": "Pasirinkti",
+    "export": "Eksportuoti",
+    "selectOrExport": "Pasirinkti ar Eksportuoti",
+    "toast": {
+      "success": "Sėkmingai pradėtas eksportavimas. Įrašą galima peržiūrėti /exports kataloge.",
+      "error": {
+        "failed": "Nepavyko pradėti eksportavimo: {{error}}",
+        "endTimeMustAfterStartTime": "Pabaigos Laikas privalo būti vėliau nei pradžios laikas",
+        "noVaildTimeSelected": "Nėra pasirinkto tinkamo laikotarpio"
       }
     }
+  },
+  "recording": {
+    "button": {
+      "markAsReviewed": "Žymėti kaip peržiūrėtą",
+      "export": "Eksportuoti",
+      "deleteNow": "Ištrinti Dabar",
+      "markAsUnreviewed": "Pažymėti kaip nematytą"
+    },
+    "confirmDelete": {
+      "desc": {
+        "selected": "Ar esate įsitikinę, kad norite ištrinti visus įrašytus vaizdo įrašus susijusius su šiuo peržiūros elementu?<br /><br />Laikykite<em>Shift</em> norint ateityje praleisti šį pranešimą."
+      },
+      "title": "Patvirtinti Ištrynimą",
+      "toast": {
+        "success": "Vaizdo įrašas susijęs su pasirinkta peržiūra buvo sėkmingai ištrintas.",
+        "error": "Nepavyko ištrinti: {{error}}"
+      }
+    }
+  },
+  "search": {
+    "saveSearch": {
+      "label": "Išsaugoti Paiešką",
+      "desc": "Suteikite vardą šiai išsaugotai paieškai.",
+      "placeholder": "Įveskite pavadinima savo paieškai",
+      "overwrite": "{{searchName}} jau egzistuoja. Jei išsaugosite esamas įrašas bus perrašytas.",
+      "success": "Paieška ({{searchName}}) buvo išsaugota.",
+      "button": {
+        "save": {
+          "label": "Išsaugoti šią paiešką"
+        }
+      }
+    }
+  },
+  "imagePicker": {
+    "selectImage": "Pasirinkti miniatiūrą sekamam objektui",
+    "search": {
+      "placeholder": "Ieškoti pagal etiketę arba sub etiketę..."
+    },
+    "noImages": "Šiai kamerai miniatiūrų nerasta"
   }
 }

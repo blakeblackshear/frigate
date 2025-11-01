@@ -40,7 +40,8 @@
       "title": "Detektorer",
       "cpuUsage": "Detektor CPU-belastning",
       "memoryUsage": "Detektor minnebruk",
-      "temperature": "Detektor temperatur"
+      "temperature": "Detektor temperatur",
+      "cpuUsageInformation": "CPU brukt til å forberede inn- og utdata til/fra deteksjonsmodeller. Denne verdien måler ikke bruk under inferens, selv om en GPU eller akselerator benyttes."
     },
     "hardwareInfo": {
       "gpuMemory": "GPU-minne",
@@ -100,7 +101,11 @@
         "tips": "Denne verdien representerer kanskje ikke nøyaktig den ledige plassen Frigate har tilgang til, dersom det finnes andre filer lagret på disken. Frigate sporer kun lagring brukt av egne opptak."
       }
     },
-    "title": "Lagring"
+    "title": "Lagring",
+    "shm": {
+      "title": "SHM (delt minne) allokering",
+      "warning": "Den nåværende SHM-størrelsen på {{total}} MB er for liten. Øk den til minst {{min_shm}} MB."
+    }
   },
   "cameras": {
     "info": {
@@ -113,7 +118,7 @@
       "fetching": "Henter kameradata",
       "stream": "Strøm {{idx}}",
       "video": "Video:",
-      "fps": "Bilder per sekund:",
+      "fps": "FPS:",
       "unknown": "Ukjent",
       "tips": {
         "title": "Kamerainformasjon"
@@ -175,6 +180,7 @@
     "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)",
     "cameraIsOffline": "{{camera}} er frakoblet",
     "detectIsSlow": "{{detect}} er treg ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} er veldig treg ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} er veldig treg ({{speed}} ms)",
+    "shmTooLow": "/dev/shm-allokeringen ({{total}} MB) bør økes til minst {{min}} MB."
   }
 }

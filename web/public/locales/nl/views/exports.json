@@ -13,5 +13,11 @@
   },
   "noExports": "Geen export gevonden",
   "deleteExport": "Verwijder Export",
-  "deleteExport.desc": "Weet je zeker dat je dit wilt wissen: {{exportName}}?"
+  "deleteExport.desc": "Weet je zeker dat je dit wilt wissen: {{exportName}}?",
+  "tooltip": {
+    "shareExport": "Deel export",
+    "downloadVideo": "Download video",
+    "editName": "Naam bewerken",
+    "deleteExport": "Verwijder export"
+  }
 }

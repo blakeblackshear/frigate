@@ -147,7 +147,7 @@ WEB Digest Algorithm  - MD5
 Reolink has many different camera models with inconsistently supported features and behavior. The below table shows a summary of various features and recommendations.
 
 | Camera Resolution | Camera Generation         | Recommended Stream Type           | Additional Notes                                                        |
-| ----------------  | ------------------------- | --------------------------------  | ----------------------------------------------------------------------- |
+| ----------------- | ------------------------- | --------------------------------- | ----------------------------------------------------------------------- |
 | 5MP or lower      | All                       | http-flv                          | Stream is h264                                                          |
 | 6MP or higher     | Latest (ex: Duo3, CX-8##) | http-flv with ffmpeg 8.0, or rtsp | This uses the new http-flv-enhanced over H265 which requires ffmpeg 8.0 |
 | 6MP or higher     | Older (ex: RLC-8##)       | rtsp                              |                                                                         |
@@ -238,7 +238,7 @@ go2rtc:
       - rtspx://192.168.1.1:7441/abcdefghijk
 ```
 
-[See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.9.9#source-rtsp)
+[See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.9.10#source-rtsp)
 
 In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record if used directly with unifi protect.
 
@@ -257,6 +257,7 @@ TP-Link VIGI cameras need some adjustments to the main stream settings on the ca
 To use a USB camera (webcam) with Frigate, the recommendation is to use go2rtc's [FFmpeg Device](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#source-ffmpeg-device) support:
 
 - Preparation outside of Frigate:
+
   - Get USB camera path. Run `v4l2-ctl --list-devices` to get a listing of locally-connected cameras available. (You may need to install `v4l-utils` in a way appropriate for your Linux distribution). In the sample configuration below, we use `video=0` to correlate with a detected device path of `/dev/video0`
   - Get USB camera formats & resolutions. Run `ffmpeg -f v4l2 -list_formats all -i /dev/video0` to get an idea of what formats and resolutions the USB Camera supports. In the sample configuration below, we use a width of 1024 and height of 576 in the stream and detection settings based on what was reported back.
   - If using Frigate in a container (e.g. Docker on TrueNAS), ensure you have USB Passthrough support enabled, along with a specific Host Device (`/dev/video0`) + Container Device (`/dev/video0`) listed.
@@ -284,5 +285,3 @@ cameras:
       width: 1024
       height: 576
 ```
-
-
