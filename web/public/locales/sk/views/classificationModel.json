@@ -43,7 +43,8 @@
   },
   "train": {
     "title": "Posledné klasifikácie",
-    "aria": "Vyberte Nedávne Klasifikácie"
+    "aria": "Vyberte Nedávne Klasifikácie",
+    "titleShort": "Nedávne"
   },
   "categories": "Triedy",
   "createCategory": {

@@ -49,6 +49,10 @@
       "playAlertVideos": {
         "label": "Prehrať videá s upozornením",
         "desc": "Predvolene sa nedávne upozornenia na paneli Živé vysielanie prehrávajú ako krátke cyklické videá. Túto možnosť vypnite, ak chcete zobrazovať iba statický obrázok nedávnych upozornení na tomto zariadení/prehliadači."
+      },
+      "displayCameraNames": {
+        "label": "Vždy Zobraziť názvy kamier",
+        "desc": "Vždy zobrazujte názvy kamier v čipe na ovládacom paneli živého náhľadu z viacerých kamier."
       }
     },
     "storedLayouts": {
@@ -292,7 +296,7 @@
       "name": {
         "title": "Meno",
         "inputPlaceHolder": "Zadajte meno…",
-        "tips": "Názov musí mať aspoň 2 znaky a nesmie byť zhodný s názvom kamery alebo inej zóny."
+        "tips": "Názov musí mať aspoň 2 znaky, musí mať aspoň jedno písmeno a nesmie byť názvom kamery alebo inej zóny."
       },
       "inertia": {
         "title": "Zotrvačnosť",
@@ -792,6 +796,133 @@
           "customDesc": "Vlastná rola so špecifickým prístupom k kamere."
         }
       }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Správa roly diváka",
+      "desc": "Spravujte vlastné roly divákov a ich povolenia na prístup ku kamere pre túto inštanciu Frigate."
+    },
+    "addRole": "Pridať rolu",
+    "table": {
+      "role": "Rola",
+      "cameras": "Kamery",
+      "actions": "Akcie",
+      "noRoles": "Neboli nájdené žiadne vlastné role.",
+      "editCameras": "Editovať kamery",
+      "deleteRole": "Odstrániť rolu"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rola {{role}} bola úspešne vytvorená",
+        "updateCameras": "Kamery aktualizované pre rolu {{role}}",
+        "deleteRole": "Rola {{role}} bola úspešne odstránená",
+        "userRolesUpdated": "{{count}} užívateľ (y) priradené tejto úlohe boli aktualizované pre \"viewer\", ktorý má prístup ku všetkým kamerám."
+      },
+      "error": {
+        "createRoleFailed": "Nepodarilo sa vytvoriť rolu: {{errorMessage}}",
+        "updateCamerasFailed": "Nepodarilo sa aktualizovať kamery: {{errorMessage}}",
+        "deleteRoleFailed": "Nepodarilo sa odstrániť rolu: {{errorMessage}}",
+        "userUpdateFailed": "Nepodarilo sa aktualizovať používateľské role: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Vytvoriť novú rolu",
+        "desc": "Pridajte novú úlohu a zadajte prístup k kamerám."
+      },
+      "editCameras": {
+        "title": "Editovať Rolu Kamery",
+        "desc": "Aktualizujte prístup k kamere pre rolu <strong>{{role}}<strong>."
+      },
+      "deleteRole": {
+        "title": "Odstrániť rolu",
+        "desc": "Túto akciu nie je možné vrátiť späť. Týmto sa rola natrvalo odstráni a všetci používatelia s touto rolou budú priradení k role „pozerač“, ktorá umožní divákovi prístup ku všetkým kamerám.",
+        "warn": "Ste si istí, že chcete odstrániť <strong>{{role}}</strong>?",
+        "deleting": "Odstraňuje sa..."
+      },
+      "form": {
+        "role": {
+          "title": "Názov role",
+          "placeholder": "Zadajte názov roly",
+          "desc": "Povolené sú iba písmená, čísla, bodky a podčiarkovníky.",
+          "roleIsRequired": "Vyžaduje sa názov roly",
+          "roleOnlyInclude": "Názov role môže obsahovať iba písmená, čísla, . alebo _",
+          "roleExists": "Úloha s týmto menom už existuje."
+        },
+        "cameras": {
+          "title": "Kamery",
+          "desc": "Vyberte kamery, ku ktorým má táto rola prístup. Vyžaduje sa aspoň jedna kamera.",
+          "required": "Aspoň jedna kamera musí byť vybraná."
+        }
+      }
+    }
+  },
+  "notification": {
+    "title": "Notifikacie",
+    "notificationSettings": {
+      "title": "Nastavenia notifikácií",
+      "desc": "Frigate dokáže natívne odosielať push notifikácie do vášho zariadenia, keď je spustený v prehliadači alebo nainštalovaný ako PWA."
+    },
+    "notificationUnavailable": {
+      "title": "Notifikacie su nedostupné",
+      "desc": "Webové push notifikácie vyžadujú zabezpečený kontext (<code>https://…</code>). Ide o obmedzenie prehliadača. Ak chcete používať notifikácie, pristupujte k Frigate bezpečne."
+    },
+    "globalSettings": {
+      "title": "Globálne nastavenia",
+      "desc": "Dočasne pozastaviť upozornenia pre konkrétne kamery na všetkých registrovaných zariadeniach."
+    },
+    "email": {
+      "title": "E-mail",
+      "placeholder": "e.g. príklad@email.com",
+      "desc": "Vyžaduje sa platný e-mail, ktorý bude použitý na upozornenie v prípade akýchkoľvek problémov so službou push."
+    },
+    "cameras": {
+      "title": "Kamery",
+      "noCameras": "K dispozícii nie sú žiadne kamery",
+      "desc": "Vyberte, na ktoré kamery umožňujú notifikácie."
+    },
+    "deviceSpecific": "Špecifické nastavenia zariadenia",
+    "registerDevice": "Registrovať toto zariadenie",
+    "unregisterDevice": "Zrušte registráciu tohto zariadenia",
+    "sendTestNotification": "Odoslať testovacie oznámenie",
+    "unsavedRegistrations": "Neuložené registrácie oznámení",
+    "unsavedChanges": "Neuložené zmeny upozornení",
+    "active": "Upozornenia sú aktívne",
+    "suspended": "Oznámenie pozastavuju {{time}}",
+    "suspendTime": {
+      "suspend": "Pozastaviť",
+      "5minutes": "Pozastaviť na 5 minút",
+      "10minutes": "Pozastaviť na 10 minút",
+      "30minutes": "Pozastaviť na 30 minút",
+      "1hour": "Pozastaviť na 1 hodinu",
+      "12hours": "Pozastaviť na 12 hodín",
+      "24hours": "Pozastaviť na 24 hodín",
+      "untilRestart": "Pozastaviť do reštartovania"
+    },
+    "cancelSuspension": "Zrušiť pozastavenie",
+    "toast": {
+      "success": {
+        "registered": "Úspešne zaregistrované pre upozornenia. Pred odoslaním akýchkoľvek upozornení (vrátane testovacieho upozornenia) je potrebné reštartovať Frigate.",
+        "settingSaved": "Nastavenie oznámenia boli uložené."
+      },
+      "error": {
+        "registerFailed": "Uloženie registrácie upozornenia zlyhalo."
+      }
+    }
+  },
+  "frigatePlus": {
+    "title": "Nastavenie Frigate+",
+    "apiKey": {
+      "title": "Frigate + API kľúč",
+      "validated": "Frigate + API kľúč je detekovaný a overený",
+      "notValidated": "Frigate + API kľúč nie je detekovaný alebo nie je overený",
+      "desc": "Frigate+ API kľúč umožňuje integráciu s Frigate+ služby.",
+      "plusLink": "Prečítajte si viac o Frigate+"
+    },
+    "snapshotConfig": {
+      "title": "Konfigurácia snímky",
+      "desc": "Odosielanie do Frigate+ vyžaduje, aby boli v konfigurácii povolené snímky aj snímky <code>clean_copy</code>."
     }
   }
 }
