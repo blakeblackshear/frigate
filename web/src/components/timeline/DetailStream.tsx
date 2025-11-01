@@ -57,7 +57,7 @@ export default function DetailStream({
     elementRef: scrollRef,
   });
 
-  const effectiveTime = currentTime + annotationOffset / 1000;
+  const effectiveTime = currentTime - annotationOffset / 1000;
   const [upload, setUpload] = useState<Event | undefined>(undefined);
   const [controlsExpanded, setControlsExpanded] = useState(false);
   const [alwaysExpandActive, setAlwaysExpandActive] = usePersistence(
@@ -213,6 +213,7 @@ export default function DetailStream({
                     config={config}
                     onSeek={onSeekCheckPlaying}
                     effectiveTime={effectiveTime}
+                    annotationOffset={annotationOffset}
                     isActive={activeReviewId == id}
                     onActivate={() => setActiveReviewId(id)}
                     onOpenUpload={(e) => setUpload(e)}
@@ -278,6 +279,7 @@ type ReviewGroupProps = {
   onActivate?: () => void;
   onOpenUpload?: (e: Event) => void;
   effectiveTime?: number;
+  annotationOffset: number;
   alwaysExpandActive?: boolean;
 };
 
@@ -290,11 +292,14 @@ function ReviewGroup({
   onActivate,
   onOpenUpload,
   effectiveTime,
+  annotationOffset,
   alwaysExpandActive = false,
 }: ReviewGroupProps) {
   const { t } = useTranslation("views/events");
   const [open, setOpen] = useState(false);
   const start = review.start_time ?? 0;
+  // review.start_time is in detect time, convert to record for seeking
+  const startRecord = start + annotationOffset / 1000;
 
   // Auto-expand when this review becomes active and alwaysExpandActive is enabled
   useEffect(() => {
@@ -371,7 +376,7 @@ function ReviewGroup({
         )}
         onClick={() => {
           onActivate?.();
-          onSeek(start);
+          onSeek(startRecord);
         }}
       >
         <div className="ml-4 mr-2 mt-1.5 flex flex-row items-start">
@@ -450,6 +455,7 @@ function ReviewGroup({
                     key={event.id}
                     event={event}
                     effectiveTime={effectiveTime}
+                    annotationOffset={annotationOffset}
                     onSeek={onSeek}
                     onOpenUpload={onOpenUpload}
                   />
@@ -483,12 +489,14 @@ function ReviewGroup({
 type EventListProps = {
   event: Event;
   effectiveTime?: number;
+  annotationOffset: number;
   onSeek: (ts: number, play?: boolean) => void;
   onOpenUpload?: (e: Event) => void;
 };
 function EventList({
   event,
   effectiveTime,
+  annotationOffset,
   onSeek,
   onOpenUpload,
 }: EventListProps) {
@@ -505,14 +513,17 @@ function EventList({
     if (event) {
       setSelectedObjectIds([]);
       setSelectedObjectIds([event.id]);
-      onSeek(event.start_time);
+      // event.start_time is detect time, convert to record
+      const recordTime = event.start_time + annotationOffset / 1000;
+      onSeek(recordTime);
     } else {
       setSelectedObjectIds([]);
     }
   };
 
   const handleTimelineClick = (ts: number, play?: boolean) => {
-    handleObjectSelect(event);
+    setSelectedObjectIds([]);
+    setSelectedObjectIds([event.id]);
     onSeek(ts, play);
   };
 
@@ -554,7 +565,6 @@ function EventList({
               )}
               onClick={(e) => {
                 e.stopPropagation();
-                onSeek(event.start_time);
                 handleObjectSelect(event);
               }}
               role="button"
@@ -568,7 +578,6 @@ function EventList({
               className="flex flex-1 items-center gap-2"
               onClick={(e) => {
                 e.stopPropagation();
-                onSeek(event.start_time);
                 handleObjectSelect(event);
               }}
               role="button"
@@ -607,6 +616,7 @@ function EventList({
             eventId={event.id}
             onSeek={handleTimelineClick}
             effectiveTime={effectiveTime}
+            annotationOffset={annotationOffset}
             startTime={event.start_time}
             endTime={event.end_time}
           />
@@ -621,6 +631,7 @@ type LifecycleItemProps = {
   isActive?: boolean;
   onSeek?: (timestamp: number, play?: boolean) => void;
   effectiveTime?: number;
+  annotationOffset: number;
   isTimelineActive?: boolean;
 };
 
@@ -629,6 +640,7 @@ function LifecycleItem({
   isActive,
   onSeek,
   effectiveTime,
+  annotationOffset,
   isTimelineActive = false,
 }: LifecycleItemProps) {
   const { t } = useTranslation("views/events");
@@ -682,7 +694,8 @@ function LifecycleItem({
     <div
       role="button"
       onClick={() => {
-        onSeek?.(item.timestamp, false);
+        const recordTimestamp = item.timestamp + annotationOffset / 1000;
+        onSeek?.(recordTimestamp, false);
       }}
       className={cn(
         "flex cursor-pointer items-center gap-2 text-sm text-primary-variant",
@@ -751,12 +764,14 @@ function ObjectTimeline({
   eventId,
   onSeek,
   effectiveTime,
+  annotationOffset,
   startTime,
   endTime,
 }: {
   eventId: string;
   onSeek: (ts: number, play?: boolean) => void;
   effectiveTime?: number;
+  annotationOffset: number;
   startTime?: number;
   endTime?: number;
 }) {
@@ -857,6 +872,7 @@ function ObjectTimeline({
               onSeek={onSeek}
               isActive={isActive}
               effectiveTime={effectiveTime}
+              annotationOffset={annotationOffset}
               isTimelineActive={isWithinEventRange}
             />
           );
