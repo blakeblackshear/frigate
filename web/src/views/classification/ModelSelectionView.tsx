@@ -2,7 +2,7 @@ import { baseUrl } from "@/api/baseUrl";
 import ClassificationModelWizardDialog from "@/components/classification/ClassificationModelWizardDialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ImageShadowOverlay } from "@/components/overlay/ImageShadowOverlay";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { cn } from "@/lib/utils";
@@ -10,13 +10,35 @@ import {
   CustomClassificationModelConfig,
   FrigateConfig,
 } from "@/types/frigateConfig";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
 import { MdModelTraining } from "react-icons/md";
+import { LuTrash2 } from "react-icons/lu";
+import { FiMoreVertical } from "react-icons/fi";
 import useSWR from "swr";
 import Heading from "@/components/ui/heading";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import axios from "axios";
+import { toast } from "sonner";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import BlurredIconButton from "@/components/button/BlurredIconButton";
 
 const allModelTypes = ["objects", "states"] as const;
 type ModelType = (typeof allModelTypes)[number];
@@ -126,7 +148,7 @@ export default function ModelSelectionView({
             onClick={() => setNewModel(true)}
           >
             <FaFolderPlus />
-            Add Classification
+            {t("button.addClassification")}
           </Button>
         </div>
       </div>
@@ -142,6 +164,7 @@ export default function ModelSelectionView({
               key={config.name}
               config={config}
               onClick={() => onClick(config)}
+              onDelete={() => refreshConfig()}
             />
           ))}
         </div>
@@ -179,11 +202,52 @@ function NoModelsView({
 type ModelCardProps = {
   config: CustomClassificationModelConfig;
   onClick: () => void;
+  onDelete: () => void;
 };
-function ModelCard({ config, onClick }: ModelCardProps) {
+function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
+  const { t } = useTranslation(["views/classificationModel"]);
+
   const { data: dataset } = useSWR<{
     [id: string]: string[];
   }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const bypassDialogRef = useRef(false);
+
+  useKeyboardListener(["Shift"], (_, modifiers) => {
+    bypassDialogRef.current = modifiers.shift;
+    return false;
+  });
+
+  const handleDelete = useCallback(async () => {
+    await axios
+      .delete(`classification/${config.name}`)
+      .then((resp) => {
+        if (resp.status == 200) {
+          toast.success(t("toast.success.deletedModel", { count: 1 }), {
+            position: "top-center",
+          });
+          onDelete();
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(t("toast.error.deleteModelFailed", { errorMessage }), {
+          position: "top-center",
+        });
+      });
+  }, [config, onDelete, t]);
+
+  const handleDeleteClick = useCallback(() => {
+    if (bypassDialogRef.current) {
+      handleDelete();
+    } else {
+      setDeleteDialogOpen(true);
+    }
+  }, [handleDelete]);
 
   const coverImage = useMemo(() => {
     if (!dataset) {
@@ -204,22 +268,66 @@ function ModelCard({ config, onClick }: ModelCardProps) {
   }, [dataset]);
 
   return (
-    <div
-      key={config.name}
-      className={cn(
-        "relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg",
-        "outline-transparent duration-500",
-      )}
-      onClick={() => onClick()}
-    >
-      <img
-        className="size-full"
-        src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
-      />
-      <ImageShadowOverlay />
-      <div className="absolute bottom-2 left-3 text-lg smart-capitalize">
-        {config.name}
+    <>
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={() => setDeleteDialogOpen(!deleteDialogOpen)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("deleteModel.title")}</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
+            {t("deleteModel.single", { name: config.name })}
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={handleDelete}
+            >
+              {t("button.delete", { ns: "common" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div
+        className={cn(
+          "relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg",
+        )}
+        onClick={onClick}
+      >
+        <img
+          className="size-full"
+          src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
+        />
+        <ImageShadowOverlay />
+        <div className="absolute bottom-2 left-3 text-lg text-white smart-capitalize">
+          {config.name}
+        </div>
+        <div className="absolute bottom-2 right-2 z-40">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <BlurredIconButton>
+                <FiMoreVertical className="size-5 text-white" />
+              </BlurredIconButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleDeleteClick}>
+                <LuTrash2 className="mr-2 size-4" />
+                <span>
+                  {bypassDialogRef.current
+                    ? t("button.deleteNow", { ns: "common" })
+                    : t("button.delete", { ns: "common" })}
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

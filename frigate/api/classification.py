@@ -804,3 +804,42 @@ async def generate_object_examples(request: Request, body: GenerateObjectExample
         content={"success": True, "message": "Example generation completed"},
         status_code=200,
     )
+
+
+@router.delete(
+    "/classification/{name}",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete a classification model",
+    description="""Deletes a specific classification model and all its associated data.
+    The name must exist in the classification models. Returns a success message or an error if the name is invalid.""",
+)
+def delete_classification_model(request: Request, name: str):
+    config: FrigateConfig = request.app.frigate_config
+
+    if name not in config.classification.custom:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"{name} is not a known classification model.",
+                }
+            ),
+            status_code=404,
+        )
+
+    # Delete the classification model's data directory
+    model_dir = os.path.join(CLIPS_DIR, sanitize_filename(name))
+
+    if os.path.exists(model_dir):
+        shutil.rmtree(model_dir)
+
+    return JSONResponse(
+        content=(
+            {
+                "success": True,
+                "message": f"Successfully deleted classification model {name}.",
+            }
+        ),
+        status_code=200,
+    )
