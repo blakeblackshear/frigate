@@ -43,7 +43,8 @@
   },
   "train": {
     "title": "Classifications récentes",
-    "aria": "Sélectionner des classifications récentes"
+    "aria": "Sélectionner des classifications récentes",
+    "titleShort": "Récent"
   },
   "categories": "Classes",
   "createCategory": {
@@ -98,7 +99,8 @@
         "stateRequiresTwoClasses": "Les modèles d'état nécessitent au moins deux classes.",
         "objectLabelRequired": "Veuillez sélectionner une étiquette d'objet.",
         "objectTypeRequired": "Veuillez sélectionner un type de classification."
-      }
+      },
+      "states": "États"
     },
     "step2": {
       "description": "Sélectionnez les caméras et définissez la zone à surveiller pour chaque caméra. Le modèle classifiera l'état de ces zones.",
