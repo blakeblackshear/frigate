@@ -391,10 +391,7 @@ export default function SearchDetailDialog({
                 </>
               )}
               {page == "tracking_details" && (
-                <TrackingDetails
-                  className="w-full overflow-x-hidden"
-                  event={search as unknown as Event}
-                />
+                <TrackingDetails event={search as unknown as Event} />
               )}
             </>
           )}

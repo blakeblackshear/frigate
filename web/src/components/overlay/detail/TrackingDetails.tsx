@@ -301,31 +301,36 @@ export function TrackingDetails({
 
       <div
         className={cn(
-          "relative flex items-center justify-center",
-          cameraAspect === "wide"
-            ? "w-full flex-1"
-            : cameraAspect === "tall"
-              ? "max-h-[50dvh] lg:max-h-[70dvh]"
-              : isDesktop && "w-full flex-[3]",
+          "flex w-full items-center justify-center",
+          isDesktop && "overflow-hidden",
+          cameraAspect === "tall" ? "max-h-[50dvh] lg:max-h-[70dvh]" : "w-full",
+          cameraAspect !== "tall" && isDesktop && "flex-[3]",
         )}
         style={{ aspectRatio: aspectRatio }}
         ref={containerRef}
       >
-        <HlsVideoPlayer
-          videoRef={videoRef}
-          containerRef={containerRef}
-          visible={true}
-          currentSource={videoSource}
-          hotKeys={false}
-          supportsFullscreen={false}
-          fullscreen={false}
-          frigateControls={true}
-          onTimeUpdate={handleTimeUpdate}
-          onSeekToTime={handleSeekToTime}
-          isDetailMode={true}
-          camera={event.camera}
-          currentTimeOverride={currentTime}
-        />
+        <div
+          className={cn(
+            "relative",
+            cameraAspect === "tall" ? "h-full" : "w-full",
+          )}
+        >
+          <HlsVideoPlayer
+            videoRef={videoRef}
+            containerRef={containerRef}
+            visible={true}
+            currentSource={videoSource}
+            hotKeys={false}
+            supportsFullscreen={false}
+            fullscreen={false}
+            frigateControls={true}
+            onTimeUpdate={handleTimeUpdate}
+            onSeekToTime={handleSeekToTime}
+            isDetailMode={true}
+            camera={event.camera}
+            currentTimeOverride={currentTime}
+          />
+        </div>
       </div>
 
       <div className={cn(isDesktop && "flex-[2] overflow-hidden")}>
@@ -335,7 +340,7 @@ export function TrackingDetails({
             isDesktop && "scrollbar-container h-full overflow-y-auto",
           )}
         >
-          <div className="mt-3 flex flex-row items-center justify-between">
+          <div className="flex flex-row items-center justify-between">
             <Heading as="h4">{t("trackingDetails.title")}</Heading>
 
             <div className="flex flex-row gap-2">
