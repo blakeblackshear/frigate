@@ -267,7 +267,7 @@
         "desc": "Specifică o viteză minimă pe care trebuie să o aibă obiectele pentru a fi considerate în această zonă."
       },
       "documentTitle": "Editează zone - Frigate",
-      "clickDrawPolygon": "Click pentru a desena un poligon pe imagine.",
+      "clickDrawPolygon": "Apasă pentru a desena un poligon pe imagine.",
       "toast": {
         "success": "Zona ({{zoneName}}) a fost salvată. Repornește Frigate pentru a aplica modificările."
       },
@@ -282,7 +282,7 @@
       "point_one": "{{count}} punct",
       "point_few": "{{count}} puncte",
       "point_other": "{{count}} de puncte",
-      "clickDrawPolygon": "Fă click pentru a desena un poligon pe imagine.",
+      "clickDrawPolygon": "Fă clic pentru a desena un poligon pe imagine.",
       "label": "Măști de mișcare",
       "documentTitle": "Editează masca de mișcare - Frigate",
       "desc": {
@@ -330,7 +330,7 @@
           "title": "{{polygonName}} a fost salvat. Repornește Frigate pentru a aplica modificările."
         }
       },
-      "clickDrawPolygon": "Fă click pentru a desena un poligon pe imagine.",
+      "clickDrawPolygon": "Fă clic pentru a desena un poligon pe imagine.",
       "context": "Măștile de filtrare a obiectelor sunt folosite pentru a elimina falsele pozitive pentru un anumit tip de obiect, în funcție de locația acestuia."
     },
     "restart_required": "Repornire necesară (măști/zone modificate)",
@@ -682,7 +682,7 @@
   "triggers": {
     "documentTitle": "Declanșatoare",
     "management": {
-      "title": "Gestionarea declanșatoarelor",
+      "title": "Declanșatoare",
       "desc": "Gestionează declanșatoarele pentru {{camera}}. Folosește tipul miniatură pentru a declanșa pe miniaturi similare cu obiectul urmărit selectat și tipul descriere pentru a declanșa pe descrieri similare textului pe care îl specifici."
     },
     "addTrigger": "Adaugă declanșator",
@@ -721,25 +721,28 @@
       "form": {
         "name": {
           "title": "Nume",
-          "placeholder": "Introdu numele declanșatorului",
+          "placeholder": "Denumește acest declanșator",
           "error": {
-            "minLength": "Numele trebuie să aibă cel puțin 2 caractere.",
-            "invalidCharacters": "Numele poate conține doar litere, cifre, underscore-uri și cratime.",
+            "minLength": "Câmpul trebuie să aibă cel puțin 2 caractere.",
+            "invalidCharacters": "Câmpul poate conține doar litere, cifre, underscore-uri și cratime.",
             "alreadyExists": "Un declanșator cu acest nume există deja pentru această cameră."
-          }
+          },
+          "description": "Introduceți un nume sau o descriere unică pentru a identifica acest declanșator"
         },
         "enabled": {
           "description": "Activează sau dezactivează acest declanșator"
         },
         "type": {
           "title": "Tip",
-          "placeholder": "Selectează tipul de declanșator"
+          "placeholder": "Selectează tipul de declanșator",
+          "description": "Declanșează atunci când este detectată o descriere de obiect urmărit similară",
+          "thumbnail": "Declanșează atunci când este detectată o miniatură de obiect urmărit similară"
         },
         "content": {
           "title": "Conținut",
-          "imagePlaceholder": "Selectează o imagine",
+          "imagePlaceholder": "Selectează o miniatură",
           "textPlaceholder": "Introdu conținutul textului",
-          "imageDesc": "Selectează o imagine pentru a declanșa această acțiune atunci când o imagine similară este detectată.",
+          "imageDesc": "Sunt afișate doar ultimele 100 de miniaturi. Dacă nu găsiți miniatura dorită, vă rugăm să verificați obiectele anterioare în Explorator și să configurați un declanșator din meniul de acolo.",
           "textDesc": "Introduceți textul pentru a declanșa această acțiune atunci când este detectată o descriere de obiect urmărit similară.",
           "error": {
             "required": "Conținutul este obligatoriu."
@@ -750,7 +753,8 @@
           "error": {
             "min": "Pragul trebuie să fie cel puțin 0",
             "max": "Pragul trebuie să fie cel mult 1"
-          }
+          },
+          "desc": "Setați pragul de similitudine pentru acest declanșator. Un prag mai mare înseamnă că este necesară o potrivire mai apropiată pentru declanșarea acestuia."
         },
         "actions": {
           "title": "Acțiuni",
@@ -781,6 +785,23 @@
     "semanticSearch": {
       "title": "Căutarea semantică este dezactivată",
       "desc": "Căutarea semantică trebuie să fie activată pentru a utiliza declanșatoarele."
+    },
+    "wizard": {
+      "title": "Creează declanșator",
+      "step1": {
+        "description": "Configurează setările de bază pentru declanșatorul tău."
+      },
+      "step2": {
+        "description": "Configurează conținutul care va declanșa această acțiune."
+      },
+      "step3": {
+        "description": "Configurează pragul și acțiunile pentru acest declanșator."
+      },
+      "steps": {
+        "nameAndType": "Nume și Tip",
+        "configureData": "Configurează datele",
+        "thresholdAndActions": "Prag și Acțiuni"
+      }
     }
   },
   "roles": {
@@ -896,11 +917,16 @@
         "invalidCharacters": "Numele camerei conține caractere nevalide",
         "nameExists": "Numele camerei există deja",
         "brands": {
-          "reolink-rtsp": "RTSP Reolink nu este recomandat. Se recomandă să activezi HTTP în setările camerei și să repornești asistentul de cameră."
-        }
+          "reolink-rtsp": "RTSP Reolink nu este recomandat. Activează HTTP în setările firmware ale camerei și repornește asistentul."
+        },
+        "customUrlRtspRequired": "URL-urile personalizate trebuie să înceapă cu \"rtsp://\". Este necesară configurare manuală pentru stream-urile de cameră non-RTSP."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Sondare metadate cameră...",
+        "fetchingSnapshot": "Preluare snapshot cameră..."
       }
     },
     "step2": {
