@@ -100,7 +100,8 @@
   },
   "list": {
     "two": "{{0}} and {{1}}",
-    "many": "{{items}}, and {{last}}"
+    "many": "{{items}}, and {{last}}",
+    "separatorWithSpace": ", "
   },
   "field": {
     "optional": "Optional",

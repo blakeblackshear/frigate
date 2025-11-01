@@ -13,7 +13,8 @@ function formatZonesList(zones: string[]): string {
     });
   }
 
-  const allButLast = zones.slice(0, -1).join(", ");
+  const separatorWithSpace = t("list.separatorWithSpace", { ns: "common" });
+  const allButLast = zones.slice(0, -1).join(separatorWithSpace);
   return t("list.many", {
     items: allButLast,
     last: zones[zones.length - 1],
