@@ -50,6 +50,10 @@
       "automaticLiveView": {
         "label": "Automatisk direktevisning",
         "desc": "Bytt automatisk til et kameras direktevisning når aktivitet oppdages. Deaktivering av dette valget gjør at statiske kamerabilder i Direkte-dashbord kun oppdateres én gang i minuttet."
+      },
+      "displayCameraNames": {
+        "label": "Vis alltid kameranavn",
+        "desc": "Vis alltid kameranavnene i en merkelapp i dashbordet for direktevisning med flere kameraer."
       }
     },
     "storedLayouts": {
@@ -681,12 +685,12 @@
   "enrichments": {
     "title": "Innstillinger for utvidelser",
     "licensePlateRecognition": {
-      "desc": "Frigate kan gjenkjenne kjennemerker på kjøretøy og automatisk legge til de oppdagede tegnene i feltet \"recognized_license_plate\", eller et kjent navn som en under-merkelapp på objekter av typen bil. Et vanlig brukstilfelle kan være å lese kjennemerker på biler som kjører inn i en innkjørsel eller biler som passerer på en gate.",
+      "desc": "Frigate kan gjenkjenne kjennemerker på kjøretøy og automatisk legge til de oppdagede tegnene i feltet \"recognized_license_plate\", eller et kjent navn som en underetikett på objekter av typen bil. Et vanlig brukstilfelle kan være å lese kjennemerker på biler som kjører inn i en innkjørsel eller biler som passerer på en gate.",
       "title": "Kjennemerke gjenkjenning",
       "readTheDocumentation": "Se dokumentasjonen"
     },
     "birdClassification": {
-      "desc": "Fugleklassifisering identifiserer kjente fugler ved hjelp av en kvantisert TensorFlow-modell. Når en fugl gjenkjennes, vil det vanlige navnet legges til som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
+      "desc": "Fugleklassifisering identifiserer kjente fugler ved hjelp av en kvantisert TensorFlow-modell. Når en fugl gjenkjennes, vil det vanlige navnet legges til som en underetikett. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
       "title": "Klassifisering av fugler"
     },
     "semanticSearch": {
@@ -730,7 +734,7 @@
         }
       },
       "title": "Ansiktsgjenkjenning",
-      "desc": "Ansiktsgjenkjenning gjør det mulig å tildele navn til personer, og når ansiktet deres gjenkjennes, vil Frigate tildele personens navn som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
+      "desc": "Ansiktsgjenkjenning gjør det mulig å tildele navn til personer, og når ansiktet deres gjenkjennes, vil Frigate tildele personens navn som en underetikett. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
       "readTheDocumentation": "Se dokumentasjonen"
     },
     "unsavedChanges": "Ulagrede endringer i innstillinger for utvidelser",
@@ -764,7 +768,9 @@
     },
     "actions": {
       "alert": "Marker som varsel",
-      "notification": "Send meldingsvarsel"
+      "notification": "Send meldingsvarsel",
+      "sub_label": "Legg til underetikett",
+      "attribute": "Legg til attributt"
     },
     "dialog": {
       "createTrigger": {
@@ -819,7 +825,7 @@
         },
         "actions": {
           "title": "Handlinger",
-          "desc": "Som standard sender Frigate en MQTT-melding for alle utløsere. Velg en ekstra handling som skal utføres når denne utløseren aktiveres.",
+          "desc": "Som standard sender Frigate en MQTT-melding for alle utløsere. Underetiketter legger til navnet på utløseren i objektetiketten. Attributter er søkbare metadata som lagres separat i objektets sporingsmetadata.",
           "error": {
             "min": "Minst én handling må velges."
           }
