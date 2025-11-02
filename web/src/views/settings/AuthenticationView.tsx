@@ -36,7 +36,7 @@ import EditRoleCamerasDialog from "@/components/overlay/EditRoleCamerasDialog";
 import { useTranslation } from "react-i18next";
 import DeleteRoleDialog from "@/components/overlay/DeleteRoleDialog";
 import { Separator } from "@/components/ui/separator";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 
 type AuthenticationViewProps = {
   section?: "users" | "roles";

@@ -11,10 +11,12 @@ export type Polygon = {
   distances: number[];
   isFinished: boolean;
   color: number[];
+  friendly_name?: string;
 };
 
 export type ZoneFormValuesType = {
   name: string;
+  friendly_name: string;
   inertia: number;
   loitering_time: number;
   isFinished: boolean;

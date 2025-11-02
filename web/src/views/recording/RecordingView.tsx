@@ -63,7 +63,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { DetailStreamProvider } from "@/context/detail-stream-context";
 import { GenAISummaryDialog } from "@/components/overlay/chip/GenAISummaryChip";

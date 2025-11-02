@@ -280,6 +280,7 @@ export interface CameraConfig {
       speed_threshold: number;
       objects: string[];
       color: number[];
+      friendly_name?: string;
     };
   };
 }

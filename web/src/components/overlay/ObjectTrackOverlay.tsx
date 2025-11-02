@@ -12,6 +12,7 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { Event } from "@/types/event";
+import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 
 // Use a small tolerance (10ms) for browsers with seek precision by-design issues
 const TOLERANCE = 0.01;
@@ -73,6 +74,10 @@ export default function ObjectTrackOverlay({
     { revalidateOnFocus: false },
   );
 
+  const getZonesFriendlyNames = (zones: string[], config: FrigateConfig) => {
+    return zones?.map((zone) => resolveZoneName(config, zone)) ?? [];
+  };
+
   const timelineResults = useMemo(() => {
     // Group timeline entries by source_id
     if (!timelineData) return selectedObjectIds.map(() => []);
@@ -86,8 +91,19 @@ export default function ObjectTrackOverlay({
     }
 
     // Return timeline arrays in the same order as selectedObjectIds
-    return selectedObjectIds.map((id) => grouped[id] || []);
-  }, [selectedObjectIds, timelineData]);
+    return selectedObjectIds.map((id) => {
+      const entries = grouped[id] || [];
+      return entries.map((event) => ({
+        ...event,
+        data: {
+          ...event.data,
+          zones_friendly_names: config
+            ? getZonesFriendlyNames(event.data?.zones, config)
+            : [],
+        },
+      }));
+    });
+  }, [selectedObjectIds, timelineData, config]);
 
   const typeColorMap = useMemo(
     () => ({

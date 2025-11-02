@@ -77,7 +77,7 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 import FaceSelectionDialog from "../FaceSelectionDialog";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { CgTranscript } from "react-icons/cg";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { PiPath } from "react-icons/pi";
 import Heading from "@/components/ui/heading";
 

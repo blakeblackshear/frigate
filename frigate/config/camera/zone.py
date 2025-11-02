@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class ZoneConfig(BaseModel):
+    friendly_name: Optional[str] = Field(
+        None, title="Zone friendly name used in the Frigate UI."
+    )
     filters: dict[str, FilterConfig] = Field(
         default_factory=dict, title="Zone filters."
     )

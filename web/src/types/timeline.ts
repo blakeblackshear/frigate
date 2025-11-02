@@ -22,6 +22,7 @@ export type TrackingDetailsSequence = {
     attribute: string;
     attribute_box?: [number, number, number, number];
     zones: string[];
+    zones_friendly_names?: string[];
   };
   class_type: LifecycleClassType;
   source_id: string;
