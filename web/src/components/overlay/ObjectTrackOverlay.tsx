@@ -239,16 +239,21 @@ export default function ObjectTrackOverlay({
                 b.timestamp - a.timestamp,
             )[0]?.data?.zones || [];
 
-        // bounding box (with tolerance for browsers with seek precision by-design issues)
-        const boxCandidates = timelineData?.filter(
-          (event: TrackingDetailsSequence) =>
-            event.timestamp <= effectiveCurrentTime + TOLERANCE &&
-            event.data.box,
-        );
-        const currentBox = boxCandidates?.sort(
-          (a: TrackingDetailsSequence, b: TrackingDetailsSequence) =>
-            b.timestamp - a.timestamp,
-        )[0]?.data?.box;
+        // bounding box - only show if there's a timeline event at/near the current time with a box
+        // Search all timeline events (not just those before current time) to find one matching the seek position
+        const nearbyTimelineEvent = timelineData
+          ?.filter((event: TrackingDetailsSequence) => event.data.box)
+          .sort(
+            (a: TrackingDetailsSequence, b: TrackingDetailsSequence) =>
+              Math.abs(a.timestamp - effectiveCurrentTime) -
+              Math.abs(b.timestamp - effectiveCurrentTime),
+          )
+          .find(
+            (event: TrackingDetailsSequence) =>
+              Math.abs(event.timestamp - effectiveCurrentTime) <= TOLERANCE,
+          );
+
+        const currentBox = nearbyTimelineEvent?.data?.box;
 
         return {
           objectId,
