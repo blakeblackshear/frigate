@@ -14,7 +14,8 @@ from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Previews, Recordings, ReviewSegment, UserReviewStatus
 from frigate.record.util import remove_empty_directories, sync_recordings
-from frigate.util.builtin import clear_and_unlink, get_tomorrow_at_time
+from frigate.util.builtin import clear_and_unlink
+from frigate.util.time import get_tomorrow_at_time
 
 logger = logging.getLogger(__name__)
 

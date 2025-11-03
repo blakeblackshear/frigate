@@ -34,7 +34,7 @@ from frigate.record.export import (
     PlaybackSourceEnum,
     RecordingExporter,
 )
-from frigate.util.builtin import is_current_hour
+from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
 
