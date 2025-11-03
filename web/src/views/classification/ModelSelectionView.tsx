@@ -214,7 +214,7 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
 
   const handleDelete = useCallback(async () => {
     try {
-      // First, remove from config to stop the processor
+      await axios.delete(`classification/${config.name}`);
       await axios.put("/config/set", {
         requires_restart: 0,
         update_topic: `config/classification/custom/${config.name}`,
@@ -226,9 +226,6 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
           },
         },
       });
-
-      // Then, delete the model data and files
-      await axios.delete(`classification/${config.name}`);
 
       toast.success(t("toast.success.deletedModel", { count: 1 }), {
         position: "top-center",
