@@ -28,6 +28,8 @@ import {
   FaArrowRight,
   FaCheckCircle,
   FaChevronDown,
+  FaChevronLeft,
+  FaChevronRight,
   FaDownload,
   FaHistory,
   FaImage,
@@ -80,6 +82,7 @@ import { CgTranscript } from "react-icons/cg";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import { PiPath } from "react-icons/pi";
 import Heading from "@/components/ui/heading";
+import { DialogPortal } from "@radix-ui/react-dialog";
 
 const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
@@ -91,6 +94,8 @@ type SearchDetailDialogProps = {
   setSearchPage: (page: SearchTab) => void;
   setSimilarity?: () => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  onPrevious?: () => void;
+  onNext?: () => void;
 };
 export default function SearchDetailDialog({
   search,
@@ -99,6 +104,8 @@ export default function SearchDetailDialog({
   setSearchPage,
   setSimilarity,
   setInputFocused,
+  onPrevious,
+  onNext,
 }: SearchDetailDialogProps) {
   const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -227,6 +234,57 @@ export default function SearchDetailDialog({
         onOpenChange={handleOpenChange}
         enableHistoryBack={true}
       >
+        {isDesktop && onPrevious && onNext && (
+          <DialogPortal>
+            <div className="pointer-events-none fixed inset-0 z-[200] flex items-center justify-center">
+              <div
+                className={cn(
+                  "relative flex items-center justify-between",
+                  "w-full",
+                  // match dialog's max-width classes
+                  "sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
+                  page == "tracking_details" && "lg:max-w-[75%] xl:max-w-[80%]",
+                )}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPrevious?.();
+                      }}
+                      className="nav-button pointer-events-auto absolute -left-16 rounded-lg border bg-secondary/60 p-2 text-primary-variant shadow-lg backdrop-blur-sm hover:bg-secondary/80 hover:text-primary"
+                      aria-label={t("searchResult.previousTrackedObject")}
+                    >
+                      <FaChevronLeft className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("searchResult.previousTrackedObject")}
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNext?.();
+                      }}
+                      className="nav-button pointer-events-auto absolute -right-16 rounded-lg border bg-secondary/60 p-2 text-primary-variant shadow-lg backdrop-blur-sm hover:bg-secondary/80 hover:text-primary"
+                      aria-label={t("searchResult.nextTrackedObject")}
+                    >
+                      <FaChevronRight className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("searchResult.nextTrackedObject")}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          </DialogPortal>
+        )}
         <Content
           className={cn(
             "scrollbar-container overflow-y-auto",
@@ -237,11 +295,18 @@ export default function SearchDetailDialog({
               "lg:max-w-[75%] xl:max-w-[80%]",
             isMobile && "px-4",
           )}
+          onInteractOutside={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest(".nav-button")) {
+              e.preventDefault();
+            }
+          }}
         >
           <Header>
             <Title>{t("trackedObjectDetails")}</Title>
             <Description className="sr-only">
               {t("trackedObjectDetails")}
+              <span className="sr-only" tabIndex={0} />
             </Description>
           </Header>
           {isDesktop ? (
