@@ -271,6 +271,8 @@
       "disconnectStream": "Disconnect",
       "estimatedBandwidth": "Estimated Bandwidth",
       "roles": "Roles",
+      "ffmpegModule": "Use stream compatibility mode",
+      "ffmpegModuleDescription": "If the stream does not load after several attempts, try enabling this. When enabled, Frigate will use the ffmpeg module with go2rtc. This may provide better compatibility with some camera streams.",
       "none": "None",
       "error": "Error",
       "streamValidated": "Stream {{number}} validated successfully",

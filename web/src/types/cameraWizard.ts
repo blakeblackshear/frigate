@@ -85,6 +85,8 @@ export type StreamConfig = {
   quality?: string;
   testResult?: TestResult;
   userTested?: boolean;
+  useFfmpeg?: boolean;
+  restream?: boolean;
 };
 
 export type TestResult = {
@@ -105,7 +107,6 @@ export type WizardFormData = {
   brandTemplate?: CameraBrand;
   customUrl?: string;
   streams?: StreamConfig[];
-  restreamIds?: string[];
 };
 
 // API Response Types
@@ -146,6 +147,7 @@ export type CameraConfigData = {
         inputs: {
           path: string;
           roles: string[];
+          input_args?: string;
         }[];
       };
       live?: {

@@ -608,6 +608,12 @@ export default function Step1NameCamera({
         </div>
       )}
 
+      {isTesting && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <ActivityIndicator className="size-4" />
+          {testStatus}
+        </div>
+      )}
       <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
         <Button
           type="button"
@@ -635,10 +641,7 @@ export default function Step1NameCamera({
             variant="select"
             className="flex items-center justify-center gap-2 sm:flex-1"
           >
-            {isTesting && <ActivityIndicator className="size-4" />}
-            {isTesting && testStatus
-              ? testStatus
-              : t("cameraWizard.step1.testConnection")}
+            {t("cameraWizard.step1.testConnection")}
           </Button>
         )}
       </div>
