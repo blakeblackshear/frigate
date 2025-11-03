@@ -9,6 +9,7 @@ from multiprocessing import Queue, Value
 from multiprocessing.synchronize import Event as MpEvent
 
 import numpy as np
+import zmq
 
 from frigate.comms.object_detector_signaler import (
     ObjectDetectorPublisher,
@@ -376,6 +377,26 @@ class RemoteObjectDetector:
 
         if self.stop_event.is_set():
             return detections
+
+        # Drain any stale notifications from the ZMQ buffer before making a new request
+        # This prevents reading detection results from a previous request
+        stale_count = 0
+        while True:
+            try:
+                stale_msg = self.detector_subscriber.socket.recv_string(
+                    flags=zmq.NOBLOCK
+                )
+                stale_count += 1
+                logger.warning(
+                    f"{self.name}: Drained stale notification #{stale_count}: {stale_msg}"
+                )
+            except zmq.Again:
+                break
+
+        if stale_count > 0:
+            logger.warning(
+                f"{self.name}: Drained {stale_count} stale notification(s) before new detection request"
+            )
 
         # copy input to shared memory
         self.np_shm[:] = tensor_input[:]
