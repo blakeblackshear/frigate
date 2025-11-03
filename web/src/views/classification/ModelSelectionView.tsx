@@ -10,7 +10,7 @@ import {
   CustomClassificationModelConfig,
   FrigateConfig,
 } from "@/types/frigateConfig";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
 import { MdModelTraining } from "react-icons/md";
@@ -21,7 +21,6 @@ import Heading from "@/components/ui/heading";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import axios from "axios";
 import { toast } from "sonner";
-import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -212,12 +211,6 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
   }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const bypassDialogRef = useRef(false);
-
-  useKeyboardListener(["Shift"], (_, modifiers) => {
-    bypassDialogRef.current = modifiers.shift;
-    return false;
-  });
 
   const handleDelete = useCallback(async () => {
     await axios
@@ -241,13 +234,10 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
       });
   }, [config, onDelete, t]);
 
-  const handleDeleteClick = useCallback(() => {
-    if (bypassDialogRef.current) {
-      handleDelete();
-    } else {
-      setDeleteDialogOpen(true);
-    }
-  }, [handleDelete]);
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteDialogOpen(true);
+  }, []);
 
   const coverImage = useMemo(() => {
     if (!dataset) {
@@ -304,7 +294,7 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
           className="size-full"
           src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
         />
-        <ImageShadowOverlay />
+        <ImageShadowOverlay lowerClassName="h-[30%] z-0" />
         <div className="absolute bottom-2 left-3 text-lg text-white smart-capitalize">
           {config.name}
         </div>
@@ -315,14 +305,13 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
                 <FiMoreVertical className="size-5 text-white" />
               </BlurredIconButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              onClick={(e) => e.stopPropagation()}
+            >
               <DropdownMenuItem onClick={handleDeleteClick}>
                 <LuTrash2 className="mr-2 size-4" />
-                <span>
-                  {bypassDialogRef.current
-                    ? t("button.deleteNow", { ns: "common" })
-                    : t("button.delete", { ns: "common" })}
-                </span>
+                <span>{t("button.delete", { ns: "common" })}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
