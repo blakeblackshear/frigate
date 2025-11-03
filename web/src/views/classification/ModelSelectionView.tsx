@@ -213,25 +213,39 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleDelete = useCallback(async () => {
-    await axios
-      .delete(`classification/${config.name}`)
-      .then((resp) => {
-        if (resp.status == 200) {
-          toast.success(t("toast.success.deletedModel", { count: 1 }), {
-            position: "top-center",
-          });
-          onDelete();
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(t("toast.error.deleteModelFailed", { errorMessage }), {
-          position: "top-center",
-        });
+    try {
+      // First, remove from config to stop the processor
+      await axios.put("/config/set", {
+        requires_restart: 0,
+        update_topic: `config/classification/custom/${config.name}`,
+        config_data: {
+          classification: {
+            custom: {
+              [config.name]: "",
+            },
+          },
+        },
       });
+
+      // Then, delete the model data and files
+      await axios.delete(`classification/${config.name}`);
+
+      toast.success(t("toast.success.deletedModel", { count: 1 }), {
+        position: "top-center",
+      });
+      onDelete();
+    } catch (err) {
+      const error = err as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        "Unknown error";
+      toast.error(t("toast.error.deleteModelFailed", { errorMessage }), {
+        position: "top-center",
+      });
+    }
   }, [config, onDelete, t]);
 
   const handleDeleteClick = useCallback((e: React.MouseEvent) => {

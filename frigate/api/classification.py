@@ -34,12 +34,10 @@ from frigate.config.camera import DetectConfig
 from frigate.const import CLIPS_DIR, FACE_DIR, MODEL_CACHE_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event
-from frigate.util.builtin import update_yaml_file_bulk
 from frigate.util.classification import (
     collect_object_classification_examples,
     collect_state_classification_examples,
 )
-from frigate.util.config import find_config_file
 from frigate.util.path import get_event_snapshot
 
 logger = logging.getLogger(__name__)
@@ -839,31 +837,6 @@ def delete_classification_model(request: Request, name: str):
     model_dir = os.path.join(MODEL_CACHE_DIR, sanitize_filename(name))
     if os.path.exists(model_dir):
         shutil.rmtree(model_dir)
-
-    # Remove the model from the config file
-    config_file = find_config_file()
-    try:
-        # Setting value to empty string deletes the key
-        updates = {f"classification.custom.{name}": ""}
-        update_yaml_file_bulk(config_file, updates)
-
-        # Reload and update the in-memory config
-        with open(config_file, "r") as f:
-            new_raw_config = f.read()
-
-        new_config = FrigateConfig.parse(new_raw_config)
-        request.app.frigate_config = new_config
-    except Exception as e:
-        logger.error(f"Error updating config file: {e}")
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": "Failed to update config file.",
-                }
-            ),
-            status_code=500,
-        )
 
     return JSONResponse(
         content=(
