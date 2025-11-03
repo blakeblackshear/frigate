@@ -283,44 +283,65 @@ class EmbeddingMaintainer(threading.Thread):
         logger.info("Exiting embeddings maintenance...")
 
     def _check_classification_config_updates(self) -> None:
-        """Check for classification config updates and add new processors."""
+        """Check for classification config updates and add/remove processors."""
         topic, model_config = self.classification_config_subscriber.check_for_update()
 
-        if topic and model_config:
+        if topic:
             model_name = topic.split("/")[-1]
-            self.config.classification.custom[model_name] = model_config
 
-            # Check if processor already exists
-            for processor in self.realtime_processors:
-                if isinstance(
-                    processor,
-                    (
-                        CustomStateClassificationProcessor,
-                        CustomObjectClassificationProcessor,
-                    ),
-                ):
-                    if processor.model_config.name == model_name:
-                        logger.debug(
-                            f"Classification processor for model {model_name} already exists, skipping"
+            if model_config is None:
+                self.realtime_processors = [
+                    processor
+                    for processor in self.realtime_processors
+                    if not (
+                        isinstance(
+                            processor,
+                            (
+                                CustomStateClassificationProcessor,
+                                CustomObjectClassificationProcessor,
+                            ),
                         )
-                        return
+                        and processor.model_config.name == model_name
+                    )
+                ]
 
-            if model_config.state_config is not None:
-                processor = CustomStateClassificationProcessor(
-                    self.config, model_config, self.requestor, self.metrics
+                logger.info(
+                    f"Successfully removed classification processor for model: {model_name}"
                 )
             else:
-                processor = CustomObjectClassificationProcessor(
-                    self.config,
-                    model_config,
-                    self.event_metadata_publisher,
-                    self.metrics,
-                )
+                self.config.classification.custom[model_name] = model_config
 
-            self.realtime_processors.append(processor)
-            logger.info(
-                f"Added classification processor for model: {model_name} (type: {type(processor).__name__})"
-            )
+                # Check if processor already exists
+                for processor in self.realtime_processors:
+                    if isinstance(
+                        processor,
+                        (
+                            CustomStateClassificationProcessor,
+                            CustomObjectClassificationProcessor,
+                        ),
+                    ):
+                        if processor.model_config.name == model_name:
+                            logger.debug(
+                                f"Classification processor for model {model_name} already exists, skipping"
+                            )
+                            return
+
+                if model_config.state_config is not None:
+                    processor = CustomStateClassificationProcessor(
+                        self.config, model_config, self.requestor, self.metrics
+                    )
+                else:
+                    processor = CustomObjectClassificationProcessor(
+                        self.config,
+                        model_config,
+                        self.event_metadata_publisher,
+                        self.metrics,
+                    )
+
+                self.realtime_processors.append(processor)
+                logger.info(
+                    f"Added classification processor for model: {model_name} (type: {type(processor).__name__})"
+                )
 
     def _process_requests(self) -> None:
         """Process embeddings requests"""

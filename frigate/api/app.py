@@ -403,12 +403,13 @@ def config_set(request: Request, body: AppConfigSetBody):
                     settings,
                 )
             else:
-                # Handle nested config updates (e.g., config/classification/custom/{name})
+                # Generic handling for global config updates
                 settings = config.get_nested_object(body.update_topic)
-                if settings:
-                    request.app.config_publisher.publisher.publish(
-                        body.update_topic, settings
-                    )
+
+                # Publish None for removal, actual config for add/update
+                request.app.config_publisher.publisher.publish(
+                    body.update_topic, settings
+                )
 
     return JSONResponse(
         content=(

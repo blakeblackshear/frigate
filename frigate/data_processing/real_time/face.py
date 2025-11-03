@@ -330,6 +330,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
     def handle_request(self, topic, request_data) -> dict[str, Any] | None:
         if topic == EmbeddingsRequestEnum.clear_face_classifier.value:
             self.recognizer.clear()
+            return {"success": True, "message": "Face classifier cleared."}
         elif topic == EmbeddingsRequestEnum.recognize_face.value:
             img = cv2.imdecode(
                 np.frombuffer(base64.b64decode(request_data["image"]), dtype=np.uint8),
