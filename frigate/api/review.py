@@ -368,7 +368,7 @@ async def review_summary(
         period_clauses = clauses.copy()
         period_clauses.append(
             (ReviewSegment.start_time >= period_start)
-            & (ReviewSegment.start_time < period_end)
+            & (ReviewSegment.start_time <= period_end)
         )
 
         period_query = (
