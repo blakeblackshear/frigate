@@ -57,8 +57,8 @@ from frigate.const import CLIPS_DIR, TRIGGER_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
 from frigate.track.object_processing import TrackedObject
-from frigate.util.builtin import get_tz_modifiers
 from frigate.util.path import get_event_thumbnail_bytes
+from frigate.util.time import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
 

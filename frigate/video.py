@@ -34,7 +34,7 @@ from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
 from frigate.track.tracked_object import TrackedObjectAttribute
-from frigate.util.builtin import EventsPerSecond, get_tomorrow_at_time
+from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import (
     FrameManager,
     SharedMemoryFrameManager,
@@ -53,6 +53,7 @@ from frigate.util.object import (
     reduce_detections,
 )
 from frigate.util.process import FrigateProcess
+from frigate.util.time import get_tomorrow_at_time
 
 logger = logging.getLogger(__name__)
 

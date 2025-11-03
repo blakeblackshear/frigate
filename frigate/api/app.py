@@ -37,7 +37,6 @@ from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
     clean_camera_user_pass,
     flatten_config_data,
-    get_tz_modifiers,
     process_config_query_string,
     update_yaml_file_bulk,
 )
@@ -48,6 +47,7 @@ from frigate.util.services import (
     restart_frigate,
     vainfo_hwaccel,
 )
+from frigate.util.time import get_tz_modifiers
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
