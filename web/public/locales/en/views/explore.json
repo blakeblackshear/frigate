@@ -215,6 +215,8 @@
   "trackedObjectsCount_other": "{{count}} tracked objects ",
   "searchResult": {
     "tooltip": "Matched {{type}} at {{confidence}}%",
+    "previousTrackedObject": "Previous tracked object",
+    "nextTrackedObject": "Next tracked object",
     "deleteTrackedObject": {
       "toast": {
         "success": "Tracked object deleted successfully.",
