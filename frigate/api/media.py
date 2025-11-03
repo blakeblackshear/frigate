@@ -424,7 +424,7 @@ def all_recordings_summary(
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Returns true/false by day indicating if recordings exist"""
-    # Determine the set of cameras to query
+
     cameras = params.cameras
     if cameras != "all":
         requested = set(unquote(cameras).split(","))
@@ -435,7 +435,6 @@ def all_recordings_summary(
     else:
         camera_list = allowed_cameras
 
-    # Find overall time range for the selected cameras
     time_range_query = (
         Recordings.select(
             fn.MIN(Recordings.start_time).alias("min_time"),
@@ -449,16 +448,13 @@ def all_recordings_summary(
     min_time = time_range_query.get("min_time")
     max_time = time_range_query.get("max_time")
 
-    # No recordings available
     if min_time is None or max_time is None:
         return JSONResponse(content={})
 
-    # Split time range into DST-consistent periods
     dst_periods = get_dst_transitions(params.timezone, min_time, max_time)
 
     days: dict[str, bool] = {}
 
-    # Query each DST period separately and merge day results
     for period_start, period_end, period_offset in dst_periods:
         hours_offset = int(period_offset / 60 / 60)
         minutes_offset = int(period_offset / 60 - hours_offset * 60)
