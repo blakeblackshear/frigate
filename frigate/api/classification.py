@@ -844,8 +844,15 @@ def delete_classification_model(request: Request, name: str):
     config_file = find_config_file()
     try:
         # Setting value to empty string deletes the key
-        updates = {f"classification.custom.{name}": None}
+        updates = {"classification.custom": None}
         update_yaml_file_bulk(config_file, updates)
+
+        # Reload and update the in-memory config
+        with open(config_file, "r") as f:
+            new_raw_config = f.read()
+
+        new_config = FrigateConfig.parse(new_raw_config)
+        request.app.frigate_config = new_config
     except Exception as e:
         logger.error(f"Error updating config file: {e}")
         return JSONResponse(
