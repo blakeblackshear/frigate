@@ -166,6 +166,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         camera = obj_data["camera"]
 
         if not self.config.cameras[camera].face_recognition.enabled:
+            logger.debug(f"Face recognition disabled for camera {camera}, skipping")
             return
 
         start = datetime.datetime.now().timestamp()
