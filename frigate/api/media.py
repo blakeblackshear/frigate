@@ -46,7 +46,7 @@ from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.image import get_image_from_recording
 from frigate.util.path import get_event_thumbnail_bytes
-from frigate.util.time import get_tz_modifiers
+from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
 
@@ -424,49 +424,81 @@ def all_recordings_summary(
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Returns true/false by day indicating if recordings exist"""
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
-
+    # Determine the set of cameras to query
     cameras = params.cameras
     if cameras != "all":
         requested = set(unquote(cameras).split(","))
         filtered = requested.intersection(allowed_cameras)
         if not filtered:
             return JSONResponse(content={})
-        cameras = ",".join(filtered)
+        camera_list = list(filtered)
     else:
-        cameras = allowed_cameras
+        camera_list = allowed_cameras
 
-    query = (
+    # Find overall time range for the selected cameras
+    time_range_query = (
         Recordings.select(
-            fn.strftime(
-                "%Y-%m-%d",
-                fn.datetime(
-                    Recordings.start_time + seconds_offset,
-                    "unixepoch",
-                    hour_modifier,
-                    minute_modifier,
-                ),
-            ).alias("day")
+            fn.MIN(Recordings.start_time).alias("min_time"),
+            fn.MAX(Recordings.start_time).alias("max_time"),
         )
-        .group_by(
-            fn.strftime(
-                "%Y-%m-%d",
-                fn.datetime(
-                    Recordings.start_time + seconds_offset,
-                    "unixepoch",
-                    hour_modifier,
-                    minute_modifier,
-                ),
-            )
-        )
-        .order_by(Recordings.start_time.desc())
+        .where(Recordings.camera << camera_list)
+        .dicts()
+        .get()
     )
 
-    if params.cameras != "all":
-        query = query.where(Recordings.camera << cameras.split(","))
+    min_time = time_range_query.get("min_time")
+    max_time = time_range_query.get("max_time")
 
-    recording_days = query.namedtuples()
-    days = {day.day: True for day in recording_days}
+    # No recordings available
+    if min_time is None or max_time is None:
+        return JSONResponse(content={})
+
+    # Split time range into DST-consistent periods
+    dst_periods = get_dst_transitions(params.timezone, min_time, max_time)
+
+    days: dict[str, bool] = {}
+
+    # Query each DST period separately and merge day results
+    for period_start, period_end, period_offset in dst_periods:
+        hours_offset = int(period_offset / 60 / 60)
+        minutes_offset = int(period_offset / 60 - hours_offset * 60)
+        period_hour_modifier = f"{hours_offset} hour"
+        period_minute_modifier = f"{minutes_offset} minute"
+
+        period_query = (
+            Recordings.select(
+                fn.strftime(
+                    "%Y-%m-%d",
+                    fn.datetime(
+                        Recordings.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("day")
+            )
+            .where(
+                (Recordings.camera << camera_list)
+                & (Recordings.end_time >= period_start)
+                & (Recordings.start_time <= period_end)
+            )
+            .group_by(
+                fn.strftime(
+                    "%Y-%m-%d",
+                    fn.datetime(
+                        Recordings.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                )
+            )
+            .order_by(Recordings.start_time.desc())
+            .namedtuples()
+        )
+
+        for g in period_query:
+            days[g.day] = True
 
     return JSONResponse(content=days)
 
@@ -476,61 +508,103 @@ def all_recordings_summary(
 )
 async def recordings_summary(camera_name: str, timezone: str = "utc"):
     """Returns hourly summary for recordings of given camera"""
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(timezone)
-    recording_groups = (
+
+    time_range_query = (
         Recordings.select(
-            fn.strftime(
-                "%Y-%m-%d %H",
-                fn.datetime(
-                    Recordings.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ).alias("hour"),
-            fn.SUM(Recordings.duration).alias("duration"),
-            fn.SUM(Recordings.motion).alias("motion"),
-            fn.SUM(Recordings.objects).alias("objects"),
+            fn.MIN(Recordings.start_time).alias("min_time"),
+            fn.MAX(Recordings.start_time).alias("max_time"),
         )
         .where(Recordings.camera == camera_name)
-        .group_by((Recordings.start_time + seconds_offset).cast("int") / 3600)
-        .order_by(Recordings.start_time.desc())
-        .namedtuples()
+        .dicts()
+        .get()
     )
 
-    event_groups = (
-        Event.select(
-            fn.strftime(
-                "%Y-%m-%d %H",
-                fn.datetime(
-                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ).alias("hour"),
-            fn.COUNT(Event.id).alias("count"),
+    min_time = time_range_query.get("min_time")
+    max_time = time_range_query.get("max_time")
+
+    days: dict[str, dict] = {}
+
+    if min_time is None or max_time is None:
+        return JSONResponse(content=list(days.values()))
+
+    dst_periods = get_dst_transitions(timezone, min_time, max_time)
+
+    for period_start, period_end, period_offset in dst_periods:
+        hours_offset = int(period_offset / 60 / 60)
+        minutes_offset = int(period_offset / 60 - hours_offset * 60)
+        period_hour_modifier = f"{hours_offset} hour"
+        period_minute_modifier = f"{minutes_offset} minute"
+
+        recording_groups = (
+            Recordings.select(
+                fn.strftime(
+                    "%Y-%m-%d %H",
+                    fn.datetime(
+                        Recordings.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("hour"),
+                fn.SUM(Recordings.duration).alias("duration"),
+                fn.SUM(Recordings.motion).alias("motion"),
+                fn.SUM(Recordings.objects).alias("objects"),
+            )
+            .where(
+                (Recordings.camera == camera_name)
+                & (Recordings.end_time >= period_start)
+                & (Recordings.start_time <= period_end)
+            )
+            .group_by((Recordings.start_time + period_offset).cast("int") / 3600)
+            .order_by(Recordings.start_time.desc())
+            .namedtuples()
         )
-        .where(Event.camera == camera_name, Event.has_clip)
-        .group_by((Event.start_time + seconds_offset).cast("int") / 3600)
-        .namedtuples()
-    )
 
-    event_map = {g.hour: g.count for g in event_groups}
+        event_groups = (
+            Event.select(
+                fn.strftime(
+                    "%Y-%m-%d %H",
+                    fn.datetime(
+                        Event.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("hour"),
+                fn.COUNT(Event.id).alias("count"),
+            )
+            .where(Event.camera == camera_name, Event.has_clip)
+            .where(
+                (Event.start_time >= period_start) & (Event.start_time <= period_end)
+            )
+            .group_by((Event.start_time + period_offset).cast("int") / 3600)
+            .namedtuples()
+        )
 
-    days = {}
+        event_map = {g.hour: g.count for g in event_groups}
 
-    for recording_group in recording_groups:
-        parts = recording_group.hour.split()
-        hour = parts[1]
-        day = parts[0]
-        events_count = event_map.get(recording_group.hour, 0)
-        hour_data = {
-            "hour": hour,
-            "events": events_count,
-            "motion": recording_group.motion,
-            "objects": recording_group.objects,
-            "duration": round(recording_group.duration),
-        }
-        if day not in days:
-            days[day] = {"events": events_count, "hours": [hour_data], "day": day}
-        else:
-            days[day]["events"] += events_count
-            days[day]["hours"].append(hour_data)
+        for recording_group in recording_groups:
+            parts = recording_group.hour.split()
+            hour = parts[1]
+            day = parts[0]
+            events_count = event_map.get(recording_group.hour, 0)
+            hour_data = {
+                "hour": hour,
+                "events": events_count,
+                "motion": recording_group.motion,
+                "objects": recording_group.objects,
+                "duration": round(recording_group.duration),
+            }
+            if day in days:
+                # merge counts if already present (edge-case at DST boundary)
+                days[day]["events"] += events_count or 0
+                days[day]["hours"].append(hour_data)
+            else:
+                days[day] = {
+                    "events": events_count or 0,
+                    "hours": [hour_data],
+                    "day": day,
+                }
 
     return JSONResponse(content=list(days.values()))
 
