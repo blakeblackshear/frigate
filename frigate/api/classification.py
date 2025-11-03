@@ -844,7 +844,7 @@ def delete_classification_model(request: Request, name: str):
     config_file = find_config_file()
     try:
         # Setting value to empty string deletes the key
-        updates = {"classification.custom": None}
+        updates = {f"classification.custom.{name}": None}
         update_yaml_file_bulk(config_file, updates)
 
         # Reload and update the in-memory config
