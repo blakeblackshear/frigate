@@ -36,9 +36,11 @@ If the EQ13 is out of stock, the link below may take you to a suggested alternat
 
 :::
 
-| Name                                                                                                          | Coral Inference Speed | Coral Compatibility | Notes                                                                                     |
-| ------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | ----------------------------------------------------------------------------------------- |
-| Beelink EQ13 (<a href="https://amzn.to/4jn2qVr" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | 5-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras. |
+| Name                                                                                                          | Capabilities                                                               | Notes                                               |
+| ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------- |
+| Beelink EQ13 (<a href="https://amzn.to/4jn2qVr" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | Can run object detection on several 1080p cameras with low-medium activity | Dual gigabit NICs for easy isolated camera network. |
+| 1220P                                                                                                         | Can handle a large number of 1080p cameras with high activity              |                                                     |
+| 125H                                                                                                          | Can handle a significant number of 1080p cameras with high activity        | Includes NPU for more efficient detection in 0.17+  |
 
 ## Detectors
 
