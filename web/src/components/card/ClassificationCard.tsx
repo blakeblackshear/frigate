@@ -181,6 +181,7 @@ type GroupedClassificationCardProps = {
   selectedItems: string[];
   i18nLibrary: string;
   objectType: string;
+  noClassificationLabel?: string;
   onClick: (data: ClassificationItemData | undefined) => void;
   children?: (data: ClassificationItemData) => React.ReactNode;
 };
@@ -190,6 +191,7 @@ export function GroupedClassificationCard({
   threshold,
   selectedItems,
   i18nLibrary,
+  noClassificationLabel = "details.none",
   onClick,
   children,
 }: GroupedClassificationCardProps) {
@@ -222,10 +224,12 @@ export function GroupedClassificationCard({
     const bestTyped: ClassificationItemData = best;
     return {
       ...bestTyped,
-      name: event ? (event.sub_label ?? t("details.unknown")) : bestTyped.name,
+      name: event
+        ? (event.sub_label ?? t(noClassificationLabel))
+        : bestTyped.name,
       score: event?.data?.sub_label_score || bestTyped.score,
     };
-  }, [group, event, t]);
+  }, [group, event, noClassificationLabel, t]);
 
   const bestScoreStatus = useMemo(() => {
     if (!bestItem?.score || !threshold) {
@@ -311,7 +315,9 @@ export function GroupedClassificationCard({
                     isMobile && "px-2",
                   )}
                 >
-                  {event?.sub_label ? event.sub_label : t("details.unknown")}
+                  {event?.sub_label
+                    ? event.sub_label
+                    : t(noClassificationLabel)}
                   {event?.sub_label && (
                     <div
                       className={cn(
