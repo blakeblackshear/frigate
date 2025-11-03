@@ -34,11 +34,12 @@ from frigate.config.camera import DetectConfig
 from frigate.const import CLIPS_DIR, FACE_DIR, MODEL_CACHE_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event
-from frigate.util.builtin import find_config_file, update_yaml_file_bulk
+from frigate.util.builtin import update_yaml_file_bulk
 from frigate.util.classification import (
     collect_object_classification_examples,
     collect_state_classification_examples,
 )
+from frigate.util.config import find_config_file
 from frigate.util.path import get_event_snapshot
 
 logger = logging.getLogger(__name__)
