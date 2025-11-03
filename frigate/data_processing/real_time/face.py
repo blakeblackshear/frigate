@@ -209,6 +209,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             person_box = obj_data.get("box")
 
             if not person_box:
+                logger.debug(f"No person box available for {id}")
                 return
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
@@ -234,7 +235,8 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             try:
                 face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
-            except Exception:
+            except Exception as e:
+                logger.debug(f"Failed to convert face frame color for {id}: {e}")
                 return
         else:
             # don't run for object without attributes
@@ -252,6 +254,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             # no faces detected in this frame
             if not face:
+                logger.debug(f"No face attributes found for {id}")
                 return
 
             face_box = face.get("box")
@@ -275,6 +278,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         res = self.recognizer.classify(face_frame)
 
         if not res:
+            logger.debug(f"Face recognizer returned no result for {id}")
             self.__update_metrics(datetime.datetime.now().timestamp() - start)
             return
 

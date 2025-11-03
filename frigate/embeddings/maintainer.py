@@ -158,11 +158,13 @@ class EmbeddingMaintainer(threading.Thread):
         self.realtime_processors: list[RealTimeProcessorApi] = []
 
         if self.config.face_recognition.enabled:
+            logger.debug("Face recognition enabled, initializing FaceRealTimeProcessor")
             self.realtime_processors.append(
                 FaceRealTimeProcessor(
                     self.config, self.requestor, self.event_metadata_publisher, metrics
                 )
             )
+            logger.debug("FaceRealTimeProcessor initialized successfully")
 
         if self.config.classification.bird.enabled:
             self.realtime_processors.append(
