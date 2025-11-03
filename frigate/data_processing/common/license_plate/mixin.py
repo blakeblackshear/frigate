@@ -14,8 +14,8 @@ from typing import Any, List, Optional, Tuple
 
 import cv2
 import numpy as np
-from Levenshtein import distance, jaro_winkler
 from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
+from rapidfuzz.distance import JaroWinkler, Levenshtein
 from shapely.geometry import Polygon
 
 from frigate.comms.event_metadata_updater import (
@@ -1123,7 +1123,9 @@ class LicensePlateProcessingMixin:
         for i, plate in enumerate(plates):
             merged = False
             for j, cluster in enumerate(clusters):
-                sims = [jaro_winkler(plate["plate"], v["plate"]) for v in cluster]
+                sims = [
+                    JaroWinkler.similarity(plate["plate"], v["plate"]) for v in cluster
+                ]
                 if len(sims) > 0:
                     avg_sim = sum(sims) / len(sims)
                     if avg_sim >= self.cluster_threshold:
@@ -1500,7 +1502,7 @@ class LicensePlateProcessingMixin:
                     and current_time - data["last_seen"]
                     <= self.config.cameras[camera].lpr.expire_time
                 ):
-                    similarity = jaro_winkler(data["plate"], top_plate)
+                    similarity = JaroWinkler.similarity(data["plate"], top_plate)
                     if similarity >= self.similarity_threshold:
                         plate_id = existing_id
                         logger.debug(
@@ -1580,7 +1582,8 @@ class LicensePlateProcessingMixin:
                     for label, plates_list in self.lpr_config.known_plates.items()
                     if any(
                         re.match(f"^{plate}$", rep_plate)
-                        or distance(plate, rep_plate) <= self.lpr_config.match_distance
+                        or Levenshtein.distance(plate, rep_plate)
+                        <= self.lpr_config.match_distance
                         for plate in plates_list
                     )
                 ),
