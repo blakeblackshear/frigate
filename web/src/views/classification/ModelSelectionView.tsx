@@ -294,7 +294,7 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
           className="size-full"
           src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
         />
-        <ImageShadowOverlay />
+        <ImageShadowOverlay lowerClassName="h-[30%] z-0" />
         <div className="absolute bottom-2 left-3 text-lg text-white smart-capitalize">
           {config.name}
         </div>
