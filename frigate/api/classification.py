@@ -851,7 +851,7 @@ def delete_classification_model(request: Request, name: str):
             content=(
                 {
                     "success": False,
-                    "message": f"Failed to update config file: {str(e)}",
+                    "message": "Failed to update config file.",
                 }
             ),
             status_code=500,
