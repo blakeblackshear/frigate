@@ -36,7 +36,7 @@ from frigate.config import FrigateConfig
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
-from frigate.util.time import get_dst_transitions, get_tz_modifiers
+from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +197,6 @@ async def review_summary(
 
     user_id = current_user["username"]
 
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
     day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
 
     cameras = params.cameras
