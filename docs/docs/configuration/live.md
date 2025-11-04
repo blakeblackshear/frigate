@@ -128,6 +128,8 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
 
 - For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.64.0.0/10` CIDR block.
 
+- Note that some browsers may not support H.265 (HEVC). You can check your browser's current version for H.265 compatibility [here](https://caniuse.com/hevc). 
+
 :::tip
 
 This extra configuration may not be required if Frigate has been installed as a Home Assistant Add-on, as Frigate uses the Supervisor's API to generate a WebRTC candidate.
