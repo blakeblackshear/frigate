@@ -16,7 +16,15 @@ To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the 
 
 ### Restricting alerts and detections to specific zones
 
-Often you will only want alerts to be created when an object enters areas of interest. This is done using zones along with setting required_zones. Let's say you only want to have an alert created when an object enters your entire_yard zone, the config would be:
+You can flexibly define alert or detection zones, allowing you to focus on what matters most.
+
+Often you will only want alerts to be created when an object enters areas of interest. This is done using zones along with setting review classification.
+
+For example, you only want to have an alert created when an object enters your `Entire Yard` zone. Simply go to the `Camera → Review → Alerts` settings, check the `Entire Yard` zone you just created, and save the changes.
+
+![Review Classification](/img/zones-review.png)
+
+the config would be:
 
 ```yaml
 cameras:
@@ -27,10 +35,13 @@ cameras:
           - entire_yard
     zones:
       entire_yard:
+        friendly_name: Entire yard🏡 # You can use characters from any language, including emojis.
         coordinates: ...
 ```
 
-You may also want to filter detections to only be created when an object enters a secondary area of interest. This is done using zones along with setting required_zones. Let's say you want alerts when an object enters the inner area of the yard but detections when an object enters the edge of the yard, the config would be
+You may also want to filter detections to only be created when an object enters a secondary area of interest. This is done using zones along with setting required_zones. Let's say you want alerts when an object enters the inner area of the yard but detections when an object enters the edge of the yard. Simply go to the `Detections` option on the previous page, check `Limit detections to specific zones`, and then select the desired zones.
+
+the config would be
 
 ```yaml
 cameras:
@@ -44,8 +55,10 @@ cameras:
           - edge_yard
     zones:
       edge_yard:
+        friendly_name: Edge yard🚗 # You can use characters from any language, including emojis.
         coordinates: ...
       inner_yard:
+        friendly_name: Inner yard🪵 # You can use characters from any language, including emojis.
         coordinates: ...
 ```
 
@@ -59,6 +72,7 @@ cameras:
         - entire_yard
     zones:
       entire_yard:
+        friendly_name: Entire yard🏡
         coordinates: ...
 ```
 
@@ -82,6 +96,8 @@ cameras:
 
 Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. Objects will be tracked for any `person` that enter anywhere in the yard, and for cars only if they enter the street.
 
+Of course, you can also manually select the desired tracked Object when editing zones on the `Masks / Zones` page.
+
 ### Zone Loitering
 
 Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time after which the object will be considered in the zone.
@@ -89,6 +105,7 @@ Sometimes objects are expected to be passing through a zone, but an object loite
 :::note
 
 When using loitering zones, a review item will behave in the following way:
+
 - When a person is in a loitering zone, the review item will remain active until the person leaves the loitering zone, regardless of if they are stationary.
 - When any other object is in a loitering zone, the review item will remain active until the loitering time is met. Then if the object is stationary the review item will end.
 
