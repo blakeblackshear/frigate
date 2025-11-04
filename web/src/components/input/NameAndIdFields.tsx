@@ -64,12 +64,25 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
     const subscription = watch((value, { name }) => {
       if (name === nameField) {
         const processedId = effectiveProcessId(value[nameField] || "");
-        setValue(idField, processedId as PathValue<T, Path<T>>);
-        trigger(idField);
+        setValue(idField, processedId as PathValue<T, Path<T>>, {
+          shouldValidate: false,
+        });
+        // Only trigger validation if nameField has no errors
+        if (!errors[nameField]) {
+          trigger(idField);
+        }
       }
     });
     return () => subscription.unsubscribe();
-  }, [watch, setValue, trigger, nameField, idField, effectiveProcessId]);
+  }, [
+    watch,
+    setValue,
+    trigger,
+    nameField,
+    idField,
+    effectiveProcessId,
+    errors,
+  ]);
 
   const idError = errors[idField];
   useEffect(() => {
