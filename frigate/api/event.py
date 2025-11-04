@@ -2,6 +2,7 @@
 
 import base64
 import datetime
+import json
 import logging
 import os
 import random
@@ -58,7 +59,7 @@ from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
 from frigate.track.object_processing import TrackedObject
 from frigate.util.path import get_event_thumbnail_bytes
-from frigate.util.time import get_tz_modifiers
+from frigate.util.time import get_dst_transitions, get_tz_modifiers
 
 logger = logging.getLogger(__name__)
 
@@ -813,7 +814,6 @@ def events_summary(
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
     tz_name = params.timezone
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
     has_clip = params.has_clip
     has_snapshot = params.has_snapshot
 
@@ -828,33 +828,91 @@ def events_summary(
     if len(clauses) == 0:
         clauses.append((True))
 
-    groups = (
+    time_range_query = (
         Event.select(
-            Event.camera,
-            Event.label,
-            Event.sub_label,
-            Event.data,
-            fn.strftime(
-                "%Y-%m-%d",
-                fn.datetime(
-                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ).alias("day"),
-            Event.zones,
-            fn.COUNT(Event.id).alias("count"),
+            fn.MIN(Event.start_time).alias("min_time"),
+            fn.MAX(Event.start_time).alias("max_time"),
         )
         .where(reduce(operator.and_, clauses) & (Event.camera << allowed_cameras))
-        .group_by(
-            Event.camera,
-            Event.label,
-            Event.sub_label,
-            Event.data,
-            (Event.start_time + seconds_offset).cast("int") / (3600 * 24),
-            Event.zones,
-        )
+        .dicts()
+        .get()
     )
 
-    return JSONResponse(content=[e for e in groups.dicts()])
+    min_time = time_range_query.get("min_time")
+    max_time = time_range_query.get("max_time")
+
+    if min_time is None or max_time is None:
+        return JSONResponse(content=[])
+
+    dst_periods = get_dst_transitions(tz_name, min_time, max_time)
+
+    grouped: dict[tuple, dict] = {}
+
+    for period_start, period_end, period_offset in dst_periods:
+        hours_offset = int(period_offset / 60 / 60)
+        minutes_offset = int(period_offset / 60 - hours_offset * 60)
+        period_hour_modifier = f"{hours_offset} hour"
+        period_minute_modifier = f"{minutes_offset} minute"
+
+        period_groups = (
+            Event.select(
+                Event.camera,
+                Event.label,
+                Event.sub_label,
+                Event.data,
+                fn.strftime(
+                    "%Y-%m-%d",
+                    fn.datetime(
+                        Event.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("day"),
+                Event.zones,
+                fn.COUNT(Event.id).alias("count"),
+            )
+            .where(
+                reduce(operator.and_, clauses)
+                & (Event.camera << allowed_cameras)
+                & (Event.start_time >= period_start)
+                & (Event.start_time <= period_end)
+            )
+            .group_by(
+                Event.camera,
+                Event.label,
+                Event.sub_label,
+                Event.data,
+                (Event.start_time + period_offset).cast("int") / (3600 * 24),
+                Event.zones,
+            )
+            .namedtuples()
+        )
+
+        for g in period_groups:
+            key = (
+                g.camera,
+                g.label,
+                g.sub_label,
+                json.dumps(g.data, sort_keys=True) if g.data is not None else None,
+                g.day,
+                json.dumps(g.zones, sort_keys=True) if g.zones is not None else None,
+            )
+
+            if key in grouped:
+                grouped[key]["count"] += int(g.count or 0)
+            else:
+                grouped[key] = {
+                    "camera": g.camera,
+                    "label": g.label,
+                    "sub_label": g.sub_label,
+                    "data": g.data,
+                    "day": g.day,
+                    "zones": g.zones,
+                    "count": int(g.count or 0),
+                }
+
+    return JSONResponse(content=list(grouped.values()))
 
 
 @router.get(
