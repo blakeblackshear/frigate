@@ -155,7 +155,6 @@ export default function ZoneEditPane({
             "masksAndZones.form.zoneName.error.mustBeAtLeastTwoCharacters",
           ),
         })
-        .transform((val: string) => val.trim().replace(/\s+/g, "_"))
         .refine(
           (value: string) => {
             return !cameras.map((cam) => cam.name).includes(value);
