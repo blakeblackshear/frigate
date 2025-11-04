@@ -41,7 +41,12 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
   placeholderId,
 }: NameAndIdFieldsProps<T>) {
   const { t } = useTranslation(["common"]);
-  const { watch, setValue, trigger } = useFormContext<T>();
+  const {
+    watch,
+    setValue,
+    trigger,
+    formState: { errors },
+  } = useFormContext<T>();
   const [isIdVisible, setIsIdVisible] = useState(false);
 
   const defaultProcessId = (name: string) => {
@@ -65,6 +70,13 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
     });
     return () => subscription.unsubscribe();
   }, [watch, setValue, trigger, nameField, idField, effectiveProcessId]);
+
+  const idError = errors[idField];
+  useEffect(() => {
+    if (idError) {
+      setIsIdVisible(true);
+    }
+  }, [idError]);
 
   return (
     <>
