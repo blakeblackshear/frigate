@@ -225,7 +225,9 @@ export function GroupedClassificationCard({
     return {
       ...bestTyped,
       name: event
-        ? (event.sub_label ?? t(noClassificationLabel))
+        ? event.sub_label && event.sub_label !== "none"
+          ? event.sub_label
+          : t(noClassificationLabel)
         : bestTyped.name,
       score: event?.data?.sub_label_score || bestTyped.score,
     };
@@ -315,10 +317,10 @@ export function GroupedClassificationCard({
                     isMobile && "px-2",
                   )}
                 >
-                  {event?.sub_label
+                  {event?.sub_label && event.sub_label !== "none"
                     ? event.sub_label
                     : t(noClassificationLabel)}
-                  {event?.sub_label && (
+                  {event?.sub_label && event.sub_label !== "none" && (
                     <div
                       className={cn(
                         "",
