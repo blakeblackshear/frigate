@@ -367,7 +367,7 @@ function ReviewGroup({
   return (
     <div
       data-review-id={id}
-      className={`cursor-pointer rounded-lg bg-secondary px-1 py-3 outline outline-[2px] -outline-offset-[1.8px] ${
+      className={`mx-1 cursor-pointer rounded-lg bg-secondary px-0 py-3 outline outline-[2px] -outline-offset-[1.8px] ${
         isActive
           ? "shadow-selected outline-selected"
           : "outline-transparent duration-500"
