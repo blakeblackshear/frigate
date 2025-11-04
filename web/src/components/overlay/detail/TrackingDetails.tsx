@@ -599,7 +599,7 @@ export function TrackingDetails({
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="capitalize">{label}</span>
-                    <span className="text-secondary-foreground">
+                    <span className="md:text-md text-sm text-secondary-foreground">
                       {formattedStart ?? ""} - {formattedEnd ?? ""}
                     </span>
                     {event.data?.recognized_license_plate && (

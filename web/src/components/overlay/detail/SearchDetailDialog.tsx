@@ -340,19 +340,21 @@ export default function SearchDetailDialog({
                     />
                   )}
                   {page === "snapshot" && !search.has_snapshot && (
-                    <img
-                      className="size-full select-none rounded-lg object-contain transition-opacity"
-                      style={
-                        isIOS
-                          ? {
-                              WebkitUserSelect: "none",
-                              WebkitTouchCallout: "none",
-                            }
-                          : undefined
-                      }
-                      draggable={false}
-                      src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-                    />
+                    <div className="size-full">
+                      <img
+                        className="w-full select-none rounded-lg object-contain transition-opacity"
+                        style={
+                          isIOS
+                            ? {
+                                WebkitUserSelect: "none",
+                                WebkitTouchCallout: "none",
+                              }
+                            : undefined
+                        }
+                        draggable={false}
+                        src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
+                      />
+                    </div>
                   )}
                 </div>
                 <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
@@ -1298,7 +1300,7 @@ export function ObjectSnapshotTab({
   );
 
   return (
-    <div className="relative size-full">
+    <div className="relative w-full">
       <ImageLoadingIndicator
         className="absolute inset-0 aspect-video min-h-[60dvh] w-full"
         imgLoaded={imgLoaded}
@@ -1321,7 +1323,7 @@ export function ObjectSnapshotTab({
                 <div className="relative mx-auto">
                   <img
                     ref={imgRef}
-                    className={`mx-auto max-h-[60dvh] bg-black object-contain`}
+                    className="mx-auto max-h-[60dvh] rounded-lg bg-background object-contain"
                     src={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
                     alt={`${search?.label}`}
                     loading={isSafari ? "eager" : "lazy"}
@@ -1360,7 +1362,7 @@ export function ObjectSnapshotTab({
               search.end_time &&
               search.label != "on_demand" && (
                 <Card className="p-1 text-sm md:p-2">
-                  <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
+                  <CardContent className="flex flex-col items-start justify-between gap-3 p-2 md:flex-row md:items-center">
                     <div className={cn("flex max-w-sm flex-col space-y-3")}>
                       <div className={"text-lg leading-none"}>
                         {t("explore.plus.submitToPlus.label")}
@@ -1475,10 +1477,7 @@ export function VideoTab({ search }: VideoTabProps) {
       <span tabIndex={0} className="sr-only" />
       <GenericVideoPlayer source={source}>
         <div
-          className={cn(
-            "absolute top-2 z-10 flex items-center gap-2",
-            isIOS ? "right-8" : "right-2",
-          )}
+          className={cn("absolute right-2 top-2 z-10 flex items-center gap-2")}
         >
           {reviewItem && (
             <Tooltip>
