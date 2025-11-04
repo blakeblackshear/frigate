@@ -1,5 +1,8 @@
 {
   "documentTitle": "Classification Models",
+  "details": {
+    "scoreInfo": "Score represents the average classification confidence across all detections of this object."
+  },
   "button": {
     "deleteClassificationAttempts": "Delete Classification Images",
     "renameCategory": "Rename Class",
