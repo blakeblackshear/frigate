@@ -270,7 +270,7 @@ export default function ZoneEditPane({
     mode: "onBlur",
     defaultValues: {
       name: polygon?.name ?? "",
-      friendly_name: polygon?.friendly_name ?? polygon?.name,
+      friendly_name: polygon?.friendly_name ?? polygon?.name ?? "",
       inertia:
         polygon?.camera &&
         polygon?.name &&
