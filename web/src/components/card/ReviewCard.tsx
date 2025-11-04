@@ -37,6 +37,7 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { Button, buttonVariants } from "../ui/button";
 import { Trans, useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { LuCircle } from "react-icons/lu";
 
 type ReviewCardProps = {
   event: ReviewSegment;
@@ -142,7 +143,7 @@ export default function ReviewCard({
         className={cn(
           "size-full rounded-lg",
           activeReviewItem?.id == event.id &&
-            "outline outline-[3px] outline-offset-1 outline-selected",
+            "outline outline-[3px] -outline-offset-[2.8px] outline-selected duration-200",
           imgLoaded ? "visible" : "invisible",
         )}
         src={`${baseUrl}${event.thumb_path.replace("/media/frigate/", "")}`}
@@ -165,6 +166,14 @@ export default function ReviewCard({
           <TooltipTrigger asChild>
             <div className="flex items-center justify-evenly gap-1">
               <>
+                <LuCircle
+                  className={cn(
+                    "size-2",
+                    event.severity == "alert"
+                      ? "fill-severity_alert text-severity_alert"
+                      : "fill-severity_detection text-severity_detection",
+                  )}
+                />
                 {event.data.objects.map((object) => {
                   return getIconForLabel(
                     object,

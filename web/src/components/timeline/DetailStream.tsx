@@ -367,7 +367,11 @@ function ReviewGroup({
   return (
     <div
       data-review-id={id}
-      className="cursor-pointer rounded-lg bg-secondary py-3"
+      className={`mx-1 cursor-pointer rounded-lg bg-secondary px-0 py-3 outline outline-[2px] -outline-offset-[1.8px] ${
+        isActive
+          ? "shadow-selected outline-selected"
+          : "outline-transparent duration-500"
+      }`}
     >
       <div
         className={cn(
@@ -382,10 +386,10 @@ function ReviewGroup({
         <div className="ml-4 mr-2 mt-1.5 flex flex-row items-start">
           <LuCircle
             className={cn(
-              "size-3",
-              isActive
-                ? "fill-selected text-selected"
-                : "fill-muted duration-500 dark:fill-secondary-highlight dark:text-secondary-highlight",
+              "size-3 duration-500",
+              review.severity == "alert"
+                ? "fill-severity_alert text-severity_alert"
+                : "fill-severity_detection text-severity_detection",
             )}
           />
         </div>
