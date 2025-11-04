@@ -39,8 +39,8 @@ If the EQ13 is out of stock, the link below may take you to a suggested alternat
 | Name                                                                                                          | Capabilities                                                               | Notes                                               |
 | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------- |
 | Beelink EQ13 (<a href="https://amzn.to/4jn2qVr" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | Can run object detection on several 1080p cameras with low-medium activity | Dual gigabit NICs for easy isolated camera network. |
-| 1220P                                                                                                         | Can handle a large number of 1080p cameras with high activity              |                                                     |
-| 125H                                                                                                          | Can handle a significant number of 1080p cameras with high activity        | Includes NPU for more efficient detection in 0.17+  |
+| Intel 1120p ([Amazon](https://www.amazon.com/Beelink-i3-1220P-Computer-Display-Gigabit/dp/B0DDCKT9YP)         | Can handle a large number of 1080p cameras with high activity              |                                                     |
+| Intel 125H  ([Amazon](https://www.amazon.com/MINISFORUM-Pro-125H-Barebone-Computer-HDMI2-1/dp/B0FH21FSZM)     | Can handle a significant number of 1080p cameras with high activity        | Includes NPU for more efficient detection in 0.17+  |
 
 ## Detectors
 
