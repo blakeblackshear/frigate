@@ -961,6 +961,7 @@ function ObjectTrainGrid({
                 selectedItems={selectedImages}
                 i18nLibrary="views/classificationModel"
                 objectType={model.object_config?.objects?.at(0) ?? "Object"}
+                noClassificationLabel="details.none"
                 onClick={(data) => {
                   if (data) {
                     onClickImages([data.filename], true);

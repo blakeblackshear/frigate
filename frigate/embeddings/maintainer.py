@@ -397,7 +397,14 @@ class EmbeddingMaintainer(threading.Thread):
 
         source_type, _, camera, frame_name, data = update
 
+        logger.debug(
+            f"Received update - source_type: {source_type}, camera: {camera}, data label: {data.get('label') if data else 'None'}"
+        )
+
         if not camera or source_type != EventTypeEnum.tracked_object:
+            logger.debug(
+                f"Skipping update - camera: {camera}, source_type: {source_type}"
+            )
             return
 
         if self.config.semantic_search.enabled:
@@ -407,6 +414,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         # no need to process updated objects if no processors are active
         if len(self.realtime_processors) == 0 and len(self.post_processors) == 0:
+            logger.debug(
+                f"No processors active - realtime: {len(self.realtime_processors)}, post: {len(self.post_processors)}"
+            )
             return
 
         # Create our own thumbnail based on the bounding box and the frame time
@@ -415,6 +425,7 @@ class EmbeddingMaintainer(threading.Thread):
                 frame_name, camera_config.frame_shape_yuv
             )
         except FileNotFoundError:
+            logger.debug(f"Frame {frame_name} not found for camera {camera}")
             pass
 
         if yuv_frame is None:
@@ -423,7 +434,11 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
+        logger.debug(
+            f"Processing {len(self.realtime_processors)} realtime processors for object {data.get('id')} (label: {data.get('label')})"
+        )
         for processor in self.realtime_processors:
+            logger.debug(f"Calling process_frame on {processor.__class__.__name__}")
             processor.process_frame(data, yuv_frame)
 
         for processor in self.post_processors:
