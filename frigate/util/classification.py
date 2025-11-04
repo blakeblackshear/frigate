@@ -20,8 +20,8 @@ from frigate.const import (
 from frigate.log import redirect_output_to_logger
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.types import ModelStatusTypesEnum
+from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import get_image_from_recording
-from frigate.util.path import get_event_thumbnail_bytes
 from frigate.util.process import FrigateProcess
 
 BATCH_SIZE = 16

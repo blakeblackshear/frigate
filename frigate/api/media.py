@@ -44,8 +44,8 @@ from frigate.const import (
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.track.object_processing import TrackedObjectProcessor
+from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import get_image_from_recording
-from frigate.util.path import get_event_thumbnail_bytes
 from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
