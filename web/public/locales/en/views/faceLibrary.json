@@ -6,7 +6,8 @@
   },
   "details": {
     "timestamp": "Timestamp",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "scoreInfo": "Score is a weighted average of all face scores, weighted by the size of the face in each image."
   },
   "documentTitle": "Face Library - Frigate",
   "uploadFaceImage": {

@@ -11,7 +11,8 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { LuSearch } from "react-icons/lu";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { LuSearch, LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { useNavigate } from "react-router-dom";
 import { HiSquare2Stack } from "react-icons/hi2";
@@ -321,14 +322,31 @@ export function GroupedClassificationCard({
                     ? event.sub_label
                     : t(noClassificationLabel)}
                   {event?.sub_label && event.sub_label !== "none" && (
-                    <div
-                      className={cn(
-                        "",
-                        bestScoreStatus == "match" && "text-success",
-                        bestScoreStatus == "potential" && "text-orange-400",
-                        bestScoreStatus == "unknown" && "text-danger",
-                      )}
-                    >{`${Math.round((event.data.sub_label_score || 0) * 100)}%`}</div>
+                    <div className="flex items-center gap-1">
+                      <div
+                        className={cn(
+                          "",
+                          bestScoreStatus == "match" && "text-success",
+                          bestScoreStatus == "potential" && "text-orange-400",
+                          bestScoreStatus == "unknown" && "text-danger",
+                        )}
+                      >{`${Math.round((event.data.sub_label_score || 0) * 100)}%`}</div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            className="focus:outline-none"
+                            aria-label={t("details.scoreInfo", {
+                              ns: i18nLibrary,
+                            })}
+                          >
+                            <LuInfo className="size-3" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 text-sm">
+                          {t("details.scoreInfo", { ns: i18nLibrary })}
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   )}
                 </ContentTitle>
                 <ContentDescription className={cn("", isMobile && "px-2")}>
