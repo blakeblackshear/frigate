@@ -20,8 +20,8 @@ from frigate.genai import GenAIClient
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
+from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import create_thumbnail, ensure_jpeg_bytes
-from frigate.util.path import get_event_thumbnail_bytes
 
 if TYPE_CHECKING:
     from frigate.embeddings import Embeddings

@@ -62,8 +62,8 @@ from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event, Recordings, ReviewSegment, Trigger
 from frigate.util.builtin import serialize
+from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import SharedMemoryFrameManager
-from frigate.util.path import get_event_thumbnail_bytes
 
 from .embeddings import Embeddings
 

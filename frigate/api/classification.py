@@ -38,7 +38,7 @@ from frigate.util.classification import (
     collect_object_classification_examples,
     collect_state_classification_examples,
 )
-from frigate.util.path import get_event_snapshot
+from frigate.util.file import get_event_snapshot
 
 logger = logging.getLogger(__name__)
 

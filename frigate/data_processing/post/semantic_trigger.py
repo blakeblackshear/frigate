@@ -22,7 +22,7 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings.util import ZScoreNormalization
 from frigate.models import Event, Trigger
 from frigate.util.builtin import cosine_distance
-from frigate.util.path import get_event_thumbnail_bytes
+from frigate.util.file import get_event_thumbnail_bytes
 
 from ..post.api import PostProcessorApi
 from ..types import DataProcessorMetrics

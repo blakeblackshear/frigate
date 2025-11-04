@@ -136,7 +136,7 @@ export default function EventView({
 
   const [selectedReviews, setSelectedReviews] = useState<ReviewSegment[]>([]);
   const onSelectReview = useCallback(
-    (review: ReviewSegment, ctrl: boolean) => {
+    (review: ReviewSegment, ctrl: boolean, detail: boolean) => {
       if (selectedReviews.length > 0 || ctrl) {
         const index = selectedReviews.findIndex((r) => r.id === review.id);
 
@@ -156,17 +156,31 @@ export default function EventView({
           setSelectedReviews(copy);
         }
       } else {
+        // If a specific date is selected in the calendar and it's after the event start,
+        // use the selected date instead of the event start time
+        const effectiveStartTime =
+          timeRange.after > review.start_time
+            ? timeRange.after
+            : review.start_time;
+
         onOpenRecording({
           camera: review.camera,
-          startTime: review.start_time - REVIEW_PADDING,
+          startTime: effectiveStartTime - REVIEW_PADDING,
           severity: review.severity,
+          timelineType: detail ? "detail" : undefined,
         });
 
         review.has_been_reviewed = true;
         markItemAsReviewed(review);
       }
     },
-    [selectedReviews, setSelectedReviews, onOpenRecording, markItemAsReviewed],
+    [
+      selectedReviews,
+      setSelectedReviews,
+      onOpenRecording,
+      markItemAsReviewed,
+      timeRange.after,
+    ],
   );
   const onSelectAllReviews = useCallback(() => {
     if (!currentReviewItems || currentReviewItems.length == 0) {
@@ -402,7 +416,6 @@ export default function EventView({
             onSelectAllReviews={onSelectAllReviews}
             setSelectedReviews={setSelectedReviews}
             pullLatestData={pullLatestData}
-            onOpenRecording={onOpenRecording}
           />
         )}
         {severity == "significant_motion" && (
@@ -442,11 +455,14 @@ type DetectionReviewProps = {
   loading: boolean;
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
-  onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
+  onSelectReview: (
+    review: ReviewSegment,
+    ctrl: boolean,
+    detail: boolean,
+  ) => void;
   onSelectAllReviews: () => void;
   setSelectedReviews: (reviews: ReviewSegment[]) => void;
   pullLatestData: () => void;
-  onOpenRecording: (recordingInfo: RecordingStartingPoint) => void;
 };
 function DetectionReview({
   contentRef,
@@ -466,7 +482,6 @@ function DetectionReview({
   onSelectAllReviews,
   setSelectedReviews,
   pullLatestData,
-  onOpenRecording,
 }: DetectionReviewProps) {
   const { t } = useTranslation(["views/events"]);
 
@@ -758,16 +773,7 @@ function DetectionReview({
                           ctrl: boolean,
                           detail: boolean,
                         ) => {
-                          if (detail) {
-                            onOpenRecording({
-                              camera: review.camera,
-                              startTime: review.start_time - REVIEW_PADDING,
-                              severity: review.severity,
-                              timelineType: "detail",
-                            });
-                          } else {
-                            onSelectReview(review, ctrl);
-                          }
+                          onSelectReview(review, ctrl, detail);
                         }}
                       />
                     </div>
