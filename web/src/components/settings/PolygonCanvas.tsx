@@ -270,7 +270,7 @@ export function PolygonCanvas({
     const activePolygon = updatedPolygons[activePolygonIndex];
 
     // add default points order for already completed polygons
-    if (!activePolygon.pointsOrder && activePolygon.isFinished) {
+    if (!activePolygon?.pointsOrder && activePolygon?.isFinished) {
       updatedPolygons[activePolygonIndex] = {
         ...activePolygon,
         pointsOrder: activePolygon.points.map((_, index) => index),
