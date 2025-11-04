@@ -43,5 +43,5 @@ export function generateFixedHash(name: string, prefix: string = "id"): string {
  * @returns True if the name is valid, false otherwise
  */
 export function isValidId(name: string): boolean {
-  return /^[a-zA-Z0-9_-]+$/.test(name);
+  return /^[a-zA-Z0-9_-]+$/.test(name) && !/^\d+$/.test(name);
 }
