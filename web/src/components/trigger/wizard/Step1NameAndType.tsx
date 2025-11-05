@@ -101,7 +101,7 @@ export default function Step1NameAndType({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
+    mode: "onBlur",
     defaultValues: {
       enabled: true,
       name: initialData?.name ?? trigger?.name ?? "",
