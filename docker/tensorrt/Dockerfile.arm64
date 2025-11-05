@@ -112,7 +112,8 @@ RUN apt-get update \
     && apt-get install -y protobuf-compiler libprotobuf-dev \
     && rm -rf /var/lib/apt/lists/*
 RUN --mount=type=bind,source=docker/tensorrt/requirements-models-arm64.txt,target=/requirements-tensorrt-models.txt \
-    pip3 wheel --wheel-dir=/trt-model-wheels -r /requirements-tensorrt-models.txt
+    --mount=type=bind,source=docker/tensorrt/requirements-arm64.txt,target=/requirements-tensorrt-constraints.txt \
+    pip3 wheel --wheel-dir=/trt-model-wheels -c /requirements-tensorrt-constraints.txt -r /requirements-tensorrt-models.txt
 
 FROM wget AS jetson-ffmpeg
 ARG DEBIAN_FRONTEND
