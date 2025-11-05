@@ -15,7 +15,7 @@ The jsmpeg live view will use more browser and client GPU resources. Using go2rt
 | ------ | ------------------------------------- | ---------- | ---------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | jsmpeg | same as `detect -> fps`, capped at 10 | 720p       | no                           | no              | Resolution is configurable, but go2rtc is recommended if you want higher resolutions and better frame rates. jsmpeg is Frigate's default without go2rtc configured. |
 | mse    | native                                | native     | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only. This is Frigate's default when go2rtc is configured.                                                              |
-| webrtc | native                                | native     | yes (depends on audio codec) | yes             | Requires extra configuration, doesn't support h.265. Frigate attempts to use WebRTC when MSE fails or when using a camera's two-way talk feature.                   |
+| webrtc | native                                | native     | yes (depends on audio codec) | yes             | Requires extra configuration. Frigate attempts to use WebRTC when MSE fails or when using a camera's two-way talk feature.                   |
 
 ### Camera Settings Recommendations
 
@@ -127,7 +127,8 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
   ```
 
 - For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.64.0.0/10` CIDR block.
-- Note that WebRTC does not support H.265.
+
+- Note that some browsers may not support H.265 (HEVC). You can check your browser's current version for H.265 compatibility [here](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#codecs-madness). 
 
 :::tip
 
