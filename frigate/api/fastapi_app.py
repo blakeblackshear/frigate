@@ -34,6 +34,7 @@ from frigate.embeddings import EmbeddingsContext
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
 from frigate.storage import StorageMaintainer
+from frigate.transcode.temp_file_cache import TempFileCache
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,7 @@ class RemoteUserPlugin(Plugin):
 def create_fastapi_app(
     frigate_config: FrigateConfig,
     database: SqliteQueueDatabase,
+    temp_file_cache: TempFileCache,
     embeddings: Optional[EmbeddingsContext],
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
@@ -134,6 +136,7 @@ def create_fastapi_app(
     app.stats_emitter = stats_emitter
     app.event_metadata_updater = event_metadata_updater
     app.config_publisher = config_publisher
+    app.temp_file_cache = temp_file_cache
 
     if frigate_config.auth.enabled:
         secret = get_jwt_secret()

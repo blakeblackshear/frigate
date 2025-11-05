@@ -73,6 +73,7 @@ from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
+from frigate.transcode.temp_file_cache import TempFileCache
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import UntrackedSharedMemory
 from frigate.util.services import set_file_limit
@@ -224,6 +225,9 @@ class FrigateApp:
             vacuum_db(migrate_db)
 
         migrate_db.close()
+
+    def init_transcode_cache(self) -> None:
+        self.transcode_cache = TempFileCache()
 
     def init_go2rtc(self) -> None:
         for proc in psutil.process_iter(["pid", "name"]):
@@ -530,6 +534,7 @@ class FrigateApp:
         self.init_camera_metrics()
         self.init_queues()
         self.init_database()
+        self.init_transcode_cache()
         self.init_onvif()
         self.init_recording_manager()
         self.init_review_segment_manager()
@@ -561,6 +566,7 @@ class FrigateApp:
                 create_fastapi_app(
                     self.config,
                     self.db,
+                    self.transcode_cache,
                     self.embeddings,
                     self.detected_frames_processor,
                     self.storage_maintainer,
@@ -634,6 +640,7 @@ class FrigateApp:
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
+        self.transcode_cache.stop()
 
         # Save embeddings stats to disk
         if self.embeddings:
