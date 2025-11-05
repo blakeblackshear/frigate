@@ -311,7 +311,12 @@ export function GroupedClassificationCard({
                 isMobileOnly && "top-0 mx-4",
               )}
             >
-              <div>
+              <div
+                className={cn(
+                  "",
+                  isMobile && "flex flex-col items-center justify-center",
+                )}
+              >
                 <ContentTitle className="flex items-center gap-2 font-normal capitalize">
                   {event?.sub_label && event.sub_label !== "none"
                     ? event.sub_label

@@ -274,7 +274,7 @@ export default function ClassificationModelEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && handleCancel()}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("edit.title")}</DialogTitle>
           <DialogDescription>
@@ -284,7 +284,7 @@ export default function ClassificationModelEditDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 pb-4">
+        <div className="space-y-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {isObjectModel && (
