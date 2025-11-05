@@ -385,7 +385,7 @@ export default function Step1NameCamera({
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className="h-8"
+                        className="text-md h-8"
                         placeholder={t(
                           "cameraWizard.step1.cameraNamePlaceholder",
                         )}
@@ -475,7 +475,7 @@ export default function Step1NameCamera({
                         </FormLabel>
                         <FormControl>
                           <Input
-                            className="h-8"
+                            className="text-md h-8"
                             placeholder="192.168.1.100"
                             {...field}
                           />
@@ -495,7 +495,7 @@ export default function Step1NameCamera({
                         </FormLabel>
                         <FormControl>
                           <Input
-                            className="h-8"
+                            className="text-md h-8"
                             placeholder={t(
                               "cameraWizard.step1.usernamePlaceholder",
                             )}
@@ -518,7 +518,7 @@ export default function Step1NameCamera({
                         <FormControl>
                           <div className="relative">
                             <Input
-                              className="h-8 pr-10"
+                              className="text-md h-8 pr-10"
                               type={showPassword ? "text" : "password"}
                               placeholder={t(
                                 "cameraWizard.step1.passwordPlaceholder",
@@ -558,7 +558,7 @@ export default function Step1NameCamera({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="h-8"
+                          className="text-md h-8"
                           placeholder="rtsp://username:password@host:port/path"
                           {...field}
                         />
