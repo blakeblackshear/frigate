@@ -22,6 +22,7 @@ import {
   LuChevronRight,
   LuSettings,
 } from "react-icons/lu";
+import { MdAutoAwesome } from "react-icons/md";
 import { getTranslatedLabel } from "@/utils/i18n";
 import EventMenu from "@/components/timeline/EventMenu";
 import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
@@ -410,8 +411,9 @@ function ReviewGroup({
             </div>
             <div className="flex flex-col gap-0.5">
               {review.data.metadata?.title && (
-                <div className="mb-1 text-sm text-primary-variant">
-                  {review.data.metadata.title}
+                <div className="mb-1 flex items-center gap-1 text-sm text-primary-variant">
+                  <MdAutoAwesome className="size-3 shrink-0" />
+                  <span className="truncate">{review.data.metadata.title}</span>
                 </div>
               )}
               <div className="flex flex-row items-center gap-1.5">
