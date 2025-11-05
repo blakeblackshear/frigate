@@ -32,6 +32,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 import { Badge } from "@/components/ui/badge";
 import { HiDotsHorizontal } from "react-icons/hi";
 import axios from "axios";
@@ -72,6 +73,12 @@ export function TrackingDetails({
   ]);
 
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  eventSequence?.map((event) => {
+    event.data.zones_friendly_names = event.data?.zones?.map((zone) => {
+      return resolveZoneName(config, zone);
+    });
+  });
 
   const effectiveTime = useMemo(() => {
     return currentTime - annotationOffset / 1000;
@@ -703,7 +710,8 @@ function LifecycleIconRow({
                           }}
                         />
                         <span className="smart-capitalize">
-                          {zone.replaceAll("_", " ")}
+                          {item.data?.zones_friendly_names?.[zidx] ??
+                            zone.replaceAll("_", " ")}
                         </span>
                       </Badge>
                     );

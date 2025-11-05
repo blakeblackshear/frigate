@@ -42,7 +42,9 @@ export function getLifecycleItemDescription(
       return t("trackingDetails.lifecycleItemDesc.entered_zone", {
         ns: "views/explore",
         label,
-        zones: formatZonesList(lifecycleItem.data.zones),
+        zones: formatZonesList(
+          lifecycleItem.data.zones_friendly_names ?? lifecycleItem.data.zones,
+        ),
       });
     case "active":
       return t("trackingDetails.lifecycleItemDesc.active", {

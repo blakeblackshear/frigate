@@ -31,6 +31,7 @@ import { Link } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { usePersistence } from "@/hooks/use-persistence";
 import { isDesktop } from "react-device-detect";
+import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
@@ -645,6 +646,16 @@ function LifecycleItem({
 }: LifecycleItemProps) {
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  item = {
+    ...item,
+    data: {
+      ...item.data,
+      zones_friendly_names: item?.data?.zones?.map((zone) => {
+        return resolveZoneName(config, zone);
+      }),
+    },
+  };
 
   const aspectRatio = useMemo(() => {
     if (!config || !item?.camera) {
