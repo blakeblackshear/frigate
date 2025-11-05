@@ -7,7 +7,7 @@ import {
 } from "@/types/classification";
 import { Event } from "@/types/event";
 import { forwardRef, useMemo, useRef, useState } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -264,8 +264,8 @@ export function GroupedClassificationCard({
 
   const Overlay = isDesktop ? Dialog : MobilePage;
   const Trigger = isDesktop ? DialogTrigger : MobilePageTrigger;
-  const Header = isDesktop ? DialogHeader : MobilePageHeader;
   const Content = isDesktop ? DialogContent : MobilePageContent;
+  const Header = isDesktop ? DialogHeader : MobilePageHeader;
   const ContentTitle = isDesktop ? DialogTitle : MobilePageTitle;
   const ContentDescription = isDesktop
     ? DialogDescription
@@ -298,26 +298,21 @@ export function GroupedClassificationCard({
         <Trigger asChild></Trigger>
         <Content
           className={cn(
-            "",
+            "scrollbar-container",
             isDesktop && "min-w-[50%] max-w-[65%]",
-            isMobile && "flex flex-col",
+            isMobile && "overflow-y-auto",
           )}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <>
             <Header
               className={cn(
-                "flex flex-row items-center gap-4 px-2",
-                isMobile && "flex-shrink-0",
+                "mx-2 flex flex-row items-center gap-4",
+                isMobileOnly && "top-0 mx-4",
               )}
             >
               <div>
-                <ContentTitle
-                  className={cn(
-                    "flex items-center gap-2 font-normal capitalize",
-                    isMobile && "px-2",
-                  )}
-                >
+                <ContentTitle className="flex items-center gap-2 font-normal capitalize">
                   {event?.sub_label && event.sub_label !== "none"
                     ? event.sub_label
                     : t(noClassificationLabel)}
@@ -390,7 +385,7 @@ export function GroupedClassificationCard({
               className={cn(
                 "grid w-full auto-rows-min grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-8",
                 isDesktop && "p-2",
-                isMobile && "scrollbar-container flex-1 overflow-y-auto p-2",
+                isMobile && "px-4 pb-4",
               )}
             >
               {group.map((data: ClassificationItemData) => (
