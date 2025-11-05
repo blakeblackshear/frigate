@@ -16,15 +16,7 @@ To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the 
 
 ### Restricting alerts and detections to specific zones
 
-You can flexibly define alert or detection zones, allowing you to focus on what matters most.
-
-Often you will only want alerts to be created when an object enters areas of interest. This is done using zones along with setting review classification.
-
-For example, you only want to have an alert created when an object enters your `Entire Yard` zone. Simply go to the `Camera → Review → Alerts` settings, check the `Entire Yard` zone you just created, and save the changes.
-
-![Review Classification](/img/zones-review.png)
-
-the config would be:
+Often you will only want alerts to be created when an object enters areas of interest. This is done using zones along with setting required_zones. Let's say you only want to have an alert created when an object enters your entire_yard zone, the config would be:
 
 ```yaml
 cameras:
@@ -39,9 +31,7 @@ cameras:
         coordinates: ...
 ```
 
-You may also want to filter detections to only be created when an object enters a secondary area of interest. This is done using zones along with setting required_zones. Let's say you want alerts when an object enters the inner area of the yard but detections when an object enters the edge of the yard. Simply go to the `Detections` option on the previous page, check `Limit detections to specific zones`, and then select the desired zones.
-
-the config would be
+You may also want to filter detections to only be created when an object enters a secondary area of interest. This is done using zones along with setting required_zones. Let's say you want alerts when an object enters the inner area of the yard but detections when an object enters the edge of the yard, the config would be
 
 ```yaml
 cameras:
