@@ -86,7 +86,6 @@ cameras:
 
 Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. Objects will be tracked for any `person` that enter anywhere in the yard, and for cars only if they enter the street.
 
-Of course, you can also manually select the desired tracked Object when editing zones on the `Masks / Zones` page.
 
 ### Zone Loitering
 
