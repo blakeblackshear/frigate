@@ -558,9 +558,7 @@ export function TrackingDetails({
 
           <div className="mt-4">
             <div
-              className={cn(
-                "rounded-md bg-secondary p-3 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500",
-              )}
+              className={cn("rounded-md bg-background_alt px-0 py-3 md:px-2")}
             >
               <div className="flex w-full items-center justify-between">
                 <div
@@ -586,7 +584,7 @@ export function TrackingDetails({
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="capitalize">{label}</span>
-                    <span className="md:text-md text-sm text-secondary-foreground">
+                    <span className="md:text-md text-xs text-secondary-foreground">
                       {formattedStart ?? ""} - {formattedEnd ?? ""}
                     </span>
                     {event.data?.recognized_license_plate && (
