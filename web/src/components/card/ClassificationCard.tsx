@@ -307,7 +307,7 @@ export function GroupedClassificationCard({
           <>
             <Header
               className={cn(
-                "mx-2 flex flex-row items-center gap-4",
+                "flex flex-row items-center gap-4 px-2",
                 isMobile && "flex-shrink-0",
               )}
             >
@@ -390,7 +390,7 @@ export function GroupedClassificationCard({
               className={cn(
                 "grid w-full auto-rows-min grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-8",
                 isDesktop && "p-2",
-                isMobile && "scrollbar-container flex-1 overflow-y-auto",
+                isMobile && "scrollbar-container flex-1 overflow-y-auto p-2",
               )}
             >
               {group.map((data: ClassificationItemData) => (
