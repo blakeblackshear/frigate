@@ -157,9 +157,11 @@ function MobileMenuItem({
   const { t } = useTranslation(["views/settings"]);
 
   return (
-    <Button
-      variant="ghost"
-      className={cn("w-full justify-between pr-2", className)}
+    <div
+      className={cn(
+        "inline-flex h-10 w-full cursor-pointer items-center justify-between whitespace-nowrap rounded-md px-4 py-2 pr-2 text-sm font-medium text-primary-variant disabled:pointer-events-none disabled:opacity-50",
+        className,
+      )}
       onClick={() => {
         onSelect(item.key);
         onClose?.();
@@ -167,7 +169,7 @@ function MobileMenuItem({
     >
       <div className="smart-capitalize">{t("menu." + item.key)}</div>
       <LuChevronRight className="size-4" />
-    </Button>
+    </div>
   );
 }
 
