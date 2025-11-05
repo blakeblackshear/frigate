@@ -25,6 +25,7 @@ type NameAndIdFieldsProps<T extends FieldValues = FieldValues> = {
   processId?: (name: string) => string;
   placeholderName?: string;
   placeholderId?: string;
+  idVisible?: boolean;
 };
 
 export default function NameAndIdFields<T extends FieldValues = FieldValues>({
@@ -39,10 +40,11 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
   processId,
   placeholderName,
   placeholderId,
+  idVisible,
 }: NameAndIdFieldsProps<T>) {
   const { t } = useTranslation(["common"]);
   const { watch, setValue, trigger, formState } = useFormContext<T>();
-  const [isIdVisible, setIsIdVisible] = useState(false);
+  const [isIdVisible, setIsIdVisible] = useState(idVisible ?? false);
   const hasUserTypedRef = useRef(false);
 
   const defaultProcessId = (name: string) => {

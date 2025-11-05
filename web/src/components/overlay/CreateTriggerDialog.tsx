@@ -258,6 +258,7 @@ export default function CreateTriggerDialog({
               nameLabel={t("triggers.dialog.form.name.title")}
               nameDescription={t("triggers.dialog.form.name.description")}
               placeholderName={t("triggers.dialog.form.name.placeholder")}
+              idVisible={!!trigger}
             />
 
             <FormField
