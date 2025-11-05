@@ -6,7 +6,7 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { Button } from "../../ui/button";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Textarea } from "../../ui/textarea";
@@ -59,7 +59,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
-import { Card, CardContent } from "@/components/ui/card";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import { GenericVideoPlayer } from "@/components/player/GenericVideoPlayer";
@@ -326,9 +325,6 @@ export default function SearchDetailDialog({
                             : "not_enabled",
                         } as unknown as Event
                       }
-                      onEventUploaded={() => {
-                        search.plus_id = "new_upload";
-                      }}
                     />
                   )}
                   {page === "snapshot" && !search.has_snapshot && (
@@ -412,9 +408,6 @@ export default function SearchDetailDialog({
                             : "not_enabled",
                         } as unknown as Event
                       }
-                      onEventUploaded={() => {
-                        search.plus_id = "new_upload";
-                      }}
                     />
                   )}
                   {page == "snapshot" && !search.has_snapshot && (
@@ -472,7 +465,11 @@ function ObjectDetailsTab({
   setInputFocused,
   showThumbnail = true,
 }: ObjectDetailsTabProps) {
-  const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
+  const { t, i18n } = useTranslation([
+    "views/explore",
+    "views/faceLibrary",
+    "components/dialog",
+  ]);
 
   const apiHost = useApiHost();
 
@@ -917,35 +914,160 @@ function ObjectDetailsTab({
       });
   }, [search, t]);
 
+  // frigate+ submission
+
+  type SubmissionState = "reviewing" | "uploading" | "submitted";
+  const [state, setState] = useState<SubmissionState>(
+    search?.plus_id ? "submitted" : "reviewing",
+  );
+
+  useEffect(
+    () => setState(search?.plus_id ? "submitted" : "reviewing"),
+    [search],
+  );
+
+  const onSubmitToPlus = useCallback(
+    async (falsePositive: boolean) => {
+      if (!search) {
+        return;
+      }
+
+      falsePositive
+        ? axios.put(`events/${search.id}/false_positive`)
+        : axios.post(`events/${search.id}/plus`, {
+            include_annotation: 1,
+          });
+
+      setState("submitted");
+      setSearch({
+        ...search,
+        plus_id: "new_upload",
+      });
+    },
+    [search, setSearch],
+  );
+
+  const popoverContainerRef = useRef<HTMLDivElement | null>(null);
+
   return (
-    <div className="flex flex-col gap-5">
+    <div ref={popoverContainerRef} className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">{t("details.label")}</div>
-            <div className="flex flex-row items-center gap-2 text-sm smart-capitalize">
-              {getIconForLabel(search.label, "size-4 text-primary")}
-              {getTranslatedLabel(search.label)}
-              {search.sub_label && ` (${search.sub_label})`}
-              {isAdmin && search.end_time && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span>
-                      <FaPencilAlt
-                        className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
-                        onClick={() => {
-                          setIsSubLabelDialogOpen(true);
-                        }}
-                      />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipPortal>
-                    <TooltipContent>
-                      {t("details.editSubLabel.title")}
-                    </TooltipContent>
-                  </TooltipPortal>
-                </Tooltip>
-              )}
+          <div className="w-full">
+            <div className="flex w-full flex-row flex-wrap gap-6">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="text-sm text-primary/40">
+                      {t("details.label")}
+                    </div>
+                    <div className="flex flex-row items-center gap-2 text-sm smart-capitalize">
+                      {getIconForLabel(search.label, "size-4 text-primary")}
+                      {getTranslatedLabel(search.label)}
+                      {search.sub_label && ` (${search.sub_label})`}
+                      {isAdmin && search.end_time && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <FaPencilAlt
+                                className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                                onClick={() => setIsSubLabelDialogOpen(true)}
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipPortal>
+                            <TooltipContent>
+                              {t("details.editSubLabel.title")}
+                            </TooltipContent>
+                          </TooltipPortal>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <div className="text-sm text-primary/40">
+                      <div className="flex flex-row items-center gap-1">
+                        {t("details.topScore.label")}
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <div className="cursor-pointer p-0">
+                              <LuInfo className="size-4" />
+                              <span className="sr-only">Info</span>
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            container={popoverContainerRef.current}
+                            className="w-80 text-xs"
+                          >
+                            {t("details.topScore.info")}
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </div>
+                    <div className="text-sm">
+                      {topScore}%{subLabelScore && ` (${subLabelScore}%)`}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <div className="text-sm text-primary/40">
+                      {t("details.camera")}
+                    </div>
+                    <div className="text-sm smart-capitalize">
+                      <CameraNameLabel camera={search.camera} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-3">
+                  {snapScore != undefined && (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="text-sm text-primary/40">
+                        <div className="flex flex-row items-center gap-1">
+                          {t("details.snapshotScore.label")}
+                        </div>
+                      </div>
+                      <div className="text-sm">{snapScore}%</div>
+                    </div>
+                  )}
+
+                  {averageEstimatedSpeed && (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="text-sm text-primary/40">
+                        {t("details.estimatedSpeed")}
+                      </div>
+                      <div className="flex flex-col space-y-0.5 text-sm">
+                        <div className="flex flex-row items-center gap-2">
+                          {averageEstimatedSpeed}{" "}
+                          {config?.ui.unit_system == "imperial"
+                            ? t("unit.speed.mph", { ns: "common" })
+                            : t("unit.speed.kph", { ns: "common" })}
+                          {velocityAngle != undefined && (
+                            <span className="text-primary/40">
+                              <FaArrowRight
+                                size={10}
+                                style={{
+                                  transform: `rotate(${(360 - Number(velocityAngle)) % 360}deg)`,
+                                }}
+                              />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-1.5">
+                    <div className="text-sm text-primary/40">
+                      {t("details.timestamp")}
+                    </div>
+                    <div className="text-sm">{formattedDate}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           {search?.data.recognized_license_plate && (
@@ -964,9 +1086,7 @@ function ObjectDetailsTab({
                         <span>
                           <FaPencilAlt
                             className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
-                            onClick={() => {
-                              setIsLPRDialogOpen(true);
-                            }}
+                            onClick={() => setIsLPRDialogOpen(true)}
                           />
                         </span>
                       </TooltipTrigger>
@@ -981,77 +1101,104 @@ function ObjectDetailsTab({
               </div>
             </div>
           )}
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              <div className="flex flex-row items-center gap-1">
-                {t("details.topScore.label")}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="cursor-pointer p-0">
-                      <LuInfo className="size-4" />
-                      <span className="sr-only">Info</span>
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80">
-                    {t("details.topScore.info")}
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            <div className="text-sm">
-              {topScore}%{subLabelScore && ` (${subLabelScore}%)`}
-            </div>
-          </div>
-          {snapScore != undefined && (
-            <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">
-                <div className="flex flex-row items-center gap-1">
-                  {t("details.snapshotScore.label")}
+        </div>
+      </div>
+
+      <div className="my-2 flex flex-col gap-1.5">
+        <div className="text-sm text-primary/40">
+          <div className="flex flex-row items-center gap-1">
+            {t("explore.plus.submitToPlus.label", {
+              ns: "components/dialog",
+            })}
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="cursor-pointer p-0">
+                  <LuInfo className="size-4" />
+                  <span className="sr-only">Info</span>
                 </div>
-              </div>
-              <div className="text-sm">{snapScore}%</div>
-            </div>
-          )}
-          {averageEstimatedSpeed && (
-            <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">
-                {t("details.estimatedSpeed")}
-              </div>
-              <div className="flex flex-col space-y-0.5 text-sm">
-                {averageEstimatedSpeed && (
-                  <div className="flex flex-row items-center gap-2">
-                    {averageEstimatedSpeed}{" "}
-                    {config?.ui.unit_system == "imperial"
-                      ? t("unit.speed.mph", { ns: "common" })
-                      : t("unit.speed.kph", { ns: "common" })}{" "}
-                    {velocityAngle != undefined && (
-                      <span className="text-primary/40">
-                        <FaArrowRight
-                          size={10}
-                          style={{
-                            transform: `rotate(${(360 - Number(velocityAngle)) % 360}deg)`,
-                          }}
-                        />
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">{t("details.camera")}</div>
-            <div className="text-sm smart-capitalize">
-              <CameraNameLabel camera={search.camera} />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              {t("details.timestamp")}
-            </div>
-            <div className="text-sm">{formattedDate}</div>
+              </PopoverTrigger>
+              <PopoverContent
+                container={popoverContainerRef.current}
+                className="w-80 text-xs"
+              >
+                {t("explore.plus.submitToPlus.desc", {
+                  ns: "components/dialog",
+                })}
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
+
+        <div className="flex w-full flex-1 flex-row items-center justify-between gap-2 text-sm md:flex-1">
+          {state == "reviewing" && (
+            <>
+              <div>
+                {i18n.language === "en" ? (
+                  // English with a/an logic plus label
+                  <>
+                    {/^[aeiou]/i.test(search?.label || "") ? (
+                      <Trans
+                        ns="components/dialog"
+                        values={{ label: search?.label }}
+                      >
+                        explore.plus.review.question.ask_an
+                      </Trans>
+                    ) : (
+                      <Trans
+                        ns="components/dialog"
+                        values={{ label: search?.label }}
+                      >
+                        explore.plus.review.question.ask_a
+                      </Trans>
+                    )}
+                  </>
+                ) : (
+                  // For other languages
+                  <Trans
+                    ns="components/dialog"
+                    values={{
+                      untranslatedLabel: search?.label,
+                      translatedLabel: getTranslatedLabel(search?.label),
+                    }}
+                  >
+                    explore.plus.review.question.ask_full
+                  </Trans>
+                )}
+              </div>
+              <div className="flex max-w-xl flex-row gap-2">
+                <Button
+                  className="flex-1 bg-success"
+                  aria-label={t("button.yes", { ns: "common" })}
+                  onClick={() => {
+                    setState("uploading");
+                    onSubmitToPlus(false);
+                  }}
+                >
+                  {t("button.yes", { ns: "common" })}
+                </Button>
+                <Button
+                  className="flex-1 text-white"
+                  aria-label={t("button.no", { ns: "common" })}
+                  variant="destructive"
+                  onClick={() => {
+                    setState("uploading");
+                    onSubmitToPlus(true);
+                  }}
+                >
+                  {t("button.no", { ns: "common" })}
+                </Button>
+              </div>
+            </>
+          )}
+          {state == "uploading" && <ActivityIndicator />}
+          {state == "submitted" && (
+            <div className="flex flex-row items-center justify-center gap-2">
+              <FaCheckCircle className="size-4 text-success" />
+              {t("explore.plus.review.state.submitted")}
+            </div>
+          )}
+        </div>
+
         {showThumbnail && (
           <div className="flex w-full flex-col gap-2 pl-6">
             <img
@@ -1247,45 +1394,11 @@ function ObjectDetailsTab({
 
 type ObjectSnapshotTabProps = {
   search: Event;
-  onEventUploaded: () => void;
 };
-export function ObjectSnapshotTab({
-  search,
-  onEventUploaded,
-}: ObjectSnapshotTabProps) {
-  const { t, i18n } = useTranslation(["components/dialog"]);
-  type SubmissionState = "reviewing" | "uploading" | "submitted";
+export function ObjectSnapshotTab({ search }: ObjectSnapshotTabProps) {
+  const { t } = useTranslation(["components/dialog"]);
 
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
-
-  // upload
-
-  const [state, setState] = useState<SubmissionState>(
-    search?.plus_id ? "submitted" : "reviewing",
-  );
-
-  useEffect(
-    () => setState(search?.plus_id ? "submitted" : "reviewing"),
-    [search],
-  );
-
-  const onSubmitToPlus = useCallback(
-    async (falsePositive: boolean) => {
-      if (!search) {
-        return;
-      }
-
-      falsePositive
-        ? axios.put(`events/${search.id}/false_positive`)
-        : axios.post(`events/${search.id}/plus`, {
-            include_annotation: 1,
-          });
-
-      setState("submitted");
-      onEventUploaded();
-    },
-    [search, onEventUploaded],
-  );
 
   return (
     <div className="relative w-full">
@@ -1345,95 +1458,6 @@ export function ObjectSnapshotTab({
                 </div>
               )}
             </TransformComponent>
-            {search.data.type == "object" &&
-              search.plus_id !== "not_enabled" &&
-              search.end_time &&
-              search.label != "on_demand" && (
-                <Card className="p-1 text-sm md:p-2">
-                  <CardContent className="flex flex-col items-start justify-between gap-3 p-2 md:flex-row md:items-center">
-                    <div className={cn("flex max-w-sm flex-col space-y-3")}>
-                      <div className={"text-lg leading-none"}>
-                        {t("explore.plus.submitToPlus.label")}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {t("explore.plus.submitToPlus.desc")}
-                      </div>
-                    </div>
-
-                    <div className="flex w-full flex-1 flex-col justify-center gap-2 md:ml-8 md:flex-1 md:justify-end">
-                      {state == "reviewing" && (
-                        <>
-                          <div>
-                            {i18n.language === "en" ? (
-                              // English with a/an logic plus label
-                              <>
-                                {/^[aeiou]/i.test(search?.label || "") ? (
-                                  <Trans
-                                    ns="components/dialog"
-                                    values={{ label: search?.label }}
-                                  >
-                                    explore.plus.review.question.ask_an
-                                  </Trans>
-                                ) : (
-                                  <Trans
-                                    ns="components/dialog"
-                                    values={{ label: search?.label }}
-                                  >
-                                    explore.plus.review.question.ask_a
-                                  </Trans>
-                                )}
-                              </>
-                            ) : (
-                              // For other languages
-                              <Trans
-                                ns="components/dialog"
-                                values={{
-                                  untranslatedLabel: search?.label,
-                                  translatedLabel: getTranslatedLabel(
-                                    search?.label,
-                                  ),
-                                }}
-                              >
-                                explore.plus.review.question.ask_full
-                              </Trans>
-                            )}
-                          </div>
-                          <div className="flex w-full flex-row gap-2">
-                            <Button
-                              className="flex-1 bg-success"
-                              aria-label={t("button.yes", { ns: "common" })}
-                              onClick={() => {
-                                setState("uploading");
-                                onSubmitToPlus(false);
-                              }}
-                            >
-                              {t("button.yes", { ns: "common" })}
-                            </Button>
-                            <Button
-                              className="flex-1 text-white"
-                              aria-label={t("button.no", { ns: "common" })}
-                              variant="destructive"
-                              onClick={() => {
-                                setState("uploading");
-                                onSubmitToPlus(true);
-                              }}
-                            >
-                              {t("button.no", { ns: "common" })}
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                      {state == "uploading" && <ActivityIndicator />}
-                      {state == "submitted" && (
-                        <div className="flex flex-row items-center justify-center gap-2">
-                          <FaCheckCircle className="text-success" />
-                          {t("explore.plus.review.state.submitted")}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
           </div>
         </TransformWrapper>
       </div>
