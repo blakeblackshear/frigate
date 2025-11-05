@@ -157,9 +157,11 @@ function MobileMenuItem({
   const { t } = useTranslation(["views/settings"]);
 
   return (
-    <Button
-      variant="ghost"
-      className={cn("w-full justify-between pr-2", className)}
+    <div
+      className={cn(
+        "inline-flex h-10 w-full cursor-pointer items-center justify-between whitespace-nowrap rounded-md px-4 py-2 pr-2 text-sm font-medium text-primary-variant disabled:pointer-events-none disabled:opacity-50",
+        className,
+      )}
       onClick={() => {
         onSelect(item.key);
         onClose?.();
@@ -167,7 +169,7 @@ function MobileMenuItem({
     >
       <div className="smart-capitalize">{t("menu." + item.key)}</div>
       <LuChevronRight className="size-4" />
-    </Button>
+    </div>
   );
 }
 
@@ -273,6 +275,9 @@ export default function Settings() {
       } else {
         setPageToggle(page as SettingsType);
       }
+      if (isMobile) {
+        setContentMobileOpen(true);
+      }
     }
     // don't clear url params if we're creating a new object mask
     return !(searchParams.has("object_mask") || searchParams.has("event_id"));
@@ -282,6 +287,9 @@ export default function Settings() {
     const cameraNames = cameras.map((c) => c.name);
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);
+      if (isMobile) {
+        setContentMobileOpen(true);
+      }
     }
     // don't clear url params if we're creating a new object mask or trigger
     return !(searchParams.has("object_mask") || searchParams.has("event_id"));

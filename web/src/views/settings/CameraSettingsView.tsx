@@ -717,11 +717,11 @@ export default function CameraSettingsView({
                   <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
                     <Button
                       className="flex flex-1"
-                      aria-label={t("button.cancel", { ns: "common" })}
+                      aria-label={t("button.reset", { ns: "common" })}
                       onClick={onCancel}
                       type="button"
                     >
-                      <Trans>button.cancel</Trans>
+                      <Trans>button.reset</Trans>
                     </Button>
                     <Button
                       variant="select"
