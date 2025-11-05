@@ -32,7 +32,6 @@ import {
   FaChevronRight,
   FaDownload,
   FaHistory,
-  FaImage,
 } from "react-icons/fa";
 import { TrackingDetails } from "./TrackingDetails";
 import { DetailStreamProvider } from "@/context/detail-stream-context";
@@ -80,7 +79,6 @@ import FaceSelectionDialog from "../FaceSelectionDialog";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { CgTranscript } from "react-icons/cg";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
-import { PiPath } from "react-icons/pi";
 import Heading from "@/components/ui/heading";
 import { DialogPortal } from "@radix-ui/react-dialog";
 
@@ -193,8 +191,6 @@ export default function SearchDetailDialog({
               data-nav-item={item}
               aria-label={`Select ${item}`}
             >
-              {item == "snapshot" && <FaImage className="size-4" />}
-              {item == "tracking_details" && <PiPath className="size-4" />}
               <div className="smart-capitalize">
                 {item === "snapshot"
                   ? search?.has_snapshot
@@ -395,10 +391,6 @@ export default function SearchDetailDialog({
                         data-nav-item={item}
                         aria-label={`Select ${item}`}
                       >
-                        {item == "snapshot" && <FaImage className="size-4" />}
-                        {item == "tracking_details" && (
-                          <PiPath className="size-4" />
-                        )}
                         <div className="smart-capitalize">
                           {t(`type.${item}`)}
                         </div>
