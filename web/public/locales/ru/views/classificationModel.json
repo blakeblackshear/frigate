@@ -1,9 +1,1 @@
-{
-  "toast": {
-    "success": {
-      "deletedModel_one": "Успешно удалена {{count}} модель",
-      "deletedModel_few": "Успешно удалены {{count}} модели",
-      "deletedModel_many": "Успешно удалены {{count}} моделей"
-    }
-  }
-}
+{}
