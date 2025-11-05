@@ -273,6 +273,9 @@ export default function Settings() {
       } else {
         setPageToggle(page as SettingsType);
       }
+      if (isMobile) {
+        setContentMobileOpen(true);
+      }
     }
     // don't clear url params if we're creating a new object mask
     return !(searchParams.has("object_mask") || searchParams.has("event_id"));
@@ -282,6 +285,9 @@ export default function Settings() {
     const cameraNames = cameras.map((c) => c.name);
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);
+      if (isMobile) {
+        setContentMobileOpen(true);
+      }
     }
     // don't clear url params if we're creating a new object mask or trigger
     return !(searchParams.has("object_mask") || searchParams.has("event_id"));
