@@ -179,7 +179,7 @@ export default function PolygonItem({
           if (res.status === 200) {
             toast.success(
               t("masksAndZones.form.polygonDrawing.delete.success", {
-                name: polygon?.name,
+                name: polygon?.friendly_name ?? polygon?.name,
               }),
               {
                 position: "top-center",
