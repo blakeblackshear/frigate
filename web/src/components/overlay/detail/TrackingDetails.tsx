@@ -4,7 +4,6 @@ import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import { TrackingDetailsSequence } from "@/types/timeline";
-import Heading from "@/components/ui/heading";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
@@ -511,8 +510,6 @@ export function TrackingDetails({
           )}
         >
           <div className="flex flex-row items-center justify-between">
-            <Heading as="h4">{t("trackingDetails.title")}</Heading>
-
             <div className="flex flex-row gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -535,17 +532,7 @@ export function TrackingDetails({
               </Tooltip>
             </div>
           </div>
-          <div className="flex flex-row items-center justify-between">
-            <div className="mb-2 text-sm text-muted-foreground">
-              {t("trackingDetails.scrollViewTips")}
-            </div>
-            <div className="min-w-20 text-right text-sm text-muted-foreground">
-              {t("trackingDetails.count", {
-                first: eventSequence?.length ?? 0,
-                second: eventSequence?.length ?? 0,
-              })}
-            </div>
-          </div>
+
           {config?.cameras[event.camera]?.onvif.autotracking
             .enabled_in_config && (
             <div className="-mt-2 mb-2 text-sm text-danger">
