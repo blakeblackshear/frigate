@@ -1,5 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
 import ClassificationModelWizardDialog from "@/components/classification/ClassificationModelWizardDialog";
+import ClassificationModelEditDialog from "@/components/classification/ClassificationModelEditDialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ImageShadowOverlay } from "@/components/overlay/ImageShadowOverlay";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
 import { MdModelTraining } from "react-icons/md";
-import { LuTrash2 } from "react-icons/lu";
+import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { FiMoreVertical } from "react-icons/fi";
 import useSWR from "swr";
 import Heading from "@/components/ui/heading";
@@ -163,6 +164,7 @@ export default function ModelSelectionView({
               key={config.name}
               config={config}
               onClick={() => onClick(config)}
+              onUpdate={() => refreshConfig()}
               onDelete={() => refreshConfig()}
             />
           ))}
@@ -201,9 +203,10 @@ function NoModelsView({
 type ModelCardProps = {
   config: CustomClassificationModelConfig;
   onClick: () => void;
+  onUpdate: () => void;
   onDelete: () => void;
 };
-function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
+function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
   const { data: dataset } = useSWR<{
@@ -211,6 +214,7 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
   }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const handleDelete = useCallback(async () => {
     try {
@@ -250,6 +254,11 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
     setDeleteDialogOpen(true);
   }, []);
 
+  const handleEditClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditDialogOpen(true);
+  }, []);
+
   const coverImage = useMemo(() => {
     if (!dataset) {
       return undefined;
@@ -270,6 +279,13 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
 
   return (
     <>
+      <ClassificationModelEditDialog
+        open={editDialogOpen}
+        model={config}
+        onClose={() => setEditDialogOpen(false)}
+        onSuccess={() => onUpdate()}
+      />
+
       <AlertDialog
         open={deleteDialogOpen}
         onOpenChange={() => setDeleteDialogOpen(!deleteDialogOpen)}
@@ -320,6 +336,10 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
               align="end"
               onClick={(e) => e.stopPropagation()}
             >
+              <DropdownMenuItem onClick={handleEditClick}>
+                <LuPencil className="mr-2 size-4" />
+                <span>{t("button.edit", { ns: "common" })}</span>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleDeleteClick}>
                 <LuTrash2 className="mr-2 size-4" />
                 <span>{t("button.delete", { ns: "common" })}</span>

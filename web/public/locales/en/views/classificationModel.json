@@ -10,7 +10,8 @@
     "deleteImages": "Delete Images",
     "trainModel": "Train Model",
     "addClassification": "Add Classification",
-    "deleteModels": "Delete Models"
+    "deleteModels": "Delete Models",
+    "editModel": "Edit Model"
   },
   "toast": {
     "success": {
@@ -20,14 +21,16 @@
       "deletedModel_other": "Successfully deleted {{count}} models",
       "categorizedImage": "Successfully Classified Image",
       "trainedModel": "Successfully trained model.",
-      "trainingModel": "Successfully started model training."
+      "trainingModel": "Successfully started model training.",
+      "updatedModel": "Successfully updated model configuration"
     },
     "error": {
       "deleteImageFailed": "Failed to delete: {{errorMessage}}",
       "deleteCategoryFailed": "Failed to delete class: {{errorMessage}}",
       "deleteModelFailed": "Failed to delete model: {{errorMessage}}",
       "categorizeFailed": "Failed to categorize image: {{errorMessage}}",
-      "trainingFailed": "Failed to start model training: {{errorMessage}}"
+      "trainingFailed": "Failed to start model training: {{errorMessage}}",
+      "updateModelFailed": "Failed to update model: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -38,6 +41,12 @@
     "title": "Delete Classification Model",
     "single": "Are you sure you want to delete {{name}}? This will permanently delete all associated data including images and training data. This action cannot be undone.",
     "desc": "Are you sure you want to delete {{count}} model(s)? This will permanently delete all associated data including images and training data. This action cannot be undone."
+  },
+  "edit": {
+    "title": "Edit Classification Model",
+    "descriptionState": "Edit the classes for this state classification model. Changes will require retraining the model.",
+    "descriptionObject": "Edit the object type and classification type for this object classification model.",
+    "stateClassesInfo": "Note: Changing state classes requires retraining the model with the updated classes."
   },
   "deleteDatasetImages": {
     "title": "Delete Dataset Images",
