@@ -35,7 +35,7 @@ cameras:
           - entire_yard
     zones:
       entire_yard:
-        friendly_name: Entire yard🏡 # You can use characters from any language, including emojis.
+        friendly_name: Entire yard # You can use characters from any language text
         coordinates: ...
 ```
 
@@ -55,10 +55,10 @@ cameras:
           - edge_yard
     zones:
       edge_yard:
-        friendly_name: Edge yard🚗 # You can use characters from any language, including emojis.
+        friendly_name: Edge yard # You can use characters from any language text
         coordinates: ...
       inner_yard:
-        friendly_name: Inner yard🪵 # You can use characters from any language, including emojis.
+        friendly_name: Inner yard # You can use characters from any language text
         coordinates: ...
 ```
 
