@@ -62,7 +62,7 @@ cameras:
         - entire_yard
     zones:
       entire_yard:
-        friendly_name: Entire yard🏡
+        friendly_name: Entire yard
         coordinates: ...
 ```
 
