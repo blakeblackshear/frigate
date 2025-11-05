@@ -5,21 +5,27 @@ set -euxo pipefail
 SQLITE3_VERSION="3.46.1"
 PYSQLITE3_VERSION="0.5.3"
 
+# Install libsqlite3-dev if not present (needed for some base images like NVIDIA TensorRT)
+if ! dpkg -l | grep -q libsqlite3-dev; then
+  echo "Installing libsqlite3-dev for compilation..."
+  apt-get update && apt-get install -y libsqlite3-dev && rm -rf /var/lib/apt/lists/*
+fi
+
 # Fetch the pre-built sqlite amalgamation instead of building from source
 if [[ ! -d "sqlite" ]]; then
   mkdir sqlite
   cd sqlite
-  
+
   # Download the pre-built amalgamation from sqlite.org
   # For SQLite 3.46.1, the amalgamation version is 3460100
   SQLITE_AMALGAMATION_VERSION="3460100"
-  
+
   wget https://www.sqlite.org/2024/sqlite-amalgamation-${SQLITE_AMALGAMATION_VERSION}.zip -O sqlite-amalgamation.zip
   unzip sqlite-amalgamation.zip
   mv sqlite-amalgamation-${SQLITE_AMALGAMATION_VERSION}/* .
   rmdir sqlite-amalgamation-${SQLITE_AMALGAMATION_VERSION}
   rm sqlite-amalgamation.zip
-  
+
   cd ../
 fi
 
