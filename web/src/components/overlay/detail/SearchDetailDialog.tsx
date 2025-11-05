@@ -30,8 +30,6 @@ import {
   FaChevronDown,
   FaChevronLeft,
   FaChevronRight,
-  FaDownload,
-  FaHistory,
 } from "react-icons/fa";
 import { TrackingDetails } from "./TrackingDetails";
 import { DetailStreamProvider } from "@/context/detail-stream-context";
@@ -49,14 +47,16 @@ import {
 } from "@/components/ui/tooltip";
 import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
-import Chip from "@/components/indicators/Chip";
+// Chip removed from VideoTab - kept import commented out previously
 import { capitalizeAll } from "@/utils/stringUtil";
 import useGlobalMutation from "@/hooks/use-global-mutate";
+import { HiDotsHorizontal } from "react-icons/hi";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import useImageLoaded from "@/hooks/use-image-loaded";
@@ -67,16 +67,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { LuInfo, LuSearch } from "react-icons/lu";
+import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { Trans, useTranslation } from "react-i18next";
-import { TbFaceId } from "react-icons/tb";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import FaceSelectionDialog from "../FaceSelectionDialog";
 import { getTranslatedLabel } from "@/utils/i18n";
-import { CgTranscript } from "react-icons/cg";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import Heading from "@/components/ui/heading";
 import { DialogPortal } from "@radix-ui/react-dialog";
@@ -346,7 +344,6 @@ export default function SearchDetailDialog({
                   )}
                 </div>
                 <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
-                  {tabsComponent}
                   <div className="scrollbar-container flex-1 overflow-y-auto">
                     {page == "snapshot" && (
                       <ObjectDetailsTab
@@ -356,6 +353,7 @@ export default function SearchDetailDialog({
                         setSimilarity={setSimilarity}
                         setInputFocused={setInputFocused}
                         showThumbnail={false}
+                        tabs={tabsComponent}
                       />
                     )}
                   </div>
@@ -456,6 +454,7 @@ type ObjectDetailsTabProps = {
   setSimilarity?: () => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
   showThumbnail?: boolean;
+  tabs?: React.ReactNode;
 };
 function ObjectDetailsTab({
   search,
@@ -464,6 +463,7 @@ function ObjectDetailsTab({
   setSimilarity,
   setInputFocused,
   showThumbnail = true,
+  tabs,
 }: ObjectDetailsTabProps) {
   const { t, i18n } = useTranslation([
     "views/explore",
@@ -581,6 +581,12 @@ function ObjectDetailsTab({
     } else {
       return undefined;
     }
+  }, [search]);
+
+  const clipTimeRange = useMemo(() => {
+    const startTime = (search.start_time ?? 0) - REVIEW_PADDING;
+    const endTime = (search.end_time ?? Date.now() / 1000) + REVIEW_PADDING;
+    return `start/${startTime}/end/${endTime}`;
   }, [search]);
 
   const updateDescription = useCallback(() => {
@@ -853,6 +859,11 @@ function ObjectDetailsTab({
     [faceData],
   );
 
+  const { data: reviewItem } = useSWR<ReviewSegment>([
+    `review/event/${search.id}`,
+  ]);
+  const navigate = useNavigate();
+
   const onTrainFace = useCallback(
     (trainName: string) => {
       axios
@@ -948,9 +959,90 @@ function ObjectDetailsTab({
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);
-
   return (
     <div ref={popoverContainerRef} className="flex flex-col gap-5">
+      {tabs && (
+        <div className="flex items-center justify-between">
+          <div className="flex-1">{tabs}</div>
+          <div className="ml-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <div className="rounded p-1 pr-2" role="button">
+                  <HiDotsHorizontal className="size-4 text-muted-foreground" />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <a
+                      className="w-full"
+                      href={`${baseUrl}api/events/${search.id}/snapshot.jpg?bbox=1`}
+                      download={`${search.camera}_${search.label}.jpg`}
+                    >
+                      <div className="flex cursor-pointer items-center gap-2">
+                        <span>{t("itemMenu.downloadSnapshot.label")}</span>
+                      </div>
+                    </a>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem>
+                    <a
+                      className="w-full"
+                      href={`${baseUrl}api/${search.camera}/${clipTimeRange}/clip.mp4`}
+                      download
+                    >
+                      <div className="flex cursor-pointer items-center gap-2">
+                        <span>{t("itemMenu.downloadVideo.label")}</span>
+                      </div>
+                    </a>
+                  </DropdownMenuItem>
+                  {config?.semantic_search.enabled &&
+                    setSimilarity != undefined &&
+                    search.data.type == "object" && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSearch(undefined);
+                          setSimilarity();
+                        }}
+                      >
+                        <div className="flex cursor-pointer items-center gap-2">
+                          <span>{t("itemMenu.findSimilar.label")}</span>
+                        </div>
+                      </DropdownMenuItem>
+                    )}
+                  {reviewItem && reviewItem.id && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        navigate(`/review?id=${reviewItem.id}`);
+                      }}
+                    >
+                      <div className="flex cursor-pointer items-center gap-2">
+                        <span>{t("itemMenu.viewInHistory.label")}</span>
+                      </div>
+                    </DropdownMenuItem>
+                  )}
+
+                  {hasFace && (
+                    <DropdownMenuItem asChild>
+                      <FaceSelectionDialog
+                        faceNames={faceNames}
+                        onTrainAttempt={onTrainFace}
+                      >
+                        <div className="flex cursor-pointer items-center gap-2">
+                          <span>
+                            {t("trainFace", { ns: "views/faceLibrary" })}
+                          </span>
+                        </div>
+                      </FaceSelectionDialog>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenuPortal>
+            </DropdownMenu>
+          </div>
+        </div>
+      )}
+
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
           <div className="w-full">
@@ -1214,54 +1306,6 @@ function ObjectDetailsTab({
               draggable={false}
               src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
             />
-            <div
-              className={cn(
-                "flex w-full flex-row gap-2",
-                isMobile && "flex-col",
-              )}
-            >
-              {config?.semantic_search.enabled &&
-                setSimilarity != undefined &&
-                search.data.type == "object" && (
-                  <Button
-                    className="w-full"
-                    aria-label={t("itemMenu.findSimilar.aria")}
-                    onClick={() => {
-                      setSearch(undefined);
-                      setSimilarity();
-                    }}
-                  >
-                    <div className="flex gap-1">
-                      <LuSearch />
-                      {t("itemMenu.findSimilar.label")}
-                    </div>
-                  </Button>
-                )}
-              {hasFace && (
-                <FaceSelectionDialog
-                  className="w-full"
-                  faceNames={faceNames}
-                  onTrainAttempt={onTrainFace}
-                >
-                  <Button className="w-full">
-                    <div className="flex gap-1">
-                      <TbFaceId />
-                      {t("trainFace", { ns: "views/faceLibrary" })}
-                    </div>
-                  </Button>
-                </FaceSelectionDialog>
-              )}
-              {config?.cameras[search?.camera].audio_transcription.enabled &&
-                search?.label == "speech" &&
-                search?.end_time && (
-                  <Button className="w-full" onClick={onTranscribe}>
-                    <div className="flex gap-1">
-                      <CgTranscript />
-                      {t("itemMenu.audioTranscription.label")}
-                    </div>
-                  </Button>
-                )}
-            </div>
           </div>
         )}
       </div>
@@ -1305,6 +1349,15 @@ function ObjectDetailsTab({
         )}
 
         <div className="flex w-full flex-row justify-end gap-2">
+          {config?.cameras[search?.camera].audio_transcription.enabled &&
+            search?.label == "speech" &&
+            search?.end_time && (
+              <Button onClick={onTranscribe}>
+                <div className="flex gap-1">
+                  {t("itemMenu.audioTranscription.label")}
+                </div>
+              </Button>
+            )}
           {config?.cameras[search.camera].objects.genai.enabled &&
             search.end_time && (
               <div className="flex items-start">
@@ -1356,6 +1409,7 @@ function ObjectDetailsTab({
               {t("button.save", { ns: "common" })}
             </Button>
           )}
+
           <TextEntryDialog
             open={isSubLabelDialogOpen}
             setOpen={setIsSubLabelDialogOpen}
@@ -1396,8 +1450,6 @@ type ObjectSnapshotTabProps = {
   search: Event;
 };
 export function ObjectSnapshotTab({ search }: ObjectSnapshotTabProps) {
-  const { t } = useTranslation(["components/dialog"]);
-
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   return (
@@ -1432,29 +1484,6 @@ export function ObjectSnapshotTab({ search }: ObjectSnapshotTabProps) {
                       onImgLoad();
                     }}
                   />
-                  <div
-                    className={cn(
-                      "absolute right-1 top-1 flex items-center gap-2",
-                    )}
-                  >
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <a
-                          href={`${baseUrl}api/events/${search?.id}/snapshot.jpg?bbox=1`}
-                          download={`${search?.camera}_${search?.label}.jpg`}
-                        >
-                          <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                            <FaDownload className="size-4 text-white" />
-                          </Chip>
-                        </a>
-                      </TooltipTrigger>
-                      <TooltipPortal>
-                        <TooltipContent>
-                          {t("button.download", { ns: "common" })}
-                        </TooltipContent>
-                      </TooltipPortal>
-                    </Tooltip>
-                  </div>
                 </div>
               )}
             </TransformComponent>
@@ -1470,12 +1499,6 @@ type VideoTabProps = {
 };
 
 export function VideoTab({ search }: VideoTabProps) {
-  const { t } = useTranslation(["views/explore"]);
-  const navigate = useNavigate();
-  const { data: reviewItem } = useSWR<ReviewSegment>([
-    `review/event/${search.id}`,
-  ]);
-
   const clipTimeRange = useMemo(() => {
     const startTime = search.start_time - REVIEW_PADDING;
     const endTime = (search.end_time ?? Date.now() / 1000) + REVIEW_PADDING;
@@ -1487,53 +1510,7 @@ export function VideoTab({ search }: VideoTabProps) {
   return (
     <>
       <span tabIndex={0} className="sr-only" />
-      <GenericVideoPlayer source={source}>
-        <div
-          className={cn("absolute right-2 top-2 z-10 flex items-center gap-2")}
-        >
-          {reviewItem && (
-            <Tooltip>
-              <TooltipTrigger>
-                <Chip
-                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                  onClick={() => {
-                    if (reviewItem?.id) {
-                      const params = new URLSearchParams({
-                        id: reviewItem.id,
-                      }).toString();
-                      navigate(`/review?${params}`);
-                    }
-                  }}
-                >
-                  <FaHistory className="size-4 text-white" />
-                </Chip>
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent>
-                  {t("itemMenu.viewInHistory.label")}
-                </TooltipContent>
-              </TooltipPortal>
-            </Tooltip>
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                download
-                href={`${baseUrl}api/${search.camera}/${clipTimeRange}/clip.mp4`}
-              >
-                <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                  <FaDownload className="size-4 text-white" />
-                </Chip>
-              </a>
-            </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent>
-                {t("button.download", { ns: "common" })}
-              </TooltipContent>
-            </TooltipPortal>
-          </Tooltip>
-        </div>
-      </GenericVideoPlayer>
+      <GenericVideoPlayer source={source} />
     </>
   );
 }
