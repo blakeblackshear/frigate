@@ -454,6 +454,7 @@ function ReviewGroup({
                   <EventList
                     key={event.id}
                     event={event}
+                    review={review}
                     effectiveTime={effectiveTime}
                     annotationOffset={annotationOffset}
                     onSeek={onSeek}
@@ -488,6 +489,7 @@ function ReviewGroup({
 
 type EventListProps = {
   event: Event;
+  review: ReviewSegment;
   effectiveTime?: number;
   annotationOffset: number;
   onSeek: (ts: number, play?: boolean) => void;
@@ -495,6 +497,7 @@ type EventListProps = {
 };
 function EventList({
   event,
+  review,
   effectiveTime,
   annotationOffset,
   onSeek,
@@ -613,6 +616,7 @@ function EventList({
 
         <div className="mt-2">
           <ObjectTimeline
+            review={review}
             eventId={event.id}
             onSeek={handleTimelineClick}
             effectiveTime={effectiveTime}
@@ -761,6 +765,7 @@ function LifecycleItem({
 
 // Fetch and render timeline entries for a single event id on demand.
 function ObjectTimeline({
+  review,
   eventId,
   onSeek,
   effectiveTime,
@@ -768,6 +773,7 @@ function ObjectTimeline({
   startTime,
   endTime,
 }: {
+  review: ReviewSegment;
   eventId: string;
   onSeek: (ts: number, play?: boolean) => void;
   effectiveTime?: number;
@@ -776,12 +782,26 @@ function ObjectTimeline({
   endTime?: number;
 }) {
   const { t } = useTranslation("views/events");
-  const { data: timeline, isValidating } = useSWR<TrackingDetailsSequence[]>([
+  const { data: fullTimeline, isValidating } = useSWR<
+    TrackingDetailsSequence[]
+  >([
     "timeline",
     {
       source_id: eventId,
     },
   ]);
+
+  const timeline = useMemo(() => {
+    if (!fullTimeline) {
+      return fullTimeline;
+    }
+
+    return fullTimeline.filter(
+      (t) =>
+        t.timestamp >= review.start_time &&
+        (review.end_time == undefined || t.timestamp <= review.end_time),
+    );
+  }, [fullTimeline, review]);
 
   if (isValidating && (!timeline || timeline.length === 0)) {
     return <ActivityIndicator className="ml-2 size-3" />;
