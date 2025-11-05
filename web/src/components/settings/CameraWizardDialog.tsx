@@ -174,9 +174,7 @@ export default function CameraWizardDialog({
             ...(friendlyName && { friendly_name: friendlyName }),
             ffmpeg: {
               inputs: wizardData.streams.map((stream, index) => {
-                const isRestreamed =
-                  wizardData.restreamIds?.includes(stream.id) ?? false;
-                if (isRestreamed) {
+                if (stream.restream) {
                   const go2rtcStreamName =
                     wizardData.streams!.length === 1
                       ? finalCameraName
@@ -234,7 +232,11 @@ export default function CameraWizardDialog({
                   wizardData.streams!.length === 1
                     ? finalCameraName
                     : `${finalCameraName}_${index + 1}`;
-                go2rtcStreams[streamName] = [stream.url];
+
+                const streamUrl = stream.useFfmpeg
+                  ? `ffmpeg:${stream.url}`
+                  : stream.url;
+                go2rtcStreams[streamName] = [streamUrl];
               });
 
               if (Object.keys(go2rtcStreams).length > 0) {

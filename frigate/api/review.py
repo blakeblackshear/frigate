@@ -36,7 +36,7 @@ from frigate.config import FrigateConfig
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
-from frigate.util.builtin import get_tz_modifiers
+from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +197,6 @@ async def review_summary(
 
     user_id = current_user["username"]
 
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
     day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
 
     cameras = params.cameras
@@ -329,89 +328,135 @@ async def review_summary(
             )
         clauses.append(reduce(operator.or_, label_clauses))
 
-    day_in_seconds = 60 * 60 * 24
-    last_month_query = (
+    # Find the time range of available data
+    time_range_query = (
         ReviewSegment.select(
-            fn.strftime(
-                "%Y-%m-%d",
-                fn.datetime(
-                    ReviewSegment.start_time,
-                    "unixepoch",
-                    hour_modifier,
-                    minute_modifier,
-                ),
-            ).alias("day"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == SeverityEnum.alert)
-                            & (UserReviewStatus.has_been_reviewed == True),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("reviewed_alert"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == SeverityEnum.detection)
-                            & (UserReviewStatus.has_been_reviewed == True),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("reviewed_detection"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == SeverityEnum.alert),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("total_alert"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == SeverityEnum.detection),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("total_detection"),
-        )
-        .left_outer_join(
-            UserReviewStatus,
-            on=(
-                (ReviewSegment.id == UserReviewStatus.review_segment)
-                & (UserReviewStatus.user_id == user_id)
-            ),
+            fn.MIN(ReviewSegment.start_time).alias("min_time"),
+            fn.MAX(ReviewSegment.start_time).alias("max_time"),
         )
         .where(reduce(operator.and_, clauses) if clauses else True)
-        .group_by(
-            (ReviewSegment.start_time + seconds_offset).cast("int") / day_in_seconds
-        )
-        .order_by(ReviewSegment.start_time.desc())
+        .dicts()
+        .get()
     )
+
+    min_time = time_range_query.get("min_time")
+    max_time = time_range_query.get("max_time")
 
     data = {
         "last24Hours": last_24_query,
     }
 
-    for e in last_month_query.dicts().iterator():
-        data[e["day"]] = e
+    # If no data, return early
+    if min_time is None or max_time is None:
+        return JSONResponse(content=data)
+
+    # Get DST transition periods
+    dst_periods = get_dst_transitions(params.timezone, min_time, max_time)
+
+    day_in_seconds = 60 * 60 * 24
+
+    # Query each DST period separately with the correct offset
+    for period_start, period_end, period_offset in dst_periods:
+        # Calculate hour/minute modifiers for this period
+        hours_offset = int(period_offset / 60 / 60)
+        minutes_offset = int(period_offset / 60 - hours_offset * 60)
+        period_hour_modifier = f"{hours_offset} hour"
+        period_minute_modifier = f"{minutes_offset} minute"
+
+        # Build clauses including time range for this period
+        period_clauses = clauses.copy()
+        period_clauses.append(
+            (ReviewSegment.start_time >= period_start)
+            & (ReviewSegment.start_time <= period_end)
+        )
+
+        period_query = (
+            ReviewSegment.select(
+                fn.strftime(
+                    "%Y-%m-%d",
+                    fn.datetime(
+                        ReviewSegment.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("day"),
+                fn.SUM(
+                    Case(
+                        None,
+                        [
+                            (
+                                (ReviewSegment.severity == SeverityEnum.alert)
+                                & (UserReviewStatus.has_been_reviewed == True),
+                                1,
+                            )
+                        ],
+                        0,
+                    )
+                ).alias("reviewed_alert"),
+                fn.SUM(
+                    Case(
+                        None,
+                        [
+                            (
+                                (ReviewSegment.severity == SeverityEnum.detection)
+                                & (UserReviewStatus.has_been_reviewed == True),
+                                1,
+                            )
+                        ],
+                        0,
+                    )
+                ).alias("reviewed_detection"),
+                fn.SUM(
+                    Case(
+                        None,
+                        [
+                            (
+                                (ReviewSegment.severity == SeverityEnum.alert),
+                                1,
+                            )
+                        ],
+                        0,
+                    )
+                ).alias("total_alert"),
+                fn.SUM(
+                    Case(
+                        None,
+                        [
+                            (
+                                (ReviewSegment.severity == SeverityEnum.detection),
+                                1,
+                            )
+                        ],
+                        0,
+                    )
+                ).alias("total_detection"),
+            )
+            .left_outer_join(
+                UserReviewStatus,
+                on=(
+                    (ReviewSegment.id == UserReviewStatus.review_segment)
+                    & (UserReviewStatus.user_id == user_id)
+                ),
+            )
+            .where(reduce(operator.and_, period_clauses))
+            .group_by(
+                (ReviewSegment.start_time + period_offset).cast("int") / day_in_seconds
+            )
+            .order_by(ReviewSegment.start_time.desc())
+        )
+
+        # Merge results from this period
+        for e in period_query.dicts().iterator():
+            day_key = e["day"]
+            if day_key in data:
+                # Merge counts if day already exists (edge case at DST boundary)
+                data[day_key]["reviewed_alert"] += e["reviewed_alert"] or 0
+                data[day_key]["reviewed_detection"] += e["reviewed_detection"] or 0
+                data[day_key]["total_alert"] += e["total_alert"] or 0
+                data[day_key]["total_detection"] += e["total_detection"] or 0
+            else:
+                data[day_key] = e
 
     return JSONResponse(content=data)
 

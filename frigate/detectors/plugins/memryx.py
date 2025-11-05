@@ -17,6 +17,7 @@ from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     ModelTypeEnum,
 )
+from frigate.util.file import FileLock
 from frigate.util.model import post_process_yolo
 
 logger = logging.getLogger(__name__)
@@ -177,29 +178,6 @@ class MemryXDetector(DetectionApi):
             logger.error(f"Failed to initialize MemryX model: {e}")
             raise
 
-    def _acquire_file_lock(self, lock_path: str, timeout: int = 60, poll: float = 0.2):
-        """
-        Create an exclusive lock file. Blocks (with polling) until it can acquire,
-        or raises TimeoutError. Uses only stdlib (os.O_EXCL).
-        """
-        start = time.time()
-        while True:
-            try:
-                fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_RDWR)
-                os.close(fd)
-                return
-            except FileExistsError:
-                if time.time() - start > timeout:
-                    raise TimeoutError(f"Timeout waiting for lock: {lock_path}")
-                time.sleep(poll)
-
-    def _release_file_lock(self, lock_path: str):
-        """Best-effort removal of the lock file."""
-        try:
-            os.remove(lock_path)
-        except FileNotFoundError:
-            pass
-
     def load_yolo_constants(self):
         base = f"{self.cache_dir}/{self.model_folder}"
         # constants for yolov9 post-processing
@@ -212,9 +190,9 @@ class MemryXDetector(DetectionApi):
             os.makedirs(self.cache_dir, exist_ok=True)
 
         lock_path = os.path.join(self.cache_dir, f".{self.model_folder}.lock")
-        self._acquire_file_lock(lock_path)
+        lock = FileLock(lock_path, timeout=60)
 
-        try:
+        with lock:
             # ---------- CASE 1: user provided a custom model path ----------
             if self.memx_model_path:
                 if not self.memx_model_path.endswith(".zip"):
@@ -337,9 +315,6 @@ class MemryXDetector(DetectionApi):
                         logger.warning(
                             f"Failed to remove downloaded zip {zip_path}: {e}"
                         )
-
-        finally:
-            self._release_file_lock(lock_path)
 
     def send_input(self, connection_id, tensor_input: np.ndarray):
         """Pre-process (if needed) and send frame to MemryX input queue"""

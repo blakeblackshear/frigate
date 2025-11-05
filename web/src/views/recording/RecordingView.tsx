@@ -970,7 +970,6 @@ function Timeline({
         "relative overflow-hidden",
         isDesktop
           ? cn(
-              "no-scrollbar overflow-y-auto",
               timelineType == "timeline"
                 ? "w-[100px] flex-shrink-0"
                 : timelineType == "detail"

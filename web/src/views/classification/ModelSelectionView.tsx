@@ -1,5 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
 import ClassificationModelWizardDialog from "@/components/classification/ClassificationModelWizardDialog";
+import ClassificationModelEditDialog from "@/components/classification/ClassificationModelEditDialog";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ImageShadowOverlay } from "@/components/overlay/ImageShadowOverlay";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -10,18 +11,17 @@ import {
   CustomClassificationModelConfig,
   FrigateConfig,
 } from "@/types/frigateConfig";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
 import { MdModelTraining } from "react-icons/md";
-import { LuTrash2 } from "react-icons/lu";
+import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { FiMoreVertical } from "react-icons/fi";
 import useSWR from "swr";
 import Heading from "@/components/ui/heading";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import axios from "axios";
 import { toast } from "sonner";
-import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -164,6 +164,7 @@ export default function ModelSelectionView({
               key={config.name}
               config={config}
               onClick={() => onClick(config)}
+              onUpdate={() => refreshConfig()}
               onDelete={() => refreshConfig()}
             />
           ))}
@@ -202,9 +203,10 @@ function NoModelsView({
 type ModelCardProps = {
   config: CustomClassificationModelConfig;
   onClick: () => void;
+  onUpdate: () => void;
   onDelete: () => void;
 };
-function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
+function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
   const { data: dataset } = useSWR<{
@@ -212,42 +214,50 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
   }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const bypassDialogRef = useRef(false);
-
-  useKeyboardListener(["Shift"], (_, modifiers) => {
-    bypassDialogRef.current = modifiers.shift;
-    return false;
-  });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const handleDelete = useCallback(async () => {
-    await axios
-      .delete(`classification/${config.name}`)
-      .then((resp) => {
-        if (resp.status == 200) {
-          toast.success(t("toast.success.deletedModel", { count: 1 }), {
-            position: "top-center",
-          });
-          onDelete();
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(t("toast.error.deleteModelFailed", { errorMessage }), {
-          position: "top-center",
-        });
+    try {
+      await axios.delete(`classification/${config.name}`);
+      await axios.put("/config/set", {
+        requires_restart: 0,
+        update_topic: `config/classification/custom/${config.name}`,
+        config_data: {
+          classification: {
+            custom: {
+              [config.name]: "",
+            },
+          },
+        },
       });
+
+      toast.success(t("toast.success.deletedModel", { count: 1 }), {
+        position: "top-center",
+      });
+      onDelete();
+    } catch (err) {
+      const error = err as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        "Unknown error";
+      toast.error(t("toast.error.deleteModelFailed", { errorMessage }), {
+        position: "top-center",
+      });
+    }
   }, [config, onDelete, t]);
 
-  const handleDeleteClick = useCallback(() => {
-    if (bypassDialogRef.current) {
-      handleDelete();
-    } else {
-      setDeleteDialogOpen(true);
-    }
-  }, [handleDelete]);
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteDialogOpen(true);
+  }, []);
+
+  const handleEditClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditDialogOpen(true);
+  }, []);
 
   const coverImage = useMemo(() => {
     if (!dataset) {
@@ -269,6 +279,13 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
 
   return (
     <>
+      <ClassificationModelEditDialog
+        open={editDialogOpen}
+        model={config}
+        onClose={() => setEditDialogOpen(false)}
+        onSuccess={() => onUpdate()}
+      />
+
       <AlertDialog
         open={deleteDialogOpen}
         onOpenChange={() => setDeleteDialogOpen(!deleteDialogOpen)}
@@ -304,7 +321,7 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
           className="size-full"
           src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
         />
-        <ImageShadowOverlay />
+        <ImageShadowOverlay lowerClassName="h-[30%] z-0" />
         <div className="absolute bottom-2 left-3 text-lg text-white smart-capitalize">
           {config.name}
         </div>
@@ -315,14 +332,17 @@ function ModelCard({ config, onClick, onDelete }: ModelCardProps) {
                 <FiMoreVertical className="size-5 text-white" />
               </BlurredIconButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DropdownMenuItem onClick={handleEditClick}>
+                <LuPencil className="mr-2 size-4" />
+                <span>{t("button.edit", { ns: "common" })}</span>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleDeleteClick}>
                 <LuTrash2 className="mr-2 size-4" />
-                <span>
-                  {bypassDialogRef.current
-                    ? t("button.deleteNow", { ns: "common" })
-                    : t("button.delete", { ns: "common" })}
-                </span>
+                <span>{t("button.delete", { ns: "common" })}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

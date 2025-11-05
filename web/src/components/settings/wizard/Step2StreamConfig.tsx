@@ -201,16 +201,12 @@ export default function Step2StreamConfig({
 
   const setRestream = useCallback(
     (streamId: string) => {
-      const currentIds = wizardData.restreamIds || [];
-      const isSelected = currentIds.includes(streamId);
-      const newIds = isSelected
-        ? currentIds.filter((id) => id !== streamId)
-        : [...currentIds, streamId];
-      onUpdate({
-        restreamIds: newIds,
-      });
+      const stream = streams.find((s) => s.id === streamId);
+      if (!stream) return;
+
+      updateStream(streamId, { restream: !stream.restream });
     },
-    [wizardData.restreamIds, onUpdate],
+    [streams, updateStream],
   );
 
   const hasDetectRole = streams.some((s) => s.roles.includes("detect"));
@@ -435,9 +431,7 @@ export default function Step2StreamConfig({
                       {t("cameraWizard.step2.go2rtc")}
                     </span>
                     <Switch
-                      checked={(wizardData.restreamIds || []).includes(
-                        stream.id,
-                      )}
+                      checked={stream.restream || false}
                       onCheckedChange={() => setRestream(stream.id)}
                     />
                   </div>

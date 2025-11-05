@@ -7,11 +7,12 @@ import {
 } from "@/types/classification";
 import { Event } from "@/types/event";
 import { forwardRef, useMemo, useRef, useState } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { LuSearch } from "react-icons/lu";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { LuSearch, LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { useNavigate } from "react-router-dom";
 import { HiSquare2Stack } from "react-icons/hi2";
@@ -181,6 +182,7 @@ type GroupedClassificationCardProps = {
   selectedItems: string[];
   i18nLibrary: string;
   objectType: string;
+  noClassificationLabel?: string;
   onClick: (data: ClassificationItemData | undefined) => void;
   children?: (data: ClassificationItemData) => React.ReactNode;
 };
@@ -190,6 +192,7 @@ export function GroupedClassificationCard({
   threshold,
   selectedItems,
   i18nLibrary,
+  noClassificationLabel = "details.none",
   onClick,
   children,
 }: GroupedClassificationCardProps) {
@@ -222,10 +225,14 @@ export function GroupedClassificationCard({
     const bestTyped: ClassificationItemData = best;
     return {
       ...bestTyped,
-      name: event ? (event.sub_label ?? t("details.unknown")) : bestTyped.name,
+      name: event
+        ? event.sub_label && event.sub_label !== "none"
+          ? event.sub_label
+          : t(noClassificationLabel)
+        : bestTyped.name,
       score: event?.data?.sub_label_score || bestTyped.score,
     };
-  }, [group, event, t]);
+  }, [group, event, noClassificationLabel, t]);
 
   const bestScoreStatus = useMemo(() => {
     if (!bestItem?.score || !threshold) {
@@ -257,8 +264,8 @@ export function GroupedClassificationCard({
 
   const Overlay = isDesktop ? Dialog : MobilePage;
   const Trigger = isDesktop ? DialogTrigger : MobilePageTrigger;
-  const Header = isDesktop ? DialogHeader : MobilePageHeader;
   const Content = isDesktop ? DialogContent : MobilePageContent;
+  const Header = isDesktop ? DialogHeader : MobilePageHeader;
   const ContentTitle = isDesktop ? DialogTitle : MobilePageTitle;
   const ContentDescription = isDesktop
     ? DialogDescription
@@ -291,9 +298,9 @@ export function GroupedClassificationCard({
         <Trigger asChild></Trigger>
         <Content
           className={cn(
-            "",
+            "scrollbar-container",
             isDesktop && "min-w-[50%] max-w-[65%]",
-            isMobile && "flex flex-col",
+            isMobile && "overflow-y-auto",
           )}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
@@ -301,26 +308,45 @@ export function GroupedClassificationCard({
             <Header
               className={cn(
                 "mx-2 flex flex-row items-center gap-4",
-                isMobile && "flex-shrink-0",
+                isMobileOnly && "top-0 mx-4",
               )}
             >
-              <div>
-                <ContentTitle
-                  className={cn(
-                    "flex items-center gap-2 font-normal capitalize",
-                    isMobile && "px-2",
-                  )}
-                >
-                  {event?.sub_label ? event.sub_label : t("details.unknown")}
-                  {event?.sub_label && (
-                    <div
-                      className={cn(
-                        "",
-                        bestScoreStatus == "match" && "text-success",
-                        bestScoreStatus == "potential" && "text-orange-400",
-                        bestScoreStatus == "unknown" && "text-danger",
-                      )}
-                    >{`${Math.round((event.data.sub_label_score || 0) * 100)}%`}</div>
+              <div
+                className={cn(
+                  "",
+                  isMobile && "flex flex-col items-center justify-center",
+                )}
+              >
+                <ContentTitle className="flex items-center gap-2 font-normal capitalize">
+                  {event?.sub_label && event.sub_label !== "none"
+                    ? event.sub_label
+                    : t(noClassificationLabel)}
+                  {event?.sub_label && event.sub_label !== "none" && (
+                    <div className="flex items-center gap-1">
+                      <div
+                        className={cn(
+                          "",
+                          bestScoreStatus == "match" && "text-success",
+                          bestScoreStatus == "potential" && "text-orange-400",
+                          bestScoreStatus == "unknown" && "text-danger",
+                        )}
+                      >{`${Math.round((event.data.sub_label_score || 0) * 100)}%`}</div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            className="focus:outline-none"
+                            aria-label={t("details.scoreInfo", {
+                              ns: i18nLibrary,
+                            })}
+                          >
+                            <LuInfo className="size-3" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 text-sm">
+                          {t("details.scoreInfo", { ns: i18nLibrary })}
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   )}
                 </ContentTitle>
                 <ContentDescription className={cn("", isMobile && "px-2")}>
@@ -364,7 +390,7 @@ export function GroupedClassificationCard({
               className={cn(
                 "grid w-full auto-rows-min grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-8",
                 isDesktop && "p-2",
-                isMobile && "scrollbar-container flex-1 overflow-y-auto",
+                isMobile && "px-4 pb-4",
               )}
             >
               {group.map((data: ClassificationItemData) => (

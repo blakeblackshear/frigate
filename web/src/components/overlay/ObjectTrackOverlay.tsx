@@ -59,6 +59,47 @@ export default function ObjectTrackOverlay({
 
   const effectiveCurrentTime = currentTime - annotationOffset / 1000;
 
+  const {
+    pathStroke,
+    pointRadius,
+    pointStroke,
+    zoneStroke,
+    boxStroke,
+    highlightRadius,
+  } = useMemo(() => {
+    const BASE_WIDTH = 1280;
+    const BASE_HEIGHT = 720;
+    const BASE_PATH_STROKE = 5;
+    const BASE_POINT_RADIUS = 7;
+    const BASE_POINT_STROKE = 3;
+    const BASE_ZONE_STROKE = 5;
+    const BASE_BOX_STROKE = 5;
+    const BASE_HIGHLIGHT_RADIUS = 5;
+
+    const scale = Math.sqrt(
+      (videoWidth * videoHeight) / (BASE_WIDTH * BASE_HEIGHT),
+    );
+
+    const pathStroke = Math.max(1, Math.round(BASE_PATH_STROKE * scale));
+    const pointRadius = Math.max(2, Math.round(BASE_POINT_RADIUS * scale));
+    const pointStroke = Math.max(1, Math.round(BASE_POINT_STROKE * scale));
+    const zoneStroke = Math.max(1, Math.round(BASE_ZONE_STROKE * scale));
+    const boxStroke = Math.max(1, Math.round(BASE_BOX_STROKE * scale));
+    const highlightRadius = Math.max(
+      2,
+      Math.round(BASE_HIGHLIGHT_RADIUS * scale),
+    );
+
+    return {
+      pathStroke,
+      pointRadius,
+      pointStroke,
+      zoneStroke,
+      boxStroke,
+      highlightRadius,
+    };
+  }, [videoWidth, videoHeight]);
+
   // Fetch all event data in a single request (CSV ids)
   const { data: eventsData } = useSWR<Event[]>(
     selectedObjectIds.length > 0
@@ -214,16 +255,21 @@ export default function ObjectTrackOverlay({
                 b.timestamp - a.timestamp,
             )[0]?.data?.zones || [];
 
-        // bounding box (with tolerance for browsers with seek precision by-design issues)
-        const boxCandidates = timelineData?.filter(
-          (event: TrackingDetailsSequence) =>
-            event.timestamp <= effectiveCurrentTime + TOLERANCE &&
-            event.data.box,
-        );
-        const currentBox = boxCandidates?.sort(
-          (a: TrackingDetailsSequence, b: TrackingDetailsSequence) =>
-            b.timestamp - a.timestamp,
-        )[0]?.data?.box;
+        // bounding box - only show if there's a timeline event at/near the current time with a box
+        // Search all timeline events (not just those before current time) to find one matching the seek position
+        const nearbyTimelineEvent = timelineData
+          ?.filter((event: TrackingDetailsSequence) => event.data.box)
+          .sort(
+            (a: TrackingDetailsSequence, b: TrackingDetailsSequence) =>
+              Math.abs(a.timestamp - effectiveCurrentTime) -
+              Math.abs(b.timestamp - effectiveCurrentTime),
+          )
+          .find(
+            (event: TrackingDetailsSequence) =>
+              Math.abs(event.timestamp - effectiveCurrentTime) <= TOLERANCE,
+          );
+
+        const currentBox = nearbyTimelineEvent?.data?.box;
 
         return {
           objectId,
@@ -349,7 +395,7 @@ export default function ObjectTrackOverlay({
           points={zone.points}
           fill={zone.fill}
           stroke={zone.stroke}
-          strokeWidth="5"
+          strokeWidth={zoneStroke}
           opacity="0.7"
         />
       ))}
@@ -369,7 +415,7 @@ export default function ObjectTrackOverlay({
                 d={generateStraightPath(absolutePositions)}
                 fill="none"
                 stroke={objData.color}
-                strokeWidth="5"
+                strokeWidth={pathStroke}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -381,13 +427,13 @@ export default function ObjectTrackOverlay({
                   <circle
                     cx={pos.x}
                     cy={pos.y}
-                    r="7"
+                    r={pointRadius}
                     fill={getPointColor(
                       objData.color,
                       pos.lifecycle_item?.class_type,
                     )}
                     stroke="white"
-                    strokeWidth="3"
+                    strokeWidth={pointStroke}
                     style={{ cursor: onSeekToTime ? "pointer" : "default" }}
                     onClick={() => handlePointClick(pos.timestamp)}
                   />
@@ -416,7 +462,7 @@ export default function ObjectTrackOverlay({
                   height={objData.currentBox[3] * videoHeight}
                   fill="none"
                   stroke={objData.color}
-                  strokeWidth="5"
+                  strokeWidth={boxStroke}
                   opacity="0.9"
                 />
                 <circle
@@ -428,10 +474,10 @@ export default function ObjectTrackOverlay({
                     (objData.currentBox[1] + objData.currentBox[3]) *
                     videoHeight
                   }
-                  r="5"
+                  r={highlightRadius}
                   fill="rgb(255, 255, 0)" // yellow highlight
                   stroke={objData.color}
-                  strokeWidth="5"
+                  strokeWidth={boxStroke}
                   opacity="1"
                 />
               </g>

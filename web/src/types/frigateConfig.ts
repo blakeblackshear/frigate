@@ -307,6 +307,7 @@ export type CustomClassificationModelConfig = {
   threshold: number;
   object_config?: {
     objects: string[];
+    classification_type: string;
   };
   state_config?: {
     cameras: {

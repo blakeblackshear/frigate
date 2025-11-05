@@ -327,31 +327,39 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       </AlertDialog>
 
       <div className="flex flex-row justify-between gap-2 p-2 align-middle">
-        <div className="flex flex-row items-center justify-center gap-2">
-          <Button
-            className="flex items-center gap-2.5 rounded-lg"
-            aria-label={t("label.back", { ns: "common" })}
-            onClick={() => navigate(-1)}
-          >
-            <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-            {isDesktop && (
-              <div className="text-primary">
-                {t("button.back", { ns: "common" })}
-              </div>
-            )}
-          </Button>
-          <LibrarySelector
-            pageToggle={pageToggle}
-            dataset={dataset || {}}
-            trainImages={trainImages || []}
-            setPageToggle={setPageToggle}
-            onDelete={onDelete}
-            onRename={() => {}}
-          />
-        </div>
+        {(isDesktop || !selectedImages?.length) && (
+          <div className="flex flex-row items-center justify-center gap-2">
+            <Button
+              className="flex items-center gap-2.5 rounded-lg"
+              aria-label={t("label.back", { ns: "common" })}
+              onClick={() => navigate(-1)}
+            >
+              <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+              {isDesktop && (
+                <div className="text-primary">
+                  {t("button.back", { ns: "common" })}
+                </div>
+              )}
+            </Button>
+
+            <LibrarySelector
+              pageToggle={pageToggle}
+              dataset={dataset || {}}
+              trainImages={trainImages || []}
+              setPageToggle={setPageToggle}
+              onDelete={onDelete}
+              onRename={() => {}}
+            />
+          </div>
+        )}
         {selectedImages?.length > 0 ? (
-          <div className="flex items-center justify-center gap-2">
-            <div className="mx-1 flex w-48 items-center justify-center text-sm text-muted-foreground">
+          <div
+            className={cn(
+              "flex w-full items-center justify-end gap-2",
+              isMobileOnly && "justify-between",
+            )}
+          >
+            <div className="flex w-48 items-center justify-center text-sm text-muted-foreground">
               <div className="p-1">{`${selectedImages.length} selected`}</div>
               <div className="p-1">{"|"}</div>
               <div
@@ -961,6 +969,7 @@ function ObjectTrainGrid({
                 selectedItems={selectedImages}
                 i18nLibrary="views/classificationModel"
                 objectType={model.object_config?.objects?.at(0) ?? "Object"}
+                noClassificationLabel="details.none"
                 onClick={(data) => {
                   if (data) {
                     onClickImages([data.filename], true);

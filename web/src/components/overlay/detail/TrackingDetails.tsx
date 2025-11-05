@@ -8,7 +8,7 @@ import Heading from "@/components/ui/heading";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
-import { LuCircle, LuSettings } from "react-icons/lu";
+import { LuCircle, LuFolderX, LuSettings } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -38,9 +38,12 @@ import { HiDotsHorizontal } from "react-icons/hi";
 import axios from "axios";
 import { toast } from "sonner";
 import { useDetailStream } from "@/context/detail-stream-context";
-import { isDesktop, isIOS } from "react-device-detect";
+import { isDesktop, isIOS, isMobileOnly, isSafari } from "react-device-detect";
 import Chip from "@/components/indicators/Chip";
 import { FaDownload, FaHistory } from "react-icons/fa";
+import { useApiHost } from "@/api";
+import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
+import ObjectTrackOverlay from "../ObjectTrackOverlay";
 
 type TrackingDetailsProps = {
   className?: string;
@@ -57,8 +60,18 @@ export function TrackingDetails({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useTranslation(["views/explore"]);
   const navigate = useNavigate();
+  const apiHost = useApiHost();
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [displaySource, _setDisplaySource] = useState<"video" | "image">(
+    "video",
+  );
   const { setSelectedObjectIds, annotationOffset, setAnnotationOffset } =
     useDetailStream();
+
+  // manualOverride holds a record-stream timestamp explicitly chosen by the
+  // user (eg, clicking a lifecycle row). When null we display `currentTime`.
+  const [manualOverride, setManualOverride] = useState<number | null>(null);
 
   // event.start_time is detect time, convert to record, then subtract padding
   const [currentTime, setCurrentTime] = useState(
@@ -79,10 +92,14 @@ export function TrackingDetails({
       return resolveZoneName(config, zone);
     });
   });
-
+  
+  // Use manualOverride (set when seeking in image mode) if present so
+  // lifecycle rows and overlays follow image-mode seeks. Otherwise fall
+  // back to currentTime used for video mode.
   const effectiveTime = useMemo(() => {
-    return currentTime - annotationOffset / 1000;
-  }, [currentTime, annotationOffset]);
+    const displayedRecordTime = manualOverride ?? currentTime;
+    return displayedRecordTime - annotationOffset / 1000;
+  }, [manualOverride, currentTime, annotationOffset]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [_selectedZone, setSelectedZone] = useState("");
@@ -125,20 +142,30 @@ export function TrackingDetails({
 
   const handleLifecycleClick = useCallback(
     (item: TrackingDetailsSequence) => {
-      if (!videoRef.current) return;
+      if (!videoRef.current && !imgRef.current) return;
 
       // Convert lifecycle timestamp (detect stream) to record stream time
       const targetTimeRecord = item.timestamp + annotationOffset / 1000;
 
-      // Convert to video-relative time for seeking
+      if (displaySource === "image") {
+        // For image mode: set a manual override timestamp and update
+        // currentTime so overlays render correctly.
+        setManualOverride(targetTimeRecord);
+        setCurrentTime(targetTimeRecord);
+        return;
+      }
+
+      // For video mode: convert to video-relative time and seek player
       const eventStartRecord =
         (event.start_time ?? 0) + annotationOffset / 1000;
       const videoStartTime = eventStartRecord - REVIEW_PADDING;
       const relativeTime = targetTimeRecord - videoStartTime;
 
-      videoRef.current.currentTime = relativeTime;
+      if (videoRef.current) {
+        videoRef.current.currentTime = relativeTime;
+      }
     },
-    [event.start_time, annotationOffset],
+    [event.start_time, annotationOffset, displaySource],
   );
 
   const formattedStart = config
@@ -179,11 +206,20 @@ export function TrackingDetails({
   }, [eventSequence]);
 
   useEffect(() => {
-    if (seekToTimestamp === null || !videoRef.current) return;
+    if (seekToTimestamp === null) return;
+
+    if (displaySource === "image") {
+      // For image mode, set the manual override so the snapshot updates to
+      // the exact record timestamp.
+      setManualOverride(seekToTimestamp);
+      setSeekToTimestamp(null);
+      return;
+    }
 
     // seekToTimestamp is a record stream timestamp
     // event.start_time is detect stream time, convert to record
     // The video clip starts at (eventStartRecord - REVIEW_PADDING)
+    if (!videoRef.current) return;
     const eventStartRecord = event.start_time + annotationOffset / 1000;
     const videoStartTime = eventStartRecord - REVIEW_PADDING;
     const relativeTime = seekToTimestamp - videoStartTime;
@@ -191,7 +227,14 @@ export function TrackingDetails({
       videoRef.current.currentTime = relativeTime;
     }
     setSeekToTimestamp(null);
-  }, [seekToTimestamp, event.start_time, annotationOffset]);
+  }, [
+    seekToTimestamp,
+    event.start_time,
+    annotationOffset,
+    apiHost,
+    event.camera,
+    displaySource,
+  ]);
 
   const isWithinEventRange =
     effectiveTime !== undefined &&
@@ -294,6 +337,27 @@ export function TrackingDetails({
     [event.start_time, annotationOffset],
   );
 
+  const [src, setSrc] = useState(
+    `${apiHost}api/${event.camera}/recordings/${currentTime + REVIEW_PADDING}/snapshot.jpg?height=500`,
+  );
+  const [hasError, setHasError] = useState(false);
+
+  // Derive the record timestamp to display: manualOverride if present,
+  // otherwise use currentTime.
+  const displayedRecordTime = manualOverride ?? currentTime;
+
+  useEffect(() => {
+    if (displayedRecordTime) {
+      const newSrc = `${apiHost}api/${event.camera}/recordings/${displayedRecordTime}/snapshot.jpg?height=500`;
+      setSrc(newSrc);
+    }
+    setImgLoaded(false);
+    setHasError(false);
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayedRecordTime]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -311,9 +375,10 @@ export function TrackingDetails({
 
       <div
         className={cn(
-          "flex w-full items-center justify-center",
+          "flex items-center justify-center",
           isDesktop && "overflow-hidden",
           cameraAspect === "tall" ? "max-h-[50dvh] lg:max-h-[70dvh]" : "w-full",
+          cameraAspect === "tall" && isMobileOnly && "w-full",
           cameraAspect !== "tall" && isDesktop && "flex-[3]",
         )}
         style={{ aspectRatio: aspectRatio }}
@@ -325,21 +390,75 @@ export function TrackingDetails({
             cameraAspect === "tall" ? "h-full" : "w-full",
           )}
         >
-          <HlsVideoPlayer
-            videoRef={videoRef}
-            containerRef={containerRef}
-            visible={true}
-            currentSource={videoSource}
-            hotKeys={false}
-            supportsFullscreen={false}
-            fullscreen={false}
-            frigateControls={true}
-            onTimeUpdate={handleTimeUpdate}
-            onSeekToTime={handleSeekToTime}
-            isDetailMode={true}
-            camera={event.camera}
-            currentTimeOverride={currentTime}
-          />
+          {displaySource == "video" && (
+            <HlsVideoPlayer
+              videoRef={videoRef}
+              containerRef={containerRef}
+              visible={true}
+              currentSource={videoSource}
+              hotKeys={false}
+              supportsFullscreen={false}
+              fullscreen={false}
+              frigateControls={true}
+              onTimeUpdate={handleTimeUpdate}
+              onSeekToTime={handleSeekToTime}
+              isDetailMode={true}
+              camera={event.camera}
+              currentTimeOverride={currentTime}
+            />
+          )}
+          {displaySource == "image" && (
+            <>
+              <ImageLoadingIndicator
+                className="absolute inset-0"
+                imgLoaded={imgLoaded}
+              />
+              {hasError && (
+                <div className="relative aspect-video">
+                  <div className="flex flex-col items-center justify-center p-20 text-center">
+                    <LuFolderX className="size-16" />
+                    {t("objectLifecycle.noImageFound")}
+                  </div>
+                </div>
+              )}
+              <div
+                className={cn("relative", imgLoaded ? "visible" : "invisible")}
+              >
+                <div className="absolute z-50 size-full">
+                  <ObjectTrackOverlay
+                    key={`overlay-${displayedRecordTime}`}
+                    camera={event.camera}
+                    showBoundingBoxes={true}
+                    currentTime={displayedRecordTime}
+                    videoWidth={imgRef?.current?.naturalWidth ?? 0}
+                    videoHeight={imgRef?.current?.naturalHeight ?? 0}
+                    className="absolute inset-0 z-10"
+                    onSeekToTime={handleSeekToTime}
+                  />
+                </div>
+                <img
+                  key={event.id}
+                  ref={imgRef}
+                  className={cn(
+                    "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
+                  )}
+                  loading={isSafari ? "eager" : "lazy"}
+                  style={
+                    isIOS
+                      ? {
+                          WebkitUserSelect: "none",
+                          WebkitTouchCallout: "none",
+                        }
+                      : undefined
+                  }
+                  draggable={false}
+                  src={src}
+                  onLoad={() => setImgLoaded(true)}
+                  onError={() => setHasError(true)}
+                />
+              </div>
+            </>
+          )}
           <div
             className={cn(
               "absolute top-2 z-[5] flex items-center gap-2",

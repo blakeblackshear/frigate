@@ -8,7 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { generateFixedHash, isValidId } from "@/utils/stringUtil";
 import { useTranslation } from "react-i18next";
@@ -25,6 +25,7 @@ type NameAndIdFieldsProps<T extends FieldValues = FieldValues> = {
   processId?: (name: string) => string;
   placeholderName?: string;
   placeholderId?: string;
+  idVisible?: boolean;
 };
 
 export default function NameAndIdFields<T extends FieldValues = FieldValues>({
@@ -39,10 +40,12 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
   processId,
   placeholderName,
   placeholderId,
+  idVisible,
 }: NameAndIdFieldsProps<T>) {
   const { t } = useTranslation(["common"]);
-  const { watch, setValue, trigger } = useFormContext<T>();
-  const [isIdVisible, setIsIdVisible] = useState(false);
+  const { watch, setValue, trigger, formState } = useFormContext<T>();
+  const [isIdVisible, setIsIdVisible] = useState(idVisible ?? false);
+  const hasUserTypedRef = useRef(false);
 
   const defaultProcessId = (name: string) => {
     const normalized = name.replace(/\s+/g, "_").toLowerCase();
@@ -58,6 +61,7 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
   useEffect(() => {
     const subscription = watch((value, { name }) => {
       if (name === nameField) {
+        hasUserTypedRef.current = true;
         const processedId = effectiveProcessId(value[nameField] || "");
         setValue(idField, processedId as PathValue<T, Path<T>>);
         trigger(idField);
@@ -65,6 +69,14 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
     });
     return () => subscription.unsubscribe();
   }, [watch, setValue, trigger, nameField, idField, effectiveProcessId]);
+
+  // Auto-expand if there's an error on the ID field after user has typed
+  useEffect(() => {
+    const idError = formState.errors[idField];
+    if (idError && hasUserTypedRef.current && !isIdVisible) {
+      setIsIdVisible(true);
+    }
+  }, [formState.errors, idField, isIdVisible]);
 
   return (
     <>

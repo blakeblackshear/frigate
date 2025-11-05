@@ -1,7 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useTranslation } from "react-i18next";
-import { LuRotateCcw } from "react-icons/lu";
+import { LuRotateCcw, LuInfo } from "react-icons/lu";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import axios from "axios";
@@ -216,7 +222,6 @@ export default function Step3Validation({
       brandTemplate: wizardData.brandTemplate,
       customUrl: wizardData.customUrl,
       streams: wizardData.streams,
-      restreamIds: wizardData.restreamIds,
     };
 
     onSave(configData);
@@ -318,6 +323,51 @@ export default function Step3Validation({
                       <StreamPreview
                         stream={stream}
                         onBandwidthUpdate={handleBandwidthUpdate}
+                      />
+                    </div>
+                  )}
+
+                  {result?.success && (
+                    <div className="mb-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">
+                          {t("cameraWizard.step3.ffmpegModule")}
+                        </span>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0"
+                            >
+                              <LuInfo className="size-3" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="pointer-events-auto w-80 text-xs">
+                            <div className="space-y-2">
+                              <div className="font-medium">
+                                {t("cameraWizard.step3.ffmpegModule")}
+                              </div>
+                              <div className="text-muted-foreground">
+                                {t(
+                                  "cameraWizard.step3.ffmpegModuleDescription",
+                                )}
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <Switch
+                        checked={stream.useFfmpeg || false}
+                        onCheckedChange={(checked) => {
+                          onUpdate({
+                            streams: streams.map((s) =>
+                              s.id === stream.id
+                                ? { ...s, useFfmpeg: checked }
+                                : s,
+                            ),
+                          });
+                        }}
                       />
                     </div>
                   )}
@@ -491,8 +541,7 @@ function StreamIssues({
 
     // Restreaming check
     if (stream.roles.includes("record")) {
-      const restreamIds = wizardData.restreamIds || [];
-      if (restreamIds.includes(stream.id)) {
+      if (stream.restream) {
         result.push({
           type: "warning",
           message: t("cameraWizard.step3.issues.restreamingWarning"),
@@ -660,9 +709,10 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
 
   useEffect(() => {
     // Register stream with go2rtc
+    const streamUrl = stream.useFfmpeg ? `ffmpeg:${stream.url}` : stream.url;
     axios
       .put(`go2rtc/streams/${streamId}`, null, {
-        params: { src: stream.url },
+        params: { src: streamUrl },
       })
       .then(() => {
         // Add small delay to allow go2rtc api to run and initialize the stream
@@ -680,7 +730,7 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
         // do nothing on cleanup errors - go2rtc won't consume the streams
       });
     };
-  }, [stream.url, streamId]);
+  }, [stream.url, stream.useFfmpeg, streamId]);
 
   const resolution = stream.testResult?.resolution;
   let aspectRatio = "16/9";

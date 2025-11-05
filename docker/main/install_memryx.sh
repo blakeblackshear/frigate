@@ -2,9 +2,9 @@
 set -e
 
 # Download the MxAccl for Frigate github release
-wget https://github.com/memryx/mx_accl_frigate/archive/refs/heads/main.zip -O /tmp/mxaccl.zip
+wget https://github.com/memryx/mx_accl_frigate/archive/refs/tags/v2.1.0.zip -O /tmp/mxaccl.zip
 unzip /tmp/mxaccl.zip -d /tmp
-mv /tmp/mx_accl_frigate-main /opt/mx_accl_frigate
+mv /tmp/mx_accl_frigate-2.1.0 /opt/mx_accl_frigate
 rm /tmp/mxaccl.zip
 
 # Install Python dependencies

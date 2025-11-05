@@ -845,6 +845,7 @@ function FaceAttemptGroup({
       selectedItems={selectedFaces}
       i18nLibrary="views/faceLibrary"
       objectType="person"
+      noClassificationLabel="details.unknown"
       onClick={(data) => {
         if (data) {
           onClickFaces([data.filename], true);

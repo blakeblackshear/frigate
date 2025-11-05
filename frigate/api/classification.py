@@ -31,14 +31,14 @@ from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.config.camera import DetectConfig
-from frigate.const import CLIPS_DIR, FACE_DIR
+from frigate.const import CLIPS_DIR, FACE_DIR, MODEL_CACHE_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event
 from frigate.util.classification import (
     collect_object_classification_examples,
     collect_state_classification_examples,
 )
-from frigate.util.path import get_event_snapshot
+from frigate.util.file import get_event_snapshot
 
 logger = logging.getLogger(__name__)
 
@@ -828,9 +828,13 @@ def delete_classification_model(request: Request, name: str):
             status_code=404,
         )
 
-    # Delete the classification model's data directory
-    model_dir = os.path.join(CLIPS_DIR, sanitize_filename(name))
+    # Delete the classification model's data directory in clips
+    data_dir = os.path.join(CLIPS_DIR, sanitize_filename(name))
+    if os.path.exists(data_dir):
+        shutil.rmtree(data_dir)
 
+    # Delete the classification model's files in model_cache
+    model_dir = os.path.join(MODEL_CACHE_DIR, sanitize_filename(name))
     if os.path.exists(model_dir):
         shutil.rmtree(model_dir)
 

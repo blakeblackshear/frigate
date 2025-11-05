@@ -317,6 +317,21 @@ export default function Step3ChooseExamples({
     return unclassifiedImages.length === 0;
   }, [unclassifiedImages]);
 
+  const handleBack = useCallback(() => {
+    if (currentClassIndex > 0) {
+      const previousClass = allClasses[currentClassIndex - 1];
+      setCurrentClassIndex((prev) => prev - 1);
+
+      // Restore selections for the previous class
+      const previousSelections = Object.entries(imageClassifications)
+        .filter(([_, className]) => className === previousClass)
+        .map(([imageName, _]) => imageName);
+      setSelectedImages(new Set(previousSelections));
+    } else {
+      onBack();
+    }
+  }, [currentClassIndex, allClasses, imageClassifications, onBack]);
+
   return (
     <div className="flex flex-col gap-6">
       {isTraining ? (
@@ -420,7 +435,7 @@ export default function Step3ChooseExamples({
 
       {!isTraining && (
         <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
-          <Button type="button" onClick={onBack} className="sm:flex-1">
+          <Button type="button" onClick={handleBack} className="sm:flex-1">
             {t("button.back", { ns: "common" })}
           </Button>
           <Button
