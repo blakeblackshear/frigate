@@ -72,7 +72,6 @@ import { Trans, useTranslation } from "react-i18next";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
-import Heading from "@/components/ui/heading";
 import { DialogPortal } from "@radix-ui/react-dialog";
 
 const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
@@ -356,7 +355,6 @@ export default function SearchDetailDialog({
                         setSearch={setSearch}
                         setSimilarity={setSimilarity}
                         setInputFocused={setInputFocused}
-                        showThumbnail={false}
                         tabs={tabsComponent}
                       />
                     )}
@@ -427,16 +425,12 @@ export default function SearchDetailDialog({
                       src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
                     />
                   )}
-                  <Heading as="h3" className="mt-2 smart-capitalize">
-                    {t("type.details")}
-                  </Heading>
                   <ObjectDetailsTab
                     search={search}
                     config={config}
                     setSearch={setSearch}
                     setSimilarity={setSimilarity}
                     setInputFocused={setInputFocused}
-                    showThumbnail={false}
                   />
                 </>
               )}
@@ -457,7 +451,6 @@ type ObjectDetailsTabProps = {
   setSearch: (search: SearchResult | undefined) => void;
   setSimilarity?: () => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
-  showThumbnail?: boolean;
   tabs?: React.ReactNode;
 };
 function ObjectDetailsTab({
@@ -466,7 +459,6 @@ function ObjectDetailsTab({
   setSearch,
   setSimilarity,
   setInputFocused,
-  showThumbnail = true,
   tabs,
 }: ObjectDetailsTabProps) {
   const { t, i18n } = useTranslation([
@@ -1169,24 +1161,6 @@ function ObjectDetailsTab({
             </div>
           )}
         </div>
-
-        {showThumbnail && (
-          <div className="flex w-full flex-col gap-2 pl-6">
-            <img
-              className="aspect-video select-none rounded-lg object-contain transition-opacity"
-              style={
-                isIOS
-                  ? {
-                      WebkitUserSelect: "none",
-                      WebkitTouchCallout: "none",
-                    }
-                  : undefined
-              }
-              draggable={false}
-              src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-            />
-          </div>
-        )}
       </div>
       <div className="flex flex-col gap-1.5">
         {config?.cameras[search.camera].objects.genai.enabled &&
