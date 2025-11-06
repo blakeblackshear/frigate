@@ -37,8 +37,6 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useDetailStream } from "@/context/detail-stream-context";
 import { isDesktop, isIOS, isMobileOnly, isSafari } from "react-device-detect";
-import Chip from "@/components/indicators/Chip";
-import { FaDownload, FaHistory } from "react-icons/fa";
 import { useApiHost } from "@/api";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import ObjectTrackOverlay from "../ObjectTrackOverlay";
@@ -48,16 +46,17 @@ type TrackingDetailsProps = {
   event: Event;
   fullscreen?: boolean;
   tabs?: React.ReactNode;
+  actions?: React.ReactNode;
 };
 
 export function TrackingDetails({
   className,
   event,
   tabs,
+  actions,
 }: TrackingDetailsProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useTranslation(["views/explore"]);
-  const navigate = useNavigate();
   const apiHost = useApiHost();
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -451,59 +450,16 @@ export function TrackingDetails({
               </div>
             </>
           )}
-          <div
-            className={cn(
-              "absolute top-2 z-[5] flex items-center gap-2",
-              isIOS ? "right-8" : "right-2",
-            )}
-          >
-            {event && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <Chip
-                    className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                    onClick={() => {
-                      if (event?.id) {
-                        const params = new URLSearchParams({
-                          id: event.id,
-                        }).toString();
-                        navigate(`/review?${params}`);
-                      }
-                    }}
-                  >
-                    <FaHistory className="size-4 text-white" />
-                  </Chip>
-                </TooltipTrigger>
-                <TooltipPortal>
-                  <TooltipContent>
-                    {t("itemMenu.viewInHistory.label")}
-                  </TooltipContent>
-                </TooltipPortal>
-              </Tooltip>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <a
-                  download
-                  href={`${baseUrl}api/${event.camera}/start/${event.start_time - REVIEW_PADDING}/end/${(event.end_time ?? Date.now() / 1000) + REVIEW_PADDING}/clip.mp4`}
-                >
-                  <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                    <FaDownload className="size-4 text-white" />
-                  </Chip>
-                </a>
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent>
-                  {t("button.download", { ns: "common" })}
-                </TooltipContent>
-              </TooltipPortal>
-            </Tooltip>
-          </div>
         </div>
       </div>
 
       <div className={cn(isDesktop && "flex-[2] overflow-hidden")}>
-        {isDesktop && tabs && <div className="mb-4">{tabs}</div>}
+        {isDesktop && (tabs || actions) && (
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex-1">{tabs}</div>
+            <div className="ml-2">{actions}</div>
+          </div>
+        )}
         <div
           className={cn(
             isDesktop && "scrollbar-container h-full overflow-y-auto",

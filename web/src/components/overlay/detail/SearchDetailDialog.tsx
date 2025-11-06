@@ -45,18 +45,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
-import { useNavigate } from "react-router-dom";
+import { REVIEW_PADDING } from "@/types/review";
 // Chip removed from VideoTab - kept import commented out previously
 import { capitalizeAll } from "@/utils/stringUtil";
 import useGlobalMutation from "@/hooks/use-global-mutate";
-import { HiDotsHorizontal } from "react-icons/hi";
+import DetailActionsMenu from "./DetailActionsMenu";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import useImageLoaded from "@/hooks/use-image-loaded";
@@ -73,7 +71,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { Trans, useTranslation } from "react-i18next";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import FaceSelectionDialog from "../FaceSelectionDialog";
+// FaceSelectionDialog moved into DetailActionsMenu
 import { getTranslatedLabel } from "@/utils/i18n";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import Heading from "@/components/ui/heading";
@@ -304,6 +302,14 @@ export default function SearchDetailDialog({
                 className="size-full"
                 event={search as unknown as Event}
                 tabs={tabsComponent}
+                actions={
+                  <DetailActionsMenu
+                    search={search}
+                    config={config}
+                    setSearch={setSearch}
+                    setSimilarity={setSimilarity}
+                  />
+                }
               />
             ) : (
               <div className="flex h-full gap-4 overflow-hidden">
@@ -583,11 +589,7 @@ function ObjectDetailsTab({
     }
   }, [search]);
 
-  const clipTimeRange = useMemo(() => {
-    const startTime = (search.start_time ?? 0) - REVIEW_PADDING;
-    const endTime = (search.end_time ?? Date.now() / 1000) + REVIEW_PADDING;
-    return `start/${startTime}/end/${endTime}`;
-  }, [search]);
+  // clipTimeRange is calculated inside the shared DetailActionsMenu
 
   const updateDescription = useCallback(() => {
     if (!search) {
@@ -859,11 +861,6 @@ function ObjectDetailsTab({
     [faceData],
   );
 
-  const { data: reviewItem } = useSWR<ReviewSegment>([
-    `review/event/${search.id}`,
-  ]);
-  const navigate = useNavigate();
-
   const onTrainFace = useCallback(
     (trainName: string) => {
       axios
@@ -965,80 +962,15 @@ function ObjectDetailsTab({
         <div className="flex items-center justify-between">
           <div className="flex-1">{tabs}</div>
           <div className="ml-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <div className="rounded p-1 pr-2" role="button">
-                  <HiDotsHorizontal className="size-4 text-muted-foreground" />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <a
-                      className="w-full"
-                      href={`${baseUrl}api/events/${search.id}/snapshot.jpg?bbox=1`}
-                      download={`${search.camera}_${search.label}.jpg`}
-                    >
-                      <div className="flex cursor-pointer items-center gap-2">
-                        <span>{t("itemMenu.downloadSnapshot.label")}</span>
-                      </div>
-                    </a>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem>
-                    <a
-                      className="w-full"
-                      href={`${baseUrl}api/${search.camera}/${clipTimeRange}/clip.mp4`}
-                      download
-                    >
-                      <div className="flex cursor-pointer items-center gap-2">
-                        <span>{t("itemMenu.downloadVideo.label")}</span>
-                      </div>
-                    </a>
-                  </DropdownMenuItem>
-                  {config?.semantic_search.enabled &&
-                    setSimilarity != undefined &&
-                    search.data.type == "object" && (
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSearch(undefined);
-                          setSimilarity();
-                        }}
-                      >
-                        <div className="flex cursor-pointer items-center gap-2">
-                          <span>{t("itemMenu.findSimilar.label")}</span>
-                        </div>
-                      </DropdownMenuItem>
-                    )}
-                  {reviewItem && reviewItem.id && (
-                    <DropdownMenuItem
-                      onClick={() => {
-                        navigate(`/review?id=${reviewItem.id}`);
-                      }}
-                    >
-                      <div className="flex cursor-pointer items-center gap-2">
-                        <span>{t("itemMenu.viewInHistory.label")}</span>
-                      </div>
-                    </DropdownMenuItem>
-                  )}
-
-                  {hasFace && (
-                    <DropdownMenuItem asChild>
-                      <FaceSelectionDialog
-                        faceNames={faceNames}
-                        onTrainAttempt={onTrainFace}
-                      >
-                        <div className="flex cursor-pointer items-center gap-2">
-                          <span>
-                            {t("trainFace", { ns: "views/faceLibrary" })}
-                          </span>
-                        </div>
-                      </FaceSelectionDialog>
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenuPortal>
-            </DropdownMenu>
+            <DetailActionsMenu
+              search={search}
+              config={config}
+              setSearch={setSearch}
+              setSimilarity={setSimilarity}
+              faceNames={faceNames}
+              onTrainFace={onTrainFace}
+              hasFace={!!hasFace}
+            />
           </div>
         </div>
       )}
