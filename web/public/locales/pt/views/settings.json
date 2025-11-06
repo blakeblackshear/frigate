@@ -864,7 +864,9 @@
         "createRole": "Papel {{role}} criado com sucesso",
         "updateCameras": "Câmaras atualizados para o papel {{role}}",
         "deleteRole": "Papel {{role}} apagado com sucesso",
-        "userRolesUpdated": "{{count}} utilizador(os) atribuídos a este papel foram atualizados para 'visualizador', que possui acesso a todas as câmaras."
+        "userRolesUpdated_one": "{{count}} utilizador(os) atribuídos a este papel foram atualizados para 'visualizador', que possui acesso a todas as câmaras.",
+        "userRolesUpdated_many": "",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Falha ao criar papel: {{errorMessage}}",
