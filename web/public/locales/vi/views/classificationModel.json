@@ -1,1 +1,20 @@
-{}
+{
+  "documentTitle": "Mô Hình Phân Loại",
+  "button": {
+    "deleteClassificationAttempts": "Xóa Hình Ảnh Phân Loại",
+    "renameCategory": "Đổi Tên Lớp",
+    "deleteCategory": "Xoá Lớp",
+    "deleteImages": "Xoá Hình Ảnh",
+    "trainModel": "Huấn Luyện Mô Hình",
+    "addClassification": "Thêm Phân Loại",
+    "deleteModels": "Xoá Mô Hình"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Lớp Đã Bị Xoá",
+      "deletedImage": "Hình ảnh đã bị xóa",
+      "deletedModel_other": "Đã xóa thành công {{count}} mô hình",
+      "categorizedImage": "Phân Loại Hình Ảnh Thành Công"
+    }
+  }
+}
