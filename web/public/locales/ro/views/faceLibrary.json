@@ -1,8 +1,8 @@
 {
   "description": {
-    "addFace": "Parcurge adăugarea unei colecții noi la biblioteca de fețe.",
+    "addFace": "Adaugă o colecție nouă în Biblioteca de fețe încărcând prima ta imagine.",
     "placeholder": "Introduceti un nume pentru aceasta colectie",
-    "invalidName": "Nume invalid. Numele poate conține doar litere, cifre, spații, apostrofuri, liniuțe de subliniere și cratime."
+    "invalidName": "Nume invalid. Numele pot include doar litere, cifre, spații, apostrofuri, underscore-uri și liniuțe."
   },
   "details": {
     "person": "Persoană",
