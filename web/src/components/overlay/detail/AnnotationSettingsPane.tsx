@@ -1,4 +1,3 @@
-import Heading from "@/components/ui/heading";
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -133,12 +132,12 @@ export function AnnotationSettingsPane({
   }
 
   return (
-    <div className="space-y-3 p-4">
-      <Heading as="h4" className="my-2">
+    <div className="p-4">
+      <div className="text-md mb-2">
         {t("trackingDetails.annotationSettings.title")}
-      </Heading>
+      </div>
 
-      <Separator className="my-2 flex bg-secondary" />
+      <Separator className="mb-4 flex bg-secondary" />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}

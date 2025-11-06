@@ -65,6 +65,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
@@ -150,7 +151,7 @@ function TabsWithActions({
         setSimilarity={setSimilarity}
       />
       {pageToggle === "tracking_details" && (
-        <AnnotationSettingsPopover
+        <AnnotationSettings
           search={search}
           open={isPopoverOpen}
           setIsOpen={setIsPopoverOpen}
@@ -160,17 +161,17 @@ function TabsWithActions({
   );
 }
 
-type AnnotationSettingsPopoverProps = {
+type AnnotationSettingsProps = {
   search: SearchResult;
   open: boolean;
   setIsOpen: (open: boolean) => void;
 };
 
-function AnnotationSettingsPopover({
+function AnnotationSettings({
   search,
   open,
   setIsOpen,
-}: AnnotationSettingsPopoverProps) {
+}: AnnotationSettingsProps) {
   const { t } = useTranslation(["views/explore"]);
   const { annotationOffset, setAnnotationOffset } = useDetailStream();
 
@@ -202,29 +203,39 @@ function AnnotationSettingsPopover({
     }
   }, [open]);
 
+  const Overlay = isDesktop ? Popover : Drawer;
+  const Trigger = isDesktop ? PopoverTrigger : DrawerTrigger;
+  const Content = isDesktop ? PopoverContent : DrawerContent;
+
   return (
     <div className="ml-2">
-      <Popover modal={true} open={open} onOpenChange={handleOpenChange}>
-        <PopoverTrigger
-          asChild
-          onPointerDown={registerTriggerCloseIntent}
-          onKeyDown={(event) => {
-            if (open && (event.key === "Enter" || event.key === " ")) {
-              registerTriggerCloseIntent();
-            }
-          }}
-        >
+      <Overlay modal={isDesktop} open={open} onOpenChange={handleOpenChange}>
+        <Trigger asChild>
           <Button
             type="button"
             className="size-7 p-1.5"
             variant={open ? "select" : "ghost"}
             aria-label={t("trackingDetails.adjustAnnotationSettings")}
             aria-expanded={open}
+            onPointerDown={registerTriggerCloseIntent}
+            onKeyDown={(event) => {
+              if (open && (event.key === "Enter" || event.key === " ")) {
+                registerTriggerCloseIntent();
+              }
+            }}
           >
             <PiSlidersHorizontalBold className="size-5" />
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[90vw] max-w-md p-0" align="end">
+        </Trigger>
+
+        <Content
+          className={
+            isDesktop
+              ? "w-[90vw] max-w-md p-0"
+              : "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4"
+          }
+          {...(isDesktop ? { align: "end" } : {})}
+        >
           <AnnotationSettingsPane
             event={search as unknown as Event}
             annotationOffset={annotationOffset}
@@ -237,8 +248,8 @@ function AnnotationSettingsPopover({
               }
             }}
           />
-        </PopoverContent>
-      </Popover>
+        </Content>
+      </Overlay>
     </div>
   );
 }
