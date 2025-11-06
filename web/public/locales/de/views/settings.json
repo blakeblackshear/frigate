@@ -892,7 +892,8 @@
         "createRole": "Rolle {{role}} erfolgreich erstellt",
         "updateCameras": "Kameras für Rolle {{role}} aktualisiert",
         "deleteRole": "Rolle {{role}} erfolgreich gelöscht",
-        "userRolesUpdated": "{{count}} Benutzer, denen diese Rolle zugewiesen wurde, wurden auf „Zuschauer“ aktualisiert, der Zugriff auf alle Kameras hat."
+        "userRolesUpdated_one": "{{count}} Benutzer, denen diese Rolle zugewiesen wurde, wurden auf „Zuschauer“ aktualisiert, der Zugriff auf alle Kameras hat.",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Fehler beim Erstellen der Rolle: {{errorMessage}}",
