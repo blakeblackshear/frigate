@@ -1,1 +1,8 @@
-{}
+{
+  "toast": {
+    "success": {
+      "deletedImage": "已刪除的圖片",
+      "deletedModel_other": "成功刪除 {{count}} 個模型"
+    }
+  }
+}
