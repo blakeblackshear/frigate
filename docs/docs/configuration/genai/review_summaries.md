@@ -88,7 +88,6 @@ cameras:
       genai:
         enabled: true
         camera_context: |
-          Spatial layout reference:
           - Front door entrance is to the right of the frame
           - Driveway and street are to the left
           - Steps in the center lead from the sidewalk to the front door
