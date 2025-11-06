@@ -368,7 +368,7 @@ function DialogContentComponent({
         >
           {snapshotElement}
         </div>
-        <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
+        <div className="flex flex-col gap-4 overflow-hidden md:basis-2/5">
           <TabsWithActions
             search={search}
             searchTabs={searchTabs}
@@ -1491,14 +1491,19 @@ export function ObjectSnapshotTab({
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   return (
-    <div className={cn("relative w-full", className)}>
+    <div className={cn("relative", isDesktop && "size-full", className)}>
       <ImageLoadingIndicator
         className="absolute inset-0 aspect-video min-h-[60dvh] w-full"
         imgLoaded={imgLoaded}
       />
-      <div className={`${imgLoaded ? "visible" : "invisible"}`}>
+      <div
+        className={cn(
+          "flex size-full items-center",
+          imgLoaded ? "visible" : "invisible",
+        )}
+      >
         <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
-          <div className="flex flex-col space-y-3">
+          <div className="flex w-full flex-col space-y-3 overflow-hidden">
             <TransformComponent
               wrapperStyle={{
                 width: "100%",
@@ -1511,7 +1516,7 @@ export function ObjectSnapshotTab({
               }}
             >
               {search?.id && (
-                <div className="relative mx-auto">
+                <div className="relative mx-auto flex h-full">
                   <img
                     ref={imgRef}
                     className="mx-auto max-h-[60dvh] rounded-lg bg-background object-contain"

@@ -440,7 +440,7 @@ export function TrackingDetails({
         </div>
       </div>
 
-      <div className={cn(isDesktop && "flex-[2] overflow-hidden")}>
+      <div className={cn(isDesktop && "overflow-hidden md:basis-2/5")}>
         {isDesktop && tabs && (
           <div className="mb-4 flex items-center justify-between">
             <div className="flex-1">{tabs}</div>
@@ -453,7 +453,7 @@ export function TrackingDetails({
         >
           {config?.cameras[event.camera]?.onvif.autotracking
             .enabled_in_config && (
-            <div className="-mt-2 mb-2 text-sm text-danger">
+            <div className="mb-2 text-sm text-danger">
               {t("trackingDetails.autoTrackingTips")}
             </div>
           )}
