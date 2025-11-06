@@ -13,7 +13,6 @@ import {
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { HiDotsHorizontal } from "react-icons/hi";
-import FaceSelectionDialog from "../FaceSelectionDialog";
 import { SearchResult } from "@/types/search";
 import { FrigateConfig } from "@/types/frigateConfig";
 
@@ -32,9 +31,6 @@ export default function DetailActionsMenu({
   config,
   setSearch,
   setSimilarity,
-  faceNames = [],
-  onTrainFace,
-  hasFace = false,
 }: Props) {
   const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
   const navigate = useNavigate();
@@ -113,19 +109,6 @@ export default function DetailActionsMenu({
               <div className="flex cursor-pointer items-center gap-2">
                 <span>{t("itemMenu.viewInHistory.label")}</span>
               </div>
-            </DropdownMenuItem>
-          )}
-
-          {hasFace && onTrainFace && (
-            <DropdownMenuItem asChild>
-              <FaceSelectionDialog
-                faceNames={faceNames}
-                onTrainAttempt={onTrainFace}
-              >
-                <div className="flex cursor-pointer items-center gap-2">
-                  <span>{t("trainFace", { ns: "views/faceLibrary" })}</span>
-                </div>
-              </FaceSelectionDialog>
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>

@@ -46,7 +46,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { REVIEW_PADDING } from "@/types/review";
-// Chip removed from VideoTab - kept import commented out previously
 import { capitalizeAll } from "@/utils/stringUtil";
 import useGlobalMutation from "@/hooks/use-global-mutate";
 import DetailActionsMenu from "./DetailActionsMenu";
@@ -71,7 +70,6 @@ import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { Trans, useTranslation } from "react-i18next";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-// FaceSelectionDialog moved into DetailActionsMenu
 import { getTranslatedLabel } from "@/utils/i18n";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import Heading from "@/components/ui/heading";
@@ -589,8 +587,6 @@ function ObjectDetailsTab({
     }
   }, [search]);
 
-  // clipTimeRange is calculated inside the shared DetailActionsMenu
-
   const updateDescription = useCallback(() => {
     if (!search) {
       return;
@@ -843,57 +839,6 @@ function ObjectDetailsTab({
     [search, apiHost, mutate, setSearch, t],
   );
 
-  // face training
-
-  const hasFace = useMemo(() => {
-    if (!config?.face_recognition.enabled || !search) {
-      return false;
-    }
-
-    return search.data.attributes?.find((attr) => attr.label == "face");
-  }, [config, search]);
-
-  const { data: faceData } = useSWR(hasFace ? "faces" : null);
-
-  const faceNames = useMemo<string[]>(
-    () =>
-      faceData ? Object.keys(faceData).filter((face) => face != "train") : [],
-    [faceData],
-  );
-
-  const onTrainFace = useCallback(
-    (trainName: string) => {
-      axios
-        .post(`/faces/train/${trainName}/classify`, { event_id: search.id })
-        .then((resp) => {
-          if (resp.status == 200) {
-            toast.success(
-              t("toast.success.trainedFace", { ns: "views/faceLibrary" }),
-              {
-                position: "top-center",
-              },
-            );
-          }
-        })
-        .catch((error) => {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.detail ||
-            "Unknown error";
-          toast.error(
-            t("toast.error.trainFailed", {
-              ns: "views/faceLibrary",
-              errorMessage,
-            }),
-            {
-              position: "top-center",
-            },
-          );
-        });
-    },
-    [search, t],
-  );
-
   // speech transcription
 
   const onTranscribe = useCallback(() => {
@@ -967,9 +912,6 @@ function ObjectDetailsTab({
               config={config}
               setSearch={setSearch}
               setSimilarity={setSimilarity}
-              faceNames={faceNames}
-              onTrainFace={onTrainFace}
-              hasFace={!!hasFace}
             />
           </div>
         </div>
