@@ -6,7 +6,14 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { Button } from "../../ui/button";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Textarea } from "../../ui/textarea";
@@ -91,6 +98,7 @@ type TabsWithActionsProps = {
   setSimilarity?: () => void;
   isPopoverOpen: boolean;
   setIsPopoverOpen: (open: boolean) => void;
+  dialogContainer: HTMLDivElement | null;
 };
 
 function TabsWithActions({
@@ -103,8 +111,15 @@ function TabsWithActions({
   setSimilarity,
   isPopoverOpen,
   setIsPopoverOpen,
+  dialogContainer,
 }: TabsWithActionsProps) {
   const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
+
+  useEffect(() => {
+    if (pageToggle !== "tracking_details" && isPopoverOpen) {
+      setIsPopoverOpen(false);
+    }
+  }, [pageToggle, isPopoverOpen, setIsPopoverOpen]);
 
   if (!search) return null;
 
@@ -155,6 +170,7 @@ function TabsWithActions({
           search={search}
           open={isPopoverOpen}
           setIsOpen={setIsPopoverOpen}
+          container={dialogContainer}
         />
       )}
     </div>
@@ -165,12 +181,14 @@ type AnnotationSettingsProps = {
   search: SearchResult;
   open: boolean;
   setIsOpen: (open: boolean) => void;
+  container?: HTMLElement | null;
 };
 
 function AnnotationSettings({
   search,
   open,
   setIsOpen,
+  container,
 }: AnnotationSettingsProps) {
   const { t } = useTranslation(["views/explore"]);
   const { annotationOffset, setAnnotationOffset } = useDetailStream();
@@ -206,6 +224,9 @@ function AnnotationSettings({
   const Overlay = isDesktop ? Popover : Drawer;
   const Trigger = isDesktop ? PopoverTrigger : DrawerTrigger;
   const Content = isDesktop ? PopoverContent : DrawerContent;
+  const contentProps = isDesktop
+    ? { align: "end" as const, container: container ?? undefined }
+    : {};
 
   return (
     <div className="ml-2">
@@ -234,7 +255,7 @@ function AnnotationSettings({
               ? "w-[90vw] max-w-md p-0"
               : "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4"
           }
-          {...(isDesktop ? { align: "end" } : {})}
+          {...contentProps}
           data-annotation-popover
         >
           <AnnotationSettingsPane
@@ -262,6 +283,7 @@ type DialogContentComponentProps = {
   setSimilarity?: () => void;
   isPopoverOpen: boolean;
   setIsPopoverOpen: (open: boolean) => void;
+  dialogContainer: HTMLDivElement | null;
 };
 
 function DialogContentComponent({
@@ -278,6 +300,7 @@ function DialogContentComponent({
   setSimilarity,
   isPopoverOpen,
   setIsPopoverOpen,
+  dialogContainer,
 }: DialogContentComponentProps) {
   if (page === "tracking_details") {
     return (
@@ -296,6 +319,7 @@ function DialogContentComponent({
               setSimilarity={setSimilarity}
               isPopoverOpen={isPopoverOpen}
               setIsPopoverOpen={setIsPopoverOpen}
+              dialogContainer={dialogContainer}
             />
           ) : undefined
         }
@@ -354,6 +378,7 @@ function DialogContentComponent({
             setSimilarity={setSimilarity}
             isPopoverOpen={isPopoverOpen}
             setIsPopoverOpen={setIsPopoverOpen}
+            dialogContainer={dialogContainer}
           />
           <div className="scrollbar-container flex-1 overflow-y-auto">
             <ObjectDetailsTab
@@ -421,12 +446,16 @@ export default function SearchDetailDialog({
 
   const [isOpen, setIsOpen] = useState(search != undefined);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const dialogContentRef = useRef<HTMLDivElement | null>(null);
+  const [dialogContainer, setDialogContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
-      setIsPopoverOpen(open);
       setIsOpen(open);
       if (!open) {
+        setIsPopoverOpen(false);
         // short timeout to allow the mobile page animation
         // to complete before updating the state
         setTimeout(() => {
@@ -436,6 +465,10 @@ export default function SearchDetailDialog({
     },
     [setSearch],
   );
+
+  useLayoutEffect(() => {
+    setDialogContainer(dialogContentRef.current);
+  }, [isOpen, search?.id]);
 
   useEffect(() => {
     if (search) {
@@ -545,6 +578,7 @@ export default function SearchDetailDialog({
           </DialogPortal>
         )}
         <Content
+          ref={isDesktop ? dialogContentRef : undefined}
           className={cn(
             "scrollbar-container overflow-y-auto",
             isDesktop &&
@@ -581,6 +615,7 @@ export default function SearchDetailDialog({
                 setSimilarity={setSimilarity}
                 isPopoverOpen={isPopoverOpen}
                 setIsPopoverOpen={setIsPopoverOpen}
+                dialogContainer={dialogContainer}
               />
             </div>
           )}
@@ -599,6 +634,7 @@ export default function SearchDetailDialog({
             setSimilarity={setSimilarity}
             isPopoverOpen={isPopoverOpen}
             setIsPopoverOpen={setIsPopoverOpen}
+            dialogContainer={dialogContainer}
           />
         </Content>
       </Overlay>
