@@ -753,7 +753,7 @@
         "createRole": "角色 {{role}} 已成功建立",
         "updateCameras": "角色 {{role}} 的鏡頭已更新",
         "deleteRole": "角色 {{role}} 已成功刪除",
-        "userRolesUpdated": "{{count}} 位使用者被更新為「觀察者」角色，將可存取所有鏡頭。"
+        "userRolesUpdated_other": "{{count}} 位使用者被更新為「觀察者」角色，將可存取所有鏡頭。"
       },
       "error": {
         "createRoleFailed": "建立角色失敗：{{errorMessage}}",
