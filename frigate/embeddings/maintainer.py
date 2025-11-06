@@ -226,7 +226,9 @@ class EmbeddingMaintainer(threading.Thread):
             for c in self.config.cameras.values()
         ):
             self.post_processors.append(
-                AudioTranscriptionPostProcessor(self.config, self.requestor, metrics)
+                AudioTranscriptionPostProcessor(
+                    self.config, self.requestor, self.embeddings, metrics
+                )
             )
 
         semantic_trigger_processor: SemanticTriggerProcessor | None = None
