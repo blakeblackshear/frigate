@@ -121,13 +121,13 @@ export default function AnnotationOffsetSlider({ className }: Props) {
           <PopoverTrigger asChild>
             <button
               className="focus:outline-none"
-              aria-label={t("trackingDetails.annotationSettings.offset.desc")}
+              aria-label={t("trackingDetails.annotationSettings.offset.tips")}
             >
               <LuInfo className="size-4" />
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-80 text-sm">
-            {t("trackingDetails.annotationSettings.offset.desc")}
+            {t("trackingDetails.annotationSettings.offset.tips")}
           </PopoverContent>
         </Popover>
       </div>

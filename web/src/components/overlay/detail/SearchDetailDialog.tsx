@@ -6,7 +6,14 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { Button } from "../../ui/button";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Textarea } from "../../ui/textarea";
@@ -28,11 +35,11 @@ import {
   FaArrowRight,
   FaCheckCircle,
   FaChevronDown,
-  FaDownload,
-  FaHistory,
-  FaImage,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
 import { TrackingDetails } from "./TrackingDetails";
+import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
 import { DetailStreamProvider } from "@/context/detail-stream-context";
 import {
   MobilePage,
@@ -46,11 +53,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
-import { useNavigate } from "react-router-dom";
-import Chip from "@/components/indicators/Chip";
+import { REVIEW_PADDING } from "@/types/review";
 import { capitalizeAll } from "@/utils/stringUtil";
 import useGlobalMutation from "@/hooks/use-global-mutate";
+import DetailActionsMenu from "./DetailActionsMenu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +64,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
-import { Card, CardContent } from "@/components/ui/card";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import { GenericVideoPlayer } from "@/components/player/GenericVideoPlayer";
@@ -67,22 +72,341 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { LuInfo, LuSearch } from "react-icons/lu";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { Trans, useTranslation } from "react-i18next";
-import { TbFaceId } from "react-icons/tb";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import FaceSelectionDialog from "../FaceSelectionDialog";
 import { getTranslatedLabel } from "@/utils/i18n";
-import { CgTranscript } from "react-icons/cg";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
-import { PiPath } from "react-icons/pi";
-import Heading from "@/components/ui/heading";
+import { DialogPortal } from "@radix-ui/react-dialog";
+import { useDetailStream } from "@/context/detail-stream-context";
+import { PiSlidersHorizontalBold } from "react-icons/pi";
 
 const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
+
+type TabsWithActionsProps = {
+  search: SearchResult;
+  searchTabs: SearchTab[];
+  pageToggle: SearchTab;
+  setPageToggle: (v: SearchTab) => void;
+  config?: FrigateConfig;
+  setSearch: (s: SearchResult | undefined) => void;
+  setSimilarity?: () => void;
+  isPopoverOpen: boolean;
+  setIsPopoverOpen: (open: boolean) => void;
+  dialogContainer: HTMLDivElement | null;
+};
+
+function TabsWithActions({
+  search,
+  searchTabs,
+  pageToggle,
+  setPageToggle,
+  config,
+  setSearch,
+  setSimilarity,
+  isPopoverOpen,
+  setIsPopoverOpen,
+  dialogContainer,
+}: TabsWithActionsProps) {
+  const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
+
+  useEffect(() => {
+    if (pageToggle !== "tracking_details" && isPopoverOpen) {
+      setIsPopoverOpen(false);
+    }
+  }, [pageToggle, isPopoverOpen, setIsPopoverOpen]);
+
+  if (!search) return null;
+
+  return (
+    <div className="flex items-center justify-between gap-1">
+      <ScrollArea className="flex-1 whitespace-nowrap">
+        <div className="mb-2 flex flex-row md:mb-0">
+          <ToggleGroup
+            className="*:rounded-md *:px-3 *:py-4"
+            type="single"
+            size="sm"
+            value={pageToggle}
+            onValueChange={(value: SearchTab) => {
+              if (value) {
+                setPageToggle(value);
+              }
+            }}
+          >
+            {Object.values(searchTabs).map((item) => (
+              <ToggleGroupItem
+                key={item}
+                className="flex scroll-mx-10 items-center justify-between gap-2 text-muted-foreground"
+                value={item}
+                data-nav-item={item}
+                aria-label={`Select ${item}`}
+              >
+                <div className="smart-capitalize">
+                  {item === "snapshot"
+                    ? search?.has_snapshot
+                      ? t("type.snapshot")
+                      : t("type.thumbnail")
+                    : t(`type.${item}`)}
+                </div>
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          <ScrollBar orientation="horizontal" className="h-0" />
+        </div>
+      </ScrollArea>
+      <DetailActionsMenu
+        search={search}
+        config={config}
+        setSearch={setSearch}
+        setSimilarity={setSimilarity}
+      />
+      {pageToggle === "tracking_details" && (
+        <AnnotationSettings
+          search={search}
+          open={isPopoverOpen}
+          setIsOpen={setIsPopoverOpen}
+          container={dialogContainer}
+        />
+      )}
+    </div>
+  );
+}
+
+type AnnotationSettingsProps = {
+  search: SearchResult;
+  open: boolean;
+  setIsOpen: (open: boolean) => void;
+  container?: HTMLElement | null;
+};
+
+function AnnotationSettings({
+  search,
+  open,
+  setIsOpen,
+  container,
+}: AnnotationSettingsProps) {
+  const { t } = useTranslation(["views/explore"]);
+  const { annotationOffset, setAnnotationOffset } = useDetailStream();
+
+  const ignoreNextOpenRef = useRef(false);
+
+  useEffect(() => {
+    setIsOpen(false);
+    ignoreNextOpenRef.current = false;
+  }, [search, setIsOpen]);
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        if (ignoreNextOpenRef.current) {
+          ignoreNextOpenRef.current = false;
+          return;
+        }
+        setIsOpen(true);
+      } else {
+        setIsOpen(false);
+      }
+    },
+    [setIsOpen],
+  );
+
+  const registerTriggerCloseIntent = useCallback(() => {
+    if (open) {
+      ignoreNextOpenRef.current = true;
+    }
+  }, [open]);
+
+  const Overlay = isDesktop ? Popover : Drawer;
+  const Trigger = isDesktop ? PopoverTrigger : DrawerTrigger;
+  const Content = isDesktop ? PopoverContent : DrawerContent;
+  const contentProps = isDesktop
+    ? { align: "end" as const, container: container ?? undefined }
+    : {};
+
+  return (
+    <div className="ml-2">
+      <Overlay modal={isDesktop} open={open} onOpenChange={handleOpenChange}>
+        <Trigger asChild>
+          <Button
+            type="button"
+            className="size-7 p-1.5"
+            variant={open ? "select" : "ghost"}
+            aria-label={t("trackingDetails.adjustAnnotationSettings")}
+            aria-expanded={open}
+            onPointerDown={registerTriggerCloseIntent}
+            onKeyDown={(event) => {
+              if (open && (event.key === "Enter" || event.key === " ")) {
+                registerTriggerCloseIntent();
+              }
+            }}
+          >
+            <PiSlidersHorizontalBold className="size-5" />
+          </Button>
+        </Trigger>
+
+        <Content
+          className={
+            isDesktop
+              ? "w-[90vw] max-w-md bg-background_alt p-0"
+              : "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4"
+          }
+          {...contentProps}
+          {...(isDesktop ? { disablePortal: true } : {})}
+          data-annotation-popover
+        >
+          <AnnotationSettingsPane
+            event={search as unknown as Event}
+            annotationOffset={annotationOffset}
+            setAnnotationOffset={setAnnotationOffset}
+          />
+        </Content>
+      </Overlay>
+    </div>
+  );
+}
+
+type DialogContentComponentProps = {
+  page: SearchTab;
+  search: SearchResult;
+  isDesktop: boolean;
+  apiHost: string;
+  config?: FrigateConfig;
+  searchTabs: SearchTab[];
+  pageToggle: SearchTab;
+  setPageToggle: (v: SearchTab) => void;
+  setSearch: (s: SearchResult | undefined) => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  setSimilarity?: () => void;
+  isPopoverOpen: boolean;
+  setIsPopoverOpen: (open: boolean) => void;
+  dialogContainer: HTMLDivElement | null;
+};
+
+function DialogContentComponent({
+  page,
+  search,
+  isDesktop,
+  apiHost,
+  config,
+  searchTabs,
+  pageToggle,
+  setPageToggle,
+  setSearch,
+  setInputFocused,
+  setSimilarity,
+  isPopoverOpen,
+  setIsPopoverOpen,
+  dialogContainer,
+}: DialogContentComponentProps) {
+  if (page === "tracking_details") {
+    return (
+      <TrackingDetails
+        className={cn("size-full", !isDesktop && "flex flex-col gap-4")}
+        event={search as unknown as Event}
+        tabs={
+          isDesktop ? (
+            <TabsWithActions
+              search={search}
+              searchTabs={searchTabs}
+              pageToggle={pageToggle}
+              setPageToggle={setPageToggle}
+              config={config}
+              setSearch={setSearch}
+              setSimilarity={setSimilarity}
+              isPopoverOpen={isPopoverOpen}
+              setIsPopoverOpen={setIsPopoverOpen}
+              dialogContainer={dialogContainer}
+            />
+          ) : undefined
+        }
+      />
+    );
+  }
+
+  // Snapshot page content
+  const snapshotElement = search.has_snapshot ? (
+    <ObjectSnapshotTab
+      className={isDesktop ? undefined : "mb-4"}
+      search={
+        {
+          ...search,
+          plus_id: config?.plus?.enabled ? search.plus_id : "not_enabled",
+        } as unknown as Event
+      }
+    />
+  ) : (
+    <div className={cn(!isDesktop ? "mb-4 w-full" : "size-full")}>
+      <img
+        className="w-full select-none rounded-lg object-contain transition-opacity"
+        style={
+          isIOS
+            ? {
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none",
+              }
+            : undefined
+        }
+        draggable={false}
+        src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
+      />
+    </div>
+  );
+
+  if (isDesktop) {
+    return (
+      <div className="flex h-full gap-4 overflow-hidden">
+        <div
+          className={cn(
+            "scrollbar-container flex-[3] overflow-y-hidden",
+            !search.has_snapshot && "flex-[2]",
+          )}
+        >
+          {snapshotElement}
+        </div>
+        <div className="flex flex-col gap-4 overflow-hidden md:basis-2/5">
+          <TabsWithActions
+            search={search}
+            searchTabs={searchTabs}
+            pageToggle={pageToggle}
+            setPageToggle={setPageToggle}
+            config={config}
+            setSearch={setSearch}
+            setSimilarity={setSimilarity}
+            isPopoverOpen={isPopoverOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
+            dialogContainer={dialogContainer}
+          />
+          <div className="scrollbar-container flex-1 overflow-y-auto">
+            <ObjectDetailsTab
+              search={search}
+              config={config}
+              setSearch={setSearch}
+              setInputFocused={setInputFocused}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // mobile
+  return (
+    <>
+      {snapshotElement}
+      <ObjectDetailsTab
+        search={search}
+        config={config}
+        setSearch={setSearch}
+        setInputFocused={setInputFocused}
+      />
+    </>
+  );
+}
 
 type SearchDetailDialogProps = {
   search?: SearchResult;
@@ -91,7 +415,10 @@ type SearchDetailDialogProps = {
   setSearchPage: (page: SearchTab) => void;
   setSimilarity?: () => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  onPrevious?: () => void;
+  onNext?: () => void;
 };
+
 export default function SearchDetailDialog({
   search,
   page,
@@ -99,6 +426,8 @@ export default function SearchDetailDialog({
   setSearchPage,
   setSimilarity,
   setInputFocused,
+  onPrevious,
+  onNext,
 }: SearchDetailDialogProps) {
   const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -117,11 +446,17 @@ export default function SearchDetailDialog({
   // dialog and mobile page
 
   const [isOpen, setIsOpen] = useState(search != undefined);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const dialogContentRef = useRef<HTMLDivElement | null>(null);
+  const [dialogContainer, setDialogContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
       setIsOpen(open);
       if (!open) {
+        setIsPopoverOpen(false);
         // short timeout to allow the mobile page animation
         // to complete before updating the state
         setTimeout(() => {
@@ -132,11 +467,17 @@ export default function SearchDetailDialog({
     [setSearch],
   );
 
+  useLayoutEffect(() => {
+    setDialogContainer(dialogContentRef.current);
+  }, [isOpen, search?.id]);
+
   useEffect(() => {
     if (search) {
       setIsOpen(search != undefined);
     }
   }, [search]);
+
+  // show/hide annotation settings is handled inside TabsWithActions
 
   const searchTabs = useMemo(() => {
     if (!config || !search) {
@@ -163,46 +504,6 @@ export default function SearchDetailDialog({
     }
   }, [pageToggle, searchTabs, setSearchPage]);
 
-  // Tabs component for reuse
-  const tabsComponent = (
-    <ScrollArea className="w-full whitespace-nowrap">
-      <div className="flex flex-row">
-        <ToggleGroup
-          className="*:rounded-md *:px-3 *:py-4"
-          type="single"
-          size="sm"
-          value={pageToggle}
-          onValueChange={(value: SearchTab) => {
-            if (value) {
-              setPageToggle(value);
-            }
-          }}
-        >
-          {Object.values(searchTabs).map((item) => (
-            <ToggleGroupItem
-              key={item}
-              className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-              value={item}
-              data-nav-item={item}
-              aria-label={`Select ${item}`}
-            >
-              {item == "snapshot" && <FaImage className="size-4" />}
-              {item == "tracking_details" && <PiPath className="size-4" />}
-              <div className="smart-capitalize">
-                {item === "snapshot"
-                  ? search?.has_snapshot
-                    ? t("type.snapshot")
-                    : t("type.thumbnail")
-                  : t(`type.${item}`)}
-              </div>
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-        <ScrollBar orientation="horizontal" className="h-0" />
-      </div>
-    </ScrollArea>
-  );
-
   if (!search) {
     return;
   }
@@ -227,174 +528,115 @@ export default function SearchDetailDialog({
         onOpenChange={handleOpenChange}
         enableHistoryBack={true}
       >
+        {isDesktop && onPrevious && onNext && (
+          <DialogPortal>
+            <div className="pointer-events-none fixed inset-0 z-[200] flex items-center justify-center">
+              <div
+                className={cn(
+                  "relative flex items-center justify-between",
+                  "w-full",
+                  // match dialog's max-width classes
+                  "sm:max-w-xl md:max-w-4xl lg:max-w-[70%]",
+                )}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPrevious?.();
+                      }}
+                      className="nav-button pointer-events-auto absolute -left-16 rounded-lg border bg-secondary/60 p-2 text-primary-variant shadow-lg backdrop-blur-sm hover:bg-secondary/80 hover:text-primary"
+                      aria-label={t("searchResult.previousTrackedObject")}
+                    >
+                      <FaChevronLeft className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("searchResult.previousTrackedObject")}
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNext?.();
+                      }}
+                      className="nav-button pointer-events-auto absolute -right-16 rounded-lg border bg-secondary/60 p-2 text-primary-variant shadow-lg backdrop-blur-sm hover:bg-secondary/80 hover:text-primary"
+                      aria-label={t("searchResult.nextTrackedObject")}
+                    >
+                      <FaChevronRight className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("searchResult.nextTrackedObject")}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          </DialogPortal>
+        )}
         <Content
+          ref={isDesktop ? dialogContentRef : undefined}
           className={cn(
             "scrollbar-container overflow-y-auto",
             isDesktop &&
-              "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
-            isDesktop &&
-              page == "tracking_details" &&
-              "lg:max-w-[75%] xl:max-w-[80%]",
+              "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-[70%]",
             isMobile && "px-4",
           )}
+          onInteractOutside={(e) => {
+            if (isPopoverOpen) {
+              e.preventDefault();
+            }
+            const target = e.target as HTMLElement;
+            if (target.closest(".nav-button")) {
+              e.preventDefault();
+            }
+          }}
         >
           <Header>
             <Title>{t("trackedObjectDetails")}</Title>
             <Description className="sr-only">
               {t("trackedObjectDetails")}
+              <span className="sr-only" tabIndex={0} />
             </Description>
           </Header>
-          {isDesktop ? (
-            page === "tracking_details" ? (
-              <TrackingDetails
-                className="size-full"
-                event={search as unknown as Event}
-                tabs={tabsComponent}
+
+          {!isDesktop && (
+            <div className="flex w-full flex-col justify-center gap-4">
+              <TabsWithActions
+                search={search}
+                searchTabs={searchTabs}
+                pageToggle={pageToggle}
+                setPageToggle={setPageToggle}
+                config={config}
+                setSearch={setSearch}
+                setSimilarity={setSimilarity}
+                isPopoverOpen={isPopoverOpen}
+                setIsPopoverOpen={setIsPopoverOpen}
+                dialogContainer={dialogContainer}
               />
-            ) : (
-              <div className="flex h-full gap-4 overflow-hidden">
-                <div
-                  className={cn(
-                    "scrollbar-container flex-[3] overflow-y-hidden",
-                    page === "snapshot" && !search.has_snapshot && "flex-[2]",
-                  )}
-                >
-                  {page === "snapshot" && search.has_snapshot && (
-                    <ObjectSnapshotTab
-                      search={
-                        {
-                          ...search,
-                          plus_id: config?.plus?.enabled
-                            ? search.plus_id
-                            : "not_enabled",
-                        } as unknown as Event
-                      }
-                      onEventUploaded={() => {
-                        search.plus_id = "new_upload";
-                      }}
-                    />
-                  )}
-                  {page === "snapshot" && !search.has_snapshot && (
-                    <img
-                      className="size-full select-none rounded-lg object-contain transition-opacity"
-                      style={
-                        isIOS
-                          ? {
-                              WebkitUserSelect: "none",
-                              WebkitTouchCallout: "none",
-                            }
-                          : undefined
-                      }
-                      draggable={false}
-                      src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-                    />
-                  )}
-                </div>
-                <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
-                  {tabsComponent}
-                  <div className="scrollbar-container flex-1 overflow-y-auto">
-                    {page == "snapshot" && (
-                      <ObjectDetailsTab
-                        search={search}
-                        config={config}
-                        setSearch={setSearch}
-                        setSimilarity={setSimilarity}
-                        setInputFocused={setInputFocused}
-                        showThumbnail={false}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          ) : (
-            <>
-              <ScrollArea
-                className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
-              >
-                <div className="flex flex-row">
-                  <ToggleGroup
-                    className="*:rounded-md *:px-3 *:py-4"
-                    type="single"
-                    size="sm"
-                    value={pageToggle}
-                    onValueChange={(value: SearchTab) => {
-                      if (value) {
-                        setPageToggle(value);
-                      }
-                    }}
-                  >
-                    {Object.values(searchTabs).map((item) => (
-                      <ToggleGroupItem
-                        key={item}
-                        className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-                        value={item}
-                        data-nav-item={item}
-                        aria-label={`Select ${item}`}
-                      >
-                        {item == "snapshot" && <FaImage className="size-4" />}
-                        {item == "tracking_details" && (
-                          <PiPath className="size-4" />
-                        )}
-                        <div className="smart-capitalize">
-                          {t(`type.${item}`)}
-                        </div>
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                  <ScrollBar orientation="horizontal" className="h-0" />
-                </div>
-              </ScrollArea>
-              {page == "snapshot" && (
-                <>
-                  {search.has_snapshot && (
-                    <ObjectSnapshotTab
-                      search={
-                        {
-                          ...search,
-                          plus_id: config?.plus?.enabled
-                            ? search.plus_id
-                            : "not_enabled",
-                        } as unknown as Event
-                      }
-                      onEventUploaded={() => {
-                        search.plus_id = "new_upload";
-                      }}
-                    />
-                  )}
-                  {page == "snapshot" && !search.has_snapshot && (
-                    <img
-                      className="w-full select-none rounded-lg object-contain transition-opacity"
-                      style={
-                        isIOS
-                          ? {
-                              WebkitUserSelect: "none",
-                              WebkitTouchCallout: "none",
-                            }
-                          : undefined
-                      }
-                      draggable={false}
-                      src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-                    />
-                  )}
-                  <Heading as="h3" className="mt-2 smart-capitalize">
-                    {t("type.details")}
-                  </Heading>
-                  <ObjectDetailsTab
-                    search={search}
-                    config={config}
-                    setSearch={setSearch}
-                    setSimilarity={setSimilarity}
-                    setInputFocused={setInputFocused}
-                    showThumbnail={false}
-                  />
-                </>
-              )}
-              {page == "tracking_details" && (
-                <TrackingDetails event={search as unknown as Event} />
-              )}
-            </>
+            </div>
           )}
+
+          <DialogContentComponent
+            page={page}
+            search={search}
+            isDesktop={isDesktop}
+            apiHost={apiHost}
+            config={config}
+            searchTabs={searchTabs}
+            pageToggle={pageToggle}
+            setPageToggle={setPageToggle}
+            setSearch={setSearch}
+            setInputFocused={setInputFocused}
+            setSimilarity={setSimilarity}
+            isPopoverOpen={isPopoverOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
+            dialogContainer={dialogContainer}
+          />
         </Content>
       </Overlay>
     </DetailStreamProvider>
@@ -405,19 +647,19 @@ type ObjectDetailsTabProps = {
   search: SearchResult;
   config?: FrigateConfig;
   setSearch: (search: SearchResult | undefined) => void;
-  setSimilarity?: () => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
-  showThumbnail?: boolean;
 };
 function ObjectDetailsTab({
   search,
   config,
   setSearch,
-  setSimilarity,
   setInputFocused,
-  showThumbnail = true,
 }: ObjectDetailsTabProps) {
-  const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
+  const { t, i18n } = useTranslation([
+    "views/explore",
+    "views/faceLibrary",
+    "components/dialog",
+  ]);
 
   const apiHost = useApiHost();
 
@@ -783,57 +1025,6 @@ function ObjectDetailsTab({
     [search, apiHost, mutate, setSearch, t],
   );
 
-  // face training
-
-  const hasFace = useMemo(() => {
-    if (!config?.face_recognition.enabled || !search) {
-      return false;
-    }
-
-    return search.data.attributes?.find((attr) => attr.label == "face");
-  }, [config, search]);
-
-  const { data: faceData } = useSWR(hasFace ? "faces" : null);
-
-  const faceNames = useMemo<string[]>(
-    () =>
-      faceData ? Object.keys(faceData).filter((face) => face != "train") : [],
-    [faceData],
-  );
-
-  const onTrainFace = useCallback(
-    (trainName: string) => {
-      axios
-        .post(`/faces/train/${trainName}/classify`, { event_id: search.id })
-        .then((resp) => {
-          if (resp.status == 200) {
-            toast.success(
-              t("toast.success.trainedFace", { ns: "views/faceLibrary" }),
-              {
-                position: "top-center",
-              },
-            );
-          }
-        })
-        .catch((error) => {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.detail ||
-            "Unknown error";
-          toast.error(
-            t("toast.error.trainFailed", {
-              ns: "views/faceLibrary",
-              errorMessage,
-            }),
-            {
-              position: "top-center",
-            },
-          );
-        });
-    },
-    [search, t],
-  );
-
   // speech transcription
 
   const onTranscribe = useCallback(() => {
@@ -862,35 +1053,159 @@ function ObjectDetailsTab({
       });
   }, [search, t]);
 
+  // frigate+ submission
+
+  type SubmissionState = "reviewing" | "uploading" | "submitted";
+  const [state, setState] = useState<SubmissionState>(
+    search?.plus_id ? "submitted" : "reviewing",
+  );
+
+  useEffect(
+    () => setState(search?.plus_id ? "submitted" : "reviewing"),
+    [search],
+  );
+
+  const onSubmitToPlus = useCallback(
+    async (falsePositive: boolean) => {
+      if (!search) {
+        return;
+      }
+
+      falsePositive
+        ? axios.put(`events/${search.id}/false_positive`)
+        : axios.post(`events/${search.id}/plus`, {
+            include_annotation: 1,
+          });
+
+      setState("submitted");
+      setSearch({
+        ...search,
+        plus_id: "new_upload",
+      });
+    },
+    [search, setSearch],
+  );
+
+  const popoverContainerRef = useRef<HTMLDivElement | null>(null);
   return (
-    <div className="flex flex-col gap-5">
+    <div ref={popoverContainerRef} className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">{t("details.label")}</div>
-            <div className="flex flex-row items-center gap-2 text-sm smart-capitalize">
-              {getIconForLabel(search.label, "size-4 text-primary")}
-              {getTranslatedLabel(search.label)}
-              {search.sub_label && ` (${search.sub_label})`}
-              {isAdmin && search.end_time && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span>
-                      <FaPencilAlt
-                        className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
-                        onClick={() => {
-                          setIsSubLabelDialogOpen(true);
-                        }}
-                      />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipPortal>
-                    <TooltipContent>
-                      {t("details.editSubLabel.title")}
-                    </TooltipContent>
-                  </TooltipPortal>
-                </Tooltip>
-              )}
+          <div className="w-full">
+            <div className="flex w-full flex-row flex-wrap gap-6">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="text-sm text-primary/40">
+                      {t("details.label")}
+                    </div>
+                    <div className="flex flex-row items-center gap-2 text-sm smart-capitalize">
+                      {getIconForLabel(search.label, "size-4 text-primary")}
+                      {getTranslatedLabel(search.label)}
+                      {search.sub_label && ` (${search.sub_label})`}
+                      {isAdmin && search.end_time && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <FaPencilAlt
+                                className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
+                                onClick={() => setIsSubLabelDialogOpen(true)}
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipPortal>
+                            <TooltipContent>
+                              {t("details.editSubLabel.title")}
+                            </TooltipContent>
+                          </TooltipPortal>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <div className="text-sm text-primary/40">
+                      <div className="flex flex-row items-center gap-1">
+                        {t("details.topScore.label")}
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <div className="cursor-pointer p-0">
+                              <LuInfo className="size-4" />
+                              <span className="sr-only">Info</span>
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            container={popoverContainerRef.current}
+                            className="w-80 text-xs"
+                          >
+                            {t("details.topScore.info")}
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </div>
+                    <div className="text-sm">
+                      {topScore}%{subLabelScore && ` (${subLabelScore}%)`}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <div className="text-sm text-primary/40">
+                      {t("details.camera")}
+                    </div>
+                    <div className="text-sm smart-capitalize">
+                      <CameraNameLabel camera={search.camera} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-3">
+                  {snapScore != undefined && (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="text-sm text-primary/40">
+                        <div className="flex flex-row items-center gap-1">
+                          {t("details.snapshotScore.label")}
+                        </div>
+                      </div>
+                      <div className="text-sm">{snapScore}%</div>
+                    </div>
+                  )}
+
+                  {averageEstimatedSpeed && (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="text-sm text-primary/40">
+                        {t("details.estimatedSpeed")}
+                      </div>
+                      <div className="flex flex-col space-y-0.5 text-sm">
+                        <div className="flex flex-row items-center gap-2">
+                          {averageEstimatedSpeed}{" "}
+                          {config?.ui.unit_system == "imperial"
+                            ? t("unit.speed.mph", { ns: "common" })
+                            : t("unit.speed.kph", { ns: "common" })}
+                          {velocityAngle != undefined && (
+                            <span className="text-primary/40">
+                              <FaArrowRight
+                                size={10}
+                                style={{
+                                  transform: `rotate(${(360 - Number(velocityAngle)) % 360}deg)`,
+                                }}
+                              />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-1.5">
+                    <div className="text-sm text-primary/40">
+                      {t("details.timestamp")}
+                    </div>
+                    <div className="text-sm">{formattedDate}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           {search?.data.recognized_license_plate && (
@@ -909,9 +1224,7 @@ function ObjectDetailsTab({
                         <span>
                           <FaPencilAlt
                             className="size-4 cursor-pointer text-primary/40 hover:text-primary/80"
-                            onClick={() => {
-                              setIsLPRDialogOpen(true);
-                            }}
+                            onClick={() => setIsLPRDialogOpen(true)}
                           />
                         </span>
                       </TooltipTrigger>
@@ -926,142 +1239,108 @@ function ObjectDetailsTab({
               </div>
             </div>
           )}
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              <div className="flex flex-row items-center gap-1">
-                {t("details.topScore.label")}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="cursor-pointer p-0">
-                      <LuInfo className="size-4" />
-                      <span className="sr-only">Info</span>
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80">
-                    {t("details.topScore.info")}
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            <div className="text-sm">
-              {topScore}%{subLabelScore && ` (${subLabelScore}%)`}
-            </div>
-          </div>
-          {snapScore != undefined && (
-            <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">
-                <div className="flex flex-row items-center gap-1">
-                  {t("details.snapshotScore.label")}
+        </div>
+      </div>
+
+      <div
+        className={cn(
+          "my-2 flex w-full flex-col justify-between gap-1.5",
+          state == "submitted" && "flex-row",
+        )}
+      >
+        <div className="text-sm text-primary/40">
+          <div className="flex flex-row items-center gap-1">
+            {t("explore.plus.submitToPlus.label", {
+              ns: "components/dialog",
+            })}
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="cursor-pointer p-0">
+                  <LuInfo className="size-4" />
+                  <span className="sr-only">Info</span>
                 </div>
-              </div>
-              <div className="text-sm">{snapScore}%</div>
-            </div>
-          )}
-          {averageEstimatedSpeed && (
-            <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary/40">
-                {t("details.estimatedSpeed")}
-              </div>
-              <div className="flex flex-col space-y-0.5 text-sm">
-                {averageEstimatedSpeed && (
-                  <div className="flex flex-row items-center gap-2">
-                    {averageEstimatedSpeed}{" "}
-                    {config?.ui.unit_system == "imperial"
-                      ? t("unit.speed.mph", { ns: "common" })
-                      : t("unit.speed.kph", { ns: "common" })}{" "}
-                    {velocityAngle != undefined && (
-                      <span className="text-primary/40">
-                        <FaArrowRight
-                          size={10}
-                          style={{
-                            transform: `rotate(${(360 - Number(velocityAngle)) % 360}deg)`,
-                          }}
-                        />
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">{t("details.camera")}</div>
-            <div className="text-sm smart-capitalize">
-              <CameraNameLabel camera={search.camera} />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">
-              {t("details.timestamp")}
-            </div>
-            <div className="text-sm">{formattedDate}</div>
+              </PopoverTrigger>
+              <PopoverContent
+                container={popoverContainerRef.current}
+                className="w-80 text-xs"
+              >
+                {t("explore.plus.submitToPlus.desc", {
+                  ns: "components/dialog",
+                })}
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
-        {showThumbnail && (
-          <div className="flex w-full flex-col gap-2 pl-6">
-            <img
-              className="aspect-video select-none rounded-lg object-contain transition-opacity"
-              style={
-                isIOS
-                  ? {
-                      WebkitUserSelect: "none",
-                      WebkitTouchCallout: "none",
-                    }
-                  : undefined
-              }
-              draggable={false}
-              src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-            />
-            <div
-              className={cn(
-                "flex w-full flex-row gap-2",
-                isMobile && "flex-col",
-              )}
-            >
-              {config?.semantic_search.enabled &&
-                setSimilarity != undefined &&
-                search.data.type == "object" && (
-                  <Button
-                    className="w-full"
-                    aria-label={t("itemMenu.findSimilar.aria")}
-                    onClick={() => {
-                      setSearch(undefined);
-                      setSimilarity();
+
+        <div className="flex flex-row items-center justify-between gap-2 text-sm">
+          {state == "reviewing" && (
+            <>
+              <div>
+                {i18n.language === "en" ? (
+                  // English with a/an logic plus label
+                  <>
+                    {/^[aeiou]/i.test(search?.label || "") ? (
+                      <Trans
+                        ns="components/dialog"
+                        values={{ label: search?.label }}
+                      >
+                        explore.plus.review.question.ask_an
+                      </Trans>
+                    ) : (
+                      <Trans
+                        ns="components/dialog"
+                        values={{ label: search?.label }}
+                      >
+                        explore.plus.review.question.ask_a
+                      </Trans>
+                    )}
+                  </>
+                ) : (
+                  // For other languages
+                  <Trans
+                    ns="components/dialog"
+                    values={{
+                      untranslatedLabel: search?.label,
+                      translatedLabel: getTranslatedLabel(search?.label),
                     }}
                   >
-                    <div className="flex gap-1">
-                      <LuSearch />
-                      {t("itemMenu.findSimilar.label")}
-                    </div>
-                  </Button>
+                    explore.plus.review.question.ask_full
+                  </Trans>
                 )}
-              {hasFace && (
-                <FaceSelectionDialog
-                  className="w-full"
-                  faceNames={faceNames}
-                  onTrainAttempt={onTrainFace}
+              </div>
+              <div className="flex max-w-xl flex-row gap-2">
+                <Button
+                  className="flex-1 bg-success"
+                  aria-label={t("button.yes", { ns: "common" })}
+                  onClick={() => {
+                    setState("uploading");
+                    onSubmitToPlus(false);
+                  }}
                 >
-                  <Button className="w-full">
-                    <div className="flex gap-1">
-                      <TbFaceId />
-                      {t("trainFace", { ns: "views/faceLibrary" })}
-                    </div>
-                  </Button>
-                </FaceSelectionDialog>
-              )}
-              {config?.cameras[search?.camera].audio_transcription.enabled &&
-                search?.label == "speech" &&
-                search?.end_time && (
-                  <Button className="w-full" onClick={onTranscribe}>
-                    <div className="flex gap-1">
-                      <CgTranscript />
-                      {t("itemMenu.audioTranscription.label")}
-                    </div>
-                  </Button>
-                )}
+                  {t("button.yes", { ns: "common" })}
+                </Button>
+                <Button
+                  className="flex-1 text-white"
+                  aria-label={t("button.no", { ns: "common" })}
+                  variant="destructive"
+                  onClick={() => {
+                    setState("uploading");
+                    onSubmitToPlus(true);
+                  }}
+                >
+                  {t("button.no", { ns: "common" })}
+                </Button>
+              </div>
+            </>
+          )}
+          {state == "uploading" && <ActivityIndicator />}
+          {state == "submitted" && (
+            <div className="flex flex-row items-center justify-center gap-2">
+              <FaCheckCircle className="size-4 text-success" />
+              {t("explore.plus.review.state.submitted")}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="flex flex-col gap-1.5">
         {config?.cameras[search.camera].objects.genai.enabled &&
@@ -1103,6 +1382,15 @@ function ObjectDetailsTab({
         )}
 
         <div className="flex w-full flex-row justify-end gap-2">
+          {config?.cameras[search?.camera].audio_transcription.enabled &&
+            search?.label == "speech" &&
+            search?.end_time && (
+              <Button onClick={onTranscribe}>
+                <div className="flex gap-1">
+                  {t("itemMenu.audioTranscription.label")}
+                </div>
+              </Button>
+            )}
           {config?.cameras[search.camera].objects.genai.enabled &&
             search.end_time && (
               <div className="flex items-start">
@@ -1154,6 +1442,7 @@ function ObjectDetailsTab({
               {t("button.save", { ns: "common" })}
             </Button>
           )}
+
           <TextEntryDialog
             open={isSubLabelDialogOpen}
             setOpen={setIsSubLabelDialogOpen}
@@ -1192,55 +1481,29 @@ function ObjectDetailsTab({
 
 type ObjectSnapshotTabProps = {
   search: Event;
-  onEventUploaded: () => void;
+  className?: string;
+  onEventUploaded?: () => void;
 };
 export function ObjectSnapshotTab({
   search,
-  onEventUploaded,
+  className,
 }: ObjectSnapshotTabProps) {
-  const { t, i18n } = useTranslation(["components/dialog"]);
-  type SubmissionState = "reviewing" | "uploading" | "submitted";
-
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
-  // upload
-
-  const [state, setState] = useState<SubmissionState>(
-    search?.plus_id ? "submitted" : "reviewing",
-  );
-
-  useEffect(
-    () => setState(search?.plus_id ? "submitted" : "reviewing"),
-    [search],
-  );
-
-  const onSubmitToPlus = useCallback(
-    async (falsePositive: boolean) => {
-      if (!search) {
-        return;
-      }
-
-      falsePositive
-        ? axios.put(`events/${search.id}/false_positive`)
-        : axios.post(`events/${search.id}/plus`, {
-            include_annotation: 1,
-          });
-
-      setState("submitted");
-      onEventUploaded();
-    },
-    [search, onEventUploaded],
-  );
-
   return (
-    <div className="relative size-full">
+    <div className={cn("relative", isDesktop && "size-full", className)}>
       <ImageLoadingIndicator
         className="absolute inset-0 aspect-video min-h-[60dvh] w-full"
         imgLoaded={imgLoaded}
       />
-      <div className={`${imgLoaded ? "visible" : "invisible"}`}>
+      <div
+        className={cn(
+          "flex size-full items-center",
+          imgLoaded ? "visible" : "invisible",
+        )}
+      >
         <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
-          <div className="flex flex-col space-y-3">
+          <div className="flex w-full flex-col space-y-3 overflow-hidden">
             <TransformComponent
               wrapperStyle={{
                 width: "100%",
@@ -1253,10 +1516,10 @@ export function ObjectSnapshotTab({
               }}
             >
               {search?.id && (
-                <div className="relative mx-auto">
+                <div className="relative mx-auto flex h-full">
                   <img
                     ref={imgRef}
-                    className={`mx-auto max-h-[60dvh] bg-black object-contain`}
+                    className="mx-auto max-h-[60dvh] rounded-lg bg-background object-contain"
                     src={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
                     alt={`${search?.label}`}
                     loading={isSafari ? "eager" : "lazy"}
@@ -1264,121 +1527,9 @@ export function ObjectSnapshotTab({
                       onImgLoad();
                     }}
                   />
-                  <div
-                    className={cn(
-                      "absolute right-1 top-1 flex items-center gap-2",
-                    )}
-                  >
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <a
-                          href={`${baseUrl}api/events/${search?.id}/snapshot.jpg?bbox=1`}
-                          download={`${search?.camera}_${search?.label}.jpg`}
-                        >
-                          <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                            <FaDownload className="size-4 text-white" />
-                          </Chip>
-                        </a>
-                      </TooltipTrigger>
-                      <TooltipPortal>
-                        <TooltipContent>
-                          {t("button.download", { ns: "common" })}
-                        </TooltipContent>
-                      </TooltipPortal>
-                    </Tooltip>
-                  </div>
                 </div>
               )}
             </TransformComponent>
-            {search.data.type == "object" &&
-              search.plus_id !== "not_enabled" &&
-              search.end_time &&
-              search.label != "on_demand" && (
-                <Card className="p-1 text-sm md:p-2">
-                  <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
-                    <div className={cn("flex max-w-sm flex-col space-y-3")}>
-                      <div className={"text-lg leading-none"}>
-                        {t("explore.plus.submitToPlus.label")}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {t("explore.plus.submitToPlus.desc")}
-                      </div>
-                    </div>
-
-                    <div className="flex w-full flex-1 flex-col justify-center gap-2 md:ml-8 md:flex-1 md:justify-end">
-                      {state == "reviewing" && (
-                        <>
-                          <div>
-                            {i18n.language === "en" ? (
-                              // English with a/an logic plus label
-                              <>
-                                {/^[aeiou]/i.test(search?.label || "") ? (
-                                  <Trans
-                                    ns="components/dialog"
-                                    values={{ label: search?.label }}
-                                  >
-                                    explore.plus.review.question.ask_an
-                                  </Trans>
-                                ) : (
-                                  <Trans
-                                    ns="components/dialog"
-                                    values={{ label: search?.label }}
-                                  >
-                                    explore.plus.review.question.ask_a
-                                  </Trans>
-                                )}
-                              </>
-                            ) : (
-                              // For other languages
-                              <Trans
-                                ns="components/dialog"
-                                values={{
-                                  untranslatedLabel: search?.label,
-                                  translatedLabel: getTranslatedLabel(
-                                    search?.label,
-                                  ),
-                                }}
-                              >
-                                explore.plus.review.question.ask_full
-                              </Trans>
-                            )}
-                          </div>
-                          <div className="flex w-full flex-row gap-2">
-                            <Button
-                              className="flex-1 bg-success"
-                              aria-label={t("button.yes", { ns: "common" })}
-                              onClick={() => {
-                                setState("uploading");
-                                onSubmitToPlus(false);
-                              }}
-                            >
-                              {t("button.yes", { ns: "common" })}
-                            </Button>
-                            <Button
-                              className="flex-1 text-white"
-                              aria-label={t("button.no", { ns: "common" })}
-                              variant="destructive"
-                              onClick={() => {
-                                setState("uploading");
-                                onSubmitToPlus(true);
-                              }}
-                            >
-                              {t("button.no", { ns: "common" })}
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                      {state == "uploading" && <ActivityIndicator />}
-                      {state == "submitted" && (
-                        <div className="flex flex-row items-center justify-center gap-2">
-                          <FaCheckCircle className="text-success" />
-                          {t("explore.plus.review.state.submitted")}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
           </div>
         </TransformWrapper>
       </div>
@@ -1391,12 +1542,6 @@ type VideoTabProps = {
 };
 
 export function VideoTab({ search }: VideoTabProps) {
-  const { t } = useTranslation(["views/explore"]);
-  const navigate = useNavigate();
-  const { data: reviewItem } = useSWR<ReviewSegment>([
-    `review/event/${search.id}`,
-  ]);
-
   const clipTimeRange = useMemo(() => {
     const startTime = search.start_time - REVIEW_PADDING;
     const endTime = (search.end_time ?? Date.now() / 1000) + REVIEW_PADDING;
@@ -1408,56 +1553,7 @@ export function VideoTab({ search }: VideoTabProps) {
   return (
     <>
       <span tabIndex={0} className="sr-only" />
-      <GenericVideoPlayer source={source}>
-        <div
-          className={cn(
-            "absolute top-2 z-10 flex items-center gap-2",
-            isIOS ? "right-8" : "right-2",
-          )}
-        >
-          {reviewItem && (
-            <Tooltip>
-              <TooltipTrigger>
-                <Chip
-                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                  onClick={() => {
-                    if (reviewItem?.id) {
-                      const params = new URLSearchParams({
-                        id: reviewItem.id,
-                      }).toString();
-                      navigate(`/review?${params}`);
-                    }
-                  }}
-                >
-                  <FaHistory className="size-4 text-white" />
-                </Chip>
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent>
-                  {t("itemMenu.viewInHistory.label")}
-                </TooltipContent>
-              </TooltipPortal>
-            </Tooltip>
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <a
-                download
-                href={`${baseUrl}api/${search.camera}/${clipTimeRange}/clip.mp4`}
-              >
-                <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                  <FaDownload className="size-4 text-white" />
-                </Chip>
-              </a>
-            </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent>
-                {t("button.download", { ns: "common" })}
-              </TooltipContent>
-            </TooltipPortal>
-          </Tooltip>
-        </div>
-      </GenericVideoPlayer>
+      <GenericVideoPlayer source={source} />
     </>
   );
 }

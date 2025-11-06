@@ -80,6 +80,15 @@ export default function SearchView({
   });
   const navigate = useNavigate();
 
+  const { data: exploreEvents } = useSWR<SearchResult[]>(
+    (!searchFilter || Object.keys(searchFilter).length === 0) &&
+      !searchTerm &&
+      defaultView === "summary"
+      ? ["events/explore", { limit: isMobileOnly ? 5 : 10 }]
+      : null,
+    { revalidateOnFocus: true },
+  );
+
   // grid
 
   const gridClassName = cn(
@@ -202,19 +211,23 @@ export default function SearchView({
     ],
   );
 
-  // remove duplicate event ids
-
-  const uniqueResults = useMemo(() => {
-    return searchResults?.filter(
-      (value, index, self) =>
-        index === self.findIndex((v) => v.id === value.id),
-    );
-  }, [searchResults]);
-
   // detail
 
   const [searchDetail, setSearchDetail] = useState<SearchResult>();
   const [page, setPage] = useState<SearchTab>("snapshot");
+
+  // remove duplicate event ids
+
+  const uniqueResults = useMemo(() => {
+    if (!searchResults) return [];
+
+    const results = searchResults.filter(
+      (value, index, self) =>
+        index === self.findIndex((v) => v.id === value.id),
+    );
+
+    return results;
+  }, [searchResults]);
 
   // search interaction
 
@@ -285,17 +298,23 @@ export default function SearchView({
   // update search detail when results change
 
   useEffect(() => {
-    if (searchDetail && searchResults) {
-      const flattenedResults = searchResults.flat();
-      const updatedSearchDetail = flattenedResults.find(
-        (result) => result.id === searchDetail.id,
-      );
+    if (searchDetail) {
+      const results =
+        defaultView === "summary" ? exploreEvents : searchResults?.flat();
+      if (results) {
+        const updatedSearchDetail = results.find(
+          (result) => result.id === searchDetail.id,
+        );
 
-      if (updatedSearchDetail && !isEqual(updatedSearchDetail, searchDetail)) {
-        setSearchDetail(updatedSearchDetail);
+        if (
+          updatedSearchDetail &&
+          !isEqual(updatedSearchDetail, searchDetail)
+        ) {
+          setSearchDetail(updatedSearchDetail);
+        }
       }
     }
-  }, [searchResults, searchDetail]);
+  }, [searchResults, exploreEvents, searchDetail, defaultView]);
 
   const hasExistingSearch = useMemo(
     () => searchResults != undefined || searchFilter != undefined,
@@ -306,13 +325,49 @@ export default function SearchView({
 
   const [inputFocused, setInputFocused] = useState(false);
 
+  const goToPrevious = useCallback(() => {
+    const results =
+      exploreEvents && defaultView === "summary"
+        ? exploreEvents.filter((event) => event.label === searchDetail?.label)
+        : uniqueResults;
+    if (results && results.length > 0) {
+      const currentIndex = searchDetail
+        ? results.findIndex((result) => result.id === searchDetail.id)
+        : -1;
+
+      const newIndex =
+        currentIndex === -1
+          ? results.length - 1
+          : (currentIndex - 1 + results.length) % results.length;
+
+      setSearchDetail(results[newIndex]);
+    }
+  }, [uniqueResults, exploreEvents, searchDetail, defaultView]);
+
+  const goToNext = useCallback(() => {
+    const results =
+      exploreEvents && defaultView === "summary"
+        ? exploreEvents.filter((event) => event.label === searchDetail?.label)
+        : uniqueResults;
+    if (results && results.length > 0) {
+      const currentIndex = searchDetail
+        ? results.findIndex((result) => result.id === searchDetail.id)
+        : -1;
+
+      const newIndex =
+        currentIndex === -1 ? 0 : (currentIndex + 1) % results.length;
+
+      setSearchDetail(results[newIndex]);
+    }
+  }, [uniqueResults, exploreEvents, searchDetail, defaultView]);
+
   const onKeyboardShortcut = useCallback(
     (key: string | null, modifiers: KeyModifiers) => {
       if (inputFocused) {
         return false;
       }
 
-      if (!modifiers.down || !uniqueResults) {
+      if (!modifiers.down || (!uniqueResults && !exploreEvents)) {
         return true;
       }
 
@@ -327,43 +382,23 @@ export default function SearchView({
           setSelectedObjects([]);
           return true;
         case "ArrowLeft":
-          if (uniqueResults.length > 0) {
-            const currentIndex = searchDetail
-              ? uniqueResults.findIndex(
-                  (result) => result.id === searchDetail.id,
-                )
-              : -1;
-
-            const newIndex =
-              currentIndex === -1
-                ? uniqueResults.length - 1
-                : (currentIndex - 1 + uniqueResults.length) %
-                  uniqueResults.length;
-
-            setSearchDetail(uniqueResults[newIndex]);
-          }
+          goToPrevious();
           return true;
         case "ArrowRight":
-          if (uniqueResults.length > 0) {
-            const currentIndex = searchDetail
-              ? uniqueResults.findIndex(
-                  (result) => result.id === searchDetail.id,
-                )
-              : -1;
-
-            const newIndex =
-              currentIndex === -1
-                ? 0
-                : (currentIndex + 1) % uniqueResults.length;
-
-            setSearchDetail(uniqueResults[newIndex]);
-          }
+          goToNext();
           return true;
       }
 
       return false;
     },
-    [uniqueResults, inputFocused, onSelectAllObjects, searchDetail],
+    [
+      uniqueResults,
+      exploreEvents,
+      inputFocused,
+      onSelectAllObjects,
+      goToPrevious,
+      goToNext,
+    ],
   );
 
   useKeyboardListener(
@@ -469,16 +504,22 @@ export default function SearchView({
   return (
     <div className="flex size-full flex-col pt-2 md:py-2">
       <Toaster closeButton={true} />
-      <SearchDetailDialog
-        search={searchDetail}
-        page={page}
-        setSearch={setSearchDetail}
-        setSearchPage={setPage}
-        setSimilarity={
-          searchDetail && (() => setSimilaritySearch(searchDetail))
-        }
-        setInputFocused={setInputFocused}
-      />
+      <div className="relative">
+        {searchDetail && (
+          <SearchDetailDialog
+            search={searchDetail}
+            page={page}
+            setSearch={setSearchDetail}
+            setSearchPage={setPage}
+            setSimilarity={
+              searchDetail && (() => setSimilaritySearch(searchDetail))
+            }
+            setInputFocused={setInputFocused}
+            onPrevious={goToPrevious}
+            onNext={goToNext}
+          />
+        )}
+      </div>
 
       <div
         className={cn(

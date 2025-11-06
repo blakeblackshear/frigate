@@ -1,6 +1,3 @@
-import Heading from "@/components/ui/heading";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +5,6 @@ import axios from "axios";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { LuExternalLink } from "react-icons/lu";
-import { PiWarningCircle } from "react-icons/pi";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -31,15 +27,11 @@ import { useDocDomain } from "@/hooks/use-doc-domain";
 
 type AnnotationSettingsPaneProps = {
   event: Event;
-  showZones: boolean;
-  setShowZones: React.Dispatch<React.SetStateAction<boolean>>;
   annotationOffset: number;
   setAnnotationOffset: React.Dispatch<React.SetStateAction<number>>;
 };
 export function AnnotationSettingsPane({
   event,
-  showZones,
-  setShowZones,
   annotationOffset,
   setAnnotationOffset,
 }: AnnotationSettingsPaneProps) {
@@ -140,26 +132,12 @@ export function AnnotationSettingsPane({
   }
 
   return (
-    <div className="mb-3 space-y-3 rounded-lg border border-secondary-foreground bg-background_alt p-2">
-      <Heading as="h4" className="my-2">
+    <div className="p-4">
+      <div className="text-md mb-2">
         {t("trackingDetails.annotationSettings.title")}
-      </Heading>
-      <div className="flex flex-col">
-        <div className="flex flex-row items-center justify-start gap-2 p-3">
-          <Switch
-            id="show-zones"
-            checked={showZones}
-            onCheckedChange={setShowZones}
-          />
-          <Label className="cursor-pointer" htmlFor="show-zones">
-            {t("trackingDetails.annotationSettings.showAllZones.title")}
-          </Label>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          {t("trackingDetails.annotationSettings.showAllZones.desc")}
-        </div>
       </div>
-      <Separator className="my-2 flex bg-secondary" />
+
+      <Separator className="mb-4 flex bg-secondary" />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -169,17 +147,18 @@ export function AnnotationSettingsPane({
             control={form.control}
             name="annotationOffset"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {t("trackingDetails.annotationSettings.offset.label")}
-                </FormLabel>
-                <div className="flex flex-col gap-3 md:flex-row-reverse md:gap-8">
-                  <div className="flex flex-row items-center gap-3 rounded-lg bg-destructive/50 p-3 text-sm text-primary-variant md:my-5">
-                    <PiWarningCircle className="size-24" />
-                    <div>
-                      <Trans ns="views/explore">
-                        trackingDetails.annotationSettings.offset.desc
-                      </Trans>
+              <FormItem className="flex flex-row items-start justify-between space-x-2">
+                <div className="flex flex-col gap-1">
+                  <FormLabel>
+                    {t("trackingDetails.annotationSettings.offset.label")}
+                  </FormLabel>
+                  <FormDescription>
+                    <Trans ns="views/explore">
+                      trackingDetails.annotationSettings.offset.millisecondsToOffset
+                    </Trans>
+                    <FormMessage />
+                    <div className="mt-2">
+                      {t("trackingDetails.annotationSettings.offset.tips")}
                       <div className="mt-2 flex items-center text-primary">
                         <Link
                           to={getLocaleDocUrl("configuration/reference")}
@@ -192,26 +171,19 @@ export function AnnotationSettingsPane({
                         </Link>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex flex-col">
+                  </FormDescription>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="min-w-24">
                     <FormControl>
                       <Input
-                        className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                        className="text-md w-full border border-input bg-background p-2 text-center hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                         placeholder="0"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      <Trans ns="views/explore">
-                        trackingDetails.annotationSettings.offset.millisecondsToOffset
-                      </Trans>
-                      <div className="mt-2">
-                        {t("trackingDetails.annotationSettings.offset.tips")}
-                      </div>
-                    </FormDescription>
                   </div>
                 </div>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -220,7 +192,9 @@ export function AnnotationSettingsPane({
             <div className="flex flex-row gap-2 pt-5">
               <Button
                 className="flex flex-1"
+                variant="default"
                 aria-label={t("button.apply", { ns: "common" })}
+                type="button"
                 onClick={form.handleSubmit(onApply)}
               >
                 {t("button.apply", { ns: "common" })}
