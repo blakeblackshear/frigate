@@ -32,6 +32,7 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import { TrackingDetails } from "./TrackingDetails";
+import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
 import { LuSettings } from "react-icons/lu";
 import { DetailStreamProvider } from "@/context/detail-stream-context";
 import {
@@ -74,6 +75,7 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import { DialogPortal } from "@radix-ui/react-dialog";
+import { useDetailStream } from "@/context/detail-stream-context";
 
 const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
@@ -147,17 +149,46 @@ function TabsWithActions({
         setSearch={setSearch}
         setSimilarity={setSimilarity}
       />
-      <div className="ml-2">
+      {pageToggle === "tracking_details" && (
+        <AnnotationSettingsPopover
+          search={search}
+          showControls={showControls}
+          setShowControls={setShowControls}
+        />
+      )}
+    </div>
+  );
+}
+
+type AnnotationSettingsPopoverProps = {
+  search: SearchResult;
+  showControls?: boolean;
+  setShowControls?: (v: boolean) => void;
+};
+
+function AnnotationSettingsPopover({
+  search,
+  showControls,
+  setShowControls,
+}: AnnotationSettingsPopoverProps) {
+  const { t } = useTranslation(["views/explore"]);
+  const { annotationOffset, setAnnotationOffset } = useDetailStream();
+  const [showZones, setShowZones] = useState(true);
+
+  return (
+    <div className="ml-2">
+      <Popover modal={true} open={showControls} onOpenChange={setShowControls}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant={showControls ? "select" : "default"}
-              className="size-7 p-1.5"
-              aria-label={t("trackingDetails.adjustAnnotationSettings")}
-              onClick={() => setShowControls?.(!showControls)}
-            >
-              <LuSettings className="size-5" />
-            </Button>
+            <PopoverTrigger asChild>
+              <Button
+                variant={showControls ? "select" : "default"}
+                className="size-7 p-1.5"
+                aria-label={t("trackingDetails.adjustAnnotationSettings")}
+              >
+                <LuSettings className="size-5" />
+              </Button>
+            </PopoverTrigger>
           </TooltipTrigger>
           <TooltipPortal>
             <TooltipContent>
@@ -165,7 +196,23 @@ function TabsWithActions({
             </TooltipContent>
           </TooltipPortal>
         </Tooltip>
-      </div>
+        <PopoverContent className="w-[90vw] max-w-2xl p-0" align="end">
+          <AnnotationSettingsPane
+            event={search as unknown as Event}
+            showZones={showZones}
+            setShowZones={setShowZones}
+            annotationOffset={annotationOffset}
+            setAnnotationOffset={(value) => {
+              if (typeof value === "function") {
+                const newValue = value(annotationOffset);
+                setAnnotationOffset(newValue);
+              } else {
+                setAnnotationOffset(value);
+              }
+            }}
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
@@ -221,8 +268,6 @@ function DialogContentComponent({
             />
           ) : undefined
         }
-        showControls={showControls}
-        setShowControls={setShowControls}
       />
     );
   }

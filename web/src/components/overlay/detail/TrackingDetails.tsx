@@ -8,8 +8,6 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { LuCircle, LuFolderX } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
-
 import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
 import { REVIEW_PADDING } from "@/types/review";
@@ -40,15 +38,12 @@ type TrackingDetailsProps = {
   event: Event;
   fullscreen?: boolean;
   tabs?: React.ReactNode;
-  showControls?: boolean;
-  setShowControls?: (v: boolean) => void;
 };
 
 export function TrackingDetails({
   className,
   event,
   tabs,
-  showControls = false,
 }: TrackingDetailsProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useTranslation(["views/explore"]);
@@ -58,8 +53,7 @@ export function TrackingDetails({
   const [displaySource, _setDisplaySource] = useState<"video" | "image">(
     "video",
   );
-  const { setSelectedObjectIds, annotationOffset, setAnnotationOffset } =
-    useDetailStream();
+  const { setSelectedObjectIds, annotationOffset } = useDetailStream();
 
   // manualOverride holds a record-stream timestamp explicitly chosen by the
   // user (eg, clicking a lifecycle row). When null we display `currentTime`.
@@ -90,7 +84,6 @@ export function TrackingDetails({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [_selectedZone, setSelectedZone] = useState("");
   const [_lifecycleZones, setLifecycleZones] = useState<string[]>([]);
-  const [showZones, setShowZones] = useState(true);
   const [seekToTimestamp, setSeekToTimestamp] = useState<number | null>(null);
 
   const aspectRatio = useMemo(() => {
@@ -463,22 +456,6 @@ export function TrackingDetails({
             <div className="-mt-2 mb-2 text-sm text-danger">
               {t("trackingDetails.autoTrackingTips")}
             </div>
-          )}
-          {showControls && (
-            <AnnotationSettingsPane
-              event={event}
-              showZones={showZones}
-              setShowZones={setShowZones}
-              annotationOffset={annotationOffset}
-              setAnnotationOffset={(value) => {
-                if (typeof value === "function") {
-                  const newValue = value(annotationOffset);
-                  setAnnotationOffset(newValue);
-                } else {
-                  setAnnotationOffset(value);
-                }
-              }}
-            />
           )}
 
           <div className="mt-4">

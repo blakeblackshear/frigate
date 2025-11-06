@@ -140,7 +140,7 @@ export function AnnotationSettingsPane({
   }
 
   return (
-    <div className="mb-3 space-y-3 rounded-lg border border-secondary-foreground bg-background_alt p-2">
+    <div className="space-y-3 p-4">
       <Heading as="h4" className="my-2">
         {t("trackingDetails.annotationSettings.title")}
       </Heading>
