@@ -36,5 +36,6 @@
   "selected_one": "{{count}} kiválasztva",
   "selected_other": "{{count}} kiválasztva",
   "suspiciousActivity": "Gyanús Tevékenység",
-  "threateningActivity": "Fenyegető Tevékenység"
+  "threateningActivity": "Fenyegető Tevékenység",
+  "zoomIn": "Nagyítás"
 }

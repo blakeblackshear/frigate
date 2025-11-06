@@ -217,9 +217,7 @@ export function GroupedClassificationCard({
     });
 
     if (!best) {
-      // select an item from the middle of the time series as this usually correlates
-      // to a more representative image than the first or last
-      return group.at(Math.floor(group.length / 2));
+      return group.at(-1);
     }
 
     const bestTyped: ClassificationItemData = best;
@@ -230,7 +228,7 @@ export function GroupedClassificationCard({
           ? event.sub_label
           : t(noClassificationLabel)
         : bestTyped.name,
-      score: event?.data?.sub_label_score || bestTyped.score,
+      score: event?.data?.sub_label_score,
     };
   }, [group, event, noClassificationLabel, t]);
 

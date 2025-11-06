@@ -33,7 +33,8 @@
     "details": "detalii",
     "snapshot": "snapshot",
     "video": "video",
-    "object_lifecycle": "ciclul de viață al obiectului"
+    "object_lifecycle": "ciclul de viață al obiectului",
+    "thumbnail": "miniatură"
   },
   "objectLifecycle": {
     "lifecycleItemDesc": {
@@ -200,12 +201,22 @@
     "audioTranscription": {
       "label": "Transcrie",
       "aria": "Solicită transcrierea audio"
+    },
+    "viewTrackingDetails": {
+      "label": "Vizualizați detaliile de urmărire",
+      "aria": "Vizualizați detaliile de urmărire"
+    },
+    "showObjectDetails": {
+      "label": "Afișează traseul obiectului"
+    },
+    "hideObjectDetails": {
+      "label": "Ascunde traseul obiectului"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Confirmă ștergerea",
-      "desc": "Ștergerea acestui obiect urmărit elimină instantaneul, orice încorporări salvate și orice intrări asociate ciclului de viață al obiectului. Materialul video înregistrat al acestui obiect urmărit în vizualizarea Istoric <em>NU</em> va fi șters.<br /><br />Ești sigur că vrei să continui?"
+      "desc": "Ștergerea acestui obiect urmărit elimină snapshot-ul, orice încorporări salvate și orice intrări asociate detaliilor de urmărire. Materialul video înregistrat al acestui obiect urmărit în vizualizarea Istoric <em>NU</em> va fi șters.<br /><br />Ești sigur că vrei să continui?"
     }
   },
   "noTrackedObjects": "Nu au fost găsite obiecte urmărite",
@@ -224,5 +235,53 @@
   },
   "concerns": {
     "label": "Îngrijorări"
+  },
+  "trackingDetails": {
+    "title": "Detalii de Urmărire",
+    "noImageFound": "Nu s-a găsit nicio imagine pentru acest marcaj de timp.",
+    "createObjectMask": "Creează Masca Obiectului",
+    "adjustAnnotationSettings": "Ajustează Setările de anotare",
+    "scrollViewTips": "Apasă pentru a vizualiza momentele semnificative din ciclul de viață al acestui obiect.",
+    "autoTrackingTips": "Pozițiile casetelor de delimitare vor fi inexacte pentru camerele cu urmărire automată.",
+    "count": "{{first}} din {{second}}",
+    "trackedPoint": "Punct Urmărit",
+    "lifecycleItemDesc": {
+      "visible": "detectat {{label}}",
+      "entered_zone": "{{label}} a intrat în {{zones}}",
+      "active": "{{label}} a devenit activ",
+      "stationary": "{{label}} a devenit staționar",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} detectat pentru {{label}}",
+        "other": "{{label}} recunoscut ca {{attribute}}"
+      },
+      "gone": "{{label}} a plecat",
+      "heard": "{{label}} auzit",
+      "external": "{{label}} detectat",
+      "header": {
+        "zones": "Zone",
+        "ratio": "Raport",
+        "area": "Aria"
+      }
+    },
+    "annotationSettings": {
+      "title": "Setări de adnotare",
+      "showAllZones": {
+        "title": "Afișează toate",
+        "desc": "Afișează întotdeauna zonele pe cadrele în care obiectele au intrat într-o zonă."
+      },
+      "offset": {
+        "label": "Compensare adnotare",
+        "desc": "Aceste date provin din fluxul de detectare al camerei tale, dar sunt suprapuse pe imaginile din fluxul de înregistrare. Este puțin probabil ca cele două fluxuri să fie perfect sincronizate. Drept urmare, caseta delimitatoare și materialul video nu se vor alinia perfect. Poți folosi această setare pentru a decală adnotările înainte sau înapoi în timp, pentru a le alinia mai bine cu materialul înregistrat.",
+        "millisecondsToOffset": "Millisecunde pentru a decalca adnotările de detectare. <em>Implicit: 0</em>",
+        "tips": "SFAT: Imaginează-ți că există un clip al unui eveniment cu o persoană care merge de la stânga la dreapta. Dacă caseta delimitatoare a cronologiei evenimentului este constant în stânga persoanei, atunci valoarea ar trebui să fie scăzută. În mod similar, dacă o persoană merge de la stânga la dreapta și caseta delimitatoare este constant în fața persoanei, atunci valoarea ar trebui să fie crescută.",
+        "toast": {
+          "success": "Decalajul de adnotare pentru {{camera}} a fost salvat în fișierul de configurare. Repornește Frigate pentru a aplica modificările."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Slide-ul anterior",
+      "next": "Slide-ul următor"
+    }
   }
 }

@@ -745,7 +745,8 @@
         "createRole": "Role {{role}} created successfully",
         "updateCameras": "Cameras updated for role {{role}}",
         "deleteRole": "Role {{role}} deleted successfully",
-        "userRolesUpdated": "{{count}} user(s) assigned to this role have been updated to 'viewer', which has access to all cameras."
+        "userRolesUpdated_one": "{{count}} user assigned to this role has been updated to 'viewer', which has access to all cameras.",
+        "userRolesUpdated_other": "{{count}} users assigned to this role have been updated to 'viewer', which has access to all cameras."
       },
       "error": {
         "createRoleFailed": "Failed to create role: {{errorMessage}}",

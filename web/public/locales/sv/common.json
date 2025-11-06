@@ -250,7 +250,10 @@
     "copyUrlToClipboard": "Webbadressen har kopierats till urklipp."
   },
   "label": {
-    "back": "Gå tillbaka"
+    "back": "Gå tillbaka",
+    "hide": "Dölj {{item}}",
+    "show": "Visa {{item}}",
+    "ID": "ID"
   },
   "unit": {
     "speed": {
@@ -274,5 +277,14 @@
   "readTheDocumentation": "Läs dokumentationen",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} och {{1}}",
+    "many": "{{items}} och {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Valfritt",
+    "internalID": "Det interna ID som Frigate använder i konfigurationen och databasen"
   }
 }

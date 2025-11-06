@@ -13,5 +13,6 @@
     }
   },
   "confirm": "Keluar tanpa menyimpan?",
-  "safeModeDescription": "Frigate sedang dalam mode aman karena kesalahan validasi konfigurasi."
+  "safeModeDescription": "Frigate sedang dalam mode aman karena kesalahan validasi konfigurasi.",
+  "safeConfigEditor": "Editor Konfigurasi(Mode Aman)"
 }

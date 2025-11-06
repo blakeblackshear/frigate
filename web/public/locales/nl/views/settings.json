@@ -50,6 +50,10 @@
       "playAlertVideos": {
         "label": "Meldingen afspelen",
         "desc": "Standaard worden recente meldingen op het Live dashboard afgespeeld als kleine lusvideo's. Schakel deze optie uit om alleen een statische afbeelding van recente meldingen weer te geven op dit apparaat/browser."
+      },
+      "displayCameraNames": {
+        "label": "Altijd cameranamen weergeven",
+        "desc": "Toon altijd de cameranamen in een label op het live-cameradashboard."
       }
     },
     "title": "Algemene instellingen",
@@ -764,7 +768,9 @@
     },
     "actions": {
       "alert": "Markeren als waarschuwing",
-      "notification": "Melding verzenden"
+      "notification": "Melding verzenden",
+      "sub_label": "Sublabel toevoegen",
+      "attribute": "Attribuut toevoegen"
     },
     "dialog": {
       "createTrigger": {
@@ -819,7 +825,7 @@
         },
         "actions": {
           "title": "Acties",
-          "desc": "Standaard verstuurt Frigate een MQTT-bericht voor alle triggers. Kies een extra actie die moet worden uitgevoerd wanneer deze trigger wordt geactiveerd.",
+          "desc": "Standaard stuurt Frigate een MQTT-bericht voor alle triggers. Sublabels voegen de triggernaam toe aan het objectlabel. Attributen zijn doorzoekbare metadata die afzonderlijk worden opgeslagen in de metadata van het gevolgde object.",
           "error": {
             "min": "Er moet ten minste één actie worden geselecteerd."
           }
@@ -884,7 +890,8 @@
         "createRole": "Rol {{role}} succesvol aangemaakt",
         "updateCameras": "Camera's bijgewerkt voor rol {{role}}",
         "deleteRole": "Rol {{role}} succesvol verwijderd",
-        "userRolesUpdated": "{{count}} gebruiker(s) die aan deze rol waren toegewezen, zijn bijgewerkt naar ‘kijker’, die toegang heeft tot alle camera’s."
+        "userRolesUpdated_one": "{{count}} gebruiker(s) die aan deze rol waren toegewezen, zijn bijgewerkt naar ‘kijker’, die toegang heeft tot alle camera’s.",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Kan rol niet aanmaken: {{errorMessage}}",
@@ -1069,7 +1076,9 @@
         },
         "resolutionHigh": "Een resolutie van {{resolution}} kan leiden tot een verhoogd gebruik van systeembronnen.",
         "resolutionLow": "Een resolutie van {{resolution}} kan te laag zijn voor betrouwbare detectie van kleine objecten."
-      }
+      },
+      "ffmpegModule": "Gebruik stream-compatibiliteitsmodus",
+      "ffmpegModuleDescription": "Als de stream na meerdere pogingen niet wordt geladen, probeer dit dan in te schakelen. Wanneer deze optie is ingeschakeld, gebruikt Frigate de ffmpeg-module samen met go2rtc. Dit kan zorgen voor een betere compatibiliteit met sommige camerastreams."
     }
   },
   "cameraManagement": {

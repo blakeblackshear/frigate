@@ -40,12 +40,20 @@
   "detail": {
     "noDataFound": "Nicio dată detaliată de revizuit",
     "aria": "Comută vizualizarea detaliată",
-    "trackedObject_one": "obiect urmărit",
-    "trackedObject_other": "obiecte urmărite",
-    "noObjectDetailData": "Nicio dată de detaliu obiect disponibilă."
+    "trackedObject_one": "obiect",
+    "trackedObject_other": "obiecte",
+    "noObjectDetailData": "Nicio dată de detaliu obiect disponibilă.",
+    "label": "Detaliu",
+    "settings": "Setări vizualizare detaliată",
+    "alwaysExpandActive": {
+      "title": "Extinde întotdeauna activul",
+      "desc": "Extinde întotdeauna detaliile obiectului elementului activ de revizuire, atunci când sunt disponibile."
+    }
   },
   "objectTrack": {
     "trackedPoint": "Punct urmărit",
-    "clickToSeek": "Fă clic pentru a naviga la acest moment"
-  }
+    "clickToSeek": "Apasă pentru a naviga la acest moment"
+  },
+  "zoomIn": "Mărește",
+  "zoomOut": "Micșorează"
 }

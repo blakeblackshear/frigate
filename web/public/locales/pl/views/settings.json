@@ -757,7 +757,9 @@
         "createRole": "Utworzono rolę {{role}}",
         "updateCameras": "Zaktualizowano kamery dla roli {{role}}",
         "deleteRole": "Rola {{role}} została usunięta",
-        "userRolesUpdated": "{{count}} użytkowników przypisanych do tej roli zostało zaktualizowanych do roli 'viewer', która ma dostęp do wszystkich kamer."
+        "userRolesUpdated_one": "{{count}} użytkowników przypisanych do tej roli zostało zaktualizowanych do roli 'viewer', która ma dostęp do wszystkich kamer.",
+        "userRolesUpdated_few": "",
+        "userRolesUpdated_many": ""
       },
       "error": {
         "createRoleFailed": "Nie udało się utworzyć roli: {{errorMessage}}",

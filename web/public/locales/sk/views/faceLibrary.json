@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Sprievodca pridáním novej kolekcie do Knižnice tvárí.",
+    "addFace": "Sprievodca pridaním novej kolekcie do Knižnice tvárí.",
     "invalidName": "Neplatné meno. Mená môžu obsahovať iba písmená, čísla, medzery, apostrofy, podčiarkovníky a spojovníky.",
     "placeholder": "Zadajte názov pre túto kolekciu"
   },
@@ -23,7 +23,7 @@
     "title": "Vytvoriť Zbierku",
     "desc": "Vytvoriť novú zbierku",
     "new": "Vytvoriť novú tvár",
-    "nextSteps": "Vybudovanie pevných základov: <li> Pomocou záložky Tréning vyberte a trénujte obrázky pre každú detekovanú osobu.</li><li>Pre dosiahnutie najlepších výsledkov sa zamerajte na snímky s priamym pohľadom; vyhnite sa snímkam, ktoré zachytávajú tváre pod uhlom.</li></ul>"
+    "nextSteps": "Vybudovanie silného základu:<li>Použite kartu Nedávne rozpoznania na výber a trénovanie obrázkov pre každú rozpoznanú osobu.</li><li>Pre dosiahnutie najlepších výsledkov sa zamerajte na priame obrázky; vyhnite sa trénovaniu obrázkov, ktoré zachytávajú tváre pod uhlom.</li></ul>"
   },
   "steps": {
     "faceName": "Zadajte Meno tváre",

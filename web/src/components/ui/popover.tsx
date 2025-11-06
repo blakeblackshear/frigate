@@ -11,13 +11,21 @@ const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
     container?: HTMLElement | null;
+    disablePortal?: boolean;
   }
 >(
   (
-    { className, container, align = "center", sideOffset = 4, ...props },
+    {
+      className,
+      container,
+      disablePortal = false,
+      align = "center",
+      sideOffset = 4,
+      ...props
+    },
     ref,
-  ) => (
-    <PopoverPrimitive.Portal container={container}>
+  ) => {
+    const content = (
       <PopoverPrimitive.Content
         ref={ref}
         align={align}
@@ -28,8 +36,18 @@ const PopoverContent = React.forwardRef<
         )}
         {...props}
       />
-    </PopoverPrimitive.Portal>
-  ),
+    );
+
+    if (disablePortal) {
+      return content;
+    }
+
+    return (
+      <PopoverPrimitive.Portal container={container}>
+        {content}
+      </PopoverPrimitive.Portal>
+    );
+  },
 );
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 

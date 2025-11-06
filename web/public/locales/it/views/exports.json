@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "Impossibile rinominare l'esportazione: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Condividi esportazione",
+    "downloadVideo": "Scarica video",
+    "editName": "Modifica nome",
+    "deleteExport": "Elimina esportazione"
   }
 }

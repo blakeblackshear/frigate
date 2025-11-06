@@ -1,0 +1,39 @@
+{
+  "documentTitle": "Modelos de Classificação",
+  "button": {
+    "deleteClassificationAttempts": "Apagar Imagens de Classificação",
+    "renameCategory": "Renomear Classe",
+    "deleteCategory": "Apagar Classe",
+    "deleteImages": "Apagar Imagens",
+    "trainModel": "Treinar Modelo",
+    "addClassification": "Adicionar classificação",
+    "deleteModels": "Excluir modelos"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Classe Apagada",
+      "deletedImage": "Imagens Apagadas",
+      "categorizedImage": "Imagem Classificada com Sucesso",
+      "trainedModel": "Modelo treinado com sucesso.",
+      "trainingModel": "Treinamento do modelo iniciado com sucesso.",
+      "deletedModel_one": "Modelo(s) {{count}} excluído(s) com sucesso",
+      "deletedModel_many": "",
+      "deletedModel_other": ""
+    },
+    "error": {
+      "deleteImageFailed": "Falha ao deletar:{{errorMessage}}",
+      "deleteCategoryFailed": "Falha ao deletar classe:{{errorMessage}}",
+      "categorizeFailed": "Falha ao categorizar imagem:{{errorMessage}}",
+      "deleteModelFailed": "Falha ao excluir o modelo: {{errorMessage}}",
+      "trainingFailed": "Falha ao iniciar o treinamento do modelo: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Excluir Classe",
+    "desc": "Tem certeza de que deseja excluir a classe {{name}}? Isso excluirá permanentemente todas as imagens associadas e exigirá o treinamento do modelo novamente."
+  },
+  "deleteModel": {
+    "title": "Deletar modelo de classificação",
+    "single": "Tem certeza de que deseja excluir {{name}}? Isso excluirá permanentemente todos os dados associados, incluindo imagens e dados de treinamento. Esta ação não pode ser desfeita."
+  }
+}

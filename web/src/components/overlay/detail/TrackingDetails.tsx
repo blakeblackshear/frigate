@@ -2,21 +2,12 @@ import useSWR from "swr";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { Button } from "@/components/ui/button";
 import { TrackingDetailsSequence } from "@/types/timeline";
-import Heading from "@/components/ui/heading";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
-import { LuCircle, LuFolderX, LuSettings } from "react-icons/lu";
+import { LuCircle, LuFolderX } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
-import { TooltipPortal } from "@radix-ui/react-tooltip";
 import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
 import { REVIEW_PADDING } from "@/types/review";
@@ -39,8 +30,6 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useDetailStream } from "@/context/detail-stream-context";
 import { isDesktop, isIOS, isMobileOnly, isSafari } from "react-device-detect";
-import Chip from "@/components/indicators/Chip";
-import { FaDownload, FaHistory } from "react-icons/fa";
 import { useApiHost } from "@/api";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import ObjectTrackOverlay from "../ObjectTrackOverlay";
@@ -59,15 +48,13 @@ export function TrackingDetails({
 }: TrackingDetailsProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useTranslation(["views/explore"]);
-  const navigate = useNavigate();
   const apiHost = useApiHost();
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [displaySource, _setDisplaySource] = useState<"video" | "image">(
     "video",
   );
-  const { setSelectedObjectIds, annotationOffset, setAnnotationOffset } =
-    useDetailStream();
+  const { setSelectedObjectIds, annotationOffset } = useDetailStream();
 
   // manualOverride holds a record-stream timestamp explicitly chosen by the
   // user (eg, clicking a lifecycle row). When null we display `currentTime`.
@@ -104,8 +91,6 @@ export function TrackingDetails({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [_selectedZone, setSelectedZone] = useState("");
   const [_lifecycleZones, setLifecycleZones] = useState<string[]>([]);
-  const [showControls, setShowControls] = useState(false);
-  const [showZones, setShowZones] = useState(true);
   const [seekToTimestamp, setSeekToTimestamp] = useState<number | null>(null);
 
   const aspectRatio = useMemo(() => {
@@ -366,7 +351,7 @@ export function TrackingDetails({
     <div
       className={cn(
         isDesktop
-          ? "flex size-full gap-4 overflow-hidden"
+          ? "flex size-full justify-evenly gap-4 overflow-hidden"
           : "flex size-full flex-col gap-2",
         className,
       )}
@@ -459,128 +444,34 @@ export function TrackingDetails({
               </div>
             </>
           )}
-          <div
-            className={cn(
-              "absolute top-2 z-[5] flex items-center gap-2",
-              isIOS ? "right-8" : "right-2",
-            )}
-          >
-            {event && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <Chip
-                    className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                    onClick={() => {
-                      if (event?.id) {
-                        const params = new URLSearchParams({
-                          id: event.id,
-                        }).toString();
-                        navigate(`/review?${params}`);
-                      }
-                    }}
-                  >
-                    <FaHistory className="size-4 text-white" />
-                  </Chip>
-                </TooltipTrigger>
-                <TooltipPortal>
-                  <TooltipContent>
-                    {t("itemMenu.viewInHistory.label")}
-                  </TooltipContent>
-                </TooltipPortal>
-              </Tooltip>
-            )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <a
-                  download
-                  href={`${baseUrl}api/${event.camera}/start/${event.start_time - REVIEW_PADDING}/end/${(event.end_time ?? Date.now() / 1000) + REVIEW_PADDING}/clip.mp4`}
-                >
-                  <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                    <FaDownload className="size-4 text-white" />
-                  </Chip>
-                </a>
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent>
-                  {t("button.download", { ns: "common" })}
-                </TooltipContent>
-              </TooltipPortal>
-            </Tooltip>
-          </div>
         </div>
       </div>
 
-      <div className={cn(isDesktop && "flex-[2] overflow-hidden")}>
-        {isDesktop && tabs && <div className="mb-4">{tabs}</div>}
+      <div
+        className={cn(
+          isDesktop && "justify-between overflow-hidden md:basis-2/5",
+        )}
+      >
+        {isDesktop && tabs && (
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex-1">{tabs}</div>
+          </div>
+        )}
         <div
           className={cn(
             isDesktop && "scrollbar-container h-full overflow-y-auto",
           )}
         >
-          <div className="flex flex-row items-center justify-between">
-            <Heading as="h4">{t("trackingDetails.title")}</Heading>
-
-            <div className="flex flex-row gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={showControls ? "select" : "default"}
-                    className="size-7 p-1.5"
-                    aria-label={t("trackingDetails.adjustAnnotationSettings")}
-                  >
-                    <LuSettings
-                      className="size-5"
-                      onClick={() => setShowControls(!showControls)}
-                    />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipPortal>
-                  <TooltipContent>
-                    {t("trackingDetails.adjustAnnotationSettings")}
-                  </TooltipContent>
-                </TooltipPortal>
-              </Tooltip>
-            </div>
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <div className="mb-2 text-sm text-muted-foreground">
-              {t("trackingDetails.scrollViewTips")}
-            </div>
-            <div className="min-w-20 text-right text-sm text-muted-foreground">
-              {t("trackingDetails.count", {
-                first: eventSequence?.length ?? 0,
-                second: eventSequence?.length ?? 0,
-              })}
-            </div>
-          </div>
           {config?.cameras[event.camera]?.onvif.autotracking
             .enabled_in_config && (
-            <div className="-mt-2 mb-2 text-sm text-danger">
+            <div className="mb-2 text-sm text-danger">
               {t("trackingDetails.autoTrackingTips")}
             </div>
-          )}
-          {showControls && (
-            <AnnotationSettingsPane
-              event={event}
-              showZones={showZones}
-              setShowZones={setShowZones}
-              annotationOffset={annotationOffset}
-              setAnnotationOffset={(value) => {
-                if (typeof value === "function") {
-                  const newValue = value(annotationOffset);
-                  setAnnotationOffset(newValue);
-                } else {
-                  setAnnotationOffset(value);
-                }
-              }}
-            />
           )}
 
           <div className="mt-4">
             <div
-              className={cn(
-                "rounded-md bg-secondary p-3 outline outline-[3px] -outline-offset-[2.8px] outline-transparent duration-500",
-              )}
+              className={cn("rounded-md bg-background_alt px-0 py-3 md:px-2")}
             >
               <div className="flex w-full items-center justify-between">
                 <div
@@ -606,7 +497,7 @@ export function TrackingDetails({
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="capitalize">{label}</span>
-                    <span className="text-secondary-foreground">
+                    <span className="md:text-md text-xs text-secondary-foreground">
                       {formattedStart ?? ""} - {formattedEnd ?? ""}
                     </span>
                     {event.data?.recognized_license_plate && (

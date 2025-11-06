@@ -799,7 +799,8 @@
         "createRole": "Szerepkör létrehozva: {{role}}",
         "updateCameras": "Kamerák frissítve a szerepkörhöz: {{role}}",
         "deleteRole": "Szerepkör sikeresen törölve: {{role}}",
-        "userRolesUpdated": "{{count}} felhasználó, akit ehhez a szerepkörhöz rendeltünk, frissült „néző”-re, amely hozzáféréssel rendelkezik az összes kamerához."
+        "userRolesUpdated_one": "{{count}} felhasználó, akit ehhez a szerepkörhöz rendeltünk, frissült „néző”-re, amely hozzáféréssel rendelkezik az összes kamerához.",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Nem sikerült létrehozni a szerepkört: {{errorMessage}}",

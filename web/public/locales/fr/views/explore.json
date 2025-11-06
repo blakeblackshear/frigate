@@ -109,7 +109,8 @@
     "details": "détails",
     "video": "vidéo",
     "object_lifecycle": "cycle de vie de l'objet",
-    "snapshot": "instantané"
+    "snapshot": "instantané",
+    "thumbnail": "Miniature"
   },
   "objectLifecycle": {
     "title": "Cycle de vie de l'objet",
@@ -240,7 +241,7 @@
     "noImageFound": "Aucune image trouvée pour cet horodatage",
     "createObjectMask": "Créer un masque d'objet",
     "adjustAnnotationSettings": "Ajuster les paramètres d'annotation",
-    "scrollViewTips": "Défilez pour voir les moments significatifs du cycle de vie de cet objet.",
+    "scrollViewTips": "Cliquez pour voir les moments significatifs du cycle de vie de cet objet.",
     "autoTrackingTips": "Les positions des cadres de détection seront imprécises pour les caméras à suivi automatique.",
     "count": "{{first}} sur {{second}}",
     "trackedPoint": "Point suivi",
@@ -264,7 +265,7 @@
     },
     "annotationSettings": {
       "offset": {
-        "desc": "Ces données proviennent du flux de détection de votre caméra mais sont superposées aux images du flux d'enregistrement. Il est peu probable que les deux flux soient parfaitement synchronisés. Par conséquent, le cadre de détection et l'enregistrement ne seront pas parfaitement alignés. Cependant, le champ <code>annotation_offset</code> peut être utilisé pour corriger cela.",
+        "desc": "Ces données proviennent du flux de détection de votre caméra, mais elles sont superposées aux images du flux d'enregistrement. Il est peu probable que les deux flux soient parfaitement synchronisés. Par conséquent, le cadre de délimitation et la vidéo ne s'aligneront pas parfaitement. Vous pouvez utiliser ce paramètre pour décaler les annotations vers l'avant ou vers l'arrière dans le temps afin de mieux les aligner avec la vidéo enregistrée.",
         "millisecondsToOffset": "Millisecondes de décalage pour les annotations de détection. <em>Par défaut : 0</em>",
         "tips": "ASTUCE : Imaginez une séquence d'événement avec une personne marchant de gauche à droite. Si le cadre de détection sur la chronologie de l'événement est constamment à gauche de la personne, la valeur doit être diminuée. De même, si une personne marche de gauche à droite et que le cadre de détection est constamment devant la personne, la valeur doit être augmentée.",
         "toast": {

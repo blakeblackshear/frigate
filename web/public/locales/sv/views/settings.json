@@ -25,7 +25,11 @@
         "desc": "Som standard visas varningar på Live panelen som små loopande klipp. Inaktivera denna inställning för att bara visa en statisk bild av nya varningar på denna enhet/webbläsare.",
         "label": "Spela upp Varnings videor"
       },
-      "title": "Live Panel"
+      "title": "Live Panel",
+      "displayCameraNames": {
+        "label": "Visa alltid kameranamn",
+        "desc": "Visa alltid kameranamnen i ett chip i instrumentpanelen för livevisning med flera kameror."
+      }
     },
     "storedLayouts": {
       "title": "Sparade Layouter",
@@ -640,7 +644,8 @@
         "createRole": "Roll {{role}} skapad",
         "updateCameras": "Kameror uppdaterade för roll {{role}}",
         "deleteRole": "Roll {{role}} raderad",
-        "userRolesUpdated": "{{count}} användare som tilldelats den här rollen har uppdaterats till 'tittare', vilket har åtkomst till alla kameror."
+        "userRolesUpdated_one": "{{count}} användare som tilldelats den här rollen har uppdaterats till 'tittare', vilket har åtkomst till alla kameror.",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Misslyckades att skapa roll: {{errorMessage}}",
@@ -731,7 +736,7 @@
   "triggers": {
     "documentTitle": "Utlösare",
     "management": {
-      "title": "Utlösare hantering",
+      "title": "Utlösare",
       "desc": "Hantera utlösare för {{camera}}. Använd miniatyrtypen för att utlösa liknande miniatyrer som ditt valda spårade objekt och beskrivningstypen för att utlösa liknande beskrivningar av text du anger."
     },
     "addTrigger": "Lägg till utlösare",
@@ -752,7 +757,9 @@
     },
     "actions": {
       "notification": "Skicka avisering",
-      "alert": "Markera som Varning"
+      "alert": "Markera som Varning",
+      "sub_label": "Lägg till underetikett",
+      "attribute": "Lägg till attribut"
     },
     "dialog": {
       "createTrigger": {
@@ -770,25 +777,28 @@
       "form": {
         "name": {
           "title": "Namn",
-          "placeholder": "Ange utlösarens namn",
+          "placeholder": "Namnge denna utlösare",
           "error": {
-            "minLength": "Namnet måste vara minst 2 tecken lång.",
-            "invalidCharacters": "Namnet får bara innehålla bokstäver, siffror, understreck, och bindestreck.",
+            "minLength": "Fältet måste vara minst 2 tecken långt.",
+            "invalidCharacters": "Fältet får bara innehålla bokstäver, siffror, understreck och bindestreck.",
             "alreadyExists": "En utlösare med detta namn finns redan för den här kameran."
-          }
+          },
+          "description": "Ange ett unikt namn eller en unik beskrivning för att identifiera den här utlösaren"
         },
         "enabled": {
           "description": "Aktivera eller inaktivera den här utlösaren"
         },
         "type": {
           "title": "Typ",
-          "placeholder": "Välj utlösartyp"
+          "placeholder": "Välj utlösartyp",
+          "description": "Utlöses när en liknande beskrivning av spårat objekt detekteras",
+          "thumbnail": "Utlöses när en liknande miniatyrbild av ett spårat objekt upptäcks"
         },
         "content": {
           "title": "Innehåll",
-          "imagePlaceholder": "Välj en bild",
+          "imagePlaceholder": "Välj en miniatyrbild",
           "textPlaceholder": "Ange textinnehåll",
-          "imageDesc": "Välj en bild för att utlösa den här åtgärden när en liknande bild upptäcks.",
+          "imageDesc": "Endast de senaste 100 miniatyrerna visas. Om du inte hittar önskad miniatyr kan du granska tidigare objekt i Utforska och skapa en utlösare från menyn där.",
           "textDesc": "Ange text för att utlösa den här åtgärden när en liknande beskrivning av spårat objekt upptäcks.",
           "error": {
             "required": "Innehåll krävs."
@@ -799,11 +809,12 @@
           "error": {
             "min": "Tröskelvärdet måste vara minst 0",
             "max": "Tröskelvärdet får vara högst 1"
-          }
+          },
+          "desc": "Ställ in likhetströskeln för denna utlösare. En högre tröskel innebär att en bättre matchning krävs för att utlösaren ska aktiveras."
         },
         "actions": {
           "title": "Åtgärder",
-          "desc": "Som standard utlöser Frigate ett MQTT-meddelande för alla utlösare. Välj en ytterligare åtgärd att utföra när den här utlösaren utlöses.",
+          "desc": "Som standard utlöser Frigate ett MQTT-meddelande för alla utlösare. Underetiketter lägger till utlösarnamnet till objektetiketten. Attribut är sökbara metadata som lagras separat i de spårade objektmetadata.",
           "error": {
             "min": "Minst en åtgärd måste väljas."
           }
@@ -830,6 +841,23 @@
     "semanticSearch": {
       "title": "Semantisk sökning är inaktiverad",
       "desc": "Semantisk sökning måste vara aktiverad för att använda Utlösare."
+    },
+    "wizard": {
+      "title": "Skapa utlösare",
+      "step1": {
+        "description": "Konfigurera grundinställningarna för din trigger."
+      },
+      "step2": {
+        "description": "Ställ in innehållet som ska utlösa den här åtgärden."
+      },
+      "step3": {
+        "description": "Konfigurera tröskelvärdet och åtgärderna för den här utlösaren."
+      },
+      "steps": {
+        "nameAndType": "Namn och typ",
+        "configureData": "Konfigurera data",
+        "thresholdAndActions": "Tröskelvärde och åtgärder"
+      }
     }
   },
   "cameraWizard": {
@@ -886,10 +914,15 @@
         "nameExists": "Kameranamnet finns redan",
         "brands": {
           "reolink-rtsp": "Reolink RTSP rekommenderas inte. Aktivera HTTP i kamerans firmwareinställningar och starta om guiden."
-        }
+        },
+        "customUrlRtspRequired": "Anpassade webbadresser måste börja med \"rtsp://\". Manuell konfiguration krävs för kameraströmmar som inte använder RTSP."
       },
       "docs": {
         "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Undersöker kamerans metadata...",
+        "fetchingSnapshot": "Hämtar kamerabild..."
       }
     },
     "step2": {
@@ -968,8 +1001,12 @@
         },
         "hikvision": {
           "substreamWarning": "Delström 1 är låst till en låg upplösning. Många Hikvision kameror stöder ytterligare delströmmar som måste aktiveras i kamerans inställningar. Det rekommenderas att kontrollera och använda dessa strömmar om de är tillgängliga."
-        }
-      }
+        },
+        "resolutionHigh": "En upplösning på {{resolution}} kan orsaka ökad resursanvändning.",
+        "resolutionLow": "En upplösning på {{resolution}} kan vara för låg för tillförlitlig detektering av små objekt."
+      },
+      "ffmpegModule": "Använd läge för strömkompatibilitet",
+      "ffmpegModuleDescription": "Om strömmen inte läses in efter flera försök, prova att aktivera detta. När det är aktiverat kommer Frigate att använda ffmpeg-modulen med go2rtc. Detta kan ge bättre kompatibilitet med vissa kameraströmmar."
     }
   },
   "cameraManagement": {

@@ -50,6 +50,10 @@
       "automaticLiveView": {
         "label": "Automatisk direktevisning",
         "desc": "Bytt automatisk til et kameras direktevisning når aktivitet oppdages. Deaktivering av dette valget gjør at statiske kamerabilder i Direkte-dashbord kun oppdateres én gang i minuttet."
+      },
+      "displayCameraNames": {
+        "label": "Vis alltid kameranavn",
+        "desc": "Vis alltid kameranavnene i en merkelapp i dashbordet for direktevisning med flere kameraer."
       }
     },
     "storedLayouts": {
@@ -337,7 +341,7 @@
         }
       },
       "toast": {
-        "success": "Sone ({{zoneName}}) er lagret. Start Frigate på nytt for å bruke endringer."
+        "success": "Sone ({{zoneName}}) er lagret. Start Frigate på nytt for å aktivere endringer."
       }
     },
     "motionMasks": {
@@ -681,12 +685,12 @@
   "enrichments": {
     "title": "Innstillinger for utvidelser",
     "licensePlateRecognition": {
-      "desc": "Frigate kan gjenkjenne kjennemerker på kjøretøy og automatisk legge til de oppdagede tegnene i feltet \"recognized_license_plate\", eller et kjent navn som en under-merkelapp på objekter av typen bil. Et vanlig brukstilfelle kan være å lese kjennemerker på biler som kjører inn i en innkjørsel eller biler som passerer på en gate.",
+      "desc": "Frigate kan gjenkjenne kjennemerker på kjøretøy og automatisk legge til de oppdagede tegnene i feltet \"recognized_license_plate\", eller et kjent navn som en underetikett på objekter av typen bil. Et vanlig brukstilfelle kan være å lese kjennemerker på biler som kjører inn i en innkjørsel eller biler som passerer på en gate.",
       "title": "Kjennemerke gjenkjenning",
       "readTheDocumentation": "Se dokumentasjonen"
     },
     "birdClassification": {
-      "desc": "Fugleklassifisering identifiserer kjente fugler ved hjelp av en kvantisert TensorFlow-modell. Når en fugl gjenkjennes, vil det vanlige navnet legges til som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
+      "desc": "Fugleklassifisering identifiserer kjente fugler ved hjelp av en kvantisert TensorFlow-modell. Når en fugl gjenkjennes, vil det vanlige navnet legges til som en underetikett. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
       "title": "Klassifisering av fugler"
     },
     "semanticSearch": {
@@ -730,7 +734,7 @@
         }
       },
       "title": "Ansiktsgjenkjenning",
-      "desc": "Ansiktsgjenkjenning gjør det mulig å tildele navn til personer, og når ansiktet deres gjenkjennes, vil Frigate tildele personens navn som en under-merkelapp. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
+      "desc": "Ansiktsgjenkjenning gjør det mulig å tildele navn til personer, og når ansiktet deres gjenkjennes, vil Frigate tildele personens navn som en underetikett. Denne informasjonen vises i brukergrensesnittet, filtre, samt i meldingsvarsler.",
       "readTheDocumentation": "Se dokumentasjonen"
     },
     "unsavedChanges": "Ulagrede endringer i innstillinger for utvidelser",
@@ -764,7 +768,9 @@
     },
     "actions": {
       "alert": "Marker som varsel",
-      "notification": "Send meldingsvarsel"
+      "notification": "Send meldingsvarsel",
+      "sub_label": "Legg til underetikett",
+      "attribute": "Legg til attributt"
     },
     "dialog": {
       "createTrigger": {
@@ -819,7 +825,7 @@
         },
         "actions": {
           "title": "Handlinger",
-          "desc": "Som standard sender Frigate en MQTT-melding for alle utløsere. Velg en ekstra handling som skal utføres når denne utløseren aktiveres.",
+          "desc": "Som standard sender Frigate en MQTT-melding for alle utløsere. Underetiketter legger til navnet på utløseren i objektetiketten. Attributter er søkbare metadata som lagres separat i objektets sporingsmetadata.",
           "error": {
             "min": "Minst én handling må velges."
           }
@@ -884,7 +890,8 @@
         "createRole": "Rollen {{role}} ble opprettet",
         "updateCameras": "Kameraer oppdatert for rollen {{role}}",
         "deleteRole": "Rollen {{role}} ble slettet",
-        "userRolesUpdated": "{{count}} bruker(e) som var tildelt denne rollen er oppdatert til \"visningsbruker\", som har tilgang til alle kameraer."
+        "userRolesUpdated_one": "{{count}} bruker(e) som var tildelt denne rollen er oppdatert til \"visningsbruker\", som har tilgang til alle kameraer.",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Kunne ikke opprette rolle: {{errorMessage}}",
@@ -1069,7 +1076,9 @@
         },
         "resolutionHigh": "En oppløsning på {{resolution}} kan føre til økt ressursbruk.",
         "resolutionLow": "En oppløsning på {{resolution}} kan være for lav for pålitelig deteksjon av små objekter."
-      }
+      },
+      "ffmpegModuleDescription": "Hvis strømmen ikke lastes inn etter flere forsøk, kan du prøve å aktivere dette. Når det er aktivert, vil Frigate bruke ffmpeg-modulen sammen med go2rtc. Dette kan gi bedre kompatibilitet med enkelte kamerastrømmer.",
+      "ffmpegModule": "Bruk kompatibilitetsmodus for strøm"
     }
   },
   "cameraManagement": {
@@ -1145,7 +1154,7 @@
       "selectDetectionsZones": "Velg soner for deteksjoner",
       "limitDetections": "Avgrens deteksjoner til bestemte soner",
       "toast": {
-        "success": "Konfigurasjonen for inspeksjonsklassifisering er lagret. Start Frigate på nytt for å bruke endringer."
+        "success": "Konfigurasjonen for inspeksjonsklassifisering er lagret. Start Frigate på nytt for å aktivere endringer."
       }
     }
   }

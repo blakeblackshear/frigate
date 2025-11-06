@@ -41,7 +41,7 @@
     "aria": "Vybrat trénink"
   },
   "description": {
-    "addFace": "Prúvodce přidání nové kolekce do Knižnice obličejů.",
+    "addFace": "Přidejte novou kolekci do Knihovny obličejů nahráním prvního obrázku.",
     "placeholder": "Zadejte název pro tuto kolekci",
     "invalidName": "Neplatný název. Názvy mohou obsahovat pouze písmena, čísla, mezery, apostrofy, podtržítka a pomlčky."
   },

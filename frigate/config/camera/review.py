@@ -140,6 +140,10 @@ Evaluate in this order:
 The mere presence of an unidentified person in private areas during late night hours is inherently suspicious and warrants human review, regardless of what activity they appear to be doing or how brief the sequence is.""",
         title="Custom activity context prompt defining normal and suspicious activity patterns for this property.",
     )
+    camera_context: str = Field(
+        default="",
+        title="Spatial context about the camera's field of view to help with descriptive accuracy. Should describe physical features and locations outside the frame.",
+    )
 
 
 class ReviewConfig(FrigateBaseModel):

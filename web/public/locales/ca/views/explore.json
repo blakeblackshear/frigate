@@ -84,7 +84,8 @@
     "details": "detalls",
     "snapshot": "instantània",
     "video": "vídeo",
-    "object_lifecycle": "cicle de vida de l'objecte"
+    "object_lifecycle": "cicle de vida de l'objecte",
+    "thumbnail": "miniatura"
   },
   "details": {
     "timestamp": "Marca temporal",
@@ -240,7 +241,7 @@
     "noImageFound": "No s'ha trobat cap imatge amb aquesta hora.",
     "createObjectMask": "Crear màscara d'objecte",
     "adjustAnnotationSettings": "Ajustar configuració d'anotacions",
-    "scrollViewTips": "Desplaça per veure els moments significants del cicle de vida d'aquest objecte.",
+    "scrollViewTips": "Feu clic per veure els moments significatius del cicle de vida d'aquest objecte.",
     "autoTrackingTips": "Limitar les posicións de la caixa serà inacurat per càmeras de seguiment automàtic.",
     "count": "{{first}} de {{second}}",
     "trackedPoint": "Punt Seguit",
@@ -270,7 +271,7 @@
       },
       "offset": {
         "label": "Òfset d'Anotació",
-        "desc": "Aquestes dades provenen del flux de detecció de la càmera, però se superposen a les imatges del flux de gravació. És poc probable que els dos fluxos estiguin perfectament sincronitzats. Com a resultat, el quadre delimitador i el metratge no s'alinearan perfectament. Tanmateix, es pot utilitzar el camp <code>annotation_offset</code> per ajustar-ho.",
+        "desc": "Aquestes dades provenen del flux de detecció de la càmera, però se superposen a les imatges del flux de gravació. És poc probable que els dos fluxos estiguin perfectament sincronitzats. Com a resultat, el quadre delimitador i les imatges no s'alinearan perfectament. Tanmateix, es pot utilitzar el camp <code>annotation_offset</code> per ajustar-ho.",
         "millisecondsToOffset": "Millisegons per l'òfset de detecció d'anotacions per. <em>Per defecte: 0</em>",
         "tips": "CONSELL: Imagineu-vos que hi ha un clip d'esdeveniment amb una persona caminant d'esquerra a dreta. Si el quadre delimitador de la cronologia de l'esdeveniment està constantment a l'esquerra de la persona, aleshores s'hauria de disminuir el valor. De la mateixa manera, si una persona camina d'esquerra a dreta i el quadre delimitador està constantment per davant de la persona, aleshores s'hauria d'augmentar el valor.",
         "toast": {

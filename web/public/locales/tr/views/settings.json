@@ -10,7 +10,9 @@
     "object": "Hata Ayıklama - Frigate",
     "general": "Genel Ayarlar - Frigate",
     "notifications": "Bildirim Ayarları - Frigate",
-    "enrichments": "Zenginleştirme Ayarları - Frigate"
+    "enrichments": "Zenginleştirme Ayarları - Frigate",
+    "cameraManagement": "Kameraları Yönet - Frigate",
+    "cameraReview": "Kamera İnceleme Ayarları - Frigate"
   },
   "menu": {
     "masksAndZones": "Maskeler / Alanlar",
@@ -23,7 +25,10 @@
     "debug": "Hata Ayıklama",
     "cameras": "Kamera Ayarları",
     "enrichments": "Zenginleştirmeler",
-    "triggers": "Tetikler"
+    "triggers": "Tetikler",
+    "cameraManagement": "Yönet",
+    "cameraReview": "İncele",
+    "roles": "Roller"
   },
   "general": {
     "title": "Genel Ayarlar",
@@ -36,7 +41,11 @@
         "label": "Alarm Videolarını Oynat",
         "desc": "Varsayılan olarak canlı görüntü panelinde gösterilen son alarmlar ufak videolar olarak oynatılır. Bu tarayıcı/cihazda video yerine sabit resim göstermek için bu seçeneği kapatın."
       },
-      "title": "Canlı Görüntü Paneli"
+      "title": "Canlı Görüntü Paneli",
+      "displayCameraNames": {
+        "label": "Kamera Adlarını Her Zaman Göster",
+        "desc": "Çok kameralı canlı izleme panelinde, kamera adlarını her zaman bir etiket içinde göster."
+      }
     },
     "storedLayouts": {
       "desc": "Kamera grubundaki kameraların düzenini kameraları sürükleyerek ve büyüterek/küçülterek değiştirebilirsiniz. Düzen bilgisi tarayıcınızda depolanır.",

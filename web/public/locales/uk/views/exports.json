@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "Не вдалося перейменувати експорт: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Поділитися експортом",
+    "downloadVideo": "Завантажити відео",
+    "editName": "Редагувати ім'я",
+    "deleteExport": "Видалити експорт"
   }
 }

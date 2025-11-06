@@ -5,7 +5,10 @@
     "renameCategory": "重命名类别",
     "deleteCategory": "删除类别",
     "deleteImages": "删除图片",
-    "trainModel": "训练模型"
+    "trainModel": "训练模型",
+    "addClassification": "添加分类",
+    "deleteModels": "删除模型",
+    "editModel": "编辑模型"
   },
   "toast": {
     "success": {
@@ -13,13 +16,17 @@
       "deletedImage": "删除图片",
       "categorizedImage": "成功分类图片",
       "trainedModel": "训练模型成功。",
-      "trainingModel": "已开始训练模型。"
+      "trainingModel": "已开始训练模型。",
+      "deletedModel_other": "已删除 {{count}} 个模型",
+      "updatedModel": "已更新模型配置"
     },
     "error": {
       "deleteImageFailed": "删除失败：{{errorMessage}}",
       "deleteCategoryFailed": "删除类别失败：{{errorMessage}}",
       "categorizeFailed": "图片分类失败：{{errorMessage}}",
-      "trainingFailed": "开始训练模型失败：{{errorMessage}}"
+      "trainingFailed": "开始训练模型失败：{{errorMessage}}",
+      "deleteModelFailed": "删除模型失败：{{errorMessage}}",
+      "updateModelFailed": "更新模型失败：{{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -43,7 +50,8 @@
   },
   "train": {
     "title": "最近分类记录",
-    "aria": "选择最近分类记录"
+    "aria": "选择最近分类记录",
+    "titleShort": "最近"
   },
   "categories": "类别",
   "createCategory": {
@@ -98,7 +106,8 @@
         "stateRequiresTwoClasses": "状态模型至少需要两个类别",
         "objectLabelRequired": "请选择一个目标标签",
         "objectTypeRequired": "请选择一个目标标签"
-      }
+      },
+      "states": "状态"
     },
     "step2": {
       "description": "选择摄像头，并为摄像头定义要监控的区域。模型将对这些区域的状态进行分类。",
@@ -131,5 +140,23 @@
       },
       "generateSuccess": "样本图片生成成功"
     }
+  },
+  "deleteModel": {
+    "title": "删除分类模型",
+    "single": "你确定要删除 {{name}} 吗？此操作将永久删除所有相关数据，包括图片和训练数据，且无法撤销。",
+    "desc": "你确定要删除 {{count}} 个模型吗？此操作将永久删除所有相关数据，包括图片和训练数据，且无法撤销。"
+  },
+  "menu": {
+    "objects": "目标",
+    "states": "状态"
+  },
+  "details": {
+    "scoreInfo": "得分表示该目标所有检测结果的平均分类置信度。"
+  },
+  "edit": {
+    "title": "编辑分类模型",
+    "descriptionState": "编辑此状态分类模型的类别；更改后需要重新训练模型。",
+    "descriptionObject": "编辑此目标分类模型的目标类型和分类类型。",
+    "stateClassesInfo": "注意：更改状态类别后需使用更新后的类别重新训练模型。"
   }
 }

@@ -59,7 +59,7 @@
     "export": "Dışa Aktar",
     "selectOrExport": "Seç veya Dışa Aktar",
     "toast": {
-      "success": "Dışa aktarım başladı. Dosyaya /exports klasöründe veya Dışa Aktar sekmesinden ulaşabilirsiniz.",
+      "success": "Dışa aktarma başarıyla başlatıldı. Dosyayı dışa aktarmalar sayfasında görüntüleyebilirsiniz.",
       "error": {
         "failed": "Dışa aktarım başlatılamadı: {{error}}",
         "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",

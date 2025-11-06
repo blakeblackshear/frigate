@@ -524,7 +524,7 @@ function LibrarySelector({
         regexErrorMessage={t("description.invalidName")}
       />
 
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
             {pageToggle == "train" ? t("train.title") : pageToggle}

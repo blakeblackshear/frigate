@@ -234,7 +234,10 @@ class OpenVINOModelRunner(BaseModelRunner):
         # Import here to avoid circular imports
         from frigate.embeddings.types import EnrichmentModelTypeEnum
 
-        return model_type in [EnrichmentModelTypeEnum.paddleocr.value]
+        return model_type in [
+            EnrichmentModelTypeEnum.paddleocr.value,
+            EnrichmentModelTypeEnum.jina_v2.value,
+        ]
 
     def __init__(self, model_path: str, device: str, model_type: str, **kwargs):
         self.model_path = model_path
@@ -345,6 +348,16 @@ class OpenVINOModelRunner(BaseModelRunner):
 
                 # Create tensor with the correct element type
                 input_element_type = input_port.get_element_type()
+
+                # Ensure input data matches the expected dtype to prevent type mismatches
+                # that can occur with models like Jina-CLIP v2 running on OpenVINO
+                expected_dtype = input_element_type.to_dtype()
+                if input_data.dtype != expected_dtype:
+                    logger.debug(
+                        f"Converting input '{input_name}' from {input_data.dtype} to {expected_dtype}"
+                    )
+                    input_data = input_data.astype(expected_dtype)
+
                 input_tensor = ov.Tensor(input_element_type, input_data.shape)
                 np.copyto(input_tensor.data, input_data)
 

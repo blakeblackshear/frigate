@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Tambah ke koleksi Pustaka Wajah.",
+    "addFace": "Tambah ke koleksi Pustaka Wajah dengan men-upload gambar pertama anda.",
     "placeholder": "Masukkan Nama untuk koleksi ini",
     "invalidName": "Nama tidak valid. Nama hanya dapat berisi huruf, angka, spasi, apostrof, garis bawah, dan tanda hubung."
   },
@@ -18,13 +18,75 @@
   "createFaceLibrary": {
     "desc": "Buat koleksi baru",
     "title": "Buat Koleksi",
-    "nextSteps": "Untuk membangun fondasi yang kuat:<li>Gunakan tab Latih untuk memilih dan melatih gambar untuk setiap orang yang terdeteksi.</li><li>Fokus pada gambar lurus untuk hasil terbaik; hindari melatih gambar yang menangkap wajah pada sudut tertentu.</li></ul>"
+    "nextSteps": "Untuk membangun fondasi yang kuat:<li>Gunakan tab Pengenalan Terbaru untuk memilih dan melatih gambar untuk setiap orang yang terdeteksi.</li><li>Fokus pada gambar langsung untuk hasil terbaik; hindari melatih gambar yang menangkap wajah pada sudut tertentu.</li></ul>",
+    "new": "Buat Wajah Baru"
   },
   "uploadFaceImage": {
     "desc": "Unggah gambar untuk dipindai wajah dan sertakan untuk {{pageToggle}}",
     "title": "Unggah Gambar Wajah"
   },
   "steps": {
-    "faceName": "Masukkan Nama Wajah"
+    "faceName": "Masukkan Nama Wajah",
+    "uploadFace": "Unggah Gambar Wajah",
+    "nextSteps": "Langkah Berikutnya",
+    "description": {
+      "uploadFace": "Upload sebuah gambar dari {{name}} yang menunjukkan wajah mereka dari sisi depan. Gambar tidak perlu dipotong ke wajah mereka."
+    }
+  },
+  "train": {
+    "title": "Pengenalan Terkini",
+    "aria": "Pilih pengenalan terkini",
+    "empty": "Tidak ada percobaan pengenalan wajah baru-baru ini"
+  },
+  "deleteFaceLibrary": {
+    "title": "Hapus Nama",
+    "desc": "Apakah anda yakin ingin menghapus koleksi {{name}}? Ini akan menghapus semua wajah terkait secara permanen."
+  },
+  "deleteFaceAttempts": {
+    "title": "Hapus Wajah-Wajah",
+    "desc_other": "Apakah anda yakin ingin menghapis {{count}} wajah? Aksi ini tidak dapat diurungkan."
+  },
+  "renameFace": {
+    "title": "Ganti Nama Wajah",
+    "desc": "Masukkan nama baru untuk {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Hapus Wajah",
+    "addFace": "Tambah Wajah",
+    "renameFace": "Ganti Nama Wajah",
+    "deleteFace": "Hapus Wajah",
+    "uploadImage": "Unggah Gambar",
+    "reprocessFace": "Proses Ulang Wajah"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Silahkan pilih sebuah file gambar."
+    },
+    "dropActive": "Letakkan gambar di sini…",
+    "dropInstructions": "Seret dan lepaskan atau tempel gambar di sini, atau klik untuk memilih",
+    "maxSize": "Ukuran maksimum: {{size}}MB"
+  },
+  "nofaces": "Tidak ada wajah tersedia",
+  "trainFaceAs": "Latih Gambar sebagai:",
+  "trainFace": "Latih Wajah",
+  "toast": {
+    "success": {
+      "uploadedImage": "Berhasil men unggah gambar.",
+      "addFaceLibrary": "{{name}} telah berhasil ditambahkan ke Pustaka Wajah!",
+      "deletedFace_other": "Berhasil menghapus {{count}} wajah.",
+      "deletedName_other": "{{count}} wajah telah berhasil dihapus.",
+      "renamedFace": "Berhasil mengganti nama wajah ke {{name}}",
+      "trainedFace": "Berhasil melatih wajah.",
+      "updatedFaceScore": "Berhasil memperbaharui nilai wajah."
+    },
+    "error": {
+      "uploadingImageFailed": "Gagal menunggah gambar: {{errorMessage}}",
+      "addFaceLibraryFailed": "Gagal mengatur nama wajah: {{errorMessage}}",
+      "deleteFaceFailed": "Gagal untuk menghapus: {{errorMessage}}",
+      "deleteNameFailed": "Gagal menghapus nama: {{errorMessage}}",
+      "renameFaceFailed": "Gagal mengganti nama wajah: {{errorMessage}}",
+      "trainFailed": "Gagal untuk melatih: {{errorMessage}}",
+      "updateFaceScoreFailed": "Gagal untuk memperbaharui nilai wajah: {{errorMessage}}"
+    }
   }
 }

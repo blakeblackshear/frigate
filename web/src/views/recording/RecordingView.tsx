@@ -974,7 +974,7 @@ function Timeline({
                 ? "w-[100px] flex-shrink-0"
                 : timelineType == "detail"
                   ? "min-w-[20rem] max-w-[30%] flex-shrink-0 flex-grow-0 basis-[30rem] md:min-w-[20rem] md:max-w-[25%] lg:min-w-[30rem] lg:max-w-[33%]"
-                  : "w-60 flex-shrink-0",
+                  : "w-80 flex-shrink-0",
             )
           : cn(
               timelineType == "timeline"

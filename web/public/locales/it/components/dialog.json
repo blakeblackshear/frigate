@@ -61,7 +61,7 @@
     "export": "Esporta",
     "selectOrExport": "Seleziona o esporta",
     "toast": {
-      "success": "Esportazione avviata correttamente. Visualizza il file nella cartella /exports.",
+      "success": "Esportazione avviata correttamente. Visualizza il file nella pagina delle esportazioni.",
       "error": {
         "failed": "Impossibile avviare l'esportazione: {{error}}",
         "endTimeMustAfterStartTime": "L'ora di fine deve essere successiva all'ora di inizio",
@@ -129,6 +129,7 @@
     "search": {
       "placeholder": "Cerca per etichetta o sottoetichetta..."
     },
-    "noImages": "Nessuna miniatura trovata per questa fotocamera"
+    "noImages": "Nessuna miniatura trovata per questa fotocamera",
+    "unknownLabel": "Immagine di attivazione salvata"
   }
 }

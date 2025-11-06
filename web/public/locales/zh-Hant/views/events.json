@@ -36,5 +36,7 @@
   "camera": "鏡頭",
   "detected": "已偵測",
   "suspiciousActivity": "可疑的活動",
-  "threateningActivity": "有威脅性的活動"
+  "threateningActivity": "有威脅性的活動",
+  "zoomIn": "放大",
+  "zoomOut": "縮小"
 }

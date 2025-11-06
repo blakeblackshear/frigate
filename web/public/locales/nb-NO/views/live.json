@@ -71,15 +71,15 @@
       "label": "Vis statistikk",
       "desc": "Aktiver dette alternativet for å vise strømmestatistikk som et overlegg på kamerastrømmen."
     },
-    "started": "Startet manuelt opptak på forespørsel.",
-    "end": "Avslutt opptak på forespørsel",
-    "title": "På forespørsel",
+    "started": "Startet manuelt opptak.",
+    "end": "Avslutt manuelt opptak",
+    "title": "Manuelt opptak",
     "debugView": "Feilsøkingsvisning",
-    "start": "Start opptak på forespørsel",
-    "failedToStart": "Kunne ikke starte manuelt opptak på forespørsel.",
+    "start": "Start manuelt opptak",
+    "failedToStart": "Kunne ikke starte manuelt opptak.",
     "recordDisabledTips": "Siden opptak er deaktivert eller begrenset i konfigurasjonen for dette kameraet, vil kun et øyeblikksbilde bli lagret.",
-    "ended": "Avsluttet manuelt opptak på forespørsel.",
-    "failedToEnd": "Kunne ikke avslutte manuelt opptak på forespørsel."
+    "ended": "Avsluttet manuelt opptak.",
+    "failedToEnd": "Kunne ikke avslutte manuelt opptak."
   },
   "audio": "Lyd",
   "suspend": {

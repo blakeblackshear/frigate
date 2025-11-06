@@ -34,7 +34,8 @@
     "details": "详情",
     "snapshot": "快照",
     "video": "视频",
-    "object_lifecycle": "目标全周期"
+    "object_lifecycle": "目标全周期",
+    "thumbnail": "缩略图"
   },
   "objectLifecycle": {
     "title": "目标全周期",
@@ -236,7 +237,7 @@
     "noImageFound": "在该时间内没找到图片。",
     "createObjectMask": "创建目标遮罩",
     "adjustAnnotationSettings": "调整注释设置",
-    "scrollViewTips": "滚动以查看该目标全周期中的关键时刻。",
+    "scrollViewTips": "点击以查看该目标全周期中的关键时刻。",
     "autoTrackingTips": "自动追踪摄像头的边框定位可能不准确。",
     "count": "{{first}} / {{second}}",
     "trackedPoint": "追踪点",
@@ -266,7 +267,7 @@
       },
       "offset": {
         "label": "标记偏移量",
-        "desc": "此数据来自摄像头的检测视频流，但叠加在录制视频流的图像上。由于两个视频流通常不会完全同步，因此边框与画面可能无法完全对齐。不过，可以使用 <code>annotation_offset</code> 字段进行调整。",
+        "desc": "此数据来自摄像头的检测视频流，但叠加在录制视频流的画面上。两个视频流可能不会完全同步，因此边框与画面可能无法完全对齐。可以使用此设置将标记在时间轴上向前或向后偏移，以更好地与录制画面对齐。",
         "millisecondsToOffset": "用于偏移检测标记的毫秒数。<em> 默认值：0</em>",
         "tips": "提示：假设有一段人从左向右走的事件录制，如果事件时间轴中的边框始终在人的左侧（即后方），则应该减小偏移值；反之，如果边框始终领先于人物，则应增大偏移值。",
         "toast": {
