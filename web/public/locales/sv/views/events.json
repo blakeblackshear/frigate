@@ -43,10 +43,17 @@
     "trackedObject_one": "objekt",
     "trackedObject_other": "objekt",
     "noObjectDetailData": "Inga objektdetaljdata tillgängliga.",
-    "label": "Detalj"
+    "label": "Detalj",
+    "settings": "Detaljvy inställningar",
+    "alwaysExpandActive": {
+      "title": "Expandera alltid aktivt",
+      "desc": "Expandera alltid objektinformationen för det aktiva granskningsobjektet när den är tillgänglig."
+    }
   },
   "objectTrack": {
     "trackedPoint": "Spårad punkt",
     "clickToSeek": "Klicka för att söka till den här tiden"
-  }
+  },
+  "zoomIn": "Zooma in",
+  "zoomOut": "Zooma ut"
 }
