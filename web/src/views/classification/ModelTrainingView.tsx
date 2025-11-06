@@ -118,6 +118,11 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
 
   const [trainFilter, setTrainFilter] = useApiFilter<TrainFilter>();
 
+  const refreshAll = useCallback(() => {
+    refreshTrain();
+    refreshDataset();
+  }, [refreshTrain, refreshDataset]);
+
   // image multiselect
 
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -409,7 +414,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           trainImages={trainImages || []}
           trainFilter={trainFilter}
           selectedImages={selectedImages}
-          onRefresh={refreshTrain}
+          onRefresh={refreshAll}
           onClickImages={onClickImages}
           onDelete={onDelete}
         />
