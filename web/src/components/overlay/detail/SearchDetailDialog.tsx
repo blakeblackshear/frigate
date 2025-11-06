@@ -32,6 +32,7 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import { TrackingDetails } from "./TrackingDetails";
+import { LuSettings } from "react-icons/lu";
 import { DetailStreamProvider } from "@/context/detail-stream-context";
 import {
   MobilePage,
@@ -77,6 +78,234 @@ import { DialogPortal } from "@radix-ui/react-dialog";
 const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
 
+type TabsWithActionsProps = {
+  search: SearchResult;
+  searchTabs: SearchTab[];
+  pageToggle: SearchTab;
+  setPageToggle: (v: SearchTab) => void;
+  config?: FrigateConfig;
+  setSearch: (s: SearchResult | undefined) => void;
+  setSimilarity?: () => void;
+  showControls?: boolean;
+  setShowControls?: (v: boolean) => void;
+};
+
+function TabsWithActions({
+  search,
+  searchTabs,
+  pageToggle,
+  setPageToggle,
+  config,
+  setSearch,
+  setSimilarity,
+  showControls,
+  setShowControls,
+}: TabsWithActionsProps) {
+  const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
+
+  if (!search) return null;
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <ScrollArea className="flex-1 whitespace-nowrap">
+        <div className="mb-2 flex flex-row md:mb-0">
+          <ToggleGroup
+            className="*:rounded-md *:px-3 *:py-4"
+            type="single"
+            size="sm"
+            value={pageToggle}
+            onValueChange={(value: SearchTab) => {
+              if (value) {
+                setPageToggle(value);
+              }
+            }}
+          >
+            {Object.values(searchTabs).map((item) => (
+              <ToggleGroupItem
+                key={item}
+                className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                value={item}
+                data-nav-item={item}
+                aria-label={`Select ${item}`}
+              >
+                <div className="smart-capitalize">
+                  {item === "snapshot"
+                    ? search?.has_snapshot
+                      ? t("type.snapshot")
+                      : t("type.thumbnail")
+                    : t(`type.${item}`)}
+                </div>
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          <ScrollBar orientation="horizontal" className="h-0" />
+        </div>
+      </ScrollArea>
+      <DetailActionsMenu
+        search={search}
+        config={config}
+        setSearch={setSearch}
+        setSimilarity={setSimilarity}
+      />
+      <div className="ml-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={showControls ? "select" : "default"}
+              className="size-7 p-1.5"
+              aria-label={t("trackingDetails.adjustAnnotationSettings")}
+              onClick={() => setShowControls?.(!showControls)}
+            >
+              <LuSettings className="size-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipPortal>
+            <TooltipContent>
+              {t("trackingDetails.adjustAnnotationSettings")}
+            </TooltipContent>
+          </TooltipPortal>
+        </Tooltip>
+      </div>
+    </div>
+  );
+}
+
+type DialogContentComponentProps = {
+  page: SearchTab;
+  search: SearchResult;
+  isDesktop: boolean;
+  apiHost: string;
+  config?: FrigateConfig;
+  searchTabs: SearchTab[];
+  pageToggle: SearchTab;
+  setPageToggle: (v: SearchTab) => void;
+  setSearch: (s: SearchResult | undefined) => void;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  setSimilarity?: () => void;
+  showControls?: boolean;
+  setShowControls?: (v: boolean) => void;
+};
+
+function DialogContentComponent({
+  page,
+  search,
+  isDesktop,
+  apiHost,
+  config,
+  searchTabs,
+  pageToggle,
+  setPageToggle,
+  setSearch,
+  setInputFocused,
+  setSimilarity,
+  showControls,
+  setShowControls,
+}: DialogContentComponentProps) {
+  if (page === "tracking_details") {
+    return (
+      <TrackingDetails
+        className={cn("size-full", !isDesktop && "flex flex-col gap-4")}
+        event={search as unknown as Event}
+        tabs={
+          isDesktop ? (
+            <TabsWithActions
+              search={search}
+              searchTabs={searchTabs}
+              pageToggle={pageToggle}
+              setPageToggle={setPageToggle}
+              config={config}
+              setSearch={setSearch}
+              setSimilarity={setSimilarity}
+              showControls={showControls}
+              setShowControls={setShowControls}
+            />
+          ) : undefined
+        }
+        showControls={showControls}
+        setShowControls={setShowControls}
+      />
+    );
+  }
+
+  // Snapshot page content
+  const snapshotElement = search.has_snapshot ? (
+    <ObjectSnapshotTab
+      className={isDesktop ? undefined : "mb-4"}
+      search={
+        {
+          ...search,
+          plus_id: config?.plus?.enabled ? search.plus_id : "not_enabled",
+        } as unknown as Event
+      }
+    />
+  ) : (
+    <div className={cn(!isDesktop ? "mb-4 w-full" : "size-full")}>
+      <img
+        className="w-full select-none rounded-lg object-contain transition-opacity"
+        style={
+          isIOS
+            ? {
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none",
+              }
+            : undefined
+        }
+        draggable={false}
+        src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
+      />
+    </div>
+  );
+
+  if (isDesktop) {
+    return (
+      <div className="flex h-full gap-4 overflow-hidden">
+        <div
+          className={cn(
+            "scrollbar-container flex-[3] overflow-y-hidden",
+            !search.has_snapshot && "flex-[2]",
+          )}
+        >
+          {snapshotElement}
+        </div>
+        <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
+          <TabsWithActions
+            search={search}
+            searchTabs={searchTabs}
+            pageToggle={pageToggle}
+            setPageToggle={setPageToggle}
+            config={config}
+            setSearch={setSearch}
+            setSimilarity={setSimilarity}
+            showControls={showControls}
+            setShowControls={setShowControls}
+          />
+          <div className="scrollbar-container flex-1 overflow-y-auto">
+            <ObjectDetailsTab
+              search={search}
+              config={config}
+              setSearch={setSearch}
+              setInputFocused={setInputFocused}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // mobile
+  return (
+    <>
+      {snapshotElement}
+      <ObjectDetailsTab
+        search={search}
+        config={config}
+        setSearch={setSearch}
+        setInputFocused={setInputFocused}
+      />
+    </>
+  );
+}
+
 type SearchDetailDialogProps = {
   search?: SearchResult;
   page: SearchTab;
@@ -87,6 +316,7 @@ type SearchDetailDialogProps = {
   onPrevious?: () => void;
   onNext?: () => void;
 };
+
 export default function SearchDetailDialog({
   search,
   page,
@@ -135,6 +365,10 @@ export default function SearchDetailDialog({
     }
   }, [search]);
 
+  // show/hide annotation settings
+
+  const [showControls, setShowControls] = useState(false);
+
   const searchTabs = useMemo(() => {
     if (!config || !search) {
       return [];
@@ -159,44 +393,6 @@ export default function SearchDetailDialog({
       setSearchPage("snapshot");
     }
   }, [pageToggle, searchTabs, setSearchPage]);
-
-  // Tabs component for reuse
-  const tabsComponent = (
-    <ScrollArea className="w-full whitespace-nowrap">
-      <div className="flex flex-row">
-        <ToggleGroup
-          className="*:rounded-md *:px-3 *:py-4"
-          type="single"
-          size="sm"
-          value={pageToggle}
-          onValueChange={(value: SearchTab) => {
-            if (value) {
-              setPageToggle(value);
-            }
-          }}
-        >
-          {Object.values(searchTabs).map((item) => (
-            <ToggleGroupItem
-              key={item}
-              className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-              value={item}
-              data-nav-item={item}
-              aria-label={`Select ${item}`}
-            >
-              <div className="smart-capitalize">
-                {item === "snapshot"
-                  ? search?.has_snapshot
-                    ? t("type.snapshot")
-                    : t("type.thumbnail")
-                  : t(`type.${item}`)}
-              </div>
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-        <ScrollBar orientation="horizontal" className="h-0" />
-      </div>
-    </ScrollArea>
-  );
 
   if (!search) {
     return;
@@ -293,152 +489,38 @@ export default function SearchDetailDialog({
               <span className="sr-only" tabIndex={0} />
             </Description>
           </Header>
-          {isDesktop ? (
-            page === "tracking_details" ? (
-              <TrackingDetails
-                className="size-full"
-                event={search as unknown as Event}
-                tabs={tabsComponent}
-                actions={
-                  <DetailActionsMenu
-                    search={search}
-                    config={config}
-                    setSearch={setSearch}
-                    setSimilarity={setSimilarity}
-                  />
-                }
+
+          {!isDesktop && (
+            <div className="flex w-full flex-col justify-center gap-4">
+              <TabsWithActions
+                search={search}
+                searchTabs={searchTabs}
+                pageToggle={pageToggle}
+                setPageToggle={setPageToggle}
+                config={config}
+                setSearch={setSearch}
+                setSimilarity={setSimilarity}
+                showControls={showControls}
+                setShowControls={setShowControls}
               />
-            ) : (
-              <div className="flex h-full gap-4 overflow-hidden">
-                <div
-                  className={cn(
-                    "scrollbar-container flex-[3] overflow-y-hidden",
-                    page === "snapshot" && !search.has_snapshot && "flex-[2]",
-                  )}
-                >
-                  {page === "snapshot" && search.has_snapshot && (
-                    <ObjectSnapshotTab
-                      search={
-                        {
-                          ...search,
-                          plus_id: config?.plus?.enabled
-                            ? search.plus_id
-                            : "not_enabled",
-                        } as unknown as Event
-                      }
-                    />
-                  )}
-                  {page === "snapshot" && !search.has_snapshot && (
-                    <div className="size-full">
-                      <img
-                        className="w-full select-none rounded-lg object-contain transition-opacity"
-                        style={
-                          isIOS
-                            ? {
-                                WebkitUserSelect: "none",
-                                WebkitTouchCallout: "none",
-                              }
-                            : undefined
-                        }
-                        draggable={false}
-                        src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-[2] flex-col gap-4 overflow-hidden">
-                  <div className="scrollbar-container flex-1 overflow-y-auto">
-                    {page == "snapshot" && (
-                      <ObjectDetailsTab
-                        search={search}
-                        config={config}
-                        setSearch={setSearch}
-                        setSimilarity={setSimilarity}
-                        setInputFocused={setInputFocused}
-                        tabs={tabsComponent}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          ) : (
-            <>
-              <ScrollArea
-                className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
-              >
-                <div className="flex flex-row">
-                  <ToggleGroup
-                    className="*:rounded-md *:px-3 *:py-4"
-                    type="single"
-                    size="sm"
-                    value={pageToggle}
-                    onValueChange={(value: SearchTab) => {
-                      if (value) {
-                        setPageToggle(value);
-                      }
-                    }}
-                  >
-                    {Object.values(searchTabs).map((item) => (
-                      <ToggleGroupItem
-                        key={item}
-                        className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-                        value={item}
-                        data-nav-item={item}
-                        aria-label={`Select ${item}`}
-                      >
-                        <div className="smart-capitalize">
-                          {t(`type.${item}`)}
-                        </div>
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                  <ScrollBar orientation="horizontal" className="h-0" />
-                </div>
-              </ScrollArea>
-              {page == "snapshot" && (
-                <>
-                  {search.has_snapshot && (
-                    <ObjectSnapshotTab
-                      search={
-                        {
-                          ...search,
-                          plus_id: config?.plus?.enabled
-                            ? search.plus_id
-                            : "not_enabled",
-                        } as unknown as Event
-                      }
-                    />
-                  )}
-                  {page == "snapshot" && !search.has_snapshot && (
-                    <img
-                      className="w-full select-none rounded-lg object-contain transition-opacity"
-                      style={
-                        isIOS
-                          ? {
-                              WebkitUserSelect: "none",
-                              WebkitTouchCallout: "none",
-                            }
-                          : undefined
-                      }
-                      draggable={false}
-                      src={`${apiHost}api/events/${search.id}/thumbnail.webp`}
-                    />
-                  )}
-                  <ObjectDetailsTab
-                    search={search}
-                    config={config}
-                    setSearch={setSearch}
-                    setSimilarity={setSimilarity}
-                    setInputFocused={setInputFocused}
-                  />
-                </>
-              )}
-              {page == "tracking_details" && (
-                <TrackingDetails event={search as unknown as Event} />
-              )}
-            </>
+            </div>
           )}
+
+          <DialogContentComponent
+            page={page}
+            search={search}
+            isDesktop={isDesktop}
+            apiHost={apiHost}
+            config={config}
+            searchTabs={searchTabs}
+            pageToggle={pageToggle}
+            setPageToggle={setPageToggle}
+            setSearch={setSearch}
+            setInputFocused={setInputFocused}
+            setSimilarity={setSimilarity}
+            showControls={showControls}
+            setShowControls={setShowControls}
+          />
         </Content>
       </Overlay>
     </DetailStreamProvider>
@@ -449,17 +531,13 @@ type ObjectDetailsTabProps = {
   search: SearchResult;
   config?: FrigateConfig;
   setSearch: (search: SearchResult | undefined) => void;
-  setSimilarity?: () => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
-  tabs?: React.ReactNode;
 };
 function ObjectDetailsTab({
   search,
   config,
   setSearch,
-  setSimilarity,
   setInputFocused,
-  tabs,
 }: ObjectDetailsTabProps) {
   const { t, i18n } = useTranslation([
     "views/explore",
@@ -895,20 +973,6 @@ function ObjectDetailsTab({
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);
   return (
     <div ref={popoverContainerRef} className="flex flex-col gap-5">
-      {tabs && (
-        <div className="flex items-center justify-between">
-          <div className="flex-1">{tabs}</div>
-          <div className="ml-2">
-            <DetailActionsMenu
-              search={search}
-              config={config}
-              setSearch={setSearch}
-              setSimilarity={setSimilarity}
-            />
-          </div>
-        </div>
-      )}
-
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
           <div className="w-full">
@@ -1301,12 +1365,17 @@ function ObjectDetailsTab({
 
 type ObjectSnapshotTabProps = {
   search: Event;
+  className?: string;
+  onEventUploaded?: () => void;
 };
-export function ObjectSnapshotTab({ search }: ObjectSnapshotTabProps) {
+export function ObjectSnapshotTab({
+  search,
+  className,
+}: ObjectSnapshotTabProps) {
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   return (
-    <div className="relative w-full">
+    <div className={cn("relative w-full", className)}>
       <ImageLoadingIndicator
         className="absolute inset-0 aspect-video min-h-[60dvh] w-full"
         imgLoaded={imgLoaded}

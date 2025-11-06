@@ -2,20 +2,14 @@ import useSWR from "swr";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { Button } from "@/components/ui/button";
 import { TrackingDetailsSequence } from "@/types/timeline";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
-import { LuCircle, LuFolderX, LuSettings } from "react-icons/lu";
+import { LuCircle, LuFolderX } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
-import { TooltipPortal } from "@radix-ui/react-tooltip";
+
 import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
 import { REVIEW_PADDING } from "@/types/review";
@@ -46,14 +40,15 @@ type TrackingDetailsProps = {
   event: Event;
   fullscreen?: boolean;
   tabs?: React.ReactNode;
-  actions?: React.ReactNode;
+  showControls?: boolean;
+  setShowControls?: (v: boolean) => void;
 };
 
 export function TrackingDetails({
   className,
   event,
   tabs,
-  actions,
+  showControls = false,
 }: TrackingDetailsProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useTranslation(["views/explore"]);
@@ -95,7 +90,6 @@ export function TrackingDetails({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [_selectedZone, setSelectedZone] = useState("");
   const [_lifecycleZones, setLifecycleZones] = useState<string[]>([]);
-  const [showControls, setShowControls] = useState(false);
   const [showZones, setShowZones] = useState(true);
   const [seekToTimestamp, setSeekToTimestamp] = useState<number | null>(null);
 
@@ -454,10 +448,9 @@ export function TrackingDetails({
       </div>
 
       <div className={cn(isDesktop && "flex-[2] overflow-hidden")}>
-        {isDesktop && (tabs || actions) && (
+        {isDesktop && tabs && (
           <div className="mb-4 flex items-center justify-between">
             <div className="flex-1">{tabs}</div>
-            <div className="ml-2">{actions}</div>
           </div>
         )}
         <div
@@ -465,30 +458,6 @@ export function TrackingDetails({
             isDesktop && "scrollbar-container h-full overflow-y-auto",
           )}
         >
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-row gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={showControls ? "select" : "default"}
-                    className="size-7 p-1.5"
-                    aria-label={t("trackingDetails.adjustAnnotationSettings")}
-                  >
-                    <LuSettings
-                      className="size-5"
-                      onClick={() => setShowControls(!showControls)}
-                    />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipPortal>
-                  <TooltipContent>
-                    {t("trackingDetails.adjustAnnotationSettings")}
-                  </TooltipContent>
-                </TooltipPortal>
-              </Tooltip>
-            </div>
-          </div>
-
           {config?.cameras[event.camera]?.onvif.autotracking
             .enabled_in_config && (
             <div className="-mt-2 mb-2 text-sm text-danger">
