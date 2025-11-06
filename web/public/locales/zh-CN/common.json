@@ -283,7 +283,8 @@
   },
   "list": {
     "two": "{{0}} 和 {{1}}",
-    "many": "{{items}} 以及 {{last}}"
+    "many": "{{items}} 以及 {{last}}",
+    "separatorWithSpace": "， "
   },
   "field": {
     "optional": "可选",

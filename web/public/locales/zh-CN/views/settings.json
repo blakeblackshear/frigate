@@ -51,6 +51,10 @@
       "playAlertVideos": {
         "label": "播放警报视频",
         "desc": "默认情况下，实时监控页面上的最新警报会以一小段循环视频的形式进行播放。禁用此选项将仅显示浏览器本地缓存的静态图片。"
+      },
+      "displayCameraNames": {
+        "label": "始终显示摄像头名称",
+        "desc": "在有多摄像头情况下的实时监控页面，将始终显示摄像头名称标签。"
       }
     },
     "storedLayouts": {
@@ -761,7 +765,9 @@
     },
     "actions": {
       "alert": "标记为警报",
-      "notification": "发送通知"
+      "notification": "发送通知",
+      "sub_label": "添加子标签",
+      "attribute": "添加属性"
     },
     "dialog": {
       "createTrigger": {
@@ -816,7 +822,7 @@
         },
         "actions": {
           "title": "动作",
-          "desc": "默认情况下，Frigate 会为所有触发器发送 MQTT 消息。请选择此触发器触发时需要执行的附加操作。",
+          "desc": "默认情况下，Frigate 会为所有触发器发送 MQTT 消息。子标签会将触发器名称添加到对象标签中。属性是可搜索的元数据，独立存储在追踪对象的元数据中。",
           "error": {
             "min": "必须至少选择一项动作。"
           }
@@ -881,7 +887,7 @@
         "createRole": "权限组 {{role}} 创建成功",
         "updateCameras": "已更新摄像头至 {{role}} 权限组",
         "deleteRole": "已删除 {{role}} 权限组",
-        "userRolesUpdated": "已将分配到此权限组的 {{count}} 位用户更新为 “成员”，该权限组可访问所有摄像头。"
+        "userRolesUpdated_other": "已将分配到此权限组的 {{count}} 位用户更新为 “成员”，该权限组可访问所有摄像头。"
       },
       "error": {
         "createRoleFailed": "创建权限组失败：{{errorMessage}}",
@@ -1066,7 +1072,9 @@
         },
         "resolutionHigh": "使用 {{resolution}} 分辨率可能会导致占用更多的系统资源。",
         "resolutionLow": "使用 {{resolution}} 分辨率可能过低，难以检测较小的物体。"
-      }
+      },
+      "ffmpegModule": "使用视频流兼容模式",
+      "ffmpegModuleDescription": "如果多次尝试后视频流仍无法加载，可以尝试启用此功能。启用后，Frigate 将使用集成 go2rtc 的 ffmpeg 模块，这可能会提高与某些摄像头视频流的兼容性。"
     }
   },
   "cameraManagement": {
