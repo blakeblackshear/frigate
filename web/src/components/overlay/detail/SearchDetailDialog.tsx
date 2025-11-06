@@ -252,10 +252,11 @@ function AnnotationSettings({
         <Content
           className={
             isDesktop
-              ? "w-[90vw] max-w-md p-0"
+              ? "w-[90vw] max-w-md bg-background_alt p-0"
               : "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4"
           }
           {...contentProps}
+          {...(isDesktop ? { disablePortal: true } : {})}
           data-annotation-popover
         >
           <AnnotationSettingsPane

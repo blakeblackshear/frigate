@@ -156,6 +156,7 @@ export function AnnotationSettingsPane({
                     <Trans ns="views/explore">
                       trackingDetails.annotationSettings.offset.millisecondsToOffset
                     </Trans>
+                    <FormMessage />
                     <div className="mt-2">
                       {t("trackingDetails.annotationSettings.offset.tips")}
                       <div className="mt-2 flex items-center text-primary">
@@ -183,7 +184,6 @@ export function AnnotationSettingsPane({
                     </FormControl>
                   </div>
                 </div>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -192,6 +192,7 @@ export function AnnotationSettingsPane({
             <div className="flex flex-row gap-2 pt-5">
               <Button
                 className="flex flex-1"
+                variant="default"
                 aria-label={t("button.apply", { ns: "common" })}
                 onClick={form.handleSubmit(onApply)}
               >
