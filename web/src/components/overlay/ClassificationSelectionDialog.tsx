@@ -97,14 +97,12 @@ export default function ClassificationSelectionDialog({
 
   return (
     <div className={className ?? "flex"}>
-      {newClass && (
-        <TextEntryDialog
-          open={true}
-          setOpen={setNewClass}
-          title={t("createCategory.new")}
-          onSave={(newCat) => onCategorizeImage(newCat)}
-        />
-      )}
+      <TextEntryDialog
+        open={newClass}
+        setOpen={setNewClass}
+        title={t("createCategory.new")}
+        onSave={(newCat) => onCategorizeImage(newCat)}
+      />
 
       <Tooltip>
         <Selector>
