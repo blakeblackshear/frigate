@@ -344,7 +344,7 @@ export function TrackingDetails({
     <div
       className={cn(
         isDesktop
-          ? "flex size-full gap-4 overflow-hidden"
+          ? "flex size-full justify-evenly gap-4 overflow-hidden"
           : "flex size-full flex-col gap-2",
         className,
       )}
@@ -440,7 +440,11 @@ export function TrackingDetails({
         </div>
       </div>
 
-      <div className={cn(isDesktop && "overflow-hidden md:basis-2/5")}>
+      <div
+        className={cn(
+          isDesktop && "justify-between overflow-hidden md:basis-2/5",
+        )}
+      >
         {isDesktop && tabs && (
           <div className="mb-4 flex items-center justify-between">
             <div className="flex-1">{tabs}</div>
