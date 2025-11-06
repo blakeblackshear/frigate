@@ -5,7 +5,10 @@
     "renameCategory": "Klasse hernoemen",
     "deleteCategory": "Klasse verwijderen",
     "deleteImages": "Afbeeldingen verwijderen",
-    "trainModel": "Model trainen"
+    "trainModel": "Model trainen",
+    "addClassification": "Classificatie toevoegen",
+    "deleteModels": "Modellen verwijderen",
+    "editModel": "Model bewerken"
   },
   "toast": {
     "success": {
@@ -13,13 +16,18 @@
       "deletedImage": "Verwijderde afbeeldingen",
       "categorizedImage": "Succesvol geclassificeerde afbeelding",
       "trainedModel": "Succesvol getraind model.",
-      "trainingModel": "Modeltraining succesvol gestart."
+      "trainingModel": "Modeltraining succesvol gestart.",
+      "deletedModel_one": "{{count}} model succesvol verwijderd",
+      "deletedModel_other": "{{count}} modellen succesvol verwijderd",
+      "updatedModel": "Modelconfiguratie succesvol bijgewerkt"
     },
     "error": {
       "deleteImageFailed": "Verwijderen mislukt: {{errorMessage}}",
       "deleteCategoryFailed": "Het verwijderen van de klasse is mislukt: {{errorMessage}}",
       "categorizeFailed": "Afbeelding categoriseren mislukt: {{errorMessage}}",
-      "trainingFailed": "Het starten van de modeltraining is mislukt: {{errorMessage}}"
+      "trainingFailed": "Het starten van de modeltraining is mislukt: {{errorMessage}}",
+      "deleteModelFailed": "Model verwijderen mislukt: {{errorMessage}}",
+      "updateModelFailed": "Bijwerken van model mislukt: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -43,7 +51,8 @@
   },
   "train": {
     "title": "Recente classificaties",
-    "aria": "Selecteer recente classificaties"
+    "aria": "Selecteer recente classificaties",
+    "titleShort": "Recent"
   },
   "categories": "Klassen",
   "createCategory": {
@@ -98,7 +107,8 @@
         "stateRequiresTwoClasses": "Toestandsmodellen vereisen minimaal 2 klassen",
         "objectLabelRequired": "Selecteer een objectlabel",
         "objectTypeRequired": "Selecteer een classificatietype"
-      }
+      },
+      "states": "Staten"
     },
     "step2": {
       "description": "Selecteer camera’s en definieer voor elke camera het te monitoren gebied. Het model zal de toestand van deze gebieden classificeren.",
@@ -131,5 +141,23 @@
       },
       "generateSuccess": "Met succes gegenereerde voorbeeldafbeeldingen"
     }
+  },
+  "deleteModel": {
+    "title": "Classificatiemodel verwijderen",
+    "single": "Weet u zeker dat u {{name}} wilt verwijderen? Hiermee worden alle bijbehorende gegevens, inclusief afbeeldingen en trainingsgegevens, definitief verwijderd. Deze actie kan niet ongedaan worden gemaakt.",
+    "desc": "Weet u zeker dat u {{count}} model(len) wilt verwijderen? Hiermee worden alle bijbehorende gegevens, inclusief afbeeldingen en trainingsgegevens, permanent verwijderd. Deze actie kan niet ongedaan worden gemaakt."
+  },
+  "menu": {
+    "objects": "Objecten",
+    "states": "Staten"
+  },
+  "details": {
+    "scoreInfo": "Score geeft het gemiddelde classificatievertrouwen weer over alle detecties van dit object."
+  },
+  "edit": {
+    "title": "Classificatiemodel bewerken",
+    "descriptionState": "Bewerk de klassen voor dit statusclassificatiemodel. Wijzigingen vereisen dat het model opnieuw wordt getraind.",
+    "descriptionObject": "Bewerk het objecttype en het classificatietype voor dit objectclassificatiemodel.",
+    "stateClassesInfo": "Let op: het wijzigen van statusklassen vereist dat het model opnieuw wordt getraind met de bijgewerkte klassen."
   }
 }
