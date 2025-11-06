@@ -5,7 +5,9 @@
     "renameCategory": "Gi nytt navn til kategori",
     "deleteCategory": "Slett kategori",
     "deleteImages": "Slett bilder",
-    "trainModel": "Tren modell"
+    "trainModel": "Tren modell",
+    "addClassification": "Legg til klassifisering",
+    "deleteModels": "Slett modeller"
   },
   "toast": {
     "success": {
@@ -13,13 +15,16 @@
       "deletedImage": "Bilder slettet",
       "categorizedImage": "Bildet ble klassifisert",
       "trainedModel": "Modellen ble trent.",
-      "trainingModel": "Modelltrening startet."
+      "trainingModel": "Modelltrening startet.",
+      "deletedModel_one": "{{count}} modell(er) ble slettet",
+      "deletedModel_other": ""
     },
     "error": {
       "deleteImageFailed": "Kunne ikke slette: {{errorMessage}}",
       "deleteCategoryFailed": "Kunne ikke slette kategori: {{errorMessage}}",
       "categorizeFailed": "Kunne ikke klassifisere bilde: {{errorMessage}}",
-      "trainingFailed": "Kunne ikke starte modelltrening: {{errorMessage}}"
+      "trainingFailed": "Kunne ikke starte modelltrening: {{errorMessage}}",
+      "deleteModelFailed": "Kunne ikke slette modell: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -43,7 +48,8 @@
   },
   "train": {
     "title": "Nylige klassifiseringer",
-    "aria": "Velg nylige klassifiseringer"
+    "aria": "Velg nylige klassifiseringer",
+    "titleShort": "Nylig"
   },
   "categories": "Kategorier",
   "createCategory": {
@@ -98,7 +104,8 @@
         "stateRequiresTwoClasses": "Tilstandsmodeller krever minst to kategorier",
         "objectLabelRequired": "Velg en objektetikett",
         "objectTypeRequired": "Velg en klassifiseringstype"
-      }
+      },
+      "states": "Tilstander"
     },
     "step2": {
       "description": "Velg kameraer og definer området som skal overvåkes for hvert kamera. Modellen vil klassifisere tilstanden til disse områdene.",
@@ -131,5 +138,17 @@
       },
       "generateSuccess": "Eksempelbilder ble generert"
     }
+  },
+  "deleteModel": {
+    "title": "Slett klassifiseringsmodell",
+    "single": "Er du sikker på at du vil slette {{name}}? Dette vil permanent slette alle tilknyttede data, inkludert bilder og treningsdata. Denne handlingen kan ikke angres.",
+    "desc": "Er du sikker på at du vil slette {{count}} modell(er)? Dette vil permanent slette alle tilknyttede data, inkludert bilder og treningsdata. Denne handlingen kan ikke angres."
+  },
+  "menu": {
+    "objects": "Objekter",
+    "states": "Tilstander"
+  },
+  "details": {
+    "scoreInfo": "Poengsummen representerer gjennomsnittlig klassifiseringskonfidens på tvers av alle deteksjoner av dette objektet."
   }
 }
