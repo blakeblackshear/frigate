@@ -1128,7 +1128,12 @@ function ObjectDetailsTab({
         </div>
       </div>
 
-      <div className="my-2 flex flex-col gap-1.5">
+      <div
+        className={cn(
+          "my-2 flex w-full flex-col justify-between gap-1.5",
+          state == "submitted" && "flex-row",
+        )}
+      >
         <div className="text-sm text-primary/40">
           <div className="flex flex-row items-center gap-1">
             {t("explore.plus.submitToPlus.label", {
@@ -1153,7 +1158,7 @@ function ObjectDetailsTab({
           </div>
         </div>
 
-        <div className="flex w-full flex-1 flex-row items-center justify-between gap-2 text-sm md:flex-1">
+        <div className="flex flex-row items-center justify-between gap-2 text-sm">
           {state == "reviewing" && (
             <>
               <div>
