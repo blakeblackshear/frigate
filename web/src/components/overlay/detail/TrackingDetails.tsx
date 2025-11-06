@@ -457,7 +457,7 @@ export function TrackingDetails({
         >
           {config?.cameras[event.camera]?.onvif.autotracking
             .enabled_in_config && (
-            <div className="mb-2 text-sm text-danger">
+            <div className="mb-2 ml-3 text-sm text-danger">
               {t("trackingDetails.autoTrackingTips")}
             </div>
           )}
