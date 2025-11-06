@@ -110,7 +110,8 @@
     "snapshot": "captura instantánea",
     "video": "vídeo",
     "object_lifecycle": "ciclo de vida del objeto",
-    "details": "detalles"
+    "details": "detalles",
+    "thumbnail": "miniatura"
   },
   "objectLifecycle": {
     "title": "Ciclo de vida del objeto",
@@ -224,5 +225,11 @@
   },
   "concerns": {
     "label": "Preocupaciones"
+  },
+  "trackingDetails": {
+    "title": "Detalles del Seguimiento",
+    "noImageFound": "No se ha encontrado imagen en este momento.",
+    "createObjectMask": "Crear Máscara de Objeto",
+    "adjustAnnotationSettings": "Ajustar configuración de anotaciones"
   }
 }

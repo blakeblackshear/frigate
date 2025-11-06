@@ -27,7 +27,8 @@
     "enrichments": "Análisis avanzado",
     "triggers": "Disparadores",
     "roles": "Rols",
-    "cameraManagement": "Administración"
+    "cameraManagement": "Administración",
+    "cameraReview": "Revisar"
   },
   "dialog": {
     "unsavedChanges": {
@@ -864,7 +865,9 @@
         "createRole": "Rol {{role}} creado exitosamente",
         "updateCameras": "Cámara actualizada para el rol {{role}}",
         "deleteRole": "Rol {{role}} eliminado exitosamente",
-        "userRolesUpdated": "{{count}} usuarios asignados a este rol han sido actualizados a 'visor', que tiene acceso a todas las cámaras."
+        "userRolesUpdated_one": "{{count}} usuarios asignados a este rol han sido actualizados a 'visor', que tiene acceso a todas las cámaras.",
+        "userRolesUpdated_many": "",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Creación de rol fallida: {{errorMessage}}",

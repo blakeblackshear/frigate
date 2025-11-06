@@ -37,5 +37,17 @@
   "selected_other": "{{count}} seleccionados",
   "detected": "detectado",
   "suspiciousActivity": "Actividad Sospechosa",
-  "threateningActivity": "Actividad Amenzadora"
+  "threateningActivity": "Actividad Amenzadora",
+  "zoomIn": "Agrandar",
+  "zoomOut": "Alejar",
+  "detail": {
+    "label": "Detalle",
+    "trackedObject_one": "objeto",
+    "trackedObject_other": "objetos",
+    "noObjectDetailData": "No hay datos detallados del objeto.",
+    "settings": "Configuración de la Vista Detalle"
+  },
+  "objectTrack": {
+    "clickToSeek": "Clic para ir a este momento"
+  }
 }
