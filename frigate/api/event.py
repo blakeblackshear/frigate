@@ -912,7 +912,7 @@ def events_summary(
                     "count": int(g.count or 0),
                 }
 
-    return JSONResponse(content=list(grouped.values()))
+    return JSONResponse(content=sorted(grouped.values(), key=lambda x: x["day"]))
 
 
 @router.get(
