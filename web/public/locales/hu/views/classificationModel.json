@@ -1,1 +1,17 @@
-{}
+{
+  "documentTitle": "Osztályozási modellek",
+  "button": {
+    "deleteClassificationAttempts": "Osztályozási képek törlése",
+    "deleteImages": "Képek törlése",
+    "trainModel": "Modell betanítása",
+    "deleteModels": "Modellek törlése"
+  },
+  "toast": {
+    "success": {
+      "deletedImage": "Törölt képek",
+      "deletedModel_one": "Sikeresen törölt {{count}} modellt",
+      "deletedModel_other": "",
+      "categorizedImage": "A kép sikeresen osztályozva"
+    }
+  }
+}

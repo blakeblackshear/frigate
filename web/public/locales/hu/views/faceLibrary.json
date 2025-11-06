@@ -42,12 +42,12 @@
     "title": "Gyűjtemény létrehozása",
     "desc": "Új gyűjtemény létrehozása",
     "new": "Új arc létrhozása",
-    "nextSteps": "A jó alap készítéséhez:<li>Használja a Tanítás fület az egyes észlelt személyekhez tartozó képek kiválasztására és betanítására.</li>A legjobb eredmény érdekében válassza az egyenesen előre néző arcokat ábrázoló képeket és kerülje a ferde szögből készült arcképeket a tanításhoz.</li></ul>"
+    "nextSteps": "A jó alap készítéséhez:<li>Használja a Legutóbbi felismerések fület az egyes észlelt személyekhez tartozó képek kiválasztásához és betanításához.</li>A legjobb eredmény érdekében válassza az egyenesen előre néző arcokat ábrázoló képeket és kerülje a ferde szögből készült arcképeket a tanításhoz.</li></ul>"
   },
   "description": {
     "placeholder": "Adj nevet ennek a gyűjteménynek",
     "invalidName": "Nem megfelelő név. A nevek csak betűket, számokat, szóközöket, aposztrófokat, alulhúzásokat és kötőjeleket tartalmazhatnak.",
-    "addFace": "Segédlet új gyűjtemény hozzáadásához az arckép könyvtárban."
+    "addFace": "Adj hozzá egy új gyűjteményt az Arcképtárhoz az első képed feltöltésével."
   },
   "selectFace": "Arc kiválasztása",
   "deleteFaceLibrary": {
