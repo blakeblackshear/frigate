@@ -174,15 +174,6 @@ export function AnnotationSettingsPane({
                   </FormDescription>
                 </div>
                 <div className="flex flex-col gap-3">
-                  {/* <div className="flex flex-row items-center gap-3 rounded-lg bg-destructive/50 p-3 text-sm text-primary-variant md:my-5">
-                    <PiWarningCircle className="size-24" />
-                    <div>
-                      <Trans ns="views/explore">
-                        trackingDetails.annotationSettings.offset.desc
-                      </Trans>
-
-                    </div>
-                  </div> */}
                   <div className="min-w-24">
                     <FormControl>
                       <Input
