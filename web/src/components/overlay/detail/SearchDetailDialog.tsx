@@ -33,7 +33,6 @@ import {
 } from "react-icons/fa";
 import { TrackingDetails } from "./TrackingDetails";
 import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
-import { LuSettings } from "react-icons/lu";
 import { DetailStreamProvider } from "@/context/detail-stream-context";
 import {
   MobilePage,
@@ -76,6 +75,7 @@ import { getTranslatedLabel } from "@/utils/i18n";
 import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
 import { DialogPortal } from "@radix-ui/react-dialog";
 import { useDetailStream } from "@/context/detail-stream-context";
+import { PiSlidersHorizontalBold } from "react-icons/pi";
 
 const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
@@ -108,7 +108,7 @@ function TabsWithActions({
   if (!search) return null;
 
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center justify-between gap-1">
       <ScrollArea className="flex-1 whitespace-nowrap">
         <div className="mb-2 flex flex-row md:mb-0">
           <ToggleGroup
@@ -173,7 +173,6 @@ function AnnotationSettingsPopover({
 }: AnnotationSettingsPopoverProps) {
   const { t } = useTranslation(["views/explore"]);
   const { annotationOffset, setAnnotationOffset } = useDetailStream();
-  const [showZones, setShowZones] = useState(true);
 
   const ignoreNextOpenRef = useRef(false);
 
@@ -218,18 +217,16 @@ function AnnotationSettingsPopover({
           <Button
             type="button"
             className="size-7 p-1.5"
-            variant={open ? "select" : "default"}
+            variant={open ? "select" : "ghost"}
             aria-label={t("trackingDetails.adjustAnnotationSettings")}
             aria-expanded={open}
           >
-            <LuSettings className="size-5" />
+            <PiSlidersHorizontalBold className="size-5" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[90vw] max-w-2xl p-0" align="end">
+        <PopoverContent className="w-[90vw] max-w-md p-0" align="end">
           <AnnotationSettingsPane
             event={search as unknown as Event}
-            showZones={showZones}
-            setShowZones={setShowZones}
             annotationOffset={annotationOffset}
             setAnnotationOffset={(value) => {
               if (typeof value === "function") {
