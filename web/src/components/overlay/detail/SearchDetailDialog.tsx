@@ -536,7 +536,7 @@ export default function SearchDetailDialog({
                   "relative flex items-center justify-between",
                   "w-full",
                   // match dialog's max-width classes
-                  "sm:max-w-xl md:max-w-4xl lg:max-w-[75%] xl:max-w-[80%]",
+                  "sm:max-w-xl md:max-w-4xl lg:max-w-[70%]",
                 )}
               >
                 <Tooltip>
@@ -583,7 +583,7 @@ export default function SearchDetailDialog({
           className={cn(
             "scrollbar-container overflow-y-auto",
             isDesktop &&
-              "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-[75%] xl:max-w-[80%]",
+              "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-[70%]",
             isMobile && "px-4",
           )}
           onInteractOutside={(e) => {
