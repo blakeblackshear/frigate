@@ -92,7 +92,7 @@ export function TrackingDetails({
       return resolveZoneName(config, zone);
     });
   });
-  
+
   // Use manualOverride (set when seeking in image mode) if present so
   // lifecycle rows and overlays follow image-mode seeks. Otherwise fall
   // back to currentTime used for video mode.
