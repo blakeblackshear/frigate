@@ -117,6 +117,7 @@
     "search": {
       "placeholder": "Cerca per etiqueta o subetiqueta..."
     },
-    "noImages": "No s'han trobat miniatures per a aquesta càmera"
+    "noImages": "No s'han trobat miniatures per a aquesta càmera",
+    "unknownLabel": "Imatge activadora desada"
   }
 }

@@ -49,6 +49,10 @@
       "playAlertVideos": {
         "label": "Reproduir vídeos d’alerta",
         "desc": "Per defecte, les alertes recents al tauler en directe es reprodueixen com a vídeos petits en bucle. Desactiva aquesta opció per mostrar només una imatge estàtica de les alertes recents en aquest dispositiu/navegador."
+      },
+      "displayCameraNames": {
+        "label": "Mostra sempre els noms de la càmera",
+        "desc": "Mostra sempre els noms de les càmeres en un xip al tauler de visualització en directe multicàmera."
       }
     },
     "storedLayouts": {
@@ -695,7 +699,9 @@
     },
     "actions": {
       "alert": "Marcar com Alerta",
-      "notification": "Enviar Notificació"
+      "notification": "Enviar Notificació",
+      "sub_label": "Afegeix una subetiqueta",
+      "attribute": "Afegeix un atribut"
     },
     "dialog": {
       "createTrigger": {
@@ -713,25 +719,28 @@
       "form": {
         "name": {
           "title": "Nom",
-          "placeholder": "Entrar el nom del disparador",
+          "placeholder": "Anomena aquest activador",
           "error": {
-            "minLength": "El nom ha de tenir almenys 2 caràcters de llargada.",
-            "invalidCharacters": "El nom només pot contenir lletres, números, guions i guinons baixos.",
+            "minLength": "El camp ha de tenir almenys 2 caràcters.",
+            "invalidCharacters": "El camp només pot contenir lletres, números, guions baixos i guions.",
             "alreadyExists": "El disparador amb aquest nom ja existeix per aquesta càmera."
-          }
+          },
+          "description": "Introduïu un nom o una descripció únics per a identificar aquest activador"
         },
         "enabled": {
           "description": "Activar o desactivar aquest disparador"
         },
         "type": {
           "title": "Tipus",
-          "placeholder": "Selecciona un tipus de disparador"
+          "placeholder": "Selecciona un tipus de disparador",
+          "description": "Activa quan es detecta una descripció similar d'un objecte rastrejat",
+          "thumbnail": "Activa quan es detecti una miniatura d'objecte rastrejada similar"
         },
         "content": {
           "title": "Contingut",
-          "imagePlaceholder": "Selecciona una imatge",
+          "imagePlaceholder": "Selecciona una miniatura",
           "textPlaceholder": "Entra el contingut de text",
-          "imageDesc": "Selecciona una imatge per disparar aquesta acció quan una imatge similar sigui detectada.",
+          "imageDesc": "Només es mostren les 100 miniatures més recents. Si no podeu trobar la miniatura desitjada, reviseu els objectes anteriors a Explora i configureu un activador des del menú.",
           "textDesc": "Entra el text per disparar aquesta acció quan es detecti una descripció d'objecte a rastrejar similar.",
           "error": {
             "required": "Contigunt requerit."
@@ -742,11 +751,12 @@
           "error": {
             "min": "El llindar ha de ser mínim 0",
             "max": "El llindar ha de ser máxim 1"
-          }
+          },
+          "desc": "Estableix el llindar de similitud per a aquest activador. Un llindar més alt significa que es requereix una coincidència més propera per disparar el disparador."
         },
         "actions": {
           "title": "Accions",
-          "desc": "Per defecte, Frigate dispara un missatge MQTT per tots els disparadors. Tria una acció adicional per realitzar quan aquest disparador dispari.",
+          "desc": "Per defecte, Frigate dispara un missatge MQTT per a tots els activadors. Subetiquetes afegeix el nom de l'activador a l'etiqueta de l'objecte. Els atributs són metadades cercables emmagatzemades per separat a les metadades de l'objecte rastrejat.",
           "error": {
             "min": "S'ha de seleccionar una acció com a mínim."
           }
@@ -772,13 +782,30 @@
     },
     "documentTitle": "Disparadors",
     "management": {
-      "title": "Gestió de disparadors",
+      "title": "Activadors",
       "desc": "Gestionar els disparadors de {{camera}}. Usa les tipus de miniatures per disparar miniatures similars a l'objecte a seguir seleccionat, i el tipus de descripció per disparar en cas de descripcions similars a l'especificada."
     },
     "addTrigger": "Afegir disaprador",
     "semanticSearch": {
       "desc": "La cerca semàntica ha d'estar activada per a utilitzar els activadors.",
       "title": "La cerca semàntica està desactivada"
+    },
+    "wizard": {
+      "title": "Crea un activador",
+      "step1": {
+        "description": "Configura la configuració bàsica per al vostre activador."
+      },
+      "step2": {
+        "description": "Configura el contingut que activarà aquesta acció."
+      },
+      "step3": {
+        "description": "Configura el llindar i les accions d'aquest activador."
+      },
+      "steps": {
+        "nameAndType": "Nom i tipus",
+        "configureData": "Configura les dades",
+        "thresholdAndActions": "Llindar i accions"
+      }
     }
   },
   "roles": {
@@ -831,7 +858,9 @@
         "createRole": "Rol {{role}} creat exitosament",
         "updateCameras": "Càmeres actualitzades per al rol {{role}}",
         "deleteRole": "Rol {{role}} eliminat exitosament",
-        "userRolesUpdated": "{{count}} usuari(s) asignats a aquest rol s'han actualitzat a 'visor', i tenen accés a totes les càmeres."
+        "userRolesUpdated_one": "{{count}} usuari(s) asignats a aquest rol s'han actualitzat a 'visor', i tenen accés a totes les càmeres.",
+        "userRolesUpdated_many": "",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Error al crear el rol: {{errorMessage}}",
@@ -985,7 +1014,9 @@
       "estimatedBandwidth": "Amplada de banda estimad",
       "roles": "Rols",
       "streamValidated": "El flux {{number}} s'ha validat correctament",
-      "streamValidationFailed": "Ha fallat la validació del flux {{number}}"
+      "streamValidationFailed": "Ha fallat la validació del flux {{number}}",
+      "ffmpegModule": "Usa el mode de compatibilitat del flux",
+      "ffmpegModuleDescription": "Si el flux no es carrega després de diversos intents, proveu d'activar-ho. Quan està activat, Frigate utilitzarà el mòdul ffmpeg amb go2rtc. Això pot proporcionar una millor compatibilitat amb alguns fluxos de càmera."
     }
   },
   "cameraManagement": {

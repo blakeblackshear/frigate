@@ -218,7 +218,10 @@
     }
   },
   "label": {
-    "back": "Torna enrere"
+    "back": "Torna enrere",
+    "hide": "Oculta {{item}}",
+    "show": "Mostra {{item}}",
+    "ID": "ID"
   },
   "button": {
     "apply": "Aplicar",
@@ -281,5 +284,14 @@
   "readTheDocumentation": "Llegir la documentació",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} i {{1}}",
+    "many": "{{items}}, i {{last}}",
+    "separatorWithSpace": ",· "
+  },
+  "field": {
+    "optional": "Opcional",
+    "internalID": "L'ID intern que Frigate s'utilitza a la configuració i a la base de dades"
   }
 }

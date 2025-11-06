@@ -5,7 +5,10 @@
     "renameCategory": "Reanomena la classe",
     "deleteCategory": "Suprimeix la classe",
     "deleteImages": "Suprimeix les imatges",
-    "trainModel": "Model de tren"
+    "trainModel": "Model de tren",
+    "addClassification": "Afegeix una classificació",
+    "deleteModels": "Suprimeix els models",
+    "editModel": "Edita el model"
   },
   "toast": {
     "success": {
@@ -13,13 +16,19 @@
       "deletedImage": "Imatges suprimides",
       "categorizedImage": "Imatge classificada amb èxit",
       "trainedModel": "Model entrenat amb èxit.",
-      "trainingModel": "S'ha iniciat amb èxit la formació de models."
+      "trainingModel": "S'ha iniciat amb èxit la formació de models.",
+      "deletedModel_one": "S'ha suprimit correctament el model {{count}}",
+      "deletedModel_many": "S'han suprimit correctament {{count}} models",
+      "deletedModel_other": "",
+      "updatedModel": "S'ha actualitzat correctament la configuració del model"
     },
     "error": {
       "deleteImageFailed": "No s'ha pogut suprimir: {{errorMessage}}",
       "deleteCategoryFailed": "No s'ha pogut suprimir la classe: {{errorMessage}}",
       "categorizeFailed": "No s'ha pogut categoritzar la imatge: {{errorMessage}}",
-      "trainingFailed": "No s'ha pogut iniciar l'entrenament del model: {{errorMessage}}"
+      "trainingFailed": "No s'ha pogut iniciar l'entrenament del model: {{errorMessage}}",
+      "deleteModelFailed": "No s'ha pogut suprimir el model: {{errorMessage}}",
+      "updateModelFailed": "No s'ha pogut actualitzar el model: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -43,7 +52,8 @@
   },
   "train": {
     "title": "Classificacions recents",
-    "aria": "Selecciona les classificacions recents"
+    "aria": "Selecciona les classificacions recents",
+    "titleShort": "Recent"
   },
   "categories": "Classes",
   "createCategory": {
@@ -98,7 +108,8 @@
         "stateRequiresTwoClasses": "Els models d'estat requereixen almenys 2 classes",
         "objectLabelRequired": "Seleccioneu una etiqueta d'objecte",
         "objectTypeRequired": "Seleccioneu un tipus de classificació"
-      }
+      },
+      "states": "Estats"
     },
     "step2": {
       "description": "Seleccioneu les càmeres i definiu l'àrea a monitoritzar per a cada càmera. El model classificarà l'estat d'aquestes àrees.",
@@ -131,5 +142,23 @@
       },
       "generateSuccess": "Imatges de mostra generades amb èxit"
     }
+  },
+  "deleteModel": {
+    "title": "Suprimeix el model de classificació",
+    "single": "Esteu segur que voleu suprimir {{name}}? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer.",
+    "desc": "Esteu segur que voleu suprimir {{count}} model(s)? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer."
+  },
+  "menu": {
+    "objects": "Objectes",
+    "states": "Estats"
+  },
+  "details": {
+    "scoreInfo": "La puntuació representa la confiança mitjana de la classificació en totes les deteccions d'aquest objecte."
+  },
+  "edit": {
+    "title": "Edita el model de classificació",
+    "descriptionState": "Edita les classes per a aquest model de classificació d'estats. Els canvis requeriran tornar a entrenar el model.",
+    "descriptionObject": "Edita el tipus d'objecte i el tipus de classificació per a aquest model de classificació d'objectes.",
+    "stateClassesInfo": "Nota: Canviar les classes d'estat requereix tornar a entrenar el model amb les classes actualitzades."
   }
 }
