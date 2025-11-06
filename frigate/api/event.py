@@ -912,7 +912,7 @@ def events_summary(
                     "count": int(g.count or 0),
                 }
 
-    return JSONResponse(content=list(sorted(grouped.keys()).values()))
+    return JSONResponse(content=list(grouped.values()))
 
 
 @router.get(

@@ -99,11 +99,13 @@ class TestHttpMedia(BaseTestHttp):
             # Verify we get exactly 3 days
             assert len(summary) == 3, f"Expected 3 days, got {len(summary)}"
 
-            # Verify the correct dates are returned
-            dates = summary
-            assert "2024-03-09" in dates, f"Expected 2024-03-09 in {dates}"
-            assert "2024-03-10" in dates, f"Expected 2024-03-10 in {dates}"
-            assert "2024-03-11" in dates, f"Expected 2024-03-11 in {dates}"
+            # Verify the correct dates are returned (API returns dict with True values)
+            assert "2024-03-09" in summary, f"Expected 2024-03-09 in {summary}"
+            assert "2024-03-10" in summary, f"Expected 2024-03-10 in {summary}"
+            assert "2024-03-11" in summary, f"Expected 2024-03-11 in {summary}"
+            assert summary["2024-03-09"] is True
+            assert summary["2024-03-10"] is True
+            assert summary["2024-03-11"] is True
 
     def test_recordings_summary_across_dst_fall_back(self):
         """
@@ -173,11 +175,13 @@ class TestHttpMedia(BaseTestHttp):
             # Verify we get exactly 3 days
             assert len(summary) == 3, f"Expected 3 days, got {len(summary)}"
 
-            # Verify the correct dates are returned
-            dates = summary
-            assert "2024-11-02" in dates, f"Expected 2024-11-02 in {dates}"
-            assert "2024-11-03" in dates, f"Expected 2024-11-03 in {dates}"
-            assert "2024-11-04" in dates, f"Expected 2024-11-04 in {dates}"
+            # Verify the correct dates are returned (API returns dict with True values)
+            assert "2024-11-02" in summary, f"Expected 2024-11-02 in {summary}"
+            assert "2024-11-03" in summary, f"Expected 2024-11-03 in {summary}"
+            assert "2024-11-04" in summary, f"Expected 2024-11-04 in {summary}"
+            assert summary["2024-11-02"] is True
+            assert summary["2024-11-03"] is True
+            assert summary["2024-11-04"] is True
 
     def test_recordings_summary_multiple_cameras_across_dst(self):
         """
@@ -229,6 +233,8 @@ class TestHttpMedia(BaseTestHttp):
             assert len(summary) == 2, f"Expected 2 days, got {len(summary)}"
             assert "2024-03-09" in summary
             assert "2024-03-10" in summary
+            assert summary["2024-03-09"] is True
+            assert summary["2024-03-10"] is True
 
     def test_recordings_summary_at_dst_transition_time(self):
         """
@@ -267,6 +273,7 @@ class TestHttpMedia(BaseTestHttp):
             # The recording should appear on March 10
             assert len(summary) == 1
             assert "2024-03-10" in summary
+            assert summary["2024-03-10"] is True
 
     def test_recordings_summary_utc_timezone(self):
         """
@@ -311,6 +318,8 @@ class TestHttpMedia(BaseTestHttp):
             assert len(summary) == 2
             assert "2024-03-09" in summary
             assert "2024-03-10" in summary
+            assert summary["2024-03-09"] is True
+            assert summary["2024-03-10"] is True
 
     def test_recordings_summary_no_recordings(self):
         """
@@ -367,3 +376,4 @@ class TestHttpMedia(BaseTestHttp):
             summary = response.json()
             assert len(summary) == 1
             assert "2024-03-10" in summary
+            assert summary["2024-03-10"] is True
