@@ -269,6 +269,10 @@ export function PolygonCanvas({
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
 
+    if (!activePolygon) {
+      return;
+    }
+
     // add default points order for already completed polygons
     if (!activePolygon.pointsOrder && activePolygon.isFinished) {
       updatedPolygons[activePolygonIndex] = {

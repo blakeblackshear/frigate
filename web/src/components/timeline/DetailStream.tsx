@@ -655,16 +655,6 @@ function LifecycleItem({
   const { t } = useTranslation("views/events");
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  item = {
-    ...item,
-    data: {
-      ...item.data,
-      zones_friendly_names: item?.data?.zones?.map((zone) => {
-        return resolveZoneName(config, zone);
-      }),
-    },
-  };
-
   const aspectRatio = useMemo(() => {
     if (!config || !item?.camera) {
       return 16 / 9;
@@ -806,17 +796,28 @@ function ObjectTimeline({
     },
   ]);
 
+  const { data: config } = useSWR<FrigateConfig>("config");
   const timeline = useMemo(() => {
     if (!fullTimeline) {
       return fullTimeline;
     }
 
-    return fullTimeline.filter(
-      (t) =>
-        t.timestamp >= review.start_time &&
-        (review.end_time == undefined || t.timestamp <= review.end_time),
-    );
-  }, [fullTimeline, review]);
+    return fullTimeline
+      .filter(
+        (t) =>
+          t.timestamp >= review.start_time &&
+          (review.end_time == undefined || t.timestamp <= review.end_time),
+      )
+      .map((event) => ({
+        ...event,
+        data: {
+          ...event.data,
+          zones_friendly_names: event.data?.zones?.map((zone) =>
+            resolveZoneName(config, zone),
+          ),
+        },
+      }));
+  }, [config, fullTimeline, review]);
 
   if (isValidating && (!timeline || timeline.length === 0)) {
     return <ActivityIndicator className="ml-2 size-3" />;
