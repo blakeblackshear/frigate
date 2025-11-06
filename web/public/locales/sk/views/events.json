@@ -43,10 +43,17 @@
     "trackedObject_one": "objekt",
     "trackedObject_other": "objekty",
     "noObjectDetailData": "Nie sú k dispozícii žiadne podrobné údaje o objekte.",
-    "label": "Detail"
+    "label": "Detail",
+    "settings": "Nastavenia podrobného zobrazenia",
+    "alwaysExpandActive": {
+      "title": "Rozbaľte vždy aktívne",
+      "desc": "Vždy rozbaľte podrobnosti objektu aktívnej položky recenzie, ak sú k dispozícii."
+    }
   },
   "objectTrack": {
     "trackedPoint": "Sledovaný bod",
     "clickToSeek": "Kliknutím prejdete na tento čas"
-  }
+  },
+  "zoomIn": "Priblížiť",
+  "zoomOut": "Oddialiť"
 }

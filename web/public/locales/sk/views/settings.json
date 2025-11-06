@@ -49,6 +49,10 @@
       "playAlertVideos": {
         "label": "Prehrať videá s upozornením",
         "desc": "Predvolene sa nedávne upozornenia na paneli Živé vysielanie prehrávajú ako krátke cyklické videá. Túto možnosť vypnite, ak chcete zobrazovať iba statický obrázok nedávnych upozornení na tomto zariadení/prehliadači."
+      },
+      "displayCameraNames": {
+        "label": "Vždy Zobraziť názvy kamier",
+        "desc": "Vždy zobrazujte názvy kamier v čipe na ovládacom paneli živého náhľadu z viacerých kamier."
       }
     },
     "storedLayouts": {
@@ -292,7 +296,7 @@
       "name": {
         "title": "Meno",
         "inputPlaceHolder": "Zadajte meno…",
-        "tips": "Názov musí mať aspoň 2 znaky a nesmie byť zhodný s názvom kamery alebo inej zóny."
+        "tips": "Názov musí mať aspoň 2 znaky, musí mať aspoň jedno písmeno a nesmie byť názvom kamery alebo inej zóny."
       },
       "inertia": {
         "title": "Zotrvačnosť",
@@ -791,6 +795,285 @@
           "viewerDesc": "Obmedzené iba na živé dashboardy, funkcie Review, Explore a Exports.",
           "customDesc": "Vlastná rola so špecifickým prístupom k kamere."
         }
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Správa roly diváka",
+      "desc": "Spravujte vlastné roly divákov a ich povolenia na prístup ku kamere pre túto inštanciu Frigate."
+    },
+    "addRole": "Pridať rolu",
+    "table": {
+      "role": "Rola",
+      "cameras": "Kamery",
+      "actions": "Akcie",
+      "noRoles": "Neboli nájdené žiadne vlastné role.",
+      "editCameras": "Editovať kamery",
+      "deleteRole": "Odstrániť rolu"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rola {{role}} bola úspešne vytvorená",
+        "updateCameras": "Kamery aktualizované pre rolu {{role}}",
+        "deleteRole": "Rola {{role}} bola úspešne odstránená",
+        "userRolesUpdated_one": "{{count}} užívateľ (y) priradené tejto úlohe boli aktualizované pre \"viewer\", ktorý má prístup ku všetkým kamerám.",
+        "userRolesUpdated_few": "",
+        "userRolesUpdated_other": ""
+      },
+      "error": {
+        "createRoleFailed": "Nepodarilo sa vytvoriť rolu: {{errorMessage}}",
+        "updateCamerasFailed": "Nepodarilo sa aktualizovať kamery: {{errorMessage}}",
+        "deleteRoleFailed": "Nepodarilo sa odstrániť rolu: {{errorMessage}}",
+        "userUpdateFailed": "Nepodarilo sa aktualizovať používateľské role: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Vytvoriť novú rolu",
+        "desc": "Pridajte novú úlohu a zadajte prístup k kamerám."
+      },
+      "editCameras": {
+        "title": "Editovať Rolu Kamery",
+        "desc": "Aktualizujte prístup k kamere pre rolu <strong>{{role}}<strong>."
+      },
+      "deleteRole": {
+        "title": "Odstrániť rolu",
+        "desc": "Túto akciu nie je možné vrátiť späť. Týmto sa rola natrvalo odstráni a všetci používatelia s touto rolou budú priradení k role „pozerač“, ktorá umožní divákovi prístup ku všetkým kamerám.",
+        "warn": "Ste si istí, že chcete odstrániť <strong>{{role}}</strong>?",
+        "deleting": "Odstraňuje sa..."
+      },
+      "form": {
+        "role": {
+          "title": "Názov role",
+          "placeholder": "Zadajte názov roly",
+          "desc": "Povolené sú iba písmená, čísla, bodky a podčiarkovníky.",
+          "roleIsRequired": "Vyžaduje sa názov roly",
+          "roleOnlyInclude": "Názov role môže obsahovať iba písmená, čísla, . alebo _",
+          "roleExists": "Úloha s týmto menom už existuje."
+        },
+        "cameras": {
+          "title": "Kamery",
+          "desc": "Vyberte kamery, ku ktorým má táto rola prístup. Vyžaduje sa aspoň jedna kamera.",
+          "required": "Aspoň jedna kamera musí byť vybraná."
+        }
+      }
+    }
+  },
+  "notification": {
+    "title": "Notifikacie",
+    "notificationSettings": {
+      "title": "Nastavenia notifikácií",
+      "desc": "Frigate dokáže natívne odosielať push notifikácie do vášho zariadenia, keď je spustený v prehliadači alebo nainštalovaný ako PWA."
+    },
+    "notificationUnavailable": {
+      "title": "Notifikacie su nedostupné",
+      "desc": "Webové push notifikácie vyžadujú zabezpečený kontext (<code>https://…</code>). Ide o obmedzenie prehliadača. Ak chcete používať notifikácie, pristupujte k Frigate bezpečne."
+    },
+    "globalSettings": {
+      "title": "Globálne nastavenia",
+      "desc": "Dočasne pozastaviť upozornenia pre konkrétne kamery na všetkých registrovaných zariadeniach."
+    },
+    "email": {
+      "title": "E-mail",
+      "placeholder": "e.g. príklad@email.com",
+      "desc": "Vyžaduje sa platný e-mail, ktorý bude použitý na upozornenie v prípade akýchkoľvek problémov so službou push."
+    },
+    "cameras": {
+      "title": "Kamery",
+      "noCameras": "K dispozícii nie sú žiadne kamery",
+      "desc": "Vyberte, na ktoré kamery umožňujú notifikácie."
+    },
+    "deviceSpecific": "Špecifické nastavenia zariadenia",
+    "registerDevice": "Registrovať toto zariadenie",
+    "unregisterDevice": "Zrušte registráciu tohto zariadenia",
+    "sendTestNotification": "Odoslať testovacie oznámenie",
+    "unsavedRegistrations": "Neuložené registrácie oznámení",
+    "unsavedChanges": "Neuložené zmeny upozornení",
+    "active": "Upozornenia sú aktívne",
+    "suspended": "Oznámenie pozastavuju {{time}}",
+    "suspendTime": {
+      "suspend": "Pozastaviť",
+      "5minutes": "Pozastaviť na 5 minút",
+      "10minutes": "Pozastaviť na 10 minút",
+      "30minutes": "Pozastaviť na 30 minút",
+      "1hour": "Pozastaviť na 1 hodinu",
+      "12hours": "Pozastaviť na 12 hodín",
+      "24hours": "Pozastaviť na 24 hodín",
+      "untilRestart": "Pozastaviť do reštartovania"
+    },
+    "cancelSuspension": "Zrušiť pozastavenie",
+    "toast": {
+      "success": {
+        "registered": "Úspešne zaregistrované pre upozornenia. Pred odoslaním akýchkoľvek upozornení (vrátane testovacieho upozornenia) je potrebné reštartovať Frigate.",
+        "settingSaved": "Nastavenie oznámenia boli uložené."
+      },
+      "error": {
+        "registerFailed": "Uloženie registrácie upozornenia zlyhalo."
+      }
+    }
+  },
+  "frigatePlus": {
+    "title": "Nastavenie Frigate+",
+    "apiKey": {
+      "title": "Frigate + API kľúč",
+      "validated": "Frigate + API kľúč je detekovaný a overený",
+      "notValidated": "Frigate + API kľúč nie je detekovaný alebo nie je overený",
+      "desc": "Frigate+ API kľúč umožňuje integráciu s Frigate+ služby.",
+      "plusLink": "Prečítajte si viac o Frigate+"
+    },
+    "snapshotConfig": {
+      "title": "Konfigurácia snímky",
+      "desc": "Odosielanie do Frigate+ vyžaduje, aby boli v konfigurácii povolené snímky aj snímky <code>clean_copy</code>.",
+      "cleanCopyWarning": "Niektoré kamery majú povolené snímky, ale voľba <code>clean_copy</code> je zakázaná. Pre možnosť odosielania snímok z týchto kamier do služby Frigate+ je nutné túto voľbu povoliť v konfigurácii snímok.",
+      "table": {
+        "camera": "Kamera",
+        "snapshots": "Snímky",
+        "cleanCopySnapshots": "<code>clean_copy</code> Snímky"
+      }
+    },
+    "modelInfo": {
+      "title": "Informácie o Modele",
+      "modelType": "Typ Modelu",
+      "trainDate": "Dátum Tréningu",
+      "baseModel": "Základný Model",
+      "plusModelType": {
+        "baseModel": "Základný Model",
+        "userModel": "Doladené"
+      },
+      "supportedDetectors": "Podporované Detektory",
+      "cameras": "Kamery",
+      "loading": "Načítavam informácie o modeli…",
+      "error": "Chyba načítania informácií o modeli",
+      "availableModels": "Dostupné Moduly",
+      "loadingAvailableModels": "Načítavam dostupné modely…",
+      "modelSelect": "Tu môžete vybrať dostupné modely zo služby Frigate+. Upozorňujeme, že je možné zvoliť iba modely kompatibilné s aktuálnou konfiguráciou detektora."
+    },
+    "unsavedChanges": "Neuložené zmeny nastavenia Frigate+",
+    "restart_required": "Vyžadovaný reštart (model Frigate+ zmenený)",
+    "toast": {
+      "success": "Nastavenia Frigate+ boli uložené. Reštartujte Frigate+ pre aplikovanie zmien.",
+      "error": "Chyba pri ukladaní zmien konfigurácie: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Spúšťače",
+    "semanticSearch": {
+      "title": "Sémantické vyhľadávanie je vypnuté",
+      "desc": "Na používanie spúšťačov musí byť povolené sémantické vyhľadávanie."
+    },
+    "management": {
+      "title": "Spúšťače",
+      "desc": "Správa spúšťa {{camera}}. Použite typ miniatúry, aby ste spustili na podobných miniatúr na vybraných tracked objekt, a typ popisu, aby ste spustili podobné popisy na text, ktorý určíte."
+    },
+    "addTrigger": "Pridať Spúšťač",
+    "table": {
+      "name": "Meno",
+      "type": "Typ",
+      "content": "Obsah",
+      "threshold": "Prah",
+      "actions": "Akcie",
+      "noTriggers": "Pre túto kameru nie sú nakonfigurované žiadne spúšťače.",
+      "edit": "Upraviť",
+      "deleteTrigger": "Odstrániť spúšťač",
+      "lastTriggered": "Naposledy spustené"
+    },
+    "type": {
+      "thumbnail": "Náhľad",
+      "description": "Popis"
+    },
+    "actions": {
+      "notification": "Poslať upozornenie",
+      "sub_label": "Pridať vedľajší štítok",
+      "attribute": "Pridať atribút"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Vytvoriť spúšťač",
+        "desc": "Vytvorte spúšť pre kameru {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Upraviť spúšťač",
+        "desc": "Upraviť nastavenia spúšťača na kamere {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Odstrániť spúšťač",
+        "desc": "Naozaj chcete odstrániť spúšťač <strong>{{triggerName}}</strong>? Túto akciu nie je možné vrátiť späť."
+      },
+      "form": {
+        "name": {
+          "title": "Meno",
+          "placeholder": "Zadajte meno pre spúšťača",
+          "description": "Zadajte jedinečné meno alebo popis na identifikáciu tohto spúšťania",
+          "error": {
+            "minLength": "Názov musí mať aspoň 2 znaky.",
+            "invalidCharacters": "Meno môže obsahovať iba písmená, číslice, podčiarkovníky a pomlčky.",
+            "alreadyExists": "Spúšťač s týmto názvom už pre túto kameru existuje."
+          }
+        },
+        "enabled": {
+          "description": "Povoliť alebo zakázať tento spúšťač"
+        },
+        "type": {
+          "title": "Typ",
+          "placeholder": "Vybrať typ spúšťača",
+          "description": "Spustiť, keď sa zistí podobný popis sledovaného objektu",
+          "thumbnail": "Spustiť, keď sa zistí podobná miniatúra sledovaného objektu"
+        },
+        "content": {
+          "title": "Obsah",
+          "imagePlaceholder": "Vyberte miniatúru",
+          "textPlaceholder": "Zadajte obsah textu",
+          "imageDesc": "Zobrazujú sa iba posledné 100 miniatúr. Ak nemôžete nájsť požadovanú miniatúru, prečítajte si skôr objekty v preskúmať a nastaviť spúšťací z ponuky tam.",
+          "textDesc": "Zadajte text, aby ste spustili túto akciu, keď je detekovaný podobný popis objektu.",
+          "error": {
+            "required": "Obsah je potrebný."
+          }
+        },
+        "threshold": {
+          "title": "Prah",
+          "desc": "Nastavte prah podobnosti pre tento spúšťač. Vyšší prah znamená, že na spustenie spúšťača je potrebná bližšia zhoda.",
+          "error": {
+            "min": "Threshold musí byť aspoň 0",
+            "max": "Threshold musí byť na väčšine 1"
+          }
+        },
+        "actions": {
+          "title": "Akcie",
+          "desc": "V predvolenom nastavení Frigate odosiela MQTT správu pre všetky spúšťače. Zvoľte dodatočnú akciu, ktorá sa má vykonať, keď sa tento spúšťač aktivuje.",
+          "error": {
+            "min": "Musí byť vybraná aspoň jedna akcia."
+          }
+        }
+      }
+    },
+    "wizard": {
+      "title": "Vytvoriť spúšťač",
+      "step1": {
+        "description": "Konfigurujte základné nastavenia pre vašu spúšť."
+      },
+      "step2": {
+        "description": "Nastavte obsah, ktorý spustí túto akciu."
+      },
+      "step3": {
+        "description": "Konfigurovať prah a akcie pre tento spúšťač."
+      },
+      "steps": {
+        "nameAndType": "Meno a typ",
+        "configureData": "Konfigurovať údaje",
+        "thresholdAndActions": "Prah a akcie"
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Spúšťač {{name}} bol úspešne vytvorený.",
+        "updateTrigger": "Spúšťač {{name}} bol úspešne aktualizovaný.",
+        "deleteTrigger": "Spúšťač {{name}} bol úspešne zmazaný."
+      },
+      "error": {
+        "createTriggerFailed": "Nepodarilo sa vytvoriť spúšťač: {{errorMessage}}",
+        "updateTriggerFailed": "Nepodarilo sa aktualizovať spúšťač: {{errorMessage}}",
+        "deleteTriggerFailed": "Nepodarilo sa zmazať spúšťač: {{errorMessage}}"
       }
     }
   }

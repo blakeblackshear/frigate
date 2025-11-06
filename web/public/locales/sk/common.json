@@ -101,7 +101,10 @@
   },
   "readTheDocumentation": "Prečítajte si dokumentáciu",
   "label": {
-    "back": "Choď späť"
+    "back": "Choď späť",
+    "hide": "Skryť {{item}}",
+    "show": "Zobraziť {{item}}",
+    "ID": "ID"
   },
   "button": {
     "apply": "Použiť",
@@ -281,5 +284,14 @@
   },
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} a {{1}}",
+    "many": "{{items}}, a {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Voliteľné",
+    "internalID": "Interné ID Frigate používa v konfigurácii a databáze"
   }
 }
