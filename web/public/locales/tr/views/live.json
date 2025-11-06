@@ -19,11 +19,11 @@
     },
     "started": "Manuel talep üzerine kayıt başlatıldı.",
     "failedToStart": "Manuel talep üzerine kayıt başlatılamadı.",
-    "title": "İsteğe Bağlı Kayıt",
+    "title": "İsteğe Bağlı",
     "end": "Talep Üzerine Kaydı Bitir",
     "debugView": "Hata Ayıklama Görünümü",
     "ended": "Manuel talep üzerine kayıt bitirildi.",
-    "tips": "Bu kameranın kayıt tutma ayarları kapsamında manuel olarak bir olay başlatın.",
+    "tips": "Bu kameranın kayıt saklama ayarlarına göre anlık bir görüntü indirin veya manuel bir olay başlatın.",
     "playInBackground": {
       "label": "Arka planda oynat",
       "desc": "Yayını oynatıcı arkadayken de devam ettirmek için bu seçeneği açın."
@@ -167,5 +167,11 @@
   "transcription": {
     "enable": "Canlı Ses Çözümlemeyi Aç",
     "disable": "Canlı Ses Çözümlemeyi Kapat"
+  },
+  "snapshot": {
+    "takeSnapshot": "Anlık Ekran Görüntüsünü İndir",
+    "noVideoSource": "Anlık görüntü için kullanılabilir bir video kaynağı bulunamadı.",
+    "captureFailed": "Anlık görüntü yakalanamadı.",
+    "downloadStarted": "Anlık görüntü indirme işlemi başlatıldı."
   }
 }
