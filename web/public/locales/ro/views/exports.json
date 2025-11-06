@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "Eroare redenumire export: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Partajează exportul",
+    "downloadVideo": "Descarcă videoclipul",
+    "editName": "Editează numele",
+    "deleteExport": "Șterge exportul"
   }
 }

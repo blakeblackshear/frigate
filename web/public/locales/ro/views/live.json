@@ -17,9 +17,9 @@
     },
     "move": {
       "clickMove": {
-        "label": "Fă click în cadrul imaginii pentru a centra camera",
-        "enable": "Activează clic pentru a muta",
-        "disable": "Dezactivează clic pentru a muta"
+        "label": "Apasă în cadrul imaginii pentru a centra camera",
+        "enable": "Activează mutarea prin clic",
+        "disable": "Dezactivează mutarea prin clic"
       },
       "left": {
         "label": "Mișcă camera PTZ spre stânga"
@@ -36,7 +36,7 @@
     },
     "frame": {
       "center": {
-        "label": "Fă clic în cadru pentru a centra camera PTZ"
+        "label": "Apasă în cadru pentru a centra camera PTZ"
       }
     },
     "presets": "Presetări cameră PTZ",
@@ -100,7 +100,7 @@
     "start": "Pornește înregistrarea la cerere",
     "started": "Înregistrare la cerere pornită manual.",
     "failedToStart": "Nu s-a putut porni înregistrarea manuală la cerere.",
-    "recordDisabledTips": "Deoarece înregistrarea este dezactivată sau restricționată în configurația pentru această cameră, va fi salvată doar o captură de ecran.",
+    "recordDisabledTips": "Deoarece înregistrarea este dezactivată sau restricționată în configurația pentru această cameră, doar un snapshot va fi salvat.",
     "end": "Oprește înregistrarea la cerere",
     "ended": "Înregistrarea manuală la cerere s-a încheiat.",
     "failedToEnd": "Nu s-a reușit încheierea înregistrării manuale la cerere."
