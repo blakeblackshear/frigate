@@ -88,8 +88,8 @@ type TabsWithActionsProps = {
   config?: FrigateConfig;
   setSearch: (s: SearchResult | undefined) => void;
   setSimilarity?: () => void;
-  showControls?: boolean;
-  setShowControls?: (v: boolean) => void;
+  isPopoverOpen: boolean;
+  setIsPopoverOpen: (open: boolean) => void;
 };
 
 function TabsWithActions({
@@ -100,8 +100,8 @@ function TabsWithActions({
   config,
   setSearch,
   setSimilarity,
-  showControls,
-  setShowControls,
+  isPopoverOpen,
+  setIsPopoverOpen,
 }: TabsWithActionsProps) {
   const { t } = useTranslation(["views/explore", "views/faceLibrary"]);
 
@@ -152,8 +152,8 @@ function TabsWithActions({
       {pageToggle === "tracking_details" && (
         <AnnotationSettingsPopover
           search={search}
-          showControls={showControls}
-          setShowControls={setShowControls}
+          open={isPopoverOpen}
+          setIsOpen={setIsPopoverOpen}
         />
       )}
     </div>
@@ -162,40 +162,69 @@ function TabsWithActions({
 
 type AnnotationSettingsPopoverProps = {
   search: SearchResult;
-  showControls?: boolean;
-  setShowControls?: (v: boolean) => void;
+  open: boolean;
+  setIsOpen: (open: boolean) => void;
 };
 
 function AnnotationSettingsPopover({
   search,
-  showControls,
-  setShowControls,
+  open,
+  setIsOpen,
 }: AnnotationSettingsPopoverProps) {
   const { t } = useTranslation(["views/explore"]);
   const { annotationOffset, setAnnotationOffset } = useDetailStream();
   const [showZones, setShowZones] = useState(true);
 
+  const ignoreNextOpenRef = useRef(false);
+
+  useEffect(() => {
+    setIsOpen(false);
+    ignoreNextOpenRef.current = false;
+  }, [search, setIsOpen]);
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        if (ignoreNextOpenRef.current) {
+          ignoreNextOpenRef.current = false;
+          return;
+        }
+        setIsOpen(true);
+      } else {
+        setIsOpen(false);
+      }
+    },
+    [setIsOpen],
+  );
+
+  const registerTriggerCloseIntent = useCallback(() => {
+    if (open) {
+      ignoreNextOpenRef.current = true;
+    }
+  }, [open]);
+
   return (
     <div className="ml-2">
-      <Popover modal={true} open={showControls} onOpenChange={setShowControls}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
-              <Button
-                variant={showControls ? "select" : "default"}
-                className="size-7 p-1.5"
-                aria-label={t("trackingDetails.adjustAnnotationSettings")}
-              >
-                <LuSettings className="size-5" />
-              </Button>
-            </PopoverTrigger>
-          </TooltipTrigger>
-          <TooltipPortal>
-            <TooltipContent>
-              {t("trackingDetails.adjustAnnotationSettings")}
-            </TooltipContent>
-          </TooltipPortal>
-        </Tooltip>
+      <Popover modal={true} open={open} onOpenChange={handleOpenChange}>
+        <PopoverTrigger
+          asChild
+          onPointerDown={registerTriggerCloseIntent}
+          onKeyDown={(event) => {
+            if (open && (event.key === "Enter" || event.key === " ")) {
+              registerTriggerCloseIntent();
+            }
+          }}
+        >
+          <Button
+            type="button"
+            className="size-7 p-1.5"
+            variant={open ? "select" : "default"}
+            aria-label={t("trackingDetails.adjustAnnotationSettings")}
+            aria-expanded={open}
+          >
+            <LuSettings className="size-5" />
+          </Button>
+        </PopoverTrigger>
         <PopoverContent className="w-[90vw] max-w-2xl p-0" align="end">
           <AnnotationSettingsPane
             event={search as unknown as Event}
@@ -229,8 +258,8 @@ type DialogContentComponentProps = {
   setSearch: (s: SearchResult | undefined) => void;
   setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
   setSimilarity?: () => void;
-  showControls?: boolean;
-  setShowControls?: (v: boolean) => void;
+  isPopoverOpen: boolean;
+  setIsPopoverOpen: (open: boolean) => void;
 };
 
 function DialogContentComponent({
@@ -245,8 +274,8 @@ function DialogContentComponent({
   setSearch,
   setInputFocused,
   setSimilarity,
-  showControls,
-  setShowControls,
+  isPopoverOpen,
+  setIsPopoverOpen,
 }: DialogContentComponentProps) {
   if (page === "tracking_details") {
     return (
@@ -263,8 +292,8 @@ function DialogContentComponent({
               config={config}
               setSearch={setSearch}
               setSimilarity={setSimilarity}
-              showControls={showControls}
-              setShowControls={setShowControls}
+              isPopoverOpen={isPopoverOpen}
+              setIsPopoverOpen={setIsPopoverOpen}
             />
           ) : undefined
         }
@@ -321,8 +350,8 @@ function DialogContentComponent({
             config={config}
             setSearch={setSearch}
             setSimilarity={setSimilarity}
-            showControls={showControls}
-            setShowControls={setShowControls}
+            isPopoverOpen={isPopoverOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
           />
           <div className="scrollbar-container flex-1 overflow-y-auto">
             <ObjectDetailsTab
@@ -389,9 +418,11 @@ export default function SearchDetailDialog({
   // dialog and mobile page
 
   const [isOpen, setIsOpen] = useState(search != undefined);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
+      setIsPopoverOpen(open);
       setIsOpen(open);
       if (!open) {
         // short timeout to allow the mobile page animation
@@ -410,9 +441,7 @@ export default function SearchDetailDialog({
     }
   }, [search]);
 
-  // show/hide annotation settings
-
-  const [showControls, setShowControls] = useState(false);
+  // show/hide annotation settings is handled inside TabsWithActions
 
   const searchTabs = useMemo(() => {
     if (!config || !search) {
@@ -521,6 +550,9 @@ export default function SearchDetailDialog({
             isMobile && "px-4",
           )}
           onInteractOutside={(e) => {
+            if (isPopoverOpen) {
+              e.preventDefault();
+            }
             const target = e.target as HTMLElement;
             if (target.closest(".nav-button")) {
               e.preventDefault();
@@ -545,8 +577,8 @@ export default function SearchDetailDialog({
                 config={config}
                 setSearch={setSearch}
                 setSimilarity={setSimilarity}
-                showControls={showControls}
-                setShowControls={setShowControls}
+                isPopoverOpen={isPopoverOpen}
+                setIsPopoverOpen={setIsPopoverOpen}
               />
             </div>
           )}
@@ -563,8 +595,8 @@ export default function SearchDetailDialog({
             setSearch={setSearch}
             setInputFocused={setInputFocused}
             setSimilarity={setSimilarity}
-            showControls={showControls}
-            setShowControls={setShowControls}
+            isPopoverOpen={isPopoverOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
           />
         </Content>
       </Overlay>
