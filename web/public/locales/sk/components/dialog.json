@@ -53,7 +53,7 @@
     "export": "Exportovať",
     "selectOrExport": "Vybrať pre Export",
     "toast": {
-      "success": "Export úspešne spustený. Súbor nájdete v adresári /exports.",
+      "success": "Export bol úspešne spustený. Súbor si pozrite na stránke exportov.",
       "error": {
         "failed": "Chyba spustenia exportu: {{error}}",
         "endTimeMustAfterStartTime": "Čas konca musí byť po čase začiatku",
@@ -117,6 +117,7 @@
     "search": {
       "placeholder": "Hľadať podľa štítku alebo podštítku..."
     },
-    "noImages": "Pre tuto kameru sa nenašli žiadne miniatúry"
+    "noImages": "Pre tuto kameru sa nenašli žiadne miniatúry",
+    "unknownLabel": "Uložený obrázok spúšťača"
   }
 }

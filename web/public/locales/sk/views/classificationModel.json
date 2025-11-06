@@ -5,7 +5,9 @@
     "renameCategory": "Premenovať triedu",
     "deleteCategory": "Odstrániť triedu",
     "deleteImages": "Odstrániť obrázky",
-    "trainModel": "Model vlaku"
+    "trainModel": "Model vlaku",
+    "addClassification": "Pridať klasifikáciu",
+    "deleteModels": "Odstrániť modely"
   },
   "toast": {
     "success": {
@@ -13,13 +15,17 @@
       "deletedImage": "Vymazané obrázky",
       "categorizedImage": "Obrázok bol úspešne klasifikovaný",
       "trainedModel": "Úspešne vyškolený model.",
-      "trainingModel": "Úspešne spustený modelový tréning."
+      "trainingModel": "Úspešne spustený modelový tréning.",
+      "deletedModel_one": "Úspešne zmazané {{count}} model (y)",
+      "deletedModel_few": "",
+      "deletedModel_other": ""
     },
     "error": {
       "deleteImageFailed": "Nepodarilo sa odstrániť: {{errorMessage}}",
       "deleteCategoryFailed": "Nepodarilo sa odstrániť triedu: {{errorMessage}}",
       "categorizeFailed": "Nepodarilo sa kategorizovať obrázok: {{errorMessage}}",
-      "trainingFailed": "Nepodarilo sa spustiť trénovanie modelu: {{errorMessage}}"
+      "trainingFailed": "Nepodarilo sa spustiť trénovanie modelu: {{errorMessage}}",
+      "deleteModelFailed": "Nepodarilo sa odstrániť model: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -43,7 +49,8 @@
   },
   "train": {
     "title": "Posledné klasifikácie",
-    "aria": "Vyberte Nedávne Klasifikácie"
+    "aria": "Vyberte Nedávne Klasifikácie",
+    "titleShort": "Nedávne"
   },
   "categories": "Triedy",
   "createCategory": {
@@ -98,7 +105,8 @@
         "stateRequiresTwoClasses": "Modely štátov vyžadujú aspoň 2 triedy",
         "objectLabelRequired": "Vyberte označenie objektu",
         "objectTypeRequired": "Vyberte typ klasifikácie"
-      }
+      },
+      "states": "Štátov"
     },
     "step2": {
       "description": "Vyberte kamery a definujte oblasť, ktorú chcete pre každú kameru monitorovať. Model klasifikuje stav týchto oblastí.",
@@ -131,5 +139,14 @@
       },
       "generateSuccess": "Vzorové obrázky boli úspešne vygenerované"
     }
+  },
+  "deleteModel": {
+    "title": "Odstrániť klasifikačný model",
+    "single": "Ste si istí, že chcete odstrániť {{name}}? To bude trvalo odstrániť všetky súvisiace údaje vrátane obrázkov a vzdelávacích údajov. Táto akcia nemôže byť neporušená.",
+    "desc": "Ste si istí, že chcete odstrániť {{count}} model (y)? To bude trvalo odstrániť všetky súvisiace údaje vrátane obrázkov a vzdelávacích údajov. Táto akcia nemôže byť neporušená."
+  },
+  "menu": {
+    "objects": "Objekty",
+    "states": "Štátov"
   }
 }
