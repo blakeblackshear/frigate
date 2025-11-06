@@ -16,13 +16,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { Event } from "@/types/event";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { ReviewSegment } from "@/types/review";
-import {
-  LuChevronDown,
-  LuCircle,
-  LuChevronRight,
-  LuSettings,
-} from "react-icons/lu";
-import { MdAutoAwesome } from "react-icons/md";
+import { LuChevronDown, LuCircle, LuChevronRight } from "react-icons/lu";
 import { getTranslatedLabel } from "@/utils/i18n";
 import EventMenu from "@/components/timeline/EventMenu";
 import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
@@ -32,6 +26,7 @@ import { Link } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { usePersistence } from "@/hooks/use-persistence";
 import { isDesktop } from "react-device-detect";
+import { PiSlidersHorizontalBold } from "react-icons/pi";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
@@ -237,7 +232,7 @@ export default function DetailStream({
             className="flex w-full items-center justify-between p-3"
           >
             <div className="flex items-center gap-2 text-sm font-medium">
-              <LuSettings className="size-4" />
+              <PiSlidersHorizontalBold className="size-4" />
               <span>{t("detail.settings")}</span>
             </div>
             {controlsExpanded ? (
