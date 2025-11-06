@@ -106,7 +106,7 @@
     "enable": "Увімкнути",
     "disabled": "Вимкнено",
     "disable": "Вимкнути",
-    "save": "Зберігати",
+    "save": "Зберегти",
     "download": "Завантажити",
     "info": "Інфо",
     "suspended": "Призупинено",
@@ -238,7 +238,10 @@
     }
   },
   "label": {
-    "back": "Повернутись"
+    "back": "Повернутись",
+    "hide": "Приховати {{item}}",
+    "show": "Показати {{item}}",
+    "ID": "ID"
   },
   "toast": {
     "save": {
@@ -282,5 +285,14 @@
   "readTheDocumentation": "Прочитати документацію",
   "information": {
     "pixels": "{{area}}пикс"
+  },
+  "list": {
+    "two": "{{0}} і {{1}}",
+    "many": "{{items}}, і {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Необов'язково",
+    "internalID": "Внутрішній ідентифікатор, який Frigate використовує в конфігурації та базі даних"
   }
 }
