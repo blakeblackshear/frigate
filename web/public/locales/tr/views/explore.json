@@ -109,7 +109,8 @@
     "details": "detaylar",
     "object_lifecycle": "nesne yaşam döngüsü",
     "snapshot": "fotoğraf",
-    "video": "video"
+    "video": "video",
+    "thumbnail": "küçük resim"
   },
   "objectLifecycle": {
     "title": "Nesne Yaşam Döngüsü",
@@ -219,5 +220,32 @@
   "exploreMore": "Daha fazla {{label}} nesnesini keşfet",
   "aiAnalysis": {
     "title": "Yapay Zeka Analizi"
+  },
+  "trackingDetails": {
+    "title": "Takip Ayrıntıları",
+    "noImageFound": "Bu zaman damgasına ait bir görsel bulunamadı.",
+    "createObjectMask": "Nesne Maskesi Oluştur",
+    "adjustAnnotationSettings": "Etiketleme ayarlarını düzenle",
+    "scrollViewTips": "Bu nesnenin yaşam döngüsündeki önemli olayları görmek için tıklayın.",
+    "autoTrackingTips": "Otomatik takip yapan kameralar için sınır kutusu konumları doğru olmayabilir.",
+    "count": "{{second}}’den {{first}}",
+    "trackedPoint": "Takip edilen nokta",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} tespit edildi",
+      "entered_zone": "{{label}} {{zones}} bölgesine girdi",
+      "active": "{{label}} etkin hale geldi",
+      "stationary": "{{label}} sabit hale geldi",
+      "attribute": {
+        "faceOrLicense_plate": "{{label}} için {{attribute}} tespit edildi",
+        "other": "{{label}}, {{attribute}} olarak tanındı"
+      },
+      "gone": "{{label}} ayrıldı",
+      "heard": "{{label}} duyuldu",
+      "external": "{{label}} tespit edildi",
+      "header": {
+        "zones": "Bölgeler",
+        "ratio": "Oran"
+      }
+    }
   }
 }

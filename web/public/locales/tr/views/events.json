@@ -36,5 +36,23 @@
   "selected_other": "{{count}} seçildi",
   "detected": "algılandı",
   "suspiciousActivity": "Şüpheli Etkinlik",
-  "threateningActivity": "Tehlikeli Etkinlik"
+  "threateningActivity": "Tehlikeli Etkinlik",
+  "zoomIn": "Büyüt",
+  "zoomOut": "Küçült",
+  "detail": {
+    "label": "Detay",
+    "aria": "Ayrıntı görünümünü aç/kapat",
+    "trackedObject_one": "Nesne",
+    "trackedObject_other": "nesneler",
+    "noObjectDetailData": "Nesneye ait ayrıntılı veri bulunmuyor.",
+    "settings": "Ayrıntılı Görünüm Ayarları",
+    "alwaysExpandActive": {
+      "title": "Etkin olanı her zaman genişlet",
+      "desc": "Varsa, etkin inceleme öğesinin nesne ayrıntılarını daima göster."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Takip edilen nokta",
+    "clickToSeek": "Bu zamana gitmek için tıklayın"
+  }
 }

@@ -1,1 +1,78 @@
-{}
+{
+  "documentTitle": "Sınıflandırma Modelleri",
+  "details": {
+    "scoreInfo": "Skor, modelin nesneyi tespit ettiği tüm durumlar için ortalama güven düzeyini gösterir."
+  },
+  "button": {
+    "deleteClassificationAttempts": "Sınıflandırma Fotoğraflarını Sil",
+    "renameCategory": "Sınıfı Yeniden Adlandır",
+    "deleteCategory": "Sınıfı Sil",
+    "deleteImages": "Fotoğrafları Sil",
+    "trainModel": "Modeli Eğit",
+    "addClassification": "Sınıflandırma Ekle",
+    "deleteModels": "Modelleri Sil"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Silinmiş Sınıf",
+      "deletedImage": "Silinmiş Fotoğraflar",
+      "deletedModel_one": "{{tane}} model(ler) başarıyla silindi",
+      "deletedModel_other": "",
+      "categorizedImage": "Fotoğraf Başarıyla Sınıflandırıldı",
+      "trainedModel": "Model başarıyla eğitildi.",
+      "trainingModel": "Model eğitimi başarıyla başladı."
+    },
+    "error": {
+      "deleteImageFailed": "Silinirken hatayla karşılaşıldı: {{errorMessage}}",
+      "deleteModelFailed": "Model silinirken hata oluştu: {{errorMessage}}",
+      "categorizeFailed": "Görsel sınıflandırılamadı: {{errorMessage}}",
+      "trainingFailed": "Model eğitimi başlatılamadı: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Sınıfı Sil",
+    "desc": "{{name}} adlı sınıfı silmek istediğinizden emin misiniz? Bu işlem, sınıfa ait tüm görselleri kalıcı olarak silecek ve modelin yeniden eğitilmesini gerektirecektir."
+  },
+  "deleteModel": {
+    "title": "Sınıflandırma Modelini Sil",
+    "single": "{{name}} öğesini silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz.",
+    "desc": "{{count}} modeli silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz."
+  },
+  "deleteDatasetImages": {
+    "title": "Eğitim verisi görsellerini sil",
+    "desc": "{{dataset}} veri kümesinden {{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve modelin yeniden eğitilmesini gerektirecektir."
+  },
+  "deleteTrainImages": {
+    "title": "Eğitim Görsellerini Sil",
+    "desc": "{{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+  },
+  "renameCategory": {
+    "title": "Sınıfı Yeniden Adlandır",
+    "desc": "{{name}} için yeni bir ad girin. Ad değişikliğinin etkili olabilmesi için modeli yeniden eğitmeniz gerekecektir."
+  },
+  "description": {
+    "invalidName": "Geçersiz ad. Ad yalnızca harfler, rakamlar, boşluklar, kesme işaretleri (’), alt çizgiler (_) ve tireler (-) içerebilir."
+  },
+  "train": {
+    "title": "Son Sınıflandırmalar",
+    "titleShort": "Son",
+    "aria": "Son Sınıflandırmaları Seç"
+  },
+  "categories": "Sınıflar",
+  "createCategory": {
+    "new": "Yeni Sınıf Oluştur"
+  },
+  "categorizeImageAs": "Görseli Şu Şekilde Sınıflandır:",
+  "categorizeImage": "Görseli Sınıflandır",
+  "menu": {
+    "objects": "Nesneler",
+    "states": "Durumlar"
+  },
+  "noModels": {
+    "object": {
+      "title": "Nesne sınıflandırma modeli mevcut değil",
+      "description": "Algılanan nesneleri sınıflandırmak için özel bir model oluşturun.",
+      "buttonText": "Nesne Modeli Oluştur"
+    }
+  }
+}
