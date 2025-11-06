@@ -14,7 +14,6 @@ type SearchThumbnailProps = {
   findSimilar: () => void;
   refreshResults: () => void;
   showTrackingDetails: () => void;
-  showSnapshot: () => void;
   addTrigger: () => void;
 };
 
@@ -24,7 +23,6 @@ export default function SearchThumbnailFooter({
   findSimilar,
   refreshResults,
   showTrackingDetails,
-  showSnapshot,
   addTrigger,
 }: SearchThumbnailProps) {
   const { t } = useTranslation(["views/search"]);
@@ -62,7 +60,6 @@ export default function SearchThumbnailFooter({
           findSimilar={findSimilar}
           refreshResults={refreshResults}
           showTrackingDetails={showTrackingDetails}
-          showSnapshot={showSnapshot}
           addTrigger={addTrigger}
         />
       </div>
