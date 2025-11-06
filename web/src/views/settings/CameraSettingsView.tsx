@@ -42,6 +42,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { isDesktop } from "react-device-detect";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
+import { formatList } from "@/utils/stringUtil";
 
 type CameraSettingsViewProps = {
   selectedCamera: string;
@@ -106,27 +107,27 @@ export default function CameraSettingsView({
 
   const alertsLabels = useMemo(() => {
     return cameraConfig?.review.alerts.labels
-      ? cameraConfig.review.alerts.labels
-          .map((label) =>
+      ? formatList(
+          cameraConfig.review.alerts.labels.map((label) =>
             getTranslatedLabel(
               label,
               cameraConfig?.audio?.listen?.includes(label) ? "audio" : "object",
             ),
-          )
-          .join(", ")
+          ),
+        )
       : "";
   }, [cameraConfig]);
 
   const detectionsLabels = useMemo(() => {
     return cameraConfig?.review.detections.labels
-      ? cameraConfig.review.detections.labels
-          .map((label) =>
+      ? formatList(
+          cameraConfig.review.detections.labels.map((label) =>
             getTranslatedLabel(
               label,
               cameraConfig?.audio?.listen?.includes(label) ? "audio" : "object",
             ),
-          )
-          .join(", ")
+          ),
+        )
       : "";
   }, [cameraConfig]);
 
@@ -555,8 +556,10 @@ export default function CameraSettingsView({
                                   "cameraReview.reviewClassification.zoneObjectAlertsTips",
                                   {
                                     alertsLabels,
-                                    zone: watchedAlertsZones.map((zone) =>
-                                      getZoneName(zone),
+                                    zone: formatList(
+                                      watchedAlertsZones.map((zone) =>
+                                        getZoneName(zone),
+                                      ),
                                     ),
                                     cameraName: selectCameraName,
                                   },
@@ -669,8 +672,10 @@ export default function CameraSettingsView({
                                   i18nKey="cameraReview.reviewClassification.zoneObjectDetectionsTips.text"
                                   values={{
                                     detectionsLabels,
-                                    zone: watchedDetectionsZones.map((zone) =>
-                                      getZoneName(zone),
+                                    zone: formatList(
+                                      watchedDetectionsZones.map((zone) =>
+                                        getZoneName(zone),
+                                      ),
                                     ),
                                     cameraName: selectCameraName,
                                   }}
@@ -681,8 +686,10 @@ export default function CameraSettingsView({
                                   i18nKey="cameraReview.reviewClassification.zoneObjectDetectionsTips.notSelectDetections"
                                   values={{
                                     detectionsLabels,
-                                    zone: watchedDetectionsZones.map((zone) =>
-                                      getZoneName(zone),
+                                    zone: formatList(
+                                      watchedDetectionsZones.map((zone) =>
+                                        getZoneName(zone),
+                                      ),
                                     ),
                                     cameraName: selectCameraName,
                                   }}
