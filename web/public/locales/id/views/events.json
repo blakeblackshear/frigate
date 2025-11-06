@@ -12,5 +12,48 @@
     "motion": "Data gerakan tidak ditemukan"
   },
   "timeline.aria": "Pilih timeline",
-  "timeline": "Linimasa"
+  "timeline": "Linimasa",
+  "zoomIn": "Perbesar",
+  "zoomOut": "Perkecil",
+  "events": {
+    "label": "Peristiwa-Peristiwa",
+    "aria": "Pilih peristiwa",
+    "noFoundForTimePeriod": "Tidak ada peristiwa dalam periode waktu berikut."
+  },
+  "detail": {
+    "label": "Detil",
+    "noDataFound": "Tidak ada detil data untuk di review",
+    "aria": "Beralih tampilan detil",
+    "trackedObject_one": "objek",
+    "trackedObject_other": "objek-objek",
+    "noObjectDetailData": "Tidak ada data objek detil tersedia.",
+    "settings": "Pengaturan Tampilan Detil",
+    "alwaysExpandActive": {
+      "title": "Selalu lebarkan yang aktif",
+      "desc": "Selalu perluas detil objek item tinjauan aktif jika tersedia."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Titik terlacak",
+    "clickToSeek": "Klik untuk mencari waktu ini"
+  },
+  "documentTitle": "Tinjauan - Frigate",
+  "recordings": {
+    "documentTitle": "Rekaman - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "24 Jam Terakhir"
+  },
+  "markAsReviewed": "Tandai sebagai sudah ditinjau",
+  "markTheseItemsAsReviewed": "Tandai item-item berikut sebagai sudah ditinjau",
+  "newReviewItems": {
+    "button": "Item Batu Untuk Ditinjau",
+    "label": "Lihat item ulasan baru"
+  },
+  "selected_one": "{{count}} terpilih",
+  "selected_other": "{{count}} terpilih",
+  "camera": "Kamera",
+  "detected": "terdeteksi",
+  "suspiciousActivity": "Aktivitas Mencurigakan",
+  "threateningActivity": "Aktivitas yang Mengancam"
 }
