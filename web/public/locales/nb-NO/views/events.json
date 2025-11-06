@@ -43,10 +43,17 @@
     "trackedObject_one": "objekt",
     "trackedObject_other": "objekter",
     "noObjectDetailData": "Ingen detaljdata for objektet tilgjengelig.",
-    "label": "Detalj"
+    "label": "Detalj",
+    "settings": "Detaljvisning – innstillinger",
+    "alwaysExpandActive": {
+      "desc": "Utvid alltid objektdetaljene for det aktive gjennomgangselementet når tilgjengelig.",
+      "title": "Utvid alltid for aktive"
+    }
   },
   "objectTrack": {
     "trackedPoint": "Sporingspunkt",
     "clickToSeek": "Klikk for å gå til dette tidspunktet"
-  }
+  },
+  "zoomIn": "Zoom inn",
+  "zoomOut": "Zoom ut"
 }

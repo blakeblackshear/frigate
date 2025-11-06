@@ -294,6 +294,7 @@
   },
   "list": {
     "two": "{{0}} og {{1}}",
-    "many": "{{items}}, og {{last}}"
+    "many": "{{items}}, og {{last}}",
+    "separatorWithSpace": ", "
   }
 }

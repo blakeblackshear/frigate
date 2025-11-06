@@ -87,7 +87,7 @@
       },
       "toast": {
         "success": {
-          "updatedSublabel": "Under-merkelapp oppdatert med suksess.",
+          "updatedSublabel": "Underetikett ble oppdatert.",
           "updatedLPR": "Vellykket oppdatering av kjennemerke.",
           "regenerate": "En ny beskrivelse har blitt anmodet fra {{provider}}. Avhengig av hastigheten til leverandøren din, kan den nye beskrivelsen ta litt tid å regenerere.",
           "audioTranscription": "Lydtranskripsjon ble forespurt."
@@ -95,7 +95,7 @@
         "error": {
           "regenerate": "Feil ved anrop til {{provider}} for en ny beskrivelse: {{errorMessage}}",
           "updatedLPRFailed": "Oppdatering av kjennemerke feilet: {{errorMessage}}",
-          "updatedSublabelFailed": "Feil ved oppdatering av under-merkelapp: {{errorMessage}}",
+          "updatedSublabelFailed": "Feil ved oppdatering av underetikett: {{errorMessage}}",
           "audioTranscription": "Forespørsel om lydtranskripsjon feilet: {{errorMessage}}"
         }
       },
@@ -103,7 +103,7 @@
       "tips": {
         "mismatch_one": "{{count}} utilgjengelig objekt ble oppdaget og inkludert i dette inspeksjonselementet. Disse objektene kvalifiserte ikke som et varsel eller deteksjon, eller har allerede blitt ryddet opp/slettet.",
         "mismatch_other": "{{count}} utilgjengelige objekter ble oppdaget og inkludert i dette inspeksjonselementet. Disse objektene kvalifiserte ikke som et varsel eller deteksjon, eller har allerede blitt ryddet opp/slettet.",
-        "hasMissingObjects": "Juster konfigurasjonen hvis du vil at Frigate skal lagre sporede objekter for følgende merkelapper: <em>{{objects}}</em>"
+        "hasMissingObjects": "Juster konfigurasjonen hvis du vil at Frigate skal lagre sporede objekter for følgende etiketter: <em>{{objects}}</em>"
       }
     },
     "topScore": {
@@ -126,10 +126,10 @@
     },
     "regenerateFromThumbnails": "Regenerer fra miniatyrbilder",
     "tips": {
-      "descriptionSaved": "Beskrivelse lagret med suksess",
+      "descriptionSaved": "Beskrivelsen ble lagret",
       "saveDescriptionFailed": "Feil ved lagring av beskrivelse: {{errorMessage}}"
     },
-    "label": "Merkelapp",
+    "label": "Etikett",
     "editLPR": {
       "title": "Rediger kjennemerke",
       "descNoLabel": "Skriv inn et nytt kjennemerke for dette sporede objekt",
@@ -142,9 +142,9 @@
     "expandRegenerationMenu": "Utvid regenereringsmenyen",
     "regenerateFromSnapshot": "Regenerer fra øyeblikksbilde",
     "editSubLabel": {
-      "title": "Rediger under-merkelapp",
-      "desc": "Angi en ny under-merkelapp for denne {{label}}",
-      "descNoLabel": "Angi en ny under-merkelapp for dette sporede objektet"
+      "title": "Rediger underetikett",
+      "desc": "Angi en ny underetikett for \"{{label}}\"",
+      "descNoLabel": "Angi en ny underetikett for dette sporede objektet"
     },
     "snapshotScore": {
       "label": "Øyeblikksbilde poengsum"
@@ -204,7 +204,7 @@
     "deleteTrackedObject": {
       "toast": {
         "error": "Feil ved sletting av sporet objekt: {{errorMessage}}",
-        "success": "Sporet objekt ble slettet med suksess."
+        "success": "Sporet objekt ble slettet."
       }
     },
     "tooltip": "Samsvarer {{type}} til {{confidence}}%"
@@ -214,7 +214,8 @@
     "details": "detaljer",
     "snapshot": "øyeblikksbilde",
     "video": "video",
-    "object_lifecycle": "objektets livssyklus"
+    "object_lifecycle": "objektets livssyklus",
+    "thumbnail": "miniatyrbilde"
   },
   "dialog": {
     "confirmDelete": {
@@ -238,7 +239,7 @@
     "noImageFound": "Ingen bilder funnet for dette tidsstempelet.",
     "createObjectMask": "Opprett objektmaske",
     "adjustAnnotationSettings": "Juster annoteringsinnstillinger",
-    "scrollViewTips": "Rull for å se de viktige øyeblikkene i dette objektets livssyklus.",
+    "scrollViewTips": "Klikk for å se de viktige øyeblikkene i dette objektets livssyklus.",
     "autoTrackingTips": "Posisjonene til avgrensningsboksene vil være unøyaktige for kameraer med automatisk sporing.",
     "count": "{{first}} av {{second}}",
     "trackedPoint": "Sporet punkt",
@@ -268,11 +269,11 @@
       },
       "offset": {
         "label": "Annoteringsforskyvning",
-        "desc": "Disse dataene kommer fra kameraets deteksjonsstrøm, men legges over bilder fra opptaksstrømmen. Det er usannsynlig at de to strømmene er perfekt synkronisert. Som et resultat vil avgrensningsboksen og opptaket ikke stemme perfekt overens. Feltet <code>annotation_offset</code> kan imidlertid brukes til å justere dette.",
+        "desc": "Disse dataene kommer fra kameraets deteksjonsstrøm, men legges over bilder fra opptaksstrømmen. Det er lite sannsynlig at de to strømmene er perfekt synkronisert. Som et resultat vil avgrensningsboksen og opptaket ikke stemme perfekt overens. Du kan bruke denne innstillingen til å forskyve annoteringene fremover eller bakover i tid for å tilpasse dem bedre til det innspilte opptaket.",
         "millisecondsToOffset": "Antall millisekunder deteksjonsannoteringene skal forskyves med. <em>Standard: 0</em>",
         "tips": "TIPS: Se for deg et hendelsesklipp med en person som går fra venstre mot høyre. Hvis avgrensningsboksen på tidslinjen for hendelsen konsekvent er til venstre for personen, bør verdien reduseres. På samme måte, hvis en person går fra venstre mot høyre og avgrensningsboksen konsekvent er foran personen, bør verdien økes.",
         "toast": {
-          "success": "Annoteringsforskyvning for {{camera}} er lagret i konfigurasjonsfilen. Start Frigate på nytt for å ta i bruk endringene."
+          "success": "Annoteringsforskyvning for {{camera}} er lagret i konfigurasjonsfilen. Start Frigate på nytt for å aktivere endringene."
         }
       }
     },
