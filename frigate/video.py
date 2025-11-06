@@ -196,7 +196,9 @@ class CameraWatchdog(threading.Thread):
         self.sleeptime = self.config.ffmpeg.retry_interval
 
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            None, {config.name: config}, [CameraConfigUpdateEnum.enabled]
+            None,
+            {config.name: config},
+            [CameraConfigUpdateEnum.enabled, CameraConfigUpdateEnum.record],
         )
         self.requestor = InterProcessRequestor()
         self.was_enabled = self.config.enabled
