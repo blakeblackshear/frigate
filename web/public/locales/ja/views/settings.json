@@ -582,7 +582,7 @@
         "createRole": "ロール {{role}} を作成しました",
         "updateCameras": "ロール {{role}} のカメラを更新しました",
         "deleteRole": "ロール {{role}} を削除しました",
-        "userRolesUpdated": "このロールに割り当てられていた {{count}} ユーザーは「viewer」に更新され、すべてのカメラへの閲覧アクセスが付与されました。"
+        "userRolesUpdated_other": "このロールに割り当てられていた {{count}} ユーザーは「viewer」に更新され、すべてのカメラへの閲覧アクセスが付与されました。"
       },
       "error": {
         "createRoleFailed": "ロールの作成に失敗しました: {{errorMessage}}",
