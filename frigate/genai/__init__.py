@@ -45,6 +45,7 @@ class GenAIClient:
         preferred_language: str | None,
         debug_save: bool,
         activity_context_prompt: str,
+        camera_context: str = "",
     ) -> ReviewMetadata | None:
         """Generate a description for the review item activity."""
 
@@ -69,12 +70,24 @@ class GenAIClient:
             else:
                 return "\n- (No objects detected)"
 
+        def get_camera_context_section() -> str:
+            if camera_context:
+                return f"""## Camera Spatial Context
+
+Use this spatial information when writing the title and scene description to provide more accurate context about where activity is occurring or where people/objects are moving to/from.
+
+{camera_context}"""
+            return ""
+
+        camera_context_section = get_camera_context_section()
         context_prompt = f"""
 Your task is to analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
 
 ## Normal Activity Patterns for This Property
 
 {activity_context_prompt}
+
+{camera_context_section}
 
 ## Task Instructions
 
@@ -100,7 +113,7 @@ When forming your description:
 ## Response Format
 
 Your response MUST be a flat JSON object with:
-- `title` (string): A concise, direct title that describes the purpose or overall action, not just what you literally see. Use names from "Objects in Scene" based on what you visually observe. If you see both a name and an unidentified object of the same type but visually observe only one person/object, use ONLY the name. Examples: "Joe walking dog", "Person taking out trash", "Joe accessing vehicle", "Joe and person on front porch".
+- `title` (string): A concise, direct title that describes the purpose or overall action, not just what you literally see. {'Use spatial context when available to make titles more meaningful.' if camera_context_section else ''} Use names from "Objects in Scene" based on what you visually observe. If you see both a name and an unidentified object of the same type but visually observe only one person/object, use ONLY the name. Examples: "Joe walking dog", "Person taking out trash", "Joe accessing vehicle", "Person leaving porch for driveway", "Joe and person on front porch".
 - `scene` (string): A narrative description of what happens across the sequence from start to finish. **Only describe actions you can actually observe happening in the frames provided.** Do not infer or assume actions that aren't visible (e.g., if you see someone walking but never see them sit, don't say they sat down). Include setting, detected objects, and their observable actions. Avoid speculation or filling in assumed behaviors. Your description should align with and support the threat level you assign.
 - `confidence` (float): 0-1 confidence in your analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous. Lower confidence when the sequence is unclear, objects are partially obscured, or context is ambiguous.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined in "Normal Activity Patterns for This Property" above. Your threat level must be consistent with your scene description and the guidance above.
