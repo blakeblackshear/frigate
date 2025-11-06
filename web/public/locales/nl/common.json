@@ -290,7 +290,8 @@
   },
   "list": {
     "two": "{{0}} en {{1}}",
-    "many": "{{items}}, en {{last}}"
+    "many": "{{items}}, en {{last}}",
+    "separatorWithSpace": ", "
   },
   "field": {
     "optional": "Optioneel",
