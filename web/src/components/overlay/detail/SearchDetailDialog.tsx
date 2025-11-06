@@ -141,7 +141,7 @@ function TabsWithActions({
             {Object.values(searchTabs).map((item) => (
               <ToggleGroupItem
                 key={item}
-                className={`flex scroll-mx-10 items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                className="flex scroll-mx-10 items-center justify-between gap-2 text-muted-foreground"
                 value={item}
                 data-nav-item={item}
                 aria-label={`Select ${item}`}

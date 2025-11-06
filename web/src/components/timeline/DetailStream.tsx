@@ -27,6 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import { usePersistence } from "@/hooks/use-persistence";
 import { isDesktop } from "react-device-detect";
 import { PiSlidersHorizontalBold } from "react-icons/pi";
+import { MdAutoAwesome } from "react-icons/md";
 
 type DetailStreamProps = {
   reviewItems?: ReviewSegment[];
