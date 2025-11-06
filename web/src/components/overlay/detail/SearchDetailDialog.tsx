@@ -235,18 +235,12 @@ function AnnotationSettings({
               : "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4"
           }
           {...(isDesktop ? { align: "end" } : {})}
+          data-annotation-popover
         >
           <AnnotationSettingsPane
             event={search as unknown as Event}
             annotationOffset={annotationOffset}
-            setAnnotationOffset={(value) => {
-              if (typeof value === "function") {
-                const newValue = value(annotationOffset);
-                setAnnotationOffset(newValue);
-              } else {
-                setAnnotationOffset(value);
-              }
-            }}
+            setAnnotationOffset={setAnnotationOffset}
           />
         </Content>
       </Overlay>
