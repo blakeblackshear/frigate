@@ -194,6 +194,7 @@ export function AnnotationSettingsPane({
                 className="flex flex-1"
                 variant="default"
                 aria-label={t("button.apply", { ns: "common" })}
+                type="button"
                 onClick={form.handleSubmit(onApply)}
               >
                 {t("button.apply", { ns: "common" })}
