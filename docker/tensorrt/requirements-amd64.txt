@@ -1,6 +1,6 @@
 # NVidia TensorRT Support (amd64 only)
 --extra-index-url 'https://pypi.nvidia.com'
-cython==3.0.*; platform_machine == 'x86_64'
+cython==3.2.*; platform_machine == 'x86_64'
 nvidia_cuda_cupti_cu12==12.5.82; platform_machine == 'x86_64'
 nvidia-cublas-cu12==12.5.3.*; platform_machine == 'x86_64'
 nvidia-cudnn-cu12==9.3.0.*; platform_machine == 'x86_64'
