@@ -458,7 +458,7 @@ async def review_summary(
             else:
                 data[day_key] = e
 
-    return JSONResponse(content=data)
+    return JSONResponse(content=sorted(data.keys()))
 
 
 @router.post("/reviews/viewed", response_model=GenericResponse)

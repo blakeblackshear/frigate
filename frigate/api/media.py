@@ -496,7 +496,7 @@ def all_recordings_summary(
         for g in period_query:
             days[g.day] = True
 
-    return JSONResponse(content=days)
+    return JSONResponse(content=sorted(days.keys()))
 
 
 @router.get(
