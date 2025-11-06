@@ -51,6 +51,10 @@
       "playAlertVideos": {
         "label": "Lire les vidéos d'alerte",
         "desc": "Par défaut, les alertes récentes du tableau de bord en direct sont diffusées sous forme de petites vidéos en boucle. Désactivez cette option pour afficher uniquement une image statique des alertes récentes sur cet appareil/navigateur."
+      },
+      "displayCameraNames": {
+        "label": "Toujours afficher les noms des caméras",
+        "desc": "Toujours afficher les noms des caméras dans une puce sur le tableau de bord de la vue en direct multi-caméras"
       }
     },
     "storedLayouts": {
@@ -767,7 +771,9 @@
     },
     "actions": {
       "alert": "Marquer comme alerte",
-      "notification": "Envoyer une notification"
+      "notification": "Envoyer une notification",
+      "sub_label": "Ajouter une sous-étiquette",
+      "attribute": "Ajouter un attribut"
     },
     "dialog": {
       "createTrigger": {
@@ -822,7 +828,7 @@
         },
         "actions": {
           "title": "Actions",
-          "desc": "Par défaut, Frigate publie un message MQTT à chaque déclenchement. Sélectionnez une action complémentaire à exécuter lors de ce déclenchement.",
+          "desc": "Par défaut, Frigate envoie un message MQTT pour tous les déclencheurs. Les sous-étiquettes ajoutent le nom du déclencheur à l'étiquette de l'objet. Les attributs sont des métadonnées recherchables stockées séparément dans les métadonnées de l'objet suivi.",
           "error": {
             "min": "Au moins une action doit être sélectionnée."
           }
@@ -887,7 +893,9 @@
         "createRole": "Rôle {{role}} créé avec succès",
         "updateCameras": "Caméras mis à jour pour le rôle {{role}}",
         "deleteRole": "Rôle {{role}} supprimé avec succès",
-        "userRolesUpdated": "{{count}} utilisateurs affectés à ce rôle ont été mis à jour avec des droits \"Observateur\", et ont accès à toutes les caméras."
+        "userRolesUpdated_one": "{{count}} utilisateurs affectés à ce rôle ont été mis à jour avec des droits \"Observateur\", et ont accès à toutes les caméras.",
+        "userRolesUpdated_many": "",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Échec dans la création du rôle : {{errorMessage}}",
@@ -1072,7 +1080,9 @@
         "resolutionHigh": "La résolution {{resolution}} risque d'augmenter l'utilisation des ressources.",
         "resolutionLow": "La résolution {{resolution}} risque d'être trop faible pour détecter les petits objets de manière fiable."
       },
-      "valid": "Valide"
+      "valid": "Valide",
+      "ffmpegModule": "Utiliser le mode de compatibilité du flux",
+      "ffmpegModuleDescription": "Si le flux ne se charge pas après plusieurs tentatives, essayez d'activer cette option. Lorsqu'elle est activée, Frigate utilisera le module ffmpeg avec go2rtc. Cela peut offrir une meilleure compatibilité avec certains flux de caméra."
     }
   },
   "cameraManagement": {

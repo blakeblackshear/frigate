@@ -5,7 +5,10 @@
     "renameCategory": "Renommer la classe",
     "deleteCategory": "Supprimer la classe",
     "deleteImages": "Supprimer les images",
-    "trainModel": "Entraîner le modèle"
+    "trainModel": "Entraîner le modèle",
+    "addClassification": "Ajouter une classification",
+    "deleteModels": "Supprimer les modèles",
+    "editModel": "Modifier le modèle"
   },
   "toast": {
     "success": {
@@ -13,13 +16,19 @@
       "deletedImage": "Images supprimées",
       "categorizedImage": "Image classifiée avec succès",
       "trainedModel": "Modèle entraîné avec succès.",
-      "trainingModel": "L'entraînement du modèle a démarré avec succès."
+      "trainingModel": "L'entraînement du modèle a démarré avec succès.",
+      "deletedModel_one": "{{count}} modèle supprimé avec succès",
+      "deletedModel_many": "{{count}} modèles supprimés avec succès",
+      "deletedModel_other": "{{count}} modèles supprimés avec succès",
+      "updatedModel": "Configuration du modèle mise à jour avec succès"
     },
     "error": {
       "deleteImageFailed": "Échec de la suppression : {{errorMessage}}",
       "deleteCategoryFailed": "Échec de la suppression de la classe : {{errorMessage}}",
       "categorizeFailed": "Échec de la catégorisation de l'image : {{errorMessage}}",
-      "trainingFailed": "Échec du démarrage de l'entraînement du modèle : {{errorMessage}}"
+      "trainingFailed": "Échec du démarrage de l'entraînement du modèle : {{errorMessage}}",
+      "deleteModelFailed": "Impossible de supprimer le modèle : {{errorMessage}}",
+      "updateModelFailed": "Impossible de mettre à jour le modèle : {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -43,7 +52,8 @@
   },
   "train": {
     "title": "Classifications récentes",
-    "aria": "Sélectionner des classifications récentes"
+    "aria": "Sélectionner des classifications récentes",
+    "titleShort": "Récent"
   },
   "categories": "Classes",
   "createCategory": {
@@ -98,7 +108,8 @@
         "stateRequiresTwoClasses": "Les modèles d'état nécessitent au moins deux classes.",
         "objectLabelRequired": "Veuillez sélectionner une étiquette d'objet.",
         "objectTypeRequired": "Veuillez sélectionner un type de classification."
-      }
+      },
+      "states": "États"
     },
     "step2": {
       "description": "Sélectionnez les caméras et définissez la zone à surveiller pour chaque caméra. Le modèle classifiera l'état de ces zones.",
@@ -131,5 +142,23 @@
       },
       "generateSuccess": "Génération des images d'exemple réussie"
     }
+  },
+  "deleteModel": {
+    "title": "Supprimer le modèle de classification",
+    "single": "Voulez-vous vraiment supprimer {{name}} ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible.",
+    "desc": "Voulez-vous vraiment supprimer {{count}} modèle(s) ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible."
+  },
+  "menu": {
+    "objects": "Objets",
+    "states": "États"
+  },
+  "details": {
+    "scoreInfo": "Le score représente la moyenne de la confiance de classification pour toutes les détections de cet objet."
+  },
+  "edit": {
+    "title": "Modifier le modèle de classification",
+    "descriptionState": "Modifier les classes pour ce modèle de classification d'état. Les modifications nécessiteront un réentraînement du modèle.",
+    "descriptionObject": "Modifier le type d'objet et le type de classification pour ce modèle de classification d'objet",
+    "stateClassesInfo": "Note : La modification des classes d'état nécessite un réentraînement du modèle avec les classes mises à jour."
   }
 }

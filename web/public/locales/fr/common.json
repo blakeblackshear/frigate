@@ -301,6 +301,7 @@
   },
   "list": {
     "two": "{{0}} et {{1}}",
-    "many": "{{items}}, et {{last}}"
+    "many": "{{items}}, et {{last}}",
+    "separatorWithSpace": ", "
   }
 }
