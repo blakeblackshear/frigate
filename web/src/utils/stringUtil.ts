@@ -21,20 +21,30 @@ export const capitalizeAll = (text: string): string => {
  * @returns A valid camera identifier (lowercase, alphanumeric, max 8 chars)
  */
 export function generateFixedHash(name: string, prefix: string = "id"): string {
-  // Safely encode Unicode as UTF-8 bytes
+  // Use the full UTF-8 bytes of the name and compute an FNV-1a 32-bit hash.
+  // This is deterministic, fast, works with Unicode and avoids collisions from
+  // simple truncation of base64 output.
   const utf8Bytes = new TextEncoder().encode(name);
 
-  // Convert to base64 manually
-  let binary = "";
-  for (const byte of utf8Bytes) {
-    binary += String.fromCharCode(byte);
+  // FNV-1a 32-bit hash algorithm
+  let hash = 0x811c9dc5; // FNV offset basis
+  for (let i = 0; i < utf8Bytes.length; i++) {
+    hash ^= utf8Bytes[i];
+    // Multiply by FNV prime (0x01000193) with 32-bit overflow
+    hash = (hash >>> 0) * 0x01000193;
+    // Ensure 32-bit unsigned integer
+    hash >>>= 0;
   }
-  const base64 = btoa(binary);
 
-  // Strip out non-alphanumeric characters and truncate
-  const cleanHash = base64.replace(/[^a-zA-Z0-9]/g, "").substring(0, 8);
+  // Convert to an 8-character lowercase hex string
+  const hashHex = (hash >>> 0).toString(16).padStart(8, "0").toLowerCase();
 
-  return `${prefix}_${cleanHash.toLowerCase()}`;
+  // Ensure the first character is a letter to avoid an identifier that's purely
+  // numeric (isValidId forbids all-digit IDs). If it starts with a digit,
+  // replace with 'a'. This is extremely unlikely but a simple safeguard.
+  const safeHash = /^[0-9]/.test(hashHex[0]) ? `a${hashHex.slice(1)}` : hashHex;
+
+  return `${prefix}_${safeHash}`;
 }
 
 /**
