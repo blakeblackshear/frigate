@@ -604,41 +604,39 @@ export default function SearchDetailDialog({
             </Description>
           </Header>
 
-          <div className="flex-1">
-            {!isDesktop && (
-              <div className="flex w-full flex-col justify-center gap-4">
-                <TabsWithActions
-                  search={search}
-                  searchTabs={searchTabs}
-                  pageToggle={pageToggle}
-                  setPageToggle={setPageToggle}
-                  config={config}
-                  setSearch={setSearch}
-                  setSimilarity={setSimilarity}
-                  isPopoverOpen={isPopoverOpen}
-                  setIsPopoverOpen={setIsPopoverOpen}
-                  dialogContainer={dialogContainer}
-                />
-              </div>
-            )}
+          {!isDesktop && (
+            <div className="flex w-full flex-col justify-center gap-4">
+              <TabsWithActions
+                search={search}
+                searchTabs={searchTabs}
+                pageToggle={pageToggle}
+                setPageToggle={setPageToggle}
+                config={config}
+                setSearch={setSearch}
+                setSimilarity={setSimilarity}
+                isPopoverOpen={isPopoverOpen}
+                setIsPopoverOpen={setIsPopoverOpen}
+                dialogContainer={dialogContainer}
+              />
+            </div>
+          )}
 
-            <DialogContentComponent
-              page={page}
-              search={search}
-              isDesktop={isDesktop}
-              apiHost={apiHost}
-              config={config}
-              searchTabs={searchTabs}
-              pageToggle={pageToggle}
-              setPageToggle={setPageToggle}
-              setSearch={setSearch}
-              setInputFocused={setInputFocused}
-              setSimilarity={setSimilarity}
-              isPopoverOpen={isPopoverOpen}
-              setIsPopoverOpen={setIsPopoverOpen}
-              dialogContainer={dialogContainer}
-            />
-          </div>
+          <DialogContentComponent
+            page={page}
+            search={search}
+            isDesktop={isDesktop}
+            apiHost={apiHost}
+            config={config}
+            searchTabs={searchTabs}
+            pageToggle={pageToggle}
+            setPageToggle={setPageToggle}
+            setSearch={setSearch}
+            setInputFocused={setInputFocused}
+            setSimilarity={setSimilarity}
+            isPopoverOpen={isPopoverOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
+            dialogContainer={dialogContainer}
+          />
         </Content>
       </Overlay>
     </DetailStreamProvider>
