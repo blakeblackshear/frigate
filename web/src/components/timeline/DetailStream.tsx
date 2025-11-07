@@ -392,7 +392,7 @@ function ReviewGroup({
           />
         </div>
         <div className="mr-3 flex w-full justify-between">
-          <div className="ml-1 flex flex-col items-start gap-1.5">
+          <div className="ml-1 mr-6 flex min-w-0 flex-col items-start gap-1.5">
             <div className="flex flex-row gap-3">
               <div className="text-sm font-medium">{displayTime}</div>
               <div className="relative flex items-center gap-2 text-white">
