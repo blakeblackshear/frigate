@@ -40,7 +40,8 @@
   "deleteModel": {
     "title": "Delete Classification Model",
     "single": "Are you sure you want to delete {{name}}? This will permanently delete all associated data including images and training data. This action cannot be undone.",
-    "desc": "Are you sure you want to delete {{count}} model(s)? This will permanently delete all associated data including images and training data. This action cannot be undone."
+    "desc_one": "Are you sure you want to delete {{count}} model? This will permanently delete all associated data including images and training data. This action cannot be undone.",
+    "desc_other": "Are you sure you want to delete {{count}} models? This will permanently delete all associated data including images and training data. This action cannot be undone."
   },
   "edit": {
     "title": "Edit Classification Model",
@@ -50,11 +51,13 @@
   },
   "deleteDatasetImages": {
     "title": "Delete Dataset Images",
-    "desc": "Are you sure you want to delete {{count}} images from {{dataset}}? This action cannot be undone and will require re-training the model."
+    "desc_one": "Are you sure you want to delete {{count}} image from {{dataset}}? This action cannot be undone and will require re-training the model.",
+    "desc_other": "Are you sure you want to delete {{count}} images from {{dataset}}? This action cannot be undone and will require re-training the model."
   },
   "deleteTrainImages": {
     "title": "Delete Train Images",
-    "desc": "Are you sure you want to delete {{count}} images? This action cannot be undone."
+    "desc_one": "Are you sure you want to delete {{count}} image? This action cannot be undone.",
+    "desc_other": "Are you sure you want to delete {{count}} images? This action cannot be undone."
   },
   "renameCategory": {
     "title": "Rename Class",
