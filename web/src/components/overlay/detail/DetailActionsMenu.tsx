@@ -111,6 +111,23 @@ export default function DetailActionsMenu({
               </div>
             </DropdownMenuItem>
           )}
+
+          {config?.semantic_search.enabled && search.data.type == "object" && (
+            <DropdownMenuItem
+              onClick={() => {
+                setIsOpen(false);
+                setTimeout(() => {
+                  navigate(
+                    `/settings?page=triggers&camera=${search.camera}&event_id=${search.id}`,
+                  );
+                }, 0);
+              }}
+            >
+              <div className="flex cursor-pointer items-center gap-2">
+                <span>{t("itemMenu.addTrigger.label")}</span>
+              </div>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>
