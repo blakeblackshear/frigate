@@ -576,6 +576,7 @@ export default function ZoneEditPane({
             control={form.control}
             nameField="friendly_name"
             idField="name"
+            idVisible={(polygon && polygon.name.length > 0) ?? false}
             nameLabel={t("masksAndZones.zones.name.title")}
             nameDescription={t("masksAndZones.zones.name.tips")}
             placeholderName={t("masksAndZones.zones.name.inputPlaceHolder")}
