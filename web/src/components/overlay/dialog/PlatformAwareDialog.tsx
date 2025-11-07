@@ -20,6 +20,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import { isMobile } from "react-device-detect";
 
 type PlatformAwareDialogProps = {
@@ -86,14 +87,16 @@ export function PlatformAwareSheet({
           {trigger}
         </MobilePageTrigger>
         <MobilePagePortal>
-          <MobilePageContent className="h-full overflow-hidden">
+          <MobilePageContent className="flex h-full flex-col">
             <MobilePageHeader
               className="mx-2"
               onClose={() => onOpenChange(false)}
             >
               <MobilePageTitle>{title}</MobilePageTitle>
             </MobilePageHeader>
-            <div className={contentClassName}>{content}</div>
+            <div className={cn("flex-1 overflow-y-auto", contentClassName)}>
+              {content}
+            </div>
           </MobilePageContent>
         </MobilePagePortal>
       </MobilePage>
