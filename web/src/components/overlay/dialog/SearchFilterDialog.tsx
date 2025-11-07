@@ -230,6 +230,7 @@ export default function SearchFilterDialog({
     <PlatformAwareSheet
       trigger={trigger}
       title={t("more")}
+      titleClassName="mb-5 -mt-3"
       content={content}
       contentClassName={cn(
         "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",
