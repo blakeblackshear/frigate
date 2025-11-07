@@ -306,7 +306,7 @@ function DialogContentComponent({
   if (page === "tracking_details") {
     return (
       <TrackingDetails
-        className={cn("size-full", !isDesktop && "flex flex-col gap-4")}
+        className={cn(isDesktop ? "size-full" : "flex flex-col gap-4")}
         event={search as unknown as Event}
         tabs={
           isDesktop ? (
@@ -584,7 +584,7 @@ export default function SearchDetailDialog({
             "scrollbar-container overflow-y-auto",
             isDesktop &&
               "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-[70%]",
-            isMobile && "px-4",
+            isMobile && "flex h-full flex-col px-4",
           )}
           onInteractOutside={(e) => {
             if (isPopoverOpen) {
@@ -596,7 +596,7 @@ export default function SearchDetailDialog({
             }
           }}
         >
-          <Header>
+          <Header className={cn(!isDesktop && "top-0 mb-0")}>
             <Title>{t("trackedObjectDetails")}</Title>
             <Description className="sr-only">
               {t("trackedObjectDetails")}
@@ -604,39 +604,41 @@ export default function SearchDetailDialog({
             </Description>
           </Header>
 
-          {!isDesktop && (
-            <div className="flex w-full flex-col justify-center gap-4">
-              <TabsWithActions
-                search={search}
-                searchTabs={searchTabs}
-                pageToggle={pageToggle}
-                setPageToggle={setPageToggle}
-                config={config}
-                setSearch={setSearch}
-                setSimilarity={setSimilarity}
-                isPopoverOpen={isPopoverOpen}
-                setIsPopoverOpen={setIsPopoverOpen}
-                dialogContainer={dialogContainer}
-              />
-            </div>
-          )}
+          <div className="flex-1">
+            {!isDesktop && (
+              <div className="flex w-full flex-col justify-center gap-4">
+                <TabsWithActions
+                  search={search}
+                  searchTabs={searchTabs}
+                  pageToggle={pageToggle}
+                  setPageToggle={setPageToggle}
+                  config={config}
+                  setSearch={setSearch}
+                  setSimilarity={setSimilarity}
+                  isPopoverOpen={isPopoverOpen}
+                  setIsPopoverOpen={setIsPopoverOpen}
+                  dialogContainer={dialogContainer}
+                />
+              </div>
+            )}
 
-          <DialogContentComponent
-            page={page}
-            search={search}
-            isDesktop={isDesktop}
-            apiHost={apiHost}
-            config={config}
-            searchTabs={searchTabs}
-            pageToggle={pageToggle}
-            setPageToggle={setPageToggle}
-            setSearch={setSearch}
-            setInputFocused={setInputFocused}
-            setSimilarity={setSimilarity}
-            isPopoverOpen={isPopoverOpen}
-            setIsPopoverOpen={setIsPopoverOpen}
-            dialogContainer={dialogContainer}
-          />
+            <DialogContentComponent
+              page={page}
+              search={search}
+              isDesktop={isDesktop}
+              apiHost={apiHost}
+              config={config}
+              searchTabs={searchTabs}
+              pageToggle={pageToggle}
+              setPageToggle={setPageToggle}
+              setSearch={setSearch}
+              setInputFocused={setInputFocused}
+              setSimilarity={setSimilarity}
+              isPopoverOpen={isPopoverOpen}
+              setIsPopoverOpen={setIsPopoverOpen}
+              dialogContainer={dialogContainer}
+            />
+          </div>
         </Content>
       </Overlay>
     </DetailStreamProvider>

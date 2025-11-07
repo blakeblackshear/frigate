@@ -352,7 +352,8 @@ export function TrackingDetails({
       className={cn(
         isDesktop
           ? "flex size-full justify-evenly gap-4 overflow-hidden"
-          : "flex size-full flex-col gap-2",
+          : "flex flex-col gap-2",
+        !isDesktop && cameraAspect === "tall" && "size-full",
         className,
       )}
     >
