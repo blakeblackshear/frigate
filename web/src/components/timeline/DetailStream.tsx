@@ -192,7 +192,7 @@ export default function DetailStream({
       <div className="relative flex h-full flex-col">
         <div
           ref={scrollRef}
-          className="scrollbar-container flex-1 overflow-y-auto pb-14"
+          className="scrollbar-container flex-1 overflow-y-auto overflow-x-hidden pb-14"
         >
           <div className="space-y-4 py-2">
             {reviewItems?.length === 0 ? (
