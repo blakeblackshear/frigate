@@ -3,6 +3,7 @@
 import logging
 import os
 import platform
+import threading
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -290,6 +291,10 @@ class OpenVINOModelRunner(BaseModelRunner):
         self.infer_request = self.compiled_model.create_infer_request()
         self.input_tensor: ov.Tensor | None = None
 
+        # Thread lock to prevent concurrent inference (needed for JinaV2 which shares
+        # one runner between text and vision embeddings called from different threads)
+        self._inference_lock = threading.Lock()
+
         if not self.complex_model:
             try:
                 input_shape = self.compiled_model.inputs[0].get_shape()
@@ -333,67 +338,70 @@ class OpenVINOModelRunner(BaseModelRunner):
         Returns:
             List of output tensors
         """
-        # Handle single input case for backward compatibility
-        if (
-            len(inputs) == 1
-            and len(self.compiled_model.inputs) == 1
-            and self.input_tensor is not None
-        ):
-            # Single input case - use the pre-allocated tensor for efficiency
-            input_data = list(inputs.values())[0]
-            np.copyto(self.input_tensor.data, input_data)
-            self.infer_request.infer(self.input_tensor)
-        else:
-            if self.complex_model:
-                try:
-                    # This ensures the model starts with a clean state for each sequence
-                    # Important for RNN models like PaddleOCR recognition
-                    self.infer_request.reset_state()
-                except Exception:
-                    # this will raise an exception for models with AUTO set as the device
-                    pass
+        # Lock prevents concurrent access to infer_request
+        # Needed for JinaV2: genai thread (text) + embeddings thread (vision)
+        with self._inference_lock:
+            # Handle single input case for backward compatibility
+            if (
+                len(inputs) == 1
+                and len(self.compiled_model.inputs) == 1
+                and self.input_tensor is not None
+            ):
+                # Single input case - use the pre-allocated tensor for efficiency
+                input_data = list(inputs.values())[0]
+                np.copyto(self.input_tensor.data, input_data)
+                self.infer_request.infer(self.input_tensor)
+            else:
+                if self.complex_model:
+                    try:
+                        # This ensures the model starts with a clean state for each sequence
+                        # Important for RNN models like PaddleOCR recognition
+                        self.infer_request.reset_state()
+                    except Exception:
+                        # this will raise an exception for models with AUTO set as the device
+                        pass
 
-            # Multiple inputs case - set each input by name
-            for input_name, input_data in inputs.items():
-                # Find the input by name and its index
-                input_port = None
-                input_index = None
-                for idx, port in enumerate(self.compiled_model.inputs):
-                    if port.get_any_name() == input_name:
-                        input_port = port
-                        input_index = idx
-                        break
+                # Multiple inputs case - set each input by name
+                for input_name, input_data in inputs.items():
+                    # Find the input by name and its index
+                    input_port = None
+                    input_index = None
+                    for idx, port in enumerate(self.compiled_model.inputs):
+                        if port.get_any_name() == input_name:
+                            input_port = port
+                            input_index = idx
+                            break
 
-                if input_port is None:
-                    raise ValueError(f"Input '{input_name}' not found in model")
+                    if input_port is None:
+                        raise ValueError(f"Input '{input_name}' not found in model")
 
-                # Create tensor with the correct element type
-                input_element_type = input_port.get_element_type()
+                    # Create tensor with the correct element type
+                    input_element_type = input_port.get_element_type()
 
-                # Ensure input data matches the expected dtype to prevent type mismatches
-                # that can occur with models like Jina-CLIP v2 running on OpenVINO
-                expected_dtype = input_element_type.to_dtype()
-                if input_data.dtype != expected_dtype:
-                    logger.debug(
-                        f"Converting input '{input_name}' from {input_data.dtype} to {expected_dtype}"
-                    )
-                    input_data = input_data.astype(expected_dtype)
+                    # Ensure input data matches the expected dtype to prevent type mismatches
+                    # that can occur with models like Jina-CLIP v2 running on OpenVINO
+                    expected_dtype = input_element_type.to_dtype()
+                    if input_data.dtype != expected_dtype:
+                        logger.debug(
+                            f"Converting input '{input_name}' from {input_data.dtype} to {expected_dtype}"
+                        )
+                        input_data = input_data.astype(expected_dtype)
 
-                input_tensor = ov.Tensor(input_element_type, input_data.shape)
-                np.copyto(input_tensor.data, input_data)
+                    input_tensor = ov.Tensor(input_element_type, input_data.shape)
+                    np.copyto(input_tensor.data, input_data)
 
-                # Set the input tensor for the specific port index
-                self.infer_request.set_input_tensor(input_index, input_tensor)
+                    # Set the input tensor for the specific port index
+                    self.infer_request.set_input_tensor(input_index, input_tensor)
 
-            # Run inference
-            self.infer_request.infer()
+                # Run inference
+                self.infer_request.infer()
 
-        # Get all output tensors
-        outputs = []
-        for i in range(len(self.compiled_model.outputs)):
-            outputs.append(self.infer_request.get_output_tensor(i).data)
+            # Get all output tensors
+            outputs = []
+            for i in range(len(self.compiled_model.outputs)):
+                outputs.append(self.infer_request.get_output_tensor(i).data)
 
-        return outputs
+            return outputs
 
 
 class RKNNModelRunner(BaseModelRunner):
