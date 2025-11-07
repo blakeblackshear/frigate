@@ -161,12 +161,12 @@ class CudaGraphRunner(BaseModelRunner):
     """
 
     @staticmethod
-    def is_complex_model(model_type: str) -> bool:
+    def is_model_supported(model_type: str) -> bool:
         # Import here to avoid circular imports
         from frigate.detectors.detector_config import ModelTypeEnum
         from frigate.embeddings.types import EnrichmentModelTypeEnum
 
-        return model_type in [
+        return model_type not in [
             ModelTypeEnum.yolonas.value,
             EnrichmentModelTypeEnum.paddleocr.value,
             EnrichmentModelTypeEnum.jina_v1.value,
@@ -239,9 +239,30 @@ class OpenVINOModelRunner(BaseModelRunner):
             EnrichmentModelTypeEnum.jina_v2.value,
         ]
 
+    @staticmethod
+    def is_model_npu_supported(model_type: str) -> bool:
+        # Import here to avoid circular imports
+        from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+        return model_type not in [
+            EnrichmentModelTypeEnum.paddleocr.value,
+            EnrichmentModelTypeEnum.jina_v1.value,
+            EnrichmentModelTypeEnum.jina_v2.value,
+            EnrichmentModelTypeEnum.arcface.value,
+        ]
+
     def __init__(self, model_path: str, device: str, model_type: str, **kwargs):
         self.model_path = model_path
         self.device = device
+
+        if device == "NPU" and not OpenVINOModelRunner.is_model_npu_supported(
+            model_type
+        ):
+            logger.warning(
+                f"OpenVINO model {model_type} is not supported on NPU, using GPU instead"
+            )
+            device = "GPU"
+
         self.complex_model = OpenVINOModelRunner.is_complex_model(model_type)
 
         if not os.path.isfile(model_path):
@@ -500,7 +521,7 @@ def get_optimized_runner(
             return OpenVINOModelRunner(model_path, device, model_type, **kwargs)
 
     if (
-        not CudaGraphRunner.is_complex_model(model_type)
+        not CudaGraphRunner.is_model_supported(model_type)
         and providers[0] == "CUDAExecutionProvider"
     ):
         options[0] = {
