@@ -1078,12 +1078,31 @@ function ObjectDetailsTab({
           });
 
       setState("submitted");
-      setSearch({
-        ...search,
-        plus_id: "new_upload",
-      });
+      mutate(
+        (key) =>
+          typeof key === "string" &&
+          (key.includes("events") ||
+            key.includes("events/search") ||
+            key.includes("events/explore")),
+        (currentData: SearchResult[][] | SearchResult[] | undefined) => {
+          if (!currentData) return currentData;
+          // optimistic update
+          return currentData
+            .flat()
+            .map((event) =>
+              event.id === search.id
+                ? { ...event, plus_id: "new_upload" }
+                : event,
+            );
+        },
+        {
+          optimisticData: true,
+          rollbackOnError: true,
+          revalidate: false,
+        },
+      );
     },
-    [search, setSearch],
+    [search, mutate],
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);
@@ -1243,7 +1262,6 @@ function ObjectDetailsTab({
       </div>
 
       {search.data.type === "object" &&
-        !search.plus_id &&
         config?.plus?.enabled &&
         search.has_snapshot && (
           <div
