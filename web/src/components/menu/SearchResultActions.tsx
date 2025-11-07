@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import axios from "axios";
 import { LuCamera, LuDownload, LuTrash2 } from "react-icons/lu";
 import { FiMoreVertical } from "react-icons/fi";
-import { FaArrowsRotate } from "react-icons/fa6";
 import { MdImageSearch } from "react-icons/md";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -31,16 +30,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import useSWR from "swr";
 
 import { Trans, useTranslation } from "react-i18next";
 import { BsFillLightningFill } from "react-icons/bs";
 import BlurredIconButton from "../button/BlurredIconButton";
+import { PiPath } from "react-icons/pi";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
@@ -125,7 +120,7 @@ export default function SearchResultActions({
           aria-label={t("itemMenu.viewTrackingDetails.aria")}
           onClick={showTrackingDetails}
         >
-          <FaArrowsRotate className="mr-2 size-4" />
+          <PiPath className="mr-2 size-4" />
           <span>{t("itemMenu.viewTrackingDetails.label")}</span>
         </MenuItem>
       )}
@@ -146,6 +141,16 @@ export default function SearchResultActions({
           >
             <BsFillLightningFill className="mr-2 size-4" />
             <span>{t("itemMenu.addTrigger.label")}</span>
+          </MenuItem>
+        )}
+      {config?.semantic_search?.enabled &&
+        searchResult.data.type == "object" && (
+          <MenuItem
+            aria-label={t("itemMenu.findSimilar.aria")}
+            onClick={findSimilar}
+          >
+            <MdImageSearch className="mr-2 size-4" />
+            <span>{t("itemMenu.findSimilar.label")}</span>
           </MenuItem>
         )}
       <MenuItem
@@ -193,23 +198,6 @@ export default function SearchResultActions({
         </ContextMenu>
       ) : (
         <>
-          {config?.semantic_search?.enabled &&
-            searchResult.data.type == "object" && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <BlurredIconButton
-                    onClick={findSimilar}
-                    aria-label={t("itemMenu.findSimilar.aria")}
-                  >
-                    <MdImageSearch className="size-5" />
-                  </BlurredIconButton>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t("itemMenu.findSimilar.label")}
-                </TooltipContent>
-              </Tooltip>
-            )}
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <BlurredIconButton aria-label={t("itemMenu.more.aria")}>
