@@ -55,29 +55,32 @@ export default function DetailActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>
-            <a
-              className="w-full"
-              href={`${baseUrl}api/events/${search.id}/snapshot.jpg?bbox=1`}
-              download={`${search.camera}_${search.label}.jpg`}
-            >
-              <div className="flex cursor-pointer items-center gap-2">
-                <span>{t("itemMenu.downloadSnapshot.label")}</span>
-              </div>
-            </a>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem>
-            <a
-              className="w-full"
-              href={`${baseUrl}api/${search.camera}/${clipTimeRange}/clip.mp4`}
-              download
-            >
-              <div className="flex cursor-pointer items-center gap-2">
-                <span>{t("itemMenu.downloadVideo.label")}</span>
-              </div>
-            </a>
-          </DropdownMenuItem>
+          {search.has_snapshot && (
+            <DropdownMenuItem>
+              <a
+                className="w-full"
+                href={`${baseUrl}api/events/${search.id}/snapshot.jpg?bbox=1`}
+                download={`${search.camera}_${search.label}.jpg`}
+              >
+                <div className="flex cursor-pointer items-center gap-2">
+                  <span>{t("itemMenu.downloadSnapshot.label")}</span>
+                </div>
+              </a>
+            </DropdownMenuItem>
+          )}
+          {search.has_clip && (
+            <DropdownMenuItem>
+              <a
+                className="w-full"
+                href={`${baseUrl}api/${search.camera}/${clipTimeRange}/clip.mp4`}
+                download
+              >
+                <div className="flex cursor-pointer items-center gap-2">
+                  <span>{t("itemMenu.downloadVideo.label")}</span>
+                </div>
+              </a>
+            </DropdownMenuItem>
+          )}
 
           {config?.semantic_search.enabled &&
             setSimilarity != undefined &&
