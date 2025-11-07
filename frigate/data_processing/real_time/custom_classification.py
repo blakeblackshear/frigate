@@ -547,4 +547,4 @@ def write_classification_attempt(
 
     # delete oldest face image if maximum is reached
     if len(files) > max_files:
-        os.unlink(os.path.join(folder, files[-1]))
+        os.unlink(os.path.join(folder, files[-1]), missing_ok=True)
