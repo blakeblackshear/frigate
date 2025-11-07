@@ -1244,7 +1244,8 @@ function ObjectDetailsTab({
 
       {search.data.type === "object" &&
         !search.plus_id &&
-        config?.plus?.enabled && (
+        config?.plus?.enabled &&
+        search.has_snapshot && (
           <div
             className={cn(
               "my-2 flex w-full flex-col justify-between gap-1.5",
