@@ -403,7 +403,8 @@ export default function TriggerView({
     setShowCreate(true);
     setSelectedTrigger({
       enabled: true,
-      name: "",
+      name: eventId,
+      friendly_name: "",
       type: "thumbnail",
       data: eventId,
       threshold: 0.5,
