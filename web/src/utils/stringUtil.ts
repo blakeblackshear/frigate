@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 export const capitalizeFirstLetter = (text: string): string => {
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
@@ -44,4 +46,30 @@ export function generateFixedHash(name: string, prefix: string = "id"): string {
  */
 export function isValidId(name: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(name) && !/^\d+$/.test(name);
+}
+
+/**
+ * Formats a list of strings into a human-readable format with proper localization.
+ * Handles different cases for empty, single-item, two-item, and multi-item lists.
+ *
+ * @param item - The array of strings to format
+ * @returns A formatted string representation of the list
+ */
+export function formatList(item: string[]): string {
+  if (item.length === 0) return "";
+  if (item.length === 1) return item[0];
+  if (item.length === 2) {
+    return t("list.two", {
+      0: item[0],
+      1: item[1],
+      ns: "common",
+    });
+  }
+
+  const separatorWithSpace = t("list.separatorWithSpace", { ns: "common" });
+  const allButLast = item.slice(0, -1).join(separatorWithSpace);
+  return t("list.many", {
+    items: allButLast,
+    last: item[item.length - 1],
+  });
 }

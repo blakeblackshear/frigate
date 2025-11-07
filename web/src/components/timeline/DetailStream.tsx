@@ -26,6 +26,7 @@ import { Link } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { usePersistence } from "@/hooks/use-persistence";
 import { isDesktop } from "react-device-detect";
+import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 import { PiSlidersHorizontalBold } from "react-icons/pi";
 import { MdAutoAwesome } from "react-icons/md";
 
@@ -793,17 +794,28 @@ function ObjectTimeline({
     },
   ]);
 
+  const { data: config } = useSWR<FrigateConfig>("config");
   const timeline = useMemo(() => {
     if (!fullTimeline) {
       return fullTimeline;
     }
 
-    return fullTimeline.filter(
-      (t) =>
-        t.timestamp >= review.start_time &&
-        (review.end_time == undefined || t.timestamp <= review.end_time),
-    );
-  }, [fullTimeline, review]);
+    return fullTimeline
+      .filter(
+        (t) =>
+          t.timestamp >= review.start_time &&
+          (review.end_time == undefined || t.timestamp <= review.end_time),
+      )
+      .map((event) => ({
+        ...event,
+        data: {
+          ...event.data,
+          zones_friendly_names: event.data?.zones?.map((zone) =>
+            resolveZoneName(config, zone),
+          ),
+        },
+      }));
+  }, [config, fullTimeline, review]);
 
   if (isValidating && (!timeline || timeline.length === 0)) {
     return <ActivityIndicator className="ml-2 size-3" />;

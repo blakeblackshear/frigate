@@ -1,25 +1,7 @@
 import { TrackingDetailsSequence } from "@/types/timeline";
 import { t } from "i18next";
 import { getTranslatedLabel } from "./i18n";
-import { capitalizeFirstLetter } from "./stringUtil";
-
-function formatZonesList(zones: string[]): string {
-  if (zones.length === 0) return "";
-  if (zones.length === 1) return zones[0];
-  if (zones.length === 2) {
-    return t("list.two", {
-      0: zones[0],
-      1: zones[1],
-    });
-  }
-
-  const separatorWithSpace = t("list.separatorWithSpace", { ns: "common" });
-  const allButLast = zones.slice(0, -1).join(separatorWithSpace);
-  return t("list.many", {
-    items: allButLast,
-    last: zones[zones.length - 1],
-  });
-}
+import { capitalizeFirstLetter, formatList } from "./stringUtil";
 
 export function getLifecycleItemDescription(
   lifecycleItem: TrackingDetailsSequence,
@@ -42,7 +24,9 @@ export function getLifecycleItemDescription(
       return t("trackingDetails.lifecycleItemDesc.entered_zone", {
         ns: "views/explore",
         label,
-        zones: formatZonesList(lifecycleItem.data.zones),
+        zones: formatList(
+          lifecycleItem.data.zones_friendly_names ?? lifecycleItem.data.zones,
+        ),
       });
     case "active":
       return t("trackingDetails.lifecycleItemDesc.active", {

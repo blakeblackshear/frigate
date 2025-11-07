@@ -42,7 +42,7 @@ import { useInitialCameraState } from "@/api/ws";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
 import TriggerView from "@/views/settings/TriggerView";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import {
   Sidebar,
   SidebarContent,
@@ -650,7 +650,7 @@ function CameraSelectButton({
                 key={item.name}
                 isChecked={item.name === selectedCamera}
                 label={item.name}
-                isCameraName={true}
+                type={"camera"}
                 onCheckedChange={(isChecked) => {
                   if (isChecked && (isEnabled || isCameraSettingsPage)) {
                     setSelectedCamera(item.name);

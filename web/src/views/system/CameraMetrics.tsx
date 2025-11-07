@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/tooltip";
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 
 type CameraMetricsProps = {

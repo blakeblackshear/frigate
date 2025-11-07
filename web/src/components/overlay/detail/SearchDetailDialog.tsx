@@ -80,7 +80,7 @@ import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import { Trans, useTranslation } from "react-i18next";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { getTranslatedLabel } from "@/utils/i18n";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { DialogPortal } from "@radix-ui/react-dialog";
 import { useDetailStream } from "@/context/detail-stream-context";
 import { PiSlidersHorizontalBold } from "react-icons/pi";

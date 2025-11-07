@@ -229,6 +229,7 @@ export default function MasksAndZonesView({
           typeIndex: index,
           camera: cameraConfig.name,
           name,
+          friendly_name: zoneData.friendly_name,
           objects: zoneData.objects,
           points: interpolatePoints(
             parseCoordinates(zoneData.coordinates),

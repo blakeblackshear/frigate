@@ -47,7 +47,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { CameraNameLabel } from "../camera/CameraNameLabel";
+import { CameraNameLabel } from "../camera/FriendlyNameLabel";
 
 type LiveContextMenuProps = {
   className?: string;

@@ -810,6 +810,8 @@ cameras:
       # NOTE: This must be different than any camera names, but can match with another zone on another
       #       camera.
       front_steps:
+        # Optional: A friendly name or descriptive text for the zones
+        friendly_name: ""
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
         coordinates: 0.033,0.306,0.324,0.138,0.439,0.185,0.042,0.428

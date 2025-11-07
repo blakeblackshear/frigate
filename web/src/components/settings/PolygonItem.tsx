@@ -179,7 +179,7 @@ export default function PolygonItem({
           if (res.status === 200) {
             toast.success(
               t("masksAndZones.form.polygonDrawing.delete.success", {
-                name: polygon?.name,
+                name: polygon?.friendly_name ?? polygon?.name,
               }),
               {
                 position: "top-center",
@@ -261,7 +261,9 @@ export default function PolygonItem({
               }}
             />
           )}
-          <p className="cursor-default">{polygon.name}</p>
+          <p className="cursor-default">
+            {polygon.friendly_name ?? polygon.name}
+          </p>
         </div>
         <AlertDialog
           open={deleteDialogOpen}
@@ -278,7 +280,7 @@ export default function PolygonItem({
                 ns="views/settings"
                 values={{
                   type: polygon.type.replace("_", " "),
-                  name: polygon.name,
+                  name: polygon.friendly_name ?? polygon.name,
                 }}
               >
                 masksAndZones.form.polygonDrawing.delete.desc
