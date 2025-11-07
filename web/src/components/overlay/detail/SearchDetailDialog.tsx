@@ -596,7 +596,7 @@ export default function SearchDetailDialog({
             }
           }}
         >
-          <Header className={cn(!isDesktop && "top-0 mb-0")}>
+          <Header className={cn(!isDesktop && "top-0 z-[60] mb-0")}>
             <Title>{t("trackedObjectDetails")}</Title>
             <Description className="sr-only">
               {t("trackedObjectDetails")}
