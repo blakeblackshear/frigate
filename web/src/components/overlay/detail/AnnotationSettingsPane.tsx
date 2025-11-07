@@ -141,50 +141,52 @@ export function AnnotationSettingsPane({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-1 flex-col space-y-6"
+          className="flex flex-1 flex-col space-y-3"
         >
           <FormField
             control={form.control}
             name="annotationOffset"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start justify-between space-x-2">
-                <div className="flex flex-col gap-1">
-                  <FormLabel>
-                    {t("trackingDetails.annotationSettings.offset.label")}
-                  </FormLabel>
-                  <FormDescription>
-                    <Trans ns="views/explore">
-                      trackingDetails.annotationSettings.offset.millisecondsToOffset
-                    </Trans>
-                    <FormMessage />
-                    <div className="mt-2">
-                      {t("trackingDetails.annotationSettings.offset.tips")}
-                      <div className="mt-2 flex items-center text-primary">
-                        <Link
-                          to={getLocaleDocUrl("configuration/reference")}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline"
-                        >
-                          {t("readTheDocumentation", { ns: "common" })}
-                          <LuExternalLink className="ml-2 inline-flex size-3" />
-                        </Link>
-                      </div>
+              <>
+                <FormItem className="flex flex-row items-start justify-between space-x-2">
+                  <div className="flex flex-col gap-1">
+                    <FormLabel>
+                      {t("trackingDetails.annotationSettings.offset.label")}
+                    </FormLabel>
+                    <FormDescription>
+                      <Trans ns="views/explore">
+                        trackingDetails.annotationSettings.offset.millisecondsToOffset
+                      </Trans>
+                      <FormMessage />
+                    </FormDescription>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <div className="min-w-24">
+                      <FormControl>
+                        <Input
+                          className="text-md w-full border border-input bg-background p-2 text-center hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          placeholder="0"
+                          {...field}
+                        />
+                      </FormControl>
                     </div>
-                  </FormDescription>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <div className="min-w-24">
-                    <FormControl>
-                      <Input
-                        className="text-md w-full border border-input bg-background p-2 text-center hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                        placeholder="0"
-                        {...field}
-                      />
-                    </FormControl>
+                  </div>
+                </FormItem>
+                <div className="mt-1 text-sm text-secondary-foreground">
+                  {t("trackingDetails.annotationSettings.offset.tips")}
+                  <div className="mt-2 flex items-center text-primary-variant">
+                    <Link
+                      to={getLocaleDocUrl("configuration/reference")}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline"
+                    >
+                      {t("readTheDocumentation", { ns: "common" })}
+                      <LuExternalLink className="ml-2 inline-flex size-3" />
+                    </Link>
                   </div>
                 </div>
-              </FormItem>
+              </>
             )}
           />
 

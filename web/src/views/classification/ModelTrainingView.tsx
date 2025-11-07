@@ -118,6 +118,11 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
 
   const [trainFilter, setTrainFilter] = useApiFilter<TrainFilter>();
 
+  const refreshAll = useCallback(() => {
+    refreshTrain();
+    refreshDataset();
+  }, [refreshTrain, refreshDataset]);
+
   // image multiselect
 
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -183,11 +188,12 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   );
 
   const onDelete = useCallback(
-    (ids: string[], isName: boolean = false) => {
+    (ids: string[], isName: boolean = false, category?: string) => {
+      const targetCategory = category || pageToggle;
       const api =
-        pageToggle == "train"
+        targetCategory == "train"
           ? `/classification/${model.name}/train/delete`
-          : `/classification/${model.name}/dataset/${pageToggle}/delete`;
+          : `/classification/${model.name}/dataset/${targetCategory}/delete`;
 
       axios
         .post(api, { ids })
@@ -408,7 +414,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           trainImages={trainImages || []}
           trainFilter={trainFilter}
           selectedImages={selectedImages}
-          onRefresh={refreshTrain}
+          onRefresh={refreshAll}
           onClickImages={onClickImages}
           onDelete={onDelete}
         />
@@ -432,7 +438,7 @@ type LibrarySelectorProps = {
   dataset: { [id: string]: string[] };
   trainImages: string[];
   setPageToggle: (toggle: string) => void;
-  onDelete: (ids: string[], isName: boolean) => void;
+  onDelete: (ids: string[], isName: boolean, category?: string) => void;
   onRename: (old_name: string, new_name: string) => void;
 };
 function LibrarySelector({
@@ -448,7 +454,7 @@ function LibrarySelector({
   // data
 
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [renameClass, setRenameFace] = useState<string | null>(null);
+  const [renameClass, setRenameClass] = useState<string | null>(null);
   const pageTitle = useMemo(() => {
     if (pageToggle != "train") {
       return pageToggle;
@@ -463,12 +469,12 @@ function LibrarySelector({
 
   // interaction
 
-  const handleDeleteFace = useCallback(
+  const handleDeleteCategory = useCallback(
     (name: string) => {
-      // Get all image IDs for this face
+      // Get all image IDs for this category
       const imageIds = dataset?.[name] || [];
 
-      onDelete(imageIds, true);
+      onDelete(imageIds, true, name);
       setPageToggle("train");
     },
     [dataset, onDelete, setPageToggle],
@@ -476,7 +482,7 @@ function LibrarySelector({
 
   const handleSetOpen = useCallback(
     (open: boolean) => {
-      setRenameFace(open ? renameClass : null);
+      setRenameClass(open ? renameClass : null);
     },
     [renameClass],
   );
@@ -503,7 +509,7 @@ function LibrarySelector({
               className="text-white"
               onClick={() => {
                 if (confirmDelete) {
-                  handleDeleteFace(confirmDelete);
+                  handleDeleteCategory(confirmDelete);
                   setConfirmDelete(null);
                 }
               }}
@@ -521,7 +527,7 @@ function LibrarySelector({
         description={t("renameCategory.desc", { name: renameClass })}
         onSave={(newName) => {
           onRename(renameClass!, newName);
-          setRenameFace(null);
+          setRenameClass(null);
         }}
         defaultValue={renameClass || ""}
         regexPattern={/^[\p{L}\p{N}\s'_-]{1,50}$/u}
@@ -588,7 +594,7 @@ function LibrarySelector({
                       className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setRenameFace(id);
+                        setRenameClass(id);
                       }}
                     >
                       <LuPencil className="size-4 text-primary" />

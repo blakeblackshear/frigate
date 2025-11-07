@@ -98,7 +98,11 @@ export default function RestartDialog({
         open={restartingSheetOpen}
         onOpenChange={() => setRestartingSheetOpen(false)}
       >
-        <SheetContent side="top" onInteractOutside={(e) => e.preventDefault()}>
+        <SheetContent
+          side="top"
+          onInteractOutside={(e) => e.preventDefault()}
+          className="[&>button:first-of-type]:hidden"
+        >
           <div className="flex flex-col items-center">
             <ActivityIndicator />
             <SheetHeader className="mt-5 text-center">

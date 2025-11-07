@@ -662,8 +662,11 @@ def delete_classification_dataset_images(
         if os.path.isfile(file_path):
             os.unlink(file_path)
 
+    if os.path.exists(folder) and not os.listdir(folder):
+        os.rmdir(folder)
+
     return JSONResponse(
-        content=({"success": True, "message": "Successfully deleted faces."}),
+        content=({"success": True, "message": "Successfully deleted images."}),
         status_code=200,
     )
 
@@ -723,7 +726,7 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
     os.unlink(training_file)
 
     return JSONResponse(
-        content=({"success": True, "message": "Successfully deleted faces."}),
+        content=({"success": True, "message": "Successfully categorized image."}),
         status_code=200,
     )
 
@@ -761,7 +764,7 @@ def delete_classification_train_images(request: Request, name: str, body: dict =
             os.unlink(file_path)
 
     return JSONResponse(
-        content=({"success": True, "message": "Successfully deleted faces."}),
+        content=({"success": True, "message": "Successfully deleted images."}),
         status_code=200,
     )
 

@@ -55,20 +55,24 @@ export default function EventMenu({
         </DropdownMenuTrigger>
         <DropdownMenuPortal>
           <DropdownMenuContent>
-            <DropdownMenuItem onSelect={handleObjectSelect}>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onSelect={handleObjectSelect}
+            >
               {isSelected
                 ? t("itemMenu.hideObjectDetails.label")
                 : t("itemMenu.showObjectDetails.label")}
             </DropdownMenuItem>
             <DropdownMenuSeparator className="my-0.5" />
             <DropdownMenuItem
+              className="cursor-pointer"
               onSelect={() => {
                 navigate(`/explore?event_id=${event.id}`);
               }}
             >
               {t("details.item.button.viewInExplore")}
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem className="cursor-pointer" asChild>
               <a
                 download
                 href={
@@ -86,6 +90,7 @@ export default function EventMenu({
               event.data.type == "object" &&
               config?.plus?.enabled && (
                 <DropdownMenuItem
+                  className="cursor-pointer"
                   onSelect={() => {
                     setIsOpen(false);
                     onOpenUpload?.(event);
@@ -97,6 +102,7 @@ export default function EventMenu({
 
             {event.has_snapshot && config?.semantic_search?.enabled && (
               <DropdownMenuItem
+                className="cursor-pointer"
                 onSelect={() => {
                   if (onOpenSimilarity) onOpenSimilarity(event);
                   else

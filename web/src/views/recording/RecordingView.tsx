@@ -985,7 +985,7 @@ function Timeline({
             ),
       )}
     >
-      {isMobile && (
+      {isMobile && timelineType == "timeline" && (
         <GenAISummaryDialog review={activeReviewItem} onOpen={onAnalysisOpen} />
       )}
 

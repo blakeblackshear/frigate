@@ -236,10 +236,6 @@ function ExploreThumbnailImage({
     onSelectSearch(event, false, "tracking_details");
   };
 
-  const handleShowSnapshot = () => {
-    onSelectSearch(event, false, "snapshot");
-  };
-
   const handleAddTrigger = () => {
     navigate(
       `/settings?page=triggers&camera=${event.camera}&event_id=${event.id}`,
@@ -252,7 +248,6 @@ function ExploreThumbnailImage({
       findSimilar={handleFindSimilar}
       refreshResults={mutate}
       showTrackingDetails={handleShowTrackingDetails}
-      showSnapshot={handleShowSnapshot}
       addTrigger={handleAddTrigger}
       isContextMenu={true}
     >

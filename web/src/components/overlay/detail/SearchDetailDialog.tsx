@@ -1242,106 +1242,110 @@ function ObjectDetailsTab({
         </div>
       </div>
 
-      <div
-        className={cn(
-          "my-2 flex w-full flex-col justify-between gap-1.5",
-          state == "submitted" && "flex-row",
-        )}
-      >
-        <div className="text-sm text-primary/40">
-          <div className="flex flex-row items-center gap-1">
-            {t("explore.plus.submitToPlus.label", {
-              ns: "components/dialog",
-            })}
-            <Popover>
-              <PopoverTrigger asChild>
-                <div className="cursor-pointer p-0">
-                  <LuInfo className="size-4" />
-                  <span className="sr-only">Info</span>
-                </div>
-              </PopoverTrigger>
-              <PopoverContent
-                container={popoverContainerRef.current}
-                className="w-80 text-xs"
-              >
-                {t("explore.plus.submitToPlus.desc", {
+      {search.data.type === "object" &&
+        !search.plus_id &&
+        config?.plus?.enabled && (
+          <div
+            className={cn(
+              "my-2 flex w-full flex-col justify-between gap-1.5",
+              state == "submitted" && "flex-row",
+            )}
+          >
+            <div className="text-sm text-primary/40">
+              <div className="flex flex-row items-center gap-1">
+                {t("explore.plus.submitToPlus.label", {
                   ns: "components/dialog",
                 })}
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="cursor-pointer p-0">
+                      <LuInfo className="size-4" />
+                      <span className="sr-only">Info</span>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    container={popoverContainerRef.current}
+                    className="w-80 text-xs"
+                  >
+                    {t("explore.plus.submitToPlus.desc", {
+                      ns: "components/dialog",
+                    })}
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
 
-        <div className="flex flex-row items-center justify-between gap-2 text-sm">
-          {state == "reviewing" && (
-            <>
-              <div>
-                {i18n.language === "en" ? (
-                  // English with a/an logic plus label
-                  <>
-                    {/^[aeiou]/i.test(search?.label || "") ? (
-                      <Trans
-                        ns="components/dialog"
-                        values={{ label: search?.label }}
-                      >
-                        explore.plus.review.question.ask_an
-                      </Trans>
+            <div className="flex flex-row items-center justify-between gap-2 text-sm">
+              {state == "reviewing" && (
+                <>
+                  <div>
+                    {i18n.language === "en" ? (
+                      // English with a/an logic plus label
+                      <>
+                        {/^[aeiou]/i.test(search?.label || "") ? (
+                          <Trans
+                            ns="components/dialog"
+                            values={{ label: search?.label }}
+                          >
+                            explore.plus.review.question.ask_an
+                          </Trans>
+                        ) : (
+                          <Trans
+                            ns="components/dialog"
+                            values={{ label: search?.label }}
+                          >
+                            explore.plus.review.question.ask_a
+                          </Trans>
+                        )}
+                      </>
                     ) : (
+                      // For other languages
                       <Trans
                         ns="components/dialog"
-                        values={{ label: search?.label }}
+                        values={{
+                          untranslatedLabel: search?.label,
+                          translatedLabel: getTranslatedLabel(search?.label),
+                        }}
                       >
-                        explore.plus.review.question.ask_a
+                        explore.plus.review.question.ask_full
                       </Trans>
                     )}
-                  </>
-                ) : (
-                  // For other languages
-                  <Trans
-                    ns="components/dialog"
-                    values={{
-                      untranslatedLabel: search?.label,
-                      translatedLabel: getTranslatedLabel(search?.label),
-                    }}
-                  >
-                    explore.plus.review.question.ask_full
-                  </Trans>
-                )}
-              </div>
-              <div className="flex max-w-xl flex-row gap-2">
-                <Button
-                  className="flex-1 bg-success"
-                  aria-label={t("button.yes", { ns: "common" })}
-                  onClick={() => {
-                    setState("uploading");
-                    onSubmitToPlus(false);
-                  }}
-                >
-                  {t("button.yes", { ns: "common" })}
-                </Button>
-                <Button
-                  className="flex-1 text-white"
-                  aria-label={t("button.no", { ns: "common" })}
-                  variant="destructive"
-                  onClick={() => {
-                    setState("uploading");
-                    onSubmitToPlus(true);
-                  }}
-                >
-                  {t("button.no", { ns: "common" })}
-                </Button>
-              </div>
-            </>
-          )}
-          {state == "uploading" && <ActivityIndicator />}
-          {state == "submitted" && (
-            <div className="flex flex-row items-center justify-center gap-2">
-              <FaCheckCircle className="size-4 text-success" />
-              {t("explore.plus.review.state.submitted")}
+                  </div>
+                  <div className="flex max-w-xl flex-row gap-2">
+                    <Button
+                      className="flex-1 bg-success"
+                      aria-label={t("button.yes", { ns: "common" })}
+                      onClick={() => {
+                        setState("uploading");
+                        onSubmitToPlus(false);
+                      }}
+                    >
+                      {t("button.yes", { ns: "common" })}
+                    </Button>
+                    <Button
+                      className="flex-1 text-white"
+                      aria-label={t("button.no", { ns: "common" })}
+                      variant="destructive"
+                      onClick={() => {
+                        setState("uploading");
+                        onSubmitToPlus(true);
+                      }}
+                    >
+                      {t("button.no", { ns: "common" })}
+                    </Button>
+                  </div>
+                </>
+              )}
+              {state == "uploading" && <ActivityIndicator />}
+              {state == "submitted" && (
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <FaCheckCircle className="size-4 text-success" />
+                  {t("explore.plus.review.state.submitted")}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
       <div className="flex flex-col gap-1.5">
         {config?.cameras[search.camera].objects.genai.enabled &&
         !search.end_time &&

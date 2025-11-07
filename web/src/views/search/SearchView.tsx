@@ -688,9 +688,6 @@ export default function SearchView({
                           showTrackingDetails={() =>
                             onSelectSearch(value, false, "tracking_details")
                           }
-                          showSnapshot={() =>
-                            onSelectSearch(value, false, "snapshot")
-                          }
                           addTrigger={() => {
                             if (
                               config?.semantic_search.enabled &&

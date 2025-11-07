@@ -4,6 +4,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -121,17 +122,20 @@ export function MobilePagePortal({
 type MobilePageContentProps = {
   children: React.ReactNode;
   className?: string;
+  scrollerRef?: React.RefObject<HTMLDivElement>;
 };
 
 export function MobilePageContent({
   children,
   className,
+  scrollerRef,
 }: MobilePageContentProps) {
   const context = useContext(MobilePageContext);
   if (!context)
     throw new Error("MobilePageContent must be used within MobilePage");
 
   const [isVisible, setIsVisible] = useState(context.open);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (context.open) {
@@ -140,15 +144,27 @@ export function MobilePageContent({
   }, [context.open]);
 
   const handleAnimationComplete = () => {
-    if (!context.open) {
+    if (context.open) {
+      // After opening animation completes, ensure scroller is at the top
+      if (scrollerRef?.current) {
+        scrollerRef.current.scrollTop = 0;
+      }
+    } else {
       setIsVisible(false);
     }
   };
+
+  useEffect(() => {
+    if (context.open && scrollerRef?.current) {
+      scrollerRef.current.scrollTop = 0;
+    }
+  }, [context.open, scrollerRef]);
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
+          ref={containerRef}
           className={cn(
             "fixed inset-0 z-50 mb-12 bg-background",
             isPWA && "mb-16",
