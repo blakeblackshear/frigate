@@ -96,7 +96,9 @@
     "back": "Go back",
     "hide": "Hide {{item}}",
     "show": "Show {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "None",
+    "all": "All"
   },
   "list": {
     "two": "{{0}} and {{1}}",

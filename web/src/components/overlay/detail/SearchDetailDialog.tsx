@@ -1490,7 +1490,7 @@ function ObjectDetailsTab({
             </div>
           ) : (
             <div className="overflow-auto text-sm text-primary">
-              {desc || "None"}
+              {desc || t("label.none", { ns: "common" })}
             </div>
           )
         ) : (
