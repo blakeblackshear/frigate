@@ -75,7 +75,7 @@
       "deletedName_other": "{{count}} faces have been successfully deleted.",
       "renamedFace": "Successfully renamed face to {{name}}",
       "trainedFace": "Successfully trained face.",
-      "updatedFaceScore": "Successfully updated face score."
+      "updatedFaceScore": "Successfully updated face score to {{name}} ({{score}})."
     },
     "error": {
       "uploadingImageFailed": "Failed to upload image: {{errorMessage}}",

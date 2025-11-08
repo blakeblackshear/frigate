@@ -622,7 +622,15 @@ type TrainingGridProps = {
   faceNames: string[];
   selectedFaces: string[];
   onClickFaces: (images: string[], ctrl: boolean) => void;
-  onRefresh: () => void;
+  onRefresh: (
+    data?:
+      | FaceLibraryData
+      | Promise<FaceLibraryData>
+      | ((
+          currentData: FaceLibraryData | undefined,
+        ) => FaceLibraryData | undefined),
+    opts?: boolean | { revalidate?: boolean },
+  ) => Promise<FaceLibraryData | undefined>;
 };
 function TrainingGrid({
   config,
@@ -726,7 +734,15 @@ type FaceAttemptGroupProps = {
   faceNames: string[];
   selectedFaces: string[];
   onClickFaces: (image: string[], ctrl: boolean) => void;
-  onRefresh: () => void;
+  onRefresh: (
+    data?:
+      | FaceLibraryData
+      | Promise<FaceLibraryData>
+      | ((
+          currentData: FaceLibraryData | undefined,
+        ) => FaceLibraryData | undefined),
+    opts?: boolean | { revalidate?: boolean },
+  ) => Promise<FaceLibraryData | undefined>;
 };
 function FaceAttemptGroup({
   config,
@@ -814,11 +830,44 @@ function FaceAttemptGroup({
       axios
         .post(`/faces/reprocess`, { training_file: data.filename })
         .then((resp) => {
-          if (resp.status == 200) {
-            toast.success(t("toast.success.updatedFaceScore"), {
-              position: "top-center",
-            });
-            onRefresh();
+          if (resp.status == 200 && resp.data?.success) {
+            const { face_name, score } = resp.data;
+            const oldFilename = data.filename;
+            const parts = oldFilename.split("-");
+            const newFilename = `${parts[0]}-${parts[1]}-${parts[2]}-${face_name}-${score}.webp`;
+
+            onRefresh(
+              (currentData: FaceLibraryData | undefined) => {
+                if (!currentData?.train) return currentData;
+
+                return {
+                  ...currentData,
+                  train: currentData.train.map((filename: string) =>
+                    filename === oldFilename ? newFilename : filename,
+                  ),
+                };
+              },
+              { revalidate: true },
+            );
+
+            toast.success(
+              t("toast.success.updatedFaceScore", {
+                name: face_name,
+                score: score.toFixed(2),
+              }),
+              {
+                position: "top-center",
+              },
+            );
+          } else if (resp.data?.success === false) {
+            // Handle case where API returns success: false
+            const errorMessage = resp.data?.message || "Unknown error";
+            toast.error(
+              t("toast.error.updateFaceScoreFailed", { errorMessage }),
+              {
+                position: "top-center",
+              },
+            );
           }
         })
         .catch((error) => {
