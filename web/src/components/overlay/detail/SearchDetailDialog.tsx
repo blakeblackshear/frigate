@@ -34,9 +34,12 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import {
   FaArrowRight,
   FaCheckCircle,
-  FaChevronDown,
   FaChevronLeft,
   FaChevronRight,
+  FaMicrophone,
+  FaRedo,
+  FaCheck,
+  FaTimes,
 } from "react-icons/fa";
 import { TrackingDetails } from "./TrackingDetails";
 import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
@@ -684,6 +687,8 @@ function ObjectDetailsTab({
   const [desc, setDesc] = useState(search?.data.description);
   const [isSubLabelDialogOpen, setIsSubLabelDialogOpen] = useState(false);
   const [isLPRDialogOpen, setIsLPRDialogOpen] = useState(false);
+  const [isEditingDesc, setIsEditingDesc] = useState(false);
+  const originalDescRef = useRef<string | null>(null);
 
   const handleDescriptionFocus = useCallback(() => {
     setInputFocused(true);
@@ -1114,6 +1119,23 @@ function ObjectDetailsTab({
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);
+  const canRegenerate = !!(
+    config?.cameras[search.camera].objects.genai.enabled && search.end_time
+  );
+  const showAiPlaceholder = !!(
+    config?.cameras[search.camera].objects.genai.enabled &&
+    !search.end_time &&
+    (config.cameras[search.camera].objects.genai.required_zones.length === 0 ||
+      search.zones.some((zone) =>
+        config.cameras[search.camera].objects.genai.required_zones.includes(
+          zone,
+        ),
+      )) &&
+    (config.cameras[search.camera].objects.genai.objects.length === 0 ||
+      config.cameras[search.camera].objects.genai.objects.includes(
+        search.label,
+      ))
+  );
   return (
     <div ref={popoverContainerRef} className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
@@ -1374,75 +1396,68 @@ function ObjectDetailsTab({
           </div>
         )}
       <div className="flex flex-col gap-1.5">
-        {config?.cameras[search.camera].objects.genai.enabled &&
-        !search.end_time &&
-        (config.cameras[search.camera].objects.genai.required_zones.length ===
-          0 ||
-          search.zones.some((zone) =>
-            config.cameras[search.camera].objects.genai.required_zones.includes(
-              zone,
-            ),
-          )) &&
-        (config.cameras[search.camera].objects.genai.objects.length === 0 ||
-          config.cameras[search.camera].objects.genai.objects.includes(
-            search.label,
-          )) ? (
-          <>
-            <div className="text-sm text-primary/40">
-              {t("details.description.label")}
-            </div>
-            <div className="flex h-64 flex-col items-center justify-center gap-3 border p-4 text-sm text-primary/40">
-              <div className="flex">
-                <ActivityIndicator />
-              </div>
-              <div className="flex">{t("details.description.aiTips")}</div>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="text-sm text-primary/40"></div>
-            <Textarea
-              className="text-md h-64"
-              placeholder={t("details.description.placeholder")}
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              onFocus={handleDescriptionFocus}
-              onBlur={handleDescriptionBlur}
-            />
-          </>
-        )}
-
-        <div className="flex w-full flex-row justify-end gap-2">
-          {config?.cameras[search?.camera].audio_transcription.enabled &&
-            search?.label == "speech" &&
-            search?.end_time && (
-              <Button onClick={onTranscribe}>
-                <div className="flex gap-1">
-                  {t("itemMenu.audioTranscription.label")}
-                </div>
-              </Button>
-            )}
-          {config?.cameras[search.camera].objects.genai.enabled &&
-            search.end_time && (
-              <div className="flex items-start">
-                <Button
-                  className="rounded-r-none border-r-0"
-                  aria-label={t("details.button.regenerate.label")}
-                  onClick={() => regenerateDescription("thumbnails")}
+        <div className="flex items-start justify-start gap-2">
+          <div className="text-sm text-primary/40">
+            {t("details.description.label")}
+          </div>
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  aria-label={t("button.edit", { ns: "common" })}
+                  className="text-primary/40 hover:text-primary"
+                  onClick={() => {
+                    originalDescRef.current = desc ?? "";
+                    setIsEditingDesc(true);
+                  }}
                 >
-                  {t("details.button.regenerate.title")}
-                </Button>
-                {search.has_snapshot && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        className="rounded-l-none border-l-0 px-2"
-                        aria-label={t("details.expandRegenerationMenu")}
-                      >
-                        <FaChevronDown className="size-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                  <FaPencilAlt className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {t("button.edit", { ns: "common" })}
+              </TooltipContent>
+            </Tooltip>
+
+            {config?.cameras[search?.camera].audio_transcription.enabled &&
+              search?.label == "speech" &&
+              search?.end_time && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      aria-label={t("itemMenu.audioTranscription.label")}
+                      className="text-primary/40 hover:text-primary"
+                      onClick={onTranscribe}
+                    >
+                      <FaMicrophone className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("itemMenu.audioTranscription.label")}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+            {canRegenerate && (
+              <div className="relative">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          aria-label={t("details.button.regenerate.label")}
+                          className="text-primary/40 hover:text-primary"
+                        >
+                          <FaRedo className="size-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t("details.button.regenerate.title")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {search.has_snapshot && (
                       <DropdownMenuItem
                         className="cursor-pointer"
                         aria-label={t("details.regenerateFromSnapshot")}
@@ -1450,61 +1465,100 @@ function ObjectDetailsTab({
                       >
                         {t("details.regenerateFromSnapshot")}
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        aria-label={t("details.regenerateFromThumbnails")}
-                        onClick={() => regenerateDescription("thumbnails")}
-                      >
-                        {t("details.regenerateFromThumbnails")}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
+                    )}
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      aria-label={t("details.regenerateFromThumbnails")}
+                      onClick={() => regenerateDescription("thumbnails")}
+                    >
+                      {t("details.regenerateFromThumbnails")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
-          {((config?.cameras[search.camera].objects.genai.enabled &&
-            search.end_time) ||
-            !config?.cameras[search.camera].objects.genai.enabled) && (
-            <Button
-              variant="select"
-              aria-label={t("button.save", { ns: "common" })}
-              onClick={updateDescription}
-            >
-              {t("button.save", { ns: "common" })}
-            </Button>
-          )}
-
-          <TextEntryDialog
-            open={isSubLabelDialogOpen}
-            setOpen={setIsSubLabelDialogOpen}
-            title={t("details.editSubLabel.title")}
-            description={
-              search.label
-                ? t("details.editSubLabel.desc", {
-                    label: search.label,
-                  })
-                : t("details.editSubLabel.descNoLabel")
-            }
-            onSave={handleSubLabelSave}
-            defaultValue={search?.sub_label || ""}
-            allowEmpty={true}
-          />
-          <TextEntryDialog
-            open={isLPRDialogOpen}
-            setOpen={setIsLPRDialogOpen}
-            title={t("details.editLPR.title")}
-            description={
-              search.label
-                ? t("details.editLPR.desc", {
-                    label: search.label,
-                  })
-                : t("details.editLPR.descNoLabel")
-            }
-            onSave={handleLPRSave}
-            defaultValue={search?.data.recognized_license_plate || ""}
-            allowEmpty={true}
-          />
+          </div>
         </div>
+
+        {!isEditingDesc ? (
+          showAiPlaceholder ? (
+            <div className="flex h-32 flex-col items-center justify-center gap-3 border p-4 text-sm text-primary/40">
+              <div className="flex">
+                <ActivityIndicator />
+              </div>
+              <div className="flex">{t("details.description.aiTips")}</div>
+            </div>
+          ) : (
+            <div className="overflow-auto text-sm text-primary">
+              {desc || "None"}
+            </div>
+          )
+        ) : (
+          <div className="flex flex-col gap-2">
+            <Textarea
+              className="text-md h-32"
+              placeholder={t("details.description.placeholder")}
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              onFocus={handleDescriptionFocus}
+              onBlur={handleDescriptionBlur}
+              autoFocus
+            />
+            <div className="flex flex-row justify-end gap-2">
+              <button
+                aria-label={t("button.save", { ns: "common" })}
+                className="text-primary/40 hover:text-primary"
+                onClick={() => {
+                  setIsEditingDesc(false);
+                  updateDescription();
+                }}
+              >
+                <FaCheck className="size-4" />
+              </button>
+              <button
+                aria-label={t("button.cancel", { ns: "common" })}
+                className="text-primary/40 hover:text-primary"
+                onClick={() => {
+                  setIsEditingDesc(false);
+                  setDesc(originalDescRef.current ?? "");
+                }}
+              >
+                <FaTimes className="size-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        <TextEntryDialog
+          open={isSubLabelDialogOpen}
+          setOpen={setIsSubLabelDialogOpen}
+          title={t("details.editSubLabel.title")}
+          description={
+            search.label
+              ? t("details.editSubLabel.desc", {
+                  label: search.label,
+                })
+              : t("details.editSubLabel.descNoLabel")
+          }
+          onSave={handleSubLabelSave}
+          defaultValue={search?.sub_label || ""}
+          allowEmpty={true}
+        />
+        <TextEntryDialog
+          open={isLPRDialogOpen}
+          setOpen={setIsLPRDialogOpen}
+          title={t("details.editLPR.title")}
+          description={
+            search.label
+              ? t("details.editLPR.desc", {
+                  label: search.label,
+                })
+              : t("details.editLPR.descNoLabel")
+          }
+          onSave={handleLPRSave}
+          defaultValue={search?.data.recognized_license_plate || ""}
+          allowEmpty={true}
+        />
       </div>
     </div>
   );
