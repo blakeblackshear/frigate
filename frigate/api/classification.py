@@ -112,9 +112,18 @@ def reclassify_face(request: Request, body: dict = None):
     context: EmbeddingsContext = request.app.embeddings
     response = context.reprocess_face(training_file)
 
+    if not isinstance(response, dict):
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "message": "Could not process request.",
+            },
+        )
+
     return JSONResponse(
+        status_code=200 if response.get("success", True) else 400,
         content=response,
-        status_code=200,
     )
 
 

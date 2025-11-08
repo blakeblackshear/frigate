@@ -423,7 +423,10 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             res = self.recognizer.classify(img)
 
             if not res:
-                return
+                return {
+                    "message": "No face was recognized.",
+                    "success": False,
+                }
 
             sub_label, score = res
 
@@ -441,6 +444,13 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                     folder, f"{id}-{timestamp}-{sub_label}-{score}.webp"
                 )
                 shutil.move(current_file, new_file)
+
+            return {
+                "message": f"Successfully reprocessed face. Result: {sub_label} (score: {score:.2f})",
+                "success": True,
+                "face_name": sub_label,
+                "score": score,
+            }
 
     def expire_object(self, object_id: str, camera: str):
         if object_id in self.person_face_history:
