@@ -515,7 +515,7 @@ export function ReviewTimeline({
         <div
           className={`absolute z-30 flex gap-2 ${
             isMobile
-              ? "bottom-4 right-1 flex-col gap-3"
+              ? "bottom-4 right-1 flex-col-reverse gap-3"
               : "bottom-2 left-1/2 -translate-x-1/2"
           }`}
         >
