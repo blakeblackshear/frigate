@@ -72,7 +72,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
@@ -126,7 +131,7 @@ function TabsWithActions({
   return (
     <div className="flex items-center justify-between gap-1">
       <ScrollArea className="flex-1 whitespace-nowrap">
-        <div className="mb-2 flex flex-row md:mb-0">
+        <div className="mb-2 flex flex-row">
           <ToggleGroup
             className="*:rounded-md *:px-3 *:py-4"
             type="single"
@@ -224,6 +229,7 @@ function AnnotationSettings({
   const Overlay = isDesktop ? Popover : Drawer;
   const Trigger = isDesktop ? PopoverTrigger : DrawerTrigger;
   const Content = isDesktop ? PopoverContent : DrawerContent;
+  const Title = isDesktop ? "div" : DrawerTitle;
   const contentProps = isDesktop
     ? { align: "end" as const, container: container ?? undefined }
     : {};
@@ -248,7 +254,9 @@ function AnnotationSettings({
             <PiSlidersHorizontalBold className="size-5" />
           </Button>
         </Trigger>
-
+        <Title className="sr-only">
+          {t("trackingDetails.adjustAnnotationSettings")}
+        </Title>
         <Content
           className={
             isDesktop
@@ -306,7 +314,7 @@ function DialogContentComponent({
   if (page === "tracking_details") {
     return (
       <TrackingDetails
-        className={cn("size-full", !isDesktop && "flex flex-col gap-4")}
+        className={cn(isDesktop ? "size-full" : "flex flex-col gap-4")}
         event={search as unknown as Event}
         tabs={
           isDesktop ? (
@@ -340,7 +348,7 @@ function DialogContentComponent({
       }
     />
   ) : (
-    <div className={cn(!isDesktop ? "mb-4 w-full" : "size-full")}>
+    <div className={cn(!isDesktop ? "mb-4 w-full md:max-w-lg" : "size-full")}>
       <img
         className="w-full select-none rounded-lg object-contain transition-opacity"
         style={
@@ -584,8 +592,13 @@ export default function SearchDetailDialog({
             "scrollbar-container overflow-y-auto",
             isDesktop &&
               "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-[70%]",
-            isMobile && "px-4",
+            isMobile && "flex h-full flex-col px-4",
           )}
+          onEscapeKeyDown={(event) => {
+            if (isPopoverOpen) {
+              event.preventDefault();
+            }
+          }}
           onInteractOutside={(e) => {
             if (isPopoverOpen) {
               e.preventDefault();
@@ -596,7 +609,7 @@ export default function SearchDetailDialog({
             }
           }}
         >
-          <Header>
+          <Header className={cn(!isDesktop && "top-0 z-[60] mb-0")}>
             <Title>{t("trackedObjectDetails")}</Title>
             <Description className="sr-only">
               {t("trackedObjectDetails")}
@@ -1078,12 +1091,31 @@ function ObjectDetailsTab({
           });
 
       setState("submitted");
-      setSearch({
-        ...search,
-        plus_id: "new_upload",
-      });
+      mutate(
+        (key) =>
+          typeof key === "string" &&
+          (key.includes("events") ||
+            key.includes("events/search") ||
+            key.includes("events/explore")),
+        (currentData: SearchResult[][] | SearchResult[] | undefined) => {
+          if (!currentData) return currentData;
+          // optimistic update
+          return currentData
+            .flat()
+            .map((event) =>
+              event.id === search.id
+                ? { ...event, plus_id: "new_upload" }
+                : event,
+            );
+        },
+        {
+          optimisticData: true,
+          rollbackOnError: true,
+          revalidate: false,
+        },
+      );
     },
-    [search, setSearch],
+    [search, mutate],
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);
@@ -1243,8 +1275,8 @@ function ObjectDetailsTab({
       </div>
 
       {search.data.type === "object" &&
-        !search.plus_id &&
-        config?.plus?.enabled && (
+        config?.plus?.enabled &&
+        search.has_snapshot && (
           <div
             className={cn(
               "my-2 flex w-full flex-col justify-between gap-1.5",

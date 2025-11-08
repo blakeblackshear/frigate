@@ -261,6 +261,8 @@ OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will al
 
 :::tip
 
+**NPU + GPU Systems:** If you have both NPU and GPU available (Intel Core Ultra processors), use NPU for object detection and GPU for enrichments (semantic search, face recognition, etc.) for best performance and compatibility.
+
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
 
 ```yaml
@@ -283,7 +285,7 @@ detectors:
 | [RF-DETR](#rf-detr)                   | ✅  | ✅  | Requires XE iGPU or Arc                                      |
 | [YOLO-NAS](#yolo-nas)                 | ✅  | ✅  |                                                              |
 | [MobileNet v2](#ssdlite-mobilenet-v2) | ✅  | ✅  | Fast and lightweight model, less accurate than larger models |
-| [YOLOX](#yolox)                       | ✅  |  ?  |                                                              |
+| [YOLOX](#yolox)                       | ✅  | ?   |                                                              |
 | [D-FINE](#d-fine)                     | ❌  | ❌  |                                                              |
 
 #### SSDLite MobileNet v2

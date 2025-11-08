@@ -352,7 +352,8 @@ export function TrackingDetails({
       className={cn(
         isDesktop
           ? "flex size-full justify-evenly gap-4 overflow-hidden"
-          : "flex size-full flex-col gap-2",
+          : "flex flex-col gap-2",
+        !isDesktop && cameraAspect === "tall" && "size-full",
         className,
       )}
     >
@@ -453,7 +454,7 @@ export function TrackingDetails({
         )}
       >
         {isDesktop && tabs && (
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-2 flex items-center justify-between">
             <div className="flex-1">{tabs}</div>
           </div>
         )}
@@ -719,9 +720,13 @@ function LifecycleIconRow({
                             backgroundColor: `rgb(${color})`,
                           }}
                         />
-                        <span className="smart-capitalize">
-                          {item.data?.zones_friendly_names?.[zidx] ??
-                            zone.replaceAll("_", " ")}
+                        <span
+                          className={cn(
+                            item.data?.zones_friendly_names?.[zidx] === zone &&
+                              "smart-capitalize",
+                          )}
+                        >
+                          {item.data?.zones_friendly_names?.[zidx]}
                         </span>
                       </Badge>
                     );

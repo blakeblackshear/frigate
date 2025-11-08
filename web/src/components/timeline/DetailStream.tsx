@@ -15,7 +15,7 @@ import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Event } from "@/types/event";
 import { getIconForLabel } from "@/utils/iconUtil";
-import { ReviewSegment } from "@/types/review";
+import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { LuChevronDown, LuCircle, LuChevronRight } from "react-icons/lu";
 import { getTranslatedLabel } from "@/utils/i18n";
 import EventMenu from "@/components/timeline/EventMenu";
@@ -391,8 +391,8 @@ function ReviewGroup({
             )}
           />
         </div>
-        <div className="mr-3 flex w-full justify-between">
-          <div className="ml-1 flex flex-col items-start gap-1.5">
+        <div className="mr-3 grid w-full grid-cols-[1fr_auto] gap-2">
+          <div className="ml-1 flex min-w-0 flex-col gap-1.5">
             <div className="flex flex-row gap-3">
               <div className="text-sm font-medium">{displayTime}</div>
               <div className="relative flex items-center gap-2 text-white">
@@ -408,7 +408,7 @@ function ReviewGroup({
             </div>
             <div className="flex flex-col gap-0.5">
               {review.data.metadata?.title && (
-                <div className="mb-1 flex items-center gap-1 text-sm text-primary-variant">
+                <div className="mb-1 flex min-w-0 items-center gap-1 text-sm text-primary-variant">
                   <MdAutoAwesome className="size-3 shrink-0" />
                   <span className="truncate">{review.data.metadata.title}</span>
                 </div>
@@ -432,7 +432,7 @@ function ReviewGroup({
               e.stopPropagation();
               setOpen((v) => !v);
             }}
-            className="ml-2 inline-flex items-center justify-center rounded p-1 hover:bg-secondary/10"
+            className="inline-flex items-center justify-center self-center rounded p-1 hover:bg-secondary/10"
           >
             {open ? (
               <LuChevronDown className="size-4 text-primary-variant" />
@@ -803,8 +803,9 @@ function ObjectTimeline({
     return fullTimeline
       .filter(
         (t) =>
-          t.timestamp >= review.start_time &&
-          (review.end_time == undefined || t.timestamp <= review.end_time),
+          t.timestamp >= review.start_time - REVIEW_PADDING &&
+          (review.end_time == undefined ||
+            t.timestamp <= review.end_time + REVIEW_PADDING),
       )
       .map((event) => ({
         ...event,

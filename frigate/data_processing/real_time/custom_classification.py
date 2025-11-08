@@ -418,8 +418,8 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             obj_data["box"][2],
             obj_data["box"][3],
             max(
-                obj_data["box"][1] - obj_data["box"][0],
-                obj_data["box"][3] - obj_data["box"][2],
+                obj_data["box"][2] - obj_data["box"][0],
+                obj_data["box"][3] - obj_data["box"][1],
             ),
             1.0,
         )
@@ -546,5 +546,8 @@ def write_classification_attempt(
     )
 
     # delete oldest face image if maximum is reached
-    if len(files) > max_files:
-        os.unlink(os.path.join(folder, files[-1]))
+    try:
+        if len(files) > max_files:
+            os.unlink(os.path.join(folder, files[-1]))
+    except FileNotFoundError:
+        pass

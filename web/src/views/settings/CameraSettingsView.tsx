@@ -98,12 +98,12 @@ export default function CameraSettingsView({
       return Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
         camera: cameraConfig.name,
         name,
-        friendly_name: getZoneName(name, cameraConfig.name),
+        friendly_name: cameraConfig.zones[name].friendly_name,
         objects: zoneData.objects,
         color: zoneData.color,
       }));
     }
-  }, [cameraConfig, getZoneName]);
+  }, [cameraConfig]);
 
   const alertsLabels = useMemo(() => {
     return cameraConfig?.review.alerts.labels
@@ -533,8 +533,14 @@ export default function CameraSettingsView({
                                             }}
                                           />
                                         </FormControl>
-                                        <FormLabel className="font-normal smart-capitalize">
-                                          {zone.friendly_name}
+                                        <FormLabel
+                                          className={cn(
+                                            "font-normal",
+                                            !zone.friendly_name &&
+                                              "smart-capitalize",
+                                          )}
+                                        >
+                                          {zone.friendly_name || zone.name}
                                         </FormLabel>
                                       </FormItem>
                                     )}
@@ -632,8 +638,14 @@ export default function CameraSettingsView({
                                               }}
                                             />
                                           </FormControl>
-                                          <FormLabel className="font-normal smart-capitalize">
-                                            {zone.friendly_name}
+                                          <FormLabel
+                                            className={cn(
+                                              "font-normal",
+                                              !zone.friendly_name &&
+                                                "smart-capitalize",
+                                            )}
+                                          >
+                                            {zone.friendly_name || zone.name}
                                           </FormLabel>
                                         </FormItem>
                                       )}
