@@ -804,7 +804,8 @@ function ObjectTimeline({
       .filter(
         (t) =>
           t.timestamp >= review.start_time - REVIEW_PADDING &&
-          (review.end_time == undefined || t.timestamp <= review.end_time),
+          (review.end_time == undefined ||
+            t.timestamp <= review.end_time + REVIEW_PADDING),
       )
       .map((event) => ({
         ...event,
