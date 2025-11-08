@@ -454,7 +454,7 @@ export function TrackingDetails({
         )}
       >
         {isDesktop && tabs && (
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-2 flex items-center justify-between">
             <div className="flex-1">{tabs}</div>
           </div>
         )}

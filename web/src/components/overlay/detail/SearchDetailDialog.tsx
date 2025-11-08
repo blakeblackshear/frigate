@@ -72,7 +72,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { FaPencilAlt } from "react-icons/fa";
@@ -126,7 +131,7 @@ function TabsWithActions({
   return (
     <div className="flex items-center justify-between gap-1">
       <ScrollArea className="flex-1 whitespace-nowrap">
-        <div className="mb-2 flex flex-row md:mb-0">
+        <div className="mb-2 flex flex-row">
           <ToggleGroup
             className="*:rounded-md *:px-3 *:py-4"
             type="single"
@@ -224,6 +229,7 @@ function AnnotationSettings({
   const Overlay = isDesktop ? Popover : Drawer;
   const Trigger = isDesktop ? PopoverTrigger : DrawerTrigger;
   const Content = isDesktop ? PopoverContent : DrawerContent;
+  const Title = isDesktop ? "div" : DrawerTitle;
   const contentProps = isDesktop
     ? { align: "end" as const, container: container ?? undefined }
     : {};
@@ -248,7 +254,9 @@ function AnnotationSettings({
             <PiSlidersHorizontalBold className="size-5" />
           </Button>
         </Trigger>
-
+        <Title className="sr-only">
+          {t("trackingDetails.adjustAnnotationSettings")}
+        </Title>
         <Content
           className={
             isDesktop
@@ -340,7 +348,7 @@ function DialogContentComponent({
       }
     />
   ) : (
-    <div className={cn(!isDesktop ? "mb-4 w-full" : "size-full")}>
+    <div className={cn(!isDesktop ? "mb-4 w-full md:max-w-lg" : "size-full")}>
       <img
         className="w-full select-none rounded-lg object-contain transition-opacity"
         style={
@@ -586,6 +594,11 @@ export default function SearchDetailDialog({
               "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-[70%]",
             isMobile && "flex h-full flex-col px-4",
           )}
+          onEscapeKeyDown={(event) => {
+            if (isPopoverOpen) {
+              event.preventDefault();
+            }
+          }}
           onInteractOutside={(e) => {
             if (isPopoverOpen) {
               e.preventDefault();
