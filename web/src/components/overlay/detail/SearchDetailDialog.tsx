@@ -37,7 +37,6 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaMicrophone,
-  FaRedo,
   FaCheck,
   FaTimes,
 } from "react-icons/fa";
@@ -92,6 +91,7 @@ import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { DialogPortal } from "@radix-ui/react-dialog";
 import { useDetailStream } from "@/context/detail-stream-context";
 import { PiSlidersHorizontalBold } from "react-icons/pi";
+import { HiSparkles } from "react-icons/hi";
 
 const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
@@ -1122,7 +1122,7 @@ function ObjectDetailsTab({
   const canRegenerate = !!(
     config?.cameras[search.camera].objects.genai.enabled && search.end_time
   );
-  const showAiPlaceholder = !!(
+  const showGenAIPlaceholder = !!(
     config?.cameras[search.camera].objects.genai.enabled &&
     !search.end_time &&
     (config.cameras[search.camera].objects.genai.required_zones.length === 0 ||
@@ -1396,16 +1396,16 @@ function ObjectDetailsTab({
           </div>
         )}
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-start justify-start gap-2">
+        <div className="flex items-center justify-start gap-3">
           <div className="text-sm text-primary/40">
             {t("details.description.label")}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   aria-label={t("button.edit", { ns: "common" })}
-                  className="text-primary/40 hover:text-primary"
+                  className="text-primary/40 hover:text-primary/80"
                   onClick={() => {
                     originalDescRef.current = desc ?? "";
                     setIsEditingDesc(true);
@@ -1426,7 +1426,7 @@ function ObjectDetailsTab({
                   <TooltipTrigger asChild>
                     <button
                       aria-label={t("itemMenu.audioTranscription.label")}
-                      className="text-primary/40 hover:text-primary"
+                      className="text-primary/40 hover:text-primary/80"
                       onClick={onTranscribe}
                     >
                       <FaMicrophone className="size-4" />
@@ -1441,21 +1441,21 @@ function ObjectDetailsTab({
             {canRegenerate && (
               <div className="relative">
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger asChild>
                         <button
                           aria-label={t("details.button.regenerate.label")}
-                          className="text-primary/40 hover:text-primary"
+                          className="text-primary/40 hover:text-primary/80"
                         >
-                          <FaRedo className="size-4" />
+                          <HiSparkles className="size-4" />
                         </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {t("details.button.regenerate.title")}
-                      </TooltipContent>
-                    </Tooltip>
-                  </DropdownMenuTrigger>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("details.button.regenerate.title")}
+                    </TooltipContent>
+                  </Tooltip>
                   <DropdownMenuContent>
                     {search.has_snapshot && (
                       <DropdownMenuItem
@@ -1481,7 +1481,7 @@ function ObjectDetailsTab({
         </div>
 
         {!isEditingDesc ? (
-          showAiPlaceholder ? (
+          showGenAIPlaceholder ? (
             <div className="flex h-32 flex-col items-center justify-center gap-3 border p-4 text-sm text-primary/40">
               <div className="flex">
                 <ActivityIndicator />
@@ -1504,27 +1504,42 @@ function ObjectDetailsTab({
               onBlur={handleDescriptionBlur}
               autoFocus
             />
-            <div className="flex flex-row justify-end gap-2">
-              <button
-                aria-label={t("button.save", { ns: "common" })}
-                className="text-primary/40 hover:text-primary"
-                onClick={() => {
-                  setIsEditingDesc(false);
-                  updateDescription();
-                }}
-              >
-                <FaCheck className="size-4" />
-              </button>
-              <button
-                aria-label={t("button.cancel", { ns: "common" })}
-                className="text-primary/40 hover:text-primary"
-                onClick={() => {
-                  setIsEditingDesc(false);
-                  setDesc(originalDescRef.current ?? "");
-                }}
-              >
-                <FaTimes className="size-4" />
-              </button>
+            <div className="flex flex-row justify-end gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    aria-label={t("button.save", { ns: "common" })}
+                    className="text-primary/40 hover:text-primary/80"
+                    onClick={() => {
+                      setIsEditingDesc(false);
+                      updateDescription();
+                    }}
+                  >
+                    <FaCheck className="size-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t("button.save", { ns: "common" })}
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    aria-label={t("button.cancel", { ns: "common" })}
+                    className="text-primary/40 hover:text-primary"
+                    onClick={() => {
+                      setIsEditingDesc(false);
+                      setDesc(originalDescRef.current ?? "");
+                    }}
+                  >
+                    <FaTimes className="size-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t("button.cancel", { ns: "common" })}
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         )}
