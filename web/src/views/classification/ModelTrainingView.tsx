@@ -745,17 +745,11 @@ function TrainGrid({
             return false;
           }
 
-          if (
-            trainFilter.min_score &&
-            trainFilter.min_score > data.score / 100.0
-          ) {
+          if (trainFilter.min_score && trainFilter.min_score > data.score) {
             return false;
           }
 
-          if (
-            trainFilter.max_score &&
-            trainFilter.max_score < data.score / 100.0
-          ) {
+          if (trainFilter.max_score && trainFilter.max_score < data.score) {
             return false;
           }
 
