@@ -367,16 +367,11 @@ function DialogContentComponent({
 
   if (isDesktop) {
     return (
-      <div className="flex h-full gap-4 overflow-hidden">
-        <div
-          className={cn(
-            "scrollbar-container flex-[3] overflow-y-hidden",
-            !search.has_snapshot && "flex-[2]",
-          )}
-        >
+      <div className="grid h-full w-full grid-cols-[60%_40%] gap-4">
+        <div className="scrollbar-container min-w-0 overflow-y-auto overflow-x-hidden">
           {snapshotElement}
         </div>
-        <div className="flex flex-col gap-4 overflow-hidden md:basis-2/5">
+        <div className="flex min-w-0 flex-col gap-4 pr-2">
           <TabsWithActions
             search={search}
             searchTabs={searchTabs}
@@ -389,7 +384,7 @@ function DialogContentComponent({
             setIsPopoverOpen={setIsPopoverOpen}
             dialogContainer={dialogContainer}
           />
-          <div className="scrollbar-container flex-1 overflow-y-auto">
+          <div className="scrollbar-container min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4">
             <ObjectDetailsTab
               search={search}
               config={config}
