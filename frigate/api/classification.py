@@ -764,7 +764,7 @@ def rename_classification_category(
             content=(
                 {
                     "success": False,
-                    "message": f"Failed to rename category: {str(e)}",
+                    "message": "Failed to rename category",
                 }
             ),
             status_code=500,
