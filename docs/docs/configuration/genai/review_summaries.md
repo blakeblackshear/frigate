@@ -68,36 +68,6 @@ The mere presence of an unidentified person in private areas during late night h
 
 </details>
 
-### Camera Spatial Context
-
-In addition to defining activity patterns, you can provide spatial context for specific cameras to help the LLM generate more accurate and descriptive titles and scene descriptions. The `camera_context` field allows you to describe physical features and locations that are outside the camera's field of view but are relevant for understanding the scene.
-
-**Important Guidelines:**
-
-- This context is used **only for descriptive purposes** to help the LLM write better titles and scene descriptions
-- It should describe **physical features and spatial relationships** (e.g., "front door is to the right", "driveway on the left")
-- It should **NOT** include subjective assessments or threat evaluations (e.g., "high-crime area")
-- Threat level determination remains based solely on observable actions defined in the activity patterns
-
-Example configuration:
-
-```yaml
-cameras:
-  front_door:
-    review:
-      genai:
-        enabled: true
-        camera_context: |
-          - Front door entrance is to the right of the frame
-          - Driveway and street are to the left
-          - Steps in the center lead from the sidewalk to the front door
-          - Garage is located beyond the left edge of the frame
-```
-
-This helps the LLM generate more natural descriptions like "Person approaching front door" instead of "Person walking toward right side of frame".
-
-The `camera_context` can be defined globally under `genai.review` and overridden per camera for specific spatial details.
-
 ### Image Source
 
 By default, review summaries use preview images (cached preview frames) which have a lower resolution but use fewer tokens per image. For better image quality and more detailed analysis, you can configure Frigate to extract frames directly from recordings at a higher resolution:

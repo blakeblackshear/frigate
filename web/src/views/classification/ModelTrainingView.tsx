@@ -187,6 +187,37 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
     null,
   );
 
+  const onRename = useCallback(
+    (old_name: string, new_name: string) => {
+      axios
+        .put(`/classification/${model.name}/dataset/${old_name}/rename`, {
+          new_category: new_name,
+        })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(
+              t("toast.success.renamedCategory", { name: new_name }),
+              {
+                position: "top-center",
+              },
+            );
+            setPageToggle(new_name);
+            refreshDataset();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.renameCategoryFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [model, setPageToggle, refreshDataset, t],
+  );
+
   const onDelete = useCallback(
     (ids: string[], isName: boolean = false, category?: string) => {
       const targetCategory = category || pageToggle;
@@ -354,7 +385,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
               trainImages={trainImages || []}
               setPageToggle={setPageToggle}
               onDelete={onDelete}
-              onRename={() => {}}
+              onRename={onRename}
             />
           </div>
         )}
@@ -534,7 +565,7 @@ function LibrarySelector({
         regexErrorMessage={t("description.invalidName")}
       />
 
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
             {pageTitle}
@@ -585,48 +616,50 @@ function LibrarySelector({
                   ({dataset?.[id].length})
                 </span>
               </div>
-              <div className="flex gap-0.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setRenameClass(id);
-                      }}
-                    >
-                      <LuPencil className="size-4 text-primary" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipPortal>
-                    <TooltipContent>
-                      {t("button.renameCategory")}
-                    </TooltipContent>
-                  </TooltipPortal>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setConfirmDelete(id);
-                      }}
-                    >
-                      <LuTrash2 className="size-4 text-destructive" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipPortal>
-                    <TooltipContent>
-                      {t("button.deleteCategory")}
-                    </TooltipContent>
-                  </TooltipPortal>
-                </Tooltip>
-              </div>
+              {id != "none" && (
+                <div className="flex gap-0.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRenameClass(id);
+                        }}
+                      >
+                        <LuPencil className="size-4 text-primary" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipPortal>
+                      <TooltipContent>
+                        {t("button.renameCategory")}
+                      </TooltipContent>
+                    </TooltipPortal>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmDelete(id);
+                        }}
+                      >
+                        <LuTrash2 className="size-4 text-destructive" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipPortal>
+                      <TooltipContent>
+                        {t("button.deleteCategory")}
+                      </TooltipContent>
+                    </TooltipPortal>
+                  </Tooltip>
+                </div>
+              )}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -745,17 +778,11 @@ function TrainGrid({
             return false;
           }
 
-          if (
-            trainFilter.min_score &&
-            trainFilter.min_score > data.score / 100.0
-          ) {
+          if (trainFilter.min_score && trainFilter.min_score > data.score) {
             return false;
           }
 
-          if (
-            trainFilter.max_score &&
-            trainFilter.max_score < data.score / 100.0
-          ) {
+          if (trainFilter.max_score && trainFilter.max_score < data.score) {
             return false;
           }
 

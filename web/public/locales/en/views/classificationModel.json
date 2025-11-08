@@ -22,7 +22,8 @@
       "categorizedImage": "Successfully Classified Image",
       "trainedModel": "Successfully trained model.",
       "trainingModel": "Successfully started model training.",
-      "updatedModel": "Successfully updated model configuration"
+      "updatedModel": "Successfully updated model configuration",
+      "renamedCategory": "Successfully renamed class to {{name}}"
     },
     "error": {
       "deleteImageFailed": "Failed to delete: {{errorMessage}}",
@@ -30,7 +31,8 @@
       "deleteModelFailed": "Failed to delete model: {{errorMessage}}",
       "categorizeFailed": "Failed to categorize image: {{errorMessage}}",
       "trainingFailed": "Failed to start model training: {{errorMessage}}",
-      "updateModelFailed": "Failed to update model: {{errorMessage}}"
+      "updateModelFailed": "Failed to update model: {{errorMessage}}",
+      "renameCategoryFailed": "Failed to rename class: {{errorMessage}}"
     }
   },
   "deleteCategory": {

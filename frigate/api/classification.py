@@ -112,9 +112,18 @@ def reclassify_face(request: Request, body: dict = None):
     context: EmbeddingsContext = request.app.embeddings
     response = context.reprocess_face(training_file)
 
+    if not isinstance(response, dict):
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "message": "Could not process request.",
+            },
+        )
+
     return JSONResponse(
+        status_code=200 if response.get("success", True) else 400,
         content=response,
-        status_code=200,
     )
 
 
@@ -669,6 +678,97 @@ def delete_classification_dataset_images(
         content=({"success": True, "message": "Successfully deleted images."}),
         status_code=200,
     )
+
+
+@router.put(
+    "/classification/{name}/dataset/{old_category}/rename",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Rename a classification category",
+    description="""Renames a classification category for a given classification model.
+    The old category must exist and the new name must be valid. Returns a success message or an error if the name is invalid.""",
+)
+def rename_classification_category(
+    request: Request, name: str, old_category: str, body: dict = None
+):
+    config: FrigateConfig = request.app.frigate_config
+
+    if name not in config.classification.custom:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"{name} is not a known classification model.",
+                }
+            ),
+            status_code=404,
+        )
+
+    json: dict[str, Any] = body or {}
+    new_category = sanitize_filename(json.get("new_category", ""))
+
+    if not new_category:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "New category name is required.",
+                }
+            ),
+            status_code=400,
+        )
+
+    old_folder = os.path.join(
+        CLIPS_DIR, sanitize_filename(name), "dataset", sanitize_filename(old_category)
+    )
+    new_folder = os.path.join(
+        CLIPS_DIR, sanitize_filename(name), "dataset", new_category
+    )
+
+    if not os.path.exists(old_folder):
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"Category {old_category} does not exist.",
+                }
+            ),
+            status_code=404,
+        )
+
+    if os.path.exists(new_folder):
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"Category {new_category} already exists.",
+                }
+            ),
+            status_code=400,
+        )
+
+    try:
+        os.rename(old_folder, new_folder)
+        return JSONResponse(
+            content=(
+                {
+                    "success": True,
+                    "message": f"Successfully renamed category to {new_category}.",
+                }
+            ),
+            status_code=200,
+        )
+    except Exception as e:
+        logger.error(f"Error renaming category: {e}")
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "Failed to rename category",
+                }
+            ),
+            status_code=500,
+        )
 
 
 @router.post(
