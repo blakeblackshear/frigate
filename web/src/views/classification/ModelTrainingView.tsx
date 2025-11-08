@@ -187,6 +187,37 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
     null,
   );
 
+  const onRename = useCallback(
+    (old_name: string, new_name: string) => {
+      axios
+        .put(`/classification/${model.name}/dataset/${old_name}/rename`, {
+          new_category: new_name,
+        })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(
+              t("toast.success.renamedCategory", { name: new_name }),
+              {
+                position: "top-center",
+              },
+            );
+            setPageToggle(new_name);
+            refreshDataset();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.renameCategoryFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [model, setPageToggle, refreshDataset, t],
+  );
+
   const onDelete = useCallback(
     (ids: string[], isName: boolean = false, category?: string) => {
       const targetCategory = category || pageToggle;
@@ -354,7 +385,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
               trainImages={trainImages || []}
               setPageToggle={setPageToggle}
               onDelete={onDelete}
-              onRename={() => {}}
+              onRename={onRename}
             />
           </div>
         )}
