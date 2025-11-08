@@ -159,7 +159,7 @@ export default function CreateTriggerDialog({
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (trigger) {
+    if (trigger && existingTriggerNames.includes(trigger.name)) {
       onEdit({ ...values });
     } else {
       onCreate(
