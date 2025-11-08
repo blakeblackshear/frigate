@@ -351,7 +351,12 @@ function DialogContentComponent({
       }
     />
   ) : (
-    <div className={cn(!isDesktop ? "mb-4 w-full md:max-w-lg" : "size-full")}>
+    <div
+      className={cn(
+        "max-w-lg",
+        !isDesktop ? "mb-4 w-full" : "mx-auto size-full",
+      )}
+    >
       <img
         className="w-full select-none rounded-lg object-contain transition-opacity"
         style={
