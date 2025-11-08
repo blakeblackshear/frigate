@@ -565,7 +565,7 @@ function LibrarySelector({
         regexErrorMessage={t("description.invalidName")}
       />
 
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
             {pageTitle}
@@ -616,48 +616,50 @@ function LibrarySelector({
                   ({dataset?.[id].length})
                 </span>
               </div>
-              <div className="flex gap-0.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setRenameClass(id);
-                      }}
-                    >
-                      <LuPencil className="size-4 text-primary" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipPortal>
-                    <TooltipContent>
-                      {t("button.renameCategory")}
-                    </TooltipContent>
-                  </TooltipPortal>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setConfirmDelete(id);
-                      }}
-                    >
-                      <LuTrash2 className="size-4 text-destructive" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipPortal>
-                    <TooltipContent>
-                      {t("button.deleteCategory")}
-                    </TooltipContent>
-                  </TooltipPortal>
-                </Tooltip>
-              </div>
+              {id != "none" && (
+                <div className="flex gap-0.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRenameClass(id);
+                        }}
+                      >
+                        <LuPencil className="size-4 text-primary" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipPortal>
+                      <TooltipContent>
+                        {t("button.renameCategory")}
+                      </TooltipContent>
+                    </TooltipPortal>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmDelete(id);
+                        }}
+                      >
+                        <LuTrash2 className="size-4 text-destructive" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipPortal>
+                      <TooltipContent>
+                        {t("button.deleteCategory")}
+                      </TooltipContent>
+                    </TooltipPortal>
+                  </Tooltip>
+                </div>
+              )}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
