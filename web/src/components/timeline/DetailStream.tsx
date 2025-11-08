@@ -15,7 +15,7 @@ import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Event } from "@/types/event";
 import { getIconForLabel } from "@/utils/iconUtil";
-import { ReviewSegment } from "@/types/review";
+import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { LuChevronDown, LuCircle, LuChevronRight } from "react-icons/lu";
 import { getTranslatedLabel } from "@/utils/i18n";
 import EventMenu from "@/components/timeline/EventMenu";
@@ -803,7 +803,7 @@ function ObjectTimeline({
     return fullTimeline
       .filter(
         (t) =>
-          t.timestamp >= review.start_time &&
+          t.timestamp >= review.start_time - REVIEW_PADDING &&
           (review.end_time == undefined || t.timestamp <= review.end_time),
       )
       .map((event) => ({
