@@ -67,9 +67,6 @@
         },
         "activity_context_prompt": {
           "label": "Custom activity context prompt defining normal activity patterns for this property."
-        },
-        "camera_context": {
-          "label": "Spatial context about the camera's field of view to help with descriptive accuracy. Should describe physical features and locations outside the frame. This is for spatial reference only and should NOT include subjective assessments."
         }
       }
     }
