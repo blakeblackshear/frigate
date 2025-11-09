@@ -529,7 +529,7 @@ def get_optimized_runner(
             return OpenVINOModelRunner(model_path, device, model_type, **kwargs)
 
     if (
-        not CudaGraphRunner.is_model_supported(model_type)
+        CudaGraphRunner.is_model_supported(model_type)
         and providers[0] == "CUDAExecutionProvider"
     ):
         options[0] = {
