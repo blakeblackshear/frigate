@@ -107,6 +107,9 @@ export type WizardFormData = {
   brandTemplate?: CameraBrand;
   customUrl?: string;
   streams?: StreamConfig[];
+  probeMode?: boolean; // true for probe, false for manual
+  onvifPort?: number;
+  probeResult?: OnvifProbeResponse;
 };
 
 // API Response Types
@@ -166,4 +169,27 @@ export type ConfigSetBody = {
   requires_restart: number;
   config_data: CameraConfigData;
   update_topic?: string;
+};
+
+export type OnvifRtspCandidate = {
+  source: "GetStreamUri" | "pattern";
+  profile_token?: string;
+  uri: string;
+};
+
+export type OnvifProbeResponse = {
+  success: boolean;
+  host?: string;
+  port?: number;
+  manufacturer?: string;
+  model?: string;
+  firmware_version?: string;
+  profiles_count?: number;
+  ptz_supported?: boolean;
+  presets_count?: number;
+  autotrack_supported?: boolean;
+  move_status_supported?: boolean;
+  rtsp_candidates?: OnvifRtspCandidate[];
+  message?: string;
+  detail?: string;
 };
