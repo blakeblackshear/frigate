@@ -102,6 +102,12 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
         position: "top-center",
       });
       setWasTraining(false);
+      refreshDataset();
+    } else if (modelState == "failed") {
+      toast.error(t("toast.error.trainingFailed"), {
+        position: "top-center",
+      });
+      setWasTraining(false);
     }
     // only refresh when modelState changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,9 +118,19 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   const { data: trainImages, mutate: refreshTrain } = useSWR<string[]>(
     `classification/${model.name}/train`,
   );
-  const { data: dataset, mutate: refreshDataset } = useSWR<{
-    [id: string]: string[];
+  const { data: datasetResponse, mutate: refreshDataset } = useSWR<{
+    categories: { [id: string]: string[] };
+    training_metadata: {
+      has_trained: boolean;
+      last_training_date: string | null;
+      last_training_image_count: number;
+      current_image_count: number;
+      new_images_count: number;
+    } | null;
   }>(`classification/${model.name}/dataset`);
+
+  const dataset = datasetResponse?.categories || {};
+  const trainingMetadata = datasetResponse?.training_metadata;
 
   const [trainFilter, setTrainFilter] = useApiFilter<TrainFilter>();
 
@@ -177,7 +193,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           error.response?.data?.detail ||
           "Unknown error";
 
-        toast.error(t("toast.error.trainingFailed", { errorMessage }), {
+        toast.error(t("toast.error.trainingFailedToStart", { errorMessage }), {
           position: "top-center",
         });
       });
@@ -421,19 +437,48 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
               filterValues={{ classes: Object.keys(dataset || {}) }}
               onUpdateFilter={setTrainFilter}
             />
-            <Button
-              className="flex justify-center gap-2"
-              onClick={trainModel}
-              variant="select"
-              disabled={modelState != "complete"}
-            >
-              {modelState == "training" ? (
-                <ActivityIndicator size={20} />
-              ) : (
-                <HiSparkles className="text-white" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="flex justify-center gap-2"
+                  onClick={trainModel}
+                  variant={modelState == "failed" ? "destructive" : "select"}
+                  disabled={
+                    (modelState != "complete" && modelState != "failed") ||
+                    (trainingMetadata?.new_images_count ?? 0) === 0
+                  }
+                >
+                  {modelState == "training" ? (
+                    <ActivityIndicator size={20} />
+                  ) : (
+                    <HiSparkles className="text-white" />
+                  )}
+                  {isDesktop && (
+                    <>
+                      {t("button.trainModel")}
+                      {trainingMetadata?.new_images_count !== undefined &&
+                        trainingMetadata.new_images_count > 0 && (
+                          <span className="text-sm text-selected-foreground">
+                            ({trainingMetadata.new_images_count})
+                          </span>
+                        )}
+                    </>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              {((trainingMetadata?.new_images_count ?? 0) === 0 ||
+                (modelState != "complete" && modelState != "failed")) && (
+                <TooltipPortal>
+                  <TooltipContent>
+                    {modelState == "training"
+                      ? t("tooltip.trainingInProgress")
+                      : trainingMetadata?.new_images_count === 0
+                        ? t("tooltip.noNewImages")
+                        : t("tooltip.modelNotReady")}
+                  </TooltipContent>
+                </TooltipPortal>
               )}
-              {isDesktop && t("button.trainModel")}
-            </Button>
+            </Tooltip>
           </div>
         )}
       </div>
