@@ -99,6 +99,11 @@ export type TestResult = {
   error?: string;
 };
 
+export type CandidateTestMap = Record<
+  string,
+  TestResult | { success: false; error: string }
+>;
+
 export type WizardFormData = {
   cameraName?: string;
   host?: string;
@@ -115,7 +120,7 @@ export type WizardFormData = {
 // API Response Types
 export type FfprobeResponse = {
   return_code: number;
-  stderr: string;
+  stderr: string | string[];
   stdout: FfprobeData | string;
 };
 
