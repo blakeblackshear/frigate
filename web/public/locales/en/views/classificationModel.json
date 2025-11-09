@@ -148,6 +148,8 @@
     "step3": {
       "selectImagesPrompt": "Select all images with: {{className}}",
       "selectImagesDescription": "Click on images to select them. Click Continue when you're done with this class.",
+      "allImagesRequired_one": "Please classify all images. {{count}} image remaining.",
+      "allImagesRequired_other": "Please classify all images. {{count}} images remaining.",
       "generating": {
         "title": "Generating Sample Images",
         "description": "Frigate is pulling representative images from your recordings. This may take a moment..."
