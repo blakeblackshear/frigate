@@ -505,7 +505,6 @@ async def onvif_probe(
     try:
         logger.debug(f"Probing ONVIF device at {host}:{port}")
 
-        # Resolve wsdl directory from the installed onvif package (if available)
         try:
             wsdl_base = None
             spec = find_spec("onvif")
@@ -760,14 +759,54 @@ async def onvif_probe(
                             else getattr(stream_uri_resp, "Uri", None)
                         )
                         if uri:
-                            rtsp_candidates.append(
-                                {
-                                    "source": "GetStreamUri",
-                                    "profile_token": token,
-                                    "uri": uri,
-                                }
+                            logger.debug(
+                                f"GetStreamUri returned for token {token}: {uri}"
                             )
+                            # If credentials were provided, do NOT add the unauthenticated URI.
+                            try:
+                                if isinstance(uri, str) and uri.startswith("rtsp://"):
+                                    if username and password and "@" not in uri:
+                                        # Inject URL-encoded credentials and add only the
+                                        # authenticated version.
+                                        cred = f"{quote_plus(username)}:{quote_plus(password)}@"
+                                        injected = uri.replace(
+                                            "rtsp://", f"rtsp://{cred}", 1
+                                        )
+                                        rtsp_candidates.append(
+                                            {
+                                                "source": "GetStreamUri",
+                                                "profile_token": token,
+                                                "uri": injected,
+                                            }
+                                        )
+                                    else:
+                                        # No credentials provided or URI already contains
+                                        # credentials — add the URI as returned.
+                                        rtsp_candidates.append(
+                                            {
+                                                "source": "GetStreamUri",
+                                                "profile_token": token,
+                                                "uri": uri,
+                                            }
+                                        )
+                                else:
+                                    # Non-RTSP URIs (e.g., http-flv) — add as returned.
+                                    rtsp_candidates.append(
+                                        {
+                                            "source": "GetStreamUri",
+                                            "profile_token": token,
+                                            "uri": uri,
+                                        }
+                                    )
+                            except Exception as e:
+                                logger.debug(
+                                    f"Skipping stream URI for token {token} due to processing error: {e}"
+                                )
+                                continue
                     except Exception:
+                        logger.debug(
+                            f"GetStreamUri failed for token {token}", exc_info=True
+                        )
                         continue
 
             # Add common RTSP patterns as fallback
@@ -782,7 +821,12 @@ async def onvif_probe(
                     "/cam/realmonitor?channel=1&subtype=0",
                     "/11",
                 ]
-                auth_str = f"{username}:{password}@" if username and password else ""
+                # Use URL-encoded credentials for pattern fallback URIs when provided
+                auth_str = (
+                    f"{quote_plus(username)}:{quote_plus(password)}@"
+                    if username and password
+                    else ""
+                )
                 rtsp_port = 554
                 for path in common_paths:
                     uri = f"rtsp://{auth_str}{host}:{rtsp_port}{path}"
