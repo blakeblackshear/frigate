@@ -23,6 +23,7 @@ class ModelStatusTypesEnum(str, Enum):
     error = "error"
     training = "training"
     complete = "complete"
+    failed = "failed"
 
 
 class TrackedObjectUpdateTypesEnum(str, Enum):

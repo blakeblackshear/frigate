@@ -306,13 +306,13 @@ def kickoff_model_training(
         logger.error(
             f"Training subprocess failed for {model_name} (exit code: {training_process.exitcode})"
         )
-        # mark training as complete (not failed) so UI doesn't stay in training state
-        # but don't reload the model since it failed
+        # mark training as failed so UI shows error state
+        # don't reload the model since it failed
         requestor.send_data(
             UPDATE_MODEL_STATE,
             {
                 "model": model_name,
-                "state": ModelStatusTypesEnum.complete,
+                "state": ModelStatusTypesEnum.failed,
             },
         )
 

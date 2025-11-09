@@ -103,6 +103,11 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       });
       setWasTraining(false);
       refreshDataset();
+    } else if (modelState == "failed") {
+      toast.error(t("toast.error.trainingFailed"), {
+        position: "top-center",
+      });
+      setWasTraining(false);
     }
     // only refresh when modelState changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -188,7 +193,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           error.response?.data?.detail ||
           "Unknown error";
 
-        toast.error(t("toast.error.trainingFailed", { errorMessage }), {
+        toast.error(t("toast.error.trainingFailedToStart", { errorMessage }), {
           position: "top-center",
         });
       });
@@ -437,9 +442,9 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
                 <Button
                   className="flex justify-center gap-2"
                   onClick={trainModel}
-                  variant="select"
+                  variant={modelState == "failed" ? "destructive" : "select"}
                   disabled={
-                    modelState != "complete" ||
+                    (modelState != "complete" && modelState != "failed") ||
                     (trainingMetadata?.new_images_count ?? 0) === 0
                   }
                 >
@@ -462,7 +467,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
                 </Button>
               </TooltipTrigger>
               {((trainingMetadata?.new_images_count ?? 0) === 0 ||
-                modelState != "complete") && (
+                (modelState != "complete" && modelState != "failed")) && (
                 <TooltipPortal>
                   <TooltipContent>
                     {modelState == "training"
