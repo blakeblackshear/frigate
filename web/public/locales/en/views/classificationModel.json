@@ -13,6 +13,11 @@
     "deleteModels": "Delete Models",
     "editModel": "Edit Model"
   },
+  "tooltip": {
+    "trainingInProgress": "Model is currently training",
+    "noNewImages": "No new images to train. Classify more images in the dataset first.",
+    "modelNotReady": "Model is not ready for training"
+  },
   "toast": {
     "success": {
       "deletedCategory": "Deleted Class",

@@ -37,6 +37,8 @@ from frigate.models import Event
 from frigate.util.classification import (
     collect_object_classification_examples,
     collect_state_classification_examples,
+    get_dataset_image_count,
+    read_training_metadata,
 )
 from frigate.util.file import get_event_snapshot
 
@@ -564,23 +566,54 @@ def get_classification_dataset(name: str):
     dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(name), "dataset")
 
     if not os.path.exists(dataset_dir):
-        return JSONResponse(status_code=200, content={})
+        return JSONResponse(
+            status_code=200, content={"categories": {}, "training_metadata": None}
+        )
 
-    for name in os.listdir(dataset_dir):
-        category_dir = os.path.join(dataset_dir, name)
+    for category_name in os.listdir(dataset_dir):
+        category_dir = os.path.join(dataset_dir, category_name)
 
         if not os.path.isdir(category_dir):
             continue
 
-        dataset_dict[name] = []
+        dataset_dict[category_name] = []
 
         for file in filter(
             lambda f: (f.lower().endswith((".webp", ".png", ".jpg", ".jpeg"))),
             os.listdir(category_dir),
         ):
-            dataset_dict[name].append(file)
+            dataset_dict[category_name].append(file)
 
-    return JSONResponse(status_code=200, content=dataset_dict)
+    # Get training metadata
+    metadata = read_training_metadata(sanitize_filename(name))
+    current_image_count = get_dataset_image_count(sanitize_filename(name))
+
+    if metadata is None:
+        training_metadata = {
+            "has_trained": False,
+            "last_training_date": None,
+            "last_training_image_count": 0,
+            "current_image_count": current_image_count,
+            "new_images_count": current_image_count,
+        }
+    else:
+        last_training_count = metadata.get("last_training_image_count", 0)
+        new_images_count = max(0, current_image_count - last_training_count)
+        training_metadata = {
+            "has_trained": True,
+            "last_training_date": metadata.get("last_training_date"),
+            "last_training_image_count": last_training_count,
+            "current_image_count": current_image_count,
+            "new_images_count": new_images_count,
+        }
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "categories": dataset_dict,
+            "training_metadata": training_metadata,
+        },
+    )
 
 
 @router.get(

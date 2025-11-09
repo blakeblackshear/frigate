@@ -1,5 +1,7 @@
 """Util for classification models."""
 
+import datetime
+import json
 import logging
 import os
 import random
@@ -27,8 +29,94 @@ from frigate.util.process import FrigateProcess
 BATCH_SIZE = 16
 EPOCHS = 50
 LEARNING_RATE = 0.001
+TRAINING_METADATA_FILE = ".training_metadata.json"
 
 logger = logging.getLogger(__name__)
+
+
+def write_training_metadata(model_name: str, image_count: int) -> None:
+    """
+    Write training metadata to a hidden file in the model's clips directory.
+
+    Args:
+        model_name: Name of the classification model
+        image_count: Number of images used in training
+    """
+    clips_model_dir = os.path.join(CLIPS_DIR, model_name)
+    os.makedirs(clips_model_dir, exist_ok=True)
+
+    metadata_path = os.path.join(clips_model_dir, TRAINING_METADATA_FILE)
+    metadata = {
+        "last_training_date": datetime.datetime.now().isoformat(),
+        "last_training_image_count": image_count,
+    }
+
+    try:
+        with open(metadata_path, "w") as f:
+            json.dump(metadata, f, indent=2)
+        logger.info(f"Wrote training metadata for {model_name}: {image_count} images")
+    except Exception as e:
+        logger.error(f"Failed to write training metadata for {model_name}: {e}")
+
+
+def read_training_metadata(model_name: str) -> dict[str, any] | None:
+    """
+    Read training metadata from the hidden file in the model's clips directory.
+
+    Args:
+        model_name: Name of the classification model
+
+    Returns:
+        Dictionary with last_training_date and last_training_image_count, or None if not found
+    """
+    clips_model_dir = os.path.join(CLIPS_DIR, model_name)
+    metadata_path = os.path.join(clips_model_dir, TRAINING_METADATA_FILE)
+
+    if not os.path.exists(metadata_path):
+        return None
+
+    try:
+        with open(metadata_path, "r") as f:
+            metadata = json.load(f)
+        return metadata
+    except Exception as e:
+        logger.error(f"Failed to read training metadata for {model_name}: {e}")
+        return None
+
+
+def get_dataset_image_count(model_name: str) -> int:
+    """
+    Count the total number of images in the model's dataset directory.
+
+    Args:
+        model_name: Name of the classification model
+
+    Returns:
+        Total count of images across all categories
+    """
+    dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
+
+    if not os.path.exists(dataset_dir):
+        return 0
+
+    total_count = 0
+    try:
+        for category in os.listdir(dataset_dir):
+            category_dir = os.path.join(dataset_dir, category)
+            if not os.path.isdir(category_dir):
+                continue
+
+            image_files = [
+                f
+                for f in os.listdir(category_dir)
+                if f.lower().endswith((".webp", ".png", ".jpg", ".jpeg"))
+            ]
+            total_count += len(image_files)
+    except Exception as e:
+        logger.error(f"Failed to count dataset images for {model_name}: {e}")
+        return 0
+
+    return total_count
 
 
 class ClassificationTrainingProcess(FrigateProcess):
@@ -144,6 +232,10 @@ class ClassificationTrainingProcess(FrigateProcess):
         # write model
         with open(os.path.join(model_dir, "model.tflite"), "wb") as f:
             f.write(tflite_model)
+
+        # write training metadata with image count
+        dataset_image_count = get_dataset_image_count(self.model_name)
+        write_training_metadata(self.model_name, dataset_image_count)
 
 
 def kickoff_model_training(
