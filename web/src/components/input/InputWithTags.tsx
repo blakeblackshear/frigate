@@ -81,6 +81,22 @@ export default function InputWithTags({
     revalidateOnFocus: false,
   });
 
+  const allAudioListenLabels = useMemo<string[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const labels = new Set<string>();
+    Object.values(config.cameras).forEach((camera) => {
+      if (camera?.audio?.enabled) {
+        camera.audio.listen.forEach((label) => {
+          labels.add(label);
+        });
+      }
+    });
+    return [...labels].sort();
+  }, [config]);
+
   const [inputValue, setInputValue] = useState(search || "");
   const [currentFilterType, setCurrentFilterType] = useState<FilterType | null>(
     null,
@@ -421,7 +437,11 @@ export default function InputWithTags({
         ? t("button.yes", { ns: "common" })
         : t("button.no", { ns: "common" });
     } else if (filterType === "labels") {
-      return getTranslatedLabel(String(filterValues));
+      const value = String(filterValues);
+      return getTranslatedLabel(
+        value,
+        allAudioListenLabels.includes(value) ? "audio" : "object",
+      );
     } else if (filterType === "search_type") {
       return t("filter.searchType." + String(filterValues));
     } else {
@@ -828,7 +848,12 @@ export default function InputWithTags({
                           >
                             {t("filter.label." + filterType)}:{" "}
                             {filterType === "labels" ? (
-                              getTranslatedLabel(value)
+                              getTranslatedLabel(
+                                value,
+                                allAudioListenLabels.includes(value)
+                                  ? "audio"
+                                  : "object",
+                              )
                             ) : filterType === "cameras" ? (
                               <CameraNameLabel camera={value} />
                             ) : filterType === "zones" ? (

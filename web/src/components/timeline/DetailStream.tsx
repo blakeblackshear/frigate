@@ -478,7 +478,7 @@ function ReviewGroup({
                     <div className="rounded-full bg-muted-foreground p-1">
                       {getIconForLabel(audioLabel, "size-3 text-white")}
                     </div>
-                    <span>{getTranslatedLabel(audioLabel)}</span>
+                    <span>{getTranslatedLabel(audioLabel, "audio")}</span>
                   </div>
                 </div>
               ))}
@@ -513,7 +513,28 @@ function EventList({
 
   const isSelected = selectedObjectIds.includes(event.id);
 
-  const label = event.sub_label || getTranslatedLabel(event.label);
+  const allAudioListenLabels = useMemo<string[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const labels = new Set<string>();
+    Object.values(config.cameras).forEach((camera) => {
+      if (camera?.audio?.enabled) {
+        camera.audio.listen.forEach((label) => {
+          labels.add(label);
+        });
+      }
+    });
+    return [...labels].sort();
+  }, [config]);
+
+  const label =
+    event.sub_label ||
+    getTranslatedLabel(
+      event.label,
+      allAudioListenLabels.includes(event.label) ? "audio" : "object",
+    );
 
   const handleObjectSelect = (event: Event | undefined) => {
     if (event) {

@@ -454,6 +454,24 @@ export function GeneralFilterContent({
   onClose,
 }: GeneralFilterContentProps) {
   const { t } = useTranslation(["components/filter", "views/events"]);
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+  const allAudioListenLabels = useMemo<string[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const labels = new Set<string>();
+    Object.values(config.cameras).forEach((camera) => {
+      if (camera?.audio?.enabled) {
+        camera.audio.listen.forEach((label) => {
+          labels.add(label);
+        });
+      }
+    });
+    return [...labels].sort();
+  }, [config]);
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
@@ -504,7 +522,10 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={getTranslatedLabel(item)}
+              label={getTranslatedLabel(
+                item,
+                allAudioListenLabels.includes(item) ? "audio" : "object",
+              )}
               isChecked={filter.labels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
