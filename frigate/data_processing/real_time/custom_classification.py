@@ -227,6 +227,9 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             self.tensor_output_details[0]["index"]
         )[0]
         probs = res / res.sum(axis=0)
+        logger.debug(
+            f"{self.model_config.name} Ran state classification with probabilities: {probs}"
+        )
         best_id = np.argmax(probs)
         score = round(probs[best_id], 2)
         self.__update_metrics(datetime.datetime.now().timestamp() - now)
@@ -455,6 +458,9 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             self.tensor_output_details[0]["index"]
         )[0]
         probs = res / res.sum(axis=0)
+        logger.debug(
+            f"{self.model_config.name} Ran object classification with probabilities: {probs}"
+        )
         best_id = np.argmax(probs)
         score = round(probs[best_id], 2)
         self.__update_metrics(datetime.datetime.now().timestamp() - now)
