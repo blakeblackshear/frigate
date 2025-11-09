@@ -1119,9 +1119,9 @@ See the [installation docs](../frigate/installation.md#axera) for information on
 
 When configuring the AXEngine detector, you have to specify the model name.
 
-#### yolov5s
+#### yolov9
 
-A yolov5s model is provided in the container at /axmodels and is used by this detector type by default. 
+A yolov9 model is provided in the container at /axmodels and is used by this detector type by default.
 
 Use the model configuration shown below when using the axengine detector with the default axmodel:
 
@@ -1131,7 +1131,7 @@ detectors:  # required
     type: axengine  # required
 
 model:  # required
-  path: yolov5s_320  # required
+  path: yolov9_320  # required
   width: 320  # required
   height: 320  # required
   tensor_format: bgr  # required

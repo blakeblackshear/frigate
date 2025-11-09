@@ -13,7 +13,7 @@ ARG PIP_BREAK_SYSTEM_PACKAGES
 
 # Install axmodels
 RUN mkdir -p /axmodels \
-    && wget https://github.com/ivanshi1108/assets/releases/download/v0.16.2/yolov5s_320.axmodel -O /axmodels/yolov5s_320.axmodel
+    && wget https://github.com/ivanshi1108/assets/releases/download/v0.16.2/yolov9_tiny_u16_npu3_bgr_320x320_nhwc.axmodel -O /axmodels/yolov9_320.axmodel
 
 # Install axpyengine
 RUN wget https://github.com/AXERA-TECH/pyaxengine/releases/download/0.1.3.rc1/axengine-0.1.3-py3-none-any.whl -O /axengine-0.1.3-py3-none-any.whl

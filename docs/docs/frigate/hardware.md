@@ -112,11 +112,11 @@ Frigate supports multiple different detectors that work on different types of ha
 
 ### AXERA
 
-- **AXEngine** Default model is **yolov5s_320**
+- **AXEngine** Default model is **yolov9**
 
 | Name             | AXERA AX650N/AX8850N Inference Time |
 | ---------------- | ----------------------------------- |
-| yolov5s_320      | ~ 1.676 ms                          |
+| yolov9           | ~ 1.012 ms                          |
 
 ### Hailo-8
 
