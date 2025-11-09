@@ -188,6 +188,11 @@
       "brandInformation": "Brand information",
       "brandUrlFormat": "For cameras with the RTSP URL format as: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "connectionSettings": "Connection Settings",
+      "detectionMethod": "Detection Method",
+      "onvifPort": "ONVIF Port",
+      "probeMode": "Probe camera",
+      "manualMode": "Manual selection",
       "testConnection": "Test Connection",
       "testSuccess": "Connection test successful!",
       "testFailed": "Connection test failed. Please check your input and try again.",
@@ -196,6 +201,15 @@
         "probingMetadata": "Probing camera metadata...",
         "fetchingSnapshot": "Fetching camera snapshot..."
       },
+      "probingDevice": "Probing device...",
+      "probeError": "Probe Error",
+      "probeNoSuccess": "Probe unsuccessful",
+      "deviceInfo": "Device Information",
+      "rtspCandidates": "RTSP Candidates",
+      "useCandidate": "Use",
+      "uriCopied": "URI copied",
+      "probeFailed": "Failed to probe camera: {{error}}",
+      "probeButton": "Probe camera",
       "warnings": {
         "noSnapshot": "Unable to fetch a snapshot from the configured stream."
       },
