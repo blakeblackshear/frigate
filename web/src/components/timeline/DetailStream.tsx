@@ -349,7 +349,7 @@ function ReviewGroup({
       ? fetchedEvents.length
       : (review.data.objects ?? []).length;
 
-    return `${objectCount} ${t("detail.trackedObject", { count: objectCount })}`;
+    return `${t("detail.trackedObject", { count: objectCount })}`;
   }, [review, t, fetchedEvents]);
 
   const reviewDuration = useMemo(
