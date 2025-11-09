@@ -144,7 +144,8 @@
     "unselect": "Unselect",
     "export": "Export",
     "deleteNow": "Delete Now",
-    "next": "Next"
+    "next": "Next",
+    "continue": "Continue"
   },
   "menu": {
     "system": "System",
