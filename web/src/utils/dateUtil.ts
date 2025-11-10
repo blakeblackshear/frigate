@@ -244,12 +244,12 @@ export const getDurationFromTimestamps = (
   abbreviated: boolean = false,
 ): string => {
   if (isNaN(start_time)) {
-    return "Invalid start time";
+    return i18n.t("time.invalidStartTime", { ns: "common" });
   }
-  let duration = "In Progress";
+  let duration = i18n.t("time.inProgress", { ns: "common" });
   if (end_time !== null) {
     if (isNaN(end_time)) {
-      return "Invalid end time";
+      return i18n.t("time.invalidEndTime", { ns: "common" });
     }
     const start = fromUnixTime(start_time);
     const end = fromUnixTime(end_time);

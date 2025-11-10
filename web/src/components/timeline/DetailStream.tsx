@@ -513,28 +513,8 @@ function EventList({
 
   const isSelected = selectedObjectIds.includes(event.id);
 
-  const allAudioListenLabels = useMemo<string[]>(() => {
-    if (!config) {
-      return [];
-    }
-
-    const labels = new Set<string>();
-    Object.values(config.cameras).forEach((camera) => {
-      if (camera?.audio?.enabled) {
-        camera.audio.listen.forEach((label) => {
-          labels.add(label);
-        });
-      }
-    });
-    return [...labels].sort();
-  }, [config]);
-
   const label =
-    event.sub_label ||
-    getTranslatedLabel(
-      event.label,
-      allAudioListenLabels.includes(event.label) ? "audio" : "object",
-    );
+    event.sub_label || getTranslatedLabel(event.label, event.data.type);
 
   const handleObjectSelect = (event: Event | undefined) => {
     if (event) {

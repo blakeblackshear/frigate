@@ -72,7 +72,10 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+    },
+    "inProgress": "In progress",
+    "invalidStartTime": "Invalid start time",
+    "invalidEndTime": "Invalid end time"
   },
   "unit": {
     "speed": {

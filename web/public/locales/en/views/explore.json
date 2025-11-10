@@ -35,7 +35,7 @@
     "snapshot": "snapshot",
     "thumbnail": "thumbnail",
     "video": "video",
-    "object_lifecycle": "object lifecycle"
+    "tracking_details": "tracking details"
   },
   "trackingDetails": {
     "title": "Tracking Details",

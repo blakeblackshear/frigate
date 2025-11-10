@@ -81,9 +81,9 @@ export default function InputWithTags({
     revalidateOnFocus: false,
   });
 
-  const allAudioListenLabels = useMemo<string[]>(() => {
+  const allAudioListenLabels = useMemo<Set<string>>(() => {
     if (!config) {
-      return [];
+      return new Set<string>();
     }
 
     const labels = new Set<string>();
@@ -94,8 +94,29 @@ export default function InputWithTags({
         });
       }
     });
-    return [...labels].sort();
+    return labels;
   }, [config]);
+
+  const translatedAudioLabelMap = useMemo<Map<string, string>>(() => {
+    const map = new Map<string, string>();
+    if (!config) return map;
+
+    allAudioListenLabels.forEach((label) => {
+      // getTranslatedLabel likely depends on i18n internally; including `lang`
+      // in deps ensures this map is rebuilt when language changes
+      map.set(label, getTranslatedLabel(label, "audio"));
+    });
+    return map;
+  }, [allAudioListenLabels, config]);
+
+  function resolveLabel(value: string) {
+    const mapped = translatedAudioLabelMap.get(value);
+    if (mapped) return mapped;
+    return getTranslatedLabel(
+      value,
+      allAudioListenLabels.has(value) ? "audio" : "object",
+    );
+  }
 
   const [inputValue, setInputValue] = useState(search || "");
   const [currentFilterType, setCurrentFilterType] = useState<FilterType | null>(
@@ -438,10 +459,7 @@ export default function InputWithTags({
         : t("button.no", { ns: "common" });
     } else if (filterType === "labels") {
       const value = String(filterValues);
-      return getTranslatedLabel(
-        value,
-        allAudioListenLabels.includes(value) ? "audio" : "object",
-      );
+      return resolveLabel(value);
     } else if (filterType === "search_type") {
       return t("filter.searchType." + String(filterValues));
     } else {
@@ -848,12 +866,7 @@ export default function InputWithTags({
                           >
                             {t("filter.label." + filterType)}:{" "}
                             {filterType === "labels" ? (
-                              getTranslatedLabel(
-                                value,
-                                allAudioListenLabels.includes(value)
-                                  ? "audio"
-                                  : "object",
-                              )
+                              resolveLabel(value)
                             ) : filterType === "cameras" ? (
                               <CameraNameLabel camera={value} />
                             ) : filterType === "zones" ? (
