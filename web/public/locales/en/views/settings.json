@@ -154,6 +154,7 @@
     "description": "Follow the steps below to add a new camera to your Frigate installation.",
     "steps": {
       "nameAndConnection": "Name & Connection",
+      "probeOrSnapshot": "Probe or Snapshot",
       "streamConfiguration": "Stream Configuration",
       "validationAndTesting": "Validation & Testing"
     },
@@ -172,7 +173,7 @@
       "testFailed": "Stream test failed: {{error}}"
     },
     "step1": {
-      "description": "Enter your camera details and test the connection.",
+      "description": "Enter your camera details and choose to probe the camera or manually select the brand.",
       "cameraName": "Camera Name",
       "cameraNamePlaceholder": "e.g., front_door or Back Yard Overview",
       "host": "Host/IP Address",
@@ -188,33 +189,63 @@
       "brandInformation": "Brand information",
       "brandUrlFormat": "For cameras with the RTSP URL format as: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://username:password@host:port/path",
-      "testConnection": "Test Connection",
-      "testSuccess": "Connection test successful!",
-      "testFailed": "Connection test failed. Please check your input and try again.",
-      "streamDetails": "Stream Details",
-      "testing": {
-        "probingMetadata": "Probing camera metadata...",
-        "fetchingSnapshot": "Fetching camera snapshot..."
-      },
-      "warnings": {
-        "noSnapshot": "Unable to fetch a snapshot from the configured stream."
-      },
+      "connectionSettings": "Connection Settings",
+      "detectionMethod": "Stream Detection Method",
+      "onvifPort": "ONVIF Port",
+      "probeMode": "Probe camera",
+      "manualMode": "Manual selection",
+      "detectionMethodDescription": "Probe the camera with ONVIF (if supported) to find camera stream URLs, or manually select the camera brand to use pre-defined URLs. To enter a custom RTSP URL, choose the manual method and select \"Other\".",
+      "onvifPortDescription": "For cameras that support ONVIF, this is usually 80 or 8080.",
       "errors": {
         "brandOrCustomUrlRequired": "Either select a camera brand with host/IP or choose 'Other' with a custom URL",
         "nameRequired": "Camera name is required",
         "nameLength": "Camera name must be 64 characters or less",
         "invalidCharacters": "Camera name contains invalid characters",
         "nameExists": "Camera name already exists",
-        "customUrlRtspRequired": "Custom URLs must begin with \"rtsp://\". Manual configuration is required for non-RTSP camera streams.",
-        "brands": {
-          "reolink-rtsp": "Reolink RTSP is not recommended. Enable HTTP in the camera's firmware settings and restart the wizard."
-        }
-      },
-      "docs": {
-        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+        "customUrlRtspRequired": "Custom URLs must begin with \"rtsp://\". Manual configuration is required for non-RTSP camera streams."
       }
     },
     "step2": {
+      "description": "Probe the camera for available streams or configure manual settings based on your selected detection method.",
+      "testSuccess": "Connection test successful!",
+      "testFailed": "Connection test failed. Please check your input and try again.",
+      "testFailedTitle": "Test Failed",
+      "streamDetails": "Stream Details",
+      "probing": "Probing camera...",
+      "retry": "Retry",
+      "testing": {
+        "probingMetadata": "Probing camera metadata...",
+        "fetchingSnapshot": "Fetching camera snapshot..."
+      },
+      "probeFailed": "Failed to probe camera: {{error}}",
+      "probingDevice": "Probing device...",
+      "probeSuccessful": "Probe successful",
+      "probeError": "Probe Error",
+      "probeNoSuccess": "Probe unsuccessful",
+      "deviceInfo": "Device Information",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "firmware": "Firmware",
+      "profiles": "Profiles",
+      "ptzSupport": "PTZ Support",
+      "autotrackingSupport": "Autotracking Support",
+      "presets": "Presets",
+      "rtspCandidates": "RTSP Candidates",
+      "rtspCandidatesDescription": "The following RTSP URLs were found from the camera probe. Test the connection to view stream metadata.",
+      "noRtspCandidates": "No RTSP URLs were found from the camera. Your credentials may be incorrect, or the camera may not support ONVIF or the method used to retrieve RTSP URLs. Go back and enter the RTSP URL manually.",
+      "candidateStreamTitle": "Candidate {{number}}",
+      "useCandidate": "Use",
+      "uriCopy": "Copy",
+      "uriCopied": "URI copied to clipboard",
+      "testConnection": "Test Connection",
+      "toggleUriView": "Click to toggle full URI view",
+      "connected": "Connected",
+      "notConnected": "Not Connected",
+      "errors": {
+        "hostRequired": "Host/IP address is required"
+      }
+    },
+    "step3": {
       "description": "Configure stream roles and add additional streams for your camera.",
       "streamsTitle": "Camera Streams",
       "addStream": "Add Stream",
@@ -222,6 +253,9 @@
       "streamTitle": "Stream {{number}}",
       "streamUrl": "Stream URL",
       "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "selectStream": "Select a stream",
+      "searchCandidates": "Search candidates...",
+      "noStreamFound": "No stream found",
       "url": "URL",
       "resolution": "Resolution",
       "selectResolution": "Select resolution",
@@ -253,7 +287,7 @@
         "description": "Use go2rtc restreaming to reduce connections to your camera."
       }
     },
-    "step3": {
+    "step4": {
       "description": "Final validation and analysis before saving your new camera. Connect each stream before saving.",
       "validationTitle": "Stream Validation",
       "connectAllStreams": "Connect All Streams",
@@ -289,6 +323,9 @@
         "audioCodecRecordError": "The AAC audio codec is required to support audio in recordings.",
         "audioCodecRequired": "An audio stream is required to support audio detection.",
         "restreamingWarning": "Reducing connections to the camera for the record stream may increase CPU usage slightly.",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP is not recommended. Enable HTTP in the camera's firmware settings and restart the wizard."
+        },
         "dahua": {
           "substreamWarning": "Substream 1 is locked to a low resolution. Many Dahua / Amcrest / EmpireTech cameras support additional substreams that need to be enabled in the camera's settings. It is recommended to check and utilize those streams if available."
         },
