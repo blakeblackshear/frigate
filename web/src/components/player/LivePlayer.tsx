@@ -331,7 +331,10 @@ export default function LivePlayer({
     >
       {cameraEnabled &&
         ((showStillWithoutActivity && !liveReady) || liveReady) && (
-          <ImageShadowOverlay />
+          <ImageShadowOverlay
+            upperClassName="md:rounded-2xl"
+            lowerClassName="md:rounded-2xl"
+          />
         )}
       {player}
       {cameraEnabled &&
