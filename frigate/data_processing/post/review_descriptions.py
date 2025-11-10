@@ -130,7 +130,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
             if image_source == ImageSourceEnum.recordings:
                 duration = final_data["end_time"] - final_data["start_time"]
-                buffer_extension = duration * RECORDING_BUFFER_EXTENSION_PERCENT
+                buffer_extension = min(
+                    10, max(2, duration * RECORDING_BUFFER_EXTENSION_PERCENT)
+                )
 
                 thumbs = self.get_recording_frames(
                     camera,
