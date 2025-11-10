@@ -59,7 +59,11 @@ import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import TrainFilterDialog from "@/components/overlay/dialog/TrainFilterDialog";
 import useApiFilter from "@/hooks/use-api-filter";
-import { ClassificationItemData, TrainFilter } from "@/types/classification";
+import {
+  ClassificationDatasetResponse,
+  ClassificationItemData,
+  TrainFilter,
+} from "@/types/classification";
 import {
   ClassificationCard,
   GroupedClassificationCard,
@@ -118,17 +122,10 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   const { data: trainImages, mutate: refreshTrain } = useSWR<string[]>(
     `classification/${model.name}/train`,
   );
-  const { data: datasetResponse, mutate: refreshDataset } = useSWR<{
-    categories: { [id: string]: string[] };
-    training_metadata: {
-      has_trained: boolean;
-      last_training_date: string | null;
-      last_training_image_count: number;
-      current_image_count: number;
-      new_images_count: number;
-      dataset_changed: boolean;
-    } | null;
-  }>(`classification/${model.name}/dataset`);
+  const { data: datasetResponse, mutate: refreshDataset } =
+    useSWR<ClassificationDatasetResponse>(
+      `classification/${model.name}/dataset`,
+    );
 
   const dataset = datasetResponse?.categories || {};
   const trainingMetadata = datasetResponse?.training_metadata;

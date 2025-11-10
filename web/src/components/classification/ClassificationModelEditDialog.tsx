@@ -28,6 +28,7 @@ import {
   CustomClassificationModelConfig,
   FrigateConfig,
 } from "@/types/frigateConfig";
+import { ClassificationDatasetResponse } from "@/types/classification";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -140,16 +141,19 @@ export default function ClassificationModelEditDialog({
   });
 
   // Fetch dataset to get current classes for state models
-  const { data: dataset } = useSWR<{
-    [id: string]: string[];
-  }>(isStateModel ? `classification/${model.name}/dataset` : null, {
-    revalidateOnFocus: false,
-  });
+  const { data: dataset } = useSWR<ClassificationDatasetResponse>(
+    isStateModel ? `classification/${model.name}/dataset` : null,
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   // Update form with classes from dataset when loaded
   useEffect(() => {
-    if (isStateModel && dataset) {
-      const classes = Object.keys(dataset).filter((key) => key !== "none");
+    if (isStateModel && dataset?.categories) {
+      const classes = Object.keys(dataset.categories).filter(
+        (key) => key !== "none",
+      );
       if (classes.length > 0) {
         (form as ReturnType<typeof useForm<StateFormData>>).setValue(
           "classes",

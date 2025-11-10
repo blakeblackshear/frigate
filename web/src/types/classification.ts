@@ -20,3 +20,17 @@ export type ClassificationThreshold = {
   recognition: number;
   unknown: number;
 };
+
+export type ClassificationDatasetResponse = {
+  categories: {
+    [id: string]: string[];
+  };
+  training_metadata: {
+    has_trained: boolean;
+    last_training_date: string | null;
+    last_training_image_count: number;
+    current_image_count: number;
+    new_images_count: number;
+    dataset_changed: boolean;
+  } | null;
+};

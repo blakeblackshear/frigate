@@ -11,6 +11,7 @@ import {
   CustomClassificationModelConfig,
   FrigateConfig,
 } from "@/types/frigateConfig";
+import { ClassificationDatasetResponse } from "@/types/classification";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
@@ -209,9 +210,10 @@ type ModelCardProps = {
 function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
   const { t } = useTranslation(["views/classificationModel"]);
 
-  const { data: dataset } = useSWR<{
-    [id: string]: string[];
-  }>(`classification/${config.name}/dataset`, { revalidateOnFocus: false });
+  const { data: dataset } = useSWR<ClassificationDatasetResponse>(
+    `classification/${config.name}/dataset`,
+    { revalidateOnFocus: false },
+  );
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -260,20 +262,25 @@ function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
   }, []);
 
   const coverImage = useMemo(() => {
-    if (!dataset) {
+    if (!dataset || !dataset.categories) {
       return undefined;
     }
 
-    const keys = Object.keys(dataset).filter((key) => key != "none");
-    const selectedKey = keys[0];
+    const keys = Object.keys(dataset.categories).filter((key) => key != "none");
+    if (keys.length === 0) {
+      return undefined;
+    }
 
-    if (!dataset[selectedKey]) {
+    const selectedKey = keys[0];
+    const images = dataset.categories[selectedKey];
+
+    if (!images || images.length === 0) {
       return undefined;
     }
 
     return {
       name: selectedKey,
-      img: dataset[selectedKey][0],
+      img: images[0],
     };
   }, [dataset]);
 
@@ -317,11 +324,19 @@ function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
         )}
         onClick={onClick}
       >
-        <img
-          className="size-full"
-          src={`${baseUrl}clips/${config.name}/dataset/${coverImage?.name}/${coverImage?.img}`}
-        />
-        <ImageShadowOverlay lowerClassName="h-[30%] z-0" />
+        {coverImage ? (
+          <>
+            <img
+              className="size-full"
+              src={`${baseUrl}clips/${config.name}/dataset/${coverImage.name}/${coverImage.img}`}
+            />
+            <ImageShadowOverlay lowerClassName="h-[30%] z-0" />
+          </>
+        ) : (
+          <div className="flex size-full items-center justify-center bg-background_alt">
+            <MdModelTraining className="size-16 text-muted-foreground" />
+          </div>
+        )}
         <div className="absolute bottom-2 left-3 text-lg text-white smart-capitalize">
           {config.name}
         </div>
