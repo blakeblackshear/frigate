@@ -953,31 +953,29 @@ async def generate_object_examples(request: Request, body: GenerateObjectExample
     dependencies=[Depends(require_role(["admin"]))],
     summary="Delete a classification model",
     description="""Deletes a specific classification model and all its associated data.
-    The name must exist in the classification models. Returns a success message or an error if the name is invalid.""",
+    Works even if the model is not in the config (e.g., partially created during wizard).
+    Returns a success message.""",
 )
 def delete_classification_model(request: Request, name: str):
-    config: FrigateConfig = request.app.frigate_config
-
-    if name not in config.classification.custom:
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": f"{name} is not a known classification model.",
-                }
-            ),
-            status_code=404,
-        )
+    sanitized_name = sanitize_filename(name)
 
     # Delete the classification model's data directory in clips
-    data_dir = os.path.join(CLIPS_DIR, sanitize_filename(name))
+    data_dir = os.path.join(CLIPS_DIR, sanitized_name)
     if os.path.exists(data_dir):
-        shutil.rmtree(data_dir)
+        try:
+            shutil.rmtree(data_dir)
+            logger.info(f"Deleted classification data directory for {name}")
+        except Exception as e:
+            logger.debug(f"Failed to delete data directory for {name}: {e}")
 
     # Delete the classification model's files in model_cache
-    model_dir = os.path.join(MODEL_CACHE_DIR, sanitize_filename(name))
+    model_dir = os.path.join(MODEL_CACHE_DIR, sanitized_name)
     if os.path.exists(model_dir):
-        shutil.rmtree(model_dir)
+        try:
+            shutil.rmtree(model_dir)
+            logger.info(f"Deleted classification model directory for {name}")
+        except Exception as e:
+            logger.debug(f"Failed to delete model directory for {name}: {e}")
 
     return JSONResponse(
         content=(
