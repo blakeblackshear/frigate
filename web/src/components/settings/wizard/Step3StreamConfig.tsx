@@ -14,6 +14,8 @@ import {
   StreamRole,
   TestResult,
   FfprobeStream,
+  FfprobeData,
+  FfprobeResponse,
   CandidateTestMap,
 } from "@/types/cameraWizard";
 import { Label } from "../../ui/label";
@@ -168,7 +170,7 @@ export default function Step3StreamConfig({
   );
 
   const testStream = useCallback(
-    (stream: StreamConfig) => {
+    async (stream: StreamConfig) => {
       if (!stream.url.trim()) {
         toast.error(t("cameraWizard.commonErrors.noUrl"));
         return;
@@ -176,102 +178,124 @@ export default function Step3StreamConfig({
 
       setTestingStreams((prev) => new Set(prev).add(stream.id));
 
-      axios
-        .get("ffprobe", {
+      try {
+        const response = await axios.get("ffprobe", {
           params: { paths: stream.url, detailed: true },
           timeout: 10000,
-        })
-        .then((response) => {
-          if (response.data?.[0]?.return_code === 0) {
-            const probeData = response.data[0];
-            const streams = probeData.stdout.streams || [];
+        });
 
-            const videoStream = streams.find(
-              (s: FfprobeStream) =>
-                s.codec_type === "video" ||
-                s.codec_name?.includes("h264") ||
-                s.codec_name?.includes("h265"),
-            );
+        let probeData: FfprobeResponse | null = null;
+        if (
+          response.data &&
+          response.data.length > 0 &&
+          response.data[0].return_code === 0
+        ) {
+          probeData = response.data[0];
+        }
 
-            const audioStream = streams.find(
-              (s: FfprobeStream) =>
-                s.codec_type === "audio" ||
-                s.codec_name?.includes("aac") ||
-                s.codec_name?.includes("mp3"),
-            );
-
-            const resolution = videoStream
-              ? `${videoStream.width}x${videoStream.height}`
-              : undefined;
-
-            const fps = videoStream?.avg_frame_rate
-              ? parseFloat(videoStream.avg_frame_rate.split("/")[0]) /
-                parseFloat(videoStream.avg_frame_rate.split("/")[1])
-              : undefined;
-
-            const testResult: TestResult = {
-              success: true,
-              resolution,
-              videoCodec: videoStream?.codec_name,
-              audioCodec: audioStream?.codec_name,
-              fps: fps && !isNaN(fps) ? fps : undefined,
-            };
-
-            // Update the stream and also persist the candidate test result
-            updateStream(stream.id, { testResult, userTested: true });
-            onUpdate({
-              candidateTests: {
-                ...(wizardData.candidateTests || {}),
-                [stream.url]: testResult,
-              } as CandidateTestMap,
-            });
-            toast.success(t("cameraWizard.step3.testSuccess"));
-          } else {
-            const error = response.data?.[0]?.stderr || "Unknown error";
-            const failResult: TestResult = { success: false, error };
-            updateStream(stream.id, {
-              testResult: failResult,
-              userTested: true,
-            });
-            onUpdate({
-              candidateTests: {
-                ...(wizardData.candidateTests || {}),
-                [stream.url]: failResult,
-              } as CandidateTestMap,
-            });
-            toast.error(t("cameraWizard.commonErrors.testFailed", { error }));
-          }
-        })
-        .catch((error) => {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.detail ||
-            "Connection failed";
-          const catchResult: TestResult = {
-            success: false,
-            error: errorMessage,
-          };
-          updateStream(stream.id, {
-            testResult: catchResult,
-            userTested: true,
-          });
+        if (!probeData) {
+          const error =
+            Array.isArray(response.data?.[0]?.stderr) &&
+            response.data[0].stderr.length > 0
+              ? response.data[0].stderr.join("\n")
+              : "Unable to probe stream";
+          const failResult: TestResult = { success: false, error };
+          updateStream(stream.id, { testResult: failResult, userTested: true });
           onUpdate({
             candidateTests: {
               ...(wizardData.candidateTests || {}),
-              [stream.url]: catchResult,
+              [stream.url]: failResult,
             } as CandidateTestMap,
           });
-          toast.error(
-            t("cameraWizard.commonErrors.testFailed", { error: errorMessage }),
-          );
-        })
-        .finally(() => {
-          setTestingStreams((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(stream.id);
-            return newSet;
-          });
+          toast.error(t("cameraWizard.commonErrors.testFailed", { error }));
+          return;
+        }
+
+        let ffprobeData: FfprobeData;
+        if (typeof probeData.stdout === "string") {
+          try {
+            ffprobeData = JSON.parse(probeData.stdout as string) as FfprobeData;
+          } catch {
+            ffprobeData = { streams: [] } as FfprobeData;
+          }
+        } else {
+          ffprobeData = probeData.stdout as FfprobeData;
+        }
+
+        const streamsArr = ffprobeData.streams || [];
+
+        const videoStream = streamsArr.find(
+          (s: FfprobeStream) =>
+            s.codec_type === "video" ||
+            s.codec_name?.includes("h264") ||
+            s.codec_name?.includes("hevc"),
+        );
+
+        const audioStream = streamsArr.find(
+          (s: FfprobeStream) =>
+            s.codec_type === "audio" ||
+            s.codec_name?.includes("aac") ||
+            s.codec_name?.includes("mp3") ||
+            s.codec_name?.includes("pcm_mulaw") ||
+            s.codec_name?.includes("pcm_alaw"),
+        );
+
+        const resolution = videoStream
+          ? `${videoStream.width}x${videoStream.height}`
+          : undefined;
+
+        const fps = videoStream?.avg_frame_rate
+          ? parseFloat(videoStream.avg_frame_rate.split("/")[0]) /
+            parseFloat(videoStream.avg_frame_rate.split("/")[1])
+          : undefined;
+
+        const testResult: TestResult = {
+          success: true,
+          resolution,
+          videoCodec: videoStream?.codec_name,
+          audioCodec: audioStream?.codec_name,
+          fps: fps && !isNaN(fps) ? fps : undefined,
+        };
+
+        updateStream(stream.id, { testResult, userTested: true });
+        onUpdate({
+          candidateTests: {
+            ...(wizardData.candidateTests || {}),
+            [stream.url]: testResult,
+          } as CandidateTestMap,
         });
+        toast.success(t("cameraWizard.step3.testSuccess"));
+      } catch (error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string; detail?: string } };
+          message?: string;
+        };
+        const errorMessage =
+          axiosError.response?.data?.message ||
+          axiosError.response?.data?.detail ||
+          axiosError.message ||
+          "Connection failed";
+        const catchResult: TestResult = {
+          success: false,
+          error: errorMessage,
+        };
+        updateStream(stream.id, { testResult: catchResult, userTested: true });
+        onUpdate({
+          candidateTests: {
+            ...(wizardData.candidateTests || {}),
+            [stream.url]: catchResult,
+          } as CandidateTestMap,
+        });
+        toast.error(
+          t("cameraWizard.commonErrors.testFailed", { error: errorMessage }),
+        );
+      } finally {
+        setTestingStreams((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(stream.id);
+          return newSet;
+        });
+      }
     },
     [updateStream, t, onUpdate, wizardData.candidateTests],
   );
