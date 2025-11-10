@@ -265,10 +265,11 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
               );
             }
 
+            // Always refresh dataset to update the categories list
+            refreshDataset();
+
             if (pageToggle == "train") {
               refreshTrain();
-            } else {
-              refreshDataset();
             }
           }
         })
@@ -572,27 +573,44 @@ function LibrarySelector({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("deleteCategory.title")}</DialogTitle>
+            <DialogTitle>
+              {Object.keys(dataset).length <= 2
+                ? t("deleteCategory.minClassesTitle")
+                : t("deleteCategory.title")}
+            </DialogTitle>
             <DialogDescription>
-              {t("deleteCategory.desc", { name: confirmDelete })}
+              {Object.keys(dataset).length <= 2
+                ? t("deleteCategory.minClassesDesc")
+                : t("deleteCategory.desc", { name: confirmDelete })}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setConfirmDelete(null)}>
-              {t("button.cancel", { ns: "common" })}
-            </Button>
-            <Button
-              variant="destructive"
-              className="text-white"
-              onClick={() => {
-                if (confirmDelete) {
-                  handleDeleteCategory(confirmDelete);
-                  setConfirmDelete(null);
-                }
-              }}
-            >
-              {t("button.delete", { ns: "common" })}
-            </Button>
+            {Object.keys(dataset).length <= 2 ? (
+              <Button variant="outline" onClick={() => setConfirmDelete(null)}>
+                {t("button.ok", { ns: "common" })}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setConfirmDelete(null)}
+                >
+                  {t("button.cancel", { ns: "common" })}
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="text-white"
+                  onClick={() => {
+                    if (confirmDelete) {
+                      handleDeleteCategory(confirmDelete);
+                      setConfirmDelete(null);
+                    }
+                  }}
+                >
+                  {t("button.delete", { ns: "common" })}
+                </Button>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
