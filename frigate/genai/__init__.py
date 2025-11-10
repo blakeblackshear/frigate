@@ -51,8 +51,7 @@ class GenAIClient:
         def get_concern_prompt() -> str:
             if concerns:
                 concern_list = "\n    - ".join(concerns)
-                return f"""
-- `other_concerns` (list of strings): Include a list of any of the following concerns that are occurring:
+                return f"""- `other_concerns` (list of strings): Include a list of any of the following concerns that are occurring:
     - {concern_list}"""
             else:
                 return ""
@@ -70,7 +69,7 @@ class GenAIClient:
                 return "\n- (No objects detected)"
 
         context_prompt = f"""
-Your task is to analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"].replace("_", " ")} security camera.
+Your task is to analyze the sequence of images ({len(thumbnails)} total) taken in chronological order from the perspective of the {review_data["camera"]} security camera.
 
 ## Normal Activity Patterns for This Property
 
@@ -110,7 +109,7 @@ Your response MUST be a flat JSON object with:
 
 - Frame 1 = earliest, Frame {len(thumbnails)} = latest
 - Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
-- Zones involved: {", ".join(z.replace("_", " ").title() for z in review_data["zones"]) or "None"}
+- Zones involved: {", ".join(review_data["zones"]) if review_data["zones"] else "None"}
 
 ## Objects in Scene
 

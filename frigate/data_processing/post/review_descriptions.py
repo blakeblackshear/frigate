@@ -16,6 +16,7 @@ from peewee import DoesNotExist
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.config.camera import CameraConfig
 from frigate.config.camera.review import GenAIReviewConfig, ImageSourceEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
 from frigate.data_processing.types import PostProcessDataEnum
@@ -193,7 +194,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     self.requestor,
                     self.genai_client,
                     self.review_desc_speed,
-                    camera,
+                    camera_config,
                     final_data,
                     thumbs,
                     camera_config.review.genai,
@@ -422,7 +423,7 @@ def run_analysis(
     requestor: InterProcessRequestor,
     genai_client: GenAIClient,
     review_inference_speed: InferenceSpeed,
-    camera: str,
+    camera_config: CameraConfig,
     final_data: dict[str, str],
     thumbs: list[bytes],
     genai_config: GenAIReviewConfig,
@@ -430,10 +431,19 @@ def run_analysis(
     attribute_labels: list[str],
 ) -> None:
     start = datetime.datetime.now().timestamp()
+
+    # Format zone names using zone config friendly names if available
+    formatted_zones = []
+    for zone_name in final_data["data"]["zones"]:
+        if zone_name in camera_config.zones:
+            formatted_zones.append(
+                camera_config.zones[zone_name].get_formatted_name(zone_name)
+            )
+
     analytics_data = {
         "id": final_data["id"],
-        "camera": camera,
-        "zones": final_data["data"]["zones"],
+        "camera": camera_config.get_formatted_name(),
+        "zones": formatted_zones,
         "start": datetime.datetime.fromtimestamp(final_data["start_time"]).strftime(
             "%A, %I:%M %p"
         ),
