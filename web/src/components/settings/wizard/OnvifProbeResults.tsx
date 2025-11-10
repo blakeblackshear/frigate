@@ -1,8 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+// Input removed: URL shown as text
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { FaExclamationCircle, FaCopy, FaCheck } from "react-icons/fa";
+import { FaCopy, FaCheck } from "react-icons/fa";
+import { LuX } from "react-icons/lu";
+import { CiCircleAlert } from "react-icons/ci";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useState } from "react";
 import { toast } from "sonner";
 import type {
@@ -11,6 +15,8 @@ import type {
   TestResult,
   CandidateTestMap,
 } from "@/types/cameraWizard";
+import { FaCircleCheck } from "react-icons/fa6";
+import { cn } from "@/lib/utils";
 
 type OnvifProbeResultsProps = {
   isLoading: boolean;
@@ -61,15 +67,11 @@ export default function OnvifProbeResults({
   if (isError) {
     return (
       <div className="space-y-4">
-        <div className="flex items-start gap-3 rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-          <FaExclamationCircle className="mt-1 size-5 flex-shrink-0 text-destructive" />
-          <div className="space-y-1">
-            <h3 className="font-medium text-destructive">
-              {t("cameraWizard.step1.probeError")}
-            </h3>
-            {error && <p className="text-sm text-muted-foreground">{error}</p>}
-          </div>
-        </div>
+        <Alert variant="destructive">
+          <CiCircleAlert className="size-5" />
+          <AlertTitle>{t("cameraWizard.step1.probeError")}</AlertTitle>
+          {error && <AlertDescription>{error}</AlertDescription>}
+        </Alert>
         <Button onClick={onRetry} variant="outline" className="w-full">
           {t("button.retry", { ns: "common" })}
         </Button>
@@ -80,19 +82,13 @@ export default function OnvifProbeResults({
   if (!probeResult?.success) {
     return (
       <div className="space-y-4">
-        <div className="flex items-start gap-3 rounded-lg border border-amber-500/50 bg-amber-500/10 p-4">
-          <FaExclamationCircle className="mt-1 size-5 flex-shrink-0 text-amber-600" />
-          <div className="space-y-1">
-            <h3 className="font-medium text-amber-900">
-              {t("cameraWizard.step1.probeNoSuccess")}
-            </h3>
-            {probeResult?.message && (
-              <p className="text-sm text-muted-foreground">
-                {probeResult.message}
-              </p>
-            )}
-          </div>
-        </div>
+        <Alert variant="destructive">
+          <CiCircleAlert className="size-5" />
+          <AlertTitle>{t("cameraWizard.step1.probeNoSuccess")}</AlertTitle>
+          {probeResult?.message && (
+            <AlertDescription>{probeResult.message}</AlertDescription>
+          )}
+        </Alert>
         <Button onClick={onRetry} variant="outline" className="w-full">
           {t("button.retry", { ns: "common" })}
         </Button>
@@ -104,6 +100,13 @@ export default function OnvifProbeResults({
 
   return (
     <div className="space-y-4">
+      {/* Probe success header (green check + text) */}
+      {probeResult?.success && (
+        <div className="mb-3 flex flex-row items-center gap-2 text-sm text-success">
+          <FaCircleCheck className="size-4" />
+          <span>{t("cameraWizard.step1.probeSuccessful")}</span>
+        </div>
+      )}
       <Card>
         <CardTitle className="border-b p-4 text-sm">
           {t("cameraWizard.step1.deviceInfo")}
@@ -111,49 +114,73 @@ export default function OnvifProbeResults({
         <CardContent className="space-y-2 p-4 text-sm">
           {probeResult.manufacturer && (
             <div>
-              <span className="text-muted-foreground">Manufacturer:</span>{" "}
-              <span className="font-medium">{probeResult.manufacturer}</span>
+              <span className="text-muted-foreground">
+                {t("cameraWizard.step1.manufacturer")}:
+              </span>{" "}
+              <span className="text-primary-variant">
+                {probeResult.manufacturer}
+              </span>
             </div>
           )}
           {probeResult.model && (
             <div>
-              <span className="text-muted-foreground">Model:</span>{" "}
-              <span className="font-medium">{probeResult.model}</span>
+              <span className="text-muted-foreground">
+                {t("cameraWizard.step1.model")}:
+              </span>{" "}
+              <span className="text-primary-variant">{probeResult.model}</span>
             </div>
           )}
           {probeResult.firmware_version && (
             <div>
-              <span className="text-muted-foreground">Firmware:</span>{" "}
-              <span className="font-medium">
+              <span className="text-muted-foreground">
+                {t("cameraWizard.step1.firmware")}:
+              </span>{" "}
+              <span className="text-primary-variant">
                 {probeResult.firmware_version}
               </span>
             </div>
           )}
           {probeResult.profiles_count !== undefined && (
             <div>
-              <span className="text-muted-foreground">Profiles:</span>{" "}
-              <span className="font-medium">{probeResult.profiles_count}</span>
+              <span className="text-muted-foreground">
+                {t("cameraWizard.step1.profiles")}:
+              </span>{" "}
+              <span className="text-primary-variant">
+                {probeResult.profiles_count}
+              </span>
             </div>
           )}
           {probeResult.ptz_supported !== undefined && (
             <div>
-              <span className="text-muted-foreground">PTZ Support:</span>{" "}
-              <span className="font-medium">
-                {probeResult.ptz_supported ? "Yes" : "No"}
+              <span className="text-muted-foreground">
+                {t("cameraWizard.step1.ptzSupport")}:
+              </span>{" "}
+              <span className="text-primary-variant">
+                {probeResult.ptz_supported
+                  ? t("yes", { ns: "common" })
+                  : t("no", { ns: "common" })}
               </span>
             </div>
           )}
           {probeResult.ptz_supported && probeResult.autotrack_supported && (
             <div>
-              <span className="text-muted-foreground">Autotrack Support:</span>{" "}
-              <span className="font-medium">Yes</span>
+              <span className="text-muted-foreground">
+                {t("cameraWizard.step1.autotrackingSupport")}:
+              </span>{" "}
+              <span className="text-primary-variant">
+                {t("yes", { ns: "common" })}
+              </span>
             </div>
           )}
           {probeResult.ptz_supported &&
             probeResult.presets_count !== undefined && (
               <div>
-                <span className="text-muted-foreground">Presets:</span>{" "}
-                <span className="font-medium">{probeResult.presets_count}</span>
+                <span className="text-muted-foreground">
+                  {t("cameraWizard.step1.presets")}:
+                </span>{" "}
+                <span className="text-primary-variant">
+                  {probeResult.presets_count}
+                </span>
               </div>
             )}
         </CardContent>
@@ -161,9 +188,7 @@ export default function OnvifProbeResults({
 
       {rtspCandidates.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-sm font-medium">
-            {t("cameraWizard.step1.rtspCandidates")}
-          </h3>
+          <h3 className="text-sm">{t("cameraWizard.step1.rtspCandidates")}</h3>
 
           <div className="space-y-2">
             {rtspCandidates.map((candidate, idx) => {
@@ -174,12 +199,13 @@ export default function OnvifProbeResults({
               return (
                 <CandidateItem
                   key={idx}
+                  index={idx}
                   candidate={candidate}
                   copiedUri={copiedUri}
                   onCopy={() => handleCopyUri(candidate.uri)}
                   onUse={() => onSelectCandidate(candidate.uri)}
                   isSelected={isSelected}
-                  onTest={() => testCandidate && testCandidate(candidate.uri)}
+                  testCandidate={testCandidate}
                   candidateTest={candidateTest}
                   isTesting={isTesting}
                 />
@@ -194,129 +220,142 @@ export default function OnvifProbeResults({
 
 type CandidateItemProps = {
   candidate: OnvifRtspCandidate;
-  isTested?: boolean;
+  index?: number;
+  // isTested?: boolean; (unused)
   copiedUri: string | null;
   onCopy: () => void;
   onUse: () => void;
   isSelected?: boolean;
-  onTest?: () => void;
+  // onTest?: () => void; (unused)
+  testCandidate?: (uri: string) => void;
   candidateTest?: TestResult | { success: false; error: string };
   isTesting?: boolean;
 };
 
 function CandidateItem({
+  index,
   candidate,
-  isTested,
   copiedUri,
   onCopy,
   onUse,
   isSelected,
-  onTest,
+  testCandidate,
   candidateTest,
   isTesting,
 }: CandidateItemProps) {
   const { t } = useTranslation(["views/settings"]);
   const [showFull, setShowFull] = useState(false);
 
-  // Mask credentials for display
   const maskUri = (uri: string) => {
     const match = uri.match(/rtsp:\/\/([^:]+):([^@]+)@(.+)/);
-    if (match) {
-      return `rtsp://${match[1]}:••••@${match[3]}`;
-    }
+    if (match) return `rtsp://${match[1]}:••••@${match[3]}`;
     return uri;
   };
 
   return (
     <div
-      className={`rounded-lg border p-3 ${
-        isSelected ? "border-selected bg-selected/10" : "border-input bg-card"
-      }`}
+      className={cn(
+        "rounded-lg bg-card",
+        isSelected &&
+          "outline outline-[3px] -outline-offset-[2.8px] outline-selected duration-200",
+      )}
     >
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              {isTested !== undefined && (
-                <span
-                  className={`text-xs font-medium ${
-                    isTested ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {isTested ? "✓ OK" : "✗ Failed"}
-                </span>
-              )}
-            </div>
-            <div className="mt-1 flex items-center gap-2">
-              <p
-                className="cursor-pointer break-all text-xs text-muted-foreground hover:underline"
-                onClick={() => setShowFull(!showFull)}
-                title="Click to toggle masked/full view"
-              >
-                {showFull ? candidate.uri : maskUri(candidate.uri)}
-              </p>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={onCopy}
-                className="h-7 w-7 p-0"
-                title="Copy URI"
-              >
-                {copiedUri === candidate.uri ? (
-                  <FaCheck className="size-3" />
-                ) : (
-                  <FaCopy className="size-3" />
-                )}
-              </Button>
-            </div>
+      <div className="flex flex-col space-y-4 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="font-medium">
+              {t("cameraWizard.step1.candidateStreamTitle", {
+                number: (index ?? 0) + 1,
+              })}
+            </h4>
+            {candidateTest?.success && (
+              <div className="mt-1 text-sm text-muted-foreground">
+                {[
+                  candidateTest.resolution,
+                  candidateTest.fps
+                    ? `${candidateTest.fps} ${t(
+                        "cameraWizard.testResultLabels.fps",
+                      )}`
+                    : null,
+                  candidateTest.videoCodec,
+                  candidateTest.audioCodec,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </div>
+            )}
           </div>
+
           <div className="flex flex-shrink-0 items-center gap-2">
+            {candidateTest?.success && (
+              <div className="flex items-center gap-2 text-sm">
+                <FaCircleCheck className="size-4 text-success" />
+                <span className="text-success">
+                  {t("cameraWizard.step2.connected")}
+                </span>
+              </div>
+            )}
+
+            {candidateTest && !candidateTest.success && (
+              <div className="flex items-center gap-2 text-sm">
+                <LuX className="size-4 text-danger" />
+                <span className="text-danger">
+                  {t("cameraWizard.step2.notConnected")}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-1 flex items-start gap-2">
+          <p
+            className="flex-1 cursor-pointer break-all text-sm text-primary-variant hover:underline"
+            onClick={() => setShowFull((s) => !s)}
+            title={t("cameraWizard.step1.toggleUriView")}
+          >
+            {showFull ? candidate.uri : maskUri(candidate.uri)}
+          </p>
+
+          <div className="flex items-center gap-2">
             <Button
               size="sm"
-              onClick={onTest}
+              variant="ghost"
+              onClick={onCopy}
+              className="mr-4 size-8 p-0"
+              title={t("cameraWizard.step1.uriCopy")}
+            >
+              {copiedUri === candidate.uri ? (
+                <FaCheck className="size-3" />
+              ) : (
+                <FaCopy className="size-3" />
+              )}
+            </Button>
+
+            <Button
+              size="sm"
               variant="outline"
-              className="h-7 px-3 text-xs"
+              onClick={() => testCandidate?.(candidate.uri)}
+              className="h-8 px-3 text-sm"
             >
               {isTesting ? (
                 <ActivityIndicator className="size-3" />
               ) : (
-                t("cameraWizard.step1.test")
+                t("cameraWizard.step1.testConnection")
               )}
-            </Button>
-            <Button
-              size="sm"
-              onClick={onUse}
-              variant="default"
-              className="h-7 px-3 text-xs"
-            >
-              {t("cameraWizard.step1.useCandidate")}
             </Button>
           </div>
         </div>
-        {candidateTest && candidateTest.success && (
-          <div className="text-xs text-muted-foreground">
-            {candidateTest.resolution && (
-              <span className="mr-2">
-                {`${t("cameraWizard.testResultLabels.resolution")} ${candidateTest.resolution}`}
-              </span>
-            )}
-            {candidateTest.fps && (
-              <span className="mr-2">
-                {t("cameraWizard.testResultLabels.fps")} {candidateTest.fps}
-              </span>
-            )}
-            {candidateTest.videoCodec && (
-              <span className="mr-2">
-                {`${t("cameraWizard.testResultLabels.video")} ${candidateTest.videoCodec}`}
-              </span>
-            )}
-            {candidateTest.audioCodec && (
-              <span className="mr-2">
-                {`${t("cameraWizard.testResultLabels.audio")} ${candidateTest.audioCodec}`}
-              </span>
-            )}
-          </div>
-        )}
+
+        <div className="mt-3 flex flex-row justify-end">
+          <Button
+            size="sm"
+            onClick={onUse}
+            variant="select"
+            className="h-8 px-3 text-sm"
+          >
+            {t("cameraWizard.step1.useCandidate")}
+          </Button>
+        </div>
       </div>
     </div>
   );

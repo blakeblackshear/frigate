@@ -458,7 +458,13 @@ export default function Step1NameCamera({
 
       if (streamConfigs.length > 0) {
         // Add all successful streams and navigate to Step 2
-        onNext({ streams: streamConfigs, customUrl: firstSuccessfulUri });
+        const values = form.getValues();
+        const cameraName = values.cameraName;
+        onNext({
+          cameraName,
+          streams: streamConfigs,
+          customUrl: firstSuccessfulUri,
+        });
         toast.success(t("cameraWizard.step1.testSuccess"));
         setProbeDialogOpen(false);
         setProbeResult(null);
@@ -490,7 +496,7 @@ export default function Step1NameCamera({
       setIsTesting(false);
       setTestStatus("");
     }
-  }, [selectedCandidateUris, t, onNext, probeUri]);
+  }, [selectedCandidateUris, t, onNext, probeUri, form]);
 
   const testCandidate = useCallback(
     async (uri: string) => {
