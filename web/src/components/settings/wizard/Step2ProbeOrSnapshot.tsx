@@ -334,74 +334,86 @@ export default function Step2ProbeOrSnapshot({
     [generateDynamicStreamUrl],
   );
 
-  const testConnection = useCallback(async () => {
-    const streamUrl = await generateStreamUrl(wizardData);
+  const testConnection = useCallback(
+    async (showToast = true) => {
+      const streamUrl = await generateStreamUrl(wizardData);
 
-    if (!streamUrl) {
-      toast.error(t("cameraWizard.commonErrors.noUrl"));
-      return;
-    }
+      if (!streamUrl) {
+        toast.error(t("cameraWizard.commonErrors.noUrl"));
+        return;
+      }
 
-    setIsTesting(true);
-    setTestStatus("");
-    setTestResult(null);
+      setIsTesting(true);
+      setTestStatus("");
+      setTestResult(null);
 
-    try {
-      setTestStatus(t("cameraWizard.step2.testing.probingMetadata"));
-      const result = await probeUri(streamUrl, true, setTestStatus);
+      try {
+        setTestStatus(t("cameraWizard.step2.testing.probingMetadata"));
+        const result = await probeUri(streamUrl, true, setTestStatus);
 
-      if (result && result.success) {
-        setTestResult(result);
-        const streamId = `stream_${Date.now()}`;
-        onUpdate({
-          streams: [
-            {
-              id: streamId,
-              url: streamUrl,
-              roles: ["detect"] as StreamRole[],
-              testResult: result,
-            },
-          ],
-        });
-        toast.success(t("cameraWizard.step2.testSuccess"));
-      } else {
-        const errMsg = result?.error || "Unable to probe stream";
+        if (result && result.success) {
+          setTestResult(result);
+          const streamId = `stream_${Date.now()}`;
+          onUpdate({
+            streams: [
+              {
+                id: streamId,
+                url: streamUrl,
+                roles: ["detect"] as StreamRole[],
+                testResult: result,
+              },
+            ],
+          });
+
+          if (showToast) {
+            toast.success(t("cameraWizard.step2.testSuccess"));
+          }
+        } else {
+          const errMsg = result?.error || "Unable to probe stream";
+          setTestResult({
+            success: false,
+            error: errMsg,
+          });
+
+          if (showToast) {
+            toast.error(
+              t("cameraWizard.commonErrors.testFailed", { error: errMsg }),
+              {
+                duration: 6000,
+              },
+            );
+          }
+        }
+      } catch (error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string; detail?: string } };
+          message?: string;
+        };
+        const errorMessage =
+          axiosError.response?.data?.message ||
+          axiosError.response?.data?.detail ||
+          axiosError.message ||
+          "Connection failed";
         setTestResult({
           success: false,
-          error: errMsg,
+          error: errorMessage,
         });
-        toast.error(
-          t("cameraWizard.commonErrors.testFailed", { error: errMsg }),
-          {
-            duration: 6000,
-          },
-        );
+
+        if (showToast) {
+          toast.error(
+            t("cameraWizard.commonErrors.testFailed", { error: errorMessage }),
+            {
+              duration: 10000,
+            },
+          );
+        }
+      } finally {
+        setIsTesting(false);
+        setTestStatus("");
       }
-    } catch (error) {
-      const axiosError = error as {
-        response?: { data?: { message?: string; detail?: string } };
-        message?: string;
-      };
-      const errorMessage =
-        axiosError.response?.data?.message ||
-        axiosError.response?.data?.detail ||
-        axiosError.message ||
-        "Connection failed";
-      setTestResult({
-        success: false,
-        error: errorMessage,
-      });
-      toast.error(
-        t("cameraWizard.commonErrors.testFailed", { error: errorMessage }),
-        {
-          duration: 10000,
-        },
-      );
-    } finally {
-      setIsTesting(false);
-      setTestStatus("");
-    }
-  }, [wizardData, generateStreamUrl, t, onUpdate, probeUri]);
+    },
+    [wizardData, generateStreamUrl, t, onUpdate, probeUri],
+  );
 
   const handleContinue = useCallback(() => {
     onNext();
@@ -416,7 +428,8 @@ export default function Step2ProbeOrSnapshot({
       if (probeMode) {
         probeCamera();
       } else {
-        testConnection();
+        // Auto-run the connection test but suppress toasts to avoid duplicates
+        testConnection(false);
       }
     }
   }, [hasStarted, probeMode, probeCamera, testConnection]);
