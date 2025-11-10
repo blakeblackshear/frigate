@@ -15,6 +15,7 @@ import Step3ChooseExamples, {
 } from "./wizard/Step3ChooseExamples";
 import { cn } from "@/lib/utils";
 import { isDesktop } from "react-device-detect";
+import axios from "axios";
 
 const OBJECT_STEPS = [
   "wizard.steps.nameAndDefine",
@@ -120,7 +121,18 @@ export default function ClassificationModelWizardDialog({
     dispatch({ type: "PREVIOUS_STEP" });
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    // Clean up any generated training images if we're cancelling from Step 3
+    if (wizardState.step1Data && wizardState.step3Data?.examplesGenerated) {
+      try {
+        await axios.delete(
+          `/classification/${wizardState.step1Data.modelName}`,
+        );
+      } catch (error) {
+        // Silently fail - user is already cancelling
+      }
+    }
+
     dispatch({ type: "RESET" });
     onClose();
   };

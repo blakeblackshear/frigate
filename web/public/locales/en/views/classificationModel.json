@@ -16,6 +16,7 @@
   "tooltip": {
     "trainingInProgress": "Model is currently training",
     "noNewImages": "No new images to train. Classify more images in the dataset first.",
+    "noChanges": "No changes to the dataset since last training.",
     "modelNotReady": "Model is not ready for training"
   },
   "toast": {
@@ -43,7 +44,9 @@
   },
   "deleteCategory": {
     "title": "Delete Class",
-    "desc": "Are you sure you want to delete the class {{name}}? This will permanently delete all associated images and require re-training the model."
+    "desc": "Are you sure you want to delete the class {{name}}? This will permanently delete all associated images and require re-training the model.",
+    "minClassesTitle": "Cannot Delete Class",
+    "minClassesDesc": "A classification model must have at least 2 classes. Add another class before deleting this one."
   },
   "deleteModel": {
     "title": "Delete Classification Model",

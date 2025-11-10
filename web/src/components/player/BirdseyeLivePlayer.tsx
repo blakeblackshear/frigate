@@ -77,7 +77,10 @@ export default function BirdseyeLivePlayer({
       )}
       onClick={onClick}
     >
-      <ImageShadowOverlay />
+      <ImageShadowOverlay
+        upperClassName="md:rounded-2xl"
+        lowerClassName="md:rounded-2xl"
+      />
       <div className="size-full" ref={playerRef}>
         {player}
       </div>

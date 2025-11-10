@@ -394,7 +394,11 @@ class OpenVINOModelRunner(BaseModelRunner):
                     self.infer_request.set_input_tensor(input_index, input_tensor)
 
                 # Run inference
-                self.infer_request.infer()
+                try:
+                    self.infer_request.infer()
+                except Exception as e:
+                    logger.error(f"Error during OpenVINO inference: {e}")
+                    return []
 
             # Get all output tensors
             outputs = []

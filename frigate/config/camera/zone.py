@@ -56,6 +56,12 @@ class ZoneConfig(BaseModel):
     def contour(self) -> np.ndarray:
         return self._contour
 
+    def get_formatted_name(self, zone_name: str) -> str:
+        """Return the friendly name if set, otherwise return a formatted version of the zone name."""
+        if self.friendly_name:
+            return self.friendly_name
+        return zone_name.replace("_", " ").title()
+
     @field_validator("objects", mode="before")
     @classmethod
     def validate_objects(cls, v):

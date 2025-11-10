@@ -6,7 +6,6 @@ import threading
 import time
 from typing import Optional
 
-from faster_whisper import WhisperModel
 from peewee import DoesNotExist
 
 from frigate.comms.inter_process import InterProcessRequestor
@@ -51,6 +50,9 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
 
     def __build_recognizer(self) -> None:
         try:
+            # Import dynamically to avoid crashes on systems without AVX support
+            from faster_whisper import WhisperModel
+
             self.recognizer = WhisperModel(
                 model_size_or_path="small",
                 device="cuda"

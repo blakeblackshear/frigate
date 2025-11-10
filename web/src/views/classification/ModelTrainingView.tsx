@@ -59,7 +59,11 @@ import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import TrainFilterDialog from "@/components/overlay/dialog/TrainFilterDialog";
 import useApiFilter from "@/hooks/use-api-filter";
-import { ClassificationItemData, TrainFilter } from "@/types/classification";
+import {
+  ClassificationDatasetResponse,
+  ClassificationItemData,
+  TrainFilter,
+} from "@/types/classification";
 import {
   ClassificationCard,
   GroupedClassificationCard,
@@ -118,16 +122,10 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   const { data: trainImages, mutate: refreshTrain } = useSWR<string[]>(
     `classification/${model.name}/train`,
   );
-  const { data: datasetResponse, mutate: refreshDataset } = useSWR<{
-    categories: { [id: string]: string[] };
-    training_metadata: {
-      has_trained: boolean;
-      last_training_date: string | null;
-      last_training_image_count: number;
-      current_image_count: number;
-      new_images_count: number;
-    } | null;
-  }>(`classification/${model.name}/dataset`);
+  const { data: datasetResponse, mutate: refreshDataset } =
+    useSWR<ClassificationDatasetResponse>(
+      `classification/${model.name}/dataset`,
+    );
 
   const dataset = datasetResponse?.categories || {};
   const trainingMetadata = datasetResponse?.training_metadata;
@@ -264,10 +262,11 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
               );
             }
 
+            // Always refresh dataset to update the categories list
+            refreshDataset();
+
             if (pageToggle == "train") {
               refreshTrain();
-            } else {
-              refreshDataset();
             }
           }
         })
@@ -445,7 +444,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
                   variant={modelState == "failed" ? "destructive" : "select"}
                   disabled={
                     (modelState != "complete" && modelState != "failed") ||
-                    (trainingMetadata?.new_images_count ?? 0) === 0
+                    !trainingMetadata?.dataset_changed
                   }
                 >
                   {modelState == "training" ? (
@@ -466,14 +465,14 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
                   )}
                 </Button>
               </TooltipTrigger>
-              {((trainingMetadata?.new_images_count ?? 0) === 0 ||
+              {(!trainingMetadata?.dataset_changed ||
                 (modelState != "complete" && modelState != "failed")) && (
                 <TooltipPortal>
                   <TooltipContent>
                     {modelState == "training"
                       ? t("tooltip.trainingInProgress")
-                      : trainingMetadata?.new_images_count === 0
-                        ? t("tooltip.noNewImages")
+                      : !trainingMetadata?.dataset_changed
+                        ? t("tooltip.noChanges")
                         : t("tooltip.modelNotReady")}
                   </TooltipContent>
                 </TooltipPortal>
@@ -571,27 +570,44 @@ function LibrarySelector({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("deleteCategory.title")}</DialogTitle>
+            <DialogTitle>
+              {Object.keys(dataset).length <= 2
+                ? t("deleteCategory.minClassesTitle")
+                : t("deleteCategory.title")}
+            </DialogTitle>
             <DialogDescription>
-              {t("deleteCategory.desc", { name: confirmDelete })}
+              {Object.keys(dataset).length <= 2
+                ? t("deleteCategory.minClassesDesc")
+                : t("deleteCategory.desc", { name: confirmDelete })}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setConfirmDelete(null)}>
-              {t("button.cancel", { ns: "common" })}
-            </Button>
-            <Button
-              variant="destructive"
-              className="text-white"
-              onClick={() => {
-                if (confirmDelete) {
-                  handleDeleteCategory(confirmDelete);
-                  setConfirmDelete(null);
-                }
-              }}
-            >
-              {t("button.delete", { ns: "common" })}
-            </Button>
+            {Object.keys(dataset).length <= 2 ? (
+              <Button variant="outline" onClick={() => setConfirmDelete(null)}>
+                {t("button.ok", { ns: "common" })}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setConfirmDelete(null)}
+                >
+                  {t("button.cancel", { ns: "common" })}
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="text-white"
+                  onClick={() => {
+                    if (confirmDelete) {
+                      handleDeleteCategory(confirmDelete);
+                      setConfirmDelete(null);
+                    }
+                  }}
+                >
+                  {t("button.delete", { ns: "common" })}
+                </Button>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
