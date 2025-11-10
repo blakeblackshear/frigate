@@ -266,7 +266,7 @@
       "autotrackingSupport": "Autotracking Support",
       "presets": "Presets",
       "rtspCandidates": "RTSP Candidates",
-      "rtspCandidatesDescription": "The following RTSP URLs were found from the camera probe. Select one or more to use for this camera in Frigate.",
+      "rtspCandidatesDescription": "The following RTSP URLs were found from the camera probe. Test the connection to view stream metadata.",
       "candidateStreamTitle": "Candidate {{number}}",
       "useCandidate": "Use",
       "uriCopy": "Copy",
