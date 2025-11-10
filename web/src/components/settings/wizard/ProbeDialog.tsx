@@ -61,7 +61,7 @@ export default function ProbeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-h-[90%] max-w-3xl overflow-y-auto xl:max-h-[80%]">
         <StepIndicator
           steps={STEPS}
           currentStep={0}

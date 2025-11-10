@@ -19,7 +19,7 @@ import { FaCircleCheck, FaTriangleExclamation } from "react-icons/fa6";
 import { LuX } from "react-icons/lu";
 import { Card, CardContent } from "../../ui/card";
 
-type Step3ValidationProps = {
+type Step4ValidationProps = {
   wizardData: Partial<WizardFormData>;
   onUpdate: (data: Partial<WizardFormData>) => void;
   onSave: (config: WizardFormData) => void;
@@ -27,13 +27,13 @@ type Step3ValidationProps = {
   isLoading?: boolean;
 };
 
-export default function Step3Validation({
+export default function Step4Validation({
   wizardData,
   onUpdate,
   onSave,
   onBack,
   isLoading = false,
-}: Step3ValidationProps) {
+}: Step4ValidationProps) {
   const { t } = useTranslation(["views/settings"]);
   const [isValidating, setIsValidating] = useState(false);
   const [testingStreams, setTestingStreams] = useState<Set<string>>(new Set());
@@ -143,13 +143,13 @@ export default function Step3Validation({
 
       if (testResult.success) {
         toast.success(
-          t("cameraWizard.step3.streamValidated", {
+          t("cameraWizard.step4.streamValidated", {
             number: streams.findIndex((s) => s.id === stream.id) + 1,
           }),
         );
       } else {
         toast.error(
-          t("cameraWizard.step3.streamValidationFailed", {
+          t("cameraWizard.step4.streamValidationFailed", {
             number: streams.findIndex((s) => s.id === stream.id) + 1,
           }),
         );
@@ -200,16 +200,16 @@ export default function Step3Validation({
         (r) => r.success,
       ).length;
       if (successfulTests === results.size) {
-        toast.success(t("cameraWizard.step3.reconnectionSuccess"));
+        toast.success(t("cameraWizard.step4.reconnectionSuccess"));
       } else {
-        toast.warning(t("cameraWizard.step3.reconnectionPartial"));
+        toast.warning(t("cameraWizard.step4.reconnectionPartial"));
       }
     }
   }, [streams, onUpdate, t, performStreamValidation]);
 
   const handleSave = useCallback(() => {
     if (!wizardData.cameraName || !wizardData.streams?.length) {
-      toast.error(t("cameraWizard.step3.saveError"));
+      toast.error(t("cameraWizard.step4.saveError"));
       return;
     }
 
@@ -239,13 +239,13 @@ export default function Step3Validation({
   return (
     <div className="space-y-6">
       <div className="text-sm text-muted-foreground">
-        {t("cameraWizard.step3.description")}
+        {t("cameraWizard.step4.description")}
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">
-            {t("cameraWizard.step3.validationTitle")}
+            {t("cameraWizard.step4.validationTitle")}
           </h3>
           <Button
             onClick={validateAllStreams}
@@ -254,8 +254,8 @@ export default function Step3Validation({
           >
             {isValidating && <ActivityIndicator className="mr-2 size-4" />}
             {isValidating
-              ? t("cameraWizard.step3.connecting")
-              : t("cameraWizard.step3.connectAllStreams")}
+              ? t("cameraWizard.step4.connecting")
+              : t("cameraWizard.step4.connectAllStreams")}
           </Button>
         </div>
 
@@ -270,7 +270,7 @@ export default function Step3Validation({
                       <div className="flex flex-col space-y-1">
                         <div className="flex flex-row items-center">
                           <h4 className="mr-2 font-medium">
-                            {t("cameraWizard.step3.streamTitle", {
+                            {t("cameraWizard.step4.streamTitle", {
                               number: index + 1,
                             })}
                           </h4>
@@ -331,7 +331,7 @@ export default function Step3Validation({
                     <div className="mb-3 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-sm">
-                          {t("cameraWizard.step3.ffmpegModule")}
+                          {t("cameraWizard.step4.ffmpegModule")}
                         </span>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -346,11 +346,11 @@ export default function Step3Validation({
                           <PopoverContent className="pointer-events-auto w-80 text-xs">
                             <div className="space-y-2">
                               <div className="font-medium">
-                                {t("cameraWizard.step3.ffmpegModule")}
+                                {t("cameraWizard.step4.ffmpegModule")}
                               </div>
                               <div className="text-muted-foreground">
                                 {t(
-                                  "cameraWizard.step3.ffmpegModuleDescription",
+                                  "cameraWizard.step4.ffmpegModuleDescription",
                                 )}
                               </div>
                             </div>
@@ -402,17 +402,17 @@ export default function Step3Validation({
                         <ActivityIndicator className="mr-2 size-4" />
                       )}
                       {result?.success
-                        ? t("cameraWizard.step3.disconnectStream")
+                        ? t("cameraWizard.step4.disconnectStream")
                         : testingStreams.has(stream.id)
-                          ? t("cameraWizard.step3.connectingStream")
-                          : t("cameraWizard.step3.connectStream")}
+                          ? t("cameraWizard.step4.connectingStream")
+                          : t("cameraWizard.step4.connectStream")}
                     </Button>
                   </div>
 
                   {result && (
                     <div className="space-y-2">
                       <div className="text-xs">
-                        {t("cameraWizard.step3.issues.title")}
+                        {t("cameraWizard.step4.issues.title")}
                       </div>
                       <div className="rounded-lg bg-background p-3">
                         <StreamIssues
@@ -455,7 +455,7 @@ export default function Step3Validation({
           {isLoading && <ActivityIndicator className="mr-2 size-4" />}
           {isLoading
             ? t("button.saving", { ns: "common" })
-            : t("cameraWizard.step3.saveAndApply")}
+            : t("cameraWizard.step4.saveAndApply")}
         </Button>
       </div>
     </div>
@@ -486,7 +486,7 @@ function StreamIssues({
       if (streamUrl.startsWith("rtsp://")) {
         result.push({
           type: "warning",
-          message: t("cameraWizard.step1.errors.brands.reolink-rtsp"),
+          message: t("cameraWizard.step4.issues.brands.reolink-rtsp"),
         });
       }
     }
@@ -497,7 +497,7 @@ function StreamIssues({
       if (["h264", "h265", "hevc"].includes(videoCodec)) {
         result.push({
           type: "good",
-          message: t("cameraWizard.step3.issues.videoCodecGood", {
+          message: t("cameraWizard.step4.issues.videoCodecGood", {
             codec: stream.testResult.videoCodec,
           }),
         });
@@ -511,20 +511,20 @@ function StreamIssues({
         if (audioCodec === "aac") {
           result.push({
             type: "good",
-            message: t("cameraWizard.step3.issues.audioCodecGood", {
+            message: t("cameraWizard.step4.issues.audioCodecGood", {
               codec: stream.testResult.audioCodec,
             }),
           });
         } else {
           result.push({
             type: "error",
-            message: t("cameraWizard.step3.issues.audioCodecRecordError"),
+            message: t("cameraWizard.step4.issues.audioCodecRecordError"),
           });
         }
       } else {
         result.push({
           type: "warning",
-          message: t("cameraWizard.step3.issues.noAudioWarning"),
+          message: t("cameraWizard.step4.issues.noAudioWarning"),
         });
       }
     }
@@ -534,7 +534,7 @@ function StreamIssues({
       if (!stream.testResult?.audioCodec) {
         result.push({
           type: "error",
-          message: t("cameraWizard.step3.issues.audioCodecRequired"),
+          message: t("cameraWizard.step4.issues.audioCodecRequired"),
         });
       }
     }
@@ -544,7 +544,7 @@ function StreamIssues({
       if (stream.restream) {
         result.push({
           type: "warning",
-          message: t("cameraWizard.step3.issues.restreamingWarning"),
+          message: t("cameraWizard.step4.issues.restreamingWarning"),
         });
       }
     }
@@ -557,14 +557,14 @@ function StreamIssues({
         if (minDimension > 1080) {
           result.push({
             type: "warning",
-            message: t("cameraWizard.step3.issues.resolutionHigh", {
+            message: t("cameraWizard.step4.issues.resolutionHigh", {
               resolution: stream.resolution,
             }),
           });
         } else if (maxDimension < 640) {
           result.push({
             type: "error",
-            message: t("cameraWizard.step3.issues.resolutionLow", {
+            message: t("cameraWizard.step4.issues.resolutionLow", {
               resolution: stream.resolution,
             }),
           });
@@ -580,7 +580,7 @@ function StreamIssues({
     ) {
       result.push({
         type: "warning",
-        message: t("cameraWizard.step3.issues.dahua.substreamWarning"),
+        message: t("cameraWizard.step4.issues.dahua.substreamWarning"),
       });
     }
     if (
@@ -590,7 +590,7 @@ function StreamIssues({
     ) {
       result.push({
         type: "warning",
-        message: t("cameraWizard.step3.issues.hikvision.substreamWarning"),
+        message: t("cameraWizard.step4.issues.hikvision.substreamWarning"),
       });
     }
 
@@ -662,7 +662,7 @@ function BandwidthDisplay({
   return (
     <div className="mb-2 text-sm">
       <span className="font-medium text-muted-foreground">
-        {t("cameraWizard.step3.estimatedBandwidth")}:
+        {t("cameraWizard.step4.estimatedBandwidth")}:
       </span>{" "}
       <span className="text-secondary-foreground">
         {streamBandwidth.toFixed(1)} {t("unit.data.kbps", { ns: "common" })}
@@ -748,7 +748,7 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
         style={{ aspectRatio }}
       >
         <span className="text-sm text-danger">
-          {t("cameraWizard.step3.streamUnavailable")}
+          {t("cameraWizard.step4.streamUnavailable")}
         </span>
         <Button
           variant="outline"
@@ -757,7 +757,7 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
           className="flex items-center gap-2"
         >
           <LuRotateCcw className="size-4" />
-          {t("cameraWizard.step3.reload")}
+          {t("cameraWizard.step4.reload")}
         </Button>
       </div>
     );
@@ -771,7 +771,7 @@ function StreamPreview({ stream, onBandwidthUpdate }: StreamPreviewProps) {
       >
         <ActivityIndicator className="size-4" />
         <span className="ml-2 text-sm">
-          {t("cameraWizard.step3.connecting")}
+          {t("cameraWizard.step4.connecting")}
         </span>
       </div>
     );

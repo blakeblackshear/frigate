@@ -49,7 +49,7 @@ export default function OnvifProbeResults({
   const handleCopyUri = (uri: string) => {
     navigator.clipboard.writeText(uri);
     setCopiedUri(uri);
-    toast.success(t("cameraWizard.step1.uriCopied"));
+    toast.success(t("cameraWizard.step2.uriCopied"));
     setTimeout(() => setCopiedUri(null), 2000);
   };
 
@@ -58,7 +58,7 @@ export default function OnvifProbeResults({
       <div className="flex flex-col items-center justify-center gap-4 py-8">
         <ActivityIndicator className="size-6" />
         <p className="text-sm text-muted-foreground">
-          {t("cameraWizard.step1.probingDevice")}
+          {t("cameraWizard.step2.probingDevice")}
         </p>
       </div>
     );
@@ -69,7 +69,7 @@ export default function OnvifProbeResults({
       <div className="space-y-4">
         <Alert variant="destructive">
           <CiCircleAlert className="size-5" />
-          <AlertTitle>{t("cameraWizard.step1.probeError")}</AlertTitle>
+          <AlertTitle>{t("cameraWizard.step2.probeError")}</AlertTitle>
           {error && <AlertDescription>{error}</AlertDescription>}
         </Alert>
         <Button onClick={onRetry} variant="outline" className="w-full">
@@ -84,7 +84,7 @@ export default function OnvifProbeResults({
       <div className="space-y-4">
         <Alert variant="destructive">
           <CiCircleAlert className="size-5" />
-          <AlertTitle>{t("cameraWizard.step1.probeNoSuccess")}</AlertTitle>
+          <AlertTitle>{t("cameraWizard.step2.probeNoSuccess")}</AlertTitle>
           {probeResult?.message && (
             <AlertDescription>{probeResult.message}</AlertDescription>
           )}
@@ -104,18 +104,18 @@ export default function OnvifProbeResults({
       {probeResult?.success && (
         <div className="mb-3 flex flex-row items-center gap-2 text-sm text-success">
           <FaCircleCheck className="size-4" />
-          <span>{t("cameraWizard.step1.probeSuccessful")}</span>
+          <span>{t("cameraWizard.step2.probeSuccessful")}</span>
         </div>
       )}
       <Card>
         <CardTitle className="border-b p-4 text-sm">
-          {t("cameraWizard.step1.deviceInfo")}
+          {t("cameraWizard.step2.deviceInfo")}
         </CardTitle>
         <CardContent className="space-y-2 p-4 text-sm">
           {probeResult.manufacturer && (
             <div>
               <span className="text-muted-foreground">
-                {t("cameraWizard.step1.manufacturer")}:
+                {t("cameraWizard.step2.manufacturer")}:
               </span>{" "}
               <span className="text-primary-variant">
                 {probeResult.manufacturer}
@@ -125,7 +125,7 @@ export default function OnvifProbeResults({
           {probeResult.model && (
             <div>
               <span className="text-muted-foreground">
-                {t("cameraWizard.step1.model")}:
+                {t("cameraWizard.step2.model")}:
               </span>{" "}
               <span className="text-primary-variant">{probeResult.model}</span>
             </div>
@@ -133,7 +133,7 @@ export default function OnvifProbeResults({
           {probeResult.firmware_version && (
             <div>
               <span className="text-muted-foreground">
-                {t("cameraWizard.step1.firmware")}:
+                {t("cameraWizard.step2.firmware")}:
               </span>{" "}
               <span className="text-primary-variant">
                 {probeResult.firmware_version}
@@ -143,7 +143,7 @@ export default function OnvifProbeResults({
           {probeResult.profiles_count !== undefined && (
             <div>
               <span className="text-muted-foreground">
-                {t("cameraWizard.step1.profiles")}:
+                {t("cameraWizard.step2.profiles")}:
               </span>{" "}
               <span className="text-primary-variant">
                 {probeResult.profiles_count}
@@ -153,7 +153,7 @@ export default function OnvifProbeResults({
           {probeResult.ptz_supported !== undefined && (
             <div>
               <span className="text-muted-foreground">
-                {t("cameraWizard.step1.ptzSupport")}:
+                {t("cameraWizard.step2.ptzSupport")}:
               </span>{" "}
               <span className="text-primary-variant">
                 {probeResult.ptz_supported
@@ -165,7 +165,7 @@ export default function OnvifProbeResults({
           {probeResult.ptz_supported && probeResult.autotrack_supported && (
             <div>
               <span className="text-muted-foreground">
-                {t("cameraWizard.step1.autotrackingSupport")}:
+                {t("cameraWizard.step2.autotrackingSupport")}:
               </span>{" "}
               <span className="text-primary-variant">
                 {t("yes", { ns: "common" })}
@@ -176,7 +176,7 @@ export default function OnvifProbeResults({
             probeResult.presets_count !== undefined && (
               <div>
                 <span className="text-muted-foreground">
-                  {t("cameraWizard.step1.presets")}:
+                  {t("cameraWizard.step2.presets")}:
                 </span>{" "}
                 <span className="text-primary-variant">
                   {probeResult.presets_count}
@@ -188,7 +188,7 @@ export default function OnvifProbeResults({
 
       {rtspCandidates.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-sm">{t("cameraWizard.step1.rtspCandidates")}</h3>
+          <h3 className="text-sm">{t("cameraWizard.step2.rtspCandidates")}</h3>
 
           <div className="space-y-2">
             {rtspCandidates.map((candidate, idx) => {
@@ -264,7 +264,7 @@ function CandidateItem({
         <div className="flex items-center justify-between">
           <div>
             <h4 className="font-medium">
-              {t("cameraWizard.step1.candidateStreamTitle", {
+              {t("cameraWizard.step2.candidateStreamTitle", {
                 number: (index ?? 0) + 1,
               })}
             </h4>
@@ -311,7 +311,7 @@ function CandidateItem({
           <p
             className="flex-1 cursor-pointer break-all text-sm text-primary-variant hover:underline"
             onClick={() => setShowFull((s) => !s)}
-            title={t("cameraWizard.step1.toggleUriView")}
+            title={t("cameraWizard.step2.toggleUriView")}
           >
             {showFull ? candidate.uri : maskUri(candidate.uri)}
           </p>
@@ -322,7 +322,7 @@ function CandidateItem({
               variant="ghost"
               onClick={onCopy}
               className="mr-4 size-8 p-0"
-              title={t("cameraWizard.step1.uriCopy")}
+              title={t("cameraWizard.step2.uriCopy")}
             >
               {copiedUri === candidate.uri ? (
                 <FaCheck className="size-3" />
@@ -340,7 +340,7 @@ function CandidateItem({
               {isTesting ? (
                 <ActivityIndicator className="size-3" />
               ) : (
-                t("cameraWizard.step1.testConnection")
+                t("cameraWizard.step2.testConnection")
               )}
             </Button>
           </div>
@@ -353,7 +353,7 @@ function CandidateItem({
             variant="select"
             className="h-8 px-3 text-sm"
           >
-            {t("cameraWizard.step1.useCandidate")}
+            {t("cameraWizard.step2.useCandidate")}
           </Button>
         </div>
       </div>
