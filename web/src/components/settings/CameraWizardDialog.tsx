@@ -340,7 +340,9 @@ export default function CameraWizardDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className={cn("max-h-[90dvh] max-w-3xl overflow-y-auto")}
+        className={cn(
+          "scrollbar-container max-h-[90dvh] max-w-3xl overflow-y-auto",
+        )}
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
