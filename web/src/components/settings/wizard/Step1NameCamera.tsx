@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -73,7 +74,6 @@ export default function Step1NameCamera({
   const [testStatus, setTestStatus] = useState<string>("");
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [probeMode, setProbeMode] = useState<boolean>(true);
-  const [onvifPort, setOnvifPort] = useState<number>(80);
   const [isProbing, setIsProbing] = useState(false);
   const [probeError, setProbeError] = useState<string | null>(null);
   const [probeResult, setProbeResult] = useState<OnvifProbeResponse | null>(
@@ -111,6 +111,7 @@ export default function Step1NameCamera({
       username: z.string().optional(),
       password: z.string().optional(),
       brandTemplate: z.enum(CAMERA_BRAND_VALUES).optional(),
+      onvifPort: z.coerce.number().int().min(1).max(65535).optional(),
       customUrl: z
         .string()
         .optional()
@@ -147,6 +148,7 @@ export default function Step1NameCamera({
           ? (wizardData.brandTemplate as CameraBrand)
           : "dahua",
       customUrl: wizardData.customUrl || "",
+      onvifPort: wizardData.onvifPort ?? 80,
     },
     mode: "onChange",
   });
@@ -246,7 +248,7 @@ export default function Step1NameCamera({
       const response = await axios.get("/onvif/probe", {
         params: {
           host: data.host,
-          port: onvifPort,
+          port: data.onvifPort ?? 80,
           username: data.username || "",
           password: data.password || "",
           test: false,
@@ -276,7 +278,7 @@ export default function Step1NameCamera({
     } finally {
       setIsProbing(false);
     }
-  }, [form, onvifPort, t]);
+  }, [form, t]);
 
   const handleSelectCandidate = useCallback((uri: string) => {
     // toggle selection: add or remove from selectedCandidateUris
@@ -737,27 +739,34 @@ export default function Step1NameCamera({
                     </label>
                   </div>
                 </RadioGroup>
+                <FormDescription>
+                  {t("cameraWizard.step1.detectionMethodDescription")}
+                </FormDescription>
               </div>
 
               {probeMode && (
-                <FormItem>
-                  <FormLabel className="text-primary-variant">
-                    {t("cameraWizard.step1.onvifPort")}
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className="text-md h-8"
-                      type="number"
-                      min="1"
-                      max="65535"
-                      value={onvifPort}
-                      onChange={(e) =>
-                        setOnvifPort(parseInt(e.target.value, 10) || 80)
-                      }
-                      placeholder="80"
-                    />
-                  </FormControl>
-                </FormItem>
+                <FormField
+                  control={form.control}
+                  name="onvifPort"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel className="text-primary-variant">
+                        {t("cameraWizard.step1.onvifPort")}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-md h-8"
+                          type="text"
+                          {...field}
+                          placeholder="80"
+                        />
+                      </FormControl>
+                      <FormMessage>
+                        {fieldState.error ? fieldState.error.message : null}
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
               )}
 
               {!probeMode && (
@@ -954,6 +963,9 @@ export default function Step1NameCamera({
             variant="select"
             className="flex items-center justify-center gap-2 sm:flex-1"
           >
+            {(isProbing || isTesting) && (
+              <ActivityIndicator className="size-4" />
+            )}
             {probeMode
               ? t("cameraWizard.step1.probeMode")
               : t("cameraWizard.step1.testConnection")}
