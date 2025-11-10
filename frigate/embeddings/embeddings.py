@@ -472,7 +472,7 @@ class Embeddings:
                                 )
                                 thumbnail_missing = True
                         except DoesNotExist:
-                            logger.warning(
+                            logger.debug(
                                 f"Event ID {trigger.data} for trigger {trigger_name} does not exist."
                             )
                             continue
