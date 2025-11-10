@@ -17,7 +17,7 @@ import type {
 } from "@/types/cameraWizard";
 import { FaCircleCheck } from "react-icons/fa6";
 import { Card, CardContent, CardTitle } from "../../ui/card";
-import ProbeDialog from "./ProbeDialog";
+import OnvifProbeResults from "./OnvifProbeResults";
 import { CAMERA_BRANDS } from "@/types/cameraWizard";
 import { detectReolinkCamera } from "@/utils/cameraUtil";
 
@@ -45,16 +45,15 @@ export default function Step2ProbeOrSnapshot({
   const [probeResult, setProbeResult] = useState<OnvifProbeResponse | null>(
     null,
   );
-  const [probeDialogOpen, setProbeDialogOpen] = useState(false);
+  const [testingCandidates, setTestingCandidates] = useState<
+    Record<string, boolean>
+  >({} as Record<string, boolean>);
   const [selectedCandidateUris, setSelectedCandidateUris] = useState<string[]>(
     [],
   );
   const [candidateTests, setCandidateTests] = useState<CandidateTestMap>(
     {} as CandidateTestMap,
   );
-  const [testingCandidates, setTestingCandidates] = useState<
-    Record<string, boolean>
-  >({} as Record<string, boolean>);
 
   const handleSelectCandidate = useCallback((uri: string) => {
     setSelectedCandidateUris((s) => {
@@ -205,7 +204,6 @@ export default function Step2ProbeOrSnapshot({
 
       if (response.data && response.data.success) {
         setProbeResult(response.data);
-        setProbeDialogOpen(true);
       } else {
         setProbeError(response.data?.message || "Probe failed");
       }
@@ -266,7 +264,6 @@ export default function Step2ProbeOrSnapshot({
       if (streamConfigs.length > 0) {
         onNext({ streams: streamConfigs });
         toast.success(t("cameraWizard.step2.testSuccess"));
-        setProbeDialogOpen(false);
       } else {
         toast.error(
           t("cameraWizard.commonErrors.testFailed", {
@@ -459,29 +456,18 @@ export default function Step2ProbeOrSnapshot({
   return (
     <div className="space-y-6">
       {probeMode ? (
-        // Probe mode: show probe dialog
+        // Probe mode: show probe results directly
         <>
           {probeResult && (
-            <div className="p-4">
-              <ProbeDialog
-                open={probeDialogOpen}
-                onOpenChange={(open) => {
-                  setProbeDialogOpen(open);
-                  // If dialog is being closed (open=false), go back
-                  if (!open) {
-                    onBack();
-                  }
-                }}
+            <div className="space-y-4">
+              <OnvifProbeResults
                 isLoading={isProbing}
                 isError={!!probeError}
                 error={probeError || undefined}
                 probeResult={probeResult}
                 onSelectCandidate={handleSelectCandidate}
                 onRetry={probeCamera}
-                selectedCandidateUris={selectedCandidateUris}
-                testAllSelectedCandidates={testAllSelectedCandidates}
-                isTesting={isTesting}
-                testStatus={testStatus}
+                selectedUris={selectedCandidateUris}
                 testCandidate={testCandidate}
                 candidateTests={candidateTests}
                 testingCandidates={testingCandidates}
@@ -489,31 +475,15 @@ export default function Step2ProbeOrSnapshot({
             </div>
           )}
 
-          {isProbing && !probeResult && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <ActivityIndicator className="size-4" />
-              {t("cameraWizard.step2.probing")}
-            </div>
-          )}
-
-          {probeError && !probeResult && (
-            <div className="space-y-4">
-              <div className="text-sm text-destructive">{probeError}</div>
-              <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
-                <Button type="button" onClick={onBack} className="sm:flex-1">
-                  {t("button.back", { ns: "common" })}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={probeCamera}
-                  variant="select"
-                  className="flex items-center justify-center gap-2 sm:flex-1"
-                >
-                  {t("cameraWizard.step2.retry")}
-                </Button>
-              </div>
-            </div>
-          )}
+          <ProbeFooterButtons
+            isProbing={isProbing}
+            probeError={probeError}
+            onBack={onBack}
+            onTestAll={testAllSelectedCandidates}
+            onRetry={probeCamera}
+            isTesting={isTesting}
+            selectedCount={selectedCandidateUris.length}
+          />
         </>
       ) : (
         // Manual mode: show snapshot and stream details
@@ -566,32 +536,19 @@ export default function Step2ProbeOrSnapshot({
             </div>
           )}
 
-          <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
-            <Button type="button" onClick={onBack} className="sm:flex-1">
-              {t("button.back", { ns: "common" })}
-            </Button>
-            {testResult?.success ? (
-              <Button
-                type="button"
-                onClick={handleContinue}
-                variant="select"
-                className="flex items-center justify-center gap-2 sm:flex-1"
-              >
-                {t("button.continue", { ns: "common" })}
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                onClick={testConnection}
-                disabled={isTesting}
-                variant="select"
-                className="flex items-center justify-center gap-2 sm:flex-1"
-              >
-                {isTesting && <ActivityIndicator className="size-4" />}
-                {t("cameraWizard.step2.retry")}
-              </Button>
-            )}
-          </div>
+          <ProbeFooterButtons
+            mode="manual"
+            isProbing={false}
+            probeError={null}
+            onBack={onBack}
+            onTestAll={testAllSelectedCandidates}
+            onRetry={probeCamera}
+            isTesting={isTesting}
+            selectedCount={selectedCandidateUris.length}
+            manualTestSuccess={!!testResult?.success}
+            onContinue={handleContinue}
+            onManualTest={testConnection}
+          />
         </>
       )}
     </div>
@@ -636,5 +593,135 @@ function StreamDetails({ testResult }: { testResult: TestResult }) {
         </div>
       )}
     </>
+  );
+}
+
+type ProbeFooterProps = {
+  isProbing: boolean;
+  probeError: string | null;
+  onBack: () => void;
+  onTestAll: () => void;
+  onRetry: () => void;
+  isTesting: boolean;
+  selectedCount: number;
+  mode?: "probe" | "manual";
+  manualTestSuccess?: boolean;
+  onContinue?: () => void;
+  onManualTest?: () => void;
+};
+
+function ProbeFooterButtons({
+  isProbing,
+  probeError,
+  onBack,
+  onTestAll,
+  onRetry,
+  isTesting,
+  selectedCount,
+  mode = "probe",
+  manualTestSuccess,
+  onContinue,
+  onManualTest,
+}: ProbeFooterProps) {
+  const { t } = useTranslation(["views/settings"]);
+
+  // Loading footer
+  if (isProbing) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <ActivityIndicator className="size-4" />
+          {t("cameraWizard.step2.probing")}
+        </div>
+        <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+          <Button type="button" onClick={onBack} disabled className="sm:flex-1">
+            {t("button.back", { ns: "common" })}
+          </Button>
+          <Button
+            type="button"
+            disabled
+            variant="select"
+            className="flex items-center justify-center gap-2 sm:flex-1"
+          >
+            <ActivityIndicator className="size-4" />
+            {t("cameraWizard.step2.probing")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Error footer
+  if (probeError) {
+    return (
+      <div className="space-y-4">
+        <div className="text-sm text-destructive">{probeError}</div>
+        <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+          <Button type="button" onClick={onBack} className="sm:flex-1">
+            {t("button.back", { ns: "common" })}
+          </Button>
+          <Button
+            type="button"
+            onClick={onRetry}
+            variant="select"
+            className="flex items-center justify-center gap-2 sm:flex-1"
+          >
+            {t("cameraWizard.step2.retry")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Default footer: show back + test (test disabled if none selected or testing)
+  // If manual mode, show Continue when test succeeded, otherwise show Test (calls onManualTest)
+  if (mode === "manual") {
+    return (
+      <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+        <Button type="button" onClick={onBack} className="sm:flex-1">
+          {t("button.back", { ns: "common" })}
+        </Button>
+        {manualTestSuccess ? (
+          <Button
+            type="button"
+            onClick={onContinue}
+            variant="select"
+            className="flex items-center justify-center gap-2 sm:flex-1"
+          >
+            {t("button.continue", { ns: "common" })}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            onClick={onManualTest}
+            disabled={isTesting}
+            variant="select"
+            className="flex items-center justify-center gap-2 sm:flex-1"
+          >
+            {isTesting && <ActivityIndicator className="size-4" />}
+            {t("cameraWizard.step2.retry")}
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  // Default probe footer
+  return (
+    <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+      <Button type="button" onClick={onBack} className="sm:flex-1">
+        {t("button.back", { ns: "common" })}
+      </Button>
+      <Button
+        type="button"
+        onClick={onTestAll}
+        disabled={isTesting || selectedCount === 0}
+        variant="select"
+        className="flex items-center justify-center gap-2 sm:flex-1"
+      >
+        {isTesting && <ActivityIndicator className="size-4" />}
+        {t("cameraWizard.step2.testConnection")}
+      </Button>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// Input removed: URL shown as text
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { FaCopy, FaCheck } from "react-icons/fa";
 import { LuX } from "react-icons/lu";
@@ -96,137 +95,155 @@ export default function OnvifProbeResults({
     );
   }
 
-  const rtspCandidates = probeResult.rtsp_candidates || [];
+  const rtspCandidates = (probeResult.rtsp_candidates || []).filter(
+    (c) => c.source === "GetStreamUri",
+  );
+
+  if (probeResult?.success && rtspCandidates.length === 0) {
+    return (
+      <div className="space-y-4">
+        <Alert variant="destructive">
+          <CiCircleAlert className="size-5" />
+          <AlertTitle>{t("cameraWizard.step2.noRtspCandidates")}</AlertTitle>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      {/* Probe success header (green check + text) */}
-      {probeResult?.success && (
-        <div className="mb-3 flex flex-row items-center gap-2 text-sm text-success">
-          <FaCircleCheck className="size-4" />
-          <span>{t("cameraWizard.step2.probeSuccessful")}</span>
-        </div>
-      )}
-      <Card>
-        <CardTitle className="border-b p-4 text-sm">
-          {t("cameraWizard.step2.deviceInfo")}
-        </CardTitle>
-        <CardContent className="space-y-2 p-4 text-sm">
-          {probeResult.manufacturer && (
-            <div>
-              <span className="text-muted-foreground">
-                {t("cameraWizard.step2.manufacturer")}:
-              </span>{" "}
-              <span className="text-primary-variant">
-                {probeResult.manufacturer}
-              </span>
-            </div>
-          )}
-          {probeResult.model && (
-            <div>
-              <span className="text-muted-foreground">
-                {t("cameraWizard.step2.model")}:
-              </span>{" "}
-              <span className="text-primary-variant">{probeResult.model}</span>
-            </div>
-          )}
-          {probeResult.firmware_version && (
-            <div>
-              <span className="text-muted-foreground">
-                {t("cameraWizard.step2.firmware")}:
-              </span>{" "}
-              <span className="text-primary-variant">
-                {probeResult.firmware_version}
-              </span>
-            </div>
-          )}
-          {probeResult.profiles_count !== undefined && (
-            <div>
-              <span className="text-muted-foreground">
-                {t("cameraWizard.step2.profiles")}:
-              </span>{" "}
-              <span className="text-primary-variant">
-                {probeResult.profiles_count}
-              </span>
-            </div>
-          )}
-          {probeResult.ptz_supported !== undefined && (
-            <div>
-              <span className="text-muted-foreground">
-                {t("cameraWizard.step2.ptzSupport")}:
-              </span>{" "}
-              <span className="text-primary-variant">
-                {probeResult.ptz_supported
-                  ? t("yes", { ns: "common" })
-                  : t("no", { ns: "common" })}
-              </span>
-            </div>
-          )}
-          {probeResult.ptz_supported && probeResult.autotrack_supported && (
-            <div>
-              <span className="text-muted-foreground">
-                {t("cameraWizard.step2.autotrackingSupport")}:
-              </span>{" "}
-              <span className="text-primary-variant">
-                {t("yes", { ns: "common" })}
-              </span>
-            </div>
-          )}
-          {probeResult.ptz_supported &&
-            probeResult.presets_count !== undefined && (
+    <>
+      <div className="space-y-2">
+        {probeResult?.success && (
+          <div className="mb-3 flex flex-row items-center gap-2 text-sm text-success">
+            <FaCircleCheck className="size-4" />
+            <span>{t("cameraWizard.step2.probeSuccessful")}</span>
+          </div>
+        )}
+        <div className="text-sm">{t("cameraWizard.step2.deviceInfo")}</div>
+        <Card>
+          <CardContent className="space-y-2 p-4 text-sm">
+            {probeResult.manufacturer && (
               <div>
                 <span className="text-muted-foreground">
-                  {t("cameraWizard.step2.presets")}:
+                  {t("cameraWizard.step2.manufacturer")}:
                 </span>{" "}
                 <span className="text-primary-variant">
-                  {probeResult.presets_count}
+                  {probeResult.manufacturer}
                 </span>
               </div>
             )}
-        </CardContent>
-      </Card>
+            {probeResult.model && (
+              <div>
+                <span className="text-muted-foreground">
+                  {t("cameraWizard.step2.model")}:
+                </span>{" "}
+                <span className="text-primary-variant">
+                  {probeResult.model}
+                </span>
+              </div>
+            )}
+            {probeResult.firmware_version && (
+              <div>
+                <span className="text-muted-foreground">
+                  {t("cameraWizard.step2.firmware")}:
+                </span>{" "}
+                <span className="text-primary-variant">
+                  {probeResult.firmware_version}
+                </span>
+              </div>
+            )}
+            {probeResult.profiles_count !== undefined && (
+              <div>
+                <span className="text-muted-foreground">
+                  {t("cameraWizard.step2.profiles")}:
+                </span>{" "}
+                <span className="text-primary-variant">
+                  {probeResult.profiles_count}
+                </span>
+              </div>
+            )}
+            {probeResult.ptz_supported !== undefined && (
+              <div>
+                <span className="text-muted-foreground">
+                  {t("cameraWizard.step2.ptzSupport")}:
+                </span>{" "}
+                <span className="text-primary-variant">
+                  {probeResult.ptz_supported
+                    ? t("yes", { ns: "common" })
+                    : t("no", { ns: "common" })}
+                </span>
+              </div>
+            )}
+            {probeResult.ptz_supported && probeResult.autotrack_supported && (
+              <div>
+                <span className="text-muted-foreground">
+                  {t("cameraWizard.step2.autotrackingSupport")}:
+                </span>{" "}
+                <span className="text-primary-variant">
+                  {t("yes", { ns: "common" })}
+                </span>
+              </div>
+            )}
+            {probeResult.ptz_supported &&
+              probeResult.presets_count !== undefined && (
+                <div>
+                  <span className="text-muted-foreground">
+                    {t("cameraWizard.step2.presets")}:
+                  </span>{" "}
+                  <span className="text-primary-variant">
+                    {probeResult.presets_count}
+                  </span>
+                </div>
+              )}
+          </CardContent>
+        </Card>
+      </div>
+      <div className="space-y-2">
+        {rtspCandidates.length > 0 && (
+          <div className="mt-5 space-y-2">
+            <div className="text-sm">
+              {t("cameraWizard.step2.rtspCandidates")}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {t("cameraWizard.step2.rtspCandidatesDescription")}
+            </div>
 
-      {rtspCandidates.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-sm">{t("cameraWizard.step2.rtspCandidates")}</h3>
+            <div className="space-y-2">
+              {rtspCandidates.map((candidate, idx) => {
+                const isSelected = !!selectedUris?.includes(candidate.uri);
+                const candidateTest = candidateTests?.[candidate.uri];
+                const isTesting = testingCandidates?.[candidate.uri];
 
-          <div className="space-y-2">
-            {rtspCandidates.map((candidate, idx) => {
-              const isSelected = !!selectedUris?.includes(candidate.uri);
-              const candidateTest = candidateTests?.[candidate.uri];
-              const isTesting = testingCandidates?.[candidate.uri];
-
-              return (
-                <CandidateItem
-                  key={idx}
-                  index={idx}
-                  candidate={candidate}
-                  copiedUri={copiedUri}
-                  onCopy={() => handleCopyUri(candidate.uri)}
-                  onUse={() => onSelectCandidate(candidate.uri)}
-                  isSelected={isSelected}
-                  testCandidate={testCandidate}
-                  candidateTest={candidateTest}
-                  isTesting={isTesting}
-                />
-              );
-            })}
+                return (
+                  <CandidateItem
+                    key={idx}
+                    index={idx}
+                    candidate={candidate}
+                    copiedUri={copiedUri}
+                    onCopy={() => handleCopyUri(candidate.uri)}
+                    onUse={() => onSelectCandidate(candidate.uri)}
+                    isSelected={isSelected}
+                    testCandidate={testCandidate}
+                    candidateTest={candidateTest}
+                    isTesting={isTesting}
+                  />
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
 
 type CandidateItemProps = {
   candidate: OnvifRtspCandidate;
   index?: number;
-  // isTested?: boolean; (unused)
   copiedUri: string | null;
   onCopy: () => void;
   onUse: () => void;
   isSelected?: boolean;
-  // onTest?: () => void; (unused)
   testCandidate?: (uri: string) => void;
   candidateTest?: TestResult | { success: false; error: string };
   isTesting?: boolean;
@@ -253,110 +270,115 @@ function CandidateItem({
   };
 
   return (
-    <div
+    <Card
       className={cn(
-        "rounded-lg bg-card",
         isSelected &&
           "outline outline-[3px] -outline-offset-[2.8px] outline-selected duration-200",
       )}
     >
-      <div className="flex flex-col space-y-4 p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="font-medium">
-              {t("cameraWizard.step2.candidateStreamTitle", {
-                number: (index ?? 0) + 1,
-              })}
-            </h4>
-            {candidateTest?.success && (
-              <div className="mt-1 text-sm text-muted-foreground">
-                {[
-                  candidateTest.resolution,
-                  candidateTest.fps
-                    ? `${candidateTest.fps} ${t(
-                        "cameraWizard.testResultLabels.fps",
-                      )}`
-                    : null,
-                  candidateTest.videoCodec,
-                  candidateTest.audioCodec,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-shrink-0 items-center gap-2">
-            {candidateTest?.success && (
-              <div className="flex items-center gap-2 text-sm">
-                <FaCircleCheck className="size-4 text-success" />
-                <span className="text-success">
-                  {t("cameraWizard.step2.connected")}
-                </span>
-              </div>
-            )}
-
-            {candidateTest && !candidateTest.success && (
-              <div className="flex items-center gap-2 text-sm">
-                <LuX className="size-4 text-danger" />
-                <span className="text-danger">
-                  {t("cameraWizard.step2.notConnected")}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-1 flex items-start gap-2">
-          <p
-            className="flex-1 cursor-pointer break-all text-sm text-primary-variant hover:underline"
-            onClick={() => setShowFull((s) => !s)}
-            title={t("cameraWizard.step2.toggleUriView")}
-          >
-            {showFull ? candidate.uri : maskUri(candidate.uri)}
-          </p>
-
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={onCopy}
-              className="mr-4 size-8 p-0"
-              title={t("cameraWizard.step2.uriCopy")}
-            >
-              {copiedUri === candidate.uri ? (
-                <FaCheck className="size-3" />
-              ) : (
-                <FaCopy className="size-3" />
+      <CardContent className="p-4">
+        <div className="flex flex-col space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium">
+                {t("cameraWizard.step2.candidateStreamTitle", {
+                  number: (index ?? 0) + 1,
+                })}
+              </h4>
+              {candidateTest?.success && (
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {[
+                    candidateTest.resolution,
+                    candidateTest.fps
+                      ? `${candidateTest.fps} ${t(
+                          "cameraWizard.testResultLabels.fps",
+                        )}`
+                      : null,
+                    candidateTest.videoCodec,
+                    candidateTest.audioCodec,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </div>
               )}
-            </Button>
+            </div>
 
+            <div className="flex flex-shrink-0 items-center gap-2">
+              {candidateTest?.success && (
+                <div className="flex items-center gap-2 text-sm">
+                  <FaCircleCheck className="size-4 text-success" />
+                  <span className="text-success">
+                    {t("cameraWizard.step2.connected")}
+                  </span>
+                </div>
+              )}
+
+              {candidateTest && !candidateTest.success && (
+                <div className="flex items-center gap-2 text-sm">
+                  <LuX className="size-4 text-danger" />
+                  <span className="text-danger">
+                    {t("cameraWizard.step2.notConnected")}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-1 flex items-start gap-2">
+            <p
+              className="flex-1 cursor-pointer break-all text-sm text-primary-variant hover:underline"
+              onClick={() => setShowFull((s) => !s)}
+              title={t("cameraWizard.step2.toggleUriView")}
+            >
+              {showFull ? candidate.uri : maskUri(candidate.uri)}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onCopy}
+                className="mr-4 size-8 p-0"
+                title={t("cameraWizard.step2.uriCopy")}
+              >
+                {copiedUri === candidate.uri ? (
+                  <FaCheck className="size-3" />
+                ) : (
+                  <FaCopy className="size-3" />
+                )}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isTesting}
+                onClick={() => testCandidate?.(candidate.uri)}
+                className="h-8 px-3 text-sm"
+              >
+                {isTesting ? (
+                  <>
+                    <ActivityIndicator className="mr-2 size-4" />{" "}
+                    {t("cameraWizard.step2.testConnection")}
+                  </>
+                ) : (
+                  t("cameraWizard.step2.testConnection")
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-row justify-end">
             <Button
               size="sm"
-              variant="outline"
-              onClick={() => testCandidate?.(candidate.uri)}
+              onClick={onUse}
+              variant="select"
               className="h-8 px-3 text-sm"
             >
-              {isTesting ? (
-                <ActivityIndicator className="size-3" />
-              ) : (
-                t("cameraWizard.step2.testConnection")
-              )}
+              {t("cameraWizard.step2.useCandidate")}
             </Button>
           </div>
         </div>
-
-        <div className="mt-3 flex flex-row justify-end">
-          <Button
-            size="sm"
-            onClick={onUse}
-            variant="select"
-            className="h-8 px-3 text-sm"
-          >
-            {t("cameraWizard.step2.useCandidate")}
-          </Button>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
