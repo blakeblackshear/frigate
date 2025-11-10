@@ -111,9 +111,14 @@ export default function Step2ProbeOrSnapshot({
             s.codec_name?.includes("pcm_alaw"),
         );
 
-        const resolution = videoStream
-          ? `${videoStream.width}x${videoStream.height}`
-          : undefined;
+        let resolution: string | undefined = undefined;
+        if (videoStream) {
+          const width = Number(videoStream.width || 0);
+          const height = Number(videoStream.height || 0);
+          if (width > 0 && height > 0) {
+            resolution = `${width}x${height}`;
+          }
+        }
 
         const fps = videoStream?.avg_frame_rate
           ? parseFloat(videoStream.avg_frame_rate.split("/")[0]) /
