@@ -241,6 +241,7 @@
     "export": "Export",
     "uiPlayground": "UI Playground",
     "faceLibrary": "Face Library",
+    "classification": "Classification",
     "user": {
       "title": "User",
       "account": "Account",
