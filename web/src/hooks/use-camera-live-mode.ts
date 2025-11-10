@@ -6,6 +6,7 @@ import { LivePlayerMode, LiveStreamMetadata } from "@/types/live";
 export default function useCameraLiveMode(
   cameras: CameraConfig[],
   windowVisible: boolean,
+  activeStreams?: { [cameraName: string]: string },
 ) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -20,16 +21,20 @@ export default function useCameraLiveMode(
       );
 
       if (isRestreamed) {
-        Object.values(camera.live.streams).forEach((streamName) => {
-          streamNames.add(streamName);
-        });
+        if (activeStreams && activeStreams[camera.name]) {
+          streamNames.add(activeStreams[camera.name]);
+        } else {
+          Object.values(camera.live.streams).forEach((streamName) => {
+            streamNames.add(streamName);
+          });
+        }
       }
     });
 
     return streamNames.size > 0
       ? Array.from(streamNames).sort().join(",")
       : null;
-  }, [cameras, config]);
+  }, [cameras, config, activeStreams]);
 
   const streamsFetcher = useCallback(async (key: string) => {
     const streamNames = key.split(",");

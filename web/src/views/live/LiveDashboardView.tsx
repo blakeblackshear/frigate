@@ -202,14 +202,6 @@ export default function LiveDashboardView({
     };
   }, []);
 
-  const {
-    preferredLiveModes,
-    setPreferredLiveModes,
-    resetPreferredLiveMode,
-    isRestreamedStates,
-    supportsAudioOutputStates,
-  } = useCameraLiveMode(cameras, windowVisible);
-
   const [globalAutoLive] = usePersistence("autoLiveView", true);
   const [displayCameraNames] = usePersistence("displayCameraNames", false);
 
@@ -238,6 +230,33 @@ export default function LiveDashboardView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [visibleCameraObserver.current],
   );
+
+  const activeStreams = useMemo(() => {
+    const streams: { [cameraName: string]: string } = {};
+    cameras.forEach((camera) => {
+      const availableStreams = camera.live.streams || {};
+      const streamNameFromSettings =
+        currentGroupStreamingSettings?.[camera.name]?.streamName || "";
+      const streamExists =
+        streamNameFromSettings &&
+        Object.values(availableStreams).includes(streamNameFromSettings);
+
+      const streamName = streamExists
+        ? streamNameFromSettings
+        : Object.values(availableStreams)[0] || "";
+
+      streams[camera.name] = streamName;
+    });
+    return streams;
+  }, [cameras, currentGroupStreamingSettings]);
+
+  const {
+    preferredLiveModes,
+    setPreferredLiveModes,
+    resetPreferredLiveMode,
+    isRestreamedStates,
+    supportsAudioOutputStates,
+  } = useCameraLiveMode(cameras, windowVisible, activeStreams);
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
