@@ -458,7 +458,15 @@ def _extract_fps(r_frame_rate: str) -> float | None:
         return None
 
 
-@router.get("/onvif/probe", dependencies=[Depends(require_role(["admin"]))])
+@router.get(
+    "/onvif/probe",
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Probe ONVIF device",
+    description=(
+        "Probe an ONVIF device to determine capabilities and optionally test available stream URIs. "
+        "Query params: host (required), port (default 80), username, password, test (boolean)."
+    ),
+)
 async def onvif_probe(
     request: Request,
     host: str = Query(None),
@@ -475,11 +483,11 @@ async def onvif_probe(
     - Media profiles count
     - PTZ support
     - Available presets
-    - Autotrack move status support
+    - Autotracking support
 
     Query Parameters:
         host: Device host/IP address (required)
-        port: Device port (default 8080)
+        port: Device port (default 80)
         username: ONVIF username (optional)
         password: ONVIF password (optional)
         test: run ffprobe on the stream (optional)
