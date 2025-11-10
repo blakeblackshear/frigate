@@ -761,6 +761,9 @@ export default function Step1NameCamera({
                           placeholder="80"
                         />
                       </FormControl>
+                      <FormDescription>
+                        {t("cameraWizard.step1.onvifPortDescription")}
+                      </FormDescription>
                       <FormMessage>
                         {fieldState.error ? fieldState.error.message : null}
                       </FormMessage>

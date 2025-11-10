@@ -189,7 +189,7 @@
       "brandUrlFormat": "For cameras with the RTSP URL format as: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://username:password@host:port/path",
       "connectionSettings": "Connection Settings",
-      "detectionMethod": "Detection Method",
+      "detectionMethod": "Stream Detection Method",
       "onvifPort": "ONVIF Port",
       "probeMode": "Probe camera",
       "manualMode": "Manual selection",
@@ -201,7 +201,8 @@
         "probingMetadata": "Probing camera metadata...",
         "fetchingSnapshot": "Fetching camera snapshot..."
       },
-      "detectionMethodDescription": "Probe the camera with ONVIF to find camera stream URLs, or manually select the camera brand to use pre-defined URLs. To enter a custom RTSP URL, choose the manual method and select \"Other\".",
+      "detectionMethodDescription": "Probe the camera with ONVIF (if supported) to find camera stream URLs, or manually select the camera brand to use pre-defined URLs. To enter a custom RTSP URL, choose the manual method and select \"Other\".",
+      "onvifPortDescription": "For cameras that support ONVIF, this is usually 80 or 8080.",
       "probingDevice": "Probing device...",
       "probeError": "Probe Error",
       "probeNoSuccess": "Probe unsuccessful",
