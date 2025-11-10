@@ -14,6 +14,7 @@ import {
   StreamRole,
   TestResult,
   FfprobeStream,
+  CandidateTestMap,
 } from "@/types/cameraWizard";
 import { Label } from "../../ui/label";
 import { FaCircleCheck } from "react-icons/fa6";
@@ -25,6 +26,16 @@ import {
 import { LuInfo, LuExternalLink } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 type Step3StreamConfigProps = {
   wizardData: Partial<WizardFormData>;
@@ -44,19 +55,48 @@ export default function Step3StreamConfig({
   const { t } = useTranslation(["views/settings", "components/dialog"]);
   const { getLocaleDocUrl } = useDocDomain();
   const [testingStreams, setTestingStreams] = useState<Set<string>>(new Set());
+  const [openCombobox, setOpenCombobox] = useState<string | null>(null);
 
   const streams = useMemo(() => wizardData.streams || [], [wizardData.streams]);
 
+  // Probe mode candidate tracking
+  const probeCandidates = useMemo(
+    () => (wizardData.probeCandidates || []) as string[],
+    [wizardData.probeCandidates],
+  );
+
+  const candidateTests = useMemo(
+    () => (wizardData.candidateTests || {}) as CandidateTestMap,
+    [wizardData.candidateTests],
+  );
+
+  const isProbeMode = !!wizardData.probeMode;
+
   const addStream = useCallback(() => {
+    const newStreamId = `stream_${Date.now()}`;
+
+    let initialUrl = "";
+    if (isProbeMode && probeCandidates.length > 0) {
+      // pick first candidate not already used
+      const used = new Set(streams.map((s) => s.url).filter(Boolean));
+      const firstAvailable = probeCandidates.find((c) => !used.has(c));
+      if (firstAvailable) {
+        initialUrl = firstAvailable;
+      }
+    }
+
     const newStream: StreamConfig = {
-      id: `stream_${Date.now()}`,
-      url: "",
+      id: newStreamId,
+      url: initialUrl,
       roles: [],
+      testResult: initialUrl ? candidateTests[initialUrl] : undefined,
+      userTested: initialUrl ? !!candidateTests[initialUrl] : false,
     };
+
     onUpdate({
       streams: [...streams, newStream],
     });
-  }, [streams, onUpdate]);
+  }, [streams, onUpdate, isProbeMode, probeCandidates, candidateTests]);
 
   const removeStream = useCallback(
     (streamId: string) => {
@@ -87,6 +127,19 @@ export default function Step3StreamConfig({
         }
       });
       return roles;
+    },
+    [streams],
+  );
+
+  const getUsedUrlsExcludingStream = useCallback(
+    (excludeStreamId: string) => {
+      const used = new Set<string>();
+      streams.forEach((s) => {
+        if (s.id !== excludeStreamId && s.url) {
+          used.add(s.url);
+        }
+      });
+      return used;
     },
     [streams],
   );
@@ -164,13 +217,27 @@ export default function Step3StreamConfig({
               fps: fps && !isNaN(fps) ? fps : undefined,
             };
 
+            // Update the stream and also persist the candidate test result
             updateStream(stream.id, { testResult, userTested: true });
+            onUpdate({
+              candidateTests: {
+                ...(wizardData.candidateTests || {}),
+                [stream.url]: testResult,
+              } as CandidateTestMap,
+            });
             toast.success(t("cameraWizard.step3.testSuccess"));
           } else {
             const error = response.data?.[0]?.stderr || "Unknown error";
+            const failResult: TestResult = { success: false, error };
             updateStream(stream.id, {
-              testResult: { success: false, error },
+              testResult: failResult,
               userTested: true,
+            });
+            onUpdate({
+              candidateTests: {
+                ...(wizardData.candidateTests || {}),
+                [stream.url]: failResult,
+              } as CandidateTestMap,
             });
             toast.error(t("cameraWizard.commonErrors.testFailed", { error }));
           }
@@ -180,9 +247,19 @@ export default function Step3StreamConfig({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Connection failed";
+          const catchResult: TestResult = {
+            success: false,
+            error: errorMessage,
+          };
           updateStream(stream.id, {
-            testResult: { success: false, error: errorMessage },
+            testResult: catchResult,
             userTested: true,
+          });
+          onUpdate({
+            candidateTests: {
+              ...(wizardData.candidateTests || {}),
+              [stream.url]: catchResult,
+            } as CandidateTestMap,
           });
           toast.error(
             t("cameraWizard.commonErrors.testFailed", { error: errorMessage }),
@@ -196,7 +273,7 @@ export default function Step3StreamConfig({
           });
         });
     },
-    [updateStream, t],
+    [updateStream, t, onUpdate, wizardData.candidateTests],
   );
 
   const setRestream = useCallback(
@@ -277,17 +354,100 @@ export default function Step3StreamConfig({
                     {t("cameraWizard.step3.url")}
                   </label>
                   <div className="flex flex-row items-center gap-2">
-                    <Input
-                      value={stream.url}
-                      onChange={(e) =>
-                        updateStream(stream.id, {
-                          url: e.target.value,
-                          testResult: undefined,
-                        })
-                      }
-                      className="h-8 flex-1"
-                      placeholder={t("cameraWizard.step3.streamUrlPlaceholder")}
-                    />
+                    {isProbeMode && probeCandidates.length > 0 ? (
+                      <Popover
+                        open={openCombobox === stream.id}
+                        onOpenChange={(isOpen) => {
+                          setOpenCombobox(isOpen ? stream.id : null);
+                        }}
+                      >
+                        <PopoverTrigger asChild>
+                          <div className="min-w-0 flex-1">
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={openCombobox === stream.id}
+                              className="h-8 w-full justify-between overflow-hidden text-left"
+                            >
+                              <span className="truncate">
+                                {stream.url
+                                  ? stream.url
+                                  : t("cameraWizard.step3.selectStream")}
+                              </span>
+                              <ChevronsUpDown className="ml-2 size-6 opacity-50" />
+                            </Button>
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-[--radix-popover-trigger-width] p-2"
+                          disablePortal
+                        >
+                          <Command>
+                            <CommandInput
+                              placeholder={t(
+                                "cameraWizard.step3.searchCandidates",
+                              )}
+                              className="h-9"
+                            />
+                            <CommandList>
+                              <CommandEmpty>
+                                {t("cameraWizard.step3.noStreamFound")}
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {probeCandidates
+                                  .filter((c) => {
+                                    const used = getUsedUrlsExcludingStream(
+                                      stream.id,
+                                    );
+                                    return !used.has(c);
+                                  })
+                                  .map((candidate) => (
+                                    <CommandItem
+                                      key={candidate}
+                                      value={candidate}
+                                      onSelect={() => {
+                                        updateStream(stream.id, {
+                                          url: candidate,
+                                          testResult:
+                                            candidateTests[candidate] ||
+                                            undefined,
+                                          userTested:
+                                            !!candidateTests[candidate],
+                                        });
+                                        setOpenCombobox(null);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-3",
+                                          stream.url === candidate
+                                            ? "opacity-100"
+                                            : "opacity-0",
+                                        )}
+                                      />
+                                      {candidate}
+                                    </CommandItem>
+                                  ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    ) : (
+                      <Input
+                        value={stream.url}
+                        onChange={(e) =>
+                          updateStream(stream.id, {
+                            url: e.target.value,
+                            testResult: undefined,
+                          })
+                        }
+                        className="h-8 flex-1"
+                        placeholder={t(
+                          "cameraWizard.step3.streamUrlPlaceholder",
+                        )}
+                      />
+                    )}
                     <Button
                       type="button"
                       onClick={() => testStream(stream)}
@@ -468,7 +628,7 @@ export default function Step3StreamConfig({
           <Button
             type="button"
             onClick={() => onNext?.()}
-            disabled={!canProceed}
+            disabled={!canProceed || testingStreams.size > 0}
             variant="select"
             className="sm:flex-1"
           >

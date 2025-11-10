@@ -142,11 +142,13 @@ export default function Step1NameCamera({
     onUpdate({ ...data, probeMode });
   };
 
-  const handleContinue = useCallback(() => {
-    const data = form.getValues();
-    onUpdate({ ...data, probeMode });
-    onNext();
-  }, [form, probeMode, onUpdate, onNext]);
+  const handleContinue = useCallback(async () => {
+    const isValid = await form.trigger();
+    if (isValid) {
+      const data = form.getValues();
+      onNext({ ...data, probeMode });
+    }
+  }, [form, probeMode, onNext]);
 
   return (
     <div className="space-y-6">

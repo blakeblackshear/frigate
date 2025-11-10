@@ -115,6 +115,8 @@ export type WizardFormData = {
   probeMode?: boolean; // true for probe, false for manual
   onvifPort?: number;
   probeResult?: OnvifProbeResponse;
+  probeCandidates?: string[]; // candidate URLs from probe
+  candidateTests?: CandidateTestMap; // test results for candidates
 };
 
 // API Response Types

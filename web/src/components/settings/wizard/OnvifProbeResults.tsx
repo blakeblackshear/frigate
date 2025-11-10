@@ -22,7 +22,6 @@ type OnvifProbeResultsProps = {
   isError: boolean;
   error?: string;
   probeResult?: OnvifProbeResponse;
-  onSelectCandidate: (uri: string) => void;
   onRetry: () => void;
   selectedUris?: string[];
   testCandidate?: (uri: string) => void;
@@ -35,7 +34,6 @@ export default function OnvifProbeResults({
   isError,
   error,
   probeResult,
-  onSelectCandidate,
   onRetry,
   selectedUris,
   testCandidate,
@@ -221,7 +219,6 @@ export default function OnvifProbeResults({
                     candidate={candidate}
                     copiedUri={copiedUri}
                     onCopy={() => handleCopyUri(candidate.uri)}
-                    onUse={() => onSelectCandidate(candidate.uri)}
                     isSelected={isSelected}
                     testCandidate={testCandidate}
                     candidateTest={candidateTest}
@@ -242,7 +239,6 @@ type CandidateItemProps = {
   index?: number;
   copiedUri: string | null;
   onCopy: () => void;
-  onUse: () => void;
   isSelected?: boolean;
   testCandidate?: (uri: string) => void;
   candidateTest?: TestResult | { success: false; error: string };
@@ -254,7 +250,6 @@ function CandidateItem({
   candidate,
   copiedUri,
   onCopy,
-  onUse,
   isSelected,
   testCandidate,
   candidateTest,
@@ -365,17 +360,6 @@ function CandidateItem({
                 )}
               </Button>
             </div>
-          </div>
-
-          <div className="mt-3 flex flex-row justify-end">
-            <Button
-              size="sm"
-              onClick={onUse}
-              variant="select"
-              className="h-8 px-3 text-sm"
-            >
-              {t("cameraWizard.step2.useCandidate")}
-            </Button>
           </div>
         </div>
       </CardContent>

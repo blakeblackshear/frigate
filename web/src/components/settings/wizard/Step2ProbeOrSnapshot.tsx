@@ -48,21 +48,11 @@ export default function Step2ProbeOrSnapshot({
   const [testingCandidates, setTestingCandidates] = useState<
     Record<string, boolean>
   >({} as Record<string, boolean>);
-  const [selectedCandidateUris, setSelectedCandidateUris] = useState<string[]>(
-    [],
-  );
   const [candidateTests, setCandidateTests] = useState<CandidateTestMap>(
     {} as CandidateTestMap,
   );
 
-  const handleSelectCandidate = useCallback((uri: string) => {
-    setSelectedCandidateUris((s) => {
-      if (s.includes(uri)) {
-        return s.filter((u) => u !== uri);
-      }
-      return [...s, uri];
-    });
-  }, []);
+  // selection is handled in Step 3 now; no local selection needed in Step 2
 
   const probeUri = useCallback(
     async (
@@ -204,6 +194,15 @@ export default function Step2ProbeOrSnapshot({
 
       if (response.data && response.data.success) {
         setProbeResult(response.data);
+        // Extract candidate URLs and pass to wizardData
+        const candidateUris = (response.data.rtsp_candidates || [])
+          .filter((c: { source: string }) => c.source === "GetStreamUri")
+          .map((c: { uri: string }) => c.uri);
+        onUpdate({
+          probeMode: true,
+          probeCandidates: candidateUris,
+          candidateTests: {},
+        });
       } else {
         setProbeError(response.data?.message || "Probe failed");
       }
@@ -222,73 +221,39 @@ export default function Step2ProbeOrSnapshot({
     } finally {
       setIsProbing(false);
     }
-  }, [wizardData, t]);
+  }, [wizardData, onUpdate, t]);
 
   const testAllSelectedCandidates = useCallback(async () => {
-    const uris = selectedCandidateUris;
+    const uris = (probeResult?.rtsp_candidates || [])
+      .filter((c) => c.source === "GetStreamUri")
+      .map((c) => c.uri);
+
     if (!uris || uris.length === 0) {
       toast.error(t("cameraWizard.commonErrors.noUrl"));
       return;
     }
 
-    setIsTesting(true);
-    setTestStatus(t("cameraWizard.step2.testing.probingMetadata"));
-
-    const streamConfigs: StreamConfig[] = [];
-
-    try {
-      for (let i = 0; i < uris.length; i++) {
-        const uri = uris[i];
-        const streamTestResult = await probeUri(uri, false);
-
-        if (streamTestResult && streamTestResult.success) {
-          const streamId = `stream_${Date.now()}_${i}`;
-          streamConfigs.push({
-            id: streamId,
-            url: uri,
-            roles:
-              streamConfigs.length === 0
-                ? (["detect"] as StreamRole[])
-                : ([] as StreamRole[]),
-            testResult: streamTestResult,
-          });
-          setCandidateTests((s) => ({ ...s, [uri]: streamTestResult }));
-        } else {
-          setCandidateTests((s) => ({
-            ...s,
-            [uri]: streamTestResult,
-          }));
-        }
-      }
-
-      if (streamConfigs.length > 0) {
-        onNext({ streams: streamConfigs });
-        toast.success(t("cameraWizard.step2.testSuccess"));
-      } else {
-        toast.error(
-          t("cameraWizard.commonErrors.testFailed", {
-            error: "No streams succeeded",
-          }),
-        );
-      }
-    } catch (error) {
-      const axiosError = error as {
-        response?: { data?: { message?: string; detail?: string } };
-        message?: string;
-      };
-      const errorMessage =
-        axiosError.response?.data?.message ||
-        axiosError.response?.data?.detail ||
-        axiosError.message ||
-        "Connection failed";
-      toast.error(
-        t("cameraWizard.commonErrors.testFailed", { error: errorMessage }),
-      );
-    } finally {
-      setIsTesting(false);
-      setTestStatus("");
+    // Prepare an initial stream so the wizard can proceed to step 3.
+    // Use the first candidate as the initial stream (no extra probing here).
+    const streamsToCreate: StreamConfig[] = [];
+    if (uris.length > 0) {
+      const first = uris[0];
+      streamsToCreate.push({
+        id: `stream_${Date.now()}`,
+        url: first,
+        roles: ["detect" as const],
+        testResult: candidateTests[first],
+      });
     }
-  }, [selectedCandidateUris, t, onNext, probeUri]);
+
+    // Use existing candidateTests state (may contain entries from individual tests)
+    onNext({
+      probeMode: true,
+      probeCandidates: uris,
+      candidateTests: candidateTests,
+      streams: streamsToCreate,
+    });
+  }, [probeResult, candidateTests, onNext, t]);
 
   const testCandidate = useCallback(
     async (uri: string) => {
@@ -465,9 +430,7 @@ export default function Step2ProbeOrSnapshot({
                 isError={!!probeError}
                 error={probeError || undefined}
                 probeResult={probeResult}
-                onSelectCandidate={handleSelectCandidate}
                 onRetry={probeCamera}
-                selectedUris={selectedCandidateUris}
                 testCandidate={testCandidate}
                 candidateTests={candidateTests}
                 testingCandidates={testingCandidates}
@@ -481,8 +444,15 @@ export default function Step2ProbeOrSnapshot({
             onBack={onBack}
             onTestAll={testAllSelectedCandidates}
             onRetry={probeCamera}
-            isTesting={isTesting}
-            selectedCount={selectedCandidateUris.length}
+            // disable next if either the overall testConnection is running or any candidate test is running
+            isTesting={
+              isTesting || Object.values(testingCandidates).some((v) => v)
+            }
+            candidateCount={
+              (probeResult?.rtsp_candidates || []).filter(
+                (c) => c.source === "GetStreamUri",
+              ).length
+            }
           />
         </>
       ) : (
@@ -543,8 +513,14 @@ export default function Step2ProbeOrSnapshot({
             onBack={onBack}
             onTestAll={testAllSelectedCandidates}
             onRetry={probeCamera}
-            isTesting={isTesting}
-            selectedCount={selectedCandidateUris.length}
+            isTesting={
+              isTesting || Object.values(testingCandidates).some((v) => v)
+            }
+            candidateCount={
+              (probeResult?.rtsp_candidates || []).filter(
+                (c) => c.source === "GetStreamUri",
+              ).length
+            }
             manualTestSuccess={!!testResult?.success}
             onContinue={handleContinue}
             onManualTest={testConnection}
@@ -603,7 +579,7 @@ type ProbeFooterProps = {
   onTestAll: () => void;
   onRetry: () => void;
   isTesting: boolean;
-  selectedCount: number;
+  candidateCount?: number;
   mode?: "probe" | "manual";
   manualTestSuccess?: boolean;
   onContinue?: () => void;
@@ -617,7 +593,7 @@ function ProbeFooterButtons({
   onTestAll,
   onRetry,
   isTesting,
-  selectedCount,
+  candidateCount = 0,
   mode = "probe",
   manualTestSuccess,
   onContinue,
@@ -698,8 +674,14 @@ function ProbeFooterButtons({
             variant="select"
             className="flex items-center justify-center gap-2 sm:flex-1"
           >
-            {isTesting && <ActivityIndicator className="size-4" />}
-            {t("cameraWizard.step2.retry")}
+            {isTesting ? (
+              <>
+                <ActivityIndicator className="size-4" />{" "}
+                {t("button.continue", { ns: "common" })}
+              </>
+            ) : (
+              t("cameraWizard.step2.retry")
+            )}
           </Button>
         )}
       </div>
@@ -715,12 +697,12 @@ function ProbeFooterButtons({
       <Button
         type="button"
         onClick={onTestAll}
-        disabled={isTesting || selectedCount === 0}
+        disabled={isTesting || (candidateCount ?? 0) === 0}
         variant="select"
         className="flex items-center justify-center gap-2 sm:flex-1"
       >
         {isTesting && <ActivityIndicator className="size-4" />}
-        {t("cameraWizard.step2.testConnection")}
+        {t("button.next", { ns: "common" })}
       </Button>
     </div>
   );
