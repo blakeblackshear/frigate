@@ -595,9 +595,13 @@ def get_classification_dataset(name: str):
             "last_training_image_count": 0,
             "current_image_count": current_image_count,
             "new_images_count": current_image_count,
+            "dataset_changed": current_image_count > 0,
         }
     else:
         last_training_count = metadata.get("last_training_image_count", 0)
+        # Dataset has changed if count is different (either added or deleted images)
+        dataset_changed = current_image_count != last_training_count
+        # Only show positive count for new images (ignore deletions in the count display)
         new_images_count = max(0, current_image_count - last_training_count)
         training_metadata = {
             "has_trained": True,
@@ -605,6 +609,7 @@ def get_classification_dataset(name: str):
             "last_training_image_count": last_training_count,
             "current_image_count": current_image_count,
             "new_images_count": new_images_count,
+            "dataset_changed": dataset_changed,
         }
 
     return JSONResponse(

@@ -126,6 +126,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
       last_training_image_count: number;
       current_image_count: number;
       new_images_count: number;
+      dataset_changed: boolean;
     } | null;
   }>(`classification/${model.name}/dataset`);
 
@@ -445,7 +446,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
                   variant={modelState == "failed" ? "destructive" : "select"}
                   disabled={
                     (modelState != "complete" && modelState != "failed") ||
-                    (trainingMetadata?.new_images_count ?? 0) === 0
+                    !trainingMetadata?.dataset_changed
                   }
                 >
                   {modelState == "training" ? (
@@ -466,14 +467,14 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
                   )}
                 </Button>
               </TooltipTrigger>
-              {((trainingMetadata?.new_images_count ?? 0) === 0 ||
+              {(!trainingMetadata?.dataset_changed ||
                 (modelState != "complete" && modelState != "failed")) && (
                 <TooltipPortal>
                   <TooltipContent>
                     {modelState == "training"
                       ? t("tooltip.trainingInProgress")
-                      : trainingMetadata?.new_images_count === 0
-                        ? t("tooltip.noNewImages")
+                      : !trainingMetadata?.dataset_changed
+                        ? t("tooltip.noChanges")
                         : t("tooltip.modelNotReady")}
                   </TooltipContent>
                 </TooltipPortal>
