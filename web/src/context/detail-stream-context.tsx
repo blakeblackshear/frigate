@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 
@@ -36,6 +42,23 @@ export function DetailStreamProvider({
     () => initialSelectedObjectIds ?? [],
   );
 
+  // When the parent provides a new initialSelectedObjectIds (for example
+  // when navigating between search results) update the selection so children
+  // like `ObjectTrackOverlay` receive the new ids immediately. We only
+  // perform this update when the incoming value actually changes.
+  useEffect(() => {
+    if (
+      initialSelectedObjectIds &&
+      (initialSelectedObjectIds.length !== selectedObjectIds.length ||
+        initialSelectedObjectIds.some((v, i) => selectedObjectIds[i] !== v))
+    ) {
+      setSelectedObjectIds(initialSelectedObjectIds);
+    }
+    // Intentionally include selectedObjectIds to compare previous value and
+    // avoid overwriting user interactions unless the incoming prop changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSelectedObjectIds]);
+
   const toggleObjectSelection = (id: string | undefined) => {
     if (id === undefined) {
       setSelectedObjectIds([]);
@@ -63,10 +86,33 @@ export function DetailStreamProvider({
     setAnnotationOffset(cfgOffset);
   }, [config, camera]);
 
-  // Clear selected objects when exiting detail mode or changing cameras
+  // Clear selected objects when exiting detail mode or when the camera
+  // changes for providers that are not initialized with an explicit
+  // `initialSelectedObjectIds` (e.g., the RecordingView). For providers
+  // that receive `initialSelectedObjectIds` (like SearchDetailDialog) we
+  // avoid clearing on camera change to prevent a race with children that
+  // immediately set selection when mounting.
+  const prevCameraRef = useRef<string | undefined>(undefined);
   useEffect(() => {
-    setSelectedObjectIds([]);
-  }, [isDetailMode, camera]);
+    // Always clear when leaving detail mode
+    if (!isDetailMode) {
+      setSelectedObjectIds([]);
+      prevCameraRef.current = camera;
+      return;
+    }
+
+    // If camera changed and the parent did not provide initialSelectedObjectIds,
+    // clear selection to preserve previous behavior.
+    if (
+      prevCameraRef.current !== undefined &&
+      prevCameraRef.current !== camera &&
+      initialSelectedObjectIds === undefined
+    ) {
+      setSelectedObjectIds([]);
+    }
+
+    prevCameraRef.current = camera;
+  }, [isDetailMode, camera, initialSelectedObjectIds]);
 
   const value: DetailStreamContextType = {
     selectedObjectIds,
