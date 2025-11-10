@@ -73,7 +73,9 @@ export default function useCameraLiveMode(
     [key: string]: LiveStreamMetadata;
   }>(restreamedStreamsKey, streamsFetcher, {
     revalidateOnFocus: false,
-    dedupingInterval: 10000,
+    revalidateOnReconnect: false,
+    revalidateIfStale: false,
+    dedupingInterval: 60000,
   });
 
   const [preferredLiveModes, setPreferredLiveModes] = useState<{

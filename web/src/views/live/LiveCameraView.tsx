@@ -162,6 +162,9 @@ export default function LiveCameraView({
     isRestreamed ? `go2rtc/streams/${streamName}` : null,
     {
       revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+      dedupingInterval: 60000,
     },
   );
 
