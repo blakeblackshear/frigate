@@ -267,13 +267,29 @@ export default function Step1NameCamera({
               }}
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="probe" id="probe-mode" />
+                <RadioGroupItem
+                  value="probe"
+                  id="probe-mode"
+                  className={
+                    probeMode
+                      ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                      : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                  }
+                />
                 <label htmlFor="probe-mode" className="cursor-pointer text-sm">
                   {t("cameraWizard.step1.probeMode")}
                 </label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="manual" id="manual-mode" />
+                <RadioGroupItem
+                  value="manual"
+                  id="manual-mode"
+                  className={
+                    !probeMode
+                      ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                      : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                  }
+                />
                 <label htmlFor="manual-mode" className="cursor-pointer text-sm">
                   {t("cameraWizard.step1.manualMode")}
                 </label>
