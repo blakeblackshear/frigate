@@ -52,8 +52,6 @@ export default function Step2ProbeOrSnapshot({
     {} as CandidateTestMap,
   );
 
-  // selection is handled in Step 3 now; no local selection needed in Step 2
-
   const probeUri = useCallback(
     async (
       uri: string,
@@ -701,7 +699,6 @@ function ProbeFooterButtons({
         variant="select"
         className="flex items-center justify-center gap-2 sm:flex-1"
       >
-        {isTesting && <ActivityIndicator className="size-4" />}
         {t("button.next", { ns: "common" })}
       </Button>
     </div>
