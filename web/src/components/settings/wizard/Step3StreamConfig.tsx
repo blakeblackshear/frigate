@@ -25,11 +25,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { LuInfo, LuExternalLink } from "react-icons/lu";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { isMobile } from "react-device-detect";
+import {
+  LuInfo,
+  LuExternalLink,
+  LuCheck,
+  LuChevronsUpDown,
+} from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -384,84 +390,165 @@ export default function Step3StreamConfig({
                   </label>
                   <div className="flex flex-row items-center gap-2">
                     {isProbeMode && probeCandidates.length > 0 ? (
-                      <Popover
-                        open={openCombobox === stream.id}
-                        onOpenChange={(isOpen) => {
-                          setOpenCombobox(isOpen ? stream.id : null);
-                        }}
-                      >
-                        <PopoverTrigger asChild>
-                          <div className="min-w-0 flex-1">
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={openCombobox === stream.id}
-                              className="h-8 w-full justify-between overflow-hidden text-left"
-                            >
-                              <span className="truncate">
-                                {stream.url
-                                  ? stream.url
-                                  : t("cameraWizard.step3.selectStream")}
-                              </span>
-                              <ChevronsUpDown className="ml-2 size-6 opacity-50" />
-                            </Button>
-                          </div>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-[--radix-popover-trigger-width] p-2"
-                          disablePortal
+                      // Responsive: Popover on desktop, Drawer on mobile
+                      !isMobile ? (
+                        <Popover
+                          open={openCombobox === stream.id}
+                          onOpenChange={(isOpen) => {
+                            setOpenCombobox(isOpen ? stream.id : null);
+                          }}
                         >
-                          <Command>
-                            <CommandInput
-                              placeholder={t(
-                                "cameraWizard.step3.searchCandidates",
-                              )}
-                              className="h-9"
-                            />
-                            <CommandList>
-                              <CommandEmpty>
-                                {t("cameraWizard.step3.noStreamFound")}
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {probeCandidates
-                                  .filter((c) => {
-                                    const used = getUsedUrlsExcludingStream(
-                                      stream.id,
-                                    );
-                                    return !used.has(c);
-                                  })
-                                  .map((candidate) => (
-                                    <CommandItem
-                                      key={candidate}
-                                      value={candidate}
-                                      onSelect={() => {
-                                        updateStream(stream.id, {
-                                          url: candidate,
-                                          testResult:
-                                            candidateTests[candidate] ||
-                                            undefined,
-                                          userTested:
-                                            !!candidateTests[candidate],
-                                        });
-                                        setOpenCombobox(null);
-                                      }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-3",
-                                          stream.url === candidate
-                                            ? "opacity-100"
-                                            : "opacity-0",
-                                        )}
-                                      />
-                                      {candidate}
-                                    </CommandItem>
-                                  ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                          <PopoverTrigger asChild>
+                            <div className="min-w-0 flex-1">
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openCombobox === stream.id}
+                                className="h-8 w-full justify-between overflow-hidden text-left"
+                              >
+                                <span className="truncate">
+                                  {stream.url
+                                    ? stream.url
+                                    : t("cameraWizard.step3.selectStream")}
+                                </span>
+                                <LuChevronsUpDown className="ml-2 size-6 opacity-50" />
+                              </Button>
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            className="w-[--radix-popover-trigger-width] p-2"
+                            disablePortal
+                          >
+                            <Command>
+                              <CommandInput
+                                placeholder={t(
+                                  "cameraWizard.step3.searchCandidates",
+                                )}
+                                className="h-9"
+                              />
+                              <CommandList>
+                                <CommandEmpty>
+                                  {t("cameraWizard.step3.noStreamFound")}
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {probeCandidates
+                                    .filter((c) => {
+                                      const used = getUsedUrlsExcludingStream(
+                                        stream.id,
+                                      );
+                                      return !used.has(c);
+                                    })
+                                    .map((candidate) => (
+                                      <CommandItem
+                                        key={candidate}
+                                        value={candidate}
+                                        onSelect={() => {
+                                          updateStream(stream.id, {
+                                            url: candidate,
+                                            testResult:
+                                              candidateTests[candidate] ||
+                                              undefined,
+                                            userTested:
+                                              !!candidateTests[candidate],
+                                          });
+                                          setOpenCombobox(null);
+                                        }}
+                                      >
+                                        <LuCheck
+                                          className={cn(
+                                            "mr-3 size-5",
+                                            stream.url === candidate
+                                              ? "opacity-100"
+                                              : "opacity-0",
+                                          )}
+                                        />
+                                        {candidate}
+                                      </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <Drawer
+                          open={openCombobox === stream.id}
+                          onOpenChange={(isOpen) =>
+                            setOpenCombobox(isOpen ? stream.id : null)
+                          }
+                        >
+                          <DrawerTrigger asChild>
+                            <div className="min-w-0 flex-1">
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openCombobox === stream.id}
+                                className="h-8 w-full justify-between overflow-hidden text-left"
+                              >
+                                <span className="truncate">
+                                  {stream.url
+                                    ? stream.url
+                                    : t("cameraWizard.step3.selectStream")}
+                                </span>
+                                <LuChevronsUpDown className="ml-2 size-6 opacity-50" />
+                              </Button>
+                            </div>
+                          </DrawerTrigger>
+                          <DrawerContent className="mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-2">
+                            <div className="mt-2">
+                              <Command>
+                                <CommandInput
+                                  placeholder={t(
+                                    "cameraWizard.step3.searchCandidates",
+                                  )}
+                                  className="h-9"
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    {t("cameraWizard.step3.noStreamFound")}
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {probeCandidates
+                                      .filter((c) => {
+                                        const used = getUsedUrlsExcludingStream(
+                                          stream.id,
+                                        );
+                                        return !used.has(c);
+                                      })
+                                      .map((candidate) => (
+                                        <CommandItem
+                                          key={candidate}
+                                          value={candidate}
+                                          onSelect={() => {
+                                            updateStream(stream.id, {
+                                              url: candidate,
+                                              testResult:
+                                                candidateTests[candidate] ||
+                                                undefined,
+                                              userTested:
+                                                !!candidateTests[candidate],
+                                            });
+                                            setOpenCombobox(null);
+                                          }}
+                                        >
+                                          <LuCheck
+                                            className={cn(
+                                              "mr-3 size-5",
+                                              stream.url === candidate
+                                                ? "opacity-100"
+                                                : "opacity-0",
+                                            )}
+                                          />
+                                          {candidate}
+                                        </CommandItem>
+                                      ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </div>
+                          </DrawerContent>
+                        </Drawer>
+                      )
                     ) : (
                       <Input
                         value={stream.url}
