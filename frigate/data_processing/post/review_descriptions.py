@@ -30,6 +30,7 @@ from ..types import DataProcessorMetrics
 logger = logging.getLogger(__name__)
 
 RECORDING_BUFFER_EXTENSION_PERCENT = 0.10
+MIN_RECORDING_DURATION = 10
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
@@ -133,6 +134,14 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 buffer_extension = min(
                     10, max(2, duration * RECORDING_BUFFER_EXTENSION_PERCENT)
                 )
+
+                # Ensure minimum total duration for short review items
+                # This provides better context for brief events
+                total_duration = duration + (2 * buffer_extension)
+                if total_duration < MIN_RECORDING_DURATION:
+                    # Expand buffer to reach minimum duration, still respecting max of 10s per side
+                    additional_buffer_per_side = (MIN_RECORDING_DURATION - duration) / 2
+                    buffer_extension = min(10, additional_buffer_per_side)
 
                 thumbs = self.get_recording_frames(
                     camera,
