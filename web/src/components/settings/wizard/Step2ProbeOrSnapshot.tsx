@@ -191,6 +191,7 @@ export default function Step2ProbeOrSnapshot({
           username: wizardData.username || "",
           password: wizardData.password || "",
           test: false,
+          auth_type: wizardData.useDigestAuth ? "digest" : "basic",
         },
         timeout: 30000,
       });

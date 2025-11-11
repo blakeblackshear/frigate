@@ -114,6 +114,7 @@ export type WizardFormData = {
   streams?: StreamConfig[];
   probeMode?: boolean; // true for probe, false for manual
   onvifPort?: number;
+  useDigestAuth?: boolean;
   probeResult?: OnvifProbeResponse;
   probeCandidates?: string[]; // candidate URLs from probe
   candidateTests?: CandidateTestMap; // test results for candidates
