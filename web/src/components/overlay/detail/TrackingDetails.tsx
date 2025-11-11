@@ -343,6 +343,10 @@ export function TrackingDetails({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayedRecordTime]);
 
+  const onUploadFrameToPlus = useCallback(() => {
+    return axios.post(`/${event.camera}/plus/${currentTime}`);
+  }, [event.camera, currentTime]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -388,6 +392,7 @@ export function TrackingDetails({
               frigateControls={true}
               onTimeUpdate={handleTimeUpdate}
               onSeekToTime={handleSeekToTime}
+              onUploadFrame={onUploadFrameToPlus}
               isDetailMode={true}
               camera={event.camera}
               currentTimeOverride={currentTime}
