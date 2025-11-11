@@ -16,6 +16,7 @@ import type {
 } from "@/types/cameraWizard";
 import { FaCircleCheck } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
+import { maskUri } from "@/utils/cameraUtil";
 
 type OnvifProbeResultsProps = {
   isLoading: boolean;
@@ -257,12 +258,6 @@ function CandidateItem({
 }: CandidateItemProps) {
   const { t } = useTranslation(["views/settings"]);
   const [showFull, setShowFull] = useState(false);
-
-  const maskUri = (uri: string) => {
-    const match = uri.match(/rtsp:\/\/([^:]+):([^@]+)@(.+)/);
-    if (match) return `rtsp://${match[1]}:••••@${match[3]}`;
-    return uri;
-  };
 
   return (
     <Card

@@ -18,6 +18,7 @@ import { PlayerStatsType } from "@/types/live";
 import { FaCircleCheck, FaTriangleExclamation } from "react-icons/fa6";
 import { LuX } from "react-icons/lu";
 import { Card, CardContent } from "../../ui/card";
+import { maskUri } from "@/utils/cameraUtil";
 
 type Step4ValidationProps = {
   wizardData: Partial<WizardFormData>;
@@ -374,7 +375,7 @@ export default function Step4Validation({
 
                   <div className="mb-2 flex flex-col justify-between gap-1 md:flex-row md:items-center">
                     <span className="break-all text-sm text-muted-foreground">
-                      {stream.url}
+                      {maskUri(stream.url)}
                     </span>
                     <Button
                       onClick={() => {

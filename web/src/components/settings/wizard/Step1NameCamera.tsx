@@ -8,6 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -81,6 +82,7 @@ export default function Step1NameCamera({
       password: z.string().optional(),
       brandTemplate: z.enum(CAMERA_BRAND_VALUES).optional(),
       onvifPort: z.coerce.number().int().min(1).max(65535).optional(),
+      useDigestAuth: z.boolean().optional(),
       customUrl: z
         .string()
         .optional()
@@ -118,6 +120,7 @@ export default function Step1NameCamera({
           : "dahua",
       customUrl: wizardData.customUrl || "",
       onvifPort: wizardData.onvifPort ?? 80,
+      useDigestAuth: wizardData.useDigestAuth ?? false,
     },
     mode: "onChange",
   });
@@ -325,6 +328,32 @@ export default function Step1NameCamera({
                   <FormMessage>
                     {fieldState.error ? fieldState.error.message : null}
                   </FormMessage>
+                </FormItem>
+              )}
+            />
+          )}
+
+          {probeMode && (
+            <FormField
+              control={form.control}
+              name="useDigestAuth"
+              render={({ field }) => (
+                <FormItem className="flex items-start space-x-2">
+                  <FormControl>
+                    <Checkbox
+                      className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
+                      checked={!!field.value}
+                      onCheckedChange={(val) => field.onChange(!!val)}
+                    />
+                  </FormControl>
+                  <div className="flex flex-1 flex-col space-y-1">
+                    <FormLabel className="mb-0 text-primary-variant">
+                      {t("cameraWizard.step1.useDigestAuth")}
+                    </FormLabel>
+                    <FormDescription className="mt-0">
+                      {t("cameraWizard.step1.useDigestAuthDescription")}
+                    </FormDescription>
+                  </div>
                 </FormItem>
               )}
             />
