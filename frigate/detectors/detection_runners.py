@@ -255,6 +255,7 @@ class OpenVINOModelRunner(BaseModelRunner):
     def __init__(self, model_path: str, device: str, model_type: str, **kwargs):
         self.model_path = model_path
         self.device = device
+        self.model_type = model_type
 
         if device == "NPU" and not OpenVINOModelRunner.is_model_npu_supported(
             model_type
@@ -341,6 +342,13 @@ class OpenVINOModelRunner(BaseModelRunner):
         # Lock prevents concurrent access to infer_request
         # Needed for JinaV2: genai thread (text) + embeddings thread (vision)
         with self._inference_lock:
+            from frigate.embeddings.types import EnrichmentModelTypeEnum
+
+            if self.model_type in [EnrichmentModelTypeEnum.arcface.value]:
+                # For face recognition models, create a fresh infer_request
+                # for each inference to avoid state pollution that causes incorrect results.
+                self.infer_request = self.compiled_model.create_infer_request()
+
             # Handle single input case for backward compatibility
             if (
                 len(inputs) == 1
