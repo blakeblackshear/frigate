@@ -72,7 +72,10 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+    },
+    "inProgress": "In progress",
+    "invalidStartTime": "Invalid start time",
+    "invalidEndTime": "Invalid end time"
   },
   "unit": {
     "speed": {
@@ -144,7 +147,8 @@
     "unselect": "Unselect",
     "export": "Export",
     "deleteNow": "Delete Now",
-    "next": "Next"
+    "next": "Next",
+    "continue": "Continue"
   },
   "menu": {
     "system": "System",
@@ -237,6 +241,7 @@
     "export": "Export",
     "uiPlayground": "UI Playground",
     "faceLibrary": "Face Library",
+    "classification": "Classification",
     "user": {
       "title": "User",
       "account": "Account",

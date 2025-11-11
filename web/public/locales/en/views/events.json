@@ -24,8 +24,8 @@
     "label": "Detail",
     "noDataFound": "No detail data to review",
     "aria": "Toggle detail view",
-    "trackedObject_one": "object",
-    "trackedObject_other": "objects",
+    "trackedObject_one": "{{count}} object",
+    "trackedObject_other": "{{count}} objects",
     "noObjectDetailData": "No object detail data available.",
     "settings": "Detail View Settings",
     "alwaysExpandActive": {

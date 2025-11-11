@@ -1155,7 +1155,7 @@ function ObjectDetailsTab({
                     </div>
                     <div className="flex flex-row items-center gap-2 text-sm smart-capitalize">
                       {getIconForLabel(search.label, "size-4 text-primary")}
-                      {getTranslatedLabel(search.label)}
+                      {getTranslatedLabel(search.label, search.data.type)}
                       {search.sub_label && ` (${search.sub_label})`}
                       {isAdmin && search.end_time && (
                         <Tooltip>
@@ -1394,7 +1394,9 @@ function ObjectDetailsTab({
               {state == "submitted" && (
                 <div className="flex flex-row items-center justify-center gap-2">
                   <FaCheckCircle className="size-4 text-success" />
-                  {t("explore.plus.review.state.submitted")}
+                  {t("explore.plus.review.state.submitted", {
+                    ns: "components/dialog",
+                  })}
                 </div>
               )}
             </div>

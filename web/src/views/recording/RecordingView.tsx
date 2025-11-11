@@ -649,7 +649,7 @@ export function RecordingView({
                   value="detail"
                   aria-label="Detail Stream"
                 >
-                  <div className="">Detail</div>
+                  <div className="">{t("detail.label")}</div>
                 </ToggleGroupItem>
               </ToggleGroup>
             ) : (

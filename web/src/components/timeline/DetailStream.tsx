@@ -349,7 +349,7 @@ function ReviewGroup({
       ? fetchedEvents.length
       : (review.data.objects ?? []).length;
 
-    return `${objectCount} ${t("detail.trackedObject", { count: objectCount })}`;
+    return `${t("detail.trackedObject", { count: objectCount })}`;
   }, [review, t, fetchedEvents]);
 
   const reviewDuration = useMemo(
@@ -478,7 +478,7 @@ function ReviewGroup({
                     <div className="rounded-full bg-muted-foreground p-1">
                       {getIconForLabel(audioLabel, "size-3 text-white")}
                     </div>
-                    <span>{getTranslatedLabel(audioLabel)}</span>
+                    <span>{getTranslatedLabel(audioLabel, "audio")}</span>
                   </div>
                 </div>
               ))}
@@ -513,7 +513,8 @@ function EventList({
 
   const isSelected = selectedObjectIds.includes(event.id);
 
-  const label = event.sub_label || getTranslatedLabel(event.label);
+  const label =
+    event.sub_label || getTranslatedLabel(event.label, event.data.type);
 
   const handleObjectSelect = (event: Event | undefined) => {
     if (event) {
