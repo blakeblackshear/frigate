@@ -1131,7 +1131,8 @@ detectors:  # required
     type: axengine  # required
 
 model:  # required
-  path: yolov9_320  # required
+  path: frigate-yolov9-tiny  # required
+  model_type: yolo-generic # required
   width: 320  # required
   height: 320  # required
   tensor_format: bgr  # required

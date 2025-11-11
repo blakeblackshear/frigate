@@ -20,9 +20,12 @@ logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "axengine"
 
-NUM_CLASSES = 80
-CONF_THRESH = 0.65
-IOU_THRESH = 0.45
+supported_models = {
+    ModelTypeEnum.yologeneric: "frigate-yolov9-tiny",
+}
+
+model_cache_dir = os.path.join(MODEL_CACHE_DIR, "axengine_cache/")
+
 
 class AxengineDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
@@ -34,100 +37,57 @@ class Axengine(DetectionApi):
         super().__init__(config)
         self.height = config.model.height
         self.width = config.model.width
-        model_path = config.model.path or "yolov9_320"
-        self.session = axe.InferenceSession(f"/axmodels/{model_path}.axmodel")
+        model_path = config.model.path or "frigate-yolov9-tiny"
+
+        model_props = self.parse_model_input(model_path)
+
+        self.session = axe.InferenceSession(model_props["path"])
 
     def __del__(self):
         pass
 
-    def post_processing(self, raw_output, input_shape):
-        """
-        raw_output: [1, 1, 84, 8400]
-        Returns: numpy array of shape (20, 6) [class_id, score, y_min, x_min, y_max, x_max] in normalized coordinates
-        """
-        results = np.zeros((20, 6), np.float32)
+    def parse_model_input(self, model_path):
+        model_props = {}
+        model_props["preset"] = True
 
-        try:
-            if not isinstance(raw_output, np.ndarray):
-                raw_output = np.array(raw_output)
+        model_matched = False
+        for model_type, pattern in supported_models.items():
+            if re.match(pattern, model_path):
+                model_matched = True
+                model_props["model_type"] = model_type
 
-            if len(raw_output.shape) == 4 and raw_output.shape[0] == 1 and raw_output.shape[1] == 1:
-                raw_output = raw_output.squeeze(1)
+        if model_matched:
+            model_props["filename"] = model_path + f".axmodel"
+            model_props["path"] = model_cache_dir + model_props["filename"]
 
-            pred = raw_output[0].transpose(1, 0)
-
-            bxy = pred[:, :2]
-            bwh = pred[:, 2:4]
-            cls = pred[:, 4:4 + NUM_CLASSES]
-
-            cx = bxy[:, 0]
-            cy = bxy[:, 1]
-            w = bwh[:, 0]
-            h = bwh[:, 1]
-
-            x_min = cx - w / 2
-            y_min = cy - h / 2
-            x_max = cx + w / 2
-            y_max = cy + h / 2
-
-            scores = np.max(cls, axis=1)
-            class_ids = np.argmax(cls, axis=1)
-
-            mask = scores >= CONF_THRESH
-            boxes = np.stack([x_min, y_min, x_max, y_max], axis=1)[mask]
-            scores = scores[mask]
-            class_ids = class_ids[mask]
-
-            if len(boxes) == 0:
-                return results
-
-            boxes_nms = np.stack([x_min[mask], y_min[mask],
-                                x_max[mask] - x_min[mask],
-                                y_max[mask] - y_min[mask]], axis=1)
-
-            indices = cv2.dnn.NMSBoxes(
-                boxes_nms.tolist(),
-                scores.tolist(),
-                score_threshold=CONF_THRESH,
-                nms_threshold=IOU_THRESH
+        if not os.path.isfile(model_props["path"]):
+            self.download_model(model_props["filename"])
+        else:
+            supported_models_str = ", ".join(
+                model[1:-1] for model in supported_models
             )
+            raise Exception(
+                f"Model {model_path} is unsupported. Provide your own model or choose one of the following: {supported_models_str}"
+            )
+        return model_props
 
-            if len(indices) == 0:
-                return results
+    def download_model(self, filename):
+        if not os.path.isdir(model_cache_dir):
+            os.mkdir(model_cache_dir)
 
-            indices = indices.flatten()
-
-            sorted_indices = sorted(indices, key=lambda idx: scores[idx], reverse=True)
-            indices = sorted_indices
-
-            valid_detections = 0
-            for i, idx in enumerate(indices):
-                if i >= 20:
-                    break
-
-                x_min_val, y_min_val, x_max_val, y_max_val = boxes[idx]
-                score = scores[idx]
-                class_id = class_ids[idx]
-
-                if score < CONF_THRESH:
-                    continue
-
-                results[valid_detections] = [
-                    float(class_id),                     # class_id
-                    float(score),                        # score
-                    max(0, y_min_val) / input_shape[0],  # y_min
-                    max(0, x_min_val) / input_shape[1],  # x_min
-                    min(1, y_max_val / input_shape[0]),  # y_max
-                    min(1, x_max_val / input_shape[1])   # x_max
-                ]
-                valid_detections += 1
-
-            return results
-
-        except Exception as e:
-            return results
+        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
+        urllib.request.urlretrieve(
+            f"{GITHUB_ENDPOINT}/ivanshi1108/assets/releases/download/v0.16.2/{filename}",
+            model_cache_dir + filename,
+        )
 
     def detect_raw(self, tensor_input):
         results = None
         results = self.session.run(None, {"images": tensor_input})
-        return self.post_processing(results, (self.width, self.height))
+        if self.detector_config.model.model_type == ModelTypeEnum.yologeneric:
+            return post_process_yolo(results, self.width, self.height)
+        else:
+            raise ValueError(
+                f'Model type "{self.detector_config.model.model_type}" is currently not supported.'
+            )
+

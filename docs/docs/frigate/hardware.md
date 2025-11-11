@@ -116,7 +116,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 | Name             | AXERA AX650N/AX8850N Inference Time |
 | ---------------- | ----------------------------------- |
-| yolov9           | ~ 1.012 ms                          |
+| yolov9-tiny      | ~ 1.012 ms                          |
 
 ### Hailo-8
 
