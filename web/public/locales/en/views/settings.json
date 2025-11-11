@@ -196,6 +196,8 @@
       "manualMode": "Manual selection",
       "detectionMethodDescription": "Probe the camera with ONVIF (if supported) to find camera stream URLs, or manually select the camera brand to use pre-defined URLs. To enter a custom RTSP URL, choose the manual method and select \"Other\".",
       "onvifPortDescription": "For cameras that support ONVIF, this is usually 80 or 8080.",
+      "useDigestAuth": "Use digest authentication",
+      "useDigestAuthDescription": "Use HTTP digest authentication when connecting to ONVIF-enabled cameras.",
       "errors": {
         "brandOrCustomUrlRequired": "Either select a camera brand with host/IP or choose 'Other' with a custom URL",
         "nameRequired": "Camera name is required",
