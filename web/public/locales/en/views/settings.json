@@ -8,7 +8,7 @@
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Debug - Frigate",
-    "general": "General Settings - Frigate",
+    "general": "UI Settings - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
     "notifications": "Notification Settings - Frigate"
   },
@@ -37,7 +37,7 @@
     "noCamera": "No Camera"
   },
   "general": {
-    "title": "General Settings",
+    "title": "UI Settings",
     "liveDashboard": {
       "title": "Live Dashboard",
       "automaticLiveView": {
@@ -51,6 +51,10 @@
       "displayCameraNames": {
         "label": "Always Show Camera Names",
         "desc": "Always show the camera names in a chip in the multi-camera live view dashboard."
+      },
+      "liveFallbackTimeout": {
+        "label": "Live Player Fallback Timeout",
+        "desc": "When a camera's high quality live stream is unavailable, fall back to low bandwidth mode after this many seconds. Default: 3."
       }
     },
     "storedLayouts": {
