@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 DETECTOR_KEY = "axengine"
 
 supported_models = {
-    ModelTypeEnum.yologeneric: "frigate-yolov9-tiny",
+    ModelTypeEnum.yologeneric: "frigate-yolov9-.*$",
 }
 
 model_cache_dir = os.path.join(MODEL_CACHE_DIR, "axengine_cache/")
@@ -38,9 +38,7 @@ class Axengine(DetectionApi):
         self.height = config.model.height
         self.width = config.model.width
         model_path = config.model.path or "frigate-yolov9-tiny"
-
         model_props = self.parse_model_input(model_path)
-
         self.session = axe.InferenceSession(model_props["path"])
 
     def __del__(self):
@@ -51,6 +49,7 @@ class Axengine(DetectionApi):
         model_props["preset"] = True
 
         model_matched = False
+
         for model_type, pattern in supported_models.items():
             if re.match(pattern, model_path):
                 model_matched = True
@@ -60,8 +59,8 @@ class Axengine(DetectionApi):
             model_props["filename"] = model_path + f".axmodel"
             model_props["path"] = model_cache_dir + model_props["filename"]
 
-        if not os.path.isfile(model_props["path"]):
-            self.download_model(model_props["filename"])
+            if not os.path.isfile(model_props["path"]):
+                self.download_model(model_props["filename"])
         else:
             supported_models_str = ", ".join(
                 model[1:-1] for model in supported_models
