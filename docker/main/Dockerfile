@@ -189,7 +189,7 @@ RUN /build_pysqlite3.sh
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
     if [ "$DEBUG" = "true" ]; then \
-        pip3 wheel --wheel-dir=/wheels -r /requirements-dev.txt; \
+    pip3 wheel --wheel-dir=/wheels -r /requirements-dev.txt; \
     fi
 
 # Install HailoRT & Wheels
@@ -318,6 +318,10 @@ FROM --platform=$BUILDPLATFORM node:20 AS web-build
 
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./
+
+ARG GIT_COMMIT_HASH
+ENV GIT_COMMIT_HASH=$GIT_COMMIT_HASH
+
 RUN npm install
 
 COPY web/ ./
