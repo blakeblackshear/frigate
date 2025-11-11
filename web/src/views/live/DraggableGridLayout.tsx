@@ -86,14 +86,6 @@ export default function DraggableGridLayout({
 
   // preferred live modes per camera
 
-  const {
-    preferredLiveModes,
-    setPreferredLiveModes,
-    resetPreferredLiveMode,
-    isRestreamedStates,
-    supportsAudioOutputStates,
-  } = useCameraLiveMode(cameras, windowVisible);
-
   const [globalAutoLive] = usePersistence("autoLiveView", true);
   const [displayCameraNames] = usePersistence("displayCameraNames", false);
 
@@ -105,6 +97,33 @@ export default function DraggableGridLayout({
       return allGroupsStreamingSettings[cameraGroup];
     }
   }, [allGroupsStreamingSettings, cameraGroup]);
+
+  const activeStreams = useMemo(() => {
+    const streams: { [cameraName: string]: string } = {};
+    cameras.forEach((camera) => {
+      const availableStreams = camera.live.streams || {};
+      const streamNameFromSettings =
+        currentGroupStreamingSettings?.[camera.name]?.streamName || "";
+      const streamExists =
+        streamNameFromSettings &&
+        Object.values(availableStreams).includes(streamNameFromSettings);
+
+      const streamName = streamExists
+        ? streamNameFromSettings
+        : Object.values(availableStreams)[0] || "";
+
+      streams[camera.name] = streamName;
+    });
+    return streams;
+  }, [cameras, currentGroupStreamingSettings]);
+
+  const {
+    preferredLiveModes,
+    setPreferredLiveModes,
+    resetPreferredLiveMode,
+    isRestreamedStates,
+    supportsAudioOutputStates,
+  } = useCameraLiveMode(cameras, windowVisible, activeStreams);
 
   // grid layout
 

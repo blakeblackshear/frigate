@@ -99,6 +99,10 @@ export default function UiSettingsView() {
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
   const [weekStartsOn, setWeekStartsOn] = usePersistence("weekStartsOn", 0);
   const [alertVideos, setAlertVideos] = usePersistence("alertVideos", true);
+  const [fallbackTimeout, setFallbackTimeout] = usePersistence(
+    "liveFallbackTimeout",
+    3,
+  );
 
   return (
     <>
@@ -160,6 +164,48 @@ export default function UiSettingsView() {
               <div className="my-2 max-w-5xl text-sm text-muted-foreground">
                 <p>{t("general.liveDashboard.displayCameraNames.desc")}</p>
               </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex flex-row items-center justify-start gap-2">
+                <Label
+                  className="cursor-pointer"
+                  htmlFor="live-fallback-timeout"
+                >
+                  {t("general.liveDashboard.liveFallbackTimeout.label")}
+                </Label>
+              </div>
+              <div className="my-2 max-w-5xl text-sm text-muted-foreground">
+                <p>{t("general.liveDashboard.liveFallbackTimeout.desc")}</p>
+              </div>
+              <Select
+                value={fallbackTimeout?.toString()}
+                onValueChange={(value) => setFallbackTimeout(parseInt(value))}
+              >
+                <SelectTrigger className="w-36">
+                  {t("time.second", {
+                    ns: "common",
+                    time: fallbackTimeout,
+                    count: fallbackTimeout,
+                  })}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((timeout) => (
+                      <SelectItem
+                        key={timeout}
+                        className="cursor-pointer"
+                        value={timeout.toString()}
+                      >
+                        {t("time.second", {
+                          ns: "common",
+                          time: timeout,
+                          count: timeout,
+                        })}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

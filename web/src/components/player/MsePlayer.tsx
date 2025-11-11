@@ -1,4 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
+import { usePersistence } from "@/hooks/use-persistence";
 import {
   LivePlayerError,
   PlayerStatsType,
@@ -70,6 +71,8 @@ function MSEPlayer({
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
   const [errorCount, setErrorCount] = useState<number>(0);
   const totalBytesLoaded = useRef(0);
+
+  const [fallbackTimeout] = usePersistence<number>("liveFallbackTimeout", 3);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -475,7 +478,10 @@ function MSEPlayer({
         setBufferTimeout(undefined);
       }
 
-      const timeoutDuration = bufferTime == 0 ? 5000 : 3000;
+      const timeoutDuration =
+        bufferTime == 0
+          ? (fallbackTimeout ?? 3) * 2 * 1000
+          : (fallbackTimeout ?? 3) * 1000;
       setBufferTimeout(
         setTimeout(() => {
           if (
@@ -500,6 +506,7 @@ function MSEPlayer({
     onError,
     onPlaying,
     playbackEnabled,
+    fallbackTimeout,
   ]);
 
   useEffect(() => {
