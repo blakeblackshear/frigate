@@ -73,12 +73,22 @@ export async function detectReolinkCamera(
 }
 
 /**
- * Mask credentials in RTSP URIs for display (e.g., rtsp://user:pass@host -> rtsp://user:••••@host)
+ * Mask credentials in RTSP URIs for display
  */
 export function maskUri(uri: string): string {
   try {
-    const match = uri.match(/rtsp:\/\/([^:]+):([^@]+)@(.+)/);
-    if (match) return `rtsp://${match[1]}:${"*".repeat(4)}@${match[3]}`;
+    // Handle RTSP URLs with user:pass@host format
+    const rtspMatch = uri.match(/rtsp:\/\/([^:]+):([^@]+)@(.+)/);
+    if (rtspMatch) {
+      return `rtsp://${rtspMatch[1]}:${"*".repeat(4)}@${rtspMatch[3]}`;
+    }
+
+    // Handle HTTP/HTTPS URLs with password query parameter
+    const urlObj = new URL(uri);
+    if (urlObj.searchParams.has("password")) {
+      urlObj.searchParams.set("password", "*".repeat(4));
+      return urlObj.toString();
+    }
   } catch (e) {
     // ignore
   }
