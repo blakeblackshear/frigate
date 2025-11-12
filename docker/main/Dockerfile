@@ -189,7 +189,7 @@ RUN /build_pysqlite3.sh
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
     if [ "$DEBUG" = "true" ]; then \
-    pip3 wheel --wheel-dir=/wheels -r /requirements-dev.txt; \
+        pip3 wheel --wheel-dir=/wheels -r /requirements-dev.txt; \
     fi
 
 # Install HailoRT & Wheels
