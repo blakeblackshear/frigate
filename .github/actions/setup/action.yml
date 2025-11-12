@@ -4,6 +4,8 @@ inputs:
   GITHUB_TOKEN:
     required: true
 outputs:
+  short-sha:
+    value: ${{ steps.create-short-sha.outputs.SHORT_SHA }}
   image-name:
     value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ steps.create-short-sha.outputs.SHORT_SHA }}
   cache-name:
