@@ -37,6 +37,7 @@ jobs:
           context: .
           file: docker/main/Dockerfile
           push: true
+          build-args: GIT_COMMIT_HASH=${GITHUB_SHA::7}
           platforms: linux/amd64
           target: frigate
           tags: ${{ steps.setup.outputs.image-name }}-amd64
@@ -61,6 +62,7 @@ jobs:
           context: .
           file: docker/main/Dockerfile
           push: true
+          build-args: GIT_COMMIT_HASH=${GITHUB_SHA::7}
           platforms: linux/arm64
           target: frigate
           tags: |
