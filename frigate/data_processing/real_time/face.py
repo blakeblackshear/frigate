@@ -424,7 +424,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             if not res:
                 return {
-                    "message": "No face was recognized.",
+                    "message": "Model is still training, please try again in a few moments.",
                     "success": False,
                 }
 
