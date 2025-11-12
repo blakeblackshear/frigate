@@ -70,7 +70,7 @@ export default function StorageMetrics({
   ]);
 
   const earliestDate = useMemo(() => {
-    const keys = Object.keys(recordingsSummary || {}).sort();
+    const keys = Object.keys(recordingsSummary || {});
     return keys.length
       ? new TZDate(keys[0] + "T00:00:00", timezone).getTime() / 1000
       : null;
