@@ -683,6 +683,22 @@ function ObjectDetailsTab({
 
   const mutate = useGlobalMutation();
 
+  // Helper to map over SWR cached search results while preserving
+  // either paginated format (SearchResult[][]) or flat format (SearchResult[])
+  const mapSearchResults = useCallback(
+    (
+      currentData: SearchResult[][] | SearchResult[] | undefined,
+      fn: (event: SearchResult) => SearchResult,
+    ) => {
+      if (!currentData) return currentData;
+      if (Array.isArray(currentData[0])) {
+        return (currentData as SearchResult[][]).map((page) => page.map(fn));
+      }
+      return (currentData as SearchResult[]).map(fn);
+    },
+    [],
+  );
+
   // users
 
   const isAdmin = useIsAdmin();
@@ -810,17 +826,12 @@ function ObjectDetailsTab({
             (key.includes("events") ||
               key.includes("events/search") ||
               key.includes("events/explore")),
-          (currentData: SearchResult[][] | SearchResult[] | undefined) => {
-            if (!currentData) return currentData;
-            // optimistic update
-            return currentData
-              .flat()
-              .map((event) =>
-                event.id === search.id
-                  ? { ...event, data: { ...event.data, description: desc } }
-                  : event,
-              );
-          },
+          (currentData: SearchResult[][] | SearchResult[] | undefined) =>
+            mapSearchResults(currentData, (event) =>
+              event.id === search.id
+                ? { ...event, data: { ...event.data, description: desc } }
+                : event,
+            ),
           {
             optimisticData: true,
             rollbackOnError: true,
@@ -843,7 +854,7 @@ function ObjectDetailsTab({
         );
         setDesc(search.data.description);
       });
-  }, [desc, search, mutate, t]);
+  }, [desc, search, mutate, t, mapSearchResults]);
 
   const regenerateDescription = useCallback(
     (source: "snapshot" | "thumbnails") => {
@@ -915,9 +926,8 @@ function ObjectDetailsTab({
                 (key.includes("events") ||
                   key.includes("events/search") ||
                   key.includes("events/explore")),
-              (currentData: SearchResult[][] | SearchResult[] | undefined) => {
-                if (!currentData) return currentData;
-                return currentData.flat().map((event) =>
+              (currentData: SearchResult[][] | SearchResult[] | undefined) =>
+                mapSearchResults(currentData, (event) =>
                   event.id === search.id
                     ? {
                         ...event,
@@ -928,8 +938,7 @@ function ObjectDetailsTab({
                         },
                       }
                     : event,
-                );
-              },
+                ),
               {
                 optimisticData: true,
                 rollbackOnError: true,
@@ -963,7 +972,7 @@ function ObjectDetailsTab({
           );
         });
     },
-    [search, apiHost, mutate, setSearch, t],
+    [search, apiHost, mutate, setSearch, t, mapSearchResults],
   );
 
   // recognized plate
@@ -992,9 +1001,8 @@ function ObjectDetailsTab({
                 (key.includes("events") ||
                   key.includes("events/search") ||
                   key.includes("events/explore")),
-              (currentData: SearchResult[][] | SearchResult[] | undefined) => {
-                if (!currentData) return currentData;
-                return currentData.flat().map((event) =>
+              (currentData: SearchResult[][] | SearchResult[] | undefined) =>
+                mapSearchResults(currentData, (event) =>
                   event.id === search.id
                     ? {
                         ...event,
@@ -1005,8 +1013,7 @@ function ObjectDetailsTab({
                         },
                       }
                     : event,
-                );
-              },
+                ),
               {
                 optimisticData: true,
                 rollbackOnError: true,
@@ -1040,7 +1047,7 @@ function ObjectDetailsTab({
           );
         });
     },
-    [search, apiHost, mutate, setSearch, t],
+    [search, apiHost, mutate, setSearch, t, mapSearchResults],
   );
 
   // speech transcription
@@ -1102,17 +1109,12 @@ function ObjectDetailsTab({
           (key.includes("events") ||
             key.includes("events/search") ||
             key.includes("events/explore")),
-        (currentData: SearchResult[][] | SearchResult[] | undefined) => {
-          if (!currentData) return currentData;
-          // optimistic update
-          return currentData
-            .flat()
-            .map((event) =>
-              event.id === search.id
-                ? { ...event, plus_id: "new_upload" }
-                : event,
-            );
-        },
+        (currentData: SearchResult[][] | SearchResult[] | undefined) =>
+          mapSearchResults(currentData, (event) =>
+            event.id === search.id
+              ? { ...event, plus_id: "new_upload" }
+              : event,
+          ),
         {
           optimisticData: true,
           rollbackOnError: true,
@@ -1120,7 +1122,7 @@ function ObjectDetailsTab({
         },
       );
     },
-    [search, mutate],
+    [search, mutate, mapSearchResults],
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);
