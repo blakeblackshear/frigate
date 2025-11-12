@@ -221,12 +221,26 @@ export function TrackingDetails({
     displaySource,
   ]);
 
-  const isWithinEventRange =
-    effectiveTime !== undefined &&
-    event.start_time !== undefined &&
-    event.end_time !== undefined &&
-    effectiveTime >= event.start_time &&
-    effectiveTime <= event.end_time;
+  const isWithinEventRange = useMemo(() => {
+    if (effectiveTime === undefined || event.start_time === undefined) {
+      return false;
+    }
+
+    // If an event has not ended yet, fall back to last timestamp in eventSequence
+    let eventEnd = event.end_time;
+    if (eventEnd == null && eventSequence && eventSequence.length > 0) {
+      const last = eventSequence[eventSequence.length - 1];
+      if (last && last.timestamp !== undefined) {
+        eventEnd = last.timestamp;
+      }
+    }
+
+    if (eventEnd == null) {
+      return false;
+    }
+
+    return effectiveTime >= event.start_time && effectiveTime <= eventEnd;
+  }, [effectiveTime, event.start_time, event.end_time, eventSequence]);
 
   // Calculate how far down the blue line should extend based on effectiveTime
   const calculateLineHeight = useCallback(() => {
