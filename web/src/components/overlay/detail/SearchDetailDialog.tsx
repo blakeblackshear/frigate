@@ -1505,7 +1505,7 @@ function ObjectDetailsTab({
         ) : (
           <div className="flex flex-col gap-2">
             <Textarea
-              className="text-md h-32"
+              className="text-md h-32 md:text-sm"
               placeholder={t("details.description.placeholder")}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
@@ -1513,25 +1513,7 @@ function ObjectDetailsTab({
               onBlur={handleDescriptionBlur}
               autoFocus
             />
-            <div className="flex flex-row justify-end gap-4">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    aria-label={t("button.save", { ns: "common" })}
-                    className="text-primary/40 hover:text-primary/80"
-                    onClick={() => {
-                      setIsEditingDesc(false);
-                      updateDescription();
-                    }}
-                  >
-                    <FaCheck className="size-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t("button.save", { ns: "common" })}
-                </TooltipContent>
-              </Tooltip>
-
+            <div className="mb-10 flex flex-row justify-end gap-5">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -1542,11 +1524,29 @@ function ObjectDetailsTab({
                       setDesc(originalDescRef.current ?? "");
                     }}
                   >
-                    <FaTimes className="size-4" />
+                    <FaTimes className="size-5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
                   {t("button.cancel", { ns: "common" })}
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    aria-label={t("button.save", { ns: "common" })}
+                    className="text-primary/40 hover:text-primary/80"
+                    onClick={() => {
+                      setIsEditingDesc(false);
+                      updateDescription();
+                    }}
+                  >
+                    <FaCheck className="size-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t("button.save", { ns: "common" })}
                 </TooltipContent>
               </Tooltip>
             </div>
