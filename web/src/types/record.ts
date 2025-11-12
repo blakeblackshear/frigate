@@ -1,4 +1,5 @@
 import { ReviewSeverity } from "./review";
+import { TimelineType } from "./timeline";
 
 export type Recording = {
   id: string;
@@ -37,7 +38,7 @@ export type RecordingStartingPoint = {
   camera: string;
   startTime: number;
   severity: ReviewSeverity;
-  timelineType?: "timeline" | "events" | "detail";
+  timelineType?: TimelineType;
 };
 
 export type RecordingPlayerError = "stalled" | "startup";
