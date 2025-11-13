@@ -37,8 +37,6 @@ jobs:
           context: .
           file: docker/main/Dockerfile
           push: true
-          build-args: 
-            GIT_COMMIT_HASH=${{ steps.setup.outputs.short-sha }}
           platforms: linux/amd64
           target: frigate
           tags: ${{ steps.setup.outputs.image-name }}-amd64
@@ -63,8 +61,6 @@ jobs:
           context: .
           file: docker/main/Dockerfile
           push: true
-          build-args:
-            GIT_COMMIT_HASH=${{ steps.setup.outputs.short-sha }}
           platforms: linux/arm64
           target: frigate
           tags: |

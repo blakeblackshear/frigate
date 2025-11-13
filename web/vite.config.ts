@@ -5,12 +5,10 @@ import react from "@vitejs/plugin-react-swc";
 import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
 const proxyHost = process.env.PROXY_HOST || "localhost:5000";
-const gitCommitHash = process.env.GIT_COMMIT_HASH || "unknown";
 // https://vitejs.dev/config/
 export default defineConfig({
   define: {
     "import.meta.vitest": "undefined",
-    "import.meta.env.GIT_COMMIT_HASH": JSON.stringify(gitCommitHash),
   },
   server: {
     proxy: {

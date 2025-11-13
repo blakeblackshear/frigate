@@ -319,9 +319,6 @@ FROM --platform=$BUILDPLATFORM node:20 AS web-build
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./
 
-ARG GIT_COMMIT_HASH
-ENV GIT_COMMIT_HASH=$GIT_COMMIT_HASH
-
 RUN npm install
 
 COPY web/ ./
