@@ -157,7 +157,7 @@ export default function UiSettingsView() {
                   checked={cameraNames}
                   onCheckedChange={setCameraName}
                 />
-                <Label className="cursor-pointer" htmlFor="auto-live">
+                <Label className="cursor-pointer" htmlFor="camera-names">
                   {t("general.liveDashboard.displayCameraNames.label")}
                 </Label>
               </div>
