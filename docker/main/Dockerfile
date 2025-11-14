@@ -318,7 +318,6 @@ FROM --platform=$BUILDPLATFORM node:20 AS web-build
 
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./
-
 RUN npm install
 
 COPY web/ ./
