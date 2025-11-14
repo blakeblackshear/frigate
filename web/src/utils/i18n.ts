@@ -33,7 +33,7 @@ i18n
     fallbackLng: "en", // use en if detected lng is not available
 
     backend: {
-      loadPath: "locales/{{lng}}/{{ns}}.json",
+      loadPath: `locales/{{lng}}/{{ns}}.json?v=${import.meta.env.VITE_GIT_COMMIT_HASH || "unknown"}`,
     },
 
     ns: [
