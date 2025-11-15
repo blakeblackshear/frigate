@@ -850,6 +850,29 @@ function FrigateCameraFeatures({
     }
   }, [activeToastId, t]);
 
+  const endEventViaBeacon = useCallback(() => {
+    if (!recordingEventIdRef.current) return;
+
+    const url = `${window.location.origin}/api/events/${recordingEventIdRef.current}/end`;
+    const payload = JSON.stringify({
+      end_time: Math.ceil(Date.now() / 1000),
+    });
+
+    // this needs to be a synchronous XMLHttpRequest to guarantee the PUT
+    // reaches the server before the browser kills the page
+    const xhr = new XMLHttpRequest();
+    try {
+      xhr.open("PUT", url, false);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("X-CSRF-TOKEN", "1");
+      xhr.setRequestHeader("X-CACHE-BYPASS", "1");
+      xhr.withCredentials = true;
+      xhr.send(payload);
+    } catch (e) {
+      // Silently ignore errors during unload
+    }
+  }, []);
+
   const handleEventButtonClick = useCallback(() => {
     if (isRecording) {
       endEvent();
@@ -887,8 +910,19 @@ function FrigateCameraFeatures({
   }, [camera.name, isRestreamed, preferredLiveMode, t]);
 
   useEffect(() => {
+    // Handle page unload/close (browser close, tab close, refresh, navigation to external site)
+    const handleBeforeUnload = () => {
+      if (recordingEventIdRef.current) {
+        endEventViaBeacon();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     // ensure manual event is stopped when component unmounts
     return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+
       if (recordingEventIdRef.current) {
         endEvent();
       }
