@@ -3,18 +3,18 @@ id: license_plate_recognition
 title: License Plate Recognition (LPR)
 ---
 
-Frigate can recognize license plates on vehicles and automatically add the detected characters to the `recognized_license_plate` field or a known name as a `sub_label` to tracked objects of type `car` or `motorcycle`. A common use case may be to read the license plates of cars pulling into a driveway or cars passing by on a street.
+Frigate can recognize license plates on vehicles and automatically add the detected characters to the `recognized_license_plate` field or a [known](#matching) name as a `sub_label` to tracked objects of type `car` or `motorcycle`. A common use case may be to read the license plates of cars pulling into a driveway or cars passing by on a street.
 
 LPR works best when the license plate is clearly visible to the camera. For moving vehicles, Frigate continuously refines the recognition process, keeping the most confident result. When a vehicle becomes stationary, LPR continues to run for a short time after to attempt recognition.
 
 When a plate is recognized, the details are:
 
-- Added as a `sub_label` (if known) or the `recognized_license_plate` field (if unknown) to a tracked object.
-- Viewable in the Review Item Details pane in Review (sub labels).
+- Added as a `sub_label` (if [known](#matching)) or the `recognized_license_plate` field (if unknown) to a tracked object.
+- Viewable in the Details pane in Review/History.
 - Viewable in the Tracked Object Details pane in Explore (sub labels and recognized license plates).
 - Filterable through the More Filters menu in Explore.
-- Published via the `frigate/events` MQTT topic as a `sub_label` (known) or `recognized_license_plate` (unknown) for the `car` or `motorcycle` tracked object.
-- Published via the `frigate/tracked_object_update` MQTT topic with `name` (if known) and `plate`.
+- Published via the `frigate/events` MQTT topic as a `sub_label` ([known](#matching)) or `recognized_license_plate` (unknown) for the `car` or `motorcycle` tracked object.
+- Published via the `frigate/tracked_object_update` MQTT topic with `name` (if [known](#matching)) and `plate`.
 
 ## Model Requirements
 
@@ -31,6 +31,7 @@ In the default mode, Frigate's LPR needs to first detect a `car` or `motorcycle`
 ## Minimum System Requirements
 
 License plate recognition works by running AI models locally on your system. The YOLOv9 plate detector model and the OCR models ([PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)) are relatively lightweight and can run on your CPU or GPU, depending on your configuration. At least 4GB of RAM is required.
+
 ## Configuration
 
 License plate recognition is disabled by default. Enable it in your config file:
@@ -73,8 +74,8 @@ Fine-tune the LPR feature using these optional parameters at the global level of
   - Default: `small`
   - This can be `small` or `large`.
   - The `small` model is fast and identifies groups of Latin and Chinese characters.
-  - The `large` model identifies Latin characters only, but uses an enhanced text detector and is more capable at finding characters on multi-line plates. It is significantly slower than the `small` model. Note that using the `large` model does not improve _text recognition_, but it may improve _text detection_.
-  - For most users, the `small` model is recommended.
+  - The `large` model identifies Latin characters only, and uses an enhanced text detector to find characters on multi-line plates. It is significantly slower than the `small` model.
+  - If your country or region does not use multi-line plates, you should use the `small` model as performance is much better for single-line plates.
 
 ### Recognition
 
@@ -305,7 +306,7 @@ With this setup:
 - Review items will always be classified as a `detection`.
 - Snapshots will always be saved.
 - Zones and object masks are **not** used.
-- The `frigate/events` MQTT topic will **not** publish tracked object updates with the license plate bounding box and score, though `frigate/reviews` will publish if recordings are enabled. If a plate is recognized as a known plate, publishing will occur with an updated `sub_label` field. If characters are recognized, publishing will occur with an updated `recognized_license_plate` field.
+- The `frigate/events` MQTT topic will **not** publish tracked object updates with the license plate bounding box and score, though `frigate/reviews` will publish if recordings are enabled. If a plate is recognized as a [known](#matching) plate, publishing will occur with an updated `sub_label` field. If characters are recognized, publishing will occur with an updated `recognized_license_plate` field.
 - License plate snapshots are saved at the highest-scoring moment and appear in Explore.
 - Debug view will not show `license_plate` bounding boxes.
 
