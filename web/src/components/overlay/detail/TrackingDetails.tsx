@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useResizeObserver } from "@/hooks/resize-observer";
 import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { TrackingDetailsSequence } from "@/types/timeline";
@@ -89,9 +90,16 @@ export function TrackingDetails({
   }, [manualOverride, currentTime, annotationOffset]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const timelineContainerRef = useRef<HTMLDivElement | null>(null);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [_selectedZone, setSelectedZone] = useState("");
   const [_lifecycleZones, setLifecycleZones] = useState<string[]>([]);
   const [seekToTimestamp, setSeekToTimestamp] = useState<number | null>(null);
+  const [lineBottomOffsetPx, setLineBottomOffsetPx] = useState<number>(32);
+  const [lineTopOffsetPx, setLineTopOffsetPx] = useState<number>(8);
+  const [blueLineHeightPx, setBlueLineHeightPx] = useState<number>(0);
+
+  const [timelineSize] = useResizeObserver(timelineContainerRef);
 
   const aspectRatio = useMemo(() => {
     if (!config) {
@@ -225,7 +233,6 @@ export function TrackingDetails({
     if (effectiveTime === undefined || event.start_time === undefined) {
       return false;
     }
-
     // If an event has not ended yet, fall back to last timestamp in eventSequence
     let eventEnd = event.end_time;
     if (eventEnd == null && eventSequence && eventSequence.length > 0) {
@@ -238,57 +245,58 @@ export function TrackingDetails({
     if (eventEnd == null) {
       return false;
     }
-
     return effectiveTime >= event.start_time && effectiveTime <= eventEnd;
   }, [effectiveTime, event.start_time, event.end_time, eventSequence]);
 
-  // Calculate how far down the blue line should extend based on effectiveTime
-  const calculateLineHeight = useCallback(() => {
-    if (!eventSequence || eventSequence.length === 0 || !isWithinEventRange) {
-      return 0;
-    }
+  // Dynamically compute pixel offsets so the timeline line starts at the
+  // first row midpoint and ends at the last row midpoint. For accuracy,
+  // measure the center Y of each lifecycle row and interpolate the current
+  // effective time into a pixel position; then set the blue line height
+  // so it reaches the center dot at the same time the dot becomes active.
+  useEffect(() => {
+    if (!timelineContainerRef.current || !eventSequence) return;
 
-    const currentTime = effectiveTime ?? 0;
+    const containerRect = timelineContainerRef.current.getBoundingClientRect();
+    const validRefs = rowRefs.current.filter((r) => r !== null);
+    if (validRefs.length === 0) return;
 
-    // Find which events have been passed
-    let lastPassedIndex = -1;
-    for (let i = 0; i < eventSequence.length; i++) {
-      if (currentTime >= (eventSequence[i].timestamp ?? 0)) {
-        lastPassedIndex = i;
-      } else {
-        break;
+    const centers = validRefs.map((n) => {
+      const r = n.getBoundingClientRect();
+      return r.top + r.height / 2 - containerRect.top;
+    });
+
+    const topOffset = Math.max(0, centers[0]);
+    const bottomOffset = Math.max(
+      0,
+      containerRect.height - centers[centers.length - 1],
+    );
+
+    setLineTopOffsetPx(Math.round(topOffset));
+    setLineBottomOffsetPx(Math.round(bottomOffset));
+
+    const eff = effectiveTime ?? 0;
+    const timestamps = eventSequence.map((s) => s.timestamp ?? 0);
+
+    let pixelPos = centers[0];
+    if (eff <= timestamps[0]) {
+      pixelPos = centers[0];
+    } else if (eff >= timestamps[timestamps.length - 1]) {
+      pixelPos = centers[centers.length - 1];
+    } else {
+      for (let i = 0; i < timestamps.length - 1; i++) {
+        const t1 = timestamps[i];
+        const t2 = timestamps[i + 1];
+        if (eff >= t1 && eff <= t2) {
+          const ratio = t2 > t1 ? (eff - t1) / (t2 - t1) : 0;
+          pixelPos = centers[i] + ratio * (centers[i + 1] - centers[i]);
+          break;
+        }
       }
     }
 
-    // No events passed yet
-    if (lastPassedIndex < 0) return 0;
-
-    // All events passed
-    if (lastPassedIndex >= eventSequence.length - 1) return 100;
-
-    // Calculate percentage based on item position, not time
-    // Each item occupies an equal visual space regardless of time gaps
-    const itemPercentage = 100 / (eventSequence.length - 1);
-
-    // Find progress between current and next event for smooth transition
-    const currentEvent = eventSequence[lastPassedIndex];
-    const nextEvent = eventSequence[lastPassedIndex + 1];
-    const currentTimestamp = currentEvent.timestamp ?? 0;
-    const nextTimestamp = nextEvent.timestamp ?? 0;
-
-    // Calculate interpolation between the two events
-    const timeBetween = nextTimestamp - currentTimestamp;
-    const timeElapsed = currentTime - currentTimestamp;
-    const interpolation = timeBetween > 0 ? timeElapsed / timeBetween : 0;
-
-    // Base position plus interpolated progress to next item
-    return Math.min(
-      100,
-      lastPassedIndex * itemPercentage + interpolation * itemPercentage,
-    );
-  }, [eventSequence, effectiveTime, isWithinEventRange]);
-
-  const blueLineHeight = calculateLineHeight();
+    const bluePx = Math.round(Math.max(0, pixelPos - topOffset));
+    setBlueLineHeightPx(bluePx);
+  }, [eventSequence, timelineSize.width, timelineSize.height, effectiveTime]);
 
   const videoSource = useMemo(() => {
     // event.start_time and event.end_time are in DETECT stream time
@@ -545,12 +553,21 @@ export function TrackingDetails({
                     {t("detail.noObjectDetailData", { ns: "views/events" })}
                   </div>
                 ) : (
-                  <div className="-pb-2 relative mx-0">
-                    <div className="absolute -top-2 bottom-8 left-6 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground" />
+                  <div
+                    className="-pb-2 relative mx-0"
+                    ref={timelineContainerRef}
+                  >
+                    <div
+                      className="absolute -top-2 left-6 z-0 w-0.5 -translate-x-1/2 bg-secondary-foreground"
+                      style={{ bottom: lineBottomOffsetPx }}
+                    />
                     {isWithinEventRange && (
                       <div
-                        className="absolute left-6 top-2 z-[5] max-h-[calc(100%-3rem)] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
-                        style={{ height: `${blueLineHeight}%` }}
+                        className="absolute left-6 z-[5] w-0.5 -translate-x-1/2 bg-selected transition-all duration-300"
+                        style={{
+                          top: `${lineTopOffsetPx}px`,
+                          height: `${blueLineHeightPx}px`,
+                        }}
                       />
                     )}
                     <div className="space-y-2">
@@ -603,20 +620,26 @@ export function TrackingDetails({
                             : undefined;
 
                         return (
-                          <LifecycleIconRow
+                          <div
                             key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
-                            item={item}
-                            isActive={isActive}
-                            formattedEventTimestamp={formattedEventTimestamp}
-                            ratio={ratio}
-                            areaPx={areaPx}
-                            areaPct={areaPct}
-                            onClick={() => handleLifecycleClick(item)}
-                            setSelectedZone={setSelectedZone}
-                            getZoneColor={getZoneColor}
-                            effectiveTime={effectiveTime}
-                            isTimelineActive={isWithinEventRange}
-                          />
+                            ref={(el) => {
+                              rowRefs.current[idx] = el;
+                            }}
+                          >
+                            <LifecycleIconRow
+                              item={item}
+                              isActive={isActive}
+                              formattedEventTimestamp={formattedEventTimestamp}
+                              ratio={ratio}
+                              areaPx={areaPx}
+                              areaPct={areaPct}
+                              onClick={() => handleLifecycleClick(item)}
+                              setSelectedZone={setSelectedZone}
+                              getZoneColor={getZoneColor}
+                              effectiveTime={effectiveTime}
+                              isTimelineActive={isWithinEventRange}
+                            />
+                          </div>
                         );
                       })}
                     </div>
