@@ -57,6 +57,7 @@ import { Trans, useTranslation } from "react-i18next";
 import {
   LuFolderCheck,
   LuImagePlus,
+  LuPencil,
   LuRefreshCw,
   LuScanFace,
   LuTrash2,
@@ -579,7 +580,9 @@ function LibrarySelector({
                         e.stopPropagation();
                         setRenameFace(face);
                       }}
-                    ></Button>
+                    >
+                      <LuPencil className="size-4 text-primary" />
+                    </Button>
                   </TooltipTrigger>
                   <TooltipPortal>
                     <TooltipContent>{t("button.renameFace")}</TooltipContent>
@@ -595,7 +598,9 @@ function LibrarySelector({
                         e.stopPropagation();
                         setConfirmDelete(face);
                       }}
-                    ></Button>
+                    >
+                      <LuTrash2 className="size-4 text-destructive" />
+                    </Button>
                   </TooltipTrigger>
                   <TooltipPortal>
                     <TooltipContent>{t("button.deleteFace")}</TooltipContent>
