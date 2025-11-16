@@ -52,7 +52,7 @@ self.addEventListener("notificationclick", (event) => {
                 "X-CSRF-TOKEN": 1,
               },
               body: JSON.stringify({ ids: [event.notification.data.id] }),
-            })
+            }), // eslint-disable-line comma-dangle
           );
         }
         break;
