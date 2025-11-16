@@ -201,12 +201,17 @@ export default function TriggerView({
               .then((configResponse) => {
                 if (configResponse.status === 200) {
                   updateConfig();
+                  const displayName =
+                    friendly_name && friendly_name !== ""
+                      ? `${friendly_name} (${name})`
+                      : name;
+
                   toast.success(
                     t(
                       isEdit
                         ? "triggers.toast.success.updateTrigger"
                         : "triggers.toast.success.createTrigger",
-                      { name },
+                      { name: displayName },
                     ),
                     { position: "top-center" },
                   );
@@ -351,8 +356,19 @@ export default function TriggerView({
               .then((configResponse) => {
                 if (configResponse.status === 200) {
                   updateConfig();
+                  const friendly =
+                    config?.cameras?.[selectedCamera]?.semantic_search
+                      ?.triggers?.[name]?.friendly_name;
+
+                  const displayName =
+                    friendly && friendly !== ""
+                      ? `${friendly} (${name})`
+                      : name;
+
                   toast.success(
-                    t("triggers.toast.success.deleteTrigger", { name }),
+                    t("triggers.toast.success.deleteTrigger", {
+                      name: displayName,
+                    }),
                     {
                       position: "top-center",
                     },
@@ -381,7 +397,7 @@ export default function TriggerView({
           setIsLoading(false);
         });
     },
-    [t, updateConfig, selectedCamera, setUnsavedChanges],
+    [t, updateConfig, selectedCamera, setUnsavedChanges, config],
   );
 
   useEffect(() => {
@@ -843,7 +859,14 @@ export default function TriggerView({
       />
       <DeleteTriggerDialog
         show={showDelete}
-        triggerName={selectedTrigger?.name ?? ""}
+        triggerName={
+          selectedTrigger
+            ? selectedTrigger.friendly_name &&
+              selectedTrigger.friendly_name !== ""
+              ? `${selectedTrigger.friendly_name} (${selectedTrigger.name})`
+              : selectedTrigger.name
+            : ""
+        }
         isLoading={isLoading}
         onCancel={() => {
           setShowDelete(false);
