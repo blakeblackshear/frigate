@@ -1781,9 +1781,8 @@ def create_trigger_embedding(
                 logger.debug(
                     f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
                 )
-            except Exception as e:
-                logger.error(e.with_traceback())
-                logger.error(
+            except Exception:
+                logger.exception(
                     f"Failed to write thumbnail for trigger with data {body.data} in {camera_name}"
                 )
 
@@ -1807,8 +1806,8 @@ def create_trigger_embedding(
             status_code=200,
         )
 
-    except Exception as e:
-        logger.error(e.with_traceback())
+    except Exception:
+        logger.exception("Error creating trigger embedding")
         return JSONResponse(
             content={
                 "success": False,
@@ -1917,9 +1916,8 @@ def update_trigger_embedding(
                     logger.debug(
                         f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
                     )
-                except Exception as e:
-                    logger.error(e.with_traceback())
-                    logger.error(
+                except Exception:
+                    logger.exception(
                         f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera_name}"
                     )
 
@@ -1958,9 +1956,8 @@ def update_trigger_embedding(
                 logger.debug(
                     f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
                 )
-            except Exception as e:
-                logger.error(e.with_traceback())
-                logger.error(
+            except Exception:
+                logger.exception(
                     f"Failed to write thumbnail for trigger with data {body.data} in {camera_name}"
                 )
 
@@ -1972,8 +1969,8 @@ def update_trigger_embedding(
             status_code=200,
         )
 
-    except Exception as e:
-        logger.error(e.with_traceback())
+    except Exception:
+        logger.exception("Error updating trigger embedding")
         return JSONResponse(
             content={
                 "success": False,
@@ -2033,9 +2030,8 @@ def delete_trigger_embedding(
             logger.debug(
                 f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
             )
-        except Exception as e:
-            logger.error(e.with_traceback())
-            logger.error(
+        except Exception:
+            logger.exception(
                 f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera_name}"
             )
 
@@ -2047,8 +2043,8 @@ def delete_trigger_embedding(
             status_code=200,
         )
 
-    except Exception as e:
-        logger.error(e.with_traceback())
+    except Exception:
+        logger.exception("Error deleting trigger embedding")
         return JSONResponse(
             content={
                 "success": False,

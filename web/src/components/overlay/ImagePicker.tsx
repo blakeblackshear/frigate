@@ -171,6 +171,18 @@ export default function ImagePicker({
                       alt={selectedImage?.label || "Selected image"}
                       className="size-16 rounded object-cover"
                       onLoad={() => handleImageLoad(selectedImageId || "")}
+                      onError={(e) => {
+                        // If trigger thumbnail fails to load, fall back to event thumbnail
+                        if (!selectedImage) {
+                          const target = e.target as HTMLImageElement;
+                          if (
+                            target.src.includes("clips/triggers") &&
+                            selectedImageId
+                          ) {
+                            target.src = `${apiHost}api/events/${selectedImageId}/thumbnail.webp`;
+                          }
+                        }
+                      }}
                       loading="lazy"
                     />
                     {selectedImageId && !loadedImages.has(selectedImageId) && (
