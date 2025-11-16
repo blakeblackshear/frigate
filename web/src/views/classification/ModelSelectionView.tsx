@@ -16,7 +16,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaFolderPlus } from "react-icons/fa";
 import { MdModelTraining } from "react-icons/md";
-import { LuPencil, LuTrash2 } from "react-icons/lu";
 import { FiMoreVertical } from "react-icons/fi";
 import useSWR from "swr";
 import Heading from "@/components/ui/heading";
@@ -352,11 +351,9 @@ function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
               onClick={(e) => e.stopPropagation()}
             >
               <DropdownMenuItem onClick={handleEditClick}>
-                <LuPencil className="mr-2 size-4" />
                 <span>{t("button.edit", { ns: "common" })}</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleDeleteClick}>
-                <LuTrash2 className="mr-2 size-4" />
                 <span>{t("button.delete", { ns: "common" })}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
