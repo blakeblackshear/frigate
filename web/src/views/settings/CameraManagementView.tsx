@@ -5,17 +5,9 @@ import { Button } from "@/components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
-import { Label } from "@/components/ui/label";
 import CameraEditForm from "@/components/settings/CameraEditForm";
 import CameraWizardDialog from "@/components/settings/CameraWizardDialog";
 import { LuPlus } from "react-icons/lu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { isDesktop } from "react-device-detect";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
@@ -90,31 +82,6 @@ export default function CameraManagementView({
                 </Button>
                 {cameras.length > 0 && (
                   <>
-                    <div className="my-4 flex flex-col gap-2">
-                      <Label>{t("cameraManagement.editCamera")}</Label>
-                      <Select
-                        onValueChange={(value) => {
-                          setEditCameraName(value);
-                          setViewMode("edit");
-                        }}
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue
-                            placeholder={t("cameraManagement.selectCamera")}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {cameras.map((camera) => {
-                            return (
-                              <SelectItem key={camera} value={camera}>
-                                <CameraNameLabel camera={camera} />
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
                     <Separator className="my-2 flex bg-secondary" />
                     <div className="max-w-7xl space-y-4">
                       <Heading as="h4" className="my-2">
