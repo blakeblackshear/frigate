@@ -179,6 +179,36 @@ def config(request: Request):
     return JSONResponse(content=config)
 
 
+@router.get("/config/raw_paths", dependencies=[Depends(require_role(["admin"]))])
+def config_raw_paths(request: Request):
+    """Admin-only endpoint that returns camera paths and go2rtc streams without credential masking."""
+    config_obj: FrigateConfig = request.app.frigate_config
+
+    raw_paths = {"cameras": {}, "go2rtc": {"streams": {}}}
+
+    # Extract raw camera ffmpeg input paths
+    for camera_name, camera in config_obj.cameras.items():
+        raw_paths["cameras"][camera_name] = {
+            "ffmpeg": {
+                "inputs": [
+                    {"path": input.path, "roles": input.roles}
+                    for input in camera.ffmpeg.inputs
+                ]
+            }
+        }
+
+    # Extract raw go2rtc stream URLs
+    go2rtc_config = config_obj.go2rtc.model_dump(
+        mode="json", warnings="none", exclude_none=True
+    )
+    for stream_name, stream in go2rtc_config.get("streams", {}).items():
+        if stream is None:
+            continue
+        raw_paths["go2rtc"]["streams"][stream_name] = stream
+
+    return JSONResponse(content=raw_paths)
+
+
 @router.get("/config/raw")
 def config_raw():
     config_file = find_config_file()
