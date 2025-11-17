@@ -13,7 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import useSWR from "swr";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,7 @@ import { LuCheck, LuX } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { isDesktop, isMobile } from "react-device-detect";
 import { cn } from "@/lib/utils";
+import { FrigateConfig } from "@/types/frigateConfig";
 import {
   MobilePage,
   MobilePageContent,
@@ -54,8 +56,14 @@ export default function CreateUserDialog({
   onCreate,
   onCancel,
 }: CreateUserOverlayProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
   const { t } = useTranslation(["views/settings"]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const roles = useMemo(() => {
+    const existingRoles = config ? Object.keys(config.auth?.roles || {}) : [];
+    return Array.from(new Set(["admin", "viewer", ...(existingRoles || [])]));
+  }, [config]);
 
   const formSchema = z
     .object({
@@ -69,7 +77,7 @@ export default function CreateUserDialog({
       confirmPassword: z
         .string()
         .min(1, t("users.dialog.createUser.confirmPassword")),
-      role: z.enum(["admin", "viewer"]),
+      role: z.string().min(1),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: t("users.dialog.form.password.notMatch"),
@@ -246,24 +254,22 @@ export default function CreateUserDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem
-                        value="admin"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-primary" />
-                          <span>{t("role.admin", { ns: "common" })}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="viewer"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span>{t("role.viewer", { ns: "common" })}</span>
-                        </div>
-                      </SelectItem>
+                      {roles.map((r) => (
+                        <SelectItem
+                          value={r}
+                          key={r}
+                          className="flex items-center gap-2"
+                        >
+                          <div className="flex items-center gap-2">
+                            {r === "admin" ? (
+                              <Shield className="h-4 w-4 text-primary" />
+                            ) : (
+                              <User className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <span>{t(`role.${r}`, { ns: "common" }) || r}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormDescription className="text-xs text-muted-foreground">
