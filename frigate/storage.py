@@ -254,7 +254,7 @@ class StorageMaintainer(threading.Thread):
                 for i in range(0, len(events_to_update), max_deletes):
                     batch = events_to_update[i : i + max_deletes]
                     Event.update(has_clip=False).where(Event.id << batch).execute()
-                logger.info(
+                logger.debug(
                     f"Updated has_clip to False for {len(events_to_update)} events"
                 )
 
