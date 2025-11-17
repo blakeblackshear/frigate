@@ -6,7 +6,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 export default function ProtectedRoute({
   requiredRoles,
 }: {
-  requiredRoles: ("admin" | "viewer")[];
+  requiredRoles: string[];
 }) {
   const { auth } = useContext(AuthContext);
 

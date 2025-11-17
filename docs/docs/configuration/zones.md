@@ -27,6 +27,7 @@ cameras:
           - entire_yard
     zones:
       entire_yard:
+        friendly_name: Entire yard # You can use characters from any language text
         coordinates: ...
 ```
 
@@ -44,8 +45,10 @@ cameras:
           - edge_yard
     zones:
       edge_yard:
+        friendly_name: Edge yard # You can use characters from any language text
         coordinates: ...
       inner_yard:
+        friendly_name: Inner yard # You can use characters from any language text
         coordinates: ...
 ```
 
@@ -59,6 +62,7 @@ cameras:
         - entire_yard
     zones:
       entire_yard:
+        friendly_name: Entire yard
         coordinates: ...
 ```
 
@@ -82,13 +86,16 @@ cameras:
 
 Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. Objects will be tracked for any `person` that enter anywhere in the yard, and for cars only if they enter the street.
 
+
 ### Zone Loitering
 
 Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time after which the object will be considered in the zone.
 
 :::note
 
-When using loitering zones, a review item will remain active until the object leaves. Loitering zones are only meant to be used in areas where loitering is not expected behavior.
+When using loitering zones, a review item will behave in the following way:
+- When a person is in a loitering zone, the review item will remain active until the person leaves the loitering zone, regardless of if they are stationary.
+- When any other object is in a loitering zone, the review item will remain active until the loitering time is met. Then if the object is stationary the review item will end.
 
 :::
 

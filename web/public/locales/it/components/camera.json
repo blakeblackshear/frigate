@@ -29,7 +29,7 @@
           "label": "Metodo di trasmissione",
           "method": {
             "smartStreaming": {
-              "label": "Trasmissione intelligente (consigliato)",
+              "label": "Trasmissione intelligente (consigliata)",
               "desc": "La trasmissione intelligente aggiorna l'immagine della telecamera una volta al minuto quando non si verifica alcuna attività rilevabile, per risparmiare larghezza di banda e risorse. Quando viene rilevata un'attività, l'immagine passa automaticamente alla trasmissione dal vivo."
             },
             "continuousStreaming": {
@@ -60,7 +60,8 @@
         "desc": "Modifica le opzioni di trasmissione dal vivo per la schermata di questo gruppo di telecamere. <em>Queste impostazioni sono specifiche del dispositivo/browser.</em>",
         "stream": "Flusso",
         "placeholder": "Scegli un flusso"
-      }
+      },
+      "birdseye": "Birdseye"
     },
     "cameras": {
       "desc": "Seleziona le telecamere per questo gruppo.",

@@ -92,16 +92,24 @@ export default function UiSettingsView() {
   // settings
 
   const [autoLive, setAutoLive] = usePersistence("autoLiveView", true);
+  const [cameraNames, setCameraName] = usePersistence(
+    "displayCameraNames",
+    false,
+  );
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
   const [weekStartsOn, setWeekStartsOn] = usePersistence("weekStartsOn", 0);
   const [alertVideos, setAlertVideos] = usePersistence("alertVideos", true);
+  const [fallbackTimeout, setFallbackTimeout] = usePersistence(
+    "liveFallbackTimeout",
+    3,
+  );
 
   return (
     <>
       <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
-        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
-          <Heading as="h3" className="my-2">
+        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
+          <Heading as="h4" className="mb-2">
             {t("general.title")}
           </Heading>
 
@@ -141,6 +149,63 @@ export default function UiSettingsView() {
               <div className="my-2 max-w-5xl text-sm text-muted-foreground">
                 <p>{t("general.liveDashboard.playAlertVideos.desc")}</p>
               </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex flex-row items-center justify-start gap-2">
+                <Switch
+                  id="camera-names"
+                  checked={cameraNames}
+                  onCheckedChange={setCameraName}
+                />
+                <Label className="cursor-pointer" htmlFor="camera-names">
+                  {t("general.liveDashboard.displayCameraNames.label")}
+                </Label>
+              </div>
+              <div className="my-2 max-w-5xl text-sm text-muted-foreground">
+                <p>{t("general.liveDashboard.displayCameraNames.desc")}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex flex-row items-center justify-start gap-2">
+                <Label
+                  className="cursor-pointer"
+                  htmlFor="live-fallback-timeout"
+                >
+                  {t("general.liveDashboard.liveFallbackTimeout.label")}
+                </Label>
+              </div>
+              <div className="my-2 max-w-5xl text-sm text-muted-foreground">
+                <p>{t("general.liveDashboard.liveFallbackTimeout.desc")}</p>
+              </div>
+              <Select
+                value={fallbackTimeout?.toString()}
+                onValueChange={(value) => setFallbackTimeout(parseInt(value))}
+              >
+                <SelectTrigger className="w-36">
+                  {t("time.second", {
+                    ns: "common",
+                    time: fallbackTimeout,
+                    count: fallbackTimeout,
+                  })}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((timeout) => (
+                      <SelectItem
+                        key={timeout}
+                        className="cursor-pointer"
+                        value={timeout.toString()}
+                      >
+                        {t("time.second", {
+                          ns: "common",
+                          time: timeout,
+                          count: timeout,
+                        })}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

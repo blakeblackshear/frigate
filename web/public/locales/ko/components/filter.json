@@ -1,1 +1,39 @@
-{}
+{
+  "filter": "필터",
+  "labels": {
+    "label": "레이블",
+    "all": {
+      "title": "모든 레이블",
+      "short": "레이블"
+    }
+  },
+  "zones": {
+    "label": "구역",
+    "all": {
+      "title": "모든 구역",
+      "short": "구역"
+    }
+  },
+  "dates": {
+    "selectPreset": "프리셋 선택",
+    "all": {
+      "title": "모든 날짜",
+      "short": "날짜"
+    }
+  },
+  "timeRange": "시간 구역",
+  "subLabels": {
+    "label": "서브 레이블",
+    "all": "모든 서브 레이블"
+  },
+  "more": "더 많은 필터",
+  "classes": {
+    "label": "분류",
+    "all": {
+      "title": "모든 분류"
+    }
+  },
+  "reset": {
+    "label": "기본값으로 필터 초기화"
+  }
+}

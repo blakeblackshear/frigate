@@ -12,5 +12,7 @@
       "savingError": "Errore durante il salvataggio della configurazione"
     }
   },
-  "confirm": "Vuoi uscire senza salvare?"
+  "confirm": "Vuoi uscire senza salvare?",
+  "safeConfigEditor": "Editor di configurazione (modalità provvisoria)",
+  "safeModeDescription": "Frigate è in modalità provvisoria a causa di un errore di convalida della configurazione."
 }

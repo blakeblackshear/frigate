@@ -10,7 +10,9 @@
     "general": "Algemene instellingen - Frigate",
     "frigatePlus": "Frigate+ Instellingen - Frigate",
     "notifications": "Meldingsinstellingen - Frigate",
-    "enrichments": "Verrijkingsinstellingen - Frigate"
+    "enrichments": "Verrijkingsinstellingen - Frigate",
+    "cameraManagement": "Camera's beheren - Frigate",
+    "cameraReview": "Camera Review Instellingen - Frigate"
   },
   "menu": {
     "ui": "Gebruikersinterface",
@@ -22,7 +24,11 @@
     "notifications": "Meldingen",
     "cameras": "Camera-instellingen",
     "frigateplus": "Frigate+",
-    "enrichments": "Verrijkingen"
+    "enrichments": "Verrijkingen",
+    "triggers": "Triggers",
+    "roles": "Functie",
+    "cameraManagement": "Beheer",
+    "cameraReview": "Beoordeel"
   },
   "dialog": {
     "unsavedChanges": {
@@ -44,6 +50,10 @@
       "playAlertVideos": {
         "label": "Meldingen afspelen",
         "desc": "Standaard worden recente meldingen op het Live dashboard afgespeeld als kleine lusvideo's. Schakel deze optie uit om alleen een statische afbeelding van recente meldingen weer te geven op dit apparaat/browser."
+      },
+      "displayCameraNames": {
+        "label": "Altijd cameranamen weergeven",
+        "desc": "Toon altijd de cameranamen in een label op het live-cameradashboard."
       }
     },
     "title": "Algemene instellingen",
@@ -178,7 +188,45 @@
       "desc": "Schakel een camera tijdelijk uit totdat Frigate opnieuw wordt gestart. Het uitschakelen van een camera stopt de verwerking van de streams van deze camera volledig door Frigate. Detectie, opname en foutopsporing zijn dan niet beschikbaar.<br /> <em>Let op: dit schakelt go2rtc-restreams niet uit.</em>",
       "title": "Streams"
     },
-    "title": "Camera-instellingen"
+    "title": "Camera-instellingen",
+    "object_descriptions": {
+      "title": "AI-gegenereerde objectomschrijvingen",
+      "desc": "AI-gegenereerde objectomschrijvingen tijdelijk uitschakelen voor deze camera. Wanneer uitgeschakeld, zullen omschrijvingen van gevolgde objecten op deze camera niet aangevraagd worden."
+    },
+    "review_descriptions": {
+      "title": "Generatieve-AI Beoordelingsbeschrijvingen",
+      "desc": "Tijdelijk generatieve-AI-beoordelingsbeschrijvingen voor deze camera in- of uitschakelen. Wanneer dit is uitgeschakeld, worden er geen door AI gegenereerde beschrijvingen opgevraagd voor beoordelingsitems van deze camera."
+    },
+    "addCamera": "Nieuwe camera toevoegen",
+    "editCamera": "Camera bewerken:",
+    "selectCamera": "Selecteer een camera",
+    "backToSettings": "Terug naar camera-instellingen",
+    "cameraConfig": {
+      "add": "Camera toevoegen",
+      "edit": "Camera bewerken",
+      "description": "Configureer de camera-instellingen, inclusief streaming-inputs en functies.",
+      "name": "Cameranaam",
+      "nameRequired": "Cameranaam is vereist",
+      "nameInvalid": "De cameranaam mag alleen letters, cijfers, onderstrepingstekens of koppeltekens bevatten",
+      "namePlaceholder": "bijv. voor_deur",
+      "enabled": "Ingeschakeld",
+      "ffmpeg": {
+        "inputs": "Streams-Input",
+        "path": "Stroompad",
+        "pathRequired": "Streampad is vereist",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Functie",
+        "rolesRequired": "Er is ten minste één functie vereist",
+        "rolesUnique": "Elke functie (audio, detecteren, opnemen) kan slechts aan één stream worden toegewezen",
+        "addInput": "Inputstream toevoegen",
+        "removeInput": "Inputstream verwijderen",
+        "inputsRequired": "Er is ten minste één stream-input vereist"
+      },
+      "toast": {
+        "success": "Camera {{cameraName}} is succesvol opgeslagen"
+      },
+      "nameLength": "Cameranaam mag niet langer zijn dan 24 tekens."
+    }
   },
   "masksAndZones": {
     "filter": {
@@ -199,7 +247,8 @@
           "mustNotContainPeriod": "De zonenaam mag geen punten bevatten.",
           "hasIllegalCharacter": "De zonenaam bevat ongeldige tekens.",
           "mustNotBeSameWithCamera": "De zonenaam mag niet gelijk zijn aan de cameranaam.",
-          "alreadyExists": "Er bestaat al een zone met deze naam voor deze camera."
+          "alreadyExists": "Er bestaat al een zone met deze naam voor deze camera.",
+          "mustHaveAtLeastOneLetter": "De zonenaam moet minimaal één letter bevatten."
         }
       },
       "distance": {
@@ -253,7 +302,7 @@
       "name": {
         "title": "Naam",
         "inputPlaceHolder": "Voer een naam in…",
-        "tips": "De naam moet minimaal 2 tekens lang zijn en mag niet gelijk zijn aan de naam van een camera of een andere zone."
+        "tips": "De naam moet minimaal 2 tekens lang zijn, minimaal één letter bevatten en mag niet gelijk zijn aan de naam van een camera of andere zone."
       },
       "inertia": {
         "title": "Traagheid",
@@ -420,7 +469,20 @@
       "score": "Score",
       "ratio": "Verhouding"
     },
-    "detectorDesc": "Frigate gebruikt je detectoren ({{detectors}}) om objecten in de videostream van je camera te detecteren."
+    "detectorDesc": "Frigate gebruikt je detectoren ({{detectors}}) om objecten in de videostream van je camera te detecteren.",
+    "paths": {
+      "title": "Paden",
+      "desc": "Toon belangrijke punten van het pad van het gevolgde object",
+      "tips": "<p><strong>Paden</strong></p><br><p>Lijnen en cirkels geven belangrijke punten aan waar het gevolgde object zich tijdens zijn levensduur heeft verplaatst.</p>"
+    },
+    "openCameraWebUI": "Open de webinterface van {{camera}}",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Geen audiodetecties",
+      "score": "score",
+      "currentRMS": "Huidige RMS",
+      "currentdbFS": "Huidige dbFS"
+    }
   },
   "users": {
     "title": "Gebruikers",
@@ -506,7 +568,8 @@
           "admin": "Beheerder",
           "adminDesc": "Volledige toegang tot alle functies.",
           "viewer": "Gebruiker",
-          "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports."
+          "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports.",
+          "customDesc": "Aangepaste rol met specifieke cameratoegang."
         },
         "select": "Selecteer een rol"
       },
@@ -679,6 +742,420 @@
     "toast": {
       "success": "Verrijkingsinstellingen zijn opgeslagen. Start Frigate opnieuw op om je wijzigingen toe te passen.",
       "error": "Configuratiewijzigingen konden niet worden opgeslagen: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Triggers",
+    "management": {
+      "title": "Triggers",
+      "desc": "Beheer triggers voor {{camera}}. Gebruik een thumbnail om te triggeren op vergelijkbare thumbnails van het door jou gevolgde object, of gebruik een objectbeschrijving om te triggeren op vergelijkbare beschrijvingen van de door jou opgegeven tekst."
+    },
+    "addTrigger": "Trigger toevoegen",
+    "table": {
+      "name": "Naam",
+      "type": "Type",
+      "content": "Inhoud",
+      "threshold": "Drempel",
+      "actions": "Acties",
+      "noTriggers": "Er zijn geen triggers geconfigureerd voor deze camera.",
+      "edit": "Bewerken",
+      "deleteTrigger": "Trigger verwijderen",
+      "lastTriggered": "Laatst geactiveerd"
+    },
+    "type": {
+      "thumbnail": "Thumbnail",
+      "description": "Beschrijving"
+    },
+    "actions": {
+      "alert": "Markeren als waarschuwing",
+      "notification": "Melding verzenden",
+      "sub_label": "Sublabel toevoegen",
+      "attribute": "Attribuut toevoegen"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Trigger aanmaken",
+        "desc": "Maak een trigger voor camera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Trigger bewerken",
+        "desc": "Wijzig de instellingen voor de trigger op camera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Trigger verwijderen",
+        "desc": "Weet u zeker dat u de trigger <strong>{{triggerName}}</strong> wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
+      },
+      "form": {
+        "name": {
+          "title": "Naam",
+          "placeholder": "Geef deze trigger een naam",
+          "error": {
+            "minLength": "Het veld moet minimaal 2 tekens lang zijn.",
+            "invalidCharacters": "Dit veld mag alleen letters, cijfers, onderstrepingstekens en koppeltekens bevatten.",
+            "alreadyExists": "Er bestaat al een trigger met deze naam voor deze camera."
+          },
+          "description": "Voer een unieke naam of beschrijving in om deze trigger te identificeren"
+        },
+        "enabled": {
+          "description": "Deze trigger in- of uitschakelen"
+        },
+        "type": {
+          "title": "Type",
+          "placeholder": "Selecteer het type trigger",
+          "description": "Activeer wanneer een vergelijkbare beschrijving van een gevolgd object wordt gedetecteerd",
+          "thumbnail": "Activeer wanneer een vergelijkbare thumbnail van een gevolgd object wordt gedetecteerd"
+        },
+        "content": {
+          "title": "Inhoud",
+          "imagePlaceholder": "Selecteer een thumbnail",
+          "textPlaceholder": "Tekst invoeren",
+          "imageDesc": "Alleen de meest recente 100 thumbnails worden weergegeven. Als je de gewenste thumbnail niet kunt vinden, bekijk dan eerdere objecten in Verkennen en stel daar een trigger in via het menu.",
+          "textDesc": "Voer tekst in om deze actie te activeren wanneer een vergelijkbare beschrijving van een gevolgd object wordt gedetecteerd.",
+          "error": {
+            "required": "Inhoud is vereist."
+          }
+        },
+        "threshold": {
+          "title": "Drempel",
+          "error": {
+            "min": "De drempelwaarde moet minimaal 0 zijn",
+            "max": "De drempelwaarde mag maximaal 1 zijn"
+          },
+          "desc": "Stel de vergelijkingsdrempel in voor deze trigger. Een hogere drempel betekent dat er een nauwere overeenkomst vereist is om de trigger te activeren."
+        },
+        "actions": {
+          "title": "Acties",
+          "desc": "Standaard stuurt Frigate een MQTT-bericht voor alle triggers. Sublabels voegen de triggernaam toe aan het objectlabel. Attributen zijn doorzoekbare metadata die afzonderlijk worden opgeslagen in de metadata van het gevolgde object.",
+          "error": {
+            "min": "Er moet ten minste één actie worden geselecteerd."
+          }
+        },
+        "friendly_name": {
+          "title": "Gebruiksvriendelijke naam",
+          "placeholder": "Geef een naam of beschrijf deze trigger",
+          "description": "Een optionele gebruiksvriendelijke naam of beschrijvende tekst voor deze trigger."
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Trigger {{name}} is succesvol aangemaakt.",
+        "updateTrigger": "Trigger {{name}} is succesvol bijgewerkt.",
+        "deleteTrigger": "Trigger {{name}} succesvol verwijderd."
+      },
+      "error": {
+        "createTriggerFailed": "Trigger kan niet worden gemaakt: {{errorMessage}}",
+        "updateTriggerFailed": "Trigger kan niet worden bijgewerkt: {{errorMessage}}",
+        "deleteTriggerFailed": "Trigger kan niet worden verwijderd: {{errorMessage}}"
+      }
+    },
+    "semanticSearch": {
+      "title": "Semantisch zoeken is uitgeschakeld",
+      "desc": "Semantisch zoeken moet ingeschakeld zijn om triggers te kunnen gebruiken."
+    },
+    "wizard": {
+      "title": "Trigger maken",
+      "step1": {
+        "description": "Configureer de basisinstellingen voor uw trigger."
+      },
+      "step2": {
+        "description": "Stel de inhoud in die deze trigger activeert."
+      },
+      "step3": {
+        "description": "Configureer de drempelwaarde en acties voor deze trigger."
+      },
+      "steps": {
+        "nameAndType": "Naam en type",
+        "configureData": "Gegevens configureren",
+        "thresholdAndActions": "Drempel en acties"
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Beheer van kijkersrollen",
+      "desc": "Beheer aangepaste kijkersrollen en hun camera-toegangsrechten voor deze Frigate-instantie."
+    },
+    "addRole": "Rol toevoegen",
+    "table": {
+      "role": "Rol",
+      "cameras": "Camera's",
+      "actions": "Acties",
+      "noRoles": "Er zijn geen aangepaste rollen gevonden.",
+      "editCameras": "Camera's bewerken",
+      "deleteRole": "Rol verwijderen"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rol {{role}} succesvol aangemaakt",
+        "updateCameras": "Camera's bijgewerkt voor rol {{role}}",
+        "deleteRole": "Rol {{role}} succesvol verwijderd",
+        "userRolesUpdated_one": "{{count}} gebruiker(s) die aan deze rol waren toegewezen, zijn bijgewerkt naar ‘kijker’, die toegang heeft tot alle camera’s.",
+        "userRolesUpdated_other": ""
+      },
+      "error": {
+        "createRoleFailed": "Kan rol niet aanmaken: {{errorMessage}}",
+        "updateCamerasFailed": "Het is niet gelukt om de camera's bij te werken: {{errorMessage}}",
+        "deleteRoleFailed": "Kan rol niet verwijderen: {{errorMessage}}",
+        "userUpdateFailed": "Het bijwerken van gebruikersrollen is mislukt: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Nieuwe rol maken",
+        "desc": "Voeg een nieuwe rol toe en specificeer de camera-toegangsrechten."
+      },
+      "editCameras": {
+        "title": "Camera’s voor rol bewerken",
+        "desc": "Werk de camera-toegang bij voor de rol <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Rol verwijderen",
+        "desc": "Deze actie kan niet ongedaan worden gemaakt. De rol wordt permanent verwijderd en alle gebruikers met deze rol worden toegewezen aan de rol ‘kijker’, die toegang geeft tot alle camera’s.",
+        "warn": "Weet u zeker dat u <strong>{{role}}</strong> wilt verwijderen?",
+        "deleting": "Verwijderen..."
+      },
+      "form": {
+        "role": {
+          "title": "Rolnaam",
+          "placeholder": "Voer rolnaam in",
+          "desc": "Alleen letters, cijfers, punten en underscores zijn toegestaan.",
+          "roleIsRequired": "Rolnaam is vereist",
+          "roleOnlyInclude": "De rolnaam mag alleen letters, cijfers, . of _ bevatten",
+          "roleExists": "Er bestaat al een rol met deze naam."
+        },
+        "cameras": {
+          "title": "Camera's",
+          "desc": "Selecteer de camera's waartoe deze rol toegang heeft. Er is minimaal één camera vereist.",
+          "required": "Er moet minimaal één camera worden geselecteerd."
+        }
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Camera toevoegen",
+    "description": "Volg de onderstaande stappen om een nieuwe camera toe te voegen aan uw Frigate-installatie.",
+    "steps": {
+      "nameAndConnection": "Naam & Verbinding",
+      "streamConfiguration": "Streamconfiguratie",
+      "validationAndTesting": "Validatie & testen"
+    },
+    "save": {
+      "success": "Nieuwe camera {{cameraName}} succesvol opgeslagen.",
+      "failure": "Fout bij het opslaan van {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Resolutie",
+      "video": "Video",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Geef een geldige stream-URL op",
+      "testFailed": "Streamtest mislukt: {{error}}"
+    },
+    "step1": {
+      "description": "Voer je cameragegevens in en test de verbinding.",
+      "cameraName": "Cameranaam",
+      "cameraNamePlaceholder": "bijv. voordeur of achtertuin camera",
+      "host": "Host/IP-adres",
+      "port": "Port",
+      "username": "Gebruikersnaam",
+      "usernamePlaceholder": "Optioneel",
+      "password": "Wachtwoord",
+      "passwordPlaceholder": "Optioneel",
+      "selectTransport": "Selecteer transportprotocol",
+      "cameraBrand": "Cameramerk",
+      "selectBrand": "Selecteer cameramerk voor URL-sjabloon",
+      "customUrl": "Aangepaste stream-URL",
+      "brandInformation": "Merkinformatie",
+      "brandUrlFormat": "Voor camera's met het RTSP URL-formaat als: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://gebruikersnaam:wachtwoord@host:poort/pad",
+      "testConnection": "Testverbinding",
+      "testSuccess": "Verbindingstest succesvol!",
+      "testFailed": "Verbindingstest mislukt. Controleer uw invoer en probeer het opnieuw.",
+      "streamDetails": "Streamdetails",
+      "warnings": {
+        "noSnapshot": "Er kan geen snapshot worden opgehaald uit de geconfigureerde stream."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Selecteer een cameramerk met host/IP of kies 'Overig' voor een aangepaste URL",
+        "nameRequired": "Cameranaam is vereist",
+        "nameLength": "De cameranaam mag maximaal 64 tekens lang zijn",
+        "invalidCharacters": "Cameranaam bevat ongeldige tekens",
+        "nameExists": "Cameranaam bestaat al",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP wordt niet aanbevolen. Schakel HTTP in via de firmware-instellingen van de camera en start de wizard opnieuw."
+        },
+        "customUrlRtspRequired": "Aangepaste URL’s moeten beginnen met “rtsp://”. Handmatige configuratie is vereist voor camera­streams die geen RTSP gebruiken."
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Camerametadata wordt onderzocht...",
+        "fetchingSnapshot": "Camerasnapshot ophalen..."
+      }
+    },
+    "step2": {
+      "description": "Configureer streamrollen en voeg extra streams toe voor uw camera.",
+      "streamsTitle": "Camerastreams",
+      "addStream": "Stream toevoegen",
+      "addAnotherStream": "Voeg een extra stream toe",
+      "streamTitle": "Stream {{number}}",
+      "streamUrl": "Stream-URL",
+      "streamUrlPlaceholder": "rtsp://gebruikersnaam:wachtwoord@host:poort/pad",
+      "url": "URL",
+      "resolution": "Resolutie",
+      "selectResolution": "Selecteer resolutie",
+      "quality": "Kwaliteit",
+      "selectQuality": "Selecteer kwaliteit",
+      "roles": "Functie",
+      "roleLabels": {
+        "detect": "Objectdetectie",
+        "record": "Opname",
+        "audio": "Audio"
+      },
+      "testStream": "Testverbinding",
+      "testSuccess": "Streamtest succesvol!",
+      "testFailed": "Streamtest mislukt",
+      "testFailedTitle": "Test mislukt",
+      "connected": "Aangesloten",
+      "notConnected": "Niet verbonden",
+      "featuresTitle": "Functies",
+      "go2rtc": "Verminder verbindingen met de camera",
+      "detectRoleWarning": "Er moet minimaal één stream de rol 'detecteren' hebben om door te kunnen gaan.",
+      "rolesPopover": {
+        "title": "Streamrollen",
+        "detect": "Hoofdfeed voor objectdetectie.",
+        "record": "Slaat segmenten van de videofeed op op basis van de configuratie-instellingen.",
+        "audio": "Feed voor op audio gebaseerde detectie."
+      },
+      "featuresPopover": {
+        "title": "Streamfuncties",
+        "description": "Gebruik go2rtc-herstreaming om het aantal verbindingen met je camera te verminderen."
+      }
+    },
+    "step3": {
+      "description": "Laatste controle en analyse voordat je je nieuwe camera opslaat. Verbind elke stream voordat je opslaat.",
+      "validationTitle": "Streamvalidatie",
+      "connectAllStreams": "Verbind alle streams",
+      "reconnectionSuccess": "Opnieuw verbinden gelukt.",
+      "reconnectionPartial": "Bij sommige streams kon de verbinding niet worden hersteld.",
+      "streamUnavailable": "Streamvoorbeeld niet beschikbaar",
+      "reload": "Herladen",
+      "connecting": "Verbinden...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Geldig",
+      "failed": "Mislukt",
+      "notTested": "Niet getest",
+      "connectStream": "Verbinden",
+      "connectingStream": "Verbinden",
+      "disconnectStream": "Verbreek verbinding",
+      "estimatedBandwidth": "Geschatte bandbreedte",
+      "roles": "Functie",
+      "none": "Niets",
+      "error": "Fout",
+      "streamValidated": "Stream {{number}} is succesvol gevalideerd",
+      "streamValidationFailed": "Stream {{number}} validatie mislukt",
+      "saveAndApply": "Nieuwe camera opslaan",
+      "saveError": "Ongeldige configuratie, Controleer uw instellingen.",
+      "issues": {
+        "title": "Streamvalidatie",
+        "videoCodecGood": "Videocodec is {{codec}}.",
+        "audioCodecGood": "Audiocodec is {{codec}}.",
+        "noAudioWarning": "Geen audio gedetecteerd voor deze stream, opnames bevatten geen audio.",
+        "audioCodecRecordError": "De AAC-audiocodec is vereist om audio in opnames te ondersteunen.",
+        "audioCodecRequired": "Ter ondersteuning van audiodetectie is een audiostream vereist.",
+        "restreamingWarning": "Als u het aantal verbindingen met de camera voor de opnamestream vermindert, kan het CPU-gebruik iets toenemen.",
+        "dahua": {
+          "substreamWarning": "Substream 1 is beperkt tot een lage resolutie. Veel Dahua / Amcrest / EmpireTech camera’s ondersteunen extra substreams die in de instellingen van de camera ingeschakeld moeten worden. Het wordt aanbevolen deze streams te controleren en te gebruiken indien beschikbaar."
+        },
+        "hikvision": {
+          "substreamWarning": "Substream 1 is beperkt tot een lage resolutie. Veel Hikvision-camera’s ondersteunen extra substreams die in de instellingen van de camera ingeschakeld moeten worden. Het wordt aanbevolen deze streams te controleren en te gebruiken indien beschikbaar."
+        },
+        "resolutionHigh": "Een resolutie van {{resolution}} kan leiden tot een verhoogd gebruik van systeembronnen.",
+        "resolutionLow": "Een resolutie van {{resolution}} kan te laag zijn voor betrouwbare detectie van kleine objecten."
+      },
+      "ffmpegModule": "Gebruik stream-compatibiliteitsmodus",
+      "ffmpegModuleDescription": "Als de stream na meerdere pogingen niet wordt geladen, probeer dit dan in te schakelen. Wanneer deze optie is ingeschakeld, gebruikt Frigate de ffmpeg-module samen met go2rtc. Dit kan zorgen voor een betere compatibiliteit met sommige camerastreams."
+    }
+  },
+  "cameraManagement": {
+    "title": "Camera’s beheren",
+    "addCamera": "Nieuwe camera toevoegen",
+    "editCamera": "Camera bewerken:",
+    "selectCamera": "Selecteer een camera",
+    "backToSettings": "Terug naar camera-instellingen",
+    "streams": {
+      "title": "Camera's in-/uitschakelen",
+      "desc": "Schakel een camera tijdelijk uit totdat Frigate opnieuw wordt gestart. Het uitschakelen van een camera stopt de verwerking van de streams van deze camera volledig door Frigate. Detectie, opname en foutopsporing zijn dan niet beschikbaar.<br /> <em>Let op: dit schakelt go2rtc-restreams niet uit.</em>"
+    },
+    "cameraConfig": {
+      "add": "Camera toevoegen",
+      "edit": "Camera bewerken",
+      "description": "Configureer de camera-instellingen, inclusief streaming-inputs en functies.",
+      "name": "Cameranaam",
+      "nameRequired": "Cameranaam is vereist",
+      "nameLength": "Cameranaam mag niet langer zijn dan 64 tekens.",
+      "namePlaceholder": "bijv. voordeur of achtertuin camera",
+      "enabled": "Ingeschakeld",
+      "ffmpeg": {
+        "inputs": "Streams-Input",
+        "path": "Streampad",
+        "pathRequired": "Streampad is vereist",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Functie",
+        "rolesRequired": "Er is ten minste één functie vereist",
+        "rolesUnique": "Elke functie (audio, detecteren, opnemen) kan slechts aan één stream worden toegewezen",
+        "addInput": "Inputstream toevoegen",
+        "removeInput": "Inputstream verwijderen",
+        "inputsRequired": "Er is ten minste één stream-input vereist"
+      },
+      "go2rtcStreams": "go2C Streams",
+      "streamUrls": "Stream URLs",
+      "addUrl": "URL toevoegen",
+      "addGo2rtcStream": "Voeg go2rtc Stream toe",
+      "toast": {
+        "success": "Camera {{cameraName}} is succesvol opgeslagen"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Camerabeoordelings-instellingen",
+    "object_descriptions": {
+      "title": "AI-gegenereerde objectomschrijvingen",
+      "desc": "AI-gegenereerde objectomschrijvingen tijdelijk uitschakelen voor deze camera. Wanneer uitgeschakeld, zullen omschrijvingen van gevolgde objecten op deze camera niet aangevraagd worden."
+    },
+    "review_descriptions": {
+      "title": "Generatieve-AI Beoordelingsbeschrijvingen",
+      "desc": "Tijdelijk generatieve-AI-beoordelingsbeschrijvingen voor deze camera in- of uitschakelen. Wanneer dit is uitgeschakeld, worden er geen door AI gegenereerde beschrijvingen opgevraagd voor beoordelingsitems van deze camera."
+    },
+    "review": {
+      "title": "Beoordeel",
+      "desc": "Schakel waarschuwingen en detecties voor deze camera tijdelijk in of uit totdat Frigate opnieuw wordt gestart. Wanneer uitgeschakeld, worden er geen nieuwe beoordelingsitems gegenereerd. ",
+      "alerts": "Meldingen ",
+      "detections": "Detecties "
+    },
+    "reviewClassification": {
+      "title": "Beoordelingsclassificatie",
+      "desc": "Frigate categoriseert beoordelingsitems als meldingen en detecties.Standaard worden alle <em>person</em>- en <em>car</em>-objecten als meldingen beschouwd. Je kunt de categorisatie verfijnen door zones te configureren waarin uitsluitend deze objecten gedetecteerd moeten worden.",
+      "noDefinedZones": "Voor deze camera zijn nog geen zones ingesteld.",
+      "objectAlertsTips": "Alle {{alertsLabels}}-objecten op {{cameraName}} worden weergegeven als meldingen.",
+      "zoneObjectAlertsTips": "Alle {{alertsLabels}}-objecten die zijn gedetecteerd in {{zone}} op {{cameraName}} worden weergegeven als meldingen.",
+      "objectDetectionsTips": "Alle {{detectionsLabels}}-objecten die op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties ongeacht in welke zone ze zich bevinden.",
+      "zoneObjectDetectionsTips": {
+        "text": "Alle {{detectionsLabels}}-objecten die in {{zone}} op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties.",
+        "notSelectDetections": "Alle {{detectionsLabels}}-objecten die in {{zone}} op {{cameraName}} worden gedetecteerd en niet als melding zijn gecategoriseerd, worden weergegeven als detecties – ongeacht in welke zone ze zich bevinden.",
+        "regardlessOfZoneObjectDetectionsTips": "Alle {{detectionsLabels}}-objecten die op {{cameraName}} niet zijn gecategoriseerd, worden weergegeven als detecties ongeacht in welke zone ze zich bevinden."
+      },
+      "unsavedChanges": "Niet-opgeslagen classificatie-instellingen voor {{camera}}",
+      "selectAlertsZones": "Zones selecteren voor meldingen",
+      "selectDetectionsZones": "Selecteer zones voor detecties",
+      "limitDetections": "Beperk detecties tot specifieke zones",
+      "toast": {
+        "success": "Configuratie voor beoordelingsclassificatie is opgeslagen. Herstart Frigate om de wijzigingen toe te passen."
+      }
     }
   }
 }

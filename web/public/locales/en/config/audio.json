@@ -1,0 +1,26 @@
+{
+  "label": "Global Audio events configuration.",
+  "properties": {
+    "enabled": {
+      "label": "Enable audio events."
+    },
+    "max_not_heard": {
+      "label": "Seconds of not hearing the type of audio to end the event."
+    },
+    "min_volume": {
+      "label": "Min volume required to run audio detection."
+    },
+    "listen": {
+      "label": "Audio to listen for."
+    },
+    "filters": {
+      "label": "Audio filters."
+    },
+    "enabled_in_config": {
+      "label": "Keep track of original state of audio detection."
+    },
+    "num_threads": {
+      "label": "Number of detection threads"
+    }
+  }
+}

@@ -6,8 +6,10 @@ import logging
 import os
 import re
 import resource
+import shutil
 import signal
 import subprocess as sp
+import time
 import traceback
 from datetime import datetime
 from typing import Any, List, Optional, Tuple
@@ -22,6 +24,7 @@ from frigate.const import (
     DRIVER_ENV_VAR,
     FFMPEG_HWACCEL_NVIDIA,
     FFMPEG_HWACCEL_VAAPI,
+    SHM_FRAMES_VAR,
 )
 from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
 
@@ -386,6 +389,39 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
         return results
 
 
+def get_openvino_npu_stats() -> Optional[dict[str, str]]:
+    """Get NPU stats using openvino."""
+    NPU_RUNTIME_PATH = "/sys/devices/pci0000:00/0000:00:0b.0/power/runtime_active_time"
+
+    try:
+        with open(NPU_RUNTIME_PATH, "r") as f:
+            initial_runtime = float(f.read().strip())
+
+        initial_time = time.time()
+
+        # Sleep for 1 second to get an accurate reading
+        time.sleep(1.0)
+
+        # Read runtime value again
+        with open(NPU_RUNTIME_PATH, "r") as f:
+            current_runtime = float(f.read().strip())
+
+        current_time = time.time()
+
+        # Calculate usage percentage
+        runtime_diff = current_runtime - initial_runtime
+        time_diff = (current_time - initial_time) * 1000.0  # Convert to milliseconds
+
+        if time_diff > 0:
+            usage = min(100.0, max(0.0, (runtime_diff / time_diff * 100.0)))
+        else:
+            usage = 0.0
+
+        return {"npu": f"{round(usage, 2)}", "mem": "-"}
+    except (FileNotFoundError, PermissionError, ValueError):
+        return None
+
+
 def get_rockchip_gpu_stats() -> Optional[dict[str, str]]:
     """Get GPU stats using rk."""
     try:
@@ -513,9 +549,20 @@ def get_jetson_stats() -> Optional[dict[int, dict]]:
     return results
 
 
-def ffprobe_stream(ffmpeg, path: str) -> sp.CompletedProcess:
+def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     clean_path = escape_special_characters(path)
+
+    # Base entries that are always included
+    stream_entries = "codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate"
+
+    # Additional detailed entries
+    if detailed:
+        stream_entries += ",codec_name,profile,level,pix_fmt,channels,sample_rate,channel_layout,r_frame_rate"
+        format_entries = "format_name,size,bit_rate,duration"
+    else:
+        format_entries = None
+
     ffprobe_cmd = [
         ffmpeg.ffprobe_path,
         "-timeout",
@@ -523,11 +570,15 @@ def ffprobe_stream(ffmpeg, path: str) -> sp.CompletedProcess:
         "-print_format",
         "json",
         "-show_entries",
-        "stream=codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate",
-        "-loglevel",
-        "quiet",
-        clean_path,
+        f"stream={stream_entries}",
     ]
+
+    # Add format entries for detailed mode
+    if detailed and format_entries:
+        ffprobe_cmd.extend(["-show_entries", f"format={format_entries}"])
+
+    ffprobe_cmd.extend(["-loglevel", "error", clean_path])
+
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
@@ -601,87 +652,87 @@ def auto_detect_hwaccel() -> str:
 async def get_video_properties(
     ffmpeg, url: str, get_duration: bool = False
 ) -> dict[str, Any]:
-    async def calculate_duration(video: Optional[Any]) -> float:
-        duration = None
-
-        if video is not None:
-            # Get the frames per second (fps) of the video stream
-            fps = video.get(cv2.CAP_PROP_FPS)
-            total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-
-            if fps and total_frames:
-                duration = total_frames / fps
-
-        # if cv2 failed need to use ffprobe
-        if duration is None:
-            p = await asyncio.create_subprocess_exec(
-                ffmpeg.ffprobe_path,
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration",
-                "-of",
-                "default=noprint_wrappers=1:nokey=1",
-                f"{url}",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
+    async def probe_with_ffprobe(
+        url: str,
+    ) -> tuple[bool, int, int, Optional[str], float]:
+        """Fallback using ffprobe: returns (valid, width, height, codec, duration)."""
+        cmd = [
+            ffmpeg.ffprobe_path,
+            "-v",
+            "quiet",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            url,
+        ]
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            await p.wait()
+            stdout, _ = await proc.communicate()
+            if proc.returncode != 0:
+                return False, 0, 0, None, -1
 
-            if p.returncode == 0:
-                result = (await p.stdout.read()).decode()
-            else:
-                result = None
+            data = json.loads(stdout.decode())
+            video_streams = [
+                s for s in data.get("streams", []) if s.get("codec_type") == "video"
+            ]
+            if not video_streams:
+                return False, 0, 0, None, -1
 
-            if result:
-                try:
-                    duration = float(result.strip())
-                except ValueError:
-                    duration = -1
-            else:
-                duration = -1
+            v = video_streams[0]
+            width = int(v.get("width", 0))
+            height = int(v.get("height", 0))
+            codec = v.get("codec_name")
 
-        return duration
+            duration_str = data.get("format", {}).get("duration")
+            duration = float(duration_str) if duration_str else -1.0
 
-    width = height = 0
+            return True, width, height, codec, duration
+        except (json.JSONDecodeError, ValueError, KeyError, asyncio.SubprocessError):
+            return False, 0, 0, None, -1
 
-    try:
-        # Open the video stream using OpenCV
-        video = cv2.VideoCapture(url)
+    def probe_with_cv2(url: str) -> tuple[bool, int, int, Optional[str], float]:
+        """Primary attempt using cv2: returns (valid, width, height, fourcc, duration)."""
+        cap = cv2.VideoCapture(url)
+        if not cap.isOpened():
+            cap.release()
+            return False, 0, 0, None, -1
 
-        # Check if the video stream was opened successfully
-        if not video.isOpened():
-            video = None
-    except Exception:
-        video = None
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        valid = width > 0 and height > 0
+        fourcc = None
+        duration = -1.0
 
-    result = {}
+        if valid:
+            fourcc_int = int(cap.get(cv2.CAP_PROP_FOURCC))
+            fourcc = fourcc_int.to_bytes(4, "little").decode("latin-1").strip()
 
+            if get_duration:
+                fps = cap.get(cv2.CAP_PROP_FPS)
+                total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                if fps > 0 and total_frames > 0:
+                    duration = total_frames / fps
+
+        cap.release()
+        return valid, width, height, fourcc, duration
+
+    # try cv2 first
+    has_video, width, height, fourcc, duration = probe_with_cv2(url)
+
+    # fallback to ffprobe if needed
+    if not has_video or (get_duration and duration < 0):
+        has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
+
+    result: dict[str, Any] = {"has_valid_video": has_video}
+    if has_video:
+        result.update({"width": width, "height": height})
+        if fourcc:
+            result["fourcc"] = fourcc
     if get_duration:
-        result["duration"] = await calculate_duration(video)
-
-    if video is not None:
-        # Get the width of frames in the video stream
-        width = video.get(cv2.CAP_PROP_FRAME_WIDTH)
-
-        # Get the height of frames in the video stream
-        height = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
-
-        # Get the stream encoding
-        fourcc_int = int(video.get(cv2.CAP_PROP_FOURCC))
-        fourcc = (
-            chr((fourcc_int >> 0) & 255)
-            + chr((fourcc_int >> 8) & 255)
-            + chr((fourcc_int >> 16) & 255)
-            + chr((fourcc_int >> 24) & 255)
-        )
-
-        # Release the video stream
-        video.release()
-
-        result["width"] = round(width)
-        result["height"] = round(height)
-        result["fourcc"] = fourcc
+        result["duration"] = duration
 
     return result
 
@@ -768,3 +819,65 @@ def set_file_limit() -> None:
     logger.debug(
         f"File limit set. New soft limit: {new_soft}, Hard limit remains: {current_hard}"
     )
+
+
+def get_fs_type(path: str) -> str:
+    bestMatch = ""
+    fsType = ""
+    for part in psutil.disk_partitions(all=True):
+        if path.startswith(part.mountpoint) and len(bestMatch) < len(part.mountpoint):
+            fsType = part.fstype
+            bestMatch = part.mountpoint
+    return fsType
+
+
+def calculate_shm_requirements(config) -> dict:
+    try:
+        storage_stats = shutil.disk_usage("/dev/shm")
+    except (FileNotFoundError, OSError):
+        return {}
+
+    total_mb = round(storage_stats.total / pow(2, 20), 1)
+    used_mb = round(storage_stats.used / pow(2, 20), 1)
+    free_mb = round(storage_stats.free / pow(2, 20), 1)
+
+    # required for log files + nginx cache
+    min_req_shm = 40 + 10
+
+    if config.birdseye.restream:
+        min_req_shm += 8
+
+    available_shm = total_mb - min_req_shm
+    cam_total_frame_size = 0.0
+
+    for camera in config.cameras.values():
+        if camera.enabled_in_config and camera.detect.width and camera.detect.height:
+            cam_total_frame_size += round(
+                (camera.detect.width * camera.detect.height * 1.5 + 270480) / 1048576,
+                1,
+            )
+
+    # leave room for 2 cameras that are added dynamically, if a user wants to add more cameras they may need to increase the SHM size and restart after adding them.
+    cam_total_frame_size += 2 * round(
+        (1280 * 720 * 1.5 + 270480) / 1048576,
+        1,
+    )
+
+    shm_frame_count = min(
+        int(os.environ.get(SHM_FRAMES_VAR, "50")),
+        int(available_shm / cam_total_frame_size),
+    )
+
+    # minimum required shm recommendation
+    min_shm = round(min_req_shm + cam_total_frame_size * 20)
+
+    return {
+        "total": total_mb,
+        "used": used_mb,
+        "free": free_mb,
+        "mount_type": get_fs_type("/dev/shm"),
+        "available": round(available_shm, 1),
+        "camera_frame_size": cam_total_frame_size,
+        "shm_frame_count": shm_frame_count,
+        "min_shm": min_shm,
+    }

@@ -5,7 +5,7 @@ import copy
 import datetime
 import logging
 import math
-import multiprocessing as mp
+import multiprocessing.queues
 import queue
 import re
 import shlex
@@ -14,13 +14,10 @@ import urllib.parse
 from collections.abc import Mapping
 from multiprocessing.sharedctypes import Synchronized
 from pathlib import Path
-from typing import Any, Optional, Tuple, Union
-from zoneinfo import ZoneInfoNotFoundError
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
-import pytz
 from ruamel.yaml import YAML
-from tzlocal import get_localzone
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
@@ -157,17 +154,6 @@ def load_labels(path: Optional[str], encoding="utf-8", prefill=91):
         return labels
 
 
-def get_tz_modifiers(tz_name: str) -> Tuple[str, str, float]:
-    seconds_offset = (
-        datetime.datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
-    )
-    hours_offset = int(seconds_offset / 60 / 60)
-    minutes_offset = int(seconds_offset / 60 - hours_offset * 60)
-    hour_modifier = f"{hours_offset} hour"
-    minute_modifier = f"{minutes_offset} minute"
-    return hour_modifier, minute_modifier, seconds_offset
-
-
 def to_relative_box(
     width: int, height: int, box: Tuple[int, int, int, int]
 ) -> Tuple[int | float, int | float, int | float, int | float]:
@@ -184,25 +170,12 @@ def create_mask(frame_shape, mask):
     mask_img[:] = 255
 
 
-def update_yaml_from_url(file_path, url):
-    parsed_url = urllib.parse.urlparse(url)
-    query_string = urllib.parse.parse_qs(parsed_url.query, keep_blank_values=True)
-
-    # Filter out empty keys but keep blank values for non-empty keys
-    query_string = {k: v for k, v in query_string.items() if k}
-
+def process_config_query_string(query_string: Dict[str, list]) -> Dict[str, Any]:
+    updates = {}
     for key_path_str, new_value_list in query_string.items():
-        key_path = key_path_str.split(".")
-        for i in range(len(key_path)):
-            try:
-                index = int(key_path[i])
-                key_path[i] = (key_path[i - 1], index)
-                key_path.pop(i - 1)
-            except ValueError:
-                pass
-
+        # use the string key as-is for updates dictionary
         if len(new_value_list) > 1:
-            update_yaml_file(file_path, key_path, new_value_list)
+            updates[key_path_str] = new_value_list
         else:
             value = new_value_list[0]
             try:
@@ -210,10 +183,24 @@ def update_yaml_from_url(file_path, url):
                 value = ast.literal_eval(value) if "," not in value else value
             except (ValueError, SyntaxError):
                 pass
-            update_yaml_file(file_path, key_path, value)
+            updates[key_path_str] = value
+    return updates
 
 
-def update_yaml_file(file_path, key_path, new_value):
+def flatten_config_data(
+    config_data: Dict[str, Any], parent_key: str = ""
+) -> Dict[str, Any]:
+    items = []
+    for key, value in config_data.items():
+        new_key = f"{parent_key}.{key}" if parent_key else key
+        if isinstance(value, dict):
+            items.extend(flatten_config_data(value, new_key).items())
+        else:
+            items.append((new_key, value))
+    return dict(items)
+
+
+def update_yaml_file_bulk(file_path: str, updates: Dict[str, Any]):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
 
@@ -226,7 +213,17 @@ def update_yaml_file(file_path, key_path, new_value):
         )
         return
 
-    data = update_yaml(data, key_path, new_value)
+    # Apply all updates
+    for key_path_str, new_value in updates.items():
+        key_path = key_path_str.split(".")
+        for i in range(len(key_path)):
+            try:
+                index = int(key_path[i])
+                key_path[i] = (key_path[i - 1], index)
+                key_path.pop(i - 1)
+            except ValueError:
+                pass
+        data = update_yaml(data, key_path, new_value)
 
     try:
         with open(file_path, "w") as f:
@@ -287,34 +284,6 @@ def find_by_key(dictionary, target_key):
     return None
 
 
-def get_tomorrow_at_time(hour: int) -> datetime.datetime:
-    """Returns the datetime of the following day at 2am."""
-    try:
-        tomorrow = datetime.datetime.now(get_localzone()) + datetime.timedelta(days=1)
-    except ZoneInfoNotFoundError:
-        tomorrow = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
-            days=1
-        )
-        logger.warning(
-            "Using utc for maintenance due to missing or incorrect timezone set"
-        )
-
-    return tomorrow.replace(hour=hour, minute=0, second=0).astimezone(
-        datetime.timezone.utc
-    )
-
-
-def is_current_hour(timestamp: int) -> bool:
-    """Returns if timestamp is in the current UTC hour."""
-    start_of_next_hour = (
-        datetime.datetime.now(datetime.timezone.utc).replace(
-            minute=0, second=0, microsecond=0
-        )
-        + datetime.timedelta(hours=1)
-    ).timestamp()
-    return timestamp < start_of_next_hour
-
-
 def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:
     """clear file then unlink to avoid space retained by file descriptors."""
     if not missing_ok and not file.exists():
@@ -327,14 +296,24 @@ def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:
     file.unlink(missing_ok=missing_ok)
 
 
-def empty_and_close_queue(q: mp.Queue):
+def empty_and_close_queue(q):
     while True:
         try:
             q.get(block=True, timeout=0.5)
-        except queue.Empty:
+        except (queue.Empty, EOFError):
+            break
+        except Exception as e:
+            logger.debug(f"Error while emptying queue: {e}")
+            break
+
+    # close the queue if it is a multiprocessing queue
+    # manager proxy queues do not have close or join_thread method
+    if isinstance(q, multiprocessing.queues.Queue):
+        try:
             q.close()
             q.join_thread()
-            return
+        except Exception:
+            pass
 
 
 def generate_color_palette(n):
@@ -407,3 +386,19 @@ def sanitize_float(value):
     if isinstance(value, (int, float)) and not math.isfinite(value):
         return 0.0
     return value
+
+
+def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+    return 1 - cosine_distance(a, b)
+
+
+def cosine_distance(a: np.ndarray, b: np.ndarray) -> float:
+    """Returns cosine distance to match sqlite-vec's calculation."""
+    dot = np.dot(a, b)
+    a_mag = np.dot(a, a)  # ||a||^2
+    b_mag = np.dot(b, b)  # ||b||^2
+
+    if a_mag == 0 or b_mag == 0:
+        return 1.0
+
+    return 1.0 - (dot / (np.sqrt(a_mag) * np.sqrt(b_mag)))

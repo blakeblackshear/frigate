@@ -1,6 +1,6 @@
 {
   "time": {
-    "untilForRestart": "Jusqu'au redémarrage de Frigate.",
+    "untilForRestart": "Jusqu'au redémarrage de Frigate",
     "untilRestart": "Jusqu'au redémarrage",
     "untilForTime": "Jusqu'à {{time}}",
     "justNow": "À l'instant",
@@ -22,10 +22,10 @@
     "pm": "PM",
     "am": "AM",
     "yr": "{{time}} a",
-    "year_one": "{{time}} année",
-    "year_many": "{{time}} années",
-    "year_other": "{{time}} années",
-    "mo": "{{time}} m",
+    "year_one": "{{time}} an",
+    "year_many": "{{time}} ans",
+    "year_other": "{{time}} ans",
+    "mo": "{{time}} mois",
     "month_one": "{{time}} mois",
     "month_many": "{{time}} mois",
     "month_other": "{{time}} mois",
@@ -33,7 +33,7 @@
     "second_one": "{{time}} seconde",
     "second_many": "{{time}} secondes",
     "second_other": "{{time}} secondes",
-    "m": "{{time}} mn",
+    "m": "{{time}} min",
     "hour_one": "{{time}} heure",
     "hour_many": "{{time}} heures",
     "hour_other": "{{time}} heures",
@@ -65,23 +65,23 @@
     },
     "formattedTimestampHourMinute": {
       "24hour": "HH:mm",
-      "12hour": "HH:mm aaa"
+      "12hour": "HH:mm"
     },
     "formattedTimestampMonthDay": "d MMM",
     "formattedTimestampFilename": {
-      "12hour": "dd-MM-yy-HH-mm-ss-a",
+      "12hour": "dd-MM-yy-HH-mm-ss",
       "24hour": "dd-MM-yy-HH-mm-ss"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "d MMM, HH:mm aaa",
+      "12hour": "d MMM, HH:mm",
       "24hour": "d MMM, HH:mm"
     },
     "formattedTimestampHourMinuteSecond": {
       "24hour": "HH:mm:ss",
-      "12hour": "HH:mm:ss aaa"
+      "12hour": "HH:mm:ss"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "d MMM yyyy, HH:mm aaa",
+      "12hour": "d MMM yyyy, HH:mm",
       "24hour": "d MMM yyyy, HH:mm"
     },
     "formattedTimestampMonthDayYear": {
@@ -98,16 +98,16 @@
     "close": "Fermer",
     "copy": "Copier",
     "back": "Retour",
-    "history": "Historique",
-    "pictureInPicture": "Image en incrustation",
+    "history": "Chronologie",
+    "pictureInPicture": "Image dans l'image",
     "twoWayTalk": "Conversation bidirectionnelle",
-    "off": "Inactif",
-    "edit": "Editer",
+    "off": "OFF",
+    "edit": "Modifier",
     "copyCoordinates": "Copier les coordonnées",
     "delete": "Supprimer",
     "yes": "Oui",
     "no": "Non",
-    "unsuspended": "Reprendre",
+    "unsuspended": "Réactiver",
     "play": "Lire",
     "unselect": "Désélectionner",
     "suspended": "Suspendu",
@@ -120,7 +120,7 @@
     "next": "Suivant",
     "exitFullscreen": "Sortir du mode plein écran",
     "cameraAudio": "Son de la caméra",
-    "on": "Actif",
+    "on": "ON",
     "export": "Exporter",
     "deleteNow": "Supprimer maintenant",
     "download": "Télécharger",
@@ -142,14 +142,14 @@
       "nl": "Nederlands (Néerlandais)",
       "sv": "Svenska (Suédois)",
       "cs": "Čeština (Tchèque)",
-      "nb": "Norsk Bokmål (Bokmål Norvégien)",
+      "nb": "Norsk Bokmål (Norvégien Bokmål)",
       "ko": "한국어 (Coréen)",
-      "fa": "فارسی (Perse)",
+      "fa": "فارسی (Persan)",
       "pl": "Polski (Polonais)",
       "el": "Ελληνικά (Grec)",
       "ro": "Română (Roumain)",
       "hu": "Magyar (Hongrois)",
-      "he": "עברית (Hebreu)",
+      "he": "עברית (Hébreu)",
       "ru": "Русский (Russe)",
       "de": "Deutsch (Allemand)",
       "es": "Español (Espagnol)",
@@ -162,7 +162,15 @@
       "vi": "Tiếng Việt (Vietnamien)",
       "yue": "粵語 (Cantonais)",
       "th": "ไทย (Thai)",
-      "ca": "Català (Catalan)"
+      "ca": "Català (Catalan)",
+      "ptBR": "Português brasileiro (Portugais brésilien)",
+      "sr": "Српски (Serbe)",
+      "sl": "Slovenščina (Slovène)",
+      "lt": "Lietuvių (Lithuanien)",
+      "bg": "Български (Bulgare)",
+      "gl": "Galego (Galicien)",
+      "id": "Bahasa Indonesia (Indonésien)",
+      "ur": "اردو (Ourdou)"
     },
     "appearance": "Apparence",
     "darkMode": {
@@ -173,7 +181,7 @@
       },
       "label": "Mode sombre"
     },
-    "review": "Revue d'événements",
+    "review": "Événements",
     "explore": "Explorer",
     "export": "Exporter",
     "user": {
@@ -191,18 +199,18 @@
     },
     "system": "Système",
     "help": "Aide",
-    "configurationEditor": "Editeur de configuration",
+    "configurationEditor": "Éditeur de configuration",
     "theme": {
       "contrast": "Contraste élevé",
       "blue": "Bleu",
       "green": "Vert",
       "nord": "Nord",
       "red": "Rouge",
-      "default": "Défaut",
+      "default": "Par défaut",
       "label": "Thème",
       "highcontrast": "Contraste élevé"
     },
-    "systemMetrics": "Indicateurs systèmes",
+    "systemMetrics": "Métriques du système",
     "settings": "Paramètres",
     "withSystem": "Système",
     "restart": "Redémarrer Frigate",
@@ -216,7 +224,7 @@
       "allCameras": "Toutes les caméras",
       "title": "Direct"
     },
-    "uiPlayground": "Gestion de l'interface",
+    "uiPlayground": "Bac à sable de l'interface",
     "faceLibrary": "Bibliothèque de visages",
     "languages": "Langues"
   },
@@ -225,16 +233,16 @@
       "title": "Enregistrer",
       "error": {
         "noMessage": "Echec lors de l'enregistrement des changements de configuration",
-        "title": "Echec lors de l'enregistrement des changements de configuration : {{errorMessage}}"
+        "title": "Échec de l'enregistrement des changements de configuration : {{errorMessage}}"
       }
     },
-    "copyUrlToClipboard": "Lien copié dans le presse-papier."
+    "copyUrlToClipboard": "URL copiée dans le presse-papiers"
   },
   "role": {
     "title": "Rôle",
     "viewer": "Observateur",
     "admin": "Administrateur",
-    "desc": "Les administrateurs accèdent à l'ensemble des fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, de la revue d'événements, et à l'historique des enregistrements dans l'interface utilisateur."
+    "desc": "Les administrateurs ont un accès complet à toutes les fonctionnalités de l'interface Frigate. Les observateurs sont limités à la consultation des caméras, des événements, et à l'historique des enregistrements dans l'interface."
   },
   "pagination": {
     "next": {
@@ -254,13 +262,17 @@
     "desc": "Page non trouvée"
   },
   "selectItem": "Sélectionner {{item}}",
+  "readTheDocumentation": "Lire la documentation",
   "accessDenied": {
     "title": "Accès refusé",
     "documentTitle": "Accès refusé - Frigate",
-    "desc": "Vous n'avez pas l'autorisation de voir cette page."
+    "desc": "Vous n'avez pas l'autorisation de consulter cette page."
   },
   "label": {
-    "back": "Retour"
+    "back": "Retour",
+    "hide": "Masquer {{item}}",
+    "show": "Afficher {{item}}",
+    "ID": "ID"
   },
   "unit": {
     "speed": {
@@ -270,6 +282,26 @@
     "length": {
       "feet": "pieds",
       "meters": "mètres"
+    },
+    "data": {
+      "kbps": "ko/s",
+      "mbps": "Mo/s",
+      "gbps": "Go/s",
+      "kbph": "ko/heure",
+      "mbph": "Mo/heure",
+      "gbph": "Go/heure"
     }
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "field": {
+    "optional": "Facultatif",
+    "internalID": "L'ID interne utilisée par Frigate dans la configuration et la base de donnêes"
+  },
+  "list": {
+    "two": "{{0}} et {{1}}",
+    "many": "{{items}}, et {{last}}",
+    "separatorWithSpace": ", "
   }
 }

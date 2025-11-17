@@ -2,7 +2,7 @@
   "configEditor": "Éditeur de configuration",
   "documentTitle": "Éditeur de configuration - Frigate",
   "copyConfig": "Copier la configuration",
-  "saveOnly": "Enregistrer seulement",
+  "saveOnly": "Enregistrer uniquement",
   "saveAndRestart": "Enregistrer et redémarrer",
   "toast": {
     "success": {
@@ -12,5 +12,7 @@
       "savingError": "Erreur lors de l'enregistrement de la configuration"
     }
   },
-  "confirm": "Quitter sans enregistrer ?"
+  "confirm": "Quitter sans enregistrer ?",
+  "safeConfigEditor": "Éditeur de configuration (mode sans échec)",
+  "safeModeDescription": "Frigate est en mode sans échec en raison d'une erreur de validation de la configuration."
 }

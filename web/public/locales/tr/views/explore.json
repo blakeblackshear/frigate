@@ -18,12 +18,14 @@
         "success": {
           "updatedSublabel": "Alt etiket başarıyla gücellendi.",
           "regenerate": "Yeni bir açıklama {{provider}} sağlayıcısından talep edildi. Sağlayıcının hızına bağlı olarak yeni açıklamanın oluşturulması biraz zaman alabilir.",
-          "updatedLPR": "Plaka başarıyla güncellendi."
+          "updatedLPR": "Plaka başarıyla güncellendi.",
+          "audioTranscription": "Ses çözümlemesi başarıyla talep edildi."
         },
         "error": {
           "updatedSublabelFailed": "Alt etiket güncellenemedi: {{errorMessage}}",
           "regenerate": "{{provider}} sağlayıcısından yeni açıklama talep edilemedi: {{errorMessage}}",
-          "updatedLPRFailed": "Plaka güncellenemedi: {{errorMessage}}"
+          "updatedLPRFailed": "Plaka güncellenemedi: {{errorMessage}}",
+          "audioTranscription": "Ses çözümlemesi talep edilemedi: {{errorMessage}}"
         }
       }
     },
@@ -68,6 +70,9 @@
     "recognizedLicensePlate": "Tanınan Plaka",
     "snapshotScore": {
       "label": "Fotoğraf Skoru"
+    },
+    "score": {
+      "label": "Skor"
     }
   },
   "generativeAI": "Üretken Yapay Zeka",
@@ -102,12 +107,13 @@
   "trackedObjectDetails": "Takip Edilen Nesne Detayları",
   "type": {
     "details": "detaylar",
-    "object_lifecycle": "nesne geçmişi",
+    "object_lifecycle": "nesne yaşam döngüsü",
     "snapshot": "fotoğraf",
-    "video": "video"
+    "video": "video",
+    "thumbnail": "küçük resim"
   },
   "objectLifecycle": {
-    "title": "Nesne Geçmişi",
+    "title": "Nesne Yaşam Döngüsü",
     "noImageFound": "Bu zaman damgası için bir resim bulunamadı.",
     "createObjectMask": "Nesne Maskesi Oluştur",
     "adjustAnnotationSettings": "Belirteç ayarları",
@@ -150,7 +156,7 @@
       "next": "Sonraki sayfa",
       "previous": "Önceki sayfa"
     },
-    "scrollViewTips": "Bu nesnenin geçmişindeki önemli noktaları görmek için kaydırın.",
+    "scrollViewTips": "Bu nesnenin yaşam döngüsündeki önemli noktaları görmek için kaydırın.",
     "autoTrackingTips": "Otomatik takip yapılan kameralarda gösterilen çerçeveler hatalı olacaktır.",
     "count": "Toplam {{second}} kerede {{first}} kez",
     "trackedPoint": "Takip Edilen Nokta"
@@ -182,6 +188,14 @@
     "downloadSnapshot": {
       "aria": "Fotoğrafı indir",
       "label": "Fotoğrafı indir"
+    },
+    "addTrigger": {
+      "label": "Tetik ekle",
+      "aria": "Bu takip edilen nesne için bir tetik ekle"
+    },
+    "audioTranscription": {
+      "label": "Çözümle",
+      "aria": "Ses çözümlemesi iste"
     }
   },
   "noTrackedObjects": "Takip Edilen Nesne Bulunamadı",
@@ -203,5 +217,35 @@
   },
   "trackedObjectsCount_one": "{{count}} adet takip edilen nesne ",
   "trackedObjectsCount_other": "{{count}} adet takip edilen nesne ",
-  "exploreMore": "Daha fazla {{label}} nesnesini keşfet"
+  "exploreMore": "Daha fazla {{label}} nesnesini keşfet",
+  "aiAnalysis": {
+    "title": "Yapay Zeka Analizi"
+  },
+  "trackingDetails": {
+    "title": "Takip Ayrıntıları",
+    "noImageFound": "Bu zaman damgasına ait bir görsel bulunamadı.",
+    "createObjectMask": "Nesne Maskesi Oluştur",
+    "adjustAnnotationSettings": "Etiketleme ayarlarını düzenle",
+    "scrollViewTips": "Bu nesnenin yaşam döngüsündeki önemli olayları görmek için tıklayın.",
+    "autoTrackingTips": "Otomatik takip yapan kameralar için sınır kutusu konumları doğru olmayabilir.",
+    "count": "{{second}}’den {{first}}",
+    "trackedPoint": "Takip edilen nokta",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} tespit edildi",
+      "entered_zone": "{{label}} {{zones}} bölgesine girdi",
+      "active": "{{label}} etkin hale geldi",
+      "stationary": "{{label}} sabit hale geldi",
+      "attribute": {
+        "faceOrLicense_plate": "{{label}} için {{attribute}} tespit edildi",
+        "other": "{{label}}, {{attribute}} olarak tanındı"
+      },
+      "gone": "{{label}} ayrıldı",
+      "heard": "{{label}} duyuldu",
+      "external": "{{label}} tespit edildi",
+      "header": {
+        "zones": "Bölgeler",
+        "ratio": "Oran"
+      }
+    }
+  }
 }

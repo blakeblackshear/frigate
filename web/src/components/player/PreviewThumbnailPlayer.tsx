@@ -16,12 +16,14 @@ import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import useContextMenu from "@/hooks/use-contextmenu";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { TimeRange } from "@/types/timeline";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { cn } from "@/lib/utils";
 import { InProgressPreview, VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
 import { baseUrl } from "@/api/baseUrl";
 import { useTranslation } from "react-i18next";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { MdOutlinePersonSearch } from "react-icons/md";
+import { getTranslatedLabel } from "@/utils/i18n";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -234,7 +236,12 @@ export default function PreviewThumbnailPlayer({
             )}
           />
         )}
-        <div className={cn("absolute left-0 top-2", !isSafari && "z-40")}>
+        <div
+          className={cn(
+            "absolute left-0 top-2 flex gap-2",
+            !isSafari && "z-40",
+          )}
+        >
           <Tooltip>
             <div
               className="flex"
@@ -242,7 +249,7 @@ export default function PreviewThumbnailPlayer({
               onMouseLeave={() => setTooltipHovering(false)}
             >
               <TooltipTrigger asChild>
-                <div className="mx-3 pb-1 text-sm text-white">
+                <div className="ml-3 pb-1 text-sm text-white">
                   {(review.severity == "alert" ||
                     review.severity == "detection") && (
                     <>
@@ -263,22 +270,63 @@ export default function PreviewThumbnailPlayer({
               </TooltipTrigger>
             </div>
             <TooltipContent className="smart-capitalize">
-              {[
-                ...new Set([
-                  ...(review.data.objects || []),
-                  ...(review.data.sub_labels || []),
-                  ...(review.data.audio || []),
-                ]),
-              ]
-                .filter(
-                  (item) => item !== undefined && !item.includes("-verified"),
-                )
-                .map((text) => capitalizeFirstLetter(text))
-                .sort()
-                .join(", ")
-                .replaceAll("-verified", "")}
+              {review.data.metadata
+                ? review.data.metadata.title
+                : [
+                    ...new Set([
+                      ...(review.data.objects || []),
+                      ...(review.data.sub_labels || []),
+                      ...(review.data.audio || []),
+                    ]),
+                  ]
+                    .filter(
+                      (item) =>
+                        item !== undefined && !item.includes("-verified"),
+                    )
+                    .map((text) => getTranslatedLabel(text))
+                    .sort()
+                    .join(", ")}
             </TooltipContent>
           </Tooltip>
+          {!!(
+            review.data.metadata?.potential_threat_level &&
+            !review.has_been_reviewed
+          ) && (
+            <Tooltip>
+              <div
+                className="flex"
+                onMouseEnter={() => setTooltipHovering(true)}
+                onMouseLeave={() => setTooltipHovering(false)}
+              >
+                <TooltipTrigger asChild>
+                  <div className="pb-1 text-sm text-white">
+                    {(review.severity == "alert" ||
+                      review.severity == "detection") && (
+                      <>
+                        <Chip
+                          className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} z-0 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
+                          onClick={() => onClick(review, false, true)}
+                        >
+                          {review.data.metadata.potential_threat_level == 1 ? (
+                            <MdOutlinePersonSearch className="size-3" />
+                          ) : (
+                            <FaExclamationTriangle className="size-3" />
+                          )}
+                        </Chip>
+                      </>
+                    )}
+                  </div>
+                </TooltipTrigger>
+              </div>
+              <TooltipContent className="smart-capitalize">
+                {review.data.metadata.potential_threat_level == 1 ? (
+                  <>{t("suspiciousActivity", { ns: "views/events" })}</>
+                ) : (
+                  <>{t("threateningActivity", { ns: "views/events" })}</>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
         {!playingBack && (
           <div

@@ -1,9 +1,9 @@
 {
   "button": {
     "downloadVideo": {
-      "label": "Descarregar vídeo",
+      "label": "Transferir Vídeo",
       "toast": {
-        "success": "O vídeo do seu item de análise começou a ser descarregado."
+        "success": "O vídeo do seu item de análise começou a ser transferido."
       }
     }
   }

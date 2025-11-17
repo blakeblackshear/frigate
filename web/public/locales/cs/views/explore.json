@@ -23,12 +23,14 @@
         "success": {
           "regenerate": "Od {{provider}} byl vyžádán nový popis. V závislosti na rychlosti vašeho poskytovatele může obnovení nového popisu nějakou dobu trvat.",
           "updatedSublabel": "Úspěšně aktualizovaný podružný štítek.",
-          "updatedLPR": "Úspěšně aktualizovaná SPZ."
+          "updatedLPR": "Úspěšně aktualizovaná SPZ.",
+          "audioTranscription": "Požádání o přepis zvuku bylo úspěšné."
         },
         "error": {
           "regenerate": "Chyba volání {{provider}} pro nový popis: {{errorMessage}}",
           "updatedSublabelFailed": "Chyba obnovení podružného štítku: {{errorMessage}}",
-          "updatedLPRFailed": "Chyba obnovení SPZ: {{errorMessage}}"
+          "updatedLPRFailed": "Chyba obnovení SPZ: {{errorMessage}}",
+          "audioTranscription": "Požádání o přepis zvuku bylo neúspěšné: {{errorMessage}}"
         }
       }
     },
@@ -70,7 +72,10 @@
       "label": "Nejvyšší skóre"
     },
     "label": "Štítek",
-    "recognizedLicensePlate": "Rozpoznaná SPZ"
+    "recognizedLicensePlate": "Rozpoznaná SPZ",
+    "score": {
+      "label": "Skóre"
+    }
   },
   "exploreIsUnavailable": {
     "title": "Prozkoumat je nedostupné",
@@ -188,6 +193,14 @@
     "viewObjectLifecycle": {
       "label": "Zobrazit životní cyklus objektu",
       "aria": "Ukázat životní cyklus objektu"
+    },
+    "addTrigger": {
+      "label": "Přidat spouštěč",
+      "aria": "Přidat spouštěč pro tento sledovaný objekt"
+    },
+    "audioTranscription": {
+      "label": "Přepsat",
+      "aria": "Požádat o přepis zvukového záznamu"
     }
   },
   "dialog": {
@@ -205,5 +218,11 @@
   },
   "noTrackedObjects": "Žádné sledované objekty nebyly nalezeny",
   "fetchingTrackedObjectsFailed": "Chyba při načítání sledovaných objektů: {{errorMessage}}",
-  "exploreMore": "Prozkoumat více {{label}} objektů"
+  "exploreMore": "Prozkoumat více {{label}} objektů",
+  "aiAnalysis": {
+    "title": "Analýza AI"
+  },
+  "concerns": {
+    "label": "Obavy"
+  }
 }

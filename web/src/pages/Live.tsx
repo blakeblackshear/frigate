@@ -13,25 +13,32 @@ import { useTranslation } from "react-i18next";
 
 import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
+import { useIsCustomRole } from "@/hooks/use-is-custom-role";
 
 function Live() {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const isCustomRole = useIsCustomRole();
 
   // selection
 
   const [selectedCameraName, setSelectedCameraName] = useHashState();
-  const [cameraGroup, setCameraGroup] = usePersistedOverlayState(
+  const [cameraGroup, setCameraGroup, loaded, ,] = usePersistedOverlayState(
     "cameraGroup",
     "default" as string,
   );
 
   useSearchEffect("group", (cameraGroup) => {
-    if (config && cameraGroup) {
+    if (config && cameraGroup && loaded) {
       const group = config.camera_groups[cameraGroup];
 
       if (group) {
         setCameraGroup(cameraGroup);
+        // return false so that url cleanup doesn't occur here.
+        // will be cleaned up by usePersistedOverlayState in the
+        // camera group selector so that the icon switches correctly
+        return false;
       }
 
       return true;
@@ -49,14 +56,16 @@ function Live() {
 
   useKeyboardListener(["f"], (key, modifiers) => {
     if (!modifiers.down) {
-      return;
+      return true;
     }
 
     switch (key) {
       case "f":
         toggleFullscreen();
-        break;
+        return true;
     }
+
+    return false;
   });
 
   // document title
@@ -81,19 +90,22 @@ function Live() {
 
   // settings
 
+  const allowedCameras = useAllowedCameras();
+
   const includesBirdseye = useMemo(() => {
     if (
       config &&
       Object.keys(config.camera_groups).length &&
       cameraGroup &&
       config.camera_groups[cameraGroup] &&
-      cameraGroup != "default"
+      cameraGroup != "default" &&
+      (!isCustomRole || "birdseye" in allowedCameras)
     ) {
       return config.camera_groups[cameraGroup].cameras.includes("birdseye");
     } else {
       return false;
     }
-  }, [config, cameraGroup]);
+  }, [config, cameraGroup, allowedCameras, isCustomRole]);
 
   const cameras = useMemo(() => {
     if (!config) {
@@ -111,13 +123,15 @@ function Live() {
         .filter(
           (conf) => conf.enabled_in_config && group.cameras.includes(conf.name),
         )
+        .filter((cam) => allowedCameras.includes(cam.name))
         .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
     }
 
     return Object.values(config.cameras)
       .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
+      .filter((cam) => allowedCameras.includes(cam.name))
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-  }, [config, cameraGroup]);
+  }, [config, cameraGroup, allowedCameras]);
 
   const selectedCamera = useMemo(
     () => cameras.find((cam) => cam.name == selectedCameraName),
@@ -134,6 +148,7 @@ function Live() {
         />
       ) : selectedCamera ? (
         <LiveCameraView
+          key={selectedCameraName}
           config={config}
           camera={selectedCamera}
           supportsFullscreen={supportsFullScreen}

@@ -1,0 +1,40 @@
+{
+  "documentTitle": "Модели классификации",
+  "details": {
+    "scoreInfo": "Оценка представляет собой среднюю степень достоверности классификации по всем обнаружениям данного объекта."
+  },
+  "button": {
+    "deleteClassificationAttempts": "Удалить изображения классификации",
+    "renameCategory": "Переименовать класс",
+    "deleteCategory": "Удалить класс",
+    "deleteImages": "Удалить изображения",
+    "trainModel": "Тренировать модель",
+    "addClassification": "Добавить классификацию",
+    "deleteModels": "Удалить модели",
+    "editModel": "Редактировать модель"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Удаленный класс",
+      "deletedImage": "Удалённые изображения",
+      "deletedModel_one": "Успешно удалена {{count}} модель",
+      "deletedModel_few": "Успешно удалены {{count}} модели",
+      "deletedModel_many": "Успешно удалены {{count}} моделей",
+      "categorizedImage": "Изображение успешно классифицировано",
+      "trainedModel": "Успешно обученная модель.",
+      "trainingModel": "Успешно начато обучение моделей.",
+      "updatedModel": "Успешно обновлена конфигурация модели"
+    },
+    "error": {
+      "deleteImageFailed": "Не удалось удалить: {{errorMessage}}",
+      "deleteCategoryFailed": "Не удалось удалить класс: {{errorMessage}}",
+      "deleteModelFailed": "Не удалось удалить модель: {{errorMessage}}",
+      "categorizeFailed": "Не удалось классифицировать изображение: {{errorMessage}}",
+      "trainingFailed": "Не удалось начать обучение модели: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Удалить класс",
+    "desc": "Вы уверены, что хотите удалить класс {{name}}? Это приведёт к безвозвратному удалению всех связанных с ним изображений и потребует повторного обучения модели."
+  }
+}

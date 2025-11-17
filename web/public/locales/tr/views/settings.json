@@ -10,7 +10,9 @@
     "object": "Hata Ayıklama - Frigate",
     "general": "Genel Ayarlar - Frigate",
     "notifications": "Bildirim Ayarları - Frigate",
-    "enrichments": "Zenginleştirme Ayarları - Frigate"
+    "enrichments": "Zenginleştirme Ayarları - Frigate",
+    "cameraManagement": "Kameraları Yönet - Frigate",
+    "cameraReview": "Kamera İnceleme Ayarları - Frigate"
   },
   "menu": {
     "masksAndZones": "Maskeler / Alanlar",
@@ -22,7 +24,11 @@
     "classification": "Sınıflandırma",
     "debug": "Hata Ayıklama",
     "cameras": "Kamera Ayarları",
-    "enrichments": "Zenginleştirmeler"
+    "enrichments": "Zenginleştirmeler",
+    "triggers": "Tetikler",
+    "cameraManagement": "Yönet",
+    "cameraReview": "İncele",
+    "roles": "Roller"
   },
   "general": {
     "title": "Genel Ayarlar",
@@ -35,7 +41,11 @@
         "label": "Alarm Videolarını Oynat",
         "desc": "Varsayılan olarak canlı görüntü panelinde gösterilen son alarmlar ufak videolar olarak oynatılır. Bu tarayıcı/cihazda video yerine sabit resim göstermek için bu seçeneği kapatın."
       },
-      "title": "Canlı Görüntü Paneli"
+      "title": "Canlı Görüntü Paneli",
+      "displayCameraNames": {
+        "label": "Kamera Adlarını Her Zaman Göster",
+        "desc": "Çok kameralı canlı izleme panelinde, kamera adlarını her zaman bir etiket içinde göster."
+      }
     },
     "storedLayouts": {
       "desc": "Kamera grubundaki kameraların düzenini kameraları sürükleyerek ve büyüterek/küçülterek değiştirebilirsiniz. Düzen bilgisi tarayıcınızda depolanır.",
@@ -177,6 +187,44 @@
     "streams": {
       "desc": "Frigate yeniden başlataılana kadar bir kamerayı devre dışı bırakın. Bir kameranın devre dışı bırakılması, Frigate'in bu kamerayı işlemesini tamamen durdurur. Algılama, kayıt ve hata ayıklama özellikleri kullanılamaz.<br /> <em>Not: Bu eylem, go2rtc'deki yeniden akışları devre dışı bırakmaz.</em>",
       "title": "Akışlar"
+    },
+    "object_descriptions": {
+      "title": "Üretken AI Nesne Açıklamaları",
+      "desc": "Bu kamera için Üretken Yapay Zeka kullanarak nesne açıklamaları oluşturmayı geçici olarak etkinleştirin/devre dışı bırakın. Devre dışı bırakıldığında, bu kamerada takip edilen nesneler için yapay zekadan nesne açıklamaları talep edilmeyecektir."
+    },
+    "review_descriptions": {
+      "title": "Üretken AI İnceleme Öğesi Açıklamaları",
+      "desc": "Bu kamera için Üretken Yapay Zeka kullanarak inceleme öğelerinin açıklamalarını oluşturmayı geçici olarak etkinleştirin/devre dışı bırakın. Devre dışı bırakıldığında, bu kameraya bağlı inceleme öğeleri için yapay zekadan açıklama metni talep edilmeyecektir."
+    },
+    "addCamera": "Yeni Kamera Ekle",
+    "editCamera": "Kamerayı Düzenle:",
+    "selectCamera": "Kamera Seç",
+    "backToSettings": "Kamera Ayarlarına Dön",
+    "cameraConfig": {
+      "add": "Kamera Ekle",
+      "edit": "Kamerayı Düzenle",
+      "description": "Kameranızın ayarlarını, kameraların akışları ve roller de dahil olacak şekilde yapılandırın.",
+      "name": "Kamera İsmi",
+      "nameRequired": "Kamera adı gereklidir",
+      "nameInvalid": "Kamera adı yalnızca harf, rakam, alt çizgi veya tire içerebilir",
+      "namePlaceholder": "örn: onkapi",
+      "enabled": "Açık",
+      "ffmpeg": {
+        "inputs": "Kamera Girdi Akışları",
+        "path": "Akış Yolu",
+        "pathRequired": "Akış yolu gereklidir",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roller",
+        "rolesRequired": "En az bir rol gereklidir",
+        "rolesUnique": "Her rol (ses, tespit, kayıt) yalnızca bir adet yayına atanabilir. Her rol aynı akışı kullanabilir, lakin bir rol birden fazla akışa atanamaz.",
+        "addInput": "Girdi Akışı Ekle",
+        "removeInput": "Girdi Akışını Kaldır",
+        "inputsRequired": "En az bir girdi akışı gereklidir"
+      },
+      "toast": {
+        "success": "Kamera {{cameraName}} başarıyla kaydedildi"
+      },
+      "nameLength": "Kamera ismi 24 karakterden kısa olmalıdır."
     }
   },
   "masksAndZones": {
@@ -396,7 +444,7 @@
     "regions": {
       "title": "Tespit Bölgeleri",
       "desc": "Nesne algılayıcıya gönderilen tespit alanlarını göster",
-      "tips": "<p><strong>Bölge Kutuları</strong></p><br><p>Görüntüdeki nesne dedektörüne gönderilen tespit alanları parlak yeşil renk çerçeve ile gösterilir.</p>"
+      "tips": "<p><strong>Bölge Kutuları</strong></p><br><p>Nesne dedektörüne gönderilen tespit alanları görüntüde parlak yeşil renk çerçeve ile gösterilir.</p>"
     },
     "objectShapeFilterDrawing": {
       "title": "Nesne Şekil Filtresi Çizimi",
@@ -419,7 +467,20 @@
       "desc": "Tanımlanmış alanların sınırlarını göster"
     },
     "objectList": "Nesne Listesi",
-    "desc": "Hata ayıklama görünümü, izlenen nesnelerin ve istatistiklerinin gerçek zamanlı bir görünümünü gösterir. Nesne listesi algılanan nesnelerin zaman gecikmeli bir özetini gösterir."
+    "desc": "Hata ayıklama görünümü, izlenen nesnelerin ve istatistiklerinin gerçek zamanlı bir görünümünü gösterir. Nesne listesi algılanan nesnelerin zaman gecikmeli bir özetini gösterir.",
+    "paths": {
+      "title": "Hareket İzi",
+      "desc": "Takip edilen nesnenin hareket izi üzerindeki önemli noktaları göster",
+      "tips": "<p><strong>Hareket İzi</strong></p><br><p>Çizgiler ve daireler, takip edilen nesnenin yaşam döngüsü boyunca hareket ettiği önemli noktaları gösterir.</p>"
+    },
+    "openCameraWebUI": "{{camera}}'nın Web Arayüzünü Aç",
+    "audio": {
+      "title": "Ses",
+      "noAudioDetections": "Ses tespiti yok",
+      "score": "skor",
+      "currentRMS": "Şu Anki RMS",
+      "currentdbFS": "Şu Anki dbFS"
+    }
   },
   "users": {
     "title": "Kullanıcılar",
@@ -678,6 +739,101 @@
     "toast": {
       "success": "Zenginleştirme ayarları kaydedildi. Değişiklikleri uygulamak için Frigate'i yeniden başlatın.",
       "error": "Yapılandırma değişiklikleri kaydedilemedi: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "dialog": {
+      "form": {
+        "name": {
+          "error": {
+            "invalidCharacters": "İsim yalnızca harf, rakam, alt çizgi veya tire içerebilir.",
+            "minLength": "Bu isim en az iki karakterden oluşmalıdır.",
+            "alreadyExists": "Bu kamerada aynı isimle bir tetik zaten mevcut."
+          },
+          "title": "İsim",
+          "placeholder": "Tetik için bir isim girin"
+        },
+        "enabled": {
+          "description": "Bu tetiği açın veya kapatın"
+        },
+        "type": {
+          "title": "Tetik Türü",
+          "placeholder": "Tetik türünü seçin"
+        },
+        "content": {
+          "title": "İçerik",
+          "imagePlaceholder": "Bir resim seçin",
+          "textPlaceholder": "Metin içeriği girin",
+          "imageDesc": "Benzer bir resim tespit edildiğinde tetiklenilmesi için bir resim seçin.",
+          "textDesc": "Benzer bir takip edilen nesne açıklaması algılandığında bu eylemi tetiklemek için metin girin.",
+          "error": {
+            "required": "İçerik gereklidir."
+          }
+        },
+        "threshold": {
+          "title": "Tetik Eşiği",
+          "error": {
+            "min": "Tetik eşiği 0 ile 1 arasında olmalıdır",
+            "max": "Tetik eşiği 0 ile 1 arasında olmalıdır"
+          }
+        },
+        "actions": {
+          "title": "Eylemler",
+          "desc": "Varsayılan olarak Frigate bütün tetkler için MQTT'ye bir mesaj atar. İsterseniz yapılacak ek bir eylem de belirleyebilirsiniz.",
+          "error": {
+            "min": "En az bir eylem seçilmelidir."
+          }
+        }
+      },
+      "createTrigger": {
+        "title": "Tetik Oluştur",
+        "desc": "{{camera}} kamerası için tetik oluşturun"
+      },
+      "editTrigger": {
+        "title": "Tetiği Düzenle",
+        "desc": "{{camera}} kamerasındaki tetiğin ayarlarını düzenleyin"
+      },
+      "deleteTrigger": {
+        "title": "Tetiği Sil",
+        "desc": "<strong>{{triggerName}}</strong> isimli tetiği silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+      }
+    },
+    "documentTitle": "Tetikler",
+    "management": {
+      "title": "Tetik Yönetimi",
+      "desc": "{{camera}} için tetikleri yönetin. Seçtiğiniz takip edilen nesneye benzer küçük resimlerde tetiklemek için küçük resmi kullanın veya belirlediğiniz metne benzer açıklamalar çıkması durumunda tetiklemek için ise açıklama seçeneğini kullanın."
+    },
+    "addTrigger": "Tetik Ekle",
+    "table": {
+      "name": "İsim",
+      "type": "Tetik Türü",
+      "content": "İçerik",
+      "threshold": "Tetik Eşiği",
+      "actions": "Eylemler",
+      "noTriggers": "Bu kamera için hiç bir tetik ayarlanmadı.",
+      "edit": "Düzenle",
+      "deleteTrigger": "Tetiği Sil",
+      "lastTriggered": "En son tetikleme"
+    },
+    "type": {
+      "thumbnail": "Küçük Resim",
+      "description": "Açıklama"
+    },
+    "actions": {
+      "alert": "Alarm Olarak İşaretle",
+      "notification": "Bildirim Gönder"
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Tetik {{name}} başarıyla oluşturuldu.",
+        "updateTrigger": "Tetik {{name}} başarıyla güncellendi.",
+        "deleteTrigger": "Tetik {{name}} başarıyla silindi."
+      },
+      "error": {
+        "createTriggerFailed": "Tetik oluşturulamadı: {{errorMessage}}",
+        "updateTriggerFailed": "Tetik güncellenemedi: {{errorMessage}}",
+        "deleteTriggerFailed": "Tetik silinemedi: {{errorMessage}}"
+      }
     }
   }
 }

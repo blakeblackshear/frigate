@@ -1,14 +1,14 @@
 {
   "filter": "Filter",
   "labels": {
-    "label": "Merkelapper",
+    "label": "Etiketter",
     "all": {
       "title": "Alle masker / soner",
-      "short": "Merkelapper"
+      "short": "Etiketter"
     },
     "count": "{{count}} merkelapper",
-    "count_other": "{{count}} Merkelapper",
-    "count_one": "{{count}} Merkelapp"
+    "count_other": "{{count}} Etiketter",
+    "count_one": "{{count}} Etikett"
   },
   "features": {
     "hasVideoClip": "Har et videoklipp",
@@ -39,7 +39,7 @@
       "title": "Innstillinger",
       "defaultView": {
         "title": "Standard visning",
-        "desc": "Når ingen filtre er valgt, vis et sammendrag av de nyeste sporede objektene per merkelapp, eller vis et ufiltrert rutenett.",
+        "desc": "Når ingen filtre er valgt, vis et sammendrag av de nyeste sporede objektene per etikett, eller vis et ufiltrert rutenett.",
         "summary": "Sammendrag",
         "unfilteredGrid": "Ufiltrert rutenett"
       },
@@ -84,7 +84,9 @@
     "title": "Gjenkjente kjennemerker",
     "loadFailed": "Kunne ikke laste inn gjenkjente kjennemerker.",
     "loading": "Laster inn gjenkjente kjennemerker…",
-    "placeholder": "Skriv for å søke etter kjennemerker…"
+    "placeholder": "Skriv for å søke etter kjennemerker…",
+    "selectAll": "Velg alle",
+    "clearAll": "Fjern alle"
   },
   "dates": {
     "all": {
@@ -99,8 +101,8 @@
   },
   "timeRange": "Tidsrom",
   "subLabels": {
-    "label": "Under-Merkelapper",
-    "all": "Alle under-Merkelapper"
+    "label": "Underetiketter",
+    "all": "Alle underetiketter"
   },
   "score": "Poengsum",
   "estimatedSpeed": "Estimert hastighet ({{unit}})",
@@ -123,5 +125,13 @@
       "title": "Alle soner",
       "short": "Soner"
     }
+  },
+  "classes": {
+    "label": "Klasser",
+    "all": {
+      "title": "Alle klasser"
+    },
+    "count_one": "{{count}} Klasse",
+    "count_other": "{{count}} Klasser"
   }
 }

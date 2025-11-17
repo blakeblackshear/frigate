@@ -7,7 +7,45 @@
       "desc": "Tarkastele kohteen tietoja",
       "button": {
         "share": "Jaa tämä tarkasteltu kohde"
+      },
+      "toast": {
+        "error": {
+          "updatedSublabelFailed": "Alatunnisteen päivitys epäonnistui",
+          "updatedLPRFailed": "Rekisterikilven päivitys epäonnistui"
+        }
       }
+    },
+    "recognizedLicensePlate": "Tunnistettu rekisterikilpi",
+    "estimatedSpeed": "Arvioitu nopeus",
+    "objects": "Objektit",
+    "camera": "Kamera",
+    "zones": "Alueet",
+    "label": "Tunniste",
+    "editSubLabel": {
+      "title": "Editoi alitunnistetta",
+      "desc": "Syötä uusi alitunniste tähän",
+      "descNoLabel": "Lisää uusi alatunniste tähän seurattuun kohteeseen"
+    },
+    "editLPR": {
+      "title": "Muokkaa rekisterikilpeä",
+      "desc": "Syötä uusi rekisterikilven arvo tähän",
+      "descNoLabel": "Syötä uusi rekisterikilven arvo tähän seurattuun objektiin"
+    },
+    "snapshotScore": {
+      "label": "Tilannekuvan arvosana"
+    },
+    "topScore": {
+      "label": "Huippuarvosana",
+      "info": "Ylin pistemäärä on seurattavan kohteen korkein mediaani, joten tämä voi erota hakutuloksen esikatselukuvassa näkyvästä pistemäärästä."
+    },
+    "button": {
+      "findSimilar": "Etsi samankaltaisia"
+    },
+    "description": {
+      "label": "Kuvaus"
+    },
+    "score": {
+      "label": "Pisteet"
     }
   },
   "exploreIsUnavailable": {
@@ -28,7 +66,8 @@
       "setup": {
         "visionModel": "Vision-malli",
         "textModel": "Tekstimalli",
-        "textTokenizer": "Tekstin osioija"
+        "textTokenizer": "Tekstin osioija",
+        "visionModelFeatureExtractor": "Näkömallin piirreluokkain"
       },
       "tips": {
         "documentation": "Lue dokumentaatio",
@@ -90,6 +129,27 @@
     "downloadSnapshot": {
       "label": "Lataa kuvankaappaus",
       "aria": "Lataa kuvankaappaus"
+    },
+    "addTrigger": {
+      "label": "Lisää laukaisin",
+      "aria": "Lisää laukaisin tälle seurattavalle kohteelle"
+    },
+    "submitToPlus": {
+      "label": "Lähetä Frigate+:lle"
+    },
+    "downloadVideo": {
+      "label": "Lataa video",
+      "aria": "Lataa video"
+    },
+    "viewObjectLifecycle": {
+      "label": "Tarkastele objektin elinkaarta",
+      "aria": "Näytä objektin elinkaari"
+    },
+    "findSimilar": {
+      "label": "Etsi samankaltaisia"
     }
+  },
+  "aiAnalysis": {
+    "title": "AI-analyysi"
   }
 }

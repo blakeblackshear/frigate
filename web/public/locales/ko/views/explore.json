@@ -1,1 +1,31 @@
-{}
+{
+  "documentTitle": "탐색 - Frigate",
+  "generativeAI": "생성형 AI",
+  "exploreMore": "{{label}} 더 많은 감지 대상 탐색하기",
+  "exploreIsUnavailable": {
+    "title": "탐색을 사용할 수 없습니다",
+    "embeddingsReindexing": {
+      "context": "감지 정보 재처리가 완료되면 탐색할 수 있습니다.",
+      "startingUp": "시작 중…",
+      "estimatedTime": "예상 남은시간:",
+      "finishingShortly": "곧 완료됩니다",
+      "step": {
+        "thumbnailsEmbedded": "처리된 썸네일: ",
+        "descriptionsEmbedded": "처리된 설명: ",
+        "trackedObjectsProcessed": "처리된 추적 감지: "
+      }
+    },
+    "downloadingModels": {
+      "context": "Frigate가 시맨틱 검색 기능을 지원하기 위해 필요한 임베딩 모델을 다운로드하고 있습니다. 네트워크 연결 속도에 따라 몇 분 정도 소요될 수 있습니다.",
+      "setup": {
+        "visionModel": "Vision model",
+        "visionModelFeatureExtractor": "Vision model feature extractor",
+        "textModel": "Text model",
+        "textTokenizer": "Text tokenizer"
+      }
+    }
+  },
+  "details": {
+    "timestamp": "시간 기록"
+  }
+}

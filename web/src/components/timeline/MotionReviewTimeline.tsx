@@ -10,6 +10,7 @@ import {
   MotionData,
   ReviewSegment,
   TimelineZoomDirection,
+  ZoomLevel,
 } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
@@ -17,6 +18,7 @@ import {
   VirtualizedMotionSegments,
   VirtualizedMotionSegmentsRef,
 } from "./VirtualizedMotionSegments";
+import { RecordingSegment } from "@/types/record";
 
 export type MotionReviewTimelineProps = {
   segmentDuration: number;
@@ -38,12 +40,17 @@ export type MotionReviewTimelineProps = {
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
   events: ReviewSegment[];
   motion_events: MotionData[];
+  noRecordingRanges?: RecordingSegment[];
   contentRef: RefObject<HTMLDivElement>;
   timelineRef?: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
   dense?: boolean;
   isZooming: boolean;
   zoomDirection: TimelineZoomDirection;
+  alwaysShowMotionLine?: boolean;
+  onZoomChange?: (newZoomLevel: number) => void;
+  possibleZoomLevels?: ZoomLevel[];
+  currentZoomLevel?: number;
 };
 
 export function MotionReviewTimeline({
@@ -66,12 +73,17 @@ export function MotionReviewTimeline({
   setExportEndTime,
   events,
   motion_events,
+  noRecordingRanges,
   contentRef,
   timelineRef,
   onHandlebarDraggingChange,
   dense = false,
   isZooming,
   zoomDirection,
+  alwaysShowMotionLine = false,
+  onZoomChange,
+  possibleZoomLevels,
+  currentZoomLevel,
 }: MotionReviewTimelineProps) {
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
@@ -95,6 +107,17 @@ export function MotionReviewTimeline({
   const { getMotionSegmentValue } = useMotionSegmentUtils(
     segmentDuration,
     motion_events,
+  );
+
+  const getRecordingAvailability = useCallback(
+    (time: number): boolean | undefined => {
+      if (!noRecordingRanges?.length) return undefined;
+
+      return !noRecordingRanges.some(
+        (range) => time >= range.start_time && time < range.end_time,
+      );
+    },
+    [noRecordingRanges],
   );
 
   const segmentTimes = useMemo(() => {
@@ -189,6 +212,10 @@ export function MotionReviewTimeline({
       scrollToSegment={scrollToSegment}
       isZooming={isZooming}
       zoomDirection={zoomDirection}
+      getRecordingAvailability={getRecordingAvailability}
+      onZoomChange={onZoomChange}
+      possibleZoomLevels={possibleZoomLevels}
+      currentZoomLevel={currentZoomLevel}
     >
       <VirtualizedMotionSegments
         ref={virtualizedSegmentsRef}
@@ -206,6 +233,8 @@ export function MotionReviewTimeline({
         dense={dense}
         motionOnly={motionOnly}
         getMotionSegmentValue={getMotionSegmentValue}
+        getRecordingAvailability={getRecordingAvailability}
+        alwaysShowMotionLine={alwaysShowMotionLine}
       />
     </ReviewTimeline>
   );

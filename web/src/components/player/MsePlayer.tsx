@@ -1,4 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
+import { usePersistence } from "@/hooks/use-persistence";
 import {
   LivePlayerError,
   PlayerStatsType,
@@ -71,6 +72,8 @@ function MSEPlayer({
   const [errorCount, setErrorCount] = useState<number>(0);
   const totalBytesLoaded = useRef(0);
 
+  const [fallbackTimeout] = usePersistence<number>("liveFallbackTimeout", 3);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTIDRef = useRef<number | null>(null);
@@ -83,6 +86,17 @@ function MSEPlayer({
   const wsURL = useMemo(() => {
     return `${baseUrl.replace(/^http/, "ws")}live/mse/api/ws?src=${camera}`;
   }, [camera]);
+
+  const handleError = useCallback(
+    (error: LivePlayerError, description: string = "Unknown error") => {
+      // eslint-disable-next-line no-console
+      console.error(
+        `${camera} - MSE error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live/#live-view-faq`,
+      );
+      onError?.(error);
+    },
+    [camera, onError],
+  );
 
   const handleLoadedMetadata = useCallback(() => {
     if (videoRef.current && setFullResolution) {
@@ -237,9 +251,9 @@ function MSEPlayer({
               onDisconnect();
             }
             if (isIOS || isSafari) {
-              onError?.("mse-decode");
+              handleError("mse-decode", "Safari cannot open MediaSource.");
             } else {
-              onError?.("startup");
+              handleError("startup", "Error opening MediaSource.");
             }
           });
         },
@@ -267,9 +281,9 @@ function MSEPlayer({
               onDisconnect();
             }
             if (isIOS || isSafari) {
-              onError?.("mse-decode");
+              handleError("mse-decode", "Safari cannot open MediaSource.");
             } else {
-              onError?.("startup");
+              handleError("startup", "Error opening MediaSource.");
             }
           });
         },
@@ -297,7 +311,7 @@ function MSEPlayer({
           if (wsRef.current) {
             onDisconnect();
           }
-          onError?.("mse-decode");
+          handleError("mse-decode", "Safari reported InvalidStateError.");
           return;
         } else {
           throw e; // Re-throw if it's not the error we're handling
@@ -424,7 +438,10 @@ function MSEPlayer({
       (bufferThreshold > 10 || bufferTime > 10)
     ) {
       onDisconnect();
-      onError?.("stalled");
+      handleError(
+        "stalled",
+        "Buffer time (10 seconds) exceeded, browser may not be playing media correctly.",
+      );
     }
 
     const playbackRate = calculateAdaptivePlaybackRate(
@@ -461,7 +478,10 @@ function MSEPlayer({
         setBufferTimeout(undefined);
       }
 
-      const timeoutDuration = bufferTime == 0 ? 5000 : 3000;
+      const timeoutDuration =
+        bufferTime == 0
+          ? (fallbackTimeout ?? 3) * 2 * 1000
+          : (fallbackTimeout ?? 3) * 1000;
       setBufferTimeout(
         setTimeout(() => {
           if (
@@ -470,7 +490,10 @@ function MSEPlayer({
             videoRef.current
           ) {
             onDisconnect();
-            onError("stalled");
+            handleError(
+              "stalled",
+              `Media playback has stalled after ${timeoutDuration / 1000} seconds due to insufficient buffering or a network interruption.`,
+            );
           }
         }, timeoutDuration),
       );
@@ -479,9 +502,11 @@ function MSEPlayer({
     bufferTimeout,
     isPlaying,
     onDisconnect,
+    handleError,
     onError,
     onPlaying,
     playbackEnabled,
+    fallbackTimeout,
   ]);
 
   useEffect(() => {
@@ -663,7 +688,7 @@ function MSEPlayer({
           if (wsRef.current) {
             onDisconnect();
           }
-          onError?.("startup");
+          handleError("startup", "Browser reported a network error.");
         }
 
         if (
@@ -674,7 +699,7 @@ function MSEPlayer({
           if (wsRef.current) {
             onDisconnect();
           }
-          onError?.("mse-decode");
+          handleError("mse-decode", "Safari reported decoding errors.");
         }
 
         setErrorCount((prevCount) => prevCount + 1);
@@ -683,7 +708,7 @@ function MSEPlayer({
           onDisconnect();
           if (errorCount >= 3) {
             // too many mse errors, try jsmpeg
-            onError?.("startup");
+            handleError("startup", `Max error count ${errorCount} exceeded.`);
           } else {
             reconnect(5000);
           }

@@ -2,7 +2,7 @@ import os
 from enum import Enum
 from typing import Optional
 
-from pydantic import Field, PrivateAttr
+from pydantic import Field, PrivateAttr, model_validator
 
 from frigate.const import CACHE_DIR, CACHE_SEGMENT_FORMAT, REGEX_CAMERA_NAME
 from frigate.ffmpeg_presets import (
@@ -19,14 +19,15 @@ from frigate.util.builtin import (
 
 from ..base import FrigateBaseModel
 from ..classification import (
+    CameraAudioTranscriptionConfig,
     CameraFaceRecognitionConfig,
     CameraLicensePlateRecognitionConfig,
+    CameraSemanticSearchConfig,
 )
 from .audio import AudioConfig
 from .birdseye import BirdseyeCameraConfig
 from .detect import DetectConfig
 from .ffmpeg import CameraFfmpegConfig, CameraInput
-from .genai import GenAICameraConfig
 from .live import CameraLiveConfig
 from .motion import MotionConfig
 from .mqtt import CameraMqttConfig
@@ -50,11 +51,27 @@ class CameraTypeEnum(str, Enum):
 
 class CameraConfig(FrigateBaseModel):
     name: Optional[str] = Field(None, title="Camera name.", pattern=REGEX_CAMERA_NAME)
+
+    friendly_name: Optional[str] = Field(
+        None, title="Camera friendly name used in the Frigate UI."
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def handle_friendly_name(cls, values):
+        if isinstance(values, dict) and "friendly_name" in values:
+            pass
+        return values
+
     enabled: bool = Field(default=True, title="Enable camera.")
 
     # Options with global fallback
     audio: AudioConfig = Field(
         default_factory=AudioConfig, title="Audio events configuration."
+    )
+    audio_transcription: CameraAudioTranscriptionConfig = Field(
+        default_factory=CameraAudioTranscriptionConfig,
+        title="Audio transcription config.",
     )
     birdseye: BirdseyeCameraConfig = Field(
         default_factory=BirdseyeCameraConfig, title="Birdseye camera configuration."
@@ -66,18 +83,13 @@ class CameraConfig(FrigateBaseModel):
         default_factory=CameraFaceRecognitionConfig, title="Face recognition config."
     )
     ffmpeg: CameraFfmpegConfig = Field(title="FFmpeg configuration for the camera.")
-    genai: GenAICameraConfig = Field(
-        default_factory=GenAICameraConfig, title="Generative AI configuration."
-    )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
     )
     lpr: CameraLicensePlateRecognitionConfig = Field(
         default_factory=CameraLicensePlateRecognitionConfig, title="LPR config."
     )
-    motion: Optional[MotionConfig] = Field(
-        None, title="Motion detection configuration."
-    )
+    motion: MotionConfig = Field(None, title="Motion detection configuration.")
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Object configuration."
     )
@@ -86,6 +98,10 @@ class CameraConfig(FrigateBaseModel):
     )
     review: ReviewConfig = Field(
         default_factory=ReviewConfig, title="Review configuration."
+    )
+    semantic_search: CameraSemanticSearchConfig = Field(
+        default_factory=CameraSemanticSearchConfig,
+        title="Semantic search configuration.",
     )
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Snapshot configuration."
@@ -161,6 +177,12 @@ class CameraConfig(FrigateBaseModel):
     def ffmpeg_cmds(self) -> list[dict[str, list[str]]]:
         return self._ffmpeg_cmds
 
+    def get_formatted_name(self) -> str:
+        """Return the friendly name if set, otherwise return a formatted version of the camera name."""
+        if self.friendly_name:
+            return self.friendly_name
+        return self.name.replace("_", " ").title() if self.name else ""
+
     def create_ffmpeg_cmds(self):
         if "_ffmpeg_cmds" in self:
             return
@@ -219,6 +241,7 @@ class CameraConfig(FrigateBaseModel):
                 self.detect.fps,
                 self.detect.width,
                 self.detect.height,
+                self.ffmpeg.gpu,
             )
             or ffmpeg_input.hwaccel_args
             or parse_preset_hardware_acceleration_decode(
@@ -226,6 +249,7 @@ class CameraConfig(FrigateBaseModel):
                 self.detect.fps,
                 self.detect.width,
                 self.detect.height,
+                self.ffmpeg.gpu,
             )
             or camera_arg
             or []

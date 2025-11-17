@@ -52,7 +52,7 @@
     "export": "Export",
     "selectOrExport": "Select or Export",
     "toast": {
-      "success": "Successfully started export. View the file in the /exports folder.",
+      "success": "Successfully started export. View the file in the exports page.",
       "error": {
         "failed": "Failed to start export: {{error}}",
         "endTimeMustAfterStartTime": "End time must be after start time",
@@ -69,8 +69,7 @@
     "restreaming": {
       "disabled": "Restreaming is not enabled for this camera.",
       "desc": {
-        "title": "Set up go2rtc for additional live view options and audio for this camera.",
-        "readTheDocumentation": "Read the documentation"
+        "title": "Set up go2rtc for additional live view options and audio for this camera."
       }
     },
     "showStats": {
@@ -107,7 +106,16 @@
     "button": {
       "export": "Export",
       "markAsReviewed": "Mark as reviewed",
+      "markAsUnreviewed": "Mark as unreviewed",
       "deleteNow": "Delete Now"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Select a tracked object's thumbnail",
+    "unknownLabel": "Saved Trigger Image",
+    "search": {
+      "placeholder": "Search by label or sub label..."
+    },
+    "noImages": "No thumbnails found for this camera"
   }
 }

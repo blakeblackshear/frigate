@@ -1,0 +1,152 @@
+{
+  "documentTitle": "Klasifikačné modely",
+  "button": {
+    "deleteClassificationAttempts": "Odstrániť obrázky klasifikácie",
+    "renameCategory": "Premenovať triedu",
+    "deleteCategory": "Odstrániť triedu",
+    "deleteImages": "Odstrániť obrázky",
+    "trainModel": "Model vlaku",
+    "addClassification": "Pridať klasifikáciu",
+    "deleteModels": "Odstrániť modely"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Vymazaná trieda",
+      "deletedImage": "Vymazané obrázky",
+      "categorizedImage": "Obrázok bol úspešne klasifikovaný",
+      "trainedModel": "Úspešne vyškolený model.",
+      "trainingModel": "Úspešne spustený modelový tréning.",
+      "deletedModel_one": "Úspešne zmazané {{count}} model (y)",
+      "deletedModel_few": "",
+      "deletedModel_other": ""
+    },
+    "error": {
+      "deleteImageFailed": "Nepodarilo sa odstrániť: {{errorMessage}}",
+      "deleteCategoryFailed": "Nepodarilo sa odstrániť triedu: {{errorMessage}}",
+      "categorizeFailed": "Nepodarilo sa kategorizovať obrázok: {{errorMessage}}",
+      "trainingFailed": "Nepodarilo sa spustiť trénovanie modelu: {{errorMessage}}",
+      "deleteModelFailed": "Nepodarilo sa odstrániť model: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Odstrániť triedu",
+    "desc": "Naozaj chcete odstrániť triedu {{name}}? Týmto sa natrvalo odstránia všetky súvisiace obrázky a bude potrebné pretrénovať model."
+  },
+  "deleteDatasetImages": {
+    "title": "Odstrániť obrázky množiny údajov",
+    "desc": "Naozaj chcete odstrániť {{count}} obrázkov z {{dataset}}? Túto akciu nie je možné vrátiť späť a bude si vyžadovať pretrénovanie modelu."
+  },
+  "deleteTrainImages": {
+    "title": "Odstrániť obrázky vlakov",
+    "desc": "Naozaj chcete odstrániť {{count}} obrázkov? Túto akciu nie je možné vrátiť späť."
+  },
+  "renameCategory": {
+    "title": "Premenovať triedu",
+    "desc": "Zadajte nový názov pre {{name}}. Budete musieť model pretrénovať, aby sa zmena názvu prejavila."
+  },
+  "description": {
+    "invalidName": "Neplatné meno. Mená môžu obsahovať iba písmená, čísla, medzery, apostrofy, podčiarkovníky a spojovníky."
+  },
+  "train": {
+    "title": "Posledné klasifikácie",
+    "aria": "Vyberte Nedávne Klasifikácie",
+    "titleShort": "Nedávne"
+  },
+  "categories": "Triedy",
+  "createCategory": {
+    "new": "Vytvorenie novej triedy"
+  },
+  "categorizeImageAs": "Klasifikovať obrázok ako:",
+  "categorizeImage": "Klasifikovať obrázok",
+  "noModels": {
+    "object": {
+      "title": "Žiadne modely klasifikácie objektov",
+      "description": "Vytvorte si vlastný model na klasifikáciu detekovaných objektov.",
+      "buttonText": "Vytvorte objektový model"
+    },
+    "state": {
+      "title": "Žiadne modely klasifikácie štátov",
+      "description": "Vytvorte si vlastný model na monitorovanie a klasifikáciu zmien stavu v špecifických oblastiach kamery.",
+      "buttonText": "Vytvorte model stavu"
+    }
+  },
+  "wizard": {
+    "title": "Vytvorte novú klasifikáciu",
+    "steps": {
+      "nameAndDefine": "Názov a definícia",
+      "stateArea": "Štátna oblasť",
+      "chooseExamples": "Vyberte Príklady"
+    },
+    "step1": {
+      "description": "Stavové modely monitorujú oblasti pevných kamier a sledujú zmeny (napr. otvorenie/zatvorenie dverí). Objektové modely pridávajú klasifikácie k detekovaným objektom (napr. známe zvieratá, doručovatelia atď.).",
+      "name": "Meno",
+      "namePlaceholder": "Zadajte názov modelu...",
+      "type": "Typ",
+      "typeState": "štátu",
+      "typeObject": "Objekt",
+      "objectLabel": "Označenie objektu",
+      "objectLabelPlaceholder": "Vyberte typ objektu...",
+      "classificationType": "Typ klasifikácie",
+      "classificationTypeTip": "Získajte informácie o typoch klasifikácie",
+      "classificationTypeDesc": "Podznačky pridávajú k označeniu objektu ďalší text (napr. „Osoba: UPS“). Atribúty sú vyhľadávateľné metadáta uložené samostatne v metadátach objektu.",
+      "classificationSubLabel": "Podštítky",
+      "classificationAttribute": "Atribút",
+      "classes": "Triedy",
+      "classesTip": "Naučte sa o triedach",
+      "classesStateDesc": "Definujte rôzne stavy, v ktorých sa môže nachádzať oblasť kamery. Napríklad: „otvorené“ a „zatvorené“ pre garážovú bránu.",
+      "classesObjectDesc": "Definujte rôzne kategórie, do ktorých sa majú detekované objekty klasifikovať. Napríklad: „doručovateľ/doručovateľka“, „obyvateľ/obyvateľka“, „cudzinec/cudzinec“ pre klasifikáciu osôb.",
+      "classPlaceholder": "Zadajte názov triedy...",
+      "errors": {
+        "nameRequired": "Vyžaduje sa názov modelu",
+        "nameLength": "Názov modelu musí mať 64 znakov alebo menej",
+        "nameOnlyNumbers": "Názov modelu nemôže obsahovať iba čísla",
+        "classRequired": "Vyžaduje sa aspoň 1 kurz",
+        "classesUnique": "Názvy tried musia byť jedinečné",
+        "stateRequiresTwoClasses": "Modely štátov vyžadujú aspoň 2 triedy",
+        "objectLabelRequired": "Vyberte označenie objektu",
+        "objectTypeRequired": "Vyberte typ klasifikácie"
+      },
+      "states": "Štátov"
+    },
+    "step2": {
+      "description": "Vyberte kamery a definujte oblasť, ktorú chcete pre každú kameru monitorovať. Model klasifikuje stav týchto oblastí.",
+      "cameras": "Kamery",
+      "selectCamera": "Vyberte kameru",
+      "noCameras": "Kliknite + na pridanie kamier",
+      "selectCameraPrompt": "Vyberte kameru zo zoznamu a definujte jej oblasť monitorovania"
+    },
+    "step3": {
+      "selectImagesPrompt": "Vybrať všetky obrázky s: {{className}}",
+      "selectImagesDescription": "Kliknite na obrázky a vyberte ich. Po dokončení tejto hodiny kliknite na tlačidlo Pokračovať.",
+      "generating": {
+        "title": "Generovanie vzorových obrázkov",
+        "description": "Frigate načítava reprezentatívne obrázky z vašich nahrávok. Môže to chvíľu trvať..."
+      },
+      "training": {
+        "title": "Tréningový model",
+        "description": "Váš model sa trénuje na pozadí. Zatvorte toto dialógové okno a váš model sa spustí hneď po dokončení trénovania."
+      },
+      "retryGenerate": "Opakovať generovanie",
+      "noImages": "Nevygenerovali sa žiadne vzorové obrázky",
+      "classifying": "Klasifikácia a tréning...",
+      "trainingStarted": "Školenie začalo úspešne",
+      "errors": {
+        "noCameras": "Nie sú nakonfigurované žiadne kamery",
+        "noObjectLabel": "Nie je vybratý žiadny štítok objektu",
+        "generateFailed": "Nepodarilo sa vygenerovať príklady: {{error}}",
+        "generationFailed": "Generovanie zlyhalo. Skúste to znova.",
+        "classifyFailed": "Nepodarilo sa klasifikovať obrázky: {{error}}"
+      },
+      "generateSuccess": "Vzorové obrázky boli úspešne vygenerované"
+    }
+  },
+  "deleteModel": {
+    "title": "Odstrániť klasifikačný model",
+    "single": "Ste si istí, že chcete odstrániť {{name}}? To bude trvalo odstrániť všetky súvisiace údaje vrátane obrázkov a vzdelávacích údajov. Táto akcia nemôže byť neporušená.",
+    "desc": "Ste si istí, že chcete odstrániť {{count}} model (y)? To bude trvalo odstrániť všetky súvisiace údaje vrátane obrázkov a vzdelávacích údajov. Táto akcia nemôže byť neporušená."
+  },
+  "menu": {
+    "objects": "Objekty",
+    "states": "Štátov"
+  }
+}

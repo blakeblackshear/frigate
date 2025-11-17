@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class ZoneConfig(BaseModel):
+    friendly_name: Optional[str] = Field(
+        None, title="Zone friendly name used in the Frigate UI."
+    )
     filters: dict[str, FilterConfig] = Field(
         default_factory=dict, title="Zone filters."
     )
@@ -52,6 +55,12 @@ class ZoneConfig(BaseModel):
     @property
     def contour(self) -> np.ndarray:
         return self._contour
+
+    def get_formatted_name(self, zone_name: str) -> str:
+        """Return the friendly name if set, otherwise return a formatted version of the zone name."""
+        if self.friendly_name:
+            return self.friendly_name
+        return zone_name.replace("_", " ").title()
 
     @field_validator("objects", mode="before")
     @classmethod

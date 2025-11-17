@@ -10,7 +10,7 @@
     "enable": "Otomatik Takibi Aç"
   },
   "manualRecording": {
-    "start": "Talep üzerine kaydı başlat",
+    "start": "Talep Üzerine Kaydı Başlat",
     "failedToEnd": "Manuel talep üzerine kayıt bitirilemedi.",
     "recordDisabledTips": "Kamera konfigürasyonunda kayıtlar devre dışı bırakıldığı veya kısıtlandığı için yalnızca bir fotoğraf kaydedilcektir.",
     "showStats": {
@@ -19,11 +19,11 @@
     },
     "started": "Manuel talep üzerine kayıt başlatıldı.",
     "failedToStart": "Manuel talep üzerine kayıt başlatılamadı.",
-    "title": "İsteğe Bağlı Kayıt",
-    "end": "Talep üzerine kaydı bitir",
+    "title": "İsteğe Bağlı",
+    "end": "Talep Üzerine Kaydı Bitir",
     "debugView": "Hata Ayıklama Görünümü",
     "ended": "Manuel talep üzerine kayıt bitirildi.",
-    "tips": "Bu kameranın kayıt tutma ayarları kapsamında manuel olarak bir olay başlatın.",
+    "tips": "Bu kameranın kayıt saklama ayarlarına göre anlık bir görüntü indirin veya manuel bir olay başlatın.",
     "playInBackground": {
       "label": "Arka planda oynat",
       "desc": "Yayını oynatıcı arkadayken de devam ettirmek için bu seçeneği açın."
@@ -60,8 +60,9 @@
     "title": "{{camera}} Ayarları",
     "autotracking": "Otomatik Takip",
     "cameraEnabled": "Kamera Açık",
-    "objectDetection": "Nesne Algılama",
-    "audioDetection": "Ses Algılama"
+    "objectDetection": "Nesne Tespiti",
+    "audioDetection": "Ses Algılama",
+    "transcription": "Ses Çözümlemesi"
   },
   "effectiveRetainMode": {
     "modes": {
@@ -115,14 +116,22 @@
       "center": {
         "label": "PTZ kamerayı ortalamak için görüntüye tıklatın"
       }
+    },
+    "focus": {
+      "in": {
+        "label": "PTZ kamera odağını yakınlaştır"
+      },
+      "out": {
+        "label": "PTZ kamera odağını uzaklaştır"
+      }
     }
   },
   "history": {
     "label": "Geçmiş görüntüleri göster"
   },
   "camera": {
-    "enable": "Kamerayı aç",
-    "disable": "Kamerayı kapat"
+    "enable": "Kamerayı Aç",
+    "disable": "Kamerayı Kapat"
   },
   "suspend": {
     "forTime": "Askıya alınma süresi: "
@@ -154,5 +163,15 @@
   "detect": {
     "disable": "Tespiti Kapat",
     "enable": "Tespiti Aç"
+  },
+  "transcription": {
+    "enable": "Canlı Ses Çözümlemeyi Aç",
+    "disable": "Canlı Ses Çözümlemeyi Kapat"
+  },
+  "snapshot": {
+    "takeSnapshot": "Anlık Ekran Görüntüsünü İndir",
+    "noVideoSource": "Anlık görüntü için kullanılabilir bir video kaynağı bulunamadı.",
+    "captureFailed": "Anlık görüntü yakalanamadı.",
+    "downloadStarted": "Anlık görüntü indirme işlemi başlatıldı."
   }
 }

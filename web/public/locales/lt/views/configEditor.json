@@ -12,5 +12,7 @@
     "error": {
       "savingError": "Klaida išsaugant konfiguraciją"
     }
-  }
+  },
+  "safeConfigEditor": "Konfiguracijos Redaktorius (Saugus Rėžimas)",
+  "safeModeDescription": "Frigate yra saugiame rėžime dėl konfiguracijos tinkamumo klaidos."
 }

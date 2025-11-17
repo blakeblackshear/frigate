@@ -25,6 +25,7 @@ import { CamerasFilterButton } from "./CamerasFilterButton";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -72,6 +73,7 @@ export default function ReviewFilterGroup({
   setMotionOnly,
 }: ReviewFilterGroupProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const allowedCameras = useAllowedCameras();
 
   const allLabels = useMemo<string[]>(() => {
     if (filterList?.labels) {
@@ -83,7 +85,9 @@ export default function ReviewFilterGroup({
     }
 
     const labels = new Set<string>();
-    const cameras = filter?.cameras || Object.keys(config.cameras);
+    const cameras = (filter?.cameras || allowedCameras).filter((camera) =>
+      allowedCameras.includes(camera),
+    );
 
     cameras.forEach((camera) => {
       if (camera == "birdseye") {
@@ -106,7 +110,7 @@ export default function ReviewFilterGroup({
     });
 
     return [...labels].sort();
-  }, [config, filterList, filter]);
+  }, [config, filterList, filter, allowedCameras]);
 
   const allZones = useMemo<string[]>(() => {
     if (filterList?.zones) {
@@ -118,7 +122,9 @@ export default function ReviewFilterGroup({
     }
 
     const zones = new Set<string>();
-    const cameras = filter?.cameras || Object.keys(config.cameras);
+    const cameras = (filter?.cameras || allowedCameras).filter((camera) =>
+      allowedCameras.includes(camera),
+    );
 
     cameras.forEach((camera) => {
       if (camera == "birdseye") {
@@ -134,11 +140,11 @@ export default function ReviewFilterGroup({
     });
 
     return [...zones].sort();
-  }, [config, filterList, filter]);
+  }, [config, filterList, filter, allowedCameras]);
 
   const filterValues = useMemo(
     () => ({
-      cameras: Object.keys(config?.cameras ?? {}).sort(
+      cameras: allowedCameras.sort(
         (a, b) =>
           (config?.cameras[a]?.ui?.order ?? 0) -
           (config?.cameras[b]?.ui?.order ?? 0),
@@ -146,7 +152,7 @@ export default function ReviewFilterGroup({
       labels: Object.values(allLabels || {}),
       zones: Object.values(allZones || {}),
     }),
-    [config, allLabels, allZones],
+    [config, allLabels, allZones, allowedCameras],
   );
 
   const groups = useMemo(() => {
@@ -448,6 +454,24 @@ export function GeneralFilterContent({
   onClose,
 }: GeneralFilterContentProps) {
   const { t } = useTranslation(["components/filter", "views/events"]);
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+  const allAudioListenLabels = useMemo<string[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const labels = new Set<string>();
+    Object.values(config.cameras).forEach((camera) => {
+      if (camera?.audio?.enabled) {
+        camera.audio.listen.forEach((label) => {
+          labels.add(label);
+        });
+      }
+    });
+    return [...labels].sort();
+  }, [config]);
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
@@ -489,8 +513,7 @@ export function GeneralFilterContent({
             checked={filter.labels === undefined}
             onCheckedChange={(isChecked) => {
               if (isChecked) {
-                const { labels: _labels, ...rest } = filter;
-                onUpdateFilter(rest);
+                onUpdateFilter({ ...filter, labels: undefined });
               }
             }}
           />
@@ -499,7 +522,10 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={getTranslatedLabel(item)}
+              label={getTranslatedLabel(
+                item,
+                allAudioListenLabels.includes(item) ? "audio" : "object",
+              )}
               isChecked={filter.labels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
@@ -536,8 +562,7 @@ export function GeneralFilterContent({
                 checked={filter.zones === undefined}
                 onCheckedChange={(isChecked) => {
                   if (isChecked) {
-                    const { zones: _zones, ...rest } = filter;
-                    onUpdateFilter(rest);
+                    onUpdateFilter({ ...filter, zones: undefined });
                   }
                 }}
               />
@@ -546,7 +571,8 @@ export function GeneralFilterContent({
               {allZones.map((item) => (
                 <FilterSwitch
                   key={item}
-                  label={item.replaceAll("_", " ")}
+                  label={item}
+                  type={"zone"}
                   isChecked={filter.zones?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {

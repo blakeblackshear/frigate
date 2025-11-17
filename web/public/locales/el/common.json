@@ -1,8 +1,125 @@
 {
   "time": {
-    "untilForTime": "Ως{{time}}",
+    "untilForTime": "Ως {{time}}",
     "untilForRestart": "Μέχρι να γίνει επανεκίννηση του Frigate.",
     "untilRestart": "Μέχρι να γίνει επανεκκίνηση",
-    "justNow": "Μόλις τώρα"
+    "justNow": "Μόλις τώρα",
+    "ago": "Πριν {{timeAgo}}",
+    "today": "Σήμερα",
+    "yesterday": "Εχθές",
+    "last7": "Τελευταίες 7 ημέρες",
+    "year_one": "{{time}} χρόνος",
+    "year_other": "{{time}} χρόνια",
+    "month_one": "{{time}} μήνας",
+    "month_other": "{{time}} μήνες",
+    "day_one": "{{time}} ημέρα",
+    "day_other": "{{time}} ημέρες",
+    "hour_one": "{{time}} ώρα",
+    "hour_other": "{{time}} ώρες",
+    "minute_one": "{{time}} λεπτό",
+    "minute_other": "{{time}} λεπτά",
+    "second_one": "{{time}} δευτερόλεπτο",
+    "second_other": "{{time}} δευτερόλεπτα",
+    "last14": "Τελευταίες 14 ημέρες",
+    "last30": "Τελευταίες 30 ημέρες",
+    "thisWeek": "Αυτή την εβδομάδα",
+    "lastWeek": "Προηγούμενη Εβδομάδα",
+    "am": "π.μ.",
+    "yr": "{{time}}χρ",
+    "mo": "{{time}}μη",
+    "thisMonth": "Αυτό τον Μήνα",
+    "lastMonth": "Τελευταίος Μήνας",
+    "5minutes": "5 λεπτά",
+    "10minutes": "10 λεπτά",
+    "30minutes": "30 λεπτά",
+    "1hour": "1 ώρα",
+    "12hours": "12 ώρες",
+    "24hours": "24 ώρες",
+    "pm": "μ.μ.",
+    "formattedTimestamp": {
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM yyyy",
+      "24hour": "d MMM yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    }
+  },
+  "menu": {
+    "live": {
+      "cameras": {
+        "count_one": "{{count}} Κάμερα",
+        "count_other": "{{count}} Κάμερες"
+      }
+    }
+  },
+  "button": {
+    "save": "Αποθήκευση",
+    "apply": "Εφαρμογή",
+    "reset": "Επαναφορά",
+    "done": "Τέλος",
+    "enabled": "Ενεργοποιημένο",
+    "enable": "Ενεργοποίηση",
+    "disabled": "Απενεργοποιημένο",
+    "disable": "Απενεργοποίηση",
+    "saving": "Αποθήκευση…",
+    "cancel": "Ακύρωση",
+    "close": "Κλείσιμο",
+    "copy": "Αντιγραφή",
+    "back": "Πίσω",
+    "pictureInPicture": "Εικόνα σε εικόνα",
+    "cameraAudio": "Ήχος κάμερας",
+    "edit": "Επεξεργασία",
+    "copyCoordinates": "Αντιγραφή συντεταγμένων",
+    "delete": "Διαγραφή",
+    "yes": "Ναι",
+    "no": "Όχι",
+    "download": "Κατέβασμα",
+    "info": "Πληροφορίες"
+  },
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "χλμ/ώρα"
+    },
+    "length": {
+      "meters": "μέτρα"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/ώρα",
+      "mbph": "MB/ώρα",
+      "gbph": "GB/ώρα"
+    }
+  },
+  "label": {
+    "back": "Επιστροφή"
   }
 }

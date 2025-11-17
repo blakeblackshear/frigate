@@ -1,1 +1,17 @@
-{}
+{
+  "documentTitle": "내보내기 - Frigate",
+  "search": "검색",
+  "noExports": "내보내기가 없습니다",
+  "deleteExport": "내보내기 삭제",
+  "deleteExport.desc": "{{exportName}}을 지우시겠습니까?",
+  "editExport": {
+    "title": "내보내기 이름 변경",
+    "desc": "이 내보내기의 새 이름을 입력하세요.",
+    "saveExport": "내보내기 저장"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "내보내기 이름 변경에 실패했습니다: {{errorMessage}}"
+    }
+  }
+}

@@ -58,7 +58,8 @@
         "desc": "Ändere die Live Stream Optionen für das Dashboard dieser Kameragruppe. <em>Diese Einstellungen sind geräte-/browserspezifisch.</em>",
         "stream": "Stream",
         "placeholder": "Wähle einen Stream"
-      }
+      },
+      "birdseye": "Vogelperspektive"
     },
     "add": "Kameragruppe hinzufügen",
     "cameras": {

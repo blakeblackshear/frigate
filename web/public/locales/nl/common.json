@@ -128,10 +128,21 @@
     "length": {
       "feet": "voet",
       "meters": "meter"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/uur",
+      "mbph": "MB/uur",
+      "gbph": "GB/uur"
     }
   },
   "label": {
-    "back": "Ga terug"
+    "back": "Ga terug",
+    "hide": "Verberg {{item}}",
+    "show": "Toon {{item}}",
+    "ID": "ID"
   },
   "menu": {
     "system": "Systeem",
@@ -175,7 +186,15 @@
       "ja": "日本語 (Japans)",
       "yue": "粵語 (Kantonees)",
       "th": "ไทย (Thais)",
-      "ca": "Català (Catalaans)"
+      "ca": "Català (Catalaans)",
+      "ptBR": "Português brasileiro (Braziliaans Portugees)",
+      "sr": "Српски (Servisch)",
+      "sl": "Slovenščina (Sloveens)",
+      "lt": "Lietuvių (Litouws)",
+      "bg": "Български (Bulgaars)",
+      "gl": "Galego (Galicisch)",
+      "id": "Bahasa Indonesia (Indonesisch)",
+      "ur": "اردو (Urdu)"
     },
     "darkMode": {
       "label": "Donkere modus",
@@ -264,5 +283,18 @@
     "title": "404",
     "documentTitle": "Niet gevonden - Frigate"
   },
-  "selectItem": "Selecteer {{item}}"
+  "selectItem": "Selecteer {{item}}",
+  "readTheDocumentation": "Lees de documentatie",
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} en {{1}}",
+    "many": "{{items}}, en {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Optioneel",
+    "internalID": "De interne ID die Frigate gebruikt in de configuratie en database"
+  }
 }

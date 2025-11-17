@@ -13,6 +13,11 @@
       "submitToPlus": {
         "label": "Pošalji na Frigate+",
         "desc": "Objekti na lokacijama koje želite da izbegnete nisu lažno pozitivni. Slanje lažno pozitivnih rezultata će zbuniti model."
+      },
+      "review": {
+        "question": {
+          "ask_a": "Da li je ovaj objekat <code>{{label}}</code>?"
+        }
       }
     }
   }

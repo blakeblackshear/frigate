@@ -11,11 +11,17 @@ import {
   InferenceThreshold,
 } from "@/types/graph";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import GPUInfoDialog from "@/components/overlay/GPUInfoDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { CiCircleAlert } from "react-icons/ci";
 
 type GeneralMetricsProps = {
   lastUpdated: number;
@@ -548,7 +554,27 @@ export default function GeneralMetrics({
           )}
           {statsHistory.length != 0 ? (
             <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-              <div className="mb-5">{t("general.detector.cpuUsage")}</div>
+              <div className="mb-5 flex flex-row items-center justify-between">
+                {t("general.detector.cpuUsage")}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="focus:outline-none"
+                      aria-label={t("general.detector.cpuUsage")}
+                    >
+                      <CiCircleAlert
+                        className="size-5"
+                        aria-label={t("general.detector.cpuUsage")}
+                      />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <div className="space-y-2">
+                      {t("general.detector.cpuUsageInformation")}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
               {detCpuSeries.map((series) => (
                 <ThresholdBarGraph
                   key={series.name}

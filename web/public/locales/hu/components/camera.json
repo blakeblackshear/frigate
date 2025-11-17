@@ -1,6 +1,6 @@
 {
   "group": {
-    "label": "Kamera Csoport",
+    "label": "Kamera Csoportok",
     "delete": {
       "confirm": {
         "desc": "Biztosan törölni akarja a következő kamera csoportot <em>{{name}}</em>?",
@@ -66,7 +66,8 @@
           "desc": "Csak akkor engedélyezze ezt az opciót, ha a kamera élő közvetítése képhibás, és a kép jobb oldalán átlós vonal látható."
         },
         "desc": "Változtassa meg az élő adás beállításait ezen kamera csoport kijelzőjén. <em> Ezek a beállítások eszköz/böngésző-specifikusak.</em>"
-      }
+      },
+      "birdseye": "Madártávlat"
     }
   },
   "debug": {

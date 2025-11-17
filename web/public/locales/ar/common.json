@@ -3,6 +3,18 @@
     "untilForTime": "حتى {{time}}",
     "untilForRestart": "حتى يعاد تشغيل فرايجيت.",
     "untilRestart": "حتى إعادة التشغيل",
-    "ago": "منذ {{timeAgo}}"
+    "ago": "منذ {{timeAgo}}",
+    "justNow": "في التو",
+    "today": "اليوم",
+    "last14": "آخر 14 يومًا",
+    "last30": "آخر 30 يومًا",
+    "thisWeek": "هذا الأسبوع",
+    "lastWeek": "الأسبوع الماضي",
+    "thisMonth": "هذا الشهر",
+    "yesterday": "بالأمس",
+    "last7": "آخر 7 أيام",
+    "lastMonth": "الشهر المنصرم",
+    "5minutes": "5 دقائق",
+    "10minutes": "10 دقائق"
   }
 }

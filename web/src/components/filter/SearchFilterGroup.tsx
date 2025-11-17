@@ -24,9 +24,9 @@ import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import SearchFilterDialog from "../overlay/dialog/SearchFilterDialog";
 import { CalendarRangeFilterButton } from "./CalendarFilterButton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 
 type SearchFilterGroupProps = {
   className: string;
@@ -46,6 +46,7 @@ export default function SearchFilterGroup({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const allowedCameras = useAllowedCameras();
 
   const allLabels = useMemo<string[]>(() => {
     if (filterList?.labels) {
@@ -57,7 +58,9 @@ export default function SearchFilterGroup({
     }
 
     const labels = new Set<string>();
-    const cameras = filter?.cameras || Object.keys(config.cameras);
+    const cameras = (filter?.cameras || allowedCameras).filter((camera) =>
+      allowedCameras.includes(camera),
+    );
 
     cameras.forEach((camera) => {
       if (camera == "birdseye") {
@@ -87,7 +90,7 @@ export default function SearchFilterGroup({
     });
 
     return [...labels].sort();
-  }, [config, filterList, filter]);
+  }, [config, filterList, filter, allowedCameras]);
 
   const allZones = useMemo<string[]>(() => {
     if (filterList?.zones) {
@@ -99,7 +102,9 @@ export default function SearchFilterGroup({
     }
 
     const zones = new Set<string>();
-    const cameras = filter?.cameras || Object.keys(config.cameras);
+    const cameras = (filter?.cameras || allowedCameras).filter((camera) =>
+      allowedCameras.includes(camera),
+    );
 
     cameras.forEach((camera) => {
       if (camera == "birdseye") {
@@ -118,16 +123,16 @@ export default function SearchFilterGroup({
     });
 
     return [...zones].sort();
-  }, [config, filterList, filter]);
+  }, [config, filterList, filter, allowedCameras]);
 
   const filterValues = useMemo(
     () => ({
-      cameras: Object.keys(config?.cameras || {}),
+      cameras: allowedCameras,
       labels: Object.values(allLabels || {}),
       zones: Object.values(allZones || {}),
       search_type: ["thumbnail", "description"] as SearchSource[],
     }),
-    [config, allLabels, allZones],
+    [allLabels, allZones, allowedCameras],
   );
 
   const availableSortTypes = useMemo(() => {
@@ -343,6 +348,26 @@ export function GeneralFilterContent({
   onClose,
 }: GeneralFilterContentProps) {
   const { t } = useTranslation(["components/filter"]);
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
+  const allAudioListenLabels = useMemo<string[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const labels = new Set<string>();
+    Object.values(config.cameras).forEach((camera) => {
+      if (camera?.audio?.enabled) {
+        camera.audio.listen.forEach((label) => {
+          labels.add(label);
+        });
+      }
+    });
+    return [...labels].sort();
+  }, [config]);
+
   return (
     <>
       <div className="overflow-x-hidden">
@@ -368,7 +393,10 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={getTranslatedLabel(item)}
+              label={getTranslatedLabel(
+                item,
+                allAudioListenLabels.includes(item) ? "audio" : "object",
+              )}
               isChecked={currentLabels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {

@@ -1,0 +1,179 @@
+{
+  "documentTitle": "Classification Models",
+  "details": {
+    "scoreInfo": "Score represents the average classification confidence across all detections of this object."
+  },
+  "button": {
+    "deleteClassificationAttempts": "Delete Classification Images",
+    "renameCategory": "Rename Class",
+    "deleteCategory": "Delete Class",
+    "deleteImages": "Delete Images",
+    "trainModel": "Train Model",
+    "addClassification": "Add Classification",
+    "deleteModels": "Delete Models",
+    "editModel": "Edit Model"
+  },
+  "tooltip": {
+    "trainingInProgress": "Model is currently training",
+    "noNewImages": "No new images to train. Classify more images in the dataset first.",
+    "noChanges": "No changes to the dataset since last training.",
+    "modelNotReady": "Model is not ready for training"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Deleted Class",
+      "deletedImage": "Deleted Images",
+      "deletedModel_one": "Successfully deleted {{count}} model",
+      "deletedModel_other": "Successfully deleted {{count}} models",
+      "categorizedImage": "Successfully Classified Image",
+      "trainedModel": "Successfully trained model.",
+      "trainingModel": "Successfully started model training.",
+      "updatedModel": "Successfully updated model configuration",
+      "renamedCategory": "Successfully renamed class to {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Failed to delete: {{errorMessage}}",
+      "deleteCategoryFailed": "Failed to delete class: {{errorMessage}}",
+      "deleteModelFailed": "Failed to delete model: {{errorMessage}}",
+      "categorizeFailed": "Failed to categorize image: {{errorMessage}}",
+      "trainingFailed": "Model training failed. Check Frigate logs for details.",
+      "trainingFailedToStart": "Failed to start model training: {{errorMessage}}",
+      "updateModelFailed": "Failed to update model: {{errorMessage}}",
+      "renameCategoryFailed": "Failed to rename class: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Delete Class",
+    "desc": "Are you sure you want to delete the class {{name}}? This will permanently delete all associated images and require re-training the model.",
+    "minClassesTitle": "Cannot Delete Class",
+    "minClassesDesc": "A classification model must have at least 2 classes. Add another class before deleting this one."
+  },
+  "deleteModel": {
+    "title": "Delete Classification Model",
+    "single": "Are you sure you want to delete {{name}}? This will permanently delete all associated data including images and training data. This action cannot be undone.",
+    "desc_one": "Are you sure you want to delete {{count}} model? This will permanently delete all associated data including images and training data. This action cannot be undone.",
+    "desc_other": "Are you sure you want to delete {{count}} models? This will permanently delete all associated data including images and training data. This action cannot be undone."
+  },
+  "edit": {
+    "title": "Edit Classification Model",
+    "descriptionState": "Edit the classes for this state classification model. Changes will require retraining the model.",
+    "descriptionObject": "Edit the object type and classification type for this object classification model.",
+    "stateClassesInfo": "Note: Changing state classes requires retraining the model with the updated classes."
+  },
+  "deleteDatasetImages": {
+    "title": "Delete Dataset Images",
+    "desc_one": "Are you sure you want to delete {{count}} image from {{dataset}}? This action cannot be undone and will require re-training the model.",
+    "desc_other": "Are you sure you want to delete {{count}} images from {{dataset}}? This action cannot be undone and will require re-training the model."
+  },
+  "deleteTrainImages": {
+    "title": "Delete Train Images",
+    "desc_one": "Are you sure you want to delete {{count}} image? This action cannot be undone.",
+    "desc_other": "Are you sure you want to delete {{count}} images? This action cannot be undone."
+  },
+  "renameCategory": {
+    "title": "Rename Class",
+    "desc": "Enter a new name for {{name}}. You will be required to retrain the model for the name change to take affect."
+  },
+  "description": {
+    "invalidName": "Invalid name. Names can only include letters, numbers, spaces, apostrophes, underscores, and hyphens."
+  },
+  "train": {
+    "title": "Recent Classifications",
+    "titleShort": "Recent",
+    "aria": "Select Recent Classifications"
+  },
+  "categories": "Classes",
+  "createCategory": {
+    "new": "Create New Class"
+  },
+  "categorizeImageAs": "Classify Image As:",
+  "categorizeImage": "Classify Image",
+  "menu": {
+    "objects": "Objects",
+    "states": "States"
+  },
+  "noModels": {
+    "object": {
+      "title": "No Object Classification Models",
+      "description": "Create a custom model to classify detected objects.",
+      "buttonText": "Create Object Model"
+    },
+    "state": {
+      "title": "No State Classification Models",
+      "description": "Create a custom model to monitor and classify state changes in specific camera areas.",
+      "buttonText": "Create State Model"
+    }
+  },
+  "wizard": {
+    "title": "Create New Classification",
+    "steps": {
+      "nameAndDefine": "Name & Define",
+      "stateArea": "State Area",
+      "chooseExamples": "Choose Examples"
+    },
+    "step1": {
+      "description": "State models monitor fixed camera areas for changes (e.g., door open/closed). Object models add classifications to detected objects (e.g., known animals, delivery persons, etc.).",
+      "name": "Name",
+      "namePlaceholder": "Enter model name...",
+      "type": "Type",
+      "typeState": "State",
+      "typeObject": "Object",
+      "objectLabel": "Object Label",
+      "objectLabelPlaceholder": "Select object type...",
+      "classificationType": "Classification Type",
+      "classificationTypeTip": "Learn about classification types",
+      "classificationTypeDesc": "Sub Labels add additional text to the object label (e.g., 'Person: UPS'). Attributes are searchable metadata stored separately in the object metadata.",
+      "classificationSubLabel": "Sub Label",
+      "classificationAttribute": "Attribute",
+      "classes": "Classes",
+      "states": "States",
+      "classesTip": "Learn about classes",
+      "classesStateDesc": "Define the different states your camera area can be in. For example: 'open' and 'closed' for a garage door.",
+      "classesObjectDesc": "Define the different categories to classify detected objects into. For example: 'delivery_person', 'resident', 'stranger' for person classification.",
+      "classPlaceholder": "Enter class name...",
+      "errors": {
+        "nameRequired": "Model name is required",
+        "nameLength": "Model name must be 64 characters or less",
+        "nameOnlyNumbers": "Model name cannot contain only numbers",
+        "classRequired": "At least 1 class is required",
+        "classesUnique": "Class names must be unique",
+        "stateRequiresTwoClasses": "State models require at least 2 classes",
+        "objectLabelRequired": "Please select an object label",
+        "objectTypeRequired": "Please select a classification type"
+      }
+    },
+    "step2": {
+      "description": "Select cameras and define the area to monitor for each camera. The model will classify the state of these areas.",
+      "cameras": "Cameras",
+      "selectCamera": "Select Camera",
+      "noCameras": "Click + to add cameras",
+      "selectCameraPrompt": "Select a camera from the list to define its monitoring area"
+    },
+    "step3": {
+      "selectImagesPrompt": "Select all images with: {{className}}",
+      "selectImagesDescription": "Click on images to select them. Click Continue when you're done with this class.",
+      "allImagesRequired_one": "Please classify all images. {{count}} image remaining.",
+      "allImagesRequired_other": "Please classify all images. {{count}} images remaining.",
+      "generating": {
+        "title": "Generating Sample Images",
+        "description": "Frigate is pulling representative images from your recordings. This may take a moment..."
+      },
+      "training": {
+        "title": "Training Model",
+        "description": "Your model is being trained in the background. Close this dialog, and your model will start running as soon as training is complete."
+      },
+      "retryGenerate": "Retry Generation",
+      "noImages": "No sample images generated",
+      "classifying": "Classifying & Training...",
+      "trainingStarted": "Training started successfully",
+      "errors": {
+        "noCameras": "No cameras configured",
+        "noObjectLabel": "No object label selected",
+        "generateFailed": "Failed to generate examples: {{error}}",
+        "generationFailed": "Generation failed. Please try again.",
+        "classifyFailed": "Failed to classify images: {{error}}"
+      },
+      "generateSuccess": "Successfully generated sample images"
+    }
+  }
+}

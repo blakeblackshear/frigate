@@ -7,7 +7,7 @@
       "label": "Ištrinti Kamerų Grupę",
       "confirm": {
         "title": "Patvirtinti ištrynimą",
-        "desc": "Ar tikrai norite ištrinti šią kamerų grupę <em>{{name}}</em>?"
+        "desc": "Esate įsitikinę, kad norite ištrinti šią kamerų grupę <em>{{name}}</em>?"
       }
     },
     "name": {
@@ -15,8 +15,73 @@
       "placeholder": "Įveskite pavadinimą…",
       "errorMessage": {
         "mustLeastCharacters": "Kamerų grupės pavadinimas turi būti bent 2 simbolių.",
-        "exists": "Kamerų grupės pavadinimas jau egzistuoja."
+        "exists": "Kamerų grupės pavadinimas jau egzistuoja.",
+        "nameMustNotPeriod": "Kamerų grupės pavadinime negali būti taško.",
+        "invalid": "Nepriimtinas kamera grupės pavadinimas."
       }
+    },
+    "cameras": {
+      "label": "Kameros",
+      "desc": "Pasirinkite kameras šiai grupei."
+    },
+    "icon": "Ikona",
+    "success": "Kameraų grupė {{name}} išsaugota.",
+    "camera": {
+      "setting": {
+        "label": "Kamerų Transliacijos Nustatymai",
+        "title": "{{cameraName}} Transliavimo Nustatymai",
+        "desc": "Keisti tiesioginės tranliacijos nustatymus šiai kamerų grupės valdymo lentai. <em>Šie nustatymai yra specifiniai įrenginiui/ naršyklei.</em>",
+        "audioIsAvailable": "Šiai transliacijai yra garso takelis",
+        "audioIsUnavailable": "Šiai transliacijai nėra garso takelio",
+        "audio": {
+          "tips": {
+            "title": "Šiai transliacijai garsas turi būti teikiamas iš kameros ir konfiguruojamas naudojant go2rtc.",
+            "document": "Skaityti dokumentaciją "
+          }
+        },
+        "stream": "Transliacija",
+        "placeholder": "Pasirinkti transliaciją",
+        "streamMethod": {
+          "label": "Transliacijos Metodas",
+          "placeholder": "Pasirinkti transliacijos metodą",
+          "method": {
+            "noStreaming": {
+              "label": "Nėra transliacijos",
+              "desc": "Kameros vaizdas atsinaujins tik kartą per mintuę ir nebus tiesioginės transliacijos."
+            },
+            "smartStreaming": {
+              "label": "Išmanus Transliavimas (rekomenduojama)",
+              "desc": "Išmanus transliavimas atnaujins jūsų kameros vaizdą kartą per minutę jei nebus aptinkama jokia veikla tam kad saugoti tinklo pralaiduma ir kitus resursus. Aptikus veiklą atvaizdavimas nepertraukiamai persijungs į tiesioginę transliaciją."
+            },
+            "continuousStreaming": {
+              "label": "Nuolatinė Transliacija",
+              "desc": {
+                "title": "Kameros vaizdas visada bus tiesioginė transliacija, jei jis bus matomas valdymo lentoje, net jei jokia veikla nėra aptinkama.",
+                "warning": "Nepertraukiama transliacija gali naudoti daug tinklo duomenų bei sukelti našumo problemų. Naudoti su atsarga."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "desc": "Šį nustatymą naudoti tik jei jūsų kameros tiesioginėje transliacijoje matomi spalvų neatitikimai arba matoma įstriža linija dešinėje vaizdo pusėje.",
+          "label": "Suderinamumo rėžimas"
+        }
+      },
+      "birdseye": "Birdseye"
     }
+  },
+  "debug": {
+    "options": {
+      "label": "Nustatymai",
+      "title": "Pasirinkimai",
+      "showOptions": "Rodyti Pasirinkimus",
+      "hideOptions": "Slėpti Pasirinkimus"
+    },
+    "boundingBox": "Ribojantis Kvadratas",
+    "timestamp": "Laiko žymė",
+    "zones": "Zonos",
+    "mask": "Maskuotė",
+    "motion": "Judesys",
+    "regions": "Regionas"
   }
 }

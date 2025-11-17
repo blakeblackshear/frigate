@@ -1,1 +1,17 @@
-{}
+{
+  "filter": "Filter",
+  "classes": {
+    "label": "Klasser",
+    "all": {
+      "title": "Alle klasser"
+    },
+    "count_one": "{{count}} Klasse",
+    "count_other": "{{count}} Klasser"
+  },
+  "labels": {
+    "all": {
+      "short": "Labels"
+    },
+    "count_one": "{{count}} Label"
+  }
+}

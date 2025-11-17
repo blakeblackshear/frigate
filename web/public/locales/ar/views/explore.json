@@ -3,6 +3,28 @@
   "documentTitle": "اكتشف - فرايجيت",
   "generativeAI": "ذكاء اصطناعي مولد",
   "exploreIsUnavailable": {
-    "title": "المتصفح غير متاح"
+    "title": "المتصفح غير متاح",
+    "embeddingsReindexing": {
+      "context": "يمكن استخدام الاستكشاف بعد انتهاء تضمين الكائنات المتعقبة من إعادة الفهرسة.",
+      "startingUp": "إبتدا التشغيل…",
+      "step": {
+        "thumbnailsEmbedded": "الصور المصغرة المضمنة: ",
+        "descriptionsEmbedded": "الأوصاف المضمنة: ",
+        "trackedObjectsProcessed": "الأشياء المتعقبة التي تمت معالجتها: "
+      },
+      "estimatedTime": "الزمن المتبقي المقدر:",
+      "finishingShortly": "سينتهي قريبًا"
+    },
+    "downloadingModels": {
+      "context": "تقوم Frigate بتنزيل نماذج التضمين اللازمة لدعم ميزة البحث الدلالي. قد يستغرق ذلك عدة دقائق حسب سرعة اتصالك بالإنترنت.",
+      "setup": {
+        "visionModel": "نموذج الرؤية",
+        "visionModelFeatureExtractor": "مستخرج ميزات نموذج الرؤية",
+        "textModel": "نموذج النص"
+      }
+    }
+  },
+  "details": {
+    "timestamp": "الطابع الزمني"
   }
 }

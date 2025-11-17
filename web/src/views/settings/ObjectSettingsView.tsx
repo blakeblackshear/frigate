@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ObjectType } from "@/types/ws";
+import { AudioDetection, ObjectType } from "@/types/ws";
 import useDeepMemo from "@/hooks/use-deep-memo";
 import { Card } from "@/components/ui/card";
 import { getIconForLabel } from "@/utils/iconUtil";
@@ -30,6 +30,9 @@ import { isDesktop } from "react-device-detect";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import { AudioLevelGraph } from "@/components/audio/AudioLevelGraph";
+import { useWs } from "@/api/ws";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -93,6 +96,12 @@ export default function ObjectSettingsView({
       description: t("debug.regions.desc"),
       info: <Trans ns="views/settings">debug.regions.tips</Trans>,
     },
+    {
+      param: "paths",
+      title: t("debug.paths.title"),
+      description: t("debug.paths.desc"),
+      info: <Trans ns="views/settings">debug.paths.tips</Trans>,
+    },
   ];
 
   const [options, setOptions, optionsLoaded] = usePersistence<Options>(
@@ -120,9 +129,14 @@ export default function ObjectSettingsView({
     }
   }, [config, selectedCamera]);
 
-  const { objects } = useCameraActivity(cameraConfig ?? ({} as CameraConfig));
+  const cameraName = useCameraFriendlyName(cameraConfig);
+
+  const { objects, audio_detections } = useCameraActivity(
+    cameraConfig ?? ({} as CameraConfig),
+  );
 
   const memoizedObjects = useDeepMemo(objects);
+  const memoizedAudio = useDeepMemo(audio_detections);
 
   const searchParams = useMemo(() => {
     if (!optionsLoaded) {
@@ -148,10 +162,10 @@ export default function ObjectSettingsView({
   }
 
   return (
-    <div className="flex size-full flex-col md:flex-row">
+    <div className="mt-1 flex size-full flex-col pb-2 md:flex-row">
       <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
-        <Heading as="h3" className="my-2">
+        <Heading as="h4" className="mb-2">
           {t("debug.title")}
         </Heading>
         <div className="mb-5 space-y-3 text-sm text-muted-foreground">
@@ -175,7 +189,9 @@ export default function ObjectSettingsView({
                 rel="noopener noreferrer"
                 className="inline"
               >
-                Open {capitalizeFirstLetter(cameraConfig.name)}'s Web UI
+                {t("debug.openCameraWebUI", {
+                  camera: cameraName,
+                })}
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
             </div>
@@ -183,11 +199,18 @@ export default function ObjectSettingsView({
         )}
 
         <Tabs defaultValue="debug" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList
+            className={`grid w-full ${cameraConfig.ffmpeg.inputs.some((input) => input.roles.includes("audio")) ? "grid-cols-3" : "grid-cols-2"}`}
+          >
             <TabsTrigger value="debug">{t("debug.debugging")}</TabsTrigger>
             <TabsTrigger value="objectlist">
               {t("debug.objectList")}
             </TabsTrigger>
+            {cameraConfig.ffmpeg.inputs.some((input) =>
+              input.roles.includes("audio"),
+            ) && (
+              <TabsTrigger value="audio">{t("debug.audio.title")}</TabsTrigger>
+            )}
           </TabsList>
           <TabsContent value="debug">
             <div className="flex w-full flex-col space-y-6">
@@ -269,7 +292,7 @@ export default function ObjectSettingsView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  {t("debug.objectShapeFilterDrawing.document")}
+                                  {t("readTheDocumentation", { ns: "common" })}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -298,6 +321,16 @@ export default function ObjectSettingsView({
           <TabsContent value="objectlist">
             <ObjectList cameraConfig={cameraConfig} objects={memoizedObjects} />
           </TabsContent>
+          {cameraConfig.ffmpeg.inputs.some((input) =>
+            input.roles.includes("audio"),
+          ) && (
+            <TabsContent value="audio">
+              <AudioList
+                cameraConfig={cameraConfig}
+                audioDetections={memoizedAudio}
+              />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
 
@@ -356,7 +389,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
   return (
     <div className="scrollbar-container flex w-full flex-col overflow-y-auto">
       {objects && objects.length > 0 ? (
-        objects.map((obj) => {
+        objects.map((obj: ObjectType) => {
           return (
             <Card className="mb-1 p-2 text-sm" key={obj.id}>
               <div className="flex flex-row items-center gap-3 pb-1">
@@ -429,6 +462,64 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
       ) : (
         <div className="p-3 text-center">{t("debug.noObjects")}</div>
       )}
+    </div>
+  );
+}
+
+type AudioListProps = {
+  cameraConfig: CameraConfig;
+  audioDetections?: AudioDetection[];
+};
+
+function AudioList({ cameraConfig, audioDetections }: AudioListProps) {
+  const { t } = useTranslation(["views/settings"]);
+
+  // Get audio levels directly from ws hooks
+  const {
+    value: { payload: audioRms },
+  } = useWs(`${cameraConfig.name}/audio/rms`, "");
+  const {
+    value: { payload: audioDBFS },
+  } = useWs(`${cameraConfig.name}/audio/dBFS`, "");
+
+  return (
+    <div className="scrollbar-container flex w-full flex-col overflow-y-auto">
+      {audioDetections && Object.keys(audioDetections).length > 0 ? (
+        Object.entries(audioDetections).map(([key, obj]) => (
+          <Card className="mb-1 p-2 text-sm" key={obj.id ?? key}>
+            <div className="flex flex-row items-center gap-3 pb-1">
+              <div className="flex flex-1 flex-row items-center justify-start p-3 pl-1">
+                <div className="rounded-lg bg-selected p-2">
+                  {getIconForLabel(key, "size-5 text-white")}
+                </div>
+                <div className="ml-3 text-lg">{getTranslatedLabel(key)}</div>
+              </div>
+              <div className="flex w-8/12 flex-row items-center justify-end">
+                <div className="text-md mr-2 w-1/3">
+                  <div className="flex flex-col items-end justify-end">
+                    <p className="mb-1.5 text-sm text-primary-variant">
+                      {t("debug.audio.score")}
+                    </p>
+                    {obj.score ? (obj.score * 100).toFixed(1).toString() : "-"}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))
+      ) : (
+        <div className="p-3 text-center">
+          <p className="mb-2">{t("debug.audio.noAudioDetections")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("debug.audio.currentRMS")}{" "}
+            {(typeof audioRms === "number" ? audioRms : 0).toFixed(1)} |{" "}
+            {t("debug.audio.currentdbFS")}{" "}
+            {(typeof audioDBFS === "number" ? audioDBFS : 0).toFixed(1)}
+          </p>
+        </div>
+      )}
+
+      <AudioLevelGraph cameraName={cameraConfig.name} />
     </div>
   );
 }

@@ -1,1 +1,11 @@
-{}
+{
+  "filter": "Filter",
+  "export": "Eksporter",
+  "calendar": "Kalender",
+  "filters": "Filtere",
+  "toast": {
+    "error": {
+      "endTimeMustAfterStartTime": "Sluttidspunkt skal være efter starttidspunkt"
+    }
+  }
+}

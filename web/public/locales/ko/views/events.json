@@ -1,1 +1,51 @@
-{}
+{
+  "alerts": "경보",
+  "detections": "대상 감지",
+  "motion": {
+    "label": "움직임 감지",
+    "only": "움직임 감지만"
+  },
+  "allCameras": "모든 카메라",
+  "empty": {
+    "alert": "다시 볼 '경보' 영상이 없습니다",
+    "detection": "다시 볼 '대상 감지' 영상이 없습니다",
+    "motion": "움직임 감지 데이터가 없습니다"
+  },
+  "timeline": "타임라인",
+  "timeline.aria": "타임라인 선택",
+  "events": {
+    "label": "이벤트",
+    "aria": "이벤트 선택",
+    "noFoundForTimePeriod": "이 시간대에 이벤트가 없습니다."
+  },
+  "detail": {
+    "noDataFound": "다시 볼 상세 데이터가 없습니다",
+    "aria": "상세 보기",
+    "trackedObject_one": "추적 대상",
+    "trackedObject_other": "추적 대상",
+    "noObjectDetailData": "상세 보기 데이터가 없습니다."
+  },
+  "objectTrack": {
+    "trackedPoint": "추적 포인트",
+    "clickToSeek": "이 시점으로 이동"
+  },
+  "documentTitle": "다시 보기 - Frigate",
+  "recordings": {
+    "documentTitle": "녹화 - Frigate"
+  },
+  "calendarFilter": {
+    "last24Hours": "최근 24시간"
+  },
+  "markAsReviewed": "'다시 봤음'으로 표시",
+  "markTheseItemsAsReviewed": "이 영상들을 '다시 봤음'으로 표시",
+  "newReviewItems": {
+    "label": "새로운 '다시 보기' 영상 보기",
+    "button": "새로운 '다시 보기' 영상"
+  },
+  "selected_one": "{{count}} 선택됨",
+  "selected_other": "{{count}} 선택됨",
+  "camera": "카메라",
+  "detected": "감지됨",
+  "suspiciousActivity": "수상한 행동",
+  "threateningActivity": "위협적인 행동"
+}

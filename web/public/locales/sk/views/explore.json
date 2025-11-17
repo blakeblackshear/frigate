@@ -2,7 +2,80 @@
   "documentTitle": "Preskúmať - Frigate",
   "generativeAI": "Generatívna AI",
   "details": {
-    "timestamp": "Časová pečiatka"
+    "timestamp": "Časová pečiatka",
+    "item": {
+      "title": "Skontrolujte podrobnosti položky",
+      "desc": "Skontrolujte podrobnosti položky",
+      "button": {
+        "share": "Zdieľajte túto recenziu",
+        "viewInExplore": "Zobraziť v Preskúmať"
+      },
+      "tips": {
+        "mismatch_one": "Bol zistený a zahrnutý do tejto položky kontroly nedostupný objekt ({{count}}). Tieto objekty buď neboli kvalifikované ako upozornenie alebo detekcia, alebo už boli vyčistené/odstránené.",
+        "mismatch_few": "Bolo zistených a zahrnutých do tejto položky kontroly {{count}} nedostupných objektov. Tieto objekty buď neboli kvalifikované ako upozornenie alebo detekcia, alebo už boli vyčistené/odstránené.",
+        "mismatch_other": "Bolo zistených a zahrnutých do tejto položky kontroly {{count}} nedostupných objektov. Tieto objekty buď neboli kvalifikované ako upozornenie alebo detekcia, alebo už boli vyčistené/odstránené.",
+        "hasMissingObjects": "Upravte si konfiguráciu, ak chcete, aby Frigate ukladal sledované objekty pre nasledujúce označenia: <em>{{objects}}<em>"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "Od poskytovateľa {{provider}} bol vyžiadaný nový popis. V závislosti od rýchlosti vášho poskytovateľa môže jeho obnovenie chvíľu trvať.",
+          "updatedSublabel": "Podštítok bol úspešne aktualizovaný.",
+          "updatedLPR": "ŠPZ bola úspešne aktualizovaná.",
+          "audioTranscription": "Úspešne požiadané o prepis zvuku."
+        },
+        "error": {
+          "regenerate": "Nepodarilo sa zavolať od {{provider}} pre nový popis: {{errorMessage}}",
+          "updatedSublabelFailed": "Nepodarilo sa aktualizovať podštítok: {{errorMessage}}",
+          "updatedLPRFailed": "Nepodarilo sa aktualizovať evidenčné číslo vozidla: {{errorMessage}}",
+          "audioTranscription": "Nepodarilo sa vyžiadať prepis zvuku: {{errorMessage}}"
+        }
+      }
+    },
+    "label": "Označenie",
+    "editSubLabel": {
+      "title": "Upraviť vedľajší štítok",
+      "desc": "Zadajte nový podštítok pre tento {{label}}",
+      "descNoLabel": "Zadajte nový podštítok pre tento sledovaný objekt"
+    },
+    "editLPR": {
+      "title": "Upraviť ŠPZ",
+      "desc": "Zadajte novú hodnotu evidenčného čísla vozidla pre toto {{label}}",
+      "descNoLabel": "Zadajte novú hodnotu evidenčného čísla vozidla pre tento sledovaný objekt"
+    },
+    "snapshotScore": {
+      "label": "Snímka skóre"
+    },
+    "topScore": {
+      "label": "Najlepšie skóre",
+      "info": "Najvyššie skóre je najvyššie mediánové skóre sledovaného objektu, takže sa môže líšiť od skóre zobrazeného na miniatúre výsledkov vyhľadávania."
+    },
+    "score": {
+      "label": "Skóre"
+    },
+    "recognizedLicensePlate": "Uznaná SPZ",
+    "estimatedSpeed": "Odhadovaná rýchlosť",
+    "objects": "Objekty",
+    "camera": "Kamera",
+    "zones": "Zóny",
+    "button": {
+      "findSimilar": "Nájsť podobné",
+      "regenerate": {
+        "title": "Regenerovať",
+        "label": "Obnoviť popis sledovaného objektu"
+      }
+    },
+    "description": {
+      "placeholder": "Popis sledovaného objektu",
+      "aiTips": "Frigate si od vášho poskytovateľa generatívnej umelej inteligencie nevyžiada popis, kým sa neukončí životný cyklus sledovaného objektu.",
+      "label": "Popis"
+    },
+    "expandRegenerationMenu": "Rozbaľte ponuku regenerácie",
+    "regenerateFromSnapshot": "Obnoviť zo snímky",
+    "regenerateFromThumbnails": "Obnoviť z miniatúr",
+    "tips": {
+      "descriptionSaved": "Úspešne uložený popis",
+      "saveDescriptionFailed": "Nepodarilo sa aktualizovať popis: {{errorMessage}}"
+    }
   },
   "exploreMore": "Preskumať viac {{label}} objektov",
   "exploreIsUnavailable": {
@@ -38,7 +111,8 @@
     "details": "detaily",
     "snapshot": "snímka",
     "video": "video",
-    "object_lifecycle": "životný cyklus objektu"
+    "object_lifecycle": "životný cyklus objektu",
+    "thumbnail": "Náhľad"
   },
   "objectLifecycle": {
     "title": "Životný cyklus Objektu",
@@ -48,6 +122,166 @@
     "scrollViewTips": "Posúvaním zobrazíte významné momenty životného cyklu tohto objektu.",
     "autoTrackingTips": "Pozície ohraničujúcich rámčekov budú pre kamery s automatickým sledovaním nepresné.",
     "count": "{{first}} z {{second}}",
-    "trackedPoint": "Sledovaný bod"
+    "trackedPoint": "Sledovaný bod",
+    "lifecycleItemDesc": {
+      "visible": "Zistený {{label}}",
+      "entered_zone": "{{label}} vstúpil do {{zones}}",
+      "active": "{{label}} sa stal aktívnym",
+      "stationary": "{{label}} sa zastavil",
+      "attribute": {
+        "faceOrLicense_plate": "Pre {{label}} bol zistený {{attribute}}",
+        "other": "{{label}} rozpoznané ako {{attribute}}"
+      },
+      "gone": "{{label}} zostalo",
+      "heard": "{{label}} počul",
+      "external": "Zistený {{label}}",
+      "header": {
+        "zones": "Zóny",
+        "ratio": "Pomer",
+        "area": "Oblasť"
+      }
+    },
+    "annotationSettings": {
+      "title": "Nastavenia anotácií",
+      "showAllZones": {
+        "title": "Zobraziť všetky zóny",
+        "desc": "Vždy zobrazovať zóny na rámoch, do ktorých objekty vstúpili."
+      },
+      "offset": {
+        "label": "Odsadenie anotácie",
+        "desc": "Tieto údaje pochádzajú z detekčného kanála vašej kamery, ale prekrývajú sa s obrázkami zo záznamového kanála. Je nepravdepodobné, že tieto dva streamy sú dokonale synchronizované. V dôsledku toho sa ohraničujúci rámček a zábery nebudú dokonale zarovnané. Na úpravu tohto posunu je však možné použiť pole <code>annotation_offset</code>.",
+        "documentation": "Prečítajte si dokumentáciu ",
+        "millisecondsToOffset": "Milisekundy na posunutie detekcie anotácií. <em>Predvolené: 0</em>",
+        "tips": "TIP: Predstavte si klip udalosti, v ktorom osoba kráča zľava doprava. Ak je ohraničujúci rámček časovej osi udalosti stále naľavo od osoby, hodnota by sa mala znížiť. Podobne, ak osoba kráča zľava doprava a ohraničujúci rámček je stále pred ňou, hodnota by sa mala zvýšiť.",
+        "toast": {
+          "success": "Odsadenie anotácie pre {{camera}} bolo uložené do konfiguračného súboru. Reštartujte Frigate, aby sa zmeny prejavili."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Predchádzajúca snímka",
+      "next": "Ďalšia snímka"
+    }
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Stiahnut video",
+      "aria": "Stiahnite si video"
+    },
+    "downloadSnapshot": {
+      "label": "Stiahnite si snímok",
+      "aria": "Stiahnite si snímok"
+    },
+    "viewObjectLifecycle": {
+      "label": "Pozrieť životný cyklus objektu",
+      "aria": "Životný cyklus objektu"
+    },
+    "findSimilar": {
+      "label": "Nájsť podobné",
+      "aria": "Nájdite podobné sledované objekty"
+    },
+    "addTrigger": {
+      "label": "Pridať spúšťač",
+      "aria": "Pridať spúšťač pre tento sledovaný objekt"
+    },
+    "audioTranscription": {
+      "label": "Prepisovať",
+      "aria": "Požiadajte o prepis zvuku"
+    },
+    "submitToPlus": {
+      "label": "Odoslať na Frigate+",
+      "aria": "Odoslať na Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "Zobraziť v histórii",
+      "aria": "Zobraziť v histórii"
+    },
+    "deleteTrackedObject": {
+      "label": "Odstrániť tento sledovaný objekt"
+    },
+    "showObjectDetails": {
+      "label": "Zobraziť cestu objektu"
+    },
+    "hideObjectDetails": {
+      "label": "Skryť cestu objektu"
+    },
+    "viewTrackingDetails": {
+      "label": "Zobraziť podrobnosti sledovania",
+      "aria": "Zobraziť podrobnosti o sledovaní"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Potvrdiť zmazanie",
+      "desc": "Odstránením tohto sledovaného objektu sa odstráni snímka, všetky uložené vložené prvky a všetky súvisiace položky s podrobnosťami o sledovaní. Zaznamenané zábery tohto sledovaného objektu v zobrazení História <em>NEBUDÚ</em> odstránené.<br /><br />Naozaj chcete pokračovať?"
+    }
+  },
+  "noTrackedObjects": "Žiadne sledované objekty neboli nájdené",
+  "fetchingTrackedObjectsFailed": "Chyba pri načítaní sledovaných objektov: {{errorMessage}}",
+  "trackedObjectsCount_one": "{{count}} sledovaný objekt ",
+  "trackedObjectsCount_few": "{{count}} sledované objekty ",
+  "trackedObjectsCount_other": "{{count}} sledovaných objektov ",
+  "searchResult": {
+    "tooltip": "Zhoda s {{type}} na {{confidence}} %",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Sledovaný objekt úspešne zmazaný.",
+        "error": "Sledovaný objekt sa nepodarilo zmazať: {{errorMessage}}"
+      }
+    }
+  },
+  "aiAnalysis": {
+    "title": "Analýza AI"
+  },
+  "concerns": {
+    "label": "Obavy"
+  },
+  "trackingDetails": {
+    "title": "Podrobnosti sledovania",
+    "noImageFound": "Pre túto časovú pečiatku sa nenašiel žiadny obrázok.",
+    "createObjectMask": "Vytvoriť masku objektu",
+    "adjustAnnotationSettings": "Upravte nastavenia anotácií",
+    "scrollViewTips": "Kliknite pre zobrazenie významných momentov životného cyklu tohto objektu.",
+    "autoTrackingTips": "Pozície ohraničujúcich rámčekov budú pre kamery s automatickým sledovaním nepresné.",
+    "count": "{{first}} z {{second}}",
+    "trackedPoint": "Sledovaný bod",
+    "lifecycleItemDesc": {
+      "visible": "Zistený {{label}}",
+      "entered_zone": "{{label}} vstúpil do {{zones}}",
+      "active": "{{label}} sa stal aktívnym",
+      "stationary": "{{label}} sa zastavil",
+      "attribute": {
+        "faceOrLicense_plate": "Pre {{label}} bol zistený {{attribute}}",
+        "other": "{{label}} rozpoznané ako {{attribute}}"
+      },
+      "gone": "{{label}} zostalo",
+      "heard": "{{label}} počul",
+      "external": "Zistený {{label}}",
+      "header": {
+        "zones": "Zóny",
+        "ratio": "Pomer",
+        "area": "Oblasť"
+      }
+    },
+    "annotationSettings": {
+      "title": "Nastavenia anotácií",
+      "showAllZones": {
+        "title": "Zobraziť všetky zóny",
+        "desc": "Vždy zobrazovať zóny na rámoch, do ktorých objekty vstúpili."
+      },
+      "offset": {
+        "label": "Odsadenie anotácie",
+        "desc": "Tieto údaje pochádzajú z detektoru kamery, ale sú prepustené na obrázky z rekordného krmiva. Je nepravdepodobné, že dva prúdy sú perfektne synchronizované. V dôsledku toho, skreslenie box a zábery nebudú dokonale zaradiť. Toto nastavenie môžete použiť na ofsetovanie annotácií dopredu alebo dozadu, aby ste ich lepšie zladili s zaznamenanými zábermi.",
+        "millisecondsToOffset": "Milisekundy na posunutie detekcie anotácií. <em>Predvolené: 0</em>",
+        "tips": "TIP: Predstavte si klip udalosti, v ktorom osoba kráča zľava doprava. Ak je ohraničujúci rámček časovej osi udalosti stále naľavo od osoby, hodnota by sa mala znížiť. Podobne, ak osoba kráča zľava doprava a ohraničujúci rámček je stále pred ňou, hodnota by sa mala zvýšiť.",
+        "toast": {
+          "success": "Odsadenie anotácie pre {{camera}} bolo uložené do konfiguračného súboru. Reštartujte Frigate, aby sa zmeny prejavili."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Predchádzajúca snímka",
+      "next": "Ďalšia snímka"
+    }
   }
 }

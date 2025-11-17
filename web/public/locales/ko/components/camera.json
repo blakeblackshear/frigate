@@ -1,1 +1,86 @@
-{}
+{
+  "group": {
+    "label": "카메라 그룹",
+    "add": "카메라 그룹 추가",
+    "edit": "카메라 그룹 편집",
+    "delete": {
+      "label": "카메라 그룹 삭제",
+      "confirm": {
+        "title": "삭제 확인",
+        "desc": "정말로 카메라 그룹을 삭제하시겠습니까 <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "이름",
+      "placeholder": "이름을 입력하세요…",
+      "errorMessage": {
+        "mustLeastCharacters": "카메라 그룹 이름은 최소 2자 이상 써야합니다.",
+        "exists": "이미 존재하는 카메라 그룹 이름입니다.",
+        "nameMustNotPeriod": "카메라 그룹 이름에 마침표(.)를 넣을 수 없습니다.",
+        "invalid": "설정 불가능한 카메라 그룹 이름."
+      }
+    },
+    "cameras": {
+      "label": "카메라",
+      "desc": "이 그룹에 넣을 카메라 선택하기."
+    },
+    "icon": "아이콘",
+    "success": "카메라 그룹 {{name}} 저장되었습니다.",
+    "camera": {
+      "birdseye": "버드아이",
+      "setting": {
+        "label": "카메라 스트리밍 설정",
+        "title": "{{cameraName}} 스트리밍 설정",
+        "desc": "카메라 그룹 대시보드의 실시간 스트리밍 옵션을 변경하세요. <em>이 설정은 기기/브라우저에 따라 다릅니다.</em>",
+        "audioIsAvailable": "이 카메라는 오디오 기능을 사용할 수 있습니다",
+        "audioIsUnavailable": "이 카메라는 오디오 기능을 사용할 수 없습니다",
+        "audio": {
+          "tips": {
+            "title": "오디오를 출력하려면 카메라가 지원하거나 go2rtc에서 설정해야합니다."
+          }
+        },
+        "stream": "스트림",
+        "placeholder": "스트림 선택",
+        "streamMethod": {
+          "label": "스트리밍 방식",
+          "placeholder": "스트리밍 방식 선택",
+          "method": {
+            "noStreaming": {
+              "label": "스트리밍 없음",
+              "desc": "카메라 이미지는 1분에 한 번만 보여지며 라이브 스트리밍은 되지 않습니다."
+            },
+            "smartStreaming": {
+              "label": "스마트 스트리밍 (추천함)",
+              "desc": "스마트 스트리밍은 감지되는 활동이 없을 때 대역폭과 자원을 절약하기 위해 1분마다 한 번 카메라 이미지를 업데이트합니다. 활동이 감지되면, 이미지는 자동으로 라이브 스트림으로 원활하게 전환됩니다."
+            },
+            "continuousStreaming": {
+              "label": "지속적인 스트리밍",
+              "desc": {
+                "title": "활동이 감지되지 않더라도 카메라 이미지가 대시보드에서 항상 실시간 스트림됩니다.",
+                "warning": "지속적인 스트리밍은 높은 대역폭 사용과 퍼포먼스 이슈를 발생할 수 있습니다. 사용에 주의해주세요."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "호환 모드",
+          "desc": "이 옵션은 카메라 라이브 스트림 화면의 색상이 왜곡 되었거나 이미지 오른쪽에 대각선이 나타날때만 사용하세요."
+        }
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "설정",
+      "title": "옵션",
+      "showOptions": "옵션 보기",
+      "hideOptions": "옵션 숨기기"
+    },
+    "boundingBox": "감지 영역 상자",
+    "timestamp": "시간 기록",
+    "zones": "구역 (Zones)",
+    "mask": "마스크",
+    "motion": "움직임",
+    "regions": "영역 (Regions)"
+  }
+}

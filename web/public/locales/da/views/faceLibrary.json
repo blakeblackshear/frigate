@@ -1,3 +1,10 @@
 {
-  "selectItem": "Vælg {{item}}"
+  "selectItem": "Vælg {{item}}",
+  "description": {
+    "addFace": "Gennemgang af tilføjelse til ansigts bibliotek",
+    "placeholder": "Angiv et navn for bibliotek"
+  },
+  "details": {
+    "person": "Person"
+  }
 }

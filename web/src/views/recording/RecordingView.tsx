@@ -7,9 +7,11 @@ import PreviewPlayer, {
 import { DynamicVideoController } from "@/components/player/dynamic/DynamicVideoController";
 import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
+import DetailStream from "@/components/timeline/DetailStream";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import { useResizeObserver } from "@/hooks/resize-observer";
 import { ExportMode } from "@/types/filter";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
@@ -20,6 +22,7 @@ import {
   ReviewFilter,
   ReviewSegment,
   ReviewSummary,
+  ZoomLevel,
 } from "@/types/review";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
 import {
@@ -43,18 +46,29 @@ import Logo from "@/components/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaVideo } from "react-icons/fa";
 import { VideoResolutionType } from "@/types/live";
-import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
-import { useResizeObserver } from "@/hooks/resize-observer";
+import {
+  ASPECT_VERTICAL_LAYOUT,
+  ASPECT_WIDE_LAYOUT,
+  RecordingSegment,
+  RecordingStartingPoint,
+} from "@/types/record";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTranslation } from "react-i18next";
+import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
+import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
+import { DetailStreamProvider } from "@/context/detail-stream-context";
+import { GenAISummaryDialog } from "@/components/overlay/chip/GenAISummaryChip";
+
+const DATA_REFRESH_TIME = 600000; // 10 minutes
 
 type RecordingViewProps = {
   startCamera: string;
@@ -66,6 +80,7 @@ type RecordingViewProps = {
   allPreviews?: Preview[];
   filter?: ReviewFilter;
   updateFilter: (newFilter: ReviewFilter) => void;
+  refreshData?: () => void;
 };
 export function RecordingView({
   startCamera,
@@ -77,6 +92,7 @@ export function RecordingView({
   allPreviews,
   filter,
   updateFilter,
+  refreshData,
 }: RecordingViewProps) {
   const { t } = useTranslation(["views/events"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -87,17 +103,23 @@ export function RecordingView({
 
   const timezone = useTimezone(config);
 
+  const allowedCameras = useAllowedCameras();
+  const effectiveCameras = useMemo(
+    () => allCameras.filter((camera) => allowedCameras.includes(camera)),
+    [allCameras, allowedCameras],
+  );
+  const [mainCamera, setMainCamera] = useState(startCamera);
+
   const { data: recordingsSummary } = useSWR<RecordingsSummary>([
     "recordings/summary",
     {
       timezone: timezone,
-      cameras: allCameras.join(",") ?? null,
+      cameras: mainCamera ?? null,
     },
   ]);
 
   // controller state
 
-  const [mainCamera, setMainCamera] = useState(startCamera);
   const mainControllerRef = useRef<DynamicVideoController | null>(null);
   const mainLayoutRef = useRef<HTMLDivElement | null>(null);
   const cameraLayoutRef = useRef<HTMLDivElement | null>(null);
@@ -117,9 +139,15 @@ export function RecordingView({
 
   // timeline
 
+  const [recording] = useOverlayState<RecordingStartingPoint>(
+    "recording",
+    undefined,
+    false,
+  );
+
   const [timelineType, setTimelineType] = useOverlayState<TimelineType>(
     "timelineType",
-    "timeline",
+    recording?.timelineType ?? "timeline",
   );
 
   const chunkedTimeRange = useMemo(
@@ -137,6 +165,7 @@ export function RecordingView({
       chunkedTimeRange[chunkedTimeRange.length - 1],
     [selectedRangeIdx, chunkedTimeRange],
   );
+
   const reviewFilterList = useMemo(() => {
     const uniqueLabels = new Set<string>();
 
@@ -173,6 +202,40 @@ export function RecordingView({
       setSelectedRangeIdx(selectedRangeIdx + 1);
     }
   }, [selectedRangeIdx, chunkedTimeRange]);
+
+  // visibility tracking for refreshing stale data
+
+  const lastVisibilityTime = useRef<number>(Date.now());
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        const now = Date.now();
+        const timeSinceLastVisible = now - lastVisibilityTime.current;
+
+        // Only refresh if user was away for a while
+        // and the video is not currently playing
+        if (
+          timeSinceLastVisible >= DATA_REFRESH_TIME &&
+          refreshData &&
+          mainControllerRef.current &&
+          !mainControllerRef.current.isPlaying()
+        ) {
+          refreshData();
+        }
+
+        lastVisibilityTime.current = now;
+      } else {
+        lastVisibilityTime.current = Date.now();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [refreshData]);
 
   // scrubbing and timeline state
 
@@ -224,15 +287,14 @@ export function RecordingView({
   ]);
 
   const manuallySetCurrentTime = useCallback(
-    (time: number) => {
+    (time: number, play: boolean = false) => {
       if (!currentTimeRange) {
         return;
       }
-
       setCurrentTime(time);
 
       if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
-        mainControllerRef.current?.seekToTimestamp(time, true);
+        mainControllerRef.current?.seekToTimestamp(time, play);
       } else {
         updateSelectedSegment(time, true);
       }
@@ -251,7 +313,7 @@ export function RecordingView({
         } else {
           updateSelectedSegment(currentTime, true);
         }
-      } else if (playerTime != currentTime) {
+      } else if (playerTime != currentTime && timelineType != "detail") {
         mainControllerRef.current?.play();
       }
     }
@@ -266,14 +328,16 @@ export function RecordingView({
 
   const onSelectCamera = useCallback(
     (newCam: string) => {
-      setMainCamera(newCam);
-      setFullResolution({
-        width: 0,
-        height: 0,
-      });
-      setPlaybackStart(currentTime);
+      if (allowedCameras.includes(newCam)) {
+        setMainCamera(newCam);
+        setFullResolution({
+          width: 0,
+          height: 0,
+        });
+        setPlaybackStart(currentTime);
+      }
     },
-    [currentTime],
+    [currentTime, allowedCameras],
   );
 
   // fullscreen
@@ -332,49 +396,47 @@ export function RecordingView({
     }
   }, [mainCameraAspect]);
 
-  const [{ width: mainWidth, height: mainHeight }] =
+  // use a resize observer to determine whether to use w-full or h-full based on container aspect ratio
+  const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(cameraLayoutRef);
+  const [{ width: previewRowWidth, height: previewRowHeight }] =
+    useResizeObserver(previewRowRef);
 
-  const mainCameraStyle = useMemo(() => {
-    if (isMobile || mainCameraAspect != "normal" || !config) {
-      return undefined;
+  const useHeightBased = useMemo(() => {
+    if (!containerWidth || !containerHeight) {
+      return false;
     }
 
-    const camera = config.cameras[mainCamera];
-
-    if (!camera) {
-      return undefined;
+    const cameraAspectRatio = getCameraAspect(mainCamera);
+    if (!cameraAspectRatio) {
+      return false;
     }
 
-    const aspect = getCameraAspect(mainCamera);
+    // Calculate available space for camera after accounting for preview row
+    // For tall cameras: preview row is side-by-side (takes width)
+    // For wide/normal cameras: preview row is stacked (takes height)
+    const availableWidth =
+      mainCameraAspect == "tall" && previewRowWidth
+        ? containerWidth - previewRowWidth
+        : containerWidth;
+    const availableHeight =
+      mainCameraAspect != "tall" && previewRowHeight
+        ? containerHeight - previewRowHeight
+        : containerHeight;
 
-    if (!aspect) {
-      return undefined;
-    }
+    const availableAspectRatio = availableWidth / availableHeight;
 
-    const availableHeight = mainHeight - 112;
-
-    let percent;
-    if (mainWidth / availableHeight < aspect) {
-      percent = 100;
-    } else {
-      const availableWidth = aspect * availableHeight;
-      percent =
-        (mainWidth < availableWidth
-          ? mainWidth / availableWidth
-          : availableWidth / mainWidth) * 100;
-    }
-
-    return {
-      width: `${Math.round(percent)}%`,
-    };
+    // If available space is wider than camera aspect, constrain by height (h-full)
+    // If available space is taller than camera aspect, constrain by width (w-full)
+    return availableAspectRatio >= cameraAspectRatio;
   }, [
-    config,
-    mainCameraAspect,
-    mainWidth,
-    mainHeight,
-    mainCamera,
+    containerWidth,
+    containerHeight,
+    previewRowWidth,
+    previewRowHeight,
     getCameraAspect,
+    mainCamera,
+    mainCameraAspect,
   ]);
 
   const previewRowOverflows = useMemo(() => {
@@ -439,297 +501,342 @@ export function RecordingView({
     [visiblePreviewObserver.current],
   );
 
+  const activeReviewItem = useMemo(() => {
+    if (!config?.cameras?.[mainCamera].review.genai?.enabled_in_config) {
+      return undefined;
+    }
+
+    return mainCameraReviewItems.find(
+      (rev) =>
+        rev.start_time - REVIEW_PADDING < currentTime &&
+        rev.end_time &&
+        currentTime < rev.end_time + REVIEW_PADDING,
+    );
+  }, [config, currentTime, mainCameraReviewItems, mainCamera]);
+  const onAnalysisOpen = useCallback(
+    (open: boolean) => {
+      if (open) {
+        mainControllerRef.current?.pause();
+      } else {
+        mainControllerRef.current?.play();
+      }
+    },
+    [mainControllerRef],
+  );
+
   return (
-    <div ref={contentRef} className="flex size-full flex-col pt-2">
-      <Toaster closeButton={true} />
-      <div className="relative mb-2 flex h-11 w-full items-center justify-between px-2">
-        {isMobile && (
-          <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
-        )}
-        <div className={cn("flex items-center gap-2")}>
-          <Button
-            className="flex items-center gap-2.5 rounded-lg"
-            aria-label={t("label.back", { ns: "common" })}
-            size="sm"
-            onClick={() => navigate(-1)}
-          >
-            <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+    <DetailStreamProvider
+      isDetailMode={timelineType === "detail"}
+      currentTime={currentTime}
+      camera={mainCamera}
+    >
+      <div ref={contentRef} className="flex size-full flex-col pt-2">
+        <Toaster closeButton={true} />
+        <div className="relative mb-2 flex h-11 w-full items-center justify-between px-2">
+          {isMobile && (
+            <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
+          )}
+          <div className={cn("flex items-center gap-2")}>
+            <Button
+              className="flex items-center gap-2.5 rounded-lg"
+              aria-label={t("label.back", { ns: "common" })}
+              size="sm"
+              onClick={() => navigate(-1)}
+            >
+              <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+              {isDesktop && (
+                <div className="text-primary">
+                  {t("button.back", { ns: "common" })}
+                </div>
+              )}
+            </Button>
+            <Button
+              className="flex items-center gap-2.5 rounded-lg"
+              aria-label="Go to the main camera live view"
+              size="sm"
+              onClick={() => {
+                navigate(`/#${mainCamera}`);
+              }}
+            >
+              <FaVideo className="size-5 text-secondary-foreground" />
+              {isDesktop && (
+                <div className="text-primary">
+                  {t("menu.live.title", { ns: "common" })}
+                </div>
+              )}
+            </Button>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <MobileCameraDrawer
+              allCameras={effectiveCameras}
+              selected={mainCamera}
+              onSelectCamera={onSelectCamera}
+            />
             {isDesktop && (
-              <div className="text-primary">
-                {t("button.back", { ns: "common" })}
-              </div>
+              <ExportDialog
+                camera={mainCamera}
+                currentTime={currentTime}
+                latestTime={timeRange.before}
+                mode={exportMode}
+                range={exportRange}
+                showPreview={showExportPreview}
+                setRange={(range) => {
+                  setExportRange(range);
+
+                  if (range != undefined) {
+                    mainControllerRef.current?.pause();
+                  }
+                }}
+                setMode={setExportMode}
+                setShowPreview={setShowExportPreview}
+              />
             )}
-          </Button>
-          <Button
-            className="flex items-center gap-2.5 rounded-lg"
-            aria-label="Go to the main camera live view"
-            size="sm"
-            onClick={() => {
-              navigate(`/#${mainCamera}`);
-            }}
-          >
-            <FaVideo className="size-5 text-secondary-foreground" />
             {isDesktop && (
-              <div className="text-primary">
-                {t("menu.live.title", { ns: "common" })}
-              </div>
+              <ReviewFilterGroup
+                filters={["cameras", "date", "general"]}
+                reviewSummary={reviewSummary}
+                recordingsSummary={recordingsSummary}
+                filter={filter}
+                motionOnly={false}
+                filterList={reviewFilterList}
+                showReviewed
+                setShowReviewed={() => {}}
+                mainCamera={mainCamera}
+                onUpdateFilter={(newFilter: ReviewFilter) => {
+                  const updatedCameras =
+                    newFilter.cameras === undefined
+                      ? undefined // Respect undefined as "all cameras"
+                      : newFilter.cameras
+                        ? Array.from(
+                            new Set([mainCamera, ...(newFilter.cameras || [])]),
+                          ) // Include mainCamera if specific cameras are selected
+                        : [mainCamera];
+                  const adjustedFilter: ReviewFilter = {
+                    ...newFilter,
+                    cameras: updatedCameras,
+                  };
+                  updateFilter(adjustedFilter);
+                }}
+                setMotionOnly={() => {}}
+              />
             )}
-          </Button>
-        </div>
-        <div className="flex items-center justify-end gap-2">
-          <MobileCameraDrawer
-            allCameras={allCameras}
-            selected={mainCamera}
-            onSelectCamera={(cam) => {
-              setPlaybackStart(currentTime);
-              setMainCamera(cam);
-            }}
-          />
-          {isDesktop && (
-            <ExportDialog
+            {isDesktop ? (
+              <ToggleGroup
+                className="*:rounded-md *:px-3 *:py-4"
+                type="single"
+                size="sm"
+                value={timelineType}
+                onValueChange={(value: TimelineType) =>
+                  value ? setTimelineType(value, true) : null
+                } // don't allow the severity to be unselected
+              >
+                <ToggleGroupItem
+                  className={`${timelineType == "timeline" ? "" : "text-muted-foreground"}`}
+                  value="timeline"
+                  aria-label={t("timeline.aria")}
+                >
+                  <div className="">{t("timeline")}</div>
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}
+                  value="events"
+                  aria-label={t("events.aria")}
+                >
+                  <div className="">{t("events.label")}</div>
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  className={`${timelineType == "detail" ? "" : "text-muted-foreground"}`}
+                  value="detail"
+                  aria-label="Detail Stream"
+                >
+                  <div className="">{t("detail.label")}</div>
+                </ToggleGroupItem>
+              </ToggleGroup>
+            ) : (
+              <MobileTimelineDrawer
+                selected={timelineType ?? "timeline"}
+                onSelect={setTimelineType}
+              />
+            )}
+            <MobileReviewSettingsDrawer
               camera={mainCamera}
+              filter={filter}
               currentTime={currentTime}
               latestTime={timeRange.before}
+              recordingsSummary={recordingsSummary}
               mode={exportMode}
               range={exportRange}
-              showPreview={showExportPreview}
-              setRange={(range) => {
-                setExportRange(range);
-
-                if (range != undefined) {
-                  mainControllerRef.current?.pause();
-                }
-              }}
+              showExportPreview={showExportPreview}
+              allLabels={reviewFilterList.labels}
+              allZones={reviewFilterList.zones}
+              onUpdateFilter={updateFilter}
+              setRange={setExportRange}
               setMode={setExportMode}
-              setShowPreview={setShowExportPreview}
+              setShowExportPreview={setShowExportPreview}
             />
-          )}
-          {isDesktop && (
-            <ReviewFilterGroup
-              filters={["cameras", "date", "general"]}
-              reviewSummary={reviewSummary}
-              recordingsSummary={recordingsSummary}
-              filter={filter}
-              motionOnly={false}
-              filterList={reviewFilterList}
-              showReviewed
-              setShowReviewed={() => {}}
-              mainCamera={mainCamera}
-              onUpdateFilter={(newFilter: ReviewFilter) => {
-                const updatedCameras =
-                  newFilter.cameras === undefined
-                    ? undefined // Respect undefined as "all cameras"
-                    : newFilter.cameras
-                      ? Array.from(
-                          new Set([mainCamera, ...(newFilter.cameras || [])]),
-                        ) // Include mainCamera if specific cameras are selected
-                      : [mainCamera];
-                const adjustedFilter: ReviewFilter = {
-                  ...newFilter,
-                  cameras: updatedCameras,
-                };
-                updateFilter(adjustedFilter);
-              }}
-              setMotionOnly={() => {}}
-            />
-          )}
-          {isDesktop ? (
-            <ToggleGroup
-              className="*:rounded-md *:px-3 *:py-4"
-              type="single"
-              size="sm"
-              value={timelineType}
-              onValueChange={(value: TimelineType) =>
-                value ? setTimelineType(value, true) : null
-              } // don't allow the severity to be unselected
-            >
-              <ToggleGroupItem
-                className={`${timelineType == "timeline" ? "" : "text-muted-foreground"}`}
-                value="timeline"
-                aria-label={t("timeline.aria")}
-              >
-                <div className="">{t("timeline")}</div>
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}
-                value="events"
-                aria-label={t("events.aria")}
-              >
-                <div className="">{t("events.label")}</div>
-              </ToggleGroupItem>
-            </ToggleGroup>
-          ) : (
-            <MobileTimelineDrawer
-              selected={timelineType ?? "timeline"}
-              onSelect={setTimelineType}
-            />
-          )}
-          <MobileReviewSettingsDrawer
-            camera={mainCamera}
-            filter={filter}
-            currentTime={currentTime}
-            latestTime={timeRange.before}
-            recordingsSummary={recordingsSummary}
-            mode={exportMode}
-            range={exportRange}
-            showExportPreview={showExportPreview}
-            allLabels={reviewFilterList.labels}
-            allZones={reviewFilterList.zones}
-            onUpdateFilter={updateFilter}
-            setRange={setExportRange}
-            setMode={setExportMode}
-            setShowExportPreview={setShowExportPreview}
-          />
+          </div>
         </div>
-      </div>
 
-      <div
-        ref={mainLayoutRef}
-        className={cn(
-          "flex h-full justify-center overflow-hidden",
-          isDesktop ? "" : "flex-col gap-2 landscape:flex-row",
-        )}
-      >
         <div
-          ref={cameraLayoutRef}
-          className={cn("flex flex-1 flex-wrap", isDesktop ? "w-[80%]" : "")}
+          ref={mainLayoutRef}
+          className={cn(
+            "flex flex-1 overflow-hidden",
+            isDesktop ? "flex-row" : "flex-col gap-2 landscape:flex-row",
+          )}
         >
           <div
+            ref={cameraLayoutRef}
             className={cn(
-              "flex size-full items-center",
-              mainCameraAspect == "tall"
-                ? "flex-row justify-evenly"
-                : "flex-col justify-center gap-2",
+              "flex flex-1 flex-wrap overflow-hidden",
+              isDesktop
+                ? "min-w-0 px-4"
+                : "portrait:max-h-[50dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto",
             )}
           >
             <div
-              key={mainCamera}
               className={cn(
-                "relative",
-                isDesktop
-                  ? cn(
-                      "flex justify-center px-4",
-                      mainCameraAspect == "tall"
-                        ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]"
-                        : mainCameraAspect == "wide"
-                          ? "w-full"
-                          : "",
-                    )
-                  : cn(
-                      "pt-2 portrait:w-full",
-                      mainCameraAspect == "wide"
-                        ? "aspect-wide landscape:w-full"
-                        : "aspect-video landscape:h-[94%] landscape:xl:h-[65%]",
-                    ),
+                "flex size-full items-center",
+                mainCameraAspect == "tall"
+                  ? "flex-row justify-evenly"
+                  : "flex-col justify-center gap-2",
               )}
-              style={{
-                width: mainCameraStyle ? mainCameraStyle.width : undefined,
-                aspectRatio: isDesktop
-                  ? mainCameraAspect == "tall"
-                    ? getCameraAspect(mainCamera)
-                    : undefined
-                  : Math.max(1, getCameraAspect(mainCamera) ?? 0),
-              }}
             >
-              <DynamicVideoPlayer
-                className={grow}
-                camera={mainCamera}
-                timeRange={currentTimeRange}
-                cameraPreviews={allPreviews ?? []}
-                startTimestamp={playbackStart}
-                hotKeys={exportMode != "select"}
-                fullscreen={fullscreen}
-                onTimestampUpdate={(timestamp) => {
-                  setPlayerTime(timestamp);
-                  setCurrentTime(timestamp);
-                  Object.values(previewRefs.current ?? {}).forEach((prev) =>
-                    prev.scrubToTimestamp(Math.floor(timestamp)),
-                  );
-                }}
-                onClipEnded={onClipEnded}
-                onControllerReady={(controller) => {
-                  mainControllerRef.current = controller;
-                }}
-                isScrubbing={scrubbing || exportMode == "timeline"}
-                supportsFullscreen={supportsFullScreen}
-                setFullResolution={setFullResolution}
-                toggleFullscreen={toggleFullscreen}
-                containerRef={mainLayoutRef}
-              />
-            </div>
-            {isDesktop && allCameras.length > 1 && (
               <div
-                ref={previewRowRef}
+                key={mainCamera}
                 className={cn(
-                  "scrollbar-container flex gap-2 overflow-auto",
-                  mainCameraAspect == "tall"
-                    ? "h-full w-72 flex-col"
-                    : `h-28 w-full`,
-                  previewRowOverflows ? "" : "items-center justify-center",
+                  "relative flex max-h-full min-h-0 min-w-0 max-w-full items-center justify-center",
+                  isDesktop
+                    ? // Desktop: dynamically switch between w-full and h-full based on
+                      // container vs camera aspect ratio to ensure proper fitting
+                      useHeightBased
+                      ? "h-full"
+                      : "w-full"
+                    : cn(
+                        "flex-shrink-0 portrait:w-full landscape:h-full",
+                        mainCameraAspect == "wide"
+                          ? "aspect-wide"
+                          : mainCameraAspect == "tall"
+                            ? "aspect-tall portrait:h-full"
+                            : "aspect-video",
+                      ),
                 )}
+                style={{
+                  aspectRatio: getCameraAspect(mainCamera),
+                }}
               >
-                <div className="w-2" />
-                {allCameras.map((cam) => {
-                  if (cam == mainCamera || cam == "birdseye") {
-                    return;
-                  }
+                {isDesktop && (
+                  <GenAISummaryDialog
+                    review={activeReviewItem}
+                    onOpen={onAnalysisOpen}
+                  />
+                )}
 
-                  return (
-                    <Tooltip key={cam}>
-                      <TooltipTrigger asChild>
-                        <div
-                          className={
-                            mainCameraAspect == "tall" ? "w-full" : "h-full"
-                          }
-                          style={{
-                            aspectRatio: getCameraAspect(cam),
-                          }}
-                        >
-                          <PreviewPlayer
-                            previewRef={previewRef}
-                            className="size-full"
-                            camera={cam}
-                            timeRange={currentTimeRange}
-                            cameraPreviews={allPreviews ?? []}
-                            startTime={startTime}
-                            isScrubbing={scrubbing}
-                            isVisible={visiblePreviews.includes(cam)}
-                            onControllerReady={(controller) => {
-                              previewRefs.current[cam] = controller;
-                              controller.scrubToTimestamp(startTime);
-                            }}
-                            onClick={() => onSelectCamera(cam)}
-                          />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent className="smart-capitalize">
-                        {cam.replaceAll("_", " ")}
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-                <div className="w-2" />
+                <DynamicVideoPlayer
+                  className={grow}
+                  camera={mainCamera}
+                  timeRange={currentTimeRange}
+                  cameraPreviews={allPreviews ?? []}
+                  startTimestamp={playbackStart}
+                  hotKeys={exportMode != "select"}
+                  fullscreen={fullscreen}
+                  onTimestampUpdate={(timestamp) => {
+                    setPlayerTime(timestamp);
+                    setCurrentTime(timestamp);
+                    Object.values(previewRefs.current ?? {}).forEach((prev) =>
+                      prev.scrubToTimestamp(Math.floor(timestamp)),
+                    );
+                  }}
+                  onClipEnded={onClipEnded}
+                  onSeekToTime={manuallySetCurrentTime}
+                  onControllerReady={(controller) => {
+                    mainControllerRef.current = controller;
+                  }}
+                  isScrubbing={scrubbing || exportMode == "timeline"}
+                  supportsFullscreen={supportsFullScreen}
+                  setFullResolution={setFullResolution}
+                  toggleFullscreen={toggleFullscreen}
+                  containerRef={mainLayoutRef}
+                />
               </div>
-            )}
+              {isDesktop && effectiveCameras.length > 1 && (
+                <div
+                  ref={previewRowRef}
+                  className={cn(
+                    "scrollbar-container flex flex-shrink-0 gap-2 overflow-auto",
+                    mainCameraAspect == "tall"
+                      ? "ml-2 h-full w-72 min-w-72 flex-col"
+                      : "h-28 min-h-28 w-full",
+                    previewRowOverflows ? "" : "items-center justify-center",
+                    timelineType == "detail" && isDesktop && "mt-4",
+                  )}
+                >
+                  <div className="w-2" />
+                  {effectiveCameras.map((cam) => {
+                    if (cam == mainCamera || cam == "birdseye") {
+                      return;
+                    }
+
+                    return (
+                      <Tooltip key={cam}>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={
+                              mainCameraAspect == "tall" ? "w-full" : "h-full"
+                            }
+                            style={{
+                              aspectRatio: getCameraAspect(cam),
+                            }}
+                          >
+                            <PreviewPlayer
+                              previewRef={previewRef}
+                              className="size-full"
+                              camera={cam}
+                              timeRange={currentTimeRange}
+                              cameraPreviews={allPreviews ?? []}
+                              startTime={startTime}
+                              isScrubbing={scrubbing}
+                              isVisible={visiblePreviews.includes(cam)}
+                              onControllerReady={(controller) => {
+                                previewRefs.current[cam] = controller;
+                                controller.scrubToTimestamp(startTime);
+                              }}
+                              onClick={() => onSelectCamera(cam)}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="smart-capitalize">
+                          <CameraNameLabel camera={cam} />
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                  <div className="w-2" />
+                </div>
+              )}
+            </div>
           </div>
+          <Timeline
+            contentRef={contentRef}
+            mainCamera={mainCamera}
+            timelineType={
+              (exportRange == undefined ? timelineType : "timeline") ??
+              "timeline"
+            }
+            timeRange={timeRange}
+            mainCameraReviewItems={mainCameraReviewItems}
+            activeReviewItem={activeReviewItem}
+            currentTime={currentTime}
+            exportRange={exportMode == "timeline" ? exportRange : undefined}
+            setCurrentTime={setCurrentTime}
+            manuallySetCurrentTime={manuallySetCurrentTime}
+            setScrubbing={setScrubbing}
+            setExportRange={setExportRange}
+            onAnalysisOpen={onAnalysisOpen}
+            isPlaying={mainControllerRef?.current?.isPlaying() ?? false}
+          />
         </div>
-        <Timeline
-          contentRef={contentRef}
-          mainCamera={mainCamera}
-          timelineType={
-            (exportRange == undefined ? timelineType : "timeline") ?? "timeline"
-          }
-          timeRange={timeRange}
-          mainCameraReviewItems={mainCameraReviewItems}
-          currentTime={currentTime}
-          exportRange={exportMode == "timeline" ? exportRange : undefined}
-          setCurrentTime={setCurrentTime}
-          manuallySetCurrentTime={manuallySetCurrentTime}
-          setScrubbing={setScrubbing}
-          setExportRange={setExportRange}
-        />
       </div>
-    </div>
+    </DetailStreamProvider>
   );
 }
 
@@ -740,12 +847,15 @@ type TimelineProps = {
   timelineType: TimelineType;
   timeRange: TimeRange;
   mainCameraReviewItems: ReviewSegment[];
+  activeReviewItem?: ReviewSegment;
   currentTime: number;
   exportRange?: TimeRange;
+  isPlaying?: boolean;
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   manuallySetCurrentTime: (time: number, force: boolean) => void;
   setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
   setExportRange: (range: TimeRange) => void;
+  onAnalysisOpen: (open: boolean) => void;
 };
 function Timeline({
   contentRef,
@@ -754,12 +864,15 @@ function Timeline({
   timelineType,
   timeRange,
   mainCameraReviewItems,
+  activeReviewItem,
   currentTime,
   exportRange,
+  isPlaying,
   setCurrentTime,
   manuallySetCurrentTime,
   setScrubbing,
   setExportRange,
+  onAnalysisOpen,
 }: TimelineProps) {
   const { t } = useTranslation(["views/events"]);
   const internalTimelineRef = useRef<HTMLDivElement>(null);
@@ -772,7 +885,7 @@ function Timeline({
     timestampSpread: 15,
   });
 
-  const possibleZoomLevels = useMemo(
+  const possibleZoomLevels: ZoomLevel[] = useMemo(
     () => [
       { segmentDuration: 30, timestampSpread: 15 },
       { segmentDuration: 15, timestampSpread: 5 },
@@ -788,6 +901,14 @@ function Timeline({
     [possibleZoomLevels],
   );
 
+  const currentZoomLevel = useMemo(
+    () =>
+      possibleZoomLevels.findIndex(
+        (level) => level.segmentDuration === zoomSettings.segmentDuration,
+      ),
+    [possibleZoomLevels, zoomSettings.segmentDuration],
+  );
+
   const { isZooming, zoomDirection } = useTimelineZoom({
     zoomSettings,
     zoomLevels: possibleZoomLevels,
@@ -797,13 +918,31 @@ function Timeline({
   });
 
   // motion data
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    {
+      segmentDuration: zoomSettings.segmentDuration,
+    },
+  );
+
+  const alignedAfter = alignStartDateToTimeline(timeRange.after);
+  const alignedBefore = alignEndDateToTimeline(timeRange.before);
 
   const { data: motionData, isLoading } = useSWR<MotionData[]>([
     "review/activity/motion",
     {
-      before: timeRange.before,
-      after: timeRange.after,
+      before: alignedBefore,
+      after: alignedAfter,
       scale: Math.round(zoomSettings.segmentDuration / 2),
+      cameras: mainCamera,
+    },
+  ]);
+
+  const { data: noRecordings } = useSWR<RecordingSegment[]>([
+    "recordings/unavailable",
+    {
+      before: alignedBefore,
+      after: alignedAfter,
+      scale: Math.round(zoomSettings.segmentDuration),
       cameras: mainCamera,
     },
   ]);
@@ -827,14 +966,35 @@ function Timeline({
 
   return (
     <div
-      className={`${
+      className={cn(
+        "relative overflow-hidden",
         isDesktop
-          ? `${timelineType == "timeline" ? "w-[100px]" : "w-60"} no-scrollbar overflow-y-auto`
-          : `overflow-hidden portrait:flex-grow ${timelineType == "timeline" ? "landscape:w-[100px]" : "landscape:w-[175px]"} `
-      } relative`}
+          ? cn(
+              timelineType == "timeline"
+                ? "w-[100px] flex-shrink-0"
+                : timelineType == "detail"
+                  ? "min-w-[20rem] max-w-[30%] flex-shrink-0 flex-grow-0 basis-[30rem] md:min-w-[20rem] md:max-w-[25%] lg:min-w-[30rem] lg:max-w-[33%]"
+                  : "w-80 flex-shrink-0",
+            )
+          : cn(
+              timelineType == "timeline"
+                ? "portrait:flex-grow landscape:w-[100px] landscape:flex-shrink-0"
+                : timelineType == "detail"
+                  ? "portrait:flex-grow landscape:w-[19rem] landscape:flex-shrink-0"
+                  : "portrait:flex-grow landscape:w-[19rem] landscape:flex-shrink-0",
+            ),
+      )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
+      {isMobile && timelineType == "timeline" && (
+        <GenAISummaryDialog review={activeReviewItem} onOpen={onAnalysisOpen} />
+      )}
+
+      {timelineType != "detail" && (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
+        </>
+      )}
       {timelineType == "timeline" ? (
         !isLoading ? (
           <MotionReviewTimeline
@@ -853,14 +1013,27 @@ function Timeline({
             setHandlebarTime={setCurrentTime}
             events={mainCameraReviewItems}
             motion_events={motionData ?? []}
+            noRecordingRanges={noRecordings ?? []}
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
             isZooming={isZooming}
             zoomDirection={zoomDirection}
+            onZoomChange={handleZoomChange}
+            possibleZoomLevels={possibleZoomLevels}
+            currentZoomLevel={currentZoomLevel}
           />
         ) : (
           <Skeleton className="size-full" />
         )
+      ) : timelineType == "detail" ? (
+        <DetailStream
+          currentTime={currentTime}
+          onSeek={(timestamp, play) =>
+            manuallySetCurrentTime(timestamp, play ?? true)
+          }
+          reviewItems={mainCameraReviewItems}
+          isPlaying={isPlaying}
+        />
       ) : (
         <div className="scrollbar-container h-full overflow-auto bg-secondary">
           <div
@@ -883,7 +1056,7 @@ function Timeline({
                   <ReviewCard
                     key={review.id}
                     event={review}
-                    currentTime={currentTime}
+                    activeReviewItem={activeReviewItem}
                     onClick={() => {
                       manuallySetCurrentTime(
                         review.start_time - REVIEW_PADDING,

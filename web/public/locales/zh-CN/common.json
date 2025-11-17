@@ -85,10 +85,21 @@
     "length": {
       "feet": "英尺",
       "meters": "米"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/每小时",
+      "mbph": "MB/每小时",
+      "gbph": "GB/每小时"
     }
   },
   "label": {
-    "back": "返回"
+    "back": "返回",
+    "hide": "隐藏 {{item}}",
+    "show": "显示 {{item}}",
+    "ID": "ID"
   },
   "pagination": {
     "label": "分页",
@@ -181,7 +192,15 @@
       "cs": "捷克语 (Čeština)",
       "yue": "粤语 (粵語)",
       "th": "泰语（ไทย）",
-      "ca": "加泰罗尼亚语 (Català )"
+      "ca": "加泰罗尼亚语 (Català )",
+      "ptBR": "巴西葡萄牙语 (Português brasileiro)",
+      "sr": "塞尔维亚语 (Српски)",
+      "sl": "斯洛文尼亚语 (Slovenščina)",
+      "lt": "立陶宛语 (Lietuvių)",
+      "bg": "保加利亚语 (Български)",
+      "gl": "加利西亚语 (Galego)",
+      "id": "印度尼西亚语 (Bahasa Indonesia)",
+      "ur": "乌尔都语 (اردو)"
     },
     "appearance": "外观",
     "darkMode": {
@@ -257,5 +276,18 @@
     "title": "404",
     "desc": "页面未找到"
   },
-  "selectItem": "选择 {{item}}"
+  "selectItem": "选择 {{item}}",
+  "readTheDocumentation": "阅读文档",
+  "information": {
+    "pixels": "{{area}} 像素"
+  },
+  "list": {
+    "two": "{{0}} 和 {{1}}",
+    "many": "{{items}} 以及 {{last}}",
+    "separatorWithSpace": "， "
+  },
+  "field": {
+    "optional": "可选",
+    "internalID": "Frigate 在配置与数据库中使用的内部 ID"
+  }
 }

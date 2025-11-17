@@ -2,17 +2,17 @@
   "restart": {
     "button": "Reiniciar",
     "restarting": {
-      "title": "Frigate está reiniciando",
+      "title": "Frigate está a reiniciar",
       "content": "Esta página será recarregada em {{countdown}} segundos.",
-      "button": "Forçar atualização agora"
+      "button": "Forçar Recarregar Agora"
     },
-    "title": "Tem certeza de que deseja reiniciar o Frigate?"
+    "title": "Tem a certeza que deseja reiniciar o Frigate?"
   },
   "explore": {
     "plus": {
       "submitToPlus": {
-        "label": "Enviar para Frigate+",
-        "desc": "Objetos em locais que você quer evitar não são falsos positivos. Enviá-los como falsos positivos confundirá o modelo."
+        "label": "Submeter para Frigate+",
+        "desc": "Os objetos nas localizações que quer evitar não são falsos positivos. Submete-los como falsos positivos confundirá o modelo."
       },
       "review": {
         "true": {
@@ -22,7 +22,7 @@
           "true_other": "Estão são {{label}}"
         },
         "state": {
-          "submitted": "Enviado"
+          "submitted": "Submetido"
         },
         "false": {
           "label": "Não confirmar esta etiqueta para Frigate Plus",
@@ -31,15 +31,15 @@
           "false_other": "Estes não são {{label}}"
         },
         "question": {
-          "label": "Confirme este rótulo para Frigate Plus",
+          "label": "Confirme esta etiqueta para Frigate Plus",
           "ask_a": "Este objeto é um <code>{{label}}</code>?",
           "ask_an": "Este objeto é um <code>{{label}}</code>?",
-          "ask_full": "Este objeto é um(a) <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+          "ask_full": "Este objeto é um <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         }
       }
     },
     "video": {
-      "viewInHistory": "Ver no histórico"
+      "viewInHistory": "Ver no Histórico"
     }
   },
   "export": {
@@ -60,67 +60,74 @@
     },
     "export": "Exportar",
     "toast": {
-      "success": "Exportação iniciada com sucesso. Veja o arquivo na pasta /exports.",
+      "success": "Exportação iniciada com sucesso. Veja o ficheiro na pasta de exportações.",
       "error": {
-        "failed": "Falha ao iniciar a exportação: {{error}}",
+        "failed": "Não foi possível iniciar a exportação: {{error}}",
         "endTimeMustAfterStartTime": "O horário de término deve ser posterior ao horário de início",
         "noVaildTimeSelected": "Nenhum intervalo de tempo válido selecionado"
       }
     },
     "selectOrExport": "Selecionar ou Exportar",
     "fromTimeline": {
-      "saveExport": "Salvar exportação",
-      "previewExport": "Visualizar exportação"
+      "saveExport": "Guardar Exportação",
+      "previewExport": "Pré-visualizar Exportação"
     },
-    "select": "Selecione",
+    "select": "Selecionar",
     "name": {
-      "placeholder": "Nome da exportação"
+      "placeholder": "Nome da Exportação"
     }
   },
   "streaming": {
     "showStats": {
       "label": "Mostrar estatísticas de transmissão",
-      "desc": "Habilite esta opção para mostrar estatísticas de transmissão como uma sobreposição no feed da câmara."
+      "desc": "Ative esta opção para mostrar as estatísticas de transmissão como uma sobreposição na feed da câmara."
     },
     "restreaming": {
       "desc": {
-        "title": "Configure o go2rtc para obter opções adicionais de visualização ao vivo e áudio para esta câmara.",
+        "title": "Configure go2rtc para obter opções adicionais da visualização ao vivo e o áudio para esta câmara.",
         "readTheDocumentation": "Leia a documentação"
       },
-      "disabled": "A retransmissão não está habilitada para esta câmara."
+      "disabled": "A retransmissão não está ativada para esta câmara."
     },
     "label": "Transmissão",
-    "debugView": "Exibição de depuração"
+    "debugView": "Ver Depuração"
   },
   "search": {
     "saveSearch": {
-      "label": "Salvar pesquisa",
-      "overwrite": "{{searchName}} já existe. Salvar substituirá o valor existente.",
-      "success": "A pesquisa ({{searchName}}) foi salva.",
+      "label": "Guardar Procura",
+      "overwrite": "{{searchName}} já existe. Ao guardar irá substituir o valor existente.",
+      "success": "A procura ({{searchName}}) foi guardada.",
       "button": {
         "save": {
-          "label": "Salvar esta pesquisa"
+          "label": "Guardar esta procura"
         }
       },
-      "placeholder": "Digite um nome para sua pesquisa",
-      "desc": "Forneça um nome para esta pesquisa salva."
+      "placeholder": "Insira um nome para a sua procura",
+      "desc": "Forneça um nome para esta procura guardada."
     }
   },
   "recording": {
     "confirmDelete": {
-      "title": "Confirmar exclusão",
+      "title": "Confirmar Eliminar",
       "desc": {
-        "selected": "Tem certeza de que deseja excluir todos os vídeos gravados associados a este item de analise?<br /><br />Segure a tecla <em>Shift</em> para ignorar esta caixa de diálogo no futuro."
+        "selected": "Tem a certeza que deseja eliminar todos os vídeos guardados associados com este item de análise?<br /><br />Pressione a tecla <em>Shift</em> para ignorar esta janela no futuro."
       },
       "toast": {
-        "success": "As imagens de vídeo associadas aos itens de analise selecionados foram excluídas com êxito.",
-        "error": "Falhou a apagar: {{error}}"
+        "success": "As imagens de vídeo associadas com os itens de análise selecionados foram elimiandos com sucesso.",
+        "error": "Não foi possível eliminar: {{error}}"
       }
     },
     "button": {
       "export": "Exportar",
       "markAsReviewed": "Marcar como analisado",
-      "deleteNow": "Excluir agora"
+      "deleteNow": "Eliminar Agora"
     }
+  },
+  "imagePicker": {
+    "selectImage": "Selecione a miniatura de um objeto rastreado",
+    "search": {
+      "placeholder": "Pesquisar por etiqueta ou sub-etiqueta..."
+    },
+    "noImages": "Nenhuma miniatura encontrada para esta câmera"
   }
 }

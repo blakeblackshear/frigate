@@ -101,7 +101,7 @@
       "title": "Lade",
       "desc": "Wenn das Protokollfenster nach unten gescrollt wird, werden neue Protokolle automatisch geladen, sobald sie hinzugefügt werden."
     },
-    "disableLogStreaming": "Log des Streams deaktvieren",
+    "disableLogStreaming": "Log des Streams deaktivieren",
     "allLogs": "Alle Logs"
   },
   "trackedObjectDelete": {
@@ -121,6 +121,16 @@
     "loadFailed": "Bekannte Nummernschilder konnten nicht geladen werden.",
     "loading": "Lade bekannte Nummernschilder…",
     "placeholder": "Tippe, um Kennzeichen zu suchen…",
-    "selectPlatesFromList": "Wählen eine oder mehrere Kennzeichen aus der Liste aus."
+    "selectPlatesFromList": "Wählen eine oder mehrere Kennzeichen aus der Liste aus.",
+    "selectAll": "Alle wählen",
+    "clearAll": "Alle löschen"
+  },
+  "classes": {
+    "label": "Klassen",
+    "all": {
+      "title": "Alle Klassen"
+    },
+    "count_one": "{{count}} Klasse",
+    "count_other": "{{count}} Klassen"
   }
 }

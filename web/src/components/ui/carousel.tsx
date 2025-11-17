@@ -212,13 +212,13 @@ const CarouselPrevious = React.forwardRef<
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
-      aria-label={t("objectLifecycle.carousel.previous")}
+      aria-label={t("trackingDetails.carousel.previous")}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
       <ArrowLeft className="h-4 w-4" />
-      <span className="sr-only">{t("objectLifecycle.carousel.previous")}</span>
+      <span className="sr-only">{t("trackingDetails.carousel.previous")}</span>
     </Button>
   );
 });
@@ -243,13 +243,13 @@ const CarouselNext = React.forwardRef<
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
-      aria-label={t("objectLifecycle.carousel.next")}
+      aria-label={t("trackingDetails.carousel.next")}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
       <ArrowRight className="h-4 w-4" />
-      <span className="sr-only">{t("objectLifecycle.carousel.next")}</span>
+      <span className="sr-only">{t("trackingDetails.carousel.next")}</span>
     </Button>
   );
 });

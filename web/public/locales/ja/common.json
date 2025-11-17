@@ -1,7 +1,271 @@
 {
   "time": {
-    "untilForRestart": "Frigateが再起動するまで.",
+    "untilForRestart": "Frigate が再起動するまで。",
     "untilRestart": "再起動まで",
-    "untilForTime": "{{time}} まで"
+    "untilForTime": "{{time}} まで",
+    "ago": "{{timeAgo}} 前",
+    "justNow": "今",
+    "today": "本日",
+    "yesterday": "昨日",
+    "last7": "7日間",
+    "last14": "14日間",
+    "last30": "30日間",
+    "thisWeek": "今週",
+    "lastWeek": "先週",
+    "thisMonth": "今月",
+    "lastMonth": "先月",
+    "5minutes": "5 分",
+    "10minutes": "10 分",
+    "30minutes": "30 分",
+    "1hour": "1 時間",
+    "12hours": "12 時間",
+    "24hours": "24 時間",
+    "pm": "午後",
+    "am": "午前",
+    "yr": "{{time}}年",
+    "year_other": "{{time}} 年",
+    "mo": "{{time}}ヶ月",
+    "month_other": "{{time}} ヶ月",
+    "d": "{{time}}日",
+    "day_other": "{{time}} 日",
+    "h": "{{time}}時間",
+    "hour_other": "{{time}} 時間",
+    "m": "{{time}}分",
+    "minute_other": "{{time}} 分",
+    "s": "{{time}}秒",
+    "second_other": "{{time}} 秒",
+    "formattedTimestamp": {
+      "12hour": "MMM d, h:mm:ss aaa",
+      "24hour": "MMM d, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "MM/dd h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "MMM d, h:mm aaa",
+      "24hour": "MMM d, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "MMM d, yyyy",
+      "24hour": "MMM d, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "MMM d yyyy, h:mm aaa",
+      "24hour": "MMM d yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampFilename": {
+      "12hour": "MM-dd-yy-h-mm-ss-a",
+      "24hour": "MM-dd-yy-HH-mm-ss"
+    }
+  },
+  "readTheDocumentation": "ドキュメントを見る",
+  "unit": {
+    "speed": {
+      "mph": "mph",
+      "kph": "Km/h"
+    },
+    "length": {
+      "feet": "フィート",
+      "meters": "メートル"
+    },
+    "data": {
+      "gbph": "GB/hour",
+      "gbps": "GB/s",
+      "kbph": "kB/hour",
+      "kbps": "kB/s",
+      "mbph": "MB/hour",
+      "mbps": "MB/s"
+    }
+  },
+  "label": {
+    "back": "戻る"
+  },
+  "button": {
+    "apply": "適用",
+    "reset": "リセット",
+    "done": "完了",
+    "enabled": "有効",
+    "enable": "有効にする",
+    "disabled": "無効",
+    "disable": "無効にする",
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "copy": "コピー",
+    "back": "戻る",
+    "history": "履歴",
+    "fullscreen": "全画面",
+    "exitFullscreen": "全画面解除",
+    "pictureInPicture": "ピクチャーインピクチャー",
+    "twoWayTalk": "双方向通話",
+    "cameraAudio": "カメラ音声",
+    "on": "オン",
+    "off": "オフ",
+    "edit": "編集",
+    "copyCoordinates": "座標をコピー",
+    "delete": "削除",
+    "yes": "はい",
+    "no": "いいえ",
+    "download": "ダウンロード",
+    "info": "情報",
+    "suspended": "一時停止",
+    "unsuspended": "再開",
+    "play": "再生",
+    "unselect": "選択解除",
+    "export": "書き出し",
+    "deleteNow": "今すぐ削除",
+    "next": "次へ"
+  },
+  "menu": {
+    "system": "システム",
+    "systemMetrics": "システムモニター",
+    "configuration": "設定",
+    "systemLogs": "システムログ",
+    "settings": "設定",
+    "configurationEditor": "設定エディタ",
+    "languages": "言語",
+    "appearance": "外観",
+    "darkMode": {
+      "label": "ダークモード",
+      "light": "ライト",
+      "dark": "ダーク",
+      "withSystem": {
+        "label": "システム設定に従う"
+      }
+    },
+    "withSystem": "システム",
+    "theme": {
+      "label": "テーマ",
+      "blue": "青",
+      "green": "緑",
+      "nord": "ノルド",
+      "red": "赤",
+      "highcontrast": "ハイコントラスト",
+      "default": "デフォルト"
+    },
+    "help": "ヘルプ",
+    "documentation": {
+      "title": "ドキュメント",
+      "label": "Frigate ドキュメント"
+    },
+    "restart": "Frigate を再起動",
+    "live": {
+      "title": "ライブ",
+      "allCameras": "全カメラ",
+      "cameras": {
+        "title": "カメラ",
+        "count_other": "{{count}} 台のカメラ"
+      }
+    },
+    "review": "レビュー",
+    "explore": "ブラウズ",
+    "export": "書き出し",
+    "uiPlayground": "UI テスト環境",
+    "faceLibrary": "顔データベース",
+    "user": {
+      "title": "ユーザー",
+      "account": "アカウント",
+      "current": "現在のユーザー: {{user}}",
+      "anonymous": "未ログイン",
+      "logout": "ログアウト",
+      "setPassword": "パスワードを設定"
+    },
+    "language": {
+      "en": "English (英語)",
+      "es": "Español (スペイン語)",
+      "zhCN": "简体中文 (簡体字中国語)",
+      "hi": "हिन्दी (ヒンディー語)",
+      "fr": "Français (フランス語)",
+      "ar": "العربية (アラビア語)",
+      "pt": "Português (ポルトガル語)",
+      "ptBR": "Português brasileiro (ブラジルポルトガル語)",
+      "ru": "Русский (ロシア語)",
+      "de": "Deutsch (ドイツ語)",
+      "ja": "日本語 (日本語)",
+      "tr": "Türkçe (トルコ語)",
+      "it": "Italiano (イタリア語)",
+      "nl": "Nederlands (オランダ語)",
+      "sv": "Svenska (スウェーデン語)",
+      "cs": "Čeština (チェコ語)",
+      "nb": "Norsk Bokmål (ノルウェー語)",
+      "ko": "한국어 (韓国語)",
+      "vi": "Tiếng Việt (ベトナム語)",
+      "fa": "فارسی (ペルシア語)",
+      "pl": "Polski (ポーランド語)",
+      "uk": "Українська (ウクライナ語)",
+      "he": "עברית (ヘブライ語)",
+      "el": "Ελληνικά (ギリシャ語)",
+      "ro": "Română (ルーマニア語)",
+      "hu": "Magyar (ハンガリー語)",
+      "fi": "Suomi (フィンランド語)",
+      "da": "Dansk (デンマーク語)",
+      "sk": "Slovenčina (スロバキア語)",
+      "yue": "粵語 (広東語)",
+      "th": "ไทย (タイ語)",
+      "ca": "Català (カタルーニャ語)",
+      "sr": "Српски (セルビア語)",
+      "sl": "Slovenščina (スロベニア語)",
+      "lt": "Lietuvių (リトアニア語)",
+      "bg": "Български (ブルガリア語)",
+      "gl": "Galego (ガリシア語)",
+      "id": "Bahasa Indonesia (インドネシア語)",
+      "ur": "اردو (ウルドゥー語)",
+      "withSystem": {
+        "label": "システム設定に従う"
+      }
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "URLをクリップボードにコピーしました。",
+    "save": {
+      "title": "保存",
+      "error": {
+        "title": "設定変更の保存に失敗しました: {{errorMessage}}",
+        "noMessage": "設定変更の保存に失敗しました"
+      }
+    }
+  },
+  "role": {
+    "title": "役割",
+    "admin": "管理者",
+    "viewer": "閲覧者",
+    "desc": "管理者はFrigate UIのすべての機能に完全にアクセスできます。閲覧者はカメラ、レビュー項目、履歴映像の閲覧に制限されます。"
+  },
+  "pagination": {
+    "label": "ページ移動",
+    "previous": {
+      "title": "前へ",
+      "label": "前のページへ"
+    },
+    "next": {
+      "title": "次へ",
+      "label": "次のページへ"
+    },
+    "more": "さらにページ"
+  },
+  "accessDenied": {
+    "documentTitle": "アクセス拒否 - Frigate",
+    "title": "アクセス拒否",
+    "desc": "このページを表示する権限がありません。"
+  },
+  "notFound": {
+    "documentTitle": "ページが見つかりません - Frigate",
+    "title": "404",
+    "desc": "ページが見つかりません"
+  },
+  "selectItem": "{{item}} を選択",
+  "information": {
+    "pixels": "{{area}}ピクセル"
   }
 }

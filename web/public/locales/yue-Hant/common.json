@@ -76,6 +76,14 @@
     "length": {
       "feet": "呎",
       "meters": "米"
+    },
+    "data": {
+      "kbps": "kB/秒",
+      "mbps": "MB/秒",
+      "gbps": "GB/秒",
+      "kbph": "kB/小時",
+      "mbph": "MB/小時",
+      "gbph": "GB/小時"
     }
   },
   "label": {
@@ -160,7 +168,15 @@
       "he": "עברית (希伯來文)",
       "yue": "粵語 (廣東話)",
       "th": "ไทย (泰文)",
-      "ca": "Català (加泰羅尼亞語)"
+      "ca": "Català (加泰羅尼亞語)",
+      "ptBR": "Português brasileiro (巴西葡萄牙文)",
+      "sr": "Српски (塞爾維亞文)",
+      "sl": "Slovenščina (斯洛文尼亞文)",
+      "lt": "Lietuvių (立陶宛文)",
+      "bg": "Български (保加利亞文)",
+      "gl": "Galego (加利西亞文)",
+      "id": "Bahasa Indonesia (印尼文)",
+      "ur": "اردو (烏爾都文)"
     },
     "appearance": "外觀",
     "darkMode": {
@@ -248,5 +264,9 @@
     "documentTitle": "找不到頁面 - Frigate",
     "desc": "找不到頁面",
     "title": "404"
+  },
+  "readTheDocumentation": "閱讀文件",
+  "information": {
+    "pixels": "{{area}}像素"
   }
 }

@@ -1,1 +1,51 @@
-{}
+{
+  "submitFrigatePlus": {
+    "submit": "제출",
+    "title": "이 프레임을 Frigate+에 제출하시겠습니까?"
+  },
+  "stats": {
+    "bandwidth": {
+      "short": "대역폭",
+      "title": "대역폭:"
+    },
+    "latency": {
+      "short": {
+        "title": "지연",
+        "value": "{{seconds}} 초"
+      },
+      "title": "지연:",
+      "value": "{{seconds}} 초"
+    },
+    "streamType": {
+      "short": "종류",
+      "title": "스트림 종류:"
+    },
+    "totalFrames": "총 프레임:",
+    "droppedFrames": {
+      "title": "손실 프레임:",
+      "short": {
+        "title": "손실됨",
+        "value": "{{droppedFrames}} 프레임"
+      }
+    },
+    "decodedFrames": "복원된 프레임:",
+    "droppedFrameRate": "프레임 손실률:"
+  },
+  "noRecordingsFoundForThisTime": "이 시간대에는 녹화본이 없습니다",
+  "noPreviewFound": "미리 보기를 찾을 수 없습니다",
+  "noPreviewFoundFor": "{{cameraName}}에 미리보기를 찾을 수 없습니다",
+  "livePlayerRequiredIOSVersion": "이 라이브 스트림 방식은 iOS 17.1 이거나 높은 버전이 필요합니다.",
+  "streamOffline": {
+    "title": "스트림 오프라인",
+    "desc": "{{cameraName}} 카메라에 <code>감지(detect)</code> 스트림의 프레임을 얻지 못했습니다. 에러 로그를 확인하세요"
+  },
+  "cameraDisabled": "카메라를 이용할 수 없습니다",
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Frigate+에 프레임이 성공적으로 제출됐습니다"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Frigate+에 프레임을 보내지 못했습니다"
+    }
+  }
+}

@@ -2,8 +2,8 @@
   "selectItem": "{{item}} seçin",
   "description": {
     "placeholder": "Bu koleksiyona bir isim verin",
-    "addFace": "Yüz Kütüphanesi’ne yeni bir koleksiyon ekleme adımlarını takip edin.",
-    "invalidName": "Geçersiz isim. İsimlerde yalnızca harf, sayı, boşluk, kesme işareti, tire veya alt çizgi kullanılabilir."
+    "addFace": "İlk görselinizi yükleyerek Yüz Kütüphanesi’ne yeni bir koleksiyon ekleyin.",
+    "invalidName": "Geçersiz ad. Ad yalnızca harfler, rakamlar, boşluklar, kesme işaretleri (’), alt çizgiler (_) ve tireler (-) içerebilir."
   },
   "details": {
     "person": "İnsan",
@@ -24,11 +24,11 @@
     "desc": "Yeni bir yüz koleksiyonu oluşturun",
     "new": "Yeni Yüz Oluştur",
     "title": "Koleksiyon Oluştur",
-    "nextSteps": "Sağlam bir temel oluşturmak için:<li>Her tespit edilen kişi için 'Eğit' sekmesinden resimler seçip eğitin.</li><li>En iyi sonuçlar için doğrudan karşıdan çekilmiş yüz resimlerine odaklanın; açılı yüz resimlerinden kaçının.</li></ul>"
+    "nextSteps": "Sağlam bir temel oluşturmak için:<li>Her tespit edilen kişi için **Recent Recognitions (Son Tanımalar)** sekmesini kullanarak görüntüleri seçin ve eğitim gerçekleştirin.</li> <li>En iyi sonuçlar için doğrudan önden çekilmiş yüz görüntülerine odaklanın; yüzlerin açılı göründüğü fotoğrafları eğitimde kullanmaktan kaçının.</li>"
   },
   "train": {
-    "title": "Eğit",
-    "aria": "Eğitimi seç",
+    "title": "Son Algılananlar",
+    "aria": "Son algılanan nesneleri seç",
     "empty": "Yakın zamanda yüz tanıma denemesi olmadı"
   },
   "deleteFaceLibrary": {
@@ -49,7 +49,7 @@
     "validation": {
       "selectImage": "Lütfen bir resim dosyası seçin."
     },
-    "dropInstructions": "Bir resmi buraya sürükleyip bırakın ya da tıklayarak seçin"
+    "dropInstructions": "Bir görseli buraya sürükleyip bırakın, yapıştırın ya da seçmek için tıklayın."
   },
   "trainFaceAs": "Yüzü şu olarak eğit:",
   "toast": {

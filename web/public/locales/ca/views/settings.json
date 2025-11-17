@@ -9,7 +9,9 @@
     "masksAndZones": "Editor de màscares i zones - Frigate",
     "general": "Paràmetres Generals - Frigate",
     "frigatePlus": "Paràmetres de Frigate+ - Frigate",
-    "notifications": "Paràmetres de notificació - Frigate"
+    "notifications": "Paràmetres de notificació - Frigate",
+    "cameraManagement": "Gestionar càmeres - Frigate",
+    "cameraReview": "Configuració Revisió de Càmeres - Frigate"
   },
   "menu": {
     "ui": "Interfície d'usuari",
@@ -20,7 +22,11 @@
     "notifications": "Notificacions",
     "debug": "Depuració",
     "frigateplus": "Frigate+",
-    "enrichments": "Enriquiments"
+    "enrichments": "Enriquiments",
+    "triggers": "Disparadors",
+    "cameraManagement": "Gestió",
+    "cameraReview": "Revisió",
+    "roles": "Rols"
   },
   "dialog": {
     "unsavedChanges": {
@@ -43,6 +49,10 @@
       "playAlertVideos": {
         "label": "Reproduir vídeos d’alerta",
         "desc": "Per defecte, les alertes recents al tauler en directe es reprodueixen com a vídeos petits en bucle. Desactiva aquesta opció per mostrar només una imatge estàtica de les alertes recents en aquest dispositiu/navegador."
+      },
+      "displayCameraNames": {
+        "label": "Mostra sempre els noms de la càmera",
+        "desc": "Mostra sempre els noms de les càmeres en un xip al tauler de visualització en directe multicàmera."
       }
     },
     "storedLayouts": {
@@ -108,7 +118,8 @@
           "mustBeAtLeastTwoCharacters": "El nom de la zona ha de contenir com a mínim 2 caràcters.",
           "mustNotContainPeriod": "El nom de la zona no pot contenir punts.",
           "alreadyExists": "Ja existeix una zona amb aquest nom per a aquesta càmera.",
-          "mustNotBeSameWithCamera": "El nom de la zona no pot ser el mateix que el nom de la càmera."
+          "mustNotBeSameWithCamera": "El nom de la zona no pot ser el mateix que el nom de la càmera.",
+          "mustHaveAtLeastOneLetter": "El nom de la zona ha de tenir almenys una lletra."
         }
       },
       "inertia": {
@@ -157,7 +168,7 @@
       "name": {
         "inputPlaceHolder": "Introduïu un nom…",
         "title": "Nom",
-        "tips": "El nom ha de tenir almenys 2 caràcters i no pot coincidir amb el nom d'una càmera ni amb el d'una altra zona."
+        "tips": "El nom ha de tenir almenys 2 caràcters, ha de tenir almenys una lletra, i no ha de ser el nom d'una càmera o una altra zona."
       },
       "label": "Zones",
       "desc": {
@@ -344,6 +355,43 @@
       "detections": "Deteccions ",
       "title": "Revisar",
       "desc": "Habilita o deshabilita temporalment les alertes i deteccions per a aquesta càmera fins que es reiniciï Frigate. Quan estigui desactivat, no es generaran nous elements de revisió. "
+    },
+    "object_descriptions": {
+      "title": "Descripció d'objectes per IA generativa",
+      "desc": "Activar/desactivar temporalment la IA generativa de descripcions per aquesta càmera. Quan està desactivat, les descripcions d'IA generativa no seran requerides per als objectes seguits per aquesta càmera."
+    },
+    "review_descriptions": {
+      "title": "Revisar las descripcions d'IA generativa",
+      "desc": "Activar/desactivals temporalment les descripcions d'IA generativa per aquesta càmera. Quan estan desactivades, les descripcions d'IA generativa no serán requerides per revisar els items en aquesta càmera."
+    },
+    "addCamera": "Afegir Nova Càmera",
+    "editCamera": "Editar Càmera:",
+    "selectCamera": "Seleccionar Càmera",
+    "backToSettings": "Tornar a la Configuració de Càmera",
+    "cameraConfig": {
+      "add": "Afegir Càmera",
+      "edit": "Editar Càmera",
+      "description": "Configurar la càmera incloent les entrades y rols.",
+      "name": "Nom de Càmera",
+      "nameRequired": "El nom de càmera es necesari",
+      "nameLength": "El nom de la càmera ha de ser com a mínim de 24 caràcters.",
+      "namePlaceholder": "e.x., porta_entrada",
+      "enabled": "Activat",
+      "ffmpeg": {
+        "inputs": "Entrades",
+        "path": "Direcció d'entrada",
+        "pathRequired": "Direcció d'entrada necesaria",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Rols",
+        "rolesRequired": "Com a mínin un rol es necesari",
+        "rolesUnique": "Cada rol (audio, detecció, gravació) pot ser assiganda a una entrada",
+        "addInput": "Afegir una entrada",
+        "removeInput": "Esborrar una entrada",
+        "inputsRequired": "Com a mínim una entrada es necesaria"
+      },
+      "toast": {
+        "success": "La càmera {{cameraName}} s'ha guardat correctament"
+      }
     }
   },
   "motionDetectionTuner": {
@@ -414,11 +462,24 @@
       "tips": "<p><strong>Caixes de moviment</strong></p><br><p>Es sobreposaran requadres vermells a les àrees del fotograma on actualment s’estigui detectant moviment.</p>"
     },
     "detectorDesc": "Frigate fa servir els teus detectors ({{detectors}}) per a detectar objectes a les imatges de la teva càmera.",
-    "desc": "La vista de depuració mostra en temps real els objectes rastrejats i les seves estadístiques. La llista d’objectes mostra un resum amb retard temporal dels objectes detectats."
+    "desc": "La vista de depuració mostra en temps real els objectes rastrejats i les seves estadístiques. La llista d’objectes mostra un resum amb retard temporal dels objectes detectats.",
+    "openCameraWebUI": "Obrir la interficie d'usuari de {{camera}}",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "No hi ha deteccions d'audio",
+      "score": "puntuació",
+      "currentRMS": "RMS Actual",
+      "currentdbFS": "dbFS Actual"
+    },
+    "paths": {
+      "title": "Rutes",
+      "desc": "Mostrar els punts significatius de la ruta dels objectes seguits",
+      "tips": "<p><strong>Rutes</strong></p><br><p>Les línies i cercles indicarán els punts significatius dels objectes seguits durant el seu cicle de vida.</p>"
+    }
   },
   "users": {
     "table": {
-      "username": "Nom d'usuari",
+      "username": "Usuari",
       "password": "Contrasenya",
       "deleteUser": "Suprimir usuari",
       "noUsers": "No s'han trobat usuaris.",
@@ -492,7 +553,8 @@
           "admin": "Administrador",
           "adminDesc": "Accés complet a totes les funcionalitats.",
           "intro": "Selecciona el rol adequat per a aquest usuari:",
-          "viewerDesc": "Limitat només a panells en directe, revisió, exporació i exportació."
+          "viewerDesc": "Limitat només a panells en directe, revisió, exporació i exportació.",
+          "customDesc": "Rol personalitzat per accés específic a una cámera."
         },
         "title": "Canviar la funció d’usuari",
         "desc": "Actualitzar permisos per a <strong>{{username}}</strong>",
@@ -618,5 +680,420 @@
       "success": "Els paràmetres complementaris s'han desat. Reinicia Frigate per aplicar els canvis."
     },
     "restart_required": "És necessari reiniciar (Han cambiat paràmetres complementaris)"
+  },
+  "triggers": {
+    "table": {
+      "actions": "Accions",
+      "noTriggers": "No hi ha disparadors configurats en aquesta càmera.",
+      "edit": "Editar",
+      "deleteTrigger": "Esborrar Disparador",
+      "lastTriggered": "Últim Disparo",
+      "name": "Nom",
+      "type": "Tipus",
+      "content": "Contingut",
+      "threshold": "Llindar"
+    },
+    "type": {
+      "thumbnail": "Miniatura",
+      "description": "Descripció"
+    },
+    "actions": {
+      "alert": "Marcar com Alerta",
+      "notification": "Enviar Notificació",
+      "sub_label": "Afegeix una subetiqueta",
+      "attribute": "Afegeix un atribut"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Crear Disparador",
+        "desc": "Crear disparador per una càmera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Editar Disparador",
+        "desc": "Editar la configuració per al disparador de càmera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Esborrar Disparador",
+        "desc": "Estas segur que vols esborrar el disparador <strong>{{triggerName}}</strong>? Aquesta acció no es pot desfer."
+      },
+      "form": {
+        "name": {
+          "title": "Nom",
+          "placeholder": "Anomena aquest activador",
+          "error": {
+            "minLength": "El camp ha de tenir almenys 2 caràcters.",
+            "invalidCharacters": "El camp només pot contenir lletres, números, guions baixos i guions.",
+            "alreadyExists": "El disparador amb aquest nom ja existeix per aquesta càmera."
+          },
+          "description": "Introduïu un nom o una descripció únics per a identificar aquest activador"
+        },
+        "enabled": {
+          "description": "Activar o desactivar aquest disparador"
+        },
+        "type": {
+          "title": "Tipus",
+          "placeholder": "Selecciona un tipus de disparador",
+          "description": "Activa quan es detecta una descripció similar d'un objecte rastrejat",
+          "thumbnail": "Activa quan es detecti una miniatura d'objecte rastrejada similar"
+        },
+        "content": {
+          "title": "Contingut",
+          "imagePlaceholder": "Selecciona una miniatura",
+          "textPlaceholder": "Entra el contingut de text",
+          "imageDesc": "Només es mostren les 100 miniatures més recents. Si no podeu trobar la miniatura desitjada, reviseu els objectes anteriors a Explora i configureu un activador des del menú.",
+          "textDesc": "Entra el text per disparar aquesta acció quan es detecti una descripció d'objecte a rastrejar similar.",
+          "error": {
+            "required": "Contigunt requerit."
+          }
+        },
+        "threshold": {
+          "title": "Llindar",
+          "error": {
+            "min": "El llindar ha de ser mínim 0",
+            "max": "El llindar ha de ser máxim 1"
+          },
+          "desc": "Estableix el llindar de similitud per a aquest activador. Un llindar més alt significa que es requereix una coincidència més propera per disparar el disparador."
+        },
+        "actions": {
+          "title": "Accions",
+          "desc": "Per defecte, Frigate dispara un missatge MQTT per a tots els activadors. Subetiquetes afegeix el nom de l'activador a l'etiqueta de l'objecte. Els atributs són metadades cercables emmagatzemades per separat a les metadades de l'objecte rastrejat.",
+          "error": {
+            "min": "S'ha de seleccionar una acció com a mínim."
+          }
+        },
+        "friendly_name": {
+          "title": "Nom amistós",
+          "placeholder": "Nom o descripció d'aquest disparador",
+          "description": "Un nom opcional amistós o text descriptiu per a aquest activador."
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "El disparador {{name}} s'ha creat existosament.",
+        "updateTrigger": "El disparador {{name}} s'ha actualitzat correctament.",
+        "deleteTrigger": "El disparador {{name}} s'ha borrat correctament."
+      },
+      "error": {
+        "createTriggerFailed": "Error al crear el disparador: {{errorMessage}}",
+        "updateTriggerFailed": "Error a l'actualitzar el disparador: {{errorMessage}}",
+        "deleteTriggerFailed": "Error a l'esborrar el disparador: {{errorMessage}}"
+      }
+    },
+    "documentTitle": "Disparadors",
+    "management": {
+      "title": "Activadors",
+      "desc": "Gestionar els disparadors de {{camera}}. Usa les tipus de miniatures per disparar miniatures similars a l'objecte a seguir seleccionat, i el tipus de descripció per disparar en cas de descripcions similars a l'especificada."
+    },
+    "addTrigger": "Afegir disaprador",
+    "semanticSearch": {
+      "desc": "La cerca semàntica ha d'estar activada per a utilitzar els activadors.",
+      "title": "La cerca semàntica està desactivada"
+    },
+    "wizard": {
+      "title": "Crea un activador",
+      "step1": {
+        "description": "Configura la configuració bàsica per al vostre activador."
+      },
+      "step2": {
+        "description": "Configura el contingut que activarà aquesta acció."
+      },
+      "step3": {
+        "description": "Configura el llindar i les accions d'aquest activador."
+      },
+      "steps": {
+        "nameAndType": "Nom i tipus",
+        "configureData": "Configura les dades",
+        "thresholdAndActions": "Llindar i accions"
+      }
+    }
+  },
+  "roles": {
+    "dialog": {
+      "form": {
+        "cameras": {
+          "required": "Almenys has de seleccionar una càmera.",
+          "title": "Càmeres",
+          "desc": "Selecciona les càmeres que tingui accés aquest rol. Com a mínim s'ha de seleccionar una càmera."
+        },
+        "role": {
+          "title": "Nom del Rol",
+          "placeholder": "Entra el nom del rol",
+          "desc": "Només lletres, números, els punts i subrallats están permesos.",
+          "roleIsRequired": "Nom del Rol requerit",
+          "roleOnlyInclude": "El nom de Rol només pot incloure lletres, nombres, . o _",
+          "roleExists": "Ja existeis un rol amb aquest nom."
+        }
+      },
+      "createRole": {
+        "title": "Crear nou Rol",
+        "desc": "Afegir nou rol y especificar permisos d'accés."
+      },
+      "editCameras": {
+        "title": "Editar Càmeres Rol",
+        "desc": "Actualitza l'acces a les càmeres per al rol <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Eliminar Rol",
+        "desc": "Aquesta acció no pot ser restablerta. S'esborrarà permenentment el rol y els usuaris asignats amb aquest rol de 'visor', que els dona accés a totes les càmeres.",
+        "warn": "Estas segur que vols eliminar <strong>{{role}}</strong>?",
+        "deleting": "Eliminant..."
+      }
+    },
+    "management": {
+      "title": "Gestió del Rols de Visors",
+      "desc": "Gestiona els rols visors personalitzats y els seus permisos d'accés per aquesta instancia de Frigate."
+    },
+    "addRole": "Afegir Rol",
+    "table": {
+      "role": "Rol",
+      "cameras": "Càmeres",
+      "actions": "Accions",
+      "noRoles": "No s'han trobat rols personalitzats.",
+      "editCameras": "Editar Càmeres",
+      "deleteRole": "Eliminar Rol"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rol {{role}} creat exitosament",
+        "updateCameras": "Càmeres actualitzades per al rol {{role}}",
+        "deleteRole": "Rol {{role}} eliminat exitosament",
+        "userRolesUpdated_one": "{{count}} usuari(s) asignats a aquest rol s'han actualitzat a 'visor', i tenen accés a totes les càmeres.",
+        "userRolesUpdated_many": "",
+        "userRolesUpdated_other": ""
+      },
+      "error": {
+        "createRoleFailed": "Error al crear el rol: {{errorMessage}}",
+        "updateCamerasFailed": "Error a l'actualitzar les càmeres: {{errorMessage}}",
+        "deleteRoleFailed": "Error a l'eliminar el rol: {{errorMessage}}",
+        "userUpdateFailed": "Error a l'actualitzar els ros d'usuari: {{errorMessage}}"
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Afegir C àmera",
+    "description": "Seguiu els passos de sota per afegir una nova càmera a la instal·lació.",
+    "steps": {
+      "nameAndConnection": "Nom i connexió",
+      "streamConfiguration": "Configuració de stream",
+      "validationAndTesting": "Validació i proves"
+    },
+    "step1": {
+      "cameraBrand": "Marca de la càmera",
+      "description": "Introduïu els detalls de la càmera i proveu la connexió.",
+      "cameraName": "Nom de la càmera",
+      "cameraNamePlaceholder": "p. ex., vista general de la porta davantera o de la barra posterior",
+      "host": "Adreça de l'amfitrió/IP",
+      "port": "Port",
+      "username": "Nom d'usuari",
+      "usernamePlaceholder": "Opcional",
+      "password": "Contrasenya",
+      "passwordPlaceholder": "Opcional",
+      "selectTransport": "Selecciona el protocol de transport",
+      "brandInformation": "Informació de marca",
+      "brandUrlFormat": "Per a càmeres amb el format d'URL RTSP com: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://usuari:contrasenya@host:port/ruta",
+      "testConnection": "Prova la connexió",
+      "testSuccess": "Prova de connexió correcta!",
+      "testFailed": "Ha fallat la prova de connexió. Si us plau, comproveu la vostra entrada i torneu-ho a provar.",
+      "streamDetails": "Detalls del flux",
+      "warnings": {
+        "noSnapshot": "No s'ha pogut obtenir una instantània del flux configurat."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Seleccioneu una marca de càmera amb host/IP o trieu 'Altres' amb un URL personalitzat",
+        "nameRequired": "Es requereix el nom de la càmera",
+        "nameLength": "El nom de la càmera ha de tenir 64 caràcters o menys",
+        "invalidCharacters": "El nom de la càmera conté caràcters no vàlids",
+        "nameExists": "El nom de la càmera ja existeix",
+        "brands": {
+          "reolink-rtsp": "No es recomana Reolink RST. Es recomana habilitar HTTP a la configuració de la càmera i reiniciar l'assistent de la càmera."
+        },
+        "customUrlRtspRequired": "Els URL personalitzats han de començar amb \"rtsp://\". Es requereix configuració manual per a fluxos de càmera no RTSP."
+      },
+      "selectBrand": "Seleccioneu la marca de la càmera per a la plantilla d'URL",
+      "customUrl": "URL de flux personalitzat",
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "S'estan provant les metadades de la càmera...",
+        "fetchingSnapshot": "S'està recuperant la instantània de la càmera..."
+      }
+    },
+    "save": {
+      "failure": "SS'ha produït un error en desar {{cameraName}}.",
+      "success": "S'ha desat correctament la càmera nova {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Resolució",
+      "video": "Vídeo",
+      "audio": "Àudio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Proporcioneu un URL de flux vàlid",
+      "testFailed": "Ha fallat la prova de flux: {{error}}"
+    },
+    "step2": {
+      "description": "Configura els rols de flux i afegeix fluxos addicionals per a la càmera.",
+      "streamsTitle": "Fluxos de la càmera",
+      "addStream": "Afegeix un flux",
+      "addAnotherStream": "Afegeix un altre flux",
+      "streamTitle": "Flux {{number}}",
+      "streamUrl": "URL del flux",
+      "url": "URL",
+      "resolution": "Resolució",
+      "selectResolution": "Selecciona la resolució",
+      "quality": "Qualitat",
+      "selectQuality": "Selecciona la qualitat",
+      "roleLabels": {
+        "detect": "Detecció d'objectes",
+        "record": "Enregistrament",
+        "audio": "Àudio"
+      },
+      "testStream": "Prova la connexió",
+      "testSuccess": "Prova de flux amb èxit!",
+      "testFailed": "Ha fallat la prova del flux",
+      "testFailedTitle": "Ha fallat la prova",
+      "connected": "Connectat",
+      "notConnected": "No connectat",
+      "featuresTitle": "Característiques",
+      "go2rtc": "Redueix les connexions a la càmera",
+      "detectRoleWarning": "Almenys un flux ha de tenir el rol de \"detecte\" per continuar.",
+      "rolesPopover": {
+        "title": "Rols de flux",
+        "detect": "Canal principal per a la detecció d'objectes.",
+        "record": "Desa els segments del canal de vídeo basats en la configuració.",
+        "audio": "Canal per a la detecció basada en àudio."
+      },
+      "featuresPopover": {
+        "title": "Característiques del flux",
+        "description": "Utilitzeu el restreaming go2rtc per reduir les connexions a la càmera."
+      },
+      "roles": "Rols",
+      "streamUrlPlaceholder": "rtsp://usuari:contrasenya@host:port/ruta"
+    },
+    "step3": {
+      "none": "Cap",
+      "error": "Error",
+      "saveAndApply": "Desa una càmera nova",
+      "saveError": "Configuració no vàlida. Si us plau, comproveu la configuració.",
+      "issues": {
+        "title": "Validació del flux",
+        "videoCodecGood": "El còdec de vídeo és {{codec}}.",
+        "audioCodecGood": "El còdec d'àudio és {{codec}}.",
+        "noAudioWarning": "No s'ha detectat cap àudio per a aquest flux, els enregistraments no tindran àudio.",
+        "audioCodecRecordError": "El còdec d'àudio AAC és necessari per a suportar l'àudio en els enregistraments.",
+        "audioCodecRequired": "Es requereix un flux d'àudio per admetre la detecció d'àudio.",
+        "restreamingWarning": "Reduir les connexions a la càmera per al flux de registre pot augmentar lleugerament l'ús de la CPU.",
+        "dahua": {
+          "substreamWarning": "El substream 1 està bloquejat a una resolució baixa. Moltes càmeres Dahua / Amcrest / EmpireTech suporten subfluxos addicionals que han d'estar habilitats a la configuració de la càmera. Es recomana comprovar i utilitzar aquests corrents si estan disponibles."
+        },
+        "hikvision": {
+          "substreamWarning": "El substream 1 està bloquejat a una resolució baixa. Moltes càmeres Hikvision suporten subfluxos addicionals que han d'estar habilitats a la configuració de la càmera. Es recomana comprovar i utilitzar aquests corrents si estan disponibles."
+        },
+        "resolutionHigh": "Una resolució de {{resolution}} pot causar un ús més gran dels recursos.",
+        "resolutionLow": "Una resolució de {{resolution}} pot ser massa baixa per a la detecció fiable d'objectes petits."
+      },
+      "description": "Validació i anàlisi final abans de desar la nova càmera. Connecta cada flux abans de desar-lo.",
+      "validationTitle": "Validació del flux",
+      "connectAllStreams": "Connecta tots els fluxos",
+      "reconnectionSuccess": "S'ha reconnectat correctament.",
+      "reconnectionPartial": "Alguns fluxos no s'han pogut tornar a connectar.",
+      "streamUnavailable": "La vista prèvia del flux no està disponible",
+      "reload": "Torna a carregar",
+      "connecting": "Connectant...",
+      "streamTitle": "Flux {{number}}",
+      "valid": "Vàlid",
+      "failed": "Ha fallat",
+      "notTested": "No provat",
+      "connectStream": "Connecta",
+      "connectingStream": "Connectant",
+      "disconnectStream": "Desconnecta",
+      "estimatedBandwidth": "Amplada de banda estimad",
+      "roles": "Rols",
+      "streamValidated": "El flux {{number}} s'ha validat correctament",
+      "streamValidationFailed": "Ha fallat la validació del flux {{number}}",
+      "ffmpegModule": "Usa el mode de compatibilitat del flux",
+      "ffmpegModuleDescription": "Si el flux no es carrega després de diversos intents, proveu d'activar-ho. Quan està activat, Frigate utilitzarà el mòdul ffmpeg amb go2rtc. Això pot proporcionar una millor compatibilitat amb alguns fluxos de càmera."
+    }
+  },
+  "cameraManagement": {
+    "title": "Gestiona les càmeres",
+    "addCamera": "Afegeix una càmera nova",
+    "editCamera": "Edita la càmera:",
+    "selectCamera": "Selecciona una càmera",
+    "backToSettings": "Torna a la configuració de la càmera",
+    "streams": {
+      "title": "Habilita / Inhabilita les càmeres",
+      "desc": "Inhabilita temporalment una càmera fins que es reiniciï la fragata. La inhabilitació d'una càmera atura completament el processament de Frigate dels fluxos d'aquesta càmera. La detecció, l'enregistrament i la depuració no estaran disponibles.<br /> <em>Nota: això no desactiva les retransmissions de go2rtc.</em>"
+    },
+    "cameraConfig": {
+      "add": "Afegeix una càmera",
+      "edit": "Edita la càmera",
+      "description": "Configura la configuració de la càmera, incloses les entrades i els rols de flux.",
+      "name": "Nom de la càmera",
+      "nameRequired": "Es requereix el nom de la càmera",
+      "nameLength": "El nom de la càmera ha de tenir menys de 64 caràcters.",
+      "namePlaceholder": "p. ex., vista general de la porta davantera o de la barra posterior",
+      "enabled": "Habilitat",
+      "ffmpeg": {
+        "inputs": "Fluxos d'entrada",
+        "path": "Camí del flux",
+        "pathRequired": "Es requereix un camí de flux",
+        "pathPlaceholder": "rtsp://...",
+        "rolesRequired": "Es requereix almenys un rol",
+        "rolesUnique": "Cada rol (àudio, detecta, registra) només es pot assignar a un flux",
+        "addInput": "Afegeix un flux d'entrada",
+        "removeInput": "Elimina el flux d'entrada",
+        "inputsRequired": "Es requereix com a mínim un flux d'entrada",
+        "roles": "Rols"
+      },
+      "go2rtcStreams": "go2rtc Fluxos",
+      "streamUrls": "URL de flux",
+      "addUrl": "Afegeix un URL",
+      "addGo2rtcStream": "Afegeix go2rtc flux",
+      "toast": {
+        "success": "La càmera {{cameraName}} s'ha desat correctament"
+      }
+    }
+  },
+  "cameraReview": {
+    "object_descriptions": {
+      "title": "Descripcions d'objectes generadors d'IA",
+      "desc": "Activa/desactiva temporalment les descripcions d'objectes generatius d'IA per a aquesta càmera. Quan està desactivat, les descripcions generades per IA no se sol·licitaran per als objectes rastrejats en aquesta càmera."
+    },
+    "review_descriptions": {
+      "title": "Descripcions de la IA generativa",
+      "desc": "Activa/desactiva temporalment les descripcions de revisió de la IA generativa per a aquesta càmera. Quan està desactivat, les descripcions generades per IA no se sol·licitaran per als elements de revisió d'aquesta càmera."
+    },
+    "review": {
+      "title": "Revisió",
+      "desc": "Activa/desactiva temporalment les alertes i deteccions d'aquesta càmera fins que es reiniciï Frigate. Si està desactivat, no es generaran nous elements de revisió. ",
+      "alerts": "Alertes. ",
+      "detections": "Deteccions. "
+    },
+    "reviewClassification": {
+      "title": "Revisió de la classificació",
+      "desc": "Frigate categoritza els articles de revisió com Alertes i Deteccions. Per defecte, tots els objectes <em>persona</em> i <em>cotxe</em> es consideren Alertes. Podeu refinar la categorització dels elements de revisió configurant-los les zones requerides.",
+      "noDefinedZones": "No hi ha zones definides per a aquesta càmera.",
+      "selectAlertsZones": "Selecciona zones per a les alertes",
+      "selectDetectionsZones": "Selecció de zones per a les deteccions",
+      "limitDetections": "Limita les deteccions a zones específiques",
+      "toast": {
+        "success": "S'ha desat la configuració de la classificació de la revisió. Reinicia la fragata per aplicar canvis."
+      },
+      "unsavedChanges": "Paràmetres de classificació de revisions sense desar per {{camera}}",
+      "objectAlertsTips": "Totes els objectes {{alertsLabels}} de {{cameraName}} es mostraran com avisos.",
+      "zoneObjectAlertsTips": "Tots els objectes{{alertsLabels}} detectats en {{zone}} de {{cameraName}} es mostraran com a avisos.",
+      "objectDetectionsTips": "Tots els objectes {{detectionsLabels}} que no estiguin categoritzats de {{cameraName}} es mostraran com a Deteccions independentment de la zona on es trobin.",
+      "zoneObjectDetectionsTips": {
+        "text": "Tots els objectes {{detectionsLabels}} no categoritzats a {{zone}} de {{cameraName}} es mostraran com a Deteccions.",
+        "notSelectDetections": "Tots els objectes {{detectionsLabels}} detectats a {{zone}} de{{cameraName}} no categoritzats com a alertes es mostraran com a Deteccions independentment de la zona on es trobin.",
+        "regardlessOfZoneObjectDetectionsTips": "Tots els objectes {{detectionsLabels}} que no estiguin categoritzats de {{cameraName}} es mostraran com a Deteccions independentment de la zona on es trobin."
+      }
+    },
+    "title": "Paràmetres de Revisió de la Càmera"
   }
 }

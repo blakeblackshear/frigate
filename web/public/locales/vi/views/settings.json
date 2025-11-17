@@ -9,7 +9,9 @@
     "object": "Gỡ lỗi - Frigate",
     "general": "Cài đặt Chung - Frigate",
     "frigatePlus": "Cài đặt Frigate+ - Frigate",
-    "motionTuner": "Bộ tinh chỉnh Chuyển động - Frigate"
+    "motionTuner": "Bộ tinh chỉnh Chuyển động - Frigate",
+    "cameraManagement": "Quản Lý Camera - Frigate",
+    "cameraReview": "Cài Đặt Xem Lại Camera - Frigate"
   },
   "notification": {
     "toast": {
@@ -77,7 +79,7 @@
     },
     "snapshotConfig": {
       "table": {
-        "camera": "Camera",
+        "camera": "Máy quay",
         "cleanCopySnapshots": "Ảnh chụp nhanh <code>clean_copy</code>",
         "snapshots": "Ảnh chụp nhanh"
       },
@@ -142,6 +144,44 @@
     "streams": {
       "title": "Luồng phát",
       "desc": "Tạm thời vô hiệu hóa một camera cho đến khi Frigate khởi động lại. Vô hiệu hóa một camera sẽ dừng hoàn toàn quá trình xử lý các luồng của camera này của Frigate. Việc phát hiện, ghi hình và gỡ lỗi sẽ không khả dụng.<br /> <em>Lưu ý: Điều này không vô hiệu hóa các luồng phát lại của go2rtc.</em>"
+    },
+    "object_descriptions": {
+      "title": "Mô tả đối tượng bằng AI tạo sinh",
+      "desc": "Tạm thời bật/tắt mô tả đối tượng bằng AI tạo sinh cho camera này. Khi tắt, mô tả do AI tạo sinh sẽ không được yêu cầu cho các đối tượng được theo dõi trên camera này."
+    },
+    "review_descriptions": {
+      "title": "Mô tả đánh giá bằng AI tạo sinh",
+      "desc": "Tạm thời bật/tắt mô tả xem lại bằng AI tạo sinh cho camera này. Khi tắt, mô tả do AI tạo sinh sẽ không được yêu cầu cho các mục xem lại trên camera này."
+    },
+    "addCamera": "Thêm Camera mới",
+    "editCamera": "Chỉnh sửa Camera:",
+    "selectCamera": "Chọn Camera",
+    "backToSettings": "Quay lại cài đặt Camera",
+    "cameraConfig": {
+      "add": "Thêm Camera",
+      "edit": "Chỉnh sửa Camera",
+      "description": "Cấu hình Camera, bao gồm luồng đầu vào và vai trò.",
+      "name": "Tên Camera",
+      "nameRequired": "Yêu cầu nhập tên Camera",
+      "nameInvalid": "Tên Camera chỉ được chứa chữ cái, số, dấu gạch dưới hoặc dấu gạch ngang",
+      "namePlaceholder": "Ví dụ: front_door",
+      "enabled": "Bật",
+      "ffmpeg": {
+        "inputs": "Luồng đầu vào",
+        "path": "Đường dẫn luồng",
+        "pathRequired": "Yêu cầu nhập đường dẫn luồng",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Vai trò",
+        "rolesRequired": "Cần ít nhất một vai trò",
+        "rolesUnique": "Mỗi vai trò (âm thanh, phát hiện, ghi hình) chỉ có thể được gán cho một luồng duy nhất",
+        "addInput": "Thêm luồng đầu vào",
+        "removeInput": "Xóa luồng đầu vào",
+        "inputsRequired": "Cần ít nhất một luồng đầu vào"
+      },
+      "toast": {
+        "success": "Camera {{cameraName}} đã được lưu thành công"
+      },
+      "nameLength": "Tên của camera phải dưới 24 ký tự."
     }
   },
   "masksAndZones": {
@@ -381,6 +421,19 @@
       "desc": "Hiển thị các hộp xung quanh các khu vực phát hiện có chuyển động",
       "tips": "<p><strong>Hộp chuyển động</strong></p><br><p>Các hộp màu đỏ sẽ được chồng lên các khu vực của khung hình nơi chuyển động đang được phát hiện</p>",
       "title": "Hộp chuyển động"
+    },
+    "paths": {
+      "title": "Đường dẫn",
+      "desc": "Hiển thị các điểm quan trọng trên đường đi của đối tượng được theo dõi",
+      "tips": "<p><strong>Đường đi</strong></p><br><p>Đường thẳng và vòng tròn sẽ hiển thị các điểm quan trọng mà đối tượng được theo dõi đã di chuyển trong suốt quá trình theo dõi.</p>"
+    },
+    "openCameraWebUI": "Đang mở giao diện Web của {{camera}}",
+    "audio": {
+      "title": "Âm thanh",
+      "noAudioDetections": "Không phát hiện âm thanh",
+      "score": "điểm",
+      "currentRMS": "RMS hiện tại",
+      "currentdbFS": "dbFS hiện tại"
     }
   },
   "users": {
@@ -607,10 +660,106 @@
     "notifications": "Thông báo",
     "motionTuner": "Tinh chỉnh Chuyển động",
     "cameras": "Cài đặt Camera",
-    "enrichments": "Làm giàu Dữ liệu"
+    "enrichments": "Làm giàu Dữ liệu",
+    "triggers": "Sự kiện kích hoạt"
   },
   "cameraSetting": {
-    "camera": "Camera",
+    "camera": "Máy quay",
     "noCamera": "Không có Camera"
+  },
+  "triggers": {
+    "documentTitle": "Sự kiện kích hoạt",
+    "management": {
+      "title": "Quản lý sự kiện kích hoạt",
+      "desc": "Quản lý sự kiện kích hoạt cho {{camera}}. Sử dụng kiểu \"ảnh xem trước\" để kích hoạt dựa trên ảnh xem trước tương tự cho đối tượng cần theo dõi đã chọn, và kiểu \"mô tả\" để kích hoạt dựa trên những mô tả tương tự cho đoạn văn bản bạn đã chỉ định."
+    },
+    "addTrigger": "Thêm sự kiện kích hoạt",
+    "table": {
+      "content": "Nội dung",
+      "threshold": "Ngưỡng",
+      "actions": "Hành động",
+      "noTriggers": "Không có sự kiện kích hoạt được cài đặt cho máy quay này.",
+      "type": "Kiểu",
+      "name": "Tên",
+      "deleteTrigger": "Xóa sự kiện kích hoạt",
+      "lastTriggered": "Lần kích hoạt gần nhất",
+      "edit": "Chỉnh sửa"
+    },
+    "type": {
+      "description": "Mô tả",
+      "thumbnail": "Ảnh xem trước"
+    },
+    "dialog": {
+      "form": {
+        "enabled": {
+          "description": "Kích hoạt hoặc vô hiệu hóa sự kiện kích hoạt này"
+        },
+        "actions": {
+          "title": "Các hành động",
+          "desc": "Theo mặc định, hệ thống đã luôn tự động ghi nhận lại mọi sự kiện. Bạn có thể chọn thêm một hành động khác để thực hiện khi sự kiện này xảy ra.",
+          "error": {
+            "min": "Phải chọn ít nhất một hành động."
+          }
+        },
+        "name": {
+          "title": "Tên",
+          "placeholder": "Nhập tên sự kiện kích hoạt",
+          "error": {
+            "minLength": "Tên phải có độ dài ít nhất 2 ký tự.",
+            "invalidCharacters": "Tên chỉ có thể chứa ký tự, chữ số, gạch chân, và gạch nối.",
+            "alreadyExists": "Một sự kiện kích hoạt trùng tên đã tồn tại cho máy quay này."
+          }
+        },
+        "type": {
+          "title": "Kiểu",
+          "placeholder": "Chọn kiểu cho sự kiện kích hoạt"
+        },
+        "content": {
+          "title": "Nội dung",
+          "imagePlaceholder": "Chọn một hình ảnh",
+          "textPlaceholder": "Nhập nội dung văn bản",
+          "imageDesc": "Chọn một hình ảnh để kích hoạt hành động này khi một hình ảnh tương tự được phát hiện.",
+          "textDesc": "Nhập vẵn bản để kích hoạt hành động này khi một đối tượng theo dõi với mô tả tương tự được phát hiện.",
+          "error": {
+            "required": "Nội dung bắt buộc."
+          }
+        },
+        "threshold": {
+          "title": "Ngưỡng",
+          "error": {
+            "min": "Ngưỡng phải ít nhất bằng 0",
+            "max": "Ngưỡng lớn nhất phải bé hơn 1"
+          }
+        }
+      },
+      "createTrigger": {
+        "title": "Tạo sự kiện kích hoạt",
+        "desc": "Tạo sự kiện kích hoạt cho máy quay {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Chỉnh sửa Sự kiện kích hoạt",
+        "desc": "Chỉnh sửa cài đặt cho sự kiện kích hoạt trên máy quay {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Xóa Sự kiện kích hoạt",
+        "desc": "Bạn có chắc chắn muốn xóa sự kịn kích hoạt <strong>{{triggerName}}</strong>? Thao tác này không thể khôi phục được."
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Sự kiện kích hoạt {{name}} đã được tạo thành công.",
+        "updateTrigger": "Sự kiện kích hoạt {{name}} đã được cập nhật thành công.",
+        "deleteTrigger": "Sự kiện kích hoạt {{name}} đã được xóa thành công."
+      },
+      "error": {
+        "createTriggerFailed": "Tạo sự kiện kích hoạt thất bại: {{errorMessage}}",
+        "updateTriggerFailed": "Cập nhật sự kiện kích hoạt thất bại: {{errorMessage}}",
+        "deleteTriggerFailed": "Xóa sự kiện kích hoạt thất bại: {{errorMessage}}"
+      }
+    },
+    "actions": {
+      "alert": "Gắn nhãn Cảnh báo",
+      "notification": "Gửi thông báo"
+    }
   }
 }

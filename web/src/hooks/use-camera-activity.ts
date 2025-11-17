@@ -1,4 +1,5 @@
 import {
+  useAudioDetections,
   useEnabledState,
   useFrigateEvents,
   useInitialCameraState,
@@ -8,7 +9,7 @@ import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { MotionData, ReviewSegment } from "@/types/review";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTimelineUtils } from "./use-timeline-utils";
-import { ObjectType } from "@/types/ws";
+import { AudioDetection, ObjectType } from "@/types/ws";
 import useDeepMemo from "./use-deep-memo";
 import { isEqual } from "lodash";
 import { useAutoFrigateStats } from "./use-stats";
@@ -20,6 +21,7 @@ type useCameraActivityReturn = {
   activeTracking: boolean;
   activeMotion: boolean;
   objects: ObjectType[];
+  audio_detections: AudioDetection[];
   offline: boolean;
 };
 
@@ -38,6 +40,9 @@ export function useCameraActivity(
     return getAttributeLabels(config);
   }, [config]);
   const [objects, setObjects] = useState<ObjectType[] | undefined>([]);
+  const [audioDetections, setAudioDetections] = useState<
+    AudioDetection[] | undefined
+  >([]);
 
   // init camera activity
 
@@ -50,6 +55,15 @@ export function useCameraActivity(
       setObjects(updatedCameraState.objects);
     }
   }, [updatedCameraState, camera]);
+
+  const { payload: updatedAudioState } = useAudioDetections();
+  const memoizedAudioState = useDeepMemo(updatedAudioState);
+
+  useEffect(() => {
+    if (memoizedAudioState) {
+      setAudioDetections(memoizedAudioState[camera.name]);
+    }
+  }, [memoizedAudioState, camera]);
 
   // handle camera activity
 
@@ -144,7 +158,9 @@ export function useCameraActivity(
       return false;
     }
 
-    return cameras[camera.name].camera_fps == 0 && stats["service"].uptime > 60;
+    return (
+      cameras[camera.name]?.camera_fps == 0 && stats["service"].uptime > 60
+    );
   }, [camera, stats]);
 
   const isCameraEnabled = cameraEnabled ? cameraEnabled === "ON" : true;
@@ -158,6 +174,7 @@ export function useCameraActivity(
         : updatedCameraState?.motion === true
       : false,
     objects: isCameraEnabled ? (objects ?? []) : [],
+    audio_detections: isCameraEnabled ? (audioDetections ?? []) : [],
     offline,
   };
 }

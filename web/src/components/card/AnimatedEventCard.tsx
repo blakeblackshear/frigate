@@ -50,6 +50,27 @@ export function AnimatedEventCard({
     fetchPreviews: !currentHour,
   });
 
+  const tooltipText = useMemo(() => {
+    if (event?.data?.metadata?.title) {
+      return event.data.metadata.title;
+    }
+
+    return (
+      `${[
+        ...new Set([
+          ...(event.data.objects || []),
+          ...(event.data.sub_labels || []),
+          ...(event.data.audio || []),
+        ]),
+      ]
+        .filter((item) => item !== undefined && !item.includes("-verified"))
+        .map((text) => text.charAt(0).toUpperCase() + text.substring(1))
+        .sort()
+        .join(", ")
+        .replaceAll("-verified", "")} ` + t("detected")
+    );
+  }, [event, t]);
+
   // visibility
 
   const [windowVisible, setWindowVisible] = useState(true);
@@ -91,7 +112,10 @@ export function AnimatedEventCard({
 
   // image behavior
 
-  const [alertVideos] = usePersistence("alertVideos", true);
+  const [alertVideos, _, alertVideosLoaded] = usePersistence(
+    "alertVideos",
+    true,
+  );
 
   const aspectRatio = useMemo(() => {
     if (
@@ -121,7 +145,7 @@ export function AnimatedEventCard({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  className="absolute right-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  className="absolute left-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                   size="xs"
                   aria-label={t("markAsReviewed")}
                   onClick={async () => {
@@ -135,7 +159,7 @@ export function AnimatedEventCard({
               <TooltipContent>{t("markAsReviewed")}</TooltipContent>
             </Tooltip>
           )}
-          {previews != undefined && (
+          {previews != undefined && alertVideosLoaded && (
             <div
               className="size-full cursor-pointer"
               onClick={onOpenReview}
@@ -217,20 +241,7 @@ export function AnimatedEventCard({
           )}
         </div>
       </TooltipTrigger>
-      <TooltipContent>
-        {`${[
-          ...new Set([
-            ...(event.data.objects || []),
-            ...(event.data.sub_labels || []),
-            ...(event.data.audio || []),
-          ]),
-        ]
-          .filter((item) => item !== undefined && !item.includes("-verified"))
-          .map((text) => text.charAt(0).toUpperCase() + text.substring(1))
-          .sort()
-          .join(", ")
-          .replaceAll("-verified", "")} ` + t("detected")}
-      </TooltipContent>
+      <TooltipContent>{tooltipText}</TooltipContent>
     </Tooltip>
   );
 }

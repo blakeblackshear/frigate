@@ -1,10 +1,10 @@
 {
-  "detections": "Detecções",
+  "detections": "Deteções",
   "motion": {
     "label": "Movimento",
-    "only": "Somente movimento"
+    "only": "Apenas movimento"
   },
-  "allCameras": "Todas as câmaras",
+  "allCameras": "Todas as Câmaras",
   "empty": {
     "motion": "Nenhum dado de movimento encontrado",
     "alert": "Não há alertas para análise",
@@ -20,7 +20,7 @@
   "alerts": "Alertas",
   "documentTitle": "Análise - Frigate",
   "recordings": {
-    "documentTitle": "Gravações - Frigate"
+    "documentTitle": "Frigate - Gravações"
   },
   "calendarFilter": {
     "last24Hours": "Últimas 24 horas"
@@ -32,7 +32,9 @@
     "button": "Novos itens para analisar"
   },
   "camera": "Câmara",
-  "detected": "detectado",
+  "detected": "detetado",
   "selected_one": "{{count}} selecionado",
-  "selected_other": "{{count}} selecionados"
+  "selected_other": "{{count}} selecionados",
+  "suspiciousActivity": "Atividade Suspeita",
+  "threateningActivity": "Atividade Ameaçadora"
 }

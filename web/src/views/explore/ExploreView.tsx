@@ -11,7 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
-import { SearchResult } from "@/types/search";
+import { EventType, SearchResult } from "@/types/search";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -75,13 +75,13 @@ export default function ExploreView({
     }, {});
   }, [events]);
 
-  const trackedObjectUpdate = useTrackedObjectUpdate();
+  const { payload: wsUpdate } = useTrackedObjectUpdate();
 
   useEffect(() => {
-    mutate();
-    // mutate / revalidate when event description updates come in
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackedObjectUpdate]);
+    if (wsUpdate && wsUpdate.type == "description") {
+      mutate();
+    }
+  }, [wsUpdate, mutate]);
 
   // update search detail when results change
 
@@ -110,7 +110,8 @@ export default function ExploreView({
           key={label}
           searchResults={filteredEvents}
           isValidating={isValidating}
-          objectType={label}
+          label={label}
+          labelType={filteredEvents[0]?.data?.type || "object"}
           setSearchDetail={setSearchDetail}
           mutate={mutate}
           setSimilaritySearch={setSimilaritySearch}
@@ -122,7 +123,8 @@ export default function ExploreView({
 }
 
 type ThumbnailRowType = {
-  objectType: string;
+  label: string;
+  labelType: EventType;
   searchResults?: SearchResult[];
   isValidating: boolean;
   setSearchDetail: (search: SearchResult | undefined) => void;
@@ -132,7 +134,8 @@ type ThumbnailRowType = {
 };
 
 function ThumbnailRow({
-  objectType,
+  label,
+  labelType,
   searchResults,
   isValidating,
   setSearchDetail,
@@ -153,7 +156,7 @@ function ThumbnailRow({
   return (
     <div className="rounded-lg bg-background_alt p-2 md:px-4">
       <div className="flex flex-row items-center text-lg smart-capitalize">
-        {getTranslatedLabel(objectType)}
+        {getTranslatedLabel(label, labelType)}
         {searchResults && (
           <span className="ml-3 text-sm text-secondary-foreground">
             {t("trackedObjectsCount", {
@@ -181,7 +184,7 @@ function ThumbnailRow({
         ))}
         <div
           className="flex cursor-pointer items-center justify-center"
-          onClick={() => handleSearch(objectType)}
+          onClick={() => handleSearch(label)}
         >
           <Tooltip>
             <TooltipTrigger>
@@ -192,7 +195,9 @@ function ThumbnailRow({
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent>
-                {t("exploreMore", { label: getTranslatedLabel(objectType) })}
+                {t("exploreMore", {
+                  label: getTranslatedLabel(label, labelType),
+                })}
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -219,6 +224,7 @@ function ExploreThumbnailImage({
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+  const navigate = useNavigate();
 
   const handleFindSimilar = () => {
     if (config?.semantic_search.enabled) {
@@ -226,12 +232,14 @@ function ExploreThumbnailImage({
     }
   };
 
-  const handleShowObjectLifecycle = () => {
-    onSelectSearch(event, false, "object_lifecycle");
+  const handleShowTrackingDetails = () => {
+    onSelectSearch(event, false, "tracking_details");
   };
 
-  const handleShowSnapshot = () => {
-    onSelectSearch(event, false, "snapshot");
+  const handleAddTrigger = () => {
+    navigate(
+      `/settings?page=triggers&camera=${event.camera}&event_id=${event.id}`,
+    );
   };
 
   return (
@@ -239,8 +247,8 @@ function ExploreThumbnailImage({
       searchResult={event}
       findSimilar={handleFindSimilar}
       refreshResults={mutate}
-      showObjectLifecycle={handleShowObjectLifecycle}
-      showSnapshot={handleShowSnapshot}
+      showTrackingDetails={handleShowTrackingDetails}
+      addTrigger={handleAddTrigger}
       isContextMenu={true}
     >
       <div className="relative size-full">

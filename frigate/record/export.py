@@ -21,13 +21,14 @@ from frigate.const import (
     EXPORT_DIR,
     MAX_PLAYLIST_SECONDS,
     PREVIEW_FRAME_TYPE,
+    PROCESS_PRIORITY_LOW,
 )
 from frigate.ffmpeg_presets import (
     EncodeTypeEnum,
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Export, Previews, Recordings
-from frigate.util.builtin import is_current_hour
+from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ TIMELAPSE_DATA_INPUT_ARGS = "-an -skip_frame nokey"
 
 
 def lower_priority():
-    os.nice(10)
+    os.nice(PROCESS_PRIORITY_LOW)
 
 
 class PlaybackFactorEnum(str, Enum):

@@ -1,1 +1,19 @@
-{}
+{
+  "documentTitle": "Udforsk - Frigate",
+  "generativeAI": "Generativ AI",
+  "type": {
+    "details": "detaljer",
+    "video": "video"
+  },
+  "objectLifecycle": {
+    "lifecycleItemDesc": {
+      "active": "{{label}} blev aktiv"
+    }
+  },
+  "exploreIsUnavailable": {
+    "embeddingsReindexing": {
+      "startingUp": "Starter…",
+      "estimatedTime": "Estimeret tid tilbage:"
+    }
+  }
+}

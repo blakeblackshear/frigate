@@ -1,5 +1,8 @@
 {
   "noRecordingsFoundForThisTime": "इस समय का कोई रिकॉर्डिंग नहीं मिला",
   "noPreviewFound": "कोई प्रीव्यू नहीं मिला",
-  "noPreviewFoundFor": "{{cameraName}} के लिए कोई पूर्वावलोकन नहीं मिला"
+  "noPreviewFoundFor": "{{cameraName}} के लिए कोई पूर्वावलोकन नहीं मिला",
+  "submitFrigatePlus": {
+    "title": "इस फ्रेम को फ्रिगेट+ पर सबमिट करें?"
+  }
 }

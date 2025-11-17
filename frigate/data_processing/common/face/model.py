@@ -9,8 +9,9 @@ import numpy as np
 from scipy import stats
 
 from frigate.config import FrigateConfig
-from frigate.const import MODEL_CACHE_DIR
+from frigate.const import FACE_DIR, MODEL_CACHE_DIR
 from frigate.embeddings.onnx.face_embedding import ArcfaceEmbedding, FaceNetEmbedding
+from frigate.log import redirect_output_to_logger
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ class FaceRecognizer(ABC):
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         pass
 
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def init_landmark_detector(self) -> None:
         landmark_model = os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
 
@@ -170,7 +172,7 @@ class FaceNetRecognizer(FaceRecognizer):
             face_embeddings_map: dict[str, list[np.ndarray]] = {}
             idx = 0
 
-            dir = "/media/frigate/clips/faces"
+            dir = FACE_DIR
             for name in os.listdir(dir):
                 if name == "train":
                     continue
@@ -260,14 +262,14 @@ class FaceNetRecognizer(FaceRecognizer):
                 score = confidence
                 label = name
 
-        return label, round(score - blur_reduction, 2)
+        return label, max(0, round(score - blur_reduction, 2))
 
 
 class ArcFaceRecognizer(FaceRecognizer):
     def __init__(self, config: FrigateConfig):
         super().__init__(config)
         self.mean_embs: dict[int, np.ndarray] = {}
-        self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding()
+        self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding(config.face_recognition)
         self.model_builder_queue: queue.Queue | None = None
 
     def clear(self) -> None:
@@ -280,7 +282,7 @@ class ArcFaceRecognizer(FaceRecognizer):
             face_embeddings_map: dict[str, list[np.ndarray]] = {}
             idx = 0
 
-            dir = "/media/frigate/clips/faces"
+            dir = FACE_DIR
             for name in os.listdir(dir):
                 if name == "train":
                     continue
@@ -368,4 +370,4 @@ class ArcFaceRecognizer(FaceRecognizer):
                 score = confidence
                 label = name
 
-        return label, round(score - blur_reduction, 2)
+        return label, max(0, round(score - blur_reduction, 2))

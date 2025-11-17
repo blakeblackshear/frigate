@@ -4,14 +4,14 @@
   "exploreIsUnavailable": {
     "title": "浏览功能不可用",
     "embeddingsReindexing": {
-      "context": "跟踪对象嵌入重新索引完成后，可以使用浏览功能。",
+      "context": "完成跟踪目标嵌入重新索引后，才可以使用 浏览 功能。",
       "startingUp": "启动中…",
       "estimatedTime": "预计剩余时间：",
       "finishingShortly": "即将完成",
       "step": {
         "thumbnailsEmbedded": "缩略图嵌入：",
         "descriptionsEmbedded": "描述嵌入：",
-        "trackedObjectsProcessed": "跟踪对象已处理："
+        "trackedObjectsProcessed": "跟踪目标已处理： "
       }
     },
     "downloadingModels": {
@@ -23,25 +23,26 @@
         "textTokenizer": "文本分词器"
       },
       "tips": {
-        "context": "模型下载完成后，您可能需要重新索引跟踪对象的嵌入。",
+        "context": "模型下载完成后，您可能需要重新索引跟踪目标的嵌入。",
         "documentation": "阅读文档"
       },
       "error": "发生错误。请检查Frigate日志。"
     }
   },
-  "trackedObjectDetails": "跟踪对象详情",
+  "trackedObjectDetails": "目标追踪详情",
   "type": {
     "details": "详情",
     "snapshot": "快照",
     "video": "视频",
-    "object_lifecycle": "对象生命周期"
+    "object_lifecycle": "目标全周期",
+    "thumbnail": "缩略图"
   },
   "objectLifecycle": {
-    "title": "对象生命周期",
+    "title": "目标全周期",
     "noImageFound": "未找到此时间戳的图像。",
-    "createObjectMask": "创建对象遮罩",
+    "createObjectMask": "创建目标/物体遮罩",
     "adjustAnnotationSettings": "调整标注设置",
-    "scrollViewTips": "滚动查看此对象生命周期的重要时刻。",
+    "scrollViewTips": "滚动查看此目标全周期的关键节点。",
     "autoTrackingTips": "自动跟踪摄像头的边界框位置可能不准确。",
     "lifecycleItemDesc": {
       "visible": "检测到 {{label}}",
@@ -65,7 +66,7 @@
       "title": "标注设置",
       "showAllZones": {
         "title": "显示所有区域",
-        "desc": "在对象进入区域的帧上始终显示区域。"
+        "desc": "始终在目标进入区域的帧上显示区域标记。"
       },
       "offset": {
         "label": "标注偏移",
@@ -94,19 +95,21 @@
         "viewInExplore": "在 浏览 中查看"
       },
       "tips": {
-        "mismatch_other": "检测到 {{count}} 个不可用的对象，并已包含在此核查项中。这些对象可能未达到警报或检测标准，或者已被清理/删除。",
-        "hasMissingObjects": "如果希望 Frigate 保存以下标签的跟踪对象，请调整您的配置：<em>{{objects}}</em>"
+        "mismatch_other": "检测到 {{count}} 个不可用的目标，并已包含在此核查项中。这些目标可能未达到警报或检测标准，或者已被清理/删除。",
+        "hasMissingObjects": "如果希望 Frigate 保存以下标签的跟踪目标，请调整您的配置：<em>{{objects}}</em>"
       },
       "toast": {
         "success": {
           "regenerate": "已向 {{provider}} 请求新的描述。根据提供商的速度，生成新描述可能需要一些时间。",
           "updatedSublabel": "成功更新子标签。",
-          "updatedLPR": "成功更新车牌。"
+          "updatedLPR": "成功更新车牌。",
+          "audioTranscription": "成功请求音频转录。"
         },
         "error": {
           "regenerate": "调用 {{provider}} 生成新描述失败：{{errorMessage}}",
           "updatedSublabelFailed": "更新子标签失败：{{errorMessage}}",
-          "updatedLPRFailed": "更新车牌失败：{{errorMessage}}"
+          "updatedLPRFailed": "更新车牌失败：{{errorMessage}}",
+          "audioTranscription": "请求音频转录失败：{{errorMessage}}"
         }
       }
     },
@@ -114,14 +117,14 @@
     "editSubLabel": {
       "title": "编辑子标签",
       "desc": "为 {{label}} 输入新的子标签",
-      "descNoLabel": "为此跟踪对象输入新的子标签"
+      "descNoLabel": "为此跟踪目标输入新的子标签"
     },
     "topScore": {
       "label": "最高得分",
-      "info": "最高分是跟踪对象的最高中位数得分，因此可能与搜索结果缩略图上显示的得分不同。"
+      "info": "最高分是追踪目标的中位分数最高值，因此可能与搜索结果缩略图中显示的分数有所不同。"
     },
     "estimatedSpeed": "预计速度",
-    "objects": "对象",
+    "objects": "目标/物体",
     "camera": "摄像头",
     "zones": "区域",
     "timestamp": "时间戳",
@@ -129,13 +132,13 @@
       "findSimilar": "查找相似项",
       "regenerate": {
         "title": "重新生成",
-        "label": "重新生成跟踪对象描述"
+        "label": "重新生成追踪目标的描述"
       }
     },
     "description": {
       "label": "描述",
-      "placeholder": "跟踪对象的描述",
-      "aiTips": "在跟踪对象的生命周期结束之前，Frigate 不会向您的生成式 AI 提供商请求描述。"
+      "placeholder": "追踪目标的描述",
+      "aiTips": "在追踪目标的目标全周期结束之前，Frigate 不会向您的生成式 AI 提供商请求描述。"
     },
     "expandRegenerationMenu": "展开重新生成菜单",
     "regenerateFromSnapshot": "从快照重新生成",
@@ -146,12 +149,15 @@
     },
     "editLPR": {
       "desc": "为 {{label}} 输入新的车牌值",
-      "descNoLabel": "为检测到的对象输入新的车牌值",
+      "descNoLabel": "为检测到的目标输入新的车牌值",
       "title": "编辑车牌"
     },
     "recognizedLicensePlate": "识别的车牌",
     "snapshotScore": {
       "label": "快照得分"
+    },
+    "score": {
+      "label": "分值"
     }
   },
   "itemMenu": {
@@ -164,12 +170,12 @@
       "aria": "下载快照"
     },
     "viewObjectLifecycle": {
-      "label": "查看对象生命周期",
-      "aria": "显示对象的生命周期"
+      "label": "查看目标全周期",
+      "aria": "显示目标的全周期"
     },
     "findSimilar": {
       "label": "查找相似项",
-      "aria": "查看相似的对象"
+      "aria": "查看相似的目标/物体"
     },
     "submitToPlus": {
       "label": "提交至 Frigate+",
@@ -180,26 +186,98 @@
       "aria": "在历史记录中查看"
     },
     "deleteTrackedObject": {
-      "label": "删除此跟踪对象"
+      "label": "删除此追踪目标"
+    },
+    "addTrigger": {
+      "label": "添加触发器",
+      "aria": "为该追踪目标添加触发器"
+    },
+    "audioTranscription": {
+      "label": "转录",
+      "aria": "请求音频转录"
+    },
+    "showObjectDetails": {
+      "label": "显示目标轨迹"
+    },
+    "hideObjectDetails": {
+      "label": "隐藏目标轨迹"
+    },
+    "viewTrackingDetails": {
+      "label": "查看追踪详情",
+      "aria": "显示追踪详情"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "确认删除",
-      "desc": "删除此跟踪对象将移除快照、所有已保存的嵌入数据以及任何关联的对象生命周期条目。但在历史视图中的录制视频<em>不会</em>被删除。<br /><br />你确定要继续删除吗？"
+      "desc": "删除此追踪目标后将移除快照、所有已保存的嵌入向量数据以及任何相关的目标追踪详情条目，但在 历史 页面中跟踪对象的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
     }
   },
-  "noTrackedObjects": "未找到跟踪对象",
-  "fetchingTrackedObjectsFailed": "获取跟踪对象失败：{{errorMessage}}",
-  "trackedObjectsCount_other": "{{count}} 个跟踪对象 ",
+  "noTrackedObjects": "未找到追踪目标",
+  "fetchingTrackedObjectsFailed": "获取追踪目标失败：{{errorMessage}}",
+  "trackedObjectsCount_other": "{{count}} 个追踪目标 ",
   "searchResult": {
     "deleteTrackedObject": {
       "toast": {
-        "success": "跟踪对象删除成功。",
-        "error": "删除跟踪对象失败：{{errorMessage}}"
+        "success": "删除追踪目标成功。",
+        "error": "删除追踪目标失败：{{errorMessage}}"
       }
     },
     "tooltip": "与 {{type}} 匹配度为 {{confidence}}%"
   },
-  "exploreMore": "浏览更多的 {{label}}"
+  "exploreMore": "浏览更多的 {{label}}",
+  "aiAnalysis": {
+    "title": "AI分析"
+  },
+  "concerns": {
+    "label": "风险等级"
+  },
+  "trackingDetails": {
+    "title": "追踪细节",
+    "noImageFound": "在该时间内没找到图片。",
+    "createObjectMask": "创建目标遮罩",
+    "adjustAnnotationSettings": "调整注释设置",
+    "scrollViewTips": "点击以查看该目标全周期中的关键时刻。",
+    "autoTrackingTips": "自动追踪摄像头的边框定位可能不准确。",
+    "count": "{{first}} / {{second}}",
+    "trackedPoint": "追踪点",
+    "lifecycleItemDesc": {
+      "visible": "已检测到 {{label}}",
+      "entered_zone": "{{label}} 进入 {{zones}}",
+      "active": "{{label}} 正在活动",
+      "stationary": "{{label}} 变为静止",
+      "attribute": {
+        "faceOrLicense_plate": "检测到 {{label}} 的 {{attribute}} 属性",
+        "other": "{{label}} 被识别为 {{attribute}}"
+      },
+      "gone": "{{label}} 离开",
+      "heard": "{{label}} 被听到",
+      "external": "已检测到 {{label}}",
+      "header": {
+        "zones": "区",
+        "ratio": "占比",
+        "area": "坐标区域"
+      }
+    },
+    "annotationSettings": {
+      "title": "标记设置",
+      "showAllZones": {
+        "title": "显示所有区",
+        "desc": "在目标进入区域的帧中始终显示区域框。"
+      },
+      "offset": {
+        "label": "标记偏移量",
+        "desc": "此数据来自摄像头的检测视频流，但叠加在录制视频流的画面上。两个视频流可能不会完全同步，因此边框与画面可能无法完全对齐。可以使用此设置将标记在时间轴上向前或向后偏移，以更好地与录制画面对齐。",
+        "millisecondsToOffset": "用于偏移检测标记的毫秒数。<em> 默认值：0</em>",
+        "tips": "提示：假设有一段人从左向右走的事件录制，如果事件时间轴中的边框始终在人的左侧（即后方），则应该减小偏移值；反之，如果边框始终领先于人物，则应增大偏移值。",
+        "toast": {
+          "success": "{{camera}} 的标记偏移量已保存。请重启 Frigate 以应用更改。"
+        }
+      }
+    },
+    "carousel": {
+      "previous": "上一张图",
+      "next": "下一张图"
+    }
+  }
 }

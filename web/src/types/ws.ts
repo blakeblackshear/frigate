@@ -30,7 +30,7 @@ type FrigateObjectState = {
 };
 
 export interface FrigateReview {
-  type: "new" | "update" | "end";
+  type: "new" | "update" | "end" | "genai";
   before: ReviewSegment;
   after: ReviewSegment;
 }
@@ -51,6 +51,12 @@ export type ObjectType = {
   sub_label: string;
 };
 
+export type AudioDetection = {
+  id: string;
+  label: string;
+  score: number;
+};
+
 export interface FrigateCameraState {
   config: {
     enabled: boolean;
@@ -58,21 +64,31 @@ export interface FrigateCameraState {
     snapshots: boolean;
     record: boolean;
     audio: boolean;
+    audio_transcription: boolean;
     notifications: boolean;
     notifications_suspended: number;
     autotracking: boolean;
     alerts: boolean;
     detections: boolean;
+    object_descriptions: boolean;
+    review_descriptions: boolean;
   };
   motion: boolean;
   objects: ObjectType[];
+  audio_detections: AudioDetection[];
+}
+export interface FrigateAudioDetections {
+  [camera: string]: AudioDetection[];
 }
 
 export type ModelState =
   | "not_downloaded"
   | "downloading"
   | "downloaded"
-  | "error";
+  | "error"
+  | "training"
+  | "complete"
+  | "failed";
 
 export type EmbeddingsReindexProgressType = {
   thumbnails: number;
@@ -84,3 +100,29 @@ export type EmbeddingsReindexProgressType = {
 };
 
 export type ToggleableSetting = "ON" | "OFF";
+
+export type TrackedObjectUpdateType =
+  | "description"
+  | "lpr"
+  | "transcription"
+  | "face";
+
+export type TrackedObjectUpdateReturnType = {
+  type: TrackedObjectUpdateType;
+  id: string;
+  camera: string;
+  description?: string;
+  name?: string;
+  plate?: string;
+  score?: number;
+  timestamp?: number;
+  text?: string;
+} | null;
+
+export type TriggerStatus = {
+  name: string;
+  camera: string;
+  event_id: string;
+  type: string;
+  score: number;
+};

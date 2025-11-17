@@ -12,13 +12,16 @@ ARG PIP_BREAK_SYSTEM_PACKAGES
 # Install TensorRT wheels
 COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
-RUN  pip3 wheel --wheel-dir=/trt-wheels -c /requirements-wheels.txt -r /requirements-tensorrt.txt
+
+# remove dependencies from the requirements that have type constraints
+RUN  sed -i '/\[.*\]/d' /requirements-wheels.txt \
+    && pip3 wheel --wheel-dir=/trt-wheels -c /requirements-wheels.txt -r /requirements-tensorrt.txt
 
 FROM deps AS frigate-tensorrt
 ARG PIP_BREAK_SYSTEM_PACKAGES
 
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
-    pip3 uninstall -y onnxruntime-openvino tensorflow-cpu \
+    pip3 uninstall -y onnxruntime \
     && pip3 install -U /deps/trt-wheels/*.whl
 
 COPY --from=rootfs / /

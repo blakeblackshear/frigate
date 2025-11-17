@@ -257,15 +257,13 @@ export default function Explore() {
 
   // mutation and revalidation
 
-  const trackedObjectUpdate = useTrackedObjectUpdate();
+  const { payload: wsUpdate } = useTrackedObjectUpdate();
 
   useEffect(() => {
-    if (trackedObjectUpdate) {
+    if (wsUpdate && wsUpdate.type == "description") {
       mutate();
     }
-    // mutate / revalidate when event description updates come in
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackedObjectUpdate]);
+  }, [wsUpdate, mutate]);
 
   // embeddings reindex progress
 
@@ -484,9 +482,7 @@ export default function Explore() {
                     rel="noopener noreferrer"
                     className="inline"
                   >
-                    {t(
-                      "exploreIsUnavailable.downloadingModels.tips.documentation",
-                    )}{" "}
+                    {t("readTheDocumentation", { ns: "common" })}
                     <LuExternalLink className="ml-2 inline-flex size-3" />
                   </Link>
                 </div>

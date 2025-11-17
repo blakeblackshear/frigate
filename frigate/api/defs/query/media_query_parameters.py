@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel
+from pydantic.json_schema import SkipJsonSchema
 
 
 class Extension(str, Enum):
@@ -22,6 +23,7 @@ class MediaLatestFrameQueryParams(BaseModel):
     zones: Optional[int] = None
     mask: Optional[int] = None
     motion: Optional[int] = None
+    paths: Optional[int] = None
     regions: Optional[int] = None
     quality: Optional[int] = 70
     height: Optional[int] = None
@@ -51,3 +53,10 @@ class MediaMjpegFeedQueryParams(BaseModel):
 class MediaRecordingsSummaryQueryParams(BaseModel):
     timezone: str = "utc"
     cameras: Optional[str] = "all"
+
+
+class MediaRecordingsAvailabilityQueryParams(BaseModel):
+    cameras: str = "all"
+    before: Union[float, SkipJsonSchema[None]] = None
+    after: Union[float, SkipJsonSchema[None]] = None
+    scale: int = 30

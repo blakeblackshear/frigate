@@ -10,7 +10,7 @@ echo "[INFO] Starting certsync..."
 
 lefile="/etc/letsencrypt/live/frigate/fullchain.pem"
 
-tls_enabled=`python3 /usr/local/nginx/get_tls_settings.py | jq -r .enabled`
+tls_enabled=`python3 /usr/local/nginx/get_listen_settings.py | jq -r .tls.enabled`
 
 while true
 do

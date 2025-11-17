@@ -55,12 +55,12 @@
   "searchFor": "Buscar {{inputValue}}",
   "button": {
     "clear": "Netejar cerca",
-    "save": "Desar la cerca",
-    "delete": "Suprimeix la recerca desada",
-    "filterInformation": "Informació de filtre",
+    "save": "Desa la cerca",
+    "delete": "Elimina la recerca desada",
+    "filterInformation": "Informació del filtre",
     "filterActive": "Filtres actius"
   },
-  "trackedObjectId": "ID d'objecte rastrejat",
+  "trackedObjectId": "ID de l'objecte rastrejat",
   "placeholder": {
     "search": "Cercar…"
   },

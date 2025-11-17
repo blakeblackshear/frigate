@@ -97,7 +97,7 @@
   "score": "Рахунок",
   "estimatedSpeed": "Розрахункова швидкість ({{unit}})",
   "review": {
-    "showReviewed": "Показати переглянув"
+    "showReviewed": "Показувати переглянуті"
   },
   "motion": {
     "showMotionOnly": "Показати тiльки рух"
@@ -121,6 +121,16 @@
     "loading": "Завантаження визнаних номерів…",
     "placeholder": "Введіть для пошуку номерні знаки…",
     "noLicensePlatesFound": "Номерних знаків не знайдено.",
-    "selectPlatesFromList": "Виберіть одну або кілька пластин зі списку."
+    "selectPlatesFromList": "Виберіть одну або кілька пластин зі списку.",
+    "selectAll": "Вибрати все",
+    "clearAll": "Очистити все"
+  },
+  "classes": {
+    "label": "Заняття",
+    "all": {
+      "title": "Усі класи"
+    },
+    "count_one": "Клас {{count}}",
+    "count_other": "{{count}} Класи"
   }
 }

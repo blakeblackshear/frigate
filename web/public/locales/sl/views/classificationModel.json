@@ -1,0 +1,50 @@
+{
+  "description": {
+    "invalidName": "Neveljavno ime. Ime lahko vsebuje črke, števila, presledke, narekovaje, podčrtaje in pomišljaje."
+  },
+  "categories": "Razredi",
+  "createCategory": {
+    "new": "Naredi nov razred"
+  },
+  "button": {
+    "renameCategory": "Preimenuj razred",
+    "deleteCategory": "Zbriši razred",
+    "deleteImages": "Zbriši slike",
+    "trainModel": "Treniraj model"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Izbrisan razred",
+      "deletedImage": "Zbrisane slike",
+      "trainedModel": "Uspešno treniranje modela.",
+      "trainingModel": "Uspešen začetek treniranje modela."
+    },
+    "error": {
+      "deleteImageFailed": "Neuspešno brisanje: {{errorMessage}}",
+      "deleteCategoryFailed": "Neuspešno brisanje razreda: {{errorMessage}}",
+      "trainingFailed": "Neuspešen začetek treniranje modela: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Zbriši razred"
+  },
+  "deleteTrainImages": {
+    "title": "Zbriši slike za treniranje",
+    "desc": "Ali ste prepričani, da želite izbrisati {{count}} slik? Tega dejanja ni mogoče razveljaviti."
+  },
+  "renameCategory": {
+    "title": "Preimenuj razred",
+    "desc": "Vnesite novo ime za {{name}}. Model bo treba znova naučiti, da bo sprememba imena začela veljati."
+  },
+  "train": {
+    "title": "Nedavne razvrstitve",
+    "aria": "Izberi nedavne razvrstitve"
+  },
+  "categorizeImageAs": "Razvrsti sliko kot:",
+  "categorizeImage": "Razvrsti sliko",
+  "noModels": {
+    "object": {
+      "title": "Ni modelov za razvrščanje objektov"
+    }
+  }
+}

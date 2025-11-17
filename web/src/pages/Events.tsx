@@ -15,6 +15,7 @@ import {
   ReviewSummary,
   SegmentedReviewData,
 } from "@/types/review";
+import { TimelineType } from "@/types/timeline";
 import {
   getBeginningOfDayTimestamp,
   getEndOfDayTimestamp,
@@ -49,6 +50,16 @@ export default function Events() {
     false,
   );
 
+  const [notificationTab, setNotificationTab] =
+    useState<TimelineType>("timeline");
+
+  useSearchEffect("tab", (tab: string) => {
+    if (tab === "timeline" || tab === "events" || tab === "detail") {
+      setNotificationTab(tab as TimelineType);
+    }
+    return true;
+  });
+
   useSearchEffect("id", (reviewId: string) => {
     axios
       .get(`review/${reviewId}`)
@@ -66,6 +77,7 @@ export default function Events() {
               camera: resp.data.camera,
               startTime,
               severity: resp.data.severity,
+              timelineType: notificationTab,
             },
             true,
           );
@@ -356,6 +368,7 @@ export default function Events() {
       if (itemsToMarkReviewed.length > 0) {
         await axios.post(`reviews/viewed`, {
           ids: itemsToMarkReviewed,
+          reviewed: true,
         });
         reloadData();
       }
@@ -365,7 +378,10 @@ export default function Events() {
 
   const markItemAsReviewed = useCallback(
     async (review: ReviewSegment) => {
-      const resp = await axios.post(`reviews/viewed`, { ids: [review.id] });
+      const resp = await axios.post(`reviews/viewed`, {
+        ids: [review.id],
+        reviewed: true,
+      });
 
       if (resp.status == 200) {
         updateSegments(
@@ -480,6 +496,7 @@ export default function Events() {
           timeRange={selectedTimeRange}
           filter={reviewFilter}
           updateFilter={onUpdateFilter}
+          refreshData={reloadData}
         />
       );
     }

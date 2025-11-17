@@ -1,1 +1,8 @@
-{}
+{
+  "iconPicker": {
+    "selectIcon": "아이콘을 선택해주세요",
+    "search": {
+      "placeholder": "아이콘 검색 중…"
+    }
+  }
+}

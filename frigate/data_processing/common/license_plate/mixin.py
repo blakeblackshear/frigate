@@ -14,15 +14,15 @@ from typing import Any, List, Optional, Tuple
 
 import cv2
 import numpy as np
-from Levenshtein import distance, jaro_winkler
 from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
+from rapidfuzz.distance import JaroWinkler, Levenshtein
 from shapely.geometry import Polygon
 
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
 )
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.embeddings.onnx.lpr_embedding import LPR_EMBEDDING_SIZE
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
@@ -43,8 +43,22 @@ class LicensePlateProcessingMixin:
         self.plates_det_second = EventsPerSecond()
         self.plates_det_second.start()
         self.event_metadata_publisher = EventMetadataPublisher()
-        self.ctc_decoder = CTCDecoder()
+        self.ctc_decoder = CTCDecoder(
+            character_dict_path=os.path.join(
+                MODEL_CACHE_DIR, "paddleocr-onnx", "ppocr_keys_v1.txt"
+            )
+        )
+        # process plates that are stationary and have no position changes for 5 seconds
+        self.stationary_scan_duration = 5
+
         self.batch_size = 6
+
+        # Object config
+        self.lp_objects: list[str] = []
+
+        for obj, attributes in self.config.model.attributes_map.items():
+            if "license_plate" in attributes:
+                self.lp_objects.append(obj)
 
         # Detection specific parameters
         self.min_size = 8
@@ -54,6 +68,7 @@ class LicensePlateProcessingMixin:
 
         # matching
         self.similarity_threshold = 0.8
+        self.cluster_threshold = 0.85
 
     def _detect(self, image: np.ndarray) -> List[np.ndarray]:
         """
@@ -198,7 +213,7 @@ class LicensePlateProcessingMixin:
 
         boxes = self._detect(image)
         if len(boxes) == 0:
-            logger.debug("No boxes found by OCR detector model")
+            logger.debug(f"{camera}: No boxes found by OCR detector model")
             return [], [], []
 
         if len(boxes) > 0:
@@ -348,6 +363,27 @@ class LicensePlateProcessingMixin:
                 conf for conf_list in qualifying_confidences for conf in conf_list
             ]
 
+            # Apply replace rules to combined_plate if configured
+            original_combined = combined_plate
+            if self.lpr_config.replace_rules:
+                for rule in self.lpr_config.replace_rules:
+                    try:
+                        pattern = getattr(rule, "pattern", "")
+                        replacement = getattr(rule, "replacement", "")
+                        if pattern:
+                            combined_plate = re.sub(
+                                pattern, replacement, combined_plate
+                            )
+                    except re.error as e:
+                        logger.warning(
+                            f"{camera}: Invalid regex in replace_rules '{pattern}': {e}"
+                        )
+
+            if combined_plate != original_combined:
+                logger.debug(
+                    f"{camera}: Rules applied: '{original_combined}' -> '{combined_plate}'"
+                )
+
             # Compute the combined area for qualifying boxes
             qualifying_boxes = [boxes[i] for i in qualifying_indices]
             qualifying_plate_images = [
@@ -370,15 +406,22 @@ class LicensePlateProcessingMixin:
             ):
                 if len(plate) < self.lpr_config.min_plate_length:
                     logger.debug(
-                        f"Filtered out '{plate}' due to length ({len(plate)} < {self.lpr_config.min_plate_length})"
+                        f"{camera}: Filtered out '{plate}' due to length ({len(plate)} < {self.lpr_config.min_plate_length})"
                     )
                     continue
 
-                if self.lpr_config.format and not re.fullmatch(
-                    self.lpr_config.format, plate
-                ):
-                    logger.debug(f"Filtered out '{plate}' due to format mismatch")
-                    continue
+                if self.lpr_config.format:
+                    try:
+                        if not re.fullmatch(self.lpr_config.format, plate):
+                            logger.debug(
+                                f"{camera}: Filtered out '{plate}' due to format mismatch"
+                            )
+                            continue
+                    except re.error:
+                        # Skip format filtering if regex is invalid
+                        logger.error(
+                            f"{camera}: Invalid regex in LPR format configuration: {self.lpr_config.format}"
+                        )
 
                 filtered_data.append((plate, conf_list, area))
 
@@ -978,7 +1021,9 @@ class LicensePlateProcessingMixin:
             image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
         return image
 
-    def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
+    def _detect_license_plate(
+        self, camera: string, input: np.ndarray
+    ) -> tuple[int, int, int, int]:
         """
         Use a lightweight YOLOv9 model to detect license plates for users without Frigate+
 
@@ -1048,118 +1093,89 @@ class LicensePlateProcessingMixin:
             ).clip(0, [input.shape[1], input.shape[0]] * 2)
 
             logger.debug(
-                f"Found license plate. Bounding box: {expanded_box.astype(int)}"
+                f"{camera}: Found license plate. Bounding box: {expanded_box.astype(int)}"
             )
             return tuple(expanded_box.astype(int))
         else:
             return None  # No detection above the threshold
 
-    def _should_keep_previous_plate(
-        self, id, top_plate, top_char_confidences, top_area, avg_confidence
-    ):
-        """Determine if the previous plate should be kept over the current one."""
-        if id not in self.detected_license_plates:
-            return False
+    def _get_cluster_rep(
+        self, plates: List[dict]
+    ) -> Tuple[str, float, List[float], int]:
+        """
+        Cluster plate variants and select the representative from the best cluster.
+        """
+        if len(plates) == 0:
+            return "", 0.0, [], 0
 
-        prev_data = self.detected_license_plates[id]
-        prev_plate = prev_data["plate"]
-        prev_char_confidences = prev_data["char_confidences"]
-        prev_area = prev_data["area"]
-        prev_avg_confidence = (
-            sum(prev_char_confidences) / len(prev_char_confidences)
-            if prev_char_confidences
-            else 0
+        if len(plates) == 1:
+            p = plates[0]
+            return p["plate"], p["conf"], p["char_confidences"], p["area"]
+
+        # Log initial variants
+        logger.debug(f"Clustering {len(plates)} plate variants:")
+        for i, p in enumerate(plates):
+            logger.debug(
+                f"  Variant {i + 1}: '{p['plate']}' (conf: {p['conf']:.3f}, area: {p['area']})"
+            )
+
+        clusters = []
+        for i, plate in enumerate(plates):
+            merged = False
+            for j, cluster in enumerate(clusters):
+                sims = [
+                    JaroWinkler.similarity(plate["plate"], v["plate"]) for v in cluster
+                ]
+                if len(sims) > 0:
+                    avg_sim = sum(sims) / len(sims)
+                    if avg_sim >= self.cluster_threshold:
+                        cluster.append(plate)
+                        logger.debug(
+                            f"  Merged variant {i + 1} '{plate['plate']}' (conf: {plate['conf']:.3f}) into cluster {j + 1} (avg_sim: {avg_sim:.3f})"
+                        )
+                        merged = True
+                        break
+            if not merged:
+                clusters.append([plate])
+                logger.debug(
+                    f"  Started new cluster {len(clusters)} with variant {i + 1} '{plate['plate']}' (conf: {plate['conf']:.3f})"
+                )
+
+        if not clusters:
+            return "", 0.0, [], 0
+
+        # Log cluster summaries
+        for j, cluster in enumerate(clusters):
+            cluster_size = len(cluster)
+            max_conf = max(v["conf"] for v in cluster)
+            sample_variants = [v["plate"] for v in cluster[:3]]  # First 3 for brevity
+            logger.debug(
+                f"  Cluster {j + 1}: size {cluster_size}, max conf {max_conf:.3f}, variants: {sample_variants}{'...' if cluster_size > 3 else ''}"
+            )
+
+        # Best cluster: largest size, tiebroken by max conf
+        def cluster_score(c):
+            return (len(c), max(v["conf"] for v in c))
+
+        best_cluster_idx = max(
+            range(len(clusters)), key=lambda j: cluster_score(clusters[j])
         )
-
-        # 1. Normalize metrics
-        # Length score: Equal lengths = 0.5, penalize extra characters if low confidence
-        length_diff = len(top_plate) - len(prev_plate)
-        max_length_diff = 3
-        curr_length_score = 0.5 + (length_diff / (2 * max_length_diff))
-        curr_length_score = max(0, min(1, curr_length_score))
-        prev_length_score = 0.5 - (length_diff / (2 * max_length_diff))
-        prev_length_score = max(0, min(1, prev_length_score))
-
-        # Adjust length score based on confidence of extra characters
-        conf_threshold = 0.75  # Minimum confidence for a character to be "trusted"
-        top_plate_char_count = len(top_plate.replace(" ", ""))
-        prev_plate_char_count = len(prev_plate.replace(" ", ""))
-
-        if top_plate_char_count > prev_plate_char_count:
-            extra_confidences = top_char_confidences[prev_plate_char_count:]
-            if extra_confidences:  # Ensure the slice is not empty
-                extra_conf = min(extra_confidences)  # Lowest extra char confidence
-                if extra_conf < conf_threshold:
-                    curr_length_score *= extra_conf / conf_threshold  # Penalize if weak
-        elif prev_plate_char_count > top_plate_char_count:
-            extra_confidences = prev_char_confidences[top_plate_char_count:]
-            if extra_confidences:  # Ensure the slice is not empty
-                extra_conf = min(extra_confidences)
-                if extra_conf < conf_threshold:
-                    prev_length_score *= extra_conf / conf_threshold
-
-        # Area score: Normalize by max area
-        max_area = max(top_area, prev_area)
-        curr_area_score = top_area / max_area if max_area > 0 else 0
-        prev_area_score = prev_area / max_area if max_area > 0 else 0
-
-        # Confidence scores
-        curr_conf_score = avg_confidence
-        prev_conf_score = prev_avg_confidence
-
-        # Character confidence comparison (average over shared length)
-        min_length = min(len(top_plate), len(prev_plate))
-        if min_length > 0:
-            curr_char_conf = sum(top_char_confidences[:min_length]) / min_length
-            prev_char_conf = sum(prev_char_confidences[:min_length]) / min_length
-        else:
-            curr_char_conf = prev_char_conf = 0
-
-        # Penalize any character below threshold
-        curr_min_conf = min(top_char_confidences) if top_char_confidences else 0
-        prev_min_conf = min(prev_char_confidences) if prev_char_confidences else 0
-        curr_conf_penalty = (
-            1.0 if curr_min_conf >= conf_threshold else (curr_min_conf / conf_threshold)
-        )
-        prev_conf_penalty = (
-            1.0 if prev_min_conf >= conf_threshold else (prev_min_conf / conf_threshold)
-        )
-
-        # 2. Define weights (boost confidence importance)
-        weights = {
-            "length": 0.2,
-            "area": 0.2,
-            "avg_confidence": 0.35,
-            "char_confidence": 0.25,
-        }
-
-        # 3. Calculate weighted scores with penalty
-        curr_score = (
-            curr_length_score * weights["length"]
-            + curr_area_score * weights["area"]
-            + curr_conf_score * weights["avg_confidence"]
-            + curr_char_conf * weights["char_confidence"]
-        ) * curr_conf_penalty
-
-        prev_score = (
-            prev_length_score * weights["length"]
-            + prev_area_score * weights["area"]
-            + prev_conf_score * weights["avg_confidence"]
-            + prev_char_conf * weights["char_confidence"]
-        ) * prev_conf_penalty
-
-        # 4. Log the comparison
+        best_cluster = clusters[best_cluster_idx]
+        best_size, best_max_conf = cluster_score(best_cluster)
         logger.debug(
-            f"Plate comparison - Current: {top_plate} (score: {curr_score:.3f}, min_conf: {curr_min_conf:.2f}) vs "
-            f"Previous: {prev_plate} (score: {prev_score:.3f}, min_conf: {prev_min_conf:.2f}) "
-            f"Metrics - Length: {len(top_plate)} vs {len(prev_plate)} (scores: {curr_length_score:.2f} vs {prev_length_score:.2f}), "
-            f"Area: {top_area} vs {prev_area}, "
-            f"Avg Conf: {avg_confidence:.2f} vs {prev_avg_confidence:.2f}, "
-            f"Char Conf: {curr_char_conf:.2f} vs {prev_char_conf:.2f}"
+            f"  Selected best cluster {best_cluster_idx + 1}: size {best_size}, max conf {best_max_conf:.3f}"
         )
 
-        # 5. Return True if previous plate scores higher
-        return prev_score > curr_score
+        # Rep: highest conf in best cluster
+        rep = max(best_cluster, key=lambda v: v["conf"])
+        logger.debug(
+            f"  Selected rep from best cluster: '{rep['plate']}' (conf: {rep['conf']:.3f})"
+        )
+        logger.debug(
+            f"  Final clustered plate: '{rep['plate']}' (conf: {rep['conf']:.3f})"
+        )
+
+        return rep["plate"], rep["conf"], rep["char_confidences"], rep["area"]
 
     def _generate_plate_event(self, camera: str, plate: str, plate_score: float) -> str:
         """Generate a unique ID for a plate event based on camera and text."""
@@ -1168,7 +1184,6 @@ class LicensePlateProcessingMixin:
         event_id = f"{now}-{rand_id}"
 
         self.event_metadata_publisher.publish(
-            EventMetadataTypeEnum.lpr_event_create,
             (
                 now,
                 camera,
@@ -1179,6 +1194,7 @@ class LicensePlateProcessingMixin:
                 None,
                 plate,
             ),
+            EventMetadataTypeEnum.lpr_event_create.value,
         )
         return event_id
 
@@ -1210,7 +1226,7 @@ class LicensePlateProcessingMixin:
                 )
 
             yolov9_start = datetime.datetime.now().timestamp()
-            license_plate = self._detect_license_plate(rgb)
+            license_plate = self._detect_license_plate(camera, rgb)
 
             logger.debug(
                 f"{camera}: YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
@@ -1250,7 +1266,7 @@ class LicensePlateProcessingMixin:
 
             # don't run for non car/motorcycle or non license plate (dedicated lpr with frigate+) objects
             if (
-                obj_data.get("label") not in ["car", "motorcycle"]
+                obj_data.get("label") not in self.lp_objects
                 and obj_data.get("label") != "license_plate"
             ):
                 logger.debug(
@@ -1258,21 +1274,39 @@ class LicensePlateProcessingMixin:
                 )
                 return
 
-            # don't run for stationary car objects
-            if obj_data.get("stationary") == True:
+            # don't run for non-stationary objects with no position changes to avoid processing uncertain moving objects
+            # zero position_changes is the initial state after registering a new tracked object
+            # LPR will run 2 frames after detect.min_initialized is reached
+            if obj_data.get("position_changes", 0) == 0 and not obj_data.get(
+                "stationary", False
+            ):
                 logger.debug(
-                    f"{camera}: Not a processing license plate for a stationary car/motorcycle object."
+                    f"{camera}: Skipping LPR for non-stationary {obj_data['label']} object {id} with no position changes.  (Detected in {self.config.cameras[camera].detect.min_initialized + 1} concurrent frames, threshold to run is {self.config.cameras[camera].detect.min_initialized + 2} frames)"
                 )
                 return
 
-            # don't run for objects with no position changes
-            # this is the initial state after registering a new tracked object
-            # LPR will run 2 frames after detect.min_initialized is reached
-            if obj_data.get("position_changes", 0) == 0:
-                logger.debug(
-                    f"{camera}: Plate detected in {self.config.cameras[camera].detect.min_initialized + 1} concurrent frames, LPR frame threshold ({self.config.cameras[camera].detect.min_initialized + 2})"
-                )
-                return
+            # run for stationary objects for a limited time after they become stationary
+            if obj_data.get("stationary") == True:
+                threshold = self.config.cameras[camera].detect.stationary.threshold
+                if obj_data.get("motionless_count", 0) >= threshold:
+                    frames_since_stationary = (
+                        obj_data.get("motionless_count", 0) - threshold
+                    )
+                    fps = self.config.cameras[camera].detect.fps
+                    time_since_stationary = frames_since_stationary / fps
+
+                    # only print this log for a short time to avoid log spam
+                    if (
+                        self.stationary_scan_duration
+                        < time_since_stationary
+                        <= self.stationary_scan_duration + 1
+                    ):
+                        logger.debug(
+                            f"{camera}: {obj_data.get('label', 'An')} object {id} has been stationary for > {self.stationary_scan_duration} seconds, skipping LPR."
+                        )
+
+                    if time_since_stationary > self.stationary_scan_duration:
+                        return
 
             license_plate: Optional[dict[str, Any]] = None
 
@@ -1302,7 +1336,7 @@ class LicensePlateProcessingMixin:
                     )
 
                 yolov9_start = datetime.datetime.now().timestamp()
-                license_plate = self._detect_license_plate(car)
+                license_plate = self._detect_license_plate(camera, car)
                 logger.debug(
                     f"{camera}: YOLOv9 LPD inference time: {(datetime.datetime.now().timestamp() - yolov9_start) * 1000:.2f} ms"
                 )
@@ -1342,7 +1376,7 @@ class LicensePlateProcessingMixin:
                     logger.debug(f"{camera}: No attributes to parse.")
                     return
 
-                if obj_data.get("label") in ["car", "motorcycle"]:
+                if obj_data.get("label") in self.lp_objects:
                     attributes: list[dict[str, Any]] = obj_data.get(
                         "current_attributes", []
                     )
@@ -1413,7 +1447,7 @@ class LicensePlateProcessingMixin:
                     license_plate_frame,
                 )
 
-        logger.debug(f"{camera}: Running plate recognition.")
+        logger.debug(f"{camera}: Running plate recognition for id: {id}.")
 
         # run detection, returns results sorted by confidence, best first
         start = datetime.datetime.now().timestamp()
@@ -1433,7 +1467,7 @@ class LicensePlateProcessingMixin:
                     f"{camera}: Detected text: {plate} (average confidence: {avg_confidence:.2f}, area: {text_area} pixels)"
                 )
         else:
-            logger.debug("No text detected")
+            logger.debug(f"{camera}: No text detected")
             return
 
         top_plate, top_char_confidences, top_area = (
@@ -1468,7 +1502,7 @@ class LicensePlateProcessingMixin:
                     and current_time - data["last_seen"]
                     <= self.config.cameras[camera].lpr.expire_time
                 ):
-                    similarity = jaro_winkler(data["plate"], top_plate)
+                    similarity = JaroWinkler.similarity(data["plate"], top_plate)
                     if similarity >= self.similarity_threshold:
                         plate_id = existing_id
                         logger.debug(
@@ -1476,9 +1510,7 @@ class LicensePlateProcessingMixin:
                         )
                         break
             if plate_id is None:
-                plate_id = self._generate_plate_event(
-                    obj_data, top_plate, avg_confidence
-                )
+                plate_id = self._generate_plate_event(camera, top_plate, avg_confidence)
                 logger.debug(
                     f"{camera}: New plate event for dedicated LPR camera {plate_id}: {top_plate}"
                 )
@@ -1490,25 +1522,69 @@ class LicensePlateProcessingMixin:
 
             id = plate_id
 
-        # Check if we have a previously detected plate for this ID
-        if id in self.detected_license_plates:
-            if self._should_keep_previous_plate(
-                id, top_plate, top_char_confidences, top_area, avg_confidence
-            ):
-                logger.debug(f"{camera}: Keeping previous plate")
-                return
+        is_new = id not in self.detected_license_plates
+
+        # Collect variant
+        variant = {
+            "plate": top_plate,
+            "conf": avg_confidence,
+            "char_confidences": top_char_confidences,
+            "area": top_area,
+            "timestamp": current_time,
+        }
+
+        # Initialize or append to plates
+        self.detected_license_plates.setdefault(id, {"plates": [], "camera": camera})
+        self.detected_license_plates[id]["plates"].append(variant)
+
+        # Prune old variants - this is probably higher than it needs to be
+        # since we don't detect a plate every frame
+        num_variants = self.config.cameras[camera].detect.fps * 5
+        if len(self.detected_license_plates[id]["plates"]) > num_variants:
+            self.detected_license_plates[id]["plates"] = self.detected_license_plates[
+                id
+            ]["plates"][-num_variants:]
+
+        # Cluster and select rep
+        plates = self.detected_license_plates[id]["plates"]
+        rep_plate, rep_conf, rep_char_confs, rep_area = self._get_cluster_rep(plates)
+
+        if rep_plate != top_plate:
+            logger.debug(
+                f"{camera}: Clustering changed top plate '{top_plate}' (conf: {avg_confidence:.3f}) to rep '{rep_plate}' (conf: {rep_conf:.3f})"
+            )
+
+        # Update stored rep
+        self.detected_license_plates[id].update(
+            {
+                "plate": rep_plate,
+                "char_confidences": rep_char_confs,
+                "area": rep_area,
+                "last_seen": current_time if dedicated_lpr else None,
+            }
+        )
+
+        if not dedicated_lpr:
+            self.detected_license_plates[id]["obj_data"] = obj_data
+
+        if is_new:
+            if camera not in self.camera_current_cars:
+                self.camera_current_cars[camera] = []
+            self.camera_current_cars[camera].append(id)
 
         # Determine subLabel based on known plates, use regex matching
         # Default to the detected plate, use label name if there's a match
+        sub_label = None
         try:
             sub_label = next(
                 (
                     label
-                    for label, plates in self.lpr_config.known_plates.items()
+                    for label, plates_list in self.lpr_config.known_plates.items()
                     if any(
-                        re.match(f"^{plate}$", top_plate)
-                        or distance(plate, top_plate) <= self.lpr_config.match_distance
-                        for plate in plates
+                        re.match(f"^{plate}$", rep_plate)
+                        or Levenshtein.distance(plate, rep_plate)
+                        <= self.lpr_config.match_distance
+                        for plate in plates_list
                     )
                 ),
                 None,
@@ -1517,12 +1593,11 @@ class LicensePlateProcessingMixin:
             logger.error(
                 f"{camera}: Invalid regex in known plates configuration: {self.lpr_config.known_plates}"
             )
-            sub_label = None
 
         # If it's a known plate, publish to sub_label
         if sub_label is not None:
             self.sub_label_publisher.publish(
-                EventMetadataTypeEnum.sub_label, (id, sub_label, avg_confidence)
+                (id, sub_label, rep_conf), EventMetadataTypeEnum.sub_label.value
             )
 
         # always publish to recognized_license_plate field
@@ -1532,8 +1607,8 @@ class LicensePlateProcessingMixin:
                 {
                     "type": TrackedObjectUpdateTypesEnum.lpr,
                     "name": sub_label,
-                    "plate": top_plate,
-                    "score": avg_confidence,
+                    "plate": rep_plate,
+                    "score": rep_conf,
                     "id": id,
                     "camera": camera,
                     "timestamp": start,
@@ -1541,8 +1616,8 @@ class LicensePlateProcessingMixin:
             ),
         )
         self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.recognized_license_plate,
-            (id, top_plate, avg_confidence),
+            (id, "recognized_license_plate", rep_plate, rep_conf),
+            EventMetadataTypeEnum.attribute.value,
         )
 
         # save the best snapshot for dedicated lpr cams not using frigate+
@@ -1551,29 +1626,14 @@ class LicensePlateProcessingMixin:
             and "license_plate" not in self.config.cameras[camera].objects.track
         ):
             logger.debug(
-                f"{camera}: Writing snapshot for {id}, {top_plate}, {current_time}"
+                f"{camera}: Writing snapshot for {id}, {rep_plate}, {current_time}"
             )
             frame_bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             _, encoded_img = cv2.imencode(".jpg", frame_bgr)
             self.sub_label_publisher.publish(
-                EventMetadataTypeEnum.save_lpr_snapshot,
                 (base64.b64encode(encoded_img).decode("ASCII"), id, camera),
+                EventMetadataTypeEnum.save_lpr_snapshot.value,
             )
-
-        if id not in self.detected_license_plates:
-            if camera not in self.camera_current_cars:
-                self.camera_current_cars[camera] = []
-
-            self.camera_current_cars[camera].append(id)
-
-        self.detected_license_plates[id] = {
-            "plate": top_plate,
-            "char_confidences": top_char_confidences,
-            "area": top_area,
-            "obj_data": obj_data,
-            "camera": camera,
-            "last_seen": current_time if dedicated_lpr else None,
-        }
 
     def handle_request(self, topic, request_data) -> dict[str, Any] | None:
         return
@@ -1595,113 +1655,121 @@ class CTCDecoder:
     for each decoded character sequence.
     """
 
-    def __init__(self):
+    def __init__(self, character_dict_path=None):
         """
-        Initialize the CTCDecoder with a list of characters and a character map.
+        Initializes the CTCDecoder.
+        :param character_dict_path: Path to the character dictionary file.
+                                    If None, a default (English-focused) list is used.
+                                    For Chinese models, this should point to the correct
+                                    character dictionary file provided with the model.
+        """
+        self.characters = []
+        if character_dict_path and os.path.exists(character_dict_path):
+            with open(character_dict_path, "r", encoding="utf-8") as f:
+                self.characters = (
+                    ["blank"] + [line.strip() for line in f if line.strip()] + [" "]
+                )
+        else:
+            self.characters = [
+                "blank",
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                ":",
+                ";",
+                "<",
+                "=",
+                ">",
+                "?",
+                "@",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "O",
+                "P",
+                "Q",
+                "R",
+                "S",
+                "T",
+                "U",
+                "V",
+                "W",
+                "X",
+                "Y",
+                "Z",
+                "[",
+                "\\",
+                "]",
+                "^",
+                "_",
+                "`",
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "g",
+                "h",
+                "i",
+                "j",
+                "k",
+                "l",
+                "m",
+                "n",
+                "o",
+                "p",
+                "q",
+                "r",
+                "s",
+                "t",
+                "u",
+                "v",
+                "w",
+                "x",
+                "y",
+                "z",
+                "{",
+                "|",
+                "}",
+                "~",
+                "!",
+                '"',
+                "#",
+                "$",
+                "%",
+                "&",
+                "'",
+                "(",
+                ")",
+                "*",
+                "+",
+                ",",
+                "-",
+                ".",
+                "/",
+                " ",
+                " ",
+            ]
 
-        The character set includes digits, letters, special characters, and a "blank" token
-        (used by the CTC model for decoding purposes). A character map is created to map
-        indices to characters.
-        """
-        self.characters = [
-            "blank",
-            "0",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            ":",
-            ";",
-            "<",
-            "=",
-            ">",
-            "?",
-            "@",
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-            "K",
-            "L",
-            "M",
-            "N",
-            "O",
-            "P",
-            "Q",
-            "R",
-            "S",
-            "T",
-            "U",
-            "V",
-            "W",
-            "X",
-            "Y",
-            "Z",
-            "[",
-            "\\",
-            "]",
-            "^",
-            "_",
-            "`",
-            "a",
-            "b",
-            "c",
-            "d",
-            "e",
-            "f",
-            "g",
-            "h",
-            "i",
-            "j",
-            "k",
-            "l",
-            "m",
-            "n",
-            "o",
-            "p",
-            "q",
-            "r",
-            "s",
-            "t",
-            "u",
-            "v",
-            "w",
-            "x",
-            "y",
-            "z",
-            "{",
-            "|",
-            "}",
-            "~",
-            "!",
-            '"',
-            "#",
-            "$",
-            "%",
-            "&",
-            "'",
-            "(",
-            ")",
-            "*",
-            "+",
-            ",",
-            "-",
-            ".",
-            "/",
-            " ",
-            " ",
-        ]
         self.char_map = {i: char for i, char in enumerate(self.characters)}
 
     def __call__(
@@ -1735,7 +1803,7 @@ class CTCDecoder:
                     merged_path.append(char_index)
                     merged_probs.append(seq_log_probs[t, char_index])
 
-            result = "".join(self.char_map[idx] for idx in merged_path)
+            result = "".join(self.char_map.get(idx, "") for idx in merged_path)
             results.append(result)
 
             confidence = np.exp(merged_probs).tolist()

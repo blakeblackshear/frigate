@@ -119,9 +119,19 @@
     "loading": "Cargando matrículas reconocidas…",
     "placeholder": "Escribe para buscar matrículas…",
     "noLicensePlatesFound": "No se encontraron matrículas.",
-    "selectPlatesFromList": "Selecciona una o más matrículas de la lista."
+    "selectPlatesFromList": "Selecciona una o más matrículas de la lista.",
+    "selectAll": "Seleccionar todas",
+    "clearAll": "Limpiar todas"
   },
   "zoneMask": {
     "filterBy": "Filtrar por máscara de zona"
+  },
+  "classes": {
+    "label": "Clases",
+    "all": {
+      "title": "Todas las Clases"
+    },
+    "count_one": "{{count}} Clase",
+    "count_other": "{{count}} Clases"
   }
 }

@@ -3,21 +3,26 @@
     "button": "Starta om",
     "restarting": {
       "title": "Frigate startar om",
-      "content": "Sidan uppdateras om {{countdown}} seconds.",
-      "button": "Tvinga uppdatering nu"
+      "content": "Sidan uppdateras om {{countdown}} sekunder.",
+      "button": "Tvinga omladdning nu"
     },
     "title": "Är du säker på att du vill starta om Frigate?"
   },
   "explore": {
     "plus": {
       "submitToPlus": {
-        "label": "Skicka till Frigate+"
+        "label": "Skicka till Frigate+",
+        "desc": "Objekt på platser du vill undvika är inte falska positiva resultat. Att skicka in dem som falska positiva resultat kommer att förvirra modellen."
       },
       "review": {
         "question": {
           "ask_a": "Är detta objektet <code>{{label}}</code>?",
           "ask_an": "Är detta objektet en <code>{{label}}</code>?",
-          "ask_full": "Är detta objektet <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+          "ask_full": "Är detta objektet <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
+          "label": "Bekräfta denna etikett för Frigate Plus"
+        },
+        "state": {
+          "submitted": "Inskickad"
         }
       }
     },
@@ -37,12 +42,81 @@
       "end": {
         "title": "Slut Tid",
         "label": "Välj Sluttid"
-      }
+      },
+      "custom": "Anpassad"
     },
     "name": {
       "placeholder": "Ge exporten ett namn"
     },
     "select": "Välj",
-    "export": "Eksport"
+    "export": "Eksport",
+    "selectOrExport": "Välj eller exportera",
+    "toast": {
+      "success": "Exporten har startats. Visa filen på exportsidan.",
+      "error": {
+        "failed": "Misslyckades med att starta exporten: {{error}}",
+        "endTimeMustAfterStartTime": "Sluttiden måste vara efter starttiden",
+        "noVaildTimeSelected": "Inget giltigt tidsintervall valt"
+      }
+    },
+    "fromTimeline": {
+      "saveExport": "Spara export",
+      "previewExport": "Förhandsgranska export"
+    }
+  },
+  "streaming": {
+    "label": "Videoström",
+    "restreaming": {
+      "disabled": "Omströmning är inte aktiverad för den här kameran.",
+      "desc": {
+        "title": "Konfigurera go2rtc för ytterligare livevisningsalternativ och ljud för den här kameran.",
+        "readTheDocumentation": "Läs dokumentationen"
+      }
+    },
+    "showStats": {
+      "label": "Visa strömstatistik",
+      "desc": "Aktivera det här alternativet för att visa strömstatistik som ett överlägg över kameraflödet."
+    },
+    "debugView": "Felsöknings vy"
+  },
+  "search": {
+    "saveSearch": {
+      "overwrite": "{{searchName}} finns redan. Om du sparar skrivs det befintliga värdet över.",
+      "success": "Sökningen ({{searchName}}) har sparats.",
+      "button": {
+        "save": {
+          "label": "Spara den här sökningen"
+        }
+      },
+      "label": "Spara Sökning",
+      "desc": "Ange ett namn för den här sparade sökningen.",
+      "placeholder": "Ange ett namn för din sökning"
+    }
+  },
+  "recording": {
+    "confirmDelete": {
+      "title": "Bekräfta radering",
+      "desc": {
+        "selected": "Är du säker på att du vill radera all inspelad video som är kopplad till det här granskningsobjektet?<br /><br />Håll ner <em>Shift</em>-tangenten för att hoppa över den här dialogrutan i framtiden."
+      },
+      "toast": {
+        "success": "Videoklipp som är kopplade till de valda granskningsobjekten har raderats.",
+        "error": "Misslyckades med att ta bort: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Exportera",
+      "markAsReviewed": "Markera som granskad",
+      "deleteNow": "Ta bort nu",
+      "markAsUnreviewed": "Markera som ogranskad"
+    }
+  },
+  "imagePicker": {
+    "selectImage": "Välj miniatyrbilden för ett spårat objekt",
+    "search": {
+      "placeholder": "Sök efter etikett eller underetikett..."
+    },
+    "noImages": "Inga miniatyrbilder hittades för den här kameran",
+    "unknownLabel": "Sparad triggerbild"
   }
 }

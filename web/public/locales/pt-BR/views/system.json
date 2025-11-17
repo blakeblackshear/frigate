@@ -42,7 +42,8 @@
       "inferenceSpeed": "Velocidade de Inferência do Detector",
       "temperature": "Detector Temperatura",
       "cpuUsage": "Utilização de CPU de Detecção",
-      "memoryUsage": "Utilização de Memória do Detector"
+      "memoryUsage": "Utilização de Memória do Detector",
+      "cpuUsageInformation": "CPU utilizado para preparar os dados de entrada e saída de/para os modelos de detecção. Esse valor não mede a utilização da inferência, mesmo se estiver usando um GPU ou acelerador."
     },
     "hardwareInfo": {
       "title": "Informações de Hardware",
@@ -102,6 +103,10 @@
         "title": "Não Utilizado",
         "tips": "Esse valor por não representar com precisão o espaço livre disponí®el para o Frigate se você possui outros arquivos armazenados no seu drive além das gravações do Frigate. O Frigate não rastreia a utilização do armazenamento além de suas próprias gravações."
       }
+    },
+    "shm": {
+      "title": "Alocação de memória compartilhada (SHM)",
+      "warning": "O tamanho de {{total}}MB de memória compartilhada (SHM) é insuficiente. Aumente para ao menos {{min_shm}}MB."
     }
   },
   "cameras": {
@@ -157,8 +162,9 @@
     "detectHighCpuUsage": "{{camera}} possui alta utilização de CPU para detecção ({{detectAvg}}%)",
     "healthy": "O sistema está saudável",
     "cameraIsOffline": "{{camera}} está offline",
-    "reindexingEmbeddings": "Reindexando os vetores de característica de imagens ({{processed}}% completado)",
-    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)"
+    "reindexingEmbeddings": "Reindexando os embeddings ({{processed}}% completado)",
+    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)",
+    "shmTooLow": "A alocação ({{total}} MB) para a pasta /dev/shm deve ser aumentada para ao menos {{min}} MB."
   },
   "enrichments": {
     "title": "Enriquecimentos",
@@ -167,13 +173,13 @@
       "face_recognition": "Reconhecimento Facial",
       "plate_recognition": "Reconhecimento de Placa",
       "plate_recognition_speed": "Velocidade de Reconhecimento de Placas",
-      "text_embedding_speed": "Velocidade de Geração de Vetores de Texto",
+      "text_embedding_speed": "Velocidade de Embeddings de Texto",
       "yolov9_plate_detection_speed": "Velocidade de Reconhecimento de Placas do YOLOv9",
       "yolov9_plate_detection": "Detecção de Placas do YOLOv9",
-      "image_embedding": "Vetores de Características de Imagens",
-      "text_embedding": "Vetor de Característica de Texto",
-      "image_embedding_speed": "Velocidade de Geração de Vetores de Imagem",
-      "face_embedding_speed": "Velocidade de Geração de Vetores de Rostos",
+      "image_embedding": "Embeddings de Imagens",
+      "text_embedding": "Embeddings de Texto",
+      "image_embedding_speed": "Velocidade de Embeddings de Imagens",
+      "face_embedding_speed": "Velocidade de Embedding de Rostos",
       "face_recognition_speed": "Velocidade de Reconhecimento de Rostos"
     }
   }

@@ -4,7 +4,7 @@ import CameraInfoDialog from "@/components/overlay/CameraInfoDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats } from "@/types/stats";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MdInfo } from "react-icons/md";
 import {
   Tooltip,
@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/tooltip";
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
+import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 
 type CameraMetricsProps = {
   lastUpdated: number;
@@ -26,13 +28,23 @@ export default function CameraMetrics({
   const { t } = useTranslation(["views/system"]);
   // camera info dialog
 
+  const getCameraName = useCallback(
+    (cameraId: string) => resolveCameraName(config, cameraId),
+    [config],
+  );
+
   const [showCameraInfoDialog, setShowCameraInfoDialog] = useState(false);
   const [probeCameraName, setProbeCameraName] = useState<string>();
 
   // stats
 
   const { data: initialStats } = useSWR<FrigateStats[]>(
-    ["stats/history", { keys: "cpu_usages,cameras,detection_fps,service" }],
+    [
+      "stats/history",
+      {
+        keys: "cpu_usages,cameras,camera_fps,detection_fps,skipped_fps,service",
+      },
+    ],
     {
       revalidateOnFocus: false,
     },
@@ -97,14 +109,9 @@ export default function CameraMetrics({
         return;
       }
 
-      let frames = 0;
-      Object.values(stats.cameras).forEach(
-        (camStat) => (frames += camStat.camera_fps),
-      );
-
       series["overall_fps"].data.push({
         x: statsIdx,
-        y: Math.round(frames),
+        y: stats.camera_fps,
       });
 
       series["overall_dps"].data.push({
@@ -112,14 +119,9 @@ export default function CameraMetrics({
         y: stats.detection_fps,
       });
 
-      let skipped = 0;
-      Object.values(stats.cameras).forEach(
-        (camStat) => (skipped += camStat.skipped_fps),
-      );
-
       series["overall_skipped_dps"].data.push({
         x: statsIdx,
-        y: skipped,
+        y: stats.skipped_fps,
       });
     });
     return Object.values(series);
@@ -147,7 +149,7 @@ export default function CameraMetrics({
         }
 
         if (!(key in series)) {
-          const camName = key.replaceAll("_", " ");
+          const camName = getCameraName(key);
           series[key] = {};
           series[key]["ffmpeg"] = {
             name: t("cameras.label.cameraFfmpeg", { camName: camName }),
@@ -173,12 +175,12 @@ export default function CameraMetrics({
         });
         series[key]["detect"].data.push({
           x: statsIdx,
-          y: stats.cpu_usages[camStats.pid.toString()].cpu,
+          y: stats.cpu_usages[camStats.pid?.toString()]?.cpu,
         });
       });
     });
     return series;
-  }, [config, statsHistory, t]);
+  }, [config, getCameraName, statsHistory, t]);
 
   const cameraFpsSeries = useMemo(() => {
     if (!statsHistory) {
@@ -198,7 +200,7 @@ export default function CameraMetrics({
 
       Object.entries(stats.cameras).forEach(([key, camStats]) => {
         if (!(key in series)) {
-          const camName = key.replaceAll("_", " ");
+          const camName = getCameraName(key);
           series[key] = {};
           series[key]["fps"] = {
             name: t("cameras.label.cameraFramesPerSecond", {
@@ -235,7 +237,7 @@ export default function CameraMetrics({
       });
     });
     return series;
-  }, [statsHistory, t]);
+  }, [getCameraName, statsHistory, t]);
 
   useEffect(() => {
     if (!showCameraInfoDialog) {
@@ -281,7 +283,7 @@ export default function CameraMetrics({
                   <div className="flex w-full flex-col gap-3">
                     <div className="flex flex-row items-center justify-between">
                       <div className="text-sm font-medium text-muted-foreground smart-capitalize">
-                        {camera.name.replaceAll("_", " ")}
+                        <CameraNameLabel camera={camera} />
                       </div>
                       <Tooltip>
                         <TooltipTrigger>

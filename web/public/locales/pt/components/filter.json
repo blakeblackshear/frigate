@@ -13,18 +13,18 @@
   "zones": {
     "label": "Zonas",
     "all": {
-      "title": "Todas as zonas",
+      "title": "Todas as Zonas",
       "short": "Zonas"
     }
   },
   "dates": {
     "all": {
-      "title": "Todas as datas",
+      "title": "Todas as Datas",
       "short": "Datas"
     },
-    "selectPreset": "Escolhe uma predefinição…"
+    "selectPreset": "Selecionar um Pré-ajuste…"
   },
-  "more": "Mais filtros",
+  "more": "Mais Filtros",
   "reset": {
     "label": "Redefinir filtros para valores padrão"
   },
@@ -35,28 +35,28 @@
   "score": "Pontuação",
   "features": {
     "label": "Funcionalidades",
-    "hasSnapshot": "Tem um snapshot",
+    "hasSnapshot": "Tem uma captura",
     "hasVideoClip": "Tem um videoclipe",
     "submittedToFrigatePlus": {
-      "label": "Enviado para Frigate+",
-      "tips": "Primeiro, você deve filtrar os objetos rastreados que têm um snapshot.<br /><br />Objetos rastreados sem um snapshot não podem ser enviados ao Frigate+."
+      "label": "Submetido para Frigate+",
+      "tips": "Primeiro, deve filtrar os objetos rastreados que têm uma captura.<br /><br />Os objetos rastreados sem uma captura não podem ser submetidos para Frigate+."
     }
   },
   "sort": {
-    "label": "Organizar",
+    "label": "Ordenar",
     "dateAsc": "Data (Ascendente)",
-    "scoreAsc": "Pontuação do objeto (Crescente)",
-    "scoreDesc": "Pontuação do objeto (Decrescente)",
-    "speedDesc": "Velocidade estimada (Decrescente)",
-    "speedAsc": "Velocidade estimada (Crescente)",
+    "scoreAsc": "Pontuação do Objeto (Ascendente)",
+    "scoreDesc": "Pontuação do Objeto (Descendente)",
+    "speedDesc": "Velocidade Estimada (Descendente)",
+    "speedAsc": "Velocidade Estimada (Ascendente)",
     "dateDesc": "Data (Decrescente)",
     "relevance": "Relevância"
   },
   "cameras": {
-    "label": "Filtro de câmaras",
+    "label": "Filtro de Câmaras",
     "all": {
       "short": "Câmaras",
-      "title": "Todas as câmaras"
+      "title": "Todas as Câmaras"
     }
   },
   "review": {
@@ -67,22 +67,22 @@
   },
   "explore": {
     "settings": {
-      "title": "Configurações",
+      "title": "Definições",
       "defaultView": {
-        "title": "Exibição padrão",
-        "summary": "Sumário",
-        "unfilteredGrid": "Grade não filtrada",
-        "desc": "Quando nenhum filtro for selecionado, exiba um resumo dos objetos rastreados mais recentemente por etiqueta ou exiba uma grade não filtrada."
+        "title": "Visualização Predefinida",
+        "summary": "Resumo",
+        "unfilteredGrid": "Grelha não Filtrada",
+        "desc": "Quando não for selecionado nenhum filtro, exiba um resumo dos objetos rastreados mais recentes por etiqueta, ou exiba uma grelha não filtrada."
       },
       "gridColumns": {
-        "title": "Colunas da grade",
-        "desc": "Selecione o número de colunas na visualização em grade."
+        "title": "Colunas da Grelha",
+        "desc": "Selecione o número de colunas na visualização em grelha."
       },
       "searchSource": {
-        "label": "Pesquisar fonte",
-        "desc": "Escolha se deseja pesquisar nas miniaturas ou descrições dos seus objetos rastreados.",
+        "label": "Procurar Fonte",
+        "desc": "Escolha se deseja procurar nas miniaturas ou descrições dos seus objetos rastreados.",
         "options": {
-          "thumbnailImage": "Imagem em miniatura",
+          "thumbnailImage": "Imagem em Miniatura",
           "description": "Descrição"
         }
       }
@@ -94,14 +94,14 @@
     }
   },
   "logSettings": {
-    "label": "Nível de log do filtro",
+    "label": "Nível de registo do filtro",
     "loading": {
-      "title": "Carregando",
-      "desc": "Ao fazer scroll até ao fundo no painel de logs, novos registos são automaticamente apresentados à medida que são adicionados."
+      "title": "A carregar",
+      "desc": "Quando desliza até ao fundo no painel de registos, os novos registos são apresentados automaticamente à medida que são adicionados."
     },
-    "filterBySeverity": "Filtrar logs por gravidade",
-    "disableLogStreaming": "Desativar transmissão de logs",
-    "allLogs": "Todos os logs"
+    "filterBySeverity": "Filtrar registos por gravidade",
+    "disableLogStreaming": "Desativar transmissão de registos",
+    "allLogs": "Todos os registos"
   },
   "estimatedSpeed": "Velocidade estimada ({{unit}})",
   "timeRange": "Intervalo de tempo",
@@ -109,19 +109,29 @@
     "filterBy": "Filtrar por máscara de zona"
   },
   "trackedObjectDelete": {
-    "title": "Confirmar exclusão",
+    "title": "Confirmar Eliminar",
     "toast": {
-      "success": "Objetos rastreados excluídos com sucesso.",
-      "error": "Falha ao excluir os objetos rastreados: {{errorMessage}}"
+      "success": "Objetos rastreados eliminados com sucesso.",
+      "error": "Não foi possível eliminar os objetos rastreados: {{errorMessage}}"
     },
-    "desc": "Excluir estes {{objectLength}} objetos rastreados remove a captura de imagem, quaisquer embeddings salvos e todas as entradas associadas ao ciclo de vida do objeto. As gravações desses objetos rastreados na visualização do Histórico <em>NÃO</em> serão excluídas.<br /><br />Tem certeza de que deseja continuar?<br /><br />Mantenha pressionada a tecla <em>Shift</em> para ignorar este diálogo no futuro."
+    "desc": "Ao eliminar estes {{objectLength}} objetos rastreados remove a captura de imagem, quaisquer integrações guardadas, e todas as entradas associadas ao ciclo de vida do objeto. As gravações desses objetos rastreados na visualização do Histórico <em>NÃO</em> serão eliminadas.<br /><br />Tem a certeza que deseja continuar?<br /><br />Mantenha pressionada a tecla <em>Shift</em> para ignorar esta janela no futuro."
   },
   "recognizedLicensePlates": {
-    "title": "Placas Reconhecidas",
-    "noLicensePlatesFound": "Nenhuma matrícula encontrada.",
-    "selectPlatesFromList": "Selecione uma ou mais placas da lista.",
-    "loadFailed": "Falha ao carregar as placas reconhecidas.",
-    "loading": "Carregando placas reconhecidas…",
-    "placeholder": "Digite para procurar placas…"
+    "title": "Matrículas Reconhecidas",
+    "noLicensePlatesFound": "Não foram encontradas matrículas.",
+    "selectPlatesFromList": "Selecione uma ou mais matrículas da lista.",
+    "loadFailed": "Não foi possível carregar as matrículas reconhecidas.",
+    "loading": "A carregar as matrículas reconhecidas…",
+    "placeholder": "Digite para procurar matrículas…",
+    "selectAll": "Selecionar tudo",
+    "clearAll": "Limpar tudo"
+  },
+  "classes": {
+    "label": "Classes",
+    "all": {
+      "title": "Todas as Classes"
+    },
+    "count_one": "{{count}} Classe",
+    "count_other": "{{count}} Classes"
   }
 }

@@ -284,7 +284,9 @@ def post_process_yolox(
 
 
 def get_ort_providers(
-    force_cpu: bool = False, device: str = "AUTO", requires_fp16: bool = False
+    force_cpu: bool = False,
+    device: str | None = "AUTO",
+    requires_fp16: bool = False,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     if force_cpu:
         return (
@@ -301,11 +303,12 @@ def get_ort_providers(
 
     for provider in ort.get_available_providers():
         if provider == "CUDAExecutionProvider":
-            device_id = 0 if not device.isdigit() else int(device)
+            device_id = 0 if (not device or not device.isdigit()) else int(device)
             providers.append(provider)
             options.append(
                 {
                     "arena_extend_strategy": "kSameAsRequested",
+                    "use_ep_level_unified_stream": True,
                     "device_id": device_id,
                 }
             )
@@ -337,21 +340,28 @@ def get_ort_providers(
             else:
                 continue
         elif provider == "OpenVINOExecutionProvider":
-            os.makedirs(os.path.join(MODEL_CACHE_DIR, "openvino/ort"), exist_ok=True)
+            # OpenVINO is used directly
+            if device == "OpenVINO":
+                os.makedirs(
+                    os.path.join(MODEL_CACHE_DIR, "openvino/ort"), exist_ok=True
+                )
+                providers.append(provider)
+                options.append(
+                    {
+                        "cache_dir": os.path.join(MODEL_CACHE_DIR, "openvino/ort"),
+                        "device_type": device,
+                    }
+                )
+        elif provider == "MIGraphXExecutionProvider":
+            migraphx_cache_dir = os.path.join(MODEL_CACHE_DIR, "migraphx")
+            os.makedirs(migraphx_cache_dir, exist_ok=True)
+
             providers.append(provider)
             options.append(
                 {
-                    "cache_dir": os.path.join(MODEL_CACHE_DIR, "openvino/ort"),
-                    "device_type": device,
+                    "migraphx_model_cache_dir": migraphx_cache_dir,
                 }
             )
-        elif provider == "MIGraphXExecutionProvider":
-            # MIGraphX uses more CPU than ROCM, while also being the same speed
-            if device == "MIGraphX":
-                providers.append(provider)
-                options.append({})
-            else:
-                continue
         elif provider == "CPUExecutionProvider":
             providers.append(provider)
             options.append(
@@ -359,6 +369,10 @@ def get_ort_providers(
                     "enable_cpu_mem_arena": False,
                 }
             )
+        elif provider == "AzureExecutionProvider":
+            # Skip Azure provider - not typically available on local hardware
+            # and prevents fallback to OpenVINO when it's the first provider
+            continue
         else:
             providers.append(provider)
             options.append({})

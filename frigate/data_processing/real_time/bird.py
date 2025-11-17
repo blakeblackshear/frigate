@@ -13,6 +13,7 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.config import FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
+from frigate.log import redirect_output_to_logger
 from frigate.util.object import calculate_region
 
 from ..types import DataProcessorMetrics
@@ -79,6 +80,7 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         except Exception as e:
             logger.error(f"Failed to download {path}: {e}")
 
+    @redirect_output_to_logger(logger, logging.DEBUG)
     def __build_detector(self) -> None:
         self.interpreter = Interpreter(
             model_path=os.path.join(MODEL_CACHE_DIR, "bird/bird.tflite"),
@@ -129,7 +131,11 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
         ]
 
         if input.shape != (224, 224):
-            input = cv2.resize(input, (224, 224))
+            try:
+                input = cv2.resize(input, (224, 224))
+            except Exception:
+                logger.warning("Failed to resize image for bird classification")
+                return
 
         input = np.expand_dims(input, axis=0)
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], input)
@@ -157,8 +163,8 @@ class BirdRealTimeProcessor(RealTimeProcessorApi):
             return
 
         self.sub_label_publisher.publish(
-            EventMetadataTypeEnum.sub_label,
             (obj_data["id"], self.labelmap[best_id], score),
+            EventMetadataTypeEnum.sub_label.value,
         )
         self.detected_birds[obj_data["id"]] = score
 

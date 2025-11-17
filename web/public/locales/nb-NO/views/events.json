@@ -34,5 +34,26 @@
   "markTheseItemsAsReviewed": "Merk disse elementene som inspiserte",
   "selected_one": "{{count}} valgt",
   "selected_other": "{{count}} valgt",
-  "detected": "detektert"
+  "detected": "detektert",
+  "suspiciousActivity": "Mistenkelig aktivitet",
+  "threateningActivity": "Truende aktivitet",
+  "detail": {
+    "noDataFound": "Ingen detaljer å inspisere",
+    "aria": "Vis/skjul detaljvisning",
+    "trackedObject_one": "objekt",
+    "trackedObject_other": "objekter",
+    "noObjectDetailData": "Ingen detaljdata for objektet tilgjengelig.",
+    "label": "Detalj",
+    "settings": "Detaljvisning – innstillinger",
+    "alwaysExpandActive": {
+      "desc": "Utvid alltid objektdetaljene for det aktive gjennomgangselementet når tilgjengelig.",
+      "title": "Utvid alltid for aktive"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Sporingspunkt",
+    "clickToSeek": "Klikk for å gå til dette tidspunktet"
+  },
+  "zoomIn": "Zoom inn",
+  "zoomOut": "Zoom ut"
 }

@@ -66,7 +66,12 @@ def has_better_attr(current_thumb, new_obj, attr_label) -> bool:
     return max_new_attr > max_current_attr
 
 
-def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
+def is_better_thumbnail(
+    label: str,
+    current_thumb: dict[str, Any],
+    new_obj: dict[str, Any],
+    frame_shape: tuple[int, int],
+) -> bool:
     # larger is better
     # cutoff images are less ideal, but they should also be smaller?
     # better scores are obviously better too
@@ -938,6 +943,58 @@ def add_mask(mask: str, mask_img: np.ndarray):
     cv2.fillPoly(mask_img, pts=[contour], color=(0))
 
 
+def run_ffmpeg_snapshot(
+    ffmpeg,
+    input_path: str,
+    codec: str,
+    seek_time: Optional[float] = None,
+    height: Optional[int] = None,
+    timeout: Optional[int] = None,
+) -> tuple[Optional[bytes], str]:
+    """Run ffmpeg to extract a snapshot/image from a video source."""
+    ffmpeg_cmd = [
+        ffmpeg.ffmpeg_path,
+        "-hide_banner",
+        "-loglevel",
+        "warning",
+    ]
+
+    if seek_time is not None:
+        ffmpeg_cmd.extend(["-ss", f"00:00:{seek_time}"])
+
+    ffmpeg_cmd.extend(
+        [
+            "-i",
+            input_path,
+            "-frames:v",
+            "1",
+            "-c:v",
+            codec,
+            "-f",
+            "image2pipe",
+            "-",
+        ]
+    )
+
+    if height is not None:
+        ffmpeg_cmd.insert(-3, "-vf")
+        ffmpeg_cmd.insert(-3, f"scale=-1:{height}")
+
+    try:
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+            timeout=timeout,
+        )
+
+        if process.returncode == 0 and process.stdout:
+            return process.stdout, ""
+        else:
+            return None, process.stderr.decode() if process.stderr else "ffmpeg failed"
+    except sp.TimeoutExpired:
+        return None, "timeout"
+
+
 def get_image_from_recording(
     ffmpeg,  # Ffmpeg Config
     file_path: str,
@@ -947,37 +1004,11 @@ def get_image_from_recording(
 ) -> Optional[Any]:
     """retrieve a frame from given time in recording file."""
 
-    ffmpeg_cmd = [
-        ffmpeg.ffmpeg_path,
-        "-hide_banner",
-        "-loglevel",
-        "warning",
-        "-ss",
-        f"00:00:{relative_frame_time}",
-        "-i",
-        file_path,
-        "-frames:v",
-        "1",
-        "-c:v",
-        codec,
-        "-f",
-        "image2pipe",
-        "-",
-    ]
-
-    if height is not None:
-        ffmpeg_cmd.insert(-3, "-vf")
-        ffmpeg_cmd.insert(-3, f"scale=-1:{height}")
-
-    process = sp.run(
-        ffmpeg_cmd,
-        capture_output=True,
+    image_data, _ = run_ffmpeg_snapshot(
+        ffmpeg, file_path, codec, seek_time=relative_frame_time, height=height
     )
 
-    if process.returncode == 0:
-        return process.stdout
-    else:
-        return None
+    return image_data
 
 
 def get_histogram(image, x_min, y_min, x_max, y_max):
@@ -990,7 +1021,26 @@ def get_histogram(image, x_min, y_min, x_max, y_max):
     return cv2.normalize(hist, hist).flatten()
 
 
-def ensure_jpeg_bytes(image_data):
+def create_thumbnail(
+    yuv_frame: np.ndarray, box: tuple[int, int, int, int], height=500
+) -> Optional[bytes]:
+    """Return jpg thumbnail of a region of the frame."""
+    frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2BGR_I420)
+    region = calculate_region(
+        frame.shape, box[0], box[1], box[2], box[3], height, multiplier=1.4
+    )
+    frame = frame[region[1] : region[3], region[0] : region[2]]
+    width = int(height * frame.shape[1] / frame.shape[0])
+    frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
+    ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+
+    if ret:
+        return jpg.tobytes()
+
+    return None
+
+
+def ensure_jpeg_bytes(image_data: bytes) -> bytes:
     """Ensure image data is jpeg bytes for genai"""
     try:
         img_array = np.frombuffer(image_data, dtype=np.uint8)

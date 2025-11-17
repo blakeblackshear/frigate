@@ -2,6 +2,185 @@
   "documentTitle": {
     "cameras": "カメラ統計 - Frigate",
     "general": "一般統計 - Frigate",
-    "storage": "ストレージ統計 - Frigate"
+    "storage": "ストレージ統計 - Frigate",
+    "enrichments": "高度解析統計 - Frigate",
+    "logs": {
+      "frigate": "Frigate ログ - Frigate",
+      "go2rtc": "Go2RTC ログ - Frigate",
+      "nginx": "Nginx ログ - Frigate"
+    }
+  },
+  "title": "システム",
+  "metrics": "システムメトリクス",
+  "logs": {
+    "download": {
+      "label": "ログをダウンロード"
+    },
+    "copy": {
+      "label": "クリップボードにコピー",
+      "success": "ログをクリップボードにコピーしました",
+      "error": "ログをクリップボードにコピーできませんでした"
+    },
+    "type": {
+      "label": "種類",
+      "timestamp": "タイムスタンプ",
+      "tag": "タグ",
+      "message": "メッセージ"
+    },
+    "tips": "ログはサーバーからストリーミングされています",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "ログの取得エラー: {{errorMessage}}",
+        "whileStreamingLogs": "ログのストリーミング中にエラー: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "全般",
+    "detector": {
+      "title": "検出器",
+      "inferenceSpeed": "ディテクタ推論速度",
+      "temperature": "ディテクタ温度",
+      "cpuUsage": "ディテクタの CPU 使用率",
+      "cpuUsageInformation": "検出モデルへの入力／出力データの準備に使用される CPU。GPU やアクセラレータを使用していても、この値は推論の使用量を測定しません。",
+      "memoryUsage": "ディテクタのメモリ使用量"
+    },
+    "hardwareInfo": {
+      "title": "ハードウェア情報",
+      "gpuUsage": "GPU 使用率",
+      "gpuMemory": "GPU メモリ",
+      "gpuEncoder": "GPU エンコーダー",
+      "gpuDecoder": "GPU デコーダー",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "vainfo 出力",
+          "returnCode": "戻りコード: {{code}}",
+          "processOutput": "プロセス出力:",
+          "processError": "プロセスエラー:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "NVIDIA SMI 出力",
+          "name": "名前: {{name}}",
+          "driver": "ドライバー: {{driver}}",
+          "cudaComputerCapability": "CUDA 計算能力: {{cuda_compute}}",
+          "vbios": "VBIOS 情報: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "GPU 情報を閉じる"
+        },
+        "copyInfo": {
+          "label": "GPU 情報をコピー"
+        },
+        "toast": {
+          "success": "GPU 情報をクリップボードにコピーしました"
+        }
+      },
+      "npuUsage": "NPU 使用率",
+      "npuMemory": "NPU メモリ"
+    },
+    "otherProcesses": {
+      "title": "その他のプロセス",
+      "processCpuUsage": "プロセスの CPU 使用率",
+      "processMemoryUsage": "プロセスのメモリ使用量"
+    }
+  },
+  "storage": {
+    "title": "ストレージ",
+    "overview": "概要",
+    "recordings": {
+      "title": "録画",
+      "tips": "この値は Frigate のデータベースで録画が使用している総ストレージ量を表します。Frigate はディスク上のすべてのファイルの使用量を追跡しているわけではありません。",
+      "earliestRecording": "利用可能な最古の録画:"
+    },
+    "shm": {
+      "title": "SHM（共有メモリ）の割り当て",
+      "warning": "現在の SHM サイズ {{total}}MB は小さすぎます。少なくとも {{min_shm}}MB に増やしてください。"
+    },
+    "cameraStorage": {
+      "title": "カメラストレージ",
+      "camera": "カメラ",
+      "unusedStorageInformation": "未使用ストレージ情報",
+      "storageUsed": "ストレージ使用量",
+      "percentageOfTotalUsed": "総使用量に占める割合",
+      "bandwidth": "帯域幅",
+      "unused": {
+        "title": "未使用",
+        "tips": "Frigate の録画以外にドライブへ保存しているファイルがある場合、この値は Frigate が利用できる空き容量を正確に表さないことがあります。Frigate は録画以外のストレージ使用量を追跡しません。"
+      }
+    }
+  },
+  "cameras": {
+    "title": "カメラ",
+    "overview": "概要",
+    "info": {
+      "aspectRatio": "アスペクト比",
+      "cameraProbeInfo": "{{camera}} カメラプローブ情報",
+      "streamDataFromFFPROBE": "ストリームデータは <code>ffprobe</code> で取得しています。",
+      "fetching": "カメラデータを取得中",
+      "stream": "ストリーム {{idx}}",
+      "video": "動画:",
+      "codec": "コーデック:",
+      "resolution": "解像度:",
+      "fps": "FPS:",
+      "unknown": "不明",
+      "audio": "音声:",
+      "error": "エラー: {{error}}",
+      "tips": {
+        "title": "カメラプローブ情報"
+      }
+    },
+    "framesAndDetections": "フレーム / 検出",
+    "label": {
+      "camera": "カメラ",
+      "detect": "検出",
+      "skipped": "スキップ",
+      "ffmpeg": "FFmpeg",
+      "capture": "キャプチャ",
+      "overallFramesPerSecond": "全体フレーム/秒",
+      "overallDetectionsPerSecond": "全体検出/秒",
+      "overallSkippedDetectionsPerSecond": "全体スキップ検出/秒",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} キャプチャ",
+      "cameraDetect": "{{camName}} 検出",
+      "cameraFramesPerSecond": "{{camName}} フレーム/秒",
+      "cameraDetectionsPerSecond": "{{camName}} 検出/秒",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} スキップ検出/秒"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "プローブデータをクリップボードにコピーしました。"
+      },
+      "error": {
+        "unableToProbeCamera": "カメラをプローブできません: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "最終更新: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} の FFmpeg の CPU 使用率が高い（{{ffmpegAvg}}%）",
+    "detectHighCpuUsage": "{{camera}} の検出の CPU 使用率が高い（{{detectAvg}}%）",
+    "healthy": "システムは正常です",
+    "reindexingEmbeddings": "埋め込みを再インデックス中（{{processed}}% 完了）",
+    "cameraIsOffline": "{{camera}} はオフラインです",
+    "detectIsSlow": "{{detect}} が遅い（{{speed}} ms）",
+    "detectIsVerySlow": "{{detect}} が非常に遅い（{{speed}} ms）",
+    "shmTooLow": "/dev/shm の割り当て（{{total}} MB）は少なくとも {{min}} MB に増やす必要があります。"
+  },
+  "enrichments": {
+    "title": "高度解析",
+    "infPerSecond": "毎秒推論回数",
+    "embeddings": {
+      "image_embedding": "画像埋め込み",
+      "text_embedding": "テキスト埋め込み",
+      "face_recognition": "顔認識",
+      "plate_recognition": "ナンバープレート認識",
+      "image_embedding_speed": "画像埋め込み速度",
+      "face_embedding_speed": "顔埋め込み速度",
+      "face_recognition_speed": "顔認識速度",
+      "plate_recognition_speed": "ナンバープレート認識速度",
+      "text_embedding_speed": "テキスト埋め込み速度",
+      "yolov9_plate_detection_speed": "YOLOv9 ナンバープレート検出速度",
+      "yolov9_plate_detection": "YOLOv9 ナンバープレート検出"
+    }
   }
 }

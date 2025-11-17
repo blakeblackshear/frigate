@@ -2,14 +2,16 @@
   "documentTitle": {
     "default": "Nastavenia - Frigate",
     "authentication": "Nastavenie autentifikácie- Frigate",
-    "camera": "Nastavenia fotoaparátu – Frigate",
+    "camera": "Nastavenia Kamier– Frigate",
     "enrichments": "Nastavenia obohatenia – Frigate",
     "masksAndZones": "Editor masky a zón - Frigate",
     "motionTuner": "Ladič detekcie pohybu - Frigate",
     "object": "Ladenie - Frigate",
     "general": "Všeobecné nastavenia – Frigate",
     "frigatePlus": "Nastavenia Frigate+ – Frigate",
-    "notifications": "Nastavenia upozornení – Frigate"
+    "notifications": "Nastavenia upozornení – Frigate",
+    "cameraManagement": "Manažment kamier - Frigate",
+    "cameraReview": "Nastavenie kamier - Frigate"
   },
   "menu": {
     "ui": "Uživaťelské rozohranie",
@@ -20,7 +22,11 @@
     "debug": "Ladenie",
     "users": "Uživatelia",
     "notifications": "Notifikacie",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "triggers": "Spúšťače",
+    "roles": "Roly",
+    "cameraManagement": "Manažment",
+    "cameraReview": "Recenzia"
   },
   "dialog": {
     "unsavedChanges": {
@@ -43,12 +49,1032 @@
       "playAlertVideos": {
         "label": "Prehrať videá s upozornením",
         "desc": "Predvolene sa nedávne upozornenia na paneli Živé vysielanie prehrávajú ako krátke cyklické videá. Túto možnosť vypnite, ak chcete zobrazovať iba statický obrázok nedávnych upozornení na tomto zariadení/prehliadači."
+      },
+      "displayCameraNames": {
+        "label": "Vždy Zobraziť názvy kamier",
+        "desc": "Vždy zobrazujte názvy kamier v čipe na ovládacom paneli živého náhľadu z viacerých kamier."
       }
     },
     "storedLayouts": {
       "title": "Uložené rozloženia",
       "desc": "Rozloženie kamier v skupine kamier je možné presúvať/zmeniť jeho veľkosť. Pozície sú uložené v lokálnom úložisku vášho prehliadača.",
       "clearAll": "Vymazať všetky rozloženia"
+    },
+    "cameraGroupStreaming": {
+      "title": "Nastavenia streamovania skupiny kamier",
+      "desc": "Nastavenia streamovania pre každú skupinu kamier sú uložené v lokálnom úložisku vášho prehliadača.",
+      "clearAll": "Vymazať všetky nastavenia streamovania"
+    },
+    "recordingsViewer": {
+      "title": "Prehliadač nahrávok",
+      "defaultPlaybackRate": {
+        "label": "Predvolená rýchlosť prehrávania",
+        "desc": "Predvolená rýchlosť prehrávania nahrávok."
+      }
+    },
+    "calendar": {
+      "title": "Kalendár",
+      "firstWeekday": {
+        "label": "Prvý pracovný deň",
+        "desc": "Deň, kedy začínajú týždne v kalendári kontroly.",
+        "sunday": "Nedeľa",
+        "monday": "Pondelok"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Uložené rozloženie pre {{cameraName}} bolo vymazané",
+        "clearStreamingSettings": "Nastavenia streamovania pre všetky skupiny kamier boli vymazané."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Nepodarilo sa vymazať uložené rozloženie: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Nepodarilo sa vymazať nastavenia streamovania: {{errorMessage}}"
+      }
+    }
+  },
+  "enrichments": {
+    "title": "Nastavenia obohatení",
+    "unsavedChanges": "Zmeny nastavení neuložených obohatení",
+    "birdClassification": {
+      "title": "Klasifikácia vtákov",
+      "desc": "Klasifikácia vtákov identifikuje známe vtáky pomocou kvantizovaného modelu Tensorflow. Keď je známy vták rozpoznaný, jeho bežný názov sa pridá ako podoznačenie (sub_label). Tieto informácie sú zahrnuté v používateľskom rozhraní, filtroch, ako aj v oznámeniach."
+    },
+    "semanticSearch": {
+      "title": "Sémantické vyhľadávanie",
+      "desc": "Sémantické vyhľadávanie vo Frigate vám umožňuje nájsť sledované objekty v rámci vašich recenzovaných položiek pomocou samotného obrázka, textového popisu definovaného používateľom alebo automaticky vygenerovaného popisu.",
+      "reindexNow": {
+        "label": "Preindexovať teraz",
+        "desc": "Reindexovanie obnoví vložené súbory pre všetky sledované objekty. Tento proces beží na pozadí a môže maximálne zaťažiť váš procesor a trvať pomerne dlho v závislosti od počtu sledovaných objektov, ktoré máte.",
+        "confirmTitle": "Potvrďte opätovné indexovanie",
+        "confirmDesc": "Naozaj chcete preindexovať všetky sledované vložené objekty? Tento proces bude bežať na pozadí, ale môže maximálne zaťažiť váš procesor a trvať pomerne dlho. Priebeh si môžete pozrieť na stránke Preskúmať.",
+        "confirmButton": "Preindexovať",
+        "success": "Reindexovanie sa úspešne spustilo.",
+        "alreadyInProgress": "Reindexovanie už prebieha.",
+        "error": "Nepodarilo sa spustiť reindexáciu: {{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "Veľkosť modelu",
+        "desc": "Veľkosť modelu použitého pre vkladanie sémantického vyhľadávania.",
+        "small": {
+          "title": "malý",
+          "desc": "Použitie funkcie <em>small</em> využíva kvantizovanú verziu modelu, ktorá spotrebuje menej pamäte RAM a beží rýchlejšie na CPU s veľmi zanedbateľným rozdielom v kvalite vkladania."
+        },
+        "large": {
+          "title": "veľký",
+          "desc": "Použitie parametra <em>large</em> využíva celý model Jina a v prípade potreby sa automaticky spustí na GPU."
+        }
+      }
+    },
+    "faceRecognition": {
+      "title": "Rozpoznávanie tváre",
+      "desc": "Rozpoznávanie tváre umožňuje priradiť ľuďom mená a po rozpoznaní ich tváre Frigate priradí meno osoby ako podštítok. Tieto informácie sú zahrnuté v používateľskom rozhraní, filtroch, ako aj v upozorneniach.",
+      "modelSize": {
+        "label": "Veľkosť modelu",
+        "desc": "Veľkosť modelu použitého na rozpoznávanie tváre.",
+        "small": {
+          "title": "malý",
+          "desc": "Použitie funkcie <em>small</em> využíva model vkladania tvárí FaceNet, ktorý efektívne beží na väčšine procesorov."
+        },
+        "large": {
+          "title": "veľký",
+          "desc": "Použitie funkcie <em>large</em> využíva model vkladania tvárí ArcFace a v prípade potreby sa automaticky spustí na grafickom procesore."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Rozpoznávanie ŠPZ",
+      "desc": "Frigate dokáže rozpoznávať evidenčné čísla vozidiel a automaticky pridávať detekované znaky do poľa recognized_license_plate alebo známy názov ako podradený štítok k objektom typu car. Bežným prípadom použitia môže byť čítanie evidenčných čísel áut vchádzajúcich na príjazdovú cestu alebo áut prechádzajúcich po ulici."
+    },
+    "restart_required": "Vyžaduje sa reštart (zmenené nastavenia obohatenia)",
+    "toast": {
+      "success": "Nastavenia obohatenia boli uložené. Reštartujte Frigate, aby sa zmeny prejavili.",
+      "error": "Nepodarilo sa uložiť zmeny konfigurácie: {{errorMessage}}"
+    }
+  },
+  "camera": {
+    "title": "Nastavenie kamier",
+    "streams": {
+      "title": "Streamy",
+      "desc": "Dočasne deaktivujte kameru, kým sa Frigate nereštartuje. Deaktivácia kamery úplne zastaví spracovanie streamov z tejto kamery aplikáciou Frigate. Detekcia, nahrávanie a ladenie nebudú k dispozícii.<br /> <em>Poznámka: Toto nezakáže restreamy go2rtc.</em>"
+    },
+    "review": {
+      "title": "Recenzia",
+      "desc": "Dočasne povoliť/zakázať upozornenia a detekcie pre túto kameru, kým sa Frigate nereštartuje. Po zakázaní sa nebudú generovať žiadne nové položky kontroly. ",
+      "alerts": "Upozornenia ",
+      "detections": "Detekcie "
+    },
+    "object_descriptions": {
+      "title": "Generatívne popisy objektov umelej inteligencie",
+      "desc": "Dočasne povoliť/zakázať generatívne popisy objektov AI pre túto kameru. Ak je táto funkcia zakázaná, pre sledované objekty na tejto kamere sa nebudú vyžadovať popisy generované AI."
+    },
+    "review_descriptions": {
+      "title": "Popisy generatívnej umelej inteligencie",
+      "desc": "Dočasne povoliť/zakázať generatívne popisy kontroly pomocou umelej inteligencie pre túto kameru. Ak je táto funkcia zakázaná, popisy generované umelou inteligenciou sa nebudú vyžadovať pre položky kontroly v tejto kamere."
+    },
+    "reviewClassification": {
+      "title": "Preskúmať klasifikáciu",
+      "desc": "Frigate kategorizuje položky recenzií ako Upozornenia a Detekcie. Predvolene sa všetky objekty typu <em>osoba</em> a <em>auto</em> považujú za Upozornenia. Kategorizáciu položiek recenzií môžete spresniť konfiguráciou požadovaných zón pre ne.",
+      "noDefinedZones": "Pre túto kameru nie sú definované žiadne zóny.",
+      "objectAlertsTips": "Všetky objekty {{alertsLabels}} na {{cameraName}} sa zobrazia ako Upozornenia.",
+      "zoneObjectAlertsTips": "Všetky objekty {{alertsLabels}} detekované v {{zone}} na {{cameraName}} budú zobrazené ako Upozornenia.",
+      "objectDetectionsTips": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{cameraName}}, sa zobrazia ako detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú.",
+      "zoneObjectDetectionsTips": {
+        "text": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{zone}} na kamere {{cameraName}}, budú zobrazené ako detekcie.",
+        "notSelectDetections": "Všetky objekty typu {{detectionsLabels}} detekované v zóne {{zone}} na kamere {{cameraName}}, ktoré nie sú zaradené do kategórie Upozornenia, sa zobrazia ako Detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú.",
+        "regardlessOfZoneObjectDetectionsTips": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{cameraName}}, sa zobrazia ako detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú."
+      },
+      "unsavedChanges": "Neuložené nastavenia klasifikácie recenzií pre {{camera}}",
+      "selectAlertsZones": "Vyberte podobné sledované objekty",
+      "selectDetectionsZones": "Vyberte zóny pre detekcie",
+      "limitDetections": "Obmedziť detekciu na konkrétne zóny",
+      "toast": {
+        "success": "Konfigurácia klasifikácie bola uložená. Reštartujte Frigate, aby sa zmeny prejavili."
+      }
+    },
+    "addCamera": "Pridať novu kameru",
+    "editCamera": "Upraviť kameru:",
+    "selectCamera": "Vyberte kameru",
+    "backToSettings": "Späť na nastavenia kamery",
+    "cameraConfig": {
+      "add": "Pridať kameru",
+      "edit": "Upraviť kameru",
+      "description": "Konfigurovať nastavenia kamery, vrátane vstupov streamu a rolí.",
+      "name": "Názov kamery",
+      "nameRequired": "Názov kamery je povinný",
+      "nameLength": "Názov kamery musí mať menej ako 24 znakov.",
+      "namePlaceholder": "napr. predné dvere",
+      "enabled": "Povoliť",
+      "ffmpeg": {
+        "inputs": "Vstupné streamy",
+        "path": "Cesta streamu",
+        "pathRequired": "Cesta k streamu je povinná",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roly",
+        "rolesRequired": "Je vyžadovaná aspoň jedna rola",
+        "rolesUnique": "Každá rola (audio, detekcia, záznam) môže byť priradená iba k jednému streamu",
+        "addInput": "Pridať vstupný stream",
+        "removeInput": "Odobrať vstupný stream",
+        "inputsRequired": "Je vyžadovaný aspoň jeden vstupný stream"
+      },
+      "toast": {
+        "success": "Kamera {{cameraName}} bola úspešne uložená"
+      }
+    }
+  },
+  "masksAndZones": {
+    "filter": {
+      "all": "Všetky Masky a Zóny"
+    },
+    "restart_required": "Vyžadovaný reštart (masky/zóny boli zmenené)",
+    "toast": {
+      "success": {
+        "copyCoordinates": "Súradnice pre {{polyName}} skopírované do schránky."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Nemohol kopírovať súradnice na klipboard."
+      }
+    },
+    "form": {
+      "polygonDrawing": {
+        "error": {
+          "mustBeFinished": "Kreslenie polygónu musí byť pred uložením dokončené."
+        },
+        "removeLastPoint": "Odobrať posledný bod",
+        "reset": {
+          "label": "Vymazať všetky body"
+        },
+        "snapPoints": {
+          "true": "Prichytávať body",
+          "false": "Neprichytávať body"
+        },
+        "delete": {
+          "title": "Potvrdiť Zmazanie",
+          "desc": "Naozaj chcete zmazať {{type}}<em>{{name}}</em>?",
+          "success": "{{name}} bolo zmazané."
+        }
+      },
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "Názov Zóny musia mať minimálne 2 znaky.",
+          "mustNotBeSameWithCamera": "Názov Zóny nesmie byť rovnaký ako názov kamery.",
+          "alreadyExists": "Zóna s rovnakým názvom pri tejto kamere už existuje.",
+          "mustNotContainPeriod": "Názov zóny nesmie obsahovať bodky.",
+          "hasIllegalCharacter": "Názov zóny obsahuje zakázané znaky.",
+          "mustHaveAtLeastOneLetter": "Názov zóny musí mať aspoň jedno písmeno."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Vzdialenosť musí byť väčšia alebo rovná 0.1.",
+          "mustBeFilled": "Na použitie odhadu rýchlosti musia byť vyplnené všetky polia pre vzdialenosť."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Zotrvačnosť musí byť väčšia ako 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Doba zotrvania musí byť väčšia alebo rovná nule."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Prahová hodnota rýchlosti musí byť väčšia alebo rovná 0,1."
+        }
+      }
+    },
+    "zones": {
+      "label": "Zóny",
+      "documentTitle": "Upraviť Zónu - Frigate",
+      "desc": {
+        "title": "Zóny umožňujú definovať konkrétnu oblasť v zábere, vďaka čomu je možné určiť, či sa objekt nachádza v danej oblasti alebo nie.",
+        "documentation": "Dokumentácia"
+      },
+      "clickDrawPolygon": "Kliknite pre kreslenie polygónu na obrázku.",
+      "name": {
+        "title": "Meno",
+        "inputPlaceHolder": "Zadajte meno…",
+        "tips": "Názov musí mať aspoň 2 znaky, musí mať aspoň jedno písmeno a nesmie byť názvom kamery alebo inej zóny."
+      },
+      "inertia": {
+        "title": "Zotrvačnosť",
+        "desc": "Určuje, po koľkých snímkach strávených v zóne je objekt považovaný za prítomný v tejto zóne.<em>Predvolená hodnota: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Doba zotrvania",
+        "desc": "Nastavuje minimálnu dobu v sekundách, počas ktorej musí byť objekt v zóne, aby došlo k aktivácii.<em>Predvolená hodnota: 0</em>"
+      },
+      "objects": {
+        "title": "Objekty",
+        "desc": "Zoznam objektov, na ktoré sa táto zóna vzťahuje."
+      },
+      "allObjects": "Všetky Objekty",
+      "speedEstimation": {
+        "title": "Odhad rýchlosti",
+        "desc": "Povoliť odhad rýchlosti pre objekty v tejto zóne. Zóna musí mať presne 4 body.",
+        "lineADistance": "Vzdialenosť linky A ({{unit}})",
+        "lineBDistance": "Vzdialenosť linky B ({{unit}})",
+        "lineCDistance": "Vzdialenosť linky C ({{unit}})",
+        "lineDDistance": "Vzdialenosť linky D ({{unit}})"
+      },
+      "speedThreshold": {
+        "title": "Prah rýchlosti ({{unit}})",
+        "desc": "Určuje minimálnu rýchlosť, pri ktorej sú objekty v tejto zóne zohľadnené.",
+        "toast": {
+          "error": {
+            "pointLengthError": "Odhad rýchlosti bol pre túto zónu deaktivovaný. Zóny s odhadom rýchlosti musia mať presne 4 body.",
+            "loiteringTimeError": "Pokiaľ má zóna nastavenú dobu zotrvania väčšiu ako 0, neodporúča sa používať odhad rýchlosti."
+          }
+        }
+      },
+      "toast": {
+        "success": "Zóna {{zoneName}} bola uložená. Reštartujte Frigate pre aplikovanie zmien."
+      },
+      "add": "Pridať zónu",
+      "edit": "Upraviť zónu",
+      "point_one": "{{count}}bod",
+      "point_few": "{{count}}body",
+      "point_other": "{{count}}bodov"
+    },
+    "motionMasks": {
+      "label": "Maska Detekcia pohybu",
+      "documentTitle": "Editovať Masku Detekcia pohybu - Frigate",
+      "desc": {
+        "title": "Masky detekcie pohybu slúžia na zabránenie nežiaducim typom pohybu v spustení detekcie. Príliš rozsiahle maskovanie však môže sťažiť sledovanie objektov.",
+        "documentation": "Dokumentácia"
+      },
+      "add": "Nová Maska Detekcia pohybu",
+      "edit": "Upraviť Masku Detekcia pohybu",
+      "context": {
+        "title": "Masky detekcie pohybu slúžia na zabránenie tomu, aby nežiaduce typy pohybu spúšťali detekciu (napríklad vetvy stromov alebo časové značky kamery). Masky detekcie pohybu by sa mali používať <em>veľmi striedmo</em> – príliš rozsiahle maskovanie môže sťažiť sledovanie objektov."
+      },
+      "point_one": "{{count}} bod",
+      "point_few": "{{count}} body",
+      "point_other": "{{count}} bodov",
+      "clickDrawPolygon": "Kliknutím nakreslíte polygón do obrázku.",
+      "polygonAreaTooLarge": {
+        "title": "Maska detekcie pohybu pokrýva {{polygonArea}}% záberu kamery. Príliš veľké masky detekcie pohybu nie sú odporúčané.",
+        "tips": "Masky detekcie pohybu nebránia detekcii objektov. Namiesto toho by ste mali použiť požadovanú zónu."
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} bol uložený. Reštartujte Frigate pre aplikovanie zmien.",
+          "noName": "Maska Detekcia pohybu bola uložená. Reštartujte Frigate pre aplikovanie zmien."
+        }
+      }
+    },
+    "objectMasks": {
+      "label": "Masky Objektu",
+      "documentTitle": "Upraviť Masku Objektu - Frigate",
+      "desc": {
+        "title": "Masky filtrovania objektov slúžia na odfiltrovanie falošných detekcií daného typu objektu na základe jeho umiestnenia.",
+        "documentation": "Dokumentácia"
+      },
+      "add": "Pridať Masku Objektu",
+      "edit": "Upraviť Masku Objektu",
+      "context": "Masky filtrovania objektov slúžia na odfiltrovanie falošných poplachov konkrétneho typu objektu na základe jeho umiestnenia.",
+      "point_one": "{{count}}bod",
+      "point_few": "{{count}}body",
+      "point_other": "{{count}} bodov",
+      "clickDrawPolygon": "Kliknutím nakreslite polygón do obrázku.",
+      "objects": {
+        "title": "Objekty",
+        "desc": "Typ objektu, na ktorý sa táto maska objektu vzťahuje.",
+        "allObjectTypes": "Všetky typy objektov"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} bol uložený. Reštartujte Frigate pre aplikovanie zmien.",
+          "noName": "Maska Objektu bola uložená. Reštartujte Frigate pre aplikovanie zmien."
+        }
+      }
+    },
+    "motionMaskLabel": "Maska Detekcia pohybu {{number}}",
+    "objectMaskLabel": "Maska Objektu {{number}} {{label}}"
+  },
+  "motionDetectionTuner": {
+    "title": "Ladenie detekcie pohybu",
+    "unsavedChanges": "Neuložené zmeny ladenia detekcie pohybu {{camera}}",
+    "desc": {
+      "title": "Frigate používa detekciu pohybu ako prvú kontrolu na overenie, či sa v snímke deje niečo, čo stojí za ďalšiu analýzu pomocou detekcie objektov.",
+      "documentation": "Prečítajte si príručku Ladenie detekcie pohybu"
+    },
+    "Threshold": {
+      "title": "Prah",
+      "desc": "Prahová hodnota určuje, aká veľká zmena jasu pixelu je nutná, aby bol považovaný za pohyb. <em>Predvolené: 30</em>"
+    },
+    "contourArea": {
+      "title": "Obrysová Oblasť",
+      "desc": "Hodnota plochy obrysu sa používa na rozhodnutie, ktoré skupiny zmenených pixelov sa kvalifikujú ako pohyb. <em>Predvolené: 10</em>"
+    },
+    "improveContrast": {
+      "title": "Zlepšiť Kontrast",
+      "desc": "Zlepšiť kontrast pre tmavé scény <em>Predvolené: ON</em>"
+    },
+    "toast": {
+      "success": "Nastavenie detekcie pohybu bolo uložené."
+    }
+  },
+  "debug": {
+    "title": "Ladenie",
+    "detectorDesc": "Frigate používa vaše detektory {{detectors}} na detekciu objektov v streame vašich kamier.",
+    "desc": "Ladiace zobrazenie ukazuje sledované objekty a ich štatistiky v reálnom čase. Zoznam objektov zobrazuje časovo oneskorený prehľad detekovaných objektov.",
+    "openCameraWebUI": "Otvoriť webové rozhranie {{camera}}",
+    "debugging": "Ladenie",
+    "objectList": "Zoznam objektov",
+    "noObjects": "Žiadne objekty",
+    "audio": {
+      "title": "Zvuk",
+      "noAudioDetections": "Žiadne detekcia zvuku",
+      "score": "skóre",
+      "currentRMS": "Aktuálne RMS",
+      "currentdbFS": "Aktuálne dbFS"
+    },
+    "boundingBoxes": {
+      "title": "Ohraničujúce rámčeky",
+      "desc": "Zobraziť ohraničujúce rámčeky okolo sledovaných objektov",
+      "colors": {
+        "label": "Farby Ohraničujúcich Rámčekov Objektov",
+        "info": "<li>Pri spustení bude každému objektovému štítku priradená iná farba.</li><li>Tenká tmavo modrá čiara označuje, že objekt nie je v danom okamihu detekovaný.</li><li>Tenká šedá čiara znamená, že objekt je detekovaný ako nehybný.</li><li>Silná čiara je označovaná aktivované).</li>"
+      }
+    },
+    "timestamp": {
+      "title": "Časová pečiatka",
+      "desc": "Prekryť obrázok časovou pečiatkou"
+    },
+    "zones": {
+      "title": "Zóny",
+      "desc": "Zobraziť obrys všetkých definovaných zón"
+    },
+    "mask": {
+      "title": "Masky detekcie pohybu",
+      "desc": "Zobraziť polygóny masiek detekcie pohybu"
+    },
+    "motion": {
+      "title": "Rámčeky detekcie pohybu",
+      "desc": "Zobraziť rámčeky okolo oblastí, kde bol detekovaný pohyb",
+      "tips": "<p><strong>Boxy pohybu</strong></p><br><p>Červené boxy budú prekryté na miestach snímky, kde je práve detekovaný pohyb.</p>"
+    },
+    "regions": {
+      "title": "Regióny",
+      "desc": "Zobraziť rámček oblasti záujmu odoslaný do detektora objektov",
+      "tips": "<p><strong>Oblasti regiónov</strong></p><br><p>Jasnozelené políčka budú prekrývať oblasti záujmu v zábere, ktoré sa odosielajú do detektora objektov.</p>"
+    },
+    "paths": {
+      "title": "Cesty",
+      "desc": "Zobraziť významné body dráhy sledovaného objektu",
+      "tips": "<p><strong>Cesty</strong></p><br><p>Čiary a kruhy označujú významné body, ktorými sa sledovaný objekt počas svojho životného cyklu pohyboval.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Výkres filtra tvaru objektu",
+      "desc": "Nakreslite na obrázok obdĺžnik, aby ste zobrazili podrobnosti o ploche a pomere",
+      "tips": "Povolením tejto možnosti nakreslíte na obraze kamery obdĺžnik, ktorý zobrazuje jeho plochu a pomer strán. Tieto hodnoty sa potom dajú použiť na nastavenie parametrov filtra tvaru objektu vo vašej konfigurácii.",
+      "score": "Skóre",
+      "ratio": "Pomer",
+      "area": "Oblasť"
+    }
+  },
+  "cameraWizard": {
+    "title": "Pridať kameru",
+    "description": "Postupujte podľa pokynov nižšie a pridajte novú kameru na inštaláciu Frigate.",
+    "steps": {
+      "nameAndConnection": "Meno a pripojenie",
+      "streamConfiguration": "Konfigurácia prúdu",
+      "validationAndTesting": "Platnosť a testovanie"
+    },
+    "save": {
+      "success": "Úspešne zachránil novú kameru {{cameraName}}.",
+      "failure": "Úspora chýb {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Rozlíšenie",
+      "video": "Video",
+      "audio": "Zvuk",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Uveďte platnú adresu streamu",
+      "testFailed": "Test Stream zlyhal: {{error}}"
+    },
+    "step1": {
+      "description": "Zadajte detaily kamery a vyskúšajte pripojenie.",
+      "cameraName": "Názov kamery",
+      "cameraNamePlaceholder": "e.g., front_door alebo Back Yard Prehľad",
+      "host": "Hostia / IP adresa",
+      "port": "Prístav",
+      "username": "Používateľské meno",
+      "usernamePlaceholder": "Voliteľné",
+      "password": "Heslo",
+      "passwordPlaceholder": "Voliteľné",
+      "selectTransport": "Vyberte dopravný protokol",
+      "cameraBrand": "Značka kamery",
+      "selectBrand": "Vyberte značku kamery pre URL šablónu",
+      "customUrl": "Vlastné Stream URL",
+      "brandInformation": "Informácie o značke",
+      "brandUrlFormat": "Pre kamery s formátom RTSP URL ako: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "testConnection": "Testovacie pripojenie",
+      "testSuccess": "Test pripojenia úspešný!",
+      "testFailed": "Test pripojenia zlyhal. Skontrolujte svoj vstup a skúste to znova.",
+      "streamDetails": "Detaily vysielania",
+      "warnings": {
+        "noSnapshot": "Nemožno načítať snímku z konfigurovaného vysielania."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Buď vyberte značku kamery s hostiteľom / IP alebo si vyberte \"Iný\" s vlastnou URL",
+        "nameRequired": "Názov kamery je povinný",
+        "nameLength": "Názov kamery musí byť 64 znakov alebo menej",
+        "invalidCharacters": "Názov kamery obsahuje neplatné znaky",
+        "nameExists": "Názov kamery už existuje",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP sa neodporúča. Odporúča sa povoliť HTTP v nastavení kamery a reštartovať sprievodca kamery."
+        },
+        "customUrlRtspRequired": "Vlastné URL musia začať s \"rtsp / \"\". Manuálna konfigurácia je potrebná pre non-RTSP kamerové prúdy."
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Skúmanie metadát kamery...",
+        "fetchingSnapshot": "Načítava sa snímka z kamery..."
+      }
+    },
+    "step2": {
+      "description": "Konfigurovať prúdové role a pridať ďalšie prúdy pre vašu kameru.",
+      "streamsTitle": "Kamerové prúdy",
+      "addStream": "Pridať Stream",
+      "addAnotherStream": "Pridať ďalší Stream",
+      "streamTitle": "Stream {{number}}",
+      "streamUrl": "Stream URL",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "url": "URL",
+      "resolution": "Rozlíšenie",
+      "selectResolution": "Vyberte rozlíšenie",
+      "quality": "Kvalita",
+      "selectQuality": "Vyberte kvalitu",
+      "roles": "Roly",
+      "roleLabels": {
+        "detect": "Detekcia objektov",
+        "record": "Nahrávanie",
+        "audio": "Zvuk"
+      },
+      "testStream": "Testovacie pripojenie",
+      "testSuccess": "Stream test úspešné!",
+      "testFailed": "Stream test zlyhal",
+      "testFailedTitle": "Test Zlyhal",
+      "connected": "Pripojené",
+      "notConnected": "Nie je pripojený",
+      "featuresTitle": "Vlastnosti",
+      "go2rtc": "Znížte počet pripojení ku kamere",
+      "detectRoleWarning": "Aspoň jeden prúd musí mať \"detekt\" úlohu pokračovať.",
+      "rolesPopover": {
+        "title": "Roly streamu",
+        "detect": "Hlavné krmivo pre detekciu objektu.",
+        "record": "Ukladá segmenty video kanála na základe nastavení konfigurácie.",
+        "audio": "Kŕmenie pre detekciu zvuku."
+      },
+      "featuresPopover": {
+        "title": "Funkcie streamu",
+        "description": "Použite prekrytie go2rtc na zníženie pripojenia k fotoaparátu."
+      }
+    },
+    "step3": {
+      "connectStream": "Pripojiť",
+      "connectingStream": "Pripája",
+      "disconnectStream": "Odpojiť",
+      "estimatedBandwidth": "Odhadovaná šírka pásma",
+      "roles": "Roly",
+      "none": "Žiadny",
+      "error": "Chyba",
+      "streamValidated": "Stream {{number}} úspešne overený",
+      "streamValidationFailed": "Stream {{number}} validácia zlyhala",
+      "saveAndApply": "Uložiť novú kameru",
+      "saveError": "Neplatná konfigurácia. Skontrolujte nastavenia.",
+      "issues": {
+        "title": "Stream Platnosť",
+        "videoCodecGood": "Kód videa {{codec}}.",
+        "audioCodecGood": "Audio kódc je {{codec}}.",
+        "noAudioWarning": "Žiadne audio zistené pre tento prúd, nahrávanie nebude mať audio.",
+        "audioCodecRecordError": "AAC audio kodek je potrebný na podporu audio v záznamoch.",
+        "audioCodecRequired": "Zvukový prúd je povinný podporovať detekciu zvuku.",
+        "restreamingWarning": "Zníženie pripojenia ku kamery pre rekordný prúd môže mierne zvýšiť využitie CPU.",
+        "dahua": {
+          "substreamWarning": "Substream 1 je uzamknutý na nízke rozlíšenie. Mnoho Dahua / Amcrest / EmpireTech kamery podporujú ďalšie podstreamy, ktoré musia byť povolené v nastavení kamery. Odporúča sa skontrolovať a využiť tie prúdy, ak je k dispozícii."
+        },
+        "hikvision": {
+          "substreamWarning": "Substream 1 je uzamknutý na nízke rozlíšenie. Mnoho Hikvision kamery podporujú ďalšie podstreamy, ktoré musia byť povolené v nastavení kamery. Odporúča sa skontrolovať a využiť tie prúdy, ak je k dispozícii."
+        },
+        "resolutionHigh": "Rozlíšenie {{resolution}} môže spôsobiť zvýšenú spotrebu zdrojov.",
+        "resolutionLow": "Rozlíšenie {{resolution}} môže byť príliš nízka pre spoľahlivú detekciu malých objektov."
+      },
+      "description": "Záverečné overenie a analýza pred uložením nového fotoaparátu. Pripojte každý prúd pred uložením.",
+      "validationTitle": "Stream Platnosť",
+      "connectAllStreams": "Pripojte všetky prúdy",
+      "reconnectionSuccess": "Opätovné pripojenie bolo úspešné.",
+      "reconnectionPartial": "Niektoré prúdy sa nepodarilo prepojiť.",
+      "streamUnavailable": "Ukážka streamu nie je k dispozícii",
+      "reload": "Znovu načítať",
+      "connecting": "Pripája...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Platné",
+      "failed": "Zlyhanie",
+      "notTested": "Netestované"
+    }
+  },
+  "cameraManagement": {
+    "title": "Správa kamier",
+    "addCamera": "Pridať novu kameru",
+    "editCamera": "Upraviť kameru:",
+    "selectCamera": "Vyberte kameru",
+    "backToSettings": "Späť na nastavenia kamery",
+    "streams": {
+      "title": "Enable / Disable kamery",
+      "desc": "Dočasne deaktivujte kameru, kým sa Frigate nereštartuje. Deaktivácia kamery úplne zastaví spracovanie streamov z tejto kamery aplikáciou Frigate. Detekcia, nahrávanie a ladenie nebudú k dispozícii.<br /> <em>Poznámka: Toto nezakáže restreamy go2rtc.</em>"
+    },
+    "cameraConfig": {
+      "add": "Pridať kameru",
+      "edit": "Upraviť kameru",
+      "description": "Konfigurovať nastavenia kamery, vrátane vstupov streamu a rolí.",
+      "name": "Názov kamery",
+      "nameRequired": "Názov kamery je povinný",
+      "nameLength": "Názov kamery musí byť menšia ako 64 znakov.",
+      "namePlaceholder": "e.g., predne_dvere alebo Prehľad Záhrady",
+      "enabled": "Povoliť",
+      "ffmpeg": {
+        "inputs": "Vstupné streamy",
+        "path": "Cesta streamu",
+        "pathRequired": "Cesta k streamu je povinná",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roly",
+        "rolesRequired": "Je vyžadovaná aspoň jedna rola",
+        "rolesUnique": "Každá rola (audio, detekcia, záznam) môže byť priradená iba k jednému streamu",
+        "addInput": "Pridať vstupný stream",
+        "removeInput": "Odobrať vstupný stream",
+        "inputsRequired": "Je vyžadovaný aspoň jeden vstupný stream"
+      },
+      "go2rtcStreams": "go2rtc Streamy",
+      "streamUrls": "Stream URLs",
+      "addUrl": "Pridať URL",
+      "addGo2rtcStream": "Pridať go2rtc Stream",
+      "toast": {
+        "success": "Kamera {{cameraName}} bola úspešne uložená"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Nastavenie recenzie kamery",
+    "object_descriptions": {
+      "title": "Generatívne popisy objektov umelej inteligencie",
+      "desc": "Dočasne umožňujú/disable Generovať opisy objektu AI pre tento fotoaparát. Keď je zakázané, AI vygenerované popisy nebudú požiadané o sledovanie objektov na tomto fotoaparáte."
+    },
+    "review_descriptions": {
+      "title": "Popisy generatívnej umelej inteligencie",
+      "desc": "Dočasne povoliť/disable Genive AI opisy pre tento fotoaparát. Keď je zakázané, AI vygenerované popisy nebudú požiadané o preskúmanie položiek na tomto fotoaparáte."
+    },
+    "review": {
+      "title": "Recenzia",
+      "desc": "Dočasne umožňujú/disable upozornenia a detekcia pre tento fotoaparát až do reštartu Frigate. Pri vypnutých, nebudú vygenerované žiadne nové položky preskúmania. ",
+      "alerts": "Upozornenia ",
+      "detections": "Detekcie "
+    },
+    "reviewClassification": {
+      "title": "Preskúmať klasifikáciu",
+      "desc": "Frigate kategorizuje položky recenzií ako Upozornenia a Detekcie. Predvolene sa všetky objekty typu <em>osoba</em> a <em>auto</em> považujú za Upozornenia. Kategorizáciu položiek recenzií môžete spresniť konfiguráciou požadovaných zón pre ne.",
+      "noDefinedZones": "Pre túto kameru nie sú definované žiadne zóny.",
+      "objectAlertsTips": "Všetky objekty {{alertsLabels}} na {{cameraName}} sa zobrazia ako Upozornenia.",
+      "zoneObjectAlertsTips": "Všetky objekty {{alertsLabels}} detekované v {{zone}} na {{cameraName}} budú zobrazené ako Upozornenia.",
+      "objectDetectionsTips": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{cameraName}}, sa zobrazia ako detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú.",
+      "zoneObjectDetectionsTips": {
+        "text": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{zone}} na kamere {{cameraName}}, budú zobrazené ako detekcie.",
+        "notSelectDetections": "Všetky objekty typu {{detectionsLabels}} detekované v zóne {{zone}} na kamere {{cameraName}}, ktoré nie sú zaradené do kategórie Upozornenia, sa zobrazia ako Detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú.",
+        "regardlessOfZoneObjectDetectionsTips": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{cameraName}}, sa zobrazia ako detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú."
+      },
+      "unsavedChanges": "Nezaradené Nastavenie hodnotenia pre {{camera}}",
+      "selectAlertsZones": "Vyberte zóny pre upozornenia",
+      "selectDetectionsZones": "Vyberte zóny pre detekcie",
+      "limitDetections": "Obmedziť detekciu na konkrétne zóny",
+      "toast": {
+        "success": "Konfigurácia klasifikácie bola uložená. Reštartujte Frigate, aby sa zmeny prejavili."
+      }
+    }
+  },
+  "users": {
+    "title": "Používatelia",
+    "management": {
+      "title": "Správa používateľov",
+      "desc": "Spravovať používateľské účty tejto inštancie Frigate."
+    },
+    "addUser": "Pridať používateľa",
+    "updatePassword": "Aktualizovať heslo",
+    "toast": {
+      "success": {
+        "createUser": "Užívateľ {{user}} úspešne vytvorený",
+        "deleteUser": "Užívateľ {{user}} úspešne odobraný",
+        "updatePassword": "Heslo úspešne aktualizované.",
+        "roleUpdated": "Aktualizovaná rola pre používateľa {{user}}"
+      },
+      "error": {
+        "setPasswordFailed": "Nepodarilo sa uložiť heslo: {{errorMessage}}",
+        "createUserFailed": "Nepodarilo sa vytvoriť používateľa: {{errorMessage}}",
+        "deleteUserFailed": "Nepodarilo sa odstrániť používateľa: {{errorMessage}}",
+        "roleUpdateFailed": "Nepodarilo sa aktualizovať rolu: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Používateľské meno",
+      "actions": "Akcie",
+      "role": "Rola",
+      "noUsers": "Nenašli sa žiadni používatelia.",
+      "changeRole": "Zmeniť rolu používateľa",
+      "password": "Heslo",
+      "deleteUser": "Odstrániť používateľa"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Používateľské meno",
+          "desc": "Povolené sú iba písmená, čísla, bodky a podčiarkovníky.",
+          "placeholder": "Zadajte používateľské meno"
+        },
+        "password": {
+          "title": "Heslo",
+          "placeholder": "Zadajte heslo",
+          "confirm": {
+            "title": "Potvrdiť heslo",
+            "placeholder": "Potvrdiť heslo"
+          },
+          "strength": {
+            "title": "Sila hesla: ",
+            "weak": "Slabý",
+            "medium": "Stredná",
+            "strong": "Silný",
+            "veryStrong": "Veľmi silný"
+          },
+          "match": "Heslá sa zhodujú",
+          "notMatch": "Heslá sa nezhodujú"
+        },
+        "newPassword": {
+          "title": "Nové heslo",
+          "placeholder": "Zadajte nové heslo",
+          "confirm": {
+            "placeholder": "Znovu zadajte nové heslo"
+          }
+        },
+        "usernameIsRequired": "Vyžaduje sa používateľské meno",
+        "passwordIsRequired": "Heslo je povinné"
+      },
+      "createUser": {
+        "title": "Vytvorenie nového užívateľa",
+        "desc": "Pridajte nový používateľský účet a zadajte rolu pre prístup k oblastiam používateľského rozhrania Frigate.",
+        "usernameOnlyInclude": "Používateľské meno môže obsahovať iba písmená, číslice, . alebo _",
+        "confirmPassword": "Potvrďte svoje heslo"
+      },
+      "deleteUser": {
+        "title": "Odstrániť užívateľa",
+        "desc": "Túto akciu nie je možné vrátiť späť. Týmto sa natrvalo odstráni používateľský účet a odstránia sa všetky súvisiace údaje.",
+        "warn": "Naozaj chcete odstrániť používateľa <strong>{{username}}<strong>?"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Heslo nemôže byť prázdne",
+        "doNotMatch": "Heslá sa nezhodujú",
+        "updatePassword": "Aktualizácia hesla pre {{username}}",
+        "setPassword": "Nastaviť heslo",
+        "desc": "Vytvorte si silné heslo na zabezpečenie tohto účtu."
+      },
+      "changeRole": {
+        "title": "Zmeniť rolu používateľa",
+        "select": "Vyberte rolu",
+        "desc": "Aktualizovať povolenia pre používateľa <strong>{{username}}<strong>",
+        "roleInfo": {
+          "intro": "Vyberte príslušnú rolu pre tohto používateľa:",
+          "admin": "Správca",
+          "adminDesc": "Úplný prístup ku všetkým funkciám.",
+          "viewer": "Divák",
+          "viewerDesc": "Obmedzené iba na živé dashboardy, funkcie Review, Explore a Exports.",
+          "customDesc": "Vlastná rola so špecifickým prístupom k kamere."
+        }
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Správa roly diváka",
+      "desc": "Spravujte vlastné roly divákov a ich povolenia na prístup ku kamere pre túto inštanciu Frigate."
+    },
+    "addRole": "Pridať rolu",
+    "table": {
+      "role": "Rola",
+      "cameras": "Kamery",
+      "actions": "Akcie",
+      "noRoles": "Neboli nájdené žiadne vlastné role.",
+      "editCameras": "Editovať kamery",
+      "deleteRole": "Odstrániť rolu"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Rola {{role}} bola úspešne vytvorená",
+        "updateCameras": "Kamery aktualizované pre rolu {{role}}",
+        "deleteRole": "Rola {{role}} bola úspešne odstránená",
+        "userRolesUpdated_one": "{{count}} užívateľ (y) priradené tejto úlohe boli aktualizované pre \"viewer\", ktorý má prístup ku všetkým kamerám.",
+        "userRolesUpdated_few": "",
+        "userRolesUpdated_other": ""
+      },
+      "error": {
+        "createRoleFailed": "Nepodarilo sa vytvoriť rolu: {{errorMessage}}",
+        "updateCamerasFailed": "Nepodarilo sa aktualizovať kamery: {{errorMessage}}",
+        "deleteRoleFailed": "Nepodarilo sa odstrániť rolu: {{errorMessage}}",
+        "userUpdateFailed": "Nepodarilo sa aktualizovať používateľské role: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Vytvoriť novú rolu",
+        "desc": "Pridajte novú úlohu a zadajte prístup k kamerám."
+      },
+      "editCameras": {
+        "title": "Editovať Rolu Kamery",
+        "desc": "Aktualizujte prístup k kamere pre rolu <strong>{{role}}<strong>."
+      },
+      "deleteRole": {
+        "title": "Odstrániť rolu",
+        "desc": "Túto akciu nie je možné vrátiť späť. Týmto sa rola natrvalo odstráni a všetci používatelia s touto rolou budú priradení k role „pozerač“, ktorá umožní divákovi prístup ku všetkým kamerám.",
+        "warn": "Ste si istí, že chcete odstrániť <strong>{{role}}</strong>?",
+        "deleting": "Odstraňuje sa..."
+      },
+      "form": {
+        "role": {
+          "title": "Názov role",
+          "placeholder": "Zadajte názov roly",
+          "desc": "Povolené sú iba písmená, čísla, bodky a podčiarkovníky.",
+          "roleIsRequired": "Vyžaduje sa názov roly",
+          "roleOnlyInclude": "Názov role môže obsahovať iba písmená, čísla, . alebo _",
+          "roleExists": "Úloha s týmto menom už existuje."
+        },
+        "cameras": {
+          "title": "Kamery",
+          "desc": "Vyberte kamery, ku ktorým má táto rola prístup. Vyžaduje sa aspoň jedna kamera.",
+          "required": "Aspoň jedna kamera musí byť vybraná."
+        }
+      }
+    }
+  },
+  "notification": {
+    "title": "Notifikacie",
+    "notificationSettings": {
+      "title": "Nastavenia notifikácií",
+      "desc": "Frigate dokáže natívne odosielať push notifikácie do vášho zariadenia, keď je spustený v prehliadači alebo nainštalovaný ako PWA."
+    },
+    "notificationUnavailable": {
+      "title": "Notifikacie su nedostupné",
+      "desc": "Webové push notifikácie vyžadujú zabezpečený kontext (<code>https://…</code>). Ide o obmedzenie prehliadača. Ak chcete používať notifikácie, pristupujte k Frigate bezpečne."
+    },
+    "globalSettings": {
+      "title": "Globálne nastavenia",
+      "desc": "Dočasne pozastaviť upozornenia pre konkrétne kamery na všetkých registrovaných zariadeniach."
+    },
+    "email": {
+      "title": "E-mail",
+      "placeholder": "e.g. príklad@email.com",
+      "desc": "Vyžaduje sa platný e-mail, ktorý bude použitý na upozornenie v prípade akýchkoľvek problémov so službou push."
+    },
+    "cameras": {
+      "title": "Kamery",
+      "noCameras": "K dispozícii nie sú žiadne kamery",
+      "desc": "Vyberte, na ktoré kamery umožňujú notifikácie."
+    },
+    "deviceSpecific": "Špecifické nastavenia zariadenia",
+    "registerDevice": "Registrovať toto zariadenie",
+    "unregisterDevice": "Zrušte registráciu tohto zariadenia",
+    "sendTestNotification": "Odoslať testovacie oznámenie",
+    "unsavedRegistrations": "Neuložené registrácie oznámení",
+    "unsavedChanges": "Neuložené zmeny upozornení",
+    "active": "Upozornenia sú aktívne",
+    "suspended": "Oznámenie pozastavuju {{time}}",
+    "suspendTime": {
+      "suspend": "Pozastaviť",
+      "5minutes": "Pozastaviť na 5 minút",
+      "10minutes": "Pozastaviť na 10 minút",
+      "30minutes": "Pozastaviť na 30 minút",
+      "1hour": "Pozastaviť na 1 hodinu",
+      "12hours": "Pozastaviť na 12 hodín",
+      "24hours": "Pozastaviť na 24 hodín",
+      "untilRestart": "Pozastaviť do reštartovania"
+    },
+    "cancelSuspension": "Zrušiť pozastavenie",
+    "toast": {
+      "success": {
+        "registered": "Úspešne zaregistrované pre upozornenia. Pred odoslaním akýchkoľvek upozornení (vrátane testovacieho upozornenia) je potrebné reštartovať Frigate.",
+        "settingSaved": "Nastavenie oznámenia boli uložené."
+      },
+      "error": {
+        "registerFailed": "Uloženie registrácie upozornenia zlyhalo."
+      }
+    }
+  },
+  "frigatePlus": {
+    "title": "Nastavenie Frigate+",
+    "apiKey": {
+      "title": "Frigate + API kľúč",
+      "validated": "Frigate + API kľúč je detekovaný a overený",
+      "notValidated": "Frigate + API kľúč nie je detekovaný alebo nie je overený",
+      "desc": "Frigate+ API kľúč umožňuje integráciu s Frigate+ služby.",
+      "plusLink": "Prečítajte si viac o Frigate+"
+    },
+    "snapshotConfig": {
+      "title": "Konfigurácia snímky",
+      "desc": "Odosielanie do Frigate+ vyžaduje, aby boli v konfigurácii povolené snímky aj snímky <code>clean_copy</code>.",
+      "cleanCopyWarning": "Niektoré kamery majú povolené snímky, ale voľba <code>clean_copy</code> je zakázaná. Pre možnosť odosielania snímok z týchto kamier do služby Frigate+ je nutné túto voľbu povoliť v konfigurácii snímok.",
+      "table": {
+        "camera": "Kamera",
+        "snapshots": "Snímky",
+        "cleanCopySnapshots": "<code>clean_copy</code> Snímky"
+      }
+    },
+    "modelInfo": {
+      "title": "Informácie o Modele",
+      "modelType": "Typ Modelu",
+      "trainDate": "Dátum Tréningu",
+      "baseModel": "Základný Model",
+      "plusModelType": {
+        "baseModel": "Základný Model",
+        "userModel": "Doladené"
+      },
+      "supportedDetectors": "Podporované Detektory",
+      "cameras": "Kamery",
+      "loading": "Načítavam informácie o modeli…",
+      "error": "Chyba načítania informácií o modeli",
+      "availableModels": "Dostupné Moduly",
+      "loadingAvailableModels": "Načítavam dostupné modely…",
+      "modelSelect": "Tu môžete vybrať dostupné modely zo služby Frigate+. Upozorňujeme, že je možné zvoliť iba modely kompatibilné s aktuálnou konfiguráciou detektora."
+    },
+    "unsavedChanges": "Neuložené zmeny nastavenia Frigate+",
+    "restart_required": "Vyžadovaný reštart (model Frigate+ zmenený)",
+    "toast": {
+      "success": "Nastavenia Frigate+ boli uložené. Reštartujte Frigate+ pre aplikovanie zmien.",
+      "error": "Chyba pri ukladaní zmien konfigurácie: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Spúšťače",
+    "semanticSearch": {
+      "title": "Sémantické vyhľadávanie je vypnuté",
+      "desc": "Na používanie spúšťačov musí byť povolené sémantické vyhľadávanie."
+    },
+    "management": {
+      "title": "Spúšťače",
+      "desc": "Správa spúšťa {{camera}}. Použite typ miniatúry, aby ste spustili na podobných miniatúr na vybraných tracked objekt, a typ popisu, aby ste spustili podobné popisy na text, ktorý určíte."
+    },
+    "addTrigger": "Pridať Spúšťač",
+    "table": {
+      "name": "Meno",
+      "type": "Typ",
+      "content": "Obsah",
+      "threshold": "Prah",
+      "actions": "Akcie",
+      "noTriggers": "Pre túto kameru nie sú nakonfigurované žiadne spúšťače.",
+      "edit": "Upraviť",
+      "deleteTrigger": "Odstrániť spúšťač",
+      "lastTriggered": "Naposledy spustené"
+    },
+    "type": {
+      "thumbnail": "Náhľad",
+      "description": "Popis"
+    },
+    "actions": {
+      "notification": "Poslať upozornenie",
+      "sub_label": "Pridať vedľajší štítok",
+      "attribute": "Pridať atribút"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Vytvoriť spúšťač",
+        "desc": "Vytvorte spúšť pre kameru {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Upraviť spúšťač",
+        "desc": "Upraviť nastavenia spúšťača na kamere {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Odstrániť spúšťač",
+        "desc": "Naozaj chcete odstrániť spúšťač <strong>{{triggerName}}</strong>? Túto akciu nie je možné vrátiť späť."
+      },
+      "form": {
+        "name": {
+          "title": "Meno",
+          "placeholder": "Zadajte meno pre spúšťača",
+          "description": "Zadajte jedinečné meno alebo popis na identifikáciu tohto spúšťania",
+          "error": {
+            "minLength": "Názov musí mať aspoň 2 znaky.",
+            "invalidCharacters": "Meno môže obsahovať iba písmená, číslice, podčiarkovníky a pomlčky.",
+            "alreadyExists": "Spúšťač s týmto názvom už pre túto kameru existuje."
+          }
+        },
+        "enabled": {
+          "description": "Povoliť alebo zakázať tento spúšťač"
+        },
+        "type": {
+          "title": "Typ",
+          "placeholder": "Vybrať typ spúšťača",
+          "description": "Spustiť, keď sa zistí podobný popis sledovaného objektu",
+          "thumbnail": "Spustiť, keď sa zistí podobná miniatúra sledovaného objektu"
+        },
+        "content": {
+          "title": "Obsah",
+          "imagePlaceholder": "Vyberte miniatúru",
+          "textPlaceholder": "Zadajte obsah textu",
+          "imageDesc": "Zobrazujú sa iba posledné 100 miniatúr. Ak nemôžete nájsť požadovanú miniatúru, prečítajte si skôr objekty v preskúmať a nastaviť spúšťací z ponuky tam.",
+          "textDesc": "Zadajte text, aby ste spustili túto akciu, keď je detekovaný podobný popis objektu.",
+          "error": {
+            "required": "Obsah je potrebný."
+          }
+        },
+        "threshold": {
+          "title": "Prah",
+          "desc": "Nastavte prah podobnosti pre tento spúšťač. Vyšší prah znamená, že na spustenie spúšťača je potrebná bližšia zhoda.",
+          "error": {
+            "min": "Threshold musí byť aspoň 0",
+            "max": "Threshold musí byť na väčšine 1"
+          }
+        },
+        "actions": {
+          "title": "Akcie",
+          "desc": "V predvolenom nastavení Frigate odosiela MQTT správu pre všetky spúšťače. Zvoľte dodatočnú akciu, ktorá sa má vykonať, keď sa tento spúšťač aktivuje.",
+          "error": {
+            "min": "Musí byť vybraná aspoň jedna akcia."
+          }
+        }
+      }
+    },
+    "wizard": {
+      "title": "Vytvoriť spúšťač",
+      "step1": {
+        "description": "Konfigurujte základné nastavenia pre vašu spúšť."
+      },
+      "step2": {
+        "description": "Nastavte obsah, ktorý spustí túto akciu."
+      },
+      "step3": {
+        "description": "Konfigurovať prah a akcie pre tento spúšťač."
+      },
+      "steps": {
+        "nameAndType": "Meno a typ",
+        "configureData": "Konfigurovať údaje",
+        "thresholdAndActions": "Prah a akcie"
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Spúšťač {{name}} bol úspešne vytvorený.",
+        "updateTrigger": "Spúšťač {{name}} bol úspešne aktualizovaný.",
+        "deleteTrigger": "Spúšťač {{name}} bol úspešne zmazaný."
+      },
+      "error": {
+        "createTriggerFailed": "Nepodarilo sa vytvoriť spúšťač: {{errorMessage}}",
+        "updateTriggerFailed": "Nepodarilo sa aktualizovať spúšťač: {{errorMessage}}",
+        "deleteTriggerFailed": "Nepodarilo sa zmazať spúšťač: {{errorMessage}}"
+      }
     }
   }
 }

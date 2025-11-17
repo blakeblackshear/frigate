@@ -2,8 +2,135 @@
   "labels": {
     "label": "ラベル",
     "all": {
-      "title": "すべてのラベル"
+      "title": "すべてのラベル",
+      "short": "ラベル"
+    },
+    "count_one": "{{count}} ラベル",
+    "count_other": "{{count}} ラベル"
+  },
+  "filter": "フィルター",
+  "classes": {
+    "label": "クラス",
+    "all": {
+      "title": "すべてのクラス"
+    },
+    "count_one": "{{count}} クラス",
+    "count_other": "{{count}} クラス"
+  },
+  "zones": {
+    "label": "ゾーン",
+    "all": {
+      "title": "すべてのゾーン",
+      "short": "ゾーン"
     }
   },
-  "filter": "フィルタ"
+  "dates": {
+    "selectPreset": "プリセットを選択…",
+    "all": {
+      "title": "すべての日付",
+      "short": "日付"
+    }
+  },
+  "more": "その他のフィルター",
+  "reset": {
+    "label": "フィルターを既定値にリセット"
+  },
+  "timeRange": "期間",
+  "subLabels": {
+    "label": "サブラベル",
+    "all": "すべてのサブラベル"
+  },
+  "score": "スコア",
+  "estimatedSpeed": "推定速度（{{unit}}）",
+  "features": {
+    "label": "機能",
+    "hasSnapshot": "スナップショットあり",
+    "hasVideoClip": "ビデオクリップあり",
+    "submittedToFrigatePlus": {
+      "label": "Frigate+ に送信済み",
+      "tips": "まずスナップショットのある追跡オブジェクトでフィルターしてください。<br /><br />スナップショットのない追跡オブジェクトは Frigate+ に送信できません。"
+    }
+  },
+  "sort": {
+    "label": "並び替え",
+    "dateAsc": "日付（昇順）",
+    "dateDesc": "日付（降順）",
+    "scoreAsc": "オブジェクトスコア（昇順）",
+    "scoreDesc": "オブジェクトスコア（降順）",
+    "speedAsc": "推定速度（昇順）",
+    "speedDesc": "推定速度（降順）",
+    "relevance": "関連度"
+  },
+  "cameras": {
+    "label": "カメラフィルター",
+    "all": {
+      "title": "すべてのカメラ",
+      "short": "カメラ"
+    }
+  },
+  "review": {
+    "showReviewed": "レビュー済みを表示"
+  },
+  "motion": {
+    "showMotionOnly": "モーションのみ表示"
+  },
+  "explore": {
+    "settings": {
+      "title": "設定",
+      "defaultView": {
+        "title": "既定の表示",
+        "desc": "フィルター未選択時、ラベルごとの最新追跡オブジェクトの概要を表示するか、未フィルタのグリッドを表示するかを選びます。",
+        "summary": "概要",
+        "unfilteredGrid": "未フィルタグリッド"
+      },
+      "gridColumns": {
+        "title": "グリッド列数",
+        "desc": "グリッド表示の列数を選択します。"
+      },
+      "searchSource": {
+        "label": "検索対象",
+        "desc": "追跡オブジェクトのサムネイル画像と説明文のどちらを検索するかを選択します。",
+        "options": {
+          "thumbnailImage": "サムネイル画像",
+          "description": "説明"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "フィルターする日付を選択"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "ログレベルでフィルター",
+    "filterBySeverity": "重大度でログをフィルター",
+    "loading": {
+      "title": "読み込み中",
+      "desc": "ログペインが最下部にあると、新しいログが追加され次第自動でストリーミング表示されます。"
+    },
+    "disableLogStreaming": "ログのストリーミングを無効化",
+    "allLogs": "すべてのログ"
+  },
+  "trackedObjectDelete": {
+    "title": "削除の確認",
+    "desc": "これら {{objectLength}} 件の追跡オブジェクトを削除すると、スナップショット、保存された埋め込み、関連するオブジェクトのライフサイクル項目が削除されます。履歴ビューの録画映像は削除<em>されません</em>。<br /><br />続行してもよろしいですか？<br /><br />今後このダイアログを表示しない場合は <em>Shift</em> キーを押しながら操作してください。",
+    "toast": {
+      "success": "追跡オブジェクトを削除しました。",
+      "error": "追跡オブジェクトの削除に失敗しました: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "ゾーンマスクでフィルター"
+  },
+  "recognizedLicensePlates": {
+    "title": "認識されたナンバープレート",
+    "loadFailed": "認識済みナンバープレートの読み込みに失敗しました。",
+    "loading": "認識済みナンバープレートを読み込み中…",
+    "placeholder": "ナンバープレートを入力して検索…",
+    "noLicensePlatesFound": "ナンバープレートが見つかりません。",
+    "selectPlatesFromList": "リストから1件以上選択してください。",
+    "selectAll": "すべて選択",
+    "clearAll": "すべてクリア"
+  }
 }

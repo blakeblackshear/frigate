@@ -7,6 +7,7 @@ import { Preview } from "@/types/preview";
 import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer, { HlsSource } from "../HlsVideoPlayer";
+import { useDetailStream } from "@/context/detail-stream-context";
 import { TimeRange } from "@/types/timeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { VideoResolutionType } from "@/types/live";
@@ -32,6 +33,7 @@ type DynamicVideoPlayerProps = {
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
+  onSeekToTime?: (timestamp: number, play?: boolean) => void;
   setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   toggleFullscreen: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
@@ -49,6 +51,7 @@ export default function DynamicVideoPlayer({
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
+  onSeekToTime,
   setFullResolution,
   toggleFullscreen,
   containerRef,
@@ -56,6 +59,13 @@ export default function DynamicVideoPlayer({
   const { t } = useTranslation(["components/player"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // for detail stream context in History
+  const {
+    isDetailMode,
+    camera: contextCamera,
+    currentTime,
+  } = useDetailStream();
 
   // controlling playback
 
@@ -265,6 +275,11 @@ export default function DynamicVideoPlayer({
         onTimeUpdate={onTimeUpdate}
         onPlayerLoaded={onPlayerLoaded}
         onClipEnded={onValidateClipEnd}
+        onSeekToTime={(timestamp, play) => {
+          if (onSeekToTime) {
+            onSeekToTime(timestamp, play);
+          }
+        }}
         onPlaying={() => {
           if (isScrubbing) {
             playerRef.current?.pause();
@@ -284,6 +299,9 @@ export default function DynamicVideoPlayer({
             setIsBuffering(true);
           }
         }}
+        isDetailMode={isDetailMode}
+        camera={contextCamera || camera}
+        currentTimeOverride={currentTime}
       />
       <PreviewPlayer
         className={cn(

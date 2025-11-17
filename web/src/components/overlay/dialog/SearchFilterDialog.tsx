@@ -41,7 +41,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { LuCheck } from "react-icons/lu";
+import { LuCheck, LuSquareCheck, LuX } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type SearchFilterDialogProps = {
@@ -230,6 +230,7 @@ export default function SearchFilterDialog({
     <PlatformAwareSheet
       trigger={trigger}
       title={t("more")}
+      titleClassName="mb-5 -mt-3"
       content={content}
       contentClassName={cn(
         "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",
@@ -429,7 +430,8 @@ export function ZoneFilterContent({
               {allZones.map((item) => (
                 <FilterSwitch
                   key={item}
-                  label={item.replaceAll("_", " ")}
+                  label={item}
+                  type={"zone"}
                   isChecked={zones?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {
@@ -923,12 +925,18 @@ export function RecognizedLicensePlatesFilterContent({
     }
   };
 
-  if (allRecognizedLicensePlates && allRecognizedLicensePlates.length === 0) {
-    return null;
-  }
-
   const filterItems = (value: string, search: string) => {
     if (!search) return 1; // Show all items if no search input
+
+    // If wrapped in /.../, treat as raw regex
+    if (search.startsWith("/") && search.endsWith("/") && search.length > 2) {
+      try {
+        const regex = new RegExp(search.slice(1, -1), "i");
+        return regex.test(value) ? 1 : -1;
+      } catch {
+        return -1;
+      }
+    }
 
     if (search.includes("*") || search.includes("?")) {
       const escapedSearch = search
@@ -942,6 +950,46 @@ export function RecognizedLicensePlatesFilterContent({
     // fallback to substring matching if no wildcards
     return value.toLowerCase().includes(search.toLowerCase()) ? 1 : -1;
   };
+
+  const filteredPlates = useMemo(() => {
+    if (!allRecognizedLicensePlates) return [];
+    return allRecognizedLicensePlates.filter(
+      (plate) => filterItems(plate, inputValue) > 0,
+    );
+  }, [allRecognizedLicensePlates, inputValue]);
+
+  const handleSelectAllVisible = () => {
+    const allVisibleSelected = filteredPlates.every((plate) =>
+      selectedRecognizedLicensePlates.includes(plate),
+    );
+
+    let newSelected;
+    if (allVisibleSelected) {
+      // clear all
+      newSelected = selectedRecognizedLicensePlates.filter(
+        (plate) => !filteredPlates.includes(plate),
+      );
+    } else {
+      // select all
+      newSelected = Array.from(
+        new Set([...selectedRecognizedLicensePlates, ...filteredPlates]),
+      );
+    }
+
+    setSelectedRecognizedLicensePlates(newSelected);
+    setRecognizedLicensePlates(
+      newSelected.length === 0 ? undefined : newSelected,
+    );
+  };
+
+  const handleClearAll = () => {
+    setSelectedRecognizedLicensePlates([]);
+    setRecognizedLicensePlates(undefined);
+  };
+
+  if (allRecognizedLicensePlates && allRecognizedLicensePlates.length === 0) {
+    return null;
+  }
 
   return (
     <div className="overflow-x-hidden">
@@ -1010,6 +1058,30 @@ export function RecognizedLicensePlatesFilterContent({
           <p className="mt-1 text-sm text-muted-foreground">
             {t("recognizedLicensePlates.selectPlatesFromList")}
           </p>
+          <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
+            {filteredPlates.length > 0 &&
+            !filteredPlates.every((plate) =>
+              selectedRecognizedLicensePlates.includes(plate),
+            ) ? (
+              <button
+                onClick={handleSelectAllVisible}
+                className="flex items-center gap-1 text-sm text-primary hover:underline"
+              >
+                <LuSquareCheck className="size-4" />
+                {t("recognizedLicensePlates.selectAll")}
+              </button>
+            ) : null}
+
+            {selectedRecognizedLicensePlates.length > 0 && (
+              <button
+                onClick={handleClearAll}
+                className="flex items-center gap-1 text-sm text-primary hover:underline"
+              >
+                <LuX className="size-4" />
+                {t("recognizedLicensePlates.clearAll")}
+              </button>
+            )}
+          </div>
         </>
       )}
     </div>

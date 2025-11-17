@@ -1,1 +1,17 @@
-{}
+{
+  "group": {
+    "label": "Kamera Grupper",
+    "add": "Tilføj Kameragruppe",
+    "edit": "Rediger Kamera Gruppe",
+    "delete": {
+      "label": "Slet kamera gruppe",
+      "confirm": {
+        "title": "Bekræft sletning",
+        "desc": "Er du sikker på at du vil slette kamera gruppen <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Navn"
+    }
+  }
+}

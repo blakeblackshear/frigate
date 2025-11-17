@@ -22,13 +22,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { AuthContext } from "@/context/auth-context";
 import { useTranslation } from "react-i18next";
+import useSWR from "swr";
+import { LuExternalLink } from "react-icons/lu";
+import { useDocDomain } from "@/hooks/use-doc-domain";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  const { t } = useTranslation(["components/auth"]);
+  const { t } = useTranslation(["components/auth", "common"]);
+  const { getLocaleDocUrl } = useDocDomain();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const { login } = React.useContext(AuthContext);
+
+  // need to use local fetcher because useSWR default fetcher is not set up in this context
+  const fetcher = (path: string) => axios.get(path).then((res) => res.data);
+  const { data } = useSWR("/auth/first_time_login", fetcher);
+  const showFirstTimeLink = data?.admin_first_time_login === true;
 
   const formSchema = z.object({
     user: z.string().min(1, t("form.errors.usernameRequired")),
@@ -136,6 +146,24 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           </div>
         </form>
       </Form>
+      {showFirstTimeLink && (
+        <Card className="mt-4 p-4 text-center text-sm">
+          <CardContent className="p-2">
+            <p className="mb-2 text-primary-variant">
+              {t("form.firstTimeLogin")}
+            </p>
+            <a
+              href={getLocaleDocUrl("configuration/authentication#onboarding")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-primary"
+            >
+              {t("readTheDocumentation", { ns: "common" })}
+              <LuExternalLink className="ml-2 size-3" />
+            </a>
+          </CardContent>
+        </Card>
+      )}
       <Toaster />
     </div>
   );

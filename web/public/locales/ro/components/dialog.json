@@ -46,7 +46,8 @@
     "button": {
       "deleteNow": "Șterge acum",
       "export": "Exportă",
-      "markAsReviewed": "Marchează ca revizuit"
+      "markAsReviewed": "Marchează ca revizuit",
+      "markAsUnreviewed": "Marchează ca nerevizuit"
     },
     "confirmDelete": {
       "toast": {
@@ -82,7 +83,7 @@
     "export": "Exportă",
     "selectOrExport": "Selectează sau exportă",
     "toast": {
-      "success": "Exportul a început cu succes. Vizualizați fișierul în dosarul /exports.",
+      "success": "Exportul a început cu succes. Vizualizați fișierul pe pagina de exporturi.",
       "error": {
         "failed": "Eroare la pornirea exportului: {{error}}",
         "endTimeMustAfterStartTime": "Ora de sfârșit trebuie să fie după ora de început",
@@ -105,7 +106,7 @@
     },
     "showStats": {
       "label": "Afișează statistici streaming",
-      "desc": "Activează această opțiune pentru a afișa statisticile de streaming ca un overlay peste fluxul camerei."
+      "desc": "Activează această opțiune pentru a afișa statisticile de streaming ca un overlay peste stream-ul camerei."
     },
     "debugView": "Vizualizator depanare"
   },
@@ -122,5 +123,13 @@
         }
       }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Selectează miniatura unui obiect urmărit",
+    "search": {
+      "placeholder": "Caută după etichetă sau subetichetă..."
+    },
+    "noImages": "Nu s-au găsit miniaturi pentru această cameră",
+    "unknownLabel": "Imaginea declanșator salvată"
   }
 }

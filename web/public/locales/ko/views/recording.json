@@ -1,1 +1,12 @@
-{}
+{
+  "filter": "필터",
+  "export": "내보내기",
+  "calendar": "날짜",
+  "filters": "필터",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "올바른 시간 범위를 선택하세요",
+      "endTimeMustAfterStartTime": "종료 시간은 시작 시간보다 뒤에 있어야합니다"
+    }
+  }
+}

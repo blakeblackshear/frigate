@@ -104,6 +104,11 @@ export default function MobileReviewSettingsDrawer({
             t("export.toast.success", { ns: "components/dialog" }),
             {
               position: "top-center",
+              action: (
+                <a href="/export" target="_blank" rel="noopener noreferrer">
+                  <Button>View</Button>
+                </a>
+              ),
             },
           );
           setName("");

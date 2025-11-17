@@ -81,7 +81,8 @@
     "button": {
       "markAsReviewed": "Oznacz jako sprawdzone",
       "deleteNow": "Usuń teraz",
-      "export": "Eksportuj"
+      "export": "Eksportuj",
+      "markAsUnreviewed": "Oznacz jako niesprawdzone"
     },
     "confirmDelete": {
       "title": "Potwierdź Usunięcie",
@@ -122,5 +123,12 @@
         }
       }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Wybierz miniaturkę śledzonego obiektu",
+    "search": {
+      "placeholder": "Wyszukaj po etykiecie (label) lub etykiecie potomnej (sub label)..."
+    },
+    "noImages": "Brak miniatur dla tej kamery"
   }
 }

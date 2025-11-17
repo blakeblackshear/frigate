@@ -66,7 +66,8 @@
           "label": "Mod compatibilitate",
           "desc": "Activează această opțiune doar dacă stream-ul live al camerei afișează artefacte de culoare și are o linie diagonală pe partea dreaptă a imaginii."
         }
-      }
+      },
+      "birdseye": "Vedere de ansamblu"
     }
   },
   "debug": {

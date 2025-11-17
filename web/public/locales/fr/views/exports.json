@@ -1,17 +1,23 @@
 {
-  "documentTitle": "Exporter - Frigate",
+  "documentTitle": "Exports - Frigate",
   "search": "Rechercher",
-  "noExports": "Aucun export trouvé",
-  "deleteExport": "Supprimer l'export",
-  "deleteExport.desc": "Êtes-vous sûr de vouloir supprimer {{exportName}}?",
+  "noExports": "Aucune exportation trouvée",
+  "deleteExport": "Supprimer l'exportation",
+  "deleteExport.desc": "Êtes-vous sûr de vouloir supprimer {{exportName}} ?",
   "editExport": {
-    "title": "Renommer l'export",
-    "desc": "Saisissez un nouveau nom pour cet export.",
-    "saveExport": "Enregistrer l'export"
+    "title": "Renommer l'exportation",
+    "desc": "Saisissez un nouveau nom pour cette exportation.",
+    "saveExport": "Enregistrer l'exportation"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Échec du renommage de l'export : {{errorMessage}}"
+      "renameExportFailed": "Échec du renommage de l'exportation : {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Partager l'exportation",
+    "downloadVideo": "Télécharger la vidéo",
+    "editName": "Modifier le nom",
+    "deleteExport": "Supprimer l'exportation"
   }
 }

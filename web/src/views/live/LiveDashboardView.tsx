@@ -44,6 +44,8 @@ import { useResizeObserver } from "@/hooks/resize-observer";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { useTranslation } from "react-i18next";
+import { EmptyCard } from "@/components/card/EmptyCard";
+import { BsFillCameraVideoOffFill } from "react-icons/bs";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -114,7 +116,11 @@ export default function LiveDashboardView({
 
     // if event is ended and was saved, update events list
     if (eventUpdate.after.severity == "alert") {
-      if (eventUpdate.type == "end" || eventUpdate.type == "new") {
+      if (
+        eventUpdate.type == "end" ||
+        eventUpdate.type == "new" ||
+        eventUpdate.type == "genai"
+      ) {
         setTimeout(
           () => updateEvents(),
           eventUpdate.type == "end" ? 1000 : 6000,
@@ -196,15 +202,8 @@ export default function LiveDashboardView({
     };
   }, []);
 
-  const {
-    preferredLiveModes,
-    setPreferredLiveModes,
-    resetPreferredLiveMode,
-    isRestreamedStates,
-    supportsAudioOutputStates,
-  } = useCameraLiveMode(cameras, windowVisible);
-
   const [globalAutoLive] = usePersistence("autoLiveView", true);
+  const [displayCameraNames] = usePersistence("displayCameraNames", false);
 
   const { allGroupsStreamingSettings, setAllGroupsStreamingSettings } =
     useStreamingSettings();
@@ -231,6 +230,33 @@ export default function LiveDashboardView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [visibleCameraObserver.current],
   );
+
+  const activeStreams = useMemo(() => {
+    const streams: { [cameraName: string]: string } = {};
+    cameras.forEach((camera) => {
+      const availableStreams = camera.live.streams || {};
+      const streamNameFromSettings =
+        currentGroupStreamingSettings?.[camera.name]?.streamName || "";
+      const streamExists =
+        streamNameFromSettings &&
+        Object.values(availableStreams).includes(streamNameFromSettings);
+
+      const streamName = streamExists
+        ? streamNameFromSettings
+        : Object.values(availableStreams)[0] || "";
+
+      streams[camera.name] = streamName;
+    });
+    return streams;
+  }, [cameras, currentGroupStreamingSettings]);
+
+  const {
+    preferredLiveModes,
+    setPreferredLiveModes,
+    resetPreferredLiveMode,
+    isRestreamedStates,
+    supportsAudioOutputStates,
+  } = useCameraLiveMode(cameras, windowVisible, activeStreams);
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
@@ -347,6 +373,10 @@ export default function LiveDashboardView({
     setAudioStates(updatedStates);
     onSaveMuting(true);
   };
+
+  if (cameras.length == 0 && !includeBirdseye) {
+    return <NoCameraView />;
+  }
 
   return (
     <div
@@ -539,6 +569,7 @@ export default function LiveDashboardView({
                     preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                     autoLive={autoLive ?? globalAutoLive}
                     showStillWithoutActivity={showStillWithoutActivity ?? true}
+                    alwaysShowCameraName={displayCameraNames}
                     useWebGL={useWebGL}
                     playInBackground={false}
                     showStats={statsStates[camera.name]}
@@ -601,6 +632,22 @@ export default function LiveDashboardView({
           toggleFullscreen={toggleFullscreen}
         />
       )}
+    </div>
+  );
+}
+
+function NoCameraView() {
+  const { t } = useTranslation(["views/live"]);
+
+  return (
+    <div className="flex size-full items-center justify-center">
+      <EmptyCard
+        icon={<BsFillCameraVideoOffFill className="size-8" />}
+        title={t("noCameras.title")}
+        description={t("noCameras.description")}
+        buttonText={t("noCameras.buttonText")}
+        link="/settings?page=cameraManagement"
+      />
     </div>
   );
 }

@@ -72,7 +72,8 @@
       "title": "Rilevatori",
       "cpuUsage": "Utilizzo CPU rilevatore",
       "memoryUsage": "Utilizzo memoria rilevatore",
-      "temperature": "Temperatura del rilevatore"
+      "temperature": "Temperatura del rilevatore",
+      "cpuUsageInformation": "CPU utilizzata nella preparazione dei dati di ingresso e uscita da/verso i modelli di rilevamento. Questo valore non misura l'utilizzo dell'inferenza, anche se si utilizza una GPU o un acceleratore."
     },
     "title": "Generale",
     "otherProcesses": {
@@ -83,10 +84,10 @@
   },
   "enrichments": {
     "embeddings": {
-      "face_embedding_speed": "Velocità incorporazione volti",
+      "face_embedding_speed": "Velocità incorporamento volti",
       "plate_recognition_speed": "Velocità riconoscimento targhe",
-      "image_embedding_speed": "Velocità incorporazione immagini",
-      "text_embedding_speed": "Velocità incorporazione testo",
+      "image_embedding_speed": "Velocità incorporamento immagini",
+      "text_embedding_speed": "Velocità incorporamento testo",
       "face_recognition_speed": "Velocità di riconoscimento facciale",
       "face_recognition": "Riconoscimento facciale",
       "plate_recognition": "Riconoscimento delle targhe",
@@ -102,7 +103,7 @@
     "info": {
       "fetching": "Recupero dati della telecamera",
       "streamDataFromFFPROBE": "I dati del flusso vengono ottenuti con <code>ffprobe</code>.",
-      "cameraProbeInfo": "Informazioni analisi telecamera {{camera}}",
+      "cameraProbeInfo": "Informazioni flussi telecamera {{camera}}",
       "stream": "Flusso {{idx}}",
       "video": "Video:",
       "codec": "Codec:",
@@ -112,7 +113,7 @@
       "audio": "Audio:",
       "error": "Errore: {{error}}",
       "tips": {
-        "title": "Informazioni analisi telecamera"
+        "title": "Informazioni flussi telecamera"
       },
       "aspectRatio": "rapporto d'aspetto"
     },
@@ -121,15 +122,15 @@
     "framesAndDetections": "Fotogrammi / Rilevamenti",
     "label": {
       "camera": "telecamera",
-      "detect": "rileva",
-      "skipped": "saltato",
+      "detect": "rilevamento",
+      "skipped": "saltati",
       "ffmpeg": "FFmpeg",
       "capture": "cattura",
       "overallFramesPerSecond": "fotogrammi totali al secondo",
       "overallDetectionsPerSecond": "rilevamenti totali al secondo",
       "overallSkippedDetectionsPerSecond": "rilevamenti totali saltati al secondo",
       "cameraCapture": "{{camName}} cattura",
-      "cameraDetect": "{{camName}} rileva",
+      "cameraDetect": "{{camName}} rilevamento",
       "cameraFramesPerSecond": "{{camName}} fotogrammi al secondo",
       "cameraDetectionsPerSecond": "{{camName}} rilevamenti al secondo",
       "cameraSkippedDetectionsPerSecond": "{{camName}} rilevamenti saltati al secondo",
@@ -151,7 +152,8 @@
     "reindexingEmbeddings": "Reindicizzazione degli incorporamenti (completata al {{processed}}%)",
     "cameraIsOffline": "{{camera}} è disconnessa",
     "detectIsSlow": "{{detect}} è lento ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} è molto lento ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} è molto lento ({{speed}} ms)",
+    "shmTooLow": "L'allocazione /dev/shm ({{total}} MB) dovrebbe essere aumentata almeno a {{min}} MB."
   },
   "title": "Sistema",
   "metrics": "Metriche di sistema",
@@ -174,6 +176,11 @@
         "title": "Liberi",
         "tips": "Questo valore potrebbe non rappresentare accuratamente lo spazio libero disponibile per Frigate se nel disco sono archiviati altri file oltre alle registrazioni di Frigate. Frigate non tiene traccia dell'utilizzo dello spazio di archiviazione al di fuori delle sue registrazioni."
       }
+    },
+    "shm": {
+      "title": "Allocazione SHM (memoria condivisa)",
+      "warning": "La dimensione SHM attuale di {{total}} MB è troppo piccola. Aumentarla ad almeno {{min_shm}} MB.",
+      "readTheDocumentation": "Leggi la documentazione"
     }
   },
   "lastRefreshed": "Ultimo aggiornamento: "

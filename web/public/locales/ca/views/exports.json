@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "Error al canviar el nom de l’exportació: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "shareExport": "Comparteix l'exportació",
+    "downloadVideo": "Baixa el vídeo",
+    "editName": "Edita el nom",
+    "deleteExport": "Suprimeix l'exportació"
   }
 }

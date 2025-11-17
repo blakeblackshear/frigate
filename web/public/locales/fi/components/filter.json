@@ -56,7 +56,36 @@
   "cameras": {
     "label": "Kameran suodattimet",
     "all": {
-      "title": "Kaikki kamerat"
+      "title": "Kaikki kamerat",
+      "short": "Kamerat"
+    }
+  },
+  "classes": {
+    "label": "Luokat",
+    "all": {
+      "title": "Kaikki luokat"
+    },
+    "count_one": "{{count}} Luokka",
+    "count_other": "{{count}} Luokkaa"
+  },
+  "recognizedLicensePlates": {
+    "clearAll": "Tyhjennä kaikki",
+    "title": "Tunnistetut rekisterikilvet",
+    "loadFailed": "Tunnistettujen rekisterikilpien lataaminen epäonnistui.",
+    "loading": "Ladataan tunnistettuja rekisterikilpiä…",
+    "placeholder": "Kirjoita hakeaksesi rekisterikilpeä…",
+    "noLicensePlatesFound": "Rekisterikilpiä ei löytynyt.",
+    "selectPlatesFromList": "Valitse yksi tai useampi rekisterikilpi luettelosta.",
+    "selectAll": "Valitse kaikki"
+  },
+  "logSettings": {
+    "allLogs": "Kaikki lokit",
+    "filterBySeverity": "Suodata lokit vakavuuden mukaan"
+  },
+  "trackedObjectDelete": {
+    "title": "Vahvista poisto",
+    "toast": {
+      "error": "Seurattujen kohteiden poistaminen epäonnistui: {{errorMessage}}"
     }
   }
 }

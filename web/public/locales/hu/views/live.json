@@ -43,7 +43,15 @@
         "label": "Kattinston a képre a PTZ kamera középre igazításához"
       }
     },
-    "presets": "PTZ kamera előzetes beállításai"
+    "presets": "PTZ kamera előzetes beállításai",
+    "focus": {
+      "in": {
+        "label": "PTZ kamera fókuszálás BE"
+      },
+      "out": {
+        "label": "PTZ kamera fókuszálás KI"
+      }
+    }
   },
   "camera": {
     "enable": "Kamera Engedélyezése",
@@ -126,6 +134,9 @@
     "playInBackground": {
       "label": "Lejátszás a háttérben",
       "tips": "Engedélyezze ezt az opciót a folyamatos közvetítéshez akkor is, ha a lejátszó rejtve van."
+    },
+    "debug": {
+      "picker": "A stream kiválasztása nem érhető el hibakeresési módban. A hibakeresési nézet mindig az észlelési szerepkörhöz rendelt streamet használja."
     }
   },
   "cameraSettings": {
@@ -135,7 +146,8 @@
     "recording": "Felvétel",
     "audioDetection": "Hang Észlelés",
     "snapshots": "Pillanatképek",
-    "autotracking": "Automatikus követés"
+    "autotracking": "Automatikus követés",
+    "transcription": "Hang Feliratozás"
   },
   "history": {
     "label": "Előzmény felvételek megjelenítése"
@@ -154,5 +166,20 @@
       "label": "Kameracsoport szerkesztése"
     },
     "exitEdit": "Szerkesztés bezárása"
+  },
+  "transcription": {
+    "enable": "Élő Audio Feliratozás Engedélyezése",
+    "disable": "Élő Audio Feliratozás Kikapcsolása"
+  },
+  "noCameras": {
+    "title": "Nincsenek kamerák beállítva",
+    "description": "Kezdje egy kamera csatlakoztatásával.",
+    "buttonText": "Kamera hozzáadása"
+  },
+  "snapshot": {
+    "takeSnapshot": "Azonnali pillanatkép letöltése",
+    "noVideoSource": "Ehhez a pillanatképhez videó forrás nem elérhető.",
+    "captureFailed": "Pillanatkép készítése sikertelen.",
+    "downloadStarted": "Pillanatkép letöltése elindítva."
   }
 }

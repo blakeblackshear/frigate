@@ -113,39 +113,48 @@
   },
   "menu": {
     "language": {
-      "yue": "Kantonesiska",
-      "it": "Italienska",
-      "fr": "Franska",
-      "nl": "Nederländska (Dutch)",
-      "hi": "Hindi",
-      "pt": "Portugisiska",
-      "ru": "Ryska",
-      "pl": "Polska",
-      "el": "Grekiska",
-      "sk": "Slovenska",
-      "tr": "Turkiska",
-      "uk": "Ukrainska",
-      "he": "Hebreiska",
-      "ro": "Romänska",
-      "hu": "Ungerska",
-      "fi": "Finska",
-      "da": "Danska",
-      "ar": "Arabiska",
-      "es": "Spanska",
-      "zhCN": "Kinesiska",
-      "de": "Tyska",
-      "ja": "Japanska",
-      "sv": "Svenska (Swedish)",
-      "cs": "Tjeckiska (Czech)",
+      "yue": "粵語 (Kantonesiska)",
+      "it": "Italiano (Italienska)",
+      "fr": "Français (Franska)",
+      "nl": "Nederlands (Nederländska)",
+      "hi": "हिन्दी (Hindi)",
+      "pt": "Português (Portugisiska)",
+      "ru": "Русский (Ryska)",
+      "pl": "Polski (Polska)",
+      "el": "Ελληνικά (Grekiska)",
+      "sk": "Slovenčina (Slovenska)",
+      "tr": "Türkçe (Turkiska)",
+      "uk": "Українська (Ukrainska)",
+      "he": "עברית (Hebreiska)",
+      "ro": "Română (Romänska)",
+      "hu": "Magyar (Ungerska)",
+      "fi": "Suomi (Finska)",
+      "da": "Dansk (Danska)",
+      "ar": "العربية (Arabiska)",
+      "es": "Español (Spanska)",
+      "zhCN": "简体中文 (Kinesiska)",
+      "de": "Deutsch (Tyska)",
+      "ja": "日本語 (Japanska)",
+      "sv": "Svenska (Svenska)",
+      "cs": "Čeština (Tjeckiska)",
       "nb": "Norsk Bokmål (Norsk Bokmål)",
-      "ko": "Koreanska",
-      "vi": "Vietnamesiska",
-      "fa": "Persiska",
-      "th": "Thailändska",
+      "ko": "한국어 (Koreanska)",
+      "vi": "Tiếng Việt (Vietnamesiska)",
+      "fa": "فارسی (Persiska)",
+      "th": "ไทย (Thailändska)",
       "withSystem": {
         "label": "Använd systeminställningarna för språk"
       },
-      "en": "Engelska"
+      "en": "English (Engelska)",
+      "ptBR": "Português brasileiro (Brasiliansk Portugisiska)",
+      "ca": "Català (Katalanska)",
+      "sr": "Српски (Serbiska)",
+      "sl": "Slovenščina (Slovenska)",
+      "lt": "Lietuvių (Litauiska)",
+      "bg": "Български (Bulgariska)",
+      "gl": "Galego (Galiciska)",
+      "id": "Bahasa Indonesia (Indonesiska)",
+      "ur": "اردو (Urdu)"
     },
     "darkMode": {
       "withSystem": {
@@ -241,7 +250,10 @@
     "copyUrlToClipboard": "Webbadressen har kopierats till urklipp."
   },
   "label": {
-    "back": "Gå tillbaka"
+    "back": "Gå tillbaka",
+    "hide": "Dölj {{item}}",
+    "show": "Visa {{item}}",
+    "ID": "ID"
   },
   "unit": {
     "speed": {
@@ -251,7 +263,28 @@
     "length": {
       "feet": "fot",
       "meters": "meter"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/timme",
+      "mbph": "MB/timme",
+      "gbph": "GB/timme"
     }
   },
-  "selectItem": "Välj {{item}}"
+  "selectItem": "Välj {{item}}",
+  "readTheDocumentation": "Läs dokumentationen",
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} och {{1}}",
+    "many": "{{items}} och {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Valfritt",
+    "internalID": "Det interna ID som Frigate använder i konfigurationen och databasen"
+  }
 }

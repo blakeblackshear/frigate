@@ -34,5 +34,19 @@
     "label": "Pamatyti naujus peržiūros įrašus",
     "button": "Nauji Įrašai Peržiūrėjimui"
   },
-  "detected": "aptikta"
+  "detected": "aptikta",
+  "suspiciousActivity": "Įtartina Veikla",
+  "threateningActivity": "Grėsminga Veikla",
+  "detail": {
+    "noDataFound": "Peržiūrai informacijos nėra",
+    "aria": "Perjungti į detalų vaizdą",
+    "trackedObject_one": "objektas",
+    "trackedObject_other": "objektai",
+    "noObjectDetailData": "Nėra objekto detalių duomenų.",
+    "label": "Detalės"
+  },
+  "objectTrack": {
+    "trackedPoint": "Susektas taškas",
+    "clickToSeek": "Spustelkite perkelti į šį laiką"
+  }
 }

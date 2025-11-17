@@ -23,6 +23,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 
 type FrigatePlusModel = {
   id: string;
@@ -210,8 +211,8 @@ export default function FrigatePlusSettingsView({
     <>
       <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
-        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
-          <Heading as="h3" className="my-2">
+        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none">
+          <Heading as="h4" className="mb-2">
             {t("frigatePlus.title")}
           </Heading>
 
@@ -457,7 +458,7 @@ export default function FrigatePlusSettingsView({
                       rel="noopener noreferrer"
                       className="inline"
                     >
-                      {t("frigatePlus.snapshotConfig.documentation")}
+                      {t("readTheDocumentation", { ns: "common" })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
                   </div>
@@ -487,7 +488,9 @@ export default function FrigatePlusSettingsView({
                               key={name}
                               className="border-b border-secondary"
                             >
-                              <td className="px-4 py-2">{name}</td>
+                              <td className="px-4 py-2">
+                                <CameraNameLabel camera={name} />
+                              </td>
                               <td className="px-4 py-2 text-center">
                                 {camera.snapshots.enabled ? (
                                   <CheckCircle2 className="mx-auto size-5 text-green-500" />

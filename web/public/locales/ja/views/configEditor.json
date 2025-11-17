@@ -1,7 +1,18 @@
 {
   "copyConfig": "設定をコピー",
-  "configEditor": "Configエディタ",
+  "configEditor": "設定エディタ",
   "saveAndRestart": "保存後再起動",
   "saveOnly": "保存",
-  "confirm": "保存せずに終了しますか？"
+  "confirm": "保存せずに終了しますか？",
+  "documentTitle": "設定エディタ - Frigate",
+  "safeConfigEditor": "設定エディタ (セーフモード)",
+  "safeModeDescription": "Frigate は config の検証エラーによるセーフモードです.",
+  "toast": {
+    "success": {
+      "copyToClipboard": "コンフィグをクリップボードにコピー。"
+    },
+    "error": {
+      "savingError": "設定の保存に失敗しました"
+    }
+  }
 }

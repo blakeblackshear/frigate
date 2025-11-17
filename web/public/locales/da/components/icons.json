@@ -1,1 +1,8 @@
-{}
+{
+  "iconPicker": {
+    "selectIcon": "Vælg et ikon",
+    "search": {
+      "placeholder": "Søg efter ikoner…"
+    }
+  }
+}

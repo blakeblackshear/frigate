@@ -43,6 +43,14 @@
       "out": {
         "label": "Diminuir Zoom na câmera PTZ"
       }
+    },
+    "focus": {
+      "in": {
+        "label": "Aumentar foco da câmera PTZ"
+      },
+      "out": {
+        "label": "Tirar foco da câmera PTZ"
+      }
     }
   },
   "camera": {
@@ -78,8 +86,8 @@
     "disable": "Ocultar Estatísticas de Transmissão"
   },
   "manualRecording": {
-    "title": "Gravação Sob Demanda",
-    "tips": "Inicie um evento manual baseado nas configurações de retenção de gravação dessa câmera.",
+    "title": "Sob Demanda",
+    "tips": "Baixe uma captura de tela instantânea ou Inicie um evento manual baseado nas configurações de retenção de gravação dessa câmera.",
     "playInBackground": {
       "label": "Reproduzir em segundo plano",
       "desc": "Habilite essa opção para continuar transmitindo quando o reprodutor estiver oculto."
@@ -126,6 +134,9 @@
     "playInBackground": {
       "label": "Reproduzir em segundo plano",
       "tips": "Habilitar essa opção para continuar a transmissão quando o reprodutor estiver oculto."
+    },
+    "debug": {
+      "picker": "A seleção da transmissão fica indisponível em modo de depuração. A visualização de depuração sempre usa o papel de detecção atribuído à transmissão."
     }
   },
   "cameraSettings": {
@@ -135,7 +146,8 @@
     "recording": "Gravação",
     "snapshots": "Capturas de Imagem",
     "audioDetection": "Detecção de Áudio",
-    "autotracking": "Auto Rastreamento"
+    "autotracking": "Auto Rastreamento",
+    "transcription": "Transcrição de Áudio"
   },
   "history": {
     "label": "Exibir gravação histórica"
@@ -154,5 +166,20 @@
       "label": "Editar Grupo de Câmera"
     },
     "exitEdit": "Sair da Edição"
+  },
+  "transcription": {
+    "enable": "Habilitar Transcrição de Áudio em Tempo Real",
+    "disable": "Desabilitar Transcrição de Áudio em Tempo Real"
+  },
+  "noCameras": {
+    "title": "Nenhuma Câmera Configurada",
+    "description": "Inicie conectando uma câmera ao Frigate",
+    "buttonText": "Adicionar Câmera"
+  },
+  "snapshot": {
+    "takeSnapshot": "Baixar captura de imagem instantânea",
+    "noVideoSource": "Nenhuma fonte de vídeo disponível para captura de imagem.",
+    "captureFailed": "Falha ao capturar imagem.",
+    "downloadStarted": "Download de capturas de imagem iniciado."
   }
 }

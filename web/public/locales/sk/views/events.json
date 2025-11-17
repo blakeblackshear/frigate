@@ -34,5 +34,26 @@
   "selected_one": "{{count}} vybraných",
   "selected_other": "{{count}} vybraných",
   "camera": "Kamera",
-  "detected": "Detekované"
+  "detected": "Detekované",
+  "suspiciousActivity": "Podozrivá aktivita",
+  "threateningActivity": "Ohrozujúca činnosť",
+  "detail": {
+    "noDataFound": "Žiadne podrobné údaje na kontrolu",
+    "aria": "Prepnúť zobrazenie detailov",
+    "trackedObject_one": "objekt",
+    "trackedObject_other": "objekty",
+    "noObjectDetailData": "Nie sú k dispozícii žiadne podrobné údaje o objekte.",
+    "label": "Detail",
+    "settings": "Nastavenia podrobného zobrazenia",
+    "alwaysExpandActive": {
+      "title": "Rozbaľte vždy aktívne",
+      "desc": "Vždy rozbaľte podrobnosti objektu aktívnej položky recenzie, ak sú k dispozícii."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Sledovaný bod",
+    "clickToSeek": "Kliknutím prejdete na tento čas"
+  },
+  "zoomIn": "Priblížiť",
+  "zoomOut": "Oddialiť"
 }

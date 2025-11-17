@@ -72,7 +72,10 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+    },
+    "inProgress": "In progress",
+    "invalidStartTime": "Invalid start time",
+    "invalidEndTime": "Invalid end time"
   },
   "unit": {
     "speed": {
@@ -82,10 +85,32 @@
     "length": {
       "feet": "feet",
       "meters": "meters"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/hour",
+      "mbph": "MB/hour",
+      "gbph": "GB/hour"
     }
   },
   "label": {
-    "back": "Go back"
+    "back": "Go back",
+    "hide": "Hide {{item}}",
+    "show": "Show {{item}}",
+    "ID": "ID",
+    "none": "None",
+    "all": "All"
+  },
+  "list": {
+    "two": "{{0}} and {{1}}",
+    "many": "{{items}}, and {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Optional",
+    "internalID": "The Internal ID Frigate uses in the configuration and database"
   },
   "button": {
     "apply": "Apply",
@@ -122,7 +147,8 @@
     "unselect": "Unselect",
     "export": "Export",
     "deleteNow": "Delete Now",
-    "next": "Next"
+    "next": "Next",
+    "continue": "Continue"
   },
   "menu": {
     "system": "System",
@@ -215,6 +241,7 @@
     "export": "Export",
     "uiPlayground": "UI Playground",
     "faceLibrary": "Face Library",
+    "classification": "Classification",
     "user": {
       "title": "User",
       "account": "Account",
@@ -262,5 +289,9 @@
     "title": "404",
     "desc": "Page not found"
   },
-  "selectItem": "Select {{item}}"
+  "selectItem": "Select {{item}}",
+  "readTheDocumentation": "Read the documentation",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

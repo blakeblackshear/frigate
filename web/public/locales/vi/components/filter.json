@@ -93,7 +93,9 @@
     "loadFailed": "Không thể tải biển số xe được nhận dạng.",
     "loading": "Đang tải biển số xe được nhận dạng…",
     "placeholder": "Nhập để tìm kiếm biển số xe…",
-    "noLicensePlatesFound": "Không tìm thấy biển số xe nào."
+    "noLicensePlatesFound": "Không tìm thấy biển số xe nào.",
+    "selectAll": "Chọn tất cả",
+    "clearAll": "Xóa tất cả"
   },
   "more": "Thêm Bộ lọc",
   "reset": {
@@ -122,5 +124,13 @@
       "title": "Tất cả Khu vực",
       "short": "Khu vực"
     }
+  },
+  "classes": {
+    "label": "Các nhãn nhận diện",
+    "all": {
+      "title": "Tất cả nhãn nhận diện"
+    },
+    "count_one": "{{count}} Nhãn nhận diện",
+    "count_other": "{{count}} Các nhãn nhận diện"
   }
 }

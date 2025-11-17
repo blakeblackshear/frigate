@@ -1,1 +1,183 @@
-{}
+{
+  "documentTitle": "실시간 보기 - Frigate",
+  "documentTitle.withCamera": "{{camera}} - 실시간 보기 - Frigate",
+  "lowBandwidthMode": "저대역폭 모드",
+  "twoWayTalk": {
+    "enable": "양방향 말하기 활성화",
+    "disable": "양방향 말하기 비활성화"
+  },
+  "cameraAudio": {
+    "enable": "카메라 오디오 활성화",
+    "disable": "카메라 오디오 비활성화"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "클릭해서 카메라 중앙 배치",
+        "enable": "클릭해서 움직이기 기능 활성화",
+        "disable": "클릭해서 움직이기 기능 비활성화"
+      },
+      "left": {
+        "label": "PTZ 카메라 왼쪽으로 이동"
+      },
+      "up": {
+        "label": "PTZ 카메라 위로 이동"
+      },
+      "down": {
+        "label": "PTZ 카메라 아래로 이동"
+      },
+      "right": {
+        "label": "PTZ 카메라 오른쪽으로 이동"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "PTZ 카메라 확대"
+      },
+      "out": {
+        "label": "PTZ 카메라 축소"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "PTZ 카메라 포커스 인"
+      },
+      "out": {
+        "label": "PTZ 카메라 포커스 아웃"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "클릭해서 PTZ 카메라 중앙 배치"
+      }
+    },
+    "presets": "PTZ 카메라 프리셋"
+  },
+  "camera": {
+    "enable": "카메라 활성화",
+    "disable": "카메라 비활성화"
+  },
+  "muteCameras": {
+    "enable": "모든 카메라 음소거",
+    "disable": "모든 카메라 음소거 해제"
+  },
+  "detect": {
+    "enable": "감지 활성화",
+    "disable": "감지 비활성화"
+  },
+  "recording": {
+    "enable": "녹화 활성화",
+    "disable": "녹화 비활성화"
+  },
+  "snapshots": {
+    "enable": "스냅샷 활성화",
+    "disable": "스냅샷 비활성화"
+  },
+  "audioDetect": {
+    "enable": "오디오 감지 활성화",
+    "disable": "오디오 감지 비활성화"
+  },
+  "transcription": {
+    "enable": "실시간 오디오 자막 활성화",
+    "disable": "실시간 오디오 자막 비활성화"
+  },
+  "autotracking": {
+    "enable": "자동 추적 활성화",
+    "disable": "자동 추적 비활성화"
+  },
+  "streamStats": {
+    "enable": "스트림 통계 보기",
+    "disable": "스트림 통계 숨기기"
+  },
+  "manualRecording": {
+    "title": "수동 녹화",
+    "tips": "이 카메라의 녹화 보관 설정에 따라 인스턴트 스냅샷을 다운로드하거나 수동 녹화를 시작할 수 있습니다.",
+    "playInBackground": {
+      "label": "백그라운드에서 재생",
+      "desc": "이 옵션을 활성화하면 플레이어가 숨겨져도 계속 스트리밍됩니다."
+    },
+    "showStats": {
+      "label": "통계 보기",
+      "desc": "이 옵션을 활성화하면 카메라 피드에 스트림 통계가 나타납니다."
+    },
+    "debugView": "디버그 보기",
+    "start": "수동 녹화 시작",
+    "started": "수동 녹화 시작되었습니다.",
+    "failedToStart": "수동 녹화 시작이 실패했습니다.",
+    "recordDisabledTips": "이 카메라 설정에서 녹화가 비활성화 되었거나 제한되어 있어 스냅샷만 저장됩니다.",
+    "end": "수동 녹화 종료",
+    "ended": "수동 녹화가 종료되었습니다.",
+    "failedToEnd": "수동 녹화 종료가 실패했습니다."
+  },
+  "streamingSettings": "스트리밍 설정",
+  "notifications": "알림",
+  "audio": "오디오",
+  "suspend": {
+    "forTime": "일시정지 시간: "
+  },
+  "stream": {
+    "title": "스트림",
+    "audio": {
+      "available": "이 스트림에서 오디오를 사용할 수 있습니다",
+      "unavailable": "이 스트림에서 오디오를 사용할 수 없습니다",
+      "tips": {
+        "title": "이 스트림에서 오디오를 사용하려면 카메라에서 오디오를 출력하고 go2rtc에서 설정해야 합니다."
+      }
+    },
+    "debug": {
+      "picker": "디버그 모드에선 스트림 모드를 선택할 수 없습니다. 디버그 뷰에서는 항상 감지(Detect) 역할로 설정한 스트림을 사용합니다."
+    },
+    "twoWayTalk": {
+      "tips": "양방향 말하기 기능을 사용하려면 기기에서 기능을 지원해야하며 WebRTC를 설정해야합니다.",
+      "available": "이 기기는 양방향 말하기 기능을 사용할 수 있습니다",
+      "unavailable": "이 기기는 양방향 말하기 기능을 사용할 수 없습니다"
+    },
+    "lowBandwidth": {
+      "tips": "버퍼링 또는 스트림 오류로 실시간 화면을 저대역폭 모드로 변경되었습니다.",
+      "resetStream": "스트림 리셋"
+    },
+    "playInBackground": {
+      "label": "백그라운드에서 재생",
+      "tips": "이 옵션을 활성화하면 플레이어가 숨겨져도 스트리밍이 지속됩니다."
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} 설정",
+    "cameraEnabled": "카메라 활성화",
+    "objectDetection": "대상 감지",
+    "recording": "녹화",
+    "snapshots": "스냅샷",
+    "audioDetection": "오디오 감지",
+    "transcription": "오디오 자막",
+    "autotracking": "자동 추적"
+  },
+  "history": {
+    "label": "이전 영상 보기"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "전체",
+      "motion": "움직임 감지",
+      "active_objects": "활성 대상"
+    },
+    "notAllTips": "{{source}} 녹화 보관 설정이 <code>mode: {{effectiveRetainMode}}</code>로 되어 있어, 이 수동 녹화는 {{effectiveRetainModeName}}이(가) 있는 구간만 저장됩니다."
+  },
+  "editLayout": {
+    "label": "레이아웃 편집",
+    "group": {
+      "label": "카메라 그룹 편집"
+    },
+    "exitEdit": "편집 종료"
+  },
+  "noCameras": {
+    "title": "설정된 카메라 없음",
+    "description": "카메라를 연결해 시작하세요.",
+    "buttonText": "카메라 추가"
+  },
+  "snapshot": {
+    "takeSnapshot": "인스턴트 스냅샷 다운로드",
+    "noVideoSource": "스냅샷 찍을 비디오 소스가 없습니다.",
+    "captureFailed": "스냅샷 캡쳐를 하지 못했습니다.",
+    "downloadStarted": "스냅샷 다운로드가 시작됐습니다."
+  }
+}

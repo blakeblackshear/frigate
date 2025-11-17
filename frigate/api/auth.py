@@ -11,7 +11,7 @@ import secrets
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -33,7 +33,23 @@ from frigate.models import User
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.auth])
-VALID_ROLES = ["admin", "viewer"]
+
+
+@router.get("/auth/first_time_login")
+def first_time_login(request: Request):
+    """Return whether the admin first-time login help flag is set in config.
+
+    This endpoint is intentionally unauthenticated so the login page can
+    query it before a user is authenticated.
+    """
+    auth_config = request.app.frigate_config.auth
+
+    return JSONResponse(
+        content={
+            "admin_first_time_login": auth_config.admin_first_time_login
+            or auth_config.reset_admin_password
+        }
+    )
 
 
 class RateLimiter:
@@ -204,6 +220,7 @@ async def get_current_user(request: Request):
 def require_role(required_roles: List[str]):
     async def role_checker(request: Request):
         proxy_config: ProxyConfig = request.app.frigate_config.proxy
+        config_roles = list(request.app.frigate_config.auth.roles.keys())
 
         # Get role from header (could be comma-separated)
         role_header = request.headers.get("remote-role")
@@ -217,17 +234,121 @@ def require_role(required_roles: List[str]):
         if not roles:
             raise HTTPException(status_code=403, detail="Role not provided")
 
-        # Check if any role matches required_roles
-        if not any(role in required_roles for role in roles):
+        # enforce config roles
+        valid_roles = [r for r in roles if r in config_roles]
+        if not valid_roles:
             raise HTTPException(
                 status_code=403,
-                detail=f"Role {', '.join(roles)} not authorized. Required: {', '.join(required_roles)}",
+                detail=f"No valid roles found in {roles}. Required: {', '.join(required_roles)}. Available: {', '.join(config_roles)}",
             )
 
-        # Return the first matching role
-        return next((role for role in roles if role in required_roles), roles[0])
+        if not any(role in required_roles for role in valid_roles):
+            raise HTTPException(
+                status_code=403,
+                detail=f"Role {', '.join(valid_roles)} not authorized. Required: {', '.join(required_roles)}",
+            )
+
+        return next(
+            (role for role in valid_roles if role in required_roles), valid_roles[0]
+        )
 
     return role_checker
+
+
+def resolve_role(
+    headers: dict, proxy_config: ProxyConfig, config_roles: set[str]
+) -> str:
+    """
+    Determine the effective role for a request based on proxy headers and configuration.
+
+    Order of resolution:
+      1. If a role header is defined in proxy_config.header_map.role:
+         - If a role_map is configured, treat the header as group claims
+           (split by proxy_config.separator) and map to roles.
+         - If no role_map is configured, treat the header as role names directly.
+      2. If no valid role is found, return proxy_config.default_role if it's valid in config_roles, else 'viewer'.
+
+    Args:
+        headers (dict): Incoming request headers (case-insensitive).
+        proxy_config (ProxyConfig): Proxy configuration.
+        config_roles (set[str]): Set of valid roles from config.
+
+    Returns:
+        str: Resolved role (one of config_roles or validated default).
+    """
+    default_role = proxy_config.default_role
+    role_header = proxy_config.header_map.role
+
+    # Validate default_role against config; fallback to 'viewer' if invalid
+    validated_default = default_role if default_role in config_roles else "viewer"
+    if not config_roles:
+        validated_default = "viewer"  # Edge case: no roles defined
+
+    if not role_header:
+        logger.debug(
+            "No role header configured in proxy_config.header_map. Returning validated default role '%s'.",
+            validated_default,
+        )
+        return validated_default
+
+    raw_value = headers.get(role_header, "")
+    logger.debug("Raw role header value from '%s': %r", role_header, raw_value)
+
+    if not raw_value:
+        logger.debug(
+            "Role header missing or empty. Returning validated default role '%s'.",
+            validated_default,
+        )
+        return validated_default
+
+    # role_map configured, treat header as group claims
+    if proxy_config.header_map.role_map:
+        groups = [
+            g.strip() for g in raw_value.split(proxy_config.separator) if g.strip()
+        ]
+        logger.debug("Parsed groups from role header: %s", groups)
+
+        matched_roles = {
+            role_name
+            for role_name, required_groups in proxy_config.header_map.role_map.items()
+            if any(group in groups for group in required_groups)
+        }
+        logger.debug("Matched roles from role_map: %s", matched_roles)
+
+        if matched_roles:
+            resolved = next(
+                (r for r in config_roles if r in matched_roles), validated_default
+            )
+            logger.debug("Resolved role (with role_map) to '%s'.", resolved)
+            return resolved
+
+        logger.debug(
+            "No role_map match for groups '%s'. Using validated default role '%s'.",
+            raw_value,
+            validated_default,
+        )
+        return validated_default
+
+    # no role_map, treat as role names directly
+    roles_from_header = [
+        r.strip().lower() for r in raw_value.split(proxy_config.separator) if r.strip()
+    ]
+    logger.debug("Parsed roles directly from header: %s", roles_from_header)
+
+    resolved = next(
+        (r for r in config_roles if r in roles_from_header),
+        validated_default,
+    )
+    if resolved == validated_default and roles_from_header:
+        logger.debug(
+            "Provided proxy role header values '%s' did not contain a valid role. Using validated default role '%s'.",
+            raw_value,
+            validated_default,
+        )
+    else:
+        logger.debug("Resolved role (direct header) to '%s'.", resolved)
+
+    return resolved
 
 
 # Endpoints
@@ -266,22 +387,11 @@ def auth(request: Request):
             else "anonymous"
         )
 
-        role_header = proxy_config.header_map.role
-        role = (
-            request.headers.get(role_header, default=proxy_config.default_role)
-            if role_header
-            else proxy_config.default_role
-        )
+        # parse header and resolve a valid role
+        config_roles_set = set(auth_config.roles.keys())
+        role = resolve_role(request.headers, proxy_config, config_roles_set)
 
-        # if comma-separated with "admin", use "admin",
-        # if comma-separated with "viewer", use "viewer",
-        # else use default role
-
-        roles = [r.strip() for r in role.split(proxy_config.separator)] if role else []
-        success_response.headers["remote-role"] = next(
-            (r for r in VALID_ROLES if r in roles), proxy_config.default_role
-        )
-
+        success_response.headers["remote-role"] = role
         return success_response
 
     # now apply authentication
@@ -373,7 +483,13 @@ def profile(request: Request):
     username = request.headers.get("remote-user", "anonymous")
     role = request.headers.get("remote-role", "viewer")
 
-    return JSONResponse(content={"username": username, "role": role})
+    all_camera_names = set(request.app.frigate_config.cameras.keys())
+    roles_dict = request.app.frigate_config.auth.roles
+    allowed_cameras = User.get_allowed_cameras(role, roles_dict, all_camera_names)
+
+    return JSONResponse(
+        content={"username": username, "role": role, "allowed_cameras": allowed_cameras}
+    )
 
 
 @router.get("/logout")
@@ -404,14 +520,23 @@ def login(request: Request, body: AppPostLoginBody):
     password_hash = db_user.password_hash
     if verify_password(password, password_hash):
         role = getattr(db_user, "role", "viewer")
-        if role not in VALID_ROLES:
-            role = "viewer"  # Enforce valid roles
+        config_roles_set = set(request.app.frigate_config.auth.roles.keys())
+        if role not in config_roles_set:
+            logger.warning(
+                f"User {db_user.username} has an invalid role {role}, falling back to 'viewer'."
+            )
+            role = "viewer"
         expiration = int(time.time()) + JWT_SESSION_LENGTH
         encoded_jwt = create_encoded_jwt(user, role, expiration, request.app.jwt_token)
         response = Response("", 200)
         set_jwt_cookie(
             response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
         )
+        # Clear admin_first_time_login flag after successful admin login so the
+        # UI stops showing the first-time login documentation link.
+        if role == "admin":
+            request.app.frigate_config.auth.admin_first_time_login = False
+
         return response
     return JSONResponse(content={"message": "Login failed"}, status_code=401)
 
@@ -430,11 +555,17 @@ def create_user(
     body: AppPostUsersBody,
 ):
     HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
+    config_roles = list(request.app.frigate_config.auth.roles.keys())
 
     if not re.match("^[A-Za-z0-9._]+$", body.username):
         return JSONResponse(content={"message": "Invalid username"}, status_code=400)
 
-    role = body.role if body.role in VALID_ROLES else "viewer"
+    if body.role not in config_roles:
+        return JSONResponse(
+            content={"message": f"Role must be one of: {', '.join(config_roles)}"},
+            status_code=400,
+        )
+    role = body.role or "viewer"
     password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
     User.insert(
         {
@@ -505,10 +636,52 @@ async def update_role(
         return JSONResponse(
             content={"message": "Cannot modify admin user's role"}, status_code=403
         )
-    if body.role not in VALID_ROLES:
+    config_roles = list(request.app.frigate_config.auth.roles.keys())
+    if body.role not in config_roles:
         return JSONResponse(
-            content={"message": "Role must be 'admin' or 'viewer'"}, status_code=400
+            content={"message": f"Role must be one of: {', '.join(config_roles)}"},
+            status_code=400,
         )
 
     User.set_by_id(username, {User.role: body.role})
     return JSONResponse(content={"success": True})
+
+
+async def require_camera_access(
+    camera_name: Optional[str] = None,
+    request: Request = None,
+):
+    """Dependency to enforce camera access based on user role."""
+    if camera_name is None:
+        return  # For lists, filter later
+
+    current_user = await get_current_user(request)
+    if isinstance(current_user, JSONResponse):
+        return current_user
+
+    role = current_user["role"]
+    all_camera_names = set(request.app.frigate_config.cameras.keys())
+    roles_dict = request.app.frigate_config.auth.roles
+    allowed_cameras = User.get_allowed_cameras(role, roles_dict, all_camera_names)
+
+    # Admin or full access bypasses
+    if role == "admin" or not roles_dict.get(role):
+        return
+
+    if camera_name not in allowed_cameras:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Access denied to camera '{camera_name}'. Allowed: {allowed_cameras}",
+        )
+
+
+async def get_allowed_cameras_for_filter(request: Request):
+    """Dependency to get allowed_cameras for filtering lists."""
+    current_user = await get_current_user(request)
+    if isinstance(current_user, JSONResponse):
+        return []  # Unauthorized: no cameras
+
+    role = current_user["role"]
+    all_camera_names = set(request.app.frigate_config.cameras.keys())
+    roles_dict = request.app.frigate_config.auth.roles
+    return User.get_allowed_cameras(role, roles_dict, all_camera_names)

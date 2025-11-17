@@ -32,7 +32,15 @@
         "label": "Fer clic a la imatge per centrar la càmera PTZ"
       }
     },
-    "presets": "Predefinits de la càmera PTZ"
+    "presets": "Predefinits de la càmera PTZ",
+    "focus": {
+      "in": {
+        "label": "Enfoca la càmera PTZ aprop"
+      },
+      "out": {
+        "label": "Enfoca la càmera PTZ lluny"
+      }
+    }
   },
   "documentTitle": "Directe - Frigate",
   "documentTitle.withCamera": "{{camera}} - Directe - Frigate",
@@ -78,8 +86,8 @@
     "disable": "Amaga estadístiques de la transmissió"
   },
   "manualRecording": {
-    "title": "Gravació sota demanda",
-    "tips": "Iniciar un event manual basat en els paràmetres de retenció de gravació per aquesta càmera.",
+    "title": "Sota demanda",
+    "tips": "Baixeu una instantània o inicieu un esdeveniment manual basat en la configuració de retenció d'enregistrament d'aquesta càmera.",
     "playInBackground": {
       "label": "Reproduir en segon pla",
       "desc": "Habilita aquesta opció per a continuar la transmissió quan el reproductor està amagat."
@@ -122,6 +130,9 @@
     "playInBackground": {
       "label": "Reproduir en segon pla",
       "tips": "Habilita aquesta opció per a contiuar la transmissió tot i que el reproductor estigui ocult."
+    },
+    "debug": {
+      "picker": "Selecció de stream no disponible en mode debug. La vista debug sempre fa servir el stream assignat pel rol de detecció."
     }
   },
   "streamingSettings": "Paràmetres de transmissió",
@@ -135,7 +146,8 @@
     "snapshots": "Instantànies",
     "autotracking": "Seguiment automàtic",
     "objectDetection": "Detecció d'objectes",
-    "audioDetection": "Detecció d'àudio"
+    "audioDetection": "Detecció d'àudio",
+    "transcription": "Transcripció d'audio"
   },
   "history": {
     "label": "Mostrar gravacions històriques"
@@ -154,5 +166,20 @@
       "label": "Editar grup de càmeres"
     },
     "exitEdit": "Sortir de l'edició"
+  },
+  "transcription": {
+    "enable": "Habilita la transcripció d'àudio en temps real",
+    "disable": "Deshabilita la transcripció d'àudio en temps real"
+  },
+  "snapshot": {
+    "takeSnapshot": "Descarregar una instantània",
+    "noVideoSource": "No hi ha cap font de video per fer una instantània.",
+    "captureFailed": "Error capturant una instantània.",
+    "downloadStarted": "Inici de baixada d'instantània."
+  },
+  "noCameras": {
+    "title": "No s'ha configurat cap càmera",
+    "description": "Comenceu connectant una càmera a Frigate.",
+    "buttonText": "Afegeix una càmera"
   }
 }

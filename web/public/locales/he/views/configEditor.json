@@ -1,5 +1,5 @@
 {
-  "documentTitle": "עורך הגדרות - פריגטה",
+  "documentTitle": "עורך הגדרות - Frigate",
   "configEditor": "עורך תצורה",
   "copyConfig": "העתקת הגדרות",
   "saveAndRestart": "שמירה והפעלה מחדש",
@@ -12,5 +12,7 @@
     "error": {
       "savingError": "שגיאה בשמירת ההגדרות"
     }
-  }
+  },
+  "safeConfigEditor": "עורך תצורה (מצב בטוח)",
+  "safeModeDescription": "Frigate במצב בטוח עקב שגיאת אימות הגדרות."
 }

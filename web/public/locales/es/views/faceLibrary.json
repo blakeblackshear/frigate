@@ -1,6 +1,6 @@
 {
   "description": {
-    "addFace": "Guía para agregar una nueva colección a la Biblioteca de Rostros.",
+    "addFace": "Agregar una nueva colección a la Biblioteca de Rostros subiendo tu primera imagen.",
     "placeholder": "Introduce un nombre para esta colección",
     "invalidName": "Nombre inválido. Los nombres solo pueden incluir letras, números, espacios, apóstrofes, guiones bajos y guiones."
   },
@@ -23,11 +23,11 @@
     "title": "Crear colección",
     "desc": "Crear una nueva colección",
     "new": "Crear nuevo rostro",
-    "nextSteps": "Para construir una base sólida: <li>Usa la pestaña Entrenar para seleccionar y entrenar con imágenes de cada persona detectada.</li> <li>Enfócate en imágenes frontales para obtener los mejores resultados; evita entrenar con imágenes que capturen rostros en ángulo.</li>"
+    "nextSteps": "Para construir una base sólida: <li>Usa la pestaña Reconocimientos Recientes para seleccionar y entrenar con imágenes de cada persona detectada.</li> <li>Céntrate en imágenes frontales para obtener los mejores resultados; evita entrenar con imágenes que capturen rostros de perfil.</li>"
   },
   "train": {
-    "title": "Entrenar",
-    "aria": "Seleccionar entrenamiento",
+    "title": "Reconocimientos Recientes",
+    "aria": "Seleccionar reconocimientos recientes",
     "empty": "No hay intentos recientes de reconocimiento facial"
   },
   "selectItem": "Seleccionar {{item}}",
@@ -49,7 +49,7 @@
       "selectImage": "Por favor, selecciona un archivo de imagen."
     },
     "dropActive": "Suelta la imagen aquí…",
-    "dropInstructions": "Arrastra y suelta una imagen aquí, o haz clic para seleccionar",
+    "dropInstructions": "Arrastra y suelta, o pega una imagen aquí, o haz clic para seleccionar",
     "maxSize": "Tamaño máximo: {{size}}MB"
   },
   "toast": {

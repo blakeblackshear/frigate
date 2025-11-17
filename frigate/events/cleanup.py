@@ -12,7 +12,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event, Timeline
-from frigate.util.path import delete_event_snapshot, delete_event_thumbnail
+from frigate.util.file import delete_event_snapshot, delete_event_thumbnail
 
 logger = logging.getLogger(__name__)
 
@@ -229,6 +229,11 @@ class EventCleanup(threading.Thread):
             try:
                 media_path.unlink(missing_ok=True)
                 if file_extension == "jpg":
+                    media_path = Path(
+                        f"{os.path.join(CLIPS_DIR, media_name)}-clean.webp"
+                    )
+                    media_path.unlink(missing_ok=True)
+                    # Also delete clean.png (legacy) for backward compatibility
                     media_path = Path(
                         f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
                     )

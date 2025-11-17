@@ -4,15 +4,21 @@ import datetime
 import logging
 from functools import reduce
 from pathlib import Path
+from typing import List
 
 import pandas as pd
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, IntegrityError, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.auth import get_current_user, require_role
+from frigate.api.auth import (
+    get_allowed_cameras_for_filter,
+    get_current_user,
+    require_camera_access,
+    require_role,
+)
 from frigate.api.defs.query.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
@@ -26,9 +32,11 @@ from frigate.api.defs.response.review_response import (
     ReviewSummaryResponse,
 )
 from frigate.api.defs.tags import Tags
+from frigate.config import FrigateConfig
+from frigate.embeddings import EmbeddingsContext
 from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
-from frigate.util.builtin import get_tz_modifiers
+from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +47,7 @@ router = APIRouter(tags=[Tags.review])
 async def review(
     params: ReviewQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
     if isinstance(current_user, JSONResponse):
         return current_user
@@ -63,8 +72,14 @@ async def review(
     ]
 
     if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((ReviewSegment.camera << camera_list))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content=[])
+        camera_list = list(filtered)
+    else:
+        camera_list = allowed_cameras
+    clauses.append((ReviewSegment.camera << camera_list))
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -138,7 +153,7 @@ async def review(
 
 
 @router.get("/review_ids", response_model=list[ReviewSegmentResponse])
-def review_ids(ids: str):
+async def review_ids(request: Request, ids: str):
     ids = ids.split(",")
 
     if not ids:
@@ -146,6 +161,18 @@ def review_ids(ids: str):
             content=({"success": False, "message": "Valid list of ids must be sent"}),
             status_code=400,
         )
+
+    for review_id in ids:
+        try:
+            review = ReviewSegment.get(ReviewSegment.id == review_id)
+            await require_camera_access(review.camera, request=request)
+        except DoesNotExist:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": f"Review {review_id} not found"}
+                ),
+                status_code=404,
+            )
 
     try:
         reviews = (
@@ -163,13 +190,13 @@ def review_ids(ids: str):
 async def review_summary(
     params: ReviewSummaryQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
 ):
     if isinstance(current_user, JSONResponse):
         return current_user
 
     user_id = current_user["username"]
 
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
     day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
 
     cameras = params.cameras
@@ -179,8 +206,14 @@ async def review_summary(
     clauses = [(ReviewSegment.start_time > day_ago)]
 
     if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((ReviewSegment.camera << camera_list))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content={})
+        camera_list = list(filtered)
+    else:
+        camera_list = allowed_cameras
+    clauses.append((ReviewSegment.camera << camera_list))
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -274,8 +307,14 @@ async def review_summary(
     clauses = []
 
     if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((ReviewSegment.camera << camera_list))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content={})
+        camera_list = list(filtered)
+    else:
+        camera_list = allowed_cameras
+    clauses.append((ReviewSegment.camera << camera_list))
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -289,95 +328,142 @@ async def review_summary(
             )
         clauses.append(reduce(operator.or_, label_clauses))
 
-    day_in_seconds = 60 * 60 * 24
-    last_month_query = (
+    # Find the time range of available data
+    time_range_query = (
         ReviewSegment.select(
-            fn.strftime(
-                "%Y-%m-%d",
-                fn.datetime(
-                    ReviewSegment.start_time,
-                    "unixepoch",
-                    hour_modifier,
-                    minute_modifier,
-                ),
-            ).alias("day"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == SeverityEnum.alert)
-                            & (UserReviewStatus.has_been_reviewed == True),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("reviewed_alert"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == SeverityEnum.detection)
-                            & (UserReviewStatus.has_been_reviewed == True),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("reviewed_detection"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == SeverityEnum.alert),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("total_alert"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == SeverityEnum.detection),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("total_detection"),
-        )
-        .left_outer_join(
-            UserReviewStatus,
-            on=(
-                (ReviewSegment.id == UserReviewStatus.review_segment)
-                & (UserReviewStatus.user_id == user_id)
-            ),
+            fn.MIN(ReviewSegment.start_time).alias("min_time"),
+            fn.MAX(ReviewSegment.start_time).alias("max_time"),
         )
         .where(reduce(operator.and_, clauses) if clauses else True)
-        .group_by(
-            (ReviewSegment.start_time + seconds_offset).cast("int") / day_in_seconds
-        )
-        .order_by(ReviewSegment.start_time.desc())
+        .dicts()
+        .get()
     )
+
+    min_time = time_range_query.get("min_time")
+    max_time = time_range_query.get("max_time")
 
     data = {
         "last24Hours": last_24_query,
     }
 
-    for e in last_month_query.dicts().iterator():
-        data[e["day"]] = e
+    # If no data, return early
+    if min_time is None or max_time is None:
+        return JSONResponse(content=data)
+
+    # Get DST transition periods
+    dst_periods = get_dst_transitions(params.timezone, min_time, max_time)
+
+    day_in_seconds = 60 * 60 * 24
+
+    # Query each DST period separately with the correct offset
+    for period_start, period_end, period_offset in dst_periods:
+        # Calculate hour/minute modifiers for this period
+        hours_offset = int(period_offset / 60 / 60)
+        minutes_offset = int(period_offset / 60 - hours_offset * 60)
+        period_hour_modifier = f"{hours_offset} hour"
+        period_minute_modifier = f"{minutes_offset} minute"
+
+        # Build clauses including time range for this period
+        period_clauses = clauses.copy()
+        period_clauses.append(
+            (ReviewSegment.start_time >= period_start)
+            & (ReviewSegment.start_time <= period_end)
+        )
+
+        period_query = (
+            ReviewSegment.select(
+                fn.strftime(
+                    "%Y-%m-%d",
+                    fn.datetime(
+                        ReviewSegment.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("day"),
+                fn.SUM(
+                    Case(
+                        None,
+                        [
+                            (
+                                (ReviewSegment.severity == SeverityEnum.alert)
+                                & (UserReviewStatus.has_been_reviewed == True),
+                                1,
+                            )
+                        ],
+                        0,
+                    )
+                ).alias("reviewed_alert"),
+                fn.SUM(
+                    Case(
+                        None,
+                        [
+                            (
+                                (ReviewSegment.severity == SeverityEnum.detection)
+                                & (UserReviewStatus.has_been_reviewed == True),
+                                1,
+                            )
+                        ],
+                        0,
+                    )
+                ).alias("reviewed_detection"),
+                fn.SUM(
+                    Case(
+                        None,
+                        [
+                            (
+                                (ReviewSegment.severity == SeverityEnum.alert),
+                                1,
+                            )
+                        ],
+                        0,
+                    )
+                ).alias("total_alert"),
+                fn.SUM(
+                    Case(
+                        None,
+                        [
+                            (
+                                (ReviewSegment.severity == SeverityEnum.detection),
+                                1,
+                            )
+                        ],
+                        0,
+                    )
+                ).alias("total_detection"),
+            )
+            .left_outer_join(
+                UserReviewStatus,
+                on=(
+                    (ReviewSegment.id == UserReviewStatus.review_segment)
+                    & (UserReviewStatus.user_id == user_id)
+                ),
+            )
+            .where(reduce(operator.and_, period_clauses))
+            .group_by(
+                (ReviewSegment.start_time + period_offset).cast("int") / day_in_seconds
+            )
+            .order_by(ReviewSegment.start_time.desc())
+        )
+
+        # Merge results from this period
+        for e in period_query.dicts().iterator():
+            day_key = e["day"]
+            if day_key in data:
+                # Merge counts if day already exists (edge case at DST boundary)
+                data[day_key]["reviewed_alert"] += e["reviewed_alert"] or 0
+                data[day_key]["reviewed_detection"] += e["reviewed_detection"] or 0
+                data[day_key]["total_alert"] += e["total_alert"] or 0
+                data[day_key]["total_detection"] += e["total_detection"] or 0
+            else:
+                data[day_key] = e
 
     return JSONResponse(content=data)
 
 
 @router.post("/reviews/viewed", response_model=GenericResponse)
 async def set_multiple_reviewed(
+    request: Request,
     body: ReviewModifyMultipleBody,
     current_user: dict = Depends(get_current_user),
 ):
@@ -388,26 +474,33 @@ async def set_multiple_reviewed(
 
     for review_id in body.ids:
         try:
+            review = ReviewSegment.get(ReviewSegment.id == review_id)
+            await require_camera_access(review.camera, request=request)
             review_status = UserReviewStatus.get(
                 UserReviewStatus.user_id == user_id,
                 UserReviewStatus.review_segment == review_id,
             )
-            # If it exists and isn’t reviewed, update it
-            if not review_status.has_been_reviewed:
-                review_status.has_been_reviewed = True
+            # Update based on the reviewed parameter
+            if review_status.has_been_reviewed != body.reviewed:
+                review_status.has_been_reviewed = body.reviewed
                 review_status.save()
         except DoesNotExist:
             try:
                 UserReviewStatus.create(
                     user_id=user_id,
                     review_segment=ReviewSegment.get(id=review_id),
-                    has_been_reviewed=True,
+                    has_been_reviewed=body.reviewed,
                 )
             except (DoesNotExist, IntegrityError):
                 pass
 
     return JSONResponse(
-        content=({"success": True, "message": "Reviewed multiple items"}),
+        content=(
+            {
+                "success": True,
+                "message": f"Marked multiple items as {'reviewed' if body.reviewed else 'unreviewed'}",
+            }
+        ),
         status_code=200,
     )
 
@@ -469,7 +562,10 @@ def delete_reviews(body: ReviewModifyMultipleBody):
 @router.get(
     "/review/activity/motion", response_model=list[ReviewActivityMotionResponse]
 )
-def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
+def motion_activity(
+    params: ReviewActivityMotionQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     """Get motion and audio activity."""
     cameras = params.cameras
     before = params.before or datetime.datetime.now().timestamp()
@@ -484,8 +580,14 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     clauses.append((Recordings.motion > 0))
 
     if cameras != "all":
-        camera_list = cameras.split(",")
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content=[])
+        camera_list = list(filtered)
         clauses.append((Recordings.camera << camera_list))
+    else:
+        clauses.append((Recordings.camera << allowed_cameras))
 
     data: list[Recordings] = (
         Recordings.select(
@@ -543,15 +645,13 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
 
 
 @router.get("/review/event/{event_id}", response_model=ReviewSegmentResponse)
-def get_review_from_event(event_id: str):
+async def get_review_from_event(request: Request, event_id: str):
     try:
-        return JSONResponse(
-            model_to_dict(
-                ReviewSegment.get(
-                    ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
-                )
-            )
+        review = ReviewSegment.get(
+            ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
         )
+        await require_camera_access(review.camera, request=request)
+        return JSONResponse(model_to_dict(review))
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Review item not found"},
@@ -560,11 +660,11 @@ def get_review_from_event(event_id: str):
 
 
 @router.get("/review/{review_id}", response_model=ReviewSegmentResponse)
-def get_review(review_id: str):
+async def get_review(request: Request, review_id: str):
     try:
-        return JSONResponse(
-            content=model_to_dict(ReviewSegment.get(ReviewSegment.id == review_id))
-        )
+        review = ReviewSegment.get(ReviewSegment.id == review_id)
+        await require_camera_access(review.camera, request=request)
+        return JSONResponse(content=model_to_dict(review))
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Review item not found"},
@@ -606,3 +706,35 @@ async def set_not_reviewed(
         content=({"success": True, "message": f"Set Review {review_id} as not viewed"}),
         status_code=200,
     )
+
+
+@router.post(
+    "/review/summarize/start/{start_ts}/end/{end_ts}",
+    description="Use GenAI to summarize review items over a period of time.",
+)
+def generate_review_summary(request: Request, start_ts: float, end_ts: float):
+    config: FrigateConfig = request.app.frigate_config
+
+    if not config.genai.provider:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": "GenAI must be configured to use this feature.",
+                }
+            ),
+            status_code=400,
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    summary = context.generate_review_summary(start_ts, end_ts)
+
+    if summary:
+        return JSONResponse(
+            content=({"success": True, "summary": summary}), status_code=200
+        )
+    else:
+        return JSONResponse(
+            content=({"success": False, "message": "Failed to create summary."}),
+            status_code=500,
+        )

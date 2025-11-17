@@ -3,6 +3,7 @@ from enum import Enum
 
 class Tags(Enum):
     app = "App"
+    camera = "Camera"
     preview = "Preview"
     logs = "Logs"
     media = "Media"
@@ -10,5 +11,5 @@ class Tags(Enum):
     review = "Review"
     export = "Export"
     events = "Events"
-    classification = "classification"
+    classification = "Classification"
     auth = "Auth"

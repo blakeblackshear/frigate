@@ -6,11 +6,13 @@
     "motionTuner": "Ajuste de movimento - Frigate",
     "object": "Depuração - Frigate",
     "authentication": "Configurações de autenticação - Frigate",
-    "general": "Configurações Gerais - Frigate",
+    "general": "Configurações gerais - Frigate",
     "frigatePlus": "Configurações do Frigate+ - Frigate",
     "default": "Configurações - Frigate",
     "notifications": "Configuração de Notificações - Frigate",
-    "enrichments": "Configurações Avançadas - Frigate"
+    "enrichments": "Configurações Avançadas - Frigate",
+    "cameraManagement": "Gerir Câmaras - Frigate",
+    "cameraReview": "Configurações de Revisão de Câmara - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -22,7 +24,11 @@
     "users": "Utilizadores",
     "notifications": "Notificações",
     "frigateplus": "Frigate+",
-    "enrichments": "Avançado"
+    "enrichments": "Avançado",
+    "triggers": "Gatilhos",
+    "cameraManagement": "Gestão",
+    "cameraReview": "Rever",
+    "roles": "Papéis"
   },
   "dialog": {
     "unsavedChanges": {
@@ -465,6 +471,19 @@
     "mask": {
       "title": "Máscaras de movimento",
       "desc": "Mostrar polígonos de máscara de movimento"
+    },
+    "paths": {
+      "title": "Caminhos",
+      "desc": "Mostrar pontos significativos do caminho do objeto rastreado",
+      "tips": "<p><strong>Paths</strong></p><br><p>Linhas e círculos indicarão pontos significativos que o objeto rastreado moveu durante seu ciclo de vida.</p>"
+    },
+    "openCameraWebUI": "Abrir a Interface Web de {{camera}}",
+    "audio": {
+      "title": "Áudio",
+      "noAudioDetections": "Nenhuma detecção de áudio",
+      "score": "pontuanção",
+      "currentRMS": "RMS Atual",
+      "currentdbFS": "dbFS Atual"
     }
   },
   "camera": {
@@ -499,6 +518,44 @@
       "desc": "Ative ou desative alertas e detecções para esta câmara. Quando desativado, nenhum novo item de análise será gerado. ",
       "alerts": "Alertas ",
       "detections": "Detecções "
+    },
+    "object_descriptions": {
+      "title": "Descrições de objetos de IA generativa",
+      "desc": "Ative/desative temporariamente as descrições de objetos de IA generativa para esta câmera. Quando desativadas, as descrições geradas por IA não serão solicitadas para objetos rastreados nesta câmera."
+    },
+    "review_descriptions": {
+      "title": "Descrições de análises de IA generativa",
+      "desc": "Ative/desative temporariamente as descrições de avaliação geradas por IA para esta câmera. Quando desativadas, as descrições geradas por IA não serão solicitadas para itens de avaliação nesta câmera."
+    },
+    "addCamera": "Adicionar Nova Câmera",
+    "editCamera": "Editar Câmera:",
+    "selectCamera": "Selecione uma Câmera",
+    "backToSettings": "Voltar para as Configurações da Câmera",
+    "cameraConfig": {
+      "add": "Adicionar Câmera",
+      "edit": "Editar Câmera",
+      "description": "Configure as definições da câmera, incluindo entradas de transmissão e funções.",
+      "name": "Nome da Câmera",
+      "nameRequired": "O nome da câmera é obrigatório",
+      "nameInvalid": "O nome da câmera deve conter apenas letras, números, sublinhados ou hifens",
+      "namePlaceholder": "e.g., porta_da_frente",
+      "enabled": "Habilitado",
+      "ffmpeg": {
+        "inputs": "Entrada de Streams",
+        "path": "Caminho da Stream",
+        "pathRequired": "Caminho da Stream é obrigatória",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Funções",
+        "rolesRequired": "Pelo menos uma função é necessária",
+        "rolesUnique": "Cada função (áudio, detecção, gravação) só pode ser atribuída a uma stream",
+        "addInput": "Adicionar Entrada de Stream",
+        "removeInput": "Remover Entrada de Stream",
+        "inputsRequired": "É necessário pelo menos uma stream de entrada"
+      },
+      "toast": {
+        "success": "Câmera {{cameraName}} guardada com sucesso"
+      },
+      "nameLength": "O nome da câmara deve ter ao menos 24 caracteres."
     }
   },
   "motionDetectionTuner": {
@@ -594,7 +651,8 @@
           "adminDesc": "Acesso total a todos os recursos.",
           "viewer": "Visualização",
           "viewerDesc": "Limitado apenas a painéis ao vivo, análise, exploração e exportações.",
-          "intro": "Selecione a função apropriada para este utilizador:"
+          "intro": "Selecione a função apropriada para este utilizador:",
+          "customDesc": "Papel customizado com acesso a câmaras específicas."
         },
         "title": "Alterar função do utilizador",
         "desc": "Atualizar permissões para <strong>{{username}}</strong>",
@@ -681,6 +739,248 @@
         "deleteUserFailed": "Falha ao excluir o utilizador: {{errorMessage}}",
         "roleUpdateFailed": "Falha ao atualizar a função: {{errorMessage}}"
       }
+    }
+  },
+  "triggers": {
+    "documentTitle": "Triggers (gatilhos)",
+    "management": {
+      "title": "Gestão de Triggers",
+      "desc": "Gira triggers para {{camera}}. Use o tipo de miniatura para acionar miniaturas semelhantes ao objeto rastreado selecionado e o tipo de descrição para acionar descrições semelhantes ao texto especificado."
+    },
+    "addTrigger": "Adicionar Trigger",
+    "table": {
+      "name": "Nome",
+      "type": "Tipo",
+      "content": "Conteúdo",
+      "threshold": "Limite",
+      "actions": "Ações",
+      "noTriggers": "Nenhum trigger configurado para esta câmera.",
+      "edit": "Editar",
+      "deleteTrigger": "Apagar Trigger",
+      "lastTriggered": "Último acionado"
+    },
+    "type": {
+      "thumbnail": "Miniatura",
+      "description": "Descrição"
+    },
+    "actions": {
+      "alert": "Marcar como Alerta",
+      "notification": "Enviar Notificação"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Criar Trigger",
+        "desc": "Crie um trigger para a câmera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Editar Trigger",
+        "desc": "Editar as definições do trigger na câmera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Apagar Trigger",
+        "desc": "Tem certeza de que deseja apagar o trigger <strong>{{triggerName}}</strong>? Esta ação não pode ser desfeita."
+      },
+      "form": {
+        "name": {
+          "title": "Nome",
+          "placeholder": "Insira o nome do trigger",
+          "error": {
+            "minLength": "O nome deve ter pelo menos 2 caracteres.",
+            "invalidCharacters": "O nome só pode conter letras, números, sublinhados e hifens.",
+            "alreadyExists": "Já existe um trigger com este nome para esta câmera."
+          }
+        },
+        "enabled": {
+          "description": "Habilitar ou desabilitar este trigger"
+        },
+        "type": {
+          "title": "Tipo",
+          "placeholder": "Selecione o tipo de trigger"
+        },
+        "content": {
+          "title": "Conteúdo",
+          "imagePlaceholder": "Selecione uma imagem",
+          "textPlaceholder": "Insira o conteúdo do texto",
+          "imageDesc": "Selecione uma imagem para acionar esta ação quando uma imagem semelhante for detectada.",
+          "textDesc": "Insira um texto para acionar esta ação quando uma descrição de objeto rastreado semelhante for detectada.",
+          "error": {
+            "required": "O Conteúdo é obrigatório."
+          }
+        },
+        "threshold": {
+          "title": "Limite",
+          "error": {
+            "min": "Limite deve ser pelo menos 0",
+            "max": "Limite deve ser no máximo 1"
+          }
+        },
+        "actions": {
+          "title": "Ações",
+          "desc": "Por padrão, o Frigate envia uma mensagem MQTT para todos os triggers. Escolha uma ação adicional a ser executada quando este trigger for disparado.",
+          "error": {
+            "min": "Pelo menos uma ação deve ser selecionada."
+          }
+        },
+        "friendly_name": {
+          "title": "Nome Amigável",
+          "placeholder": "Nomeie ou descreva este gatilho",
+          "description": "Um nome amigável ou descritivo opcional para este gatilho."
+        }
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Trigger {{name}} criado com sucesso.",
+        "updateTrigger": "Trigger {{name}} atualizado com sucesso.",
+        "deleteTrigger": "Trigger {{name}} apagado com sucesso."
+      },
+      "error": {
+        "createTriggerFailed": "Falha ao criar trigger: {{errorMessage}}",
+        "updateTriggerFailed": "Falha ao atualizar o trigger: {{errorMessage}}",
+        "deleteTriggerFailed": "Falha ao apagar o trigger: {{errorMessage}}"
+      }
+    },
+    "semanticSearch": {
+      "title": "Pesquisa Semântica desativada",
+      "desc": "Pesquisa Semântica deve estar ativada para usar os Gatilhos."
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Gestão do Papel de Visualizador",
+      "desc": "Gerir papéis de visualizador customizados e as suas permissões de acesso para esta instância do Frigate."
+    },
+    "addRole": "Adicionar Papel",
+    "table": {
+      "role": "Papel",
+      "cameras": "Câmaras",
+      "actions": "Ações",
+      "noRoles": "Nenhum papel customizado encontrado.",
+      "editCameras": "Editar Câmaras",
+      "deleteRole": "Apagar Papel"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Papel {{role}} criado com sucesso",
+        "updateCameras": "Câmaras atualizados para o papel {{role}}",
+        "deleteRole": "Papel {{role}} apagado com sucesso",
+        "userRolesUpdated_one": "{{count}} utilizador(os) atribuídos a este papel foram atualizados para 'visualizador', que possui acesso a todas as câmaras.",
+        "userRolesUpdated_many": "",
+        "userRolesUpdated_other": ""
+      },
+      "error": {
+        "createRoleFailed": "Falha ao criar papel: {{errorMessage}}",
+        "updateCamerasFailed": "Falha ao atualizar câmaras: {{errorMessage}}",
+        "deleteRoleFailed": "Falha ao apagar papel: {{errorMessage}}",
+        "userUpdateFailed": "Falha ao atualizar papel do utilizador: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Criar Novo Papel",
+        "desc": "Adicionar um novo papel e especificar permissões de acesso."
+      },
+      "editCameras": {
+        "title": "Editar Câmaras de Papéis",
+        "desc": "Atualizar acesso da câmara para o papel <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Apagar Papel",
+        "desc": "Esta ação não pode ser desfeita. Isto irá apagar permanentemente o papel e atribuir a quaisquer utilizadores com este papel como 'visualizador', o que dará acesso de visualização para todas as câmaras.",
+        "warn": "Tem certeza que quer apagar <strong>{{role}}</strong>?",
+        "deleting": "A apagar…"
+      },
+      "form": {
+        "role": {
+          "title": "Nome do Papel",
+          "placeholder": "Digitar nome do papel",
+          "desc": "Apenas letras, números, pontos e sublinhados são permitidos.",
+          "roleIsRequired": "Nome para o papel é requerido",
+          "roleOnlyInclude": "O nome do papel pode conter apenas letras, números, pontos ou sublinhados",
+          "roleExists": "Um papel com este nome já existe."
+        },
+        "cameras": {
+          "title": "Câmaras",
+          "desc": "Selecione as câmaras que este papel terá acesso. Ao menos uma câmara é requerida.",
+          "required": "Ao menos uma câmara deve ser selecionada."
+        }
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Adicionar Câmara",
+    "description": "Siga os passos abaixo para adicionar uma câmara nova no seu Frigate.",
+    "steps": {
+      "nameAndConnection": "Nome e Conexão",
+      "streamConfiguration": "Configuração de Stream",
+      "validationAndTesting": "Validação e Teste"
+    },
+    "save": {
+      "success": "Nova câmara {{cameraName}} grava com sucesso.",
+      "failure": "Erro ao gravar {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Resolução",
+      "video": "Vídeo",
+      "audio": "Áudio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Favor fornecer uma URL de stream válida",
+      "testFailed": "Teste de stream falhou: {{error}}"
+    },
+    "step1": {
+      "description": "Adicione os pormenores da sua câmara e teste a conexão.",
+      "cameraName": "Nome da Câmara",
+      "cameraNamePlaceholder": "ex., porta_entrada ou Visão Geral do Quintal",
+      "host": "Host/Endereço IP",
+      "port": "Porta",
+      "username": "Nome de Utilizador",
+      "usernamePlaceholder": "Opcional",
+      "password": "Palavra-passe",
+      "passwordPlaceholder": "Opcional",
+      "selectTransport": "Selecionar protocolo de transporte",
+      "cameraBrand": "Marca da Câmara",
+      "selectBrand": "Selecione a marca da câmara para template de URL",
+      "customUrl": "URL Customizada de Stream",
+      "brandInformation": "Informação da marca",
+      "brandUrlFormat": "Para câmaras com o formato de URL RTSP como: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://nomedeusuario:palavra-passe@host:porta/caminho",
+      "testConnection": "Testar Conexão",
+      "testSuccess": "Teste de conexão bem sucedido!",
+      "testFailed": "Teste de conexão falhou. Favor verifique os dados e tente novamente.",
+      "streamDetails": "Pormenores do Stream",
+      "warnings": {
+        "noSnapshot": "Não foi possível adquirir uma captura de imagem do stream configurado."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Selecione a marca da câmara com o host/IP or selecione 'Outro' com uma URL customizada",
+        "nameRequired": "Nome para a câmara requerido"
+      }
+    },
+    "step2": {
+      "url": "URL",
+      "roleLabels": {
+        "audio": "Áudio"
+      }
+    },
+    "step3": {
+      "reload": "Recarregar",
+      "valid": "Válido",
+      "failed": "Falhou",
+      "none": "Nenhum",
+      "error": "Erro"
+    }
+  },
+  "cameraManagement": {
+    "cameraConfig": {
+      "enabled": "Ativado",
+      "addUrl": "Adicionar URL"
+    }
+  },
+  "cameraReview": {
+    "review": {
+      "title": "Rever"
     }
   }
 }

@@ -102,17 +102,23 @@ export default function CreateFaceWizardDialog({
       }}
     >
       <Content
-        className={cn("flex flex-col gap-4", isDesktop ? "max-w-3xl" : "p-4")}
+        className={cn(
+          "flex flex-col gap-4",
+          isDesktop ? (step == 0 ? "max-w-xl" : "max-w-3xl") : "p-4",
+        )}
       >
-        <Header>
-          <Title>{t("button.addFace")}</Title>
-          {isDesktop && <Description>{t("description.addFace")}</Description>}
-        </Header>
         <StepIndicator
           steps={STEPS}
           currentStep={step}
           translationNameSpace="views/faceLibrary"
+          className="mb-4 justify-start"
+          variant="dots"
         />
+        <Header>
+          <Title>{t("button.addFace")}</Title>
+          {isDesktop && <Description>{t("description.addFace")}</Description>}
+        </Header>
+
         {step == 0 && (
           <TextEntry
             placeholder={t("description.placeholder")}
@@ -161,7 +167,7 @@ export default function CreateFaceWizardDialog({
                 rel="noopener noreferrer"
                 className="inline"
               >
-                {t("readTheDocs")}
+                {t("readTheDocumentation", { ns: "common" })}
                 <LuExternalLink className="ml-2 inline-flex size-3" />
               </Link>
             </div>

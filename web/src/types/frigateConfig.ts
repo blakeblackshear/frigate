@@ -1,4 +1,5 @@
 import { IconName } from "@/components/icons/IconPicker";
+import { TriggerAction, TriggerType } from "./trigger";
 
 export interface UiConfig {
   timezone?: string;
@@ -32,6 +33,7 @@ export type SearchModel = "jinav1" | "jinav2";
 export type SearchModelSize = "small" | "large";
 
 export interface CameraConfig {
+  friendly_name: string;
   audio: {
     enabled: boolean;
     enabled_in_config: boolean;
@@ -40,6 +42,11 @@ export interface CameraConfig {
     max_not_heard: number;
     min_volume: number;
     num_threads: number;
+  };
+  audio_transcription: {
+    enabled: boolean;
+    enabled_in_config: boolean;
+    live_enabled: boolean;
   };
   best_image_timeout: number;
   birdseye: {
@@ -88,13 +95,6 @@ export interface CameraConfig {
     cmd: string;
     roles: string[];
   }[];
-  genai: {
-    enabled: string;
-    prompt: string;
-    object_prompts: { [key: string]: string };
-    required_zones: string[];
-    objects: string[];
-  };
   live: {
     height: number;
     quality: number;
@@ -140,6 +140,14 @@ export interface CameraConfig {
     };
     mask: string;
     track: string[];
+    genai: {
+      enabled: boolean;
+      enabled_in_config: boolean;
+      prompt: string;
+      object_prompts: { [key: string]: string };
+      required_zones: string[];
+      objects: string[];
+    };
   };
   onvif: {
     autotracking: {
@@ -211,9 +219,27 @@ export interface CameraConfig {
         mode: string;
       };
     };
+    genai?: {
+      enabled: boolean;
+      enabled_in_config: boolean;
+      alerts: boolean;
+      detections: boolean;
+    };
   };
   rtmp: {
     enabled: boolean;
+  };
+  semantic_search: {
+    triggers: {
+      [triggerName: string]: {
+        enabled: boolean;
+        type: TriggerType;
+        data: string;
+        threshold: number;
+        actions: TriggerAction[];
+        friendly_name: string;
+      };
+    };
   };
   snapshots: {
     bounding_box: boolean;
@@ -254,6 +280,7 @@ export interface CameraConfig {
       speed_threshold: number;
       objects: string[];
       color: number[];
+      friendly_name?: string;
     };
   };
 }
@@ -274,6 +301,24 @@ export type CameraStreamingSettings = {
   volume: number;
 };
 
+export type CustomClassificationModelConfig = {
+  enabled: boolean;
+  name: string;
+  threshold: number;
+  object_config?: {
+    objects: string[];
+    classification_type: string;
+  };
+  state_config?: {
+    cameras: {
+      [cameraName: string]: {
+        crop: [number, number, number, number];
+      };
+    };
+    motion: boolean;
+  };
+};
+
 export type GroupStreamingSettings = {
   [cameraName: string]: CameraStreamingSettings;
 };
@@ -283,6 +328,9 @@ export type AllGroupsStreamingSettings = {
 };
 
 export interface FrigateConfig {
+  version: string;
+  safe_mode: boolean;
+
   audio: {
     enabled: boolean;
     enabled_in_config: boolean | null;
@@ -291,6 +339,16 @@ export interface FrigateConfig {
     max_not_heard: number;
     min_volume: number;
     num_threads: number;
+  };
+
+  audio_transcription: {
+    enabled: boolean;
+  };
+
+  auth: {
+    roles: {
+      [roleName: string]: string[];
+    };
   };
 
   birdseye: BirdseyeConfig;
@@ -303,6 +361,9 @@ export interface FrigateConfig {
     bird: {
       enabled: boolean;
       threshold: number;
+    };
+    custom: {
+      [modelKey: string]: CustomClassificationModelConfig;
     };
   };
 
@@ -362,15 +423,10 @@ export interface FrigateConfig {
   };
 
   genai: {
-    enabled: boolean;
     provider: string;
     base_url?: string;
     api_key?: string;
     model: string;
-    prompt: string;
-    object_prompts: { [key: string]: string };
-    required_zones: string[];
-    objects: string[];
   };
 
   go2rtc: {

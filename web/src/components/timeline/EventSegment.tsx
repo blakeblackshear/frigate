@@ -1,4 +1,3 @@
-import { useApiHost } from "@/api";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
@@ -18,6 +17,7 @@ import { HoverCardPortal } from "@radix-ui/react-hover-card";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
 import useTapUtils from "@/hooks/use-tap-utils";
+import ReviewCard from "../card/ReviewCard";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -54,7 +54,7 @@ export function EventSegment({
     displaySeverityType,
     shouldShowRoundedCorners,
     getEventStart,
-    getEventThumbnail,
+    getEvent,
   } = useEventSegmentUtils(segmentDuration, events, severityType);
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
@@ -87,13 +87,11 @@ export function EventSegment({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getEventStart, segmentTime]);
 
-  const apiHost = useApiHost();
-
   const { handleTouchStart } = useTapUtils();
 
-  const eventThumbnail = useMemo(() => {
-    return getEventThumbnail(segmentTime);
-  }, [getEventThumbnail, segmentTime]);
+  const segmentEvent = useMemo(() => {
+    return getEvent(segmentTime);
+  }, [getEvent, segmentTime]);
 
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
   const segmentKey = useMemo(
@@ -235,7 +233,7 @@ export function EventSegment({
                   <div className="flex w-[20px] flex-row justify-center md:w-[40px]">
                     <div className="flex justify-center">
                       <div
-                        className="absolute left-1/2 z-10 ml-[2px] h-[8px] w-[8px] -translate-x-1/2 transform cursor-pointer"
+                        className="absolute left-1/2 z-10 ml-[2px] h-[8px] w-[8px] -translate-x-1/2 transform cursor-pointer md:ml-0"
                         data-severity={severityValue}
                       >
                         <div
@@ -252,10 +250,7 @@ export function EventSegment({
                   className="w-[250px] rounded-lg p-2 md:rounded-2xl"
                   side="left"
                 >
-                  <img
-                    className="rounded-lg"
-                    src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
-                  />
+                  {segmentEvent && <ReviewCard event={segmentEvent} />}
                 </HoverCardContent>
               </HoverCardPortal>
             </HoverCard>

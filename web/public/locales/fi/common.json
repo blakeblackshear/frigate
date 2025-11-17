@@ -39,7 +39,10 @@
     "minute_one": "{{time}}minuutti",
     "minute_other": "{{time}}minuuttia",
     "second_one": "{{time}}sekuntti",
-    "second_other": "{{time}}sekunttia"
+    "second_other": "{{time}}sekunttia",
+    "formattedTimestampHourMinute": {
+      "24hour": "HH:mm"
+    }
   },
   "pagination": {
     "next": {
@@ -168,5 +171,6 @@
     "length": {
       "feet": "jalka"
     }
-  }
+  },
+  "readTheDocumentation": "Lue dokumentaatio"
 }

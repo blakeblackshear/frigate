@@ -14,6 +14,10 @@ import { useFormattedTimestamp, useTimezone } from "@/hooks/use-date-utils";
 import { RecordingsSummary } from "@/types/review";
 import { useTranslation } from "react-i18next";
 import { TZDate } from "react-day-picker";
+import { Link } from "react-router-dom";
+import { useDocDomain } from "@/hooks/use-doc-domain";
+import { LuExternalLink } from "react-icons/lu";
+import { FaExclamationTriangle } from "react-icons/fa";
 
 type CameraStorage = {
   [key: string]: {
@@ -36,6 +40,7 @@ export default function StorageMetrics({
   });
   const { t } = useTranslation(["views/system"]);
   const timezone = useTimezone(config);
+  const { getLocaleDocUrl } = useDocDomain();
 
   const totalStorage = useMemo(() => {
     if (!cameraStorage || !stats) {
@@ -67,8 +72,7 @@ export default function StorageMetrics({
   const earliestDate = useMemo(() => {
     const keys = Object.keys(recordingsSummary || {});
     return keys.length
-      ? new TZDate(keys[keys.length - 1] + "T00:00:00", timezone).getTime() /
-          1000
+      ? new TZDate(keys[0] + "T00:00:00", timezone).getTime() / 1000
       : null;
   }, [recordingsSummary, timezone]);
 
@@ -142,7 +146,46 @@ export default function StorageMetrics({
           />
         </div>
         <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-          <div className="mb-5">/dev/shm</div>
+          <div className="mb-5 flex flex-row items-center justify-between">
+            /dev/shm
+            {stats.service.storage["/dev/shm"]["total"] <
+              (stats.service.storage["/dev/shm"]["min_shm"] ?? 0) && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    className="focus:outline-none"
+                    aria-label={t("storage.shm.title")}
+                  >
+                    <FaExclamationTriangle
+                      className="size-5 text-danger"
+                      aria-label={t("storage.shm.title")}
+                    />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-2">
+                    {t("storage.shm.warning", {
+                      total: stats.service.storage["/dev/shm"]["total"],
+                      min_shm: stats.service.storage["/dev/shm"]["min_shm"],
+                    })}
+                    <div className="mt-2 flex items-center text-primary">
+                      <Link
+                        to={getLocaleDocUrl(
+                          "frigate/installation#calculating-required-shm-size",
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline"
+                      >
+                        {t("readTheDocumentation", { ns: "common" })}
+                        <LuExternalLink className="ml-2 inline-flex size-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
           <StorageGraph
             graphId="general-shared-memory"
             used={stats.service.storage["/dev/shm"]["used"]}

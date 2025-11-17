@@ -1,22 +1,31 @@
 """Event apis."""
 
+import base64
 import datetime
+import json
 import logging
 import os
 import random
 import string
 from functools import reduce
 from pathlib import Path
+from typing import List
 from urllib.parse import unquote
 
 import cv2
+import numpy as np
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
+from pathvalidate import sanitize_filename
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.auth import require_role
+from frigate.api.auth import (
+    get_allowed_cameras_for_filter,
+    require_camera_access,
+    require_role,
+)
 from frigate.api.defs.query.events_query_parameters import (
     DEFAULT_TIME_RANGE,
     EventsQueryParams,
@@ -34,6 +43,7 @@ from frigate.api.defs.request.events_body import (
     EventsLPRBody,
     EventsSubLabelBody,
     SubmitPlusBody,
+    TriggerEmbeddingBody,
 )
 from frigate.api.defs.response.event_response import (
     EventCreateResponse,
@@ -44,19 +54,28 @@ from frigate.api.defs.response.event_response import (
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
-from frigate.const import CLIPS_DIR
+from frigate.const import CLIPS_DIR, TRIGGER_DIR
 from frigate.embeddings import EmbeddingsContext
-from frigate.models import Event, ReviewSegment, Timeline
+from frigate.models import Event, ReviewSegment, Timeline, Trigger
 from frigate.track.object_processing import TrackedObject
-from frigate.util.builtin import get_tz_modifiers
+from frigate.util.file import get_event_thumbnail_bytes
+from frigate.util.time import get_dst_transitions, get_tz_modifiers
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.events])
 
 
-@router.get("/events", response_model=list[EventResponse])
-def events(params: EventsQueryParams = Depends()):
+@router.get(
+    "/events",
+    response_model=list[EventResponse],
+    summary="Get events",
+    description="Returns a list of events.",
+)
+def events(
+    params: EventsQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     camera = params.camera
     cameras = params.cameras
 
@@ -130,8 +149,14 @@ def events(params: EventsQueryParams = Depends()):
         clauses.append((Event.camera == camera))
 
     if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((Event.camera << camera_list))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content=[])
+        camera_list = list(filtered)
+    else:
+        camera_list = allowed_cameras
+    clauses.append((Event.camera << camera_list))
 
     if labels != "all":
         label_list = labels.split(",")
@@ -161,43 +186,32 @@ def events(params: EventsQueryParams = Depends()):
         clauses.append((sub_label_clause))
 
     if recognized_license_plate != "all":
-        # use matching so joined recognized_license_plates are included
-        # for example a recognized license plate 'ABC123' would get events
-        # with recognized license plates 'ABC123' and 'ABC123, XYZ789'
-        recognized_license_plate_clauses = []
         filtered_recognized_license_plates = recognized_license_plate.split(",")
+
+        clauses_for_plates = []
 
         if "None" in filtered_recognized_license_plates:
             filtered_recognized_license_plates.remove("None")
-            recognized_license_plate_clauses.append(
-                (Event.data["recognized_license_plate"].is_null())
+            clauses_for_plates.append(Event.data["recognized_license_plate"].is_null())
+
+        # regex vs exact matching
+        normal_plates = []
+        for plate in filtered_recognized_license_plates:
+            if plate.startswith("^") or any(ch in plate for ch in ".[]?+*"):
+                clauses_for_plates.append(
+                    Event.data["recognized_license_plate"].cast("text").regexp(plate)
+                )
+            else:
+                normal_plates.append(plate)
+
+        # if there are any plain string plates, match them with IN
+        if normal_plates:
+            clauses_for_plates.append(
+                Event.data["recognized_license_plate"].cast("text").in_(normal_plates)
             )
 
-        for recognized_license_plate in filtered_recognized_license_plates:
-            # Exact matching plus list inclusion
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    == recognized_license_plate
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*{recognized_license_plate},*"
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*, {recognized_license_plate}*"
-                )
-            )
-
-        recognized_license_plate_clause = reduce(
-            operator.or_, recognized_license_plate_clauses
-        )
-        clauses.append((recognized_license_plate_clause))
+        recognized_license_plate_clause = reduce(operator.or_, clauses_for_plates)
+        clauses.append(recognized_license_plate_clause)
 
     if zones != "all":
         # use matching so events with multiple zones
@@ -326,10 +340,25 @@ def events(params: EventsQueryParams = Depends()):
     return JSONResponse(content=list(events))
 
 
-@router.get("/events/explore", response_model=list[EventResponse])
-def events_explore(limit: int = 10):
+@router.get(
+    "/events/explore",
+    response_model=list[EventResponse],
+    summary="Get summary of objects.",
+    description="""Gets a summary of objects from the database.
+    Returns a list of objects with a max of `limit` objects for each label.
+    """,
+)
+def events_explore(
+    limit: int = 10,
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     # get distinct labels for all events
-    distinct_labels = Event.select(Event.label).distinct().order_by(Event.label)
+    distinct_labels = (
+        Event.select(Event.label)
+        .where(Event.camera << allowed_cameras)
+        .distinct()
+        .order_by(Event.label)
+    )
 
     label_counts = {}
 
@@ -340,14 +369,18 @@ def events_explore(limit: int = 10):
             # get most recent events for this label
             label_events = (
                 Event.select()
-                .where(Event.label == label)
+                .where((Event.label == label) & (Event.camera << allowed_cameras))
                 .order_by(Event.start_time.desc())
                 .limit(limit)
                 .iterator()
             )
 
             # count total events for this label
-            label_counts[label] = Event.select().where(Event.label == label).count()
+            label_counts[label] = (
+                Event.select()
+                .where((Event.label == label) & (Event.camera << allowed_cameras))
+                .count()
+            )
 
             yield from label_events
 
@@ -399,8 +432,15 @@ def events_explore(limit: int = 10):
     return JSONResponse(content=processed_events)
 
 
-@router.get("/event_ids", response_model=list[EventResponse])
-def event_ids(ids: str):
+@router.get(
+    "/event_ids",
+    response_model=list[EventResponse],
+    summary="Get events by ids.",
+    description="""Gets events by a list of ids.
+    Returns a list of events.
+    """,
+)
+async def event_ids(ids: str, request: Request):
     ids = ids.split(",")
 
     if not ids:
@@ -408,6 +448,14 @@ def event_ids(ids: str):
             content=({"success": False, "message": "Valid list of ids must be sent"}),
             status_code=400,
         )
+
+    for event_id in ids:
+        try:
+            event = Event.get(Event.id == event_id)
+            await require_camera_access(event.camera, request=request)
+        except DoesNotExist:
+            # we should not fail the entire request if an event is not found
+            continue
 
     try:
         events = Event.select().where(Event.id << ids).dicts().iterator()
@@ -418,8 +466,18 @@ def event_ids(ids: str):
         )
 
 
-@router.get("/events/search")
-def events_search(request: Request, params: EventsSearchQueryParams = Depends()):
+@router.get(
+    "/events/search",
+    summary="Search events.",
+    description="""Searches for events in the database.
+    Returns a list of events.
+    """,
+)
+def events_search(
+    request: Request,
+    params: EventsSearchQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     query = params.query
     search_type = params.search_type
     include_thumbnails = params.include_thumbnails
@@ -492,7 +550,13 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     event_filters = []
 
     if cameras != "all":
-        event_filters.append((Event.camera << cameras.split(",")))
+        requested = set(cameras.split(","))
+        filtered = requested.intersection(allowed_cameras)
+        if not filtered:
+            return JSONResponse(content=[])
+        event_filters.append((Event.camera << list(filtered)))
+    else:
+        event_filters.append((Event.camera << allowed_cameras))
 
     if labels != "all":
         event_filters.append((Event.label << labels.split(",")))
@@ -511,42 +575,31 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         event_filters.append((reduce(operator.or_, zone_clauses)))
 
     if recognized_license_plate != "all":
-        # use matching so joined recognized_license_plates are included
-        # for example an recognized_license_plate 'ABC123' would get events
-        # with recognized_license_plates 'ABC123' and 'ABC123, XYZ789'
-        recognized_license_plate_clauses = []
         filtered_recognized_license_plates = recognized_license_plate.split(",")
+
+        clauses_for_plates = []
 
         if "None" in filtered_recognized_license_plates:
             filtered_recognized_license_plates.remove("None")
-            recognized_license_plate_clauses.append(
-                (Event.data["recognized_license_plate"].is_null())
+            clauses_for_plates.append(Event.data["recognized_license_plate"].is_null())
+
+        # regex vs exact matching
+        normal_plates = []
+        for plate in filtered_recognized_license_plates:
+            if plate.startswith("^") or any(ch in plate for ch in ".[]?+*"):
+                clauses_for_plates.append(
+                    Event.data["recognized_license_plate"].cast("text").regexp(plate)
+                )
+            else:
+                normal_plates.append(plate)
+
+        # if there are any plain string plates, match them with IN
+        if normal_plates:
+            clauses_for_plates.append(
+                Event.data["recognized_license_plate"].cast("text").in_(normal_plates)
             )
 
-        for recognized_license_plate in filtered_recognized_license_plates:
-            # Exact matching plus list inclusion
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    == recognized_license_plate
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*{recognized_license_plate},*"
-                )
-            )
-            recognized_license_plate_clauses.append(
-                (
-                    Event.data["recognized_license_plate"].cast("text")
-                    % f"*, {recognized_license_plate}*"
-                )
-            )
-
-        recognized_license_plate_clause = reduce(
-            operator.or_, recognized_license_plate_clauses
-        )
+        recognized_license_plate_clause = reduce(operator.or_, clauses_for_plates)
         event_filters.append((recognized_license_plate_clause))
 
     if after:
@@ -756,9 +809,11 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
 
 @router.get("/events/summary")
-def events_summary(params: EventsSummaryQueryParams = Depends()):
+def events_summary(
+    params: EventsSummaryQueryParams = Depends(),
+    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+):
     tz_name = params.timezone
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
     has_clip = params.has_clip
     has_snapshot = params.has_snapshot
 
@@ -773,39 +828,104 @@ def events_summary(params: EventsSummaryQueryParams = Depends()):
     if len(clauses) == 0:
         clauses.append((True))
 
-    groups = (
+    time_range_query = (
         Event.select(
-            Event.camera,
-            Event.label,
-            Event.sub_label,
-            Event.data,
-            fn.strftime(
-                "%Y-%m-%d",
-                fn.datetime(
-                    Event.start_time, "unixepoch", hour_modifier, minute_modifier
-                ),
-            ).alias("day"),
-            Event.zones,
-            fn.COUNT(Event.id).alias("count"),
+            fn.MIN(Event.start_time).alias("min_time"),
+            fn.MAX(Event.start_time).alias("max_time"),
         )
-        .where(reduce(operator.and_, clauses))
-        .group_by(
-            Event.camera,
-            Event.label,
-            Event.sub_label,
-            Event.data,
-            (Event.start_time + seconds_offset).cast("int") / (3600 * 24),
-            Event.zones,
-        )
+        .where(reduce(operator.and_, clauses) & (Event.camera << allowed_cameras))
+        .dicts()
+        .get()
     )
 
-    return JSONResponse(content=[e for e in groups.dicts()])
+    min_time = time_range_query.get("min_time")
+    max_time = time_range_query.get("max_time")
+
+    if min_time is None or max_time is None:
+        return JSONResponse(content=[])
+
+    dst_periods = get_dst_transitions(tz_name, min_time, max_time)
+
+    grouped: dict[tuple, dict] = {}
+
+    for period_start, period_end, period_offset in dst_periods:
+        hours_offset = int(period_offset / 60 / 60)
+        minutes_offset = int(period_offset / 60 - hours_offset * 60)
+        period_hour_modifier = f"{hours_offset} hour"
+        period_minute_modifier = f"{minutes_offset} minute"
+
+        period_groups = (
+            Event.select(
+                Event.camera,
+                Event.label,
+                Event.sub_label,
+                Event.data,
+                fn.strftime(
+                    "%Y-%m-%d",
+                    fn.datetime(
+                        Event.start_time,
+                        "unixepoch",
+                        period_hour_modifier,
+                        period_minute_modifier,
+                    ),
+                ).alias("day"),
+                Event.zones,
+                fn.COUNT(Event.id).alias("count"),
+            )
+            .where(
+                reduce(operator.and_, clauses)
+                & (Event.camera << allowed_cameras)
+                & (Event.start_time >= period_start)
+                & (Event.start_time <= period_end)
+            )
+            .group_by(
+                Event.camera,
+                Event.label,
+                Event.sub_label,
+                Event.data,
+                (Event.start_time + period_offset).cast("int") / (3600 * 24),
+                Event.zones,
+            )
+            .namedtuples()
+        )
+
+        for g in period_groups:
+            key = (
+                g.camera,
+                g.label,
+                g.sub_label,
+                json.dumps(g.data, sort_keys=True) if g.data is not None else None,
+                g.day,
+                json.dumps(g.zones, sort_keys=True) if g.zones is not None else None,
+            )
+
+            if key in grouped:
+                grouped[key]["count"] += int(g.count or 0)
+            else:
+                grouped[key] = {
+                    "camera": g.camera,
+                    "label": g.label,
+                    "sub_label": g.sub_label,
+                    "data": g.data,
+                    "day": g.day,
+                    "zones": g.zones,
+                    "count": int(g.count or 0),
+                }
+
+    return JSONResponse(content=sorted(grouped.values(), key=lambda x: x["day"]))
 
 
-@router.get("/events/{event_id}", response_model=EventResponse)
-def event(event_id: str):
+@router.get(
+    "/events/{event_id}",
+    response_model=EventResponse,
+    summary="Get event by id.",
+    description="Gets an event by its id.",
+)
+async def event(event_id: str, request: Request):
     try:
-        return model_to_dict(Event.get(Event.id == event_id))
+        event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
+        return model_to_dict(event)
     except DoesNotExist:
         return JSONResponse(content="Event not found", status_code=404)
 
@@ -814,6 +934,11 @@ def event(event_id: str):
     "/events/{event_id}/retain",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Set event retain indefinitely.",
+    description="""Sets an event to retain indefinitely.
+    Returns a success message or an error if the event is not found.
+    NOTE: This is a legacy endpoint and is not supported in the frontend.
+    """,
 )
 def set_retain(event_id: str):
     try:
@@ -833,8 +958,15 @@ def set_retain(event_id: str):
     )
 
 
-@router.post("/events/{event_id}/plus", response_model=EventUploadPlusResponse)
-def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
+@router.post(
+    "/events/{event_id}/plus",
+    response_model=EventUploadPlusResponse,
+    summary="Send event to Frigate+.",
+    description="""Sends an event to Frigate+.
+    Returns a success message or an error if the event is not found.
+    """,
+)
+async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
     if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
         logger.error(message)
@@ -852,6 +984,7 @@ def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
 
     try:
         event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         message = f"Event {event_id} not found"
         logger.error(message)
@@ -864,12 +997,12 @@ def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
         include_annotation = None
 
     if event.end_time is None:
-        logger.error(f"Unable to load clean png for in-progress event: {event.id}")
+        logger.error(f"Unable to load clean snapshot for in-progress event: {event.id}")
         return JSONResponse(
             content=(
                 {
                     "success": False,
-                    "message": "Unable to load clean png for in-progress event",
+                    "message": "Unable to load clean snapshot for in-progress event",
                 }
             ),
             status_code=400,
@@ -882,24 +1015,44 @@ def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
             content=({"success": False, "message": message}), status_code=400
         )
 
-    # load clean.png
+    # load clean.webp or clean.png (legacy)
     try:
-        filename = f"{event.camera}-{event.id}-clean.png"
-        image = cv2.imread(os.path.join(CLIPS_DIR, filename))
+        filename_webp = f"{event.camera}-{event.id}-clean.webp"
+        filename_png = f"{event.camera}-{event.id}-clean.png"
+
+        image_path = None
+        if os.path.exists(os.path.join(CLIPS_DIR, filename_webp)):
+            image_path = os.path.join(CLIPS_DIR, filename_webp)
+        elif os.path.exists(os.path.join(CLIPS_DIR, filename_png)):
+            image_path = os.path.join(CLIPS_DIR, filename_png)
+
+        if image_path is None:
+            logger.error(f"Unable to find clean snapshot for event: {event.id}")
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": "Unable to find clean snapshot for event",
+                    }
+                ),
+                status_code=400,
+            )
+
+        image = cv2.imread(image_path)
     except Exception:
-        logger.error(f"Unable to load clean png for event: {event.id}")
+        logger.error(f"Unable to load clean snapshot for event: {event.id}")
         return JSONResponse(
             content=(
-                {"success": False, "message": "Unable to load clean png for event"}
+                {"success": False, "message": "Unable to load clean snapshot for event"}
             ),
             status_code=400,
         )
 
     if image is None or image.size == 0:
-        logger.error(f"Unable to load clean png for event: {event.id}")
+        logger.error(f"Unable to load clean snapshot for event: {event.id}")
         return JSONResponse(
             content=(
-                {"success": False, "message": "Unable to load clean png for event"}
+                {"success": False, "message": "Unable to load clean snapshot for event"}
             ),
             status_code=400,
         )
@@ -945,8 +1098,15 @@ def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
     )
 
 
-@router.put("/events/{event_id}/false_positive", response_model=EventUploadPlusResponse)
-def false_positive(request: Request, event_id: str):
+@router.put(
+    "/events/{event_id}/false_positive",
+    response_model=EventUploadPlusResponse,
+    summary="Submit false positive to Frigate+",
+    description="""Submit an event as a false positive to Frigate+.
+    This endpoint is the same as the standard Frigate+ submission endpoint,
+    but is specifically for marking an event as a false positive.""",
+)
+async def false_positive(request: Request, event_id: str):
     if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
         logger.error(message)
@@ -962,6 +1122,7 @@ def false_positive(request: Request, event_id: str):
 
     try:
         event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         message = f"Event {event_id} not found"
         logger.error(message)
@@ -985,7 +1146,7 @@ def false_positive(request: Request, event_id: str):
         )
 
     if not event.plus_id:
-        plus_response = send_to_plus(request, event_id)
+        plus_response = await send_to_plus(request, event_id)
         if plus_response.status_code != 200:
             return plus_response
         # need to refetch the event now that it has a plus_id
@@ -1038,10 +1199,16 @@ def false_positive(request: Request, event_id: str):
     "/events/{event_id}/retain",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Stop event from being retained indefinitely.",
+    description="""Stops an event from being retained indefinitely.
+    Returns a success message or an error if the event is not found.
+    NOTE: This is a legacy endpoint and is not supported in the frontend.
+    """,
 )
-def delete_retain(event_id: str):
+async def delete_retain(event_id: str, request: Request):
     try:
         event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -1061,14 +1228,19 @@ def delete_retain(event_id: str):
     "/events/{event_id}/sub_label",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Set event sub label.",
+    description="""Sets an event's sub label.
+    Returns a success message or an error if the event is not found.
+    """,
 )
-def set_sub_label(
+async def set_sub_label(
     request: Request,
     event_id: str,
     body: EventsSubLabelBody,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         event = None
 
@@ -1099,7 +1271,7 @@ def set_sub_label(
         new_score = None
 
     request.app.event_metadata_updater.publish(
-        EventMetadataTypeEnum.sub_label, (event_id, new_sub_label, new_score)
+        (event_id, new_sub_label, new_score), EventMetadataTypeEnum.sub_label.value
     )
 
     return JSONResponse(
@@ -1115,14 +1287,19 @@ def set_sub_label(
     "/events/{event_id}/recognized_license_plate",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Set event license plate.",
+    description="""Sets an event's license plate.
+    Returns a success message or an error if the event is not found.
+    """,
 )
-def set_plate(
+async def set_plate(
     request: Request,
     event_id: str,
     body: EventsLPRBody,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         event = None
 
@@ -1153,7 +1330,8 @@ def set_plate(
         new_score = None
 
     request.app.event_metadata_updater.publish(
-        EventMetadataTypeEnum.recognized_license_plate, (event_id, new_plate, new_score)
+        (event_id, "recognized_license_plate", new_plate, new_score),
+        EventMetadataTypeEnum.attribute.value,
     )
 
     return JSONResponse(
@@ -1169,14 +1347,19 @@ def set_plate(
     "/events/{event_id}/description",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Set event description.",
+    description="""Sets an event's description.
+    Returns a success message or an error if the event is not found.
+    """,
 )
-def set_description(
+async def set_description(
     request: Request,
     event_id: str,
     body: EventsDescriptionBody,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -1220,12 +1403,17 @@ def set_description(
     "/events/{event_id}/description/regenerate",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Regenerate event description.",
+    description="""Regenerates an event's description.
+    Returns a success message or an error if the event is not found.
+    """,
 )
-def regenerate_description(
+async def regenerate_description(
     request: Request, event_id: str, params: RegenerateQueryParameters = Depends()
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         return JSONResponse(
             content=({"success": False, "message": "Event " + event_id + " not found"}),
@@ -1234,9 +1422,10 @@ def regenerate_description(
 
     camera_config = request.app.frigate_config.cameras[event.camera]
 
-    if camera_config.genai.enabled:
+    if camera_config.objects.genai.enabled or params.force:
         request.app.event_metadata_updater.publish(
-            EventMetadataTypeEnum.regenerate_description, (event.id, params.source)
+            (event.id, params.source, params.force),
+            EventMetadataTypeEnum.regenerate_description.value,
         )
 
         return JSONResponse(
@@ -1263,9 +1452,46 @@ def regenerate_description(
     )
 
 
-def delete_single_event(event_id: str, request: Request) -> dict:
+@router.post(
+    "/description/generate",
+    response_model=GenericResponse,
+    # dependencies=[Depends(require_role(["admin"]))],
+    summary="Generate description embedding.",
+    description="""Generates an embedding for an event's description.
+    Returns a success message or an error if the event is not found.
+    """,
+)
+def generate_description_embedding(
+    request: Request,
+    body: EventsDescriptionBody,
+):
+    new_description = body.description
+
+    # If semantic search is enabled, update the index
+    if request.app.frigate_config.semantic_search.enabled:
+        context: EmbeddingsContext = request.app.embeddings
+        if len(new_description) > 0:
+            result = context.generate_description_embedding(
+                new_description,
+            )
+
+    return JSONResponse(
+        content=(
+            {
+                "success": True,
+                "message": f"Embedding for description is {result}"
+                if result
+                else "Failed to generate embedding",
+            }
+        ),
+        status_code=200,
+    )
+
+
+async def delete_single_event(event_id: str, request: Request) -> dict:
     try:
         event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
     except DoesNotExist:
         return {"success": False, "message": f"Event {event_id} not found"}
 
@@ -1274,6 +1500,7 @@ def delete_single_event(event_id: str, request: Request) -> dict:
         snapshot_paths = [
             Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg"),
             Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"),
+            Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.webp"),
         ]
         for media in snapshot_paths:
             media.unlink(missing_ok=True)
@@ -1294,9 +1521,13 @@ def delete_single_event(event_id: str, request: Request) -> dict:
     "/events/{event_id}",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete event.",
+    description="""Deletes an event from the database.
+    Returns a success message or an error if the event is not found.
+    """,
 )
-def delete_event(request: Request, event_id: str):
-    result = delete_single_event(event_id, request)
+async def delete_event(request: Request, event_id: str):
+    result = await delete_single_event(event_id, request)
     status_code = 200 if result["success"] else 404
     return JSONResponse(content=result, status_code=status_code)
 
@@ -1305,8 +1536,12 @@ def delete_event(request: Request, event_id: str):
     "/events/",
     response_model=EventMultiDeleteResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete events.",
+    description="""Deletes a list of events from the database.
+    Returns a success message or an error if the events are not found.
+    """,
 )
-def delete_events(request: Request, body: EventsDeleteBody):
+async def delete_events(request: Request, body: EventsDeleteBody):
     if not body.event_ids:
         return JSONResponse(
             content=({"success": False, "message": "No event IDs provided."}),
@@ -1317,7 +1552,7 @@ def delete_events(request: Request, body: EventsDeleteBody):
     not_found_events = []
 
     for event_id in body.event_ids:
-        result = delete_single_event(event_id, request)
+        result = await delete_single_event(event_id, request)
         if result["success"]:
             deleted_events.append(event_id)
         else:
@@ -1335,6 +1570,13 @@ def delete_events(request: Request, body: EventsDeleteBody):
     "/events/{camera_name}/{label}/create",
     response_model=EventCreateResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="Create manual event.",
+    description="""Creates a manual event in the database.
+    Returns a success message or an error if the event is not found.
+    NOTES:
+    - Creating a manual event does not trigger an update to /events MQTT topic.
+    - If a duration is set to null, the event will need to be ended manually by calling /events/{event_id}/end.
+    """,
 )
 def create_event(
     request: Request,
@@ -1361,7 +1603,6 @@ def create_event(
     event_id = f"{now}-{rand_id}"
 
     request.app.event_metadata_updater.publish(
-        EventMetadataTypeEnum.manual_event_create,
         (
             now,
             camera_name,
@@ -1374,6 +1615,7 @@ def create_event(
             body.source_type,
             body.draw,
         ),
+        EventMetadataTypeEnum.manual_event_create.value,
     )
 
     return JSONResponse(
@@ -1392,12 +1634,19 @@ def create_event(
     "/events/{event_id}/end",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],
+    summary="End manual event.",
+    description="""Ends a manual event.
+    Returns a success message or an error if the event is not found.
+    NOTE: This should only be used for manual events.
+    """,
 )
-def end_event(request: Request, event_id: str, body: EventsEndBody):
+async def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
+        event: Event = Event.get(Event.id == event_id)
+        await require_camera_access(event.camera, request=request)
         end_time = body.end_time or datetime.datetime.now().timestamp()
         request.app.event_metadata_updater.publish(
-            EventMetadataTypeEnum.manual_event_end, (event_id, end_time)
+            (event_id, end_time), EventMetadataTypeEnum.manual_event_end.value
         )
     except Exception:
         return JSONResponse(
@@ -1411,3 +1660,442 @@ def end_event(request: Request, event_id: str, body: EventsEndBody):
         content=({"success": True, "message": "Event successfully ended."}),
         status_code=200,
     )
+
+
+@router.post(
+    "/trigger/embedding",
+    response_model=dict,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Create trigger embedding.",
+    description="""Creates a trigger embedding for a specific trigger.
+    Returns a success message or an error if the trigger is not found.
+    """,
+)
+def create_trigger_embedding(
+    request: Request,
+    body: TriggerEmbeddingBody,
+    camera_name: str,
+    name: str,
+):
+    try:
+        if not request.app.frigate_config.semantic_search.enabled:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Semantic search is not enabled",
+                },
+                status_code=400,
+            )
+
+        # Check if trigger already exists
+        if (
+            Trigger.select()
+            .where(Trigger.camera == camera_name, Trigger.name == name)
+            .exists()
+        ):
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Trigger {camera_name}:{name} already exists",
+                },
+                status_code=400,
+            )
+
+        context: EmbeddingsContext = request.app.embeddings
+        # Generate embedding based on type
+        embedding = None
+        if body.type == "description":
+            embedding = context.generate_description_embedding(body.data)
+        elif body.type == "thumbnail":
+            try:
+                event: Event = Event.get(Event.id == body.data)
+            except DoesNotExist:
+                # TODO: check triggers directory for image
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Failed to fetch event for {body.type} trigger",
+                    },
+                    status_code=400,
+                )
+
+            # Skip the event if not an object
+            if event.data.get("type") != "object":
+                return
+
+            if thumbnail := get_event_thumbnail_bytes(event):
+                cursor = context.db.execute_sql(
+                    """
+                    SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
+                    """,
+                    [body.data],
+                )
+
+                row = cursor.fetchone() if cursor else None
+
+                if row:
+                    query_embedding = row[0]
+                    embedding = np.frombuffer(query_embedding, dtype=np.float32)
+            else:
+                # Extract valid thumbnail
+                thumbnail = get_event_thumbnail_bytes(event)
+
+                if thumbnail is None:
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": f"Failed to get thumbnail for {body.data} for {body.type} trigger",
+                        },
+                        status_code=400,
+                    )
+
+                embedding = context.generate_image_embedding(
+                    body.data, (base64.b64encode(thumbnail).decode("ASCII"))
+                )
+
+        if embedding is None:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Failed to generate embedding for {body.type} trigger",
+                },
+                status_code=400,
+            )
+
+        if body.type == "thumbnail":
+            # Save image to the triggers directory
+            try:
+                os.makedirs(
+                    os.path.join(TRIGGER_DIR, sanitize_filename(camera_name)),
+                    exist_ok=True,
+                )
+                with open(
+                    os.path.join(
+                        TRIGGER_DIR,
+                        sanitize_filename(camera_name),
+                        f"{sanitize_filename(body.data)}.webp",
+                    ),
+                    "wb",
+                ) as f:
+                    f.write(thumbnail)
+                logger.debug(
+                    f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
+                )
+            except Exception:
+                logger.exception(
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera_name}"
+                )
+
+        Trigger.create(
+            camera=camera_name,
+            name=name,
+            type=body.type,
+            data=body.data,
+            threshold=body.threshold,
+            model=request.app.frigate_config.semantic_search.model,
+            embedding=np.array(embedding, dtype=np.float32).tobytes(),
+            triggering_event_id="",
+            last_triggered=None,
+        )
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "message": f"Trigger created successfully for {camera_name}:{name}",
+            },
+            status_code=200,
+        )
+
+    except Exception:
+        logger.exception("Error creating trigger embedding")
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Error creating trigger embedding",
+            },
+            status_code=500,
+        )
+
+
+@router.put(
+    "/trigger/embedding/{camera_name}/{name}",
+    response_model=dict,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Update trigger embedding.",
+    description="""Updates a trigger embedding for a specific trigger.
+    Returns a success message or an error if the trigger is not found.
+    """,
+)
+def update_trigger_embedding(
+    request: Request,
+    camera_name: str,
+    name: str,
+    body: TriggerEmbeddingBody,
+):
+    try:
+        if not request.app.frigate_config.semantic_search.enabled:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Semantic search is not enabled",
+                },
+                status_code=400,
+            )
+
+        context: EmbeddingsContext = request.app.embeddings
+        # Generate embedding based on type
+        embedding = None
+        if body.type == "description":
+            embedding = context.generate_description_embedding(body.data)
+        elif body.type == "thumbnail":
+            webp_file = sanitize_filename(body.data) + ".webp"
+            webp_path = os.path.join(
+                TRIGGER_DIR, sanitize_filename(camera_name), webp_file
+            )
+
+            try:
+                event: Event = Event.get(Event.id == body.data)
+                # Skip the event if not an object
+                if event.data.get("type") != "object":
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": f"Event {body.data} is not a tracked object for {body.type} trigger",
+                        },
+                        status_code=400,
+                    )
+                # Extract valid thumbnail
+                thumbnail = get_event_thumbnail_bytes(event)
+
+                with open(webp_path, "wb") as f:
+                    f.write(thumbnail)
+            except DoesNotExist:
+                # check triggers directory for image
+                if not os.path.exists(webp_path):
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": f"Failed to fetch event for {body.type} trigger",
+                        },
+                        status_code=400,
+                    )
+                else:
+                    # Load the image from the triggers directory
+                    with open(webp_path, "rb") as f:
+                        thumbnail = f.read()
+
+            embedding = context.generate_image_embedding(
+                body.data, (base64.b64encode(thumbnail).decode("ASCII"))
+            )
+
+        if embedding is None:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Failed to generate embedding for {body.type} trigger",
+                },
+                status_code=400,
+            )
+
+        # Check if trigger exists for upsert
+        trigger = Trigger.get_or_none(
+            Trigger.camera == camera_name, Trigger.name == name
+        )
+
+        if trigger:
+            # Update existing trigger
+            if trigger.data != body.data:  # Delete old thumbnail only if data changes
+                try:
+                    os.remove(
+                        os.path.join(
+                            TRIGGER_DIR,
+                            sanitize_filename(camera_name),
+                            f"{trigger.data}.webp",
+                        )
+                    )
+                    logger.debug(
+                        f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
+                    )
+                except Exception:
+                    logger.exception(
+                        f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera_name}"
+                    )
+
+            Trigger.update(
+                data=body.data,
+                model=request.app.frigate_config.semantic_search.model,
+                embedding=np.array(embedding, dtype=np.float32).tobytes(),
+                threshold=body.threshold,
+                triggering_event_id="",
+                last_triggered=None,
+            ).where(Trigger.camera == camera_name, Trigger.name == name).execute()
+        else:
+            # Create new trigger (for rename case)
+            Trigger.create(
+                camera=camera_name,
+                name=name,
+                type=body.type,
+                data=body.data,
+                threshold=body.threshold,
+                model=request.app.frigate_config.semantic_search.model,
+                embedding=np.array(embedding, dtype=np.float32).tobytes(),
+                triggering_event_id="",
+                last_triggered=None,
+            )
+
+        if body.type == "thumbnail":
+            # Save image to the triggers directory
+            try:
+                camera_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera_name))
+                os.makedirs(camera_path, exist_ok=True)
+                with open(
+                    os.path.join(camera_path, f"{sanitize_filename(body.data)}.webp"),
+                    "wb",
+                ) as f:
+                    f.write(thumbnail)
+                logger.debug(
+                    f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
+                )
+            except Exception:
+                logger.exception(
+                    f"Failed to write thumbnail for trigger with data {body.data} in {camera_name}"
+                )
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "message": f"Trigger updated successfully for {camera_name}:{name}",
+            },
+            status_code=200,
+        )
+
+    except Exception:
+        logger.exception("Error updating trigger embedding")
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Error updating trigger embedding",
+            },
+            status_code=500,
+        )
+
+
+@router.delete(
+    "/trigger/embedding/{camera_name}/{name}",
+    response_model=dict,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Delete trigger embedding.",
+    description="""Deletes a trigger embedding for a specific trigger.
+    Returns a success message or an error if the trigger is not found.
+    """,
+)
+def delete_trigger_embedding(
+    request: Request,
+    camera_name: str,
+    name: str,
+):
+    try:
+        trigger = Trigger.get_or_none(
+            Trigger.camera == camera_name, Trigger.name == name
+        )
+        if trigger is None:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Trigger {camera_name}:{name} not found",
+                },
+                status_code=500,
+            )
+
+        deleted = (
+            Trigger.delete()
+            .where(Trigger.camera == camera_name, Trigger.name == name)
+            .execute()
+        )
+        if deleted == 0:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"Error deleting trigger {camera_name}:{name}",
+                },
+                status_code=401,
+            )
+
+        try:
+            os.remove(
+                os.path.join(
+                    TRIGGER_DIR, sanitize_filename(camera_name), f"{trigger.data}.webp"
+                )
+            )
+            logger.debug(
+                f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
+            )
+        except Exception:
+            logger.exception(
+                f"Failed to delete thumbnail for trigger with data {trigger.data} in {camera_name}"
+            )
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "message": f"Trigger deleted successfully for {camera_name}:{name}",
+            },
+            status_code=200,
+        )
+
+    except Exception:
+        logger.exception("Error deleting trigger embedding")
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Error deleting trigger embedding",
+            },
+            status_code=500,
+        )
+
+
+@router.get(
+    "/triggers/status/{camera_name}",
+    response_model=dict,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Get triggers status.",
+    description="""Gets the status of all triggers for a specific camera.
+    Returns a success message or an error if the camera is not found.
+    """,
+)
+def get_triggers_status(
+    camera_name: str,
+):
+    try:
+        # Fetch all triggers for the specified camera
+        triggers = Trigger.select().where(Trigger.camera == camera_name)
+
+        # Prepare the response with trigger status
+        status = {
+            trigger.name: {
+                "last_triggered": trigger.last_triggered.timestamp()
+                if trigger.last_triggered
+                else None,
+                "triggering_event_id": trigger.triggering_event_id
+                if trigger.triggering_event_id
+                else None,
+            }
+            for trigger in triggers
+        }
+
+        if not status:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": f"No triggers found for camera {camera_name}",
+                },
+                status_code=404,
+            )
+
+        return {"success": True, "triggers": status}
+    except Exception as ex:
+        logger.exception(ex)
+        return JSONResponse(
+            content=({"success": False, "message": "Error fetching trigger status"}),
+            status_code=400,
+        )

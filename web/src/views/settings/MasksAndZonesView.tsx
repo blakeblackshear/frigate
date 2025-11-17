@@ -1,14 +1,7 @@
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PolygonCanvas } from "@/components/settings/PolygonCanvas";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { interpolatePoints, parseCoordinates } from "@/utils/canvasUtil";
@@ -36,7 +29,6 @@ import ObjectMaskEditPane from "@/components/settings/ObjectMaskEditPane";
 import PolygonItem from "@/components/settings/PolygonItem";
 import { Link } from "react-router-dom";
 import { isDesktop } from "react-device-detect";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useTranslation } from "react-i18next";
@@ -71,8 +63,6 @@ export default function MasksAndZonesView({
   const [editPane, setEditPane] = useState<PolygonType | undefined>(undefined);
   const [activeLine, setActiveLine] = useState<number | undefined>();
   const [snapPoints, setSnapPoints] = useState(false);
-
-  const { addMessage } = useContext(StatusBarMessagesContext)!;
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
@@ -196,13 +186,7 @@ export default function MasksAndZonesView({
     setAllPolygons([...(editingPolygons ?? [])]);
     setHoveredPolygonIndex(null);
     setUnsavedChanges(false);
-    addMessage(
-      "masks_zones",
-      t("masksAndZones.restart_required"),
-      undefined,
-      "masks_zones",
-    );
-  }, [t, editingPolygons, setUnsavedChanges, addMessage]);
+  }, [editingPolygons, setUnsavedChanges]);
 
   useEffect(() => {
     if (isLoading) {
@@ -245,6 +229,7 @@ export default function MasksAndZonesView({
           typeIndex: index,
           camera: cameraConfig.name,
           name,
+          friendly_name: zoneData.friendly_name,
           objects: zoneData.objects,
           points: interpolatePoints(
             parseCoordinates(zoneData.coordinates),
@@ -449,7 +434,7 @@ export default function MasksAndZonesView({
       {cameraConfig && editingPolygons && (
         <div className="flex size-full flex-col md:flex-row">
           <Toaster position="top-center" closeButton={true} />
-          <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
+          <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12">
             {editPane == "zone" && (
               <ZoneEditPane
                 polygons={editingPolygons}
@@ -498,7 +483,7 @@ export default function MasksAndZonesView({
             )}
             {editPane === undefined && (
               <>
-                <Heading as="h3" className="my-2">
+                <Heading as="h4" className="mb-2">
                   {t("menu.masksAndZones")}
                 </Heading>
                 <div className="flex w-full flex-col">
@@ -522,7 +507,7 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  {t("masksAndZones.zones.desc.documentation")}{" "}
+                                  {t("readTheDocumentation", { ns: "common" })}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -590,9 +575,7 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  {t(
-                                    "masksAndZones.motionMasks.desc.documentation",
-                                  )}{" "}
+                                  {t("readTheDocumentation", { ns: "common" })}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -662,9 +645,7 @@ export default function MasksAndZonesView({
                                   rel="noopener noreferrer"
                                   className="inline"
                                 >
-                                  {t(
-                                    "masksAndZones.objectMasks.desc.documentation",
-                                  )}{" "}
+                                  {t("readTheDocumentation", { ns: "common" })}
                                   <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
@@ -716,7 +697,7 @@ export default function MasksAndZonesView({
           </div>
           <div
             ref={containerRef}
-            className="flex max-h-[50%] md:h-dvh md:max-h-full md:w-7/12 md:grow"
+            className="flex max-h-[50%] md:mr-3 md:h-dvh md:max-h-full md:w-7/12 md:grow"
           >
             <div className="mx-auto flex size-full flex-row justify-center">
               {cameraConfig &&

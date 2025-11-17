@@ -8,8 +8,10 @@ from .base import FrigateBaseModel
 __all__ = [
     "CameraFaceRecognitionConfig",
     "CameraLicensePlateRecognitionConfig",
+    "CameraAudioTranscriptionConfig",
     "FaceRecognitionConfig",
     "SemanticSearchConfig",
+    "CameraSemanticSearchConfig",
     "LicensePlateRecognitionConfig",
 ]
 
@@ -19,9 +21,43 @@ class SemanticSearchModelEnum(str, Enum):
     jinav2 = "jinav2"
 
 
-class LPRDeviceEnum(str, Enum):
+class EnrichmentsDeviceEnum(str, Enum):
     GPU = "GPU"
     CPU = "CPU"
+
+
+class TriggerType(str, Enum):
+    THUMBNAIL = "thumbnail"
+    DESCRIPTION = "description"
+
+
+class TriggerAction(str, Enum):
+    NOTIFICATION = "notification"
+    SUB_LABEL = "sub_label"
+    ATTRIBUTE = "attribute"
+
+
+class ObjectClassificationType(str, Enum):
+    sub_label = "sub_label"
+    attribute = "attribute"
+
+
+class AudioTranscriptionConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable audio transcription.")
+    language: str = Field(
+        default="en",
+        title="Language abbreviation to use for audio event transcription/translation.",
+    )
+    device: Optional[EnrichmentsDeviceEnum] = Field(
+        default=EnrichmentsDeviceEnum.CPU,
+        title="The device used for audio transcription.",
+    )
+    model_size: str = Field(
+        default="small", title="The size of the embeddings model used."
+    )
+    live_enabled: Optional[bool] = Field(
+        default=False, title="Enable live transcriptions."
+    )
 
 
 class BirdClassificationConfig(FrigateBaseModel):
@@ -34,9 +70,51 @@ class BirdClassificationConfig(FrigateBaseModel):
     )
 
 
+class CustomClassificationStateCameraConfig(FrigateBaseModel):
+    crop: list[float, float, float, float] = Field(
+        title="Crop of image frame on this camera to run classification on."
+    )
+
+
+class CustomClassificationStateConfig(FrigateBaseModel):
+    cameras: Dict[str, CustomClassificationStateCameraConfig] = Field(
+        title="Cameras to run classification on."
+    )
+    motion: bool = Field(
+        default=False,
+        title="If classification should be run when motion is detected in the crop.",
+    )
+    interval: int | None = Field(
+        default=None,
+        title="Interval to run classification on in seconds.",
+        gt=0,
+    )
+
+
+class CustomClassificationObjectConfig(FrigateBaseModel):
+    objects: list[str] = Field(title="Object types to classify.")
+    classification_type: ObjectClassificationType = Field(
+        default=ObjectClassificationType.sub_label,
+        title="Type of classification that is applied.",
+    )
+
+
+class CustomClassificationConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable running the model.")
+    name: str | None = Field(default=None, title="Name of classification model.")
+    threshold: float = Field(
+        default=0.8, title="Classification score threshold to change the state."
+    )
+    object_config: CustomClassificationObjectConfig | None = Field(default=None)
+    state_config: CustomClassificationStateConfig | None = Field(default=None)
+
+
 class ClassificationConfig(FrigateBaseModel):
     bird: BirdClassificationConfig = Field(
         default_factory=BirdClassificationConfig, title="Bird classification config."
+    )
+    custom: Dict[str, CustomClassificationConfig] = Field(
+        default={}, title="Custom Classification Model Configs."
     )
 
 
@@ -52,6 +130,40 @@ class SemanticSearchConfig(FrigateBaseModel):
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
     )
+    device: Optional[str] = Field(
+        default=None,
+        title="The device key to use for semantic search.",
+        description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
+    )
+
+
+class TriggerConfig(FrigateBaseModel):
+    friendly_name: Optional[str] = Field(
+        None, title="Trigger friendly name used in the Frigate UI."
+    )
+    enabled: bool = Field(default=True, title="Enable this trigger")
+    type: TriggerType = Field(default=TriggerType.DESCRIPTION, title="Type of trigger")
+    data: str = Field(title="Trigger content (text phrase or image ID)")
+    threshold: float = Field(
+        title="Confidence score required to run the trigger",
+        default=0.8,
+        gt=0.0,
+        le=1.0,
+    )
+    actions: List[TriggerAction] = Field(
+        default=[], title="Actions to perform when trigger is matched"
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+
+class CameraSemanticSearchConfig(FrigateBaseModel):
+    triggers: Dict[str, TriggerConfig] = Field(
+        default={},
+        title="Trigger actions on tracked objects that match existing thumbnails or descriptions",
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class FaceRecognitionConfig(FrigateBaseModel):
@@ -87,10 +199,17 @@ class FaceRecognitionConfig(FrigateBaseModel):
         title="Min face recognitions for the sub label to be applied to the person object.",
     )
     save_attempts: int = Field(
-        default=100, ge=0, title="Number of face attempts to save in the train tab."
+        default=200,
+        ge=0,
+        title="Number of face attempts to save in the recent recognitions tab.",
     )
     blur_confidence_filter: bool = Field(
         default=True, title="Apply blur quality filter to face confidence."
+    )
+    device: Optional[str] = Field(
+        default=None,
+        title="The device key to use for face recognition.",
+        description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
     )
 
 
@@ -103,12 +222,15 @@ class CameraFaceRecognitionConfig(FrigateBaseModel):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
+class ReplaceRule(FrigateBaseModel):
+    pattern: str = Field(..., title="Regex pattern to match.")
+    replacement: str = Field(
+        ..., title="Replacement string (supports backrefs like '\\1')."
+    )
+
+
 class LicensePlateRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable license plate recognition.")
-    device: Optional[LPRDeviceEnum] = Field(
-        default=LPRDeviceEnum.CPU,
-        title="The device used for license plate recognition.",
-    )
     model_size: str = Field(
         default="small", title="The size of the embeddings model used."
     )
@@ -154,6 +276,15 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
         default=False,
         title="Save plates captured for LPR for debugging purposes.",
     )
+    device: Optional[str] = Field(
+        default=None,
+        title="The device key to use for LPR.",
+        description="This is an override, to target a specific device. See https://onnxruntime.ai/docs/execution-providers/ for more information",
+    )
+    replace_rules: List[ReplaceRule] = Field(
+        default_factory=list,
+        title="List of regex replacement rules for normalizing detected plates. Each rule has 'pattern' and 'replacement'.",
+    )
 
 
 class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
@@ -172,6 +303,18 @@ class CameraLicensePlateRecognitionConfig(FrigateBaseModel):
         title="Amount of contrast adjustment and denoising to apply to license plate images before recognition.",
         ge=0,
         le=10,
+    )
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+
+class CameraAudioTranscriptionConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable audio transcription.")
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of audio transcription."
+    )
+    live_enabled: Optional[bool] = Field(
+        default=False, title="Enable live transcriptions."
     )
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
