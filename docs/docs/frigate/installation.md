@@ -56,7 +56,7 @@ services:
     volumes:
       - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
-      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+      - type: tmpfs # Recommended: 1GB of memory
         target: /tmp/cache
         tmpfs:
           size: 1000000000
@@ -310,7 +310,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
-      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+      - type: tmpfs # Recommended: 1GB of memory
         target: /tmp/cache
         tmpfs:
           size: 1000000000
