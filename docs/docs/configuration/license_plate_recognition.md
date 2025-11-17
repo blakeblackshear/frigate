@@ -178,7 +178,7 @@ lpr:
 
 :::note
 
-If you want to detect cars on cameras but don't want to use resources to run LPR on those cars, you should disable LPR for those specific cameras.
+If a camera is configured to detect `car` or `motorcycle` but you don't want Frigate to run LPR for that camera, disable LPR at the camera level:
 
 ```yaml
 cameras:
