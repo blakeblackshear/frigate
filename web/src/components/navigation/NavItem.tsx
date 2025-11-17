@@ -46,7 +46,7 @@ export default function NavItem({
       onClick={onClick}
       className={({ isActive }) =>
         cn(
-          "flex flex-col items-center justify-center rounded-lg p-2",
+          "flex flex-col items-center justify-center rounded-lg p-[6px]",
           className,
           variants[item.variant ?? "primary"][isActive ? "active" : "inactive"],
         )
