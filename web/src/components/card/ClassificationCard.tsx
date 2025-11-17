@@ -398,11 +398,7 @@ export function GroupedClassificationCard({
                     threshold={threshold}
                     selected={false}
                     i18nLibrary={i18nLibrary}
-                    onClick={(data, meta) => {
-                      if (meta || selectedItems.length > 0) {
-                        onClick(data);
-                      }
-                    }}
+                    onClick={() => {}}
                   >
                     {children?.(data)}
                   </ClassificationCard>

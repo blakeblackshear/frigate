@@ -4,9 +4,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { baseUrl } from "@/api/baseUrl";
 import { toast } from "sonner";
 import axios from "axios";
-import { LuCamera, LuDownload, LuTrash2 } from "react-icons/lu";
 import { FiMoreVertical } from "react-icons/fi";
-import { MdImageSearch } from "react-icons/md";
 import { buttonVariants } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -31,11 +29,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import useSWR from "swr";
-
 import { Trans, useTranslation } from "react-i18next";
-import { BsFillLightningFill } from "react-icons/bs";
 import BlurredIconButton from "../button/BlurredIconButton";
-import { PiPath } from "react-icons/pi";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
@@ -98,7 +93,6 @@ export default function SearchResultActions({
             href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
             download={`${searchResult.camera}_${searchResult.label}.mp4`}
           >
-            <LuDownload className="mr-2 size-4" />
             <span>{t("itemMenu.downloadVideo.label")}</span>
           </a>
         </MenuItem>
@@ -110,7 +104,6 @@ export default function SearchResultActions({
             href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
             download={`${searchResult.camera}_${searchResult.label}.jpg`}
           >
-            <LuCamera className="mr-2 size-4" />
             <span>{t("itemMenu.downloadSnapshot.label")}</span>
           </a>
         </MenuItem>
@@ -120,44 +113,31 @@ export default function SearchResultActions({
           aria-label={t("itemMenu.viewTrackingDetails.aria")}
           onClick={showTrackingDetails}
         >
-          <PiPath className="mr-2 size-4" />
           <span>{t("itemMenu.viewTrackingDetails.label")}</span>
         </MenuItem>
       )}
-      {config?.semantic_search?.enabled && isContextMenu && (
-        <MenuItem
-          aria-label={t("itemMenu.findSimilar.aria")}
-          onClick={findSimilar}
-        >
-          <MdImageSearch className="mr-2 size-4" />
-          <span>{t("itemMenu.findSimilar.label")}</span>
-        </MenuItem>
-      )}
-      {config?.semantic_search?.enabled &&
-        searchResult.data.type == "object" && (
-          <MenuItem
-            aria-label={t("itemMenu.addTrigger.aria")}
-            onClick={addTrigger}
-          >
-            <BsFillLightningFill className="mr-2 size-4" />
-            <span>{t("itemMenu.addTrigger.label")}</span>
-          </MenuItem>
-        )}
       {config?.semantic_search?.enabled &&
         searchResult.data.type == "object" && (
           <MenuItem
             aria-label={t("itemMenu.findSimilar.aria")}
             onClick={findSimilar}
           >
-            <MdImageSearch className="mr-2 size-4" />
             <span>{t("itemMenu.findSimilar.label")}</span>
+          </MenuItem>
+        )}
+      {config?.semantic_search?.enabled &&
+        searchResult.data.type == "object" && (
+          <MenuItem
+            aria-label={t("itemMenu.addTrigger.aria")}
+            onClick={addTrigger}
+          >
+            <span>{t("itemMenu.addTrigger.label")}</span>
           </MenuItem>
         )}
       <MenuItem
         aria-label={t("itemMenu.deleteTrackedObject.label")}
         onClick={() => setDeleteDialogOpen(true)}
       >
-        <LuTrash2 className="mr-2 size-4" />
         <span>{t("button.delete", { ns: "common" })}</span>
       </MenuItem>
     </>

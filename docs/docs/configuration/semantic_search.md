@@ -141,7 +141,7 @@ Triggers are best configured through the Frigate UI.
      Check the `Add Attribute` box to add the trigger's internal ID (e.g., "red_car_alert") to a data attribute on the tracked object that can be processed via the API or MQTT.
 5. Save the trigger to update the configuration and store the embedding in the database.
 
-When a trigger fires, the UI highlights the trigger with a blue dot for 3 seconds for easy identification.
+When a trigger fires, the UI highlights the trigger with a blue dot for 3 seconds for easy identification. Additionally, the UI will show the last date/time and tracked object ID that activated your trigger. The last triggered timestamp is not saved to the database or persisted through restarts of Frigate.
 
 ### Usage and Best Practices
 

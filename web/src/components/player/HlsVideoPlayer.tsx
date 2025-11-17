@@ -318,6 +318,7 @@ export default function HlsVideoPlayer({
         {isDetailMode &&
           camera &&
           currentTime &&
+          loadedMetadata &&
           videoDimensions.width > 0 &&
           videoDimensions.height > 0 && (
             <div className="absolute z-50 size-full">
