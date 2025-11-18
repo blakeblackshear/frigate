@@ -652,53 +652,36 @@ def auto_detect_hwaccel() -> str:
 async def get_video_properties(
     ffmpeg, url: str, get_duration: bool = False
 ) -> dict[str, Any]:
-    async def probe_with_ffprobe(
-        url: str,
-    ) -> tuple[bool, int, int, Optional[str], float]:
-        """Fallback using ffprobe: returns (valid, width, height, codec, duration)."""
-        cmd = [
-            ffmpeg.ffprobe_path,
-            "-v",
-            "quiet",
-            "-print_format",
-            "json",
-            "-show_format",
-            "-show_streams",
-            url,
-        ]
+    async def probe_duration_with_ffprobe(url: str) -> float:
+        """Only extract duration from ffprobe if cv2 fails"""
         try:
             proc = await asyncio.create_subprocess_exec(
-                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                ffmpeg.ffprobe_path,
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                url,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
-            stdout, _ = await proc.communicate()
+            out, _ = await proc.communicate()
             if proc.returncode != 0:
-                return False, 0, 0, None, -1
+                return -1.0
 
-            data = json.loads(stdout.decode())
-            video_streams = [
-                s for s in data.get("streams", []) if s.get("codec_type") == "video"
-            ]
-            if not video_streams:
-                return False, 0, 0, None, -1
-
-            v = video_streams[0]
-            width = int(v.get("width", 0))
-            height = int(v.get("height", 0))
-            codec = v.get("codec_name")
-
-            duration_str = data.get("format", {}).get("duration")
-            duration = float(duration_str) if duration_str else -1.0
-
-            return True, width, height, codec, duration
-        except (json.JSONDecodeError, ValueError, KeyError, asyncio.SubprocessError):
-            return False, 0, 0, None, -1
+            result = out.decode().strip()
+            return float(result) if result else -1.0
+        except Exception:
+            return -1.0
 
     def probe_with_cv2(url: str) -> tuple[bool, int, int, Optional[str], float]:
-        """Primary attempt using cv2: returns (valid, width, height, fourcc, duration)."""
+        """Get width, height, codec, and optionally duration via frames/FPS."""
         cap = cv2.VideoCapture(url)
         if not cap.isOpened():
             cap.release()
-            return False, 0, 0, None, -1
+            return False, 0, 0, None, -1.0
 
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -722,13 +705,14 @@ async def get_video_properties(
     # try cv2 first
     has_video, width, height, fourcc, duration = probe_with_cv2(url)
 
-    # fallback to ffprobe if needed
-    if not has_video or (get_duration and duration < 0):
-        has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
+    # If we still need duration, use ffprobe
+    if get_duration and duration < 0:
+        duration = await probe_duration_with_ffprobe(url)
 
     result: dict[str, Any] = {"has_valid_video": has_video}
     if has_video:
-        result.update({"width": width, "height": height})
+        result["width"] = width
+        result["height"] = height
         if fourcc:
             result["fourcc"] = fourcc
     if get_duration:
