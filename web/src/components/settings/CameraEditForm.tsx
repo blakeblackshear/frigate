@@ -18,7 +18,7 @@ import { z } from "zod";
 import axios from "axios";
 import { toast, Toaster } from "sonner";
 import { useTranslation } from "react-i18next";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { LuTrash2, LuPlus } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -42,7 +42,15 @@ export default function CameraEditForm({
   onCancel,
 }: CameraEditFormProps) {
   const { t } = useTranslation(["views/settings"]);
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config, mutate: mutateConfig } =
+    useSWR<FrigateConfig>("config");
+  const { data: rawPaths, mutate: mutateRawPaths } = useSWR<{
+    cameras: Record<
+      string,
+      { ffmpeg: { inputs: { path: string; roles: string[] }[] } }
+    >;
+    go2rtc: { streams: Record<string, string | string[]> };
+  }>(cameraName ? "config/raw_paths" : null);
   const [isLoading, setIsLoading] = useState(false);
 
   const formSchema = useMemo(
@@ -145,14 +153,23 @@ export default function CameraEditForm({
   if (cameraName && config?.cameras[cameraName]) {
     const camera = config.cameras[cameraName];
     defaultValues.enabled = camera.enabled ?? true;
-    defaultValues.ffmpeg.inputs = camera.ffmpeg?.inputs?.length
-      ? camera.ffmpeg.inputs.map((input) => ({
+
+    // Use raw paths from the admin endpoint if available, otherwise fall back to masked paths
+    const rawCameraData = rawPaths?.cameras?.[cameraName];
+    defaultValues.ffmpeg.inputs = rawCameraData?.ffmpeg?.inputs?.length
+      ? rawCameraData.ffmpeg.inputs.map((input) => ({
           path: input.path,
           roles: input.roles as Role[],
         }))
-      : defaultValues.ffmpeg.inputs;
+      : camera.ffmpeg?.inputs?.length
+        ? camera.ffmpeg.inputs.map((input) => ({
+            path: input.path,
+            roles: input.roles as Role[],
+          }))
+        : defaultValues.ffmpeg.inputs;
 
-    const go2rtcStreams = config.go2rtc?.streams || {};
+    const go2rtcStreams =
+      rawPaths?.go2rtc?.streams || config.go2rtc?.streams || {};
     const cameraStreams: Record<string, string[]> = {};
 
     // get candidate stream names for this camera. could be the camera's own name,
@@ -195,6 +212,60 @@ export default function CameraEditForm({
     defaultValues,
     mode: "onChange",
   });
+
+  // Update form values when rawPaths loads
+  useEffect(() => {
+    if (
+      cameraName &&
+      config?.cameras[cameraName] &&
+      rawPaths?.cameras?.[cameraName]
+    ) {
+      const camera = config.cameras[cameraName];
+      const rawCameraData = rawPaths.cameras[cameraName];
+
+      // Update ffmpeg inputs with raw paths
+      if (rawCameraData.ffmpeg?.inputs?.length) {
+        form.setValue(
+          "ffmpeg.inputs",
+          rawCameraData.ffmpeg.inputs.map((input) => ({
+            path: input.path,
+            roles: input.roles as Role[],
+          })),
+        );
+      }
+
+      // Update go2rtc streams with raw URLs
+      if (rawPaths.go2rtc?.streams) {
+        const validNames = new Set<string>();
+        validNames.add(cameraName);
+
+        camera.ffmpeg?.inputs?.forEach((input) => {
+          const restreamMatch = input.path.match(
+            /^rtsp:\/\/127\.0\.0\.1:8554\/([^?#/]+)(?:[?#].*)?$/,
+          );
+          if (restreamMatch) {
+            validNames.add(restreamMatch[1]);
+          }
+        });
+
+        const liveStreams = camera?.live?.streams;
+        if (liveStreams) {
+          Object.keys(liveStreams).forEach((key) => validNames.add(key));
+        }
+
+        const cameraStreams: Record<string, string[]> = {};
+        Object.entries(rawPaths.go2rtc.streams).forEach(([name, urls]) => {
+          if (validNames.has(name)) {
+            cameraStreams[name] = Array.isArray(urls) ? urls : [urls];
+          }
+        });
+
+        if (Object.keys(cameraStreams).length > 0) {
+          form.setValue("go2rtcStreams", cameraStreams);
+        }
+      }
+    }
+  }, [cameraName, config, rawPaths, form]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -268,6 +339,8 @@ export default function CameraEditForm({
                 }),
                 { position: "top-center" },
               );
+              mutateConfig();
+              mutateRawPaths();
               if (onSave) onSave();
             });
           } else {
@@ -277,6 +350,8 @@ export default function CameraEditForm({
               }),
               { position: "top-center" },
             );
+            mutateConfig();
+            mutateRawPaths();
             if (onSave) onSave();
           }
         } else {

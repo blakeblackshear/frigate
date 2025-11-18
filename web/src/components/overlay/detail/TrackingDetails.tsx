@@ -12,7 +12,11 @@ import { cn } from "@/lib/utils";
 import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
 import { REVIEW_PADDING } from "@/types/review";
-import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
+import {
+  ASPECT_VERTICAL_LAYOUT,
+  ASPECT_WIDE_LAYOUT,
+  Recording,
+} from "@/types/record";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -74,6 +78,139 @@ export function TrackingDetails({
   ]);
 
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // Fetch recording segments for the event's time range to handle motion-only gaps
+  const eventStartRecord = useMemo(
+    () => (event.start_time ?? 0) + annotationOffset / 1000,
+    [event.start_time, annotationOffset],
+  );
+  const eventEndRecord = useMemo(
+    () => (event.end_time ?? Date.now() / 1000) + annotationOffset / 1000,
+    [event.end_time, annotationOffset],
+  );
+
+  const { data: recordings } = useSWR<Recording[]>(
+    event.camera
+      ? [
+          `${event.camera}/recordings`,
+          {
+            after: eventStartRecord - REVIEW_PADDING,
+            before: eventEndRecord + REVIEW_PADDING,
+          },
+        ]
+      : null,
+  );
+
+  // Convert a timeline timestamp to actual video player time, accounting for
+  // motion-only recording gaps. Uses the same algorithm as DynamicVideoController.
+  const timestampToVideoTime = useCallback(
+    (timestamp: number): number => {
+      if (!recordings || recordings.length === 0) {
+        // Fallback to simple calculation if no recordings data
+        return timestamp - (eventStartRecord - REVIEW_PADDING);
+      }
+
+      const videoStartTime = eventStartRecord - REVIEW_PADDING;
+
+      // If timestamp is before video start, return 0
+      if (timestamp < videoStartTime) return 0;
+
+      // Check if timestamp is before the first recording or after the last
+      if (
+        timestamp < recordings[0].start_time ||
+        timestamp > recordings[recordings.length - 1].end_time
+      ) {
+        // No recording available at this timestamp
+        return 0;
+      }
+
+      // Calculate the inpoint offset - the HLS video may start partway through the first segment
+      let inpointOffset = 0;
+      if (
+        videoStartTime > recordings[0].start_time &&
+        videoStartTime < recordings[0].end_time
+      ) {
+        inpointOffset = videoStartTime - recordings[0].start_time;
+      }
+
+      let seekSeconds = 0;
+      for (const segment of recordings) {
+        // Skip segments that end before our timestamp
+        if (segment.end_time <= timestamp) {
+          // Add this segment's duration, but subtract inpoint offset from first segment
+          if (segment === recordings[0]) {
+            seekSeconds += segment.duration - inpointOffset;
+          } else {
+            seekSeconds += segment.duration;
+          }
+        } else if (segment.start_time <= timestamp) {
+          // The timestamp is within this segment
+          if (segment === recordings[0]) {
+            // For the first segment, account for the inpoint offset
+            seekSeconds +=
+              timestamp - Math.max(segment.start_time, videoStartTime);
+          } else {
+            seekSeconds += timestamp - segment.start_time;
+          }
+          break;
+        }
+      }
+
+      return seekSeconds;
+    },
+    [recordings, eventStartRecord],
+  );
+
+  // Convert video player time back to timeline timestamp, accounting for
+  // motion-only recording gaps. Reverse of timestampToVideoTime.
+  const videoTimeToTimestamp = useCallback(
+    (playerTime: number): number => {
+      if (!recordings || recordings.length === 0) {
+        // Fallback to simple calculation if no recordings data
+        const videoStartTime = eventStartRecord - REVIEW_PADDING;
+        return playerTime + videoStartTime;
+      }
+
+      const videoStartTime = eventStartRecord - REVIEW_PADDING;
+
+      // Calculate the inpoint offset - the video may start partway through the first segment
+      let inpointOffset = 0;
+      if (
+        videoStartTime > recordings[0].start_time &&
+        videoStartTime < recordings[0].end_time
+      ) {
+        inpointOffset = videoStartTime - recordings[0].start_time;
+      }
+
+      let timestamp = 0;
+      let totalTime = 0;
+
+      for (const segment of recordings) {
+        const segmentDuration =
+          segment === recordings[0]
+            ? segment.duration - inpointOffset
+            : segment.duration;
+
+        if (totalTime + segmentDuration > playerTime) {
+          // The player time is within this segment
+          if (segment === recordings[0]) {
+            // For the first segment, add the inpoint offset
+            timestamp =
+              Math.max(segment.start_time, videoStartTime) +
+              (playerTime - totalTime);
+          } else {
+            timestamp = segment.start_time + (playerTime - totalTime);
+          }
+          break;
+        } else {
+          totalTime += segmentDuration;
+        }
+      }
+
+      return timestamp;
+    },
+    [recordings, eventStartRecord],
+  );
 
   eventSequence?.map((event) => {
     event.data.zones_friendly_names = event.data?.zones?.map((zone) => {
@@ -148,17 +285,14 @@ export function TrackingDetails({
         return;
       }
 
-      // For video mode: convert to video-relative time and seek player
-      const eventStartRecord =
-        (event.start_time ?? 0) + annotationOffset / 1000;
-      const videoStartTime = eventStartRecord - REVIEW_PADDING;
-      const relativeTime = targetTimeRecord - videoStartTime;
+      // For video mode: convert to video-relative time (accounting for motion-only gaps)
+      const relativeTime = timestampToVideoTime(targetTimeRecord);
 
       if (videoRef.current) {
         videoRef.current.currentTime = relativeTime;
       }
     },
-    [event.start_time, annotationOffset, displaySource],
+    [annotationOffset, displaySource, timestampToVideoTime],
   );
 
   const formattedStart = config
@@ -177,21 +311,22 @@ export function TrackingDetails({
       })
     : "";
 
-  const formattedEnd = config
-    ? formatUnixTimestampToDateTime(event.end_time ?? 0, {
-        timezone: config.ui.timezone,
-        date_format:
-          config.ui.time_format == "24hour"
-            ? t("time.formattedTimestamp.24hour", {
-                ns: "common",
-              })
-            : t("time.formattedTimestamp.12hour", {
-                ns: "common",
-              }),
-        time_style: "medium",
-        date_style: "medium",
-      })
-    : "";
+  const formattedEnd =
+    config && event.end_time != null
+      ? formatUnixTimestampToDateTime(event.end_time, {
+          timezone: config.ui.timezone,
+          date_format:
+            config.ui.time_format == "24hour"
+              ? t("time.formattedTimestamp.24hour", {
+                  ns: "common",
+                })
+              : t("time.formattedTimestamp.12hour", {
+                  ns: "common",
+                }),
+          time_style: "medium",
+          date_style: "medium",
+        })
+      : "";
 
   useEffect(() => {
     if (!eventSequence || eventSequence.length === 0) return;
@@ -210,24 +345,14 @@ export function TrackingDetails({
     }
 
     // seekToTimestamp is a record stream timestamp
-    // event.start_time is detect stream time, convert to record
-    // The video clip starts at (eventStartRecord - REVIEW_PADDING)
+    // Convert to video position (accounting for motion-only recording gaps)
     if (!videoRef.current) return;
-    const eventStartRecord = event.start_time + annotationOffset / 1000;
-    const videoStartTime = eventStartRecord - REVIEW_PADDING;
-    const relativeTime = seekToTimestamp - videoStartTime;
+    const relativeTime = timestampToVideoTime(seekToTimestamp);
     if (relativeTime >= 0) {
       videoRef.current.currentTime = relativeTime;
     }
     setSeekToTimestamp(null);
-  }, [
-    seekToTimestamp,
-    event.start_time,
-    annotationOffset,
-    apiHost,
-    event.camera,
-    displaySource,
-  ]);
+  }, [seekToTimestamp, displaySource, timestampToVideoTime]);
 
   const isWithinEventRange = useMemo(() => {
     if (effectiveTime === undefined || event.start_time === undefined) {
@@ -334,14 +459,13 @@ export function TrackingDetails({
 
   const handleTimeUpdate = useCallback(
     (time: number) => {
-      // event.start_time is detect stream time, convert to record
-      const eventStartRecord = event.start_time + annotationOffset / 1000;
-      const videoStartTime = eventStartRecord - REVIEW_PADDING;
-      const absoluteTime = time + videoStartTime;
+      // Convert video player time back to timeline timestamp
+      // accounting for motion-only recording gaps
+      const absoluteTime = videoTimeToTimestamp(time);
 
       setCurrentTime(absoluteTime);
     },
-    [event.start_time, annotationOffset],
+    [videoTimeToTimestamp],
   );
 
   const [src, setSrc] = useState(
@@ -525,9 +649,16 @@ export function TrackingDetails({
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="capitalize">{label}</span>
-                    <span className="md:text-md text-xs text-secondary-foreground">
-                      {formattedStart ?? ""} - {formattedEnd ?? ""}
-                    </span>
+                    <div className="md:text-md flex items-center text-xs text-secondary-foreground">
+                      {formattedStart ?? ""}
+                      {event.end_time != null ? (
+                        <> - {formattedEnd}</>
+                      ) : (
+                        <div className="inline-block">
+                          <ActivityIndicator className="ml-3 size-4" />
+                        </div>
+                      )}
+                    </div>
                     {event.data?.recognized_license_plate && (
                       <>
                         <span className="text-secondary-foreground">·</span>

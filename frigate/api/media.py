@@ -762,6 +762,15 @@ async def recording_clip(
         .order_by(Recordings.start_time.asc())
     )
 
+    if recordings.count() == 0:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "No recordings found for the specified time range",
+            },
+            status_code=400,
+        )
+
     file_name = sanitize_filename(f"playlist_{camera_name}_{start_ts}-{end_ts}.txt")
     file_path = os.path.join(CACHE_DIR, file_name)
     with open(file_path, "w") as file:

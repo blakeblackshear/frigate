@@ -26,7 +26,7 @@ import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
-import CameraSettingsView from "@/views/settings/CameraSettingsView";
+import CameraReviewSettingsView from "@/views/settings/CameraReviewSettingsView";
 import CameraManagementView from "@/views/settings/CameraManagementView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
@@ -93,7 +93,7 @@ const settingsGroups = [
     label: "cameras",
     items: [
       { key: "cameraManagement", component: CameraManagementView },
-      { key: "cameraReview", component: CameraSettingsView },
+      { key: "cameraReview", component: CameraReviewSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
       { key: "motionTuner", component: MotionTunerView },
     ],
