@@ -177,21 +177,22 @@ export function TrackingDetails({
       })
     : "";
 
-  const formattedEnd = config
-    ? formatUnixTimestampToDateTime(event.end_time ?? 0, {
-        timezone: config.ui.timezone,
-        date_format:
-          config.ui.time_format == "24hour"
-            ? t("time.formattedTimestamp.24hour", {
-                ns: "common",
-              })
-            : t("time.formattedTimestamp.12hour", {
-                ns: "common",
-              }),
-        time_style: "medium",
-        date_style: "medium",
-      })
-    : "";
+  const formattedEnd =
+    config && event.end_time != null
+      ? formatUnixTimestampToDateTime(event.end_time, {
+          timezone: config.ui.timezone,
+          date_format:
+            config.ui.time_format == "24hour"
+              ? t("time.formattedTimestamp.24hour", {
+                  ns: "common",
+                })
+              : t("time.formattedTimestamp.12hour", {
+                  ns: "common",
+                }),
+          time_style: "medium",
+          date_style: "medium",
+        })
+      : "";
 
   useEffect(() => {
     if (!eventSequence || eventSequence.length === 0) return;
@@ -525,9 +526,16 @@ export function TrackingDetails({
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="capitalize">{label}</span>
-                    <span className="md:text-md text-xs text-secondary-foreground">
-                      {formattedStart ?? ""} - {formattedEnd ?? ""}
-                    </span>
+                    <div className="md:text-md flex items-center text-xs text-secondary-foreground">
+                      {formattedStart ?? ""}
+                      {event.end_time != null ? (
+                        <> - {formattedEnd}</>
+                      ) : (
+                        <div className="inline-block">
+                          <ActivityIndicator className="ml-3 size-4" />
+                        </div>
+                      )}
+                    </div>
                     {event.data?.recognized_license_plate && (
                       <>
                         <span className="text-secondary-foreground">·</span>
