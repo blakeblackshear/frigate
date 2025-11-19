@@ -1002,7 +1002,7 @@ COPY --from=build /dfine/output/dfine_${MODEL_SIZE}_obj2coco.onnx /dfine-${MODEL
 EOF
 ```
 
-### Download RF-DETR Model
+### Downloading RF-DETR Model
 
 RF-DETR can be exported as ONNX by running the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=Nano` in the first line to `Nano`, `Small`, or `Medium` size.
 
