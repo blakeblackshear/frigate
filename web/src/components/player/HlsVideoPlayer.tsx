@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import Hls from "hls.js";
-import { isAndroid, isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import VideoControls from "./VideoControls";
 import { VideoResolutionType } from "@/types/live";
@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import ObjectTrackOverlay from "@/components/overlay/ObjectTrackOverlay";
 
 // Android native hls does not seek correctly
-const USE_NATIVE_HLS = !isAndroid;
+const USE_NATIVE_HLS = false;
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
 const unsupportedErrorCodes = [
   MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
@@ -135,23 +135,6 @@ export default function HlsVideoPlayer({
     if (!useHlsCompat) {
       videoRef.current.src = currentSource.playlist;
       videoRef.current.load();
-      // For native HLS, we need to seek after metadata loads since startPosition isn't supported
-      if (currentSource.startPosition !== undefined) {
-        videoRef.current.addEventListener(
-          "loadedmetadata",
-          () => {
-            if (videoRef.current && currentSource.startPosition !== undefined) {
-              // Clamp startPosition to video duration to prevent seeking beyond the end
-              const clampedPosition = Math.min(
-                currentSource.startPosition,
-                videoRef.current.duration || Infinity,
-              );
-              videoRef.current.currentTime = clampedPosition;
-            }
-          },
-          { once: true },
-        );
-      }
       return;
     }
 
