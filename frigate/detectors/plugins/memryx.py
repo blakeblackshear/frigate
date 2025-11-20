@@ -18,7 +18,6 @@ from frigate.detectors.detector_config import (
     ModelTypeEnum,
 )
 from frigate.util.file import FileLock
-from frigate.util.model import post_process_yolo
 
 logger = logging.getLogger(__name__)
 
