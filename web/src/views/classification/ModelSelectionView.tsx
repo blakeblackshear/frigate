@@ -39,6 +39,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import BlurredIconButton from "@/components/button/BlurredIconButton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const allModelTypes = ["objects", "states"] as const;
 type ModelType = (typeof allModelTypes)[number];
@@ -332,9 +333,7 @@ function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
             <ImageShadowOverlay lowerClassName="h-[30%] z-0" />
           </>
         ) : (
-          <div className="flex size-full items-center justify-center bg-background_alt">
-            <MdModelTraining className="size-16 text-muted-foreground" />
-          </div>
+          <Skeleton className="flex size-full items-center justify-center" />
         )}
         <div className="absolute bottom-2 left-3 text-lg text-white smart-capitalize">
           {config.name}
