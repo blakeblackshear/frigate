@@ -20,7 +20,14 @@ import {
   FrigateConfig,
 } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   isDesktop,
   isMobile,
@@ -46,6 +53,8 @@ import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { useTranslation } from "react-i18next";
 import { EmptyCard } from "@/components/card/EmptyCard";
 import { BsFillCameraVideoOffFill } from "react-icons/bs";
+import { AuthContext } from "@/context/auth-context";
+import { useIsCustomRole } from "@/hooks/use-is-custom-role";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -374,10 +383,6 @@ export default function LiveDashboardView({
     onSaveMuting(true);
   };
 
-  if (cameras.length == 0 && !includeBirdseye) {
-    return <NoCameraView />;
-  }
-
   return (
     <div
       className="scrollbar-container size-full select-none overflow-y-auto px-1 pt-2 md:p-2"
@@ -439,198 +444,215 @@ export default function LiveDashboardView({
         </div>
       )}
 
-      {!fullscreen && events && events.length > 0 && (
-        <ScrollArea>
-          <TooltipProvider>
-            <div className="flex items-center gap-2 px-1">
-              {events.map((event) => {
-                return (
-                  <AnimatedEventCard
-                    key={event.id}
-                    event={event}
-                    selectedGroup={cameraGroup}
-                    updateEvents={updateEvents}
-                  />
-                );
-              })}
-            </div>
-          </TooltipProvider>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      )}
-
-      {!cameraGroup || cameraGroup == "default" || isMobileOnly ? (
+      {cameras.length == 0 && !includeBirdseye ? (
+        <NoCameraView />
+      ) : (
         <>
-          <div
-            className={cn(
-              "mt-2 grid grid-cols-1 gap-2 px-2 md:gap-4",
-              mobileLayout == "grid" &&
-                "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4",
-              isMobile && "px-0",
-            )}
-          >
-            {includeBirdseye && birdseyeConfig?.enabled && (
+          {!fullscreen && events && events.length > 0 && (
+            <ScrollArea>
+              <TooltipProvider>
+                <div className="flex items-center gap-2 px-1">
+                  {events.map((event) => {
+                    return (
+                      <AnimatedEventCard
+                        key={event.id}
+                        event={event}
+                        selectedGroup={cameraGroup}
+                        updateEvents={updateEvents}
+                      />
+                    );
+                  })}
+                </div>
+              </TooltipProvider>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          )}
+
+          {!cameraGroup || cameraGroup == "default" || isMobileOnly ? (
+            <>
               <div
-                className={(() => {
-                  const aspectRatio =
-                    birdseyeConfig.width / birdseyeConfig.height;
-                  if (aspectRatio > 2) {
-                    return `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
-                  } else if (aspectRatio < 1) {
-                    return `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
-                  } else {
-                    return "aspect-video";
-                  }
-                })()}
-                ref={birdseyeContainerRef}
+                className={cn(
+                  "mt-2 grid grid-cols-1 gap-2 px-2 md:gap-4",
+                  mobileLayout == "grid" &&
+                    "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4",
+                  isMobile && "px-0",
+                )}
               >
-                <BirdseyeLivePlayer
-                  birdseyeConfig={birdseyeConfig}
-                  liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
-                  onClick={() => onSelectCamera("birdseye")}
-                  containerRef={birdseyeContainerRef}
-                />
-              </div>
-            )}
-            {cameras.map((camera) => {
-              let grow;
-              const aspectRatio = camera.detect.width / camera.detect.height;
-              if (aspectRatio > 2) {
-                grow = `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
-              } else if (aspectRatio < 1) {
-                grow = `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
-              } else {
-                grow = "aspect-video";
-              }
-              const availableStreams = camera.live.streams || {};
-              const firstStreamEntry = Object.values(availableStreams)[0] || "";
-
-              const streamNameFromSettings =
-                currentGroupStreamingSettings?.[camera.name]?.streamName || "";
-              const streamExists =
-                streamNameFromSettings &&
-                Object.values(availableStreams).includes(
-                  streamNameFromSettings,
-                );
-
-              const streamName = streamExists
-                ? streamNameFromSettings
-                : firstStreamEntry;
-              const streamType =
-                currentGroupStreamingSettings?.[camera.name]?.streamType;
-              const autoLive =
-                streamType !== undefined
-                  ? streamType !== "no-streaming"
-                  : undefined;
-              const showStillWithoutActivity =
-                currentGroupStreamingSettings?.[camera.name]?.streamType !==
-                "continuous";
-              const useWebGL =
-                currentGroupStreamingSettings?.[camera.name]
-                  ?.compatibilityMode || false;
-              return (
-                <LiveContextMenu
-                  className={grow}
-                  key={camera.name}
-                  camera={camera.name}
-                  cameraGroup={cameraGroup}
-                  streamName={streamName}
-                  preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
-                  isRestreamed={isRestreamedStates[camera.name]}
-                  supportsAudio={
-                    supportsAudioOutputStates[streamName]?.supportsAudio ??
-                    false
-                  }
-                  audioState={audioStates[camera.name]}
-                  toggleAudio={() => toggleAudio(camera.name)}
-                  statsState={statsStates[camera.name]}
-                  toggleStats={() => toggleStats(camera.name)}
-                  volumeState={volumeStates[camera.name] ?? 1}
-                  setVolumeState={(value) =>
-                    setVolumeStates({
-                      [camera.name]: value,
-                    })
-                  }
-                  muteAll={muteAll}
-                  unmuteAll={unmuteAll}
-                  resetPreferredLiveMode={() =>
-                    resetPreferredLiveMode(camera.name)
-                  }
-                  config={config}
-                >
-                  <LivePlayer
-                    cameraRef={cameraRef}
-                    key={camera.name}
-                    className={`${grow} rounded-lg bg-black md:rounded-2xl`}
-                    windowVisible={
-                      windowVisible && visibleCameras.includes(camera.name)
-                    }
-                    cameraConfig={camera}
-                    preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
-                    autoLive={autoLive ?? globalAutoLive}
-                    showStillWithoutActivity={showStillWithoutActivity ?? true}
-                    alwaysShowCameraName={displayCameraNames}
-                    useWebGL={useWebGL}
-                    playInBackground={false}
-                    showStats={statsStates[camera.name]}
-                    streamName={streamName}
-                    onClick={() => onSelectCamera(camera.name)}
-                    onError={(e) => handleError(camera.name, e)}
-                    onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
-                    playAudio={audioStates[camera.name] ?? false}
-                    volume={volumeStates[camera.name]}
-                  />
-                </LiveContextMenu>
-              );
-            })}
-          </div>
-          {isDesktop && (
-            <div
-              className={cn(
-                "fixed",
-                isDesktop && "bottom-12 lg:bottom-9",
-                isMobile && "bottom-12 lg:bottom-16",
-                hasScrollbar && isDesktop ? "right-6" : "right-3",
-                "z-50 flex flex-row gap-2",
-              )}
-            >
-              <Tooltip>
-                <TooltipTrigger asChild>
+                {includeBirdseye && birdseyeConfig?.enabled && (
                   <div
-                    className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
-                    onClick={toggleFullscreen}
+                    className={(() => {
+                      const aspectRatio =
+                        birdseyeConfig.width / birdseyeConfig.height;
+                      if (aspectRatio > 2) {
+                        return `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
+                      } else if (aspectRatio < 1) {
+                        return `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
+                      } else {
+                        return "aspect-video";
+                      }
+                    })()}
+                    ref={birdseyeContainerRef}
                   >
-                    {fullscreen ? (
-                      <FaCompress className="size-5 md:m-[6px]" />
-                    ) : (
-                      <FaExpand className="size-5 md:m-[6px]" />
-                    )}
+                    <BirdseyeLivePlayer
+                      birdseyeConfig={birdseyeConfig}
+                      liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
+                      onClick={() => onSelectCamera("birdseye")}
+                      containerRef={birdseyeContainerRef}
+                    />
                   </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {fullscreen
-                    ? t("button.exitFullscreen", { ns: "common" })
-                    : t("button.fullscreen", { ns: "common" })}
-                </TooltipContent>
-              </Tooltip>
-            </div>
+                )}
+                {cameras.map((camera) => {
+                  let grow;
+                  const aspectRatio =
+                    camera.detect.width / camera.detect.height;
+                  if (aspectRatio > 2) {
+                    grow = `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
+                  } else if (aspectRatio < 1) {
+                    grow = `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
+                  } else {
+                    grow = "aspect-video";
+                  }
+                  const availableStreams = camera.live.streams || {};
+                  const firstStreamEntry =
+                    Object.values(availableStreams)[0] || "";
+
+                  const streamNameFromSettings =
+                    currentGroupStreamingSettings?.[camera.name]?.streamName ||
+                    "";
+                  const streamExists =
+                    streamNameFromSettings &&
+                    Object.values(availableStreams).includes(
+                      streamNameFromSettings,
+                    );
+
+                  const streamName = streamExists
+                    ? streamNameFromSettings
+                    : firstStreamEntry;
+                  const streamType =
+                    currentGroupStreamingSettings?.[camera.name]?.streamType;
+                  const autoLive =
+                    streamType !== undefined
+                      ? streamType !== "no-streaming"
+                      : undefined;
+                  const showStillWithoutActivity =
+                    currentGroupStreamingSettings?.[camera.name]?.streamType !==
+                    "continuous";
+                  const useWebGL =
+                    currentGroupStreamingSettings?.[camera.name]
+                      ?.compatibilityMode || false;
+                  return (
+                    <LiveContextMenu
+                      className={grow}
+                      key={camera.name}
+                      camera={camera.name}
+                      cameraGroup={cameraGroup}
+                      streamName={streamName}
+                      preferredLiveMode={
+                        preferredLiveModes[camera.name] ?? "mse"
+                      }
+                      isRestreamed={isRestreamedStates[camera.name]}
+                      supportsAudio={
+                        supportsAudioOutputStates[streamName]?.supportsAudio ??
+                        false
+                      }
+                      audioState={audioStates[camera.name]}
+                      toggleAudio={() => toggleAudio(camera.name)}
+                      statsState={statsStates[camera.name]}
+                      toggleStats={() => toggleStats(camera.name)}
+                      volumeState={volumeStates[camera.name] ?? 1}
+                      setVolumeState={(value) =>
+                        setVolumeStates({
+                          [camera.name]: value,
+                        })
+                      }
+                      muteAll={muteAll}
+                      unmuteAll={unmuteAll}
+                      resetPreferredLiveMode={() =>
+                        resetPreferredLiveMode(camera.name)
+                      }
+                      config={config}
+                    >
+                      <LivePlayer
+                        cameraRef={cameraRef}
+                        key={camera.name}
+                        className={`${grow} rounded-lg bg-black md:rounded-2xl`}
+                        windowVisible={
+                          windowVisible && visibleCameras.includes(camera.name)
+                        }
+                        cameraConfig={camera}
+                        preferredLiveMode={
+                          preferredLiveModes[camera.name] ?? "mse"
+                        }
+                        autoLive={autoLive ?? globalAutoLive}
+                        showStillWithoutActivity={
+                          showStillWithoutActivity ?? true
+                        }
+                        alwaysShowCameraName={displayCameraNames}
+                        useWebGL={useWebGL}
+                        playInBackground={false}
+                        showStats={statsStates[camera.name]}
+                        streamName={streamName}
+                        onClick={() => onSelectCamera(camera.name)}
+                        onError={(e) => handleError(camera.name, e)}
+                        onResetLiveMode={() =>
+                          resetPreferredLiveMode(camera.name)
+                        }
+                        playAudio={audioStates[camera.name] ?? false}
+                        volume={volumeStates[camera.name]}
+                      />
+                    </LiveContextMenu>
+                  );
+                })}
+              </div>
+              {isDesktop && (
+                <div
+                  className={cn(
+                    "fixed",
+                    isDesktop && "bottom-12 lg:bottom-9",
+                    isMobile && "bottom-12 lg:bottom-16",
+                    hasScrollbar && isDesktop ? "right-6" : "right-3",
+                    "z-50 flex flex-row gap-2",
+                  )}
+                >
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
+                        onClick={toggleFullscreen}
+                      >
+                        {fullscreen ? (
+                          <FaCompress className="size-5 md:m-[6px]" />
+                        ) : (
+                          <FaExpand className="size-5 md:m-[6px]" />
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {fullscreen
+                        ? t("button.exitFullscreen", { ns: "common" })
+                        : t("button.fullscreen", { ns: "common" })}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              )}
+            </>
+          ) : (
+            <DraggableGridLayout
+              cameras={cameras}
+              cameraGroup={cameraGroup}
+              containerRef={containerRef}
+              cameraRef={cameraRef}
+              includeBirdseye={includeBirdseye}
+              onSelectCamera={onSelectCamera}
+              windowVisible={windowVisible}
+              visibleCameras={visibleCameras}
+              isEditMode={isEditMode}
+              setIsEditMode={setIsEditMode}
+              fullscreen={fullscreen}
+              toggleFullscreen={toggleFullscreen}
+            />
           )}
         </>
-      ) : (
-        <DraggableGridLayout
-          cameras={cameras}
-          cameraGroup={cameraGroup}
-          containerRef={containerRef}
-          cameraRef={cameraRef}
-          includeBirdseye={includeBirdseye}
-          onSelectCamera={onSelectCamera}
-          windowVisible={windowVisible}
-          visibleCameras={visibleCameras}
-          isEditMode={isEditMode}
-          setIsEditMode={setIsEditMode}
-          fullscreen={fullscreen}
-          toggleFullscreen={toggleFullscreen}
-        />
       )}
     </div>
   );
@@ -638,15 +660,26 @@ export default function LiveDashboardView({
 
 function NoCameraView() {
   const { t } = useTranslation(["views/live"]);
+  const { auth } = useContext(AuthContext);
+  const isCustomRole = useIsCustomRole();
+
+  // Check if this is a restricted user with no cameras in this group
+  const isRestricted = isCustomRole && auth.isAuthenticated;
 
   return (
     <div className="flex size-full items-center justify-center">
       <EmptyCard
         icon={<BsFillCameraVideoOffFill className="size-8" />}
-        title={t("noCameras.title")}
-        description={t("noCameras.description")}
-        buttonText={t("noCameras.buttonText")}
-        link="/settings?page=cameraManagement"
+        title={
+          isRestricted ? t("noCameras.restricted.title") : t("noCameras.title")
+        }
+        description={
+          isRestricted
+            ? t("noCameras.restricted.description")
+            : t("noCameras.description")
+        }
+        buttonText={!isRestricted ? t("noCameras.buttonText") : undefined}
+        link={!isRestricted ? "/settings?page=cameraManagement" : undefined}
       />
     </div>
   );

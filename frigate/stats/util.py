@@ -362,7 +362,7 @@ def stats_snapshot(
             stats["embeddings"]["review_description_speed"] = round(
                 embeddings_metrics.review_desc_speed.value * 1000, 2
             )
-            stats["embeddings"]["review_descriptions"] = round(
+            stats["embeddings"]["review_description_events_per_second"] = round(
                 embeddings_metrics.review_desc_dps.value, 2
             )
 
@@ -370,7 +370,7 @@ def stats_snapshot(
             stats["embeddings"]["object_description_speed"] = round(
                 embeddings_metrics.object_desc_speed.value * 1000, 2
             )
-            stats["embeddings"]["object_descriptions"] = round(
+            stats["embeddings"]["object_description_events_per_second"] = round(
                 embeddings_metrics.object_desc_dps.value, 2
             )
 
@@ -378,7 +378,7 @@ def stats_snapshot(
             stats["embeddings"][f"{key}_classification_speed"] = round(
                 embeddings_metrics.classification_speeds[key].value * 1000, 2
             )
-            stats["embeddings"][f"{key}_classification"] = round(
+            stats["embeddings"][f"{key}_classification_events_per_second"] = round(
                 embeddings_metrics.classification_cps[key].value, 2
             )
 

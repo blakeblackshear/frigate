@@ -600,7 +600,7 @@ export default function Step3StreamConfig({
                   <Label className="text-sm font-medium text-primary-variant">
                     {t("cameraWizard.step3.roles")}
                   </Label>
-                  <Popover>
+                  <Popover modal={true}>
                     <PopoverTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                         <LuInfo className="size-3" />
@@ -670,7 +670,7 @@ export default function Step3StreamConfig({
                   <Label className="text-sm font-medium text-primary-variant">
                     {t("cameraWizard.step3.featuresTitle")}
                   </Label>
-                  <Popover>
+                  <Popover modal={true}>
                     <PopoverTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
                         <LuInfo className="size-3" />

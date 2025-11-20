@@ -177,6 +177,10 @@
   "noCameras": {
     "title": "No Cameras Configured",
     "description": "Get started by connecting a camera to Frigate.",
-    "buttonText": "Add Camera"
+    "buttonText": "Add Camera",
+    "restricted": {
+      "title": "No Cameras Available",
+      "description": "You don't have permission to view any cameras in this group."
+    }
   }
 }

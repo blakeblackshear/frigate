@@ -807,6 +807,15 @@ function ObjectDetailsTab({
     }
   }, [search]);
 
+  const isEventsKey = useCallback((key: unknown): boolean => {
+    const candidate = Array.isArray(key) ? key[0] : key;
+    const EVENTS_KEY_PATTERNS = ["events", "events/search", "events/explore"];
+    return (
+      typeof candidate === "string" &&
+      EVENTS_KEY_PATTERNS.some((p) => candidate.includes(p))
+    );
+  }, []);
+
   const updateDescription = useCallback(() => {
     if (!search) {
       return;
@@ -821,11 +830,7 @@ function ObjectDetailsTab({
           });
         }
         mutate(
-          (key) =>
-            typeof key === "string" &&
-            (key.includes("events") ||
-              key.includes("events/search") ||
-              key.includes("events/explore")),
+          (key) => isEventsKey(key),
           (currentData: SearchResult[][] | SearchResult[] | undefined) =>
             mapSearchResults(currentData, (event) =>
               event.id === search.id
@@ -838,6 +843,7 @@ function ObjectDetailsTab({
             revalidate: false,
           },
         );
+        setSearch({ ...search, data: { ...search.data, description: desc } });
       })
       .catch((error) => {
         const errorMessage =
@@ -854,7 +860,7 @@ function ObjectDetailsTab({
         );
         setDesc(search.data.description);
       });
-  }, [desc, search, mutate, t, mapSearchResults]);
+  }, [desc, search, mutate, t, mapSearchResults, isEventsKey, setSearch]);
 
   const regenerateDescription = useCallback(
     (source: "snapshot" | "thumbnails") => {
@@ -921,11 +927,7 @@ function ObjectDetailsTab({
             });
 
             mutate(
-              (key) =>
-                typeof key === "string" &&
-                (key.includes("events") ||
-                  key.includes("events/search") ||
-                  key.includes("events/explore")),
+              (key) => isEventsKey(key),
               (currentData: SearchResult[][] | SearchResult[] | undefined) =>
                 mapSearchResults(currentData, (event) =>
                   event.id === search.id
@@ -972,7 +974,7 @@ function ObjectDetailsTab({
           );
         });
     },
-    [search, apiHost, mutate, setSearch, t, mapSearchResults],
+    [search, apiHost, mutate, setSearch, t, mapSearchResults, isEventsKey],
   );
 
   // recognized plate
@@ -996,11 +998,7 @@ function ObjectDetailsTab({
             });
 
             mutate(
-              (key) =>
-                typeof key === "string" &&
-                (key.includes("events") ||
-                  key.includes("events/search") ||
-                  key.includes("events/explore")),
+              (key) => isEventsKey(key),
               (currentData: SearchResult[][] | SearchResult[] | undefined) =>
                 mapSearchResults(currentData, (event) =>
                   event.id === search.id
@@ -1047,7 +1045,7 @@ function ObjectDetailsTab({
           );
         });
     },
-    [search, apiHost, mutate, setSearch, t, mapSearchResults],
+    [search, apiHost, mutate, setSearch, t, mapSearchResults, isEventsKey],
   );
 
   // speech transcription
@@ -1103,12 +1101,9 @@ function ObjectDetailsTab({
           });
 
       setState("submitted");
+      setSearch({ ...search, plus_id: "new_upload" });
       mutate(
-        (key) =>
-          typeof key === "string" &&
-          (key.includes("events") ||
-            key.includes("events/search") ||
-            key.includes("events/explore")),
+        (key) => isEventsKey(key),
         (currentData: SearchResult[][] | SearchResult[] | undefined) =>
           mapSearchResults(currentData, (event) =>
             event.id === search.id
@@ -1122,7 +1117,7 @@ function ObjectDetailsTab({
         },
       );
     },
-    [search, mutate, mapSearchResults],
+    [search, mutate, mapSearchResults, setSearch, isEventsKey],
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);

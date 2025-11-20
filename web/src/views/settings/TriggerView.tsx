@@ -198,9 +198,9 @@ export default function TriggerView({
 
             return axios
               .put("config/set", configBody)
-              .then((configResponse) => {
+              .then(async (configResponse) => {
                 if (configResponse.status === 200) {
-                  updateConfig();
+                  await updateConfig();
                   const displayName =
                     friendly_name && friendly_name !== ""
                       ? `${friendly_name} (${name})`
@@ -353,9 +353,9 @@ export default function TriggerView({
 
             return axios
               .put("config/set", configBody)
-              .then((configResponse) => {
+              .then(async (configResponse) => {
                 if (configResponse.status === 200) {
-                  updateConfig();
+                  await updateConfig();
                   const friendly =
                     config?.cameras?.[selectedCamera]?.semantic_search
                       ?.triggers?.[name]?.friendly_name;

@@ -35,19 +35,18 @@ Each model is available in multiple parameter sizes (3b, 4b, 8b, etc.). Larger s
 
 :::tip
 
-If you are trying to use a single model for Frigate and HomeAssistant, it will need to support vision and tools calling. https://github.com/skye-harris/ollama-modelfiles contains optimized model configs for this task.
+If you are trying to use a single model for Frigate and HomeAssistant, it will need to support vision and tools calling. qwen3-VL supports vision and tools simultaneously in Ollama.
 
 :::
 
 The following models are recommended:
 
-| Model             | Notes                                                       |
-| ----------------- | ----------------------------------------------------------- |
-| `qwen3-vl`        | Strong visual and situational understanding                 |
-| `Intern3.5VL`     | Relatively fast with good vision comprehension              |
-| `gemma3`          | Strong frame-to-frame understanding, slower inference times |
-| `qwen2.5-vl`      | Fast but capable model with good vision comprehension       |
-| `llava-phi3`      | Lightweight and fast model with vision comprehension        |
+| Model             | Notes                                                                |
+| ----------------- | -------------------------------------------------------------------- |
+| `qwen3-vl`        | Strong visual and situational understanding, higher vram requirement |
+| `Intern3.5VL`     | Relatively fast with good vision comprehension                       |
+| `gemma3`          | Strong frame-to-frame understanding, slower inference times          |
+| `qwen2.5-vl`      | Fast but capable model with good vision comprehension                |
 
 :::note
 
