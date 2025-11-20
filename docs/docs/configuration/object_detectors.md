@@ -962,7 +962,6 @@ model:
   # path: /config/yolov9.zip
   # The .zip file must contain:
   # ├── yolov9.dfp          (a file ending with .dfp)
-  # └── yolov9_post.onnx    (optional; only if the model includes a cropped post-processing network)
 ```
 
 #### YOLOX
@@ -989,7 +988,7 @@ model:
   # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
   # path: /config/yolox.zip
   # The .zip file must contain:
-  # ├── yolox.dfp          (a file ending with .dfp)
+  # ├── yolox.dfp          (a file ending with .dfp) 
 ```
 
 #### SSDLite MobileNet v2
