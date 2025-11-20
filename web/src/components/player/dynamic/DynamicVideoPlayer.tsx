@@ -111,7 +111,6 @@ export default function DynamicVideoPlayer({
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout>();
   const [source, setSource] = useState<HlsSource>({
     playlist: `${apiHost}vod/${camera}/start/${timeRange.after}/end/${timeRange.before}/master.m3u8`,
-    startPosition: startTimestamp ? timeRange.after - startTimestamp : 0,
   });
 
   // start at correct time
@@ -196,26 +195,8 @@ export default function DynamicVideoPlayer({
       playerRef.current.autoplay = !isScrubbing;
     }
 
-    let startPosition = undefined;
-
-    if (startTimestamp) {
-      const inpointOffset = calculateInpointOffset(
-        recordingParams.after,
-        (recordings || [])[0],
-      );
-      const idealStartPosition = Math.max(
-        0,
-        startTimestamp - timeRange.after - inpointOffset,
-      );
-
-      if (idealStartPosition >= recordings[0].start_time - timeRange.after) {
-        startPosition = idealStartPosition;
-      }
-    }
-
     setSource({
       playlist: `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`,
-      startPosition,
     });
 
     setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));

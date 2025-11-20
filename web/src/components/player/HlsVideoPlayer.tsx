@@ -135,6 +135,23 @@ export default function HlsVideoPlayer({
     if (!useHlsCompat) {
       videoRef.current.src = currentSource.playlist;
       videoRef.current.load();
+      // For native HLS, we need to seek after metadata loads since startPosition isn't supported
+      if (currentSource.startPosition !== undefined) {
+        videoRef.current.addEventListener(
+          "loadedmetadata",
+          () => {
+            if (videoRef.current && currentSource.startPosition !== undefined) {
+              // Clamp startPosition to video duration to prevent seeking beyond the end
+              const clampedPosition = Math.min(
+                currentSource.startPosition,
+                videoRef.current.duration || Infinity,
+              );
+              videoRef.current.currentTime = clampedPosition;
+            }
+          },
+          { once: true },
+        );
+      }
       return;
     }
 

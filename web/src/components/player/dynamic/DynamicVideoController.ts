@@ -113,8 +113,6 @@ export class DynamicVideoController {
       } else {
         this.playerController.pause();
       }
-    } else {
-      // no op
     }
   }
 
