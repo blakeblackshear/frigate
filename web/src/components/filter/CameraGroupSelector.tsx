@@ -9,7 +9,7 @@ import useSWR from "swr";
 import { MdHome } from "react-icons/md";
 import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { Button, buttonVariants } from "../ui/button";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { LuPencil, LuPlus } from "react-icons/lu";
 import {
@@ -280,6 +280,12 @@ function NewGroupDialog({
     `${activeGroup}-draggable-layout`,
   );
 
+  useEffect(() => {
+    if (!open) {
+      setEditState("none");
+    }
+  }, [open]);
+
   // callbacks
 
   const onDeleteGroup = useCallback(
@@ -368,13 +374,7 @@ function NewGroupDialog({
         position="top-center"
         closeButton={true}
       />
-      <Overlay
-        open={open}
-        onOpenChange={(open) => {
-          setEditState("none");
-          setOpen(open);
-        }}
-      >
+      <Overlay open={open} onOpenChange={setOpen}>
         <Content
           className={cn(
             "scrollbar-container overflow-y-auto",
