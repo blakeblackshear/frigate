@@ -111,7 +111,7 @@ export default function DynamicVideoPlayer({
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout>();
   const [source, setSource] = useState<HlsSource>({
     playlist: `${apiHost}vod/${camera}/start/${timeRange.after}/end/${timeRange.before}/master.m3u8`,
-    startPosition: startTimestamp ? timeRange.after - startTimestamp : 0,
+    startPosition: startTimestamp ? startTimestamp - timeRange.after : 0,
   });
 
   // start at correct time
