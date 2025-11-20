@@ -729,29 +729,30 @@ export default function GeneralMetrics({
                   ) : (
                     <Skeleton className="aspect-video w-full" />
                   )}
-                </>
-              )}
-              {statsHistory[0]?.npu_usages && (
-                <>
-                  {statsHistory.length != 0 ? (
-                    <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                      <div className="mb-5">
-                        {t("general.hardwareInfo.npuUsage")}
-                      </div>
-                      {npuSeries.map((series) => (
-                        <ThresholdBarGraph
-                          key={series.name}
-                          graphId={`${series.name}-npu`}
-                          name={series.name}
-                          unit="%"
-                          threshold={GPUUsageThreshold}
-                          updateTimes={updateTimes}
-                          data={[series]}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <Skeleton className="aspect-video w-full" />
+
+                  {statsHistory[0]?.npu_usages && (
+                    <>
+                      {statsHistory.length != 0 ? (
+                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                          <div className="mb-5">
+                            {t("general.hardwareInfo.npuUsage")}
+                          </div>
+                          {npuSeries.map((series) => (
+                            <ThresholdBarGraph
+                              key={series.name}
+                              graphId={`${series.name}-npu`}
+                              name={series.name}
+                              unit="%"
+                              threshold={GPUUsageThreshold}
+                              updateTimes={updateTimes}
+                              data={[series]}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <Skeleton className="aspect-video w-full" />
+                      )}
+                    </>
                   )}
                 </>
               )}
