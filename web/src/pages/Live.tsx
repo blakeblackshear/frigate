@@ -93,19 +93,23 @@ function Live() {
   const allowedCameras = useAllowedCameras();
 
   const includesBirdseye = useMemo(() => {
+    // Restricted users should never have access to birdseye
+    if (isCustomRole) {
+      return false;
+    }
+
     if (
       config &&
       Object.keys(config.camera_groups).length &&
       cameraGroup &&
       config.camera_groups[cameraGroup] &&
-      cameraGroup != "default" &&
-      (!isCustomRole || "birdseye" in allowedCameras)
+      cameraGroup != "default"
     ) {
       return config.camera_groups[cameraGroup].cameras.includes("birdseye");
     } else {
       return false;
     }
-  }, [config, cameraGroup, allowedCameras, isCustomRole]);
+  }, [config, cameraGroup, isCustomRole]);
 
   const cameras = useMemo(() => {
     if (!config) {
