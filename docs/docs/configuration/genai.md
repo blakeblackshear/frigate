@@ -70,7 +70,7 @@ You should have at least 8 GB of RAM available (or VRAM if running on GPU) to ru
 genai:
   provider: ollama
   base_url: http://localhost:11434
-  model: llava:7b
+  model: qwen3-vl:4b
 ```
 
 ## Google Gemini
