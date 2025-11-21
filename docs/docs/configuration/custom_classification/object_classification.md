@@ -35,6 +35,15 @@ For object classification:
   - Ideal when multiple attributes can coexist independently.
   - Example: Detecting if a `person` in a construction yard is wearing a helmet or not.
 
+## Assignment Requirements
+
+Sub labels and attributes are only assigned when both conditions are met:
+
+1. **Threshold**: Each classification attempt must have a confidence score that meets or exceeds the configured `threshold` (default: `0.8`).
+2. **Class Consensus**: After at least 3 classification attempts, 60% of attempts must agree on the same class label. If the consensus class is `none`, no assignment is made.
+
+This two-step verification prevents false positives by requiring consistent predictions across multiple frames before assigning a sub label or attribute.
+
 ## Example use cases
 
 ### Sub label
