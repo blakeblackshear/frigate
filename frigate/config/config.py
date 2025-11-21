@@ -792,6 +792,10 @@ class FrigateConfig(FrigateBaseModel):
             # copy over auth and proxy config in case auth needs to be enforced
             safe_config["auth"] = config.get("auth", {})
             safe_config["proxy"] = config.get("proxy", {})
+
+            # copy over database config for auth and so a new db is not created
+            safe_config["database"] = config.get("database", {})
+
             return cls.parse_object(safe_config, **context)
 
         # Validate and return the config dict.
