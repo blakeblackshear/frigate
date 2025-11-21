@@ -25,7 +25,7 @@ Examples of available modules are:
 
 - `frigate.app`
 - `frigate.mqtt`
-- `frigate.object_detection`
+- `frigate.object_detection.base`
 - `detector.<detector_name>`
 - `watchdog.<camera_name>`
 - `ffmpeg.<camera_name>.<sorted_roles>` NOTE: All FFmpeg logs are sent as `error` level.

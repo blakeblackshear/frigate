@@ -849,6 +849,7 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
 
     clips = []
     durations = []
+    min_duration_ms = 100  # Minimum 100ms to ensure at least one video frame
     max_duration_ms = MAX_SEGMENT_DURATION * 1000
 
     recording: Recordings
@@ -866,11 +867,11 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
-        if duration <= 0:
-            # skip if the clip has no valid duration
+        if duration < min_duration_ms:
+            # skip if the clip has no valid duration (too short to contain frames)
             continue
 
-        if 0 < duration < max_duration_ms:
+        if min_duration_ms <= duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)

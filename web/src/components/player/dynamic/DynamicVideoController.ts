@@ -2,7 +2,10 @@ import { Recording } from "@/types/record";
 import { DynamicPlayback } from "@/types/playback";
 import { PreviewController } from "../PreviewPlayer";
 import { TimeRange, TrackingDetailsSequence } from "@/types/timeline";
-import { calculateInpointOffset } from "@/utils/videoUtil";
+import {
+  calculateInpointOffset,
+  calculateSeekPosition,
+} from "@/utils/videoUtil";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -72,38 +75,20 @@ export class DynamicVideoController {
       return;
     }
 
-    if (
-      this.recordings.length == 0 ||
-      time < this.recordings[0].start_time ||
-      time > this.recordings[this.recordings.length - 1].end_time
-    ) {
-      this.setNoRecording(true);
-      return;
-    }
-
     if (this.playerMode != "playback") {
       this.playerMode = "playback";
     }
 
-    let seekSeconds = 0;
-    (this.recordings || []).every((segment) => {
-      // if the next segment is past the desired time, stop calculating
-      if (segment.start_time > time) {
-        return false;
-      }
+    const seekSeconds = calculateSeekPosition(
+      time,
+      this.recordings,
+      this.inpointOffset,
+    );
 
-      if (segment.end_time < time) {
-        seekSeconds += segment.end_time - segment.start_time;
-        return true;
-      }
-
-      seekSeconds +=
-        segment.end_time - segment.start_time - (segment.end_time - time);
-      return true;
-    });
-
-    // adjust for HLS inpoint offset
-    seekSeconds -= this.inpointOffset;
+    if (seekSeconds === undefined) {
+      this.setNoRecording(true);
+      return;
+    }
 
     if (seekSeconds != 0) {
       this.playerController.currentTime = seekSeconds;

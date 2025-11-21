@@ -35,6 +35,15 @@ For object classification:
   - Ideal when multiple attributes can coexist independently.
   - Example: Detecting if a `person` in a construction yard is wearing a helmet or not.
 
+## Assignment Requirements
+
+Sub labels and attributes are only assigned when both conditions are met:
+
+1. **Threshold**: Each classification attempt must have a confidence score that meets or exceeds the configured `threshold` (default: `0.8`).
+2. **Class Consensus**: After at least 3 classification attempts, 60% of attempts must agree on the same class label. If the consensus class is `none`, no assignment is made.
+
+This two-step verification prevents false positives by requiring consistent predictions across multiple frames before assigning a sub label or attribute.
+
 ## Example use cases
 
 ### Sub label
@@ -66,13 +75,17 @@ classification:
 
 ## Training the model
 
-Creating and training the model is done within the Frigate UI using the `Classification` page.
+Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of two steps:
 
-### Getting Started
+### Step 1: Name and Define
+
+Enter a name for your model, select the object label to classify (e.g., `person`, `dog`, `car`), choose the classification type (sub label or attribute), and define your classes. Include a `none` class for objects that don't fit any specific category.
+
+### Step 2: Assign Training Examples
+
+The system will automatically generate example images from detected objects matching your selected label. You'll be guided through each class one at a time to select which images represent that class. Any images not assigned to a specific class will automatically be assigned to `none` when you complete the last class. Once all images are processed, training will begin automatically.
 
 When choosing which objects to classify, start with a small number of visually distinct classes and ensure your training samples match camera viewpoints and distances typical for those objects.
-
-// TODO add this section once UI is implemented. Explain process of selecting objects and curating training examples.
 
 ### Improving the Model
 
