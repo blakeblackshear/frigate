@@ -48,13 +48,23 @@ classification:
 
 ## Training the model
 
-Creating and training the model is done within the Frigate UI using the `Classification` page.
+Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of three steps:
 
-### Getting Started
+### Step 1: Name and Define
 
-When choosing a portion of the camera frame for state classification, it is important to make the crop tight around the area of interest to avoid extra signals unrelated to what is being classified.
+Enter a name for your model and define at least 2 classes (states) that represent mutually exclusive states. For example, `open` and `closed` for a door, or `on` and `off` for lights.
 
-// TODO add this section once UI is implemented. Explain process of selecting a crop.
+### Step 2: Select the Crop Area
+
+Choose one or more cameras and draw a rectangle over the area of interest for each camera. The crop should be tight around the region you want to classify to avoid extra signals unrelated to what is being classified. You can drag and resize the rectangle to adjust the crop area.
+
+### Step 3: Assign Training Examples
+
+The system will automatically generate example images from your camera feeds. You'll be guided through each class one at a time to select which images represent that state.
+
+**Important**: All images must be assigned to a state before training can begin. This includes images that may not be optimal, such as when people temporarily block the view, sun glare is present, or other distractions occur. Assign these images to the state that is actually present (based on what you know the state to be), not based on the distraction. This training helps the model correctly identify the state even when such conditions occur during inference.
+
+Once all images are assigned, training will begin automatically.
 
 ### Improving the Model
 

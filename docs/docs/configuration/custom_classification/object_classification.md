@@ -75,13 +75,17 @@ classification:
 
 ## Training the model
 
-Creating and training the model is done within the Frigate UI using the `Classification` page.
+Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of two steps:
 
-### Getting Started
+### Step 1: Name and Define
+
+Enter a name for your model, select the object label to classify (e.g., `person`, `dog`, `car`), choose the classification type (sub label or attribute), and define your classes. Include a `none` class for objects that don't fit any specific category.
+
+### Step 2: Assign Training Examples
+
+The system will automatically generate example images from detected objects matching your selected label. You'll be guided through each class one at a time to select which images represent that class. Any images not assigned to a specific class will automatically be assigned to `none` when you complete the last class. Once all images are processed, training will begin automatically.
 
 When choosing which objects to classify, start with a small number of visually distinct classes and ensure your training samples match camera viewpoints and distances typical for those objects.
-
-// TODO add this section once UI is implemented. Explain process of selecting objects and curating training examples.
 
 ### Improving the Model
 
