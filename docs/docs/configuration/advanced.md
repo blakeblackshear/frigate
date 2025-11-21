@@ -247,7 +247,7 @@ curl -X POST http://frigate_host:5000/api/config/save -d @config.json
 if you'd like you can use your yaml config directly by using [`yq`](https://github.com/mikefarah/yq) to convert it to json:
 
 ```bash
-yq r -j config.yml | curl -X POST http://frigate_host:5000/api/config/save -d @-
+yq -o=json '.' config.yaml | curl -X POST 'http://frigate_host:5000/api/config/save?save_option=saveonly' --data-binary @-
 ```
 
 ### Via Command Line
