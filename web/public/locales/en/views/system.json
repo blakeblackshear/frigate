@@ -76,7 +76,12 @@
         }
       },
       "npuUsage": "NPU Usage",
-      "npuMemory": "NPU Memory"
+      "npuMemory": "NPU Memory",
+      "intelGpuWarning": {
+        "title": "Intel GPU Stats Warning",
+        "message": "GPU stats unavailable",
+        "description": "This is a known bug in Intel's GPU stats reporting tools (intel_gpu_top) where it will break and repeatedly return a GPU usage of 0% even in cases where hardware acceleration and object detection are correctly running on the (i)GPU. This is not a Frigate bug. You can restart the host to temporarily fix the issue and confirm that the GPU is working correctly. This does not affect performance."
+      }
     },
     "otherProcesses": {
       "title": "Other Processes",
