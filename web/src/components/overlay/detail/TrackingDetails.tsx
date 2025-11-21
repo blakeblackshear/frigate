@@ -56,6 +56,7 @@ export function TrackingDetails({
   const apiHost = useApiHost();
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [displaySource, _setDisplaySource] = useState<"video" | "image">(
     "video",
   );
@@ -69,6 +70,10 @@ export function TrackingDetails({
   const [currentTime, setCurrentTime] = useState(
     (event.start_time ?? 0) + annotationOffset / 1000 - REVIEW_PADDING,
   );
+
+  useEffect(() => {
+    setIsVideoLoading(true);
+  }, [event.id]);
 
   const { data: eventSequence } = useSWR<TrackingDetailsSequence[]>([
     "timeline",
@@ -527,22 +532,28 @@ export function TrackingDetails({
           )}
         >
           {displaySource == "video" && (
-            <HlsVideoPlayer
-              videoRef={videoRef}
-              containerRef={containerRef}
-              visible={true}
-              currentSource={videoSource}
-              hotKeys={false}
-              supportsFullscreen={false}
-              fullscreen={false}
-              frigateControls={true}
-              onTimeUpdate={handleTimeUpdate}
-              onSeekToTime={handleSeekToTime}
-              onUploadFrame={onUploadFrameToPlus}
-              isDetailMode={true}
-              camera={event.camera}
-              currentTimeOverride={currentTime}
-            />
+            <>
+              <HlsVideoPlayer
+                videoRef={videoRef}
+                containerRef={containerRef}
+                visible={true}
+                currentSource={videoSource}
+                hotKeys={false}
+                supportsFullscreen={false}
+                fullscreen={false}
+                frigateControls={true}
+                onTimeUpdate={handleTimeUpdate}
+                onSeekToTime={handleSeekToTime}
+                onUploadFrame={onUploadFrameToPlus}
+                onPlaying={() => setIsVideoLoading(false)}
+                isDetailMode={true}
+                camera={event.camera}
+                currentTimeOverride={currentTime}
+              />
+              {isVideoLoading && (
+                <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+              )}
+            </>
           )}
           {displaySource == "image" && (
             <>

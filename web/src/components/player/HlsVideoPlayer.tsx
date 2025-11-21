@@ -130,6 +130,8 @@ export default function HlsVideoPlayer({
       return;
     }
 
+    setLoadedMetadata(false);
+
     const currentPlaybackRate = videoRef.current.playbackRate;
 
     if (!useHlsCompat) {
