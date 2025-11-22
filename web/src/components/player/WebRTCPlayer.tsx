@@ -42,7 +42,7 @@ export default function WebRtcPlayer({
     (error: LivePlayerError, description: string = "Unknown error") => {
       // eslint-disable-next-line no-console
       console.error(
-        `${camera} - WebRTC error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live/#live-view-faq`,
+        `${camera} - WebRTC error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live/#live-player-error-messages`,
       );
       onError?.(error);
     },
