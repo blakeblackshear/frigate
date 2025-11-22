@@ -1,5 +1,28 @@
 {
   "description": {
     "addFace": "Vodič za dodavanje nove kolekcije u Biblioteku lica."
+  },
+  "steps": {
+    "faceName": "Unesi Ime Lica",
+    "uploadFace": "Prenesi Sliku Lica",
+    "nextSteps": "Sljedeći Koraci",
+    "description": {
+      "uploadFace": "Prenesite sliku {{name}} koja prikazuje njezino lice iz prednjeg kuta. Slika ne mora biti obrezana samo na njezino lice."
+    }
+  },
+  "train": {
+    "title": "Nedavna Prepoznavanja",
+    "aria": "Odaberite nedavna prepoznavanja",
+    "empty": "Nema nedavnih pokušaja prepoznavanja lica"
+  },
+  "deleteFaceLibrary": {
+    "title": "Izbriši Ime",
+    "desc": "Jeste li sigurni da želite izbrisati kolekciju {{name}}? Ovim će se trajno izbrisati sva povezana lica."
+  },
+  "deleteFaceAttempts": {
+    "title": "Izbriši Lica",
+    "desc_one": "Jeste li sigurni da želite izbrisati {{count}} lice? Ova se radnja ne može poništiti.",
+    "desc_few": "Jeste li sigurni da želite izbrisati {{count}} lica? Ova se radnja ne može poništiti.",
+    "desc_other": "Jeste li sigurni da želite izbrisati {{count}} lica? Ova se radnja ne može poništiti."
   }
 }
