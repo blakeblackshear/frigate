@@ -40,8 +40,8 @@
   "detail": {
     "noDataFound": "Nenhum dado de detalhe para revisar",
     "aria": "Alternar visualização de detalhe",
-    "trackedObject_one": "objeto",
-    "trackedObject_other": "objetos",
+    "trackedObject_one": "{{count}} objeto(s)",
+    "trackedObject_other": "{{count}} objetos",
     "noObjectDetailData": "Nenhum dado de detalhe de objeto disponível.",
     "label": "Detalhe",
     "settings": "Configurações de visualização detalhada",
