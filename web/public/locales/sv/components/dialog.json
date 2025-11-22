@@ -34,7 +34,7 @@
     "time": {
       "fromTimeline": "Välj från tidslinjen",
       "lastHour_one": "Sista timma",
-      "lastHour_other": "Sista t {{count}} Timmarna",
+      "lastHour_other": "Sista {{count}} timmar",
       "start": {
         "title": "Start Tid",
         "label": "Välj Start Tid"
