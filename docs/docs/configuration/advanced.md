@@ -53,6 +53,17 @@ environment_vars:
   VARIABLE_NAME: variable_value
 ```
 
+#### TensorFlow Thread Configuration
+
+If you encounter thread creation errors during classification model training, you can limit TensorFlow's thread usage:
+
+```yaml
+environment_vars:
+  TF_INTRA_OP_PARALLELISM_THREADS: "2" # Threads within operations (0 = use default)
+  TF_INTER_OP_PARALLELISM_THREADS: "2" # Threads between operations (0 = use default)
+  TF_DATASET_THREAD_POOL_SIZE: "2" # Data pipeline threads (0 = use default)
+```
+
 ### `database`
 
 Tracked object and recording information is managed in a sqlite database at `/config/frigate.db`. If that database is deleted, recordings will be orphaned and will need to be cleaned up manually. They also won't show up in the Media Browser within Home Assistant.
