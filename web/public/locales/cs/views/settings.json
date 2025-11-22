@@ -306,7 +306,8 @@
     "notifications": "Notifikace",
     "frigateplus": "Frigate+",
     "enrichments": "Obohacení",
-    "triggers": "Spouštěče"
+    "triggers": "Spouštěče",
+    "cameraManagement": "Správa"
   },
   "dialog": {
     "unsavedChanges": {

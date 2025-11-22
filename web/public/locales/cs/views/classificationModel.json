@@ -1,7 +1,31 @@
 {
   "documentTitle": "Klasifikační modely",
   "button": {
-    "deleteClassificationAttempts": "Odstranit Klasifikační obrazy",
-    "renameCategory": "Přejmenovat třídu"
+    "deleteClassificationAttempts": "Odstrániť Klasifikačné obrazy",
+    "renameCategory": "Premenovať triedu",
+    "deleteCategory": "Zmazať triedu",
+    "deleteImages": "Zmazať obrázok",
+    "trainModel": "Trenovací model",
+    "addClassification": "Pridať klasifikáciu",
+    "deleteModels": "Zmazať modeli",
+    "editModel": "Upraviť model"
+  },
+  "details": {
+    "scoreInfo": "Skóre predstavuje priemernú istotu klasifikácie naprieč detekciami tohoto objektu."
+  },
+  "tooltip": {
+    "trainingInProgress": "Model se práve trénuje",
+    "noNewImages": "Žiadne nové obrázky na trénovanie. Najskôr klasifikujte viac obrazkov v datasete.",
+    "noChanges": "Od posledného treningu nedošlo k žiadnym zmenám v datasete.",
+    "modelNotReady": "Model nieje pripravený na trénovanie."
+  },
+  "toast": {
+    "success": {
+      "deletedImage": "Zmazať obrazky",
+      "deletedModel_one": "Úspešne odstranený {{count}} model",
+      "deletedModel_few": "Úspešne odstranené {{count}} modely",
+      "deletedModel_other": "Úspěšne ostranených {{count}} modelov",
+      "deletedCategory": "Zmazať triedu"
+    }
   }
 }
