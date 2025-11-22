@@ -76,7 +76,12 @@
         }
       },
       "npuUsage": "Použitie NPU",
-      "npuMemory": "Pamäť NPU"
+      "npuMemory": "Pamäť NPU",
+      "intelGpuWarning": {
+        "title": "Intel GPU Stats Upozornenie",
+        "message": "Štatistiky GPU nedostupné",
+        "description": "Toto je známa chyba v Štatistike správ Intel (intel_gpu_top) kde sa rozpadne a opakovane vráti používanie GPU 0% aj v prípadoch, keď hardvér detekcie objektov správne beží na (i)GPU. Toto nie je Frigate chyba. Môžete reštartovať a tak dočasne opraviť problém a potvrdiť, že GPU funguje správne. Toto nemá vplyv na výkon."
+      }
     },
     "otherProcesses": {
       "title": "Iné procesy",
@@ -180,7 +185,11 @@
       "plate_recognition_speed": "Rýchlosť rozpoznávania ŠPZ",
       "text_embedding_speed": "Rýchlosť vkladania textu",
       "yolov9_plate_detection_speed": "YOLOv9 rýchlosť detekcie ŠPZ",
-      "yolov9_plate_detection": "YOLOv9 Detekcia ŠPZ"
-    }
+      "yolov9_plate_detection": "YOLOv9 Detekcia ŠPZ",
+      "review_description": "Popis recenzie",
+      "review_description_speed": "Popis recenzie Rýchlosťi",
+      "review_description_events_per_second": "Popis"
+    },
+    "averageInf": "Priemerný čas inferencie"
   }
 }

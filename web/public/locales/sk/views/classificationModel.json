@@ -7,7 +7,8 @@
     "deleteImages": "Odstrániť obrázky",
     "trainModel": "Model vlaku",
     "addClassification": "Pridať klasifikáciu",
-    "deleteModels": "Odstrániť modely"
+    "deleteModels": "Odstrániť modely",
+    "editModel": "Editovať model"
   },
   "toast": {
     "success": {
@@ -18,19 +19,26 @@
       "trainingModel": "Úspešne spustený modelový tréning.",
       "deletedModel_one": "Úspešne zmazané {{count}} model (y)",
       "deletedModel_few": "",
-      "deletedModel_other": ""
+      "deletedModel_other": "",
+      "updatedModel": "Úspešne zmenená konfigurácia modelu",
+      "renamedCategory": "Úspešne premenovaná trieda na"
     },
     "error": {
       "deleteImageFailed": "Nepodarilo sa odstrániť: {{errorMessage}}",
       "deleteCategoryFailed": "Nepodarilo sa odstrániť triedu: {{errorMessage}}",
       "categorizeFailed": "Nepodarilo sa kategorizovať obrázok: {{errorMessage}}",
       "trainingFailed": "Nepodarilo sa spustiť trénovanie modelu: {{errorMessage}}",
-      "deleteModelFailed": "Nepodarilo sa odstrániť model: {{errorMessage}}"
+      "deleteModelFailed": "Nepodarilo sa odstrániť model: {{errorMessage}}",
+      "trainingFailedToStart": "Neuspešny štart trenovania modelu:",
+      "updateModelFailed": "Chyba pri úprave modelu:",
+      "renameCategoryFailed": "Chyba pri premenovani triedy:"
     }
   },
   "deleteCategory": {
     "title": "Odstrániť triedu",
-    "desc": "Naozaj chcete odstrániť triedu {{name}}? Týmto sa natrvalo odstránia všetky súvisiace obrázky a bude potrebné pretrénovať model."
+    "desc": "Naozaj chcete odstrániť triedu {{name}}? Týmto sa natrvalo odstránia všetky súvisiace obrázky a bude potrebné pretrénovať model.",
+    "minClassesTitle": "Nemožete zmazať triedu",
+    "minClassesDesc": "Klasifikačný model musí mať aspoň 2 triedy. Pred odstránením tejto triedy pridajte ďalšiu triedu."
   },
   "deleteDatasetImages": {
     "title": "Odstrániť obrázky množiny údajov",
@@ -148,5 +156,20 @@
   "menu": {
     "objects": "Objekty",
     "states": "Štátov"
+  },
+  "details": {
+    "scoreInfo": "Skóre predstavuje priemernú istotu klasifikácie naprieč detekciami tohoto objektu."
+  },
+  "tooltip": {
+    "trainingInProgress": "Model sa aktuálne trénuje",
+    "noNewImages": "Žiadne nové obrázky na trénovanie. Najskor klasifikuj nové obrazky do datasetu.",
+    "noChanges": "Žiadne zmeny v datasete od posledného tréningu.",
+    "modelNotReady": "Model nie je pripravený na trénovanie."
+  },
+  "edit": {
+    "title": "Nastavenie modelu",
+    "descriptionState": "Upravte triedy pre tento model klasifikácie. Zmeny budú vyžadovať pretrénovanie modelu.",
+    "descriptionObject": "Upravte typ objektu a typ klasifikácie pre tento model klasifikácie.",
+    "stateClassesInfo": "Poznámka: Zmena tried stavov vyžaduje pretrénovanie modelu s aktualizovanými triedami."
   }
 }
