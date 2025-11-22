@@ -65,7 +65,12 @@
       "gpuUsage": "Utilizzo GPU",
       "gpuMemory": "Memoria GPU",
       "npuUsage": "Utilizzo NPU",
-      "npuMemory": "Memoria NPU"
+      "npuMemory": "Memoria NPU",
+      "intelGpuWarning": {
+        "title": "Avviso statistiche GPU Intel",
+        "message": "Statistiche GPU non disponibili",
+        "description": "Si tratta di un problema noto negli strumenti di reportistica delle statistiche GPU di Intel (intel_gpu_top), che si interrompe e restituisce ripetutamente un utilizzo della GPU pari a 0% anche nei casi in cui l'accelerazione hardware e il rilevamento degli oggetti funzionano correttamente sulla (i)GPU. Non si tratta di un problema di Frigate. È possibile riavviare il sistema per risolvere temporaneamente il problema e verificare che la GPU funzioni correttamente. Ciò non influisce sulle prestazioni."
+      }
     },
     "detector": {
       "inferenceSpeed": "Velocità inferenza rilevatore",
@@ -94,16 +99,23 @@
       "yolov9_plate_detection_speed": "Velocità di rilevamento della targa con YOLOv9",
       "yolov9_plate_detection": "Rilevamento della targa con YOLOv9",
       "image_embedding": "Incorporamento di immagini",
-      "text_embedding": "Incorporamento di testo"
+      "text_embedding": "Incorporamento di testo",
+      "review_description": "Descrizione della revisione",
+      "review_description_speed": "Velocità della descrizione di revisione",
+      "review_description_events_per_second": "Descrizione della revisione",
+      "object_description": "Descrizione dell'oggetto",
+      "object_description_speed": "Velocità della descrizione dell'oggetto",
+      "object_description_events_per_second": "Descrizione dell'oggetto"
     },
     "title": "Miglioramenti",
-    "infPerSecond": "Inferenze al secondo"
+    "infPerSecond": "Inferenze al secondo",
+    "averageInf": "Tempo medio di inferenza"
   },
   "cameras": {
     "info": {
       "fetching": "Recupero dati della telecamera",
       "streamDataFromFFPROBE": "I dati del flusso vengono ottenuti con <code>ffprobe</code>.",
-      "cameraProbeInfo": "Informazioni flussi telecamera {{camera}}",
+      "cameraProbeInfo": "Informazioni analisi telecamera {{camera}}",
       "stream": "Flusso {{idx}}",
       "video": "Video:",
       "codec": "Codec:",
@@ -113,7 +125,7 @@
       "audio": "Audio:",
       "error": "Errore: {{error}}",
       "tips": {
-        "title": "Informazioni flussi telecamera"
+        "title": "Informazioni analisi telecamera"
       },
       "aspectRatio": "rapporto d'aspetto"
     },

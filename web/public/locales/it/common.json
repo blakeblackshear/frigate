@@ -87,7 +87,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d MMM, yyyy",
       "24hour": "d MMM, yyyy"
-    }
+    },
+    "inProgress": "In corso",
+    "invalidStartTime": "Ora di inizio non valida",
+    "invalidEndTime": "Ora di fine non valida"
   },
   "button": {
     "cancel": "Annulla",
@@ -124,7 +127,8 @@
     "back": "Indietro",
     "pictureInPicture": "Immagine nell'immagine",
     "twoWayTalk": "Comunicazione bidirezionale",
-    "cameraAudio": "Audio della telecamera"
+    "cameraAudio": "Audio della telecamera",
+    "continue": "Continua"
   },
   "unit": {
     "speed": {
@@ -148,7 +152,9 @@
     "back": "Vai indietro",
     "hide": "Nascondi {{item}}",
     "show": "Mostra {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "Nessuna",
+    "all": "Tutte"
   },
   "menu": {
     "configuration": "Configurazione",
@@ -250,7 +256,8 @@
       "setPassword": "Imposta password"
     },
     "withSystem": "Sistema",
-    "faceLibrary": "Raccolta volti"
+    "faceLibrary": "Raccolta volti",
+    "classification": "Classificazione"
   },
   "pagination": {
     "next": {
