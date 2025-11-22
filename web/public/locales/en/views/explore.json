@@ -103,7 +103,7 @@
           "regenerate": "A new description has been requested from {{provider}}. Depending on the speed of your provider, the new description may take some time to regenerate.",
           "updatedSublabel": "Successfully updated sub label.",
           "updatedLPR": "Successfully updated license plate.",
-          "audioTranscription": "Successfully requested audio transcription."
+          "audioTranscription": "Successfully requested audio transcription. Depending on the speed of your Frigate server, the transcription may take some time to complete."
         },
         "error": {
           "regenerate": "Failed to call {{provider}} for a new description: {{errorMessage}}",

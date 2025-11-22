@@ -195,6 +195,7 @@ class EmbeddingMaintainer(threading.Thread):
                     self.config,
                     model_config,
                     self.event_metadata_publisher,
+                    self.requestor,
                     self.metrics,
                 )
             )
@@ -339,6 +340,7 @@ class EmbeddingMaintainer(threading.Thread):
                         self.config,
                         model_config,
                         self.event_metadata_publisher,
+                        self.requestor,
                         self.metrics,
                     )
 

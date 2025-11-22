@@ -42,9 +42,10 @@ export default function DetailActionsMenu({
     return `start/${startTime}/end/${endTime}`;
   }, [search]);
 
-  const { data: reviewItem } = useSWR<ReviewSegment>([
-    `review/event/${search.id}`,
-  ]);
+  // currently, audio event ids are not saved in review items
+  const { data: reviewItem } = useSWR<ReviewSegment>(
+    search.data?.type === "audio" ? null : [`review/event/${search.id}`],
+  );
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>

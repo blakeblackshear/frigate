@@ -572,9 +572,8 @@ export function SortTypeContent({
             className="w-full space-y-1"
           >
             {availableSortTypes.map((value) => (
-              <div className="flex flex-row gap-2">
+              <div key={value} className="flex flex-row gap-2">
                 <RadioGroupItem
-                  key={value}
                   value={value}
                   id={`sort-${value}`}
                   className={

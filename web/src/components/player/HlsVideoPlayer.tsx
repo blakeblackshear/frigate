@@ -94,24 +94,52 @@ export default function HlsVideoPlayer({
   const [loadedMetadata, setLoadedMetadata] = useState(false);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
 
+  const applyVideoDimensions = useCallback(
+    (width: number, height: number) => {
+      if (setFullResolution) {
+        setFullResolution({ width, height });
+      }
+      setVideoDimensions({ width, height });
+      if (height > 0) {
+        setTallCamera(width / height < ASPECT_VERTICAL_LAYOUT);
+      }
+    },
+    [setFullResolution],
+  );
+
   const handleLoadedMetadata = useCallback(() => {
     setLoadedMetadata(true);
-    if (videoRef.current) {
-      const width = videoRef.current.videoWidth;
-      const height = videoRef.current.videoHeight;
-
-      if (setFullResolution) {
-        setFullResolution({
-          width,
-          height,
-        });
-      }
-
-      setVideoDimensions({ width, height });
-
-      setTallCamera(width / height < ASPECT_VERTICAL_LAYOUT);
+    if (!videoRef.current) {
+      return;
     }
-  }, [videoRef, setFullResolution]);
+
+    const width = videoRef.current.videoWidth;
+    const height = videoRef.current.videoHeight;
+
+    // iOS Safari occasionally reports 0x0 for videoWidth/videoHeight
+    // Poll with requestAnimationFrame until dimensions become available (or timeout).
+    if (width > 0 && height > 0) {
+      applyVideoDimensions(width, height);
+      return;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 120; // ~2 seconds at 60fps
+    const tryGetDims = () => {
+      if (!videoRef.current) return;
+      const w = videoRef.current.videoWidth;
+      const h = videoRef.current.videoHeight;
+      if (w > 0 && h > 0) {
+        applyVideoDimensions(w, h);
+        return;
+      }
+      if (attempts < maxAttempts) {
+        attempts += 1;
+        requestAnimationFrame(tryGetDims);
+      }
+    };
+    requestAnimationFrame(tryGetDims);
+  }, [videoRef, applyVideoDimensions]);
 
   useEffect(() => {
     if (!videoRef.current) {

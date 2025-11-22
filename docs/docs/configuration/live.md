@@ -214,6 +214,42 @@ For restreamed cameras, go2rtc remains active but does not use system resources 
 
 Note that disabling a camera through the config file (`enabled: False`) removes all related UI elements, including historical footage access. To retain access while disabling the camera, keep it enabled in the config and use the UI or MQTT to disable it temporarily.
 
+### Live player error messages
+
+When your browser runs into problems playing back your camera streams, it will log short error messages to the browser console. They indicate playback, codec, or network issues on the client/browser side, not something server side with Frigate itself. Below are the common messages you may see and simple actions you can take to try to resolve them.
+
+- **startup**
+
+  - What it means: The player failed to initialize or connect to the live stream (network or startup error).
+  - What to try: Reload the Live view or click _Reset_. Verify `go2rtc` is running and the camera stream is reachable. Try switching to a different stream from the Live UI dropdown (if available) or use a different browser.
+
+  - Possible console messages from the player code:
+
+    - `Error opening MediaSource.`
+    - `Browser reported a network error.`
+    - `Max error count ${errorCount} exceeded.` (the numeric value will vary)
+
+- **mse-decode**
+
+  - What it means: The browser reported a decoding error while trying to play the stream, which usually is a result of a codec incompatibility or corrupted frames.
+  - What to try: Ensure your camera/restream is using H.264 video and AAC audio (these are the most compatible). If your camera uses a non-standard audio codec, configure `go2rtc` to transcode the stream to AAC. Try another browser (some browsers have stricter MSE/codec support) and, for iPhone, ensure you're on iOS 17.1 or newer.
+
+  - Possible console messages from the player code:
+
+    - `Safari cannot open MediaSource.`
+    - `Safari reported InvalidStateError.`
+    - `Safari reported decoding errors.`
+
+- **stalled**
+
+  - What it means: Playback has stalled because the player has fallen too far behind live (extended buffering or no data arriving).
+  - What to try: This is usually indicative of the browser struggling to decode too many high-resolution streams at once. Try selecting a lower-bandwidth stream (substream), reduce the number of live streams open, improve the network connection, or lower the camera resolution. Also check your camera's keyframe (I-frame) interval — shorter intervals make playback start and recover faster. You can also try increasing the timeout value in the UI pane of Frigate's settings.
+
+  - Possible console messages from the player code:
+
+    - `Buffer time (10 seconds) exceeded, browser may not be playing media correctly.`
+    - `Media playback has stalled after <n> seconds due to insufficient buffering or a network interruption.` (the seconds value will vary)
+
 ## Live view FAQ
 
 1. **Why don't I have audio in my Live view?**
@@ -277,3 +313,38 @@ Note that disabling a camera through the config file (`enabled: False`) removes 
 7. **My camera streams have lots of visual artifacts / distortion.**
 
    Some cameras don't include the hardware to support multiple connections to the high resolution stream, and this can cause unexpected behavior. In this case it is recommended to [restream](./restream.md) the high resolution stream so that it can be used for live view and recordings.
+
+8. **Why does my camera stream switch aspect ratios on the Live dashboard?**
+
+   Your camera may change aspect ratios on the dashboard because Frigate uses different streams for different purposes. With go2rtc and Smart Streaming, Frigate shows a static image from the `detect` stream when no activity is present, and switches to the live stream when motion is detected. The camera image will change size if your streams use different aspect ratios.
+
+   To prevent this, make the `detect` stream match the go2rtc live stream's aspect ratio (resolution does not need to match, just the aspect ratio). You can either adjust the camera's output resolution or set the `width` and `height` values in your config's `detect` section to a resolution with an aspect ratio that matches.
+
+   Example: Resolutions from two streams
+
+   - Mismatched (may cause aspect ratio switching on the dashboard):
+
+     - Live/go2rtc stream: 1920x1080 (16:9)
+     - Detect stream: 640x352 (~1.82:1, not 16:9)
+
+   - Matched (prevents switching):
+     - Live/go2rtc stream: 1920x1080 (16:9)
+     - Detect stream: 640x360 (16:9)
+
+   You can update the detect settings in your camera config to match the aspect ratio of your go2rtc live stream. For example:
+
+   ```yaml
+   cameras:
+     front_door:
+       detect:
+         width: 640
+         height: 360 # set this to 360 instead of 352
+       ffmpeg:
+         inputs:
+           - path: rtsp://127.0.0.1:8554/front_door # main stream 1920x1080
+             roles:
+               - record
+           - path: rtsp://127.0.0.1:8554/front_door_sub # sub stream 640x352
+             roles:
+               - detect
+   ```

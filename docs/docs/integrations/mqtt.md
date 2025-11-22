@@ -159,11 +159,44 @@ Message published for updates to tracked object metadata, for example:
 }
 ```
 
+#### Object Classification Update
+
+Message published when [object classification](/configuration/custom_classification/object_classification) reaches consensus on a classification result.
+
+**Sub label type:**
+
+```json
+{
+  "type": "classification",
+  "id": "1607123955.475377-mxklsc",
+  "camera": "front_door_cam",
+  "timestamp": 1607123958.748393,
+  "model": "person_classifier",
+  "sub_label": "delivery_person",
+  "score": 0.87
+}
+```
+
+**Attribute type:**
+
+```json
+{
+  "type": "classification",
+  "id": "1607123955.475377-mxklsc",
+  "camera": "front_door_cam",
+  "timestamp": 1607123958.748393,
+  "model": "helmet_detector",
+  "attribute": "yes",
+  "score": 0.92
+}
+```
+
 ### `frigate/reviews`
 
-Message published for each changed review item. The first message is published when the `detection` or `alert` is initiated. 
+Message published for each changed review item. The first message is published when the `detection` or `alert` is initiated.
 
 An `update` with the same ID will be published when:
+
 - The severity changes from `detection` to `alert`
 - Additional objects are detected
 - An object is recognized via face, lpr, etc.
@@ -307,6 +340,11 @@ Publishes the rms value for audio detected on this camera.
 Publishes transcribed text for audio detected on this camera.
 
 **NOTE:** Requires audio detection and transcription to be enabled
+
+### `frigate/<camera_name>/classification/<model_name>`
+
+Publishes the current state detected by a state classification model for the camera. The topic name includes the model name as configured in your classification settings.
+The published value is the detected state class name (e.g., `open`, `closed`, `on`, `off`). The state is only published when it changes, helping to reduce unnecessary MQTT traffic.
 
 ### `frigate/<camera_name>/enabled/set`
 
