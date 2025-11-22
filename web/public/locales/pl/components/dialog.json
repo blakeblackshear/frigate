@@ -65,7 +65,7 @@
     "export": "Eksportuj",
     "selectOrExport": "Wybierz lub Eksportuj",
     "toast": {
-      "success": "Pomyślnie rozpoczęto eksport. Zobacz plik w folderze /exports.",
+      "success": "Pomyślnie rozpoczęto eksport. Zobacz plik na stronie eksportów.",
       "error": {
         "failed": "Nie udało się rozpocząć eksportu: {{error}}",
         "endTimeMustAfterStartTime": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia",
