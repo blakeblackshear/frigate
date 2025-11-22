@@ -49,7 +49,7 @@
       "deletedName_one": "{{count}} ansikt ble slettet.",
       "deletedName_other": "{{count}} ansikter ble slettet.",
       "trainedFace": "Ansiktet ble trent.",
-      "updatedFaceScore": "Ansiktsskåring ble oppdatert.",
+      "updatedFaceScore": "Ansiktsskåring ble oppdatert til {{name}} ({{score}}).",
       "uploadedImage": "Bildet ble lastet opp.",
       "addFaceLibrary": "{{name}} ble lagt til i ansiktsbiblioteket!",
       "renamedFace": "Nytt navn ble gitt til ansikt {{name}}"

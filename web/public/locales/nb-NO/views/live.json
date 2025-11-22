@@ -180,6 +180,10 @@
   "noCameras": {
     "title": "Ingen kameraer konfigurert",
     "description": "Kom i gang ved å koble et kamera til Frigate.",
-    "buttonText": "Legg til kamera"
+    "buttonText": "Legg til kamera",
+    "restricted": {
+      "title": "Ingen kameraer tilgjengelig",
+      "description": "Du har ikke tilgang for å se noen kameraer i denne gruppen."
+    }
   }
 }
