@@ -51,7 +51,7 @@
     "h": "{{time}}h",
     "m": "{{time}}m",
     "s": "{{time}}s",
-    "yr": "le",
+    "yr": "{{time}}l.",
     "formattedTimestamp": {
       "12hour": "d MMM, h:mm:ss aaa",
       "24hour": "d MMM, HH:mm:ss"
@@ -84,7 +84,10 @@
     "formattedTimestampFilename": {
       "12hour": "dd-MM-yy-h-mm-ss-a",
       "24hour": "dd-MM-yy-HH-mm-ss"
-    }
+    },
+    "invalidStartTime": "Napačen čas začetka",
+    "invalidEndTime": "Napačen čas konca",
+    "inProgress": "V teku"
   },
   "menu": {
     "live": {
@@ -152,7 +155,13 @@
       "bg": "Български (bulgarščina)",
       "withSystem": {
         "label": "Uporabi sistemske nastavitve za jezik"
-      }
+      },
+      "ptBR": "Português brasileiro (Brazilska portugalščina)",
+      "ca": "Català (Katalonščina)",
+      "lt": "Lietuvių (Litovščina)",
+      "gl": "Galego (Galicijščina)",
+      "id": "Bahasa Indonesia (Indonezijščina)",
+      "ur": "اردو (Urdujščina)"
     },
     "appearance": "Izgled",
     "darkMode": {
@@ -179,7 +188,9 @@
       "anonymous": "anonimen",
       "logout": "Odjava",
       "setPassword": "Nastavi Geslo"
-    }
+    },
+    "uiPlayground": "UI Peskovnik",
+    "classification": "Klasifikacija"
   },
   "button": {
     "apply": "Uporabi",
@@ -216,7 +227,8 @@
     "unselect": "Odznači",
     "export": "Izvoz",
     "deleteNow": "Izbriši Zdaj",
-    "next": "Naprej"
+    "next": "Naprej",
+    "continue": "Nadaljuj"
   },
   "unit": {
     "speed": {
@@ -226,10 +238,23 @@
     "length": {
       "feet": "čevelj",
       "meters": "metri"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/uro",
+      "mbph": "MB/uro",
+      "gbph": "GB/uro"
     }
   },
   "label": {
-    "back": "Pojdi nazaj"
+    "back": "Pojdi nazaj",
+    "hide": "Skrij {{item}}",
+    "show": "Prikaži {{item}}",
+    "ID": "ID",
+    "none": "Brez",
+    "all": "Vse"
   },
   "pagination": {
     "next": {
@@ -270,5 +295,17 @@
     "title": "404",
     "desc": "Stran ni najdena"
   },
-  "readTheDocumentation": "Preberite dokumentacijo"
+  "readTheDocumentation": "Preberite dokumentacijo",
+  "list": {
+    "two": "{{0}} in {{1}}",
+    "many": "{{items}}, in {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Izbirno",
+    "internalID": "Interni ID, ki ga Frigate uporablja v konfiguraciji in podatkovni bazi"
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }
