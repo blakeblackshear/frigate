@@ -36,5 +36,11 @@
   "selected_one": "{{count}} vybráno",
   "selected_other": "{{count}} vybráno",
   "suspiciousActivity": "Podezřelá aktivita",
-  "threateningActivity": "Ohrožující činnost"
+  "threateningActivity": "Ohrožující činnost",
+  "zoomIn": "Přiblížit",
+  "zoomOut": "Oddálit",
+  "detail": {
+    "label": "Detail",
+    "noDataFound": "Žádná detailní data k prohlédnutí"
+  }
 }

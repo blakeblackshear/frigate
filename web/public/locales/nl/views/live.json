@@ -180,6 +180,10 @@
   "noCameras": {
     "title": "Geen camera’s ingesteld",
     "description": "Begin door een camera te verbinden met Frigate.",
-    "buttonText": "Camera toevoegen"
+    "buttonText": "Camera toevoegen",
+    "restricted": {
+      "title": "Geen camera's beschikbaar",
+      "description": "Je hebt geen toestemming om camera's in deze groep te bekijken."
+    }
   }
 }

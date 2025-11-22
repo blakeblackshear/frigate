@@ -1,7 +1,10 @@
 {
   "button": {
     "downloadVideo": {
-      "label": "Download Video"
+      "label": "Download Video",
+      "toast": {
+        "success": "Din video til gennemgang er begyndt at blive downloadet."
+      }
     }
   }
 }

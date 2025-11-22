@@ -172,7 +172,11 @@
   "noCameras": {
     "title": "Nie sú konfigurované žiadne kamery",
     "description": "Začnite tým, že pripojíte kameru do Frigate.",
-    "buttonText": "Pridať kameru"
+    "buttonText": "Pridať kameru",
+    "restricted": {
+      "title": "Žiadne kamery k dispozícii",
+      "description": "Nemáte povolenie na zobrazenie akýchkoľvek kamier v tejto skupine."
+    }
   },
   "snapshot": {
     "takeSnapshot": "Stiahnite si okamžité snímky",

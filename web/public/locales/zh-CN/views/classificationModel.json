@@ -18,20 +18,25 @@
       "trainedModel": "训练模型成功。",
       "trainingModel": "已开始训练模型。",
       "deletedModel_other": "已删除 {{count}} 个模型",
-      "updatedModel": "已更新模型配置"
+      "updatedModel": "已更新模型配置",
+      "renamedCategory": "成功修改类别名称为 {{name}}"
     },
     "error": {
       "deleteImageFailed": "删除失败：{{errorMessage}}",
       "deleteCategoryFailed": "删除类别失败：{{errorMessage}}",
       "categorizeFailed": "图片分类失败：{{errorMessage}}",
-      "trainingFailed": "开始训练模型失败：{{errorMessage}}",
+      "trainingFailed": "训练模型失败，请查看 Frigate 日志获取详情。",
       "deleteModelFailed": "删除模型失败：{{errorMessage}}",
-      "updateModelFailed": "更新模型失败：{{errorMessage}}"
+      "updateModelFailed": "更新模型失败：{{errorMessage}}",
+      "trainingFailedToStart": "开始训练模型失败：{{errorMessage}}",
+      "renameCategoryFailed": "修改类别名称失败：{{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "删除类别",
-    "desc": "确定要删除类别 {{name}} 吗？此操作将永久删除所有关联的图片，并需要重新训练模型。"
+    "desc": "确定要删除类别 {{name}} 吗？此操作将永久删除所有关联的图片，并需要重新训练模型。",
+    "minClassesTitle": "无法删除此类别",
+    "minClassesDesc": "分类模型必须至少有2个类别。你需要先添加一个新的类别，然后再删除当前这个类别。"
   },
   "deleteDatasetImages": {
     "title": "删除图片数据集",
@@ -138,7 +143,8 @@
         "generationFailed": "生成失败，请重试。",
         "classifyFailed": "图片分类失败：{{error}}"
       },
-      "generateSuccess": "样本图片生成成功"
+      "generateSuccess": "样本图片生成成功",
+      "allImagesRequired_other": "请对所有图片进行分类。还有 {{count}} 张图片需要分类。"
     }
   },
   "deleteModel": {
@@ -158,5 +164,11 @@
     "descriptionState": "编辑此状态分类模型的类别；更改后需要重新训练模型。",
     "descriptionObject": "编辑此目标分类模型的目标类型和分类类型。",
     "stateClassesInfo": "注意：更改状态类别后需使用更新后的类别重新训练模型。"
+  },
+  "tooltip": {
+    "trainingInProgress": "模型正在训练中",
+    "noNewImages": "没有新的图片可用于训练。请先对数据集中的更多图片进行分类。",
+    "noChanges": "自上次训练以来，数据集未作任何更改。",
+    "modelNotReady": "模型尚未准备好进行训练"
   }
 }

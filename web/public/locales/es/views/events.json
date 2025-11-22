@@ -42,12 +42,19 @@
   "zoomOut": "Alejar",
   "detail": {
     "label": "Detalle",
-    "trackedObject_one": "objeto",
-    "trackedObject_other": "objetos",
+    "trackedObject_one": "{{count}} objeto",
+    "trackedObject_other": "{{count}} objetos",
     "noObjectDetailData": "No hay datos detallados del objeto.",
-    "settings": "Configuración de la Vista Detalle"
+    "settings": "Configuración de la Vista Detalle",
+    "noDataFound": "No hay datos detallados para revisar",
+    "aria": "Alternar vista de detalles",
+    "alwaysExpandActive": {
+      "title": "Expandir siempre los activos",
+      "desc": "Expandir siempre los detalles del objeto activo cuando esten disponibles."
+    }
   },
   "objectTrack": {
-    "clickToSeek": "Clic para ir a este momento"
+    "clickToSeek": "Clic para ir a este momento",
+    "trackedPoint": "Puntro trazado"
   }
 }

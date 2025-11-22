@@ -121,7 +121,12 @@
     "unsuspended": "fortsetzen"
   },
   "label": {
-    "back": "Zurück"
+    "back": "Zurück",
+    "hide": "Verstecke {{item}}",
+    "show": "Zeige {{item}}",
+    "ID": "ID",
+    "none": "Nichts",
+    "all": "Alle"
   },
   "menu": {
     "configurationEditor": "Konfigurationseditor",
@@ -284,5 +289,14 @@
   },
   "information": {
     "pixels": "{{area}}px"
+  },
+  "field": {
+    "optional": "Optional",
+    "internalID": "Die interne ID, die Frigate in der Konfiguration und Datenbank verwendet"
+  },
+  "list": {
+    "two": "{{0}} und {{1}}",
+    "many": "{{items}}, und {{last}}",
+    "separatorWithSpace": ", "
   }
 }

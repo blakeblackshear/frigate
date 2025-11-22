@@ -6,6 +6,7 @@
     "save": "Gem søgning",
     "delete": "Slet gemt søgning",
     "filterInformation": "Filter information",
-    "filterActive": "Filtre aktiv"
+    "filterActive": "Filtre aktiv",
+    "clear": "Ryd søgning"
   }
 }

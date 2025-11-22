@@ -69,7 +69,7 @@
       "deletedName_other": "{{count}} de fețe au fost șterse cu succes.",
       "trainedFace": "Față antrenată cu succes.",
       "renamedFace": "Fața a fost redenumită cu succes ca {{name}}",
-      "updatedFaceScore": "Scorul feței a fost actualizat cu succes.",
+      "updatedFaceScore": "Scorul feței a fost actualizat cu succes la {{name}} ({{score}}).",
       "deletedFace_one": "{{count}} față a fost ștersă cu succes.",
       "deletedFace_few": "{{count}} fețe au fost șterse cu succes.",
       "deletedFace_other": "{{count}} de fețe au fost șterse cu succes.",

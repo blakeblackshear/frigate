@@ -78,7 +78,10 @@
     "formattedTimestampMonthDayYear": {
       "24hour": "MMM d, yyyy",
       "12hour": "MMM d, yyyy"
-    }
+    },
+    "inProgress": "У процесі",
+    "invalidStartTime": "Недійсний час початку",
+    "invalidEndTime": "Недійсний час завершення"
   },
   "button": {
     "exitFullscreen": "Вийти з повноекранного режиму",
@@ -115,7 +118,8 @@
     "export": "Експортувати",
     "deleteNow": "Видалити негайно",
     "next": "Наступне",
-    "unsuspended": "Відновити дію"
+    "unsuspended": "Відновити дію",
+    "continue": "Продовжити"
   },
   "menu": {
     "language": {
@@ -216,8 +220,9 @@
         "label": "Використовуйте налаштування системи для світлого або темного режиму"
       }
     },
-    "appearance": "Поява",
-    "withSystem": "Система"
+    "appearance": "Зовнішність",
+    "withSystem": "Система",
+    "classification": "Класифікація"
   },
   "unit": {
     "speed": {
@@ -241,7 +246,9 @@
     "back": "Повернутись",
     "hide": "Приховати {{item}}",
     "show": "Показати {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "Жоден",
+    "all": "Усі"
   },
   "toast": {
     "save": {

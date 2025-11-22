@@ -36,7 +36,7 @@
       "deletedFace_one": "{{count}} gezicht is succesvol verwijderd.",
       "deletedFace_other": "{{count}} gezichten zijn succesvol verwijderd.",
       "trainedFace": "Met succes getraind gezicht.",
-      "updatedFaceScore": "De gezichtsscore is succesvol bijgewerkt.",
+      "updatedFaceScore": "De gezichtsscore is succesvol bijgewerkt naar {{name}} ({{score}}).",
       "deletedName_one": "{{count}} gezicht is succesvol verwijderd.",
       "deletedName_other": "{{count}} gezichten zijn succesvol verwijderd.",
       "uploadedImage": "Afbeelding succesvol geüpload.",

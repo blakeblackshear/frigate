@@ -7,7 +7,7 @@
     "classification": "Classificatie-instellingen - Frigate",
     "masksAndZones": "Masker- en zone-editor - Frigate",
     "object": "Foutopsporing Frigate",
-    "general": "Algemene instellingen - Frigate",
+    "general": "Gebruikersinterface-instellingen - Frigate",
     "frigatePlus": "Frigate+ Instellingen - Frigate",
     "notifications": "Meldingsinstellingen - Frigate",
     "enrichments": "Verrijkingsinstellingen - Frigate",
@@ -26,7 +26,7 @@
     "frigateplus": "Frigate+",
     "enrichments": "Verrijkingen",
     "triggers": "Triggers",
-    "roles": "Functie",
+    "roles": "Rollen",
     "cameraManagement": "Beheer",
     "cameraReview": "Beoordeel"
   },
@@ -54,9 +54,13 @@
       "displayCameraNames": {
         "label": "Altijd cameranamen weergeven",
         "desc": "Toon altijd de cameranamen in een label op het live-cameradashboard."
+      },
+      "liveFallbackTimeout": {
+        "label": "Live speler fallback time-out",
+        "desc": "Wanneer de hoogwaardige livestream van een camera niet beschikbaar is, schakel dan na dit aantal seconden terug naar de modus voor lage bandbreedte. Standaard: 3."
       }
     },
-    "title": "Algemene instellingen",
+    "title": "Gebruikersinterface instellingen",
     "storedLayouts": {
       "title": "Opgeslagen indelingen",
       "clearAll": "Alle indelingen wissen",
@@ -68,7 +72,7 @@
       "clearAll": "Alle streaminginstellingen wissen"
     },
     "recordingsViewer": {
-      "title": "Opnamebekijker",
+      "title": "Opnameweergave",
       "defaultPlaybackRate": {
         "label": "Standaard afspeelsnelheid",
         "desc": "Standaard afspeelsnelheid voor het afspelen van opnames."
@@ -567,7 +571,7 @@
           "intro": "Selecteer een gepaste rol voor deze gebruiker:",
           "admin": "Beheerder",
           "adminDesc": "Volledige toegang tot alle functies.",
-          "viewer": "Gebruiker",
+          "viewer": "Kijker",
           "viewerDesc": "Alleen toegang tot Live-dashboards, Beoordelen, Verkennen en Exports.",
           "customDesc": "Aangepaste rol met specifieke cameratoegang."
         },
@@ -890,8 +894,8 @@
         "createRole": "Rol {{role}} succesvol aangemaakt",
         "updateCameras": "Camera's bijgewerkt voor rol {{role}}",
         "deleteRole": "Rol {{role}} succesvol verwijderd",
-        "userRolesUpdated_one": "{{count}} gebruiker(s) die aan deze rol waren toegewezen, zijn bijgewerkt naar ‘kijker’, die toegang heeft tot alle camera’s.",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_one": "{{count}} gebruiker die aan deze rol was toegewezen, is bijgewerkt naar de rol ‘kijker’, die toegang heeft tot alle camera’s.",
+        "userRolesUpdated_other": "{{count}} gebruikers die aan deze rol waren toegewezen, zijn bijgewerkt naar de rol ‘kijker’, die toegang heeft tot alle camera’s."
       },
       "error": {
         "createRoleFailed": "Kan rol niet aanmaken: {{errorMessage}}",
@@ -938,7 +942,8 @@
     "steps": {
       "nameAndConnection": "Naam & Verbinding",
       "streamConfiguration": "Streamconfiguratie",
-      "validationAndTesting": "Validatie & testen"
+      "validationAndTesting": "Validatie & testen",
+      "probeOrSnapshot": "Test of Snapshot"
     },
     "save": {
       "success": "Nieuwe camera {{cameraName}} succesvol opgeslagen.",
@@ -955,7 +960,7 @@
       "testFailed": "Streamtest mislukt: {{error}}"
     },
     "step1": {
-      "description": "Voer je cameragegevens in en test de verbinding.",
+      "description": "Voer de gegevens van uw camera in en kies ervoor om de camera te scannen of selecteer handmatig het merk.",
       "cameraName": "Cameranaam",
       "cameraNamePlaceholder": "bijv. voordeur of achtertuin camera",
       "host": "Host/IP-adres",
@@ -995,10 +1000,19 @@
       "testing": {
         "probingMetadata": "Camerametadata wordt onderzocht...",
         "fetchingSnapshot": "Camerasnapshot ophalen..."
-      }
+      },
+      "connectionSettings": "Verbindingsinstellingen",
+      "detectionMethod": "Stream-detectiemethode",
+      "onvifPort": "ONVIF-poort",
+      "probeMode": "Camera testen",
+      "manualMode": "Handmatige selectie",
+      "detectionMethodDescription": "Test de camera met ONVIF (indien ondersteund) om de stream-URL’s van de camera te vinden, of selecteer handmatig het cameramerk om vooraf gedefinieerde URL’s te gebruiken. Om een aangepaste RTSP-URL in te voeren, kies de handmatige methode en selecteer “Anders”.",
+      "onvifPortDescription": "Voor camera's die ONVIF ondersteunen, is dit meestal 80 of 8080.",
+      "useDigestAuth": "Gebruik digest-authenticatie",
+      "useDigestAuthDescription": "Gebruik HTTP-digestauthenticatie voor ONVIF. Sommige camera’s vereisen mogelijk een aparte ONVIF-gebruikersnaam en -wachtwoord in plaats van de standaard ‘admin’ gebruiker."
     },
     "step2": {
-      "description": "Configureer streamrollen en voeg extra streams toe voor uw camera.",
+      "description": "Controleer de camera op beschikbare streams of configureer handmatige instellingen op basis van de door u geselecteerde detectiemethode.",
       "streamsTitle": "Camerastreams",
       "addStream": "Stream toevoegen",
       "addAnotherStream": "Voeg een extra stream toe",
@@ -1017,8 +1031,8 @@
         "audio": "Audio"
       },
       "testStream": "Testverbinding",
-      "testSuccess": "Streamtest succesvol!",
-      "testFailed": "Streamtest mislukt",
+      "testSuccess": "Verbindingstest succesvol!",
+      "testFailed": "Verbindingstest mislukt. Controleer uw invoer en probeer het opnieuw.",
       "testFailedTitle": "Test mislukt",
       "connected": "Aangesloten",
       "notConnected": "Niet verbonden",
@@ -1034,10 +1048,42 @@
       "featuresPopover": {
         "title": "Streamfuncties",
         "description": "Gebruik go2rtc-herstreaming om het aantal verbindingen met je camera te verminderen."
+      },
+      "streamDetails": "Streamdetails",
+      "probing": "Camera wordt getest...",
+      "retry": "Opnieuw proberen",
+      "testing": {
+        "probingMetadata": "Camera-metadata onderzoeken...",
+        "fetchingSnapshot": "Camerasnapshot ophalen..."
+      },
+      "probeFailed": "Het testen van de camera is mislukt: {{error}}",
+      "probingDevice": "Onderzoekapparaat...",
+      "probeSuccessful": "Test succesvol",
+      "probeError": "Testfout",
+      "probeNoSuccess": "Test mislukt",
+      "deviceInfo": "Apparaatinformatie",
+      "manufacturer": "Fabrikant",
+      "model": "Model",
+      "firmware": "Firmware",
+      "profiles": "Profielen",
+      "ptzSupport": "PTZ-ondersteuning",
+      "autotrackingSupport": "Ondersteuning voor automatische tracking",
+      "presets": "Standaardinstellingen",
+      "rtspCandidates": "RTSP-kandidaten",
+      "rtspCandidatesDescription": "De volgende RTSP-URL's zijn gevonden door de camera te scannen. Test de verbinding om de metagegevens van de stream te bekijken.",
+      "noRtspCandidates": "Er zijn geen RTSP-URL’s gevonden van de camera. Je inloggegevens zijn mogelijk onjuist, of de camera ondersteunt ONVIF of de gebruikte methode voor het ophalen van RTSP-URL’s niet. Ga terug en voer de RTSP-URL handmatig in.",
+      "candidateStreamTitle": "Kandidaat {{number}}",
+      "useCandidate": "Gebruik",
+      "uriCopy": "Kopiëren",
+      "uriCopied": "URI gekopieerd naar klembord",
+      "testConnection": "Testverbinding",
+      "toggleUriView": "Klik om te schakelen tussen volledige URI-weergave",
+      "errors": {
+        "hostRequired": "Host/IP-adres is vereist"
       }
     },
     "step3": {
-      "description": "Laatste controle en analyse voordat je je nieuwe camera opslaat. Verbind elke stream voordat je opslaat.",
+      "description": "Configureer streamrollen en voeg extra streams toe voor uw camera.",
       "validationTitle": "Streamvalidatie",
       "connectAllStreams": "Verbind alle streams",
       "reconnectionSuccess": "Opnieuw verbinden gelukt.",
@@ -1078,7 +1124,91 @@
         "resolutionLow": "Een resolutie van {{resolution}} kan te laag zijn voor betrouwbare detectie van kleine objecten."
       },
       "ffmpegModule": "Gebruik stream-compatibiliteitsmodus",
-      "ffmpegModuleDescription": "Als de stream na meerdere pogingen niet wordt geladen, probeer dit dan in te schakelen. Wanneer deze optie is ingeschakeld, gebruikt Frigate de ffmpeg-module samen met go2rtc. Dit kan zorgen voor een betere compatibiliteit met sommige camerastreams."
+      "ffmpegModuleDescription": "Als de stream na meerdere pogingen niet wordt geladen, probeer dit dan in te schakelen. Wanneer deze optie is ingeschakeld, gebruikt Frigate de ffmpeg-module samen met go2rtc. Dit kan zorgen voor een betere compatibiliteit met sommige camerastreams.",
+      "streamsTitle": "Camerastreams",
+      "addStream": "Stream toevoegen",
+      "addAnotherStream": "Voeg een extra stream toe",
+      "streamUrl": "Stream-URL",
+      "streamUrlPlaceholder": "rtsp://gebruikersnaam:wachtwoord@host:poort/pad",
+      "selectStream": "Selecteer een stream",
+      "searchCandidates": "Zoek kandidaten...",
+      "noStreamFound": "Geen stream gevonden",
+      "url": "URL",
+      "resolution": "Resolutie",
+      "selectResolution": "Selecteer resolutie",
+      "quality": "Kwaliteit",
+      "selectQuality": "Selecteer kwaliteit",
+      "roleLabels": {
+        "detect": "Objectdetectie",
+        "record": "Opname",
+        "audio": "Audio"
+      },
+      "testStream": "Testverbinding",
+      "testSuccess": "Streamtest succesvol!",
+      "testFailed": "Streamtest mislukt",
+      "testFailedTitle": "Test mislukt",
+      "connected": "Aangesloten",
+      "notConnected": "Niet verbonden",
+      "featuresTitle": "Functies",
+      "go2rtc": "Verminder verbindingen met de camera",
+      "detectRoleWarning": "Er moet minimaal één stream de rol 'detecteren' hebben om door te kunnen gaan.",
+      "rolesPopover": {
+        "title": "Streamrollen",
+        "detect": "Hoofdstream voor objectdetectie.",
+        "record": "Slaat segmenten van de videostream op op basis van de configuratie-instellingen.",
+        "audio": "Stream voor op audio gebaseerde detectie."
+      },
+      "featuresPopover": {
+        "title": "Streamfuncties",
+        "description": "Gebruik go2rtc-herstreaming om het aantal verbindingen met je camera te verminderen."
+      }
+    },
+    "step4": {
+      "description": "Laatste controle en analyse voordat je je nieuwe camera opslaat. Verbind elke stream voordat je opslaat.",
+      "validationTitle": "Streamvalidatie",
+      "connectAllStreams": "Verbind alle streams",
+      "reconnectionSuccess": "Opnieuw verbinden gelukt.",
+      "reconnectionPartial": "Bij sommige streams kon de verbinding niet worden hersteld.",
+      "streamUnavailable": "Streamvoorbeeld niet beschikbaar",
+      "reload": "Herladen",
+      "connecting": "Verbinden...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Geldig",
+      "failed": "Mislukt",
+      "notTested": "Niet getest",
+      "connectStream": "Verbinden",
+      "connectingStream": "Verbinden",
+      "disconnectStream": "Verbreek verbinding",
+      "estimatedBandwidth": "Geschatte bandbreedte",
+      "roles": "Rollen",
+      "ffmpegModule": "Gebruik stream-compatibiliteitsmodus",
+      "ffmpegModuleDescription": "Als de stream na meerdere pogingen niet wordt geladen, probeer dit dan in te schakelen. Wanneer deze optie is ingeschakeld, gebruikt Frigate de ffmpeg-module samen met go2rtc. Dit kan zorgen voor een betere compatibiliteit met sommige camerastreams.",
+      "none": "Geen",
+      "error": "Fout",
+      "streamValidated": "Stream {{number}} is succesvol gevalideerd",
+      "streamValidationFailed": "Stream {{number}} validatie mislukt",
+      "saveAndApply": "Nieuwe camera opslaan",
+      "saveError": "Ongeldige configuratie, Controleer uw instellingen.",
+      "issues": {
+        "title": "Streamvalidatie",
+        "videoCodecGood": "Videocodec is {{codec}}.",
+        "audioCodecGood": "Audiocodec is {{codec}}.",
+        "resolutionHigh": "Een resolutie van {{resolution}} kan leiden tot een verhoogd gebruik van systeembronnen.",
+        "resolutionLow": "Een resolutie van {{resolution}} kan te laag zijn voor betrouwbare detectie van kleine objecten.",
+        "noAudioWarning": "Geen audio gedetecteerd voor deze stream, opnames bevatten geen audio.",
+        "audioCodecRecordError": "De AAC-audiocodec is vereist om audio in opnames te ondersteunen.",
+        "audioCodecRequired": "Ter ondersteuning van audiodetectie is een audiostream vereist.",
+        "restreamingWarning": "Als u het aantal verbindingen met de camera voor de opnamestream vermindert, kan het CPU-gebruik iets toenemen.",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP wordt niet aanbevolen. Schakel HTTP in via de firmware-instellingen van de camera en start de wizard opnieuw."
+        },
+        "dahua": {
+          "substreamWarning": "Substream 1 is beperkt tot een lage resolutie. Veel Dahua / Amcrest / EmpireTech camera’s ondersteunen extra substreams die in de instellingen van de camera ingeschakeld moeten worden. Het wordt aanbevolen deze streams te controleren en te gebruiken indien beschikbaar."
+        },
+        "hikvision": {
+          "substreamWarning": "Substream 1 is beperkt tot een lage resolutie. Veel Hikvision-camera’s ondersteunen extra substreams die in de instellingen van de camera ingeschakeld moeten worden. Het wordt aanbevolen deze streams te controleren en te gebruiken indien beschikbaar."
+        }
+      }
     }
   },
   "cameraManagement": {

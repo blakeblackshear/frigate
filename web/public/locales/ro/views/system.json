@@ -42,6 +42,11 @@
         "closeInfo": {
           "label": "Închide informațiile GPU"
         }
+      },
+      "intelGpuWarning": {
+        "title": "Avertisment statistici GPU Intel",
+        "message": "Statistici GPU indisponibile",
+        "description": "Aceasta este o eroare cunoscută în instrumentele Intel pentru raportarea statisticilor GPU (intel_gpu_top), unde acestea se blochează și returnează repetat o utilizare GPU de 0%, chiar și în cazurile în care accelerarea hardware și detectarea obiectelor rulează corect pe (i)GPU. Aceasta nu este o eroare Frigate. Poți reporni gazda pentru a remedia temporar problema și pentru a confirma că GPU-ul funcționează corect. Aceasta nu afectează performanța."
       }
     },
     "detector": {
@@ -123,15 +128,22 @@
       "face_embedding_speed": "Viteză încorporare fețe",
       "yolov9_plate_detection_speed": "Viteza detecției numerelor de înmatriculare YOLOv9",
       "text_embedding_speed": "Viteză încorporare text",
-      "yolov9_plate_detection": "Detectare numere de înmatriculare YOLOv9"
+      "yolov9_plate_detection": "Detectare numere de înmatriculare YOLOv9",
+      "review_description": "Descriere Revizuire",
+      "review_description_speed": "Viteză Descriere Revizuire",
+      "review_description_events_per_second": "Descriere Revizuire",
+      "object_description": "Descriere Obiect",
+      "object_description_speed": "Viteză Descriere Obiect",
+      "object_description_events_per_second": "Descriere Obiect"
     },
-    "infPerSecond": "Inferențe pe secundă"
+    "infPerSecond": "Inferențe pe secundă",
+    "averageInf": "Timp Mediu de Inferență"
   },
   "cameras": {
     "info": {
       "codec": "Codec:",
       "resolution": "Rezoluție:",
-      "cameraProbeInfo": "Informații sondare cameră {{camera}}",
+      "cameraProbeInfo": "Informații testare cameră {{camera}}",
       "streamDataFromFFPROBE": "Datele stream-ului sunt obținute cu <code>ffprobe</code>.",
       "aspectRatio": "raport aspect",
       "fetching": "Se preiau datele camerei",
@@ -140,7 +152,7 @@
       "audio": "Sunet:",
       "error": "Eroare:{{error}}",
       "tips": {
-        "title": "Informații sondă cameră"
+        "title": "Informații test cameră"
       },
       "fps": "Cadre/s:",
       "unknown": "Necunoscut"
@@ -166,10 +178,10 @@
     "framesAndDetections": "Cadre / Detecții",
     "toast": {
       "success": {
-        "copyToClipboard": "Datele sondei au fost copiate."
+        "copyToClipboard": "Datele testului au fost copiate."
       },
       "error": {
-        "unableToProbeCamera": "Sondarea camerei nu a fost posibilă: {{errorMessage}}"
+        "unableToProbeCamera": "Testarea camerei nu a fost posibilă: {{errorMessage}}"
       }
     }
   },

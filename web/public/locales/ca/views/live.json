@@ -180,6 +180,10 @@
   "noCameras": {
     "title": "No s'ha configurat cap càmera",
     "description": "Comenceu connectant una càmera a Frigate.",
-    "buttonText": "Afegeix una càmera"
+    "buttonText": "Afegeix una càmera",
+    "restricted": {
+      "title": "No hi ha càmeres disponibles",
+      "description": "No teniu permís per veure cap càmera en aquest grup."
+    }
   }
 }

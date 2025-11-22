@@ -16,10 +16,10 @@
     "pm": "pm",
     "am": "am",
     "yr": "{{time}}år",
-    "mo": "{{time}} mån",
+    "mo": "{{time}}må",
     "month_one": "{{time}} månad",
     "month_other": "{{time}} månader",
-    "d": "{{time}}dag",
+    "d": "{{time}}d",
     "last7": "Senaste 7 dagarna",
     "5minutes": "5 minuter",
     "last30": "Senaste 30 dagarna",
@@ -35,13 +35,13 @@
       "12hour": "d MMM, yyyy",
       "24hour": "d MMM, yyy"
     },
-    "h": "{{time}} h",
+    "h": "{{time}}t",
     "hour_one": "{{time}} timme",
     "hour_other": "{{time}} timmar",
-    "m": "{{time}} m",
+    "m": "{{time}}m",
     "minute_one": "{{time}} minut",
     "minute_other": "{{time}} minuter",
-    "s": "{{time}} s",
+    "s": "{{time}}s",
     "formattedTimestamp": {
       "12hour": "d MMM, kl. h:mm:ss a",
       "24hour": "d MMM, HH:mm:ss"
@@ -72,7 +72,10 @@
       "24hour": "dd-MM-yy-HH-mm-ss"
     },
     "day_one": "{{time}} dag",
-    "day_other": "{{time}} dagar"
+    "day_other": "{{time}} dagar",
+    "inProgress": "Pågår",
+    "invalidStartTime": "Ogiltig starttid",
+    "invalidEndTime": "Ogiltig sluttid"
   },
   "button": {
     "save": "Spara",
@@ -104,12 +107,13 @@
     "cameraAudio": "Kameraljud",
     "on": "PÅ",
     "off": "AV",
-    "delete": "Släng",
+    "delete": "Radera",
     "yes": "Ja",
     "no": "Nej",
     "download": "Ladda ner",
     "info": "Info",
-    "export": "Exportera"
+    "export": "Exportera",
+    "continue": "Fortsätta"
   },
   "menu": {
     "language": {
@@ -209,7 +213,8 @@
     "languages": "Språk",
     "configurationEditor": "Konfigurationsredigerare",
     "withSystem": "System",
-    "appearance": "Utseende"
+    "appearance": "Utseende",
+    "classification": "Klassificering"
   },
   "pagination": {
     "next": {
@@ -253,7 +258,9 @@
     "back": "Gå tillbaka",
     "hide": "Dölj {{item}}",
     "show": "Visa {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "Ingen",
+    "all": "Alla"
   },
   "unit": {
     "speed": {

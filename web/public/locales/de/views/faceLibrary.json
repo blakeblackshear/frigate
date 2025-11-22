@@ -1,7 +1,7 @@
 {
   "description": {
     "placeholder": "Gib einen Name für diese Kollektion ein",
-    "addFace": "Anleitung für das Hinzufügen einer neuen Kollektion zur Gesichtsbibliothek.",
+    "addFace": "Füge der Gesichtsbibliothek eine neue Sammlung hinzu, indem ein erstes Bild hochgeladen wird.",
     "invalidName": "Ungültiger Name. Namen dürfen nur Buchstaben, Zahlen, Leerzeichen, Apostrophe, Unterstriche und Bindestriche enthalten."
   },
   "details": {
@@ -22,7 +22,7 @@
     "title": "Kollektion erstellen",
     "new": "Lege ein neues Gesicht an",
     "desc": "Erstelle eine neue Kollektion",
-    "nextSteps": "Um eine solide Grundlage zu bilden: <li> Benutze den Trainieren Tab, um Bilder für jede erkannte Person auszuwählen und zu trainieren.</li> <li>Konzentriere dich für gute Ergebnisse auf Frontalfotos; vermeide Bilder zu Trainingszwecken, bei denen Gesichter aus einem Winkel erfasst wurden.</li></ul>"
+    "nextSteps": "Um eine solide Grundlage zu bilden: <li> Benutze den \"Aktuelle Erkennungen\" Tab, um Bilder für jede erkannte Person auszuwählen und zu trainieren.</li> <li>Konzentriere dich für gute Ergebnisse auf Frontalfotos; vermeide Bilder zu Trainingszwecken, bei denen Gesichter aus einem Winkel erfasst wurden.</li></ul>"
   },
   "documentTitle": "Gesichtsbibliothek - Frigate",
   "selectItem": "Wähle {{item}}",
@@ -44,8 +44,8 @@
     "deleteFace": "Lösche Gesicht"
   },
   "train": {
-    "title": "Trainiere",
-    "aria": "Wähle Training",
+    "title": "Aktuelle Erkennungen",
+    "aria": "Wähle aktuelle Erkennungen",
     "empty": "Es gibt keine aktuellen Versuche zur Gesichtserkennung"
   },
   "deleteFaceLibrary": {

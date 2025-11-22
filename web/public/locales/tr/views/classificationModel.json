@@ -36,15 +36,18 @@
   "deleteModel": {
     "title": "Sınıflandırma Modelini Sil",
     "single": "{{name}} öğesini silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz.",
-    "desc": "{{count}} modeli silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz."
+    "desc_one": "{{count}} modeli silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz.",
+    "desc_other": ""
   },
   "deleteDatasetImages": {
     "title": "Eğitim verisi görsellerini sil",
-    "desc": "{{dataset}} veri kümesinden {{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve modelin yeniden eğitilmesini gerektirecektir."
+    "desc_one": "{{dataset}} veri kümesinden {{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve modelin yeniden eğitilmesini gerektirecektir.",
+    "desc_other": ""
   },
   "deleteTrainImages": {
     "title": "Eğitim Görsellerini Sil",
-    "desc": "{{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+    "desc_one": "{{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "desc_other": ""
   },
   "renameCategory": {
     "title": "Sınıfı Yeniden Adlandır",

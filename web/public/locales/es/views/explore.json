@@ -111,7 +111,8 @@
     "video": "vídeo",
     "object_lifecycle": "ciclo de vida del objeto",
     "details": "detalles",
-    "thumbnail": "miniatura"
+    "thumbnail": "miniatura",
+    "tracking_details": "detalles de seguimiento"
   },
   "objectLifecycle": {
     "title": "Ciclo de vida del objeto",
@@ -227,9 +228,14 @@
     "label": "Preocupaciones"
   },
   "trackingDetails": {
-    "title": "Detalles del Seguimiento",
+    "title": "Detalles del seguimiento",
     "noImageFound": "No se ha encontrado imagen en este momento.",
-    "createObjectMask": "Crear Máscara de Objeto",
-    "adjustAnnotationSettings": "Ajustar configuración de anotaciones"
+    "createObjectMask": "Crear máscara de objeto",
+    "adjustAnnotationSettings": "Ajustar configuración de anotaciones",
+    "scrollViewTips": "Haz clic para ver los momentos relevantes del ciclo de vida de este objeto.",
+    "count": "{{first}} de {{second}}",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} detectado"
+    }
   }
 }

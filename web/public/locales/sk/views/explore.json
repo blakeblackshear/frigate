@@ -112,7 +112,8 @@
     "snapshot": "snímka",
     "video": "video",
     "object_lifecycle": "životný cyklus objektu",
-    "thumbnail": "Náhľad"
+    "thumbnail": "Náhľad",
+    "tracking_details": "Pohybové detaili"
   },
   "objectLifecycle": {
     "title": "Životný cyklus Objektu",
@@ -228,7 +229,9 @@
         "success": "Sledovaný objekt úspešne zmazaný.",
         "error": "Sledovaný objekt sa nepodarilo zmazať: {{errorMessage}}"
       }
-    }
+    },
+    "previousTrackedObject": "Predchádzajúci trackovaný objekt",
+    "nextTrackedObject": "Ďalší trackovaný objekt"
   },
   "aiAnalysis": {
     "title": "Analýza AI"

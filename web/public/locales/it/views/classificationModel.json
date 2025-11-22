@@ -20,28 +20,37 @@
       "deletedModel_one": "Eliminato con successo {{count}} modello",
       "deletedModel_many": "Eliminati con successo {{count}} modelli",
       "deletedModel_other": "Eliminati con successo {{count}} modelli",
-      "updatedModel": "Configurazione del modello aggiornata correttamente"
+      "updatedModel": "Configurazione del modello aggiornata correttamente",
+      "renamedCategory": "Classe rinominata correttamente in {{name}}"
     },
     "error": {
       "deleteImageFailed": "Impossibile eliminare: {{errorMessage}}",
       "deleteCategoryFailed": "Impossibile eliminare la classe: {{errorMessage}}",
       "categorizeFailed": "Impossibile categorizzare l'immagine: {{errorMessage}}",
-      "trainingFailed": "Impossibile avviare l'addestramento del modello: {{errorMessage}}",
+      "trainingFailed": "Addestramento del modello fallito. Controlla i registri di Frigate per i dettagli.",
       "deleteModelFailed": "Impossibile eliminare il modello: {{errorMessage}}",
-      "updateModelFailed": "Impossibile aggiornare il modello: {{errorMessage}}"
+      "updateModelFailed": "Impossibile aggiornare il modello: {{errorMessage}}",
+      "trainingFailedToStart": "Impossibile avviare l'addestramento del modello: {{errorMessage}}",
+      "renameCategoryFailed": "Impossibile rinominare la classe: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Elimina classe",
-    "desc": "Vuoi davvero eliminare la classe {{name}}? Questa operazione eliminerà definitivamente tutte le immagini associate e richiederà un nuovo addestramento del modello."
+    "desc": "Vuoi davvero eliminare la classe {{name}}? Questa operazione eliminerà definitivamente tutte le immagini associate e richiederà un nuovo addestramento del modello.",
+    "minClassesTitle": "Impossibile eliminare la classe",
+    "minClassesDesc": "Un modello di classificazione deve avere almeno 2 classi. Aggiungi un'altra classe prima di eliminare questa."
   },
   "deleteDatasetImages": {
     "title": "Elimina immagini della base dati",
-    "desc": "Vuoi davvero eliminare {{count}} immagini da {{dataset}}? Questa azione non può essere annullata e richiederà un nuovo addestramento del modello."
+    "desc_one": "Vuoi davvero eliminare {{count}} immagine da {{dataset}}? Questa azione non può essere annullata e richiederà un nuovo addestramento del modello.",
+    "desc_many": "Vuoi davvero eliminare {{count}} immagini da {{dataset}}? Questa azione non può essere annullata e richiederà un nuovo addestramento del modello.",
+    "desc_other": "Vuoi davvero eliminare {{count}} immagini da {{dataset}}? Questa azione non può essere annullata e richiederà un nuovo addestramento del modello."
   },
   "deleteTrainImages": {
     "title": "Elimina le immagini di addestramento",
-    "desc": "Vuoi davvero eliminare {{count}} immagini? Questa azione non può essere annullata."
+    "desc_one": "Vuoi davvero eliminare {{count}} immagine? Questa azione non può essere annullata.",
+    "desc_many": "Vuoi davvero eliminare {{count}} immagini? Questa azione non può essere annullata.",
+    "desc_other": "Vuoi davvero eliminare {{count}} immagini? Questa azione non può essere annullata."
   },
   "renameCategory": {
     "title": "Rinomina classe",
@@ -140,13 +149,18 @@
         "generationFailed": "Generazione fallita. Per favore riprova.",
         "classifyFailed": "Impossibile classificare le immagini: {{error}}"
       },
-      "generateSuccess": "Immagini campione generate correttamente"
+      "generateSuccess": "Immagini campione generate correttamente",
+      "allImagesRequired_one": "Classifica tutte le immagini. Rimane {{count}} immagine.",
+      "allImagesRequired_many": "Classifica tutte le immagini. Rimangono {{count}} immagini.",
+      "allImagesRequired_other": "Classifica tutte le immagini. Rimangono {{count}} immagini."
     }
   },
   "deleteModel": {
     "title": "Elimina modello di classificazione",
     "single": "Vuoi davvero eliminare {{name}}? Questa operazione eliminerà definitivamente tutti i dati associati, comprese le immagini e i dati di allenamento. Questa azione non può essere annullata.",
-    "desc": "Vuoi davvero eliminare {{count}} modello/i? Questa operazione eliminerà definitivamente tutti i dati associati, comprese le immagini e i dati di addestramento. Questa azione non può essere annullata."
+    "desc_one": "Vuoi davvero eliminare {{count}} modello? Questa operazione eliminerà definitivamente tutti i dati associati, comprese le immagini e i dati di addestramento. Questa azione non può essere annullata.",
+    "desc_many": "Vuoi davvero eliminare {{count}} modelli? Questa operazione eliminerà definitivamente tutti i dati associati, comprese le immagini e i dati di addestramento. Questa azione non può essere annullata.",
+    "desc_other": "Vuoi davvero eliminare {{count}} modelli? Questa operazione eliminerà definitivamente tutti i dati associati, comprese le immagini e i dati di addestramento. Questa azione non può essere annullata."
   },
   "menu": {
     "objects": "Oggetti",
@@ -160,5 +174,11 @@
     "descriptionState": "Modifica le classi per questo modello di classificazione dello stato. Le modifiche richiederanno un nuovo addestramento del modello.",
     "descriptionObject": "Modifica il tipo di oggetto e il tipo di classificazione per questo modello di classificazione degli oggetti.",
     "stateClassesInfo": "Nota: la modifica delle classi di stato richiede il riaddestramento del modello con le classi aggiornate."
+  },
+  "tooltip": {
+    "trainingInProgress": "Il modello è attualmente in addestramento",
+    "modelNotReady": "Il modello non è pronto per l'addestramento",
+    "noNewImages": "Nessuna nuova immagine da addestrare. Classifica prima più immagini nel database.",
+    "noChanges": "Nessuna modifica al database dall'ultimo addestramento."
   }
 }

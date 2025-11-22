@@ -180,7 +180,14 @@
       "face_recognition": "人脸特征提取",
       "plate_recognition": "车牌识别",
       "yolov9_plate_detection_speed": "YOLOv9 车牌检测速度",
-      "yolov9_plate_detection": "YOLOv9 车牌检测"
-    }
+      "yolov9_plate_detection": "YOLOv9 车牌检测",
+      "review_description": "核查描述",
+      "review_description_speed": "核查描述速度",
+      "review_description_events_per_second": "核查描述",
+      "object_description": "目标描述",
+      "object_description_speed": "目标描述速度",
+      "object_description_events_per_second": "目标描述"
+    },
+    "averageInf": "平均推理时间"
   }
 }

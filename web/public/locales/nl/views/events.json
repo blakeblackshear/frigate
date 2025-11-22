@@ -40,8 +40,8 @@
   "detail": {
     "noDataFound": "Geen gedetailleerde gegevens om te beoordelen",
     "aria": "Detailweergave in- of uitschakelen",
-    "trackedObject_one": "object",
-    "trackedObject_other": "objecten",
+    "trackedObject_one": "{{count}} object",
+    "trackedObject_other": "{{count}} objecten",
     "noObjectDetailData": "Geen objectdetails beschikbaar.",
     "label": "Detail",
     "settings": "Instellingen voor detailweergave",

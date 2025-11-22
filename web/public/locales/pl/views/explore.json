@@ -159,7 +159,8 @@
     "details": "szczegóły",
     "snapshot": "zrzut ekranu",
     "video": "wideo",
-    "object_lifecycle": "cykl życia obiektu"
+    "object_lifecycle": "cykl życia obiektu",
+    "thumbnail": "miniaturka"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -224,5 +225,13 @@
   },
   "concerns": {
     "label": "Obawy"
+  },
+  "trackingDetails": {
+    "title": "Szczegóły śledzenia",
+    "noImageFound": "Nie znaleziono obrazka dla podanego czasu.",
+    "createObjectMask": "Utwórz maskę obiektu",
+    "adjustAnnotationSettings": "Dostosuj ustawienia adnotacji",
+    "scrollViewTips": "Kliknij, aby zobaczyć najważniejsze momenty cyklu życia tego obiektu.",
+    "count": "{{first}} z {{second}}"
   }
 }

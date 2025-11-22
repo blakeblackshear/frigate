@@ -87,7 +87,8 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d MMM, yyyy",
       "24hour": "d MMM, yyyy"
-    }
+    },
+    "inProgress": "В процессе"
   },
   "selectItem": "Выбрать {{item}}",
   "button": {
@@ -128,7 +129,12 @@
     "next": "Следующий"
   },
   "label": {
-    "back": "Вернуться"
+    "back": "Вернуться",
+    "hide": "Скрыть {{item}}",
+    "show": "Показать {{item}}",
+    "ID": "ID",
+    "all": "Все",
+    "none": "Ничего"
   },
   "unit": {
     "speed": {
@@ -248,7 +254,8 @@
       "logout": "Выход",
       "setPassword": "Установить пароль"
     },
-    "appearance": "Внешний вид"
+    "appearance": "Внешний вид",
+    "classification": "Распознование"
   },
   "pagination": {
     "label": "пагинация",
@@ -291,5 +298,14 @@
   "readTheDocumentation": "Читать документацию",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} и {{1}}",
+    "many": "{{items}}, и {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Необязательный",
+    "internalID": "Внутренний идентификатор Frigate, используемый в конфигурации и базе данных"
   }
 }

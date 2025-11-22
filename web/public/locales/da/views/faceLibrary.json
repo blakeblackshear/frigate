@@ -1,10 +1,19 @@
 {
   "selectItem": "Vælg {{item}}",
   "description": {
-    "addFace": "Gennemgang af tilføjelse til ansigts bibliotek",
-    "placeholder": "Angiv et navn for bibliotek"
+    "addFace": "Tilføj en ny samling til ansigtsbiblioteket ved at uploade dit første billede.",
+    "placeholder": "Angiv et navn for bibliotek",
+    "invalidName": "Ugyldigt navn. Navne må kun indeholde bogstaver, tal, mellemrum, apostroffer, understregninger og bindestreger."
   },
   "details": {
-    "person": "Person"
+    "person": "Person",
+    "timestamp": "Tidsstempel",
+    "unknown": "Ukendt",
+    "scoreInfo": "Scoren er et vægtet gennemsnit af alle ansigtsscorer, vægtet efter ansigtets størrelse på hvert billede."
+  },
+  "documentTitle": "Ansigtsbibliotek - Frigate",
+  "uploadFaceImage": {
+    "title": "Upload ansigtsbillede",
+    "desc": "Upload et billede for at scanne efter ansigter og inkludere det for {{pageToggle}}"
   }
 }

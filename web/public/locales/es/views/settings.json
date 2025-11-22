@@ -7,7 +7,7 @@
     "camera": "Configuración de cámara - Frigate",
     "motionTuner": "Ajuste de movimiento - Frigate",
     "classification": "Configuración de clasificación - Frigate",
-    "general": "Configuración General - Frigate",
+    "general": "Configuración de Interfaz de Usuario - Frigate",
     "frigatePlus": "Configuración de Frigate+ - Frigate",
     "notifications": "Configuración de Notificaciones - Frigate",
     "enrichments": "Configuración de Análisis Avanzado - Frigate",
@@ -78,7 +78,7 @@
       "title": "Diseños guardados",
       "clearAll": "Borrar todos los diseños"
     },
-    "title": "Configuración general",
+    "title": "Ajustes de Interfaz de Usuario",
     "toast": {
       "success": {
         "clearStoredLayout": "Diseño almacenado eliminado para {{cameraName}}",

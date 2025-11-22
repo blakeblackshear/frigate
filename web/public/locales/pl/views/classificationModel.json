@@ -2,6 +2,57 @@
   "documentTitle": "Modele klasyfikacji",
   "button": {
     "deleteClassificationAttempts": "Usuń obrazy klasyfikacyjne",
-    "renameCategory": "Zmień nazwę klasy"
+    "renameCategory": "Zmień nazwę klasy",
+    "deleteCategory": "Usuń klasę",
+    "deleteImages": "Usuń obrazy",
+    "trainModel": "Przeszkol model",
+    "addClassification": "Dodaj klasyfikację",
+    "deleteModels": "Usuń modele",
+    "editModel": "Edytuj model"
+  },
+  "details": {
+    "scoreInfo": "Wynik przedstawia średnią pewność klasyfikacji wszystkich wykryć danego obiektu."
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Usunięte klasy",
+      "deletedImage": "Usunięte obrazy",
+      "deletedModel_one": "Pomyślenie usunięto {{count}} model",
+      "deletedModel_few": "Pomyślenie usunięto {{count}} modele",
+      "deletedModel_many": "Pomyślenie usunięto {{count}} modeli",
+      "categorizedImage": "Obraz pomyślnie sklasyfikowany",
+      "trainedModel": "Model pomyślnie wytrenowany",
+      "trainingModel": "Pomyślnie uruchomiono trenowanie modelu.",
+      "updatedModel": "Pomyślnie zaktualizowane ustawienia modelu",
+      "renamedCategory": "Pomyślnie zmieniono nazwę klasy na {{name}}"
+    },
+    "error": {
+      "deleteImageFailed": "Nie udało się usunąć: {{errorMessage}}",
+      "deleteCategoryFailed": "Nie udało się usunąć klasy: {{errorMessage}}",
+      "deleteModelFailed": "Nie udało się usunąć modelu: {{errorMessage}}",
+      "categorizeFailed": "Nie udało się skategoryzować obrazka: {{errorMessage}}",
+      "trainingFailed": "Trening modelu zakończył się niepowodzeniem. Sprawdź logi Frigate aby uzyskać więcej informacji.",
+      "updateModelFailed": "Nie udało się zaktualizować modelu: {{errorMessage}}",
+      "trainingFailedToStart": "Nie udało się rozpocząć trenowania modelu: {{errorMessage}}",
+      "renameCategoryFailed": "Nie udało się zmienić nazwy klasy: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Usuń klasę",
+    "desc": "Czy na pewno chcesz usunąć klasę {{name}}? Spowoduje to trawałe usunięcie wszystkich powiązanych obrazków i konieczność ponownego trenowania modelu."
+  },
+  "deleteModel": {
+    "title": "Usuń model klasyfikacji",
+    "single": "Czy na pewno chcesz usunąć {{name}}? Spowoduje to trwałe usunięcie wszystkich powiązanych data włącznie z obrazkami i danymi treningowymi. Nie można cofnąć tej operacji.",
+    "desc_one": "Czy na pewno chcesz usunąć {{count}} model? Spowoduje to trwałe usunięcie wszystkich powiązanych danych, włącznie z obrazami i danymi treningowymi. Nie można cofnąć tej operacji.",
+    "desc_few": "Czy na pewno chcesz usunąć {{count}} modele? Spowoduje to trwałe usunięcie wszystkich powiązanych danych, włącznie z obrazami i danymi treningowymi. Nie można cofnąć tej operacji.",
+    "desc_many": "Czy na pewno chcesz usunąć {{count}} modeli? Spowoduje to trwałe usunięcie wszystkich powiązanych danych, włącznie z obrazami i danymi treningowymi. Nie można cofnąć tej operacji."
+  },
+  "edit": {
+    "title": "Edytuj model klasyfikacji"
+  },
+  "tooltip": {
+    "trainingInProgress": "Trwa trenowanie modelu",
+    "modelNotReady": "Mode nie jest gotowy do trenowania"
   }
 }

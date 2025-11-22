@@ -17,31 +17,40 @@
       "categorizedImage": "Imatge classificada amb èxit",
       "trainedModel": "Model entrenat amb èxit.",
       "trainingModel": "S'ha iniciat amb èxit la formació de models.",
-      "deletedModel_one": "S'ha suprimit correctament el model {{count}}",
-      "deletedModel_many": "S'han suprimit correctament {{count}} models",
-      "deletedModel_other": "",
-      "updatedModel": "S'ha actualitzat correctament la configuració del model"
+      "deletedModel_one": "S'ha suprimit correctament {{count}} model",
+      "deletedModel_many": "S'han suprimit correctament els {{count}} models",
+      "deletedModel_other": "S'han suprimit correctament els {{count}} models",
+      "updatedModel": "S'ha actualitzat correctament la configuració del model",
+      "renamedCategory": "S'ha canviat el nom de la classe a {{name}}"
     },
     "error": {
       "deleteImageFailed": "No s'ha pogut suprimir: {{errorMessage}}",
       "deleteCategoryFailed": "No s'ha pogut suprimir la classe: {{errorMessage}}",
       "categorizeFailed": "No s'ha pogut categoritzar la imatge: {{errorMessage}}",
-      "trainingFailed": "No s'ha pogut iniciar l'entrenament del model: {{errorMessage}}",
+      "trainingFailed": "Ha fallat l'entrenament del model. Comproveu els registres de fragata per a més detalls.",
       "deleteModelFailed": "No s'ha pogut suprimir el model: {{errorMessage}}",
-      "updateModelFailed": "No s'ha pogut actualitzar el model: {{errorMessage}}"
+      "updateModelFailed": "No s'ha pogut actualitzar el model: {{errorMessage}}",
+      "renameCategoryFailed": "No s'ha pogut canviar el nom de la classe: {{errorMessage}}",
+      "trainingFailedToStart": "Errar en arrencar l'entrenament del model: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Suprimeix la classe",
-    "desc": "Esteu segur que voleu suprimir la classe {{name}}? Això suprimirà permanentment totes les imatges associades i requerirà tornar a entrenar el model."
+    "desc": "Esteu segur que voleu suprimir la classe {{name}}? Això suprimirà permanentment totes les imatges associades i requerirà tornar a entrenar el model.",
+    "minClassesTitle": "No es pot suprimir la classe",
+    "minClassesDesc": "Un model de classificació ha de tenir almenys 2 classes. Afegeix una altra classe abans d'eliminar aquesta."
   },
   "deleteDatasetImages": {
     "title": "Suprimeix les imatges del conjunt de dades",
-    "desc": "Esteu segur que voleu suprimir {{count}} imatges de {{dataset}}? Aquesta acció no es pot desfer i requerirà tornar a entrenar el model."
+    "desc_one": "Esteu segur que voleu suprimir {{count}} imatge de {{dataset}}? Aquesta acció no es pot desfer i requerirà tornar a entrenar el model.",
+    "desc_many": "Esteu segur que voleu suprimir {{count}} imatges de {{dataset}}? Aquesta acció no es pot desfer i requerirà tornar a entrenar el model.",
+    "desc_other": "Esteu segur que voleu suprimir {{count}} imatges de {{dataset}}? Aquesta acció no es pot desfer i requerirà tornar a entrenar el model."
   },
   "deleteTrainImages": {
     "title": "Suprimeix les imatges del tren",
-    "desc": "Esteu segur que voleu suprimir {{count}} imatges? Aquesta acció no es pot desfer."
+    "desc_one": "Esteu segur que voleu suprimir {{count}} imatge? Aquesta acció no es pot desfer.",
+    "desc_many": "Esteu segur que voleu suprimir {{count}} imatges? Aquesta acció no es pot desfer.",
+    "desc_other": "Esteu segur que voleu suprimir {{count}} imatges? Aquesta acció no es pot desfer."
   },
   "renameCategory": {
     "title": "Reanomena la classe",
@@ -140,13 +149,18 @@
         "generationFailed": "Ha fallat la generació. Torneu-ho a provar.",
         "classifyFailed": "No s'han pogut classificar les imatges: {{error}}"
       },
-      "generateSuccess": "Imatges de mostra generades amb èxit"
+      "generateSuccess": "Imatges de mostra generades amb èxit",
+      "allImagesRequired_one": "Classifiqueu totes les imatges. Queda {{count}} imatge.",
+      "allImagesRequired_many": "Classifiqueu totes les imatges. Queden {{count}} imatges.",
+      "allImagesRequired_other": "Classifiqueu totes les imatges. Queden {{count}} imatges."
     }
   },
   "deleteModel": {
     "title": "Suprimeix el model de classificació",
     "single": "Esteu segur que voleu suprimir {{name}}? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer.",
-    "desc": "Esteu segur que voleu suprimir {{count}} model(s)? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer."
+    "desc_one": "Esteu segur que voleu suprimir el model {{count}}? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer.",
+    "desc_many": "Esteu segur que voleu suprimir {{count}} models? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer.",
+    "desc_other": "Esteu segur que voleu suprimir {{count}} models? Això suprimirà permanentment totes les dades associades, incloses les imatges i les dades d'entrenament. Aquesta acció no es pot desfer."
   },
   "menu": {
     "objects": "Objectes",
@@ -160,5 +174,11 @@
     "descriptionState": "Edita les classes per a aquest model de classificació d'estats. Els canvis requeriran tornar a entrenar el model.",
     "descriptionObject": "Edita el tipus d'objecte i el tipus de classificació per a aquest model de classificació d'objectes.",
     "stateClassesInfo": "Nota: Canviar les classes d'estat requereix tornar a entrenar el model amb les classes actualitzades."
+  },
+  "tooltip": {
+    "trainingInProgress": "El model s'està entrenant actualment",
+    "noNewImages": "Sense noves imatges per entrenar. Classifica més imatges primer.",
+    "modelNotReady": "El model no está preparat per entrenar",
+    "noChanges": "No hi ha canvis al conjunt de dades des de l'última formació."
   }
 }

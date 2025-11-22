@@ -13,7 +13,17 @@
   "exploreIsUnavailable": {
     "embeddingsReindexing": {
       "startingUp": "Starter…",
-      "estimatedTime": "Estimeret tid tilbage:"
-    }
+      "estimatedTime": "Estimeret tid tilbage:",
+      "context": "Udforsk kan bruges, når genindekseringen af de sporede objektindlejringer er fuldført.",
+      "finishingShortly": "Afsluttes om lidt",
+      "step": {
+        "thumbnailsEmbedded": "Miniaturer indlejret: "
+      }
+    },
+    "title": "Udforsk er ikke tilgængelig"
+  },
+  "exploreMore": "Udforsk flere {{label}}-objekter",
+  "details": {
+    "timestamp": "Tidsstempel"
   }
 }

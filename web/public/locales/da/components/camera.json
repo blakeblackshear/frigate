@@ -11,7 +11,11 @@
       }
     },
     "name": {
-      "label": "Navn"
+      "label": "Navn",
+      "placeholder": "Indtast et navn…",
+      "errorMessage": {
+        "mustLeastCharacters": "Kameragruppens navn skal være mindst 2 tegn."
+      }
     }
   }
 }
