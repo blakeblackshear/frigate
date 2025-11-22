@@ -227,6 +227,12 @@ cameras:
 
 ### Unifi Protect Cameras
 
+:::note 
+
+Unifi G5s cameras and newer need a Unifi Protect server to enable rtsps stream, it's not posible to enable it in standalone mode.
+
+:::
+
 Unifi protect cameras require the rtspx stream to be used with go2rtc.
 To utilize a Unifi protect camera, modify the rtsps link to begin with rtspx.
 Additionally, remove the "?enableSrtp" from the end of the Unifi link.
