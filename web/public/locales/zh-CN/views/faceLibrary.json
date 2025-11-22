@@ -62,7 +62,7 @@
       "deletedFace_other": "成功删除 {{count}} 个 人脸特征。",
       "deletedName_other": "成功删除 {{count}} 个 人脸特征。",
       "trainedFace": "人脸特征训练成功。",
-      "updatedFaceScore": "更新人脸特征评分成功。",
+      "updatedFaceScore": "更新 {{name}} 人脸特征评分（{{score}}）成功。",
       "renamedFace": "成功重命名人脸为{{name}}"
     },
     "error": {

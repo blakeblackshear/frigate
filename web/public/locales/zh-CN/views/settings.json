@@ -7,7 +7,7 @@
     "masksAndZones": "遮罩和区域编辑器 - Frigate",
     "motionTuner": "运动调整器 - Frigate",
     "object": "调试 - Frigate",
-    "general": "常规设置 - Frigate",
+    "general": "页面设置 - Frigate",
     "frigatePlus": "Frigate+ 设置 - Frigate",
     "notifications": "通知设置 - Frigate",
     "enrichments": "增强功能设置 - Frigate",
@@ -41,7 +41,7 @@
     "noCamera": "没有摄像头"
   },
   "general": {
-    "title": "常规设置",
+    "title": "页面设置",
     "liveDashboard": {
       "title": "实时监控面板",
       "automaticLiveView": {
@@ -55,6 +55,10 @@
       "displayCameraNames": {
         "label": "始终显示摄像头名称",
         "desc": "在有多摄像头情况下的实时监控页面，将始终显示摄像头名称标签。"
+      },
+      "liveFallbackTimeout": {
+        "label": "实时监控播放器回退超时",
+        "desc": "当摄像头的高清实时监控流不可用时，将在此时间后回退到低带宽模式。默认值：3秒。"
       }
     },
     "storedLayouts": {
@@ -305,7 +309,7 @@
       "name": {
         "title": "区域名称",
         "inputPlaceHolder": "请输入名称…",
-        "tips": "名称至少包含两个字符，其中至少需要一个英文字母，且不能和摄像头或其他区域同名。同时，当前仅支持英文与数字组合。"
+        "tips": "名称至少包含两个字符，且不能和摄像头或其他区域同名。"
       },
       "inertia": {
         "title": "惯性",
@@ -433,7 +437,7 @@
       "desc": "将在被追踪的目标周围显示边界框",
       "colors": {
         "label": "目标边界框颜色定义",
-        "info": "<li>启用后，将会为每个目标的标签分配不同的颜色</li><li>深蓝色细线代表该目标或物体在当前时间点未被检测到</li><li>灰色细线代表检测到的目标或物体静止不动</li><li>粗线表示该目标或物体为自动跟踪的主体（在启动时）</li>"
+        "info": "<li>启用后，将会为每个目标的标签分配不同的颜色</li><li>深蓝色细线代表该目标或物体在当前时间点未被检测到</li><li>灰色细线代表检测到的目标或物体静止不动</li><li>粗线表示在启动自动追踪时，该目标为自动追踪的主体</li>"
       }
     },
     "timestamp": {
@@ -934,7 +938,8 @@
     "steps": {
       "nameAndConnection": "名称与连接",
       "streamConfiguration": "视频流配置",
-      "validationAndTesting": "验证与测试"
+      "validationAndTesting": "验证与测试",
+      "probeOrSnapshot": "探测或快照"
     },
     "save": {
       "success": "已保存新摄像头 {{cameraName}}。",
@@ -951,7 +956,7 @@
       "testFailed": "视频流测试失败：{{error}}"
     },
     "step1": {
-      "description": "请输入你的摄像头信息并测试连接是否正常。",
+      "description": "请输入你的摄像头信息，并选择是自动探测摄像头信息还是手动指定品牌。",
       "cameraName": "摄像头名称",
       "cameraNamePlaceholder": "例如：大门，后院等",
       "host": "主机/IP地址",
@@ -991,10 +996,19 @@
       "testing": {
         "probingMetadata": "正在获取摄像头基本数据……",
         "fetchingSnapshot": "正在获取摄像头快照……"
-      }
+      },
+      "connectionSettings": "连接设置",
+      "detectionMethod": "视频流检测方法",
+      "onvifPort": "ONVIF 端口",
+      "probeMode": "探测摄像头",
+      "manualMode": "手动选择",
+      "detectionMethodDescription": "如果支持 ONVIF 协议，将使用该协议探测摄像头，以自动获取摄像头视频流地址；若不支持，也可手动选择摄像头品牌来使用预设地址。如需输入自定义RTSP地址，请选择手动模式并选取\"其他\"选项。",
+      "onvifPortDescription": "对于支持ONVIF协议的摄像头，该端口通常为80或8080。",
+      "useDigestAuth": "使用摘要认证",
+      "useDigestAuthDescription": "为ONVIF协议启用HTTP摘要认证。部分摄像头可能需要专用的 ONVIF 用户名/密码，而非默认的admin账户。"
     },
     "step2": {
-      "description": "配置视频流的功能并为摄像头添加额外的视频流。",
+      "description": "将根据你选择的检测方式，将会自动查找摄像头可用流配置，或进行手动配置。",
       "streamsTitle": "摄像头视频流",
       "addStream": "添加视频流",
       "addAnotherStream": "添加另一个视频流",
@@ -1013,8 +1027,8 @@
         "audio": "音频"
       },
       "testStream": "测试连接",
-      "testSuccess": "视频流测试通过！",
-      "testFailed": "视频流测试失败",
+      "testSuccess": "连接测试通过！",
+      "testFailed": "连接测试失败，请检查输入项后重试。",
       "testFailedTitle": "测试失败",
       "connected": "已连接",
       "notConnected": "未连接",
@@ -1030,10 +1044,42 @@
       "featuresPopover": {
         "title": "视频流特殊功能",
         "description": "将使用go2rtc的转流功能来减少摄像头连接数。"
+      },
+      "streamDetails": "视频流详情",
+      "probing": "正在检测摄像头中……",
+      "retry": "重试",
+      "testing": {
+        "probingMetadata": "正在查询摄像头参数……",
+        "fetchingSnapshot": "正在获取摄像头快照……"
+      },
+      "probeFailed": "检测摄像头失败：{{error}}",
+      "probingDevice": "寻找设备中……",
+      "probeSuccessful": "检测成功",
+      "probeError": "检测遇到错误",
+      "probeNoSuccess": "检测未成功",
+      "deviceInfo": "设备信息",
+      "manufacturer": "制造商",
+      "model": "型号",
+      "firmware": "固件",
+      "profiles": "配置文件",
+      "ptzSupport": "支持 PTZ",
+      "autotrackingSupport": "支持自动追踪",
+      "presets": "预设配置",
+      "rtspCandidates": "RTSP候选地址",
+      "rtspCandidatesDescription": "通过摄像头自动检测发现了以下RTSP地址。测试连接以查看视频流参数。",
+      "noRtspCandidates": "未从摄像头检测到任何 RTSP 地址。可能是你的账号密码错误，或者摄像头不支持 ONVIF 协议，亦或是当前采用的 RTSP 地址获取方式无效。请返回上一步，尝试手动输入RTSP地址。",
+      "candidateStreamTitle": "候选{{number}}",
+      "useCandidate": "使用",
+      "uriCopy": "复制",
+      "uriCopied": "地址已复制到剪贴板",
+      "testConnection": "测试连接",
+      "toggleUriView": "点击切换完整 URI 显示",
+      "errors": {
+        "hostRequired": "主机/IP地址为必填"
       }
     },
     "step3": {
-      "description": "在保存新摄像头前将进行最终验证与分析。保存前请连接所有视频流。",
+      "description": "为你的摄像头配置视频流功能并添加额外视频流。",
       "validationTitle": "视频流验证",
       "connectAllStreams": "连接所有视频流",
       "reconnectionSuccess": "重连成功。",
@@ -1074,7 +1120,91 @@
         "resolutionLow": "使用 {{resolution}} 分辨率可能过低，难以检测较小的物体。"
       },
       "ffmpegModule": "使用视频流兼容模式",
-      "ffmpegModuleDescription": "如果多次尝试后视频流仍无法加载，可以尝试启用此功能。启用后，Frigate 将使用集成 go2rtc 的 ffmpeg 模块，这可能会提高与某些摄像头视频流的兼容性。"
+      "ffmpegModuleDescription": "如果多次尝试后视频流仍无法加载，可以尝试启用此功能。启用后，Frigate 将使用集成 go2rtc 的 ffmpeg 模块，这可能会提高与某些摄像头视频流的兼容性。",
+      "streamsTitle": "摄像头视频流",
+      "addStream": "添加视频流",
+      "addAnotherStream": "添加其他视频流",
+      "streamUrl": "视频流地址",
+      "streamUrlPlaceholder": "rtsp://用户名:密码@主机:端口/路径",
+      "selectStream": "选择一个视频流",
+      "searchCandidates": "搜索候选项……",
+      "noStreamFound": "没有找到视频流",
+      "url": "URL地址",
+      "resolution": "分辨率",
+      "selectResolution": "选择分辨率",
+      "quality": "质量",
+      "selectQuality": "选择质量",
+      "roleLabels": {
+        "detect": "目标检测",
+        "record": "录制",
+        "audio": "音频检测"
+      },
+      "testStream": "测试连接",
+      "testSuccess": "视频流测试成功！",
+      "testFailed": "视频流测试失败",
+      "testFailedTitle": "测试失败",
+      "connected": "已连接",
+      "notConnected": "未连接",
+      "featuresTitle": "功能特性",
+      "go2rtc": "减少与摄像头的连接数",
+      "detectRoleWarning": "必须得有一个视频流设置了“检测”功能才能继续操作。",
+      "rolesPopover": {
+        "title": "视频流功能",
+        "detect": "用于目标检测的主码流。",
+        "record": "根据配置设置保存视频流片段。",
+        "audio": "用于音频检测的音视频流。"
+      },
+      "featuresPopover": {
+        "title": "视频流功能特性",
+        "description": "使用 go2rtc 中继转流功能，减少与摄像头的网络连接数，提升效率。"
+      }
+    },
+    "step4": {
+      "description": "将进行保存新摄像头配置前的最终验证与分析，请在保存前确保所有视频流均已连接。",
+      "validationTitle": "视频流验证",
+      "connectAllStreams": "连接所有视频流",
+      "reconnectionSuccess": "重新连接成功。",
+      "reconnectionPartial": "部分视频流重新连接失败。",
+      "streamUnavailable": "视频流预览不可用",
+      "reload": "重新加载",
+      "connecting": "连接中……",
+      "streamTitle": "视频流 {{number}}",
+      "valid": "通过",
+      "failed": "失败",
+      "notTested": "未测试",
+      "connectStream": "连接",
+      "connectingStream": "连接中",
+      "disconnectStream": "断开连接",
+      "estimatedBandwidth": "预估带宽",
+      "roles": "功能",
+      "ffmpegModule": "使用视频流兼容模式",
+      "ffmpegModuleDescription": "若多次尝试后仍无法加载视频流，可尝试启用此功能。启用后，Frigate 将通过 go2rtc 调用 ffmpeg 模块。这可能会提升与部分摄像头视频流的兼容性。",
+      "none": "无",
+      "error": "错误",
+      "streamValidated": "视频流 {{number}} 验证成功",
+      "streamValidationFailed": "视频流 {{number}} 验证失败",
+      "saveAndApply": "保存新摄像头",
+      "saveError": "配置无效，请检查您的设置。",
+      "issues": {
+        "title": "视频流验证",
+        "videoCodecGood": "视频编解码器为 {{codec}}。",
+        "audioCodecGood": "音频编解码器为 {{codec}}。",
+        "resolutionHigh": "使用 {{resolution}} 分辨率可能导致资源使用率增加。",
+        "resolutionLow": "{{resolution}} 分辨率可能过低，难以可靠检测小型目标或物体。",
+        "noAudioWarning": "检测到该视频流无音频信号，录制视频将没有声音。",
+        "audioCodecRecordError": "录制功能需要 AAC 音频编解码器以实现音频支持。",
+        "audioCodecRequired": "要实现音频检测功能，必须要有音频流。",
+        "restreamingWarning": "为录制流开启“减少与摄像头的连接数”可能会略微增加CPU使用率。",
+        "brands": {
+          "reolink-rtsp": "不建议使用 Reolink 的 RTSP 协议。请在摄像头后台设置中启用 HTTP协议，并重新启动向导。"
+        },
+        "dahua": {
+          "substreamWarning": "子码流1当前被锁定为低分辨率。多数大华、安讯士、EmpireTech品牌的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动启用。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
+        },
+        "hikvision": {
+          "substreamWarning": "子码流1当前被锁定为低分辨率。多数海康威视的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动启用。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
+        }
+      }
     }
   },
   "cameraManagement": {
