@@ -180,6 +180,10 @@
   "noCameras": {
     "title": "Nicio Cameră Configurată",
     "description": "Începe prin a conecta o cameră la Frigate.",
-    "buttonText": "Adaugă cameră"
+    "buttonText": "Adaugă cameră",
+    "restricted": {
+      "title": "Nicio Cameră Disponibilă",
+      "description": "Nu aveți permisiunea de a vizualiza camere în acest grup."
+    }
   }
 }

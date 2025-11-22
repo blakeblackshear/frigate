@@ -20,28 +20,37 @@
       "deletedModel_one": "{{count}} model șters cu succes",
       "deletedModel_few": "{{count}} modele șterse cu succes",
       "deletedModel_other": "{{count}} modele șterse cu succes",
-      "updatedModel": "Configurația modelului a fost actualizată cu succes"
+      "updatedModel": "Configurația modelului a fost actualizată cu succes",
+      "renamedCategory": "Clasa a fost redenumită cu succes în {{name}}"
     },
     "error": {
       "deleteImageFailed": "Ștergerea a eșuat: {{errorMessage}}",
       "deleteCategoryFailed": "Ștergerea clasei a eșuat: {{errorMessage}}",
       "categorizeFailed": "Categorisirea imaginii a eșuat: {{errorMessage}}",
-      "trainingFailed": "Pornirea antrenamentului modelului a eșuat: {{errorMessage}}",
+      "trainingFailed": "Antrenarea modelului a eșuat. Verifică jurnalele Frigate pentru detalii.",
       "deleteModelFailed": "Ștergerea modelului a eșuat: {{errorMessage}}",
-      "updateModelFailed": "Actualizarea modelului a eșuat: {{errorMessage}}"
+      "updateModelFailed": "Actualizarea modelului a eșuat: {{errorMessage}}",
+      "renameCategoryFailed": "Redenumirea clasei a eșuat: {{errorMessage}}",
+      "trainingFailedToStart": "Nu s-a putut porni antrenarea modelului: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Șterge clasa",
-    "desc": "Sigur doriți să ștergeți clasa {{name}}? Aceasta va șterge permanent toate imaginile asociate și va necesita reantrenarea modelului."
+    "desc": "Sigur doriți să ștergeți clasa {{name}}? Aceasta va șterge permanent toate imaginile asociate și va necesita reantrenarea modelului.",
+    "minClassesTitle": "Nu se poate șterge clasa",
+    "minClassesDesc": "Un model de clasificare trebuie să aibă cel puțin 2 clase. Adaugă o altă clasă înainte de a o șterge pe aceasta."
   },
   "deleteDatasetImages": {
     "title": "Șterge imaginile setului de date",
-    "desc": "Sigur doriți să ștergeți {{count}} imagini din {{dataset}}? Această acțiune nu poate fi anulată și va necesita reantrenarea modelului."
+    "desc_one": "Sigur doriți să ștergeți {{count}} imagine din {{dataset}}? Această acțiune nu poate fi anulată și va necesita reantrenarea modelului.",
+    "desc_few": "Sigur doriți să ștergeți {{count}} imagini din {{dataset}}? Această acțiune nu poate fi anulată și va necesita reantrenarea modelului.",
+    "desc_other": "Sigur doriți să ștergeți {{count}} de imagini din {{dataset}}? Această acțiune nu poate fi anulată și va necesita reantrenarea modelului."
   },
   "deleteTrainImages": {
     "title": "Șterge imaginile de antrenament",
-    "desc": "Sigur doriți să ștergeți {{count}} imagini? Această acțiune nu poate fi anulată."
+    "desc_one": "Sigur doriți să ștergeți {{count}} imagine? Această acțiune nu poate fi anulată.",
+    "desc_few": "Sigur doriți să ștergeți {{count}} imagini? Această acțiune nu poate fi anulată.",
+    "desc_other": "Sigur doriți să ștergeți {{count}} de imagini? Această acțiune nu poate fi anulată."
   },
   "renameCategory": {
     "title": "Redenumește clasa",
@@ -140,13 +149,18 @@
         "generationFailed": "Generarea a eșuat. Vă rugăm să încercați din nou.",
         "classifyFailed": "Clasificarea imaginilor a eșuat: {{error}}"
       },
-      "generateSuccess": "Imaginile de exemplu au fost generate cu succes"
+      "generateSuccess": "Imaginile de exemplu au fost generate cu succes",
+      "allImagesRequired_one": "Te rog să clasifici toate imaginile. {{count}} imagine rămasă.",
+      "allImagesRequired_few": "Te rog să clasifici toate imaginile. {{count}} imagini rămase.",
+      "allImagesRequired_other": "Te rog să clasifici toate imaginile. {{count}} de imagini rămase."
     }
   },
   "deleteModel": {
     "title": "Șterge modelul de clasificare",
     "single": "Sigur doriți să ștergeți {{name}}? Aceasta va șterge permanent toate datele asociate, inclusiv imaginile și datele de antrenament. Această acțiune nu poate fi anulată.",
-    "desc": "Sigur doriți să ștergeți {{count}} model(e)? Aceasta va șterge permanent toate datele asociate, inclusiv imaginile și datele de antrenament. Această acțiune nu poate fi anulată."
+    "desc_one": "Sigur doriți să ștergeți {{count}} model? Aceasta va șterge permanent toate datele asociate, inclusiv imaginile și datele de antrenament. Această acțiune nu poate fi anulată.",
+    "desc_few": "Sigur doriți să ștergeți {{count}} modele? Aceasta va șterge permanent toate datele asociate, inclusiv imaginile și datele de antrenament. Această acțiune nu poate fi anulată.",
+    "desc_other": "Sigur doriți să ștergeți {{count}} de modele? Aceasta va șterge permanent toate datele asociate, inclusiv imaginile și datele de antrenament. Această acțiune nu poate fi anulată."
   },
   "menu": {
     "objects": "Obiecte",
@@ -160,5 +174,11 @@
     "descriptionState": "Editează clasele pentru acest model de clasificare a stării. Modificările vor necesita reantrenarea modelului.",
     "descriptionObject": "Editează tipul de obiect și tipul de clasificare pentru acest model de clasificare a obiectelor.",
     "stateClassesInfo": "Notă: Modificarea claselor de stare necesită reantrenarea modelului cu clasele actualizate."
+  },
+  "tooltip": {
+    "trainingInProgress": "Modelul este în curs de antrenare",
+    "noNewImages": "Nu există imagini noi pentru antrenare. Clasifică mai întâi mai multe imagini în setul de date.",
+    "modelNotReady": "Modelul nu este pregătit pentru antrenare",
+    "noChanges": "Nicio modificare a setului de date de la ultima antrenare."
   }
 }
