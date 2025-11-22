@@ -5,7 +5,7 @@
     "camera": "Paramètres des caméras - Frigate",
     "classification": "Paramètres de classification - Frigate",
     "motionTuner": "Réglage de la détection de mouvement - Frigate",
-    "general": "Paramètres généraux - Frigate",
+    "general": "Paramètres de l'interface utilisateur - Frigate",
     "masksAndZones": "Éditeur de masques et de zones - Frigate",
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
@@ -41,7 +41,7 @@
     "noCamera": "Aucune caméra"
   },
   "general": {
-    "title": "Paramètres généraux",
+    "title": "Paramètres de l'interface utilisateur",
     "liveDashboard": {
       "title": "Tableau de bord en direct",
       "automaticLiveView": {
@@ -55,6 +55,10 @@
       "displayCameraNames": {
         "label": "Toujours afficher les noms des caméras",
         "desc": "Toujours afficher les noms des caméras dans une puce sur le tableau de bord de la vue en direct multi-caméras"
+      },
+      "liveFallbackTimeout": {
+        "label": "Délai d'attente avant repli (Lecteur en direct)",
+        "desc": "Lorsque le flux en direct haute qualité d'une caméra est indisponible, le lecteur bascule en mode faible bande passante après ce nombre de secondes. Par défaut : 3."
       }
     },
     "storedLayouts": {
@@ -893,9 +897,9 @@
         "createRole": "Rôle {{role}} créé avec succès",
         "updateCameras": "Caméras mis à jour pour le rôle {{role}}",
         "deleteRole": "Rôle {{role}} supprimé avec succès",
-        "userRolesUpdated_one": "{{count}} utilisateurs affectés à ce rôle ont été mis à jour avec des droits \"Observateur\", et ont accès à toutes les caméras.",
-        "userRolesUpdated_many": "",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_one": "{{count}} utilisateur affecté à ce rôle a été mis à jour avec des droits \"Observateur\", et a accès à toutes les caméras.",
+        "userRolesUpdated_many": "{{count}} utilisateurs affectés à ce rôle ont été mis à jour avec des droits \"Observateur\", et ont accès à toutes les caméras.",
+        "userRolesUpdated_other": "{{count}} utilisateurs affectés à ce rôle ont été mis à jour avec des droits \"Observateur\", et ont accès à toutes les caméras."
       },
       "error": {
         "createRoleFailed": "Échec dans la création du rôle : {{errorMessage}}",
@@ -942,7 +946,8 @@
     "steps": {
       "nameAndConnection": "Nom et connexion",
       "streamConfiguration": "Configuration du flux",
-      "validationAndTesting": "Validation et tests"
+      "validationAndTesting": "Validation et tests",
+      "probeOrSnapshot": "Sondage ou Instantané"
     },
     "save": {
       "success": "Nouvelle caméra {{cameraName}} enregistrée avec succès",
@@ -959,7 +964,7 @@
       "testFailed": "Échec du test de flux : {{error}}"
     },
     "step1": {
-      "description": "Saisissez les détails de votre caméra et testez la connexion.",
+      "description": "Saisissez les détails de votre caméra et choisissez d'interroger la caméra ou de sélectionner manuellement la marque.",
       "cameraName": "Nom de la caméra",
       "cameraNamePlaceholder": "par ex., porte_entree ou apercu_cour_arriere",
       "host": "Hôte / Adresse IP",
@@ -999,10 +1004,19 @@
       "testing": {
         "probingMetadata": "Vérification des métadonnées de la caméra en cours...",
         "fetchingSnapshot": "Récupération de l'instantané de la caméra en cours..."
-      }
+      },
+      "connectionSettings": "Paramètres de connexion",
+      "detectionMethod": "Méthode de détection du flux",
+      "onvifPort": "Port ONVIF",
+      "probeMode": "Interroger la caméra",
+      "manualMode": "Sélection manuelle",
+      "detectionMethodDescription": "Interrogez la caméra avec ONVIF (si pris en charge) pour trouver les URL de flux de la caméra, ou sélectionnez manuellement la marque de la caméra pour utiliser des URL prédéfinies. Pour saisir une URL RTSP personnalisée, choisissez la méthode manuelle et sélectionnez \"Autre\".",
+      "onvifPortDescription": "Pour les caméras prenant en charge ONVIF, il s'agit généralement de 80 ou 8080.",
+      "useDigestAuth": "Utiliser l'authentification Digest",
+      "useDigestAuthDescription": "Utilisez l'authentification Digest HTTP pour ONVIF. Certaines caméras peuvent nécessiter un nom d'utilisateur/mot de passe ONVIF dédié au lieu de l'utilisateur administrateur standard."
     },
     "step2": {
-      "description": "Définissez les rôles du flux et ajoutez des flux supplémentaires pour votre caméra.",
+      "description": "Interrogez la caméra pour les flux disponibles ou configurez des paramètres manuels en fonction de la méthode de détection sélectionnée.",
       "streamsTitle": "Flux de caméra",
       "addStream": "Ajouter un flux",
       "addAnotherStream": "Ajouter un autre flux",
@@ -1021,8 +1035,8 @@
         "detect": "Détection d'objets"
       },
       "testStream": "Tester la connexion",
-      "testSuccess": "Test du flux réussi !",
-      "testFailed": "Échec du test du flux",
+      "testSuccess": "Test de connexion réussi !",
+      "testFailed": "Échec du test de connexion. Veuillez vérifier votre saisie et réessayer.",
       "testFailedTitle": "Échec du test",
       "connected": "Connecté",
       "notConnected": "Non connecté",
@@ -1038,10 +1052,42 @@
       "featuresPopover": {
         "title": "Fonctionnalités du flux",
         "description": "Utilisez la rediffusion du flux go2rtc pour réduire le nombre de connexions à votre caméra."
+      },
+      "streamDetails": "Détails du flux",
+      "probing": "Interrogation de la caméra en cours...",
+      "retry": "Réessayer",
+      "testing": {
+        "probingMetadata": "Interrogation des métadonnées de la caméra en cours...",
+        "fetchingSnapshot": "Récupération de l'instantané de la caméra en cours..."
+      },
+      "probeFailed": "Impossible d'interroger la caméra : {{error}}",
+      "probingDevice": "Interrogation de l'appareil en cours...",
+      "probeSuccessful": "Interrogation réussie",
+      "probeError": "Erreur d'interrogation",
+      "probeNoSuccess": "Échec de l'interrogation",
+      "deviceInfo": "Informations sur l'appareil",
+      "manufacturer": "Fabricant",
+      "model": "Modèle",
+      "firmware": "Micrologiciel",
+      "profiles": "Profils",
+      "ptzSupport": "Prise en charge PTZ",
+      "autotrackingSupport": "Prise en charge du suivi automatique",
+      "presets": "Préréglages",
+      "rtspCandidates": "Candidats RTSP",
+      "rtspCandidatesDescription": "Les URL RTSP suivantes ont été trouvées lors de l'interrogation de la caméra. Testez la connexion pour afficher les métadonnées du flux.",
+      "noRtspCandidates": "Aucune URL RTSP n'a été trouvée sur la caméra. Vos identifiants sont peut-être incorrects, ou la caméra ne prend peut-être pas en charge ONVIF ou la méthode utilisée pour récupérer les URL RTSP. Revenez en arrière et saisissez l'URL RTSP manuellement.",
+      "candidateStreamTitle": "Candidat {{number}}",
+      "useCandidate": "Utiliser",
+      "uriCopy": "Copier",
+      "uriCopied": "URI copiée dans le presse-papiers",
+      "testConnection": "Tester la connexion",
+      "toggleUriView": "Cliquer pour basculer l'affichage de l'URI complet",
+      "errors": {
+        "hostRequired": "L'hôte/adresse IP est requis."
       }
     },
     "step3": {
-      "description": "Validation et analyse finales avant l'enregistrement de votre nouvelle caméra. Connectez chaque flux avant d'enregistrer.",
+      "description": "Configurez les rôles des flux et ajoutez des flux supplémentaires pour votre caméra.",
       "validationTitle": "Validation du flux",
       "connectAllStreams": "Connecter tous les flux",
       "reconnectionSuccess": "Reconnexion réussie.",
@@ -1082,7 +1128,91 @@
       },
       "valid": "Valide",
       "ffmpegModule": "Utiliser le mode de compatibilité du flux",
-      "ffmpegModuleDescription": "Si le flux ne se charge pas après plusieurs tentatives, essayez d'activer cette option. Lorsqu'elle est activée, Frigate utilisera le module ffmpeg avec go2rtc. Cela peut offrir une meilleure compatibilité avec certains flux de caméra."
+      "ffmpegModuleDescription": "Si le flux ne se charge pas après plusieurs tentatives, essayez d'activer cette option. Lorsqu'elle est activée, Frigate utilisera le module ffmpeg avec go2rtc. Cela peut offrir une meilleure compatibilité avec certains flux de caméra.",
+      "streamsTitle": "Flux de la caméra",
+      "addStream": "Ajouter un flux",
+      "addAnotherStream": "Ajouter un autre flux",
+      "streamUrl": "URL du flux",
+      "streamUrlPlaceholder": "rtsp://nomdutilisateur:motdepasse@hote:port/chemin",
+      "selectStream": "Sélectionner un flux",
+      "searchCandidates": "Rechercher des candidats",
+      "noStreamFound": "Aucun flux trouvé",
+      "url": "URL",
+      "resolution": "Résolution",
+      "selectResolution": "Sélectionner la résolution",
+      "quality": "Qualité",
+      "selectQuality": "Sélectionner la qualité",
+      "roleLabels": {
+        "detect": "Détection d'objet",
+        "record": "Enregistrement",
+        "audio": "Audio"
+      },
+      "testStream": "Tester la connexion",
+      "testSuccess": "Test du flux réussi !",
+      "testFailed": "Échec du test du flux",
+      "testFailedTitle": "Échec du test",
+      "connected": "Connecté",
+      "notConnected": "Non connecté",
+      "featuresTitle": "Fonctionnalités",
+      "go2rtc": "Réduire les connexions à la caméra",
+      "detectRoleWarning": "Au moins un flux doit avoir le rôle 'détection' pour continuer.",
+      "rolesPopover": {
+        "title": "Rôles du flux",
+        "detect": "Flux principal pour la détection d'objet",
+        "record": "Enregistre des segments du flux vidéo en fonction des paramètres de configuration",
+        "audio": "Flux pour la détection basée sur l'audio"
+      },
+      "featuresPopover": {
+        "title": "Fonctionnalités du flux",
+        "description": "Utiliser la rediffusion go2rtc pour réduire les connexions à votre caméra"
+      }
+    },
+    "step4": {
+      "description": "Validation et analyse finales avant d'enregistrer votre nouvelle caméra. Connectez chaque flux avant d'enregistrer.",
+      "validationTitle": "Validation du flux",
+      "connectAllStreams": "Connecter tous les flux",
+      "reconnectionSuccess": "Reconnexion réussie",
+      "reconnectionPartial": "Certains flux n'ont pas réussi à se reconnecter.",
+      "streamUnavailable": "Aperçu du flux non disponible",
+      "reload": "Recharger",
+      "connecting": "En cours de connexion...",
+      "streamTitle": "Flux {{number}}",
+      "valid": "Valide",
+      "failed": "Échec",
+      "notTested": "Non testé",
+      "connectStream": "Connecter",
+      "connectingStream": "En cours de connexion",
+      "disconnectStream": "Déconnecter",
+      "estimatedBandwidth": "Bande passante estimée",
+      "roles": "Rôles",
+      "ffmpegModule": "Utiliser le mode de compatibilité du flux",
+      "ffmpegModuleDescription": "Si le flux ne se charge pas après plusieurs tentatives, essayez d'activer cette option. Lorsqu'elle est activée, Frigate utilisera le module ffmpeg avec go2rtc. Cela peut offrir une meilleure compatibilité avec certains flux de caméra.",
+      "none": "Aucun",
+      "error": "Erreur",
+      "streamValidated": "Flux {{number}} validé avec succès",
+      "streamValidationFailed": "Échec de la validation du flux {{number}}",
+      "saveAndApply": "Enregistrer la nouvelle caméra",
+      "saveError": "Configuration invalide. Veuillez vérifier vos paramètres.",
+      "issues": {
+        "title": "Validation du flux",
+        "videoCodecGood": "Le codec vidéo est {{codec}}.",
+        "audioCodecGood": "Le codec audio est {{codec}}.",
+        "resolutionHigh": "Une résolution de {{resolution}} peut entraîner une utilisation accrue des ressources.",
+        "resolutionLow": "Une résolution de {{resolution}} peut être trop faible pour une détection fiable des petits objets.",
+        "noAudioWarning": "Aucun audio détecté pour ce flux, les enregistrements n'auront pas de son.",
+        "audioCodecRecordError": "Le codec audio AAC est requis pour prendre en charge l'audio dans les enregistrements.",
+        "audioCodecRequired": "Un flux audio est requis pour prendre en charge la détection audio.",
+        "restreamingWarning": "Réduire les connexions à la caméra pour le flux d'enregistrement peut légèrement augmenter l'utilisation du processeur.",
+        "brands": {
+          "reolink-rtsp": "Le RTSP Reolink n'est pas recommandé. Activez HTTP dans les paramètres du micrologiciel de la caméra et redémarrez l'assistant."
+        },
+        "dahua": {
+          "substreamWarning": "Le sous-flux 1 est limité à une basse résolution. De nombreuses caméras Dahua / Amcrest / EmpireTech prennent en charge des sous-flux supplémentaires qui doivent être activés dans les paramètres de la caméra. Il est recommandé de vérifier et d'utiliser ces flux s'ils sont disponibles."
+        },
+        "hikvision": {
+          "substreamWarning": "Le sous-flux 1 est limité à une basse résolution. De nombreuses caméras Hikvision prennent en charge des sous-flux supplémentaires qui doivent être activés dans les paramètres de la caméra. Il est recommandé de vérifier et d'utiliser ces flux s'ils sont disponibles."
+        }
+      }
     }
   },
   "cameraManagement": {
