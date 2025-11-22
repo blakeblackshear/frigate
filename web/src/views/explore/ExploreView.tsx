@@ -16,7 +16,6 @@ import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useTrackedObjectUpdate } from "@/api/ws";
-import { isEqual } from "lodash";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import SearchResultActions from "@/components/menu/SearchResultActions";
 import { SearchTab } from "@/components/overlay/detail/SearchDetailDialog";
@@ -25,14 +24,12 @@ import { useTranslation } from "react-i18next";
 import { getTranslatedLabel } from "@/utils/i18n";
 
 type ExploreViewProps = {
-  searchDetail: SearchResult | undefined;
   setSearchDetail: (search: SearchResult | undefined) => void;
   setSimilaritySearch: (search: SearchResult) => void;
   onSelectSearch: (item: SearchResult, ctrl: boolean, page?: SearchTab) => void;
 };
 
 export default function ExploreView({
-  searchDetail,
   setSearchDetail,
   setSimilaritySearch,
   onSelectSearch,
@@ -82,20 +79,6 @@ export default function ExploreView({
       mutate();
     }
   }, [wsUpdate, mutate]);
-
-  // update search detail when results change
-
-  useEffect(() => {
-    if (searchDetail && events) {
-      const updatedSearchDetail = events.find(
-        (result) => result.id === searchDetail.id,
-      );
-
-      if (updatedSearchDetail && !isEqual(updatedSearchDetail, searchDetail)) {
-        setSearchDetail(updatedSearchDetail);
-      }
-    }
-  }, [events, searchDetail, setSearchDetail]);
 
   if (isLoading) {
     return (

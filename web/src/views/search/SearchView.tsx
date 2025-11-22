@@ -19,7 +19,6 @@ import useKeyboardListener, {
 import scrollIntoView from "scroll-into-view-if-needed";
 import InputWithTags from "@/components/input/InputWithTags";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { isEqual } from "lodash";
 import { formatDateToLocaleString } from "@/utils/dateUtil";
 import SearchThumbnailFooter from "@/components/card/SearchThumbnailFooter";
 import ExploreSettings from "@/components/settings/SearchSettings";
@@ -213,7 +212,7 @@ export default function SearchView({
 
   // detail
 
-  const [searchDetail, setSearchDetail] = useState<SearchResult>();
+  const [selectedId, setSelectedId] = useState<string>();
   const [page, setPage] = useState<SearchTab>("snapshot");
 
   // remove duplicate event ids
@@ -228,6 +227,16 @@ export default function SearchView({
 
     return results;
   }, [searchResults]);
+
+  const searchDetail = useMemo(() => {
+    if (!selectedId) return undefined;
+    // summary view
+    if (defaultView === "summary" && exploreEvents) {
+      return exploreEvents.find((r) => r.id === selectedId);
+    }
+    // grid view
+    return uniqueResults.find((r) => r.id === selectedId);
+  }, [selectedId, uniqueResults, exploreEvents, defaultView]);
 
   // search interaction
 
@@ -256,7 +265,7 @@ export default function SearchView({
         }
       } else {
         setPage(page);
-        setSearchDetail(item);
+        setSelectedId(item.id);
       }
     },
     [selectedObjects],
@@ -295,26 +304,12 @@ export default function SearchView({
     }
   };
 
-  // update search detail when results change
-
+  // clear selected item when search results clear
   useEffect(() => {
-    if (searchDetail) {
-      const results =
-        defaultView === "summary" ? exploreEvents : searchResults?.flat();
-      if (results) {
-        const updatedSearchDetail = results.find(
-          (result) => result.id === searchDetail.id,
-        );
-
-        if (
-          updatedSearchDetail &&
-          !isEqual(updatedSearchDetail, searchDetail)
-        ) {
-          setSearchDetail(updatedSearchDetail);
-        }
-      }
+    if (!searchResults && !exploreEvents) {
+      setSelectedId(undefined);
     }
-  }, [searchResults, exploreEvents, searchDetail, defaultView]);
+  }, [searchResults, exploreEvents]);
 
   const hasExistingSearch = useMemo(
     () => searchResults != undefined || searchFilter != undefined,
@@ -340,7 +335,7 @@ export default function SearchView({
           ? results.length - 1
           : (currentIndex - 1 + results.length) % results.length;
 
-      setSearchDetail(results[newIndex]);
+      setSelectedId(results[newIndex].id);
     }
   }, [uniqueResults, exploreEvents, searchDetail, defaultView]);
 
@@ -357,7 +352,7 @@ export default function SearchView({
       const newIndex =
         currentIndex === -1 ? 0 : (currentIndex + 1) % results.length;
 
-      setSearchDetail(results[newIndex]);
+      setSelectedId(results[newIndex].id);
     }
   }, [uniqueResults, exploreEvents, searchDetail, defaultView]);
 
@@ -509,7 +504,7 @@ export default function SearchView({
           <SearchDetailDialog
             search={searchDetail}
             page={page}
-            setSearch={setSearchDetail}
+            setSearch={(item) => setSelectedId(item?.id)}
             setSearchPage={setPage}
             setSimilarity={
               searchDetail && (() => setSimilaritySearch(searchDetail))
@@ -629,7 +624,7 @@ export default function SearchView({
                           detail: boolean,
                         ) => {
                           if (detail && selectedObjects.length == 0) {
-                            setSearchDetail(value);
+                            setSelectedId(value.id);
                           } else {
                             onSelectSearch(
                               value,
@@ -724,8 +719,7 @@ export default function SearchView({
         defaultView == "summary" && (
           <div className="scrollbar-container flex size-full flex-col overflow-y-auto">
             <ExploreView
-              searchDetail={searchDetail}
-              setSearchDetail={setSearchDetail}
+              setSearchDetail={(item) => setSelectedId(item?.id)}
               setSimilaritySearch={setSimilaritySearch}
               onSelectSearch={onSelectSearch}
             />
