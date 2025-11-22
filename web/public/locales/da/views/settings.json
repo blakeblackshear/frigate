@@ -3,6 +3,12 @@
     "default": "Indstillinger - Frigate",
     "authentication": "Bruger Indstillinger - Frigate",
     "camera": "Kamera indstillinger - Frigate",
-    "object": "Debug - Frigate"
+    "object": "Debug - Frigate",
+    "cameraManagement": "Administrér kameraer - Frigate",
+    "cameraReview": "Indstillinger for kameragennemgang - Frigate",
+    "enrichments": "Indstillinger for berigelser - Frigate",
+    "masksAndZones": "Maske- og zoneeditor - Frigate",
+    "motionTuner": "Bevægelsesjustering - Frigate",
+    "general": "Brugergrænsefladeindstillinger - Frigate"
   }
 }

@@ -7,5 +7,10 @@
   },
   "allCameras": "Alle kameraer",
   "timeline": "Tidslinje",
-  "camera": "Kamera"
+  "camera": "Kamera",
+  "empty": {
+    "alert": "Der er ingen advarsler at gennemgå",
+    "detection": "Der er ingen registreringer at gennemgå",
+    "motion": "Ingen bevægelsesdata fundet"
+  }
 }

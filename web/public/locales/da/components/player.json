@@ -1,5 +1,15 @@
 {
   "noRecordingsFoundForThisTime": "Ingen optagelser fundet i det angivet tidsrum",
   "noPreviewFound": "Ingen forhåndsvisning fundet",
-  "cameraDisabled": "Kamera er deaktiveret"
+  "cameraDisabled": "Kamera er deaktiveret",
+  "noPreviewFoundFor": "Ingen forhåndsvisning fundet for {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Indsend denne frame til Frigate+?",
+    "submit": "Indsend"
+  },
+  "livePlayerRequiredIOSVersion": "iOS 17.1 eller nyere kræves for denne type livestream.",
+  "streamOffline": {
+    "title": "Stream offline",
+    "desc": "Der er ikke modtaget nogen frames på {{cameraName}}-<code>detect</code>-streamen, tjek fejlloggene."
+  }
 }
