@@ -700,9 +700,9 @@ genai:
 # Optional: Configuration for audio transcription
 # NOTE: only the enabled option can be overridden at the camera level
 audio_transcription:
-  # Optional: Enable license plate recognition (default: shown below)
+  # Optional: Enable audio transcription (default: shown below)
   enabled: False
-  # Optional: The device to run the models on (default: shown below)
+  # Optional: The device to run the models on. (default: shown below)
   device: CPU
   # Optional: Set the model size used for transcription. (default: shown below)
   model_size: small
