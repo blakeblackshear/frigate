@@ -700,11 +700,11 @@ genai:
 # Optional: Configuration for audio transcription
 # NOTE: only the enabled option can be overridden at the camera level
 audio_transcription:
-  # Optional: Enable audio transcription (default: shown below)
+  # Optional: Enable live and speech event audio transcription (default: shown below)
   enabled: False
-  # Optional: The device to run the models on. (default: shown below)
+  # Optional: The device to run the models on for live transcription. (default: shown below)
   device: CPU
-  # Optional: Set the model size used for transcription. (default: shown below)
+  # Optional: Set the model size used for live transcription. (default: shown below)
   model_size: small
   # Optional: Set the language used for transcription translation. (default: shown below)
   # List of language codes: https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10

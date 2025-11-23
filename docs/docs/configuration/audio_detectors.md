@@ -144,4 +144,10 @@ In order to use transcription and translation for past events, you must enable a
 
 The transcribed/translated speech will appear in the description box in the Tracked Object Details pane. If Semantic Search is enabled, embeddings are generated for the transcription text and are fully searchable using the description search type.
 
-Recorded `speech` events will always use a `whisper` model, regardless of the `model_size` config setting. Without a GPU, generating transcriptions for longer `speech` events may take a fair amount of time, so be patient.
+:::note
+
+Only one `speech` event may be transcribed at a time. Frigate does not automatically transcribe `speech` events or implement a queue for long-running transcription model inference.
+
+:::
+
+Recorded `speech` events will always use a `whisper` model, regardless of the `model_size` config setting. Without a supported Nvidia GPU, generating transcriptions for longer `speech` events may take a fair amount of time, so be patient.
