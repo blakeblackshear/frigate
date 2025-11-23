@@ -130,8 +130,13 @@ def get_soc_type() -> Optional[str]:
     """Get the SoC type from device tree."""
     try:
         with open("/proc/device-tree/compatible") as file:
-            soc = file.read().split(",")[-1].strip("\x00")
-            return soc
+            content = file.read()
+
+            # Check for Jetson devices
+            if "nvidia" in content:
+                return None
+
+            return content.split(",")[-1].strip("\x00")
     except FileNotFoundError:
         logger.debug("Could not determine SoC type from device tree")
         return None
