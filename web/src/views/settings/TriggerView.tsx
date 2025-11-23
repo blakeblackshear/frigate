@@ -440,7 +440,7 @@ export default function TriggerView({
   return (
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mr-3 md:mt-0">
+      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mr-3 md:mt-0">
         {!isSemanticSearchEnabled ? (
           <div className="mb-5 flex flex-row items-center justify-between gap-2">
             <div className="flex flex-col items-start">
