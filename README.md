@@ -1,8 +1,10 @@
 <p align="center">
-  <img align="center" alt="logo" src="docs/static/img/frigate.png">
+  <img align="center" alt="logo" src="docs/static/img/branding/frigate.png">
 </p>
 
-# Frigate - NVR With Realtime Object Detection for IP Cameras
+# Frigate NVR™ - Realtime Object Detection for IP Cameras
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <a href="https://hosted.weblate.org/engage/frigate-nvr/">
 <img src="https://hosted.weblate.org/widget/frigate-nvr/language-badge.svg" alt="Translation status" />
@@ -32,6 +34,15 @@ View the documentation at https://docs.frigate.video
 ## Donations
 
 If you would like to make a donation to support development, please use [Github Sponsors](https://github.com/sponsors/blakeblackshear).
+
+## License
+
+This project is licensed under the **MIT License**.
+
+- **Code:** The source code, configuration files, and documentation in this repository are available under the [MIT License](LICENSE). You are free to use, modify, and distribute the code as long as you include the original copyright notice.
+- **Trademarks:** The "Frigate" name, the "Frigate NVR" brand, and the Frigate logo are **trademarks of Frigate LLC** and are **not** covered by the MIT License.
+
+Please see our [Trademark Policy](TRADEMARK.md) for details on acceptable use of our brand assets.
 
 ## Screenshots
 
@@ -66,3 +77,7 @@ We use [Weblate](https://hosted.weblate.org/projects/frigate-nvr/) to support la
 <a href="https://hosted.weblate.org/engage/frigate-nvr/">
 <img src="https://hosted.weblate.org/widget/frigate-nvr/multi-auto.svg" alt="Translation status" />
 </a>
+
+---
+
+**Copyright © 2025 Frigate LLC.**
