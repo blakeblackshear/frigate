@@ -1,6 +1,7 @@
 """Real time processor that works with classification tflite models."""
 
 import datetime
+import json
 import logging
 import os
 from typing import Any
@@ -21,6 +22,7 @@ from frigate.config.classification import (
 )
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.log import redirect_output_to_logger
+from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.object import box_overlaps, calculate_region
 
@@ -284,6 +286,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         config: FrigateConfig,
         model_config: CustomClassificationConfig,
         sub_label_publisher: EventMetadataPublisher,
+        requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
     ):
         super().__init__(config, metrics)
@@ -292,6 +295,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         self.train_dir = os.path.join(CLIPS_DIR, self.model_config.name, "train")
         self.interpreter: Interpreter | None = None
         self.sub_label_publisher = sub_label_publisher
+        self.requestor = requestor
         self.tensor_input_details: dict[str, Any] | None = None
         self.tensor_output_details: dict[str, Any] | None = None
         self.classification_history: dict[str, list[tuple[str, float, float]]] = {}
@@ -486,6 +490,8 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         )
 
         if consensus_label is not None:
+            camera = obj_data["camera"]
+
             if (
                 self.model_config.object_config.classification_type
                 == ObjectClassificationType.sub_label
@@ -493,6 +499,20 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                 self.sub_label_publisher.publish(
                     (object_id, consensus_label, consensus_score),
                     EventMetadataTypeEnum.sub_label,
+                )
+                self.requestor.send_data(
+                    "tracked_object_update",
+                    json.dumps(
+                        {
+                            "type": TrackedObjectUpdateTypesEnum.classification,
+                            "id": object_id,
+                            "camera": camera,
+                            "timestamp": now,
+                            "model": self.model_config.name,
+                            "sub_label": consensus_label,
+                            "score": consensus_score,
+                        }
+                    ),
                 )
             elif (
                 self.model_config.object_config.classification_type
@@ -506,6 +526,20 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                         consensus_score,
                     ),
                     EventMetadataTypeEnum.attribute.value,
+                )
+                self.requestor.send_data(
+                    "tracked_object_update",
+                    json.dumps(
+                        {
+                            "type": TrackedObjectUpdateTypesEnum.classification,
+                            "id": object_id,
+                            "camera": camera,
+                            "timestamp": now,
+                            "model": self.model_config.name,
+                            "attribute": consensus_label,
+                            "score": consensus_score,
+                        }
+                    ),
                 )
 
     def handle_request(self, topic, request_data):

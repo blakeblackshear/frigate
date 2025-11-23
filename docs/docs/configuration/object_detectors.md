@@ -3,6 +3,8 @@ id: object_detectors
 title: Object Detectors
 ---
 
+import CommunityBadge from '@site/src/components/CommunityBadge';
+
 # Supported Hardware
 
 :::info
@@ -13,8 +15,8 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
-- [MemryX](#memryx-mx3): The MX3 Acceleration module is available in m.2 format, offering broad compatibility across various platforms.
-- [DeGirum](#degirum): Service for using hardware devices in the cloud or locally. Hardware and models provided on the cloud on [their website](https://hub.degirum.com).
+- <CommunityBadge /> [MemryX](#memryx-mx3): The MX3 Acceleration module is available in m.2 format, offering broad compatibility across various platforms.
+- <CommunityBadge /> [DeGirum](#degirum): Service for using hardware devices in the cloud or locally. Hardware and models provided on the cloud on [their website](https://hub.degirum.com).
 
 **AMD**
 
@@ -34,16 +36,16 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX model is configured.
 
-**Nvidia Jetson**
+**Nvidia Jetson** <CommunityBadge />
 
 - [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Jetson devices, using one of many default models.
 - [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt-jp6` Frigate image when a supported ONNX model is configured.
 
-**Rockchip**
+**Rockchip** <CommunityBadge />
 
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
 
-**Synaptics**
+**Synaptics** <CommunityBadge />
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs.
 
@@ -988,7 +990,7 @@ model:
   # Optional: The model is normally fetched through the runtime, so 'path' can be omitted unless you want to use a custom or local model.
   # path: /config/yolox.zip
   # The .zip file must contain:
-  # ├── yolox.dfp          (a file ending with .dfp) 
+  # ├── yolox.dfp          (a file ending with .dfp)
 ```
 
 #### SSDLite MobileNet v2
