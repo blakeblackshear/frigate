@@ -109,6 +109,7 @@ class TimelineProcessor(threading.Thread):
                     event_data["region"],
                 ),
                 "attribute": "",
+                "score": event_data["score"],
             },
         }
 

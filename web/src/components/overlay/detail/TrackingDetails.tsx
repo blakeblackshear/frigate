@@ -75,12 +75,15 @@ export function TrackingDetails({
     setIsVideoLoading(true);
   }, [event.id]);
 
-  const { data: eventSequence } = useSWR<TrackingDetailsSequence[]>([
-    "timeline",
+  const { data: eventSequence } = useSWR<TrackingDetailsSequence[]>(
+    ["timeline", { source_id: event.id }],
+    null,
     {
-      source_id: event.id,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 30000,
     },
-  ]);
+  );
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -104,6 +107,12 @@ export function TrackingDetails({
           },
         ]
       : null,
+    null,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 30000,
+    },
   );
 
   // Convert a timeline timestamp to actual video player time, accounting for
@@ -714,53 +723,6 @@ export function TrackingDetails({
                     )}
                     <div className="space-y-2">
                       {eventSequence.map((item, idx) => {
-                        const isActive =
-                          Math.abs(
-                            (effectiveTime ?? 0) - (item.timestamp ?? 0),
-                          ) <= 0.5;
-                        const formattedEventTimestamp = config
-                          ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
-                              timezone: config.ui.timezone,
-                              date_format:
-                                config.ui.time_format == "24hour"
-                                  ? t(
-                                      "time.formattedTimestampHourMinuteSecond.24hour",
-                                      { ns: "common" },
-                                    )
-                                  : t(
-                                      "time.formattedTimestampHourMinuteSecond.12hour",
-                                      { ns: "common" },
-                                    ),
-                              time_style: "medium",
-                              date_style: "medium",
-                            })
-                          : "";
-
-                        const ratio =
-                          Array.isArray(item.data.box) &&
-                          item.data.box.length >= 4
-                            ? (
-                                aspectRatio *
-                                (item.data.box[2] / item.data.box[3])
-                              ).toFixed(2)
-                            : "N/A";
-                        const areaPx =
-                          Array.isArray(item.data.box) &&
-                          item.data.box.length >= 4
-                            ? Math.round(
-                                (config.cameras[event.camera]?.detect?.width ??
-                                  0) *
-                                  (config.cameras[event.camera]?.detect
-                                    ?.height ?? 0) *
-                                  (item.data.box[2] * item.data.box[3]),
-                              )
-                            : undefined;
-                        const areaPct =
-                          Array.isArray(item.data.box) &&
-                          item.data.box.length >= 4
-                            ? (item.data.box[2] * item.data.box[3]).toFixed(4)
-                            : undefined;
-
                         return (
                           <div
                             key={`${item.timestamp}-${item.source_id ?? ""}-${idx}`}
@@ -770,11 +732,7 @@ export function TrackingDetails({
                           >
                             <LifecycleIconRow
                               item={item}
-                              isActive={isActive}
-                              formattedEventTimestamp={formattedEventTimestamp}
-                              ratio={ratio}
-                              areaPx={areaPx}
-                              areaPct={areaPct}
+                              event={event}
                               onClick={() => handleLifecycleClick(item)}
                               setSelectedZone={setSelectedZone}
                               getZoneColor={getZoneColor}
@@ -798,11 +756,7 @@ export function TrackingDetails({
 
 type LifecycleIconRowProps = {
   item: TrackingDetailsSequence;
-  isActive?: boolean;
-  formattedEventTimestamp: string;
-  ratio: string;
-  areaPx?: number;
-  areaPct?: string;
+  event: Event;
   onClick: () => void;
   setSelectedZone: (z: string) => void;
   getZoneColor: (zoneName: string) => number[] | undefined;
@@ -812,11 +766,7 @@ type LifecycleIconRowProps = {
 
 function LifecycleIconRow({
   item,
-  isActive,
-  formattedEventTimestamp,
-  ratio,
-  areaPx,
-  areaPct,
+  event,
   onClick,
   setSelectedZone,
   getZoneColor,
@@ -826,8 +776,100 @@ function LifecycleIconRow({
   const { t } = useTranslation(["views/explore", "components/player"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const [isOpen, setIsOpen] = useState(false);
-
   const navigate = useNavigate();
+
+  const aspectRatio = useMemo(() => {
+    if (!config) {
+      return 16 / 9;
+    }
+
+    return (
+      config.cameras[event.camera].detect.width /
+      config.cameras[event.camera].detect.height
+    );
+  }, [config, event]);
+
+  const isActive = useMemo(
+    () => Math.abs((effectiveTime ?? 0) - (item.timestamp ?? 0)) <= 0.5,
+    [effectiveTime, item.timestamp],
+  );
+
+  const formattedEventTimestamp = useMemo(
+    () =>
+      config
+        ? formatUnixTimestampToDateTime(item.timestamp ?? 0, {
+            timezone: config.ui.timezone,
+            date_format:
+              config.ui.time_format == "24hour"
+                ? t("time.formattedTimestampHourMinuteSecond.24hour", {
+                    ns: "common",
+                  })
+                : t("time.formattedTimestampHourMinuteSecond.12hour", {
+                    ns: "common",
+                  }),
+            time_style: "medium",
+            date_style: "medium",
+          })
+        : "",
+    [config, item.timestamp, t],
+  );
+
+  const ratio = useMemo(
+    () =>
+      Array.isArray(item.data.box) && item.data.box.length >= 4
+        ? (aspectRatio * (item.data.box[2] / item.data.box[3])).toFixed(2)
+        : "N/A",
+    [aspectRatio, item.data.box],
+  );
+
+  const areaPx = useMemo(
+    () =>
+      Array.isArray(item.data.box) && item.data.box.length >= 4
+        ? Math.round(
+            (config?.cameras[event.camera]?.detect?.width ?? 0) *
+              (config?.cameras[event.camera]?.detect?.height ?? 0) *
+              (item.data.box[2] * item.data.box[3]),
+          )
+        : undefined,
+    [config, event.camera, item.data.box],
+  );
+
+  const attributeAreaPx = useMemo(
+    () =>
+      Array.isArray(item.data.attribute_box) &&
+      item.data.attribute_box.length >= 4
+        ? Math.round(
+            (config?.cameras[event.camera]?.detect?.width ?? 0) *
+              (config?.cameras[event.camera]?.detect?.height ?? 0) *
+              (item.data.attribute_box[2] * item.data.attribute_box[3]),
+          )
+        : undefined,
+    [config, event.camera, item.data.attribute_box],
+  );
+
+  const attributeAreaPct = useMemo(
+    () =>
+      Array.isArray(item.data.attribute_box) &&
+      item.data.attribute_box.length >= 4
+        ? (item.data.attribute_box[2] * item.data.attribute_box[3]).toFixed(4)
+        : undefined,
+    [item.data.attribute_box],
+  );
+
+  const areaPct = useMemo(
+    () =>
+      Array.isArray(item.data.box) && item.data.box.length >= 4
+        ? (item.data.box[2] * item.data.box[3]).toFixed(4)
+        : undefined,
+    [item.data.box],
+  );
+
+  const score = useMemo(() => {
+    if (item.data.score !== undefined) {
+      return (item.data.score * 100).toFixed(0) + "%";
+    }
+    return "N/A";
+  }, [item.data.score]);
 
   return (
     <div
@@ -856,16 +898,28 @@ function LifecycleIconRow({
             <div className="text-md flex items-start break-words text-left">
               {getLifecycleItemDescription(item)}
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-secondary-foreground md:gap-5">
-              <div className="flex items-center gap-1">
+            <div className="my-2 ml-2 flex flex-col flex-wrap items-start gap-1.5 text-xs text-secondary-foreground">
+              <div className="flex items-center gap-1.5">
+                <span className="text-primary-variant">
+                  {t("trackingDetails.lifecycleItemDesc.header.score")}
+                </span>
+                <span className="font-medium text-primary">{score}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
                 <span className="text-primary-variant">
                   {t("trackingDetails.lifecycleItemDesc.header.ratio")}
                 </span>
                 <span className="font-medium text-primary">{ratio}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <span className="text-primary-variant">
-                  {t("trackingDetails.lifecycleItemDesc.header.area")}
+                  {t("trackingDetails.lifecycleItemDesc.header.area")}{" "}
+                  {attributeAreaPx !== undefined &&
+                    attributeAreaPct !== undefined && (
+                      <span className="text-primary-variant">
+                        ({getTranslatedLabel(item.data.label)})
+                      </span>
+                    )}
                 </span>
                 {areaPx !== undefined && areaPct !== undefined ? (
                   <span className="font-medium text-primary">
@@ -876,9 +930,25 @@ function LifecycleIconRow({
                   <span>N/A</span>
                 )}
               </div>
+              {attributeAreaPx !== undefined &&
+                attributeAreaPct !== undefined && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-primary-variant">
+                      {t("trackingDetails.lifecycleItemDesc.header.area")} (
+                      {getTranslatedLabel(item.data.attribute)})
+                    </span>
+                    <span className="font-medium text-primary">
+                      {t("information.pixels", {
+                        ns: "common",
+                        area: attributeAreaPx,
+                      })}{" "}
+                      · {attributeAreaPct}%
+                    </span>
+                  </div>
+                )}
 
               {item.data?.zones && item.data.zones.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="mt-1 flex flex-wrap items-center gap-2">
                   {item.data.zones.map((zone, zidx) => {
                     const color = getZoneColor(zone)?.join(",") ?? "0,0,0";
                     return (

@@ -16,6 +16,7 @@ export type TrackingDetailsSequence = {
   data: {
     camera: string;
     label: string;
+    score: number;
     sub_label: string;
     box?: [number, number, number, number];
     region: [number, number, number, number];
