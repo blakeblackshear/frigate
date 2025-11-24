@@ -542,6 +542,7 @@ def transcribe_audio(request: Request, body: AudioTranscriptionBody):
             status_code=409,  # 409 Conflict
         )
     else:
+        logger.debug(f"Failed to transcribe audio, response: {response}")
         return JSONResponse(
             content={
                 "success": False,

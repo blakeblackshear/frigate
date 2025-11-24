@@ -461,6 +461,40 @@ export function useEmbeddingsReindexProgress(
   return { payload: data };
 }
 
+export function useAudioTranscriptionProcessState(
+  revalidateOnFocus: boolean = true,
+): { payload: string } {
+  const {
+    value: { payload },
+    send: sendCommand,
+  } = useWs("audio_transcription_state", "audioTranscriptionState");
+
+  const data = useDeepMemo(
+    payload ? (JSON.parse(payload as string) as string) : "idle",
+  );
+
+  useEffect(() => {
+    let listener = undefined;
+    if (revalidateOnFocus) {
+      sendCommand("audioTranscriptionState");
+      listener = () => {
+        if (document.visibilityState == "visible") {
+          sendCommand("audioTranscriptionState");
+        }
+      };
+      addEventListener("visibilitychange", listener);
+    }
+    return () => {
+      if (listener) {
+        removeEventListener("visibilitychange", listener);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revalidateOnFocus]);
+
+  return { payload: data || "idle" };
+}
+
 export function useBirdseyeLayout(revalidateOnFocus: boolean = true): {
   payload: string;
 } {

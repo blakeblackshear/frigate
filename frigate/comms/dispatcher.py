@@ -23,6 +23,7 @@ from frigate.const import (
     NOTIFICATION_TEST,
     REQUEST_REGION_GRID,
     UPDATE_AUDIO_ACTIVITY,
+    UPDATE_AUDIO_TRANSCRIPTION_STATE,
     UPDATE_BIRDSEYE_LAYOUT,
     UPDATE_CAMERA_ACTIVITY,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
@@ -61,6 +62,7 @@ class Dispatcher:
         self.model_state: dict[str, ModelStatusTypesEnum] = {}
         self.embeddings_reindex: dict[str, Any] = {}
         self.birdseye_layout: dict[str, Any] = {}
+        self.audio_transcription_state: str = "idle"
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
             "audio_transcription": self._on_audio_transcription_command,
@@ -178,6 +180,19 @@ class Dispatcher:
         def handle_model_state() -> None:
             self.publish("model_state", json.dumps(self.model_state.copy()))
 
+        def handle_update_audio_transcription_state() -> None:
+            if payload:
+                self.audio_transcription_state = payload
+                self.publish(
+                    "audio_transcription_state",
+                    json.dumps(self.audio_transcription_state),
+                )
+
+        def handle_audio_transcription_state() -> None:
+            self.publish(
+                "audio_transcription_state", json.dumps(self.audio_transcription_state)
+            )
+
         def handle_update_embeddings_reindex_progress() -> None:
             self.embeddings_reindex = payload
             self.publish(
@@ -264,10 +279,12 @@ class Dispatcher:
             UPDATE_MODEL_STATE: handle_update_model_state,
             UPDATE_EMBEDDINGS_REINDEX_PROGRESS: handle_update_embeddings_reindex_progress,
             UPDATE_BIRDSEYE_LAYOUT: handle_update_birdseye_layout,
+            UPDATE_AUDIO_TRANSCRIPTION_STATE: handle_update_audio_transcription_state,
             NOTIFICATION_TEST: handle_notification_test,
             "restart": handle_restart,
             "embeddingsReindexProgress": handle_embeddings_reindex_progress,
             "modelState": handle_model_state,
+            "audioTranscriptionState": handle_audio_transcription_state,
             "birdseyeLayout": handle_birdseye_layout,
             "onConnect": handle_on_connect,
         }

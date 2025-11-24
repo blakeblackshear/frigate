@@ -92,6 +92,7 @@ import { DialogPortal } from "@radix-ui/react-dialog";
 import { useDetailStream } from "@/context/detail-stream-context";
 import { PiSlidersHorizontalBold } from "react-icons/pi";
 import { HiSparkles } from "react-icons/hi";
+import { useAudioTranscriptionProcessState } from "@/api/ws";
 
 const SEARCH_TABS = ["snapshot", "tracking_details"] as const;
 export type SearchTab = (typeof SEARCH_TABS)[number];
@@ -1076,6 +1077,11 @@ function ObjectDetailsTab({
       });
   }, [search, t]);
 
+  // audio transcription processing state
+
+  const { payload: audioTranscriptionProcessState } =
+    useAudioTranscriptionProcessState();
+
   // frigate+ submission
 
   type SubmissionState = "reviewing" | "uploading" | "submitted";
@@ -1431,10 +1437,20 @@ function ObjectDetailsTab({
                   <TooltipTrigger asChild>
                     <button
                       aria-label={t("itemMenu.audioTranscription.label")}
-                      className="text-primary/40 hover:text-primary/80"
+                      className={cn(
+                        "text-primary/40",
+                        audioTranscriptionProcessState === "processing"
+                          ? "cursor-not-allowed"
+                          : "hover:text-primary/80",
+                      )}
                       onClick={onTranscribe}
+                      disabled={audioTranscriptionProcessState === "processing"}
                     >
-                      <FaMicrophone className="size-4" />
+                      {audioTranscriptionProcessState === "processing" ? (
+                        <ActivityIndicator className="size-4" />
+                      ) : (
+                        <FaMicrophone className="size-4" />
+                      )}
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
