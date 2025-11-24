@@ -1104,41 +1104,6 @@ model:  # required
   labelmap_path: /labelmap/coco-80.txt  # required
 ```
 
-## AXERA
-
-Hardware accelerated object detection is supported on the following SoCs:
-
-- AX650N
-- AX8850N
-
-This implementation uses the [AXera Pulsar2 Toolchain](https://huggingface.co/AXERA-TECH/Pulsar2).
-
-See the [installation docs](../frigate/installation.md#axera) for information on configuring the AXEngine hardware.
-
-### Configuration
-
-When configuring the AXEngine detector, you have to specify the model name.
-
-#### yolov9
-
-A yolov9 model is provided in the container at /axmodels and is used by this detector type by default.
-
-Use the model configuration shown below when using the axengine detector with the default axmodel:
-
-```yaml
-detectors:  # required
-  axengine:  # required
-    type: axengine  # required
-
-model:  # required
-  path: frigate-yolov9-tiny  # required
-  model_type: yolo-generic # required
-  width: 320  # required
-  height: 320  # required
-  tensor_format: bgr  # required
-  labelmap_path: /labelmap/coco-80.txt  # required
-```
-
 ## Rockchip platform
 
 Hardware accelerated object detection is supported on the following SoCs:
@@ -1401,6 +1366,41 @@ model:
     width: 300 # width is in the model name as the first number in the "int"x"int" section
     height: 300 # height is in the model name as the second number in the "int"x"int" section
     input_pixel_format: rgb/bgr # look at the model.json to figure out which to put here
+```
+
+## AXERA
+
+Hardware accelerated object detection is supported on the following SoCs:
+
+- AX650N
+- AX8850N
+
+This implementation uses the [AXera Pulsar2 Toolchain](https://huggingface.co/AXERA-TECH/Pulsar2).
+
+See the [installation docs](../frigate/installation.md#axera) for information on configuring the AXEngine hardware.
+
+### Configuration
+
+When configuring the AXEngine detector, you have to specify the model name.
+
+#### yolov9
+
+A yolov9 model is provided in the container at /axmodels and is used by this detector type by default.
+
+Use the model configuration shown below when using the axengine detector with the default axmodel:
+
+```yaml
+detectors:
+  axengine:
+    type: axengine
+
+model:
+  path: frigate-yolov9-tiny
+  model_type: yolo-generic
+  width: 320
+  height: 320
+  tensor_format: bgr
+  labelmap_path: /labelmap/coco-80.txt
 ```
 
 # Models
