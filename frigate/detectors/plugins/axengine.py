@@ -4,17 +4,12 @@ import re
 import urllib.request
 from typing import Literal
 
-import cv2
-import numpy as np
-from pydantic import Field
+import axengine as axe
 
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import post_process_yolo
-
-import axengine as axe
-from axengine import axclrt_provider_name, axengine_provider_name
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +51,7 @@ class Axengine(DetectionApi):
                 model_props["model_type"] = model_type
 
         if model_matched:
-            model_props["filename"] = model_path + f".axmodel"
+            model_props["filename"] = model_path + ".axmodel"
             model_props["path"] = model_cache_dir + model_props["filename"]
 
             if not os.path.isfile(model_props["path"]):
