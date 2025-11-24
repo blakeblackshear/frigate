@@ -1753,7 +1753,7 @@ def create_trigger_embedding(
                     body.data, (base64.b64encode(thumbnail).decode("ASCII"))
                 )
 
-        if embedding is None:
+        if not embedding:
             return JSONResponse(
                 content={
                     "success": False,
@@ -1888,7 +1888,7 @@ def update_trigger_embedding(
                 body.data, (base64.b64encode(thumbnail).decode("ASCII"))
             )
 
-        if embedding is None:
+        if not embedding:
             return JSONResponse(
                 content={
                     "success": False,
