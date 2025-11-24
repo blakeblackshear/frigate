@@ -148,7 +148,9 @@ export default function Step3ChooseExamples({
       // Step 3: Kick off training
       await axios.post(`/classification/${step1Data.modelName}/train`);
 
-      toast.success(t("wizard.step3.trainingStarted"));
+      toast.success(t("wizard.step3.trainingStarted"), {
+        closeButton: true,
+      });
       setIsTraining(true);
     },
     [step1Data, step2Data, t],
