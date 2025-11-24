@@ -61,7 +61,8 @@
       "header": {
         "zones": "Zones",
         "ratio": "Ratio",
-        "area": "Area"
+        "area": "Area",
+        "score": "Score"
       }
     },
     "annotationSettings": {
