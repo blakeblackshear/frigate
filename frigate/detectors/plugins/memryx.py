@@ -54,7 +54,7 @@ class MemryXDetector(DetectionApi):
                 "MemryX SDK is not installed. Install it and set up MIX environment."
             )
             return
-        
+
         # Get stop_event from detector_config
         self.stop_event = getattr(detector_config, "_stop_event", stop_event)
 
@@ -372,10 +372,7 @@ class MemryXDetector(DetectionApi):
                 return None
             try:
                 # Wait for a frame from the queue with timeout to check stop_event periodically
-                frame = self.capture_queue.get(
-                    block=True, 
-                    timeout=0.5
-                )  
+                frame = self.capture_queue.get(block=True, timeout=0.5)
 
                 return frame
 
@@ -388,18 +385,15 @@ class MemryXDetector(DetectionApi):
 
     def receive_output(self):
         """Retrieve processed results from MemryX output queue + a copy of the original frame"""
-        try: 
+        try:
             # Get connection ID with timeout
-            connection_id = (
-                self.capture_id_queue.get(
-                    block=True, 
-                    timeout=1.0
-                )
+            connection_id = self.capture_id_queue.get(
+                block=True, timeout=1.0
             )  # Get the corresponding connection ID
             detections = self.output_queue.get()  # Get detections from MemryX
 
             return connection_id, detections
-        
+
         except Exception as e:
             # On timeout or stop event, return None
             if self.stop_event.is_set():
@@ -409,7 +403,6 @@ class MemryXDetector(DetectionApi):
                 logger.warning(f"[receive_output] Error receiving output: {e}")
 
             return None, None
-    
 
     def post_process_yolonas(self, output):
         predictions = output[0]
@@ -857,7 +850,7 @@ class MemryXDetector(DetectionApi):
             raise Exception(
                 f"{self.memx_model_type} is currently not supported for memryx. See the docs for more info on supported models."
             )
-        
+
     def shutdown(self):
         """Gracefully shutdown the MemryX accelerator"""
         try:

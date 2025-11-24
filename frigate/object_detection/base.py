@@ -336,7 +336,7 @@ class ObjectDetectProcess:
         # if the process has already exited on its own, just return
         if self.detect_process and self.detect_process.exitcode:
             return
-        
+
         logging.info("Waiting for detection process to exit gracefully...")
         self.detect_process.join(timeout=30)
         if self.detect_process.exitcode is None:
