@@ -96,7 +96,7 @@ function MSEPlayer({
       );
       if (mseCodecRef.current) {
         // eslint-disable-next-line no-console
-        console.error(`MSE codec in use: ${mseCodecRef.current}`);
+        console.error(`${camera} - MSE codec in use: ${mseCodecRef.current}`);
       }
       onError?.(error);
     },
