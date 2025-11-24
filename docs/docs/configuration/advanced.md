@@ -25,7 +25,7 @@ Examples of available modules are:
 
 - `frigate.app`
 - `frigate.mqtt`
-- `frigate.object_detection`
+- `frigate.object_detection.base`
 - `detector.<detector_name>`
 - `watchdog.<camera_name>`
 - `ffmpeg.<camera_name>.<sorted_roles>` NOTE: All FFmpeg logs are sent as `error` level.
@@ -51,6 +51,17 @@ Example:
 ```yaml
 environment_vars:
   VARIABLE_NAME: variable_value
+```
+
+#### TensorFlow Thread Configuration
+
+If you encounter thread creation errors during classification model training, you can limit TensorFlow's thread usage:
+
+```yaml
+environment_vars:
+  TF_INTRA_OP_PARALLELISM_THREADS: "2" # Threads within operations (0 = use default)
+  TF_INTER_OP_PARALLELISM_THREADS: "2" # Threads between operations (0 = use default)
+  TF_DATASET_THREAD_POOL_SIZE: "2" # Data pipeline threads (0 = use default)
 ```
 
 ### `database`
@@ -247,7 +258,7 @@ curl -X POST http://frigate_host:5000/api/config/save -d @config.json
 if you'd like you can use your yaml config directly by using [`yq`](https://github.com/mikefarah/yq) to convert it to json:
 
 ```bash
-yq r -j config.yml | curl -X POST http://frigate_host:5000/api/config/save -d @-
+yq -o=json '.' config.yaml | curl -X POST 'http://frigate_host:5000/api/config/save?save_option=saveonly' --data-binary @-
 ```
 
 ### Via Command Line

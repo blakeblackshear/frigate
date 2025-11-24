@@ -36,5 +36,24 @@
   "selected_one": "{{count}} selectate",
   "selected_other": "{{count}} selectate",
   "suspiciousActivity": "Activitate suspectă",
-  "threateningActivity": "Activitate amenințătoare"
+  "threateningActivity": "Activitate amenințătoare",
+  "detail": {
+    "noDataFound": "Nicio dată detaliată de revizuit",
+    "aria": "Comută vizualizarea detaliată",
+    "trackedObject_one": "obiect",
+    "trackedObject_other": "obiecte",
+    "noObjectDetailData": "Nicio dată de detaliu obiect disponibilă.",
+    "label": "Detaliu",
+    "settings": "Setări vizualizare detaliată",
+    "alwaysExpandActive": {
+      "title": "Extinde întotdeauna activul",
+      "desc": "Extinde întotdeauna detaliile obiectului elementului activ de revizuire, atunci când sunt disponibile."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Punct urmărit",
+    "clickToSeek": "Apasă pentru a naviga la acest moment"
+  },
+  "zoomIn": "Mărește",
+  "zoomOut": "Micșorează"
 }

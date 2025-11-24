@@ -20,6 +20,7 @@ apt-get -qq install --no-install-recommends -y \
     libgl1 \
     libglib2.0-0 \
     libusb-1.0.0 \
+    python3-h2 \
     libgomp1  # memryx detector
 
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
@@ -95,6 +96,9 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
 
     apt-get -qq install -y ocl-icd-libopencl1
 
+    # install libtbb12 for NPU support
+    apt-get -qq install -y libtbb12
+
     rm -f /usr/share/keyrings/intel-graphics.gpg
     rm -f /etc/apt/sources.list.d/intel-gpu-jammy.list
 
@@ -115,6 +119,11 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     wget https://github.com/intel/compute-runtime/releases/download/24.52.32224.5/intel-level-zero-gpu_1.6.32224.5_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-opencl-2_2.5.6+18417_amd64.deb
     wget https://github.com/intel/intel-graphics-compiler/releases/download/v2.5.6/intel-igc-core-2_2.5.6+18417_amd64.deb
+    # npu packages
+    wget https://github.com/oneapi-src/level-zero/releases/download/v1.21.9/level-zero_1.21.9+u22.04_amd64.deb
+    wget https://github.com/intel/linux-npu-driver/releases/download/v1.17.0/intel-driver-compiler-npu_1.17.0.20250508-14912879441_ubuntu22.04_amd64.deb
+    wget https://github.com/intel/linux-npu-driver/releases/download/v1.17.0/intel-fw-npu_1.17.0.20250508-14912879441_ubuntu22.04_amd64.deb
+    wget https://github.com/intel/linux-npu-driver/releases/download/v1.17.0/intel-level-zero-npu_1.17.0.20250508-14912879441_ubuntu22.04_amd64.deb
 
     dpkg -i *.deb
     rm *.deb
@@ -136,6 +145,6 @@ rm -rf /var/lib/apt/lists/*
 
 # Install yq, for frigate-prepare and go2rtc echo source
 curl -fsSL \
-    "https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_$(dpkg --print-architecture)" \
+    "https://github.com/mikefarah/yq/releases/download/v4.48.2/yq_linux_$(dpkg --print-architecture)" \
     --output /usr/local/bin/yq
 chmod +x /usr/local/bin/yq

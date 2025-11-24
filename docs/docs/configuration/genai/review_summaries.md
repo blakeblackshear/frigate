@@ -7,37 +7,94 @@ Generative AI can be used to automatically generate structured summaries of revi
 
 Requests for a summary are requested automatically to your AI provider for alert review items when the activity has ended, they can also be optionally enabled for detections as well.
 
-Generative AI review summaries can also be toggled dynamically for a camera via MQTT with the topic `frigate/<camera_name>/review_descriptions/set`. See the [MQTT documentation](/integrations/mqtt/#frigatecamera_namereviewdescriptionsset).
+Generative AI review summaries can also be toggled dynamically for a [camera via MQTT](/integrations/mqtt/#frigatecamera_namereviewdescriptionsset).
 
 ## Review Summary Usage and Best Practices
 
 Review summaries provide structured JSON responses that are saved for each review item:
 
 ```
-- `scene` (string): A full description including setting, entities, actions, and any plausible supported inferences.
-- `confidence` (float): 0-1 confidence in the analysis.
+- `title` (string): A concise, direct title that describes the purpose or overall action (e.g., "Person taking out trash", "Joe walking dog").
+- `scene` (string): A narrative description of what happens across the sequence from start to finish, including setting, detected objects, and their observable actions.
+- `confidence` (float): 0-1 confidence in the analysis. Higher confidence when objects/actions are clearly visible and context is unambiguous.
 - `other_concerns` (list): List of user-defined concerns that may need additional investigation.
 - `potential_threat_level` (integer): 0, 1, or 2 as defined below.
-
-Threat-level definitions:
-- 0 — Typical or expected activity for this location/time (includes residents, guests, or known animals engaged in normal activities, even if they glance around or scan surroundings).
-- 1 — Unusual or suspicious activity: At least one security-relevant behavior is present **and not explainable by a normal residential activity**.
-- 2 — Active or immediate threat: Breaking in, vandalism, aggression, weapon display.
 ```
 
-This will show in the UI as a list of concerns that each review item has along with the general description.
+This will show in multiple places in the UI to give additional context about each activity, and allow viewing more details when extra attention is required. Frigate's built in notifications will also automatically show the title and description when the data is available.
 
 ### Defining Typical Activity
 
-Each installation and even camera can have different parameters for what is considered suspicious activity. Frigate allows the `activity_context_prompt` to be defined globally and at the camera level, which allows you to define more specifically what should be considered normal activity. It is important that this is not overly specific as it can sway the output of the response. The default `activity_context_prompt` is below:
+Each installation and even camera can have different parameters for what is considered suspicious activity. Frigate allows the `activity_context_prompt` to be defined globally and at the camera level, which allows you to define more specifically what should be considered normal activity. It is important that this is not overly specific as it can sway the output of the response.
+
+<details>
+  <summary>Default Activity Context Prompt</summary>
 
 ```
-- **Zone context is critical**: Private enclosed spaces (back yards, back decks, fenced areas, inside garages) are resident territory where brief transient activity, routine tasks, and pet care are expected and normal. Front yards, driveways, and porches are semi-public but still resident spaces where deliveries, parking, and coming/going are routine. Consider whether the zone and activity align with normal residential use.
-- **Person + Pet = Normal Activity**: When both "Person" and "Dog" (or "Cat") are detected together in residential zones, this is routine pet care activity (walking, letting out, playing, supervising). Assign Level 0 unless there are OTHER strong suspicious behaviors present (like testing doors, taking items, etc.). A person with their pet in a residential zone is baseline normal activity.
-- Brief appearances in private zones (back yards, garages) are normal residential patterns.
-- Normal residential activity includes: residents, family members, guests, deliveries, services, maintenance workers, routine property use (parking, unloading, mail pickup, trash removal).
-- Brief movement with legitimate items (bags, packages, tools, equipment) in appropriate zones is routine.
+### Normal Activity Indicators (Level 0)
+- Known/verified people in any zone at any time
+- People with pets in residential areas
+- Deliveries or services during daytime/evening (6 AM - 10 PM): carrying packages to doors/porches, placing items, leaving
+- Services/maintenance workers with visible tools, uniforms, or service vehicles during daytime
+- Activity confined to public areas only (sidewalks, streets) without entering property at any time
+
+### Suspicious Activity Indicators (Level 1)
+- **Testing or attempting to open doors/windows/handles on vehicles or buildings** — ALWAYS Level 1 regardless of time or duration
+- **Unidentified person in private areas (driveways, near vehicles/buildings) during late night/early morning (11 PM - 5 AM)** — ALWAYS Level 1 regardless of activity or duration
+- Taking items that don't belong to them (packages, objects from porches/driveways)
+- Climbing or jumping fences/barriers to access property
+- Attempting to conceal actions or items from view
+- Prolonged loitering: remaining in same area without visible purpose throughout most of the sequence
+
+### Critical Threat Indicators (Level 2)
+- Holding break-in tools (crowbars, pry bars, bolt cutters)
+- Weapons visible (guns, knives, bats used aggressively)
+- Forced entry in progress
+- Physical aggression or violence
+- Active property damage or theft in progress
+
+### Assessment Guidance
+Evaluate in this order:
+
+1. **If person is verified/known** → Level 0 regardless of time or activity
+2. **If person is unidentified:**
+   - Check time: If late night/early morning (11 PM - 5 AM) AND in private areas (driveways, near vehicles/buildings) → Level 1
+   - Check actions: If testing doors/handles, taking items, climbing → Level 1
+   - Otherwise, if daytime/evening (6 AM - 10 PM) with clear legitimate purpose (delivery, service worker) → Level 0
+3. **Escalate to Level 2 if:** Weapons, break-in tools, forced entry in progress, violence, or active property damage visible (escalates from Level 0 or 1)
+
+The mere presence of an unidentified person in private areas during late night hours is inherently suspicious and warrants human review, regardless of what activity they appear to be doing or how brief the sequence is.
 ```
+
+</details>
+
+### Image Source
+
+By default, review summaries use preview images (cached preview frames) which have a lower resolution but use fewer tokens per image. For better image quality and more detailed analysis, you can configure Frigate to extract frames directly from recordings at a higher resolution:
+
+```yaml
+review:
+  genai:
+    enabled: true
+    image_source: recordings # Options: "preview" (default) or "recordings"
+```
+
+When using `recordings`, frames are extracted at 480px height while maintaining the camera's original aspect ratio, providing better detail for the LLM while being mindful of context window size. This is particularly useful for scenarios where fine details matter, such as identifying license plates, reading text, or analyzing distant objects.
+
+The number of frames sent to the LLM is dynamically calculated based on:
+
+- Your LLM provider's context window size
+- The camera's resolution and aspect ratio (ultrawide cameras like 32:9 use more tokens per image)
+- The image source (recordings use more tokens than preview images)
+
+Frame counts are automatically optimized to use ~98% of the available context window while capping at 20 frames maximum to ensure reasonable inference times. Note that using recordings will:
+
+- Provide higher quality images to the LLM (480p vs 180p preview images)
+- Use more tokens per image due to higher resolution
+- Result in fewer frames being sent for ultrawide cameras due to larger image size
+- Require that recordings are enabled for the camera
+
+If recordings are not available for a given time period, the system will automatically fall back to using preview frames.
 
 ### Additional Concerns
 

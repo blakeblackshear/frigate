@@ -10,7 +10,9 @@
     "frigatePlus": "Configurações do Frigate+ - Frigate",
     "default": "Configurações - Frigate",
     "notifications": "Configuração de Notificações - Frigate",
-    "enrichments": "Configurações Avançadas - Frigate"
+    "enrichments": "Configurações Avançadas - Frigate",
+    "cameraManagement": "Gerir Câmaras - Frigate",
+    "cameraReview": "Configurações de Revisão de Câmara - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -23,7 +25,10 @@
     "notifications": "Notificações",
     "frigateplus": "Frigate+",
     "enrichments": "Avançado",
-    "triggers": "Gatilhos"
+    "triggers": "Gatilhos",
+    "cameraManagement": "Gestão",
+    "cameraReview": "Rever",
+    "roles": "Papéis"
   },
   "dialog": {
     "unsavedChanges": {
@@ -815,6 +820,11 @@
           "error": {
             "min": "Pelo menos uma ação deve ser selecionada."
           }
+        },
+        "friendly_name": {
+          "title": "Nome Amigável",
+          "placeholder": "Nomeie ou descreva este gatilho",
+          "description": "Um nome amigável ou descritivo opcional para este gatilho."
         }
       }
     },
@@ -829,6 +839,10 @@
         "updateTriggerFailed": "Falha ao atualizar o trigger: {{errorMessage}}",
         "deleteTriggerFailed": "Falha ao apagar o trigger: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Pesquisa Semântica desativada",
+      "desc": "Pesquisa Semântica deve estar ativada para usar os Gatilhos."
     }
   },
   "roles": {
@@ -850,7 +864,9 @@
         "createRole": "Papel {{role}} criado com sucesso",
         "updateCameras": "Câmaras atualizados para o papel {{role}}",
         "deleteRole": "Papel {{role}} apagado com sucesso",
-        "userRolesUpdated": "{{count}} utilizador(os) atribuídos a este papel foram atualizados para 'visualizador', que possui acesso a todas as câmaras."
+        "userRolesUpdated_one": "{{count}} utilizador(os) atribuídos a este papel foram atualizados para 'visualizador', que possui acesso a todas as câmaras.",
+        "userRolesUpdated_many": "",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Falha ao criar papel: {{errorMessage}}",
@@ -889,6 +905,82 @@
           "required": "Ao menos uma câmara deve ser selecionada."
         }
       }
+    }
+  },
+  "cameraWizard": {
+    "title": "Adicionar Câmara",
+    "description": "Siga os passos abaixo para adicionar uma câmara nova no seu Frigate.",
+    "steps": {
+      "nameAndConnection": "Nome e Conexão",
+      "streamConfiguration": "Configuração de Stream",
+      "validationAndTesting": "Validação e Teste"
+    },
+    "save": {
+      "success": "Nova câmara {{cameraName}} grava com sucesso.",
+      "failure": "Erro ao gravar {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Resolução",
+      "video": "Vídeo",
+      "audio": "Áudio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Favor fornecer uma URL de stream válida",
+      "testFailed": "Teste de stream falhou: {{error}}"
+    },
+    "step1": {
+      "description": "Adicione os pormenores da sua câmara e teste a conexão.",
+      "cameraName": "Nome da Câmara",
+      "cameraNamePlaceholder": "ex., porta_entrada ou Visão Geral do Quintal",
+      "host": "Host/Endereço IP",
+      "port": "Porta",
+      "username": "Nome de Utilizador",
+      "usernamePlaceholder": "Opcional",
+      "password": "Palavra-passe",
+      "passwordPlaceholder": "Opcional",
+      "selectTransport": "Selecionar protocolo de transporte",
+      "cameraBrand": "Marca da Câmara",
+      "selectBrand": "Selecione a marca da câmara para template de URL",
+      "customUrl": "URL Customizada de Stream",
+      "brandInformation": "Informação da marca",
+      "brandUrlFormat": "Para câmaras com o formato de URL RTSP como: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://nomedeusuario:palavra-passe@host:porta/caminho",
+      "testConnection": "Testar Conexão",
+      "testSuccess": "Teste de conexão bem sucedido!",
+      "testFailed": "Teste de conexão falhou. Favor verifique os dados e tente novamente.",
+      "streamDetails": "Pormenores do Stream",
+      "warnings": {
+        "noSnapshot": "Não foi possível adquirir uma captura de imagem do stream configurado."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Selecione a marca da câmara com o host/IP or selecione 'Outro' com uma URL customizada",
+        "nameRequired": "Nome para a câmara requerido"
+      }
+    },
+    "step2": {
+      "url": "URL",
+      "roleLabels": {
+        "audio": "Áudio"
+      }
+    },
+    "step3": {
+      "reload": "Recarregar",
+      "valid": "Válido",
+      "failed": "Falhou",
+      "none": "Nenhum",
+      "error": "Erro"
+    }
+  },
+  "cameraManagement": {
+    "cameraConfig": {
+      "enabled": "Ativado",
+      "addUrl": "Adicionar URL"
+    }
+  },
+  "cameraReview": {
+    "review": {
+      "title": "Rever"
     }
   }
 }

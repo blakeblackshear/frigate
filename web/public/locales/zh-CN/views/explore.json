@@ -34,7 +34,8 @@
     "details": "详情",
     "snapshot": "快照",
     "video": "视频",
-    "object_lifecycle": "目标全周期"
+    "object_lifecycle": "目标全周期",
+    "thumbnail": "缩略图"
   },
   "objectLifecycle": {
     "title": "目标全周期",
@@ -194,12 +195,22 @@
     "audioTranscription": {
       "label": "转录",
       "aria": "请求音频转录"
+    },
+    "showObjectDetails": {
+      "label": "显示目标轨迹"
+    },
+    "hideObjectDetails": {
+      "label": "隐藏目标轨迹"
+    },
+    "viewTrackingDetails": {
+      "label": "查看追踪详情",
+      "aria": "显示追踪详情"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "确认删除",
-      "desc": "删除此追踪目标后将移除快照、所有已保存的嵌入向量数据以及任何相关的目标全周期条目，但在 历史 页面中跟踪对象的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
+      "desc": "删除此追踪目标后将移除快照、所有已保存的嵌入向量数据以及任何相关的目标追踪详情条目，但在 历史 页面中跟踪对象的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
     }
   },
   "noTrackedObjects": "未找到追踪目标",
@@ -217,5 +228,56 @@
   "exploreMore": "浏览更多的 {{label}}",
   "aiAnalysis": {
     "title": "AI分析"
+  },
+  "concerns": {
+    "label": "风险等级"
+  },
+  "trackingDetails": {
+    "title": "追踪细节",
+    "noImageFound": "在该时间内没找到图片。",
+    "createObjectMask": "创建目标遮罩",
+    "adjustAnnotationSettings": "调整注释设置",
+    "scrollViewTips": "点击以查看该目标全周期中的关键时刻。",
+    "autoTrackingTips": "自动追踪摄像头的边框定位可能不准确。",
+    "count": "{{first}} / {{second}}",
+    "trackedPoint": "追踪点",
+    "lifecycleItemDesc": {
+      "visible": "已检测到 {{label}}",
+      "entered_zone": "{{label}} 进入 {{zones}}",
+      "active": "{{label}} 正在活动",
+      "stationary": "{{label}} 变为静止",
+      "attribute": {
+        "faceOrLicense_plate": "检测到 {{label}} 的 {{attribute}} 属性",
+        "other": "{{label}} 被识别为 {{attribute}}"
+      },
+      "gone": "{{label}} 离开",
+      "heard": "{{label}} 被听到",
+      "external": "已检测到 {{label}}",
+      "header": {
+        "zones": "区",
+        "ratio": "占比",
+        "area": "坐标区域"
+      }
+    },
+    "annotationSettings": {
+      "title": "标记设置",
+      "showAllZones": {
+        "title": "显示所有区",
+        "desc": "在目标进入区域的帧中始终显示区域框。"
+      },
+      "offset": {
+        "label": "标记偏移量",
+        "desc": "此数据来自摄像头的检测视频流，但叠加在录制视频流的画面上。两个视频流可能不会完全同步，因此边框与画面可能无法完全对齐。可以使用此设置将标记在时间轴上向前或向后偏移，以更好地与录制画面对齐。",
+        "millisecondsToOffset": "用于偏移检测标记的毫秒数。<em> 默认值：0</em>",
+        "tips": "提示：假设有一段人从左向右走的事件录制，如果事件时间轴中的边框始终在人的左侧（即后方），则应该减小偏移值；反之，如果边框始终领先于人物，则应增大偏移值。",
+        "toast": {
+          "success": "{{camera}} 的标记偏移量已保存。请重启 Frigate 以应用更改。"
+        }
+      }
+    },
+    "carousel": {
+      "previous": "上一张图",
+      "next": "下一张图"
+    }
   }
 }

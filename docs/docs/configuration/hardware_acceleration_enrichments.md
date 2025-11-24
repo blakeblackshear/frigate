@@ -5,7 +5,7 @@ title: Enrichments
 
 # Enrichments
 
-Some of Frigate's enrichments can use a discrete GPU / NPU for accelerated processing.
+Some of Frigate's enrichments can use a discrete GPU or integrated GPU for accelerated processing.
 
 ## Requirements
 
@@ -18,8 +18,10 @@ Object detection and enrichments (like Semantic Search, Face Recognition, and Li
 - **Intel**
 
   - OpenVINO will automatically be detected and used for enrichments in the default Frigate image.
+  - **Note:** Intel NPUs have limited model support for enrichments. GPU is recommended for enrichments when available.
 
 - **Nvidia**
+
   - Nvidia GPUs will automatically be detected and used for enrichments in the `-tensorrt` Frigate image.
   - Jetson devices will automatically be detected and used for enrichments in the `-tensorrt-jp6` Frigate image.
 

@@ -89,11 +89,22 @@
     "length": {
       "feet": "nohy",
       "meters": "metrov"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kb/hour",
+      "mbph": "MB/hour",
+      "gbph": "GB/hour"
     }
   },
   "readTheDocumentation": "Prečítajte si dokumentáciu",
   "label": {
-    "back": "Choď späť"
+    "back": "Choď späť",
+    "hide": "Skryť {{item}}",
+    "show": "Zobraziť {{item}}",
+    "ID": "ID"
   },
   "button": {
     "apply": "Použiť",
@@ -127,9 +138,160 @@
     "suspended": "Pozastavené",
     "export": "Exportovať",
     "deleteNow": "Odstrániť teraz",
-    "next": "Ďalej"
+    "next": "Ďalej",
+    "unsuspended": "Zrušte pozastavenie",
+    "play": "Hrať",
+    "unselect": "Zrušte výber"
   },
   "menu": {
-    "system": "Systém"
+    "system": "Systém",
+    "systemMetrics": "Systémové metriky",
+    "configuration": "Konfigurácia",
+    "systemLogs": "Systémový záznam",
+    "settings": "Nastavenia",
+    "configurationEditor": "Editor konfigurácie",
+    "languages": "Jazyky",
+    "language": {
+      "en": "English (Angličtina)",
+      "es": "Español (Španielčina)",
+      "zhCN": "简体中文 (Zjednodušená čínština)",
+      "hi": "हिन्दी (Hindčina)",
+      "fr": "Français (Francúzština)",
+      "ar": "العربية (Arabčina)",
+      "pt": "Portugalčina (Portugalčina)",
+      "ptBR": "Português brasileiro (Brazílska Portugalčina)",
+      "ru": "Русский (Ruština)",
+      "de": "nemčina (Nemčina)",
+      "ja": "日本語 (Japončina)",
+      "tr": "Türkçe (Turečtina)",
+      "it": "Italiano (Taliančina)",
+      "nl": "Nederlands (Holandčina)",
+      "sv": "Svenska (Švédčina)",
+      "cs": "Czech (Čeština)",
+      "nb": "Norsk Bokmål (Norský Bokmål)",
+      "ko": "한국어 (Korejština)",
+      "vi": "Tiếng Việt (Vietnamština)",
+      "fa": "فارسی (Perština)",
+      "pl": "Polski (Polština)",
+      "uk": "Українська (Ukrainština)",
+      "he": "עברית (Hebrejština)",
+      "el": "Ελληνικά (Gréčtina)",
+      "ro": "Română (Rumunčina)",
+      "hu": "Magyar (Maďarština)",
+      "fi": "Suomi (Fínčina)",
+      "da": "Dansk (Dánština)",
+      "sk": "Slovenčina (Slovenčina)",
+      "yue": "粵語 (Kantónčina)",
+      "th": "ไทย (Thajčina)",
+      "ca": "Català (Katalánčina)",
+      "sr": "Српски (Serbsky)",
+      "sl": "Slovinština (Slovinsko)",
+      "lt": "Lietuvių (Lithuanian)",
+      "bg": "Български (Bulgarian)",
+      "gl": "Galego (Galician)",
+      "id": "Bahasa Indonesia (Indonesian)",
+      "ur": "اردو (Urdu)",
+      "withSystem": {
+        "label": "Použiť systémové nastavenia pre jazyk"
+      }
+    },
+    "restart": "Reštartovať Frigate",
+    "live": {
+      "title": "Naživo",
+      "allCameras": "Všetky kamery",
+      "cameras": {
+        "title": "Kamery",
+        "count_one": "{{count}}kamera",
+        "count_few": "{{count}}kamery",
+        "count_other": "{{count}}kamier"
+      }
+    },
+    "export": "Exportovať",
+    "uiPlayground": "UI ihrisko",
+    "faceLibrary": "Knižnica Tvárov",
+    "user": {
+      "title": "Užívateľ",
+      "account": "Účet",
+      "current": "Aktuálny používateľ: {{user}}",
+      "anonymous": "anonymný",
+      "logout": "Odhlásiť",
+      "setPassword": "Nastaviť heslo"
+    },
+    "appearance": "Vzhľad",
+    "darkMode": {
+      "label": "Tmavý režim",
+      "light": "Svetlý",
+      "dark": "Tma",
+      "withSystem": {
+        "label": "Použiť systémové nastavenia pre svetlý a tmavý režim"
+      }
+    },
+    "withSystem": "Systém",
+    "theme": {
+      "label": "Téma",
+      "blue": "Modrá",
+      "green": "Zelená",
+      "nord": "Polárna",
+      "red": "Červená",
+      "highcontrast": "Vysoký kontrast",
+      "default": "Predvolené"
+    },
+    "help": "Pomocník",
+    "documentation": {
+      "title": "Dokumentácia",
+      "label": "Dokumentácia Frigate"
+    },
+    "review": "Recenzia",
+    "explore": "Preskúmať"
+  },
+  "toast": {
+    "copyUrlToClipboard": "Adresa URL bola skopírovaná do schránky.",
+    "save": {
+      "title": "Uložiť",
+      "error": {
+        "title": "Chyba pri ukladaní zmien konfigurácie: {{errorMessage}}",
+        "noMessage": "Chyba pri ukladaní zmien konfigurácie"
+      }
+    }
+  },
+  "role": {
+    "title": "Rola",
+    "admin": "Správca",
+    "viewer": "Divák",
+    "desc": "Správcovia majú plný prístup ku všetkým funkciám v užívateľskom rozhraní Frigate. Diváci sú obmedzení na sledovanie kamier, položiek prehľadu a historických záznamov v UI."
+  },
+  "pagination": {
+    "label": "stránkovanie",
+    "previous": {
+      "title": "Predchádzajúci",
+      "label": "Ísť na predchádzajúcu stranu"
+    },
+    "next": {
+      "title": "Ďalšia",
+      "label": "Ísť na ďalšiu stranu"
+    },
+    "more": "Viac strán"
+  },
+  "accessDenied": {
+    "documentTitle": "Prístup odmietnutý - Frigate",
+    "title": "Prístup odmietnutý",
+    "desc": "Nemáte oprávnenie zobraziť túto stránku."
+  },
+  "notFound": {
+    "documentTitle": "Nenájdené - Frigate",
+    "title": "404",
+    "desc": "Stránka nenájdená"
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} a {{1}}",
+    "many": "{{items}}, a {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Voliteľné",
+    "internalID": "Interné ID Frigate používa v konfigurácii a databáze"
   }
 }

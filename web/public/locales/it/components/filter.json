@@ -63,7 +63,7 @@
         "label": "Cerca la fonte",
         "desc": "Scegli se cercare nelle miniature o nelle descrizioni degli oggetti tracciati.",
         "options": {
-          "thumbnailImage": "Immagine anteprima",
+          "thumbnailImage": "Immagine in miniatura",
           "description": "Descrizione"
         }
       }

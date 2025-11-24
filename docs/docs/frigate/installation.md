@@ -56,7 +56,7 @@ services:
     volumes:
       - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
-      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+      - type: tmpfs # Recommended: 1GB of memory
         target: /tmp/cache
         tmpfs:
           size: 1000000000
@@ -132,7 +132,7 @@ If you are using `docker run`, add this option to your command `--device /dev/ha
 
 Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8l) to complete the setup.
 
-### MemryX MX3  
+### MemryX MX3
 
 The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVMe SSD), and supports a variety of configurations:
 - x86 (Intel/AMD) PCs
@@ -140,10 +140,10 @@ The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVM
 - Orange Pi 5 Plus/Max
 - Multi-M.2 PCIe carrier cards
 
-#### Configuration  
+#### Configuration
 
 
-#### Installation  
+#### Installation
 
 To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/get_started/hardware_setup.html).
 
@@ -154,7 +154,7 @@ Then follow these steps for installing the correct driver/runtime configuration:
 3. Run the script with `./user_installation.sh`
 4. **Restart your computer** to complete driver installation.
 
-#### Setup  
+#### Setup
 
 To set up Frigate, follow the default installation instructions, for example:   `ghcr.io/blakeblackshear/frigate:stable`
 
@@ -280,7 +280,7 @@ or add these options to your `docker run` command:
 ```
 --device /dev/synap \
 --device /dev/video0 \
---device /dev/video1 
+--device /dev/video1
 ```
 
 #### Configuration
@@ -340,12 +340,13 @@ services:
       - /dev/bus/usb:/dev/bus/usb # Passes the USB Coral, needs to be modified for other versions
       - /dev/apex_0:/dev/apex_0 # Passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
       - /dev/video11:/dev/video11 # For Raspberry Pi 4B
-      - /dev/dri/renderD128:/dev/dri/renderD128 # For intel hwaccel, needs to be updated for your hardware
+      - /dev/dri/renderD128:/dev/dri/renderD128 # AMD / Intel GPU, needs to be updated for your hardware
+      - /dev/accel:/dev/accel # Intel NPU
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /path/to/your/config:/config
       - /path/to/your/storage:/media/frigate
-      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+      - type: tmpfs # Recommended: 1GB of memory
         target: /tmp/cache
         tmpfs:
           size: 1000000000

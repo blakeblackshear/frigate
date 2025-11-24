@@ -1,8 +1,8 @@
 {
   "description": {
-    "addFace": "Parcurge adăugarea unei colecții noi la biblioteca de fețe.",
+    "addFace": "Adaugă o colecție nouă în Biblioteca de fețe încărcând prima ta imagine.",
     "placeholder": "Introduceti un nume pentru aceasta colectie",
-    "invalidName": "Nume invalid. Numele poate conține doar litere, cifre, spații, apostrofuri, liniuțe de subliniere și cratime."
+    "invalidName": "Nume invalid. Numele pot include doar litere, cifre, spații, apostrofuri, underscore-uri și liniuțe."
   },
   "details": {
     "person": "Persoană",
@@ -20,15 +20,15 @@
   "createFaceLibrary": {
     "desc": "Creează o colecție nouă",
     "title": "Creează colecție",
-    "nextSteps": "Pentru a construi o bază solidă:<li>Folosește fila „antrenare” pentru a selecta și antrena pe imagini pentru fiecare persoană detectată.</li><li>Concentrează-te pe imagini frontale pentru cele mai bune rezultate; evită imaginile de antrenament care surprind fețe din unghiuri laterale.</li></ul>",
+    "nextSteps": "Pentru a construi o bază solidă:<li>Folosește fila „Recunoașteri Recente” pentru a selecta și antrena pe imagini pentru fiecare persoană detectată.</li><li>Concentrează-te pe imagini frontale pentru cele mai bune rezultate; evită imaginile de antrenament care surprind fețe din unghiuri laterale.</li></ul>",
     "new": "Crează o față nouă"
   },
   "collections": "Colecții",
   "documentTitle": "Bibliotecă fețe - Frigate",
   "train": {
     "empty": "Nu există încercări recente de recunoaștere facială",
-    "title": "Antrenează",
-    "aria": "Selectează antrenarea"
+    "title": "Recunoașteri Recente",
+    "aria": "Selectează Recunoașteri Recente"
   },
   "steps": {
     "description": {
@@ -88,7 +88,7 @@
   },
   "imageEntry": {
     "dropActive": "Trage imaginea aici…",
-    "dropInstructions": "Trage și plasează o imagine aici sau fă clic pentru a selecta",
+    "dropInstructions": "Trage și plasează sau lipește o imagine aici sau fă clic pentru a selecta",
     "maxSize": "Dimensiunea maximă: {{size}}MB",
     "validation": {
       "selectImage": "Te rog să selectezi un fișier imagine."

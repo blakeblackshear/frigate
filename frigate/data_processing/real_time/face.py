@@ -166,6 +166,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         camera = obj_data["camera"]
 
         if not self.config.cameras[camera].face_recognition.enabled:
+            logger.debug(f"Face recognition disabled for camera {camera}, skipping")
             return
 
         start = datetime.datetime.now().timestamp()
@@ -208,6 +209,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             person_box = obj_data.get("box")
 
             if not person_box:
+                logger.debug(f"No person box available for {id}")
                 return
 
             rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
@@ -233,7 +235,8 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             try:
                 face_frame = cv2.cvtColor(face_frame, cv2.COLOR_RGB2BGR)
-            except Exception:
+            except Exception as e:
+                logger.debug(f"Failed to convert face frame color for {id}: {e}")
                 return
         else:
             # don't run for object without attributes
@@ -251,6 +254,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             # no faces detected in this frame
             if not face:
+                logger.debug(f"No face attributes found for {id}")
                 return
 
             face_box = face.get("box")
@@ -274,6 +278,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         res = self.recognizer.classify(face_frame)
 
         if not res:
+            logger.debug(f"Face recognizer returned no result for {id}")
             self.__update_metrics(datetime.datetime.now().timestamp() - start)
             return
 
@@ -330,6 +335,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
     def handle_request(self, topic, request_data) -> dict[str, Any] | None:
         if topic == EmbeddingsRequestEnum.clear_face_classifier.value:
             self.recognizer.clear()
+            return {"success": True, "message": "Face classifier cleared."}
         elif topic == EmbeddingsRequestEnum.recognize_face.value:
             img = cv2.imdecode(
                 np.frombuffer(base64.b64decode(request_data["image"]), dtype=np.uint8),
@@ -417,7 +423,10 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             res = self.recognizer.classify(img)
 
             if not res:
-                return
+                return {
+                    "message": "Model is still training, please try again in a few moments.",
+                    "success": False,
+                }
 
             sub_label, score = res
 
@@ -435,6 +444,13 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                     folder, f"{id}-{timestamp}-{sub_label}-{score}.webp"
                 )
                 shutil.move(current_file, new_file)
+
+            return {
+                "message": f"Successfully reprocessed face. Result: {sub_label} (score: {score:.2f})",
+                "success": True,
+                "face_name": sub_label,
+                "score": score,
+            }
 
     def expire_object(self, object_id: str, camera: str):
         if object_id in self.person_face_history:

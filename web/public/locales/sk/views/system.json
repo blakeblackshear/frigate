@@ -138,7 +138,49 @@
       "capture": "zachytiť",
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraCapture": "zachytiť{{camName}}",
-      "cameraDetect": "Detekcia {{camName}}"
+      "cameraDetect": "Detekcia {{camName}}",
+      "overallFramesPerSecond": "celkový počet snímok za sekundu",
+      "overallDetectionsPerSecond": "celkový počet detekcií za sekundu",
+      "overallSkippedDetectionsPerSecond": "celkový počet vynechaných detekcií za sekundu",
+      "cameraFramesPerSecond": "{{camName}}snimky za sekundu",
+      "cameraDetectionsPerSecond": "{{camName}}detekcie za sekundu",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} vynechaných detekcií za sekundu"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Dáta sondy boli skopírované do schránky."
+      },
+      "error": {
+        "unableToProbeCamera": "Nepodarilo sa overiť kameru: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Naposledy obnovené: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} má vysoké využitie CPU vo formáte FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} má vysoké využitie CPU pri detekcii ({{detectAvg}}%)",
+    "healthy": "Systém je zdravý",
+    "reindexingEmbeddings": "Preindexovanie vložených prvkov (dokončené na {{processed}} %)",
+    "cameraIsOffline": "{{camera}} je offline",
+    "detectIsSlow": "{{detect}} je pomalý ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} je veľmi pomalý ({{speed}} ms)",
+    "shmTooLow": "Alokácia /dev/shm ({{total}} MB) by sa mala zvýšiť aspoň na {{min}} MB."
+  },
+  "enrichments": {
+    "title": "Obohatenia",
+    "infPerSecond": "Inferencie za sekundu",
+    "embeddings": {
+      "image_embedding": "Vkladanie obrázkov",
+      "text_embedding": "Vkladanie textu",
+      "face_recognition": "Rozpoznávanie tváre",
+      "plate_recognition": "Rozpoznávanie ŠPZ",
+      "image_embedding_speed": "Rýchlosť vkladania obrázkov",
+      "face_embedding_speed": "Rýchlosť vkladania tváre",
+      "face_recognition_speed": "Rýchlosť rozpoznávania tváre",
+      "plate_recognition_speed": "Rýchlosť rozpoznávania ŠPZ",
+      "text_embedding_speed": "Rýchlosť vkladania textu",
+      "yolov9_plate_detection_speed": "YOLOv9 rýchlosť detekcie ŠPZ",
+      "yolov9_plate_detection": "YOLOv9 Detekcia ŠPZ"
     }
   }
 }

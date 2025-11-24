@@ -9,6 +9,7 @@ from typing import Any
 
 from peewee import DoesNotExist
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.embeddings_updater import (
     EmbeddingsRequestEnum,
@@ -61,8 +62,8 @@ from frigate.events.types import EventTypeEnum, RegenerateDescriptionEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event, Recordings, ReviewSegment, Trigger
 from frigate.util.builtin import serialize
+from frigate.util.file import get_event_thumbnail_bytes
 from frigate.util.image import SharedMemoryFrameManager
-from frigate.util.path import get_event_thumbnail_bytes
 
 from .embeddings import Embeddings
 
@@ -94,6 +95,9 @@ class EmbeddingMaintainer(threading.Thread):
                 CameraConfigUpdateEnum.review_genai,
                 CameraConfigUpdateEnum.semantic_search,
             ],
+        )
+        self.classification_config_subscriber = ConfigSubscriber(
+            "config/classification/custom/"
         )
 
         # Configure Frigate DB
@@ -154,11 +158,13 @@ class EmbeddingMaintainer(threading.Thread):
         self.realtime_processors: list[RealTimeProcessorApi] = []
 
         if self.config.face_recognition.enabled:
+            logger.debug("Face recognition enabled, initializing FaceRealTimeProcessor")
             self.realtime_processors.append(
                 FaceRealTimeProcessor(
                     self.config, self.requestor, self.event_metadata_publisher, metrics
                 )
             )
+            logger.debug("FaceRealTimeProcessor initialized successfully")
 
         if self.config.classification.bird.enabled:
             self.realtime_processors.append(
@@ -189,6 +195,7 @@ class EmbeddingMaintainer(threading.Thread):
                     self.config,
                     model_config,
                     self.event_metadata_publisher,
+                    self.requestor,
                     self.metrics,
                 )
             )
@@ -220,7 +227,9 @@ class EmbeddingMaintainer(threading.Thread):
             for c in self.config.cameras.values()
         ):
             self.post_processors.append(
-                AudioTranscriptionPostProcessor(self.config, self.requestor, metrics)
+                AudioTranscriptionPostProcessor(
+                    self.config, self.requestor, self.embeddings, metrics
+                )
             )
 
         semantic_trigger_processor: SemanticTriggerProcessor | None = None
@@ -229,6 +238,7 @@ class EmbeddingMaintainer(threading.Thread):
                 db,
                 self.config,
                 self.requestor,
+                self.event_metadata_publisher,
                 metrics,
                 self.embeddings,
             )
@@ -255,6 +265,7 @@ class EmbeddingMaintainer(threading.Thread):
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
             self.config_updater.check_for_updates()
+            self._check_classification_config_updates()
             self._process_requests()
             self._process_updates()
             self._process_recordings_updates()
@@ -265,6 +276,7 @@ class EmbeddingMaintainer(threading.Thread):
             self._process_event_metadata()
 
         self.config_updater.stop()
+        self.classification_config_subscriber.stop()
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()
@@ -274,6 +286,68 @@ class EmbeddingMaintainer(threading.Thread):
         self.embeddings_responder.stop()
         self.requestor.stop()
         logger.info("Exiting embeddings maintenance...")
+
+    def _check_classification_config_updates(self) -> None:
+        """Check for classification config updates and add/remove processors."""
+        topic, model_config = self.classification_config_subscriber.check_for_update()
+
+        if topic:
+            model_name = topic.split("/")[-1]
+
+            if model_config is None:
+                self.realtime_processors = [
+                    processor
+                    for processor in self.realtime_processors
+                    if not (
+                        isinstance(
+                            processor,
+                            (
+                                CustomStateClassificationProcessor,
+                                CustomObjectClassificationProcessor,
+                            ),
+                        )
+                        and processor.model_config.name == model_name
+                    )
+                ]
+
+                logger.info(
+                    f"Successfully removed classification processor for model: {model_name}"
+                )
+            else:
+                self.config.classification.custom[model_name] = model_config
+
+                # Check if processor already exists
+                for processor in self.realtime_processors:
+                    if isinstance(
+                        processor,
+                        (
+                            CustomStateClassificationProcessor,
+                            CustomObjectClassificationProcessor,
+                        ),
+                    ):
+                        if processor.model_config.name == model_name:
+                            logger.debug(
+                                f"Classification processor for model {model_name} already exists, skipping"
+                            )
+                            return
+
+                if model_config.state_config is not None:
+                    processor = CustomStateClassificationProcessor(
+                        self.config, model_config, self.requestor, self.metrics
+                    )
+                else:
+                    processor = CustomObjectClassificationProcessor(
+                        self.config,
+                        model_config,
+                        self.event_metadata_publisher,
+                        self.requestor,
+                        self.metrics,
+                    )
+
+                self.realtime_processors.append(processor)
+                logger.info(
+                    f"Added classification processor for model: {model_name} (type: {type(processor).__name__})"
+                )
 
     def _process_requests(self) -> None:
         """Process embeddings requests"""
@@ -327,7 +401,14 @@ class EmbeddingMaintainer(threading.Thread):
 
         source_type, _, camera, frame_name, data = update
 
+        logger.debug(
+            f"Received update - source_type: {source_type}, camera: {camera}, data label: {data.get('label') if data else 'None'}"
+        )
+
         if not camera or source_type != EventTypeEnum.tracked_object:
+            logger.debug(
+                f"Skipping update - camera: {camera}, source_type: {source_type}"
+            )
             return
 
         if self.config.semantic_search.enabled:
@@ -337,6 +418,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         # no need to process updated objects if no processors are active
         if len(self.realtime_processors) == 0 and len(self.post_processors) == 0:
+            logger.debug(
+                f"No processors active - realtime: {len(self.realtime_processors)}, post: {len(self.post_processors)}"
+            )
             return
 
         # Create our own thumbnail based on the bounding box and the frame time
@@ -345,6 +429,7 @@ class EmbeddingMaintainer(threading.Thread):
                 frame_name, camera_config.frame_shape_yuv
             )
         except FileNotFoundError:
+            logger.debug(f"Frame {frame_name} not found for camera {camera}")
             pass
 
         if yuv_frame is None:
@@ -353,7 +438,11 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
+        logger.debug(
+            f"Processing {len(self.realtime_processors)} realtime processors for object {data.get('id')} (label: {data.get('label')})"
+        )
         for processor in self.realtime_processors:
+            logger.debug(f"Calling process_frame on {processor.__class__.__name__}")
             processor.process_frame(data, yuv_frame)
 
         for processor in self.post_processors:

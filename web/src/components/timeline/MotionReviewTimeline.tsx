@@ -10,6 +10,7 @@ import {
   MotionData,
   ReviewSegment,
   TimelineZoomDirection,
+  ZoomLevel,
 } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
@@ -46,6 +47,10 @@ export type MotionReviewTimelineProps = {
   dense?: boolean;
   isZooming: boolean;
   zoomDirection: TimelineZoomDirection;
+  alwaysShowMotionLine?: boolean;
+  onZoomChange?: (newZoomLevel: number) => void;
+  possibleZoomLevels?: ZoomLevel[];
+  currentZoomLevel?: number;
 };
 
 export function MotionReviewTimeline({
@@ -75,6 +80,10 @@ export function MotionReviewTimeline({
   dense = false,
   isZooming,
   zoomDirection,
+  alwaysShowMotionLine = false,
+  onZoomChange,
+  possibleZoomLevels,
+  currentZoomLevel,
 }: MotionReviewTimelineProps) {
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
@@ -203,6 +212,10 @@ export function MotionReviewTimeline({
       scrollToSegment={scrollToSegment}
       isZooming={isZooming}
       zoomDirection={zoomDirection}
+      getRecordingAvailability={getRecordingAvailability}
+      onZoomChange={onZoomChange}
+      possibleZoomLevels={possibleZoomLevels}
+      currentZoomLevel={currentZoomLevel}
     >
       <VirtualizedMotionSegments
         ref={virtualizedSegmentsRef}
@@ -221,6 +234,7 @@ export function MotionReviewTimeline({
         motionOnly={motionOnly}
         getMotionSegmentValue={getMotionSegmentValue}
         getRecordingAvailability={getRecordingAvailability}
+        alwaysShowMotionLine={alwaysShowMotionLine}
       />
     </ReviewTimeline>
   );

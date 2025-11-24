@@ -110,7 +110,8 @@
     "details": "детали",
     "snapshot": "снимок",
     "video": "видео",
-    "object_lifecycle": "жизненный цикл объекта"
+    "object_lifecycle": "жизненный цикл объекта",
+    "thumbnail": "миниатюра"
   },
   "objectLifecycle": {
     "title": "Жизненный цикл объекта",

@@ -37,7 +37,6 @@ from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.util.builtin import (
     clean_camera_user_pass,
     flatten_config_data,
-    get_tz_modifiers,
     process_config_query_string,
     update_yaml_file_bulk,
 )
@@ -48,6 +47,7 @@ from frigate.util.services import (
     restart_frigate,
     vainfo_hwaccel,
 )
+from frigate.util.time import get_tz_modifiers
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -177,6 +177,36 @@ def config(request: Request):
         )
 
     return JSONResponse(content=config)
+
+
+@router.get("/config/raw_paths", dependencies=[Depends(require_role(["admin"]))])
+def config_raw_paths(request: Request):
+    """Admin-only endpoint that returns camera paths and go2rtc streams without credential masking."""
+    config_obj: FrigateConfig = request.app.frigate_config
+
+    raw_paths = {"cameras": {}, "go2rtc": {"streams": {}}}
+
+    # Extract raw camera ffmpeg input paths
+    for camera_name, camera in config_obj.cameras.items():
+        raw_paths["cameras"][camera_name] = {
+            "ffmpeg": {
+                "inputs": [
+                    {"path": input.path, "roles": input.roles}
+                    for input in camera.ffmpeg.inputs
+                ]
+            }
+        }
+
+    # Extract raw go2rtc stream URLs
+    go2rtc_config = config_obj.go2rtc.model_dump(
+        mode="json", warnings="none", exclude_none=True
+    )
+    for stream_name, stream in go2rtc_config.get("streams", {}).items():
+        if stream is None:
+            continue
+        raw_paths["go2rtc"]["streams"][stream_name] = stream
+
+    return JSONResponse(content=raw_paths)
 
 
 @router.get("/config/raw")
@@ -387,20 +417,29 @@ def config_set(request: Request, body: AppConfigSetBody):
         old_config: FrigateConfig = request.app.frigate_config
         request.app.frigate_config = config
 
-        if body.update_topic and body.update_topic.startswith("config/cameras/"):
-            _, _, camera, field = body.update_topic.split("/")
+        if body.update_topic:
+            if body.update_topic.startswith("config/cameras/"):
+                _, _, camera, field = body.update_topic.split("/")
 
-            if field == "add":
-                settings = config.cameras[camera]
-            elif field == "remove":
-                settings = old_config.cameras[camera]
+                if field == "add":
+                    settings = config.cameras[camera]
+                elif field == "remove":
+                    settings = old_config.cameras[camera]
+                else:
+                    settings = config.get_nested_object(body.update_topic)
+
+                request.app.config_publisher.publish_update(
+                    CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
+                    settings,
+                )
             else:
+                # Generic handling for global config updates
                 settings = config.get_nested_object(body.update_topic)
 
-            request.app.config_publisher.publish_update(
-                CameraConfigUpdateTopic(CameraConfigUpdateEnum[field], camera),
-                settings,
-            )
+                # Publish None for removal, actual config for add/update
+                request.app.config_publisher.publisher.publish(
+                    body.update_topic, settings
+                )
 
     return JSONResponse(
         content=(
@@ -688,7 +727,11 @@ def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = N
         clauses.append((Timeline.camera == camera))
 
     if source_id:
-        clauses.append((Timeline.source_id == source_id))
+        source_ids = [sid.strip() for sid in source_id.split(",")]
+        if len(source_ids) == 1:
+            clauses.append((Timeline.source_id == source_ids[0]))
+        else:
+            clauses.append((Timeline.source_id.in_(source_ids)))
 
     if len(clauses) == 0:
         clauses.append((True))

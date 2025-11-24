@@ -4,26 +4,31 @@
     "authentication": "Paramètres d'authentification - Frigate",
     "camera": "Paramètres des caméras - Frigate",
     "classification": "Paramètres de classification - Frigate",
-    "motionTuner": "Réglages du mouvement - Frigate",
+    "motionTuner": "Réglage de la détection de mouvement - Frigate",
     "general": "Paramètres généraux - Frigate",
     "masksAndZones": "Éditeur de masques et de zones - Frigate",
     "object": "Débogage - Frigate",
     "frigatePlus": "Paramètres Frigate+ - Frigate",
     "notifications": "Paramètres de notification - Frigate",
-    "enrichments": "Paramètres d'enrichissements - Frigate"
+    "enrichments": "Paramètres d'enrichissements - Frigate",
+    "cameraManagement": "Gestion des caméras - Frigate",
+    "cameraReview": "Paramètres des événements de caméra - Frigate"
   },
   "menu": {
     "ui": "Interface utilisateur",
     "classification": "Classification",
     "masksAndZones": "Masques / Zones",
-    "motionTuner": "Réglages du mouvement",
+    "motionTuner": "Réglage de la détection de mouvement",
     "debug": "Débogage",
     "cameras": "Paramètres des caméras",
     "users": "Utilisateurs",
     "notifications": "Notifications",
     "frigateplus": "Frigate+",
     "enrichments": "Enrichissements",
-    "triggers": "Déclencheurs"
+    "triggers": "Déclencheurs",
+    "roles": "Rôles",
+    "cameraManagement": "Gestion",
+    "cameraReview": "Événements"
   },
   "dialog": {
     "unsavedChanges": {
@@ -44,8 +49,12 @@
         "desc": "Basculez automatiquement vers la vue en direct d'une caméra lorsqu'une activité est détectée. La désactivation de cette option limite la mise à jour des images statiques de la caméra sur le tableau de bord en direct à une fois par minute seulement."
       },
       "playAlertVideos": {
-        "label": "Lire les vidéos d'alertes",
+        "label": "Lire les vidéos d'alerte",
         "desc": "Par défaut, les alertes récentes du tableau de bord en direct sont diffusées sous forme de petites vidéos en boucle. Désactivez cette option pour afficher uniquement une image statique des alertes récentes sur cet appareil/navigateur."
+      },
+      "displayCameraNames": {
+        "label": "Toujours afficher les noms des caméras",
+        "desc": "Toujours afficher les noms des caméras dans une puce sur le tableau de bord de la vue en direct multi-caméras"
       }
     },
     "storedLayouts": {
@@ -62,13 +71,13 @@
       "title": "Visionneuse d'enregistrements",
       "defaultPlaybackRate": {
         "label": "Vitesse de lecture par défaut",
-        "desc": "Vitesse de lecture par défaut pour la lecture des enregistrements."
+        "desc": "Vitesse de lecture par défaut pour la lecture des enregistrements"
       }
     },
     "calendar": {
       "firstWeekday": {
         "label": "Premier jour de la semaine",
-        "desc": "Le jour du début de semaine du calendrier de la revue d'évènements.",
+        "desc": "Le jour du début de la semaine du calendrier des événements",
         "sunday": "Dimanche",
         "monday": "Lundi"
       },
@@ -127,7 +136,7 @@
     },
     "cameras": {
       "title": "Caméras",
-      "noCameras": "Aucune caméra disponible",
+      "noCameras": "Aucune caméra n'est disponible",
       "desc": "Sélectionnez les caméras pour lesquelles activer les notifications."
     },
     "deviceSpecific": "Paramètres spécifiques de l'appareil",
@@ -137,12 +146,12 @@
     "registerDevice": "Enregistrer cet appareil",
     "unregisterDevice": "Désenregistrer cet appareil",
     "sendTestNotification": "Envoyer une notification de test",
-    "unsavedChanges": "Modifications des notifications non enregistrés",
+    "unsavedChanges": "Modifications des notifications non enregistrées",
     "unsavedRegistrations": "Enregistrements des notifications non enregistrés"
   },
   "frigatePlus": {
     "apiKey": {
-      "notValidated": "La clé API Frigate+ n'est pas détectée ou non validée",
+      "notValidated": "La clé API Frigate+ n'est pas détectée ou n'est pas validée.",
       "title": "Clé API Frigate+",
       "validated": "La clé API Frigate+ est détectée et validée",
       "desc": "La clé API Frigate+ permet l'intégration avec le service Frigate+.",
@@ -151,12 +160,12 @@
     "title": "Paramètres Frigate+",
     "snapshotConfig": {
       "documentation": "Lire la documentation",
-      "desc": "La soumission à Frigate+ nécessite que les instantanés et les instantanés <code>clean_copy</code> soient activés dans votre configuration.",
-      "title": "Configuration de l'instantané",
+      "desc": "La soumission à Frigate+ nécessite à la fois que les instantanés et les instantanés <code>clean_copy</code> soient activés dans votre configuration.",
+      "title": "Configuration des instantanés",
       "table": {
         "snapshots": "Instantanés",
         "camera": "Caméra",
-        "cleanCopySnapshots": "<code>clean_copy</code> Instantanés"
+        "cleanCopySnapshots": "Instantanés <code>clean_copy</code>"
       },
       "cleanCopyWarning": "Certaines caméras ont des instantanés activés, mais la copie propre est désactivée. Vous devez activer <code>clean_copy</code> dans votre configuration d'instantanés pour pouvoir envoyer les images de ces caméras à Frigate+."
     },
@@ -167,7 +176,7 @@
       "supportedDetectors": "Détecteurs pris en charge",
       "loading": "Chargement des informations du modèle…",
       "title": "Informations sur le modèle",
-      "trainDate": "Date d'entrainement",
+      "trainDate": "Date d'entraînement",
       "error": "Échec du chargement des informations du modèle",
       "availableModels": "Modèles disponibles",
       "dimensions": "Dimensions",
@@ -183,7 +192,7 @@
       "error": "Échec de l'enregistrement des modifications de configuration : {{errorMessage}}"
     },
     "restart_required": "Redémarrage requis (modèle Frigate+ changé)",
-    "unsavedChanges": "Modifications de paramètres de Frigate+ non enregistrés"
+    "unsavedChanges": "Modifications de paramètres de Frigate+ non enregistrées"
   },
   "classification": {
     "title": "Paramètres de classification",
@@ -327,7 +336,8 @@
           "mustNotBeSameWithCamera": "Le nom de la zone ne doit pas être le même que le nom de la caméra.",
           "mustNotContainPeriod": "Le nom de la zone ne doit pas contenir de points.",
           "hasIllegalCharacter": "Le nom de la zone contient des caractères interdits.",
-          "alreadyExists": "Une zone portant ce nom existe déjà pour cette caméra."
+          "alreadyExists": "Une zone portant ce nom existe déjà pour cette caméra.",
+          "mustHaveAtLeastOneLetter": "Le nom de la zone doit comporter au moins une lettre."
         }
       },
       "distance": {
@@ -351,7 +361,7 @@
         },
         "snapPoints": {
           "true": "Points d'accrochage",
-          "false": "Ne cassez pas les points"
+          "false": "Ne pas réunir les points"
         }
       },
       "loiteringTime": {
@@ -366,7 +376,7 @@
       },
       "speed": {
         "error": {
-          "mustBeGreaterOrEqualTo": "Le seuil de vitesse soit être égal ou supérieur à 0.1."
+          "mustBeGreaterOrEqualTo": "Le seuil de vitesse doit être supérieur ou égal à 0.1."
         }
       }
     },
@@ -380,12 +390,12 @@
       "edit": "Modifier une zone",
       "name": {
         "title": "Nom",
-        "inputPlaceHolder": "Entrer un nom…",
-        "tips": "Le nom doit comporter au moins 2 caractères et ne doit pas être le nom d'une caméra ou d'une autre zone."
+        "inputPlaceHolder": "Saisissez un nom.",
+        "tips": "Le nom doit comporter au moins 2 caractères, dont une lettre, et ne doit pas être le nom d'une caméra ou d'une autre zone."
       },
       "loiteringTime": {
         "desc": "Définit une durée minimale en secondes pendant laquelle l'objet doit rester dans la zone pour qu'elle s'active. <em>Par défaut : 0</em>",
-        "title": "Temps de latence"
+        "title": "Temps de maraudage"
       },
       "speedEstimation": {
         "title": "Estimation de la vitesse",
@@ -411,7 +421,7 @@
       "point_other": "{{count}} points",
       "label": "Zones",
       "inertia": {
-        "desc": "Spécifie le nombre d'images qu'un objet doit avoir dans une zone avant d'être considéré comme faisant partie de la zone. <em>Par défaut : 3</em>",
+        "desc": "Spécifie le nombre d'images pendant lesquelles un objet doit être dans une zone avant d'être considéré comme y étant. <em>Par défaut : 3</em>",
         "title": "Inertie"
       },
       "toast": {
@@ -426,7 +436,7 @@
     },
     "motionMasks": {
       "label": "Masque de mouvement",
-      "documentTitle": "Modifier masque de mouvement - Frigate",
+      "documentTitle": "Modifier le masque de mouvement - Frigate",
       "context": {
         "documentation": "Lire la documentation",
         "title": "Les masques de mouvement servent à empêcher les mouvements indésirables de déclencher la détection (par exemple : branches d'arbres, horodatage des caméras). Ils doivent être utilisés <em>avec parcimonie</em>, car un surmasquage complique le suivi des objets."
@@ -454,7 +464,7 @@
       "add": "Nouveau masque de mouvement"
     },
     "objectMasks": {
-      "label": "Masques de l'objet",
+      "label": "Masques d'objet",
       "desc": {
         "documentation": "Documentation",
         "title": "Les masques de filtrage d'objets sont utilisés pour filtrer les faux positifs pour un type d'objet donné en fonction de l'emplacement."
@@ -476,7 +486,7 @@
       "point_many": "{{count}} points",
       "point_other": "{{count}} points",
       "add": "Ajouter un masque d'objet",
-      "documentTitle": "Modifier le masque de l'objet - Frigate",
+      "documentTitle": "Modifier le masque d'objet - Frigate",
       "context": "Les masques de filtrage d'objets sont utilisés pour filtrer les faux positifs pour un type d'objet donné en fonction de l'emplacement."
     },
     "filter": {
@@ -498,7 +508,7 @@
     "title": "Réglage de la détection de mouvement",
     "desc": {
       "documentation": "Lisez le guide de réglage de mouvement",
-      "title": "Frigate utilise la détection de mouvement comme première ligne de contrôle pour voir s'il se passe quelque chose dans l'image qui mérite d'être vérifié avec la détection d'objet."
+      "title": "Frigate utilise la détection de mouvement comme première ligne de contrôle pour voir s'il se passe quelque chose dans l'image qui mérite d'être vérifié avec la détection d'objets."
     },
     "Threshold": {
       "title": "Seuil",
@@ -521,12 +531,12 @@
     "debugging": "Débogage",
     "objectList": "Liste d'objets",
     "boundingBoxes": {
-      "title": "Cadres de délimitation",
+      "title": "Cadres de détection",
       "colors": {
-        "label": "Couleurs du cadre de délimitation d'un objet",
-        "info": "<li>Au démarrage, différentes couleurs seront attribuées à chaque libellé d'objet</li><li>Une fine ligne bleu foncé indique que l'objet n'est pas détecté à ce moment précis</li><li>Une fine ligne grise indique que l'objet est détecté comme étant stationnaire</li><li>Une ligne épaisse indique que l'objet fait l'objet d'un suivi automatique (lorsqu'il est activé)</li>"
+        "label": "Couleurs des cadres de détection d'objet",
+        "info": "<li>Au démarrage, différentes couleurs seront attribuées à chaque étiquette d'objet</li><li>Une fine ligne bleu foncé indique que cet objet n'est pas détecté à ce moment précis</li><li>Une fine ligne grise indique que cet objet est détecté comme étant immobile</li><li>Une ligne épaisse indique que cet objet fait l'objet d'un suivi automatique (lorsqu'il est activé)</li>"
       },
-      "desc": "Afficher les cadres de délimitation autour des objets suivis"
+      "desc": "Afficher les cadres de détection autour des objets suivis"
     },
     "timestamp": {
       "title": "Horodatage",
@@ -543,11 +553,11 @@
     "motion": {
       "desc": "Afficher des cadres autour des zones où un mouvement est détecté",
       "title": "Cadres de mouvement",
-      "tips": "<p><strong>Cadres de mouvement</strong></p><br><p>Des cadres rouges seront superposées sur les zones de l'image où un mouvement est actuellement détecté</p>"
+      "tips": "<p><strong>Cadres de mouvement</strong></p><br><p>Des cadres rouges seront superposés sur les zones de l'image où un mouvement est actuellement détecté</p>"
     },
     "regions": {
       "title": "Régions",
-      "desc": "Afficher une boîte de la région d'intérêt envoyée au détecteur d'objet",
+      "desc": "Afficher un cadre de la région d'intérêt envoyée au détecteur d'objet",
       "tips": "<p><strong>Cadres de région</strong></p><br><p>Des cadres verts lumineux seront superposés sur les zones d'intérêt de l'image qui sont envoyées au détecteur d'objets.</p>"
     },
     "objectShapeFilterDrawing": {
@@ -564,9 +574,9 @@
     "detectorDesc": "Frigate utilise vos détecteurs ({{detectors}}) pour détecter les objets dans le flux vidéo de votre caméra.",
     "desc": "La vue de débogage affiche en temps réel les objets suivis et leurs statistiques. La liste des objets affiche un résumé différé des objets détectés.",
     "paths": {
-      "title": "Chemins",
-      "desc": "Montrer les points notables du chemin de l'objet suivi",
-      "tips": "<p><strong>Chemins</strong></p><br><p>Les lignes et les cercles indiqueront les points notables des déplacements de l'objet suivi pendant son cycle de vie.</p>"
+      "title": "Trajets",
+      "desc": "Afficher les points notables du trajet de l'objet suivi",
+      "tips": "<p><strong>Trajets</strong></p><br><p>Les lignes et les cercles indiqueront les points notables où l'objet suivi s'est déplacé pendant son cycle de vie.</p>"
     },
     "audio": {
       "title": "Audio",
@@ -575,7 +585,7 @@
       "currentRMS": "RMS actuel",
       "currentdbFS": "dbFS actuel"
     },
-    "openCameraWebUI": "Ouvre l'interface Web de {{camera}}"
+    "openCameraWebUI": "Ouvrir l'interface Web de {{camera}}"
   },
   "users": {
     "title": "Utilisateurs",
@@ -612,34 +622,34 @@
       "form": {
         "user": {
           "title": "Nom d'utilisateur",
-          "placeholder": "Entrez le nom d'utilisateur",
+          "placeholder": "Saisir le nom d'utilisateur",
           "desc": "Seules les lettres, les chiffres, les points et les traits de soulignement sont autorisés."
         },
         "password": {
           "strength": {
             "weak": "Faible",
-            "title": "Sécurité du mot de passe : ",
+            "title": "Niveau de sécurité du mot de passe : ",
             "medium": "Moyen",
             "strong": "Fort",
             "veryStrong": "Très fort"
           },
           "match": "Les mots de passe correspondent",
-          "notMatch": "Les mots de passe ne correspondent pas",
-          "placeholder": "Entrez le mot de passe",
+          "notMatch": "Les mots de passe ne correspondent pas.",
+          "placeholder": "Saisir le mot de passe",
           "title": "Mot de passe",
           "confirm": {
-            "title": "Confirmez le mot de passe",
-            "placeholder": "Confirmez le mot de passe"
+            "title": "Confirmer le mot de passe",
+            "placeholder": "Confirmer le mot de passe"
           }
         },
         "newPassword": {
           "title": "Nouveau mot de passe",
-          "placeholder": "Entrez le nouveau mot de passe",
+          "placeholder": "Saisissez le nouveau mot de passe.",
           "confirm": {
-            "placeholder": "Ré-entrez le nouveau mot de passe"
+            "placeholder": "Confirmez le nouveau mot de passe."
           }
         },
-        "usernameIsRequired": "Le nom d'utilisateur est requis",
+        "usernameIsRequired": "Nom d'utilisateur requis",
         "passwordIsRequired": "Mot de passe requis"
       },
       "deleteUser": {
@@ -649,7 +659,7 @@
       },
       "passwordSetting": {
         "updatePassword": "Mettre à jour le mot de passe pour {{username}}",
-        "setPassword": "Définir le mot de passe",
+        "setPassword": "Configurer un mot de passe",
         "desc": "Créez un mot de passe fort pour sécuriser ce compte.",
         "doNotMatch": "Les mots de passe ne correspondent pas",
         "cannotBeEmpty": "Le mot de passe ne peut être vide"
@@ -662,7 +672,7 @@
           "admin": "Administrateur",
           "adminDesc": "Accès complet à l'ensemble des fonctionnalités.",
           "viewer": "Observateur",
-          "viewerDesc": "Limité aux tableaux de bord Direct, Revue d'événements, Explorer et Exports.",
+          "viewerDesc": "Limité aux tableaux de bord Direct, Événements, Explorer et Exports.",
           "customDesc": "Rôle personnalisé avec accès spécifique à la caméra"
         },
         "select": "Sélectionnez un rôle"
@@ -670,7 +680,7 @@
       "createUser": {
         "title": "Créer un nouvel utilisateur",
         "desc": "Ajoutez un nouveau compte utilisateur et spécifiez un rôle pour accéder aux zones de l'interface utilisateur Frigate.",
-        "usernameOnlyInclude": "Le nom d'utilisateur ne peut inclure que des lettres, des chiffres, . ou _",
+        "usernameOnlyInclude": "Le nom d'utilisateur ne peut inclure que des lettres, des chiffres, des points (.) ou des traits de soulignement (_).",
         "confirmPassword": "Veuillez confirmer votre mot de passe"
       }
     }
@@ -679,26 +689,26 @@
     "title": "Paramètres d'enrichissements",
     "birdClassification": {
       "title": "Identification des oiseaux",
-      "desc": "L'identification des oiseaux est réalisée à l'aide d'un modèle TensorFlow quantifié. Lorsqu'un oiseau est reconnu, son nom commun est automatiquement ajouté comme sous-libellé. Cette information est intégréesà l'interface utilisateur, aux filtres de recherche et aux notifications."
+      "desc": "L'identification des oiseaux est réalisée à l'aide d'un modèle TensorFlow quantifié. Lorsqu'un oiseau est reconnu, son nom commun est automatiquement ajouté comme sous-étiquette. Cette information est intégrée à l'interface utilisateur, aux filtres de recherche et aux notifications."
     },
     "semanticSearch": {
       "title": "Recherche sémantique",
       "readTheDocumentation": "Lire la documentation",
       "reindexNow": {
         "label": "Réindexer maintenant",
-        "desc": "La réindexation va régénérer les représentations numériques pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un temps considérable, en fonction du nombre d'objets suivis.",
-        "confirmTitle": "Confirmez la réindexation",
+        "desc": "La réindexation va régénérer les embeddings pour tous les objets suivis. Ce processus s'exécute en arrière-plan et peut saturer votre processeur et prendre un temps considérable en fonction du nombre d'objets suivis.",
+        "confirmTitle": "Confirmer la réindexation",
         "confirmButton": "Réindexer",
         "success": "La réindexation a démarré avec succès.",
         "alreadyInProgress": "La réindexation est déjà en cours.",
         "error": "Échec du démarrage de la réindexation : {{errorMessage}}",
-        "confirmDesc": "Êtes-vous sûr de vouloir réindexer tous les représentations numériques des objets suivis ? Ce processus s'exécutera en arrière-plan, mais il pourrait saturer votre processeur et prendre un temps considérable. Vous pouvez suivre la progression sur la page Explorer."
+        "confirmDesc": "Êtes-vous sûr de vouloir réindexer tous les embeddings des objets suivis ? Ce processus s'exécutera en arrière-plan, mais il pourrait saturer votre processeur et prendre un temps considérable. Vous pouvez suivre la progression sur la page Explorer."
       },
       "modelSize": {
-        "desc": "La taille du modèle utilisé pour les représentations numériques de recherche sémantique.",
+        "desc": "La taille du modèle utilisé pour les embeddings de recherche sémantique",
         "small": {
           "title": "petit",
-          "desc": "Utiliser <em>petit</em> emploie une version quantifiée du modèle qui utilise moins de mémoire et s'exécute plus rapidement sur le processeur avec une différence négligeable dans la qualité des représentations numériques."
+          "desc": "Utiliser <em>petit</em> emploie une version quantifiée du modèle qui utilise moins de mémoire et s'exécute plus rapidement sur le processeur avec une différence négligeable dans la qualité des embeddings."
         },
         "large": {
           "title": "grand",
@@ -706,7 +716,7 @@
         },
         "label": "Taille du modèle"
       },
-      "desc": "La recherche sémantique de Frigate vous permet de retrouver les objets suivis dans votre revue d'évènements en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement."
+      "desc": "La recherche sémantique de Frigate vous permet de retrouver les objets suivis dans vos événements en utilisant soit l'image elle-même, soit une description textuelle définie par l'utilisateur, soit une description générée automatiquement."
     },
     "unsavedChanges": "Modifications non enregistrées des paramètres d'enrichissements",
     "faceRecognition": {
@@ -714,33 +724,33 @@
       "readTheDocumentation": "Lire la documentation",
       "modelSize": {
         "label": "Taille du modèle",
-        "desc": "La taille du modèle utilisé pour la reconnaissance faciale.",
+        "desc": "La taille du modèle utilisé pour la reconnaissance faciale",
         "small": {
           "title": "petit",
-          "desc": "Utiliser <em>petit</em> emploie un modèle de représentation numérique faciale FaceNet qui s'exécute efficacement sur la plupart des processeurs."
+          "desc": "Utiliser <em>petit</em> emploie un modèle d'embedding facial FaceNet qui s'exécute efficacement sur la plupart des processeurs."
         },
         "large": {
           "title": "grand",
-          "desc": "Utiliser <em>grand</em> emploie un modèle de représentation numérique faciale ArcFace et s'exécutera automatiquement sur le GPU si disponible."
+          "desc": "Utiliser <em>grand</em> emploie un modèle d'embedding facial ArcFace et s'exécutera automatiquement sur le GPU si disponible."
         }
       },
-      "desc": "La reconnaissance faciale permet à Frigate d'identifier les individus par leur nom. Dès qu'un visage est reconnu, Frigate associe ce nom comme sous-libellé à l'événement. Ces informations sont ensuite intégrées dans l'interface utilisateur, les options de filtrage et les notifications."
+      "desc": "La reconnaissance faciale permet à Frigate d'identifier les individus par leur nom. Dès qu'un visage est reconnu, Frigate associe ce nom comme sous-étiquette à l'événement. Ces informations sont ensuite intégrées dans l'interface utilisateur, les options de filtrage et les notifications."
     },
     "licensePlateRecognition": {
       "title": "Reconnaissance des plaques d'immatriculation",
       "readTheDocumentation": "Lire la documentation",
-      "desc": "Frigate identifie les plaques d'immatriculation des véhicules et peut automatiquement insérer les caractères détectés dans le champ recognized_license_plate. Il est également capable d'assigner un nom familier comme sous-libellé aux objets de type \"voiture\". Par exemple, cette fonction est souvent utilisée pour lire les plaques des véhicules empruntant une allée ou une rue."
+      "desc": "Frigate identifie les plaques d'immatriculation des véhicules et peut automatiquement insérer les caractères détectés dans le champ recognized_license_plate. Il est également capable d'assigner un nom familier comme sous-étiquette aux objets de type \"voiture\". Par exemple, cette fonction est souvent utilisée pour lire les plaques des véhicules empruntant une allée ou une rue."
     },
     "toast": {
       "error": "Échec de l'enregistrement des modifications de configuration : {{errorMessage}}",
-      "success": "Les paramètres d'enrichissements ont été enregistrés. Redémarrez Frigate pour appliquer les modifications."
+      "success": "Les paramètres d'enrichissements ont été enregistrés. Redémarrez Frigate pour appliquer vos modifications."
     },
     "restart_required": "Redémarrage nécessaire (paramètres d'enrichissements modifiés)"
   },
   "triggers": {
     "documentTitle": "Déclencheurs",
     "management": {
-      "title": "Gestion des déclencheurs",
+      "title": "Déclencheurs",
       "desc": "Gérer les déclencheurs pour {{camera}}. Utilisez le type vignette pour déclencher à partir de vignettes similaires à l'objet suivi sélectionné. Utilisez le type description pour déclencher à partir de textes de description similaires que vous avez spécifiés."
     },
     "addTrigger": "Ajouter un déclencheur",
@@ -751,7 +761,7 @@
       "threshold": "Seuil",
       "actions": "Actions",
       "noTriggers": "Aucun déclencheur configuré pour cette caméra.",
-      "edit": "Éditer",
+      "edit": "Modifier",
       "deleteTrigger": "Supprimer le déclencheur",
       "lastTriggered": "Dernier déclencheur"
     },
@@ -761,7 +771,9 @@
     },
     "actions": {
       "alert": "Marquer comme alerte",
-      "notification": "Envoyer une notification"
+      "notification": "Envoyer une notification",
+      "sub_label": "Ajouter une sous-étiquette",
+      "attribute": "Ajouter un attribut"
     },
     "dialog": {
       "createTrigger": {
@@ -769,8 +781,8 @@
         "desc": "Créer un déclencheur pour la caméra {{camera}}"
       },
       "editTrigger": {
-        "title": "Éditer le déclencheur",
-        "desc": "Éditer les paramètres du déclencheur de la caméra {{camera}}"
+        "title": "Modifier le déclencheur",
+        "desc": "Modifier les paramètres du déclencheur de la caméra {{camera}}"
       },
       "deleteTrigger": {
         "title": "Supprimer le déclencheur",
@@ -779,25 +791,28 @@
       "form": {
         "name": {
           "title": "Nom",
-          "placeholder": "Entrez le nom du déclencheur",
+          "placeholder": "Nommez ce déclencheur",
           "error": {
-            "minLength": "Le nom soit comporter au moins deux caractères.",
-            "invalidCharacters": "Le nom peut contenir uniquement des lettres, des nombres, des tirets bas, et des tirets.",
+            "minLength": "Le champ doit comporter au moins deux caractères.",
+            "invalidCharacters": "Le champ peut contenir uniquement des lettres, des nombres, des tirets bas, et des tirets.",
             "alreadyExists": "Un déclencheur avec le même nom existe déjà pour cette caméra."
-          }
+          },
+          "description": "Saisissez un nom ou une description unique pour identifier ce déclencheur."
         },
         "enabled": {
           "description": "Activer ou désactiver ce déclencheur"
         },
         "type": {
           "title": "Type",
-          "placeholder": "Sélectionner un type de déclencheur"
+          "placeholder": "Sélectionner un type de déclencheur",
+          "description": "Déclencher lorsqu'une description d'objet suivi similaire est détectée",
+          "thumbnail": "Déclencher lorsqu'une vignette d'objet suivi similaire est détectée"
         },
         "content": {
           "title": "Contenu",
-          "imagePlaceholder": "Sélectionner une image",
+          "imagePlaceholder": "Sélectionner une vignette",
           "textPlaceholder": "Saisir le contenu du texte",
-          "imageDesc": "Sélectionnez une image pour déclencher cette action lorsqu'une image similaire est détectée.",
+          "imageDesc": "Seules les 100 vignettes les plus récentes sont affichées. Si vous ne trouvez pas la vignette souhaitée, veuillez consulter les objets précédents dans Explorer et configurer un déclencheur à partir de ce menu.",
           "textDesc": "Entrez un texte pour déclencher cette action lorsqu'une description similaire d'objet suivi est détectée.",
           "error": {
             "required": "Le contenu est requis."
@@ -808,14 +823,20 @@
           "error": {
             "min": "Le seuil doit être au moins 0",
             "max": "Le seuil peut être au plus 1"
-          }
+          },
+          "desc": "Définissez le seuil de similarité pour ce déclencheur. Un seuil plus élevé signifie qu'une correspondance plus exacte est requise pour activer le déclencheur."
         },
         "actions": {
           "title": "Actions",
-          "desc": "Par défaut, Frigate publie un message MQTT à chaque déclenchement. Sélectionnez une action complémentaire à exécuter lors de ce déclenchement.",
+          "desc": "Par défaut, Frigate envoie un message MQTT pour tous les déclencheurs. Les sous-étiquettes ajoutent le nom du déclencheur à l'étiquette de l'objet. Les attributs sont des métadonnées recherchables stockées séparément dans les métadonnées de l'objet suivi.",
           "error": {
             "min": "Au moins une action doit être sélectionnée."
           }
+        },
+        "friendly_name": {
+          "title": "Nom convivial",
+          "placeholder": "Nommez ou décrivez ce déclencheur",
+          "description": "Nom convivial ou texte descriptif facultatif pour ce déclencheur."
         }
       }
     },
@@ -830,12 +851,33 @@
         "updateTriggerFailed": "Échec de la mise à jour du déclencheur : {{errorMessage}}",
         "deleteTriggerFailed": "Échec de la suppression du déclencheur : {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "La recherche sémantique est désactivée",
+      "desc": "La recherche sémantique doit être activée pour utiliser les déclencheurs."
+    },
+    "wizard": {
+      "title": "Créer un déclencheur",
+      "step1": {
+        "description": "Configurez les paramètres de base pour votre déclencheur."
+      },
+      "step2": {
+        "description": "Configurez le contenu qui déclenchera cette action."
+      },
+      "step3": {
+        "description": "Configurez le seuil et les actions pour ce déclencheur."
+      },
+      "steps": {
+        "nameAndType": "Nom et type",
+        "configureData": "Configuration des données",
+        "thresholdAndActions": "Seuil et actions"
+      }
     }
   },
   "roles": {
     "management": {
-      "title": "Gestion des rôles de visionnage",
-      "desc": "Gérer les rôles personnalisés de visionnage et leurs permissions d'accès aux caméras pour cette instance de Frigate."
+      "title": "Gestion des rôles Observateur",
+      "desc": "Gérer les rôles Observateur personnalisés et leurs permissions d'accès aux caméras pour cette instance de Frigate."
     },
     "addRole": "Ajouter un rôle",
     "table": {
@@ -843,7 +885,7 @@
       "cameras": "Caméras",
       "actions": "Actions",
       "noRoles": "Aucun rôle personnalisé trouvé.",
-      "editCameras": "Éditer les caméras",
+      "editCameras": "Modifier les caméras",
       "deleteRole": "Supprimer le rôle"
     },
     "toast": {
@@ -851,7 +893,9 @@
         "createRole": "Rôle {{role}} créé avec succès",
         "updateCameras": "Caméras mis à jour pour le rôle {{role}}",
         "deleteRole": "Rôle {{role}} supprimé avec succès",
-        "userRolesUpdated": "{{count}} utilisateurs affectés à ce rôle ont été mis à jour avec des droits 'visionnage', et ont accès à toutes les caméras."
+        "userRolesUpdated_one": "{{count}} utilisateurs affectés à ce rôle ont été mis à jour avec des droits \"Observateur\", et ont accès à toutes les caméras.",
+        "userRolesUpdated_many": "",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Échec dans la création du rôle : {{errorMessage}}",
@@ -866,22 +910,22 @@
         "desc": "Ajouter un nouveau rôle et définir les permissions d'accès à la caméra."
       },
       "editCameras": {
-        "title": "Editer les caméras du rôle",
+        "title": "Modifier les caméras du rôle",
         "desc": "Mettre à jour les accès aux caméras pour le rôle <strong>{{role}}</strong>."
       },
       "deleteRole": {
         "title": "Suppression du rôle",
-        "desc": "Cette action est irréversible. Elle supprimera définitivement le rôle et tous les utilisateurs associés seront affectés au rôle 'visionnage', avec un accès à toutes les caméras.",
+        "desc": "Cette action est irréversible. Elle supprimera définitivement le rôle et tous les utilisateurs associés seront affectés au rôle \"Observateur\", avec un accès à toutes les caméras.",
         "warn": "Êtes-vous sûr de vouloir supprimer <strong>{{role}}</strong> ?",
         "deleting": "En cours de suppression..."
       },
       "form": {
         "role": {
           "title": "Nom du rôle",
-          "placeholder": "Saisissez un nom de rôle",
-          "desc": "Seuls les lettres, nombres, points et tirets bas sont autorisés.",
+          "placeholder": "Saisissez un nom de rôle.",
+          "desc": "Seuls les lettres, les chiffres, les points et les traits de soulignement sont autorisés.",
           "roleIsRequired": "Un nom de rôle est requis",
-          "roleOnlyInclude": "Le nom de rôle peut uniquement contenir des lettres, nombres, . ou _",
+          "roleOnlyInclude": "Le nom de rôle ne peut inclure que des lettres, des chiffres, des points (.) ou des traits de soulignement (_).",
           "roleExists": "Un rôle avec ce nom existe déjà."
         },
         "cameras": {
@@ -889,6 +933,232 @@
           "desc": "Sélectionnez les caméras auxquelles ce rôle aura accès. Au moins une caméra est requise.",
           "required": "Au moins une caméra doit être sélectionnée."
         }
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Ajouter une caméra",
+    "description": "Suivez les étapes ci-dessous pour ajouter une nouvelle caméra à votre installation Frigate.",
+    "steps": {
+      "nameAndConnection": "Nom et connexion",
+      "streamConfiguration": "Configuration du flux",
+      "validationAndTesting": "Validation et tests"
+    },
+    "save": {
+      "success": "Nouvelle caméra {{cameraName}} enregistrée avec succès",
+      "failure": "Échec lors de l'enregistrement de {{cameraName}}"
+    },
+    "testResultLabels": {
+      "resolution": "Résolution",
+      "video": "Vidéo",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Veuillez saisir une URL de flux valide.",
+      "testFailed": "Échec du test de flux : {{error}}"
+    },
+    "step1": {
+      "description": "Saisissez les détails de votre caméra et testez la connexion.",
+      "cameraName": "Nom de la caméra",
+      "cameraNamePlaceholder": "par ex., porte_entree ou apercu_cour_arriere",
+      "host": "Hôte / Adresse IP",
+      "port": "Port",
+      "username": "Nom d'utilisateur",
+      "usernamePlaceholder": "Facultatif",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Facultatif",
+      "selectTransport": "Sélectionnez le protocole de transport.",
+      "cameraBrand": "Marque de la caméra",
+      "selectBrand": "Sélectionnez la marque de la caméra pour déterminer la forme de l'URL.",
+      "customUrl": "URL de flux personnalisé",
+      "brandInformation": "Information sur la marque",
+      "brandUrlFormat": "Pour les caméras avec un format d'URL RTSP comme : {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://nomutilisateur:motdepasse@hote:port/chemin",
+      "testConnection": "Tester la connexion",
+      "testSuccess": "Test de connexion réussi !",
+      "testFailed": "Échec du test de connexion. Veuillez vérifier votre saisie et réessayez.",
+      "streamDetails": "Détails du flux",
+      "warnings": {
+        "noSnapshot": "Impossible de récupérer un instantané à partir du flux configuré"
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Sélectionnez une marque de caméra avec hôte/IP ou choisissez « Autre » avec une URL personnalisée.",
+        "nameRequired": "Le nom de la caméra est requis.",
+        "nameLength": "Le nom de la caméra ne doit pas dépasser 64 caractères.",
+        "invalidCharacters": "Le nom de la caméra contient des caractères invalides.",
+        "nameExists": "Ce nom de caméra est déjà utilisé.",
+        "brands": {
+          "reolink-rtsp": "Le protocole RTSP de Reolink est déconseillé. Activez le protocole HTTP dans les paramètres du firmware de la caméra, puis relancez l'assistant."
+        },
+        "customUrlRtspRequired": "Les URL personnalisées doivent commencer par \"rtsp://\". Une configuration manuelle est requise pour les flux de caméra non-RTSP."
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Vérification des métadonnées de la caméra en cours...",
+        "fetchingSnapshot": "Récupération de l'instantané de la caméra en cours..."
+      }
+    },
+    "step2": {
+      "description": "Définissez les rôles du flux et ajoutez des flux supplémentaires pour votre caméra.",
+      "streamsTitle": "Flux de caméra",
+      "addStream": "Ajouter un flux",
+      "addAnotherStream": "Ajouter un autre flux",
+      "streamTitle": "Flux {{number}}",
+      "streamUrl": "URL du flux",
+      "streamUrlPlaceholder": "rtsp://nomutilisateur:motdepasse@hote:port/chemin",
+      "url": "URL",
+      "resolution": "Résolution",
+      "selectResolution": "Sélectionnez la résolution.",
+      "quality": "Qualité",
+      "selectQuality": "Sélectionnez la qualité.",
+      "roles": "Rôles",
+      "roleLabels": {
+        "record": "Enregistrement",
+        "audio": "Audio",
+        "detect": "Détection d'objets"
+      },
+      "testStream": "Tester la connexion",
+      "testSuccess": "Test du flux réussi !",
+      "testFailed": "Échec du test du flux",
+      "testFailedTitle": "Échec du test",
+      "connected": "Connecté",
+      "notConnected": "Non connecté",
+      "featuresTitle": "Caractéristiques",
+      "go2rtc": "Réduire le nombre de connexions à la caméra",
+      "detectRoleWarning": "Pour continuer, au moins un flux doit avoir le rôle \"détection\".",
+      "rolesPopover": {
+        "title": "Rôles du flux",
+        "detect": "Flux principal pour la détection d'objets",
+        "record": "Enregistre des extraits du flux vidéo en fonction des paramètres de configuration.",
+        "audio": "Flux pour la détection audio"
+      },
+      "featuresPopover": {
+        "title": "Fonctionnalités du flux",
+        "description": "Utilisez la rediffusion du flux go2rtc pour réduire le nombre de connexions à votre caméra."
+      }
+    },
+    "step3": {
+      "description": "Validation et analyse finales avant l'enregistrement de votre nouvelle caméra. Connectez chaque flux avant d'enregistrer.",
+      "validationTitle": "Validation du flux",
+      "connectAllStreams": "Connecter tous les flux",
+      "reconnectionSuccess": "Reconnexion réussie.",
+      "reconnectionPartial": "La reconnexion de certains flux a échoué.",
+      "streamUnavailable": "Aperçu du flux indisponible",
+      "reload": "Recharger",
+      "connecting": "Connexion en cours...",
+      "streamTitle": "Flux {{number}}",
+      "failed": "Échec",
+      "notTested": "Non testé",
+      "connectStream": "Connecter",
+      "connectingStream": "Connexion en cours",
+      "disconnectStream": "Déconnecter",
+      "estimatedBandwidth": "Débit estimé",
+      "roles": "Rôles",
+      "none": "Aucun",
+      "error": "Erreur",
+      "streamValidated": "Flux {{number}} validé avec succès",
+      "streamValidationFailed": "La validation du flux {{number}} a échoué",
+      "saveAndApply": "Enregistrer une nouvelle caméra",
+      "saveError": "Configuration invalide. Veuillez vérifier vos paramètres.",
+      "issues": {
+        "title": "Validation du flux",
+        "videoCodecGood": "Le codec vidéo est {{codec}}.",
+        "audioCodecGood": "Le codec audio est {{codec}}.",
+        "noAudioWarning": "Aucun son n'est détecté sur ce flux, les enregistrements seront muets.",
+        "audioCodecRecordError": "Le codec audio AAC est requis pour la prise en charge du son dans les enregistrements.",
+        "audioCodecRequired": "Un flux audio est requis pour prendre en charge la détection audio.",
+        "restreamingWarning": "La réduction des connexions à la caméra pour le flux d'enregistrement peut augmenter légèrement l'utilisation du processeur.",
+        "dahua": {
+          "substreamWarning": "Le flux secondaire 1 est limité en basse résolution. De nombreuses caméras (Dahua, Amcrest, EmpireTech...) proposent des flux supplémentaires qu'il suffit d'activer dans leurs propres paramètres. Il est recommandé de vérifier leur disponibilité et de les utiliser."
+        },
+        "hikvision": {
+          "substreamWarning": "Le flux secondaire 1 est limité en basse résolution. De nombreuses caméras Hikvision proposent des flux supplémentaires qu'il suffit d'activer dans leurs propres paramètres. Il est recommandé de vérifier leur disponibilité et de les utiliser."
+        },
+        "resolutionHigh": "La résolution {{resolution}} risque d'augmenter l'utilisation des ressources.",
+        "resolutionLow": "La résolution {{resolution}} risque d'être trop faible pour détecter les petits objets de manière fiable."
+      },
+      "valid": "Valide",
+      "ffmpegModule": "Utiliser le mode de compatibilité du flux",
+      "ffmpegModuleDescription": "Si le flux ne se charge pas après plusieurs tentatives, essayez d'activer cette option. Lorsqu'elle est activée, Frigate utilisera le module ffmpeg avec go2rtc. Cela peut offrir une meilleure compatibilité avec certains flux de caméra."
+    }
+  },
+  "cameraManagement": {
+    "title": "Gérer les caméras",
+    "addCamera": "Ajouter une nouvelle caméra",
+    "editCamera": "Modifier la caméra :",
+    "selectCamera": "Sélectionnez une caméra",
+    "backToSettings": "Retour aux paramètres de la caméra",
+    "streams": {
+      "title": "Activer / désactiver les caméras",
+      "desc": "Désactive temporairement une caméra jusqu'au redémarrage de Frigate. La désactivation d'une caméra interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l'enregistrement et le débogage deviennent alors indisponibles.<br /><em>Remarque : cela n'affecte pas les rediffusions des flux go2rtc.</em>"
+    },
+    "cameraConfig": {
+      "add": "Ajouter une caméra",
+      "edit": "Modifier la caméra",
+      "description": "Configurez les paramètres de la caméra, notamment les flux entrants et les rôles.",
+      "name": "Nom de la caméra",
+      "nameRequired": "Le nom de la caméra est requis",
+      "nameLength": "Le nom de la caméra doit comporter moins de 64 caractères.",
+      "namePlaceholder": "par exemple, porte d'entrée ou aperçu de la cour arrière",
+      "enabled": "Activé",
+      "ffmpeg": {
+        "inputs": "Flux d'entrée",
+        "path": "Chemin du flux",
+        "pathRequired": "Chemin du flux requis",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Rôles",
+        "rolesRequired": "Au moins un rôle est requis",
+        "rolesUnique": "Chaque rôle (audio, détection, enregistrement) ne peut être attribué qu'à un seul flux",
+        "addInput": "Ajouter un flux d'entrée",
+        "removeInput": "Supprimer le flux d'entrée",
+        "inputsRequired": "Au moins un flux d'entrée est requis"
+      },
+      "go2rtcStreams": "Flux go2rtc",
+      "streamUrls": "URL des flux",
+      "addUrl": "Ajouter une URL",
+      "addGo2rtcStream": "Ajouter un flux go2rtc",
+      "toast": {
+        "success": "La caméra {{cameraName}} a été enregistrée avec succès"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Paramètres des événements de la caméra",
+    "object_descriptions": {
+      "title": "Descriptions d'objets par l'IA générative",
+      "desc": "Active ou désactive temporairement les descriptions d'objets générées par l'IA générative pour cette caméra. Lorsque cette option est désactivée, aucune description par l'IA n'est générée pour les objets suivis sur cette caméra."
+    },
+    "review_descriptions": {
+      "title": "Descriptions des événements par l'IA générative",
+      "desc": "Active ou désactive temporairement les descriptions par l'IA générative pour cette caméra. Lorsque cette option est désactivée, aucune description par l'IA ne sera générée pour les événements de cette caméra."
+    },
+    "review": {
+      "title": "Événements",
+      "desc": "Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu'au redémarrage de Frigate. Lorsque cette option est désactivée, aucun nouvel événement n'est généré. ",
+      "alerts": "Alertes ",
+      "detections": "Détections "
+    },
+    "reviewClassification": {
+      "title": "Classification des événements",
+      "desc": "Frigate classe les événements en deux catégories : \"Alertes\" et \"Détections\". Par défaut, les objets de type <em>personne</em> et <em>voiture</em> sont considérés comme des \"Alertes\". Vous pouvez affiner cette classification en définissant des zones spécifiques pour chaque objet.",
+      "noDefinedZones": "Aucune zone n'est définie pour cette caméra.",
+      "objectAlertsTips": "Sur la caméra {{cameraName}}, tous les objets {{alertsLabels}} apparaîtront en tant qu'\"Alertes\".",
+      "zoneObjectAlertsTips": "Sur la caméra {{cameraName}}, tous les objets {{alertsLabels}} détectés dans la zone {{zone}} apparaîtront en tant qu'\"Alertes\".",
+      "objectDetectionsTips": "Sur la caméra {{cameraName}}, tous les objets {{detectionsLabels}} non catégorisés apparaîtront en tant que \"Détections\", peu importe leur zone.",
+      "zoneObjectDetectionsTips": {
+        "text": "Sur la caméra {{cameraName}}, tous les objets {{detectionsLabels}} non catégorisés dans la zone {{zone}} apparaîtront en tant que \"Détections\".",
+        "notSelectDetections": "Sur la caméra {{cameraName}}, tous les objets {{detectionsLabels}} détectés dans la zone {{zone}} qui ne sont pas catégorisés comme \"Alertes\" apparaîtront en tant que \"Détections\", et ce, quelle que soit leur zone.",
+        "regardlessOfZoneObjectDetectionsTips": "Sur la caméra {{cameraName}}, tous les objets {{detectionsLabels}} non catégorisés apparaîtront en tant que \"Détections\", peu importe leur zone."
+      },
+      "unsavedChanges": "Paramètres de classification des événements non enregistrés pour {{camera}}",
+      "selectAlertsZones": "Sélectionnez les zones pour les alertes",
+      "selectDetectionsZones": "Sélectionner les zones pour les détections",
+      "limitDetections": "Limiter les détections à des zones spécifiques",
+      "toast": {
+        "success": "La configuration de la classification des événements a été enregistrée. Redémarrez Frigate pour appliquer les modifications."
       }
     }
   }

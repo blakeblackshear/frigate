@@ -488,6 +488,8 @@ class FrigateApp:
                     }
                 ).execute()
 
+                self.config.auth.admin_first_time_login = True
+
                 logger.info("********************************************************")
                 logger.info("********************************************************")
                 logger.info("***    Auth is enabled, but no users exist.          ***")

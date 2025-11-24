@@ -25,6 +25,7 @@ from frigate.util.services import (
     get_intel_gpu_stats,
     get_jetson_stats,
     get_nvidia_gpu_stats,
+    get_openvino_npu_stats,
     get_rockchip_gpu_stats,
     get_rockchip_npu_stats,
     is_vaapi_amd_driver,
@@ -247,6 +248,10 @@ async def set_npu_usages(config: FrigateConfig, all_stats: dict[str, Any]) -> No
             # Rockchip NPU usage
             rk_usage = get_rockchip_npu_stats()
             stats["rockchip"] = rk_usage
+        elif detector.type == "openvino" and detector.device == "NPU":
+            # OpenVINO NPU usage
+            ov_usage = get_openvino_npu_stats()
+            stats["openvino"] = ov_usage
 
     if stats:
         all_stats["npu_usages"] = stats
@@ -357,7 +362,7 @@ def stats_snapshot(
             stats["embeddings"]["review_description_speed"] = round(
                 embeddings_metrics.review_desc_speed.value * 1000, 2
             )
-            stats["embeddings"]["review_descriptions"] = round(
+            stats["embeddings"]["review_description_events_per_second"] = round(
                 embeddings_metrics.review_desc_dps.value, 2
             )
 
@@ -365,7 +370,7 @@ def stats_snapshot(
             stats["embeddings"]["object_description_speed"] = round(
                 embeddings_metrics.object_desc_speed.value * 1000, 2
             )
-            stats["embeddings"]["object_descriptions"] = round(
+            stats["embeddings"]["object_description_events_per_second"] = round(
                 embeddings_metrics.object_desc_dps.value, 2
             )
 
@@ -373,7 +378,7 @@ def stats_snapshot(
             stats["embeddings"][f"{key}_classification_speed"] = round(
                 embeddings_metrics.classification_speeds[key].value * 1000, 2
             )
-            stats["embeddings"][f"{key}_classification"] = round(
+            stats["embeddings"][f"{key}_classification_events_per_second"] = round(
                 embeddings_metrics.classification_cps[key].value, 2
             )
 

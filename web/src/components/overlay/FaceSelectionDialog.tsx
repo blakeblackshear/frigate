@@ -12,6 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -20,7 +21,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { isDesktop, isMobile } from "react-device-detect";
-import { LuPlus, LuScanFace } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import React, { ReactNode, useMemo, useState } from "react";
@@ -62,7 +62,7 @@ export default function FaceSelectionDialog({
       );
 
   return (
-    <div className={className ?? ""}>
+    <div className={className ?? "flex"}>
       {newFace && (
         <TextEntryDialog
           open={true}
@@ -89,27 +89,26 @@ export default function FaceSelectionDialog({
             <DropdownMenuLabel>{t("trainFaceAs")}</DropdownMenuLabel>
             <div
               className={cn(
-                "flex max-h-[40dvh] flex-col overflow-y-auto",
+                "flex max-h-[40dvh] flex-col overflow-y-auto overflow-x-hidden",
                 isMobile && "gap-2 pb-4",
               )}
             >
-              <SelectorItem
-                className="flex cursor-pointer gap-2 smart-capitalize"
-                onClick={() => setNewFace(true)}
-              >
-                <LuPlus />
-                {t("createFaceLibrary.new")}
-              </SelectorItem>
               {faceNames.sort().map((faceName) => (
                 <SelectorItem
                   key={faceName}
                   className="flex cursor-pointer gap-2 smart-capitalize"
                   onClick={() => onTrainAttempt(faceName)}
                 >
-                  <LuScanFace />
                   {faceName}
                 </SelectorItem>
               ))}
+              <DropdownMenuSeparator />
+              <SelectorItem
+                className="flex cursor-pointer gap-2 smart-capitalize"
+                onClick={() => setNewFace(true)}
+              >
+                {t("createFaceLibrary.new")}
+              </SelectorItem>
             </div>
           </SelectorContent>
         </Selector>

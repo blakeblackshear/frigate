@@ -230,6 +230,7 @@ export default function SearchFilterDialog({
     <PlatformAwareSheet
       trigger={trigger}
       title={t("more")}
+      titleClassName="mb-5 -mt-3"
       content={content}
       contentClassName={cn(
         "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",
@@ -429,7 +430,8 @@ export function ZoneFilterContent({
               {allZones.map((item) => (
                 <FilterSwitch
                   key={item}
-                  label={item.replaceAll("_", " ")}
+                  label={item}
+                  type={"zone"}
                   isChecked={zones?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {

@@ -16,7 +16,7 @@ from frigate.comms.recordings_updater import (
     RecordingsDataSubscriber,
     RecordingsDataTypeEnum,
 )
-from frigate.config import CameraConfig, DetectConfig, ModelConfig
+from frigate.config import CameraConfig, DetectConfig, LoggerConfig, ModelConfig
 from frigate.config.camera.camera import CameraTypeEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
@@ -34,7 +34,7 @@ from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
 from frigate.track.tracked_object import TrackedObjectAttribute
-from frigate.util.builtin import EventsPerSecond, get_tomorrow_at_time
+from frigate.util.builtin import EventsPerSecond
 from frigate.util.image import (
     FrameManager,
     SharedMemoryFrameManager,
@@ -53,6 +53,7 @@ from frigate.util.object import (
     reduce_detections,
 )
 from frigate.util.process import FrigateProcess
+from frigate.util.time import get_tomorrow_at_time
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +196,9 @@ class CameraWatchdog(threading.Thread):
         self.sleeptime = self.config.ffmpeg.retry_interval
 
         self.config_subscriber = CameraConfigUpdateSubscriber(
-            None, {config.name: config}, [CameraConfigUpdateEnum.enabled]
+            None,
+            {config.name: config},
+            [CameraConfigUpdateEnum.enabled, CameraConfigUpdateEnum.record],
         )
         self.requestor = InterProcessRequestor()
         self.was_enabled = self.config.enabled
@@ -536,6 +539,7 @@ class CameraCapture(FrigateProcess):
         shm_frame_count: int,
         camera_metrics: CameraMetrics,
         stop_event: MpEvent,
+        log_config: LoggerConfig | None = None,
     ) -> None:
         super().__init__(
             stop_event,
@@ -546,9 +550,10 @@ class CameraCapture(FrigateProcess):
         self.config = config
         self.shm_frame_count = shm_frame_count
         self.camera_metrics = camera_metrics
+        self.log_config = log_config
 
     def run(self) -> None:
-        self.pre_run_setup()
+        self.pre_run_setup(self.log_config)
         camera_watchdog = CameraWatchdog(
             self.config,
             self.shm_frame_count,
@@ -574,6 +579,7 @@ class CameraTracker(FrigateProcess):
         ptz_metrics: PTZMetrics,
         region_grid: list[list[dict[str, Any]]],
         stop_event: MpEvent,
+        log_config: LoggerConfig | None = None,
     ) -> None:
         super().__init__(
             stop_event,
@@ -589,9 +595,10 @@ class CameraTracker(FrigateProcess):
         self.camera_metrics = camera_metrics
         self.ptz_metrics = ptz_metrics
         self.region_grid = region_grid
+        self.log_config = log_config
 
     def run(self) -> None:
-        self.pre_run_setup()
+        self.pre_run_setup(self.log_config)
         frame_queue = self.camera_metrics.frame_queue
         frame_shape = self.config.frame_shape
 

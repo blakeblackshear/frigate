@@ -226,10 +226,21 @@
     "length": {
       "feet": "picioare",
       "meters": "metri"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/oră",
+      "mbph": "MB/oră",
+      "gbph": "GB/oră"
     }
   },
   "label": {
-    "back": "Mergi înapoi"
+    "back": "Mergi înapoi",
+    "hide": "Ascunde {{item}}",
+    "show": "Afișează {{item}}",
+    "ID": "ID"
   },
   "selectItem": "Selectează {{item}}",
   "pagination": {
@@ -270,5 +281,17 @@
     "title": "404",
     "desc": "Pagină negăsită"
   },
-  "readTheDocumentation": "Citește documentația"
+  "readTheDocumentation": "Citește documentația",
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} și {{1}}",
+    "many": "{{items}}, și {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Opțional",
+    "internalID": "ID-ul Intern pe care Frigate îl folosește în configurație și în baza de date"
+  }
 }

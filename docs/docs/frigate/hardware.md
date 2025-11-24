@@ -3,6 +3,8 @@ id: hardware
 title: Recommended hardware
 ---
 
+import CommunityBadge from '@site/src/components/CommunityBadge';
+
 ## Cameras
 
 Cameras that output H.264 video and AAC audio will offer the most compatibility with all features of Frigate and Home Assistant. It is also helpful if your camera supports multiple substreams to allow different resolutions to be used for detection, streaming, and recordings without re-encoding.
@@ -59,7 +61,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
   - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#edge-tpu-detector)
 
-- [MemryX](#memryx-mx3): The MX3 M.2 accelerator module is available in m.2 format allowing for a wide range of compatibility with devices.
+- <CommunityBadge /> [MemryX](#memryx-mx3): The MX3 M.2 accelerator module is available in m.2 format allowing for a wide range of compatibility with devices.
   - [Supports many model architectures](../../configuration/object_detectors#memryx-mx3)
   - Runs best with tiny, small, or medium-size models
 
@@ -78,45 +80,31 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Intel**
 
-- [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
+- [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel NPUs to provide efficient object detection.
   - [Supports majority of model architectures](../../configuration/object_detectors#openvino-supported-models)
   - Runs best with tiny, small, or medium models
 
 **Nvidia**
 
-- [TensortRT](#tensorrt---nvidia-gpu): TensorRT can run on Nvidia GPUs and Jetson devices.
+- [TensortRT](#tensorrt---nvidia-gpu): TensorRT can run on Nvidia GPUs to provide efficient object detection.
+
   - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#onnx-supported-models)
   - Runs well with any size models including large
 
-**Rockchip**
+- <CommunityBadge /> [Jetson](#nvidia-jetson): Jetson devices are supported via the TensorRT or ONNX detectors when running Jetpack 6.
+
+**Rockchip** <CommunityBadge />
 
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs to provide efficient object detection.
   - [Supports limited model architectures](../../configuration/object_detectors#choosing-a-model)
   - Runs best with tiny or small size models
   - Runs efficiently on low power hardware
 
-**Synaptics**
+**Synaptics** <CommunityBadge />
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs to provide efficient object detection.
 
 :::
-
-### Synaptics
-
-- **Synaptics** Default model is **mobilenet**
-
-| Name             | Synaptics SL1680 Inference Time |
-| ---------------- | ------------------------------- |
-| ssd mobilenet    | ~ 25 ms                         |
-| yolov5m          | ~ 118 ms                        |
-
-### AXERA
-
-- **AXEngine** Default model is **yolov9**
-
-| Name             | AXERA AX650N/AX8850N Inference Time |
-| ---------------- | ----------------------------------- |
-| yolov9-tiny      | ~ 4 ms                              |
 
 ### Hailo-8
 
@@ -150,6 +138,7 @@ The OpenVINO detector type is able to run on:
 
 - 6th Gen Intel Platforms and newer that have an iGPU
 - x86 hosts with an Intel Arc GPU
+- Intel NPUs
 - Most modern AMD CPUs (though this is officially not supported by Intel)
 - x86 & Arm64 hosts via CPU (generally not recommended)
 
@@ -174,7 +163,8 @@ Inference speeds vary greatly depending on the CPU or GPU used, some known examp
 | Intel UHD 770  | ~ 15 ms                    | t-320: ~ 16 ms s-320: ~ 20 ms s-640: ~ 40 ms      | 320: ~ 20 ms 640: ~ 46 ms |                        |                                    |
 | Intel N100     | ~ 15 ms                    | s-320: 30 ms                                      | 320: ~ 25 ms              |                        | Can only run one detector instance |
 | Intel N150     | ~ 15 ms                    | t-320: 16 ms s-320: 24 ms                         |                           |                        |                                    |
-| Intel Iris XE  | ~ 10 ms                    | s-320: 12 ms s-640: 30 ms                         | 320: ~ 18 ms 640: ~ 50 ms |                        |                                    |
+| Intel Iris XE  | ~ 10 ms                    | t-320: 6 ms t-640: 14 ms s-320: 8 ms s-640: 16 ms | 320: ~ 10 ms 640: ~ 20 ms | 320-n: 33 ms           |                                    |
+| Intel NPU      | ~ 6 ms                     | s-320: 11 ms                                      | 320: ~ 14 ms 640: ~ 34 ms | 320-n: 40 ms           |                                    |
 | Intel Arc A310 | ~ 5 ms                     | t-320: 7 ms t-640: 11 ms s-320: 8 ms s-640: 15 ms | 320: ~ 8 ms 640: ~ 14 ms  |                        |                                    |
 | Intel Arc A380 | ~ 6 ms                     |                                                   | 320: ~ 10 ms 640: ~ 22 ms | 336: 20 ms 448: 27 ms  |                                    |
 | Intel Arc A750 | ~ 4 ms                     |                                                   | 320: ~ 8 ms               |                        |                                    |
@@ -267,7 +257,7 @@ Inference speeds may vary depending on the host platform. The above data was mea
 
 ### Nvidia Jetson
 
-Frigate supports all Jetson boards, from the inexpensive Jetson Nano to the powerful Jetson Orin AGX. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration_video#nvidia-jetson-orin-agx-orin-nx-orin-nano-xavier-agx-xavier-nx-tx2-tx1-nano) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
+Jetson devices are supported via the TensorRT or ONNX detectors when running Jetpack 6. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration_video#nvidia-jetson-orin-agx-orin-nx-orin-nano-xavier-agx-xavier-nx-tx2-tx1-nano) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
 
 Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
 
@@ -287,6 +277,15 @@ Frigate supports hardware video processing on all Rockchip boards. However, hard
 | rk3566 1 core  |                       | small: ~ 96 ms              |                         |
 
 The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms for yolo-nas s.
+
+### Synaptics
+
+- **Synaptics** Default model is **mobilenet**
+
+| Name          | Synaptics SL1680 Inference Time |
+| ------------- | ------------------------------- |
+| ssd mobilenet | ~ 25 ms                         |
+| yolov5m       | ~ 118 ms                        |
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
@@ -309,3 +308,11 @@ Basically - When you increase the resolution and/or the frame rate of the stream
 YES! The Coral does not help with decoding video streams.
 
 Decompressing video streams takes a significant amount of CPU power. Video compression uses key frames (also known as I-frames) to send a full frame in the video stream. The following frames only include the difference from the key frame, and the CPU has to compile each frame by merging the differences with the key frame. [More detailed explanation](https://support.video.ibm.com/hc/en-us/articles/18106203580316-Keyframes-InterFrame-Video-Compression). Higher resolutions and frame rates mean more processing power is needed to decode the video stream, so try and set them on the camera to avoid unnecessary decoding work.
+
+### AXERA
+
+- **AXEngine** Default model is **yolov9**
+
+| Name             | AXERA AX650N/AX8850N Inference Time |
+| ---------------- | ----------------------------------- |
+| yolov9-tiny      | ~ 4 ms                              |

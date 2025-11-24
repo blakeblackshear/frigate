@@ -10,7 +10,17 @@ State classification allows you to train a custom MobileNetV2 classification mod
 State classification models are lightweight and run very fast on CPU. Inference should be usable on virtually any machine that can run Frigate.
 
 Training the model does briefly use a high amount of system resources for about 1–3 minutes per training run. On lower-power devices, training may take longer.
-When running the `-tensorrt` image, Nvidia GPUs will automatically be used to accelerate training.
+
+## Classes
+
+Classes are the different states an area on your camera can be in. Each class represents a distinct visual state that the model will learn to recognize.
+
+For state classification:
+
+- Define classes that represent mutually exclusive states
+- Examples: `open` and `closed` for a garage door, `on` and `off` for lights
+- Use at least 2 classes (typically binary states work best)
+- Keep class names clear and descriptive
 
 ## Example use cases
 
@@ -38,15 +48,25 @@ classification:
 
 ## Training the model
 
-Creating and training the model is done within the Frigate UI using the `Classification` page.
+Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of three steps:
 
-### Getting Started
+### Step 1: Name and Define
 
-When choosing a portion of the camera frame for state classification, it is important to make the crop tight around the area of interest to avoid extra signals unrelated to what is being classified.
+Enter a name for your model and define at least 2 classes (states) that represent mutually exclusive states. For example, `open` and `closed` for a door, or `on` and `off` for lights.
 
-// TODO add this section once UI is implemented. Explain process of selecting a crop.
+### Step 2: Select the Crop Area
+
+Choose one or more cameras and draw a rectangle over the area of interest for each camera. The crop should be tight around the region you want to classify to avoid extra signals unrelated to what is being classified. You can drag and resize the rectangle to adjust the crop area.
+
+### Step 3: Assign Training Examples
+
+The system will automatically generate example images from your camera feeds. You'll be guided through each class one at a time to select which images represent that state.
+
+**Important**: All images must be assigned to a state before training can begin. This includes images that may not be optimal, such as when people temporarily block the view, sun glare is present, or other distractions occur. Assign these images to the state that is actually present (based on what you know the state to be), not based on the distraction. This training helps the model correctly identify the state even when such conditions occur during inference.
+
+Once all images are assigned, training will begin automatically.
 
 ### Improving the Model
 
 - **Problem framing**: Keep classes visually distinct and state-focused (e.g., `open`, `closed`, `unknown`). Avoid combining object identity with state in a single model unless necessary.
-- **Data collection**: Use the model’s Train tab to gather balanced examples across times of day and weather.
+- **Data collection**: Use the model’s Recent Classifications tab to gather balanced examples across times of day and weather.

@@ -56,7 +56,7 @@ pywebpush == 2.0.*
 # alpr
 pyclipper == 1.3.*
 shapely == 2.0.*
-Levenshtein==0.26.*
+rapidfuzz==3.12.*
 # HailoRT Wheels
 appdirs==1.4.*
 argcomplete==2.0.*

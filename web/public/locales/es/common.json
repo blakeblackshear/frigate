@@ -280,5 +280,8 @@
     "desc": "Página no encontrada"
   },
   "selectItem": "Seleccionar {{item}}",
-  "readTheDocumentation": "Leer la documentación"
+  "readTheDocumentation": "Leer la documentación",
+  "information": {
+    "pixels": "{{area}}px"
+  }
 }

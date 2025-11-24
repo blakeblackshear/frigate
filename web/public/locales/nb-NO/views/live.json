@@ -62,7 +62,7 @@
     "disable": "Deaktiver automatisk sporing"
   },
   "manualRecording": {
-    "tips": "Start en manuell hendelse basert på kameraets innstillinger for opptaksbevaring.",
+    "tips": "Last ned et øyeblikksbilde, eller start en manuell hendelse basert på dette kameraets innstillinger for opptaksbevaring.",
     "playInBackground": {
       "label": "Spill av i bakgrunnen",
       "desc": "Aktiver dette alternativet for å fortsette strømming når spilleren er skjult."
@@ -71,15 +71,15 @@
       "label": "Vis statistikk",
       "desc": "Aktiver dette alternativet for å vise strømmestatistikk som et overlegg på kamerastrømmen."
     },
-    "started": "Startet manuelt opptak på forespørsel.",
-    "end": "Avslutt opptak på forespørsel",
-    "title": "Opptak på forespørsel",
+    "started": "Startet manuelt opptak.",
+    "end": "Avslutt manuelt opptak",
+    "title": "Manuelt opptak",
     "debugView": "Feilsøkingsvisning",
-    "start": "Start opptak på forespørsel",
-    "failedToStart": "Kunne ikke starte manuelt opptak på forespørsel.",
+    "start": "Start manuelt opptak",
+    "failedToStart": "Kunne ikke starte manuelt opptak.",
     "recordDisabledTips": "Siden opptak er deaktivert eller begrenset i konfigurasjonen for dette kameraet, vil kun et øyeblikksbilde bli lagret.",
-    "ended": "Avsluttet manuelt opptak på forespørsel.",
-    "failedToEnd": "Kunne ikke avslutte manuelt opptak på forespørsel."
+    "ended": "Avsluttet manuelt opptak.",
+    "failedToEnd": "Kunne ikke avslutte manuelt opptak."
   },
   "audio": "Lyd",
   "suspend": {
@@ -170,5 +170,16 @@
   "transcription": {
     "enable": "Aktiver direkte lydtranskripsjon",
     "disable": "Deaktiver direkte lydtranskripsjon"
+  },
+  "snapshot": {
+    "noVideoSource": "Ingen videokilde tilgjengelig for øyeblikksbilde.",
+    "captureFailed": "Kunne ikke ta øyeblikksbilde.",
+    "downloadStarted": "Nedlasting av øyeblikksbilde startet.",
+    "takeSnapshot": "Last ned øyeblikksbilde"
+  },
+  "noCameras": {
+    "title": "Ingen kameraer konfigurert",
+    "description": "Kom i gang ved å koble et kamera til Frigate.",
+    "buttonText": "Legg til kamera"
   }
 }

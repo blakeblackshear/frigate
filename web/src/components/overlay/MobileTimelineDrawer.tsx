@@ -51,6 +51,15 @@ export default function MobileTimelineDrawer({
         >
           {t("events.label")}
         </div>
+        <div
+          className={`mx-4 w-full py-2 text-center smart-capitalize ${selected == "detail" ? "rounded-lg bg-secondary" : ""}`}
+          onClick={() => {
+            onSelect("detail");
+            setDrawer(false);
+          }}
+        >
+          {t("detail.label")}
+        </div>
       </DrawerContent>
     </Drawer>
   );

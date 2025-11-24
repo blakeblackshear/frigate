@@ -23,7 +23,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useDocDomain } from "@/hooks/use-doc-domain";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 
 type FrigatePlusModel = {
   id: string;

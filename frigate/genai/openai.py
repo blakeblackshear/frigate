@@ -18,6 +18,7 @@ class OpenAIClient(GenAIClient):
     """Generative AI client for Frigate using OpenAI."""
 
     provider: OpenAI
+    context_size: Optional[int] = None
 
     def _init_provider(self):
         """Initialize the client."""
@@ -69,5 +70,33 @@ class OpenAIClient(GenAIClient):
 
     def get_context_size(self) -> int:
         """Get the context window size for OpenAI."""
-        # OpenAI GPT-4 Vision models have 128K token context window
-        return 128000
+        if self.context_size is not None:
+            return self.context_size
+
+        try:
+            models = self.provider.models.list()
+            for model in models.data:
+                if model.id == self.genai_config.model:
+                    if hasattr(model, "max_model_len") and model.max_model_len:
+                        self.context_size = model.max_model_len
+                        logger.debug(
+                            f"Retrieved context size {self.context_size} for model {self.genai_config.model}"
+                        )
+                        return self.context_size
+
+        except Exception as e:
+            logger.debug(
+                f"Failed to fetch model context size from API: {e}, using default"
+            )
+
+        # Default to 128K for ChatGPT models, 8K for others
+        model_name = self.genai_config.model.lower()
+        if "gpt" in model_name:
+            self.context_size = 128000
+        else:
+            self.context_size = 8192
+
+        logger.debug(
+            f"Using default context size {self.context_size} for model {self.genai_config.model}"
+        )
+        return self.context_size

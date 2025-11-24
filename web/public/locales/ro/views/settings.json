@@ -10,7 +10,9 @@
     "object": "Depanare - Frigate",
     "general": "Setări generale - Frigate",
     "frigatePlus": "Setări Frigate+ - Frigate",
-    "enrichments": "Setări de Îmbogățiri - Frigate"
+    "enrichments": "Setări de Îmbogățiri - Frigate",
+    "cameraManagement": "Gestionează Camerele - Frigate",
+    "cameraReview": "Setări Revizuire Cameră - Frigate"
   },
   "menu": {
     "ui": "Interfață utilizator",
@@ -22,7 +24,10 @@
     "users": "Utilizatori",
     "notifications": "Notificări",
     "frigateplus": "Frigate+",
-    "triggers": "Declanșatoare"
+    "triggers": "Declanșatoare",
+    "roles": "Roluri",
+    "cameraManagement": "Administrare",
+    "cameraReview": "Revizuire"
   },
   "dialog": {
     "unsavedChanges": {
@@ -45,6 +50,10 @@
       "playAlertVideos": {
         "label": "Redă videoclipurile de alertă",
         "desc": "În mod implicit, alertele recente din panoul Live se redau ca videoclipuri mici, ce ruleaza repetat. Dezactivează această opțiune pentru a afișa doar o imagine statică a alertelor recente pe acest dispozitiv/browser."
+      },
+      "displayCameraNames": {
+        "label": "Afișează întotdeauna numele camerelor",
+        "desc": "Afișează întotdeauna numele camerelor într-un indicator în tabloul de bord cu vizualizare live pe mai multe camere."
       }
     },
     "storedLayouts": {
@@ -245,7 +254,7 @@
       "name": {
         "inputPlaceHolder": "Introdu un nume…",
         "title": "Nume",
-        "tips": "Numele trebuie să aibă cel puțin 2 caractere și nu trebuie să fie identic cu numele unei camere sau al unei alte zone existente."
+        "tips": "Numele trebuie să aibă cel puțin 2 caractere, trebuie să conțină cel puțin o literă și nu trebuie să fie identic cu numele unei camere sau al unei alte zone existente."
       },
       "inertia": {
         "title": "Inerție",
@@ -262,7 +271,7 @@
         "desc": "Specifică o viteză minimă pe care trebuie să o aibă obiectele pentru a fi considerate în această zonă."
       },
       "documentTitle": "Editează zone - Frigate",
-      "clickDrawPolygon": "Click pentru a desena un poligon pe imagine.",
+      "clickDrawPolygon": "Apasă pentru a desena un poligon pe imagine.",
       "toast": {
         "success": "Zona ({{zoneName}}) a fost salvată. Repornește Frigate pentru a aplica modificările."
       },
@@ -277,7 +286,7 @@
       "point_one": "{{count}} punct",
       "point_few": "{{count}} puncte",
       "point_other": "{{count}} de puncte",
-      "clickDrawPolygon": "Fă click pentru a desena un poligon pe imagine.",
+      "clickDrawPolygon": "Fă clic pentru a desena un poligon pe imagine.",
       "label": "Măști de mișcare",
       "documentTitle": "Editează masca de mișcare - Frigate",
       "desc": {
@@ -325,7 +334,7 @@
           "title": "{{polygonName}} a fost salvat. Repornește Frigate pentru a aplica modificările."
         }
       },
-      "clickDrawPolygon": "Fă click pentru a desena un poligon pe imagine.",
+      "clickDrawPolygon": "Fă clic pentru a desena un poligon pe imagine.",
       "context": "Măștile de filtrare a obiectelor sunt folosite pentru a elimina falsele pozitive pentru un anumit tip de obiect, în funcție de locația acestuia."
     },
     "restart_required": "Repornire necesară (măști/zone modificate)",
@@ -349,7 +358,8 @@
           "mustNotContainPeriod": "Numele zonei nu trebuie să conțină puncte.",
           "hasIllegalCharacter": "Numele zonei conține caractere nepermise.",
           "mustNotBeSameWithCamera": "Numele zonei nu trebuie să fie identic cu numele camerei.",
-          "alreadyExists": "O zonă cu acest nume există deja pentru această cameră."
+          "alreadyExists": "O zonă cu acest nume există deja pentru această cameră.",
+          "mustHaveAtLeastOneLetter": "Numele zonei trebuie să aibă cel puțin o literă."
         }
       },
       "polygonDrawing": {
@@ -676,7 +686,7 @@
   "triggers": {
     "documentTitle": "Declanșatoare",
     "management": {
-      "title": "Gestionarea declanșatoarelor",
+      "title": "Declanșatoare",
       "desc": "Gestionează declanșatoarele pentru {{camera}}. Folosește tipul miniatură pentru a declanșa pe miniaturi similare cu obiectul urmărit selectat și tipul descriere pentru a declanșa pe descrieri similare textului pe care îl specifici."
     },
     "addTrigger": "Adaugă declanșator",
@@ -697,7 +707,9 @@
     },
     "actions": {
       "alert": "Marchează ca alertă",
-      "notification": "Trimite notificare"
+      "notification": "Trimite notificare",
+      "sub_label": "Adaugă subeticheta",
+      "attribute": "Adaugă atribut"
     },
     "dialog": {
       "createTrigger": {
@@ -715,25 +727,28 @@
       "form": {
         "name": {
           "title": "Nume",
-          "placeholder": "Introdu numele declanșatorului",
+          "placeholder": "Denumește acest declanșator",
           "error": {
-            "minLength": "Numele trebuie să aibă cel puțin 2 caractere.",
-            "invalidCharacters": "Numele poate conține doar litere, cifre, underscore-uri și cratime.",
+            "minLength": "Câmpul trebuie să aibă cel puțin 2 caractere.",
+            "invalidCharacters": "Câmpul poate conține doar litere, cifre, underscore-uri și cratime.",
             "alreadyExists": "Un declanșator cu acest nume există deja pentru această cameră."
-          }
+          },
+          "description": "Introduceți un nume sau o descriere unică pentru a identifica acest declanșator"
         },
         "enabled": {
           "description": "Activează sau dezactivează acest declanșator"
         },
         "type": {
           "title": "Tip",
-          "placeholder": "Selectează tipul de declanșator"
+          "placeholder": "Selectează tipul de declanșator",
+          "description": "Declanșează atunci când este detectată o descriere de obiect urmărit similară",
+          "thumbnail": "Declanșează atunci când este detectată o miniatură de obiect urmărit similară"
         },
         "content": {
           "title": "Conținut",
-          "imagePlaceholder": "Selectează o imagine",
+          "imagePlaceholder": "Selectează o miniatură",
           "textPlaceholder": "Introdu conținutul textului",
-          "imageDesc": "Selectează o imagine pentru a declanșa această acțiune atunci când o imagine similară este detectată.",
+          "imageDesc": "Sunt afișate doar ultimele 100 de miniaturi. Dacă nu găsiți miniatura dorită, vă rugăm să verificați obiectele anterioare în Explorator și să configurați un declanșator din meniul de acolo.",
           "textDesc": "Introduceți textul pentru a declanșa această acțiune atunci când este detectată o descriere de obiect urmărit similară.",
           "error": {
             "required": "Conținutul este obligatoriu."
@@ -744,14 +759,20 @@
           "error": {
             "min": "Pragul trebuie să fie cel puțin 0",
             "max": "Pragul trebuie să fie cel mult 1"
-          }
+          },
+          "desc": "Setați pragul de similitudine pentru acest declanșator. Un prag mai mare înseamnă că este necesară o potrivire mai apropiată pentru declanșarea acestuia."
         },
         "actions": {
           "title": "Acțiuni",
-          "desc": "Implicit, Frigate trimite un mesaj MQTT pentru toate declanșatoarele. Alegeți o acțiune suplimentară de efectuat atunci când acest declanșator se activează.",
+          "desc": "În mod implicit, Frigate trimite un mesaj MQTT pentru toate declanșatoarele. Subetichetele adaugă numele declanșatorului la eticheta obiectului. Atributele sunt metadate căutabile, stocate separat în metadatele obiectului urmărit.",
           "error": {
             "min": "Trebuie selectată cel puțin o acțiune."
           }
+        },
+        "friendly_name": {
+          "title": "Nume prietenos",
+          "placeholder": "Denumește sau descrie acest declanșator",
+          "description": "Un nume prietenos opțional sau un text descriptiv pentru acest declanșator."
         }
       }
     },
@@ -765,6 +786,27 @@
         "createTriggerFailed": "Crearea declanșatorului a eșuat: {{errorMessage}}",
         "updateTriggerFailed": "Actualizarea declanșatorului a eșuat: {{errorMessage}}",
         "deleteTriggerFailed": "Eliminarea declanșatorului a eșuat: {{errorMessage}}"
+      }
+    },
+    "semanticSearch": {
+      "title": "Căutarea semantică este dezactivată",
+      "desc": "Căutarea semantică trebuie să fie activată pentru a utiliza declanșatoarele."
+    },
+    "wizard": {
+      "title": "Creează declanșator",
+      "step1": {
+        "description": "Configurează setările de bază pentru declanșatorul tău."
+      },
+      "step2": {
+        "description": "Configurează conținutul care va declanșa această acțiune."
+      },
+      "step3": {
+        "description": "Configurează pragul și acțiunile pentru acest declanșator."
+      },
+      "steps": {
+        "nameAndType": "Nume și Tip",
+        "configureData": "Configurează datele",
+        "thresholdAndActions": "Prag și Acțiuni"
       }
     }
   },
@@ -787,7 +829,9 @@
         "createRole": "Rolul {{role}} a fost creat cu succes",
         "updateCameras": "Camerele au fost actualizate pentru rolul {{role}}",
         "deleteRole": "Rolul {{role}} a fost șters cu succes",
-        "userRolesUpdated": "{{count}} utilizator(i) atribuiți acestui rol au fost actualizați la „vizualizator”, care are acces la toate camerele."
+        "userRolesUpdated_one": "{{count}} utilizator(i) atribuiți acestui rol au fost actualizați la „vizualizator”, care are acces la toate camerele.",
+        "userRolesUpdated_few": "",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Crearea rolului a eșuat: {{errorMessage}}",
@@ -825,6 +869,232 @@
           "desc": "Selectați camerele la care acest rol are acces. Este necesară cel puțin o cameră.",
           "required": "Trebuie selectată cel puțin o cameră."
         }
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Adaugă cameră",
+    "description": "Urmează pașii de mai jos pentru a adăuga o cameră nouă la sistemul tău Frigate.",
+    "steps": {
+      "nameAndConnection": "Nume și Conexiune",
+      "streamConfiguration": "Configurare streaming",
+      "validationAndTesting": "Validare și Testare"
+    },
+    "save": {
+      "success": "Camera nouă {{cameraName}} a fost salvată cu succes.",
+      "failure": "Eroare la salvarea {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Rezoluție",
+      "video": "Video",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Te rog să furnizezi un URL de streaming valid",
+      "testFailed": "Testul de streaming a eșuat: {{error}}"
+    },
+    "step1": {
+      "description": "Introdu detaliile camerei și testează conexiunea.",
+      "cameraName": "Nume cameră",
+      "cameraNamePlaceholder": "ex. usă_intrare sau Vedere Curte Spate",
+      "host": "Gazdă/Adresă IP",
+      "port": "Port",
+      "username": "Nume de utilizator",
+      "usernamePlaceholder": "Opțional",
+      "password": "Parolă",
+      "passwordPlaceholder": "Opțional",
+      "selectTransport": "Selectează protocolul de transport",
+      "cameraBrand": "Brand cameră",
+      "selectBrand": "Selectează marca camerei pentru șablonul de URL",
+      "customUrl": "URL Streaming Personalizat",
+      "brandInformation": "Informații despre brand",
+      "brandUrlFormat": "Pentru camere cu formatul URL RTSP ca: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://utilizator:parolă@gazdă:port/cale",
+      "testConnection": "Testează Conexiunea",
+      "testSuccess": "Testul de conexiune a reușit!",
+      "testFailed": "Testul de conexiune a eșuat. Te rog să verifici datele introduse și să încerci din nou.",
+      "streamDetails": "Detalii stream",
+      "warnings": {
+        "noSnapshot": "Nu se poate obține un snapshot de pe stream-ul configurat."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Ori selectează un brand de cameră cu adresă gazdă/IP, ori alege „Alta” cu un URL personalizat",
+        "nameRequired": "Numele camerei este obligatoriu",
+        "nameLength": "Numele camerei trebuie să aibă 64 de caractere sau mai puțin",
+        "invalidCharacters": "Numele camerei conține caractere nevalide",
+        "nameExists": "Numele camerei există deja",
+        "brands": {
+          "reolink-rtsp": "RTSP Reolink nu este recomandat. Activează HTTP în setările firmware ale camerei și repornește asistentul."
+        },
+        "customUrlRtspRequired": "URL-urile personalizate trebuie să înceapă cu \"rtsp://\". Este necesară configurare manuală pentru stream-urile de cameră non-RTSP."
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Sondare metadate cameră...",
+        "fetchingSnapshot": "Preluare snapshot cameră..."
+      }
+    },
+    "step2": {
+      "description": "Configurează rolurile de streaming și adaugă stream-uri suplimentare pentru camera ta.",
+      "streamsTitle": "Stream-uri cameră",
+      "addStream": "Adaugă stream",
+      "addAnotherStream": "Adaugă un alt stream",
+      "streamTitle": "Stream {{number}}",
+      "streamUrl": "URL stream",
+      "streamUrlPlaceholder": "rtsp://utilizator:parolă@gazdă:port/cale",
+      "url": "URL",
+      "resolution": "Rezoluție",
+      "selectResolution": "Selectează rezoluția",
+      "quality": "Calitate",
+      "selectQuality": "Selectează calitatea",
+      "roles": "Roluri",
+      "roleLabels": {
+        "detect": "Detecție obiecte",
+        "record": "Înregistrare",
+        "audio": "Audio"
+      },
+      "testStream": "Testează conexiunea",
+      "testSuccess": "Testul de streaming a reușit!",
+      "testFailed": "Testul de streaming a eșuat",
+      "testFailedTitle": "Test eșuat",
+      "connected": "Conectat",
+      "notConnected": "Neconectat",
+      "featuresTitle": "Funcționalități",
+      "go2rtc": "Redu conexiunile la cameră",
+      "detectRoleWarning": "Cel puțin un stream trebuie să aibă rolul „detectare” pentru a continua.",
+      "rolesPopover": {
+        "title": "Roluri de streaming",
+        "detect": "Stream principal pentru detecția obiectelor.",
+        "record": "Salvează segmente ale stream-ului video pe baza setărilor de configurare.",
+        "audio": "Stream pentru detecția bazată pe sunet."
+      },
+      "featuresPopover": {
+        "title": "Funcționalități streaming",
+        "description": "Folosește restreaming go2rtc pentru a reduce conexiunile la cameră."
+      }
+    },
+    "step3": {
+      "description": "Validare finală și analiză înainte de a salva noua cameră. Conectează fiecare stream înainte de a salva.",
+      "validationTitle": "Validare stream",
+      "connectAllStreams": "Conectează toate stream-urile",
+      "reconnectionSuccess": "Reconectare reușită.",
+      "reconnectionPartial": "Unele stram-uri nu s-au reconectat.",
+      "streamUnavailable": "Previzualizare streaming indisponibilă",
+      "reload": "Reîncarcă",
+      "connecting": "Conectare...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Valid",
+      "failed": "Eșuat",
+      "notTested": "Netestat",
+      "connectStream": "Conectare",
+      "connectingStream": "Se conectează",
+      "disconnectStream": "Deconectare",
+      "estimatedBandwidth": "Lățime de bandă estimată",
+      "roles": "Roluri",
+      "none": "Niciunul",
+      "error": "Eroare",
+      "streamValidated": "Stream {{number}} validat cu succes",
+      "streamValidationFailed": "Validarea pentru stream {{number}} a eșuat",
+      "saveAndApply": "Salvează Camera Nouă",
+      "saveError": "Configurație invalidă. Verifică setările.",
+      "issues": {
+        "title": "Validare stream",
+        "videoCodecGood": "Codecul video este {{codec}}.",
+        "audioCodecGood": "Codecul audio este {{codec}}.",
+        "noAudioWarning": "Nu s-a detectat audio pentru acest strem, înregistrările nu vor avea sunet.",
+        "audioCodecRecordError": "Codec-ul audio AAC este necesar pentru a suporta audio în înregistrări.",
+        "audioCodecRequired": "Un stream audio este necesar pentru a suporta detecția audio.",
+        "restreamingWarning": "Reducerea conexiunilor la cameră pentru stream-ul de înregistrare poate crește ușor utilizarea procesorului.",
+        "dahua": {
+          "substreamWarning": "Substream-ul 1 este blocat la o rezoluție scăzută. Multe camere Dahua / Amcrest / EmpireTech suportă substream-uri suplimentare care trebuie să fie activate în setările camerei. Este recomandat să verifici și să utilizezi acele stream-uri, dacă sunt disponibile."
+        },
+        "hikvision": {
+          "substreamWarning": "Substream-ul 1 este blocat la o rezoluție scăzută. Multe camere Hikvision suportă substream-uri suplimentare care trebuie să fie activate în setările camerei. Este recomandat să verifici și să utilizezi acele strem-uri, dacă sunt disponibile."
+        },
+        "resolutionHigh": "O rezoluție de {{resolution}} poate cauza o utilizare crescută a resurselor.",
+        "resolutionLow": "O rezoluție de {{resolution}} poate fi prea mică pentru detectarea fiabilă a obiectelor mici."
+      },
+      "ffmpegModule": "Folosește modul de compatibilitate pentru stream-uri",
+      "ffmpegModuleDescription": "Dacă fluxul nu se încarcă după mai multe încercări, activați această opțiune. Când este activată, Frigate va folosi modulul ffmpeg împreună cu go2rtc. Aceasta poate oferi o compatibilitate mai bună cu unele fluxuri de camere."
+    }
+  },
+  "cameraManagement": {
+    "title": "Administrează Camerele",
+    "addCamera": "Adaugă cameră nouă",
+    "editCamera": "Editează cameră:",
+    "selectCamera": "Selectează o cameră",
+    "backToSettings": "Înapoi la setările camerei",
+    "streams": {
+      "title": "Activează / dezactivează camere",
+      "desc": "Dezactivează temporar o cameră până la repornirea Frigate. Dezactivarea unei camere oprește complet procesarea streamingului acestei camere de către Frigate. Detecția, înregistrarea și depanarea vor fi indisponibile.<br /> <em>Notă: Aceasta nu dezactivează restreamingul go2rtc.</em>"
+    },
+    "cameraConfig": {
+      "add": "Adaugă cameră",
+      "edit": "Editează cameră",
+      "description": "Configurează setările camerei, inclusiv intrările și rolurile de streaming.",
+      "name": "Nume cameră",
+      "nameRequired": "Numele camerei este obligatoriu",
+      "nameLength": "Numele camerei trebuie să fie mai scurt de 64 de caractere.",
+      "namePlaceholder": "ex. ușă_intrare sau Vedere Curte Spate",
+      "enabled": "Activat",
+      "ffmpeg": {
+        "inputs": "Stream-uri de intrare",
+        "path": "Cale streaming",
+        "pathRequired": "Calea streaming este obligatorie",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roluri",
+        "rolesRequired": "Este necesar cel puțin un rol",
+        "rolesUnique": "Fiecare rol (audio, detectare, înregistrare) poate fi atribuit unui singur stream",
+        "addInput": "Adaugă stream de intrare",
+        "removeInput": "Elimină stream-ul de intrare",
+        "inputsRequired": "Este necesar cel puțin un stream de intrare"
+      },
+      "go2rtcStreams": "Streamuri go2rtc",
+      "streamUrls": "URL-uri streaming",
+      "addUrl": "Adaugă URL",
+      "addGo2rtcStream": "Adaugă stream go2rtc",
+      "toast": {
+        "success": "Camera {{cameraName}} salvată cu succes"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Setări de Revizuire a Camerei",
+    "object_descriptions": {
+      "title": "Descrieri de Obiecte cu AI Generativ",
+      "desc": "Activează/dezactivează temporar descrierile de obiecte cu AI Generativ pentru această cameră. Când este dezactivată, descrierile generate de AI nu vor fi solicitate pentru obiectele urmărite pe această cameră."
+    },
+    "review_descriptions": {
+      "title": "Descrieri de revizuire cu AI Generativ",
+      "desc": "Activează/dezactivează temporar descrierile de revizuire cu AI Generativ pentru această cameră. Când este dezactivat, descrierile generate de AI nu vor fi solicitate pentru elementele de revizuire de pe această cameră."
+    },
+    "review": {
+      "title": "Revizuire",
+      "desc": "Activează/dezactivează temporar alertele și detecțiile pentru această cameră până la repornirea Frigate. Când este dezactivat, nu vor fi generate elemente de revizuire noi. ",
+      "alerts": "Alerte ",
+      "detections": "Detecții "
+    },
+    "reviewClassification": {
+      "title": "Clasificare revizuire",
+      "desc": "Frigate clasifică elementele de revizuire ca Alerte și Detecții. În mod implicit, toate obiectele de tip <em>persoană</em> și <em>mașină</em> sunt considerate Alerte. Poți rafina clasificarea elementelor tale de revizuire prin configurarea zonelor necesare pentru acestea.",
+      "noDefinedZones": "Nu sunt definite zone pentru această cameră.",
+      "objectAlertsTips": "Toate obiectele {{alertsLabels}} de pe {{cameraName}} vor fi afișate ca Alerte.",
+      "zoneObjectAlertsTips": "Toate obiectele {{alertsLabels}} detectate în {{zone}} pe {{cameraName}} vor fi afișate ca Alerte.",
+      "objectDetectionsTips": "Toate obiectele {{detectionsLabels}} necategorizate pe {{cameraName}} vor fi afișate ca Detecții indiferent de zona în care se află.",
+      "zoneObjectDetectionsTips": {
+        "text": "Toate obiectele {{detectionsLabels}} necategorizate în {{zone}} pe {{cameraName}} vor fi afișate ca Detecții.",
+        "notSelectDetections": "Toate obiectele {{detectionsLabels}} detectate în {{zone}} pe {{cameraName}} și necategorizate ca Alerte vor fi afișate ca Detecții indiferent de zona în care se află.",
+        "regardlessOfZoneObjectDetectionsTips": "Toate obiectele {{detectionsLabels}} necategorizate pe {{cameraName}} vor fi afișate ca Detecții indiferent de zona în care se află."
+      },
+      "unsavedChanges": "Setări de Clasificare Revizuire nesalvate pentru {{camera}}",
+      "selectAlertsZones": "Selectați zonele pentru Alerte",
+      "selectDetectionsZones": "Selectați zonele pentru Detecții",
+      "limitDetections": "Limitați detecțiile la zone specifice",
+      "toast": {
+        "success": "Configurația Clasificare Revizuire a fost salvată. Reporniți Frigate pentru a aplica modificările."
       }
     }
   }

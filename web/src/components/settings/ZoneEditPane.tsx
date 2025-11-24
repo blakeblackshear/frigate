@@ -34,6 +34,7 @@ import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { getTranslatedLabel } from "@/utils/i18n";
+import NameAndIdFields from "../input/NameAndIdFields";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -146,10 +147,37 @@ export default function ZoneEditPane({
               "masksAndZones.form.zoneName.error.mustNotContainPeriod",
             ),
           },
+        ),
+      friendly_name: z
+        .string()
+        .min(2, {
+          message: t(
+            "masksAndZones.form.zoneName.error.mustBeAtLeastTwoCharacters",
+          ),
+        })
+        .refine(
+          (value: string) => {
+            return !cameras.map((cam) => cam.name).includes(value);
+          },
+          {
+            message: t(
+              "masksAndZones.form.zoneName.error.mustNotBeSameWithCamera",
+            ),
+          },
         )
-        .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
-          message: t("masksAndZones.form.zoneName.error.hasIllegalCharacter"),
-        }),
+        .refine(
+          (value: string) => {
+            const otherPolygonNames =
+              polygons
+                ?.filter((_, index) => index !== activePolygonIndex)
+                .map((polygon) => polygon.name) || [];
+
+            return !otherPolygonNames.includes(value);
+          },
+          {
+            message: t("masksAndZones.form.zoneName.error.alreadyExists"),
+          },
+        ),
       inertia: z.coerce
         .number()
         .min(1, {
@@ -242,6 +270,7 @@ export default function ZoneEditPane({
     mode: "onBlur",
     defaultValues: {
       name: polygon?.name ?? "",
+      friendly_name: polygon?.friendly_name ?? polygon?.name ?? "",
       inertia:
         polygon?.camera &&
         polygon?.name &&
@@ -281,6 +310,7 @@ export default function ZoneEditPane({
     async (
       {
         name: zoneName,
+        friendly_name,
         inertia,
         loitering_time,
         objects: form_objects,
@@ -410,9 +440,14 @@ export default function ZoneEditPane({
         }
       }
 
+      let friendlyNameQuery = "";
+      if (friendly_name) {
+        friendlyNameQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.friendly_name=${encodeURIComponent(friendly_name)}`;
+      }
+
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${alertQueries}${detectionQueries}`,
+          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${friendlyNameQuery}${alertQueries}${detectionQueries}`,
           {
             requires_restart: 0,
             update_topic: `config/cameras/${polygon.camera}/zones`,
@@ -422,7 +457,7 @@ export default function ZoneEditPane({
           if (res.status === 200) {
             toast.success(
               t("masksAndZones.zones.toast.success", {
-                zoneName,
+                zoneName: friendly_name || zoneName,
               }),
               {
                 position: "top-center",
@@ -536,26 +571,17 @@ export default function ZoneEditPane({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-2 space-y-6">
-          <FormField
+          <NameAndIdFields
+            type="zone"
             control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("masksAndZones.zones.name.title")}</FormLabel>
-                <FormControl>
-                  <Input
-                    className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                    placeholder={t("masksAndZones.zones.name.inputPlaceHolder")}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  {t("masksAndZones.zones.name.tips")}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            nameField="friendly_name"
+            idField="name"
+            idVisible={(polygon && polygon.name.length > 0) ?? false}
+            nameLabel={t("masksAndZones.zones.name.title")}
+            nameDescription={t("masksAndZones.zones.name.tips")}
+            placeholderName={t("masksAndZones.zones.name.inputPlaceHolder")}
           />
+
           <Separator className="my-2 flex bg-secondary" />
           <FormField
             control={form.control}

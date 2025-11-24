@@ -10,7 +10,9 @@
     "frigatePlus": "Frigate+ Inställningar - Frigate",
     "notifications": "Notifikations Inställningar - Frigate",
     "motionTuner": "Rörelse inställning - Frigate",
-    "object": "Felsöka - Frigate"
+    "object": "Felsöka - Frigate",
+    "cameraManagement": "Hantera kameror - Frigate",
+    "cameraReview": "Kameragranskningsinställningar - Frigate"
   },
   "general": {
     "title": "Allmänna Inställningar",
@@ -20,10 +22,14 @@
         "label": "Automatisk Live Visning"
       },
       "playAlertVideos": {
-        "desc": "Som standard visas varningar på Live Panelen som små loopande klipp. Inaktivera denna inställning för att bara visa en statisk bild av nya varningar på denna enhet/webbläsare.",
-        "label": "Spela Varnings Videos"
+        "desc": "Som standard visas varningar på Live panelen som små loopande klipp. Inaktivera denna inställning för att bara visa en statisk bild av nya varningar på denna enhet/webbläsare.",
+        "label": "Spela upp Varnings videor"
       },
-      "title": "Live Panel"
+      "title": "Live Panel",
+      "displayCameraNames": {
+        "label": "Visa alltid kameranamn",
+        "desc": "Visa alltid kameranamnen i ett chip i instrumentpanelen för livevisning med flera kameror."
+      }
     },
     "storedLayouts": {
       "title": "Sparade Layouter",
@@ -138,7 +144,10 @@
     "enrichments": "Förbättringar",
     "motionTuner": "Rörelsemottagare",
     "debug": "Felsök",
-    "triggers": "Utlösare"
+    "triggers": "Utlösare",
+    "roles": "Roller",
+    "cameraManagement": "Hantering",
+    "cameraReview": "Granska"
   },
   "dialog": {
     "unsavedChanges": {
@@ -239,7 +248,8 @@
           "mustNotBeSameWithCamera": "Zonnamnet får inte vara detsamma som kameranamnet.",
           "alreadyExists": "En zon med detta namn finns redan för den här kameran.",
           "mustNotContainPeriod": "Zonnamnet får inte innehålla punkter.",
-          "hasIllegalCharacter": "Zonnamnet innehåller ogiltiga tecken."
+          "hasIllegalCharacter": "Zonnamnet innehåller ogiltiga tecken.",
+          "mustHaveAtLeastOneLetter": "Zonnamnet måste ha minst en bokstav."
         }
       },
       "distance": {
@@ -294,7 +304,7 @@
       "name": {
         "title": "Namn",
         "inputPlaceHolder": "Ange ett namn…",
-        "tips": "Namnet måste vara minst 2 tecken långt och får inte vara namnet på en kamera eller en annan zon."
+        "tips": "Namnet måste vara minst 2 tecken långt, måste innehålla minst en bokstav och får inte vara namnet på en kamera eller en annan zon."
       },
       "inertia": {
         "title": "Momentum",
@@ -634,7 +644,8 @@
         "createRole": "Roll {{role}} skapad",
         "updateCameras": "Kameror uppdaterade för roll {{role}}",
         "deleteRole": "Roll {{role}} raderad",
-        "userRolesUpdated": "{{count}} användare som tilldelats den här rollen har uppdaterats till 'tittare', vilket har åtkomst till alla kameror."
+        "userRolesUpdated_one": "{{count}} användare som tilldelats den här rollen har uppdaterats till 'tittare', vilket har åtkomst till alla kameror.",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Misslyckades att skapa roll: {{errorMessage}}",
@@ -725,7 +736,7 @@
   "triggers": {
     "documentTitle": "Utlösare",
     "management": {
-      "title": "Utlösare hantering",
+      "title": "Utlösare",
       "desc": "Hantera utlösare för {{camera}}. Använd miniatyrtypen för att utlösa liknande miniatyrer som ditt valda spårade objekt och beskrivningstypen för att utlösa liknande beskrivningar av text du anger."
     },
     "addTrigger": "Lägg till utlösare",
@@ -746,7 +757,9 @@
     },
     "actions": {
       "notification": "Skicka avisering",
-      "alert": "Markera som varning"
+      "alert": "Markera som Varning",
+      "sub_label": "Lägg till underetikett",
+      "attribute": "Lägg till attribut"
     },
     "dialog": {
       "createTrigger": {
@@ -764,25 +777,28 @@
       "form": {
         "name": {
           "title": "Namn",
-          "placeholder": "Ange utlösarens namn",
+          "placeholder": "Namnge denna utlösare",
           "error": {
-            "minLength": "Namnet måste vara minst 2 tecken lång.",
-            "invalidCharacters": "Namnet får bara innehålla bokstäver, siffror, understreck, och bindestreck.",
+            "minLength": "Fältet måste vara minst 2 tecken långt.",
+            "invalidCharacters": "Fältet får bara innehålla bokstäver, siffror, understreck och bindestreck.",
             "alreadyExists": "En utlösare med detta namn finns redan för den här kameran."
-          }
+          },
+          "description": "Ange ett unikt namn eller en unik beskrivning för att identifiera den här utlösaren"
         },
         "enabled": {
           "description": "Aktivera eller inaktivera den här utlösaren"
         },
         "type": {
           "title": "Typ",
-          "placeholder": "Välj utlösartyp"
+          "placeholder": "Välj utlösartyp",
+          "description": "Utlöses när en liknande beskrivning av spårat objekt detekteras",
+          "thumbnail": "Utlöses när en liknande miniatyrbild av ett spårat objekt upptäcks"
         },
         "content": {
           "title": "Innehåll",
-          "imagePlaceholder": "Välj en bild",
+          "imagePlaceholder": "Välj en miniatyrbild",
           "textPlaceholder": "Ange textinnehåll",
-          "imageDesc": "Välj en bild för att utlösa den här åtgärden när en liknande bild upptäcks.",
+          "imageDesc": "Endast de senaste 100 miniatyrerna visas. Om du inte hittar önskad miniatyr kan du granska tidigare objekt i Utforska och skapa en utlösare från menyn där.",
           "textDesc": "Ange text för att utlösa den här åtgärden när en liknande beskrivning av spårat objekt upptäcks.",
           "error": {
             "required": "Innehåll krävs."
@@ -793,14 +809,20 @@
           "error": {
             "min": "Tröskelvärdet måste vara minst 0",
             "max": "Tröskelvärdet får vara högst 1"
-          }
+          },
+          "desc": "Ställ in likhetströskeln för denna utlösare. En högre tröskel innebär att en bättre matchning krävs för att utlösaren ska aktiveras."
         },
         "actions": {
           "title": "Åtgärder",
-          "desc": "Som standard utlöser Frigate ett MQTT-meddelande för alla utlösare. Välj en ytterligare åtgärd att utföra när den här utlösaren utlöses.",
+          "desc": "Som standard utlöser Frigate ett MQTT-meddelande för alla utlösare. Underetiketter lägger till utlösarnamnet till objektetiketten. Attribut är sökbara metadata som lagras separat i de spårade objektmetadata.",
           "error": {
             "min": "Minst en åtgärd måste väljas."
           }
+        },
+        "friendly_name": {
+          "title": "Vänligt namn",
+          "placeholder": "Namnge eller beskriv denna utlösare",
+          "description": "Ett valfritt vänligt namn eller en beskrivande text för denna utlösare."
         }
       }
     },
@@ -814,6 +836,253 @@
         "createTriggerFailed": "Misslyckades med att skapa utlösaren: {{errorMessage}}",
         "updateTriggerFailed": "Misslyckades med att uppdatera utlösaren: {{errorMessage}}",
         "deleteTriggerFailed": "Misslyckades med att ta bort utlösaren: {{errorMessage}}"
+      }
+    },
+    "semanticSearch": {
+      "title": "Semantisk sökning är inaktiverad",
+      "desc": "Semantisk sökning måste vara aktiverad för att använda Utlösare."
+    },
+    "wizard": {
+      "title": "Skapa utlösare",
+      "step1": {
+        "description": "Konfigurera grundinställningarna för din trigger."
+      },
+      "step2": {
+        "description": "Ställ in innehållet som ska utlösa den här åtgärden."
+      },
+      "step3": {
+        "description": "Konfigurera tröskelvärdet och åtgärderna för den här utlösaren."
+      },
+      "steps": {
+        "nameAndType": "Namn och typ",
+        "configureData": "Konfigurera data",
+        "thresholdAndActions": "Tröskelvärde och åtgärder"
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Lägg till kamera",
+    "description": "Följ stegen nedan för att lägga till en ny kamera i din Frigate-installation.",
+    "steps": {
+      "nameAndConnection": "Namn och anslutning",
+      "streamConfiguration": "Strömkonfiguration",
+      "validationAndTesting": "Validering och testning"
+    },
+    "save": {
+      "success": "Ny kamera {{cameraName}} har sparats.",
+      "failure": "Fel vid sparning av {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Upplösning",
+      "video": "Video",
+      "audio": "Ljud",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Ange en giltig strömnings länk",
+      "testFailed": "Strömtest misslyckades: {{error}}"
+    },
+    "step1": {
+      "description": "Ange dina kamerauppgifter och testa anslutningen.",
+      "cameraName": "Kameranamn",
+      "cameraNamePlaceholder": "t.ex. ytterdörr eller Översikt över bakgård",
+      "host": "Värd-/IP-adress",
+      "port": "Portnummer",
+      "username": "Användarnamn",
+      "usernamePlaceholder": "Frivillig",
+      "password": "Lösenord",
+      "passwordPlaceholder": "Frivillig",
+      "selectTransport": "Välj transportprotokoll",
+      "cameraBrand": "Kameramärke",
+      "selectBrand": "Välj kameramärke för URL-mall",
+      "customUrl": "Anpassad ström länk",
+      "brandInformation": "Varumärkesinformation",
+      "brandUrlFormat": "För kameror med RTSP URL-formatet: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://användarnamn:passord@värd:port/text",
+      "testConnection": "Testa anslutning",
+      "testSuccess": "Anslutningstestet lyckades!",
+      "testFailed": "Anslutningstestet misslyckades. Kontrollera dina indata och försök igen.",
+      "streamDetails": "Streamdetaljer",
+      "warnings": {
+        "noSnapshot": "Det gick inte att hämta en ögonblicksbild från den konfigurerade strömmen."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Välj antingen ett kameramärke med värd/IP eller välj \"Annat\" med en anpassad URL",
+        "nameRequired": "Kameranamn krävs",
+        "nameLength": "Kameranamnet måste vara högst 64 tecken långt",
+        "invalidCharacters": "Kameranamnet innehåller ogiltiga tecken",
+        "nameExists": "Kameranamnet finns redan",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP rekommenderas inte. Aktivera HTTP i kamerans firmwareinställningar och starta om guiden."
+        },
+        "customUrlRtspRequired": "Anpassade webbadresser måste börja med \"rtsp://\". Manuell konfiguration krävs för kameraströmmar som inte använder RTSP."
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      },
+      "testing": {
+        "probingMetadata": "Undersöker kamerans metadata...",
+        "fetchingSnapshot": "Hämtar kamerabild..."
+      }
+    },
+    "step2": {
+      "description": "Konfigurera strömningsroller och lägg till ytterligare strömmar för din kamera.",
+      "streamsTitle": "Kameraströmmar",
+      "addStream": "Lägg till ström",
+      "addAnotherStream": "Lägg till ytterligare en ström",
+      "streamTitle": "Ström {{number}}",
+      "streamUrl": "Ström URL",
+      "streamUrlPlaceholder": "rtsp://användarnamn:lösenord@värd:portnummer/plats",
+      "url": "URL",
+      "resolution": "Upplösning",
+      "selectResolution": "Välj upplösning",
+      "quality": "Kvalitet",
+      "selectQuality": "Välj kvalitet",
+      "roles": "Roller",
+      "roleLabels": {
+        "detect": "Objektdetektering",
+        "record": "Inspelning",
+        "audio": "Ljud"
+      },
+      "testStream": "Testa anslutning",
+      "testSuccess": "Ström testet lyckades!",
+      "testFailed": "Ström testet misslyckades",
+      "testFailedTitle": "Testet misslyckades",
+      "connected": "Ansluten",
+      "notConnected": "Inte ansluten",
+      "featuresTitle": "Funktioner",
+      "go2rtc": "Minska anslutningar till kameran",
+      "detectRoleWarning": "Minst en ström måste ha rollen \"upptäcka\" för att fortsätta.",
+      "rolesPopover": {
+        "title": "Ström-roller",
+        "detect": "Huvud video ström för objektdetektering.",
+        "record": "Sparar segment av videoflödet baserat på konfigurationsinställningar.",
+        "audio": "Flöde för ljudbaserad detektering."
+      },
+      "featuresPopover": {
+        "title": "Strömfunktioner",
+        "description": "Använd go2rtc-omströmning för att minska anslutningar till din kamera."
+      }
+    },
+    "step3": {
+      "description": "Slutgiltig validering och analys innan du sparar din nya kamera. Anslut varje ström innan du sparar.",
+      "validationTitle": "Strömvalidering",
+      "connectAllStreams": "Anslut alla strömmar",
+      "reconnectionSuccess": "Återanslutningen lyckades.",
+      "reconnectionPartial": "Vissa strömmar kunde inte återanslutas.",
+      "streamUnavailable": "Förhandsgranskning av strömmen är inte tillgänglig",
+      "reload": "Ladda om",
+      "connecting": "Ansluter...",
+      "streamTitle": "Ström {{number}}",
+      "valid": "Giltig",
+      "failed": "Misslyckades",
+      "notTested": "Inte testad",
+      "connectStream": "Ansluta",
+      "connectingStream": "Ansluter",
+      "disconnectStream": "Koppla från",
+      "estimatedBandwidth": "Uppskattad bandbredd",
+      "roles": "Roller",
+      "none": "Ingen",
+      "error": "Fel",
+      "streamValidated": "Ström {{number}} har validerats",
+      "streamValidationFailed": "Validering av ström {{number}} misslyckades",
+      "saveAndApply": "Spara ny kamera",
+      "saveError": "Ogiltig konfiguration. Kontrollera dina inställningar.",
+      "issues": {
+        "title": "Strömvalidering",
+        "videoCodecGood": "Videokodeken är {{codec}}.",
+        "audioCodecGood": "Ljudkodeken är {{codec}}.",
+        "noAudioWarning": "Inget ljud upptäcktes för den här strömmen, inspelningarna kommer inte att ha något ljud.",
+        "audioCodecRecordError": "AAC-ljudkodeken krävs för att stödja ljud i inspelningar.",
+        "audioCodecRequired": "En ljudström krävs för att stödja ljuddetektering.",
+        "restreamingWarning": "Att minska anslutningarna till kameran för inspelningsströmmen kan öka CPU-användningen något.",
+        "dahua": {
+          "substreamWarning": "Delström 1 är låst till en låg upplösning. Många Dahua / Amcrest / EmpireTech kameror stöder ytterligare delströmmar som måste aktiveras i kamerans inställningar. Det rekommenderas att kontrollera och använda dessa strömmar om de är tillgängliga."
+        },
+        "hikvision": {
+          "substreamWarning": "Delström 1 är låst till en låg upplösning. Många Hikvision kameror stöder ytterligare delströmmar som måste aktiveras i kamerans inställningar. Det rekommenderas att kontrollera och använda dessa strömmar om de är tillgängliga."
+        },
+        "resolutionHigh": "En upplösning på {{resolution}} kan orsaka ökad resursanvändning.",
+        "resolutionLow": "En upplösning på {{resolution}} kan vara för låg för tillförlitlig detektering av små objekt."
+      },
+      "ffmpegModule": "Använd läge för strömkompatibilitet",
+      "ffmpegModuleDescription": "Om strömmen inte läses in efter flera försök, prova att aktivera detta. När det är aktiverat kommer Frigate att använda ffmpeg-modulen med go2rtc. Detta kan ge bättre kompatibilitet med vissa kameraströmmar."
+    }
+  },
+  "cameraManagement": {
+    "title": "Hantera kameror",
+    "addCamera": "Lägg till ny kamera",
+    "editCamera": "Redigera kamera:",
+    "selectCamera": "Välj en kamera",
+    "backToSettings": "Tillbaka till kamerainställningar",
+    "streams": {
+      "title": "Aktivera/avaktivera kameror",
+      "desc": "Inaktivera tillfälligt en kamera tills Frigate startar om. Om du inaktiverar en kamera helt stoppas Frigates bearbetning av kamerans strömmar. Detektering, inspelning och felsökning kommer inte att vara tillgängliga.<br /> <em>Obs! Detta inaktiverar inte go2rtc-återströmmar.</em>"
+    },
+    "cameraConfig": {
+      "add": "Lägg till kamera",
+      "edit": "Redigera kamera",
+      "description": "Konfigurera kamerainställningar inklusive strömingångar och roller.",
+      "name": "Kameranamn",
+      "nameRequired": "Kameranamn krävs",
+      "nameLength": "Kameranamnet måste vara kortare än 64 tecken.",
+      "namePlaceholder": "t.ex. ytterdörr eller Översikt över bakgård",
+      "enabled": "Aktiverad",
+      "ffmpeg": {
+        "inputs": "Ingångsströmmar",
+        "path": "Strömväg",
+        "pathRequired": "Strömväg krävs",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Roller",
+        "rolesRequired": "Minst en roll krävs",
+        "rolesUnique": "Varje roll (ljud, detektering, inspelning) kan bara tilldelas en ström",
+        "addInput": "Lägg till inmatningsström",
+        "removeInput": "Ta bort inmatningsström",
+        "inputsRequired": "Minst en indataström krävs"
+      },
+      "go2rtcStreams": "go2rtc-strömmar",
+      "streamUrls": "Ström-URL:er",
+      "addUrl": "Lägg till URL",
+      "addGo2rtcStream": "Lägg till go2rtc-ström",
+      "toast": {
+        "success": "Kamera {{cameraName}} sparades"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Inställningar för kameragranskning",
+    "object_descriptions": {
+      "title": "Generativa AI-objektbeskrivningar",
+      "desc": "Aktivera/inaktivera tillfälligt generativa AI-objektbeskrivningar för den här kameran. När den är inaktiverad kommer AI-genererade beskrivningar inte att begäras för spårade objekt på den här kameran."
+    },
+    "review_descriptions": {
+      "title": "Beskrivningar av generativa AI-granskningar",
+      "desc": "Tillfälligt aktivera/inaktivera genererade AI-granskningsbeskrivningar för den här kameran. När det är inaktiverat kommer AI-genererade beskrivningar inte att begäras för granskningsobjekt på den här kameran."
+    },
+    "review": {
+      "title": "Granska",
+      "desc": "Tillfälligt aktivera/avaktivera varningar och detekteringar för den här kameran tills Frigate startar om. När den är avaktiverad genereras inga nya granskningsobjekt. ",
+      "alerts": "Aviseringar ",
+      "detections": "Detektioner "
+    },
+    "reviewClassification": {
+      "title": "Granska klassificering",
+      "desc": "Frigate kategoriserar granskningsobjekt som Varningar och Detekteringar. Som standard betraktas alla <em>person</em>- och <em>bil</em>-objekt som Varningar. Du kan förfina kategoriseringen av dina granskningsobjekt genom att konfigurera obligatoriska zoner för dem.",
+      "noDefinedZones": "Inga zoner är definierade för den här kameran.",
+      "objectAlertsTips": "Alla {{alertsLabels}}-objekt på {{cameraName}} kommer att visas som Varningar.",
+      "zoneObjectAlertsTips": "Alla {{alertsLabels}} objekt som upptäcks i {{zone}} på {{cameraName}} kommer att visas som Varningar.",
+      "objectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} kommer att visas som Detektioner oavsett vilken zon de befinner sig i.",
+      "zoneObjectDetectionsTips": {
+        "text": "Alla {{detectionsLabels}}-objekt som inte kategoriseras i {{zone}} på {{cameraName}} kommer att visas som Detektioner.",
+        "notSelectDetections": "Alla {{detectionsLabels}} objekt som upptäckts i {{zone}} på {{cameraName}} och som inte kategoriserats som Varningar kommer att visas som Detekteringar oavsett vilken zon de befinner sig i.",
+        "regardlessOfZoneObjectDetectionsTips": "Alla {{detectionsLabels}}-objekt som inte kategoriseras på {{cameraName}} kommer att visas som Detektioner oavsett vilken zon de befinner sig i."
+      },
+      "unsavedChanges": "Osparade inställningar för granskningsklassificering för {{camera}}",
+      "selectAlertsZones": "Välj zoner för Varningar",
+      "selectDetectionsZones": "Välj zoner för Detektioner",
+      "limitDetections": "Begränsa detektioner till specifika zoner",
+      "toast": {
+        "success": "Konfigurationen för granskning av klassificering har sparats. Starta om Frigate för att tillämpa ändringarna."
       }
     }
   }

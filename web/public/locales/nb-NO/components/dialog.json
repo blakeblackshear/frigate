@@ -29,7 +29,7 @@
           "false_other": "Dette er ikke en {{label}}"
         },
         "question": {
-          "label": "Bekreft denne merkelappen for Frigate Plus",
+          "label": "Bekreft denne etiketten for Frigate Plus",
           "ask_an": "Er dette objekt en <code>{{label}}</code>?",
           "ask_a": "Er dette objektet en <code>{{label}}</code>?",
           "ask_full": "Er dette objekt en <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
@@ -56,7 +56,7 @@
       }
     },
     "toast": {
-      "success": "Eksporten startet. Se filen i /exports-mappen.",
+      "success": "Eksport startet. Se filen på eksportsiden.",
       "error": {
         "failed": "Klarte ikke å starte eksport: {{error}}",
         "noVaildTimeSelected": "Ingen gyldig tidsperiode valgt",
@@ -117,14 +117,16 @@
     "button": {
       "export": "Eksportér",
       "markAsReviewed": "Merk som inspisert",
-      "deleteNow": "Slett nå"
+      "deleteNow": "Slett nå",
+      "markAsUnreviewed": "Merk som ikke inspisert"
     }
   },
   "imagePicker": {
     "selectImage": "Velg et sporet objekts miniatyrbilde",
     "search": {
-      "placeholder": "Søk etter (under-)merkelapp..."
+      "placeholder": "Søk etter (under-)etikett..."
     },
-    "noImages": "Ingen miniatyrbilder funnet for dette kameraet"
+    "noImages": "Ingen miniatyrbilder funnet for dette kameraet",
+    "unknownLabel": "Lagret utløserbilde"
   }
 }

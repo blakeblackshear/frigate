@@ -15,12 +15,9 @@ from collections.abc import Mapping
 from multiprocessing.sharedctypes import Synchronized
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
-from zoneinfo import ZoneInfoNotFoundError
 
 import numpy as np
-import pytz
 from ruamel.yaml import YAML
-from tzlocal import get_localzone
 
 from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
 
@@ -157,17 +154,6 @@ def load_labels(path: Optional[str], encoding="utf-8", prefill=91):
         return labels
 
 
-def get_tz_modifiers(tz_name: str) -> Tuple[str, str, float]:
-    seconds_offset = (
-        datetime.datetime.now(pytz.timezone(tz_name)).utcoffset().total_seconds()
-    )
-    hours_offset = int(seconds_offset / 60 / 60)
-    minutes_offset = int(seconds_offset / 60 - hours_offset * 60)
-    hour_modifier = f"{hours_offset} hour"
-    minute_modifier = f"{minutes_offset} minute"
-    return hour_modifier, minute_modifier, seconds_offset
-
-
 def to_relative_box(
     width: int, height: int, box: Tuple[int, int, int, int]
 ) -> Tuple[int | float, int | float, int | float, int | float]:
@@ -296,34 +282,6 @@ def find_by_key(dictionary, target_key):
                 if result is not None:
                     return result
     return None
-
-
-def get_tomorrow_at_time(hour: int) -> datetime.datetime:
-    """Returns the datetime of the following day at 2am."""
-    try:
-        tomorrow = datetime.datetime.now(get_localzone()) + datetime.timedelta(days=1)
-    except ZoneInfoNotFoundError:
-        tomorrow = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
-            days=1
-        )
-        logger.warning(
-            "Using utc for maintenance due to missing or incorrect timezone set"
-        )
-
-    return tomorrow.replace(hour=hour, minute=0, second=0).astimezone(
-        datetime.timezone.utc
-    )
-
-
-def is_current_hour(timestamp: int) -> bool:
-    """Returns if timestamp is in the current UTC hour."""
-    start_of_next_hour = (
-        datetime.datetime.now(datetime.timezone.utc).replace(
-            minute=0, second=0, microsecond=0
-        )
-        + datetime.timedelta(hours=1)
-    ).timestamp()
-    return timestamp < start_of_next_hour
 
 
 def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:

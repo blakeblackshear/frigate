@@ -207,10 +207,21 @@
     "length": {
       "feet": "peus",
       "meters": "metres"
+    },
+    "data": {
+      "kbps": "Kb/s",
+      "mbps": "Mb/s",
+      "gbps": "Gb/s",
+      "kbph": "kB/hora",
+      "mbph": "MB/hora",
+      "gbph": "GB/hora"
     }
   },
   "label": {
-    "back": "Torna enrere"
+    "back": "Torna enrere",
+    "hide": "Oculta {{item}}",
+    "show": "Mostra {{item}}",
+    "ID": "ID"
   },
   "button": {
     "apply": "Aplicar",
@@ -270,5 +281,17 @@
     "desc": "Pàgina no trobada"
   },
   "selectItem": "Selecciona {{item}}",
-  "readTheDocumentation": "Llegir la documentació"
+  "readTheDocumentation": "Llegir la documentació",
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} i {{1}}",
+    "many": "{{items}}, i {{last}}",
+    "separatorWithSpace": ",· "
+  },
+  "field": {
+    "optional": "Opcional",
+    "internalID": "L'ID intern que Frigate s'utilitza a la configuració i a la base de dades"
+  }
 }

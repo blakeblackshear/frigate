@@ -26,7 +26,7 @@ import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
-import CameraSettingsView from "@/views/settings/CameraSettingsView";
+import CameraReviewSettingsView from "@/views/settings/CameraReviewSettingsView";
 import CameraManagementView from "@/views/settings/CameraManagementView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
@@ -42,7 +42,7 @@ import { useInitialCameraState } from "@/api/ws";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
 import TriggerView from "@/views/settings/TriggerView";
-import { CameraNameLabel } from "@/components/camera/CameraNameLabel";
+import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import {
   Sidebar,
   SidebarContent,
@@ -93,7 +93,7 @@ const settingsGroups = [
     label: "cameras",
     items: [
       { key: "cameraManagement", component: CameraManagementView },
-      { key: "cameraReview", component: CameraSettingsView },
+      { key: "cameraReview", component: CameraReviewSettingsView },
       { key: "masksAndZones", component: MasksAndZonesView },
       { key: "motionTuner", component: MotionTunerView },
     ],
@@ -157,9 +157,11 @@ function MobileMenuItem({
   const { t } = useTranslation(["views/settings"]);
 
   return (
-    <Button
-      variant="ghost"
-      className={cn("w-full justify-between pr-2", className)}
+    <div
+      className={cn(
+        "inline-flex h-10 w-full cursor-pointer items-center justify-between whitespace-nowrap rounded-md px-4 py-2 pr-2 text-sm font-medium text-primary-variant disabled:pointer-events-none disabled:opacity-50",
+        className,
+      )}
       onClick={() => {
         onSelect(item.key);
         onClose?.();
@@ -167,7 +169,7 @@ function MobileMenuItem({
     >
       <div className="smart-capitalize">{t("menu." + item.key)}</div>
       <LuChevronRight className="size-4" />
-    </Button>
+    </div>
   );
 }
 
@@ -273,6 +275,9 @@ export default function Settings() {
       } else {
         setPageToggle(page as SettingsType);
       }
+      if (isMobile) {
+        setContentMobileOpen(true);
+      }
     }
     // don't clear url params if we're creating a new object mask
     return !(searchParams.has("object_mask") || searchParams.has("event_id"));
@@ -282,6 +287,9 @@ export default function Settings() {
     const cameraNames = cameras.map((c) => c.name);
     if (cameraNames.includes(camera)) {
       setSelectedCamera(camera);
+      if (isMobile) {
+        setContentMobileOpen(true);
+      }
     }
     // don't clear url params if we're creating a new object mask or trigger
     return !(searchParams.has("object_mask") || searchParams.has("event_id"));
@@ -642,7 +650,7 @@ function CameraSelectButton({
                 key={item.name}
                 isChecked={item.name === selectedCamera}
                 label={item.name}
-                isCameraName={true}
+                type={"camera"}
                 onCheckedChange={(isChecked) => {
                   if (isChecked && (isEnabled || isCameraSettingsPage)) {
                     setSelectedCamera(item.name);

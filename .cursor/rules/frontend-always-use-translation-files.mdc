@@ -1,0 +1,6 @@
+---
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: false
+---
+
+Never write strings in the frontend directly, always write to and reference the relevant translations file.

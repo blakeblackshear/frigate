@@ -1,7 +1,7 @@
 """Ollama Provider for Frigate AI."""
 
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from httpx import TimeoutException
 from ollama import Client as ApiClient
@@ -17,10 +17,24 @@ logger = logging.getLogger(__name__)
 class OllamaClient(GenAIClient):
     """Generative AI client for Frigate using Ollama."""
 
+    LOCAL_OPTIMIZED_OPTIONS = {
+        "options": {
+            "temperature": 0.5,
+            "repeat_penalty": 1.05,
+            "presence_penalty": 0.3,
+        },
+    }
+
     provider: ApiClient
+    provider_options: dict[str, Any]
 
     def _init_provider(self):
         """Initialize the client."""
+        self.provider_options = {
+            **self.LOCAL_OPTIMIZED_OPTIONS,
+            **self.genai_config.provider_options,
+        }
+
         try:
             client = ApiClient(host=self.genai_config.base_url, timeout=self.timeout)
             # ensure the model is available locally
@@ -48,10 +62,13 @@ class OllamaClient(GenAIClient):
                 self.genai_config.model,
                 prompt,
                 images=images if images else None,
-                **self.genai_config.provider_options,
+                **self.provider_options,
+            )
+            logger.debug(
+                f"Ollama tokens used: eval_count={result.get('eval_count')}, prompt_eval_count={result.get('prompt_eval_count')}"
             )
             return result["response"].strip()
-        except (TimeoutException, ResponseError) as e:
+        except (TimeoutException, ResponseError, ConnectionError) as e:
             logger.warning("Ollama returned an error: %s", str(e))
             return None
 

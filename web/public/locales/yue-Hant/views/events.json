@@ -34,5 +34,7 @@
   },
   "detections": "偵測",
   "timeline.aria": "選擇時間線",
-  "detected": "已偵測"
+  "detected": "已偵測",
+  "suspiciousActivity": "可疑行為",
+  "threateningActivity": "威脅行為"
 }

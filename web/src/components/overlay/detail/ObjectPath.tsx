@@ -8,6 +8,9 @@ import {
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { getLifecycleItemDescription } from "@/utils/lifecycleUtil";
 import { useTranslation } from "react-i18next";
+import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
+import { FrigateConfig } from "@/types/frigateConfig";
+import useSWR from "swr";
 
 type ObjectPathProps = {
   positions?: Position[];
@@ -42,16 +45,31 @@ export function ObjectPath({
   visible = true,
 }: ObjectPathProps) {
   const { t } = useTranslation(["views/explore"]);
+  const { data: config } = useSWR<FrigateConfig>("config");
   const getAbsolutePositions = useCallback(() => {
     if (!imgRef.current || !positions) return [];
     const imgRect = imgRef.current.getBoundingClientRect();
-    return positions.map((pos) => ({
-      x: pos.x * imgRect.width,
-      y: pos.y * imgRect.height,
-      timestamp: pos.timestamp,
-      lifecycle_item: pos.lifecycle_item,
-    }));
-  }, [positions, imgRef]);
+    return positions.map((pos) => {
+      return {
+        x: pos.x * imgRect.width,
+        y: pos.y * imgRect.height,
+        timestamp: pos.timestamp,
+        lifecycle_item: pos.lifecycle_item?.data?.zones
+          ? {
+              ...pos.lifecycle_item,
+              data: {
+                ...pos.lifecycle_item?.data,
+                zones_friendly_names: pos.lifecycle_item?.data.zones.map(
+                  (zone) => {
+                    return resolveZoneName(config, zone);
+                  },
+                ),
+              },
+            }
+          : pos.lifecycle_item,
+      };
+    });
+  }, [imgRef, positions, config]);
 
   const generateStraightPath = useCallback((points: Position[]) => {
     if (!points || points.length < 2) return "";
@@ -105,7 +123,7 @@ export function ObjectPath({
             <TooltipContent side="top" className="smart-capitalize">
               {pos.lifecycle_item
                 ? getLifecycleItemDescription(pos.lifecycle_item)
-                : t("objectLifecycle.trackedPoint")}
+                : t("trackingDetails.trackedPoint")}
             </TooltipContent>
           </TooltipPortal>
         </Tooltip>

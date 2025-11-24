@@ -34,9 +34,11 @@ import { toast } from "sonner";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
-import { buttonVariants } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { Trans, useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { LuCircle } from "react-icons/lu";
+import { MdAutoAwesome } from "react-icons/md";
 
 type ReviewCardProps = {
   event: ReviewSegment;
@@ -83,6 +85,11 @@ export default function ReviewCard({
         if (response.status == 200) {
           toast.success(t("export.toast.success"), {
             position: "top-center",
+            action: (
+              <a href="/export" target="_blank" rel="noopener noreferrer">
+                <Button>View</Button>
+              </a>
+            ),
           });
         }
       })
@@ -137,7 +144,7 @@ export default function ReviewCard({
         className={cn(
           "size-full rounded-lg",
           activeReviewItem?.id == event.id &&
-            "outline outline-[3px] outline-offset-1 outline-selected",
+            "outline outline-[3px] -outline-offset-[2.8px] outline-selected duration-200",
           imgLoaded ? "visible" : "invisible",
         )}
         src={`${baseUrl}${event.thumb_path.replace("/media/frigate/", "")}`}
@@ -158,21 +165,33 @@ export default function ReviewCard({
       <div className="flex items-center justify-between">
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex items-center justify-evenly gap-1">
-              <>
-                {event.data.objects.map((object) => {
-                  return getIconForLabel(
-                    object,
-                    "size-3 text-primary dark:text-white",
-                  );
-                })}
-                {event.data.audio.map((audio) => {
-                  return getIconForLabel(
-                    audio,
-                    "size-3 text-primary dark:text-white",
-                  );
-                })}
-              </>
+            <div className="flex items-center gap-2">
+              <LuCircle
+                className={cn(
+                  "size-2",
+                  event.severity == "alert"
+                    ? "fill-severity_alert text-severity_alert"
+                    : "fill-severity_detection text-severity_detection",
+                )}
+              />
+              <div className="flex items-center gap-1">
+                {event.data.objects.map((object, idx) => (
+                  <div
+                    key={`${object}-${idx}`}
+                    className="rounded-full bg-muted-foreground p-1"
+                  >
+                    {getIconForLabel(object, "size-3 text-white")}
+                  </div>
+                ))}
+                {event.data.audio.map((audio, idx) => (
+                  <div
+                    key={`${audio}-${idx}`}
+                    className="rounded-full bg-muted-foreground p-1"
+                  >
+                    {getIconForLabel(audio, "size-3 text-white")}
+                  </div>
+                ))}
+              </div>
               <div className="font-extra-light text-xs">{formattedDate}</div>
             </div>
           </TooltipTrigger>
@@ -199,6 +218,14 @@ export default function ReviewCard({
           dense
         />
       </div>
+      {event.data.metadata?.title && (
+        <div className="flex items-center gap-1.5 rounded bg-secondary/50">
+          <MdAutoAwesome className="size-3 shrink-0 text-primary" />
+          <span className="truncate text-xs text-primary">
+            {event.data.metadata.title}
+          </span>
+        </div>
+      )}
     </div>
   );
 

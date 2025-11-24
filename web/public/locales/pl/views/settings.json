@@ -10,7 +10,8 @@
     "motionTuner": "Konfigurator Ruchu",
     "debug": "Debugowanie",
     "enrichments": "Wzbogacenia",
-    "triggers": "Wyzwalacze"
+    "triggers": "Wyzwalacze",
+    "roles": "Role"
   },
   "dialog": {
     "unsavedChanges": {
@@ -83,7 +84,8 @@
     "motionTuner": "Konfigurator Ruchu - Frigate",
     "object": "Debug - Frigate",
     "notifications": "Ustawienia powiadomień - Frigate",
-    "enrichments": "Ustawienia wzbogacania - Frigate"
+    "enrichments": "Ustawienia wzbogacania - Frigate",
+    "cameraManagement": "Zarządzanie kamerami – Frigate"
   },
   "classification": {
     "title": "Ustawienia Klasyfikacji",
@@ -755,7 +757,9 @@
         "createRole": "Utworzono rolę {{role}}",
         "updateCameras": "Zaktualizowano kamery dla roli {{role}}",
         "deleteRole": "Rola {{role}} została usunięta",
-        "userRolesUpdated": "{{count}} użytkowników przypisanych do tej roli zostało zaktualizowanych do roli 'viewer', która ma dostęp do wszystkich kamer."
+        "userRolesUpdated_one": "{{count}} użytkowników przypisanych do tej roli zostało zaktualizowanych do roli 'viewer', która ma dostęp do wszystkich kamer.",
+        "userRolesUpdated_few": "",
+        "userRolesUpdated_many": ""
       },
       "error": {
         "createRoleFailed": "Nie udało się utworzyć roli: {{errorMessage}}",
@@ -875,6 +879,11 @@
           "error": {
             "min": "Musisz wybrać co najmniej jedną akcję."
           }
+        },
+        "friendly_name": {
+          "title": "Przyjazna nazwa",
+          "placeholder": "Nazwij lub opisz ten trigger",
+          "description": "Opcjonalna przyjazna nazwa lub opis tego triggera."
         }
       }
     },
@@ -889,6 +898,10 @@
         "updateTriggerFailed": "Nie udało się zaktualizować wyzwalacza: {{errorMessage}}",
         "deleteTriggerFailed": "Nie udało się usunąć wyzwalacza: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Wyszukiwanie semantyczne jest zablokowane",
+      "desc": "Wyszukiwanie semantyczne musi być włączone, aby korzystać z triggerów."
     }
   }
 }

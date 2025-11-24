@@ -23,7 +23,7 @@
       "label": "Min face recognitions for the sub label to be applied to the person object."
     },
     "save_attempts": {
-      "label": "Number of face attempts to save in the train tab."
+      "label": "Number of face attempts to save in the recent recognitions tab."
     },
     "blur_confidence_filter": {
       "label": "Apply blur quality filter to face confidence."

@@ -348,6 +348,26 @@ export function GeneralFilterContent({
   onClose,
 }: GeneralFilterContentProps) {
   const { t } = useTranslation(["components/filter"]);
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
+  const allAudioListenLabels = useMemo<string[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const labels = new Set<string>();
+    Object.values(config.cameras).forEach((camera) => {
+      if (camera?.audio?.enabled) {
+        camera.audio.listen.forEach((label) => {
+          labels.add(label);
+        });
+      }
+    });
+    return [...labels].sort();
+  }, [config]);
+
   return (
     <>
       <div className="overflow-x-hidden">
@@ -373,7 +393,10 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <FilterSwitch
               key={item}
-              label={getTranslatedLabel(item)}
+              label={getTranslatedLabel(
+                item,
+                allAudioListenLabels.includes(item) ? "audio" : "object",
+              )}
               isChecked={currentLabels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
@@ -549,9 +572,8 @@ export function SortTypeContent({
             className="w-full space-y-1"
           >
             {availableSortTypes.map((value) => (
-              <div className="flex flex-row gap-2">
+              <div key={value} className="flex flex-row gap-2">
                 <RadioGroupItem
-                  key={value}
                   value={value}
                   id={`sort-${value}`}
                   className={

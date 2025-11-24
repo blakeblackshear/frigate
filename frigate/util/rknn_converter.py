@@ -1,6 +1,5 @@
 """RKNN model conversion utility for Frigate."""
 
-import fcntl
 import logging
 import os
 import subprocess
@@ -8,6 +7,8 @@ import sys
 import time
 from pathlib import Path
 from typing import Optional
+
+from frigate.util.file import FileLock
 
 logger = logging.getLogger(__name__)
 
@@ -129,8 +130,13 @@ def get_soc_type() -> Optional[str]:
     """Get the SoC type from device tree."""
     try:
         with open("/proc/device-tree/compatible") as file:
-            soc = file.read().split(",")[-1].strip("\x00")
-            return soc
+            content = file.read()
+
+            # Check for Jetson devices
+            if "nvidia" in content:
+                return None
+
+            return content.split(",")[-1].strip("\x00")
     except FileNotFoundError:
         logger.debug("Could not determine SoC type from device tree")
         return None
@@ -245,112 +251,6 @@ def convert_onnx_to_rknn(
                 logger.warning(f"Failed to remove temporary ONNX file: {e}")
 
 
-def cleanup_stale_lock(lock_file_path: Path) -> bool:
-    """
-    Clean up a stale lock file if it exists and is old.
-
-    Args:
-        lock_file_path: Path to the lock file
-
-    Returns:
-        True if lock was cleaned up, False otherwise
-    """
-    try:
-        if lock_file_path.exists():
-            # Check if lock file is older than 10 minutes (stale)
-            lock_age = time.time() - lock_file_path.stat().st_mtime
-            if lock_age > 600:  # 10 minutes
-                logger.warning(
-                    f"Removing stale lock file: {lock_file_path} (age: {lock_age:.1f}s)"
-                )
-                lock_file_path.unlink()
-                return True
-    except Exception as e:
-        logger.error(f"Error cleaning up stale lock: {e}")
-
-    return False
-
-
-def acquire_conversion_lock(lock_file_path: Path, timeout: int = 300) -> bool:
-    """
-    Acquire a file-based lock for model conversion.
-
-    Args:
-        lock_file_path: Path to the lock file
-        timeout: Maximum time to wait for lock in seconds
-
-    Returns:
-        True if lock acquired, False if timeout or error
-    """
-    try:
-        lock_file_path.parent.mkdir(parents=True, exist_ok=True)
-        cleanup_stale_lock(lock_file_path)
-        lock_fd = os.open(lock_file_path, os.O_CREAT | os.O_RDWR)
-
-        # Try to acquire exclusive lock
-        start_time = time.time()
-        while time.time() - start_time < timeout:
-            try:
-                fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                # Lock acquired successfully
-                logger.debug(f"Acquired conversion lock: {lock_file_path}")
-                return True
-            except (OSError, IOError):
-                # Lock is held by another process, wait and retry
-                if time.time() - start_time >= timeout:
-                    logger.warning(
-                        f"Timeout waiting for conversion lock: {lock_file_path}"
-                    )
-                    os.close(lock_fd)
-                    return False
-
-                logger.debug("Waiting for conversion lock to be released...")
-                time.sleep(1)
-
-        os.close(lock_fd)
-        return False
-
-    except Exception as e:
-        logger.error(f"Error acquiring conversion lock: {e}")
-        return False
-
-
-def release_conversion_lock(lock_file_path: Path) -> None:
-    """
-    Release the conversion lock.
-
-    Args:
-        lock_file_path: Path to the lock file
-    """
-    try:
-        if lock_file_path.exists():
-            lock_file_path.unlink()
-            logger.debug(f"Released conversion lock: {lock_file_path}")
-    except Exception as e:
-        logger.error(f"Error releasing conversion lock: {e}")
-
-
-def is_lock_stale(lock_file_path: Path, max_age: int = 600) -> bool:
-    """
-    Check if a lock file is stale (older than max_age seconds).
-
-    Args:
-        lock_file_path: Path to the lock file
-        max_age: Maximum age in seconds before considering lock stale
-
-    Returns:
-        True if lock is stale, False otherwise
-    """
-    try:
-        if lock_file_path.exists():
-            lock_age = time.time() - lock_file_path.stat().st_mtime
-            return lock_age > max_age
-    except Exception:
-        pass
-
-    return False
-
-
 def wait_for_conversion_completion(
     model_type: str, rknn_path: Path, lock_file_path: Path, timeout: int = 300
 ) -> bool:
@@ -358,6 +258,7 @@ def wait_for_conversion_completion(
     Wait for another process to complete the conversion.
 
     Args:
+        model_type: Type of model being converted
         rknn_path: Path to the expected RKNN model
         lock_file_path: Path to the lock file to monitor
         timeout: Maximum time to wait in seconds
@@ -366,6 +267,8 @@ def wait_for_conversion_completion(
         True if RKNN model appears, False if timeout
     """
     start_time = time.time()
+    lock = FileLock(lock_file_path, stale_timeout=600)
+
     while time.time() - start_time < timeout:
         # Check if RKNN model appeared
         if rknn_path.exists():
@@ -385,11 +288,14 @@ def wait_for_conversion_completion(
                 return False
 
         # Check if lock is stale
-        if is_lock_stale(lock_file_path):
+        if lock.is_stale():
             logger.warning("Lock file is stale, attempting to clean up and retry...")
-            cleanup_stale_lock(lock_file_path)
+            lock._cleanup_stale_lock()
             # Try to acquire lock again
-            if acquire_conversion_lock(lock_file_path, timeout=60):
+            retry_lock = FileLock(
+                lock_file_path, timeout=60, cleanup_stale_on_init=True
+            )
+            if retry_lock.acquire():
                 try:
                     # Check if RKNN file appeared while waiting
                     if rknn_path.exists():
@@ -415,7 +321,7 @@ def wait_for_conversion_completion(
                     return False
 
                 finally:
-                    release_conversion_lock(lock_file_path)
+                    retry_lock.release()
 
         logger.debug("Waiting for RKNN model to appear...")
         time.sleep(1)
@@ -452,8 +358,9 @@ def auto_convert_model(
             return str(rknn_path)
 
         lock_file_path = base_path.parent / f"{base_name}.conversion.lock"
+        lock = FileLock(lock_file_path, timeout=300, cleanup_stale_on_init=True)
 
-        if acquire_conversion_lock(lock_file_path):
+        if lock.acquire():
             try:
                 if rknn_path.exists():
                     logger.info(
@@ -476,7 +383,7 @@ def auto_convert_model(
                     return None
 
             finally:
-                release_conversion_lock(lock_file_path)
+                lock.release()
         else:
             logger.info(
                 f"Another process is converting {model_path}, waiting for completion..."

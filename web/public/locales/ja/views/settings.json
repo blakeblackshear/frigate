@@ -3,17 +3,19 @@
     "authentication": "認証設定 - Frigate",
     "camera": "カメラ設定 - Frigate",
     "default": "設定 - Frigate",
-    "enrichments": "エンリッチメント設定 - Frigate",
+    "enrichments": "高度解析設定 - Frigate",
     "masksAndZones": "マスク／ゾーンエディタ - Frigate",
     "motionTuner": "モーションチューナー - Frigate",
     "object": "デバッグ - Frigate",
     "general": "一般設定 - Frigate",
     "frigatePlus": "Frigate+ 設定 - Frigate",
-    "notifications": "通知設定 - Frigate"
+    "notifications": "通知設定 - Frigate",
+    "cameraManagement": "カメラ設定 - Frigate",
+    "cameraReview": "カメラレビュー設定 - Frigate"
   },
   "menu": {
     "ui": "UI",
-    "enrichments": "エンリッチメント",
+    "enrichments": "高度解析",
     "cameras": "カメラ設定",
     "masksAndZones": "マスク／ゾーン",
     "motionTuner": "モーションチューナー",
@@ -21,7 +23,10 @@
     "debug": "デバッグ",
     "users": "ユーザー",
     "notifications": "通知",
-    "frigateplus": "Frigate+"
+    "frigateplus": "Frigate+",
+    "cameraManagement": "管理",
+    "cameraReview": "レビュー",
+    "roles": "区分"
   },
   "dialog": {
     "unsavedChanges": {
@@ -84,8 +89,8 @@
     }
   },
   "enrichments": {
-    "title": "エンリッチメント設定",
-    "unsavedChanges": "未保存のエンリッチメント設定の変更",
+    "title": "高度解析設定",
+    "unsavedChanges": "未保存の高度解析設定の変更",
     "birdClassification": {
       "title": "鳥類分類",
       "desc": "量子化された TensorFlow モデルを使って既知の鳥を識別します。既知の鳥を認識した場合、その一般名を sub_label として追加します。この情報は UI、フィルタ、通知に含まれます。"
@@ -136,9 +141,9 @@
       "title": "ナンバープレート認識",
       "desc": "車両のナンバープレートを認識し、検出文字列を recognized_license_plate フィールドへ、または既知の名称を car タイプのオブジェクトの sub_label として自動追加できます。一般的な用途として、私道に入ってくる車や道路を通過する車のナンバー読み取りがあります。"
     },
-    "restart_required": "再起動が必要です（エンリッチメント設定を変更）",
+    "restart_required": "再起動が必要です（高度解析設定を変更）",
     "toast": {
-      "success": "エンリッチメント設定を保存しました。変更を適用するには Frigate を再起動してください。",
+      "success": "高度解析設定を保存しました。変更を適用するには Frigate を再起動してください。",
       "error": "設定変更の保存に失敗しました: {{errorMessage}}"
     }
   },
@@ -577,7 +582,7 @@
         "createRole": "ロール {{role}} を作成しました",
         "updateCameras": "ロール {{role}} のカメラを更新しました",
         "deleteRole": "ロール {{role}} を削除しました",
-        "userRolesUpdated": "このロールに割り当てられていた {{count}} ユーザーは「viewer」に更新され、すべてのカメラへの閲覧アクセスが付与されました。"
+        "userRolesUpdated_other": "このロールに割り当てられていた {{count}} ユーザーは「viewer」に更新され、すべてのカメラへの閲覧アクセスが付与されました。"
       },
       "error": {
         "createRoleFailed": "ロールの作成に失敗しました: {{errorMessage}}",
@@ -793,6 +798,11 @@
           "error": {
             "min": "少なくとも1つのアクションを選択してください。"
           }
+        },
+        "friendly_name": {
+          "title": "表示名",
+          "placeholder": "このトリガーの名前または説明",
+          "description": "このトリガーの表示名または説明文"
         }
       }
     },
@@ -806,6 +816,227 @@
         "createTriggerFailed": "トリガーの作成に失敗しました: {{errorMessage}}",
         "updateTriggerFailed": "トリガーの更新に失敗しました: {{errorMessage}}",
         "deleteTriggerFailed": "トリガーの削除に失敗しました: {{errorMessage}}"
+      }
+    },
+    "semanticSearch": {
+      "desc": "トリガーを使用するにはセマンティック検索を有効にする必要があります。",
+      "title": "セマンティック検索が無効です"
+    }
+  },
+  "cameraWizard": {
+    "step3": {
+      "saveAndApply": "新しいカメラを保存",
+      "description": "保存前の最終検証と解析。保存する前に各ストリームを接続してください。",
+      "validationTitle": "ストリーム検証",
+      "connectAllStreams": "すべてのストリームを接続",
+      "reconnectionSuccess": "再接続に成功しました。",
+      "reconnectionPartial": "一部のストリームの再接続に失敗しました。",
+      "streamUnavailable": "ストリームプレビューは利用できません",
+      "reload": "再読み込み",
+      "connecting": "接続中…",
+      "streamTitle": "ストリーム {{number}}",
+      "valid": "有効",
+      "failed": "失敗",
+      "notTested": "未テスト",
+      "connectStream": "接続",
+      "connectingStream": "接続中",
+      "disconnectStream": "切断",
+      "estimatedBandwidth": "推定帯域幅",
+      "roles": "ロール",
+      "none": "なし",
+      "error": "エラー",
+      "streamValidated": "ストリーム {{number}} の検証に成功しました",
+      "streamValidationFailed": "ストリーム {{number}} の検証に失敗しました",
+      "saveError": "無効な構成です。設定を確認してください。",
+      "issues": {
+        "title": "ストリーム検証",
+        "videoCodecGood": "ビデオコーデックは {{codec}} です。",
+        "audioCodecGood": "オーディオコーデックは {{codec}} です。",
+        "noAudioWarning": "このストリームでは音声が検出されません。録画には音声が含まれません。",
+        "audioCodecRecordError": "録画に音声を含めるには AAC オーディオコーデックが必要です。",
+        "audioCodecRequired": "音声検出を有効にするには音声ストリームが必要です。",
+        "restreamingWarning": "録画ストリームでカメラへの接続数を減らすと、CPU 使用率がわずかに増加する場合があります。",
+        "hikvision": {
+          "substreamWarning": "サブストリーム1は低解像度に固定されています。多くの Hikvision 製カメラでは、追加のサブストリームが利用可能であり、カメラ本体の設定で有効化する必要があります。使用できる場合は、それらのストリームを確認して活用することを推奨します。"
+        },
+        "dahua": {
+          "substreamWarning": "サブストリーム1は低解像度に固定されています。多くの Dahua／Amcrest／EmpireTech 製カメラでは、追加のサブストリームが利用可能であり、カメラ本体の設定で有効化する必要があります。使用できる場合は、それらのストリームを確認して活用することを推奨します。"
+        }
+      }
+    },
+    "title": "カメラを追加",
+    "description": "以下の手順に従って、Frigate に新しいカメラを追加します。",
+    "steps": {
+      "nameAndConnection": "名称と接続",
+      "streamConfiguration": "ストリーム設定",
+      "validationAndTesting": "検証とテスト"
+    },
+    "save": {
+      "success": "新しいカメラ {{cameraName}} を保存しました。",
+      "failure": "保存エラー: {{cameraName}}。"
+    },
+    "testResultLabels": {
+      "resolution": "解像度",
+      "video": "ビデオ",
+      "audio": "オーディオ",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "有効なストリーム URL を入力してください",
+      "testFailed": "ストリームテストに失敗しました: {{error}}"
+    },
+    "step1": {
+      "description": "カメラの詳細を入力し、接続テストを実行します。",
+      "cameraName": "カメラ名",
+      "cameraNamePlaceholder": "例: front_door または Back Yard Overview",
+      "host": "ホスト／IP アドレス",
+      "port": "ポート",
+      "username": "ユーザー名",
+      "usernamePlaceholder": "任意",
+      "password": "パスワード",
+      "passwordPlaceholder": "任意",
+      "selectTransport": "トランスポートプロトコルを選択",
+      "cameraBrand": "カメラブランド",
+      "selectBrand": "URL テンプレート用のカメラブランドを選択",
+      "customUrl": "カスタムストリーム URL",
+      "brandInformation": "ブランド情報",
+      "brandUrlFormat": "RTSP URL 形式が {{exampleUrl}} のカメラ向け",
+      "customUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "testConnection": "接続テスト",
+      "testSuccess": "接続テストに成功しました！",
+      "testFailed": "接続テストに失敗しました。入力内容を確認して再試行してください。",
+      "streamDetails": "ストリーム詳細",
+      "warnings": {
+        "noSnapshot": "設定されたストリームからスナップショットを取得できません。"
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "ホスト／IP とブランドを選択するか、「その他」を選んでカスタム URL を指定してください",
+        "nameRequired": "カメラ名は必須です",
+        "nameLength": "カメラ名は64文字以下である必要があります",
+        "invalidCharacters": "カメラ名に無効な文字が含まれています",
+        "nameExists": "このカメラ名は既に存在します",
+        "brands": {
+          "reolink-rtsp": "Reolink の RTSP は推奨されません。カメラ設定で http を有効にし、カメラウィザードを再起動することを推奨します。"
+        }
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      }
+    },
+    "step2": {
+      "description": "ストリームのロールを設定し、必要に応じて追加ストリームを登録します。",
+      "streamsTitle": "カメラストリーム",
+      "addStream": "ストリームを追加",
+      "addAnotherStream": "ストリームをさらに追加",
+      "streamTitle": "ストリーム {{number}}",
+      "streamUrl": "ストリーム URL",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "url": "URL",
+      "resolution": "解像度",
+      "selectResolution": "解像度を選択",
+      "quality": "品質",
+      "selectQuality": "品質を選択",
+      "roles": "ロール",
+      "roleLabels": {
+        "detect": "物体検出",
+        "record": "録画",
+        "audio": "音声"
+      },
+      "testStream": "接続テスト",
+      "testSuccess": "ストリームテストに成功しました！",
+      "testFailed": "ストリームテストに失敗しました",
+      "testFailedTitle": "テスト失敗",
+      "connected": "接続済み",
+      "notConnected": "未接続",
+      "featuresTitle": "機能",
+      "go2rtc": "カメラへの接続数を削減",
+      "detectRoleWarning": "\"detect\" ロールを持つストリームが少なくとも1つ必要です。",
+      "rolesPopover": {
+        "title": "ストリームロール",
+        "detect": "物体検出のメインフィード。",
+        "record": "設定に基づいて映像フィードのセグメントを保存します。",
+        "audio": "音声検出用のフィード。"
+      },
+      "featuresPopover": {
+        "title": "ストリーム機能",
+        "description": "go2rtc のリストリーミングを使用してカメラへの接続数を削減します。"
+      }
+    }
+  },
+  "cameraManagement": {
+    "title": "カメラ管理",
+    "addCamera": "新しいカメラを追加",
+    "editCamera": "カメラを編集:",
+    "selectCamera": "カメラを選択",
+    "backToSettings": "カメラ設定に戻る",
+    "streams": {
+      "title": "カメラの有効化／無効化",
+      "desc": "Frigate を再起動するまで一時的にカメラを無効化します。無効化すると、このカメラのストリーム処理は完全に停止し、検出・録画・デバッグは利用できません。<br /> <em>注: これは go2rtc のリストリームを無効にはしません。</em>"
+    },
+    "cameraConfig": {
+      "add": "カメラを追加",
+      "edit": "カメラを編集",
+      "description": "ストリーム入力とロールを含むカメラ設定を構成します。",
+      "name": "カメラ名",
+      "nameRequired": "カメラ名は必須です",
+      "nameLength": "カメラ名は64文字未満である必要があります。",
+      "namePlaceholder": "例: front_door または Back Yard Overview",
+      "enabled": "有効",
+      "ffmpeg": {
+        "inputs": "入力ストリーム",
+        "path": "ストリームパス",
+        "pathRequired": "ストリームパスは必須です",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "ロール",
+        "rolesRequired": "少なくとも1つのロールが必要です",
+        "rolesUnique": "各ロール（audio、detect、record）は1つのストリームにのみ割り当て可能です",
+        "addInput": "入力ストリームを追加",
+        "removeInput": "入力ストリームを削除",
+        "inputsRequired": "少なくとも1つの入力ストリームが必要です"
+      },
+      "go2rtcStreams": "go2rtc ストリーム",
+      "streamUrls": "ストリーム URL",
+      "addUrl": "URL を追加",
+      "addGo2rtcStream": "go2rtc ストリームを追加",
+      "toast": {
+        "success": "カメラ {{cameraName}} を保存しました"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "カメラレビュー設定",
+    "object_descriptions": {
+      "title": "生成AIによるオブジェクト説明",
+      "desc": "このカメラに対する生成AIのオブジェクト説明を一時的に有効／無効にします。無効にすると、このカメラの追跡オブジェクトについてAI生成の説明は要求されません。"
+    },
+    "review_descriptions": {
+      "title": "生成AIによるレビュー説明",
+      "desc": "このカメラに対する生成AIのレビュー説明を一時的に有効／無効にします。無効にすると、このカメラのレビュー項目についてAI生成の説明は要求されません。"
+    },
+    "review": {
+      "title": "レビュー",
+      "desc": "Frigate を再起動するまで、このカメラのアラートと検出を一時的に有効／無効にします。無効にすると、新しいレビュー項目は生成されません。 ",
+      "alerts": "アラート ",
+      "detections": "検出 "
+    },
+    "reviewClassification": {
+      "title": "レビュー分類",
+      "desc": "Frigate はレビュー項目をアラートと検出に分類します。既定では、すべての <em>person</em> と <em>car</em> オブジェクトはアラートとして扱われます。必須ゾーンを設定することで、分類をより細かく調整できます。",
+      "noDefinedZones": "このカメラにはゾーンが定義されていません。",
+      "objectAlertsTips": "すべての {{alertsLabels}} オブジェクトは {{cameraName}} でアラートとして表示されます。",
+      "zoneObjectAlertsTips": "{{cameraName}} の {{zone}} で検出されたすべての {{alertsLabels}} オブジェクトはアラートとして表示されます。",
+      "objectDetectionsTips": "{{cameraName}} で分類されていないすべての {{detectionsLabels}} オブジェクトは、どのゾーンにあっても検出として表示されます。",
+      "zoneObjectDetectionsTips": {
+        "text": "{{cameraName}} の {{zone}} で分類されていないすべての {{detectionsLabels}} オブジェクトは検出として表示されます。",
+        "notSelectDetections": "{{cameraName}} の {{zone}} で検出され、アラートに分類されなかったすべての {{detectionsLabels}} オブジェクトは、ゾーンに関係なく検出として表示されます。",
+        "regardlessOfZoneObjectDetectionsTips": "{{cameraName}} で分類されていないすべての {{detectionsLabels}} オブジェクトは、どのゾーンにあっても検出として表示されます。"
+      },
+      "unsavedChanges": "未保存のレビュー分類設定（{{camera}}）",
+      "selectAlertsZones": "アラート用のゾーンを選択",
+      "selectDetectionsZones": "検出用のゾーンを選択",
+      "limitDetections": "特定のゾーンに検出を限定する",
+      "toast": {
+        "success": "レビュー分類の設定を保存しました。変更を適用するには Frigate を再起動してください。"
       }
     }
   }

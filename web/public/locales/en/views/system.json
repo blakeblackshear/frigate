@@ -76,7 +76,12 @@
         }
       },
       "npuUsage": "NPU Usage",
-      "npuMemory": "NPU Memory"
+      "npuMemory": "NPU Memory",
+      "intelGpuWarning": {
+        "title": "Intel GPU Stats Warning",
+        "message": "GPU stats unavailable",
+        "description": "This is a known bug in Intel's GPU stats reporting tools (intel_gpu_top) where it will break and repeatedly return a GPU usage of 0% even in cases where hardware acceleration and object detection are correctly running on the (i)GPU. This is not a Frigate bug. You can restart the host to temporarily fix the issue and confirm that the GPU is working correctly. This does not affect performance."
+      }
     },
     "otherProcesses": {
       "title": "Other Processes",
@@ -169,6 +174,7 @@
   "enrichments": {
     "title": "Enrichments",
     "infPerSecond": "Inferences Per Second",
+    "averageInf": "Average Inference Time",
     "embeddings": {
       "image_embedding": "Image Embedding",
       "text_embedding": "Text Embedding",
@@ -180,7 +186,13 @@
       "plate_recognition_speed": "Plate Recognition Speed",
       "text_embedding_speed": "Text Embedding Speed",
       "yolov9_plate_detection_speed": "YOLOv9 Plate Detection Speed",
-      "yolov9_plate_detection": "YOLOv9 Plate Detection"
+      "yolov9_plate_detection": "YOLOv9 Plate Detection",
+      "review_description": "Review Description",
+      "review_description_speed": "Review Description Speed",
+      "review_description_events_per_second": "Review Description",
+      "object_description": "Object Description",
+      "object_description_speed": "Object Description Speed",
+      "object_description_events_per_second": "Object Description"
     }
   }
 }

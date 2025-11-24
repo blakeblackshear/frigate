@@ -134,10 +134,21 @@
     "length": {
       "feet": "piedi",
       "meters": "metri"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/ora",
+      "mbph": "MB/ora",
+      "gbph": "GB/ora"
     }
   },
   "label": {
-    "back": "Vai indietro"
+    "back": "Vai indietro",
+    "hide": "Nascondi {{item}}",
+    "show": "Mostra {{item}}",
+    "ID": "ID"
   },
   "menu": {
     "configuration": "Configurazione",
@@ -257,7 +268,7 @@
     "title": "Ruolo",
     "admin": "Amministratore",
     "viewer": "Spettatore",
-    "desc": "Gli Amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia di Frigate. Gli Spettatori sono limitati alla sola visualizzazione delle telecamere, rivedono gli oggetti e le registrazioni storiche nell'interfaccia utente."
+    "desc": "Gli amministratori hanno accesso completo a tutte le funzionalità dell'interfaccia utente di Frigate. Gli spettatori possono visualizzare solo le telecamere, gli elementi di revisione e i filmati storici nell'interfaccia utente."
   },
   "accessDenied": {
     "desc": "Non hai i permessi per visualizzare questa pagina.",
@@ -280,5 +291,17 @@
     }
   },
   "selectItem": "Seleziona {{item}}",
-  "readTheDocumentation": "Leggi la documentazione"
+  "readTheDocumentation": "Leggi la documentazione",
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "list": {
+    "two": "{{0}} e {{1}}",
+    "many": "{{items}}, e {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Opzionale",
+    "internalID": "L'ID interno che Frigate utilizza nella configurazione e nel database"
+  }
 }

@@ -6,10 +6,8 @@ import threading
 import time
 from typing import Optional
 
-from faster_whisper import WhisperModel
 from peewee import DoesNotExist
 
-from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import (
@@ -32,11 +30,13 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         self,
         config: FrigateConfig,
         requestor: InterProcessRequestor,
+        embeddings,
         metrics: DataProcessorMetrics,
     ):
         super().__init__(config, metrics, None)
         self.config = config
         self.requestor = requestor
+        self.embeddings = embeddings
         self.recognizer = None
         self.transcription_lock = threading.Lock()
         self.transcription_thread = None
@@ -50,6 +50,9 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
 
     def __build_recognizer(self) -> None:
         try:
+            # Import dynamically to avoid crashes on systems without AVX support
+            from faster_whisper import WhisperModel
+
             self.recognizer = WhisperModel(
                 model_size_or_path="small",
                 device="cuda"
@@ -128,10 +131,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
             )
 
             # Embed the description
-            self.requestor.send_data(
-                EmbeddingsRequestEnum.embed_description.value,
-                {"id": event_id, "description": transcription},
-            )
+            self.embeddings.embed_description(event_id, transcription)
 
         except DoesNotExist:
             logger.debug("No recording found for audio transcription post-processing")

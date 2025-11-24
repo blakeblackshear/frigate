@@ -24,10 +24,13 @@ echo "Adding MemryX GPG key and repository..."
 wget -qO- https://developer.memryx.com/deb/memryx.asc | sudo tee /etc/apt/trusted.gpg.d/memryx.asc >/dev/null
 echo 'deb https://developer.memryx.com/deb stable main' | sudo tee /etc/apt/sources.list.d/memryx.list >/dev/null
 
-# Update and install memx-drivers
-echo "Installing memx-drivers..."
+# Update and install specific SDK 2.1 packages
+echo "Installing MemryX SDK 2.1 packages..."
 sudo apt update
-sudo apt install -y memx-drivers
+sudo apt install -y memx-drivers=2.1.* memx-accl=2.1.* mxa-manager=2.1.*
+
+# Hold packages to prevent automatic upgrades
+sudo apt-mark hold memx-drivers memx-accl mxa-manager
 
 # ARM-specific board setup
 if [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
@@ -37,11 +40,5 @@ fi
 
 echo -e "\n\n\033[1;31mYOU MUST RESTART YOUR COMPUTER NOW\033[0m\n\n"
 
-# Install other runtime packages
-packages=("memx-accl" "mxa-manager")
-for pkg in "${packages[@]}"; do
-    echo "Installing $pkg..."
-    sudo apt install -y "$pkg"
-done
+echo "MemryX SDK 2.1 installation complete!"
 
-echo "MemryX installation complete!"

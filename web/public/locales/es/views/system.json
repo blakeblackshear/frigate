@@ -105,7 +105,7 @@
       "unusedStorageInformation": "Información de Almacenamiento No Utilizado"
     },
     "shm": {
-      "title": "Asignación SHM (memoria compartida)",
+      "title": "Asignación de SHM (memoria compartida)",
       "warning": "El tamaño actual de SHM de {{total}}MB es muy pequeño. Aumente al menos a {{min_shm}}MB."
     }
   },

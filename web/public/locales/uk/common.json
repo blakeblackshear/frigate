@@ -227,10 +227,21 @@
     "length": {
       "feet": "ноги",
       "meters": "метрів"
+    },
+    "data": {
+      "kbps": "кБ/с",
+      "mbps": "МБ/с",
+      "gbps": "ГБ/с",
+      "kbph": "кБ/годину",
+      "mbph": "МБ/годину",
+      "gbph": "ГБ/годину"
     }
   },
   "label": {
-    "back": "Повернутись"
+    "back": "Повернутись",
+    "hide": "Приховати {{item}}",
+    "show": "Показати {{item}}",
+    "ID": "ID"
   },
   "toast": {
     "save": {
@@ -271,5 +282,17 @@
     "title": "404"
   },
   "selectItem": "Вибрати {{item}}",
-  "readTheDocumentation": "Прочитати документацію"
+  "readTheDocumentation": "Прочитати документацію",
+  "information": {
+    "pixels": "{{area}}пикс"
+  },
+  "list": {
+    "two": "{{0}} і {{1}}",
+    "many": "{{items}}, і {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Необов'язково",
+    "internalID": "Внутрішній ідентифікатор, який Frigate використовує в конфігурації та базі даних"
+  }
 }

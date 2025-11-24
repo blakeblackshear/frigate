@@ -36,5 +36,23 @@
   "camera": "Câmera",
   "detected": "detectado",
   "suspiciousActivity": "Atividade Suspeita",
-  "threateningActivity": "Atividade de Ameaça"
+  "threateningActivity": "Atividade de Ameaça",
+  "detail": {
+    "noDataFound": "Nenhum dado de detalhe para revisar",
+    "aria": "Alternar visualização de detalhe",
+    "trackedObject_one": "objeto",
+    "trackedObject_other": "objetos",
+    "noObjectDetailData": "Nenhum dado de detalhe de objeto disponível.",
+    "label": "Detalhe",
+    "settings": "Configurações de visualização detalhada",
+    "alwaysExpandActive": {
+      "title": "Expandir sempre o modo ativo"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Ponto rastreado",
+    "clickToSeek": "Clique para ir para esse horário"
+  },
+  "zoomIn": "Ampliar",
+  "zoomOut": "Diminuir o zoom"
 }

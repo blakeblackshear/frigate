@@ -158,7 +158,8 @@
     "snapshot": "istantanea",
     "object_lifecycle": "ciclo di vita dell'oggetto",
     "details": "dettagli",
-    "video": "video"
+    "video": "video",
+    "thumbnail": "miniatura"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -195,11 +196,21 @@
     "audioTranscription": {
       "label": "Trascrivere",
       "aria": "Richiedi la trascrizione audio"
+    },
+    "showObjectDetails": {
+      "label": "Mostra il percorso dell'oggetto"
+    },
+    "hideObjectDetails": {
+      "label": "Nascondi il percorso dell'oggetto"
+    },
+    "viewTrackingDetails": {
+      "label": "Visualizza i dettagli di tracciamento",
+      "aria": "Mostra i dettagli di tracciamento"
     }
   },
   "dialog": {
     "confirmDelete": {
-      "desc": "L'eliminazione di questo oggetto tracciato rimuove l'istantanea, eventuali incorporamenti salvati e tutte le voci associate al ciclo di vita dell'oggetto. Il filmato registrato di questo oggetto tracciato nella vista Storico <em>NON</em> verrà eliminato.<br /><br />Vuoi davvero procedere?",
+      "desc": "L'eliminazione di questo oggetto tracciato rimuove l'istantanea, eventuali incorporamenti salvati e tutte le voci associate ai dettagli di tracciamento. Il filmato registrato di questo oggetto tracciato nella vista Storico <em>NON</em> verrà eliminato.<br /><br />Vuoi davvero procedere?",
       "title": "Conferma eliminazione"
     }
   },
@@ -224,5 +235,53 @@
   },
   "concerns": {
     "label": "Preoccupazioni"
+  },
+  "trackingDetails": {
+    "title": "Dettagli di tracciamento",
+    "noImageFound": "Nessuna immagine trovata per questo orario.",
+    "createObjectMask": "Crea maschera oggetto",
+    "adjustAnnotationSettings": "Regola le impostazioni di annotazione",
+    "scrollViewTips": "Clicca per visualizzare i momenti più significativi del ciclo di vita di questo oggetto.",
+    "autoTrackingTips": "Le posizioni dei riquadri di delimitazione saranno imprecise per le telecamere con tracciamento automatico.",
+    "count": "{{first}} di {{second}}",
+    "trackedPoint": "Punto tracciato",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} rilevato",
+      "entered_zone": "{{label}} è entrato in {{zones}}",
+      "active": "{{label}} è diventato attivo",
+      "stationary": "{{label}} è diventato stazionario",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} rilevato per {{label}}",
+        "other": "{{label}} riconosciuto come {{attribute}}"
+      },
+      "gone": "{{label}} lasciato",
+      "heard": "{{label}} sentito",
+      "external": "{{label}} rilevato",
+      "header": {
+        "zones": "Zone",
+        "ratio": "Rapporto",
+        "area": "Area"
+      }
+    },
+    "annotationSettings": {
+      "title": "Impostazioni di annotazione",
+      "showAllZones": {
+        "title": "Mostra tutte le zone",
+        "desc": "Mostra sempre le zone nei fotogrammi in cui gli oggetti sono entrati in una zona."
+      },
+      "offset": {
+        "label": "Differenza annotazione",
+        "desc": "Questi dati provengono dal flusso di rilevamento della telecamera, ma vengono sovrapposti alle immagini del flusso di registrazione. È improbabile che i due flussi siano perfettamente sincronizzati. Di conseguenza, il riquadro di delimitazione e il filmato non saranno perfettamente allineati. È possibile utilizzare questa impostazione per spostare le annotazioni in avanti o indietro nel tempo per allinearle meglio al filmato registrato.",
+        "millisecondsToOffset": "Millisecondi per compensare il rilevamento delle annotazioni. <em>Predefinito: 0</em>",
+        "tips": "SUGGERIMENTO: Immagina un video evento con una persona che cammina da sinistra a destra. Se il riquadro di delimitazione della cronologia dell'evento si trova costantemente a sinistra della persona, il valore dovrebbe essere diminuito. Allo stesso modo, se una persona cammina da sinistra a destra e il riquadro di delimitazione si trova costantemente davanti alla persona, il valore dovrebbe essere aumentato.",
+        "toast": {
+          "success": "La differenza dell'annotazione per {{camera}} è stato salvato nel file di configurazione. Riavvia Frigate per applicare le modifiche."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Diapositiva precedente",
+      "next": "Diapositiva successiva"
+    }
   }
 }

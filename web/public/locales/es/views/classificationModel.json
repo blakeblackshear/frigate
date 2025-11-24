@@ -1,0 +1,40 @@
+{
+  "documentTitle": "Modelos de Clasificación",
+  "button": {
+    "deleteClassificationAttempts": "Borrar Imágenes de Clasificación.",
+    "renameCategory": "Renombrar Clase",
+    "deleteCategory": "Borrar Clase",
+    "deleteImages": "Borrar Imágenes",
+    "trainModel": "Entrenar Modelo",
+    "addClassification": "Añadir Clasificación",
+    "deleteModels": "Borrar Modelos",
+    "editModel": "Editar Modelo"
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Clase Borrada",
+      "deletedImage": "Imágenes Borradas",
+      "deletedModel_one": "Borrado con éxito {{count}} modelo",
+      "deletedModel_many": "Borrados con éxito {{count}} modelos",
+      "deletedModel_other": "Borrados con éxito {{count}} modelos",
+      "categorizedImage": "Imagen Clasificada Correctamente",
+      "trainedModel": "Modelo entrenado correctamente."
+    },
+    "error": {
+      "deleteImageFailed": "Fallo al borrar: {{errorMessage}}",
+      "deleteCategoryFailed": "Fallo al borrar clase: {{errorMessage}}",
+      "deleteModelFailed": "Fallo al borrar modelo: {{errorMessage}}",
+      "categorizeFailed": "Fallo al categorizar imagen: {{errorMessage}}",
+      "trainingFailed": "Fallo al iniciar el entrenamiento del modelo: {{errorMessage}}",
+      "updateModelFailed": "Fallo al actualizar modelo: {{errorMessage}}"
+    }
+  },
+  "deleteCategory": {
+    "title": "Borrar Clase",
+    "desc": "¿Esta seguro de que quiere borrar la clase {{name}}? Esto borrará permanentemente todas las imágenes asociadas y requerirá reentrenar el modelo."
+  },
+  "deleteModel": {
+    "title": "Borrar Modelo de Clasificación",
+    "single": "¿Está seguro de que quiere eliminar {{name}}? Esto borrar permanentemente todos los datos asociados incluidas las imágenes y los datos de entrenamiento. Esta acción no se puede deshacer."
+  }
+}

@@ -9,7 +9,9 @@
     "object": "Gỡ lỗi - Frigate",
     "general": "Cài đặt Chung - Frigate",
     "frigatePlus": "Cài đặt Frigate+ - Frigate",
-    "motionTuner": "Bộ tinh chỉnh Chuyển động - Frigate"
+    "motionTuner": "Bộ tinh chỉnh Chuyển động - Frigate",
+    "cameraManagement": "Quản Lý Camera - Frigate",
+    "cameraReview": "Cài Đặt Xem Lại Camera - Frigate"
   },
   "notification": {
     "toast": {

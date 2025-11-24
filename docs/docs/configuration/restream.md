@@ -24,6 +24,11 @@ birdseye:
   restream: True
 ```
 
+:::tip 
+
+To improve connection speed when using Birdseye via restream you can enable a small idle heartbeat by setting `birdseye.idle_heartbeat_fps` to a low value (e.g. `1–2`).  This makes Frigate periodically push the last frame even when no motion is detected, reducing initial connection latency.
+
+:::
 ### Securing Restream With Authentication
 
 The go2rtc restream can be secured with RTSP based username / password authentication. Ex:

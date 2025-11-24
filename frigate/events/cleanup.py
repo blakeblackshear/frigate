@@ -12,7 +12,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event, Timeline
-from frigate.util.path import delete_event_snapshot, delete_event_thumbnail
+from frigate.util.file import delete_event_snapshot, delete_event_thumbnail
 
 logger = logging.getLogger(__name__)
 

@@ -87,7 +87,7 @@
   },
   "manualRecording": {
     "title": "按需录制",
-    "tips": "根据此摄像头的录制保留设置，手动启动事件。",
+    "tips": "根据此摄像头的录像存储设置，可以下载即时快照或手动触发事件记录。",
     "playInBackground": {
       "label": "后台播放",
       "desc": "启用此选项可在播放器隐藏时继续视频流播放。"
@@ -134,6 +134,9 @@
     "playInBackground": {
       "label": "后台播放",
       "tips": "启用此选项可在播放器隐藏时继续视频流播放。"
+    },
+    "debug": {
+      "picker": "调试模式下无法切换视频流。调试将始终使用检测（detect）功能的视频流。"
     }
   },
   "cameraSettings": {
@@ -167,5 +170,16 @@
   "transcription": {
     "enable": "启用实时音频转录",
     "disable": "关闭实时音频转录"
+  },
+  "noCameras": {
+    "title": "未设置摄像头",
+    "description": "准备开始连接摄像头至 Frigate 。",
+    "buttonText": "添加摄像头"
+  },
+  "snapshot": {
+    "takeSnapshot": "下载即时快照",
+    "noVideoSource": "当前无可用于快照的视频源。",
+    "captureFailed": "捕获快照失败。",
+    "downloadStarted": "快照下载已开始。"
   }
 }

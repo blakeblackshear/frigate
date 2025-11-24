@@ -52,7 +52,7 @@
     "export": "Eksport",
     "selectOrExport": "Välj eller exportera",
     "toast": {
-      "success": "Exporten har startats. Visa filen i mappen /exports.",
+      "success": "Exporten har startats. Visa filen på exportsidan.",
       "error": {
         "failed": "Misslyckades med att starta exporten: {{error}}",
         "endTimeMustAfterStartTime": "Sluttiden måste vara efter starttiden",
@@ -107,7 +107,8 @@
     "button": {
       "export": "Exportera",
       "markAsReviewed": "Markera som granskad",
-      "deleteNow": "Ta bort nu"
+      "deleteNow": "Ta bort nu",
+      "markAsUnreviewed": "Markera som ogranskad"
     }
   },
   "imagePicker": {
@@ -115,6 +116,7 @@
     "search": {
       "placeholder": "Sök efter etikett eller underetikett..."
     },
-    "noImages": "Inga miniatyrbilder hittades för den här kameran"
+    "noImages": "Inga miniatyrbilder hittades för den här kameran",
+    "unknownLabel": "Sparad triggerbild"
   }
 }

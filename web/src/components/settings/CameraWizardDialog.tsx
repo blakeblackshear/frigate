@@ -12,14 +12,16 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import axios from "axios";
 import Step1NameCamera from "@/components/settings/wizard/Step1NameCamera";
-import Step2StreamConfig from "@/components/settings/wizard/Step2StreamConfig";
-import Step3Validation from "@/components/settings/wizard/Step3Validation";
+import Step2ProbeOrSnapshot from "@/components/settings/wizard/Step2ProbeOrSnapshot";
+import Step3StreamConfig from "@/components/settings/wizard/Step3StreamConfig";
+import Step4Validation from "@/components/settings/wizard/Step4Validation";
 import type {
   WizardFormData,
   CameraConfigData,
   ConfigSetBody,
 } from "@/types/cameraWizard";
 import { processCameraName } from "@/utils/cameraUtil";
+import { cn } from "@/lib/utils";
 
 type WizardState = {
   wizardData: Partial<WizardFormData>;
@@ -55,6 +57,7 @@ const wizardReducer = (
 
 const STEPS = [
   "cameraWizard.steps.nameAndConnection",
+  "cameraWizard.steps.probeOrSnapshot",
   "cameraWizard.steps.streamConfiguration",
   "cameraWizard.steps.validationAndTesting",
 ];
@@ -98,20 +101,20 @@ export default function CameraWizardDialog({
   const canProceedToNext = useCallback((): boolean => {
     switch (currentStep) {
       case 0:
-        // Can proceed if camera name is set and at least one stream exists
-        return !!(
-          state.wizardData.cameraName &&
-          (state.wizardData.streams?.length ?? 0) > 0
-        );
+        // Step 1: Can proceed if camera name is set
+        return !!state.wizardData.cameraName;
       case 1:
-        // Can proceed if at least one stream has 'detect' role
+        // Step 2: Can proceed if at least one stream exists (from probe or manual test)
+        return (state.wizardData.streams?.length ?? 0) > 0;
+      case 2:
+        // Step 3: Can proceed if at least one stream has 'detect' role
         return !!(
           state.wizardData.streams?.some((stream) =>
             stream.roles.includes("detect"),
           ) ?? false
         );
-      case 2:
-        // Always can proceed from final step (save will be handled there)
+      case 3:
+        // Step 4: Always can proceed from final step (save will be handled there)
         return true;
       default:
         return false;
@@ -172,9 +175,7 @@ export default function CameraWizardDialog({
             ...(friendlyName && { friendly_name: friendlyName }),
             ffmpeg: {
               inputs: wizardData.streams.map((stream, index) => {
-                const isRestreamed =
-                  wizardData.restreamIds?.includes(stream.id) ?? false;
-                if (isRestreamed) {
+                if (stream.restream) {
                   const go2rtcStreamName =
                     wizardData.streams!.length === 1
                       ? finalCameraName
@@ -232,7 +233,11 @@ export default function CameraWizardDialog({
                   wizardData.streams!.length === 1
                     ? finalCameraName
                     : `${finalCameraName}_${index + 1}`;
-                go2rtcStreams[streamName] = [stream.url];
+
+                const streamUrl = stream.useFfmpeg
+                  ? `ffmpeg:${stream.url}`
+                  : stream.url;
+                go2rtcStreams[streamName] = [streamUrl];
               });
 
               if (Object.keys(go2rtcStreams).length > 0) {
@@ -335,7 +340,9 @@ export default function CameraWizardDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="max-h-[90dvh] max-w-4xl overflow-y-auto"
+        className={cn(
+          "scrollbar-container max-h-[90dvh] max-w-3xl overflow-y-auto",
+        )}
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
@@ -373,7 +380,16 @@ export default function CameraWizardDialog({
               />
             )}
             {currentStep === 1 && (
-              <Step2StreamConfig
+              <Step2ProbeOrSnapshot
+                wizardData={state.wizardData}
+                onUpdate={onUpdate}
+                onNext={handleNext}
+                onBack={handleBack}
+                probeMode={state.wizardData.probeMode ?? true}
+              />
+            )}
+            {currentStep === 2 && (
+              <Step3StreamConfig
                 wizardData={state.wizardData}
                 onUpdate={onUpdate}
                 onBack={handleBack}
@@ -381,8 +397,8 @@ export default function CameraWizardDialog({
                 canProceed={canProceedToNext()}
               />
             )}
-            {currentStep === 2 && (
-              <Step3Validation
+            {currentStep === 3 && (
+              <Step4Validation
                 wizardData={state.wizardData}
                 onUpdate={onUpdate}
                 onSave={handleSave}

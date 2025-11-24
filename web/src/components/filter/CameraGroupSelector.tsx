@@ -9,7 +9,7 @@ import useSWR from "swr";
 import { MdHome } from "react-icons/md";
 import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { Button, buttonVariants } from "../ui/button";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { LuPencil, LuPlus } from "react-icons/lu";
 import {
@@ -76,7 +76,7 @@ import { CameraStreamingDialog } from "../settings/CameraStreamingDialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { Trans, useTranslation } from "react-i18next";
-import { CameraNameLabel } from "../camera/CameraNameLabel";
+import { CameraNameLabel } from "../camera/FriendlyNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { useIsCustomRole } from "@/hooks/use-is-custom-role";
 
@@ -87,6 +87,8 @@ type CameraGroupSelectorProps = {
 export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
   const { t } = useTranslation(["components/camera"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const allowedCameras = useAllowedCameras();
+  const isCustomRole = useIsCustomRole();
 
   // tooltip
 
@@ -119,10 +121,22 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
       return [];
     }
 
-    return Object.entries(config.camera_groups).sort(
-      (a, b) => a[1].order - b[1].order,
-    );
-  }, [config]);
+    const allGroups = Object.entries(config.camera_groups);
+
+    // If custom role, filter out groups where user has no accessible cameras
+    if (isCustomRole) {
+      return allGroups
+        .filter(([, groupConfig]) => {
+          // Check if user has access to at least one camera in this group
+          return groupConfig.cameras.some((cameraName) =>
+            allowedCameras.includes(cameraName),
+          );
+        })
+        .sort((a, b) => a[1].order - b[1].order);
+    }
+
+    return allGroups.sort((a, b) => a[1].order - b[1].order);
+  }, [config, allowedCameras, isCustomRole]);
 
   // add group
 
@@ -139,6 +153,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
         activeGroup={group}
         setGroup={setGroup}
         deleteGroup={deleteGroup}
+        isCustomRole={isCustomRole}
       />
       <Scroller className={`${isMobile ? "whitespace-nowrap" : ""}`}>
         <div
@@ -206,14 +221,16 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
             );
           })}
 
-          <Button
-            className="bg-secondary text-muted-foreground"
-            aria-label={t("group.add")}
-            size="xs"
-            onClick={() => setAddGroup(true)}
-          >
-            <LuPlus className="size-4 text-primary" />
-          </Button>
+          {!isCustomRole && (
+            <Button
+              className="bg-secondary text-muted-foreground"
+              aria-label={t("group.add")}
+              size="xs"
+              onClick={() => setAddGroup(true)}
+            >
+              <LuPlus className="size-4 text-primary" />
+            </Button>
+          )}
           {isMobile && <ScrollBar orientation="horizontal" className="h-0" />}
         </div>
       </Scroller>
@@ -228,6 +245,7 @@ type NewGroupDialogProps = {
   activeGroup?: string;
   setGroup: (value: string | undefined, replace?: boolean | undefined) => void;
   deleteGroup: () => void;
+  isCustomRole?: boolean;
 };
 function NewGroupDialog({
   open,
@@ -236,6 +254,7 @@ function NewGroupDialog({
   activeGroup,
   setGroup,
   deleteGroup,
+  isCustomRole,
 }: NewGroupDialogProps) {
   const { t } = useTranslation(["components/camera"]);
   const { mutate: updateConfig } = useSWR<FrigateConfig>("config");
@@ -260,6 +279,12 @@ function NewGroupDialog({
   const [, , , deleteGridLayout] = usePersistence(
     `${activeGroup}-draggable-layout`,
   );
+
+  useEffect(() => {
+    if (!open) {
+      setEditState("none");
+    }
+  }, [open]);
 
   // callbacks
 
@@ -349,13 +374,7 @@ function NewGroupDialog({
         position="top-center"
         closeButton={true}
       />
-      <Overlay
-        open={open}
-        onOpenChange={(open) => {
-          setEditState("none");
-          setOpen(open);
-        }}
-      >
+      <Overlay open={open} onOpenChange={setOpen}>
         <Content
           className={cn(
             "scrollbar-container overflow-y-auto",
@@ -371,28 +390,30 @@ function NewGroupDialog({
               >
                 <Title>{t("group.label")}</Title>
                 <Description className="sr-only">{t("group.edit")}</Description>
-                <div
-                  className={cn(
-                    "absolute",
-                    isDesktop && "right-6 top-10",
-                    isMobile && "absolute right-0 top-4",
-                  )}
-                >
-                  <Button
-                    size="sm"
+                {!isCustomRole && (
+                  <div
                     className={cn(
-                      isDesktop &&
-                        "size-6 rounded-md bg-secondary-foreground p-1 text-background",
-                      isMobile && "text-secondary-foreground",
+                      "absolute",
+                      isDesktop && "right-6 top-10",
+                      isMobile && "absolute right-0 top-4",
                     )}
-                    aria-label={t("group.add")}
-                    onClick={() => {
-                      setEditState("add");
-                    }}
                   >
-                    <LuPlus />
-                  </Button>
-                </div>
+                    <Button
+                      size="sm"
+                      className={cn(
+                        isDesktop &&
+                          "size-6 rounded-md bg-secondary-foreground p-1 text-background",
+                        isMobile && "text-secondary-foreground",
+                      )}
+                      aria-label={t("group.add")}
+                      onClick={() => {
+                        setEditState("add");
+                      }}
+                    >
+                      <LuPlus />
+                    </Button>
+                  </div>
+                )}
               </Header>
               <div className="flex flex-col gap-4 md:gap-3">
                 {currentGroups.map((group) => (
@@ -401,6 +422,7 @@ function NewGroupDialog({
                     group={group}
                     onDeleteGroup={() => onDeleteGroup(group[0])}
                     onEditGroup={() => onEditGroup(group)}
+                    isReadOnly={isCustomRole}
                   />
                 ))}
               </div>
@@ -512,12 +534,14 @@ type CameraGroupRowProps = {
   group: [string, CameraGroupConfig];
   onDeleteGroup: () => void;
   onEditGroup: () => void;
+  isReadOnly?: boolean;
 };
 
 export function CameraGroupRow({
   group,
   onDeleteGroup,
   onEditGroup,
+  isReadOnly,
 }: CameraGroupRowProps) {
   const { t } = useTranslation(["components/camera"]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -564,7 +588,7 @@ export function CameraGroupRow({
           </AlertDialogContent>
         </AlertDialog>
 
-        {isMobile && (
+        {isMobile && !isReadOnly && (
           <>
             <DropdownMenu modal={!isDesktop}>
               <DropdownMenuTrigger>
@@ -589,7 +613,7 @@ export function CameraGroupRow({
             </DropdownMenu>
           </>
         )}
-        {!isMobile && (
+        {!isMobile && !isReadOnly && (
           <div className="flex flex-row items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>

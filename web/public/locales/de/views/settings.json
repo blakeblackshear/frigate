@@ -10,7 +10,9 @@
     "classification": "Klassifizierungseinstellungen – Frigate",
     "motionTuner": "Bewegungserkennungs-Optimierer – Frigate",
     "notifications": "Benachrichtigungs-Einstellungen",
-    "enrichments": "Erweiterte Statistiken - Frigate"
+    "enrichments": "Erweiterte Statistiken - Frigate",
+    "cameraManagement": "Kameras verwalten - Frigate",
+    "cameraReview": "Kamera Einstellungen prüfen - Frigate"
   },
   "menu": {
     "ui": "Benutzeroberfläche",
@@ -23,7 +25,10 @@
     "users": "Benutzer",
     "notifications": "Benachrichtigungen",
     "enrichments": "Erkennungsfunktionen",
-    "triggers": "Auslöser"
+    "triggers": "Auslöser",
+    "roles": "Rollen",
+    "cameraManagement": "Verwaltung",
+    "cameraReview": "Überprüfung"
   },
   "dialog": {
     "unsavedChanges": {
@@ -69,7 +74,7 @@
       "title": "Kalender",
       "firstWeekday": {
         "label": "Erster Wochentag",
-        "desc": "Der Tag, an dem die Wochen des Review Kalenders beginnen.",
+        "desc": "Der Tag, an dem die Wochen des Überprüfungs-Kalenders beginnen.",
         "sunday": "Sonntag",
         "monday": "Montag"
       }
@@ -812,6 +817,11 @@
           "error": {
             "min": "Mindesten eine Aktion muss ausgewählt sein."
           }
+        },
+        "friendly_name": {
+          "title": "Nutzerfreundlicher Name",
+          "placeholder": "Benenne oder beschreibe diesen Auslöser",
+          "description": "Ein optionaler nutzerfreundlicher Name oder eine Beschreibung für diesen Auslöser."
         }
       }
     },
@@ -826,6 +836,10 @@
         "updateTriggerFailed": "Auslöser könnte nicht aktualisiert werden: {{errorMessage}}",
         "deleteTriggerFailed": "Auslöser konnte nicht gelöscht werden: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "title": "Semantische Suche ist deaktiviert",
+      "desc": "Semantische Suche muss aktiviert sein um Auslöser nutzen zu können."
     }
   },
   "roles": {
@@ -878,13 +892,231 @@
         "createRole": "Rolle {{role}} erfolgreich erstellt",
         "updateCameras": "Kameras für Rolle {{role}} aktualisiert",
         "deleteRole": "Rolle {{role}} erfolgreich gelöscht",
-        "userRolesUpdated": "{{count}} Benutzer, denen diese Rolle zugewiesen wurde, wurden auf „Zuschauer“ aktualisiert, der Zugriff auf alle Kameras hat."
+        "userRolesUpdated_one": "{{count}} Benutzer, denen diese Rolle zugewiesen wurde, wurden auf „Zuschauer“ aktualisiert, der Zugriff auf alle Kameras hat.",
+        "userRolesUpdated_other": ""
       },
       "error": {
         "createRoleFailed": "Fehler beim Erstellen der Rolle: {{errorMessage}}",
         "updateCamerasFailed": "Aktualisierung der Kameras fehlgeschlagen: {{errorMessage}}",
         "deleteRoleFailed": "Rolle konnte nicht gelöscht werden: {{errorMessage}}",
         "userUpdateFailed": "Aktualisierung der Benutzerrollen fehlgeschlagen: {{errorMessage}}"
+      }
+    }
+  },
+  "cameraWizard": {
+    "title": "Kamera hinzufügen",
+    "description": "Folge den Anweisungen unten, um eine neue Kamera zu deiner Frigate-Installation hinzuzufügen.",
+    "steps": {
+      "nameAndConnection": "Name & Verbindung",
+      "streamConfiguration": "Stream Konfiguration",
+      "validationAndTesting": "Überprüfung & Testen"
+    },
+    "save": {
+      "success": "Neue Kamera {{cameraName}} erfolgreich hinzugefügt.",
+      "failure": "Fehler beim Speichern von {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Auflösung",
+      "video": "Video",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Bitte korrekte Stream-URL eingeben",
+      "testFailed": "Stream Test fehlgeschlagen: {{error}}"
+    },
+    "step1": {
+      "description": "Gib deine Kameradaten ein und teste die Verbindung.",
+      "cameraName": "Kamera-Name",
+      "cameraNamePlaceholder": "z.B. vordere_tür oder Hof Übersicht",
+      "host": "Host/IP Adresse",
+      "port": "Port",
+      "username": "Nutzername",
+      "usernamePlaceholder": "Optional",
+      "password": "Passwort",
+      "passwordPlaceholder": "Optional",
+      "selectTransport": "Transport-Protokoll auswählen",
+      "cameraBrand": "Kamera-Hersteller",
+      "selectBrand": "Wähle die Kamera-Hersteller für die URL-Vorlage aus",
+      "customUrl": "Benutzerdefinierte Stream-URL",
+      "brandInformation": "Hersteller Information",
+      "brandUrlFormat": "Für Kameras mit RTSP URL nutze folgendes Format: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://nutzername:passwort@host:port/pfad",
+      "testConnection": "Teste Verbindung",
+      "testSuccess": "Verbindungstest erfolgreich!",
+      "testFailed": "Verbindungstest fehlgeschlagen. Bitte prüfe deine Eingaben und versuche es erneut.",
+      "streamDetails": "Stream Details",
+      "warnings": {
+        "noSnapshot": "Es kann kein Snapshot aus dem konfigurierten Stream abgerufen werden."
+      },
+      "errors": {
+        "brandOrCustomUrlRequired": "Wählen Sie entweder einen Kamera-Hersteller mit Host/IP aus oder wählen Sie „Andere“ mit einer benutzerdefinierten URL",
+        "nameRequired": "Kamera-Name benötigt",
+        "nameLength": "Kamera-Name darf höchsten 64 Zeichen lang sein",
+        "invalidCharacters": "Kamera-Name enthält ungültige Zeichen",
+        "nameExists": "Kamera-Name existiert bereits",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP wird nicht empfohlen. Es wird empfohlen, http in den Kameraeinstellungen zu aktivieren und den Kamera-Assistenten neu zu starten."
+        }
+      },
+      "docs": {
+        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+      }
+    },
+    "step2": {
+      "description": "Konfigurieren Sie Stream-Rollen und fügen Sie zusätzliche Streams für Ihre Kamera hinzu.",
+      "streamsTitle": "Kamera Streams",
+      "addStream": "Stream hinzufügen",
+      "addAnotherStream": "Weiteren Stream hinzufügen",
+      "streamTitle": "Stream {{nummer}}",
+      "streamUrl": "Stream URL",
+      "streamUrlPlaceholder": "rtsp://nutzername:passwort@host:port/pfad",
+      "url": "URL",
+      "resolution": "Auflösung",
+      "selectResolution": "Auflösung auswählen",
+      "quality": "Qualität",
+      "selectQuality": "Qualität auswählen",
+      "roles": "Rollen",
+      "roleLabels": {
+        "detect": "Objekt-Erkennung",
+        "record": "Aufzeichnung",
+        "audio": "Audio"
+      },
+      "testStream": "Verbindung testen",
+      "testSuccess": "Stream erfolgreich getestet!",
+      "testFailed": "Stream-Test fehlgeschlagen",
+      "testFailedTitle": "Test fehlgeschlagen",
+      "connected": "Verbunden",
+      "notConnected": "Nicht verbunden",
+      "featuresTitle": "Funktionen",
+      "go2rtc": "Verbindungen zur Kamera reduzieren",
+      "detectRoleWarning": "Mindestens ein Stream muss die Rolle „detect“ haben, um fortfahren zu können.",
+      "rolesPopover": {
+        "title": "Stream Rollen",
+        "detect": "Haupt-Feed für Objekt-Erkennung.",
+        "record": "Speichert Segmente des Video-Feeds basierend auf den Konfigurationseinstellungen.",
+        "audio": "Feed für audiobasierte Erkennung."
+      },
+      "featuresPopover": {
+        "title": "Stream Funktionen",
+        "description": "Verwende go2rtc Restreaming, um die Verbindungen zu deiner Kamera zu reduzieren."
+      }
+    },
+    "step3": {
+      "description": "Endgültige Validierung und Analyse vor dem Speichern Ihrer neuen Kamera. Verbinde jeden Stream vor dem Speichern.",
+      "validationTitle": "Stream Validierung",
+      "connectAllStreams": "Verbinde alle Streams",
+      "reconnectionSuccess": "Wiederverbindung erfolgreich.",
+      "reconnectionPartial": "Einige Streams konnten nicht wieder verbunden werden.",
+      "streamUnavailable": "Stream-Vorschau nicht verfügbar",
+      "reload": "Neu laden",
+      "connecting": "Verbinde...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Gültig",
+      "failed": "Fehlgeschlagen",
+      "notTested": "Nicht getestet",
+      "connectStream": "Verbinden",
+      "connectingStream": "Verbinde",
+      "disconnectStream": "Trennen",
+      "estimatedBandwidth": "Geschätzte Bandbreite",
+      "roles": "Rollen",
+      "none": "Keine",
+      "error": "Fehler",
+      "streamValidated": "Stream {{number}} wurde erfolgreich validiert",
+      "streamValidationFailed": "Stream {{number}} Validierung fehlgeschlagen",
+      "saveAndApply": "Neue Kamera speichern",
+      "saveError": "Ungültige Konfiguration. Bitte prüfe die Einstellungen.",
+      "issues": {
+        "title": "Stream Validierung",
+        "videoCodecGood": "Video-Codec ist {{codec}}.",
+        "audioCodecGood": "Audio-Codec ist {{codec}}.",
+        "noAudioWarning": "Für diesen Stream wurde kein Ton erkannt, die Aufzeichnungen enthalten keinen Ton.",
+        "audioCodecRecordError": "Der AAC-Audio-Codec ist erforderlich, um Audio in Aufnahmen zu unterstützen.",
+        "audioCodecRequired": "Ein Audiostream ist erforderlich, um Audioerkennung zu unterstützen.",
+        "restreamingWarning": "Eine Reduzierung der Verbindungen zur Kamera für den Aufzeichnungsstream kann zu einer etwas höheren CPU-Auslastung führen.",
+        "dahua": {
+          "substreamWarning": "Substream 1 ist auf eine niedrige Auflösung festgelegt. Viele Kameras von Dahua / Amcrest / EmpireTech unterstützen zusätzliche Substreams, die in den Kameraeinstellungen aktiviert werden müssen. Es wird empfohlen, diese Streams zu nutzen, sofern sie verfügbar sind."
+        },
+        "hikvision": {
+          "substreamWarning": "Substream 1 ist auf eine niedrige Auflösung festgelegt. Viele Hikvision-Kameras unterstützen zusätzliche Substreams, die in den Kameraeinstellungen aktiviert werden müssen. Es wird empfohlen, diese Streams zu nutzen, sofern sie verfügbar sind."
+        }
+      }
+    }
+  },
+  "cameraManagement": {
+    "title": "Kameras verwalten",
+    "addCamera": "Neue Kamera hinzufügen",
+    "editCamera": "Kamera bearbeiten:",
+    "selectCamera": "Wähle eine Kamera",
+    "backToSettings": "Zurück zu Kamera-Einstellungen",
+    "streams": {
+      "title": "Kameras aktivieren / deaktivieren",
+      "desc": "Deaktiviere eine Kamera vorübergehend, bis Frigate neu gestartet wird. Deaktivierung einer Kamera stoppt die Verarbeitung der Streams dieser Kamera durch Frigate vollständig. Erkennung, Aufzeichnung und Debugging sind dann nicht mehr verfügbar. <br /> <em>Hinweis: Dies deaktiviert nicht die go2rtc restreams.</em>"
+    },
+    "cameraConfig": {
+      "add": "Kamera hinzufügen",
+      "edit": "Kamera bearbeiten",
+      "description": "Konfiguriere die Kameraeinstellungen, einschließlich Streams und Rollen.",
+      "name": "Kamera-Name",
+      "nameRequired": "Kamera-Name benötigt",
+      "nameLength": "Kamera-Name darf maximal 64 Zeichen lang sein.",
+      "namePlaceholder": "z.B. vordere_tür oder Hof Übersicht",
+      "enabled": "Aktiviert",
+      "ffmpeg": {
+        "inputs": "Eingang Streams",
+        "path": "Stream-Pfad",
+        "pathRequired": "Stream-Pfad benötigt",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Rollen",
+        "rolesRequired": "Mindestens eine Rolle wird benötigt",
+        "rolesUnique": "Jede Rolle (audio, detect, record) kann nur einem Stream zugewiesen werden",
+        "addInput": "Eingangs-Stream hinzufügen",
+        "removeInput": "Eingangs-Stream entfernen",
+        "inputsRequired": "Es wird mindestens ein Eingangs-Stream benötigt"
+      },
+      "go2rtcStreams": "go2rtc Streams",
+      "streamUrls": "Stream URLs",
+      "addUrl": "URL hinzufügen",
+      "addGo2rtcStream": "go2rtc Stream hinzufügen",
+      "toast": {
+        "success": "Kamera {{cameraName}} erfolgreich gespeichert"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Kamera-Einstellungen überprüfen",
+    "object_descriptions": {
+      "title": "Generative KI Objektbeschreibungen",
+      "desc": "Aktiviere/deaktiviere vorübergehend die Objektbeschreibungen durch Generative KI für diese Kamera. Wenn diese Option deaktiviert ist, werden keine KI-generierten Beschreibungen für verfolgte Objekte dieser Kamera erstellt."
+    },
+    "review_descriptions": {
+      "title": "Generative KI Review Beschreibungen",
+      "desc": "Generative KI Review Beschreibungen für diese Kamera vorübergehend aktivieren/deaktivieren. Wenn diese Option deaktiviert ist, werden für die Review Elemente dieser Kamera keine KI-generierten Beschreibungen angefordert."
+    },
+    "review": {
+      "title": "Review",
+      "desc": "Aktivieren/deaktivieren Sie vorübergehend Warnmeldungen und Erkennungen für diese Kamera, bis Frigate neu gestartet wird. Wenn diese Funktion deaktiviert ist, werden keine neuen Überprüfungselemente generiert. ",
+      "alerts": "Warnungen ",
+      "detections": "Erkennungen "
+    },
+    "reviewClassification": {
+      "title": "Bewertungsklassifizierung",
+      "desc": "Frigate kategorisiert zu überprüfende Elemente als Warnmeldungen und Erkennungen. Standardmäßig werden alle Objekte vom Typ <em>person</em> und <em>car</em> als Warnmeldungen betrachtet. Sie können die Kategorisierung der zu überprüfenden Elemente verfeinern, indem Sie die erforderlichen Zonen für sie konfigurieren.",
+      "noDefinedZones": "Für diese Kamera sind keine Zonen definiert.",
+      "objectAlertsTips": "Alle {{alertsLabels}}-Objekte auf {{cameraName}} werden als Warnmeldungen angezeigt.",
+      "zoneObjectAlertsTips": "Alle {{alertsLabels}}-Objekte, die in {{zone}} auf {{cameraName}} erkannt wurden, werden als Warnmeldungen angezeigt.",
+      "objectDetectionsTips": "Alle {{detectionsLabels}}-Objekte, die nicht unter {{cameraName}} kategorisiert sind, werden unabhängig davon, in welcher Zone sie sich befinden, als Erkennungen angezeigt.",
+      "zoneObjectDetectionsTips": {
+        "text": "Alle {{detectionsLabels}}-Objekte, die nicht in {{zone}} auf {{cameraName}} kategorisiert sind, werden als Erkennungen angezeigt.",
+        "notSelectDetections": "Alle {{detectionsLabels}}-Objekte, die in {{zone}} auf {{cameraName}} erkannt und nicht als Warnmeldungen kategorisiert wurden, werden unabhängig davon, in welcher Zone sie sich befinden, als Erkennungen angezeigt.",
+        "regardlessOfZoneObjectDetectionsTips": "Alle {{detectionsLabels}}-Objekte, die nicht unter {{cameraName}} kategorisiert sind, werden unabhängig davon, in welcher Zone sie sich befinden, als Erkennungen angezeigt."
+      },
+      "unsavedChanges": "Nicht gespeicherte Überprüfung der Klassifizierungseinstellungen für {{camera}}",
+      "selectAlertsZones": "Zonen für Warnmeldungen auswählen",
+      "selectDetectionsZones": "Zonen für Erkennungen auswählen",
+      "limitDetections": "Erkennungen auf bestimmte Zonen beschränken",
+      "toast": {
+        "success": "Die Konfiguration der Bewertungsklassifizierung wurde gespeichert. Starten Sie Frigate neu, um die Änderungen zu übernehmen."
       }
     }
   }

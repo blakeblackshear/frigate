@@ -262,12 +262,16 @@ export function PolygonCanvas({
   };
 
   useEffect(() => {
-    if (activePolygonIndex === undefined || !polygons) {
+    if (activePolygonIndex === undefined || !polygons?.length) {
       return;
     }
 
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
+
+    if (!activePolygon) {
+      return;
+    }
 
     // add default points order for already completed polygons
     if (!activePolygon.pointsOrder && activePolygon.isFinished) {

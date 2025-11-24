@@ -240,11 +240,13 @@ birdseye:
     scaling_factor: 2.0
     # Optional: Maximum number of cameras to show at one time, showing the most recent (default: show all cameras)
     max_cameras: 1
+  # Optional: Frames-per-second to re-send the last composed Birdseye frame when idle (no motion or active updates). (default: shown below)
+  idle_heartbeat_fps: 0.0
 
 # Optional: ffmpeg configuration
 # More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
 ffmpeg:
-  # Optional: ffmpeg binry path (default: shown below)
+  # Optional: ffmpeg binary path (default: shown below)
   # can also be set to `7.0` or `5.0` to specify one of the included versions
   # or can be set to any path that holds `bin/ffmpeg` & `bin/ffprobe`
   path: "default"
@@ -427,6 +429,15 @@ review:
     alerts: True
     # Optional: Enable GenAI review summaries for detections (default: shown below)
     detections: False
+    # Optional: Activity Context Prompt to give context to the GenAI what activity is and is not suspicious.
+    # It is important to be direct and detailed. See documentation for the default prompt structure.
+    activity_context_prompt: """Define what is and is not suspicious
+"""
+    # Optional: Image source for GenAI (default: preview)
+    # Options: "preview" (uses cached preview frames at ~180p) or "recordings" (extracts frames from recordings at 480p)
+    # Using "recordings" provides better image quality but uses more tokens per image.
+    # Frame count is automatically calculated based on context window size, aspect ratio, and image source (capped at 20 frames).
+    image_source: preview
     # Optional: Additional concerns that the GenAI should make note of (default: None)
     additional_concerns:
       - Animals in the garden
@@ -628,7 +639,7 @@ face_recognition:
   # Optional: Min face recognitions for the sub label to be applied to the person object (default: shown below)
   min_faces: 1
   # Optional: Number of images of recognized faces to save for training (default: shown below)
-  save_attempts: 100
+  save_attempts: 200
   # Optional: Apply a blur quality filter to adjust confidence based on the blur level of the image (default: shown below)
   blur_confidence_filter: True
   # Optional: Set the model size used face recognition. (default: shown below)
@@ -669,20 +680,18 @@ lpr:
   # Optional: List of regex replacement rules to normalize detected plates (default: shown below)
   replace_rules: {}
 
-# Optional: Configuration for AI generated tracked object descriptions
+# Optional: Configuration for AI / LLM provider
 # WARNING: Depending on the provider, this will send thumbnails over the internet
-# to Google or OpenAI's LLMs to generate descriptions. It can be overridden at
-# the camera level (enabled: False) to enhance privacy for indoor cameras.
+# to Google or OpenAI's LLMs to generate descriptions. GenAI features can be configured at
+# the camera level to enhance privacy for indoor cameras.
 genai:
-  # Optional: Enable AI description generation (default: shown below)
-  enabled: False
-  # Required if enabled: Provider must be one of ollama, gemini, or openai
+  # Required: Provider must be one of ollama, gemini, or openai
   provider: ollama
   # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
   base_url: http://localhost::11434
   # Required if gemini or openai
   api_key: "{FRIGATE_GENAI_API_KEY}"
-  # Required if enabled: The model to use with the provider.
+  # Required: The model to use with the provider.
   model: gemini-1.5-flash
   # Optional additional args to pass to the GenAI Provider (default: None)
   provider_options:
@@ -801,6 +810,8 @@ cameras:
       # NOTE: This must be different than any camera names, but can match with another zone on another
       #       camera.
       front_steps:
+        # Optional: A friendly name or descriptive text for the zones
+        friendly_name: ""
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
         coordinates: 0.033,0.306,0.324,0.138,0.439,0.185,0.042,0.428
@@ -920,10 +931,13 @@ cameras:
         type: thumbnail
         # Reference data for matching, either an event ID for `thumbnail` or a text string for `description`. (default: none)
         data: 1751565549.853251-b69j73
-        # Similarity threshold for triggering. (default: none)
-        threshold: 0.7
+        # Similarity threshold for triggering. (default: shown below)
+        threshold: 0.8
         # List of actions to perform when the trigger fires. (default: none)
-        # Available options: `notification` (send a webpush notification)
+        # Available options:
+        # - `notification` (send a webpush notification)
+        # - `sub_label` (add trigger friendly name as a sub label to the triggering tracked object)
+        # - `attribute` (add trigger's name and similarity score as a data attribute to the triggering tracked object)
         actions:
           - notification
 

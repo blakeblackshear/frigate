@@ -29,7 +29,7 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event, Trigger
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, serialize
-from frigate.util.path import get_event_thumbnail_bytes
+from frigate.util.file import get_event_thumbnail_bytes
 
 from .onnx.jina_v1_embedding import JinaV1ImageEmbedding, JinaV1TextEmbedding
 from .onnx.jina_v2_embedding import JinaV2Embedding
@@ -472,7 +472,7 @@ class Embeddings:
                                 )
                                 thumbnail_missing = True
                         except DoesNotExist:
-                            logger.warning(
+                            logger.debug(
                                 f"Event ID {trigger.data} for trigger {trigger_name} does not exist."
                             )
                             continue

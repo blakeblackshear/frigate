@@ -90,8 +90,8 @@
     "disable": "Skryť štatistiky streamu"
   },
   "manualRecording": {
-    "title": "Nahrávanie na požiadanie",
-    "tips": "Spustiť manuálnu udalosť na základe nastavení uchovávania záznamu tejto kamery.",
+    "title": "Na požiadanie",
+    "tips": "Stiahnite si okamžité snímky alebo začnite manuálnu akciu založenú na nastavení nahrávania tejto kamery.",
     "playInBackground": {
       "label": "Hrať na pozadí",
       "desc": "Povoľte túto možnosť, ak chcete pokračovať v streamovaní, aj keď je prehrávač skrytý."
@@ -136,6 +136,9 @@
     "playInBackground": {
       "label": "Hrať na pozadí",
       "tips": "Povoľte túto možnosť, ak chcete pokračovať v streamovaní, aj keď je prehrávač skrytý."
+    },
+    "debug": {
+      "picker": "Výber streamu nie je k dispozícii v režime ladenia. Zobrazenie ladenia vždy používa stream, ktorému je priradená rola detekcie."
     }
   },
   "cameraSettings": {
@@ -165,5 +168,16 @@
       "label": "Upraviť skupinu kamier"
     },
     "exitEdit": "Ukončiť úpravy"
+  },
+  "noCameras": {
+    "title": "Nie sú konfigurované žiadne kamery",
+    "description": "Začnite tým, že pripojíte kameru do Frigate.",
+    "buttonText": "Pridať kameru"
+  },
+  "snapshot": {
+    "takeSnapshot": "Stiahnite si okamžité snímky",
+    "noVideoSource": "Žiadny zdroj videa k dispozícii pre snapshot.",
+    "captureFailed": "Nepodarilo sa zachytiť snímku.",
+    "downloadStarted": "Sťahovanie snímky sa začalo."
   }
 }

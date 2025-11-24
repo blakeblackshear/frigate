@@ -7,13 +7,17 @@ import { Preview } from "@/types/preview";
 import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer, { HlsSource } from "../HlsVideoPlayer";
+import { useDetailStream } from "@/context/detail-stream-context";
 import { TimeRange } from "@/types/timeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { VideoResolutionType } from "@/types/live";
 import axios from "axios";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { calculateInpointOffset } from "@/utils/videoUtil";
+import {
+  calculateInpointOffset,
+  calculateSeekPosition,
+} from "@/utils/videoUtil";
 import { isFirefox } from "react-device-detect";
 
 /**
@@ -32,6 +36,7 @@ type DynamicVideoPlayerProps = {
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
+  onSeekToTime?: (timestamp: number, play?: boolean) => void;
   setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   toggleFullscreen: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
@@ -49,6 +54,7 @@ export default function DynamicVideoPlayer({
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
+  onSeekToTime,
   setFullResolution,
   toggleFullscreen,
   containerRef,
@@ -56,6 +62,13 @@ export default function DynamicVideoPlayer({
   const { t } = useTranslation(["components/player"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // for detail stream context in History
+  const {
+    isDetailMode,
+    camera: contextCamera,
+    currentTime,
+  } = useDetailStream();
 
   // controlling playback
 
@@ -99,10 +112,10 @@ export default function DynamicVideoPlayer({
   const [isLoading, setIsLoading] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout>();
-  const [source, setSource] = useState<HlsSource>({
-    playlist: `${apiHost}vod/${camera}/start/${timeRange.after}/end/${timeRange.before}/master.m3u8`,
-    startPosition: startTimestamp ? timeRange.after - startTimestamp : 0,
-  });
+
+  // Don't set source until recordings load - we need accurate startPosition
+  // to avoid hls.js clamping to video end when startPosition exceeds duration
+  const [source, setSource] = useState<HlsSource | undefined>(undefined);
 
   // start at correct time
 
@@ -174,16 +187,12 @@ export default function DynamicVideoPlayer({
   );
 
   useEffect(() => {
-    if (!controller || !recordings?.length) {
+    if (!recordings?.length) {
       if (recordings?.length == 0) {
         setNoRecording(true);
       }
 
       return;
-    }
-
-    if (playerRef.current) {
-      playerRef.current.autoplay = !isScrubbing;
     }
 
     let startPosition = undefined;
@@ -193,20 +202,30 @@ export default function DynamicVideoPlayer({
         recordingParams.after,
         (recordings || [])[0],
       );
-      const idealStartPosition = Math.max(
-        0,
-        startTimestamp - timeRange.after - inpointOffset,
-      );
 
-      if (idealStartPosition >= recordings[0].start_time - timeRange.after) {
-        startPosition = idealStartPosition;
-      }
+      startPosition = calculateSeekPosition(
+        startTimestamp,
+        recordings,
+        inpointOffset,
+      );
     }
 
     setSource({
       playlist: `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`,
       startPosition,
     });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recordings]);
+
+  useEffect(() => {
+    if (!controller || !recordings?.length) {
+      return;
+    }
+
+    if (playerRef.current) {
+      playerRef.current.autoplay = !isScrubbing;
+    }
 
     setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
 
@@ -215,7 +234,7 @@ export default function DynamicVideoPlayer({
       timeRange,
     });
 
-    // we only want this to change when recordings update
+    // we only want this to change when controller or recordings update
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, recordings]);
 
@@ -253,38 +272,48 @@ export default function DynamicVideoPlayer({
 
   return (
     <>
-      <HlsVideoPlayer
-        videoRef={playerRef}
-        containerRef={containerRef}
-        visible={!(isScrubbing || isLoading)}
-        currentSource={source}
-        hotKeys={hotKeys}
-        supportsFullscreen={supportsFullscreen}
-        fullscreen={fullscreen}
-        inpointOffset={inpointOffset}
-        onTimeUpdate={onTimeUpdate}
-        onPlayerLoaded={onPlayerLoaded}
-        onClipEnded={onValidateClipEnd}
-        onPlaying={() => {
-          if (isScrubbing) {
-            playerRef.current?.pause();
-          }
+      {source && (
+        <HlsVideoPlayer
+          videoRef={playerRef}
+          containerRef={containerRef}
+          visible={!(isScrubbing || isLoading)}
+          currentSource={source}
+          hotKeys={hotKeys}
+          supportsFullscreen={supportsFullscreen}
+          fullscreen={fullscreen}
+          inpointOffset={inpointOffset}
+          onTimeUpdate={onTimeUpdate}
+          onPlayerLoaded={onPlayerLoaded}
+          onClipEnded={onValidateClipEnd}
+          onSeekToTime={(timestamp, play) => {
+            if (onSeekToTime) {
+              onSeekToTime(timestamp, play);
+            }
+          }}
+          onPlaying={() => {
+            if (isScrubbing) {
+              playerRef.current?.pause();
+            }
 
-          if (loadingTimeout) {
-            clearTimeout(loadingTimeout);
-          }
+            if (loadingTimeout) {
+              clearTimeout(loadingTimeout);
+            }
 
-          setNoRecording(false);
-        }}
-        setFullResolution={setFullResolution}
-        onUploadFrame={onUploadFrameToPlus}
-        toggleFullscreen={toggleFullscreen}
-        onError={(error) => {
-          if (error == "stalled" && !isScrubbing) {
-            setIsBuffering(true);
-          }
-        }}
-      />
+            setNoRecording(false);
+          }}
+          setFullResolution={setFullResolution}
+          onUploadFrame={onUploadFrameToPlus}
+          toggleFullscreen={toggleFullscreen}
+          onError={(error) => {
+            if (error == "stalled" && !isScrubbing) {
+              setIsBuffering(true);
+            }
+          }}
+          isDetailMode={isDetailMode}
+          camera={contextCamera || camera}
+          currentTimeOverride={currentTime}
+        />
+      )}
       <PreviewPlayer
         className={cn(
           className,

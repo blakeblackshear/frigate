@@ -9,6 +9,7 @@ import {
   ReviewData,
   ReviewSegment,
   ReviewSeverity,
+  ZoomLevel,
 } from "@/types/review";
 import { Button } from "@/components/ui/button";
 import CameraActivityIndicator from "@/components/indicators/CameraActivityIndicator";
@@ -180,7 +181,7 @@ function UIPlayground() {
     timestampSpread: 15,
   });
 
-  const possibleZoomLevels = useMemo(
+  const possibleZoomLevels: ZoomLevel[] = useMemo(
     () => [
       { segmentDuration: 60, timestampSpread: 15 },
       { segmentDuration: 30, timestampSpread: 5 },
@@ -194,6 +195,14 @@ function UIPlayground() {
       setZoomSettings(possibleZoomLevels[newZoomLevel]);
     },
     [possibleZoomLevels],
+  );
+
+  const currentZoomLevel = useMemo(
+    () =>
+      possibleZoomLevels.findIndex(
+        (level) => level.segmentDuration === zoomSettings.segmentDuration,
+      ),
+    [possibleZoomLevels, zoomSettings.segmentDuration],
   );
 
   const { zoomLevel, handleZoom, isZooming, zoomDirection } = useTimelineZoom({
@@ -414,6 +423,9 @@ function UIPlayground() {
                 dense={isMobile} // dense will produce a smaller handlebar and only minute resolution on timestamps
                 isZooming={isZooming} // is the timeline actively zooming?
                 zoomDirection={zoomDirection} // is the timeline zooming in or out
+                onZoomChange={handleZoomChange}
+                possibleZoomLevels={possibleZoomLevels}
+                currentZoomLevel={currentZoomLevel}
               />
             )}
             {isEventsReviewTimeline && (
@@ -441,6 +453,9 @@ function UIPlayground() {
                 dense // dense will produce a smaller handlebar and only minute resolution on timestamps
                 isZooming={isZooming} // is the timeline actively zooming?
                 zoomDirection={zoomDirection} // is the timeline zooming in or out
+                onZoomChange={handleZoomChange}
+                possibleZoomLevels={possibleZoomLevels}
+                currentZoomLevel={currentZoomLevel}
               />
             )}
           </div>

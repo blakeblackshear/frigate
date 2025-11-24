@@ -69,7 +69,7 @@
         "noVaildTimeSelected": "No se seleccionó un rango de tiempo válido.",
         "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio."
       },
-      "success": "Exportación iniciada con éxito. Ver el archivo en la carpeta /exports."
+      "success": "Exportación iniciada con éxito. Ver el archivo en la página exportaciones."
     },
     "fromTimeline": {
       "saveExport": "Guardar exportación",
@@ -120,7 +120,8 @@
     "button": {
       "export": "Exportar",
       "markAsReviewed": "Marcar como revisado",
-      "deleteNow": "Eliminar ahora"
+      "deleteNow": "Eliminar ahora",
+      "markAsUnreviewed": "Marcar como no revisado"
     }
   },
   "imagePicker": {

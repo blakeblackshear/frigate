@@ -8,7 +8,7 @@
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
     "object": "Debug - Frigate",
-    "general": "General Settings - Frigate",
+    "general": "UI Settings - Frigate",
     "frigatePlus": "Frigate+ Settings - Frigate",
     "notifications": "Notification Settings - Frigate"
   },
@@ -37,7 +37,7 @@
     "noCamera": "No Camera"
   },
   "general": {
-    "title": "General Settings",
+    "title": "UI Settings",
     "liveDashboard": {
       "title": "Live Dashboard",
       "automaticLiveView": {
@@ -47,6 +47,14 @@
       "playAlertVideos": {
         "label": "Play Alert Videos",
         "desc": "By default, recent alerts on the Live dashboard play as small looping videos. Disable this option to only show a static image of recent alerts on this device/browser."
+      },
+      "displayCameraNames": {
+        "label": "Always Show Camera Names",
+        "desc": "Always show the camera names in a chip in the multi-camera live view dashboard."
+      },
+      "liveFallbackTimeout": {
+        "label": "Live Player Fallback Timeout",
+        "desc": "When a camera's high quality live stream is unavailable, fall back to low bandwidth mode after this many seconds. Default: 3."
       }
     },
     "storedLayouts": {
@@ -150,6 +158,7 @@
     "description": "Follow the steps below to add a new camera to your Frigate installation.",
     "steps": {
       "nameAndConnection": "Name & Connection",
+      "probeOrSnapshot": "Probe or Snapshot",
       "streamConfiguration": "Stream Configuration",
       "validationAndTesting": "Validation & Testing"
     },
@@ -168,7 +177,7 @@
       "testFailed": "Stream test failed: {{error}}"
     },
     "step1": {
-      "description": "Enter your camera details and test the connection.",
+      "description": "Enter your camera details and choose to probe the camera or manually select the brand.",
       "cameraName": "Camera Name",
       "cameraNamePlaceholder": "e.g., front_door or Back Yard Overview",
       "host": "Host/IP Address",
@@ -184,28 +193,65 @@
       "brandInformation": "Brand information",
       "brandUrlFormat": "For cameras with the RTSP URL format as: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://username:password@host:port/path",
-      "testConnection": "Test Connection",
-      "testSuccess": "Connection test successful!",
-      "testFailed": "Connection test failed. Please check your input and try again.",
-      "streamDetails": "Stream Details",
-      "warnings": {
-        "noSnapshot": "Unable to fetch a snapshot from the configured stream."
-      },
+      "connectionSettings": "Connection Settings",
+      "detectionMethod": "Stream Detection Method",
+      "onvifPort": "ONVIF Port",
+      "probeMode": "Probe camera",
+      "manualMode": "Manual selection",
+      "detectionMethodDescription": "Probe the camera with ONVIF (if supported) to find camera stream URLs, or manually select the camera brand to use pre-defined URLs. To enter a custom RTSP URL, choose the manual method and select \"Other\".",
+      "onvifPortDescription": "For cameras that support ONVIF, this is usually 80 or 8080.",
+      "useDigestAuth": "Use digest authentication",
+      "useDigestAuthDescription": "Use HTTP digest authentication for ONVIF. Some cameras may require a dedicated ONVIF username/password instead of the standard admin user.",
       "errors": {
         "brandOrCustomUrlRequired": "Either select a camera brand with host/IP or choose 'Other' with a custom URL",
         "nameRequired": "Camera name is required",
         "nameLength": "Camera name must be 64 characters or less",
         "invalidCharacters": "Camera name contains invalid characters",
         "nameExists": "Camera name already exists",
-        "brands": {
-          "reolink-rtsp": "Reolink RTSP is not recommended. It is recommended to enable http in the camera settings and restart the camera wizard."
-        }
-      },
-      "docs": {
-        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
+        "customUrlRtspRequired": "Custom URLs must begin with \"rtsp://\". Manual configuration is required for non-RTSP camera streams."
       }
     },
     "step2": {
+      "description": "Probe the camera for available streams or configure manual settings based on your selected detection method.",
+      "testSuccess": "Connection test successful!",
+      "testFailed": "Connection test failed. Please check your input and try again.",
+      "testFailedTitle": "Test Failed",
+      "streamDetails": "Stream Details",
+      "probing": "Probing camera...",
+      "retry": "Retry",
+      "testing": {
+        "probingMetadata": "Probing camera metadata...",
+        "fetchingSnapshot": "Fetching camera snapshot..."
+      },
+      "probeFailed": "Failed to probe camera: {{error}}",
+      "probingDevice": "Probing device...",
+      "probeSuccessful": "Probe successful",
+      "probeError": "Probe Error",
+      "probeNoSuccess": "Probe unsuccessful",
+      "deviceInfo": "Device Information",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "firmware": "Firmware",
+      "profiles": "Profiles",
+      "ptzSupport": "PTZ Support",
+      "autotrackingSupport": "Autotracking Support",
+      "presets": "Presets",
+      "rtspCandidates": "RTSP Candidates",
+      "rtspCandidatesDescription": "The following RTSP URLs were found from the camera probe. Test the connection to view stream metadata.",
+      "noRtspCandidates": "No RTSP URLs were found from the camera. Your credentials may be incorrect, or the camera may not support ONVIF or the method used to retrieve RTSP URLs. Go back and enter the RTSP URL manually.",
+      "candidateStreamTitle": "Candidate {{number}}",
+      "useCandidate": "Use",
+      "uriCopy": "Copy",
+      "uriCopied": "URI copied to clipboard",
+      "testConnection": "Test Connection",
+      "toggleUriView": "Click to toggle full URI view",
+      "connected": "Connected",
+      "notConnected": "Not Connected",
+      "errors": {
+        "hostRequired": "Host/IP address is required"
+      }
+    },
+    "step3": {
       "description": "Configure stream roles and add additional streams for your camera.",
       "streamsTitle": "Camera Streams",
       "addStream": "Add Stream",
@@ -213,6 +259,9 @@
       "streamTitle": "Stream {{number}}",
       "streamUrl": "Stream URL",
       "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "selectStream": "Select a stream",
+      "searchCandidates": "Search candidates...",
+      "noStreamFound": "No stream found",
       "url": "URL",
       "resolution": "Resolution",
       "selectResolution": "Select resolution",
@@ -244,7 +293,7 @@
         "description": "Use go2rtc restreaming to reduce connections to your camera."
       }
     },
-    "step3": {
+    "step4": {
       "description": "Final validation and analysis before saving your new camera. Connect each stream before saving.",
       "validationTitle": "Stream Validation",
       "connectAllStreams": "Connect All Streams",
@@ -262,6 +311,8 @@
       "disconnectStream": "Disconnect",
       "estimatedBandwidth": "Estimated Bandwidth",
       "roles": "Roles",
+      "ffmpegModule": "Use stream compatibility mode",
+      "ffmpegModuleDescription": "If the stream does not load after several attempts, try enabling this. When enabled, Frigate will use the ffmpeg module with go2rtc. This may provide better compatibility with some camera streams.",
       "none": "None",
       "error": "Error",
       "streamValidated": "Stream {{number}} validated successfully",
@@ -272,10 +323,15 @@
         "title": "Stream Validation",
         "videoCodecGood": "Video codec is {{codec}}.",
         "audioCodecGood": "Audio codec is {{codec}}.",
+        "resolutionHigh": "A resolution of {{resolution}} may cause increased resource usage.",
+        "resolutionLow": "A resolution of {{resolution}} may be too low for reliable detection of small objects.",
         "noAudioWarning": "No audio detected for this stream, recordings will not have audio.",
         "audioCodecRecordError": "The AAC audio codec is required to support audio in recordings.",
         "audioCodecRequired": "An audio stream is required to support audio detection.",
         "restreamingWarning": "Reducing connections to the camera for the record stream may increase CPU usage slightly.",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP is not recommended. Enable HTTP in the camera's firmware settings and restart the wizard."
+        },
         "dahua": {
           "substreamWarning": "Substream 1 is locked to a low resolution. Many Dahua / Amcrest / EmpireTech cameras support additional substreams that need to be enabled in the camera's settings. It is recommended to check and utilize those streams if available."
         },
@@ -385,7 +441,8 @@
           "mustNotBeSameWithCamera": "Zone name must not be the same as camera name.",
           "alreadyExists": "A zone with this name already exists for this camera.",
           "mustNotContainPeriod": "Zone name must not contain periods.",
-          "hasIllegalCharacter": "Zone name contains illegal characters."
+          "hasIllegalCharacter": "Zone name contains illegal characters.",
+          "mustHaveAtLeastOneLetter": "Zone name must have at least one letter."
         }
       },
       "distance": {
@@ -443,7 +500,7 @@
       "name": {
         "title": "Name",
         "inputPlaceHolder": "Enter a name…",
-        "tips": "Name must be at least 2 characters and must not be the name of a camera or another zone."
+        "tips": "Name must be at least 2 characters, must have at least one letter, and must not be the name of a camera or another zone."
       },
       "inertia": {
         "title": "Inertia",
@@ -731,7 +788,8 @@
         "createRole": "Role {{role}} created successfully",
         "updateCameras": "Cameras updated for role {{role}}",
         "deleteRole": "Role {{role}} deleted successfully",
-        "userRolesUpdated": "{{count}} user(s) assigned to this role have been updated to 'viewer', which has access to all cameras."
+        "userRolesUpdated_one": "{{count}} user assigned to this role has been updated to 'viewer', which has access to all cameras.",
+        "userRolesUpdated_other": "{{count}} users assigned to this role have been updated to 'viewer', which has access to all cameras."
       },
       "error": {
         "createRoleFailed": "Failed to create role: {{errorMessage}}",
@@ -875,7 +933,7 @@
       "desc": "Semantic Search must be enabled to use Triggers."
     },
     "management": {
-      "title": "Trigger Management",
+      "title": "Triggers",
       "desc": "Manage triggers for {{camera}}. Use the thumbnail type to trigger on similar thumbnails to your selected tracked object, and the description type to trigger on similar descriptions to text you specify."
     },
     "addTrigger": "Add Trigger",
@@ -895,8 +953,9 @@
       "description": "Description"
     },
     "actions": {
-      "alert": "Mark as Alert",
-      "notification": "Send Notification"
+      "notification": "Send Notification",
+      "sub_label": "Add Sub Label",
+      "attribute": "Add Attribute"
     },
     "dialog": {
       "createTrigger": {
@@ -914,10 +973,11 @@
       "form": {
         "name": {
           "title": "Name",
-          "placeholder": "Enter trigger name",
+          "placeholder": "Name this trigger",
+          "description": "Enter a unique name or description to identify this trigger",
           "error": {
-            "minLength": "Name must be at least 2 characters long.",
-            "invalidCharacters": "Name can only contain letters, numbers, underscores, and hyphens.",
+            "minLength": "Field must be at least 2 characters long.",
+            "invalidCharacters": "Field can only contain letters, numbers, underscores, and hyphens.",
             "alreadyExists": "A trigger with this name already exists for this camera."
           }
         },
@@ -926,18 +986,15 @@
         },
         "type": {
           "title": "Type",
-          "placeholder": "Select trigger type"
-        },
-        "friendly_name": {
-          "title": "Friendly Name",
-          "placeholder": "Name or describe this trigger",
-          "description": "An optional friendly name or descriptive text for this trigger."
+          "placeholder": "Select trigger type",
+          "description": "Trigger when a similar tracked object description is detected",
+          "thumbnail": "Trigger when a similar tracked object thumbnail is detected"
         },
         "content": {
           "title": "Content",
-          "imagePlaceholder": "Select an image",
+          "imagePlaceholder": "Select a thumbnail",
           "textPlaceholder": "Enter text content",
-          "imageDesc": "Select an image to trigger this action when a similar image is detected.",
+          "imageDesc": "Only the most recent 100 thumbnails are displayed. If you can't find your desired thumbnail, please review earlier objects in Explore and set up a trigger from the menu there.",
           "textDesc": "Enter text to trigger this action when a similar tracked object description is detected.",
           "error": {
             "required": "Content is required."
@@ -945,6 +1002,7 @@
         },
         "threshold": {
           "title": "Threshold",
+          "desc": "Set the similarity threshold for this trigger. A higher threshold means a closer match is required to fire the trigger.",
           "error": {
             "min": "Threshold must be at least 0",
             "max": "Threshold must be at most 1"
@@ -952,11 +1010,28 @@
         },
         "actions": {
           "title": "Actions",
-          "desc": "By default, Frigate fires an MQTT message for all triggers. Choose an additional action to perform when this trigger fires.",
+          "desc": "By default, Frigate fires an MQTT message for all triggers. Sub labels add the trigger name to the object label. Attributes are searchable metadata stored separately in the tracked object metadata.",
           "error": {
             "min": "At least one action must be selected."
           }
         }
+      }
+    },
+    "wizard": {
+      "title": "Create Trigger",
+      "step1": {
+        "description": "Configure the basic settings for your trigger."
+      },
+      "step2": {
+        "description": "Set up the content that will trigger this action."
+      },
+      "step3": {
+        "description": "Configure the threshold and actions for this trigger."
+      },
+      "steps": {
+        "nameAndType": "Name and Type",
+        "configureData": "Configure Data",
+        "thresholdAndActions": "Threshold and Actions"
       }
     },
     "toast": {

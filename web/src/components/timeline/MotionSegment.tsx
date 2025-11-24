@@ -16,6 +16,8 @@ type MotionSegmentProps = {
   firstHalfMotionValue: number;
   secondHalfMotionValue: number;
   hasRecording?: boolean;
+  prevIsNoRecording?: boolean;
+  nextIsNoRecording?: boolean;
   motionOnly: boolean;
   showMinimap: boolean;
   minimapStartTime?: number;
@@ -23,6 +25,7 @@ type MotionSegmentProps = {
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
   dense: boolean;
+  alwaysShowMotionLine?: boolean;
 };
 
 export function MotionSegment({
@@ -33,6 +36,8 @@ export function MotionSegment({
   firstHalfMotionValue,
   secondHalfMotionValue,
   hasRecording,
+  prevIsNoRecording,
+  nextIsNoRecording,
   motionOnly,
   showMinimap,
   minimapStartTime,
@@ -40,6 +45,7 @@ export function MotionSegment({
   setHandlebarTime,
   scrollToSegment,
   dense,
+  alwaysShowMotionLine = false,
 }: MotionSegmentProps) {
   const severityType = "all";
   const { getSeverity, getReviewed, displaySeverityType } =
@@ -116,6 +122,16 @@ export function MotionSegment({
     return showMinimap && segmentTime === alignedMinimapEndTime;
   }, [showMinimap, segmentTime, alignedMinimapEndTime]);
 
+  // Bottom border: current segment HAS recording, but next segment (below/earlier) has NO recording
+  const isFirstSegmentWithoutRecording = useMemo(() => {
+    return hasRecording === true && nextIsNoRecording === true;
+  }, [hasRecording, nextIsNoRecording]);
+
+  // Top border: current segment HAS recording, but prev segment (above/later) has NO recording
+  const isLastSegmentWithoutRecording = useMemo(() => {
+    return hasRecording === true && prevIsNoRecording === true;
+  }, [hasRecording, prevIsNoRecording]);
+
   const firstMinimapSegmentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -178,16 +194,17 @@ export function MotionSegment({
             segmentClasses,
             severity[0] && "bg-gradient-to-r",
             severity[0] && severityColorsBg[severity[0]],
-            // TODO: will update this for 0.17
-            false &&
-              hasRecording == false &&
-              firstHalfMotionValue == 0 &&
-              secondHalfMotionValue == 0 &&
-              "bg-slashes",
+            hasRecording == false && "bg-background",
           )}
           onClick={segmentClick}
           onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
         >
+          {isFirstSegmentWithoutRecording && (
+            <div className="absolute bottom-[0px] left-0 right-0 h-[1px] bg-primary-variant/40" />
+          )}
+          {isLastSegmentWithoutRecording && (
+            <div className="absolute -top-[1px] left-0 right-0 h-[1px] bg-primary-variant/50" />
+          )}
           {!motionOnly && (
             <>
               {showMinimap && (
@@ -218,45 +235,50 @@ export function MotionSegment({
             </>
           )}
 
-          <div className="absolute left-1/2 z-10 h-[8px] w-[20px] -translate-x-1/2 transform cursor-pointer md:w-[40px]">
-            <div className="mb-[1px] flex w-[20px] flex-row justify-center pt-[1px] md:w-[40px]">
-              <div className="mb-[1px] flex justify-center">
-                <div
-                  key={`${segmentKey}_motion_data_1`}
-                  data-motion-value={secondHalfSegmentWidth}
-                  className={cn(
-                    "h-[2px]",
-                    "rounded-full",
-                    secondHalfSegmentWidth
-                      ? "bg-motion_review"
-                      : "bg-muted-foreground",
-                  )}
-                  style={{
-                    width: secondHalfSegmentWidth || 1,
-                  }}
-                ></div>
+          {(hasRecording ||
+            firstHalfSegmentWidth > 0 ||
+            secondHalfSegmentWidth > 0 ||
+            alwaysShowMotionLine) && (
+            <div className="absolute left-1/2 z-10 h-[8px] w-[20px] -translate-x-1/2 transform cursor-pointer md:w-[40px]">
+              <div className="mb-[1px] flex w-[20px] flex-row justify-center pt-[1px] md:w-[40px]">
+                <div className="mb-[1px] flex justify-center">
+                  <div
+                    key={`${segmentKey}_motion_data_1`}
+                    data-motion-value={secondHalfSegmentWidth}
+                    className={cn(
+                      "h-[2px]",
+                      "rounded-full",
+                      secondHalfSegmentWidth
+                        ? "bg-motion_review"
+                        : "bg-muted-foreground",
+                    )}
+                    style={{
+                      width: secondHalfSegmentWidth || 1,
+                    }}
+                  ></div>
+                </div>
               </div>
-            </div>
 
-            <div className="flex w-[20px] flex-row justify-center pb-[1px] md:w-[40px]">
-              <div className="flex justify-center">
-                <div
-                  key={`${segmentKey}_motion_data_2`}
-                  data-motion-value={firstHalfSegmentWidth}
-                  className={cn(
-                    "h-[2px]",
-                    "rounded-full",
-                    firstHalfSegmentWidth
-                      ? "bg-motion_review"
-                      : "bg-muted-foreground",
-                  )}
-                  style={{
-                    width: firstHalfSegmentWidth || 1,
-                  }}
-                ></div>
+              <div className="flex w-[20px] flex-row justify-center pb-[1px] md:w-[40px]">
+                <div className="flex justify-center">
+                  <div
+                    key={`${segmentKey}_motion_data_2`}
+                    data-motion-value={firstHalfSegmentWidth}
+                    className={cn(
+                      "h-[2px]",
+                      "rounded-full",
+                      firstHalfSegmentWidth
+                        ? "bg-motion_review"
+                        : "bg-muted-foreground",
+                    )}
+                    style={{
+                      width: firstHalfSegmentWidth || 1,
+                    }}
+                  ></div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </>

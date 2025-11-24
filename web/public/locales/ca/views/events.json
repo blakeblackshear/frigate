@@ -36,5 +36,24 @@
   "selected_one": "{{count}} seleccionats",
   "selected_other": "{{count}} seleccionats",
   "suspiciousActivity": "Activitat sospitosa",
-  "threateningActivity": "Activitat amenaçadora"
+  "threateningActivity": "Activitat amenaçadora",
+  "detail": {
+    "noDataFound": "No hi ha dades detallades a revisar",
+    "trackedObject_one": "objecte",
+    "aria": "Canvia la vista de detall",
+    "trackedObject_other": "objectes",
+    "noObjectDetailData": "No hi ha dades de detall d'objecte disponibles.",
+    "label": "Detall",
+    "settings": "Configuració de la vista detallada",
+    "alwaysExpandActive": {
+      "title": "Expandeix sempre actiu",
+      "desc": "Expandeix sempre els detalls de l'objecte de la revisió activa quan estigui disponible."
+    }
+  },
+  "objectTrack": {
+    "clickToSeek": "Feu clic per cercar aquesta hora",
+    "trackedPoint": "Punt de seguiment"
+  },
+  "zoomIn": "Amplia",
+  "zoomOut": "Redueix"
 }

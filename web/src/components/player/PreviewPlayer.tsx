@@ -309,6 +309,7 @@ function PreviewVideoPlayer({
           playsInline
           muted
           disableRemotePlayback
+          disablePictureInPicture
           onSeeked={onPreviewSeeked}
           onLoadedData={() => {
             if (firstLoad) {

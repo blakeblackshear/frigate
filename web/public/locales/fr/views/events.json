@@ -2,22 +2,22 @@
   "detections": "Détections",
   "motion": {
     "label": "Mouvement",
-    "only": "Mouvement seulement"
+    "only": "Mouvement uniquement"
   },
   "alerts": "Alertes",
   "allCameras": "Toutes les caméras",
   "empty": {
-    "alert": "Il n'y a aucune alerte à passer en revue",
-    "detection": "Il n'y a aucune détection à passer en revue",
+    "alert": "Il n'y a aucune alerte à examiner.",
+    "detection": "Il n'y a aucune détection à examiner.",
     "motion": "Aucune donnée de mouvement trouvée"
   },
   "timeline": "Chronologie",
   "events": {
     "label": "Événements",
     "aria": "Sélectionner les événements",
-    "noFoundForTimePeriod": "Aucun événement trouvé pour cette plage de temps."
+    "noFoundForTimePeriod": "Aucun événement n'a été trouvé pour cette plage de temps."
   },
-  "documentTitle": "Revue d'événements -Frigate",
+  "documentTitle": "Événements - Frigate",
   "recordings": {
     "documentTitle": "Enregistrements - Frigate"
   },
@@ -25,17 +25,36 @@
     "last24Hours": "Dernières 24 heures"
   },
   "timeline.aria": "Sélectionner une chronologie",
-  "markAsReviewed": "Marqué comme passé en revue",
+  "markAsReviewed": "Marquer comme vérifié",
   "newReviewItems": {
-    "button": "Nouveaux éléments à passer en revue",
-    "label": "Afficher les nouveaux éléments de la revue d'événements"
+    "button": "Nouveaux événements à examiner",
+    "label": "Afficher les nouveaux événements"
   },
   "camera": "Caméra",
-  "markTheseItemsAsReviewed": "Marquer ces éléments comme passés en revue",
+  "markTheseItemsAsReviewed": "Marquer ces éléments comme vérifiés",
   "selected": "{{count}} sélectionné(s)",
   "selected_other": "{{count}} sélectionné(s)",
   "selected_one": "{{count}} sélectionné(s)",
   "detected": "détecté",
   "suspiciousActivity": "Activité suspecte",
-  "threateningActivity": "Activité menaçante"
+  "threateningActivity": "Activité menaçante",
+  "detail": {
+    "noDataFound": "Aucun détail à examiner",
+    "aria": "Activer/désactiver la vue détaillée",
+    "trackedObject_one": "objet",
+    "trackedObject_other": "objets",
+    "noObjectDetailData": "Aucun détail d'objet disponible",
+    "label": "Détail",
+    "settings": "Paramètres de la vue Détail",
+    "alwaysExpandActive": {
+      "title": "Toujours développer l'élément actif",
+      "desc": "Toujours développer les détails de l'objet de l'événement actif si disponibles"
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Point suivi",
+    "clickToSeek": "Cliquez pour atteindre ce moment."
+  },
+  "zoomIn": "Zoom avant",
+  "zoomOut": "Zoom arrière"
 }

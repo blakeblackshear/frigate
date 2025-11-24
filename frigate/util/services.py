@@ -9,6 +9,7 @@ import resource
 import shutil
 import signal
 import subprocess as sp
+import time
 import traceback
 from datetime import datetime
 from typing import Any, List, Optional, Tuple
@@ -388,6 +389,39 @@ def get_intel_gpu_stats(intel_gpu_device: Optional[str]) -> Optional[dict[str, s
         return results
 
 
+def get_openvino_npu_stats() -> Optional[dict[str, str]]:
+    """Get NPU stats using openvino."""
+    NPU_RUNTIME_PATH = "/sys/devices/pci0000:00/0000:00:0b.0/power/runtime_active_time"
+
+    try:
+        with open(NPU_RUNTIME_PATH, "r") as f:
+            initial_runtime = float(f.read().strip())
+
+        initial_time = time.time()
+
+        # Sleep for 1 second to get an accurate reading
+        time.sleep(1.0)
+
+        # Read runtime value again
+        with open(NPU_RUNTIME_PATH, "r") as f:
+            current_runtime = float(f.read().strip())
+
+        current_time = time.time()
+
+        # Calculate usage percentage
+        runtime_diff = current_runtime - initial_runtime
+        time_diff = (current_time - initial_time) * 1000.0  # Convert to milliseconds
+
+        if time_diff > 0:
+            usage = min(100.0, max(0.0, (runtime_diff / time_diff * 100.0)))
+        else:
+            usage = 0.0
+
+        return {"npu": f"{round(usage, 2)}", "mem": "-"}
+    except (FileNotFoundError, PermissionError, ValueError):
+        return None
+
+
 def get_rockchip_gpu_stats() -> Optional[dict[str, str]]:
     """Get GPU stats using rk."""
     try:
@@ -543,7 +577,7 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
     if detailed and format_entries:
         ffprobe_cmd.extend(["-show_entries", f"format={format_entries}"])
 
-    ffprobe_cmd.extend(["-loglevel", "quiet", clean_path])
+    ffprobe_cmd.extend(["-loglevel", "error", clean_path])
 
     return sp.run(ffprobe_cmd, capture_output=True)
 
