@@ -104,6 +104,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs to provide efficient object detection.
 
+**AXERA** <CommunityBadge />
+
+- [AXEngine](#axera): axera models can run on AXERA NPUs via AXEngine, delivering highly efficient object detection.
+
 :::
 
 ### Hailo-8
@@ -287,6 +291,14 @@ The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms fo
 | ssd mobilenet | ~ 25 ms                         |
 | yolov5m       | ~ 118 ms                        |
 
+### AXERA
+
+- **AXEngine** Default model is **yolov9**
+
+| Name             | AXERA AX650N/AX8850N Inference Time |
+| ---------------- | ----------------------------------- |
+| yolov9-tiny      | ~ 4 ms                              |
+
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
 This is taken from a [user question on reddit](https://www.reddit.com/r/homeassistant/comments/q8mgau/comment/hgqbxh5/?utm_source=share&utm_medium=web2x&context=3). Modified slightly for clarity.
@@ -308,11 +320,3 @@ Basically - When you increase the resolution and/or the frame rate of the stream
 YES! The Coral does not help with decoding video streams.
 
 Decompressing video streams takes a significant amount of CPU power. Video compression uses key frames (also known as I-frames) to send a full frame in the video stream. The following frames only include the difference from the key frame, and the CPU has to compile each frame by merging the differences with the key frame. [More detailed explanation](https://support.video.ibm.com/hc/en-us/articles/18106203580316-Keyframes-InterFrame-Video-Compression). Higher resolutions and frame rates mean more processing power is needed to decode the video stream, so try and set them on the camera to avoid unnecessary decoding work.
-
-### AXERA
-
-- **AXEngine** Default model is **yolov9**
-
-| Name             | AXERA AX650N/AX8850N Inference Time |
-| ---------------- | ----------------------------------- |
-| yolov9-tiny      | ~ 4 ms                              |
