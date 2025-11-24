@@ -43,6 +43,7 @@ class BaseLocalDetector(ObjectDetector):
         self,
         detector_config: BaseDetectorConfig = None,
         labels: str = None,
+        stop_event: MpEvent = None,
     ):
         self.fps = EventsPerSecond()
         if labels is None:
@@ -57,6 +58,10 @@ class BaseLocalDetector(ObjectDetector):
         else:
             self.input_transform = None
             self.dtype = InputDTypeEnum.int
+
+        # Attach stop_event to detector_config so detectors can access it
+        if detector_config and stop_event:
+            detector_config._stop_event = stop_event
 
         self.detect_api = create_detector(detector_config)
 
@@ -240,6 +245,10 @@ class AsyncDetectorRunner(FrigateProcess):
         while not self.stop_event.is_set():
             connection_id, detections = self._detector.async_receive_output()
 
+            # Handle timeout case (queue.Empty) - just continue
+            if connection_id is None:
+                continue
+
             if not self.send_times:
                 # guard; shouldn't happen if send/recv are balanced
                 continue
@@ -266,21 +275,40 @@ class AsyncDetectorRunner(FrigateProcess):
 
         self._frame_manager = SharedMemoryFrameManager()
         self._publisher = ObjectDetectorPublisher()
-        self._detector = AsyncLocalObjectDetector(detector_config=self.detector_config)
+        self._detector = AsyncLocalObjectDetector(
+            detector_config=self.detector_config, stop_event=self.stop_event
+        )
 
         for name in self.cameras:
             self.create_output_shm(name)
 
-        t_detect = threading.Thread(target=self._detect_worker, daemon=True)
-        t_result = threading.Thread(target=self._result_worker, daemon=True)
+        t_detect = threading.Thread(target=self._detect_worker, daemon=False)
+        t_result = threading.Thread(target=self._result_worker, daemon=False)
         t_detect.start()
         t_result.start()
 
-        while not self.stop_event.is_set():
-            time.sleep(0.5)
+        try:
+            while not self.stop_event.is_set():
+                time.sleep(0.5)
 
-        self._publisher.stop()
-        logger.info("Exited async detection process...")
+            logger.info(
+                "Stop event detected, waiting for detector threads to finish..."
+            )
+
+            # Wait for threads to finish processing
+            t_detect.join(timeout=5)
+            t_result.join(timeout=5)
+
+            # Explicitly shutdown MemryX accelerator
+            if hasattr(self._detector.detect_api, "shutdown"):
+                logger.info("Calling MemryX shutdown method...")
+                self._detector.detect_api.shutdown()
+
+            self._publisher.stop()
+        except Exception as e:
+            logger.error(f"Error during async detector shutdown: {e}")
+        finally:
+            logger.info("Exited Async detection process...")
 
 
 class ObjectDetectProcess:
@@ -308,7 +336,7 @@ class ObjectDetectProcess:
         # if the process has already exited on its own, just return
         if self.detect_process and self.detect_process.exitcode:
             return
-        self.detect_process.terminate()
+        
         logging.info("Waiting for detection process to exit gracefully...")
         self.detect_process.join(timeout=30)
         if self.detect_process.exitcode is None:
