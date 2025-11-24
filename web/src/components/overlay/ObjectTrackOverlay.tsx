@@ -42,6 +42,7 @@ type ObjectData = {
   pathPoints: PathPoint[];
   currentZones: string[];
   currentBox?: number[];
+  currentAttributeBox?: number[];
 };
 
 export default function ObjectTrackOverlay({
@@ -105,6 +106,12 @@ export default function ObjectTrackOverlay({
     selectedObjectIds.length > 0
       ? ["event_ids", { ids: selectedObjectIds.join(",") }]
       : null,
+    null,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 30000,
+    },
   );
 
   // Fetch timeline data for each object ID using fixed number of hooks
@@ -112,7 +119,12 @@ export default function ObjectTrackOverlay({
     selectedObjectIds.length > 0
       ? `timeline?source_id=${selectedObjectIds.join(",")}&limit=1000`
       : null,
-    { revalidateOnFocus: false },
+    null,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 30000,
+    },
   );
 
   const getZonesFriendlyNames = (zones: string[], config: FrigateConfig) => {
@@ -270,6 +282,7 @@ export default function ObjectTrackOverlay({
           );
 
         const currentBox = nearbyTimelineEvent?.data?.box;
+        const currentAttributeBox = nearbyTimelineEvent?.data?.attribute_box;
 
         return {
           objectId,
@@ -278,6 +291,7 @@ export default function ObjectTrackOverlay({
           pathPoints: combinedPoints,
           currentZones,
           currentBox,
+          currentAttributeBox,
         };
       })
       .filter((obj: ObjectData) => obj.pathPoints.length > 0); // Only include objects with path data
@@ -479,6 +493,20 @@ export default function ObjectTrackOverlay({
                   stroke={objData.color}
                   strokeWidth={boxStroke}
                   opacity="1"
+                />
+              </g>
+            )}
+            {objData.currentAttributeBox && showBoundingBoxes && (
+              <g>
+                <rect
+                  x={objData.currentAttributeBox[0] * videoWidth}
+                  y={objData.currentAttributeBox[1] * videoHeight}
+                  width={objData.currentAttributeBox[2] * videoWidth}
+                  height={objData.currentAttributeBox[3] * videoHeight}
+                  fill="none"
+                  stroke={objData.color}
+                  strokeWidth={boxStroke}
+                  opacity="0.9"
                 />
               </g>
             )}

@@ -434,7 +434,7 @@ export default function MasksAndZonesView({
       {cameraConfig && editingPolygons && (
         <div className="flex size-full flex-col md:flex-row">
           <Toaster position="top-center" closeButton={true} />
-          <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12">
+          <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12">
             {editPane == "zone" && (
               <ZoneEditPane
                 polygons={editingPolygons}

@@ -82,6 +82,7 @@ function MSEPlayer({
     [key: string]: (msg: { value: string; type: string }) => void;
   }>({});
   const msRef = useRef<MediaSource | null>(null);
+  const mseCodecRef = useRef<string | null>(null);
 
   const wsURL = useMemo(() => {
     return `${baseUrl.replace(/^http/, "ws")}live/mse/api/ws?src=${camera}`;
@@ -93,6 +94,10 @@ function MSEPlayer({
       console.error(
         `${camera} - MSE error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live/#live-player-error-messages`,
       );
+      if (mseCodecRef.current) {
+        // eslint-disable-next-line no-console
+        console.error(`${camera} - MSE codec in use: ${mseCodecRef.current}`);
+      }
       onError?.(error);
     },
     [camera, onError],
@@ -298,6 +303,9 @@ function MSEPlayer({
 
     onmessageRef.current["mse"] = (msg) => {
       if (msg.type !== "mse") return;
+
+      // Store the codec value for error logging
+      mseCodecRef.current = msg.value;
 
       let sb: SourceBuffer | undefined;
       try {
