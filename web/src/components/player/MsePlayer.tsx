@@ -94,12 +94,19 @@ function MSEPlayer({
       console.error(
         `${camera} - MSE error '${error}': ${description} See the documentation: https://docs.frigate.video/configuration/live/#live-player-error-messages`,
       );
+
       if (mseCodecRef.current) {
         // eslint-disable-next-line no-console
-        console.error(`${camera} - MSE codec in use: ${mseCodecRef.current}`);
+        console.error(
+          `${camera} - Browser negotiated codecs: ${mseCodecRef.current}`,
+        );
+        // eslint-disable-next-line no-console
+        console.error(`${camera} - Supported codecs: ${CODECS.join(", ")}`);
       }
       onError?.(error);
     },
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [camera, onError],
   );
 
