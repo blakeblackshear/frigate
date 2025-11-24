@@ -2,7 +2,6 @@ import glob
 import logging
 import os
 import shutil
-import time
 import urllib.request
 import zipfile
 from queue import Queue
