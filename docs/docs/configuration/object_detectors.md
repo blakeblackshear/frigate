@@ -49,7 +49,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs.
 
-**AXERA**
+**AXERA** <CommunityBadge />
 
 - [AXEngine](#axera): axmodels can run on AXERA AI acceleration.
 
