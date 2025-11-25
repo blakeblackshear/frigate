@@ -11,7 +11,9 @@
     "debug": "Debugowanie",
     "enrichments": "Wzbogacenia",
     "triggers": "Wyzwalacze",
-    "roles": "Role"
+    "roles": "Role",
+    "cameraManagement": "Zarządzanie",
+    "cameraReview": "Przejrzyj"
   },
   "dialog": {
     "unsavedChanges": {
@@ -79,13 +81,14 @@
     "masksAndZones": "Edytor Masek i Stref - Frigate",
     "frigatePlus": "Ustawienia Frigate+ - Frigate",
     "classification": "Ustawienia Klasyfikacji - Frigate",
-    "general": "Ustawienia Ogólne - Frigate",
+    "general": "Ustawienia Interfejsu - Frigate",
     "authentication": "Ustawienia Uwierzytelniania - Frigate",
     "motionTuner": "Konfigurator Ruchu - Frigate",
     "object": "Debug - Frigate",
     "notifications": "Ustawienia powiadomień - Frigate",
     "enrichments": "Ustawienia wzbogacania - Frigate",
-    "cameraManagement": "Zarządzanie kamerami – Frigate"
+    "cameraManagement": "Zarządzanie kamerami – Frigate",
+    "cameraReview": "Ustawienia przeglądu kamer - Frigate"
   },
   "classification": {
     "title": "Ustawienia Klasyfikacji",
