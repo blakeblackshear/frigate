@@ -425,5 +425,21 @@
   "sanding": "Schleifen",
   "machine_gun": "Maschinengewehr",
   "boom": "Dröhnen",
-  "field_recording": "Außenaufnahme"
+  "field_recording": "Außenaufnahme",
+  "liquid": "Flüssigkeit",
+  "splash": "Spritzer",
+  "slosh": "Schwenken",
+  "squish": "Quetschen",
+  "drip": "Tropfen",
+  "pour": "Gießen",
+  "trickle": "Tröpfeln",
+  "fill": "Füllen",
+  "spray": "Sprühen",
+  "pump": "Pumpen",
+  "stir": "Umrühren",
+  "boiling": "Köchelnd",
+  "arrow": "Pfeil",
+  "electronic_tuner": "Elektronischer Tuner",
+  "effects_unit": "Effekteinheit",
+  "chorus_effect": "Chorus-Effekt"
 }

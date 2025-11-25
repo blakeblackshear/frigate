@@ -66,7 +66,7 @@
         "failed": "Fehler beim Starten des Exports: {{error}}",
         "noVaildTimeSelected": "Kein gültiger Zeitraum ausgewählt"
       },
-      "success": "Export erfolgreich gestartet. Die Datei befindet sich im Ordner /exports."
+      "success": "Export erfolgreich gestartet. Die Datei befindet sich auf der Exportseite."
     },
     "fromTimeline": {
       "saveExport": "Export speichern",
@@ -126,6 +126,7 @@
     "search": {
       "placeholder": "Nach Label oder Unterlabel suchen..."
     },
-    "noImages": "Kein Vorschaubild für diese Kamera gefunden"
+    "noImages": "Kein Vorschaubild für diese Kamera gefunden",
+    "unknownLabel": "Gespeichertes Triggerbild"
   }
 }

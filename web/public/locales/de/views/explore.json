@@ -158,7 +158,8 @@
     "details": "Details",
     "video": "Video",
     "object_lifecycle": "Objekt-Lebenszyklus",
-    "snapshot": "Snapshot"
+    "snapshot": "Snapshot",
+    "thumbnail": "Vorschaubild"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -195,12 +196,22 @@
     "addTrigger": {
       "aria": "Einen Trigger für dieses verfolgte Objekt hinzufügen",
       "label": "Trigger hinzufügen"
+    },
+    "viewTrackingDetails": {
+      "label": "Details zum Verfolgen anzeigen",
+      "aria": "Details zum Verfolgen anzeigen"
+    },
+    "showObjectDetails": {
+      "label": "Objektpfad anzeigen"
+    },
+    "hideObjectDetails": {
+      "label": "Objektpfad verbergen"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Löschen bestätigen",
-      "desc": "Beim Löschen dieses verfolgten Objekts werden der Schnappschuss, alle gespeicherten Einbettungen und alle zugehörigen Objektlebenszykluseinträge entfernt. Aufgezeichnetes Filmmaterial dieses verfolgten Objekts in der Verlaufsansicht wird <em>NICHT</em> gelöscht. <br /><br />Sind Sie sicher, dass Sie fortfahren möchten?"
+      "desc": "Beim Löschen dieses verfolgten Objekts werden der Schnappschuss, alle gespeicherten Einbettungen und alle zugehörigen Verfolgungsdetails entfernt. Aufgezeichnetes Filmmaterial dieses verfolgten Objekts in der Verlaufsansicht wird <em>NICHT</em> gelöscht. <br /><br />Sind Sie sicher, dass Sie fortfahren möchten?"
     }
   },
   "searchResult": {
@@ -210,7 +221,9 @@
         "error": "Das verfolgte Objekt konnte nicht gelöscht werden: {{errorMessage}}"
       }
     },
-    "tooltip": "Entspricht {{type}} bei {{confidence}}%"
+    "tooltip": "Entspricht {{type}} bei {{confidence}}%",
+    "previousTrackedObject": "Vorheriges verfolgtes Objekt",
+    "nextTrackedObject": "Nächstes verfolgtes Objekt"
   },
   "noTrackedObjects": "Keine verfolgten Objekte gefunden",
   "fetchingTrackedObjectsFailed": "Fehler beim Abrufen von verfolgten Objekten: {{errorMessage}}",
@@ -222,5 +235,49 @@
   },
   "concerns": {
     "label": "Bedenken"
+  },
+  "trackingDetails": {
+    "noImageFound": "Kein Bild mit diesem Zeitstempel gefunden.",
+    "createObjectMask": "Objekt-Maske erstellen",
+    "scrollViewTips": "Klicke, um die relevanten Momente aus dem Lebenszyklus dieses Objektes zu sehen.",
+    "lifecycleItemDesc": {
+      "visible": "{{label}} erkannt",
+      "entered_zone": "{{label}} betrat {{zones}}",
+      "active": "{{label}} wurde aktiv",
+      "stationary": "{{label}} wurde stationär",
+      "attribute": {
+        "faceOrLicense_plate": "{{attribute}} erkannt für {{label}}",
+        "other": "{{label}} erkannt als {{attribute}}"
+      },
+      "gone": "{{label}} verließ",
+      "heard": "{{label}} wurde gehört",
+      "external": "{{label}} erkannt",
+      "header": {
+        "zones": "Zonen",
+        "ratio": "Verhältnis",
+        "area": "Bereich"
+      }
+    },
+    "annotationSettings": {
+      "title": "Anmerkungseinstellungen",
+      "showAllZones": {
+        "title": "Zeige alle Zonen",
+        "desc": "Immer Zonen auf Rahmen anzeigen, in die Objekte eingetreten sind."
+      },
+      "offset": {
+        "label": "Anmerkungen Versatz",
+        "desc": "Diese Daten stammen aus dem Erkennungsfeed der Kamera, werden jedoch über Bilder aus dem Aufzeichnungsfeed gelegt. Es ist unwahrscheinlich, dass beide Streams perfekt synchron sind. Daher stimmen der Begrenzungsrahmen und das Filmmaterial nicht vollständig überein. Mit dieser Einstellung lassen sich die Anmerkungen zeitlich nach vorne oder hinten verschieben, um sie besser an das aufgezeichnete Filmmaterial anzupassen.",
+        "millisecondsToOffset": "Millisekunden, um Erkennungs-Anmerkungen zu verschieben. <em>Standard: 0</em>",
+        "tips": "Verringere den Wert, wenn die Videowiedergabe den Boxen und Wegpunkten voraus ist, und erhöhe den Wert, wenn die Videowiedergabe hinter ihnen zurückbleibt. Dieser Wert kann negativ sein.",
+        "toast": {
+          "success": "Der Anmerkungs-Offset für {{camera}} wurde in der Konfigurationsdatei gespeichert. Starte Frigate neu, um Ihre Änderungen zu übernehmen."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Vorherige Anzeige",
+      "next": "Nächste Anzeige"
+    },
+    "title": "Verfolgungsdetails"
   }
 }
