@@ -43,7 +43,7 @@ class MemryXDetector(DetectionApi):
         ModelTypeEnum.yolox,
     ]
 
-    def __init__(self, detector_config, stop_event=None):
+    def __init__(self, detector_config):
         """Initialize MemryX detector with the provided configuration."""
         try:
             # Import MemryX SDK
@@ -54,8 +54,8 @@ class MemryXDetector(DetectionApi):
             )
             return
 
-        # Get stop_event from detector_config
-        self.stop_event = getattr(detector_config, "_stop_event", stop_event)
+        # Initialize stop_event as None, will be set later by set_stop_event()
+        self.stop_event = None
 
         model_cfg = getattr(detector_config, "model", None)
 
@@ -366,7 +366,7 @@ class MemryXDetector(DetectionApi):
         """Input callback function: wait for frames in the input queue, preprocess, and send to MX3 (return)"""
         while True:
             # Check if shutdown is requested
-            if self.stop_event.is_set():
+            if self.stop_event and self.stop_event.is_set():
                 logger.debug("[process_input] Stop event detected, returning None")
                 return None
             try:
@@ -395,7 +395,7 @@ class MemryXDetector(DetectionApi):
 
         except Exception as e:
             # On timeout or stop event, return None
-            if self.stop_event.is_set():
+            if self.stop_event and self.stop_event.is_set():
                 logger.debug("[receive_output] Stop event detected, exiting")
             # Silently handle queue.Empty timeouts, they're expected during normal operation
             elif "Empty" not in str(type(e).__name__):
@@ -849,6 +849,10 @@ class MemryXDetector(DetectionApi):
             raise Exception(
                 f"{self.memx_model_type} is currently not supported for memryx. See the docs for more info on supported models."
             )
+
+    def set_stop_event(self, stop_event):
+        """Set the stop event for graceful shutdown."""
+        self.stop_event = stop_event
 
     def shutdown(self):
         """Gracefully shutdown the MemryX accelerator"""

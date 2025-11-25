@@ -59,11 +59,11 @@ class BaseLocalDetector(ObjectDetector):
             self.input_transform = None
             self.dtype = InputDTypeEnum.int
 
-        # Attach stop_event to detector_config so detectors can access it
-        if detector_config and stop_event:
-            detector_config._stop_event = stop_event
-
         self.detect_api = create_detector(detector_config)
+
+        # If the detector supports setting stop_event, provide it
+        if hasattr(self.detect_api, "set_stop_event") and stop_event:
+            self.detect_api.set_stop_event(stop_event)
 
     def _transform_input(self, tensor_input: np.ndarray) -> np.ndarray:
         if self.input_transform:
