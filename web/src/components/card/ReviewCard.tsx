@@ -87,7 +87,7 @@ export default function ReviewCard({
             position: "top-center",
             action: (
               <a href="/export" target="_blank" rel="noopener noreferrer">
-                <Button>View</Button>
+                <Button>{t("export.toast.view")}</Button>
               </a>
             ),
           });

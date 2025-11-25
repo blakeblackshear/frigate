@@ -232,7 +232,7 @@ When your browser runs into problems playing back your camera streams, it will l
 - **mse-decode**
 
   - What it means: The browser reported a decoding error while trying to play the stream, which usually is a result of a codec incompatibility or corrupted frames.
-  - What to try: Ensure your camera/restream is using H.264 video and AAC audio (these are the most compatible). If your camera uses a non-standard audio codec, configure `go2rtc` to transcode the stream to AAC. Try another browser (some browsers have stricter MSE/codec support) and, for iPhone, ensure you're on iOS 17.1 or newer.
+  - What to try: Check the browser console for the supported and negotiated codecs. Ensure your camera/restream is using H.264 video and AAC audio (these are the most compatible). If your camera uses a non-standard audio codec, configure `go2rtc` to transcode the stream to AAC. Try another browser (some browsers have stricter MSE/codec support) and, for iPhone, ensure you're on iOS 17.1 or newer.
 
   - Possible console messages from the player code:
 

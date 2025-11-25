@@ -314,11 +314,10 @@ function GeneralFilterButton({
     <PlatformAwareDialog
       trigger={trigger}
       content={content}
-      contentClassName={
-        isDesktop
-          ? "scrollbar-container h-auto max-h-[80dvh] overflow-y-auto"
-          : "max-h-[75dvh] overflow-hidden p-4"
-      }
+      contentClassName={cn(
+        "scrollbar-container h-auto overflow-y-auto",
+        isDesktop ? "max-h-[80dvh]" : "px-4",
+      )}
       open={open}
       onOpenChange={(open) => {
         if (!open) {
@@ -510,11 +509,10 @@ function SortTypeButton({
     <PlatformAwareDialog
       trigger={trigger}
       content={content}
-      contentClassName={
-        isDesktop
-          ? "scrollbar-container h-auto max-h-[80dvh] overflow-y-auto"
-          : "max-h-[75dvh] overflow-hidden p-4"
-      }
+      contentClassName={cn(
+        "scrollbar-container h-auto overflow-y-auto",
+        isDesktop ? "max-h-[80dvh]" : "px-4",
+      )}
       open={open}
       onOpenChange={(open) => {
         if (!open) {

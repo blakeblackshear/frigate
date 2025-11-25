@@ -808,6 +808,7 @@ function FaceAttemptGroup({
           if (resp.status == 200) {
             toast.success(t("toast.success.trainedFace"), {
               position: "top-center",
+              closeButton: true,
             });
             onRefresh();
           }

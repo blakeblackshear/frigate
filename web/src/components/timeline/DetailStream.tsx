@@ -681,22 +681,62 @@ function LifecycleItem({
       })
     : "";
 
-  const ratio =
-    Array.isArray(item?.data.box) && item?.data.box.length >= 4
-      ? (aspectRatio * (item?.data.box[2] / item?.data.box[3])).toFixed(2)
-      : "N/A";
-  const areaPx =
-    Array.isArray(item?.data.box) && item?.data.box.length >= 4
-      ? Math.round(
-          (config?.cameras[item?.camera]?.detect?.width ?? 0) *
-            (config?.cameras[item?.camera]?.detect?.height ?? 0) *
-            (item?.data.box[2] * item?.data.box[3]),
-        )
-      : undefined;
-  const areaPct =
-    Array.isArray(item?.data.box) && item?.data.box.length >= 4
-      ? (item?.data.box[2] * item?.data.box[3]).toFixed(4)
-      : undefined;
+  const ratio = useMemo(
+    () =>
+      Array.isArray(item?.data.box) && item?.data.box.length >= 4
+        ? (aspectRatio * (item?.data.box[2] / item?.data.box[3])).toFixed(2)
+        : "N/A",
+    [aspectRatio, item],
+  );
+
+  const areaPx = useMemo(
+    () =>
+      Array.isArray(item?.data.box) && item?.data.box.length >= 4
+        ? Math.round(
+            (config?.cameras[item?.camera]?.detect?.width ?? 0) *
+              (config?.cameras[item?.camera]?.detect?.height ?? 0) *
+              (item?.data.box[2] * item?.data.box[3]),
+          )
+        : undefined,
+    [config, item],
+  );
+
+  const areaPct = useMemo(
+    () =>
+      Array.isArray(item?.data.box) && item?.data.box.length >= 4
+        ? (item?.data.box[2] * item?.data.box[3]).toFixed(4)
+        : undefined,
+    [item],
+  );
+
+  const attributeAreaPx = useMemo(
+    () =>
+      Array.isArray(item?.data.attribute_box) &&
+      item?.data.attribute_box.length >= 4
+        ? Math.round(
+            (config?.cameras[item?.camera]?.detect?.width ?? 0) *
+              (config?.cameras[item?.camera]?.detect?.height ?? 0) *
+              (item?.data.attribute_box[2] * item?.data.attribute_box[3]),
+          )
+        : undefined,
+    [config, item],
+  );
+
+  const attributeAreaPct = useMemo(
+    () =>
+      Array.isArray(item?.data.attribute_box) &&
+      item?.data.attribute_box.length >= 4
+        ? (item?.data.attribute_box[2] * item?.data.attribute_box[3]).toFixed(4)
+        : undefined,
+    [item],
+  );
+
+  const score = useMemo(() => {
+    if (item?.data?.score !== undefined) {
+      return (item.data.score * 100).toFixed(0) + "%";
+    }
+    return "N/A";
+  }, [item?.data?.score]);
 
   return (
     <div
@@ -735,6 +775,13 @@ function LifecycleItem({
               <div className="flex flex-col gap-1">
                 <div className="flex items-start gap-1">
                   <span className="text-muted-foreground">
+                    {t("trackingDetails.lifecycleItemDesc.header.score")}
+                  </span>
+                  <span className="font-medium text-foreground">{score}</span>
+                </div>
+
+                <div className="flex items-start gap-1">
+                  <span className="text-muted-foreground">
                     {t("trackingDetails.lifecycleItemDesc.header.ratio")}
                   </span>
                   <span className="font-medium text-foreground">{ratio}</span>
@@ -742,7 +789,13 @@ function LifecycleItem({
 
                 <div className="flex items-start gap-1">
                   <span className="text-muted-foreground">
-                    {t("trackingDetails.lifecycleItemDesc.header.area")}
+                    {t("trackingDetails.lifecycleItemDesc.header.area")}{" "}
+                    {attributeAreaPx !== undefined &&
+                      attributeAreaPct !== undefined && (
+                        <span className="text-muted-foreground">
+                          ({getTranslatedLabel(item.data.label)})
+                        </span>
+                      )}
                   </span>
                   {areaPx !== undefined && areaPct !== undefined ? (
                     <span className="font-medium text-foreground">
@@ -754,6 +807,26 @@ function LifecycleItem({
                     <span>N/A</span>
                   )}
                 </div>
+
+                {attributeAreaPx !== undefined &&
+                  attributeAreaPct !== undefined && (
+                    <div className="flex items-start gap-1">
+                      <span className="text-muted-foreground">
+                        {t("trackingDetails.lifecycleItemDesc.header.area")}{" "}
+                        {attributeAreaPx !== undefined &&
+                          attributeAreaPct !== undefined && (
+                            <span className="text-muted-foreground">
+                              ({getTranslatedLabel(item.data.attribute)})
+                            </span>
+                          )}
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {attributeAreaPx} {t("pixels", { ns: "common" })}{" "}
+                        <span className="text-secondary-foreground">·</span>{" "}
+                        {attributeAreaPct}%
+                      </span>
+                    </div>
+                  )}
               </div>
             </div>
           </TooltipContent>
@@ -820,7 +893,7 @@ function ObjectTimeline({
   }, [config, fullTimeline, review]);
 
   if (isValidating && (!timeline || timeline.length === 0)) {
-    return <ActivityIndicator className="ml-2 size-3" />;
+    return <ActivityIndicator className="ml-2.5 size-3" />;
   }
 
   if (!timeline || timeline.length === 0) {

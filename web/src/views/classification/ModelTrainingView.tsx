@@ -104,12 +104,14 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
     if (modelState == "complete") {
       toast.success(t("toast.success.trainedModel"), {
         position: "top-center",
+        closeButton: true,
       });
       setWasTraining(false);
       refreshDataset();
     } else if (modelState == "failed") {
       toast.error(t("toast.error.trainingFailed"), {
         position: "top-center",
+        closeButton: true,
       });
       setWasTraining(false);
     }
@@ -182,6 +184,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
           setWasTraining(true);
           toast.success(t("toast.success.trainingModel"), {
             position: "top-center",
+            closeButton: true,
           });
         }
       })
@@ -193,6 +196,7 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
 
         toast.error(t("toast.error.trainingFailedToStart", { errorMessage }), {
           position: "top-center",
+          closeButton: true,
         });
       });
   }, [model, t]);
