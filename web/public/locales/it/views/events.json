@@ -41,8 +41,8 @@
   "detail": {
     "noDataFound": "Nessun dato dettagliato da rivedere",
     "aria": "Attiva/disattiva la visualizzazione dettagliata",
-    "trackedObject_one": "oggetto",
-    "trackedObject_other": "oggetti",
+    "trackedObject_one": "{{count}} oggetto",
+    "trackedObject_other": "{{count}} oggetti",
     "noObjectDetailData": "Non sono disponibili dati dettagliati sull'oggetto.",
     "label": "Dettaglio",
     "settings": "Impostazioni di visualizzazione dettagliata",

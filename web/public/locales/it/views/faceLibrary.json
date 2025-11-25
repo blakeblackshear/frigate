@@ -38,7 +38,7 @@
       "deletedFace_one": "Eliminato con successo {{count}} volto.",
       "deletedFace_many": "Eliminati con successo {{count}} volti.",
       "deletedFace_other": "Eliminati con successo {{count}} volti.",
-      "updatedFaceScore": "Punteggio del volto aggiornato con successo.",
+      "updatedFaceScore": "Punteggio del volto aggiornato con successo a {{name}} ({{score}}).",
       "uploadedImage": "Immagine caricata correttamente.",
       "addFaceLibrary": "{{name}} è stato aggiunto con successo alla Libreria dei Volti!",
       "renamedFace": "Rinominato correttamente il volto in {{name}}"

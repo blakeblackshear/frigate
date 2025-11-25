@@ -7,7 +7,7 @@
     "masksAndZones": "Editor di maschere e zone - Frigate",
     "motionTuner": "Regolatore di movimento - Frigate",
     "object": "Correzioni - Frigate",
-    "general": "Impostazioni generali - Frigate",
+    "general": "Impostazioni interfaccia - Frigate",
     "frigatePlus": "Impostazioni Frigate+ - Frigate",
     "notifications": "Impostazioni di notifiche - Frigate",
     "enrichments": "Impostazioni di miglioramento - Frigate",
@@ -498,9 +498,13 @@
       "displayCameraNames": {
         "label": "Mostra sempre i nomi delle telecamere",
         "desc": "Mostra sempre i nomi delle telecamere in una scheda nel cruscotto della visualizzazione dal vivo multi telecamera."
+      },
+      "liveFallbackTimeout": {
+        "label": "Scadenza attesa lettore dal vivo",
+        "desc": "Quando la trasmissione dal vivo ad alta qualità di una telecamera non è disponibile, dopo questo numero di secondi torna alla modalità a bassa larghezza di banda. Valore predefinito: 3."
       }
     },
-    "title": "Impostazioni generali",
+    "title": "Impostazioni interfaccia",
     "storedLayouts": {
       "title": "Formati memorizzati",
       "desc": "La disposizione delle telecamere in un gruppo può essere trascinata/ridimensionata. Le posizioni vengono salvate nella memoria locale del browser.",
@@ -892,9 +896,9 @@
         "createRole": "Ruolo {{role}} creato con successo",
         "updateCameras": "Telecamere aggiornate per il ruolo {{role}}",
         "deleteRole": "Ruolo {{role}} eliminato con successo",
-        "userRolesUpdated_one": "{{count}} utenti assegnati a questo ruolo sono stati aggiornati a \"spettatore\", che ha accesso a tutte le telecamere.",
-        "userRolesUpdated_many": "",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_one": "{{count}} utente assegnato a questo ruolo è stato aggiornato a \"spettatore\", che ha accesso a tutte le telecamere.",
+        "userRolesUpdated_many": "{{count}} utenti assegnati a questo ruolo sono stati aggiornati a \"spettatore\", che ha accesso a tutte le telecamere.",
+        "userRolesUpdated_other": "{{count}} utenti assegnati a questo ruolo sono stati aggiornati a \"spettatore\", che ha accesso a tutte le telecamere."
       },
       "error": {
         "createRoleFailed": "Impossibile creare il ruolo: {{errorMessage}}",
@@ -975,7 +979,7 @@
   "cameraWizard": {
     "step3": {
       "streamUnavailable": "Anteprima trasmissione non disponibile",
-      "description": "Convalida e analisi finale prima di salvare la nuova telecamera. Connetti ogni flusso prima di salvare.",
+      "description": "Configura i ruoli del flusso e aggiungi altri flussi alla tua telecamera.",
       "validationTitle": "Convalida del flusso",
       "connectAllStreams": "Connetti tutti i flussi",
       "reconnectionSuccess": "Riconnessione riuscita.",
@@ -1015,14 +1019,52 @@
         "resolutionLow": "Una risoluzione di {{resolution}} potrebbe essere troppo bassa per un rilevamento affidabile di oggetti di piccole dimensioni."
       },
       "ffmpegModule": "Utilizza la modalità di compatibilità della trasmissione",
-      "ffmpegModuleDescription": "Se il flusso non si carica dopo diversi tentativi, prova ad abilitare questa opzione. Se abilitata, Frigate utilizzerà il modulo ffmpeg con go2rtc. Questo potrebbe garantire una migliore compatibilità con alcuni flussi di telecamere."
+      "ffmpegModuleDescription": "Se il flusso non si carica dopo diversi tentativi, prova ad abilitare questa opzione. Se abilitata, Frigate utilizzerà il modulo ffmpeg con go2rtc. Questo potrebbe garantire una migliore compatibilità con alcuni flussi di telecamere.",
+      "streamsTitle": "Flussi della telecamera",
+      "addStream": "Aggiungi flusso",
+      "addAnotherStream": "Aggiungi un altro flusso",
+      "streamUrl": "URL del flusso",
+      "streamUrlPlaceholder": "rtsp://nomeutente:password@sistema:porta/percorso",
+      "selectStream": "Seleziona un flusso",
+      "searchCandidates": "Ricerca candidati in corso...",
+      "noStreamFound": "Nessun flusso trovato",
+      "url": "URL",
+      "resolution": "Risoluzione",
+      "selectResolution": "Seleziona la risoluzione",
+      "quality": "Qualità",
+      "selectQuality": "Seleziona la qualità",
+      "roleLabels": {
+        "detect": "Rilevamento di oggetti",
+        "record": "Registrazione",
+        "audio": "Audio"
+      },
+      "testStream": "Prova di connessione",
+      "testSuccess": "Prova del flusso riuscita!",
+      "testFailed": "Prova del flusso fallita",
+      "testFailedTitle": "Prova fallita",
+      "connected": "Connesso",
+      "notConnected": "Non connesso",
+      "featuresTitle": "Caratteristiche",
+      "go2rtc": "Riduci le connessioni alla telecamera",
+      "detectRoleWarning": "Per procedere, almeno un flusso deve avere il ruolo \"rilevamento\".",
+      "rolesPopover": {
+        "title": "Ruoli del flusso",
+        "detect": "Flusso principale per il rilevamento degli oggetti.",
+        "record": "Salva segmenti del flusso video in base alle impostazioni di configurazione.",
+        "audio": "Flusso per il rilevamento basato sull'audio."
+      },
+      "featuresPopover": {
+        "title": "Caratteristiche del flusso",
+        "description": "Utilizza la ritrasmissione go2rtc per ridurre le connessioni alla tua telecamera."
+      }
     },
     "title": "Aggiungi telecamera",
     "description": "Per aggiungere una nuova telecamera alla tua installazione Frigate, segui i passaggi indicati di seguito.",
     "steps": {
       "nameAndConnection": "Nome e connessione",
       "streamConfiguration": "Configurazione flusso",
-      "validationAndTesting": "Validazione e prova"
+      "validationAndTesting": "Validazione e prova",
+      "probeOrSnapshot": "Analisi o istantanea"
     },
     "save": {
       "success": "Nuova telecamera {{cameraName}} salvata correttamente.",
@@ -1035,11 +1077,11 @@
       "fps": "FPS"
     },
     "commonErrors": {
-      "noUrl": "Si prega di fornire un URL di flusso valido",
+      "noUrl": "Fornisci un URL di flusso valido",
       "testFailed": "Prova del flusso fallita: {{error}}"
     },
     "step1": {
-      "description": "Inserisci i dettagli della tua telecamera e verifica la connessione.",
+      "description": "Inserisci i dettagli della tua telecamera e scegli se analizzarla o selezionarne manualmente la marca.",
       "cameraName": "Nome telecamera",
       "cameraNamePlaceholder": "ad esempio, porta_anteriore o Panoramica cortile",
       "host": "Indirizzo sistema/IP",
@@ -1079,10 +1121,19 @@
       "testing": {
         "probingMetadata": "Analisi dei metadati della telecamera in corso...",
         "fetchingSnapshot": "Recupero istantanea della telecamera in corso..."
-      }
+      },
+      "probeMode": "Analisi telecamera",
+      "detectionMethodDescription": "Analizza la telecamera con ONVIF (se supportato) per trovare gli URL dei flussi video della telecamera oppure seleziona manualmente la marca della telecamera per utilizzare URL predefiniti. Per inserire un URL RTSP personalizzato, scegli il metodo manuale e seleziona \"Altro\".",
+      "connectionSettings": "Impostazioni di connessione",
+      "detectionMethod": "Metodo di rilevamento del flusso",
+      "onvifPort": "Porta ONVIF",
+      "manualMode": "Selezione manuale",
+      "onvifPortDescription": "Per le telecamere che supportano ONVIF, in genere è 80 o 8080.",
+      "useDigestAuth": "Utilizza l'autenticazione digest",
+      "useDigestAuthDescription": "Utilizza l'autenticazione HTTP digest per ONVIF. Alcune telecamere potrebbero richiedere un nome utente e una password ONVIF dedicati, anziché l'utente amministratore classico."
     },
     "step2": {
-      "description": "Configura i ruoli del flusso e aggiungi altri flussi per la tua telecamera.",
+      "description": "Analizza la telecamera per individuare i flussi disponibili oppure configura le impostazioni manuali in base al metodo di rilevamento selezionato.",
       "streamsTitle": "Flussi della telecamera",
       "addStream": "Aggiungi flusso",
       "addAnotherStream": "Aggiungi un altro flusso",
@@ -1101,8 +1152,8 @@
         "audio": "Audio"
       },
       "testStream": "Prova connessione",
-      "testSuccess": "Prova del flusso riuscita!",
-      "testFailed": "Prova del flusso fallita",
+      "testSuccess": "Prova di connessione riuscita!",
+      "testFailed": "Prova di connessione fallita. Controlla i dati inseriti e riprova.",
       "testFailedTitle": "Prova fallita",
       "connected": "Connessa",
       "notConnected": "Non connessa",
@@ -1118,6 +1169,85 @@
       "featuresPopover": {
         "title": "Caratteristiche del flusso",
         "description": "Utilizza la ritrasmissione go2rtc per ridurre le connessioni alla tua telecamera."
+      },
+      "probeFailed": "Impossibile analizzare la telecamera: {{error}}",
+      "probeSuccessful": "Analisi riuscita",
+      "probeError": "Errore analisi",
+      "probeNoSuccess": "Analisi non riuscita",
+      "rtspCandidatesDescription": "I seguenti URL RTSP sono stati trovati dall'analisi della telecamera. Prova la connessione per visualizzare i metadati della trasmissione.",
+      "streamDetails": "Dettagli del flusso",
+      "probing": "Analisi telecamera in corso...",
+      "retry": "Riprova",
+      "testing": {
+        "probingMetadata": "Analisi dei metadati della telecamera in corso...",
+        "fetchingSnapshot": "Recupero dell'istantanea della telecamera in corso..."
+      },
+      "probingDevice": "Analisi del dispositivo in corso...",
+      "deviceInfo": "Informazioni sul dispositivo",
+      "manufacturer": "Produttore",
+      "model": "Modello",
+      "firmware": "Firmware",
+      "profiles": "Profili",
+      "ptzSupport": "Supporto PTZ",
+      "autotrackingSupport": "Supporto per il tracciamento automatico",
+      "presets": "Preimpostazioni",
+      "rtspCandidates": "Candidati RTSP",
+      "noRtspCandidates": "Nessun URL RTSP trovato dalla telecamera. Le credenziali potrebbero essere errate oppure la telecamera potrebbe non supportare ONVIF o il metodo utilizzato per recuperare gli URL RTSP. Torna indietro e inserisci manualmente l'URL RTSP.",
+      "candidateStreamTitle": "Candidato {{number}}}}",
+      "useCandidate": "Utilizza",
+      "uriCopy": "Copia",
+      "uriCopied": "URI copiato negli appunti",
+      "testConnection": "Prova di connessione",
+      "toggleUriView": "Fai clic per attivare/disattivare la visualizzazione completa dell'URI",
+      "errors": {
+        "hostRequired": "È richiesto il nome sistema/indirizzo IP"
+      }
+    },
+    "step4": {
+      "description": "Convalida e analisi finale prima di salvare la nuova telecamera. Collega ogni flusso prima di salvare.",
+      "validationTitle": "Validazione del flusso",
+      "connectAllStreams": "Connetti tutti i flussi",
+      "reconnectionSuccess": "Riconnessione riuscita.",
+      "reconnectionPartial": "Alcuni flussi non sono riusciti a riconnettersi.",
+      "streamUnavailable": "Anteprima del flusso non disponibile",
+      "reload": "Ricarica",
+      "connecting": "Connessione in corso...",
+      "streamTitle": "Flusso {{number}}",
+      "valid": "Valida",
+      "failed": "Fallito",
+      "notTested": "Non verificato",
+      "connectStream": "Connetti",
+      "connectingStream": "Connessione in corso",
+      "disconnectStream": "Disconnetti",
+      "estimatedBandwidth": "Larghezza di banda stimata",
+      "roles": "Ruoli",
+      "ffmpegModule": "Utilizza la modalità di compatibilità del flusso",
+      "ffmpegModuleDescription": "Se il flusso non si carica dopo diversi tentativi, prova ad abilitare questa opzione. Se abilitata, Frigate utilizzerà il modulo ffmpeg con go2rtc. Questo potrebbe garantire una migliore compatibilità con alcuni flussi di telecamere.",
+      "none": "Nessuno",
+      "error": "Errore",
+      "streamValidated": "Flusso {{number}} convalidato con successo",
+      "streamValidationFailed": "Convalida del flusso {{number}} non riuscita",
+      "saveAndApply": "Salva nuova telecamera",
+      "saveError": "Configurazione non valida. Controlla le impostazioni.",
+      "issues": {
+        "title": "Validazione del flusso",
+        "videoCodecGood": "Il codec video è {{codec}}.",
+        "audioCodecGood": "Il codec audio è {{codec}}.",
+        "resolutionHigh": "Una risoluzione di {{resolution}} potrebbe causare un aumento dell'utilizzo delle risorse.",
+        "resolutionLow": "Una risoluzione di {{resolution}} potrebbe essere troppo bassa per un rilevamento affidabile di oggetti di piccole dimensioni.",
+        "noAudioWarning": "Nessun audio rilevato per questo flusso, le registrazioni non avranno audio.",
+        "audioCodecRecordError": "Per supportare l'audio nelle registrazioni è necessario il codec audio AAC.",
+        "audioCodecRequired": "Per supportare il rilevamento audio è necessario un flusso audio.",
+        "restreamingWarning": "Riducendo le connessioni alla telecamera per il flusso di registrazione l'utilizzo della CPU potrebbe aumentare leggermente.",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP non è consigliato. Abilita HTTP nelle impostazioni del firmware della telecamera e riavvia la procedura guidata."
+        },
+        "dahua": {
+          "substreamWarning": "Il sottoflusso 1 è bloccato a bassa risoluzione. Molte telecamere Dahua/Amcrest/EmpireTech supportano sottoflussi aggiuntivi che devono essere abilitati nelle impostazioni della telecamera. Si consiglia di controllare e utilizzare tali flussi, se disponibili."
+        },
+        "hikvision": {
+          "substreamWarning": "Il sottoflusso 1 è bloccato a bassa risoluzione. Molte telecamere Hikvision supportano sottoflussi aggiuntivi che devono essere abilitati nelle impostazioni della telecamera. Si consiglia di controllare e utilizzare tali flussi, se disponibili."
+        }
       }
     }
   },

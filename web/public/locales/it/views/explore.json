@@ -53,7 +53,7 @@
           "regenerate": "È stata richiesta una nuova descrizione a {{provider}}. A seconda della velocità del tuo provider, la rigenerazione della nuova descrizione potrebbe richiedere del tempo.",
           "updatedSublabel": "Sottoetichetta aggiornata correttamente.",
           "updatedLPR": "Targa aggiornata con successo.",
-          "audioTranscription": "Trascrizione audio richiesta con successo."
+          "audioTranscription": "Trascrizione audio richiesta con successo. A seconda della velocità del server Frigate, la trascrizione potrebbe richiedere del tempo."
         },
         "error": {
           "regenerate": "Impossibile chiamare {{provider}} per una nuova descrizione: {{errorMessage}}",
@@ -159,7 +159,8 @@
     "object_lifecycle": "ciclo di vita dell'oggetto",
     "details": "dettagli",
     "video": "video",
-    "thumbnail": "miniatura"
+    "thumbnail": "miniatura",
+    "tracking_details": "dettagli di tracciamento"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -222,7 +223,9 @@
         "success": "Oggetto tracciato eliminato correttamente."
       }
     },
-    "tooltip": "Corrispondenza {{type}} al {{confidence}}%"
+    "tooltip": "Corrispondenza {{type}} al {{confidence}}%",
+    "previousTrackedObject": "Oggetto tracciato in precedenza",
+    "nextTrackedObject": "Prossimo oggetto tracciato"
   },
   "trackedObjectsCount_one": "{{count}} oggetto tracciato ",
   "trackedObjectsCount_many": "{{count}} oggetti tracciati ",
@@ -273,7 +276,7 @@
         "label": "Differenza annotazione",
         "desc": "Questi dati provengono dal flusso di rilevamento della telecamera, ma vengono sovrapposti alle immagini del flusso di registrazione. È improbabile che i due flussi siano perfettamente sincronizzati. Di conseguenza, il riquadro di delimitazione e il filmato non saranno perfettamente allineati. È possibile utilizzare questa impostazione per spostare le annotazioni in avanti o indietro nel tempo per allinearle meglio al filmato registrato.",
         "millisecondsToOffset": "Millisecondi per compensare il rilevamento delle annotazioni. <em>Predefinito: 0</em>",
-        "tips": "SUGGERIMENTO: Immagina un video evento con una persona che cammina da sinistra a destra. Se il riquadro di delimitazione della cronologia dell'evento si trova costantemente a sinistra della persona, il valore dovrebbe essere diminuito. Allo stesso modo, se una persona cammina da sinistra a destra e il riquadro di delimitazione si trova costantemente davanti alla persona, il valore dovrebbe essere aumentato.",
+        "tips": "Ridurre il valore se la riproduzione video è in anticipo rispetto ai riquadri e ai punti del percorso, e aumentarlo se la riproduzione video è in ritardo rispetto ad essi. Questo valore può essere negativo.",
         "toast": {
           "success": "La differenza dell'annotazione per {{camera}} è stato salvato nel file di configurazione. Riavvia Frigate per applicare le modifiche."
         }
