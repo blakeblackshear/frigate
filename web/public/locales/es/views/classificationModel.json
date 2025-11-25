@@ -18,15 +18,19 @@
       "deletedModel_many": "Borrados con éxito {{count}} modelos",
       "deletedModel_other": "Borrados con éxito {{count}} modelos",
       "categorizedImage": "Imagen Clasificada Correctamente",
-      "trainedModel": "Modelo entrenado correctamente."
+      "trainedModel": "Modelo entrenado correctamente.",
+      "trainingModel": "Entrenamiento del modelo iniciado correctamente.",
+      "updatedModel": "Configuración del modelo actualizada correctamente",
+      "renamedCategory": "Clase renombrada correctamente a {{name}}"
     },
     "error": {
       "deleteImageFailed": "Fallo al borrar: {{errorMessage}}",
       "deleteCategoryFailed": "Fallo al borrar clase: {{errorMessage}}",
       "deleteModelFailed": "Fallo al borrar modelo: {{errorMessage}}",
       "categorizeFailed": "Fallo al categorizar imagen: {{errorMessage}}",
-      "trainingFailed": "Fallo al iniciar el entrenamiento del modelo: {{errorMessage}}",
-      "updateModelFailed": "Fallo al actualizar modelo: {{errorMessage}}"
+      "trainingFailed": "El entrenamiento del modelo ha fallado. Revisa los registros de Frigate para más detalles.",
+      "updateModelFailed": "Fallo al actualizar modelo: {{errorMessage}}",
+      "trainingFailedToStart": "No se pudo iniciar el entrenamiento del modelo: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -35,6 +39,21 @@
   },
   "deleteModel": {
     "title": "Borrar Modelo de Clasificación",
-    "single": "¿Está seguro de que quiere eliminar {{name}}? Esto borrar permanentemente todos los datos asociados incluidas las imágenes y los datos de entrenamiento. Esta acción no se puede deshacer."
+    "single": "¿Está seguro de que quiere eliminar {{name}}? Esto borrar permanentemente todos los datos asociados incluidas las imágenes y los datos de entrenamiento. Esta acción no se puede deshacer.",
+    "desc_one": "¿Estas seguro de que quiere borrar {{count}} modelo? Esto borrara permanentemente todos los datos asociados, incluyendo imágenes y datos de entrenamiento. Esta acción no puede ser desehecha.",
+    "desc_many": "¿Estas seguro de que quiere borrar {{count}} modelos? Esto borrara permanentemente todos los datos asociados, incluyendo imágenes y datos de entrenamiento. Esta acción no puede ser desehecha.",
+    "desc_other": "¿Estas seguro de que quiere borrar {{count}} modelos? Esto borrara permanentemente todos los datos asociados, incluyendo imágenes y datos de entrenamiento. Esta acción no puede ser desehecha."
+  },
+  "edit": {
+    "title": "Editar modelo de clasificación"
+  },
+  "tooltip": {
+    "noChanges": "No se han realizado cambios en el conjunto de datos desde el último entrenamiento.",
+    "modelNotReady": "El modelo no está listo para el entrenamiento",
+    "trainingInProgress": "El modelo está entrenándose actualmente.",
+    "noNewImages": "No hay imágenes nuevas para entrenar. Clasifica antes más imágenes del conjunto de datos."
+  },
+  "details": {
+    "scoreInfo": "La puntuación representa la confianza media de clasificación en todas las detecciones de este objeto."
   }
 }

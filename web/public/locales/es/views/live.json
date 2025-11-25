@@ -85,7 +85,7 @@
     "disable": "Ocultar estadísticas de transmisión"
   },
   "manualRecording": {
-    "title": "Grabación bajo demanda",
+    "title": "Bajo demanda",
     "tips": "Iniciar un evento manual basado en la configuración de retención de grabaciones de esta cámara.",
     "playInBackground": {
       "label": "Reproducir en segundo plano",
