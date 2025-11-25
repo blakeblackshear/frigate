@@ -6,7 +6,7 @@
     "masksAndZones": "Maske- og soneeditor - Frigate",
     "motionTuner": "Bevegelsesjustering - Frigate",
     "object": "Test og feilsøk - Frigate",
-    "general": "Generelle innstillinger - Frigate",
+    "general": "Brukergrensesnitt innstillinger - Frigate",
     "classification": "Klassifiseringsinnstillinger - Frigate",
     "frigatePlus": "Frigate+ innstillinger - Frigate",
     "notifications": "Meldingsvarsler Innstillinger - Frigate",
@@ -54,6 +54,10 @@
       "displayCameraNames": {
         "label": "Vis alltid kameranavn",
         "desc": "Vis alltid kameranavnene i en merkelapp i dashbordet for direktevisning med flere kameraer."
+      },
+      "liveFallbackTimeout": {
+        "label": "Tidsavbrudd for reserveløsning for direkteavspiller",
+        "desc": "Når et kameras direktestrøm med høy kvalitet er utilgjengelig, bytt til lav båndbreddemodus etter dette antallet sekunder. Standard: 3."
       }
     },
     "storedLayouts": {
@@ -87,7 +91,7 @@
         "clearStreamingSettingsFailed": "Kunne ikke fjerne strømmingsinnstillinger: {{errorMessage}}"
       }
     },
-    "title": "Generelle innstillinger",
+    "title": "Brukergrensesnitt innstillinger",
     "cameraGroupStreaming": {
       "title": "Strømmingsinnstillinger for kameragrupper",
       "desc": "Strømmingsinnstillingene lagres lokalt i nettleseren.",
@@ -890,8 +894,8 @@
         "createRole": "Rollen {{role}} ble opprettet",
         "updateCameras": "Kameraer oppdatert for rollen {{role}}",
         "deleteRole": "Rollen {{role}} ble slettet",
-        "userRolesUpdated_one": "{{count}} bruker(e) som var tildelt denne rollen er oppdatert til \"visningsbruker\", som har tilgang til alle kameraer.",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_one": "{{count}} bruker tildelt denne rollen er oppdatert til \"visningsbruker\", som har tilgang til alle kameraer.",
+        "userRolesUpdated_other": "{{count}} brukere tildelt denne rollen er oppdatert til \"visningsbruker\", som har tilgang til alle kameraer."
       },
       "error": {
         "createRoleFailed": "Kunne ikke opprette rolle: {{errorMessage}}",
@@ -938,7 +942,8 @@
     "steps": {
       "nameAndConnection": "Navn og tilkobling",
       "streamConfiguration": "Strømkonfigurasjon",
-      "validationAndTesting": "Validering og testing"
+      "validationAndTesting": "Validering og testing",
+      "probeOrSnapshot": "Sjekk eller øyeblikksbilde"
     },
     "save": {
       "success": "Lagret nytt kamera {{cameraName}}.",
@@ -955,7 +960,7 @@
       "testFailed": "Strømmetest feilet: {{error}}"
     },
     "step1": {
-      "description": "Skriv inn kameradetaljene dine og test tilkoblingen.",
+      "description": "Skriv inn kameradetaljene dine og velg å sjekke kameraet eller manuelt velg produsent.",
       "cameraName": "Kameranavn",
       "cameraNamePlaceholder": "f.eks. front_dor eller Hageoversikt",
       "host": "Vert/IP-adresse",
@@ -995,10 +1000,19 @@
       "testing": {
         "probingMetadata": "Henter kamerametadata…",
         "fetchingSnapshot": "Henter øyeblikksbilde for kamera..."
-      }
+      },
+      "connectionSettings": "Tilkoblingsinnstillinger",
+      "detectionMethod": "Metode for strømdeteksjon",
+      "onvifPort": "ONVIF-port",
+      "probeMode": "Sjekk kamera",
+      "manualMode": "Manuelt valg",
+      "detectionMethodDescription": "Sjekk kameraet med ONVIF (hvis støttet) for å finne kameraets strømme-URL-er, eller velg kameramerke manuelt for å bruke forhåndsdefinerte URL-er. For å skrive inn en egendefinert RTSP URL, velg manuell metode og velg \"Annet\".",
+      "onvifPortDescription": "For kameraer som støtter ONVIF, er dette vanligvis 80 eller 8080.",
+      "useDigestAuth": "Bruk digest-autentisering",
+      "useDigestAuthDescription": "Bruk HTTP digest-autentisering for ONVIF. Noen kameraer kan kreve et dedikert ONVIF brukernavn/passord i stedet for standard administrator-bruker."
     },
     "step2": {
-      "description": "Konfigurer strømroller og legg til flere strømmer for kameraet ditt.",
+      "description": "Sjekk kameraet for tilgjengelige strømmer eller konfigurer manuelle innstillinger basert på valgt deteksjonsmetode.",
       "streamsTitle": "Kamerastrømmer",
       "addStream": "Legg til strøm",
       "addAnotherStream": "Legg til en annen strøm",
@@ -1017,8 +1031,8 @@
         "audio": "Lyd"
       },
       "testStream": "Test tilkobling",
-      "testSuccess": "Strømmetesten var vellykket!",
-      "testFailed": "Strømmetesten feilet",
+      "testSuccess": "Tilkoblingstest vellykket!",
+      "testFailed": "Tilkoblingstest feilet. Vennligst sjekk inndataene dine og prøv igjen.",
       "testFailedTitle": "Test feilet",
       "connected": "Tilkoblet",
       "notConnected": "Ikke tilkoblet",
@@ -1034,10 +1048,42 @@
       "featuresPopover": {
         "title": "Strømfunksjoner",
         "description": "Bruk go2rtc-restrømming for å redusere antall tilkoblinger til kameraet ditt."
+      },
+      "streamDetails": "Strømdetaljer",
+      "probing": "Test kamera...",
+      "retry": "Prøv på nytt",
+      "testing": {
+        "probingMetadata": "Sjekker metadata for kamera...",
+        "fetchingSnapshot": "Henter øyeblikksbilde fra kamera..."
+      },
+      "probeFailed": "Kunne ikke å sjekke kamera: {{error}}",
+      "probingDevice": "Tester enhet...",
+      "probeSuccessful": "Sjekk vellykket",
+      "probeError": "Sjekk feilet",
+      "probeNoSuccess": "Sjekk mislyktes",
+      "deviceInfo": "Enhetsinformasjon",
+      "manufacturer": "Produsent",
+      "model": "Modell",
+      "firmware": "Fastvare",
+      "profiles": "Profiler",
+      "ptzSupport": "PTZ-støtte",
+      "autotrackingSupport": "Autosporing-støtte",
+      "presets": "Forhåndsinnstillinger",
+      "rtspCandidates": "RTSP-kandidater",
+      "rtspCandidatesDescription": "Følgende RTSP URL-er ble funnet ved sjekk av kameraet. Test tilkoblingen for å se strømmetadata.",
+      "noRtspCandidates": "Ingen RTSP URL-er ble funnet fra kameraet. Det kan hende at påloggingsinformasjonen din er feil, eller at kameraet ikke støtter ONVIF eller metoden som brukes for å hente RTSP URL-er. Gå tilbake og skriv inn RTSP URL-en manuelt.",
+      "candidateStreamTitle": "Kandidat {{number}}",
+      "useCandidate": "Bruk",
+      "uriCopy": "Kopier",
+      "uriCopied": "URI kopiert til utklippstavlen",
+      "testConnection": "Test tilkobling",
+      "toggleUriView": "Klikk for å vise/skjule full URI",
+      "errors": {
+        "hostRequired": "Vert/IP-adresse er påkrevd"
       }
     },
     "step3": {
-      "description": "Endelig validering og analyse før du lagrer det nye kameraet. Koble til hver strøm før du lagrer.",
+      "description": "Konfigurer strømroller og legg til flere strømmer for kameraet ditt.",
       "validationTitle": "Strømvalidering",
       "connectAllStreams": "Koble til alle strømmer",
       "reconnectionSuccess": "Gjenoppkobling vellykket.",
@@ -1078,7 +1124,91 @@
         "resolutionLow": "En oppløsning på {{resolution}} kan være for lav for pålitelig deteksjon av små objekter."
       },
       "ffmpegModuleDescription": "Hvis strømmen ikke lastes inn etter flere forsøk, kan du prøve å aktivere dette. Når det er aktivert, vil Frigate bruke ffmpeg-modulen sammen med go2rtc. Dette kan gi bedre kompatibilitet med enkelte kamerastrømmer.",
-      "ffmpegModule": "Bruk kompatibilitetsmodus for strøm"
+      "ffmpegModule": "Bruk kompatibilitetsmodus for strøm",
+      "streamsTitle": "Kamerastrømmer",
+      "addStream": "Legg til strøm",
+      "addAnotherStream": "Legg til en annen strøm",
+      "streamUrl": "Strøm-URL",
+      "streamUrlPlaceholder": "rtsp://brukernavn:passord@vert:port/sti",
+      "selectStream": "Velg en strøm",
+      "searchCandidates": "Søk blant kandidater...",
+      "noStreamFound": "Ingen strøm funnet",
+      "url": "URL",
+      "resolution": "Oppløsning",
+      "selectResolution": "Velg oppløsning",
+      "quality": "Kvalitet",
+      "selectQuality": "Velg kvalitet",
+      "roleLabels": {
+        "detect": "Objektdeteksjon",
+        "record": "Opptak",
+        "audio": "Lyd"
+      },
+      "testStream": "Test tilkobling",
+      "testSuccess": "Strømmetest vellykket!",
+      "testFailed": "Strømmetest feilet",
+      "testFailedTitle": "Test feilet",
+      "connected": "Tilkoblet",
+      "notConnected": "Ikke tilkoblet",
+      "featuresTitle": "Funksjoner",
+      "go2rtc": "Reduser antall tilkoblinger til kamera",
+      "detectRoleWarning": "Minst én strøm må ha \"deteksjon\"-rollen for å fortsette.",
+      "rolesPopover": {
+        "title": "Strømroller",
+        "detect": "Hovedstrøm for objektdeteksjon.",
+        "record": "Lagrer segmenter av videostrømmen basert på konfigurasjonsinnstillinger.",
+        "audio": "Strøm for lydbasert deteksjon."
+      },
+      "featuresPopover": {
+        "title": "Strømfunksjoner",
+        "description": "Bruk go2rtc-restrømming for å redusere antall tilkoblinger til kameraet."
+      }
+    },
+    "step4": {
+      "description": "Endelig validering og analyse før du lagrer det nye kameraet. Koble til hver strøm før du lagrer.",
+      "validationTitle": "Strømvalidering",
+      "connectAllStreams": "Koble til alle strømmer",
+      "reconnectionSuccess": "Tilkobling vellykket.",
+      "reconnectionPartial": "Noen strømmer kunne ikke koble til på nytt.",
+      "streamUnavailable": "Forhåndsvisning av strøm utilgjengelig",
+      "reload": "Last på nytt",
+      "connecting": "Kobler til...",
+      "streamTitle": "Strøm {{number}}",
+      "valid": "Gyldig",
+      "failed": "Feilet",
+      "notTested": "Ikke testet",
+      "connectStream": "Koble til",
+      "connectingStream": "Kobler til",
+      "disconnectStream": "Koble fra",
+      "estimatedBandwidth": "Estimert båndbredde",
+      "roles": "Roller",
+      "ffmpegModule": "Bruk kompatibilitetsmodus for strøm",
+      "ffmpegModuleDescription": "Hvis strømmen ikke lastes etter flere forsøk, prøv å aktivere dette. Når aktivert, vil Frigate bruke ffmpeg-modulen med go2rtc. Dette kan gi bedre kompatibilitet med noen kamerastrømmer.",
+      "none": "Ingen",
+      "error": "Feil",
+      "streamValidated": "Strøm {{number}} validert",
+      "streamValidationFailed": "Validering av strøm {{number}} feilet",
+      "saveAndApply": "Lagre nytt kamera",
+      "saveError": "Ugyldig konfigurasjon. Vennligst sjekk innstillingene dine.",
+      "issues": {
+        "title": "Strømvalidering",
+        "videoCodecGood": "Videokodek er {{codec}}.",
+        "audioCodecGood": "Lydkodek er {{codec}}.",
+        "resolutionHigh": "En oppløsning på {{resolution}} kan føre til økt ressursbruk.",
+        "resolutionLow": "En oppløsning på {{resolution}} kan være for lav for pålitelig deteksjon av små objekter.",
+        "noAudioWarning": "Ingen lyd oppdaget for denne strømmen, opptak vil ikke ha lyd.",
+        "audioCodecRecordError": "AAC-lydkodeken kreves for å støtte lyd i opptak.",
+        "audioCodecRequired": "En lydstrøm kreves for å støtte lyddeteksjon.",
+        "restreamingWarning": "Å redusere tilkoblinger til kameraet for opptaksstrømmen kan øke CPU-bruken noe.",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP anbefales ikke. Aktiver HTTP i kameraets fastvareinnstillinger og start veiviseren på nytt."
+        },
+        "dahua": {
+          "substreamWarning": "Substrøm 1 er låst til lav oppløsning. Mange Dahua / Amcrest / EmpireTech-kameraer støtter flere substrømmer som må aktiveres i kameraets innstillinger. Det anbefales å sjekke og benytte disse strømmene hvis de er tilgjengelige."
+        },
+        "hikvision": {
+          "substreamWarning": "Substrøm 1 er låst til lav oppløsning. Mange Hikvision-kameraer støtter flere substrømmer som må aktiveres i kameraets innstillinger. Det anbefales å sjekke og benytte disse strømmene hvis de er tilgjengelige."
+        }
+      }
     }
   },
   "cameraManagement": {
@@ -1132,7 +1262,7 @@
       "desc": "Midlertidig aktiver/deaktiver inspeksjonsbeskrivelser med generativ KI for dette kameraet. Når deaktivert, vil det ikke bli bedt om KI-genererte beskrivelser for inspeksjonselementer på dette kameraet."
     },
     "review": {
-      "title": "Inspeksjon",
+      "title": "Inspiser",
       "desc": "Aktiver/deaktiver varsler og deteksjoner midlertidig for dette kameraet til Frigate startes på nytt. Når deaktivert, vil det ikke genereres nye inspeksjonselementer. ",
       "alerts": "Varsler ",
       "detections": "Deteksjoner "

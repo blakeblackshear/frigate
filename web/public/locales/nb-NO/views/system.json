@@ -74,7 +74,12 @@
       "title": "Maskinvareinformasjon",
       "gpuUsage": "GPU-belastning",
       "npuMemory": "NPU minne",
-      "npuUsage": "NPU belastning"
+      "npuUsage": "NPU belastning",
+      "intelGpuWarning": {
+        "title": "Advarsel om Intel GPU-statistikk",
+        "message": "GPU statistikk ikke tilgjengelig",
+        "description": "Dette er en kjent feil i Intels verktøy for rapportering av GPU-statistikk (intel_gpu_top), der verktøyet slutter å fungere og gjentatte ganger viser 0 % GPU-bruk, selv om maskinvareakselerasjon og objektdeteksjon kjører korrekt på (i)GPU-en. Dette er ikke en feil i Frigate. Du kan starte verten på nytt for å løse problemet midlertidig, og for å bekrefte at GPU-en fungerer som den skal. Dette påvirker ikke ytelsen."
+      }
     },
     "otherProcesses": {
       "title": "Andre prosesser",
@@ -165,10 +170,17 @@
       "text_embedding": "Tekst-vektorrepresentasjoner",
       "plate_recognition": "Kjennemerke gjenkjenning",
       "yolov9_plate_detection_speed": "Hastighet for YOLOv9 kjennemerkedeteksjon",
-      "yolov9_plate_detection": "YOLOv9 kjennemerkedeteksjon"
+      "yolov9_plate_detection": "YOLOv9 kjennemerkedeteksjon",
+      "object_description": "Objektbeskrivelse",
+      "object_description_speed": "Objektbeskrivelse hastighet",
+      "object_description_events_per_second": "Objektbeskrivelse",
+      "review_description": "Inspeksjonsbeskrivelse",
+      "review_description_events_per_second": "Inspeksjonsbeskrivelse",
+      "review_description_speed": "Inspeksjonsbeskrivelse hastighet"
     },
     "title": "Utvidelser",
-    "infPerSecond": "Inferenser per sekund"
+    "infPerSecond": "Inferenser per sekund",
+    "averageInf": "Gjennomsnittlig inferenstid"
   },
   "title": "System",
   "metrics": "Systemmålinger",

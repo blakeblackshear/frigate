@@ -81,7 +81,10 @@
     "formattedTimestampMonthDayYear": {
       "24hour": "d. MMM, yyyy",
       "12hour": "d. MMM, yyyy"
-    }
+    },
+    "inProgress": "Pågår",
+    "invalidStartTime": "Ugyldig starttid",
+    "invalidEndTime": "Ugyldig sluttid"
   },
   "button": {
     "copy": "Kopier",
@@ -118,7 +121,8 @@
     "unselect": "Fjern valg",
     "export": "Eksporter",
     "deleteNow": "Slett nå",
-    "next": "Neste"
+    "next": "Neste",
+    "continue": "Fortsett"
   },
   "menu": {
     "help": "Hjelp",
@@ -219,7 +223,8 @@
       "contrast": "Høy kontrast",
       "default": "Standard",
       "highcontrast": "Høy kontrast"
-    }
+    },
+    "classification": "Klassifisering"
   },
   "pagination": {
     "next": {
@@ -255,7 +260,9 @@
     "back": "Gå tilbake",
     "hide": "Skjul {{item}}",
     "show": "Vis {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "Ingen",
+    "all": "Alle"
   },
   "toast": {
     "copyUrlToClipboard": "Nettadresse kopiert til utklippstavlen.",
