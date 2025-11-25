@@ -78,7 +78,10 @@
     "formattedTimestampFilename": {
       "12hour": "MM-dd-yy-h-mm-ss-a",
       "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+    },
+    "inProgress": "Spracováva sa",
+    "invalidStartTime": "Neplatný čas štartu",
+    "invalidEndTime": "Neplatný čas ukončenia"
   },
   "selectItem": "Vyberte {{item}}",
   "unit": {
@@ -104,7 +107,9 @@
     "back": "Choď späť",
     "hide": "Skryť {{item}}",
     "show": "Zobraziť {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "None",
+    "all": "Všetko"
   },
   "button": {
     "apply": "Použiť",
@@ -141,7 +146,8 @@
     "next": "Ďalej",
     "unsuspended": "Zrušte pozastavenie",
     "play": "Hrať",
-    "unselect": "Zrušte výber"
+    "unselect": "Zrušte výber",
+    "continue": "Pokračovať"
   },
   "menu": {
     "system": "Systém",

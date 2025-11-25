@@ -7,7 +7,7 @@
     "masksAndZones": "Editor masky a zón - Frigate",
     "motionTuner": "Ladič detekcie pohybu - Frigate",
     "object": "Ladenie - Frigate",
-    "general": "Všeobecné nastavenia – Frigate",
+    "general": "UI nastavenia – Frigate",
     "frigatePlus": "Nastavenia Frigate+ – Frigate",
     "notifications": "Nastavenia upozornení – Frigate",
     "cameraManagement": "Manažment kamier - Frigate",
@@ -39,7 +39,7 @@
     "noCamera": "Žiadna Kamera"
   },
   "general": {
-    "title": "Hlavné nastavenia",
+    "title": "UI nastavenia",
     "liveDashboard": {
       "title": "Živý Dashboard",
       "automaticLiveView": {
@@ -53,6 +53,10 @@
       "displayCameraNames": {
         "label": "Vždy Zobraziť názvy kamier",
         "desc": "Vždy zobrazujte názvy kamier v čipe na ovládacom paneli živého náhľadu z viacerých kamier."
+      },
+      "liveFallbackTimeout": {
+        "label": "Časový limit",
+        "desc": "Keď je kamerový vysoko kvalitný živý stream nedostupný, prejdite späť na režim nízkej kvality. Predvolené: 3."
       }
     },
     "storedLayouts": {
@@ -482,7 +486,8 @@
     "steps": {
       "nameAndConnection": "Meno a pripojenie",
       "streamConfiguration": "Konfigurácia prúdu",
-      "validationAndTesting": "Platnosť a testovanie"
+      "validationAndTesting": "Platnosť a testovanie",
+      "probeOrSnapshot": "Probe alebo Snapshot"
     },
     "save": {
       "success": "Úspešne zachránil novú kameru {{cameraName}}.",
@@ -539,7 +544,14 @@
       "testing": {
         "probingMetadata": "Skúmanie metadát kamery...",
         "fetchingSnapshot": "Načítava sa snímka z kamery..."
-      }
+      },
+      "connectionSettings": "Nastavenie pripojenia",
+      "detectionMethod": "Stream Detekcia Metóda",
+      "onvifPort": "ONVIF Port",
+      "probeMode": "Probe kamera",
+      "manualMode": "Ručný výber",
+      "detectionMethodDescription": "Vyskúša cez ONVIF (ak je podporovaný) nájsť kamery streamové adresy, alebo ručne vyberte značku kamery a jej preddefinované URL. Ak chcete zadať vlastnú URL RTSP, vyberte manuálne zadanie a označte \"Ostatné\".",
+      "onvifPortDescription": "Pre kamery, ktoré podporujú ONVIF, to je zvyčajne 80 alebo 8080."
     },
     "step2": {
       "description": "Konfigurovať prúdové role a pridať ďalšie prúdy pre vašu kameru.",
