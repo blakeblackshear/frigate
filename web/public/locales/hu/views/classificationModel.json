@@ -4,7 +4,8 @@
     "deleteClassificationAttempts": "Osztályozási képek törlése",
     "deleteImages": "Képek törlése",
     "trainModel": "Modell betanítása",
-    "deleteModels": "Modellek törlése"
+    "deleteModels": "Modellek törlése",
+    "editModel": "Modell szerkesztése"
   },
   "toast": {
     "success": {
