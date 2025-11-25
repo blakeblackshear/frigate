@@ -7,7 +7,8 @@
     "deleteImages": "Apagar Imagens",
     "trainModel": "Treinar Modelo",
     "addClassification": "Adicionar classificação",
-    "deleteModels": "Excluir modelos"
+    "deleteModels": "Excluir modelos",
+    "editModel": "Editar Modelo"
   },
   "toast": {
     "success": {
@@ -16,9 +17,9 @@
       "categorizedImage": "Imagem Classificada com Sucesso",
       "trainedModel": "Modelo treinado com sucesso.",
       "trainingModel": "Treinamento do modelo iniciado com sucesso.",
-      "deletedModel_one": "Modelo(s) {{count}} excluído(s) com sucesso",
-      "deletedModel_many": "",
-      "deletedModel_other": ""
+      "deletedModel_one": "{{count}} modelo excluído com sucesso",
+      "deletedModel_many": "{{count}} modelos excluídos com sucesso",
+      "deletedModel_other": "{{count}} modelos excluídos com sucesso"
     },
     "error": {
       "deleteImageFailed": "Falha ao deletar:{{errorMessage}}",
@@ -35,5 +36,14 @@
   "deleteModel": {
     "title": "Deletar modelo de classificação",
     "single": "Tem certeza de que deseja excluir {{name}}? Isso excluirá permanentemente todos os dados associados, incluindo imagens e dados de treinamento. Esta ação não pode ser desfeita."
+  },
+  "details": {
+    "scoreInfo": "A pontuação representa a média de confiança da classificação de todas as detecções deste objeto."
+  },
+  "tooltip": {
+    "trainingInProgress": "O modelo está sendo treinado",
+    "noNewImages": "Nenhuma nova imagem para treinar. Classifique mais imagens para treinar mais.",
+    "noChanges": "Nenhuma alteração ao conjunto de dados desde o último treinamento.",
+    "modelNotReady": "O modelo não está pronto para treinamento"
   }
 }
