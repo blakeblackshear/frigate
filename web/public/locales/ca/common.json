@@ -104,7 +104,8 @@
       "anonymous": "Anònim",
       "logout": "Tanca la sessió",
       "current": "Usuari actual: {{user}}"
-    }
+    },
+    "classification": "Classificació"
   },
   "pagination": {
     "previous": {
@@ -197,7 +198,10 @@
     "formattedTimestampMonthDayYearHourMinute": {
       "12hour": "MMM d yyyy, h:mm aaa",
       "24hour": "MMM d yyyy, HH:mm"
-    }
+    },
+    "inProgress": "En curs",
+    "invalidStartTime": "Hora d'inici no vàlida",
+    "invalidEndTime": "Hora de finalització no vàlida"
   },
   "unit": {
     "speed": {
@@ -221,7 +225,9 @@
     "back": "Torna enrere",
     "hide": "Oculta {{item}}",
     "show": "Mostra {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "Cap",
+    "all": "Tots"
   },
   "button": {
     "apply": "Aplicar",
@@ -258,7 +264,8 @@
     "off": "APAGAT",
     "unselect": "Desseleccionar",
     "enable": "Habilitar",
-    "enabled": "Habilitat"
+    "enabled": "Habilitat",
+    "continue": "Continua"
   },
   "toast": {
     "copyUrlToClipboard": "URL copiada al porta-retalls.",

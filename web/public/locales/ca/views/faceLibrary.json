@@ -67,7 +67,7 @@
   "toast": {
     "success": {
       "trainedFace": "Rostre entrenat amb èxit.",
-      "updatedFaceScore": "Puntació de rostre actualitzada amb èxit.",
+      "updatedFaceScore": "S'ha actualitzat correctament la puntuació de la cara a {{name}} ({{score}}).",
       "uploadedImage": "Imatge pujada amb èxit.",
       "addFaceLibrary": "{{name}} s'ha afegit amb èxit a la biblioteca de rostres!",
       "deletedName_one": "{{count}} rostre s'ha suprimit amb èxit.",

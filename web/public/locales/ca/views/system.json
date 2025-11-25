@@ -76,7 +76,12 @@
         }
       },
       "npuUsage": "Ús de NPU",
-      "npuMemory": "Memòria de NPU"
+      "npuMemory": "Memòria de NPU",
+      "intelGpuWarning": {
+        "title": "Avís d'estadístiques de la GPU d'Intel",
+        "message": "Estadístiques de GPU no disponibles",
+        "description": "Aquest és un error conegut en les eines d'informació de les estadístiques de GPU d'Intel (intel.gpu.top) on es trencarà i retornarà repetidament un ús de GPU del 0% fins i tot en els casos en què l'acceleració del maquinari i la detecció d'objectes s'executen correctament a la (i)GPU. Això no és un error de fragata. Podeu reiniciar l'amfitrió per a corregir temporalment el problema i confirmar que la GPU funciona correctament. Això no afecta el rendiment."
+      }
     },
     "otherProcesses": {
       "title": "Altres processos",
@@ -179,8 +184,15 @@
       "plate_recognition_speed": "Velocitat de reconeixement de matrícules",
       "text_embedding_speed": "Velocitat d'incrustació de text",
       "yolov9_plate_detection": "Detecció de matrícules YOLOv9",
-      "yolov9_plate_detection_speed": "Velocitat de detecció de matrícules YOLOv9"
+      "yolov9_plate_detection_speed": "Velocitat de detecció de matrícules YOLOv9",
+      "review_description": "Descripció de la revisió",
+      "review_description_speed": "Velocitat de la descripció de la revisió",
+      "review_description_events_per_second": "Descripció de la revisió",
+      "object_description": "Descripció de l'objecte",
+      "object_description_speed": "Velocitat de la descripció de l'objecte",
+      "object_description_events_per_second": "Descripció de l'objecte"
     },
-    "infPerSecond": "Inferències per segon"
+    "infPerSecond": "Inferències per segon",
+    "averageInf": "Temps mitjà d'inferència"
   }
 }

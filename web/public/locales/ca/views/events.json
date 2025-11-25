@@ -39,9 +39,9 @@
   "threateningActivity": "Activitat amenaçadora",
   "detail": {
     "noDataFound": "No hi ha dades detallades a revisar",
-    "trackedObject_one": "objecte",
+    "trackedObject_one": "{{count}} objecte",
     "aria": "Canvia la vista de detall",
-    "trackedObject_other": "objectes",
+    "trackedObject_other": "{{count}} objectes",
     "noObjectDetailData": "No hi ha dades de detall d'objecte disponibles.",
     "label": "Detall",
     "settings": "Configuració de la vista detallada",

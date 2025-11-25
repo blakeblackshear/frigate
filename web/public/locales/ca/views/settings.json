@@ -7,7 +7,7 @@
     "authentication": "Configuració d'autenticació - Frigate",
     "camera": "Paràmetres de càmera - Frigate",
     "masksAndZones": "Editor de màscares i zones - Frigate",
-    "general": "Paràmetres Generals - Frigate",
+    "general": "Configuració de la interfície d'usuari - Fragata",
     "frigatePlus": "Paràmetres de Frigate+ - Frigate",
     "notifications": "Paràmetres de notificació - Frigate",
     "cameraManagement": "Gestionar càmeres - Frigate",
@@ -39,7 +39,7 @@
     "noCamera": "Cap càmera"
   },
   "general": {
-    "title": "Paràmetres generals",
+    "title": "Paràmetres de la interfície d'usuari",
     "liveDashboard": {
       "title": "Panell en directe",
       "automaticLiveView": {
@@ -53,6 +53,10 @@
       "displayCameraNames": {
         "label": "Mostra sempre els noms de la càmera",
         "desc": "Mostra sempre els noms de les càmeres en un xip al tauler de visualització en directe multicàmera."
+      },
+      "liveFallbackTimeout": {
+        "label": "Temps d'espera per a la reserva del jugador en directe",
+        "desc": "Quan el flux en viu d'alta qualitat d'una càmera no està disponible, torneu al mode d'amplada de banda baixa després d'aquests molts segons. Per defecte: 3."
       }
     },
     "storedLayouts": {
@@ -858,9 +862,9 @@
         "createRole": "Rol {{role}} creat exitosament",
         "updateCameras": "Càmeres actualitzades per al rol {{role}}",
         "deleteRole": "Rol {{role}} eliminat exitosament",
-        "userRolesUpdated_one": "{{count}} usuari(s) asignats a aquest rol s'han actualitzat a 'visor', i tenen accés a totes les càmeres.",
-        "userRolesUpdated_many": "",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_one": "{{count}} l'usuari assignat a aquest rol s'ha actualitzat a 'visor', que té accés a totes les càmeres.",
+        "userRolesUpdated_many": "{{count}} usuaris assignats a aquest rol s'han actualitzat a 'visor', que té accés a totes les càmeres.",
+        "userRolesUpdated_other": "{{count}} usuaris assignats a aquest rol s'han actualitzat a 'visor', que té accés a totes les càmeres."
       },
       "error": {
         "createRoleFailed": "Error al crear el rol: {{errorMessage}}",
@@ -871,16 +875,17 @@
     }
   },
   "cameraWizard": {
-    "title": "Afegir C àmera",
+    "title": "Afegir Càmera",
     "description": "Seguiu els passos de sota per afegir una nova càmera a la instal·lació.",
     "steps": {
       "nameAndConnection": "Nom i connexió",
       "streamConfiguration": "Configuració de stream",
-      "validationAndTesting": "Validació i proves"
+      "validationAndTesting": "Validació i proves",
+      "probeOrSnapshot": "Prova o instantània"
     },
     "step1": {
       "cameraBrand": "Marca de la càmera",
-      "description": "Introduïu els detalls de la càmera i proveu la connexió.",
+      "description": "Introduïu els detalls de la càmera i trieu provar la càmera o seleccionar manualment la marca.",
       "cameraName": "Nom de la càmera",
       "cameraNamePlaceholder": "p. ex., vista general de la porta davantera o de la barra posterior",
       "host": "Adreça de l'amfitrió/IP",
@@ -919,7 +924,16 @@
       "testing": {
         "probingMetadata": "S'estan provant les metadades de la càmera...",
         "fetchingSnapshot": "S'està recuperant la instantània de la càmera..."
-      }
+      },
+      "connectionSettings": "Configuració de la connexió",
+      "detectionMethod": "Mètode de detecció de flux",
+      "onvifPort": "ONVIF Port",
+      "probeMode": "Càmera de prova",
+      "manualMode": "Selecció manual",
+      "detectionMethodDescription": "Proveu la càmera amb ONVIF (si és compatible) per trobar URL de flux de càmera, o seleccioneu manualment la marca de càmera per utilitzar URL predefinits. Per a introduir un URL RTSP personalitzat, trieu el mètode manual i seleccioneu \"Altres\".",
+      "onvifPortDescription": "Per a les càmeres que suporten ONVIF, això sol ser 80 o 8080.",
+      "useDigestAuth": "Utilitza l'autenticació digest",
+      "useDigestAuthDescription": "Usa l'autenticació de resum HTTP per a ONVIF. Algunes càmeres poden requerir un nom d'usuari/contrasenya ONVIF dedicat en lloc de l'usuari administrador estàndard."
     },
     "save": {
       "failure": "SS'ha produït un error en desar {{cameraName}}.",
@@ -936,7 +950,7 @@
       "testFailed": "Ha fallat la prova de flux: {{error}}"
     },
     "step2": {
-      "description": "Configura els rols de flux i afegeix fluxos addicionals per a la càmera.",
+      "description": "Proveu la càmera per als fluxos disponibles o configureu la configuració manual basada en el mètode de detecció seleccionat.",
       "streamsTitle": "Fluxos de la càmera",
       "addStream": "Afegeix un flux",
       "addAnotherStream": "Afegeix un altre flux",
@@ -953,8 +967,8 @@
         "audio": "Àudio"
       },
       "testStream": "Prova la connexió",
-      "testSuccess": "Prova de flux amb èxit!",
-      "testFailed": "Ha fallat la prova del flux",
+      "testSuccess": "Prova de connexió correcta!",
+      "testFailed": "Ha fallat la prova de connexió. Si us plau, comproveu la vostra entrada i torneu-ho a provar.",
       "testFailedTitle": "Ha fallat la prova",
       "connected": "Connectat",
       "notConnected": "No connectat",
@@ -972,7 +986,39 @@
         "description": "Utilitzeu el restreaming go2rtc per reduir les connexions a la càmera."
       },
       "roles": "Rols",
-      "streamUrlPlaceholder": "rtsp://usuari:contrasenya@host:port/ruta"
+      "streamUrlPlaceholder": "rtsp://usuari:contrasenya@host:port/ruta",
+      "streamDetails": "Detalls del flux",
+      "probing": "Provant càmera...",
+      "retry": "Intentar de nou",
+      "testing": {
+        "probingMetadata": "S'estan provant les metadades de la càmera...",
+        "fetchingSnapshot": "S'està recuperant la instantània de la càmera..."
+      },
+      "probeFailed": "No s'ha pogut provar la càmera: {{error}}",
+      "probingDevice": "Provant dispositiu...",
+      "probeSuccessful": "Prova exitosa",
+      "probeError": "Error de prova",
+      "probeNoSuccess": "La prova no ha tingut èxit",
+      "deviceInfo": "Informació del dispositiu",
+      "manufacturer": "Fabricant",
+      "model": "Model",
+      "firmware": "Firmware",
+      "profiles": "Perfils",
+      "ptzSupport": "Suport PTZ",
+      "autotrackingSupport": "Implementació de seguiment automàtic",
+      "presets": "Predefinits",
+      "rtspCandidates": "Candidats RTSP",
+      "rtspCandidatesDescription": "S'han trobat els següents URL RTSP de la sonda de la càmera. Proveu la connexió per a veure les metadades del flux.",
+      "noRtspCandidates": "No s'ha trobat cap URL RTSP a la càmera. Les vostres credencials poden ser incorrectes, o la càmera pot no admetre ONVIF o el mètode utilitzat per recuperar els URL RTSP. Torneu enrere i introduïu l'URL RTSP manualment.",
+      "candidateStreamTitle": "Candidat {{number}}",
+      "useCandidate": "Utilitza",
+      "uriCopy": "Copia",
+      "uriCopied": "URI copiat al porta-retalls",
+      "testConnection": "Prova la connexió",
+      "toggleUriView": "Feu clic per a commutar la vista completa de l'URI",
+      "errors": {
+        "hostRequired": "Es requereix l'adreça de l'amfitrió/IP"
+      }
     },
     "step3": {
       "none": "Cap",
@@ -996,7 +1042,7 @@
         "resolutionHigh": "Una resolució de {{resolution}} pot causar un ús més gran dels recursos.",
         "resolutionLow": "Una resolució de {{resolution}} pot ser massa baixa per a la detecció fiable d'objectes petits."
       },
-      "description": "Validació i anàlisi final abans de desar la nova càmera. Connecta cada flux abans de desar-lo.",
+      "description": "Configura els rols de flux i afegeix fluxos addicionals per a la càmera.",
       "validationTitle": "Validació del flux",
       "connectAllStreams": "Connecta tots els fluxos",
       "reconnectionSuccess": "S'ha reconnectat correctament.",
@@ -1016,7 +1062,91 @@
       "streamValidated": "El flux {{number}} s'ha validat correctament",
       "streamValidationFailed": "Ha fallat la validació del flux {{number}}",
       "ffmpegModule": "Usa el mode de compatibilitat del flux",
-      "ffmpegModuleDescription": "Si el flux no es carrega després de diversos intents, proveu d'activar-ho. Quan està activat, Frigate utilitzarà el mòdul ffmpeg amb go2rtc. Això pot proporcionar una millor compatibilitat amb alguns fluxos de càmera."
+      "ffmpegModuleDescription": "Si el flux no es carrega després de diversos intents, proveu d'activar-ho. Quan està activat, Frigate utilitzarà el mòdul ffmpeg amb go2rtc. Això pot proporcionar una millor compatibilitat amb alguns fluxos de càmera.",
+      "streamsTitle": "Fluxos de la càmera",
+      "addStream": "Afegeix un flux",
+      "addAnotherStream": "Afegeix un altre flux",
+      "streamUrl": "URL del flux",
+      "streamUrlPlaceholder": "rtsp://usuari:contrasenya@host:port/ruta",
+      "selectStream": "Selecciona un flux",
+      "searchCandidates": "Cerca candidats...",
+      "noStreamFound": "No s'ha trobat cap flux",
+      "url": "URL",
+      "resolution": "Resolució",
+      "selectResolution": "Selecciona la resolució",
+      "quality": "Qualitat",
+      "selectQuality": "Selecciona la qualitat",
+      "roleLabels": {
+        "detect": "Detecció d'objectes",
+        "record": "Enregistrament",
+        "audio": "Àudio"
+      },
+      "testStream": "Prova la connexió",
+      "testSuccess": "Prova de flux amb èxit!",
+      "testFailed": "Ha fallat la prova del flux",
+      "testFailedTitle": "Ha fallat la prova",
+      "connected": "Connectat",
+      "notConnected": "No connectat",
+      "featuresTitle": "Característiques",
+      "go2rtc": "Redueix les connexions a la càmera",
+      "detectRoleWarning": "Almenys un flux ha de tenir el rol de \"detecte\" per continuar.",
+      "rolesPopover": {
+        "title": "Roles de flux",
+        "detect": "Canal principal per a la detecció d'objectes.",
+        "record": "Desa els segments del canal de vídeo basats en la configuració.",
+        "audio": "Canal per a la detecció basada en àudio."
+      },
+      "featuresPopover": {
+        "title": "Característiques del flux",
+        "description": "Utilitzeu el restreaming go2rtc per reduir les connexions a la càmera."
+      }
+    },
+    "step4": {
+      "description": "Validació i anàlisi final abans de desar la nova càmera. Connecta cada flux abans de desar-lo.",
+      "validationTitle": "Validació del flux",
+      "connectAllStreams": "Connecta tots els fluxos",
+      "reconnectionSuccess": "S'ha reconnectat correctament.",
+      "reconnectionPartial": "Alguns fluxos no s'han pogut tornar a connecta.",
+      "streamUnavailable": "La vista prèvia del flux no està disponible",
+      "reload": "Torna a carregar",
+      "connecting": "S'està connectant...",
+      "streamTitle": "Flux {{number}}",
+      "valid": "Vàlid",
+      "failed": "Ha fallat",
+      "notTested": "No provat",
+      "connectStream": "Connecta",
+      "connectingStream": "Connectant",
+      "disconnectStream": "Desconnecta",
+      "estimatedBandwidth": "Amplada de banda estimada",
+      "roles": "Roles",
+      "ffmpegModule": "Usa el mode de compatibilitat del flux",
+      "ffmpegModuleDescription": "Si el flux no es carrega després de diversos intents, proveu d'activar-ho. Quan està activat, Frigate utilitzarà el mòdul ffmpeg amb go2rtc. Això pot proporcionar una millor compatibilitat amb alguns fluxos de càmera.",
+      "none": "Cap",
+      "error": "Error",
+      "streamValidated": "El flux {{number}} s'ha validat correctament",
+      "streamValidationFailed": "Ha fallat la validació del flux {{number}}",
+      "saveAndApply": "Desa una càmera nova",
+      "saveError": "Configuració no vàlida. Si us plau, comproveu la configuració.",
+      "issues": {
+        "title": "Validació del flux",
+        "videoCodecGood": "El còdec de vídeo és {{codec}}.",
+        "audioCodecGood": "El còdec d'àudio és {{codec}}.",
+        "resolutionHigh": "Una resolució de {{resolution}} pot causar un ús més gran dels recursos.",
+        "resolutionLow": "Una resolució de {{resolution}} pot ser massa baixa per a la detecció fiable d'objectes petits.",
+        "noAudioWarning": "No s'ha detectat cap àudio per a aquest flux, els enregistraments no tindran àudio.",
+        "audioCodecRecordError": "El còdec d'àudio AAC és necessari per a suportar l'àudio en els enregistraments.",
+        "audioCodecRequired": "Es requereix un flux d'àudio per admetre la detecció d'àudio.",
+        "restreamingWarning": "Reduir les connexions a la càmera per al flux de registre pot augmentar lleugerament l'ús de la CPU.",
+        "brands": {
+          "reolink-rtsp": "No és racomana utilitzar Reolink RSTP. Activeu HTTP a la configuració del microprogramari de la càmera i reinicieu l'assistent."
+        },
+        "dahua": {
+          "substreamWarning": "El substream 1 està bloquejat a una resolució baixa. Moltes càmeres Dahua / Amcrest / EmpireTech suporten subfluxos addicionals que han d'estar habilitats a la configuració de la càmera. Es recomana comprovar i utilitzar aquests corrents si estan disponibles."
+        },
+        "hikvision": {
+          "substreamWarning": "El substream 1 està bloquejat a una resolució baixa. Moltes càmeres Hikvision suporten subfluxos addicionals que han d'estar habilitats a la configuració de la càmera. Es recomana comprovar i utilitzar aquests corrents si estan disponibles."
+        }
+      }
     }
   },
   "cameraManagement": {
