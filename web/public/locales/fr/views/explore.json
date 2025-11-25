@@ -42,7 +42,7 @@
           "regenerate": "Une nouvelle description a été demandée à {{provider}}. Selon la vitesse de votre fournisseur, la régénération de la nouvelle description peut prendre un certain temps.",
           "updatedSublabel": "Sous-étiquette mise à jour avec succès",
           "updatedLPR": "Plaque d'immatriculation mise à jour avec succès",
-          "audioTranscription": "Transcription audio demandée avec succès"
+          "audioTranscription": "Transcription audio demandée avec succès. Selon la vitesse de votre serveur Frigate, la transcription peut prendre un certain temps."
         },
         "error": {
           "regenerate": "Échec de l'appel de {{provider}} pour une nouvelle description : {{errorMessage}}",
@@ -110,7 +110,8 @@
     "video": "vidéo",
     "object_lifecycle": "cycle de vie de l'objet",
     "snapshot": "instantané",
-    "thumbnail": "Miniature"
+    "thumbnail": "Miniature",
+    "tracking_details": "Détails du suivi"
   },
   "objectLifecycle": {
     "title": "Cycle de vie de l'objet",
@@ -227,7 +228,9 @@
         "error": "Échec de la suppression de l'objet suivi : {{errorMessage}}"
       }
     },
-    "tooltip": "Correspondance : {{type}} à {{confidence}}%"
+    "tooltip": "Correspondance : {{type}} à {{confidence}}%",
+    "previousTrackedObject": "Objet suivi précédent",
+    "nextTrackedObject": "Objet suivi suivant"
   },
   "exploreMore": "Explorer plus d'objets {{label}}",
   "aiAnalysis": {
@@ -267,7 +270,7 @@
       "offset": {
         "desc": "Ces données proviennent du flux de détection de votre caméra, mais elles sont superposées aux images du flux d'enregistrement. Il est peu probable que les deux flux soient parfaitement synchronisés. Par conséquent, le cadre de délimitation et la vidéo ne s'aligneront pas parfaitement. Vous pouvez utiliser ce paramètre pour décaler les annotations vers l'avant ou vers l'arrière dans le temps afin de mieux les aligner avec la vidéo enregistrée.",
         "millisecondsToOffset": "Millisecondes de décalage pour les annotations de détection. <em>Par défaut : 0</em>",
-        "tips": "ASTUCE : Imaginez une séquence d'événement avec une personne marchant de gauche à droite. Si le cadre de détection sur la chronologie de l'événement est constamment à gauche de la personne, la valeur doit être diminuée. De même, si une personne marche de gauche à droite et que le cadre de détection est constamment devant la personne, la valeur doit être augmentée.",
+        "tips": "Diminuez la valeur si la lecture vidéo est en avance sur les cadres de détection et les points de tracé, et augmentez-la si la lecture vidéo est en retard sur ceux-ci. Cette valeur peut être négative.",
         "toast": {
           "success": "Le décalage des annotations pour {{camera}} a été sauvegardé dans le fichier de configuration. Redémarrez Frigate pour appliquer vos modifications."
         },

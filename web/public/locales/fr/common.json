@@ -87,7 +87,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d MMM, yyyy",
       "24hour": "d MMM,yyyy"
-    }
+    },
+    "inProgress": "En cours",
+    "invalidStartTime": "Heure de début invalide",
+    "invalidEndTime": "Heure de fin invalide"
   },
   "button": {
     "apply": "Appliquer",
@@ -124,7 +127,8 @@
     "export": "Exporter",
     "deleteNow": "Supprimer maintenant",
     "download": "Télécharger",
-    "done": "Terminé"
+    "done": "Terminé",
+    "continue": "Continuer"
   },
   "menu": {
     "configuration": "Configuration",
@@ -226,7 +230,8 @@
     },
     "uiPlayground": "Bac à sable de l'interface",
     "faceLibrary": "Bibliothèque de visages",
-    "languages": "Langues"
+    "languages": "Langues",
+    "classification": "Classification"
   },
   "toast": {
     "save": {
@@ -272,7 +277,9 @@
     "back": "Retour",
     "hide": "Masquer {{item}}",
     "show": "Afficher {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "Aucun",
+    "all": "Tous"
   },
   "unit": {
     "speed": {
