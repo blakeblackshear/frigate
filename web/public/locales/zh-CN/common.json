@@ -75,7 +75,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "yy年MM月dd日",
       "24hour": "yy年MM月dd日"
-    }
+    },
+    "inProgress": "进行中",
+    "invalidStartTime": "无效的开始时间",
+    "invalidEndTime": "无效的结束时间"
   },
   "unit": {
     "speed": {
@@ -99,7 +102,9 @@
     "back": "返回",
     "hide": "隐藏 {{item}}",
     "show": "显示 {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "无",
+    "all": "所有"
   },
   "pagination": {
     "label": "分页",
@@ -148,7 +153,8 @@
     "deleteNow": "立即删除",
     "next": "下一个",
     "cameraAudio": "摄像头音频",
-    "twoWayTalk": "双向对话"
+    "twoWayTalk": "双向对话",
+    "continue": "继续"
   },
   "menu": {
     "system": "系统",
@@ -248,7 +254,8 @@
       "setPassword": "设置密码",
       "title": "用户"
     },
-    "restart": "重启 Frigate"
+    "restart": "重启 Frigate",
+    "classification": "目标分类"
   },
   "toast": {
     "copyUrlToClipboard": "已复制链接到剪贴板。",
@@ -284,7 +291,7 @@
   "list": {
     "two": "{{0}} 和 {{1}}",
     "many": "{{items}} 以及 {{last}}",
-    "separatorWithSpace": "， "
+    "separatorWithSpace": "、 "
   },
   "field": {
     "optional": "可选",
