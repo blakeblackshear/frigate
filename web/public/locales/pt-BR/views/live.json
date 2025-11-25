@@ -71,7 +71,7 @@
   },
   "snapshots": {
     "enable": "Permitir Capturas de Imagem",
-    "disable": "Desativar Campturas de Imagem"
+    "disable": "Desativar Capturas de Imagem"
   },
   "audioDetect": {
     "enable": "Ativar Detecção de Áudio",
