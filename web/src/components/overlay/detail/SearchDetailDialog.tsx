@@ -538,7 +538,7 @@ export default function SearchDetailDialog({
       <Overlay
         open={isOpen}
         onOpenChange={handleOpenChange}
-        enableHistoryBack={false}
+        enableHistoryBack={true}
       >
         {isDesktop && onPrevious && onNext && (
           <DialogPortal>
