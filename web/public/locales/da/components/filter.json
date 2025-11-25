@@ -10,8 +10,10 @@
   },
   "labels": {
     "all": {
-      "short": "Labels"
+      "short": "Labels",
+      "title": "Alle etiketter"
     },
-    "count_one": "{{count}} Label"
+    "count_one": "{{count}} Label",
+    "label": "Etiketter"
   }
 }

@@ -5,7 +5,8 @@
   "filters": "Filtere",
   "toast": {
     "error": {
-      "endTimeMustAfterStartTime": "Sluttidspunkt skal være efter starttidspunkt"
+      "endTimeMustAfterStartTime": "Sluttidspunkt skal være efter starttidspunkt",
+      "noValidTimeSelected": "Intet gyldigt tidsinterval valgt"
     }
   }
 }

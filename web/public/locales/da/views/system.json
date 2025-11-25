@@ -6,7 +6,98 @@
       "frigate": "Frigate Logs - Frigate",
       "go2rtc": "Go2RTC Logs - Frigate",
       "nginx": "Nginx Logs - Frigate"
+    },
+    "general": "Generelle statistikker - Frigate",
+    "enrichments": "Beredningsstatistikker - Frigate"
+  },
+  "title": "System",
+  "logs": {
+    "copy": {
+      "label": "Kopier til udklipsholder",
+      "success": "Logs er kopieret til udklipsholder",
+      "error": "Kunne ikke kopiere logs til udklipsholder"
+    },
+    "type": {
+      "label": "Type",
+      "timestamp": "Tidsstempel",
+      "message": "Besked",
+      "tag": "Tag"
+    },
+    "tips": "Logs bliver streamet fra serveren",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Fejl ved indhentning af logs: {{errorMessage}}",
+        "whileStreamingLogs": "Fejl ved streaming af logs: {{errorMessage}}"
+      }
+    },
+    "download": {
+      "label": "Download logs"
     }
   },
-  "title": "System"
+  "general": {
+    "title": "Generelt",
+    "hardwareInfo": {
+      "gpuUsage": "GPU forbrug",
+      "gpuMemory": "GPU hukommelse",
+      "gpuEncoder": "GPU indkoder",
+      "gpuDecoder": "GPU afkoder",
+      "title": "Hardware information",
+      "gpuInfo": {
+        "closeInfo": {
+          "label": "Luk GPU information"
+        },
+        "copyInfo": {
+          "label": "Kopier GPU information"
+        },
+        "toast": {
+          "success": "Kopierede GPU information til udklipsholder"
+        }
+      },
+      "npuUsage": "NPU forbrug",
+      "npuMemory": "NPU hukommelse"
+    },
+    "detector": {
+      "title": "Detektorer",
+      "inferenceSpeed": "Detektorinferenshastighed",
+      "temperature": "Detektor temperatur",
+      "cpuUsage": "Detektor CPU forbrug",
+      "cpuUsageInformation": "CPU brugt til at forberede input- og outputdata til/fra detektionsmodeller. Denne værdi måler ikke inferensforbrug, selvom der bruges en GPU eller accelerator.",
+      "memoryUsage": "Detektorhummelsesforbrug"
+    },
+    "otherProcesses": {
+      "title": "Andre processer",
+      "processCpuUsage": "Proces CPU forbrug",
+      "processMemoryUsage": "Proceshukommelsesforbrug"
+    }
+  },
+  "metrics": "System metrikker",
+  "storage": {
+    "title": "Lagring",
+    "overview": "Overblik",
+    "recordings": {
+      "title": "Optagelser",
+      "tips": "Denne værdi repræsenterer den samlede lagerplads, der bruges af optagelserne i Frigates database. Frigate sporer ikke lagerpladsforbruget for alle filer på din disk.",
+      "earliestRecording": "Tidligste optagelse til rådighed:"
+    },
+    "shm": {
+      "title": "SHM (delt hukommelse) tildeling",
+      "warning": "Den nuværende SHM størrelse af {{total}}MB er for lille. Øg den til minimum {{min_shm}}MB."
+    },
+    "cameraStorage": {
+      "title": "Kamera lagring",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Ubrugt lagringsinformation",
+      "storageUsed": "Lagring",
+      "percentageOfTotalUsed": "Procentandel af total",
+      "bandwidth": "Båndbredde",
+      "unused": {
+        "title": "Ubrugt",
+        "tips": "Denne værdi repræsenterer muligvis ikke nøjagtigt den ledige plads, der er tilgængelig for Frigate, hvis du har andre filer gemt på dit drev ud over Frigates optagelser. Frigate sporer ikke lagerforbrug ud over sine optagelser."
+      }
+    }
+  },
+  "cameras": {
+    "title": "Kameraer",
+    "overview": "Overblik"
+  }
 }
