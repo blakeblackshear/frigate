@@ -2,7 +2,6 @@ import glob
 import logging
 import os
 import shutil
-import time
 import urllib.request
 import zipfile
 from queue import Queue
@@ -54,6 +53,9 @@ class MemryXDetector(DetectionApi):
                 "MemryX SDK is not installed. Install it and set up MIX environment."
             )
             return
+
+        # Initialize stop_event as None, will be set later by set_stop_event()
+        self.stop_event = None
 
         model_cfg = getattr(detector_config, "model", None)
 
@@ -363,26 +365,43 @@ class MemryXDetector(DetectionApi):
     def process_input(self):
         """Input callback function: wait for frames in the input queue, preprocess, and send to MX3 (return)"""
         while True:
+            # Check if shutdown is requested
+            if self.stop_event and self.stop_event.is_set():
+                logger.debug("[process_input] Stop event detected, returning None")
+                return None
             try:
-                # Wait for a frame from the queue (blocking call)
-                frame = self.capture_queue.get(
-                    block=True
-                )  # Blocks until data is available
+                # Wait for a frame from the queue with timeout to check stop_event periodically
+                frame = self.capture_queue.get(block=True, timeout=0.5)
 
                 return frame
 
             except Exception as e:
-                logger.info(f"[process_input] Error processing input: {e}")
-                time.sleep(0.1)  # Prevent busy waiting in case of error
+                # Silently handle queue.Empty timeouts (expected during normal operation)
+                # Log any other unexpected exceptions
+                if "Empty" not in str(type(e).__name__):
+                    logger.warning(f"[process_input] Unexpected error: {e}")
+                # Loop continues and will check stop_event at the top
 
     def receive_output(self):
         """Retrieve processed results from MemryX output queue + a copy of the original frame"""
-        connection_id = (
-            self.capture_id_queue.get()
-        )  # Get the corresponding connection ID
-        detections = self.output_queue.get()  # Get detections from MemryX
+        try:
+            # Get connection ID with timeout
+            connection_id = self.capture_id_queue.get(
+                block=True, timeout=1.0
+            )  # Get the corresponding connection ID
+            detections = self.output_queue.get()  # Get detections from MemryX
 
-        return connection_id, detections
+            return connection_id, detections
+
+        except Exception as e:
+            # On timeout or stop event, return None
+            if self.stop_event and self.stop_event.is_set():
+                logger.debug("[receive_output] Stop event detected, exiting")
+            # Silently handle queue.Empty timeouts, they're expected during normal operation
+            elif "Empty" not in str(type(e).__name__):
+                logger.warning(f"[receive_output] Error receiving output: {e}")
+
+            return None, None
 
     def post_process_yolonas(self, output):
         predictions = output[0]
@@ -830,6 +849,19 @@ class MemryXDetector(DetectionApi):
             raise Exception(
                 f"{self.memx_model_type} is currently not supported for memryx. See the docs for more info on supported models."
             )
+
+    def set_stop_event(self, stop_event):
+        """Set the stop event for graceful shutdown."""
+        self.stop_event = stop_event
+
+    def shutdown(self):
+        """Gracefully shutdown the MemryX accelerator"""
+        try:
+            if hasattr(self, "accl") and self.accl is not None:
+                self.accl.shutdown()
+                logger.info("MemryX accelerator shutdown complete")
+        except Exception as e:
+            logger.error(f"Error during MemryX shutdown: {e}")
 
     def detect_raw(self, tensor_input: np.ndarray):
         """Removed synchronous detect_raw() function so that we only use async"""
