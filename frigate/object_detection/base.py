@@ -61,7 +61,7 @@ class BaseLocalDetector(ObjectDetector):
 
         self.detect_api = create_detector(detector_config)
 
-        # If the detector supports setting stop_event, provide it
+        # If the detector supports stop_event, pass it
         if hasattr(self.detect_api, "set_stop_event") and stop_event:
             self.detect_api.set_stop_event(stop_event)
 
@@ -299,10 +299,8 @@ class AsyncDetectorRunner(FrigateProcess):
             t_detect.join(timeout=5)
             t_result.join(timeout=5)
 
-            # Explicitly shutdown MemryX accelerator
-            if hasattr(self._detector.detect_api, "shutdown"):
-                logger.info("Calling MemryX shutdown method...")
-                self._detector.detect_api.shutdown()
+            # Shutdown the AsyncDetector
+            self._detector.detect_api.shutdown()
 
             self._publisher.stop()
         except Exception as e:
