@@ -35,6 +35,14 @@
 
 如果您想通过捐赠支持开发，请使用 [Github Sponsors](https://github.com/sponsors/blakeblackshear)。
 
+## 协议
+
+本项目采用 **MIT 许可证**授权。
+**代码部分**：本代码库中的源代码、配置文件和文档均遵循 [MIT 许可证](LICENSE)。您可以自由使用、修改和分发这些代码，但必须保留原始版权声明。
+
+**商标部分**：“Frigate”名称、“Frigate NVR”品牌以及 Frigate 的 Logo 为 **Frigate LLC 的商标**，**不在** MIT 许可证覆盖范围内。
+有关品牌资产的规范使用详情，请参阅我们的[《商标政策》](TRADEMARK.md)。
+
 ## 截图
 
 ### 实时监控面板
