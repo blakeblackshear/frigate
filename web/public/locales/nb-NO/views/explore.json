@@ -207,7 +207,9 @@
         "success": "Sporet objekt ble slettet."
       }
     },
-    "tooltip": "Samsvarer {{type}} til {{confidence}}%"
+    "tooltip": "Samsvarer {{type}} til {{confidence}}%",
+    "previousTrackedObject": "Forrige sporede objekt",
+    "nextTrackedObject": "Neste sporede objekt"
   },
   "trackedObjectDetails": "Detaljer om sporet objekt",
   "type": {
@@ -215,7 +217,8 @@
     "snapshot": "øyeblikksbilde",
     "video": "video",
     "object_lifecycle": "objektets livssyklus",
-    "thumbnail": "miniatyrbilde"
+    "thumbnail": "miniatyrbilde",
+    "tracking_details": "sporingsdetaljer"
   },
   "dialog": {
     "confirmDelete": {
