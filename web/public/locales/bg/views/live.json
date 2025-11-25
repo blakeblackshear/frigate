@@ -63,5 +63,6 @@
   },
   "cameraSettings": {
     "cameraEnabled": "Камерата е включена"
-  }
+  },
+  "documentTitle": "Наживо - Frigate"
 }
