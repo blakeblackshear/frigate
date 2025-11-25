@@ -24,11 +24,11 @@
     "title": "Utwórz kolekcję",
     "desc": "Utwórz nową kolekcję",
     "new": "Utwórz nową twarz",
-    "nextSteps": "Aby zbudować solidną podstawę: <li>Użyj zakładki Trenuj, aby wybrać i trenować na obrazach dla każdej wykrytej osoby.</li><li>Skup się na zdjęciach twarzy na wprost dla najlepszych wyników; unikaj trenowania na zdjęciach, które pokazują twarze pod kątem.</li></ul>"
+    "nextSteps": "Aby zbudować solidną podstawę: <li>Użyj zakładki Ostatnie rozpoznania, aby wybrać i trenować na obrazach dla każdej wykrytej osoby.</li><li>Skup się na zdjęciach twarzy na wprost dla najlepszych wyników; unikaj trenowania na zdjęciach, które pokazują twarze pod kątem.</li></ul>"
   },
   "train": {
-    "aria": "Wybierz trenowanie",
-    "title": "Trenuj",
+    "aria": "Wybierz ostatnio rozpoznane",
+    "title": "Ostatnie rozpoznania",
     "empty": "Nie podjęto ostatnio żadnych prób rozpoznawania twarzy"
   },
   "selectFace": "Wybierz twarz",

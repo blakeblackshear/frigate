@@ -36,5 +36,24 @@
   "selected_other": "{{count}} wybrane",
   "detected": "wykryto",
   "suspiciousActivity": "Podejrzana aktywność",
-  "threateningActivity": "Niebezpieczne działania"
+  "threateningActivity": "Niebezpieczne działania",
+  "zoomIn": "Przybliż",
+  "zoomOut": "Oddal",
+  "detail": {
+    "label": "Szczegóły",
+    "noDataFound": "Brak szczegółów do przejrzenia",
+    "aria": "Przełącz widok szczegółów",
+    "trackedObject_one": "obiekt",
+    "trackedObject_other": "obiekty",
+    "noObjectDetailData": "Brak danych szczegółowych dla obiektu.",
+    "settings": "Ustawienia widoku szczegółów",
+    "alwaysExpandActive": {
+      "title": "Zawsze rozwiń aktywne",
+      "desc": "Zawsze rozwijaj szczegóły aktywnego obiektu, jeżeli są dostępne."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Śledzony punkt",
+    "clickToSeek": "Kliknij aby przewinąć do tego miejsca"
+  }
 }
