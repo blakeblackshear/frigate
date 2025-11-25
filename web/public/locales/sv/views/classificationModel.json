@@ -19,28 +19,35 @@
       "trainingModel": "Modellträning har startat.",
       "deletedModel_one": "{{count}} modell har raderats",
       "deletedModel_other": "{{count}} modeller har raderats",
-      "updatedModel": "Uppdaterade modellkonfiguration"
+      "updatedModel": "Uppdaterade modellkonfiguration",
+      "renamedCategory": "Klassen har bytt namn till {{name}}"
     },
     "error": {
       "deleteImageFailed": "Misslyckades med att ta bort: {{errorMessage}}",
       "deleteCategoryFailed": "Misslyckades med att ta bort klassen: {{errorMessage}}",
       "categorizeFailed": "Misslyckades med att kategorisera bilden: {{errorMessage}}",
-      "trainingFailed": "Misslyckades med att starta modellträning: {{errorMessage}}",
+      "trainingFailed": "Modellträningen misslyckades. Kontrollera Frigate loggarna för mer information.",
       "deleteModelFailed": "Misslyckades med att ta bort modellen: {{errorMessage}}",
-      "updateModelFailed": "Misslyckades med att uppdatera modell: {{errorMessage}}"
+      "updateModelFailed": "Misslyckades med att uppdatera modell: {{errorMessage}}",
+      "trainingFailedToStart": "Misslyckades med att starta modellträning: {{errorMessage}}",
+      "renameCategoryFailed": "Misslyckades med att byta namn på klassen: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Ta bort klass",
-    "desc": "Är du säker på att du vill ta bort klassen {{name}}? Detta kommer att ta bort alla associerade bilder permanent och kräva att modellen tränas om."
+    "desc": "Är du säker på att du vill ta bort klassen {{name}}? Detta kommer att ta bort alla associerade bilder permanent och kräva att modellen tränas om.",
+    "minClassesTitle": "Kan inte ta bort klassen",
+    "minClassesDesc": "En klassificeringsmodell måste ha minst två klasser. Lägg till ytterligare en klass innan du tar bort den här."
   },
   "deleteDatasetImages": {
     "title": "Ta bort datamängdsbilder",
-    "desc": "Är du säker på att du vill ta bort {{count}} bilder från {{dataset}}? Den här åtgärden kan inte ångras och kräver att modellen tränas om."
+    "desc_one": "Är du säker på att du vill ta bort {{count}} bild från {{dataset}}? Den här åtgärden kan inte ångras och kräver att modellen tränas om.",
+    "desc_other": "Är du säker på att du vill ta bort {{count}} bilder från {{dataset}}? Den här åtgärden kan inte ångras och kräver att modellen tränas om."
   },
   "deleteTrainImages": {
     "title": "Ta bort tränade bilder",
-    "desc": "Är du säker på att du vill ta bort {{count}} bilder? Den här åtgärden kan inte ångras."
+    "desc_one": "Är du säker på att du vill ta bort {{count}} bild? Den här åtgärden kan inte ångras.",
+    "desc_other": "Är du säker på att du vill ta bort {{count}} bilder? Den här åtgärden kan inte ångras."
   },
   "renameCategory": {
     "title": "Byt namn på klass",
@@ -139,13 +146,16 @@
         "generationFailed": "Genereringen misslyckades. Försök igen.",
         "classifyFailed": "Misslyckades med att klassificera bilder: {{error}}"
       },
-      "generateSuccess": "Exempelbilder har genererats"
+      "generateSuccess": "Exempelbilder har genererats",
+      "allImagesRequired_one": "Vänligen klassificera alla bilder. {{count}} bild återstår.",
+      "allImagesRequired_other": "Vänligen klassificera alla bilder. {{count}} bilder återstår."
     }
   },
   "deleteModel": {
     "title": "Ta bort klassificeringsmodell",
     "single": "Är du säker på att du vill ta bort {{name}}? Detta kommer att permanent ta bort all tillhörande data, inklusive bilder och träningsdata. Åtgärden kan inte ångras.",
-    "desc": "Är du säker på att du vill ta bort {{count}} modell(er)? Detta kommer att permanent ta bort all tillhörande data, inklusive bilder och träningsdata. Åtgärden kan inte ångras."
+    "desc_one": "Är du säker på att du vill ta bort {{count}} modell? Detta kommer att permanent ta bort all tillhörande data, inklusive bilder och träningsdata. Åtgärden kan inte ångras.",
+    "desc_other": "Är du säker på att du vill ta bort {{count}} modeller? Detta kommer att permanent ta bort all tillhörande data, inklusive bilder och träningsdata. Åtgärden kan inte ångras."
   },
   "menu": {
     "objects": "Objekt",
@@ -159,5 +169,11 @@
     "descriptionState": "Redigera klasserna för denna tillståndsklassificeringsmodell. Ändringar kräver omträning av modellen.",
     "descriptionObject": "Redigera objekttyp och klassificeringstyp för denna objektklassificeringsmodell.",
     "stateClassesInfo": "Observera: För att ändra tillståndsklasser måste modellen omtränas med de uppdaterade klasserna."
+  },
+  "tooltip": {
+    "trainingInProgress": "Modellen tränar för närvarande",
+    "noNewImages": "Inga nya bilder att träna. Klassificera fler bilder i datasetet först.",
+    "noChanges": "Inga ändringar i datamängden sedan senaste träningen.",
+    "modelNotReady": "Modellen är inte redo för träning"
   }
 }

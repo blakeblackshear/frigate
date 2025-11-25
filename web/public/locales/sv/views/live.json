@@ -73,8 +73,8 @@
     "disable": "Avaktivera ljudaktivering"
   },
   "autotracking": {
-    "enable": "Aktivera automatisk panorering",
-    "disable": "Avaktivera automatisk panorering"
+    "enable": "Aktivera Autospårning",
+    "disable": "Avaktivera Autospårning"
   },
   "notifications": "Notifikationer",
   "audio": "Ljud",
@@ -174,7 +174,11 @@
   "noCameras": {
     "title": "Inga kameror konfigurerade",
     "description": "Börja med att ansluta en kamera till Frigate.",
-    "buttonText": "Lägg till kamera"
+    "buttonText": "Lägg till kamera",
+    "restricted": {
+      "title": "Inga kameror tillgängliga",
+      "description": "Du har inte behörighet att visa några kameror i den här gruppen."
+    }
   },
   "snapshot": {
     "takeSnapshot": "Ladda ner omedelbar ögonblicksbild",
