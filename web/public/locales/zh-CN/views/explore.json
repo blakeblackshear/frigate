@@ -4,14 +4,14 @@
   "exploreIsUnavailable": {
     "title": "浏览功能不可用",
     "embeddingsReindexing": {
-      "context": "完成跟踪目标嵌入重新索引后，才可以使用 浏览 功能。",
+      "context": "完成追踪目标嵌入重新索引后，才可以使用 浏览 功能。",
       "startingUp": "启动中…",
       "estimatedTime": "预计剩余时间：",
       "finishingShortly": "即将完成",
       "step": {
         "thumbnailsEmbedded": "缩略图嵌入：",
         "descriptionsEmbedded": "描述嵌入：",
-        "trackedObjectsProcessed": "跟踪目标已处理： "
+        "trackedObjectsProcessed": "追踪目标已处理： "
       }
     },
     "downloadingModels": {
@@ -23,7 +23,7 @@
         "textTokenizer": "文本分词器"
       },
       "tips": {
-        "context": "模型下载完成后，您可能需要重新索引跟踪目标的嵌入。",
+        "context": "模型下载完成后，您可能需要重新索引追踪目标的嵌入。",
         "documentation": "阅读文档"
       },
       "error": "发生错误。请检查Frigate日志。"
@@ -35,7 +35,8 @@
     "snapshot": "快照",
     "video": "视频",
     "object_lifecycle": "目标全周期",
-    "thumbnail": "缩略图"
+    "thumbnail": "缩略图",
+    "tracking_details": "追踪详情"
   },
   "objectLifecycle": {
     "title": "目标全周期",
@@ -96,7 +97,7 @@
       },
       "tips": {
         "mismatch_other": "检测到 {{count}} 个不可用的目标，并已包含在此核查项中。这些目标可能未达到警报或检测标准，或者已被清理/删除。",
-        "hasMissingObjects": "如果希望 Frigate 保存以下标签的跟踪目标，请调整您的配置：<em>{{objects}}</em>"
+        "hasMissingObjects": "如果希望 Frigate 保存 <em>{{objects}}</em> 标签的追踪目标，请调整您的配置。"
       },
       "toast": {
         "success": {
@@ -117,7 +118,7 @@
     "editSubLabel": {
       "title": "编辑子标签",
       "desc": "为 {{label}} 输入新的子标签",
-      "descNoLabel": "为此跟踪目标输入新的子标签"
+      "descNoLabel": "为该追踪目标输入新的子标签"
     },
     "topScore": {
       "label": "最高得分",
@@ -210,7 +211,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "确认删除",
-      "desc": "删除此追踪目标后将移除快照、所有已保存的嵌入向量数据以及任何相关的目标追踪详情条目，但在 历史 页面中跟踪对象的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
+      "desc": "删除此追踪目标后，将移除快照、所有已保存的嵌入向量数据以及任何相关的目标追踪详情条目，但在 历史 页面中追踪对象的录制视频片段<em>不会</em>被删除。<br /><br />你确定要继续删除该追踪目标吗？"
     }
   },
   "noTrackedObjects": "未找到追踪目标",
@@ -223,7 +224,9 @@
         "error": "删除追踪目标失败：{{errorMessage}}"
       }
     },
-    "tooltip": "与 {{type}} 匹配度为 {{confidence}}%"
+    "tooltip": "与 {{type}} 匹配度为 {{confidence}}%",
+    "previousTrackedObject": "上一个追踪目标",
+    "nextTrackedObject": "下一个追踪目标"
   },
   "exploreMore": "浏览更多的 {{label}}",
   "aiAnalysis": {
