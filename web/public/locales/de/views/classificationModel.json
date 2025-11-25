@@ -1,1 +1,40 @@
-{}
+{
+  "documentTitle": "Klassifizierungsmodelle",
+  "details": {
+    "scoreInfo": "Die Punktzahl gibt die durchschnittliche Klassifizierungssicherheit aller Erkennungen dieses Objekts wieder."
+  },
+  "button": {
+    "deleteClassificationAttempts": "Lösche Klassifizierungs-Bilder",
+    "renameCategory": "Klasse umbenennen",
+    "deleteCategory": "Klasse löschen",
+    "deleteImages": "Bilder löschen",
+    "trainModel": "Modell trainieren",
+    "addClassification": "Klassifizierung hinzufügen",
+    "deleteModels": "Modell löschen",
+    "editModel": "Modell bearbeiten"
+  },
+  "tooltip": {
+    "trainingInProgress": "Modell wird gerade trainiert",
+    "noNewImages": "Keine weiteren Bilder zum trainieren. Bitte klassifiziere weitere Bilder im Datensatz.",
+    "noChanges": "Keine Veränderungen des Datensatzes seit dem letzten Training.",
+    "modelNotReady": "Modell ist nicht bereit trainiert zu werden."
+  },
+  "toast": {
+    "success": {
+      "deletedCategory": "Klasse gelöscht",
+      "deletedImage": "Gelöschte Bilder",
+      "deletedModel_one": "{{count}} Model erfolgreich gelöscht",
+      "deletedModel_other": "{{count}} Modelle erfolgreich gelöscht",
+      "categorizedImage": "Bild erfolgreich klassifiziert",
+      "trainedModel": "Modell erfolgreich trainiert.",
+      "trainingModel": "Modelltraining erfolgreich gestartet.",
+      "updatedModel": "Modellkonfiguration erfolgreich aktualisiert",
+      "renamedCategory": "Klasse erfolgreich in {{name}} umbenannt"
+    },
+    "error": {
+      "deleteImageFailed": "Löschen fehlgeschlagen: {{errorMessage}}",
+      "deleteCategoryFailed": "Klasse konnte nicht gelöscht werden: {{errorMessage}}",
+      "deleteModelFailed": "Model konnte nicht gelöscht werden: {{errorMessage}}"
+    }
+  }
+}

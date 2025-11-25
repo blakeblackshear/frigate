@@ -36,5 +36,22 @@
   "selected_other": "{{count}} ausgewählt",
   "detected": "erkannt",
   "suspiciousActivity": "Verdächtige Aktivität",
-  "threateningActivity": "Bedrohliche Aktivität"
+  "threateningActivity": "Bedrohliche Aktivität",
+  "zoomIn": "Hereinzoomen",
+  "zoomOut": "Herauszoomen",
+  "detail": {
+    "label": "Detail",
+    "aria": "Detailansicht umschalten",
+    "trackedObject_one": "{{count}} Objekt",
+    "trackedObject_other": "{{count}} Objekte",
+    "noObjectDetailData": "Keine detaillierten Daten des Objekt verfügbar.",
+    "noDataFound": "Keine Detaildaten zur Überprüfung",
+    "settings": "Detailansicht Einstellungen",
+    "alwaysExpandActive": {
+      "desc": "Immer die Objektdetails des aktiven Überprüfungselements erweitern, sofern verfügbar."
+    }
+  },
+  "objectTrack": {
+    "trackedPoint": "Verfolgter Punkt"
+  }
 }
