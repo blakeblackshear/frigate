@@ -28,11 +28,15 @@
   },
   "deleteDatasetImages": {
     "title": "Ištrinti Imties Nuotraukas",
-    "desc": "Esate įsitikinę norite ištrinti {{count}} nautraukas iš {{dataset}}? Šis veiksmas negrįžtamas ir reikės iš naujo apmokinti modelį."
+    "desc_one": "Esate įsitikinę norite ištrinti {{count}} nautraukas iš {{dataset}}? Šis veiksmas negrįžtamas ir reikės iš naujo apmokinti modelį.",
+    "desc_few": "",
+    "desc_other": ""
   },
   "deleteTrainImages": {
     "title": "Ištrinti Apmokymo Nuotraukas",
-    "desc": "Ar esate įsitikinę, kad norite ištrinti {{count}} nuotraukas? Šis veiksmas negrįžtamas."
+    "desc_one": "Ar esate įsitikinę, kad norite ištrinti {{count}} nuotraukas? Šis veiksmas negrįžtamas.",
+    "desc_few": "",
+    "desc_other": ""
   },
   "renameCategory": {
     "title": "Pervadinti Klasę",
