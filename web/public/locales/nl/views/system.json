@@ -75,7 +75,12 @@
       "gpuEncoder": "GPU Encodeerder",
       "gpuMemory": "GPU-geheugen",
       "npuUsage": "NPU-gebruik",
-      "npuMemory": "NPU-geheugen"
+      "npuMemory": "NPU-geheugen",
+      "intelGpuWarning": {
+        "title": "Waarschuwing Intel GPU-statistieken",
+        "message": "GPU-statistieken niet beschikbaar",
+        "description": "Dit is een bekend probleem in de GPU-statistiekentools van Intel (intel_gpu_top). Deze raken defect en geven herhaaldelijk een GPU-gebruik van 0% weer, zelfs wanneer hardware-acceleratie en objectdetectie correct draaien op de (i)GPU. Dit is geen bug in Frigate. Je kunt de host opnieuw opstarten om het tijdelijk op te lossen en te controleren dat de GPU goed werkt. Dit heeft geen invloed op de prestaties."
+      }
     },
     "otherProcesses": {
       "processMemoryUsage": "Process Geheugen Gebruik",
@@ -181,7 +186,14 @@
       "face_recognition": "Gezichtsherkenning",
       "yolov9_plate_detection_speed": "YOLOv9 Kentekenplaat Detectiesnelheid",
       "yolov9_plate_detection": "YOLOv9 Kentekenplaatdetectie",
-      "plate_recognition": "Kentekenherkenning"
-    }
+      "plate_recognition": "Kentekenherkenning",
+      "review_description": "Beoordelingsbeschrijving",
+      "review_description_speed": "Snelheid beoordelingsbeschrijving",
+      "review_description_events_per_second": "Beoordelingsbeschrijving",
+      "object_description": "Objectbeschrijving",
+      "object_description_speed": "Objectbeschrijvingssnelheid",
+      "object_description_events_per_second": "Objectbeschrijving"
+    },
+    "averageInf": "Gemiddelde inferentietijd"
   }
 }

@@ -81,7 +81,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d MMM yyyy",
       "24hour": "d MMM yyyy"
-    }
+    },
+    "inProgress": "Wordt uitgevoerd",
+    "invalidStartTime": "Ongeldige starttijd",
+    "invalidEndTime": "Ongeldige eindtijd"
   },
   "button": {
     "enabled": "Ingeschakeld",
@@ -118,7 +121,8 @@
     "download": "Download",
     "unselect": "Deselecteren",
     "next": "Volgende",
-    "deleteNow": "Nu verwijderen"
+    "deleteNow": "Nu verwijderen",
+    "continue": "Doorgaan"
   },
   "unit": {
     "speed": {
@@ -142,7 +146,9 @@
     "back": "Ga terug",
     "hide": "Verberg {{item}}",
     "show": "Toon {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "Geen",
+    "all": "Alle"
   },
   "menu": {
     "system": "Systeem",
@@ -243,7 +249,8 @@
       "setPassword": "Wachtwoord instellen",
       "account": "Account",
       "anonymous": "anoniem"
-    }
+    },
+    "classification": "Classificatie"
   },
   "toast": {
     "copyUrlToClipboard": "URL naar klembord gekopieerd.",
@@ -258,7 +265,7 @@
   "role": {
     "title": "Rol",
     "admin": "Beheerder",
-    "viewer": "Gebruiker",
+    "viewer": "Kijker",
     "desc": "Beheerders hebben volledige toegang tot alle functies in de Frigate-interface. Kijkers kunnen alleen camera’s bekijken, items beoordelen en historische beelden terugkijken."
   },
   "pagination": {

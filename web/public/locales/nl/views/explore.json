@@ -34,7 +34,8 @@
     "video": "video",
     "snapshot": "snapshot",
     "object_lifecycle": "objectlevenscyclus",
-    "thumbnail": "thumbnail"
+    "thumbnail": "thumbnail",
+    "tracking_details": "trackinggegevens"
   },
   "objectLifecycle": {
     "createObjectMask": "Objectmasker maken",
@@ -104,7 +105,7 @@
           "regenerate": "Er is een nieuwe beschrijving aangevraagd bij {{provider}}. Afhankelijk van de snelheid van je provider kan het regenereren van de nieuwe beschrijving enige tijd duren.",
           "updatedSublabel": "Sublabel succesvol bijgewerkt.",
           "updatedLPR": "Kenteken succesvol bijgewerkt.",
-          "audioTranscription": "Audiotranscriptie succesvol aangevraagd."
+          "audioTranscription": "Audio-transcriptie succesvol aangevraagd. Afhankelijk van de snelheid van uw Frigate-server kan het even duren voordat de transcriptie voltooid is."
         },
         "error": {
           "updatedSublabelFailed": "Het is niet gelukt om het sublabel bij te werken: {{errorMessage}}",
@@ -218,7 +219,9 @@
         "error": "Verwijderen van gevolgd object mislukt: {{errorMessage}}"
       }
     },
-    "tooltip": "{{type}} komt voor {{confidence}}% overeen met de zoekopdracht"
+    "tooltip": "{{type}} komt voor {{confidence}}% overeen met de zoekopdracht",
+    "previousTrackedObject": "Vorig gevolgd object",
+    "nextTrackedObject": "Volgende gevolgde object"
   },
   "dialog": {
     "confirmDelete": {
@@ -271,7 +274,7 @@
         "label": "Annotatie-afwijking",
         "desc": "Deze gegevens zijn afkomstig van de detectiestream van je camera, maar worden weergegeven op beelden uit de opnamestream. Het is onwaarschijnlijk dat deze twee streams perfect gesynchroniseerd zijn. Hierdoor zullen het objectkader en het beeld niet exact op elkaar aansluiten. Met deze instelling kun je de annotaties vooruit of achteruit in de tijd verschuiven om ze beter uit te lijnen met het opgenomen beeldmateriaal.",
         "millisecondsToOffset": "Aantal milliseconden om objectkader mee te verschuiven. <em>Standaard: 0</em>",
-        "tips": "TIP: Stel je voor dat er een clip is waarin een persoon van links naar rechts loopt. Als het objectkader in de tijdlijn van de activiteit steeds links van de persoon ligt, dan moet de waarde verlaagd worden. Op dezelfde manier als het objectkader consequent vóór de persoon ligt dus vooruitloopt, moet de waarde verhoogd worden.",
+        "tips": "Verlaag de waarde als de videoweergave sneller is dan de objectkaders en hun trajectpunten, en verhoog de waarde als de videoweergave achterloopt. Deze waarde kan negatief zijn.",
         "toast": {
           "success": "Annotatieverschuiving voor {{camera}} is opgeslagen in het configuratiebestand. Herstart Frigate om je wijzigingen toe te passen."
         }
