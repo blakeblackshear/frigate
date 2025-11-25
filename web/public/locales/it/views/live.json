@@ -174,7 +174,11 @@
   "noCameras": {
     "buttonText": "Aggiungi telecamera",
     "title": "Nessuna telecamera configurata",
-    "description": "Per iniziare, collega una telecamera a Frigate."
+    "description": "Per iniziare, collega una telecamera a Frigate.",
+    "restricted": {
+      "title": "Nessuna telecamera disponibile",
+      "description": "Non hai l'autorizzazione per visualizzare alcuna telecamera in questo gruppo."
+    }
   },
   "snapshot": {
     "takeSnapshot": "Scarica l'istantanea attuale",
