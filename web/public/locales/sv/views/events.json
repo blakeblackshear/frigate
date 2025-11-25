@@ -40,8 +40,8 @@
   "detail": {
     "noDataFound": "Inga detaljerade data att granska",
     "aria": "Växla detaljvy",
-    "trackedObject_one": "objekt",
-    "trackedObject_other": "objekt",
+    "trackedObject_one": "{{count}} objekt",
+    "trackedObject_other": "{{count}} objekt",
     "noObjectDetailData": "Inga objektdetaljdata tillgängliga.",
     "label": "Detalj",
     "settings": "Detaljvy inställningar",

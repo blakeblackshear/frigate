@@ -2,7 +2,7 @@
   "documentTitle": {
     "camera": "Kamerainställningar - Frigate",
     "default": "Inställningar - Frigate",
-    "general": "Allmänna inställningar - Frigate",
+    "general": "Användargränssnitt Inställningar - Frigate",
     "authentication": "Autentiseringsinställningar - Frigate",
     "classification": "Klassificeringsinställningar - Frigate",
     "masksAndZones": "Maskerings- och zonverktyg - Frigate",
@@ -15,7 +15,7 @@
     "cameraReview": "Kameragranskningsinställningar - Frigate"
   },
   "general": {
-    "title": "Allmänna Inställningar",
+    "title": "UI inställningar",
     "liveDashboard": {
       "automaticLiveView": {
         "desc": "Automatiskt byte till kamera där aktivitet registreras. Inaktivering av denna inställning gör att en statisk bild visas i Live Panelen som uppdateras en gång per minut.",
@@ -29,6 +29,10 @@
       "displayCameraNames": {
         "label": "Visa alltid kameranamn",
         "desc": "Visa alltid kameranamnen i ett chip i instrumentpanelen för livevisning med flera kameror."
+      },
+      "liveFallbackTimeout": {
+        "label": "Live spelare reserv timeout",
+        "desc": "När en kameras högkvalitativa liveström inte är tillgänglig, återgå till lågbandbreddsläge efter så här många sekunder. Standard: 3."
       }
     },
     "storedLayouts": {
@@ -439,7 +443,7 @@
       "desc": "Visa avgränsningsrutor runt spårade objekt",
       "colors": {
         "label": "Färger för objektgränser",
-        "info": "<li>Vid uppstart tilldelas olika färger till varje objektetikett</li><li>En mörkblå tunn linje indikerar att objektet inte detekteras vid denna aktuella tidpunkt</li><li>En grå tunn linje indikerar att objektet detekteras som stillastående</li><li>En tjock linje indikerar att objektet är föremål för automatisk spårning (när det är aktiverat)</li>"
+        "info": "<li>Vid uppstart tilldelas olika färger till varje objektetikett</li><li>En mörkblå tunn linje indikerar att objektet inte detekteras vid denna aktuella tidpunkt</li><li>En grå tunn linje indikerar att objektet detekteras som stillastående</li><li>En tjock linje indikerar att objektet är föremål för autospårning (när det är aktiverat)</li>"
       }
     },
     "timestamp": {
@@ -645,7 +649,7 @@
         "updateCameras": "Kameror uppdaterade för roll {{role}}",
         "deleteRole": "Roll {{role}} raderad",
         "userRolesUpdated_one": "{{count}} användare som tilldelats den här rollen har uppdaterats till 'tittare', vilket har åtkomst till alla kameror.",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_other": "{{count}} användare som tilldelats den här rollen har uppdaterats till 'tittare', vilket har åtkomst till alla kameror."
       },
       "error": {
         "createRoleFailed": "Misslyckades att skapa roll: {{errorMessage}}",
@@ -866,7 +870,8 @@
     "steps": {
       "nameAndConnection": "Namn och anslutning",
       "streamConfiguration": "Strömkonfiguration",
-      "validationAndTesting": "Validering och testning"
+      "validationAndTesting": "Validering och testning",
+      "probeOrSnapshot": "Prob eller ögonblicksbild"
     },
     "save": {
       "success": "Ny kamera {{cameraName}} har sparats.",
@@ -883,7 +888,7 @@
       "testFailed": "Strömtest misslyckades: {{error}}"
     },
     "step1": {
-      "description": "Ange dina kamerauppgifter och testa anslutningen.",
+      "description": "Ange dina kamerauppgifter och välj att undersöka kameran eller manuellt välja märke.",
       "cameraName": "Kameranamn",
       "cameraNamePlaceholder": "t.ex. ytterdörr eller Översikt över bakgård",
       "host": "Värd-/IP-adress",
@@ -923,10 +928,19 @@
       "testing": {
         "probingMetadata": "Undersöker kamerans metadata...",
         "fetchingSnapshot": "Hämtar kamerabild..."
-      }
+      },
+      "connectionSettings": "Anslutningsinställningar",
+      "detectionMethod": "Strömdetekteringsmetod",
+      "onvifPort": "ONVIF-port",
+      "probeMode": "Undersök kameran",
+      "manualMode": "Manuellt val",
+      "detectionMethodDescription": "Undersök kameran med ONVIF (om det stöds) för att hitta kameraströms-URL:er, eller välj kameramärke manuellt för att använda fördefinierade URL:er. För att ange en anpassad RTSP-URL, välj den manuella metoden och välj \"Annat\".",
+      "onvifPortDescription": "För kameror som stöder ONVIF är detta vanligtvis 80 eller 8080.",
+      "useDigestAuth": "Använd digest-autentisering",
+      "useDigestAuthDescription": "Använd HTTP-sammanfattningsautentisering för ONVIF. Vissa kameror kan kräva ett dedikerat ONVIF-användarnamn/lösenord istället för standardadministratörsanvändaren."
     },
     "step2": {
-      "description": "Konfigurera strömningsroller och lägg till ytterligare strömmar för din kamera.",
+      "description": "Undersök kameran efter tillgängliga strömmar eller konfigurera manuella inställningar baserat på din valda detekteringsmetod.",
       "streamsTitle": "Kameraströmmar",
       "addStream": "Lägg till ström",
       "addAnotherStream": "Lägg till ytterligare en ström",
@@ -945,8 +959,8 @@
         "audio": "Ljud"
       },
       "testStream": "Testa anslutning",
-      "testSuccess": "Ström testet lyckades!",
-      "testFailed": "Ström testet misslyckades",
+      "testSuccess": "Anslutningstestet lyckades!",
+      "testFailed": "Anslutningstestet misslyckades. Kontrollera dina indata och försök igen.",
       "testFailedTitle": "Testet misslyckades",
       "connected": "Ansluten",
       "notConnected": "Inte ansluten",
@@ -962,10 +976,42 @@
       "featuresPopover": {
         "title": "Strömfunktioner",
         "description": "Använd go2rtc-omströmning för att minska anslutningar till din kamera."
+      },
+      "streamDetails": "Streamdetaljer",
+      "probing": "Undersöker kameran...",
+      "retry": "Försöka igen",
+      "testing": {
+        "probingMetadata": "Undersöker kamerans metadata...",
+        "fetchingSnapshot": "Hämtar kamerabild..."
+      },
+      "probeFailed": "Misslyckades med att undersöka kameran: {{error}}",
+      "probingDevice": "Undersöker enheten...",
+      "probeSuccessful": "Kontroll lyckades",
+      "probeError": "Kontroll fel",
+      "probeNoSuccess": "Kontroll misslyckades",
+      "deviceInfo": "Enhetsinformation",
+      "manufacturer": "Tillverkare",
+      "model": "Modell",
+      "firmware": "Inbyggd programvara",
+      "profiles": "Profiler",
+      "ptzSupport": "PTZ-stöd",
+      "autotrackingSupport": "Stöd för Autospårning",
+      "presets": "Förinställningar",
+      "rtspCandidates": "RTSP-kandidater",
+      "rtspCandidatesDescription": "Följande RTSP-URL:er hittades från kamera kontrollen. Testa anslutningen för att visa strömmetadata.",
+      "noRtspCandidates": "Inga RTSP-URL:er hittades från kameran. Dina inloggningsuppgifter kan vara felaktiga, eller så kanske kameran inte stöder ONVIF eller metoden som används för att hämta RTSP-URL:er. Gå tillbaka och ange RTSP-URL:en manuellt.",
+      "candidateStreamTitle": "Kandidat {{number}}",
+      "useCandidate": "Använda",
+      "uriCopy": "Kopiera",
+      "uriCopied": "URI kopierad till urklipp",
+      "testConnection": "Testa anslutning",
+      "toggleUriView": "Klicka för att växla mellan fullständig URI-vy",
+      "errors": {
+        "hostRequired": "Värd-/IP-adress krävs"
       }
     },
     "step3": {
-      "description": "Slutgiltig validering och analys innan du sparar din nya kamera. Anslut varje ström innan du sparar.",
+      "description": "Konfigurera strömningsroller och lägg till ytterligare strömmar för din kamera.",
       "validationTitle": "Strömvalidering",
       "connectAllStreams": "Anslut alla strömmar",
       "reconnectionSuccess": "Återanslutningen lyckades.",
@@ -1006,7 +1052,91 @@
         "resolutionLow": "En upplösning på {{resolution}} kan vara för låg för tillförlitlig detektering av små objekt."
       },
       "ffmpegModule": "Använd läge för strömkompatibilitet",
-      "ffmpegModuleDescription": "Om strömmen inte läses in efter flera försök, prova att aktivera detta. När det är aktiverat kommer Frigate att använda ffmpeg-modulen med go2rtc. Detta kan ge bättre kompatibilitet med vissa kameraströmmar."
+      "ffmpegModuleDescription": "Om strömmen inte läses in efter flera försök, prova att aktivera detta. När det är aktiverat kommer Frigate att använda ffmpeg-modulen med go2rtc. Detta kan ge bättre kompatibilitet med vissa kameraströmmar.",
+      "streamsTitle": "Kameraströmmar",
+      "addStream": "Lägg till ström",
+      "addAnotherStream": "Lägg till ytterligare en ström",
+      "streamUrl": "Stream-URL",
+      "streamUrlPlaceholder": "rtsp://användarnamn:lösenord@värd:portnummer/plats",
+      "selectStream": "Välj en ström",
+      "searchCandidates": "Sök kandidater...",
+      "noStreamFound": "Ingen ström hittades",
+      "url": "URL",
+      "resolution": "Upplösning",
+      "selectResolution": "Välj upplösning",
+      "quality": "Kvalitet",
+      "selectQuality": "Välj kvalitet",
+      "roleLabels": {
+        "detect": "Objektdetektering",
+        "record": "Inspelning",
+        "audio": "Ljud"
+      },
+      "testStream": "Testa anslutning",
+      "testSuccess": "Streamtestet lyckades!",
+      "testFailed": "Strömtestet misslyckades",
+      "testFailedTitle": "Testet misslyckades",
+      "connected": "Ansluten",
+      "notConnected": "Inte ansluten",
+      "featuresTitle": "Funktioner",
+      "go2rtc": "Minska anslutningar till kameran",
+      "detectRoleWarning": "Minst en ström måste ha rollen \"upptäck\" för att fortsätta.",
+      "rolesPopover": {
+        "title": "Stream-roller",
+        "detect": "Huvud kamera flöde för objektdetektering.",
+        "record": "Sparar segment av videoflödet baserat på konfigurationsinställningar.",
+        "audio": "Flöde för ljudbaserad detektering."
+      },
+      "featuresPopover": {
+        "title": "Streamfunktioner",
+        "description": "Använd go2rtc-omströmning för att minska anslutningar till din kamera."
+      }
+    },
+    "step4": {
+      "description": "Slutgiltig validering och analys innan du sparar din nya kamera. Anslut varje ström innan du sparar.",
+      "validationTitle": "Ström validering",
+      "connectAllStreams": "Anslut alla strömmar",
+      "reconnectionSuccess": "Återanslutningen lyckades.",
+      "reconnectionPartial": "Vissa strömmar kunde inte återanslutas.",
+      "streamUnavailable": "Förhandsgranskning av strömmen är inte tillgänglig",
+      "reload": "Ladda om",
+      "connecting": "Ansluter...",
+      "streamTitle": "Ström {{number}}",
+      "valid": "Giltig",
+      "failed": "Misslyckades",
+      "notTested": "Inte testad",
+      "connectStream": "Ansluta",
+      "connectingStream": "Ansluter",
+      "disconnectStream": "Koppla från",
+      "estimatedBandwidth": "Uppskattad bandbredd",
+      "roles": "Roller",
+      "ffmpegModule": "Använd strömkompatibilitetsläge",
+      "ffmpegModuleDescription": "Om strömmen inte laddas efter flera försök, försök att aktivera detta. När det är aktiverat kommer Frigate att använda ffmpeg-modulen med go2rtc. Detta kan ge bättre kompatibilitet med vissa kameraströmmar.",
+      "none": "Ingen",
+      "error": "Fel",
+      "streamValidated": "Ström {{number}} har validerats",
+      "streamValidationFailed": "Validering av ström {{number}} misslyckades",
+      "saveAndApply": "Spara ny kamera",
+      "saveError": "Ogiltig konfiguration. Kontrollera dina inställningar.",
+      "issues": {
+        "title": "Ström validering",
+        "videoCodecGood": "Videokodeken är {{codec}}.",
+        "audioCodecGood": "Ljudkodeken är {{codec}}.",
+        "resolutionHigh": "En upplösning på {{resolution}} kan orsaka ökad resursanvändning.",
+        "resolutionLow": "En upplösning på {{resolution}} kan vara för låg för tillförlitlig detektering av små objekt.",
+        "noAudioWarning": "Inget ljud upptäcktes för den här strömmen, inspelningarna kommer inte att ha ljud.",
+        "audioCodecRecordError": "AAC-ljudkodeken krävs för att stödja ljud i inspelningar.",
+        "audioCodecRequired": "En ljudström krävs för att stödja ljuddetektering.",
+        "restreamingWarning": "Att minska anslutningarna till kameran för inspelningsströmmen kan öka CPU-användningen något.",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP rekommenderas inte. Aktivera HTTP i kamerans firmwareinställningar och starta om guiden."
+        },
+        "dahua": {
+          "substreamWarning": "Delström 1 är låst till en låg upplösning. Många Dahua/Amcrest/EmpireTech-kameror stöder ytterligare delströmmar som måste aktiveras i kamerans inställningar. Det rekommenderas att kontrollera och använda dessa strömmar om de är tillgängliga."
+        },
+        "hikvision": {
+          "substreamWarning": "Delström 1 är låst till en låg upplösning. Många Hikvision-kameror stöder ytterligare delströmmar som måste aktiveras i kamerans inställningar. Det rekommenderas att kontrollera och använda dessa strömmar om de är tillgängliga."
+        }
+      }
     }
   },
   "cameraManagement": {
