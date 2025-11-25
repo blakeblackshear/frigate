@@ -40,8 +40,8 @@
   "detail": {
     "noDataFound": "Nicio dată detaliată de revizuit",
     "aria": "Comută vizualizarea detaliată",
-    "trackedObject_one": "obiect",
-    "trackedObject_other": "obiecte",
+    "trackedObject_one": "{{count}} obiect",
+    "trackedObject_other": "{{count}} obiecte",
     "noObjectDetailData": "Nicio dată de detaliu obiect disponibilă.",
     "label": "Detaliu",
     "settings": "Setări vizualizare detaliată",

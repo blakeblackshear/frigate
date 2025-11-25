@@ -34,7 +34,8 @@
     "snapshot": "snapshot",
     "video": "video",
     "object_lifecycle": "ciclul de viață al obiectului",
-    "thumbnail": "miniatură"
+    "thumbnail": "miniatură",
+    "tracking_details": "detalii de urmărire"
   },
   "objectLifecycle": {
     "lifecycleItemDesc": {
@@ -105,7 +106,7 @@
           "regenerate": "O nouă descriere a fost solicitată de la {{provider}}. În funcție de viteza furnizorului tău, regenerarea noii descrieri poate dura ceva timp.",
           "updatedSublabel": "Subeticheta a fost actualizată cu succes.",
           "updatedLPR": "Plăcuța de înmatriculare a fost actualizată cu succes.",
-          "audioTranscription": "Transcrierea audio a fost solicitată cu succes."
+          "audioTranscription": "Transcrierea audio a fost solicitată cu succes. În funcție de viteza serverului dumneavoastră Frigate, transcrierea poate dura ceva timp până la finalizare."
         },
         "error": {
           "updatedSublabelFailed": "Nu s-a putut actualiza sub-etichetarea: {{errorMessage}}",
@@ -228,7 +229,9 @@
         "error": "Ștergerea obiectului urmărit a eșuat: {{errorMessage}}"
       }
     },
-    "tooltip": "Potrivire {{type}} cu {{confidence}}%"
+    "tooltip": "Potrivire {{type}} cu {{confidence}}%",
+    "previousTrackedObject": "Obiectul urmărit anterior",
+    "nextTrackedObject": "Următorul obiect urmărit"
   },
   "aiAnalysis": {
     "title": "Analiză AI"
@@ -271,9 +274,9 @@
       },
       "offset": {
         "label": "Compensare adnotare",
-        "desc": "Aceste date provin din fluxul de detectare al camerei tale, dar sunt suprapuse pe imaginile din fluxul de înregistrare. Este puțin probabil ca cele două fluxuri să fie perfect sincronizate. Drept urmare, caseta delimitatoare și materialul video nu se vor alinia perfect. Poți folosi această setare pentru a decală adnotările înainte sau înapoi în timp, pentru a le alinia mai bine cu materialul înregistrat.",
+        "desc": "Aceste date provin din stream-ul de detectare al camerei tale, dar sunt suprapuse pe imaginile din stream-ul de înregistrare. Este puțin probabil ca cele două stream-uri să fie perfect sincronizate. Drept urmare, caseta delimitatoare și materialul video nu se vor alinia perfect. Poți folosi această setare pentru a decală adnotările înainte sau înapoi în timp, pentru a le alinia mai bine cu materialul înregistrat.",
         "millisecondsToOffset": "Millisecunde pentru a decalca adnotările de detectare. <em>Implicit: 0</em>",
-        "tips": "SFAT: Imaginează-ți că există un clip al unui eveniment cu o persoană care merge de la stânga la dreapta. Dacă caseta delimitatoare a cronologiei evenimentului este constant în stânga persoanei, atunci valoarea ar trebui să fie scăzută. În mod similar, dacă o persoană merge de la stânga la dreapta și caseta delimitatoare este constant în fața persoanei, atunci valoarea ar trebui să fie crescută.",
+        "tips": "Reduceți valoarea dacă redarea video este înaintea casetelor și punctelor de traseu și creșteți valoarea dacă redarea video este în urma acestora. Această valoare poate fi negativă.",
         "toast": {
           "success": "Decalajul de adnotare pentru {{camera}} a fost salvat în fișierul de configurare. Repornește Frigate pentru a aplica modificările."
         }

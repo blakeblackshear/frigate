@@ -78,7 +78,10 @@
     "minute_other": "{{time}} de minute",
     "second_one": "{{time}} secundă",
     "second_few": "{{time}} secunde",
-    "second_other": "{{time}} de secunde"
+    "second_other": "{{time}} de secunde",
+    "inProgress": "În desfășurare",
+    "invalidStartTime": "Oră de început invalidă",
+    "invalidEndTime": "Oră de sfârșit invalidă"
   },
   "menu": {
     "documentation": {
@@ -179,7 +182,8 @@
     },
     "withSystem": "Modul sistemului",
     "restart": "Repornește Frigate",
-    "review": "Revizuire"
+    "review": "Revizuire",
+    "classification": "Clasificare"
   },
   "button": {
     "cameraAudio": "Sunet cameră",
@@ -216,7 +220,8 @@
     "unselect": "Deselectează",
     "export": "Exportă",
     "deleteNow": "Șterge acum",
-    "next": "Următorul"
+    "next": "Următorul",
+    "continue": "Continuă"
   },
   "unit": {
     "speed": {
@@ -240,7 +245,9 @@
     "back": "Mergi înapoi",
     "hide": "Ascunde {{item}}",
     "show": "Afișează {{item}}",
-    "ID": "ID"
+    "ID": "ID",
+    "none": "Niciuna",
+    "all": "Toate"
   },
   "selectItem": "Selectează {{item}}",
   "pagination": {
