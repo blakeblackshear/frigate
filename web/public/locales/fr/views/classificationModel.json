@@ -20,28 +20,37 @@
       "deletedModel_one": "{{count}} modèle supprimé avec succès",
       "deletedModel_many": "{{count}} modèles supprimés avec succès",
       "deletedModel_other": "{{count}} modèles supprimés avec succès",
-      "updatedModel": "Configuration du modèle mise à jour avec succès"
+      "updatedModel": "Configuration du modèle mise à jour avec succès",
+      "renamedCategory": "Classe renommée en {{name}} avec succès"
     },
     "error": {
       "deleteImageFailed": "Échec de la suppression : {{errorMessage}}",
       "deleteCategoryFailed": "Échec de la suppression de la classe : {{errorMessage}}",
       "categorizeFailed": "Échec de la catégorisation de l'image : {{errorMessage}}",
-      "trainingFailed": "Échec du démarrage de l'entraînement du modèle : {{errorMessage}}",
+      "trainingFailed": "L'entraînement du modèle a échoué. Consultez les journaux de Frigate pour plus de détails.",
       "deleteModelFailed": "Impossible de supprimer le modèle : {{errorMessage}}",
-      "updateModelFailed": "Impossible de mettre à jour le modèle : {{errorMessage}}"
+      "updateModelFailed": "Impossible de mettre à jour le modèle : {{errorMessage}}",
+      "renameCategoryFailed": "Impossible de renommer la classe : {{errorMessage}}",
+      "trainingFailedToStart": "Impossible de démarrer l'entraînement du modèle : {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Supprimer la classe",
-    "desc": "Êtes-vous sûr de vouloir supprimer la classe {{name}} ? Cette action supprimera définitivement toutes les images associées et nécessitera un réentraînement du modèle."
+    "desc": "Êtes-vous sûr de vouloir supprimer la classe {{name}} ? Cette action supprimera définitivement toutes les images associées et nécessitera un réentraînement du modèle.",
+    "minClassesTitle": "Impossible de supprimer la classe",
+    "minClassesDesc": "Un modèle de classification doit avoir au moins 2 classes. Ajoutez une autre classe avant de supprimer celle-ci."
   },
   "deleteDatasetImages": {
     "title": "Supprimer les images du jeu de données",
-    "desc": "Êtes-vous sûr de vouloir supprimer {{count}} images du jeu de données {{dataset}} ? Cette action est irréversible et nécessitera un réentraînement du modèle."
+    "desc_one": "Êtes-vous sûr de vouloir supprimer {{count}} image du jeu de données {{dataset}} ? Cette action est irréversible et nécessitera un réentraînement du modèle.",
+    "desc_many": "Êtes-vous sûr de vouloir supprimer {{count}} images du jeu de données {{dataset}} ? Cette action est irréversible et nécessitera un réentraînement du modèle.",
+    "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} images du jeu de données {{dataset}} ? Cette action est irréversible et nécessitera un réentraînement du modèle."
   },
   "deleteTrainImages": {
     "title": "Supprimer les images d'entraînement",
-    "desc": "Êtes-vous sûr de vouloir supprimer {{count}} images ? Cette action est irréversible."
+    "desc_one": "Êtes-vous sûr de vouloir supprimer {{count}} image ? Cette action est irréversible.",
+    "desc_many": "Êtes-vous sûr de vouloir supprimer {{count}} images ? Cette action est irréversible.",
+    "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} images ? Cette action est irréversible."
   },
   "renameCategory": {
     "title": "Renommer la classe",
@@ -140,13 +149,18 @@
         "generationFailed": "Échec de la génération. Veuillez réessayer.",
         "classifyFailed": "Échec de la classification des images : {{error}}"
       },
-      "generateSuccess": "Génération des images d'exemple réussie"
+      "generateSuccess": "Génération des images d'exemple réussie",
+      "allImagesRequired_one": "Veuillez classifier toutes les images. {{count}} image restante.",
+      "allImagesRequired_many": "Veuillez classifier toutes les images. {{count}} images restantes.",
+      "allImagesRequired_other": "Veuillez classifier toutes les images. {{count}} images restantes."
     }
   },
   "deleteModel": {
     "title": "Supprimer le modèle de classification",
     "single": "Voulez-vous vraiment supprimer {{name}} ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible.",
-    "desc": "Voulez-vous vraiment supprimer {{count}} modèle(s) ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible."
+    "desc_one": "Voulez-vous vraiment supprimer {{count}} modèle ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible.",
+    "desc_many": "Voulez-vous vraiment supprimer {{count}} modèles ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible.",
+    "desc_other": "Voulez-vous vraiment supprimer {{count}} modèles ? Cela supprimera définitivement toutes les données associées, y compris les images et les données d'entraînement. Cette action est irréversible."
   },
   "menu": {
     "objects": "Objets",
@@ -160,5 +174,11 @@
     "descriptionState": "Modifier les classes pour ce modèle de classification d'état. Les modifications nécessiteront un réentraînement du modèle.",
     "descriptionObject": "Modifier le type d'objet et le type de classification pour ce modèle de classification d'objet",
     "stateClassesInfo": "Note : La modification des classes d'état nécessite un réentraînement du modèle avec les classes mises à jour."
+  },
+  "tooltip": {
+    "trainingInProgress": "Modèle en cours d'entraînement",
+    "noNewImages": "Aucune nouvelle image pour l'entraînement. Veuillez d'abord classifier plus d'images dans le jeu de données.",
+    "modelNotReady": "Le modèle n'est pas prêt pour l'entraînement.",
+    "noChanges": "Aucune modification du jeu de données depuis le dernier entraînement"
   }
 }

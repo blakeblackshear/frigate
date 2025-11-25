@@ -76,7 +76,12 @@
         }
       },
       "npuUsage": "Utilisation NPU",
-      "npuMemory": "Mémoire NPU"
+      "npuMemory": "Mémoire NPU",
+      "intelGpuWarning": {
+        "title": "Avertissement relatif aux statistiques du GPU Intel",
+        "message": "Statistiques du GPU non disponibles",
+        "description": "Il s'agit d'un bug connu de l'outil de statistiques GPU d'Intel (intel_gpu_top) : il peut afficher à tort une utilisation de 0 %, même lorsque l'accélération matérielle et la détection d'objets fonctionnent correctement sur l'iGPU. Ce problème ne vient pas de Frigate. Vous pouvez redémarrer l'hôte pour rétablir temporairement l'affichage et confirmer le fonctionnement du GPU. Les performances ne sont pas affectées."
+      }
     },
     "otherProcesses": {
       "title": "Autres processus",
@@ -151,7 +156,7 @@
         "copyToClipboard": "Données de la sonde copiées dans le presse-papiers"
       },
       "error": {
-        "unableToProbeCamera": "Impossible d'inspecter la caméra : {{errorMessage}}"
+        "unableToProbeCamera": "Impossible d'interroger la caméra : {{errorMessage}}"
       }
     }
   },
@@ -180,7 +185,14 @@
       "yolov9_plate_detection": "Détection de plaques d'immatriculation YOLOv9",
       "face_recognition": "Reconnaissance faciale",
       "text_embedding": "Vitesse d'embedding de visage",
-      "yolov9_plate_detection_speed": "Vitesse de détection de plaques d'immatriculation YOLOv9"
-    }
+      "yolov9_plate_detection_speed": "Vitesse de détection de plaques d'immatriculation YOLOv9",
+      "review_description": "Description de la revue",
+      "review_description_speed": "Vitesse de la description de la revue",
+      "review_description_events_per_second": "Description de la revue",
+      "object_description": "Description de l'objet",
+      "object_description_speed": "Vitesse de la description d'objet",
+      "object_description_events_per_second": "Description de l'objet"
+    },
+    "averageInf": "Temps d'inférence moyen"
   }
 }

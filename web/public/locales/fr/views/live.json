@@ -174,7 +174,11 @@
   "noCameras": {
     "title": "Aucune caméra n'est configurée",
     "description": "Pour commencer, connectez une caméra à Frigate.",
-    "buttonText": "Ajouter une caméra"
+    "buttonText": "Ajouter une caméra",
+    "restricted": {
+      "title": "Aucune caméra disponible",
+      "description": "Vous n'avez pas la permission de visionner les caméras de ce groupe."
+    }
   },
   "snapshot": {
     "takeSnapshot": "Télécharger un instantané",

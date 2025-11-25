@@ -60,7 +60,7 @@
       "deletedName_other": "{{count}} visages ont été supprimés avec succès.",
       "uploadedImage": "Image téléversée avec succès",
       "addFaceLibrary": "{{name}} a été ajouté avec succès à la bibliothèque de visages !",
-      "updatedFaceScore": "Score du visage mis à jour avec succès",
+      "updatedFaceScore": "Score du visage ({{score}}) de {{name}} mis à jour avec succès",
       "deletedFace_one": "{{count}} visage supprimé avec succès",
       "deletedFace_many": "{{count}} visages supprimés avec succès",
       "deletedFace_other": "{{count}} visages supprimés avec succès",

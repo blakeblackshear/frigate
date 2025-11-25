@@ -41,8 +41,8 @@
   "detail": {
     "noDataFound": "Aucun détail à examiner",
     "aria": "Activer/désactiver la vue détaillée",
-    "trackedObject_one": "objet",
-    "trackedObject_other": "objets",
+    "trackedObject_one": "{{count}} objet",
+    "trackedObject_other": "{{count}} objets",
     "noObjectDetailData": "Aucun détail d'objet disponible",
     "label": "Détail",
     "settings": "Paramètres de la vue Détail",
