@@ -405,9 +405,6 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         if obj_data.get("end_time") is not None:
             return
 
-        if obj_data.get("stationary"):
-            return
-
         object_id = obj_data["id"]
 
         if (
