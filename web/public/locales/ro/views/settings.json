@@ -8,7 +8,7 @@
     "notifications": "Setări notificări - Frigate",
     "motionTuner": "Ajustare mișcare - Frigate",
     "object": "Depanare - Frigate",
-    "general": "Setări generale - Frigate",
+    "general": "Setări interfață - Frigate",
     "frigatePlus": "Setări Frigate+ - Frigate",
     "enrichments": "Setări de Îmbogățiri - Frigate",
     "cameraManagement": "Gestionează Camerele - Frigate",
@@ -40,7 +40,7 @@
     "noCamera": "Nicio cameră"
   },
   "general": {
-    "title": "Setări generale",
+    "title": "Setări interfață",
     "liveDashboard": {
       "title": "Tabloul de bord live",
       "automaticLiveView": {
@@ -54,6 +54,10 @@
       "displayCameraNames": {
         "label": "Afișează întotdeauna numele camerelor",
         "desc": "Afișează întotdeauna numele camerelor într-un indicator în tabloul de bord cu vizualizare live pe mai multe camere."
+      },
+      "liveFallbackTimeout": {
+        "label": "Timp de expirare pentru redarea live",
+        "desc": "Când stream-ul live de înaltă calitate al unei camere nu este disponibil, revino la modul cu lățime de bandă scăzută după acest număr de secunde. Implicit: 3."
       }
     },
     "storedLayouts": {
@@ -829,9 +833,9 @@
         "createRole": "Rolul {{role}} a fost creat cu succes",
         "updateCameras": "Camerele au fost actualizate pentru rolul {{role}}",
         "deleteRole": "Rolul {{role}} a fost șters cu succes",
-        "userRolesUpdated_one": "{{count}} utilizator(i) atribuiți acestui rol au fost actualizați la „vizualizator”, care are acces la toate camerele.",
-        "userRolesUpdated_few": "",
-        "userRolesUpdated_other": ""
+        "userRolesUpdated_one": "{{count}} utilizator atribuit acestui rol a fost actualizat la „vizualizator”, care are acces la toate camerele.",
+        "userRolesUpdated_few": "{{count}} utilizatori atribuiți acestui rol au fost actualizați la „vizualizatori”, care are acces la toate camerele.",
+        "userRolesUpdated_other": "{{count}} de utilizatori atribuiți acestui rol au fost actualizați la „vizualizatori”, care are acces la toate camerele."
       },
       "error": {
         "createRoleFailed": "Crearea rolului a eșuat: {{errorMessage}}",
@@ -878,7 +882,8 @@
     "steps": {
       "nameAndConnection": "Nume și Conexiune",
       "streamConfiguration": "Configurare streaming",
-      "validationAndTesting": "Validare și Testare"
+      "validationAndTesting": "Validare și Testare",
+      "probeOrSnapshot": "Sondează sau fă snapshot"
     },
     "save": {
       "success": "Camera nouă {{cameraName}} a fost salvată cu succes.",
@@ -895,7 +900,7 @@
       "testFailed": "Testul de streaming a eșuat: {{error}}"
     },
     "step1": {
-      "description": "Introdu detaliile camerei și testează conexiunea.",
+      "description": "Introduceți detaliile camerei și alegeți să testați camera sau să selectați manual marca.",
       "cameraName": "Nume cameră",
       "cameraNamePlaceholder": "ex. usă_intrare sau Vedere Curte Spate",
       "host": "Gazdă/Adresă IP",
@@ -935,10 +940,19 @@
       "testing": {
         "probingMetadata": "Sondare metadate cameră...",
         "fetchingSnapshot": "Preluare snapshot cameră..."
-      }
+      },
+      "connectionSettings": "Setări conexiune",
+      "detectionMethod": "Metoda de detecție stream",
+      "onvifPort": "Port ONVIF",
+      "probeMode": "Sondare cameră",
+      "manualMode": "Selecție manuală",
+      "detectionMethodDescription": "Sondează camera cu ONVIF (dacă este suportat) pentru a găsi URL-urile de stream ale camerei, sau selectează manual marca camerei pentru a utiliza URL-uri predefinite. Pentru a introduce un URL RTSP personalizat, alege metoda manuală și selectează \"Altele\".",
+      "onvifPortDescription": "Pentru camerele care suportă ONVIF, acesta este de obicei 80 sau 8080.",
+      "useDigestAuth": "Utilizați autentificarea digest",
+      "useDigestAuthDescription": "Utilizați autentificarea HTTP digest pentru ONVIF. Unele camere pot necesita un nume de utilizator/parolă ONVIF dedicat în locul utilizatorului standard de administrare."
     },
     "step2": {
-      "description": "Configurează rolurile de streaming și adaugă stream-uri suplimentare pentru camera ta.",
+      "description": "Testează camera pentru fluxurile disponibile sau configurează setările manuale pe baza metodei de detectare selectate.",
       "streamsTitle": "Stream-uri cameră",
       "addStream": "Adaugă stream",
       "addAnotherStream": "Adaugă un alt stream",
@@ -957,8 +971,8 @@
         "audio": "Audio"
       },
       "testStream": "Testează conexiunea",
-      "testSuccess": "Testul de streaming a reușit!",
-      "testFailed": "Testul de streaming a eșuat",
+      "testSuccess": "Testul de conexiune a fost realizat cu succes!",
+      "testFailed": "Testul de conexiune a eșuat. Verifică datele introduse și încearcă din nou.",
       "testFailedTitle": "Test eșuat",
       "connected": "Conectat",
       "notConnected": "Neconectat",
@@ -974,10 +988,42 @@
       "featuresPopover": {
         "title": "Funcționalități streaming",
         "description": "Folosește restreaming go2rtc pentru a reduce conexiunile la cameră."
+      },
+      "streamDetails": "Detalii stream",
+      "probing": "Se sondează camera...",
+      "retry": "Reîncercare",
+      "testing": {
+        "probingMetadata": "Se sondează metadatele camerei...",
+        "fetchingSnapshot": "Se aduce snapshot cameră..."
+      },
+      "probeFailed": "Sondarea camerei a eșuat: {{error}}",
+      "probingDevice": "Se sondează dispozitivul...",
+      "probeSuccessful": "Sondare reușită",
+      "probeError": "Eroare la sondare",
+      "probeNoSuccess": "Sondare nereușită",
+      "deviceInfo": "Informații dispozitiv",
+      "manufacturer": "Producător",
+      "model": "Model",
+      "firmware": "Firmware",
+      "profiles": "Profiluri",
+      "ptzSupport": "Suport PTZ",
+      "autotrackingSupport": "Suport autourmărire",
+      "presets": "Presetări",
+      "rtspCandidates": "Candidați RTSP",
+      "rtspCandidatesDescription": "Următoarele URL-uri RTSP au fost găsite în urma sondării camerei. Testați conexiunea pentru a vizualiza metadatele stream-ului.",
+      "noRtspCandidates": "Nu au fost găsite URL-uri RTSP de la cameră. Este posibil ca datele dumneavoastră de autentificare să fie incorecte, sau este posibil ca aparatul foto să nu suporte ONVIF sau metoda utilizată pentru a prelua URL-urile RTSP. Întoarceți-vă și introduceți URL-ul RTSP manual.",
+      "candidateStreamTitle": "Candidat {{number}}",
+      "useCandidate": "Folosește",
+      "uriCopy": "Copiază",
+      "uriCopied": "URI copiat în clipboard",
+      "testConnection": "Testează conexiunea",
+      "toggleUriView": "Click pentru a comuta vizualizarea URI completă",
+      "errors": {
+        "hostRequired": "Gazdă/adresaIP este necesară"
       }
     },
     "step3": {
-      "description": "Validare finală și analiză înainte de a salva noua cameră. Conectează fiecare stream înainte de a salva.",
+      "description": "Configurează rolurile stream-ului și adaugă stream-uri suplimentare pentru camera ta.",
       "validationTitle": "Validare stream",
       "connectAllStreams": "Conectează toate stream-urile",
       "reconnectionSuccess": "Reconectare reușită.",
@@ -1018,7 +1064,91 @@
         "resolutionLow": "O rezoluție de {{resolution}} poate fi prea mică pentru detectarea fiabilă a obiectelor mici."
       },
       "ffmpegModule": "Folosește modul de compatibilitate pentru stream-uri",
-      "ffmpegModuleDescription": "Dacă fluxul nu se încarcă după mai multe încercări, activați această opțiune. Când este activată, Frigate va folosi modulul ffmpeg împreună cu go2rtc. Aceasta poate oferi o compatibilitate mai bună cu unele fluxuri de camere."
+      "ffmpegModuleDescription": "Dacă fluxul nu se încarcă după mai multe încercări, activați această opțiune. Când este activată, Frigate va folosi modulul ffmpeg împreună cu go2rtc. Aceasta poate oferi o compatibilitate mai bună cu unele fluxuri de camere.",
+      "streamsTitle": "Stream-uri cameră",
+      "addStream": "Adaugă stream",
+      "addAnotherStream": "Adaugă alt stream",
+      "streamUrl": "URL stream",
+      "streamUrlPlaceholder": "rtsp://utilizator:parolă@adresaIP:port/cale",
+      "selectStream": "Selectați un flux",
+      "searchCandidates": "Căutați candidați...",
+      "noStreamFound": "Niciun stream găsit",
+      "url": "URL",
+      "resolution": "Rezoluție",
+      "quality": "Calitate",
+      "selectResolution": "Selectează rezoluția",
+      "selectQuality": "Selectează calitatea",
+      "roleLabels": {
+        "detect": "Detecție Obiect",
+        "record": "Înregistrare",
+        "audio": "Audio"
+      },
+      "testStream": "Testează conexiunea",
+      "testSuccess": "Testul stream-ului a avut succes!",
+      "testFailed": "Testul stream-ului a eșuat",
+      "testFailedTitle": "Testul a eșuat",
+      "connected": "Conectat",
+      "notConnected": "Neconectat",
+      "featuresTitle": "Funcționalități",
+      "go2rtc": "Reduceți conexiunile la cameră",
+      "detectRoleWarning": "Cel puțin un stream trebuie să aibă rolul \"detect\" pentru a continua.",
+      "rolesPopover": {
+        "title": "Roluri stream",
+        "detect": "Stream principal pentru detecția obiectelor.",
+        "record": "Salvează segmente ale stream-ului video pe baza setărilor de configurare.",
+        "audio": "Stream pentru detecția bazată pe audio."
+      },
+      "featuresPopover": {
+        "title": "Funcționalități stream",
+        "description": "Utilizați go2rtc restreaming pentru a reduce conexiunile la cameră."
+      }
+    },
+    "step4": {
+      "description": "Validare finală și analiză înainte de a salva noua cameră. Conectați fiecare stream înainte de a salva.",
+      "validationTitle": "Validare stream",
+      "connectAllStreams": "Conectează toate stream-urile",
+      "reconnectionSuccess": "Reconectare reușită.",
+      "reconnectionPartial": "Unele stream-uri nu au reușit să se reconecteze.",
+      "streamUnavailable": "Previzualizare flux indisponibilă",
+      "reload": "Reîncarcă",
+      "connecting": "Conectare...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Valid",
+      "failed": "Eșuat",
+      "notTested": "Netestat",
+      "connectStream": "Conectare",
+      "connectingStream": "Se conectează",
+      "disconnectStream": "Deconectare",
+      "estimatedBandwidth": "Lățime de bandă estimată",
+      "roles": "Roluri",
+      "ffmpegModule": "Utilizează modul de compatibilitate stream",
+      "ffmpegModuleDescription": "Dacă stream-ul nu se încarcă după câteva încercări, activați această opțiune. Când este activată, Frigate va utiliza modulul ffmpeg cu go2rtc. Acest lucru poate oferi o compatibilitate mai bună cu unele stream-uri de cameră.",
+      "none": "Niciuna",
+      "error": "Eroare",
+      "streamValidated": "Stream-ul {{number}} validat cu succes",
+      "streamValidationFailed": "Validarea stream-ului {{number}} a eșuat",
+      "saveAndApply": "Salvează camera nouă",
+      "saveError": "Configurație nevalidă. Vă rugăm să vă verificați setările.",
+      "issues": {
+        "title": "Validare stream",
+        "videoCodecGood": "Codecul video: {{codec}}.",
+        "audioCodecGood": "Codecul audio: {{codec}}.",
+        "resolutionHigh": "O rezoluție de {{resolution}} poate cauza o utilizare crescută a resurselor.",
+        "resolutionLow": "O rezoluție de {{resolution}} ar putea fi prea mică pentru detectarea fiabilă a obiectelor mici.",
+        "noAudioWarning": "Nu a fost detectat audio pentru acest stream, înregistrările nu vor avea audio.",
+        "audioCodecRecordError": "Codec-ul audio AAC este necesar pentru a suporta audio în înregistrări.",
+        "audioCodecRequired": "Este necesar un stream audio pentru a suporta detecția audio.",
+        "restreamingWarning": "Reducerea conexiunilor la cameră pentru stream-ul de înregistrare poate crește ușor utilizarea procesorului (CPU).",
+        "brands": {
+          "reolink-rtsp": "RTSP Reolink nu este recomandat. Activați HTTP în setările de firmware ale camerei și reporniți asistentul."
+        },
+        "dahua": {
+          "substreamWarning": "Substream-ul 1 este blocat la o rezoluție scăzută. Multe camere Dahua / Amcrest / EmpireTech suportă stream-uri secundare suplimentare care trebuie activate în setările camerei. Se recomandă să verificați și să utilizați aceste stream-uri dacă sunt disponibile."
+        },
+        "hikvision": {
+          "substreamWarning": "Substream-ul 1 este blocat la o rezoluție scăzută. Multe camere Hikvision suportă stream-uri secundare suplimentare care trebuie activate în setările camerei. Se recomandă să verificați și să utilizați aceste stream-uri dacă sunt disponibile."
+        }
+      }
     }
   },
   "cameraManagement": {
