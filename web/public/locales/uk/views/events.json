@@ -40,8 +40,8 @@
   "detail": {
     "noDataFound": "Немає детальних даних для перегляду",
     "aria": "Перемикання детального перегляду",
-    "trackedObject_one": "об'єкт",
-    "trackedObject_other": "об'єкти",
+    "trackedObject_one": "{{count}} об'єкт",
+    "trackedObject_other": "{{count}} об'єкти",
     "noObjectDetailData": "Детальні дані про об'єкт недоступні.",
     "label": "Деталь",
     "settings": "Налаштування детального перегляду",
