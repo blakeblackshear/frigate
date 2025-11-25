@@ -131,6 +131,7 @@ const sidebars: SidebarsConfig = {
       "troubleshooting/recordings",
       "troubleshooting/gpu",
       "troubleshooting/edgetpu",
+      "troubleshooting/memory",
     ],
     Development: [
       "development/contributing",
