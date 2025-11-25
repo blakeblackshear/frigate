@@ -12,6 +12,7 @@ from typing import Any
 
 import cv2
 from peewee import DoesNotExist
+from titlecase import titlecase
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.inter_process import InterProcessRequestor
@@ -455,14 +456,14 @@ def run_analysis(
 
     for i, verified_label in enumerate(final_data["data"]["verified_objects"]):
         object_type = verified_label.replace("-verified", "").replace("_", " ")
-        name = sub_labels_list[i].replace("_", " ").title()
+        name = titlecase(sub_labels_list[i].replace("_", " "))
         unified_objects.append(f"{name} ({object_type})")
 
     for label in objects_list:
         if "-verified" in label:
             continue
         elif label in labelmap_objects:
-            object_type = label.replace("_", " ").title()
+            object_type = titlecase(label.replace("_", " "))
 
             if label in attribute_labels:
                 unified_objects.append(f"{object_type} (delivery/service)")
