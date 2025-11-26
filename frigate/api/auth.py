@@ -447,7 +447,7 @@ def create_user(
     return JSONResponse(content={"username": body.username})
 
 
-@router.delete("/users/{username}")
+@router.delete("/users/{username}", dependencies=[Depends(require_role(["admin"]))])
 def delete_user(username: str):
     User.delete_by_id(username)
     return JSONResponse(content={"success": True})
