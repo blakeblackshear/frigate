@@ -206,6 +206,14 @@ class TestHttpMedia(BaseTestHttp):
         march_10_afternoon = tz.localize(datetime(2024, 3, 10, 15, 0, 0)).timestamp()
 
         with AuthTestClient(self.app) as client:
+            # Override allowed cameras for this test to include both
+            async def mock_get_allowed_cameras_for_filter(_request: Request):
+                return ["front_door", "back_door"]
+
+            self.app.dependency_overrides[get_allowed_cameras_for_filter] = (
+                mock_get_allowed_cameras_for_filter
+            )
+
             # Insert recordings for front_door on March 9
             Recordings.insert(
                 id="front_march_9",
@@ -245,6 +253,14 @@ class TestHttpMedia(BaseTestHttp):
             assert "2024-03-10" in summary
             assert summary["2024-03-09"] is True
             assert summary["2024-03-10"] is True
+
+            # Reset dependency override back to default single camera for other tests
+            async def reset_allowed_cameras(_request: Request):
+                return ["front_door"]
+
+            self.app.dependency_overrides[get_allowed_cameras_for_filter] = (
+                reset_allowed_cameras
+            )
 
     def test_recordings_summary_at_dst_transition_time(self):
         """
