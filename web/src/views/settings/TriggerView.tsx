@@ -43,6 +43,7 @@ import { useTriggers } from "@/api/ws";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { CiCircleAlert } from "react-icons/ci";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { isDesktop } from "react-device-detect";
 
 type ConfigSetBody = {
   requires_restart: number;
@@ -440,7 +441,12 @@ export default function TriggerView({
   return (
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2 md:order-none md:mr-3 md:mt-0">
+      <div
+        className={cn(
+          "scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2",
+          isDesktop && "order-none mr-3 mt-0",
+        )}
+      >
         {!isSemanticSearchEnabled ? (
           <div className="mb-5 flex flex-row items-center justify-between gap-2">
             <div className="flex flex-col items-start">
@@ -651,7 +657,7 @@ export default function TriggerView({
               </div>
 
               {/* Desktop Table View */}
-              <div className="scrollbar-container hidden flex-1 overflow-hidden rounded-lg border border-border bg-background_alt md:mr-3 md:block">
+              <div className="scrollbar-container hidden flex-1 overflow-hidden rounded-lg border border-border bg-background_alt md:block">
                 <div className="h-full overflow-auto">
                   <Table>
                     <TableHeader className="sticky top-0 bg-muted/50">

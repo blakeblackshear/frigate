@@ -113,7 +113,12 @@ export function PlatformAwareSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
+    <Sheet
+      open={open}
+      onOpenChange={onOpenChange}
+      modal={false}
+      enableHistoryBack
+    >
       <SheetTrigger asChild className={triggerClassName}>
         {trigger}
       </SheetTrigger>

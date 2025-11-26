@@ -2,6 +2,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useHistoryBack } from "@/hooks/use-history-back";
 
 // Enhanced Dialog with History Support
 interface HistoryDialogProps extends DialogPrimitive.DialogProps {
@@ -15,51 +16,28 @@ const Dialog = ({
   ...props
 }: HistoryDialogProps) => {
   const [internalOpen, setInternalOpen] = React.useState(open || false);
-  const historyStateRef = React.useRef<null | {
-    listener: (e: PopStateEvent) => void;
-  }>(null);
 
+  // Sync internal state with controlled open prop
   React.useEffect(() => {
     if (open !== undefined) {
       setInternalOpen(open);
     }
   }, [open]);
 
-  React.useEffect(() => {
-    if (enableHistoryBack) {
-      if (internalOpen) {
-        window.history.pushState({ dialogOpen: true }, "");
+  const handleOpenChange = React.useCallback(
+    (newOpen: boolean) => {
+      setInternalOpen(newOpen);
+      onOpenChange?.(newOpen);
+    },
+    [onOpenChange],
+  );
 
-        const listener = () => {
-          setInternalOpen(false);
-          if (onOpenChange) onOpenChange(false);
-        };
-
-        historyStateRef.current = { listener };
-        window.addEventListener("popstate", listener);
-
-        return () => {
-          if (internalOpen) {
-            window.removeEventListener("popstate", listener);
-            historyStateRef.current = null;
-          }
-        };
-      } else if (historyStateRef.current) {
-        window.removeEventListener(
-          "popstate",
-          historyStateRef.current.listener,
-        );
-        historyStateRef.current = null;
-      }
-    }
-  }, [enableHistoryBack, internalOpen, onOpenChange]);
-
-  const handleOpenChange = (open: boolean) => {
-    setInternalOpen(open);
-    if (onOpenChange) {
-      onOpenChange(open);
-    }
-  };
+  // Handle browser back button to close dialog
+  useHistoryBack({
+    enabled: enableHistoryBack,
+    open: internalOpen,
+    onClose: () => handleOpenChange(false),
+  });
 
   return (
     <DialogPrimitive.Root
