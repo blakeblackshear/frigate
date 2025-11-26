@@ -677,7 +677,9 @@ def delete_user(request: Request, username: str):
     return JSONResponse(content={"success": True})
 
 
-@router.put("/users/{username}/password")
+@router.put(
+    "/users/{username}/password", dependencies=[Depends(allow_any_authenticated())]
+)
 async def update_password(
     request: Request,
     username: str,

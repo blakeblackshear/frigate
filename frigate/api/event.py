@@ -22,6 +22,7 @@ from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import (
+    allow_any_authenticated,
     get_allowed_cameras_for_filter,
     require_camera_access,
     require_role,
@@ -808,7 +809,7 @@ def events_search(
     return JSONResponse(content=processed_events)
 
 
-@router.get("/events/summary")
+@router.get("/events/summary", dependencies=[Depends(allow_any_authenticated())])
 def events_summary(
     params: EventsSummaryQueryParams = Depends(),
     allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),

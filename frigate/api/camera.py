@@ -15,7 +15,11 @@ from onvif import ONVIFCamera, ONVIFError
 from zeep.exceptions import Fault, TransportError
 from zeep.transports import AsyncTransport
 
-from frigate.api.auth import require_role
+from frigate.api.auth import (
+    allow_any_authenticated,
+    require_camera_access,
+    require_role,
+)
 from frigate.api.defs.tags import Tags
 from frigate.config.config import FrigateConfig
 from frigate.util.builtin import clean_camera_user_pass
@@ -50,7 +54,7 @@ def _is_valid_host(host: str) -> bool:
         return False
 
 
-@router.get("/go2rtc/streams")
+@router.get("/go2rtc/streams", dependencies=[Depends(allow_any_authenticated())])
 def go2rtc_streams():
     r = requests.get("http://127.0.0.1:1984/api/streams")
     if not r.ok:
@@ -66,7 +70,9 @@ def go2rtc_streams():
     return JSONResponse(content=stream_data)
 
 
-@router.get("/go2rtc/streams/{camera_name}")
+@router.get(
+    "/go2rtc/streams/{camera_name}", dependencies=[Depends(require_camera_access)]
+)
 def go2rtc_camera_stream(request: Request, camera_name: str):
     r = requests.get(
         f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
@@ -161,7 +167,7 @@ def go2rtc_delete_stream(stream_name: str):
         )
 
 
-@router.get("/ffprobe")
+@router.get("/ffprobe", dependencies=[Depends(require_role(["admin"]))])
 def ffprobe(request: Request, paths: str = "", detailed: bool = False):
     path_param = paths
 
