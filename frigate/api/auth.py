@@ -39,15 +39,14 @@ def require_admin_by_default():
 
     This is set as the default dependency on the FastAPI app to ensure all
     endpoints require admin access unless explicitly overridden with
-    allow_public(), allow_any_authenticated(), or allow_viewer().
+    allow_public(), allow_any_authenticated(), or require_role().
 
     Port 5000 (internal) always has admin role set by the /auth endpoint,
     so this check passes automatically for internal requests.
 
-    Certain paths are exempted from the global admin check because they have
-    their own route-level authorization dependencies (allow_public(),
-    allow_any_authenticated(), etc). The route-level dependencies handle the
-    actual authorization for these paths.
+    Certain paths are exempted from the global admin check because they must
+    be accessible before authentication (login, auth) or they have their own
+    route-level authorization dependencies that handle access control.
     """
     # Paths that have route-level auth dependencies and should bypass global admin check
     # These paths still have authorization - it's handled by their route-level dependencies
@@ -106,6 +105,7 @@ def require_admin_by_default():
             return
 
         # For all other paths, require admin role
+        # Port 5000 (internal) requests have admin role set automatically
         role = request.headers.get("remote-role")
         if role == "admin":
             return
@@ -116,6 +116,17 @@ def require_admin_by_default():
         )
 
     return admin_checker
+
+
+def _is_authenticated(request: Request) -> bool:
+    """
+    Helper to determine if a request is from an authenticated user.
+
+    Returns True if the request has a valid authenticated user (not anonymous).
+    Port 5000 internal requests are considered anonymous despite having admin role.
+    """
+    username = request.headers.get("remote-user")
+    return username is not None and username != "anonymous"
 
 
 def allow_public():
@@ -139,45 +150,29 @@ def allow_any_authenticated():
     """
     Override dependency to allow any authenticated user (bypass admin requirement).
 
-    The user must have valid remote-user and remote-role headers, but any role
-    is accepted. Port 5000 requests have "admin" role so they also pass.
+    Allows:
+    - Port 5000 internal requests (have admin role despite anonymous user)
+    - Any authenticated user with a real username (not "anonymous")
+
+    Rejects:
+    - Port 8971 requests with anonymous user (auth disabled, no proxy auth)
 
     Example:
         @router.get("/authenticated-endpoint", dependencies=[Depends(allow_any_authenticated())])
     """
 
     async def auth_checker(request: Request):
-        if not request.headers.get("remote-user"):
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication required",
-            )
+        # Port 5000 requests have admin role and should be allowed
+        role = request.headers.get("remote-role")
+        if role == "admin":
+            return
+        
+        # Otherwise require a real authenticated user (not anonymous)
+        if not _is_authenticated(request):
+            raise HTTPException(status_code=401, detail="Authentication required")
         return
 
     return auth_checker
-
-
-def allow_viewer():
-    """
-    Override dependency to allow viewer or higher roles (admin, custom roles with cameras).
-
-    This is useful for read-only endpoints that should allow non-admin authenticated users.
-
-    Example:
-        @router.get("/viewer-endpoint", dependencies=[Depends(allow_viewer())])
-    """
-
-    async def viewer_checker(request: Request):
-        role = request.headers.get("remote-role")
-        if not role:
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication required",
-            )
-        # Any role is allowed (admin, viewer, or custom roles)
-        return
-
-    return viewer_checker
 
 
 router = APIRouter(tags=[Tags.auth])
