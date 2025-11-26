@@ -2,14 +2,13 @@ from datetime import datetime
 from typing import Any
 from unittest.mock import Mock
 
-from fastapi.testclient import TestClient
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.models import Event, Recordings, ReviewSegment, Timeline
 from frigate.stats.emitter import StatsEmitter
-from frigate.test.http_api.base_http_test import BaseTestHttp
+from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp, Request
 from frigate.test.test_storage import _insert_mock_event
 
 
@@ -18,14 +17,26 @@ class TestHttpApp(BaseTestHttp):
         super().setUp([Event, Recordings, ReviewSegment, Timeline])
         self.app = super().create_app()
 
-        # Mock auth to bypass camera access for tests
-        async def mock_get_current_user(request: Any):
-            return {"username": "test_user", "role": "admin"}
+        # Mock get_current_user for all tests
+        async def mock_get_current_user(request: Request):
+            username = request.headers.get("remote-user")
+            role = request.headers.get("remote-role")
+            if not username or not role:
+                from fastapi.responses import JSONResponse
+
+                return JSONResponse(
+                    content={"message": "No authorization headers."}, status_code=401
+                )
+            return {"username": username, "role": role}
 
         self.app.dependency_overrides[get_current_user] = mock_get_current_user
-        self.app.dependency_overrides[get_allowed_cameras_for_filter] = lambda: [
-            "front_door"
-        ]
+
+        async def mock_get_allowed_cameras_for_filter(request: Request):
+            return ["front_door"]
+
+        self.app.dependency_overrides[get_allowed_cameras_for_filter] = (
+            mock_get_allowed_cameras_for_filter
+        )
 
     def tearDown(self):
         self.app.dependency_overrides.clear()
@@ -35,20 +46,20 @@ class TestHttpApp(BaseTestHttp):
     ###################################  GET /events Endpoint   #########################################################
     ####################################################################################################################
     def test_get_event_list_no_events(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             events = client.get("/events").json()
             assert len(events) == 0
 
     def test_get_event_list_no_match_event_id(self):
         id = "123456.random"
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_event(id)
             events = client.get("/events", params={"event_id": "abc"}).json()
             assert len(events) == 0
 
     def test_get_event_list_match_event_id(self):
         id = "123456.random"
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_event(id)
             events = client.get("/events", params={"event_id": id}).json()
             assert len(events) == 1
@@ -58,7 +69,7 @@ class TestHttpApp(BaseTestHttp):
         now = int(datetime.now().timestamp())
 
         id = "123456.random"
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_event(id, now, now + 1)
             events = client.get(
                 "/events", params={"max_length": 1, "min_length": 1}
@@ -69,7 +80,7 @@ class TestHttpApp(BaseTestHttp):
     def test_get_event_list_no_match_max_length(self):
         now = int(datetime.now().timestamp())
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_event(id, now, now + 2)
             events = client.get("/events", params={"max_length": 1}).json()
@@ -78,7 +89,7 @@ class TestHttpApp(BaseTestHttp):
     def test_get_event_list_no_match_min_length(self):
         now = int(datetime.now().timestamp())
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_event(id, now, now + 2)
             events = client.get("/events", params={"min_length": 3}).json()
@@ -88,7 +99,7 @@ class TestHttpApp(BaseTestHttp):
         id = "123456.random"
         id2 = "54321.random"
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_event(id)
             events = client.get("/events").json()
             assert len(events) == 1
@@ -108,14 +119,14 @@ class TestHttpApp(BaseTestHttp):
     def test_get_event_list_no_match_has_clip(self):
         now = int(datetime.now().timestamp())
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_event(id, now, now + 2)
             events = client.get("/events", params={"has_clip": 0}).json()
             assert len(events) == 0
 
     def test_get_event_list_has_clip(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_event(id, has_clip=True)
             events = client.get("/events", params={"has_clip": 1}).json()
@@ -123,7 +134,7 @@ class TestHttpApp(BaseTestHttp):
             assert events[0]["id"] == id
 
     def test_get_event_list_sort_score(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             id2 = "54321.random"
             super().insert_mock_event(id, top_score=37, score=37, data={"score": 50})
@@ -141,7 +152,7 @@ class TestHttpApp(BaseTestHttp):
     def test_get_event_list_sort_start_time(self):
         now = int(datetime.now().timestamp())
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             id2 = "54321.random"
             super().insert_mock_event(id, start_time=now + 3)
@@ -159,7 +170,7 @@ class TestHttpApp(BaseTestHttp):
     def test_get_good_event(self):
         id = "123456.random"
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_event(id)
             event = client.get(f"/events/{id}").json()
 
@@ -171,7 +182,7 @@ class TestHttpApp(BaseTestHttp):
         id = "123456.random"
         bad_id = "654321.other"
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_event(id)
             event_response = client.get(f"/events/{bad_id}")
             assert event_response.status_code == 404
@@ -180,7 +191,7 @@ class TestHttpApp(BaseTestHttp):
     def test_delete_event(self):
         id = "123456.random"
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_event(id)
             event = client.get(f"/events/{id}").json()
             assert event
@@ -193,7 +204,7 @@ class TestHttpApp(BaseTestHttp):
     def test_event_retention(self):
         id = "123456.random"
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_event(id)
             client.post(f"/events/{id}/retain", headers={"remote-role": "admin"})
             event = client.get(f"/events/{id}").json()
@@ -212,12 +223,11 @@ class TestHttpApp(BaseTestHttp):
         morning = 1656590400  # 06/30/2022 6 am (GMT)
         evening = 1656633600  # 06/30/2022 6 pm (GMT)
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_event(morning_id, morning)
             super().insert_mock_event(evening_id, evening)
             # both events come back
             events = client.get("/events").json()
-            print("events!!!", events)
             assert events
             assert len(events) == 2
             # morning event is excluded
@@ -248,7 +258,7 @@ class TestHttpApp(BaseTestHttp):
 
         mock_event_updater.publish.side_effect = update_event
 
-        with TestClient(app) as client:
+        with AuthTestClient(app) as client:
             super().insert_mock_event(id)
             new_sub_label_response = client.post(
                 f"/events/{id}/sub_label",
@@ -285,7 +295,7 @@ class TestHttpApp(BaseTestHttp):
 
         mock_event_updater.publish.side_effect = update_event
 
-        with TestClient(app) as client:
+        with AuthTestClient(app) as client:
             super().insert_mock_event(id)
             client.post(
                 f"/events/{id}/sub_label",
@@ -301,7 +311,7 @@ class TestHttpApp(BaseTestHttp):
     ####################################################################################################################
     def test_get_metrics(self):
         """ensure correct prometheus metrics api response"""
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             ts_start = datetime.now().timestamp()
             ts_end = ts_start + 30
             _insert_mock_event(

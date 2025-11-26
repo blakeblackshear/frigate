@@ -1,14 +1,13 @@
 """Unit tests for recordings/media API endpoints."""
 
 from datetime import datetime, timezone
-from typing import Any
 
 import pytz
-from fastapi.testclient import TestClient
+from fastapi import Request
 
 from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 from frigate.models import Recordings
-from frigate.test.http_api.base_http_test import BaseTestHttp
+from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
 
 class TestHttpMedia(BaseTestHttp):
@@ -19,15 +18,26 @@ class TestHttpMedia(BaseTestHttp):
         super().setUp([Recordings])
         self.app = super().create_app()
 
-        # Mock auth to bypass camera access for tests
-        async def mock_get_current_user(request: Any):
-            return {"username": "test_user", "role": "admin"}
+        # Mock get_current_user for all tests
+        async def mock_get_current_user(request: Request):
+            username = request.headers.get("remote-user")
+            role = request.headers.get("remote-role")
+            if not username or not role:
+                from fastapi.responses import JSONResponse
+
+                return JSONResponse(
+                    content={"message": "No authorization headers."}, status_code=401
+                )
+            return {"username": username, "role": role}
 
         self.app.dependency_overrides[get_current_user] = mock_get_current_user
-        self.app.dependency_overrides[get_allowed_cameras_for_filter] = lambda: [
-            "front_door",
-            "back_door",
-        ]
+
+        async def mock_get_allowed_cameras_for_filter(request: Request):
+            return ["front_door"]
+
+        self.app.dependency_overrides[get_allowed_cameras_for_filter] = (
+            mock_get_allowed_cameras_for_filter
+        )
 
     def tearDown(self):
         """Clean up after tests."""
@@ -52,7 +62,7 @@ class TestHttpMedia(BaseTestHttp):
         # March 11, 2024 at 12:00 PM EDT (after DST)
         march_11_noon = tz.localize(datetime(2024, 3, 11, 12, 0, 0)).timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             # Insert recordings for each day
             Recordings.insert(
                 id="recording_march_9",
@@ -128,7 +138,7 @@ class TestHttpMedia(BaseTestHttp):
         # November 4, 2024 at 12:00 PM EST (after DST)
         nov_4_noon = tz.localize(datetime(2024, 11, 4, 12, 0, 0)).timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             # Insert recordings for each day
             Recordings.insert(
                 id="recording_nov_2",
@@ -195,7 +205,15 @@ class TestHttpMedia(BaseTestHttp):
         # March 10, 2024 at 3:00 PM EDT (after DST transition)
         march_10_afternoon = tz.localize(datetime(2024, 3, 10, 15, 0, 0)).timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
+            # Override allowed cameras for this test to include both
+            async def mock_get_allowed_cameras_for_filter(_request: Request):
+                return ["front_door", "back_door"]
+
+            self.app.dependency_overrides[get_allowed_cameras_for_filter] = (
+                mock_get_allowed_cameras_for_filter
+            )
+
             # Insert recordings for front_door on March 9
             Recordings.insert(
                 id="front_march_9",
@@ -236,6 +254,14 @@ class TestHttpMedia(BaseTestHttp):
             assert summary["2024-03-09"] is True
             assert summary["2024-03-10"] is True
 
+            # Reset dependency override back to default single camera for other tests
+            async def reset_allowed_cameras(_request: Request):
+                return ["front_door"]
+
+            self.app.dependency_overrides[get_allowed_cameras_for_filter] = (
+                reset_allowed_cameras
+            )
+
     def test_recordings_summary_at_dst_transition_time(self):
         """
         Test recordings that span the exact DST transition time.
@@ -250,7 +276,7 @@ class TestHttpMedia(BaseTestHttp):
         # This is 1.5 hours of actual time but spans the "missing" hour
         after_transition = tz.localize(datetime(2024, 3, 10, 3, 30, 0)).timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             Recordings.insert(
                 id="recording_during_transition",
                 path="/media/recordings/transition.mp4",
@@ -283,7 +309,7 @@ class TestHttpMedia(BaseTestHttp):
         march_9_utc = datetime(2024, 3, 9, 17, 0, 0, tzinfo=timezone.utc).timestamp()
         march_10_utc = datetime(2024, 3, 10, 17, 0, 0, tzinfo=timezone.utc).timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             Recordings.insert(
                 id="recording_march_9_utc",
                 path="/media/recordings/march_9_utc.mp4",
@@ -325,7 +351,7 @@ class TestHttpMedia(BaseTestHttp):
         """
         Test recordings summary when no recordings exist.
         """
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             response = client.get(
                 "/recordings/summary",
                 params={"timezone": "America/New_York", "cameras": "all"},
@@ -342,7 +368,7 @@ class TestHttpMedia(BaseTestHttp):
         tz = pytz.timezone("America/New_York")
         march_10_noon = tz.localize(datetime(2024, 3, 10, 12, 0, 0)).timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             # Insert recordings for both cameras
             Recordings.insert(
                 id="front_recording",

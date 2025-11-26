@@ -14,6 +14,7 @@ from peewee import Case, DoesNotExist, IntegrityError, fn, operator
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import (
+    allow_any_authenticated,
     get_allowed_cameras_for_filter,
     get_current_user,
     require_camera_access,
@@ -43,7 +44,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.review])
 
 
-@router.get("/review", response_model=list[ReviewSegmentResponse])
+@router.get(
+    "/review",
+    response_model=list[ReviewSegmentResponse],
+    dependencies=[Depends(allow_any_authenticated())],
+)
 async def review(
     params: ReviewQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
@@ -152,7 +157,11 @@ async def review(
     return JSONResponse(content=[r for r in review_query])
 
 
-@router.get("/review_ids", response_model=list[ReviewSegmentResponse])
+@router.get(
+    "/review_ids",
+    response_model=list[ReviewSegmentResponse],
+    dependencies=[Depends(allow_any_authenticated())],
+)
 async def review_ids(request: Request, ids: str):
     ids = ids.split(",")
 
@@ -186,7 +195,11 @@ async def review_ids(request: Request, ids: str):
         )
 
 
-@router.get("/review/summary", response_model=ReviewSummaryResponse)
+@router.get(
+    "/review/summary",
+    response_model=ReviewSummaryResponse,
+    dependencies=[Depends(allow_any_authenticated())],
+)
 async def review_summary(
     params: ReviewSummaryQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
@@ -461,7 +474,11 @@ async def review_summary(
     return JSONResponse(content=data)
 
 
-@router.post("/reviews/viewed", response_model=GenericResponse)
+@router.post(
+    "/reviews/viewed",
+    response_model=GenericResponse,
+    dependencies=[Depends(allow_any_authenticated())],
+)
 async def set_multiple_reviewed(
     request: Request,
     body: ReviewModifyMultipleBody,
@@ -644,7 +661,11 @@ def motion_activity(
     return JSONResponse(content=normalized)
 
 
-@router.get("/review/event/{event_id}", response_model=ReviewSegmentResponse)
+@router.get(
+    "/review/event/{event_id}",
+    response_model=ReviewSegmentResponse,
+    dependencies=[Depends(allow_any_authenticated())],
+)
 async def get_review_from_event(request: Request, event_id: str):
     try:
         review = ReviewSegment.get(
@@ -659,7 +680,11 @@ async def get_review_from_event(request: Request, event_id: str):
         )
 
 
-@router.get("/review/{review_id}", response_model=ReviewSegmentResponse)
+@router.get(
+    "/review/{review_id}",
+    response_model=ReviewSegmentResponse,
+    dependencies=[Depends(allow_any_authenticated())],
+)
 async def get_review(request: Request, review_id: str):
     try:
         review = ReviewSegment.get(ReviewSegment.id == review_id)
@@ -672,7 +697,11 @@ async def get_review(request: Request, review_id: str):
         )
 
 
-@router.delete("/review/{review_id}/viewed", response_model=GenericResponse)
+@router.delete(
+    "/review/{review_id}/viewed",
+    response_model=GenericResponse,
+    dependencies=[Depends(allow_any_authenticated())],
+)
 async def set_not_reviewed(
     review_id: str,
     current_user: dict = Depends(get_current_user),
