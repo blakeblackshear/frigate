@@ -448,7 +448,13 @@ def create_user(
 
 
 @router.delete("/users/{username}", dependencies=[Depends(require_role(["admin"]))])
-def delete_user(username: str):
+def delete_user(request: Request, username: str):
+    # Prevent deletion of the built-in admin user
+    if username == "admin":
+        return JSONResponse(
+            content={"message": "Cannot delete admin user"}, status_code=403
+        )
+
     User.delete_by_id(username)
     return JSONResponse(content={"success": True})
 
