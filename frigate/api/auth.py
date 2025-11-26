@@ -86,7 +86,8 @@ def require_admin_by_default():
     # Path prefixes that should be exempt (for paths with parameters)
     EXEMPT_PREFIXES = (
         "/logs/",  # /logs/{service}
-        "/review",  # /review, /review/{id}, /review_ids, etc.
+        "/review",  # /review, /review/{id}, /review_ids, /review/summary, etc.
+        "/reviews/",  # /reviews/viewed, /reviews/delete
         "/events/",  # /events/{id}/thumbnail, etc. (camera-scoped)
         "/go2rtc/streams/",  # /go2rtc/streams/{camera}
         "/users/",  # /users/{username}/password (has own auth)
@@ -166,7 +167,7 @@ def allow_any_authenticated():
         role = request.headers.get("remote-role")
         if role == "admin":
             return
-        
+
         # Otherwise require a real authenticated user (not anonymous)
         if not _is_authenticated(request):
             raise HTTPException(status_code=401, detail="Authentication required")
