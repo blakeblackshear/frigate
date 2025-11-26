@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import Hls from "hls.js";
-import { isAndroid, isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import VideoControls from "./VideoControls";
 import { VideoResolutionType } from "@/types/live";
@@ -21,7 +21,7 @@ import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 import { useTranslation } from "react-i18next";
 
 // Android native hls does not seek correctly
-const USE_NATIVE_HLS = !isAndroid;
+const USE_NATIVE_HLS = false;
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
 const unsupportedErrorCodes = [
   MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
