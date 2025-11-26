@@ -10,12 +10,8 @@ import useSWR from "swr";
 import { baseUrl } from "@/api/baseUrl";
 import { isMobile } from "react-device-detect";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { IoIosWarning } from "react-icons/io";
 
 export type Step3FormData = {
   examplesGenerated: boolean;
@@ -159,6 +155,19 @@ export default function Step3ChooseExamples({
   const handleContinueClassification = useCallback(async () => {
     // Mark selected images with current class
     const newClassifications = { ...imageClassifications };
+
+    // Handle user going back and de-selecting images
+    const imagesToCheck = unknownImages.slice(0, 24);
+    imagesToCheck.forEach((imageName) => {
+      if (
+        newClassifications[imageName] === currentClass &&
+        !selectedImages.has(imageName)
+      ) {
+        delete newClassifications[imageName];
+      }
+    });
+
+    // Then, add all currently selected images to the current class
     selectedImages.forEach((imageName) => {
       newClassifications[imageName] = currentClass;
     });
@@ -329,8 +338,43 @@ export default function Step3ChooseExamples({
     return unclassifiedImages.length === 0;
   }, [unclassifiedImages]);
 
-  // For state models on the last class, require all images to be classified
   const isLastClass = currentClassIndex === allClasses.length - 1;
+  const statesWithExamples = useMemo(() => {
+    if (step1Data.modelType !== "state") return new Set<string>();
+
+    const states = new Set<string>();
+    const allImages = unknownImages.slice(0, 24);
+
+    // Check which states have at least one image classified
+    allImages.forEach((img) => {
+      let className: string | undefined;
+      if (selectedImages.has(img)) {
+        className = currentClass;
+      } else {
+        className = imageClassifications[img];
+      }
+      if (className && allClasses.includes(className)) {
+        states.add(className);
+      }
+    });
+
+    return states;
+  }, [
+    step1Data.modelType,
+    unknownImages,
+    imageClassifications,
+    selectedImages,
+    currentClass,
+    allClasses,
+  ]);
+
+  const allStatesHaveExamples = useMemo(() => {
+    if (step1Data.modelType !== "state") return true;
+    return allClasses.every((className) => statesWithExamples.has(className));
+  }, [step1Data.modelType, allClasses, statesWithExamples]);
+
+  // For state models on the last class, require all images to be classified
+  // But allow proceeding even if not all states have examples (with warning)
   const canProceed = useMemo(() => {
     if (step1Data.modelType === "state" && isLastClass) {
       // Check if all 24 images will be classified after current selections are applied
@@ -351,6 +395,28 @@ export default function Step3ChooseExamples({
     unknownImages,
     imageClassifications,
     selectedImages,
+  ]);
+
+  const hasUnclassifiedImages = useMemo(() => {
+    if (!unknownImages) return false;
+    const allImages = unknownImages.slice(0, 24);
+    return allImages.some((img) => !imageClassifications[img]);
+  }, [unknownImages, imageClassifications]);
+
+  const showMissingStatesWarning = useMemo(() => {
+    return (
+      step1Data.modelType === "state" &&
+      isLastClass &&
+      !allStatesHaveExamples &&
+      !hasUnclassifiedImages &&
+      hasGenerated
+    );
+  }, [
+    step1Data.modelType,
+    isLastClass,
+    allStatesHaveExamples,
+    hasUnclassifiedImages,
+    hasGenerated,
   ]);
 
   const handleBack = useCallback(() => {
@@ -399,6 +465,17 @@ export default function Step3ChooseExamples({
         </div>
       ) : hasGenerated ? (
         <div className="flex flex-col gap-4">
+          {showMissingStatesWarning && (
+            <Alert variant="destructive">
+              <IoIosWarning className="size-5" />
+              <AlertTitle>
+                {t("wizard.step3.missingStatesWarning.title")}
+              </AlertTitle>
+              <AlertDescription>
+                {t("wizard.step3.missingStatesWarning.description")}
+              </AlertDescription>
+            </Alert>
+          )}
           {!allImagesClassified && (
             <div className="text-center">
               <h3 className="text-lg font-medium">
@@ -474,35 +551,22 @@ export default function Step3ChooseExamples({
           <Button type="button" onClick={handleBack} className="sm:flex-1">
             {t("button.back", { ns: "common" })}
           </Button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                onClick={
-                  allImagesClassified
-                    ? handleContinue
-                    : handleContinueClassification
-                }
-                variant="select"
-                className="flex items-center justify-center gap-2 sm:flex-1"
-                disabled={
-                  !hasGenerated || isGenerating || isProcessing || !canProceed
-                }
-              >
-                {isProcessing && <ActivityIndicator className="size-4" />}
-                {t("button.continue", { ns: "common" })}
-              </Button>
-            </TooltipTrigger>
-            {!canProceed && (
-              <TooltipPortal>
-                <TooltipContent>
-                  {t("wizard.step3.allImagesRequired", {
-                    count: unclassifiedImages.length,
-                  })}
-                </TooltipContent>
-              </TooltipPortal>
-            )}
-          </Tooltip>
+          <Button
+            type="button"
+            onClick={
+              allImagesClassified
+                ? handleContinue
+                : handleContinueClassification
+            }
+            variant="select"
+            className="flex items-center justify-center gap-2 sm:flex-1"
+            disabled={
+              !hasGenerated || isGenerating || isProcessing || !canProceed
+            }
+          >
+            {isProcessing && <ActivityIndicator className="size-4" />}
+            {t("button.continue", { ns: "common" })}
+          </Button>
         </div>
       )}
     </div>
