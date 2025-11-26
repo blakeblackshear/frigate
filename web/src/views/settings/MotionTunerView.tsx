@@ -23,6 +23,8 @@ import { LuExternalLink } from "react-icons/lu";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { cn } from "@/lib/utils";
+import { isDesktop } from "react-device-detect";
 
 type MotionTunerViewProps = {
   selectedCamera: string;
@@ -325,7 +327,12 @@ export default function MotionTunerView({
       </div>
 
       {cameraConfig ? (
-        <div className="flex max-h-[70%] md:mr-3 md:h-dvh md:max-h-full md:w-7/12 md:grow">
+        <div
+          className={cn(
+            "flex max-h-[70%] md:h-dvh md:max-h-full md:w-7/12 md:grow",
+            isDesktop && "md:mr-3",
+          )}
+        >
           <div className="size-full min-h-10">
             <AutoUpdatingCameraImage
               camera={cameraConfig.name}

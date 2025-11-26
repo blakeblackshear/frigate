@@ -35,6 +35,7 @@ import { useTranslation } from "react-i18next";
 
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { cn } from "@/lib/utils";
 
 type MasksAndZoneViewProps = {
   selectedCamera: string;
@@ -697,7 +698,10 @@ export default function MasksAndZonesView({
           </div>
           <div
             ref={containerRef}
-            className="flex max-h-[50%] md:mr-3 md:h-dvh md:max-h-full md:w-7/12 md:grow"
+            className={cn(
+              "flex max-h-[50%] md:h-dvh md:max-h-full md:w-7/12 md:grow",
+              isDesktop && "md:mr-3",
+            )}
           >
             <div className="mx-auto flex size-full flex-row justify-center">
               {cameraConfig &&
