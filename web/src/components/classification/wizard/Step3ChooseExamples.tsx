@@ -141,15 +141,49 @@ export default function Step3ChooseExamples({
       );
       await Promise.all(categorizePromises);
 
-      // Step 3: Kick off training
-      await axios.post(`/classification/${step1Data.modelName}/train`);
+      // Step 2.5: Create empty folders for classes that don't have any images
+      // This ensures all classes are available in the dataset view later
+      const classesWithImages = new Set(
+        Object.values(classifications).filter((c) => c && c !== "none"),
+      );
+      const emptyFolderPromises = step1Data.classes
+        .filter((className) => !classesWithImages.has(className))
+        .map((className) =>
+          axios.post(
+            `/classification/${step1Data.modelName}/dataset/${className}/create`,
+          ),
+        );
+      await Promise.all(emptyFolderPromises);
 
-      toast.success(t("wizard.step3.trainingStarted"), {
-        closeButton: true,
-      });
-      setIsTraining(true);
+      // Step 3: Determine if we should train
+      // For state models, we need ALL states to have examples
+      // For object models, we need at least 2 classes with images
+      const allStatesHaveExamplesForTraining =
+        step1Data.modelType !== "state" ||
+        step1Data.classes.every((className) =>
+          classesWithImages.has(className),
+        );
+      const shouldTrain =
+        allStatesHaveExamplesForTraining && classesWithImages.size >= 2;
+
+      // Step 4: Kick off training only if we have enough classes with images
+      if (shouldTrain) {
+        await axios.post(`/classification/${step1Data.modelName}/train`);
+
+        toast.success(t("wizard.step3.trainingStarted"), {
+          closeButton: true,
+        });
+        setIsTraining(true);
+      } else {
+        // Don't train - not all states have examples
+        toast.success(t("wizard.step3.modelCreated"), {
+          closeButton: true,
+        });
+        setIsTraining(false);
+        onClose();
+      }
     },
-    [step1Data, step2Data, t],
+    [step1Data, step2Data, t, onClose],
   );
 
   const handleContinueClassification = useCallback(async () => {
