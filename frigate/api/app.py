@@ -90,7 +90,7 @@ def stats_history(request: Request, keys: str = None):
     return JSONResponse(content=request.app.stats_emitter.get_stats_history(keys))
 
 
-@router.get("/metrics", dependencies=[Depends(allow_public())])
+@router.get("/metrics", dependencies=[Depends(allow_any_authenticated())])
 def metrics(request: Request):
     """Expose Prometheus metrics endpoint and update metrics with latest stats"""
     # Retrieve the latest statistics and update the Prometheus metrics
