@@ -54,7 +54,7 @@ import { useTranslation } from "react-i18next";
 import { EmptyCard } from "@/components/card/EmptyCard";
 import { BsFillCameraVideoOffFill } from "react-icons/bs";
 import { AuthContext } from "@/context/auth-context";
-import { useIsCustomRole } from "@/hooks/use-is-custom-role";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -661,10 +661,10 @@ export default function LiveDashboardView({
 function NoCameraView() {
   const { t } = useTranslation(["views/live"]);
   const { auth } = useContext(AuthContext);
-  const isCustomRole = useIsCustomRole();
+  const isAdmin = useIsAdmin();
 
   // Check if this is a restricted user with no cameras in this group
-  const isRestricted = isCustomRole && auth.isAuthenticated;
+  const isRestricted = !isAdmin && auth.isAuthenticated;
 
   return (
     <div className="flex size-full items-center justify-center">

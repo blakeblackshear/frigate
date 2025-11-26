@@ -14,12 +14,12 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
-import { useIsCustomRole } from "@/hooks/use-is-custom-role";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 function Live() {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
-  const isCustomRole = useIsCustomRole();
+  const isAdmin = useIsAdmin();
 
   // selection
 
@@ -94,7 +94,7 @@ function Live() {
 
   const includesBirdseye = useMemo(() => {
     // Restricted users should never have access to birdseye
-    if (isCustomRole) {
+    if (!isAdmin) {
       return false;
     }
 
@@ -109,7 +109,7 @@ function Live() {
     } else {
       return false;
     }
-  }, [config, cameraGroup, isCustomRole]);
+  }, [config, cameraGroup, isAdmin]);
 
   const cameras = useMemo(() => {
     if (!config) {
