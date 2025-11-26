@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 
-from fastapi.testclient import TestClient
+from fastapi import Request
 from peewee import DoesNotExist
 
 from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 from frigate.models import Event, Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
-from frigate.test.http_api.base_http_test import BaseTestHttp
+from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
 
 class TestHttpReview(BaseTestHttp):
@@ -16,14 +16,26 @@ class TestHttpReview(BaseTestHttp):
         self.user_id = "admin"
 
         # Mock get_current_user for all tests
-        async def mock_get_current_user():
-            return {"username": self.user_id, "role": "admin"}
+        # This mock uses headers set by AuthTestClient
+        async def mock_get_current_user(request: Request):
+            username = request.headers.get("remote-user")
+            role = request.headers.get("remote-role")
+            if not username or not role:
+                from fastapi.responses import JSONResponse
+
+                return JSONResponse(
+                    content={"message": "No authorization headers."}, status_code=401
+                )
+            return {"username": username, "role": role}
 
         self.app.dependency_overrides[get_current_user] = mock_get_current_user
 
-        self.app.dependency_overrides[get_allowed_cameras_for_filter] = lambda: [
-            "front_door"
-        ]
+        async def mock_get_allowed_cameras_for_filter(request: Request):
+            return ["front_door"]
+
+        self.app.dependency_overrides[get_allowed_cameras_for_filter] = (
+            mock_get_allowed_cameras_for_filter
+        )
 
     def tearDown(self):
         self.app.dependency_overrides.clear()
@@ -57,7 +69,7 @@ class TestHttpReview(BaseTestHttp):
         but ends after is included in the results."""
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random", now, now + 2)
             response = client.get("/review")
             assert response.status_code == 200
@@ -67,7 +79,7 @@ class TestHttpReview(BaseTestHttp):
     def test_get_review_no_filters(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id, now - 2, now - 1)
             response = client.get("/review")
@@ -81,7 +93,7 @@ class TestHttpReview(BaseTestHttp):
         """Test that review items outside the range are not returned."""
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id, now - 2, now - 1)
             super().insert_mock_review_segment(f"{id}2", now + 4, now + 5)
@@ -97,7 +109,7 @@ class TestHttpReview(BaseTestHttp):
     def test_get_review_with_time_filter(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id, now, now + 2)
             params = {
@@ -113,7 +125,7 @@ class TestHttpReview(BaseTestHttp):
     def test_get_review_with_limit_filter(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             id2 = "654321.random"
             super().insert_mock_review_segment(id, now, now + 2)
@@ -132,7 +144,7 @@ class TestHttpReview(BaseTestHttp):
     def test_get_review_with_severity_filters_no_matches(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id, now, now + 2, SeverityEnum.detection)
             params = {
@@ -149,7 +161,7 @@ class TestHttpReview(BaseTestHttp):
     def test_get_review_with_severity_filters(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id, now, now + 2, SeverityEnum.detection)
             params = {
@@ -165,7 +177,7 @@ class TestHttpReview(BaseTestHttp):
     def test_get_review_with_all_filters(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id, now, now + 2)
             params = {
@@ -188,7 +200,7 @@ class TestHttpReview(BaseTestHttp):
     ###################################  GET /review/summary Endpoint   #################################################
     ####################################################################################################################
     def test_get_review_summary_all_filters(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
             params = {
                 "cameras": "front_door",
@@ -219,7 +231,7 @@ class TestHttpReview(BaseTestHttp):
             self.assertEqual(response_json, expected_response)
 
     def test_get_review_summary_no_filters(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
             response = client.get("/review/summary")
             assert response.status_code == 200
@@ -247,7 +259,7 @@ class TestHttpReview(BaseTestHttp):
         now = datetime.now()
         five_days_ago = datetime.today() - timedelta(days=5)
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment(
                 "123456.random", now.timestamp() - 2, now.timestamp() - 1
             )
@@ -291,7 +303,7 @@ class TestHttpReview(BaseTestHttp):
         now = datetime.now()
         five_days_ago = datetime.today() - timedelta(days=5)
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random", now.timestamp())
             five_days_ago_ts = five_days_ago.timestamp()
             for i in range(20):
@@ -342,7 +354,7 @@ class TestHttpReview(BaseTestHttp):
     def test_get_review_summary_multiple_in_same_day_with_reviewed(self):
         five_days_ago = datetime.today() - timedelta(days=5)
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             five_days_ago_ts = five_days_ago.timestamp()
             for i in range(10):
                 id = f"123456_{i}.random_alert_not_reviewed"
@@ -393,14 +405,14 @@ class TestHttpReview(BaseTestHttp):
     ####################################################################################################################
 
     def test_post_reviews_viewed_no_body(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
             response = client.post("/reviews/viewed")
             # Missing ids
             assert response.status_code == 422
 
     def test_post_reviews_viewed_no_body_ids(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
             body = {"ids": [""]}
             response = client.post("/reviews/viewed", json=body)
@@ -408,7 +420,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 422
 
     def test_post_reviews_viewed_non_existent_id(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": ["1"]}
@@ -425,7 +437,7 @@ class TestHttpReview(BaseTestHttp):
                 )
 
     def test_post_reviews_viewed(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": [id]}
@@ -445,14 +457,14 @@ class TestHttpReview(BaseTestHttp):
     ###################################  POST reviews/delete Endpoint   ################################################
     ####################################################################################################################
     def test_post_reviews_delete_no_body(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
             response = client.post("/reviews/delete", headers={"remote-role": "admin"})
             # Missing ids
             assert response.status_code == 422
 
     def test_post_reviews_delete_no_body_ids(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
             body = {"ids": [""]}
             response = client.post(
@@ -462,7 +474,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 422
 
     def test_post_reviews_delete_non_existent_id(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": ["1"]}
@@ -479,7 +491,7 @@ class TestHttpReview(BaseTestHttp):
             assert review_ids_in_db_after[0].id == id
 
     def test_post_reviews_delete(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id)
             body = {"ids": [id]}
@@ -495,7 +507,7 @@ class TestHttpReview(BaseTestHttp):
             assert len(review_ids_in_db_after) == 0
 
     def test_post_reviews_delete_many(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             ids = ["123456.random", "654321.random"]
             for id in ids:
                 super().insert_mock_review_segment(id)
@@ -527,7 +539,7 @@ class TestHttpReview(BaseTestHttp):
     def test_review_activity_motion_no_data_for_time_range(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             params = {
                 "after": now,
                 "before": now + 3,
@@ -540,7 +552,7 @@ class TestHttpReview(BaseTestHttp):
     def test_review_activity_motion(self):
         now = int(datetime.now().timestamp())
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             one_m = int((datetime.now() + timedelta(minutes=1)).timestamp())
             id = "123456.random"
             id2 = "123451.random"
@@ -573,7 +585,7 @@ class TestHttpReview(BaseTestHttp):
     ###################################  GET /review/event/{event_id} Endpoint   #######################################
     ####################################################################################################################
     def test_review_event_not_found(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             response = client.get("/review/event/123456.random")
             assert response.status_code == 404
             response_json = response.json()
@@ -585,7 +597,7 @@ class TestHttpReview(BaseTestHttp):
     def test_review_event_not_found_in_data(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             id = "123456.random"
             super().insert_mock_review_segment(id, now + 1, now + 2)
             response = client.get(f"/review/event/{id}")
@@ -599,7 +611,7 @@ class TestHttpReview(BaseTestHttp):
     def test_review_get_specific_event(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             event_id = "123456.event.random"
             super().insert_mock_event(event_id)
             review_id = "123456.review.random"
@@ -626,7 +638,7 @@ class TestHttpReview(BaseTestHttp):
     ###################################  GET /review/{review_id} Endpoint   #######################################
     ####################################################################################################################
     def test_review_not_found(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             response = client.get("/review/123456.random")
             assert response.status_code == 404
             response_json = response.json()
@@ -638,7 +650,7 @@ class TestHttpReview(BaseTestHttp):
     def test_get_review(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             review_id = "123456.review.random"
             super().insert_mock_review_segment(review_id, now + 1, now + 2)
             response = client.get(f"/review/{review_id}")
@@ -662,7 +674,7 @@ class TestHttpReview(BaseTestHttp):
     ####################################################################################################################
 
     def test_delete_review_viewed_review_not_found(self):
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             review_id = "123456.random"
             response = client.delete(f"/review/{review_id}/viewed")
             assert response.status_code == 404
@@ -675,7 +687,7 @@ class TestHttpReview(BaseTestHttp):
     def test_delete_review_viewed(self):
         now = datetime.now().timestamp()
 
-        with TestClient(self.app) as client:
+        with AuthTestClient(self.app) as client:
             review_id = "123456.review.random"
             super().insert_mock_review_segment(review_id, now + 1, now + 2)
             self._insert_user_review_status(review_id, reviewed=True)
