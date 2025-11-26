@@ -43,12 +43,73 @@ def require_admin_by_default():
 
     Port 5000 (internal) always has admin role set by the /auth endpoint,
     so this check passes automatically for internal requests.
+
+    Certain paths are exempted from the global admin check because they have
+    their own route-level authorization dependencies (allow_public(),
+    allow_any_authenticated(), etc). The route-level dependencies handle the
+    actual authorization for these paths.
     """
+    # Paths that have route-level auth dependencies and should bypass global admin check
+    # These paths still have authorization - it's handled by their route-level dependencies
+    EXEMPT_PATHS = {
+        # Public auth endpoints (allow_public)
+        "/auth",
+        "/auth/first_time_login",
+        "/login",
+        # Authenticated user endpoints (allow_any_authenticated)
+        "/logout",
+        "/profile",
+        # Public info endpoints (allow_public)
+        "/",
+        "/version",
+        "/config/schema.json",
+        "/metrics",
+        # Authenticated user endpoints (allow_any_authenticated)
+        "/stats",
+        "/stats/history",
+        "/config",
+        "/config/raw",
+        "/vainfo",
+        "/nvinfo",
+        "/labels",
+        "/sub_labels",
+        "/plus/models",
+        "/recognized_license_plates",
+        "/timeline",
+        "/timeline/hourly",
+        "/events/summary",
+        "/recordings/storage",
+        "/recordings/summary",
+        "/recordings/unavailable",
+        "/go2rtc/streams",
+    }
+
+    # Path prefixes that should be exempt (for paths with parameters)
+    EXEMPT_PREFIXES = (
+        "/logs/",  # /logs/{service}
+        "/review",  # /review, /review/{id}, /review_ids, etc.
+        "/events/",  # /events/{id}/thumbnail, etc. (camera-scoped)
+        "/go2rtc/streams/",  # /go2rtc/streams/{camera}
+        "/users/",  # /users/{username}/password (has own auth)
+        "/preview/",  # /preview/{file}/thumbnail.jpg
+    )
 
     async def admin_checker(request: Request):
+        path = request.url.path
+
+        # Check exact path matches
+        if path in EXEMPT_PATHS:
+            return
+
+        # Check prefix matches for parameterized paths
+        if path.startswith(EXEMPT_PREFIXES):
+            return
+
+        # For all other paths, require admin role
         role = request.headers.get("remote-role")
         if role == "admin":
             return
+
         raise HTTPException(
             status_code=403,
             detail="Admin role required for this endpoint",
