@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useApiHost } from "@/api";
 import { isCurrentHour } from "@/utils/dateUtil";
-import { ReviewSegment } from "@/types/review";
+import {
+  ReviewSegment,
+  ThreatLevel,
+  THREAT_LEVEL_LABELS,
+} from "@/types/review";
 import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
@@ -44,7 +48,7 @@ export default function PreviewThumbnailPlayer({
   onClick,
   onTimeUpdate,
 }: PreviewPlayerProps) {
-  const { t } = useTranslation(["components/player"]);
+  const { t } = useTranslation(["components/player", "views/events"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -319,11 +323,21 @@ export default function PreviewThumbnailPlayer({
                 </TooltipTrigger>
               </div>
               <TooltipContent className="smart-capitalize">
-                {review.data.metadata.potential_threat_level == 1 ? (
-                  <>{t("suspiciousActivity", { ns: "views/events" })}</>
-                ) : (
-                  <>{t("threateningActivity", { ns: "views/events" })}</>
-                )}
+                {(() => {
+                  const threatLevel =
+                    review.data.metadata.potential_threat_level ?? 0;
+                  switch (threatLevel) {
+                    case ThreatLevel.NEEDS_REVIEW:
+                      return t("needsReview", { ns: "views/events" });
+                    case ThreatLevel.SECURITY_CONCERN:
+                      return t("securityConcern", { ns: "views/events" });
+                    default:
+                      return (
+                        THREAT_LEVEL_LABELS[threatLevel as ThreatLevel] ||
+                        "Unknown"
+                      );
+                  }
+                })()}
               </TooltipContent>
             </Tooltip>
           )}

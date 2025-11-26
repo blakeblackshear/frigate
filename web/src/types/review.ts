@@ -87,6 +87,13 @@ export type ZoomLevel = {
 };
 
 export enum ThreatLevel {
-  SUSPICIOUS = 1,
-  DANGER = 2,
+  NORMAL = 0,
+  NEEDS_REVIEW = 1,
+  SECURITY_CONCERN = 2,
 }
+
+export const THREAT_LEVEL_LABELS: Record<ThreatLevel, string> = {
+  [ThreatLevel.NORMAL]: "Normal",
+  [ThreatLevel.NEEDS_REVIEW]: "Needs review",
+  [ThreatLevel.SECURITY_CONCERN]: "Security concern",
+};

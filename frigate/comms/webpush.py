@@ -375,7 +375,19 @@ class WebPushClient(Communicator):
         ended = state == "end" or state == "genai"
 
         if state == "genai" and payload["after"]["data"]["metadata"]:
-            title = payload["after"]["data"]["metadata"]["title"]
+            base_title = payload["after"]["data"]["metadata"]["title"]
+            threat_level = payload["after"]["data"]["metadata"].get(
+                "potential_threat_level", 0
+            )
+
+            # Add prefix for threat levels 1 and 2
+            if threat_level == 1:
+                title = f"Needs Review: {base_title}"
+            elif threat_level == 2:
+                title = f"Security Concern: {base_title}"
+            else:
+                title = base_title
+
             message = payload["after"]["data"]["metadata"]["scene"]
         else:
             title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"

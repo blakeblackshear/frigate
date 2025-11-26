@@ -1,7 +1,11 @@
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
-import { ReviewSegment, ThreatLevel } from "@/types/review";
+import {
+  ReviewSegment,
+  ThreatLevel,
+  THREAT_LEVEL_LABELS,
+} from "@/types/review";
 import { useEffect, useMemo, useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { useTranslation } from "react-i18next";
@@ -55,13 +59,22 @@ export function GenAISummaryDialog({
     }
 
     let concerns = "";
-    switch (aiAnalysis.potential_threat_level) {
-      case ThreatLevel.SUSPICIOUS:
-        concerns = `• ${t("suspiciousActivity", { ns: "views/events" })}\n`;
-        break;
-      case ThreatLevel.DANGER:
-        concerns = `• ${t("threateningActivity", { ns: "views/events" })}\n`;
-        break;
+    const threatLevel = aiAnalysis.potential_threat_level ?? 0;
+
+    if (threatLevel > 0) {
+      let label = "";
+
+      switch (threatLevel) {
+        case ThreatLevel.NEEDS_REVIEW:
+          label = t("needsReview", { ns: "views/events" });
+          break;
+        case ThreatLevel.SECURITY_CONCERN:
+          label = t("securityConcern", { ns: "views/events" });
+          break;
+        default:
+          label = THREAT_LEVEL_LABELS[threatLevel as ThreatLevel] || "Unknown";
+      }
+      concerns = `• ${label}\n`;
     }
 
     (aiAnalysis.other_concerns ?? []).forEach((c) => {
