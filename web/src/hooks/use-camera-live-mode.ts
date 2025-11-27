@@ -1,3 +1,4 @@
+import { baseUrl } from "@/api/baseUrl";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import useSWR from "swr";
@@ -41,9 +42,12 @@ export default function useCameraLiveMode(
 
     const metadataPromises = streamNames.map(async (streamName) => {
       try {
-        const response = await fetch(`/api/go2rtc/streams/${streamName}`, {
-          priority: "low",
-        });
+        const response = await fetch(
+          `${baseUrl}api/go2rtc/streams/${streamName}`,
+          {
+            priority: "low",
+          },
+        );
 
         if (response.ok) {
           const data = await response.json();

@@ -871,6 +871,46 @@ def categorize_classification_image(request: Request, name: str, body: dict = No
 
 
 @router.post(
+    "/classification/{name}/dataset/{category}/create",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Create an empty classification category folder",
+    description="""Creates an empty folder for a classification category.
+    This is used to create folders for categories that don't have images yet.
+    Returns a success message or an error if the name is invalid.""",
+)
+def create_classification_category(request: Request, name: str, category: str):
+    config: FrigateConfig = request.app.frigate_config
+
+    if name not in config.classification.custom:
+        return JSONResponse(
+            content=(
+                {
+                    "success": False,
+                    "message": f"{name} is not a known classification model.",
+                }
+            ),
+            status_code=404,
+        )
+
+    category_folder = os.path.join(
+        CLIPS_DIR, sanitize_filename(name), "dataset", sanitize_filename(category)
+    )
+
+    os.makedirs(category_folder, exist_ok=True)
+
+    return JSONResponse(
+        content=(
+            {
+                "success": True,
+                "message": f"Successfully created category folder: {category}",
+            }
+        ),
+        status_code=200,
+    )
+
+
+@router.post(
     "/classification/{name}/train/delete",
     response_model=GenericResponse,
     dependencies=[Depends(require_role(["admin"]))],

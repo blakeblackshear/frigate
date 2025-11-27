@@ -205,14 +205,20 @@ Rules for the report:
   - Group bullets under subheadings when multiple events fall into the same category (e.g., Vehicle Activity, Porch Activity, Unusual Behavior).
 
 - Threat levels
-  - Always show (threat level: X) for each event.
+  - Always show the threat level for each event using these labels:
+    - Threat level 0: "Normal"
+    - Threat level 1: "Needs review"
+    - Threat level 2: "Security concern"
+  - Format as (threat level: Normal), (threat level: Needs review), or (threat level: Security concern).
   - If multiple events at the same time share the same threat level, only state it once.
 
 - Final assessment
   - End with a Final Assessment section.
-  - If all events are threat level 1 with no escalation:
+  - If all events are threat level 0:
     Final assessment: Only normal residential activity observed during this period.
-  - If threat level 2+ events are present, clearly summarize them as Potential concerns requiring review.
+  - If threat level 1 events are present:
+    Final assessment: Some activity requires review but no security concerns identified.
+  - If threat level 2 events are present, clearly summarize them as Security concerns requiring immediate attention.
 
 - Conciseness
   - Do not repeat benign clothing/appearance details unless they distinguish individuals.

@@ -348,7 +348,7 @@ def migrate_016_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
 
 def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    """Handle migrating frigate config to 0.16-0"""
+    """Handle migrating frigate config to 0.17-0"""
     new_config = config.copy()
 
     # migrate global to new recording configuration
@@ -380,7 +380,7 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
 
     if global_genai:
         new_genai_config = {}
-        new_object_config = config.get("objects", {})
+        new_object_config = new_config.get("objects", {})
         new_object_config["genai"] = {}
 
         for key in global_genai.keys():
@@ -389,7 +389,8 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
             else:
                 new_object_config["genai"][key] = global_genai[key]
 
-        config["genai"] = new_genai_config
+        new_config["genai"] = new_genai_config
+        new_config["objects"] = new_object_config
 
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, Any]] = camera.copy()
@@ -415,8 +416,9 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
         camera_genai = camera_config.get("genai", {})
 
         if camera_genai:
-            new_object_config = config.get("objects", {})
-            new_object_config["genai"] = camera_genai
+            camera_object_config = camera_config.get("objects", {})
+            camera_object_config["genai"] = camera_genai
+            camera_config["objects"] = camera_object_config
             del camera_config["genai"]
 
         new_config["cameras"][name] = camera_config

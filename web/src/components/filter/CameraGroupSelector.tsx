@@ -78,7 +78,7 @@ import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { Trans, useTranslation } from "react-i18next";
 import { CameraNameLabel } from "../camera/FriendlyNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
-import { useIsCustomRole } from "@/hooks/use-is-custom-role";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -88,7 +88,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
   const { t } = useTranslation(["components/camera"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const allowedCameras = useAllowedCameras();
-  const isCustomRole = useIsCustomRole();
+  const isAdmin = useIsAdmin();
 
   // tooltip
 
@@ -124,7 +124,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
     const allGroups = Object.entries(config.camera_groups);
 
     // If custom role, filter out groups where user has no accessible cameras
-    if (isCustomRole) {
+    if (!isAdmin) {
       return allGroups
         .filter(([, groupConfig]) => {
           // Check if user has access to at least one camera in this group
@@ -136,7 +136,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
     }
 
     return allGroups.sort((a, b) => a[1].order - b[1].order);
-  }, [config, allowedCameras, isCustomRole]);
+  }, [config, allowedCameras, isAdmin]);
 
   // add group
 
@@ -153,7 +153,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
         activeGroup={group}
         setGroup={setGroup}
         deleteGroup={deleteGroup}
-        isCustomRole={isCustomRole}
+        isAdmin={isAdmin}
       />
       <Scroller className={`${isMobile ? "whitespace-nowrap" : ""}`}>
         <div
@@ -221,7 +221,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
             );
           })}
 
-          {!isCustomRole && (
+          {isAdmin && (
             <Button
               className="bg-secondary text-muted-foreground"
               aria-label={t("group.add")}
@@ -245,7 +245,7 @@ type NewGroupDialogProps = {
   activeGroup?: string;
   setGroup: (value: string | undefined, replace?: boolean | undefined) => void;
   deleteGroup: () => void;
-  isCustomRole?: boolean;
+  isAdmin?: boolean;
 };
 function NewGroupDialog({
   open,
@@ -254,7 +254,7 @@ function NewGroupDialog({
   activeGroup,
   setGroup,
   deleteGroup,
-  isCustomRole,
+  isAdmin,
 }: NewGroupDialogProps) {
   const { t } = useTranslation(["components/camera"]);
   const { mutate: updateConfig } = useSWR<FrigateConfig>("config");
@@ -390,7 +390,7 @@ function NewGroupDialog({
               >
                 <Title>{t("group.label")}</Title>
                 <Description className="sr-only">{t("group.edit")}</Description>
-                {!isCustomRole && (
+                {isAdmin && (
                   <div
                     className={cn(
                       "absolute",
@@ -422,7 +422,7 @@ function NewGroupDialog({
                     group={group}
                     onDeleteGroup={() => onDeleteGroup(group[0])}
                     onEditGroup={() => onEditGroup(group)}
-                    isReadOnly={isCustomRole}
+                    isReadOnly={!isAdmin}
                   />
                 ))}
               </div>
@@ -677,7 +677,7 @@ export function CameraGroupEdit({
     );
 
   const allowedCameras = useAllowedCameras();
-  const isCustomRole = useIsCustomRole();
+  const isAdmin = useIsAdmin();
 
   const [openCamera, setOpenCamera] = useState<string | null>();
 
@@ -867,7 +867,7 @@ export function CameraGroupEdit({
                 <FormMessage />
                 {[
                   ...(birdseyeConfig?.enabled &&
-                  (!isCustomRole || "birdseye" in allowedCameras)
+                  (isAdmin || "birdseye" in allowedCameras)
                     ? ["birdseye"]
                     : []),
                   ...Object.keys(config?.cameras ?? {})

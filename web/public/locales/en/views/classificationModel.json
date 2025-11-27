@@ -166,6 +166,7 @@
       "noImages": "No sample images generated",
       "classifying": "Classifying & Training...",
       "trainingStarted": "Training started successfully",
+      "modelCreated": "Model created successfully. Use the Recent Classifications view to add images for missing states, then train the model.",
       "errors": {
         "noCameras": "No cameras configured",
         "noObjectLabel": "No object label selected",
@@ -173,7 +174,11 @@
         "generationFailed": "Generation failed. Please try again.",
         "classifyFailed": "Failed to classify images: {{error}}"
       },
-      "generateSuccess": "Successfully generated sample images"
+      "generateSuccess": "Successfully generated sample images",
+      "missingStatesWarning": {
+        "title": "Missing State Examples",
+        "description": "You haven't selected examples for all states. The model will not be trained until all states have images. After continuing, use the Recent Classifications view to classify images for the missing states, then train the model."
+      }
     }
   }
 }

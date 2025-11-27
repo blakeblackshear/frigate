@@ -54,6 +54,7 @@
   "selected_other": "{{count}} selected",
   "camera": "Camera",
   "detected": "detected",
-  "suspiciousActivity": "Suspicious Activity",
-  "threateningActivity": "Threatening Activity"
+  "normalActivity": "Normal",
+  "needsReview": "Needs review",
+  "securityConcern": "Security concern"
 }

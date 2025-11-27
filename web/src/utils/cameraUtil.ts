@@ -1,3 +1,4 @@
+import { baseUrl } from "@/api/baseUrl";
 import { generateFixedHash, isValidId } from "./stringUtil";
 
 /**
@@ -52,9 +53,12 @@ export async function detectReolinkCamera(
       password,
     });
 
-    const response = await fetch(`/api/reolink/detect?${params.toString()}`, {
-      method: "GET",
-    });
+    const response = await fetch(
+      `${baseUrl}api/reolink/detect?${params.toString()}`,
+      {
+        method: "GET",
+      },
+    );
 
     if (!response.ok) {
       return null;
