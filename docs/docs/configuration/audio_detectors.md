@@ -157,3 +157,19 @@ Only one `speech` event may be transcribed at a time. Frigate does not automatic
 :::
 
 Recorded `speech` events will always use a `whisper` model, regardless of the `model_size` config setting. Without a supported Nvidia GPU, generating transcriptions for longer `speech` events may take a fair amount of time, so be patient.
+
+#### FAQ
+
+1. Why doesn't Frigate automatically transcribe all `speech` events?
+
+   Frigate does not implement a queue mechanism for speech transcription, and adding one is not trivial. A proper queue would need backpressure, prioritization, memory/disk buffering, retry logic, crash recovery, and safeguards to prevent unbounded growth when events outpace processing. That’s a significant amount of complexity for a feature that, in most real-world environments, would mostly just churn through low-value noise.
+
+   Because transcription is **serialized (one event at a time)** and speech events can be generated far faster than they can be processed, an auto-transcribe toggle would very quickly create an ever-growing backlog and degrade core functionality. For the amount of engineering and risk involved, it adds **very little practical value** for the majority of deployments, which are often on low-powered, edge hardware.
+
+   If you hear speech that’s actually important and worth saving/indexing for the future, **just press the transcribe button in Explore** on that specific `speech` event - that keeps things explicit, reliable, and under your control.
+
+2. Why don't you save live transcription text and use that for `speech` events?
+
+   There’s no guarantee that a `speech` event is even created from the exact audio that went through the transcription model. Live transcription and `speech` event creation are **separate, asynchronous processes**. Even when both are correctly configured, trying to align the **precise start and end time of a speech event** with whatever audio the model happened to be processing at that moment is unreliable.
+
+   Automatically persisting that data would often result in **misaligned, partial, or irrelevant transcripts**, while still incurring all of the CPU, storage, and privacy costs of transcription. That’s why Frigate treats transcription as an **explicit, user-initiated action** rather than an automatic side-effect of every `speech` event.
