@@ -99,6 +99,31 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         if self.inference_speed:
             self.inference_speed.update(duration)
 
+    def _should_save_image(self, camera: str, detected_state: str) -> bool:
+        """
+        Determine if we should save the image for training.
+        Only save when the state is changing or being verified, not when it's stable.
+        """
+        if camera not in self.state_history:
+            # First detection for this camera, save it
+            return True
+
+        verification = self.state_history[camera]
+        current_state = verification.get("current_state")
+        pending_state = verification.get("pending_state")
+
+        # Save if there's a pending state change being verified
+        if pending_state is not None:
+            return True
+
+        # Save if the detected state differs from the current verified state
+        # (state is changing)
+        if current_state is not None and detected_state != current_state:
+            return True
+
+        # Don't save if state is stable (detected_state == current_state)
+        return False
+
     def verify_state_change(self, camera: str, detected_state: str) -> str | None:
         """
         Verify state change requires 3 consecutive identical states before publishing.
@@ -212,14 +237,15 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
                 return
 
         if self.interpreter is None:
-            write_classification_attempt(
-                self.train_dir,
-                cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
-                "none-none",
-                now,
-                "unknown",
-                0.0,
-            )
+            if self._should_save_image(camera, "unknown"):
+                write_classification_attempt(
+                    self.train_dir,
+                    cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+                    "none-none",
+                    now,
+                    "unknown",
+                    0.0,
+                )
             return
 
         input = np.expand_dims(resized_frame, axis=0)
@@ -236,14 +262,17 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         score = round(probs[best_id], 2)
         self.__update_metrics(datetime.datetime.now().timestamp() - now)
 
-        write_classification_attempt(
-            self.train_dir,
-            cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
-            "none-none",
-            now,
-            self.labelmap[best_id],
-            score,
-        )
+        detected_state = self.labelmap[best_id]
+
+        if self._should_save_image(camera, detected_state):
+            write_classification_attempt(
+                self.train_dir,
+                cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
+                "none-none",
+                now,
+                detected_state,
+                score,
+            )
 
         if score < self.model_config.threshold:
             logger.debug(
@@ -251,7 +280,6 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
             )
             return
 
-        detected_state = self.labelmap[best_id]
         verified_state = self.verify_state_change(camera, detected_state)
 
         if verified_state is not None:
