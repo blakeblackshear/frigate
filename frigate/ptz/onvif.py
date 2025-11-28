@@ -190,7 +190,11 @@ class OnvifController:
         ptz: ONVIFService = await onvif.create_ptz_service()
         self.cams[camera_name]["ptz"] = ptz
 
-        imaging: ONVIFService = await onvif.create_imaging_service()
+        try:
+            imaging: ONVIFService = await onvif.create_imaging_service()
+        except (Fault, ONVIFError, TransportError, Exception) as e:
+            logger.debug(f"Imaging service not supported for {camera_name}: {e}")
+            imaging = None
         self.cams[camera_name]["imaging"] = imaging
         try:
             video_sources = await media.GetVideoSources()
@@ -381,7 +385,10 @@ class OnvifController:
                             f"Disabling autotracking zooming for {camera_name}: Absolute zoom not supported. Exception: {e}"
                         )
 
-        if self.cams[camera_name]["video_source_token"] is not None:
+        if (
+            self.cams[camera_name]["video_source_token"] is not None
+            and imaging is not None
+        ):
             try:
                 imaging_capabilities = await imaging.GetImagingSettings(
                     {"VideoSourceToken": self.cams[camera_name]["video_source_token"]}
@@ -421,6 +428,7 @@ class OnvifController:
         if (
             "focus" in self.cams[camera_name]["features"]
             and self.cams[camera_name]["video_source_token"]
+            and self.cams[camera_name]["imaging"] is not None
         ):
             try:
                 stop_request = self.cams[camera_name]["imaging"].create_type("Stop")
@@ -648,6 +656,7 @@ class OnvifController:
         if (
             "focus" not in self.cams[camera_name]["features"]
             or not self.cams[camera_name]["video_source_token"]
+            or self.cams[camera_name]["imaging"] is None
         ):
             logger.error(f"{camera_name} does not support ONVIF continuous focus.")
             return
