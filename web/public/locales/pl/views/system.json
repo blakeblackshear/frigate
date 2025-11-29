@@ -42,7 +42,11 @@
       "gpuMemory": "Pamięć GPU",
       "gpuUsage": "Użycie GPU",
       "npuUsage": "Użycie NPU",
-      "npuMemory": "Pamięć NPU"
+      "npuMemory": "Pamięć NPU",
+      "intelGpuWarning": {
+        "message": "Statystyki układu graficznego niedostępne",
+        "description": "W narzędziach telemetrii i statystyki układów graficznych firmy Intel (intel_gpu_top) znajduje się znany błąd powodujący raportowanie użycia układu graficznego wynoszące 0%, nawet gdy akceleracja sprzętowa i wykrywanie obiektów działa prawidłowo korzystając ze zintegrowanego układu graficznego. To nie jest błąd oprogramowania Frigate. Restart hosta może chwilowo rozwiązać problem i pozwolić na weryfikację działania układu graficznego. Ten bład nie wpływa na wydajność systemu,"
+      }
     },
     "title": "Ogólne",
     "detector": {

@@ -67,7 +67,7 @@
   },
   "manualRecording": {
     "title": "Nagrywanie na żądanie",
-    "tips": "Rozpocznij ręczne zdarzenie w oparciu o ustawienia przechowywania nagrań tej kamery.",
+    "tips": "Ręcznie rozpocznij zdarzenie w oparciu o ustawienia przechowywania nagrań tej kamery.",
     "playInBackground": {
       "label": "Odtwarzaj w tle",
       "desc": "Włącz tę opcję, aby kontynuować transmisję, gdy odtwarzacz jest ukryty."
@@ -173,7 +173,17 @@
   },
   "noCameras": {
     "buttonText": "Dodaj kamerę",
-    "description": "Zacznij od podłączenia kamery.",
-    "title": "Nie ustawiono żadnej kamery"
+    "description": "Zacznij od podłączenia kamery do Frigate.",
+    "title": "Nie skonfigurowano żadnej kamery",
+    "restricted": {
+      "title": "Brak dostępnych kamer",
+      "description": "Nie masz uprawnień aby przeglądać kamery w tej grupie."
+    }
+  },
+  "snapshot": {
+    "takeSnapshot": "Pobierz miniaturę",
+    "captureFailed": "Nie udało się wykonać migawki.",
+    "downloadStarted": "Pobieranie migawki rozpoczęte.",
+    "noVideoSource": "Brak źródeł video dostępnych do wykonania migawki."
   }
 }
