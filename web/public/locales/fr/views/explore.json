@@ -263,7 +263,8 @@
       "header": {
         "zones": "Zones",
         "ratio": "Ratio",
-        "area": "Surface"
+        "area": "Surface",
+        "score": "Score"
       }
     },
     "annotationSettings": {
