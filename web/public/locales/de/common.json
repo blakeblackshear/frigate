@@ -81,7 +81,10 @@
     "formattedTimestampMonthDayYear": {
       "12hour": "d. MMM yyyy",
       "24hour": "d. MMM yyyy"
-    }
+    },
+    "inProgress": "In Bearbeitung",
+    "invalidStartTime": "Ungültige Startzeit",
+    "invalidEndTime": "Ungültige Endzeit"
   },
   "button": {
     "save": "Speichern",
@@ -118,7 +121,8 @@
     "pictureInPicture": "Bild in Bild",
     "on": "AN",
     "suspended": "Pausierte",
-    "unsuspended": "fortsetzen"
+    "unsuspended": "fortsetzen",
+    "continue": "Weiter"
   },
   "label": {
     "back": "Zurück",
@@ -227,7 +231,8 @@
       "logout": "Abmelden"
     },
     "uiPlayground": "Testgebiet für Benutzeroberfläche",
-    "export": "Exportieren"
+    "export": "Exportieren",
+    "classification": "Klassifizierung"
   },
   "unit": {
     "speed": {

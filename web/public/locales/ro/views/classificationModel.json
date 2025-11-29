@@ -152,7 +152,12 @@
       "generateSuccess": "Imaginile de exemplu au fost generate cu succes",
       "allImagesRequired_one": "Te rog să clasifici toate imaginile. {{count}} imagine rămasă.",
       "allImagesRequired_few": "Te rog să clasifici toate imaginile. {{count}} imagini rămase.",
-      "allImagesRequired_other": "Te rog să clasifici toate imaginile. {{count}} de imagini rămase."
+      "allImagesRequired_other": "Te rog să clasifici toate imaginile. {{count}} de imagini rămase.",
+      "modelCreated": "Modelul a fost creat cu succes. Folosește vizualizarea Clasificări recente pentru a adăuga imagini pentru stările lipsă, apoi antrenează modelul.",
+      "missingStatesWarning": {
+        "title": "Exemple de stări lipsă",
+        "description": "Nu ai selectat exemple pentru toate stările. Modelul nu va fi antrenat până când toate stările nu au imagini. După continuare, folosește vizualizarea Clasificări recente pentru a clasifica imagini pentru stările lipsă, apoi antrenează modelul."
+      }
     }
   },
   "deleteModel": {

@@ -43,7 +43,12 @@
       "gpuEncoder": "GPU Kodlayıcı",
       "title": "Donanım Bilgisi",
       "npuUsage": "NPU Kullanımı",
-      "npuMemory": "NPU Bellek Kullanımı"
+      "npuMemory": "NPU Bellek Kullanımı",
+      "intelGpuWarning": {
+        "title": "Intel GPU İstatistik Uyarısı",
+        "message": "GPU istatistikleri kullanılamıyor",
+        "description": "Bu, Intel’in GPU istatistik raporlama araçlarında (intel_gpu_top) bilinen bir hatadır; araç çalışmayı bozarak, donanımsal hızlandırma ve nesne tespiti (i)GPU üzerinde doğru şekilde çalışıyor olsa bile, GPU kullanımını tekrar tekrar %0 olarak döndürür. Bu bir Frigate hatası değildir. Sorunu geçici olarak düzeltmek ve GPU’nun doğru çalıştığını doğrulamak için host sistemini yeniden başlatabilirsiniz. Bu durum performansı etkilemez."
+      }
     },
     "otherProcesses": {
       "title": "Diğer İşlemler",

@@ -90,7 +90,7 @@
           "updatedSublabel": "Underetikett ble oppdatert.",
           "updatedLPR": "Vellykket oppdatering av kjennemerke.",
           "regenerate": "En ny beskrivelse har blitt anmodet fra {{provider}}. Avhengig av hastigheten til leverandøren din, kan den nye beskrivelsen ta litt tid å regenerere.",
-          "audioTranscription": "Lydtranskripsjon ble forespurt."
+          "audioTranscription": "Lydtranskripsjon ble forespurt. Avhengig av ytelsen på din Frigate server kan transkripsjonen ta noe tid å fullføre."
         },
         "error": {
           "regenerate": "Feil ved anrop til {{provider}} for en ny beskrivelse: {{errorMessage}}",
@@ -107,8 +107,8 @@
       }
     },
     "topScore": {
-      "info": "Den høyeste poengsummen er den høyeste medianverdi for det sporede objektet, så denne kan avvike fra poengsummen som vises på miniatyrbildet for søkeresultatet.",
-      "label": "Høyeste poengsum"
+      "info": "Toppscoren er den høyeste medianverdien for det sporede objektet, så denne kan avvike fra scoren som vises på miniatyrbildet i søkeresultatet.",
+      "label": "Toppscore"
     },
     "estimatedSpeed": "Estimert hastighet",
     "objects": "Objekter",
@@ -147,10 +147,10 @@
       "descNoLabel": "Angi en ny underetikett for dette sporede objektet"
     },
     "snapshotScore": {
-      "label": "Øyeblikksbilde poengsum"
+      "label": "Øyeblikksbilde score"
     },
     "score": {
-      "label": "Poengsum"
+      "label": "Score"
     }
   },
   "itemMenu": {
@@ -261,7 +261,8 @@
       "header": {
         "zones": "Soner",
         "ratio": "Forhold",
-        "area": "Område"
+        "area": "Område",
+        "score": "Score"
       }
     },
     "annotationSettings": {
