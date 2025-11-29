@@ -263,7 +263,8 @@
       "header": {
         "zones": "Зони",
         "ratio": "Співвідношення",
-        "area": "Площа"
+        "area": "Площа",
+        "score": "Рахунок"
       }
     },
     "annotationSettings": {
