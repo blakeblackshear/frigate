@@ -148,7 +148,12 @@
       },
       "generateSuccess": "Met succes gegenereerde voorbeeldafbeeldingen",
       "allImagesRequired_one": "Classificeer alle afbeeldingen. {{count}} afbeelding resterend.",
-      "allImagesRequired_other": "Classificeer alle afbeeldingen. {{count}} afbeeldingen resterend."
+      "allImagesRequired_other": "Classificeer alle afbeeldingen. {{count}} afbeeldingen resterend.",
+      "modelCreated": "Model succesvol aangemaakt. Gebruik de weergave Recente classificaties om afbeeldingen voor ontbrekende statussen toe te voegen en train vervolgens het model.",
+      "missingStatesWarning": {
+        "title": "Voorbeelden van ontbrekende staten",
+        "description": "Je hebt geen voorbeelden geselecteerd voor alle staten. Het model wordt pas getraind wanneer alle staten afbeeldingen hebben. Ga je verder, gebruik dan de weergave Recente Classificaties om afbeeldingen voor de ontbrekende staten te classificeren en train daarna het model."
+      }
     }
   },
   "deleteModel": {

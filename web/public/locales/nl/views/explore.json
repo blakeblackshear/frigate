@@ -261,7 +261,8 @@
       "header": {
         "zones": "Zones",
         "ratio": "Verhouding",
-        "area": "Gebied"
+        "area": "Gebied",
+        "score": "Score"
       }
     },
     "annotationSettings": {
