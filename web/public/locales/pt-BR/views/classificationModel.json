@@ -19,19 +19,25 @@
       "trainingModel": "Treinamento do modelo iniciado com sucesso.",
       "deletedModel_one": "{{count}} modelo excluído com sucesso",
       "deletedModel_many": "{{count}} modelos excluídos com sucesso",
-      "deletedModel_other": "{{count}} modelos excluídos com sucesso"
+      "deletedModel_other": "{{count}} modelos excluídos com sucesso",
+      "updatedModel": "Configuração do modelo atualizada com sucesso",
+      "renamedCategory": "Classe renomeada para {{name}} com sucesso"
     },
     "error": {
       "deleteImageFailed": "Falha ao deletar:{{errorMessage}}",
       "deleteCategoryFailed": "Falha ao deletar classe:{{errorMessage}}",
       "categorizeFailed": "Falha ao categorizar imagem:{{errorMessage}}",
       "deleteModelFailed": "Falha ao excluir o modelo: {{errorMessage}}",
-      "trainingFailed": "Falha ao iniciar o treinamento do modelo: {{errorMessage}}"
+      "trainingFailed": "Falha ao iniciar o treinamento do modelo: {{errorMessage}}",
+      "trainingFailedToStart": "Falha ao iniciar o treinamento do modelo: {{errorMessage}}",
+      "updateModelFailed": "Falha ao atualizar modelo: {{errorMessage}}",
+      "renameCategoryFailed": "Falha ao renomear classe: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Excluir Classe",
-    "desc": "Tem certeza de que deseja excluir a classe {{name}}? Isso excluirá permanentemente todas as imagens associadas e exigirá o treinamento do modelo novamente."
+    "desc": "Tem certeza de que deseja excluir a classe {{name}}? Isso excluirá permanentemente todas as imagens associadas e exigirá o treinamento do modelo novamente.",
+    "minClassesTitle": "Não é possível apagar a classe"
   },
   "deleteModel": {
     "title": "Deletar modelo de classificação",
