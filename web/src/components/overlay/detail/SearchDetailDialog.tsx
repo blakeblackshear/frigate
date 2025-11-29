@@ -1299,7 +1299,8 @@ function ObjectDetailsTab({
         </div>
       </div>
 
-      {search.data.type === "object" &&
+      {isAdmin &&
+        search.data.type === "object" &&
         config?.plus?.enabled &&
         search.end_time != undefined &&
         search.has_snapshot && (

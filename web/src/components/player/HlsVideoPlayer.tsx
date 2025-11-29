@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 import { useTranslation } from "react-i18next";
 import ObjectTrackOverlay from "@/components/overlay/ObjectTrackOverlay";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = false;
@@ -83,6 +84,7 @@ export default function HlsVideoPlayer({
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation("components/player");
   const { data: config } = useSWR<FrigateConfig>("config");
+  const isAdmin = useIsAdmin();
 
   // for detail stream context in History
   const currentTime = currentTimeOverride;
@@ -285,7 +287,7 @@ export default function HlsVideoPlayer({
             volume: true,
             seek: true,
             playbackRate: true,
-            plusUpload: config?.plus?.enabled == true,
+            plusUpload: isAdmin && config?.plus?.enabled == true,
             fullscreen: supportsFullscreen,
           }}
           setControlsOpen={setControlsOpen}

@@ -20,6 +20,7 @@ import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator
 import { baseUrl } from "@/api/baseUrl";
 import { getTranslatedLabel } from "@/utils/i18n";
 import useImageLoaded from "@/hooks/use-image-loaded";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 export type FrigatePlusDialogProps = {
   upload?: Event;
@@ -57,7 +58,9 @@ export function FrigatePlusDialog({
   );
 
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+  const isAdmin = useIsAdmin();
   const showCard =
+    isAdmin &&
     !!upload &&
     upload.data.type === "object" &&
     upload.plus_id !== "not_enabled" &&
