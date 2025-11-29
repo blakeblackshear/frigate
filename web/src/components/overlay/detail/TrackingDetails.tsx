@@ -38,6 +38,7 @@ import { isDesktop, isIOS, isMobileOnly, isSafari } from "react-device-detect";
 import { useApiHost } from "@/api";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import ObjectTrackOverlay from "../ObjectTrackOverlay";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type TrackingDetailsProps = {
   className?: string;
@@ -777,6 +778,7 @@ function LifecycleIconRow({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const isAdmin = useIsAdmin();
 
   const aspectRatio = useMemo(() => {
     if (!config) {
@@ -993,7 +995,7 @@ function LifecycleIconRow({
         <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
           <div className="flex flex-row items-center gap-3">
             <div className="whitespace-nowrap">{formattedEventTimestamp}</div>
-            {(config?.plus?.enabled || item.data.box) && (
+            {((isAdmin && config?.plus?.enabled) || item.data.box) && (
               <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
                 <DropdownMenuTrigger>
                   <div className="rounded p-1 pr-2" role="button">
@@ -1002,7 +1004,7 @@ function LifecycleIconRow({
                 </DropdownMenuTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuContent>
-                    {config?.plus?.enabled && (
+                    {isAdmin && config?.plus?.enabled && (
                       <DropdownMenuItem
                         className="cursor-pointer"
                         onSelect={async () => {

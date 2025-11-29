@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useState } from "react";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type EventMenuProps = {
   event: Event;
@@ -35,6 +36,7 @@ export default function EventMenu({
   const navigate = useNavigate();
   const { t } = useTranslation("views/explore");
   const [isOpen, setIsOpen] = useState(false);
+  const isAdmin = useIsAdmin();
 
   const handleObjectSelect = () => {
     if (isSelected) {
@@ -85,7 +87,8 @@ export default function EventMenu({
               </a>
             </DropdownMenuItem>
 
-            {event.has_snapshot &&
+            {isAdmin &&
+              event.has_snapshot &&
               event.plus_id == undefined &&
               event.data.type == "object" &&
               config?.plus?.enabled && (
