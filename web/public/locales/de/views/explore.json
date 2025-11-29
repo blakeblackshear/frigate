@@ -18,7 +18,7 @@
           "updatedSublabel": "Unterkategorie erfolgreich aktualisiert.",
           "updatedLPR": "Nummernschild erfolgreich aktualisiert.",
           "regenerate": "Eine neue Beschreibung wurde von {{provider}} angefordert. Je nach Geschwindigkeit des Anbieters kann es einige Zeit dauern, bis die neue Beschreibung generiert ist.",
-          "audioTranscription": "Audio Transkription erfolgreich angefordert."
+          "audioTranscription": "Die Audio-Transkription wurde erfolgreich angefordert. Je nach Geschwindigkeit Ihres Frigate-Servers kann die Transkription einige Zeit in Anspruch nehmen."
         },
         "error": {
           "regenerate": "Der Aufruf von {{provider}} für eine neue Beschreibung ist fehlgeschlagen: {{errorMessage}}",
@@ -159,7 +159,8 @@
     "video": "Video",
     "object_lifecycle": "Objekt-Lebenszyklus",
     "snapshot": "Snapshot",
-    "thumbnail": "Vorschaubild"
+    "thumbnail": "Vorschaubild",
+    "tracking_details": "Nachverfolgungs-Details"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -249,13 +250,14 @@
         "faceOrLicense_plate": "{{attribute}} erkannt für {{label}}",
         "other": "{{label}} erkannt als {{attribute}}"
       },
-      "gone": "{{label}} verließ",
+      "gone": "{{label}} hat verlassen",
       "heard": "{{label}} wurde gehört",
       "external": "{{label}} erkannt",
       "header": {
         "zones": "Zonen",
         "ratio": "Verhältnis",
-        "area": "Bereich"
+        "area": "Bereich",
+        "score": "Bewertung"
       }
     },
     "annotationSettings": {
@@ -278,6 +280,10 @@
       "previous": "Vorherige Anzeige",
       "next": "Nächste Anzeige"
     },
-    "title": "Verfolgungsdetails"
+    "title": "Verfolgungsdetails",
+    "adjustAnnotationSettings": "Anmerkungseinstellungen anpassen",
+    "autoTrackingTips": "Die Positionen der Begrenzungsrahmen sind bei Kameras mit automatischer Verfolgung ungenau.",
+    "count": "{{first}} von {{second}}",
+    "trackedPoint": "Verfolgter Punkt"
   }
 }

@@ -64,7 +64,7 @@
       "deletedName_other": "{{count}} Gesichter wurden erfolgreich gelöscht.",
       "addFaceLibrary": "{{name}} wurde erfolgreich in die Gesichtsbibliothek aufgenommen!",
       "trainedFace": "Gesicht erfolgreich trainiert.",
-      "updatedFaceScore": "Gesichtsbewertung erfolgreich aktualisiert.",
+      "updatedFaceScore": "Gesichtsbewertung erfolgreich auf {{name}} ({{score}}) aktualisiert.",
       "renamedFace": "Gesicht erfolgreich in {{name}} umbenannt"
     },
     "error": {
