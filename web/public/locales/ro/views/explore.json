@@ -263,7 +263,8 @@
       "header": {
         "zones": "Zone",
         "ratio": "Raport",
-        "area": "Aria"
+        "area": "Aria",
+        "score": "Scor"
       }
     },
     "annotationSettings": {
