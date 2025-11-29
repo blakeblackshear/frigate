@@ -70,6 +70,7 @@ router = APIRouter(tags=[Tags.events])
 @router.get(
     "/events",
     response_model=list[EventResponse],
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get events",
     description="Returns a list of events.",
 )
@@ -344,6 +345,7 @@ def events(
 @router.get(
     "/events/explore",
     response_model=list[EventResponse],
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get summary of objects.",
     description="""Gets a summary of objects from the database.
     Returns a list of objects with a max of `limit` objects for each label.
@@ -436,6 +438,7 @@ def events_explore(
 @router.get(
     "/event_ids",
     response_model=list[EventResponse],
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get events by ids.",
     description="""Gets events by a list of ids.
     Returns a list of events.
@@ -469,6 +472,7 @@ async def event_ids(ids: str, request: Request):
 
 @router.get(
     "/events/search",
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Search events.",
     description="""Searches for events in the database.
     Returns a list of events.
@@ -919,6 +923,7 @@ def events_summary(
 @router.get(
     "/events/{event_id}",
     response_model=EventResponse,
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get event by id.",
     description="Gets an event by its id.",
 )
@@ -962,6 +967,7 @@ def set_retain(event_id: str):
 @router.post(
     "/events/{event_id}/plus",
     response_model=EventUploadPlusResponse,
+    dependencies=[Depends(require_role(["admin"]))],
     summary="Send event to Frigate+.",
     description="""Sends an event to Frigate+.
     Returns a success message or an error if the event is not found.
@@ -1102,6 +1108,7 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
 @router.put(
     "/events/{event_id}/false_positive",
     response_model=EventUploadPlusResponse,
+    dependencies=[Depends(require_role(["admin"]))],
     summary="Submit false positive to Frigate+",
     description="""Submit an event as a false positive to Frigate+.
     This endpoint is the same as the standard Frigate+ submission endpoint,

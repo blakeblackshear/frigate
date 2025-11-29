@@ -62,8 +62,8 @@ def require_admin_by_default():
         "/",
         "/version",
         "/config/schema.json",
-        "/metrics",
         # Authenticated user endpoints (allow_any_authenticated)
+        "/metrics",
         "/stats",
         "/stats/history",
         "/config",
@@ -76,22 +76,28 @@ def require_admin_by_default():
         "/recognized_license_plates",
         "/timeline",
         "/timeline/hourly",
-        "/events/summary",
         "/recordings/storage",
         "/recordings/summary",
         "/recordings/unavailable",
         "/go2rtc/streams",
+        "/event_ids",
+        "/events",
+        "/exports",
     }
 
     # Path prefixes that should be exempt (for paths with parameters)
     EXEMPT_PREFIXES = (
         "/logs/",  # /logs/{service}
-        "/review",  # /review, /review/{id}, /review_ids, /review/summary, etc.
+        "/review",  # /review, /review/{id}, /review/summary, /review_ids, etc.
         "/reviews/",  # /reviews/viewed, /reviews/delete
-        "/events/",  # /events/{id}/thumbnail, etc. (camera-scoped)
+        "/events/",  # /events/{id}/thumbnail, /events/summary, etc. (camera-scoped)
+        "/export/",  # /export/{camera}/start/..., /export/{id}/rename, /export/{id}
         "/go2rtc/streams/",  # /go2rtc/streams/{camera}
         "/users/",  # /users/{username}/password (has own auth)
         "/preview/",  # /preview/{file}/thumbnail.jpg
+        "/exports/",  # /exports/{export_id}
+        "/vod/",  # /vod/{camera_name}/...
+        "/notifications/",  # /notifications/pubkey, /notifications/register
     )
 
     async def admin_checker(request: Request):
@@ -105,6 +111,24 @@ def require_admin_by_default():
         if path.startswith(EXEMPT_PREFIXES):
             return
 
+        # Dynamic camera path exemption:
+        # Any path whose first segment matches a configured camera name should
+        # bypass the global admin requirement. These endpoints enforce access
+        # via route-level dependencies (e.g. require_camera_access) to ensure
+        # per-camera authorization. This allows non-admin authenticated users
+        # (e.g. viewer role) to access camera-specific resources without
+        # needing admin privileges.
+        try:
+            if path.startswith("/"):
+                first_segment = path.split("/", 2)[1]
+                if (
+                    first_segment
+                    and first_segment in request.app.frigate_config.cameras
+                ):
+                    return
+        except Exception:
+            pass
+
         # For all other paths, require admin role
         # Port 5000 (internal) requests have admin role set automatically
         role = request.headers.get("remote-role")
@@ -113,7 +137,7 @@ def require_admin_by_default():
 
         raise HTTPException(
             status_code=403,
-            detail="Admin role required for this endpoint",
+            detail="Access denied. A user with the admin role is required.",
         )
 
     return admin_checker

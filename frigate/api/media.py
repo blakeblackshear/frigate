@@ -945,6 +945,7 @@ async def vod_hour(
 
 @router.get(
     "/vod/event/{event_id}",
+    dependencies=[Depends(allow_any_authenticated())],
     description="Returns an HLS playlist for the specified object. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
 async def vod_event(

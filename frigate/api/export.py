@@ -14,6 +14,7 @@ from peewee import DoesNotExist
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import (
+    allow_any_authenticated,
     get_allowed_cameras_for_filter,
     require_camera_access,
     require_role,
@@ -44,6 +45,7 @@ router = APIRouter(tags=[Tags.export])
 @router.get(
     "/exports",
     response_model=ExportsResponse,
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get exports",
     description="""Gets all exports from the database for cameras the user has access to.
     Returns a list of exports ordered by date (most recent first).""",
@@ -272,6 +274,7 @@ async def export_delete(event_id: str, request: Request):
 @router.get(
     "/exports/{export_id}",
     response_model=ExportModel,
+    dependencies=[Depends(allow_any_authenticated())],
     summary="Get a single export",
     description="""Gets a specific export by ID. The user must have access to the camera
     associated with the export.""",
