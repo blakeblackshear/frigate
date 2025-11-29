@@ -265,6 +265,7 @@ export default function LiveDashboardView({
     resetPreferredLiveMode,
     isRestreamedStates,
     supportsAudioOutputStates,
+    streamMetadata,
   } = useCameraLiveMode(cameras, windowVisible, activeStreams);
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
@@ -650,6 +651,12 @@ export default function LiveDashboardView({
               setIsEditMode={setIsEditMode}
               fullscreen={fullscreen}
               toggleFullscreen={toggleFullscreen}
+              preferredLiveModes={preferredLiveModes}
+              setPreferredLiveModes={setPreferredLiveModes}
+              resetPreferredLiveMode={resetPreferredLiveMode}
+              isRestreamedStates={isRestreamedStates}
+              supportsAudioOutputStates={supportsAudioOutputStates}
+              streamMetadata={streamMetadata}
             />
           )}
         </>
