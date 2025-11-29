@@ -23,8 +23,8 @@
     "label": "Sorter",
     "dateAsc": "Dato (Stigende)",
     "dateDesc": "Dato (Synkende)",
-    "scoreAsc": "Objektpoengsum (Stigende)",
-    "scoreDesc": "Objektpoengsum (Synkende)",
+    "scoreAsc": "Objektscore (Stigende)",
+    "scoreDesc": "Objektscore (Synkende)",
     "speedAsc": "Estimert hastighet (Stigende)",
     "speedDesc": "Estimert hastighet (Synkende)",
     "relevance": "Relevans"
@@ -104,7 +104,7 @@
     "label": "Underetiketter",
     "all": "Alle underetiketter"
   },
-  "score": "Poengsum",
+  "score": "Score",
   "estimatedSpeed": "Estimert hastighet ({{unit}})",
   "cameras": {
     "all": {
