@@ -7,7 +7,6 @@ import {
 import { isDesktop, isMobile } from "react-device-detect";
 import useSWR from "swr";
 import { MdHome } from "react-icons/md";
-import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { Button, buttonVariants } from "../ui/button";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -57,7 +56,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import * as LuIcons from "react-icons/lu";
@@ -79,6 +78,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { CameraNameLabel } from "../camera/FriendlyNameLabel";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useUserPersistedOverlayState } from "@/hooks/use-overlay-state";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -109,9 +109,9 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
     [timeoutId],
   );
 
-  // groups
+  // groups - use user-namespaced key for persistence to avoid cross-user conflicts
 
-  const [group, setGroup, , deleteGroup] = usePersistedOverlayState(
+  const [group, setGroup, , deleteGroup] = useUserPersistedOverlayState(
     "cameraGroup",
     "default" as string,
   );
@@ -276,7 +276,7 @@ function NewGroupDialog({
   const [editState, setEditState] = useState<"none" | "add" | "edit">("none");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [, , , deleteGridLayout] = usePersistence(
+  const [, , , deleteGridLayout] = useUserPersistence(
     `${activeGroup}-draggable-layout`,
   );
 

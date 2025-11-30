@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import {
   AllGroupsStreamingSettings,
   CameraConfig,
@@ -78,7 +78,7 @@ export default function LiveDashboardView({
 
   // layout
 
-  const [mobileLayout, setMobileLayout] = usePersistence<"grid" | "list">(
+  const [mobileLayout, setMobileLayout] = useUserPersistence<"grid" | "list">(
     "live-layout",
     isDesktop ? "grid" : "list",
   );
@@ -211,8 +211,8 @@ export default function LiveDashboardView({
     };
   }, []);
 
-  const [globalAutoLive] = usePersistence("autoLiveView", true);
-  const [displayCameraNames] = usePersistence("displayCameraNames", false);
+  const [globalAutoLive] = useUserPersistence("autoLiveView", true);
+  const [displayCameraNames] = useUserPersistence("displayCameraNames", false);
 
   const { allGroupsStreamingSettings, setAllGroupsStreamingSettings } =
     useStreamingSettings();

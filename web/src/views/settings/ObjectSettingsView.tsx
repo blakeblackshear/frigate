@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import useSWR from "swr";
 import Heading from "@/components/ui/heading";
 import { Switch } from "@/components/ui/switch";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -104,7 +104,7 @@ export default function ObjectSettingsView({
     },
   ];
 
-  const [options, setOptions, optionsLoaded] = usePersistence<Options>(
+  const [options, setOptions, optionsLoaded] = useUserPersistence<Options>(
     `${selectedCamera}-feed`,
     emptyObject,
   );

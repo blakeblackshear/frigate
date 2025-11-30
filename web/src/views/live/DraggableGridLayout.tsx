@@ -1,4 +1,4 @@
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import {
   AllGroupsStreamingSettings,
   BirdseyeConfig,
@@ -40,7 +40,7 @@ import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard, LuPencil } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { EditGroupDialog } from "@/components/filter/CameraGroupSelector";
-import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
+import { useUserPersistedOverlayState } from "@/hooks/use-overlay-state";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import {
   Tooltip,
@@ -102,8 +102,8 @@ export default function DraggableGridLayout({
 
   // preferred live modes per camera
 
-  const [globalAutoLive] = usePersistence("autoLiveView", true);
-  const [displayCameraNames] = usePersistence("displayCameraNames", false);
+  const [globalAutoLive] = useUserPersistence("autoLiveView", true);
+  const [displayCameraNames] = useUserPersistence("displayCameraNames", false);
 
   const { allGroupsStreamingSettings, setAllGroupsStreamingSettings } =
     useStreamingSettings();
@@ -118,11 +118,14 @@ export default function DraggableGridLayout({
 
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
 
-  const [gridLayout, setGridLayout, isGridLayoutLoaded] = usePersistence<
+  const [gridLayout, setGridLayout, isGridLayoutLoaded] = useUserPersistence<
     Layout[]
   >(`${cameraGroup}-draggable-layout`);
 
-  const [group] = usePersistedOverlayState("cameraGroup", "default" as string);
+  const [group] = useUserPersistedOverlayState(
+    "cameraGroup",
+    "default" as string,
+  );
 
   const groups = useMemo(() => {
     if (!config) {

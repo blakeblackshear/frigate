@@ -9,7 +9,7 @@ import { Button } from "../../components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { del as delData } from "idb-keyval";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { isSafari } from "react-device-detect";
 import {
   Select,
@@ -91,15 +91,15 @@ export default function UiSettingsView() {
 
   // settings
 
-  const [autoLive, setAutoLive] = usePersistence("autoLiveView", true);
-  const [cameraNames, setCameraName] = usePersistence(
+  const [autoLive, setAutoLive] = useUserPersistence("autoLiveView", true);
+  const [cameraNames, setCameraName] = useUserPersistence(
     "displayCameraNames",
     false,
   );
-  const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
-  const [weekStartsOn, setWeekStartsOn] = usePersistence("weekStartsOn", 0);
-  const [alertVideos, setAlertVideos] = usePersistence("alertVideos", true);
-  const [fallbackTimeout, setFallbackTimeout] = usePersistence(
+  const [playbackRate, setPlaybackRate] = useUserPersistence("playbackRate", 1);
+  const [weekStartsOn, setWeekStartsOn] = useUserPersistence("weekStartsOn", 0);
+  const [alertVideos, setAlertVideos] = useUserPersistence("alertVideos", true);
+  const [fallbackTimeout, setFallbackTimeout] = useUserPersistence(
     "liveFallbackTimeout",
     3,
   );

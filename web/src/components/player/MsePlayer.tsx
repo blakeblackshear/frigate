@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import {
   LivePlayerError,
   PlayerStatsType,
@@ -72,7 +72,10 @@ function MSEPlayer({
   const [errorCount, setErrorCount] = useState<number>(0);
   const totalBytesLoaded = useRef(0);
 
-  const [fallbackTimeout] = usePersistence<number>("liveFallbackTimeout", 3);
+  const [fallbackTimeout] = useUserPersistence<number>(
+    "liveFallbackTimeout",
+    3,
+  );
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);

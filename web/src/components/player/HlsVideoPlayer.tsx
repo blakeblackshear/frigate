@@ -15,7 +15,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { AxiosResponse } from "axios";
 import { toast } from "sonner";
 import { useOverlayState } from "@/hooks/use-overlay-state";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { cn } from "@/lib/utils";
 import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 import { useTranslation } from "react-i18next";
@@ -210,9 +210,9 @@ export default function HlsVideoPlayer({
 
   const [tallCamera, setTallCamera] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [muted, setMuted] = usePersistence("hlsPlayerMuted", true);
+  const [muted, setMuted] = useUserPersistence("hlsPlayerMuted", true);
   const [volume, setVolume] = useOverlayState("playerVolume", 1.0);
-  const [defaultPlaybackRate] = usePersistence("playbackRate", 1);
+  const [defaultPlaybackRate] = useUserPersistence("playbackRate", 1);
   const [playbackRate, setPlaybackRate] = useOverlayState(
     "playbackRate",
     defaultPlaybackRate ?? 1,

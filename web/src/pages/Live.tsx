@@ -1,10 +1,7 @@
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import {
-  useHashState,
-  usePersistedOverlayState,
-  useSearchEffect,
-} from "@/hooks/use-overlay-state";
+import { useHashState, useSearchEffect } from "@/hooks/use-overlay-state";
+import { useUserPersistedOverlayState } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import LiveBirdseyeView from "@/views/live/LiveBirdseyeView";
 import LiveCameraView from "@/views/live/LiveCameraView";
@@ -24,7 +21,7 @@ function Live() {
   // selection
 
   const [selectedCameraName, setSelectedCameraName] = useHashState();
-  const [cameraGroup, setCameraGroup, loaded, ,] = usePersistedOverlayState(
+  const [cameraGroup, setCameraGroup, loaded] = useUserPersistedOverlayState(
     "cameraGroup",
     "default" as string,
   );
