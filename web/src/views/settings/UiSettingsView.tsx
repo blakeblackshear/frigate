@@ -1,15 +1,17 @@
 import Heading from "@/components/ui/heading";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useCallback, useEffect } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { Toaster } from "sonner";
 import { toast } from "sonner";
 import { Separator } from "../../components/ui/separator";
 import { Button } from "../../components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { del as delData } from "idb-keyval";
-import { useUserPersistence } from "@/hooks/use-user-persistence";
+import {
+  useUserPersistence,
+  deleteUserNamespacedKey,
+} from "@/hooks/use-user-persistence";
 import { isSafari } from "react-device-detect";
 import {
   Select,
@@ -19,6 +21,7 @@ import {
   SelectTrigger,
 } from "../../components/ui/select";
 import { useTranslation } from "react-i18next";
+import { AuthContext } from "@/context/auth-context";
 
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
@@ -26,13 +29,16 @@ const WEEK_STARTS_ON = ["Sunday", "Monday"];
 export default function UiSettingsView() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const { t } = useTranslation("views/settings");
+  const { auth } = useContext(AuthContext);
+  const username = auth?.user?.username;
+
   const clearStoredLayouts = useCallback(() => {
     if (!config) {
       return [];
     }
 
     Object.entries(config.camera_groups).forEach(async (value) => {
-      await delData(`${value[0]}-draggable-layout`)
+      await deleteUserNamespacedKey(`${value[0]}-draggable-layout`, username)
         .then(() => {
           toast.success(
             t("general.toast.success.clearStoredLayout", {
@@ -56,14 +62,14 @@ export default function UiSettingsView() {
           );
         });
     });
-  }, [config, t]);
+  }, [config, t, username]);
 
   const clearStreamingSettings = useCallback(async () => {
     if (!config) {
       return [];
     }
 
-    await delData(`streaming-settings`)
+    await deleteUserNamespacedKey(`streaming-settings`, username)
       .then(() => {
         toast.success(t("general.toast.success.clearStreamingSettings"), {
           position: "top-center",
@@ -83,7 +89,7 @@ export default function UiSettingsView() {
           },
         );
       });
-  }, [config, t]);
+  }, [config, t, username]);
 
   useEffect(() => {
     document.title = t("documentTitle.general");

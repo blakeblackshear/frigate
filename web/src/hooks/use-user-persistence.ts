@@ -13,6 +13,29 @@ type useUserPersistenceReturn<S> = [
 const MIGRATED_KEYS_STORAGE_KEY = "frigate-migrated-user-keys";
 
 /**
+ * Compute the user-namespaced key for a given base key and username.
+ */
+export function getUserNamespacedKey(
+  key: string,
+  username: string | undefined,
+): string {
+  const isAuthenticated = username && username !== "anonymous";
+  return isAuthenticated ? `${key}:${username}` : key;
+}
+
+/**
+ * Delete a user-namespaced key from storage.
+ * This is useful for clearing user-specific data from settings pages.
+ */
+export async function deleteUserNamespacedKey(
+  key: string,
+  username: string | undefined,
+): Promise<void> {
+  const namespacedKey = getUserNamespacedKey(key, username);
+  await delData(namespacedKey);
+}
+
+/**
  * Get the set of keys that have already been migrated for a specific user.
  */
 async function getMigratedKeys(username: string): Promise<Set<string>> {
@@ -60,8 +83,16 @@ export function useUserPersistence<S>(
     username && username !== "anonymous" && !auth.isLoading;
   const namespacedKey = isAuthenticated ? `${key}:${username}` : key;
 
+  // Track the key that was used when loading to prevent cross-key writes
+  const loadedKeyRef = useRef<string | null>(null);
+
   const setValue = useCallback(
     (newValue: S | undefined) => {
+      // Only allow writes if we've loaded for this key
+      // This prevents stale callbacks from writing to the wrong key
+      if (loadedKeyRef.current !== namespacedKey) {
+        return;
+      }
       setInternalValue(newValue);
       async function update() {
         await setData(namespacedKey, newValue);
@@ -72,6 +103,9 @@ export function useUserPersistence<S>(
   );
 
   const deleteValue = useCallback(async () => {
+    if (loadedKeyRef.current !== namespacedKey) {
+      return;
+    }
     await delData(namespacedKey);
     setInternalValue(defaultValue);
   }, [namespacedKey, defaultValue]);
@@ -82,7 +116,8 @@ export function useUserPersistence<S>(
       return;
     }
 
-    // Reset migration flag when key changes
+    // Reset state when key changes - this prevents stale writes
+    loadedKeyRef.current = null;
     migrationAttemptedRef.current = false;
     setLoaded(false);
 
@@ -99,6 +134,7 @@ export function useUserPersistence<S>(
         if (typeof existingNamespacedValue !== "undefined") {
           // Already have namespaced data, use it
           setInternalValue(existingNamespacedValue);
+          loadedKeyRef.current = namespacedKey;
           setLoaded(true);
           return;
         }
@@ -107,6 +143,7 @@ export function useUserPersistence<S>(
         if (migratedKeys.has(key)) {
           // Already migrated, don't read from legacy key
           setInternalValue(defaultValue);
+          loadedKeyRef.current = namespacedKey;
           setLoaded(true);
           return;
         }
@@ -119,6 +156,7 @@ export function useUserPersistence<S>(
           await delData(key);
           await markKeyAsMigrated(username, key);
           setInternalValue(legacyValue);
+          loadedKeyRef.current = namespacedKey;
           setLoaded(true);
           return;
         }
@@ -126,6 +164,7 @@ export function useUserPersistence<S>(
         // No legacy value, just mark as migrated so we don't check again
         await markKeyAsMigrated(username, key);
         setInternalValue(defaultValue);
+        loadedKeyRef.current = namespacedKey;
         setLoaded(true);
         return;
       }
@@ -137,6 +176,7 @@ export function useUserPersistence<S>(
       } else {
         setInternalValue(defaultValue);
       }
+      loadedKeyRef.current = namespacedKey;
       setLoaded(true);
     }
 
