@@ -498,7 +498,7 @@ export default function SearchDetailDialog({
 
     const views = [...SEARCH_TABS];
 
-    if (search.data.type != "object" || !search.has_clip) {
+    if (!search.has_clip) {
       const index = views.indexOf("tracking_details");
       views.splice(index, 1);
     }
