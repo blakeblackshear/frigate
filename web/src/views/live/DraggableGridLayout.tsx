@@ -24,6 +24,7 @@ import "react-resizable/css/styles.css";
 import {
   AudioState,
   LivePlayerMode,
+  LiveStreamMetadata,
   StatsState,
   VolumeState,
 } from "@/types/live";
@@ -47,7 +48,6 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
-import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { useTranslation } from "react-i18next";
@@ -65,6 +65,16 @@ type DraggableGridLayoutProps = {
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   fullscreen: boolean;
   toggleFullscreen: () => void;
+  preferredLiveModes: { [key: string]: LivePlayerMode };
+  setPreferredLiveModes: React.Dispatch<
+    React.SetStateAction<{ [key: string]: LivePlayerMode }>
+  >;
+  resetPreferredLiveMode: (cameraName: string) => void;
+  isRestreamedStates: { [key: string]: boolean };
+  supportsAudioOutputStates: {
+    [key: string]: { supportsAudio: boolean; cameraName: string };
+  };
+  streamMetadata: { [key: string]: LiveStreamMetadata };
 };
 export default function DraggableGridLayout({
   cameras,
@@ -79,6 +89,12 @@ export default function DraggableGridLayout({
   setIsEditMode,
   fullscreen,
   toggleFullscreen,
+  preferredLiveModes,
+  setPreferredLiveModes,
+  resetPreferredLiveMode,
+  isRestreamedStates,
+  supportsAudioOutputStates,
+  streamMetadata,
 }: DraggableGridLayoutProps) {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -97,33 +113,6 @@ export default function DraggableGridLayout({
       return allGroupsStreamingSettings[cameraGroup];
     }
   }, [allGroupsStreamingSettings, cameraGroup]);
-
-  const activeStreams = useMemo(() => {
-    const streams: { [cameraName: string]: string } = {};
-    cameras.forEach((camera) => {
-      const availableStreams = camera.live.streams || {};
-      const streamNameFromSettings =
-        currentGroupStreamingSettings?.[camera.name]?.streamName || "";
-      const streamExists =
-        streamNameFromSettings &&
-        Object.values(availableStreams).includes(streamNameFromSettings);
-
-      const streamName = streamExists
-        ? streamNameFromSettings
-        : Object.values(availableStreams)[0] || "";
-
-      streams[camera.name] = streamName;
-    });
-    return streams;
-  }, [cameras, currentGroupStreamingSettings]);
-
-  const {
-    preferredLiveModes,
-    setPreferredLiveModes,
-    resetPreferredLiveMode,
-    isRestreamedStates,
-    supportsAudioOutputStates,
-  } = useCameraLiveMode(cameras, windowVisible, activeStreams);
 
   // grid layout
 
@@ -624,6 +613,7 @@ export default function DraggableGridLayout({
                     resetPreferredLiveMode(camera.name)
                   }
                   config={config}
+                  streamMetadata={streamMetadata}
                 >
                   <LivePlayer
                     key={camera.name}
@@ -838,6 +828,7 @@ type GridLiveContextMenuProps = {
   unmuteAll: () => void;
   resetPreferredLiveMode: () => void;
   config?: FrigateConfig;
+  streamMetadata?: { [key: string]: LiveStreamMetadata };
 };
 
 const GridLiveContextMenu = React.forwardRef<
@@ -868,6 +859,7 @@ const GridLiveContextMenu = React.forwardRef<
       unmuteAll,
       resetPreferredLiveMode,
       config,
+      streamMetadata,
       ...props
     },
     ref,
@@ -899,6 +891,7 @@ const GridLiveContextMenu = React.forwardRef<
           unmuteAll={unmuteAll}
           resetPreferredLiveMode={resetPreferredLiveMode}
           config={config}
+          streamMetadata={streamMetadata}
         >
           {children}
         </LiveContextMenu>

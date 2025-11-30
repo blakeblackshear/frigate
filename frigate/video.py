@@ -124,45 +124,50 @@ def capture_frames(
         config_subscriber.check_for_updates()
         return config.enabled
 
-    while not stop_event.is_set():
-        if not get_enabled_state():
-            logger.debug(f"Stopping capture thread for disabled {config.name}")
-            break
-
-        fps.value = frame_rate.eps()
-        skipped_fps.value = skipped_eps.eps()
-        current_frame.value = datetime.now().timestamp()
-        frame_name = f"{config.name}_frame{frame_index}"
-        frame_buffer = frame_manager.write(frame_name)
-        try:
-            frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
-        except Exception:
-            # shutdown has been initiated
-            if stop_event.is_set():
+    try:
+        while not stop_event.is_set():
+            if not get_enabled_state():
+                logger.debug(f"Stopping capture thread for disabled {config.name}")
                 break
 
-            logger.error(f"{config.name}: Unable to read frames from ffmpeg process.")
+            fps.value = frame_rate.eps()
+            skipped_fps.value = skipped_eps.eps()
+            current_frame.value = datetime.now().timestamp()
+            frame_name = f"{config.name}_frame{frame_index}"
+            frame_buffer = frame_manager.write(frame_name)
+            try:
+                frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
+            except Exception:
+                # shutdown has been initiated
+                if stop_event.is_set():
+                    break
 
-            if ffmpeg_process.poll() is not None:
                 logger.error(
-                    f"{config.name}: ffmpeg process is not running. exiting capture thread..."
+                    f"{config.name}: Unable to read frames from ffmpeg process."
                 )
-                break
 
-            continue
+                if ffmpeg_process.poll() is not None:
+                    logger.error(
+                        f"{config.name}: ffmpeg process is not running. exiting capture thread..."
+                    )
+                    break
 
-        frame_rate.update()
+                continue
 
-        # don't lock the queue to check, just try since it should rarely be full
-        try:
-            # add to the queue
-            frame_queue.put((frame_name, current_frame.value), False)
-            frame_manager.close(frame_name)
-        except queue.Full:
-            # if the queue is full, skip this frame
-            skipped_eps.update()
+            frame_rate.update()
 
-        frame_index = 0 if frame_index == shm_frame_count - 1 else frame_index + 1
+            # don't lock the queue to check, just try since it should rarely be full
+            try:
+                # add to the queue
+                frame_queue.put((frame_name, current_frame.value), False)
+                frame_manager.close(frame_name)
+            except queue.Full:
+                # if the queue is full, skip this frame
+                skipped_eps.update()
+
+            frame_index = 0 if frame_index == shm_frame_count - 1 else frame_index + 1
+    finally:
+        config_subscriber.stop()
 
 
 class CameraWatchdog(threading.Thread):
@@ -233,6 +238,16 @@ class CameraWatchdog(threading.Thread):
                     self.ffmpeg_detect_process.communicate()
                 else:
                     self.ffmpeg_detect_process.wait()
+
+        # Wait for old capture thread to fully exit before starting a new one
+        if self.capture_thread is not None and self.capture_thread.is_alive():
+            self.logger.info("Waiting for capture thread to exit...")
+            self.capture_thread.join(timeout=5)
+
+            if self.capture_thread.is_alive():
+                self.logger.warning(
+                    f"Capture thread for {self.config.name} did not exit in time"
+                )
 
         self.logger.error(
             "The following ffmpeg logs include the last 100 lines prior to exit."

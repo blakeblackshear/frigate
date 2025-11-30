@@ -38,6 +38,7 @@ import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 type CameraStreamingDialogProps = {
   camera: string;
   groupStreamingSettings: GroupStreamingSettings;
+  streamMetadata?: { [key: string]: LiveStreamMetadata };
   setGroupStreamingSettings: React.Dispatch<
     React.SetStateAction<GroupStreamingSettings>
   >;
@@ -48,6 +49,7 @@ type CameraStreamingDialogProps = {
 export function CameraStreamingDialog({
   camera,
   groupStreamingSettings,
+  streamMetadata,
   setGroupStreamingSettings,
   setIsDialogOpen,
   onSave,
@@ -76,12 +78,7 @@ export function CameraStreamingDialog({
     [config, streamName],
   );
 
-  const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
-    isRestreamed ? `go2rtc/streams/${streamName}` : null,
-    {
-      revalidateOnFocus: false,
-    },
-  );
+  const cameraMetadata = streamName ? streamMetadata?.[streamName] : undefined;
 
   const supportsAudioOutput = useMemo(() => {
     if (!cameraMetadata) {
