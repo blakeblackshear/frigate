@@ -22,6 +22,7 @@ from frigate.util.services import (
     get_bandwidth_stats,
     get_cpu_stats,
     get_fs_type,
+    get_hailo_temps,
     get_intel_gpu_stats,
     get_jetson_stats,
     get_nvidia_gpu_stats,
@@ -90,6 +91,9 @@ def get_temperatures() -> dict[str, float]:
             temp = read_temperature(os.path.join(base, apex, "temp"))
             if temp is not None:
                 temps[apex] = temp
+
+    # Get temperatures for Hailo devices
+    temps.update(get_hailo_temps())
 
     return temps
 
