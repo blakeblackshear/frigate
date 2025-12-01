@@ -250,6 +250,11 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         if self.interpreter is None:
             # When interpreter is None, always save (score is 0.0, which is < 1.0)
             if self._should_save_image(camera, "unknown", 0.0):
+                save_attempts = (
+                    self.model_config.save_attempts
+                    if self.model_config.save_attempts is not None
+                    else 100
+                )
                 write_classification_attempt(
                     self.train_dir,
                     cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
@@ -257,6 +262,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
                     now,
                     "unknown",
                     0.0,
+                    max_files=save_attempts,
                 )
             return
 
@@ -277,6 +283,11 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
         detected_state = self.labelmap[best_id]
 
         if self._should_save_image(camera, detected_state, score):
+            save_attempts = (
+                self.model_config.save_attempts
+                if self.model_config.save_attempts is not None
+                else 100
+            )
             write_classification_attempt(
                 self.train_dir,
                 cv2.cvtColor(frame, cv2.COLOR_RGB2BGR),
@@ -284,6 +295,7 @@ class CustomStateClassificationProcessor(RealTimeProcessorApi):
                 now,
                 detected_state,
                 score,
+                max_files=save_attempts,
             )
 
         if score < self.model_config.threshold:
@@ -482,6 +494,11 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                 return
 
         if self.interpreter is None:
+            save_attempts = (
+                self.model_config.save_attempts
+                if self.model_config.save_attempts is not None
+                else 200
+            )
             write_classification_attempt(
                 self.train_dir,
                 cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
@@ -489,6 +506,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
                 now,
                 "unknown",
                 0.0,
+                max_files=save_attempts,
             )
             return
 
@@ -506,6 +524,11 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
         score = round(probs[best_id], 2)
         self.__update_metrics(datetime.datetime.now().timestamp() - now)
 
+        save_attempts = (
+            self.model_config.save_attempts
+            if self.model_config.save_attempts is not None
+            else 200
+        )
         write_classification_attempt(
             self.train_dir,
             cv2.cvtColor(crop, cv2.COLOR_RGB2BGR),
@@ -513,7 +536,7 @@ class CustomObjectClassificationProcessor(RealTimeProcessorApi):
             now,
             self.labelmap[best_id],
             score,
-            max_files=200,
+            max_files=save_attempts,
         )
 
         if score < self.model_config.threshold:

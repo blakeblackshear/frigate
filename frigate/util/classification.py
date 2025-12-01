@@ -330,7 +330,7 @@ def collect_state_classification_examples(
     1. Queries review items from specified cameras
     2. Selects 100 balanced timestamps across the data
     3. Extracts keyframes from recordings (cropped to specified regions)
-    4. Selects 20 most visually distinct images
+    4. Selects 24 most visually distinct images
     5. Saves them to the dataset directory
 
     Args:
@@ -660,7 +660,6 @@ def collect_object_classification_examples(
     Args:
         model_name: Name of the classification model
         label: Object label to collect (e.g., "person", "car")
-        cameras: List of camera names to collect examples from
     """
     dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
     temp_dir = os.path.join(dataset_dir, "temp")

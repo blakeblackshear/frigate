@@ -710,6 +710,38 @@ audio_transcription:
   # List of language codes: https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10
   language: en
 
+# Optional: Configuration for custom classification models
+classification:
+  custom:
+    # Required: name of the classification model
+    model_name:
+      # Optional: Enable running the model (default: shown below)
+      enabled: True
+      # Optional: Name of classification model (default: shown below)
+      name: None
+      # Optional: Classification score threshold to change the state (default: shown below)
+      threshold: 0.8
+      # Optional: Number of classification attempts to save in the recent classifications tab (default: shown below)
+      # NOTE: Defaults to 200 for object classification and 100 for state classification if not specified
+      save_attempts: None
+      # Optional: Object classification configuration
+      object_config:
+        # Required: Object types to classify
+        objects: [dog]
+        # Optional: Type of classification that is applied (default: shown below)
+        classification_type: sub_label
+      # Optional: State classification configuration
+      state_config:
+        # Required: Cameras to run classification on
+        cameras:
+          camera_name:
+            # Required: Crop of image frame on this camera to run classification on
+            crop: [0, 180, 220, 400]
+        # Optional: If classification should be run when motion is detected in the crop (default: shown below)
+        motion: False
+        # Optional: Interval to run classification on in seconds (default: shown below)
+        interval: None
+
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.9.10)
 # NOTE: The default go2rtc API port (1984) must be used,

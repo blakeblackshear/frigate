@@ -305,6 +305,7 @@ export type CustomClassificationModelConfig = {
   enabled: boolean;
   name: string;
   threshold: number;
+  save_attempts?: number;
   object_config?: {
     objects: string[];
     classification_type: string;
