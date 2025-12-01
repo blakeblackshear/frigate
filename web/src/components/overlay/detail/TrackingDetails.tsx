@@ -622,7 +622,7 @@ export function TrackingDetails({
 
       <div
         className={cn(
-          isDesktop && "justify-between overflow-hidden md:basis-2/5",
+          isDesktop && "justify-between overflow-hidden lg:basis-2/5",
         )}
       >
         {isDesktop && tabs && (
