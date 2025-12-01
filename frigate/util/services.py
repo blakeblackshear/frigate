@@ -558,13 +558,11 @@ def get_hailo_temps() -> dict[str, float]:
         device_ids = Device.scan()
         for i, device_id in enumerate(device_ids):
             try:
-                device = Device(device_id)
-                temp_info = device.control.get_chip_temperature()
+                with Device(device_id) as device:
+                    temp_info = device.control.get_chip_temperature()
 
-                # Get board name and normalise it
-                try:
+                    # Get board name and normalise it
                     identity = device.control.identify()
-                    # Extract board name from identity string (e.g., "Hailo-8" -> "hailo8")
                     board_name = None
                     for line in str(identity).split("\n"):
                         if line.startswith("Board Name:"):
@@ -575,19 +573,21 @@ def get_hailo_temps() -> dict[str, float]:
 
                     if not board_name:
                         board_name = f"hailo{i}"
-                except Exception:
-                    board_name = f"hailo{i}"
 
-                # Use indexed name if multiple devices, otherwise just the board name
-                device_name = f"{board_name}-{i}" if len(device_ids) > 1 else board_name
+                    # Use indexed name if multiple devices, otherwise just the board name
+                    device_name = (
+                        f"{board_name}-{i}" if len(device_ids) > 1 else board_name
+                    )
 
-                # ts1_temperature is also available, but appeared to be the same as ts0 in testing.
-                temps[device_name] = round(temp_info.ts0_temperature, 1)
-                device.release()
-            except Exception:
+                    # ts1_temperature is also available, but appeared to be the same as ts0 in testing.
+                    temps[device_name] = round(temp_info.ts0_temperature, 1)
+            except Exception as e:
+                logger.debug(
+                    f"Failed to get temperature for Hailo device {device_id}: {e}"
+                )
                 continue
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Failed to scan for Hailo devices: {e}")
 
     return temps
 
