@@ -101,7 +101,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
@@ -146,7 +146,7 @@ export default function LiveCameraView({
 
   // supported features
 
-  const [streamName, setStreamName] = usePersistence<string>(
+  const [streamName, setStreamName] = useUserPersistence<string>(
     `${camera.name}-stream`,
     Object.values(camera.live.streams)[0],
   );
@@ -279,7 +279,7 @@ export default function LiveCameraView({
   const [pip, setPip] = useState(false);
   const [lowBandwidth, setLowBandwidth] = useState(false);
 
-  const [playInBackground, setPlayInBackground] = usePersistence<boolean>(
+  const [playInBackground, setPlayInBackground] = useUserPersistence<boolean>(
     `${camera.name}-background-play`,
     false,
   );

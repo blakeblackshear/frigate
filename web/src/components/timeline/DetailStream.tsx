@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Link } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { isDesktop } from "react-device-detect";
 import { resolveZoneName } from "@/hooks/use-zone-friendly-name";
 import { PiSlidersHorizontalBold } from "react-icons/pi";
@@ -58,7 +58,7 @@ export default function DetailStream({
   const effectiveTime = currentTime - annotationOffset / 1000;
   const [upload, setUpload] = useState<Event | undefined>(undefined);
   const [controlsExpanded, setControlsExpanded] = useState(false);
-  const [alwaysExpandActive, setAlwaysExpandActive] = usePersistence(
+  const [alwaysExpandActive, setAlwaysExpandActive] = useUserPersistence(
     "detailStreamActiveExpanded",
     true,
   );

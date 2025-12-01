@@ -37,7 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { SaveSearchDialog } from "./SaveSearchDialog";
 import { DeleteSearchDialog } from "./DeleteSearchDialog";
 import {
@@ -128,9 +128,8 @@ export default function InputWithTags({
 
   // TODO: search history from browser storage
 
-  const [searchHistory, setSearchHistory, searchHistoryLoaded] = usePersistence<
-    SavedSearchQuery[]
-  >("frigate-search-history");
+  const [searchHistory, setSearchHistory, searchHistoryLoaded] =
+    useUserPersistence<SavedSearchQuery[]>("frigate-search-history");
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

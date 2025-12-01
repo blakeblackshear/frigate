@@ -7,7 +7,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AnimatedCircularProgressBar from "@/components/ui/circular-progress-bar";
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useTimezone } from "@/hooks/use-date-utils";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchQuery, SearchResult } from "@/types/search";
 import { ModelState } from "@/types/ws";
@@ -47,7 +47,10 @@ export default function Explore() {
 
   // grid
 
-  const [columnCount, setColumnCount] = usePersistence("exploreGridColumns", 4);
+  const [columnCount, setColumnCount] = useUserPersistence(
+    "exploreGridColumns",
+    4,
+  );
   const gridColumns = useMemo(() => {
     if (isMobileOnly) {
       return 2;
@@ -57,7 +60,7 @@ export default function Explore() {
 
   // default layout
 
-  const [defaultView, setDefaultView, defaultViewLoaded] = usePersistence(
+  const [defaultView, setDefaultView, defaultViewLoaded] = useUserPersistence(
     "exploreDefaultView",
     "summary",
   );

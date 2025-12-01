@@ -3,7 +3,7 @@ import useApiFilter from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
 import {
@@ -42,7 +42,10 @@ export default function Events() {
     "alert",
   );
 
-  const [showReviewed, setShowReviewed] = usePersistence("showReviewed", false);
+  const [showReviewed, setShowReviewed] = useUserPersistence(
+    "showReviewed",
+    false,
+  );
 
   const [recording, setRecording] = useOverlayState<RecordingStartingPoint>(
     "recording",
