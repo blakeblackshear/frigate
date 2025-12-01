@@ -25,8 +25,10 @@ model_cache_dir = os.path.join(MODEL_CACHE_DIR, "axengine_cache/")
 class AxengineDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
 
+
 class Axengine(DetectionApi):
     type_key = DETECTOR_KEY
+
     def __init__(self, config: AxengineDetectorConfig):
         logger.info("__init__ axengine")
         super().__init__(config)
@@ -57,9 +59,7 @@ class Axengine(DetectionApi):
             if not os.path.isfile(model_props["path"]):
                 self.download_model(model_props["filename"])
         else:
-            supported_models_str = ", ".join(
-                model[1:-1] for model in supported_models
-            )
+            supported_models_str = ", ".join(model[1:-1] for model in supported_models)
             raise Exception(
                 f"Model {model_path} is unsupported. Provide your own model or choose one of the following: {supported_models_str}"
             )
@@ -84,4 +84,3 @@ class Axengine(DetectionApi):
             raise ValueError(
                 f'Model type "{self.detector_config.model.model_type}" is currently not supported.'
             )
-
