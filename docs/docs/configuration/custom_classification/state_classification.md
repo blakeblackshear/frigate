@@ -69,4 +69,6 @@ Once all images are assigned, training will begin automatically.
 ### Improving the Model
 
 - **Problem framing**: Keep classes visually distinct and state-focused (e.g., `open`, `closed`, `unknown`). Avoid combining object identity with state in a single model unless necessary.
-- **Data collection**: Use the model’s Recent Classifications tab to gather balanced examples across times of day and weather.
+- **Data collection**: Use the model's Recent Classifications tab to gather balanced examples across times of day and weather.
+- **When to train**: Focus on cases where the model is entirely incorrect or flips between states when it should not. There's no need to train additional images when the model is already working consistently.
+- **Selecting training images**: Images scoring below 100% due to new conditions (e.g., first snow of the year, seasonal changes) or variations (e.g., objects temporarily in view, insects at night) are good candidates for training, as they represent scenarios different from the default state. Training these lower-scoring images that differ from existing training data helps prevent overfitting. Avoid training large quantities of images that look very similar, especially if they already score 100% as this can lead to overfitting.
