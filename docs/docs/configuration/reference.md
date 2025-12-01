@@ -710,8 +710,14 @@ audio_transcription:
   # List of language codes: https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10
   language: en
 
-# Optional: Configuration for custom classification models
+# Optional: Configuration for classification models
 classification:
+  # Optional: Configuration for bird classification
+  bird:
+    # Optional: Enable bird classification (default: shown below)
+    enabled: False
+    # Optional: Minimum classification score required to be considered a match (default: shown below)
+    threshold: 0.9
   custom:
     # Required: name of the classification model
     model_name:
