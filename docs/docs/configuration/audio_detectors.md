@@ -168,6 +168,8 @@ Recorded `speech` events will always use a `whisper` model, regardless of the `m
 
    If you hear speech that’s actually important and worth saving/indexing for the future, **just press the transcribe button in Explore** on that specific `speech` event - that keeps things explicit, reliable, and under your control.
 
+   Other options are being considered for future versions of Frigate to add transcription options that support external `whisper` Docker containers. A single transcription service could then be shared by Frigate and other applications (for example, Home Assistant Voice), and run on more powerful machines when available.
+
 2. Why don't you save live transcription text and use that for `speech` events?
 
    There’s no guarantee that a `speech` event is even created from the exact audio that went through the transcription model. Live transcription and `speech` event creation are **separate, asynchronous processes**. Even when both are correctly configured, trying to align the **precise start and end time of a speech event** with whatever audio the model happened to be processing at that moment is unreliable.
