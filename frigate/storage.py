@@ -5,7 +5,7 @@ import shutil
 import threading
 from pathlib import Path
 
-from peewee import fn
+from peewee import SQL, fn
 
 from frigate.config import FrigateConfig
 from frigate.const import RECORD_DIR
@@ -44,13 +44,19 @@ class StorageMaintainer(threading.Thread):
                     )
                 }
 
-                # calculate MB/hr
+                # calculate MB/hr from last 100 segments
                 try:
-                    bandwidth = round(
-                        Recordings.select(fn.AVG(bandwidth_equation))
+                    # Subquery to get last 100 segments, then average their bandwidth
+                    last_100 = (
+                        Recordings.select(bandwidth_equation.alias("bw"))
                         .where(Recordings.camera == camera, Recordings.segment_size > 0)
+                        .order_by(Recordings.start_time.desc())
                         .limit(100)
-                        .scalar()
+                        .alias("recent")
+                    )
+
+                    bandwidth = round(
+                        Recordings.select(fn.AVG(SQL("bw"))).from_(last_100).scalar()
                         * 3600,
                         2,
                     )
