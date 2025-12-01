@@ -18,7 +18,6 @@ import cv2
 import psutil
 import py3nvml.py3nvml as nvml
 import requests
-from hailo_platform import Device
 
 from frigate.const import (
     DRIVER_AMD,
@@ -552,6 +551,11 @@ def get_jetson_stats() -> Optional[dict[int, dict]]:
 
 def get_hailo_temps() -> dict[str, float]:
     """Get temperatures for Hailo devices."""
+    try:
+        from hailo_platform import Device
+    except ModuleNotFoundError:
+        return {}
+
     temps = {}
 
     try:
