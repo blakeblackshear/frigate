@@ -144,7 +144,7 @@ export default function GeneralMetrics({
       }
 
       Object.entries(stats.detectors).forEach(([key], cIdx) => {
-        if (!key.includes("coral")) {
+        if (!key.includes("coral") && !key.includes("hailo")) {
           return;
         }
 
