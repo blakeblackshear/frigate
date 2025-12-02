@@ -3,7 +3,6 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 ARG ROCM=1
-ARG AMDGPU=gfx900
 ARG HSA_OVERRIDE_GFX_VERSION
 ARG HSA_OVERRIDE
 
@@ -11,7 +10,6 @@ ARG HSA_OVERRIDE
 FROM wget AS rocm
 
 ARG ROCM
-ARG AMDGPU
 
 RUN apt update -qq && \
     apt install -y wget gpg && \
@@ -36,7 +34,10 @@ FROM deps AS deps-prelim
 COPY docker/rocm/debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
 RUN apt-get update && \
     apt-get install -y libnuma1 && \
-    apt-get install -qq -y -t bookworm-backports mesa-va-drivers mesa-vulkan-drivers
+    apt-get install -qq -y -t bookworm-backports mesa-va-drivers mesa-vulkan-drivers && \
+    # Install C++ standard library headers for HIPRTC kernel compilation fallback
+    apt-get install -qq -y libstdc++-12-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/frigate
 COPY --from=rootfs / /
@@ -54,12 +55,14 @@ RUN pip3 uninstall -y onnxruntime \
 FROM scratch AS rocm-dist
 
 ARG ROCM
-ARG AMDGPU
 
 COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-driver /opt/rocm-$ROCM/bin/
-COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share/miopen/db/
-COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx908* /opt/rocm-$ROCM/share/miopen/db/
-COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/lib/rocblas/library/
+# Copy MIOpen database files for gfx10xx and gfx11xx only (RDNA2/RDNA3)
+COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx10* /opt/rocm-$ROCM/share/miopen/db/
+COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx11* /opt/rocm-$ROCM/share/miopen/db/
+# Copy rocBLAS library files for gfx10xx and gfx11xx only
+COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*gfx10* /opt/rocm-$ROCM/lib/rocblas/library/
+COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*gfx11* /opt/rocm-$ROCM/lib/rocblas/library/
 COPY --from=rocm /opt/rocm-dist/ /
 
 #######################################################################
