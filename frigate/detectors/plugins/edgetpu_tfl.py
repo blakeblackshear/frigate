@@ -81,7 +81,7 @@ class EdgeTpuTfl(DetectionApi):
         if self.model_type == ModelTypeEnum.yologeneric:
             logger.debug("Using YOLO preprocessing/postprocessing")
 
-            if len(self.tensor_output_details) not in [2,3]:
+            if len(self.tensor_output_details) not in [2, 3]:
                 logger.error(
                     f"Invalid count of output tensors in YOLO model. Found {len(self.tensor_output_details)}, expecting 2 or 3."
                 )
@@ -114,9 +114,7 @@ class EdgeTpuTfl(DetectionApi):
                     # to differentiate from (not used) max score tensor
                     output_classes_index = i
             if output_boxes_index is None or output_classes_index is None:
-                logger.warning(
-                    "Unrecognized model output, unexpected tensor shapes."
-                )
+                logger.warning("Unrecognized model output, unexpected tensor shapes.")
                 output_classes_index = (
                     0
                     if (output_boxes_index is None or output_classes_index == 1)
@@ -127,17 +125,13 @@ class EdgeTpuTfl(DetectionApi):
             scores_details = self.tensor_output_details[output_classes_index]
             classes_count = scores_details["shape"][2]
             self.scores_tensor_index = scores_details["index"]
-            self.scores_scale, self.scores_zero_point = scores_details[
-                "quantization"
-            ]
+            self.scores_scale, self.scores_zero_point = scores_details["quantization"]
             # calculate the quantized version of the min_score
             self.min_score_quantized = int(
                 (self.min_logit_value / self.scores_scale) + self.scores_zero_point
             )
             self.logit_shift_to_positive_values = (
-                max(
-                    0, math.ceil((128 + self.scores_zero_point) * self.scores_scale)
-                )
+                max(0, math.ceil((128 + self.scores_zero_point) * self.scores_scale))
                 + 1
             )  # round up
 
@@ -245,9 +239,7 @@ class EdgeTpuTfl(DetectionApi):
             scores_output_quantized = self.interpreter.get_tensor(
                 self.scores_tensor_index
             )[0]  # (2100, NC)
-            max_scores_quantized = np.max(
-                scores_output_quantized, axis=1
-            )  # (2100,)
+            max_scores_quantized = np.max(scores_output_quantized, axis=1)  # (2100,)
             mask = max_scores_quantized >= self.min_score_quantized  # (2100,)
 
             if not np.any(mask):
@@ -277,9 +269,7 @@ class EdgeTpuTfl(DetectionApi):
             # Softmax over the 16 bins
             dfl_max = np.max(dfl_distributions, axis=2, keepdims=True)
             dfl_exp = np.exp(dfl_distributions - dfl_max)
-            dfl_probs = dfl_exp / np.sum(
-                dfl_exp, axis=2, keepdims=True
-            )  # (N, 4, 16)
+            dfl_probs = dfl_exp / np.sum(dfl_exp, axis=2, keepdims=True)  # (N, 4, 16)
 
             # Weighted sum: (N, 4, 16) * (16,) -> (N, 4)
             distances = np.einsum("pcr,r->pc", dfl_probs, self.project)
