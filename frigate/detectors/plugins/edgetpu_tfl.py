@@ -77,12 +77,10 @@ class EdgeTpuTfl(DetectionApi):
 
         model_type = detector_config.model.model_type
         self.model_requires_int8 = self.tensor_input_details[0]["dtype"] == np.int8
-        if self.model_requires_int8:
-            logger.info("Detection model requires int8 format input")
 
         if model_type == ModelTypeEnum.yologeneric
-            logger.info(
-                f"Preparing YOLO postprocessing for {len(self.tensor_output_details)}-tensor output"
+            logger.debug(
+                f"Using YOLO postprocessing for {len(self.tensor_output_details)}-tensor output"
             )
             if len(self.tensor_output_details) > 1:  # expecting 2 or 3
                 self.reg_max = 16  # = 64 dfl_channels // 4 # YOLO standard
@@ -121,6 +119,7 @@ class EdgeTpuTfl(DetectionApi):
                         else 1
                     )  # 0 is default guess
                     output_boxes_index = 1 if (output_boxes_index == 0) else 0
+
                 scores_details = self.tensor_output_details[output_classes_index]
                 classes_count = scores_details["shape"][2]
                 self.scores_tensor_index = scores_details["index"]
@@ -141,16 +140,13 @@ class EdgeTpuTfl(DetectionApi):
                 boxes_details = self.tensor_output_details[output_boxes_index]
                 self.boxes_tensor_index = boxes_details["index"]
                 self.boxes_scale, self.boxes_zero_point = boxes_details["quantization"]
-                logger.info(
-                    f"Using tensor index {output_boxes_index} for boxes(DFL), {output_classes_index} for {classes_count} class scores"
-                )
 
         else:
             if model_type not in [ModelTypeEnum.ssd, None]:
                 logger.warning(
                     f"Unsupported model_type '{model_type}' for EdgeTPU detector, falling back to SSD"
                 )
-            logger.info("Using SSD preprocessing/postprocessing")
+            logger.debug("Using SSD preprocessing/postprocessing")
 
             # SSD model indices (4 outputs: boxes, class_ids, scores, count)
             for x in self.tensor_output_details:
@@ -215,7 +211,8 @@ class EdgeTpuTfl(DetectionApi):
         self.interpreter.invoke()
 
         if model_type == ModelTypeEnum.yologeneric
-            if len(self.tensor_output_details) == 1:
+            output_tensor_count = len(self.tensor_output_details)
+            if output_tensor_count == 1:
                 # Single-tensor YOLO model
                 # model output is (1, NC+4, 2100) for 320x320 image size
                 # boxes as xywh (normalized to [0,1])
@@ -234,7 +231,7 @@ class EdgeTpuTfl(DetectionApi):
 
                 return post_process_yolo(outputs, self.model_width, self.model_height)
 
-            else:
+            elif output_tensor_count in [2,3]:
                 # Multi-tensor YOLO model with (non-standard B(H*W)C output format).
                 # (the comments indicate the shape of tensors,
                 # using "2100" as the anchor count (for image size of 320x320),
@@ -349,6 +346,12 @@ class EdgeTpuTfl(DetectionApi):
                 detections[:num_detections, 5] = final_boxes[:, 2] / self.model_width
                 return detections
 
+            else:
+                logger.error(
+                    f"Invalid count of output tensors in YOLO model. Found {output_tensor_count}, expecting 1/2/3."
+                )
+                raise
+
         else:
             # Default SSD model
             self.determine_indexes_for_non_yolo_models()
@@ -369,7 +372,7 @@ class EdgeTpuTfl(DetectionApi):
                 if scores[i] < self.min_score:
                     break
                 if i == self.max_detections:
-                    logger.info(f"Too many detections ({count})!")
+                    logger.debug(f"Too many detections ({count})!")
                     break
                 detections[i] = [
                     class_ids[i],
