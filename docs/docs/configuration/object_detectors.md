@@ -13,7 +13,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Most Hardware**
 
-- [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
+- [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB, Mini PCIe, and m.2 formats allowing for a wide range of compatibility with devices.
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
 - <CommunityBadge /> [MemryX](#memryx-mx3): The MX3 Acceleration module is available in m.2 format, offering broad compatibility across various platforms.
 - <CommunityBadge /> [DeGirum](#degirum): Service for using hardware devices in the cloud or locally. Hardware and models provided on the cloud on [their website](https://hub.degirum.com).
@@ -69,11 +69,9 @@ Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8
 
 ## Edge TPU Detector
 
-The Edge TPU detector type runs a TensorFlow Lite model utilizing the Google Coral delegate for hardware acceleration. To configure an Edge TPU detector, set the `"type"` attribute to `"edgetpu"`.
+The Edge TPU detector type runs TensorFlow Lite models utilizing the Google Coral delegate for hardware acceleration. To configure an Edge TPU detector, set the `"type"` attribute to `"edgetpu"`.
 
 The Edge TPU device can be specified using the `"device"` attribute according to the [Documentation for the TensorFlow Lite Python API](https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api). If not set, the delegate will use the first device it finds.
-
-A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
 
 :::tip
 
@@ -145,6 +143,58 @@ detectors:
     type: edgetpu
     device: pci
 ```
+
+### EdgeTPU Supported Models
+
+| Model                                 | Notes                                       |
+| ------------------------------------- | ------------------------------------------- |
+| [MobileNet v2](#ssdlite-mobilenet-v2) | Default model                               |
+| [YOLOv9](#yolo-v9)                    | More accurate but slower than default model |
+
+#### SSDLite MobileNet v2
+
+A TensorFlow Lite model is provided in the container at `/edgetpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+
+A Tensorflow Lite is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an INT8 precision model.
+
+#### YOLO v9
+
+[YOLOv9](https://github.com/dbro/frigate-detector-edgetpu-yolo9/releases/download/v1.0/yolov9-s-relu6-best_320_int8_edgetpu.tflite) models that are compiled for Tensorflow Lite and properly quantized are supported, but not included by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`. Note that the model may require a custom label file (eg. [use this 17 label file](https://raw.githubusercontent.com/dbro/frigate-detector-edgetpu-yolo9/refs/heads/main/labels-coco17.txt) for the model linked above.)
+
+:::tip
+
+The YOLO detector has been designed to support YOLOv9 models, and may support other YOLO model architectures as well.
+
+:::
+
+<details>
+  <summary>YOLOv9 Setup & Config</summary>
+
+:::warning
+
+If you are using a Frigate+ YOLOv9 model, you should not define any of the below `model` parameters in your config except for `path`. See [the Frigate+ model docs](/plus/first_model#step-3-set-your-model-id-in-the-config) for more information on setting up your model.
+
+:::
+
+After placing the downloaded files for the tflite model and labels in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  coral:
+    type: edgetpu
+    device: usb
+
+model:
+  model_type: yolo-generic
+  width: 320 # <--- should match the imgsize of the model, typically 320
+  height: 320 # <--- should match the imgsize of the model, typically 320
+  path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite
+  labelmap_path: /labelmap/labels-coco-17.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 17 objects.
+
+</details>
 
 ---
 
