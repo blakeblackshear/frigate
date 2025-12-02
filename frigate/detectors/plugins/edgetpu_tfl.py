@@ -34,9 +34,6 @@ class EdgeTpuTfl(DetectionApi):
     ]
 
     def __init__(self, detector_config: EdgeTpuDetectorConfig):
-        logger.info(
-            f"Initializing {DETECTOR_KEY} detector with support for SSD and YOLOv9 models"
-        )
         device_config = {}
         if detector_config.device is not None:
             device_config = {"device": detector_config.device}
