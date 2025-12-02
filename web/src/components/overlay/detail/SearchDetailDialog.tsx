@@ -498,7 +498,7 @@ export default function SearchDetailDialog({
 
     const views = [...SEARCH_TABS];
 
-    if (search.data.type != "object" || !search.has_clip) {
+    if (!search.has_clip) {
       const index = views.indexOf("tracking_details");
       views.splice(index, 1);
     }
@@ -548,7 +548,7 @@ export default function SearchDetailDialog({
                   "relative flex items-center justify-between",
                   "w-full",
                   // match dialog's max-width classes
-                  "sm:max-w-xl md:max-w-4xl lg:max-w-[70%]",
+                  "max-h-[95dvh] max-w-[85%] xl:max-w-[70%]",
                 )}
               >
                 <Tooltip>
@@ -594,8 +594,7 @@ export default function SearchDetailDialog({
           ref={isDesktop ? dialogContentRef : undefined}
           className={cn(
             "scrollbar-container overflow-y-auto",
-            isDesktop &&
-              "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-[70%]",
+            isDesktop && "max-h-[95dvh] max-w-[85%] xl:max-w-[70%]",
             isMobile && "flex h-full flex-col px-4",
           )}
           onEscapeKeyDown={(event) => {

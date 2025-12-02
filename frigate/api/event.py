@@ -1731,37 +1731,40 @@ def create_trigger_embedding(
             if event.data.get("type") != "object":
                 return
 
-            if thumbnail := get_event_thumbnail_bytes(event):
-                cursor = context.db.execute_sql(
-                    """
-                    SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
-                    """,
-                    [body.data],
+            # Get the thumbnail
+            thumbnail = get_event_thumbnail_bytes(event)
+
+            if thumbnail is None:
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Failed to get thumbnail for {body.data} for {body.type} trigger",
+                    },
+                    status_code=400,
                 )
 
-                row = cursor.fetchone() if cursor else None
+            # Try to reuse existing embedding from database
+            cursor = context.db.execute_sql(
+                """
+                SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
+                """,
+                [body.data],
+            )
 
-                if row:
-                    query_embedding = row[0]
-                    embedding = np.frombuffer(query_embedding, dtype=np.float32)
+            row = cursor.fetchone() if cursor else None
+
+            if row:
+                query_embedding = row[0]
+                embedding = np.frombuffer(query_embedding, dtype=np.float32)
             else:
-                # Extract valid thumbnail
-                thumbnail = get_event_thumbnail_bytes(event)
-
-                if thumbnail is None:
-                    return JSONResponse(
-                        content={
-                            "success": False,
-                            "message": f"Failed to get thumbnail for {body.data} for {body.type} trigger",
-                        },
-                        status_code=400,
-                    )
-
+                # Generate new embedding
                 embedding = context.generate_image_embedding(
                     body.data, (base64.b64encode(thumbnail).decode("ASCII"))
                 )
 
-        if not embedding:
+        if embedding is None or (
+            isinstance(embedding, (list, np.ndarray)) and len(embedding) == 0
+        ):
             return JSONResponse(
                 content={
                     "success": False,
@@ -1896,7 +1899,9 @@ def update_trigger_embedding(
                 body.data, (base64.b64encode(thumbnail).decode("ASCII"))
             )
 
-        if not embedding:
+        if embedding is None or (
+            isinstance(embedding, (list, np.ndarray)) and len(embedding) == 0
+        ):
             return JSONResponse(
                 content={
                     "success": False,

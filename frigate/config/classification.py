@@ -105,6 +105,11 @@ class CustomClassificationConfig(FrigateBaseModel):
     threshold: float = Field(
         default=0.8, title="Classification score threshold to change the state."
     )
+    save_attempts: int | None = Field(
+        default=None,
+        title="Number of classification attempts to save in the recent classifications tab. If not specified, defaults to 200 for object classification and 100 for state classification.",
+        ge=0,
+    )
     object_config: CustomClassificationObjectConfig | None = Field(default=None)
     state_config: CustomClassificationStateConfig | None = Field(default=None)
 

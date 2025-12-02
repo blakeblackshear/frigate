@@ -170,6 +170,10 @@
       "label": "Download snapshot",
       "aria": "Download snapshot"
     },
+    "downloadCleanSnapshot": {
+      "label": "Download clean snapshot",
+      "aria": "Download clean snapshot"
+    },
     "viewTrackingDetails": {
       "label": "View tracking details",
       "aria": "Show the tracking details"

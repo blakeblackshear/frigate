@@ -69,6 +69,20 @@ export default function DetailActionsMenu({
               </a>
             </DropdownMenuItem>
           )}
+          {search.has_snapshot &&
+            config?.cameras[search.camera].snapshots.clean_copy && (
+              <DropdownMenuItem>
+                <a
+                  className="w-full"
+                  href={`${baseUrl}api/events/${search.id}/snapshot-clean.webp`}
+                  download={`${search.camera}_${search.label}-clean.webp`}
+                >
+                  <div className="flex cursor-pointer items-center gap-2">
+                    <span>{t("itemMenu.downloadCleanSnapshot.label")}</span>
+                  </div>
+                </a>
+              </DropdownMenuItem>
+            )}
           {search.has_clip && (
             <DropdownMenuItem>
               <a

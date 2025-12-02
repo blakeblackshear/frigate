@@ -622,7 +622,7 @@ export function TrackingDetails({
 
       <div
         className={cn(
-          isDesktop && "justify-between overflow-hidden md:basis-2/5",
+          isDesktop && "justify-between overflow-hidden lg:basis-2/5",
         )}
       >
         {isDesktop && tabs && (
@@ -900,96 +900,99 @@ function LifecycleIconRow({
             <div className="text-md flex items-start break-words text-left">
               {getLifecycleItemDescription(item)}
             </div>
-            <div className="my-2 ml-2 flex flex-col flex-wrap items-start gap-1.5 text-xs text-secondary-foreground">
-              <div className="flex items-center gap-1.5">
-                <span className="text-primary-variant">
-                  {t("trackingDetails.lifecycleItemDesc.header.score")}
-                </span>
-                <span className="font-medium text-primary">{score}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-primary-variant">
-                  {t("trackingDetails.lifecycleItemDesc.header.ratio")}
-                </span>
-                <span className="font-medium text-primary">{ratio}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-primary-variant">
-                  {t("trackingDetails.lifecycleItemDesc.header.area")}{" "}
-                  {attributeAreaPx !== undefined &&
-                    attributeAreaPct !== undefined && (
-                      <span className="text-primary-variant">
-                        ({getTranslatedLabel(item.data.label)})
-                      </span>
-                    )}
-                </span>
-                {areaPx !== undefined && areaPct !== undefined ? (
-                  <span className="font-medium text-primary">
-                    {t("information.pixels", { ns: "common", area: areaPx })} ·{" "}
-                    {areaPct}%
+            {/* Only show Score/Ratio/Area for object events, not for audio (heard) or manual API (external) events */}
+            {item.class_type !== "heard" && item.class_type !== "external" && (
+              <div className="my-2 ml-2 flex flex-col flex-wrap items-start gap-1.5 text-xs text-secondary-foreground">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-primary-variant">
+                    {t("trackingDetails.lifecycleItemDesc.header.score")}
                   </span>
-                ) : (
-                  <span>N/A</span>
-                )}
-              </div>
-              {attributeAreaPx !== undefined &&
-                attributeAreaPct !== undefined && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-primary-variant">
-                      {t("trackingDetails.lifecycleItemDesc.header.area")} (
-                      {getTranslatedLabel(item.data.attribute)})
-                    </span>
-                    <span className="font-medium text-primary">
-                      {t("information.pixels", {
-                        ns: "common",
-                        area: attributeAreaPx,
-                      })}{" "}
-                      · {attributeAreaPct}%
-                    </span>
-                  </div>
-                )}
-
-              {item.data?.zones && item.data.zones.length > 0 && (
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  {item.data.zones.map((zone, zidx) => {
-                    const color = getZoneColor(zone)?.join(",") ?? "0,0,0";
-                    return (
-                      <Badge
-                        key={`${zone}-${zidx}`}
-                        variant="outline"
-                        className="inline-flex cursor-pointer items-center gap-2"
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                          setSelectedZone(zone);
-                        }}
-                        style={{
-                          borderColor: `rgba(${color}, 0.6)`,
-                          background: `rgba(${color}, 0.08)`,
-                        }}
-                      >
-                        <span
-                          className="size-1 rounded-full"
-                          style={{
-                            display: "inline-block",
-                            width: 10,
-                            height: 10,
-                            backgroundColor: `rgb(${color})`,
-                          }}
-                        />
-                        <span
-                          className={cn(
-                            item.data?.zones_friendly_names?.[zidx] === zone &&
-                              "smart-capitalize",
-                          )}
-                        >
-                          {item.data?.zones_friendly_names?.[zidx]}
-                        </span>
-                      </Badge>
-                    );
-                  })}
+                  <span className="font-medium text-primary">{score}</span>
                 </div>
-              )}
-            </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-primary-variant">
+                    {t("trackingDetails.lifecycleItemDesc.header.ratio")}
+                  </span>
+                  <span className="font-medium text-primary">{ratio}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-primary-variant">
+                    {t("trackingDetails.lifecycleItemDesc.header.area")}{" "}
+                    {attributeAreaPx !== undefined &&
+                      attributeAreaPct !== undefined && (
+                        <span className="text-primary-variant">
+                          ({getTranslatedLabel(item.data.label)})
+                        </span>
+                      )}
+                  </span>
+                  {areaPx !== undefined && areaPct !== undefined ? (
+                    <span className="font-medium text-primary">
+                      {t("information.pixels", { ns: "common", area: areaPx })}{" "}
+                      · {areaPct}%
+                    </span>
+                  ) : (
+                    <span>N/A</span>
+                  )}
+                </div>
+                {attributeAreaPx !== undefined &&
+                  attributeAreaPct !== undefined && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-primary-variant">
+                        {t("trackingDetails.lifecycleItemDesc.header.area")} (
+                        {getTranslatedLabel(item.data.attribute)})
+                      </span>
+                      <span className="font-medium text-primary">
+                        {t("information.pixels", {
+                          ns: "common",
+                          area: attributeAreaPx,
+                        })}{" "}
+                        · {attributeAreaPct}%
+                      </span>
+                    </div>
+                  )}
+              </div>
+            )}
+
+            {item.data?.zones && item.data.zones.length > 0 && (
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                {item.data.zones.map((zone, zidx) => {
+                  const color = getZoneColor(zone)?.join(",") ?? "0,0,0";
+                  return (
+                    <Badge
+                      key={`${zone}-${zidx}`}
+                      variant="outline"
+                      className="inline-flex cursor-pointer items-center gap-2"
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        setSelectedZone(zone);
+                      }}
+                      style={{
+                        borderColor: `rgba(${color}, 0.6)`,
+                        background: `rgba(${color}, 0.08)`,
+                      }}
+                    >
+                      <span
+                        className="size-1 rounded-full"
+                        style={{
+                          display: "inline-block",
+                          width: 10,
+                          height: 10,
+                          backgroundColor: `rgb(${color})`,
+                        }}
+                      />
+                      <span
+                        className={cn(
+                          item.data?.zones_friendly_names?.[zidx] === zone &&
+                            "smart-capitalize",
+                        )}
+                      >
+                        {item.data?.zones_friendly_names?.[zidx]}
+                      </span>
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
         <div className="ml-3 flex-shrink-0 px-1 text-right text-xs text-primary-variant">
