@@ -272,9 +272,7 @@ class EdgeTpuTfl(DetectionApi):
                 )  # initialize zero results
                 scores_output_quantized = self.interpreter.get_tensor(
                     self.scores_tensor_index
-                )[
-                    0
-                ]  # (2100, NC)
+                )[0]  # (2100, NC)
                 max_scores_quantized = np.max(
                     scores_output_quantized, axis=1
                 )  # (2100,)
@@ -293,9 +291,7 @@ class EdgeTpuTfl(DetectionApi):
                 # remove candidates with probabilities < threshold
                 boxes_output_quantized_filtered = (
                     self.interpreter.get_tensor(self.boxes_tensor_index)[0]
-                )[
-                    mask
-                ]  # (N, 64)
+                )[mask]  # (N, 64)
                 boxes_output_filtered = (
                     boxes_output_quantized_filtered.astype(np.float32)
                     - self.boxes_zero_point
