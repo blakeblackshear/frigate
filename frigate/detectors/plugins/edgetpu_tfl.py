@@ -9,7 +9,6 @@ from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
-from frigate.util.model import post_process_yolo
 
 try:
     from tflite_runtime.interpreter import Interpreter, load_delegate
@@ -123,7 +122,6 @@ class EdgeTpuTfl(DetectionApi):
                 output_boxes_index = 1 if (output_boxes_index == 0) else 0
 
             scores_details = self.tensor_output_details[output_classes_index]
-            classes_count = scores_details["shape"][2]
             self.scores_tensor_index = scores_details["index"]
             self.scores_scale, self.scores_zero_point = scores_details["quantization"]
             # calculate the quantized version of the min_score
