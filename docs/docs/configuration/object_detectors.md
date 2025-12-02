@@ -1007,12 +1007,12 @@ EOF
 RF-DETR can be exported as ONNX by running the command below. You can copy and paste the whole thing to your terminal and execute, altering `MODEL_SIZE=Nano` in the first line to `Nano`, `Small`, or `Medium` size.
 
 ```sh
-docker build . --build-arg MODEL_SIZE=Nano --output . -f- <<'EOF'
+docker build . --build-arg MODEL_SIZE=Nano --rm --output . -f- <<'EOF'
 FROM python:3.11 AS build
 RUN apt-get update && apt-get install --no-install-recommends -y libgl1 && rm -rf /var/lib/apt/lists/*
 COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /bin/
 WORKDIR /rfdetr
-RUN uv pip install --system rfdetr[onnxexport] torch==2.8.0 onnxscript
+RUN uv pip install --system rfdetr[onnxexport] torch==2.8.0 onnx==1.19.1 onnxscript
 ARG MODEL_SIZE
 RUN python3 -c "from rfdetr import RFDETR${MODEL_SIZE}; x = RFDETR${MODEL_SIZE}(resolution=320); x.export(simplify=True)"
 FROM scratch
