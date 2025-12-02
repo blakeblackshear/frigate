@@ -73,24 +73,14 @@ class EdgeTpuTfl(DetectionApi):
         self.model_height = detector_config.model.height
 
         self.min_score = 0.4
-        try:
-            self.min_score = detector_config.model.min_score
-        except AttributeError:
-            pass
-
         self.max_detections = 20
-        try:
-            self.max_detections = detector_config.model.max_detections
-        except AttributeError:
-            pass
 
         model_type = detector_config.model.model_type
-        self.yolo_model = model_type == ModelTypeEnum.yologeneric
         self.model_requires_int8 = self.tensor_input_details[0]["dtype"] == np.int8
         if self.model_requires_int8:
             logger.info("Detection model requires int8 format input")
 
-        if self.yolo_model:
+        if model_type == ModelTypeEnum.yologeneric
             logger.info(
                 f"Preparing YOLO postprocessing for {len(self.tensor_output_details)}-tensor output"
             )
@@ -224,7 +214,7 @@ class EdgeTpuTfl(DetectionApi):
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
 
-        if self.yolo_model:
+        if model_type == ModelTypeEnum.yologeneric
             if len(self.tensor_output_details) == 1:
                 # Single-tensor YOLO model
                 # model output is (1, NC+4, 2100) for 320x320 image size
