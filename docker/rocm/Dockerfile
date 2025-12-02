@@ -34,7 +34,10 @@ FROM deps AS deps-prelim
 COPY docker/rocm/debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
 RUN apt-get update && \
     apt-get install -y libnuma1 && \
-    apt-get install -qq -y -t bookworm-backports mesa-va-drivers mesa-vulkan-drivers
+    apt-get install -qq -y -t bookworm-backports mesa-va-drivers mesa-vulkan-drivers && \
+    # Install C++ standard library headers for HIPRTC kernel compilation fallback
+    apt-get install -qq -y libstdc++-12-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/frigate
 COPY --from=rootfs / /
