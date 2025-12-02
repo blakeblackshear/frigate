@@ -145,11 +145,7 @@ class EdgeTpuTfl(DetectionApi):
             self.boxes_tensor_index = boxes_details["index"]
             self.boxes_scale, self.boxes_zero_point = boxes_details["quantization"]
 
-        else:
-            if self.model_type not in [ModelTypeEnum.ssd, None]:
-                logger.warning(
-                    f"Unsupported model_type '{self.model_type}' for EdgeTPU detector, falling back to SSD"
-                )
+        elif self.model_type == ModelTypeEnum.ssd:
             logger.debug("Using SSD preprocessing/postprocessing")
 
             # SSD model indices (4 outputs: boxes, class_ids, scores, count)
@@ -161,6 +157,11 @@ class EdgeTpuTfl(DetectionApi):
 
             self.output_class_ids_index = None
             self.output_class_scores_index = None
+
+        else:
+            raise Exception(
+                f"{self.model_type} is currently not supported for edgetpu. See the docs for more info on supported models."
+            )
 
     def _generate_anchors_and_strides(self):
         # for decoding the bounding box DFL information into xy coordinates
@@ -334,8 +335,7 @@ class EdgeTpuTfl(DetectionApi):
             detections[:num_detections, 5] = final_boxes[:, 2] / self.model_width
             return detections
 
-        else:
-            # Default SSD model
+        elif self.model_type == ModelTypeEnum.ssd:
             self.determine_indexes_for_non_yolo_models()
             boxes = self.interpreter.tensor(self.tensor_output_details[0]["index"])()[0]
             class_ids = self.interpreter.tensor(
@@ -366,3 +366,8 @@ class EdgeTpuTfl(DetectionApi):
                 ]
 
             return detections
+
+        else:
+            raise Exception(
+                f"{self.model_type} is currently not supported for edgetpu. See the docs for more info on supported models."
+            )
