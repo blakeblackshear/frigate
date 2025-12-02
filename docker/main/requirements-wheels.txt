@@ -8,6 +8,7 @@ fastapi == 0.115.*
 uvicorn == 0.30.*
 slowapi == 0.1.*
 joserfc == 1.0.*
+cryptography == 44.0.*
 pathvalidate == 3.2.*
 markupsafe == 3.0.*
 python-multipart == 0.0.12
