@@ -136,7 +136,6 @@ jobs:
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt,mode=max
       - name: AMD/ROCm general build
         env:
-          AMDGPU: gfx
           HSA_OVERRIDE: 0
         uses: docker/bake-action@v6
         with:
