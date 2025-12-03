@@ -177,7 +177,7 @@
       "generateSuccess": "Successfully generated sample images",
       "missingStatesWarning": {
         "title": "Missing State Examples",
-        "description": "You haven't selected examples for all states. The model will not be trained until all states have images. After continuing, use the Recent Classifications view to classify images for the missing states, then train the model."
+        "description": "It's recommended to select examples for all states for best results. You can continue without selecting all states, but the model will not be trained until all states have images. After continuing, use the Recent Classifications view to classify images for the missing states, then train the model."
       }
     }
   }
