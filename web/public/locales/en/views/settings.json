@@ -500,7 +500,7 @@
       "name": {
         "title": "Name",
         "inputPlaceHolder": "Enter a name…",
-        "tips": "Name must be at least 2 characters, must have at least one letter, and must not be the name of a camera or another zone."
+        "tips": "Name must be at least 2 characters, must have at least one letter, and must not be the name of a camera or another zone on this camera."
       },
       "inertia": {
         "title": "Inertia",
