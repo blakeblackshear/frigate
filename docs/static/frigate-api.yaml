@@ -2268,7 +2268,7 @@ paths:
     get:
       tags:
         - Events
-      summary: Get summary of objects.
+      summary: Get summary of objects
       description: |-
         Gets a summary of objects from the database.
             Returns a list of objects with a max of `limit` objects for each label.
@@ -2301,7 +2301,7 @@ paths:
     get:
       tags:
         - Events
-      summary: Get events by ids.
+      summary: Get events by ids
       description: |-
         Gets events by a list of ids.
             Returns a list of events.
@@ -2333,7 +2333,7 @@ paths:
     get:
       tags:
         - Events
-      summary: Search events.
+      summary: Search events
       description: |-
         Searches for events in the database.
             Returns a list of events.
@@ -2576,7 +2576,7 @@ paths:
     get:
       tags:
         - Events
-      summary: Get event by id.
+      summary: Get event by id
       description: Gets an event by its id.
       operationId: event_events__event_id__get
       parameters:
@@ -2602,7 +2602,7 @@ paths:
     delete:
       tags:
         - Events
-      summary: Delete event.
+      summary: Delete event
       description: |-
         Deletes an event from the database.
             Returns a success message or an error if the event is not found.
@@ -2631,7 +2631,7 @@ paths:
     post:
       tags:
         - Events
-      summary: Set event retain indefinitely.
+      summary: Set event retain indefinitely
       description: |-
         Sets an event to retain indefinitely.
             Returns a success message or an error if the event is not found.
@@ -2660,7 +2660,7 @@ paths:
     delete:
       tags:
         - Events
-      summary: Stop event from being retained indefinitely.
+      summary: Stop event from being retained indefinitely
       description: |-
         Stops an event from being retained indefinitely.
             Returns a success message or an error if the event is not found.
@@ -2690,7 +2690,7 @@ paths:
     post:
       tags:
         - Events
-      summary: Send event to Frigate+.
+      summary: Send event to Frigate+
       description: |-
         Sends an event to Frigate+.
             Returns a success message or an error if the event is not found.
@@ -2754,7 +2754,7 @@ paths:
     post:
       tags:
         - Events
-      summary: Set event sub label.
+      summary: Set event sub label
       description: |-
         Sets an event's sub label.
             Returns a success message or an error if the event is not found.
@@ -2789,7 +2789,7 @@ paths:
     post:
       tags:
         - Events
-      summary: Set event license plate.
+      summary: Set event license plate
       description: |-
         Sets an event's license plate.
             Returns a success message or an error if the event is not found.
@@ -2824,7 +2824,7 @@ paths:
     post:
       tags:
         - Events
-      summary: Set event description.
+      summary: Set event description
       description: |-
         Sets an event's description.
             Returns a success message or an error if the event is not found.
@@ -2859,7 +2859,7 @@ paths:
     put:
       tags:
         - Events
-      summary: Regenerate event description.
+      summary: Regenerate event description
       description: |-
         Regenerates an event's description.
             Returns a success message or an error if the event is not found.
@@ -2906,7 +2906,7 @@ paths:
     post:
       tags:
         - Events
-      summary: Generate description embedding.
+      summary: Generate description embedding
       description: |-
         Generates an embedding for an event's description.
             Returns a success message or an error if the event is not found.
@@ -2934,7 +2934,7 @@ paths:
     delete:
       tags:
         - Events
-      summary: Delete events.
+      summary: Delete events
       description: |-
         Deletes a list of events from the database.
             Returns a success message or an error if the events are not found.
@@ -2962,7 +2962,7 @@ paths:
     post:
       tags:
         - Events
-      summary: Create manual event.
+      summary: Create manual event
       description: |-
         Creates a manual event in the database.
             Returns a success message or an error if the event is not found.
@@ -3010,7 +3010,7 @@ paths:
     put:
       tags:
         - Events
-      summary: End manual event.
+      summary: End manual event
       description: |-
         Ends a manual event.
             Returns a success message or an error if the event is not found.
@@ -3046,7 +3046,7 @@ paths:
     post:
       tags:
         - Events
-      summary: Create trigger embedding.
+      summary: Create trigger embedding
       description: |-
         Creates a trigger embedding for a specific trigger.
             Returns a success message or an error if the trigger is not found.
@@ -3088,7 +3088,7 @@ paths:
     put:
       tags:
         - Events
-      summary: Update trigger embedding.
+      summary: Update trigger embedding
       description: |-
         Updates a trigger embedding for a specific trigger.
             Returns a success message or an error if the trigger is not found.
@@ -3131,7 +3131,7 @@ paths:
     delete:
       tags:
         - Events
-      summary: Delete trigger embedding.
+      summary: Delete trigger embedding
       description: |-
         Deletes a trigger embedding for a specific trigger.
             Returns a success message or an error if the trigger is not found.
@@ -3169,7 +3169,7 @@ paths:
     get:
       tags:
         - Events
-      summary: Get triggers status.
+      summary: Get triggers status
       description: |-
         Gets the status of all triggers for a specific camera.
             Returns a success message or an error if the camera is not found.
