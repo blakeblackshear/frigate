@@ -1652,9 +1652,26 @@ async def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
         event: Event = Event.get(Event.id == event_id)
         await require_camera_access(event.camera, request=request)
+
+        if body.end_time is not None and body.end_time < event.start_time:
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": f"end_time ({body.end_time}) cannot be before start_time ({event.start_time}).",
+                    }
+                ),
+                status_code=400,
+            )
+
         end_time = body.end_time or datetime.datetime.now().timestamp()
         request.app.event_metadata_updater.publish(
             (event_id, end_time), EventMetadataTypeEnum.manual_event_end.value
+        )
+    except DoesNotExist:
+        return JSONResponse(
+            content=({"success": False, "message": f"Event {event_id} not found."}),
+            status_code=404,
         )
     except Exception:
         return JSONResponse(
