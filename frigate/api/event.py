@@ -1620,7 +1620,7 @@ def create_event(
             body.score,
             body.sub_label,
             body.duration,
-            body.source_type,
+            "api",
             body.draw,
         ),
         EventMetadataTypeEnum.manual_event_create.value,
