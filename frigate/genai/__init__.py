@@ -191,11 +191,13 @@ Task: Write a concise, human-presentable security report in markdown format.
 
 CRITICAL - Understanding Primary vs Contextual Items:
 - Items with "_is_primary": true are events that REQUIRE REVIEW and MUST be included in the report
-- Items with "_is_primary": false are additional context from other camera perspectives
+- Items with "_is_primary": false are additional context from other camera perspectives that overlap in time
 - **DO NOT create separate bullet points or sections for contextual items**
 - **ONLY use contextual items to enrich and inform the description of primary items**
 - The "_camera" field indicates which camera captured each event
-- When a contextual item provides relevant background (e.g., delivery truck explaining person at door), incorporate that information directly into the primary event's description
+- **When a contextual item provides relevant background, you MUST incorporate it directly into the primary event's bullet point**
+- Contextual information often explains or de-escalates seemingly suspicious primary events
+- Example: If primary shows "person at door with face covering" and context shows "delivery truck present", describe it as "delivery person at door (delivery truck visible on driveway camera)"
 
 Rules for the report:
 
@@ -203,26 +205,32 @@ Rules for the report:
   - Start with:
     # Security Summary - {time_range}
   - Write a 1-2 sentence situational overview capturing the general pattern of the period.
+  - Keep the overview high-level; specific details will be in the event bullets below.
 
 - Event details
   - **ONLY create bullet points for PRIMARY items (_is_primary: true)**
+  - **Do NOT create sections or bullets for events that don't exist**
   - Do NOT create separate bullets for contextual items
   - Present primary events in chronological order as a bullet list.
-  - When contextual items overlap with a primary event, weave that information naturally into the primary event's description.
-  - Example: Instead of "Person at door" write "Person at door (delivery driver, as delivery truck was present on driveway camera)"
+  - **CRITICAL: When contextual items overlap with a primary event, you MUST weave that information directly into the same bullet point**
+  - Format: **[Timestamp]** - [Description incorporating any contextual information]. [Camera info]. (threat level: X)
+  - Example: "**5:59 PM** - Delivery person approached porch and left package, while delivery truck was visible in driveway (Front Driveway Cam shows truck). Camera: Front Door Cam. (threat level: Normal)"
+  - If contextual information provides an explanation (e.g., delivery truck → person is likely delivery driver), reflect this understanding in your description and potentially adjust the perceived threat level
   - If multiple PRIMARY events occur within the same minute, combine them into a single bullet with sub-points.
-  - If no timestamp is given, preserve order but label as "Time not specified."
   - Use bold timestamps for clarity.
-  - Include the primary event's camera name.
-  - Group bullets under subheadings when multiple PRIMARY events fall into the same category (e.g., Porch Activity, Unusual Behavior).
+  - Camera format: "Camera: [camera name]" or mention contextual cameras inline when relevant
+  - Group bullets under subheadings ONLY when you have actual PRIMARY events to list (e.g., Porch Activity, Unusual Behavior).
 
 - Threat levels
-  - Always show the threat level for PRIMARY events using these labels:
+  - Show the threat level for PRIMARY events using these labels:
     - Threat level 0: "Normal"
     - Threat level 1: "Needs review"
     - Threat level 2: "Security concern"
   - Format as (threat level: Normal), (threat level: Needs review), or (threat level: Security concern).
-  - When contextual items explain or reduce concern about a primary event, the description should reflect this understanding.
+  - **When contextual items clearly explain a primary event (e.g., delivery truck explains person at door), you should describe it as normal activity and note the explanation**
+  - **Your description and tone should reflect the fuller understanding provided by contextual information**
+  - Example: Primary event says "unidentified person with face covering" but context shows delivery truck → describe as "delivery person (truck visible on Front Driveway Cam)" rather than emphasizing suspicious elements
+  - The stored threat level remains as originally classified, but your narrative should reflect the contextual understanding
   - If multiple PRIMARY events at the same time share the same threat level, only state it once.
 
 - Final assessment
