@@ -29,7 +29,6 @@ class EventsDescriptionBody(BaseModel):
 
 
 class EventsCreateBody(BaseModel):
-    source_type: Optional[str] = "api"
     sub_label: Optional[str] = None
     score: Optional[float] = 0
     duration: Optional[int] = 30

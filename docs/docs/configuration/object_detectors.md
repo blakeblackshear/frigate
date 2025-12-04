@@ -164,12 +164,6 @@ A Tensorflow Lite is provided in the container at `/openvino-model/ssdlite_mobil
 <details>
   <summary>YOLOv9 Setup & Config</summary>
 
-:::warning
-
-If you are using a Frigate+ YOLOv9 model, you should not define any of the below `model` parameters in your config except for `path`. See [the Frigate+ model docs](/plus/first_model#step-3-set-your-model-id-in-the-config) for more information on setting up your model.
-
-:::
-
 After placing the downloaded files for the tflite model and labels in your config folder, you can use the following configuration:
 
 ```yaml
@@ -408,7 +402,7 @@ The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv
 
 :::warning
 
-If you are using a Frigate+ YOLOv9 model, you should not define any of the below `model` parameters in your config except for `path`. See [the Frigate+ model docs](/plus/first_model#step-3-set-your-model-id-in-the-config) for more information on setting up your model.
+If you are using a Frigate+ model, you should not define any of the below `model` parameters in your config except for `path`. See [the Frigate+ model docs](/plus/first_model#step-3-set-your-model-id-in-the-config) for more information on setting up your model.
 
 :::
 
@@ -748,7 +742,7 @@ The YOLO detector has been designed to support YOLOv3, YOLOv4, YOLOv7, and YOLOv
 
 :::warning
 
-If you are using a Frigate+ YOLOv9 model, you should not define any of the below `model` parameters in your config except for `path`. See [the Frigate+ model docs](/plus/first_model#step-3-set-your-model-id-in-the-config) for more information on setting up your model.
+If you are using a Frigate+ model, you should not define any of the below `model` parameters in your config except for `path`. See [the Frigate+ model docs](/plus/first_model#step-3-set-your-model-id-in-the-config) for more information on setting up your model.
 
 :::
 

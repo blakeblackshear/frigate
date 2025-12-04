@@ -559,6 +559,7 @@ export function TrackingDetails({
                 isDetailMode={true}
                 camera={event.camera}
                 currentTimeOverride={currentTime}
+                enableGapControllerRecovery={true}
               />
               {isVideoLoading && (
                 <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />

@@ -407,30 +407,6 @@ export default function Step3ChooseExamples({
     return allClasses.every((className) => statesWithExamples.has(className));
   }, [step1Data.modelType, allClasses, statesWithExamples]);
 
-  // For state models on the last class, require all images to be classified
-  // But allow proceeding even if not all states have examples (with warning)
-  const canProceed = useMemo(() => {
-    if (step1Data.modelType === "state" && isLastClass) {
-      // Check if all 24 images will be classified after current selections are applied
-      const totalImages = unknownImages.slice(0, 24).length;
-
-      // Count images that will be classified (either already classified or currently selected)
-      const allImages = unknownImages.slice(0, 24);
-      const willBeClassified = allImages.filter((img) => {
-        return imageClassifications[img] || selectedImages.has(img);
-      }).length;
-
-      return willBeClassified >= totalImages;
-    }
-    return true;
-  }, [
-    step1Data.modelType,
-    isLastClass,
-    unknownImages,
-    imageClassifications,
-    selectedImages,
-  ]);
-
   const hasUnclassifiedImages = useMemo(() => {
     if (!unknownImages) return false;
     const allImages = unknownImages.slice(0, 24);
@@ -594,9 +570,7 @@ export default function Step3ChooseExamples({
             }
             variant="select"
             className="flex items-center justify-center gap-2 sm:flex-1"
-            disabled={
-              !hasGenerated || isGenerating || isProcessing || !canProceed
-            }
+            disabled={!hasGenerated || isGenerating || isProcessing}
           >
             {isProcessing && <ActivityIndicator className="size-4" />}
             {t("button.continue", { ns: "common" })}

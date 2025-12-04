@@ -185,9 +185,18 @@ Each line represents a detection state, not necessarily unique individuals. Pare
         timeline_summary_prompt = f"""
 You are a security officer.
 Time range: {time_range}.
-Input: JSON list with "title", "scene", "confidence", "potential_threat_level" (1-2), "other_concerns".
+Input: JSON list with "title", "scene", "confidence", "potential_threat_level" (0-2), "other_concerns", "_is_primary", "_camera".
 
 Task: Write a concise, human-presentable security report in markdown format.
+
+CRITICAL - Understanding Primary vs Contextual Items:
+- Items with "_is_primary": true are events that REQUIRE REVIEW and MUST be included in the report
+- Items with "_is_primary": false are additional context from other camera perspectives that overlap in time
+- **DO NOT create separate bullet points or sections for contextual items**
+- **ONLY use contextual items to enrich and inform the description of primary items**
+- The "_camera" field indicates which camera captured each event
+- **When a contextual item provides relevant background, you MUST incorporate it directly into the primary event's bullet point**
+- Contextual information often explains or de-escalates seemingly suspicious primary events
 
 Rules for the report:
 
@@ -195,34 +204,47 @@ Rules for the report:
   - Start with:
     # Security Summary - {time_range}
   - Write a 1-2 sentence situational overview capturing the general pattern of the period.
+  - Keep the overview high-level; specific details will be in the event bullets below.
 
 - Event details
-  - Present events in chronological order as a bullet list.
-  - **If multiple events occur within the same minute or overlapping time range, COMBINE them into a single bullet.**
-    - Summarize the distinct activities as sub-points under the shared timestamp.
-  - If no timestamp is given, preserve order but label as “Time not specified.”
+  - **ONLY create bullet points for PRIMARY items (_is_primary: true)**
+  - **Do NOT create sections or bullets for events that don't exist**
+  - Do NOT create separate bullets for contextual items
+  - Present primary events in chronological order as a bullet list.
+  - **CRITICAL: When contextual items overlap with a primary event, you MUST weave that information directly into the same bullet point**
+  - Format: **[Timestamp]** - [Description incorporating any contextual information]. [Camera info]. (threat level: X)
+  - If contextual information provides an explanation (e.g., delivery truck → person is likely delivery driver), reflect this understanding in your description and potentially adjust the perceived threat level
+  - If multiple PRIMARY events occur within the same minute, combine them into a single bullet with sub-points.
   - Use bold timestamps for clarity.
-  - Group bullets under subheadings when multiple events fall into the same category (e.g., Vehicle Activity, Porch Activity, Unusual Behavior).
+  - Camera format: "Camera: [camera name]" or mention contextual cameras inline when relevant
+  - Group bullets under subheadings ONLY when you have actual PRIMARY events to list (e.g., Porch Activity, Unusual Behavior).
 
 - Threat levels
-  - Always show the threat level for each event using these labels:
+  - Show the threat level for PRIMARY events using these labels:
     - Threat level 0: "Normal"
     - Threat level 1: "Needs review"
     - Threat level 2: "Security concern"
   - Format as (threat level: Normal), (threat level: Needs review), or (threat level: Security concern).
-  - If multiple events at the same time share the same threat level, only state it once.
+  - **When contextual items clearly explain a primary event (e.g., delivery truck explains person at door), you should describe it as normal activity and note the explanation**
+  - **Your description and tone should reflect the fuller understanding provided by contextual information**
+  - Example: Primary event says "unidentified person with face covering" but context shows delivery truck → describe as "delivery person (truck visible on Front Driveway Cam)" rather than emphasizing suspicious elements
+  - The stored threat level remains as originally classified, but your narrative should reflect the contextual understanding
+  - If multiple PRIMARY events at the same time share the same threat level, only state it once.
 
 - Final assessment
   - End with a Final Assessment section.
-  - If all events are threat level 0:
+  - If all primary events are threat level 0 or explained by contextual items:
     Final assessment: Only normal residential activity observed during this period.
   - If threat level 1 events are present:
     Final assessment: Some activity requires review but no security concerns identified.
   - If threat level 2 events are present, clearly summarize them as Security concerns requiring immediate attention.
+  - Keep this section brief - do not repeat details from the event descriptions above.
 
 - Conciseness
   - Do not repeat benign clothing/appearance details unless they distinguish individuals.
   - Summarize similar routine events instead of restating full scene descriptions.
+  - When incorporating contextual information, do so briefly and naturally within the primary event description.
+  - Avoid lengthy explanatory notes - integrate context seamlessly into the narrative.
 """
 
         for item in segments:
