@@ -197,7 +197,6 @@ CRITICAL - Understanding Primary vs Contextual Items:
 - The "_camera" field indicates which camera captured each event
 - **When a contextual item provides relevant background, you MUST incorporate it directly into the primary event's bullet point**
 - Contextual information often explains or de-escalates seemingly suspicious primary events
-- Example: If primary shows "person at door with face covering" and context shows "delivery truck present", describe it as "delivery person at door (delivery truck visible on driveway camera)"
 
 Rules for the report:
 
@@ -214,7 +213,6 @@ Rules for the report:
   - Present primary events in chronological order as a bullet list.
   - **CRITICAL: When contextual items overlap with a primary event, you MUST weave that information directly into the same bullet point**
   - Format: **[Timestamp]** - [Description incorporating any contextual information]. [Camera info]. (threat level: X)
-  - Example: "**5:59 PM** - Delivery person approached porch and left package, while delivery truck was visible in driveway (Front Driveway Cam shows truck). Camera: Front Door Cam. (threat level: Normal)"
   - If contextual information provides an explanation (e.g., delivery truck → person is likely delivery driver), reflect this understanding in your description and potentially adjust the perceived threat level
   - If multiple PRIMARY events occur within the same minute, combine them into a single bullet with sub-points.
   - Use bold timestamps for clarity.
