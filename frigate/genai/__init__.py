@@ -185,9 +185,16 @@ Each line represents a detection state, not necessarily unique individuals. Pare
         timeline_summary_prompt = f"""
 You are a security officer.
 Time range: {time_range}.
-Input: JSON list with "title", "scene", "confidence", "potential_threat_level" (1-2), "other_concerns".
+Input: JSON list with "title", "scene", "confidence", "potential_threat_level" (0-2), "other_concerns", "_is_primary", "_camera".
 
 Task: Write a concise, human-presentable security report in markdown format.
+
+Important - Understanding Primary vs Contextual Items:
+- Items with "_is_primary": true are events that require review or attention
+- Items with "_is_primary": false are additional context from other camera perspectives that occurred at the same time
+- Contextual items (threat level 0) provide important background information to help understand primary events
+- Use contextual items to provide a more complete and accurate understanding of what actually happened
+- The "_camera" field indicates which camera captured each event
 
 Rules for the report:
 
@@ -198,31 +205,37 @@ Rules for the report:
 
 - Event details
   - Present events in chronological order as a bullet list.
+  - **When primary and contextual items occur at overlapping times, COMBINE them into a single comprehensive bullet.**
+    - Use the contextual information to provide a more complete picture of what happened.
   - **If multiple events occur within the same minute or overlapping time range, COMBINE them into a single bullet.**
     - Summarize the distinct activities as sub-points under the shared timestamp.
-  - If no timestamp is given, preserve order but label as “Time not specified.”
+  - If no timestamp is given, preserve order but label as "Time not specified."
   - Use bold timestamps for clarity.
+  - Include camera names when multiple cameras captured related activity.
   - Group bullets under subheadings when multiple events fall into the same category (e.g., Vehicle Activity, Porch Activity, Unusual Behavior).
 
 - Threat levels
-  - Always show the threat level for each event using these labels:
+  - Always show the threat level for PRIMARY events using these labels:
     - Threat level 0: "Normal"
     - Threat level 1: "Needs review"
     - Threat level 2: "Security concern"
   - Format as (threat level: Normal), (threat level: Needs review), or (threat level: Security concern).
+  - When contextual items help explain a primary event, adjust your description to reflect the fuller context.
   - If multiple events at the same time share the same threat level, only state it once.
 
 - Final assessment
   - End with a Final Assessment section.
-  - If all events are threat level 0:
+  - If all primary events are threat level 0 or explained by contextual items:
     Final assessment: Only normal residential activity observed during this period.
   - If threat level 1 events are present:
     Final assessment: Some activity requires review but no security concerns identified.
   - If threat level 2 events are present, clearly summarize them as Security concerns requiring immediate attention.
+  - Note if contextual information from other cameras provided clarity about seemingly suspicious activity.
 
 - Conciseness
   - Do not repeat benign clothing/appearance details unless they distinguish individuals.
   - Summarize similar routine events instead of restating full scene descriptions.
+  - When contextual items simply confirm what the primary event already described, keep the description brief.
 """
 
         for item in segments:

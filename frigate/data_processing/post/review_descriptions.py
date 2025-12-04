@@ -209,10 +209,22 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             logger.debug(
                 f"Found GenAI Review Summary request for {start_ts} to {end_ts}"
             )
-            items: list[dict[str, Any]] = [
-                r["data"]["metadata"]
+
+            # Query all review segments with camera and time information
+            segments: list[dict[str, Any]] = [
+                {
+                    "camera": r["camera"],
+                    "start_time": r["start_time"],
+                    "end_time": r["end_time"],
+                    "metadata": r["data"]["metadata"],
+                }
                 for r in (
-                    ReviewSegment.select(ReviewSegment.data)
+                    ReviewSegment.select(
+                        ReviewSegment.camera,
+                        ReviewSegment.start_time,
+                        ReviewSegment.end_time,
+                        ReviewSegment.data,
+                    )
                     .where(
                         (ReviewSegment.data["metadata"].is_null(False))
                         & (ReviewSegment.start_time < end_ts)
@@ -224,20 +236,63 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 )
             ]
 
-            if len(items) == 0:
+            if len(segments) == 0:
                 logger.debug("No review items with metadata found during time period")
-                return "No activity was found during this time."
+                return "No activity was found during this time period."
 
-            important_items = list(
-                filter(
-                    lambda item: item.get("potential_threat_level", 0) > 0
-                    or item.get("other_concerns"),
-                    items,
-                )
-            )
+            # Identify primary items (important items that need review)
+            primary_segments = [
+                seg
+                for seg in segments
+                if seg["metadata"].get("potential_threat_level", 0) > 0
+                or seg["metadata"].get("other_concerns")
+            ]
 
-            if not important_items:
+            if not primary_segments:
                 return "No concerns were found during this time period."
+
+            # For each primary segment, find overlapping contextual items from other cameras
+            all_items_for_summary = []
+
+            for primary_seg in primary_segments:
+                # Add the primary item with marker
+                primary_item = copy.deepcopy(primary_seg["metadata"])
+                primary_item["_is_primary"] = True
+                primary_item["_camera"] = primary_seg["camera"]
+                all_items_for_summary.append(primary_item)
+
+                # Find overlapping contextual items from other cameras
+                primary_start = primary_seg["start_time"]
+                primary_end = primary_seg["end_time"]
+                primary_camera = primary_seg["camera"]
+
+                for seg in segments:
+                    if seg["camera"] == primary_camera:
+                        continue
+
+                    if seg in primary_segments:
+                        continue
+
+                    seg_start = seg["start_time"]
+                    seg_end = seg["end_time"]
+
+                    if seg_start < primary_end and primary_start < seg_end:
+                        contextual_item = copy.deepcopy(seg["metadata"])
+                        contextual_item["_is_primary"] = False
+                        contextual_item["_camera"] = seg["camera"]
+                        contextual_item["_related_to_camera"] = primary_camera
+
+                        if not any(
+                            item.get("_camera") == seg["camera"]
+                            and item.get("time") == contextual_item.get("time")
+                            for item in all_items_for_summary
+                        ):
+                            all_items_for_summary.append(contextual_item)
+
+            logger.debug(
+                f"Summary includes {len(primary_segments)} primary items and "
+                f"{len(all_items_for_summary) - len(primary_segments)} contextual items"
+            )
 
             if self.config.review.genai.debug_save_thumbnails:
                 Path(
@@ -247,7 +302,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             return self.genai_client.generate_review_summary(
                 start_ts,
                 end_ts,
-                important_items,
+                all_items_for_summary,
                 self.config.review.genai.debug_save_thumbnails,
             )
         else:
