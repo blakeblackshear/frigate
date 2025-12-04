@@ -287,6 +287,42 @@ or add these options to your `docker run` command:
 
 Next, you should configure [hardware object detection](/configuration/object_detectors#synaptics) and [hardware video processing](/configuration/hardware_acceleration_video#synaptics).
 
+### AXERA
+
+<details>
+<summary>AXERA accelerators</summary>
+AXERA accelerators are available in an M.2 form factor, compatible with both Raspberry Pi and Orange Pi. This form factor has also been successfully tested on x86 platforms, making it a versatile choice for various computing environments.
+
+#### Installation
+
+Using AXERA accelerators requires the installation of the AXCL driver. We provide a convenient Linux script to complete this installation.
+
+Follow these steps for installation:
+
+1. Copy or download [this script](https://github.com/ivanshi1108/assets/releases/download/v0.16.2/user_installation.sh).
+2. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
+3. Run the script with `./user_installation.sh`
+
+#### Setup
+
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
+
+Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
+
+```yaml
+devices:
+  - /dev/axcl_host
+  - /dev/ax_mmb_dev
+  - /dev/msg_userdev
+```
+
+If you are using `docker run`, add this option to your command `--device /dev/axcl_host --device /dev/ax_mmb_dev --device /dev/msg_userdev`
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#axera) to complete the setup.
+</details>
+
 ## Docker
 
 Running through Docker with Docker Compose is the recommended install method.
