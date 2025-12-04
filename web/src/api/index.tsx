@@ -6,6 +6,10 @@ import { ReactNode } from "react";
 
 axios.defaults.baseURL = `${baseUrl}api/`;
 
+// Module-level flag to prevent multiple simultaneous redirects
+// (eg, when multiple SWR queries fail with 401 at once)
+let isRedirectingToLogin = false;
+
 type ApiProviderType = {
   children?: ReactNode;
   options?: Record<string, unknown>;
@@ -31,7 +35,8 @@ export function ApiProvider({ children, options }: ApiProviderType) {
           ) {
             // redirect to the login page if not already there
             const loginPage = error.response.headers.get("location") ?? "login";
-            if (window.location.href !== loginPage) {
+            if (window.location.href !== loginPage && !isRedirectingToLogin) {
+              isRedirectingToLogin = true;
               window.location.href = loginPage;
             }
           }
