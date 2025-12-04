@@ -3,12 +3,9 @@ import { SWRConfig } from "swr";
 import { WsProvider } from "./ws";
 import axios from "axios";
 import { ReactNode } from "react";
+import { isRedirectingToLogin, setRedirectingToLogin } from "./auth-redirect";
 
 axios.defaults.baseURL = `${baseUrl}api/`;
-
-// Module-level flag to prevent multiple simultaneous redirects
-// (eg, when multiple SWR queries fail with 401 at once)
-let isRedirectingToLogin = false;
 
 type ApiProviderType = {
   children?: ReactNode;
@@ -35,8 +32,8 @@ export function ApiProvider({ children, options }: ApiProviderType) {
           ) {
             // redirect to the login page if not already there
             const loginPage = error.response.headers.get("location") ?? "login";
-            if (window.location.href !== loginPage && !isRedirectingToLogin) {
-              isRedirectingToLogin = true;
+            if (window.location.href !== loginPage && !isRedirectingToLogin()) {
+              setRedirectingToLogin(true);
               window.location.href = loginPage;
             }
           }
