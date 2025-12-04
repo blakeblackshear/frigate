@@ -213,7 +213,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             # Query all review segments with camera and time information
             segments: list[dict[str, Any]] = [
                 {
-                    "camera": r["camera"],
+                    "camera": r["camera"].replace("_", " ").title(),
                     "start_time": r["start_time"],
                     "end_time": r["end_time"],
                     "metadata": r["data"]["metadata"],
@@ -267,7 +267,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 primary_camera = primary_seg["camera"]
 
                 for seg in segments:
-                    if seg["camera"] == primary_camera:
+                    seg_camera = seg["camera"]
+
+                    if seg_camera == primary_camera:
                         continue
 
                     if seg in primary_segments:
@@ -279,11 +281,11 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     if seg_start < primary_end and primary_start < seg_end:
                         contextual_item = copy.deepcopy(seg["metadata"])
                         contextual_item["_is_primary"] = False
-                        contextual_item["_camera"] = seg["camera"]
+                        contextual_item["_camera"] = seg_camera
                         contextual_item["_related_to_camera"] = primary_camera
 
                         if not any(
-                            item.get("_camera") == seg["camera"]
+                            item.get("_camera") == seg_camera
                             and item.get("time") == contextual_item.get("time")
                             for item in all_items_for_summary
                         ):
