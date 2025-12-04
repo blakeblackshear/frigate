@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
-import Hls from "hls.js";
+import Hls, { HlsConfig } from "hls.js";
 import { isDesktop, isMobile } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import VideoControls from "./VideoControls";
@@ -57,6 +57,7 @@ type HlsVideoPlayerProps = {
   isDetailMode?: boolean;
   camera?: string;
   currentTimeOverride?: number;
+  enableGapControllerRecovery?: boolean;
 };
 
 export default function HlsVideoPlayer({
@@ -81,6 +82,7 @@ export default function HlsVideoPlayer({
   isDetailMode = false,
   camera,
   currentTimeOverride,
+  enableGapControllerRecovery = false,
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation("components/player");
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -170,11 +172,23 @@ export default function HlsVideoPlayer({
       return;
     }
 
-    hlsRef.current = new Hls({
+    // Base HLS configuration
+    const baseConfig: Partial<HlsConfig> = {
       maxBufferLength: 10,
       maxBufferSize: 20 * 1000 * 1000,
       startPosition: currentSource.startPosition,
-    });
+    };
+
+    const hlsConfig = { ...baseConfig };
+
+    if (enableGapControllerRecovery) {
+      hlsConfig.highBufferWatchdogPeriod = 1; // Check for stalls every 1 second (default: 3)
+      hlsConfig.nudgeOffset = 0.2; // Nudge playhead forward 0.2s when stalled (default: 0.1)
+      hlsConfig.nudgeMaxRetry = 5; // Try up to 5 nudges before giving up (default: 3)
+      hlsConfig.maxBufferHole = 0.5; // Tolerate up to 0.5s gaps between fragments (default: 0.1)
+    }
+
+    hlsRef.current = new Hls(hlsConfig);
     hlsRef.current.attachMedia(videoRef.current);
     hlsRef.current.loadSource(currentSource.playlist);
     videoRef.current.playbackRate = currentPlaybackRate;
@@ -187,7 +201,13 @@ export default function HlsVideoPlayer({
         hlsRef.current.destroy();
       }
     };
-  }, [videoRef, hlsRef, useHlsCompat, currentSource]);
+  }, [
+    videoRef,
+    hlsRef,
+    useHlsCompat,
+    currentSource,
+    enableGapControllerRecovery,
+  ]);
 
   // state handling
 
