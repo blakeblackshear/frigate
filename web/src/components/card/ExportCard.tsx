@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 import BlurredIconButton from "../button/BlurredIconButton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 type ExportProps = {
   className: string;
@@ -40,6 +41,7 @@ export default function ExportCard({
   onDelete,
 }: ExportProps) {
   const { t } = useTranslation(["views/exports"]);
+  const isAdmin = useIsAdmin();
   const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(
     exportedRecording.thumb_path.length > 0,
@@ -195,7 +197,7 @@ export default function ExportCard({
                     </Tooltip>
                   </a>
                 )}
-                {!exportedRecording.in_progress && (
+                {isAdmin && !exportedRecording.in_progress && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <BlurredIconButton
@@ -212,21 +214,23 @@ export default function ExportCard({
                     <TooltipContent>{t("tooltip.editName")}</TooltipContent>
                   </Tooltip>
                 )}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <BlurredIconButton
-                      onClick={() =>
-                        onDelete({
-                          file: exportedRecording.id,
-                          exportName: exportedRecording.name,
-                        })
-                      }
-                    >
-                      <LuTrash className="size-4 fill-destructive text-destructive hover:text-white" />
-                    </BlurredIconButton>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("tooltip.deleteExport")}</TooltipContent>
-                </Tooltip>
+                {isAdmin && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <BlurredIconButton
+                        onClick={() =>
+                          onDelete({
+                            file: exportedRecording.id,
+                            exportName: exportedRecording.name,
+                          })
+                        }
+                      >
+                        <LuTrash className="size-4 fill-destructive text-destructive hover:text-white" />
+                      </BlurredIconButton>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("tooltip.deleteExport")}</TooltipContent>
+                  </Tooltip>
+                )}
               </div>
             </div>
 
