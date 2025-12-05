@@ -1002,10 +1002,6 @@ ui:
   #    full: 8:15:22 PM Mountain Standard Time
   # (default: shown below).
   time_style: medium
-  # Optional: Ability to manually override the date / time styling to use strftime format
-  # https://www.gnu.org/software/libc/manual/html_node/Formatting-Calendar-Time.html
-  # possible values are shown above (default: not set)
-  strftime_fmt: "%Y/%m/%d %H:%M"
   # Optional: Set the unit system to either "imperial" or "metric" (default: metric)
   # Used in the UI and in MQTT topics
   unit_system: metric
