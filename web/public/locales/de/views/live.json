@@ -172,9 +172,13 @@
     "disable": "Live Audio Transkription ausschalten"
   },
   "noCameras": {
-    "title": "Keine Kameras eingerichtet",
+    "title": "Keine Kameras konfiguriert",
     "description": "Beginne indem du eine Kamera anschließt.",
-    "buttonText": "Kamera hinzufügen"
+    "buttonText": "Kamera hinzufügen",
+    "restricted": {
+      "title": "Keine Kamera verfügbar",
+      "description": "Sie haben keine Berechtigung, Kameras in dieser Gruppe anzuzeigen."
+    }
   },
   "snapshot": {
     "takeSnapshot": "Sofort-Schnappschuss herunterladen",
