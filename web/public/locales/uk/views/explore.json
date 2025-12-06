@@ -218,6 +218,10 @@
     },
     "hideObjectDetails": {
       "label": "Приховати шлях до об'єкта"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Завантажити чистий знімок",
+      "aria": "Завантажити чистий знімок"
     }
   },
   "noTrackedObjects": "Відстежуваних об'єктів не знайдено",
@@ -263,7 +267,8 @@
       "header": {
         "zones": "Зони",
         "ratio": "Співвідношення",
-        "area": "Площа"
+        "area": "Площа",
+        "score": "Рахунок"
       }
     },
     "annotationSettings": {
