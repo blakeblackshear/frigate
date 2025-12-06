@@ -41,6 +41,8 @@
   "zoomOut": "Oddálit",
   "detail": {
     "label": "Detail",
-    "noDataFound": "Žádná detailní data k prohlédnutí"
+    "noDataFound": "Žádná detailní data k prohlédnutí",
+    "aria": "Přepnout detailní zobrazení",
+    "trackedObject_other": "{{count}} objektů"
   }
 }
