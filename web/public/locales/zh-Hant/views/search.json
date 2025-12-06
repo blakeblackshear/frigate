@@ -5,7 +5,7 @@
   "button": {
     "clear": "清空搜尋",
     "filterActive": "過濾中",
-    "save": "保存搜尋",
+    "save": "儲存搜尋",
     "delete": "刪除保存的搜尋",
     "filterInformation": "過濾資訊"
   },

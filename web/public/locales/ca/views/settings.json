@@ -172,7 +172,7 @@
       "name": {
         "inputPlaceHolder": "Introduïu un nom…",
         "title": "Nom",
-        "tips": "El nom ha de tenir almenys 2 caràcters, ha de tenir almenys una lletra, i no ha de ser el nom d'una càmera o una altra zona."
+        "tips": "El nom ha de tenir almenys 2 caràcters, ha de tenir almenys una lletra, i no ha de ser el nom d'una càmera o una altra zona en aquesta càmera."
       },
       "label": "Zones",
       "desc": {

@@ -65,7 +65,8 @@
         "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début.",
         "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide."
       },
-      "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations."
+      "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations.",
+      "view": "Vue"
     },
     "select": "Sélectionner",
     "name": {

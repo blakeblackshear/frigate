@@ -306,7 +306,7 @@
       "name": {
         "title": "Naam",
         "inputPlaceHolder": "Voer een naam in…",
-        "tips": "De naam moet minimaal 2 tekens lang zijn, minimaal één letter bevatten en mag niet gelijk zijn aan de naam van een camera of andere zone."
+        "tips": "De naam moet minimaal 2 tekens lang zijn, minimaal één letter bevatten en mag niet gelijk zijn aan de naam van een camera of andere zone op deze camera."
       },
       "inertia": {
         "title": "Traagheid",

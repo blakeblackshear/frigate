@@ -261,7 +261,8 @@
       "header": {
         "zones": "Zoner",
         "ratio": "Förhållandet",
-        "area": "Område"
+        "area": "Område",
+        "score": "Resultat"
       }
     },
     "annotationSettings": {

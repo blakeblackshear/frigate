@@ -56,5 +56,8 @@
     "clickToSeek": "Cliquez pour atteindre ce moment."
   },
   "zoomIn": "Zoom avant",
-  "zoomOut": "Zoom arrière"
+  "zoomOut": "Zoom arrière",
+  "normalActivity": "Normal",
+  "needsReview": "Nécessite une revue",
+  "securityConcern": "Problème de sécurité"
 }

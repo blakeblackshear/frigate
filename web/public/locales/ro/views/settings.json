@@ -258,7 +258,7 @@
       "name": {
         "inputPlaceHolder": "Introdu un nume…",
         "title": "Nume",
-        "tips": "Numele trebuie să aibă cel puțin 2 caractere, trebuie să conțină cel puțin o literă și nu trebuie să fie identic cu numele unei camere sau al unei alte zone existente."
+        "tips": "Numele trebuie să aibă cel puțin 2 caractere, să conțină cel puțin o literă și să nu fie numele unei camere sau al unei alte zone din această cameră."
       },
       "inertia": {
         "title": "Inerție",

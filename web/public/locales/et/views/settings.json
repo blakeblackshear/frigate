@@ -1,0 +1,62 @@
+{
+  "cameraWizard": {
+    "step1": {
+      "password": "Salasõna",
+      "passwordPlaceholder": "Valikuline",
+      "customUrlPlaceholder": "rtsp://kasutajanimi:salasõna@host:port/asukoht"
+    }
+  },
+  "users": {
+    "updatePassword": "Muuda salasõna",
+    "toast": {
+      "success": {
+        "updatePassword": "Salasõna muutmine õnnestus."
+      },
+      "error": {
+        "setPasswordFailed": "Salasõna salvestamine ei õnnestunud: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "password": "Salasõna"
+    },
+    "dialog": {
+      "form": {
+        "password": {
+          "title": "Salasõna",
+          "placeholder": "Sisesta salasõna",
+          "confirm": {
+            "title": "Korda salasõna",
+            "placeholder": "Korda salasõna"
+          },
+          "strength": {
+            "title": "Salasõna tugevus: ",
+            "weak": "Nõrk",
+            "medium": "Keskmime",
+            "strong": "Tugev",
+            "veryStrong": "Väga tugev"
+          },
+          "match": "Salasõnad klapivad omavahel",
+          "notMatch": "Salasõnad ei klapi omavahel"
+        },
+        "newPassword": {
+          "title": "Uus salasõna",
+          "placeholder": "Sisesta uus salasõna",
+          "confirm": {
+            "placeholder": "Sisesta uus salasõna uuesti"
+          }
+        },
+        "passwordIsRequired": "Salasõna on vajalik"
+      },
+      "createUser": {
+        "confirmPassword": "Palun kinnita oma uus salasõna"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Salasõna ei või jääda tühjaks",
+        "doNotMatch": "Salasõnad ei klapi omavahel",
+        "updatePassword": "Muuda kasutaja {{username}} salasõna",
+        "setPassword": "Sisesta salasõna",
+        "desc": "Selle kasutajakonto turvalisuse tagamiseks lisa tugev salasõna."
+      }
+    }
+  }
+}

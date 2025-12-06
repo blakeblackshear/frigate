@@ -1,0 +1,11 @@
+{
+  "time": {
+    "untilForTime": "Kuni {{time}}",
+    "today": "Täna"
+  },
+  "menu": {
+    "user": {
+      "setPassword": "Lisa salasõna"
+    }
+  }
+}

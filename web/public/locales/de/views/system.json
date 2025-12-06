@@ -31,7 +31,12 @@
       "gpuDecoder": "GPU Decoder",
       "gpuEncoder": "GPU Encoder",
       "npuUsage": "NPU Verwendung",
-      "npuMemory": "NPU Speicher"
+      "npuMemory": "NPU Speicher",
+      "intelGpuWarning": {
+        "title": "Intel GPU Statistik Warnung",
+        "message": "GPU stats nicht verfügbar",
+        "description": "Dies ist ein bekannter Fehler in den GPU-Statistik-Tools von Intel (intel_gpu_top), bei dem das Tool ausfällt und wiederholt eine GPU-Auslastung von 0 % anzeigt, selbst wenn die Hardwarebeschleunigung und die Objekterkennung auf der (i)GPU korrekt funktionieren. Dies ist kein Fehler von Frigate. Du kannst den Host neu starten, um das Problem vorübergehend zu beheben und zu prüfen, ob die GPU korrekt funktioniert. Dies hat keine Auswirkungen auf die Leistung."
+      }
     },
     "title": "Allgemein",
     "detector": {
@@ -167,10 +172,17 @@
       "face_recognition": "Gesichts Erkennung",
       "image_embedding": "Bild Embedding",
       "yolov9_plate_detection_speed": "YOLOv9 Kennzeichenerkennungsgeschwindigkeit",
-      "yolov9_plate_detection": "YOLOv9 Kennzeichenerkennung"
+      "yolov9_plate_detection": "YOLOv9 Kennzeichenerkennung",
+      "review_description": "Bewertung Beschreibung",
+      "review_description_speed": "Bewertungsbeschreibung Geschwindigkeit",
+      "review_description_events_per_second": "Bewertungsbeschreibung",
+      "object_description": "Objekt Beschreibung",
+      "object_description_speed": "Objektbeschreibung Geschwindigkeit",
+      "object_description_events_per_second": "Objektbeschreibung"
     },
     "title": "Optimierungen",
-    "infPerSecond": "Rückschlüsse pro Sekunde"
+    "infPerSecond": "Rückschlüsse pro Sekunde",
+    "averageInf": "Durchschnittliche Inferenzzeit"
   },
   "stats": {
     "healthy": "Das System läuft problemlos",

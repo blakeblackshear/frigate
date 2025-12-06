@@ -57,7 +57,8 @@
         "failed": "Misslyckades med att starta exporten: {{error}}",
         "endTimeMustAfterStartTime": "Sluttiden måste vara efter starttiden",
         "noVaildTimeSelected": "Inget giltigt tidsintervall valt"
-      }
+      },
+      "view": "Visa"
     },
     "fromTimeline": {
       "saveExport": "Spara export",

@@ -55,5 +55,8 @@
     "clickToSeek": "Apasă pentru a naviga la acest moment"
   },
   "zoomIn": "Mărește",
-  "zoomOut": "Micșorează"
+  "zoomOut": "Micșorează",
+  "normalActivity": "Normal",
+  "needsReview": "Necesită revizuire",
+  "securityConcern": "Potențială problemă de securitate"
 }

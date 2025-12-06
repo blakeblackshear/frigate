@@ -145,7 +145,10 @@
         "generationFailed": "Generovanie zlyhalo. Skúste to znova.",
         "classifyFailed": "Nepodarilo sa klasifikovať obrázky: {{error}}"
       },
-      "generateSuccess": "Vzorové obrázky boli úspešne vygenerované"
+      "generateSuccess": "Vzorové obrázky boli úspešne vygenerované",
+      "allImagesRequired_one": "Uveďte všetky obrázky. {{count}} obrázok zostáva.",
+      "allImagesRequired_few": "Uveďte všetky obrázky. {{count}} obrázky zostávajú.",
+      "allImagesRequired_other": "Uveďte všetky obrázky. {{count}} obrázkov zostávajú."
     }
   },
   "deleteModel": {

@@ -3,7 +3,7 @@
   "button": {
     "deleteClassificationAttempts": "Usuń obrazy klasyfikacyjne",
     "renameCategory": "Zmień nazwę klasy",
-    "deleteCategory": "Usuń klasę",
+    "deleteCategory": "Usuń klasyfikację",
     "deleteImages": "Usuń obrazy",
     "trainModel": "Przeszkol model",
     "addClassification": "Dodaj klasyfikację",
@@ -39,7 +39,9 @@
   },
   "deleteCategory": {
     "title": "Usuń klasę",
-    "desc": "Czy na pewno chcesz usunąć klasę {{name}}? Spowoduje to trawałe usunięcie wszystkich powiązanych obrazków i konieczność ponownego trenowania modelu."
+    "desc": "Czy na pewno chcesz usunąć klasę {{name}}? Spowoduje to trawałe usunięcie wszystkich powiązanych obrazków i konieczność ponownego trenowania modelu.",
+    "minClassesTitle": "Nie można usunąć kategorii",
+    "minClassesDesc": "Model klasyfikacyjny musi posiadać co najmniej dwie kategorie. Dodaj inną kategorię aby możliwe było usunięcie tej kategorii."
   },
   "deleteModel": {
     "title": "Usuń model klasyfikacji",
@@ -49,10 +51,29 @@
     "desc_many": "Czy na pewno chcesz usunąć {{count}} modeli? Spowoduje to trwałe usunięcie wszystkich powiązanych danych, włącznie z obrazami i danymi treningowymi. Nie można cofnąć tej operacji."
   },
   "edit": {
-    "title": "Edytuj model klasyfikacji"
+    "title": "Edytuj model klasyfikacji",
+    "descriptionObject": "Zmień typ obiektu i kryteria dla tego modelu klasyfikacji.",
+    "stateClassesInfo": "Uwaga: Zmiana typu klasyfikacji wymaga treningu nowego modelu."
   },
   "tooltip": {
     "trainingInProgress": "Trwa trenowanie modelu",
-    "modelNotReady": "Mode nie jest gotowy do trenowania"
+    "modelNotReady": "Mode nie jest gotowy do trenowania",
+    "noChanges": "Brak zmian w zbiorze danych od czasu ostatniego treningu."
+  },
+  "deleteDatasetImages": {
+    "title": "Usuń obrazy z puli danych"
+  },
+  "renameCategory": {
+    "title": "Zmień nazwę klasy",
+    "desc": "Wprowadź nową nazwę dla {{name}}. Zastosowanie tej zmiany wymagać będzie treningu nowego modelu."
+  },
+  "description": {
+    "invalidName": "Niepoprawna nazwa. Nazwy mogą zawierać tylko: litery, cyfry, spacje, cudzysłowy, podkreślniniki i myślniki."
+  },
+  "train": {
+    "title": "Ostatnie Klasyfikacje"
+  },
+  "createCategory": {
+    "new": "Stwórz nową klasyfikację"
   }
 }

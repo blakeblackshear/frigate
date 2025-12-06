@@ -81,7 +81,7 @@
     "timestamp": "时间戳",
     "zones": "区域",
     "mask": "遮罩",
-    "motion": "运动",
+    "motion": "画面变动",
     "regions": "区域"
   }
 }

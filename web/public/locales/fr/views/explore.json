@@ -208,6 +208,10 @@
     "viewTrackingDetails": {
       "label": "Voir les détails du suivi",
       "aria": "Afficher les détails du suivi"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Télécharger l'instantané vierge",
+      "aria": "Télécharger l'instantané vierge"
     }
   },
   "dialog": {
@@ -263,7 +267,8 @@
       "header": {
         "zones": "Zones",
         "ratio": "Ratio",
-        "area": "Surface"
+        "area": "Surface",
+        "score": "Score"
       }
     },
     "annotationSettings": {
