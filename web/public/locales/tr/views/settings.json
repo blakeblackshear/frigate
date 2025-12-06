@@ -8,7 +8,7 @@
     "motionTuner": "Hareket Algılama Ayarları - Frigate",
     "frigatePlus": "Frigate+ Ayarları - Frigate",
     "object": "Hata Ayıklama - Frigate",
-    "general": "Genel Ayarlar - Frigate",
+    "general": "Kullanıcı Arayüzü Ayarları – Frigate",
     "notifications": "Bildirim Ayarları - Frigate",
     "enrichments": "Zenginleştirme Ayarları - Frigate",
     "cameraManagement": "Kameraları Yönet - Frigate",
@@ -31,7 +31,7 @@
     "roles": "Roller"
   },
   "general": {
-    "title": "Genel Ayarlar",
+    "title": "Kullanıcı Arayüzü Ayarları",
     "liveDashboard": {
       "automaticLiveView": {
         "label": "Otomatik Canlı Görünüm",
@@ -45,6 +45,10 @@
       "displayCameraNames": {
         "label": "Kamera Adlarını Her Zaman Göster",
         "desc": "Çok kameralı canlı izleme panelinde, kamera adlarını her zaman bir etiket içinde göster."
+      },
+      "liveFallbackTimeout": {
+        "label": "Canlı Oynatıcı Yedekleme Zaman Aşımı",
+        "desc": "Bir kameranın yüksek kaliteli canlı akışı kullanılamadığında, belirtilen saniye kadar sonra düşük bant genişliği moduna geç. Varsayılan: 3."
       }
     },
     "storedLayouts": {
@@ -834,6 +838,54 @@
         "updateTriggerFailed": "Tetik güncellenemedi: {{errorMessage}}",
         "deleteTriggerFailed": "Tetik silinemedi: {{errorMessage}}"
       }
+    }
+  },
+  "cameraWizard": {
+    "title": "Kamera Ekle",
+    "description": "Aşağıdaki adımları izleyerek Frigate kurulumunuza yeni bir kamera ekleyin.",
+    "steps": {
+      "nameAndConnection": "Ad & Bağlantı",
+      "probeOrSnapshot": "Probe veya Anlık Görüntü",
+      "streamConfiguration": "Akış Yapılandırması",
+      "validationAndTesting": "Doğrulama ve Test"
+    },
+    "save": {
+      "success": "Yeni kamera {{cameraName}} başarıyla kaydedildi.",
+      "failure": "{{cameraName}} kaydedilirken hata oluştu."
+    },
+    "testResultLabels": {
+      "resolution": "Çözünürlük",
+      "video": "Video",
+      "audio": "Ses",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Lütfen geçerli bir akış URL'si sağlayın",
+      "testFailed": "Akış testi başarısız oldu: {{error}}"
+    },
+    "step1": {
+      "description": "Kamera bilgilerinizi girin ve kamerayı taramayı (probe) ya da markayı manuel olarak seçmeyi tercih edin.",
+      "cameraName": "Kamera Adı",
+      "cameraNamePlaceholder": "ör. front_door veya Arka Bahçe Genel Görünümü",
+      "host": "Ana Makine / IP Adresi",
+      "port": "Port",
+      "username": "Kullanıcı adı",
+      "usernamePlaceholder": "İsteğe bağlı",
+      "password": "Şifre",
+      "passwordPlaceholder": "İsteğe bağlı",
+      "selectTransport": "İletişim protokolünü seçin",
+      "cameraBrand": "Kamera Markası",
+      "selectBrand": "URL şablonu için kamera markasını seçin",
+      "customUrl": "Özel Akış URL’si",
+      "brandInformation": "Marka Bilgileri",
+      "brandUrlFormat": "RTSP URL formatı şu şekilde olan kameralar için: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://kullanıcıadı:şifre@host:port/path",
+      "connectionSettings": "Bağlantı Ayarları",
+      "detectionMethod": "Akış Algılama Yöntemi",
+      "onvifPort": "ONVIF Portu",
+      "probeMode": "Kamerayı tara",
+      "manualMode": "Manuel seçim",
+      "detectionMethodDescription": "Kamera akış URL’lerini bulmak için kamerayı ONVIF ile tarayın (destekleniyorsa) veya ön tanımlı URL’leri kullanmak için kamera markasını manuel olarak seçin. Özel bir RTSP URL’si girmek için manuel yöntemi seçin ve “Diğer”i işaretleyin."
     }
   }
 }

@@ -52,7 +52,10 @@
       "label": "Arka planda oynat",
       "tips": "Yayını oynatıcı arkadayken de devam ettirmek için bu seçeneği açın."
     },
-    "title": "Yayın"
+    "title": "Yayın",
+    "debug": {
+      "picker": "Debug modunda akış seçimi kullanılamaz. Debug görünümü her zaman “detect” rolüne atanmış akışı kullanır."
+    }
   },
   "cameraSettings": {
     "recording": "Kayıt",
@@ -173,5 +176,14 @@
     "noVideoSource": "Anlık görüntü için kullanılabilir bir video kaynağı bulunamadı.",
     "captureFailed": "Anlık görüntü yakalanamadı.",
     "downloadStarted": "Anlık görüntü indirme işlemi başlatıldı."
+  },
+  "noCameras": {
+    "title": "Hiç Kamera Yapılandırılmamış",
+    "description": "Frigate’e bir kamera bağlayarak başlayın.",
+    "buttonText": "Kamera Ekle",
+    "restricted": {
+      "title": "Kullanılabilir Kamera Yok",
+      "description": "Bu gruptaki kameraları görüntüleme izniniz yok."
+    }
   }
 }
