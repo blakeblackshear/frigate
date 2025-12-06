@@ -639,14 +639,14 @@ def write_classification_attempt(
     os.makedirs(folder, exist_ok=True)
     cv2.imwrite(file, frame)
 
-    files = sorted(
-        filter(lambda f: (f.endswith(".webp")), os.listdir(folder)),
-        key=lambda f: os.path.getctime(os.path.join(folder, f)),
-        reverse=True,
-    )
-
     # delete oldest face image if maximum is reached
     try:
+        files = sorted(
+            filter(lambda f: (f.endswith(".webp")), os.listdir(folder)),
+            key=lambda f: os.path.getctime(os.path.join(folder, f)),
+            reverse=True,
+        )
+
         if len(files) > max_files:
             os.unlink(os.path.join(folder, files[-1]))
     except FileNotFoundError:
