@@ -116,4 +116,4 @@ Along with individual review item summaries, Generative AI provides the ability 
 
 Review reports can be requested via the [API](/integrations/api#review-summarization) by sending a POST request to `/api/review/summarize/start/{start_ts}/end/{end_ts}` with Unix timestamps.
 
-For Home Assistant users, there is a built-in service (`frigate.generate_review_summary`) that makes it easy to request review reports as part of automations or scripts. This allows you to automatically generate daily summaries, vacation reports, or custom time period reports based on your specific needs.
+For Home Assistant users, there is a built-in service (`frigate.review_summarize`) that makes it easy to request review reports as part of automations or scripts. This allows you to automatically generate daily summaries, vacation reports, or custom time period reports based on your specific needs.

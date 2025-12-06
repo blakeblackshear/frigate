@@ -534,7 +534,7 @@
         }
       },
       "toast": {
-        "success": "Zone ({{zoneName}}) has been saved. Restart Frigate to apply changes."
+        "success": "Zone ({{zoneName}}) has been saved."
       }
     },
     "motionMasks": {
@@ -558,8 +558,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} has been saved. Restart Frigate to apply changes.",
-          "noName": "Motion Mask has been saved. Restart Frigate to apply changes."
+          "title": "{{polygonName}} has been saved.",
+          "noName": "Motion Mask has been saved."
         }
       }
     },
@@ -583,8 +583,8 @@
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} has been saved. Restart Frigate to apply changes.",
-          "noName": "Object Mask has been saved. Restart Frigate to apply changes."
+          "title": "{{polygonName}} has been saved.",
+          "noName": "Object Mask has been saved."
         }
       }
     }

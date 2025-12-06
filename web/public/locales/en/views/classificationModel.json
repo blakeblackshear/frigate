@@ -1,5 +1,5 @@
 {
-  "documentTitle": "Classification Models",
+  "documentTitle": "Classification Models - Frigate",
   "details": {
     "scoreInfo": "Score represents the average classification confidence across all detections of this object."
   },

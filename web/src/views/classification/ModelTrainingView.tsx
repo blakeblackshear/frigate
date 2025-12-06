@@ -84,6 +84,12 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
   const [page, setPage] = useState<string>("train");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
 
+  // title
+
+  useEffect(() => {
+    document.title = `${model.name} - ${t("documentTitle")}`;
+  }, [model.name, t]);
+
   // model state
 
   const [wasTraining, setWasTraining] = useState(false);

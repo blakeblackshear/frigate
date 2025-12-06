@@ -6,7 +6,6 @@ export interface UiConfig {
   time_format?: "browser" | "12hour" | "24hour";
   date_style?: "full" | "long" | "medium" | "short";
   time_style?: "full" | "long" | "medium" | "short";
-  strftime_fmt?: string;
   dashboard: boolean;
   order: number;
   unit_system?: "metric" | "imperial";

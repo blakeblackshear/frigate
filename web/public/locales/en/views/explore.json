@@ -77,7 +77,7 @@
         "millisecondsToOffset": "Milliseconds to offset detect annotations by. <em>Default: 0</em>",
         "tips": "Lower the value if the video playback is ahead of the boxes and path points, and increase the value if the video playback is behind them. This value can be negative.",
         "toast": {
-          "success": "Annotation offset for {{camera}} has been saved to the config file. Restart Frigate to apply your changes."
+          "success": "Annotation offset for {{camera}} has been saved to the config file."
         }
       }
     },
