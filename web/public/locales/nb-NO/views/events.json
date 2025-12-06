@@ -55,5 +55,8 @@
     "clickToSeek": "Klikk for å gå til dette tidspunktet"
   },
   "zoomIn": "Zoom inn",
-  "zoomOut": "Zoom ut"
+  "zoomOut": "Zoom ut",
+  "normalActivity": "Normal",
+  "needsReview": "Trenger inspeksjon",
+  "securityConcern": "Sikkerhetsrisiko"
 }

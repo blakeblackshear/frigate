@@ -460,7 +460,7 @@
     },
     "objectShapeFilterDrawing": {
       "document": "Se dokumentasjonen ",
-      "score": "Poengsum",
+      "score": "Score",
       "ratio": "Forhold",
       "area": "Areal",
       "title": "Tegning av objektformfilter",
@@ -478,7 +478,7 @@
     "audio": {
       "title": "Lyd",
       "noAudioDetections": "Ingen lyddeteksjoner",
-      "score": "poengsum",
+      "score": "score",
       "currentRMS": "Nåværende RMS",
       "currentdbFS": "Nåværende dbFS"
     },
