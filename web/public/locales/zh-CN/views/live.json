@@ -142,7 +142,7 @@
   "cameraSettings": {
     "title": "{{camera}} 设置",
     "cameraEnabled": "摄像头已启用",
-    "objectDetection": "对象检测",
+    "objectDetection": "目标检测",
     "recording": "录制",
     "snapshots": "快照",
     "audioDetection": "音频检测",
@@ -155,8 +155,8 @@
   "effectiveRetainMode": {
     "modes": {
       "all": "全部",
-      "motion": "运动",
-      "active_objects": "活动对象"
+      "motion": "画面变动",
+      "active_objects": "活动目标"
     },
     "notAllTips": "您的 {{source}} 录制保留配置设置为 <code>mode: {{effectiveRetainMode}}</code>，因此此按需录制将仅保留包含 {{effectiveRetainModeName}} 的片段。"
   },
@@ -174,7 +174,11 @@
   "noCameras": {
     "title": "未设置摄像头",
     "description": "准备开始连接摄像头至 Frigate 。",
-    "buttonText": "添加摄像头"
+    "buttonText": "添加摄像头",
+    "restricted": {
+      "title": "无可用摄像头",
+      "description": "你没有权限查看此分组中的任何摄像头。"
+    }
   },
   "snapshot": {
     "takeSnapshot": "下载即时快照",

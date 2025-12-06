@@ -76,7 +76,12 @@
         }
       },
       "npuMemory": "NPU内存",
-      "npuUsage": "NPU使用率"
+      "npuUsage": "NPU使用率",
+      "intelGpuWarning": {
+        "title": "Intel GPU 处于警告状态",
+        "message": "GPU 状态不可用",
+        "description": "这是 Intel 的 GPU 状态报告工具（intel_gpu_top）的已知问题：该工具会失效并反复返回 GPU 使用率为 0%，即使在硬件加速和目标检测已在 (i)GPU 上正常运行的情况下也是如此，这并不是 Frigate 的 bug。你可以通过重启主机来临时修复该问题，并确认 GPU 正常工作。该问题并不会影响性能。"
+      }
     },
     "otherProcesses": {
       "title": "其他进程",
