@@ -248,7 +248,8 @@
       "label": "Dokumentácia Frigate"
     },
     "review": "Recenzia",
-    "explore": "Preskúmať"
+    "explore": "Preskúmať",
+    "classification": "Klasifikácia"
   },
   "toast": {
     "copyUrlToClipboard": "Adresa URL bola skopírovaná do schránky.",
