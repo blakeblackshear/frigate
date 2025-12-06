@@ -220,6 +220,10 @@
     "viewTrackingDetails": {
       "label": "Veure detalls de seguiment",
       "aria": "Mostra els detalls de seguiment"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Descarrega la instantània neta",
+      "aria": "Descarrega la instantània neta"
     }
   },
   "noTrackedObjects": "No s'han trobat objectes rastrejats",
@@ -263,7 +267,8 @@
       "header": {
         "zones": "Zones",
         "ratio": "Ràtio",
-        "area": "Àrea"
+        "area": "Àrea",
+        "score": "Puntuació"
       }
     },
     "annotationSettings": {

@@ -58,7 +58,8 @@
         "endTimeMustAfterStartTime": "L'hora de finalització ha de ser posterior a l'hora d'inici",
         "noVaildTimeSelected": "No s'ha seleccionat un rang de temps vàlid",
         "failed": "No s'ha pogut inciar l'exportació: {{error}}"
-      }
+      },
+      "view": "Vista"
     },
     "fromTimeline": {
       "saveExport": "Guardar exportació",
