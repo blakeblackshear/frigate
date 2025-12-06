@@ -148,7 +148,8 @@
       },
       "generateSuccess": "Exempelbilder har genererats",
       "allImagesRequired_one": "Vänligen klassificera alla bilder. {{count}} bild återstår.",
-      "allImagesRequired_other": "Vänligen klassificera alla bilder. {{count}} bilder återstår."
+      "allImagesRequired_other": "Vänligen klassificera alla bilder. {{count}} bilder återstår.",
+      "modelCreated": "Modellen har skapats. Använd vyn Senaste klassificeringar för att lägga till bilder för saknade tillstånd och träna sedan modellen."
     }
   },
   "deleteModel": {
