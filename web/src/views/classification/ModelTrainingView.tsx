@@ -416,7 +416,12 @@ export default function ModelTrainingView({ model }: ModelTrainingViewProps) {
             )}
           >
             <div className="flex w-48 items-center justify-center text-sm text-muted-foreground">
-              <div className="p-1">{`${selectedImages.length} selected`}</div>
+              <div className="p-1">
+                {t("selected", {
+                  ns: "views/event",
+                  count: selectedImages.length,
+                })}
+              </div>
               <div className="p-1">{"|"}</div>
               <div
                 className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
@@ -676,7 +681,7 @@ function LibrarySelector({
                 className="flex-grow cursor-pointer capitalize"
                 onClick={() => setPageToggle(id)}
               >
-                {id.replaceAll("_", " ")}
+                {id === "none" ? t("none") : id.replaceAll("_", " ")}
                 <span className="ml-2 text-muted-foreground">
                   ({dataset?.[id].length})
                 </span>
