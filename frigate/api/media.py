@@ -837,7 +837,19 @@ async def recording_clip(
     dependencies=[Depends(require_camera_access)],
     description="Returns an HLS playlist for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
 )
-async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
+async def vod_ts(
+    camera_name: str,
+    start_ts: float,
+    end_ts: float,
+    force_discontinuity: bool = False,
+):
+    logger.debug(
+        "VOD: Generating VOD for %s from %s to %s with force_discontinuity=%s",
+        camera_name,
+        start_ts,
+        end_ts,
+        force_discontinuity,
+    )
     recordings = (
         Recordings.select(
             Recordings.path,
@@ -862,6 +874,14 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
 
     recording: Recordings
     for recording in recordings:
+        logger.debug(
+            "VOD: processing recording: %s start=%s end=%s duration=%s",
+            recording.path,
+            recording.start_time,
+            recording.end_time,
+            recording.duration,
+        )
+
         clip = {"type": "source", "path": recording.path}
         duration = int(recording.duration * 1000)
 
@@ -870,6 +890,11 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
             inpoint = int((start_ts - recording.start_time) * 1000)
             clip["clipFrom"] = inpoint
             duration -= inpoint
+            logger.debug(
+                "VOD: applied clipFrom %sms to %s",
+                inpoint,
+                recording.path,
+            )
 
         # adjust end if recording.end_time is after end_ts
         if recording.end_time > end_ts:
@@ -877,12 +902,23 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
 
         if duration < min_duration_ms:
             # skip if the clip has no valid duration (too short to contain frames)
+            logger.debug(
+                "VOD: skipping recording %s - resulting duration %sms too short",
+                recording.path,
+                duration,
+            )
             continue
 
         if min_duration_ms <= duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]
             clips.append(clip)
             durations.append(duration)
+            logger.debug(
+                "VOD: added clip %s duration_ms=%s clipFrom=%s",
+                recording.path,
+                duration,
+                clip.get("clipFrom"),
+            )
         else:
             logger.warning(f"Recording clip is missing or empty: {recording.path}")
 
@@ -902,7 +938,7 @@ async def vod_ts(camera_name: str, start_ts: float, end_ts: float):
     return JSONResponse(
         content={
             "cache": hour_ago.timestamp() > start_ts,
-            "discontinuity": False,
+            "discontinuity": force_discontinuity,
             "consistentSequenceMediaInfo": True,
             "durations": durations,
             "segment_duration": max(durations),
@@ -984,6 +1020,19 @@ async def vod_event(
         Event.update(has_clip=False).where(Event.id == event_id).execute()
 
     return vod_response
+
+
+@router.get(
+    "/vod/clip/{camera_name}/start/{start_ts}/end/{end_ts}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns an HLS playlist for a timestamp range with HLS discontinuity enabled. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
+async def vod_clip(
+    camera_name: str,
+    start_ts: float,
+    end_ts: float,
+):
+    return await vod_ts(camera_name, start_ts, end_ts, force_discontinuity=True)
 
 
 @router.get(
