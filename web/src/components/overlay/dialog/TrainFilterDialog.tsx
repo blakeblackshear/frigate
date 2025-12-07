@@ -180,7 +180,9 @@ export function ClassFilterContent({
               {allClasses.map((item) => (
                 <FilterSwitch
                   key={item}
-                  label={item.replaceAll("_", " ")}
+                  label={
+                    item === "none" ? t("none") : item.replaceAll("_", " ")
+                  }
                   isChecked={classes?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
                     if (isChecked) {

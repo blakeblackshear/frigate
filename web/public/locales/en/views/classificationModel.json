@@ -83,6 +83,7 @@
     "aria": "Select Recent Classifications"
   },
   "categories": "Classes",
+  "none": "None",
   "createCategory": {
     "new": "Create New Class"
   },
