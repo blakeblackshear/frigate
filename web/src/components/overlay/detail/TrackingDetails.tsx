@@ -446,7 +446,7 @@ export function TrackingDetails({
       (event.end_time ?? Date.now() / 1000) + annotationOffset / 1000;
     const startTime = eventStartRecord - REVIEW_PADDING;
     const endTime = eventEndRecord + REVIEW_PADDING;
-    const playlist = `${baseUrl}vod/${event.camera}/start/${startTime}/end/${endTime}/index.m3u8`;
+    const playlist = `${baseUrl}vod/clip/${event.camera}/start/${startTime}/end/${endTime}/index.m3u8`;
 
     return {
       playlist,
@@ -559,7 +559,6 @@ export function TrackingDetails({
                 isDetailMode={true}
                 camera={event.camera}
                 currentTimeOverride={currentTime}
-                enableGapControllerRecovery={true}
               />
               {isVideoLoading && (
                 <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
