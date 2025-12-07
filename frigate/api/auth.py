@@ -8,6 +8,7 @@ import logging
 import os
 import re
 import secrets
+import stat
 import time
 from datetime import datetime
 from pathlib import Path
@@ -311,7 +312,9 @@ def get_jwt_secret() -> str:
             )
             jwt_secret = secrets.token_hex(64)
             try:
-                with open(jwt_secret_file, "w") as f:
+                # Use os.open to create file with restrictive permissions (0o600: read/write for owner only)
+                fd = os.open(jwt_secret_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(fd, "w") as f:
                     f.write(str(jwt_secret))
             except Exception:
                 logger.warning(
