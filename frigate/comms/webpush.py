@@ -390,7 +390,20 @@ class WebPushClient(Communicator):
 
             message = payload["after"]["data"]["metadata"]["scene"]
         else:
-            title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {titlecase(', '.join(payload['after']['data']['zones']).replace('_', ' '))}"
+            zone_names = payload["after"]["data"]["zones"]
+            formatted_zone_names = []
+
+            for zone_name in zone_names:
+                if zone_name in self.config.cameras[camera].zones:
+                    formatted_zone_names.append(
+                        self.config.cameras[camera]
+                        .zones[zone_name]
+                        .get_formatted_name(zone_name)
+                    )
+                else:
+                    formatted_zone_names.append(titlecase(zone_name.replace("_", " ")))
+
+            title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {', '.join(formatted_zone_names)}"
             message = f"Detected on {camera_name}"
 
         if ended:
