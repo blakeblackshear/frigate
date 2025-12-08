@@ -67,6 +67,37 @@ export default function DetailStream({
     onSeek(timestamp, isPlaying);
   };
 
+  // Collect all unique event IDs from all review items
+  const allEventIds = useMemo(() => {
+    if (!reviewItems || reviewItems.length === 0) return [];
+    const idsSet = new Set<string>();
+    reviewItems.forEach((review) => {
+      if (review?.data?.detections?.length > 0) {
+        review.data.detections.forEach((id) => idsSet.add(id));
+      }
+    });
+    return Array.from(idsSet);
+  }, [reviewItems]);
+
+  // Fetch all events in a single API call
+  const { data: allFetchedEvents, isValidating: isValidatingEvents } = useSWR<
+    Event[]
+  >(
+    allEventIds.length > 0
+      ? ["event_ids", { ids: allEventIds.join(",") }]
+      : null,
+  );
+
+  // Create a Map for quick event lookup by ID
+  const eventsById = useMemo(() => {
+    if (!allFetchedEvents) return new Map<string, Event>();
+    const map = new Map<string, Event>();
+    allFetchedEvents.forEach((event) => {
+      map.set(event.id, event);
+    });
+    return map;
+  }, [allFetchedEvents]);
+
   // Ensure we initialize the active review when reviewItems first arrive.
   // This helps when the component mounts while the video is already
   // playing — it guarantees the matching review is highlighted right
@@ -216,6 +247,8 @@ export default function DetailStream({
                     onActivate={() => setActiveReviewId(id)}
                     onOpenUpload={(e) => setUpload(e)}
                     alwaysExpandActive={alwaysExpandActive}
+                    eventsById={eventsById}
+                    isValidatingEvents={isValidatingEvents}
                   />
                 );
               })
@@ -279,6 +312,8 @@ type ReviewGroupProps = {
   effectiveTime?: number;
   annotationOffset: number;
   alwaysExpandActive?: boolean;
+  eventsById: Map<string, Event>;
+  isValidatingEvents: boolean;
 };
 
 function ReviewGroup({
@@ -292,6 +327,8 @@ function ReviewGroup({
   effectiveTime,
   annotationOffset,
   alwaysExpandActive = false,
+  eventsById,
+  isValidatingEvents,
 }: ReviewGroupProps) {
   const { t } = useTranslation("views/events");
   const [open, setOpen] = useState(false);
@@ -318,11 +355,12 @@ function ReviewGroup({
 
   const shouldFetchEvents = review?.data?.detections?.length > 0;
 
-  const { data: fetchedEvents, isValidating } = useSWR<Event[]>(
-    shouldFetchEvents
-      ? ["event_ids", { ids: review.data.detections.join(",") }]
-      : null,
-  );
+  const fetchedEvents = useMemo(() => {
+    if (!shouldFetchEvents || !review?.data?.detections) return undefined;
+    return review.data.detections
+      .map((eventId) => eventsById.get(eventId))
+      .filter((event): event is Event => event !== undefined);
+  }, [shouldFetchEvents, review?.data?.detections, eventsById]);
 
   const rawIconLabels: string[] = [
     ...(fetchedEvents
@@ -445,7 +483,7 @@ function ReviewGroup({
 
       {open && (
         <div className="space-y-0.5">
-          {shouldFetchEvents && isValidating && !fetchedEvents ? (
+          {shouldFetchEvents && isValidatingEvents && !fetchedEvents ? (
             <ActivityIndicator />
           ) : (
             (fetchedEvents || []).map((event, index) => {
