@@ -116,13 +116,32 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const SubItemContent = isDesktop ? DropdownMenuSubContent : DialogContent;
   const Portal = isDesktop ? DropdownMenuPortal : DialogPortal;
 
-  const handlePasswordSave = async (password: string) => {
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  const verifyOldPassword = async (oldPassword: string): Promise<boolean> => {
+    if (!profile?.username || profile.username === "anonymous") return false;
+    try {
+      const response = await axios.post("login", {
+        user: profile.username,
+        password: oldPassword,
+      });
+      return response.status === 200;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const handlePasswordSave = async (password: string, oldPassword?: string) => {
     if (!profile?.username || profile.username === "anonymous") return;
     axios
-      .put(`users/${profile.username}/password`, { password })
+      .put(`users/${profile.username}/password`, {
+        password,
+        old_password: oldPassword,
+      })
       .then((response) => {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
+          setPasswordError(null);
           toast.success(
             t("users.toast.success.updatePassword", {
               ns: "views/settings",
@@ -138,6 +157,9 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
+
+        setPasswordDialogOpen(false);
+        setPasswordError(null);
         toast.error(
           t("users.toast.error.setPasswordFailed", {
             ns: "views/settings",
@@ -554,7 +576,12 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
       <SetPasswordDialog
         show={passwordDialogOpen}
         onSave={handlePasswordSave}
-        onCancel={() => setPasswordDialogOpen(false)}
+        onCancel={() => {
+          setPasswordDialogOpen(false);
+          setPasswordError(null);
+        }}
+        onVerifyOldPassword={verifyOldPassword}
+        initialError={passwordError}
         username={profile?.username}
       />
     </>

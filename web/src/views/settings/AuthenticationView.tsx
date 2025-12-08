@@ -57,6 +57,7 @@ export default function AuthenticationView({
   const [showCreateRole, setShowCreateRole] = useState(false);
   const [showEditRole, setShowEditRole] = useState(false);
   const [showDeleteRole, setShowDeleteRole] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const [selectedUser, setSelectedUser] = useState<string>();
   const [selectedUserRole, setSelectedUserRole] = useState<string>();
@@ -69,13 +70,30 @@ export default function AuthenticationView({
     document.title = t("documentTitle.authentication");
   }, [t]);
 
+  const onVerifyOldPassword = useCallback(
+    async (oldPassword: string): Promise<boolean> => {
+      if (!selectedUser) return false;
+      try {
+        const response = await axios.post("login", {
+          user: selectedUser,
+          password: oldPassword,
+        });
+        return response.status === 200;
+      } catch (error) {
+        return false;
+      }
+    },
+    [selectedUser],
+  );
+
   const onSavePassword = useCallback(
-    (user: string, password: string) => {
+    (user: string, password: string, oldPassword?: string) => {
       axios
-        .put(`users/${user}/password`, { password })
+        .put(`users/${user}/password`, { password, old_password: oldPassword })
         .then((response) => {
           if (response.status === 200) {
             setShowSetPassword(false);
+            setPasswordError(null);
             toast.success(t("users.toast.success.updatePassword"), {
               position: "top-center",
             });
@@ -86,6 +104,10 @@ export default function AuthenticationView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
+
+          // Close dialog and show toast for any errors
+          setShowSetPassword(false);
+          setPasswordError(null);
           toast.error(
             t("users.toast.error.setPasswordFailed", {
               errorMessage,
@@ -563,8 +585,15 @@ export default function AuthenticationView({
       </div>
       <SetPasswordDialog
         show={showSetPassword}
-        onCancel={() => setShowSetPassword(false)}
-        onSave={(password) => onSavePassword(selectedUser!, password)}
+        onCancel={() => {
+          setShowSetPassword(false);
+          setPasswordError(null);
+        }}
+        onVerifyOldPassword={onVerifyOldPassword}
+        initialError={passwordError}
+        onSave={(password, oldPassword) =>
+          onSavePassword(selectedUser!, password, oldPassword)
+        }
       />
       <DeleteUserDialog
         show={showDelete}
