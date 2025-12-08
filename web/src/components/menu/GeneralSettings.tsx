@@ -116,13 +116,22 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
   const SubItemContent = isDesktop ? DropdownMenuSubContent : DialogContent;
   const Portal = isDesktop ? DropdownMenuPortal : DialogPortal;
 
-  const handlePasswordSave = async (password: string) => {
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+
+  const handlePasswordSave = async (password: string, oldPassword?: string) => {
     if (!profile?.username || profile.username === "anonymous") return;
+    setIsPasswordLoading(true);
     axios
-      .put(`users/${profile.username}/password`, { password })
+      .put(`users/${profile.username}/password`, {
+        password,
+        old_password: oldPassword,
+      })
       .then((response) => {
         if (response.status === 200) {
           setPasswordDialogOpen(false);
+          setPasswordError(null);
+          setIsPasswordLoading(false);
           toast.success(
             t("users.toast.success.updatePassword", {
               ns: "views/settings",
@@ -138,15 +147,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           error.response?.data?.message ||
           error.response?.data?.detail ||
           "Unknown error";
-        toast.error(
-          t("users.toast.error.setPasswordFailed", {
-            ns: "views/settings",
-            errorMessage,
-          }),
-          {
-            position: "top-center",
-          },
-        );
+
+        // Keep dialog open and show error
+        setPasswordError(errorMessage);
+        setIsPasswordLoading(false);
       });
   };
 
@@ -554,8 +558,13 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
       <SetPasswordDialog
         show={passwordDialogOpen}
         onSave={handlePasswordSave}
-        onCancel={() => setPasswordDialogOpen(false)}
+        onCancel={() => {
+          setPasswordDialogOpen(false);
+          setPasswordError(null);
+        }}
+        initialError={passwordError}
         username={profile?.username}
+        isLoading={isPasswordLoading}
       />
     </>
   );

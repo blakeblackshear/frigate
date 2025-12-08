@@ -712,6 +712,8 @@
         "password": {
           "title": "Password",
           "placeholder": "Enter password",
+          "show": "Show password",
+          "hide": "Hide password",
           "confirm": {
             "title": "Confirm Password",
             "placeholder": "Confirm Password"
@@ -723,6 +725,13 @@
             "strong": "Strong",
             "veryStrong": "Very Strong"
           },
+          "requirements": {
+            "title": "Password requirements:",
+            "length": "At least 8 characters",
+            "uppercase": "At least one uppercase letter",
+            "digit": "At least one digit",
+            "special": "At least one special character (!@#$%^&*(),.?\":{}|<>)"
+          },
           "match": "Passwords match",
           "notMatch": "Passwords don't match"
         },
@@ -732,6 +741,10 @@
           "confirm": {
             "placeholder": "Re-enter new password"
           }
+        },
+        "currentPassword": {
+          "title": "Current Password",
+          "placeholder": "Enter your current password"
         },
         "usernameIsRequired": "Username is required",
         "passwordIsRequired": "Password is required"
@@ -750,9 +763,13 @@
       "passwordSetting": {
         "cannotBeEmpty": "Password cannot be empty",
         "doNotMatch": "Passwords do not match",
+        "currentPasswordRequired": "Current password is required",
+        "incorrectCurrentPassword": "Current password is incorrect",
+        "passwordVerificationFailed": "Failed to verify password",
         "updatePassword": "Update Password for {{username}}",
         "setPassword": "Set Password",
-        "desc": "Create a strong password to secure this account."
+        "desc": "Create a strong password to secure this account.",
+        "multiDeviceWarning": "Any other devices where you are logged in will be required to re-login within {{refresh_time}}. You can also force all users to re-authenticate immediately by rotating your JWT secret."
       },
       "changeRole": {
         "title": "Change User Role",

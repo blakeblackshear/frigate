@@ -123,7 +123,7 @@ auth:
   # Optional: Refresh time in seconds (default: shown below)
   # When the session is going to expire in less time than this setting,
   # it will be refreshed back to the session_length.
-  refresh_time: 43200 # 12 hours
+  refresh_time: 1800 # 30 minutes
   # Optional: Rate limiting for login failures to help prevent brute force
   # login attacks (default: shown below)
   # See the docs for more information on valid values

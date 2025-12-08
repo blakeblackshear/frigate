@@ -54,7 +54,9 @@ def migrate(migrator, database, fake=False, **kwargs):
 
     # Migrate existing has_been_reviewed data to UserReviewStatus for all users
     def migrate_data():
-        all_users = list(User.select())
+        # Use raw SQL to avoid ORM issues with columns that don't exist yet
+        cursor = database.execute_sql('SELECT "username" FROM "user"')
+        all_users = cursor.fetchall()
         if not all_users:
             return
 
@@ -63,7 +65,7 @@ def migrate(migrator, database, fake=False, **kwargs):
         )
         reviewed_segment_ids = [row[0] for row in cursor.fetchall()]
         # also migrate for anonymous (unauthenticated users)
-        usernames = [user.username for user in all_users] + ["anonymous"]
+        usernames = [user[0] for user in all_users] + ["anonymous"]
 
         for segment_id in reviewed_segment_ids:
             for username in usernames:

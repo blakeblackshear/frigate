@@ -57,6 +57,8 @@ export default function AuthenticationView({
   const [showCreateRole, setShowCreateRole] = useState(false);
   const [showEditRole, setShowEditRole] = useState(false);
   const [showDeleteRole, setShowDeleteRole] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState<string>();
   const [selectedUserRole, setSelectedUserRole] = useState<string>();
@@ -70,12 +72,15 @@ export default function AuthenticationView({
   }, [t]);
 
   const onSavePassword = useCallback(
-    (user: string, password: string) => {
+    (user: string, password: string, oldPassword?: string) => {
+      setIsPasswordLoading(true);
       axios
-        .put(`users/${user}/password`, { password })
+        .put(`users/${user}/password`, { password, old_password: oldPassword })
         .then((response) => {
           if (response.status === 200) {
             setShowSetPassword(false);
+            setPasswordError(null);
+            setIsPasswordLoading(false);
             toast.success(t("users.toast.success.updatePassword"), {
               position: "top-center",
             });
@@ -86,14 +91,10 @@ export default function AuthenticationView({
             error.response?.data?.message ||
             error.response?.data?.detail ||
             "Unknown error";
-          toast.error(
-            t("users.toast.error.setPasswordFailed", {
-              errorMessage,
-            }),
-            {
-              position: "top-center",
-            },
-          );
+
+          // Keep dialog open and show error
+          setPasswordError(errorMessage);
+          setIsPasswordLoading(false);
         });
     },
     [t],
@@ -563,8 +564,15 @@ export default function AuthenticationView({
       </div>
       <SetPasswordDialog
         show={showSetPassword}
-        onCancel={() => setShowSetPassword(false)}
-        onSave={(password) => onSavePassword(selectedUser!, password)}
+        onCancel={() => {
+          setShowSetPassword(false);
+          setPasswordError(null);
+        }}
+        initialError={passwordError}
+        onSave={(password, oldPassword) =>
+          onSavePassword(selectedUser!, password, oldPassword)
+        }
+        isLoading={isPasswordLoading}
       />
       <DeleteUserDialog
         show={showDelete}
