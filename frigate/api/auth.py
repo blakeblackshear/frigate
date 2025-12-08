@@ -648,27 +648,28 @@ def auth(request: Request):
             logger.debug("jwt token expired")
             return fail_response
 
-        # Check if password has been changed after token was issued
-        try:
-            user_obj = User.get_by_id(user)
-            # Only invalidate token if password was changed after token was issued
-            if user_obj.password_changed_at is not None:
-                token_iat = int(token.claims.get("iat", 0))
-                password_changed_timestamp = int(
-                    user_obj.password_changed_at.timestamp()
-                )
-                if token_iat < password_changed_timestamp:
-                    logger.debug(
-                        "jwt token issued before password change, invalidating token"
-                    )
-                    return fail_response
-        except DoesNotExist:
-            logger.debug("user not found")
-            return fail_response
-
         # if the jwt cookie is expiring soon
         if jwt_source == "cookie" and expiration - JWT_REFRESH <= current_time:
             logger.debug("jwt token expiring soon, refreshing cookie")
+
+            # Check if password has been changed since token was issued
+            # If so, force re-login by rejecting the refresh
+            try:
+                user_obj = User.get_by_id(user)
+                if user_obj.password_changed_at is not None:
+                    token_iat = int(token.claims.get("iat", 0))
+                    password_changed_timestamp = int(
+                        user_obj.password_changed_at.timestamp()
+                    )
+                    if token_iat < password_changed_timestamp:
+                        logger.debug(
+                            "jwt token issued before password change, rejecting refresh"
+                        )
+                        return fail_response
+            except DoesNotExist:
+                logger.debug("user not found")
+                return fail_response
+
             new_expiration = current_time + JWT_SESSION_LENGTH
             new_encoded_jwt = create_encoded_jwt(
                 user, role, new_expiration, request.app.jwt_token

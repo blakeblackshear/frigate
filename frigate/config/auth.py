@@ -20,7 +20,7 @@ class AuthConfig(FrigateBaseModel):
         default=86400, title="Session length for jwt session tokens", ge=60
     )
     refresh_time: int = Field(
-        default=43200,
+        default=1800,
         title="Refresh the session if it is going to expire in this many seconds",
         ge=30,
     )
